@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { once } from 'lodash';
 import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
+import { buildServerESQLCallbacks } from '@kbn/esql-server-utils';
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import {
   type ConnectorContractUnion,
   toCustomTriggerSchemaConfigs,
@@ -63,15 +66,21 @@ export class WorkflowValidationService {
   }
 
   /**
-   * `includeVariableRules` has no default because the callers need opposite
-   * answers: four variable rules are errors, so a caller that refuses to run an
-   * invalid workflow must leave them off. Only the reporting endpoint sets it.
+   * `includeVariableRules` and `includeEsqlRules` have no default because the
+   * callers need opposite answers: both rule groups emit errors, so a caller
+   * that refuses to run an invalid workflow must leave them off. Only the
+   * reporting endpoint sets them. ES|QL rules check indices and fields against
+   * the current user's cluster, which can differ from the one at run time, so
+   * they stay report-only until elastic/security-team#18778 lands.
    */
   async validateWorkflow(
     yaml: string,
     spaceId: string,
     request: KibanaRequest,
-    { includeVariableRules }: { includeVariableRules: boolean }
+    {
+      includeVariableRules,
+      includeEsqlRules,
+    }: { includeVariableRules: boolean; includeEsqlRules: boolean }
   ): Promise<ValidateWorkflowResponseDto> {
     // Resolved once, so the schema and the registry cannot disagree about a
     // connector and the contracts are not built twice per request.
@@ -92,6 +101,7 @@ export class WorkflowValidationService {
       ...(includeVariableRules && {
         variableValidationRegistry: this.createContextRegistry(allConnectors),
       }),
+      ...(includeEsqlRules && { esqlCallbacks: this.createEsqlCallbacks(request) }),
     });
   }
 
@@ -118,6 +128,25 @@ export class WorkflowValidationService {
   ): Promise<ConnectorContractUnion[]> {
     const { connectorTypes } = await this.getAvailableConnectors(spaceId, request);
     return getAllConnectorsWithDynamic(connectorTypes);
+  }
+
+  /**
+   * The callbacks the editor supplies (see `useWorkflowEsqlCallbacks`), backed
+   * by the current user's ES client. Sources and policies are fetched once per
+   * validation, not once per ES|QL step.
+   */
+  private createEsqlCallbacks(request: KibanaRequest): ESQLCallbacks {
+    const esClient = this.deps.getCoreStart().elasticsearch.client.asScoped(request);
+    const { getSources, getColumnsFor, getPolicies } = buildServerESQLCallbacks({
+      esClient,
+      logger: this.deps.logger,
+    });
+    return {
+      getSources: getSources && once(getSources),
+      getColumnsFor,
+      getPolicies: getPolicies && once(getPolicies),
+      getLicense: once(() => this.deps.licensing.getLicense()),
+    };
   }
 
   private createContextRegistry(allConnectors: ConnectorContractUnion[]): WorkflowContextRegistry {
