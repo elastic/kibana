@@ -26,6 +26,7 @@ jest.mock(
 );
 
 jest.mock('../../../../../hooks', () => ({
+  useAuthz: () => ({ integrations: { all: true } }),
   useGetPackagesQuery: (params: any) => mockUseGetPackagesQuery(params),
   useGetCategoriesQuery: (params: any) => mockUseGetCategoriesQuery(params),
   useGetAppendCustomIntegrationsQuery: () => mockUseGetAppendCustomIntegrationsQuery(),

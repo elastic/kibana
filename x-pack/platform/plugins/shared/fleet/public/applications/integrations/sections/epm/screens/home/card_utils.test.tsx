@@ -308,6 +308,23 @@ describe('Card utils', () => {
         } as any);
       });
 
+      it('should route to the overview page when the user cannot add integrations', () => {
+        const cardItem = mapToCard({
+          item: {
+            id: 'okta',
+            name: 'okta',
+            version: '1.0.0',
+            type: 'integration',
+            data_streams: [{ type: 'logs' }],
+          },
+          addBasePath,
+          getHref,
+          canAddIntegration: false,
+        } as any);
+
+        expect(cardItem.url).toBe('integration_details_overview');
+      });
+
       it('should route integration packages to the add-integration page', () => {
         const cardItem = mapToCard({
           item: {
