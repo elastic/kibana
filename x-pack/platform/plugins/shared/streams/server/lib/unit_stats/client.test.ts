@@ -92,6 +92,28 @@ const makeEsql = (overrides: Partial<Record<QueryName, () => EsqlResponse>> = {}
     return (overrides[name] ?? (() => responses[name]))();
   });
 
+const responseError = (statusCode: number, body: object = {}) =>
+  new errors.ResponseError({
+    statusCode,
+    body,
+    headers: {},
+    warnings: [],
+    meta: {} as never,
+  });
+
+/** How ES|QL reports a stream that does not exist. */
+const unknownIndexError = () =>
+  responseError(400, {
+    error: {
+      type: 'verification_exception',
+      reason: 'Found 1 problem\nline 1:6: Unknown index [metrics-streams.otel-default]',
+    },
+  });
+
+const failWith = (error: Error) => () => {
+  throw error;
+};
+
 /** The stats queries an esql mock was called with, not the probe. */
 const statsQueries = (esql: jest.Mock): string[] =>
   esql.mock.calls.map(([{ query }]) => query).filter((query) => !isProbe(query));
@@ -265,9 +287,7 @@ describe('UnitStatsClient.getStats', () => {
     });
 
     it('probes the stream once and runs no stats query when the stream does not exist', async () => {
-      const esql = makeEsql({
-        probe: () => ({ columns: [{ name: '<no-fields>', type: 'null' }], values: [] }),
-      });
+      const esql = makeEsql({ probe: failWith(unknownIndexError()) });
 
       const response = await run(esql);
 
@@ -282,17 +302,17 @@ describe('UnitStatsClient.getStats', () => {
       expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
     });
 
-    it('runs the stats queries when the probe itself fails, and reports their error', async () => {
-      const esql = makeEsql({
-        probe: () => {
-          throw new Error('probe failed');
-        },
-      });
+    it('runs no stats query and puts the probe error on every queryable component when the probe fails', async () => {
+      const esql = makeEsql({ probe: failWith(responseError(429)) });
 
       const response = await run(esql);
 
-      expect(statsQueries(esql)).toHaveLength(4);
-      expect(response.components.destinations['es-prod'].events.incoming.rate.value).toBe(4.6);
+      expect(statsQueries(esql)).toHaveLength(0);
+      expect(response.components.destinations['es-prod'].error?.code).toBe('unavailable');
+      expect(response.components.destinations['es-dev'].error?.code).toBe('unavailable');
+      expect(response.components.processors['uppercase-message'].error?.code).toBe('unavailable');
+      expect(response.components.destinations.dbg.error?.code).toBe('unsupported');
+      expect(response.error?.code).toBe('unavailable');
     });
 
     it('returns no data and no error when the queries return no rows', async () => {
@@ -319,18 +339,6 @@ describe('UnitStatsClient.getStats', () => {
   });
 
   describe('failures', () => {
-    const responseError = (statusCode: number) =>
-      new errors.ResponseError({
-        statusCode,
-        body: {},
-        headers: {},
-        warnings: [],
-        meta: {} as never,
-      });
-    const failWith = (error: Error) => () => {
-      throw error;
-    };
-
     it('puts the same error on every destination when a destination query fails', async () => {
       const response = await run(makeEsql({ destinationRate: failWith(responseError(429)) }));
 

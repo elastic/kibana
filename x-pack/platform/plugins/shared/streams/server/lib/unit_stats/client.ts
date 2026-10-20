@@ -9,6 +9,7 @@ import type { ComposerQuery } from '@elastic/esql';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { StreamsUnit } from '@kbn/streams-schema';
+import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { chunk } from 'lodash';
 import { toEsqlRequest } from '../streams/helpers/esql';
 import { UNIT_STATS_DEFAULT_WINDOW_MS, UNIT_STATS_REQUEST_TIMEOUT_MS } from './constants';
@@ -121,20 +122,12 @@ export class UnitStatsClient {
       }
     }
 
-    // One pair of queries per kind, all in parallel. A kind with no queryable ids runs none.
-    // Without the stream there is nothing to query: the ids keep their no data results.
-    const hasQueryableIds = destinationIds.length + processorIds.length > 0;
-    const shouldQuery = hasQueryableIds && (await this.doesUnitMetricsStreamExist());
-    const [destinationOutcome, processorOutcome] = shouldQuery
-      ? await Promise.all([
-          destinationIds.length > 0
-            ? this.getDestinationStats({ query, ids: destinationIds, bucketMs })
-            : undefined,
-          processorIds.length > 0
-            ? this.getProcessorStats({ query, ids: processorIds })
-            : undefined,
-        ])
-      : [];
+    const [destinationOutcome, processorOutcome] = await this.getOutcomes({
+      query,
+      destinationIds,
+      processorIds,
+      bucketMs,
+    });
     Object.assign(destinations, destinationOutcome?.results);
     Object.assign(processors, processorOutcome?.results);
 
@@ -154,20 +147,58 @@ export class UnitStatsClient {
   }
 
   /**
-   * False only when the probe finds no stream: a missing stream has no fields, not even `@timestamp`.
-   * If the probe itself fails, the queries run and report the real error.
+   * One pair of queries per kind, all in parallel. A kind with no queryable ids runs none. The
+   * probe gates them: with no stream there is nothing to query, so the ids keep their no data
+   * results. If the probe fails, no query runs and each kind gets its error.
+   */
+  private async getOutcomes({
+    query,
+    destinationIds,
+    processorIds,
+    bucketMs,
+  }: {
+    query: StatsQuery;
+    destinationIds: string[];
+    processorIds: string[];
+    bucketMs: number;
+  }) {
+    if (destinationIds.length + processorIds.length === 0) return [];
+
+    try {
+      if (!(await this.doesUnitMetricsStreamExist())) return [];
+    } catch (error) {
+      const failure = this.toKindError(error, query.unitId, 'stream probe');
+
+      return [
+        destinationIds.length > 0
+          ? this.destinationFailure({ ids: destinationIds, bucketMs, failure })
+          : undefined,
+        processorIds.length > 0 ? this.processorFailure({ ids: processorIds, failure }) : undefined,
+      ];
+    }
+
+    return Promise.all([
+      destinationIds.length > 0
+        ? this.getDestinationStats({ query, ids: destinationIds, bucketMs })
+        : undefined,
+      processorIds.length > 0 ? this.getProcessorStats({ query, ids: processorIds }) : undefined,
+    ]);
+  }
+
+  /**
+   * False when the stream is missing (or not readable, which ES|QL reports the same way). Any
+   * other failure throws, so the caller can skip the queries and report why.
    */
   private async doesUnitMetricsStreamExist(): Promise<boolean> {
-    const { esClient, logger } = this.dependencies;
+    const { esClient } = this.dependencies;
     try {
-      const response = (await esClient.esql.query(toEsqlRequest(buildStreamProbeQuery()), {
+      await esClient.esql.query(toEsqlRequest(buildStreamProbeQuery()), {
         requestTimeout: UNIT_STATS_REQUEST_TIMEOUT_MS,
-      })) as ESQLSearchResponse;
-
-      return response.columns.some(({ name }) => name === '@timestamp');
-    } catch (error) {
-      logger.debug(`Unit stats stream probe failed: ${(error as Error).message}`);
+      });
       return true;
+    } catch (error) {
+      if (isEsqlUnknownIndexError(error)) return false;
+      throw error;
     }
   }
 
@@ -234,15 +265,30 @@ export class UnitStatsClient {
         ),
       };
     } catch (error) {
-      const failure = this.toKindError(error, query.unitId, what);
-
-      return {
-        results: Object.fromEntries(
-          ids.map((id) => [id, { ...noDestinationStats(bucketMs), error: failure }])
-        ),
-        error: failure,
-      };
+      return this.destinationFailure({
+        ids,
+        bucketMs,
+        failure: this.toKindError(error, query.unitId, what),
+      });
     }
+  }
+
+  /** The same error on every destination, with no data. */
+  private destinationFailure({
+    ids,
+    bucketMs,
+    failure,
+  }: {
+    ids: string[];
+    bucketMs: number;
+    failure: StreamsUnit.StatsError;
+  }): KindOutcome<StreamsUnit.StatsDestinationResult> {
+    return {
+      results: Object.fromEntries(
+        ids.map((id) => [id, { ...noDestinationStats(bucketMs), error: failure }])
+      ),
+      error: failure,
+    };
   }
 
   private async getProcessorStats({
@@ -265,14 +311,24 @@ export class UnitStatsClient {
         results: Object.fromEntries(ids.map((id) => [id, mapped[id] ?? noProcessorStats()])),
       };
     } catch (error) {
-      const failure = this.toKindError(error, query.unitId, what);
-
-      return {
-        results: Object.fromEntries(
-          ids.map((id) => [id, { ...noProcessorStats(), error: failure }])
-        ),
-        error: failure,
-      };
+      return this.processorFailure({
+        ids,
+        failure: this.toKindError(error, query.unitId, what),
+      });
     }
+  }
+
+  /** The same error on every processor, with no data. */
+  private processorFailure({
+    ids,
+    failure,
+  }: {
+    ids: string[];
+    failure: StreamsUnit.StatsError;
+  }): KindOutcome<StreamsUnit.StatsProcessorResult> {
+    return {
+      results: Object.fromEntries(ids.map((id) => [id, { ...noProcessorStats(), error: failure }])),
+      error: failure,
+    };
   }
 }

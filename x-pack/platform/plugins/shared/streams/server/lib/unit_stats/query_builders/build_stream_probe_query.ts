@@ -9,9 +9,8 @@ import { esql, type ComposerQuery } from '@elastic/esql';
 import { UNIT_METRICS_STREAM } from '../constants';
 
 /**
- * Returns no rows, and no fields (only a `<no-fields>` column) when the stream does not exist. The
- * wildcard makes a missing stream an empty result: `TS` and `FROM` on the exact name fail with an unknown index error,
- * which cannot be told from a 403.
+ * Reads no rows. It fails with an unknown index error when the stream does not exist, which
+ * ES|QL cannot tell from a stream the user cannot read.
  */
 export const buildStreamProbeQuery = (): ComposerQuery =>
-  esql.from(`${UNIT_METRICS_STREAM}*`).pipe`LIMIT 0`;
+  esql.from(UNIT_METRICS_STREAM).pipe`LIMIT 0`;
