@@ -31,11 +31,19 @@ describe('registerNotificationDataStream', () => {
 
     it('uses the canonical data stream name', () => {
       expect(definition.name).toBe(NOTIFICATION_DATA_STREAM_NAME);
-      expect(NOTIFICATION_DATA_STREAM_NAME).toBe('.notifications');
+      expect(NOTIFICATION_DATA_STREAM_NAME).toBe('.kibana-notifications');
     });
 
     it('is hidden', () => {
       expect(definition.hidden).toBe(true);
+    });
+
+    it('is a system data stream', () => {
+      expect(definition.system).toBe(true);
+    });
+
+    it('leaves template priority unset so the Elasticsearch template wins', () => {
+      expect(definition.template.priority).toBeUndefined();
     });
 
     it('has a positive version number', () => {
@@ -62,6 +70,8 @@ describe('registerNotificationDataStream', () => {
       expect(properties.namespace.type).toBe('keyword');
       expect(properties.type.type).toBe('keyword');
       expect(properties.severity.type).toBe('keyword');
+      expect(properties.profile_uid.type).toBe('keyword');
+      expect(properties.space_ids.type).toBe('keyword');
     });
 
     it('does not map display-only fields', () => {

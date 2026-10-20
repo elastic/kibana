@@ -100,7 +100,7 @@ The structure of the notification document is defined in [`common/`](./common):
 
 - [`notification_schema.ts`](./common/notification_schema.ts) — the Zod
   `notificationSchema` for the document stored in the append-only
-  `.notifications` data stream. We use Zod because the shape is shared across
+  `.kibana-notifications` data stream. We use Zod because the shape is shared across
   server and browser code.
 
 ### Severity
@@ -229,10 +229,19 @@ export const reportDeprecatedEndpoint = async (
 
 ### Checking it landed
 
-Read it back from ES (Dev Tools → Console, or `curl` against Elasticsearch):
+Read it back from ES:
 
 ```
-GET /.notifications/_search
+GET /.kibana-notifications/_search
+```
+
+`.kibana-notifications` is registered as a system data stream, so Elasticsearch only serves a
+direct read to a caller sending `x-elastic-product-origin: kibana`. Dev Tools does not send it,
+so use `curl`:
+
+```
+curl -u elastic:changeme -H 'x-elastic-product-origin: kibana' \
+  'http://localhost:9200/.kibana-notifications/_search'
 ```
 
 ## Seeding a local dev stack
