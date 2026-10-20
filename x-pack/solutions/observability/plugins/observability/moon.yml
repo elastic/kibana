@@ -177,6 +177,10 @@ dependsOn:
   - '@kbn/alerting-v2-constants'
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/slo-constants'
+  - '@kbn/alerting-v2-common-queries'
+  - '@kbn/alerting-v2-plugin'
+  - '@kbn/alerting-v2-episodes-ui'
+  - '@kbn/alerting-v2-schemas'
 tags:
   - plugin
   - prod

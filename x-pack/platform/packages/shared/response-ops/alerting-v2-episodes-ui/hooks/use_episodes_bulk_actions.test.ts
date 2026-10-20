@@ -7,8 +7,8 @@
 
 import { renderHook } from '@testing-library/react';
 import { useEpisodesBulkActions } from './use_episodes_bulk_actions';
-import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import { episodeSupportsActions } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { EpisodeAction } from '../actions';
+import { episodeSupportsActions } from '../queries/episodes_query';
 
 const stubEpisode = (overrides: Record<string, unknown> = {}) => ({
   '@timestamp': '2026-04-23T00:00:00Z',

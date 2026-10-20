@@ -64,6 +64,7 @@ export const createClassicEpisodeSource = ({
   label: CLASSIC_SOURCE_LABEL,
   icon: ELASTIC_SOURCE_ICON,
   queryKeyPrefix: classicAlertQueryKeys.all(),
+  ruleTypeIds,
 
   severityExtensions: CLASSIC_SEVERITY_EXTENSIONS,
 

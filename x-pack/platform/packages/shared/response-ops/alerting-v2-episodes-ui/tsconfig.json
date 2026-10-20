@@ -64,6 +64,15 @@
     "@kbn/flyout-template",
     "@kbn/flyout-sections",
     "@kbn/response-ops-alerts-apis",
-    "@kbn/connector-specs"
+    "@kbn/connector-specs",
+    "@kbn/data-source",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/unified-histogram",
+    "@kbn/zod",
+    "@kbn/cell-actions",
+    "@kbn/alerts-ui-shared",
+    "@kbn/share-plugin",
+    "@kbn/deeplinks-analytics"
   ]
 }

@@ -9,10 +9,10 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import type { TimeRange } from '@kbn/es-query';
 import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
-import { useEpisodesKpisQuery } from '@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query';
+import { useEpisodesKpisQuery } from '../../hooks/use_episodes_kpis_query';
 import { EpisodesKpis } from './episodes_kpis';
 
-jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episodes_kpis_query');
+jest.mock('../../hooks/use_episodes_kpis_query');
 
 const mockUseEpisodesKpisQuery = jest.mocked(useEpisodesKpisQuery);
 

@@ -110,6 +110,7 @@ const mockAlertingVTwo = {
       {...(manageRulesHref ? { 'data-manage-rules-href': manageRulesHref } : {})}
     />
   ),
+  AlertsProvider: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
   ActionPoliciesPage: ({ hostApp, privilegeCheck }: AlertingV2PageProps) => (
     <Placeholder
       name={`actionPoliciesPage:${hostApp?.actionPolicies?.app ?? 'none'}`}

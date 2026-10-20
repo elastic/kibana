@@ -12,18 +12,21 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { overlayServiceMock } from '@kbn/core-overlays-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
-import { fetchClassicAlertById } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id';
-import { classicActionExtensions } from '@kbn/alerting-v2-episodes-ui/classic_alerts/action_extensions';
-import { classicAlertQueryKeys } from '@kbn/alerting-v2-episodes-ui/classic_alerts/query_keys';
-import type { ClassicAlertFields } from '@kbn/alerting-v2-episodes-ui/classic_alerts/types';
-import type { EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
-import { createResolveAction } from '@kbn/alerting-v2-episodes-ui/actions/resolve';
-import { createSnoozeAction } from '@kbn/alerting-v2-episodes-ui/actions/snooze';
-import { createUnresolveAction } from '@kbn/alerting-v2-episodes-ui/actions/unresolve';
-import { createUnsnoozeAction } from '@kbn/alerting-v2-episodes-ui/actions/unsnooze';
+import { fetchClassicAlertById } from '../classic_alerts/apis/fetch_classic_alert_by_id';
+import { CLASSIC_OBS_AND_STACK_RULE_TYPE_IDS } from '../classic_alerts/constants';
+import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
+import type { EpisodeDataSource } from '../types/episode_data_source';
+import { classicActionExtensions } from '../classic_alerts/action_extensions';
+import { classicAlertQueryKeys } from '../classic_alerts/query_keys';
+import type { ClassicAlertFields } from '../classic_alerts/types';
+import type { EpisodeAction } from '../actions';
+import { createResolveAction } from '../actions/resolve';
+import { createSnoozeAction } from '../actions/snooze';
+import { createUnresolveAction } from '../actions/unresolve';
+import { createUnsnoozeAction } from '../actions/unsnooze';
 import { ClassicAlertDetailsFlyout } from './classic_alert_details_flyout';
 
-jest.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_alert_by_id');
+jest.mock('../classic_alerts/apis/fetch_classic_alert_by_id');
 
 const mockEuiFlyout = jest.fn();
 
@@ -321,5 +324,39 @@ describe('ClassicAlertDetailsFlyout', () => {
     expect(
       screen.queryByTestId('alertingV2EpisodeTakeAction-ALERTING_V2_SNOOZE_EPISODE')
     ).not.toBeInTheDocument();
+  });
+
+  describe('rule type scope', () => {
+    const renderWithSource = (dataSource?: Partial<EpisodeDataSource>) =>
+      render(
+        <EpisodeDataSourceProvider dataSource={dataSource as EpisodeDataSource}>
+          <ClassicAlertDetailsFlyout alertId="alert-1" onClose={jest.fn()} services={services} />
+        </EpisodeDataSourceProvider>,
+        { wrapper: createWrapper() }
+      );
+
+    it('looks the alert up within the rule types the injected source covers', async () => {
+      mockFetchClassicAlertById.mockResolvedValue(undefined as never);
+
+      renderWithSource({ ruleTypeIds: ['siem.esqlRule'] } as Partial<EpisodeDataSource>);
+
+      await waitFor(() =>
+        expect(mockFetchClassicAlertById).toHaveBeenCalledWith(
+          expect.objectContaining({ ruleTypeIds: ['siem.esqlRule'] })
+        )
+      );
+    });
+
+    it('falls back to the Observability and stack rule types when a source declares none', async () => {
+      mockFetchClassicAlertById.mockResolvedValue(undefined as never);
+
+      renderWithSource({});
+
+      await waitFor(() =>
+        expect(mockFetchClassicAlertById).toHaveBeenCalledWith(
+          expect.objectContaining({ ruleTypeIds: CLASSIC_OBS_AND_STACK_RULE_TYPE_IDS })
+        )
+      );
+    });
   });
 });

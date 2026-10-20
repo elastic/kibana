@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { alertEpisodeToDataTableRecord } from './utils';
+import { alertEpisodeToDataTableRecord } from './alert_episode_to_data_table_record';
 import type { AlertEpisode } from '@kbn/alerting-v2-schemas';
 describe('alertEpisodeToDataTableRecord', () => {
   const mockEpisode = {
