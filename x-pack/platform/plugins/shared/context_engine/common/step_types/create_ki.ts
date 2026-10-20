@@ -15,7 +15,7 @@ import { VerifyKiOutputSchema, kiVerifiersSchema } from './verify_ki_step';
 
 export const CREATE_KI_STEP_ID = 'context-engine.createKi' as const;
 
-export const KI_VERIFICATION_FAILURE_ACTIONS = ['drop', 'write_as_failed'] as const;
+export const KI_VERIFICATION_FAILURE_ACTIONS = ['skip', 'write_as_failed'] as const;
 export type KiVerificationFailureAction = (typeof KI_VERIFICATION_FAILURE_ACTIONS)[number];
 
 export const createKiInputSchema = z.object({
@@ -35,7 +35,7 @@ export const createKiInputSchema = z.object({
     .enum(KI_VERIFICATION_FAILURE_ACTIONS)
     .optional()
     .describe(
-      'What to do with a KI that fails verification: `drop` (default) writes nothing; `write_as_failed` writes it with lifecycle status `verification_failed`, which keeps it out of search but visible in the AI index.'
+      'What to do with a KI that fails verification: `skip` (default) writes nothing and leaves any existing KI with the same id untouched; `write_as_failed` writes it with lifecycle status `verification_failed`, replacing any existing KI with the same id, out of search but visible in the AI index.'
     ),
   refresh: z
     .boolean()
@@ -50,7 +50,7 @@ export const createKiOutputSchema = z.object({
     .string()
     .optional()
     .describe(
-      'The id of the created knowledge indicator; absent when verification failed and the KI was dropped'
+      'The id of the created knowledge indicator; absent when verification failed and the write was skipped'
     ),
   verification: VerifyKiOutputSchema.optional().describe(
     'Verifier results; present when `verifiers` was given'

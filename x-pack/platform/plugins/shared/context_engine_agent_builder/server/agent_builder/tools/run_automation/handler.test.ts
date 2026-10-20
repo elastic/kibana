@@ -277,7 +277,7 @@ describe('runAutomationHandler', () => {
           stepExecutions: [
             createKi({ id: 'pilot/a' }),
             createKi({ id: 'pilot/b', verification: { passed: true } }),
-            // Failed verification, dropped: the step completes but writes nothing.
+            // Failed verification, skipped: the step completes but writes nothing.
             createKi({ verification: { passed: false } }),
             // Failed verification, written as verification_failed.
             createKi({ id: 'pilot/c', verification: { passed: false } }),

@@ -51,7 +51,7 @@ export const getCreateKiStepDefinition = ({
         ai_index_id: aiIndexId,
         ki_id: kiId,
         verifiers,
-        on_verification_failure: onVerificationFailure = 'drop',
+        on_verification_failure: onVerificationFailure = 'skip',
         refresh = false,
       } = context.input;
       const ki = omitNullKiAttributes(context.input.ki);
@@ -67,7 +67,7 @@ export const getCreateKiStepDefinition = ({
             ? await verifyKi({ context, ki, verifiers, aiIndexId })
             : undefined;
           const verificationFailed = verification !== undefined && !verification.passed;
-          if (verificationFailed && onVerificationFailure === 'drop') {
+          if (verificationFailed && onVerificationFailure === 'skip') {
             return { output: { verification } };
           }
 

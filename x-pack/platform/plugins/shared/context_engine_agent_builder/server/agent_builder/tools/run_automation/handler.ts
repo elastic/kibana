@@ -31,7 +31,7 @@ export interface RunAutomationHandlerResult extends RunAutomationResult {
   pilotSize?: number;
   /** Active KIs the run wrote, present when the call waited and the run completed. */
   kisWritten?: number;
-  /** KIs that failed verification, dropped or written as `verification_failed`. */
+  /** KIs that failed verification, skipped or written as `verification_failed`. */
   kisFailedVerification?: number;
   /** Deep link to the workflow execution in the Workflows app, when the run started. */
   workflowUrl?: string;
