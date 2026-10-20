@@ -17,6 +17,7 @@ import {
   EuiSelectable,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -238,6 +239,18 @@ export function ActionsMenu({
     currentPath,
     addGroupContent,
   });
+
+  const selectableOptions = useMemo(
+    () =>
+      displayOptions.map((option) => {
+        if (option.isGroupLabel) {
+          return { ...option, css: styles.groupLabel };
+        }
+        const className = ['actionsMenuOption', option.className].filter(Boolean).join(' ');
+        return { ...option, className };
+      }),
+    [displayOptions, styles.groupLabel]
+  );
 
   const actionableDisplayOptions = useMemo(
     () => getActionableDisplayOptions(displayOptions),
@@ -582,6 +595,11 @@ export function ActionsMenu({
   );
 
   const breadcrumbs: EuiBreadcrumb[] = useMemo(() => {
+    const breadcrumbText = (label: string) => (
+      <EuiText size="xs" component="span">
+        {label}
+      </EuiText>
+    );
     const allActionsLabel = i18n.translate('workflows.actionsMenu.breadcrumb.allActions', {
       defaultMessage: 'All actions',
     });
@@ -589,7 +607,7 @@ export function ActionsMenu({
     if (isSearching || searchTerm.startsWith(STEPS_PREFIX)) {
       return [
         {
-          text: allActionsLabel,
+          text: breadcrumbText(allActionsLabel),
           onClick: (e: React.MouseEvent) => {
             e.preventDefault();
             setSearchTerm('');
@@ -597,9 +615,11 @@ export function ActionsMenu({
           },
         },
         {
-          text: i18n.translate('workflows.actionsMenu.breadcrumb.searchResults', {
-            defaultMessage: 'Search results',
-          }),
+          text: breadcrumbText(
+            i18n.translate('workflows.actionsMenu.breadcrumb.searchResults', {
+              defaultMessage: 'Search results',
+            })
+          ),
         },
       ];
     }
@@ -608,7 +628,7 @@ export function ActionsMenu({
 
     const crumbs: EuiBreadcrumb[] = [
       {
-        text: allActionsLabel,
+        text: breadcrumbText(allActionsLabel),
         onClick: (e: React.MouseEvent) => {
           e.preventDefault();
           navigateToPath([]);
@@ -620,7 +640,7 @@ export function ActionsMenu({
       const isLast = index === pathLabels.length - 1;
       const pathToHere = currentPath.slice(0, index + 1);
       crumbs.push({
-        text: item.label,
+        text: breadcrumbText(item.label),
         ...(isLast
           ? {}
           : {
@@ -656,6 +676,13 @@ export function ActionsMenu({
     });
   }, [currentPath, navigateToPath]);
 
+  const compactBackLabel = i18n.translate('workflows.actionsMenu.compact.back', {
+    defaultMessage: 'Back',
+  });
+  const compactCloseLabel = i18n.translate('workflows.actionsMenu.close', {
+    defaultMessage: 'Close actions menu',
+  });
+
   const compactHeaderTitle = useMemo(() => {
     if (isSearching) {
       const count = actionableDisplayOptions.length;
@@ -690,7 +717,7 @@ export function ActionsMenu({
         defaultMessage: 'Actions menu',
       })}
       searchable
-      options={displayOptions}
+      options={selectableOptions}
       onChange={handleChange}
       optionMatcher={optionMatcher}
       searchProps={{
@@ -760,7 +787,7 @@ export function ActionsMenu({
           data-test-subj={isCompact ? 'actionsMenuCompact' : 'actionsMenuFull'}
         >
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={styles.header}>
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} css={isCompact ? undefined : styles.headerTitle}>
               {isCompact ? (
                 <EuiFlexGroup
                   alignItems="center"
@@ -769,16 +796,16 @@ export function ActionsMenu({
                   justifyContent="spaceBetween"
                 >
                   {showCompactBack ? (
-                    <EuiButtonIcon
-                      iconType="arrowLeft"
-                      color="text"
-                      size="xs"
-                      onClick={goBack}
-                      aria-label={i18n.translate('workflows.actionsMenu.compact.back', {
-                        defaultMessage: 'Back',
-                      })}
-                      data-test-subj="actionsMenuCompactBack"
-                    />
+                    <EuiToolTip content={compactBackLabel} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="arrowLeft"
+                        color="text"
+                        size="xs"
+                        onClick={goBack}
+                        aria-label={compactBackLabel}
+                        data-test-subj="actionsMenuCompactBack"
+                      />
+                    </EuiToolTip>
                   ) : (
                     <span aria-hidden style={{ width: 24 }} />
                   )}
@@ -786,16 +813,16 @@ export function ActionsMenu({
                     <h3>{compactHeaderTitle}</h3>
                   </EuiTitle>
                   {onClose ? (
-                    <EuiButtonIcon
-                      iconType="cross"
-                      color="text"
-                      size="xs"
-                      onClick={onClose}
-                      aria-label={i18n.translate('workflows.actionsMenu.close', {
-                        defaultMessage: 'Close actions menu',
-                      })}
-                      data-test-subj="actionsMenuCompactClose"
-                    />
+                    <EuiToolTip content={compactCloseLabel} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="cross"
+                        color="text"
+                        size="xs"
+                        onClick={onClose}
+                        aria-label={compactCloseLabel}
+                        data-test-subj="actionsMenuCompactClose"
+                      />
+                    </EuiToolTip>
                   ) : (
                     <span aria-hidden style={{ width: 24 }} />
                   )}

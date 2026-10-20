@@ -10,7 +10,10 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser';
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
+import type {
+  ConversationAttachment,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { useAgentBuilderIntegration } from './use_agent_builder_integration';
@@ -500,7 +503,76 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('auto-open on editor mount', () => {
-    it('does NOT auto-open on the create route (canvas owns the AI entry)', async () => {
+    it('opens the sidebar exactly once on the create route when autoOpenAgentChat is set', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { rerender } = renderHook(
+        (props: {
+          editorRef: React.MutableRefObject<any>;
+          isEditorMounted: boolean;
+          workflowName?: string;
+          autoOpenAgentChat?: boolean;
+        }) => useAgentBuilderIntegration(props),
+        {
+          initialProps: {
+            editorRef: { current: editor },
+            isEditorMounted: true,
+            workflowName: 'Original Name',
+            autoOpenAgentChat: true,
+          },
+        }
+      );
+
+      await flushChatAccessCheck();
+
+      expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+      expect(agentBuilder.openChat).toHaveBeenCalledWith(
+        expect.objectContaining({ greetingMessage: WORKFLOW_EDITOR_GREETING })
+      );
+
+      // Re-render with prop changes must not re-fire the auto-open.
+      rerender({
+        editorRef: { current: editor },
+        isEditorMounted: true,
+        workflowName: 'Updated Name',
+        autoOpenAgentChat: true,
+      });
+      expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+    });
+
+    it('sends the landing prompt with its attachments next to the workflow YAML', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+      const imageAttachment = {
+        id: 'image-1',
+        type: 'image',
+        data: { fileId: 'file-1' },
+      } as unknown as ConversationAttachment;
+
+      renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          autoOpenAgentChat: true,
+          initialAgentMessage: 'Build a workflow from this screenshot',
+          initialAgentAttachments: [imageAttachment],
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+      const { initialMessage, autoSendInitialMessage, attachments } =
+        agentBuilder.openChat.mock.calls[0][0];
+      expect(initialMessage).toBe('Build a workflow from this screenshot');
+      expect(autoSendInitialMessage).toBe(true);
+      expect(attachments).toEqual([imageAttachment, expectedAttachment(INITIAL_YAML)]);
+    });
+
+    it('does NOT auto-open on the create route without autoOpenAgentChat ("Start manually")', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -509,14 +581,12 @@ describe('useAgentBuilderIntegration', () => {
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
-          workflowName: 'Untitled',
         })
       );
 
       await flushChatAccessCheck();
 
       expect(agentBuilder.openChat).not.toHaveBeenCalled();
-      expect(mockTelemetry.reportWorkflowAiChatOpened).not.toHaveBeenCalled();
     });
 
     it('does NOT auto-open on an existing workflow detail view', () => {
@@ -589,6 +659,35 @@ describe('useAgentBuilderIntegration', () => {
       );
 
       expect(agentBuilder.openChat).not.toHaveBeenCalled();
+    });
+
+    it('tags chat-opened and session-completed telemetry with autoOpened=true on auto-open', async () => {
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { unmount } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          autoOpenAgentChat: true,
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+      expect(mockTelemetry.reportWorkflowAiChatOpened).toHaveBeenCalledWith({
+        entryPoint: 'workflow_editor',
+        sessionType: 'create',
+        workflowId: undefined,
+        autoOpened: true,
+      });
+
+      unmount();
+      expect(mockTelemetry.reportWorkflowAiSessionCompleted).toHaveBeenCalledWith(
+        expect.objectContaining({ autoOpened: true })
+      );
     });
 
     it('tags chat-opened and session-completed telemetry with autoOpened=true on restore', async () => {
@@ -681,6 +780,7 @@ describe('useAgentBuilderIntegration', () => {
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
+          autoOpenAgentChat: true,
         })
       );
 
@@ -783,6 +883,7 @@ describe('useAgentBuilderIntegration', () => {
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
+          autoOpenAgentChat: true,
         })
       );
 
@@ -1133,7 +1234,7 @@ describe('useAgentBuilderIntegration', () => {
   });
 
   describe('no advanced-setting gate', () => {
-    it('wires up attachment sync and chat config on a default deployment', async () => {
+    it('wires up attachment sync, chat config and auto-open on a default deployment', async () => {
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -1142,6 +1243,7 @@ describe('useAgentBuilderIntegration', () => {
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
+          autoOpenAgentChat: true,
         })
       );
 
@@ -1151,7 +1253,7 @@ describe('useAgentBuilderIntegration', () => {
       expect(result.current.isAgentBuilderAvailable).toBe(true);
       expect(agentBuilder.addAttachment).toHaveBeenCalledWith(expected);
       expect(agentBuilder.setChatConfig).toHaveBeenCalledWith(expectedChatConfig(expected));
-      expect(agentBuilder.openChat).not.toHaveBeenCalled();
+      expect(agentBuilder.openChat).toHaveBeenCalled();
     });
 
     it('never reads a ui setting', async () => {

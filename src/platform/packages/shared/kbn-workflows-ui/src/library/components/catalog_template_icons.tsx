@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiNotificationBadge, useEuiTheme } from '@elastic/eui';
+import { EuiNotificationBadge, useEuiTheme, useResizeObserver } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getBaseConnectorType, TypeIcon } from '../../components/step_icons';
 
@@ -18,6 +18,42 @@ const DEFAULT_MAX_VISIBLE_ICONS = 4;
 
 /** Shared slot so outline icons, brand logos, and the +N badge share one midline. */
 const ICON_SLOT_PX = 20;
+
+const MAX_VISIBLE_STEP_ICONS = 4;
+// Rough "+N" badge width: horizontal padding plus one character per glyph.
+const getOverflowBadgeWidth = (count: number): number => 8 + 8 * `+${count}`.length;
+
+interface RowSizes {
+  icon: number;
+  gap: number;
+  divider: number;
+}
+
+/**
+ * Picks how many step icons fit in `width`, reserving room for the "+N"
+ * badge when some are hidden. Returns the cap when the width is unknown.
+ */
+export const getVisibleStepCount = (
+  width: number,
+  triggerCount: number,
+  stepCount: number,
+  { icon, gap, divider }: RowSizes
+): number => {
+  const maxCount = Math.min(stepCount, MAX_VISIBLE_STEP_ICONS);
+  if (width <= 0) return maxCount;
+
+  for (let count = maxCount; count > 0; count--) {
+    const hidden = stepCount - count;
+    const widths = [
+      ...Array(triggerCount + count).fill(icon),
+      ...(triggerCount > 0 ? [divider] : []),
+      ...(hidden > 0 ? [getOverflowBadgeWidth(hidden)] : []),
+    ];
+    const total = widths.reduce((sum, w) => sum + w, 0) + gap * (widths.length - 1);
+    if (total <= width) return count;
+  }
+  return 1;
+};
 
 export interface CatalogTemplateIconsProps {
   stepTypes: string[];
@@ -43,6 +79,8 @@ type IconItem =
 export const CatalogTemplateIcons = React.memo<CatalogTemplateIconsProps>(
   ({ stepTypes, triggerTypes, maxVisible = DEFAULT_MAX_VISIBLE_ICONS }) => {
     const { euiTheme } = useEuiTheme();
+    const [rowElement, setRowElement] = useState<HTMLDivElement | null>(null);
+    const { width: rowWidth } = useResizeObserver(rowElement, 'width');
 
     // Dedupe step icons by base connector type (so `elasticsearch.search` and
     // `elasticsearch.index` render one icon) while keeping the first raw step
@@ -68,7 +106,22 @@ export const CatalogTemplateIcons = React.memo<CatalogTemplateIconsProps>(
       [triggerTypes, uniqueStepTypes]
     );
 
-    const visibleItems = useMemo(() => items.slice(0, maxVisible), [items, maxVisible]);
+    // Narrow cards (e.g. three in a row on the create landing) show fewer
+    // icons so the row and its "+N" badge stay inside the card.
+    const visibleStepCount = getVisibleStepCount(
+      rowWidth,
+      triggerTypes.length,
+      uniqueStepTypes.length,
+      {
+        icon: ICON_SLOT_PX,
+        gap: parseFloat(euiTheme.size.m),
+        // The divider's negative margins collapse the flex gap on both sides.
+        divider: 1 + 2 * (parseFloat(euiTheme.size.xs) - parseFloat(euiTheme.size.m)),
+      }
+    );
+    const visibleCount = Math.min(maxVisible, triggerTypes.length + visibleStepCount);
+
+    const visibleItems = useMemo(() => items.slice(0, visibleCount), [items, visibleCount]);
     const overflowCount = items.length - visibleItems.length;
 
     const iconSlotCss = useMemo(
@@ -105,6 +158,7 @@ export const CatalogTemplateIcons = React.memo<CatalogTemplateIconsProps>(
 
     return (
       <div
+        ref={setRowElement}
         data-test-subj="catalogTemplateIcons"
         css={{
           display: 'flex',

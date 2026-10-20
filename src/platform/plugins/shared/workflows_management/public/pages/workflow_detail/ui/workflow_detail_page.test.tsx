@@ -39,6 +39,7 @@ interface WorkflowDetailPageProps {
 const mockUseWorkflowsBreadcrumbs = jest.fn();
 const mockUseWorkflowUrlState = jest.fn();
 const mockUseGlobalExecutionsViewEnabled = jest.fn();
+const mockUseWorkflowsExperimentalUiSetting = jest.fn();
 
 let mockLoadConnectors = jest.fn();
 let mockLoadWorkflow = jest.fn();
@@ -55,6 +56,9 @@ jest.mock('../../../hooks/use_workflow_url_state', () => ({
 }));
 jest.mock('../../../hooks/use_global_executions_view_enabled', () => ({
   useGlobalExecutionsViewEnabled: () => mockUseGlobalExecutionsViewEnabled(),
+}));
+jest.mock('../../../hooks/use_workflows_experimental_ui_setting', () => ({
+  useWorkflowsExperimentalUiSetting: () => mockUseWorkflowsExperimentalUiSetting(),
 }));
 
 jest.mock('@kbn/workflows-ui', () => ({
@@ -87,6 +91,13 @@ jest.mock('./workflow_not_found_page', () => ({
   ),
 }));
 
+// The `/create` agentic-first landing renders `AppHeader` directly (not via
+// `WorkflowDetailHeader`), and it needs a real ChromeServiceProvider.
+jest.mock('@kbn/app-header', () => ({
+  __esModule: true,
+  AppHeader: () => null,
+}));
+
 jest.mock('./workflow_detail_header', () => ({
   WorkflowDetailHeader: ({ onOpenExecutionList }: { onOpenExecutionList?: () => void }) => (
     <div data-test-subj="workflow-detail-header">
@@ -101,7 +112,14 @@ jest.mock('./workflow_detail_header', () => ({
   ),
 }));
 jest.mock('./workflow_detail_editor', () => ({
-  WorkflowDetailEditor: () => <div data-test-subj="workflow-detail-editor">{'Editor'}</div>,
+  WorkflowDetailEditor: ({ autoOpenAgentChat }: { autoOpenAgentChat?: boolean }) => (
+    <div
+      data-test-subj="workflow-detail-editor"
+      data-auto-open-agent-chat={`${!!autoOpenAgentChat}`}
+    >
+      {'Editor'}
+    </div>
+  ),
 }));
 jest.mock('./workflow_detail_layout', () => ({
   WorkflowEditorLayout: ({ editor, executionList, executionDetail }: any) => (
@@ -224,6 +242,7 @@ describe('WorkflowDetailPage', () => {
 
     mockUseWorkflowsBreadcrumbs.mockImplementation(() => undefined);
     mockUseGlobalExecutionsViewEnabled.mockReturnValue(false);
+    mockUseWorkflowsExperimentalUiSetting.mockReturnValue(false);
     mockUseWorkflowsCapabilities.mockReturnValue(mockWorkflowsManagementCapabilities);
     mockUseWorkflowUrlState.mockReturnValue({
       activeTab: 'workflow' as const,
@@ -309,6 +328,51 @@ describe('WorkflowDetailPage', () => {
       });
 
       expect(getSeededYaml(store)).toBe(initialYaml);
+    });
+
+    it('skips the landing and auto-opens the agent chat for a remix', () => {
+      const store = createMockStore();
+
+      const { historyRef } = renderWithProviders({ id: undefined }, () => store, [
+        { pathname: '/create', state: { initialYaml } },
+      ]);
+
+      expect(screen.queryByTestId('newWorkflowPage')).not.toBeInTheDocument();
+      expect(screen.getByTestId('workflow-detail-editor')).toHaveAttribute(
+        'data-auto-open-agent-chat',
+        'true'
+      );
+
+      // URL churn drops the history state; the landing must not come back.
+      act(() => {
+        historyRef.current?.replace('/create?view=graph');
+      });
+
+      expect(screen.queryByTestId('newWorkflowPage')).not.toBeInTheDocument();
+    });
+
+    it('skips the landing on /create when the visual editor is enabled', () => {
+      mockUseWorkflowsExperimentalUiSetting.mockReturnValue(true);
+
+      renderWithProviders({ id: undefined }, () => createMockStore(), ['/create']);
+
+      expect(screen.queryByTestId('newWorkflowPage')).not.toBeInTheDocument();
+      expect(screen.getByTestId('workflow-detail-editor')).toHaveAttribute(
+        'data-auto-open-agent-chat',
+        'false'
+      );
+    });
+
+    it('opens the editor without the agent chat on "Start manually"', () => {
+      renderWithProviders({ id: undefined }, () => createMockStore(), ['/create']);
+
+      fireEvent.click(screen.getByTestId('agenticFirstStartManuallyButton'));
+
+      expect(screen.queryByTestId('newWorkflowPage')).not.toBeInTheDocument();
+      expect(screen.getByTestId('workflow-detail-editor')).toHaveAttribute(
+        'data-auto-open-agent-chat',
+        'false'
+      );
     });
 
     it('falls back to the default yaml on a plain `/create` without state', () => {

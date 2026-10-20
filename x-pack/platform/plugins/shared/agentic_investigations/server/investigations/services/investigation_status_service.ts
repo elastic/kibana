@@ -154,7 +154,6 @@ export class InvestigationStatusService {
           conversationId,
           status: 'pending',
           excludeSuperseded: true,
-          excludeUndecidedSuperseded: false,
           excludeExpired: true,
           size,
           from,

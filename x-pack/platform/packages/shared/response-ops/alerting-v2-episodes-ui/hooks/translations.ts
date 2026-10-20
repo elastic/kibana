@@ -76,3 +76,10 @@ export const RULE_TAGS_FIELD_LABEL = i18n.translate(
 export const SOURCE_FIELD_LABEL = i18n.translate('xpack.alertingV2EpisodesUi.sourceFieldLabel', {
   defaultMessage: 'Source',
 });
+
+export const MAINTENANCE_WINDOWS_FIELD_LABEL = i18n.translate(
+  'xpack.alertingV2EpisodesUi.maintenanceWindowsFieldLabel',
+  {
+    defaultMessage: 'Maintenance windows',
+  }
+);
