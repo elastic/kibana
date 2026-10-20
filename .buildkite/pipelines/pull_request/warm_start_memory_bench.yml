@@ -10,4 +10,5 @@ steps:
     timeout_in_minutes: 90
     env:
       WARM_START_MEMORY_COMMENT_ENABLED: 'true'
+      WARM_START_MEMORY_BASELINE_PIPELINE: 'does-not-exist'
     soft_fail: true
