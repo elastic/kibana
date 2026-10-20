@@ -75,7 +75,7 @@ export const selectSecretConnections = (
       throw new SecretConnectionError(
         `Monitor "${
           monitorName ?? ''
-        }" references Vault connection "${name}", which is not configured; available connections: ${available}`
+        }" references Vault connection "${name}", which is not configured (or its host is not in xpack.uptime.secretConnections.allowedHosts); available connections: ${available}`
       );
     }
     selected.set(conn.name, conn);

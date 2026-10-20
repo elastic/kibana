@@ -21,9 +21,18 @@ const serviceConfig = schema.object({
   showExperimentalLocations: schema.maybe(schema.boolean()),
 });
 
+const secretConnectionsConfig = schema.object({
+  // Hostnames Kibana may contact for secret provider (Vault) connections. `*` allows any.
+  allowedHosts: schema.arrayOf(schema.string({ minLength: 1, maxLength: 253 }), {
+    defaultValue: ['*'],
+    maxSize: 1000,
+  }),
+});
+
 const uptimeConfig = schema.object({
   index: schema.maybe(schema.string()),
   service: schema.maybe(serviceConfig),
+  secretConnections: schema.maybe(secretConnectionsConfig),
   enabled: schema.boolean({ defaultValue: true }),
 });
 

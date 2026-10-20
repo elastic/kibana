@@ -20,6 +20,7 @@ import { SECRET_CONNECTION_WRITE_API } from '../../../feature';
 import { secretConnectionId } from '../../../saved_objects/synthetics_secret_connection';
 import { listConnections, propagate, toStatus } from './connection_utils';
 import { isCredentialSensitiveChange, SECRET_REENTRY_REQUIRED_MESSAGE } from './credential_guard';
+import { getAllowedHosts, hostNotAllowedMessage, isAddressHostAllowed } from './address_guard';
 import type { SaveBody, TestBody } from './schemas';
 import { SaveBodySchema, TestBodySchema } from './schemas';
 import type { TestResult } from './vault_client';
@@ -45,6 +46,9 @@ export const saveSecretConnectionRoute: SyntheticsRestApiRouteFactory<
   requiredPrivileges: [SECRET_CONNECTION_WRITE_API],
   handler: async ({ request, response, savedObjectsClient, server, spaceId }) => {
     const body = request.body as SaveBody;
+    if (!isAddressHostAllowed(body.config.address, getAllowedHosts(server.config))) {
+      return response.badRequest({ body: { message: hostNotAllowedMessage(body.config.address) } });
+    }
     const type: SecretProviderType = body.type ?? SECRET_PROVIDER_HASHICORP_VAULT;
 
     if (body.config.authMethod === 'approle' && !body.config.roleId) {
@@ -198,6 +202,9 @@ export const testSecretConnectionRoute: SyntheticsRestApiRouteFactory<TestResult
   handler: async ({ request, server, spaceId }) => {
     const body = request.body as TestBody;
     const { address, authMethod, namespace, tlsSkipVerify, roleId } = body.config;
+    if (!isAddressHostAllowed(address, getAllowedHosts(server.config))) {
+      return { ok: false, message: hostNotAllowedMessage(address) };
+    }
 
     // Fall back to the stored secret when the client submits a blank (editing), but never
     // for a changed endpoint: that would send the stored credential to a new address.

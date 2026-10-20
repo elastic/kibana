@@ -8,6 +8,7 @@
 import { lookup as dnsLookup } from 'dns';
 import { isIPv4, isIPv6 } from 'net';
 import type { LookupFunction } from 'net';
+import type { UptimeConfig } from '../../../config';
 
 const stripBrackets = (host: string): string => host.replace(/^\[|\]$/g, '');
 
@@ -53,6 +54,32 @@ export const validateVaultAddress = (value: string): string | undefined => {
   if (value.includes('#') || value.includes('?')) return 'must not include a query or fragment';
   if (isBlockedAddress(url.hostname)) return 'must not be a link-local address';
   return undefined;
+};
+
+const ALLOW_ANY_HOST = '*';
+
+export const getAllowedHosts = (config: UptimeConfig): readonly string[] =>
+  config.secretConnections?.allowedHosts ?? [ALLOW_ANY_HOST];
+
+/** Whether the address's host is in `xpack.uptime.secretConnections.allowedHosts` (exact match). */
+export const isAddressHostAllowed = (address: string, allowedHosts: readonly string[]): boolean => {
+  if (allowedHosts.includes(ALLOW_ANY_HOST)) return true;
+  try {
+    const host = stripBrackets(new URL(address).hostname).toLowerCase();
+    return allowedHosts.some((allowed) => stripBrackets(allowed).toLowerCase() === host);
+  } catch (e) {
+    return false;
+  }
+};
+
+export const hostNotAllowedMessage = (address: string): string => {
+  let host = address;
+  try {
+    host = new URL(address).hostname;
+  } catch (e) {
+    // keep the raw value
+  }
+  return `Vault host "${host}" is not added to the Kibana config xpack.uptime.secretConnections.allowedHosts`;
 };
 
 /** DNS lookup that refuses names resolving to a blocked address (guards against rebinding). */

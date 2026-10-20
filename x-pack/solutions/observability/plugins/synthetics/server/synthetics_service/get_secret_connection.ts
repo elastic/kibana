@@ -9,6 +9,10 @@ import { getFleetSecretStorageEnabled } from './fleet_secret_storage';
 import type { SyntheticsSecretConnection } from '../../common/runtime_types';
 import { syntheticsSecretConnectionType } from '../../common/types/saved_objects';
 import type { SyntheticsServerSetup } from '../types';
+import {
+  getAllowedHosts,
+  isAddressHostAllowed,
+} from '../routes/settings/secret_connection/address_guard';
 
 /**
  * A Heartbeat `secret_stores` entry of type `vault`, assembled from an encrypted
@@ -78,12 +82,20 @@ export const getSecretConnectionConfigs = async (
         }
       );
 
+    const allowedHosts = getAllowedHosts(server.config);
     const configs: HeartbeatVaultConfig[] = [];
     for await (const result of finder.find()) {
       for (const so of result.saved_objects) {
         // Skip decrypt-failed objects (attributes stripped) rather than emitting a
         // connection with no secret.
         if (so.error || !so.attributes) continue;
+        // The list may have been tightened after the connection was saved.
+        if (!isAddressHostAllowed(so.attributes.config.address, allowedHosts)) {
+          server.logger?.warn(
+            `Vault connection "${so.attributes.name}" is not delivered: its host is not in xpack.uptime.secretConnections.allowedHosts`
+          );
+          continue;
+        }
         configs.push(toHeartbeatConfig(so.attributes));
       }
     }
