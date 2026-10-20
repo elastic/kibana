@@ -35,6 +35,11 @@ export const isBlockedAddress = (rawIp: string): boolean => {
   );
 };
 
+const isLoopbackHost = (hostname: string): boolean => {
+  const host = stripBrackets(hostname).toLowerCase();
+  return host === 'localhost' || host === '::1' || (isIPv4(host) && host.startsWith('127.'));
+};
+
 /**
  * Validates a user-supplied Vault address. The request URL is built by appending
  * a fixed path, so a query string or fragment would let the caller rewrite that path.
@@ -47,6 +52,10 @@ export const validateVaultAddress = (value: string): string | undefined => {
     return 'must be a valid URL';
   }
   if (url.protocol !== 'http:' && url.protocol !== 'https:') return 'must be an http(s) URL';
+  // Agents send their Vault token here; plaintext is only safe to a Vault Agent on the same host.
+  if (url.protocol === 'http:' && !isLoopbackHost(url.hostname)) {
+    return 'must use https unless the host is loopback';
+  }
   if (url.username || url.password) return 'must not include credentials';
   // `new URL` reports an empty `#`/`?` as no hash/search, so check the raw value.
   if (value.includes('#') || value.includes('?')) return 'must not include a query or fragment';

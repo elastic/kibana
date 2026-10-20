@@ -17,7 +17,9 @@ describe('validateVaultAddress', () => {
   it.each([
     'https://vault.example.com',
     'http://localhost:8200',
-    'http://10.0.0.5:8200/',
+    'http://127.0.0.1:8200',
+    'http://[::1]:8200',
+    'https://10.0.0.5:8200/',
     'https://vault.example.com:8200/prefix',
   ])('accepts %s', (address) => {
     expect(validateVaultAddress(address)).toBeUndefined();
@@ -30,9 +32,11 @@ describe('validateVaultAddress', () => {
     ['https://user:pass@vault.example.com', 'credentials'],
     ['ftp://vault.example.com', 'protocol'],
     ['not a url', 'invalid'],
-    ['http://169.254.169.254', 'link-local'],
-    ['http://[fe80::1]', 'link-local'],
-    ['http://[::ffff:169.254.169.254]', 'link-local'],
+    ['http://10.0.0.5:8200', 'plaintext to a remote host'],
+    ['http://vault.example.com', 'plaintext to a remote host'],
+    ['https://169.254.169.254', 'link-local'],
+    ['https://[fe80::1]', 'link-local'],
+    ['https://[::ffff:169.254.169.254]', 'link-local'],
   ])('rejects %s (%s)', (address) => {
     expect(validateVaultAddress(address)).toEqual(expect.any(String));
   });
