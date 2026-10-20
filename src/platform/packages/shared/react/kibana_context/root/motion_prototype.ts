@@ -176,12 +176,16 @@ const buildMotionCss = (tokens: MotionTokens, settings: MotionRefreshSettings): 
   }
   .${TAB_INDICATOR_CLASS} {
     position: absolute;
+    left: 0;
     bottom: 0;
+    width: 1px;
     height: ${indicatorThickness};
     background: ${indicatorColor};
     pointer-events: none;
     z-index: 1;
-    transition: left ${tabDuration} ${tabEasing}, width ${tabDuration} ${tabEasing};
+    transform-origin: left center;
+    transition: transform ${tabDuration} ${tabEasing};
+    will-change: transform;
   }
   .${TAB_INDICATOR_CLASS}[data-disabled] {
     background: ${indicatorDisabledColor};
@@ -244,6 +248,9 @@ const getSelectedTab = (tabs: HTMLElement): HTMLElement | null => {
 const isDisabledTab = (tab: HTMLElement): boolean =>
   tab.hasAttribute('disabled') || tab.getAttribute('aria-disabled') === 'true';
 
+const isIndicatorNode = (node: Node): boolean =>
+  node instanceof Element && node.classList.contains(TAB_INDICATOR_CLASS);
+
 const measureIndicator = (tabs: HTMLElement, tab: HTMLElement): { left: number; width: number } => {
   const tabsRect = tabs.getBoundingClientRect();
   const tabRect = tab.getBoundingClientRect();
@@ -265,125 +272,213 @@ const ensureIndicator = (tabs: HTMLElement): HTMLElement => {
   return indicator;
 };
 
-const applyIndicator = (tabs: HTMLElement, indicator: HTMLElement, animate: boolean) => {
-  const selected = getSelectedTab(tabs);
-  if (!selected) {
+const placement = new WeakMap<HTMLElement, { left: number; width: number }>();
+
+/** Moves one tab list's underline. `transform` keeps the slide on the compositor. */
+const applyIndicator = (tabs: HTMLElement, tab: HTMLElement | null, animate: boolean) => {
+  const indicator = ensureIndicator(tabs);
+  if (!tab) {
     if (indicator.style.opacity !== '0') indicator.style.opacity = '0';
     return;
   }
 
-  const { left, width } = measureIndicator(tabs, selected);
-  const nextLeft = `${left}px`;
-  const nextWidth = `${width}px`;
-  const disabled = isDisabledTab(selected);
+  const { left, width } = measureIndicator(tabs, tab);
+  const previous = placement.get(indicator);
+  const disabled = isDisabledTab(tab);
   if (indicator.hasAttribute('data-disabled') !== disabled) {
     indicator.toggleAttribute('data-disabled', disabled);
   }
-
   const geometryUnchanged =
-    indicator.style.left === nextLeft &&
-    indicator.style.width === nextWidth &&
+    previous !== undefined &&
+    previous.left === left &&
+    previous.width === width &&
     indicator.style.opacity === '1';
-  if (!animate && geometryUnchanged) return;
+  if (geometryUnchanged) return;
 
   if (!animate) indicator.style.transition = 'none';
   indicator.style.opacity = '1';
-  indicator.style.left = nextLeft;
-  indicator.style.width = nextWidth;
+  indicator.style.transform = `translate3d(${left}px, 0, 0) scaleX(${width})`;
+  placement.set(indicator, { left, width });
   if (!animate) {
     indicator.getBoundingClientRect();
     indicator.style.removeProperty('transition');
   }
 };
 
-const isIndicatorNode = (node: Node): boolean =>
-  node instanceof Element && node.classList.contains(TAB_INDICATOR_CLASS);
-
-const mutationTouchesTabs = (mutation: MutationRecord): boolean => {
-  if (mutation.type === 'attributes') {
-    const target = mutation.target;
-    return target instanceof Element && !!target.closest('.euiTabs') && !isIndicatorNode(target);
-  }
-
-  if (mutation.target instanceof Element && mutation.target.closest('.euiTabs')) {
-    const nodes = [...mutation.addedNodes, ...mutation.removedNodes];
-    if (nodes.length > 0 && nodes.every(isIndicatorNode)) return false;
-    return true;
-  }
-
-  const nodes = [...mutation.addedNodes, ...mutation.removedNodes];
-  return nodes.some((node) => {
-    if (!(node instanceof Element) || isIndicatorNode(node)) return false;
-    return node.classList.contains('euiTabs') || !!node.querySelector('.euiTabs');
-  });
+const collectTabLists = (node: Node, into: HTMLElement[]) => {
+  if (!(node instanceof Element) || isIndicatorNode(node)) return;
+  if (node.classList.contains('euiTabs')) into.push(node as HTMLElement);
+  node.querySelectorAll<HTMLElement>('.euiTabs').forEach((tabs) => into.push(tabs));
 };
+
+type TabSyncMode = 'selection' | 'resize';
 
 const startTabIndicator = (): (() => void) => {
   const selectedByTabs = new Map<HTMLElement, HTMLElement | null>();
-  const observed = new Set<Element>();
+  const pendingClick = new WeakMap<HTMLElement, HTMLElement>();
+  const watched = new Set<HTMLElement>();
+  const selectionObservers = new Map<HTMLElement, MutationObserver>();
+  const sized = new WeakSet<Element>();
+  const pending = new Map<HTMLElement, TabSyncMode>();
   let frame = 0;
 
-  const syncAll = () => {
-    const liveTabs = [...document.querySelectorAll<HTMLElement>('.euiTabs')];
-    const live = new Set(liveTabs);
-
-    for (const tabs of liveTabs) {
-      watch(tabs);
-      tabs.querySelectorAll<HTMLElement>('.euiTab').forEach(watch);
-
-      const indicator = ensureIndicator(tabs);
-      const selected = getSelectedTab(tabs);
-      const seen = selectedByTabs.has(tabs);
-      const previous = selectedByTabs.get(tabs) ?? null;
-      selectedByTabs.set(tabs, selected);
-      const animate = seen && previous !== selected && selected !== null;
-      applyIndicator(tabs, indicator, animate);
+  const observeSizes = (tabs: HTMLElement) => {
+    if (!sized.has(tabs)) {
+      sized.add(tabs);
+      resizeObserver.observe(tabs);
     }
-
-    for (const tabs of selectedByTabs.keys()) {
-      if (!live.has(tabs)) selectedByTabs.delete(tabs);
-    }
-  };
-
-  const schedule = () => {
-    if (frame) return;
-    frame = window.requestAnimationFrame(() => {
-      frame = 0;
-      syncAll();
+    tabs.querySelectorAll<HTMLElement>('.euiTab').forEach((tab) => {
+      if (sized.has(tab)) return;
+      sized.add(tab);
+      resizeObserver.observe(tab);
     });
   };
 
-  const resizeObserver = new ResizeObserver(() => schedule());
-  const watch = (element: Element) => {
-    if (observed.has(element)) return;
-    observed.add(element);
-    resizeObserver.observe(element);
+  const unwatch = (tabs: HTMLElement) => {
+    watched.delete(tabs);
+    selectedByTabs.delete(tabs);
+    pending.delete(tabs);
+    pendingClick.delete(tabs);
+    selectionObservers.get(tabs)?.disconnect();
+    selectionObservers.delete(tabs);
+    resizeObserver.unobserve(tabs);
+    tabs.querySelectorAll<HTMLElement>('.euiTab').forEach((tab) => resizeObserver.unobserve(tab));
   };
 
-  const observer = new MutationObserver((mutations) => {
-    if (mutations.some(mutationTouchesTabs)) schedule();
-  });
-  observer.observe(document.body, {
-    subtree: true,
-    childList: true,
-    attributes: true,
-    attributeFilter: ['class', 'aria-selected', 'disabled', 'aria-disabled'],
+  const sync = (tabs: HTMLElement, mode: TabSyncMode) => {
+    if (!tabs.isConnected) {
+      unwatch(tabs);
+      return;
+    }
+    if (pendingClick.has(tabs)) return;
+
+    const selected = getSelectedTab(tabs);
+    const seen = selectedByTabs.has(tabs);
+    const previous = selectedByTabs.get(tabs) ?? null;
+    const selectionChanged = seen && previous !== selected;
+    if (mode === 'selection' && !selectionChanged) {
+      if (selected) {
+        const indicator = tabs.querySelector<HTMLElement>(`:scope > .${TAB_INDICATOR_CLASS}`);
+        const disabled = isDisabledTab(selected);
+        if (indicator && indicator.hasAttribute('data-disabled') !== disabled) {
+          indicator.toggleAttribute('data-disabled', disabled);
+        }
+      }
+      return;
+    }
+
+    selectedByTabs.set(tabs, selected);
+    applyIndicator(tabs, selected, selectionChanged && selected !== null);
+  };
+
+  const schedule = (tabs: HTMLElement, mode: TabSyncMode) => {
+    const current = pending.get(tabs);
+    pending.set(tabs, current === 'resize' || mode === 'resize' ? 'resize' : mode);
+    if (frame) return;
+    frame = window.requestAnimationFrame(() => {
+      frame = 0;
+      const batch = [...pending];
+      pending.clear();
+      for (const [list, listMode] of batch) sync(list, listMode);
+    });
+  };
+
+  const ensureWatch = (tabs: HTMLElement) => {
+    if (watched.has(tabs)) return;
+    watched.add(tabs);
+    const observer = new MutationObserver((mutations) => {
+      let relevant = false;
+      let structureChanged = false;
+      for (const mutation of mutations) {
+        const target = mutation.target;
+        if (!(target instanceof Element) || isIndicatorNode(target)) continue;
+        if (mutation.type === 'childList') {
+          const nodes = [...mutation.addedNodes, ...mutation.removedNodes];
+          if (nodes.length > 0 && nodes.every(isIndicatorNode)) continue;
+          structureChanged = true;
+        }
+        relevant = true;
+      }
+      if (!relevant) return;
+      if (structureChanged) observeSizes(tabs);
+      schedule(tabs, 'selection');
+    });
+    observer.observe(tabs, {
+      subtree: true,
+      childList: true,
+      attributes: true,
+      attributeFilter: ['class', 'aria-selected', 'disabled', 'aria-disabled'],
+    });
+    selectionObservers.set(tabs, observer);
+    observeSizes(tabs);
+  };
+
+  const resizeObserver = new ResizeObserver((entries) => {
+    for (const entry of entries) {
+      const target = entry.target;
+      if (!(target instanceof HTMLElement)) continue;
+      const tabs = target.classList.contains('euiTabs') ? target : target.closest('.euiTabs');
+      if (tabs instanceof HTMLElement && watched.has(tabs)) schedule(tabs, 'resize');
+    }
   });
 
-  const onScroll = (event: Event) => {
+  const discoveryObserver = new MutationObserver((mutations) => {
+    const found: HTMLElement[] = [];
+    for (const mutation of mutations) {
+      mutation.addedNodes.forEach((node) => collectTabLists(node, found));
+      mutation.removedNodes.forEach((node) => {
+        if (!(node instanceof Element) || isIndicatorNode(node)) return;
+        if (node.classList.contains('euiTabs')) unwatch(node as HTMLElement);
+        node.querySelectorAll<HTMLElement>('.euiTabs').forEach(unwatch);
+      });
+    }
+    for (const tabs of found) {
+      if (watched.has(tabs)) continue;
+      ensureWatch(tabs);
+      schedule(tabs, 'resize');
+    }
+  });
+
+  const onClick = (event: Event) => {
     const target = event.target;
-    if (target instanceof Element && target.classList.contains('euiTabs')) schedule();
-  };
-  document.addEventListener('scroll', onScroll, true);
+    if (!(target instanceof Element)) return;
+    const tab = target.closest('.euiTab');
+    if (!(tab instanceof HTMLElement) || isDisabledTab(tab)) return;
+    const tabs = tab.closest('.euiTabs');
+    if (!(tabs instanceof HTMLElement)) return;
+    if (selectedByTabs.get(tabs) === tab) return;
 
-  syncAll();
+    ensureWatch(tabs);
+    pendingClick.set(tabs, tab);
+    selectedByTabs.set(tabs, tab);
+    applyIndicator(tabs, tab, true);
+
+    window.requestAnimationFrame(() => {
+      if (pendingClick.get(tabs) !== tab) return;
+      pendingClick.delete(tabs);
+      if (getSelectedTab(tabs) === tab) return;
+      const selected = getSelectedTab(tabs);
+      selectedByTabs.set(tabs, selected);
+      applyIndicator(tabs, selected, false);
+    });
+  };
+
+  discoveryObserver.observe(document.body, { childList: true, subtree: true });
+  document.addEventListener('click', onClick, true);
+  document.querySelectorAll<HTMLElement>('.euiTabs').forEach((tabs) => {
+    ensureWatch(tabs);
+    sync(tabs, 'resize');
+  });
 
   return () => {
     if (frame) window.cancelAnimationFrame(frame);
-    observer.disconnect();
+    discoveryObserver.disconnect();
+    selectionObservers.forEach((observer) => observer.disconnect());
     resizeObserver.disconnect();
-    document.removeEventListener('scroll', onScroll, true);
+    document.removeEventListener('click', onClick, true);
     document.querySelectorAll(`.${TAB_INDICATOR_CLASS}`).forEach((node) => node.remove());
+    watched.clear();
     selectedByTabs.clear();
+    pending.clear();
   };
 };
