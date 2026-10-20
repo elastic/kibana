@@ -973,12 +973,15 @@ apiTest.describe('Automated resolution integration tests', { tag: ENTITY_STORE_T
 
         const fromDateISO = new Date(Date.now() - 60_000).toISOString();
         const toDateISO = new Date(Date.now() + 60_000).toISOString();
+        // Pinned to 'single': this test seeds a generic authentication log that the
+        // priority process's identity-source gate would otherwise filter out.
         const extraction = await forceLogExtraction(
           apiClient,
           internalHeaders,
           'user',
           fromDateISO,
-          toDateISO
+          toDateISO,
+          'single'
         );
         expect(extraction.statusCode).toBe(200);
 
