@@ -15,7 +15,9 @@ import { MemoryRouter, Route } from '@kbn/shared-ux-router';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import type { GetKiResponse } from '../../../common/http_api/knowledge_indicators';
-import { CONTEXT_ENGINE_PATHS, getViewKiPath } from '../paths';
+import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
+import { getAiIndexKnowledgeIndicatorsPath, getViewKiPath, CONTEXT_ENGINE_PATHS } from '../paths';
+import { createAppChromeMock } from '../test_utils/app_chrome_mock';
 import { ViewKiPage } from './view_ki_page';
 
 const mockUseKi = jest.fn();
@@ -23,7 +25,8 @@ const mockNavigateToContextEngine = jest.fn();
 const mockCreateContextEngineUrl = jest.fn((path: string) => path);
 
 jest.mock('../hooks/use_ki', () => ({
-  useKi: (...args: unknown[]) => mockUseKi(...args),
+  useKi: (args: { aiIndexId: string; kiId: string; index: string; enabled?: boolean }) =>
+    mockUseKi(args),
 }));
 
 jest.mock('../hooks/use_navigation', () => ({
@@ -44,13 +47,21 @@ const defaultKi: GetKiResponse = {
 
 const renderViewKiPage = (initialEntry: string) => {
   const services = coreMock.createStart();
+  services.application.getUrlForApp.mockImplementation(
+    (appId, options) => `/app/${appId}${options?.path ?? ''}`
+  );
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
   return render(
     <ChromeServiceProvider value={{ chrome: services.chrome }}>
       <I18nProvider>
         <EuiProvider>
-          <KibanaContextProvider services={services}>
+          <KibanaContextProvider
+            services={{
+              ...services,
+              appChrome: createAppChromeMock(),
+            }}
+          >
             <QueryClientProvider client={queryClient}>
               <MemoryRouter initialEntries={[initialEntry]}>
                 <Route path={CONTEXT_ENGINE_PATHS.viewKi} component={ViewKiPage} />
@@ -74,6 +85,28 @@ describe('ViewKiPage', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('back button links to the knowledge indicators tab', () => {
+    const kiListPath = getAiIndexKnowledgeIndicatorsPath('sample-ki');
+
+    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+
+    expect(mockCreateContextEngineUrl).toHaveBeenCalledWith(kiListPath);
+    expect(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ)).toHaveAttribute(
+      'href',
+      kiListPath
+    );
+  });
+
+  it('navigates to the knowledge indicators tab on back click', () => {
+    const kiListPath = getAiIndexKnowledgeIndicatorsPath('sample-ki');
+
+    renderViewKiPage('/ai_index/sample-ki/ki/ki-1?index=ai-index-idx-sample-ki');
+
+    fireEvent.click(screen.getByTestId(CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ));
+
+    expect(mockNavigateToContextEngine).toHaveBeenCalledWith(kiListPath);
   });
 
   it('resolves kiId from a path built with getViewKiPath when the id contains %', () => {

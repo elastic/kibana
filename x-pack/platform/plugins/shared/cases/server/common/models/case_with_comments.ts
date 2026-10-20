@@ -417,11 +417,22 @@ export class CaseCommentModel {
     );
 
     // Attacks are a Security-only type, so only pay for the lookup when the request carries one.
-    const attacksAttachedToCase = attachments.some(({ type }) => isAttackAttachmentType(type))
-      ? await this.params.services.attachmentService.getter.getAllAttackIds({
-          caseId: this.caseInfo.id,
-        })
-      : new Set<string>();
+    const requestedAttackIds = [
+      ...new Set(
+        attachments.flatMap((attachment) =>
+          isAttackAttachmentType(attachment.type) && 'attachmentId' in attachment
+            ? getIDsAndIndicesAsArrays(attachment).ids
+            : []
+        )
+      ),
+    ];
+    const attacksAttachedToCase =
+      requestedAttackIds.length > 0
+        ? await this.params.services.attachmentService.getter.getAttachedAttackIds({
+            caseId: this.caseInfo.id,
+            attackIds: requestedAttackIds,
+          })
+        : new Set<string>();
 
     attachments.forEach((attachment) => {
       if (isAlertAttachmentType(attachment.type)) {

@@ -250,7 +250,7 @@ export function NightshiftAppHeader({
       back={back}
       tabs={tabs}
       menu={menu}
-      spacing="standard"
+      spacing="compact"
     />
   );
 }
