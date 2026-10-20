@@ -296,7 +296,11 @@ Alert Triage no longer runs once per rule execution, and enabling it attaches no
 
 **What a cost unit means.** A batch costs 5 units of fixed overhead (the Investigation, the Alert Analysis hop and the review hand-off) plus 1 unit per alert. The hourly budget is scaled to the sweep interval (`floor(budgetPerHour × minutes / 60)`), so changing the interval does not change the hourly total. Units are a planning currency, not tokens or seconds. Each rule gets up to 30 alerts first, then rules are topped up round-robin to 100 until the budget runs out.
 
-**Alert Analysis settings the Worker path uses.** The batch calls `system-security-alert-analysis` with `calledByWorker: true`, `autoCloseEnabled: false` (closing is a proposal, never inline), `autoCloseConfidenceScoreMinThreshold` from this Worker's setting, the `alertzero_reasoning` model feature, and the Investigation id. Its tag prefix comes from the space's Alert Analysis runtime config, so alerts Alert Analysis tagged on its own are left alone. Alert Analysis run on its own keeps reading its own space settings and is unchanged.
+**Alert Analysis settings the Worker path uses.** The batch calls `system-security-alert-analysis` with `calledByWorker: true`, `autoCloseEnabled: false` (closing is a proposal, never inline), `autoCloseConfidenceScoreMinThreshold` from this Worker's setting, the `alertzero_balanced` model feature, and the Investigation id. Its tag prefix comes from the space's Alert Analysis runtime config, so alerts Alert Analysis tagged on its own are left alone. Alert Analysis run on its own keeps reading its own space settings and is unchanged.
+
+### Attack Discovery Worker
+
+The per-space `system-security-floor-attack-discovery` Worker runs `system-security-attack-discovery-worker`, which generates attacks through `system-security-attack-discovery-batched-generation` and starts one `system-security-attack-discovery-review` per attack. Generation runs the `security.attack-discovery.run` step with `ground_truth_gate_enabled: false`, so it does no false-positive triage of its own. The review's FP/TP analysis (`system-security-attack-discovery-fp-tp-analysis`) is the only place an attack is judged a false positive, and the review applies that verdict.
 
 ### Worker-specific settings (`extras`)
 
