@@ -1,0 +1,49 @@
+version: '1'
+name: Nightshift Investigation (space entry point)
+description: >
+  Runs Nightshift investigations in this space as the Nightshift service account. It only hands
+  its inputs to the shared investigation workflow, which runs with this workflow's identity.
+enabled: true
+settings:
+  # Longer than the investigation's own timeout, since this run waits for it.
+  timeout: '65m'
+tags:
+  - observability
+  - investigation
+  - nightshift
+
+triggers:
+  - type: manual
+    inputs:
+      properties:
+        # The investigation is named after this run, as if the shared workflow had been run
+        # directly. A caller continuing an existing investigation passes its id instead.
+        investigation_id:
+          type: string
+          default: '{{ execution.id }}'
+          description: Investigation to run. Defaults to one named after this execution.
+      # The shared investigation validates the rest of the inputs.
+      additionalProperties: true
+
+steps:
+  # Only Nightshift's investigations client may start this workflow (it checks the caller's
+  # privileges and claims the subjects). Anyone allowed to run workflows could otherwise start an
+  # investigation as the service account. Only server code sets `triggeredBy`.
+  - name: refuse_direct_runs
+    type: if
+    condition: 'not execution.triggeredBy : "nightshift-investigations"'
+    steps:
+      - name: refuse
+        type: workflow.fail
+        with:
+          message: >-
+            This workflow runs Nightshift investigations as the Nightshift service account. Start
+            investigations from Nightshift instead. This run was started by
+            {{ execution.triggeredBy }}.
+
+  - name: investigate
+    type: workflow.execute
+    with:
+      workflow-id: system-nightshift-investigation
+      run-as-mode: inherit
+      inputs: ${{ inputs }}
