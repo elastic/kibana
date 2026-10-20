@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   StackAlertActionsCell,
@@ -31,9 +31,10 @@ describe('StackAlertActionsCell', () => {
     render(<StackAlertActionsCell {...getProps({ onRemoveFromCase })} />);
 
     await userEvent.click(screen.getByTestId(STACK_ALERT_ROW_ACTIONS_TEST_ID));
-    await userEvent.click(await screen.findByTestId(REMOVE_STACK_ALERT_FROM_CASE_TEST_ID));
+    const removeButton = await screen.findByTestId(REMOVE_STACK_ALERT_FROM_CASE_TEST_ID);
+    await userEvent.click(removeButton);
 
     expect(onRemoveFromCase).toHaveBeenCalledWith('alert-1');
-    expect(screen.queryByTestId(REMOVE_STACK_ALERT_FROM_CASE_TEST_ID)).not.toBeInTheDocument();
+    await waitForElementToBeRemoved(removeButton);
   });
 });
