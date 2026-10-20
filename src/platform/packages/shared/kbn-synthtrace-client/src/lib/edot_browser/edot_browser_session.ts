@@ -15,6 +15,7 @@ import type {
   HttpInstrumentation,
   NavigationTimingType,
 } from './edot_browser_client';
+import type { EdotBrowserLog } from './edot_browser_log';
 import type { EdotBrowserSpanDocument } from './edot_browser_span';
 import { sample, type HealthProfile } from './health_profiles';
 import { between, pick } from './random';
@@ -315,10 +316,6 @@ const loadDocument = (
   const at = (offset: number) => Math.min(Math.floor(pageStart + offset), slotEnd);
   const vitalNavigationType = navigationType === 'back_forward' ? 'back-forward' : navigationType;
 
-  const events: EdotBrowserEvent[] = [
-    client.navigation({ url, sameDocument: false }).timestamp(pageStart),
-  ];
-
   // Document request
   const fetchStart = between(random, 1, 5);
   const documentTimings = resourceTimings(random, fetchStart, 0, 30_000, { newConnection: true });
@@ -341,35 +338,41 @@ const loadDocument = (
   );
   const resources = [...ownResources, ...FILLER_RESOURCES].slice(0, resourceCount);
   let lastResourceEnd = responseEnd;
-  resources.forEach(({ path, initiatorType, sizeBytes, renderBlocking, durationFactor = 1 }) => {
-    const resourceStart = renderBlocking
-      ? responseEnd + between(random, 1, 20)
-      : responseEnd + between(random, 0, Math.max(lcp - responseEnd, 1) * 0.8);
-    const duration = sample(health.resourceDuration, random) * durationFactor * slowdown;
-    const cached = random() < 0.3;
-    const timings = resourceTimings(random, resourceStart, duration, sizeBytes, {
-      cached,
-      newConnection: !cached && isAbsoluteUrl(path),
-    });
-    lastResourceEnd = Math.max(lastResourceEnd, timings.responseEnd);
-    events.push(
-      client
-        .resourceTiming({
-          url: toUrl(site, path),
-          initiatorType,
-          timings,
-          nextHopProtocol: random() < 0.7 ? 'h2' : 'h3',
-          renderBlockingStatus: renderBlocking ? 'blocking' : 'non-blocking',
-        })
-        .timestamp(at(timings.responseEnd))
-    );
-  });
+  const resourceLogs: EdotBrowserLog[] = resources.map(
+    ({ path, initiatorType, sizeBytes, renderBlocking, durationFactor = 1 }) => {
+      const resourceStart = renderBlocking
+        ? responseEnd + between(random, 1, 20)
+        : responseEnd + between(random, 0, Math.max(lcp - responseEnd, 1) * 0.8);
+      const duration = sample(health.resourceDuration, random) * durationFactor * slowdown;
+      const cached = random() < 0.3;
+      const timings = resourceTimings(random, resourceStart, duration, sizeBytes, {
+        cached,
+        newConnection: !cached && isAbsoluteUrl(path),
+      });
+      lastResourceEnd = Math.max(lastResourceEnd, timings.responseEnd);
+      return client.resourceTiming({
+        url: toUrl(site, path),
+        initiatorType,
+        timings,
+        nextHopProtocol: random() < 0.7 ? 'h2' : 'h3',
+        renderBlockingStatus: renderBlocking ? 'blocking' : 'non-blocking',
+      });
+    }
+  );
 
   const domInteractive = responseEnd + (fcp - responseEnd) * 0.8;
   const domContentLoadedEventStart = domInteractive + between(random, 1, 10);
   const domContentLoadedEventEnd = domContentLoadedEventStart + between(random, 0.1, 15);
   const domComplete = Math.max(lastResourceEnd, lcp * 0.9, domContentLoadedEventEnd);
   const loadEventEnd = domComplete + between(random, 0.1, 5);
+  // The resource timing instrumentation collects the entries after the load event, when idle
+  const resourcesReportedAt = at(loadEventEnd + between(random, 1, 50));
+
+  const events: EdotBrowserEvent[] = [
+    // The navigation instrumentation reports hard navigations on DOMContentLoaded
+    client.navigation({ url, sameDocument: false }).timestamp(at(domContentLoadedEventStart)),
+    ...resourceLogs.map((log) => log.timestamp(resourcesReportedAt)),
+  ];
 
   events.push(
     client

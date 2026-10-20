@@ -502,12 +502,34 @@ describe('edotBrowser', () => {
           )
       ).length;
 
+      const [navigationTiming] = docs.filter(
+        (doc) => 'event_name' in doc && doc.event_name === 'browser.navigation_timing'
+      );
+      const timing = (name: string) => Number(navigationTiming.attributes?.[name]);
+      const pageLoadResources = docs.filter(
+        (doc) =>
+          'event_name' in doc &&
+          doc.event_name === 'browser.resource_timing' &&
+          doc.attributes?.['browser.resource_timing.initiator_type'] !== 'fetch'
+      );
+
       expect(docs[0]).toMatchObject({
         event_name: 'browser.navigation',
-        '@timestamp': TIMESTAMP,
         attributes: { 'url.full': expect.stringMatching(/^https:\/\/shop\.example\.com\//) },
       });
       expect(names.filter((name) => name === 'browser.navigation_timing')).toHaveLength(1);
+      // Reported on DOMContentLoaded, and resources once the page has loaded
+      expect(
+        Math.abs(
+          Number(docs[0]['@timestamp']) -
+            (TIMESTAMP + timing('browser.navigation_timing.dom_content_loaded_event_start'))
+        )
+      ).toBeLessThan(1.1);
+      pageLoadResources.forEach((doc) => {
+        expect(doc['@timestamp']).toBeGreaterThan(
+          TIMESTAMP + timing('browser.navigation_timing.load_event_end')
+        );
+      });
       expect(resourceCount).toBeGreaterThanOrEqual(3);
       expect(resourceCount).toBeLessThanOrEqual(8);
       expect(vitals).toEqual(expect.arrayContaining(['ttfb', 'fcp', 'lcp', 'cls']));
