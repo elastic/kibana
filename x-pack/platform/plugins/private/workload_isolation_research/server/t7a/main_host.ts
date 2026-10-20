@@ -17,7 +17,17 @@
 import { performance } from 'perf_hooks';
 import type { CoreStart, KibanaRequest, Logger, PluginInitializerContext } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { setResearchRunnerOverride } from '@kbn/task-manager-plugin/server';
+import {
+  markCollateralLoss,
+  registerExecutionClass,
+  researchDefinitionMeta,
+} from '@kbn/task-manager-plugin/server';
+import {
+  configKeyPaths,
+  fingerprintSavedObjectType,
+  toPlainConfig,
+} from '../capability_kit/worker_core';
+import type { PlatformReplicas } from '../capability_kit/worker_core';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { captureResearchEsCapability } from '@kbn/core-elasticsearch-client-server-internal';
@@ -99,6 +109,11 @@ export class T7aController {
   private readonly runs: Obj[] = [];
   private snapshot?: IslandSnapshot;
   private license?: Obj;
+  private licenseGeneration = 0;
+  private statusGeneration = 1;
+  private overallStatus = 'available';
+  private configKeyCount = 0;
+  private configErrors: string[] = [];
   private esCapability?: Obj;
 
   constructor(
@@ -111,13 +126,25 @@ export class T7aController {
     for (const type of OFFMAIN_TASK_TYPES) this.registry.register(type, this.entry, 'runTask');
     deps.licensing?.license$.subscribe((license) => {
       this.license = license.toJSON();
+      this.licenseGeneration += 1;
       this.snapshot = undefined;
     });
-    setResearchRunnerOverride((taskType, context) =>
-      this.config.mode === 'offmain' && OFFMAIN_TASK_TYPES.has(taskType)
-        ? this.createStub(taskType, context)
-        : undefined
-    );
+    const status = deps.core.status as {
+      overall$?: {
+        subscribe: (fn: (value: { level: { toString: () => string } }) => void) => void;
+      };
+    };
+    status.overall$?.subscribe((value) => {
+      this.overallStatus = value.level.toString();
+      this.statusGeneration += 1;
+      this.snapshot = undefined;
+    });
+    registerExecutionClass({
+      id: WORKLOAD_CLASS,
+      taskTypes: (taskType) => OFFMAIN_TASK_TYPES.has(taskType),
+      enabled: () => this.config.mode === 'offmain',
+      createRunner: (taskType, context) => this.createStub(taskType, context),
+    });
   }
 
   public getConfig(): T7aConfig {
@@ -146,6 +173,8 @@ export class T7aController {
   public stats(): Obj {
     return {
       config: this.config,
+      configKeyCount: this.configKeyCount,
+      configErrors: this.configErrors,
       outcomes: Object.fromEntries(this.outcomes),
       edges: Object.fromEntries(this.edges),
       runs: this.runs.slice(-5000),
@@ -221,6 +250,9 @@ export class T7aController {
     const authz = security?.authz as
       | { mode?: { useRbacForRequest: (r: KibanaRequest) => boolean } }
       | undefined;
+    const captured = captureEffectiveConfig();
+    this.configKeyCount = captured.keyPaths.length;
+    this.configErrors = captured.errors;
     this.snapshot = {
       kibanaVersion: this.env.packageInfo.version,
       buildFlavor: this.env.packageInfo.buildFlavor,
@@ -242,8 +274,71 @@ export class T7aController {
       useRbacForFakeRequest: authz?.mode?.useRbacForRequest(fake) ?? false,
       taskManagerIndex: '.kibana_task_manager',
       rawConfig: {},
+      effectiveConfig: captured.effectiveConfig,
+      replicas: this.replicas(),
+      readiness: this.readinessToken(),
+      taskDefinitionMeta: [...OFFMAIN_TASK_TYPES]
+        .map((type) => researchDefinitionMeta(type))
+        .filter((meta): meta is NonNullable<typeof meta> => Boolean(meta)),
     };
     return this.snapshot;
+  }
+
+  private replicas(_unused?: unknown): PlatformReplicas {
+    const pricing = this.deps.core.pricing as { getActiveProduct?: () => { name?: string } | undefined };
+    const product = pricing.getActiveProduct?.();
+    const features = (this.deps as T7aDeps & { features?: { getKibanaFeatures?: () => unknown[] } })
+      .features;
+    return {
+      license: { generation: Math.max(this.licenseGeneration, 1), value: this.license ?? {} },
+      featureFlags: { generation: 1, value: { booleans: {}, strings: {}, numbers: {} } },
+      pricing: {
+        generation: 1,
+        value: { available: {}, activeProduct: product?.name },
+      },
+      status: {
+        generation: this.statusGeneration,
+        value: {
+          elasticsearch: this.overallStatus,
+          savedObjects: this.overallStatus,
+          overall: this.overallStatus,
+        },
+      },
+      features: {
+        generation: 1,
+        value: {
+          kibana: (() => {
+            try {
+              return JSON.parse(JSON.stringify(features?.getKibanaFeatures?.() ?? [])) as unknown[];
+            } catch (error) {
+              this.configErrors = [...this.configErrors, `features: ${(error as Error).name ?? 'Error'}`];
+              return [];
+            }
+          })(),
+        },
+      },
+    };
+  }
+
+  private readinessToken(): IslandSnapshot['readiness'] {
+    const registry = (
+      this.deps.core.savedObjects as {
+        getTypeRegistry?: () => {
+          getAllTypes: () => Array<{
+            name: string;
+            mappings?: unknown;
+            namespaceType?: unknown;
+            hidden?: boolean;
+            indexPattern?: string;
+          }>;
+        };
+      }
+    ).getTypeRegistry?.();
+    const fingerprints: Record<string, string> = {};
+    if (registry) {
+      for (const type of registry.getAllTypes()) fingerprints[type.name] = fingerprintSavedObjectType(type);
+    }
+    return { generation: 1, fingerprints };
   }
 
   private capabilities(): Record<string, Binding> {
@@ -270,6 +365,37 @@ export class T7aController {
     };
     const callArgs = (args: Obj) => (args.args as unknown[] | undefined) ?? [];
     return {
+      log: asBinding(async (op, args) => {
+        if (op !== 'write') throw new Error('t7a log: op not allowlisted');
+        const message = `[worker-core][${String(args.context ?? '')}] ${String(args.message ?? '')}`;
+        const level = String(args.level ?? 'info');
+        if (level === 'error' || level === 'fatal') this.logger.error(message);
+        else if (level === 'warn') this.logger.warn(message);
+        else if (level === 'debug' || level === 'trace') this.logger.debug(message);
+        else this.logger.info(message);
+        return { ok: true };
+      }),
+      audit: asBinding(async (op, args) => {
+        if (op !== 'write') throw new Error('t7a audit: op not allowlisted');
+        const audit = core.security.audit as { withoutRequest?: { log?: (event: unknown) => void } };
+        if (audit.withoutRequest?.log) audit.withoutRequest.log(args);
+        else this.logger.info(`[worker-core][audit] ${JSON.stringify(args).slice(0, 1000)}`);
+        return { ok: true };
+      }),
+      analytics: asBinding(async (op, args) => {
+        if (op !== 'write') throw new Error('t7a analytics: op not allowlisted');
+        const report = (core.analytics as { reportEvent?: (event: unknown) => void }).reportEvent;
+        if (report) report(args);
+        return { ok: true };
+      }),
+      replica: asBinding(async (op, args) => {
+        if (op === 'pricing') return core.pricing.isFeatureAvailable(String(args.featureId));
+        if (op !== 'featureFlag') throw new Error('t7a replica: op not allowlisted');
+        const flags = core.featureFlags;
+        if (args.kind === 'string') return flags.getStringValue(String(args.key), String(args.fallback ?? ''));
+        if (args.kind === 'number') return flags.getNumberValue(String(args.key), Number(args.fallback ?? 0));
+        return flags.getBooleanValue(String(args.key), Boolean(args.fallback));
+      }),
       so: asBinding(async (op, args) => {
         const client = soClient(args);
         const method = client[op] as AnyFn | undefined;
@@ -359,6 +485,11 @@ export class T7aController {
       taskType,
       taskInstance: taskInstance as unknown as Obj,
       executionUuid: context.executionUuid,
+      executionContext: {
+        type: 'task manager',
+        name: `run ${taskType}`,
+        id: String(context.executionUuid ?? ''),
+      },
       ...(context.fakeRequest ? { fakeRequest: encodeFakeRequest(context.fakeRequest) } : {}),
     };
     const dispatch = async (phase: 'run' | 'cleanup') => {
@@ -384,7 +515,11 @@ export class T7aController {
       if (outcome.status === 'failure') throw outcome.error;
       if (outcome.status === 'terminated') {
         this.logger.warn(`t7a: ${taskType} ${phase} terminated in isolate (${outcome.reason})`);
-        throw new Error(`t7a: ${taskType} ${phase} terminated in isolate (${outcome.reason})`);
+        const error = new Error(
+          `t7a: ${taskType} ${phase} terminated in isolate (${outcome.reason})`
+        );
+        if (outcome.collateral) throw markCollateralLoss(error);
+        throw error;
       }
       const customFields = value?.customFields as Obj | undefined;
       if (customFields && Object.keys(customFields).length)
@@ -409,3 +544,40 @@ export class T7aController {
     };
   }
 }
+
+const PLUGIN_CONFIG_PATHS: Record<string, string> = {
+  eventLog: 'xpack.eventLog',
+  actions: 'xpack.actions',
+  stackConnectors: 'xpack.stack_connectors',
+  alerting: 'xpack.alerting',
+  stackAlerts: 'xpack.stack_alerts',
+  encryptedSavedObjects: 'xpack.encryptedSavedObjects',
+};
+
+/** Reads main's effective plugin config. Returns key paths only to callers that log. */
+const captureEffectiveConfig = (): {
+  effectiveConfig: Record<string, Record<string, unknown>>;
+  keyPaths: string[];
+  errors: string[];
+} => {
+  const at = (globalThis as Record<symbol, (path: string) => unknown>)[
+    Symbol.for('kbn.research.config.atPathSync')
+  ];
+  const effectiveConfig: Record<string, Record<string, unknown>> = {};
+  const errors: string[] = [];
+  if (typeof at !== 'function') {
+    return { effectiveConfig, keyPaths: [], errors: ['config capture unavailable'] };
+  }
+  for (const [id, path] of Object.entries(PLUGIN_CONFIG_PATHS)) {
+    try {
+      const plain = toPlainConfig(at(path));
+      effectiveConfig[id] =
+        plain && typeof plain === 'object' && !Array.isArray(plain)
+          ? (plain as Record<string, unknown>)
+          : {};
+    } catch (error) {
+      errors.push(`${id}: ${(error as Error).name ?? 'Error'}`);
+    }
+  }
+  return { effectiveConfig, keyPaths: configKeyPaths(effectiveConfig), errors };
+};

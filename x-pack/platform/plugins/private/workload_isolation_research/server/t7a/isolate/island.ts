@@ -48,9 +48,25 @@ import type { IKibanaMigrator } from '@kbn/core-saved-objects-base-server-intern
 import { Actions as SecurityActions } from '@kbn/security-authorization-core';
 import { Locator } from '@kbn/share-plugin/common/url_service/locators/locator';
 import { License } from '@kbn/licensing-plugin/common/license';
+import { map } from 'rxjs';
 import { encodeFakeRequest } from '../request_codec';
 import type { IslandSnapshot } from '../snapshot';
-import { bridge, countFence, strict, toData } from './bridge';
+import { bridge, bridgeSync, countFence, runContext, strict, toData } from './bridge';
+import {
+  ALERTING_BOOT_ES_WRITE_ALLOW,
+  createBootEsWriteFence,
+  createEventForwarder,
+  createExecutionContextService,
+  createForwardingLogger,
+  createPlatformReplica,
+  currentExecutionContext,
+  decideTaskManagerCall,
+  emptyPlatformReplicas,
+  routeSavedObject,
+  runInTmPhase,
+  verifyRegistryReadiness,
+} from '../../capability_kit/worker_core';
+import type { ForwardedEvent, ForwardedLog, SoTypeFingerprintInput } from '../../capability_kit/worker_core';
 
 /* eslint-disable @typescript-eslint/no-var-requires */
 
@@ -64,30 +80,24 @@ const LEVELS = ['trace', 'debug', 'info', 'warn', 'error', 'fatal'] as const;
 const minLevel = LEVELS.indexOf(
   (process.env.KBN_RESEARCH_T7A_LOG_LEVEL as (typeof LEVELS)[number]) ?? 'warn'
 );
-export const createLogger = (context: string): Logger => {
-  const log = (level: (typeof LEVELS)[number], message: unknown, meta?: unknown) => {
-    if (LEVELS.indexOf(level) < minLevel) return;
-    const text = typeof message === 'function' ? message() : message;
-    const err = (meta as { error?: { stack_trace?: string } } | undefined)?.error?.stack_trace;
-    process.stderr.write(
-      `[t7a-isolate][${level.toUpperCase()}][${context}] ${
-        text instanceof Error ? text.stack : String(text)
-      }${err ? `\n${err}` : ''}\n`
-    );
-  };
-  const logger: Logger = {
-    trace: (m, x) => log('trace', m, x),
-    debug: (m, x) => log('debug', m, x),
-    info: (m, x) => log('info', m, x),
-    warn: (m, x) => log('warn', m, x),
-    error: (m, x) => log('error', m, x),
-    fatal: (m, x) => log('fatal', m, x),
-    log: (record) => log(record.level.id as (typeof LEVELS)[number], record.message),
-    isLevelEnabled: (level) => LEVELS.indexOf(level as (typeof LEVELS)[number]) >= minLevel,
-    get: (...ctx: string[]) => createLogger([context, ...ctx].join('.')),
-  } as Logger;
-  return logger;
+const emitLog = (record: ForwardedLog): void => {
+  if (!runContext.getStore()) return;
+  void bridge('log', 'write', toData(record) as never).catch(() => undefined);
 };
+const resolveReplica = async <T>(kind: string, key: string, fallback: T, hit: T | undefined): Promise<T> => {
+  if (hit !== undefined) return hit;
+  const value = await bridge('replica', 'featureFlag', toData({ kind, key, fallback }) as never);
+  return value as T;
+};
+
+const events = createEventForwarder((event: ForwardedEvent) => {
+  if (!runContext.getStore()) return;
+  void bridge(event.sink, 'write', toData(event.payload) as never).catch(() => undefined);
+});
+
+/** Forwards worker logs to main. Level filtering stays; records are not written to stderr. */
+export const createLogger = (context: string): Logger =>
+  createForwardingLogger(context, emitLog, LEVELS[minLevel]);
 
 // ---------------------------------------------------------------------------------------------
 // generic fences
@@ -186,7 +196,17 @@ export interface CoreLite {
   readonly setupFor: (pluginStart: Promise<unknown>, ownStart: Promise<unknown>) => object;
   readonly start: object;
   readonly clusterClient: ClusterClient;
+  readonly esFence: ReturnType<typeof createBootEsWriteFence>;
+  readonly registeredSoTypes: SoTypeFingerprintInput[];
+  readonly platform: ReturnType<typeof createPlatformReplica>;
 }
+
+const statusLevel = (id: string) => {
+  if (id === 'degraded') return ServiceStatusLevels.degraded;
+  if (id === 'unavailable') return ServiceStatusLevels.unavailable;
+  if (id === 'critical') return ServiceStatusLevels.critical;
+  return ServiceStatusLevels.available;
+};
 
 export const createCoreLite = (
   snapshot: IslandSnapshot,
@@ -194,6 +214,13 @@ export const createCoreLite = (
   localSo: boolean
 ): CoreLite => {
   const logger = createLogger('core');
+  const platform = createPlatformReplica(snapshot.replicas ?? emptyPlatformReplicas());
+  const esFence = createBootEsWriteFence({
+    mode: process.env.KBN_RESEARCH_WC_ES_FENCE === 'record' ? 'record' : 'deny',
+    allow: ALERTING_BOOT_ES_WRITE_ALLOW,
+  });
+  const executionContext = createExecutionContextService();
+  const registeredSoTypes: SoTypeFingerprintInput[] = [];
   // REAL Core ClusterClient: same configureClient/transport/scoping code as main.
   const clusterClient = new ClusterClient({
     config: es.config,
@@ -203,8 +230,11 @@ export const createCoreLite = (
       dnsCacheTtlInSeconds: 0,
     }),
     kibanaVersion: snapshot.kibanaVersion,
-    getExecutionContext: () => es.executionContext,
-    onRequestHandlerFactory: getRequestHandlerFactory(es.routing.enabled, false),
+    getExecutionContext: () => {
+      const current = currentExecutionContext();
+      return current?.id ? String(current.id) : es.executionContext;
+    },
+    onRequestHandlerFactory: esFence.wrap(getRequestHandlerFactory(es.routing.enabled, false)),
   });
 
   const basePath = {
@@ -217,8 +247,8 @@ export const createCoreLite = (
   };
 
   const auditLogger = {
-    log: fence('security.audit.log'),
-    enabled: false,
+    log: (event: unknown) => events.send('audit', event),
+    enabled: true,
     includeSavedObjectNames: false,
   };
   const coreSecurityStart = strict('core.security', {
@@ -289,36 +319,114 @@ export const createCoreLite = (
   const isDefaultSpace = (request: KibanaRequest) =>
     ((request as KibanaRequest & { spaceId?: string }).spaceId ?? DEFAULT_SPACE_ID) ===
     DEFAULT_SPACE_ID;
-  const typesKnown = (types: string[]) => types.every((t) => typeRegistry.getType(t));
+  const registeredNames = () => registeredSoTypes.map((type) => type.name);
+  const optionBag = (method: string, args: unknown[]): object | undefined => {
+    if (method === 'find' || method === 'checkConflicts') {
+      return args[0] && typeof args[0] === 'object' ? (args[0] as object) : undefined;
+    }
+    const last = args[args.length - 1];
+    return args.length >= 3 && last && typeof last === 'object' && !Array.isArray(last)
+      ? (last as object)
+      : undefined;
+  };
+  const guardLocal = (
+    repo: object,
+    route: {
+      target: 'internal' | 'scoped';
+      types: string[];
+      defaultSpace: boolean;
+      securityExcluded: boolean;
+      options?: object;
+    },
+    bridged: (method: string, args: unknown[]) => unknown
+  ) =>
+    new Proxy(repo, {
+      get(target, prop) {
+        if (typeof prop !== 'string') return Reflect.get(target, prop);
+        const value = Reflect.get(target, prop);
+        if (typeof value !== 'function') return value;
+        return (...args: unknown[]) => {
+          const options = optionBag(prop, args) ?? route.options;
+          if (
+            routeSavedObject({
+              localSo,
+              target: route.target,
+              types: route.types,
+              registeredTypes: registeredNames(),
+              operation: prop,
+              options,
+              defaultSpace: route.defaultSpace,
+              securityExcluded: route.securityExcluded,
+            }) === 'bridge'
+          ) {
+            return bridged(prop, args);
+          }
+          countFence(`so.local.${route.target}.${prop}`);
+          return (value as (...inner: unknown[]) => unknown).apply(target, args);
+        };
+      },
+    });
 
   const savedObjectsStart = strict('core.savedObjects', {
-    createInternalRepository: (types?: string[]) =>
-      localSo && typesKnown(types ?? [])
-        ? (countFence('so.local.internalRepository'),
-          localRepository(clusterClient.asInternalUser, types ?? []))
-        : soFacade({ target: 'internal', types: types ?? [] }),
+    createInternalRepository: (types?: string[]) => {
+      const list = types ?? [];
+      const concrete = list.length > 0 ? list : registeredNames();
+      const facade = soFacade({ target: 'internal', types: list });
+      const route = {
+        target: 'internal' as const,
+        types: concrete,
+        defaultSpace: true,
+        securityExcluded: true,
+      };
+      if (
+        routeSavedObject({
+          localSo,
+          registeredTypes: registeredNames(),
+          ...route,
+        }) !== 'local'
+      ) {
+        return facade;
+      }
+      countFence('so.local.internalRepository');
+      return guardLocal(
+        localRepository(clusterClient.asInternalUser, list) as object,
+        route,
+        (method, args) => (facade[method] as (...inner: unknown[]) => unknown)(...args)
+      );
+    },
     getScopedClient: (request: KibanaRequest, options?: Obj) => {
       const excluded = (options?.excludedExtensions as string[] | undefined) ?? [];
       const hidden = (options?.includedHiddenTypes as string[] | undefined) ?? [];
-      if (
-        localSo &&
-        excluded.includes('security') &&
-        isDefaultSpace(request) &&
-        typesKnown(hidden)
-      ) {
-        countFence('so.local.unsecuredScopedClient');
-        // Mirrors security's SO client factory provider: with RBAC the repository runs as the
-        // internal user (authorization is the security extension's job — excluded here).
-        const esClient = snapshot.useRbacForFakeRequest
-          ? clusterClient.asInternalUser
-          : clusterClient.asScoped(request).asCurrentUser;
-        return new SavedObjectsClient(localRepository(esClient, hidden, request));
-      }
-      return soFacade({
+      const facade = soFacade({
         target: 'scoped',
         request: encodeFakeRequest(request),
         options: options ?? {},
       });
+      const route = {
+        target: 'scoped' as const,
+        types: hidden.length > 0 ? hidden : registeredNames(),
+        defaultSpace: isDefaultSpace(request),
+        securityExcluded: excluded.includes('security'),
+        options,
+      };
+      if (
+        routeSavedObject({
+          localSo,
+          registeredTypes: registeredNames(),
+          ...route,
+        }) !== 'local'
+      ) {
+        return facade;
+      }
+      countFence('so.local.unsecuredScopedClient');
+      const esClient = snapshot.useRbacForFakeRequest
+        ? clusterClient.asInternalUser
+        : clusterClient.asScoped(request).asCurrentUser;
+      return guardLocal(
+        new SavedObjectsClient(localRepository(esClient, hidden, request)) as object,
+        route,
+        (method, args) => (facade[method] as (...inner: unknown[]) => unknown)(...args)
+      );
     },
     getTypeRegistry: () => typeRegistry,
     getUnsafeInternalClient: (options?: Obj) =>
@@ -333,23 +441,38 @@ export const createCoreLite = (
     uiSettings: strict('core.uiSettings', { asScopedToClient: uiSettingsFacade }),
     security: coreSecurityStart,
     userProfile: strict('core.userProfile', {}),
-    executionContext: strict('core.executionContext', {
-      withContext: (_ctx: unknown, fn: () => unknown) => fn(),
-      get: () => undefined,
-      getAsLabels: () => ({}),
-      set: fence('core.executionContext.set'),
-    }),
+    executionContext: strict('core.executionContext', executionContext),
     analytics: strict('core.analytics', {
-      reportEvent: fence('core.analytics.reportEvent'),
+      reportEvent: (event: unknown) => events.send('analytics', event),
     }),
     http: strict('core.http', { basePath }),
     featureFlags: strict('core.featureFlags', {
-      getBooleanValue: async (_k: string, d: boolean) => d,
-      getStringValue: async (_k: string, d: string) => d,
-      getNumberValue: async (_k: string, d: number) => d,
-      getBooleanValue$: (_k: string, d: boolean) => of(d),
+      getBooleanValue: (key: string, fallback: boolean) =>
+        resolveReplica('boolean', key, fallback, platform.booleanFlag(key)),
+      getStringValue: (key: string, fallback: string) =>
+        resolveReplica('string', key, fallback, platform.stringFlag(key)),
+      getNumberValue: (key: string, fallback: number) =>
+        resolveReplica('number', key, fallback, platform.numberFlag(key)),
+      getBooleanValue$: (key: string, fallback: boolean) => {
+        const hit = platform.booleanFlag(key);
+        if (hit !== undefined) return of(hit);
+        return of(
+          bridgeSync<boolean>('replica', 'featureFlag', toData({ kind: 'boolean', key, fallback }) as never)
+        );
+      },
     }),
-    pricing: strict('core.pricing', { isFeatureAvailable: () => true }),
+    pricing: strict('core.pricing', {
+      isFeatureAvailable: (featureId: string) => {
+        const hit = platform.price(featureId);
+        if (hit !== undefined) return hit;
+        const remembered = platform.remembered(`price:${featureId}`);
+        if (typeof remembered === 'boolean') return remembered;
+        const value = bridgeSync<boolean>('replica', 'pricing', { featureId } as never);
+        platform.remember(`price:${featureId}`, value);
+        return value;
+      },
+      getActiveProduct: () => platform.activeProduct(),
+    }),
   });
 
   const setupFor = (pluginsStart: Promise<unknown>, ownStart: Promise<unknown>) =>
@@ -362,8 +485,15 @@ export const createCoreLite = (
         getServerInfo: () => ({ hostname: 'localhost', port: 0, name: 't7a', protocol: 'http' }),
       }),
       savedObjects: strict('core.savedObjects(setup)', {
-        registerType: (type: { name: string }) => {
+        registerType: (type: SoTypeFingerprintInput) => {
           countFence('core.savedObjects.registerType');
+          registeredSoTypes.push({
+            name: type.name,
+            mappings: type.mappings,
+            namespaceType: type.namespaceType,
+            hidden: type.hidden,
+            indexPattern: type.indexPattern,
+          });
           if (localSo) typeRegistry.registerType(type as never);
         },
         setEncryptionExtension: (factory: typeof encryptionExtensionFactory) => {
@@ -375,11 +505,12 @@ export const createCoreLite = (
         addClientWrapper: fence('core.savedObjects.addClientWrapper'),
       }),
       status: strict('core.status', {
-        // Main already gates on ES/SO availability before claiming tasks.
-        core$: of({
-          elasticsearch: { level: ServiceStatusLevels.available, summary: '' },
-          savedObjects: { level: ServiceStatusLevels.available, summary: '' },
-        }),
+        core$: platform.status$.pipe(
+          map((value) => ({
+            elasticsearch: { level: statusLevel(value.elasticsearch), summary: '' },
+            savedObjects: { level: statusLevel(value.savedObjects), summary: '' },
+          }))
+        ),
         set: fence('core.status.set'),
       }),
       capabilities: strict('core.capabilities', {
@@ -415,7 +546,7 @@ export const createCoreLite = (
       }),
     });
 
-  return { setupFor, start, clusterClient };
+  return { setupFor, start, clusterClient, esFence, registeredSoTypes, platform };
 };
 
 // ---------------------------------------------------------------------------------------------
@@ -425,42 +556,42 @@ export interface TaskDefinitionCapture {
   readonly definitions: Map<string, { createTaskRunner: Fn } & Obj>;
 }
 
-export const createDepFacades = (snapshot: IslandSnapshot) => {
-  const license = License.fromJSON(snapshot.license as never);
-  const license$ = new BehaviorSubject(license);
+export const createDepFacades = (
+  snapshot: IslandSnapshot,
+  platform: ReturnType<typeof createPlatformReplica>
+) => {
+  const toLicense = (value: Record<string, unknown>) => {
+    const source = Object.keys(value).length > 0 ? value : (snapshot.license as Record<string, unknown>);
+    return License.fromJSON(source as never);
+  };
+  const license$ = new BehaviorSubject(toLicense(platform.license$.getValue()));
+  platform.license$.subscribe((value) => license$.next(toLicense(value)));
   const licensingSetup = strict('licensing(setup)', {
     license$,
     featureUsage: strict('licensing.featureUsage(setup)', {
       register: fence('licensing.featureUsage.register'),
     }),
-    refresh: async () => license,
+    refresh: async () => license$.getValue(),
   });
   const licensingStart = strict('licensing(start)', {
     license$,
-    getLicense: async () => license,
-    refresh: async () => license,
+    getLicense: async () => license$.getValue(),
+    refresh: async () => license$.getValue(),
     featureUsage: strict('licensing.featureUsage(start)', {
       notifyUsage: fence('licensing.featureUsage.notifyUsage'),
     }),
   });
 
   const taskCapture: TaskDefinitionCapture = { definitions: new Map() };
-  const BRIDGED_TM = new Set(['bulkSchedule', 'schedule']);
-  const TM_READS = new Set(['aggregate', 'fetch', 'get']);
   const tmStartMethod =
     (method: string) =>
     async (...args: unknown[]) => {
-      // Only runtime action enqueueing crosses; plugin-start maintenance scheduling is fenced
-      // (main already scheduled those tasks).
       const first = args[0] as Obj | Obj[] | undefined;
-      const taskTypes = (Array.isArray(first) ? first : [first]).map((t) => String(t?.taskType));
-      if (BRIDGED_TM.has(method) && taskTypes.every((t) => t.startsWith('actions:'))) {
+      if (decideTaskManagerCall(method) === 'bridge') {
         return bridge('tm', method, toData(args) as never);
       }
-      // Reads are side-effect free and needed at run time (e.g. actions queue-limit aggregate).
-      if (TM_READS.has(method)) return bridge('tm', method, toData(args) as never);
       countFence(`taskManager.${method}`);
-      return Array.isArray(first) ? first.map((t) => ({ ...t, id: 'fenced' })) : { id: 'fenced' };
+      return Array.isArray(first) ? first.map((item) => ({ ...item, id: 'fenced' })) : { id: 'fenced' };
     };
   const taskManagerSetup = strict('taskManager(setup)', {
     index: snapshot.taskManagerIndex,
@@ -536,7 +667,10 @@ export const createDepFacades = (snapshot: IslandSnapshot) => {
   });
 
   const securityActions = new SecurityActions();
-  const auditLogger = { log: fence('security.audit.log'), enabled: false };
+  const auditLogger = {
+    log: (event: unknown) => events.send('audit', event),
+    enabled: true,
+  };
   const securityAudit = strict('security.audit', {
     asScoped: () => auditLogger,
     withoutRequest: auditLogger,
@@ -595,11 +729,7 @@ export const createDepFacades = (snapshot: IslandSnapshot) => {
   const features = strict('features', {
     registerKibanaFeature: fence('features.registerKibanaFeature'),
     registerElasticsearchFeature: fence('features.registerElasticsearchFeature'),
-    getKibanaFeatures: () => {
-      throw new Error(
-        'T7A_UNSUPPORTED features.getKibanaFeatures (replicate snapshot when needed)'
-      );
-    },
+    getKibanaFeatures: () => platform.features(),
   });
 
   const lazyUnsupported = (name: string) => () => {
@@ -714,6 +844,18 @@ export interface Island {
   readonly taskCapture: TaskDefinitionCapture;
   readonly bootMs: number;
   readonly clusterClient: ClusterClient;
+  readonly esWrites: ReturnType<ReturnType<typeof createBootEsWriteFence>['summary']>;
+  readonly esWriteRecords: ReadonlyArray<{ method: string; path: string }>;
+  readonly registeredSoTypes: readonly string[];
+  readonly taskDefinitionMeta: ReadonlyArray<{
+    type: string;
+    timeout: string;
+    maxAttempts?: number;
+    cost?: string | number;
+    priority?: string | number;
+    stateSchemaVersions: number[];
+  }>;
+  readonly applyReplicas: (next: IslandSnapshot) => void;
 }
 
 /** Boots the real alerting execution plugin set inside this isolate. */
@@ -724,7 +866,7 @@ export const bootIsland = async (
 ): Promise<Island> => {
   const t0 = performance.now();
   const core = createCoreLite(snapshot, es, localSo);
-  const deps = createDepFacades(snapshot);
+  const deps = createDepFacades(snapshot, core.platform);
   const validationContext = {
     dev: snapshot.dev,
     prod: !snapshot.dev,
@@ -739,9 +881,13 @@ export const bootIsland = async (
 
   const load = async (pkg: string, configKey: string) => {
     const mod = require(pkg) as PluginModule;
-    const config = mod.config
-      ? mod.config.schema.validate(snapshot.rawConfig[configKey] ?? {}, validationContext)
-      : {};
+    const provided = snapshot.effectiveConfig?.[configKey];
+    const config =
+      provided !== undefined
+        ? provided
+        : mod.config
+        ? mod.config.schema.validate(snapshot.rawConfig[configKey] ?? {}, validationContext)
+        : {};
     const initializerContext = {
       opaqueId: Symbol(configKey),
       env: {
@@ -800,6 +946,7 @@ export const bootIsland = async (
     stackAlerts: deferred<object>(),
   };
 
+  await runInTmPhase('boot', async () => {
   // ---- setup (Core's topological order) ----
   const esoStartDeferred = deferred<unknown>();
   if (eso) {
@@ -906,10 +1053,36 @@ export const bootIsland = async (
   const stackAlertsDeps = { alerting: {}, triggersActionsUi: { data: {} } };
   depsStart.stackAlerts.resolve(stackAlertsDeps);
   starts.stackAlerts.resolve(stackAlerts.start(core.start, stackAlertsDeps));
+  });
+  const settleMs = Number(process.env.KBN_RESEARCH_WC_BOOT_SETTLE_MS ?? 0);
+  if (settleMs > 0) await new Promise((resolve) => setTimeout(resolve, settleMs));
+  core.esFence.endBoot();
+  if (localSo) verifyRegistryReadiness(snapshot.readiness, core.registeredSoTypes);
 
   return {
     taskCapture: deps.taskCapture,
     bootMs: performance.now() - t0,
     clusterClient: core.clusterClient,
+    esWrites: core.esFence.summary(),
+    esWriteRecords: core.esFence
+      .records()
+      .filter((record) => record.write && record.phase === 'boot')
+      .map((record) => ({ method: record.method, path: record.path })),
+    registeredSoTypes: core.registeredSoTypes.map((type) => type.name),
+    taskDefinitionMeta: [...deps.taskCapture.definitions.entries()].map(([type, def]) => ({
+      type,
+      timeout: String((def as Obj).timeout ?? ''),
+      maxAttempts:
+        typeof (def as Obj).maxAttempts === 'number' ? ((def as Obj).maxAttempts as number) : undefined,
+      cost: (def as Obj).cost as string | number | undefined,
+      priority: (def as Obj).priority as string | number | undefined,
+      stateSchemaVersions: Object.keys(((def as Obj).stateSchemaByVersion as object) ?? {})
+        .map(Number)
+        .sort((left, right) => left - right),
+    })),
+    applyReplicas: (next: IslandSnapshot) => {
+      if (next.replicas) core.platform.apply(next.replicas);
+      if (localSo) verifyRegistryReadiness(next.readiness, core.registeredSoTypes);
+    },
   };
 };

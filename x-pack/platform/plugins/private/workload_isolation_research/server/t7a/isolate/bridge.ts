@@ -57,6 +57,16 @@ const reviveError = ({ __t7aError: e }: WireError): Error => {
   return error;
 };
 
+/** Calls a main-side capability synchronously (worker may wait; main must not). */
+export const bridgeSync = <T>(capability: string, operation: string, args: CodecInput): T => {
+  const context = runContext.getStore();
+  if (!context) throw new Error(`t7a bridgeSync ${capability}.${operation} called outside a run`);
+  countEdge(`${capability}.${operation}`, 'bridge');
+  const value = context.callSync(capability, operation, args);
+  if (isWireError(value)) throw reviveError(value);
+  return value as T;
+};
+
 /** Calls a main-side capability for the current run. */
 export const bridge = async <T>(
   capability: string,

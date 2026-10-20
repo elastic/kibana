@@ -65,6 +65,13 @@ export function createPluginInitializerContext({
   instanceInfo: InstanceInfo;
   nodeInfo: NodeInfo;
 }): PluginInitializerContext {
+  if (process.env.KBN_RESEARCH_CAPABILITY_KIT === 'true') {
+    const key = Symbol.for('kbn.research.config.atPathSync');
+    const holder = globalThis as Record<symbol, unknown>;
+    if (typeof holder[key] !== 'function') {
+      holder[key] = (path: string) => coreContext.configService.atPathSync(path);
+    }
+  }
   return {
     opaqueId,
 

@@ -21,6 +21,8 @@ import type { FakeRequestDescriptor } from '../request_codec';
 import { encodeRunResult, encodeTaskError } from '../task_codec';
 import { bootIsland } from './island';
 import type { Island } from './island';
+import { diffDefinitionParity } from '@kbn/task-manager-plugin/server/lib/research_runner_override';
+import { runWithExecutionContext } from '../../capability_kit/worker_core';
 import { edgeStats, fenceStats, missStats, runContext } from './bridge';
 
 let island: Promise<Island> | undefined;
@@ -34,6 +36,7 @@ interface RunInput {
   readonly taskInstance: Record<string, unknown>;
   readonly executionUuid?: string;
   readonly fakeRequest?: FakeRequestDescriptor;
+  readonly executionContext?: Record<string, unknown>;
 }
 
 const memory = () => {
@@ -68,6 +71,11 @@ const forceGc = () => {
   gc();
 };
 
+const dataSnapshot = (context: WorkerContext): IslandSnapshot => {
+  const data = (context.bundle.data ? decode(context.bundle.data) : {}) as { snapshot?: IslandSnapshot };
+  return data.snapshot ?? ({} as IslandSnapshot);
+};
+
 let islandTaskTypes: string[] = [];
 const stats = () => ({
   taskTypes: islandTaskTypes,
@@ -90,16 +98,37 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
     if (input.phase === 'boot') {
       const t = performance.now();
       const current = await getIsland(context);
+      current.applyReplicas(dataSnapshot(context));
       return {
         bootMs: current.bootMs,
         waitedMs: performance.now() - t,
         slotAgeMs: performance.now() - slotStartedAt,
         memory: memory(),
+        esWrites: current.esWrites,
+        registeredSoTypes: current.registeredSoTypes,
+        taskDefinitionMeta: current.taskDefinitionMeta,
+        fences: Object.fromEntries(fenceStats),
+        misses: Object.fromEntries(missStats),
       } as CodecInput;
     }
     const t0 = performance.now();
     const wasCold = !island;
     const current = await getIsland(context);
+    current.applyReplicas(dataSnapshot(context));
+    const parity = diffDefinitionParity(
+      ((dataSnapshot(context).taskDefinitionMeta as readonly {
+        type: string;
+        timeout: string;
+        maxAttempts?: number;
+        cost?: string | number;
+        priority?: string | number;
+        stateSchemaVersions: readonly number[];
+      }[]) ?? []),
+      current.taskDefinitionMeta
+    );
+    if (parity.length > 0) {
+      throw new Error(`worker-core task definition parity failed: ${parity.join('; ')}`);
+    }
     const bootMs = wasCold ? current.bootMs : 0;
     const definition = current.taskCapture.definitions.get(input.taskType);
     if (!definition) throw new Error(`t7a: task type ${input.taskType} not registered in island`);
@@ -130,7 +159,7 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
         return { phase: 'cleanup', customFields, coldBootMs: bootMs } as CodecInput;
       }
       try {
-        const result = await runner.run();
+        const result = await runWithExecutionContext(input.executionContext, () => runner.run());
         return {
           phase: 'run',
           wire: encodeRunResult(result),

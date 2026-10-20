@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-/* RESEARCH ONLY (Track 7.A). Read-mostly data replicated from main into the alerting class
- * isolate ("Replicate read-mostly data" lever). Everything here is plain data. */
+/* RESEARCH ONLY (Track 7.A / worker Core). Read-mostly data replicated from main into the
+ * alerting class isolate. Everything here is plain data. Config values stay in memory. */
+
+import type { PlatformReplicas, ReadinessToken } from '../capability_kit/worker_core';
 
 export interface IslandSnapshot {
   readonly kibanaVersion: string;
@@ -30,4 +32,19 @@ export interface IslandSnapshot {
   readonly taskManagerIndex: string;
   /** Raw (unvalidated) plugin config by plugin id; validated in the isolate with each plugin's schema. */
   readonly rawConfig: Readonly<Record<string, Record<string, unknown>>>;
+  /** Main's effective plugin config, already validated. Present values skip schema defaults. */
+  readonly effectiveConfig?: Readonly<Record<string, Record<string, unknown>>>;
+  /** Versioned license, flags, pricing, status and features. */
+  readonly replicas?: PlatformReplicas;
+  /** Saved-object type fingerprints minted by main after its migrations. */
+  readonly readiness?: ReadinessToken;
+  /** Main's definition metadata for types this class is allowed to run. */
+  readonly taskDefinitionMeta?: ReadonlyArray<{
+    readonly type: string;
+    readonly timeout: string;
+    readonly maxAttempts?: number;
+    readonly cost?: string | number;
+    readonly priority?: string | number;
+    readonly stateSchemaVersions: readonly number[];
+  }>;
 }
