@@ -34,7 +34,11 @@ export const installInvestigationAgent = async ({
       description: INVESTIGATION_AGENT_DESCRIPTION,
       labels: ['observability', 'significant-events', 'investigation', 'cortex', 'sandbox'],
       avatar_symbol: 'NI',
-      access_control: { access_mode: AgentAccessControlMode.Public },
+      // Shared: everyone can run it, only admins can change it. Investigations run it as the
+      // Nightshift agent service account, with its persisted configuration merged into the type's,
+      // so a user who could edit it (as `public` allows) could add tools or instructions that then
+      // run with the account's privileges.
+      access_control: { access_mode: AgentAccessControlMode.Shared },
       configuration: {
         tools: [],
         skill_ids: [],

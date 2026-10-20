@@ -30,7 +30,8 @@ describe('installInvestigationAgent', () => {
         description: expect.any(String),
         labels: ['observability', 'significant-events', 'investigation', 'cortex', 'sandbox'],
         avatar_symbol: 'NI',
-        access_control: { access_mode: AgentAccessControlMode.Public },
+        // Shared, not public: everyone can run it, only admins can change what it runs with.
+        access_control: { access_mode: AgentAccessControlMode.Shared },
         configuration: {
           tools: [],
           skill_ids: [],
