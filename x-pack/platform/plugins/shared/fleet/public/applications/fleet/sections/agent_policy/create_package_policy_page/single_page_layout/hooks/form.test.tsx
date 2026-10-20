@@ -815,6 +815,45 @@ describe('useOnSubmit', () => {
   });
 
   describe('updateAgentlessCloudConnectorConfig', () => {
+    // The setters receive functional updates, so apply them on top of the given state
+    const applyUpdate = (setter: jest.Mock, prev: any) => {
+      const update = setter.mock.calls[0][0];
+      return typeof update === 'function' ? update(prev) : update;
+    };
+
+    it('should keep changes queued earlier in the same render, e.g. supports_agentless', () => {
+      const setNewAgentPolicy = jest.fn();
+      const setPackagePolicy = jest.fn();
+
+      // `packagePolicy` is the state of this render, without the agentless flag that was queued
+      // by the setup technology hook in the same render
+      const packagePolicy = {
+        inputs: [
+          {
+            type: 'aws',
+            enabled: true,
+            streams: [{ vars: { 'aws.supports_cloud_connectors': { value: true } } }],
+          },
+        ],
+        supports_cloud_connector: true,
+      } as any;
+      const newAgentPolicy = { supports_agentless: true } as any;
+
+      updateAgentlessCloudConnectorConfig(
+        packagePolicy,
+        newAgentPolicy,
+        setNewAgentPolicy,
+        setPackagePolicy
+      );
+
+      expect(
+        applyUpdate(setPackagePolicy, { ...packagePolicy, supports_agentless: true })
+      ).toEqual(expect.objectContaining({ supports_agentless: true, supports_cloud_connector: true }));
+      expect(
+        applyUpdate(setNewAgentPolicy, { ...newAgentPolicy, name: 'Agentless policy for aws-1' })
+      ).toEqual(expect.objectContaining({ name: 'Agentless policy for aws-1', supports_agentless: true }));
+    });
+
     it('should update agentless cloud connector config when enabled and target CSP is aws', () => {
       const setNewAgentPolicy = jest.fn();
       const setPackagePolicy = jest.fn();
@@ -855,7 +894,7 @@ describe('useOnSubmit', () => {
         setPackagePolicy
       );
 
-      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setNewAgentPolicy, newAgentPolicy)).toEqual({
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
@@ -865,7 +904,7 @@ describe('useOnSubmit', () => {
           },
         },
       });
-      expect(setPackagePolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setPackagePolicy, packagePolicy)).toEqual({
         ...packagePolicy,
         supports_cloud_connector: true,
       });
@@ -909,7 +948,7 @@ describe('useOnSubmit', () => {
         setPackagePolicy
       );
 
-      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setNewAgentPolicy, newAgentPolicy)).toEqual({
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
@@ -919,7 +958,7 @@ describe('useOnSubmit', () => {
           },
         },
       });
-      expect(setPackagePolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setPackagePolicy, packagePolicy)).toEqual({
         ...packagePolicy,
         supports_cloud_connector: false,
       });
@@ -965,7 +1004,7 @@ describe('useOnSubmit', () => {
         setPackagePolicy
       );
 
-      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setNewAgentPolicy, newAgentPolicy)).toEqual({
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
@@ -975,7 +1014,7 @@ describe('useOnSubmit', () => {
           },
         },
       });
-      expect(setPackagePolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setPackagePolicy, packagePolicy)).toEqual({
         ...packagePolicy,
         supports_cloud_connector: true,
       });
@@ -1019,7 +1058,7 @@ describe('useOnSubmit', () => {
         setPackagePolicy
       );
 
-      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setNewAgentPolicy, newAgentPolicy)).toEqual({
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
@@ -1029,7 +1068,7 @@ describe('useOnSubmit', () => {
           },
         },
       });
-      expect(setPackagePolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setPackagePolicy, packagePolicy)).toEqual({
         ...packagePolicy,
         supports_cloud_connector: false,
       });
@@ -1073,7 +1112,7 @@ describe('useOnSubmit', () => {
         setPackagePolicy
       );
 
-      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setNewAgentPolicy, newAgentPolicy)).toEqual({
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
@@ -1083,7 +1122,7 @@ describe('useOnSubmit', () => {
           },
         },
       });
-      expect(setPackagePolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setPackagePolicy, packagePolicy)).toEqual({
         ...packagePolicy,
         supports_cloud_connector: true,
       });
@@ -1127,7 +1166,7 @@ describe('useOnSubmit', () => {
         setPackagePolicy
       );
 
-      expect(setNewAgentPolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setNewAgentPolicy, newAgentPolicy)).toEqual({
         ...newAgentPolicy,
         agentless: {
           ...newAgentPolicy.agentless,
@@ -1137,7 +1176,7 @@ describe('useOnSubmit', () => {
           },
         },
       });
-      expect(setPackagePolicy).toHaveBeenCalledWith({
+      expect(applyUpdate(setPackagePolicy, packagePolicy)).toEqual({
         ...packagePolicy,
         supports_cloud_connector: false,
       });
