@@ -88,44 +88,60 @@ describe('Rule Tuning outcome reports', () => {
 
     describeReportStep(steps, 'report_worker_run_completed', 'worker_run_completed', 'emit_result');
 
+    /** A harvest row; the rule's `id@revision` key is its seventh column. */
+    const harvestRow = (ruleKey: string): unknown[] => [0, 0, 0, 0, 0, 0, ruleKey];
+
     const sweepContext = ({
       activeReviews = 0,
-      candidates = 0,
+      eligible = 0,
       harvestFailed = false,
+      ineligible = 0,
       lookupFailed = false,
       requested = 0,
       rulesLookupFailed = false,
     }: {
       activeReviews?: number;
-      candidates?: number;
+      /** Harvested rules that are still enabled, at the revision their alerts came from. */
+      eligible?: number;
       harvestFailed?: boolean;
+      /** Harvested rules disabled or edited since their alerts. */
+      ineligible?: number;
       lookupFailed?: boolean;
       requested?: number;
       rulesLookupFailed?: boolean;
-    }): Record<string, unknown> => ({
-      consts: { no_rows: [] },
-      steps: {
-        collect_active_rules: { output: { expected: activeReviews } },
-        collect_candidates: { output: { count: candidates } },
-        harvest_fp_alerts_by_rule: harvestFailed
-          ? { error: { message: 'search_phase_execution_exception' } }
-          : { output: { values: [] } },
-        list_active_reviews: lookupFailed
-          ? { error: { message: 'HTTP 500' } }
-          : { output: { results: [] } },
-        list_enabled_candidates: rulesLookupFailed
-          ? { error: { message: 'HTTP 500' } }
-          : { output: { data: [] } },
-        resolve_fanout_rows: {
-          output: { rows: Array.from({ length: requested }, (_, index) => [`rule-${index}`]) },
+    }): Record<string, unknown> => {
+      const eligibleKeys = Array.from({ length: eligible }, (_, index) => `rule-${index}@1`);
+      const ineligibleKeys = Array.from({ length: ineligible }, (_, index) => `stale-${index}@1`);
+      return {
+        consts: { no_rows: [] },
+        steps: {
+          collect_active_rules: { output: { expected: activeReviews } },
+          harvest_fp_alerts_by_rule: harvestFailed
+            ? { error: { message: 'search_phase_execution_exception' } }
+            : { output: { values: [...eligibleKeys, ...ineligibleKeys].map(harvestRow) } },
+          list_active_reviews: lookupFailed
+            ? { error: { message: 'HTTP 500' } }
+            : { output: { results: [] } },
+          list_enabled_candidates: rulesLookupFailed
+            ? { error: { message: 'HTTP 500' } }
+            : { output: { data: [] } },
+          // Rendered from `list_enabled_candidates`, so a failed lookup leaves no key.
+          resolve_current_revisions: {
+            output: {
+              rule_revision_keys: rulesLookupFailed ? ',' : `,${eligibleKeys.join(',')},`,
+            },
+          },
+          resolve_fanout_rows: {
+            output: { rows: Array.from({ length: requested }, (_, index) => [`rule-${index}`]) },
+          },
         },
-      },
-    });
+      };
+    };
 
     it.each([
       [
         'reviews requested for noisy rules',
-        { activeReviews: 1, candidates: 3, requested: 2 },
+        { activeReviews: 1, eligible: 3, requested: 2 },
         {
           candidates_found: 3,
           degraded_reason: 'none',
@@ -163,10 +179,26 @@ describe('Rule Tuning outcome reports', () => {
         },
       ],
       [
-        'a failed rules lookup after a harvest that worked, which empties the fan-out',
-        { candidates: 3, rulesLookupFailed: true },
+        // 15 noisy rules, 3 disabled or edited since their alerts, and the fan-out cap of 10:
+        // found minus dispatched is exactly what the cap held back.
+        'only the rules still eligible for review, of a harvest the cap cut short',
+        { eligible: 12, ineligible: 3, requested: 10 },
         {
-          candidates_found: 3,
+          candidates_found: 12,
+          degraded_reason: 'none',
+          items_dispatched: 10,
+          items_in_flight: '10',
+          lookup_failed: false,
+          run_outcome: 'produced',
+          source_read_failed: false,
+        },
+      ],
+      [
+        // Without the enabled rules, no harvested rule can be confirmed eligible.
+        'a failed rules lookup after a harvest that worked, which empties the fan-out',
+        { eligible: 3, rulesLookupFailed: true },
+        {
+          candidates_found: 0,
           degraded_reason: 'dependency_unavailable',
           items_dispatched: 0,
           items_in_flight: '0',
@@ -177,7 +209,7 @@ describe('Rule Tuning outcome reports', () => {
       ],
       [
         'a failed in-flight lookup the sweep carried on without',
-        { candidates: 2, lookupFailed: true, requested: 2 },
+        { eligible: 2, lookupFailed: true, requested: 2 },
         {
           candidates_found: 2,
           degraded_reason: 'dependency_unavailable',
@@ -562,6 +594,9 @@ describe('Rule Coverage outcome reports', () => {
 
     describeReportStep(steps, 'report_worker_run_completed', 'worker_run_completed', 'emit_result');
 
+    const MAX_OPEN_CHECKS = 100;
+    const BATCH_SIZE = 5;
+
     const sweepContext = ({
       inFlight = 0,
       lookupFailed = false,
@@ -581,11 +616,13 @@ describe('Rule Coverage outcome reports', () => {
         list_active_reviews: lookupFailed
           ? { error: { message: 'HTTP 500' } }
           : { output: { results: [] } },
+        resolve_batch_size: { output: { size: BATCH_SIZE } },
         resolve_dispatch_batch: {
           output: {
             indicators: Array.from({ length: started }, (_, index) => ({ _id: `ki-${index}` })),
           },
         },
+        resolve_free_slots: { output: { free: Math.max(MAX_OPEN_CHECKS - inFlight, 0) } },
         search_pending_indicators: searchFailed
           ? { error: { message: 'index_not_found_exception' } }
           : { output: { hits: { hits: [], total: { value: pending } } } },
@@ -616,6 +653,33 @@ describe('Rule Coverage outcome reports', () => {
           items_in_flight: '0',
           lookup_failed: false,
           run_outcome: 'empty_nothing_pending',
+          source_read_failed: false,
+        },
+      ],
+      [
+        // A plain batch-size cut: slots were free, the batch was just smaller than the queue.
+        'a batch of a longer queue, with slots to spare',
+        { pending: 9, started: 5 },
+        {
+          candidates_found: 9,
+          degraded_reason: 'none',
+          items_dispatched: 5,
+          items_in_flight: '5',
+          lookup_failed: false,
+          run_outcome: 'produced',
+          source_read_failed: false,
+        },
+      ],
+      [
+        'a batch the open-review ceiling cut short',
+        { inFlight: 98, pending: 9, started: 2 },
+        {
+          candidates_found: 9,
+          degraded_reason: 'capacity',
+          items_dispatched: 2,
+          items_in_flight: '100',
+          lookup_failed: false,
+          run_outcome: 'degraded_partial',
           source_read_failed: false,
         },
       ],

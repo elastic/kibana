@@ -231,6 +231,8 @@ steps:
         dependency_unavailable
         {%- elsif pending > 0 and started == 0 -%}
         capacity
+        {%- elsif started < pending and steps.resolve_free_slots.output.free < steps.resolve_batch_size.output.size -%}
+        capacity
         {%- else -%}
         none
         {%- endif -%}
@@ -243,6 +245,8 @@ steps:
         empty_nothing_pending
         {%- elsif started == 0 -%}
         empty_at_capacity
+        {%- elsif started < pending and steps.resolve_free_slots.output.free < steps.resolve_batch_size.output.size -%}
+        degraded_partial
         {%- else -%}
         produced
         {%- endif -%}

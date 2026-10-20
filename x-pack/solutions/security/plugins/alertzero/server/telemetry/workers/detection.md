@@ -22,13 +22,13 @@ Both reviews report a manual entry gate the same way: the gate's own arm reports
 
 | Worker | `candidates_found` | `items_dispatched` | `items_in_flight` | `source_read_failed` / `lookup_failed` |
 |---|---|---|---|---|
-| Rule Tuning | Rules over the false-positive thresholds | Reviews requested | Earlier reviews plus the ones requested | The harvest query or the enabled-rules lookup / the in-flight review lookup |
+| Rule Tuning | Rules over the false-positive thresholds that are still enabled, at the revision their alerts came from, so found minus requested is what the per-sweep cap held back | Reviews requested | Earlier reviews plus the ones requested | The harvest query or the enabled-rules lookup / the in-flight review lookup |
 | Rule Coverage | Pending gap indicators in the lookback window | Reviews started | Earlier reviews plus the ones started | The indicator search / the active-review lookup |
 
 Neither sweep reports `items_failed`. The sweeps start their reviews without waiting for them, so the review decisions come from each review's own event.
 
 - **Rule Tuning:** `failed_source_unavailable` when the harvest or the enabled-rules lookup fails, `produced` when it requested a review, `empty_nothing_found` otherwise. The harvest drops rules already under review, so a sweep that finds only those reports `empty_nothing_found` with a non-zero `items_in_flight`, as Rule Coverage reports `empty_nothing_pending`.
-- **Rule Coverage:** `failed_source_unavailable` when the search fails, `empty_nothing_pending` with no pending indicator, `empty_at_capacity` when indicators are pending but no review slot is free (`degraded_reason: capacity`), `produced` otherwise.
+- **Rule Coverage:** `failed_source_unavailable` when the search fails, `empty_nothing_pending` with no pending indicator, `empty_at_capacity` when indicators are pending but no review slot is free, `degraded_partial` when the open-review ceiling left fewer free slots than the batch size and cut the batch short (both with `degraded_reason: capacity`), `produced` otherwise. A batch smaller than the queue with slots to spare is still `produced`.
 - A failed lookup that either sweep carries on without gives `degraded_reason: dependency_unavailable`.
 
 ## Rule type and source

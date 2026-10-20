@@ -327,7 +327,7 @@ steps:
       continue: true
     with:
       event: worker_run_completed
-      candidates_found: "${{ steps.collect_candidates.output.count | default: 0 }}"
+      candidates_found: "${{ steps.harvest_fp_alerts_by_rule.output.values | default: consts.no_rows | where_exp: 'row', 'steps.resolve_current_revisions.output.rule_revision_keys contains row[6]' | size }}"
       items_dispatched: "${{ steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size }}"
       # Reviews already running plus the ones this sweep started, as the coverage sweep counts.
       items_in_flight: |-
