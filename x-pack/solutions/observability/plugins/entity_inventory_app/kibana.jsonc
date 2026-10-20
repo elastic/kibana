@@ -4,7 +4,7 @@
   "owner": ["@elastic/obs-signals-metrics-team"],
   "group": "observability",
   "visibility": "private",
-  "description": "UI plugin for the entity inventory. Disabled by default behind the same feature flag as the entity_inventory server plugin.",
+  "description": "UI plugin for the entity inventory. Disabled by default via xpack.entityInventoryApp.enabled.",
   "plugin": {
     "id": "entityInventoryApp",
     "browser": true,
