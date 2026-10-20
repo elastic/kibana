@@ -911,7 +911,6 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const stepTestTargetName = runModeInfo?.stepTestTargetName ?? '';
 
     const historyKeyRef = useRef(Symbol('workflow-execution-flyout'));
-    const [executionWidth, setExecutionWidth] = useState(EXECUTION_PANEL_WIDTH);
     // The step flyout can inherit the session only after the run flyout has registered it.
     const [isExecutionFlyoutActive, setIsExecutionFlyoutActive] = useState(false);
     const onExecutionFlyoutActive = useCallback(() => {
@@ -919,9 +918,6 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     }, []);
     useLayoutEffect(() => {
       setIsExecutionFlyoutActive(true);
-    }, []);
-    const onExecutionResize = useCallback((width: number) => {
-      setExecutionWidth(width);
     }, []);
     const onCloseStepDetail: React.ComponentProps<typeof EuiFlyout>['onClose'] = useCallback(
       (_event, meta) => {
@@ -1231,10 +1227,11 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
           type="push"
           // Stay push when the Agent Builder sidebar shrinks the app below EUI's default `l` (992px).
           pushMinBreakpoint="xs"
-          size={executionWidth}
+          // EUI re-registers a managed flyout when `size` changes, and that closes child
+          // flyouts. The resizer tracks the dragged width itself; do not write it back here.
+          size={EXECUTION_PANEL_WIDTH}
           minWidth={MIN_PANEL_WIDTH}
           resizable={true}
-          onResize={onExecutionResize}
           paddingSize="none"
           hideCloseButton
           className={FLYOUT_CLASSNAME}

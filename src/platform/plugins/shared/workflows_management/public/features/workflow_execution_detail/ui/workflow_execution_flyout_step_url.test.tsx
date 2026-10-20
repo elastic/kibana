@@ -223,6 +223,39 @@ describe('WorkflowExecutionFlyout step URL and field paths', () => {
     expect(screen.getByTestId('workflowExecutionFlyout')).toBeInTheDocument();
   });
 
+  it('keeps the step panel mounted when the run flyout is resized', () => {
+    mockUrlState.selectedStepExecutionId = 'step-123';
+
+    renderFlyout();
+
+    const runFlyout = screen.getByTestId('workflowExecutionFlyout');
+    const fiberKey = Object.keys(runFlyout).find((key) => key.startsWith('__reactFiber'));
+    expect(fiberKey).toEqual(expect.any(String));
+
+    interface FlyoutFiber {
+      return: FlyoutFiber | null;
+      memoizedProps?: {
+        id?: string;
+        size?: number | string;
+        onResize?: (width: number) => void;
+      };
+    }
+    let fiber = (runFlyout as unknown as Record<string, FlyoutFiber>)[fiberKey!];
+    let runFlyoutProps: FlyoutFiber['memoizedProps'];
+    while (fiber) {
+      if (fiber.memoizedProps?.id === 'execution') {
+        runFlyoutProps = fiber.memoizedProps;
+        break;
+      }
+      fiber = fiber.return;
+    }
+
+    // Writing the dragged width back into `size` re-registers the run flyout and drops the step.
+    expect(runFlyoutProps?.size).toBe(560);
+    expect(runFlyoutProps?.onResize).toBeUndefined();
+    expect(screen.getByTestId('workflowExecutionStepFlyout')).toBeInTheDocument();
+  });
+
   it('offers copy only on metadata rows that exist in the workflow context', () => {
     mockUrlState.selectedStepExecutionId = 'trigger';
     jest.mocked(useWorkflowExecutionPolling).mockReturnValue({
