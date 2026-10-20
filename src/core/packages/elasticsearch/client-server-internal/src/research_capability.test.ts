@@ -19,7 +19,7 @@ import { markExternalUiamCredential } from '@kbn/core-security-server';
 import { AgentManager } from './agent_manager';
 import { ClusterClient } from './cluster_client';
 import { getRequestHandlerFactory } from './cps_request_handler';
-import { captureResearchEsCapability } from './research_capability';
+import { captureResearchEsCapability, registerResearchEsAlias } from './research_capability';
 
 const config: ElasticsearchClientConfig = {
   sniffOnStart: false,
@@ -102,6 +102,18 @@ describe('research ES capability (private Core seam)', () => {
         expect(capability.headers?.authorization).toBe('Bearer essu_provider');
     }
   );
+
+  it('captures through the actual start-contract facade shape', () => {
+    const { cluster } = setup();
+    const facade = registerResearchEsAlias(
+      { asInternalUser: cluster.asInternalUser, asScoped: cluster.asScoped.bind(cluster) },
+      cluster
+    );
+    const request = { headers: { authorization: 'ApiKey fixture' } };
+    expect(captureResearchEsCapability(facade, request)).toEqual(
+      captureResearchEsCapability(cluster, request)
+    );
+  });
 
   it('keeps secondary credentials and internal authority distinct', () => {
     const { cluster, child } = setup();

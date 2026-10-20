@@ -7,21 +7,18 @@
 
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
+import { encodeError, decodeError } from './error_codecs';
+import type { EncodedError } from './error_codecs';
 
 type Primitive = string | number | boolean | null | undefined | bigint;
 export type CodecInput = Primitive | object;
 export type WireValue =
   | { readonly kind: 'primitive'; readonly value: Exclude<Primitive, bigint> }
-  | { readonly kind: 'bigint' | 'date' | 'bytes'; readonly value: string }
-  | { readonly kind: 'duration' | 'byte_size'; readonly value: number }
+  | { readonly kind: 'bigint' | 'date' | 'bytes' | 'duration'; readonly value: string }
+  | { readonly kind: 'byte_size'; readonly value: number }
   | { readonly kind: 'array'; readonly items: readonly WireValue[] }
   | { readonly kind: 'object'; readonly entries: ReadonlyArray<readonly [string, WireValue]> }
-  | {
-      readonly kind: 'error';
-      readonly name: string;
-      readonly message: string;
-      readonly code?: string;
-    };
+  | EncodedError;
 
 const forbidden = new Set(['__proto__', 'constructor', 'prototype']);
 
@@ -36,23 +33,17 @@ export const encode = (value: CodecInput, parents = new Set<object>(), depth = 0
     return { kind: 'primitive', value };
   }
   if (value instanceof ByteSizeValue) return { kind: 'byte_size', value: value.getValueInBytes() };
-  if (moment.isDuration(value)) return { kind: 'duration', value: value.asMilliseconds() };
+  if (moment.isDuration(value)) return { kind: 'duration', value: value.toISOString() };
   if (value instanceof Date) return { kind: 'date', value: value.toISOString() };
   if (value instanceof ArrayBuffer || Buffer.isBuffer(value) || value instanceof Uint8Array) {
     const buffer = value instanceof ArrayBuffer ? Buffer.from(value) : Buffer.from(value);
     return { kind: 'bytes', value: buffer.toString('base64') };
   }
-  if (value instanceof Error) {
-    return {
-      kind: 'error',
-      name: value.name,
-      message: value.message,
-      ...('code' in value && typeof value.code === 'string' ? { code: value.code } : {}),
-    };
-  }
   if (parents.has(value)) throw new Error('Cyclic capability value');
   parents.add(value);
   try {
+    if (value instanceof Error)
+      return encodeError(value, (item) => encode(item, parents, depth + 1));
     if (Array.isArray(value))
       return {
         kind: 'array',
@@ -105,12 +96,8 @@ export const decode = (wire: WireValue, depth = 0): CodecInput => {
       }
       return result;
     }
-    case 'error': {
-      const error = new Error(wire.message);
-      error.name = wire.name;
-      if (wire.code) Object.assign(error, { code: wire.code });
-      return error;
-    }
+    case 'error':
+      return decodeError(wire, (item) => decode(item, depth + 1));
     default:
       throw new Error('Unknown capability codec');
   }

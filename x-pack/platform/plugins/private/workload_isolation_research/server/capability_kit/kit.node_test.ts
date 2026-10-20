@@ -12,6 +12,7 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { encode, decode } from './codecs';
 import { ModuleRegistry } from './registry';
 import { ExecutionHost } from './host';
+import { startEndpoint } from './transport';
 import type { Crossing } from './protocol';
 
 test('configuration codecs preserve serverless value methods and fail closed', () => {
@@ -42,6 +43,49 @@ test('configuration codecs preserve serverless value methods and fail closed', (
     /Unsafe/
   );
 });
+
+test(
+  'queued deadline retires a never-ready bootstrap so the class recovers',
+  { timeout: 15000 },
+  async () => {
+    const specifier = require.resolve('./example_tasks');
+    const registry = new ModuleRegistry(new Set([specifier]));
+    registry.register('echo', specifier, 'echo');
+    let created = 0;
+    let retired = false;
+    let onExit: () => void = () => {};
+    const host = new ExecutionHost(registry, {}, (transport) => {
+      if (++created > 1) return startEndpoint(transport);
+      return {
+        send: () => {},
+        onMessage: () => {},
+        onExit: (handler) => {
+          onExit = handler;
+        },
+        stop: async () => {
+          retired = true;
+          onExit();
+        },
+      };
+    });
+    const base = {
+      workloadClass: 'fixture',
+      moduleId: 'echo',
+      input: 'recovered',
+      principal: 'alice',
+      space: 'space-a',
+      capabilities: {},
+      deadlineMs: 20,
+    };
+    try {
+      assert.deepEqual(await host.run(base), { status: 'terminated', reason: 'deadline' });
+      assert.ok(retired);
+      assert.equal((await host.run({ ...base, deadlineMs: 10000 })).status, 'success');
+    } finally {
+      await host.stop();
+    }
+  }
+);
 
 for (const transport of ['thread', 'process'] as const) {
   test(

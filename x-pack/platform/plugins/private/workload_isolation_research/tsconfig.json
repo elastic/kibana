@@ -16,7 +16,10 @@
     "@kbn/core-elasticsearch-client-server-internal",
     "@kbn/core-saved-objects-api-server",
     "@kbn/logging",
-    "@kbn/core-spaces-common"
+    "@kbn/core-spaces-common",
+    "@kbn/core-saved-objects-server",
+    "@kbn/sse-utils",
+    "@kbn/agent-builder-common"
   ],
   "exclude": [
     "target/**/*"

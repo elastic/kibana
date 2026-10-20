@@ -28,6 +28,7 @@ import {
   ClusterClient,
   AgentManager,
   getRequestHandlerFactory,
+  registerResearchEsAlias,
   type OnRequestHandlerFactory,
 } from '@kbn/core-elasticsearch-client-server-internal';
 
@@ -235,10 +236,13 @@ export class ElasticsearchService
     }
 
     return {
-      client: {
-        asInternalUser: this.client!.asInternalUser,
-        asScoped: this.client!.asScoped.bind(this.client!),
-      },
+      client: registerResearchEsAlias(
+        {
+          asInternalUser: this.client!.asInternalUser,
+          asScoped: this.client!.asScoped.bind(this.client!),
+        },
+        this.client!
+      ),
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       getCapabilities: () => capabilities,
       metrics: {

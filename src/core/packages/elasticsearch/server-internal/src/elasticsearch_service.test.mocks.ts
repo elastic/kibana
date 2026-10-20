@@ -19,6 +19,7 @@ jest.mock('@kbn/core-elasticsearch-client-server-internal', () => ({
   ClusterClient: MockClusterClient,
   AgentManager: MockAgentManager,
   getRequestHandlerFactory: jest.fn().mockReturnValue(jest.fn()),
+  registerResearchEsAlias: (alias: object) => alias,
 }));
 
 export const isScriptingEnabledMock = jest.fn();

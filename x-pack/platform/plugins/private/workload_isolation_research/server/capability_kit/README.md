@@ -1,4 +1,4 @@
-# Track 7 capability kit — 0.1.3 pre-release research slice
+# Track 7 capability kit — 0.1.4 pre-release research slice
 
 PRIVATE research code; no public Core API, plugin lifecycle hook, or automatic enablement.
 Base harness fd3138c. Only main owns TM claims/leases/results.
@@ -76,8 +76,14 @@ Await every capability call before returning. Background callbacks are not suppo
 No Core request object or closure is cloned. Schemas/contributed callbacks load locally
 via `context.load(id)` from module registrations; arbitrary functions/getters/classes
 are rejected by the data codec. Supported values: plain data, Buffer/Uint8Array,
-ArrayBuffer (decoded as Buffer), Date, BigInt, ByteSizeValue, moment Duration, Error
-name/message/string code. Error subclass identity/extra fields are NOT yet preserved.
+ArrayBuffer (decoded as Buffer), Date, BigInt, ByteSizeValue, moment Duration
+(calendar months/days retained via ISO), and typed errors.0.1.4 reconstructs actual
+ServerSentEventError (AgentBuilderError alias; guards/code/meta/toJSON preserved),
+Boom (status/output/headers/data), and11SO helper classifications (private symbol
+identity rebuilt by owner factory). Name/message/stack/cause chains retained.
+Plain Error retains string code/numeric statusCode. Arbitrary custom Error
+subclasses are not magically reconstructed; unknown wire codec tags fail closed.
+No raw error payloads go into crossing telemetry.
 
 ## Mutable registries / semantics
 
@@ -149,6 +155,10 @@ Outstanding 7.P: worker-local composed real SO/ESO + readiness/auth/audit parity
 scoped live SO security matrix; session refresh bridge (capture is a per-run snapshot,
 not token renewal); rare sync lane; telemetry overhead and per-MB/call measurement;
 distribution-shaped initialized-service floor; bounded envelope sizes/backpressure;
-broader SO operations, typed error codecs, logger metadata and production bootstrap.
+broader SO operations, additional custom error codecs, logger metadata and production bootstrap.
+
+0.1.4 also repairs two Grok findings on0.1: actual Core start client facade now
+aliases its concrete client's private capture; waiting-run timeout retires a
+never-ready bootstrap when no waiters remain, allowing class recovery.
 Stopping execution does not roll back already-admitted host/ES writes. Framework
 callers remain responsible for idempotency and authoritative TM persistence.

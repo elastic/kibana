@@ -13,7 +13,7 @@ import type { Headers } from '@kbn/core-http-server';
 import type {
   AsScopedOptions,
   ElasticsearchClientConfig,
-  ICustomClusterClient,
+  IClusterClient,
   ScopeableRequest,
 } from '@kbn/core-elasticsearch-server';
 import { configureClient } from './configure_client';
@@ -42,7 +42,7 @@ type Capture = (
   options?: AsScopedOptions
 ) => ResearchEsCapability;
 
-const captures = new WeakMap<ICustomClusterClient, Capture>();
+const captures = new WeakMap<IClusterClient, Capture>();
 const routingFactories = new WeakMap<
   OnRequestHandlerFactory,
   (request: ScopeableRequest, options?: AsScopedOptions) => ResearchRouting
@@ -61,8 +61,18 @@ export const restrictResearchEsConfig = (
 };
 
 /** Registers a private research seam without changing the public Core client contract. */
-export const registerResearchEsCapture = (client: ICustomClusterClient, capture: Capture): void => {
+export const registerResearchEsCapture = (client: IClusterClient, capture: Capture): void => {
   if (process.env.KBN_RESEARCH_CAPABILITY_KIT === 'true') captures.set(client, capture);
+};
+
+/** Attaches the same private capture to Core's public start-contract facade. */
+export const registerResearchEsAlias = <T extends IClusterClient>(
+  alias: T,
+  source: IClusterClient
+): T => {
+  const capture = captures.get(source);
+  if (process.env.KBN_RESEARCH_CAPABILITY_KIT === 'true' && capture) captures.set(alias, capture);
+  return alias;
 };
 
 /** Records Core's actual CPS configuration; unknown/custom factories fail closed. */
@@ -86,7 +96,7 @@ export const captureResearchRouting = (
 
 /** Captures resolved credentials in memory only; callers must never persist this value. */
 export const captureResearchEsCapability = (
-  client: ICustomClusterClient,
+  client: IClusterClient,
   request: ScopeableRequest,
   mode: ResearchEsCapability['mode'] = 'current',
   options?: AsScopedOptions

@@ -71,7 +71,8 @@ export class ExecutionHost {
       readonly maxQueuePerClass?: number;
       readonly abortGraceMs?: number;
       readonly onCrossing?: (crossing: Crossing) => void;
-    } = {}
+    } = {},
+    private readonly endpointFactory: typeof startEndpoint = startEndpoint
   ) {
     if (!Number.isInteger(options.slotsPerClass ?? 1) || (options.slotsPerClass ?? 1) < 1) {
       throw new Error('slotsPerClass must be positive');
@@ -162,7 +163,7 @@ export class ExecutionHost {
     if (!idle && slots.length < (this.options.slotsPerClass ?? 1)) {
       let endpoint: Endpoint;
       try {
-        endpoint = startEndpoint(this.options.transport ?? 'thread');
+        endpoint = this.endpointFactory(this.options.transport ?? 'thread');
       } catch (error) {
         const execution = queue.shift();
         if (execution)
@@ -403,6 +404,16 @@ export class ExecutionHost {
       const queue = this.queues.get(execution.options.workloadClass);
       const index = queue?.indexOf(execution) ?? -1;
       if (index !== -1) queue?.splice(index, 1);
+      // A never-ready bootstrap has no active run; retire it once no waiter remains.
+      if (!queue?.length)
+        await Promise.all(
+          slots
+            .filter((entry) => !entry.ready && !entry.active.size)
+            .map(async (entry) => {
+              entry.stopping = true;
+              await entry.endpoint.stop();
+            })
+        );
       this.finish(execution, { status: 'terminated', reason });
     }
     this.dispatch(execution.options.workloadClass);

@@ -31,6 +31,7 @@ export {
 export { getRequestHandlerFactory } from './src/cps_request_handler';
 export {
   captureResearchEsCapability,
+  registerResearchEsAlias,
   createResearchEsClient,
   type ResearchEsCapability,
 } from './src/research_capability';

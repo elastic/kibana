@@ -6,6 +6,9 @@
  */
 
 import { threadId } from 'worker_threads';
+import Boom from '@hapi/boom';
+import { ServerSentEventError } from '@kbn/sse-utils';
+import { SavedObjectsErrorHelpers as SO } from '@kbn/core-saved-objects-server';
 import type { CodecInput } from './codecs';
 import type { WorkerContext } from './protocol';
 import { createRunServices } from './services';
@@ -37,6 +40,31 @@ export const services = async (input: CodecInput, context: WorkerContext): Promi
     await clients.close();
   }
 };
+export const typedFailure = async (input: CodecInput): Promise<CodecInput> => {
+  if (input === 'sse')
+    throw new ServerSentEventError('requestAborted', 'fixture-agent', {
+      statusCode: 499,
+      stage: 'stream',
+    });
+  if (input === 'boom') throw Boom.forbidden('fixture-boom', { stage: 'auth' });
+  throw SO.createGenericNotFoundError('fixture', 'one');
+};
+export const catchTyped = async (
+  _input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  try {
+    await context.call('fixture', 'throw', {});
+  } catch (error) {
+    return {
+      sse: error instanceof ServerSentEventError,
+      boom: Boom.isBoom(error),
+      so: error instanceof Error && SO.isNotFoundError(error),
+    };
+  }
+  throw new Error('Expected typed error');
+};
+
 export const streaming = async (
   _input: CodecInput,
   context: WorkerContext
