@@ -1381,6 +1381,7 @@ x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
 x-pack/solutions/observability/plugins/apm @elastic/obs-signals-traces-team
 x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-signals-traces-team
 x-pack/solutions/observability/plugins/client_apps @elastic/apm-agent-approvers
+x-pack/solutions/observability/plugins/digital_experience @elastic/obs-signals-rum-team
 x-pack/solutions/observability/plugins/entity_inventory @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/infra @elastic/obs-signals-metrics-team
@@ -1445,6 +1446,7 @@ x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp @elast
 x-pack/solutions/security/packages/kbn-evals-suite-detection-watch-rule-creation @elastic/security-detection-engineering
 x-pack/solutions/security/packages/kbn-evals-suite-endpoint @elastic/security-defend-workflows
 x-pack/solutions/security/packages/kbn-evals-suite-entity-analytics @elastic/security-entity-analytics
+x-pack/solutions/security/packages/kbn-evals-suite-hunt-watch @elastic/security-investigations
 x-pack/solutions/security/packages/kbn-evals-suite-lead-generation @elastic/security-entity-analytics
 x-pack/solutions/security/packages/kbn-evals-suite-pci-compliance @elastic/security-solution
 x-pack/solutions/security/packages/kbn-evals-suite-security-ai-rules @elastic/security-detection-engineering
@@ -1814,9 +1816,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations @elastic/nightshift
 
 # Observability AI Assistant
-/x-pack/platform/test/serverless/api_integration/test_suites/data_usage @elastic/kibana-management
-/x-pack/platform/test/serverless/functional/test_suites/data_usage @elastic/kibana-management
-/x-pack/platform/test/serverless/functional/page_objects/svl_data_usage.ts @elastic/kibana-management
 /x-pack/solutions/observability/test/observability_ai_assistant_functional @elastic/nightshift-context-and-research-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant @elastic/nightshift-context-and-research-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.index.ts @elastic/nightshift-context-and-research-team
@@ -3020,6 +3019,8 @@ x-pack/solutions/security/plugins/security_solution/public/cloud_defend @elastic
 x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store @elastic/security-entity-analytics
 x-pack/solutions/security/test/security_solution_api_integration/test_suites/entity_analytics/entity_store/ @elastic/security-entity-analytics
 x-pack/platform/plugins/shared/entity_store @elastic/security-entity-analytics
+# Entity store - dynamic block schema and rules (owned by Observability)
+x-pack/platform/plugins/shared/entity_store/common/domain/definitions/dynamic @elastic/obs-signals-metrics-team
 
 ## Security Solution sub teams - Threat Hunting
 
@@ -3213,6 +3214,7 @@ src/platform/packages/shared/kbn-workflows/managed/definitions/threat_intel @ela
 /x-pack/solutions/security/plugins/security_solution/test/scout_alertzero @elastic/security-investigations
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/alertzero @elastic/security-investigations
 /src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_threat_intel @elastic/security-investigations
+/src/platform/packages/shared/kbn-scout/src/servers/configs/config_sets/evals_hunt_watch @elastic/security-investigations
 x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analysis_workflow.ts @elastic/security-investigations
 
 # AlertZero Hunt Watch services

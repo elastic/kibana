@@ -82,7 +82,6 @@ jest.mock('@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows
 
 jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(() => []),
-  READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/details_flyout', () => ({
@@ -650,6 +649,7 @@ describe('privilege gating', () => {
     order: 50,
     displayName: 'Open in Discover',
     iconType: 'productDiscover',
+    enforcesOwnPrivileges: true,
     isCompatible: () => true,
     execute: jest.fn(async () => {}),
   };

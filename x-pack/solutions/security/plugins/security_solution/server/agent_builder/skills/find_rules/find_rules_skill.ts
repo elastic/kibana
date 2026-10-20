@@ -42,7 +42,7 @@ Use this skill to list, count, sort, or rank multiple Security detection rules.
 - Specific alert triage (alert id) -> alert-analysis
 - Create or edit a single rule attachment -> detection-rule-edit
 - ES|QL hunting over events -> threat-hunting
-- Alerting V2 or ES|QL alerting rules -> rule-management
+- Alerting V2 or ES|QL alerting rules -> rule-authoring
 
 ## Read-Only
 
