@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { useDebouncedValue } from '@kbn/react-hooks';
+import { useDebounceFn } from '@kbn/react-hooks';
 import {
+  isSignificantEventsSortField,
+  MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH,
   SIGNIFICANT_EVENT_INVESTIGATION_STATES,
-  SIGNIFICANT_EVENTS_SORT_FIELDS,
   SIGNIFICANT_EVENTS_SORT_ORDERS,
   type SignificantEventInvestigationState,
   type SignificantEventsSortField,
@@ -28,6 +29,7 @@ import {
   getNightshiftEventIdFromSearch,
   setNightshiftEventIdParam,
 } from '../../../common/url_params';
+import { PAGE_QUERY_PARAM } from '../constants';
 
 const SEARCH_QUERY_PARAM = 'search';
 const STATUS_QUERY_PARAM = 'status';
@@ -37,9 +39,8 @@ const SORT_FIELD_QUERY_PARAM = 'sortField';
 const SORT_ORDER_QUERY_PARAM = 'sortOrder';
 // The design leads with the most severe events.
 const DEFAULT_SORT: EventsSort = { field: 'severity', order: 'desc' };
-const PAGE_QUERY_PARAM = 'page';
-const SEARCH_DEBOUNCE_MS = 300;
-const MAX_SEARCH_LENGTH = 500;
+// Module-level so useDebounceFn keeps one debounced function across renders.
+const SEARCH_DEBOUNCE_OPTIONS = { wait: 300 };
 
 const isSignificantEventStatus = (value: string): value is SignificantEventStatus =>
   SIGNIFICANT_EVENT_STATUS_OPTIONS.includes(value as SignificantEventStatus);
@@ -59,7 +60,7 @@ const getSort = (params: URLSearchParams): EventsSort => {
   const field = params.get(SORT_FIELD_QUERY_PARAM);
   const order = params.get(SORT_ORDER_QUERY_PARAM);
   return {
-    field: SIGNIFICANT_EVENTS_SORT_FIELDS.find((option) => option === field) ?? DEFAULT_SORT.field,
+    field: isSignificantEventsSortField(field) ? field : DEFAULT_SORT.field,
     order: SIGNIFICANT_EVENTS_SORT_ORDERS.find((option) => option === order) ?? DEFAULT_SORT.order,
   };
 };
@@ -73,9 +74,12 @@ export const useEventsUrlState = () => {
   const history = useHistory();
   const { pathname, search } = useLocation();
   const params = useMemo(() => new URLSearchParams(search), [search]);
-  const urlSearch = (params.get(SEARCH_QUERY_PARAM) ?? '').slice(0, MAX_SEARCH_LENGTH);
+  const urlSearch = (params.get(SEARCH_QUERY_PARAM) ?? '').slice(
+    0,
+    MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH
+  );
   const [searchValue, setSearchValue] = useState(urlSearch);
-  const debouncedSearch = useDebouncedValue(searchValue, SEARCH_DEBOUNCE_MS).trim();
+  const searchQuery = urlSearch.trim();
   const status = params.getAll(STATUS_QUERY_PARAM).filter(isSignificantEventStatus);
   const severity = params.getAll(SEVERITY_QUERY_PARAM).filter(isSeverity);
   const investigation = params.getAll(INVESTIGATION_QUERY_PARAM).filter(isInvestigationState);
@@ -97,24 +101,22 @@ export const useEventsUrlState = () => {
     [history, pathname, search]
   );
 
-  useEffect(() => {
-    setSearchValue(urlSearch);
-  }, [urlSearch]);
-
-  useEffect(() => {
-    if (debouncedSearch === urlSearch) {
-      return;
-    }
-
+  // Only typing writes the search to the URL, so Back/Forward can't be overwritten by a stale value.
+  const { run: writeSearch, cancel: cancelSearchWrite } = useDebounceFn((value: string) => {
     updateParams((nextParams) => {
-      if (debouncedSearch) {
-        nextParams.set(SEARCH_QUERY_PARAM, debouncedSearch);
+      if (value.trim()) {
+        nextParams.set(SEARCH_QUERY_PARAM, value);
       } else {
         nextParams.delete(SEARCH_QUERY_PARAM);
       }
       nextParams.delete(PAGE_QUERY_PARAM);
     }, true);
-  }, [debouncedSearch, updateParams, urlSearch]);
+  }, SEARCH_DEBOUNCE_OPTIONS);
+
+  useEffect(() => {
+    cancelSearchWrite();
+    setSearchValue(urlSearch);
+  }, [cancelSearchWrite, urlSearch]);
 
   const setListParam = useCallback(
     (
@@ -133,19 +135,24 @@ export const useEventsUrlState = () => {
     [updateParams]
   );
 
-  const onSearchChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchValue(event.target.value.slice(0, MAX_SEARCH_LENGTH));
-  }, []);
+  const onSearchChange = useCallback(
+    (event: React.ChangeEvent<HTMLInputElement>) => {
+      const value = event.target.value.slice(0, MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH);
+      setSearchValue(value);
+      writeSearch(value);
+    },
+    [writeSearch]
+  );
 
   const setPage = useCallback(
-    (nextPage: number) => {
+    (nextPage: number, replace = false) => {
       updateParams((nextParams) => {
         if (nextPage > 1) {
           nextParams.set(PAGE_QUERY_PARAM, String(nextPage));
         } else {
           nextParams.delete(PAGE_QUERY_PARAM);
         }
-      });
+      }, replace);
     },
     [updateParams]
   );
@@ -168,11 +175,15 @@ export const useEventsUrlState = () => {
     [updateParams]
   );
 
-  const closeEvent = useCallback(() => {
-    updateParams(clearNightshiftEventIdParam);
-  }, [updateParams]);
+  const closeEvent = useCallback(
+    (replace = false) => {
+      updateParams(clearNightshiftEventIdParam, replace);
+    },
+    [updateParams]
+  );
 
   const clearFilters = useCallback(() => {
+    cancelSearchWrite();
     setSearchValue('');
     updateParams((nextParams) => {
       nextParams.delete(SEARCH_QUERY_PARAM);
@@ -181,20 +192,18 @@ export const useEventsUrlState = () => {
       nextParams.delete(INVESTIGATION_QUERY_PARAM);
       nextParams.delete(PAGE_QUERY_PARAM);
     });
-  }, [updateParams]);
+  }, [cancelSearchWrite, updateParams]);
 
   return {
     searchValue,
-    debouncedSearch,
+    searchQuery,
     status,
     severity,
     investigation,
     sort,
     page,
     eventId,
-    hasFilters: Boolean(
-      debouncedSearch || status.length || severity.length || investigation.length
-    ),
+    hasFilters: Boolean(searchQuery || status.length || severity.length || investigation.length),
     onSearchChange,
     setStatus: (nextStatus: SignificantEventStatus[]) =>
       setListParam(STATUS_QUERY_PARAM, nextStatus),

@@ -18,6 +18,7 @@ import { EventsTab } from './events_tab';
 
 const mockRefreshEvents = jest.fn();
 const mockTimeRangeChange = jest.fn();
+const mockAddWarning = jest.fn();
 
 jest.mock('../../../common/format_timestamp', () => ({
   ...jest.requireActual('../../../common/format_timestamp'),
@@ -30,12 +31,6 @@ jest.mock('../../../components/entities/significant_event/event_flyout', () => (
 }));
 jest.mock('../../../data/significant_events/use_fetch_event_by_id');
 jest.mock('../../../data/significant_events/use_significant_events_list');
-jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => ({
-  useBlocksNewActivity: () => ({
-    blocksActivity: false,
-    activityBlockTooltip: undefined,
-  }),
-}));
 jest.mock('../../../data/significant_events/use_significant_events_facets', () => ({
   useSignificantEventsFacets: () => ({
     data: {
@@ -49,24 +44,13 @@ jest.mock('../../../data/significant_events/use_significant_events_facets', () =
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
-      application: {
-        capabilities: {
-          nightshift: {
-            show: true,
-            manage: true,
-          },
-        },
-      },
       notifications: {
         toasts: {
-          addWarning: jest.fn(),
+          addWarning: mockAddWarning,
         },
       },
     },
   }),
-}));
-jest.mock('../../../investigation/investigation_status_badge', () => ({
-  InvestigationStatusBadge: () => null,
 }));
 
 const mockUseFetchEventById = useFetchEventById as jest.Mock;
@@ -118,14 +102,6 @@ describe('EventsTab', () => {
     });
   });
 
-  it('renders rows from the events response', () => {
-    renderTab();
-
-    expect(screen.getByText('Checkout latency increased')).toBeInTheDocument();
-    expect(screen.getByText('Checkout latency increased after a deployment.')).toBeInTheDocument();
-    expect(screen.getByText('Not started')).toBeInTheDocument();
-  });
-
   it('opens the event from the action, labelled by investigation state', () => {
     const investigatedEvent = {
       ...event,
@@ -153,6 +129,7 @@ describe('EventsTab', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftOpenEvent-event-2'));
     expect(new URLSearchParams(history.location.search).get('eventId')).toBe('event-2');
+    expect(screen.getByTestId('eventFlyoutStub')).toHaveTextContent('Payment errors');
   });
 
   it('sorts by a column header and keeps the choice in the URL', async () => {
@@ -232,15 +209,6 @@ describe('EventsTab', () => {
     expect(mockRefreshEvents).toHaveBeenCalled();
   });
 
-  it('opens the selected row in the addressed flyout', () => {
-    const history = renderTab();
-
-    act(() => fireEvent.click(screen.getByTestId('nightshiftDetectionEventRow-event-1')));
-
-    expect(new URLSearchParams(history.location.search).get('eventId')).toBe('event-1');
-    expect(screen.getByTestId('eventFlyoutStub')).toHaveTextContent('Checkout latency increased');
-  });
-
   it('fetches a deep-linked event that is not on the current page', () => {
     const deepLinkedEvent = {
       ...event,
@@ -257,5 +225,52 @@ describe('EventsTab', () => {
 
     expect(mockUseFetchEventById).toHaveBeenCalledWith('event-deep', { enabled: true });
     expect(screen.getByTestId('eventFlyoutStub')).toHaveTextContent('Deep-linked event');
+  });
+
+  it('drops a deep link to an event that no longer exists without a history entry', () => {
+    mockUseFetchEventById.mockReturnValue({ data: null, isLoading: false, isSuccess: true });
+
+    const history = renderTab('/detections/events?eventId=event-gone&severity=high');
+
+    expect(mockAddWarning).toHaveBeenCalled();
+    expect(history.action).toBe('REPLACE');
+    expect(history.location.search).toBe('?severity=high');
+    expect(screen.queryByTestId('eventFlyoutStub')).not.toBeInTheDocument();
+  });
+
+  it('moves back to the last page when the page is past the end', () => {
+    mockUseSignificantEventsList.mockReturnValue({
+      data: { hits: [], page: 3, perPage: 25, total: 30 },
+      isLoading: false,
+      isFetching: false,
+      refetch: mockRefreshEvents,
+    });
+
+    const history = renderTab('/detections/events?page=3');
+
+    expect(history.action).toBe('REPLACE');
+    expect(new URLSearchParams(history.location.search).get('page')).toBe('2');
+  });
+
+  it('keeps the search from history when navigating back after typing', async () => {
+    const history = renderTab();
+
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsStatusFilterButton'));
+    fireEvent.click(
+      await screen.findByTestId('nightshiftDetectionEventsStatusFilterOption-active')
+    );
+    fireEvent.change(screen.getByTestId('nightshiftDetectionEventsSearch'), {
+      target: { value: 'checkout' },
+    });
+    await waitFor(() =>
+      expect(new URLSearchParams(history.location.search).get('search')).toBe('checkout')
+    );
+
+    act(() => history.goBack());
+
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftDetectionEventsSearch')).toHaveValue('')
+    );
+    expect(history.location.search).toBe('');
   });
 });

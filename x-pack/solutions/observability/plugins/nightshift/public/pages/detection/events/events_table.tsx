@@ -20,8 +20,10 @@ import {
   type CriteriaWithPagination,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
+import { selectUnit } from '@formatjs/intl-utils';
 import { getEbtProps } from '@kbn/ebt-click';
-import type { SignificantEventsSortField } from '@kbn/significant-events-plugin/common';
+import { FormattedRelativeTime } from '@kbn/i18n-react';
+import { isSignificantEventsSortField } from '@kbn/significant-events-plugin/common';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
 import {
@@ -29,36 +31,29 @@ import {
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
 } from '../../../common/ebt_constants';
-import { formatRelativeAge, useFormatTimestamp } from '../../../common/format_timestamp';
+import { useFormatTimestamp } from '../../../common/format_timestamp';
 import {
-  getInvestigationState,
   isNeedsActionStatus,
   SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS,
   SIGNIFICANT_EVENT_STATUS_ICONS,
   SIGNIFICANT_EVENT_STATUS_LABELS,
 } from '../../../components/entities/significant_event/significant_event_status';
 import { SeverityBadge } from '../../../components/ui/severity_badge';
+import { getInvestigationState } from '../../../data/significant_events/investigation_state';
 import {
   ACTIONS_COLUMN_LABEL,
   EVENT_COLUMN_LABEL,
   EVENTS_TABLE_CAPTION,
   INVESTIGATE_LABEL,
-  INVESTIGATION_COLUMN_LABEL,
-  SEVERITY_COLUMN_LABEL,
-  STATUS_COLUMN_LABEL,
+  INVESTIGATION_LABEL,
+  SEVERITY_LABEL,
+  STATUS_LABEL,
   TIME_COLUMN_LABEL,
   VIEW_INVESTIGATION_LABEL,
 } from './translations';
 import type { EventsSort } from './use_events_url_state';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
-
-/** Table columns that map to a server sort field. */
-const SORTABLE_COLUMNS: Record<string, SignificantEventsSortField> = {
-  created_at: 'created_at',
-  status: 'status',
-  severity: 'severity',
-};
 
 export interface EventsTableProps {
   events: SignificantEventResponse[];
@@ -94,7 +89,6 @@ export const EventsTable = ({
       {
         field: 'title',
         name: EVENT_COLUMN_LABEL,
-        width: '45%',
         render: (title: string, event: SignificantEventResponse) => (
           <div
             css={css`
@@ -113,18 +107,27 @@ export const EventsTable = ({
       {
         field: 'created_at',
         name: TIME_COLUMN_LABEL,
+        width: '8em',
         sortable: true,
-        render: (createdAt: string) => (
-          <EuiToolTip content={formatTimestamp(createdAt)}>
-            <EuiText size="s" tabIndex={0}>
-              {formatRelativeAge(createdAt)}
-            </EuiText>
-          </EuiToolTip>
-        ),
+        render: (createdAt: string) => {
+          const time = Date.parse(createdAt);
+          if (Number.isNaN(time)) {
+            return <EuiText size="s">{formatTimestamp(createdAt)}</EuiText>;
+          }
+          const { value, unit } = selectUnit(time);
+          return (
+            <EuiToolTip content={formatTimestamp(createdAt)}>
+              <EuiText size="s" tabIndex={0}>
+                <FormattedRelativeTime value={value} unit={unit} numeric="always" style="short" />
+              </EuiText>
+            </EuiToolTip>
+          );
+        },
       },
       {
         field: 'status',
-        name: STATUS_COLUMN_LABEL,
+        name: STATUS_LABEL,
+        width: '9em',
         sortable: true,
         render: (status: SignificantEventResponse['status']) => (
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false} wrap={false}>
@@ -150,14 +153,16 @@ export const EventsTable = ({
       },
       {
         field: 'severity',
-        name: SEVERITY_COLUMN_LABEL,
+        name: SEVERITY_LABEL,
+        width: '8em',
         sortable: true,
         render: (severity: SignificantEventResponse['severity']) => (
           <SeverityBadge severity={severity} textSize="s" />
         ),
       },
       {
-        name: INVESTIGATION_COLUMN_LABEL,
+        name: INVESTIGATION_LABEL,
+        width: '10em',
         render: (event: SignificantEventResponse) => {
           const state = getInvestigationState(event);
           const label = SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS[state];
@@ -239,10 +244,10 @@ export const EventsTable = ({
         page: nextPage,
         sort: nextSort,
       }: CriteriaWithPagination<SignificantEventResponse>) => {
-        const nextSortField = nextSort ? SORTABLE_COLUMNS[String(nextSort.field)] : undefined;
+        const nextSortField = nextSort?.field;
         if (
           nextSort &&
-          nextSortField &&
+          isSignificantEventsSortField(nextSortField) &&
           (nextSortField !== sort.field || nextSort.direction !== sort.order)
         ) {
           onSortChange({ field: nextSortField, order: nextSort.direction });

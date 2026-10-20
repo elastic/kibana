@@ -42,7 +42,7 @@ export const EventsTab = ({
   const openButtons = useRef(new Map<string, HTMLButtonElement | null>());
   const {
     searchValue,
-    debouncedSearch,
+    searchQuery,
     status,
     severity,
     investigation,
@@ -62,7 +62,7 @@ export const EventsTab = ({
   } = useEventsUrlState();
   const filters = {
     ...timeRange,
-    search: debouncedSearch,
+    search: searchQuery,
     status,
     severity,
     investigation,
@@ -76,6 +76,8 @@ export const EventsTab = ({
   });
   const facetsQuery = useSignificantEventsFacets(filters);
   const events = eventsQuery.data?.hits ?? [];
+  const lastPage = Math.max(1, Math.ceil((eventsQuery.data?.total ?? 0) / perPage));
+  const isPastLastPage = Boolean(eventsQuery.data) && page > lastPage;
   const eventOnPage = eventId ? events.find((event) => event.event_id === eventId) : undefined;
   const eventByIdQuery = useFetchEventById(eventId, {
     enabled: Boolean(eventId) && !eventOnPage && !eventsQuery.isLoading,
@@ -91,7 +93,8 @@ export const EventsTab = ({
       eventByIdQuery.data === null
     ) {
       notifications.toasts.addWarning({ title: EVENT_NOT_FOUND_TOAST_TITLE });
-      closeEvent();
+      // Replace, so Back doesn't return to the dead link.
+      closeEvent(true);
     }
   }, [
     closeEvent,
@@ -102,6 +105,14 @@ export const EventsTab = ({
     eventsQuery.isLoading,
     notifications.toasts,
   ]);
+
+  // A stale link or a shrinking result set (new time range, an event marked inactive) can leave
+  // the URL past the last page.
+  useEffect(() => {
+    if (isPastLastPage) {
+      setPage(lastPage, true);
+    }
+  }, [isPastLastPage, lastPage, setPage]);
 
   const handlePageChange = useCallback(
     (nextPage: number, nextPerPage: number) => {
@@ -160,7 +171,7 @@ export const EventsTab = ({
             },
           }}
         />
-      ) : !eventsQuery.isLoading && eventsQuery.data && events.length === 0 ? (
+      ) : !eventsQuery.isLoading && eventsQuery.data && events.length === 0 && !isPastLastPage ? (
         <EuiEmptyPrompt
           data-test-subj="nightshiftDetectionEventsEmpty"
           iconType="search"

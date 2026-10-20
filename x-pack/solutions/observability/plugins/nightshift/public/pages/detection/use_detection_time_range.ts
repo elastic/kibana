@@ -8,7 +8,7 @@
 import dateMath from '@kbn/datemath';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { DEFAULT_DETECTION_TIME_RANGE } from './constants';
+import { DEFAULT_DETECTION_TIME_RANGE, PAGE_QUERY_PARAM } from './constants';
 
 export const RANGE_FROM_QUERY_PARAM = 'rangeFrom';
 export const RANGE_TO_QUERY_PARAM = 'rangeTo';
@@ -63,6 +63,7 @@ export const useDetectionTimeRange = (): {
       const nextParams = new URLSearchParams(search);
       nextParams.set(RANGE_FROM_QUERY_PARAM, nextTimeRange.from);
       nextParams.set(RANGE_TO_QUERY_PARAM, nextTimeRange.to);
+      nextParams.delete(PAGE_QUERY_PARAM);
       history.push({ pathname, search: nextParams.toString() });
     },
     [history, pathname, search, timeRange]

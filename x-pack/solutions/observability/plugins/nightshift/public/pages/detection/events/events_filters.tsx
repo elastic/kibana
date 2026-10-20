@@ -20,8 +20,8 @@ import {
   EuiSuperDatePicker,
   useEuiTheme,
 } from '@elastic/eui';
-import { getEbtProps } from '@kbn/ebt-click';
 import {
+  MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH,
   SIGNIFICANT_EVENT_INVESTIGATION_STATES,
   type SignificantEventInvestigationState,
   type SignificantEventsFacets,
@@ -33,7 +33,6 @@ import {
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
 import React, { useState } from 'react';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import {
   SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS,
   SIGNIFICANT_EVENT_STATUS_ICONS,
@@ -42,10 +41,10 @@ import {
 import { SIGNIFICANT_EVENT_SEVERITY } from '../../../components/ui/severity_badge';
 import type { DetectionTimeRange } from '../use_detection_time_range';
 import {
-  INVESTIGATION_FILTER_LABEL,
+  INVESTIGATION_LABEL,
   SEARCH_PLACEHOLDER,
-  SEVERITY_FILTER_LABEL,
-  STATUS_FILTER_LABEL,
+  SEVERITY_LABEL,
+  STATUS_LABEL,
 } from './translations';
 
 interface EventsFilterPopoverProps<Value extends string> {
@@ -97,11 +96,6 @@ const EventsFilterPopover = <Value extends string>({
           hasActiveFilters={selected.length > 0}
           numActiveFilters={selected.length}
           onClick={() => setIsOpen((current) => !current)}
-          {...getEbtProps({
-            action: NIGHTSHIFT_EBT_ACTIONS.FILTER_SIGNIFICANT_EVENTS,
-            element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_EVENTS_FILTERS,
-            detail: testSubject,
-          })}
         >
           {label}
         </EuiFilterButton>
@@ -168,7 +162,7 @@ export const EventsFilters = ({
           compressed
           fullWidth
           isClearable
-          maxLength={500}
+          maxLength={MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH}
           placeholder={SEARCH_PLACEHOLDER}
           aria-label={SEARCH_PLACEHOLDER}
           value={searchValue}
@@ -189,7 +183,7 @@ export const EventsFilters = ({
       <EuiFlexItem grow={false}>
         <EuiFilterGroup compressed>
           <EventsFilterPopover
-            label={SEVERITY_FILTER_LABEL}
+            label={SEVERITY_LABEL}
             options={SEVERITY_OPTIONS}
             selected={severity}
             counts={facets?.severity}
@@ -205,7 +199,7 @@ export const EventsFilters = ({
             testSubject="nightshiftDetectionEventsSeverityFilter"
           />
           <EventsFilterPopover
-            label={STATUS_FILTER_LABEL}
+            label={STATUS_LABEL}
             options={SIGNIFICANT_EVENT_STATUS_OPTIONS}
             selected={status}
             counts={facets?.status}
@@ -221,7 +215,7 @@ export const EventsFilters = ({
             testSubject="nightshiftDetectionEventsStatusFilter"
           />
           <EventsFilterPopover
-            label={INVESTIGATION_FILTER_LABEL}
+            label={INVESTIGATION_LABEL}
             options={SIGNIFICANT_EVENT_INVESTIGATION_STATES}
             selected={investigation}
             counts={facets?.investigation}

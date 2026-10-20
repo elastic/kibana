@@ -6,3 +6,6 @@
  */
 
 export const DEFAULT_DETECTION_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
+
+// Tabs paginate with this param; changing the time range resets it.
+export const PAGE_QUERY_PARAM = 'page';

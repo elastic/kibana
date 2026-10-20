@@ -15,15 +15,14 @@ export const EVENT_COLUMN_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.events.columns.event',
   { defaultMessage: 'Event' }
 );
-export const SEVERITY_COLUMN_LABEL = i18n.translate(
+export const SEVERITY_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.events.columns.severity',
   { defaultMessage: 'Severity' }
 );
-export const STATUS_COLUMN_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.events.columns.status',
-  { defaultMessage: 'Status' }
-);
-export const INVESTIGATION_COLUMN_LABEL = i18n.translate(
+export const STATUS_LABEL = i18n.translate('xpack.nightshift.detectionPage.events.columns.status', {
+  defaultMessage: 'Status',
+});
+export const INVESTIGATION_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.events.columns.investigation',
   { defaultMessage: 'Investigation' }
 );
@@ -46,18 +45,6 @@ export const VIEW_INVESTIGATION_LABEL = i18n.translate(
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.nightshift.detectionPage.events.searchPlaceholder',
   { defaultMessage: 'Search events' }
-);
-export const STATUS_FILTER_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.events.statusFilterLabel',
-  { defaultMessage: 'Status' }
-);
-export const INVESTIGATION_FILTER_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.events.investigationFilterLabel',
-  { defaultMessage: 'Investigation' }
-);
-export const SEVERITY_FILTER_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.events.severityFilterLabel',
-  { defaultMessage: 'Severity' }
 );
 export const EMPTY_TITLE = i18n.translate('xpack.nightshift.detectionPage.events.emptyTitle', {
   defaultMessage: 'No significant events found',

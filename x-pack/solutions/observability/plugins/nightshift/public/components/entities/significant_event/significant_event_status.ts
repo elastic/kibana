@@ -128,19 +128,6 @@ export const getInvestigationStatusLabel = (
   event: Pick<SignificantEvent, 'investigations'>
 ): string => getInvestigationProgressStatusLabel(isEventInvestigated(event));
 
-/** Same rule as the events route's `investigation_state` filter, so a row matches its filter. */
-export const getInvestigationState = (
-  event: Pick<SignificantEvent, 'investigations'>
-): SignificantEventInvestigationState => {
-  const investigations = event.investigations ?? [];
-  if (investigations.length === 0) {
-    return 'not_started';
-  }
-  return investigations.some(({ completed_at: completedAt }) => completedAt == null)
-    ? 'in_progress'
-    : 'completed';
-};
-
 export const SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS: Record<
   SignificantEventInvestigationState,
   string

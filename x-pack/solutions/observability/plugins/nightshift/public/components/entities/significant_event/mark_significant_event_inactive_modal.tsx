@@ -103,11 +103,6 @@ export const MarkSignificantEventInactiveModal = ({
           onClick={onClose}
           isDisabled={isUpdating}
           data-test-subj="nightshiftMarkSignificantEventInactiveCancel"
-          {...getEbtProps({
-            action: NIGHTSHIFT_EBT_ACTIONS.CANCEL_MARK_SIGNIFICANT_EVENT_INACTIVE,
-            element: NIGHTSHIFT_EBT_ELEMENTS.MARK_SIGNIFICANT_EVENT_INACTIVE_MODAL,
-            detail: NIGHTSHIFT_EBT_DETAILS.NEEDS_ACTION,
-          })}
         >
           {CANCEL_BUTTON_LABEL}
         </EuiButtonEmpty>

@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
-import { useState } from 'react';
 import { getFormattedError } from '../../common/errors';
 import { useKibana } from '../../hooks/use_kibana';
 import { invalidateSignificantEventQueries } from './invalidate_significant_event_queries';
@@ -40,7 +39,6 @@ export const useTriggerEventInvestigation = ({
     significantEvents: { significantEventsRepositoryClient },
   } = useKibana().services;
   const queryClient = useQueryClient();
-  const [triggeringEventId, setTriggeringEventId] = useState<string>();
 
   const mutation = useMutation<{ executionId: string }, Error, string>({
     mutationFn: (eventId) =>
@@ -51,7 +49,6 @@ export const useTriggerEventInvestigation = ({
           signal: null,
         }
       ),
-    onMutate: setTriggeringEventId,
     onSuccess: () => {
       toasts.addSuccess({
         title: TRIGGER_SUCCESS_TOAST_TITLE,
@@ -62,14 +59,11 @@ export const useTriggerEventInvestigation = ({
     onError: (error) => {
       toasts.addError(getFormattedError(error), { title: TRIGGER_ERROR_TOAST_TITLE });
     },
-    onSettled: async () => {
-      setTriggeringEventId(undefined);
-      await invalidateSignificantEventQueries(queryClient);
-    },
+    onSettled: () => invalidateSignificantEventQueries(queryClient),
   });
 
   return {
     triggerInvestigation: (eventId: string) => mutation.mutate(eventId),
-    triggeringEventId,
+    triggeringEventId: mutation.isLoading ? mutation.variables : undefined,
   };
 };

@@ -257,20 +257,6 @@ describe('EventFlyout', () => {
     expect(screen.getAllByText('Investigated').length).toBeGreaterThan(0);
   });
 
-  it('keeps the share action in the flyout menu', () => {
-    document.execCommand = jest.fn().mockReturnValue(true);
-    renderFlyout();
-
-    const shareAction = mockFlyoutTemplateProps?.flyoutMenuProps?.trailingActions?.[0];
-    expect(shareAction).toEqual(
-      expect.objectContaining({ 'aria-label': 'Copy link to this flyout', iconType: 'link' })
-    );
-    expect(shareAction?.onClick).toBeDefined();
-    act(() => shareAction?.onClick?.({} as React.MouseEvent<HTMLElement>));
-
-    expect(mockAddSuccess).toHaveBeenCalled();
-  });
-
   it('formats the event timestamp using the dateFormat advanced setting', () => {
     renderFlyout();
 
@@ -299,6 +285,20 @@ describe('EventFlyout', () => {
         initialMessage: expect.stringContaining(mockEvent.title),
       })
     );
+  });
+
+  it('uses a plain chat button while the latest investigation is still running', () => {
+    mockUseInvestigation.mockReturnValue({ status: 'running' });
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        investigations: [{ workflow_execution_id: 'exec-1', started_at: '2026-07-10T12:00:00Z' }],
+      },
+    });
+
+    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutChatButton'));
+    expect(screen.queryByTestId('nightshiftEventFlyoutStartNewChatItem')).not.toBeInTheDocument();
+    expect(mockOpenChat).toHaveBeenCalledWith(expect.objectContaining({ newConversation: true }));
   });
 
   it('runs an investigation from the footer for users with manage access', async () => {

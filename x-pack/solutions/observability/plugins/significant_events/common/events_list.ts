@@ -22,6 +22,11 @@ export type SignificantEventInvestigationState =
 export const SIGNIFICANT_EVENTS_SORT_FIELDS = ['created_at', 'severity', 'status'] as const;
 export type SignificantEventsSortField = (typeof SIGNIFICANT_EVENTS_SORT_FIELDS)[number];
 
+export const isSignificantEventsSortField = (value: unknown): value is SignificantEventsSortField =>
+  SIGNIFICANT_EVENTS_SORT_FIELDS.some((field) => field === value);
+
+export const MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH = 500;
+
 export const SIGNIFICANT_EVENTS_SORT_ORDERS = ['asc', 'desc'] as const;
 export type SignificantEventsSortOrder = (typeof SIGNIFICANT_EVENTS_SORT_ORDERS)[number];
 

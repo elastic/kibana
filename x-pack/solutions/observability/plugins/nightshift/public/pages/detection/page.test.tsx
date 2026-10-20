@@ -37,7 +37,7 @@ const mockUseDetectionOverview = useDetectionOverview as jest.Mock;
 const mockUseMaintenanceStatus = useMaintenanceStatus as jest.Mock;
 const refetch = jest.fn();
 
-const renderPage = (initialPath = '/detection/events') =>
+const renderPage = (initialPath = '/detections/events') =>
   render(
     <I18nProvider>
       <EuiProvider>
@@ -79,16 +79,6 @@ describe('DetectionPage', () => {
     expect(screen.getByText('discoveries')).toBeInTheDocument();
   });
 
-  it('renders the workspace tabs below the shared Detection overview', async () => {
-    renderPage();
-
-    const overviewTitle = screen.getByText('Detection engine');
-    const eventsTab = screen.getByTestId('nightshiftDetectionTab-events');
-
-    expect(overviewTitle.compareDocumentPosition(eventsTab)).toBe(Node.DOCUMENT_POSITION_FOLLOWING);
-    expect(eventsTab).toHaveAttribute('aria-selected', 'true');
-  });
-
   it('shows the overview error instead of zero counts', async () => {
     mockUseDetectionOverview.mockReturnValue({
       data: undefined,
@@ -106,7 +96,7 @@ describe('DetectionPage', () => {
   });
 
   it('falls back to the default time range when the URL range is malformed', async () => {
-    renderPage('/detection/events?rangeFrom=now-5zz&rangeTo=now');
+    renderPage('/detections/events?rangeFrom=now-5zz&rangeTo=now');
 
     expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
     expect(mockUseDetectionOverview).toHaveBeenLastCalledWith({ from: 'now-24h', to: 'now' });

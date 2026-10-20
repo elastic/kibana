@@ -35,6 +35,7 @@ import { resolveInvestigationStatuses } from '../../../lib/significant_events/ev
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import type { EventsFilterOptions } from '../../../lib/significant_events/events/types';
 import {
+  MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH,
   SIGNIFICANT_EVENT_INVESTIGATION_STATES,
   SIGNIFICANT_EVENTS_SORT_FIELDS,
   SIGNIFICANT_EVENTS_SORT_ORDERS,
@@ -100,7 +101,7 @@ const eventsFilterQuerySchema = z.object({
   source_id: sourceIdsQuerySchema(MAX_SOURCE_IDS_PER_REQUEST).describe(
     'Source ids to filter events by. One id or a repeated list.'
   ),
-  search: z.string().max(500).optional(),
+  search: z.string().max(MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH).optional(),
   severity: z.union([severitySchema, z.array(severitySchema).max(4)]).optional(),
   // Same cap as the agent `event_search` tool; the UI lets users select any number of services.
   topology_feature_id: z

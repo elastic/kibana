@@ -9,6 +9,7 @@ import { EuiLoadingSpinner, EuiPageTemplate, EuiSpacer, EuiTab, EuiTabs } from '
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
+import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { NightshiftAppHeader } from '../../app/app_header';
@@ -60,19 +61,6 @@ export const DetectionPage = ({
     [RANGE_FROM_QUERY_PARAM]: timeRange.from,
     [RANGE_TO_QUERY_PARAM]: timeRange.to,
   }).toString()}`;
-  const tabs = DETECTION_TAB_IDS.map((id) => ({
-    id,
-    label: DETECTION_TAB_LABELS[id],
-    isSelected: tab === id,
-    href: application.getUrlForApp(NIGHTSHIFT_APP_ID, {
-      path: `/detections/${id}${tabSearch}`,
-    }),
-    onClick: (event?: React.MouseEvent) => {
-      event?.preventDefault();
-      history.push(`/detections/${id}${tabSearch}`);
-    },
-    'data-test-subj': `nightshiftDetectionTab-${id}`,
-  }));
 
   return (
     <>
@@ -98,20 +86,19 @@ export const DetectionPage = ({
         />
         <EuiSpacer size="m" />
         <EuiTabs size="s">
-          {tabs.map(({ id, label, isSelected, href, onClick, 'data-test-subj': testSubject }) => (
+          {DETECTION_TAB_IDS.map((id) => (
             <EuiTab
               key={id}
-              isSelected={isSelected}
-              href={href}
-              onClick={onClick}
-              data-test-subj={testSubject}
+              isSelected={tab === id}
+              {...reactRouterNavigate(history, `/detections/${id}${tabSearch}`)}
+              data-test-subj={`nightshiftDetectionTab-${id}`}
               {...getEbtProps({
                 action: NIGHTSHIFT_EBT_ACTIONS.VIEW_DETECTION_TAB,
                 element: NIGHTSHIFT_EBT_ELEMENTS.DETECTION_WORKSPACE_TABS,
                 detail: id,
               })}
             >
-              {label}
+              {DETECTION_TAB_LABELS[id]}
             </EuiTab>
           ))}
         </EuiTabs>

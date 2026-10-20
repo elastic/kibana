@@ -9,6 +9,8 @@ export { QUERY_STATUSES } from './queries';
 export type { QueryStatus } from './queries';
 export type { PaginatedResponse } from './pagination';
 export {
+  isSignificantEventsSortField,
+  MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH,
   SIGNIFICANT_EVENT_INVESTIGATION_STATES,
   SIGNIFICANT_EVENTS_SORT_FIELDS,
   SIGNIFICANT_EVENTS_SORT_ORDERS,
