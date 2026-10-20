@@ -25,7 +25,8 @@ const buildClient = (
 ): FindOrCreateConversationClient => ({
   create: jest.fn().mockResolvedValue(undefined),
   get: jest.fn().mockResolvedValue({ id: conversationId }),
-  patchMetadata: jest.fn().mockResolvedValue(undefined),
+  // Agent Builder reports the fields the write changed; a reopen changes `status`.
+  patchMetadata: jest.fn().mockResolvedValue({ changedFields: ['status'] }),
   ...overrides,
 });
 
@@ -148,6 +149,68 @@ describe('runFindOrCreateInvestigation', () => {
         { access: 'converse' }
       );
       expect(output.created).toBe(false);
+    });
+
+    it('tells the caller about the reopen, once', async () => {
+      const onReopened = jest.fn();
+
+      await runFindOrCreateInvestigation(
+        { spaceId, reportId },
+        { conversationClient: buildRerunClient({ status: 'closed' }), onReopened }
+      );
+
+      expect(onReopened.mock.calls).toEqual([[conversationId]]);
+    });
+
+    it.each([
+      ['an already-open Investigation', buildRerunClient({ status: 'open' })],
+      ['a new Investigation', buildClient()],
+    ])('does not tell the caller about a reopen for %s', async (_label, conversationClient) => {
+      const onReopened = jest.fn();
+
+      await runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient, onReopened });
+
+      expect(onReopened).not.toHaveBeenCalled();
+    });
+
+    // Two reruns that both read `closed`: the loser's write re-reads `open` and changes nothing.
+    it('does not tell the caller about a reopen another writer already made', async () => {
+      const onReopened = jest.fn();
+      const conversationClient = buildRerunClient(
+        { status: 'closed' },
+        { patchMetadata: jest.fn().mockResolvedValue({ changedFields: [] }) }
+      );
+
+      await runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient, onReopened });
+
+      expect(onReopened).not.toHaveBeenCalled();
+    });
+
+    it('does not tell the caller about a reopen that failed', async () => {
+      const onReopened = jest.fn();
+      const conversationClient = buildRerunClient(
+        { status: 'closed' },
+        { patchMetadata: jest.fn().mockRejectedValue(new Error('conflict')) }
+      );
+
+      await expect(
+        runFindOrCreateInvestigation({ spaceId, reportId }, { conversationClient, onReopened })
+      ).rejects.toThrow('conflict');
+      expect(onReopened).not.toHaveBeenCalled();
+    });
+
+    it('still succeeds when the reopen callback throws', async () => {
+      const output = await runFindOrCreateInvestigation(
+        { spaceId, reportId },
+        {
+          conversationClient: buildRerunClient({ status: 'closed' }),
+          onReopened: () => {
+            throw new Error('telemetry down');
+          },
+        }
+      );
+
+      expect(output.investigationConversationId).toBe(conversationId);
     });
 
     it('leaves an already-open Investigation untouched', async () => {

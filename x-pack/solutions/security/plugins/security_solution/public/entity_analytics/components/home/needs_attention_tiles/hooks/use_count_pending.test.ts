@@ -113,9 +113,29 @@ describe.each([
     expect(pending()).toBe(false);
   });
 
-  it('is not loading when the query can never run, so its tile does not spin forever', () => {
+  it('stops the spinner when the query can never run, so the tile settles instead of loading for ever', () => {
+    const loading = () =>
+      renderHook(() => useCount({ spaceId: 'default' })).result.current.isLoading;
     query({ isLoading: true });
     expect(render({ skip: true }).isLoading).toBe(false);
+    // No latest entities index, or its lookup failed: the query is disabled and has no data.
+    (useResolvedLatestEntitiesIndexName as jest.Mock).mockReturnValue({
+      data: { indexName: null },
+      isLoading: false,
+    });
+    expect(loading()).toBe(false);
+    (useResolvedLatestEntitiesIndexName as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: new Error('boom'),
+    });
+    expect(loading()).toBe(false);
+    // Still loading while the index resolves.
+    (useResolvedLatestEntitiesIndexName as jest.Mock).mockReturnValue({
+      data: undefined,
+      isLoading: true,
+    });
+    expect(loading()).toBe(true);
   });
 });
 
@@ -139,14 +159,56 @@ describe('useEntitiesWithAnomaliesCount', () => {
   const pending = () =>
     renderHook(() => useEntitiesWithAnomaliesCount({ spaceId: 'default' })).result.current
       .isCountPending;
+  const missingJobs = () =>
+    renderHook(() => useEntitiesWithAnomaliesCount({ spaceId: 'default' })).result.current
+      .isMissingJobs;
+  // An ML user with a licence whose jobs fetch succeeded, unless a test says otherwise.
+  const jobs = (overrides = {}) =>
+    (useInstalledSecurityJobsIds as jest.Mock).mockReturnValue({
+      jobIds: [],
+      loading: false,
+      isMlUser: true,
+      isLicensed: true,
+      isError: false,
+      ...overrides,
+    });
 
   it('waits while the installed jobs load', () => {
-    (useInstalledSecurityJobsIds as jest.Mock).mockReturnValue({ jobIds: [], loading: true });
+    jobs({ loading: true });
     expect(pending()).toBe(true);
   });
 
   it('does not wait forever when no security job is installed', () => {
-    (useInstalledSecurityJobsIds as jest.Mock).mockReturnValue({ jobIds: [], loading: false });
+    jobs();
+    expect(pending()).toBe(false);
+  });
+
+  it('stops loading and says the jobs are missing when no security job is installed', () => {
+    // The count query is disabled, which react-query reports as loading with no data.
+    jobs();
+    const { isLoading, isMissingJobs } = renderHook(() =>
+      useEntitiesWithAnomaliesCount({ spaceId: 'default' })
+    ).result.current;
+    expect(isLoading).toBe(false);
+    expect(isMissingJobs).toBe(true);
+  });
+
+  // The jobs list is empty in each of these too, but that does not mean no job is installed.
+  it.each([
+    ['the user has no ML permission', { isMlUser: false }],
+    ['there is no ML licence', { isLicensed: false }],
+    ['the jobs fetch failed', { isError: true }],
+    ['the jobs are loading', { loading: true }],
+    ['a job is installed', { jobIds: ['job_a'] }],
+  ])('does not say the jobs are missing when %s', (_case, overrides) => {
+    jobs(overrides);
+    expect(missingJobs()).toBe(false);
+  });
+
+  it('stops loading when the jobs cannot be asked for or their fetch failed', () => {
+    jobs({ isMlUser: false });
+    expect(pending()).toBe(false);
+    jobs({ isError: true });
     expect(pending()).toBe(false);
   });
 

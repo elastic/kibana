@@ -77,6 +77,14 @@ import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
 import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
+import {
+  ALERTZERO_UI_EVENTS,
+  classifyError,
+  useAlertZeroTelemetry,
+  useReportErrorShown,
+  useReportHomeOpened,
+  useReportToastError,
+} from '../../telemetry';
 
 const wrapScanFailureCallout = (callout: JSX.Element) => (
   <EuiFlexItem grow={false}>{callout}</EuiFlexItem>
@@ -159,6 +167,19 @@ const ConversationsPageContent: React.FC = () => {
     ? getUserDisplayName(currentUserProfile.user)
     : undefined;
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
+  const { reportEvent } = useAlertZeroTelemetry();
+
+  // The Impact entity filter is the queue's only filter today. Only setting it reports, never
+  // clearing it, and its value is never reported.
+  const onEntityFilterChange = useCallback(
+    (next: string | null) => {
+      if (next !== null && next !== effectiveEntityFilter) {
+        reportEvent(ALERTZERO_UI_EVENTS.QueueFiltered, { filter_type: 'impact' });
+      }
+      setEntityFilter(next);
+    },
+    [effectiveEntityFilter, reportEvent, setEntityFilter]
+  );
 
   const [selectedIdForRecommendedAction, setSelectedIdForRecommendedAction] = useState<
     string | undefined
@@ -189,7 +210,7 @@ const ConversationsPageContent: React.FC = () => {
 
   // From chartsSummary rather than the pages: no page-size cap, and every
   // category. Shares the chart row's query key, so it costs no extra request.
-  const { data: chartsSummary, isLoading, error } = useProposalChartsSummary();
+  const { data: chartsSummary, isLoading, isFetching, error } = useProposalChartsSummary();
   const openCount = chartsSummary?.currentOpen ?? 0;
   const runningSummary = useRunningSummary();
   // Idle: nothing open and nothing closed in the window, so the queue has no rows at all.
@@ -212,6 +233,17 @@ const ConversationsPageContent: React.FC = () => {
     openCount === 0 &&
     closedTotal === 0 &&
     proposalsById.size === 0;
+  const hasSummaryError = Boolean(error) && chartsSummary === undefined;
+  useReportHomeOpened({
+    isSettled: chartsSummary !== undefined || hasSummaryError,
+    openCount: chartsSummary?.currentOpen,
+  });
+  useReportErrorShown({
+    errorClass: classifyError(error),
+    isShown: hasSummaryError,
+    isRefetching: isFetching,
+    surface: 'queue',
+  });
 
   const onClickAction: BaseActionsProps['onClickAction'] = useCallback((action, recordId) => {
     setModalState({ type: action, recordId });
@@ -290,9 +322,13 @@ const ConversationsPageContent: React.FC = () => {
 
   // Both decisions close on success only, and surface the refusal otherwise: an expired
   // deadline or a proposal someone else already decided must not look like it landed.
+  const reportQueueToastError = useReportToastError('queue');
   const onDecisionError = useMemo(
-    () => (err: unknown) => notifications?.toasts.addDanger(decisionErrorMessage(err)),
-    [notifications]
+    () => (err: unknown) => {
+      notifications?.toasts.addDanger(decisionErrorMessage(err));
+      reportQueueToastError(classifyError(err));
+    },
+    [notifications, reportQueueToastError]
   );
 
   // Stays open on success rather than closing: the approval modal itself shows the resulting
@@ -379,7 +415,8 @@ const ConversationsPageContent: React.FC = () => {
   // Agent Builder owns the flyout: it loads the conversation and renders the slots this solution
   // registered for the `investigation` template. Closing it clears the URL, which is what closes
   // the flyout on the next pass — the URL stays the single source of truth.
-  const copyInvestigationLink = useCopyInvestigationLink();
+  const copyInvestigationLink = useCopyInvestigationLink('queue');
+  const copyInvestigationLinkFromFlyout = useCopyInvestigationLink('flyout');
   // Cards are keyed by proposal id, but the link and the flyout are keyed by its conversation.
   const copyLinkForProposal = useCallback(
     (proposalId: Investigation['id']) => {
@@ -394,7 +431,7 @@ const ConversationsPageContent: React.FC = () => {
   useInvestigationDetails({
     conversationId: selectedConversationId,
     onClose: clearSelectedConversation,
-    onCopyLink: copyInvestigationLink,
+    onCopyLink: copyInvestigationLinkFromFlyout,
   });
 
   const actionInvestigation = useMemo(
@@ -481,7 +518,7 @@ const ConversationsPageContent: React.FC = () => {
             // The header renders the charts-summary count, so it tracks that query
             // rather than the section pages, which now load independently.
             isLoading={isLoading}
-            hasError={Boolean(error) && chartsSummary === undefined}
+            hasError={hasSummaryError}
             // Closed proposals are rows but not work: a window holding only decisions
             // already made is an empty queue, and must not read as "0 actions need you"
             // beside a populated header.
@@ -494,7 +531,7 @@ const ConversationsPageContent: React.FC = () => {
             })}
           />
         </EuiFlexItem>
-        <ScanFailureCallout wrapper={wrapScanFailureCallout} />
+        <ScanFailureCallout surface="queue" wrapper={wrapScanFailureCallout} />
         <EuiFlexItem grow={false}>
           <ProposalsTrendChartRow />
         </EuiFlexItem>
@@ -507,7 +544,7 @@ const ConversationsPageContent: React.FC = () => {
           <Impact
             pills={impactPills}
             entityFilter={effectiveEntityFilter}
-            onEntityFilterChange={setEntityFilter}
+            onEntityFilterChange={onEntityFilterChange}
           />
         </EuiFlexItem>
 
