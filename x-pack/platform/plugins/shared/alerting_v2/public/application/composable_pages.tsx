@@ -24,7 +24,6 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { AppHeaderTab } from '@kbn/app-header';
 import type { EpisodeAction, EpisodeActionsDeps } from '@kbn/alerting-v2-episodes-ui/actions';
 import type { EpisodeDataSource } from '@kbn/alerting-v2-episodes-ui/types/episode_data_source';
@@ -205,7 +204,6 @@ export const AlertingV2EpisodesPage = ({
       toastNotifications: coreStart.notifications.toasts,
       unifiedDocViewer: container.get(PluginStart('unifiedDocViewer')) as UnifiedDocViewerStart,
       spaces: container.get(PluginStart('spaces')) as SpacesPluginStart,
-      licensing: container.get(PluginStart('licensing')) as LicensingPluginStart,
     }),
     [coreStart, container]
   );
