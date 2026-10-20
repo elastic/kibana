@@ -1022,15 +1022,52 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
-      username: {
+      auth_method: {
         default_value: null,
         depends_on: [],
+        display: DROPDOWN,
+        label: translate('searchConnectors.nativeConnectors.exchangeServer.auth_method.label', {
+          defaultMessage: 'Authentication method',
+        }),
+        options: [
+          {
+            label: 'NTLM',
+            value: 'ntlm',
+          },
+          {
+            label: 'Kerberos (GSSAPI)',
+            value: 'kerberos',
+          },
+        ],
+        order: 3,
+        required: true,
+        sensitive: false,
+        tooltip: translate(
+          'searchConnectors.nativeConnectors.exchangeServer.auth_method.tooltip',
+          {
+            defaultMessage:
+              'Use Kerberos (GSSAPI) in FIPS mode. Kerberos relies on a valid ticket for the connector service account (for example via KRB5CCNAME); username and password are not used.',
+          }
+        ),
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: 'ntlm',
+      },
+      username: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'auth_method',
+            value: 'ntlm',
+          },
+        ],
         display: TEXTBOX,
         label: translate('searchConnectors.nativeConnectors.exchangeServer.username.label', {
           defaultMessage: 'Exchange server username',
         }),
         options: [],
-        order: 3,
+        order: 4,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -1041,13 +1078,18 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
       },
       password: {
         default_value: null,
-        depends_on: [],
+        depends_on: [
+          {
+            field: 'auth_method',
+            value: 'ntlm',
+          },
+        ],
         display: TEXTBOX,
         label: translate('searchConnectors.nativeConnectors.exchangeServer.password.label', {
           defaultMessage: 'Exchange server password',
         }),
         options: [],
-        order: 4,
+        order: 5,
         required: true,
         sensitive: true,
         tooltip: null,
@@ -1064,7 +1106,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Exchange server domain name',
         }),
         options: [],
-        order: 5,
+        order: 6,
         required: true,
         sensitive: false,
         tooltip: translate('searchConnectors.nativeConnectors.exchangeServer.domain.tooltip', {
@@ -1084,7 +1126,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Enable SSL',
         }),
         options: [],
-        order: 6,
+        order: 7,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -1106,7 +1148,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'SSL certificate',
         }),
         options: [],
-        order: 7,
+        order: 8,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -1126,7 +1168,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 8,
+        order: 9,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -1152,7 +1194,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 9,
+        order: 10,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -1178,7 +1220,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 10,
+        order: 11,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -1199,7 +1241,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         display: TOGGLE,
         label: ENABLE_DOCUMENT_LEVEL_SECURITY_LABEL,
         options: [],
-        order: 11,
+        order: 12,
         required: true,
         sensitive: false,
         tooltip: getEnableDocumentLevelSecurityTooltip(
@@ -4045,7 +4087,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         validations: [],
         value: '',
       },
-      username: {
+      auth_method: {
         default_value: null,
         depends_on: [
           {
@@ -4053,12 +4095,50 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             value: 'outlook_server',
           },
         ],
+        display: DROPDOWN,
+        label: translate('searchConnectors.nativeConnectors.outlook.auth_method.label', {
+          defaultMessage: 'Authentication method',
+        }),
+        options: [
+          {
+            label: 'NTLM',
+            value: 'ntlm',
+          },
+          {
+            label: 'Kerberos (GSSAPI)',
+            value: 'kerberos',
+          },
+        ],
+        order: 7,
+        required: true,
+        sensitive: false,
+        tooltip: translate('searchConnectors.nativeConnectors.outlook.auth_method.tooltip', {
+          defaultMessage:
+            'Use Kerberos (GSSAPI) in FIPS mode. Kerberos relies on a valid ticket for the connector service account (for example via KRB5CCNAME); username and password are not used.',
+        }),
+        type: STRING,
+        ui_restrictions: [],
+        validations: [],
+        value: 'ntlm',
+      },
+      username: {
+        default_value: null,
+        depends_on: [
+          {
+            field: 'data_source',
+            value: 'outlook_server',
+          },
+          {
+            field: 'auth_method',
+            value: 'ntlm',
+          },
+        ],
         display: TEXTBOX,
         label: translate('searchConnectors.nativeConnectors.outlook.username.label', {
           defaultMessage: 'Exchange server username',
         }),
         options: [],
-        order: 7,
+        order: 8,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -4074,13 +4154,17 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
             field: 'data_source',
             value: 'outlook_server',
           },
+          {
+            field: 'auth_method',
+            value: 'ntlm',
+          },
         ],
         display: TEXTBOX,
         label: translate('searchConnectors.nativeConnectors.outlook.password.label', {
           defaultMessage: 'Exchange server password',
         }),
         options: [],
-        order: 8,
+        order: 9,
         required: true,
         sensitive: true,
         tooltip: null,
@@ -4102,7 +4186,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Exchange server domain name',
         }),
         options: [],
-        order: 9,
+        order: 10,
         required: true,
         sensitive: false,
         tooltip: translate('searchConnectors.nativeConnectors.outlook.domain.tooltip', {
@@ -4126,7 +4210,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Enable SSL',
         }),
         options: [],
-        order: 10,
+        order: 11,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -4152,7 +4236,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'SSL certificate',
         }),
         options: [],
-        order: 11,
+        order: 12,
         required: true,
         sensitive: false,
         tooltip: null,
@@ -4169,7 +4253,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           defaultMessage: 'Sync all mail folders',
         }),
         options: [],
-        order: 12,
+        order: 13,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -4195,7 +4279,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 13,
+        order: 14,
         required: true,
         sensitive: false,
         tooltip: translate(
@@ -4221,7 +4305,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
           }
         ),
         options: [],
-        order: 13,
+        order: 15,
         required: true,
         sensitive: false,
         tooltip: translate(
