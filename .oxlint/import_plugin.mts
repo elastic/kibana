@@ -328,6 +328,7 @@ export const importPluginOverrides: OxlintOverride[] = [
         'kbn-evals-suite-alerts-rag',
         'kbn-evals-suite-attack-discovery-fp-tp',
         'kbn-evals-suite-attack-discovery',
+        'kbn-evals-suite-hunt-watch',
         'kbn-evals-suite-lead-generation',
         'kbn-evals-suite-security-alert-triage',
         'security-mitre-attack-server',
