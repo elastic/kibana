@@ -66,11 +66,6 @@ export interface DataPluginStartDependencies {
   licensing?: LicensingPluginStart;
 }
 
-export const WARM_START_MEMORY_PROBE = Array.from({ length: 400_000 }, (_, i) => ({
-  i,
-  s: `probe-${i}`,
-}));
-
 export class DataServerPlugin
   implements
     Plugin<
