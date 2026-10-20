@@ -42,15 +42,15 @@ apiTest.describe('Entity Store Status API tests', { tag: ENTITY_STORE_TAGS }, ()
     });
   });
 
+  apiTest.afterEach(async ({ apiClient }) => {
+    await uninstallAllEntityTypes(apiClient, defaultHeaders);
+  });
+
   apiTest.afterAll(async ({ apiServices }) => {
     // Only `null` removes the override, see per_process_config.spec.ts.
     await apiServices.core.settings({
       'feature_flags.overrides': { [FF_DUAL_PROCESS_ENABLED]: null },
     });
-  });
-
-  apiTest.afterEach(async ({ apiClient }) => {
-    await uninstallAllEntityTypes(apiClient, defaultHeaders);
   });
 
   apiTest(
