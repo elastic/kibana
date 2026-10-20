@@ -8,10 +8,8 @@ applies_to:
 # Generative AI connectors
 
 ::::{important}
-:applies_to: {"stack": "deprecated 9.5", "serverless": "deprecated"}
-The OpenAI, {{bedrock}}, {{gemini}}, and AI Connector types are deprecated. Existing connectors and their rule actions continue to work.
-
-{applies_to}`serverless: deprecated` {applies_to}`stack: deprecated 9.6+` You can no longer create new connectors of these types by selecting **Create connector** in {{kib}}.
+:applies_to: {"serverless": "deprecated", "stack": "deprecated 9.6+"}
+The OpenAI, {{bedrock}}, {{gemini}}, and AI Connector types are deprecated. Existing connectors and their rule actions continue to work, but you can no longer create new ones by selecting **Create connector** in {{kib}}.
 
 For new AI integrations, create an {{es}} {{infer}} endpoint with the `chat_completion` task type instead. To get started, refer to [Elastic Inference](docs-content://explore-analyze/elastic-inference.md) and [External inference](docs-content://explore-analyze/elastic-inference/external.md).
 ::::
