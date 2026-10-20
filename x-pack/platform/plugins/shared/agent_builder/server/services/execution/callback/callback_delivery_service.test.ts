@@ -67,17 +67,18 @@ describe('validateCallbackUrl', () => {
   );
 });
 
-describe('createTransport', () => {
+describe('transport selection', () => {
   afterEach(() => {
     jest.restoreAllMocks();
   });
 
+  const deliver = (service: CallbackDeliveryService) =>
+    service.makeCallbackRequest({ callbackUrl, payload: failurePayload, retry: false });
+
   it('posts the exact serialized JSON body through fetch without a signature', async () => {
     const fetchMock = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200 } as Response);
-    const transport = createCallbackDeliveryService().createTransport(callbackUrl);
 
-    const abortController = new AbortController();
-    await transport(failurePayload, abortController.signal);
+    await deliver(createCallbackDeliveryService());
 
     expect(fetchMock).toHaveBeenCalledWith(callbackUrl, {
       method: 'POST',
@@ -86,28 +87,24 @@ describe('createTransport', () => {
       },
       body: JSON.stringify(failurePayload),
       redirect: 'error',
-      signal: abortController.signal,
+      signal: expect.any(AbortSignal),
     });
   });
 
-  it('posts through the Actions Relay client for matching callback URLs', async () => {
+  it('posts through the built-in Relay transport for Relay callback URLs', async () => {
     const fetchMock = jest.spyOn(global, 'fetch');
     const relayClient = {
       isRelayOrigin: jest.fn().mockReturnValue(true),
       postCallback: jest.fn().mockResolvedValue({ status: 204 }),
     };
-    const transport = createCallbackDeliveryService(jest.fn(), relayClient).createTransport(
-      callbackUrl
-    );
 
-    const abortController = new AbortController();
-    await transport(failurePayload, abortController.signal);
+    await deliver(createCallbackDeliveryService(jest.fn(), relayClient));
 
     expect(relayClient.isRelayOrigin).toHaveBeenCalledWith(callbackUrl);
     expect(relayClient.postCallback).toHaveBeenCalledWith(
       callbackUrl,
       failurePayload,
-      abortController.signal
+      expect.any(AbortSignal)
     );
     expect(fetchMock).not.toHaveBeenCalled();
   });
@@ -118,11 +115,8 @@ describe('createTransport', () => {
       isRelayOrigin: jest.fn().mockReturnValue(false),
       postCallback: jest.fn(),
     };
-    const transport = createCallbackDeliveryService(jest.fn(), relayClient).createTransport(
-      callbackUrl
-    );
 
-    await transport(failurePayload, new AbortController().signal);
+    await deliver(createCallbackDeliveryService(jest.fn(), relayClient));
 
     expect(relayClient.postCallback).not.toHaveBeenCalled();
     expect(fetchMock).toHaveBeenCalledTimes(1);
@@ -130,11 +124,7 @@ describe('createTransport', () => {
 
   it('posts through the first registered transport that handles the URL', async () => {
     const fetchMock = jest.spyOn(global, 'fetch');
-    const relayClient = {
-      isRelayOrigin: jest.fn().mockReturnValue(true),
-      postCallback: jest.fn(),
-    };
-    const service = createCallbackDeliveryService(jest.fn(), relayClient);
+    const service = createCallbackDeliveryService();
     const skipped = { id: 'skipped', handles: jest.fn().mockReturnValue(false), send: jest.fn() };
     const first = {
       id: 'first',
@@ -147,35 +137,12 @@ describe('createTransport', () => {
     registerTransport(first);
     registerTransport(second);
 
-    const abortController = new AbortController();
-    const response = await service.createTransport(callbackUrl)(
-      failurePayload,
-      abortController.signal
-    );
+    await deliver(service);
 
-    expect(response).toEqual({ status: 202 });
-    expect(first.send).toHaveBeenCalledWith(callbackUrl, failurePayload, abortController.signal);
+    expect(first.send).toHaveBeenCalledWith(callbackUrl, failurePayload, expect.any(AbortSignal));
     expect(skipped.send).not.toHaveBeenCalled();
     expect(second.send).not.toHaveBeenCalled();
-    expect(relayClient.postCallback).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
-  });
-
-  it('keeps the Relay and fetch selection when no registered transport handles the URL', async () => {
-    const relayClient = {
-      isRelayOrigin: jest.fn().mockReturnValue(true),
-      postCallback: jest.fn().mockResolvedValue({ status: 204 }),
-    };
-    const service = createCallbackDeliveryService(jest.fn(), relayClient);
-    service.setup().registerTransport({
-      id: 'other',
-      handles: () => false,
-      send: jest.fn(),
-    });
-
-    await service.createTransport(callbackUrl)(failurePayload, new AbortController().signal);
-
-    expect(relayClient.postCallback).toHaveBeenCalledTimes(1);
   });
 
   it('rejects a transport registered twice with the same id', () => {
@@ -185,6 +152,14 @@ describe('createTransport', () => {
 
     expect(() => registerTransport(transport)).toThrow(
       'Callback transport [transport-1] is already registered'
+    );
+  });
+
+  it.each(['default', 'relay'])('rejects a transport that takes the built-in id %p', (id) => {
+    const { registerTransport } = createCallbackDeliveryService().setup();
+
+    expect(() => registerTransport({ id, handles: () => true, send: jest.fn() })).toThrow(
+      `Callback transport [${id}] is already registered`
     );
   });
 });
@@ -260,33 +235,31 @@ describe('makeCallbackRequest', () => {
     jest.useRealTimers();
   });
 
+  const deliverThrough = (transport: jest.Mock, retry: boolean) => {
+    const service = createCallbackDeliveryService();
+    service.setup().registerTransport({ id: 'test', handles: () => true, send: transport });
+    return service.makeCallbackRequest({ callbackUrl, payload: failurePayload, retry });
+  };
+
   it('posts the payload once when the request succeeds', async () => {
     const transport = jest.fn().mockResolvedValue({ status: 200 });
 
-    await createCallbackDeliveryService().makeCallbackRequest({
-      payload: failurePayload,
-      transport,
-      retry: true,
-    });
+    await deliverThrough(transport, true);
 
     expect(transport).toHaveBeenCalledTimes(1);
-    expect(transport).toHaveBeenCalledWith(failurePayload, expect.any(AbortSignal));
+    expect(transport).toHaveBeenCalledWith(callbackUrl, failurePayload, expect.any(AbortSignal));
   });
 
   it('aborts and retries requests that exceed the Actions response timeout', async () => {
     jest.useFakeTimers();
     const transport = jest.fn().mockImplementation(
-      (_payload, signal: AbortSignal) =>
+      (_callbackUrl, _payload, signal: AbortSignal) =>
         new Promise((_resolve, reject) => {
           signal.addEventListener('abort', () => reject(new Error('The operation was aborted')));
         })
     );
 
-    const delivery = createCallbackDeliveryService().makeCallbackRequest({
-      payload: failurePayload,
-      transport,
-      retry: true,
-    });
+    const delivery = deliverThrough(transport, true);
     const deliveryExpectation = expect(delivery).rejects.toThrow('The operation was aborted');
 
     await jest.advanceTimersByTimeAsync(responseTimeout * 4);
@@ -303,11 +276,7 @@ describe('makeCallbackRequest', () => {
       .mockResolvedValueOnce({ status: 503 })
       .mockResolvedValueOnce({ status: 204 });
 
-    const delivery = createCallbackDeliveryService().makeCallbackRequest({
-      payload: failurePayload,
-      transport,
-      retry: true,
-    });
+    const delivery = deliverThrough(transport, true);
     const deliveryExpectation = expect(delivery).resolves.toBeUndefined();
 
     await jest.advanceTimersByTimeAsync(700);
@@ -319,13 +288,9 @@ describe('makeCallbackRequest', () => {
   it('does not retry when retry is false', async () => {
     const transport = jest.fn().mockResolvedValue({ status: 503 });
 
-    await expect(
-      createCallbackDeliveryService().makeCallbackRequest({
-        payload: failurePayload,
-        transport,
-        retry: false,
-      })
-    ).rejects.toThrow('Callback delivery failed with status 503');
+    await expect(deliverThrough(transport, false)).rejects.toThrow(
+      'Callback delivery failed with status 503'
+    );
 
     expect(transport).toHaveBeenCalledTimes(1);
   });
@@ -333,13 +298,9 @@ describe('makeCallbackRequest', () => {
   it('does not retry 4xx responses', async () => {
     const transport = jest.fn().mockResolvedValue({ status: 400 });
 
-    await expect(
-      createCallbackDeliveryService().makeCallbackRequest({
-        payload: failurePayload,
-        transport,
-        retry: true,
-      })
-    ).rejects.toThrow('Callback delivery failed with status 400');
+    await expect(deliverThrough(transport, true)).rejects.toThrow(
+      'Callback delivery failed with status 400'
+    );
 
     expect(transport).toHaveBeenCalledTimes(1);
   });
@@ -348,11 +309,7 @@ describe('makeCallbackRequest', () => {
     jest.useFakeTimers();
     const transport = jest.fn().mockResolvedValue({ status: 503 });
 
-    const delivery = createCallbackDeliveryService().makeCallbackRequest({
-      payload: failurePayload,
-      transport,
-      retry: true,
-    });
+    const delivery = deliverThrough(transport, true);
     const deliveryExpectation = expect(delivery).rejects.toThrow(
       'Callback delivery failed with status 503'
     );

@@ -10,10 +10,11 @@ import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plu
 import type {
   CallbackConversationResolver,
   CallbackConversationResolverContext,
-  CallbackTransportDefinition,
   CallbacksSetup,
 } from '@kbn/agent-builder-server';
 import type { ChatCallbackResponse } from '../../../../common/http_api/chat_callback';
+import { CallbackTransportRegistry } from './callback_transport_registry';
+import { createRelayTransport } from './relay_transport';
 
 const callbackRetryOptions = {
   retries: 2,
@@ -22,19 +23,16 @@ const callbackRetryOptions = {
   randomize: false,
 } as const;
 
-export type CallbackTransport = (
-  payload: ChatCallbackResponse,
-  signal: AbortSignal
-) => Promise<{ status: number }>;
-
 export class CallbackDeliveryService {
   private readonly actions: ActionsPluginSetup;
-  private readonly transports: CallbackTransportDefinition[] = [];
+  private readonly transports: CallbackTransportRegistry;
   private conversationResolver?: CallbackConversationResolver;
   private defaultConversationResolver?: CallbackConversationResolver;
 
   constructor({ actions }: { actions: ActionsPluginSetup }) {
     this.actions = actions;
+    this.transports = new CallbackTransportRegistry();
+    this.transports.register(createRelayTransport({ actions }));
   }
 
   setup(): CallbacksSetup {
@@ -46,13 +44,7 @@ export class CallbackDeliveryService {
 
         this.conversationResolver = resolver;
       },
-      registerTransport: (transport) => {
-        if (this.transports.some(({ id }) => id === transport.id)) {
-          throw new Error(`Callback transport [${transport.id}] is already registered`);
-        }
-
-        this.transports.push(transport);
-      },
+      registerTransport: (transport) => this.transports.register(transport),
     };
   }
 
@@ -89,40 +81,17 @@ export class CallbackDeliveryService {
     this.actions.getActionsConfigurationUtilities().ensureUriAllowed(callbackUrl);
   }
 
-  createTransport(callbackUrl: string): CallbackTransport {
-    const registered = this.transports.find((transport) => transport.handles(callbackUrl));
-
-    if (registered) {
-      return (payload, signal) => registered.send(callbackUrl, payload, signal);
-    }
-
-    const relayClient = this.actions.getRelayClient();
-
-    if (relayClient?.isRelayOrigin(callbackUrl)) {
-      return (payload, signal) => relayClient.postCallback(callbackUrl, payload, signal);
-    }
-
-    return (payload, signal) =>
-      fetch(callbackUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-        redirect: 'error',
-        signal,
-      });
-  }
-
+  /** Delivers the payload through the transport that handles the callback URL. */
   async makeCallbackRequest({
+    callbackUrl,
     payload,
-    transport,
     retry,
   }: {
+    callbackUrl: string;
     payload: ChatCallbackResponse;
-    transport: CallbackTransport;
     retry: boolean;
   }): Promise<void> {
+    const transport = this.transports.get(callbackUrl);
     const { timeout } = this.actions.getActionsConfigurationUtilities().getResponseSettings();
 
     await pRetry(
@@ -133,7 +102,7 @@ export class CallbackDeliveryService {
         let response: { status: number };
 
         try {
-          response = await transport(payload, abortController.signal);
+          response = await transport.send(callbackUrl, payload, abortController.signal);
         } catch (error) {
           throw error instanceof Error ? error : new Error(String(error));
         } finally {
