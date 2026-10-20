@@ -561,6 +561,7 @@ export class NightshiftInvestigationsClient {
       const { workflowExecutionIds } = await getOrCreateInvestigationConversation({
         conversations,
         id: investigationId,
+        workflowExecutionId: executionId,
       });
       if (!workflowExecutionIds.includes(executionId)) {
         await conversations.patchMetadata(investigationId, {
@@ -743,6 +744,7 @@ export class NightshiftInvestigationsClient {
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
+      workflowExecutionId: executionId,
       // A raw workflow can fail before ensuring its agent, which conversation creation requires.
       ...(!reopen
         ? {
