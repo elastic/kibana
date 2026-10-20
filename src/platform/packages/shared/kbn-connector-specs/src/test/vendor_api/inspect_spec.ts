@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OpenApiDocument } from '@kbn/connector-contract-mock';
+import type { OpenApiDocument } from '@kbn/connector-emulate';
 import type { JsonObject } from './json_pointer';
 import { getAtTokens, isJsonObject, localRefToPointer, toTokens } from './json_pointer';
 import { assessPagination } from './propose_pagination';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OpenApiDocument } from '@kbn/connector-contract-mock';
+import type { OpenApiDocument } from '@kbn/connector-emulate';
 import { describeOperation, findOperation, listOperations } from './inspect_spec';
 
 const document: OpenApiDocument = {

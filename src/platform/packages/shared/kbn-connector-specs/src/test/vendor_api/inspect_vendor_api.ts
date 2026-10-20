@@ -10,8 +10,8 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { stringify } from 'yaml';
-import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-contract-mock';
-import { applyOverlay } from '@kbn/connector-contract-mock';
+import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-emulate';
+import { applyOverlay } from '@kbn/connector-emulate';
 import { describeOperation, findOperation, listOperations } from './inspect_spec';
 import { isJsonObject } from './json_pointer';
 import { loadVendorSpec } from './load_vendor_spec';

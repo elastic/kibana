@@ -9,7 +9,7 @@
 
 import fs from 'fs/promises';
 import path from 'path';
-import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-contract-mock';
+import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-emulate';
 import type { ConnectorSpec } from '../../connector_spec';
 import { forEachRef } from './json_pointer';
 import { loadVendorSpec } from './load_vendor_spec';

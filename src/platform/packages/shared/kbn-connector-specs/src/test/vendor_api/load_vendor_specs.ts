@@ -13,8 +13,8 @@ import type {
   OpenApiDocument,
   OverlayDocument,
   PaginatedOperation,
-} from '@kbn/connector-contract-mock';
-import { applyOverlay } from '@kbn/connector-contract-mock';
+} from '@kbn/connector-emulate';
+import { applyOverlay } from '@kbn/connector-emulate';
 import { loadVendorSpec } from './load_vendor_spec';
 import type { VendorApiManifest } from './manifest';
 import { parseManifest } from './manifest';

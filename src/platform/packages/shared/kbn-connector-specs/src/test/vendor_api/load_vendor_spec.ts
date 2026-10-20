@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OpenApiDocument } from '@kbn/connector-contract-mock';
+import type { OpenApiDocument } from '@kbn/connector-emulate';
 import {
   convertDiscovery,
   convertSwagger2,
   isDiscoveryDocument,
-} from '@kbn/connector-contract-mock';
+} from '@kbn/connector-emulate';
 import { bundleSpec } from './bundle_spec';
 import { isJsonObject } from './json_pointer';
 import type { ManifestSource } from './manifest';
