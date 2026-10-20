@@ -4,15 +4,18 @@ navigation_title: Authentication overview
 
 # Authentication in Scout [scout-auth]
 
-How authentication is set up in Scout and which fixture uses which identity. For usage, see [Browser authentication](./browser-auth.md) and [Authentication in API tests](./api-auth.md).
+This article goes through how authentication is set up in Scout and which fixtures your tests can use to authenticate into the stack. For lower-level practical details, see [Browser authentication](./browser-auth.md) and [Authentication in API tests](./api-auth.md).
 
 ## Default setup [scout-auth-default-setup]
 
-The default Scout server configs mirror Elastic Cloud:
+Scout uses [SAML](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-or-deployment-auth/saml) to authenticate in tests, the same way Elastic Cloud does. The login selector is disabled.
 
-- **SAML is the default login method**, backed by a mock Identity Provider (IdP) plugin that runs locally. The login selector is disabled.
-- **Roles come from `roles.yml`** (`admin`, `editor`, `viewer`, and so on). Serverless uses the roles of the selected project type and has the native realm disabled.
-- **Elasticsearch runs with security enabled** and a bootstrap superuser (`elastic` on stateful, `elastic_serverless` on serverless).
+| Deployment | Local run                               | Cloud run (ECH, MKI)                             |
+| ---------- | --------------------------------------- | ------------------------------------------------ |
+| Stateful   | SAML via a mock Identity Provider (IdP) | SAML via the real IdP with pre-provisioned users |
+| Serverless | SAML via a mock Identity Provider (IdP) | SAML via the real IdP with pre-provisioned users |
+
+Roles come from the `roles.yml` files in the `@kbn/es` package. They are Kibana's local copy of the [Elastic Cloud roles](https://www.elastic.co/docs/deploy-manage/users-roles/cloud-organization/user-roles#general-assign-user-roles-table) (`admin`, `editor`, `viewer`, and so on). The serverless files are copied from `elasticsearch-controller`, so a role change must land there first and be mirrored in `roles.yml` right after. Serverless uses the roles of the selected project type and has the native realm disabled.
 
 ## Why SAML realm roles [scout-auth-why-saml]
 
@@ -22,13 +25,13 @@ Tests exercise the same authentication and authorization path as real users. On 
 
 ## The user in the config [scout-auth-config-user]
 
-`config.auth` is the bootstrap superuser (an operator account on Cloud). Scout uses it only for `esClient` and `kbnClient`, which exist for test data setup and cleanup. Everything that represents a user of the product goes through SAML.
+`config.auth` is an internal Scout user with full privileges. Scout uses it only for `esClient` and `kbnClient`, which exist for test data setup and cleanup. Everything that represents a user of the product goes through SAML.
 
 ## What each fixture does [scout-auth-fixtures]
 
 | Fixture                      | Identity                 | Purpose                                                                |
 | ---------------------------- | ------------------------ | ---------------------------------------------------------------------- |
-| `esClient`, `kbnClient`      | Config superuser         | Data setup and cleanup                                                 |
+| `esClient`, `kbnClient`      | Internal Scout user      | Data setup and cleanup                                                 |
 | `samlAuth`                   | SAML session per role    | Creates and caches session cookies, manages the per-worker custom role |
 | `browserAuth`                | SAML session cookie      | Sets the cookie in the browser so the UI runs as that role             |
 | `samlAuth.asInteractiveUser` | SAML session cookie      | `cookieHeader` for `internal/*` endpoints                              |
@@ -37,7 +40,7 @@ Tests exercise the same authentication and authorization path as real users. On 
 
 ## Rules [scout-auth-rules]
 
-- **Do not use the config user as the user under test.** Never build your own client from `config.auth` or send basic auth with it. It is a superuser, so it hides authorization bugs and bypasses the SAML path.
+- **Do not use the config user as the user under test.** Never build your own client from `config.auth` or send basic auth with it. It has full privileges, so it hides authorization bugs and bypasses the SAML path.
 - **Do not hardcode credentials.** Use `browserAuth`, `requestAuth` or `samlAuth`.
 - **Keep `kbnClient` and `esClient` for setup and cleanup only.**
-- **Prefer the least privileged role.** Use `admin` only when testing admin-only behavior.
+- **Prefer the least privileged role.** Use `admin` only when testing admin-only behavior. See [Test with minimal permissions](./scout-best-practices.md#test-with-minimal-permissions-avoid-admin-when-possible).
