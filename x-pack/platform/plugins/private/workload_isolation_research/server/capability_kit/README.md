@@ -1,4 +1,4 @@
-# Track 7 capability kit — 0.1.7 pre-release research slice
+# Track 7 capability kit — 0.1.8 pre-release research slice
 
 PRIVATE research code; no public Core API, plugin lifecycle hook, or automatic enablement.
 Base harness fd3138c. Only main owns TM claims/leases/results.
@@ -116,8 +116,40 @@ Late host replies are fenced by run ID + slot identity. Other class slots surviv
 SO supports get/resolve/create/update/delete/find (single type). Namespace/namespaces/
 spaceId overrides are denied; pass a genuine Core space-scoped security-wrapped
 client, not an unwrapped internal repository. Principal/space must match its binding.
-This bridge preserves actual migration/security/ESO behavior ON MAIN; no claim of
-worker-local SO/ESO, large-state isolation or RBAC proof from fixture clients.
+This bridge preserves actual migration/security/ESO behavior ON MAIN. Optional
+local SO/ESO is explicit below; main bridge still needed for scoped RBAC until a
+real security/audit extension is supplied. No RBAC proof from fixture clients.
+
+## Worker-local SO/ESO (0.1.8 research frontier)
+
+Register a module export SoRegistration {revision,types,encryptedTypes}; factories
+and model-version functions load locally, never cloned. Register a private ESO
+factory module (research_eso_bootstrap.ts in ESO, copied from T1 pushed5f31987,
+then extended with currentUser injection; no public ESO contract change).
+Mint bundle.data.savedObjectsLocal: LocalSoCapability {principal,space,mode,
+index,kibanaVersion,registryId,registryRevision,esoFactoryId,encryptionKey,
+decryptionOnlyKeys,includedHiddenTypes,migrationReady}. Credentials/keys MEMORY
+ONLY. index is the DEFAULT BASE name: real Core resolves per-type VERSION aliases.
+Main must advertise readiness ONLY after actual Core startup migrations/aliases;
+this factory NEVER runs startup migrations. Revision mismatch/no readiness denies.
+Worker: await createLocalSavedObjects(context,localEsClient,logger[,securityExtension]).
+Methods get/resolve/bulkGet/find(type,opts)/create/update/delete are namespace-pinned;
+namespace/namespaces/spaceId overrides deny. Real repository+DocumentMigrator+
+encryption extension run locally. Partial ESO update of encrypted/AAD attrs denies.
+getDecryptedAsInternalUser is INTERNAL-only, uses a real repository read/migration
+without stripping then actual ESO decrypt. Included hidden types and namespace
+checks remain owner repository behavior, not manual raw-index shortcuts.
+SCOPED mode FAILS CLOSED unless passed the REAL local security/audit extension;
+no RBAC stub or synthetic identity. Existing scoped MAIN bridge remains fallback.
+No initialized scoped RBAC/audit parity proof yet. Rich contributed model-version
+registrations still require owner module factories, not copied function closures.
+
+Live t7p-composed-so-eso-001: actual secure ES, main/thread/child identical fixture
+migration-on-read, at-rest secret stripping/decrypt, safe partial update, foreign
+namespace/AAD-update denial; missing readiness/principal/revision/scoped extension
+deny. ONE initialized fixture type, not real runner/185-type registry or pod fit.
+Source/dev post-GC service floor about89–94MiB heap (not distribution/PC); thread
+RSS is WHOLE process, never per-worker. Main owns startup/indices; no second poller.
 
 ## Rare thread→main sync (0.1.6)
 
@@ -191,7 +223,7 @@ Controlled HTTP fixture checks actual Core transport headers/CPS/opaqueId/output
 including401 after fixture revocation; not live ES security or actual UIAM server.
 No stack/QAF, real runner, cgroup/pod fit, exact slices or scored latency claim.
 
-Outstanding 7.P: worker-local composed real SO/ESO + readiness/auth/audit parity;
+Outstanding 7.P: live scoped local SO security/audit parity and production readiness capture;
 scoped live SO security matrix; session refresh bridge (capture is a per-run snapshot,
 not token renewal); process sync transport; telemetry overhead and per-MB/call measurement;
 distribution-shaped initialized-service floor; bounded envelope sizes/backpressure;

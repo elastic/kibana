@@ -19,7 +19,11 @@
     "@kbn/core-spaces-common",
     "@kbn/core-saved-objects-server",
     "@kbn/sse-utils",
-    "@kbn/agent-builder-common"
+    "@kbn/agent-builder-common",
+    "@kbn/core-saved-objects-base-server-internal",
+    "@kbn/core-saved-objects-migration-server-internal",
+    "@kbn/core-saved-objects-api-server-internal",
+    "@kbn/encrypted-saved-objects-plugin"
   ],
   "exclude": [
     "target/**/*"
