@@ -719,7 +719,18 @@ node scripts/connector_emulate --connector firecrawl
 node scripts/connector_emulate --connector firecrawl --spec latest --port 5691
 ```
 
-The mock answers with the manifest's pagination, but not with the per-action `responses` in `fixtures.json`, because a proxied request doesn't say which action sent it. It logs every request with its status, and the violations of failed ones. On startup it prints the Kibana settings to use: `xpack.actions.proxyUrl` pointing at the proxy, and `xpack.actions.customHostSettings` entries that trust its CA for the vendor hosts in the specs. Vendor hosts that come from connector config, such as a tenant's subdomain, need the CA trusted for every host instead, by starting Kibana with `NODE_EXTRA_CA_CERTS=data/connector_emulate/ca.crt`. The CA is created there on first use and reused afterwards, so Kibana keeps trusting it when the mock restarts.
+The mock answers with the manifest's pagination, but not with the per-action `responses` in `fixtures.json`, because a proxied request doesn't say which action sent it. To serve specific responses for one run, such as an empty inbox or a rate limit, pass them with `--fixtures` and `--recordings`:
+
+```bash
+# fixtures.json-style responses: [{ "method": "POST", "path": "/scrape", "status": 200, "body": { ... } }]
+node scripts/connector_emulate --connector firecrawl --fixtures scenarios/empty_results.json
+# Recordings ({ "exchanges": [{ operation, request, response }] }): one file, or a folder of them
+node scripts/connector_emulate --connector firecrawl --recordings scenarios/recorded/
+```
+
+Paths are the spec's path templates, relative to its server URL. Fixtures are served first, then conforming recordings (those given for the run ahead of any committed in `vendor_api/recordings/`), then the spec's examples and samples. Fixtures and recordings the spec rejects are listed on startup.
+
+It logs every request with its status, where the response came from (`[fixture]` or `[recording]`), and the violations of failed ones. Tests read and reset the calls through the control endpoints on the proxy's own origin (`GET /_mock/calls`, `POST /_mock/reset`, `GET /_mock/operations`, or `createEmulatorControl` from `@kbn/connector-emulate`). On startup it prints the Kibana settings to use: `xpack.actions.proxyUrl` pointing at the proxy, and `xpack.actions.customHostSettings` entries that trust its CA for the vendor hosts in the specs. Vendor hosts that come from connector config, such as a tenant's subdomain, need the CA trusted for every host instead, by starting Kibana with `NODE_EXTRA_CA_CERTS=data/connector_emulate/ca.crt`. The CA is created there on first use and reused afterwards, so Kibana keeps trusting it when the mock restarts.
 
 ## Related Documentation
 

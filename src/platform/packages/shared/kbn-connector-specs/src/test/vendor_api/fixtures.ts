@@ -48,6 +48,9 @@ const actionFixtureSchema = z
 /** `vendor_api/fixtures.json`: per-action inputs, config, query operations and response overrides. */
 export const vendorApiFixturesSchema = z.record(z.string(), actionFixtureSchema);
 
+/** A list of response overrides on its own, as `node scripts/connector_emulate --fixtures` reads. */
+export const responseOverridesSchema = z.array(responseOverrideSchema);
+
 export type ActionFixture = z.infer<typeof actionFixtureSchema>;
 export type QueryOperation = z.infer<typeof queryOperationSchema>;
 export type ResponseOverride = z.infer<typeof responseOverrideSchema>;
