@@ -1391,6 +1391,8 @@
       "@kbn/node-libs-browser-webpack-plugin/*": ["./src/platform/packages/private/kbn-node-libs-browser-webpack-plugin/*"],
       "@kbn/notifications-plugin": ["./x-pack/platform/plugins/shared/notifications"],
       "@kbn/notifications-plugin/*": ["./x-pack/platform/plugins/shared/notifications/*"],
+      "@kbn/oas-docs": ["./oas_docs"],
+      "@kbn/oas-docs/*": ["./oas_docs/*"],
       "@kbn/object-utils": ["./src/platform/packages/shared/kbn-object-utils"],
       "@kbn/object-utils/*": ["./src/platform/packages/shared/kbn-object-utils/*"],
       "@kbn/object-versioning": ["./src/platform/packages/shared/kbn-object-versioning"],
@@ -1659,6 +1661,8 @@
       "@kbn/saved-search-component/*": ["./src/platform/packages/shared/kbn-saved-search-component/*"],
       "@kbn/saved-search-plugin": ["./src/platform/plugins/shared/saved_search"],
       "@kbn/saved-search-plugin/*": ["./src/platform/plugins/shared/saved_search/*"],
+      "@kbn/schema-string-helpers": ["./src/platform/packages/shared/kbn-schema-string-helpers"],
+      "@kbn/schema-string-helpers/*": ["./src/platform/packages/shared/kbn-schema-string-helpers/*"],
       "@kbn/scout": ["./src/platform/packages/shared/kbn-scout"],
       "@kbn/scout/*": ["./src/platform/packages/shared/kbn-scout/*"],
       "@kbn/scout-info": ["./src/platform/packages/private/kbn-scout-info"],
@@ -2265,7 +2269,7 @@
       "zod/v3/standard-schema.cjs": ["./node_modules/zod/v3/standard-schema.d.cts"],
       "zod/v4": ["./typings/zod/v4"],
       "fflate": ["./node_modules/fflate/lib/index.d.ts"],
-      "canvg": ["./node_modules/canvg/lib/index.d.ts"],
+      "canvg": ["./typings/canvg"],
       "immer/dist/types/types-external": [
         "./node_modules/immer/dist/types/types-external.d.ts"
       ],

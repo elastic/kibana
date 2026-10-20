@@ -199,9 +199,12 @@ describe('Lens Field Item', () => {
   });
 
   it('should not render edit field button for document field', async () => {
-    renderFieldItem({ field: documentField });
+    renderFieldItem({ field: documentField, editField: jest.fn(), hideDetails: true });
     await clickField(documentField.name);
-    expect(screen.queryByRole('button', { name: 'Edit data view field' })).not.toBeInTheDocument();
+    expect(screen.getByTestId('fieldPopoverHeader_fieldDisplayName')).toBeInTheDocument();
+    expect(
+      screen.queryByTestId(`fieldPopoverHeader_editField-${documentField.name}`)
+    ).not.toBeInTheDocument();
   });
 
   it('should pass add filter callback and pass result to filter manager', async () => {

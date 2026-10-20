@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { GetOutputHealthResponse } from '../../../common/types';
+import type {
+  GetOutputAgentPolicyCountResponse,
+  GetOutputHealthResponse,
+} from '../../../common/types';
 
 import { outputRoutesService } from '../../services';
 import type {
@@ -73,5 +76,21 @@ export function sendGetOutputHealth(outputId: string) {
     method: 'get',
     path: outputRoutesService.getOutputHealthPath(outputId),
     version: API_VERSIONS.public.v1,
+  });
+}
+
+export function sendGetOutputAgentPolicyCount(
+  outputId: string,
+  pendingFlags?: { isDefault?: boolean; isDefaultMonitoring?: boolean }
+) {
+  const query: Record<string, boolean> = {};
+  if (pendingFlags?.isDefault !== undefined) query.isDefault = pendingFlags.isDefault;
+  if (pendingFlags?.isDefaultMonitoring !== undefined)
+    query.isDefaultMonitoring = pendingFlags.isDefaultMonitoring;
+  return sendRequest<GetOutputAgentPolicyCountResponse>({
+    method: 'get',
+    path: outputRoutesService.getOutputAgentPolicyCountPath(outputId),
+    version: API_VERSIONS.internal.v1,
+    query,
   });
 }

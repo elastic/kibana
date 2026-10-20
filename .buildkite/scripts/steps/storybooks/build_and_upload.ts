@@ -12,10 +12,12 @@ import fs from 'fs';
 import path from 'path';
 import os from 'os';
 import pLimit from 'p-limit';
-import { storybookAliases } from '@kbn/dev/storybook/aliases';
+import { loadKibanaModule } from '../../../pipeline-utils/load_kibana_module.ts';
 import { getKibanaDir } from '#pipeline-utils';
 
-const GITHUB_CONTEXT = 'Build and Publish Storybooks';
+const { storybookAliases } = loadKibanaModule<typeof import('@kbn/dev/storybook/aliases')>(
+  '@kbn/dev/storybook/aliases'
+);
 
 const STORYBOOK_DIRECTORY =
   process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false'
@@ -25,7 +27,7 @@ const STORYBOOK_BUCKET = 'ci-artifacts.kibana.dev/storybooks';
 const STORYBOOK_BUCKET_URL = `https://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}`;
 const STORYBOOK_BASE_URL = `${STORYBOOK_BUCKET_URL}`;
 
-const exec = (...args: string[]) => execSync(args.join(' '), { stdio: 'inherit' });
+const exec = (command: string) => execSync(command, { stdio: 'inherit' });
 
 const buildStorybook = (storybook: string): Promise<{ logs: string }> => {
   return new Promise((resolve, reject) => {
@@ -63,16 +65,6 @@ const buildStorybook = (storybook: string): Promise<{ logs: string }> => {
   });
 };
 
-const ghStatus = (state: string, description: string) =>
-  exec(
-    `gh api "repos/elastic/kibana/statuses/${process.env.BUILDKITE_COMMIT}"`,
-    `-f state=${state}`,
-    `-f target_url="${process.env.BUILDKITE_BUILD_URL}"`,
-    `-f context="${GITHUB_CONTEXT}"`,
-    `-f description="${description}"`,
-    `--silent`
-  );
-
 const build = async () => {
   console.log('--- Building Storybooks');
 
@@ -95,6 +87,14 @@ const build = async () => {
 
 const upload = () => {
   const originalDirectory = process.cwd();
+  const activateScriptPath = path.join(
+    getKibanaDir(),
+    '.buildkite',
+    'scripts',
+    'common',
+    'activate_service_account.sh'
+  );
+  exec(`${activateScriptPath} gs://ci-artifacts.kibana.dev`);
   try {
     console.log('--- Generating Storybooks HTML');
 
@@ -124,12 +124,7 @@ const upload = () => {
     fs.writeFileSync('index.html', html);
 
     console.log('--- Uploading Storybooks');
-    const activateScript = path.relative(
-      process.cwd(),
-      path.join(getKibanaDir(), '.buildkite', 'scripts', 'common', 'activate_service_account.sh')
-    );
     exec(`
-      ${activateScript} gs://ci-artifacts.kibana.dev
       gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=js,css,html,json,map,txt,svg --recursive --no-user-output-enabled '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/'
       gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=html --no-user-output-enabled 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
     `);
@@ -145,13 +140,6 @@ const upload = () => {
 };
 
 (async () => {
-  try {
-    ghStatus('pending', 'Building Storybooks');
-    await build();
-    upload();
-    ghStatus('success', 'Storybooks built');
-  } catch (error) {
-    ghStatus('error', 'Building Storybooks failed');
-    throw error;
-  }
+  await build();
+  upload();
 })();

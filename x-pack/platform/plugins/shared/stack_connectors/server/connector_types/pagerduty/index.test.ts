@@ -952,4 +952,85 @@ describe('execute()', () => {
       }
     `);
   });
+
+  test('should remove links with empty href values', async () => {
+    const randoDate = new Date('1963-09-23T01:23:45Z').toISOString();
+    const secrets = {
+      routingKey: 'super-secret',
+    };
+    const config = {
+      apiUrl: 'the-api-url',
+    };
+    const params: ActionParamsType = {
+      eventAction: 'trigger',
+      dedupKey: 'a-dedup-key',
+      summary: 'the summary',
+      source: 'the-source',
+      severity: 'critical',
+      timestamp: randoDate,
+      component: 'the-component',
+      group: 'the-group',
+      class: 'the-class',
+      links: [
+        {
+          href: '',
+          text: 'an empty link',
+        },
+        {
+          href: '       ',
+          text: 'another empty link',
+        },
+        {
+          href: 'http://example.com',
+          text: 'a correct link',
+        },
+      ],
+    };
+    postPagerdutyMock.mockImplementation(() => {
+      return { status: 202, data: 'data-here' };
+    });
+
+    const actionId = 'some-action-id';
+    const executorOptions: PagerDutyConnectorTypeExecutorOptions = {
+      actionId,
+      config,
+      params,
+      secrets,
+      services,
+      configurationUtilities,
+      logger: mockedLogger,
+      connectorUsageCollector,
+    };
+
+    const actionResponse = await connectorType.executor(executorOptions);
+
+    expect(postPagerdutyMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        apiUrl: 'the-api-url',
+        data: expect.objectContaining({
+          dedup_key: 'a-dedup-key',
+          event_action: 'trigger',
+          links: [
+            {
+              href: 'http://example.com',
+              text: 'a correct link',
+            },
+          ],
+        }),
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Routing-Key': 'super-secret',
+        },
+      }),
+      mockedLogger,
+      configurationUtilities,
+      connectorUsageCollector
+    );
+
+    expect(actionResponse).toMatchObject({
+      actionId: 'some-action-id',
+      data: 'data-here',
+      status: 'ok',
+    });
+  });
 });

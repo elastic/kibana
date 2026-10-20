@@ -13,10 +13,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Application Usage', function () {
     const { common } = getPageObjects(['common']);
     const browser = getService('browser');
+    const retry = getService('retry');
 
     it('keys in the schema match the registered application IDs', async () => {
       await common.navigateToApp('home'); // Navigate to Home
-      await common.isChromeVisible(); // Make sure the page is fully loaded
+      await retry.waitFor('chrome to be visible', () => common.isChromeVisible());
       const appIds: unknown = await browser.execute(() => {
         // @ts-expect-error this code runs in the browser
         return window.__applicationIds__;

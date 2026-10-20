@@ -14,7 +14,7 @@ import {
   getAffectedPackages,
   listChangedFiles,
   touchedCriticalFiles,
-} from '../../affected-packages';
+} from '../../affected-packages/index.ts';
 
 /**
  * The shared inputs both per-variant filters need: which packages the PR
@@ -37,7 +37,8 @@ export async function resolveSelectiveTestingContext(
   const affectedPackages = await getAffectedPackages(mergeBase, {
     strategy: 'git',
     includeDownstream: true,
-    ignorePatterns: [], // might want to exclude metadata/text changes in the future
+    // Documentation files (README, *.md, CHANGELOG*) can't affect runtime behaviour.
+    ignorePatterns: ['**/README*', '**/*.md', '**/CHANGELOG*'],
     ignoreUncategorizedChanges: true,
   }).catch((error) => {
     console.error('Error getting affected packages', error);

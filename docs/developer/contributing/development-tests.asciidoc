@@ -12,10 +12,10 @@ invoke them:
 |Test runner |Test location |Runner command (working directory is {kib}
 root)
 |Jest |`**/*.test.{js,mjs,ts,tsx}`
-|`yarn test:jest [test path]`
+|`pnpm test:jest [test path]`
 
 |Jest (integration) |`**/integration_tests/**/*.test.{js,mjs,ts,tsx}`
-|`yarn test:jest_integration [test path]`
+|`pnpm test:jest_integration [test path]`
 
 |Functional
 |`test/**/config.js` `x-pack/platform/test/**/config.js`
@@ -33,23 +33,23 @@ Kibana primarily uses Jest for unit testing. Each plugin or package defines a `j
 
 [source,bash]
 ----
-yarn jest --config src/platform/plugins/shared/dashboard/jest.config.js
+pnpm exec jest --config src/platform/plugins/shared/dashboard/jest.config.js
 ----
 
-A script is available to provide a better user experience when testing while navigating throughout the repository. To run the tests within your current working directory, use `yarn test:jest`. Like the Jest CLI, you can also supply a path to determine which tests to run.
+A script is available to provide a better user experience when testing while navigating throughout the repository. To run the tests within your current working directory, use `pnpm test:jest`. Like the Jest CLI, you can also supply a path to determine which tests to run.
 
 [source,bash]
 ----
-kibana/src/platform/plugins/shared/dashboard/server$ yarn test:jest #or
-kibana/src/platform/plugins/shared/dashboard$ yarn test:jest server #or
-kibana$ yarn test:jest src/platform/plugins/shared/dashboard/server
+kibana/src/platform/plugins/shared/dashboard/server$ pnpm test:jest #or
+kibana/src/platform/plugins/shared/dashboard$ pnpm test:jest server #or
+kibana$ pnpm test:jest src/platform/plugins/shared/dashboard/server
 ----
 
 Any additional options supplied to `test:jest` will be passed onto the Jest CLI with the resulting Jest command always being outputted.
 
 [source,bash]
 ----
-kibana/src/platform/plugins/shared/dashboard/server$ yarn test:jest --coverage
+kibana/src/platform/plugins/shared/dashboard/server$ pnpm test:jest --coverage
 
 # is equivalent to
 
@@ -112,7 +112,7 @@ that opens. You can roll back to this snapshot when the VM expires in 90
 days.
 * In System Preferences > Sharing, change your computer name to be
 something simple, e.g. "`computer`".
-* Run {kib} with `yarn start --host=computer.local` (substituting
+* Run {kib} with `pnpm start --host=computer.local` (substituting
 your computer name).
 * Now you can run your VM, open the browser, and navigate to
 `<COMPUTER_NAME>.local:5601` to test {kib}.

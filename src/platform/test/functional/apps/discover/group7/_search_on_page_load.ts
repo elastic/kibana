@@ -87,24 +87,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       beforeEach(async () => await initSearchOnPageLoad(false));
 
       it('should not fetch data from ES initially', async function () {
-        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
+        expect(await testSubjects.waitForExists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
         expect(await unifiedFieldList.doesSidebarShowFields()).to.be(false);
       });
 
       it('should not fetch on indexPattern change', async function () {
-        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
+        expect(await testSubjects.waitForExists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
 
         await discover.selectIndexPattern('date-nested');
 
-        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
+        expect(await testSubjects.waitForExists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
         expect(await unifiedFieldList.doesSidebarShowFields()).to.be(false);
       });
 
       it('should fetch data from ES after refreshDataButton click', async function () {
-        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
+        expect(await testSubjects.waitForExists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
         expect(await unifiedFieldList.doesSidebarShowFields()).to.be(false);
 
@@ -116,7 +116,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should fetch data from ES after submit query', async function () {
-        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
+        expect(await testSubjects.waitForExists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
         expect(await unifiedFieldList.doesSidebarShowFields()).to.be(false);
 
@@ -129,7 +129,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should fetch data from ES after choosing commonly used time range', async function () {
         await discover.selectIndexPattern('logstash-*');
-        expect(await testSubjects.exists(refreshButtonSelector)).to.be(true);
+        expect(await testSubjects.waitForExists(refreshButtonSelector)).to.be(true);
         await retry.waitFor('number of fetches to be 0', waitForFetches(0));
         expect(await unifiedFieldList.doesSidebarShowFields()).to.be(false);
 

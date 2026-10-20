@@ -9,6 +9,8 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function CspSecurityCommonProvider({ getPageObjects, getService }: FtrProviderContext) {
   const security = getService('security');
+  const browser = getService('browser');
+  const deployment = getService('deployment');
   const pageObjects = getPageObjects(['security']);
 
   const roles = [
@@ -102,6 +104,9 @@ export function CspSecurityCommonProvider({ getPageObjects, getService }: FtrPro
     },
 
     async logout() {
+      // Invalidate the session server-side while the browser still holds its cookie: clearing
+      // browser state alone leaves it valid, and an in-flight request can re-issue the cookie.
+      await browser.get(`${deployment.getHostPort()}/logout`);
       await pageObjects.security.forceLogout();
     },
 

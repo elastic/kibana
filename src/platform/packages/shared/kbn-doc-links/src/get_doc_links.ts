@@ -83,7 +83,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
         ? `${SERVERLESS_DOCS}observability-apm-transaction-sampling.html`
         : `${OBSERVABILITY_DOCS}sampling.html`,
       indexLifecycleManagement: `${OBSERVABILITY_DOCS}apm-ilm-how-to.html`,
-      troubleshootingTooManyTransactions: `${KIBANA_DOCS}troubleshooting.html#troubleshooting-too-many-transactions`,
+      troubleshootingTooManyTransactions: `${OBSERVABILITY_DOCS}apm-common-problems.html#troubleshooting-too-many-transactions`,
     },
     canvas: {
       guide: `${KIBANA_DOCS}canvas.html`,

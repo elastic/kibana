@@ -7,9 +7,10 @@ source .buildkite/scripts/steps/artifacts/env.sh
 
 echo "--- Download and verify artifacts"
 
+# Only stage artifacts produced by this build
 function download {
-  download_artifact "$1" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
-  download_artifact "$1.sha512.txt" . --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
+  download_artifact "$1" . --build "$BUILDKITE_BUILD_ID"
+  download_artifact "$1.sha512.txt" . --build "$BUILDKITE_BUILD_ID"
   sha512sum -c "$1.sha512.txt"
   rm "$1.sha512.txt"
 }

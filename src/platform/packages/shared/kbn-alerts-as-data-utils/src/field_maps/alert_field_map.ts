@@ -53,6 +53,7 @@ import {
   EVENT_ORIGINAL,
   TAGS,
   ALERT_INTENDED_TIMESTAMP,
+  ALERT_TRACKED,
 } from '@kbn/rule-data-utils';
 import type { MultiField } from './types';
 
@@ -293,6 +294,11 @@ export const alertFieldMap = {
   },
   [VERSION]: {
     type: 'version',
+    array: false,
+    required: false,
+  },
+  [ALERT_TRACKED]: {
+    type: 'boolean',
     array: false,
     required: false,
   },

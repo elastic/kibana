@@ -231,6 +231,13 @@ export default function (providerContext: FtrProviderContext) {
         .send({ force: true })
         .expect(200);
 
+      // Pre-install filetest so the parallel createPackagePolicy calls below don't race a first-time install
+      await supertest
+        .post(`/api/fleet/epm/packages/filetest/0.1.0`)
+        .set('kbn-xsrf', 'xxxx')
+        .send({ force: true })
+        .expect(200);
+
       let { body: apiResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set('kbn-xsrf', 'kibana')

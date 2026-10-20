@@ -8,8 +8,11 @@
  */
 
 import { parse as yamlLoad } from 'yaml';
-import { doAnyChangesMatch as realDoAnyChangesMatch } from '../../../pipeline-utils/github/github';
+import { doAnyChangesMatch as realDoAnyChangesMatch } from '../../../pipeline-utils/github/github.ts';
 import { FIPS_GH_LABELS, FIPS_VERSION } from '#pipeline-utils/pr_labels';
+import { getKibanaDir } from '#pipeline-utils/utils';
+
+process.chdir(getKibanaDir());
 
 const mockAreChangesSkippable = jest.fn();
 const mockDoAnyChangesMatch = jest.fn();
@@ -17,7 +20,6 @@ const mockDoAllChangesMatch = jest.fn();
 const mockGetAgentImageConfig = jest.fn();
 const mockFlushCancelOnGateFailureMetadata = jest.fn();
 const mockRunPreBuild = jest.fn();
-const mockGetEvalPipeline = jest.fn();
 const mockIsAutomatedVersionBumpPR = jest.fn();
 const mockGetPrChangesCached = jest.fn();
 
@@ -36,19 +38,15 @@ jest.mock('#pipeline-utils', () => {
   };
 });
 
-jest.mock('./pre_build', () => ({
+jest.mock('./pre_build.ts', () => ({
   runPreBuild: mockRunPreBuild,
-}));
-
-jest.mock('../../../pipelines/evals/eval_pipeline', () => ({
-  getEvalPipeline: mockGetEvalPipeline,
 }));
 
 const ORIGINAL_ENV = process.env;
 
 const importPipelineModule = async () => {
   await jest.isolateModulesAsync(async () => {
-    await import('./pipeline');
+    await import('./pipeline.ts');
   });
 };
 
@@ -82,7 +80,6 @@ describe('pull_request pipeline generation', () => {
     mockDoAllChangesMatch.mockResolvedValue(false);
     mockGetAgentImageConfig.mockReturnValue('agents:\n  provider: gcp\n');
     mockRunPreBuild.mockResolvedValue(undefined);
-    mockGetEvalPipeline.mockReturnValue(null);
     mockIsAutomatedVersionBumpPR.mockResolvedValue(false);
     mockGetPrChangesCached.mockResolvedValue([]);
   });

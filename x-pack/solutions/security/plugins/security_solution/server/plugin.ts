@@ -586,6 +586,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.healthDiagnosticService.setup({
         taskManager: plugins.taskManager,
         isServerless,
+        stackVersion: this.pluginContext.env.packageInfo.version,
       });
     } else {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
