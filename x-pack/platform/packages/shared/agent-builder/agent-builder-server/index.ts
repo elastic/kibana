@@ -233,4 +233,8 @@ export type {
   ConnectorSubActionDetail,
   ConnectorDetail,
 } from './agent_connectors';
-export { listAgentConnectors, getAgentConnectorDetail } from './agent_connectors';
+export {
+  listAgentConnectors,
+  getAgentConnectorDetail,
+  resolveAllowedConnectorIds,
+} from './agent_connectors';
