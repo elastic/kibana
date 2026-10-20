@@ -1,13 +1,15 @@
-# @kbn/connector-contract-mock
+# @kbn/connector-emulate
 
-Dev-only contract mock for the connectors in `@kbn/connector-specs`. It validates the requests a connector makes against the vendor's API spec and answers them with responses that conform to that spec, so connector tests run without vendor credentials or network access.
+A package that emulates the connectors in `@kbn/connector-specs` in both CI and Kibana runtime methods.
+
+It validates the requests a connector makes against the vendor's API spec and answers them with responses that conform to that spec, so connector tests run without vendor credentials or network access.
 
 This package is being built in stages (see [#295684](https://github.com/elastic/kibana/issues/295684)).
 
 ## In-process mock
 
 ```ts
-import { createContractMockFetch } from '@kbn/connector-contract-mock';
+import { createContractMockFetch } from '@kbn/connector-emulate';
 
 const { fetch, calls } = createContractMockFetch({ specs: [openApiDocument] });
 ```

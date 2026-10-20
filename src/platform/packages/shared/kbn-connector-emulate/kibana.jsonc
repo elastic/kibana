@@ -1,6 +1,6 @@
 {
   "type": "test-helper",
-  "id": "@kbn/connector-contract-mock",
+  "id": "@kbn/connector-emulate",
   "owner": "@elastic/workflows-eng",
   "group": "platform",
   "visibility": "shared",
