@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiModal, useEuiTheme } from '@elastic/eui';
+import { EuiModal } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
@@ -28,18 +28,11 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   closePopover,
   isOpen,
 }: ActionsMenuPopoverProps) {
-  const { euiTheme } = useEuiTheme();
-
   if (!isOpen) return null;
 
-  // EuiModal hardcodes close inset at size.xs with no public prop; match header padding.
   const panelCss = css({
     width: 'min(920px, calc(100vw - 48px))',
     overflow: 'hidden',
-    '.euiModal__closeIcon': {
-      insetInlineEnd: euiTheme.size.base,
-      insetBlockStart: euiTheme.size.base,
-    },
   });
 
   return (
