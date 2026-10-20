@@ -9,10 +9,10 @@
 
 import { renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject, map, skip } from 'rxjs';
-import type { DashboardApi } from '../../dashboard_api/types';
-import { uiActionsService } from '../../services/kibana_services';
+import type { DashboardApi } from '../../../dashboard_api/types';
+import { uiActionsService } from '../../../services/kibana_services';
 import { ENHANCE_DASHBOARD_ACTION_ID } from './enhance_dashboard_action';
-import { useEnhanceDashboardAction } from './use_enhance_dashboard_action';
+import { useEnhanceButtonProps } from './use_enhance_button_props';
 
 type TestDashboardApi = DashboardApi & {
   viewMode$: BehaviorSubject<string>;
@@ -25,7 +25,7 @@ const createDashboardApi = (): TestDashboardApi =>
     children$: new BehaviorSubject({}),
   } as unknown as TestDashboardApi);
 
-describe('useEnhanceDashboardAction', () => {
+describe('useEnhanceButtonProps', () => {
   const mockExecute = jest.fn();
   const mockIsCompatible = jest.fn(async () => true);
   const mockIsDisabled = jest.fn(() => false);
@@ -59,37 +59,37 @@ describe('useEnhanceDashboardAction', () => {
     });
   });
 
-  it('returns null when the action is not registered', () => {
+  it('returns undefined when the action is not registered', () => {
     (uiActionsService.hasAction as jest.Mock).mockReturnValue(false);
     const dashboardApi = createDashboardApi();
 
-    const { result } = renderHook(() => useEnhanceDashboardAction(dashboardApi));
+    const { result } = renderHook(() => useEnhanceButtonProps(dashboardApi));
 
-    expect(result.current).toBeNull();
+    expect(result.current).toBeUndefined();
   });
 
-  it('returns null when the action is incompatible', async () => {
+  it('returns undefined when the action is incompatible', async () => {
     mockIsCompatible.mockResolvedValue(false);
     const dashboardApi = createDashboardApi();
 
-    const { result } = renderHook(() => useEnhanceDashboardAction(dashboardApi));
+    const { result } = renderHook(() => useEnhanceButtonProps(dashboardApi));
 
     await waitFor(() => {
       expect(mockIsCompatible).toHaveBeenCalled();
     });
-    expect(result.current).toBeNull();
+    expect(result.current).toBeUndefined();
   });
 
-  it('returns an execute handler when the action is compatible', async () => {
+  it('returns a click handler that executes the action when it is compatible', async () => {
     const dashboardApi = createDashboardApi();
 
-    const { result } = renderHook(() => useEnhanceDashboardAction(dashboardApi));
+    const { result } = renderHook(() => useEnhanceButtonProps(dashboardApi));
 
     await waitFor(() => {
-      expect(result.current).not.toBeNull();
+      expect(result.current).not.toBeUndefined();
     });
 
-    await result.current?.execute();
+    result.current?.onClick({ returnFocus: jest.fn() });
 
     expect(mockExecute).toHaveBeenCalledWith({
       dashboardApi,
@@ -97,21 +97,21 @@ describe('useEnhanceDashboardAction', () => {
     });
   });
 
-  it('returns null when the action becomes incompatible', async () => {
+  it('returns undefined when the action becomes incompatible', async () => {
     mockIsCompatible.mockResolvedValue(true);
     const dashboardApi = createDashboardApi();
 
-    const { result } = renderHook(() => useEnhanceDashboardAction(dashboardApi));
+    const { result } = renderHook(() => useEnhanceButtonProps(dashboardApi));
 
     await waitFor(() => {
-      expect(result.current).not.toBeNull();
+      expect(result.current).not.toBeUndefined();
     });
 
     mockIsCompatible.mockResolvedValue(false);
     dashboardApi.viewMode$.next('view');
 
     await waitFor(() => {
-      expect(result.current).toBeNull();
+      expect(result.current).toBeUndefined();
     });
   });
 
@@ -121,10 +121,10 @@ describe('useEnhanceDashboardAction', () => {
     );
     const dashboardApi = createDashboardApi();
 
-    const { result } = renderHook(() => useEnhanceDashboardAction(dashboardApi));
+    const { result } = renderHook(() => useEnhanceButtonProps(dashboardApi));
 
     await waitFor(() => {
-      expect(result.current).not.toBeNull();
+      expect(result.current).not.toBeUndefined();
     });
     expect(result.current?.isDisabled).toBe(false);
     expect(result.current?.tooltip).toBe(
@@ -136,7 +136,7 @@ describe('useEnhanceDashboardAction', () => {
     mockIsDisabled.mockReturnValue(true);
     const dashboardApi = createDashboardApi();
 
-    const { result } = renderHook(() => useEnhanceDashboardAction(dashboardApi));
+    const { result } = renderHook(() => useEnhanceButtonProps(dashboardApi));
 
     await waitFor(() => {
       expect(result.current?.isDisabled).toBe(true);
@@ -148,7 +148,7 @@ describe('useEnhanceDashboardAction', () => {
     mockIsDisabled.mockReturnValue(true);
     const dashboardApi = createDashboardApi();
 
-    const { result } = renderHook(() => useEnhanceDashboardAction(dashboardApi));
+    const { result } = renderHook(() => useEnhanceButtonProps(dashboardApi));
 
     await waitFor(() => {
       expect(result.current?.isDisabled).toBe(true);

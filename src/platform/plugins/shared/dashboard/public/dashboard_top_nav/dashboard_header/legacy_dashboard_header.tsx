@@ -13,16 +13,16 @@ import { AppMenu } from '@kbn/core-chrome-app-menu';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 
-import type { AppHeaderExperimentalDashboardAiAction } from '@kbn/app-header';
+import { useEnhanceButtonProps } from './enhance/use_enhance_button_props';
+import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { coreServices } from '../../services/kibana_services';
-import { DashboardEnhanceButton } from '../dashboard_enhance_button';
-import { DashboardFavoriteButton } from '../dashboard_favorite_button';
+import { DashboardEnhanceButton } from './enhance/dashboard_enhance_button';
+import { DashboardFavoriteButton } from './dashboard_favorite_button';
 
 export interface LegacyDashboardHeaderProps {
   badges: NonNullable<TopNavMenuProps['badges']>;
   config?: AppMenuConfig;
   lastSavedId?: string;
-  enhanceAction?: AppHeaderExperimentalDashboardAiAction;
 }
 
 /**
@@ -33,8 +33,9 @@ export const LegacyDashboardHeader = ({
   badges,
   config,
   lastSavedId,
-  enhanceAction,
 }: LegacyDashboardHeaderProps) => {
+  const enhanceButtonProps = useEnhanceButtonProps(useDashboardApi());
+
   useEffect(() => {
     coreServices.chrome.setBreadcrumbsBadges(badges);
     return () => {
@@ -50,15 +51,15 @@ export const LegacyDashboardHeader = ({
   }, [lastSavedId]);
 
   useEffect(() => {
-    if (!enhanceAction) {
+    if (!enhanceButtonProps) {
       return;
     }
 
     return coreServices.chrome.setBreadcrumbsAppendExtension({
-      content: <DashboardEnhanceButton action={enhanceAction} />,
+      content: <DashboardEnhanceButton action={enhanceButtonProps} />,
       order: 1,
     });
-  }, [enhanceAction]);
+  }, [enhanceButtonProps]);
 
   return <AppMenu setAppMenu={coreServices.chrome.setAppMenu} config={config} />;
 };

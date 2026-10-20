@@ -10,15 +10,12 @@
 import React, { useMemo } from 'react';
 
 import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
-import type {
-  AppHeaderBack,
-  AppHeaderBadge,
-  AppHeaderExperimentalDashboardAiAction,
-  AppHeaderShareAction,
-} from '@kbn/app-header';
+import type { AppHeaderBack, AppHeaderBadge, AppHeaderShareAction } from '@kbn/app-header';
 import { useFavorite } from '@kbn/content-management-favorites-public';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
+import { useEnhanceButtonProps } from './enhance/use_enhance_button_props';
+import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../../common/page_bundle_constants';
 import { getDashboardBreadcrumb } from '../../dashboard_app/_dashboard_app_strings';
 import { coreServices } from '../../services/kibana_services';
@@ -31,7 +28,6 @@ interface Props {
   badges: NonNullable<TopNavMenuProps['badges']>;
   dashboardId?: string;
   share?: AppHeaderShareAction;
-  experimentalDashboardAiAction?: AppHeaderExperimentalDashboardAiAction;
 }
 
 /**
@@ -39,6 +35,7 @@ interface Props {
  */
 export const NextChromeAppHeader = ({ isHostedByApp, dashboardId, badges, ...props }: Props) => {
   const favorite = useFavorite({ id: dashboardId });
+  const experimentalDashboardAiAction = useEnhanceButtonProps(useDashboardApi());
 
   const appHeaderBadges = useMemo<AppHeaderBadge[]>(
     () =>
@@ -68,6 +65,7 @@ export const NextChromeAppHeader = ({ isHostedByApp, dashboardId, badges, ...pro
         {...props}
         badges={appHeaderBadges}
         favorite={favorite}
+        experimentalDashboardAiAction={experimentalDashboardAiAction}
         spacing="compact"
       />
     );
@@ -79,6 +77,7 @@ export const NextChromeAppHeader = ({ isHostedByApp, dashboardId, badges, ...pro
       badges={appHeaderBadges}
       back={backToListing}
       favorite={favorite}
+      experimentalDashboardAiAction={experimentalDashboardAiAction}
       spacing="compact"
     />
   );

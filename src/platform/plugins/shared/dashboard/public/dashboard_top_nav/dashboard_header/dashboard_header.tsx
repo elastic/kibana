@@ -9,12 +9,12 @@
 
 import React from 'react';
 
-import type { AppHeaderExperimentalDashboardAiAction, AppHeaderShareAction } from '@kbn/app-header';
+import type { AppHeaderShareAction } from '@kbn/app-header';
 import { AppMenuComponent } from '@kbn/core-chrome-app-menu-components';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import { DashboardFavoritesProvider } from '../dashboard_favorite_button';
+import { DashboardFavoritesProvider } from './dashboard_favorite_button';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
 import { NextChromeAppHeader } from './next_chrome_app_header';
 
@@ -25,7 +25,6 @@ interface Props {
   badges: NonNullable<TopNavMenuProps['badges']>;
   dashboardId?: string;
   share?: AppHeaderShareAction;
-  experimentalDashboardAiAction?: AppHeaderExperimentalDashboardAiAction;
   /** The page was loaded with the `embed=true` URL param. */
   isEmbeddedViaUrl: boolean;
   /** A host app provided `setCustomHeaderActionMenu`. */
@@ -41,7 +40,6 @@ export const DashboardHeader = ({
   badges,
   dashboardId,
   share,
-  experimentalDashboardAiAction,
   isEmbeddedViaUrl,
   isHostedByApp,
 }: Props) => {
@@ -56,14 +54,7 @@ export const DashboardHeader = ({
 
   // Classic chrome: push through the imperative chrome APIs.
   if (chromeStyle !== 'project') {
-    return (
-      <LegacyDashboardHeader
-        badges={badges}
-        config={menu}
-        lastSavedId={dashboardId}
-        enhanceAction={experimentalDashboardAiAction}
-      />
-    );
+    return <LegacyDashboardHeader badges={badges} config={menu} lastSavedId={dashboardId} />;
   }
 
   // Next chrome
@@ -76,7 +67,6 @@ export const DashboardHeader = ({
         badges={badges}
         dashboardId={dashboardId}
         share={share}
-        experimentalDashboardAiAction={experimentalDashboardAiAction}
       />
     </DashboardFavoritesProvider>
   );

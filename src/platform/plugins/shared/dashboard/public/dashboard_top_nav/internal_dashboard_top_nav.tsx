@@ -57,7 +57,6 @@ import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardHeader } from './dashboard_header';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
-import { useEnhanceDashboardAction } from '../dashboard_app/enhance/use_enhance_dashboard_action';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -303,20 +302,6 @@ export function InternalDashboardTopNav({
   }, [visibilityProps.showDatePicker, allDataViews]);
 
   const shareAction = useDashboardShareAction({ redirectTo });
-  const enhanceAction = useEnhanceDashboardAction(dashboardApi);
-  const experimentalDashboardAiAction = useMemo(
-    () =>
-      viewMode === 'edit' && enhanceAction
-        ? {
-            onClick: () => {
-              void enhanceAction.execute();
-            },
-            isDisabled: enhanceAction.isDisabled,
-            tooltip: enhanceAction.tooltip,
-          }
-        : undefined,
-    [viewMode, enhanceAction]
-  );
 
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     redirectTo,
@@ -396,7 +381,6 @@ export function InternalDashboardTopNav({
           badges={badges}
           dashboardId={lastSavedId}
           share={shareAction}
-          experimentalDashboardAiAction={experimentalDashboardAiAction}
           isEmbeddedViaUrl={Boolean(embedSettings)}
           isHostedByApp={Boolean(setCustomHeaderActionMenu)}
         />

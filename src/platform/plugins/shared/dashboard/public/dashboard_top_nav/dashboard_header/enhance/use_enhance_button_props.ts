@@ -8,10 +8,11 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+import type { AppHeaderExperimentalDashboardAiAction } from '@kbn/app-header';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { catchError, EMPTY, from, map, of, startWith, switchMap } from 'rxjs';
-import type { DashboardApi } from '../../dashboard_api/types';
-import { uiActionsService } from '../../services/kibana_services';
+import type { DashboardApi } from '../../../dashboard_api/types';
+import { uiActionsService } from '../../../services/kibana_services';
 import {
   ENHANCE_DASHBOARD_ACTION_ID,
   type EnhanceDashboardActionContext,
@@ -28,15 +29,9 @@ interface CompatibleEnhanceAction {
   tooltip: string;
 }
 
-export interface UseEnhanceDashboardAction {
-  execute: () => Promise<void>;
-  isDisabled: boolean;
-  tooltip: string;
-}
-
-export const useEnhanceDashboardAction = (
+export const useEnhanceButtonProps = (
   dashboardApi: DashboardApi
-): UseEnhanceDashboardAction | null => {
+): AppHeaderExperimentalDashboardAiAction | undefined => {
   const [compatibleAction, setCompatibleAction] = useState<CompatibleEnhanceAction | null>(null);
   const context = useMemo(
     () => ({
@@ -91,11 +86,13 @@ export const useEnhanceDashboardAction = (
     () =>
       compatibleAction
         ? {
-            execute: () => compatibleAction.action.execute(context),
+            onClick: () => {
+              void compatibleAction.action.execute(context);
+            },
             isDisabled: compatibleAction.isDisabled,
             tooltip: compatibleAction.tooltip,
           }
-        : null,
+        : undefined,
     [compatibleAction, context]
   );
 };

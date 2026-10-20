@@ -14,10 +14,10 @@ import {
   FavoritesContextProvider,
 } from '@kbn/content-management-favorites-public';
 import { QueryClientProvider } from '@kbn/react-query';
-import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
-import { coreServices, usageCollectionService } from '../services/kibana_services';
-import { dashboardQueryClient } from '../services/dashboard_query_client';
+import { DASHBOARD_APP_ID } from '../../../common/page_bundle_constants';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import { coreServices, usageCollectionService } from '../../services/kibana_services';
+import { dashboardQueryClient } from '../../services/dashboard_query_client';
 
 /**
  * Provides favorites client + query context for dashboard favorite UI.
