@@ -119,6 +119,15 @@ export const FOREACH_ITEM_SCHEMA_DESC = {
   RUNTIME_TYPE: 'Collection type cannot be determined statically, it will be resolved at runtime',
 } as const;
 
+/** True when the collection path is valid but its item type is known only at runtime. */
+export function isRuntimeResolvedItemSchema(itemSchema: z.ZodType): boolean {
+  return (
+    itemSchema instanceof z.ZodUnknown &&
+    (itemSchema.description === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON ||
+      itemSchema.description === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE)
+  );
+}
+
 export interface ForeachCollectionDiagnostic {
   message: string;
   severity: 'error' | 'warning';
@@ -142,14 +151,8 @@ export function getForeachCollectionDiagnostic(
       severity: 'error',
     };
   }
-  if (
-    description === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_JSON ||
-    description === FOREACH_ITEM_SCHEMA_DESC.RUNTIME_TYPE
-  ) {
-    return {
-      message: description,
-      severity: 'warning',
-    };
+  if (isRuntimeResolvedItemSchema(itemSchema)) {
+    return null;
   }
   if (description) {
     return { message: description, severity: 'error' };

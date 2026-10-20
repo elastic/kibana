@@ -826,6 +826,8 @@ export interface SelectionDetails {
     /** Link path (relative or absolute URL) */
     path: string;
   }>;
+  /** Severity when the value does not resolve to an option. Defaults to 'error'. */
+  severity?: 'error' | 'warning';
 }
 
 /**

@@ -132,6 +132,49 @@ describe('validateStepProperties', () => {
     });
   });
 
+  it('should use the severity from getDetails when the value does not resolve', async () => {
+    const selectionHandler = {
+      search: jest.fn(),
+      resolve: jest.fn().mockResolvedValue(null),
+      getDetails: jest.fn().mockResolvedValue({ message: 'Not found yet', severity: 'warning' }),
+    };
+
+    const mockConnector = {
+      type: '1w',
+      configSchema: z.object({ prop: z.string() }),
+    };
+    mockGetAllConnectorsMapCache.mockReturnValue(new Map([['1w', mockConnector as any]]));
+    mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: 'prop' });
+
+    const validationResults = await validateStepProperties([
+      {
+        id: '1w',
+        stepId: 'step-1w',
+        startLineNumber: 1,
+        startColumn: 1,
+        endLineNumber: 1,
+        endColumn: 1,
+        yamlPath: ['prop'],
+        key: 'prop',
+        selectionHandler,
+        context: {
+          stepType: '1w',
+          scope: 'config',
+          propertyKey: 'prop',
+          values: EMPTY_VALUES,
+        },
+        propertyValue: 'missing-index',
+        propertyKey: 'prop',
+        stepType: '1w',
+        scope: 'config',
+        type: 'step-property',
+      },
+    ]);
+
+    expect(validationResults).toHaveLength(1);
+    expect(validationResults[0]).toMatchObject({ severity: 'warning', message: 'Not found yet' });
+  });
+
   it('should return valid result when resolve returns option and getDetails returns valid message', async () => {
     const resolvedOption = {
       value: '2',
@@ -325,51 +368,59 @@ describe('validateStepProperties', () => {
     expect(validationResults).toHaveLength(0);
   });
 
-  it('should skip selection validation for Liquid template values and not call resolve or getDetails', async () => {
-    const selectionHandler = {
-      search: jest.fn(),
-      resolve: jest.fn(),
-      getDetails: jest.fn(),
-    };
+  it.each([
+    ['{{ inputs.something }}'],
+    ['${{ inputs.something }}'],
+    ['.alerts-security.alerts-{{ variables.spaceId }}'],
+    ['logs-{% if inputs.env %}prod{% endif %}'],
+  ])(
+    'should skip selection validation for template value %s and not call resolve or getDetails',
+    async (propertyValue) => {
+      const selectionHandler = {
+        search: jest.fn(),
+        resolve: jest.fn(),
+        getDetails: jest.fn(),
+      };
 
-    const mockConnector = {
-      type: '6a',
-      configSchema: z.object({ prop: z.string() }),
-    };
-    mockGetAllConnectorsMapCache.mockReturnValue(new Map([['6a', mockConnector as any]]));
-    mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: 'prop' });
+      const mockConnector = {
+        type: '6a',
+        configSchema: z.object({ prop: z.string() }),
+      };
+      mockGetAllConnectorsMapCache.mockReturnValue(new Map([['6a', mockConnector as any]]));
+      mockGetSchemaAtPath.mockReturnValue({ schema: z.string(), scopedToPath: 'prop' });
 
-    const customPropertyItems: StepPropertyItem[] = [
-      {
-        id: '6a',
-        stepId: 'step-6a',
-        startLineNumber: 1,
-        startColumn: 1,
-        endLineNumber: 1,
-        endColumn: 1,
-        yamlPath: ['6a'],
-        key: 'prop',
-        selectionHandler,
-        context: {
+      const customPropertyItems: StepPropertyItem[] = [
+        {
+          id: '6a',
+          stepId: 'step-6a',
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: 1,
+          endColumn: 1,
+          yamlPath: ['6a'],
+          key: 'prop',
+          selectionHandler,
+          context: {
+            stepType: '6a',
+            scope: 'config',
+            propertyKey: 'prop',
+            values: EMPTY_VALUES,
+          },
+          propertyValue,
+          propertyKey: 'prop',
           stepType: '6a',
           scope: 'config',
-          propertyKey: 'prop',
-          values: EMPTY_VALUES,
+          type: 'step-property',
         },
-        propertyValue: '{{ inputs.something }}',
-        propertyKey: 'prop',
-        stepType: '6a',
-        scope: 'config',
-        type: 'step-property',
-      },
-    ];
+      ];
 
-    const validationResults = await validateStepProperties(customPropertyItems);
+      const validationResults = await validateStepProperties(customPropertyItems);
 
-    expect(selectionHandler.resolve).not.toHaveBeenCalled();
-    expect(selectionHandler.getDetails).not.toHaveBeenCalled();
-    expect(validationResults).toHaveLength(0);
-  });
+      expect(selectionHandler.resolve).not.toHaveBeenCalled();
+      expect(selectionHandler.getDetails).not.toHaveBeenCalled();
+      expect(validationResults).toHaveLength(0);
+    }
+  );
 
   it('should skip validation when connector is not found', async () => {
     const selectionHandler = {

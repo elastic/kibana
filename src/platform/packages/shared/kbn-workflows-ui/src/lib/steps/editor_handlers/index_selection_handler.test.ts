@@ -355,6 +355,7 @@ describe('getIndexSelectionHandler', () => {
 
       expect(details.message).toContain('does-not-exist');
       expect(details.message).toMatch(/can still run/);
+      expect(details.severity).toBe('warning');
       expect(getUrlForApp).toHaveBeenCalledWith(
         'management',
         expect.objectContaining({ deepLinkId: 'index_management', absolute: true })
