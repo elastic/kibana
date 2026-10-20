@@ -7,7 +7,7 @@
 
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public/hooks/use_track_metric';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
 import { Redirect, useLocation } from 'react-router-dom';
 import { OutPortal } from 'react-reverse-portal';

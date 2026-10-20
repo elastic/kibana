@@ -11,18 +11,16 @@ import * as reduxHooks from 'react-redux-v7';
 import { render } from '../../../../utils/testing/rtl_helpers';
 import { fireEvent } from '@testing-library/react';
 import { MonitorDetailFlyout, getDurationChartTimeRange } from './monitor_detail_flyout';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import * as monitorDetail from '../../../../hooks/use_monitor_detail';
 import * as statusByLocation from '../../../../hooks/use_status_by_location';
 import * as monitorDetailLocator from '../../../../hooks/use_monitor_detail_locator';
-import { TagsList } from '@kbn/observability-shared-plugin/public/components/tags_list/tags_list_lazy';
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
-import { useEsSearch } from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { useFetcher, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { OBSERVABILITY_MONITOR_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
 import { getMonitorAction } from '../../../../state';
 
-jest.mock('@kbn/observability-shared-plugin/public/components/tags_list/tags_list_lazy');
-jest.mock('@kbn/observability-shared-plugin/public/hooks/use_fetcher');
-jest.mock('@kbn/observability-shared-plugin/public/hooks/use_es_search');
+jest.mock('@kbn/observability-shared-plugin/public');
 
 const TagsListMock = TagsList as jest.Mock;
 TagsListMock.mockReturnValue(<div>Tags list</div>);
@@ -35,10 +33,10 @@ useFetcherMock.mockReturnValue({
   refetch: jest.fn(),
 });
 
-// The auto-mocked `useEsSearch` returns `undefined` by default. The flyout
-// renders `MonitorStatusPanel`, which now reaches `useExternalMonitor` via
-// `useSelectedMonitor`; that hook destructures `useEsSearch(...)`, so the mock
-// must return a non-undefined result.
+// `jest.mock('@kbn/observability-shared-plugin/public')` auto-mocks every export
+// with `() => undefined`. The flyout renders `MonitorStatusPanel`, which now
+// reaches `useExternalMonitor` via `useSelectedMonitor`; that hook destructures
+// `useEsSearch(...)`, so the mock must return a non-undefined result.
 const useEsSearchMock = useEsSearch as jest.Mock;
 
 interface DurationChartAttribute {
@@ -65,6 +63,9 @@ useEsSearchMock.mockReturnValue({
 
 describe('Monitor Detail Flyout', () => {
   beforeEach(() => {
+    jest
+      .spyOn(observabilitySharedPublic, 'useTheme')
+      .mockReturnValue({ eui: { euiColorVis0: 'red', euiColorVis9: 'red' } } as any);
     jest.spyOn(monitorDetail, 'useMonitorDetail').mockReturnValue({
       data: {
         docId: 'docId',

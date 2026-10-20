@@ -14,7 +14,7 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import rison from '@kbn/rison';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
 import { toggleStatusAlert } from '../../../../../../common/runtime_types/monitor_management/alert_config';

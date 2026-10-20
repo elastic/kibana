@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 
 import {

@@ -7,7 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
 

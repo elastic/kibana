@@ -17,8 +17,7 @@ import {
   EuiLoadingSpinner,
   EuiToolTip,
 } from '@elastic/eui';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
-import { useEsSearch } from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
+import { FETCH_STATUS, useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import styled from 'styled-components';
 import { useKibana } from '@kbn/kibana-react-plugin/public';

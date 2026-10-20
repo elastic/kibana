@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { fireEvent } from '@testing-library/react';
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { MonitorTagsComboBox } from './monitor_tags_combo_box';
 
-jest.mock('@kbn/observability-shared-plugin/public/hooks/use_fetcher', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public/hooks/use_fetcher'),
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
   useFetcher: jest.fn(),
 }));
 

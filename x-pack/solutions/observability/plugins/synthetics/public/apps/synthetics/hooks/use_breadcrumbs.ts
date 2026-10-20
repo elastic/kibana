@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { EuiBreadcrumb } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useBreadcrumbs as useObservabilityBreadcrumbs } from '@kbn/observability-shared-plugin/public/hooks/use_breadcrumbs';
+import { useBreadcrumbs as useObservabilityBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import type { ClientPluginsStart } from '../../../plugin';
 import type { SyntheticsUrlParams } from '../utils/url_params';
 import { stringifyUrlParams } from '../utils/url_params';

@@ -9,7 +9,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
 import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { fetchFieldSuggestions } from '../../../../state';

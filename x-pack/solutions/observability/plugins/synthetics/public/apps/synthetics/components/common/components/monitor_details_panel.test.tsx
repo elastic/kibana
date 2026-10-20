@@ -44,7 +44,7 @@ jest.mock('./monitor_assigned_agents', () => ({
   MonitorAssignedAgents: () => <div data-test-subj="monitorAssignedAgentsStub" />,
 }));
 
-jest.mock('@kbn/observability-shared-plugin/public/components/tags_list/tags_list_lazy', () => ({
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
   TagsList: ({ tags }: { tags: string[] }) => (
     <div data-test-subj="tagsListStub">{tags.join(',')}</div>
   ),

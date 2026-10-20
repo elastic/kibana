@@ -7,7 +7,7 @@
 
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_INDEX_PATTERN } from '../../common/constants';
 import type { MonitorLocations } from '../../common/runtime_types';
 

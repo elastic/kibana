@@ -7,7 +7,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiSpacer, EuiFlexItem } from '@elastic/eui';
 import { useDispatch, useSelector } from 'react-redux-v7';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public/hooks/use_track_metric';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { Redirect } from 'react-router-dom';
 import { DisabledCallout } from '../management/disabled_callout';
 import { FilterGroup } from '../common/monitor_filters/filter_group';

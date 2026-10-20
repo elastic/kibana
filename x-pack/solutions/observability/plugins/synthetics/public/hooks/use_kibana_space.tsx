@@ -6,7 +6,7 @@
  */
 import type { Space } from '@kbn/spaces-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { ClientPluginsStart } from '../plugin';
 

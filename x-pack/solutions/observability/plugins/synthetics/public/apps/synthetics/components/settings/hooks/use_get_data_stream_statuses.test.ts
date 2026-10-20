@@ -7,16 +7,13 @@
 
 import { renderHook } from '@testing-library/react';
 
-import {
-  FETCH_STATUS,
-  useFetcher,
-} from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useGetDataStreamStatuses } from './use_get_data_stream_statuses';
 import { policyLabels } from '../data_retention/policy_labels';
 import type { DataStream } from '@kbn/index-management-plugin/common';
 
-jest.mock('@kbn/observability-shared-plugin/public/hooks/use_fetcher', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public/hooks/use_fetcher'),
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
   useFetcher: jest.fn(),
 }));
 

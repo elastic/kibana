@@ -9,7 +9,7 @@ import React from 'react';
 import { waitFor, renderHook } from '@testing-library/react';
 import type { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import * as localStorageModule from 'react-use/lib/useLocalStorage';
 import { fetchMonitorManagementList } from '../../../state';
 
@@ -23,8 +23,8 @@ jest.mock('../../../state', () => ({
   fetchMonitorManagementList: jest.fn(),
 }));
 
-jest.mock('@kbn/observability-shared-plugin/public/hooks/use_fetcher', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public/hooks/use_fetcher'),
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
   useFetcher: jest.fn(),
 }));
 

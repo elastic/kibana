@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { IInspectorInfo } from '@kbn/data-plugin/common';
-import { useEsSearch } from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { applyExcludedDataTiersToParams } from '../utils/excluded_data_tiers';
 
 /**

@@ -7,10 +7,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { EuiConfirmModal, EuiLink, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
-import {
-  FETCH_STATUS,
-  useFetcher,
-} from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';

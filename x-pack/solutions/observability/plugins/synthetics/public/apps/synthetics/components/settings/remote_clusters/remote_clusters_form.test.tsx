@@ -6,15 +6,15 @@
  */
 
 import React from 'react';
-import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { screen, fireEvent } from '@testing-library/react';
 import { RemoteClustersForm } from './remote_clusters_form';
 import { render } from '../../../utils/testing';
 import * as settingsHooks from '../../../contexts/synthetics_settings_context';
 import type { SyntheticsSettingsContextValues } from '../../../contexts';
 
-jest.mock('@kbn/observability-shared-plugin/public/hooks/use_fetcher', () => ({
-  ...jest.requireActual('@kbn/observability-shared-plugin/public/hooks/use_fetcher'),
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  ...jest.requireActual('@kbn/observability-shared-plugin/public'),
   useFetcher: jest.fn(),
 }));
 

@@ -6,11 +6,11 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
+import * as observabilitySharedPublic from '@kbn/observability-shared-plugin/public';
 import { useErrorFailedStep } from './use_error_failed_step';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
-jest.mock('@kbn/observability-shared-plugin/public/hooks/use_es_search', () => ({
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useEsSearch: jest.fn().mockReturnValue({ data: undefined, loading: false }),
 }));
 

@@ -10,7 +10,7 @@ import { EuiFormRow } from '@elastic/eui';
 import type { Control, FieldErrors } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { TagsComboBox } from '@kbn/observability-shared-plugin/public/components/tags_combo_box/tags_combo_box_lazy';
+import { TagsComboBox } from '@kbn/observability-shared-plugin/public';
 import type { PrivateLocation } from '../../../../../../common/runtime_types';
 
 export function TagsField({

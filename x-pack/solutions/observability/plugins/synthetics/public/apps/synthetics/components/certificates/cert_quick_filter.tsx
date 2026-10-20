@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { FieldValueSelection } from '@kbn/observability-shared-plugin/public/components';
+import { FieldValueSelection } from '@kbn/observability-shared-plugin/public';
 
 export interface QuickFilterOption {
   value: string;

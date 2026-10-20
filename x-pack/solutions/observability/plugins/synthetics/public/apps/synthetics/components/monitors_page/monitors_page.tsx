@@ -8,7 +8,7 @@
 import React from 'react';
 import { useSelector } from 'react-redux-v7';
 import { Redirect } from 'react-router-dom';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public/hooks/use_track_metric';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
 import { MonitorsMWsCallout } from '../common/mws_callout/monitors_mws_callout';
 import { DisabledCallout } from './management/disabled_callout';

@@ -7,7 +7,7 @@
 
 import type { HttpFetchOptions, HttpFetchQuery, HttpSetup } from '@kbn/core/public';
 import type { AddInspectorRequest } from '@kbn/observability-shared-plugin/public';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import type { InspectorRequestProps } from '@kbn/observability-shared-plugin/public/contexts/inspector/inspector_context';
 import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import { kibanaService } from '../kibana_service';

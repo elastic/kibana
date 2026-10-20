@@ -13,7 +13,7 @@ import * as editMonitorLocatorModule from '../../../../hooks/use_edit_monitor_lo
 import * as monitorDetailLocatorModule from '../../../../hooks/use_monitor_detail_locator';
 import * as monitorEnableHandlerModule from '../../../../hooks/use_monitor_enable_handler';
 import * as enablementHook from '../../../../hooks/use_enablement';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 import type { OverviewStatusMetaData } from '../types';
 
 describe('ActionsPopover', () => {

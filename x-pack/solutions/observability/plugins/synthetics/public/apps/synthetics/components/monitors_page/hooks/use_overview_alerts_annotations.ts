@@ -9,7 +9,7 @@ import { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { ObservabilityDataViews } from '@kbn/exploratory-view-plugin/public';
 import type { AnnotationLayerConfig } from '@kbn/exploratory-view-plugin/public';
 import type { QueryPointEventAnnotationConfig } from '@kbn/event-annotation-common';

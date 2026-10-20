@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createEsParams } from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
+import { createEsParams } from '@kbn/observability-shared-plugin/public';
 import { useSyntheticsEsSearch } from '../../../hooks/use_synthetics_es_search';
 import type { Ping } from '../../../../../../common/runtime_types';
 import { getSyntheticsCcsIndex } from '../../../../../../common/get_synthetics_indices';

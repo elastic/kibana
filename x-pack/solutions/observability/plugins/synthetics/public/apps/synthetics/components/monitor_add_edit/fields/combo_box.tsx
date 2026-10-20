@@ -13,7 +13,7 @@ import {
   createTagsPasteHandler,
   getNewTags,
   splitTags,
-} from '@kbn/observability-shared-plugin/public/components/tags_combo_box/tags_input';
+} from '@kbn/observability-shared-plugin/public';
 
 export interface FormattedComboBoxProps {
   onChange: (value: string[]) => void;

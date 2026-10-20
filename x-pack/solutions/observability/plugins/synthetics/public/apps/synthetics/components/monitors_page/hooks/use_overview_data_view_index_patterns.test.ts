@@ -18,7 +18,7 @@ jest.mock('../../../contexts', () => ({
 }));
 
 const mockUseFetcher = jest.fn();
-jest.mock('@kbn/observability-shared-plugin/public/hooks/use_fetcher', () => ({
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useFetcher: () => mockUseFetcher(),
 }));
 

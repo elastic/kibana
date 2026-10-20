@@ -74,7 +74,7 @@ jest.mock('../../../hooks/use_synthetics_page_ready', () => ({
   useSyntheticsPageReady: jest.fn(),
 }));
 
-jest.mock('@kbn/observability-shared-plugin/public/hooks/use_track_metric', () => ({
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useTrackPageview: jest.fn(),
 }));
 

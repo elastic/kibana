@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import type { MissingCompleteAgentLocationsResponse } from '../../../../../../common/types';
 import { apiService } from '../../../../../utils/api_service/api_service';

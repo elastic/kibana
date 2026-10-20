@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch } from 'react-redux-v7';
-import { TagsList } from '@kbn/observability-shared-plugin/public/components/tags_list/tags_list_lazy';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import { useKibanaSpace } from '../../../../../hooks/use_kibana_space';
 import { PanelWithTitle } from './panel_with_title';

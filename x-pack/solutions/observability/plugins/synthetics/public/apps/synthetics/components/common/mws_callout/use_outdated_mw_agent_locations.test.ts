@@ -6,18 +6,14 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import {
-  FETCH_STATUS,
-  useFetcher,
-} from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import { apiService } from '../../../../../utils/api_service/api_service';
 import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 import { useOutdatedMwAgentLocationIds } from './use_outdated_mw_agent_locations';
 
-jest.mock('@kbn/observability-shared-plugin/public/hooks/use_fetcher', () => ({
-  FETCH_STATUS: jest.requireActual('@kbn/observability-shared-plugin/public/hooks/use_fetcher')
-    .FETCH_STATUS,
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  FETCH_STATUS: jest.requireActual('@kbn/observability-shared-plugin/public').FETCH_STATUS,
   useFetcher: jest.fn(),
 }));
 

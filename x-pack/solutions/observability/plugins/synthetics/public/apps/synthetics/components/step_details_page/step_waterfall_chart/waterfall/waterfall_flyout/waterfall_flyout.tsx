@@ -16,10 +16,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  METRIC_TYPE,
-  useUiTracker,
-} from '@kbn/observability-shared-plugin/public/hooks/use_track_metric';
+import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { Table } from './waterfall_flyout_table';
 import { MiddleTruncatedText } from '../middle_truncated_text';
 import type { WaterfallMetadataEntry } from '../../../common/network_data/types';

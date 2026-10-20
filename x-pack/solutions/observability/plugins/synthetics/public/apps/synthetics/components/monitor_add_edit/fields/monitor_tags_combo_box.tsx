@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { fetchTagSuggestions } from '../../../state';
 import type { FormattedComboBoxProps } from './combo_box';
 import { FormattedComboBox } from './combo_box';

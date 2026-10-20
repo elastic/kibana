@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { FieldValueSelection } from '@kbn/observability-shared-plugin/public/components';
+import { FieldValueSelection } from '@kbn/observability-shared-plugin/public';
 import { isLogicalAndField } from '../../../../../../../common/constants';
 import type { SyntheticsMonitorFilterItem } from '../../../../utils/filters/filter_fields';
 import {

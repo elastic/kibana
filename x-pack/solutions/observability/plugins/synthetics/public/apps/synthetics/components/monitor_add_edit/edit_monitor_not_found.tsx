@@ -8,7 +8,7 @@
 import React, { useEffect, useState } from 'react';
 import { EuiLink, EuiSpacer } from '@elastic/eui';
 import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';

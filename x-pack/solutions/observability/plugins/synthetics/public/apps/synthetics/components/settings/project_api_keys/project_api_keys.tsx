@@ -9,7 +9,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EuiText, EuiLink, EuiEmptyPrompt, EuiSwitch, EuiSpacer, EuiForm } from '@elastic/eui';
 import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/public';
 import { FormProvider } from 'react-hook-form';

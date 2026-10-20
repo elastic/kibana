@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_API_URLS } from '../../../../../../common/constants';
 import type { OutdatedMwAgentLocationsResponse } from '../../../../../../common/utils/agent_mw_support';
 import { apiService } from '../../../../../utils/api_service/api_service';

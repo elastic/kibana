@@ -36,7 +36,7 @@ jest.mock('react-router-dom', () => ({
   useParams: () => ({ monitorId: 'monitor-1' }),
 }));
 
-jest.mock('@kbn/observability-shared-plugin/public/hooks/use_time_zone', () => ({
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useTimeZone: () => 'UTC',
 }));
 

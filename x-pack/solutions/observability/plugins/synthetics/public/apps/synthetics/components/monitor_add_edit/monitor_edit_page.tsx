@@ -10,7 +10,7 @@ import { useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public/hooks/use_track_metric';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { OutPortal } from 'react-reverse-portal';
 import { CanUsePublicLocationsCallout } from './steps/can_use_public_locations_callout';
 import { DisabledCallout } from '../monitors_page/management/disabled_callout';

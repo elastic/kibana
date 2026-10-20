@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useContext, useMemo } from 'react';
-import { useFetcher } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import type { CertFacets } from '../../../../../common/runtime_types';
 import { getCertFacets } from '../../state/certs/api';
 import { SyntheticsRefreshContext } from '../../contexts';

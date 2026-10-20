@@ -6,7 +6,7 @@
  */
 
 import { createReducer } from 'redux-toolkit-v1';
-import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public/hooks/use_fetcher';
+import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';
 
 import type {
   MonitorManagementListResult,

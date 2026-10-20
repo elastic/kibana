@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public/hooks/use_track_metric';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { useDispatch } from 'react-redux-v7';
 import { ErrorCallOut } from './error_callout';

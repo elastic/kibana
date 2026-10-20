@@ -42,12 +42,9 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   }),
 }));
 
-jest.mock(
-  '@kbn/observability-shared-plugin/public/contexts/inspector/use_inspector_context',
-  () => ({
-    useInspectorContext: () => ({ inspectorAdapters: { requests: {} } }),
-  })
-);
+jest.mock('@kbn/observability-shared-plugin/public', () => ({
+  useInspectorContext: () => ({ inspectorAdapters: { requests: {} } }),
+}));
 
 jest.mock('@kbn/exploratory-view-plugin/public', () => ({
   createExploratoryViewUrl: () => '/app/exploratory-view',

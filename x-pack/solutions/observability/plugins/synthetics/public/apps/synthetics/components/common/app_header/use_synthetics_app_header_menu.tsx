@@ -11,7 +11,7 @@ import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
-import { useInspectorContext } from '@kbn/observability-shared-plugin/public/contexts/inspector/use_inspector_context';
+import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux-v7';
 import { useHistory } from 'react-router-dom';
