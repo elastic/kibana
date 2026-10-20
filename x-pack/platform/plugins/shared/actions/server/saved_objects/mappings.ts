@@ -84,6 +84,16 @@ export const connectorIngressCredentialMappings: SavedObjectsTypeMappingDefiniti
   },
 };
 
+export const connectorSigningKeyMappings: SavedObjectsTypeMappingDefinition = {
+  dynamic: false,
+  properties: {
+    connectorId: {
+      type: 'keyword',
+      ignore_above: 1024,
+    },
+  },
+};
+
 export const connectorTokenMappings: SavedObjectsTypeMappingDefinition = {
   dynamic: false,
   properties: {

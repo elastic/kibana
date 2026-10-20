@@ -42,6 +42,7 @@ import {
   type EsqlViewNameValidationError,
 } from '@kbn/esql-utils';
 import type { ESQLEditorDeps } from '../types';
+import { ESQLEditorTelemetryService, type ViewCreatedSource } from '../telemetry/telemetry_service';
 
 export const createViewLabel = i18n.translate('esqlEditor.createView.openModalTooltip', {
   defaultMessage: 'Create view',
@@ -167,12 +168,15 @@ export interface CreateViewModalProps {
   query: string;
   onClose: () => void;
   onSaved?: (viewName: string) => void | Promise<void>;
+  /** Reported with the created-view telemetry event. */
+  source: ViewCreatedSource;
 }
 
 export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
   query,
   onClose,
   onSaved,
+  source,
 }) => {
   const modalTitleId = useGeneratedHtmlId();
   const formId = useGeneratedHtmlId();
@@ -180,6 +184,10 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
     services: { core },
   } = useKibana<ESQLEditorDeps>();
   const client = useMemo(() => createEsqlViewsManagementClient(core.http), [core.http]);
+  const telemetryService = useMemo(
+    () => new ESQLEditorTelemetryService(core.analytics),
+    [core.analytics]
+  );
 
   const [name, setName] = useState('');
   const [description, setDescription] = useState('');
@@ -247,11 +255,17 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
     }
 
     setIsSaving(true);
+    const hasDescription = description.trim().length > 0;
     try {
       await client.createView({
         name,
         query,
-        description: description.trim().length > 0 ? description : undefined,
+        description: hasDescription ? description : undefined,
+      });
+      telemetryService.trackViewCreated({
+        source,
+        hasDescription,
+        queryLength: query.length,
       });
     } catch (error) {
       if (error instanceof EsqlViewsClientError) {

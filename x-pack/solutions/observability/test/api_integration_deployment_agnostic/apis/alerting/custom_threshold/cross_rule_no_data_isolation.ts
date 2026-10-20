@@ -78,7 +78,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         numOfRuns,
         esClient,
         testStart: new Date(),
-        retryOptions: { retryCount: 20, retryDelay: 5000 },
+        retryOptions: { retryDelay: 5000 },
       });
 
     const getAlertsForRule = async (ruleId: string) => {
@@ -261,10 +261,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         await indexDocsFor(allDocs);
-        const keepAlive = startKeepAlive([...healthyProdDoc, ...stagingDocs]);
+        let keepAlive = startKeepAlive(allDocs);
         try {
-          await forceRuns(prodRuleId, 2);
           await forceRuns(stagingRuleId, 2);
+          await forceRuns(prodRuleId, 2);
+
+          // prod-host-2 stops reporting only once the prod rule has its baseline run, so its
+          // disappearance is anchored to that run rather than to an earlier setup timestamp.
+          await keepAlive.stop();
+          keepAlive = startKeepAlive([...healthyProdDoc, ...stagingDocs]);
 
           await new Promise((resolve) => setTimeout(resolve, STALENESS_WAIT_MS));
 
@@ -308,15 +313,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
 
         await indexDocsFor(allDocs);
-        const keepAlive = startKeepAlive([...prodDocs, ...healthyStagingDoc]);
+        let keepAlive = startKeepAlive(allDocs);
         try {
           await forceRuns(prodRuleId, 2);
           await forceRuns(stagingRuleId, 2);
 
+          // staging-host-2 stops reporting only once the staging rule has its baseline run, so its
+          // disappearance is anchored to that run rather than to an earlier setup timestamp.
+          await keepAlive.stop();
+          keepAlive = startKeepAlive([...prodDocs, ...healthyStagingDoc]);
+
           await new Promise((resolve) => setTimeout(resolve, STALENESS_WAIT_MS));
 
-          await forceRuns(prodRuleId, 2);
           await forceRuns(stagingRuleId, 2);
+          await forceRuns(prodRuleId, 2);
 
           // Affected rule: wait for the alert, then verify exactly 1 total
           await alertingApi.waitForAlertInIndex({

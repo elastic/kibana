@@ -7,14 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { eslintCompatPlugin } from '@oxlint/plugins';
 import { NoNakedESLintDisableRule } from './src/rules/no_naked_eslint_disable';
 import { NoProtectedESLintDisableRule } from './src/rules/no_protected_eslint_disable';
 
 /**
- * Custom ESLint rules, add `'@kbn/eslint-plugin-disable'` to your eslint config to use them
+ * Custom rules run by Oxlint through `oxlint_plugin.js`; `eslintCompatPlugin` keeps them loadable
+ * by ESLint as `'@kbn/eslint-plugin-disable'`.
  * @internal
  */
-export const rules = {
-  no_naked_eslint_disable: NoNakedESLintDisableRule,
-  no_protected_eslint_disable: NoProtectedESLintDisableRule,
-};
+export const { meta, rules } = eslintCompatPlugin({
+  meta: { name: '@kbn/disable' },
+  rules: {
+    no_naked_eslint_disable: NoNakedESLintDisableRule,
+    no_protected_eslint_disable: NoProtectedESLintDisableRule,
+  },
+});

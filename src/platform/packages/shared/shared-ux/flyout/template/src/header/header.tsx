@@ -20,6 +20,7 @@ import {
   EuiTabs,
   EuiText,
   EuiTitle,
+  EuiToolTip,
   useEuiMemoizedStyles,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -36,7 +37,11 @@ import {
   useFlyoutTabs,
   useFlyoutTemplateConfig,
 } from '../context';
-import { renderTitleIcon, renderTitleWithIcon } from '../title_adornments';
+import {
+  renderTitleIcon,
+  renderTitleLoading,
+  renderTitleWithAdornments,
+} from '../title_adornments';
 import type { FlyoutHeaderProps } from '../types';
 import { FLYOUT_HEADER_CLASS_NAME } from '../use_header_collapse';
 import { Badge, badgePart, BADGE_PART_NAME, type HeaderBadgeDescriptor } from './badge';
@@ -190,12 +195,27 @@ const BadgeOverflow = ({ badges, isHidden }: { badges: ReactNode[]; isHidden: bo
   );
 };
 
-/** Renders a resolved `Header.Badge` descriptor. */
-const renderBadge = ({ label, ...badgeProps }: HeaderBadgeDescriptor, key: string): ReactNode => (
-  <EuiBadge key={key} {...badgeProps}>
-    {label}
-  </EuiBadge>
-);
+/** Renders a resolved `Header.Badge` descriptor, wrapping in a tooltip when one is provided. */
+const renderBadge = (
+  { label, toolTipContent, toolTipPosition, ...badgeProps }: HeaderBadgeDescriptor,
+  key: string
+): ReactNode => {
+  // Tooltips open from keyboard focus, so a tooltipped non-interactive badge needs a tab stop.
+  const needsTabStop = Boolean(toolTipContent) && !badgeProps.onClick && !badgeProps.href;
+  const badge = (
+    <EuiBadge key={key} tabIndex={needsTabStop ? 0 : undefined} {...badgeProps}>
+      {label}
+    </EuiBadge>
+  );
+  if (!toolTipContent) {
+    return badge;
+  }
+  return (
+    <EuiToolTip key={key} content={toolTipContent} position={toolTipPosition}>
+      {badge}
+    </EuiToolTip>
+  );
+};
 
 type HeaderZoneProps = FlyoutHeaderProps & {
   flyoutTitleId?: string;
@@ -204,8 +224,10 @@ type HeaderZoneProps = FlyoutHeaderProps & {
 /** Internal renderer for the header zone; dividers are template-owned for full bleed. */
 export const HeaderZone = ({
   title,
+  titleText,
   titleIcon,
   titleTooltip,
+  isLoading = false,
   description,
   collapsed = false,
   children,
@@ -227,6 +249,10 @@ export const HeaderZone = ({
   } = useFlyoutHeaderCollapse();
   const isCollapsed = collapsed || isScrollCollapsed;
   const titleIconNode = renderTitleIcon(titleIcon, titleTooltip);
+  const titleLoadingNode = renderTitleLoading(isLoading);
+  // The collapsed title truncates, so a string title gets a native hover reveal. A node title is
+  // left untitled: a native `title` on its ancestor would cover any tooltip the node renders.
+  const collapsedTitleText = typeof title === 'string' ? titleText ?? title : undefined;
   const headerTestSubj = resolveZoneTestSubj(dataTestSubj, rootTestSubj, 'Header');
 
   // Every block kind carries its `instanceId` forward as its React key, so reordering or
@@ -292,22 +318,24 @@ export const HeaderZone = ({
                       <h3
                         id={flyoutTitleId}
                         css={[titleCss, collapseStyles.collapsedTitle]}
-                        title={typeof title === 'string' ? title : undefined}
+                        title={collapsedTitleText}
                       >
                         {title}
                       </h3>
                     </EuiTitle>
                   </EuiFlexItem>
                   {titleIconNode && <EuiFlexItem grow={false}>{titleIconNode}</EuiFlexItem>}
+                  {titleLoadingNode && <EuiFlexItem grow={false}>{titleLoadingNode}</EuiFlexItem>}
                 </EuiFlexGroup>
               ) : (
-                renderTitleWithIcon(
+                renderTitleWithAdornments(
                   <EuiTitle size="m">
                     <h3 id={flyoutTitleId} css={titleCss}>
                       {title}
                     </h3>
                   </EuiTitle>,
-                  titleIconNode
+                  titleIconNode,
+                  titleLoadingNode
                 )
               )}
             </div>

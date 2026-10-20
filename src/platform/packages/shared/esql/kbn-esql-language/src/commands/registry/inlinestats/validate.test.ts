@@ -157,6 +157,13 @@ describe('INLINE STATS Validation', () => {
         }
       });
 
+      test('resolves a BY assignment used in the aggregation WHERE', () => {
+        inlinestatsExpectErrors(
+          'FROM a_index | INLINE STATS COUNT() WHERE addr != null BY addr = keywordField',
+          []
+        );
+      });
+
       test('various errors', () => {
         inlinestatsExpectErrors(
           'from a_index | INLINE STATS avg(doubleField) by percentile(doubleField, 90)',
