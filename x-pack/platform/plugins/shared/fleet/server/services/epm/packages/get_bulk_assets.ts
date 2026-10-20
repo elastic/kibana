@@ -12,6 +12,9 @@ import type {
   SavedObjectsType,
 } from '@kbn/core/server';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
+import { parse } from 'yaml';
+import pMap from 'p-map';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import type { AssetSOObject, GetBulkAssetsResponse, SimpleSOAssetType } from '../../../../common';
 import { ElasticsearchAssetType } from '../../../../common';
@@ -20,6 +23,9 @@ import { KibanaSavedObjectType } from '../../../../common/types';
 import { displayedAssetTypesLookup } from '../../../../common/constants';
 
 import type { SimpleSOAssetAttributes } from '../../../types';
+import { appContextService } from '../../app_context';
+
+const MAX_CONCURRENT_WORKFLOW_LOOKUPS = 10;
 
 type DisplayableSOAssetAttributes = SimpleSOAssetAttributes & {
   name?: string;
@@ -106,11 +112,63 @@ const toAssetType = (
   };
 };
 
+const parseWorkflowYaml = (yaml: unknown): { name?: unknown; description?: unknown } => {
+  if (typeof yaml !== 'string') {
+    return {};
+  }
+  try {
+    return parse(yaml) ?? {};
+  } catch {
+    return {};
+  }
+};
+
+// Workflows are not saved objects, so they are resolved through the managed workflows client,
+// scoped to the space of the request like the saved objects client.
+const getWorkflowAssets = async (
+  workflowIds: string[],
+  spaceId: string
+): Promise<BulkAssetItem[]> => {
+  const client = await appContextService.getManagedWorkflowsClient();
+  if (!client || !workflowIds.length) {
+    return [];
+  }
+
+  const states = await pMap(
+    [...new Set(workflowIds)],
+    (workflowId) => client.getInstalledWorkflowState(workflowId, spaceId),
+    { concurrency: MAX_CONCURRENT_WORKFLOW_LOOKUPS }
+  );
+
+  return states.filter(isNotNull).map(({ workflowId, templateValues }) => {
+    const { name, description } = parseWorkflowYaml(templateValues?.yaml);
+
+    return {
+      id: workflowId,
+      type: KibanaSavedObjectType.workflow,
+      attributes: {
+        title: typeof name === 'string' ? name : workflowId,
+        description: typeof description === 'string' ? description : undefined,
+      },
+      appLink: `/app/workflows/${workflowId}`,
+    };
+  });
+};
+
+const isNotNull = <T>(value: T | null): value is T => value !== null;
+
 export async function getBulkAssets(
   soClient: SavedObjectsClientContract,
   soTypeRegistry: ISavedObjectTypeRegistry,
-  assetIds: AssetSOObject[]
+  allAssetIds: AssetSOObject[]
 ) {
+  const isWorkflow = ({ type }: AssetSOObject) => type === KibanaSavedObjectType.workflow;
+  const assetIds = allAssetIds.filter((asset) => !isWorkflow(asset));
+  const workflowAssets = await getWorkflowAssets(
+    allAssetIds.filter(isWorkflow).map(({ id }) => id),
+    soClient.getCurrentNamespace() ?? DEFAULT_SPACE_ID
+  );
+
   const { resolved_objects: resolvedObjects } =
     await soClient.bulkResolve<DisplayableSOAssetAttributes>(assetIds);
   const types: Record<string, SavedObjectsType | undefined> = {};
@@ -161,5 +219,5 @@ export async function getBulkAssets(
 
       return toAssetType(obj, types[obj.type], appLink);
     });
-  return res;
+  return [...res, ...workflowAssets];
 }
