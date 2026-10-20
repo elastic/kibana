@@ -63,9 +63,13 @@ export const mapProcessorStatsResponse = ({
     if (itemsIn && itemsIn.doc_count > 0) {
       const incoming = itemsIn.sum?.value ?? 0;
       result.events.incoming.rate = toItemRate(perSecond(incoming, seconds));
-      result.events.incoming.failures.rate = toItemRate(
-        perSecond(itemsIn.failures?.sum?.value ?? 0, seconds)
-      );
+      // No failures aggregation means failures were not queried: the rate stays null (no data).
+      // A present aggregation with no matches is a real 0.
+      if (itemsIn.failures) {
+        result.events.incoming.failures.rate = toItemRate(
+          perSecond(itemsIn.failures.sum?.value ?? 0, seconds)
+        );
+      }
       if (duration && duration.doc_count > 0) {
         result.processing_duration.average = toValue(
           averageSecondsPerEvent(duration.sum?.value, incoming),

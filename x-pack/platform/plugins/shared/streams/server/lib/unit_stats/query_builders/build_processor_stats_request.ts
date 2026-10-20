@@ -8,8 +8,6 @@
 import type { estypes } from '@elastic/elasticsearch';
 import {
   DIRECTION_FIELD,
-  OUTCOME_FAILURE,
-  OUTCOME_FIELD,
   STEP_DURATION_FIELD,
   STEP_ID_FIELD,
   STEP_ITEMS_FIELD,
@@ -20,8 +18,9 @@ import { baseSearchParams, buildUnitFilter, type StatsWindow } from './unit_filt
  * One search for all processor ids (the telemetry calls them steps). It sums over every
  * placement, with no pipeline id filter. Items count the `in` direction and every outcome.
  *
- * Failures are items `in` with outcome `failure`. `refused` means a component downstream
- * failed, so it belongs to that component and is not counted here.
+ * Failures would be items `in` with outcome `failure`. `refused` means a component downstream
+ * failed, so it belongs to that component and is not counted here. They are not queried yet,
+ * see the note on `failures` below.
  *
  * The duration is a `sum`, divided by the items sum in the mapper, so the average is per
  * event. An `avg` would divide by the number of collector calls and give a per batch number.
@@ -62,10 +61,17 @@ export const buildProcessorStatsRequest = ({
           },
           aggs: {
             sum: { sum: { field: STEP_ITEMS_FIELD } },
-            failures: {
-              filter: { term: { [OUTCOME_FIELD]: OUTCOME_FAILURE } },
-              aggs: { sum: { sum: { field: STEP_ITEMS_FIELD } } },
-            },
+            // Processor failures cannot be observed yet: the collector ignores OTTL statement
+            // errors (`error_mode: ignore`), so a record that fails a statement still leaves the
+            // processor as a success. Without this aggregation the mapper leaves the failures
+            // rate null (no data). Once
+            // https://github.com/open-telemetry/opentelemetry-collector-contrib/issues/52158
+            // is fixed, restore this and import OUTCOME_FAILURE and OUTCOME_FIELD from
+            // '../constants'.
+            // failures: {
+            //   filter: { term: { [OUTCOME_FIELD]: OUTCOME_FAILURE } },
+            //   aggs: { sum: { sum: { field: STEP_ITEMS_FIELD } } },
+            // },
           },
         },
         duration: {

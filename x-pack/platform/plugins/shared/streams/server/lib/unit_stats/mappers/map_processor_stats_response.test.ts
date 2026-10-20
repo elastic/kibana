@@ -110,7 +110,16 @@ describe('mapProcessorStatsResponse', () => {
     const [first] = bucket().by_id.buckets;
     const result = map({
       by_id: {
-        buckets: [{ ...first, items_in: { doc_count: 4, sum: { value: 30 } } }],
+        buckets: [
+          {
+            ...first,
+            items_in: {
+              doc_count: 4,
+              sum: { value: 30 },
+              failures: { doc_count: 0, sum: { value: 0 } },
+            },
+          },
+        ],
       },
     }).get('uppercase-message');
 
@@ -118,6 +127,19 @@ describe('mapProcessorStatsResponse', () => {
       value: 0,
       unit: '{item}',
       time_unit: 's',
+    });
+  });
+
+  it('leaves the failures rate null when failures were not queried', () => {
+    const [first] = bucket().by_id.buckets;
+    const result = map({
+      by_id: { buckets: [{ ...first, items_in: { doc_count: 4, sum: { value: 30 } } }] },
+    }).get('uppercase-message');
+
+    expect(result?.events.incoming.failures.rate).toEqual({
+      value: null,
+      unit: null,
+      time_unit: null,
     });
   });
 

@@ -53,11 +53,7 @@ const processorAggregations = {
     buckets: [
       {
         key: 'uppercase-message',
-        items_in: {
-          doc_count: 4,
-          sum: { value: 35 },
-          failures: { doc_count: 0, sum: { value: 0 } },
-        },
+        items_in: { doc_count: 4, sum: { value: 35 } },
         duration: { doc_count: 4, sum: { value: 0.001895 } },
       },
     ],
@@ -171,7 +167,7 @@ describe('UnitStatsClient.getStats', () => {
         events: {
           incoming: {
             rate: { value: 35 / 300, unit: '{item}', time_unit: 's' },
-            failures: { rate: { value: 0, unit: '{item}', time_unit: 's' } },
+            failures: { rate: { value: null, unit: null, time_unit: null } },
           },
         },
       });
