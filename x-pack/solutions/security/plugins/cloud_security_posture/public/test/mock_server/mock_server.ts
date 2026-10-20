@@ -75,7 +75,7 @@ export const setupMockServer = ({ debug = false }: { debug?: boolean } = {}) => 
  * @param server - The MSW server instance, created with setupMockServer
  */
 export const startMockServer = (server: SetupServer) => {
-  beforeAll(() => server.listen({ onUnhandledRequest: 'warn' }));
+  beforeAll(() => server.listen({ onUnhandledFrame: 'warn' }));
   afterAll(() => server.close());
   beforeEach(() => {
     server.resetHandlers();
