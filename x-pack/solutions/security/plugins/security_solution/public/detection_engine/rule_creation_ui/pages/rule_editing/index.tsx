@@ -522,17 +522,20 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
   }, []);
 
   const renderTabs = () => {
-    return tabs.map((tab, index) => (
-      <EuiToolTip key={index} position="top" content={tab.tooltip}>
-        <EuiTab
-          onClick={() => onTabClick(tab)}
-          isSelected={tab.id === activeStep}
-          disabled={tab.disabled}
-          data-test-subj={tab['data-test-subj']}
-        >
-          {tab.name}
-        </EuiTab>
-      </EuiToolTip>
+    // The tooltip is rendered inside the tab so each tab stays a direct child of the tablist,
+    // which lets screen readers announce the correct tab position and count.
+    return tabs.map((tab) => (
+      <EuiTab
+        key={tab.id}
+        onClick={() => onTabClick(tab)}
+        isSelected={tab.id === activeStep}
+        disabled={tab.disabled}
+        data-test-subj={tab['data-test-subj']}
+      >
+        <EuiToolTip position="top" content={tab.tooltip}>
+          <span>{tab.name}</span>
+        </EuiToolTip>
+      </EuiTab>
     ));
   };
 
