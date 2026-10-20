@@ -10,6 +10,8 @@ export type { RunOptions, Binding } from './host';
 export { ModuleRegistry } from './registry';
 export { LEVER_LABELS } from './protocol';
 export { createBatchStream, bindBatchStream } from './batch_stream';
+export { createAsyncServiceClient, bindAsyncServices } from './async_handles';
+export type { ServiceHandle } from './async_handles';
 export type { EventBatch, BatchLimits } from './batch_stream';
 export { encode, decode } from './codecs';
 export type { CodecInput, WireValue } from './codecs';

@@ -1,4 +1,4 @@
-# Track 7 capability kit — 0.1.4 pre-release research slice
+# Track 7 capability kit — 0.1.5 pre-release research slice
 
 PRIVATE research code; no public Core API, plugin lifecycle hook, or automatic enablement.
 Base harness fd3138c. Only main owns TM claims/leases/results.
@@ -113,6 +113,28 @@ spaceId overrides are denied; pass a genuine Core space-scoped security-wrapped
 client, not an unwrapped internal repository. Principal/space must match its binding.
 This bridge preserves actual migration/security/ESO behavior ON MAIN; no claim of
 worker-local SO/ESO, large-state isolation or RBAC proof from fixture clients.
+
+## Residual async service handles (0.1.5)
+
+Main grants handles: bindAsyncServices({ serviceObject, registryFunction },
+{ staticMetadata: ... }). Worker uses createAsyncServiceClient(context,'handles'):
+await roots() -> services handle references + COPIED static snapshots;
+await get(ref,key), await invoke(methodRef,args), await snapshot(ref,keys),
+await release(ref). There is NO implicit JavaScript Proxy and no main sync wait.
+Class private-field receivers are owner-side; handing a host ref back unwraps to
+its actual object. Object results are handles (not eager graph snapshots); use
+snapshot(ref,keys) for bounded data, or prefer module-specifier local code.
+For callbacks: context.exportCallback(async (...args)=>...), pass that reference
+as a service argument; main receives an async callback. Returning it to its owning
+worker unwraps to the ORIGINAL function. context.releaseCallback(ref) revokes it.
+Limits256host handles/run and256worker callbacks/pending callback calls; explicit
+release or run-end cleanup, no FinalizationRegistry. Foreign/expired refs fail.
+Residual host handlers record main THREAD CPU: handlerSyncCpuUs (synchronous prefix)
+and handlerWindowCpuUs (whole await interval, INCLUDES other concurrent main work),
+plus wall durationMs. Window CPU is NOT attributable/exclusive per-call billing.
+Telemetry absent means no CPU sampling/byte measurement. No payloads in telemetry.
+Worker-owned arbitrary service objects are not transparent graphs; export their
+functions explicitly as callbacks. Network/crash persistent handles not provided.
 
 ## Acknowledged event streams (0.1.3)
 

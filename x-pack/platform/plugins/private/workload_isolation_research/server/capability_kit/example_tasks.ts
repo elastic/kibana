@@ -13,6 +13,8 @@ import type { CodecInput } from './codecs';
 import type { WorkerContext } from './protocol';
 import { createRunServices } from './services';
 import { createBatchStream } from './batch_stream';
+import { createAsyncServiceClient } from './async_handles';
+import type { ServiceHandle } from './async_handles';
 
 export const echo = async (input: CodecInput): Promise<CodecInput> => input;
 export const alternate = async (): Promise<CodecInput> => 'new-revision';
@@ -40,6 +42,52 @@ export const services = async (input: CodecInput, context: WorkerContext): Promi
     await clients.close();
   }
 };
+export const serviceHandles = async (
+  _input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  const client = createAsyncServiceClient(context, 'handles');
+  const roots = await client.roots();
+  const service = roots.services.fixture;
+  const same = (await client.get(service, 'same')) as ServiceHandle;
+  const identity = await client.invoke(same, [service]);
+  const callback = async (value: CodecInput): Promise<CodecInput> => String(value) + '-worker';
+  const callbackRef = context.exportCallback(callback);
+  const withCallback = (await client.get(service, 'withCallback')) as ServiceHandle;
+  const result = await client.invoke(withCallback, [callbackRef]);
+  const returnArg = (await client.get(service, 'returnArg')) as ServiceHandle;
+  const roundTrip = await client.invoke(returnArg, [callbackRef]);
+  context.releaseCallback(callbackRef);
+  let callbackReleased = false;
+  try {
+    await client.invoke(withCallback, [callbackRef]);
+  } catch {
+    callbackReleased = true;
+  }
+  await client.release(same);
+  let released = false;
+  try {
+    await client.invoke(same, [service]);
+  } catch {
+    released = true;
+  }
+  let foreign = false;
+  try {
+    await client.get({ ...service, runId: 'another-run' }, 'same');
+  } catch {
+    foreign = true;
+  }
+  return {
+    identity,
+    result,
+    callbackIdentity: roundTrip === callback,
+    callbackReleased,
+    released,
+    foreign,
+    staticMetadata: roots.snapshots.version,
+  };
+};
+
 export const typedFailure = async (input: CodecInput): Promise<CodecInput> => {
   if (input === 'sse')
     throw new ServerSentEventError('requestAborted', 'fixture-agent', {

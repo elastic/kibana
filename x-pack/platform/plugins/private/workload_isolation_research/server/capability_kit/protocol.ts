@@ -58,18 +58,34 @@ export interface Crossing {
   readonly direction: 'host_to_isolate' | 'isolate_to_host';
   readonly bytes: number;
   readonly durationMs: number;
+  readonly handlerSyncCpuUs?: number;
+  readonly handlerWindowCpuUs?: number;
+}
+export interface CallbackRef {
+  readonly owner: 'worker';
+  readonly runId: string;
+  readonly id: string;
+  readonly $asyncHandle: 1;
+}
+export type AsyncCallback = (...args: CodecInput[]) => CodecInput | Promise<CodecInput>;
+export interface HostCallContext {
+  invokeCallback(reference: CallbackRef, args: readonly CodecInput[]): Promise<CodecInput>;
 }
 export interface WorkerContext {
   readonly bundle: Bundle;
   readonly signal: AbortSignal;
   call(capability: string, operation: string, args: CodecInput): Promise<CodecInput>;
   load(id: string): Promise<object>;
+  exportCallback(callback: AsyncCallback): CallbackRef;
+  releaseCallback(reference: CallbackRef): void;
+  resolveCallback(reference: CallbackRef): AsyncCallback;
 }
 export type TaskEntry = (input: CodecInput, context: WorkerContext) => Promise<CodecInput>;
 export type HostHandler = (
   operation: string,
   args: CodecInput,
-  bundle: Bundle
+  bundle: Bundle,
+  context?: HostCallContext
 ) => Promise<CodecInput>;
 export type Packet =
   | {
@@ -114,6 +130,22 @@ export type Packet =
       readonly reason: 'deadline' | 'cancelled' | 'shutdown';
     }
   | { readonly version: 1; readonly kind: 'abort_ack'; readonly runId: string }
+  | {
+      readonly version: 1;
+      readonly kind: 'callback';
+      readonly runId: string;
+      readonly id: number;
+      readonly reference: CallbackRef;
+      readonly args: WireValue;
+    }
+  | {
+      readonly version: 1;
+      readonly kind: 'callback_result';
+      readonly runId: string;
+      readonly id: number;
+      readonly value: WireValue;
+      readonly failed: boolean;
+    }
   | { readonly version: 1; readonly kind: 'ready' };
 
 export type Outcome =

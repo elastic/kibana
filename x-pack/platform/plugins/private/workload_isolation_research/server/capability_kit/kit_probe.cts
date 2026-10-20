@@ -13,3 +13,4 @@ require('./es_parity.node_test');
 require('./concurrency.node_test');
 require('./batch_stream.node_test');
 require('./errors.node_test');
+require('./async_handles.node_test');

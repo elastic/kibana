@@ -37,6 +37,10 @@ interface Execution {
   readonly options: RunOptions;
   readonly bundle: Bundle;
   readonly resolve: (outcome: Outcome) => void;
+  readonly callbacks: Map<
+    number,
+    { resolve: (value: CodecInput) => void; reject: (error: Error) => void }
+  >;
   timer?: NodeJS.Timeout;
   abort?: () => void;
   termination?: {
@@ -61,6 +65,7 @@ export class ExecutionHost {
   private readonly queues = new Map<string, Execution[]>();
   private readonly activeIds = new Set<string>();
   private closing = false;
+  private callbackSequence = 0;
 
   constructor(
     private readonly registry: ModuleRegistry,
@@ -106,7 +111,7 @@ export class ExecutionHost {
       ...(options.data === undefined ? {} : { data: encode(options.data) }),
     });
     return new Promise((resolve) => {
-      const execution: Execution = { options, bundle, resolve, done: false };
+      const execution: Execution = { options, bundle, resolve, done: false, callbacks: new Map() };
       const abort = () => {
         void this.terminate(execution, 'cancelled');
       };
@@ -239,6 +244,24 @@ export class ExecutionHost {
       packet.runId !== execution.bundle.runId
     )
       return;
+    if (packet.kind === 'callback_result') {
+      const callback = execution.callbacks.get(packet.id);
+      if (!callback) return;
+      execution.callbacks.delete(packet.id);
+      const value = decode(packet.value);
+      if (packet.failed)
+        callback.reject(value instanceof Error ? value : new Error('Remote callback failed'));
+      else callback.resolve(value);
+      this.record(
+        execution,
+        'handles.callback_result',
+        'capability_bundle',
+        'isolate_to_host',
+        packet,
+        0
+      );
+      return;
+    }
     if (packet.kind === 'abort_ack') {
       if (execution.termination) execution.termination.acknowledged = true;
       this.record(
@@ -283,6 +306,8 @@ export class ExecutionHost {
     const binding = execution.options.capabilities[packet.capability];
     let value: CodecInput;
     let failed = false;
+    let handlerSyncCpuUs = 0;
+    const cpuStarted = this.options.onCrossing ? process.threadCpuUsage() : undefined;
     try {
       if (!binding || packet.grant !== execution.bundle.grants[packet.capability])
         throw new Error('Capability denied');
@@ -294,11 +319,46 @@ export class ExecutionHost {
         packet,
         0
       );
-      value = await binding.handler(packet.operation, decode(packet.args), execution.bundle);
+      const result = binding.handler(packet.operation, decode(packet.args), execution.bundle, {
+        invokeCallback: (reference, args) =>
+          new Promise((resolve, reject) => {
+            if (reference.runId !== execution.bundle.runId || execution.done || slot.stopping)
+              return reject(new Error('Foreign or expired callback handle'));
+            if (execution.callbacks.size >= 256) return reject(new Error('Pending callback limit'));
+            const id = ++this.callbackSequence;
+            execution.callbacks.set(id, { resolve, reject });
+            const callbackPacket: Packet = {
+              version: 1,
+              kind: 'callback',
+              runId: execution.bundle.runId,
+              id,
+              reference,
+              args: encode(args),
+            };
+            try {
+              this.record(
+                execution,
+                'handles.callback',
+                'capability_bundle',
+                'host_to_isolate',
+                callbackPacket,
+                0
+              );
+              slot.endpoint.send(callbackPacket);
+            } catch (error) {
+              execution.callbacks.delete(id);
+              reject(error instanceof Error ? error : new Error('Callback send failed'));
+            }
+          }),
+      });
+      const syncCpu = cpuStarted ? process.threadCpuUsage(cpuStarted) : { user: 0, system: 0 };
+      handlerSyncCpuUs = syncCpu.user + syncCpu.system;
+      value = await result;
     } catch (error) {
       failed = true;
       value = error instanceof Error ? error : new Error('Capability operation failed');
     }
+    const windowCpu = cpuStarted ? process.threadCpuUsage(cpuStarted) : { user: 0, system: 0 };
     // A late completion from a killed generation cannot reach a reused slot or commit an outcome.
     if (slot.active.get(execution.bundle.runId) !== execution || execution.done || slot.stopping)
       return;
@@ -323,7 +383,8 @@ export class ExecutionHost {
       binding?.lever ?? 'capability_bundle',
       'host_to_isolate',
       reply,
-      performance.now() - started
+      performance.now() - started,
+      { handlerSyncCpuUs, handlerWindowCpuUs: windowCpu.user + windowCpu.system }
     );
     slot.endpoint.send(reply);
   }
@@ -431,6 +492,9 @@ export class ExecutionHost {
     if (execution.termination?.timer) clearTimeout(execution.termination.timer);
     if (execution.abort) execution.options.signal?.removeEventListener('abort', execution.abort);
     this.activeIds.delete(execution.bundle.runId);
+    for (const callback of execution.callbacks.values())
+      callback.reject(new Error('Run ended; callback handle released'));
+    execution.callbacks.clear();
     for (const binding of Object.values(execution.options.capabilities)) {
       try {
         binding.onRunEnd?.(execution.bundle);
@@ -445,7 +509,8 @@ export class ExecutionHost {
     lever: Lever,
     direction: Crossing['direction'],
     packet: Packet,
-    durationMs: number
+    durationMs: number,
+    cpu: { handlerSyncCpuUs?: number; handlerWindowCpuUs?: number } = {}
   ): void {
     const listener = this.options.onCrossing;
     if (!listener) return;
@@ -458,6 +523,7 @@ export class ExecutionHost {
         direction,
         bytes: serialize(packet).byteLength,
         durationMs,
+        ...cpu,
       });
     } catch {
       /* Research telemetry must not affect execution. */
