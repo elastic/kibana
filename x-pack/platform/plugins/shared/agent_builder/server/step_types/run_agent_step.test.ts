@@ -739,15 +739,15 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(parsed.success).toBe(true);
     });
 
-    it('ConfigSchema accepts an explicit feature next to connector-id-by-feature', () => {
+    it('ConfigSchema accepts a feature list next to connector-id', () => {
       const parsed = ConfigSchema.safeParse({
-        'connector-id-by-feature': 'my_feature',
-        'explicit-connector-feature-id': 'alertzero_template_models',
+        'connector-id': 'a',
+        'connector-id-by-feature': ['alertzero_template_models', 'my_feature'],
       });
       expect(parsed.success).toBe(true);
     });
 
-    it('uses a saved explicit feature instead of connector-id-by-feature', async () => {
+    it('uses a saved own-entry feature ahead of the tier in the list', async () => {
       const events$ = of({
         type: ChatEventType.roundComplete,
         data: { round: { id: 'r-1', response: { message: 'ok' } } },
@@ -771,7 +771,15 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         internalStart: {
           execution,
           searchInferenceEndpoints: {
-            features: { get: jest.fn().mockReturnValue({ taskType: 'chat_completion' }) },
+            features: {
+              get: jest
+                .fn()
+                .mockImplementation((featureId: string) =>
+                  featureId === 'alertzero_template_models'
+                    ? { taskType: 'chat_completion', ownEntryOnly: true }
+                    : { taskType: 'chat_completion' }
+                ),
+            },
             endpoints: { getForFeature },
           },
         },
@@ -782,8 +790,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         createContext({
           input: { message: 'hello' },
           config: {
-            'connector-id-by-feature': 'alertzero_frontier',
-            'explicit-connector-feature-id': 'alertzero_template_models',
+            'connector-id-by-feature': ['alertzero_template_models', 'alertzero_frontier'],
           },
         })
       );
@@ -793,10 +800,51 @@ describe('ai.agent workflow step (Agent Builder)', () => {
           params: expect.objectContaining({ connectorId: 'template-connector' }),
         })
       );
-      expect(getForFeature).not.toHaveBeenCalledWith(
-        'alertzero_frontier',
-        expect.anything(),
-        expect.anything()
+      expect(getForFeature).toHaveBeenCalledWith('alertzero_template_models', expect.anything(), {
+        onlyReturnConfigured: true,
+        ownEntryOnly: true,
+      });
+      expect(getForFeature).not.toHaveBeenCalledWith('alertzero_frontier', expect.anything());
+    });
+
+    it('falls through to connector-id when the own-entry feature has no saved model', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const getForFeature = jest.fn().mockResolvedValue({
+        endpoints: [],
+        warnings: [],
+        soEntryFound: false,
+      });
+      const serviceManager = {
+        internalStart: {
+          execution,
+          searchInferenceEndpoints: {
+            features: {
+              get: jest.fn().mockReturnValue({ taskType: 'chat_completion', ownEntryOnly: true }),
+            },
+            endpoints: { getForFeature },
+          },
+        },
+      } as any;
+
+      const step = getRunAgentStepDefinition(serviceManager);
+      await step.handler(
+        createContext({
+          input: { message: 'hello' },
+          config: {
+            'connector-id': 'explicit-connector',
+            'connector-id-by-feature': ['alertzero_template_models', '   '],
+          },
+        })
+      );
+
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ connectorId: 'explicit-connector' }),
+        })
       );
     });
 
@@ -1309,6 +1357,182 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         cachedTokens: 30,
         totalTokens: 210,
       });
+    });
+  });
+
+  describe('prompt template', () => {
+    const templateRequiredConnector = {
+      connectorId: 'daybreak',
+      metadata: { capabilities: { templates: { policy: 'required' } } },
+    };
+    const messagesConnector = { connectorId: 'default-llm', metadata: {} };
+
+    const createInference = ({
+      connector = templateRequiredConnector,
+      content = '{"verdict":"false_positive","checks":[]}',
+    }: {
+      connector?: { connectorId: string; metadata: unknown };
+      content?: string;
+    } = {}) => {
+      const chatComplete = jest.fn().mockResolvedValue({
+        content,
+        tokens: { prompt: 3, completion: 4, total: 7, cached: 1 },
+      });
+      const getConnectorById = jest.fn().mockResolvedValue(connector);
+      const getDefaultConnector = jest.fn().mockResolvedValue(connector);
+      return {
+        chatComplete,
+        getConnectorById,
+        getDefaultConnector,
+        inference: {
+          getClient: () => ({ chatComplete, getConnectorById }),
+          getDefaultConnector,
+        },
+      };
+    };
+
+    const templateInput = {
+      message: 'judge this alert',
+      template_id: '.attack-discovery-fp-tp',
+      template_version: 1,
+      template_variables: { cited_alerts: '[]' },
+    };
+
+    it('ignores template fields when the default connector accepts messages', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
+      const { inference, chatComplete } = createInference({ connector: messagesConnector });
+      const step = getRunAgentStepDefinition({
+        internalStart: { execution, inference },
+      } as any);
+
+      await step.handler(createContext({ input: templateInput }));
+
+      expect(chatComplete).not.toHaveBeenCalled();
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ connectorId: undefined }),
+        })
+      );
+    });
+
+    it('uses the default connector when that connector requires a template', async () => {
+      const { inference, chatComplete } = createInference();
+      const execution = createExecutionMock(of());
+      const step = getRunAgentStepDefinition({
+        internalStart: { execution, inference },
+      } as any);
+
+      const res = await step.handler(createContext({ input: templateInput }));
+
+      expect(execution.executeAgent).not.toHaveBeenCalled();
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          connectorId: 'daybreak',
+          template: expect.objectContaining({ id: '.attack-discovery-fp-tp', version: 1 }),
+        })
+      );
+      expect(res.output?.message).toContain('false_positive');
+    });
+
+    it('sends the step attribution and the workflow execution id', async () => {
+      const { inference, chatComplete } = createInference();
+      const step = getRunAgentStepDefinition({
+        internalStart: { execution: createExecutionMock(of()), inference },
+      } as any);
+
+      await step.handler(
+        createContext({
+          input: templateInput,
+          config: {
+            'connector-id': 'daybreak',
+            'plugin-id': 'alertzero_fp_tp_analysis',
+            'aggregate-by': 'alertzero_parent',
+          },
+        })
+      );
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: {
+            connectorTelemetry: expect.objectContaining({
+              pluginId: 'alertzero_fp_tp_analysis',
+              aggregateBy: 'alertzero_parent',
+              interactionId: 'exec-1',
+            }),
+          },
+        })
+      );
+    });
+
+    it('rejects a template response that does not match the output schema', async () => {
+      const { inference } = createInference({ content: '{"verdict":"false_positive"}' });
+      const step = getRunAgentStepDefinition({
+        internalStart: { execution: createExecutionMock(of()), inference },
+      } as any);
+
+      const res = await step.handler(
+        createContext({
+          input: {
+            ...templateInput,
+            schema: {
+              type: 'object',
+              required: ['checks'],
+              properties: { checks: { type: 'array' }, verdict: { type: 'string' } },
+            },
+          },
+          config: { 'connector-id': 'daybreak' },
+        })
+      );
+
+      expect(res.error?.message).toContain('does not match the output schema');
+    });
+
+    it('stores a conversation when create-conversation is set', async () => {
+      const { inference } = createInference({ content: 'plain answer' });
+      const conversation = {
+        id: 'c-template',
+        agent_id: 'agent-builder',
+        user: { id: 'user-1', username: 'user' },
+      };
+      const create = jest.fn().mockResolvedValue(conversation);
+      const appendEvents = jest.fn().mockResolvedValue(conversation);
+      const conversations = {
+        getScopedClient: jest.fn().mockResolvedValue({ create, appendEvents, get: jest.fn() }),
+      };
+      const execution = createExecutionMock(of());
+      const step = getRunAgentStepDefinition({
+        internalStart: { execution, inference, conversations },
+      } as any);
+
+      const res = await step.handler(
+        createContext({
+          input: { ...templateInput, template_id: '.attack-discovery-fp-tp' },
+          config: { 'connector-id': 'daybreak', 'create-conversation': true },
+        })
+      );
+
+      expect(execution.executeAgent).not.toHaveBeenCalled();
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({ agent_id: expect.any(String), rounds: [] }),
+        { source: 'workflow' }
+      );
+      expect(appendEvents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'c-template',
+          events: expect.arrayContaining([
+            expect.objectContaining({
+              type: 'user_message',
+              data: { message: 'judge this alert' },
+            }),
+          ]),
+        }),
+        { source: 'workflow' }
+      );
+      expect(res.output?.conversation_id).toBe('c-template');
     });
   });
 });

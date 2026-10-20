@@ -390,17 +390,18 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
   it('passes the runtime connector id and create-conversation flag to the AI agent step', () => {
     const agentStep = findStepByName(workflow.steps, 'runAgent_step') as {
       'connector-id': string;
-      'connector-id-by-feature': string;
-      'explicit-connector-feature-id': string;
+      'connector-id-by-feature': string[];
       'create-conversation': string;
     };
 
     expect(agentStep).toBeDefined();
     expect(agentStep['connector-id']).toBe('{{ variables.connector_id }}');
-    // Dual connector params coexist: superRefine only fires when BOTH are non-empty; Liquid renders
-    // "" for the unused variable so exactly one is non-empty at execution time.
-    expect(agentStep['connector-id-by-feature']).toBe('{{ variables.connector_id_by_feature }}');
-    expect(agentStep['explicit-connector-feature-id']).toBe('alertzero_template_models');
+    // The template row leads. Liquid renders "" for the unused tier variable, and a blank
+    // entry is ignored, so exactly one of connector-id and the tier is set at execution time.
+    expect(agentStep['connector-id-by-feature']).toEqual([
+      'alertzero_template_models',
+      '{{ variables.connector_id_by_feature }}',
+    ]);
     // `${{ }}` preserves the boolean; a plain `{{ }}` would render the string "false" (truthy).
     expect(agentStep['create-conversation']).toBe('${{ variables.create_conversation }}');
   });
@@ -2680,8 +2681,10 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
       >;
 
       expect(promptStep['connector-id']).toBe('{{ variables.connector_id }}');
-      expect(promptStep['connector-id-by-feature']).toBe('{{ variables.connector_id_by_feature }}');
-      expect(promptStep['explicit-connector-feature-id']).toBe('alertzero_template_models');
+      expect(promptStep['connector-id-by-feature']).toEqual([
+        'alertzero_template_models',
+        '{{ variables.connector_id_by_feature }}',
+      ]);
       expect(promptStep.with).toEqual(
         expect.objectContaining({
           template_id: '.alert-triage',

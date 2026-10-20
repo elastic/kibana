@@ -165,6 +165,9 @@ export const registerAlertZeroInferenceFeatures = (
     isTechPreview: true,
     ignoreGlobalDefault: true,
     allowTemplateRequiredModels: true,
+    // An empty row must not adopt the parent tier. Steps list this id first in
+    // connector-id-by-feature and fall through to their own tier.
+    ownEntryOnly: true,
     featureId: ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
     featureName: i18n.translate('xpack.alertzero.inferenceFeature.templateModelsName', {
       defaultMessage: 'Cyber domain models',

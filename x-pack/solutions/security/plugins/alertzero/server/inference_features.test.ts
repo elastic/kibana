@@ -144,6 +144,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
       isTechPreview: true,
       ignoreGlobalDefault: true,
       allowTemplateRequiredModels: true,
+      ownEntryOnly: true,
       featureId: ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
       featureName: 'Cyber domain models',
       featureDescription:

@@ -36,8 +36,7 @@ interface YamlStep {
   with?: Record<string, unknown>;
   'on-failure'?: { continue?: boolean; retry?: Record<string, unknown> };
   'agent-id'?: string;
-  'connector-id-by-feature'?: string;
-  'explicit-connector-feature-id'?: string;
+  'connector-id-by-feature'?: string | string[];
   'create-conversation'?: boolean;
   'plugin-id'?: string;
   'aggregate-by'?: string;
@@ -547,12 +546,11 @@ describe('Attack Discovery FP/TP analysis workflow', () => {
       expect(overrides?.tools).toEqual([]);
     });
 
-    it('routes the agent through the AlertZero frontier feature', () => {
-      expect(analyze?.['connector-id-by-feature']).toBe('alertzero_frontier');
-    });
-
-    it('prefers a model saved on the prompt-template row', () => {
-      expect(analyze?.['explicit-connector-feature-id']).toBe('alertzero_template_models');
+    it('prefers a saved template-row model, then the AlertZero frontier feature', () => {
+      expect(analyze?.['connector-id-by-feature']).toEqual([
+        'alertzero_template_models',
+        'alertzero_frontier',
+      ]);
     });
 
     it('uses the thin agent', () => {

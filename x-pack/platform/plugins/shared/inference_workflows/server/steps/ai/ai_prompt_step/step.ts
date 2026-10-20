@@ -15,7 +15,10 @@ import {
   validateReasoningEffort,
 } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { resolveExplicitFeatureConnectorId } from '@kbn/search-inference-endpoints/server';
+import {
+  normalizeConnectorFeatureIds,
+  resolveConnectorIdFromFeatures,
+} from '@kbn/search-inference-endpoints/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import {
   AGGREGATE_BY_REQUIRES_PLUGIN_ID_MESSAGE,
@@ -167,12 +170,7 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
     handler: async (context) => {
       const [, { inference, searchInferenceEndpoints }] = await coreSetup.getStartServices();
 
-      const connectorIdByFeature = normalizeOptionalConnectorParam(
-        context.config['connector-id-by-feature']
-      );
-      const explicitConnectorFeatureId = normalizeOptionalConnectorParam(
-        context.config['explicit-connector-feature-id']
-      );
+      const featureIds = normalizeConnectorFeatureIds(context.config['connector-id-by-feature']);
       const connectorId = normalizeOptionalConnectorParam(context.config['connector-id']);
       const pluginId = normalizeOptionalConnectorParam(context.config['plugin-id']);
       const aggregateBy = normalizeOptionalConnectorParam(context.config['aggregate-by']);
@@ -182,44 +180,20 @@ export const aiPromptStepDefinition = (coreSetup: CoreSetup<InferenceWorkflowsSt
       }
       const request = context.contextManager.getFakeRequest();
 
-      let resolvedConnectorId: string;
-
-      const explicitConnectorId = explicitConnectorFeatureId
-        ? await resolveExplicitFeatureConnectorId({
-            featureId: explicitConnectorFeatureId,
-            request,
-            searchInferenceEndpoints,
-          })
-        : null;
-
-      if (explicitConnectorId) {
-        resolvedConnectorId = explicitConnectorId;
-      } else if (connectorIdByFeature) {
-        if (connectorId) {
-          throw new Error(
-            'Cannot specify both connector-id and connector-id-by-feature on an ai.prompt step.'
-          );
-        }
-        const feature = searchInferenceEndpoints.features.get(connectorIdByFeature);
-        if (feature && feature.taskType !== 'chat_completion') {
-          throw new Error(
-            `Feature "${connectorIdByFeature}" is not a chat completion feature (task type "${feature.taskType}"). connector-id-by-feature requires a feature with task type "chat_completion".`
-          );
-        }
-        const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
-          connectorIdByFeature,
-          request
-        );
-        if (endpoints.length === 0) {
-          throw new Error(`No connector available for feature "${connectorIdByFeature}".`);
-        }
-        resolvedConnectorId = endpoints[0].connectorId;
-      } else {
-        resolvedConnectorId = await resolveConnectorId(connectorId, inference, request, {
+      const connectorIdFromFeatures = await resolveConnectorIdFromFeatures({
+        featureIds,
+        request,
+        searchInferenceEndpoints,
+        hasExplicitConnector: connectorId !== undefined,
+        conflictMessage:
+          'Cannot specify both connector-id and connector-id-by-feature on an ai.prompt step.',
+      });
+      const resolvedConnectorId =
+        connectorIdFromFeatures ??
+        (await resolveConnectorId(connectorId, inference, request, {
           featureId: AI_PROMPT_FEATURE_ID,
           searchInferenceEndpoints,
-        });
-      }
+        }));
 
       const reasoningLevel = context.config['reasoning-level'];
       const maxContentLength = parseMaxStepSize(context.config['max-step-size']);

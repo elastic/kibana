@@ -31,6 +31,13 @@ export interface InferenceFeatureConfig {
    * endpoints hidden.
    */
   allowTemplateRequiredModels?: boolean;
+  /**
+   * When true, `connector-id-by-feature` uses a model only when an operator saved
+   * one on this row. A parent feature, recommended endpoints, and the platform
+   * default do not count. An empty row is a miss, so the next feature id or
+   * `connector-id` still applies.
+   */
+  ownEntryOnly?: boolean;
   visibilityCondition?: {
     key: string;
     value: string | number | boolean | null;

@@ -250,11 +250,12 @@ steps:
   - name: analyze
     type: ai.agent
     agent-id: alertzero-thin-agent
-    # Keep in sync with ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-    connector-id-by-feature: alertzero_frontier
-    # A model saved on this row replaces the frontier feature. An empty row does not.
-    # Keep in sync with ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-    explicit-connector-feature-id: alertzero_template_models
+    # A model saved on alertzero_template_models replaces the frontier feature.
+    # An empty row does not. Keep in sync with ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID
+    # and ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+    connector-id-by-feature:
+      - alertzero_template_models
+      - alertzero_frontier
     # plugin-id: per-run cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
     plugin-id: alertzero_fp_tp_analysis
     aggregate-by: alertzero_parent

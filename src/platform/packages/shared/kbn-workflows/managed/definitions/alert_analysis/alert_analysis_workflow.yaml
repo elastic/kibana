@@ -1578,16 +1578,16 @@ steps:
             if: "${{ variables.use_prompt != true }}"
             agent-id: "{{ variables.agent_id }}"
             connector-id: "{{ variables.connector_id }}"
-            # Exactly one of connector-id / connector-id-by-feature must be non-empty at
-            # execution time. Liquid renders "" for the unused variable; the ai.agent step's
-            # superRefine only fires when BOTH are non-empty, so they coexist safely.
-            # Standalone path: connector_id_by_feature="", connector_id=<real id>.
+            # First id: a saved model on alertzero_template_models replaces the connector.
+            # An empty row does not. Second id: the tier. Liquid renders "" for the unused
+            # variable and a blank entry is ignored.
+            # Standalone path: connector_id=<real id>, connector_id_by_feature="".
             # Worker path: connector_id="", connector_id_by_feature=<feature id>.
-            connector-id-by-feature: "{{ variables.connector_id_by_feature }}"
-            # A model saved on alertzero_template_models replaces both connector fields.
-            # An empty row leaves them in charge. Keep in sync with
-            # ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
-            explicit-connector-feature-id: alertzero_template_models
+            # A real tier still conflicts with a real connector-id.
+            # Keep in sync with ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID in @kbn/alertzero-common.
+            connector-id-by-feature:
+              - alertzero_template_models
+              - "{{ variables.connector_id_by_feature }}"
             create-conversation: "${{ variables.create_conversation }}"
             # The default maxResponseContentLength (1 MB) is too small for a 50-alert batch.
             # Azure OpenAI's buffered response for all verdicts can exceed 1 MB; Bedrock bypasses
@@ -1633,11 +1633,11 @@ steps:
             type: ai.prompt
             if: "${{ variables.use_prompt == true }}"
             connector-id: "{{ variables.connector_id }}"
-            # Same as runAgent_step: exactly one of the two is non-empty at execution time, and
-            # ai.prompt treats a blank value as unset.
-            connector-id-by-feature: "{{ variables.connector_id_by_feature }}"
-            # Same override as runAgent_step: a saved template-row model wins, an empty row does not.
-            explicit-connector-feature-id: alertzero_template_models
+            # Same list as runAgent_step: a saved template-row model wins, an empty row does not,
+            # and a blank tier entry is ignored.
+            connector-id-by-feature:
+              - alertzero_template_models
+              - "{{ variables.connector_id_by_feature }}"
             # The default maxResponseContentLength (1 MB) is too small for a 50-alert batch (see
             # runAgent_step).
             max-step-size: '10mb'

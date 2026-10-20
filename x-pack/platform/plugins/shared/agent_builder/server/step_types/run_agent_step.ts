@@ -5,28 +5,43 @@
  * 2.0.
  */
 
+import { Validator } from '@cfworker/json-schema';
 import {
   agentBuilderDefaultAgentId,
   createNonInteractiveConfig,
   ConversationAccessControlMode,
+  ConversationRoundStatus,
+  DEFAULT_CONVERSATION_TITLE,
+  normalizeConversationAccessControl,
   isConversationCreatedEvent,
   isConversationUpdatedEvent,
   isRoundCompleteEvent,
   toAutoApprovedApis,
   AgentExecutionMode,
 } from '@kbn/agent-builder-common';
+import type {
+  Conversation,
+  ConversationAccessControl,
+  ConversationRound,
+} from '@kbn/agent-builder-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
+import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import { isTemplateRequiredConnector, MessageRole } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { resolveExplicitFeatureConnectorId } from '@kbn/search-inference-endpoints/server';
+import {
+  normalizeConnectorFeatureIds,
+  resolveConnectorIdFromFeatures,
+} from '@kbn/search-inference-endpoints/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { firstValueFrom, tap, toArray } from 'rxjs';
+import { v4 as uuidv4 } from 'uuid';
 import type { ServiceManager } from '../services';
+import { roundToEvents } from '../services/conversation/client/rounds_to_events';
+import { buildExecutionTelemetryMetadata } from '../services/execution/utils/build_execution_telemetry_metadata';
 import {
   CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
   CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW,
-  ConnectorOrInferenceIdConflictError,
   resolveConnectorOrInferenceId,
 } from '../../common/resolve_connector_or_inference_id';
 import { normalizeOptionalStringParam } from '../../common/normalize_optional_string_param';
@@ -34,7 +49,6 @@ import {
   EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE,
   runAgentStepCommonDefinition,
 } from '../../common/step_types/run_agent_step';
-import { resolveConnectorIdByFeature } from '../utils/resolve_connector_id_by_feature';
 
 const parseTemplateJson = (content: string): unknown => {
   const fenced = content.match(/```(?:json)?\s*([\s\S]*?)```/);
@@ -45,6 +59,30 @@ const parseTemplateJson = (content: string): unknown => {
     throw new Error('Template response did not contain a JSON object');
   }
   return JSON.parse(candidate.slice(start, end + 1));
+};
+
+const assertTemplateMatchesSchema = (value: unknown, schema: unknown): Record<string, unknown> => {
+  if (value === null || typeof value !== 'object' || Array.isArray(value)) {
+    throw new Error('Template response JSON must be an object');
+  }
+  if (schema === null || typeof schema !== 'object' || Array.isArray(schema)) {
+    throw new Error('Output schema must be a JSON schema object');
+  }
+
+  const { valid, errors } = new Validator(
+    schema as Record<string, unknown>,
+    '2020-12',
+    false
+  ).validate(value);
+  if (!valid) {
+    throw new Error(
+      `Template response does not match the output schema: ${errors
+        .map((error) => error.error)
+        .join('; ')}`
+    );
+  }
+
+  return value as Record<string, unknown>;
 };
 
 /**
@@ -60,6 +98,7 @@ const completeWithPromptTemplate = async ({
   templateVariables,
   schema,
   abortSignal,
+  connectorTelemetry,
 }: {
   inference: InferenceServerStart | undefined;
   request: KibanaRequest;
@@ -69,10 +108,12 @@ const completeWithPromptTemplate = async ({
   templateVariables: Record<string, unknown>;
   schema: unknown;
   abortSignal?: AbortSignal;
+  connectorTelemetry?: ConnectorTelemetryMetadata;
 }): Promise<
   | {
       message: string;
       structuredOutput: unknown;
+      elapsedMs: number;
       usage: {
         connectorId?: string;
         inputTokens: number;
@@ -83,17 +124,30 @@ const completeWithPromptTemplate = async ({
     }
   | undefined
 > => {
-  if (!connectorId || !inference) {
-    if (templateId) {
+  if (!inference) {
+    if (templateId && connectorId) {
       throw new Error('Inference is not available, so the prompt template cannot be sent');
     }
     return undefined;
   }
 
+  // A step with no connector uses the default GenAI connector. Resolve it before deciding
+  // whether the template fields apply, so a messages connector ignores them.
+  let resolvedConnectorId = connectorId;
+  if (!resolvedConnectorId) {
+    if (!templateId) {
+      return undefined;
+    }
+    resolvedConnectorId = (await inference.getDefaultConnector(request))?.connectorId;
+    if (!resolvedConnectorId) {
+      return undefined;
+    }
+  }
+
   const client = inference.getClient({ request });
   let templateRequired = false;
   try {
-    const connector = await client.getConnectorById(connectorId);
+    const connector = await client.getConnectorById(resolvedConnectorId);
     templateRequired = isTemplateRequiredConnector(connector);
   } catch (error) {
     if (templateId) {
@@ -108,33 +162,119 @@ const completeWithPromptTemplate = async ({
 
   if (!templateId || templateVersion == null) {
     throw new Error(
-      `Connector "${connectorId}" requires a prompt template and cannot be called with messages`
+      `Connector "${resolvedConnectorId}" requires a prompt template and cannot be called with messages`
     );
   }
 
+  const startedAt = Date.now();
   const response = await client.chatComplete({
-    connectorId,
+    connectorId: resolvedConnectorId,
     stream: false,
     messages: [{ role: MessageRole.User, content: '' }],
     template: { id: templateId, version: templateVersion, variables: templateVariables },
     abortSignal,
+    ...(connectorTelemetry ? { metadata: { connectorTelemetry } } : {}),
   });
 
-  const structuredOutput = schema ? parseTemplateJson(response.content) : undefined;
+  const structuredOutput = schema
+    ? assertTemplateMatchesSchema(parseTemplateJson(response.content ?? ''), schema)
+    : undefined;
   const promptTokens = response.tokens?.prompt ?? 0;
   const completionTokens = response.tokens?.completion ?? 0;
 
   return {
-    message: schema ? JSON.stringify(structuredOutput) : response.content,
+    message: schema ? JSON.stringify(structuredOutput) : response.content ?? '',
     structuredOutput,
+    elapsedMs: Date.now() - startedAt,
     usage: {
-      connectorId,
+      connectorId: resolvedConnectorId,
       inputTokens: promptTokens,
       outputTokens: completionTokens,
       cachedTokens: response.tokens?.cached ?? 0,
       totalTokens: response.tokens?.total ?? promptTokens + completionTokens,
     },
   };
+};
+
+const storeTemplateConversation = async ({
+  serviceManager,
+  request,
+  agentId,
+  conversationId,
+  createConversation,
+  accessControl,
+  message,
+  responseMessage,
+  structuredOutput,
+  usage,
+  elapsedMs,
+}: {
+  serviceManager: ServiceManager;
+  request: KibanaRequest;
+  agentId: string;
+  conversationId: string | undefined;
+  createConversation: boolean | undefined;
+  accessControl: Pick<ConversationAccessControl, 'access_mode'> | undefined;
+  message: string;
+  responseMessage: string;
+  structuredOutput: unknown;
+  usage: { connectorId?: string; inputTokens: number; outputTokens: number; cachedTokens: number };
+  elapsedMs: number;
+}): Promise<string> => {
+  const conversations = serviceManager.internalStart?.conversations;
+  if (!conversations) {
+    throw new Error(
+      'Conversation service is not available, so the template result cannot be stored'
+    );
+  }
+
+  const client = await conversations.getScopedClient({ request });
+  const existing =
+    conversationId && !createConversation ? await client.get(conversationId) : undefined;
+  const conversation: Conversation =
+    existing ??
+    (await client.create(
+      {
+        agent_id: agentId,
+        ...(conversationId ? { id: conversationId } : {}),
+        title: DEFAULT_CONVERSATION_TITLE,
+        rounds: [],
+        ...(accessControl
+          ? { access_control: normalizeConversationAccessControl(accessControl) }
+          : {}),
+      },
+      { source: 'workflow' }
+    ));
+
+  const round: ConversationRound = {
+    id: uuidv4(),
+    status: ConversationRoundStatus.completed,
+    input: { message },
+    steps: [],
+    response: {
+      message: responseMessage,
+      ...(structuredOutput && typeof structuredOutput === 'object'
+        ? { structured_output: structuredOutput as object }
+        : {}),
+    },
+    started_at: new Date().toISOString(),
+    time_to_first_token: elapsedMs,
+    time_to_last_token: elapsedMs,
+    model_usage: {
+      connector_id: usage.connectorId ?? '',
+      llm_calls: 1,
+      input_tokens: usage.inputTokens,
+      output_tokens: usage.outputTokens,
+      cached_input_tokens: usage.cachedTokens,
+    },
+  };
+
+  await client.appendEvents(
+    { id: conversation.id, events: roundToEvents(round, conversation) },
+    { source: 'workflow' }
+  );
+
+  return conversation.id;
 };
 
 /**
@@ -191,7 +331,6 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           'connector-id': connectorIdRaw,
           'inference-id': inferenceIdRaw,
           'connector-id-by-feature': connectorIdByFeatureRaw,
-          'explicit-connector-feature-id': explicitConnectorFeatureIdRaw,
           'create-conversation': createConversation,
           'public-conversation': publicConversation,
           ephemeral,
@@ -221,42 +360,34 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           CONNECTOR_OR_INFERENCE_ID_CONFLICT_MESSAGE_WORKFLOW
         );
 
-        const explicitConnectorFeatureId = normalizeOptionalStringParam(
-          explicitConnectorFeatureIdRaw
-        );
-        let explicitOverride = false;
-        if (explicitConnectorFeatureId !== undefined) {
-          const { searchInferenceEndpoints } = serviceManager.internalStart ?? {};
-          if (searchInferenceEndpoints) {
-            const explicitConnectorId = await resolveExplicitFeatureConnectorId({
-              featureId: explicitConnectorFeatureId,
-              request,
-              searchInferenceEndpoints,
-            });
-            if (explicitConnectorId) {
-              effectiveConnectorId = explicitConnectorId;
-              explicitOverride = true;
-            }
-          }
-        }
-
-        const connectorIdByFeature = normalizeOptionalStringParam(connectorIdByFeatureRaw);
-        if (!explicitOverride && connectorIdByFeature !== undefined) {
-          if (effectiveConnectorId !== undefined) {
-            throw new ConnectorOrInferenceIdConflictError(
-              CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW
-            );
-          }
+        const featureIds = normalizeConnectorFeatureIds(connectorIdByFeatureRaw);
+        if (featureIds.length > 0) {
           const { searchInferenceEndpoints } = serviceManager.internalStart ?? {};
           if (!searchInferenceEndpoints) {
             throw new Error('searchInferenceEndpoints service is not available');
           }
-          effectiveConnectorId = await resolveConnectorIdByFeature({
-            featureId: connectorIdByFeature,
+          const connectorIdFromFeatures = await resolveConnectorIdFromFeatures({
+            featureIds,
             request,
             searchInferenceEndpoints,
+            hasExplicitConnector: effectiveConnectorId !== undefined,
+            conflictMessage: CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW,
           });
+          if (connectorIdFromFeatures) {
+            effectiveConnectorId = connectorIdFromFeatures;
+          }
         }
+
+        const storeConversation = !ephemeral && (createConversation || Boolean(conversationId));
+        const accessControl = publicConversation
+          ? { access_mode: ConversationAccessControlMode.Public }
+          : undefined;
+        const connectorTelemetry = buildExecutionTelemetryMetadata({
+          telemetryMetadata: pluginId
+            ? { pluginId, aggregateBy, productSolution, productFeature }
+            : undefined,
+          workflowExecutionId: context.contextManager.getContext().execution.id,
+        });
 
         const templateResult = await completeWithPromptTemplate({
           inference: serviceManager.internalStart?.inference,
@@ -267,21 +398,34 @@ export const getRunAgentStepDefinition = (serviceManager: ServiceManager) => {
           templateVariables: templateVariables ?? {},
           schema,
           abortSignal: context.abortSignal,
+          connectorTelemetry,
         });
         if (templateResult) {
+          const outputConversationId = storeConversation
+            ? await storeTemplateConversation({
+                serviceManager,
+                request,
+                agentId: effectiveAgentId,
+                conversationId,
+                createConversation,
+                accessControl,
+                message: message ?? '',
+                responseMessage: templateResult.message,
+                structuredOutput: templateResult.structuredOutput,
+                usage: templateResult.usage,
+                elapsedMs: templateResult.elapsedMs,
+              })
+            : undefined;
+
           return {
             output: {
               message: templateResult.message,
               structured_output: templateResult.structuredOutput,
+              ...(outputConversationId && { conversation_id: outputConversationId }),
               metadata: { usage: { ...usage, ...templateResult.usage } },
             },
           };
         }
-
-        const storeConversation = !ephemeral && (createConversation || Boolean(conversationId));
-        const accessControl = publicConversation
-          ? { access_mode: ConversationAccessControlMode.Public }
-          : undefined;
 
         const executionService = serviceManager.internalStart?.execution;
         if (!executionService) {

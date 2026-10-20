@@ -281,25 +281,16 @@ export const ConfigSchema = z
         'The inference endpoint ID to use. Mutually exclusive with `connector-id`; defaults apply when both are omitted.'
       ),
     /**
-     * Model Management > Feature settings feature id to resolve the connector from.
-     * Mutually exclusive with `connector-id` and `inference-id`.
+     * Model Management feature id, or a priority list of them.
+     * A single id is mutually exclusive with `connector-id` and `inference-id`.
+     * In a list, an own-entry-only feature is optional and the first other id
+     * keeps that exclusion.
      */
     'connector-id-by-feature': z
-      .string()
+      .union([z.string().max(255), z.array(z.string().max(255)).max(8)])
       .optional()
       .describe(
-        'The Model Management feature id whose configured connector should be used. Mutually exclusive with `connector-id` and `inference-id`.'
-      ),
-    /**
-     * Optional feature checked before connector-id and connector-id-by-feature.
-     * Used only when an operator has saved a model for it.
-     */
-    'explicit-connector-feature-id': z
-      .string()
-      .max(255)
-      .optional()
-      .describe(
-        'Model Management feature id. When an operator has saved a model for it, that connector is used. Otherwise connector-id and connector-id-by-feature resolve as usual. Recommended endpoints on this feature do not count.'
+        'A Model Management feature id, or an ordered list of them. An own-entry-only feature is used only when an operator has saved a model on that row; otherwise the next id is tried. The first other feature is resolved in full and is mutually exclusive with `connector-id` and `inference-id`. A single id keeps that full resolution.'
       ),
     /**
      * When true, create/persist a conversation and associate it with the executing user.
@@ -390,7 +381,13 @@ export const ConfigSchema = z
   .superRefine((cfg, ctx) => {
     const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
     const inference = normalizeOptionalConnectorOrInferenceParam(cfg['inference-id']);
-    const connectorByFeature = normalizeOptionalStringParam(cfg['connector-id-by-feature']);
+    // A list can lead with an own-entry-only feature, which may sit beside connector-id.
+    // Whether a later id conflicts is decided at runtime, once the feature registry is known.
+    const connectorByFeatureRaw = cfg['connector-id-by-feature'];
+    const connectorByFeature =
+      typeof connectorByFeatureRaw === 'string'
+        ? normalizeOptionalStringParam(connectorByFeatureRaw)
+        : undefined;
     if (connector !== undefined && inference !== undefined) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,

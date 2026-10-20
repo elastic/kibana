@@ -787,8 +787,12 @@ describe('aiPromptStepDefinition', () => {
         expect(mockInference.getChatModel).toHaveBeenCalled();
       });
 
-      it('uses a saved explicit feature ahead of connector-id-by-feature', async () => {
-        mockSearchInferenceEndpoints.features.get.mockReturnValue({ taskType: 'chat_completion' });
+      it('uses a saved own-entry feature ahead of the tier in the list', async () => {
+        mockSearchInferenceEndpoints.features.get.mockImplementation((featureId: string) =>
+          featureId === 'alertzero_template_models'
+            ? { taskType: 'chat_completion', ownEntryOnly: true }
+            : { taskType: 'chat_completion' }
+        );
         mockSearchInferenceEndpoints.endpoints.getForFeature.mockImplementation(
           async (featureId: string) => {
             if (featureId === 'alertzero_template_models') {
@@ -804,8 +808,7 @@ describe('aiPromptStepDefinition', () => {
         const contextWithFeature = {
           ...mockContext,
           config: {
-            'connector-id-by-feature': 'alertzero_efficient',
-            'explicit-connector-feature-id': 'alertzero_template_models',
+            'connector-id-by-feature': ['alertzero_template_models', 'alertzero_efficient'],
           },
         };
 
@@ -813,6 +816,11 @@ describe('aiPromptStepDefinition', () => {
 
         expect(mockInference.getChatModel).toHaveBeenCalledWith(
           expect.objectContaining({ connectorId: 'template-connector' })
+        );
+        expect(mockSearchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
+          'alertzero_template_models',
+          expect.anything(),
+          { onlyReturnConfigured: true, ownEntryOnly: true }
         );
         expect(mockSearchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalledWith(
           'alertzero_efficient',

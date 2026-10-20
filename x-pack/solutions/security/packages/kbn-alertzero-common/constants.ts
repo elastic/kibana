@@ -378,7 +378,7 @@ export const ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID = 'alertzero_frontier' as c
 /**
  * Optional model for the calls that can send an EIS prompt template: Attack Discovery,
  * alert triage, and the FP/TP judge. Empty until an operator saves a model. Those calls
- * keep their tier until then.
+ * list this id first in `connector-id-by-feature` and keep their tier until a model is saved.
  */
 export const ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID = 'alertzero_template_models' as const;
 

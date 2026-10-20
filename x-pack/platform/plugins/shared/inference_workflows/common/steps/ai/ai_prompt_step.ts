@@ -77,24 +77,21 @@ export const ConfigSchema = z
         '[tech preview] Reasoning effort level forwarded to the LLM. One of: none, minimal, low, medium, high, xhigh. Support depends on the underlying model and provider.'
       ),
     'connector-id-by-feature': z
-      .string()
-      .max(255)
+      .union([z.string().max(255), z.array(z.string().max(255)).max(8)])
       .optional()
       .describe(
-        'Resolve the connector from a named inference feature (as configured in Management → Model Settings) rather than using a literal connector id. Mutually exclusive with connector-id. Example: "context_engine_prompt".'
-      ),
-    'explicit-connector-feature-id': z
-      .string()
-      .max(255)
-      .optional()
-      .describe(
-        'Model Management feature id. When an operator has saved a model for it, that connector is used. Otherwise connector-id and connector-id-by-feature resolve as usual. Recommended endpoints on this feature do not count.'
+        'A Model Management feature id, or an ordered list of them. An own-entry-only feature is used only when an operator has saved a model on that row; otherwise the next id is tried. The first other feature is resolved in full and is mutually exclusive with connector-id. A single id keeps that full resolution. Example: "context_engine_prompt".'
       ),
   })
   .superRefine((cfg, ctx) => {
+    const connectorByFeatureRaw = cfg['connector-id-by-feature'];
+    const connectorByFeature =
+      typeof connectorByFeatureRaw === 'string'
+        ? normalizeOptionalConnectorParam(connectorByFeatureRaw)
+        : undefined;
     if (
       normalizeOptionalConnectorParam(cfg['connector-id']) !== undefined &&
-      normalizeOptionalConnectorParam(cfg['connector-id-by-feature']) !== undefined
+      connectorByFeature !== undefined
     ) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
