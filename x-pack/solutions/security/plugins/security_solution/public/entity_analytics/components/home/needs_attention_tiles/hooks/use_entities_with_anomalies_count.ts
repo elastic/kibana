@@ -53,7 +53,13 @@ export const useEntitiesWithAnomaliesCount = ({
     entityFilterClauses,
     error: indexError,
   } = useTileQueryInputs(spaceId, entityFilters);
-  const { jobIds, loading: isJobsLoading } = useInstalledSecurityJobsIds();
+  const {
+    jobIds,
+    loading: isJobsLoading,
+    isMlUser,
+    isLicensed,
+    isError: isJobsError,
+  } = useInstalledSecurityJobsIds();
 
   const isEnabled =
     !skip &&
@@ -124,8 +130,12 @@ export const useEntitiesWithAnomaliesCount = ({
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending:
       isJobsLoading || isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
-    /** No security ML job is installed, so the tile has nothing to count. */
-    isMissingJobs: !isJobsLoading && jobIds.length === 0,
+    /**
+     * No security ML job is installed, so the tile has nothing to count. Not when the jobs could not
+     * be asked for (no ML permission or licence, or the ML capabilities are still loading) or their
+     * fetch failed: then the list is empty too.
+     */
+    isMissingJobs: isMlUser && isLicensed && !isJobsError && !isJobsLoading && jobIds.length === 0,
     error: filteredError ?? indexError,
   };
 };

@@ -85,8 +85,12 @@ jest.mock('@kbn/entity-store/public', () => ({
 }));
 jest.mock('../components/home/entity_search_bar', () => ({ EntitySearchBar: () => null }));
 jest.mock('../components/home/entity_filters_bar', () => ({ EntityFiltersBar: () => null }));
+const mockSignalCards = jest.fn(
+  (_props: { cards: Array<{ id: string; noDataMessage?: string }> }) => null
+);
 jest.mock('../components/home/needs_attention_tiles/signal_cards', () => ({
-  SignalCards: () => null,
+  SignalCards: (props: { cards: Array<{ id: string; noDataMessage?: string }> }) =>
+    mockSignalCards(props),
 }));
 jest.mock('../components/home/entities_table', () => ({
   DataViewContext: { Provider: ({ children }: { children: React.ReactNode }) => <>{children}</> },
@@ -144,7 +148,10 @@ interface TileState {
 const settledTile: TileState = { isCountPending: false, isDeltaLoading: false, reachesBack: true };
 
 /** Mocks every hook of the page from one state per tile; the alert tiles share one hook. */
-const mockTiles = (state: Partial<Record<Tile, Partial<TileState>>> = {}) => {
+const mockTiles = (
+  state: Partial<Record<Tile, Partial<TileState>>> = {},
+  { anomaliesMissingJobs = false }: { anomaliesMissingJobs?: boolean } = {}
+) => {
   const of = (tile: Tile): TileState => ({ ...settledTile, ...state[tile] });
 
   hooks.useAlertBasedTiles.mockReturnValue({
@@ -162,7 +169,10 @@ const mockTiles = (state: Partial<Record<Tile, Partial<TileState>>> = {}) => {
     isMissingIndex: false,
     isCountPending: of(tile).isCountPending,
   });
-  hooks.useEntitiesWithAnomaliesCount.mockReturnValue(count('anomalies'));
+  hooks.useEntitiesWithAnomaliesCount.mockReturnValue({
+    ...count('anomalies'),
+    isMissingJobs: anomaliesMissingJobs,
+  });
   hooks.useNewEntityCount.mockReturnValue(count('newEntity'));
   hooks.useRiskMoversCount.mockReturnValue(count('riskMovers'));
   hooks.useNewlyHighCriticalCount.mockReturnValue(count('newlyHighCritical'));
@@ -287,5 +297,21 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
       render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
       expect(seriesReachesBack(tile)).toBeUndefined();
     });
+  });
+
+  it('tells the anomalies tile that it needs jobs only when no security ML job is installed', () => {
+    const anomaliesNoDataMessage = () => {
+      const { calls } = mockSignalCards.mock;
+      return calls[calls.length - 1][0].cards.find(({ id }) => id === 'entitiesWithAnomalies')
+        ?.noDataMessage;
+    };
+    mockTiles({}, { anomaliesMissingJobs: true });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+    expect(anomaliesNoDataMessage()).toBe('Requires anomaly detection jobs');
+
+    jest.clearAllMocks();
+    mockTiles({}, { anomaliesMissingJobs: false });
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+    expect(anomaliesNoDataMessage()).toBeUndefined();
   });
 });
