@@ -40,7 +40,7 @@ import {
 } from '@elastic/eui';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
@@ -133,9 +133,26 @@ const i18nTexts = {
 };
 
 const FLYOUT_CLASSNAME = 'workflowExecutionFlyout';
-/** Keep slim enough that the YAML editor stays readable with both panels open. */
+/** Push width of the run panel. The step detail overlays beside it and does not add to this. */
 const EXECUTION_PANEL_WIDTH = 560;
-const STEP_DETAIL_WIDTH = 560;
+const MIN_PANEL_WIDTH = 280;
+
+const FLYOUT_CONTENT_CSS = {
+  '.euiFlyout__content': {
+    width: '100%',
+    minWidth: 0,
+    height: '100%',
+    overflow: 'hidden',
+    display: 'flex',
+    flexDirection: 'column' as const,
+  },
+};
+
+// Overlay enables EUI's focus trap. `ownFocus={false}` (forced on a session child) only
+// releases it on the first outside click, which pulls focus out of the YAML editor.
+const STEP_DETAIL_FOCUS_TRAP_PROPS = {
+  disabled: true,
+} as React.ComponentProps<typeof EuiFlyout>['focusTrapProps'];
 /** Field column: content-sized between a header-comfortable min and a path-truncation max. */
 const FIELD_COLUMN_MIN_PX = 100;
 const FIELD_COLUMN_MAX_PX = 160;
@@ -893,42 +910,62 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const showTagsRow = showRunModeBadge || workflowTags.length > 0;
     const stepTestTargetName = runModeInfo?.stepTestTargetName ?? '';
 
-    // Widen the flyout when the step detail panel is open (FlyoutPanels pattern).
-    // Width is a hard constant — content must not flex the panels. It must go through the flyout's
-    // own `size` prop: an imperative style write loses to EUI's container-relative `inline-size`,
-    // which lands on the first commit (the EuiFlyout `container` component default).
-    const flyoutWidth = selectedStepExecutionId
-      ? EXECUTION_PANEL_WIDTH + STEP_DETAIL_WIDTH
-      : EXECUTION_PANEL_WIDTH;
+    const historyKeyRef = useRef(Symbol('workflow-execution-flyout'));
+    const [executionWidth, setExecutionWidth] = useState(EXECUTION_PANEL_WIDTH);
+    // The step flyout can inherit the session only after the run flyout has registered it.
+    const [isExecutionFlyoutActive, setIsExecutionFlyoutActive] = useState(false);
+    const onExecutionFlyoutActive = useCallback(() => {
+      setIsExecutionFlyoutActive(true);
+    }, []);
+    useLayoutEffect(() => {
+      setIsExecutionFlyoutActive(true);
+    }, []);
+    const onExecutionResize = useCallback((width: number) => {
+      setExecutionWidth(width);
+    }, []);
+    const onCloseStepDetail: React.ComponentProps<typeof EuiFlyout>['onClose'] = useCallback(
+      (_event, meta) => {
+        // Closing the run flyout already drops the child. Writing the step clear on top
+        // of that adds a history entry after the run is gone.
+        if (meta?.reason === 'navigation-cascade') {
+          return;
+        }
+        setSelectedStepExecutionId(null);
+      },
+      [setSelectedStepExecutionId]
+    );
+    const executionAriaLabel = i18n.translate('workflows.executionFlyout.ariaLabel', {
+      defaultMessage: 'Execution of {name}',
+      values: { name: workflowName },
+    });
 
     return (
-      <EuiFlyout
-        aria-label={i18n.translate('workflows.executionFlyout.ariaLabel', {
-          defaultMessage: 'Execution of {name}',
-          values: { name: workflowName },
-        })}
-        onClose={onClose}
-        type="push"
-        size={flyoutWidth}
-        paddingSize="none"
-        hideCloseButton
-        className={FLYOUT_CLASSNAME}
-        data-test-subj="workflowExecutionFlyout"
-      >
-        {/* Outer flex row — each column is a visually independent panel */}
-        <div css={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-          {/* ── Step detail panel (independent header + scrollable body) ── */}
-          {selectedStepExecutionId && (
+      <>
+        {isExecutionFlyoutActive && selectedStepExecutionId ? (
+          <EuiFlyout
+            aria-label={i18n.translate('workflows.executionFlyout.stepDetail.ariaLabel', {
+              defaultMessage: 'Step detail',
+            })}
+            session="inherit"
+            historyKey={historyKeyRef.current}
+            id="stepDetail"
+            onClose={onCloseStepDetail}
+            // Child sessions are overlay with no mask. Named size is required; pixels throw.
+            size="s"
+            resizable={true}
+            paddingSize="none"
+            hideCloseButton
+            focusTrapProps={STEP_DETAIL_FOCUS_TRAP_PROPS}
+            data-test-subj="workflowExecutionStepFlyout"
+            css={FLYOUT_CONTENT_CSS}
+          >
             <div
               css={{
-                width: `${STEP_DETAIL_WIDTH}px`,
-                minWidth: `${STEP_DETAIL_WIDTH}px`,
-                maxWidth: `${STEP_DETAIL_WIDTH}px`,
-                flex: `0 0 ${STEP_DETAIL_WIDTH}px`,
                 boxSizing: 'border-box',
                 display: 'flex',
                 flexDirection: 'column',
-                borderRight: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+                height: '100%',
+                width: '100%',
                 overflow: 'hidden',
               }}
             >
@@ -1182,13 +1219,33 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                 )}
               </div>
             </div>
-          )}
-
-          {/* ── Execution panel (own EuiFlyoutHeader / Body / Footer) ── */}
+          </EuiFlyout>
+        ) : null}
+        <EuiFlyout
+          aria-label={executionAriaLabel}
+          session="start"
+          historyKey={historyKeyRef.current}
+          id="execution"
+          onClose={onClose}
+          onActive={onExecutionFlyoutActive}
+          type="push"
+          // Stay push when the Agent Builder sidebar shrinks the app below EUI's default `l` (992px).
+          pushMinBreakpoint="xs"
+          size={executionWidth}
+          minWidth={MIN_PANEL_WIDTH}
+          resizable={true}
+          onResize={onExecutionResize}
+          paddingSize="none"
+          hideCloseButton
+          className={FLYOUT_CLASSNAME}
+          data-test-subj="workflowExecutionFlyout"
+          css={FLYOUT_CONTENT_CSS}
+        >
           <div
             css={{
               flex: 1,
               minWidth: 0,
+              height: '100%',
               display: 'flex',
               flexDirection: 'column',
               overflow: 'hidden',
@@ -1646,8 +1703,8 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
               </div>
             </EuiFlyoutFooter>
           </div>
-        </div>
-      </EuiFlyout>
+        </EuiFlyout>
+      </>
     );
   }
 );

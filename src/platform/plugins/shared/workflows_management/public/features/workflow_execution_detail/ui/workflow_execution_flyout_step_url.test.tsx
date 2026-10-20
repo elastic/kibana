@@ -177,9 +177,50 @@ describe('WorkflowExecutionFlyout step URL and field paths', () => {
 
     renderFlyout();
 
+    expect(screen.getByTestId('workflowExecutionStepFlyout')).toBeInTheDocument();
+    expect(screen.getByTestId('workflowExecutionFlyout')).toBeInTheDocument();
+
     fireEvent.click(screen.getByTestId('workflowExecutionFlyoutStepClose'));
 
     expect(mockSetSelectedStepExecution).toHaveBeenCalledWith(null);
+    expect(screen.getByTestId('workflowExecutionFlyout')).toBeInTheDocument();
+  });
+
+  it('does not clear the selected step when the run flyout cascades the step flyout closed', () => {
+    mockUrlState.selectedStepExecutionId = 'step-123';
+    const onCloseExecution = jest.fn();
+
+    render(<WorkflowExecutionFlyout executionId="exec-1" onClose={onCloseExecution} />, {
+      wrapper: getTestProvider({}),
+    });
+
+    const stepFlyout = screen.getByTestId('workflowExecutionStepFlyout');
+    const fiberKey = Object.keys(stepFlyout).find((key) => key.startsWith('__reactFiber'));
+    expect(fiberKey).toEqual(expect.any(String));
+
+    interface FlyoutFiber {
+      return: FlyoutFiber | null;
+      memoizedProps?: {
+        onClose?: (event: Event, meta?: { reason?: string }) => void;
+      };
+    }
+    let fiber = (stepFlyout as unknown as Record<string, FlyoutFiber>)[fiberKey!];
+    let closeStepFlyout: ((event: Event, meta?: { reason?: string }) => void) | undefined;
+    while (fiber) {
+      const onClose = fiber.memoizedProps?.onClose;
+      if (onClose && onClose !== onCloseExecution) {
+        closeStepFlyout = onClose;
+        break;
+      }
+      fiber = fiber.return;
+    }
+    expect(closeStepFlyout).toEqual(expect.any(Function));
+    mockSetSelectedStepExecution.mockClear();
+
+    closeStepFlyout!(new MouseEvent('click'), { reason: 'navigation-cascade' });
+
+    expect(mockSetSelectedStepExecution).not.toHaveBeenCalled();
+    expect(screen.getByTestId('workflowExecutionFlyout')).toBeInTheDocument();
   });
 
   it('offers copy only on metadata rows that exist in the workflow context', () => {
