@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment';
-import dateMath from '@kbn/datemath';
+import * as dateMath from '@kbn/datemath';
 import { loader, logger, Warn, expressionFunction } from 'vega';
 import { expressionInterpreter } from 'vega-interpreter';
 import { Utils } from '../data_model/utils';

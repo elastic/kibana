@@ -33,6 +33,7 @@ const collectBoundRoutes = () => {
 
 describe('alerting v2 route access', () => {
   const routes = collectBoundRoutes();
+  const publicRoutes = routes.filter((route) => route.options?.access === 'public');
 
   it.each(
     routes.map((route) => ({
@@ -41,5 +42,14 @@ describe('alerting v2 route access', () => {
     }))
   )('$name declares an access level that agrees with its path prefix', ({ route }) => {
     expect(route.options?.access).toEqual(expectedAccessForPath(route.path));
+  });
+
+  it.each(
+    publicRoutes.map((route) => ({
+      name: `${route.method.toUpperCase()} ${route.path}`,
+      route,
+    }))
+  )('$name declares stable availability', ({ route }) => {
+    expect(route.options?.availability?.stability).toBe('stable');
   });
 });

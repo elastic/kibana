@@ -6,11 +6,14 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import moment from 'moment';
 import { coreMock, elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { GEN_AI_SETTINGS_INFERENCE_STREAMING } from '@kbn/management-settings-ids';
+import type { InferenceSetupDependencies } from './types';
 import {
   createInferenceStreamingResolver,
+  InferencePlugin,
   resolveOnFailureMode,
   resolveReplacementsEncryptionKey,
 } from './plugin';
@@ -141,5 +144,47 @@ describe('createInferenceStreamingResolver', () => {
       expect(internalEsClient.transport.request).not.toHaveBeenCalled();
       expect(currentUserEsClient.transport.request).not.toHaveBeenCalled();
     }
+  });
+});
+
+describe('InferencePlugin.setup', () => {
+  const setupPlugin = (
+    workersEnabled: boolean,
+    plugins: Partial<InferenceSetupDependencies> = {}
+  ) => {
+    const plugin = new InferencePlugin(
+      coreMock.createPluginInitializerContext({
+        enabled: true,
+        workers: {
+          anonymization: {
+            enabled: workersEnabled,
+            minThreads: 0,
+            maxThreads: 3,
+            maxQueue: 20,
+            idleTimeout: moment.duration(30, 'seconds'),
+            taskTimeout: moment.duration(15, 'seconds'),
+          },
+        },
+      })
+    );
+    return plugin.setup(coreMock.createSetup(), {
+      actions: {},
+      ...plugins,
+    } as unknown as InferenceSetupDependencies);
+  };
+
+  for (const workersEnabled of [true, false]) {
+    it(`tells the anonymization settings plugin whether anonymization workers are enabled (${workersEnabled})`, () => {
+      const configurePatternTester = jest.fn();
+
+      setupPlugin(workersEnabled, { aiAnonymizationSettings: { configurePatternTester } });
+
+      expect(configurePatternTester).toHaveBeenCalledTimes(1);
+      expect(configurePatternTester).toHaveBeenCalledWith({ enabled: workersEnabled });
+    });
+  }
+
+  it('does not require the anonymization settings plugin', () => {
+    expect(() => setupPlugin(true)).not.toThrow();
   });
 });
