@@ -177,9 +177,9 @@ Compare one current detection against one active event using that event's compac
 1. Either side's `<grounding_evidence>` verdict is `off_topic`, unless it is an observed-error
    `off_topic` detection, which is its own event.
 2. Either side has no matched query KI, or its `<grounding_evidence>` has verdict
-   `inconclusive`/`not_checked` (`<eligibility>`). A detection that fails this check is never
-   paired or grouped: do not add it to the grouping graph or confirmed signal map. `<eligibility>`
-   says whether it is written on its own; if not, include its `rule_uuid` in `written_rule_uuids`.
+   `inconclusive`/`not_checked` (`<eligibility>`). A detection that fails this check is never paired
+   or grouped: do not add it to the grouping graph or confirmed signal map, and, unless
+   `<eligibility>` writes it on its own, include its `rule_uuid` in `written_rule_uuids`.
 3. The event holds no confirming signal: its `signal_counts.confirms` is 0.
    - Non-confirming signals never establish a continuation. The detection must pass the checks below
      against the event's compact fields.
