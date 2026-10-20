@@ -21,10 +21,13 @@ export {
   createPlatformReplica,
   currentExecutionContext,
   emptyPlatformReplicas,
+  executionContextOpaqueId,
+  taskManagerExecutionContext,
   lookupBooleanFlag,
   runWithExecutionContext,
 } from './platform';
 export type {
+  ExecutionContextValue,
   FeatureFlagReplica,
   FeaturesReplica,
   ForwardedEvent,

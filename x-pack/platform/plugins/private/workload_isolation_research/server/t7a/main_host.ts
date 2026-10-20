@@ -27,6 +27,7 @@ import {
   classifyFlagOverrides,
   configKeyPaths,
   fingerprintSavedObjectType,
+  taskManagerExecutionContext,
   toPlainConfig,
 } from '../capability_kit/worker_core';
 import type { PlatformReplicas } from '../capability_kit/worker_core';
@@ -585,11 +586,10 @@ export class T7aController {
       taskType,
       taskInstance: taskInstance as unknown as Obj,
       executionUuid: context.executionUuid,
-      executionContext: {
-        type: 'task manager',
-        name: `run ${taskType}`,
-        id: String(context.executionUuid ?? ''),
-      },
+      executionContext: taskManagerExecutionContext(
+        taskType,
+        String((taskInstance as Obj).id ?? '')
+      ),
       ...(context.fakeRequest ? { fakeRequest: encodeFakeRequest(context.fakeRequest) } : {}),
     };
     const dispatch = async (phase: 'run' | 'cleanup') => {

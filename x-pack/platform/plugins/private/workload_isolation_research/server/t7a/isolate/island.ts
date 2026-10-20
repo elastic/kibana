@@ -62,6 +62,7 @@ import {
   createForwardingLogger,
   createPlatformReplica,
   currentExecutionContext,
+  executionContextOpaqueId,
   decideTaskManagerCall,
   emptyPlatformReplicas,
   routeSavedObject,
@@ -235,8 +236,8 @@ export const createCoreLite = (
     }),
     kibanaVersion: snapshot.kibanaVersion,
     getExecutionContext: () => {
-      const current = currentExecutionContext();
-      return current?.id ? String(current.id) : es.executionContext;
+      const header = executionContextOpaqueId();
+      return header === 'unknownId' ? es.executionContext : header;
     },
     onRequestHandlerFactory: esFence.wrap(getRequestHandlerFactory(es.routing.enabled, false)),
   });
@@ -563,8 +564,9 @@ export const createCoreLite = (
     }
   };
   const observePlatform = async (token: string) => {
-    const ctx = currentExecutionContext();
+    const ctx = currentExecutionContext()?.toJSON();
     const id = ctx?.id ? String(ctx.id) : '';
+    const opaqueId = executionContextOpaqueId();
     const message = `worker-core-live token=${token} ctx=${id}`;
     const logError = await safeBridge('log', 'write', {
       level: 'info',
@@ -610,6 +612,7 @@ export const createCoreLite = (
     return {
       token,
       executionContextId: id || null,
+      executionContextOpaqueId: opaqueId,
       generations: platform.generation(),
       probeFlag: platform.booleanFlag('workerCore.liveProbe') ?? null,
       activeProduct: platform.activeProduct() ?? null,

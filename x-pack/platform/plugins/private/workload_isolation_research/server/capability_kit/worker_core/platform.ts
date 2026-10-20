@@ -65,23 +65,99 @@ export const NAMED_EVENT_EXCLUSIONS = [
   'usage.collector.register',
 ] as const;
 
-const executionContextStore = new AsyncLocalStorage<Record<string, unknown>>();
+export interface ExecutionContextValue {
+  readonly type?: string;
+  readonly name?: string;
+  readonly id?: string;
+  readonly description?: string;
+  readonly page?: string;
+  readonly url?: string;
+  readonly space?: string;
+  readonly meta?: Readonly<Record<string, string | number | boolean | undefined>>;
+  readonly child?: ExecutionContextValue;
+}
+
+const MAX_OPAQUE_CONTEXT = 1024;
+
+const encodeContextPart = (value?: string): string => encodeURIComponent(value || '');
+
+/** Same hierarchy string Core puts in the Elasticsearch opaque id. */
+const stringifyExecutionContext = (context: ExecutionContextValue): string => {
+  const current = `${encodeContextPart(context.type)}:${encodeContextPart(context.name)}:${encodeContextPart(context.id)}`;
+  const encoded = context.child ? `${current};${stringifyExecutionContext(context.child)}` : current;
+  return encoded.slice(0, MAX_OPAQUE_CONTEXT);
+};
+
+/** Container semantics of Core's `ExecutionContextContainer`: `toJSON` plus `toString`. */
+export class ResearchExecutionContextContainer {
+  readonly #context: ExecutionContextValue;
+
+  constructor(context: ExecutionContextValue, parent?: ResearchExecutionContextContainer) {
+    const parentValue = parent?.toJSON();
+    this.#context = parentValue ? { ...parentValue, child: context } : context;
+  }
+
+  toJSON(): ExecutionContextValue {
+    return this.#context;
+  }
+
+  toString(): string {
+    return stringifyExecutionContext(this.#context);
+  }
+}
+
+const executionContextStore = new AsyncLocalStorage<ResearchExecutionContextContainer>();
+const requestIdStore = new AsyncLocalStorage<{ requestId: string }>();
+
+/** Task Manager's context: task id, not the execution uuid. */
+export const taskManagerExecutionContext = (
+  taskType: string,
+  taskId: string
+): ExecutionContextValue => ({
+  type: 'task manager',
+  name: `run ${taskType}`,
+  id: taskId,
+  description: 'run task',
+});
 
 /** Applies the per-run execution context captured on main. */
-export const runWithExecutionContext = <T>(context: Record<string, unknown> | undefined, fn: () => T): T =>
-  context ? executionContextStore.run(context, fn) : fn();
+export const runWithExecutionContext = <T>(
+  context: ExecutionContextValue | undefined,
+  fn: () => T,
+  requestId?: string
+): T => {
+  if (!context) return fn();
+  const parent = executionContextStore.getStore();
+  const container = new ResearchExecutionContextContainer(context, parent);
+  const run = () => executionContextStore.run(container, fn);
+  return requestId ? requestIdStore.run({ requestId }, run) : run();
+};
 
-export const currentExecutionContext = (): Record<string, unknown> | undefined =>
+export const currentExecutionContext = (): ResearchExecutionContextContainer | undefined =>
   executionContextStore.getStore();
 
+/** `requestId;kibana:<hierarchy>`, matching `ExecutionContextService.getAsHeader`. */
+export const executionContextOpaqueId = (requestId?: string): string => {
+  const id = requestId ?? requestIdStore.getStore()?.requestId ?? 'unknownId';
+  const hierarchy = executionContextStore.getStore()?.toString();
+  return hierarchy ? `${id};kibana:${hierarchy}` : id;
+};
+
 export const createExecutionContextService = () => ({
-  withContext: <T>(context: Record<string, unknown>, fn: () => T): T =>
-    runWithExecutionContext(context, fn),
+  withContext: <T>(context: ExecutionContextValue, fn: () => T, requestId?: string): T =>
+    runWithExecutionContext(context, fn, requestId),
   get: () => currentExecutionContext(),
-  getAsLabels: () => ({ ...(currentExecutionContext() ?? {}) }),
-  set: (context: Record<string, unknown>) => {
-    const store = executionContextStore.getStore();
-    if (store) Object.assign(store, context);
+  getAsHeader: (requestId?: string) => executionContextOpaqueId(requestId),
+  getAsLabels: () => {
+    const value = currentExecutionContext()?.toJSON();
+    return value ? { ...value } : {};
+  },
+  set: (context: ExecutionContextValue) => {
+    const parent = executionContextStore.getStore();
+    executionContextStore.enterWith(new ResearchExecutionContextContainer(context, parent));
+  },
+  setRequestId: (requestId: string) => {
+    requestIdStore.enterWith({ requestId });
   },
 });
 

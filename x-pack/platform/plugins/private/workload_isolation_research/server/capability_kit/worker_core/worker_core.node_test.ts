@@ -174,11 +174,50 @@ test('logger and events forward to the sink and redact secret-looking meta', () 
   assert.throws(() => forwarder.send('unknown-sink', {}), /not forwarded or excluded/);
 });
 
+test('execution context matches Core opaque ids for concurrent tasks', async () => {
+  const { ExecutionContextContainer } = require('../../../../../../../../src/core/packages/execution-context/server-internal/src/execution_context_container');
+  const service = createExecutionContextService();
+  const taskA = {
+    type: 'task manager',
+    name: 'run alerting:.es-query',
+    id: 'task-a',
+    description: 'run task',
+  };
+  const taskB = {
+    type: 'task manager',
+    name: 'run actions:.index',
+    id: 'task-b',
+    description: 'run task',
+  };
+  const headerFor = (requestId: string, context: object) =>
+    `${requestId};kibana:${new ExecutionContextContainer(context).toString()}`;
+  const [opaqueA, opaqueB] = await Promise.all([
+    service.withContext(taskA, async () => {
+      await Promise.resolve();
+      const current = service.get();
+      assert.equal(typeof current?.toJSON, 'function');
+      assert.equal(current.toJSON().id, 'task-a');
+      assert.equal(current.toJSON().description, 'run task');
+      return service.getAsHeader('req-a');
+    }),
+    service.withContext(taskB, async () => {
+      await Promise.resolve();
+      const current = service.get();
+      assert.equal(current.toJSON().id, 'task-b');
+      return service.getAsHeader('req-b');
+    }),
+  ]);
+  assert.equal(opaqueA, headerFor('req-a', taskA));
+  assert.equal(opaqueB, headerFor('req-b', taskB));
+  assert.notEqual(opaqueA, opaqueB);
+  assert.equal(service.get(), undefined);
+});
+
 test('execution context is visible to nested calls and absent outside the run', () => {
   const service = createExecutionContextService();
   assert.equal(service.get(), undefined);
   const seen = service.withContext({ name: 'run task', id: 'abc' }, () => service.get());
-  assert.deepEqual(seen, { name: 'run task', id: 'abc' });
+  assert.deepEqual(seen?.toJSON(), { name: 'run task', id: 'abc' });
   assert.equal(
     runWithExecutionContext(undefined, () => service.get()),
     undefined
