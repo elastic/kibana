@@ -65,6 +65,11 @@ export interface ProcessedConversation {
    * round the run does not resume is rendered as history.
    */
   resumedRoundId?: string;
+  /**
+   * Leaves out the attachment guidance Agent Builder adds to user messages (the attachment list
+   * and per-type instructions), for agents without the platform attachment tools.
+   */
+  omitAttachmentGuidance?: boolean;
 }
 
 export const prepareConversation = async ({

@@ -57,6 +57,12 @@ export interface PromptFactoryParams {
   conversationTemplates: ConversationTemplatesService;
   /** Whether the run can write the conversation's metadata (`set_conversation_metadata` is registered). */
   conversationMetadataWritable: boolean;
+  /**
+   * False for an agent that opted out of the platform tools (`enable_internal_tools`): the system
+   * prompt then holds only the agent's own instructions, without Agent Builder's tool guidance.
+   * Defaults to true.
+   */
+  internalToolsEnabled?: boolean;
 }
 
 export interface HandoverParams {

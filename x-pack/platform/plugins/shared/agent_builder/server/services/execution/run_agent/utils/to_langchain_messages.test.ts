@@ -787,6 +787,19 @@ describe('prepareMessages', () => {
       expect(content).toContain('attachment_id="a-1"');
     });
 
+    it('leaves attachment_context out when the conversation omits attachment guidance', async () => {
+      const nextInput = makeRoundInput('here is a new attachment', [], {
+        attachment_context: sampleContext,
+      });
+
+      const result = await prepareMessages({
+        conversation: createConversation({ nextInput, omitAttachmentGuidance: true }),
+      });
+
+      expect(result).toHaveLength(1);
+      expect(result[0].content as string).toBe('here is a new attachment');
+    });
+
     it('renders attachment_context on a previous round message but not on the next-input message', async () => {
       const previousRounds = [
         createRound({
