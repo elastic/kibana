@@ -23,7 +23,7 @@ The runner derives `run_outcome` from its own counts, first match wins:
 5. `empty_all_duplicates`: attacks were generated, but every one already existed.
 6. `empty_no_attacks`: nothing was generated.
 
-In the shared `worker_run_completed`, the items are generation batches: `candidates_found` is the alerts analyzed, `items_dispatched` the batches attempted, `items_failed` the batches that failed, and `items_in_flight` the attacks handed to reviews. The outcomes map to `produced`, `empty_nothing_pending` (no alerts), `empty_nothing_found` (no attacks, or only duplicates), `degraded_partial` and `failed_all_items`. A failed batch gives `degraded_reason: dependency_unavailable`.
+In the shared `worker_run_completed`, the items are generation batches: `candidates_found` and `items_dispatched` are the batches attempted, `items_failed` the batches that failed, and `items_in_flight` is 0, because the run waits for its batches. Alerts analyzed and attacks handed to reviews are on `alertzero_ad_worker_run_completed`. The outcomes map to `produced`, `empty_nothing_pending` (no alerts), `empty_nothing_found` (no attacks, or only duplicates), `degraded_partial` and `failed_all_items`. A failed batch gives `degraded_reason: dependency_unavailable`.
 
 ## Closes and handoffs
 

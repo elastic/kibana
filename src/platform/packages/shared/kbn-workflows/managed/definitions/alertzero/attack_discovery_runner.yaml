@@ -305,17 +305,18 @@ steps:
         {%- endif -%}
 
   # The same run as the shared `worker_run_completed` every Worker sends, so runs compare across
-  # Workers; the items are generation batches.
+  # Workers. The items are generation batches, which the run waits for, so none is in flight;
+  # alerts and attacks are on the event above.
   - name: report_worker_run_completed
     type: alertzero.reportWorkerOutcome
     on-failure:
       continue: true
     with:
       event: worker_run_completed
-      candidates_found: "${{ steps.run_generation.output.alerts_analyzed | default: 0 }}"
+      candidates_found: "${{ steps.run_generation.output.batches_total | default: 0 }}"
       items_dispatched: "${{ steps.run_generation.output.batches_total | default: 0 }}"
       items_failed: "${{ steps.run_generation.output.batches_failed | default: 0 }}"
-      items_in_flight: "${{ steps.resolve_fanout.output.attack_count | default: 0 }}"
+      items_in_flight: 0
       degraded_reason: "{% if steps.run_generation.output.batches_failed > 0 %}dependency_unavailable{% else %}none{% endif %}"
       run_outcome: |-
         {%- assign batches_total = steps.run_generation.output.batches_total | default: 0 -%}

@@ -3126,12 +3126,12 @@ describe('Attack Discovery worker chain', () => {
         expect({ adRendered, shared: renderWith(scenario) }).toEqual({
           adRendered: adOutcome,
           shared: {
-            candidates_found: scenario.batchesTotal * 100,
+            candidates_found: scenario.batchesTotal,
             degraded_reason: degraded ? 'dependency_unavailable' : 'none',
             event: 'worker_run_completed',
             items_dispatched: scenario.batchesTotal,
             items_failed: scenario.batchesFailed,
-            items_in_flight: scenario.persisted,
+            items_in_flight: 0,
             run_outcome: sharedOutcome,
           },
         });
