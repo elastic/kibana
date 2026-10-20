@@ -69,7 +69,7 @@ const SITE: EdotBrowserSite = {
         {
           tagName: 'BUTTON',
           cssSelector: '#pay-now',
-          elementAttributes: { id: 'pay-now' },
+          otelAttributes: { action: 'pay' },
           request: { method: 'POST', url: 'https://shop.example.com/api/payment' },
         },
       ],
@@ -330,18 +330,18 @@ describe('edotBrowser', () => {
       expect(doc.attributes?.['browser.web_vital.rating']).toBe('good');
     });
 
-    it('writes clicks and omits empty element attributes', () => {
+    it('writes clicks with a named mouse button and data-otel element attributes', () => {
       const [withAttributes] = client
         .click({
           pageX: 120,
           pageY: 480,
           tagName: 'BUTTON',
           cssSelector: '#add-to-cart',
-          elementAttributes: { id: 'add-to-cart' },
+          otelAttributes: { action: 'add-to-cart' },
         })
         .serialize();
       const [withoutAttributes] = client
-        .click({ pageX: 1, pageY: 2, tagName: 'A', cssSelector: 'nav > a', elementAttributes: {} })
+        .click({ pageX: 1, pageY: 2, tagName: 'A', cssSelector: 'nav > a', button: 'middle' })
         .serialize();
 
       expect(withAttributes.event_name).toBe('browser.user_action.click');
@@ -350,10 +350,13 @@ describe('edotBrowser', () => {
         'browser.page.y': 480,
         'browser.tag_name': 'BUTTON',
         'browser.css_selector': '#add-to-cart',
-        'browser.mouse_event.button': 0,
-        'browser.element.attributes': { id: 'add-to-cart' },
+        'browser.mouse_event.button': 'left',
+        'browser.element.attributes': { action: 'add-to-cart' },
       });
-      expect(withoutAttributes.attributes).not.toHaveProperty('browser.element.attributes');
+      expect(withoutAttributes.attributes).toMatchObject({
+        'browser.mouse_event.button': 'middle',
+        'browser.element.attributes': {},
+      });
     });
 
     it('writes exceptions with ERROR severity', () => {

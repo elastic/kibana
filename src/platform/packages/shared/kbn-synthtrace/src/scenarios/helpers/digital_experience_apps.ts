@@ -95,7 +95,7 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
             {
               tagName: 'BUTTON',
               cssSelector: '#add-to-cart',
-              elementAttributes: { id: 'add-to-cart', 'data-test-subj': 'addToCart' },
+              otelAttributes: { action: 'add-to-cart' },
               request: { method: 'POST', url: `${STOREFRONT_ORIGIN}/api/cart/items` },
             },
             { tagName: 'IMG', cssSelector: 'div.gallery > img:nth-child(2)' },
@@ -108,7 +108,6 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
             {
               tagName: 'A',
               cssSelector: 'a.checkout-button',
-              elementAttributes: { href: `${CHECKOUT_ORIGIN}/checkout/shipping` },
             },
           ],
         },
@@ -145,7 +144,6 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
             {
               tagName: 'BUTTON',
               cssSelector: '#continue-to-payment',
-              elementAttributes: { id: 'continue-to-payment' },
             },
           ],
         },
@@ -156,7 +154,7 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
             {
               tagName: 'BUTTON',
               cssSelector: '#pay-now',
-              elementAttributes: { id: 'pay-now', type: 'submit' },
+              otelAttributes: { action: 'pay', step: 'payment' },
               request: {
                 method: 'POST',
                 url: `${CHECKOUT_ORIGIN}/api/payment`,
@@ -250,7 +248,6 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
             {
               tagName: 'BUTTON',
               cssSelector: 'button.vjs-play-control',
-              elementAttributes: { title: 'Play' },
             },
           ],
         },
@@ -295,7 +292,7 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
             {
               tagName: 'BUTTON',
               cssSelector: '#submit-ticket',
-              elementAttributes: { id: 'submit-ticket' },
+              otelAttributes: { action: 'submit-ticket' },
               request: {
                 method: 'POST',
                 url: `${SUPPORT_ORIGIN}/api/tickets`,
@@ -305,7 +302,6 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
             {
               tagName: 'TEXTAREA',
               cssSelector: '#ticket-description',
-              elementAttributes: { id: 'ticket-description' },
             },
           ],
         },

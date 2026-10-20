@@ -67,6 +67,7 @@ export interface NavigationTimingValues {
 export type NavigationTimingType = 'navigate' | 'reload' | 'back_forward' | 'prerender';
 export type SoftNavigationType = 'push' | 'replace' | 'traverse' | 'reload';
 export type HttpInstrumentation = 'fetch' | 'xhr';
+export type MouseButton = 'left' | 'middle' | 'right';
 
 const INTEGER_TIMING_KEYS: ReadonlySet<string> = new Set([
   'transferSize',
@@ -220,25 +221,24 @@ export class EdotBrowserClient {
     pageY,
     tagName,
     cssSelector,
-    button = 0,
-    elementAttributes = {},
+    button = 'left',
+    otelAttributes = {},
   }: {
     pageX: number;
     pageY: number;
     tagName: string;
     cssSelector: string;
-    button?: number;
-    elementAttributes?: Record<string, string>;
+    button?: MouseButton;
+    /** The element's `data-otel-*` attributes, without the prefix. */
+    otelAttributes?: Record<string, string>;
   }) {
     return this.log('browser.user_action.click', 'user-action', {
       'browser.page.x': Math.round(pageX),
       'browser.page.y': Math.round(pageY),
       'browser.tag_name': tagName,
-      'browser.css_selector': cssSelector,
+      'browser.element.attributes': otelAttributes,
       'browser.mouse_event.button': button,
-      ...(Object.keys(elementAttributes).length
-        ? { 'browser.element.attributes': elementAttributes }
-        : {}),
+      'browser.css_selector': cssSelector,
     });
   }
 

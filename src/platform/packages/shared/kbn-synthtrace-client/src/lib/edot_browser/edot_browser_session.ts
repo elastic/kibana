@@ -43,8 +43,10 @@ export interface EdotBrowserRequest {
 
 export interface EdotBrowserClickTarget {
   tagName: string;
+  /** In the format of the user-action instrumentation: ids and `:nth-child`, no `:nth-of-type`. */
   cssSelector: string;
-  elementAttributes?: Record<string, string>;
+  /** The element's `data-otel-*` attributes, without the prefix. */
+  otelAttributes?: Record<string, string>;
   /** Request fired by clicking the element. */
   request?: EdotBrowserRequest;
 }
@@ -113,10 +115,9 @@ const DEFAULT_CLICK_TARGETS: readonly EdotBrowserClickTarget[] = [
   {
     tagName: 'BUTTON',
     cssSelector: 'button.menu-toggle',
-    elementAttributes: { 'aria-label': 'Menu' },
   },
-  { tagName: 'INPUT', cssSelector: '#search', elementAttributes: { id: 'search', type: 'search' } },
-  { tagName: 'DIV', cssSelector: 'div.card:nth-of-type(3)' },
+  { tagName: 'INPUT', cssSelector: '#search' },
+  { tagName: 'DIV', cssSelector: '#main > div.card:nth-child(3)' },
 ];
 
 interface SessionContext {
