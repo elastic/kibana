@@ -13,7 +13,7 @@ import {
   ProfilingEmptyState,
   useProfilingSchemaState,
 } from '@kbn/observability-shared-plugin/public';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { isJavaAgentName as getIsJavaAgentName } from '../../../../common/agent_name';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
