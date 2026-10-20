@@ -27,9 +27,7 @@ function makeSeries(fn: (i: number) => number | null): SparklinePoint[] {
 }
 
 const latencySeries = makeSeries((i) => 1000 + Math.sin(i / 3) * 120 + Math.random() * 60);
-const latencyComparison = makeSeries((i) => 940 + Math.sin(i / 3) * 100 + Math.random() * 40);
 const throughputSeries = makeSeries((i) => 46 + Math.sin(i / 4) * 6 + Math.random() * 3);
-const throughputComparison = makeSeries((i) => 48 + Math.sin(i / 4) * 6 + Math.random() * 3);
 
 // A service entity drives this story, but the component is entity-agnostic: `title`/`subtitle`/
 // `metrics`/`links` carry no service-specific semantics, so hosts, containers, etc. map in the
@@ -39,28 +37,18 @@ const baseProps: EntitySummaryProps = {
   subtitle: 'Synthtrace: service_map · go',
   titleHref: 'https://localhost:5601/app/apm/services/checkoutService/overview',
   icon: <EuiIcon type="compute" size="xl" aria-hidden={true} />,
-  health: {
-    activeAlertCount: 1,
-    slo: { status: 'violated', violatedCount: 1 },
-  },
   metrics: [
     {
       label: 'Latency (avg)',
       valueLabel: '1,000 ms',
       color: palette[1],
-      comparisonColor: palette[11],
       series: latencySeries,
-      comparisonSeries: latencyComparison,
-      change: { label: '6.25%', direction: 'increase', evaluation: 'bad' },
     },
     {
       label: 'Throughput',
       valueLabel: '46.6 tpm',
       color: palette[2],
-      comparisonColor: palette[12],
       series: throughputSeries,
-      comparisonSeries: throughputComparison,
-      change: { label: '2.1%', direction: 'decrease', evaluation: 'neutral' },
     },
     {
       label: 'Error rate',
@@ -95,19 +83,7 @@ const baseProps: EntitySummaryProps = {
   onCopyValue: () => {},
 };
 
-export const DesignAWithSparklines: StoryFn = () => <EntitySummary {...baseProps} />;
-
-export const DesignBWithoutSparklines: StoryFn = () => (
-  <EntitySummary {...baseProps} showSparklines={false} />
-);
-
-export const Healthy: StoryFn = () => (
-  <EntitySummary
-    {...baseProps}
-    health={{ activeAlertCount: 0, slo: { status: 'healthy' } }}
-    metrics={baseProps.metrics.map((metric) => ({ ...metric, change: undefined }))}
-  />
-);
+export const Default: StoryFn = () => <EntitySummary {...baseProps} />;
 
 export const Loading: StoryFn = () => (
   <EntitySummary

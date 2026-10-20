@@ -8,12 +8,4 @@
  */
 
 export { EntitySummary } from './entity_summary';
-export type {
-  EntitySummaryProps,
-  EntitySummaryMetric,
-  EntitySummaryHealth,
-  EntitySummaryLink,
-  EntityMetricChange,
-  EntityMetricEvaluation,
-  EntitySloStatus,
-} from './entity_summary';
+export type { EntitySummaryProps, EntitySummaryMetric, EntitySummaryLink } from './entity_summary';

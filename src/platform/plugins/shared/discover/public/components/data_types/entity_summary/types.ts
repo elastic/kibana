@@ -9,11 +9,7 @@
 
 import type { ReactElement, ReactNode } from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type {
-  EntitySummaryHealth,
-  EntitySummaryLink,
-  EntitySummaryMetric,
-} from '@kbn/discover-contextual-components';
+import type { EntitySummaryLink, EntitySummaryMetric } from '@kbn/discover-contextual-components';
 import type { DiscoverFeaturesServiceStart } from '@kbn/discover-shared-plugin/public';
 import type { DiscoverServices } from '../../../build_services';
 
@@ -44,7 +40,6 @@ export interface EntitySummaryEntity {
 /** Generic popover content a definition derives from its concrete fetched data. */
 export interface EntitySummaryContent {
   metrics: EntitySummaryMetric[];
-  health?: EntitySummaryHealth;
   /** Base links, id-keyed, before any per-profile customization. */
   links: EntitySummaryLink[];
   /** When set, the popover title links here (opens in a new tab). */

@@ -13,7 +13,6 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHealth,
   EuiHorizontalRule,
   EuiIcon,
   EuiLink,
@@ -30,19 +29,7 @@ import { Sparkline, type SparklinePoint } from '@kbn/apm-ui-shared';
 
 const PANEL_WIDTH = 380;
 const SPARKLINE_HEIGHT = 24;
-// Fixed label/value column width for the stacked layout so every chart starts at the same x and
-// they all share one width (otherwise shorter labels like "Error rate" give wider charts).
 const METRIC_LABEL_COLUMN_WIDTH = 112;
-
-/** Whether a metric change is an improvement, a regression, or neutral — the caller decides. */
-export type EntityMetricEvaluation = 'good' | 'bad' | 'neutral';
-
-export interface EntityMetricChange {
-  /** Pre-formatted magnitude, e.g. `6.25%`. */
-  label: string;
-  direction: 'increase' | 'decrease' | 'neutral';
-  evaluation: EntityMetricEvaluation;
-}
 
 export interface EntitySummaryMetric {
   label: string;
@@ -51,19 +38,6 @@ export interface EntitySummaryMetric {
   /** Series color (an EUI vis palette token). */
   color: string;
   series?: SparklinePoint[] | null;
-  comparisonSeries?: SparklinePoint[];
-  comparisonColor?: string;
-  change?: EntityMetricChange;
-}
-
-export type EntitySloStatus = 'violated' | 'degrading' | 'healthy' | 'no_data';
-
-export interface EntitySummaryHealth {
-  activeAlertCount?: number;
-  slo?: {
-    status: EntitySloStatus;
-    violatedCount?: number;
-  };
 }
 
 export interface EntitySummaryLink {
@@ -91,13 +65,8 @@ export interface EntitySummaryProps {
   titleHref?: string;
   /** Entity icon rendered in the header. */
   icon?: ReactNode;
-  health?: EntitySummaryHealth;
   /** Ordered metrics (e.g. latency, throughput, failed transaction rate). */
   metrics: EntitySummaryMetric[];
-  /** Lay the metrics out side by side (`row`, default) or stacked (`column`). */
-  metricsDirection?: 'row' | 'column';
-  /** When false, renders values without charts (Design B). Defaults to true. */
-  showSparklines?: boolean;
   isLoading?: boolean;
   /** Secondary links ("Open overview", "Active alerts", …). */
   links?: EntitySummaryLink[];
@@ -107,33 +76,17 @@ export interface EntitySummaryProps {
   onCopyValue?: () => void;
 }
 
-const SLO_HEALTH_COLOR: Record<EntitySloStatus, string> = {
-  violated: 'danger',
-  degrading: 'warning',
-  healthy: 'success',
-  no_data: 'subdued',
-};
-
-const CHANGE_ICON: Record<EntityMetricChange['direction'], string> = {
-  increase: 'sortUp',
-  decrease: 'sortDown',
-  neutral: 'minus',
-};
-
 /**
- * Entity-agnostic summary popover body: a header, optional filter actions, optional health, a
- * metrics section (with sparklines), and a list of links. Purely presentational — callers map
- * their own data into the generic metric/link/health shapes.
+ * Entity-agnostic summary popover body: a header, optional filter actions, a metrics section (with
+ * sparklines), and a list of links. Purely presentational — callers map their own data into the
+ * generic metric and link shapes.
  */
 export function EntitySummary({
   title,
   subtitle,
   titleHref,
   icon,
-  health,
   metrics,
-  metricsDirection = 'row',
-  showSparklines = true,
   isLoading = false,
   links = [],
   onClose,
@@ -171,23 +124,9 @@ export function EntitySummary({
         </>
       ) : null}
 
-      {health ? (
-        <>
-          <EuiHorizontalRule margin="none" />
-          <Section>
-            <HealthSection health={health} />
-          </Section>
-        </>
-      ) : null}
-
       <EuiHorizontalRule margin="none" />
       <Section>
-        <MetricsSection
-          metrics={metrics}
-          direction={metricsDirection}
-          showSparklines={showSparklines}
-          isLoading={isLoading}
-        />
+        <MetricsSection metrics={metrics} isLoading={isLoading} />
       </Section>
 
       {links.length > 0 ? (
@@ -263,106 +202,27 @@ function Header({
   );
 }
 
-function HealthSection({ health }: { health: EntitySummaryHealth }) {
-  const { activeAlertCount, slo } = health;
-  const hasAlerts = typeof activeAlertCount === 'number' && activeAlertCount > 0;
-
-  return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-      <EuiFlexItem grow={false}>
-        {hasAlerts ? (
-          <EuiBadge color="danger" iconType="bell" data-test-subj="entitySummaryAlertsBadge">
-            {i18n.translate('discover.entitySummary.activeAlerts', {
-              defaultMessage: '{count, plural, one {# alert active} other {# alerts active}}',
-              values: { count: activeAlertCount },
-            })}
-          </EuiBadge>
-        ) : (
-          <EuiHealth color="success" data-test-subj="entitySummaryNoAlerts">
-            {i18n.translate('discover.entitySummary.noAlerts', {
-              defaultMessage: 'No alerts',
-            })}
-          </EuiHealth>
-        )}
-      </EuiFlexItem>
-      {slo ? (
-        <EuiFlexItem grow={false}>
-          <EuiHealth color={SLO_HEALTH_COLOR[slo.status]} data-test-subj="entitySummarySloHealth">
-            {getSloLabel(slo)}
-          </EuiHealth>
-        </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
-  );
-}
-
-function getSloLabel(slo: NonNullable<EntitySummaryHealth['slo']>): string {
-  switch (slo.status) {
-    case 'violated':
-      return i18n.translate('discover.entitySummary.sloViolated', {
-        defaultMessage: '{count, plural, one {# SLO violated} other {# SLOs violated}}',
-        values: { count: slo.violatedCount ?? 1 },
-      });
-    case 'degrading':
-      return i18n.translate('discover.entitySummary.sloDegrading', {
-        defaultMessage: 'SLO degrading',
-      });
-    case 'healthy':
-      return i18n.translate('discover.entitySummary.sloHealthy', {
-        defaultMessage: 'SLOs healthy',
-      });
-    case 'no_data':
-      return i18n.translate('discover.entitySummary.sloNoData', {
-        defaultMessage: 'No SLOs',
-      });
-  }
-}
-
+// Stacked layout: label + value on the left, chart on the right, so the charts line up vertically.
 function MetricsSection({
   metrics,
-  direction,
-  showSparklines,
   isLoading,
 }: {
   metrics: EntitySummaryMetric[];
-  direction: 'row' | 'column';
-  showSparklines: boolean;
   isLoading: boolean;
 }) {
-  if (direction === 'column') {
-    return (
-      <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-        {metrics.map((metric) => (
-          <EuiFlexItem key={metric.label} grow={false}>
-            <MetricRow metric={metric} showSparkline={showSparklines} isLoading={isLoading} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    );
-  }
-
   return (
-    <EuiFlexGroup gutterSize="m" responsive={false}>
+    <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
       {metrics.map((metric) => (
-        <EuiFlexItem key={metric.label}>
-          <MetricColumn metric={metric} showSparkline={showSparklines} isLoading={isLoading} />
+        <EuiFlexItem key={metric.label} grow={false}>
+          <MetricRow metric={metric} isLoading={isLoading} />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
   );
 }
 
-// Stacked layout: label + value on the left, chart on the right, so the charts line up vertically.
-function MetricRow({
-  metric,
-  showSparkline,
-  isLoading,
-}: {
-  metric: EntitySummaryMetric;
-  showSparkline: boolean;
-  isLoading: boolean;
-}) {
-  const { label, valueLabel, change } = metric;
+function MetricRow({ metric, isLoading }: { metric: EntitySummaryMetric; isLoading: boolean }) {
+  const { label, valueLabel } = metric;
 
   return (
     <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
@@ -378,65 +238,23 @@ function MetricRow({
         <EuiText size="s">
           <strong>{valueLabel}</strong>
         </EuiText>
-        {change ? <MetricChangeLabel change={change} /> : null}
       </EuiFlexItem>
-      {showSparkline ? (
-        <EuiFlexItem>
-          <MetricSparkline metric={metric} isLoading={isLoading} fullWidth />
-        </EuiFlexItem>
-      ) : null}
+      <EuiFlexItem>
+        <MetricSparkline metric={metric} isLoading={isLoading} />
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 }
 
-function MetricColumn({
-  metric,
-  showSparkline,
-  isLoading,
-}: {
-  metric: EntitySummaryMetric;
-  showSparkline: boolean;
-  isLoading: boolean;
-}) {
-  const { label, valueLabel, change } = metric;
-
-  return (
-    <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiText size="xs" color="subdued">
-          {label}
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiText size="s">
-          <strong>{valueLabel}</strong>
-        </EuiText>
-      </EuiFlexItem>
-      {change ? (
-        <EuiFlexItem grow={false}>
-          <MetricChangeLabel change={change} />
-        </EuiFlexItem>
-      ) : null}
-      {showSparkline ? (
-        <EuiFlexItem grow={false}>
-          <MetricSparkline metric={metric} isLoading={isLoading} />
-        </EuiFlexItem>
-      ) : null}
-    </EuiFlexGroup>
-  );
-}
-
-// Shared chart renderer for both metric layouts: the sparkline, or a dashed placeholder for no data.
+// The sparkline, or a dashed placeholder for no data.
 function MetricSparkline({
   metric,
   isLoading,
-  fullWidth = false,
 }: {
   metric: EntitySummaryMetric;
   isLoading: boolean;
-  fullWidth?: boolean;
 }) {
-  const { color, series, comparisonSeries, comparisonColor } = metric;
+  const { color, series } = metric;
   const hasSeries = !!series?.some((point) => point.y !== null);
 
   if (hasSeries || isLoading) {
@@ -444,10 +262,7 @@ function MetricSparkline({
       <Sparkline
         color={color}
         series={series ?? null}
-        comparisonSeries={comparisonSeries}
-        comparisonSeriesColor={comparisonColor}
-        compact={!fullWidth}
-        fullWidth={fullWidth}
+        fullWidth
         fill
         isLoading={isLoading && !hasSeries}
       />
@@ -474,30 +289,6 @@ function NoDataPlaceholder({ color }: { color: string }) {
         `}
       />
     </div>
-  );
-}
-
-function MetricChangeLabel({ change }: { change: EntityMetricChange }) {
-  const { euiTheme } = useEuiTheme();
-
-  const color =
-    change.evaluation === 'good'
-      ? euiTheme.colors.textSuccess
-      : change.evaluation === 'bad'
-      ? euiTheme.colors.textDanger
-      : euiTheme.colors.textSubdued;
-
-  return (
-    <EuiText
-      size="xs"
-      css={css`
-        color: ${color};
-        white-space: nowrap;
-      `}
-      data-test-subj="entitySummaryMetricChange"
-    >
-      <EuiIcon type={CHANGE_ICON[change.direction]} size="s" aria-hidden={true} /> {change.label}
-    </EuiText>
   );
 }
 

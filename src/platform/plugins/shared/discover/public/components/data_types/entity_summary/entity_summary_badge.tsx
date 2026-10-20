@@ -148,7 +148,6 @@ export const EntitySummaryBadge = <RawData,>({
         titleHref={content?.titleHref}
         icon={headerIcon}
         metrics={content?.metrics ?? []}
-        metricsDirection="column"
         links={links}
         isLoading={loading}
         onClose={closePopover}
