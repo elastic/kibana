@@ -21,6 +21,7 @@ import { registerImpactAttachment } from './impact/attachments';
 import { registerImpactRoutes } from './impact/routes/register_routes';
 import { createInvestigationsPrivilegesChecker } from './investigations/services/check_investigations_privileges';
 import { createImpactClient } from './impact/services/impact_client';
+import { createEntityStoreNameLookup } from './impact/services/entity_store_names';
 import { ImpactPillsService } from './impact/services/impact_pills_service';
 import { ImpactService } from './impact/services/impact_service';
 import { registerImpactStepDefinitions } from './impact/step_types';
@@ -304,6 +305,12 @@ export class AgenticInvestigationsPlugin
       getSpaceId: (request) => this.getSpaceId(request),
       getProposals: () => plugins.proposals,
       getEscalationsService: () => this.escalationsService,
+      getEntityStoreNames: createEntityStoreNameLookup({
+        getEntityStore: () => plugins.entityStore,
+        getEsClient: (request) => coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+        getSpaceId: (request) => this.getSpaceId(request),
+        logger: this.logger,
+      }),
     });
 
     this.assignmentsService = new AssignmentsService({
