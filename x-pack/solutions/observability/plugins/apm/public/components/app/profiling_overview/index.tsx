@@ -50,11 +50,15 @@ export function ProfilingOverview() {
   const isJavaAgent = getIsJavaAgentName(agentName);
   const { schema } = useProfilingSchemaState();
 
-  // Set to true when the Java service's transactions have no profiler stack-trace IDs and the
-  // host-scoped fallback has rendered. At that point we switch to the hosts schema selector so
-  // the user can pick the schema available on the profiling hosts rather than on the transactions.
+  // Tracks whether the Java service's transactions returned no profiling samples, causing the
+  // host-scoped fallback to render. Reset whenever the query inputs change so that a new time
+  // range, environment, or schema can reveal transaction-linked samples again — the child's
+  // useEffect will re-trigger onJavaFallback if the fallback is still needed.
   const [javaFallbackActive, setJavaFallbackActive] = useState(false);
   const onJavaFallback = useCallback(() => setJavaFallbackActive(true), []);
+  useEffect(() => {
+    setJavaFallbackActive(false);
+  }, [start, end, environment, kuery, schema, transactionType]);
 
   const tabs = useMemo((): EuiTabbedContentProps['tabs'] => {
     // Host-scoped views are the default for non-Java agents and the fallback for Java agents
