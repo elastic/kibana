@@ -103,7 +103,9 @@ export const useNewEntityCount = ({
   return {
     count: result?.count ?? 0,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : result?.entityIds ?? EMPTY_ENTITY_IDS,
-    isLoading: isIndexLoading || isLoading || isFetching,
+    // A query that can never run (no index, failed inputs) is not loading: react-query reports a
+    // disabled query with no data as loading for ever.
+    isLoading: isIndexLoading || (isEnabled && (isLoading || isFetching)),
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending: isIndexLoading || (isEnabled && (isLoading || isFetching)),
     error: (error as SecurityAppError | undefined) ?? indexError,
