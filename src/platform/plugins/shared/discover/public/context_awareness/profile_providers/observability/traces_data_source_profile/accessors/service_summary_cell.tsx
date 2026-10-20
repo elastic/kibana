@@ -205,7 +205,7 @@ function getMetrics(data: ObservabilityTracesServiceSummaryData | null): Service
   return [
     {
       label: i18n.translate('discover.tracesServiceSummary.latency', {
-        defaultMessage: 'Latency AVG',
+        defaultMessage: 'Latency (avg)',
       }),
       valueLabel: data?.latency.valueLabel ?? loadingLabel,
       color: palette[1],
@@ -213,7 +213,7 @@ function getMetrics(data: ObservabilityTracesServiceSummaryData | null): Service
     },
     {
       label: i18n.translate('discover.tracesServiceSummary.throughput', {
-        defaultMessage: 'Throughput',
+        defaultMessage: 'Throughput (avg)',
       }),
       valueLabel: data?.throughput.valueLabel ?? loadingLabel,
       color: palette[2],
@@ -221,10 +221,9 @@ function getMetrics(data: ObservabilityTracesServiceSummaryData | null): Service
     },
     {
       label: i18n.translate('discover.tracesServiceSummary.errorRate', {
-        defaultMessage: 'Error rate',
+        defaultMessage: 'Error rate (avg)',
       }),
       valueLabel: data?.failedTransactionRate.valueLabel ?? loadingLabel,
-      // Red to signal errors (palette[6] = #f6726a), rather than the next sequential vis color.
       color: palette[6],
       series: data?.failedTransactionRate.series ?? null,
     },
