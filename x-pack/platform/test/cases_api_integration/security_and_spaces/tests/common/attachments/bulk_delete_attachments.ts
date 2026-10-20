@@ -7,12 +7,14 @@
 
 import expect from '@kbn/expect';
 import { MAX_BULK_DELETE_ATTACHMENTS } from '@kbn/cases-plugin/common/constants';
+import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants/attachments';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {
   getPostCaseRequest,
   getUnifiedFilesAttachmentReq,
   postCaseReq,
+  postCommentAlertMultipleIdsReq,
   postCommentAlertReq,
   postCommentUserReq,
 } from '../../../../common/lib/mock';
@@ -46,6 +48,11 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
+  const getBulkAttachmentsUserActions = async (caseId: string) => {
+    const { userActions } = await findCaseUserActions({ supertest, caseID: caseId });
+    return userActions.filter(({ type }) => type === 'bulkAttachments');
+  };
+
   describe('bulk_delete_attachments', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
@@ -74,7 +81,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(comments.length).to.eql(0);
     });
 
-    it('records a delete user action for each deleted attachment', async () => {
+    it('records one grouped delete user action per attachment type', async () => {
       const postedCase = await createCase(supertest, postCaseReq);
 
       let theCase = await createComment({
@@ -93,11 +100,39 @@ export default ({ getService }: FtrProviderContext): void => {
       await bulkDeleteAttachments({ supertest, caseId: postedCase.id, savedObjectIds });
 
       const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
-      const deletions = userActions.filter(
+      const commentDeletions = userActions.filter(
         (userAction) => userAction.type === 'comment' && userAction.action === 'delete'
       );
+      const groupedDeletions = await getBulkAttachmentsUserActions(postedCase.id);
 
-      expect(deletions.length).to.eql(2);
+      expect(commentDeletions).to.eql([]);
+      expect(groupedDeletions.length).to.eql(2);
+      groupedDeletions.forEach(({ action, payload }) => {
+        expect(action).to.be('delete');
+        expect(payload).to.have.property('bulkAttachments');
+        expect('bulkAttachments' in payload ? payload.bulkAttachments.count : 0).to.be(1);
+      });
+    });
+
+    it('counts every alert of a grouped attachment', async () => {
+      const postedCase = await createCase(supertest, postCaseReq);
+      const theCase = await createComment({
+        supertest,
+        caseId: postedCase.id,
+        params: postCommentAlertMultipleIdsReq,
+      });
+
+      await bulkDeleteAttachments({
+        supertest,
+        caseId: postedCase.id,
+        savedObjectIds: [theCase.comments![0].id],
+      });
+
+      const groupedDeletions = await getBulkAttachmentsUserActions(postedCase.id);
+      expect(groupedDeletions.length).to.be(1);
+      expect(groupedDeletions[0].payload).to.eql({
+        bulkAttachments: { attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE, count: 2 },
+      });
     });
 
     it('updates the case attachment totals', async () => {

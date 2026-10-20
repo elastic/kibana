@@ -60,4 +60,11 @@ export const POLICY_SETTING_SECTION_DESCRIPTIONS = Object.freeze({
         'Select which system events to collect for monitoring and analysis. Selecting more event types increases visibility but may impact performance — enable only what you use and require.',
     }
   ),
+  aiDataCollection: i18n.translate(
+    'xpack.securitySolution.endpoint.policy.details.aiDataCollectionDescription',
+    {
+      defaultMessage:
+        'Identify AI tools and add that context to events that Elastic Defend collects from them. This improves visibility into AI activity on your hosts.',
+    }
+  ),
 });
