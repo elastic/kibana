@@ -88,7 +88,7 @@ const minLevel = LEVELS.indexOf(
 );
 const emitLog = (record: ForwardedLog): void => {
   if (!runContext.getStore()) return;
-  void bridge('log', 'write', toData(record) as never).catch(() => undefined);
+  void bridge('log', 'write', toData(record) as never, { detached: true }).catch(() => undefined);
 };
 const resolveReplica = async <T>(kind: string, key: string, fallback: T, hit: T | undefined): Promise<T> => {
   if (hit !== undefined) return hit;
@@ -98,7 +98,9 @@ const resolveReplica = async <T>(kind: string, key: string, fallback: T, hit: T 
 
 const events = createEventForwarder((event: ForwardedEvent) => {
   if (!runContext.getStore()) return;
-  void bridge(event.sink, 'write', toData(event.payload) as never).catch(() => undefined);
+  void bridge(event.sink, 'write', toData(event.payload) as never, { detached: true }).catch(
+    () => undefined
+  );
 });
 
 /** Forwards worker logs to main. Level filtering stays; records are not written to stderr. */

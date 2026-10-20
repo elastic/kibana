@@ -93,7 +93,8 @@ export interface WorkerContext {
     capability: string,
     operation: string,
     args: CodecInput,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    options?: { readonly detached?: boolean }
   ): Promise<CodecInput>;
   callSync(
     capability: string,

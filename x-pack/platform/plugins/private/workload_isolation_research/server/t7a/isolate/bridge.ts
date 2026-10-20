@@ -67,16 +67,17 @@ export const bridgeSync = <T>(capability: string, operation: string, args: Codec
   return value as T;
 };
 
-/** Calls a main-side capability for the current run. */
+/** Calls a main-side capability for the current run. Detached calls do not fail task return. */
 export const bridge = async <T>(
   capability: string,
   operation: string,
-  args: CodecInput
+  args: CodecInput,
+  options?: { readonly detached?: boolean }
 ): Promise<T> => {
   const context = runContext.getStore();
   if (!context) throw new Error(`t7a bridge ${capability}.${operation} called outside a run`);
   countEdge(`${capability}.${operation}`, 'bridge');
-  const value = await context.call(capability, operation, args);
+  const value = await context.call(capability, operation, args, undefined, options);
   if (isWireError(value)) throw reviveError(value);
   return value as T;
 };

@@ -810,6 +810,44 @@ test(
 );
 
 test(
+  'a detached log call does not fail the task as outstanding',
+  { timeout: 20000 },
+  async () => {
+    const specifier = require.resolve('../example_tasks');
+    const registry = new ModuleRegistry(new Set([specifier]));
+    registry.register('fireAndForget', specifier, 'fireAndForget');
+    const host = new ExecutionHost(registry, { transport: 'thread', abortGraceMs: 200 });
+    let wrote = false;
+    try {
+      const outcome = await host.run({
+        workloadClass: 'alerting',
+        principal: 'alice',
+        space: 'default',
+        moduleId: 'fireAndForget',
+        input: {},
+        deadlineMs: 5000,
+        capabilities: {
+          fixture: {
+            lever: 'capability_bundle',
+            handler: async () => {
+              await new Promise((resolve) => setTimeout(resolve, 40));
+              wrote = true;
+              return { ok: true };
+            },
+          },
+        },
+      });
+      assert.equal(outcome.status, 'success');
+      if (outcome.status === 'success') assert.deepEqual(outcome.value, { ok: true });
+      await new Promise((resolve) => setTimeout(resolve, 80));
+      assert.equal(wrote, true);
+    } finally {
+      await host.stop();
+    }
+  }
+);
+
+test(
   'a task that aborts its own capability call does not leave it outstanding',
   { timeout: 20000 },
   async () => {

@@ -219,6 +219,17 @@ export const failAfterCancel = async (
   throw new Error('cleanup failed');
 };
 
+/** A log-style call that is not awaited. It must not fail the task as outstanding. */
+export const fireAndForget = async (
+  _input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  void context
+    .call('fixture', 'slow', {}, undefined, { detached: true })
+    .catch(() => undefined);
+  return { ok: true };
+};
+
 /** Aborts its own capability call before returning. The call must not stay pending. */
 export const abortOwnCall = async (
   _input: CodecInput,

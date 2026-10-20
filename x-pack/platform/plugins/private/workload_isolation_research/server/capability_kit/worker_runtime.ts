@@ -29,10 +29,14 @@ interface RunState {
     {
       resolve: (value: CodecInput) => void;
       reject: (error: Error) => void;
+      capability: string;
+      operation: string;
       signal?: AbortSignal;
       onAbort: () => void;
     }
   >;
+  /** Fire-and-forget calls. They still complete on main, but they do not fail the task. */
+  readonly detached: Map<number, { resolve: (value: CodecInput) => void; reject: (error: Error) => void }>;
 }
 
 /** Keeps signals, pending RPC and registry snapshots local to each co-resident async run. */
@@ -120,10 +124,16 @@ const startRuntime = (): void => {
     }
     if (packet.kind === 'reply') {
       const run = runs.get(packet.runId);
-      const call = run?.pending.get(packet.id);
-      if (!call) return;
-      run?.pending.delete(packet.id);
-      call.signal?.removeEventListener('abort', call.onAbort);
+      const tracked = run?.pending.get(packet.id);
+      const detached = tracked ? undefined : run?.detached.get(packet.id);
+      const call = tracked ?? detached;
+      if (!call || !run) return;
+      if (tracked) {
+        run.pending.delete(packet.id);
+        tracked.signal?.removeEventListener('abort', tracked.onAbort);
+      } else {
+        run.detached.delete(packet.id);
+      }
       const value = decode(packet.value);
       if (packet.failed)
         call.reject(value instanceof Error ? value : new Error('Capability call failed'));
@@ -136,6 +146,7 @@ const startRuntime = (): void => {
     const run: RunState = {
       controller: new AbortController(),
       pending: new Map(),
+      detached: new Map(),
       callbacks: new Map(),
       syncCalls: 0,
     };
@@ -224,7 +235,7 @@ const startRuntime = (): void => {
           if (reference.runId !== bundle.runId) throw new Error('Foreign callback handle');
           run.callbacks.delete(reference.id);
         },
-        call: (capability, operation, args, signal?: AbortSignal) =>
+        call: (capability, operation, args, signal?: AbortSignal, options?: { detached?: boolean }) =>
           new Promise((resolve, reject) => {
             const grant = bundle.grants[capability];
             if (!grant) return reject(new Error('Capability not granted'));
@@ -233,6 +244,26 @@ const startRuntime = (): void => {
               return;
             }
             const id = ++sequence;
+            const packet: Packet = {
+              version: 1,
+              kind: 'call',
+              runId: bundle.runId,
+              id,
+              capability,
+              grant,
+              operation,
+              args: encode(args),
+            };
+            if (options?.detached) {
+              run.detached.set(id, { resolve, reject });
+              try {
+                send(packet);
+              } catch (error) {
+                run.detached.delete(id);
+                reject(error instanceof Error ? error : new Error('Capability send failed'));
+              }
+              return;
+            }
             const onAbort = () => {
               if (!run.pending.has(id)) return;
               run.pending.delete(id);
@@ -243,19 +274,10 @@ const startRuntime = (): void => {
               }
               reject(signal?.reason instanceof Error ? signal.reason : new Error('Capability call aborted'));
             };
-            run.pending.set(id, { resolve, reject, signal, onAbort });
+            run.pending.set(id, { resolve, reject, capability, operation, signal, onAbort });
             signal?.addEventListener('abort', onAbort, { once: true });
             try {
-              send({
-                version: 1,
-                kind: 'call',
-                runId: bundle.runId,
-                id,
-                capability,
-                grant,
-                operation,
-                args: encode(args),
-              });
+              send(packet);
             } catch (error) {
               run.pending.delete(id);
               signal?.removeEventListener('abort', onAbort);
@@ -268,7 +290,13 @@ const startRuntime = (): void => {
       if (packet.heartbeatMs !== undefined)
         send({ version: 1, kind: 'started', runId: bundle.runId });
       value = await task(decode(packet.input), context);
-      if (run.pending.size) throw new Error('Task returned with outstanding capability calls');
+      if (run.pending.size) {
+        const open = [...run.pending.values()]
+          .map((entry) => `${entry.capability}.${entry.operation}`)
+          .join(',');
+        console.error(`worker-core outstanding capability calls: ${open}`);
+        throw new Error('Task returned with outstanding capability calls');
+      }
     } catch (error) {
       failed = true;
       value = error instanceof Error ? error : new Error('Task failed with a non-Error value');
@@ -290,7 +318,9 @@ const startRuntime = (): void => {
       rss: process.memoryUsage().rss,
     });
     for (const entry of run.pending.values()) entry.reject(new Error('Run ended'));
+    for (const entry of run.detached.values()) entry.reject(new Error('Run ended'));
     run.pending.clear();
+    run.detached.clear();
     run.callbacks.clear();
     runs.delete(bundle.runId);
   };
