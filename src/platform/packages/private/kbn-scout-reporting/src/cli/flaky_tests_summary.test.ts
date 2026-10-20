@@ -432,7 +432,7 @@ describe('displaySummary', () => {
         'a very long test title that goes on and on describing every detail of the scenario under test',
       filePath:
         'x-pack/solutions/observability/plugins/synthetics/test/scout/alerting_and_reset/ui/tests/default_status_alert.spec.ts',
-      owners: ['elastic/actionable-obs-team', 'elastic/obs-signals-logs-team'],
+      owners: ['elastic/kibana-data-discovery', 'elastic/obs-signals-logs-team'],
       byBranch: [
         branch({
           branch: '8.19',

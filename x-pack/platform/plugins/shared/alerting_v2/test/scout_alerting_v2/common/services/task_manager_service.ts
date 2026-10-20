@@ -21,9 +21,10 @@ export interface TaskManagerService {
   /**
    * Triggers an immediate run of the given task via the `ftrApis` route. The
    * underlying handler always responds with HTTP 200 and surfaces failures in
-   * the response body's `error` field, which we promote to a thrown error.
+   * the response body's `error` field, which we promote to a thrown error
+   * unless `ignoreErrors` is set, in which case it is only logged.
    */
-  runSoon: (taskId: string) => Promise<void>;
+  runSoon: (taskId: string, options?: { ignoreErrors?: boolean }) => Promise<void>;
 }
 
 export const getTaskManagerService = ({
@@ -33,7 +34,7 @@ export const getTaskManagerService = ({
   log: ScoutLogger;
   kbnClient: KbnClient;
 }): TaskManagerService => ({
-  runSoon: (taskId) =>
+  runSoon: (taskId, { ignoreErrors = false } = {}) =>
     measurePerformanceAsync(log, `taskManager.runSoon[${taskId}]`, async () => {
       const response = await kbnClient.request<RunSoonResponse>({
         method: 'POST',
@@ -41,8 +42,13 @@ export const getTaskManagerService = ({
         headers: COMMON_HEADERS,
       });
 
-      if (response.data.error) {
-        throw new Error(`Failed to run_soon task '${taskId}': ${response.data.error}`);
+      const { error } = response.data;
+      if (!error) return;
+
+      const message = `Failed to run_soon task '${taskId}': ${error}`;
+      if (!ignoreErrors) {
+        throw new Error(message);
       }
+      log.error(message);
     }),
 });

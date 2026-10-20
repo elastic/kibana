@@ -15,11 +15,7 @@ import type {
   ExternalReferenceSOAttachmentPayload,
   AlertAttachmentPayload,
 } from '@kbn/cases-plugin/common/types/domain';
-import {
-  AttachmentType,
-  CaseStatuses,
-  ExternalReferenceStorageType,
-} from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentType, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/ftr_provider_context';
 import {
   defaultUser,
@@ -33,6 +29,10 @@ import {
   postCommentAlertMultipleIdsReq,
   postCommentActionsReq,
   userActionSourceApi,
+  persistableStateAttachment,
+  postExternalReferenceESReq,
+  postUnifiedIndicatorReq,
+  postUnifiedLensReq,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
 import {
   deleteAllCaseItems,
@@ -475,78 +475,48 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      // Skipped pending the attachment-cap redesign: these rely on a custom `.test` ER/PS subtype to
-      // reach MAX_PERSISTABLE_STATE_AND_EXTERNAL_REFERENCES (100), which no longer exists once the
-      // ER/PS registries are removed. Re-enable when the cap is revisited (UNIFIED_ATTACHMENT_PLAN "Deferred").
-      it.skip('400s when attempting to add a persistable state to a case that already has 100', async () => {
+      it('400s when attempting to add a persistable state to a case that already has 100', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-
-        const attachments = Array(100).fill({
-          type: AttachmentType.externalReference as const,
-          owner: 'securitySolutionFixture',
-          externalReferenceAttachmentTypeId: '.test',
-          externalReferenceId: 'so-id',
-          externalReferenceMetadata: {},
-          externalReferenceStorage: {
-            soType: 'external-ref',
-            type: ExternalReferenceStorageType.savedObject as const,
-          },
-        });
 
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: attachments,
+          params: Array(100).fill(postUnifiedIndicatorReq),
           expectedHttpCode: 200,
         });
 
-        await createComment({
+        const response = (await createComment({
           supertest,
           caseId: postedCase.id,
-          params: {
-            persistableStateAttachmentTypeId: '.test',
-            persistableStateAttachmentState: {},
-            type: AttachmentType.persistableState as const,
-            owner: 'securitySolutionFixture',
-          },
+          params: persistableStateAttachment,
           expectedHttpCode: 400,
-        });
+        })) as unknown as { message: string };
+
+        expect(response.message).to.contain(
+          'Case has reached the maximum allowed number (100) of attached persistable state and external reference attachments'
+        );
       });
 
-      // Skipped pending the attachment-cap redesign (see the sibling persistable-state limit test above).
-      it.skip('400s when attempting to add an external reference to a case that already has 100', async () => {
+      it('400s when attempting to add an external reference to a case that already has 100', async () => {
         const postedCase = await createCase(supertest, postCaseReq);
-
-        const attachments = Array(100).fill({
-          persistableStateAttachmentTypeId: '.test',
-          persistableStateAttachmentState: {},
-          type: AttachmentType.persistableState as const,
-          owner: 'securitySolutionFixture',
-        });
 
         await bulkCreateAttachments({
           supertest,
           caseId: postedCase.id,
-          params: attachments,
+          params: Array(100).fill(postUnifiedLensReq),
           expectedHttpCode: 200,
         });
 
-        await createComment({
+        const response = (await createComment({
           supertest,
           caseId: postedCase.id,
-          params: {
-            type: AttachmentType.externalReference as const,
-            owner: 'securitySolutionFixture',
-            externalReferenceAttachmentTypeId: '.test',
-            externalReferenceId: 'so-id',
-            externalReferenceMetadata: {},
-            externalReferenceStorage: {
-              soType: 'external-ref',
-              type: ExternalReferenceStorageType.savedObject as const,
-            },
-          },
+          params: postExternalReferenceESReq,
           expectedHttpCode: 400,
-        });
+        })) as unknown as { message: string };
+
+        expect(response.message).to.contain(
+          'Case has reached the maximum allowed number (100) of attached persistable state and external reference attachments'
+        );
       });
     });
 
