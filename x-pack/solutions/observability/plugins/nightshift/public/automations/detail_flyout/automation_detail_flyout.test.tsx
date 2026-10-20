@@ -25,6 +25,16 @@ jest.mock('../hooks/use_automations', () => ({
   useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+jest.mock('../../settings/components/apps_section/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../settings/components/apps_section/use_relay_app_bindings'),
+  useAllRelayAppBindings: () => ({
+    bindings: [],
+    isLoading: false,
+    isError: false,
+    isComplete: true,
+  }),
+}));
 
 const automation = {
   id: 'automation-1',
@@ -33,7 +43,7 @@ const automation = {
   tags: [],
   trigger: { rows: [{ kind: 'alert' }] },
   execution: { reasoningMode: 'investigate' },
-  completion: {},
+  completions: [],
   runtime: { dailyDispatchLimit: 20 },
   author: 'alice',
 } as unknown as Automation;

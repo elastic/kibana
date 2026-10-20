@@ -256,7 +256,7 @@ describe('bindAgentBuilder', () => {
         } as never)
       ).resolves.toEqual({
         status: 'unavailable',
-        reason: 'Alerting v2 skills are only available in Observability projects',
+        reason: 'Universal alerting skills are only available in Observability projects',
       });
     });
   });

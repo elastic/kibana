@@ -22,6 +22,7 @@ import {
   isSupportedEpisodeSeverity,
   normalizeEpisodeSeverity,
 } from './episode_severity';
+import { convertKqlToEsqlExpression } from './kql_to_esql';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 /**
@@ -48,6 +49,7 @@ export const ALERT_EPISODE_FIELDS = [
   'last_tags',
   'episode_data',
   'severity',
+  'source',
 ] as const;
 
 export interface EpisodesFilterState {
@@ -199,10 +201,14 @@ const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
 /**
  * Applies the filters that must run after the aggregations: they either read
  * columns the aggregations compute (tags, severity, assignee) or must only
- * narrow the aggregated rows (status). `ruleId`, `groupHash` and `queryString`
+ * narrow the aggregated rows (status and queryString). `ruleId` and `groupHash`
  * are applied before the aggregations by `buildEpisodesBaseQuery` instead.
  */
 export const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {
+  const trimmedSearch = filterState.queryString?.trim();
+  if (trimmedSearch) {
+    query.pipe(`WHERE ${convertKqlToEsqlExpression(trimmedSearch)}`);
+  }
   if (filterState.status?.length) {
     addStatusFilter(query, filterState.status);
   }
@@ -256,16 +262,7 @@ export const buildEpisodesBaseQuery = (
     query.where`group_hash == ${filterState.groupHash}`;
   }
 
-  const trimmedSearch = filterState?.queryString?.trim();
-  if (trimmedSearch) {
-    query.pipe(
-      `WHERE ((type == "alert" AND QSTR(${escapeStringValue(
-        trimmedSearch
-      )})) OR (action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")))`
-    );
-  } else {
-    query.where`type == "alert" OR action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")`;
-  }
+  query.where`type == "alert" OR action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")`;
 
   addGroupHashActionStats(query);
   addEpisodeIdActionStats(query);

@@ -380,7 +380,9 @@ export const VisualizeListing = () => {
     );
 
     return {
-      title: 'Visualizations',
+      title: i18n.translate('visualizations.visualizeListingVisualizationsTabTitle', {
+        defaultMessage: 'Visualizations',
+      }),
       id: 'visualizations',
       getTableList: (propsFromParent) => (
         <>

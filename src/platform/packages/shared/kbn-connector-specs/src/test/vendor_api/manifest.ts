@@ -8,7 +8,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import type { PaginationDescriptor } from '@kbn/connector-contract-mock';
+import type { PaginationDescriptor } from '@kbn/connector-emulate';
 import { toStableJson } from './stable_json';
 
 const sourceSchema = z
