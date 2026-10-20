@@ -6,7 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat } from '@elastic/eui';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
 import type { FlyoutGroupedAttachmentsRegistry } from '../grouped_attachments';
@@ -49,7 +49,8 @@ export interface OverviewSections {
   conclusion?: string;
   /**
    * How the investigation got there, such as an entry point to its hypotheses. Shown right under
-   * the conclusion, in its section, or on its own while there is no conclusion yet.
+   * the conclusion, in the same place whether or not there is one, so it keeps its state when the
+   * conclusion arrives.
    */
   reasoning?: React.ReactNode;
 }
@@ -89,24 +90,20 @@ export const OverviewTab = memo<OverviewTabProps>(
           <ImpactSection attachments={attachments} />
         )}
 
-        {conclusion ? (
+        {conclusion && (
           <EuiFlexItem data-test-subj="investigationOverviewConclusion">
             <DetailsBlock title={DETAILS_FLYOUT_LABELS.sections.conclusion}>
               <EuiMarkdownFormat textSize="s">{conclusion}</EuiMarkdownFormat>
-              {reasoning && (
-                <>
-                  <EuiSpacer size="m" />
-                  <div data-test-subj="investigationOverviewReasoning">{reasoning}</div>
-                </>
-              )}
             </DetailsBlock>
           </EuiFlexItem>
-        ) : (
-          reasoning && (
-            <EuiFlexItem grow={false} data-test-subj="investigationOverviewReasoning">
-              {reasoning}
-            </EuiFlexItem>
-          )
+        )}
+
+        {/* Its own slot whether or not there is a conclusion, so a conclusion arriving does not
+            remount it and drop the state it holds (such as an open hypothesis tree). */}
+        {reasoning && (
+          <EuiFlexItem grow={false} data-test-subj="investigationOverviewReasoning">
+            {reasoning}
+          </EuiFlexItem>
         )}
 
         {proposedActionsContent && (

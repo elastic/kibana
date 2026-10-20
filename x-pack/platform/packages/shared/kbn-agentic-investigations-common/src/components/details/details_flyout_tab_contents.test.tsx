@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
 import {
@@ -187,9 +187,35 @@ describe('OverviewTab', () => {
     ]);
     expect(screen.getByTestId('groupedAttachmentsSection')).toBeInTheDocument();
     expect(screen.getByText('bad')).toBeInTheDocument();
-    expect(
-      within(screen.getByTestId('investigationOverviewConclusion')).getByText('hypothesis tree')
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('investigationOverviewReasoning')).toHaveTextContent(
+      'hypothesis tree'
+    );
+  });
+
+  it('keeps the reasoning mounted when a conclusion arrives', () => {
+    const Reasoning = () => {
+      const [isOpen, setIsOpen] = React.useState(false);
+      return (
+        <button type="button" onClick={() => setIsOpen(true)}>
+          {isOpen ? 'tree open' : 'open tree'}
+        </button>
+      );
+    };
+    const renderWith = (conclusion?: string) => (
+      <OverviewTab
+        investigation={investigation}
+        attachments={[]}
+        groupedAttachments={groupedAttachments}
+        sections={{ conclusion, reasoning: <Reasoning /> }}
+      />
+    );
+    const { rerender } = render(renderWith());
+
+    fireEvent.click(screen.getByRole('button', { name: 'open tree' }));
+    rerender(renderWith('A bad deploy.'));
+
+    expect(screen.getByText('Conclusion')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'tree open' })).toBeInTheDocument();
   });
 
   it('shows the reasoning without a heading while there is no conclusion', () => {

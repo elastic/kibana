@@ -304,10 +304,11 @@ const HypothesisTreeCanvas = ({ input }: { input: HypothesisTreeInput }): React.
     void fitView(FIT_VIEW_OPTIONS);
   }, [fitView, selectedNodeId]);
 
-  const handleNodeClick: NodeMouseHandler<HypothesisTreeFlowNode> = useCallback(
-    (_, { id, data }) => {
+  const selectNode = useCallback(
+    (id: string) => {
+      const node = graph.nodes.find((candidate) => candidate.id === id);
       // The hypotheses chip only summarizes the row below it.
-      if (data.kind === 'hypotheses') {
+      if (!node || node.data.kind === 'hypotheses') {
         return;
       }
       if (selectedNodeId === id) {
@@ -315,14 +316,20 @@ const HypothesisTreeCanvas = ({ input }: { input: HypothesisTreeInput }): React.
         return;
       }
       setSelectedNodeId(id);
-      setSelectedActionIndex(data.kind === 'actions' ? 0 : null);
+      setSelectedActionIndex(node.data.kind === 'actions' ? 0 : null);
       centreOnNode(id);
     },
-    [centreOnNode, clearSelection, selectedNodeId]
+    [centreOnNode, clearSelection, graph.nodes, selectedNodeId]
+  );
+
+  const handleNodeClick: NodeMouseHandler<HypothesisTreeFlowNode> = useCallback(
+    (_, { id }) => selectNode(id),
+    [selectNode]
   );
 
   const actionsContext = useMemo(
     () => ({
+      onSelectNode: selectNode,
       onSelectAction: (index: number) => {
         if (selectedNodeId === HYPOTHESIS_TREE_NODE_IDS.actions && selectedActionIndex === index) {
           clearSelection();
@@ -335,7 +342,7 @@ const HypothesisTreeCanvas = ({ input }: { input: HypothesisTreeInput }): React.
         setSelectedActionIndex(index);
       },
     }),
-    [centreOnNode, clearSelection, selectedActionIndex, selectedNodeId]
+    [centreOnNode, clearSelection, selectNode, selectedActionIndex, selectedNodeId]
   );
 
   return (
@@ -350,6 +357,9 @@ const HypothesisTreeCanvas = ({ input }: { input: HypothesisTreeInput }): React.
         onPaneClick={clearSelection}
         nodesDraggable={false}
         nodesConnectable={false}
+        // The nodes that open details are buttons themselves, so React Flow's own focusable node
+        // wrapper would only add a second tab stop that Enter and Space do nothing on.
+        nodesFocusable={false}
         elementsSelectable={false}
         minZoom={0.2}
         maxZoom={1}

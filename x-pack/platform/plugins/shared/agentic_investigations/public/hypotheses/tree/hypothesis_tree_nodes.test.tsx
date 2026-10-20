@@ -10,6 +10,12 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ReactFlowProvider, type NodeProps } from '@xyflow/react';
+import {
+  useIsApprovingProposal,
+  useIsDecliningProposal,
+  useProposal,
+} from '@kbn/proposals-plugin/public';
+import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import type { InvestigationProposalSummary } from '../../../common/investigations/investigation';
 import {
   HypothesisTreeActionsContext,
@@ -17,11 +23,13 @@ import {
   type HypothesisTreeFlowNode,
 } from './hypothesis_tree_nodes';
 
+jest.mock('@kbn/proposals-plugin/public');
+
 const flags = { isSelected: false, isDimmed: false, selectedActionIndex: null };
 
 const renderNode = (
   data: HypothesisTreeFlowNode['data'],
-  actions = { onSelectAction: jest.fn() }
+  actions = { onSelectAction: jest.fn(), onSelectNode: jest.fn() }
 ) => {
   render(
     <EuiProvider>
@@ -47,7 +55,22 @@ const proposal = (id: string, title: string): InvestigationProposalSummary => ({
   created_at: '2026-07-28T14:00:00.000Z',
 });
 
+const loadedProposals: Record<string, Partial<ProposalWithMetadata>> = {
+  'p-1': { id: 'p-1', status: 'succeeded', decision: 'approved' },
+  'p-2': { id: 'p-2', status: 'pending' },
+};
+
 describe('HypothesisTreeNode', () => {
+  beforeEach(() => {
+    jest
+      .mocked(useProposal)
+      .mockImplementation(
+        (id) => ({ data: id ? loadedProposals[id] : undefined } as ReturnType<typeof useProposal>)
+      );
+    jest.mocked(useIsApprovingProposal).mockReturnValue(false);
+    jest.mocked(useIsDecliningProposal).mockReturnValue(false);
+  });
+
   it('names the trigger after its first subject and counts the others', () => {
     renderNode({
       kind: 'trigger',
@@ -182,5 +205,74 @@ describe('HypothesisTreeNode', () => {
 
     fireEvent.click(screen.getByTestId('investigationHypothesisTreeAction-1'));
     expect(actions.onSelectAction).toHaveBeenCalledWith(1);
+  });
+
+  it("shows each proposed action's status", () => {
+    jest.mocked(useIsDecliningProposal).mockImplementation((id) => id === 'p-2');
+    renderNode({
+      kind: 'actions',
+      proposals: [proposal('p-1', 'Roll back'), proposal('p-2', 'Scale up')],
+      ...flags,
+    });
+
+    expect(screen.getByTestId('investigationHypothesisTreeAction-0')).toHaveTextContent('Applied');
+    expect(screen.getByTestId('investigationHypothesisTreeAction-1')).toHaveTextContent(
+      'Declining'
+    );
+  });
+
+  it('shows a proposed action awaiting a decision as needing review', () => {
+    renderNode({ kind: 'actions', proposals: [proposal('p-2', 'Scale up')], ...flags });
+
+    expect(
+      screen.getByTestId('investigationHypothesisTreeActionStatus-pending')
+    ).toBeInTheDocument();
+  });
+
+  it('opens a node from the keyboard', () => {
+    const actions = renderNode({
+      kind: 'conclusion',
+      conclusion: 'A bad deploy.',
+      ...flags,
+    });
+
+    const node = screen.getByRole('button', { pressed: false });
+    fireEvent.keyDown(node, { key: 'Enter' });
+    fireEvent.keyDown(node, { key: ' ' });
+    fireEvent.keyDown(node, { key: 'a' });
+    expect(actions.onSelectNode).toHaveBeenCalledTimes(2);
+    expect(actions.onSelectNode).toHaveBeenCalledWith('node');
+  });
+
+  it('leaves keys on a link inside a node to the link', () => {
+    const actions = renderNode({
+      kind: 'trigger',
+      title: 'Checkout latency spike',
+      subjects: [
+        {
+          type: 'alert',
+          id: 'a-1',
+          snapshot: { rule_name: 'Checkout p99 > 2s', url: '/app/observability/alerts/a-1' },
+          created_at: 'x',
+        },
+      ],
+      ...flags,
+    });
+
+    fireEvent.keyDown(screen.getByTestId('investigationHypothesisTreeTriggerLink'), {
+      key: 'Enter',
+    });
+    expect(actions.onSelectNode).not.toHaveBeenCalled();
+  });
+
+  it('does not make the hypotheses chip a button', () => {
+    renderNode({
+      kind: 'hypotheses',
+      total: 1,
+      counts: { confirmed: 1, dismissed: 0, investigating: 0 },
+      ...flags,
+    });
+
+    expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 });

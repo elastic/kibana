@@ -30,6 +30,7 @@ import { SUBJECT_TYPE_LABELS } from '../../subjects/attachments/translations';
 import { HYPOTHESIS_STATUS_LABELS, confidenceLabel } from '../attachments/translations';
 import type { HypothesisTreeNodeData, HypothesisTreeNodeKind } from './build_hypothesis_graph';
 import { HYPOTHESIS_TREE_NODE_WIDTH } from './layout_hypothesis_graph';
+import { ProposalStatusBadge } from './proposal_status_badge';
 import {
   NODE_LABELS,
   OPEN_SLACK_THREAD_LABEL,
@@ -52,11 +53,14 @@ export type HypothesisTreeFlowNode = Node<HypothesisTreeFlowNodeData, 'hypothesi
 
 interface HypothesisTreeActionsContextValue {
   onSelectAction: (index: number) => void;
+  /** Opens or closes a node's details, as a click on it does; used for keyboard activation. */
+  onSelectNode: (nodeId: string) => void;
 }
 
-/** Lets the action cards reach the canvas without going through node data. */
+/** Lets the nodes and action cards reach the canvas without going through node data. */
 export const HypothesisTreeActionsContext = createContext<HypothesisTreeActionsContextValue>({
   onSelectAction: () => {},
+  onSelectNode: () => {},
 });
 
 /** Height of the coloured band that carries a node's role label. */
@@ -150,10 +154,16 @@ const NodeShell = ({
   isDimmed,
   revealIndex,
   footer,
+  onActivate,
   children,
 }: {
   kind: HypothesisTreeNodeKind;
   label: string;
+  /**
+   * Makes the node a button that opens its details from the keyboard (Enter or Space). Mouse
+   * clicks reach the canvas through React Flow's `onNodeClick` instead.
+   */
+  onActivate?: () => void;
   /** Rendered on the outer band below the header, for nodes without an inner card. */
   footer?: React.ReactNode;
   isSelected: boolean;
@@ -164,10 +174,29 @@ const NodeShell = ({
 }): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const roleColors = useRoleColors(kind);
+  const buttonProps = onActivate
+    ? {
+        role: 'button',
+        tabIndex: 0,
+        'aria-pressed': isSelected,
+        onKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => {
+          // Keys pressed on a link inside the node keep their own meaning.
+          if (
+            event.target !== event.currentTarget ||
+            (event.key !== 'Enter' && event.key !== ' ')
+          ) {
+            return;
+          }
+          event.preventDefault();
+          onActivate();
+        },
+      }
+    : {};
 
   return (
     <div
       data-test-subj={`investigationHypothesisTreeNode-${kind}`}
+      {...buttonProps}
       css={css`
         box-sizing: border-box;
         width: ${HYPOTHESIS_TREE_NODE_WIDTH[kind]}px;
@@ -186,9 +215,15 @@ const NodeShell = ({
           border-color: ${roleColors.strongBorder};
         }
 
+        &:focus-visible {
+          outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
+          outline-offset: ${euiTheme.focus.width};
+        }
+
         ${revealIndex !== undefined &&
         css`
-          animation: ${nodeReveal} ${euiTheme.animation.slow} ease-out both;
+          /* Fill backwards only: keeping the last frame's opacity would override the dimming. */
+          animation: ${nodeReveal} ${euiTheme.animation.slow} ease-out backwards;
           animation-delay: ${revealIndex * 60}ms;
         `}
 
@@ -340,7 +375,7 @@ export const HypothesisStatusBadge = ({
 };
 
 const ActionCard = ({
-  proposal: { title, confidence },
+  proposal: { id, title, confidence },
   index,
   isSelected,
 }: {
@@ -380,15 +415,25 @@ const ActionCard = ({
       <BodyText lines={3} bold>
         {title}
       </BodyText>
-      <EuiText
-        size="xs"
-        color="subdued"
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        responsive={false}
+        wrap
         css={css`
           margin-top: ${euiTheme.size.s};
         `}
       >
-        {PROPOSAL_CONFIDENCE_LABELS[confidence]}
-      </EuiText>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            {PROPOSAL_CONFIDENCE_LABELS[confidence]}
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <ProposalStatusBadge proposalId={id} />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </EuiPanel>
   );
 };
@@ -420,10 +465,14 @@ const STATUS_COUNT_BADGES: ReadonlyArray<{
 ];
 
 const HypothesisTreeNodeComponent = ({
+  id,
   data,
 }: NodeProps<HypothesisTreeFlowNode>): React.ReactElement => {
   const { isSelected, isDimmed } = data;
+  const { onSelectNode } = useContext(HypothesisTreeActionsContext);
   const shellProps = { isSelected, isDimmed };
+  // The chip only summarizes the row below it, and the actions node's cards are buttons themselves.
+  const selectableProps = { ...shellProps, onActivate: () => onSelectNode(id) };
 
   switch (data.kind) {
     case 'trigger': {
@@ -431,7 +480,7 @@ const HypothesisTreeNodeComponent = ({
       const href = first ? getSubjectHref(first) : undefined;
       const isSlack = first?.type === 'slack_thread';
       return (
-        <NodeShell kind="trigger" label={NODE_LABELS.trigger} {...shellProps}>
+        <NodeShell kind="trigger" label={NODE_LABELS.trigger} {...selectableProps}>
           <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiIcon
@@ -497,7 +546,7 @@ const HypothesisTreeNodeComponent = ({
         <NodeShell
           kind="hypothesis"
           label={NODE_LABELS.hypothesis}
-          {...shellProps}
+          {...selectableProps}
           revealIndex={data.index}
         >
           <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
@@ -526,7 +575,7 @@ const HypothesisTreeNodeComponent = ({
 
     case 'conclusion':
       return (
-        <NodeShell kind="conclusion" label={NODE_LABELS.conclusion} {...shellProps}>
+        <NodeShell kind="conclusion" label={NODE_LABELS.conclusion} {...selectableProps}>
           <ClampedMarkdown text={data.conclusion} lines={4} />
         </NodeShell>
       );
