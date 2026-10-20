@@ -75,7 +75,10 @@ const ExampleHeading = ({ children }: MarkdownComponentProps) => (
 const exampleProcessingPlugins = (() => {
   const plugins = getDefaultEuiMarkdownProcessingPlugins();
   const [, rehypeReactConfig] = plugins[1];
-  const { code: DefaultCode } = rehypeReactConfig.components;
+  // Typed as ComponentType, but EUI defines it as a plain function that picks EuiCode or EuiCodeBlock.
+  const renderDefaultCode = rehypeReactConfig.components.code as (
+    props: MarkdownComponentProps
+  ) => React.ReactElement;
   rehypeReactConfig.components = {
     ...rehypeReactConfig.components,
     h1: ExampleHeading,
@@ -84,7 +87,13 @@ const exampleProcessingPlugins = (() => {
     h4: ExampleHeading,
     h5: ExampleHeading,
     h6: ExampleHeading,
-    code: (props: MarkdownComponentProps) => <DefaultCode {...props} fontSize="s" />,
+    // Inline code renders as EuiCode, which would pass fontSize to the DOM.
+    code: (props: MarkdownComponentProps) => {
+      const element = renderDefaultCode(props);
+      return element.type === EuiCodeBlock
+        ? React.cloneElement(element, { fontSize: 's' })
+        : element;
+    },
   };
   return plugins;
 })();
