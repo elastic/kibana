@@ -252,7 +252,7 @@ describe('EventsTab', () => {
     expect(new URLSearchParams(history.location.search).get('page')).toBe('2');
   });
 
-  it('keeps the search from history when navigating back after typing', async () => {
+  it('keeps the search from history when navigating back while a search is pending', async () => {
     const history = renderTab();
 
     fireEvent.click(screen.getByTestId('nightshiftDetectionEventsStatusFilterButton'));
@@ -262,15 +262,11 @@ describe('EventsTab', () => {
     fireEvent.change(screen.getByTestId('nightshiftDetectionEventsSearch'), {
       target: { value: 'checkout' },
     });
-    await waitFor(() =>
-      expect(new URLSearchParams(history.location.search).get('search')).toBe('checkout')
-    );
-
     act(() => history.goBack());
+    // Let the 300 ms debounce elapse; the cancelled write must not land.
+    await act(() => new Promise((resolve) => setTimeout(resolve, 400)));
 
-    await waitFor(() =>
-      expect(screen.getByTestId('nightshiftDetectionEventsSearch')).toHaveValue('')
-    );
     expect(history.location.search).toBe('');
+    expect(screen.getByTestId('nightshiftDetectionEventsSearch')).toHaveValue('');
   });
 });

@@ -166,7 +166,7 @@ describe('markEventInvestigationCompleteInCache', () => {
     );
   });
 
-  it('reapplies pending completed_at after a refetch still missing server completion', async () => {
+  it('reapplies pending completed_at until a new round reuses the investigation id', async () => {
     let cache: NightshiftSignificantEventsQueryData | undefined = {
       hits: [
         mockEvent({
@@ -222,5 +222,24 @@ describe('markEventInvestigationCompleteInCache', () => {
     })) as NightshiftSignificantEventsQueryData;
 
     expect(data.hits[0].investigations?.[0].completed_at).toBe('2026-01-01T00:05:00.000Z');
+
+    mockSignificantEventsFetch.mockResolvedValueOnce({
+      hits: [
+        mockEvent({
+          event_id: 'evt-1',
+          investigations: [
+            { workflow_execution_id: 'exec-1', started_at: '2026-01-01T01:00:00.000Z' },
+          ],
+        }),
+      ],
+      page: 1,
+      perPage: 1,
+      total: 1,
+    });
+    const nextRound = (await capturedQueryFn!({
+      signal: undefined,
+    })) as NightshiftSignificantEventsQueryData;
+
+    expect(nextRound.hits[0].investigations?.[0].completed_at).toBeUndefined();
   });
 });

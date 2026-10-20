@@ -37,7 +37,11 @@ export const NIGHTSHIFT_EVENTS_PAGE_SIZE = 1000;
 const NIGHTSHIFT_LOOKBACK_DAYS = 30;
 const MAX_FETCH_PAGES = 10;
 
-const pendingInvestigationCompletions = new Map<string, string>();
+// Keyed by investigation id, which a re-run on the same event reuses; `startedAt` tells rounds apart.
+const pendingInvestigationCompletions = new Map<
+  string,
+  { startedAt: string; completedAt: string }
+>();
 
 const pendingInvestigationCompletionKey = (eventId: string, workflowExecutionId: string): string =>
   `${eventId}:${workflowExecutionId}`;
@@ -62,19 +66,22 @@ export const applyPendingInvestigationCompletions = <Event extends SignificantEv
 
     let investigationsChanged = false;
     const nextInvestigations = investigations.map((investigation) => {
-      if (investigation.completed_at != null) {
+      const key = pendingInvestigationCompletionKey(
+        hit.event_id,
+        investigation.workflow_execution_id
+      );
+      const pending = pendingInvestigationCompletions.get(key);
+      if (!pending) {
         return investigation;
       }
-
-      const pendingCompletedAt = pendingInvestigationCompletions.get(
-        pendingInvestigationCompletionKey(hit.event_id, investigation.workflow_execution_id)
-      );
-      if (!pendingCompletedAt) {
+      if (investigation.completed_at != null || investigation.started_at !== pending.startedAt) {
+        // The server caught up, or a new round started.
+        pendingInvestigationCompletions.delete(key);
         return investigation;
       }
 
       investigationsChanged = true;
-      return { ...investigation, completed_at: pendingCompletedAt };
+      return { ...investigation, completed_at: pending.completedAt };
     });
 
     if (!investigationsChanged) {
@@ -195,7 +202,7 @@ export const markEventInvestigationCompleteInCache = (
 
       pendingInvestigationCompletions.set(
         pendingInvestigationCompletionKey(hit.event_id, latestInvestigation.workflow_execution_id),
-        completedAt
+        { startedAt: latestInvestigation.started_at, completedAt }
       );
 
       changed = true;

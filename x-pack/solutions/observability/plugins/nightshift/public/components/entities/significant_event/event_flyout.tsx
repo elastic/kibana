@@ -100,13 +100,16 @@ const RUN_INVESTIGATION_LABEL = i18n.translate(
   'xpack.nightshift.flyout.runInvestigationButtonLabel',
   { defaultMessage: 'Run investigation' }
 );
-const RESTART_INVESTIGATION_LABEL = i18n.translate(
-  'xpack.nightshift.flyout.restartInvestigationButtonLabel',
-  { defaultMessage: 'Restart investigation' }
+const FOLLOW_UP_INVESTIGATION_LABEL = i18n.translate(
+  'xpack.nightshift.flyout.followUpInvestigationButtonLabel',
+  { defaultMessage: 'Run follow-up' }
 );
-const RESTART_INVESTIGATION_TOOLTIP = i18n.translate(
-  'xpack.nightshift.flyout.restartInvestigationTooltip',
-  { defaultMessage: 'This will cancel the running investigation and start a new one.' }
+const FOLLOW_UP_INVESTIGATION_TOOLTIP = i18n.translate(
+  'xpack.nightshift.flyout.followUpInvestigationTooltip',
+  {
+    defaultMessage:
+      'An investigation is already running. This queues a follow-up that starts when it finishes.',
+  }
 );
 const MARK_INACTIVE_LABEL = i18n.translate('xpack.nightshift.flyout.markInactiveActionLabel', {
   defaultMessage: 'Mark significant event inactive',
@@ -258,10 +261,10 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     investigationStatus !== 'complete';
   const investigationRunning = isInvestigationRunning(event) || latestInvestigationInProgress;
   const investigationActionProps = {
-    label: investigationRunning ? RESTART_INVESTIGATION_LABEL : RUN_INVESTIGATION_LABEL,
+    label: investigationRunning ? FOLLOW_UP_INVESTIGATION_LABEL : RUN_INVESTIGATION_LABEL,
     iconType: 'inspect' as const,
     tooltip:
-      activityBlockTooltip ?? (investigationRunning ? RESTART_INVESTIGATION_TOOLTIP : undefined),
+      activityBlockTooltip ?? (investigationRunning ? FOLLOW_UP_INVESTIGATION_TOOLTIP : undefined),
     onClick: () => triggerInvestigation(event.event_id),
     isDisabled: blocksActivity || triggeringEventId != null,
     isLoading: triggeringEventId === event.event_id,

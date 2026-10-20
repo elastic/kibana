@@ -118,6 +118,24 @@ export const useEventsUrlState = () => {
     setSearchValue(urlSearch);
   }, [cancelSearchWrite, urlSearch]);
 
+  // Back/Forward within the debounce window must drop the pending write, even when both
+  // entries have the same search.
+  useEffect(
+    () =>
+      history.listen((location, action) => {
+        if (action === 'POP') {
+          cancelSearchWrite();
+          setSearchValue(
+            (new URLSearchParams(location.search).get(SEARCH_QUERY_PARAM) ?? '').slice(
+              0,
+              MAX_SIGNIFICANT_EVENTS_SEARCH_LENGTH
+            )
+          );
+        }
+      }),
+    [cancelSearchWrite, history]
+  );
+
   const setListParam = useCallback(
     (
       key:

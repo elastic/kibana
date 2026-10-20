@@ -76,11 +76,12 @@ const EventsFilterPopover = <Value extends string>({
     label: getLabel(value),
     checked: selected.includes(value) ? 'on' : undefined,
     prepend: getPrepend?.(value),
-    append: (
+    // No counts while facets load or after they fail; a 0 would read as "no matches".
+    append: counts ? (
       <EuiNotificationBadge color="subdued" size="s">
-        {counts?.[value] ?? 0}
+        {counts[value]}
       </EuiNotificationBadge>
-    ),
+    ) : undefined,
     'data-test-subj': `${testSubject}Option-${value}`,
   }));
 
