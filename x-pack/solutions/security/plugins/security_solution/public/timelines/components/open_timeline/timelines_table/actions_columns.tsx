@@ -14,6 +14,7 @@ import type {
   OnOpenTimeline,
   OpenTimelineResult,
   OnOpenDeleteTimelineModal,
+  OnRemoveTimelineFromCase,
 } from '../types';
 import * as i18n from '../translations';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../../common/api/timeline';
@@ -30,6 +31,7 @@ export const getActionsColumns = ({
   onOpenTimeline,
   onCreateRule,
   onCreateRuleFromEql,
+  onRemoveFromCase,
   hasCrudAccess,
 }: {
   actionTimelineToShow: ActionTimelineToShow[];
@@ -39,6 +41,7 @@ export const getActionsColumns = ({
   onOpenTimeline: OnOpenTimeline;
   onCreateRule?: OnCreateRuleFromTimeline;
   onCreateRuleFromEql?: OnCreateRuleFromTimeline;
+  onRemoveFromCase?: OnRemoveTimelineFromCase;
   hasCrudAccess: boolean;
 }): Array<EuiTableActionsColumnType<object>> => {
   const createTimelineFromTemplate = {
@@ -185,6 +188,20 @@ export const getActionsColumns = ({
       queryType != null &&
       queryType.hasEql,
   } as Action;
+
+  const removeFromCaseAction = {
+    name: i18n.REMOVE_FROM_CASE,
+    icon: 'trash' as (typeof ICON_TYPES)[number],
+    type: 'icon',
+    onClick: ({ savedObjectId }: OpenTimelineResult) => {
+      if (onRemoveFromCase != null && savedObjectId) onRemoveFromCase(savedObjectId);
+    },
+    enabled: ({ savedObjectId }: OpenTimelineResult) => savedObjectId != null,
+    description: i18n.REMOVE_FROM_CASE,
+    'data-test-subj': 'remove-timeline-from-case',
+    available: () => actionTimelineToShow.includes('removeFromCase') && onRemoveFromCase != null,
+  } as Action;
+
   return [
     {
       width: hasCrudAccess ? '80px' : '150px',
@@ -197,6 +214,7 @@ export const getActionsColumns = ({
         deleteTimelineColumn,
         createRuleFromTimeline,
         createRuleFromTimelineCorrelation,
+        removeFromCaseAction,
       ],
     },
   ];
