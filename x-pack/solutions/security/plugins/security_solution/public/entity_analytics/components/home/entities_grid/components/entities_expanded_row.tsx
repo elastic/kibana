@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiButtonIcon, EuiScreenReaderOnly, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon, EuiIconTip, EuiScreenReaderOnly, EuiText, EuiToolTip } from '@elastic/eui';
 import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
@@ -28,7 +28,9 @@ import {
   gridRowCellsCss,
   gridRowCss,
 } from './entities_grid_styles';
+import { TARGET_ENTITY_TOOLTIP } from '../../../entity_resolution/translations';
 import { useEntityGridData } from '../hooks/use_entity_grid_data';
+import { getSortedPage } from '../queries/esql';
 import type { UseEntityGridDataOptions } from '../hooks/use_entity_grid_context';
 import {
   ENTITY_ID_FIELD,
@@ -48,22 +50,43 @@ const getTruncatedGroupLabel = (shown: number, total: number) =>
     values: { shown, total },
   });
 
-/** A group's records as individual rows; expanding is structural, so the table filters don't apply. */
-export const getGroupRecordsOptions = (
-  entityId: string,
+const getRecordsOptions = (
+  entityExpression: string,
+  pageSize: number,
   timeRange: TimeRange,
   keepFields: readonly string[]
 ): UseEntityGridDataOptions => ({
   keyScope: 'children',
   rowsMode: 'individual',
-  entityExpression: `(${ENTITY_ID_FIELD} == ${escapeStringValue(
-    entityId
-  )} OR ${RESOLVED_TO_FIELD} == ${escapeStringValue(entityId)})`,
+  entityExpression,
   sortField: RISK_SCORE_NORM_FIELD,
   sortDirection: 'desc',
-  pageSize: MAX_GROUP_RECORDS,
+  pageSize,
   timeRange,
   keepFields,
+});
+
+/**
+ * A group's records as individual rows; expanding is structural, so the table filters don't apply.
+ * The main entity is read on its own, so a group of more than 100 records still shows it.
+ */
+export const getGroupRecordsOptions = (
+  entityId: string,
+  timeRange: TimeRange,
+  keepFields: readonly string[]
+): Record<'mainEntity' | 'aliases', UseEntityGridDataOptions> => ({
+  mainEntity: getRecordsOptions(
+    `${ENTITY_ID_FIELD} == ${escapeStringValue(entityId)}`,
+    1,
+    timeRange,
+    keepFields
+  ),
+  aliases: getRecordsOptions(
+    `${RESOLVED_TO_FIELD} == ${escapeStringValue(entityId)}`,
+    MAX_GROUP_RECORDS - 1,
+    timeRange,
+    keepFields
+  ),
 });
 
 interface ExpandedEntityRowProps {
@@ -71,6 +94,7 @@ interface ExpandedEntityRowProps {
   isLast: boolean;
   /** The child is not enriched yet; enrich cells stay blank until it is. */
   isEnriching: boolean;
+  isMainEntity: boolean;
   /** Grid density, so child rows match the height of grid rows. */
   cellPadding: EuiDataGridStyleCellPaddings;
   visCols: EuiDataGridCustomBodyProps['visibleColumns'];
@@ -112,6 +136,10 @@ const nameContentCss = css`
   overflow: hidden;
 `;
 
+const mainEntityIconCss = css`
+  flex-shrink: 0;
+`;
+
 const treeConnectorCss = css`
   width: 20px;
   align-self: stretch;
@@ -123,6 +151,7 @@ const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
   child,
   isLast,
   isEnriching,
+  isMainEntity,
   cellPadding,
   visCols,
   columnsById,
@@ -171,6 +200,15 @@ const ExpandedEntityRow: React.FC<ExpandedEntityRowProps> = ({
                   >
                     {cell}
                   </div>
+                  {isMainEntity && (
+                    <EuiIconTip
+                      content={TARGET_ENTITY_TOOLTIP}
+                      type="aggregate"
+                      size="s"
+                      anchorProps={{ css: mainEntityIconCss }}
+                      iconProps={{ 'data-test-subj': 'entityGridMainEntityIcon' }}
+                    />
+                  )}
                 </div>
               </div>
             );
@@ -223,7 +261,10 @@ const ExpandedEntityTreeConnector: React.FC<ChildTreeConnectorProps> = ({ isLast
 );
 
 interface ExpandedEntityGroupProps
-  extends Omit<ExpandedEntityRowProps, 'child' | 'isLast' | 'isEnriching' | 'columnsById'> {
+  extends Omit<
+    ExpandedEntityRowProps,
+    'child' | 'isLast' | 'isEnriching' | 'isMainEntity' | 'columnsById'
+  > {
   columns: EuiDataGridColumn[];
   entityId: string;
   timeRange: TimeRange;
@@ -237,15 +278,22 @@ export const ExpandedEntityGroup: React.FC<ExpandedEntityGroupProps> = ({
   columns,
   ...rowProps
 }) => {
-  const {
-    rows: records,
-    isEnriching,
-    total,
-  } = useEntityGridData(getGroupRecordsOptions(entityId, timeRange, keepFields));
+  const recordsOptions = useMemo(
+    () => getGroupRecordsOptions(entityId, timeRange, keepFields),
+    [entityId, timeRange, keepFields]
+  );
+  const mainEntity = useEntityGridData(recordsOptions.mainEntity);
+  const aliases = useEntityGridData(recordsOptions.aliases);
+  const isEnriching = mainEntity.isEnriching || aliases.isEnriching;
+  const total = aliases.total == null ? undefined : aliases.total + mainEntity.rows.length;
   // Child rows show the parent grid's columns, Records included: each is one record.
   const rows = useMemo(
-    () => records.map((record) => ({ ...record, [GROUP_SIZE_FIELD]: 1 })),
-    [records]
+    () =>
+      getSortedPage(
+        { sort: { field: RISK_SCORE_NORM_FIELD, direction: 'desc' }, pageSize: MAX_GROUP_RECORDS },
+        [...mainEntity.rows, ...aliases.rows]
+      ).map((record) => ({ ...record, [GROUP_SIZE_FIELD]: 1 })),
+    [mainEntity.rows, aliases.rows]
   );
   const columnsById = useMemo(
     () => new Map(columns.map((column) => [column.id, column])),
@@ -260,6 +308,7 @@ export const ExpandedEntityGroup: React.FC<ExpandedEntityGroupProps> = ({
           child={child}
           isLast={i === rows.length - 1}
           isEnriching={isEnriching}
+          isMainEntity={getEntityId(child) === entityId}
           columnsById={columnsById}
           {...rowProps}
         />

@@ -222,7 +222,11 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   // Expanded groups on this page read their records; the URL can hold more expanded ids.
   const isChildrenFetching = useIsFetching({ queryKey: ENTITY_GRID_CHILDREN_QUERY_KEY }) > 0;
   const prefetchChildren = useCallback(
-    (entityId: string) => prefetch(getGroupRecordsOptions(entityId, timeRange, keepFields)),
+    (entityId: string) => {
+      const { mainEntity, aliases } = getGroupRecordsOptions(entityId, timeRange, keepFields);
+      prefetch(mainEntity);
+      prefetch(aliases);
+    },
     [prefetch, timeRange, keepFields]
   );
 
