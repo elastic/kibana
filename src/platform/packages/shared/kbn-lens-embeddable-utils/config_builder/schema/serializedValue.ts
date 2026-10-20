@@ -46,7 +46,19 @@ const multiFieldKeySchema = lazySchema(() =>
       keys: z.array(z.string()).max(100),
     })
     .strict()
-    .meta({ id: 'visMultiFieldKey', title: 'Multi Field Key' })
+    .meta({
+      id: 'visMultiFieldKey',
+      title: 'Multi Field Key',
+      description: 'Composite key from a multi-terms bucket.',
+    })
+);
+
+const multiValueCellSchema = lazySchema(() =>
+  z.array(primitiveValueSchema).max(100).meta({
+    id: 'visMultiValueCell',
+    title: 'Multi Value Cell',
+    description: 'Values of a multi-value cell.',
+  })
 );
 
 export const serializedValueSchema = lazySchema(() =>
@@ -55,7 +67,7 @@ export const serializedValueSchema = lazySchema(() =>
     z.number(),
     z.boolean(),
     z.null(),
-    z.array(primitiveValueSchema).max(100),
+    multiValueCellSchema,
     rangeKeySchema,
     multiFieldKeySchema,
   ])
