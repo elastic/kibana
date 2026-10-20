@@ -200,6 +200,9 @@ export const withNightshiftBackgroundSpan = async <T>(
               [GenAISemanticConventions.GenAIOperationName]: 'invoke_workflow',
               'nightshift.background_trace_id': resolvedTraceId,
               ...(foregroundTraceId ? { 'nightshift.foreground_trace_id': foregroundTraceId } : {}),
+              ...(options.conversationId
+                ? { 'nightshift.conversation_id': options.conversationId }
+                : {}),
               ...(options.roundId ? { 'nightshift.round_id': options.roundId } : {}),
               ...(options.workflowExecutionId
                 ? { 'nightshift.workflow_execution_id': options.workflowExecutionId }
