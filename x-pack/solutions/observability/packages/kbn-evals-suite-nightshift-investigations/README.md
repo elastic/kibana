@@ -554,6 +554,9 @@ alone and HTTP errors masked by shell pipelines do not satisfy that check.
 
 ### Local run
 
+Use the [`run-orcabench` agent skill](../../../../../.agents/skills/run-orcabench/SKILL.md)
+for a manual run with explicit model/judge selection, configuration checks and result verification.
+
 Use a separate Scout stack for ORCA. Stop a stack configured for another source before starting
 this command; a reused server does not reload connector credentials.
 
