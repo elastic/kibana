@@ -2066,6 +2066,9 @@ importers:
       '@kbn/entity-access-control-ui':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-entity-access-control-ui
+      '@kbn/entity-inventory-app-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/entity_inventory_app
       '@kbn/entity-inventory-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/entity_inventory
@@ -9628,6 +9631,8 @@ importers:
   x-pack/solutions/observability/plugins/client_apps: {}
 
   x-pack/solutions/observability/plugins/entity_inventory: {}
+
+  x-pack/solutions/observability/plugins/entity_inventory_app: {}
 
   x-pack/solutions/observability/plugins/exploratory_view: {}
 
