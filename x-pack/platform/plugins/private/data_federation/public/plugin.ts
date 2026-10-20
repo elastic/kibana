@@ -74,7 +74,7 @@ export class DataFederationPlugin
     this.registeredApp = management.sections.section.data.registerApp({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      order: 2,
+      order: 1,
       visibleIn: ['globalSearch', 'projectSideNav'],
       async mount(params: ManagementAppMountParams) {
         const { mountManagementSection } = await import('./mount_management_section');
