@@ -46,8 +46,10 @@ export const hostTargetFields = (hostNameDescription: string) => ({
 export const requireHostTarget = {
   check: (value: { hostName?: string; ip?: string; agentId?: string }) =>
     Boolean(value.hostName || value.ip || value.agentId) &&
-    !(value.ip && (value.hostName || value.agentId)),
-  message: 'Provide ip by itself, or provide hostName and/or agentId.',
+    // A resolved agent ID takes precedence, so retaining the IP from an
+    // ambiguity response must not make the model's retry invalid.
+    !(value.ip && value.hostName && !value.agentId),
+  message: 'Provide ip or hostName, or identify the target with agentId.',
 };
 
 /** How the analyst-facing confirmation names the host about to be acted on. */

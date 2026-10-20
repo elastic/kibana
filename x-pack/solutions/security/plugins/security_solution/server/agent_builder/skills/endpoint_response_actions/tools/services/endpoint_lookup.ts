@@ -67,6 +67,8 @@ export interface ResolvedEndpoint {
   status?: string;
   /** Agent policy assigned to this Fleet agent, used for policy-aware action preflight. */
   policyId?: string;
+  /** ECS host OS platform, used to interpret platform-specific endpoint policy settings. */
+  platform?: string;
 }
 
 /** A Fleet agent record that matched the hostname but could not be selected. */
@@ -133,10 +135,16 @@ interface MetadataCandidate {
     agent?: { id?: string };
     /** Fleet agent id — the identity actions and Fleet candidates key on. */
     elastic?: { agent?: { id?: string } };
-    /** Names Defend reports for the host; `hostname` is what `list_endpoints` shows. */
-    host?: { hostname?: string; name?: string; ip?: string | readonly string[] };
+    /** Names and OS Defend reports for the host. */
+    host?: {
+      hostname?: string;
+      name?: string;
+      ip?: string | readonly string[];
+      os?: { platform?: string };
+    };
   };
   host_status?: string;
+  policy_info?: { agent?: { configured?: { id?: string } } };
   /** HostInfo `last_checkin` — ISO timestamp used for the recency tiebreak. */
   last_checkin?: string;
 }
@@ -291,6 +299,8 @@ export function createEndpointLookupService(
     status: string;
     packages?: string[];
     policyId?: string;
+    hostName?: string;
+    platform?: string;
     /**
      * ISO timestamp for the newest-first tiebreak. The source differs by
      * candidate origin: `enrolled_at` for Fleet agents, `last_checkin` for
@@ -306,6 +316,7 @@ export function createEndpointLookupService(
     packages?: string[];
     enrolled_at?: string;
     policy_id?: string;
+    local_metadata?: { host?: { name?: string; os?: { platform?: string } } };
   }
 
   interface CandidateCollection {
@@ -404,6 +415,8 @@ export function createEndpointLookupService(
       status: candidate.status ? toHostStatus(candidate.status as AgentStatus) : 'unknown',
       packages: candidate.packages,
       policyId: candidate.policy_id,
+      hostName: candidate.local_metadata?.host?.name,
+      platform: candidate.local_metadata?.host?.os?.platform,
       sortKey: candidate.enrolled_at,
     }));
 
@@ -527,6 +540,9 @@ export function createEndpointLookupService(
             entry.host_status as HostStatus
           ),
           status: entry.host_status as string,
+          hostName: entry.metadata?.host?.hostname ?? entry.metadata?.host?.name,
+          platform: entry.metadata?.host?.os?.platform,
+          policyId: entry.policy_info?.agent?.configured?.id,
           sortKey: entry.last_checkin,
         },
       ];
@@ -546,9 +562,12 @@ export function createEndpointLookupService(
     // United metadata can retain more than one document for the same agent.
     // Keep its best (live/newest) document so history is not mistaken for two
     // distinct machines sharing an address.
-    const distinct = [
-      ...new Map(sorted.map((candidate) => [candidate.agentId, candidate])).values(),
-    ];
+    const seenAgentIds = new Set<string>();
+    const distinct = sorted.filter((candidate) => {
+      if (seenAgentIds.has(candidate.agentId)) return false;
+      seenAgentIds.add(candidate.agentId);
+      return true;
+    });
 
     if (!distinct.length) {
       return { kind: 'not_found' } as const;
@@ -578,6 +597,9 @@ export function createEndpointLookupService(
         agentType: 'endpoint' as const,
         packages: ['endpoint'],
         status: chosen.status,
+        ...(chosen.hostName ? { hostName: chosen.hostName } : {}),
+        ...(chosen.policyId ? { policyId: chosen.policyId } : {}),
+        ...(chosen.platform ? { platform: chosen.platform } : {}),
       },
     };
   };
@@ -630,6 +652,9 @@ export function createEndpointLookupService(
           packages,
           ...(agent.status ? { status: toHostStatus(agent.status) } : {}),
           ...(agent.policy_id ? { policyId: agent.policy_id } : {}),
+          ...(agent.local_metadata?.host?.os?.platform
+            ? { platform: agent.local_metadata.host.os.platform }
+            : {}),
           ...(typeof fleetHostName === 'string' && fleetHostName
             ? { hostName: fleetHostName }
             : {}),
@@ -723,6 +748,7 @@ export function createEndpointLookupService(
           packages: chosen.packages ?? [],
           status: chosen.status,
           ...(chosen.policyId ? { policyId: chosen.policyId } : {}),
+          ...(chosen.platform ? { platform: chosen.platform } : {}),
         },
       };
     },
