@@ -105,6 +105,9 @@ describe('useTransactionFlyoutHeader', () => {
     expect(screen.getByTestId('transactionFlyoutInfo-name')).toHaveTextContent('GET /api');
     expect(screen.getByRole('link', { name: 'GET /api' })).toHaveAttribute('href', '/mock-link');
     expect(screen.getByTestId('transactionFlyoutInfo-service')).toHaveTextContent('my-service');
+    expect(screen.getByTestId('transactionFlyoutInfo-duration')).toHaveTextContent(
+      /^5\.0 ms\s+\(50% of trace\)$/
+    );
   });
 
   it('does not crash when agent is missing', () => {
@@ -167,6 +170,7 @@ describe('useTransactionFlyoutHeader', () => {
       'transactionFlyoutInfo-name',
       'transactionFlyoutInfo-request',
     ]);
+    expect(urlParts.metaBlocks[1].props.children.props.status).toBeUndefined();
     expect(urlParts.metaBlocks[1].props.title).toBe('Request');
     expect(urlParts.metaBlocks[1].props.children.props.fitToContainer).toBe(true);
     expect(getTestSubjects(urlParts.badges)).toEqual([

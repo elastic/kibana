@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
-import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { asDuration, PercentOfParent, Timestamp } from '@kbn/apm-ui-shared';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
@@ -245,10 +245,20 @@ export function useSpanFlyoutHeader({
       >
         <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
-            <Duration
-              duration={duration}
-              parent={{ duration: totalDuration, type: 'transaction', loading: false }}
-            />
+            <span>
+              {asDuration(duration)}
+              {totalDuration ? (
+                <>
+                  {' '}
+                  &nbsp;
+                  <PercentOfParent
+                    duration={duration}
+                    totalDuration={totalDuration}
+                    parentType="transaction"
+                  />
+                </>
+              ) : null}
+            </span>
           </EuiFlexItem>
           {composite && (
             <EuiFlexItem grow={false}>

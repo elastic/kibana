@@ -6,7 +6,7 @@
  */
 
 import { useEuiTheme } from '@elastic/eui';
-import { Duration, Timestamp } from '@kbn/apm-ui-shared';
+import { asDuration, HttpStatusCode, PercentOfParent, Timestamp } from '@kbn/apm-ui-shared';
 import { FlyoutTemplate } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
@@ -199,10 +199,18 @@ export function useTransactionFlyoutHeader({
         title={DURATION_LABEL}
         data-test-subj="transactionFlyoutInfo-duration"
       >
-        <Duration
-          duration={duration}
-          parent={{ duration: rootTransactionDuration, type: 'trace' }}
-        />
+        {asDuration(duration)}
+        {rootTransactionDuration ? (
+          <>
+            {' '}
+            &nbsp;
+            <PercentOfParent
+              duration={duration}
+              totalDuration={rootTransactionDuration}
+              parentType="trace"
+            />
+          </>
+        ) : null}
       </InfoBlock>
     );
   }

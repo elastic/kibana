@@ -184,6 +184,9 @@ describe('useSpanFlyoutHeader', () => {
 
     renderParts(parts);
     expect(screen.getByTestId('spanFlyoutInfo-name')).toHaveTextContent('SELECT *');
+    expect(screen.getByTestId('spanFlyoutInfo-duration')).toHaveTextContent(
+      /^1,000 μs\s+\(20% of transaction\)$/
+    );
   });
 
   it('renders the generic title while the span is loading', () => {
