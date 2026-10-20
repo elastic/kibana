@@ -1,6 +1,6 @@
 ---
 navigation_title: "OpenAI"
-description: "Use the OpenAI connector to send requests to OpenAI and Azure OpenAI from Kibana. This connector is deprecated. Create an Elasticsearch inference endpoint instead."
+description: "Documentation for the deprecated OpenAI connector, used to send requests to OpenAI and Azure OpenAI from Kibana."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/openai-action-type.html
 applies_to:

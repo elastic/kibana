@@ -1,6 +1,6 @@
 ---
 navigation_title: "{{gemini}}"
-description: "Use the Google Gemini connector to send requests to Gemini models from Kibana. This connector is deprecated. Create an Elasticsearch inference endpoint instead."
+description: "Documentation for the deprecated Google Gemini connector, used to send requests to Google Gemini models from Kibana."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/gemini-action-type.html
 applies_to:

@@ -1,6 +1,6 @@
 ---
 navigation_title: AI Connector
-description: "Use the AI Connector to reach LLM services through the Elasticsearch Inference API. This connector is deprecated. Create an Elasticsearch inference endpoint instead."
+description: "Documentation for the deprecated AI Connector, used to send requests to LLM services from Kibana through the Elasticsearch Inference API."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/bedrock-action-type.html
 applies_to:

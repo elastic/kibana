@@ -1,6 +1,6 @@
 ---
 navigation_title: "{{bedrock}}"
-description: "Use the Amazon Bedrock connector to send requests to Amazon Bedrock models from Kibana. This connector is deprecated. Create an Elasticsearch inference endpoint instead."
+description: "Documentation for the deprecated Amazon Bedrock connector, used to send requests to Amazon Bedrock models from Kibana."
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/bedrock-action-type.html
 applies_to:
