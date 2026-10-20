@@ -21,8 +21,9 @@ import { fetchClassicAlertsAsEpisodes } from './apis/fetch_classic_episodes';
 import { fetchClassicAlertsHistogram } from './apis/fetch_classic_histogram';
 import { fetchClassicAlertsKpis } from './apis/fetch_classic_kpis';
 import { fetchClassicAlertsTags } from './apis/fetch_classic_tags';
-import { resolveClassicRules } from './apis/resolve_classic_rules';
 import { ELASTIC_SOURCE_ICON, CLASSIC_SOURCE_LABEL } from '../source_labels';
+import { resolveClassicRules } from './apis/resolve_classic_rules';
+import { fetchClassicSearchFields } from './apis/fetch_classic_search_fields';
 import { CLASSIC_ALERTS_HISTOGRAM_LIMIT, CLASSIC_EPISODE_SOURCE_ID } from './constants';
 import { classicAlertQueryKeys } from './query_keys';
 
@@ -111,6 +112,9 @@ export const createClassicEpisodeSource = ({
     fetchClassicAlertsTags({ ruleTypeIds, services, timeRange, abortSignal }),
 
   resolveRules: ({ services, ids }) => resolveClassicRules({ ids, services }),
+
+  fetchSearchFields: ({ services, abortSignal }) =>
+    fetchClassicSearchFields({ ruleTypeIds, services, abortSignal }),
 
   actionExtensions: classicActionExtensions,
 

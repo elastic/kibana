@@ -439,6 +439,7 @@ export {
   type ConversationEventInput,
   type ConversationEvent,
   type EventActor,
+  getEventActorDisplayName,
   type BaseTimelineEventInput,
   type BaseTimelineEvent,
   type UserMessageEventData,
