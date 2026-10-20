@@ -19,7 +19,6 @@ import type {
   AttachmentTotals,
   Case,
   CaseAttributes,
-  CaseStatuses,
   User,
 } from '../../../common/types/domain';
 import type {
@@ -323,7 +322,7 @@ export const getCasesByAttachmentIDs = async (
 const filterByCaseStatus = async (
   caseService: CasesService,
   casesOfAttachments: CasesWithOwnerOfAttachment[],
-  status: CaseStatuses | CaseStatuses[] | undefined
+  status: CasesByAttachmentIDsRequest['status']
 ): Promise<CasesWithOwnerOfAttachment[]> => {
   if (status === undefined) return casesOfAttachments;
   const statuses = asArray(status);

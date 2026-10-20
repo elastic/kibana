@@ -571,10 +571,11 @@ export class AttachmentGetter {
    */
   public async getCaseIdsByAttachmentIds({
     type,
-    attachmentIds,
+    attachmentIds: requestedIds,
     filter,
     legacyFilter,
   }: GetCaseIdsByAttachmentIdsArgs): Promise<CasesWithOwnerOfAttachment[]> {
+    const attachmentIds = [...new Set(requestedIds)];
     try {
       this.context.log.debug(
         `Attempting to GET cases for attachment ids ${attachmentIds.join(', ')}`

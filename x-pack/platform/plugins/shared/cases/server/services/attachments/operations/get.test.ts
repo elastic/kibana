@@ -1573,6 +1573,20 @@ describe('AttachmentService getter', () => {
       expect(JSON.stringify(findArgs.filter)).toContain('host:b');
     });
 
+    it('reads each requested id once', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
+
+      await createAttachmentGetter().getCaseIdsByAttachmentIds({
+        type: 'security.entity',
+        attachmentIds: ['host:a', 'host:a'],
+      });
+
+      const [[findArgs]] = unsecuredSavedObjectsClient.find.mock.calls;
+      expect(findArgs).toMatchObject({
+        aggs: { attachmentIds: { terms: { size: 1, include: ['host:a'] } } },
+      });
+    });
+
     it('buckets only the requested ids of an attachment that holds several', async () => {
       // An attachment holding ['host:a', 'host:b'] matches a request for 'host:b'; without
       // `include`, its 'host:a' would take a bucket of the requested size.
