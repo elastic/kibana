@@ -7,6 +7,7 @@
 
 import type { QueryDslQueryContainer, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { min, orderBy, truncate, uniq } from 'lodash';
+import { unflattenObject } from '@kbn/object-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AssetCriticalityLevel, Entity, EntityRiskLevels } from '@kbn/entity-store/common';
 import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
@@ -66,7 +67,9 @@ export const readEntities = async ({
     aggs: { found: { value_count: { field: 'entity.id' } } },
   });
 
-  const candidates = response.hits.hits.flatMap(({ _source: record }): BriefCandidate[] => {
+  const candidates = response.hits.hits.flatMap(({ _source: source }): BriefCandidate[] => {
+    // The Entity Store can hold fields as dotted keys, such as `entity.id`.
+    const record = source && (unflattenObject(source) as Entity);
     const id = record?.entity?.id;
     const tileIds = id ? tileIdsByEntityId.get(id) : undefined;
     if (!record || !id || !tileIds) {

@@ -6,6 +6,7 @@
  */
 
 import { mapValues } from 'lodash';
+import { unflattenObject } from '@kbn/object-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '@kbn/entity-store/common';
 import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/server';
@@ -50,7 +51,8 @@ export const fetchGroupMembers = async (
     const [id] = fields?.[ENTITY_ID_FIELD] ?? [];
     const [headId] = fields?.[RESOLVED_TO_FIELD] ?? [];
     if (typeof id === 'string' && typeof headId === 'string') {
-      (members[headId] ??= []).push({ id, record: record ?? {} });
+      // The Entity Store can hold fields as dotted keys, such as `asset.criticality`.
+      (members[headId] ??= []).push({ id, record: unflattenObject(record ?? {}) as Entity });
     }
   });
   return members;

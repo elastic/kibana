@@ -79,7 +79,7 @@ describe('fetchGroupMemberIds', () => {
 });
 
 describe('fetchGroupMembers', () => {
-  it("returns each member's id with the asked-for fields of its record", async () => {
+  it("returns each member's id with the asked-for fields of its record, nested", async () => {
     const esClient = buildClient([['host:a1', 'host:a']]);
     esClient.search.mockResolvedValueOnce({
       took: 1,
@@ -91,7 +91,7 @@ describe('fetchGroupMembers', () => {
             _index: 'entities',
             _id: 'host:a1',
             fields: { 'entity.id': ['host:a1'], [RESOLVED_TO_FIELD]: ['host:a'] },
-            _source: { asset: { criticality: 'high_impact' } },
+            _source: { 'asset.criticality': 'high_impact' },
           },
         ],
       },
