@@ -18,7 +18,6 @@ import { css } from '@emotion/react';
 import { defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import { useCanUpdateAgent } from '../../../hooks/agents/use_can_update_agent';
-import { useInheritedSkillIds } from '../../../hooks/skills/use_inherited_skill_ids';
 import { useSkillsService } from '../../../hooks/skills/use_skills';
 import { usePluginsService } from '../../../hooks/plugins/use_plugins';
 import { useToolsService } from '../../../hooks/tools/use_tools';
@@ -55,7 +54,6 @@ export const AgentOverview: React.FC = () => {
 
   const { agent, isLoading } = useAgentBuilderAgentById(agentId);
   const { skills: allSkills, isLoading: skillsLoading } = useSkillsService();
-  const { inheritedSkillIds, isLoading: inheritedSkillsLoading } = useInheritedSkillIds(agentId);
   const { plugins: allPlugins, isLoading: pluginsLoading } = usePluginsService();
   const { tools: allTools, isLoading: toolsLoading } = useToolsService();
   const [isEditFlyoutOpen, setIsEditFlyoutOpen] = useState(false);
@@ -71,13 +69,8 @@ export const AgentOverview: React.FC = () => {
 
   const skillsCount = useMemo(
     () =>
-      getActiveSkills(
-        allSkills,
-        agent?.configuration?.skill_ids,
-        enableElasticCapabilities,
-        inheritedSkillIds
-      ).length,
-    [allSkills, agent?.configuration?.skill_ids, enableElasticCapabilities, inheritedSkillIds]
+      getActiveSkills(allSkills, agent?.configuration?.skill_ids, enableElasticCapabilities).length,
+    [allSkills, agent?.configuration?.skill_ids, enableElasticCapabilities]
   );
 
   const pluginsCount = useMemo(
@@ -146,7 +139,7 @@ export const AgentOverview: React.FC = () => {
           pluginsCount={pluginsCount}
           connectorsCount={connectorsCount}
           toolsCount={toolsCount}
-          skillsCountLoading={skillsLoading || inheritedSkillsLoading}
+          skillsCountLoading={skillsLoading}
           pluginsCountLoading={pluginsLoading}
           toolsCountLoading={toolsLoading}
           enableElasticCapabilities={enableElasticCapabilities}

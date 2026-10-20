@@ -47,7 +47,6 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { pushFlyoutPaddingStyles } from '../../../../common.styles';
 import { useAgentEdit } from '../../../hooks/agents/use_agent_edit';
-import { useInheritedSkillIds } from '../../../hooks/skills/use_inherited_skill_ids';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { searchParamNames } from '../../../search_param_names';
@@ -163,9 +162,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     onSaveError,
   });
 
-  // Empty while creating: an agent has no id, so there is nothing to resolve yet.
-  const { inheritedSkillIds } = useInheritedSkillIds(editingAgentId);
-
   const canEditAgent = isCreateMode ? manageAgents : permissions?.update_agent ?? false;
 
   const formMethods = useForm<AgentFormData>({
@@ -251,8 +247,8 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
 
   const agentSkills = watch('configuration.skill_ids') as string[] | undefined;
   const activeSkillsCount = useMemo(
-    () => getActiveSkills(skills, agentSkills, enableElasticCapabilities, inheritedSkillIds).length,
-    [skills, agentSkills, enableElasticCapabilities, inheritedSkillIds]
+    () => getActiveSkills(skills, agentSkills, enableElasticCapabilities).length,
+    [skills, agentSkills, enableElasticCapabilities]
   );
 
   const agentPlugins = watch('configuration.plugin_ids') as string[] | undefined;
@@ -324,7 +320,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
             isLoading={isLoading}
             isFormDisabled={isFormDisabled || !manageAgents}
             areElasticCapabilitiesEnabled={enableElasticCapabilities}
-            inheritedSkillIds={inheritedSkillIds}
           />
         ),
         append: (
@@ -387,7 +382,6 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
       activeToolsCount,
       agentState?.created_by,
       activeSkillsCount,
-      inheritedSkillIds,
       activePluginsCount,
       manageAgents,
       permissions?.update_access_control,

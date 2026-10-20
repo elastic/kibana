@@ -45,13 +45,6 @@ export interface ListSkillsResponse {
   results: PublicSkillSummary[];
 }
 
-/** A skill effective for an agent; `is_default` marks skills inherited from the agent's type. */
-export type AgentSkillSummary = PublicSkillSummary & { is_default: boolean };
-
-export interface ListAgentSkillsResponse {
-  results: AgentSkillSummary[];
-}
-
 export type GetSkillResponse = PublicSkillDefinition;
 
 export interface DeleteSkillResponse {

@@ -7,7 +7,6 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import type {
-  ListAgentSkillsResponse,
   ListSkillsResponse,
   GetSkillResponse,
   DeleteSkillResponse,
@@ -33,7 +32,7 @@ export class SkillsService {
   }
 
   async listByAgent({ agentId }: { agentId: string }) {
-    const { results } = await this.http.get<ListAgentSkillsResponse>(
+    const { results } = await this.http.get<ListSkillsResponse>(
       `${internalApiPath}/agents/${encodeURIComponent(agentId)}/_skills`,
       {}
     );

@@ -135,7 +135,10 @@ describe('createConfigurationResolver', () => {
       expect(baseConfiguration).toHaveBeenCalledWith(ctx);
     });
 
-    it('falls back to the chat base for an unknown type, like the merge path', async () => {
+    // The merge path deliberately substitutes the chat base so execution keeps working. Reporting
+    // that substitution as the agent's own configuration would misattribute another type's values,
+    // so `resolveBase` says "unknown" instead.
+    it('returns undefined for an unknown type instead of falling back to the chat base', async () => {
       const resolver = createConfigurationResolver({
         typeRegistry: createTypeRegistryStub([
           { id: chatAgentTypeId, baseConfiguration: chatBase },
@@ -143,7 +146,8 @@ describe('createConfigurationResolver', () => {
         logger: loggerMock.create(),
       });
 
-      expect(await resolver.resolveBase('ghost', ctx)).toEqual(chatBase);
+      expect(await resolver.resolveBase('ghost', ctx)).toBeUndefined();
+      // ...while the merge path still applies the fallback.
       expect(
         await resolver.resolveConfig({ agentType: 'ghost', configuration: { tools: [] }, ctx })
       ).toEqual(expect.objectContaining({ ai_indices: ['elastic'] }));

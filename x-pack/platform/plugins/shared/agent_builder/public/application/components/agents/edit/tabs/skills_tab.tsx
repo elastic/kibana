@@ -45,7 +45,6 @@ interface SkillsTabProps {
   isLoading: boolean;
   isFormDisabled: boolean;
   areElasticCapabilitiesEnabled: boolean;
-  inheritedSkillIds: ReadonlySet<string>;
 }
 
 export const SkillsTab: React.FC<SkillsTabProps> = ({
@@ -54,7 +53,6 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
   isLoading,
   isFormDisabled,
   areElasticCapabilitiesEnabled,
-  inheritedSkillIds,
 }) => {
   const [showActiveOnly, setShowActiveOnly] = useState(false);
   const showActiveOnlyChangeHandler = !isFormDisabled ? setShowActiveOnly : undefined;
@@ -75,7 +73,6 @@ export const SkillsTab: React.FC<SkillsTabProps> = ({
             showActiveOnly={showActiveOnly || isFormDisabled}
             onShowActiveOnlyChange={showActiveOnlyChangeHandler}
             areElasticCapabilitiesEnabled={areElasticCapabilitiesEnabled}
-            inheritedSkillIds={inheritedSkillIds}
           />
         )}
       />
@@ -92,7 +89,6 @@ interface SkillsSelectionProps {
   showActiveOnly: boolean;
   onShowActiveOnlyChange?: (showActiveOnly: boolean) => void;
   areElasticCapabilitiesEnabled: boolean;
-  inheritedSkillIds: ReadonlySet<string>;
 }
 
 const SkillsSelection: React.FC<SkillsSelectionProps> = ({
@@ -104,7 +100,6 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   showActiveOnly,
   onShowActiveOnlyChange,
   areElasticCapabilitiesEnabled,
-  inheritedSkillIds,
 }) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [pageIndex, setPageIndex] = useState(0);
@@ -112,21 +107,14 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
 
   const selectedIdSet = useMemo(() => new Set(selectedSkills ?? []), [selectedSkills]);
 
-  const isIncludedByElasticCapabilities = useCallback(
+  const isSkillAutoIncluded = useCallback(
     (skill: PublicSkillSummary) => getIsSkillAutoIncluded(skill, areElasticCapabilitiesEnabled),
     [areElasticCapabilitiesEnabled]
   );
 
-  // Inherited and auto-included skills always apply, so they cannot be toggled.
-  const isSkillLocked = useCallback(
-    (skill: PublicSkillSummary) =>
-      inheritedSkillIds.has(skill.id) || isIncludedByElasticCapabilities(skill),
-    [inheritedSkillIds, isIncludedByElasticCapabilities]
-  );
-
   const isSkillActive = useCallback(
-    (skill: PublicSkillSummary) => selectedIdSet.has(skill.id) || isSkillLocked(skill),
-    [selectedIdSet, isSkillLocked]
+    (skill: PublicSkillSummary) => selectedIdSet.has(skill.id) || isSkillAutoIncluded(skill),
+    [selectedIdSet, isSkillAutoIncluded]
   );
 
   const displaySkills = useMemo(() => {
@@ -153,7 +141,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   const handleToggleSkill = useCallback(
     (skillId: string) => {
       const skill = skills.find((s) => s.id === skillId);
-      if (skill && isSkillLocked(skill)) return;
+      if (skill && isSkillAutoIncluded(skill)) return;
       const currentIds = selectedSkills ?? [];
       if (currentIds.includes(skillId)) {
         onSkillsChange(currentIds.filter((id) => id !== skillId));
@@ -161,7 +149,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
         onSkillsChange([...currentIds, skillId]);
       }
     },
-    [selectedSkills, onSkillsChange, skills, isSkillLocked]
+    [selectedSkills, onSkillsChange, skills, isSkillAutoIncluded]
   );
 
   const handleSearchChange = useCallback((query: string) => {
@@ -187,13 +175,7 @@ const SkillsSelection: React.FC<SkillsSelectionProps> = ({
   }
 
   const columns = [
-    createCheckboxColumn(
-      isSkillActive,
-      isSkillLocked,
-      isIncludedByElasticCapabilities,
-      handleToggleSkill,
-      disabled
-    ),
+    createCheckboxColumn(isSkillActive, isSkillAutoIncluded, handleToggleSkill, disabled),
     createSkillDetailsColumn(),
     createTypeColumn(),
   ];
@@ -372,24 +354,22 @@ const SkillDetailsColumn: React.FC<{ skill: PublicSkillSummary }> = ({ skill }) 
 
 const createCheckboxColumn = (
   isSkillActive: (skill: PublicSkillSummary) => boolean,
-  isSkillLocked: (skill: PublicSkillSummary) => boolean,
-  isIncludedByElasticCapabilities: (skill: PublicSkillSummary) => boolean,
+  isSkillAutoIncluded: (skill: PublicSkillSummary) => boolean,
   onToggle: (skillId: string) => void,
   disabled: boolean
 ) => ({
   width: '40px',
   render: (skill: PublicSkillSummary) => {
-    const locked = isSkillLocked(skill);
+    const autoIncluded = isSkillAutoIncluded(skill);
     const checkbox = (
       <EuiCheckbox
         id={`skill-${skill.id}`}
         checked={isSkillActive(skill)}
         onChange={() => onToggle(skill.id)}
-        disabled={disabled || locked}
+        disabled={disabled || autoIncluded}
       />
     );
-    // Inherited skills are locked too, but the tooltip only explains Elastic Capabilities.
-    return isIncludedByElasticCapabilities(skill) ? (
+    return autoIncluded ? (
       <EuiToolTip content={labels.agentSkills.elasticCapabilitiesManagedTooltip}>
         {checkbox}
       </EuiToolTip>

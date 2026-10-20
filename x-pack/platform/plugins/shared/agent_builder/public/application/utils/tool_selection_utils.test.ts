@@ -162,18 +162,6 @@ describe('tool_selection_utils', () => {
       expect(result).toEqual([]);
     });
 
-    it('should include inherited skills even when nothing is selected and capabilities are disabled', () => {
-      const result = getActiveSkills(mockSkills, [], false, new Set(['skill4']));
-
-      expect(result.map((s) => s.id)).toEqual(['skill4']);
-    });
-
-    it('should skip inherited ids that are not in the skill list', () => {
-      const result = getActiveSkills(mockSkills, ['skill2'], false, new Set(['unavailable']));
-
-      expect(result.map((s) => s.id)).toEqual(['skill2']);
-    });
-
     it('should return only built-in skills when explicit ids is undefined and capabilities are enabled', () => {
       const result = getActiveSkills(mockSkills, undefined, true);
 
