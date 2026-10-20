@@ -194,9 +194,18 @@ export const FieldTableCell = memo(({ rowIndex, colIndex, columnId }: FieldTable
   const expandLabel = i18n.translate('unifiedDocViewer.fieldsTable.expandCellLabel', {
     defaultMessage: 'Expand cell',
   });
+  const closePopoverLabel = i18n.translate('unifiedDocViewer.fieldsTable.closePopover', {
+    defaultMessage: 'Close popover',
+  });
 
   const onExpandClick = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => openExpansion(event.currentTarget),
+    [openExpansion]
+  );
+
+  // Direct click on the collapsed bubble trigger expands the cell (hover still reveals quick actions).
+  const onActionsTriggerActivate = useCallback(
+    (anchor: HTMLElement) => openExpansion(anchor),
     [openExpansion]
   );
 
@@ -246,7 +255,12 @@ export const FieldTableCell = memo(({ rowIndex, colIndex, columnId }: FieldTable
     <>
       <TableCell {...cellContentProps} isDetails={false} />
       {(isActive || isExpanded) && (
-        <CellActionsBubble anchorCellRef={anchorRef} actions={actions} stayVisible={isExpanded} />
+        <CellActionsBubble
+          anchorCellRef={anchorRef}
+          actions={actions}
+          stayVisible={isExpanded}
+          onTriggerActivate={onActionsTriggerActivate}
+        />
       )}
       {anchorRect && (
         <EuiPortal>
@@ -264,9 +278,27 @@ export const FieldTableCell = memo(({ rowIndex, colIndex, columnId }: FieldTable
             panelProps={{ 'data-test-subj': 'euiDataGridExpansionPopover' }}
             button={<span aria-hidden="true" />}
           >
-            <EuiText size="s" css={popoverContentStyles}>
-              <TableCell {...cellContentProps} isDetails />
-            </EuiText>
+            <EuiFlexGroup gutterSize="none" responsive={false} alignItems="flexStart">
+              <EuiFlexItem>
+                <EuiText size="s" css={popoverContentStyles}>
+                  <TableCell {...cellContentProps} isDetails />
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={closePopoverLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    aria-label={closePopoverLabel}
+                    // Same test subj as the Discover grid cell popover close control.
+                    data-test-subj="docTableClosePopover"
+                    iconType="cross"
+                    iconSize="s"
+                    size="xs"
+                    color="text"
+                    onClick={closeExpansion}
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+            </EuiFlexGroup>
             {cellActions.length > 0 && (
               <EuiPopoverFooter>
                 <EuiFlexGroup gutterSize="s" responsive={false} wrap>
@@ -326,7 +358,7 @@ export const GridCell = memo(({ cell, styles, isTabStop }: GridCellProps) => {
       setIsActive(false);
     }
   }, []);
-  // Like EuiDataGrid, Enter or F2 on the focused cell opens its popover.
+  // Like EuiDataGrid, Enter or F2 on the focused cell opens its popover under the expand icon.
   const onKeyDown = useCallback(
     (event: KeyboardEvent<HTMLDivElement>) => {
       if (
@@ -334,7 +366,13 @@ export const GridCell = memo(({ cell, styles, isTabStop }: GridCellProps) => {
         (event.key === keys.ENTER || event.key === keys.F2)
       ) {
         event.preventDefault();
-        openExpansion(event.currentTarget);
+        const cell = event.currentTarget;
+        // Prefer the expand icon when the actions toolbar is open; otherwise the collapsed
+        // trigger sits in the same corner and is the correct popover anchor.
+        const expandAnchor =
+          cell.querySelector<HTMLElement>('[data-test-subj="euiDataGridCellExpandButton"]') ??
+          cell.querySelector<HTMLElement>('[data-test-subj="tanStackCellActionsButton"]');
+        openExpansion(expandAnchor ?? cell);
       }
     },
     [openExpansion]

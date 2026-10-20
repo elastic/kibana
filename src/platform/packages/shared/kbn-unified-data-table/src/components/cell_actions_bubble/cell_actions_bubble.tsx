@@ -47,6 +47,11 @@ export interface CellActionsBubbleProps {
   stayVisible?: boolean;
   triggerTestSubj?: string;
   toolbarAriaLabel?: string;
+  /**
+   * When set, activating the collapsed trigger (click / Enter / Space) calls this instead of
+   * toggling the actions toolbar. Hover still expands the toolbar so quick actions stay reachable.
+   */
+  onTriggerActivate?: (anchor: HTMLElement) => void;
 }
 
 export const CellActionsBubble = React.memo(
@@ -56,6 +61,7 @@ export const CellActionsBubble = React.memo(
     stayVisible = false,
     triggerTestSubj = 'tanStackCellActionsButton',
     toolbarAriaLabel,
+    onTriggerActivate,
   }: CellActionsBubbleProps) => {
     const { euiTheme } = useEuiTheme();
     const styles = useMemoCss(cellActionsBubbleStyles);
@@ -255,13 +261,18 @@ export const CellActionsBubble = React.memo(
     const handleTriggerClick = useCallback(
       (event: React.MouseEvent) => {
         event.stopPropagation();
+        clearOpenTimer();
+        if (onTriggerActivate && triggerRef.current) {
+          onTriggerActivate(triggerRef.current);
+          return;
+        }
         if (isOpen) {
           closeBubble(true);
         } else {
           openBubble();
         }
       },
-      [closeBubble, isOpen, openBubble]
+      [clearOpenTimer, closeBubble, isOpen, onTriggerActivate, openBubble]
     );
 
     const handleTriggerKeyDown = useCallback(
@@ -269,6 +280,11 @@ export const CellActionsBubble = React.memo(
         event.stopPropagation();
         if (event.key === keys.ENTER || event.key === keys.SPACE) {
           event.preventDefault();
+          clearOpenTimer();
+          if (onTriggerActivate && triggerRef.current) {
+            onTriggerActivate(triggerRef.current);
+            return;
+          }
           if (isOpen) {
             closeBubble(true);
           } else {
@@ -276,7 +292,7 @@ export const CellActionsBubble = React.memo(
           }
         }
       },
-      [closeBubble, isOpen, openBubble]
+      [clearOpenTimer, closeBubble, isOpen, onTriggerActivate, openBubble]
     );
 
     const handleToolbarKeyDown = useCallback(

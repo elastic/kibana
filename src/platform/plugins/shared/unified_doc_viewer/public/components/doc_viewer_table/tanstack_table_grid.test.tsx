@@ -49,8 +49,11 @@ const buildFieldRow = (name: string, value: string, isPinned = false) =>
 
 const mockRows: FieldRow[] = [buildFieldRow('fieldA', 'valueA'), buildFieldRow('fieldB', 'valueB')];
 
+/** Hover the collapsed trigger so the toolbar expands (click expands the cell popover instead). */
 const openCellActionsBubble = async (gridCell: HTMLElement) => {
-  await userEvent.click(await within(gridCell).findByTestId('tanStackCellActionsButton'));
+  await userEvent.hover(await within(gridCell).findByTestId('tanStackCellActionsButton'));
+  // The open toolbar may portal into a fixed layer when the cell is too narrow.
+  await screen.findByTestId('euiDataGridCellExpandButton');
 };
 
 describe('TanStackTableGrid', () => {
@@ -173,6 +176,19 @@ describe('TanStackTableGrid', () => {
     expect(within(popover).getByText('valueA')).toBeInTheDocument();
     expect(within(popover).getByTestId('copyValueButton-fieldA')).toBeInTheDocument();
     expect(within(popover).getByText('Unindexed fields cannot be searched')).toBeInTheDocument();
+
+    await userEvent.click(within(popover).getByTestId('docTableClosePopover'));
+    expect(screen.queryByTestId('euiDataGridExpansionPopover')).not.toBeInTheDocument();
+  });
+
+  it('expands the cell when the collapsed actions trigger is clicked', async () => {
+    render(<TanStackTableGrid {...defaultProps} rows={[mockRows[0]]} />);
+    const valueCell = screen.getByText('valueA').closest<HTMLElement>('[role="gridcell"]')!;
+    await userEvent.hover(valueCell);
+    await userEvent.click(await within(valueCell).findByTestId('tanStackCellActionsButton'));
+
+    const popover = await screen.findByTestId('euiDataGridExpansionPopover');
+    expect(within(popover).getByText('valueA')).toBeInTheDocument();
   });
 
   describe('keyboard accessibility', () => {
@@ -210,13 +226,16 @@ describe('TanStackTableGrid', () => {
 
     it('opens the cell popover with Enter as a focus-trapped dialog', async () => {
       render(<TanStackTableGrid {...defaultProps} />);
-      getCell('valueA').focus();
+      const valueCell = getCell('valueA');
+      valueCell.focus();
       await userEvent.keyboard('{Enter}');
 
       const popover = await screen.findByTestId('euiDataGridExpansionPopover');
       expect(within(popover).getByText('valueA')).toBeInTheDocument();
       // jsdom does not move focus into the focus trap, so assert that the popover owns focus.
       expect(popover).toHaveAttribute('aria-modal', 'true');
+      // Anchored to the cell actions trigger (expand icon corner), not the full cell.
+      expect(within(valueCell).getByTestId('tanStackCellActionsButton')).toBeInTheDocument();
     });
   });
 
