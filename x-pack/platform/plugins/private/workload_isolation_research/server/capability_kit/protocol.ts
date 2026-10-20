@@ -151,6 +151,8 @@ export type Packet =
     }
   | { readonly version: 1; readonly kind: 'abort_ack'; readonly runId: string }
   | { readonly version: 1; readonly kind: 'heartbeat' }
+  /** 0.1.12: task module loaded, user code starting (stall watchdog arms here, not at dispatch). */
+  | { readonly version: 1; readonly kind: 'started'; readonly runId: string }
   | {
       readonly version: 1;
       readonly kind: 'callback';

@@ -1,4 +1,4 @@
-# Track 7 capability kit — 0.1.11 pre-release research slice
+# Track 7 capability kit — 0.1.12 pre-release research slice
 
 PRIVATE research code; no public Core API, plugin lifecycle hook, or automatic enablement.
 Base harness fd3138c. Only main owns TM claims/leases/results.
@@ -80,6 +80,14 @@ and must be labelled that way.
   This detects a blocked isolate event loop. It does NOT detect application no-progress
   (for example an awaited remote hang); keep using deadlines and app heartbeats for that.
   `'stall'` only appears when the caller opted in.
+  0.1.12 fixes two false positives found in 0.1.9:
+  (a) The watchdog now arms when the worker reports the task module LOADED (`started`
+  packet). Synchronous cold module loading (hundreds of ms under dev SWC) used to be
+  killed as a stall when stallMs was small. Bootstrap and loading stay under the deadline.
+  (b) If MAIN itself was blocked (the check ran late by more than stallMs/2), the window is
+  re-baselined. Queued worker heartbeats can't have been received yet, so the silence
+  proves nothing about the worker.
+  Use stallMs well above your largest legitimate synchronous slice.
 - **Abort reason.** If the host `signal` aborts with a codec-safe reason (for example
   `controller.abort({ source: 'api', actor })` or an Error), the worker
   `context.signal.reason` is the decoded original value. The default AbortError, or a

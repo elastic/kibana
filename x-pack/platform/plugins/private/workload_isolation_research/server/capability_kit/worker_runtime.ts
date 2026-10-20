@@ -242,6 +242,9 @@ const startRuntime = (): void => {
           }),
       };
       const task = (await load(packet.moduleId)) as TaskEntry;
+      // Synchronous cold module loading is not a stall; the watchdog arms once code starts.
+      if (packet.heartbeatMs !== undefined)
+        send({ version: 1, kind: 'started', runId: bundle.runId });
       value = await task(decode(packet.input), context);
       if (run.pending.size) throw new Error('Task returned with outstanding capability calls');
     } catch (error) {

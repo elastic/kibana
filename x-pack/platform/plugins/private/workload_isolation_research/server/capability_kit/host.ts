@@ -64,7 +64,8 @@ interface Execution {
   >;
   timer?: NodeJS.Timeout;
   stallTimer?: NodeJS.Timeout;
-  dispatchedAt?: number;
+  /** Set when the worker reports the task module loaded; undefined = watchdog not armed yet. */
+  startedAt?: number;
   readonly chains: Map<string, Promise<void>>;
   /** Main-side per-run signal handed to bindings so in-flight main work can stop too. */
   readonly hostAbort: AbortController;
@@ -404,6 +405,10 @@ export class ExecutionHost {
       );
       return;
     }
+    if (packet.kind === 'started') {
+      execution.startedAt = Date.now();
+      return;
+    }
     if (packet.kind === 'abort_ack') {
       if (execution.termination) execution.termination.acknowledged = true;
       this.record(
@@ -565,11 +570,20 @@ export class ExecutionHost {
   }
 
   private watchStall(execution: Execution, slot: Slot, stallMs: number): void {
-    execution.dispatchedAt = Date.now();
     const check = Math.max(25, Math.min(1000, Math.floor(stallMs / 4)));
+    let lastCheck = Date.now();
     execution.stallTimer = setInterval(() => {
-      if (execution.done || execution.termination) return;
-      const since = Date.now() - Math.max(slot.lastBeat, execution.dispatchedAt ?? 0);
+      if (execution.done || execution.termination || execution.startedAt === undefined) return;
+      const now = Date.now();
+      const late = now - lastCheck > check + stallMs / 2;
+      lastCheck = now;
+      // A late check means MAIN was blocked: queued worker heartbeats are not yet delivered, so
+      // silence proves nothing about the isolate. Re-baseline instead of blaming the worker.
+      if (late) {
+        execution.startedAt = now;
+        return;
+      }
+      const since = now - Math.max(slot.lastBeat, execution.startedAt);
       if (slot.ready && since > stallMs) void this.terminate(execution, 'stall');
     }, check);
   }

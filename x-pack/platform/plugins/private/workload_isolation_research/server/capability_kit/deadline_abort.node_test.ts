@@ -379,3 +379,30 @@ for (const transport of ['thread', 'process'] as const) {
     }
   );
 }
+
+test(
+  'stall watchdog does not blame a healthy worker for a MAIN-thread block',
+  { timeout: 30000 },
+  async () => {
+    const host = new ExecutionHost(registry(), { transport: 'thread', abortGraceMs: 100 });
+    try {
+      const pending = host.run({
+        ...base,
+        moduleId: 'delayed',
+        input: { ms: 2500 },
+        deadlineMs: YEAR_MS,
+        stallMs: 300,
+      });
+      await new Promise((resolve) => setTimeout(resolve, 700));
+      // Main is blocked for 1s: worker heartbeats queue up but cannot be received yet.
+      const end = performance.now() + 1000;
+      while (performance.now() < end) {
+        // Synchronous main-thread block.
+      }
+      const settled = await pending;
+      assert.deepEqual(settled.status === 'success' ? 'success' : settled, 'success');
+    } finally {
+      await host.stop();
+    }
+  }
+);
