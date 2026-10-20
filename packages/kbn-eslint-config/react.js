@@ -41,9 +41,6 @@ module.exports = {
   },
 
   rules: {
-    // Mark JSX identifiers as used for @kbn/imports/no_unused_imports, which runs in ESLint.
-    'react/jsx-uses-react': 'error',
-    'react/jsx-uses-vars': 'error',
     'react/jsx-no-duplicate-props': ['error', { ignoreCase: true }],
     'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
     'react-hooks/exhaustive-deps': 'error', // Checks effect dependencies
