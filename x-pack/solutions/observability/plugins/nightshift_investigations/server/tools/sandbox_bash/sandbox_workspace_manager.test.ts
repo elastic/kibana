@@ -390,6 +390,39 @@ describe('createSandboxWorkspaceManager', () => {
       );
     });
 
+    it('omits connector readable indices from the secrets fallback when the connector is denied', async () => {
+      const session = createSessionMock(false);
+      const configuredManager = createSandboxWorkspaceManager({
+        getDeps: () => ({
+          actions,
+          sandboxSecretsClient: {
+            listKeysForSandbox: jest
+              .fn()
+              .mockResolvedValue(['ELASTICSEARCH_ENDPOINT', 'ELASTICSEARCH_API_KEY']),
+          },
+        }),
+        telemetryConnectorId: 'elasticsearch-telemetry',
+        telemetryReadableIndices: 'Read remote-a:logs-service-*',
+        logger,
+      });
+
+      await configuredManager.ensureWorkspaceReady({
+        session,
+        callContext: createCallContext(['other']),
+      });
+
+      expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          credentials: {
+            kind: 'secrets',
+            urlKey: 'ELASTICSEARCH_ENDPOINT',
+            apiKeyKey: 'ELASTICSEARCH_API_KEY',
+          },
+          readableIndices: undefined,
+        })
+      );
+    });
+
     it('does not write elastic manifest when telemetryConnectorId is not set', async () => {
       const session = createSessionMock(true);
       await manager.ensureWorkspaceReady({
