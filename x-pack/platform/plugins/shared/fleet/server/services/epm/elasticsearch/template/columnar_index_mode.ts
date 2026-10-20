@@ -18,27 +18,6 @@ import type { Installation, RegistryDataStream } from '../../../../types';
 type ColumnarPackage = ColumnarPackageInfo & { data_streams?: RegistryDataStream[] };
 
 /**
- * Removes `doc_values: false` and `store: true` from a data stream's mappings: static fields,
- * multi-fields and dynamic templates. Elasticsearch rejects both in the columnar index modes,
- * which rebuild `_source` from doc values, and many packages get them from ECS
- * (`event.original`).
- */
-export function stripColumnarIncompatibleMappings<T>(mappings: T): T {
-  if (Array.isArray(mappings)) {
-    return mappings.map(stripColumnarIncompatibleMappings) as T;
-  }
-  if (!mappings || typeof mappings !== 'object') {
-    return mappings;
-  }
-  return Object.fromEntries(
-    Object.entries(mappings)
-      .filter(([key, value]) => !(key === 'doc_values' && value === false))
-      .filter(([key, value]) => !(key === 'store' && value === true))
-      .map(([key, value]) => [key, stripColumnarIncompatibleMappings(value)])
-  ) as T;
-}
-
-/**
  * The index mode of each logs data stream of a package, keyed by its index template name:
  * `logsdb_columnar` when the installation is on it and the data stream is ready for it.
  *
