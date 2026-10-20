@@ -275,6 +275,14 @@ describe('DiscoverMainRoute', () => {
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
   });
 
+  test('renders the main app when hasESData=false & hasDataView=true', async () => {
+    setupComponent({ hasESData: false, hasDataView: true });
+
+    await waitForLoad();
+
+    expect(screen.getByTestId('discover-main-app')).toBeVisible();
+  });
+
   test('renders no data page when hasESData=false & hasDataView=false', async () => {
     setupComponent({ hasESData: false, hasDataView: false });
 
