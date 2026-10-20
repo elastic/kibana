@@ -8,21 +8,18 @@
  */
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getIndexPatternFromESQLQuery, hasTransformationalCommand } from '@kbn/esql-utils';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { SOURCE_COLUMN } from '@kbn/unified-data-table';
 import { isEqual } from 'lodash';
 import type { DataSourceService, EsqlSource } from '@kbn/data-source';
 import { unregisterFromDataViewsCache } from '@kbn/data-source';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataDocumentsMsg, SavedSearchData } from '../discover_data_state_container';
 import { FetchStatus } from '../../../types';
 import type { InternalStateStore, TabActionInjector, TabState } from '../redux';
 import { internalStateActions } from '../redux';
 import { getValidViewMode } from '../../utils/get_valid_view_mode';
+import { getEsqlDefaultColumns } from '../../../../utils/get_esql_default_columns';
 import { shouldResetProfileAppStateDefaultField } from './profile_app_state_defaults';
-
-const ESQL_MAX_NUM_OF_COLUMNS = 50;
-const ESQL_TABLE_VIEW_COLUMN_THRESHOLD = 5;
 
 /*
  * Takes care of ES|QL state transformations when a new result is returned.
@@ -38,14 +35,12 @@ export const buildEsqlFetchSubscribe = ({
   getCurrentTab,
   injectCurrentTab,
   dataSourceService,
-  dataViews,
 }: {
   internalState: InternalStateStore;
   dataSubjects: SavedSearchData;
   getCurrentTab: () => TabState;
   injectCurrentTab: TabActionInjector;
   dataSourceService: DataSourceService;
-  dataViews: DataViewsPublicPluginStart;
 }) => {
   // EsqlSource from the last completed fetch. Undefined = no successful fetch yet (initial fetch).
   // Carries .query and .getColumns() so we no longer need to track those separately.
@@ -61,7 +56,7 @@ export const buildEsqlFetchSubscribe = ({
 
     if (registeredEsqlSourceId) {
       dataSourceService.unregisterEsqlSource(registeredEsqlSourceId);
-      unregisterFromDataViewsCache(dataViews, registeredEsqlSourceId);
+      unregisterFromDataViewsCache(registeredEsqlSourceId);
       registeredEsqlSourceId = undefined;
     }
 
@@ -121,13 +116,10 @@ export const buildEsqlFetchSubscribe = ({
 
     const esqlSource = next.dataSource;
     const allColumns = esqlSource.getColumns().map((c) => c.name);
-
-    const nextDefaultColumns =
-      hasTransformationalCommand(nextQuery.esql) ||
-      allColumns.length <= ESQL_TABLE_VIEW_COLUMN_THRESHOLD
-        ? allColumns.slice(0, ESQL_MAX_NUM_OF_COLUMNS)
-        : [];
-
+    const nextDefaultColumns = getEsqlDefaultColumns({
+      esql: nextQuery.esql,
+      responseColumns: allColumns,
+    });
     const isInitialFetch = prevEsqlSource === undefined;
 
     if (isInitialFetch) {

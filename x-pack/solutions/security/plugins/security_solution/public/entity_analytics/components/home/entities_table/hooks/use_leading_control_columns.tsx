@@ -61,7 +61,10 @@ const InvestigateInTimelineRowControl = ({
       return;
     }
 
-    const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(entityType, record.raw);
+    const kqlFilter = euidApi?.euid.kql.getEuidFilterBasedOnDocument(
+      euidApi.getBuiltInEntityDefinition(entityType),
+      record.raw
+    );
     if (kqlFilter) {
       investigateInTimeline({ query: { query: kqlFilter, language: 'kuery' } });
       return;

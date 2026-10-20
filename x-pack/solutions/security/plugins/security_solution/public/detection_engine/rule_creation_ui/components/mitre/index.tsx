@@ -31,6 +31,10 @@ import { MitreAttackTechniqueFields } from './technique_fields';
 import { createUnsupportedMitreOption } from './unsupported_mitre_option';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useMitreConfiguration } from '../../../../common/hooks/mitre/use_mitre_configuration';
+import { MITRE_ATTACK_FRAMEWORK } from '../../../../../common/detection_engine/mitre/iterate_mitre_threat_entities';
+
+const isAttackRow = (threat: Threat): boolean =>
+  !threat.framework || threat.framework === MITRE_ATTACK_FRAMEWORK;
 
 const MitreAttackContainer = styled.div`
   margin-top: 16px;
@@ -69,10 +73,20 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
     if (!isEmpty(values[values.length - 1])) {
       field.setValue([
         ...values,
-        { tactic: { id: 'none', name: 'none', reference: 'none' }, technique: [] },
+        {
+          framework: MITRE_ATTACK_FRAMEWORK,
+          tactic: { id: 'none', name: 'none', reference: 'none' },
+          technique: [],
+        },
       ]);
     } else {
-      field.setValue([{ tactic: { id: 'none', name: 'none', reference: 'none' }, technique: [] }]);
+      field.setValue([
+        {
+          framework: MITRE_ATTACK_FRAMEWORK,
+          tactic: { id: 'none', name: 'none', reference: 'none' },
+          technique: [],
+        },
+      ]);
     }
   }, [field]);
 
@@ -86,6 +100,8 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
       };
       values.splice(index, 1, {
         ...values[index],
+        // The options are the Enterprise dataset, so the row's framework must follow the selection.
+        framework: MITRE_ATTACK_FRAMEWORK,
         tactic: { id, reference, name },
         technique: [],
       });
@@ -258,7 +274,10 @@ export const AddMitreAttackThreat = memo(({ field, idAria, isDisabled }: AddItem
             <MitreAttackTechniqueFields
               field={field}
               threatIndex={index}
-              isDisabled={isDisabled || threat.tactic.name === 'none'}
+              // The picker edits against the Enterprise dataset, so technique fields are read-only on
+              // rows from other frameworks until the framework-aware picker lands. Users can replace
+              // the tactic (converting the row to ATT&CK) or delete the row.
+              isDisabled={isDisabled || threat.tactic.name === 'none' || !isAttackRow(threat)}
               idAria={idAria}
               onFieldChange={onFieldChange}
               tactics={tactics}

@@ -127,8 +127,10 @@ export interface AlertingV2FeatureDefinition {
   readonly name: string;
   readonly managementApp: string;
   /**
-   * Extra management apps granted by this feature. Used when a feature owns
-   * more than one Stack Management page (e.g. Rules also owns Rule library).
+   * Extra Stack Management apps this feature owns. Granted only by the `all`
+   * privilege (e.g. Rules also owns the write-only Rule library page).
+   * Still listed on the feature `management` block so Core does not treat
+   * them as unowned/public.
    */
   readonly additionalManagementApps?: readonly string[];
   readonly privileges: {

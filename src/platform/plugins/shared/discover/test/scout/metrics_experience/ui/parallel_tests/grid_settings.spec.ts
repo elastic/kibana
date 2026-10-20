@@ -334,5 +334,29 @@ spaceTest.describe(
         );
       }
     );
+
+    spaceTest(
+      'leaves no gap after closing the insights flyout opened from the inspector',
+      async ({ page, pageObjects }) => {
+        const { metricsExperience, inspector } = pageObjects;
+        const { flyout } = metricsExperience;
+
+        await page.setViewportSize(testData.PUSH_FLYOUT_VIEWPORT);
+
+        await metricsExperience.openInspectorFlyout(0);
+        await inspector.panel.waitFor({ state: 'visible' });
+
+        await metricsExperience.openInsightsFlyout(0);
+        await expect(inspector.panel).toBeHidden();
+        await expect(flyout.container).toBeVisible();
+
+        await flyout.closeButton.click();
+        await expect(flyout.container).toBeHidden();
+        await expect(metricsExperience.appScrollContainer).toHaveCSS(
+          'padding-inline-end',
+          NO_PUSH_OFFSET
+        );
+      }
+    );
   }
 );

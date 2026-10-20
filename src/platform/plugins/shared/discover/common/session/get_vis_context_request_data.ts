@@ -7,10 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  AS_CODE_DATA_VIEW_SPEC_TYPE,
-  AS_CODE_ESQL_DATA_SOURCE_TYPE,
-} from '@kbn/as-code-data-views-schema';
+import { AS_CODE_DATA_VIEW_SPEC_TYPE } from '@kbn/as-code-data-views-schema';
 import { ESQL_TYPE } from '@kbn/data-view-utils';
 import { get, isUndefined, omitBy } from 'lodash';
 import type { DiscoverSessionApiTab } from '@kbn/as-code-discover-schema';
@@ -43,8 +40,7 @@ export const getVisContextRequestData = (
 
   const timeField =
     dataSource.type === AS_CODE_DATA_VIEW_SPEC_TYPE ? dataSource.time_field : undefined;
-  const timeInterval =
-    dataSource.type === AS_CODE_ESQL_DATA_SOURCE_TYPE ? undefined : tab.chart_interval;
+  const timeInterval = 'chart_interval' in tab ? tab.chart_interval : undefined;
 
   return omitBy({ dataViewId, timeField, timeInterval, breakdownField }, isUndefined);
 };

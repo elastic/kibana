@@ -13,12 +13,12 @@ import type { ConnectorTypeInfo, WorkflowYaml } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import type { LineParseResult } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
+import type { EsqlStepRegion } from '../../../../../../common/lib/esql_validation/extract_esql_region';
 import type { WorkflowsResponse } from '../../../../../entities/workflows/model/types';
 import type {
   StepInfo,
   StepPropInfo,
 } from '../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
-import type { EsqlStepRegion } from '../../esql_validation/extract_esql_region';
 
 export interface AutocompleteContext {
   // what triggered the completion

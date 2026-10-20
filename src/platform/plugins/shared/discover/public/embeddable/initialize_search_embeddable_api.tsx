@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
@@ -26,7 +26,6 @@ import type { DiscoverGridSettings, SavedSearch } from '@kbn/saved-search-plugin
 import type { SortOrder, VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type {
   DataGridDensity,
-  DataTableColumnsMeta,
   JsonModeSettings,
   DocumentsDisplayMode,
 } from '@kbn/unified-data-table';
@@ -57,10 +56,15 @@ const initializeSearchSource = async (
 ) => {
   let searchSource: ISearchSource;
   let parentSearchSource: ISearchSource;
+  // The ES|QL data view is resolved from the query below; hydrating the saved one would only
+  // cost a field caps request and cache a DataView under the id the ES|QL shim uses.
+  const searchSourceFields = isOfAggregateQueryType(serializedSearchSource?.query)
+    ? omit(serializedSearchSource, 'index')
+    : serializedSearchSource;
 
   try {
     [searchSource, parentSearchSource] = await Promise.all([
-      discoverServices.data.search.searchSource.create(serializedSearchSource),
+      discoverServices.data.search.searchSource.create(searchSourceFields),
       discoverServices.data.search.searchSource.create(),
     ]);
   } catch (error) {
@@ -91,7 +95,7 @@ const initializeSearchSource = async (
 
   if (previousSourceId) {
     discoverServices.dataSourceService.unregisterEsqlSource(previousSourceId);
-    unregisterFromDataViewsCache(discoverServices.dataViews, previousSourceId);
+    unregisterFromDataViewsCache(previousSourceId);
   }
 
   return { searchSource, dataView, esqlSource: undefined };
@@ -196,7 +200,7 @@ export const initializeSearchEmbeddableApi = async ({
 
   /** This is the state that has to be fetched */
   const rows$ = new BehaviorSubject<DataTableRecord[]>([]);
-  const columnsMeta$ = new BehaviorSubject<DataTableColumnsMeta | undefined>(undefined);
+  const resultDataSource$ = new BehaviorSubject<EsqlSource | undefined>(undefined);
   const totalHitCount$ = new BehaviorSubject<number | undefined>(undefined);
   const inspectorAdapters$ = new BehaviorSubject<Adapters>({});
 
@@ -206,7 +210,7 @@ export const initializeSearchEmbeddableApi = async ({
    */
   const stateManager: SearchEmbeddableStateManager = {
     columns: columns$,
-    columnsMeta: columnsMeta$,
+    resultDataSource: resultDataSource$,
     grid: grid$,
     headerRowHeight: headerRowHeight$,
     rows: rows$,
@@ -259,6 +263,7 @@ export const initializeSearchEmbeddableApi = async ({
     // Trigger dataLoading$ and clear rows$ to show the initial loading state
     dataLoading$.next(true);
     rows$.next([]);
+    resultDataSource$.next(undefined);
 
     const previousSourceId = esqlSource$.getValue()?.id;
     const {
@@ -339,7 +344,7 @@ export const initializeSearchEmbeddableApi = async ({
       const sourceId = esqlSource$.getValue()?.id;
       if (sourceId) {
         discoverServices.dataSourceService.unregisterEsqlSource(sourceId);
-        unregisterFromDataViewsCache(discoverServices.dataViews, sourceId);
+        unregisterFromDataViewsCache(sourceId);
       }
     },
     esqlSource$,

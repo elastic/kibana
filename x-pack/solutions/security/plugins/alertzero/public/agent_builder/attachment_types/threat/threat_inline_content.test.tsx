@@ -147,7 +147,7 @@ describe('ThreatAttachmentInlineContent', () => {
         geography: { regions: ['us-east-1'] },
         evidence: {
           alert_hits_total: 5,
-          last_hunt_status: 'completed',
+          last_hunt_status: 'hit',
           corroborated_rank_score: 0.71,
         },
       }),
@@ -173,7 +173,7 @@ describe('ThreatAttachmentInlineContent', () => {
     // Evidence stats and MITRE technique link.
     expect(screen.getByText('5')).toBeInTheDocument();
     expect(screen.getByText('Alert hits')).toBeInTheDocument();
-    expect(screen.getByText('completed')).toBeInTheDocument();
+    expect(screen.getByText('Environment hits found')).toBeInTheDocument();
     expect(screen.getByText('Last hunt status')).toBeInTheDocument();
     expect(screen.getByText('0.71')).toBeInTheDocument();
     expect(screen.getByText('Corroborated rank')).toBeInTheDocument();
@@ -571,7 +571,7 @@ describe('ThreatAttachmentInlineContent', () => {
         source: { name: 'Source' },
         evidence: {
           alert_hits_total: 5,
-          last_hunt_status: 'completed',
+          last_hunt_status: 'hit',
           corroborated_rank_score: 0.71,
         },
       }),
@@ -586,6 +586,34 @@ describe('ThreatAttachmentInlineContent', () => {
 
     expect(screen.getByText('Alert hits')).toBeInTheDocument();
     expect(screen.queryByText(/alert_hits_total=/)).not.toBeInTheDocument();
+  });
+
+  // The hunt's evidence step writes the collapsed values, so those are what this has to
+  // label; keying the map on the raw Tier 1 statuses left every real value unlabelled.
+  it.each([
+    ['hit', 'Environment hits found'],
+    ['clean', 'No environment hits'],
+    ['incomplete', 'Not fully searched'],
+  ])('labels the %s hunt status the evidence step writes', async (status, expectedLabel) => {
+    const http = {
+      fetch: jest.fn().mockResolvedValue({
+        reportId: 'r-hunt-status',
+        content: { title: 'Hunt Status Title' },
+        severity: { level: 'high' },
+        rank_score: 33,
+        source: { name: 'Source' },
+        evidence: { last_hunt_status: status },
+      }),
+    } as unknown as HttpStart;
+    const attachment = buildAttachment({ report_id: 'r-hunt-status' });
+
+    render(<ThreatAttachmentInlineContent {...renderProps(attachment, http)} />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Last hunt status')).toBeInTheDocument();
+    });
+    expect(screen.getByText(expectedLabel)).toBeInTheDocument();
+    expect(screen.queryByText(status)).not.toBeInTheDocument();
   });
 
   it('shows a relative "Last hunted" stat when lastHuntedAt is present', async () => {

@@ -43,6 +43,7 @@ function createStartMock() {
 }
 
 export const securityMock = {
+  createUiApiWithComponents: getUiApiMock.createWithComponents,
   createSetup: createSetupMock,
   createStart: createStartMock,
   createMockAuthenticatedUser: securityServiceMock.createMockAuthenticatedUser,
