@@ -111,6 +111,18 @@ export class KnowledgeIndicatorClient {
     return this.reader.countKnowledgeIndicators(type);
   }
 
+  countFeatures(sourceIds: string[]): Promise<number> {
+    return this.reader.countFeatures(sourceIds);
+  }
+
+  countUnbackedQueries(sourceIds: string[]): Promise<number> {
+    return this.reader.countUnbackedQueries(sourceIds);
+  }
+
+  countRuleBackedQueries(sourceIds: string[]): Promise<number> {
+    return this.reader.countRuleBackedQueries(sourceIds);
+  }
+
   keepAlivePersistentIndicators(
     sourceId: string,
     options: { lastRefreshedBefore: string }
