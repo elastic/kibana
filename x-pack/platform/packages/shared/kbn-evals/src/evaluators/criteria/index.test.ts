@@ -93,10 +93,11 @@ describe('createCriteriaEvaluator', () => {
     const result = await runEvaluation();
 
     expect(result.score).toBeCloseTo(2 / 5, 5);
+    expect(result.label).toBeNull();
     expect((result.metadata as Record<string, unknown>).not_applicable).toBe(1);
   });
 
-  it('returns a null score when every criterion is N/A', async () => {
+  it('returns a null score and unavailable label when every criterion is N/A', async () => {
     mockScoreWith([
       { id: 'pass-me', result: 'N/A' },
       { id: 'fail-me', result: 'N/A' },
@@ -106,6 +107,7 @@ describe('createCriteriaEvaluator', () => {
     const result = await runEvaluation();
 
     expect(result.score).toBeNull();
+    expect(result.label).toBe('unavailable');
     expect(result.metadata).toMatchObject({
       successful: 0,
       failed: 0,

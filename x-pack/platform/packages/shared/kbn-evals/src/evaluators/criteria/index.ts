@@ -140,7 +140,7 @@ export function createCriteriaEvaluator({
             return `"${criterion.id}": ${evaluation.reason ?? 'No explanation given'}`;
           })
           .join('\n'),
-        label: null,
+        label: applicable.length === 0 ? 'unavailable' : null,
         metadata: {
           successful: sumBy(successful, ({ criterion }) => criterion.score),
           failed: sumBy(failed, ({ criterion }) => criterion.score),
