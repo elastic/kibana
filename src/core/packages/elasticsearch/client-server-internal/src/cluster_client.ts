@@ -44,6 +44,11 @@ import {
 } from './retry_unauthorized';
 import { createTransport, type OnRequestHandler } from './create_transport';
 import type { AgentFactoryProvider } from './agent_manager';
+import {
+  registerResearchEsCapture,
+  captureResearchRouting,
+  restrictResearchEsConfig,
+} from './research_capability';
 
 export type { OnRequestHandler };
 
@@ -127,6 +132,24 @@ export class ClusterClient implements ICustomClusterClient {
     this.getExecutionContext = getExecutionContext;
     this.getUnauthorizedErrorHandler = getUnauthorizedErrorHandler;
     this.onRequestHandlerFactory = onRequestHandlerFactory;
+    registerResearchEsCapture(this, (request, mode, options) => ({
+      version: 1,
+      mode,
+      kibanaVersion,
+      executionContext: this.getExecutionContext(),
+      config: restrictResearchEsConfig(this.config, mode === 'current'),
+      headers:
+        mode === 'current'
+          ? this.getScopedHeaders(request)
+          : mode === 'secondary'
+          ? this.getSecondaryAuthHeaders(request)
+          : undefined,
+      routing: captureResearchRouting(
+        this.onRequestHandlerFactory,
+        request,
+        mode === 'current' ? options : undefined
+      ),
+    }));
 
     const internalUserOnRequest = onRequestHandlerFactory({ logger });
 

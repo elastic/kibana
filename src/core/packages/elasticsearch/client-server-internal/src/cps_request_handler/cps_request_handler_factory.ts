@@ -17,6 +17,7 @@ import type {
 } from '../cluster_client';
 import { getCpsRequestHandler } from './cps_request_handler';
 import { getTimingRequestHandler } from '../timing';
+import { registerResearchRouting } from '../research_capability';
 
 const noopHandler: OnRequestHandler = () => undefined;
 
@@ -31,7 +32,7 @@ export function getRequestHandlerFactory(
   cpsEnabled: boolean,
   esTimingEnabled: boolean = true
 ): OnRequestHandlerFactory {
-  return (opts) => {
+  const factory: OnRequestHandlerFactory = (opts) => {
     const request = 'request' in opts && isKibanaRequest(opts.request) ? opts.request : undefined;
 
     // Get the timing handler (or noop if disabled)
@@ -46,6 +47,11 @@ export function getRequestHandlerFactory(
       cpsHandler(ctx, params, options, logger);
     };
   };
+  registerResearchRouting(factory, (request, options) => ({
+    enabled: cpsEnabled,
+    expression: resolveProjectRouting(options ? { ...options, request } : { request }),
+  }));
+  return factory;
 }
 
 /**
@@ -54,7 +60,9 @@ export function getRequestHandlerFactory(
  * - `'expression'`: the caller-supplied expression, injected verbatim.
  * - otherwise (internal user): origin-only routing.
  */
-function resolveProjectRouting(opts: FactoryRoutingOpts): string {
+type WithoutLogger<T> = T extends FactoryRoutingOpts ? Omit<T, 'logger'> : never;
+
+function resolveProjectRouting(opts: WithoutLogger<FactoryRoutingOpts>): string {
   if ('projectRouting' in opts) {
     if (opts.projectRouting === 'space') {
       return getSpaceNPRE(opts.request.spaceId ?? DEFAULT_SPACE_ID);

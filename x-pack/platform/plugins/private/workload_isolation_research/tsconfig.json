@@ -12,7 +12,11 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/task-manager-plugin",
-    "@kbn/data-views-plugin"
+    "@kbn/data-views-plugin",
+    "@kbn/core-elasticsearch-client-server-internal",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/logging",
+    "@kbn/core-spaces-common"
   ],
   "exclude": [
     "target/**/*"
