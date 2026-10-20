@@ -30,21 +30,36 @@ const NUM_BUCKETS = 20;
 
 type SeriesPoint = ObservabilityTracesServiceSummaryMetric['series'][number];
 
+const isFilledPoint = (point: SeriesPoint): boolean =>
+  typeof point.y === 'number' && Number.isFinite(point.y);
+
 const average = (series: SeriesPoint[]): number | null => {
   const values = series
     .map(({ y }) => y)
-    .filter((y): y is number => typeof y === 'number' && Number.isFinite(y));
+    .filter((y): y is number => y != null && Number.isFinite(y));
   if (values.length === 0) {
     return null;
   }
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 };
 
+// Drop empty buckets at the edges of the range. The `detailed_statistics` histogram aligns to the
+// epoch with `extended_bounds`, so the first/last bucket is a partial window that is often empty
+// (`y === null`) even when the range has data — which would otherwise render as a leading/trailing
+// dotted edge. Interior gaps are kept so genuine missing data still shows as a dotted segment.
+const trimEmptyEdges = (series: SeriesPoint[]): SeriesPoint[] => {
+  let start = 0;
+  let end = series.length - 1;
+  while (start <= end && !isFilledPoint(series[start])) start++;
+  while (end >= start && !isFilledPoint(series[end])) end--;
+  return series.slice(start, end + 1);
+};
+
 const toMetric = (
   coordinates: Coordinate[],
   format: (value: number | null) => string
 ): ObservabilityTracesServiceSummaryMetric => {
-  const series = coordinates.map(({ x, y }) => ({ x, y: y ?? null }));
+  const series = trimEmptyEdges(coordinates.map(({ x, y }) => ({ x, y: y ?? null })));
   return { series, valueLabel: format(average(series)) };
 };
 
