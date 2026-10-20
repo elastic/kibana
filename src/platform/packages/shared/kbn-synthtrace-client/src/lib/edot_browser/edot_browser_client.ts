@@ -104,6 +104,11 @@ export class EdotBrowserClient {
     return this.resourceAttributes['browser.mobile'] === true;
   }
 
+  /** Only Chromium-based browsers implement `navigator.userAgentData`, and with it brands. */
+  private get isChromium(): boolean {
+    return 'browser.brands' in this.resourceAttributes;
+  }
+
   private get sessionAttributes(): Record<string, string> {
     const { sessionId } = this.options;
     return sessionId ? { 'session.id': sessionId } : {};
@@ -184,7 +189,8 @@ export class EdotBrowserClient {
       'browser.resource_timing.redirect_end': 0,
       'browser.resource_timing.worker_start': 0,
       ...(nextHopProtocol ? { 'browser.resource_timing.next_hop_protocol': nextHopProtocol } : {}),
-      ...(renderBlockingStatus
+      // Only Chromium-based browsers report the render-blocking status
+      ...(renderBlockingStatus && this.isChromium
         ? { 'browser.resource_timing.render_blocking_status': renderBlockingStatus }
         : {}),
     });

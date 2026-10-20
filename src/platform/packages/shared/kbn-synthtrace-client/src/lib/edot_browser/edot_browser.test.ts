@@ -8,7 +8,7 @@
  */
 
 import { asFloat } from './as_float';
-import { BROWSER_PROFILES, pickBrowserProfile } from './browser_profiles';
+import { BROWSER_PROFILES, pickBrowserProfile, type BrowserProfile } from './browser_profiles';
 import { HEALTH_PROFILES, getWebVitalRating } from './health_profiles';
 import type { EdotBrowserSpanDocument } from './edot_browser_span';
 import { edotBrowser, type EdotBrowserDocument, type EdotBrowserSite } from '.';
@@ -114,11 +114,12 @@ describe('edotBrowser', () => {
 
   describe('browser profiles', () => {
     it('has matching browser attributes and user agents', () => {
+      // The user agent tokens EDOT Browser reads the browser version from
       const uaTokens: Record<string, string> = {
         Chrome: 'Chrome/',
         Edge: 'Edg/',
         Firefox: 'Firefox/',
-        Safari: 'Version/',
+        Safari: 'Safari/',
       };
       Object.values(BROWSER_PROFILES).forEach(({ resourceAttributes }) => {
         const userAgent = resourceAttributes['user_agent.original'];
@@ -255,6 +256,26 @@ describe('edotBrowser', () => {
       expect(attributes['browser.navigation_timing.unload_event_start']).toBe(0);
       expect(attributes['browser.navigation_timing.unload_event_end']).toBe(0);
       expect(raw).toContain('"browser.resource_timing.transfer_size":5120,');
+    });
+
+    it('only writes the render-blocking status for Chromium-based browsers', () => {
+      const app = edotBrowser.app({ serviceName: 'storefront-web', environment: 'production' });
+      const renderBlockingStatus = (profile: BrowserProfile) => {
+        const [doc] = app
+          .client(profile)
+          .resourceTiming({
+            url: 'https://cdn.example.com/app.css',
+            initiatorType: 'link',
+            timings: resourceTimings,
+            renderBlockingStatus: 'blocking',
+          })
+          .serialize();
+        return doc.attributes?.['browser.resource_timing.render_blocking_status'];
+      };
+
+      expect(renderBlockingStatus(BROWSER_PROFILES.edgeWindows)).toBe('blocking');
+      expect(renderBlockingStatus(BROWSER_PROFILES.firefoxLinux)).toBeUndefined();
+      expect(renderBlockingStatus(BROWSER_PROFILES.safariIos)).toBeUndefined();
     });
 
     it('writes resource timing entries', () => {

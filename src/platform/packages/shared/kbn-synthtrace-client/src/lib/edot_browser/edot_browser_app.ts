@@ -26,8 +26,8 @@ export class EdotBrowserApp {
     serviceName,
     serviceVersion = '1.0.0',
     environment,
-    sdkVersion = '2.2.0',
-    distroVersion = '1.0.0',
+    sdkVersion = '2.10.0',
+    distroVersion = '0.3.0',
   }: EdotBrowserAppOptions) {
     this.resourceAttributes = {
       'service.name': serviceName,

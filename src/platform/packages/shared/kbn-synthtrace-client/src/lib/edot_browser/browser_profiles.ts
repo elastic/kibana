@@ -86,7 +86,8 @@ export const BROWSER_PROFILES: Readonly<Record<BrowserProfileId, BrowserProfile>
     weight: 20,
     resourceAttributes: {
       'browser.name': 'Safari',
-      'browser.version': '26.0',
+      // EDOT Browser reads the version from the `Safari/` token, not `Version/`
+      'browser.version': '604.1',
       'browser.platform': 'iOS',
       'browser.mobile': true,
       'browser.language': 'en-US',
