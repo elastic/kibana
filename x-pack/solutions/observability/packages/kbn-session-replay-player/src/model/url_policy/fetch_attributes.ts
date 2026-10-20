@@ -82,8 +82,13 @@ const neutralizeAttribute = (
         return DROP;
       }
       return allowance.isAllowedImageUrl(value) ? value : DROP;
+    case 'rr_src':
+      // rrweb keeps the source of an iframe here; it is never needed to render and names a remote page.
+      return DROP;
     case 'poster':
     case 'background':
+    case 'rr_dataurl':
+      // `rr_dataURL` is applied as the source of an image when rrweb rebuilds canvases and images.
       return allowance.isAllowedImageUrl(value) ? value : DROP;
     case 'srcset':
       return SINGLE_DATA_URL_CANDIDATE.test(value.trim()) ? value : DROP;

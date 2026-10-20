@@ -19,6 +19,8 @@ import { createEventUrlNeutralizer } from './neutralize_event_urls';
 
 // Built from parts so the repository's no-script-url lint rule does not flag the test data.
 const JAVASCRIPT_VOID = `${'javascript'}:void(0)`;
+// rrweb's own attribute name does not match the repository's naming convention for literal keys.
+const RR_DATA_URL = 'rr_dataURL';
 const EVIL = 'https://evil.example/p.gif?x=1';
 const ALLOWED = 'https://cdn.shop.example/logo.png';
 
@@ -52,6 +54,12 @@ describe('createEventUrlNeutralizer', () => {
       ['meta refresh', element(10, 'meta', { 'http-equiv': 'refresh', content: `0;url=${EVIL}` })],
       ['inline style url', element(10, 'div', { style: `background:url(${EVIL})` })],
       ['link preloaded image set', element(10, 'link', { imagesrcset: `${EVIL} 1x` })],
+      ['rrweb iframe source', element(10, 'iframe', { rr_src: EVIL })],
+      ['rrweb image data URL naming a remote image', element(10, 'img', { [RR_DATA_URL]: EVIL })],
+      [
+        'rrweb canvas data URL naming a remote image',
+        element(10, 'canvas', { [RR_DATA_URL]: EVIL }),
+      ],
       ['inlined stylesheet text', element(10, 'link', { _cssText: `@import url(${EVIL});` })],
     ])('neutralises %s', (_name, node) => {
       const result = neutralizer()(snapshotWith(node));
@@ -90,6 +98,14 @@ describe('createEventUrlNeutralizer', () => {
       );
 
       expect(serialize(result)).not.toContain('cdn.shop.example');
+    });
+
+    it('keeps rrweb image data URLs that really are data URLs', () => {
+      const result = neutralizer()(
+        snapshotWith(element(10, 'canvas', { [RR_DATA_URL]: 'data:image/png;base64,AAAA' }))
+      );
+
+      expect(serialize(result)).toContain('data:image/png;base64,AAAA');
     });
 
     it('is case-insensitive about tag and attribute names', () => {
