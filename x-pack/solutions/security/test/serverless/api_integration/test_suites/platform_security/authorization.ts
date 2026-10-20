@@ -50,11 +50,7 @@ if (sourceFilePath === 'authorization.ts') {
         adminCredentials = await svlUserManager.getM2MApiCookieCredentialsWithRoleScope('admin');
       });
 
-      // Failing: See https://github.com/elastic/kibana/issues/299070
-      // The siemV5 snapshot expects the `custom_yara_signatures_*` privileges, but the
-      // `customYaraSignaturesEnabled` flag that registers them is disabled on MKI (and, to match,
-      // in configs/config.ts). Owners to decide the serverless expectation before re-enabling.
-      it.skip('composite features', async () => {
+      it('composite features', async () => {
         const { body } = await supertestWithoutAuth
           .get('/api/security/privileges?includeActions=true')
           .set(svlCommonApi.getInternalRequestHeader())
@@ -14262,38 +14258,6 @@ if (sourceFilePath === 'authorization.ts') {
                 "api:lists-summary",
                 "api:securitySolution-readBlocklist",
                 "ui:siemV5/readBlocklist",
-              ],
-              "custom_yara_signatures_all": Array [
-                "login:",
-                "api:lists-all",
-                "api:exceptions-read",
-                "api:exceptions-all",
-                "api:lists-read",
-                "api:lists-summary",
-                "api:securitySolution-writeCustomYaraSignatures",
-                "api:securitySolution-readCustomYaraSignatures",
-                "saved_object:exception-list-agnostic/bulk_get",
-                "saved_object:exception-list-agnostic/get",
-                "saved_object:exception-list-agnostic/find",
-                "saved_object:exception-list-agnostic/open_point_in_time",
-                "saved_object:exception-list-agnostic/close_point_in_time",
-                "saved_object:exception-list-agnostic/create",
-                "saved_object:exception-list-agnostic/bulk_create",
-                "saved_object:exception-list-agnostic/update",
-                "saved_object:exception-list-agnostic/bulk_update",
-                "saved_object:exception-list-agnostic/delete",
-                "saved_object:exception-list-agnostic/bulk_delete",
-                "saved_object:exception-list-agnostic/share_to_space",
-                "ui:siemV5/writeCustomYaraSignatures",
-                "ui:siemV5/readCustomYaraSignatures",
-              ],
-              "custom_yara_signatures_read": Array [
-                "login:",
-                "api:lists-read",
-                "api:exceptions-read",
-                "api:lists-summary",
-                "api:securitySolution-readCustomYaraSignatures",
-                "ui:siemV5/readCustomYaraSignatures",
               ],
               "endpoint_exceptions_all": Array [
                 "login:",
