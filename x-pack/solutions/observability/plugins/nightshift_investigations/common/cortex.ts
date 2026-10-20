@@ -57,6 +57,10 @@ export interface CortexPageSummary {
   corroborations: number;
   updated_at: string;
   description?: string;
+  conversation_id?: string;
+  round_id?: string;
+  workflow_execution_id?: string;
+  doc_version?: number;
 }
 
 export interface CortexPage extends CortexPageSummary {

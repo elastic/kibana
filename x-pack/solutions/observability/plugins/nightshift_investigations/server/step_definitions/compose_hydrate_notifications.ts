@@ -56,6 +56,8 @@ export const composeHydrateNotificationsStepDefinition = () =>
           version: z.literal(1),
           data: z.object({
             recalled_ids: z.array(z.string()).max(100),
+            materialize_execution_id: z.string().optional(),
+            background_trace_id: z.string().optional(),
           }),
         }),
       }),
@@ -64,6 +66,14 @@ export const composeHydrateNotificationsStepDefinition = () =>
       const { model_context: modelContext } = composeHydrateNotificationContext({
         writers: context.input.writers,
       });
+      const executionId = context.contextManager.getContext()?.execution?.id;
+      const candidateTraceId =
+        typeof executionId === 'string' ? executionId.replace(/-/g, '').toLowerCase() : undefined;
+      const isValidOtelTraceId = Boolean(
+        candidateTraceId &&
+          /^[0-9a-f]{32}$/.test(candidateTraceId) &&
+          candidateTraceId !== '00000000000000000000000000000000'
+      );
       return {
         output: {
           ...(modelContext ? { model_context: modelContext } : {}),
@@ -72,6 +82,12 @@ export const composeHydrateNotificationsStepDefinition = () =>
               version: 1 as const,
               data: {
                 recalled_ids: context.input.recalled_ids,
+                ...(isValidOtelTraceId && executionId
+                  ? {
+                      materialize_execution_id: executionId,
+                      background_trace_id: candidateTraceId,
+                    }
+                  : {}),
               },
             },
           },

@@ -216,6 +216,8 @@ export const runMemoryOptimize = async ({
     investigation,
     agentId,
     conversationId,
+    roundId,
+    workflowExecutionId: interactionId,
     logger,
     signal,
   });

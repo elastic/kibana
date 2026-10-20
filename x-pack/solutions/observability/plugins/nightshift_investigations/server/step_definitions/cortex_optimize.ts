@@ -14,7 +14,11 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { runCortexOptimize } from '../cortex/register_cortex';
-import { investigationRoundInputsSchema, withToolResults } from '../investigation_round';
+import {
+  appliedWriteSchema,
+  investigationRoundInputsSchema,
+  withToolResults,
+} from '../investigation_round';
 import { withTimeout } from './with_timeout';
 
 /**
@@ -72,6 +76,14 @@ export const cortexOptimizeStepDefinition = ({
     outputSchema: z.object({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
       skipped: z.boolean().optional(),
+      opened_ids: z
+        .array(z.string())
+        .optional()
+        .describe('Canonical Cortex page ids opened by the investigator this round.'),
+      applied_writes: z
+        .array(appliedWriteSchema)
+        .optional()
+        .describe('Cortex page writes applied during this round.'),
     }),
     handler: async (context) => {
       if (isEnabled && !isEnabled()) {
@@ -83,7 +95,7 @@ export const cortexOptimizeStepDefinition = ({
         `Running Cortex optimize for agent ${context.input.agent_id ?? 'unknown'}`
       );
       const { workflow, execution } = context.contextManager.getContext();
-      await withTimeout(
+      const result = await withTimeout(
         (signal) =>
           runCortexOptimize({
             request: context.contextManager.getFakeRequest(),
@@ -113,6 +125,16 @@ export const cortexOptimizeStepDefinition = ({
         `Cortex optimize timed out after ${OPTIMIZE_TIMEOUT_MS}ms`
       );
 
-      return { output: { status: 'ok' as const } };
+      return {
+        output: {
+          status: 'ok' as const,
+          ...(result?.openedIds && result.openedIds.length > 0
+            ? { opened_ids: result.openedIds }
+            : {}),
+          ...(result?.appliedWrites && result.appliedWrites.length > 0
+            ? { applied_writes: result.appliedWrites }
+            : {}),
+        },
+      };
     },
   });

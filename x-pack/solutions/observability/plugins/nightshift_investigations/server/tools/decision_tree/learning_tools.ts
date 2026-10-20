@@ -16,6 +16,7 @@ import {
 } from '@kbn/nightshift-decision-trees';
 import type { LearningRecord } from '@kbn/nightshift-decision-trees';
 import type { LearningStore } from '../../decision_trees/learning_store';
+import type { AppliedWriteRecord, WriteProvenance } from '../../investigation_round';
 import { getScopedConversationId } from '../sandbox_bash/tool_utils';
 
 export const RECORD_SYSTEM_LEARNING_TOOL_ID = 'nightshift_record_system_learning';
@@ -35,6 +36,8 @@ interface LearningToolDeps {
   getSpaceId?: (request: KibanaRequest) => string;
   /** Buffers a recorded learning so the submit tool can attach it to the committed tree version. */
   onRecord?: (conversationId: string, record: LearningRecord) => void;
+  getProvenance?: (conversationId: string) => WriteProvenance | undefined;
+  onAppliedWrite?: (conversationId: string, write: AppliedWriteRecord) => void;
 }
 
 const treeIdField = z
@@ -88,6 +91,8 @@ const recordAndReport = async ({
   context,
   getSpaceId,
   onRecord,
+  getProvenance,
+  onAppliedWrite,
 }: {
   store: LearningStore;
   logger: Logger;
@@ -95,19 +100,40 @@ const recordAndReport = async ({
   context: { runContext?: { stack: unknown[] }; request?: KibanaRequest };
   getSpaceId?: (request: KibanaRequest) => string;
   onRecord?: (conversationId: string, record: LearningRecord) => void;
+  getProvenance?: (conversationId: string) => WriteProvenance | undefined;
+  onAppliedWrite?: (conversationId: string, write: AppliedWriteRecord) => void;
 }) => {
   try {
-    const record = await store.record(input);
+    const scopedConversationId =
+      getSpaceId && context.runContext && context.request
+        ? getScopedConversationId(
+            { runContext: context.runContext, request: context.request },
+            getSpaceId
+          )
+        : undefined;
+    const provenance = scopedConversationId ? getProvenance?.(scopedConversationId) : undefined;
+    const record = await store.record({
+      ...input,
+      ...(provenance?.conversationId ? { conversationId: provenance.conversationId } : {}),
+      ...(provenance?.roundId ? { roundId: provenance.roundId } : {}),
+      ...(provenance?.workflowExecutionId
+        ? { workflowExecutionId: provenance.workflowExecutionId }
+        : {}),
+    });
     // Best-effort: buffer the learning for the submit tool so the committed version records what
     // was learned this turn. A missing conversation context simply skips buffering.
-    if (onRecord && getSpaceId && context.runContext && context.request) {
-      const conversationId = getScopedConversationId(
-        { runContext: context.runContext, request: context.request },
-        getSpaceId
+    if (scopedConversationId) {
+      onRecord?.(scopedConversationId, record);
+      const itemParts = [input.treeId, input.kind, input.category, input.connectorName].filter(
+        Boolean
       );
-      if (conversationId) {
-        onRecord(conversationId, record);
-      }
+      onAppliedWrite?.(scopedConversationId, {
+        store: 'decision_tree_learning',
+        item_id: itemParts.join(':'),
+        action: 'record',
+        after_status: 'active',
+        after_content: record.content,
+      });
     }
     return {
       results: [
@@ -131,6 +157,8 @@ export const createRecordSystemLearningTool = ({
   logger,
   getSpaceId,
   onRecord,
+  getProvenance,
+  onAppliedWrite,
 }: LearningToolDeps): BuiltinToolDefinition<typeof systemLearningSchema> => ({
   id: RECORD_SYSTEM_LEARNING_TOOL_ID,
   type: ToolType.builtin,
@@ -157,6 +185,8 @@ export const createRecordSystemLearningTool = ({
       context,
       getSpaceId,
       onRecord,
+      getProvenance,
+      onAppliedWrite,
     }),
 });
 
@@ -166,6 +196,8 @@ export const createRecordToolLearningTool = ({
   connectorNames,
   getSpaceId,
   onRecord,
+  getProvenance,
+  onAppliedWrite,
 }: LearningToolDeps & { connectorNames: readonly string[] }): BuiltinToolDefinition<
   ReturnType<typeof toolLearningSchema>
 > => {
@@ -197,6 +229,8 @@ export const createRecordToolLearningTool = ({
         context,
         getSpaceId,
         onRecord,
+        getProvenance,
+        onAppliedWrite,
       }),
   };
 };
@@ -206,6 +240,8 @@ export const createRecordRemediationTool = ({
   logger,
   getSpaceId,
   onRecord,
+  getProvenance,
+  onAppliedWrite,
 }: LearningToolDeps): BuiltinToolDefinition<typeof remediationSchema> => ({
   id: RECORD_REMEDIATION_TOOL_ID,
   type: ToolType.builtin,
@@ -227,5 +263,7 @@ export const createRecordRemediationTool = ({
       context,
       getSpaceId,
       onRecord,
+      getProvenance,
+      onAppliedWrite,
     }),
 });

@@ -17,8 +17,16 @@ import {
   buildInvestigationConversation,
   buildInvestigationRound,
 } from '../decision_trees/investigation_round';
-import { investigationRoundInputsSchema, loadInvestigationRound } from '../investigation_round';
-import { DECISION_TREE_LEARNING_TOOL_IDS } from '../tools/decision_tree';
+import {
+  appliedWriteSchema,
+  investigationRoundInputsSchema,
+  loadInvestigationRound,
+} from '../investigation_round';
+import {
+  DECISION_TREE_LEARNING_TOOL_IDS,
+  reinforcementSessionRegistry,
+} from '../tools/decision_tree';
+import { scopeConversationId } from '../tools/sandbox_bash/tool_utils';
 
 const MAX_INPUT_CHARS = 100_000;
 
@@ -59,6 +67,10 @@ export const decisionTreeReinforceStepDefinition = ({
     outputSchema: z.object({
       message: z.string().describe("The reinforcement agent's final response."),
       skipped: z.boolean().optional(),
+      applied_writes: z
+        .array(appliedWriteSchema)
+        .optional()
+        .describe('Decision tree and learning writes applied during this reinforcement turn.'),
     }),
     handler: async (context) => {
       // The combined optimize workflow installs with Cortex or Memory, so this step is registered
@@ -112,33 +124,55 @@ export const decisionTreeReinforceStepDefinition = ({
         round,
         now,
       });
+      const workflowContext = context.contextManager.getContext();
+      const spaceId = workflowContext.workflow.spaceId;
+      const executionId = workflowContext.execution.id;
+      const scopedReinforcementConvId = scopeConversationId(spaceId, conversation.id);
+      reinforcementSessionRegistry.registerSession(scopedReinforcementConvId, {
+        conversationId: conversationId || undefined,
+        roundId: roundId || undefined,
+        workflowExecutionId: executionId,
+      });
+
       // Matches Deductive: an initial investigation only edits files; learnings need a follow-up.
       const configurationOverrides =
         turnKind === 'feedback_reinforcement'
           ? { tools: [{ tool_ids: [...DECISION_TREE_LEARNING_TOOL_IDS] }] }
           : undefined;
 
-      // The workflow step's `timeout` bounds the run: its timeout zone aborts this signal.
-      const { result } = await agentBuilder.agents.runAgent({
-        request,
-        agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
-        interactive: { enabled: false },
-        defaultConnectorId: connectorId || undefined,
-        abortSignal: context.abortSignal,
-        telemetryMetadata: {
-          pluginId: 'nightshift_investigation_memory',
-          aggregateBy: 'nightshift',
-          productSolution: 'observability',
-          productFeature: 'nightshift',
-          interactionId: context.contextManager.getContext().execution.id,
-        },
-        agentParams: {
-          conversation,
-          nextInput: { message },
-          ...(configurationOverrides ? { configurationOverrides } : {}),
-        },
-      });
+      try {
+        // The workflow step's `timeout` bounds the run: its timeout zone aborts this signal.
+        const { result } = await agentBuilder.agents.runAgent({
+          request,
+          agentId: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
+          interactive: { enabled: false },
+          defaultConnectorId: connectorId || undefined,
+          abortSignal: context.abortSignal,
+          telemetryMetadata: {
+            pluginId: 'nightshift_investigation_memory',
+            aggregateBy: 'nightshift',
+            productSolution: 'observability',
+            productFeature: 'nightshift',
+            interactionId: executionId,
+          },
+          agentParams: {
+            conversation,
+            nextInput: { message },
+            ...(configurationOverrides ? { configurationOverrides } : {}),
+          },
+        });
+        const sessionState = reinforcementSessionRegistry.drainSession(scopedReinforcementConvId);
 
-      return { output: { message: result.round.response.message } };
+        return {
+          output: {
+            message: result.round.response.message,
+            ...(sessionState.appliedWrites.length > 0
+              ? { applied_writes: sessionState.appliedWrites }
+              : {}),
+          },
+        };
+      } finally {
+        reinforcementSessionRegistry.drainSession(scopedReinforcementConvId);
+      }
     },
   });

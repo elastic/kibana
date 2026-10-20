@@ -53,6 +53,10 @@ export const decisionTreePrepareStepDefinition = ({
     outputSchema: z.object({
       message: z.string().describe('Message to hand the reinforcement agent.'),
       tree_count: z.number().describe('Number of decision trees the agent may edit.'),
+      opened_ids: z
+        .array(z.string())
+        .optional()
+        .describe('Canonical symptom:<slug> tree ids opened by the investigator this round.'),
       turn_kind: z
         .enum(['initial_investigation', 'feedback_reinforcement'])
         .describe('Whether this round seeds the trees or follows up on them.'),
@@ -89,7 +93,7 @@ export const decisionTreePrepareStepDefinition = ({
 
       const telemetryConnectorId = getTelemetryConnectorId();
       const { spaceId } = context.contextManager.getContext().workflow;
-      const { message, treeCount, turnKind } = await prepareReinforcementTurn({
+      const { message, treeCount, turnKind, openedTreeIds } = await prepareReinforcementTurn({
         response,
         connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
         esClient: context.contextManager.getScopedEsClient(),
@@ -99,7 +103,13 @@ export const decisionTreePrepareStepDefinition = ({
       });
 
       return {
-        output: { message, tree_count: treeCount, turn_kind: turnKind, skipped: false },
+        output: {
+          message,
+          tree_count: treeCount,
+          turn_kind: turnKind,
+          skipped: false,
+          ...(openedTreeIds && openedTreeIds.length > 0 ? { opened_ids: openedTreeIds } : {}),
+        },
       };
     },
   });

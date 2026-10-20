@@ -37,3 +37,11 @@ export {
   extractWorkspaceReadsFromToolCalls,
   type WorkspaceReadsSummary,
 } from './workspace_reads';
+
+export {
+  APPLIED_WRITE_STORES,
+  appliedWriteSchema,
+  type AppliedWriteRecord,
+  type AppliedWriteStore,
+  type WriteProvenance,
+} from './provenance';

@@ -14,7 +14,11 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
-import { investigationRoundInputsSchema, withToolResults } from '../investigation_round';
+import {
+  appliedWriteSchema,
+  investigationRoundInputsSchema,
+  withToolResults,
+} from '../investigation_round';
 import { runMemoryOptimize } from '../memory/register_memory';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import { withTimeout } from './with_timeout';
@@ -80,6 +84,14 @@ export const memoryOptimizeStepDefinition = ({
     outputSchema: z.object({
       status: z.literal('ok').describe('The memory optimizer finished without throwing.'),
       skipped: z.boolean().optional(),
+      opened_ids: z
+        .array(z.string())
+        .optional()
+        .describe('Canonical Semantic Memory ids opened by the investigator this round.'),
+      applied_writes: z
+        .array(appliedWriteSchema)
+        .optional()
+        .describe('Semantic Memory writes applied during this round.'),
     }),
     handler: async (context) => {
       if (isEnabled && !isEnabled()) {
@@ -203,6 +215,16 @@ export const memoryOptimizeStepDefinition = ({
         });
       }
 
-      return { output: { status: 'ok' as const } };
+      return {
+        output: {
+          status: 'ok' as const,
+          ...(summary?.openedIds && summary.openedIds.length > 0
+            ? { opened_ids: summary.openedIds }
+            : {}),
+          ...(summary?.appliedWrites && summary.appliedWrites.length > 0
+            ? { applied_writes: summary.appliedWrites }
+            : {}),
+        },
+      };
     },
   });

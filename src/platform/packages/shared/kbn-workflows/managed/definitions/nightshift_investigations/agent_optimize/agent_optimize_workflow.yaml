@@ -59,6 +59,10 @@ triggers:
                       type: array
                       items:
                         type: string
+                    materialize_execution_id:
+                      type: string
+                    background_trace_id:
+                      type: string
         tool_calls:
           type: array
           description: >
