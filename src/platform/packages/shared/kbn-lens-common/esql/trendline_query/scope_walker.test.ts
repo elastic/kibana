@@ -33,6 +33,15 @@ describe('resolveTrackedColumn', () => {
     expect(resolveTrackedColumn(root.commands, 'a').name).toBe('a');
   });
 
+  it('does not retain bucket identity after EVAL overwrites its only name', () => {
+    const root = parse(
+      'FROM kibana_sample_data_logs | STATS avg_bytes = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | EVAL b = TO_STRING(b)'
+    );
+    const commandsAfterStats = root.commands.slice(2);
+
+    expect(resolveTrackedColumn(commandsAfterStats, 'b').name).not.toBe('b');
+  });
+
   it('does not mutate KEEP commands', () => {
     const root = parse('FROM index | KEEP bytes');
     resolveTrackedColumn(root.commands, '@timestamp');

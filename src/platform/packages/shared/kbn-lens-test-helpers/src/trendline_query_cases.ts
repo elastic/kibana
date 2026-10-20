@@ -59,6 +59,27 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       expectedMetricFields: ['avg_bytes'],
     },
     {
+      description: 'FROM query retaining the latest EVAL bucket alias through KEEP',
+      sourceQuery: `FROM ${index} | STATS a = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | EVAL time = b | KEEP a`,
+      expectedQuery: `FROM ${index} | STATS a = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | EVAL time = b | KEEP a, time`,
+      expectedTimeField: 'time',
+      expectedMetricFields: ['a'],
+    },
+    {
+      description: 'FROM query resolving the latest EVAL alias of a TBUCKET',
+      sourceQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes) BY bucket = TBUCKET(100) | EVAL time = bucket`,
+      expectedQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes) BY bucket = TBUCKET(100) | EVAL time = bucket`,
+      expectedTimeField: 'time',
+      expectedMetricFields: ['avg_bytes'],
+    },
+    {
+      description: 'FROM query retaining an EVAL bucket alias after the original is overwritten',
+      sourceQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | EVAL time = b | EVAL b = TO_STRING(b)`,
+      expectedQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | EVAL time = b | EVAL b = TO_STRING(b)`,
+      expectedTimeField: 'time',
+      expectedMetricFields: ['avg_bytes'],
+    },
+    {
       description: 'regular source query',
       sourceQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes)`,
       expectedQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)`,
