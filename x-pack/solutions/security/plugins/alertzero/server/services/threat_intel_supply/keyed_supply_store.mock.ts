@@ -6,12 +6,12 @@
  */
 
 import { SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID } from '@kbn/alertzero-common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
   THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
   THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
-import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { WatchWorkflowsManagementClient } from '../watches/watch_workflows_management_client';
@@ -21,10 +21,13 @@ export const SPACE_B = 'space-b';
 
 const CTH = SYSTEM_SECURITY_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_ID;
 
-/** The documents whose `enabled` flag is the observable end state of supply coupling. */
+/**
+ * Ingest and enrich live in the default space (deployment-wide), not the global workflow
+ * space. Attribute and Continuous Threat Hunt stay per Hunt space.
+ */
 const DOCUMENTS = {
-  ingest: { spaceId: GLOBAL_WORKFLOW_SPACE_ID, workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID },
-  enrich: { spaceId: GLOBAL_WORKFLOW_SPACE_ID, workflowId: THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID },
+  ingest: { spaceId: DEFAULT_SPACE_ID, workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID },
+  enrich: { spaceId: DEFAULT_SPACE_ID, workflowId: THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID },
   attrA: {
     spaceId: SPACE_A,
     workflowId: `${THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID}-${SPACE_A}`,
@@ -35,7 +38,7 @@ const DOCUMENTS = {
   },
   cthA: { spaceId: SPACE_A, workflowId: `${CTH}-${SPACE_A}` },
   cthB: { spaceId: SPACE_B, workflowId: `${CTH}-${SPACE_B}` },
-  cthDefault: { spaceId: 'default', workflowId: `${CTH}-default` },
+  cthDefault: { spaceId: DEFAULT_SPACE_ID, workflowId: `${CTH}-${DEFAULT_SPACE_ID}` },
 } as const;
 
 export type SupplyDocumentLabel = keyof typeof DOCUMENTS;
@@ -126,8 +129,8 @@ export const createKeyedSupplyStore = ({
   /** Stands in for the security_solution installer: adds missing TI documents, switched off. */
   const installer = jest.fn(async ({ spaceId }: { spaceId: string }) => {
     [
-      keyOf(GLOBAL_WORKFLOW_SPACE_ID, THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID),
-      keyOf(GLOBAL_WORKFLOW_SPACE_ID, THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID),
+      keyOf(DEFAULT_SPACE_ID, THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID),
+      keyOf(DEFAULT_SPACE_ID, THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID),
       keyOf(spaceId, `${THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID}-${spaceId}`),
     ].forEach((key) => {
       if (!docs.has(key)) {
@@ -161,17 +164,18 @@ export const createHardGateEsClient = (reportsIndexExists: boolean): Elasticsear
   ({
     indices: {
       exists: jest.fn(async () => reportsIndexExists),
+      // Hard gate reads properties via getMapping (getFieldMapping is 410 on serverless).
       getMapping: jest.fn(async () => ({
-        '.kibana-threat-reports': { mappings: { dynamic: 'strict' } },
-      })),
-      getFieldMapping: jest.fn(async () => ({
         '.kibana-threat-reports': {
           mappings: {
-            'content.title': {
-              mapping: { title: { type: 'semantic_text', inference_id: '.elser' } },
-            },
-            'content.body_text': {
-              mapping: { body_text: { type: 'semantic_text', inference_id: '.elser' } },
+            dynamic: 'strict',
+            properties: {
+              content: {
+                properties: {
+                  title: { type: 'semantic_text', inference_id: '.elser' },
+                  body_text: { type: 'semantic_text', inference_id: '.elser' },
+                },
+              },
             },
           },
         },

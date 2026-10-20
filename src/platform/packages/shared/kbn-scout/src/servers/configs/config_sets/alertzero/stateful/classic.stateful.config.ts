@@ -30,6 +30,13 @@ export const servers: ScoutServerConfig = {
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
+      // Hunt Watch enable requires a service account; AlertZero Scout specs create one via
+      // POST /internal/security/service_account. Stateful defaults this on outside serverless,
+      // but the suite pins it so a local override cannot silently refuse enable.
+      '--xpack.security.serviceAccounts.enabled=true',
+      // Stateful Scout defaults restrictInternalApis=false. Pin true so authz specs can assert
+      // that hunt/TI internal routes reject requests that omit x-elastic-internal-origin.
+      '--server.restrictInternalApis=true',
     ],
   },
 };

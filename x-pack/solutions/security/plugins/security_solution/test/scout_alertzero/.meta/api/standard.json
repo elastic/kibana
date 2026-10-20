@@ -5,7 +5,217 @@
   ],
   "tests": [
     {
-      "id": "e82d748e4d78420-f516b1f17d085ef",
+      "id": "e11dd99e43856bd-8769fe0d7fbbac4",
+      "title": "Hunt Watch - authz isolation and evidence projection returns 403 on every hunt route for a user without AlertZero",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 58,
+        "column": 9
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-7f2652e1327b1b6",
+      "title": "Hunt Watch - authz isolation and evidence projection returns 403 on hunt write routes for an AlertZero read-only user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 71,
+        "column": 25
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-9da793c87c6d843",
+      "title": "Hunt Watch - authz isolation and evidence projection lets an AlertZero read-only user read supply status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 88,
+        "column": 6
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-598289e9695b1f6",
+      "title": "Hunt Watch - authz isolation and evidence projection returns 403 naming manage_security when read-only Restore is refused",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 94,
+        "column": 25
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-00bef75323a0279",
+      "title": "Hunt Watch - authz isolation and evidence projection returns 403 when an AlertZero read-only user PATCHes a Worker",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 108,
+        "column": 6
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-c5ea5399fe9eebb",
+      "title": "Hunt Watch - authz isolation and evidence projection returns 400 when an admin omits the internal-origin header",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 117,
+        "column": 11
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-e287d6765fb732b",
+      "title": "Hunt Watch - authz isolation and evidence projection projects only the caller space evidence on a shared report",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 128,
+        "column": 31
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-10311515b5ade2d",
+      "title": "Hunt Watch - authz isolation and evidence projection omits evidence from find_threat_reports",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 139,
+        "column": 42
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-62c844c628652f4",
+      "title": "Hunt Watch - authz isolation and evidence projection refuses a B-only role on space A routes",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 145,
+        "column": 11
+      }
+    },
+    {
+      "id": "e11dd99e43856bd-49113f416922780",
+      "title": "Hunt Watch - authz isolation and evidence projection never returns feed credentials as URL userinfo from list_sources",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_authz_isolation.spec.ts",
+        "line": 175,
+        "column": 7
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-0da6f07b1dbe0a2",
+      "title": "Hunt Watch - threat intel supply across two spaces 1. enabling Hunt in A turns ingest, enrich, and attribute-A on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 127,
+        "column": 17
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-0e51a2292ebbd8a",
+      "title": "Hunt Watch - threat intel supply across two spaces 2. enabling Hunt in B leaves deployment rows on and turns attribute-B on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 157,
+        "column": 50
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-08563b05307600c",
+      "title": "Hunt Watch - threat intel supply across two spaces 7/8. disabling Hunt in A turns attribute-A off and marks deployment rows in use elsewhere",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 197,
+        "column": 20
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-a0d12f7e837942a",
+      "title": "Hunt Watch - threat intel supply across two spaces 7. disabling Hunt in B turns deployment rows off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 217,
+        "column": 18
+      }
+    },
+    {
+      "id": "13ed715b7c1260d-09becd1b12e2d4a",
+      "title": "Hunt Watch - threat intel supply across two spaces 13/17. re-enable A, drift ingest off, Restore clears drift",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_alertzero/api/tests/hunt_supply_two_space.spec.ts",
+        "line": 231,
+        "column": 28
+      }
+    },
+    {
+      "id": "f71b7e19573c864-f516b1f17d085ef",
       "title": "Threat Intel - report ingest API ingests a pasted report, then dedups an identical repeat",
       "expectedStatus": "passed",
       "tags": [
@@ -19,7 +229,7 @@
       }
     },
     {
-      "id": "e82d748e4d78420-35b6f23f231b0cb",
+      "id": "f71b7e19573c864-35b6f23f231b0cb",
       "title": "Threat Intel - report ingest API rejects a report body that fails schema validation",
       "expectedStatus": "passed",
       "tags": [
@@ -33,7 +243,7 @@
       }
     },
     {
-      "id": "e82d748e4d78420-53949f0f794f735",
+      "id": "f71b7e19573c864-53949f0f794f735",
       "title": "Threat Intel - report ingest API extracts indicators from pasted text without calling a model",
       "expectedStatus": "passed",
       "tags": [
@@ -47,7 +257,7 @@
       }
     },
     {
-      "id": "d146d645e6035ce-7d3321514ba68c7",
+      "id": "7157ea8e83a720a-7d3321514ba68c7",
       "title": "Threat Intel - source catalog API returns the source catalog and creates the space-filtered indicator alias",
       "expectedStatus": "passed",
       "tags": [
@@ -61,7 +271,7 @@
       }
     },
     {
-      "id": "d146d645e6035ce-d4894bee88697ad",
+      "id": "7157ea8e83a720a-d4894bee88697ad",
       "title": "Threat Intel - source catalog API stays consistent on a second call once the alias is memoized",
       "expectedStatus": "passed",
       "tags": [
@@ -75,7 +285,7 @@
       }
     },
     {
-      "id": "d146d645e6035ce-0f54cc42eb18431",
+      "id": "7157ea8e83a720a-0f54cc42eb18431",
       "title": "Threat Intel - source catalog API returns 404 when updating a source that does not exist",
       "expectedStatus": "passed",
       "tags": [
@@ -89,7 +299,7 @@
       }
     },
     {
-      "id": "d146d645e6035ce-57f339f81c76436",
+      "id": "7157ea8e83a720a-57f339f81c76436",
       "title": "Threat Intel - source catalog API denies a read-only Security user write access to the source catalog",
       "expectedStatus": "passed",
       "tags": [

@@ -6,9 +6,10 @@
  */
 
 import { parse } from 'yaml';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { IUiSettingsClient, KibanaRequest, Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
   RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -1770,12 +1771,13 @@ describe('WorkersService', () => {
         logger: loggingSystemMock.createLogger() as Logger,
         getEsClient: async () => createHardGateEsClient(row.hardGateOk !== false),
         enumerateSpaceIds: async () => ['default', SPACE_A, SPACE_B],
+        getInference: () => ({ getDefaultConnector: jest.fn() } as unknown as InferenceServerStart),
+        getUiSettingsClient: () => ({ get: jest.fn() } as unknown as IUiSettingsClient),
       });
       const service = new WorkersService(
         harness.management,
         Promise.resolve(harness.managedWorkflows),
         loggingSystemMock.createLogger() as Logger,
-        {},
         {},
         async (_request, registration, options) => {
           await harness.install(registration.id, options);
