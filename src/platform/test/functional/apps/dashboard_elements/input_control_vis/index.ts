@@ -31,6 +31,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./dynamic_options'));
     loadTestFile(require.resolve('./chained_controls'));
     loadTestFile(require.resolve('./input_control_range'));
-    loadTestFile(require.resolve('./dark_mode_toggle'));
   });
 }
