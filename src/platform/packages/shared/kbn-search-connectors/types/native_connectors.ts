@@ -1042,13 +1042,10 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         order: 3,
         required: true,
         sensitive: false,
-        tooltip: translate(
-          'searchConnectors.nativeConnectors.exchangeServer.auth_method.tooltip',
-          {
-            defaultMessage:
-              'Use Kerberos (GSSAPI) in FIPS mode. Kerberos relies on a valid ticket for the connector service account (for example via KRB5CCNAME); username and password are not used.',
-          }
-        ),
+        tooltip: translate('searchConnectors.nativeConnectors.exchangeServer.auth_method.tooltip', {
+          defaultMessage:
+            'Use Kerberos (GSSAPI) in FIPS mode. Kerberos relies on a valid ticket for the connector service account (for example via KRB5CCNAME); username and password are not used.',
+        }),
         type: STRING,
         ui_restrictions: [],
         validations: [],
