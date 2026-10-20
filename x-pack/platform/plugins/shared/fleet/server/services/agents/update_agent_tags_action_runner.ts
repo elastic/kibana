@@ -69,7 +69,10 @@ export async function updateTagsBatch(
     spaceId?: string;
   }
 ): Promise<{ actionId: string; updated?: number; took?: number }> {
-  const errors: Record<Agent['id'], Error> = { ...outgoingErrors };
+  // Only the restriction errors of agents the caller can access are persisted in the action results.
+  // `outgoingErrors` (for example agents not found, or in another space) are deliberately not
+  // published, as the action status enrichment would expose their hostnames across spaces.
+  const errors: Record<Agent['id'], Error> = {};
   const hostedAgentError = `Cannot modify tags on a hosted agent`;
 
   const filteredAgents = await filterHostedPolicies(
@@ -84,7 +87,7 @@ export async function updateTagsBatch(
   const actionId = options.actionId ?? uuidv4();
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
-  // agents that failed validation (hosted, agentless, not found): reported in the action results
+  // agents that failed validation (hosted, agentless): reported in the action results
   const errorAgentIds = Object.keys(errors);
 
   if (agentIds.length === 0) {

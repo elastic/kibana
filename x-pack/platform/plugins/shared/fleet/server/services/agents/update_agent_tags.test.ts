@@ -170,6 +170,20 @@ describe('update_agent_tags', () => {
     ]);
   });
 
+  it('should not publish errors for agents that are not found', async () => {
+    await updateAgentTags(
+      soClient,
+      esClient,
+      { agentIds: ['agent1', 'agent-other-space'] },
+      ['one'],
+      []
+    );
+
+    expect(getErrorResults(esClient)).toEqual([]);
+    const agentAction = esClient.create.mock.calls[0][0] as any;
+    expect(agentAction?.document.agents).not.toContain('agent-other-space');
+  });
+
   describe('agentless agents', () => {
     const mockAgentPolicies = () =>
       (agentPolicyService.getByIds as jest.Mock).mockResolvedValue([
