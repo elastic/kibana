@@ -846,12 +846,14 @@ describe('useOnSubmit', () => {
         setPackagePolicy
       );
 
-      expect(
-        applyUpdate(setPackagePolicy, { ...packagePolicy, supports_agentless: true })
-      ).toEqual(expect.objectContaining({ supports_agentless: true, supports_cloud_connector: true }));
+      expect(applyUpdate(setPackagePolicy, { ...packagePolicy, supports_agentless: true })).toEqual(
+        expect.objectContaining({ supports_agentless: true, supports_cloud_connector: true })
+      );
       expect(
         applyUpdate(setNewAgentPolicy, { ...newAgentPolicy, name: 'Agentless policy for aws-1' })
-      ).toEqual(expect.objectContaining({ name: 'Agentless policy for aws-1', supports_agentless: true }));
+      ).toEqual(
+        expect.objectContaining({ name: 'Agentless policy for aws-1', supports_agentless: true })
+      );
     });
 
     it('should update agentless cloud connector config when enabled and target CSP is aws', () => {
