@@ -31,7 +31,6 @@ import {
   MAX_ATTACHMENT_ID_LENGTH,
   MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP,
   MAX_ATTACHMENT_TYPE_LENGTH,
-  MAX_OWNERS_PER_LOOKUP,
   MAX_OWNER_LENGTH,
 } from '../../../constants';
 import {
@@ -713,10 +712,13 @@ export const GetRelatedCasesByAlertResponseRt = rt.array(RelatedCaseRt);
  * Attachments
  */
 
-const OwnerRt = limitedStringSchema({ fieldName: 'owner', min: 1, max: MAX_OWNER_LENGTH });
-
 export const CasesByAttachmentIDsRequestRt = rt.intersection([
   rt.strict({
+    /**
+     * Only the cases of this owner. One owner per call, as a user may read one solution's cases
+     * and not another's.
+     */
+    owner: limitedStringSchema({ fieldName: 'owner', min: 1, max: MAX_OWNER_LENGTH }),
     /**
      * The attachment type, e.g. `security.entity`.
      */
@@ -737,18 +739,6 @@ export const CasesByAttachmentIDsRequestRt = rt.intersection([
   }),
   rt.exact(
     rt.partial({
-      /**
-       * Only the cases of these owners. Without it, the cases of every owner the user can read.
-       */
-      owner: rt.union([
-        OwnerRt,
-        limitedArraySchema({
-          codec: OwnerRt,
-          min: 1,
-          max: MAX_OWNERS_PER_LOOKUP,
-          fieldName: 'owner',
-        }),
-      ]),
       /**
        * Only the cases with one of these statuses.
        */

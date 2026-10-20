@@ -72,7 +72,7 @@ describe('get', () => {
     const getAttachmentsFilter = () =>
       clientArgs.services.caseService.getCaseIdsByAttachmentIds.mock.calls[0][0].filter;
 
-    it('reads the attachments of the owners the user can read, scoped to the given owners', async () => {
+    it('reads the attachments of the owners the user can read, scoped to the given owner', async () => {
       await getCasesByAttachmentIDs(request, clientArgs);
 
       expect(clientArgs.authorization.getAuthorizationFilter).toHaveBeenCalledWith(
@@ -92,31 +92,13 @@ describe('get', () => {
         authorizedOwners: ['observability'],
         ensureSavedObjectsAreAuthorized: () => {},
       });
-      const { owner, ...withoutOwner } = request;
 
-      await getCasesByAttachmentIDs(withoutOwner, clientArgs);
+      await getCasesByAttachmentIDs(request, clientArgs);
 
       expect(JSON.stringify(getAttachmentsFilter())).toContain(
         'cases-attachments.attributes.owner'
       );
       expect(JSON.stringify(getAttachmentsFilter())).toContain('observability');
-    });
-
-    it('reads the attachments of every owner the user can read without an owner', async () => {
-      const { owner, ...withoutOwner } = request;
-
-      await getCasesByAttachmentIDs(withoutOwner, clientArgs);
-
-      expect(getAttachmentsFilter()).toBeUndefined();
-    });
-
-    it('accepts several owners', async () => {
-      await getCasesByAttachmentIDs(
-        { ...request, owner: ['securitySolution', 'cases'] },
-        clientArgs
-      );
-
-      expect(JSON.stringify(getAttachmentsFilter())).toContain('"cases"');
     });
 
     it('does not read the attachments when the user may not read cases', async () => {
