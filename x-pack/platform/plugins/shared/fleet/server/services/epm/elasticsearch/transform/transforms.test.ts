@@ -1773,7 +1773,7 @@ _meta:
   describe('deleting the previous installation', () => {
     const legacyPath = 'my_upload-1.0.0/elasticsearch/transform/policy_discovery/default.json';
 
-    const installLegacyOverExisting = () => {
+    const installLegacyOverExisting = (installSource: InstallSource = 'upload') => {
       (getInstallation as jest.MockedFunction<typeof getInstallation>).mockResolvedValue({
         installed_es: [
           {
@@ -1784,7 +1784,7 @@ _meta:
       } as unknown as Installation);
 
       return installTransforms({
-        installSource: 'upload',
+        installSource,
         packageInstallContext: {
           packageInfo: { name: 'my_upload', version: '1.0.0' },
           paths: [legacyPath],
@@ -1831,6 +1831,47 @@ _meta:
 
       expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(
         expect.objectContaining({ delete_dest_index: false }),
+        expect.anything()
+      );
+    });
+
+    // The incoming source does not say who the previous transforms are bound to: an uploaded
+    // package upgraded from the registry still owns transforms bound to the uploader's API key,
+    // and Elasticsearch authorizes delete_dest_index against that stored identity.
+    it('keeps the destination index when a trusted upgrade replaces an API-key-bound transform', async () => {
+      esClient.transform.getTransform.mockResponse({
+        count: 1,
+        transforms: [
+          {
+            id: 'my_upload.policy_discovery-default-0.1.0',
+            authorization: { api_key: { id: 'k' } },
+          },
+        ],
+      } as any);
+
+      await installLegacyOverExisting('registry');
+
+      expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(
+        expect.objectContaining({ delete_dest_index: false }),
+        expect.anything()
+      );
+    });
+
+    it('still deletes the destination index when a trusted upgrade replaces a kibana_system transform', async () => {
+      esClient.transform.getTransform.mockResponse({
+        count: 1,
+        transforms: [
+          {
+            id: 'my_upload.policy_discovery-default-0.1.0',
+            authorization: { roles: ['kibana_system'] },
+          },
+        ],
+      } as any);
+
+      await installLegacyOverExisting('registry');
+
+      expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(
+        expect.objectContaining({ delete_dest_index: true }),
         expect.anything()
       );
     });
