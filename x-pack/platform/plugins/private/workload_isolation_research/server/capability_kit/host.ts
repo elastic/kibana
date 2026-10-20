@@ -103,6 +103,12 @@ export class ExecutionHost {
       readonly maxQueuePerClass?: number;
       readonly abortGraceMs?: number;
       readonly onCrossing?: (crossing: Crossing) => void;
+      /**
+       * 0.1.11: co-resident async runs share ONE isolate (memory, globals, transport port), so a
+       * buggy or hostile task can observe another co-resident run's packets/grants/credentials.
+       * 'same-principal' only co-locates runs with identical principal AND space.
+       */
+      readonly coResidency?: 'any' | 'same-principal';
     } = {},
     private readonly endpointFactory: typeof startEndpoint = startEndpoint
   ) {
@@ -206,8 +212,16 @@ export class ExecutionHost {
     const slots = this.pools.get(workloadClass) ?? [];
     this.pools.set(workloadClass, slots);
     const concurrency = this.options.concurrencyPerClass?.[workloadClass] ?? 1;
+    const head = queue[0];
+    const compatible = (slot: Slot): boolean =>
+      this.options.coResidency !== 'same-principal' ||
+      [...slot.active.values()].every(
+        (entry) =>
+          entry.bundle.principal === head.bundle.principal &&
+          entry.bundle.space === head.bundle.space
+      );
     const idle = slots.find(
-      (slot) => slot.ready && slot.active.size < concurrency && !slot.stopping
+      (slot) => slot.ready && slot.active.size < concurrency && !slot.stopping && compatible(slot)
     );
     if (!idle && slots.length < (this.options.slotsPerClass ?? 1)) {
       let endpoint: Endpoint;

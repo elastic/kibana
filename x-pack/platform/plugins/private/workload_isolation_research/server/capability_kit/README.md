@@ -1,4 +1,4 @@
-# Track 7 capability kit — 0.1.10 pre-release research slice
+# Track 7 capability kit — 0.1.11 pre-release research slice
 
 PRIVATE research code; no public Core API, plugin lifecycle hook, or automatic enablement.
 Base harness fd3138c. Only main owns TM claims/leases/results.
@@ -10,6 +10,26 @@ the whole slot: EVERY co-resident outcome is terminated, with collateral flag,
 initiatingRunId and all discardedRunIds (when multiple runs are lost). Slot crash
 also reports discarded IDs. Queue/admission/lease policy still belongs to TM.
 This is the minimal runner integration surface, NOT the complete 7.P acceptance.
+
+## 0.1.11 trust domain and co-residency (credential negatives)
+
+Per-run random grants stop confused-deputy BUGS. Tested fail-closed on both transports: an
+ungranted capability, a fabricated grant, an SO bridge bound to another principal or space,
+and namespace overrides. Live ES (t7p-live-task-auth-002): foreign index 403; API key
+revoked by the host mid-run gives 401 on the next local ES call.
+NEGATIVE FINDING: one isolate is ONE trust domain. With `concurrencyPerClass > 1`, a
+co-resident run can listen on the shared worker port/IPC. It sees another run's `run`
+packet, including its grants and `data` capture (ES credentials), and can invoke that run's
+capabilities AS that run. This is demonstrated in credential_negatives.node_test.ts. Grants
+are not a security boundary between co-resident code. Kibana plugin code is trusted
+in-process today; the kit isolates failure and blocking, not hostile code.
+Mitigation: `new ExecutionHost(registry, { coResidency: 'same-principal' })` co-locates
+only runs with identical principal AND space. Different identities get different slots
+(head-of-line FIFO per class), so they never share an isolate. The test proves 0
+exposure. Cost: up to one slot per concurrent identity per class. Default stays 'any'
+for 0.1.x compatibility. Recommended for multi-user classes (workflows, Agent Builder).
+Session tokens are NOT refreshed (capture is per-run); long runs need API-key/UIAM
+task credentials, or they fail closed with 401 when the token expires.
 
 ## 0.1.10 generic service binder (replaces hand-written runner facades)
 

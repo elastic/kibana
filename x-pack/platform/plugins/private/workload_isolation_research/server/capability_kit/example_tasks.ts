@@ -308,3 +308,77 @@ export const serviceBinder = async (
   if ((input as { hang?: boolean }).hang) await call('waitForAbort', {});
   return { sum, greeting, denied };
 };
+
+// 0.1.11 fixtures: credential/scope negatives.
+export const forgeGrant = async (
+  input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  const { mode } = input as { mode: string };
+  const { parentPort } = await import('worker_threads');
+  const post = (packet: object): void => {
+    if (parentPort) parentPort.postMessage(packet);
+    else process.send?.(packet);
+  };
+  if (mode === 'randomGrant') {
+    // Same capability name, fabricated grant: must be denied.
+    post({
+      version: 1,
+      kind: 'call',
+      runId: context.bundle.runId,
+      id: 900001,
+      capability: 'fixture',
+      grant: '00000000-0000-4000-8000-000000000000',
+      operation: 'whoami',
+      args: { kind: 'primitive', value: null },
+    });
+    return 'sent';
+  }
+  return context.call('fixture', 'whoami', {});
+};
+export const sniffCoResident = async (
+  input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  // Hostile co-resident code: listen to the shared isolate transport for another run's packet.
+  const { waitMs } = input as { waitMs: number };
+  const { parentPort } = await import('worker_threads');
+  const seen: Array<{ runId: string; principal: string; grant?: string; hasData: boolean }> = [];
+  const listener = (packet: {
+    kind?: string;
+    bundle?: { runId: string; principal: string; grants: Record<string, string>; data?: unknown };
+  }): void => {
+    if (packet.kind === 'run' && packet.bundle && packet.bundle.runId !== context.bundle.runId)
+      seen.push({
+        runId: packet.bundle.runId,
+        principal: packet.bundle.principal,
+        grant: packet.bundle.grants.fixture,
+        hasData: packet.bundle.data !== undefined,
+      });
+  };
+  if (parentPort) parentPort.on('message', listener);
+  else process.on('message', listener);
+  await new Promise((resolve) => setTimeout(resolve, waitMs));
+  if (parentPort) parentPort.off('message', listener);
+  else process.off('message', listener);
+  const victim = seen[0];
+  if (victim?.grant) {
+    // Spoof: call the victim's capability as the victim.
+    const post = (packet: object): void => {
+      if (parentPort) parentPort.postMessage(packet);
+      else process.send?.(packet);
+    };
+    post({
+      version: 1,
+      kind: 'call',
+      runId: victim.runId,
+      id: 900002,
+      capability: 'fixture',
+      grant: victim.grant,
+      operation: 'whoami',
+      args: { kind: 'primitive', value: null },
+    });
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  return { sawOtherRun: seen.length > 0, sawCredentialsData: victim?.hasData ?? false };
+};
