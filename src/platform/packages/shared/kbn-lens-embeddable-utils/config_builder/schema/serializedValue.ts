@@ -32,7 +32,11 @@ const rangeKeySchema = lazySchema(() =>
         .max(100),
     })
     .strict()
-    .meta({ id: 'visRangeKey', title: 'Range Key' })
+    .meta({
+      id: 'visRangeKey',
+      title: 'Range Key',
+      description: 'Identifies a range bucket. Omit either bound for an open end.',
+    })
 );
 
 const multiFieldKeySchema = lazySchema(() =>
