@@ -84,7 +84,7 @@ export default function getRuleExecutionKpiTests({ getService }: FtrProviderCont
         expect(errorEvents.length).to.be.above(0);
       });
 
-      await retry.try(async () => {
+      const kpiLogs = await retry.try(async () => {
         const kpiResponse = await supertestWithoutAuth
           .get(
             `${getUrlPrefix(
@@ -95,20 +95,24 @@ export default function getRuleExecutionKpiTests({ getService }: FtrProviderCont
           .auth(user.username, user.password);
         expect(kpiResponse.statusCode).to.be(200);
 
-        const kpiLogs = kpiResponse.body;
-        expect(Object.keys(kpiLogs)).to.eql([
-          'success',
-          'unknown',
-          'failure',
-          'activeAlerts',
-          'newAlerts',
-          'recoveredAlerts',
-          'erroredActions',
-          'triggeredActions',
-        ]);
-        expect(kpiLogs.success).to.be.above(0);
-        expect(kpiLogs.failure).to.be.above(0);
+        // The event log is indexed asynchronously, so only the counts are retried.
+        expect(kpiResponse.body.success).to.be.above(0);
+        expect(kpiResponse.body.failure).to.be.above(0);
+
+        return kpiResponse.body;
       });
+
+      expect(Object.keys(kpiLogs)).to.eql([
+        'success',
+        'unknown',
+        'failure',
+        'warning',
+        'activeAlerts',
+        'newAlerts',
+        'recoveredAlerts',
+        'erroredActions',
+        'triggeredActions',
+      ]);
     });
   });
 }
