@@ -53,7 +53,13 @@ export const useEntitiesWithAnomaliesCount = ({
     entityFilterClauses,
     error: indexError,
   } = useTileQueryInputs(spaceId, entityFilters);
-  const { jobIds, loading: isJobsLoading } = useInstalledSecurityJobsIds();
+  const {
+    jobIds,
+    loading: isJobsLoading,
+    isMlUser,
+    isLicensed,
+    isError: isJobsError,
+  } = useInstalledSecurityJobsIds();
 
   const isEnabled =
     !skip &&
@@ -74,7 +80,7 @@ export const useEntitiesWithAnomaliesCount = ({
 
   const {
     data: queryResult,
-    isLoading,
+    isInitialLoading: isLoading,
     isFetching,
     error,
   } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(
@@ -117,10 +123,19 @@ export const useEntitiesWithAnomaliesCount = ({
   return {
     count: queryResult?.count ?? 0,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
-    isLoading: isJobsLoading || isIndexLoading || isLoading || isFetching,
+    // A query that can never run (skipped, no index, no job) is not loading: react-query reports a
+    // disabled query with no data as loading for ever.
+    isLoading:
+      isJobsLoading || isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending:
       isJobsLoading || isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
+    /**
+     * No security ML job is installed, so the tile has nothing to count. Not when the jobs could not
+     * be asked for (no ML permission or licence, or the ML capabilities are still loading) or their
+     * fetch failed: then the list is empty too.
+     */
+    isMissingJobs: isMlUser && isLicensed && !isJobsError && !isJobsLoading && jobIds.length === 0,
     error: filteredError ?? indexError,
   };
 };

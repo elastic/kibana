@@ -9,9 +9,22 @@ import { isAlertActionNoOpCode, type BulkResponse } from '@kbn/alerting-v2-schem
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import * as i18n from './translations';
 
-export const uniqueByGroup = <T extends { group_hash: string }>(items: T[]): T[] => {
+/**
+ * Keeps one item per series. `group_hash` is rule-local, so episodes of two rules on the same
+ * host share it but are different series. Items without a `series_id` have no identity to act
+ * on and are dropped.
+ */
+export const uniqueBySeries = <T extends { series_id?: string | null }>(
+  items: T[]
+): Array<T & { series_id: string }> => {
   const seen = new Set<string>();
-  return items.filter((x) => (seen.has(x.group_hash) ? false : (seen.add(x.group_hash), true)));
+  return items.filter((item): item is T & { series_id: string } => {
+    if (!item.series_id || seen.has(item.series_id)) {
+      return false;
+    }
+    seen.add(item.series_id);
+    return true;
+  });
 };
 
 export interface BulkOutcome {
