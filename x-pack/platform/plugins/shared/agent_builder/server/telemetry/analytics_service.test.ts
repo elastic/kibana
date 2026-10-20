@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { createAnalytics } from '@elastic/ebt/client';
 import type { AnalyticsServiceSetup } from '@kbn/core/server';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -21,6 +22,7 @@ import {
   type ConversationRound,
   type VersionedAttachment,
 } from '@kbn/agent-builder-common';
+import type { ReportConversationFieldsChangedParams } from '@kbn/agent-builder-common/telemetry/agent_builder_events';
 import { ModelProvider } from '@kbn/inference-common';
 import type { ExecutionTelemetry } from '../services/execution/utils/report_round_telemetry';
 import { AnalyticsService } from './analytics_service';
@@ -51,6 +53,125 @@ describe('AnalyticsService', () => {
     describe.each(agentBuilderServerEbtEvents)('eventType: $eventType', (eventConfig) => {
       it('registers the event type', () => {
         expect(analytics.registerEventType).toHaveBeenCalledWith(eventConfig);
+      });
+    });
+  });
+
+  describe('reportConversationFieldsChanged', () => {
+    const params: ReportConversationFieldsChangedParams = {
+      conversation_id: 'conversation-1',
+      template_id: 'investigation',
+      source: 'execution',
+      change_kind: 'updated',
+      changed_fields: { status: true, close_reason: true },
+      changes: [
+        { field: 'status', previous_value: 'open', next_value: 'closed' },
+        { field: 'close_reason', next_value: 'benign' },
+      ],
+    };
+
+    it('reports the event as given', () => {
+      service.reportConversationFieldsChanged(params);
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged,
+        params
+      );
+    });
+
+    it('never throws when reporting fails', () => {
+      analytics.reportEvent.mockImplementation(() => {
+        throw new Error('analytics down');
+      });
+
+      expect(() => service.reportConversationFieldsChanged(params)).not.toThrow();
+      expect(logger.debug).toHaveBeenCalled();
+    });
+
+    describe('against the registered schema, in dev mode', () => {
+      const devAnalytics = createAnalytics({ isDev: true, logger: loggerMock.create() });
+
+      beforeAll(() => {
+        new AnalyticsService(
+          devAnalytics as unknown as AnalyticsServiceSetup,
+          loggerMock.create()
+        ).registerAgentBuilderEventTypes();
+      });
+
+      afterAll(async () => {
+        await devAnalytics.shutdown();
+      });
+
+      it('accepts a close and its reason in one payload', () => {
+        expect(() =>
+          devAnalytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged, params)
+        ).not.toThrow();
+      });
+
+      it('accepts a create, with no previous value', () => {
+        expect(() =>
+          devAnalytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged, {
+            conversation_id: 'conversation-1',
+            template_id: 'investigation',
+            source: 'workflow',
+            change_kind: 'created',
+            changed_fields: { status: true },
+            changes: [{ field: 'status', next_value: 'open' }],
+          })
+        ).not.toThrow();
+      });
+
+      it('accepts a cleared field, with no next value', () => {
+        expect(() =>
+          devAnalytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged, {
+            conversation_id: 'conversation-1',
+            template_id: 'investigation',
+            source: 'server_api',
+            change_kind: 'updated',
+            changed_fields: { close_reason: true },
+            changes: [{ field: 'close_reason', previous_value: 'benign' }],
+          })
+        ).not.toThrow();
+      });
+
+      it('rejects a change without the field name', () => {
+        expect(() =>
+          devAnalytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged, {
+            ...params,
+            changes: [{ previous_value: 'open', next_value: 'closed' }],
+          })
+        ).toThrow(/field/);
+      });
+
+      // `changed_fields` is a pass_through record, which EBT doesn't validate, so its shape is
+      // guaranteed by describeConversationFieldsChanged and its tests instead.
+      it('does not validate changed_fields, a pass_through record', () => {
+        const { changed_fields: _changedFields, ...withoutChangedFields } = params;
+
+        expect(() =>
+          devAnalytics.reportEvent(
+            AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged,
+            withoutChangedFields
+          )
+        ).not.toThrow();
+      });
+
+      it('rejects a key the schema does not declare, at the top level', () => {
+        expect(() =>
+          devAnalytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged, {
+            ...params,
+            verdict: 'free text',
+          })
+        ).toThrow(/verdict/);
+      });
+
+      it('rejects a key the schema does not declare, inside a change', () => {
+        expect(() =>
+          devAnalytics.reportEvent(AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged, {
+            ...params,
+            changes: [{ field: 'verdict', next_value: 'closed', text: 'free text' }],
+          })
+        ).toThrow(/text/);
       });
     });
   });
@@ -131,6 +252,69 @@ describe('AnalyticsService', () => {
         tool_call_errors: 0,
         tools_invoked: ['custom-3c9388baa67aef90'],
       });
+    });
+
+    it('reports reasoning tokens and the distinct models of the round', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round: {
+          ...round,
+          model_usage: {
+            ...round.model_usage,
+            reasoning_tokens: 3,
+            connectors: [
+              {
+                connector_id: 'c1',
+                model: 'gpt-97q',
+                llm_calls: 2,
+                input_tokens: 3,
+                output_tokens: 4,
+              },
+              {
+                connector_id: 'c2',
+                model: 'small-1',
+                llm_calls: 1,
+                input_tokens: 1,
+                output_tokens: 1,
+              },
+              {
+                connector_id: 'c3',
+                model: 'small-1',
+                llm_calls: 1,
+                input_tokens: 1,
+                output_tokens: 1,
+              },
+            ],
+          },
+        },
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({
+          reasoning_tokens: 3,
+          models: ['gpt-97q', 'small-1'],
+          models_count: 2,
+        })
+      );
+    });
+
+    it('omits the models of a round without a per-model breakdown', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        round,
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).not.toHaveProperty('models');
+      expect(payload).not.toHaveProperty('models_count');
     });
 
     it('reports attachments.read in tools_invoked', () => {
@@ -787,6 +971,40 @@ describe('AnalyticsService', () => {
           message_length: 2,
           response_length: 5,
         })
+      );
+    });
+
+    it("reports this execution's reasoning tokens and models", () => {
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        modelProvider,
+        conversationAttachments: [],
+        telemetry: telemetry({
+          executionRound: buildRound({
+            model_usage: {
+              connector_id: 'c1',
+              llm_calls: 1,
+              input_tokens: 4,
+              output_tokens: 2,
+              reasoning_tokens: 1,
+              connectors: [
+                {
+                  connector_id: 'c1',
+                  model: 'gpt-97q',
+                  llm_calls: 1,
+                  input_tokens: 4,
+                  output_tokens: 2,
+                  reasoning_tokens: 1,
+                },
+              ],
+            },
+          }),
+        }),
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).toEqual(
+        expect.objectContaining({ reasoning_tokens: 1, models: ['gpt-97q'], models_count: 1 })
       );
     });
 

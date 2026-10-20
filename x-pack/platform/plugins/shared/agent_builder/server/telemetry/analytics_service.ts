@@ -23,6 +23,7 @@ import type {
   ReportAgentCreatedParams,
   ReportAgentUpdatedParams,
   ReportCompactionTriggeredParams,
+  ReportConversationFieldsChangedParams,
   ReportPluginImportedParams,
   ReportExecutionCompleteParams,
   ReportRoundCompleteParams,
@@ -47,6 +48,7 @@ import {
   normalizePluginIdForTelemetry,
   normalizeSkillIdForTelemetry,
   normalizeToolIdForTelemetry,
+  getModelsForTelemetry,
 } from './utils';
 
 /**
@@ -135,6 +137,22 @@ export class AnalyticsService {
     } catch (error) {
       // Do not fail the request if telemetry fails
       this.logger.debug('Failed to report AgentUpdated telemetry event', { error });
+    }
+  }
+
+  /**
+   * Reports the template fields, opted in with `report_changes`, that one write changed, after the
+   * write has landed. Never throws.
+   */
+  reportConversationFieldsChanged(params: ReportConversationFieldsChangedParams): void {
+    try {
+      this.analytics.reportEvent<ReportConversationFieldsChangedParams>(
+        AGENT_BUILDER_EVENT_TYPES.ConversationFieldsChanged,
+        params
+      );
+    } catch (error) {
+      // Do not fail the write if telemetry fails
+      this.logger.debug('Failed to report ConversationFieldsChanged telemetry event', { error });
     }
   }
 
@@ -342,6 +360,8 @@ export class AnalyticsService {
           origin: round.origin?.type,
           input_tokens: round.model_usage.input_tokens,
           cached_input_tokens: round.model_usage.cached_input_tokens,
+          reasoning_tokens: round.model_usage.reasoning_tokens,
+          ...getModelsForTelemetry(round.model_usage),
           llm_calls: round.model_usage.llm_calls,
           message_length: round.input.message.length,
           model: round.model_usage.model,
@@ -409,6 +429,8 @@ export class AnalyticsService {
           outcome: telemetry.isRoundTerminal ? 'responded' : 'prompt_requested',
           input_tokens: executionRound.model_usage.input_tokens,
           cached_input_tokens: executionRound.model_usage.cached_input_tokens,
+          reasoning_tokens: executionRound.model_usage.reasoning_tokens,
+          ...getModelsForTelemetry(executionRound.model_usage),
           output_tokens: executionRound.model_usage.output_tokens,
           llm_calls: executionRound.model_usage.llm_calls,
           model: executionRound.model_usage.model,

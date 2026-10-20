@@ -73,6 +73,11 @@ const computedFields: Record<string, RuntimeField> = {
     script: { source: "emit('')" },
     customLabel: i18n.SOURCE_FIELD_LABEL,
   },
+  maintenance_windows: {
+    type: 'keyword',
+    script: { source: "emit('')" },
+    customLabel: i18n.MAINTENANCE_WINDOWS_FIELD_LABEL,
+  },
 };
 
 const keywordFieldSpec = (name: string): FieldSpec => ({
