@@ -579,6 +579,42 @@ describe('edotBrowser', () => {
       }
     });
 
+    it('timestamps web vitals like the instrumentation', () => {
+      for (let seed = 1; seed <= 30; seed++) {
+        const docs = createSession({ seed, pageViews: 1, health: HEALTH_PROFILES.critical });
+        const vital = (name: string) =>
+          docs.find(
+            (doc) =>
+              'event_name' in doc &&
+              doc.event_name === 'browser.web_vital' &&
+              doc.attributes?.['browser.web_vital.name'] === name
+          );
+        const vitalValue = (name: string) =>
+          Number(vital(name)?.attributes?.['browser.web_vital.value']);
+        const clickTimes = docs
+          .filter((doc) => 'event_name' in doc && doc.event_name === 'browser.user_action.click')
+          .map((doc) => doc['@timestamp']);
+
+        // FCP, LCP and TTFB at their value, relative to the navigation start. Timestamps are whole
+        // milliseconds and values are rounded to 0.1ms.
+        ['ttfb', 'fcp', 'lcp'].forEach((name) => {
+          expect(
+            Math.abs(Number(vital(name)?.['@timestamp']) - (TIMESTAMP + vitalValue(name)))
+          ).toBeLessThan(1.1);
+        });
+        // CLS at the largest shift, or when the page is hidden if nothing shifted
+        if (vitalValue('cls') < 0.0001) {
+          expect(vital('cls')?.['@timestamp']).toBe(TIMESTAMP + SESSION_DURATION);
+        } else {
+          expect(vital('cls')?.['@timestamp']).toBeLessThan(TIMESTAMP + SESSION_DURATION);
+        }
+        // INP at one of the clicks
+        if (clickTimes.length) {
+          expect(clickTimes).toContain(vital('inp')?.['@timestamp']);
+        }
+      }
+    });
+
     it('writes all timings and web vital values with a fractional part', () => {
       const docs = Array.from({ length: 10 }, (_, seed) => createSession({ seed })).flat();
       const timingPattern =

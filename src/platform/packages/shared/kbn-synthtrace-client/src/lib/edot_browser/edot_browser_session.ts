@@ -133,8 +133,11 @@ interface DocumentState {
   /** Resource timings are relative to the time origin of the document. */
   timeOrigin: number;
   navigationType: string;
-  interactions: number;
+  /** Times of the clicks on the document; INP is reported for one of them. */
+  interactionTimes: number[];
   clsValue: number;
+  /** Time of the largest layout shift, unset when nothing shifted. */
+  largestShiftTime?: number;
   inpValue: number;
 }
 
@@ -163,10 +166,20 @@ const stacktrace = (
     )})`,
   ].join('\n');
 
-/** CLS, and INP if the user interacted, which web-vitals reports when the document is hidden. */
+/**
+ * CLS, and INP if the user interacted, which web-vitals reports when the document is hidden. Like
+ * the instrumentation, they are timestamped with the largest shift and the interaction, if any.
+ */
 const hideDocument = (
   { client, random }: SessionContext,
-  { navigationType, interactions, clsValue, inpValue }: DocumentState,
+  {
+    timeOrigin,
+    navigationType,
+    interactionTimes,
+    clsValue,
+    largestShiftTime,
+    inpValue,
+  }: DocumentState,
   time: number
 ): EdotBrowserEvent[] => {
   const events: EdotBrowserEvent[] = [
@@ -177,14 +190,17 @@ const hideDocument = (
         id: vitalId(random, time),
         navigationType,
         attribution: {
-          largestShiftTarget: clsValue > 0 ? 'main > div.banner' : undefined,
+          largestShiftTarget: largestShiftTime !== undefined ? 'main > div.banner' : undefined,
+          largestShiftTime:
+            largestShiftTime !== undefined ? largestShiftTime - timeOrigin : undefined,
           largestShiftValue: clsValue,
           loadState: 'complete',
         },
       })
-      .timestamp(time),
+      .timestamp(largestShiftTime ?? time),
   ];
-  if (interactions > 0) {
+  if (interactionTimes.length > 0) {
+    const interactionTime = pick(random, interactionTimes);
     events.push(
       client
         .webVital({
@@ -194,12 +210,13 @@ const hideDocument = (
           navigationType,
           attribution: {
             interactionType: 'pointer',
+            interactionTime: interactionTime - timeOrigin,
             inputDelay: inpValue * 0.2,
             processingDuration: inpValue * 0.5,
             presentationDelay: inpValue * 0.3,
           },
         })
-        .timestamp(time)
+        .timestamp(interactionTime)
     );
   }
   return events;
@@ -406,7 +423,7 @@ const loadDocument = (
           elementRenderDelay: lcp - fcp,
         },
       })
-      .timestamp(at(loadEventEnd))
+      .timestamp(at(lcp))
   );
 
   const clsValue = random() < health.clsZeroRate ? 0 : sample(health.cls, random);
@@ -415,8 +432,11 @@ const loadDocument = (
     document: {
       timeOrigin: pageStart,
       navigationType: vitalNavigationType,
-      interactions: 0,
+      interactionTimes: [],
       clsValue,
+      // Layout shifts happen while the page renders
+      largestShiftTime:
+        clsValue > 0 ? at(between(random, fcp, Math.max(lcp, loadEventEnd))) : undefined,
       inpValue: sample(health.inp, random) * slowdown,
     },
     loadedAt: at(loadEventEnd),
@@ -430,9 +450,10 @@ const interactWithPage = (
   page: EdotBrowserPage,
   from: number,
   slotEnd: number
-): { events: EdotBrowserEvent[]; interactions: number } => {
+): { events: EdotBrowserEvent[]; clickTimes: number[] } => {
   const { client, site, health, random } = ctx;
   const events: EdotBrowserEvent[] = [];
+  const clickTimes: number[] = [];
 
   (page.requests ?? []).forEach((request) => {
     const time = Math.min(from + Math.floor(between(random, 5, 50)), slotEnd);
@@ -444,6 +465,7 @@ const interactWithPage = (
   for (let c = 0; c < clickCount; c++) {
     const clickTime = Math.floor(between(random, from, slotEnd));
     const { request, ...target } = pick(random, clickTargets);
+    clickTimes.push(clickTime);
     events.push(
       client
         .click({
@@ -468,7 +490,7 @@ const interactWithPage = (
     );
   }
 
-  return { events, interactions: clickCount };
+  return { events, clickTimes };
 };
 
 /** Builds a realistic EDOT Browser session: page loads, SPA navigations, interactions and requests. */
@@ -522,7 +544,7 @@ export const session = ({
 
     const interaction = interactWithPage(ctx, currentDocument, page, interactiveFrom, slotEnd);
     events.push(...interaction.events);
-    currentDocument.interactions += interaction.interactions;
+    currentDocument.interactionTimes.push(...interaction.clickTimes);
   }
 
   if (currentDocument) {
