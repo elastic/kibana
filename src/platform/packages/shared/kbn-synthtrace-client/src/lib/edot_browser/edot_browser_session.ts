@@ -14,10 +14,10 @@ import type {
   EdotBrowserClient,
   HttpInstrumentation,
   NavigationTimingType,
+  ResourceTimingValues,
 } from './edot_browser_client';
-import type { EdotBrowserLog } from './edot_browser_log';
 import type { EdotBrowserSpanDocument } from './edot_browser_span';
-import { sample, type HealthProfile } from './health_profiles';
+import { sample, type Distribution, type HealthProfile } from './health_profiles';
 import { between, pick } from './random';
 import { resourceTimings } from './resource_timings';
 
@@ -75,17 +75,20 @@ export interface EdotBrowserSite {
   exceptions?: readonly EdotBrowserExceptionTemplate[];
 }
 
-export interface EdotBrowserSessionOptions {
+/** When the session takes place: from `start` on, or ending at `end`. */
+type SessionAnchor = { start: number; end?: undefined } | { end: number; start?: undefined };
+
+export type EdotBrowserSessionOptions = SessionAnchor & {
   client: EdotBrowserClient;
   site: EdotBrowserSite;
   health: HealthProfile;
-  start: number;
   pageViews: number;
-  sessionDurationMs?: number;
+  /** How long the user stays on a page once it is usable, in milliseconds. */
+  dwell?: Distribution;
   /** Probability that a page view after the first is a full document load, not an SPA route change. */
   hardNavigationRate?: number;
   random?: () => number;
-}
+};
 
 export type EdotBrowserDocument = OtelLogDocument | EdotBrowserSpanDocument;
 export type EdotBrowserEvent = Serializable<EdotBrowserDocument>;
@@ -95,6 +98,9 @@ const MAX_RESOURCES = 8;
 const MOBILE_SLOWDOWN = 1.4;
 const DEFAULT_FAILURE_STATUS_CODES = [500, 502, 503, 504] as const;
 const RELOAD_RATE = 0.1;
+// Many short bounces, most views in the tens of seconds and a long tail of minutes-long reads
+const DEFAULT_DWELL: Distribution = { median: 10_000, sigma: 1 };
+const MIN_DWELL_MS = 500;
 
 const FILLER_RESOURCES: readonly EdotBrowserResource[] = [
   { path: '/static/js/vendor.4f1c2a.js', initiatorType: 'script', sizeBytes: 420_000 },
@@ -135,12 +141,41 @@ interface SessionContext {
 interface PageView {
   page: EdotBrowserPage;
   start: number;
+  /** When the page is usable and the user starts interacting with it. */
+  from: number;
   end: number;
+}
+
+/** Timings of a full page load, in milliseconds relative to the navigation start. */
+interface PageLoadPlan {
+  fetchStart: number;
+  documentTimings: ResourceTimingValues;
+  responseStart: number;
+  responseEnd: number;
+  fcp: number;
+  lcp: number;
+  resources: Array<{
+    resource: EdotBrowserResource;
+    timings: ResourceTimingValues;
+    nextHopProtocol: string;
+  }>;
+  domInteractive: number;
+  domContentLoadedEventStart: number;
+  domContentLoadedEventEnd: number;
+  domComplete: number;
+  loadEventEnd: number;
+  /** The resource timing instrumentation collects the entries after the load event, when idle. */
+  resourcesReportedAt: number;
+  clsValue: number;
+  /** Unset when nothing shifted. */
+  largestShiftTime?: number;
+  inpValue: number;
 }
 
 /** A full page load and its SPA route changes, until the next full load or the session end. */
 export interface DocumentPlan {
   navigationType: NavigationTimingType;
+  load: PageLoadPlan;
   /** The first page view loads the document, the others are route changes. */
   pageViews: [PageView, ...PageView[]];
   hiddenAt: number;
@@ -311,17 +346,11 @@ const sendRequest = (
   return events;
 };
 
-/** A full document load: navigation, sub-resources, navigation timing and load web vitals. */
-const loadDocument = (
-  ctx: SessionContext,
-  { page, start: pageStart, end }: PageView,
-  navigationType: NavigationTimingType
-): { events: EdotBrowserEvent[]; document: DocumentState; loadedAt: number } => {
-  const { client, site, health, random, slowdown } = ctx;
-  const url = toUrl(site, page.path);
-  const at = (offset: number) => Math.min(Math.floor(pageStart + offset), end);
-  const vitalNavigationType = navigationType === 'back_forward' ? 'back-forward' : navigationType;
-
+/** Samples the timings of a full page load. */
+const planPageLoad = (
+  { site, health, random, slowdown }: SessionContext,
+  page: EdotBrowserPage
+): PageLoadPlan => {
   // Document request
   const fetchStart = between(random, 1, 5);
   const documentTimings = resourceTimings(random, fetchStart, 0, 30_000, { newConnection: true });
@@ -342,10 +371,10 @@ const loadDocument = (
     Math.min(ownResources.length, MAX_RESOURCES),
     Math.floor(between(random, MIN_RESOURCES, MAX_RESOURCES + 1))
   );
-  const resources = [...ownResources, ...FILLER_RESOURCES].slice(0, resourceCount);
-  let lastResourceEnd = responseEnd;
-  const resourceLogs: EdotBrowserLog[] = resources.map(
-    ({ path, initiatorType, sizeBytes, renderBlocking, durationFactor = 1 }) => {
+  const resources = [...ownResources, ...FILLER_RESOURCES]
+    .slice(0, resourceCount)
+    .map((resource) => {
+      const { path, sizeBytes, renderBlocking, durationFactor = 1 } = resource;
       const resourceStart = renderBlocking
         ? responseEnd + between(random, 1, 20)
         : responseEnd + between(random, 0, Math.max(lcp - responseEnd, 1) * 0.8);
@@ -355,15 +384,11 @@ const loadDocument = (
         cached,
         newConnection: !cached && isAbsoluteUrl(path),
       });
-      lastResourceEnd = Math.max(lastResourceEnd, timings.responseEnd);
-      return client.resourceTiming({
-        url: toUrl(site, path),
-        initiatorType,
-        timings,
-        nextHopProtocol: random() < 0.7 ? 'h2' : 'h3',
-        renderBlockingStatus: renderBlocking ? 'blocking' : 'non-blocking',
-      });
-    }
+      return { resource, timings, nextHopProtocol: random() < 0.7 ? 'h2' : 'h3' };
+    });
+  const lastResourceEnd = Math.max(
+    responseEnd,
+    ...resources.map(({ timings }) => timings.responseEnd)
   );
 
   const domInteractive = responseEnd + (fcp - responseEnd) * 0.8;
@@ -371,16 +396,72 @@ const loadDocument = (
   const domContentLoadedEventEnd = domContentLoadedEventStart + between(random, 0.1, 15);
   const domComplete = Math.max(lastResourceEnd, lcp * 0.9, domContentLoadedEventEnd);
   const loadEventEnd = domComplete + between(random, 0.1, 5);
-  // The resource timing instrumentation collects the entries after the load event, when idle
-  const resourcesReportedAt = at(loadEventEnd + between(random, 1, 50));
+  const clsValue = random() < health.clsZeroRate ? 0 : sample(health.cls, random);
+
+  return {
+    fetchStart,
+    documentTimings,
+    responseStart,
+    responseEnd,
+    fcp,
+    lcp,
+    resources,
+    domInteractive,
+    domContentLoadedEventStart,
+    domContentLoadedEventEnd,
+    domComplete,
+    loadEventEnd,
+    resourcesReportedAt: loadEventEnd + between(random, 1, 50),
+    clsValue,
+    // Layout shifts happen while the page renders
+    largestShiftTime: clsValue > 0 ? between(random, fcp, Math.max(lcp, loadEventEnd)) : undefined,
+    inpValue: sample(health.inp, random) * slowdown,
+  };
+};
+
+/** The events of a full page load: navigation, sub-resources, navigation timing and web vitals. */
+const loadDocument = (
+  { client, site, random }: SessionContext,
+  { page, start: pageStart, end }: PageView,
+  navigationType: NavigationTimingType,
+  {
+    fetchStart,
+    documentTimings,
+    responseStart,
+    responseEnd,
+    fcp,
+    lcp,
+    resources,
+    domInteractive,
+    domContentLoadedEventStart,
+    domContentLoadedEventEnd,
+    domComplete,
+    loadEventEnd,
+    resourcesReportedAt,
+    clsValue,
+    largestShiftTime,
+    inpValue,
+  }: PageLoadPlan
+): { events: EdotBrowserEvent[]; document: DocumentState } => {
+  const url = toUrl(site, page.path);
+  const at = (offset: number) => Math.min(Math.floor(pageStart + offset), end);
+  const vitalNavigationType = navigationType === 'back_forward' ? 'back-forward' : navigationType;
 
   const events: EdotBrowserEvent[] = [
     // The navigation instrumentation reports hard navigations on DOMContentLoaded
     client.navigation({ url, sameDocument: false }).timestamp(at(domContentLoadedEventStart)),
-    ...resourceLogs.map((log) => log.timestamp(resourcesReportedAt)),
-  ];
-
-  events.push(
+    ...resources.map(
+      ({ resource: { path, initiatorType, renderBlocking }, timings, nextHopProtocol }) =>
+        client
+          .resourceTiming({
+            url: toUrl(site, path),
+            initiatorType,
+            timings,
+            nextHopProtocol,
+            renderBlockingStatus: renderBlocking ? 'blocking' : 'non-blocking',
+          })
+          .timestamp(at(resourcesReportedAt))
+    ),
     client
       .navigationTiming({
         url,
@@ -443,34 +524,26 @@ const loadDocument = (
           elementRenderDelay: lcp - fcp,
         },
       })
-      .timestamp(at(lcp))
-  );
+      .timestamp(at(lcp)),
+  ];
 
-  const clsValue = random() < health.clsZeroRate ? 0 : sample(health.cls, random);
   return {
     events,
     document: {
       timeOrigin: pageStart,
       navigationType: vitalNavigationType,
       clsValue,
-      // Layout shifts happen while the page renders
-      largestShiftTime:
-        clsValue > 0 ? at(between(random, fcp, Math.max(lcp, loadEventEnd))) : undefined,
-      inpValue: sample(health.inp, random) * slowdown,
+      largestShiftTime: largestShiftTime !== undefined ? at(largestShiftTime) : undefined,
+      inpValue,
     },
-    loadedAt: at(loadEventEnd),
   };
 };
 
-/**
- * What the user does on a page view from `from` on: requests fired by the page, clicks and
- * uncaught exceptions.
- */
+/** What the user does on a page view: requests fired by the page, clicks and uncaught exceptions. */
 const interactWithPage = (
   ctx: SessionContext,
   document: DocumentState,
-  { page, end: slotEnd }: PageView,
-  from: number
+  { page, from, end: slotEnd }: PageView
 ): { events: EdotBrowserEvent[]; clickTimes: number[] } => {
   const { client, site, health, random } = ctx;
   const events: EdotBrowserEvent[] = [];
@@ -523,40 +596,45 @@ const routeChange = (
     .navigation({ url: toUrl(site, page.path), sameDocument: true, type: 'push' })
     .timestamp(start);
 
-type SessionTiming = Required<
-  Pick<
-    EdotBrowserSessionOptions,
-    'start' | 'pageViews' | 'sessionDurationMs' | 'hardNavigationRate'
-  >
->;
-
 /**
- * Splits a session into equally long page views and groups them into documents: the first page
- * view and a share of the later ones are full page loads, the others are SPA route changes.
+ * Plans a session's page views, back to back from time 0, and groups them into documents: the
+ * first page view and a share of the later ones are full page loads, the others are SPA route
+ * changes. A page view lasts until the page is usable, then as long as the user stays on it.
  */
 export const planDocuments = (
-  { site, random }: Pick<SessionContext, 'site' | 'random'>,
-  { start, pageViews, sessionDurationMs, hardNavigationRate }: SessionTiming
+  ctx: SessionContext,
+  {
+    pageViews,
+    dwell,
+    hardNavigationRate,
+  }: { pageViews: number; dwell: Distribution; hardNavigationRate: number }
 ): DocumentPlan[] => {
-  const sessionEnd = start + sessionDurationMs;
-  const slotDuration = sessionDurationMs / pageViews;
+  const { site, random } = ctx;
   const documents: Array<Omit<DocumentPlan, 'hiddenAt'>> = [];
+  let time = 0;
+  const pageView = (page: EdotBrowserPage, from: number): PageView => {
+    const view = {
+      page,
+      start: time,
+      from,
+      end: from + Math.max(Math.round(sample(dwell, random)), MIN_DWELL_MS),
+    };
+    time = view.end + 1;
+    return view;
+  };
 
   for (let i = 0; i < pageViews; i++) {
-    const slotStart = start + i * slotDuration;
-    const view: PageView = {
-      page: pick(random, site.pages),
-      // The session opens with its first page, later page views start shortly into their slot
-      start: Math.floor(i === 0 ? start : slotStart + between(random, 0, slotDuration * 0.1)),
-      end: Math.floor(Math.min(slotStart + slotDuration, sessionEnd) - 1),
-    };
+    const page = pick(random, site.pages);
     const current = documents[documents.length - 1];
     if (current && random() >= hardNavigationRate) {
-      current.pageViews.push(view);
+      current.pageViews.push(pageView(page, time));
     } else {
+      const navigationType = current && random() < RELOAD_RATE ? 'reload' : 'navigate';
+      const load = planPageLoad(ctx, page);
       documents.push({
-        navigationType: current && random() < RELOAD_RATE ? 'reload' : 'navigate',
-        pageViews: [view],
+        navigationType,
+        load,
+        pageViews: [pageView(page, time + Math.floor(load.loadEventEnd))],
       });
     }
   }
@@ -564,21 +642,35 @@ export const planDocuments = (
   // A document is hidden right before the next one loads
   return documents.map((document, index) => ({
     ...document,
-    hiddenAt:
-      index + 1 < documents.length ? documents[index + 1].pageViews[0].start - 1 : sessionEnd,
+    hiddenAt: index + 1 < documents.length ? documents[index + 1].pageViews[0].start - 1 : time - 1,
   }));
 };
+
+const shiftPageView = (view: PageView, offset: number): PageView => ({
+  ...view,
+  start: view.start + offset,
+  from: view.from + offset,
+  end: view.end + offset,
+});
+
+/** Moves a planned document from time 0 to the session's actual time. */
+const shiftDocument = (
+  { pageViews: [first, ...rest], hiddenAt, ...document }: DocumentPlan,
+  offset: number
+): DocumentPlan => ({
+  ...document,
+  pageViews: [shiftPageView(first, offset), ...rest.map((view) => shiftPageView(view, offset))],
+  hiddenAt: hiddenAt + offset,
+});
 
 /** Everything that happens to one document, from its load until it is hidden. */
 const simulateDocument = (
   ctx: SessionContext,
-  { navigationType, pageViews: [load, ...routeChanges], hiddenAt }: DocumentPlan
+  { navigationType, load, pageViews, hiddenAt }: DocumentPlan
 ): EdotBrowserEvent[] => {
-  const { events, document, loadedAt } = loadDocument(ctx, load, navigationType);
-  const visits = [
-    interactWithPage(ctx, document, load, loadedAt),
-    ...routeChanges.map((view) => interactWithPage(ctx, document, view, view.start)),
-  ];
+  const [loadView, ...routeChanges] = pageViews;
+  const { events, document } = loadDocument(ctx, loadView, navigationType, load);
+  const visits = pageViews.map((view) => interactWithPage(ctx, document, view));
 
   return [
     ...events,
@@ -594,16 +686,16 @@ const simulateDocument = (
 };
 
 /** Builds a realistic EDOT Browser session: page loads, SPA navigations, interactions and requests. */
-export const session = ({
-  client,
-  site,
-  health,
-  start,
-  pageViews,
-  sessionDurationMs = 60_000,
-  hardNavigationRate = 0.2,
-  random = Math.random,
-}: EdotBrowserSessionOptions): EdotBrowserEvent[] => {
+export const session = (options: EdotBrowserSessionOptions): EdotBrowserEvent[] => {
+  const {
+    client,
+    site,
+    health,
+    pageViews,
+    dwell = DEFAULT_DWELL,
+    hardNavigationRate = 0.2,
+    random = Math.random,
+  } = options;
   const ctx: SessionContext = {
     client,
     site,
@@ -611,8 +703,11 @@ export const session = ({
     random,
     slowdown: client.isMobile ? MOBILE_SLOWDOWN : 1,
   };
+  const documents = planDocuments(ctx, { pageViews, dwell, hardNavigationRate });
+  const duration = documents.length ? documents[documents.length - 1].hiddenAt : 0;
+  const start = options.start !== undefined ? options.start : options.end - duration;
 
-  return planDocuments(ctx, { start, pageViews, sessionDurationMs, hardNavigationRate }).flatMap(
-    (plan) => simulateDocument(ctx, plan)
-  );
+  return documents
+    .map((document) => shiftDocument(document, start))
+    .flatMap((document) => simulateDocument(ctx, document));
 };

@@ -403,8 +403,6 @@ export const parseDigitalExperienceScenarioOpts = (
 
 const MIN_PAGE_VIEWS = 1;
 const MAX_PAGE_VIEWS = 5;
-const MIN_PAGE_VIEW_MS = 8_000;
-const MAX_PAGE_VIEW_MS = 20_000;
 
 /** One generator per app in the catalogue, each producing EDOT Browser sessions over `range`. */
 export const generateEdotBrowserSessions = (
@@ -426,11 +424,6 @@ export const generateEdotBrowserSessions = (
         .generator((timestamp, _index, { stepMilliseconds }) => {
           const pageViews =
             MIN_PAGE_VIEWS + Math.floor(Math.random() * (MAX_PAGE_VIEWS - MIN_PAGE_VIEWS + 1));
-          const pageViewMs =
-            MIN_PAGE_VIEW_MS + Math.random() * (MAX_PAGE_VIEW_MS - MIN_PAGE_VIEW_MS);
-          const sessionDurationMs = Math.round(pageViews * pageViewMs);
-          // Sessions end by `timestamp`, which live mode keeps at or before now
-          const sessionEnd = timestamp - Math.floor(Math.random() * stepMilliseconds);
 
           return edotBrowser.session({
             client: app.client(edotBrowser.pickBrowserProfile(Math.random, browserWeights), {
@@ -439,9 +432,9 @@ export const generateEdotBrowserSessions = (
             }),
             site,
             health: edotBrowser.healthProfiles[health],
-            start: sessionEnd - sessionDurationMs,
+            // Sessions end by `timestamp`, which live mode keeps at or before now
+            end: timestamp - Math.floor(Math.random() * stepMilliseconds),
             pageViews,
-            sessionDurationMs,
           });
         });
     }

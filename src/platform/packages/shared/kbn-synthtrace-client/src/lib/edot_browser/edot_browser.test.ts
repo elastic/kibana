@@ -10,7 +10,12 @@
 import { asFloat } from './as_float';
 import { BROWSER_PROFILES, pickBrowserProfile, type BrowserProfile } from './browser_profiles';
 import { planDocuments } from './edot_browser_session';
-import { HEALTH_PROFILES, getWebVitalRating } from './health_profiles';
+import {
+  HEALTH_PROFILES,
+  getWebVitalRating,
+  type Distribution,
+  type HealthProfile,
+} from './health_profiles';
 import type { EdotBrowserSpanDocument } from './edot_browser_span';
 import { edotBrowser, type EdotBrowserDocument, type EdotBrowserSite } from '.';
 
@@ -477,76 +482,109 @@ describe('edotBrowser', () => {
   });
 
   describe('planDocuments', () => {
-    const plan = (seed: number, pageViews: number, hardNavigationRate = 0.2) =>
+    const DWELL = { median: 10_000, sigma: 1 };
+    const plan = (
+      seed: number,
+      pageViews: number,
+      {
+        hardNavigationRate = 0.2,
+        health = HEALTH_PROFILES.healthy,
+      }: { hardNavigationRate?: number; health?: HealthProfile } = {}
+    ) =>
       planDocuments(
-        { site: SITE, random: seededRandom(seed) },
-        { start: TIMESTAMP, pageViews, sessionDurationMs: 60_000, hardNavigationRate }
+        { client: createClient(), site: SITE, health, random: seededRandom(seed), slowdown: 1 },
+        { pageViews, dwell: DWELL, hardNavigationRate }
       );
 
-    it('splits the session into consecutive page views, starting with a full load', () => {
+    it('plans back-to-back page views from 0, starting with a full load', () => {
       for (let seed = 1; seed <= 30; seed++) {
         const documents = plan(seed, 5);
         const pageViews = documents.flatMap((document) => document.pageViews);
 
         expect(documents[0].navigationType).toBe('navigate');
         expect(pageViews).toHaveLength(5);
-        expect(pageViews[0].start).toBe(TIMESTAMP);
-        pageViews.forEach(({ start, end }, index) => {
-          expect(start).toBeLessThan(end);
-          expect(end).toBeLessThan(TIMESTAMP + 60_000);
+        expect(pageViews[0].start).toBe(0);
+        pageViews.forEach(({ start, from, end }, index) => {
+          expect(start).toBeLessThanOrEqual(from);
+          expect(end - from).toBeGreaterThanOrEqual(500);
           if (index > 0) {
-            expect(start).toBeGreaterThan(pageViews[index - 1].end);
+            expect(start).toBe(pageViews[index - 1].end + 1);
           }
         });
       }
     });
 
+    it('lets the user start on a loaded page once it has loaded, however long that takes', () => {
+      for (let seed = 1; seed <= 30; seed++) {
+        plan(seed, 5, { health: HEALTH_PROFILES.critical }).forEach(({ load, pageViews }) => {
+          const [{ start, from }, ...routeChanges] = pageViews;
+          expect(from).toBe(start + Math.floor(load.loadEventEnd));
+          routeChanges.forEach((view) => expect(view.from).toBe(view.start));
+        });
+      }
+    });
+
+    it('varies how long the user stays on a page', () => {
+      const dwellTimes = Array.from({ length: 50 }, (_, seed) => plan(seed, 5))
+        .flat()
+        .flatMap(({ pageViews }) => pageViews.map(({ from, end }) => end - from));
+
+      // Bounces and long reads, like a log-normal distribution with a median of 10s
+      expect(Math.min(...dwellTimes)).toBeLessThan(2_000);
+      expect(Math.max(...dwellTimes)).toBeGreaterThan(60_000);
+    });
+
     it('hides each document right before the next one loads, and the last at the session end', () => {
       for (let seed = 1; seed <= 30; seed++) {
         const documents = plan(seed, 5);
+        const { pageViews } = documents[documents.length - 1];
+        const lastView = pageViews[pageViews.length - 1];
 
         documents.forEach(({ hiddenAt }, index) => {
           const next = documents[index + 1];
-          expect(hiddenAt).toBe(next ? next.pageViews[0].start - 1 : TIMESTAMP + 60_000);
+          expect(hiddenAt).toBe(next ? next.pageViews[0].start - 1 : lastView.end);
         });
       }
     });
 
     it('turns page views into route changes or full loads by hardNavigationRate', () => {
-      expect(plan(1, 5, 0)).toHaveLength(1);
-      expect(plan(1, 5, 1)).toHaveLength(5);
+      expect(plan(1, 5, { hardNavigationRate: 0 })).toHaveLength(1);
+      expect(plan(1, 5, { hardNavigationRate: 1 })).toHaveLength(5);
     });
   });
 
   describe('session', () => {
-    const SESSION_DURATION = 60_000;
-
     const createSession = ({
       seed = 1,
       pageViews = 4,
       health = HEALTH_PROFILES.healthy,
       sessionId,
       site = SITE,
-      sessionDurationMs = SESSION_DURATION,
+      dwell,
+      end,
     }: {
       seed?: number;
       pageViews?: number;
-      health?: (typeof HEALTH_PROFILES)[keyof typeof HEALTH_PROFILES];
+      health?: HealthProfile;
       sessionId?: string;
       site?: EdotBrowserSite;
-      sessionDurationMs?: number;
+      dwell?: Distribution;
+      /** Anchors the session to end here instead of starting at `TIMESTAMP`. */
+      end?: number;
     } = {}) =>
       edotBrowser
         .session({
+          ...(end !== undefined ? { end } : { start: TIMESTAMP }),
           client: createClient(sessionId),
           site,
           health,
-          start: TIMESTAMP,
           pageViews,
-          sessionDurationMs,
+          dwell,
           random: seededRandom(seed),
         })
         .flatMap((event) => event.serialize());
+    const timestamps = (docs: ReturnType<typeof createSession>) =>
+      docs.map((doc) => Number(doc['@timestamp']));
 
     const eventNames = (docs: ReturnType<typeof createSession>) =>
       docs.map((doc) => ('event_name' in doc ? doc.event_name : undefined));
@@ -599,12 +637,16 @@ describe('edotBrowser', () => {
       expect(vitals).toEqual(expect.arrayContaining(['ttfb', 'fcp', 'lcp', 'cls']));
     });
 
-    it('keeps all events inside the session window', () => {
+    it('starts sessions at start or ends them at end', () => {
       for (let seed = 1; seed <= 20; seed++) {
-        createSession({ seed }).forEach((doc) => {
-          expect(doc['@timestamp']).toBeGreaterThanOrEqual(TIMESTAMP);
-          expect(doc['@timestamp']).toBeLessThanOrEqual(TIMESTAMP + SESSION_DURATION);
-        });
+        const fromStart = timestamps(createSession({ seed }));
+        const toEnd = timestamps(createSession({ seed, end: TIMESTAMP }));
+
+        expect(Math.min(...fromStart)).toBeGreaterThanOrEqual(TIMESTAMP);
+        expect(Math.max(...toEnd)).toBeLessThanOrEqual(TIMESTAMP);
+        // The same session, moved in time
+        const offset = fromStart[0] - toEnd[0];
+        fromStart.forEach((timestamp, index) => expect(timestamp - toEnd[index]).toBe(offset));
       }
     });
 
@@ -739,11 +781,12 @@ describe('edotBrowser', () => {
             Math.abs(Number(vital(name)?.['@timestamp']) - (TIMESTAMP + vitalValue(name)))
           ).toBeLessThan(1.1);
         });
-        // CLS at the largest shift, or when the page is hidden if nothing shifted
+        // CLS at the largest shift, or when the page is hidden at the session end if nothing shifted
+        const sessionEnd = Math.max(...timestamps(docs));
         if (vitalValue('cls') < 0.0001) {
-          expect(vital('cls')?.['@timestamp']).toBe(TIMESTAMP + SESSION_DURATION);
+          expect(vital('cls')?.['@timestamp']).toBe(sessionEnd);
         } else {
-          expect(vital('cls')?.['@timestamp']).toBeLessThan(TIMESTAMP + SESSION_DURATION);
+          expect(vital('cls')?.['@timestamp']).toBeLessThan(sessionEnd);
         }
         // INP at one of the clicks
         if (clickTimes.length) {
@@ -814,7 +857,7 @@ describe('edotBrowser', () => {
         createSession({
           seed,
           pageViews: 5,
-          sessionDurationMs: 3_000,
+          dwell: { median: 300, sigma: 0.5 },
           health: HEALTH_PROFILES.critical,
         })
       ).flat();
