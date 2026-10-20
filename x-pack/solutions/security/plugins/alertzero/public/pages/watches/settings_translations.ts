@@ -159,6 +159,54 @@ export const READ_ONLY_TOOLTIP = i18n.translate(
   }
 );
 
+export const UNSAVED_CHANGES_BADGE_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.unsavedChangesBadgeLabel',
+  { defaultMessage: 'Unsaved changes' }
+);
+
+export const NO_CHANGES_TO_SAVE_TOOLTIP = i18n.translate(
+  'xpack.alertzero.watches.settings.noChangesToSaveTooltip',
+  { defaultMessage: 'No changes to save' }
+);
+
+export const KEEP_EDITING_BUTTON_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.keepEditingButtonLabel',
+  { defaultMessage: 'Keep editing' }
+);
+
+export const LEAVE_PROMPT_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.leavePromptTitle',
+  { defaultMessage: 'Leave without saving?' }
+);
+
+export const LEAVE_PROMPT_DESCRIPTION = i18n.translate(
+  'xpack.alertzero.watches.settings.leavePromptDescription',
+  {
+    defaultMessage:
+      'You have unsaved changes on this Watch. If you leave, those changes will be lost unless you save first.',
+  }
+);
+
+export const LEAVE_PROMPT_CONFIRM_BUTTON_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.leavePromptConfirmButtonLabel',
+  { defaultMessage: 'Leave without saving' }
+);
+
+export const DISCARD_CONFIRM_TITLE = i18n.translate(
+  'xpack.alertzero.watches.settings.discardConfirmTitle',
+  { defaultMessage: 'Discard unsaved changes?' }
+);
+
+export const DISCARD_CONFIRM_DESCRIPTION = i18n.translate(
+  'xpack.alertzero.watches.settings.discardConfirmDescription',
+  { defaultMessage: 'The following Workers have unsaved changes that will be lost:' }
+);
+
+export const DISCARD_CONFIRM_BUTTON_LABEL = i18n.translate(
+  'xpack.alertzero.watches.settings.discardConfirmButtonLabel',
+  { defaultMessage: 'Discard' }
+);
+
 /** Shown instead of navigating when managed workflows are hidden in this space. */
 export const MANAGED_WORKFLOWS_DISABLED_POPOVER_TITLE = i18n.translate(
   'xpack.alertzero.watches.settings.managedWorkflowsDisabledPopoverTitle',

@@ -25,6 +25,9 @@ import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { stringify } from 'yaml';
+import type { AppHeaderBack } from '@kbn/app-header';
+import { useChromeAppHeaderRegistration } from '@kbn/app-header';
+import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import {
@@ -63,11 +66,10 @@ export interface TemplateDetailProps {
   /** Called once the template body has loaded — e.g. to set breadcrumbs. */
   onLoaded?: (template: TemplateBody) => void;
   /**
-   * Rendered at the top of the left column (e.g. a "Back to library" link). Kept
-   * as a slot so navigation stays in the host app while this component owns the
-   * full two-column layout (letting the preview panel reach the top of the page).
+   * Where back leads from the details step (e.g. the library). Registered in the
+   * Chrome header in project chrome, rendered atop the left column in classic chrome.
    */
-  backButton?: React.ReactNode;
+  back?: AppHeaderBack;
   /** Enables the graph/YAML preview toggle. Defaults to YAML-only when false. */
   showGraphPreview?: boolean;
   /**
@@ -102,7 +104,7 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   slug,
   template,
   onLoaded,
-  backButton,
+  back,
   showGraphPreview = false,
   installMode = 'catalog',
 }) {
@@ -135,6 +137,28 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
     setPreviewValues({});
     setActiveStep('details');
   }, [resetKey]);
+
+  // The setup step's back returns to the template summary; only the details
+  // step leaves the view, through the host's `back`.
+  const templateName = data?.metadata.name;
+  const activeBack = useMemo<AppHeaderBack | undefined>(() => {
+    if (activeStep !== 'setup' || !templateName) {
+      return back;
+    }
+    return {
+      // The summary step has no URL of its own.
+      href: window.location.pathname,
+      label: templateName,
+      onClick: (event) => {
+        event.preventDefault();
+        setActiveStep('details');
+      },
+    };
+  }, [activeStep, back, templateName]);
+
+  const isClassicChrome = useChromeStyle() === 'classic';
+  const headerConfig = useMemo(() => ({ back: activeBack }), [activeBack]);
+  useChromeAppHeaderRegistration(headerConfig);
 
   const previewYaml = useMemo(
     () => (data ? renderTemplate({ template: data, values: previewValues }) : ''),
@@ -251,26 +275,6 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
   }).toString();
   // No specific solutions listed means all solutions are supported
   const solutions = metadata.solutions?.length ? metadata.solutions : Object.keys(SOLUTION_ICONS);
-
-  // The setup step's back link returns to the template summary; only the
-  // details step leaves the view, which is the host's `backButton` slot.
-  const backLink =
-    activeStep === 'setup' ? (
-      <EuiButtonEmpty
-        size="xs"
-        flush="left"
-        iconType="chevronSingleLeft"
-        onClick={() => setActiveStep('details')}
-        data-test-subj="workflowLibraryTemplateDetailBackToTemplateButton"
-      >
-        {i18n.translate('workflows.library.templateDetail.backToTemplate', {
-          defaultMessage: 'Back to {name}',
-          values: { name: metadata.name },
-        })}
-      </EuiButtonEmpty>
-    ) : (
-      backButton
-    );
 
   const styles = {
     // Left column holds the back link + metadata; nudged down so the back link
@@ -406,12 +410,25 @@ export const TemplateDetail = React.memo<TemplateDetailProps>(function TemplateD
           gutterSize="none"
           css={[styles.leftOuter, { height: '100%' }]}
         >
-          {backLink ? (
+          {/* Project chrome renders `activeBack` in its header instead. */}
+          {isClassicChrome && activeBack ? (
             // Always visible, outside the scrollable content below. Shrink-wrap
             // + align left so the button's label isn't centered by the
             // full-width column (EuiButtonEmpty centers its content otherwise).
             <EuiFlexItem grow={false} css={{ alignItems: 'flex-start' }}>
-              {backLink}
+              <EuiButtonEmpty
+                size="xs"
+                flush="left"
+                iconType="chevronSingleLeft"
+                href={activeBack.href}
+                onClick={activeBack.onClick}
+                data-test-subj="workflowLibraryTemplateDetailBackButton"
+              >
+                {i18n.translate('workflows.library.templateDetail.backTo', {
+                  defaultMessage: 'Back to {destination}',
+                  values: { destination: activeBack.label },
+                })}
+              </EuiButtonEmpty>
             </EuiFlexItem>
           ) : null}
 

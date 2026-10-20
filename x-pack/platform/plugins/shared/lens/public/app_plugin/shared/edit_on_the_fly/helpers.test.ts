@@ -781,7 +781,7 @@ describe('Lens inline editing helpers', () => {
       );
     });
 
-    it('uses dataViews.create when spec has timeFieldName', async () => {
+    it('uses dataViews.create without fetching fields when spec has timeFieldName', async () => {
       mockFetchData.mockImplementation(() => ({
         response: { columns: queryResponseColumns, values: [] },
       }));
@@ -796,7 +796,8 @@ describe('Lens inline editing helpers', () => {
       );
 
       expect(dataViews.create).toHaveBeenCalledWith(
-        expect.objectContaining({ timeFieldName: '@timestamp' })
+        expect.objectContaining({ timeFieldName: '@timestamp' }),
+        true
       );
       expect(mockCreateEsqlAdHocDataView).not.toHaveBeenCalled();
     });
