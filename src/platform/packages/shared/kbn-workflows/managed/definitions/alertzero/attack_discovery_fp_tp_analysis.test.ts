@@ -37,6 +37,7 @@ interface YamlStep {
   'on-failure'?: { continue?: boolean; retry?: Record<string, unknown> };
   'agent-id'?: string;
   'connector-id-by-feature'?: string;
+  'explicit-connector-feature-id'?: string;
   'create-conversation'?: boolean;
   'plugin-id'?: string;
   'aggregate-by'?: string;
