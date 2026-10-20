@@ -37,7 +37,7 @@ import { normalizeTimeRange } from '../../../../../common/utils/normalize_time_r
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
 import { useGraphTelemetry } from '../../../../shared/hooks/use_graph_telemetry';
 import { extractTimelineCapabilities } from '../../../../../common/utils/timeline_capabilities';
-import { useEntityFlyoutTimeRange } from '../../../../../entity_analytics/hooks/use_entity_flyout_time_range';
+import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/alert_time_range_overrides';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -153,8 +153,8 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
 
   const { dataView, status } = useDataView(PageScope.default);
   const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
-  // Entity mode only: the entity flyout's time range (set by its opener) seeds the graph's picker.
-  const entityGraphTimeRange = useEntityFlyoutTimeRange() ?? DEFAULT_ENTITY_GRAPH_TIME_RANGE;
+  // Entity mode only: a scope that pins a time range seeds the graph's picker.
+  const entityGraphTimeRange = getScopeFlyoutTimeRange(scopeId) ?? DEFAULT_ENTITY_GRAPH_TIME_RANGE;
 
   // Interpret the clicked node and route it to the appropriate consumer-provided preview opener.
   const onOpenEventPreview = useCallback(

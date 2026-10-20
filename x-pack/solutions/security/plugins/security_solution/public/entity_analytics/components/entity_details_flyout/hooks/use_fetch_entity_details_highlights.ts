@@ -24,10 +24,7 @@ import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
-import {
-  entityFlyoutTimeRangeToMs,
-  useEntityFlyoutTimeRange,
-} from '../../../hooks/use_entity_flyout_time_range';
+import { getScopeFlyoutTimeRangeMs } from '../../../common/alert_time_range_overrides';
 import {
   buildExecutionContext,
   EA_EXECUTION_CONTEXT_NAMES,
@@ -121,6 +118,7 @@ export const useFetchEntityDetailsHighlights = ({
   refetchPersistedSummary,
   persistSummary,
   mode = 'single',
+  scopeId,
 }: {
   connectorId: string;
   anonymizationFields: AnonymizationFieldResponse[];
@@ -135,12 +133,13 @@ export const useFetchEntityDetailsHighlights = ({
   /** Refetch the persisted summary from the metadata datastream after a new one is saved. */
   refetchPersistedSummary?: () => void;
   persistSummary: boolean;
+  /** Scope the flyout was opened from; a scope that pins a time range bounds the anomalies fed to the summary. */
+  scopeId?: string;
 }) => {
   const { inference } = useKibana().services;
   const { fetchEntityDetailsHighlights, saveEntityAiSummary } = useEntityAnalyticsRoutes();
   const { addError } = useAppToasts();
   const currentUser = useCurrentUser();
-  const flyoutTimeRange = useEntityFlyoutTimeRange();
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [error, setError] = useState<Error | null>(null);
@@ -188,9 +187,9 @@ export const useFetchEntityDetailsHighlights = ({
     setIsGeneratingSummary(true);
 
     try {
-      // Anomalies feeding the summary use the flyout-level range when the opener pinned one
+      // Anomalies feeding the summary use the opener's pinned range when its scope has one
       // (resolved at generation time so a long-open flyout still gets a fresh window).
-      const flyoutRangeMs = entityFlyoutTimeRangeToMs(flyoutTimeRange);
+      const flyoutRangeMs = getScopeFlyoutTimeRangeMs(scopeId);
       const toDate = flyoutRangeMs?.to ?? Date.now();
       const fromDate =
         flyoutRangeMs?.from ?? toDate - ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
@@ -330,7 +329,7 @@ export const useFetchEntityDetailsHighlights = ({
     entityType,
     entityIdentifier,
     mode,
-    flyoutTimeRange,
+    scopeId,
     anonymizationFields,
     connectorId,
     inference,

@@ -26,7 +26,6 @@ import { cellActionRenderer } from '../../../../shared/components/cell_actions';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
 import { GraphVisualization } from '../../../../document/tools/graph/components/graph_visualization';
 import { useFlyoutSessionContext } from '../../../../session_context';
-import { EntityFlyoutTimeRangeProvider } from '../../../../../entity_analytics/hooks/use_entity_flyout_time_range';
 import {
   FLYOUT_ORIGIN,
   FLYOUT_SESSION_KIND,
@@ -122,7 +121,7 @@ export const GraphView = memo(
     );
 
     return (
-      <EntityFlyoutTimeRangeProvider scopeId={scopeId}>
+      <>
         <EuiFlyoutHeader hasBorder>
           <ToolsFlyoutHeader
             title={TITLE}
@@ -142,7 +141,7 @@ export const GraphView = memo(
             onShowGrouped={onShowGrouped}
           />
         </EuiFlyoutBody>
-      </EntityFlyoutTimeRangeProvider>
+      </>
     );
   }
 );

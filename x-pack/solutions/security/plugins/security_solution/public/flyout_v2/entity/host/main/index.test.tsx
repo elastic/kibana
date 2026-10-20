@@ -37,12 +37,8 @@ jest.mock('./content', () => {
   const { CspInsightLeftPanelSubTab, EntityDetailsLeftPanelTab } = jest.requireActual(
     '../../../../flyout/entity_details/shared/components/left_panel/left_panel_header'
   );
-  const { useEntityFlyoutTimeRange } = jest.requireActual(
-    '../../../../entity_analytics/hooks/use_entity_flyout_time_range'
-  );
   const Content = (props: { openDetailsPanel: (path: EntityDetailsPath) => void }) => (
     <>
-      <span data-test-subj="flyoutTimeRangeFrom">{useEntityFlyoutTimeRange()?.from ?? ''}</span>
       <button
         type="button"
         data-test-subj="openAnomalyInsights"
@@ -159,26 +155,6 @@ describe('<Host />', () => {
 
     expect(getByTestId('host-panel-header')).toBeInTheDocument();
     expect(getByTestId('observedEntity-accordion')).toBeInTheDocument();
-  });
-
-  it('provides the flyout time range pinned by the opening scope to its sections', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <Host {...mockProps} scopeId="entity-analytics-new-entities-table-24h" />
-      </TestProviders>
-    );
-
-    expect(getByTestId('flyoutTimeRangeFrom')).toHaveTextContent('now-24h');
-  });
-
-  it('provides no flyout time range for scopes that do not pin one', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <Host {...mockProps} />
-      </TestProviders>
-    );
-
-    expect(getByTestId('flyoutTimeRangeFrom')).toHaveTextContent('');
   });
 
   it('does not render an expand-details navigation button (no v2 left panel yet)', () => {

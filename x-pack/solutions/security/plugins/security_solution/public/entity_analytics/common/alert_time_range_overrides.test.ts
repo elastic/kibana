@@ -11,6 +11,7 @@ import {
   SCOPE_ALERT_TIME_RANGE_OVERRIDES,
   getEntityAnalyticsNewHomeScopeId,
   getScopeFlyoutTimeRange,
+  getScopeFlyoutTimeRangeMs,
 } from './alert_time_range_overrides';
 
 describe('getEntityAnalyticsNewHomeScopeId', () => {
@@ -40,5 +41,29 @@ describe('getScopeFlyoutTimeRange', () => {
     expect(getScopeFlyoutTimeRange(ENTITY_ANALYTICS_TABLE_ID)).toBeUndefined();
     expect(getScopeFlyoutTimeRange('alerts-page')).toBeUndefined();
     expect(getScopeFlyoutTimeRange(undefined)).toBeUndefined();
+  });
+});
+
+describe('getScopeFlyoutTimeRangeMs', () => {
+  const now = new Date('2024-06-15T12:00:00.000Z');
+
+  beforeEach(() => {
+    jest.useFakeTimers().setSystemTime(now);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('resolves the pinned range to epoch milliseconds ending now', () => {
+    expect(getScopeFlyoutTimeRangeMs(getEntityAnalyticsNewHomeScopeId('7d'))).toEqual({
+      from: new Date('2024-06-08T12:00:00.000Z').valueOf(),
+      to: now.valueOf(),
+    });
+  });
+
+  it('is undefined when the scope does not pin the flyout', () => {
+    expect(getScopeFlyoutTimeRangeMs(ENTITY_ANALYTICS_TABLE_ID)).toBeUndefined();
+    expect(getScopeFlyoutTimeRangeMs(undefined)).toBeUndefined();
   });
 });

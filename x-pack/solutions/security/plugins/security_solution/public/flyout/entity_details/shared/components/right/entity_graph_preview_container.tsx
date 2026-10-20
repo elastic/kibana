@@ -12,7 +12,7 @@ import {
   type GraphPreviewPanelProps,
 } from '../../../../../flyout_v2/shared/components/graph_preview_panel';
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
-import { useEntityFlyoutTimeRange } from '../../../../../entity_analytics/hooks/use_entity_flyout_time_range';
+import { getScopeFlyoutTimeRange } from '../../../../../entity_analytics/common/alert_time_range_overrides';
 
 const DEFAULT_PREVIEW_TIME_RANGE = { from: 'now-30d', to: 'now' } as const;
 
@@ -20,13 +20,14 @@ export interface EntityGraphPreviewContainerProps
   extends Pick<GraphPreviewPanelProps, 'onShowGraph' | 'showIcon'> {
   /** Entity Store v2 entity ID (`entity.id`) to center the graph preview on. */
   entityId: string;
+  /** Scope the flyout was opened from; a scope that pins a time range replaces the 30-day default. */
+  scopeId?: string;
 }
 
 export const EntityGraphPreviewContainer = memo(
-  ({ entityId, onShowGraph, showIcon }: EntityGraphPreviewContainerProps) => {
+  ({ entityId, scopeId, onShowGraph, showIcon }: EntityGraphPreviewContainerProps) => {
     const shouldShowGraph = useShouldShowGraph();
-    // The flyout-level range (set by the opener; v2 flyout only) wins over the 30-day default.
-    const timeRange = useEntityFlyoutTimeRange() ?? DEFAULT_PREVIEW_TIME_RANGE;
+    const timeRange = getScopeFlyoutTimeRange(scopeId) ?? DEFAULT_PREVIEW_TIME_RANGE;
 
     const { isLoading, isError, data } = useFetchGraphData({
       req: {

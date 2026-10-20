@@ -12,7 +12,6 @@ import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_he
 import { AnomaliesTab } from '../../../../../entity_analytics/components/anomalies/anomalies_tab';
 import type { EntityViewMode } from '../../../../../../common/entity_analytics/entity_store/resolution_group';
 import { ANOMALY_INSIGHTS_TITLE } from '../../../../shared/constants/flyout_titles';
-import { EntityFlyoutTimeRangeProvider } from '../../../../../entity_analytics/hooks/use_entity_flyout_time_range';
 import { ANOMALY_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
 const TITLE = ANOMALY_INSIGHTS_TITLE;
@@ -40,7 +39,7 @@ export interface AnomalyInsightsProps {
 export const AnomalyInsights = memo(
   ({ entityType, value, entityId, mode, scopeId, onOpenEntity }: AnomalyInsightsProps) => {
     return (
-      <EntityFlyoutTimeRangeProvider scopeId={scopeId}>
+      <>
         <EuiFlyoutHeader hasBorder>
           <ToolsFlyoutHeader
             title={TITLE}
@@ -55,9 +54,10 @@ export const AnomalyInsights = memo(
             entityName={value}
             entityType={entityType}
             mode={mode}
+            scopeId={scopeId}
           />
         </EuiFlyoutBody>
-      </EntityFlyoutTimeRangeProvider>
+      </>
     );
   }
 );

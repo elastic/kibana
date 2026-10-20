@@ -9,7 +9,6 @@ import { renderHook } from '@testing-library/react';
 import { useObservedUser } from './use_observed_user';
 import { useObservedUserDetails } from '../../../../../explore/users/containers/users/observed_details';
 import { useFirstLastSeen } from '../../../../../common/containers/use_first_last_seen';
-import { useEntityFlyoutTimeRange } from '../../../../../entity_analytics/hooks/use_entity_flyout_time_range';
 import type { EntityFromStoreResult } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { UserItem } from '../../../../../../common/search_strategy';
 
@@ -38,13 +37,8 @@ jest.mock('../../../../../data_view_manager/hooks/use_security_default_patterns'
   useSecurityDefaultPatterns: jest.fn(() => ({ indexPatterns: ['logs-*'] })),
 }));
 
-jest.mock('../../../../../entity_analytics/hooks/use_entity_flyout_time_range', () => ({
-  useEntityFlyoutTimeRange: jest.fn(() => undefined),
-}));
-
 const mockUseObservedUserDetails = useObservedUserDetails as jest.Mock;
 const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
-const mockUseEntityFlyoutTimeRange = useEntityFlyoutTimeRange as jest.Mock;
 
 const targetRecord = {
   entity: {
@@ -123,7 +117,7 @@ describe('useObservedUser', () => {
     expect(mockUseFirstLastSeen).toHaveBeenCalledWith(expect.objectContaining({ skip: true }));
   });
 
-  it('queries over the global time range when the flyout has no pinned range', () => {
+  it('queries over the global time range when the scope does not pin one', () => {
     renderHook(() => useObservedUser('target', '', buildStoreResult([])));
 
     expect(mockUseObservedUserDetails).toHaveBeenCalledWith(
@@ -134,10 +128,10 @@ describe('useObservedUser', () => {
     );
   });
 
-  it('queries over the flyout time range when the opener pinned one', () => {
-    mockUseEntityFlyoutTimeRange.mockReturnValue({ from: 'now-7d', to: 'now' });
-
-    renderHook(() => useObservedUser('target', '', buildStoreResult([])));
+  it('queries over the pinned time range when opened from the new Entity Analytics home', () => {
+    renderHook(() =>
+      useObservedUser('target', 'entity-analytics-new-entities-table-7d', buildStoreResult([]))
+    );
 
     expect(mockUseObservedUserDetails).toHaveBeenCalledWith(
       expect.objectContaining({ startDate: 'now-7d', endDate: 'now' })

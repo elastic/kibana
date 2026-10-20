@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dateMath from '@kbn/datemath';
 import {
   ENTITY_ANALYTICS_TABLE_ID,
   ENTITY_ANALYTICS_ALERTS_FROM,
@@ -22,10 +23,17 @@ export interface ScopeTimeRange {
   to: string;
 }
 
+/** {@link ScopeTimeRange} resolved to epoch milliseconds, for APIs that take numeric bounds. */
+export interface ScopeTimeRangeMs {
+  from: number;
+  to: number;
+}
+
 /**
  * Scopes whose opener pins the WHOLE entity flyout (observed data, anomalies, highlights, graph,
- * alerts) to a window: the new Entity Analytics home page selection. `EntityFlyoutTimeRangeProvider`
- * derives the flyout-level time range from this map.
+ * alerts) to a window: the new Entity Analytics home page selection. Flyout sections look their
+ * `scopeId` up here with {@link getScopeFlyoutTimeRange} and fall back to their own default
+ * (Kibana global time, `now-30d`, ...) when it is not pinned.
  */
 export const SCOPE_FLYOUT_TIME_RANGES: Readonly<Record<string, ScopeTimeRange>> =
   Object.fromEntries(
@@ -38,6 +46,19 @@ export const SCOPE_FLYOUT_TIME_RANGES: Readonly<Record<string, ScopeTimeRange>> 
 /** Returns the flyout-level time range pinned by `scopeId`, if any. */
 export const getScopeFlyoutTimeRange = (scopeId?: string): ScopeTimeRange | undefined =>
   scopeId ? SCOPE_FLYOUT_TIME_RANGES[scopeId] : undefined;
+
+/**
+ * {@link getScopeFlyoutTimeRange} resolved to epoch milliseconds (`to` rounded up). Resolves "now"
+ * at call time, so memoise the result where it feeds a query key.
+ */
+export const getScopeFlyoutTimeRangeMs = (scopeId?: string): ScopeTimeRangeMs | undefined => {
+  const timeRange = getScopeFlyoutTimeRange(scopeId);
+  if (!timeRange) return undefined;
+  const from = dateMath.parse(timeRange.from);
+  const to = dateMath.parse(timeRange.to, { roundUp: true });
+  if (!from?.isValid() || !to?.isValid()) return undefined;
+  return { from: from.valueOf(), to: to.valueOf() };
+};
 
 /**
  * Maps a scope ID to the alert query time range that should be used when an

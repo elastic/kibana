@@ -9,7 +9,6 @@ import { renderHook } from '@testing-library/react';
 import { useObservedHost } from './use_observed_host';
 import { useHostDetails } from '../../../../../explore/hosts/containers/hosts/details';
 import { useFirstLastSeen } from '../../../../../common/containers/use_first_last_seen';
-import { useEntityFlyoutTimeRange } from '../../../../../entity_analytics/hooks/use_entity_flyout_time_range';
 import type { EntityFromStoreResult } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import type { HostItem } from '../../../../../../common/search_strategy';
 
@@ -38,13 +37,8 @@ jest.mock('../../../../../data_view_manager/hooks/use_security_default_patterns'
   useSecurityDefaultPatterns: jest.fn(() => ({ indexPatterns: ['logs-*'] })),
 }));
 
-jest.mock('../../../../../entity_analytics/hooks/use_entity_flyout_time_range', () => ({
-  useEntityFlyoutTimeRange: jest.fn(() => undefined),
-}));
-
 const mockUseHostDetails = useHostDetails as jest.Mock;
 const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
-const mockUseEntityFlyoutTimeRange = useEntityFlyoutTimeRange as jest.Mock;
 
 const targetRecord = {
   entity: {
@@ -124,7 +118,7 @@ describe('useObservedHost', () => {
     expect(mockUseFirstLastSeen).toHaveBeenCalledWith(expect.objectContaining({ skip: true }));
   });
 
-  it('queries over the global time range when the flyout has no pinned range', () => {
+  it('queries over the global time range when the scope does not pin one', () => {
     renderHook(() => useObservedHost('target', '', buildStoreResult([])));
 
     expect(mockUseHostDetails).toHaveBeenCalledWith(
@@ -135,10 +129,10 @@ describe('useObservedHost', () => {
     );
   });
 
-  it('queries over the flyout time range when the opener pinned one', () => {
-    mockUseEntityFlyoutTimeRange.mockReturnValue({ from: 'now-7d', to: 'now' });
-
-    renderHook(() => useObservedHost('target', '', buildStoreResult([])));
+  it('queries over the pinned time range when opened from the new Entity Analytics home', () => {
+    renderHook(() =>
+      useObservedHost('target', 'entity-analytics-new-entities-table-7d', buildStoreResult([]))
+    );
 
     expect(mockUseHostDetails).toHaveBeenCalledWith(
       expect.objectContaining({ startDate: 'now-7d', endDate: 'now' })

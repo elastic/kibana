@@ -10,7 +10,6 @@ import '@testing-library/jest-dom';
 import { render, waitFor } from '@testing-library/react';
 import { GraphInvestigation } from '@kbn/cloud-security-posture-graph';
 import { GraphVisualization, GRAPH_VISUALIZATION_TEST_ID } from './graph_visualization';
-import { EntityFlyoutTimeRangeProvider } from '../../../../../entity_analytics/hooks/use_entity_flyout_time_range';
 
 const mockToasts = {
   addDanger: jest.fn(),
@@ -205,11 +204,9 @@ describe('GraphVisualization', () => {
       expect(initialState.timeRange).toEqual({ from: 'now-30d', to: 'now' });
     });
 
-    it('seeds the timeRange from the enclosing entity flyout when the opener pinned one', async () => {
+    it('seeds the timeRange from the scope when opened from the new Entity Analytics home', async () => {
       render(
-        <EntityFlyoutTimeRangeProvider timeRange={{ from: 'now-7d', to: 'now' }}>
-          <GraphVisualization {...ENTITY_PROPS} />
-        </EntityFlyoutTimeRangeProvider>
+        <GraphVisualization {...ENTITY_PROPS} scopeId="entity-analytics-new-entities-table-7d" />
       );
 
       await waitFor(() => {

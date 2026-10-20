@@ -222,7 +222,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     setActiveTile,
   } = useEntityAnalyticsUrlState();
   // The scope pins every time-bounded section of the flyouts opened from here (alerts, observed
-  // data, anomalies, highlights, graph) to the selected range — see `EntityFlyoutTimeRangeProvider`.
+  // data, anomalies, highlights, graph) to the selected range — see `SCOPE_FLYOUT_TIME_RANGES`.
   const scopeId = getEntityAnalyticsNewHomeScopeId(timeRange);
 
   const [isGridFullScreen, setIsGridFullScreen] = useState(false);

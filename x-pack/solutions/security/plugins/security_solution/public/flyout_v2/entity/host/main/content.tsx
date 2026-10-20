@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { Entity } from '../../../../../common/api/entity_analytics';
@@ -13,7 +13,7 @@ import type { EntityViewMode } from '../../../../../common/entity_analytics/enti
 import { ObservedDataSection } from '../../shared/components/observed_data_section';
 import { useAnomalyOverview } from '../../../../entity_analytics/api/hooks/use_anomaly_overview';
 import { useAnomalyPrivileges } from '../../../../entity_analytics/api/hooks/use_anomaly_privileges';
-import { useEntityFlyoutTimeRangeMs } from '../../../../entity_analytics/hooks/use_entity_flyout_time_range';
+import { getScopeFlyoutTimeRangeMs } from '../../../../entity_analytics/common/alert_time_range_overrides';
 import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { EntityInsight } from '../../../../cloud_security_posture/components/entity_insight';
@@ -146,8 +146,8 @@ export const Content = ({
   const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
   const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
   const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
-  // Without a flyout-level range the server applies its default lookback.
-  const flyoutTimeRangeMs = useEntityFlyoutTimeRangeMs();
+  // Pinned by the opener's scope (new Entity Analytics home); otherwise the server applies its default lookback.
+  const flyoutTimeRangeMs = useMemo(() => getScopeFlyoutTimeRangeMs(scopeId), [scopeId]);
   const anomalyOverview = useAnomalyOverview({
     entityId: entityStoreEntityId ?? '',
     mode,
@@ -187,6 +187,7 @@ export const Content = ({
           refetchEntityRecord={refetchEntityRecord}
           mode={mode}
           isEntityRecordLoading={isEntityRecordLoading}
+          scopeId={scopeId}
         />
       )}
       {!noEntityInStore &&
@@ -205,6 +206,7 @@ export const Content = ({
               prefetchedResolutionRisk={prefetchedResolutionRisk}
               hideHeaderIcon={hideHeaderIcons}
               isGroupView={isGroupView}
+              scopeId={scopeId}
             />
             <EuiHorizontalRule />
           </>

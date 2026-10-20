@@ -50,7 +50,6 @@ import { FlyoutHeaderActions } from '../../../shared/components/flyout_header_ac
 import { EntityAnalyticsFlyoutCopyLink } from '../../shared/components/entity_analytics_flyout_copy_link';
 import { toEntityDescriptorMode } from '../../../shared/url_state/flyout_v2_url_param';
 import { useNewEntityAnalyticsPage } from '../../../../entity_analytics/hooks/use_new_entity_analytics_page';
-import { EntityFlyoutTimeRangeProvider } from '../../../../entity_analytics/hooks/use_entity_flyout_time_range';
 import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 
 export interface ServiceProps {
@@ -82,7 +81,7 @@ const FIRST_RECORD_PAGINATION = {
  * or preview-mode handling. Detail panels (risk inputs, graph view, resolution) open as separate
  * system flyouts via `useFlyoutApi`.
  */
-const ServicePanel: FC<ServiceProps> = memo(function ServicePanel({
+export const Service: FC<ServiceProps> = memo(function Service({
   serviceName,
   entityId,
   mode: requestedMode = 'single',
@@ -378,20 +377,6 @@ const ServicePanel: FC<ServiceProps> = memo(function ServicePanel({
         panelProps={{ paddingSize: 'none' }}
       />
     </>
-  );
-});
-
-ServicePanel.displayName = 'ServicePanel';
-
-/**
- * {@link ServicePanel} under the flyout-level time range derived from `scopeId`, so every
- * time-bounded section (observed data, highlights, graph) follows the opener.
- */
-export const Service: FC<ServiceProps> = memo(function Service(props) {
-  return (
-    <EntityFlyoutTimeRangeProvider scopeId={props.scopeId}>
-      <ServicePanel {...props} />
-    </EntityFlyoutTimeRangeProvider>
   );
 });
 

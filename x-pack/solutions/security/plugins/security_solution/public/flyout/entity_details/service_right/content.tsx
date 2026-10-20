@@ -128,6 +128,7 @@ export const ServicePanelContent = ({
         refetchEntityRecord={refetchEntityRecord}
         mode={mode}
         isEntityRecordLoading={isEntityRecordLoading}
+        scopeId={scopeId}
       />
       {riskScoreState.hasEngineBeenInstalled && riskScoreState.data?.length !== 0 && (
         <>
@@ -143,6 +144,7 @@ export const ServicePanelContent = ({
             prefetchedResolutionRisk={prefetchedResolutionRisk}
             hideHeaderIcon={hideHeaderIcons}
             isGroupView={isGroupView}
+            scopeId={scopeId}
           />
           <EuiHorizontalRule />
         </>

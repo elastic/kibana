@@ -34,7 +34,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/entity_analytics/anomalies/constants';
 
 import { useAnomalyOverview } from '../../api/hooks/use_anomaly_overview';
-import { useEntityFlyoutTimeRange } from '../../hooks/use_entity_flyout_time_range';
+import { getScopeFlyoutTimeRange } from '../../common/alert_time_range_overrides';
 import {
   ENTITY_ANOMALIES_TAB_MANAGE_ML_JOBS,
   ENTITY_ANOMALIES_TAB_ATTACK_CHAIN_TITLE,
@@ -99,6 +99,8 @@ interface AnomaliesTabProps {
   entityName: string;
   entityType: EntityType;
   mode?: EntityViewMode;
+  /** Scope the tab was opened from; a scope that pins a time range sets the initial window. */
+  scopeId?: string;
 }
 
 export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
@@ -106,9 +108,10 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
   entityName,
   entityType,
   mode,
+  scopeId,
 }) => {
-  // Open on the enclosing flyout's time range when the opener pinned one; the user can still change it.
-  const flyoutTimeRange = useEntityFlyoutTimeRange();
+  // Open on the opener's time range when its scope pins one; the user can still change it.
+  const flyoutTimeRange = getScopeFlyoutTimeRange(scopeId);
   const [datePickerValue, setDatePickerValue] = useState<string>(() =>
     flyoutTimeRange ? getDatePickerValue(flyoutTimeRange) : DEFAULT_DATE_PICKER_VALUE
   );

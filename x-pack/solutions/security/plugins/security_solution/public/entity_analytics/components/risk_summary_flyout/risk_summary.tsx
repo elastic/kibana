@@ -38,7 +38,7 @@ import { getRiskScoreSummaryAttributes } from '../../lens_attributes/risk_score_
 import { useSpaceId } from '../../../common/hooks/use_space_id';
 import { useGlobalTime } from '../../../common/containers/use_global_time';
 import { useQueryInspector } from '../../../common/components/page/manage_query';
-import { useEntityFlyoutTimeRange } from '../../hooks/use_entity_flyout_time_range';
+import { getScopeFlyoutTimeRange } from '../../common/alert_time_range_overrides';
 
 import { getEntityData, getItems, LAST_30_DAYS } from './common';
 import { RiskContributionsPanel } from './risk_contributions_panel';
@@ -111,6 +111,8 @@ export interface RiskSummaryProps<T extends EntityType> {
    * score. Defaults to `false`: single-entity views show only the individual score.
    */
   isGroupView?: boolean;
+  /** Scope the flyout was opened from; a scope that pins a time range sets the score history window. */
+  scopeId?: string;
 }
 
 const FlyoutRiskSummaryComponent = <T extends EntityType>({
@@ -125,14 +127,15 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   prefetchedResolutionRisk,
   hideHeaderIcon,
   isGroupView = false,
+  scopeId,
 }: RiskSummaryProps<T>) => {
   const { telemetry } = useKibana().services;
   const { data } = riskScoreData;
   const fallbackRiskData = data && data.length > 0 ? data[0] : undefined;
   const { euiTheme } = useEuiTheme();
   const spaceId = useSpaceId();
-  // The score history charts span the flyout-level range when the opener pinned one, else 30 days.
-  const chartRange = useEntityFlyoutTimeRange() ?? LAST_30_DAYS;
+  // The score history charts span the opener's pinned range when its scope has one, else 30 days.
+  const chartRange = getScopeFlyoutTimeRange(scopeId) ?? LAST_30_DAYS;
   const { setQuery, deleteQuery } = useGlobalTime();
   // Flyouts can stack (a child entity flyout shares the Redux store with its parent), so the
   // registration must be unique per instance or the child would overwrite/delete the parent's.

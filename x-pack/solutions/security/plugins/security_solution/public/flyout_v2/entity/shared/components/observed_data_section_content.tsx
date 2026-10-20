@@ -10,7 +10,7 @@ import { type EntityStoreEuidApi, useEntityStoreEuidApi } from '@kbn/entity-stor
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { getCriteriaFromUsersType } from '../../../../common/components/ml/criteria/get_criteria_from_users_type';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
-import { useEntityFlyoutTimeRange } from '../../../../entity_analytics/hooks/use_entity_flyout_time_range';
+import { getScopeFlyoutTimeRange } from '../../../../entity_analytics/common/alert_time_range_overrides';
 import { useInstalledSecurityJobNameById } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 import type { ObservedEntityData } from './observed_entity/types';
 import { ObservedEntity } from './observed_entity';
@@ -106,8 +106,8 @@ export const ObservedDataSectionContent = memo((props: ObservedDataSectionProps)
 
   const globalTime = useGlobalTime();
   const { isInitializing } = globalTime;
-  // The flyout-level range (set by the opener) wins over global time for the anomalies row.
-  const { to, from } = useEntityFlyoutTimeRange() ?? globalTime;
+  // A scope that pins a time range wins over global time for the anomalies row.
+  const { to, from } = getScopeFlyoutTimeRange(scopeId) ?? globalTime;
 
   const { jobNameById } = useInstalledSecurityJobNameById();
   const jobIds = useMemo(() => Object.keys(jobNameById), [jobNameById]);

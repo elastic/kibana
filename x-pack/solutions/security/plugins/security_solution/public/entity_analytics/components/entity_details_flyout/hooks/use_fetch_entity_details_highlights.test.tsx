@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { AnonymizationFieldResponse, Replacements } from '@kbn/elastic-assistant-common';
 import type {
@@ -13,7 +12,6 @@ import type {
   EntitySummaryStalenessEntitySnapshot,
 } from '@kbn/entity-store/common';
 import { useFetchEntityDetailsHighlights } from './use_fetch_entity_details_highlights';
-import { EntityFlyoutTimeRangeProvider } from '../../../hooks/use_entity_flyout_time_range';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { EntityHighlightsResponse } from '../types';
 
@@ -470,17 +468,15 @@ describe('useFetchEntityDetailsHighlights', () => {
       );
     });
 
-    it('uses the flyout time range when the opener pinned one', async () => {
+    it('uses the pinned time range when opened from the new Entity Analytics home', async () => {
       mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
       mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
-      const wrapper: React.FC<React.PropsWithChildren> = ({ children }) => (
-        <EntityFlyoutTimeRangeProvider timeRange={{ from: 'now-7d', to: 'now' }}>
-          {children}
-        </EntityFlyoutTimeRangeProvider>
+      const { result } = renderHook(() =>
+        useFetchEntityDetailsHighlights({
+          ...mockProps,
+          scopeId: 'entity-analytics-new-entities-table-7d',
+        })
       );
-      const { result } = renderHook(() => useFetchEntityDetailsHighlights(mockProps), {
-        wrapper,
-      });
 
       await act(async () => {
         await result.current.fetchEntityHighlights();

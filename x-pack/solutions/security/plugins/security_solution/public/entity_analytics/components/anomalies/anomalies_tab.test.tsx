@@ -11,7 +11,6 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { SeverityOption } from '@kbn/ml-plugin/public/application/explorer/hooks/use_severity_options';
 import { AnomaliesTab } from './anomalies_tab';
 import { ANOMALIES_TAB_ERROR_TEST_ID } from './test_ids';
-import { EntityFlyoutTimeRangeProvider } from '../../hooks/use_entity_flyout_time_range';
 
 // ─── Hook mocks ──────────────────────────────────────────────────────────────
 
@@ -284,7 +283,7 @@ describe('AnomaliesTab', () => {
       jest.useRealTimers();
     });
 
-    it('defaults to the last 30 days when the enclosing flyout has no pinned range', () => {
+    it('defaults to the last 30 days when the scope does not pin a range', () => {
       render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
 
       expect(screen.getByTestId('mock-date-range-picker')).toHaveAttribute(
@@ -299,13 +298,10 @@ describe('AnomaliesTab', () => {
       );
     });
 
-    it('opens on the flyout time range (matching preset label) when the opener pinned one', () => {
-      render(
-        <EntityFlyoutTimeRangeProvider timeRange={{ from: 'now-7d', to: 'now' }}>
-          <AnomaliesTab {...defaultProps} />
-        </EntityFlyoutTimeRangeProvider>,
-        { wrapper: Wrapper }
-      );
+    it('opens on the pinned range (matching preset label) when opened from the new Entity Analytics home', () => {
+      render(<AnomaliesTab {...defaultProps} scopeId="entity-analytics-new-entities-table-7d" />, {
+        wrapper: Wrapper,
+      });
 
       expect(screen.getByTestId('mock-date-range-picker')).toHaveAttribute(
         'data-value',
