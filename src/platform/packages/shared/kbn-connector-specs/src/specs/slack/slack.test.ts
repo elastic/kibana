@@ -1676,6 +1676,84 @@ describe('Slack', () => {
     });
   });
 
+  describe('updateMessage action', () => {
+    it('edits the message through chat.update', async () => {
+      const mockResponse = {
+        data: { ok: true, channel: 'C123', ts: '1234567890.123457', text: 'Updated message' },
+      };
+      mockClient.post.mockResolvedValue(mockResponse);
+
+      const result = await Slack.actions.updateMessage.handler(mockContext, {
+        channel: 'C123',
+        messageTs: '1234567890.123457',
+        text: 'Updated message',
+      });
+
+      expect(mockClient.post).toHaveBeenCalledWith(
+        'https://slack.com/api/chat.update',
+        {
+          channel: 'C123',
+          ts: '1234567890.123457',
+          text: 'Updated message',
+        },
+        {
+          headers: {
+            'Content-Type': 'application/json; charset=utf-8',
+          },
+        }
+      );
+      expect(result).toEqual(mockResponse.data);
+    });
+
+    it('rejects an empty messageTs instead of posting a new message', async () => {
+      expect(
+        SlackUpdateMessageInputSchema.safeParse({ channel: 'C123', messageTs: '', text: 'x' })
+          .success
+      ).toBe(false);
+
+      await expect(
+        Slack.actions.updateMessage.handler(mockContext, {
+          channel: 'C123',
+          messageTs: '',
+          text: 'Updated message',
+        })
+      ).rejects.toThrow();
+      expect(mockClient.post).not.toHaveBeenCalled();
+    });
+
+    it('rejects text longer than the 4,000 characters chat.update accepts', async () => {
+      const parse = (text: string) =>
+        SlackUpdateMessageInputSchema.safeParse({
+          channel: 'C123',
+          messageTs: '1234567890.123457',
+          text,
+        }).success;
+      expect(parse('x'.repeat(4000))).toBe(true);
+      expect(parse('x'.repeat(4001))).toBe(false);
+
+      await expect(
+        Slack.actions.updateMessage.handler(mockContext, {
+          channel: 'C123',
+          messageTs: '1234567890.123457',
+          text: 'x'.repeat(4001),
+        })
+      ).rejects.toThrow();
+      expect(mockClient.post).not.toHaveBeenCalled();
+    });
+
+    it('should throw error when Slack API returns error', async () => {
+      mockClient.post.mockResolvedValue({ data: { ok: false, error: 'message_not_found' } });
+
+      await expect(
+        Slack.actions.updateMessage.handler(mockContext, {
+          channel: 'C123',
+          messageTs: '1234567890.123457',
+          text: 'Updated message',
+        })
+      ).rejects.toThrow('Slack updateMessage error: message_not_found');
+    });
+  });
+
   describe('relay auth', () => {
     const relayTrigger = jest.fn();
     const relayListBindings = jest.fn();
@@ -1739,6 +1817,29 @@ describe('Slack', () => {
       });
     });
 
+    it('updateMessage edits through the relay and never touches the Slack client', async () => {
+      relayTrigger.mockResolvedValue({
+        ref: '1234567890.123457',
+        tenantKey: 'team-A',
+        channel: 'C0123456789',
+      });
+
+      const result = await Slack.actions.updateMessage.handler(relayContext, {
+        channel: 'C0123456789',
+        messageTs: '1234567890.123457',
+        text: 'Updated message',
+      });
+
+      expect(relayTrigger).toHaveBeenCalledWith({
+        tenantKey: 'team-A',
+        channel: 'C0123456789',
+        message: 'Updated message',
+        messageTs: '1234567890.123457',
+      });
+      expect(mockClient.post).not.toHaveBeenCalled();
+      expect(result).toEqual({ ok: true, channel: 'C0123456789', ts: '1234567890.123457' });
+    });
+
     it('listChannels returns the connected channels and never touches the Slack client', async () => {
       relayListBindings.mockResolvedValue({
         bindings: [{ scope_id: 'C123', display_name: 'general', visibility: 'public' }],
@@ -1787,7 +1888,7 @@ describe('Slack', () => {
       await expect(
         Slack.actions.searchMessages.handler(relayContext, { query: 'anything' })
       ).rejects.toThrow(
-        'searchMessages is not available through the Elastic Slack app. Supported actions: sendMessage, listChannels, resolveChannelId.'
+        'searchMessages is not available through the Elastic Slack app. Supported actions: sendMessage, updateMessage, listChannels, resolveChannelId.'
       );
 
       expect(mockClient.post).not.toHaveBeenCalled();
@@ -1815,84 +1916,6 @@ describe('Slack', () => {
           `${name} is not available through the Elastic Slack app`
         );
       }
-    });
-  });
-
-  describe('updateMessage action', () => {
-    it('should update a message and return normalized shape', async () => {
-      mockClient.post.mockResolvedValue({
-        data: { ok: true, channel: 'C1', ts: '1.0', text: 'Updated!' },
-      });
-
-      const result = await Slack.actions.updateMessage.handler(
-        mockContext,
-        SlackUpdateMessageInputSchema.parse({ channel: 'C1', ts: '1.0', text: 'Updated!' })
-      );
-
-      expect(mockClient.post).toHaveBeenCalledWith(
-        'https://slack.com/api/chat.update',
-        { channel: 'C1', ts: '1.0', text: 'Updated!', blocks: [] },
-        expect.objectContaining({ headers: { 'Content-Type': 'application/json; charset=utf-8' } })
-      );
-      expect(result).toEqual({ ok: true, channel: 'C1', ts: '1.0', text: 'Updated!' });
-    });
-
-    it('should clear existing blocks when only text is provided', async () => {
-      mockClient.post.mockResolvedValue({
-        data: { ok: true, channel: 'C1', ts: '1.0', text: 'Done' },
-      });
-
-      await Slack.actions.updateMessage.handler(
-        mockContext,
-        SlackUpdateMessageInputSchema.parse({ channel: 'C1', ts: '1.0', text: 'Done' })
-      );
-
-      expect(mockClient.post).toHaveBeenCalledWith(
-        'https://slack.com/api/chat.update',
-        { channel: 'C1', ts: '1.0', text: 'Done', blocks: [] },
-        expect.any(Object)
-      );
-    });
-
-    it('should be classified as a destroy-scope action', () => {
-      expect(Slack.actions.updateMessage.scope).toBe('destroy');
-    });
-
-    it('should reject oversized serialized blocks', () => {
-      const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: 'x'.repeat(100_001) } }];
-
-      expect(() =>
-        SlackUpdateMessageInputSchema.parse({ channel: 'C1', ts: '1.0', blocks })
-      ).toThrow('Serialized blocks must not exceed');
-    });
-
-    it('should accept blocks instead of text', async () => {
-      mockClient.post.mockResolvedValue({
-        data: { ok: true, channel: 'C1', ts: '2.0', text: '' },
-      });
-      const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: 'Resolved' } }];
-
-      await Slack.actions.updateMessage.handler(
-        mockContext,
-        SlackUpdateMessageInputSchema.parse({ channel: 'C1', ts: '2.0', blocks })
-      );
-
-      expect(mockClient.post).toHaveBeenCalledWith(
-        'https://slack.com/api/chat.update',
-        expect.objectContaining({ blocks }),
-        expect.any(Object)
-      );
-    });
-
-    it('should throw when Slack API returns error', async () => {
-      mockClient.post.mockResolvedValue({ data: { ok: false, error: 'message_not_found' } });
-
-      await expect(
-        Slack.actions.updateMessage.handler(
-          mockContext,
-          SlackUpdateMessageInputSchema.parse({ channel: 'C1', ts: '1.0', text: 'x' })
-        )
-      ).rejects.toThrow('Slack updateMessage error: message_not_found');
     });
   });
 

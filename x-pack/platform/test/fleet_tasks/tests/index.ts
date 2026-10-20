@@ -11,6 +11,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Fleet tasks', function () {
     loadTestFile(require.resolve('./automatic_upgrades'));
     loadTestFile(require.resolve('./version_specific_policy_assignment'));
+    loadTestFile(require.resolve('./version_specific_policy_assignment_orphans'));
     loadTestFile(require.resolve('./unenroll_inactive_agents'));
     loadTestFile(require.resolve('./agent_status_change'));
   });

@@ -41,7 +41,6 @@ import {
   type SlackAssistantSearchContextResponse,
   type SlackAuthTestResponse,
   type SlackChatPostMessageResponse,
-  type SlackChatUpdateResponse,
   type SlackConversationsHistoryResponse,
   type SlackConversationsListParams,
   type SlackConversationsListResponse,
@@ -204,7 +203,7 @@ async function slackRequestWithRateLimitRetry<TData>(params: {
  * Required Slack App scopes:
  * - channels:read, groups:read, im:read, mpim:read - list public channels, private channels, DMs, and group DMs
  * - channels:history, groups:history, im:history, mpim:history - read message history from each conversation type
- * - chat:write - send messages
+ * - chat:write - send messages and edit the messages it sent
  * - channels:manage - create public channels and invite users (bot tokens)
  * - groups:write - create private channels and invite users
  * - search:read.public, search:read.private, search:read.im, search:read.mpim, search:read.files - search messages and files
@@ -220,7 +219,7 @@ export const Slack: ConnectorSpec = {
     displayName: 'Slack (v2)',
     description: i18n.translate('core.kibanaConnectorSpecs.slack.metadata.description', {
       defaultMessage:
-        'Send messages and Block Kit cards, update and react to messages, upload files, list channels and users, read conversation history and thread replies, search messages, and look up users by email in Slack',
+        'Send messages and Block Kit cards, edit and react to messages, upload files, list channels and users, read conversation history and thread replies, search messages, and look up users by email in Slack',
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
@@ -1148,6 +1147,7 @@ export const Slack: ConnectorSpec = {
         const payload: Record<string, unknown> = {
           channel: typedInput.channel,
           text: typedInput.text,
+          ...(typedInput.blocks?.length ? { blocks: typedInput.blocks } : {}),
         };
 
         if (typedInput.threadTs) {
@@ -1338,36 +1338,34 @@ export const Slack: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description:
-        'Edit an existing Slack message in-place. Use this to update an alert card as its state transitions (e.g. open → acknowledged → resolved) without posting new messages. Requires the channel ID and the message timestamp (ts) from the original sendMessage or sendBlockKitMessage response.',
+        'Edit a message this app posted earlier, replacing its text (at most 4,000 characters). Identify it by channel and the ts that sendMessage returned (messageTs). The channel must be a conversation ID, not a name, except on the Elastic Slack app. This overwrites the existing message; without blocks, Slack removes any blocks it had, so a Block Kit or richly formatted message comes back as plain text. Confirm with the user before editing unless they have already made their intent explicit. To add to a conversation instead, use sendMessage.',
       input: SlackUpdateMessageInputSchema,
       handler: async (ctx, input) => {
-        slackRelay.assertNotSupported(ctx, 'updateMessage');
-
         const typedInput: SlackUpdateMessageInput = SlackUpdateMessageInputSchema.parse(input);
 
-        const payload: Record<string, unknown> = {
-          channel: typedInput.channel,
-          ts: typedInput.ts,
-        };
-        if (typedInput.text !== undefined) payload.text = typedInput.text;
-        if (typedInput.blocks !== undefined) {
-          payload.blocks = typedInput.blocks;
-        } else if (typedInput.text !== undefined) {
-          // chat.update keeps the existing blocks when `blocks` is omitted, so clear them to show the new text.
-          payload.blocks = [];
+        const relayConnection = slackRelay.getConnection(ctx);
+        if (relayConnection) {
+          return slackRelay.actions.updateMessage(relayConnection, ctx, typedInput);
         }
 
+        const payload = {
+          channel: typedInput.channel,
+          ts: typedInput.messageTs,
+          text: typedInput.text,
+          ...(typedInput.blocks?.length ? { blocks: typedInput.blocks } : {}),
+        };
+
         try {
-          ctx.log.debug(
-            `Slack updateMessage request: channel=${typedInput.channel} ts=${typedInput.ts}`
-          );
-          const response = await slackRequestWithRateLimitRetry<SlackChatUpdateResponse>({
+          ctx.log.debug(`Slack updateMessage request: channel=${typedInput.channel}`);
+          const response = await slackRequestWithRateLimitRetry({
             ctx,
             action: 'updateMessage',
             maxRetries: SLACK_MAX_RETRIES,
             request: () =>
               ctx.client.post(`${SLACK_API_BASE}/chat.update`, payload, {
-                headers: { 'Content-Type': 'application/json; charset=utf-8' },
+                headers: {
+                  'Content-Type': 'application/json; charset=utf-8',
+                },
               }),
           });
 
@@ -1381,12 +1379,7 @@ export const Slack: ConnectorSpec = {
             );
           }
 
-          return {
-            ok: true as const,
-            channel: response.data.channel,
-            ts: response.data.ts,
-            text: response.data.text,
-          };
+          return response.data;
         } catch (error) {
           const err = error as AxiosError<unknown>;
           ctx.log.error(
@@ -1668,6 +1661,7 @@ export const Slack: ConnectorSpec = {
     'searchMessages requires a user token (EARS or OAuth). If this connector uses a bot token, searchMessages will fail — use getConversationHistory with a specific channel ID to read recent messages instead.',
     'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',
     'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
+    'sendMessage always posts a new message. To change a message this app already posted, call updateMessage with its channel ID and the ts sendMessage returned as messageTs; it overwrites the text (at most 4,000 characters) and, unless new blocks are passed, removes any blocks, so confirm with the user first.',
     'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',
     'sendMessage returns the Slack response plus a timestamp field. Use timestamp as threadTs in a follow-up sendMessage or sendBlockKitMessage to post a reply in the same thread.',
     'Use sendBlockKitMessage instead of sendMessage when the message needs formatted cards, sections, fields, images, or link buttons. Do not add buttons or menus that expect a response, because clicks are not received by this connector.',

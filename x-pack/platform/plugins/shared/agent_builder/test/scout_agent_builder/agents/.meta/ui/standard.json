@@ -1,9 +1,73 @@
 {
-  "sha1": "a746e51a9985bf0c99ed9f09c57047dd7c038fba",
+  "sha1": "ae62b835f675c28df340fab23132021029aa04bf",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "c8279dde7d9bcf0-f8dab1e1ef240ae",
+      "title": "Agent Builder — agent connectors page shows empty state when agent has no connectors",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/agent_connectors.spec.ts",
+        "line": 40,
+        "column": 13
+      }
+    },
+    {
+      "id": "c8279dde7d9bcf0-37b13724894e1e9",
+      "title": "Agent Builder — agent connectors page empty state \"Add connector\" button opens menu with both options",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/agent_connectors.spec.ts",
+        "line": 45,
+        "column": 13
+      }
+    },
+    {
+      "id": "c8279dde7d9bcf0-c1bd82443ba942b",
+      "title": "Agent Builder — agent connectors page \"From library\" menu item opens the connector library flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/agent_connectors.spec.ts",
+        "line": 54,
+        "column": 47
+      }
+    },
+    {
+      "id": "c8279dde7d9bcf0-a3c06c7a608b4a4",
+      "title": "Agent Builder — agent connectors page \"Create new connector\" menu item opens the connector creation flyout",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/agents/ui/tests/agent_connectors.spec.ts",
+        "line": 69,
+        "column": 26
+      }
+    },
     {
       "id": "e65520b227a3627-a575d75181b677a",
       "title": "Agent Builder — agents list agents list journeys",

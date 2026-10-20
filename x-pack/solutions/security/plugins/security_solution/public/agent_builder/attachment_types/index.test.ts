@@ -7,7 +7,7 @@
 
 import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import { SecurityAgentBuilderAttachments } from '../../../common/constants';
-import { registerAttachmentUiDefinitions, registerImpactAttachment } from '.';
+import { registerAttachmentUiDefinitions } from '.';
 
 describe('registerAttachmentUiDefinitions', () => {
   const mockAddAttachmentType = jest.fn();
@@ -15,17 +15,7 @@ describe('registerAttachmentUiDefinitions', () => {
     addAttachmentType: mockAddAttachmentType,
   } as unknown as AttachmentServiceStartContract;
 
-  const resolveSecurityCanvasContext = jest.fn();
-  const getSpaceId = jest.fn().mockResolvedValue('default');
-  const mockData = { search: { search: jest.fn() } };
-
-  const register = () =>
-    registerAttachmentUiDefinitions({
-      attachments: mockAttachments,
-      resolveSecurityCanvasContext,
-      getSpaceId,
-      data: mockData as never,
-    });
+  const register = () => registerAttachmentUiDefinitions({ attachments: mockAttachments });
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -72,40 +62,13 @@ describe('registerAttachmentUiDefinitions', () => {
     expect(entityCall).toBeUndefined();
   });
 
-  it('registers a renderConversationDetailsContent for security.alert', () => {
-    register();
-
-    const alertCall = mockAddAttachmentType.mock.calls.find(
-      (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alert
-    );
-    expect(alertCall![1].renderConversationDetailsContent).toBeDefined();
-  });
-
-  it('registers a renderConversationDetailsContent for security.alerts', () => {
+  it('registers security.alerts with a label and icon only', () => {
     register();
 
     const alertsCall = mockAddAttachmentType.mock.calls.find(
       (call: unknown[]) => call[0] === SecurityAgentBuilderAttachments.alerts
     );
     expect(alertsCall).toBeDefined();
-    expect(alertsCall![1].renderConversationDetailsContent).toBeDefined();
-  });
-});
-
-describe('registerImpactAttachment', () => {
-  it('registers the security.impact attachment type synchronously', () => {
-    const addAttachmentType = jest.fn();
-    const attachments = { addAttachmentType } as unknown as AttachmentServiceStartContract;
-
-    registerImpactAttachment({ attachments });
-
-    expect(addAttachmentType).toHaveBeenCalledWith(
-      SecurityAgentBuilderAttachments.impact,
-      expect.objectContaining({
-        getIcon: expect.any(Function),
-        getLabel: expect.any(Function),
-        renderInlineContent: expect.any(Function),
-      })
-    );
+    expect(alertsCall![1].renderConversationDetailsContent).toBeUndefined();
   });
 });

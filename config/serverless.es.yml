@@ -60,6 +60,11 @@ xpack.features.overrides:
   ml.category: "management"
   ### Stack Rules feature is moved from Analytics category to the Search one.
   stackAlerts.category: "enterpriseSearch"
+  ### Alerting V2 is Observability-only, so its features are hidden in Role management.
+  alerting_v2_rules.hidden: true
+  alerting_v2_alerts.hidden: true
+  alerting_v2_action_policies.hidden: true
+  alerting_v2_execution_history.hidden: true
   ### Observability AI Assistant feature is moved to Search and renamed
   observabilityAIAssistant:
     name: "AI Assistant"
@@ -92,9 +97,6 @@ xpack.ml.compatibleModuleType: 'search'
 
 data_visualizer.resultLinks.fileBeat.enabled: false
 
-# Search Notebooks
-xpack.searchNotebooks.catalog.url: https://elastic-enterprise-search.s3.us-east-2.amazonaws.com/serverless/catalog.json
-
 # Semantic text UI
 xpack.index_management.dev.enableSemanticText: true
 
@@ -111,6 +113,9 @@ aiAssistantManagementSelection.preferredChatExperience: "agent"
 
 # Query Rules UI
 xpack.searchQueryRules.enabled: true
+
+## ES|QL Data Federation in stack management
+xpack.dataFederation.enabled: true
 
 ## Search Connectors in stack management
 xpack.contentConnectors.ui.enabled: false

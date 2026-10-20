@@ -8,7 +8,6 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { AnalyticsServiceSetup, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 
 import { ProductFeatureKey } from '@kbn/security-solution-features/keys';
 import type { ILicense } from '@kbn/licensing-types';
@@ -48,6 +47,7 @@ import { upgradePrebuiltRule } from './methods/upgrade_prebuilt_rule';
 import { revertPrebuiltRule } from './methods/revert_prebuilt_rule';
 import { getHistoryForRule } from './methods/get_history_for_rule';
 import { restoreRuleFromHistory } from './methods/restore_rule_from_history';
+import { RULE_IMPORT_BATCH_SIZE } from '../../api/constants';
 import { MINIMUM_RULE_CUSTOMIZATION_LICENSE } from '../../../../../../common/constants';
 import {
   sendRuleRestoreTelemetryEvent,
@@ -66,7 +66,6 @@ import {
 interface DetectionRulesClientParams {
   actionsClient: ActionsClient;
   rulesClient: RulesClient;
-  userProfile: UserProfileServiceStart;
   savedObjectsClient: SavedObjectsClientContract;
   mlAuthz: MlAuthz;
   rulesAuthz: DetectionRulesAuthz;
@@ -79,7 +78,6 @@ interface DetectionRulesClientParams {
 export const createDetectionRulesClient = ({
   actionsClient,
   rulesClient,
-  userProfile,
   mlAuthz,
   rulesAuthz,
   savedObjectsClient,
@@ -203,11 +201,11 @@ export const createDetectionRulesClient = ({
     },
 
     async bulkDeleteRules({
-      ruleIds,
+      rules,
       changeTracking,
     }: BulkDeleteRulesArgs): Promise<BulkDeleteRulesReturn> {
       return withSecuritySpan('DetectionRulesClient.bulkDeleteRules', async () => {
-        return bulkDeleteRules({ rulesClient, ruleIds, changeTracking });
+        return bulkDeleteRules({ rulesClient, rules, changeTracking });
       });
     },
 
@@ -259,7 +257,7 @@ export const createDetectionRulesClient = ({
             overwriteRules: args.overwriteRules,
             allowMissingConnectorSecrets: args.allowMissingConnectorSecrets,
             changeTracking: args.changeTracking,
-            batchSize: args.batchSize,
+            batchSize: args.batchSize ?? RULE_IMPORT_BATCH_SIZE,
           },
           deps: {
             actionsClient,
@@ -273,7 +271,7 @@ export const createDetectionRulesClient = ({
         if (analytics) {
           sendRuleImportTelemetryEvents(
             analytics,
-            result.successes.map(({ telemetry }) => telemetry),
+            result.successes.map(({ telemetry, outcome }) => ({ ...telemetry, outcome })),
             logger
           );
         }
@@ -284,7 +282,7 @@ export const createDetectionRulesClient = ({
 
     async getHistoryForRule(args: GetHistoryForRuleArgs) {
       return withSecuritySpan('DetectionRulesClient.getHistoryForRule', async () => {
-        return getHistoryForRule({ rulesClient, userProfileService: userProfile, logger, ...args });
+        return getHistoryForRule({ rulesClient, ...args });
       });
     },
 

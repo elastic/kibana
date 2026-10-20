@@ -20,12 +20,18 @@ import type {
   DryRunResponse,
   FindRulesRequest,
   FindRulesResponse,
+  MatchRulesBody,
   RuleResponse,
   UpdateRuleData,
+  RuleRoutingTagsParams,
   RuleTagsParams,
   TagsResponse,
 } from '@kbn/alerting-v2-schemas';
-import { ALERTING_V2_RULE_API_PATH, ALERTING_V2_INTERNAL_RULE_API_PATH } from '../constants';
+import {
+  ALERTING_V2_RULE_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_API_PATH,
+  ALERTING_V2_INTERNAL_RULE_MATCH_API_PATH,
+} from '../constants';
 
 /**
  * Encodes the `id` path parameter safely. Wraps `buildPath` so a single call
@@ -60,9 +66,21 @@ export class RulesApi {
     });
   }
 
+  public async listRoutingTags(params: RuleRoutingTagsParams = {}): Promise<TagsResponse> {
+    return this.http.get<TagsResponse>(`${ALERTING_V2_INTERNAL_RULE_API_PATH}/routing_tags`, {
+      query: { search: params.search || undefined },
+    });
+  }
+
   public async listRules(params: FindRulesRequest = {}) {
     return this.http.get<FindRulesResponse>(ALERTING_V2_RULE_API_PATH, {
       query: params,
+    });
+  }
+
+  public async matchRules(body: MatchRulesBody = {}) {
+    return this.http.post<FindRulesResponse>(ALERTING_V2_INTERNAL_RULE_MATCH_API_PATH, {
+      body: JSON.stringify(body),
     });
   }
 

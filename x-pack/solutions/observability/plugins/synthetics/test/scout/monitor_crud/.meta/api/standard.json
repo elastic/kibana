@@ -1,5 +1,5 @@
 {
-  "sha1": "2472087d09462fc920fe253c883c6335bf303370",
+  "sha1": "e902f84e1bf6de7365e5936bec5a8c4b2cda98da",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -92,8 +92,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/create_monitor.spec.ts",
-        "line": 44,
+        "line": 46,
         "column": 25
+      }
+    },
+    {
+      "id": "219ae9c20262242-4178b6dbdd9b735",
+      "title": "AddNewMonitorsUI hydrates default kerberos/ntlm when omitted from the request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/create_monitor.spec.ts",
+        "line": 53,
+        "column": 57
       }
     },
     {
@@ -106,8 +120,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/create_monitor.spec.ts",
-        "line": 51,
-        "column": 57
+        "line": 78,
+        "column": 10
       }
     },
     {
@@ -1087,8 +1101,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
-        "line": 143,
-        "column": 12
+        "line": 135,
+        "column": 5
       }
     },
     {
@@ -1100,8 +1114,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
-        "line": 161,
-        "column": 17
+        "line": 148,
+        "column": 25
       }
     },
     {

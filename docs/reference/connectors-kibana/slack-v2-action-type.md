@@ -1,7 +1,7 @@
 ---
 navigation_title: "Slack (v2)"
 type: reference
-description: "Use the Slack (v2) connector to search messages, list channels, fetch channel history, look up channel and user metadata, list and look up files, send messages, create channels, and invite users to Slack channels using the Slack Web API."
+description: "Use the Slack (v2) connector to search messages, list channels, fetch channel history, look up channel and user metadata, list and look up files, send and edit messages, create channels, and invite users to Slack channels using the Slack Web API."
 applies_to:
   stack: preview 9.4
   serverless: preview
@@ -9,7 +9,7 @@ applies_to:
 
 # Slack (v2) connector [slack-v2-action-type]
 
-The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send messages, create channels, and invite users to Slack channels using the Slack Web API. It supports three authentication methods: Quick Connect OAuth 2.0 (recommended), OAuth Authorization Code (Slack OAuth v2), and Bot Token.
+The Slack (v2) connector enables workflow-driven Slack automation: search Slack messages, list conversations the token can access, resolve channel IDs from names, send and edit messages, create channels, and invite users to Slack channels using the Slack Web API. It supports three authentication methods: Quick Connect OAuth 2.0 (recommended), OAuth Authorization Code (Slack OAuth v2), and Bot Token.
 
 ## Create connectors in {{kib}} [define-slack-v2-ui]
 
@@ -20,7 +20,7 @@ You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
 Slack (v2) connectors support three authentication methods:
 
 Quick Connect OAuth 2.0 (recommended) {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
-:   Elastic's managed OAuth flow. Select this option and authorize access to your Slack workspace through Elastic. No app setup is required.
+:   Elastic's managed OAuth flow. Select this option and authorize access to your Slack workspace through Elastic. No app setup is required. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 OAuth Authorization Code
 :   Slack's OAuth v2 flow using your own Slack app. You will be redirected to Slack to authorize access to your workspace. Requires a Slack app with a Client ID, Client Secret, and the appropriate user token scopes. See [Get API credentials (OAuth)](#slack-v2-api-credentials-oauth) for setup steps.
@@ -34,11 +34,13 @@ The **Search messages** action requires a user token and is not available when u
 
 ## Receive Slack events [slack-v2-inbound-events]
 ```{applies_to}
-serverless: unavailable
+serverless: preview
 stack: preview 9.6+
 ```
 
-The connector can start a workflow from a Slack Events API `event_callback`. A saved Slack connector does not receive events until **Receive events** is turned on for that connector.
+The connector can start a workflow from a Slack Events API `event_callback`. A saved Slack connector does not receive events until **Receive events** is turned on for that connector. After you save a new connector, {{kib}} shows the **Webhook URL** and the ingest token once, so copy them then. For an existing connector, save it, then select **Rotate ingest token**. A new token stops the previous one from working. This toggle appears when `xpack.actions.inboundEvents.enabled` is `true`.
+
+In {{kib}}, you need an Enterprise license and `server.publicBaseUrl` set to the host that Slack uses to reach {{kib}}. `xpack.actions.inboundEvents.enabled` defaults to `true`. Set it to `false` to turn receive events off.
 
 | Workflow event | Slack `event.type` | Fields |
 | --- | --- | --- |
@@ -210,16 +212,11 @@ Get conversation replies
     - `cursor` (optional): Pagination cursor from a previous response. Omit for the first page.
     - `raw` (optional): If `true`, returns the full raw Slack response.
 
-Update message
-:   {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Edit an existing Slack message in-place using Slack `chat.update`. Use this to change alert state (for example, from "open" to "acknowledged") without posting a new message.
-    - `channel` (required): Conversation ID that contains the message to update.
-    - `ts` (required): Timestamp of the message to update (for example, `"1234567890.123456"`). Use the timestamp from a previous **Send message** or **Send Block Kit message** response.
-    - `text` (optional): New plain-text content for the message. Required when `blocks` is omitted. When you send `text` without `blocks`, any existing blocks on the message are cleared.
-    - `blocks` (optional): New Block Kit blocks for the message. Required when `text` is omitted.
-
-::::{note}
-At least one of `text` or `blocks` must be provided.
-::::
+Update message {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6`
+:   Edit a message the connector posted earlier, using Slack `chat.update`. The new text replaces the old text, and Slack removes any blocks the message had, so a Block Kit or richly formatted message comes back as plain text.
+    - `channel` (required): Conversation ID that holds the message (for example, `C123...`). Slack does not accept a channel name here.
+    - `messageTs` (required): Timestamp of the message to edit, as returned in `ts` by **Send message**.
+    - `text` (required): New message text, at most 4,000 characters.
 
 Add reaction
 :   {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Add an emoji reaction to a Slack message using Slack `reactions.add`. Use this as a lightweight acknowledgement signal (for example, `eyes` when seen, `white_check_mark` when resolved) without posting a new message.
@@ -255,6 +252,10 @@ Ask question
 
 Use the [Action configuration settings](/reference/configuration-reference/alerting-settings.md#action-settings) to customize connector networking, such as proxies, certificates, or TLS settings. If you use [`xpack.actions.allowedHosts`](/reference/configuration-reference/alerting-settings.md#action-settings), include `slack.com` in the list. To use **Upload file**, also include `files.slack.com`, which receives the file contents.
 
+## Get API credentials (Quick Connect OAuth 2.0) [slack-v2-api-credentials-quick-connect]
+
+No setup required. Select **Quick Connect OAuth 2.0** when you create the connector in {{kib}} and follow the authorization prompt to grant Elastic access to your Slack workspace. Your Slack workspace administrator might need to approve the app. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
+
 ## Get API credentials (OAuth) [slack-v2-api-credentials-oauth]
 
 To use OAuth Authorization Code authentication, you need a Slack app configured for OAuth.
@@ -264,7 +265,7 @@ To use OAuth Authorization Code authentication, you need a Slack app configured 
 3. Under **OAuth & Permissions**, add the following **User Token Scopes**:
    - `channels:read` — list and resolve public channel IDs
    - `channels:history` — read public channel history (for **Get conversation history**)
-   - `chat:write` — send messages
+   - `chat:write` — send messages and edit the messages you sent
    - `files:read` — access shared files (for **Get file info**, **List files**)
    - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` `files:write` — upload files (for **Upload file**)
    - `groups:read` — list private channels (including for **List channels** when `types` includes `private_channel`)
@@ -298,7 +299,7 @@ To use Bot Token authentication, you need a Slack app with a bot token.
 3. Under **OAuth & Permissions**, add the following **Bot Token Scopes**:
    - `channels:read` — list public channels
    - `channels:history` — read public channel message history
-   - `chat:write` — send messages as the bot
+   - `chat:write` — send messages as the bot and edit the messages it sent
    - `files:read` — access file metadata
    - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` `files:write` — upload files (for **Upload file**)
    - `groups:read` — list private channels the bot is a member of

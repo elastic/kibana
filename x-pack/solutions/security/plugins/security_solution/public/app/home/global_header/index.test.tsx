@@ -169,6 +169,67 @@ describe('global header', () => {
     expect(queryByTestId(DATA_VIEW_PICKER_TEST_ID)).not.toBeInTheDocument();
   });
 
+  it.each([
+    '/rules/management',
+    '/rules/monitoring',
+    '/rules/updates',
+    '/rules/add_rules',
+    '/exceptions',
+  ])(
+    'does not mount the header action menu on %s, where the page app header owns the actions',
+    (pathname) => {
+      (useLocation as jest.Mock).mockReturnValue({ pathname });
+      const setHeaderActionMenu = jest.fn();
+      (useKibana as jest.Mock).mockReturnValue({
+        ...mockUseKibana(),
+        services: { ...mockUseKibana().services, setHeaderActionMenu },
+      });
+
+      render(
+        <TestProviders store={store}>
+          <GlobalHeader />
+        </TestProviders>
+      );
+
+      expect(setHeaderActionMenu).toHaveBeenCalledWith(undefined);
+      expect(setHeaderActionMenu).not.toHaveBeenCalledWith(expect.any(Function));
+    }
+  );
+
+  it('mounts the header action menu on the exception list details page', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: '/exceptions/details/list-1' });
+    const setHeaderActionMenu = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      ...mockUseKibana(),
+      services: { ...mockUseKibana().services, setHeaderActionMenu },
+    });
+
+    render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+
+    expect(setHeaderActionMenu).toHaveBeenCalledWith(expect.any(Function));
+  });
+
+  it('mounts the header action menu on the rule details page', () => {
+    (useLocation as jest.Mock).mockReturnValue({ pathname: '/rules/id/123' });
+    const setHeaderActionMenu = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      ...mockUseKibana(),
+      services: { ...mockUseKibana().services, setHeaderActionMenu },
+    });
+
+    render(
+      <TestProviders store={store}>
+        <GlobalHeader />
+      </TestProviders>
+    );
+
+    expect(setHeaderActionMenu).toHaveBeenCalledWith(expect.any(Function));
+  });
+
   it('shows AI Assistant header link', () => {
     const { findByTestId } = render(
       <TestProviders store={store}>

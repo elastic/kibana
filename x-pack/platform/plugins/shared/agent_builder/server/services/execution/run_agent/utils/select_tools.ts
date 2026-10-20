@@ -8,7 +8,10 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { defaultAgentToolIds } from '@kbn/agent-builder-common';
 import { ToolOrigin, ToolType, filterToolsBySelection } from '@kbn/agent-builder-common';
-import { contextEngineAiIndexTools } from '@kbn/agent-builder-common/tools';
+import {
+  contextEngineAiIndexTools,
+  contextEngineMemoryTools,
+} from '@kbn/agent-builder-common/tools';
 import type {
   ToolProvider,
   ExecutableTool,
@@ -20,10 +23,10 @@ import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { AttachmentsService, SkillsService } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
-import type { Attachment } from '@kbn/agent-builder-common/attachments';
-import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import { getLatestVersion, toAttachment } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
 import { createAttachmentTools } from '../../../tools/builtin/attachments';
+import type { AiIndexCatalogEntry } from '../types';
 import type { ProcessedConversation } from './prepare_conversation';
 
 export interface SelectToolsResult {
@@ -39,6 +42,7 @@ export const selectTools = async ({
   request,
   toolProvider,
   agentConfiguration,
+  aiIndexCatalog,
   aiIndicesEnabled,
   attachmentsService,
   spaceId,
@@ -52,6 +56,7 @@ export const selectTools = async ({
   toolProvider: ToolProvider;
   attachmentsService: AttachmentsService;
   agentConfiguration: AgentConfiguration;
+  aiIndexCatalog?: AiIndexCatalogEntry[];
   aiIndicesEnabled: boolean;
   spaceId: string;
   runner: ScopedRunner;
@@ -78,6 +83,13 @@ export const selectTools = async ({
     runner,
   });
 
+  const hasMemoryEnabledAiIndex =
+    aiIndexCatalog?.some(({ memoryEnabled }) => memoryEnabled) ?? false;
+  const aiIndexToolIds = [
+    ...Object.values(contextEngineAiIndexTools),
+    ...(hasMemoryEnabledAiIndex ? Object.values(contextEngineMemoryTools) : []),
+  ];
+
   // pick tools from provider (from agent config and attachment-type tools)
   const staticRegistryTools = await pickTools({
     selection: [
@@ -87,7 +99,7 @@ export const selectTools = async ({
         ? [{ tool_ids: defaultAgentToolIds }]
         : []),
       ...(aiIndicesEnabled && (agentConfiguration.ai_indices?.length ?? 0) > 0
-        ? [{ tool_ids: Object.values(contextEngineAiIndexTools) }]
+        ? [{ tool_ids: aiIndexToolIds }]
         : []),
     ],
     toolProvider,
@@ -223,15 +235,8 @@ const getVersionedAttachmentBoundTools = async ({
       continue;
     }
 
-    const input: Attachment = {
-      id: attachment.id,
-      type: attachment.type,
-      data: latest.data as Attachment['data'],
-      ...(attachment.hidden !== undefined ? { hidden: attachment.hidden } : {}),
-    };
-
     try {
-      const formatted = await definition.format(input, formatContext);
+      const formatted = await definition.format(toAttachment(attachment, latest), formatContext);
       const boundedTools = formatted.getBoundedTools ? await formatted.getBoundedTools() : [];
       for (const tool of boundedTools) {
         tools.push(attachmentsService.convertAttachmentTool(tool));

@@ -159,4 +159,46 @@ describe('MappingEditor', () => {
 
     expect(queryByText('foo')).toBeNull();
   });
+
+  it('shows the validation callout below the fields after an invalid field is submitted', () => {
+    const Wrapper = () => {
+      const [value, setValue] = useState<MappingEditorValue>({
+        dynamic: false,
+        fields: [
+          { id: 'field-1', name: 'status_code', path: 'status', type: 'integer', format: '' },
+          { id: 'field-2', name: 'status_code', path: 'http_status', type: 'keyword', format: '' },
+        ],
+      });
+
+      return (
+        <I18nProvider>
+          <EuiProvider>
+            <KibanaContextProvider services={{ docLinks: docLinksMock }}>
+              <MappingEditor value={value} onChange={setValue} />
+            </KibanaContextProvider>
+          </EuiProvider>
+        </I18nProvider>
+      );
+    };
+
+    const { getAllByTestId, getByTestId, getByText, queryByTestId } = render(<Wrapper />);
+
+    expect(queryByTestId('dataFederationMappingEditorValidationError')).toBeNull();
+
+    fireEvent.click(getAllByTestId('dataFederationMappingEditorEditField')[0]);
+    fireEvent.click(getByTestId('dataFederationMappingEditorUpdateField'));
+
+    expect(getByText('Names must be unique.')).toBeInTheDocument();
+    const testSubjsInDocumentOrder = Array.from(
+      document.querySelectorAll(
+        '[data-test-subj="dataFederationMappingEditorField"], [data-test-subj="dataFederationMappingEditorValidationError"]'
+      ),
+      (element) => element.getAttribute('data-test-subj')
+    );
+    expect(testSubjsInDocumentOrder).toEqual([
+      'dataFederationMappingEditorField',
+      'dataFederationMappingEditorField',
+      'dataFederationMappingEditorValidationError',
+    ]);
+  });
 });
