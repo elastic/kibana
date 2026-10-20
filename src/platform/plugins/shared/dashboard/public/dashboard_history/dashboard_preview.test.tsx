@@ -66,7 +66,7 @@ const fullSnapshot = getChange('full', {
   time_range: { from: 'now-1h', to: 'now' },
 });
 
-const bareSnapshot = getChange('bare', {
+const minimalSnapshot = getChange('minimal', {
   panels: [panel('panel-c')] as DashboardState['panels'],
   filters: [],
   query: { expression: '', language: 'kql' },
@@ -96,16 +96,6 @@ const renderedPanels = () => screen.queryAllByTestId('renderedPanel').map((el) =
 const searchBar = () => screen.getByTestId('searchBar');
 
 describe('DashboardPreview', () => {
-  /** makes the first `setState` on the next mounted dashboard API reject */
-  const failNextApplication = () => {
-    const { getDashboardApi } = dashboardApiModule;
-    jest.spyOn(dashboardApiModule, 'getDashboardApi').mockImplementationOnce((...args) => {
-      const dashboard = getDashboardApi(...args);
-      jest.spyOn(dashboard.api, 'setState').mockRejectedValueOnce(new Error('failed to apply'));
-      return dashboard;
-    });
-  };
-
   it('renders the snapshot panels in a non-interactive dashboard and reports the title', async () => {
     const { setPreviewTitle } = renderPreview(fullSnapshot);
 
@@ -134,14 +124,14 @@ describe('DashboardPreview', () => {
   });
 
   it('hides the search bar when the snapshot has no filters, query, or saved time range', async () => {
-    renderPreview(bareSnapshot);
+    renderPreview(minimalSnapshot);
     await waitFor(() => expect(renderedPanels()).toEqual(['panel-c']));
 
     expect(screen.queryByTestId('searchBar')).not.toBeInTheDocument();
   });
 
   it('falls back to the inherited time range when the snapshot has none', async () => {
-    renderPreview(bareSnapshot);
+    renderPreview(minimalSnapshot);
     await waitFor(() => expect(renderedPanels()).toEqual(['panel-c']));
 
     expect(screen.getByTestId('renderedTimeRange')).toHaveTextContent(
@@ -154,10 +144,10 @@ describe('DashboardPreview', () => {
       const { rerender, setPreviewTitle } = renderPreview(fullSnapshot);
       await waitFor(() => expect(renderedPanels()).toEqual(['panel-a', 'panel-b']));
 
-      rerender(<Wrapper change={bareSnapshot} setPreviewTitle={setPreviewTitle} />);
+      rerender(<Wrapper change={minimalSnapshot} setPreviewTitle={setPreviewTitle} />);
 
       await waitFor(() => expect(renderedPanels()).toEqual(['panel-c']));
-      expect(setPreviewTitle).toHaveBeenLastCalledWith('Title bare');
+      expect(setPreviewTitle).toHaveBeenLastCalledWith('Title minimal');
       expect(screen.queryByTestId('searchBar')).not.toBeInTheDocument();
       expect(screen.getByTestId('dashboardRenderer')).toHaveAttribute('data-mount-count', '1');
 
@@ -180,7 +170,7 @@ describe('DashboardPreview', () => {
         )
       );
 
-      rerender(<Wrapper change={bareSnapshot} setPreviewTitle={setPreviewTitle} />);
+      rerender(<Wrapper change={minimalSnapshot} setPreviewTitle={setPreviewTitle} />);
 
       await waitFor(() =>
         expect(screen.getByTestId('renderedTimeRange')).toHaveTextContent(
@@ -190,7 +180,7 @@ describe('DashboardPreview', () => {
     });
 
     it('uses the saved time range when moving from none to a saved range', async () => {
-      const { rerender, setPreviewTitle } = renderPreview(bareSnapshot);
+      const { rerender, setPreviewTitle } = renderPreview(minimalSnapshot);
       await waitFor(() => expect(renderedPanels()).toEqual(['panel-c']));
 
       rerender(<Wrapper change={fullSnapshot} setPreviewTitle={setPreviewTitle} />);
@@ -204,11 +194,11 @@ describe('DashboardPreview', () => {
     });
 
     it('applies each snapshot in order when selections change in quick succession', async () => {
-      const { rerender, setPreviewTitle } = renderPreview(bareSnapshot);
+      const { rerender, setPreviewTitle } = renderPreview(minimalSnapshot);
       await waitFor(() => expect(renderedPanels()).toEqual(['panel-c']));
 
       rerender(<Wrapper change={fullSnapshot} setPreviewTitle={setPreviewTitle} />);
-      rerender(<Wrapper change={bareSnapshot} setPreviewTitle={setPreviewTitle} />);
+      rerender(<Wrapper change={minimalSnapshot} setPreviewTitle={setPreviewTitle} />);
       rerender(<Wrapper change={fullSnapshot} setPreviewTitle={setPreviewTitle} />);
 
       await waitFor(() => expect(renderedPanels()).toEqual(['panel-a', 'panel-b']));
@@ -216,19 +206,29 @@ describe('DashboardPreview', () => {
     });
 
     describe('when a snapshot fails to apply', () => {
+      /** makes the first `setState` on the next mounted dashboard API reject */
+      const failNextApplication = () => {
+        const { getDashboardApi } = dashboardApiModule;
+        jest.spyOn(dashboardApiModule, 'getDashboardApi').mockImplementationOnce((...args) => {
+          const dashboard = getDashboardApi(...args);
+          jest.spyOn(dashboard.api, 'setState').mockRejectedValueOnce(new Error('failed to apply'));
+          return dashboard;
+        });
+      };
+
       beforeEach(() => {
         failNextApplication();
       });
 
       it('shows an error for the selection whose application failed', async () => {
-        renderPreview(bareSnapshot);
+        renderPreview(minimalSnapshot);
 
         expect(await screen.findByTestId('dashboardPreviewApplyError')).toBeInTheDocument();
         expect(screen.queryByTestId('searchBar')).not.toBeInTheDocument();
       });
 
       it('clears the error when a later selection applies successfully', async () => {
-        const { rerender, setPreviewTitle } = renderPreview(bareSnapshot);
+        const { rerender, setPreviewTitle } = renderPreview(minimalSnapshot);
         await screen.findByTestId('dashboardPreviewApplyError');
 
         rerender(<Wrapper change={fullSnapshot} setPreviewTitle={setPreviewTitle} />);
