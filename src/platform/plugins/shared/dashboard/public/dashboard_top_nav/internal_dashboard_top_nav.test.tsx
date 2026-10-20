@@ -9,8 +9,9 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { waitFor } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
@@ -383,6 +384,48 @@ describe('Internal dashboard top nav', () => {
       }),
       {}
     );
+  });
+
+  describe('url embedded app menu', () => {
+    const renderEmbedded = (forceShowTopNavMenu: boolean) => {
+      const { api, internalApi } = buildMockDashboardApi({ savedObjectId: 'test-id' });
+      const dashboardApi: DashboardApi = {
+        ...api,
+        viewMode$: new BehaviorSubject<ViewMode>('view'),
+      };
+
+      return renderWithChrome(
+        <DashboardContext.Provider value={dashboardApi}>
+          <DashboardInternalContext.Provider value={internalApi}>
+            <InternalDashboardTopNav
+              redirectTo={jest.fn()}
+              embedSettings={{
+                forceShowDatePicker: false,
+                forceShowTopNavMenu,
+                forceShowQueryInput: false,
+                forceHideFilterBar: false,
+              }}
+            />
+          </DashboardInternalContext.Provider>
+        </DashboardContext.Provider>
+      );
+    };
+
+    it('should render the app menu inline instead of pushing it to chrome when forceShowTopNavMenu is true', async () => {
+      renderEmbedded(true);
+
+      expect(await screen.findByTestId('dashboardEditMode')).toBeInTheDocument();
+      expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.root)).not.toBeInTheDocument();
+      expect(coreServices.chrome.setAppMenu).not.toHaveBeenCalledWith(
+        expect.objectContaining({ items: expect.anything() })
+      );
+    });
+
+    it('should not render the app menu when forceShowTopNavMenu is false', () => {
+      renderEmbedded(false);
+
+      expect(screen.queryByTestId('dashboardEditMode')).not.toBeInTheDocument();
+    });
   });
 
   describe('esqlApproximation toggle', () => {

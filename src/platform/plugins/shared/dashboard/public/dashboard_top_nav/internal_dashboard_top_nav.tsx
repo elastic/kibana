@@ -66,6 +66,7 @@ import {
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
 import { DashboardFavoritesProvider } from './dashboard_favorite_button';
+import { EmbeddedDashboardMenu } from './embedded_dashboard_menu';
 import { LegacyDashboardHeader } from './legacy_dashboard_header';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 import { useEnhanceDashboardAction } from '../dashboard_app/enhance/use_enhance_dashboard_action';
@@ -140,6 +141,32 @@ const DashboardAppHeader = ({
   );
 };
 
+/**
+ * Header rendering mode:
+ *  - `embedded`: URL embed (`embed=true`), any chrome style. Chrome is hidden, so render the app menu
+ *    inline, and only when `show-top-menu=true` forces it visible.
+ *  - `legacy`: classic chrome -> push through the imperative chrome APIs.
+ *  - `registered`: next chrome, hosted by an app that owns the layout and provides its own header slot
+ *    (e.g. Security) -> register the content so chrome renders it in the app-header slot.
+ *  - `inline`: next chrome, standalone -> we render `AppHeader`.
+ */
+const getHeaderMode = ({
+  chromeStyle,
+  isEmbeddedViaUrl,
+  isHostedByApp,
+}: {
+  chromeStyle: ReturnType<typeof useChromeStyle>;
+  /** The page was loaded with the `embed=true` URL param. */
+  isEmbeddedViaUrl: boolean;
+  /** A host app provided `setCustomHeaderActionMenu`. */
+  isHostedByApp: boolean;
+}): 'embedded' | 'legacy' | 'registered' | 'inline' => {
+  if (isEmbeddedViaUrl) return 'embedded';
+  if (chromeStyle !== 'project') return 'legacy';
+  if (isHostedByApp) return 'registered';
+  return 'inline';
+};
+
 export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
   embedSettings,
@@ -153,14 +180,11 @@ export function InternalDashboardTopNav({
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   const chromeStyle = useChromeStyle();
-  // Header rendering mode:
-  //  - `inline`: next chrome, standalone -> we render `AppHeader`.
-  //  - `registered`: next chrome, embedded in a host that owns the layout (e.g. Security) -> register
-  //    the content so chrome renders it in the app-header slot.
-  //  - `legacy`: classic chrome -> push through the imperative chrome APIs.
-  const isEmbedded = Boolean(embedSettings || setCustomHeaderActionMenu);
-  const isAppHeaderActive = chromeStyle === 'project';
-  const headerMode = !isAppHeaderActive ? 'legacy' : isEmbedded ? 'registered' : 'inline';
+  const headerMode = getHeaderMode({
+    chromeStyle,
+    isEmbeddedViaUrl: Boolean(embedSettings),
+    isHostedByApp: Boolean(setCustomHeaderActionMenu),
+  });
 
   const { onAppLeave } = useDashboardMountContext();
 
@@ -509,6 +533,9 @@ export function InternalDashboardTopNav({
             experimentalDashboardAiAction={experimentalDashboardAiAction}
           />
         </DashboardFavoritesProvider>
+      )}
+      {headerMode === 'embedded' && visibilityProps.showTopNavMenu && (
+        <EmbeddedDashboardMenu config={appMenuConfig} />
       )}
       {headerMode === 'legacy' && (
         <LegacyDashboardHeader
