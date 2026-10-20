@@ -2890,8 +2890,6 @@
     "discover.context.olderDocumentsWarningZero": "Es konnten keine Dokumente gefunden werden, die älter als der Anker waren.",
     "discover.context.pageTitle": "Dokumente im Zusammenhang mit #{anchorId}",
     "discover.context.reloadPageDescription.reloadOrVisitTextMessage": "Bitte laden Sie die Seite neu oder kehren Sie zur Dokumentenliste zurück, um ein gültiges Ankerdokument auszuwählen.",
-    "discover.context.unableToLoadAnchorDocumentDescription": "Das Ankerdokument kann nicht geladen werden",
-    "discover.context.unableToLoadDocumentDescription": "Dokumente können nicht geladen werden",
     "discover.contextAwareness.changePointDocViewer.noChartBody": "Das Änderungspunktdiagramm ist erst verfügbar, wenn eine Abfrage ausgeführt wird.",
     "discover.contextAwareness.changePointDocViewer.noChartTitle": "Diagramm nicht verfügbar",
     "discover.contextAwareness.changePointPvalueCell.impactHigh": "hoch",

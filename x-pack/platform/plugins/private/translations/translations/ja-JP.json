@@ -2907,8 +2907,6 @@
     "discover.context.olderDocumentsWarningZero": "アンカーよりも古いドキュメントは見つかりませんでした。",
     "discover.context.pageTitle": "#{anchorId}の周りのドキュメント",
     "discover.context.reloadPageDescription.reloadOrVisitTextMessage": "ドキュメントリストを再読み込みするか、ドキュメントリストに戻り、有効なアンカードキュメントを選択してください。",
-    "discover.context.unableToLoadAnchorDocumentDescription": "アンカードキュメントを読み込めません",
-    "discover.context.unableToLoadDocumentDescription": "ドキュメントを読み込めません",
     "discover.contextAwareness.changePointDocViewer.noChartBody": "変化点チャートはクエリを実行するまで利用できません。",
     "discover.contextAwareness.changePointDocViewer.noChartTitle": "チャートは利用できません",
     "discover.contextAwareness.changePointPvalueCell.impactHigh": "高",
