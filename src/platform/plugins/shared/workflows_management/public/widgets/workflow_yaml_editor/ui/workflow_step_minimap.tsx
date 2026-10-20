@@ -138,6 +138,7 @@ interface MinimapStepRowProps {
   lineStart: number;
   index: number;
   isFocused: boolean;
+  isTabStop: boolean;
   severityInfo: StepSeverityInfo | null;
   isNested: boolean;
   colors: MinimapColors;
@@ -150,6 +151,7 @@ const MinimapStepRow = React.memo(
     lineStart,
     index,
     isFocused,
+    isTabStop,
     severityInfo,
     isNested,
     colors,
@@ -162,6 +164,9 @@ const MinimapStepRow = React.memo(
       <button
         type="button"
         title={stepId}
+        // Roving tabindex: the minimap is a single tab stop, arrow keys move between pills.
+        tabIndex={isTabStop ? 0 : -1}
+        aria-current={isFocused ? 'step' : undefined}
         // `style` for the dynamic top position avoids creating a new Emotion css
         // object on every render; the stable stepButtonBaseCss covers everything else.
         style={{ top: index * MINIMAP_ITEM_HEIGHT }}
@@ -452,6 +457,53 @@ export const WorkflowStepMinimap = ({
   // Pre-compute step IDs once for buildOuterRailSegments (which only needs ids, not full StepInfo).
   const stepIds = useMemo(() => stepEntries.map(([id]) => id), [stepEntries]);
 
+  // Roving tabindex: the whole minimap is a single tab stop. It rests on the step under the
+  // editor cursor (or the first step); arrow keys move it while the minimap has focus.
+  const [rovingStepId, setRovingStepId] = useState<string | null>(null);
+  const tabStopStepId =
+    [rovingStepId, focusedStepInfo?.stepId].find((id) => id != null && stepIds.includes(id)) ??
+    stepIds[0];
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      const { key, currentTarget, target } = e;
+      const buttons = Array.from(currentTarget.querySelectorAll('button'));
+      const currentIndex = buttons.findIndex((button) => button === target);
+      if (currentIndex === -1) return;
+
+      const last = buttons.length - 1;
+      let next: number;
+      switch (key) {
+        case 'ArrowDown':
+          next = Math.min(currentIndex + 1, last);
+          break;
+        case 'ArrowUp':
+          next = Math.max(currentIndex - 1, 0);
+          break;
+        case 'Home':
+          next = 0;
+          break;
+        case 'End':
+          next = last;
+          break;
+        default:
+          return;
+      }
+      // Keep the minimap's scroll container from scrolling on its own.
+      e.preventDefault();
+      buttons[next].focus();
+      setRovingStepId(stepIds[next]);
+    },
+    [stepIds]
+  );
+
+  // Once focus leaves the minimap, the tab stop goes back to following the current step.
+  const handleBlur = useCallback((e: React.FocusEvent<HTMLDivElement>) => {
+    const { relatedTarget, currentTarget } = e;
+    if (relatedTarget instanceof Node && currentTarget.contains(relatedTarget)) return;
+    setRovingStepId(null);
+  }, []);
+
   const outerRailSegments = useMemo(
     () =>
       nestingInfo.hasNesting
@@ -570,6 +622,8 @@ export const WorkflowStepMinimap = ({
       })}
     >
       <div
+        onKeyDown={handleKeyDown}
+        onBlur={handleBlur}
         css={css({
           position: 'relative',
           width: MINIMAP_MAX_LABEL_W + MINIMAP_TRACK_W,
@@ -645,6 +699,7 @@ export const WorkflowStepMinimap = ({
               lineStart={step.lineStart}
               index={index}
               isFocused={stepId === focusedStepInfo?.stepId}
+              isTabStop={stepId === tabStopStepId}
               severityInfo={severityMap.get(stepId) ?? null}
               isNested={isNested}
               colors={rowColors}
