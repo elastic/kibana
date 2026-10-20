@@ -13,6 +13,7 @@ import {
   TimelineEventType,
   answeredPromptRequestIds,
   assertValidConversationEventType,
+  getEventActorDisplayName,
   interruptionOfTerminal,
   isActivityEvent,
   isAttachmentEvent,
@@ -300,5 +301,28 @@ describe('timelineExecutionId', () => {
       roundId: 'round-1',
       index: 3,
     });
+  });
+});
+
+describe('getEventActorDisplayName', () => {
+  it('prefers the full name', () => {
+    expect(
+      getEventActorDisplayName({
+        type: EventActorType.user,
+        id: 'u1',
+        username: 'jdoe',
+        full_name: 'Jane Doe',
+      })
+    ).toBe('Jane Doe');
+  });
+
+  it('falls back to the username', () => {
+    expect(
+      getEventActorDisplayName({ type: EventActorType.user, id: 'u1', username: 'jdoe' })
+    ).toBe('jdoe');
+  });
+
+  it('returns undefined when the actor has no name', () => {
+    expect(getEventActorDisplayName({ type: EventActorType.system, id: 'kibana' })).toBeUndefined();
   });
 });

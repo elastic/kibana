@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/connector-contract-mock'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/nightshift-context-and-research-team'
+  defaultOwner: '@elastic/workflows-eng'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/connector-contract-mock'
   description: Moon project for @kbn/connector-contract-mock
   channel: ''
-  owner: '@elastic/nightshift-context-and-research-team'
+  owner: '@elastic/workflows-eng'
   sourceRoot: src/platform/packages/shared/kbn-connector-contract-mock
 dependsOn:
   - '@kbn/safer-lodash-set'
