@@ -710,6 +710,7 @@ class SecurityRoutingTest(unittest.TestCase):
             "Basic configuration is required",
             "Token: undefined",
             "Password: required",
+            "api_key=$BASE64_API_KEY",
             "https://elastic:changeme@localhost:9200",
             "curl -u elastic:changeme http://localhost:5601",
             "curl -u elastic:password http://localhost:5601",
@@ -2264,7 +2265,9 @@ class SearchCommandTest(unittest.TestCase):
         queries = search_queries("document_parsing_exception", "value list ip", "Manage value lists")
         self.assertEqual(queries[0], "document_parsing_exception")
         for query in queries[1:]:
-            self.assertTrue(query.endswith(("in:title", "in:body")), query)
+            if "document_parsing_exception" in query:
+                self.assertTrue(query.endswith(("in:title", "in:body")), query)
+        self.assertIn("value list ip", queries)
         self.assertIn("document_parsing_exception value list ip in:title", queries)
         self.assertIn("document_parsing_exception value list ip in:body", queries)
         self.assertIn("Manage value lists in:title", queries)
@@ -2272,7 +2275,11 @@ class SearchCommandTest(unittest.TestCase):
     def test_without_token_only_split_plain_queries_run(self):
         self.assertEqual(
             search_queries(None, "value list invalid ip"),
-            ["value list invalid ip in:title", "value list invalid ip in:body"],
+            [
+                "value list invalid ip",
+                "value list invalid ip in:title",
+                "value list invalid ip in:body",
+            ],
         )
 
     def test_bad_token_and_empty_input_rejected(self):
@@ -2361,6 +2368,16 @@ class WriteLocalPathGuardTest(unittest.TestCase):
         ):
             with self.assertRaises(ValueError, msg=body):
                 self._write(body)
+
+    def test_allows_repro_snippets_that_look_like_paths(self):
+        for body in (
+            '<img src="/missing.png" onerror="alert(1)">',
+            "Payload: `<img src=/a/b.png onerror=alert(1)>` renders",
+            "```html\n<img src=\"/tmp/x/shot.png\">\n```",
+        ):
+            self.assertTrue(self._write(body), body)
+        with self.assertRaises(ValueError):
+            self._write("See /tmp/x/shot.png for the screenshot")
 
     def test_allows_embedded_urls_and_plain_text(self):
         self.assertTrue(self._write("![s](https://github.com/user-attachments/assets/1)"))

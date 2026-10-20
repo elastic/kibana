@@ -88,7 +88,7 @@ _SECURITY_RE = re.compile(
     r"|\bcurl\b[^\n]*\s(?:-u|--user)\s+[^\s:]+:(?!\*|<|\$|(?i:(?:undefined|null|none|redacted|changeme|example|password|secret)\b))[^\s]{4,}"
     r"|\b[a-z][a-z0-9+.-]*://[^\s/:@*<]+:(?!\*|<|\$|(?i:(?:undefined|null|none|redacted|changeme|example|password|secret)\b))[^\s/@]{4,}@"
     r"|\b(?:password|passwd|secret|api[_-]?key|token)\s*[:=]\s*"
-    r"(?!(?:undefined|null|none|redacted|changeme|example)\b)"
+    r"(?!\$|(?:undefined|null|none|redacted|changeme|example)\b)"
     r"(?=[^\s'\"]*\d)[^\s'\"*]{8,}",
     re.I,
 )
@@ -106,7 +106,7 @@ _MEDIA_REF_RE = re.compile(
     re.I | re.M,
 )
 _LOCAL_MEDIA_RE = re.compile(
-    r"(?<![\w/:.-])(?:\$SESSION_DIR/|~/|\.{1,2}/|/|[A-Za-z]:\\)[^\s()<>\"'`]*"
+    r"(?<![\w/:.-])(?:\$SESSION_DIR/|~/|\.{1,2}/|/[^\s()<>\"'`/]+/|[A-Za-z]:\\)[^\s()<>\"'`]*"
     rf"\.{_MEDIA_EXT}\b"
     # a labelled or embedded reference whose target is not an http(s) URL (relative paths too)
     rf"|^\s*(?:screenshot|recording|video)s?\s*:\s*(?!https?://|!\[|<video)[^\s]*\.{_MEDIA_EXT}\b"
@@ -114,6 +114,14 @@ _LOCAL_MEDIA_RE = re.compile(
     rf"|<video[^>]*\bsrc=\"(?!https?://)[^\"]*\.{_MEDIA_EXT}\"",
     re.I | re.M,
 )
+_CODE_RE = re.compile(r"```.*?```|`[^`\n]*`", re.S)
+
+
+def _without_code(text: str) -> str:
+    """Drop fenced and inline code: repro snippets there are input, not attachments."""
+    return _CODE_RE.sub("", text)
+
+
 _TITLE_FORMAT_RE = re.compile(r"^\[.+?\] \[Bug\] .+")
 _STACK_RELEASE_RE = re.compile(r"^v?(\d+)\.(\d+)(?:\.(\d+))?$")
 _WIP_RE = re.compile(
@@ -272,7 +280,8 @@ def search_queries(token: str | None, words: str, screen: str | None = None) -> 
 
     GitHub's default search returns nothing when an identifier is ANDed with other
     words and no in:title / in:body qualifier is present, so every identifier-plus-words
-    query is qualified, and the bare identifier is also run on its own.
+    query is qualified, and the bare identifier is also run on its own. Plain words are run
+    unqualified too (they match across title and body) as well as split by field.
     """
     token = (token or "").strip()
     words = " ".join((words or "").split())
@@ -287,7 +296,7 @@ def search_queries(token: str | None, words: str, screen: str | None = None) -> 
         if words:
             queries += [f"{token} {words} in:title", f"{token} {words} in:body"]
     for plain in dict.fromkeys(text for text in (words, screen) if text):
-        queries += [f"{plain} in:title", f"{plain} in:body"]
+        queries += [plain, f"{plain} in:title", f"{plain} in:body"]
     return list(dict.fromkeys(queries))
 
 
@@ -1782,7 +1791,7 @@ def write_github(
             "or pass --security-ok if the human confirmed it is a false positive"
         )
 
-    local_media = _LOCAL_MEDIA_RE.search(body)
+    local_media = _LOCAL_MEDIA_RE.search(_without_code(body))
     if local_media:
         raise ValueError(
             f"body still references a local file ({local_media.group(0)}): run `upload`, "
