@@ -7,87 +7,89 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TEMPORARY screenshot harness for PR #298989 — do not commit.
-
-import path from 'path';
-import type { ScoutPage } from '@kbn/scout';
 import { spaceTest, tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
+import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import {
+  SAMPLE_DATA_SET_ID,
+  SAMPLE_DATA_DASHBOARD_ID,
+  SAMPLE_DATA_VIEW,
+  SAMPLE_DATA_TIME_RANGE,
+  SAMPLE_DATA_RANGE,
+} from '../constants';
 
-const OUT_DIR = process.env.DARK_MODE_SHOTS_DIR ?? '/tmp/dark-mode-shots';
-const LABEL = process.env.DARK_MODE_SHOTS_LABEL ?? 'unlabeled';
-
-const shot = (name: string) => path.join(OUT_DIR, `${LABEL}-${name}.png`);
-
-const SAMPLE_DASHBOARDS = {
-  flights: '7adfa750-4c81-11e8-b3d7-01146121b73d',
-  logs: 'edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b',
-} as const;
-
-async function toggleToDarkMode(page: ScoutPage) {
-  const expand = page.getByRole('button', { name: 'Expand developer toolbar' });
-  if (await expand.isVisible()) {
-    await expand.click();
-  }
-  const toggle = page.getByRole('button', { name: 'Toggle color theme' });
-  await expect(toggle).toHaveText('Light');
-  await toggle.click();
-  await expect(toggle).toHaveText('Dark');
-}
-
-async function settle(page: ScoutPage) {
-  await expect(page.locator('[data-render-complete="false"]')).toHaveCount(0, { timeout: 30_000 });
-  // Map tiles and canvas repaints have no render-complete signal.
-  await page.waitForTimeout(4000);
-}
-
-const panel = (page: ScoutPage, title: string) =>
-  page.testSubj.locator('embeddablePanel').filter({ has: page.getByText(title, { exact: true }) });
-
-spaceTest.describe('Dark mode toggle screenshots', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe.skip('Flights dashboard (sample data)', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ apiServices, scoutSpace }) => {
     await scoutSpace.savedObjects.cleanStandardList();
-    await apiServices.sampleData.install('flights', scoutSpace.id);
-    await apiServices.sampleData.install('logs', scoutSpace.id);
-  });
 
-  spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
-    await apiServices.sampleData.remove('flights', scoutSpace.id);
-    await apiServices.sampleData.remove('logs', scoutSpace.id);
-  });
+    // install sample flights data
+    await apiServices.sampleData.install(SAMPLE_DATA_SET_ID, scoutSpace.id);
 
-  spaceTest('flights dashboard after toggling to dark', async ({ browserAuth, page, pageObjects }) => {
-    await page.setViewportSize({ width: 1600, height: 1000 });
-    await browserAuth.loginAsAdmin();
-    await pageObjects.dashboard.openDashboardWithId(SAMPLE_DASHBOARDS.flights);
-    await settle(page);
+    await expect
+      .poll(
+        async () => {
+          const { data: dataViews } = await apiServices.dataViews.find(
+            (dataView) => dataView.name === SAMPLE_DATA_VIEW || dataView.title === SAMPLE_DATA_VIEW,
+            scoutSpace.id
+          );
+          return dataViews.length;
+        },
+        // Sample data install can take longer than Scout's default polling window.
+        { timeout: 60_000 }
+      )
+      .toBeGreaterThan(0);
 
-    await toggleToDarkMode(page);
-    await settle(page);
-
-    const metricBackgrounds = await page
-      .locator('[data-test-subj="mtrVis"] .echMetric')
-      .evaluateAll((cards) => cards.map((c) => (c as HTMLElement).style.backgroundColor));
-    // eslint-disable-next-line no-console
-    console.log(`[${LABEL}] flights metric backgrounds: ${JSON.stringify(metricBackgrounds)}`);
-
-    await page.screenshot({ path: shot('flights-top') });
-    await panel(page, '[Flights] Airport Connections (Hover Over Airport)').screenshot({
-      path: shot('flights-vega-map'),
+    await scoutSpace.uiSettings.set({
+      [UI_SETTINGS.TIMEPICKER_QUICK_RANGES]: JSON.stringify(SAMPLE_DATA_RANGE),
     });
   });
 
-  spaceTest('logs dashboard after toggling to dark', async ({ browserAuth, page, pageObjects }) => {
-    await page.setViewportSize({ width: 1600, height: 1600 });
-    await browserAuth.loginAsAdmin();
-    await pageObjects.dashboard.openDashboardWithId(SAMPLE_DASHBOARDS.logs);
-    await settle(page);
+  spaceTest.afterAll(async ({ apiServices, scoutSpace }) => {
+    // remove sample flights data
+    await apiServices.sampleData.remove(SAMPLE_DATA_SET_ID, scoutSpace.id);
+  });
 
-    await toggleToDarkMode(page);
-    await settle(page);
+  spaceTest('loads dashboard and renders panels', async ({ browserAuth, page, pageObjects }) => {
+    await spaceTest.step('login and prepare Discover', async () => {
+      await browserAuth.loginAsAdmin();
+      await pageObjects.discover.goto({ queryMode: 'classic' });
+      await pageObjects.discover.selectDataView(SAMPLE_DATA_VIEW);
+      await pageObjects.datePicker.setCommonlyUsedTime(SAMPLE_DATA_TIME_RANGE);
+      await pageObjects.discover.waitUntilSearchingHasFinished();
+      expect(await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
+    });
 
-    await panel(page, '[Logs] Machine OS and Destination Sankey Chart').screenshot({
-      path: shot('logs-vega-sankey'),
+    await spaceTest.step('open flights dashboard and validate panels', async () => {
+      await pageObjects.dashboard.openDashboardWithId(SAMPLE_DATA_DASHBOARD_ID);
+      await pageObjects.datePicker.setCommonlyUsedTime(SAMPLE_DATA_TIME_RANGE);
+      expect(await pageObjects.dashboard.getPanelCount()).toBeGreaterThan(0);
+    });
+
+    await spaceTest.step('return to dashboard and validate panels', async () => {
+      await pageObjects.dashboard.openDashboardWithId(SAMPLE_DATA_DASHBOARD_ID);
+
+      await expect.poll(async () => await pageObjects.controls.getCount()).toBe(3);
+
+      // check panels rendered
+      await expect.poll(async () => await pageObjects.dashboard.getPanelCount()).toBe(16);
+
+      // check charts rendered
+      await expect.poll(async () => await page.testSubj.locator('xyVisChart').count()).toBe(5);
+
+      // Checking saved searches rendered
+      await expect
+        .poll(async () => await pageObjects.dashboard.getSavedSearchRowCount())
+        .toBeGreaterThan(10);
+
+      // Checking tag clouds rendered
+      const legendLabels = page.locator('[data-testid="echLegendItemLabel"]');
+      const legendTexts = await legendLabels.allInnerTexts();
+      ['Sunny', 'Rain', 'Clear', 'Cloudy', 'Hail'].forEach((value) => {
+        expect(legendTexts).toContain(value);
+      });
+
+      // Checking vega chart rendered
+      await expect(page.locator('.vgaVis__view')).toBeVisible();
     });
   });
 });
