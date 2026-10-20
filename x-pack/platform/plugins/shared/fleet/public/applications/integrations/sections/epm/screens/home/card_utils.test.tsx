@@ -344,7 +344,7 @@ describe('Card utils', () => {
       });
     });
 
-    describe('when enableIntegrationTileClickToAdd is disabled (default)', () => {
+    describe('when enableIntegrationTileClickToAdd is disabled', () => {
       it('should route integration packages to the overview page', () => {
         const cardItem = mapToCard({
           item: { id: 'okta', name: 'okta', version: '1.0.0', type: 'integration' },
