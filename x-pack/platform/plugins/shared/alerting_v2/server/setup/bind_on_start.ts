@@ -6,7 +6,7 @@
  */
 
 import { Logger, OnStart, PluginStart } from '@kbn/core-di';
-import { PluginInitializer } from '@kbn/core-di-server';
+import { CoreStart, PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { EsServiceInternalToken } from '../lib/services/es_service/tokens';
@@ -34,6 +34,7 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
     const coreLogger = container.get(Logger);
     const esClient = container.get(EsServiceInternalToken);
     const changeHistoryClient = container.get(ChangeHistoryClientToken);
+    const userProfileService = container.get(CoreStart('userProfile'));
     const taskManager = container.get(
       PluginStart<AlertingServerStartDependencies['taskManager']>('taskManager')
     );
@@ -46,6 +47,8 @@ export function bindOnStart({ bind }: ContainerModuleLoadOptions) {
       esClient,
       coreLogger,
       changeHistoryClient,
+      retention: config.retention,
+      userProfileService,
     });
 
     initSubscribers(container);

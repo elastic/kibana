@@ -140,6 +140,17 @@ const rules: readonly SetFieldRule[] = [
     },
   },
   {
+    kind: 'ai_data_collection_enabled',
+    match: regex(/^(windows|mac|linux)\.ai_data_collection\.enabled$/),
+    domain: () => bool(),
+    createsMissing: true,
+    apply: (policy, _path, value, match) => {
+      const { os } = match;
+      if (os === undefined) throw new Error('Invalid ai_data_collection rule match');
+      policy[os].ai_data_collection = { enabled: value as boolean };
+    },
+  },
+  {
     kind: 'device_control_usb_storage',
     match: regex(/^(windows|mac)\.device_control\.usb_storage$/),
     domain: () => ({ type: 'enum', values: deviceValues }),
@@ -261,6 +272,7 @@ export type ClassifiedSetFieldValue =
     }
   | { readonly kind: 'antivirus_registration_mode'; readonly value: AntivirusRegistrationModes }
   | { readonly kind: 'device_control_enabled'; readonly value: boolean }
+  | { readonly kind: 'ai_data_collection_enabled'; readonly value: boolean }
   | { readonly kind: 'device_control_usb_storage'; readonly value: DeviceControlAccessLevel }
   | { readonly kind: 'custom_yara_signatures'; readonly value: boolean }
   | {

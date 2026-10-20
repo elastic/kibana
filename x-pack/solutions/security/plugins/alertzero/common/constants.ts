@@ -46,7 +46,15 @@ export const ALERTZERO_MANAGED_WORKFLOW_OWNER_ID = 'alertzero' as const;
 export const ALERTZERO_ATTACHMENT_TYPES = {
   threat: 'security.threat',
   significantSecurityEvent: 'security.significant_security_event',
+  /** Hidden start+poll handoff; server-registered only. */
+  huntCoordinatorResult: 'security.hunt_coordinator_result',
 } as const;
+
+/** Prefix for `hunt-coordinator-result-{runId}`; the route returns the full id. */
+export const HUNT_COORDINATOR_RESULT_ATTACHMENT_ID_PREFIX = 'hunt-coordinator-result-' as const;
+
+export const buildHuntCoordinatorResultAttachmentId = (runId: string): string =>
+  `${HUNT_COORDINATOR_RESULT_ATTACHMENT_ID_PREFIX}${runId}`;
 
 // --- Hunt services ---
 // HUNT_INTERNAL_ROUTE_BASE, HUNT_INDEX_SCOPE_URL, and CANDIDATES_URL are re-exported from

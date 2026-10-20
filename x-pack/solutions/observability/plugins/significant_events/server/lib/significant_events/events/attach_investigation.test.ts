@@ -6,9 +6,7 @@
  */
 
 import {
-  MAX_ASSESSMENT_NOTE_LENGTH,
-  MAX_SUMMARY_LENGTH,
-  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
+  MAX_TEXT_LENGTH,
   type SignificantEventInvestigation,
 } from '@kbn/significant-events-schema';
 import { attachInvestigationToEvent } from './attach_investigation';
@@ -69,9 +67,9 @@ describe('attachInvestigationToEvent', () => {
 
   it('attaches an investigation to a legacy event with longer narratives', async () => {
     const existing = createEvent({
-      symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1),
-      summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1),
-      assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1),
+      symptom_hypothesis: 'x'.repeat(MAX_TEXT_LENGTH + 1),
+      summary: 'x'.repeat(MAX_TEXT_LENGTH + 1),
+      assessment_note: 'x'.repeat(MAX_TEXT_LENGTH + 1),
     });
     const { client, alertEventsClient } = createClients(existing);
 
