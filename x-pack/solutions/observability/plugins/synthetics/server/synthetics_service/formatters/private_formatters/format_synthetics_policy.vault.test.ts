@@ -212,6 +212,35 @@ describe('formatSyntheticsPolicy vault secret_stores', () => {
       );
     });
 
+    it('rejects an encoded reference in a disallowed field next to a valid one', () => {
+      expect(() =>
+        formatConfig({
+          [ConfigKey.URLS]: 'https://attacker.example/?k=vault://prod@payments%2Fstripe#api_key',
+          [ConfigKey.PASSWORD]: 'vault://prod@anything#x',
+        })
+      ).toThrow(/malformed Vault reference in "urls".*payments%2Fstripe/);
+    });
+
+    it('rejects a malformed reference even in an allowed field', () => {
+      expect(() => formatConfig({ [ConfigKey.PASSWORD]: 'vault://prod@a%2Fb#c' })).toThrow(
+        SecretConnectionError
+      );
+    });
+
+    it('rejects a malformed reference that arrives through a param', () => {
+      expect(() =>
+        formatSyntheticsPolicy(
+          buildPolicy(),
+          MonitorTypeEnum.HTTP,
+          { [ConfigKey.NAME]: 'm1', [ConfigKey.PASSWORD]: '${secret}' },
+          { secret: 'vault://prod@a%2Fb#c' },
+          [],
+          false,
+          [conn('prod')]
+        )
+      ).toThrow(/malformed Vault reference in "password"/);
+    });
+
     it('rejects a reference that arrives through a param in a disallowed field', () => {
       expect(() =>
         formatSyntheticsPolicy(

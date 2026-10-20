@@ -19,7 +19,11 @@ import {
   replaceStringWithParams,
   resolveHttpAuthParams,
 } from '../formatting_utils';
-import { referencedConnectionNames } from '../vault_param_formatter';
+import {
+  findMalformedVaultReferences,
+  malformedVaultReferencesMessage,
+  referencedConnectionNames,
+} from '../vault_param_formatter';
 import { SecretConnectionError, type HeartbeatVaultConfig } from '../../get_secret_connection';
 import { syntheticsPolicyFormatters } from './formatters';
 import { PARAMS_KEYS_TO_SKIP } from '../common';
@@ -205,6 +209,18 @@ export const formatSyntheticsPolicy = (
   const referencedSecretConnections = new Set<string | undefined>();
   Object.entries(dataStream?.vars ?? {}).forEach(([key, item]) => {
     if (!item || key === ConfigKey.SOURCE_INLINE) return;
+    // Heartbeat also resolves references our strict grammar does not recognise (percent-encoded
+    // paths), which would slip past the field allowlist below.
+    const malformed = findMalformedVaultReferences(item.value);
+    if (malformed.length > 0) {
+      throw new SecretConnectionError(
+        `Monitor "${
+          config[ConfigKey.NAME] ?? ''
+        }" has a malformed Vault reference in "${key}": ${malformedVaultReferencesMessage(
+          malformed
+        )}`
+      );
+    }
     const names = referencedConnectionNames(item.value);
     if (names.size > 0 && !VAULT_REFERENCE_FIELDS.has(key)) {
       throw new SecretConnectionError(

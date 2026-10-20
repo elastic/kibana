@@ -23,6 +23,8 @@ import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 import {
   buildVaultReference,
+  findMalformedVaultReferences,
+  malformedVaultReferencesMessage,
   VaultParamSourceSchema,
 } from '../../../synthetics_service/formatters/vault_param_formatter';
 
@@ -94,6 +96,16 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     if (data.value && data.source) {
       return response.badRequest({
         body: { message: 'A parameter cannot set both a value and a vault source' },
+      });
+    }
+    const malformed = findMalformedVaultReferences(data.value);
+    if (malformed.length > 0) {
+      return response.badRequest({
+        body: {
+          message: `The parameter has a malformed Vault reference: ${malformedVaultReferencesMessage(
+            malformed
+          )}`,
+        },
       });
     }
     if (data.source) {

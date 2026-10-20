@@ -12,6 +12,7 @@ import {
   extractVaultReferences,
   buildVaultReference,
   referencedConnectionNames,
+  findMalformedVaultReferences,
   VaultParamSourceSchema,
 } from './vault_param_formatter';
 
@@ -58,6 +59,44 @@ describe('vault reference helpers', () => {
     const v = 'a=vault://prod@x/y#a;b=vault://z#b;c=vault://prod@m/n#c';
     expect(referencedConnectionNames(v)).toEqual(new Set(['prod', undefined]));
     expect(referencedConnectionNames({ h: 'vault://staging@a/b#c' })).toEqual(new Set(['staging']));
+  });
+});
+
+describe('findMalformedVaultReferences', () => {
+  it.each([
+    ['a percent-encoded path', 'https://x/?k=vault://prod@payments%2Fstripe#api_key'],
+    ['a percent-encoded connection name', 'vault://pr%6Fd@a#b'],
+    ['a tilde', 'vault://prod@a#b~c'],
+    ['a second "#"', 'vault://prod@a#b#c'],
+    ['a second "@"', 'vault://prod@a@b#c'],
+    ['a missing field', 'vault://prod@a'],
+    ['a bare scheme', 'see vault://'],
+  ])('flags %s', (_label, value) => {
+    expect(findMalformedVaultReferences(value)).not.toEqual([]);
+  });
+
+  it('returns the offending token', () => {
+    expect(findMalformedVaultReferences('x=vault://prod@a%2Fb#c y')).toEqual([
+      'vault://prod@a%2Fb#c',
+    ]);
+  });
+
+  it.each([
+    'vault://prod@myapp/creds#password',
+    'Bearer vault://prod@tokens/api#value',
+    'a=vault://p@one/two#a;b=vault://q@three#b',
+    'no references here',
+    'xvault://a%2Fb#c',
+  ])('accepts %s', (value) => {
+    expect(findMalformedVaultReferences(value)).toEqual([]);
+  });
+
+  it('scans objects', () => {
+    expect(findMalformedVaultReferences({ h: { auth: 'vault://p@a%2Fb#c' } })).toEqual([
+      'vault://p@a%2Fb#c',
+    ]);
+    expect(findMalformedVaultReferences({ h: 'vault://p@a/b#c' })).toEqual([]);
+    expect(findMalformedVaultReferences(undefined)).toEqual([]);
   });
 });
 

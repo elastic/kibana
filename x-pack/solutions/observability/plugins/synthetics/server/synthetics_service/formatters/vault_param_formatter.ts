@@ -36,10 +36,14 @@ import { z, lazySchema } from '@kbn/zod';
  * and have the remainder parsed as something else.
  */
 
-// Heartbeat only matches a reference at the start of a value or after a character
-// outside [A-Za-z0-9+.-]; mirror that so Kibana detects exactly what Heartbeat resolves.
-const VAULT_REF_SOURCE =
-  '(^|[^A-Za-z0-9+.\\-])vault://(?:([A-Za-z0-9._-]+)@)?([A-Za-z0-9._/-]+)#([A-Za-z0-9._-]+)';
+// Heartbeat's own token pattern (its `referencePattern`): everything it will try to resolve,
+// including characters it percent-decodes. Detection must be at least this broad so nothing
+// it resolves goes unchecked; the match only starts at the beginning of a value or after a
+// character outside [A-Za-z0-9+.-].
+const VAULT_TOKEN_SOURCE = '(^|[^A-Za-z0-9+.\\-])vault://([A-Za-z0-9._~%@/#\\-]*)';
+
+// The strict grammar a token must follow to be accepted.
+const VAULT_REF_CONTENT = /^(?:([A-Za-z0-9._-]+)@)?([A-Za-z0-9._/-]+)#([A-Za-z0-9._-]+)$/;
 
 export const VAULT_PATH_REGEX = /^[A-Za-z0-9._/-]+$/;
 export const VAULT_FIELD_REGEX = /^[A-Za-z0-9._-]+$/;
@@ -92,30 +96,29 @@ interface VaultReference {
   field: string;
 }
 
+const tokenContents = (strVal: string): string[] =>
+  Array.from(strVal.matchAll(new RegExp(VAULT_TOKEN_SOURCE, 'g')), (m) => m[2]);
+
 const matchAll = (strVal: string): VaultReference[] =>
-  Array.from(strVal.matchAll(new RegExp(VAULT_REF_SOURCE, 'g')), (m) => ({
-    connection: m[2] || undefined,
-    path: m[3],
-    field: m[4],
-  }));
+  tokenContents(strVal).flatMap((content) => {
+    const m = VAULT_REF_CONTENT.exec(content);
+    return m ? [{ connection: m[1] || undefined, path: m[2], field: m[3] }] : [];
+  });
+
+const toText = (value: unknown): string => {
+  if (typeof value === 'string') return value;
+  return value && typeof value === 'object' ? JSON.stringify(value) : '';
+};
 
 /** Returns true if the given string contains at least one Vault reference. */
-export const hasVaultReference = (strVal: string): boolean =>
-  new RegExp(VAULT_REF_SOURCE).test(strVal);
+export const hasVaultReference = (strVal: string): boolean => matchAll(strVal).length > 0;
 
 /**
  * Checks whether an arbitrary value (string, object, or array) contains a Vault
  * reference. Objects/arrays are stringified before matching.
  */
-export const valueContainsVaultReference = (value: unknown): boolean => {
-  if (typeof value === 'string') {
-    return hasVaultReference(value);
-  }
-  if (value && typeof value === 'object') {
-    return hasVaultReference(JSON.stringify(value));
-  }
-  return false;
-};
+export const valueContainsVaultReference = (value: unknown): boolean =>
+  hasVaultReference(toText(value));
 
 /**
  * Extracts the { connection?, path, field } tuples referenced in a string. Used to
@@ -127,16 +130,28 @@ export const extractVaultReferences = (strVal: string): VaultReference[] => matc
  * The distinct connection names referenced in a value (`undefined` = a reference
  * without a name, which is invalid). Used to pick the connections delivered to an agent.
  */
-export const referencedConnectionNames = (value: unknown): Set<string | undefined> => {
-  const names = new Set<string | undefined>();
-  const scan = (s: string) => extractVaultReferences(s).forEach((r) => names.add(r.connection));
-  if (typeof value === 'string') {
-    scan(value);
-  } else if (value && typeof value === 'object') {
-    scan(JSON.stringify(value));
-  }
-  return names;
-};
+export const referencedConnectionNames = (value: unknown): Set<string | undefined> =>
+  new Set(extractVaultReferences(toText(value)).map(({ connection }) => connection));
+
+/**
+ * The `vault://` tokens in a value that Heartbeat would try to resolve but that do not follow
+ * the strict reference grammar (for example `vault://prod@a%2Fb#c`, which Heartbeat decodes).
+ * Callers must reject them: the checks that rely on {@link extractVaultReferences} cannot see
+ * what they contain.
+ */
+export const findMalformedVaultReferences = (value: unknown): string[] =>
+  tokenContents(toText(value))
+    .filter((content) => !VAULT_REF_CONTENT.test(content))
+    .map((content) => `vault://${content}`);
+
+const MAX_TOKEN_PREVIEW = 64;
+
+export const malformedVaultReferencesMessage = (tokens: string[]): string =>
+  `${tokens
+    .map((t) => `"${t.length > MAX_TOKEN_PREVIEW ? `${t.slice(0, MAX_TOKEN_PREVIEW)}…` : t}"`)
+    .join(
+      ', '
+    )}. Use vault://<connection>@<path>#<field>, with only letters, numbers, and . _ - (and / in the path)`;
 
 /**
  * Shared request schema for a vault-backed param `source`, with the charset +
