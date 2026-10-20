@@ -10,6 +10,7 @@ import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common'
 import {
   getLastCustomContentAttachmentId,
   getLastWrittenDashboardId,
+  getToolErrors,
   readStoredCustomContent,
   readStoredCustomContentFromDashboard,
   toStoredCustomContent,
@@ -233,5 +234,25 @@ describe('readStoredCustomContentFromDashboard', () => {
     );
     expect(after).toBeUndefined();
     expect(versionCount).toBe(1);
+  });
+});
+
+describe('getToolErrors', () => {
+  it('lists the error messages of failed tool calls with the tool id', () => {
+    expect(
+      getToolErrors([
+        {
+          type: 'tool_call',
+          tool_id: 'platform.core.create_visualization',
+          results: [{ type: 'error', data: { message: 'Could not generate an ES|QL query' } }],
+        },
+        { type: 'tool_call', tool_id: 'platform.core.generate_esql', results: [{ type: 'query' }] },
+      ])
+    ).toEqual(['platform.core.create_visualization: Could not generate an ES|QL query']);
+  });
+
+  it('returns nothing when no tool failed', () => {
+    expect(getToolErrors(undefined)).toEqual([]);
+    expect(getToolErrors([{ type: 'reasoning' }])).toEqual([]);
   });
 });

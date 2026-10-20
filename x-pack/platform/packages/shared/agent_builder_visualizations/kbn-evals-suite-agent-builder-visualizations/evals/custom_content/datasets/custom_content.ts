@@ -118,7 +118,7 @@ export const CUSTOM_CONTENT_EDIT_EXAMPLES: CustomContentDatasetExample[] = [
     input: {
       question:
         'Create a custom panel with a banner: the title "Web Traffic Overview" on a blue gradient. It needs no data.',
-      followUp: `Now show the total number of requests in ${LOGS} under the title.`,
+      followUp: `Now show the live total number of requests from ${LOGS} under the title. It must update with the dashboard time range.`,
     },
     output: { data: 'query', edit: 'data' },
     metadata: { useCase: 'static-to-data-edit', dataSource: 'logs' },

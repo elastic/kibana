@@ -198,3 +198,16 @@ export const describeMissingPanel = (output: CustomContentTaskOutput): string =>
   const tools = output.toolIds.length > 0 ? ` Tools: ${output.toolIds.join(', ')}.` : '';
   return `The agent did not store a custom content panel.${instead}${tools}`;
 };
+
+/** Error messages from the agent's tool calls, shortened, for diagnosing a bypassed or failed path. */
+export const getToolErrors = (steps: Array<Record<string, unknown>> | undefined): string[] =>
+  (steps ?? []).flatMap((step) => {
+    if (step.type !== 'tool_call' || !Array.isArray(step.results)) {
+      return [];
+    }
+    return step.results.flatMap((result: unknown) =>
+      isRecord(result) && result.type === 'error' && isRecord(result.data)
+        ? [`${String(step.tool_id)}: ${String(result.data.message ?? '').slice(0, 200)}`]
+        : []
+    );
+  });

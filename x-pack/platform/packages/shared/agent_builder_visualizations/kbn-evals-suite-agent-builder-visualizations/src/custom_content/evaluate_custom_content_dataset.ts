@@ -24,6 +24,7 @@ import {
   getLastCustomContentAttachmentId,
   getLastWrittenDashboardId,
   getOtherRenderers,
+  getToolErrors,
   readStoredCustomContent,
   readStoredCustomContentFromDashboard,
   type CustomContentTaskOutput,
@@ -154,6 +155,9 @@ export function createEvaluateCustomContentDataset({
         `[custom content eval] "${(input?.question ?? '').slice(0, 60)}": stored in ${storedIn}` +
           `${otherRenderers.length > 0 ? `, also created ${otherRenderers.join('/')}` : ''}; ` +
           `tools: ${toolIds.join(' > ')}`
+      );
+      getToolErrors(steps).forEach((error) =>
+        log.info(`[custom content eval]   tool error: ${error}`)
       );
 
       return {
