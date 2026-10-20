@@ -254,6 +254,69 @@ describe('AnalyticsService', () => {
       });
     });
 
+    it('reports reasoning tokens and the distinct models of the round', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        conversationId: 'conversation-1',
+        round: {
+          ...round,
+          model_usage: {
+            ...round.model_usage,
+            reasoning_tokens: 3,
+            connectors: [
+              {
+                connector_id: 'c1',
+                model: 'gpt-97q',
+                llm_calls: 2,
+                input_tokens: 3,
+                output_tokens: 4,
+              },
+              {
+                connector_id: 'c2',
+                model: 'small-1',
+                llm_calls: 1,
+                input_tokens: 1,
+                output_tokens: 1,
+              },
+              {
+                connector_id: 'c3',
+                model: 'small-1',
+                llm_calls: 1,
+                input_tokens: 1,
+                output_tokens: 1,
+              },
+            ],
+          },
+        },
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+      });
+
+      expect(analytics.reportEvent).toHaveBeenCalledWith(
+        AGENT_BUILDER_EVENT_TYPES.RoundComplete,
+        expect.objectContaining({
+          reasoning_tokens: 3,
+          models: ['gpt-97q', 'small-1'],
+          models_count: 2,
+        })
+      );
+    });
+
+    it('omits the models of a round without a per-model breakdown', () => {
+      service.reportRoundComplete({
+        agentId: agentBuilderDefaultAgentId,
+        round,
+        roundCount: 2,
+        modelProvider,
+        conversationAttachments: [],
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).not.toHaveProperty('models');
+      expect(payload).not.toHaveProperty('models_count');
+    });
+
     it('reports attachments.read in tools_invoked', () => {
       const roundWithBuiltinTool: ConversationRound = {
         ...round,
@@ -908,6 +971,40 @@ describe('AnalyticsService', () => {
           message_length: 2,
           response_length: 5,
         })
+      );
+    });
+
+    it("reports this execution's reasoning tokens and models", () => {
+      service.reportExecutionComplete({
+        agentId: 'my-agent',
+        modelProvider,
+        conversationAttachments: [],
+        telemetry: telemetry({
+          executionRound: buildRound({
+            model_usage: {
+              connector_id: 'c1',
+              llm_calls: 1,
+              input_tokens: 4,
+              output_tokens: 2,
+              reasoning_tokens: 1,
+              connectors: [
+                {
+                  connector_id: 'c1',
+                  model: 'gpt-97q',
+                  llm_calls: 1,
+                  input_tokens: 4,
+                  output_tokens: 2,
+                  reasoning_tokens: 1,
+                },
+              ],
+            },
+          }),
+        }),
+      });
+
+      const [, payload] = analytics.reportEvent.mock.calls[0];
+      expect(payload).toEqual(
+        expect.objectContaining({ reasoning_tokens: 1, models: ['gpt-97q'], models_count: 1 })
       );
     });
 

@@ -117,7 +117,7 @@ export class ActionsService {
       ...(description !== undefined && { description }),
       ...(category !== undefined && { category }),
       ...(impact !== undefined && { impact }),
-      ...(approvalPolicy !== undefined && { approvalPolicy }),
+      approvalPolicy,
       ...(subjects !== undefined && { subjects }),
       ...(inputSchema !== undefined && { inputSchema }),
     };

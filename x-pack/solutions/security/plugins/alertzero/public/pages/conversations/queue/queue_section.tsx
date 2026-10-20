@@ -8,7 +8,6 @@
 import React, { useCallback, useMemo } from 'react';
 import {
   ConversationQueue,
-  matchesEntityFilter,
   type BaseActionsProps,
   type ConversationsActionsGroupProps,
   type Investigation,
@@ -59,14 +58,6 @@ export const QueueSection = ({
     isLoadingMore,
   } = section;
 
-  const briefingList = useMemo(
-    () =>
-      entityFilter
-        ? investigations.filter((investigation) => matchesEntityFilter(investigation, entityFilter))
-        : investigations,
-    [investigations, entityFilter]
-  );
-
   const selectedIds = useMemo(
     () => (selectedProposalId ? [selectedProposalId] : []),
     [selectedProposalId]
@@ -82,7 +73,7 @@ export const QueueSection = ({
   return (
     <ConversationQueue
       briefingType={id}
-      briefingList={briefingList}
+      briefingList={investigations}
       count={total}
       isOpen={isOpen}
       onToggle={onToggle}
