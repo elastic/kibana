@@ -199,7 +199,7 @@ export const EpisodeRuleTagsCell = ({
   return <TagBadges tags={rule?.metadata.tags ?? []} data-test-subj="episodeRuleTagsCell" />;
 };
 
-export const EpisodeMaintenanceWindowsCell = ({ row }: CellRendererProps) => {
+export const EpisodeSuppressedCell = ({ row }: CellRendererProps) => {
   const ids = row.flattened.maintenance_window_ids;
 
   if (!Array.isArray(ids) || ids.length === 0) {
