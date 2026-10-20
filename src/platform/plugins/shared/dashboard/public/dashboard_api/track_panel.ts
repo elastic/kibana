@@ -62,8 +62,8 @@ export function initializeTrackPanel(
   const focusedPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const highlightPanelId$ = new BehaviorSubject<string | undefined>(undefined);
   const selectedPanelIds$ = new BehaviorSubject<Set<string>>(new Set());
-  // Select mode outlives an empty selection (e.g. entered with the modifier key alone, or after
-  // toggling off the last panel) until the selection is explicitly cleared
+  // Select mode outlives an empty selection (e.g. after toggling off the last panel, or a drag over
+  // empty space) until the selection is explicitly cleared
   const isSelectMode$ = new BehaviorSubject<boolean>(false);
   const setSelectMode = (isSelectMode: boolean) => {
     if (isSelectMode$.value !== isSelectMode) isSelectMode$.next(isSelectMode);

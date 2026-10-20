@@ -226,10 +226,9 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>(
 
     const mouseDownPositionRef = useRef<{ x: number; y: number } | null>(null);
 
-    // In select mode (entered by selecting a panel or pressing Cmd alone) a plain click on a
-    // panel toggles it. The panel's own actions keep working, and clicks from portaled content
-    // (e.g. hover action popovers), on the drag area (it shows the Cmd+click hint instead) or
-    // that end a panel drag are ignored.
+    // In select mode (entered by selecting a panel) a plain click on a panel toggles it. The
+    // panel's own actions keep working, and clicks from portaled content (e.g. hover action
+    // popovers), on the drag area or that end a panel drag are ignored.
     const isSelectModeClick = useCallback(
       (e: React.MouseEvent) => {
         if (viewMode !== 'edit' || !isSelectMode) return false;
