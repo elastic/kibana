@@ -13,6 +13,7 @@ import { getLogFieldWithFallback } from './get_log_field_with_fallback';
 
 const rankingOrder = [
   fieldConstants.LOG_LEVEL_FIELD,
+  fieldConstants.OTEL_SEVERITY_TEXT_FIELD,
   fieldConstants.ERROR_LOG_LEVEL_FIELD,
 ] as const;
 
