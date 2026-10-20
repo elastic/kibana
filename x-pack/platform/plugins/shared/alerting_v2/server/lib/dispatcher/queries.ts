@@ -9,22 +9,10 @@ import { esql, type EsqlRequest } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM, ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import type { AlertEventType } from '../../resources/datastreams/alert_events';
 import type { Alert, ActionGroup, ActionGroupId } from './types';
-import { alertSubject, SUBJECT_SEPARATOR } from './steps/utils/subject';
+import { alertSubject, isInternalSource, SUBJECT_SEPARATOR } from './steps/utils/subject';
 
 const ALERT_EVENT_TYPE: AlertEventType = 'alert';
 
-// Field-based discrimination (type / action_type IS NULL) instead of `_index LIKE` works around
-// an ES|QL regression where `WHERE _index LIKE` before `STATS` returns 0 rows.
-// See: https://github.com/elastic/elasticsearch/issues/146318
-//
-// This scan is keys-only by design: no METADATA _source, no JSON_EXTRACT, no data_json.
-// Alert `data` is hydrated lazily by HydrateAlertDataStep (getAlertDataQueries) for the
-// surviving dispatchable set only, which is at most 10 000 alerts rather than the entire
-// multi-million-row window. See: https://github.com/elastic/rna-program/issues/838
-//
-// Rows with a null subject are dropped here: a doc with source "internal" and no rule is
-// schema-valid and reaches the index, but has no series identity. Deriving its subject in
-// TypeScript throws, which would fail the whole tick and drop every other alert in the batch.
 /**
  * Row cap applied as `LIMIT` to every dispatcher ES|QL query. ES|QL silently
  * truncates to 1 000 rows when a query has no LIMIT, and 10 000 is its maximum.
@@ -35,6 +23,17 @@ export const ESQL_QUERY_ROW_LIMIT = 10_000;
 
 /**
  * Keys-only alert scan over `.rule-events` ⨝ `.alert-actions`.
+ *
+ * Rows are told apart by `type` / `action_type` rather than `_index LIKE`, which returns 0 rows
+ * before `STATS`. See: https://github.com/elastic/elasticsearch/issues/146318
+ *
+ * No `_source` or `data` is read: HydrateAlertDataStep (`getAlertDataQueries`) fetches it for
+ * the surviving dispatchable alerts only, at most `ESQL_QUERY_ROW_LIMIT`, rather than for the
+ * whole multi-million-row window. See: https://github.com/elastic/rna-program/issues/838
+ *
+ * Rows with a null subject are dropped: a doc with source "internal" and no rule is
+ * schema-valid and reaches the index, but has no series identity. Deriving its subject in
+ * TypeScript throws, which would fail the whole tick and drop every other alert in the batch.
  *
  * `gte`/`lte` cap **event** rows only. Action rows (`type IS NULL`) are not
  * window-capped: the records `DispatchStep` writes get `@timestamp` at ingest, which
@@ -110,8 +109,8 @@ export const ALREADY_NOTIFIED_IN_CLAUSE_LITERAL_BUDGET_BYTES = 300_000;
 // `"<value>", ` = 2 quotes + comma + space (4 bytes) + 2 escape-margin bytes per literal.
 const PER_LITERAL_OVERHEAD_BYTES = 6;
 
-// Exported for unit-testing chunk boundaries. An oversized single literal gets its own chunk;
-// at ≤150-byte keys (UUID/hash) this is unreachable in practice.
+// An oversized single literal gets its own chunk; at ≤150-byte keys (UUID/hash) this is
+// unreachable in practice.
 //
 // The byte budget alone fits ~14 000 UUIDs per chunk, more than ESQL_QUERY_ROW_LIMIT rows. Capping
 // the literal count at ESQL_QUERY_ROW_LIMIT keeps one-row-per-literal queries from truncating.
@@ -186,7 +185,7 @@ const buildSuppressionsPreFilter = (
     : undefined;
 
   if (internal && external) return esql.exp`${internal} OR ${external}`;
-  // groupHash is only reached for an empty chunk; single-kind chunks return internal/external.
+  // Unreachable in practice: chunks are never empty and every chunk key has components.
   return (
     internal ??
     external ??
@@ -206,10 +205,10 @@ export const getAlertSuppressionsQueries = (alerts: readonly Alert[]): EsqlReque
   const alertIds = [...new Set(alerts.map(({ alert_id: alertId }) => alertId))];
 
   return chunkInClauseLiterals(alertIds).map((chunk) => {
-    const ids = chunk.map((id) => esql.str(id));
-
     return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
-      | WHERE alert_id IN (${ids}) AND action_type IN ("ack", "unack", "deactivate", "activate")
+      | WHERE alert_id IN (${toUniqueString(
+        chunk
+      )}) AND action_type IN ("ack", "unack", "deactivate", "activate")
       | EVAL ${SUBJECT_EVAL}
       | WHERE subject IS NOT NULL
       | STATS
@@ -261,10 +260,9 @@ export const getSeriesSuppressionsQueries = (alerts: readonly Alert[]): EsqlRequ
         const subject = alertSubject(alert);
         const pairKey = `${subject}${PAIR_SEPARATOR}${alert.group_hash}`;
         if (!componentsByPairKey.has(pairKey)) {
-          const isInternal = alert.source == null || alert.source === 'internal';
           componentsByPairKey.set(
             pairKey,
-            isInternal
+            isInternalSource(alert.source)
               ? { kind: 'internal', groupHash: alert.group_hash, ruleId: subject }
               : {
                   kind: 'external',
@@ -281,7 +279,6 @@ export const getSeriesSuppressionsQueries = (alerts: readonly Alert[]): EsqlRequ
 
   return chunkInClauseLiterals(uniquePairKeys, SUPPRESSIONS_IN_CLAUSE_LITERAL_BUDGET_BYTES).map(
     (chunk) => {
-      const pairValues = chunk.map((key) => esql.str(key));
       const preFilter = buildSuppressionsPreFilter(chunk, componentsByPairKey);
 
       return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
@@ -290,7 +287,7 @@ export const getSeriesSuppressionsQueries = (alerts: readonly Alert[]): EsqlRequ
         | EVAL ${SUBJECT_EVAL}
         | WHERE subject IS NOT NULL
         | EVAL _pair_key = CONCAT(subject, ${PAIR_SEPARATOR}, group_hash)
-        | WHERE _pair_key IN (${pairValues})
+        | WHERE _pair_key IN (${toUniqueString(chunk)})
         | EVAL _snooze_action = CASE(
             action_type == "unsnooze", "unsnooze",
             action_type == "snooze" AND (expiry IS NULL OR expiry > ${minLastEventTimestamp}::datetime), "snooze",
@@ -315,11 +312,8 @@ export const getLastNotifiedTimestampsQueries = (
   actionGroupIds: ActionGroupId[]
 ): EsqlRequest[] => {
   return chunkInClauseLiterals(actionGroupIds).map((chunk) => {
-    const values = chunk.map((id) => esql.str(id));
-    const whereClause = esql.exp`action_type == "notified" AND action_group_id IN (${values})`;
-
     return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
-      | WHERE ${whereClause}
+      | WHERE action_type == "notified" AND action_group_id IN (${toUniqueString(chunk)})
       | STATS last_notified = MAX(@timestamp), alert_status = LAST(alert_status, @timestamp) BY action_group_id
       | KEEP action_group_id, last_notified, alert_status
       | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
@@ -338,9 +332,8 @@ export const getLastNotifiedTimestampsQueries = (
 // gte/lte are inlined as ::datetime literals (not passed via the DSL filter) so the builder
 // keeps the same EsqlRequest[] shape as its siblings and the range stays part of the ES|QL plan.
 //
-// LAST(data_json, @timestamp) reproduces the single-pass semantics: the scan pass returns
-// last_event_timestamp = MAX(@timestamp) per alert, so the row LAST() picks here is the same
-// one the old STATS picked when data_json was in the scan.
+// LAST(data_json, @timestamp) picks the same event the scan reported as
+// last_event_timestamp = MAX(@timestamp), so `data` matches the alert's other fields.
 //
 // Returns one request per chunk (see ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES). Safe to concat:
 // STATS aggregates by alert_id.
@@ -349,11 +342,9 @@ export const getAlertDataQueries = (
   { gte, lte }: { gte: string; lte: string }
 ): EsqlRequest[] => {
   return chunkInClauseLiterals(alertIds).map((chunk) => {
-    const ids = chunk.map((id) => esql.str(id));
-
     return esql`FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
         | WHERE type == ${ALERT_EVENT_TYPE}
-            AND alert.id IN (${ids})
+            AND alert.id IN (${toUniqueString(chunk)})
             AND @timestamp >= ${gte}::datetime
             AND @timestamp <= ${lte}::datetime
         | EVAL alert_id = alert.id, data_json = JSON_EXTRACT(_source, "$.data")
