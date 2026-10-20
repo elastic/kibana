@@ -6,6 +6,7 @@
  */
 
 import type { EuiCommentProps } from '@elastic/eui';
+import { isEqual } from 'lodash';
 
 import type { SnakeToCamelCase } from '../../../../common/types';
 import type { CommentUserAction } from '../../../../common/types/domain';
@@ -15,13 +16,16 @@ import type { UserActionBuilder, UserActionBuilderArgs } from '../types';
 import type { AttachmentUIV2 } from '../../../../common/ui/types';
 import { createCommonUpdateUserActionBuilder } from '../common';
 import * as i18n from './translations';
+import type { AddedReferences } from './unified_attachment';
 import { createUnifiedAttachmentUserActionBuilder } from './unified_attachment';
 import type { AttachmentType as AttachmentFrameworkAttachmentType } from '../../../client/attachment_framework/types';
 import {
   getReferenceAttachmentId,
   isLegacyAttachmentRequest,
   isUnifiedAttachmentRequest,
+  isUnifiedReferenceAttachmentRequest,
   resolveUnifiedAttachmentType,
+  toStringArray,
   toUnifiedAttachmentType,
 } from '../../../../common/utils/attachments';
 
@@ -128,10 +132,12 @@ const getCreateCommentUserAction = ({
   loadingCommentIds,
   euiTheme,
   handleDeleteComment,
+  addedReferences,
 }: {
   userAction: SnakeToCamelCase<CommentUserAction>;
   attachment: AttachmentUIV2;
   isDeleted: boolean;
+  addedReferences?: AddedReferences;
 } & Omit<
   UserActionBuilderArgs,
   'comments' | 'index' | 'handleOutlineComment' | 'currentUserProfile'
@@ -166,6 +172,7 @@ const getCreateCommentUserAction = ({
       loadingCommentIds,
       appId,
       euiTheme,
+      addedReferences,
     });
 
     return unifiedBuilder.build();
@@ -189,6 +196,23 @@ const buildAttachmentFromPayload = (
     updatedBy: null,
     version: '',
   } as AttachmentUIV2);
+
+/** Returns the ids the create user action added, when a partial removal dropped some of them. */
+const getAddedReferences = (
+  attachment: AttachmentUIV2,
+  userAction: SnakeToCamelCase<CommentUserAction>
+): AddedReferences | undefined => {
+  const { comment } = userAction.payload;
+  if (
+    !isUnifiedReferenceAttachmentRequest(comment) ||
+    !isUnifiedReferenceAttachmentRequest(attachment) ||
+    isEqual(toStringArray(comment.attachmentId), toStringArray(attachment.attachmentId))
+  ) {
+    return undefined;
+  }
+
+  return { attachmentId: comment.attachmentId, metadata: comment.metadata };
+};
 
 export const createCommentUserActionBuilder: UserActionBuilder = ({
   appId,
@@ -226,6 +250,9 @@ export const createCommentUserActionBuilder: UserActionBuilder = ({
       const attachment = liveAttachment ?? buildAttachmentFromPayload(attachmentUserAction);
 
       return getCreateCommentUserAction({
+        addedReferences: liveAttachment
+          ? getAddedReferences(liveAttachment, attachmentUserAction)
+          : undefined,
         appId,
         caseData,
         casesConfiguration,

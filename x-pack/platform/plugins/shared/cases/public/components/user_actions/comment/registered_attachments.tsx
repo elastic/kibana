@@ -45,6 +45,8 @@ type BuilderArgs<C, R> = Pick<
   isDeleted?: boolean;
   getId: () => string;
   getAttachmentViewProps: () => object;
+  /** Props for the delete toast, when they differ from `getAttachmentViewProps`. */
+  getDeleteViewProps?: () => object;
 };
 
 /**
@@ -93,6 +95,7 @@ export const createRegisteredAttachmentUserActionBuilder = <
   isDeleted = false,
   getId,
   getAttachmentViewProps,
+  getDeleteViewProps,
   handleDeleteComment,
 }: BuilderArgs<C, R>): ReturnType<UserActionBuilder> => ({
   build: () => {
@@ -161,7 +164,10 @@ export const createRegisteredAttachmentUserActionBuilder = <
       ];
     }
 
-    const deleteSuccessToast = creationActivity.deleteSuccessToast ?? DELETE_REGISTERED_ATTACHMENT;
+    const deleteActivity = getDeleteViewProps
+      ? attachmentType.getCreationActivity({ ...props, ...getDeleteViewProps() })
+      : creationActivity;
+    const deleteSuccessToast = deleteActivity.deleteSuccessToast ?? DELETE_REGISTERED_ATTACHMENT;
     const renderer = getAttachmentRenderer(userAction.id);
     const actions = creationActivity.getActions?.(props) ?? [];
     const [primaryActions, nonPrimaryActions] = partition(actions, 'isPrimary');
