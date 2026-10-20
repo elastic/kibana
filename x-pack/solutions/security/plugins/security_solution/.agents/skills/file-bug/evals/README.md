@@ -6,7 +6,7 @@ The script tests check the CLI. These scenarios check whether an agent following
 2. For each scenario and each skill variant to compare (for example `main` vs your branch, copied to separate dirs — keep the sibling `exploratory-tester/scripts/parse-findings.py` next to the skill dir for Path B), start a fresh subagent with `$OUT/agent-brief.md`, `$SKILL` (the skill dir), `$SCENARIO` (a rendered file) and `$WORK` (scratch dir). Run 3+ reps per cell; use 5 for judgment-based rules such as Classify. Give Path B one session-dir copy per rep.
 3. Score from each run's `TRANSCRIPT-SUMMARY` and by reading the final message.
 
-The brief forbids running `gh`, `curl`, `write`, `upload` and `validate-labels --repo`; agents print `WOULD-RUN:` blocks instead. `file-bug.py search` runs `gh` internally, so agents run it only with `FILE_BUG_GH` pointing at `stub-gh.py` (modes: `empty`, `dup`, `identifier`). Keep both rules. Subagent concurrency may cap how many runs you can start at once.
+The brief forbids running `gh`, `curl`, `write`, `upload` and `validate-labels --repo`; agents print `WOULD-RUN:` blocks instead. `file-bug.py search` runs `gh` internally, so agents run it only with `FILE_BUG_GH` pointing at `stub-gh.py` (modes: `empty`, `dup`, `identifier`). Keep both rules. While `FILE_BUG_GH` is set the CLI only runs read commands (`gh search`, `gh label list`) and blocks everything else, so a stray write cannot reach GitHub. Subagent concurrency may cap how many runs you can start at once.
 
 ## Expected outcomes
 
@@ -71,3 +71,16 @@ Note: I could not reproduce the original miss with these agents (they reach for 
 | Path A XSS (`s1`) | 5/5 asked Classify | 3/3 asked Classify |
 
 One `s12` run executed `validate-labels --repo` for real, which the brief forbade; the command runs `gh` internally. The stub now answers `gh label list` and the brief routes `validate-labels` through it too.
+
+## Results after the review fixes (hint vs gate, explicit repo, `--action`, read-only `FILE_BUG_GH`)
+
+| Scenario | Result |
+|---|---|
+| Path B finding with a signal | 3/3 set `elastic/security-team` without asking, searched and validated labels there only |
+| Override to `elastic/kibana` | 2/2 switched, redid the search there, re-showed the draft, did not write |
+| Path A XSS | 2/2 asked Classify |
+| Reopen and comment | 2/2 `check-draft --action comment` exit 0, then the right `reopen_comment` |
+| Approve then file (`kibana`, `security-team`) | 2/2 repo written literally in every command, `embedded.md`, no `--finding` on Path A |
+
+`validate-labels` now runs through the stub, so no run reached real `gh`. Agents also declined to use the session's `area` (Entity Analytics) for a Cases finding and asked for the team; `infer-team` still returns `ask` for the Cases route.
+

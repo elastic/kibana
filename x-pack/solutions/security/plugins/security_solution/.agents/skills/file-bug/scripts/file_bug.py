@@ -18,6 +18,19 @@ FILED_VIA = "Filed via file-bug"
 FILED_MARKER = "<!-- filed-via: file-bug v1 -->"
 KIBANA_REPO = "elastic/kibana"
 SECURITY_TEAM_REPO = "elastic/security-team"
+ALLOWED_REPOS = frozenset({KIBANA_REPO, SECURITY_TEAM_REPO})
+READ_ONLY_GH = (("search", "issues"), ("search", "prs"), ("label", "list"))
+
+
+def require_allowed_repo(repo: str) -> None:
+    """Refuse an empty or unknown repo; FILE_BUG_EXTRA_REPOS (comma list) allows a scratch repo."""
+    extra = {name.strip().lower() for name in os.environ.get("FILE_BUG_EXTRA_REPOS", "").split(",")}
+    allowed = {name.lower() for name in ALLOWED_REPOS} | (extra - {""})
+    if not repo or repo.strip().lower() not in allowed:
+        raise ValueError(
+            f"--repo must be one of {sorted(ALLOWED_REPOS)} (got {repo!r}); "
+            "state the repo literally in every command"
+        )
 MAX_TITLE_LEN = 140
 SOURCE_EXPLORATORY_TESTER = "exploratory-tester"
 TESTER_SOURCE_LABEL = "sec-eng-prod:exploratory-tester"
@@ -65,25 +78,37 @@ _SENSITIVE_WORD_RE = re.compile(
     r"\bnda\b|\bcustomer\s+(?:name|id|org|organization)\b|\bour customer\b",
     re.I,
 )
+# High precision: a hit here gates the public repo. Word-list terms live in the hint below.
 _SECURITY_RE = re.compile(
     r"\bCVE-\d{4}-\d{4,}\b"
-    r"|\b(?:auth(?:entication|orization)?\s+bypass|privilege\s+escalation|"
-    r"remote\s+code\s+execution|sql\s+injection|cross[\s-]site\s+scripting|"
-    r"xss|rce|csrf|ssrf|exploit(?:able)?|vulnerab(?:le|ility|ilities))\b"
     r"|-----BEGIN [A-Z ]*PRIVATE KEY-----"
-    r"|\b(?:Bearer|ApiKey|Basic)\s+[A-Za-z0-9+/=_.-]{20,}"
+    r"|\b(?:Bearer|ApiKey)\s+(?=[A-Za-z0-9+/=_.-]*\d)[A-Za-z0-9+/=_.-]{20,}"
     r"|\bAKIA[0-9A-Z]{16}\b"
-    r"|\b(?:password|passwd|secret|api[_-]?key|token)\s*[:=]\s*\S{6,}",
+    r"|\b(?:password|passwd|secret|api[_-]?key|token)\s*[:=]\s*"
+    r"(?!(?:undefined|null|none|redacted|changeme|example)\b)(?=[^\s'\"]*\d)[^\s'\"*]{8,}",
     re.I,
 )
-_MEDIA_REF_RE = re.compile(
-    r"!\[[^\]]*\]\([^)]+\)|<video\b|\.(?:png|jpe?g|gif|webp|mp4|webm|mov)\b",
+# Soft: common Security Solution UI wording too. Never gates; it prompts a re-read for a signal.
+_SECURITY_HINT_RE = re.compile(
+    r"\b(?:auth(?:entication|orization)?\s+bypass|privilege\s+escalation|"
+    r"remote\s+code\s+execution|sql\s+injection|cross[\s-]site\s+scripting|"
+    r"xss|rce|csrf|ssrf|exploit(?:able)?|vulnerab(?:le|ility|ilities))\b",
     re.I,
+)
+_MEDIA_EXT = r"(?:png|jpe?g|gif|webp|mp4|webm|mov)"
+_MEDIA_REF_RE = re.compile(
+    r"!\[[^\]]*\]\([^)]+\)|<video\b|^\s*(?:screenshot|recording|video)s?\s*:"
+    rf"|(?:\$SESSION_DIR/|~/|\.{{1,2}}/|/)[^\s()<>\"'`]*\.{_MEDIA_EXT}\b",
+    re.I | re.M,
 )
 _LOCAL_MEDIA_RE = re.compile(
     r"(?<![\w/:.-])(?:\$SESSION_DIR/|~/|\.{1,2}/|/|[A-Za-z]:\\)[^\s()<>\"'`]*"
-    r"\.(?:png|jpe?g|gif|webp|mp4|webm|mov)\b",
-    re.I,
+    rf"\.{_MEDIA_EXT}\b"
+    # a labelled or embedded reference whose target is not an http(s) URL (relative paths too)
+    rf"|^\s*(?:screenshot|recording|video)s?\s*:\s*(?!https?://|!\[|<video)[^\s]*\.{_MEDIA_EXT}\b"
+    rf"|!\[[^\]]*\]\((?!https?://)[^)]*\.{_MEDIA_EXT}\)"
+    rf"|<video[^>]*\bsrc=\"(?!https?://)[^\"]*\.{_MEDIA_EXT}\"",
+    re.I | re.M,
 )
 _TITLE_FORMAT_RE = re.compile(r"^\[.+?\] \[Bug\] .+")
 _STACK_RELEASE_RE = re.compile(r"^v?(\d+)\.(\d+)(?:\.(\d+))?$")
@@ -1087,6 +1112,12 @@ def scan_sensitive(*texts: object) -> list[str]:
     return hits
 
 
+def scan_security_hints(*texts: object) -> list[str]:
+    """Soft signal only: security wording that is also common Security Solution UI text."""
+    blob = "\n".join(str(text) for text in texts if text)
+    return ["security_hint"] if _SECURITY_HINT_RE.search(blob) else []
+
+
 def has_media(*texts: object) -> bool:
     """True when a draft embeds or references a screenshot or recording."""
     return bool(_MEDIA_REF_RE.search("\n".join(str(text) for text in texts if text)))
@@ -1104,11 +1135,15 @@ def check_draft(
     repo: str = KIBANA_REPO,
     security_ok: bool = False,
     media_ok: bool = False,
+    action: str | None = None,
 ) -> list[str]:
     merged = _finding_with_body_answers(finding, body)
+    mode = action or ("create" if title is not None else "comment")
     # A comment/reopen without a finding adds to an existing issue that already holds the
     # template answers, so only the sensitive/security/WIP/media gates apply to it.
-    gaps = [] if title is None and not finding else list(pack_gaps(merged, config))
+    gaps = [] if mode == "comment" and not finding else list(pack_gaps(merged, config))
+    if mode == "create" and title is None:
+        gaps.append("title")
     if title is not None:
         if len(title) > MAX_TITLE_LEN or not _TITLE_FORMAT_RE.match(title):
             gaps.append("title")
@@ -1123,7 +1158,7 @@ def check_draft(
     if is_tester_finding(finding, config) and title is not None:
         if TESTER_SOURCE_LABEL not in [str(label) for label in (labels or [])]:
             gaps.append("tester_label")
-    hits = scan_sensitive(body, json.dumps(merged))
+    hits = scan_sensitive(body, json.dumps(merged), title or "")
     if not sensitive_ok:
         gaps.extend(f"sensitive:{hit}" for hit in hits if hit != "security_issue")
     if "security_issue" in hits and not security_ok and repo.lower() != SECURITY_TEAM_REPO:
@@ -1518,6 +1553,7 @@ def upload_evidence(
     run_gh: GhRunner | None = None,
 ) -> UploadResult:
     """Upload evidence to user-attachments, compressing a rejected video once."""
+    require_allowed_repo(repo)
     repo_id = repository_id
     if repo_id is None:
         repo_id = _repository_id(repo, run_gh or _default_run_gh)
@@ -1567,6 +1603,12 @@ class PartialWrite(Exception):
 def _default_run_gh(argv: list) -> dict:
     override = os.environ.get("FILE_BUG_GH")
     if override and argv and argv[0] == "gh":
+        if tuple(argv[1:3]) not in READ_ONLY_GH:
+            return {
+                "returncode": 1,
+                "stdout": "",
+                "stderr": "blocked: FILE_BUG_GH is set (eval mode), so only read commands run",
+            }
         argv = [*shlex.split(override), *argv[1:]]
     completed = subprocess.run(
         argv,
@@ -1699,6 +1741,7 @@ def write_github(
     run_gh: GhRunner = _default_run_gh,
 ) -> dict:
     """Run the `gh` write for `action`, never retrying a create that already failed."""
+    require_allowed_repo(repo)
     if action == "ask":
         raise ValueError("action 'ask' must be resolved by the caller before writing")
     if action == "create":
@@ -1709,11 +1752,16 @@ def write_github(
     if (
         repo.lower() == KIBANA_REPO
         and not security_ok
-        and "security_issue" in scan_sensitive(body)
+        and "security_issue" in scan_sensitive(body, title or "")
     ):
+        where = (
+            f"file it in {SECURITY_TEAM_REPO}"
+            if action == "create"
+            else "do not post it on a public issue"
+        )
         raise ValueError(
-            f"draft looks security-sensitive: file it in {SECURITY_TEAM_REPO}, "
-            "or pass --security-ok if the human confirmed it is not a vulnerability"
+            f"text looks security-sensitive (key, token or CVE): {where}, "
+            "or pass --security-ok if the human confirmed it is a false positive"
         )
 
     local_media = _LOCAL_MEDIA_RE.search(body)

@@ -31,6 +31,7 @@ from file_bug import (  # noqa: E402
     parse_search_results,
     render_bug_body,
     run_search,
+    scan_security_hints,
     scan_sensitive,
     scan_wip,
     upload_evidence,
@@ -286,7 +287,12 @@ def _cmd_prepare(args: argparse.Namespace) -> int:
     gaps = pack_gaps(finding, config)
     deployment = infer_deployment(finding, config)
     release = infer_release_label(finding, config)
-    sensitive = scan_sensitive(json.dumps(finding))
+    hits = scan_sensitive(json.dumps(finding))
+    sensitive = [hit for hit in hits if hit != "security_issue"]
+    security = {
+        "issue": "security_issue" in hits,
+        "hints": scan_security_hints(json.dumps(finding)),
+    }
     needs_input = bool(
         gaps or deployment.status == "ask" or release.status == "ask" or sensitive
     )
@@ -307,6 +313,7 @@ def _cmd_prepare(args: argparse.Namespace) -> int:
                 "hint": release.hint,
             },
             "sensitive": sensitive,
+            "security": security,
         },
         EXIT_ASK if needs_input else EXIT_OK,
     )
@@ -332,9 +339,13 @@ def _cmd_check_draft(args: argparse.Namespace) -> int:
     body = _read_text(args.body)
     labels = [name.strip() for name in (args.labels or "").split(",") if name.strip()]
     labels.extend(str(name).strip() for name in (args.label or []) if str(name).strip())
+    title = _optional(args.title)
+    action = args.action or ("create" if title else None)
+    if action is None:
+        return _fail("pass --title for a create check, or --action comment for a comment/reopen")
     gaps = check_draft(
         body=body,
-        title=_optional(args.title),
+        title=title,
         finding=finding,
         config=config,
         labels=labels or None,
@@ -343,9 +354,14 @@ def _cmd_check_draft(args: argparse.Namespace) -> int:
         repo=args.repo,
         security_ok=bool(args.security_ok),
         media_ok=bool(args.media_ok),
+        action=action,
     )
     return _emit(
-        {"fileable": not gaps, "gaps": gaps},
+        {
+            "fileable": not gaps,
+            "gaps": gaps,
+            "hints": scan_security_hints(body, title or "", json.dumps(finding)),
+        },
         EXIT_ASK if gaps else EXIT_OK,
     )
 
@@ -375,7 +391,7 @@ def _cmd_scan_sensitive(args: argparse.Namespace) -> int:
         texts.append(args.text)
     hits = scan_sensitive(*texts)
     return _emit(
-        {"hits": hits},
+        {"hits": hits, "hints": scan_security_hints(*texts)},
         EXIT_ASK if hits else EXIT_OK,
     )
 
@@ -612,6 +628,12 @@ def _build_parser() -> argparse.ArgumentParser:
         action="append",
         default=[],
         help="Repeatable label, same as write --label",
+    )
+    draft.add_argument(
+        "--action",
+        choices=("create", "comment"),
+        default=None,
+        help="create (needs --title) or comment (comment/reopen); required when --title is omitted",
     )
     draft.add_argument(
         "--wip-ok",

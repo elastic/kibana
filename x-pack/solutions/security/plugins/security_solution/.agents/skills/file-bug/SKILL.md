@@ -15,8 +15,9 @@ Exploratory-tester may hand off here only after the human **names** the findings
 
 ```bash
 FILE_BUG="x-pack/solutions/security/plugins/security_solution/.agents/skills/file-bug/scripts/file-bug.py"
-TARGET_REPO="elastic/kibana"   # becomes elastic/security-team after Classify says so
 ```
+
+Step 0 sets the target repo: `elastic/kibana` or `elastic/security-team`. Shell variables do not persist between commands, so after Step 0 write the repo literally (`--repo elastic/security-team`) in **every** command; `write` and `upload` refuse any other repo. The examples below write `$TARGET_REPO` for brevity.
 
 Run `python3 "$FILE_BUG" <cmd>`: JSON on stdout, exit `0` ok, `1` fail, `2` ask.
 
@@ -24,7 +25,7 @@ Run `python3 "$FILE_BUG" <cmd>`: JSON on stdout, exit `0` ok, `1` fail, `2` ask.
 
 ## Fileable checklist
 
-No write-yes request until `check-draft` exits 0 (create: pass `--title`, `--repo` and every `--label`; comment/reopen: omit `--title`) or every remaining gap is walked (`Unknown` is allowed).
+No write-yes request until `check-draft` exits 0 (create: pass `--title`, `--repo` and every `--label`; comment/reopen: `--action comment` and omit `--title`) or every remaining gap is walked (`Unknown` is allowed).
 
 | Gap or hit | Human must | Flag |
 |---|---|---|
@@ -39,10 +40,15 @@ No write-yes request until `check-draft` exits 0 (create: pass `--title`, `--rep
 
 ### 0. Classify
 
-A **signal** is any of: a user reading or changing data or actions they lack access to; script or markup running from user-controlled input; credentials, tokens or keys; customer or host data. **Path A:** if the report (text or media) shows a signal, ask once, then **Hard stop**: “Does this expose a vulnerability, credentials or secrets, customer data or PII, or an exploit path?” **Path B:** run `prepare` first; the finding and its output are the report. If they show a signal, do not ask — set `TARGET_REPO="elastic/security-team"`, search and label only there, and state the repo and the signal in one line in the draft; if the human replies it is not sensitive, switch to `elastic/kibana` and redo Search there. With no signal, do not ask on either path: use `elastic/kibana` and show the target repo in the draft.
+A **signal** is any of: a user reading or changing data or actions they lack access to; script or markup running from user-controlled input; credentials, tokens or keys; customer or host data.
 
-- **Yes / unsure** → `TARGET_REPO="elastic/security-team"`; the human confirms the repo in the draft. Search, label, upload and write only against `$TARGET_REPO` — nothing in `elastic/kibana`.
-- **No** → `TARGET_REPO="elastic/kibana"`. If `scan-sensitive` later raises `security_issue`, ask and switch repo instead of overriding.
+| Path | Signal in the report (text or media) | Do |
+|---|---|---|
+| A | yes | Ask once, then **Hard stop**: “Does this expose a vulnerability, credentials or secrets, customer data or PII, or an exploit path?” Yes or unsure → `elastic/security-team`; no → `elastic/kibana`. |
+| B | yes | Do not ask. Decide right after Step 1's `prepare`, before searching: set `elastic/security-team`, search and label only there, and state the repo and the signal in one line in the draft. If the human replies it is not sensitive, switch to `elastic/kibana` and redo Search. |
+| A or B | no | Do not ask: `elastic/kibana`; show the target repo in the draft. |
+
+Later, if `scan-sensitive`, `check-draft` or `prepare` reports `security_issue` (a CVE id, key or token), switch to `elastic/security-team`; pass `--security-ok` only if the human confirms a false positive. `hints` (`security_hint`) are common wording that is also normal UI text: never a gate, only a prompt to re-read the report for a signal. Nothing is searched, labelled, uploaded or written in `elastic/kibana` once the target is `elastic/security-team`.
 
 `Team:*` and `v*` labels may not exist in `security-team`: `validate-labels --repo "$TARGET_REPO"`, drop what is missing, show the dropped labels in the draft.
 
@@ -91,7 +97,7 @@ Path B adds `--label sec-eng-prod:exploratory-tester --finding "$FINDING_JSON"`;
 
 Comment / reopen also need `--number N`. `upload` posts to `uploads.github.com/user-attachments/assets` (undocumented; can change). Reply with the issue URL, action, uploaded URLs, leftovers.
 
-Never retry a failed **create** or **comment**. If `reopen_comment` reopens and the comment fails, report the partial write and do not reopen again. If `upload` fails or leaves leftovers, do not `write`: ask whether to retry once, hold, or file without the file — dropping it changes the approved draft, so re-show it and wait for a fresh write-yes.
+Never retry a failed **create** or **comment**. Never fall back to `elastic/kibana` because a search, upload or create against `elastic/security-team` failed (404, no access): stop and report it. If `reopen_comment` reopens and the comment fails, report the partial write and do not reopen again. If `upload` fails or leaves leftovers, do not `write`: ask whether to retry once, hold, or file without the file — dropping it changes the approved draft, so re-show it and wait for a fresh write-yes.
 
 ## Red flags
 

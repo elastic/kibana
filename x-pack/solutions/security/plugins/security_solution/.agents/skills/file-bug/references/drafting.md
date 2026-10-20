@@ -71,7 +71,7 @@ A pack is **thin** when `check-pack` exits 2. `Unknown` counts as answered, incl
 
 ## Sanitize
 
-Before draft-and-stop, run `scan-sensitive` on the finding and draft. Flag emails, `SDH…` / case IDs, NDA, “customer name/id”. Strip or ask to strip anything not needed to repro. Cases product language (`Opening case 12345`, `Cases table`) will flag — confirm and keep when it is UI text, not a customer ID, then `check-draft --sensitive-ok`. Security-sensitive bugs go to `elastic/security-team` (SKILL.md Classify); `--sensitive-ok` never unlocks `security_issue`.
+Before draft-and-stop, run `scan-sensitive` on the finding and draft. Flag emails, `SDH…` / case IDs, NDA, “customer name/id”. Strip or ask to strip anything not needed to repro. Cases product language (`Opening case 12345`, `Cases table`) will flag — confirm and keep when it is UI text, not a customer ID, then `check-draft --sensitive-ok`. Security-sensitive bugs go to `elastic/security-team` (SKILL.md Classify); `--sensitive-ok` never unlocks `security_issue`, which only high-precision patterns (CVE id, key block, token or key value) raise; wording such as "vulnerability" or "exploit" is reported as a `security_hint` and never gates.
 
 ## Environment setup questions
 
