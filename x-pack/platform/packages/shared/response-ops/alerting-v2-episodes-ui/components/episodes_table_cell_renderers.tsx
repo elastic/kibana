@@ -10,6 +10,8 @@ import { css } from '@emotion/react';
 import {
   EuiCode,
   EuiCopy,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiSkeletonText,
@@ -34,6 +36,7 @@ import { TagBadges } from './actions/tags';
 import { AlertEpisodeSeverityBadge } from './severity/episode_severity_badge';
 import type { EpisodeSeverity } from './severity/severity_utils';
 import { EMPTY_VALUE } from '../constants';
+import { useEpisodeSource } from '../source_labels';
 import * as i18n from './translations';
 
 type Rule = FindRulesResponse['items'][number];
@@ -60,6 +63,22 @@ const getEpisodeGroupingFromRow = (
     groupingFields: ruleGroupingFields,
     groupingData: parseEpisodeDataJson(episode.episode_data),
   };
+};
+
+export const EpisodeSourceCell = ({ row }: CellRendererProps) => {
+  const { label, icon } = useEpisodeSource(row.flattened.source_id as string | undefined);
+  return (
+    <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+      {icon && (
+        <EuiFlexItem grow={false}>
+          <EuiIcon type={icon} size="m" data-test-subj="episodeSourceIcon" aria-hidden={true} />
+        </EuiFlexItem>
+      )}
+      <EuiFlexItem grow={false}>
+        <span data-test-subj="episodeSourceCell">{label}</span>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
 };
 
 export const EpisodeStatusCell = ({ row, columnId }: CellRendererProps) => {

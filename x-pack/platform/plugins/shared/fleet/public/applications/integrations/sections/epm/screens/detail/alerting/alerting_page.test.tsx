@@ -177,18 +177,20 @@ describe('AlertingPage', () => {
     expect(
       screen.getByTestId('fleetAssetsAccordion.button.alerting_rule_template')
     ).toBeInTheDocument();
-    expect(screen.getByTestId('fleetAlertingEngineTab-v2')).toHaveTextContent('ES|QL Rules');
-    expect(screen.getByTestId('fleetAlertingEngineTab-v1')).toHaveTextContent('Standard Rules');
+    expect(screen.getByTestId('fleetAlertingEngineTab-v2')).toHaveTextContent('Universal rules');
+    expect(screen.getByTestId('fleetAlertingEngineTab-v1')).toHaveTextContent('Classic rules');
     expect(screen.getByText('[System] Metrics template')).toBeInTheDocument();
     expect(
       screen.queryByRole('link', { name: '[System] Metrics template' })
     ).not.toBeInTheDocument();
     expect(screen.queryByText('[System] Logs template')).not.toBeInTheDocument();
-    expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v2')).toHaveTextContent('ES|QL');
+    expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v2')).toHaveTextContent(
+      'Universal'
+    );
     expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v1')).not.toBeInTheDocument();
   });
 
-  it('should show v1 templates on the Kibana Standard Rules tab', async () => {
+  it('should show v1 templates on the Kibana Classic rules tab', async () => {
     mockIsAlertingV2Enabled.mockReturnValue(true);
     renderComponent();
 
@@ -203,7 +205,7 @@ describe('AlertingPage', () => {
       '/mock/app/management/insightsAndAlerting/triggersActions/create/template/template-1'
     );
     expect(screen.queryByText('[System] Metrics template')).not.toBeInTheDocument();
-    expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v1')).toHaveTextContent('Standard');
+    expect(screen.getByTestId('fleetAssetsAccordion.engineBadge.v1')).toHaveTextContent('Classic');
     expect(screen.queryByTestId('fleetAssetsAccordion.engineBadge.v2')).not.toBeInTheDocument();
   });
 
