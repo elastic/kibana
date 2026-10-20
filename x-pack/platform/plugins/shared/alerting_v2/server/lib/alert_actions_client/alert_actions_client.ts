@@ -446,6 +446,7 @@ export class AlertActionsClient {
           toBulkActionError(item.series_id, {
             code: ALERTING_ERROR_CODES.ALERT_GROUP_NOT_FOUND,
             message: getAlertSeriesNotFoundMessage(item.series_id),
+            details: { series_id: item.series_id },
           })
         );
         continue;

@@ -20,11 +20,10 @@ describe('encodeSeriesId', () => {
         source: 'internal',
         group_hash: GROUP_HASH,
       })
-    ).toBe(
-      'MTo6cnVsZTo6ZGVmYXVsdDo6Y3B1LWhpZ2g6Ojk4MDU4Y2I1NjkwMTdlY2I2YjA4YjU1NGVjYmNiMjUyNGZmN2RkODk3MTgyOGY0ZjJlNTkzOWMxZTY2NjdlNTY'
-    );
+    ).toBe(toId(`1::rule::default::cpu-high::${GROUP_HASH}`));
   });
 
+  // A fixed vector, so the wire format is pinned independently of `toId`.
   it('encodes an external series as base64url of the readable payload', () => {
     expect(
       encodeSeriesId({
@@ -78,6 +77,48 @@ describe('encodeSeriesId', () => {
     ].map((ref) => encodeSeriesId({ ...ref, group_hash: GROUP_HASH }));
 
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  describe('owner classification (must match the SERIES_ID_EVAL ES|QL expression)', () => {
+    // A series is external only when `source` is a non-empty value other than `internal`.
+    // Everything else is rule-backed, so it resolves to the rule owner or to `null`, and
+    // never to an external id with an empty owner segment, which `decodeSeriesId` rejects.
+    it.each([
+      ['null', null],
+      ['undefined', undefined],
+      ['an empty string', ''],
+      ['"internal"', 'internal'],
+    ])('treats %s as rule-backed', (_name, source) => {
+      expect(
+        encodeSeriesId({
+          space_id: 'default',
+          rule_id: 'cpu-high',
+          source,
+          group_hash: GROUP_HASH,
+        })
+      ).toBe(toId(`1::rule::default::cpu-high::${GROUP_HASH}`));
+    });
+
+    it.each([
+      ['null', null],
+      ['an empty string', ''],
+      ['"internal"', 'internal'],
+    ])('has no identity without a rule id when the source is %s', (_name, source) => {
+      expect(
+        encodeSeriesId({ space_id: 'default', rule_id: null, source, group_hash: GROUP_HASH })
+      ).toBeNull();
+    });
+
+    it('treats any other source as an external owner', () => {
+      expect(
+        encodeSeriesId({
+          space_id: 'default',
+          rule_id: 'cpu-high',
+          source: ' ',
+          group_hash: GROUP_HASH,
+        })
+      ).toBe(toId(`1::source::default:: ::${GROUP_HASH}`));
+    });
   });
 
   it('returns null when a rule-backed series has no rule_id', () => {

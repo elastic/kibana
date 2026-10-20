@@ -19,7 +19,7 @@ describe('series id ES|QL expressions', () => {
     expect(evalCommand).toContain(
       'CONCAT("1::source::", space_id, "::", source, "::", group_hash)'
     );
-    expect(evalCommand).toContain('source IS NULL OR source == "internal"');
+    expect(evalCommand).toContain('source IS NULL OR source == "" OR source == "internal"');
     expect(evalCommand).toContain('TO_BASE64(');
     expect(evalCommand).toContain('"[+]", "-"');
     expect(evalCommand).toContain('"/", "_"');

@@ -862,7 +862,10 @@ describe('AlertActionsClient', () => {
       expect(result.errors).toEqual([
         {
           id: missingSeriesId,
-          error: expect.objectContaining({ code: 'ALERT_GROUP_NOT_FOUND' }),
+          error: expect.objectContaining({
+            code: 'ALERT_GROUP_NOT_FOUND',
+            details: { series_id: missingSeriesId },
+          }),
         },
       ]);
     });
@@ -978,7 +981,10 @@ describe('AlertActionsClient', () => {
       expect(result.errors).toEqual([
         {
           id: otherSpaceSeriesId,
-          error: expect.objectContaining({ code: 'ALERT_GROUP_NOT_FOUND' }),
+          error: expect.objectContaining({
+            code: 'ALERT_GROUP_NOT_FOUND',
+            details: { series_id: otherSpaceSeriesId },
+          }),
         },
       ]);
       queryServiceEsClient.esql.query.mock.calls.forEach(([{ query }]) => {

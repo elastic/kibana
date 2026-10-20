@@ -59,9 +59,10 @@ const fromBase64Url = (value: string): string => {
 /**
  * Builds the id of the series a document belongs to: base64url of
  * `1::rule::{space_id}::{rule_id}::{group_hash}` for rule-backed series and
- * `1::source::{space_id}::{source}::{group_hash}` for external ones. Mirrors the
- * `SERIES_ID_EVAL` ES|QL expression byte for byte. Returns `null` when the
- * document carries no owner, as that expression does.
+ * `1::source::{space_id}::{source}::{group_hash}` for external ones. A missing, empty or
+ * `internal` source is rule-backed: an empty source is never an external owner. Mirrors the
+ * `SERIES_ID_EVAL` ES|QL expression byte for byte. Returns `null` when the document carries no
+ * owner, as that expression does.
  */
 export const encodeSeriesId = ({
   space_id: spaceId,
@@ -69,7 +70,7 @@ export const encodeSeriesId = ({
   rule_id: ruleId,
   source,
 }: SeriesRef): string | null => {
-  const isRuleBacked = source == null || source === INTERNAL_SOURCE;
+  const isRuleBacked = !source || source === INTERNAL_SOURCE;
   const owner = isRuleBacked ? ruleId : source;
 
   if (!owner) {

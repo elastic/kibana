@@ -8,8 +8,10 @@
 /**
  * Builds the `series_id` expression for a given rule id column. The id is
  * base64url of `1::rule::{space_id}::{rule_id}::{group_hash}` for rule-backed
- * series (`source` null or `internal`) and `1::source::{space_id}::{source}::{group_hash}`
- * for external ones; it is null when the owner is missing.
+ * series (`source` null, empty or `internal`) and `1::source::{space_id}::{source}::{group_hash}`
+ * for external ones; it is null when the owner is missing. An empty `source` is never an
+ * external owner: it is read as no source at all, so it can't mint an id with an empty owner
+ * segment that the decoder would reject.
  *
  * The leading `1` is the format version, not part of the identity: the `rule` / `source`
  * segment  already tells the kinds apart. It lets the decoder reject an id of a layout
@@ -22,7 +24,7 @@
  * which is what the server decodes.
  */
 const buildSeriesIdEval = (ruleIdColumn: string): string =>
-  `EVAL series_id = REPLACE(REPLACE(REPLACE(TO_BASE64(CASE(source IS NULL OR source == "internal", CONCAT("1::rule::", space_id, "::", ${ruleIdColumn}, "::", group_hash), CONCAT("1::source::", space_id, "::", source, "::", group_hash))), "[+]", "-"), "/", "_"), "=+$", "")`;
+  `EVAL series_id = REPLACE(REPLACE(REPLACE(TO_BASE64(CASE(source IS NULL OR source == "" OR source == "internal", CONCAT("1::rule::", space_id, "::", ${ruleIdColumn}, "::", group_hash), CONCAT("1::source::", space_id, "::", source, "::", group_hash))), "[+]", "-"), "/", "_"), "=+$", "")`;
 
 /**
  * Derives `series_id` over `.rule-events` and `.alert-actions` together: the

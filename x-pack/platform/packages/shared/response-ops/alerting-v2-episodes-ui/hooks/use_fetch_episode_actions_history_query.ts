@@ -32,7 +32,8 @@ export interface UseFetchEpisodeActionsHistoryQueryOptions {
   seriesId: string | null | undefined;
   /**
    * `group_hash` of the episode. It narrows the series-level actions on an indexed field before
-   * the series id is compared, so it is needed whenever `seriesId` is a string.
+   * the series id is compared, so nothing is fetched while it is `undefined` and `seriesId` is a
+   * string.
    */
   groupHash: string | undefined;
   services: { data: DataPublicPluginStart; spaces: SpacesPluginStart };
@@ -54,6 +55,9 @@ export const useFetchEpisodeActionsHistoryQuery = ({
 }: UseFetchEpisodeActionsHistoryQueryOptions) => {
   const { data } = services;
   const spaceId = useSpaceId(services.spaces);
+  // `null` means the episode has no series, so its own actions are all there is to fetch. A
+  // series needs its group hash as well, or the series-level actions would silently be skipped.
+  const isSeriesResolved = seriesId === null || (seriesId !== undefined && groupHash !== undefined);
 
   const query = useInfiniteQuery({
     queryKey: [...queryKeys.actionsHistory(spaceId, episodeId ?? '', seriesId ?? ''), pageSize],
@@ -75,7 +79,7 @@ export const useFetchEpisodeActionsHistoryQuery = ({
     },
     getNextPageParam: (lastPage) =>
       lastPage.length === pageSize ? lastPage[lastPage.length - 1]['@timestamp'] : undefined,
-    enabled: Boolean(episodeId) && seriesId !== undefined,
+    enabled: Boolean(episodeId) && isSeriesResolved,
   });
 
   const entries = useMemo(() => {

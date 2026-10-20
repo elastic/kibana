@@ -81,6 +81,22 @@ describe('useFetchEpisodeActionsHistoryQuery', () => {
     expect(result.current.isLoading).toBe(false);
   });
 
+  it('does not run until the group hash is known when the episode has a series', () => {
+    const { result } = renderHook(
+      () =>
+        useFetchEpisodeActionsHistoryQuery({
+          episodeId,
+          seriesId,
+          groupHash: undefined,
+          services: { data, spaces: mockSpaces },
+        }),
+      { wrapper }
+    );
+
+    expect(runEsqlAsyncSearchMock).not.toHaveBeenCalled();
+    expect(result.current.isLoading).toBe(false);
+  });
+
   it('fetches only the episode-level actions when the episode has no series identity', async () => {
     runEsqlAsyncSearchMock.mockResolvedValue({ columns: ACTIONS_COLUMNS, values: [] });
 
