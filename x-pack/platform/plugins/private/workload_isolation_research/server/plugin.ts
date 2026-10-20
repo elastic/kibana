@@ -24,12 +24,19 @@ import { registerResearchTasks, TickScheduler } from './tasks';
 import { registerTierBRoutes, registerTierBTasks } from './tier_b';
 import { registerMockLlmRoute } from './tier_b/canned_llm';
 import { API_BASE } from './routes';
+import { registerT7aRoutes } from './t7a/routes';
+import type { T7aController, T7aDeps } from './t7a/main_host';
 
 interface SetupDeps {
   taskManager: TaskManagerSetupContract;
 }
 interface StartDeps {
   taskManager: TaskManagerStartContract;
+  encryptedSavedObjects?: T7aDeps['encryptedSavedObjects'];
+  spaces?: T7aDeps['spaces'];
+  security?: T7aDeps['security'];
+  maintenanceWindows?: T7aDeps['maintenanceWindows'];
+  licensing?: T7aDeps['licensing'];
 }
 
 /** RESEARCH ONLY: workload isolation measurement harness. Never merge. */
@@ -38,6 +45,7 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
   private readonly config: WorkloadIsolationResearchConfig;
   private readonly recorder: Recorder;
   private ticks?: TickScheduler;
+  private t7a?: Promise<T7aController | undefined>;
 
   constructor(private readonly context: PluginInitializerContext<WorkloadIsolationResearchConfig>) {
     this.logger = context.logger.get();
@@ -63,6 +71,10 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
     };
     const router = core.http.createRouter();
     registerTierBRoutes(router, API_BASE, getRecorder, getStart);
+    registerT7aRoutes(router, API_BASE, async () => {
+      await core.getStartServices();
+      return this.t7a;
+    });
     registerMockLlmRoute(router, API_BASE, this.config.mockLlm, async () => {
       const [coreStart] = await core.getStartServices();
       return coreStart.elasticsearch.client.asInternalUser;
@@ -94,7 +106,14 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
     });
   }
 
-  public start(core: CoreStart): void {
+  public start(core: CoreStart, plugins: StartDeps): void {
+    // RESEARCH ONLY (Track 7.A): alerting class pool, opt-in.
+    if (process.env.KBN_RESEARCH_T7A === 'true') {
+      this.t7a = import('./t7a/main_host').then(
+        ({ T7aController: Controller }) =>
+          new Controller({ core, ...plugins }, this.context.env, this.logger.get('t7a'))
+      );
+    }
     this.recorder.start();
     this.recorder.startPush(async () => core.elasticsearch.client.asInternalUser);
   }

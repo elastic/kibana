@@ -24,6 +24,7 @@ import type { Middleware } from '../lib/middleware';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, eitherAsync, isErr, isOk, mapErr, mapOk, unwrap } from '../lib/result_type';
 import { getExecutionContextRunner } from '../lib/execution_context';
+import { createTaskRunnerWithResearchOverride } from '../lib/research_runner_override';
 import type { TaskMarkRunning, TaskRun, TaskTiming, TaskManagerStat } from '../task_events';
 import {
   asTaskRunEvent,
@@ -533,13 +534,17 @@ export class TaskManagerRunner implements TaskRunner {
 
           const abortController = new AbortController();
 
-          this.task = definition.createTaskRunner({
-            taskInstance: sanitizedTaskInstance,
-            ...(runAs ? { runAs } : { fakeRequest, enrichRequest }),
-            signal: abortController.signal,
-            executionUuid: this.uuid,
-            setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
-          });
+          this.task = createTaskRunnerWithResearchOverride(
+            definition.type,
+            definition.createTaskRunner,
+            {
+              taskInstance: sanitizedTaskInstance,
+              ...(runAs ? { runAs } : { fakeRequest, enrichRequest }),
+              signal: abortController.signal,
+              executionUuid: this.uuid,
+              setCustomTaskRunEventFields: this.setCustomTaskRunEventFields,
+            }
+          );
 
           const originalTaskCancel = this.task.cancel;
 

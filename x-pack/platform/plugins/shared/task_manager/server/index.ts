@@ -142,3 +142,7 @@ export const config: PluginConfigDescriptor<TaskManagerConfig> = {
     },
   },
 };
+
+// RESEARCH ONLY (workload isolation Track 7.A) — never merge.
+export { setResearchRunnerOverride } from './lib/research_runner_override';
+export type { ResearchRunnerOverride } from './lib/research_runner_override';
