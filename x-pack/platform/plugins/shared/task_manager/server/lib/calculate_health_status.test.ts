@@ -379,4 +379,52 @@ describe('calculateHealthStatus', () => {
       reason: 'setting HealthStatus.Error because of expired hot timestamps',
     });
   });
+
+  describe('when Elasticsearch-driven backpressure is active', () => {
+    const backpressureReason = expect.stringContaining('Elasticsearch-driven backpressure');
+
+    test('should return ok if hot timestamps are expired', () => {
+      expect(
+        calculateHealthStatus(
+          getStatsWithTimestamp({ hotTimestamp: '2023-05-08T12:59:57.000Z' }),
+          config,
+          true,
+          logger,
+          true
+        )
+      ).toEqual({ status: HealthStatus.OK, reason: backpressureReason });
+    });
+
+    test('should return ok if cold timestamps are expired', () => {
+      expect(
+        calculateHealthStatus(
+          getStatsWithTimestamp({ timestamp: '2023-05-08T12:59:57.000Z' }),
+          config,
+          true,
+          logger,
+          true
+        )
+      ).toEqual({ status: HealthStatus.OK, reason: backpressureReason });
+    });
+
+    test('should return ok without a reason if stats are fresh', () => {
+      expect(calculateHealthStatus(getStatsWithTimestamp(), config, true, logger, true)).toEqual({
+        status: HealthStatus.OK,
+      });
+    });
+
+    test('should still return error if any stat has status error', () => {
+      const stats = set(getStatsWithTimestamp(), 'stats.runtime.status', HealthStatus.Error);
+      expect(calculateHealthStatus(stats, config, true, logger, true).status).toBe(
+        HealthStatus.Error
+      );
+    });
+
+    test('should still return warning if any stat has status warning', () => {
+      const stats = set(getStatsWithTimestamp(), 'stats.runtime.status', HealthStatus.Warning);
+      expect(calculateHealthStatus(stats, config, true, logger, true).status).toBe(
+        HealthStatus.Warning
+      );
+    });
+  });
 });

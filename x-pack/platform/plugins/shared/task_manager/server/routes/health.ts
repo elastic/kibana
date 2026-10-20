@@ -21,7 +21,7 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import type { MonitoringStats, RawMonitoringStats } from '../monitoring';
-import { summarizeMonitoringStats, HealthStatus } from '../monitoring';
+import { summarizeMonitoringStats, isEsBackpressureActive, HealthStatus } from '../monitoring';
 import type { TaskManagerConfig } from '../config';
 import { logHealthMetrics } from '../lib/log_health_metrics';
 import { calculateHealthStatus } from '../lib/calculate_health_status';
@@ -103,7 +103,8 @@ export function healthRoute(params: HealthRouteParams): {
       summarizedStats,
       config,
       shouldRunTasks,
-      logger
+      logger,
+      isEsBackpressureActive(monitoredStats)
     );
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
@@ -125,14 +126,29 @@ export function healthRoute(params: HealthRouteParams): {
       }),
       // Only calculate the summarized stats (calculates all running averages and evaluates state)
       // when needed by throttling down to the requiredHotStatsFreshness
-      map((stats) => withServiceStatus(getHealthStatus(stats))),
-      filter(([monitoredHealth]) => monitoredHealth.status !== HealthStatus.Uninitialized)
+      map((stats) => ({
+        healthWithServiceStatus: withServiceStatus(getHealthStatus(stats)),
+        esBackpressureActive: isEsBackpressureActive(stats),
+      })),
+      filter(
+        ({ healthWithServiceStatus: [monitoredHealth] }) =>
+          monitoredHealth.status !== HealthStatus.Uninitialized
+      )
     )
-    .subscribe(([monitoredHealth, serviceStatus]) => {
-      serviceStatus$.next(serviceStatus);
-      monitoredHealth$.next(monitoredHealth);
-      logHealthMetrics(monitoredHealth, logger, config, shouldRunTasks, docLinks);
-    });
+    .subscribe(
+      ({ healthWithServiceStatus: [monitoredHealth, serviceStatus], esBackpressureActive }) => {
+        serviceStatus$.next(serviceStatus);
+        monitoredHealth$.next(monitoredHealth);
+        logHealthMetrics(
+          monitoredHealth,
+          logger,
+          config,
+          shouldRunTasks,
+          docLinks,
+          esBackpressureActive
+        );
+      }
+    );
 
   router.get(
     {

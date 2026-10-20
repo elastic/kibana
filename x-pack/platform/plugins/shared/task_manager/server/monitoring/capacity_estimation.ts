@@ -49,7 +49,8 @@ function isCapacityEstimationParams(
 export function estimateCapacity(
   logger: Logger,
   capacityStats: CapacityEstimationParams,
-  assumedKibanaInstances: number
+  assumedKibanaInstances: number,
+  esBackpressureActive = false
 ): RawMonitoredStat<CapacityEstimationStat> {
   const workload = capacityStats.workload.value;
 
@@ -192,11 +193,15 @@ export function estimateCapacity(
     averageCapacityUsedByNonRecurringTasksPerKibana +
     averageRecurringRequiredPerMinute / assumedKibanaInstances;
 
-  const { status, reason } = getHealthStatus(logger, {
-    assumedRequiredThroughputPerMinutePerKibana,
-    assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
-    capacityPerMinutePerKibana,
-  });
+  const { status, reason } = getHealthStatus(
+    logger,
+    {
+      assumedRequiredThroughputPerMinutePerKibana,
+      assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
+      capacityPerMinutePerKibana,
+    },
+    esBackpressureActive
+  );
   return {
     status,
     reason,
@@ -242,7 +247,8 @@ interface GetHealthStatusParams {
 
 function getHealthStatus(
   logger: Logger,
-  params: GetHealthStatusParams
+  params: GetHealthStatusParams,
+  esBackpressureActive: boolean
 ): { status: HealthStatus; reason?: string } {
   const {
     assumedRequiredThroughputPerMinutePerKibana,
@@ -257,25 +263,40 @@ function getHealthStatus(
 
   if (assumedAverageRecurringRequiredThroughputPerMinutePerKibana > capacityPerMinutePerKibana) {
     const reason = `Task Manager is unhealthy, the assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) > capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
-    logger.warn(reason);
+    logUnhealthy(logger, reason, esBackpressureActive);
     return { status: HealthStatus.OK, reason };
   }
 
   const reason = `Task Manager is unhealthy, the assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
-  logger.warn(reason);
+  logUnhealthy(logger, reason, esBackpressureActive);
   return { status: HealthStatus.OK, reason };
+}
+
+// Capacity is reduced on purpose during ES-driven backpressure, so it isn't worth a warning
+function logUnhealthy(logger: Logger, reason: string, esBackpressureActive: boolean) {
+  if (esBackpressureActive) {
+    logger.debug(reason);
+    return;
+  }
+  logger.warn(reason);
 }
 
 export function withCapacityEstimate(
   logger: Logger,
   monitoredStats: RawMonitoringStats['stats'],
-  assumedKibanaInstances: number
+  assumedKibanaInstances: number,
+  esBackpressureActive = false
 ): RawMonitoringStats['stats'] {
   if (isCapacityEstimationParams(monitoredStats)) {
     try {
       return {
         ...monitoredStats,
-        capacity_estimation: estimateCapacity(logger, monitoredStats, assumedKibanaInstances),
+        capacity_estimation: estimateCapacity(
+          logger,
+          monitoredStats,
+          assumedKibanaInstances,
+          esBackpressureActive
+        ),
       };
     } catch (e) {
       // Return monitoredStats with out capacity estimation
