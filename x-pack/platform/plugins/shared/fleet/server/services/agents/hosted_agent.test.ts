@@ -9,7 +9,12 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { Agent } from '../../types';
 
-import { getHostedPolicies, isHostedAgent } from './hosted_agent';
+import {
+  getAgentPolicyRestrictions,
+  isAgentlessAgent,
+  isHostedAgent,
+  throwIfAgentlessAgentPolicy,
+} from './hosted_agent';
 
 jest.mock('../agent_policy', () => {
   return {
@@ -17,6 +22,7 @@ jest.mock('../agent_policy', () => {
       getByIds: jest.fn().mockResolvedValue([
         { id: 'hosted-policy', is_managed: true },
         { id: 'regular-policy', is_managed: false },
+        { id: 'agentless-policy', is_managed: false, supports_agentless: true },
       ]),
     },
   };
@@ -25,12 +31,13 @@ jest.mock('../agent_policy', () => {
 describe('hosted agent helpers', () => {
   const soClientMock = savedObjectsClientMock.create();
   const expectedHostedPolicies = {
-    'hosted-policy': true,
-    'regular-policy': false,
+    'hosted-policy': { is_managed: true, supports_agentless: false },
+    'regular-policy': { is_managed: false, supports_agentless: false },
+    'agentless-policy': { is_managed: false, supports_agentless: true },
   };
 
   it('should query unique managed policies', async () => {
-    const result = await getHostedPolicies(soClientMock, [
+    const result = await getAgentPolicyRestrictions(soClientMock, [
       { policy_id: 'hosted-policy', policy_base_id: 'hosted-policy' } as Agent,
       { policy_id: 'hosted-policy', policy_base_id: 'hosted-policy' } as Agent,
       { policy_id: 'regular-policy', policy_base_id: 'regular-policy' } as Agent,
@@ -69,8 +76,8 @@ describe('hosted agent helpers', () => {
   });
 
   describe('version-specific variant agents', () => {
-    it('getHostedPolicies deduplicates by policy_base_id before lookup', async () => {
-      const result = await getHostedPolicies(soClientMock, [
+    it('getAgentPolicyRestrictions deduplicates by policy_base_id before lookup', async () => {
+      const result = await getAgentPolicyRestrictions(soClientMock, [
         { policy_id: 'hosted-policy#9.2', policy_base_id: 'hosted-policy' } as Agent,
         { policy_id: 'hosted-policy#9.2', policy_base_id: 'hosted-policy' } as Agent,
         { policy_id: 'regular-policy#9.2', policy_base_id: 'regular-policy' } as Agent,
@@ -100,6 +107,56 @@ describe('hosted agent helpers', () => {
         policy_base_id: 'hosted-policy',
       } as Agent);
       expect(isHosted).toBeTruthy();
+    });
+  });
+
+  describe('isAgentlessAgent', () => {
+    it('returns true for an agent on an agentless policy', () => {
+      expect(
+        isAgentlessAgent(expectedHostedPolicies, {
+          policy_id: 'agentless-policy',
+          policy_base_id: 'agentless-policy',
+        } as Agent)
+      ).toBe(true);
+    });
+
+    it('returns true for a variant agent on an agentless base policy', () => {
+      expect(
+        isAgentlessAgent(expectedHostedPolicies, {
+          policy_id: 'agentless-policy#9.2',
+          policy_base_id: 'agentless-policy',
+        } as Agent)
+      ).toBe(true);
+    });
+
+    it('returns false for regular, hosted and missing policies', () => {
+      expect(
+        isAgentlessAgent(expectedHostedPolicies, {
+          policy_id: 'regular-policy',
+          policy_base_id: 'regular-policy',
+        } as Agent)
+      ).toBe(false);
+      expect(
+        isAgentlessAgent(expectedHostedPolicies, {
+          policy_id: 'hosted-policy',
+          policy_base_id: 'hosted-policy',
+        } as Agent)
+      ).toBe(false);
+      expect(isAgentlessAgent(expectedHostedPolicies, {} as Agent)).toBe(false);
+    });
+  });
+
+  describe('throwIfAgentlessAgentPolicy', () => {
+    it('throws for an agentless policy', () => {
+      expect(() =>
+        throwIfAgentlessAgentPolicy({ supports_agentless: true }, 'Cannot restart agent')
+      ).toThrow(/Cannot restart agent.*agentless agents are managed by Elastic/);
+    });
+
+    it('does not throw for other policies', () => {
+      expect(() => throwIfAgentlessAgentPolicy({ supports_agentless: false }, 'msg')).not.toThrow();
+      expect(() => throwIfAgentlessAgentPolicy(undefined, 'msg')).not.toThrow();
+      expect(() => throwIfAgentlessAgentPolicy(null, 'msg')).not.toThrow();
     });
   });
 });

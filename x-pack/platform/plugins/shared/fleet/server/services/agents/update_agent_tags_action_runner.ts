@@ -72,7 +72,8 @@ export async function updateTagsBatch(
     soClient,
     givenAgents,
     errors,
-    hostedAgentError
+    hostedAgentError,
+    `Cannot modify tags on an agentless agent`
   );
   const agentIds = filteredAgents.map((agent) => agent.id);
 

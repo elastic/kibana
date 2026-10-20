@@ -6,11 +6,15 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { v4 as uuidv4 } from 'uuid';
 
 import type { Agent } from '../../types';
-import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentlessAgentRestrictionError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 import { SO_SEARCH_LIMIT } from '../../constants';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { agentsKueryNamespaceFilter, buildFilterWithNamespace } from '../spaces/agent_namespaces';
@@ -33,17 +37,24 @@ async function unenrollAgentIsAllowed(
   agentId: string,
   options?: {
     skipAgentlessValidation?: boolean;
+    skipHostedValidation?: boolean;
   }
 ) {
-  const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
-  if (agentPolicy?.is_managed) {
+  const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId).catch((err) => {
+    // a forced unenroll must still work for agents whose policy no longer exists
+    if (options?.skipHostedValidation && SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      return undefined;
+    }
+    throw err;
+  });
+  if (!options?.skipHostedValidation && agentPolicy?.is_managed) {
     throw new HostedAgentPolicyRestrictionRelatedError(
       `Cannot unenroll ${agentId} from a hosted agent policy ${agentPolicy.id}`
     );
   }
 
   if (!options?.skipAgentlessValidation && agentPolicy?.supports_agentless) {
-    throw new FleetError(`Cannot unenroll agentless agent ${agentId}`);
+    throw new AgentlessAgentRestrictionError(`Cannot unenroll agentless agent ${agentId}`);
   }
 
   return true;
@@ -60,11 +71,11 @@ export async function unenrollAgent(
   }
 ) {
   await getAgentById(esClient, soClient, agentId); // throw 404 if agent not in namespace
-  if (!options?.force) {
-    await unenrollAgentIsAllowed(soClient, esClient, agentId, {
-      skipAgentlessValidation: options?.skipAgentlessValidation,
-    });
-  }
+  // force skips the hosted validation, but never the agentless one
+  await unenrollAgentIsAllowed(soClient, esClient, agentId, {
+    skipAgentlessValidation: options?.skipAgentlessValidation,
+    skipHostedValidation: options?.force,
+  });
   if (options?.revoke) {
     return forceUnenrollAgent(esClient, soClient, agentId);
   }

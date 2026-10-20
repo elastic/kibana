@@ -15,6 +15,7 @@ jest.mock('./crud', () => ({
   getAgentPolicyForAgents: jest.fn().mockResolvedValue([
     { id: 'protected-policy', is_protected: true },
     { id: 'open-policy', is_protected: false },
+    { id: 'agentless-policy', is_protected: false, supports_agentless: true },
   ]),
 }));
 
@@ -54,6 +55,26 @@ describe('partitionAgentsForMigration', () => {
     const { agentsToAction, errors } = await partitionAgentsForMigration(soClient, [agent]);
     expect(agentsToAction).toContain(agent);
     expect(errors['agent-open']).toBeUndefined();
+  });
+
+  it('blocks agentless agent, including on a variant of an agentless policy', async () => {
+    const agent = makeAgent({
+      id: 'agent-agentless',
+      policy_id: 'agentless-policy',
+      policy_base_id: 'agentless-policy',
+    });
+    const variantAgent = makeAgent({
+      id: 'agent-agentless-variant',
+      policy_id: 'agentless-policy#9.2',
+      policy_base_id: 'agentless-policy',
+    });
+    const { agentsToAction, errors } = await partitionAgentsForMigration(soClient, [
+      agent,
+      variantAgent,
+    ]);
+    expect(agentsToAction).toHaveLength(0);
+    expect(errors['agent-agentless'].message).toContain('agentless agent');
+    expect(errors['agent-agentless-variant'].message).toContain('agentless agent');
   });
 
   describe('version-specific variant agents', () => {

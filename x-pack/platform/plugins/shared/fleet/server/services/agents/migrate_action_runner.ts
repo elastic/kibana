@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { isAgentMigrationSupported, MINIMUM_MIGRATE_AGENT_VERSION } from '../../../common/services';
-import { FleetError } from '../../errors';
+import { AgentlessAgentRestrictionError, FleetError } from '../../errors';
 
 import type { Agent } from '../../types';
 
@@ -48,10 +48,17 @@ export async function partitionAgentsForMigration(
   const agentPolicies = await getAgentPolicyForAgents(soClient, agents);
   const protectedAgentPolicies = agentPolicies.filter((agentPolicy) => agentPolicy?.is_protected);
   const protectedPolicyIdSet = new Set(protectedAgentPolicies.map((policy) => policy.id));
+  const agentlessPolicyIdSet = new Set(
+    agentPolicies.filter((agentPolicy) => agentPolicy?.supports_agentless).map(({ id }) => id)
+  );
 
   const agentsToAction: Agent[] = [];
   agents.forEach((agent: Agent) => {
-    if (
+    if (agent.policy_base_id && agentlessPolicyIdSet.has(agent.policy_base_id)) {
+      errors[agent.id] = new AgentlessAgentRestrictionError(
+        `Cannot migrate agentless agent ${agent.id}`
+      );
+    } else if (
       agent.policy_base_id &&
       // policy_base_id is always the base policy id, so agents on a version-specific variant
       // (`my-policy#9.2`) are correctly blocked when `my-policy` is protected.

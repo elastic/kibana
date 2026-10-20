@@ -28,6 +28,12 @@ jest.mock('../package_policy');
 jest.mock('./crud');
 jest.mock('./actions');
 
+jest.mock('./hosted_agent', () => ({
+  throwIfAgentlessAgent: jest.fn(),
+  getAgentPolicyRestrictions: jest.fn().mockResolvedValue({}),
+  isAgentlessAgent: jest.fn().mockReturnValue(false),
+}));
+
 jest.mock('./crud', () => {
   return {
     getAgents: jest.fn(),

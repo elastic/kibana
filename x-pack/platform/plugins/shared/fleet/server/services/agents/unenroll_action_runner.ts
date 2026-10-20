@@ -13,7 +13,11 @@ import { AGENT_ACTIONS_RESULTS_INDEX } from '../../../common';
 
 import type { Agent } from '../../types';
 
-import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentlessAgentRestrictionError,
+  FleetError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 
 import { outputType } from '../../../common/constants';
 
@@ -33,7 +37,7 @@ import {
   createErrorActionResults,
   getUnenrollAgentActions,
 } from './actions';
-import { getHostedPolicies, isHostedAgent } from './hosted_agent';
+import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
 import { BulkActionTaskType } from './bulk_action_types';
 
 export class UnenrollActionRunner extends ActionRunner {
@@ -69,26 +73,32 @@ export async function unenrollBatch(
     spaceId?: string;
     startTime?: string;
     skipActionCreation?: boolean;
+    skipAgentlessValidation?: boolean;
   }
 ): Promise<{ actionId: string }> {
-  const hostedPolicies = await getHostedPolicies(soClient, givenAgents);
+  const restrictions = await getAgentPolicyRestrictions(soClient, givenAgents);
   const outgoingErrors: Record<Agent['id'], Error> = {};
 
   // And which are allowed to unenroll
-  const agentsToUpdate = options.force
-    ? givenAgents
-    : givenAgents.reduce<Agent[]>((agents, agent) => {
-        if (isAgentUnenrolled(agent, options.revoke)) {
-          outgoingErrors[agent.id] = new FleetError(`Agent ${agent.id} already unenrolled`);
-        } else if (isHostedAgent(hostedPolicies, agent)) {
-          outgoingErrors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
-            `Cannot unenroll ${agent.id} from a hosted agent policy ${agent.policy_id}`
-          );
-        } else {
-          agents.push(agent);
-        }
-        return agents;
-      }, []);
+  const agentsToUpdate = givenAgents.reduce<Agent[]>((agents, agent) => {
+    // force skips the unenrolled/hosted validations, but never the agentless one
+    if (!options.skipAgentlessValidation && isAgentlessAgent(restrictions, agent)) {
+      outgoingErrors[agent.id] = new AgentlessAgentRestrictionError(
+        `Cannot unenroll agentless agent ${agent.id}`
+      );
+    } else if (options.force) {
+      agents.push(agent);
+    } else if (isAgentUnenrolled(agent, options.revoke)) {
+      outgoingErrors[agent.id] = new FleetError(`Agent ${agent.id} already unenrolled`);
+    } else if (isHostedAgent(restrictions, agent)) {
+      outgoingErrors[agent.id] = new HostedAgentPolicyRestrictionRelatedError(
+        `Cannot unenroll ${agent.id} from a hosted agent policy ${agent.policy_id}`
+      );
+    } else {
+      agents.push(agent);
+    }
+    return agents;
+  }, []);
 
   const now = new Date().toISOString();
   const actionId = options.actionId ?? uuidv4();
