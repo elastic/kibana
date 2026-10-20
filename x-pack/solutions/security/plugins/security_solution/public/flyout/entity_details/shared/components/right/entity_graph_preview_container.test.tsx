@@ -21,6 +21,7 @@ import {
   GRAPH_PREVIEW_TEST_ID,
 } from '../../../../../flyout_v2/shared/components/test_ids';
 import { EntityGraphPreviewContainer } from './entity_graph_preview_container';
+import { EntityFlyoutTimeRangeProvider } from '../../../../../entity_analytics/hooks/use_entity_flyout_time_range';
 
 jest.mock('../../../../../common/hooks/use_upselling');
 jest.mock('../../../../shared/hooks/use_should_show_graph');
@@ -84,6 +85,33 @@ describe('<EntityGraphPreviewContainer />', () => {
         refetchOnWindowFocus: false,
       },
     });
+  });
+
+  it('fetches graph data over the flyout time range when the opener pinned one', async () => {
+    const { findByTestId } = render(
+      <TestProviders>
+        <EntityFlyoutTimeRangeProvider timeRange={{ from: 'now-24h', to: 'now' }}>
+          <EntityGraphPreviewContainer
+            entityId="test-entity-id"
+            onShowGraph={mockOnShowGraph}
+            showIcon
+          />
+        </EntityFlyoutTimeRangeProvider>
+      </TestProviders>
+    );
+
+    expect(await findByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
+    expect(mockUseFetchGraphData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        req: {
+          query: {
+            entityIds: [{ id: 'test-entity-id', isOrigin: true }],
+            start: 'now-24h',
+            end: 'now',
+          },
+        },
+      })
+    );
   });
 
   it('calls onShowGraph when the header link is clicked', async () => {

@@ -16,25 +16,42 @@ import { TIME_RANGE_OPTIONS, type TimeRange } from '../components/home/entities_
 export const getEntityAnalyticsNewHomeScopeId = (timeRange: TimeRange): string =>
   `entity-analytics-new-entities-table-${timeRange}`;
 
+/** A relative or absolute `{ from, to }` window, in datemath strings. */
+export interface ScopeTimeRange {
+  from: string;
+  to: string;
+}
+
+/**
+ * Scopes whose opener pins the WHOLE entity flyout (observed data, anomalies, highlights, graph,
+ * alerts) to a window: the new Entity Analytics home page selection. `EntityFlyoutTimeRangeProvider`
+ * derives the flyout-level time range from this map.
+ */
+export const SCOPE_FLYOUT_TIME_RANGES: Readonly<Record<string, ScopeTimeRange>> =
+  Object.fromEntries(
+    TIME_RANGE_OPTIONS.map((timeRange) => [
+      getEntityAnalyticsNewHomeScopeId(timeRange),
+      { from: `now-${timeRange}`, to: ENTITY_ANALYTICS_ALERTS_TO },
+    ])
+  );
+
+/** Returns the flyout-level time range pinned by `scopeId`, if any. */
+export const getScopeFlyoutTimeRange = (scopeId?: string): ScopeTimeRange | undefined =>
+  scopeId ? SCOPE_FLYOUT_TIME_RANGES[scopeId] : undefined;
+
 /**
  * Maps a scope ID to the alert query time range that should be used when an
  * entity flyout or insights tab is opened from that scope. Components look up
  * their `scopeId` here and, when a match is found, use the returned `{ from, to }`
  * instead of the global Kibana time range.
  *
- * Add an entry here whenever a new surface pins alerts to a fixed window.
+ * Add an entry here whenever a new surface pins alerts (only) to a fixed window; surfaces that
+ * pin the whole flyout belong in {@link SCOPE_FLYOUT_TIME_RANGES}, which is included here.
  */
-export const SCOPE_ALERT_TIME_RANGE_OVERRIDES: Readonly<
-  Record<string, { from: string; to: string }>
-> = {
+export const SCOPE_ALERT_TIME_RANGE_OVERRIDES: Readonly<Record<string, ScopeTimeRange>> = {
   [ENTITY_ANALYTICS_TABLE_ID]: {
     from: ENTITY_ANALYTICS_ALERTS_FROM,
     to: ENTITY_ANALYTICS_ALERTS_TO,
   },
-  ...Object.fromEntries(
-    TIME_RANGE_OPTIONS.map((timeRange) => [
-      getEntityAnalyticsNewHomeScopeId(timeRange),
-      { from: `now-${timeRange}`, to: ENTITY_ANALYTICS_ALERTS_TO },
-    ])
-  ),
+  ...SCOPE_FLYOUT_TIME_RANGES,
 };

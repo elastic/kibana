@@ -34,6 +34,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/entity_analytics/anomalies/constants';
 
 import { useAnomalyOverview } from '../../api/hooks/use_anomaly_overview';
+import { useEntityFlyoutTimeRange } from '../../hooks/use_entity_flyout_time_range';
 import {
   ENTITY_ANOMALIES_TAB_MANAGE_ML_JOBS,
   ENTITY_ANOMALIES_TAB_ATTACK_CHAIN_TITLE,
@@ -88,6 +89,11 @@ const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
   timePrecision: 's',
 };
 
+/** Picker label for a window: the matching preset's label, else the raw bounds. */
+const getDatePickerValue = (timeRange: { from: string; to: string }): string =>
+  TIME_RANGE_PRESETS.find(({ start, end }) => start === timeRange.from && end === timeRange.to)
+    ?.label ?? `${timeRange.from} → ${timeRange.to}`;
+
 interface AnomaliesTabProps {
   entityId: string;
   entityName: string;
@@ -101,9 +107,13 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
   entityType,
   mode,
 }) => {
-  const [datePickerValue, setDatePickerValue] = useState<string>(DEFAULT_DATE_PICKER_VALUE);
-  const [start, setStart] = useState<string>(DEFAULT_TIME_RANGE.from);
-  const [end, setEnd] = useState<string>(DEFAULT_TIME_RANGE.to);
+  // Open on the enclosing flyout's time range when the opener pinned one; the user can still change it.
+  const flyoutTimeRange = useEntityFlyoutTimeRange();
+  const [datePickerValue, setDatePickerValue] = useState<string>(() =>
+    flyoutTimeRange ? getDatePickerValue(flyoutTimeRange) : DEFAULT_DATE_PICKER_VALUE
+  );
+  const [start, setStart] = useState<string>(flyoutTimeRange?.from ?? DEFAULT_TIME_RANGE.from);
+  const [end, setEnd] = useState<string>(flyoutTimeRange?.to ?? DEFAULT_TIME_RANGE.to);
   const [datePickerSettings, setDatePickerSettings] = useState<DateRangePickerSettings>(
     DEFAULT_DATE_PICKER_SETTINGS
   );

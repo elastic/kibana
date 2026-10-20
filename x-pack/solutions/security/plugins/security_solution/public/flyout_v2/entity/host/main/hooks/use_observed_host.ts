@@ -13,6 +13,7 @@ import { inputsSelectors } from '../../../../../common/store';
 import { useHostDetails } from '../../../../../explore/hosts/containers/hosts/details';
 import { useFirstLastSeen } from '../../../../../common/containers/use_first_last_seen';
 import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { useEntityFlyoutTimeRange } from '../../../../../entity_analytics/hooks/use_entity_flyout_time_range';
 import type { HostItem } from '../../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy';
 import { HOST_PANEL_OBSERVED_HOST_QUERY_ID, HOST_PANEL_RISK_SCORE_QUERY_ID } from '../constants';
@@ -50,8 +51,10 @@ export const useObservedHost = (
     inputsSelectors.timelineTimeRangeSelector(state)
   );
   const globalTime = useGlobalTime();
+  const flyoutTimeRange = useEntityFlyoutTimeRange();
   const isActiveTimelines = isActiveTimeline(scopeId);
-  const { to, from } = isActiveTimelines ? timelineTime : globalTime;
+  // The flyout-level range (set by the opener) wins over timeline / global time.
+  const { to, from } = flyoutTimeRange ?? (isActiveTimelines ? timelineTime : globalTime);
   const { isInitializing, setQuery, deleteQuery } = globalTime;
 
   const { indexPatterns } = useSecurityDefaultPatterns();

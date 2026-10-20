@@ -13,6 +13,7 @@ import type { ObservedEntityData } from '../../../../flyout_v2/entity/shared/com
 import type { ServiceItem } from '../../../../../common/search_strategy';
 import { Direction, NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../common/search_strategy';
 import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { useEntityFlyoutTimeRange } from '../../../../entity_analytics/hooks/use_entity_flyout_time_range';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { isActiveTimeline } from '../../../../helpers';
 import { useSecurityDefaultPatterns } from '../../../../data_view_manager/hooks/use_security_default_patterns';
@@ -29,8 +30,10 @@ export const useObservedService = (
     inputsSelectors.timelineTimeRangeSelector(state)
   );
   const globalTime = useGlobalTime();
+  const flyoutTimeRange = useEntityFlyoutTimeRange();
   const isActiveTimelines = isActiveTimeline(scopeId);
-  const { to, from } = isActiveTimelines ? timelineTime : globalTime;
+  // The flyout-level range (set by the opener; v2 flyout only) wins over timeline / global time.
+  const { to, from } = flyoutTimeRange ?? (isActiveTimelines ? timelineTime : globalTime);
   const { isInitializing, setQuery, deleteQuery } = globalTime;
   const serviceName = getServiceNameFromEntityIdentifiers(identityFields);
 

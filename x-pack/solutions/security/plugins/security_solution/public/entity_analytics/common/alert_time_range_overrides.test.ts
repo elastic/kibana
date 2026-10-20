@@ -6,9 +6,11 @@
  */
 
 import { TIME_RANGE_OPTIONS } from '../components/home/entities_grid/common';
+import { ENTITY_ANALYTICS_TABLE_ID } from '../components/home/constants';
 import {
   SCOPE_ALERT_TIME_RANGE_OVERRIDES,
   getEntityAnalyticsNewHomeScopeId,
+  getScopeFlyoutTimeRange,
 } from './alert_time_range_overrides';
 
 describe('getEntityAnalyticsNewHomeScopeId', () => {
@@ -23,5 +25,20 @@ describe('getEntityAnalyticsNewHomeScopeId', () => {
       from: `now-${timeRange}`,
       to: 'now',
     });
+  });
+});
+
+describe('getScopeFlyoutTimeRange', () => {
+  it.each(TIME_RANGE_OPTIONS)('pins the whole flyout to the last %s for its scope', (timeRange) => {
+    expect(getScopeFlyoutTimeRange(getEntityAnalyticsNewHomeScopeId(timeRange))).toEqual({
+      from: `now-${timeRange}`,
+      to: 'now',
+    });
+  });
+
+  it('is undefined for scopes that only pin alerts, unknown scopes and no scope', () => {
+    expect(getScopeFlyoutTimeRange(ENTITY_ANALYTICS_TABLE_ID)).toBeUndefined();
+    expect(getScopeFlyoutTimeRange('alerts-page')).toBeUndefined();
+    expect(getScopeFlyoutTimeRange(undefined)).toBeUndefined();
   });
 });

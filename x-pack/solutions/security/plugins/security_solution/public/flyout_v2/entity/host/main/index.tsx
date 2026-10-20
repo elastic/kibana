@@ -12,6 +12,7 @@ import { EuiFlyoutHeader, EuiFlyoutBody, EuiSpacer, EuiFlyoutFooter } from '@ela
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { useUpdateAssetCriticality } from '../../../../entity_analytics/api/hooks/use_update_asset_criticality';
+import { EntityFlyoutTimeRangeProvider } from '../../../../entity_analytics/hooks/use_entity_flyout_time_range';
 import { useAssetCriticalityPrivileges } from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
 import { useEntityRiskScoreRecalculation } from '../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
@@ -102,7 +103,7 @@ const FIRST_RECORD_PAGINATION = {
  * navigation or preview-mode handling. Detail panels (risk inputs, graph view, etc.)
  * open as separate system flyouts via `useFlyoutApi`.
  */
-export const Host: FC<HostProps> = memo(function Host({
+const HostPanel: FC<HostProps> = memo(function HostPanel({
   hostName,
   hit,
   entityId: entityIdProp,
@@ -349,6 +350,7 @@ export const Host: FC<HostProps> = memo(function Host({
             value: hostName,
             entityId: entityStoreEntityId,
             mode,
+            scopeId,
             onOpenEntity: onShowHost,
             title: hostName,
             origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
@@ -500,6 +502,20 @@ export const Host: FC<HostProps> = memo(function Host({
         </EuiFlyoutFooter>
       )}
     </>
+  );
+});
+
+HostPanel.displayName = 'HostPanel';
+
+/**
+ * {@link HostPanel} under the flyout-level time range derived from `scopeId`, so every
+ * time-bounded section (observed data, anomalies, highlights, graph, alerts) follows the opener.
+ */
+export const Host: FC<HostProps> = memo(function Host(props) {
+  return (
+    <EntityFlyoutTimeRangeProvider scopeId={props.scopeId}>
+      <HostPanel {...props} />
+    </EntityFlyoutTimeRangeProvider>
   );
 });
 

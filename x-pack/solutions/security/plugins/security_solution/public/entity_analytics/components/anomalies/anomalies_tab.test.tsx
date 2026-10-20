@@ -11,6 +11,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { SeverityOption } from '@kbn/ml-plugin/public/application/explorer/hooks/use_severity_options';
 import { AnomaliesTab } from './anomalies_tab';
 import { ANOMALIES_TAB_ERROR_TEST_ID } from './test_ids';
+import { EntityFlyoutTimeRangeProvider } from '../../hooks/use_entity_flyout_time_range';
 
 // ─── Hook mocks ──────────────────────────────────────────────────────────────
 
@@ -46,7 +47,9 @@ let onSeverityChange: ((opts: SeverityOption[]) => void) | undefined;
 // ─── Child component mocks ────────────────────────────────────────────────────
 
 jest.mock('@kbn/date-range-picker', () => ({
-  DateRangePicker: () => <div data-test-subj="mock-date-range-picker" />,
+  DateRangePicker: ({ value }: { value: string }) => (
+    <div data-test-subj="mock-date-range-picker" data-value={value} />
+  ),
 }));
 
 // Capture onSelectTactic so tests can drive tactic selection.
@@ -268,6 +271,50 @@ describe('AnomaliesTab', () => {
       expect(mockUseAnomalySummary).toHaveBeenLastCalledWith(
         expect.objectContaining({
           body: expect.objectContaining({ score_ranges: [{ min_score: 50, max_score: 75 }] }),
+        })
+      );
+    });
+  });
+
+  describe('initial time range', () => {
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(new Date('2024-06-15T12:00:00.000Z'));
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('defaults to the last 30 days when the enclosing flyout has no pinned range', () => {
+      render(<AnomaliesTab {...defaultProps} />, { wrapper: Wrapper });
+
+      expect(screen.getByTestId('mock-date-range-picker')).toHaveAttribute(
+        'data-value',
+        'Last 30 days'
+      );
+      expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          from: new Date('2024-05-16T12:00:00.000Z').valueOf(),
+          to: new Date('2024-06-15T12:00:00.000Z').valueOf(),
+        })
+      );
+    });
+
+    it('opens on the flyout time range (matching preset label) when the opener pinned one', () => {
+      render(
+        <EntityFlyoutTimeRangeProvider timeRange={{ from: 'now-7d', to: 'now' }}>
+          <AnomaliesTab {...defaultProps} />
+        </EntityFlyoutTimeRangeProvider>,
+        { wrapper: Wrapper }
+      );
+
+      expect(screen.getByTestId('mock-date-range-picker')).toHaveAttribute(
+        'data-value',
+        'Last 7 days'
+      );
+      expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          from: new Date('2024-06-08T12:00:00.000Z').valueOf(),
+          to: new Date('2024-06-15T12:00:00.000Z').valueOf(),
         })
       );
     });

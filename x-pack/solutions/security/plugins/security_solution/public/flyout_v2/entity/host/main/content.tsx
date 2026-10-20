@@ -13,6 +13,7 @@ import type { EntityViewMode } from '../../../../../common/entity_analytics/enti
 import { ObservedDataSection } from '../../shared/components/observed_data_section';
 import { useAnomalyOverview } from '../../../../entity_analytics/api/hooks/use_anomaly_overview';
 import { useAnomalyPrivileges } from '../../../../entity_analytics/api/hooks/use_anomaly_privileges';
+import { useEntityFlyoutTimeRangeMs } from '../../../../entity_analytics/hooks/use_entity_flyout_time_range';
 import { useHasEntityResolutionLicense } from '../../../../common/hooks/use_has_entity_resolution_license';
 import { EntityHighlightsAccordion } from '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights';
 import { EntityInsight } from '../../../../cloud_security_posture/components/entity_insight';
@@ -145,10 +146,14 @@ export const Content = ({
   const { data: anomalyPrivilegesData } = useAnomalyPrivileges(isAnomalyDetailsEnabled);
   const hasAnomalyPrivileges = anomalyPrivilegesData?.has_all_required ?? false;
   const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
+  // Without a flyout-level range the server applies its default lookback.
+  const flyoutTimeRangeMs = useEntityFlyoutTimeRangeMs();
   const anomalyOverview = useAnomalyOverview({
     entityId: entityStoreEntityId ?? '',
     mode,
     entityType: EntityType.host,
+    from: flyoutTimeRangeMs?.from,
+    to: flyoutTimeRangeMs?.to,
     enabled: loadAnomalies,
   });
 

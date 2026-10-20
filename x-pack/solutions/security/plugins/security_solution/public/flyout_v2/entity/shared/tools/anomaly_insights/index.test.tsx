@@ -34,27 +34,37 @@ jest.mock('../../../../shared/components/tools_flyout_header', () => ({
   ),
 }));
 
-jest.mock('../../../../../entity_analytics/components/anomalies/anomalies_tab', () => ({
-  AnomaliesTab: ({
-    entityId,
-    entityName,
-    entityType,
-    mode,
-  }: {
-    entityId: string;
-    entityName: string;
-    entityType: string;
-    mode?: string;
-  }) => (
-    <div
-      data-test-subj="mockAnomaliesTab"
-      data-entity-id={entityId}
-      data-entity-name={entityName}
-      data-entity-type={entityType}
-      data-mode={mode ?? ''}
-    />
-  ),
-}));
+jest.mock('../../../../../entity_analytics/components/anomalies/anomalies_tab', () => {
+  // Surfaces the flyout time range the tab would read, to assert the provider is mounted above it.
+  const { useEntityFlyoutTimeRange } = jest.requireActual(
+    '../../../../../entity_analytics/hooks/use_entity_flyout_time_range'
+  );
+  return {
+    AnomaliesTab: ({
+      entityId,
+      entityName,
+      entityType,
+      mode,
+    }: {
+      entityId: string;
+      entityName: string;
+      entityType: string;
+      mode?: string;
+    }) => {
+      const timeRange = useEntityFlyoutTimeRange();
+      return (
+        <div
+          data-test-subj="mockAnomaliesTab"
+          data-entity-id={entityId}
+          data-entity-name={entityName}
+          data-entity-type={entityType}
+          data-mode={mode ?? ''}
+          data-time-range-from={timeRange?.from ?? ''}
+        />
+      );
+    },
+  };
+});
 
 describe('<AnomalyInsights /> host', () => {
   beforeEach(() => {
@@ -108,6 +118,24 @@ describe('<AnomalyInsights /> host', () => {
       />
     );
     expect(getByTestId('mockAnomaliesTab')).toHaveAttribute('data-mode', 'resolved');
+  });
+
+  it('provides the flyout time range of a pinning scope to the tab', () => {
+    const { getByTestId } = render(
+      <AnomalyInsights
+        entityType={EntityType.host}
+        value="my-host"
+        scopeId="entity-analytics-new-entities-table-7d"
+      />
+    );
+    expect(getByTestId('mockAnomaliesTab')).toHaveAttribute('data-time-range-from', 'now-7d');
+  });
+
+  it('provides no flyout time range for scopes that do not pin one', () => {
+    const { getByTestId } = render(
+      <AnomalyInsights entityType={EntityType.host} value="my-host" scopeId="alerts-page" />
+    );
+    expect(getByTestId('mockAnomaliesTab')).toHaveAttribute('data-time-range-from', '');
   });
 
   it('forwards onOpenEntity to the header click handler', () => {

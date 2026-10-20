@@ -461,6 +461,7 @@ export const openDescriptorAsStart = (
         value: d.value,
         entityId: d.entityId,
         mode: d.mode,
+        scopeId: d.scopeId,
         ...originParams,
         onOpenEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,

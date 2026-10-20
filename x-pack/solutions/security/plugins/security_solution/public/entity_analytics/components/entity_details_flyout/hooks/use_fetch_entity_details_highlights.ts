@@ -25,6 +25,10 @@ import { useCurrentUser } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
 import {
+  entityFlyoutTimeRangeToMs,
+  useEntityFlyoutTimeRange,
+} from '../../../hooks/use_entity_flyout_time_range';
+import {
   buildExecutionContext,
   EA_EXECUTION_CONTEXT_NAMES,
 } from '../../../../common/utils/execution_context';
@@ -136,6 +140,7 @@ export const useFetchEntityDetailsHighlights = ({
   const { fetchEntityDetailsHighlights, saveEntityAiSummary } = useEntityAnalyticsRoutes();
   const { addError } = useAppToasts();
   const currentUser = useCurrentUser();
+  const flyoutTimeRange = useEntityFlyoutTimeRange();
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [abortController, setAbortController] = useState<AbortController | null>(null);
   const [error, setError] = useState<Error | null>(null);
@@ -183,8 +188,12 @@ export const useFetchEntityDetailsHighlights = ({
     setIsGeneratingSummary(true);
 
     try {
-      const toDate = Date.now();
-      const fromDate = toDate - ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
+      // Anomalies feeding the summary use the flyout-level range when the opener pinned one
+      // (resolved at generation time so a long-open flyout still gets a fresh window).
+      const flyoutRangeMs = entityFlyoutTimeRangeToMs(flyoutTimeRange);
+      const toDate = flyoutRangeMs?.to ?? Date.now();
+      const fromDate =
+        flyoutRangeMs?.from ?? toDate - ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
       const { summary, replacements, prompt } = await fetchEntityDetailsHighlights({
         params: {
           entityType,
@@ -321,6 +330,7 @@ export const useFetchEntityDetailsHighlights = ({
     entityType,
     entityIdentifier,
     mode,
+    flyoutTimeRange,
     anonymizationFields,
     connectorId,
     inference,

@@ -14,6 +14,7 @@ import { USE_NEW_ENTITY_ANALYTICS_HOME_PAGE_FLAG } from '../../../../../common/c
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 import { Content } from './content';
 import { mockHostEntityRiskScores } from '../../../../flyout/entity_details/mocks';
+import { EntityFlyoutTimeRangeProvider } from '../../../../entity_analytics/hooks/use_entity_flyout_time_range';
 
 const mockResolutionSection = jest.fn((_props: { openDetailsPanel?: unknown }) => (
   <div data-test-subj="securitySolutionFlyoutResolutionSection" />
@@ -60,6 +61,14 @@ jest.mock('../../../../cloud_security_posture/components/entity_insight', () => 
 }));
 jest.mock('../../shared/components/observed_data_section', () => ({
   ObservedDataSection: () => null,
+}));
+const mockUseAnomalyOverview = jest.fn((_params: { from?: number; to?: number }) => ({
+  data: undefined,
+  isLoading: false,
+  isError: false,
+}));
+jest.mock('../../../../entity_analytics/api/hooks/use_anomaly_overview', () => ({
+  useAnomalyOverview: (params: { from?: number; to?: number }) => mockUseAnomalyOverview(params),
 }));
 
 const defaultProps = {
@@ -267,5 +276,37 @@ describe('Content — legacy asset criticality accordion gating', () => {
       { wrapper: TestProviders }
     );
     expect(screen.queryByTestId('assetCriticalityAccordionMock')).not.toBeInTheDocument();
+  });
+});
+
+describe('Content — flyout time range', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers().setSystemTime(new Date('2024-06-15T12:00:00.000Z'));
+  });
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it('lets the server default the anomaly overview lookback when the flyout has no pinned range', () => {
+    render(<Content {...defaultProps} />, { wrapper: TestProviders });
+    expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
+      expect.objectContaining({ from: undefined, to: undefined })
+    );
+  });
+
+  it('bounds the anomaly overview to the flyout time range when the opener pinned one', () => {
+    render(
+      <EntityFlyoutTimeRangeProvider timeRange={{ from: 'now-7d', to: 'now' }}>
+        <Content {...defaultProps} />
+      </EntityFlyoutTimeRangeProvider>,
+      { wrapper: TestProviders }
+    );
+    expect(mockUseAnomalyOverview).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        from: new Date('2024-06-08T12:00:00.000Z').valueOf(),
+        to: new Date('2024-06-15T12:00:00.000Z').valueOf(),
+      })
+    );
   });
 });

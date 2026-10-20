@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, act, waitFor } from '@testing-library/react';
 import type { AnonymizationFieldResponse, Replacements } from '@kbn/elastic-assistant-common';
 import type {
@@ -12,6 +13,7 @@ import type {
   EntitySummaryStalenessEntitySnapshot,
 } from '@kbn/entity-store/common';
 import { useFetchEntityDetailsHighlights } from './use_fetch_entity_details_highlights';
+import { EntityFlyoutTimeRangeProvider } from '../../../hooks/use_entity_flyout_time_range';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import type { EntityHighlightsResponse } from '../types';
 
@@ -437,6 +439,61 @@ describe('useFetchEntityDetailsHighlights', () => {
       // The in-session result stays usable even though the persist failed.
       expect(result.current.result?.response).toEqual(mockSuccessfulInferenceOutput.output);
       expect(result.current.error).toBeNull();
+    });
+  });
+
+  describe('anomaly window', () => {
+    const NOW = new Date('2024-06-15T12:00:00.000Z');
+    beforeEach(() => {
+      jest.useFakeTimers().setSystemTime(NOW);
+    });
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('uses the default 30-day lookback when the flyout has no pinned range', async () => {
+      mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
+      mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
+      const { result } = renderHook(() => useFetchEntityDetailsHighlights(mockProps));
+
+      await act(async () => {
+        await result.current.fetchEntityHighlights();
+      });
+
+      expect(mockFetchEntityDetailsHighlights).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            from: NOW.valueOf() - 30 * 24 * 60 * 60 * 1000,
+            to: NOW.valueOf(),
+          }),
+        })
+      );
+    });
+
+    it('uses the flyout time range when the opener pinned one', async () => {
+      mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
+      mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
+      const wrapper: React.FC<React.PropsWithChildren> = ({ children }) => (
+        <EntityFlyoutTimeRangeProvider timeRange={{ from: 'now-7d', to: 'now' }}>
+          {children}
+        </EntityFlyoutTimeRangeProvider>
+      );
+      const { result } = renderHook(() => useFetchEntityDetailsHighlights(mockProps), {
+        wrapper,
+      });
+
+      await act(async () => {
+        await result.current.fetchEntityHighlights();
+      });
+
+      expect(mockFetchEntityDetailsHighlights).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({
+            from: NOW.valueOf() - 7 * 24 * 60 * 60 * 1000,
+            to: NOW.valueOf(),
+          }),
+        })
+      );
     });
   });
 

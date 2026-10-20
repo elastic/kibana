@@ -19,6 +19,7 @@ import { buildEntityNameFilter } from '../../../../../common/search_strategy';
 import { EntityIdentifierFields, EntityType } from '../../../../../common/entity_analytics/types';
 import type { Refetch } from '../../../../common/types';
 import { FIRST_RECORD_PAGINATION } from '../../../../entity_analytics/common';
+import { EntityFlyoutTimeRangeProvider } from '../../../../entity_analytics/hooks/use_entity_flyout_time_range';
 import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 import { useRefetchQueryById } from '../../../../entity_analytics/api/hooks/use_refetch_query_by_id';
 import { useCalculateEntityRiskScore } from '../../../../entity_analytics/api/hooks/use_calculate_entity_risk_score';
@@ -52,7 +53,7 @@ export type GenericEntityProps = {
  * navigation or preview-mode handling. Detail panels (fields table, CSP insights) open as separate
  * system flyouts via `useFlyoutApi`.
  */
-export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity(params) {
+const GenericEntityPanel: FC<GenericEntityProps> = memo(function GenericEntityPanel(params) {
   const { scopeId } = params;
   const { euiTheme } = useEuiTheme();
   const {
@@ -235,6 +236,20 @@ export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity
         panelProps={{ paddingSize: 'none' }}
       />
     </>
+  );
+});
+
+GenericEntityPanel.displayName = 'GenericEntityPanel';
+
+/**
+ * {@link GenericEntityPanel} under the flyout-level time range derived from `scopeId`, so the
+ * insights alert count follows the opener (the generic content renders `EntityInsight` unscoped).
+ */
+export const GenericEntity: FC<GenericEntityProps> = memo(function GenericEntity(props) {
+  return (
+    <EntityFlyoutTimeRangeProvider scopeId={props.scopeId}>
+      <GenericEntityPanel {...props} />
+    </EntityFlyoutTimeRangeProvider>
   );
 });
 

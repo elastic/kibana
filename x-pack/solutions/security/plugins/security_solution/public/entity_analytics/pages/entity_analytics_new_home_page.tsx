@@ -221,7 +221,8 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
     activeTile,
     setActiveTile,
   } = useEntityAnalyticsUrlState();
-  // Flyouts opened from the table query alerts over the range it shows.
+  // The scope pins every time-bounded section of the flyouts opened from here (alerts, observed
+  // data, anomalies, highlights, graph) to the selected range — see `EntityFlyoutTimeRangeProvider`.
   const scopeId = getEntityAnalyticsNewHomeScopeId(timeRange);
 
   const [isGridFullScreen, setIsGridFullScreen] = useState(false);
@@ -274,6 +275,7 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
           entityType,
           value: entity.entityName ?? '',
           entityId: entity.entityId,
+          scopeId,
           mode: getEntityViewMode(rowMode),
         });
       },

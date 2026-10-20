@@ -12,6 +12,7 @@ import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_he
 import { AnomaliesTab } from '../../../../../entity_analytics/components/anomalies/anomalies_tab';
 import type { EntityViewMode } from '../../../../../../common/entity_analytics/entity_store/resolution_group';
 import { ANOMALY_INSIGHTS_TITLE } from '../../../../shared/constants/flyout_titles';
+import { EntityFlyoutTimeRangeProvider } from '../../../../../entity_analytics/hooks/use_entity_flyout_time_range';
 import { ANOMALY_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
 const TITLE = ANOMALY_INSIGHTS_TITLE;
@@ -27,6 +28,8 @@ export interface AnomalyInsightsProps {
   entityId?: string;
   /** `resolved` shows the anomalies of the whole resolution group; defaults to `single`. */
   mode?: EntityViewMode;
+  /** Scope the tool was opened from; a scope that pins a time range sets the tab's initial window. */
+  scopeId?: string;
   /** Opens the originating entity flyout as a child. */
   onOpenEntity?: () => void;
 }
@@ -35,9 +38,9 @@ export interface AnomalyInsightsProps {
  * Tool flyout displaying the full behavioral anomalies view for an entity.
  */
 export const AnomalyInsights = memo(
-  ({ entityType, value, entityId, mode, onOpenEntity }: AnomalyInsightsProps) => {
+  ({ entityType, value, entityId, mode, scopeId, onOpenEntity }: AnomalyInsightsProps) => {
     return (
-      <>
+      <EntityFlyoutTimeRangeProvider scopeId={scopeId}>
         <EuiFlyoutHeader hasBorder>
           <ToolsFlyoutHeader
             title={TITLE}
@@ -54,7 +57,7 @@ export const AnomalyInsights = memo(
             mode={mode}
           />
         </EuiFlyoutBody>
-      </>
+      </EntityFlyoutTimeRangeProvider>
     );
   }
 );

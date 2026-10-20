@@ -7,17 +7,19 @@
 
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { SCOPE_ALERT_TIME_RANGE_OVERRIDES } from '../common/alert_time_range_overrides';
+import { useEntityFlyoutTimeRange } from './use_entity_flyout_time_range';
 
 /**
  * Returns `{ from, to }` for alert queries. When `scopeId` has a registered
  * entry in {@link SCOPE_ALERT_TIME_RANGE_OVERRIDES} that window wins; otherwise
- * falls back to the Kibana global time range.
+ * the enclosing entity flyout's time range (if any); otherwise the Kibana global time range.
  */
 export const useAlertTimeRange = (scopeId?: string): { from: string; to: string } => {
   const { to: globalTo, from: globalFrom } = useGlobalTime();
+  const flyoutTimeRange = useEntityFlyoutTimeRange();
   const scopeOverride = scopeId ? SCOPE_ALERT_TIME_RANGE_OVERRIDES[scopeId] : undefined;
   return {
-    from: scopeOverride?.from ?? globalFrom,
-    to: scopeOverride?.to ?? globalTo,
+    from: scopeOverride?.from ?? flyoutTimeRange?.from ?? globalFrom,
+    to: scopeOverride?.to ?? flyoutTimeRange?.to ?? globalTo,
   };
 };
