@@ -72,7 +72,7 @@ The window caps **event** rows only. Action rows are not upper-bounded, so `last
 
 `nextWatermark` never regresses: the final value is `max(computed, eventWatermark)`.
 
-Cold start (no persisted watermark) is logged as `DISPATCHER_COLD_START` and the watermark is seeded to `startedAt − OVERLAP_WINDOW_MINUTES`.
+Cold start (no persisted watermark) is logged at info level (no code) and the watermark is seeded to `startedAt − OVERLAP_WINDOW_MINUTES`.
 
 The scan window, persisted action history, and content-addressed dedup let the dispatcher decide which alerts are new or still relevant without blindly replaying everything on every run.
 

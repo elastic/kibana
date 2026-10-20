@@ -1,17 +1,17 @@
 {
-  "sha1": "e0b472ec27bcec060153a6a1339498d7b27c13ec",
+  "sha1": "4c1a5b8b46254e3bb8f4ec7401cbc90af6f28dea",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "2b399116595eb54-dcb22b3a7aa5473",
-      "title": "Seed synthetic MITRE entities (version 99.0)",
+      "id": "2b399116595eb54-2e53726a69c4e83",
+      "title": "Seed synthetic MITRE entities (versions 99.0, 9999.0)",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/global.setup.ts",
-        "line": 19,
+        "line": 81,
         "column": 1
       }
     },
@@ -118,13 +118,13 @@
       }
     },
     {
-      "id": "a764ffbb01ba080-9151f5692b280e6",
-      "title": "Remove synthetic MITRE entities (version 99.0)",
+      "id": "a764ffbb01ba080-19bcbc13293e686",
+      "title": "Remove synthetic MITRE entities (versions 99.0, 9999.0)",
       "expectedStatus": "passed",
       "tags": [],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/ui/parallel_tests/global.teardown.ts",
-        "line": 16,
+        "line": 22,
         "column": 1
       }
     }

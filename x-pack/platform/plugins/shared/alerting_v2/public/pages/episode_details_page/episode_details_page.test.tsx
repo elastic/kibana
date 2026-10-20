@@ -91,7 +91,6 @@ jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping', () => ({
 
 jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(),
-  READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
 }));
 
 // Sections that call useFetchEpisodeQuery independently are mocked to keep the
@@ -515,6 +514,7 @@ describe('EpisodeDetailsPage', () => {
       order: 50,
       displayName: 'Open in Discover',
       iconType: 'productDiscover',
+      enforcesOwnPrivileges: true,
       isCompatible: () => true,
       execute: jest.fn(async () => {}),
     };

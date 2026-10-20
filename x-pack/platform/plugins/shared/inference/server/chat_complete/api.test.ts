@@ -74,6 +74,9 @@ describe('createChatCompleteApi', () => {
     inference: {
       get: jest.fn().mockResolvedValue({ endpoints: [] }),
     },
+    transport: {
+      request: jest.fn(),
+    },
   } as any;
   beforeEach(() => {
     request = httpServerMock.createKibanaRequest();
@@ -926,6 +929,7 @@ describe('createChatCompleteApi', () => {
       expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith({
         inferenceId: '.my-inference-endpoint',
         esClient: mockEsClient,
+        stream: true,
       });
       expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledTimes(1);
       expect(inferenceEndpointAdapterMock.chatComplete).toHaveBeenCalledWith(
@@ -1007,6 +1011,7 @@ describe('createChatCompleteApi', () => {
       expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith({
         inferenceId: 'my-endpoint',
         esClient: mockEsClient,
+        stream: true,
       });
     });
 
@@ -1067,6 +1072,89 @@ describe('createChatCompleteApi', () => {
       expect(events).toHaveLength(2);
       expect(events[0].content).toBe('chunk-1');
       expect(events[1].content).toBe('chunk-2');
+    });
+
+    describe('streaming preference', () => {
+      const createChatCompleteWithStreamingPreference = (
+        shouldStreamInferenceEndpoint: jest.Mock
+      ) => {
+        const callbackApi = createChatCompleteCallbackApi({
+          request,
+          namespace: 'default',
+          actions,
+          logger,
+          anonymizationRulesPromise: Promise.resolve([]),
+          regexWorker,
+          esClient: mockEsClient,
+          endpointIdCache,
+          shouldStreamInferenceEndpoint,
+        });
+        return createChatCompleteApi({ callbackApi });
+      };
+
+      it('streams when no resolver is provided', async () => {
+        await chatComplete({
+          connectorId: 'my-endpoint',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        });
+
+        expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith(
+          expect.objectContaining({ stream: true })
+        );
+      });
+
+      it('does not stream when the resolver says so for the endpoint service', async () => {
+        const shouldStreamInferenceEndpoint = jest.fn().mockResolvedValue(false);
+        const chatCompleteWithPreference = createChatCompleteWithStreamingPreference(
+          shouldStreamInferenceEndpoint
+        );
+
+        await chatCompleteWithPreference({
+          connectorId: 'my-endpoint',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        });
+
+        expect(shouldStreamInferenceEndpoint).toHaveBeenCalledTimes(1);
+        expect(shouldStreamInferenceEndpoint).toHaveBeenCalledWith('openai');
+        expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith({
+          inferenceId: 'my-endpoint',
+          esClient: mockEsClient,
+          stream: false,
+        });
+      });
+
+      it('applies the streaming preference when a stack connector resolves to an inference endpoint', async () => {
+        const endpointConnector = createInferenceConnectorMock({
+          connectorId: '.my-inference-endpoint',
+          isInferenceEndpoint: true,
+        });
+        getInferenceExecutorMock.mockResolvedValue(
+          createInferenceExecutorMock({ connector: endpointConnector })
+        );
+        resolveInferenceEndpointMock.mockResolvedValue({
+          inferenceId: '.my-inference-endpoint',
+          provider: 'openai',
+          modelId: 'gpt-4o',
+          taskType: 'chat_completion',
+        });
+        const chatCompleteWithPreference = createChatCompleteWithStreamingPreference(
+          jest.fn().mockResolvedValue(false)
+        );
+
+        await chatCompleteWithPreference({
+          connectorId: 'stack-connector-id',
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          maxRetries: 0,
+        });
+
+        expect(createInferenceEndpointExecutorMock).toHaveBeenCalledWith({
+          inferenceId: '.my-inference-endpoint',
+          esClient: mockEsClient,
+          stream: false,
+        });
+      });
     });
   });
 

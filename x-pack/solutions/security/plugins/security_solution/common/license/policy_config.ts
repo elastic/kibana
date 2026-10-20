@@ -350,6 +350,22 @@ function isEndpointCustomYaraSignaturesPolicyValidForLicense(
   return true;
 }
 
+function isEndpointRegistryCredentialHardeningPolicyValidForLicense(
+  policy: PolicyConfig,
+  license: ILicense | null
+) {
+  if (isAtLeast(license, 'enterprise')) {
+    return true;
+  }
+
+  // Absent means never configured and is treated as disabled.
+  if (policy.windows.attack_surface_reduction.registry_credential_hardening?.enabled === true) {
+    return false;
+  }
+
+  return true;
+}
+
 function isEndpointProtectionUpdatesValidForLicense(
   policy: PolicyConfig,
   license: ILicense | null
@@ -380,6 +396,7 @@ export const isEndpointPolicyValidForLicense = (
     isEndpointCredentialDumpingPolicyValidForLicense(policy, license) &&
     isEndpointDeviceControlPolicyValidForLicense(policy, license) &&
     isEndpointCustomYaraSignaturesPolicyValidForLicense(policy, license) &&
+    isEndpointRegistryCredentialHardeningPolicyValidForLicense(policy, license) &&
     isEndpointProtectionUpdatesValidForLicense(policy, license)
   );
 };
