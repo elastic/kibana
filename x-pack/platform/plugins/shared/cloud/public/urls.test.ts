@@ -83,17 +83,21 @@ describe('Cloud Plugin URLs Service', () => {
     });
   });
 
-  it.each(['superuser', 'admin', 'developer'])(
+  it.each([
+    ['superuser', 'https://cloud.elastic.co/billing/'],
+    ['admin', 'https://cloud.elastic.co/billing/'],
+    ['developer', undefined],
+  ])(
     'exposes privileged Search Power URL in Serverless when user has the %s role',
-    async (role) => {
+    async (role, billingUrl) => {
       const { urls } = setupServiceWithRolesAndCapabilities([role], {}, serverlessConfig);
 
-      await expect(urls.getPrivilegedUrls()).resolves.toEqual(
-        expect.objectContaining({
-          searchPowerUrl:
-            'https://cloud.elastic.co/projects/vectordb/abc123?tab=settings&edit=search_power',
-        })
-      );
+      await expect(urls.getPrivilegedUrls()).resolves.toEqual({
+        billingUrl,
+        usersAndRolesUrl: undefined,
+        searchPowerUrl:
+          'https://cloud.elastic.co/projects/vectordb/abc123?tab=settings&edit=search_power',
+      });
     }
   );
 
