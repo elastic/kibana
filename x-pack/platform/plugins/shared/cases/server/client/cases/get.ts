@@ -67,7 +67,7 @@ import {
 import { limitedArraySchema, limitedStringSchema } from '../../../common/schema';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
-import type { CasesWithOwnerOfAttachment } from '../../services/cases/types';
+import type { CasesWithOwnerOfAttachment } from '../../services/attachments/types';
 import type {
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
@@ -258,7 +258,7 @@ export const getCasesByAttachmentIDs = async (
   clientArgs: CasesClientArgs
 ): Promise<GetCaseIDsByAttachmentIDsResponse> => {
   const {
-    services: { caseService },
+    services: { caseService, attachmentService },
     logger,
     authorization,
   } = clientArgs;
@@ -277,7 +277,7 @@ export const getCasesByAttachmentIDs = async (
         ? getOwnersFilter(CASE_ATTACHMENT_SAVED_OBJECT, authorizedOwners)
         : undefined;
 
-    const casesOfAttachments = await caseService.getCaseIdsByAttachmentIds({
+    const casesOfAttachments = await attachmentService.getter.getCaseIdsByAttachmentIds({
       type,
       attachmentIds,
       filter: combineAuthorizedAndOwnerFilter(

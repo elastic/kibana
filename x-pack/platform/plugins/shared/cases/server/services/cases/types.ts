@@ -28,15 +28,6 @@ export interface GetCaseIdsByAlertIdArgs {
   unifiedFilter?: KueryNode;
 }
 
-export interface GetCaseIdsByAttachmentIdsArgs {
-  type: string;
-  attachmentIds: string[];
-  /**
-   * Authorization + owner filter scoped to the unified `cases-attachments` saved object type.
-   */
-  filter?: KueryNode;
-}
-
 export interface PushedArgs {
   pushed_at: string;
   pushed_by: User;
@@ -126,30 +117,6 @@ export interface GetReportersArgs {
 export interface GetCategoryArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   filter?: KueryNode;
-}
-
-/** The cases one attachment id is attached to, with their owners for authorization. */
-export interface CasesWithOwnerOfAttachment {
-  attachmentId: string;
-  cases: Array<{ id: string; owner: string }>;
-}
-
-export interface GetCaseIdsByAttachmentIdsAggs {
-  attachmentIds: {
-    buckets: Array<{
-      key: string;
-      references: {
-        cases: {
-          caseIds: {
-            buckets: Array<{
-              key: string;
-              attachment: { owner: { buckets: Array<{ key: string }> } };
-            }>;
-          };
-        };
-      };
-    }>;
-  };
 }
 
 export interface GetCaseIdsByAlertIdAggs {

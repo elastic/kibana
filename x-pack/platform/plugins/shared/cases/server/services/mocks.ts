@@ -59,7 +59,6 @@ export const createCaseServiceMock = (): CaseServiceMock => {
     getCases: jest.fn(),
     getCaseStatuses: jest.fn(),
     getCaseIdsByAlertId: jest.fn(),
-    getCaseIdsByAttachmentIds: jest.fn(),
     getResolveCase: jest.fn(),
     getTags: jest.fn(),
     getReporters: jest.fn(),
@@ -179,6 +178,7 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
     getAttachmentIdsForCases: jest.fn(),
     getFileAttachments: jest.fn(),
     getAllAlertIds: jest.fn(),
+    getCaseIdsByAttachmentIds: jest.fn(),
     getAllAttackIds: jest.fn().mockResolvedValue(new Set()),
     getAllEventIds: jest.fn(),
   });

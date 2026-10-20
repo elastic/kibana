@@ -92,9 +92,6 @@ import {
 import type {
   GetCaseIdsByAlertIdArgs,
   GetCaseIdsByAlertIdAggs,
-  CasesWithOwnerOfAttachment,
-  GetCaseIdsByAttachmentIdsArgs,
-  GetCaseIdsByAttachmentIdsAggs,
   CasesMapWithPageInfo,
   CasesSearchStats,
   DeleteCaseArgs,
@@ -344,94 +341,6 @@ export class CasesService {
     }
 
     return Object.assign(response, { saved_objects: owners });
-  }
-
-  /**
-   * The cases each attachment id is attached to, with their owners. Attachment ids in no case are left out.
-   */
-  public async getCaseIdsByAttachmentIds({
-    type,
-    attachmentIds,
-    filter,
-  }: GetCaseIdsByAttachmentIdsArgs): Promise<CasesWithOwnerOfAttachment[]> {
-    try {
-      this.log.debug(`Attempting to GET cases for attachment ids ${attachmentIds.join(', ')}`);
-
-      const attributes = `${CASE_ATTACHMENT_SAVED_OBJECT}.attributes`;
-      const response = await this.unsecuredSavedObjectsClient.find<
-        unknown,
-        GetCaseIdsByAttachmentIdsAggs
-      >({
-        type: CASE_ATTACHMENT_SAVED_OBJECT,
-        page: 1,
-        perPage: 0,
-        aggs: {
-          attachmentIds: {
-            terms: {
-              field: `${attributes}.attachmentId`,
-              size: attachmentIds.length,
-              // An attachment can hold many ids; its other ids must not take the requested ones' buckets.
-              include: attachmentIds,
-            },
-            aggs: {
-              references: {
-                nested: { path: `${CASE_ATTACHMENT_SAVED_OBJECT}.references` },
-                aggregations: {
-                  // Saved-object-backed attachments also reference their target, e.g. a dashboard.
-                  cases: {
-                    filter: {
-                      term: {
-                        [`${CASE_ATTACHMENT_SAVED_OBJECT}.references.type`]: CASE_SAVED_OBJECT,
-                      },
-                    },
-                    aggregations: {
-                      caseIds: {
-                        terms: {
-                          field: `${CASE_ATTACHMENT_SAVED_OBJECT}.references.id`,
-                          // A ceiling, not an allocation: ES makes one bucket per (attachment id, case)
-                          // pair that exists, and past `search.max_buckets` it fails rather than
-                          // returning fewer cases.
-                          size: MAX_DOCS_PER_PAGE,
-                        },
-                        aggregations: {
-                          // An attachment has its case's owner, so the case is authorized without reading it.
-                          attachment: {
-                            reverse_nested: {},
-                            aggregations: {
-                              owner: { terms: { field: `${attributes}.owner`, size: 1 } },
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-        filter: combineFilters([
-          nodeBuilder.is(`${attributes}.type`, type),
-          buildFilter({
-            filters: attachmentIds,
-            field: 'attachmentId',
-            operator: 'or',
-            type: CASE_ATTACHMENT_SAVED_OBJECT,
-          }),
-          filter,
-        ]),
-      });
-
-      return (response.aggregations?.attachmentIds.buckets ?? []).map(({ key, references }) => ({
-        attachmentId: key,
-        cases: references.cases.caseIds.buckets.flatMap(({ key: id, attachment }) =>
-          attachment.owner.buckets.map(({ key: owner }) => ({ id, owner }))
-        ),
-      }));
-    } catch (error) {
-      this.log.error(`Error on GET cases for attachment ids ${attachmentIds.join(', ')}: ${error}`);
-      throw error;
-    }
   }
 
   /**

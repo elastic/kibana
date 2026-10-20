@@ -50,7 +50,7 @@ describe('get', () => {
     };
 
     beforeEach(() => {
-      clientArgs.services.caseService.getCaseIdsByAttachmentIds.mockResolvedValue([
+      clientArgs.services.attachmentService.getter.getCaseIdsByAttachmentIds.mockResolvedValue([
         {
           attachmentId: 'host:a',
           cases: [
@@ -63,7 +63,8 @@ describe('get', () => {
     });
 
     const getAttachmentsFilter = () =>
-      clientArgs.services.caseService.getCaseIdsByAttachmentIds.mock.calls[0][0].filter;
+      clientArgs.services.attachmentService.getter.getCaseIdsByAttachmentIds.mock.calls[0][0]
+        .filter;
 
     it('reads the attachments of the owners the user can read, scoped to the given owner', async () => {
       await getCasesByAttachmentIDs(request, clientArgs);
@@ -71,7 +72,9 @@ describe('get', () => {
       expect(clientArgs.authorization.getAuthorizationFilter).toHaveBeenCalledWith(
         Operations.getCaseIDsByAttachmentIDs
       );
-      expect(clientArgs.services.caseService.getCaseIdsByAttachmentIds).toHaveBeenCalledWith(
+      expect(
+        clientArgs.services.attachmentService.getter.getCaseIdsByAttachmentIds
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           type: 'security.entity',
           attachmentIds: ['host:a', 'host:b', 'host:c'],
@@ -100,7 +103,9 @@ describe('get', () => {
       );
 
       await expect(getCasesByAttachmentIDs(request, clientArgs)).rejects.toThrow('Unauthorized');
-      expect(clientArgs.services.caseService.getCaseIdsByAttachmentIds).not.toHaveBeenCalled();
+      expect(
+        clientArgs.services.attachmentService.getter.getCaseIdsByAttachmentIds
+      ).not.toHaveBeenCalled();
     });
 
     it('returns the case IDs per attachment ID, leaving out attachment IDs in no case', async () => {
