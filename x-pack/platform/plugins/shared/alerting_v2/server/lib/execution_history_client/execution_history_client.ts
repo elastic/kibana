@@ -26,6 +26,13 @@ import type {
 
 const SEARCH_ID_CAP = 500;
 
+// Default lower bound on `event.start` when the caller does not pass `from`;
+// the same rolling window the action-policy history applies.
+const DEFAULT_TIME_WINDOW_HOURS = 24;
+
+const defaultFrom = (): string =>
+  new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+
 interface ResolvedSearch {
   ruleIds: string[];
   matches: RuleSearchMatches;
@@ -46,8 +53,10 @@ export class ExecutionHistoryClient implements ExecutionHistoryClientContract {
 
   public async listRuleExecutions({
     search,
-    ...args
+    from = defaultFrom(),
+    ...rest
   }: ListRuleExecutionsArgs): Promise<ListRuleExecutionsResult> {
+    const args = { ...rest, from };
     if (search === undefined) {
       const result = await this.eventLog.findRuleExecutions({ spaceId: this.spaceId, ...args });
       return { ...result, searchMatches: null };
@@ -98,7 +107,7 @@ export class ExecutionHistoryClient implements ExecutionHistoryClientContract {
 
     return {
       ruleIds: [...ruleIds],
-      matches: { rules: total, isTruncated: total > SEARCH_ID_CAP },
+      matches: { ruleCount: total, isTruncated: total > SEARCH_ID_CAP },
     };
   }
 }

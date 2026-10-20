@@ -857,3 +857,60 @@ describe('actionPolicyDestinationSchema', () => {
     ).toThrow();
   });
 });
+
+describe('destinations uniqueness', () => {
+  const duplicate = [
+    { type: 'workflow' as const, id: 'wf-1' },
+    { type: 'workflow' as const, id: 'wf-1' },
+  ];
+  const base = { name: 'Test', description: 'Desc' };
+
+  it('rejects a repeated destination on create and points at its position', () => {
+    const result = createActionPolicyDataSchema.safeParse({ ...base, destinations: duplicate });
+    expect(result.success).toBe(false);
+    expect(result.error!.issues).toEqual([
+      expect.objectContaining({
+        path: ['destinations', 1],
+        message: 'Each destination can appear at most once; workflow [wf-1] is repeated',
+      }),
+    ]);
+  });
+
+  it('rejects a repeated destination on replace', () => {
+    expect(putActionPolicyDataSchema.safeParse({ ...base, destinations: duplicate }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects a repeated destination on patch', () => {
+    expect(updateActionPolicyDataSchema.safeParse({ destinations: duplicate }).success).toBe(false);
+  });
+
+  it('accepts distinct destinations', () => {
+    const destinations = [
+      { type: 'workflow' as const, id: 'wf-1' },
+      { type: 'workflow' as const, id: 'wf-2' },
+    ];
+    expect(createActionPolicyDataSchema.parse({ ...base, destinations }).destinations).toEqual(
+      destinations
+    );
+  });
+});
+
+describe('findActionPoliciesRequestSchema text inputs', () => {
+  it('trims search', () => {
+    expect(findActionPoliciesRequestSchema.parse({ search: '  cpu  ' }).search).toBe('cpu');
+  });
+
+  it('rejects a blank search', () => {
+    expect(findActionPoliciesRequestSchema.safeParse({ search: '   ' }).success).toBe(false);
+  });
+
+  it('trims filter and rejects a blank one', () => {
+    expect(findActionPoliciesRequestSchema.parse({ filter: ' enabled: true ' }).filter).toBe(
+      'enabled: true'
+    );
+    expect(findActionPoliciesRequestSchema.safeParse({ filter: '' }).success).toBe(false);
+    expect(findActionPoliciesRequestSchema.safeParse({ filter: '   ' }).success).toBe(false);
+  });
+});

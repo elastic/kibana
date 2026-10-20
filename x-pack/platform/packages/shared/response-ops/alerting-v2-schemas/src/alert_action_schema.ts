@@ -105,7 +105,12 @@ const tagEpisodeActionSchema = lazySchema(() =>
   z
     .object({
       action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.TAG).describe("Replaces an alert's tags."),
-      tags: tagsSchema.describe("Replaces the alert's tags. Send `[]` to clear."),
+      tags: tagsSchema
+        .min(1)
+        .nullable()
+        .describe(
+          "Replaces the alert's tags. Send `null` to clear them; an empty array is rejected."
+        ),
     })
     .strict()
     .meta({ id: 'alerting_tag_alert_action' })

@@ -109,7 +109,7 @@ const mockResult = (
       total: number;
       page: number;
       per_page: number;
-      search_matches?: { rules: number; is_truncated: boolean };
+      search_matches?: { rule_count: number; is_truncated: boolean };
     };
     isFetching: boolean;
     isError: boolean;
@@ -348,7 +348,7 @@ describe('RulesTabContent', () => {
           total: 1,
           page: 1,
           per_page: 10,
-          search_matches: { rules: 600, is_truncated: true },
+          search_matches: { rule_count: 600, is_truncated: true },
         },
       });
       renderComponent();
@@ -365,7 +365,7 @@ describe('RulesTabContent', () => {
           total: 0,
           page: 1,
           per_page: 10,
-          search_matches: { rules: 600, is_truncated: true },
+          search_matches: { rule_count: 600, is_truncated: true },
         },
       });
       renderComponent();

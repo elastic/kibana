@@ -58,7 +58,7 @@ backwards compatible. Renaming or removing a code is a breaking change.
 
 | Code                                | Status | When                                                                                                                                | `details`                                  |
 | ----------------------------------- | ------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `RULE_NOT_FOUND`                    | 404    | `getRule` / `updateRule` / `deleteRule` cannot find a rule by id                                                                    | `{ rule_id }`                              |
+| `RULE_NOT_FOUND`                    | 404 / 200 (per-item) | `getRule` / `updateRule` / `deleteRule` cannot find a rule by id; `_bulk_get` reports it per item in `errors[]`                      | `{ rule_id }`                              |
 | `RULE_ALREADY_EXISTS`               | 409 / 200 (per-item) | `createRule` collides with an existing id; bulk create reports it per item                                                          | `{ rule_id }` (single create)              |
 | `RULE_VERSION_CONFLICT`             | 409    | An update / delete races another writer (`if_seq_no` mismatch)                                                                      | `{ rule_id }`                              |
 | `INVALID_RULE_DATA`                 | 400    | The submitted body fails the domain-level schema check. In-process callers only (HTTP callers are rejected at the route)                                                                              | `{ context, errors }` (tree-shaped errors) |

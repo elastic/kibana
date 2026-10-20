@@ -230,7 +230,7 @@ apiTest.describe('List rule executions API', { tag: '@local-stateful-classic' },
       for (const item of response.body.items) {
         expect(item.rule.id).toBe(matchingRule.id);
       }
-      expect(response.body.search_matches).toStrictEqual({ rules: 1, is_truncated: false });
+      expect(response.body.search_matches).toStrictEqual({ rule_count: 1, is_truncated: false });
     }
   );
 

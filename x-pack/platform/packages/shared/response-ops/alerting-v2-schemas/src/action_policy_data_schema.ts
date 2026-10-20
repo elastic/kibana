@@ -19,6 +19,7 @@ import {
   MAX_KQL_LENGTH,
   MAX_NAME_LENGTH,
   MAX_PER_PAGE,
+  MAX_SEARCH_LENGTH,
 } from './constants';
 import {
   POLICY_MATCHER_DESCRIPTION,
@@ -54,6 +55,35 @@ export const actionPolicyDestinationSchema = lazySchema(() =>
     .discriminatedUnion('type', [workflowActionPolicyDestinationSchema])
     .describe('An action policy destination configuration.')
     .meta({ id: 'alerting_action_policy_destination' })
+);
+
+/**
+ * The destinations list shared by create, PUT and PATCH: 1..ACTION_POLICY_MAX_DESTINATIONS
+ * entries, no two of which name the same `type` + `id`, so a workflow is never triggered twice
+ * for one alert.
+ */
+const actionPolicyDestinationsSchema = lazySchema(() =>
+  z
+    .array(actionPolicyDestinationSchema)
+    .min(1, 'At least one destination must be provided')
+    .max(ACTION_POLICY_MAX_DESTINATIONS)
+    .superRefine((destinations, ctx) => {
+      const seen = new Set<string>();
+      destinations.forEach((destination, index) => {
+        const key = `${destination.type}:${destination.id}`;
+        if (seen.has(key)) {
+          ctx.addIssue({
+            code: 'custom',
+            message: `Each destination can appear at most once; ${destination.type} [${destination.id}] is repeated`,
+            path: [index],
+          });
+        }
+        seen.add(key);
+      });
+    })
+    .describe(
+      'The list of destinations. At least one is required; each one can appear at most once.'
+    )
 );
 
 const GROUPING_MODE_COPY = {
@@ -280,11 +310,7 @@ const createActionPolicyDataBaseSchema = lazySchema(() =>
     .object({
       name: actionPolicyNameSchema,
       description: actionPolicyDescriptionSchema.optional(),
-      destinations: z
-        .array(actionPolicyDestinationSchema)
-        .min(1, 'At least one destination must be provided')
-        .max(ACTION_POLICY_MAX_DESTINATIONS)
-        .describe('The list of destinations. At least one is required.'),
+      destinations: actionPolicyDestinationsSchema,
       matcher: policyMatcherSchema.optional().describe(POLICY_MATCHER_DESCRIPTION),
       grouping: actionPolicyGroupingSchema.optional().describe(GROUPING_DESCRIPTION),
       throttle: throttleSchema.optional().describe(THROTTLE_DESCRIPTION),
@@ -328,12 +354,7 @@ export const updateActionPolicyDataSchema = lazySchema(() =>
     .object({
       name: actionPolicyNameSchema.optional(),
       description: actionPolicyDescriptionSchema.nullable().optional(),
-      destinations: z
-        .array(actionPolicyDestinationSchema)
-        .min(1, 'At least one destination must be provided')
-        .max(ACTION_POLICY_MAX_DESTINATIONS)
-        .optional()
-        .describe('The list of destinations. At least one is required.'),
+      destinations: actionPolicyDestinationsSchema.optional(),
       matcher: policyMatcherPatchSchema
         .nullable()
         .optional()
@@ -367,15 +388,18 @@ export const findActionPoliciesRequestSchema = lazySchema(() =>
         .describe('The number of action policies to return per page. Defaults to 20.'),
       filter: z
         .string()
+        .trim()
+        .min(1)
         .max(MAX_KQL_LENGTH)
         .optional()
         .describe(
-          'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled.'
+          'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled. Cannot be empty; omit it to list every action policy.'
         ),
       search: z
         .string()
+        .trim()
         .min(1)
-        .max(256)
+        .max(MAX_SEARCH_LENGTH)
         .optional()
         .describe('A text string to search across action policy fields.'),
       sort_field: findActionPoliciesSortFieldSchema

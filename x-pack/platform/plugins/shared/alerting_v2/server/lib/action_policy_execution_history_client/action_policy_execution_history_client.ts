@@ -194,8 +194,8 @@ export class ActionPolicyExecutionHistoryClient {
       ruleIds: [...ruleIds],
       hasMatches: policyIds.size > 0 || ruleIds.size > 0,
       matches: {
-        policies: policies.total,
-        rules: rules.total,
+        policy_count: policies.total,
+        rule_count: rules.total,
         is_truncated: policies.total > SEARCH_ID_CAP || rules.total > SEARCH_ID_CAP,
       },
     };

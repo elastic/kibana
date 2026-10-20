@@ -238,3 +238,32 @@ describe('verb-specific bulk action body schemas', () => {
     ).toThrow(`Each group_hash can appear at most once per request; [${GROUP_HASH}] is repeated`);
   });
 });
+
+describe('tag action tags', () => {
+  it('clears with null', () => {
+    expect(
+      createEpisodeAlertActionBodySchema.parse({
+        action_type: ALERT_EPISODE_ACTION_TYPE.TAG,
+        tags: null,
+      })
+    ).toEqual({ action_type: ALERT_EPISODE_ACTION_TYPE.TAG, tags: null });
+  });
+
+  it('rejects an empty array on the single verb', () => {
+    expect(() =>
+      createEpisodeAlertActionBodySchema.parse({
+        action_type: ALERT_EPISODE_ACTION_TYPE.TAG,
+        tags: [],
+      })
+    ).toThrow();
+  });
+
+  it('accepts null and rejects an empty array on the bulk verb', () => {
+    expect(
+      bulkTagEpisodeActionBodySchema.parse({ items: [{ alert_id: 'e1', tags: null }] })
+    ).toEqual({ items: [{ alert_id: 'e1', tags: null }] });
+    expect(() =>
+      bulkTagEpisodeActionBodySchema.parse({ items: [{ alert_id: 'e1', tags: [] }] })
+    ).toThrow();
+  });
+});

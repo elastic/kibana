@@ -100,7 +100,7 @@ export const toListRuleExecutionsResponse = ({
     page,
     per_page: perPage,
     search_matches: searchMatches
-      ? { rules: searchMatches.rules, is_truncated: searchMatches.isTruncated }
+      ? { rule_count: searchMatches.ruleCount, is_truncated: searchMatches.isTruncated }
       : undefined,
   };
 };

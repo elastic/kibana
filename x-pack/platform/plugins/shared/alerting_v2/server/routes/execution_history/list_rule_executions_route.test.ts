@@ -129,8 +129,8 @@ describe('toListRuleExecutionsResponse', () => {
         total: 0,
         page: 1,
         perPage: 10,
-        searchMatches: { rules: 600, isTruncated: true },
+        searchMatches: { ruleCount: 600, isTruncated: true },
       }).search_matches
-    ).toEqual({ rules: 600, is_truncated: true });
+    ).toEqual({ rule_count: 600, is_truncated: true });
   });
 });

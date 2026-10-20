@@ -41,6 +41,17 @@ describe('bulkByIdsSchema', () => {
     expect(parsed.success).toBe(false);
   });
 
+  it('rejects a repeated id and points at its position', () => {
+    const result = bulkByIdsSchema.safeParse({ ids: ['a', 'b', 'a'] });
+    expect(result.success).toBe(false);
+    expect(result.error!.issues).toEqual([
+      expect.objectContaining({
+        path: ['ids', 2],
+        message: 'Each id can appear at most once per request; [a] is repeated',
+      }),
+    ]);
+  });
+
   it('rejects id arrays longer than MAX_BULK_ITEMS', () => {
     const parsed = bulkByIdsSchema.safeParse({
       ids: Array.from({ length: MAX_BULK_ITEMS + 1 }, (_, i) => `id-${i}`),

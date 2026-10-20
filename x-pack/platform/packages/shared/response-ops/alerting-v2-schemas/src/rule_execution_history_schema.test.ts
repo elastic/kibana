@@ -18,6 +18,7 @@ import {
   listRuleExecutionsResponseSchema,
   ruleExecutionOutcomeSchema,
   ruleExecutionViewSchema,
+  ruleSearchMatchCountsSchema,
 } from './rule_execution_history_schema';
 
 const validView = {
@@ -523,5 +524,23 @@ describe('rule_execution_history_schema', () => {
         }).success
       ).toBe(false);
     });
+  });
+});
+
+describe('ruleSearchMatchCountsSchema', () => {
+  it('accepts a rule count with the truncation flag', () => {
+    expect(ruleSearchMatchCountsSchema.parse({ rule_count: 3, is_truncated: false })).toEqual({
+      rule_count: 3,
+      is_truncated: false,
+    });
+  });
+
+  it('rejects the pre-GA `rules` name and negative counts', () => {
+    expect(ruleSearchMatchCountsSchema.safeParse({ rules: 3, is_truncated: false }).success).toBe(
+      false
+    );
+    expect(
+      ruleSearchMatchCountsSchema.safeParse({ rule_count: -1, is_truncated: false }).success
+    ).toBe(false);
   });
 });

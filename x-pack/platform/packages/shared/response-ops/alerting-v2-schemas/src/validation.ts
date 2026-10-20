@@ -7,7 +7,8 @@
 
 import { Parser, BasicPrettyPrinter } from '@elastic/esql';
 
-const DURATION_RE = /^(\d+)(ms|s|m|h|d|w)$/;
+// A positive integer (no leading zeros, never zero) followed by a unit.
+const DURATION_RE = /^([1-9]\d*)(ms|s|m|h|d|w)$/;
 
 const DURATION_UNIT_TO_MS: Record<string, number> = {
   ms: 1,
@@ -25,12 +26,13 @@ export function parseDurationToMs(value: string): number {
 }
 
 /**
- * Validate a duration string format (e.g., "5m", "1h", "30s", "250ms")
+ * Validate a duration string format (e.g., "5m", "1h", "30s", "250ms"). Zero and
+ * leading zeros are rejected, so the smallest valid duration is "1ms".
  * @returns Error message if invalid, undefined if valid
  */
 export function validateDuration(value: string): string | void {
   if (!DURATION_RE.test(value)) {
-    return 'Invalid duration. Expected format like "5m", "1h", "30s", "250ms"';
+    return 'Invalid duration. Expected a positive integer followed by a unit, like "5m", "1h", "30s", "250ms"';
   }
 }
 
