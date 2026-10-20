@@ -219,39 +219,36 @@ describe('WebhookActionConnectorFields renders', () => {
         'http://dev-logstash:10200/\r\n',
         'http://dev-logstash:10200/\u2028',
         'http://dev-logstash:10200/\u2029',
-      ])(
-        'rejects an invalid HTTP or HTTPS endpoint: %s',
-        async (url) => {
-          render(
-            <ConnectorFormTestProvider
+      ])('rejects an invalid HTTP or HTTPS endpoint: %s', async (url) => {
+        render(
+          <ConnectorFormTestProvider
+            isEdit={isEdit}
+            connector={{
+              ...actionConnector,
+              id: 'webhook',
+              config: { ...actionConnector.config, url },
+            }}
+            onSubmit={onSubmit}
+            serializer={formSerializer}
+            deserializer={formDeserializer}
+          >
+            <WebhookActionConnectorFields
+              readOnly={false}
               isEdit={isEdit}
-              connector={{
-                ...actionConnector,
-                id: 'webhook',
-                config: { ...actionConnector.config, url },
-              }}
-              onSubmit={onSubmit}
-              serializer={formSerializer}
-              deserializer={formDeserializer}
-            >
-              <WebhookActionConnectorFields
-                readOnly={false}
-                isEdit={isEdit}
-                registerPreSubmitValidator={() => {}}
-              />
-            </ConnectorFormTestProvider>,
-            { wrapper: customQueryProviderWrapper }
-          );
+              registerPreSubmitValidator={() => {}}
+            />
+          </ConnectorFormTestProvider>,
+          { wrapper: customQueryProviderWrapper }
+        );
 
-          await screen.findByTestId('webhookHeaderPanel');
-          await userEvent.click(screen.getByTestId('form-test-provide-submit'));
+        await screen.findByTestId('webhookHeaderPanel');
+        await userEvent.click(screen.getByTestId('form-test-provide-submit'));
 
-          await waitFor(() => {
-            expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
-            expect(screen.getByText('URL is invalid.')).toBeInTheDocument();
-          });
-        }
-      );
+        await waitFor(() => {
+          expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+          expect(screen.getByText('URL is invalid.')).toBeInTheDocument();
+        });
+      });
     });
 
     it.each([
