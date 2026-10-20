@@ -17,7 +17,12 @@ import type { ExperimentalFeatures } from '../../../../common';
 import type { EntityAnalyticsScope } from '../../../../common/entity_analytics/ai_brief/scope';
 import { RiskScoreDataClient } from '../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../../plugin_contract';
-import { BRIEF_RESULT_INSTRUCTIONS, generateBrief, getBriefToolDescription } from './brief';
+import {
+  BRIEF_RESULT_INSTRUCTIONS,
+  generateBrief,
+  getBriefToolDescription,
+  getBriefToolId,
+} from './brief';
 import { checkResolutionAccess } from './resolution/check_resolution_access';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 
@@ -34,10 +39,6 @@ export interface BriefToolDeps {
   experimentalFeatures: ExperimentalFeatures;
   kibanaVersion: string;
 }
-
-/** The id of the brief tool bound to a captured view. */
-export const getBriefToolId = (attachmentId: string): string =>
-  `generate_entity_analytics_brief_${attachmentId.replace(/[^a-zA-Z0-9_]/g, '_')}`;
 
 /**
  * The tool that turns one captured Entity Analytics view into the AI brief. It is bound to the view's

@@ -11,6 +11,7 @@
  * - the agent: what it is told about the attachment, the brief tool and the tool's result.
  */
 
+import { createHash } from 'crypto';
 import { uniq } from 'lodash';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { SecurityAgentBuilderAttachments } from '../../../../../common/constants';
@@ -149,6 +150,16 @@ export type BriefPriority = BriefDraft['priorities'][number];
 
 /** How the agent should treat a captured view, in every conversation it is attached to. */
 export const ATTACHMENT_AGENT_DESCRIPTION = `An ${SecurityAgentBuilderAttachments.entityAnalyticsAiBrief} attachment is the Entity Analytics page view the user was looking at when they asked for an AI brief. Each one comes with its own generate_entity_analytics_brief tool. When the user asks for the brief, call the tool of the attachment they mean, the most recent one if unsure. Reply with the returned \`brief\` string exactly as returned (every line, including any <render_attachment ... /> line, unchanged), then add one short sentence inviting a follow-up question. Copy each render_attachment id character for character, even when it looks like a type name: an altered id renders nothing. Do not rewrite, summarize, reorder or add numbers. While generating the brief, do not call tools that change data (watchlists, asset criticality, leads, entity resolution). For follow-up questions, use the entity analytics tools and say when a tool cannot honor the captured scope (period, search, filters).`;
+
+/**
+ * The name of the brief tool bound to a captured view. Attachment ids can be long, and models cap tool
+ * names at 64 characters, so the name carries a short hash of the id.
+ */
+export const getBriefToolId = (attachmentId: string): string =>
+  `generate_entity_analytics_brief_${createHash('sha256')
+    .update(attachmentId)
+    .digest('hex')
+    .slice(0, 12)}`;
 
 /** The description of the brief tool bound to one captured view. */
 export const getBriefToolDescription = (attachmentId: string): string =>

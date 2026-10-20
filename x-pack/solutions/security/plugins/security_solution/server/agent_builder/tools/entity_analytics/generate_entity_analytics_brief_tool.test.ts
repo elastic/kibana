@@ -13,10 +13,21 @@ import {
   setupMockCoreStartServices,
 } from '../../__mocks__/test_helpers';
 import type { ExperimentalFeatures } from '../../../../common';
-import { generateBrief } from './brief';
+import { SecurityAgentBuilderAttachments } from '../../../../common/constants';
+import { generateBrief, getBriefToolId } from './brief';
 import { createGenerateBriefTool } from './generate_entity_analytics_brief_tool';
 
 jest.mock('./brief', () => ({ ...jest.requireActual('./brief'), generateBrief: jest.fn() }));
+
+describe('getBriefToolId', () => {
+  it('stays within the 64 characters models allow, for the ids the page generates', () => {
+    const id = getBriefToolId(
+      `${SecurityAgentBuilderAttachments.entityAnalyticsAiBrief}-1760955000000`
+    );
+    expect(id.length).toBeLessThanOrEqual(64);
+    expect(id).toMatch(/^[a-z0-9_]+$/);
+  });
+});
 
 describe('createGenerateBriefTool', () => {
   const {

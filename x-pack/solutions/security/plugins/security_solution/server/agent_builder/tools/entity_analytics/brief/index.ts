@@ -24,4 +24,5 @@ export {
   ATTACHMENT_AGENT_DESCRIPTION,
   BRIEF_RESULT_INSTRUCTIONS,
   getBriefToolDescription,
+  getBriefToolId,
 } from './prompts';
