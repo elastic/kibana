@@ -37434,6 +37434,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
         - description: When false, exclude managed integration policies from the results. To manage these policies, use the managed integrations APIs.
           in: query
@@ -38675,6 +38676,7 @@ paths:
           required: false
           schema:
             maxLength: 512
+            minLength: 0
             type: string
         - description: Filter by one or more agent policy IDs
           in: query
@@ -38683,6 +38685,7 @@ paths:
           schema:
             items:
               maxLength: 512
+              minLength: 0
               type: string
             maxItems: 1000
             type: array
@@ -38691,7 +38694,7 @@ paths:
           name: kuery
           required: false
           schema:
-            maxLength: 10000
+            minLength: 0
             type: string
       responses:
         '200':
@@ -38808,6 +38811,7 @@ paths:
           schema:
             items:
               maxLength: 512
+              minLength: 0
               type: string
             maxItems: 10000
             type: array
@@ -38817,6 +38821,7 @@ paths:
           required: false
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: Filter by integration package version
           in: query
@@ -40317,7 +40322,7 @@ paths:
           name: kuery
           required: false
           schema:
-            maxLength: 10000
+            minLength: 0
             type: string
         - description: When true, include agentless agents in the results
           in: query
@@ -40429,6 +40434,7 @@ paths:
                           type: string
                         access_api_key_id:
                           maxLength: 512
+                          minLength: 0
                           type: string
                         active:
                           type: boolean
@@ -40438,6 +40444,7 @@ paths:
                           properties:
                             id:
                               maxLength: 512
+                              minLength: 0
                               type: string
                             type:
                               maxLength: 100
@@ -40464,9 +40471,11 @@ paths:
                             properties:
                               id:
                                 maxLength: 255
+                                minLength: 0
                                 type: string
                               message:
                                 maxLength: 10000
+                                minLength: 0
                                 type: string
                               status:
                                 enum:
@@ -40488,9 +40497,11 @@ paths:
                                   properties:
                                     id:
                                       maxLength: 255
+                                      minLength: 0
                                       type: string
                                     message:
                                       maxLength: 10000
+                                      minLength: 0
                                       type: string
                                     payload:
                                       additionalProperties:
@@ -40537,6 +40548,7 @@ paths:
                             properties:
                               id:
                                 maxLength: 512
+                                minLength: 0
                                 type: string
                               retired_at:
                                 maxLength: 512
@@ -40548,6 +40560,7 @@ paths:
                           type: array
                         default_api_key_id:
                           maxLength: 512
+                          minLength: 0
                           type: string
                         effective_config:
                           nullable: true
@@ -40560,6 +40573,7 @@ paths:
                           type: object
                         id:
                           maxLength: 512
+                          minLength: 0
                           type: string
                         identifying_attributes:
                           additionalProperties:
@@ -40571,6 +40585,7 @@ paths:
                           type: string
                         last_checkin_message:
                           maxLength: 10000
+                          minLength: 0
                           type: string
                         last_checkin_status:
                           enum:
@@ -40609,7 +40624,8 @@ paths:
                               type: number
                         namespaces:
                           items:
-                            maxLength: 100
+                            maxLength: 512
+                            minLength: 0
                             type: string
                           maxItems: 100
                           type: array
@@ -40625,6 +40641,7 @@ paths:
                             properties:
                               api_key_id:
                                 maxLength: 512
+                                minLength: 0
                                 type: string
                               to_retire_api_key_ids:
                                 items:
@@ -40633,6 +40650,7 @@ paths:
                                   properties:
                                     id:
                                       maxLength: 512
+                                      minLength: 0
                                       type: string
                                     retired_at:
                                       maxLength: 512
@@ -40649,6 +40667,7 @@ paths:
                         packages:
                           items:
                             maxLength: 255
+                            minLength: 0
                             type: string
                           maxItems: 10000
                           type: array
@@ -40657,9 +40676,11 @@ paths:
                           type: string
                         policy_base_id:
                           maxLength: 512
+                          minLength: 0
                           type: string
                         policy_id:
                           maxLength: 512
+                          minLength: 0
                           type: string
                         policy_revision:
                           nullable: true
@@ -40694,6 +40715,7 @@ paths:
                         tags:
                           items:
                             maxLength: 255
+                            minLength: 0
                             type: string
                           maxItems: 100
                           type: array
@@ -40754,6 +40776,7 @@ paths:
                           properties:
                             action_id:
                               maxLength: 512
+                              minLength: 0
                               type: string
                             metadata:
                               additionalProperties: false
@@ -40765,6 +40788,7 @@ paths:
                                   type: number
                                 error_msg:
                                   maxLength: 10000
+                                  minLength: 0
                                   type: string
                                 failed_state:
                                   enum:
@@ -40783,6 +40807,7 @@ paths:
                                   type: string
                                 retry_error_msg:
                                   maxLength: 10000
+                                  minLength: 0
                                   type: string
                                 retry_until:
                                   maxLength: 512
@@ -40921,6 +40946,7 @@ paths:
                 actionIds:
                   items:
                     maxLength: 512
+                    minLength: 0
                     type: string
                   maxItems: 1000
                   type: array
@@ -40947,6 +40973,7 @@ paths:
                   items:
                     items:
                       maxLength: 512
+                      minLength: 0
                       type: string
                     maxItems: 10000
                     type: array
@@ -41013,6 +41040,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -41098,6 +41126,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
         - description: When true, include CPU and memory metrics in the response
           in: query
@@ -41145,6 +41174,7 @@ paths:
                         type: string
                       access_api_key_id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       active:
                         type: boolean
@@ -41154,6 +41184,7 @@ paths:
                         properties:
                           id:
                             maxLength: 512
+                            minLength: 0
                             type: string
                           type:
                             maxLength: 100
@@ -41180,9 +41211,11 @@ paths:
                           properties:
                             id:
                               maxLength: 255
+                              minLength: 0
                               type: string
                             message:
                               maxLength: 10000
+                              minLength: 0
                               type: string
                             status:
                               enum:
@@ -41204,9 +41237,11 @@ paths:
                                 properties:
                                   id:
                                     maxLength: 255
+                                    minLength: 0
                                     type: string
                                   message:
                                     maxLength: 10000
+                                    minLength: 0
                                     type: string
                                   payload:
                                     additionalProperties:
@@ -41253,6 +41288,7 @@ paths:
                           properties:
                             id:
                               maxLength: 512
+                              minLength: 0
                               type: string
                             retired_at:
                               maxLength: 512
@@ -41264,6 +41300,7 @@ paths:
                         type: array
                       default_api_key_id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       effective_config:
                         nullable: true
@@ -41276,6 +41313,7 @@ paths:
                         type: object
                       id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       identifying_attributes:
                         additionalProperties:
@@ -41287,6 +41325,7 @@ paths:
                         type: string
                       last_checkin_message:
                         maxLength: 10000
+                        minLength: 0
                         type: string
                       last_checkin_status:
                         enum:
@@ -41325,7 +41364,8 @@ paths:
                             type: number
                       namespaces:
                         items:
-                          maxLength: 100
+                          maxLength: 512
+                          minLength: 0
                           type: string
                         maxItems: 100
                         type: array
@@ -41341,6 +41381,7 @@ paths:
                           properties:
                             api_key_id:
                               maxLength: 512
+                              minLength: 0
                               type: string
                             to_retire_api_key_ids:
                               items:
@@ -41349,6 +41390,7 @@ paths:
                                 properties:
                                   id:
                                     maxLength: 512
+                                    minLength: 0
                                     type: string
                                   retired_at:
                                     maxLength: 512
@@ -41365,6 +41407,7 @@ paths:
                       packages:
                         items:
                           maxLength: 255
+                          minLength: 0
                           type: string
                         maxItems: 10000
                         type: array
@@ -41373,9 +41416,11 @@ paths:
                         type: string
                       policy_base_id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       policy_id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       policy_revision:
                         nullable: true
@@ -41410,6 +41455,7 @@ paths:
                       tags:
                         items:
                           maxLength: 255
+                          minLength: 0
                           type: string
                         maxItems: 100
                         type: array
@@ -41470,6 +41516,7 @@ paths:
                         properties:
                           action_id:
                             maxLength: 512
+                            minLength: 0
                             type: string
                           metadata:
                             additionalProperties: false
@@ -41481,6 +41528,7 @@ paths:
                                 type: number
                               error_msg:
                                 maxLength: 10000
+                                minLength: 0
                                 type: string
                               failed_state:
                                 enum:
@@ -41499,6 +41547,7 @@ paths:
                                 type: string
                               retry_error_msg:
                                 maxLength: 10000
+                                minLength: 0
                                 type: string
                               retry_until:
                                 maxLength: 512
@@ -41618,6 +41667,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -41636,6 +41686,7 @@ paths:
                 tags:
                   items:
                     maxLength: 255
+                    minLength: 0
                     type: string
                   maxItems: 10
                   type: array
@@ -41676,6 +41727,7 @@ paths:
                         type: string
                       access_api_key_id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       active:
                         type: boolean
@@ -41685,6 +41737,7 @@ paths:
                         properties:
                           id:
                             maxLength: 512
+                            minLength: 0
                             type: string
                           type:
                             maxLength: 100
@@ -41711,9 +41764,11 @@ paths:
                           properties:
                             id:
                               maxLength: 255
+                              minLength: 0
                               type: string
                             message:
                               maxLength: 10000
+                              minLength: 0
                               type: string
                             status:
                               enum:
@@ -41735,9 +41790,11 @@ paths:
                                 properties:
                                   id:
                                     maxLength: 255
+                                    minLength: 0
                                     type: string
                                   message:
                                     maxLength: 10000
+                                    minLength: 0
                                     type: string
                                   payload:
                                     additionalProperties:
@@ -41784,6 +41841,7 @@ paths:
                           properties:
                             id:
                               maxLength: 512
+                              minLength: 0
                               type: string
                             retired_at:
                               maxLength: 512
@@ -41795,6 +41853,7 @@ paths:
                         type: array
                       default_api_key_id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       effective_config:
                         nullable: true
@@ -41807,6 +41866,7 @@ paths:
                         type: object
                       id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       identifying_attributes:
                         additionalProperties:
@@ -41818,6 +41878,7 @@ paths:
                         type: string
                       last_checkin_message:
                         maxLength: 10000
+                        minLength: 0
                         type: string
                       last_checkin_status:
                         enum:
@@ -41856,7 +41917,8 @@ paths:
                             type: number
                       namespaces:
                         items:
-                          maxLength: 100
+                          maxLength: 512
+                          minLength: 0
                           type: string
                         maxItems: 100
                         type: array
@@ -41872,6 +41934,7 @@ paths:
                           properties:
                             api_key_id:
                               maxLength: 512
+                              minLength: 0
                               type: string
                             to_retire_api_key_ids:
                               items:
@@ -41880,6 +41943,7 @@ paths:
                                 properties:
                                   id:
                                     maxLength: 512
+                                    minLength: 0
                                     type: string
                                   retired_at:
                                     maxLength: 512
@@ -41896,6 +41960,7 @@ paths:
                       packages:
                         items:
                           maxLength: 255
+                          minLength: 0
                           type: string
                         maxItems: 10000
                         type: array
@@ -41904,9 +41969,11 @@ paths:
                         type: string
                       policy_base_id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       policy_id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       policy_revision:
                         nullable: true
@@ -41941,6 +42008,7 @@ paths:
                       tags:
                         items:
                           maxLength: 255
+                          minLength: 0
                           type: string
                         maxItems: 100
                         type: array
@@ -42001,6 +42069,7 @@ paths:
                         properties:
                           action_id:
                             maxLength: 512
+                            minLength: 0
                             type: string
                           metadata:
                             additionalProperties: false
@@ -42012,6 +42081,7 @@ paths:
                                 type: number
                               error_msg:
                                 maxLength: 10000
+                                minLength: 0
                                 type: string
                               failed_state:
                                 enum:
@@ -42030,6 +42100,7 @@ paths:
                                 type: string
                               retry_error_msg:
                                 maxLength: 10000
+                                minLength: 0
                                 type: string
                               retry_until:
                                 maxLength: 512
@@ -42150,6 +42221,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -42236,6 +42308,7 @@ paths:
                       agents:
                         items:
                           maxLength: 512
+                          minLength: 0
                           type: string
                         maxItems: 10000
                         type: array
@@ -42249,12 +42322,14 @@ paths:
                         type: string
                       id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       minimum_execution_duration:
                         type: number
                       namespaces:
                         items:
-                          maxLength: 100
+                          maxLength: 512
+                          minLength: 0
                           type: string
                         maxItems: 100
                         type: array
@@ -42336,6 +42411,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -42411,6 +42487,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -42475,6 +42552,7 @@ paths:
                     tags:
                       items:
                         maxLength: 255
+                        minLength: 0
                         type: string
                       maxItems: 10
                       type: array
@@ -42499,6 +42577,7 @@ paths:
                 properties:
                   actionId:
                     maxLength: 512
+                    minLength: 0
                     type: string
                 required:
                   - actionId
@@ -42563,6 +42642,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -42664,6 +42744,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -42679,6 +42760,7 @@ paths:
               properties:
                 policy_id:
                   maxLength: 512
+                  minLength: 0
                   type: string
               required:
                 - policy_id
@@ -42755,6 +42837,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -42808,6 +42891,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -42847,6 +42931,7 @@ paths:
                     properties:
                       actionId:
                         maxLength: 512
+                        minLength: 0
                         type: string
                     required:
                       - actionId
@@ -42990,6 +43075,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -43062,6 +43148,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -43132,6 +43219,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -43223,6 +43311,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -43250,21 +43339,25 @@ paths:
                       properties:
                         actionId:
                           maxLength: 512
+                          minLength: 0
                           type: string
                         createTime:
                           maxLength: 512
                           type: string
                         error:
                           maxLength: 10000
+                          minLength: 0
                           type: string
                         filePath:
                           maxLength: 2048
                           type: string
                         id:
                           maxLength: 512
+                          minLength: 0
                           type: string
                         name:
                           maxLength: 255
+                          minLength: 0
                           type: string
                         status:
                           enum:
@@ -43402,6 +43495,7 @@ paths:
                       properties:
                         actionId:
                           maxLength: 512
+                          minLength: 0
                           type: string
                         cancellationTime:
                           maxLength: 512
@@ -43428,9 +43522,11 @@ paths:
                             properties:
                               agentId:
                                 maxLength: 512
+                                minLength: 0
                                 type: string
                               error:
                                 maxLength: 10000
+                                minLength: 0
                                 type: string
                               hostname:
                                 maxLength: 255
@@ -43459,10 +43555,12 @@ paths:
                         newPolicyId:
                           description: new policy id (POLICY_REASSIGN action)
                           maxLength: 512
+                          minLength: 0
                           type: string
                         policyId:
                           description: policy id (POLICY_CHANGE action)
                           maxLength: 512
+                          minLength: 0
                           type: string
                         revision:
                           description: new policy revision (POLICY_CHANGE action)
@@ -43576,6 +43674,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -43611,6 +43710,7 @@ paths:
                       agents:
                         items:
                           maxLength: 512
+                          minLength: 0
                           type: string
                         maxItems: 10000
                         type: array
@@ -43624,12 +43724,14 @@ paths:
                         type: string
                       id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       minimum_execution_duration:
                         type: number
                       namespaces:
                         items:
-                          maxLength: 100
+                          maxLength: 512
+                          minLength: 0
                           type: string
                         maxItems: 100
                         type: array
@@ -43806,10 +43908,11 @@ paths:
                   anyOf:
                     - items:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       maxItems: 10000
                       type: array
-                    - maxLength: 10000
+                    - minLength: 0
                       type: string
                 batchSize:
                   type: number
@@ -43860,6 +43963,7 @@ paths:
                     tags:
                       items:
                         maxLength: 255
+                        minLength: 0
                         type: string
                       maxItems: 10
                       type: array
@@ -43886,6 +43990,7 @@ paths:
                     properties:
                       actionId:
                         maxLength: 512
+                        minLength: 0
                         type: string
                     required:
                       - actionId
@@ -43970,10 +44075,11 @@ paths:
                   anyOf:
                     - items:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       maxItems: 10000
                       type: array
-                    - maxLength: 10000
+                    - minLength: 0
                       type: string
                 batchSize:
                   type: number
@@ -44009,6 +44115,7 @@ paths:
                     properties:
                       actionId:
                         maxLength: 512
+                        minLength: 0
                         type: string
                     required:
                       - actionId
@@ -44091,10 +44198,11 @@ paths:
                   anyOf:
                     - items:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       maxItems: 10000
                       type: array
-                    - maxLength: 10000
+                    - minLength: 0
                       type: string
                 batchSize:
                   type: number
@@ -44105,6 +44213,7 @@ paths:
                   type: boolean
                 policy_id:
                   maxLength: 512
+                  minLength: 0
                   type: string
               required:
                 - policy_id
@@ -44125,6 +44234,7 @@ paths:
                     properties:
                       actionId:
                         maxLength: 512
+                        minLength: 0
                         type: string
                     required:
                       - actionId
@@ -44209,11 +44319,12 @@ paths:
                     - items:
                         description: List of collector agent IDs
                         maxLength: 512
+                        minLength: 0
                         type: string
                       maxItems: 10000
                       type: array
                     - description: KQL query string. Leave empty to target all collectors
-                      maxLength: 10000
+                      minLength: 0
                       type: string
                 dryRun:
                   type: boolean
@@ -44238,6 +44349,7 @@ paths:
                     properties:
                       actionId:
                         maxLength: 512
+                        minLength: 0
                         type: string
                     required:
                       - actionId
@@ -44331,10 +44443,11 @@ paths:
                   anyOf:
                     - items:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       maxItems: 10000
                       type: array
-                    - maxLength: 10000
+                    - minLength: 0
                       type: string
                 batchSize:
                   type: number
@@ -44358,6 +44471,7 @@ paths:
                     properties:
                       actionId:
                         maxLength: 512
+                        minLength: 0
                         type: string
                     required:
                       - actionId
@@ -44539,10 +44653,11 @@ paths:
                   anyOf:
                     - items:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       maxItems: 10000
                       type: array
-                    - maxLength: 10000
+                    - minLength: 0
                       type: string
                 batchSize:
                   type: number
@@ -44656,11 +44771,12 @@ paths:
                     - items:
                         description: list of agent IDs
                         maxLength: 512
+                        minLength: 0
                         type: string
                       maxItems: 10000
                       type: array
                     - description: KQL query string, leave empty to action all agents
-                      maxLength: 10000
+                      minLength: 0
                       type: string
                 batchSize:
                   type: number
@@ -44693,6 +44809,7 @@ paths:
                     properties:
                       actionId:
                         maxLength: 512
+                        minLength: 0
                         type: string
                     required:
                       - actionId
@@ -44780,10 +44897,11 @@ paths:
                   anyOf:
                     - items:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       maxItems: 10000
                       type: array
-                    - maxLength: 10000
+                    - minLength: 0
                       type: string
                 batchSize:
                   type: number
@@ -44795,12 +44913,14 @@ paths:
                 tagsToAdd:
                   items:
                     maxLength: 255
+                    minLength: 0
                     type: string
                   maxItems: 10
                   type: array
                 tagsToRemove:
                   items:
                     maxLength: 255
+                    minLength: 0
                     type: string
                   maxItems: 10
                   type: array
@@ -44822,6 +44942,7 @@ paths:
                     properties:
                       actionId:
                         maxLength: 512
+                        minLength: 0
                         type: string
                     required:
                       - actionId
@@ -44907,10 +45028,11 @@ paths:
                   anyOf:
                     - items:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       maxItems: 10000
                       type: array
-                    - maxLength: 10000
+                    - minLength: 0
                       type: string
                 batchSize:
                   type: number
@@ -44954,6 +45076,7 @@ paths:
                     properties:
                       actionId:
                         maxLength: 512
+                        minLength: 0
                         type: string
                     required:
                       - actionId
@@ -45025,6 +45148,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -45044,6 +45168,7 @@ paths:
                     type: boolean
                   id:
                     maxLength: 512
+                    minLength: 0
                     type: string
                 required:
                   - id
@@ -45102,6 +45227,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
         - description: The name of the uploaded file
           in: path
@@ -45109,6 +45235,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
       responses:
         '200':
@@ -45379,7 +45506,7 @@ paths:
           name: kuery
           required: false
           schema:
-            maxLength: 10000
+            minLength: 0
             type: string
         - description: When true, include tags from inactive agents
           in: query
@@ -45559,6 +45686,7 @@ paths:
           name: kuery
           required: false
           schema:
+            minLength: 0
             type: string
       responses:
         '200':
@@ -48323,7 +48451,7 @@ paths:
           name: kuery
           required: false
           schema:
-            maxLength: 10000
+            minLength: 0
             type: string
       responses:
         '200':
@@ -49712,6 +49840,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -49852,6 +49981,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -50001,6 +50131,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -50079,6 +50210,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: When true, delete the package even if it has active package policies
           in: query
@@ -50152,6 +50284,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: When true, returns the package even if the signature cannot be verified
           in: query
@@ -50260,6 +50393,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: When true, allow installing prerelease versions
           in: query
@@ -50376,6 +50510,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -50468,6 +50603,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -50548,6 +50684,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -50663,6 +50800,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -50786,6 +50924,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -50878,6 +51017,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -50963,6 +51103,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -50977,6 +51118,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -51045,6 +51187,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -51131,6 +51274,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -51212,6 +51356,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -51306,6 +51451,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -51400,6 +51546,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -51515,6 +51662,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -51595,6 +51743,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
       responses:
         '200':
@@ -51659,6 +51808,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
       responses:
         '200':
@@ -51909,6 +52059,7 @@ paths:
           required: true
           schema:
             maxLength: 255
+            minLength: 0
             type: string
         - description: Package version
           in: path
@@ -52110,6 +52261,7 @@ paths:
                           type: array
                         id:
                           maxLength: 512
+                          minLength: 0
                           type: string
                         is_default:
                           default: false
@@ -52124,6 +52276,7 @@ paths:
                           type: string
                         proxy_id:
                           maxLength: 512
+                          minLength: 0
                           nullable: true
                           type: string
                         secrets:
@@ -52141,6 +52294,7 @@ paths:
                                       properties:
                                         id:
                                           maxLength: 512
+                                          minLength: 0
                                           type: string
                                       required:
                                         - id
@@ -52154,6 +52308,7 @@ paths:
                                       properties:
                                         id:
                                           maxLength: 512
+                                          minLength: 0
                                           type: string
                                       required:
                                         - id
@@ -52167,6 +52322,7 @@ paths:
                                       properties:
                                         id:
                                           maxLength: 512
+                                          minLength: 0
                                           type: string
                                       required:
                                         - id
@@ -52321,6 +52477,7 @@ paths:
                   type: array
                 id:
                   maxLength: 512
+                  minLength: 0
                   type: string
                 is_default:
                   default: false
@@ -52335,6 +52492,7 @@ paths:
                   type: string
                 proxy_id:
                   maxLength: 512
+                  minLength: 0
                   nullable: true
                   type: string
                 secrets:
@@ -52352,6 +52510,7 @@ paths:
                               properties:
                                 id:
                                   maxLength: 512
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -52365,6 +52524,7 @@ paths:
                               properties:
                                 id:
                                   maxLength: 512
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -52378,6 +52538,7 @@ paths:
                               properties:
                                 id:
                                   maxLength: 512
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -52472,6 +52633,7 @@ paths:
                         type: array
                       id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       is_default:
                         default: false
@@ -52486,6 +52648,7 @@ paths:
                         type: string
                       proxy_id:
                         maxLength: 512
+                        minLength: 0
                         nullable: true
                         type: string
                       secrets:
@@ -52503,6 +52666,7 @@ paths:
                                     properties:
                                       id:
                                         maxLength: 512
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -52516,6 +52680,7 @@ paths:
                                     properties:
                                       id:
                                         maxLength: 512
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -52529,6 +52694,7 @@ paths:
                                     properties:
                                       id:
                                         maxLength: 512
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -52649,6 +52815,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -52731,6 +52898,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -52770,6 +52938,7 @@ paths:
                         type: array
                       id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       is_default:
                         default: false
@@ -52784,6 +52953,7 @@ paths:
                         type: string
                       proxy_id:
                         maxLength: 512
+                        minLength: 0
                         nullable: true
                         type: string
                       secrets:
@@ -52801,6 +52971,7 @@ paths:
                                     properties:
                                       id:
                                         maxLength: 512
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -52814,6 +52985,7 @@ paths:
                                     properties:
                                       id:
                                         maxLength: 512
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -52827,6 +52999,7 @@ paths:
                                     properties:
                                       id:
                                         maxLength: 512
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -52957,6 +53130,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -52996,6 +53170,7 @@ paths:
                 proxy_id:
                   default: null
                   maxLength: 512
+                  minLength: 0
                   nullable: true
                   type: string
                 secrets:
@@ -53013,6 +53188,7 @@ paths:
                               properties:
                                 id:
                                   maxLength: 512
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -53026,6 +53202,7 @@ paths:
                               properties:
                                 id:
                                   maxLength: 512
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -53039,6 +53216,7 @@ paths:
                               properties:
                                 id:
                                   maxLength: 512
+                                  minLength: 0
                                   type: string
                               required:
                                 - id
@@ -53130,6 +53308,7 @@ paths:
                         type: array
                       id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       is_default:
                         default: false
@@ -53144,6 +53323,7 @@ paths:
                         type: string
                       proxy_id:
                         maxLength: 512
+                        minLength: 0
                         nullable: true
                         type: string
                       secrets:
@@ -53161,6 +53341,7 @@ paths:
                                     properties:
                                       id:
                                         maxLength: 512
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -53174,6 +53355,7 @@ paths:
                                     properties:
                                       id:
                                         maxLength: 512
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -53187,6 +53369,7 @@ paths:
                                     properties:
                                       id:
                                         maxLength: 512
+                                        minLength: 0
                                         type: string
                                     required:
                                       - id
@@ -55406,6 +55589,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -55422,6 +55606,7 @@ paths:
                 properties:
                   id:
                     maxLength: 512
+                    minLength: 0
                     type: string
                 required:
                   - id
@@ -55507,6 +55692,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -55616,6 +55802,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       requestBody:
         content:
@@ -55736,6 +55923,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -58312,14 +58500,15 @@ paths:
           name: policyId
           required: false
           schema:
-            maxLength: 512
+            maxLength: 50
+            minLength: 0
             type: string
         - description: Partial match filtering for uninstall token values
           in: query
           name: search
           required: false
           schema:
-            maxLength: 512
+            maxLength: 50
             type: string
         - description: The number of items to return
           in: query
@@ -58373,14 +58562,18 @@ paths:
                           type: string
                         id:
                           maxLength: 512
+                          minLength: 0
                           type: string
                         namespaces:
                           items:
+                            maxLength: 512
+                            minLength: 0
                             type: string
                           maxItems: 100
                           type: array
                         policy_id:
                           maxLength: 512
+                          minLength: 0
                           type: string
                         policy_name:
                           maxLength: 255
@@ -58463,7 +58656,8 @@ paths:
           name: agentPolicyId
           required: true
           schema:
-            maxLength: 512
+            maxLength: 255
+            minLength: 0
             type: string
       responses:
         '200':
@@ -58572,6 +58766,7 @@ paths:
           required: true
           schema:
             maxLength: 512
+            minLength: 0
             type: string
       responses:
         '200':
@@ -58602,14 +58797,18 @@ paths:
                         type: string
                       id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       namespaces:
                         items:
+                          maxLength: 512
+                          minLength: 0
                           type: string
                         maxItems: 100
                         type: array
                       policy_id:
                         maxLength: 512
+                        minLength: 0
                         type: string
                       policy_name:
                         maxLength: 255
@@ -144033,6 +144232,7 @@ components:
       properties:
         actionId:
           maxLength: 512
+          minLength: 0
           type: string
       required:
         - actionId
@@ -144043,6 +144243,7 @@ components:
       properties:
         message:
           maxLength: 10000
+          minLength: 0
           type: string
       required:
         - message
@@ -144192,6 +144393,7 @@ components:
           type: boolean
         id:
           maxLength: 512
+          minLength: 0
           type: string
         inactivity_timeout:
           default: 1209600
@@ -144292,6 +144494,7 @@ components:
             properties:
               name:
                 maxLength: 255
+                minLength: 0
                 type: string
               title:
                 maxLength: 255
@@ -144310,6 +144513,7 @@ components:
           anyOf:
             - items:
                 maxLength: 512
+                minLength: 0
                 type: string
               maxItems: 10000
               type: array
@@ -147366,7 +147570,7 @@ components:
           type: boolean
         kuery:
           description: KQL query to select enrollment tokens to delete.
-          maxLength: 10000
+          minLength: 0
           type: string
         tokenIds:
           description: List of enrollment token IDs to delete.
@@ -147434,12 +147638,14 @@ components:
           items:
             anyOf:
               - maxLength: 255
+                minLength: 0
                 type: string
               - additionalProperties: false
                 type: object
                 properties:
                   name:
                     maxLength: 255
+                    minLength: 0
                     type: string
                   prerelease:
                     type: boolean
@@ -147545,6 +147751,7 @@ components:
           description: Package names to apply the customization changes to.
           items:
             maxLength: 255
+            minLength: 0
             type: string
           maxItems: 1000
           minItems: 1
@@ -147640,6 +147847,7 @@ components:
               name:
                 description: Package name to rollback
                 maxLength: 255
+                minLength: 0
                 type: string
             required:
               - name
@@ -147672,6 +147880,7 @@ components:
             properties:
               name:
                 maxLength: 255
+                minLength: 0
                 type: string
               version:
                 maxLength: 512
@@ -147745,6 +147954,7 @@ components:
             properties:
               name:
                 maxLength: 255
+                minLength: 0
                 type: string
               version:
                 maxLength: 512
@@ -148536,6 +148746,7 @@ components:
             properties:
               name:
                 maxLength: 255
+                minLength: 0
                 type: string
               type:
                 enum:
@@ -151225,6 +151436,7 @@ components:
                           properties:
                             id:
                               maxLength: 512
+                              minLength: 0
                               type: string
                       required:
                         - key
@@ -151436,6 +151648,7 @@ components:
                           properties:
                             id:
                               maxLength: 512
+                              minLength: 0
                               type: string
                       required:
                         - key
@@ -152056,6 +152269,7 @@ components:
             properties:
               id:
                 maxLength: 512
+                minLength: 0
                 type: string
               type:
                 maxLength: 100
@@ -153115,6 +153329,7 @@ components:
           description: When provided, assets are installed in the specified spaces instead of the current space.
           items:
             maxLength: 512
+            minLength: 0
             type: string
           maxItems: 100
           minItems: 1
@@ -161336,15 +161551,18 @@ components:
                       type: string
         data_output_id:
           maxLength: 512
+          minLength: 0
           nullable: true
           type: string
         description:
           maxLength: 10000
+          minLength: 0
           type: string
         download_source_id:
           deprecated: true
           description: Use `download_source_ids` instead
           maxLength: 512
+          minLength: 0
           nullable: true
           type: string
         download_source_ids:
@@ -161356,6 +161574,7 @@ components:
           type: array
         fleet_server_host_id:
           maxLength: 512
+          minLength: 0
           nullable: true
           type: string
         force:
@@ -161368,6 +161587,7 @@ components:
             properties:
               name:
                 maxLength: 255
+                minLength: 0
                 type: string
               value:
                 anyOf:
@@ -161385,6 +161605,7 @@ components:
           type: boolean
         id:
           maxLength: 512
+          minLength: 0
           type: string
         inactivity_timeout:
           default: 1209600
@@ -161463,6 +161684,7 @@ components:
               type: number
         monitoring_output_id:
           maxLength: 512
+          minLength: 0
           nullable: true
           type: string
         monitoring_pprof_enabled:
@@ -161521,6 +161743,7 @@ components:
         space_ids:
           items:
             maxLength: 512
+            minLength: 0
             type: string
           maxItems: 100
           type: array
@@ -161620,6 +161843,7 @@ components:
           type: string
         policy_id:
           maxLength: 512
+          minLength: 0
           type: string
       required:
         - policy_id
@@ -161839,24 +162063,31 @@ components:
           type: object
           properties:
             audience:
+              maxLength: 2048
               type: string
             claims:
               additionalProperties:
                 nullable: true
               type: object
             client_certificate_key_file:
+              maxLength: 4096
               type: string
             client_certificate_key_id:
+              maxLength: 256
               type: string
             client_id:
+              maxLength: 256
               type: string
             client_id_file:
+              maxLength: 4096
               type: string
             client_secret_file:
+              maxLength: 4096
               type: string
             endpoint_params:
               additionalProperties:
                 items:
+                  maxLength: 1000
                   type: string
                 maxItems: 100
                 type: array
@@ -161872,9 +162103,11 @@ components:
                 - urn:ietf:params:oauth:grant-type:jwt-bearer
               type: string
             iss:
+              maxLength: 2048
               type: string
             scopes:
               items:
+                maxLength: 256
                 type: string
               maxItems: 100
               type: array
@@ -161894,20 +162127,27 @@ components:
               type: object
               properties:
                 ca_file:
+                  maxLength: 4096
                   type: string
                 cert_file:
+                  maxLength: 4096
                   type: string
                 insecure_skip_verify:
                   type: boolean
                 key_file:
+                  maxLength: 4096
                   type: string
                 max_version:
+                  maxLength: 10
                   type: string
                 min_version:
+                  maxLength: 10
                   type: string
                 server_name_override:
+                  maxLength: 256
                   type: string
             token_url:
+              maxLength: 2048
               minLength: 1
               type: string
           required:
@@ -164278,24 +164518,31 @@ components:
           type: object
           properties:
             audience:
+              maxLength: 2048
               type: string
             claims:
               additionalProperties:
                 nullable: true
               type: object
             client_certificate_key_file:
+              maxLength: 4096
               type: string
             client_certificate_key_id:
+              maxLength: 256
               type: string
             client_id:
+              maxLength: 256
               type: string
             client_id_file:
+              maxLength: 4096
               type: string
             client_secret_file:
+              maxLength: 4096
               type: string
             endpoint_params:
               additionalProperties:
                 items:
+                  maxLength: 1000
                   type: string
                 maxItems: 100
                 type: array
@@ -164311,9 +164558,11 @@ components:
                 - urn:ietf:params:oauth:grant-type:jwt-bearer
               type: string
             iss:
+              maxLength: 2048
               type: string
             scopes:
               items:
+                maxLength: 256
                 type: string
               maxItems: 100
               type: array
@@ -164333,20 +164582,27 @@ components:
               type: object
               properties:
                 ca_file:
+                  maxLength: 4096
                   type: string
                 cert_file:
+                  maxLength: 4096
                   type: string
                 insecure_skip_verify:
                   type: boolean
                 key_file:
+                  maxLength: 4096
                   type: string
                 max_version:
+                  maxLength: 10
                   type: string
                 min_version:
+                  maxLength: 10
                   type: string
                 server_name_override:
+                  maxLength: 256
                   type: string
             token_url:
+              maxLength: 2048
               minLength: 1
               type: string
           required:
@@ -169645,15 +169901,18 @@ components:
           type: boolean
         data_output_id:
           maxLength: 512
+          minLength: 0
           nullable: true
           type: string
         description:
           maxLength: 10000
+          minLength: 0
           type: string
         download_source_id:
           deprecated: true
           description: Use `download_source_ids` instead
           maxLength: 512
+          minLength: 0
           nullable: true
           type: string
         download_source_ids:
@@ -169665,6 +169924,7 @@ components:
           type: array
         fleet_server_host_id:
           maxLength: 512
+          minLength: 0
           nullable: true
           type: string
         force:
@@ -169677,6 +169937,7 @@ components:
             properties:
               name:
                 maxLength: 255
+                minLength: 0
                 type: string
               value:
                 anyOf:
@@ -169694,6 +169955,7 @@ components:
           type: boolean
         id:
           maxLength: 512
+          minLength: 0
           type: string
         inactivity_timeout:
           default: 1209600
@@ -169772,6 +170034,7 @@ components:
               type: number
         monitoring_output_id:
           maxLength: 512
+          minLength: 0
           nullable: true
           type: string
         monitoring_pprof_enabled:
@@ -169830,6 +170093,7 @@ components:
         space_ids:
           items:
             maxLength: 512
+            minLength: 0
             type: string
           maxItems: 100
           type: array
@@ -170116,24 +170380,31 @@ components:
           type: object
           properties:
             audience:
+              maxLength: 2048
               type: string
             claims:
               additionalProperties:
                 nullable: true
               type: object
             client_certificate_key_file:
+              maxLength: 4096
               type: string
             client_certificate_key_id:
+              maxLength: 256
               type: string
             client_id:
+              maxLength: 256
               type: string
             client_id_file:
+              maxLength: 4096
               type: string
             client_secret_file:
+              maxLength: 4096
               type: string
             endpoint_params:
               additionalProperties:
                 items:
+                  maxLength: 1000
                   type: string
                 maxItems: 100
                 type: array
@@ -170149,9 +170420,11 @@ components:
                 - urn:ietf:params:oauth:grant-type:jwt-bearer
               type: string
             iss:
+              maxLength: 2048
               type: string
             scopes:
               items:
+                maxLength: 256
                 type: string
               maxItems: 100
               type: array
@@ -170171,20 +170444,27 @@ components:
               type: object
               properties:
                 ca_file:
+                  maxLength: 4096
                   type: string
                 cert_file:
+                  maxLength: 4096
                   type: string
                 insecure_skip_verify:
                   type: boolean
                 key_file:
+                  maxLength: 4096
                   type: string
                 max_version:
+                  maxLength: 10
                   type: string
                 min_version:
+                  maxLength: 10
                   type: string
                 server_name_override:
+                  maxLength: 256
                   type: string
             token_url:
+              maxLength: 2048
               minLength: 1
               type: string
           required:
