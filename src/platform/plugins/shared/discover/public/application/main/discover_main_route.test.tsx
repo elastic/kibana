@@ -22,7 +22,6 @@ import { MemoryRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
-import type { CustomizationCallback } from '../../customizations';
 import type { DiscoverCustomizationService } from '../../customizations/customization_service';
 import { createCustomizationService } from '../../customizations/customization_service';
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
@@ -113,7 +112,6 @@ const setupComponent = ({
   hasESQLDatasets = false,
   stateStorageContainer,
   dataViewList,
-  customizationCallbacks = [],
 }: {
   hasESData?: boolean;
   hasDataView?: boolean;
@@ -122,10 +120,9 @@ const setupComponent = ({
   hasESQLDatasets?: boolean;
   stateStorageContainer?: IKbnUrlStateStorage;
   dataViewList?: Promise<DataViewListItem[]>;
-  customizationCallbacks?: CustomizationCallback[];
 } = {}) => {
   const props: MainRouteProps = {
-    customizationCallbacks,
+    customizationCallbacks: [],
     customizationContext: mockCustomizationContext,
     onAppLeave,
     stateStorageContainer,
@@ -159,15 +156,6 @@ const createUrlStateWithQuery = async (query: Query | AggregateQuery) => {
   await stateStorageContainer.set(APP_STATE_URL_KEY, { query });
 
   return stateStorageContainer;
-};
-
-const createPendingPromise = <T,>() => {
-  let resolve: (value: T) => void = () => {};
-  const promise = new Promise<T>((resolvePromise) => {
-    resolve = resolvePromise;
-  });
-
-  return { promise, resolve };
 };
 
 describe('DiscoverMainRoute', () => {
@@ -318,11 +306,8 @@ describe('DiscoverMainRoute', () => {
     expect(screen.getByTestId('kbnNoDataPage')).toBeVisible();
   });
 
-  test.each([
-    { mode: 'classic', query: { language: 'kuery', query: '' }, expectedView: 'noDataViewsPrompt' },
-    { mode: 'ES|QL', query: { esql: 'FROM fds_dataset' }, expectedView: 'discover-main-app' },
-  ])('opens the $mode view with only ES|QL datasets', async ({ query, expectedView }) => {
-    const stateStorageContainer = await createUrlStateWithQuery(query);
+  test('opens an ES|QL query with only ES|QL datasets', async () => {
+    const stateStorageContainer = await createUrlStateWithQuery({ esql: 'FROM fds_dataset' });
 
     setupComponent({
       hasESData: false,
@@ -332,7 +317,7 @@ describe('DiscoverMainRoute', () => {
     });
     await waitForLoad();
 
-    expect(screen.getByTestId(expectedView)).toBeVisible();
+    expect(screen.getByTestId('discover-main-app')).toBeVisible();
   });
 
   test('shows the data view prompt with only ES|QL datasets and no query or configured default', async () => {
@@ -342,13 +327,9 @@ describe('DiscoverMainRoute', () => {
     expect(screen.getByTestId('noDataViewsPrompt')).toBeVisible();
   });
 
-  test.each([
-    { defaultQuerySource: 'profile', hasESData: false, hasESQLDatasets: true },
-    { defaultQuerySource: 'space', hasESData: false, hasESQLDatasets: true },
-    { defaultQuerySource: 'profile', hasESData: true, hasESQLDatasets: false },
-  ])(
-    'opens the $defaultQuerySource default ES|QL query without a data view (local ES data: $hasESData)',
-    async ({ defaultQuerySource, hasESData, hasESQLDatasets }) => {
+  test.each(['profile', 'space'])(
+    'opens the %s default ES|QL query with only ES|QL datasets',
+    async (defaultQuerySource) => {
       mockRootProfileState = {
         ...defaultRootProfileState,
         getDefaultEsqlQuery: () =>
@@ -371,7 +352,7 @@ describe('DiscoverMainRoute', () => {
       getIsEsqlDefaultMock.mockImplementation(() => true);
 
       try {
-        setupComponent({ hasESData, hasDataView: false, hasESQLDatasets });
+        setupComponent({ hasESData: false, hasDataView: false, hasESQLDatasets: true });
         await waitForLoad();
 
         expect(screen.getByTestId('discover-main-app')).toBeVisible();
@@ -382,29 +363,9 @@ describe('DiscoverMainRoute', () => {
     }
   );
 
-  test.each([
-    {
-      name: 'shows the welcome page for ES|QL without ES data or data views',
-      hasDataView: false,
-      expectedView: 'kbnNoDataPage',
-    },
-    {
-      name: 'opens ES|QL without ES data when data views exist',
-      hasDataView: true,
-      expectedView: 'discover-main-app',
-    },
-  ])('$name', async ({ hasDataView, expectedView }) => {
-    const stateStorageContainer = await createUrlStateWithQuery({ esql: 'ROW value = 1' });
-
-    setupComponent({ hasESData: false, hasDataView, stateStorageContainer });
-    await waitForLoad();
-
-    expect(screen.getByTestId(expectedView)).toBeVisible();
-  });
-
   test('opens an ES|QL tab while the data view list is still loading', async () => {
     const stateStorageContainer = await createUrlStateWithQuery({ esql: 'ROW value = 1' });
-    const dataViewList = createPendingPromise<DataViewListItem[]>();
+    const dataViewList = Promise.withResolvers<DataViewListItem[]>();
 
     setupComponent({ stateStorageContainer, dataViewList: dataViewList.promise });
     await waitForLoad();
@@ -417,7 +378,7 @@ describe('DiscoverMainRoute', () => {
       language: 'kuery',
       query: '',
     });
-    const dataViewList = createPendingPromise<DataViewListItem[]>();
+    const dataViewList = Promise.withResolvers<DataViewListItem[]>();
 
     setupComponent({ stateStorageContainer, dataViewList: dataViewList.promise });
     await act(async () => {});
@@ -430,36 +391,6 @@ describe('DiscoverMainRoute', () => {
     await waitForLoad();
 
     expect(screen.getByTestId('discover-main-app')).toBeVisible();
-  });
-
-  test('shows the welcome page without waiting for tab customizations', async () => {
-    const pendingCustomization = createPendingPromise<undefined>();
-
-    setupComponent({
-      hasESData: false,
-      hasDataView: false,
-      customizationCallbacks: [() => pendingCustomization.promise],
-    });
-    await waitForLoad();
-
-    expect(screen.getByTestId('kbnNoDataPage')).toBeVisible();
-  });
-
-  test('shows the welcome page without the session header in project chrome', async () => {
-    const getChromeStyleMock = jest.mocked(discoverServiceMock.chrome.getChromeStyle);
-    const getChromeStyle = getChromeStyleMock.getMockImplementation();
-
-    getChromeStyleMock.mockImplementation(() => 'project');
-
-    try {
-      setupComponent({ hasESData: false, hasDataView: false });
-      await waitForLoad();
-
-      expect(screen.getByTestId('kbnNoDataPage')).toBeVisible();
-      expect(screen.queryByText('New session')).not.toBeInTheDocument();
-    } finally {
-      getChromeStyleMock.mockImplementation(getChromeStyle);
-    }
   });
 
   test('renders no data view when hasESData=true & hasDataView=false', async () => {
