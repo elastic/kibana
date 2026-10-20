@@ -13,15 +13,11 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildNewEntityCountQuery } from '../queries/new_entity_query';
-import type { TimeRange } from '../../use_time_range_param';
-import {
-  getEntityFilterESQL,
-  EMPTY_ENTITY_FILTERS,
-  type EntityFilters,
-} from '../../use_entity_filters_param';
+import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
+import type { EntityFilters, TimeRange } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 export const useNewEntityCount = ({
@@ -39,15 +35,15 @@ export const useNewEntityCount = ({
   const {
     data: resolvedIndex,
     isLoading: isIndexLoading,
+    entityFilterClauses,
     error: indexError,
-  } = useResolvedLatestEntitiesIndexName(spaceId);
+  } = useTileQueryInputs(spaceId, entityFilters);
 
   const index = resolvedIndex?.indexName;
 
   const query = useMemo(
-    () =>
-      index ? buildNewEntityCountQuery(index, timeRange, getEntityFilterESQL(entityFilters)) : null,
-    [index, timeRange, entityFilters]
+    () => (index ? buildNewEntityCountQuery(index, timeRange, entityFilterClauses) : null),
+    [index, timeRange, entityFilterClauses]
   );
 
   const isEnabled = !skip && !isIndexLoading && Boolean(index);
@@ -56,7 +52,7 @@ export const useNewEntityCount = ({
 
   const {
     data: result,
-    isLoading,
+    isInitialLoading: isLoading,
     isFetching,
     error,
   } = useQuery(
@@ -107,7 +103,9 @@ export const useNewEntityCount = ({
   return {
     count: result?.count ?? 0,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : result?.entityIds ?? EMPTY_ENTITY_IDS,
-    isLoading: isIndexLoading || isLoading || isFetching,
+    // A query that can never run (no index, failed inputs) is not loading: react-query reports a
+    // disabled query with no data as loading for ever.
+    isLoading: isIndexLoading || (isEnabled && (isLoading || isFetching)),
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending: isIndexLoading || (isEnabled && (isLoading || isFetching)),
     error: (error as SecurityAppError | undefined) ?? indexError,

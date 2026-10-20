@@ -45,6 +45,7 @@ function buildEnabledServices(): StartServicesMock {
   const services = createStartServicesMock();
   services.settings.globalClient.get.mockReturnValue(true);
   services.settings.globalClient.get$.mockReturnValue(of(true));
+  services.application.getUrlForApp.mockReturnValue('/app/workflows/library');
   return services;
 }
 
@@ -79,7 +80,7 @@ describe('LibraryTemplateDetailPage', () => {
     rerender(<LibraryTemplateDetailPage {...routeProps('second-template')} />);
 
     expect(mockSetWorkflowsBreadcrumbs).toHaveBeenLastCalledWith([
-      expect.objectContaining({ text: 'Template Library' }),
+      { text: 'Template library', href: '/app/workflows/library' },
     ]);
   });
 

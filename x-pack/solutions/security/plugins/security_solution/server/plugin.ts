@@ -40,6 +40,7 @@ import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_str
 import { turnOffPolicyProtectionsIfNotSupported } from './endpoint/migrations/turn_off_policy_protections';
 import { endpointSearchStrategyProvider } from './search_strategy/endpoint';
 import { getScheduleNotificationResponseActionsService } from './lib/detection_engine/rule_response_actions/schedule_notification_response_actions';
+import { registerAlertUpdateAuthorizationAudit } from './lib/detection_engine/routes/common/operations/audit_alert_update_authz';
 import {
   createEqlAlertType,
   createEsqlAlertType,
@@ -355,6 +356,11 @@ export class Plugin implements ISecuritySolutionPlugin {
   ): SecuritySolutionPluginSetup {
     this.logger.debug('plugin setup');
 
+    registerAlertUpdateAuthorizationAudit({
+      http: core.http,
+      getAuditLogger: (request) => plugins.security?.audit.asScoped(request),
+    });
+
     if (plugins.share) {
       plugins.share.url.locators.create(new AIValueReportLocatorDefinition());
     }
@@ -423,6 +429,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       auditLogger: plugins.security?.audit.withoutRequest,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
+      entityAnalyticsConfig: config.entityAnalytics,
       hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);

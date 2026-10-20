@@ -14,7 +14,7 @@ import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
 import {
@@ -22,7 +22,6 @@ import {
   type EntityFilters,
   type TimeRange,
 } from '../../entities_grid/common';
-import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 
 const esqlSearch = async (
@@ -51,9 +50,16 @@ export const useEntitiesWithAnomaliesCount = ({
   const {
     data: resolvedIndex,
     isLoading: isIndexLoading,
+    entityFilterClauses,
     error: indexError,
-  } = useResolvedLatestEntitiesIndexName(spaceId);
-  const { jobIds, loading: isJobsLoading } = useInstalledSecurityJobsIds();
+  } = useTileQueryInputs(spaceId, entityFilters);
+  const {
+    jobIds,
+    loading: isJobsLoading,
+    isMlUser,
+    isLicensed,
+    isError: isJobsError,
+  } = useInstalledSecurityJobsIds();
 
   const isEnabled =
     !skip &&
@@ -67,14 +73,14 @@ export const useEntitiesWithAnomaliesCount = ({
     return buildEntitiesWithAnomaliesCountQuery(
       resolvedIndex.indexName,
       timeRange,
-      buildEntityFilterClauses(entityFilters),
+      entityFilterClauses,
       jobIds
     );
-  }, [resolvedIndex?.indexName, timeRange, entityFilters, jobIds]);
+  }, [resolvedIndex?.indexName, timeRange, entityFilterClauses, jobIds]);
 
   const {
     data: queryResult,
-    isLoading,
+    isInitialLoading: isLoading,
     isFetching,
     error,
   } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(
@@ -117,10 +123,19 @@ export const useEntitiesWithAnomaliesCount = ({
   return {
     count: queryResult?.count ?? 0,
     entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
-    isLoading: isJobsLoading || isIndexLoading || isLoading || isFetching,
+    // A query that can never run (skipped, no index, no job) is not loading: react-query reports a
+    // disabled query with no data as loading for ever.
+    isLoading:
+      isJobsLoading || isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
     // True while the count is on its way, not when its query can never run (skipped, no index, no job).
     isCountPending:
       isJobsLoading || isIndexLoading || (isEnabled && Boolean(query) && (isLoading || isFetching)),
+    /**
+     * No security ML job is installed, so the tile has nothing to count. Not when the jobs could not
+     * be asked for (no ML permission or licence, or the ML capabilities are still loading) or their
+     * fetch failed: then the list is empty too.
+     */
+    isMissingJobs: isMlUser && isLicensed && !isJobsError && !isJobsLoading && jobIds.length === 0,
     error: filteredError ?? indexError,
   };
 };
