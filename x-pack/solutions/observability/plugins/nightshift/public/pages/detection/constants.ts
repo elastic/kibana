@@ -5,13 +5,4 @@
  * 2.0.
  */
 
-module.exports = {
-  overrides: [
-    {
-      files: ['**/*.gen.ts'],
-      rules: {
-        '@kbn/imports/no_unused_imports': 'off',
-      },
-    },
-  ],
-};
+export const DETECTION_OVERVIEW_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
