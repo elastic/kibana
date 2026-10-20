@@ -138,12 +138,21 @@ export const ALERTING_ERROR_CODES = {
   ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED: 'ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED',
 
   // ──────────────────────── Alert actions ────────────────────
-  /** No alert event matched the supplied `group_hash` (and `alert_id`). */
+  /**
+   * The supplied `series_id` is not a well-formed series identifier: not
+   * base64url, an unsupported version or an unparseable payload.
+   */
+  INVALID_SERIES_ID: 'INVALID_SERIES_ID',
+  /**
+   * No alert event matched the supplied `series_id` in the request's space
+   * (this includes a series id minted for another space).
+   */
   ALERT_EVENT_NOT_FOUND: 'ALERT_EVENT_NOT_FOUND',
   /**
-   * No alert event matched the supplied `group_hash`. Bulk-only refinement of
-   * `ALERT_EVENT_NOT_FOUND` that pins the miss to the group (rather than a
-   * superseded episode) so a client can tell the two apart per item.
+   * No alert event matched the supplied `series_id` in the request's space.
+   * Bulk-only refinement of `ALERT_EVENT_NOT_FOUND` that pins the miss to the
+   * series (rather than a superseded episode) so a client can tell the two
+   * apart per item.
    */
   ALERT_GROUP_NOT_FOUND: 'ALERT_GROUP_NOT_FOUND',
   /**
