@@ -8,10 +8,10 @@ applies_to:
 # Generative AI connectors
 
 ::::{important}
-:applies_to: {"serverless": "deprecated", "stack": "deprecated 9.6+"}
-The OpenAI, {{bedrock}}, {{gemini}}, and AI Connector types are deprecated. Existing connectors and their rule actions continue to work, but you can no longer create new ones by selecting **Create connector** in {{kib}}.
+The OpenAI, {{bedrock}}, {{gemini}}, and AI Connector types are replaced by {{es}} {{infer}} endpoints with the `chat_completion` task type. To get started, refer to [Elastic Inference](docs-content://explore-analyze/elastic-inference.md) and [External inference](docs-content://explore-analyze/elastic-inference/external.md).
 
-For new AI integrations, create an {{es}} {{infer}} endpoint with the `chat_completion` task type instead. To get started, refer to [Elastic Inference](docs-content://explore-analyze/elastic-inference.md) and [External inference](docs-content://explore-analyze/elastic-inference/external.md).
+- {applies_to}`serverless: deprecated` {applies_to}`stack: deprecated 9.6+` You can no longer create new connectors of these types by selecting **Create connector** in {{kib}}. Existing connectors and their rule actions continue to work.
+- {applies_to}`stack: deprecated =9.5` These connectors are still available, but deprecated.
 ::::
 
 These connectors connect {{kib}} to third-party large language model (LLM) services and to Elastic Managed LLMs.
