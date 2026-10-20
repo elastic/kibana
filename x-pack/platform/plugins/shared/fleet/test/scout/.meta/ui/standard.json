@@ -1,5 +1,5 @@
 {
-  "sha1": "812f5b2a1f652b90058ecffcd8ce891006ef3bb0",
+  "sha1": "a85c3868fa4faea6e936e04d1177421b0323b94f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -83,7 +83,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/integration_tile_navigation.spec.ts",
-        "line": 19,
+        "line": 20,
         "column": 45
       }
     },
@@ -97,7 +97,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/fleet/test/scout/ui/tests/integration_tile_navigation.spec.ts",
-        "line": 31,
+        "line": 32,
         "column": 9
       }
     },
