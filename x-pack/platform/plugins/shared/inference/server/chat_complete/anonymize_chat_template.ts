@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import type { AnonymizationOutput, ChatCompleteOptions } from '@kbn/inference-common';
+import type { AnonymizationOutput, ChatCompleteTemplate } from '@kbn/inference-common';
 import { createInferenceInternalError, MessageRole } from '@kbn/inference-common';
 import { applyStringReplacements, flattenJsonStrings } from '@kbn/ai-anonymization-server';
 import { prepareAnonymization } from './prepare_anonymization';
-
-type ChatTemplate = NonNullable<ChatCompleteOptions['template']>;
 
 type PrepareAnonymizationOptions = Parameters<typeof prepareAnonymization>[0];
 
@@ -20,8 +18,11 @@ type PrepareAnonymizationOptions = Parameters<typeof prepareAnonymization>[0];
 export const anonymizeChatTemplate = async ({
   template,
   ...anonymizationOptions
-}: { template: ChatTemplate } & Omit<PrepareAnonymizationOptions, 'messages' | 'system'>): Promise<{
-  template: ChatTemplate;
+}: { template: ChatCompleteTemplate } & Omit<
+  PrepareAnonymizationOptions,
+  'messages' | 'system'
+>): Promise<{
+  template: ChatCompleteTemplate;
   anonymization: AnonymizationOutput;
 }> => {
   const flattened = flattenJsonStrings(template.variables);

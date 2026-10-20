@@ -12,6 +12,7 @@ import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
 import {
   isTemplateRequiredConnector,
   MessageRole,
+  parseTemplateJson,
   validateReasoningEffort,
 } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
@@ -76,17 +77,6 @@ export const parseMaxStepSize = (value: string | undefined): number | undefined 
   }
 };
 
-const parseTemplateJson = (content: string): unknown => {
-  const fenced = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-  const candidate = (fenced?.[1] ?? content).trim();
-  const start = candidate.indexOf('{');
-  const end = candidate.lastIndexOf('}');
-  if (start === -1 || end <= start) {
-    throw new Error('Template response did not contain a JSON object');
-  }
-  return JSON.parse(candidate.slice(start, end + 1));
-};
-
 /**
  * When the connector requires an EIS template, call chat completion directly.
  * Returns undefined so the caller keeps the messages path.
@@ -117,6 +107,12 @@ const completePromptWithTemplate = async ({
     return undefined;
   }
 
+  // A messages call does not need the connector list. A template-only connector
+  // with no template fields fails at the gateway.
+  if (!templateId) {
+    return undefined;
+  }
+
   const client = inference.getClient({ request });
   let templateRequired = false;
   try {
@@ -133,7 +129,7 @@ const completePromptWithTemplate = async ({
     return undefined;
   }
 
-  if (!templateId || templateVersion == null) {
+  if (templateVersion == null) {
     throw new Error(
       `Connector "${connectorId}" requires a prompt template and cannot be called with messages`
     );

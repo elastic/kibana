@@ -22,6 +22,21 @@ export const ATTACK_DISCOVERY_TEMPLATE_VERSION = 1;
 const ATTACK_DISCOVERY_FIELD_SYNTAX =
   'Use {{ field.name fieldValue }} for every source field. Correct: {{ host.name host-a }}. Incorrect: {{ host-a }}.';
 
+/** Gateway schema: `alerts` maxItems. A larger batch is a 400 that fails the generation. */
+const MAX_TEMPLATE_ALERTS = 100;
+
+/** Gateway schema: each alert string maxLength. */
+const MAX_TEMPLATE_ALERT_CHARS = 8000;
+
+/** Gateway schema: `partial` maxLength. */
+const MAX_TEMPLATE_PARTIAL_CHARS = 100_000;
+
+const clampTemplateAlerts = (alerts: string[]): string[] =>
+  alerts.slice(0, MAX_TEMPLATE_ALERTS).map((alert) => alert.slice(0, MAX_TEMPLATE_ALERT_CHARS));
+
+const clampTemplatePartial = (partial: string): string =>
+  partial.slice(0, MAX_TEMPLATE_PARTIAL_CHARS);
+
 export type AttackDiscoveryTemplatePhase = 'generate' | 'continue' | 'refine';
 
 export interface AttackDiscoveryTemplateRequest {
@@ -34,6 +49,27 @@ export interface AttackDiscoveryTemplateRequest {
 export type AttackDiscoveryTemplateCompletion = (
   request: AttackDiscoveryTemplateRequest
 ) => Promise<string>;
+
+/**
+ * First refine pass sends the unrefined insights. A later pass continues the
+ * partial JSON the model already wrote, matching the messages refine prompt.
+ */
+export const attackDiscoveryRefineTemplateRequest = ({
+  alerts,
+  combinedRefinements,
+  unrefinedResults,
+}: {
+  alerts: string[];
+  combinedRefinements: string;
+  unrefinedResults: unknown;
+}): AttackDiscoveryTemplateRequest => {
+  const continuing = combinedRefinements.length > 0;
+  return {
+    alerts,
+    phase: continuing ? 'continue' : 'refine',
+    partial: continuing ? combinedRefinements : JSON.stringify({ insights: unrefinedResults }),
+  };
+};
 
 /**
  * Calls chat completion with the pinned Attack Discovery template.
@@ -55,9 +91,9 @@ export const createAttackDiscoveryTemplateCompletion = ({
         id: ATTACK_DISCOVERY_TEMPLATE_ID,
         version: ATTACK_DISCOVERY_TEMPLATE_VERSION,
         variables: {
-          alerts,
+          alerts: clampTemplateAlerts(alerts),
           phase,
-          partial: partial ?? '',
+          partial: clampTemplatePartial(partial ?? ''),
           field_syntax: ATTACK_DISCOVERY_FIELD_SYNTAX,
         },
       },

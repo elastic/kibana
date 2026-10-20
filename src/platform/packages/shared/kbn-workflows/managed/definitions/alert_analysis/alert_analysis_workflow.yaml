@@ -1570,6 +1570,23 @@ steps:
                 {% endfor %}
                 Return one verdict for every alert id above, exactly once.
 
+          # The messages path keeps the full preamble above. The template already
+          # has its own instructions and a 200k character budget for alerts_text,
+          # so it receives only the alert blocks. The worker batch_summary rule
+          # lives in the preamble, so it is appended here when this run is a worker.
+          - name: template_alerts_text
+            type: data.set
+            with:
+              alerts_text: |
+                {% assign alert_parts = steps.build_agent_message.output.message | split: '## Alerts to classify' %}
+                {{ steps.build_agent_message.output.message | remove_first: alert_parts.first | strip }}
+                {% if inputs.calledByWorker == true %}
+                Also return a `batch_summary` string: 1–2 sentences (≤45 words total), grouped by
+                host or user, explaining *why* the verdicts came out that way. Do not repeat per-alert
+                rationale; state the pattern. Omit the field entirely if there is nothing meaningful to
+                add beyond the verdict counts.
+                {% endif %}
+
           - name: runAgent_step
             type: ai.agent
             # Skipped when the space's "use a prompt" setting is on, and always on the Worker path;
@@ -1616,7 +1633,7 @@ steps:
               template_id: ".alert-triage"
               template_version: 1
               template_variables:
-                alerts_text: "{{ steps.build_agent_message.output.message }}"
+                alerts_text: "{{ steps.template_alerts_text.output.alerts_text }}"
 
               # One verdict object per alert in the batch (see consts.batch_reply_schema).
               schema: "${{ consts.batch_reply_schema }}"
@@ -1664,7 +1681,7 @@ steps:
               template_id: ".alert-triage"
               template_version: 1
               template_variables:
-                alerts_text: "{{ steps.build_agent_message.output.message }}"
+                alerts_text: "{{ steps.template_alerts_text.output.alerts_text }}"
 
               # The same reply as runAgent_step (see consts.batch_reply_schema).
               schema: "${{ consts.batch_reply_schema }}"

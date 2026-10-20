@@ -16,6 +16,7 @@ import type {
   ChatCompleteMetadata,
   ChatCompletionReasoning,
   ChatCompleteCacheControl,
+  ChatCompleteTemplate,
 } from '@kbn/inference-common';
 import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { KibanaRequest } from '@kbn/core/server';
@@ -61,11 +62,7 @@ export type InferenceAdapterChatCompleteOptions = {
    * EIS prompt template. Only the inference endpoint adapter sends this.
    * When set, that adapter omits messages and tools.
    */
-  template?: {
-    id: string;
-    version: number;
-    variables: Record<string, unknown>;
-  };
+  template?: ChatCompleteTemplate;
 } & ToolOptions;
 
 /**

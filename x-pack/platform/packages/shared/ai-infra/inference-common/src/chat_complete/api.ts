@@ -81,6 +81,16 @@ export type ChatCompleteAPI = <TOptions extends ChatCompleteOptions>(
 ) => ChatCompleteAPIResponse<TOptions>;
 
 /**
+ * EIS prompt template. Elasticsearch forwards `id`, `version`, and `variables`
+ * unchanged. The id starts with a dot.
+ */
+export interface ChatCompleteTemplate {
+  id: string;
+  version: number;
+  variables: Record<string, unknown>;
+}
+
+/**
  * Options used to call the {@link ChatCompleteAPI}.
  *
  * `connectorId` accepts both Kibana stack connector IDs (OpenAI, Bedrock, Gemini, etc.)
@@ -100,21 +110,15 @@ export type ChatCompleteOptions = {
   /**
    * The list of messages for the current conversation.
    *
-   * Ignored when `template` is set. A template-only endpoint rejects messages,
-   * so pass an empty list together with `template`.
+   * Ignored on the wire when `template` is set. A template-only endpoint rejects
+   * messages, so pass an empty list together with `template`.
    */
   messages: Message[];
   /**
-   * EIS prompt template. Mutually exclusive with `messages` on the wire:
-   * when this is set, the inference endpoint adapter sends `template` and
-   * omits `messages` and `tools`. Elasticsearch forwards `id`, `version`,
-   * and `variables` unchanged. The id starts with a dot.
+   * When set, the inference endpoint adapter sends this template and omits
+   * `messages` and `tools`.
    */
-  template?: {
-    id: string;
-    version: number;
-    variables: Record<string, unknown>;
-  };
+  template?: ChatCompleteTemplate;
   /**
    * LLM temperature. All models support the 0-1 range (some supports more).
    * Defaults to 0;

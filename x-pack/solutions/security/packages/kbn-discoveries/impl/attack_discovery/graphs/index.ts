@@ -35,6 +35,7 @@ export type {
 export {
   ATTACK_DISCOVERY_TEMPLATE_ID,
   ATTACK_DISCOVERY_TEMPLATE_VERSION,
+  attackDiscoveryRefineTemplateRequest,
   createAttackDiscoveryTemplateCompletion,
   resolveAttackDiscoveryTemplateCompletion,
 } from './template_completion';

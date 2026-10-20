@@ -14,7 +14,10 @@ import { discardPreviousRefinements } from './helpers/discard_previous_refinemen
 import { extractJson } from '../helpers/extract_json';
 import { getAnonymizedDocsFromState } from '../generate/helpers/get_anonymized_docs_from_state';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
-import type { AttackDiscoveryTemplateCompletion } from '../../../../../attack_discovery/graphs/template_completion';
+import {
+  attackDiscoveryRefineTemplateRequest,
+  type AttackDiscoveryTemplateCompletion,
+} from '../../../../../attack_discovery/graphs/template_completion';
 import { getCombined } from '../helpers/get_combined';
 import { getCombinedRefinePrompt } from './helpers/get_combined_refine_prompt';
 import { generationsAreRepeating } from '../helpers/generations_are_repeating';
@@ -75,15 +78,15 @@ export const getRefineNode = <T extends GraphInsightTypes>({
         () => `refine node is invoking the chain (${llmType}), attempt ${generationAttempts}`
       );
 
-      const partial = JSON.stringify({ unrefinedResults, combinedRefinements });
-
       // LOCAL MUTATION:
       rawResponse = completeWithTemplate
-        ? await completeWithTemplate({
-            alerts: getAnonymizedDocsFromState(state),
-            phase: 'refine',
-            partial,
-          })
+        ? await completeWithTemplate(
+            attackDiscoveryRefineTemplateRequest({
+              alerts: getAnonymizedDocsFromState(state),
+              combinedRefinements,
+              unrefinedResults,
+            })
+          )
         : ((await chain.invoke({
             format_instructions: formatInstructions,
             query,

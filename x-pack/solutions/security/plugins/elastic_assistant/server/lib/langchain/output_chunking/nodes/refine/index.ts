@@ -7,7 +7,10 @@
 
 import type { BaseLLM } from '@langchain/core/language_models/llms';
 import type { Logger } from '@kbn/core/server';
-import type { AttackDiscoveryTemplateCompletion } from '@kbn/discoveries';
+import {
+  attackDiscoveryRefineTemplateRequest,
+  type AttackDiscoveryTemplateCompletion,
+} from '@kbn/discoveries';
 import type { ZodType } from '@kbn/zod/v4';
 
 import type { BaseGraphState, GraphInsightTypes } from '../../../graphs';
@@ -74,14 +77,14 @@ export const getRefineNode = <T extends GraphInsightTypes>({
         () => `refine node is invoking the chain (${llmType}), attempt ${generationAttempts}`
       );
 
-      const partial = JSON.stringify({ unrefinedResults, combinedRefinements });
-
       const rawResponse = completeWithTemplate
-        ? await completeWithTemplate({
-            alerts: getAnonymizedDocsFromState(state),
-            phase: 'refine',
-            partial,
-          })
+        ? await completeWithTemplate(
+            attackDiscoveryRefineTemplateRequest({
+              alerts: getAnonymizedDocsFromState(state),
+              combinedRefinements,
+              unrefinedResults,
+            })
+          )
         : ((await chain.invoke({
             format_instructions: formatInstructions,
             query,

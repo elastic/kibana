@@ -7,6 +7,7 @@
 
 import type { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { isTemplateRequiredConnector } from '@kbn/inference-common';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { APIRoutes } from '../../common/types';
 import { ROUTE_VERSIONS } from '../../common/constants';
@@ -75,9 +76,15 @@ export const defineInferenceConnectorsRoute = ({
           logger,
         });
 
+        // The template feature still resolves a saved Daybreak model. Every other
+        // selector uses this route, and a template-only endpoint fails a messages call.
+        const connectors = feature?.allowTemplateRequiredModels
+          ? result.connectors
+          : result.connectors.filter((connector) => !isTemplateRequiredConnector(connector));
+
         return response.ok({
           body: {
-            connectors: result.connectors,
+            connectors,
             soEntryFound: result.soEntryFound,
           },
         });

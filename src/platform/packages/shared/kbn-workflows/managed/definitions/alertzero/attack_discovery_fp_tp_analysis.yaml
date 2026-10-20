@@ -140,6 +140,18 @@ steps:
     with:
       index: .adhoc.alerts-security.attack.discovery.alerts-{{ workflow.spaceId }}
       size: 1
+      # The template caps this document at 50k characters. Drop replacements and
+      # api_config; the checks only need the narrative and the cited alert ids.
+      _source:
+        - '@timestamp'
+        - kibana.alert.attack_discovery.alert_ids
+        - kibana.alert.attack_discovery.title
+        - kibana.alert.attack_discovery.summary_markdown
+        - kibana.alert.attack_discovery.details_markdown
+        - kibana.alert.attack_discovery.entity_summary_markdown
+        - kibana.alert.attack_discovery.mitre_attack_tactics
+        - host.name
+        - user.name
       query:
         ids:
           values:
@@ -178,6 +190,35 @@ steps:
     with:
       index: .alerts-security.alerts-{{ workflow.spaceId }}
       size: 100
+      # The template caps the whole cited-alerts string at 200k characters.
+      # Keep the fields the linkage and parent checks read.
+      _source:
+        - '@timestamp'
+        - kibana.alert.rule.name
+        - kibana.alert.severity
+        - kibana.alert.risk_score
+        - kibana.alert.reason
+        - host.name
+        - host.id
+        - user.name
+        - user.id
+        - source.ip
+        - destination.ip
+        - destination.domain
+        - process.name
+        - process.pid
+        - process.entity_id
+        - process.command_line
+        - process.parent.name
+        - process.parent.entity_id
+        - process.executable
+        - agent.id
+        - event.action
+        - event.category
+        - file.name
+        - file.hash.sha256
+        - dns.question.name
+        - network.direction
       query:
         ids:
           values: "${{ steps.load_attack_discovery.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] }}"
@@ -210,6 +251,15 @@ steps:
     with:
       index: entities-latest-{{ workflow.spaceId }}
       size: 50
+      # The template caps this string at 200k characters.
+      _source:
+        - entity.id
+        - entity.type
+        - host.name
+        - host.id
+        - user.name
+        - user.id
+        - asset.criticality
       query:
         bool:
           minimum_should_match: 1
@@ -229,6 +279,26 @@ steps:
     with:
       index: logs-endpoint.events.*
       size: 50
+      # The template caps this string at 200k characters. Endpoint documents
+      # carry process and network trees the parent and destination checks do not use.
+      _source:
+        - '@timestamp'
+        - host.name
+        - host.id
+        - user.name
+        - process.name
+        - process.parent.name
+        - process.entity_id
+        - process.executable
+        - process.command_line
+        - source.ip
+        - destination.ip
+        - destination.domain
+        - event.action
+        - event.category
+        - agent.id
+        - dns.question.name
+        - network.direction
       sort:
         - "@timestamp": asc
       query:
@@ -471,11 +541,13 @@ steps:
                     - result
                     - source
                     - id
+        # claims stays optional. The messages prompt still asks for them. The
+        # .attack-discovery-fp-tp template does not, and a required field would
+        # reject that reply.
         required:
           - verdict
           - summary_markdown
           - checks
-          - claims
 
   # The contract boundary: an unsupported verdict fails the run instead of
   # reaching the review's switch, whose default arm does nothing.

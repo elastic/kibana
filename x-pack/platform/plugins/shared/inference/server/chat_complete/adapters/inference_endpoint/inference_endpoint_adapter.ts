@@ -17,6 +17,7 @@ import type {
   ChatCompletionTokenCountEvent,
   ChatCompletionReasoning,
   ChatCompleteCacheControl,
+  ChatCompleteTemplate,
 } from '@kbn/inference-common';
 import { InferenceEndpointProvider } from '@kbn/inference-common';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
@@ -62,11 +63,7 @@ export interface InferenceEndpointAdapterChatCompleteOptions {
    * When set, the request body is `{ template }` and messages/tools are omitted.
    * EIS renders the prompt. Caller-supplied messages are rejected for these models.
    */
-  template?: {
-    id: string;
-    version: number;
-    variables: Record<string, unknown>;
-  };
+  template?: ChatCompleteTemplate;
 }
 
 export const inferenceEndpointAdapter = {

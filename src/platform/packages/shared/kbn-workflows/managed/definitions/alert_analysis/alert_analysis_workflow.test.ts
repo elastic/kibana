@@ -2689,6 +2689,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW liquid execution (Worker path)', () =
         expect.objectContaining({
           template_id: '.alert-triage',
           template_version: 1,
+          template_variables: {
+            alerts_text: '{{ steps.template_alerts_text.output.alerts_text }}',
+          },
         })
       );
     });

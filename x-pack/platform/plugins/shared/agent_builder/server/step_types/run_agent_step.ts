@@ -27,7 +27,7 @@ import type {
 import type { KibanaRequest } from '@kbn/core/server';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ConnectorTelemetryMetadata } from '@kbn/inference-common';
-import { isTemplateRequiredConnector, MessageRole } from '@kbn/inference-common';
+import { isTemplateRequiredConnector, MessageRole, parseTemplateJson } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
   normalizeConnectorFeatureIds,
@@ -49,17 +49,6 @@ import {
   EPHEMERAL_WITH_CREATE_CONVERSATION_MESSAGE,
   runAgentStepCommonDefinition,
 } from '../../common/step_types/run_agent_step';
-
-const parseTemplateJson = (content: string): unknown => {
-  const fenced = content.match(/```(?:json)?\s*([\s\S]*?)```/);
-  const candidate = (fenced?.[1] ?? content).trim();
-  const start = candidate.indexOf('{');
-  const end = candidate.lastIndexOf('}');
-  if (start === -1 || end <= start) {
-    throw new Error('Template response did not contain a JSON object');
-  }
-  return JSON.parse(candidate.slice(start, end + 1));
-};
 
 const assertTemplateMatchesSchema = (value: unknown, schema: unknown): Record<string, unknown> => {
   if (value === null || typeof value !== 'object' || Array.isArray(value)) {
@@ -131,13 +120,16 @@ const completeWithPromptTemplate = async ({
     return undefined;
   }
 
+  // A messages call does not need the connector list. A template-only connector
+  // with no template fields fails at the gateway.
+  if (!templateId) {
+    return undefined;
+  }
+
   // A step with no connector uses the default GenAI connector. Resolve it before deciding
   // whether the template fields apply, so a messages connector ignores them.
   let resolvedConnectorId = connectorId;
   if (!resolvedConnectorId) {
-    if (!templateId) {
-      return undefined;
-    }
     resolvedConnectorId = (await inference.getDefaultConnector(request))?.connectorId;
     if (!resolvedConnectorId) {
       return undefined;
@@ -160,7 +152,7 @@ const completeWithPromptTemplate = async ({
     return undefined;
   }
 
-  if (!templateId || templateVersion == null) {
+  if (templateVersion == null) {
     throw new Error(
       `Connector "${resolvedConnectorId}" requires a prompt template and cannot be called with messages`
     );
