@@ -26,6 +26,7 @@ export interface TrendlineQueryCase {
   readonly sourceQuery: string;
   readonly expectedQuery: string;
   readonly expectedTimeField: string;
+  readonly expectedResultColumns?: readonly string[];
   readonly expectedMetricFields: readonly string[];
   readonly metricFields?: readonly string[];
   readonly groupByFields?: readonly string[];
@@ -70,6 +71,7 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       sourceQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes) BY bucket = TBUCKET(100) | EVAL time = bucket`,
       expectedQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes) BY bucket = TBUCKET(100) | EVAL time = bucket`,
       expectedTimeField: 'time',
+      expectedResultColumns: ['avg_bytes', 'bucket', 'time'],
       expectedMetricFields: ['avg_bytes'],
     },
     {
@@ -77,6 +79,21 @@ export const buildTrendlineQueryCases = ({ index }: { index: string }): Trendlin
       sourceQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | EVAL time = b | EVAL b = TO_STRING(b)`,
       expectedQuery: `FROM ${index} | STATS avg_bytes = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour) | EVAL time = b | EVAL b = TO_STRING(b)`,
       expectedTimeField: 'time',
+      expectedResultColumns: ['avg_bytes', 'time', 'b'],
+      expectedMetricFields: ['avg_bytes'],
+    },
+    {
+      description: 'FROM query retaining an existing BUCKET on the original source time alias',
+      sourceQuery: `FROM ${index} | EVAL time = @timestamp | STATS avg_bytes = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour)`,
+      expectedQuery: `FROM ${index} | EVAL time = @timestamp | STATS avg_bytes = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour)`,
+      expectedTimeField: 'b',
+      expectedMetricFields: ['avg_bytes'],
+    },
+    {
+      description: 'FROM query retaining an existing BUCKET through wildcard KEEP',
+      sourceQuery: `FROM ${index} | EVAL time = @timestamp | KEEP * | STATS avg_bytes = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour)`,
+      expectedQuery: `FROM ${index} | EVAL time = @timestamp | KEEP * | STATS avg_bytes = AVG(bytes) BY b = BUCKET(@timestamp, 1 hour)`,
+      expectedTimeField: 'b',
       expectedMetricFields: ['avg_bytes'],
     },
     {
