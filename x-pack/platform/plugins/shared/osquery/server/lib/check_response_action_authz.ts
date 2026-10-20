@@ -18,6 +18,7 @@ import { resolveQueryReference, toEcsMappingRecord } from './resolve_query_refer
 interface OsqueryCapabilities {
   writeLiveQueries: boolean;
   runSavedQueries: boolean;
+  readPacks: boolean;
 }
 
 // Cache capability resolution per request so bulk operations (e.g., duplicating
@@ -83,6 +84,7 @@ export const getOsqueryCapabilities = (
       return {
         writeLiveQueries: !!resolved.osquery.writeLiveQueries,
         runSavedQueries: !!resolved.osquery.runSavedQueries,
+        readPacks: !!resolved.osquery.readPacks,
       };
     })().catch((error) => {
       capabilitiesCache.delete(request);
@@ -99,7 +101,11 @@ export interface AuthorizeOsqueryResponseActionResult {
   resolved?: ResolvedQueryReference;
 }
 
-/** `writeLiveQueries` may supply SQL. `runSavedQueries` may only run a resolved saved query or pack. */
+/**
+ * `writeLiveQueries` may supply SQL. `runSavedQueries` may only run a resolved saved query or pack.
+ * Running a pack also requires `readPacks` for every caller, mirroring the UI. It is denied
+ * before the pack is loaded.
+ */
 export const authorizeOsqueryResponseAction = async (
   coreStart: CoreStart,
   request: KibanaRequest,
@@ -107,7 +113,17 @@ export const authorizeOsqueryResponseAction = async (
   spaceId?: string,
   alertData?: ParsedTechnicalFields & { _index: string }
 ): Promise<AuthorizeOsqueryResponseActionResult> => {
-  const { writeLiveQueries, runSavedQueries } = await getOsqueryCapabilities(coreStart, request);
+  const { writeLiveQueries, runSavedQueries, readPacks } = await getOsqueryCapabilities(
+    coreStart,
+    request
+  );
+  const packId = actionParams.pack_id?.trim();
+
+  // Dispatching a pack returns its name and every query's SQL, so even a caller who may write
+  // arbitrary SQL must be able to read packs to run one.
+  if (packId && !readPacks) {
+    return { authorized: false };
+  }
 
   if (writeLiveQueries) {
     return { authorized: true };
