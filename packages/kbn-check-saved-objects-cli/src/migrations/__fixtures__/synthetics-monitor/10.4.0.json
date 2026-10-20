@@ -1,16 +1,111 @@
 {
   "10.3.0": [
     {
-      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
-      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
-      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
-      "HINT": "You can use the template below and create sample objects for 10.3.0 and 10.4.0 versions.",
-      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
-      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
-      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+      "name": "Homepage",
+      "type": "http",
+      "enabled": true,
+      "schedule": { "number": "10", "unit": "s" },
+      "urls": "https://www.elastic.co",
+      "locations": [
+        {
+          "id": "us_central",
+          "label": "North America - US Central",
+          "isServiceManaged": true
+        }
+      ],
+      "tags": [],
+      "namespace": "default",
+      "revision": 1
+    },
+    {
+      "name": "Login flow",
+      "type": "browser",
+      "enabled": true,
+      "schedule": { "number": "10", "unit": "m" },
+      "urls": "https://www.elastic.co/login",
+      "locations": [
+        {
+          "id": "us_central",
+          "label": "North America - US Central",
+          "isServiceManaged": true
+        }
+      ],
+      "tags": ["login"],
+      "namespace": "default",
+      "revision": 1
+    },
+    {
+      "name": "PostgreSQL",
+      "type": "tcp",
+      "enabled": true,
+      "schedule": { "number": "3" },
+      "hosts": "postgres.internal",
+      "locations": [
+        {
+          "id": "us_central",
+          "label": "North America - US Central",
+          "isServiceManaged": true
+        }
+      ],
+      "tags": [],
+      "namespace": "default",
+      "revision": 1
     }
   ],
   "10.4.0": [
-    {}
+    {
+      "name": "Homepage",
+      "type": "http",
+      "enabled": true,
+      "schedule": { "number": "10", "unit": "s" },
+      "schedule_interval_seconds": 10,
+      "urls": "https://www.elastic.co",
+      "locations": [
+        {
+          "id": "us_central",
+          "label": "North America - US Central",
+          "isServiceManaged": true
+        }
+      ],
+      "tags": [],
+      "namespace": "default",
+      "revision": 1
+    },
+    {
+      "name": "Login flow",
+      "type": "browser",
+      "enabled": true,
+      "schedule": { "number": "10", "unit": "m" },
+      "schedule_interval_seconds": 600,
+      "urls": "https://www.elastic.co/login",
+      "locations": [
+        {
+          "id": "us_central",
+          "label": "North America - US Central",
+          "isServiceManaged": true
+        }
+      ],
+      "tags": ["login"],
+      "namespace": "default",
+      "revision": 1
+    },
+    {
+      "name": "PostgreSQL",
+      "type": "tcp",
+      "enabled": true,
+      "schedule": { "number": "3" },
+      "schedule_interval_seconds": 180,
+      "hosts": "postgres.internal",
+      "locations": [
+        {
+          "id": "us_central",
+          "label": "North America - US Central",
+          "isServiceManaged": true
+        }
+      ],
+      "tags": [],
+      "namespace": "default",
+      "revision": 1
+    }
   ]
 }
