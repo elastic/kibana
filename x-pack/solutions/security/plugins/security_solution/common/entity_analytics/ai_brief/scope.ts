@@ -10,8 +10,6 @@ import { SIGNAL_CARD_IDS, TIME_RANGE_OPTIONS, type SignalCardId } from '../home/
 
 /** Tiles can hold hundreds of entities. The server reads the riskiest of these first. */
 export const MAX_ENTITY_IDS_PER_TILE = 200;
-const MAX_FILTERS = 20;
-const MAX_FILTERS_JSON_LENGTH = 20_000;
 
 /** The Entity Analytics view captured when the user clicks "Generate AI brief". */
 export const EntityAnalyticsScope = lazySchema(() =>
@@ -19,18 +17,6 @@ export const EntityAnalyticsScope = lazySchema(() =>
     period: z.enum(TIME_RANGE_OPTIONS),
     /** When the view was captured. The period ends here. */
     capturedAt: z.iso.datetime(),
-    /** The page's search bar query. */
-    query: z
-      .object({ query: z.string().max(4000), language: z.enum(['kuery', 'lucene']) })
-      .optional(),
-    /** The page's enabled filter pills, as Kibana `Filter` objects. */
-    filters: z
-      .array(z.looseObject({ meta: z.looseObject({}), query: z.looseObject({}).optional() }))
-      .max(MAX_FILTERS)
-      .refine((filters) => JSON.stringify(filters).length <= MAX_FILTERS_JSON_LENGTH, {
-        message: `filters must serialise to at most ${MAX_FILTERS_JSON_LENGTH} characters`,
-      })
-      .optional(),
     /** The page's entity filters (entity type, risk level, criticality, data source, watchlist). */
     entityFilters: z.record(z.string().max(64), z.array(z.string().max(256)).max(50)).optional(),
     /** The tile the user selected, if any. It orders the brief and never filters the headline values. */

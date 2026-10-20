@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { min, orderBy, truncate, uniq } from 'lodash';
 import { unflattenObject } from '@kbn/object-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AssetCriticalityLevel, Entity, EntityRiskLevels } from '@kbn/entity-store/common';
 import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
-import type { EsQueryConfig } from '@kbn/es-query';
-import { buildEsQuery } from '@kbn/es-query';
 import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
 import { SIGNAL_CARD_IDS } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
@@ -24,21 +21,19 @@ import { getHigherCriticality } from '../../../../lib/entity_analytics/risk_scor
 import { ENTITY_IDENTIFIER_TYPES } from '../entity_resolution';
 import type { BriefCandidate, BriefEntityType } from './types';
 import { MAX_BRIEF_CANDIDATES } from './types';
-import { getScopeFilters } from './describe_scope';
 
 /** Display names come from source logs, so an attacker can choose them. */
 const MAX_NAME_LENGTH = 80;
 
 export interface CandidateEntities {
-  /** Ranked and capped at `MAX_BRIEF_CANDIDATES`, narrowed by the page's search. */
+  /** Ranked and capped at `MAX_BRIEF_CANDIDATES`. */
   candidates: BriefCandidate[];
   /** Distinct entity ids in the view's tiles. */
   capturedCount: number;
+  /** Entity Store records read for them. */
+  readCount: number;
   isTruncated: boolean;
   notFoundCount: number;
-  /** Records the page's search kept. */
-  matchedCount: number;
-  hasPageQuery: boolean;
 }
 
 /** Reads the Entity Store records of the view's flagged entities, as the user, and ranks them. */
@@ -53,18 +48,15 @@ export const readEntities = async ({
 }): Promise<CandidateEntities> => {
   const tileIdsByEntityId = selectCandidateTiles(scope);
   const entityIds = [...tileIdsByEntityId.keys()];
-  const hasPageQuery = Boolean(scope.query?.query) || (scope.filters ?? []).length > 0;
 
-  // Every record is read (at most 200 ids per tile, about 1 KB each). The search narrows the hits, while
-  // `found` counts every flagged entity with a record.
-  const response = await esClient.search<Entity, { found: { value: number } }>({
+  // Every record is read: at most 200 ids per tile, about 1 KB each. The page's search isn't applied,
+  // because the tiles don't apply it either.
+  const response = await esClient.search<Entity>({
     index: getEntitiesAlias(ENTITY_LATEST, spaceId),
     size: entityIds.length,
     ignore_unavailable: true,
     query: { bool: { filter: [{ terms: { 'entity.id': entityIds } }] } },
-    post_filter: hasPageQuery ? buildPageQuery(scope) : undefined,
     sort: [{ 'entity.id': 'asc' }],
-    aggs: { found: { value_count: { field: 'entity.id' } } },
   });
 
   const candidates = response.hits.hits.flatMap(({ _source: source }): BriefCandidate[] => {
@@ -95,10 +87,9 @@ export const readEntities = async ({
       )
     ),
     capturedCount: entityIds.length,
+    readCount: response.hits.hits.length,
     isTruncated: candidates.length > MAX_BRIEF_CANDIDATES,
-    notFoundCount: entityIds.length - (response.aggregations?.found.value ?? 0),
-    matchedCount: getTotal(response.hits.total),
-    hasPageQuery,
+    notFoundCount: entityIds.length - response.hits.hits.length,
   };
 };
 
@@ -209,25 +200,6 @@ export const getCandidateRisk = ({ id, record }: BriefCandidate): CandidateRisk 
     scoredId: record.entity?.id ?? id,
   };
 };
-
-/** As detection rules build queries server-side: the page has already accepted the query. */
-const PAGE_QUERY_CONFIG: EsQueryConfig = {
-  allowLeadingWildcards: true,
-  queryStringOptions: { analyze_wildcard: true },
-  ignoreFilterIfFieldNotInIndex: false,
-  dateFormatTZ: 'Zulu',
-};
-
-const buildPageQuery = (scope: EntityAnalyticsScope): QueryDslQueryContainer =>
-  buildEsQuery(
-    undefined,
-    scope.query?.query ? [scope.query] : [],
-    getScopeFilters(scope),
-    PAGE_QUERY_CONFIG
-  );
-
-const getTotal = (total: number | SearchTotalHits | undefined): number =>
-  typeof total === 'number' ? total : total?.value ?? 0;
 
 /** The record's entity type, or the EUID prefix when the record has none. */
 const getBriefEntityType = (record: Entity, id: string): BriefEntityType => {

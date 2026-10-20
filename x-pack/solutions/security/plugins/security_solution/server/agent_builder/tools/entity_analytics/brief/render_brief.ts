@@ -17,10 +17,8 @@ import {
   describeDelta,
   describeEntityFilter,
   describeSample,
-  filterLabel,
   formatCount,
   formatCountOf,
-  getScopeFilters,
 } from './describe_scope';
 import type { CandidateEntities } from './read_entities';
 import type { VerifiedBrief } from './verify_draft';
@@ -105,14 +103,12 @@ export const renderBrief = ({
 };
 
 const renderScope = (scope: EntityAnalyticsScope, spaceId: string): string => {
-  const { period, query, entityFilters = {}, focusTileId, tiles } = scope;
+  const { period, entityFilters = {}, focusTileId, tiles } = scope;
   const selectedTitle = focusTileId && tiles[focusTileId]?.title;
   const parts = [
     `Last ${BRIEF_PERIOD_LABELS[period]}`,
     selectedTitle ? `Selected: ${selectedTitle}` : undefined,
     ...Object.entries(entityFilters).map(([key, values]) => describeEntityFilter(key, values)),
-    query?.query ? `Search "${query.query}"` : undefined,
-    ...getScopeFilters(scope).map(filterLabel),
     spaceId === DEFAULT_SPACE_ID ? undefined : `Space ${spaceId}`,
   ];
   return `**Scope:** ${escapeMarkdown(compact(parts).join(' · '))}`;
@@ -124,7 +120,6 @@ const renderNotes = (scope: EntityAnalyticsScope, entities: CandidateEntities): 
     return tile?.unavailable ? [tile.title] : [];
   });
   const notes = [
-    matchesNoEntity(entities) ? 'None of the flagged entities match the search query.' : undefined,
     entities.notFoundCount > 0
       ? `${formatCountOf(
           entities.notFoundCount,
@@ -138,15 +133,6 @@ const renderNotes = (scope: EntityAnalyticsScope, entities: CandidateEntities): 
   ];
   return compact(notes).map((text) => `_${text}_`);
 };
-
-/** Flagged entities have records, but the page's search kept none of them. */
-const matchesNoEntity = ({
-  hasPageQuery,
-  matchedCount,
-  capturedCount,
-  notFoundCount,
-}: CandidateEntities): boolean =>
-  hasPageQuery && matchedCount === 0 && capturedCount > notFoundCount;
 
 const renderSummary = (
   { tiles }: EntityAnalyticsScope,

@@ -9,7 +9,7 @@ import type { EntityAnalyticsScope } from '../../../../../common/entity_analytic
 import type { BriefPriority } from './prompts';
 import type { EntityFacts } from './types';
 import type { CandidateEntities } from './read_entities';
-import { NO_PRIORITIES_LINE, QUIET_LINE, getRiskChartEntityId, renderBrief } from './render_brief';
+import { QUIET_LINE, getRiskChartEntityId, renderBrief } from './render_brief';
 
 const scopeWith = (overrides: Partial<EntityAnalyticsScope>): EntityAnalyticsScope => ({
   period: '7d',
@@ -22,16 +22,15 @@ const noEntities: CandidateEntities = {
   candidates: [],
   isTruncated: false,
   capturedCount: 0,
+  readCount: 0,
   notFoundCount: 0,
-  matchedCount: 0,
-  hasPageQuery: false,
 };
 
 const hostA: CandidateEntities = {
   ...noEntities,
   candidates: [{ id: 'host:a', name: 'web_01', type: 'host', tileIds: ['riskMovers'], record: {} }],
   capturedCount: 1,
-  matchedCount: 1,
+  readCount: 1,
 };
 
 const priority = (entityId: string, observed = 'Observed.'): BriefPriority => ({
@@ -46,7 +45,6 @@ describe('renderBrief', () => {
     const brief = renderBrief({
       scope: scopeWith({
         entityFilters: { riskLevels: ['High'], watchlists: ['id-1', 'id-2'] },
-        query: { query: 'host.name: web*', language: 'kuery' },
         focusTileId: 'watchlisted',
         tiles: {
           entitiesWithAlerts: {
@@ -75,9 +73,8 @@ describe('renderBrief', () => {
           { id: 'user:b', name: 'jdoe', type: 'user', tileIds: ['watchlisted'], record: {} },
         ],
         capturedCount: 3,
+        readCount: 2,
         notFoundCount: 1,
-        matchedCount: 2,
-        hasPageQuery: true,
       },
       verified: {
         summary: '{{ entity.id host:a }} rose sharply.',
@@ -93,7 +90,7 @@ describe('renderBrief', () => {
       },
     });
     expect(brief)
-      .toBe(`**Scope:** Last 7 days · Selected: Watchlisted · Risk level: High · On 2 selected watchlists · Search "host.name: web\\*" · Space soc
+      .toBe(`**Scope:** Last 7 days · Selected: Watchlisted · Risk level: High · On 2 selected watchlists · Space soc
 _1 flagged entity was not found in the Entity Store._
 _Not checked, because the data couldn't be read: Entities with anomalies._
 
@@ -137,19 +134,6 @@ _Based on the 2 highest-ranked of at least 48,213 flagged entities._`);
       entities: noEntities,
     });
     expect(brief).toBe(`**Scope:** Last 7 days\n\n**What needs attention**\n${QUIET_LINE}`);
-  });
-
-  it('has nothing to prioritize, and says why, when the search matches no flagged entity', () => {
-    const brief = renderBrief({
-      scope: scopeWith({
-        query: { query: 'host.name: web*', language: 'kuery' },
-        tiles: { riskMovers: { title: 'Risk movers', value: 3, entityIds: ['host:x', 'host:y'] } },
-      }),
-      spaceId: 'default',
-      entities: { ...noEntities, capturedCount: 2, hasPageQuery: true },
-    });
-    expect(brief).toContain('_None of the flagged entities match the search query._');
-    expect(brief).toContain(`**What needs attention**\n${NO_PRIORITIES_LINE}`);
   });
 
   it('escapes markdown in model text, so it adds no links, tags or emphasis', () => {

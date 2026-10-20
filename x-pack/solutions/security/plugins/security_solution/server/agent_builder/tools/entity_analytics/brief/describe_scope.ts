@@ -6,7 +6,6 @@
  */
 
 import { mapValues, omit, upperFirst } from 'lodash';
-import type { Filter } from '@kbn/es-query';
 import type { TimeRange } from '../../../../../common/entity_analytics/home/constants';
 import type {
   EntityAnalyticsScope,
@@ -42,29 +41,6 @@ export const describeDelta = ({ delta }: EntityAnalyticsScopeTile): string => {
   return `${delta > 0 ? '+' : ''}${formatCount(delta)}`;
 };
 
-/** The scope validates filter pills as objects with `meta`; they are Kibana filters. */
-export const getScopeFilters = ({ filters }: EntityAnalyticsScope): Filter[] =>
-  (filters ?? []) as Filter[];
-
-export const filterLabel = ({ meta }: Filter): string => {
-  if (meta.alias) {
-    return meta.alias;
-  }
-  const label = `${meta.negate ? 'NOT ' : ''}${meta.key ?? 'custom filter'}`;
-  const value = filterValue(meta.params, meta.value);
-  return value ? `${label}: ${value}` : label;
-};
-
-const filterValue = (params: unknown, value: unknown): string | undefined => {
-  if (Array.isArray(params)) {
-    return params.join(', ');
-  }
-  if (params && typeof params === 'object' && 'query' in params) {
-    return String(params.query);
-  }
-  return value === undefined ? undefined : String(value);
-};
-
 const ENTITY_FILTER_LABELS: Record<string, string> = {
   entityTypes: 'Entity type',
   riskLevels: 'Risk level',
@@ -91,7 +67,7 @@ export const formatStoredValue = (value: string): string => upperFirst(value.rep
 /** Only when a cap left out flagged entities: the brief, and the model, are told it is a sample. */
 export const describeSample = (
   { tiles }: EntityAnalyticsScope,
-  { candidates, matchedCount, isTruncated }: CandidateEntities
+  { candidates, readCount, isTruncated }: CandidateEntities
 ): string | undefined => {
   const available = Object.values(tiles).filter(({ unavailable }) => !unavailable);
   // A tile that sent fewer ids than its value makes the total a lower bound.
@@ -100,7 +76,7 @@ export const describeSample = (
     return undefined;
   }
   // The largest count, never a sum: the tiles overlap.
-  const total = Math.max(matchedCount, ...available.map(({ value }) => value));
+  const total = Math.max(readCount, ...available.map(({ value }) => value));
   return `Based on the ${formatCount(candidates.length)} highest-ranked of ${
     isSampled ? 'at least ' : ''
   }${formatCountOf(total, 'flagged entity', 'flagged entities')}.`;
