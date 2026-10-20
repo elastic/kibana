@@ -9,6 +9,7 @@ import { expect } from '@kbn/scout-oblt/api';
 import { tags } from '@kbn/scout-oblt';
 import type { ApiServicesFixture, KibanaRole } from '@kbn/scout-oblt';
 import { NIGHTSHIFT_ENABLED_FLAG, NIGHTSHIFT_FEATURE_ID } from '@kbn/nightshift-shared';
+import { toSlackThreadKey } from '../../../../common';
 import {
   apiTest,
   cancelRunsOf,
@@ -219,7 +220,11 @@ apiTest.describe(
           channel: 'CSCOUT',
           thread_ts: `${Date.now()}.000100`,
         };
-        const threadKey = `team:${thread.workspace}/channel:${thread.channel}/thread:${thread.thread_ts}`;
+        const threadKey = toSlackThreadKey({
+          workspace: thread.workspace,
+          channel: thread.channel,
+          threadTs: thread.thread_ts,
+        });
 
         const created = await findOrCreateSlackThread(apiClient, cookieHeader, {
           ...thread,

@@ -566,6 +566,25 @@ describe('RelayClient', () => {
       );
     });
 
+    it('sends blocks only when there are some', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000200', tenant_key: 'team-A' },
+      } as never);
+      const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: 'hi' } }];
+
+      await createClient().trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hi', blocks });
+      await createClient().trigger({
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'hi',
+        blocks: [],
+      });
+
+      expect(requestMock.mock.calls[0][0]).toMatchObject({ data: { blocks } });
+      expect((requestMock.mock.calls[1][0] as { data: object }).data).not.toHaveProperty('blocks');
+    });
+
     it('sends message_ts and drops thread_ts when editing a posted message', async () => {
       requestMock.mockResolvedValue({
         status: 200,

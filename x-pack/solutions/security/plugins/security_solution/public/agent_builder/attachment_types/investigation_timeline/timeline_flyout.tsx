@@ -21,6 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TIMELINE_TITLE } from '../grouped_attachments';
+import { TimelineTimestamp } from './timeline_timestamp';
 import type { InvestigationTimelineEvent } from './types';
 
 export const INVESTIGATION_TIMELINE_FLYOUT_TEST_ID = 'investigationTimelineFlyout';
@@ -34,9 +35,6 @@ const EVENT_ICON_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.agentBuilder.investigationTimeline.eventIconAriaLabel',
   { defaultMessage: 'Event' }
 );
-
-/** ISO-8601 timestamps render with a space before the time, matching the flyout design. */
-const formatTimestamp = (timestamp: string): string => timestamp.replace('T', ' ');
 
 export interface InvestigationTimelineFlyoutProps {
   events: InvestigationTimelineEvent[];
@@ -84,9 +82,10 @@ export const InvestigationTimelineFlyout = ({ events }: InvestigationTimelineFly
                       color="subdued"
                       css={css({ fontFamily: euiTheme.font.familyCode })}
                     >
-                      <span data-test-subj="investigationTimelineEventTimestamp">
-                        {formatTimestamp(event.timestamp)}
-                      </span>
+                      <TimelineTimestamp
+                        value={event.timestamp}
+                        data-test-subj="investigationTimelineEventTimestamp"
+                      />
                     </EuiText>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>

@@ -229,6 +229,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
   describe('resolved-mode entity tools', () => {
     const restoreTool = (
       kind:
+        | 'entityAnomalyInsights'
         | 'entityAlertsInsights'
         | 'entityMisconfigurationInsights'
         | 'entityVulnerabilityInsights'
@@ -258,6 +259,15 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       hostName: 'my-host',
       entityId: 'host:my-host',
       mode: 'resolved',
+    });
+
+    it('restores entityAnomalyInsights in resolved mode and reopens the host in resolved mode', () => {
+      restoreTool('entityAnomalyInsights');
+      expect(mockFlyoutApi.openEntityAnomalyInsights).toHaveBeenCalledWith(resolvedTool);
+      act(() => {
+        mockFlyoutApi.openEntityAnomalyInsights.mock.calls[0][0].onOpenEntity?.();
+      });
+      expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(resolvedHost);
     });
 
     it('restores entityAlertsInsights in resolved mode and reopens the host in resolved mode', () => {
@@ -304,6 +314,32 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       expect(mockFlyoutApi.openEntityVulnerabilityInsights).toHaveBeenCalledWith(resolvedTool);
       act(() => {
         mockFlyoutApi.openEntityVulnerabilityInsights.mock.calls[0][0].onShowHost();
+      });
+      expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(resolvedHost);
+    });
+
+    it('restores entityResolution in resolved mode and reopens the host in resolved mode', () => {
+      const { history } = renderRestore('/');
+      act(() => {
+        history.push(
+          buildUrl([
+            {
+              kind: 'entityResolution',
+              entityId: 'host:my-host',
+              entityType: 'host',
+              entityName: 'my-host',
+              scopeId: 'entities-table',
+              mode: 'resolved',
+            },
+          ])
+        );
+        jest.runAllTimers();
+      });
+      expect(mockFlyoutApi.openEntityResolution).toHaveBeenCalledWith(
+        expect.objectContaining({ entityId: 'host:my-host', mode: 'resolved' })
+      );
+      act(() => {
+        mockFlyoutApi.openEntityResolution.mock.calls[0][0].onShowEntity?.();
       });
       expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(resolvedHost);
     });

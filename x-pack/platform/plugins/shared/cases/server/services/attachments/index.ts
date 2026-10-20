@@ -22,7 +22,10 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression, isNonLocalIndexName } from '@kbn/es-query';
 import { AttachmentType } from '../../../common/types/domain';
-import { UNIFIED_ALERT_TYPES_ARRAY } from '../../../common/utils/attachments';
+import {
+  UNIFIED_ALERT_TYPES_ARRAY,
+  isAlertAttachmentType,
+} from '../../../common/utils/attachments';
 import {
   AttachmentAttributesRtV2,
   AttachmentPatchAttributesRtV2,
@@ -92,24 +95,29 @@ import {
 const PERSISTABLE_ATTACHMENT_TYPES_ARRAY = Array.from(PERSISTABLE_ATTACHMENT_TYPES);
 
 /**
- * Ensures alert attachments include a rule name.
- *
- * Only the legacy `cases-comments` shape is held to this. A unified alert attachment may hold
- * many alerts raised by different rules, so `rule` is optional in its schema and neither
- * `create` nor `bulkCreate` asks for one. Demanding it back on the way out made every alert
- * attachment written without a rule permanently unpatchable, including the ones attack
- * discovery writes: even a byte for byte round trip of the stored payload was refused.
+ * Ensures alert attachments include a rule name
  */
 function assertAlertAttachmentHasRuleName(attributes: Record<string, unknown>): void {
   const type = attributes?.type;
-  if (type !== AttachmentType.alert && type !== 'alert') {
+  if (!isAlertAttachmentType(type as string)) {
     return;
   }
 
-  const rule = attributes.rule as { name?: unknown } | null | undefined;
+  if (type === AttachmentType.alert || type === 'alert') {
+    const rule = attributes.rule as { name?: unknown } | null | undefined;
+    if (rule == null || rule.name == null) {
+      throw Boom.badRequest(
+        'Invalid attributes: expected attributes.rule.name for alert attachments'
+      );
+    }
+    return;
+  }
+
+  const metadata = attributes.metadata as { rule?: { name?: unknown } } | null | undefined;
+  const rule = metadata?.rule;
   if (rule == null || rule.name == null) {
     throw Boom.badRequest(
-      'Invalid attributes: expected attributes.rule.name for alert attachments'
+      'Invalid attributes: expected attributes.metadata.rule.name for unified alert attachments'
     );
   }
 }
@@ -208,7 +216,7 @@ export class AttachmentService {
       this.context.log.debug(
         `Attempting to count all alerts (legacy + unified) for case ${caseId}`
       );
-      return this.aggregateAlertsForCase(caseId);
+      return await this.aggregateAlertsForCase(caseId);
     } catch (error) {
       this.context.log.error(`Error while counting alerts for case ${caseId}: ${error}`);
       throw error;

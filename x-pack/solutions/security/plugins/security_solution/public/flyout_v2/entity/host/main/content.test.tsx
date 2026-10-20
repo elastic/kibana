@@ -47,10 +47,11 @@ jest.mock(
     AssetCriticalityAccordion: () => <div data-test-subj="assetCriticalityAccordionMock" />,
   })
 );
+const mockEntityHighlightsAccordion = jest.fn((_props: { mode?: string }) => null);
 jest.mock(
   '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights',
   () => ({
-    EntityHighlightsAccordion: () => null,
+    EntityHighlightsAccordion: (props: { mode?: string }) => mockEntityHighlightsAccordion(props),
   })
 );
 const mockEntityInsight = jest.fn((_props: { aliasRecords?: readonly unknown[] }) => null);
@@ -100,6 +101,13 @@ describe('Content — graph/resolution navigation gating', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
+  });
+
+  it('forwards the view mode to the resolution section so the target row stays linkable', () => {
+    render(<Content {...defaultProps} mode="resolved" />, { wrapper: TestProviders });
+    expect(mockResolutionSection).toHaveBeenLastCalledWith(
+      expect.objectContaining({ mode: 'resolved' })
+    );
   });
 
   it('forwards openDetailsPanel to the graph and resolution sections by default', () => {
@@ -206,6 +214,27 @@ describe('Content — group view', () => {
     });
     expect(mockFlyoutRiskSummary).toHaveBeenLastCalledWith(
       expect.objectContaining({ isGroupView: true })
+    );
+  });
+
+  it('forwards the view mode to the entity summary so it covers the whole group', () => {
+    render(<Content {...defaultProps} mode="resolved" />, { wrapper: TestProviders });
+    expect(mockEntityHighlightsAccordion).toHaveBeenLastCalledWith(
+      expect.objectContaining({ mode: 'resolved' })
+    );
+  });
+
+  it('tells the entity summary to wait while the entity store record is loading', () => {
+    render(<Content {...defaultProps} isEntityRecordLoading />, { wrapper: TestProviders });
+    expect(mockEntityHighlightsAccordion).toHaveBeenLastCalledWith(
+      expect.objectContaining({ isEntityRecordLoading: true })
+    );
+  });
+
+  it('leaves the entity summary in single mode when no mode is given', () => {
+    render(<Content {...defaultProps} />, { wrapper: TestProviders });
+    expect(mockEntityHighlightsAccordion).toHaveBeenLastCalledWith(
+      expect.objectContaining({ mode: undefined })
     );
   });
 

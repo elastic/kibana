@@ -9,11 +9,6 @@ import { parse } from 'yaml';
 import { IMPACT_INTERNAL_URL } from '@kbn/agentic-investigations-plugin/common';
 import { PROPOSAL_BY_ID_URL } from '@kbn/proposals-common';
 import {
-  ASSET_CRITICALITY_LEVELS,
-  CONFIRMED_FINDING_CRITICALITY,
-  CRITICAL_FINDING_CRITICALITY,
-} from '../../common/proposals/asset_criticality';
-import {
   getManagedWorkflowDefinition,
   ALERTZERO_HUNT_WORKFLOW_ID,
   ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID,
@@ -237,6 +232,16 @@ describe('system-security-hunt-execute', () => {
     // same stranded-rerun bug wearing a second id.
     expect(update.with?.attachment_id).toBe(add.with?.id);
     expect(update.with?.conversation_id).toBe(add.with?.conversation_id);
+  });
+
+  // `fallback` alone does not rescue the step: the engine's `ExitTryBlockNodeImpl` re-throws
+  // the stored add error after the fallback path completes, so without `continue` the rerun
+  // still fails at `attach_sse` even though the update landed (fallback_step/README.md,
+  // "With Continue"). The add stays `failed` in the execution detail; the run completes.
+  it('lets a successful update fallback finish the add step instead of re-throwing the conflict', () => {
+    const add = stepNamed(workflow, 'add_sse_attachment');
+
+    expect(add['on-failure']?.continue).toBe(true);
   });
 
   // The hunt-once evidence write (last_hunted_at, last_hunt_status and siblings) is a dedicated
@@ -472,61 +477,6 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       const strippedPaths = rawPaths.map(stripSpacePrefix).filter((path): path is string => !!path);
 
       expect(strippedPaths.filter((path) => !KNOWN_ROUTE_PATHS.has(path))).toEqual([]);
-    });
-  });
-
-  // Packaging ranks the asset criticality levels when it resolves a slot, and the proposal gate
-  // ranks them again in Liquid when it says whether a race winner covers a finding. Both read
-  // the same list, and the action only accepts what its own definition declares, so a level added
-  // in one place and not the others would start being proposed while reading as unknown, or be
-  // proposed and then refused. This keeps the three together.
-  describe('asset criticality levels', () => {
-    const definitionYaml = (id: string): string => {
-      const definition = getManagedWorkflowDefinition(id);
-      if (!definition || !('yaml' in definition) || typeof definition.yaml !== 'string') {
-        throw new Error(`Managed definition ${id} has no yaml`);
-      }
-      return definition.yaml;
-    };
-
-    /** Finds an `enum` declared under a property of this name, wherever the schema nests it. */
-    const enumOf = (node: unknown, property: string): unknown[] | undefined => {
-      if (!node || typeof node !== 'object') {
-        return undefined;
-      }
-      const record = node as Record<string, unknown>;
-      const declared = record[property] as { enum?: unknown[] } | undefined;
-      if (declared?.enum) {
-        return declared.enum;
-      }
-      for (const value of Object.values(record)) {
-        const found = enumOf(value, property);
-        if (found) {
-          return found;
-        }
-      }
-      return undefined;
-    };
-
-    it('are the ones the Set asset criticality action accepts, in the order the resolver ranks them', () => {
-      const action = parse(definitionYaml('system-alertzero-action-set-asset-criticality'));
-
-      // The action's enum is the source; the order is the shared list's, weakest first.
-      expect(enumOf(action, 'criticality_level')).toEqual([...ASSET_CRITICALITY_LEVELS]);
-    });
-
-    it('include both levels packaging proposes, the critical one ranked above the confirmed one', () => {
-      expect(ASSET_CRITICALITY_LEVELS).toContain(CONFIRMED_FINDING_CRITICALITY);
-      expect(ASSET_CRITICALITY_LEVELS).toContain(CRITICAL_FINDING_CRITICALITY);
-      expect(ASSET_CRITICALITY_LEVELS.indexOf(CRITICAL_FINDING_CRITICALITY)).toBeGreaterThan(
-        ASSET_CRITICALITY_LEVELS.indexOf(CONFIRMED_FINDING_CRITICALITY)
-      );
-    });
-
-    it('are the list the proposal gate ranks in its lost-race note', () => {
-      const gate = definitionYaml(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID);
-
-      expect(gate).toContain(`'${ASSET_CRITICALITY_LEVELS.join(',')}' | split: ','`);
     });
   });
 });

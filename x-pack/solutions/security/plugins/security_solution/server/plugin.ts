@@ -429,6 +429,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       auditLogger: plugins.security?.audit.withoutRequest,
       kibanaVersion: pluginContext.env.packageInfo.version,
       experimentalFeatures,
+      entityAnalyticsConfig: config.entityAnalytics,
       hasEncryptionKey: plugins.encryptedSavedObjects?.canEncrypt === true,
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);

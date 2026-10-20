@@ -75,7 +75,6 @@ export interface AttachmentForDeletion {
   /** The file of a file attachment, read from the stored fields whether or not they decode. */
   fileId?: string;
   attributes?: AttachmentAttributesV2;
-  /** The version read, so a write computed from this copy can refuse to overwrite a newer one. */
   version?: string;
 }
 
