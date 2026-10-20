@@ -416,6 +416,7 @@ exports[`pull_request fragments pull_request/base 1`] = `
     },
     {
       "agents": {
+        "image": "family/kibana-minimal-ubuntu-2604",
         "machineType": "n2-standard-2",
       },
       "command": ".buildkite/scripts/steps/ci_stats_ready.sh",
@@ -490,13 +491,10 @@ exports[`pull_request fragments pull_request/build_cloud_image 1`] = `
   "steps": [
     {
       "agents": {
-        "machineType": "n2-standard-2",
+        "machineType": "n2-standard-16",
         "preemptible": true,
       },
       "command": ".buildkite/scripts/steps/cloud/build_cloud_image.sh",
-      "depends_on": [
-        "build",
-      ],
       "key": "build_cloud_image",
       "label": "Build Cloud Image",
       "retry": {
@@ -690,15 +688,12 @@ exports[`pull_request fragments pull_request/deploy_cloud 1`] = `
   "steps": [
     {
       "agents": {
-        "machineType": "n2-standard-2",
+        "machineType": "n2-standard-16",
         "preemptible": true,
       },
-      "command": ".buildkite/scripts/steps/cloud/build_and_deploy.sh",
-      "depends_on": [
-        "build",
-      ],
-      "key": "deploy_cloud",
-      "label": "Build and Deploy to Cloud",
+      "command": ".buildkite/scripts/steps/cloud/build_cloud_image.sh",
+      "key": "build_cloud_image",
+      "label": "Build Cloud Image",
       "retry": {
         "automatic": [
           {
@@ -707,7 +702,27 @@ exports[`pull_request fragments pull_request/deploy_cloud 1`] = `
           },
         ],
       },
-      "soft_fail": true,
+      "timeout_in_minutes": 60,
+    },
+    {
+      "agents": {
+        "machineType": "n2-standard-2",
+        "preemptible": true,
+      },
+      "command": ".buildkite/scripts/steps/cloud/deploy.sh",
+      "depends_on": [
+        "build_cloud_image",
+      ],
+      "key": "deploy_cloud",
+      "label": "Deploy to Cloud",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+        ],
+      },
       "timeout_in_minutes": 30,
     },
   ],
@@ -2373,7 +2388,7 @@ exports[`pull_request fragments pull_request/trigger_entity_store_performance 1`
   "steps": [
     {
       "agents": {
-        "image": "family/kibana-ubuntu-2404",
+        "image": "family/kibana-minimal-ubuntu-2604",
         "imageProject": "elastic-images-prod",
         "machineType": "n2-standard-2",
         "provider": "gcp",
