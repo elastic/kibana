@@ -39,7 +39,7 @@ const detectionOverviewRoute = createServerRoute({
     server,
   }): Promise<{
     sources: number;
-    knowledge_records: number;
+    knowledge_indicators: number;
     active_rules: number;
     detections: number;
     significant_events: number;
@@ -59,20 +59,22 @@ const detectionOverviewRoute = createServerRoute({
         scopedClients.getEventSearchClient(),
       ]);
 
-    const [knowledgeRecords, activeRules, detections, significantEvents] = await Promise.all([
-      knowledgeIndicatorClient.countFeatures(readableSourceIds),
-      knowledgeIndicatorClient.countRuleBackedQueries(readableSourceIds),
-      detectionClient
-        .findLatestPaginated({ ...params.query, page: 1, perPage: 1 })
-        .then(({ total }) => total),
-      eventClient
-        .findLatestByCurrentStatePaginated({ ...params.query, page: 1, perPage: 1 })
-        .then(({ total }) => total),
-    ]);
+    const [features, unbackedQueries, activeRules, detections, significantEvents] =
+      await Promise.all([
+        knowledgeIndicatorClient.countFeatures(readableSourceIds),
+        knowledgeIndicatorClient.countUnbackedQueries(readableSourceIds),
+        knowledgeIndicatorClient.countRuleBackedQueries(readableSourceIds),
+        detectionClient
+          .findLatestPaginated({ ...params.query, page: 1, perPage: 1 })
+          .then(({ total }) => total),
+        eventClient
+          .findLatestByCurrentStatePaginated({ ...params.query, page: 1, perPage: 1 })
+          .then(({ total }) => total),
+      ]);
 
     return {
       sources: sources.length,
-      knowledge_records: knowledgeRecords,
+      knowledge_indicators: features + unbackedQueries,
       active_rules: activeRules,
       detections,
       significant_events: significantEvents,

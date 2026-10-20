@@ -78,6 +78,24 @@ export class IndicatorReader {
     return this.revisionReader.countLatestRevisions(where, postGroupingWhere);
   }
 
+  countUnbackedQueries(sourceIds: string[]): Promise<number> {
+    if (sourceIds.length === 0) {
+      return Promise.resolve(0);
+    }
+
+    const where = combineWhere(
+      inPredicate(TYPE, [KI_TYPE_QUERY]),
+      inPredicate(SOURCE_ID, sourceIds)
+    );
+    const postGroupingWhere = combineWhere(
+      IS_NOT_DELETED,
+      IS_NOT_EXPIRED,
+      ruleUnbackedPostGroupingWhere('only')
+    );
+
+    return this.revisionReader.countLatestRevisions(where, postGroupingWhere);
+  }
+
   countRuleBackedQueries(sourceIds: string[]): Promise<number> {
     if (sourceIds.length === 0) {
       return Promise.resolve(0);

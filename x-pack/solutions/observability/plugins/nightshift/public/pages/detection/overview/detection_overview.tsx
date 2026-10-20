@@ -26,8 +26,8 @@ import {
   DETECTION_PROCESS_LABEL,
   DETECTIONS_LABEL,
   DETECTIONS_TOOLTIP,
-  KNOWLEDGE_RECORDS_LABEL,
-  KNOWLEDGE_RECORDS_TOOLTIP,
+  KNOWLEDGE_INDICATORS_LABEL,
+  KNOWLEDGE_INDICATORS_TOOLTIP,
   OVERVIEW_ERROR_MESSAGE,
   OVERVIEW_ERROR_TITLE,
   OVERVIEW_RETRY_LABEL,
@@ -39,7 +39,7 @@ import {
 
 export interface DetectionOverviewCounts {
   sources: number;
-  knowledge_records: number;
+  knowledge_indicators: number;
   active_rules: number;
   detections: number;
   significant_events: number;
@@ -81,10 +81,10 @@ export const DetectionOverview = ({
     },
     {
       icon: 'documents',
-      value: counts?.knowledge_records,
-      label: KNOWLEDGE_RECORDS_LABEL,
-      tooltip: KNOWLEDGE_RECORDS_TOOLTIP,
-      testSubject: 'nightshiftDetectionOverviewKnowledgeRecords',
+      value: counts?.knowledge_indicators,
+      label: KNOWLEDGE_INDICATORS_LABEL,
+      tooltip: KNOWLEDGE_INDICATORS_TOOLTIP,
+      testSubject: 'nightshiftDetectionOverviewKnowledgeIndicators',
     },
     {
       icon: 'bolt',
@@ -110,7 +110,7 @@ export const DetectionOverview = ({
   ];
 
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="m">
+    <EuiPanel hasBorder hasShadow={false} paddingSize="l">
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs">
@@ -125,7 +125,7 @@ export const DetectionOverview = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="l" />
       {isCountsError ? (
         <KbnDangerCallout
           announceOnMount

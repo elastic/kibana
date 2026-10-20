@@ -45,14 +45,16 @@ export const SOURCES_TOOLTIP = i18n.translate('xpack.nightshift.detectionPage.so
   defaultMessage: 'Sources in this space',
 });
 
-export const KNOWLEDGE_RECORDS_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.knowledgeRecordsLabel',
-  { defaultMessage: 'Knowledge records' }
+export const KNOWLEDGE_INDICATORS_LABEL = i18n.translate(
+  'xpack.nightshift.detectionPage.knowledgeIndicatorsLabel',
+  { defaultMessage: 'Knowledge indicators' }
 );
 
-export const KNOWLEDGE_RECORDS_TOOLTIP = i18n.translate(
-  'xpack.nightshift.detectionPage.knowledgeRecordsTooltip',
-  { defaultMessage: 'Current knowledge indicators, excluding rules' }
+export const KNOWLEDGE_INDICATORS_TOOLTIP = i18n.translate(
+  'xpack.nightshift.detectionPage.knowledgeIndicatorsTooltip',
+  {
+    defaultMessage: 'Current feature and draft query indicators; active rules are shown separately',
+  }
 );
 
 export const ACTIVE_RULES_LABEL = i18n.translate(

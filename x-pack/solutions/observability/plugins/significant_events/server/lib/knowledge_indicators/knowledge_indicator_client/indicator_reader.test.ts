@@ -121,6 +121,20 @@ describe('IndicatorReader overview counts', () => {
     expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
   });
 
+  it('counts active unbacked queries for the requested sources', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(4);
+
+    await expect(reader.countUnbackedQueries([SOURCE])).resolves.toBe(4);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`\`source.id\` IN ("${SOURCE}")`);
+    expect(query).toContain('"query"');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+    expect(query).toContain('`query.rule_backed` == FALSE');
+  });
+
   it('counts rule-backed queries for the requested sources', async () => {
     const { reader } = makeReader();
     (executeCountQuery as jest.Mock).mockResolvedValueOnce(8);

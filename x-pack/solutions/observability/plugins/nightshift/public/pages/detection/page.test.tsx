@@ -52,7 +52,7 @@ describe('DetectionPage', () => {
     mockUseDetectionOverview.mockReturnValue({
       data: {
         sources: 6,
-        knowledge_records: 113,
+        knowledge_indicators: 113,
         active_rules: 80,
         detections: 40,
         significant_events: 23,
@@ -67,6 +67,7 @@ describe('DetectionPage', () => {
     renderPage();
 
     expect(screen.getByTestId('nightshiftDetectionStatus')).toHaveTextContent('Paused');
+    expect(screen.getByText('Knowledge indicators')).toBeInTheDocument();
   });
 
   it('shows the overview error instead of zero counts', () => {

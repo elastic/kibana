@@ -20,6 +20,7 @@ describe('GET /internal/significant_events/detection/_overview', () => {
     const from = '2026-10-19T07:00:00.000Z';
     const to = '2026-10-20T07:00:00.000Z';
     const countFeatures = jest.fn().mockResolvedValue(11);
+    const countUnbackedQueries = jest.fn().mockResolvedValue(4);
     const countRuleBackedQueries = jest.fn().mockResolvedValue(7);
     const findLatestPaginated = jest.fn().mockResolvedValue({ total: 5 });
     const findLatestByCurrentStatePaginated = jest.fn().mockResolvedValue({ total: 3 });
@@ -44,6 +45,7 @@ describe('GET /internal/significant_events/detection/_overview', () => {
         },
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({
           countFeatures,
+          countUnbackedQueries,
           countRuleBackedQueries,
         }),
         getDetectionClient: jest.fn().mockResolvedValue({ findLatestPaginated }),
@@ -52,6 +54,7 @@ describe('GET /internal/significant_events/detection/_overview', () => {
     } as never);
 
     expect(countFeatures).toHaveBeenCalledWith(['source-readable']);
+    expect(countUnbackedQueries).toHaveBeenCalledWith(['source-readable']);
     expect(countRuleBackedQueries).toHaveBeenCalledWith(['source-readable']);
     expect(findLatestPaginated).toHaveBeenCalledWith({ from, to, page: 1, perPage: 1 });
     expect(findLatestByCurrentStatePaginated).toHaveBeenCalledWith({
@@ -62,7 +65,7 @@ describe('GET /internal/significant_events/detection/_overview', () => {
     });
     expect(response).toEqual({
       sources: 2,
-      knowledge_records: 11,
+      knowledge_indicators: 15,
       active_rules: 7,
       detections: 5,
       significant_events: 3,
