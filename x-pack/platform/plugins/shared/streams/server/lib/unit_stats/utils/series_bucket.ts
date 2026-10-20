@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SERIES_MIN_BUCKET_MS, SERIES_TARGET_POINTS } from '../constants';
+import { ESQL_MAX_ROWS, SERIES_MIN_BUCKET_MS, SERIES_TARGET_POINTS } from '../constants';
 
 const MINUTE_MS = 60 * 1000;
 const HOUR_MS = 60 * MINUTE_MS;
@@ -28,3 +28,16 @@ export const getSeriesBucketMs = (rangeMs: number): number => {
   })();
   return Math.max(bucketMs, SERIES_MIN_BUCKET_MS);
 };
+
+/**
+ * How many ids one series query can ask for, so that its rows (ids times buckets) stay within
+ * `ESQL_MAX_ROWS`. The first and last buckets can be partial, so the window covers one more
+ * bucket than its length divided by the bucket width.
+ */
+export const getIdsPerSeriesQuery = ({
+  rangeMs,
+  bucketMs,
+}: {
+  rangeMs: number;
+  bucketMs: number;
+}): number => Math.max(1, Math.floor(ESQL_MAX_ROWS / (Math.ceil(rangeMs / bucketMs) + 1)));

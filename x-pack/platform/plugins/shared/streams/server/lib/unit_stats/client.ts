@@ -5,36 +5,46 @@
  * 2.0.
  */
 
+import type { ComposerQuery } from '@elastic/esql';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { StreamsUnit } from '@kbn/streams-schema';
-import { buildDestinationStatsRequest } from './query_builders/build_destination_stats_request';
-import { buildProcessorStatsRequest } from './query_builders/build_processor_stats_request';
-import { UNIT_STATS_DEFAULT_WINDOW_MS } from './constants';
-import {
-  mapDestinationStatsResponse,
-  noDestinationStats,
-  type DestinationStatsAggregations,
-} from './mappers/map_destination_stats_response';
-import {
-  mapProcessorStatsResponse,
-  noProcessorStats,
-  type ProcessorStatsAggregations,
-} from './mappers/map_processor_stats_response';
+import { chunk } from 'lodash';
+import { toEsqlRequest } from '../streams/helpers/esql';
+import { UNIT_STATS_DEFAULT_WINDOW_MS, UNIT_STATS_REQUEST_TIMEOUT_MS } from './constants';
 import { isMissingStreamError, toSearchError } from './errors/search_errors';
-import { getSeriesBucketMs } from './utils/series_bucket';
+import { joinDestinationRows } from './mappers/join_destination_rows';
+import { joinProcessorRows } from './mappers/join_processor_rows';
+import { toRows, type EsqlRow } from './mappers/esql_rows';
 import {
-  buildEarliestStartRequest,
-  readEarliestStartMs,
-  type StatsWindow,
-} from './query_builders/unit_filter';
+  mapDestinationStatsRows,
+  noDestinationStats,
+} from './mappers/map_destination_stats_response';
+import { mapProcessorStatsRows, noProcessorStats } from './mappers/map_processor_stats_response';
+import {
+  buildDestinationRateQuery,
+  buildDestinationSumsQuery,
+} from './query_builders/build_destination_stats_queries';
+import {
+  buildProcessorRateQuery,
+  buildProcessorSumsQuery,
+} from './query_builders/build_processor_stats_queries';
+import type { StatsWindow } from './query_builders/filters';
+import { getIdsPerSeriesQuery, getSeriesBucketMs } from './utils/series_bucket';
 import { validateDestination, validateProcessor } from './validate_components';
 
-/** What every stats search for one request shares. */
+/** What every stats query for one request shares. */
 interface StatsQuery {
   unitId: string;
   window: StatsWindow;
   /** Set only when the request pins a config hash. */
   configHash?: string;
+}
+
+/** The results of one kind, and the error when its queries failed. */
+interface KindOutcome<TResult> {
+  results: Record<string, TResult>;
+  error?: StreamsUnit.StatsError;
 }
 
 const dedupe = (refs: StreamsUnit.StatsComponentRef[]): StreamsUnit.StatsComponentRef[] => {
@@ -66,15 +76,12 @@ export class UnitStatsClient {
     request: StreamsUnit.StatsRequest;
     now?: Date;
   }): Promise<StreamsUnit.StatsResponse> {
-    const { logger } = this.dependencies;
     const configHash = request.filter?.config_hash;
     const window = request.filter?.time_range ?? {
       start: new Date(now.getTime() - UNIT_STATS_DEFAULT_WINDOW_MS).toISOString(),
       end: now.toISOString(),
     };
-    const windowStartMs = Date.parse(window.start);
-    const windowEndMs = Date.parse(window.end);
-    const bucketMs = getSeriesBucketMs(windowEndMs - windowStartMs);
+    const bucketMs = getSeriesBucketMs(Date.parse(window.end) - Date.parse(window.start));
     const query: StatsQuery = { unitId, window, configHash };
 
     const destinationConfigs = new Map((unit.destinations ?? []).map((d) => [d.id, d]));
@@ -110,144 +117,141 @@ export class UnitStatsClient {
       }
     }
 
-    const finish = (error?: StreamsUnit.StatsError): StreamsUnit.StatsResponse => ({
-      ...(error ? { error } : {}),
+    // One pair of queries per kind, all in parallel. A kind with no queryable ids runs none.
+    const [destinationOutcome, processorOutcome] = await Promise.all([
+      destinationIds.length > 0
+        ? this.getDestinationStats({ query, ids: destinationIds, bucketMs })
+        : undefined,
+      processorIds.length > 0 ? this.getProcessorStats({ query, ids: processorIds }) : undefined,
+    ]);
+    Object.assign(destinations, destinationOutcome?.results);
+    Object.assign(processors, processorOutcome?.results);
+
+    // Every kind that ran failed with the same code: the response says so too.
+    const outcomes = [destinationOutcome, processorOutcome].flatMap((outcome) =>
+      outcome ? [outcome] : []
+    );
+    const firstError = outcomes[0]?.error;
+    const allFailedTheSame =
+      firstError !== undefined && outcomes.every(({ error }) => error?.code === firstError.code);
+
+    return {
+      ...(allFailedTheSame ? { error: firstError } : {}),
       components: { destinations, processors },
       meta: { window, ...(configHash ? { config_hash: configHash } : {}) },
-    });
-
-    if (destinationIds.length === 0 && processorIds.length === 0) {
-      return finish();
-    }
-
-    // Shared lookup. A failure here is response-level.
-    let earliestStartMs: number | undefined;
-    try {
-      earliestStartMs = await this.getEarliestStartMs(query);
-    } catch (error) {
-      if (isMissingStreamError(error)) return finish();
-      logger.debug(`Unit stats lookup failed for unit [${unitId}]: ${(error as Error).message}`);
-      return finish(toSearchError(error, 'stats').toStatsError());
-    }
-
-    // No document for the unit (and hash) at all: no data, no error.
-    if (earliestStartMs === undefined) {
-      return finish();
-    }
-
-    // The data covers the window end minus the later of the window start and the first
-    // document. Not the span of the documents in the window: a stopped destination must not
-    // read as busy.
-    const seconds = (windowEndMs - Math.max(windowStartMs, earliestStartMs)) / 1000;
-
-    // One search per kind, in parallel. A kind with no queryable ids makes no search.
-    const [destinationResults, processorResults] = await Promise.all([
-      destinationIds.length > 0
-        ? this.getDestinationStats({ query, ids: destinationIds, seconds, bucketMs })
-        : {},
-      processorIds.length > 0 ? this.getProcessorStats({ query, ids: processorIds, seconds }) : {},
-    ]);
-    Object.assign(destinations, destinationResults);
-    Object.assign(processors, processorResults);
-
-    return finish();
+    };
   }
 
-  /**
-   * Epoch ms of the first document for the unit, over all time and limited to the pinned
-   * hash when there is one. Undefined when no document matches. Throws when the search fails.
-   */
-  private async getEarliestStartMs({
-    unitId,
-    configHash,
-  }: StatsQuery): Promise<number | undefined> {
+  /** The rows of a query. */
+  private async runQuery(query: ComposerQuery): Promise<EsqlRow[]> {
     const { esClient } = this.dependencies;
-    return readEarliestStartMs(
-      await esClient.search(buildEarliestStartRequest({ unitId, configHash }))
+    const response = (await esClient.esql.query(
+      { ...toEsqlRequest(query), allow_partial_results: false },
+      { requestTimeout: UNIT_STATS_REQUEST_TIMEOUT_MS }
+    )) as ESQLSearchResponse;
+
+    return toRows(response);
+  }
+
+  /** The rows of a query run for each chunk of `chunkSize` ids, in parallel. */
+  private async runQueryInChunks(
+    ids: string[],
+    chunkSize: number,
+    buildQuery: (chunkIds: string[]) => ComposerQuery
+  ): Promise<EsqlRow[]> {
+    const chunks = await Promise.all(
+      chunk(ids, chunkSize).map((chunkIds) => this.runQuery(buildQuery(chunkIds)))
     );
+    return chunks.flat();
   }
 
   /**
-   * One search for all the destination ids. An id with no bucket, or a missing stream, is no
-   * data. A failed search puts the same error on every id, so the other kind is unaffected.
+   * The error a failed query puts on every id of its kind, so the other kind is unaffected. A
+   * missing stream is no data, not an error.
    */
+  private toKindError(error: unknown, unitId: string, what: string) {
+    const { logger } = this.dependencies;
+    if (isMissingStreamError(error)) return undefined;
+
+    logger.debug(`Unit stats ${what} failed for unit [${unitId}]: ${(error as Error).message}`);
+    return toSearchError(error, what).toStatsError();
+  }
+
   private async getDestinationStats({
-    query: { unitId, window, configHash },
+    query,
     ids,
-    seconds,
     bucketMs,
   }: {
     query: StatsQuery;
     ids: string[];
-    seconds: number;
     bucketMs: number;
-  }): Promise<Record<string, StreamsUnit.StatsDestinationResult>> {
-    const { esClient, logger } = this.dependencies;
-    const results: Record<string, StreamsUnit.StatsDestinationResult> = {};
+  }): Promise<KindOutcome<StreamsUnit.StatsDestinationResult>> {
+    const what = 'destination stats';
+    const chunkSize = getIdsPerSeriesQuery({
+      rangeMs: Date.parse(query.window.end) - Date.parse(query.window.start),
+      bucketMs,
+    });
 
     try {
-      const response = await esClient.search<unknown, DestinationStatsAggregations>(
-        buildDestinationStatsRequest({ unitId, window, ids, configHash, bucketMs })
-      );
-      const mapped = mapDestinationStatsResponse({
-        aggregations: response.aggregations,
-        seconds,
+      const [rateRows, sumsRows] = await Promise.all([
+        this.runQuery(buildDestinationRateQuery({ ...query, ids })),
+        this.runQueryInChunks(ids, chunkSize, (chunkIds) =>
+          buildDestinationSumsQuery({ ...query, ids: chunkIds, bucketMs })
+        ),
+      ]);
+      const mapped = mapDestinationStatsRows({
+        rows: joinDestinationRows({ rateRows, sumsRows }),
         bucketMs,
       });
-      for (const id of ids) {
-        results[id] = mapped.get(id) ?? noDestinationStats(bucketMs);
-      }
-    } catch (error) {
-      const failure = isMissingStreamError(error)
-        ? undefined
-        : toSearchError(error, 'destination stats').toStatsError();
-      if (failure) {
-        logger.debug(`Destination stats failed for unit [${unitId}]: ${(error as Error).message}`);
-      }
-      for (const id of ids) {
-        results[id] = { ...noDestinationStats(bucketMs), ...(failure ? { error: failure } : {}) };
-      }
-    }
 
-    return results;
+      return {
+        results: Object.fromEntries(
+          ids.map((id) => [id, mapped[id] ?? noDestinationStats(bucketMs)])
+        ),
+      };
+    } catch (error) {
+      const failure = this.toKindError(error, query.unitId, what);
+
+      return {
+        results: Object.fromEntries(
+          ids.map((id) => [
+            id,
+            { ...noDestinationStats(bucketMs), ...(failure && { error: failure }) },
+          ])
+        ),
+        error: failure,
+      };
+    }
   }
 
-  /**
-   * One search for all the processor ids. An id with no bucket, or a missing stream, is no
-   * data. A failed search puts the same error on every id, so the other kind is unaffected.
-   */
   private async getProcessorStats({
-    query: { unitId, window, configHash },
+    query,
     ids,
-    seconds,
   }: {
     query: StatsQuery;
     ids: string[];
-    seconds: number;
-  }): Promise<Record<string, StreamsUnit.StatsProcessorResult>> {
-    const { esClient, logger } = this.dependencies;
-    const results: Record<string, StreamsUnit.StatsProcessorResult> = {};
+  }): Promise<KindOutcome<StreamsUnit.StatsProcessorResult>> {
+    const what = 'processor stats';
 
     try {
-      const response = await esClient.search<unknown, ProcessorStatsAggregations>(
-        buildProcessorStatsRequest({ unitId, window, ids, configHash })
-      );
-      const mapped = mapProcessorStatsResponse({ aggregations: response.aggregations, seconds });
-      for (const id of ids) {
-        results[id] = mapped.get(id) ?? noProcessorStats();
-      }
-    } catch (error) {
-      const failure = isMissingStreamError(error)
-        ? undefined
-        : toSearchError(error, 'processor stats').toStatsError();
-      if (failure) {
-        logger.debug(`Processor stats failed for unit [${unitId}]: ${(error as Error).message}`);
-      }
-      for (const id of ids) {
-        results[id] = { ...noProcessorStats(), ...(failure ? { error: failure } : {}) };
-      }
-    }
+      const [rateRows, sumsRows] = await Promise.all([
+        this.runQuery(buildProcessorRateQuery({ ...query, ids })),
+        this.runQuery(buildProcessorSumsQuery({ ...query, ids })),
+      ]);
+      const mapped = mapProcessorStatsRows({ rows: joinProcessorRows({ rateRows, sumsRows }) });
 
-    return results;
+      return {
+        results: Object.fromEntries(ids.map((id) => [id, mapped[id] ?? noProcessorStats()])),
+      };
+    } catch (error) {
+      const failure = this.toKindError(error, query.unitId, what);
+
+      return {
+        results: Object.fromEntries(
+          ids.map((id) => [id, { ...noProcessorStats(), ...(failure && { error: failure }) }])
+        ),
+        error: failure,
+      };
+    }
   }
 }

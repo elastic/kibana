@@ -22,6 +22,8 @@ export const UNIT_STATS_QUERY_TIMEOUT = '30s';
 /** ES|QL returns at most this many rows and truncates silently, with no warning. */
 export const ESQL_MAX_ROWS = 10_000;
 
+export const UNIT_STATS_REQUEST_TIMEOUT_MS = 30_000;
+
 export const UNIT_ID_FIELD = 'resource.attributes.unit.id';
 
 export const CONFIG_HASH_FIELD = 'resource.attributes.streams.config.hash';

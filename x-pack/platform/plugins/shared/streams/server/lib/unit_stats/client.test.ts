@@ -9,7 +9,6 @@ import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { streamsUnitStatsResponseSchema, type StreamsUnit } from '@kbn/streams-schema';
-import { CONFIG_HASH_FIELD } from './constants';
 import { UnitStatsClient } from './client';
 
 const unit: StreamsUnit.Configuration = {
@@ -24,88 +23,119 @@ const unit: StreamsUnit.Configuration = {
 };
 
 const now = new Date('2026-10-19T12:00:00.000Z');
-const MINUTE = 60_000;
 
-const destinationAggregations = {
-  by_id: {
-    buckets: [
-      {
-        key: 'es-prod',
-        items: {
-          doc_count: 6,
-          sum: { value: 30 },
-          series: {
-            buckets: [
-              { key: Date.parse('2026-10-19T11:56:00.000Z'), doc_count: 3, sum: { value: 20 } },
-              { key: Date.parse('2026-10-19T11:57:00.000Z'), doc_count: 3, sum: { value: 10 } },
-            ],
-          },
-          failures: { doc_count: 0, sum: { value: 0 } },
-        },
-        duration: { doc_count: 6, average: { value: 0.107 } },
-      },
+interface EsqlResponse {
+  columns: Array<{ name: string; type: string }>;
+  values: unknown[][];
+}
+
+const responses = {
+  destinationRate: {
+    columns: [
+      { name: 'incoming_rate', type: 'double' },
+      { name: 'failed_rate', type: 'double' },
+      { name: 'avg_latency', type: 'double' },
+      { name: 'id', type: 'keyword' },
     ],
+    values: [
+      [4.6, 0, 0.18, 'es-prod'],
+      [4.2, 0, 0.17, 'es-dev'],
+    ],
+  },
+  destinationSums: {
+    columns: [
+      { name: 'sum_items', type: 'double' },
+      { name: 'id', type: 'keyword' },
+      { name: 'bucket', type: 'date' },
+    ],
+    values: [
+      [270, 'es-prod', '2026-10-19T11:46:00.000Z'],
+      [90, 'es-dev', '2026-10-19T11:46:00.000Z'],
+      [240, 'es-prod', '2026-10-19T11:47:00.000Z'],
+    ],
+  },
+  processorRate: {
+    columns: [
+      { name: 'incoming_rate', type: 'double' },
+      { name: 'step', type: 'keyword' },
+    ],
+    values: [[4.6, 'uppercase-message']],
+  },
+  processorSums: {
+    columns: [
+      { name: 'sum_items_in', type: 'double' },
+      { name: 'avg_duration_per_item', type: 'double' },
+      { name: 'step', type: 'keyword' },
+    ],
+    values: [[3870, 5.2e-6, 'uppercase-message']],
   },
 };
 
-const processorAggregations = {
-  by_id: {
-    buckets: [
-      {
-        key: 'uppercase-message',
-        items_in: { doc_count: 4, sum: { value: 35 } },
-        duration: { doc_count: 4, sum: { value: 0.001895 } },
-      },
-    ],
-  },
-};
+type QueryName = keyof typeof responses;
 
-const earliestResponse = (ms: number | null) => ({ aggregations: { earliest: { value: ms } } });
+/**
+ * Answers each `esql.query` by what the query asks for: a `TS` or a `FROM` query, for
+ * destinations or for processors. An override replaces the answer, and can throw.
+ */
+const makeEsql = (overrides: Partial<Record<QueryName, () => EsqlResponse>> = {}) =>
+  jest.fn(async ({ query }: { query: string }) => {
+    const kind = query.includes('attributes.streams.destination.id') ? 'destination' : 'processor';
+    const name = `${kind}${query.startsWith('TS') ? 'Rate' : 'Sums'}` as QueryName;
 
-/** Answers each search by its shape: the earliest start, a destination or a processor search. */
-const makeSearch = ({
-  earliestMs = now.getTime() - 5 * MINUTE,
-  earliest,
-  destination,
-  processor,
-}: {
-  earliestMs?: number | null;
-  earliest?: () => unknown;
-  destination?: () => unknown;
-  processor?: () => unknown;
-} = {}) =>
-  jest.fn(async (body: { aggs?: Record<string, unknown> }) => {
-    if (body.aggs && 'earliest' in body.aggs) {
-      return (earliest ?? (() => earliestResponse(earliestMs)))();
-    }
-    const { field } = (body.aggs?.by_id as { terms: { field: string } }).terms;
-    return field.includes('destination')
-      ? (destination ?? (() => ({ aggregations: destinationAggregations })))()
-      : (processor ?? (() => ({ aggregations: processorAggregations })))();
+    return (overrides[name] ?? (() => responses[name]))();
   });
 
-const run = (search: jest.Mock, request: StreamsUnit.StatsRequest = {}) =>
+const run = (
+  esql: jest.Mock,
+  request: StreamsUnit.StatsRequest = {},
+  statsUnit: StreamsUnit.Configuration = unit
+) =>
   new UnitStatsClient({
-    esClient: { search } as unknown as ElasticsearchClient,
+    esClient: { esql: { query: esql } } as unknown as ElasticsearchClient,
     logger: loggingSystemMock.createLogger(),
-  }).getStats({ unitId: 'default', unit, request, now });
-
-const responseError = (statusCode: number) =>
-  new errors.ResponseError({ statusCode, body: {}, headers: {}, warnings: [], meta: {} as never });
-
-const nullDestination = expect.objectContaining({
-  latency: { average: { value: null, unit: null } },
-});
+  }).getStats({ unitId: 'default', unit: statsUnit, request, now });
 
 describe('UnitStatsClient.getStats', () => {
+  it('places a destination and a processor with their values', async () => {
+    const response = await run(makeEsql());
+
+    expect(response.components.destinations['es-prod']).toEqual({
+      latency: { average: { value: 0.18, unit: 's' } },
+      events: {
+        incoming: {
+          total: { value: 510, unit: '{item}' },
+          rate: { value: 4.6, unit: '{item}', time_unit: 's' },
+          series: {
+            bucket_ms: 60_000,
+            points: [
+              { start: '2026-10-19T11:46:00.000Z', value: 270 },
+              { start: '2026-10-19T11:47:00.000Z', value: 240 },
+            ],
+          },
+          failures: { rate: { value: 0, unit: '{item}', time_unit: 's' } },
+        },
+      },
+    });
+    expect(response.components.processors['uppercase-message']).toEqual({
+      processing_duration: { average: { value: 5.2e-6, unit: 's' } },
+      events: {
+        incoming: {
+          rate: { value: 4.6, unit: '{item}', time_unit: 's' },
+          failures: { rate: { value: null, unit: null, time_unit: null } },
+        },
+      },
+    });
+    expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
+  });
+
   describe('components', () => {
     it.each([
       ['omitted', {}],
       ['an empty list', { components: [] }],
     ])(
       'answers for every component, keyed by kind and id, when components is %s',
-      async (_n, req) => {
-        const response = await run(makeSearch(), req);
+      async (_, req) => {
+        const response = await run(makeEsql(), req);
 
         expect(Object.keys(response.components.destinations)).toEqual(['es-prod', 'es-dev', 'dbg']);
         expect(Object.keys(response.components.processors)).toEqual(['uppercase-message']);
@@ -114,23 +144,21 @@ describe('UnitStatsClient.getStats', () => {
     );
 
     it('collapses duplicate components', async () => {
-      const search = makeSearch();
+      const esql = makeEsql();
       const ref = { kind: 'destination' as const, id: 'es-prod' };
 
-      const response = await run(search, { components: [ref, ref] });
+      const response = await run(esql, { components: [ref, ref] });
 
       expect(Object.keys(response.components.destinations)).toEqual(['es-prod']);
-      const destinationSearch = search.mock.calls[1][0] as unknown as { query: unknown };
-      expect(search).toHaveBeenCalledTimes(2);
-      expect(JSON.stringify(destinationSearch.query)).toContain(
-        '"terms":{"attributes.streams.destination.id":["es-prod"]}'
-      );
+      const queries = esql.mock.calls.map(([{ query }]) => query);
+      expect(queries).toHaveLength(2);
+      queries.forEach((query) => expect(query).toContain('IN ("es-prod")'));
     });
 
-    it('answers not_found and unsupported from the config without calling Elasticsearch', async () => {
-      const search = makeSearch();
+    it('answers not_found and unsupported from the config without querying', async () => {
+      const esql = makeEsql();
 
-      const response = await run(search, {
+      const response = await run(esql, {
         components: [
           { kind: 'destination', id: 'nope' },
           { kind: 'destination', id: 'dbg' },
@@ -138,7 +166,7 @@ describe('UnitStatsClient.getStats', () => {
         ],
       });
 
-      expect(search).not.toHaveBeenCalled();
+      expect(esql).not.toHaveBeenCalled();
       expect(response.components.destinations.nope.error?.code).toBe('not_found');
       expect(response.components.destinations.dbg.error?.code).toBe('unsupported');
       expect(response.components.processors.nope.error?.code).toBe('not_found');
@@ -146,183 +174,186 @@ describe('UnitStatsClient.getStats', () => {
     });
   });
 
-  describe('data', () => {
-    it('maps a destination with data and leaves the rest null with no error', async () => {
-      const response = await run(makeSearch());
+  describe('window and filters', () => {
+    const timeRange = { start: '2026-10-19T10:00:00.000Z', end: '2026-10-19T11:00:00.000Z' };
 
-      expect(response.components.destinations['es-prod'].events.incoming.total).toEqual({
-        value: 30,
-        unit: '{item}',
-      });
-      expect(response.components.destinations['es-dev']).toEqual(nullDestination);
-      expect(response.components.destinations['es-dev'].error).toBeUndefined();
-      expect(response.error).toBeUndefined();
-    });
+    it('reports the last 15 minutes by default, and no config hash', async () => {
+      const response = await run(makeEsql());
 
-    it('maps a processor with data, with a per event average', async () => {
-      const response = await run(makeSearch());
-
-      expect(response.components.processors['uppercase-message']).toEqual({
-        processing_duration: { average: { value: 0.001895 / 35, unit: 's' } },
-        events: {
-          incoming: {
-            rate: { value: 35 / 300, unit: '{item}', time_unit: 's' },
-            failures: { rate: { value: null, unit: null, time_unit: null } },
-          },
-        },
+      expect(response.meta).toEqual({
+        window: { start: '2026-10-19T11:45:00.000Z', end: '2026-10-19T12:00:00.000Z' },
       });
     });
 
-    it('reports the window, and a config hash only when the request pins one', async () => {
-      const unpinned = await run(makeSearch());
-      const pinned = await run(makeSearch(), { filter: { config_hash: 'h1' } });
-
-      expect(unpinned.meta.config_hash).toBeUndefined();
-      expect(unpinned.meta.window).toEqual({
-        start: '2026-10-19T11:45:00.000Z',
-        end: '2026-10-19T12:00:00.000Z',
+    it('reports the requested window and the pinned config hash', async () => {
+      const response = await run(makeEsql(), {
+        filter: { time_range: timeRange, config_hash: 'h1' },
       });
-      expect(pinned.meta.config_hash).toBe('h1');
+
+      expect(response.meta).toEqual({ window: timeRange, config_hash: 'h1' });
     });
 
-    it('returns null values and no error for a pinned hash with no match', async () => {
-      const response = await run(makeSearch({ earliestMs: null }), {
-        filter: { config_hash: 'nope' },
+    it('filters every query by the unit and the window, and by the hash only when pinned', async () => {
+      const unpinned = makeEsql();
+      const pinned = makeEsql();
+
+      await run(unpinned, { filter: { time_range: timeRange } });
+      await run(pinned, { filter: { time_range: timeRange, config_hash: 'h1' } });
+
+      const unpinnedQueries = unpinned.mock.calls.map(([{ query }]) => query);
+      const pinnedQueries = pinned.mock.calls.map(([{ query }]) => query);
+      expect(unpinnedQueries).toHaveLength(4);
+      unpinnedQueries.forEach((query) => {
+        expect(query).toContain('resource.attributes.unit.id == "default"');
+        expect(query).toContain(`@timestamp >= "${timeRange.start}"`);
+        expect(query).toContain(`@timestamp < "${timeRange.end}"`);
+        expect(query).not.toContain('config.hash');
+      });
+      pinnedQueries.forEach((query) =>
+        expect(query).toContain('resource.attributes.streams.config.hash == "h1"')
+      );
+    });
+
+    describe('with many destinations', () => {
+      const manyDestinations: StreamsUnit.Configuration = {
+        ...unit,
+        destinations: Array.from({ length: 1250 }, (_, index) => ({
+          id: `destination-${index}`,
+          type: 'elasticsearch',
+          supported_telemetry: ['logs' as const],
+        })),
+      };
+      const sumsQueries = (esql: jest.Mock) =>
+        esql.mock.calls
+          .map(([{ query }]) => query)
+          .filter((query) => query.startsWith('FROM') && query.includes('destination'));
+
+      it('splits the sums query by what the window allows, and asks for the rates once', async () => {
+        const esql = makeEsql();
+
+        await run(esql, {}, manyDestinations);
+
+        // The default window allows 625 ids per series query.
+        expect(sumsQueries(esql)).toHaveLength(2);
+        const rateQueries = esql.mock.calls
+          .map(([{ query }]) => query)
+          .filter((query) => query.startsWith('TS') && query.includes('destination'));
+        expect(rateQueries).toHaveLength(1);
       });
 
-      expect(response.components.destinations['es-prod']).toEqual(nullDestination);
+      it('splits it into more queries for a longer window', async () => {
+        const esql = makeEsql();
+
+        await run(
+          esql,
+          { filter: { time_range: { start: '2026-10-18T12:00:00.000Z', end: now.toISOString() } } },
+          manyDestinations
+        );
+
+        // A 24 hour window has 15 minute buckets and allows 103 ids per series query.
+        expect(sumsQueries(esql)).toHaveLength(13);
+      });
+    });
+
+    it('returns no data and no error when the queries return no rows', async () => {
+      const empty = () => ({ columns: [], values: [] });
+      const esql = makeEsql({
+        destinationRate: empty,
+        destinationSums: empty,
+        processorRate: empty,
+        processorSums: empty,
+      });
+
+      const response = await run(esql, { filter: { config_hash: 'nope' } });
+
+      expect(response.components.destinations['es-prod'].events.incoming.rate.value).toBeNull();
+      expect(response.components.destinations['es-prod'].events.incoming.total.value).toBeNull();
+      expect(response.components.destinations['es-prod'].events.incoming.series.points).toEqual([]);
+      expect(
+        response.components.processors['uppercase-message'].events.incoming.rate.value
+      ).toBeNull();
       expect(response.components.destinations['es-prod'].error).toBeUndefined();
       expect(response.error).toBeUndefined();
-    });
-  });
-
-  describe('rate denominator', () => {
-    const rateOf = async (search: jest.Mock, request?: StreamsUnit.StatsRequest) =>
-      (await run(search, request)).components.destinations['es-prod'].events.incoming.rate.value;
-
-    // The fixture holds 30 items. The window is the 15 minutes before the fixed `now`.
-    it('divides by the time since the config started when it started inside the window', async () => {
-      // Data covers 5 minutes (300 s), not the 900 s window, so 30 / 300.
-      expect(await rateOf(makeSearch({ earliestMs: now.getTime() - 5 * MINUTE }))).toBe(30 / 300);
-    });
-
-    it('divides by the whole window when the config is older than the window', async () => {
-      // The config started an hour ago, so the window start wins: 900 s, so 30 / 900.
-      expect(await rateOf(makeSearch({ earliestMs: now.getTime() - 60 * MINUTE }))).toBe(30 / 900);
-    });
-
-    it('does not shorten the denominator when no hash is pinned, whatever the config version', async () => {
-      const search = makeSearch({ earliestMs: now.getTime() - 5 * MINUTE });
-
-      await run(search);
-
-      const earliestRequest = search.mock.calls[0][0] as unknown as { query: unknown };
-      expect(JSON.stringify(earliestRequest.query)).not.toContain(CONFIG_HASH_FIELD);
-    });
-
-    it('limits the earliest start to the pinned hash', async () => {
-      const search = makeSearch();
-
-      await run(search, { filter: { config_hash: 'h1' } });
-
-      const earliestRequest = search.mock.calls[0][0] as unknown as { query: unknown };
-      expect(JSON.stringify(earliestRequest.query)).toContain(CONFIG_HASH_FIELD);
-    });
-
-    it('has a null rate when the first document is not before the window end', async () => {
-      expect(await rateOf(makeSearch({ earliestMs: now.getTime() }))).toBeNull();
+      expect(response.meta.config_hash).toBe('nope');
     });
   });
 
   describe('failures', () => {
-    it.each([
-      [403, 'forbidden'],
-      [429, 'unavailable'],
-      [503, 'unavailable'],
-      [500, 'error'],
-    ])('sets a response-level error for a %s in the shared lookup', async (status, code) => {
-      const response = await run(
-        makeSearch({
-          earliest: () => {
-            throw responseError(status);
-          },
-        })
-      );
+    const responseError = (statusCode: number) =>
+      new errors.ResponseError({
+        statusCode,
+        body: {},
+        headers: {},
+        warnings: [],
+        meta: {} as never,
+      });
+    const failWith = (error: Error) => () => {
+      throw error;
+    };
 
-      expect(response.error?.code).toBe(code);
-      expect(response.components.destinations['es-prod']).toEqual(nullDestination);
-      expect(response.components.destinations['es-prod'].error).toBeUndefined();
-    });
+    it('puts the same error on every destination when a destination query fails', async () => {
+      const response = await run(makeEsql({ destinationRate: failWith(responseError(429)) }));
 
-    it('sets a response-level timeout error for a shared lookup timeout', async () => {
-      const response = await run(
-        makeSearch({
-          earliest: () => {
-            throw new errors.TimeoutError('timeout', {} as never);
-          },
-        })
-      );
-
-      expect(response.error?.code).toBe('timeout');
-      expect(response.components.destinations['es-prod'].error).toBeUndefined();
-    });
-
-    it('treats a missing stream as no data, with no error at any level', async () => {
-      const lookup = await run(
-        makeSearch({
-          earliest: () => {
-            throw responseError(404);
-          },
-        })
-      );
-      const kind = await run(
-        makeSearch({
-          destination: () => {
-            throw responseError(404);
-          },
-        })
-      );
-
-      for (const response of [lookup, kind]) {
-        expect(response.error).toBeUndefined();
-        expect(response.components.destinations['es-prod']).toEqual(nullDestination);
-        expect(response.components.destinations['es-prod'].error).toBeUndefined();
-      }
-    });
-
-    it('sets the same component error on every destination when the destination search fails', async () => {
-      const response = await run(
-        makeSearch({
-          destination: () => {
-            throw responseError(403);
-          },
-        })
-      );
-
-      expect(response.error).toBeUndefined();
-      expect(response.components.destinations['es-prod'].error?.code).toBe('forbidden');
-      expect(response.components.destinations['es-dev'].error?.code).toBe('forbidden');
-      // Not queryable, so these keep their own error.
+      expect(response.components.destinations['es-prod'].error?.code).toBe('unavailable');
+      expect(response.components.destinations['es-dev'].error?.code).toBe('unavailable');
+      // A destination that is not queried keeps its own error.
       expect(response.components.destinations.dbg.error?.code).toBe('unsupported');
       expect(response.components.processors['uppercase-message'].error).toBeUndefined();
       expect(response.components.processors['uppercase-message'].events.incoming.rate.value).toBe(
-        35 / 300
+        4.6
       );
+      expect(response.error).toBeUndefined();
     });
 
-    it('sets the same component error on every processor when the processor search fails', async () => {
+    it('puts the same error on every processor when a processor query fails', async () => {
+      const response = await run(makeEsql({ processorSums: failWith(responseError(500)) }));
+
+      expect(response.components.processors['uppercase-message'].error?.code).toBe('error');
+      expect(response.components.destinations['es-prod'].error).toBeUndefined();
+      expect(response.components.destinations['es-prod'].events.incoming.rate.value).toBe(4.6);
+      expect(response.error).toBeUndefined();
+    });
+
+    it('gives a failed kind no data from the query that did succeed', async () => {
+      const response = await run(makeEsql({ destinationSums: failWith(responseError(429)) }));
+
+      expect(response.components.destinations['es-prod'].events.incoming.rate.value).toBeNull();
+      expect(response.components.destinations['es-prod'].events.incoming.total.value).toBeNull();
+    });
+
+    it('also sets the response error when every kind failed with the same code', async () => {
       const response = await run(
-        makeSearch({
-          processor: () => {
-            throw responseError(403);
-          },
+        makeEsql({
+          destinationSums: failWith(responseError(429)),
+          processorRate: failWith(responseError(429)),
+        })
+      );
+
+      expect(response.error?.code).toBe('unavailable');
+      expect(response.components.destinations['es-prod'].error?.code).toBe('unavailable');
+      expect(response.components.processors['uppercase-message'].error?.code).toBe('unavailable');
+    });
+
+    it('sets only the component errors when the kinds failed with different codes', async () => {
+      const response = await run(
+        makeEsql({
+          destinationRate: failWith(responseError(429)),
+          processorRate: failWith(new errors.TimeoutError('timeout', {} as never)),
         })
       );
 
       expect(response.error).toBeUndefined();
-      expect(response.components.processors['uppercase-message'].error?.code).toBe('forbidden');
-      expect(response.components.destinations['es-prod'].error).toBeUndefined();
-      expect(response.components.destinations['es-prod'].events.incoming.total.value).toBe(30);
+      expect(response.components.destinations['es-prod'].error?.code).toBe('unavailable');
+      expect(response.components.processors['uppercase-message'].error?.code).toBe('timeout');
+    });
+
+    it('sets the response error when the only kind that ran failed', async () => {
+      const response = await run(makeEsql({ destinationRate: failWith(responseError(403)) }), {
+        components: [{ kind: 'destination', id: 'es-prod' }],
+      });
+
+      expect(response.error?.code).toBe('forbidden');
+      expect(response.components.destinations['es-prod'].error?.code).toBe('forbidden');
     });
   });
 });
