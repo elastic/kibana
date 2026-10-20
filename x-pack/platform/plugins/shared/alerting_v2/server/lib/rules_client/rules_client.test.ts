@@ -141,7 +141,10 @@ describe('RulesClient', () => {
     const config: PluginConfig = {
       enabled: true,
       invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
-      retention: { ruleEvents: { enabled: false, dataRetention: '90d' } },
+      retention: {
+        ruleEvents: { enabled: false, dataRetention: '90d' },
+        alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
+      },
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
@@ -2580,6 +2583,22 @@ describe('RulesClient', () => {
         size: undefined,
         field: 'routing_tags',
       });
+    });
+  });
+
+  describe('getRuleCountsByTemplateId', () => {
+    it('returns the per-template rule counts from the saved object service', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.countByTemplateIds.mockResolvedValueOnce({ 'template-1': 4 });
+
+      const counts = await client.getRuleCountsByTemplateId(['template-1', 'template-2']);
+
+      expect(counts).toEqual({ 'template-1': 4 });
+      expect(rulesSavedObjectService.countByTemplateIds).toHaveBeenCalledWith([
+        'template-1',
+        'template-2',
+      ]);
     });
   });
 
