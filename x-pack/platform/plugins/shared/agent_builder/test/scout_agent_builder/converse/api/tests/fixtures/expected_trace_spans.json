@@ -74,6 +74,16 @@
   {
     "attributes": {
       "elastic.inference.span.kind": "CHAIN",
+      "gen_ai.conversation.id": "[CONVERSATION_ID]",
+      "hook.call": "getHandler",
+      "hook.id": "relevant-skills"
+    },
+    "kind": "Internal",
+    "name": "cycle_hook relevant-skills"
+  },
+  {
+    "attributes": {
+      "elastic.inference.span.kind": "CHAIN",
       "gen_ai.conversation.id": "[CONVERSATION_ID]"
     },
     "kind": "Internal",
