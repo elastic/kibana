@@ -132,17 +132,19 @@ the batch. Then:
 `feature_types` exactly `["dependency", "entity", "infrastructure"]`, `page: 1`, `per_page: 50`.
 Always set `slugs`: feature IDs are unique only within a source.
 
-- Every matched query references a dependency, entity, or infrastructure feature → pass them as
-  `feature_ids`, and set `slugs` to the matched queries' `source_id` values from Phase 1 (for example
-  `logs`), not the batch `source_id`. Computed KIs such as `log_patterns` and `dataset_analysis` are
-  not references.
-- Any matched query references none, including when no query matched → omit `feature_ids`, and set
-  `slugs` to all distinct batch `source_id` values. The query KI's other authored fields can only
-  resolve an entity against features that were fetched.
+- Referenced feature IDs exist → pass them as `feature_ids`, and set `slugs` to the matched queries'
+  `source_id` values from Phase 1 (for example `logs`), not the batch `source_id`.
+- No referenced feature IDs, including when no query matched → omit `feature_ids`, and set `slugs`
+  to all distinct batch `source_id` values.
 
-Stop after page 1, unless `feature_ids` was passed, the response has `has_more: true`, and one or
-more requested IDs are missing. Only then request `next_page` once with identical filters. Never
-paginate the fallback search.
+A referenced ID is a topology node only if this search returned it. When a matched query has none of
+its IDs in the result, make the one extra call instead of paginating: identical filters, `feature_ids`
+omitted, `slugs` set to all distinct batch `source_id` values. Never paginate it. The query KI's
+other authored fields can only resolve an entity against features that were fetched.
+
+Otherwise stop after page 1, unless `feature_ids` was passed, the response has `has_more: true`, and
+one or more requested IDs are missing. Only then request `next_page` once with identical filters.
+Never paginate the fallback search.
 
 `per_page` is a cap. Referenced feature IDs seed the topology; dependency endpoints and their
 matching entity identity fields are expanded from the returned topology in Step 6. Never make another
