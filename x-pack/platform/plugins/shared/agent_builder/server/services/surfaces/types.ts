@@ -7,15 +7,12 @@
 
 import type { ConversationOriginType, SurfacePayload } from '@kbn/agent-builder-common';
 import type { SurfaceComposition } from '@kbn/agent-builder-server/attachments';
-import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
-
-/** The runtime the `isomer` plugin's start contract resolves. */
-export type IsomerRuntime = Awaited<ReturnType<IsomerPluginStart['getRuntime']>>;
+import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
 
 /** Renders the response message for the surface rounds from one origin type came from. */
 export interface SurfaceRenderer {
   /** Origin type whose rounds this surface renders. */
   id: ConversationOriginType;
   /** Renders the message's composition, with its attachments resolved, for the surface. */
-  render: (composition: SurfaceComposition, runtime: IsomerRuntime) => SurfacePayload;
+  render: (composition: SurfaceComposition, runtime: KibanaIsomerRuntime) => SurfacePayload;
 }

@@ -24,9 +24,9 @@ import type {
   SurfaceNode,
   MarkdownNode,
 } from '@kbn/agent-builder-server/attachments';
+import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
-import type { IsomerRuntime } from './types';
 
 const { tagName, attributes } = renderAttachmentElement;
 
@@ -99,7 +99,7 @@ const resolveAttachmentNode = async (
     attachmentsService: AttachmentServiceStart;
     context: AttachmentSurfaceCompositionContext;
     logger: Logger;
-    runtime: IsomerRuntime;
+    runtime: KibanaIsomerRuntime;
   }
 ): Promise<SurfaceNode[]> => {
   const attachment = attachments.find(({ id }) => id === node.attachmentId);
@@ -181,7 +181,7 @@ export const buildComposition = async ({
   context: AttachmentSurfaceCompositionContext;
   logger: Logger;
   /** Validates what each attachment's `toSurfaceComposition` returns. */
-  runtime: IsomerRuntime;
+  runtime: KibanaIsomerRuntime;
 }): Promise<SurfaceComposition> => {
   const nodes = await Promise.all(
     toMessageNodes(response.message).map((node): Promise<SurfaceNode[]> | SurfaceNode[] =>

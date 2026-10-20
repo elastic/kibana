@@ -11,10 +11,11 @@ import type {
   SurfacePayload,
 } from '@kbn/agent-builder-common';
 import type { AttachmentSurfaceCompositionContext } from '@kbn/agent-builder-server/attachments';
+import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
 import { slackSurface } from './slack';
-import type { IsomerRuntime, SurfaceRenderer } from './types';
+import type { SurfaceRenderer } from './types';
 
 export interface SurfacesService {
   /**
@@ -31,10 +32,7 @@ export interface SurfacesService {
 export class SurfacesServiceImpl implements SurfacesService {
   private readonly attachmentsService: AttachmentServiceStart;
   private readonly logger: Logger;
-  /** Resolves the `isomer` plugin's runtime. */
-  private readonly getRuntime: () => Promise<IsomerRuntime>;
-
-  /** The surface renderers, one per origin type. */
+  private readonly getRuntime: () => Promise<KibanaIsomerRuntime>;
   private readonly surfaceRenderers: SurfaceRenderer[] = [slackSurface];
 
   constructor({
@@ -44,7 +42,7 @@ export class SurfacesServiceImpl implements SurfacesService {
   }: {
     attachmentsService: AttachmentServiceStart;
     logger: Logger;
-    getRuntime: () => Promise<IsomerRuntime>;
+    getRuntime: () => Promise<KibanaIsomerRuntime>;
   }) {
     this.attachmentsService = attachmentsService;
     this.logger = logger;
@@ -66,7 +64,8 @@ export class SurfacesServiceImpl implements SurfacesService {
     }
 
     try {
-      // `./composition` loads the Isomer SDK, so it waits for the first round from a surface.
+      // The runtime and the Isomer SDK `./composition` imports stay on the heap once loaded, so
+      // neither loads until a round comes from a surface.
       const [runtime, { buildComposition }] = await Promise.all([
         this.getRuntime(),
         import('./composition'),

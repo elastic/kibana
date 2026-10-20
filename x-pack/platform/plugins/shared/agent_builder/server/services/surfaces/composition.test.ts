@@ -12,13 +12,13 @@ import type {
 } from '@kbn/agent-builder-common/attachments';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
 import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentServiceStart } from '../attachments';
 import { buildComposition } from './composition';
-import type { IsomerRuntime } from './types';
 
-let runtime: IsomerRuntime;
+let runtime: KibanaIsomerRuntime;
 
 beforeAll(async () => {
   runtime = await isomerPluginMock.createStartContract().getRuntime();
