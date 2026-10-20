@@ -239,6 +239,7 @@ export class NightshiftInvestigationsPlugin
         cortexEnabled: this.cortexEnabled,
         memoryEnabled: this.memoryEnabled,
         decisionTreesEnabled: this.decisionTreesEnabled,
+        investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
         telemetryConnectorId,
         getCustomContextInstructions: ({ request, spaceId }) =>

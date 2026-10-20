@@ -40,8 +40,8 @@ export const SANDBOX_TOOL_IDS = [
 ] as const;
 
 /**
- * The agentic investigations tools. The agent no longer carries them, but earlier investigations'
- * transcripts still contain their calls, which are conclusions rather than evidence.
+ * The agentic investigations tools the agent records its findings with. Memory transcripts treat
+ * their calls as conclusions rather than evidence.
  */
 export const INVESTIGATION_TOOL_IDS = [SET_IMPACT_TOOL_ID, SET_HYPOTHESES_TOOL_ID] as const;
 
@@ -78,6 +78,8 @@ interface InvestigationAgentTypeOptions {
   cortexEnabled: boolean;
   memoryEnabled?: boolean;
   decisionTreesEnabled?: boolean;
+  /** The agentic investigations plugin is enabled, so its tools are registered. */
+  investigationToolsEnabled: boolean;
   /** The proposals plugin is enabled, so `proposals.create` is registered. */
   proposalsEnabled: boolean;
   telemetryConnectorId?: string;
@@ -117,6 +119,7 @@ export const getInvestigationAgentType = ({
   cortexEnabled,
   memoryEnabled = false,
   decisionTreesEnabled = false,
+  investigationToolsEnabled,
   proposalsEnabled,
   telemetryConnectorId,
   getCustomContextInstructions,
@@ -131,6 +134,7 @@ export const getInvestigationAgentType = ({
     tools: [
       {
         tool_ids: [
+          ...(investigationToolsEnabled ? [...INVESTIGATION_TOOL_IDS] : []),
           ...(proposalsEnabled ? [PROPOSALS_CREATE_TOOL_ID] : []),
           ...(sandboxEnabled ? [...SANDBOX_TOOL_IDS] : []),
         ],
@@ -186,6 +190,7 @@ export const registerInvestigationAgentType = (
     cortexEnabled,
     memoryEnabled = false,
     decisionTreesEnabled = false,
+    investigationToolsEnabled,
     proposalsEnabled,
     telemetryConnectorId,
     getCustomContextInstructions,
@@ -198,6 +203,7 @@ export const registerInvestigationAgentType = (
       cortexEnabled,
       memoryEnabled,
       decisionTreesEnabled,
+      investigationToolsEnabled,
       proposalsEnabled,
       telemetryConnectorId,
       getCustomContextInstructions,

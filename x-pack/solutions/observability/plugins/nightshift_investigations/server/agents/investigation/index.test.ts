@@ -28,7 +28,12 @@ const SANDBOX_TOOL_IDS = [
   SANDBOX_WRITE_FILE_TOOL_ID,
 ];
 
-const ALL_PLUGINS = { proposalsEnabled: true } as const;
+const INVESTIGATION_TOOL_IDS = [
+  'agentic_investigations.set_impact',
+  'agentic_investigations.set_hypotheses',
+];
+
+const ALL_PLUGINS = { investigationToolsEnabled: true, proposalsEnabled: true } as const;
 
 const staticBase = (type: AgentTypeDefinition): AgentBaseConfiguration => {
   if (typeof type.baseConfiguration === 'function') {
@@ -64,7 +69,11 @@ describe('Nightshift investigation agent type', () => {
       workflow_ids: ['system-nightshift-sandbox-materialize-workspace'],
       post_execution_workflow_ids: ['system-nightshift-agent-optimize'],
     });
-    expect(base.tools?.[0]?.tool_ids).toEqual([PROPOSALS_CREATE_TOOL_ID, ...SANDBOX_TOOL_IDS]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([
+      ...INVESTIGATION_TOOL_IDS,
+      PROPOSALS_CREATE_TOOL_ID,
+      ...SANDBOX_TOOL_IDS,
+    ]);
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
     // Its own prompt, not the significant-events one: it documents the sandbox query path.
     expect(base.instructions).toContain('/workspace/elastic.md');
@@ -129,7 +138,10 @@ describe('Nightshift investigation agent type', () => {
 
     expect(base.workflow_ids).toBeUndefined();
     expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
-    expect(base.tools?.[0]?.tool_ids).toEqual([PROPOSALS_CREATE_TOOL_ID]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([
+      ...INVESTIGATION_TOOL_IDS,
+      PROPOSALS_CREATE_TOOL_ID,
+    ]);
   });
 
   it('allow-lists the telemetry connector when one is configured', () => {
@@ -145,25 +157,17 @@ describe('Nightshift investigation agent type', () => {
     expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
   });
 
-  it('offers the proposal tool only when its plugin is enabled', () => {
+  it('offers the investigation and proposal tools only when their plugins are enabled', () => {
     const base = staticBase(
       getInvestigationAgentType({
         sandboxEnabled: false,
         cortexEnabled: false,
+        investigationToolsEnabled: false,
         proposalsEnabled: false,
       })
     );
 
     expect(base.tools?.[0]?.tool_ids).toEqual([]);
-  });
-
-  it('offers no investigation impact or hypotheses tools', () => {
-    const base = staticBase(
-      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true, ...ALL_PLUGINS })
-    );
-
-    expect(base.tools?.[0]?.tool_ids).toEqual([PROPOSALS_CREATE_TOOL_ID, ...SANDBOX_TOOL_IDS]);
-    expect(base.instructions).not.toContain('agentic_investigations');
   });
 
   it('instructs the agent to record its findings with the conversation and proposal tools', () => {
