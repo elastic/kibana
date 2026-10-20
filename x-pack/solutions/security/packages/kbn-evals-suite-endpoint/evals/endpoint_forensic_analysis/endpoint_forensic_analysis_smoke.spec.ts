@@ -11,6 +11,7 @@ import { evaluate } from '../../src/evaluate';
 import { waitForEndpointPackage } from '../../src/data_generators/endpoint_data';
 import { seedForensicTimeline } from '../../src/data_generators/forensic_data';
 import { cleanupForensicData } from '../../src/data_generators/cleanup';
+import { ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID } from '../../src/endpoint_forensic_tool_ids';
 
 const FORENSIC_ESQL_TRAJECTORY = [
   'platform.core.generate_esql',
@@ -138,6 +139,32 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
               tool_sequence: [...FORENSIC_ESQL_TRAJECTORY],
             },
             metadata: { golden_id: 'ef-009-persistence-enumeration', row_type: 'happy' },
+          },
+        ],
+      },
+    });
+  });
+
+  evaluate('registry key and mutex IoCs', async ({ evaluateForensicDataset }) => {
+    await evaluateForensicDataset({
+      dataset: {
+        name: 'security: endpoint-forensic-analysis-smoke-registry-mutex-iocs',
+        description: 'Smoke: forensic IoCs preserve registry keys and model-supplied mutex.',
+        examples: [
+          {
+            input: {
+              question:
+                'Reconstruct persistence on SRV-DC01 and extract IoCs. Telemetry shows the malware created mutex Global\\AcmeRansom-7F3A; keep registry keys and mutex in their own indicator categories.',
+            },
+            output: {
+              criteria: [
+                'Reports the Run\\Updater persistence key from endpoint registry telemetry as a registry key indicator, not a file path',
+                'Reports Global\\AcmeRansom-7F3A as a mutex indicator without inventing mechanical mutex telemetry',
+                'Keeps registry keys and mutex in distinct structured or clearly labelled categories',
+              ],
+              tool_sequence: [...FORENSIC_ESQL_TRAJECTORY, ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID],
+            },
+            metadata: { golden_id: 'ef-013-registry-mutex-iocs', row_type: 'happy' },
           },
         ],
       },

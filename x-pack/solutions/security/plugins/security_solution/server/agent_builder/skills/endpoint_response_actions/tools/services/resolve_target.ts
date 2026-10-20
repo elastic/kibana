@@ -26,6 +26,13 @@ export const hostTargetFields = (hostNameDescription: string) => ({
     .max(MAX_HOSTNAME_LENGTH)
     .optional()
     .describe(`${hostNameDescription} Optional when agentId is supplied.`),
+  ip: z
+    .ipv4()
+    .or(z.ipv6())
+    .optional()
+    .describe(
+      'The exact IPv4 or IPv6 address of the endpoint. Use only when hostname and agent ID are unavailable; shared addresses return an ambiguity result instead of selecting a host.'
+    ),
   agentId: z
     .string()
     .min(1)
@@ -37,29 +44,34 @@ export const hostTargetFields = (hostNameDescription: string) => ({
 });
 
 export const requireHostTarget = {
-  check: (value: { hostName?: string; agentId?: string }) =>
-    Boolean(value.hostName || value.agentId),
-  message: 'Provide hostName, agentId, or both.',
+  check: (value: { hostName?: string; ip?: string; agentId?: string }) =>
+    Boolean(value.hostName || value.ip || value.agentId) &&
+    // A resolved agent ID takes precedence, so retaining the IP from an
+    // ambiguity response must not make the model's retry invalid.
+    !(value.ip && value.hostName && !value.agentId),
+  message: 'Provide ip or hostName, or identify the target with agentId.',
 };
 
 /** How the analyst-facing confirmation names the host about to be acted on. */
 export const describeTarget = (toolParams: Record<string, unknown>): string => {
   const hostName = toolParams.hostName as string | undefined;
   const agentId = toolParams.agentId as string | undefined;
+  const ip = toolParams.ip as string | undefined;
 
   if (agentId) {
     return hostName ? `${hostName} (agent ID ${agentId})` : `the host with agent ID ${agentId}`;
   }
 
-  return hostName ?? 'the host';
+  return hostName ?? (ip ? `the host at IP ${ip}` : 'the host');
 };
 
 export interface AmbiguousDispatchData {
   kind: 'response_action_result';
   action: DispatchActionName;
-  hostName: string;
+  hostName?: string;
+  ip?: string;
   found: false;
-  reason: 'ambiguous_hostname';
+  reason: 'ambiguous_hostname' | 'ambiguous_ip';
   candidates: EndpointCandidate[];
   truncated?: true;
   totalCandidates?: number;
@@ -123,9 +135,9 @@ const refuseGoneEndpoint = (
 export async function resolveDispatchTarget(
   lookup: EndpointLookupService,
   action: DispatchActionName,
-  params: { hostName?: string; agentId?: string }
+  params: { hostName?: string; ip?: string; agentId?: string }
 ): Promise<ResolvedDispatchTarget> {
-  const { hostName, agentId } = params;
+  const { hostName, ip, agentId } = params;
 
   if (agentId) {
     const resolved = await lookup.resolveByAgentId(agentId);
@@ -146,6 +158,37 @@ export async function resolveDispatchTarget(
       // card and the audit comment would otherwise show an unverified name next
       // to the agent id.
       hostLabel: resolved.endpoint.hostName ?? agentId,
+    };
+  }
+
+  if (ip) {
+    const resolved = await lookup.resolveByIp(ip);
+    if (resolved.kind === 'not_found') {
+      return { kind: 'respond', data: endpointNotFoundData({ hostName: ip }) };
+    }
+    if (resolved.kind === 'ambiguous') {
+      return {
+        kind: 'respond',
+        data: {
+          kind: 'response_action_result',
+          action,
+          ip,
+          found: false,
+          reason: 'ambiguous_ip',
+          candidates: resolved.candidates,
+          ...(resolved.truncated
+            ? { truncated: true as const, totalCandidates: resolved.totalCandidates }
+            : {}),
+          message: `Multiple endpoints use the IP address "${ip}". Ask the analyst to identify the target by agent ID, then call this tool again with that agentId — a write action must not guess.`,
+        },
+      };
+    }
+    const gone = refuseGoneEndpoint(action, resolved.endpoint);
+    if (gone) return gone;
+    return {
+      kind: 'found',
+      endpoint: resolved.endpoint,
+      hostLabel: resolved.endpoint.hostName ?? ip,
     };
   }
 

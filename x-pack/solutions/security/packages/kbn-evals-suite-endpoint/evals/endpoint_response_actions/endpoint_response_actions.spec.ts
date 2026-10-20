@@ -134,6 +134,36 @@ evaluate.describe('Endpoint Response Actions', { tag: tags.stateful.classic }, (
   });
 
   // ---------------------------------------------------------------------------
+  // G1: Resolve a response-action target by exact IP
+  // ---------------------------------------------------------------------------
+  evaluate('isolate host by exact IP address', async ({ evaluateResponseActionsDataset }) => {
+    await evaluateResponseActionsDataset({
+      dataset: {
+        name: 'endpoint-response-actions: isolate host by IP',
+        description:
+          'Validates that an analyst can target a seeded endpoint by exact IP when no hostname or agent ID is available.',
+        examples: [
+          {
+            input: {
+              question: 'Isolate the endpoint at IP address 10.42.0.15',
+            },
+            output: {
+              criteria: [
+                `Activated the endpoint response actions skill by reading ${SKILL_PATH}`,
+                'Called endpoint-response-actions.isolate_host with ip set to exactly 10.42.0.15, rather than treating the address as a hostname',
+                'The output lists the isolate_host call under pending_confirmations, showing that exact-IP resolution reached the normal human confirmation gate',
+                'Did not invent a hostname or agent ID for the target',
+              ],
+              tool_sequence: ['endpoint-response-actions.isolate_host'],
+            },
+            metadata: { golden_id: 'era-015-isolate-by-ip', row_type: 'happy' },
+          },
+        ],
+      },
+    });
+  });
+
+  // ---------------------------------------------------------------------------
   // Scenario 3: Follow up on a prior response action by action ID
   // ---------------------------------------------------------------------------
   evaluate(

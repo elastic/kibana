@@ -22,20 +22,10 @@ import { unisolateHostTool } from '.';
 
 jest.mock('../../../../../endpoint/services/actions', () => {
   const original = jest.requireActual('../../../../../endpoint/services/actions');
-  return {
-    ...original,
-    getActionDetailsById: jest.fn(),
-  };
+  return { ...original, getActionDetailsById: jest.fn() };
 });
 
 const mockGetActionDetailsById = getActionDetailsById as jest.Mock;
-
-// waitForActionCompletion polls getActionDetailsById; tests below mock it to
-// resolve as already-completed (isCompleted: true) so the poll returns on the
-// first attempt instead of retrying for real and timing out the test.
-function mockActionCompletion(actionDetails: Record<string, unknown>) {
-  mockGetActionDetailsById.mockResolvedValue({ ...actionDetails, isCompleted: true });
-}
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 
@@ -94,6 +84,15 @@ describe('unisolateHostTool', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetActionDetailsById.mockImplementation((_service, _spaceId, actionId) =>
+      Promise.resolve({
+        id: actionId,
+        status: 'accepted',
+        wasSuccessful: true,
+        isCompleted: true,
+        hosts: {},
+      })
+    );
     toolCallState.value = undefined;
     mockEndpointAppContextService = createMockEndpointAppContext().service;
     // Hostname resolution also reads the Defend metadata index on origin, so
@@ -282,12 +281,6 @@ describe('unisolateHostTool', () => {
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => mockResponseActionsClient
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
-      mockActionCompletion({
-        id: 'action-456',
-        status: 'accepted',
-        wasSuccessful: true,
-        hosts: { 'agent-123': { name: 'my-host' } },
-      });
 
       const { result } = await confirmThenHandle(tool, {
         hostName: 'my-host',
@@ -312,6 +305,87 @@ describe('unisolateHostTool', () => {
       expect(data.status).toBe('accepted');
       expect(data.wasSuccessful).toBe(true);
       expect(data.comment).toBe('reconnecting');
+    });
+
+    it('returns a successful no-op when the endpoint is already released', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-123', packages: ['endpoint'], status: 'online' }],
+        }),
+      };
+      const release = jest.fn();
+
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation((() => ({
+          getHostMetadataList: jest.fn().mockResolvedValue({
+            data: [
+              {
+                metadata: {
+                  agent: { id: 'agent-123' },
+                  elastic: { agent: { id: 'agent-123' } },
+                  Endpoint: { state: { isolation: false } },
+                },
+                host_status: 'healthy',
+              },
+            ],
+            total: 1,
+          }),
+        })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => ({ release } as never)
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const { result } = await confirmThenHandle(tool, { hostName: 'my-host' });
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      expect(data).toMatchObject({
+        action: 'unisolate',
+        status: 'completed',
+        wasSuccessful: true,
+        noOp: true,
+        isolated: false,
+      });
+      expect(release).not.toHaveBeenCalled();
+      expect(mockEndpointAppContextService.getInternalResponseActionsClient).not.toHaveBeenCalled();
+    });
+
+    it('queues an offline endpoint without polling for completion', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-offline', packages: ['endpoint'], status: 'offline' }],
+        }),
+      };
+      const release = jest.fn().mockResolvedValue({
+        id: 'action-offline',
+        status: 'pending',
+        wasSuccessful: false,
+        hosts: { 'agent-offline': { name: 'offline-host' } },
+      });
+
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => ({ release } as never)
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const { result } = await confirmThenHandle(tool, { hostName: 'offline-host' });
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      expect(release).toHaveBeenCalledTimes(1);
+      expect(data).toMatchObject({
+        actionId: 'action-offline',
+        status: 'pending',
+        queued: true,
+        message: 'The action is queued and will execute when the endpoint reconnects.',
+      });
+      expect(mockGetActionDetailsById).not.toHaveBeenCalled();
     });
 
     it('uses a default comment when none is provided', async () => {
@@ -352,12 +426,6 @@ describe('unisolateHostTool', () => {
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => mockResponseActionsClient
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
-      mockActionCompletion({
-        id: 'action-789',
-        status: 'accepted',
-        wasSuccessful: true,
-        hosts: { 'agent-123': { name: 'test-host' } },
-      });
 
       await confirmThenHandle(tool, { hostName: 'test-host' });
 

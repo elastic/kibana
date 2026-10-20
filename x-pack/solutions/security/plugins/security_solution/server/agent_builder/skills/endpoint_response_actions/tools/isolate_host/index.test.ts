@@ -22,20 +22,10 @@ import { isolateHostTool } from '.';
 
 jest.mock('../../../../../endpoint/services/actions', () => {
   const original = jest.requireActual('../../../../../endpoint/services/actions');
-  return {
-    ...original,
-    getActionDetailsById: jest.fn(),
-  };
+  return { ...original, getActionDetailsById: jest.fn() };
 });
 
 const mockGetActionDetailsById = getActionDetailsById as jest.Mock;
-
-// waitForActionCompletion polls getActionDetailsById; tests below mock it to
-// resolve as already-completed (isCompleted: true) so the poll returns on the
-// first attempt instead of retrying for real and timing out the test.
-function mockActionCompletion(actionDetails: Record<string, unknown>) {
-  mockGetActionDetailsById.mockResolvedValue({ ...actionDetails, isCompleted: true });
-}
 
 const mockLogger = { error: jest.fn(), warn: jest.fn(), info: jest.fn(), debug: jest.fn() };
 
@@ -94,6 +84,15 @@ describe('isolateHostTool', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockGetActionDetailsById.mockImplementation((_service, _spaceId, actionId) =>
+      Promise.resolve({
+        id: actionId,
+        status: 'accepted',
+        wasSuccessful: true,
+        isCompleted: true,
+        hosts: {},
+      })
+    );
     toolCallState.value = undefined;
     mockEndpointAppContextService = createMockEndpointAppContext().service;
     // Hostname resolution also reads the Defend metadata index on origin, so
@@ -138,6 +137,309 @@ describe('isolateHostTool', () => {
       expect(prompt?.color).toBe('danger');
       expect(prompt?.message).toContain('my-host');
       expect(prompt?.message).toContain('agent-123');
+    });
+  });
+
+  describe('policy preflight', () => {
+    it('warns and refuses before dispatch when the endpoint policy disables host isolation', async () => {
+      const isolate = jest.fn();
+      const listPackagePolicies = jest.fn().mockResolvedValue({
+        items: [
+          {
+            id: 'endpoint-policy-1',
+            inputs: [
+              {
+                config: {
+                  policy: {
+                    value: { linux: { advanced: { host_isolation: { allowed: false } } } },
+                  },
+                },
+              },
+            ],
+          },
+        ],
+      });
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: {
+          listAgents: jest.fn().mockResolvedValue({
+            agents: [
+              {
+                id: 'agent-123',
+                status: 'online',
+                packages: ['endpoint'],
+                policy_id: 'agent-policy-1',
+                local_metadata: { host: { os: { platform: 'linux' } } },
+              },
+            ],
+          }),
+        },
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        getSoClient: jest.fn().mockReturnValue({}),
+        packagePolicy: { list: listPackagePolicies },
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => ({ isolate } as never)
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const { card, result } = await confirmThenHandle(
+        isolateHostTool(mockEndpointAppContextService),
+        { hostName: 'my-host' }
+      );
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      expect(card).toMatchObject({ color: 'warning' });
+      expect(card.message).toContain('disabled by the endpoint policy');
+      expect(data).toMatchObject({ error: 'invalid_argument' });
+      expect(data.message).toContain('disabled by the endpoint policy');
+      expect(isolate).not.toHaveBeenCalled();
+      expect(mockEndpointAppContextService.getInternalResponseActionsClient).not.toHaveBeenCalled();
+    });
+
+    it('refuses an IP-resolved Linux endpoint before confirmation and dispatch when its policy disables isolation', async () => {
+      const isolate = jest.fn();
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation((() => ({
+          getHostMetadataList: jest.fn().mockResolvedValue({
+            data: [
+              {
+                metadata: {
+                  elastic: { agent: { id: 'agent-ip' } },
+                  host: { hostname: 'ip-host', os: { platform: 'linux' } },
+                },
+                host_status: 'healthy',
+                policy_info: { agent: { configured: { id: 'agent-policy-ip' } } },
+              },
+            ],
+            total: 1,
+          }),
+        })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        getSoClient: jest.fn().mockReturnValue({}),
+        packagePolicy: {
+          list: jest.fn().mockResolvedValue({
+            items: [
+              {
+                inputs: [
+                  {
+                    config: {
+                      policy: {
+                        value: { linux: { advanced: { host_isolation: { allowed: false } } } },
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          }),
+        },
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => ({ isolate } as never)
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const { card, result } = await confirmThenHandle(
+        isolateHostTool(mockEndpointAppContextService),
+        { ip: '10.0.0.7' }
+      );
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      expect(card).toMatchObject({ color: 'warning' });
+      expect(card.message).toContain('ip-host');
+      expect(card.message).toContain('disabled by the endpoint policy');
+      expect(data).toMatchObject({ error: 'invalid_argument' });
+      expect(data.message).toContain('disabled by the endpoint policy');
+      expect(isolate).not.toHaveBeenCalled();
+      expect(mockEndpointAppContextService.getInternalResponseActionsClient).not.toHaveBeenCalled();
+    });
+
+    it('refuses an IP-resolved Linux endpoint at dispatch when its policy becomes disabled after confirmation', async () => {
+      const isolate = jest.fn();
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation((() => ({
+          getHostMetadataList: jest.fn().mockResolvedValue({
+            data: [
+              {
+                metadata: {
+                  elastic: { agent: { id: 'agent-ip' } },
+                  host: { hostname: 'ip-host', os: { platform: 'linux' } },
+                },
+                host_status: 'healthy',
+                policy_info: { agent: { configured: { id: 'agent-policy-ip' } } },
+              },
+            ],
+            total: 1,
+          }),
+        })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
+      const listPackagePolicies = jest
+        .fn()
+        .mockResolvedValueOnce({
+          items: [
+            {
+              inputs: [
+                {
+                  config: {
+                    policy: {
+                      value: { linux: { advanced: { host_isolation: { allowed: true } } } },
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          items: [
+            {
+              inputs: [
+                {
+                  config: {
+                    policy: {
+                      value: { linux: { advanced: { host_isolation: { allowed: false } } } },
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        });
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        getSoClient: jest.fn().mockReturnValue({}),
+        packagePolicy: { list: listPackagePolicies },
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => ({ isolate } as never)
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const { card, result } = await confirmThenHandle(
+        isolateHostTool(mockEndpointAppContextService),
+        { ip: '10.0.0.7' }
+      );
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      expect(card).toMatchObject({ color: 'danger' });
+      expect(card.message).toContain('ip-host');
+      expect(data).toMatchObject({ error: 'invalid_argument' });
+      expect(data.message).toContain('disabled by the endpoint policy');
+      expect(listPackagePolicies).toHaveBeenCalledTimes(2);
+      expect(isolate).not.toHaveBeenCalled();
+      expect(mockEndpointAppContextService.getInternalResponseActionsClient).not.toHaveBeenCalled();
+    });
+
+    it('does not apply the Linux host-isolation setting to a Windows endpoint', async () => {
+      const isolate = jest.fn().mockResolvedValue({
+        id: 'action-windows',
+        status: 'accepted',
+        wasSuccessful: true,
+        hosts: { 'agent-windows': { name: 'windows-host' } },
+      });
+      const listPackagePolicies = jest.fn();
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: {
+          listAgents: jest.fn().mockResolvedValue({
+            agents: [
+              {
+                id: 'agent-windows',
+                status: 'online',
+                packages: ['endpoint'],
+                policy_id: 'agent-policy-windows',
+                local_metadata: { host: { name: 'windows-host', os: { platform: 'windows' } } },
+              },
+            ],
+          }),
+        },
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        getSoClient: jest.fn().mockReturnValue({}),
+        packagePolicy: { list: listPackagePolicies },
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => ({ isolate } as never)
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const { card, result } = await confirmThenHandle(
+        isolateHostTool(mockEndpointAppContextService),
+        { hostName: 'windows-host' }
+      );
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      expect(card).toMatchObject({ color: 'danger' });
+      expect(card.message).toContain('windows-host');
+      expect(data).toMatchObject({ actionId: 'action-windows' });
+      expect(listPackagePolicies).not.toHaveBeenCalled();
+      expect(isolate).toHaveBeenCalledWith(expect.anything(), {
+        hosts: { 'agent-windows': { name: 'windows-host' } },
+      });
+    });
+
+    it('refuses at dispatch when the policy is disabled after confirmation', async () => {
+      const isolate = jest.fn();
+      const listPackagePolicies = jest
+        .fn()
+        .mockResolvedValueOnce({
+          items: [
+            {
+              inputs: [
+                {
+                  config: {
+                    policy: {
+                      value: { linux: { advanced: { host_isolation: { allowed: true } } } },
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        })
+        .mockResolvedValueOnce({
+          items: [
+            {
+              inputs: [
+                {
+                  config: {
+                    policy: {
+                      value: { linux: { advanced: { host_isolation: { allowed: false } } } },
+                    },
+                  },
+                },
+              ],
+            },
+          ],
+        });
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: {
+          listAgents: jest.fn().mockResolvedValue({
+            agents: [
+              {
+                id: 'agent-123',
+                status: 'online',
+                packages: ['endpoint'],
+                policy_id: 'agent-policy-1',
+                local_metadata: { host: { os: { platform: 'linux' } } },
+              },
+            ],
+          }),
+        },
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+        getSoClient: jest.fn().mockReturnValue({}),
+        packagePolicy: { list: listPackagePolicies },
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => ({ isolate } as never)
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const { card, result } = await confirmThenHandle(
+        isolateHostTool(mockEndpointAppContextService),
+        { hostName: 'my-host' }
+      );
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      expect(card).toMatchObject({ color: 'danger' });
+      expect(data).toMatchObject({ error: 'invalid_argument' });
+      expect(data.message).toContain('disabled by the endpoint policy');
+      expect(listPackagePolicies).toHaveBeenCalledTimes(2);
+      expect(isolate).not.toHaveBeenCalled();
+      expect(mockEndpointAppContextService.getInternalResponseActionsClient).not.toHaveBeenCalled();
     });
   });
 
@@ -282,12 +584,6 @@ describe('isolateHostTool', () => {
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => mockResponseActionsClient
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
-      mockActionCompletion({
-        id: 'action-456',
-        status: 'accepted',
-        wasSuccessful: true,
-        hosts: { 'agent-123': { name: 'my-host' } },
-      });
 
       const { result } = await confirmThenHandle(tool, {
         hostName: 'my-host',
@@ -309,6 +605,87 @@ describe('isolateHostTool', () => {
       expect(data.status).toBe('accepted');
       expect(data.wasSuccessful).toBe(true);
       expect(data.comment).toBe('malware detected');
+    });
+
+    it('returns a successful no-op when the endpoint is already isolated', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-123', packages: ['endpoint'], status: 'online' }],
+        }),
+      };
+      const isolate = jest.fn();
+
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation((() => ({
+          getHostMetadataList: jest.fn().mockResolvedValue({
+            data: [
+              {
+                metadata: {
+                  agent: { id: 'agent-123' },
+                  elastic: { agent: { id: 'agent-123' } },
+                  Endpoint: { state: { isolation: true } },
+                },
+                host_status: 'healthy',
+              },
+            ],
+            total: 1,
+          }),
+        })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => ({ isolate } as never)
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const { result } = await confirmThenHandle(tool, { hostName: 'my-host' });
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      expect(data).toMatchObject({
+        action: 'isolate',
+        status: 'completed',
+        wasSuccessful: true,
+        noOp: true,
+        isolated: true,
+      });
+      expect(isolate).not.toHaveBeenCalled();
+      expect(mockEndpointAppContextService.getInternalResponseActionsClient).not.toHaveBeenCalled();
+    });
+
+    it('queues an offline endpoint without polling for completion', async () => {
+      const mockAgentService = {
+        listAgents: jest.fn().mockResolvedValue({
+          agents: [{ id: 'agent-offline', packages: ['endpoint'], status: 'offline' }],
+        }),
+      };
+      const isolate = jest.fn().mockResolvedValue({
+        id: 'action-offline',
+        status: 'pending',
+        wasSuccessful: false,
+        hosts: { 'agent-offline': { name: 'offline-host' } },
+      });
+
+      mockEndpointAppContextService.getInternalFleetServices = jest.fn(() => ({
+        agent: mockAgentService,
+        ensureInCurrentSpace: jest.fn().mockResolvedValue(undefined),
+      })) as unknown as EndpointAppContextService['getInternalFleetServices'];
+      mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
+        () => ({ isolate } as never)
+      ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
+
+      const { result } = await confirmThenHandle(tool, { hostName: 'offline-host' });
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+
+      expect(isolate).toHaveBeenCalledTimes(1);
+      expect(data).toMatchObject({
+        actionId: 'action-offline',
+        status: 'pending',
+        queued: true,
+        message: 'The action is queued and will execute when the endpoint reconnects.',
+      });
+      expect(mockGetActionDetailsById).not.toHaveBeenCalled();
     });
 
     it('uses a default comment when none is provided', async () => {
@@ -349,12 +726,6 @@ describe('isolateHostTool', () => {
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => mockResponseActionsClient
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
-      mockActionCompletion({
-        id: 'action-789',
-        status: 'accepted',
-        wasSuccessful: true,
-        hosts: { 'agent-123': { name: 'test-host' } },
-      });
 
       await confirmThenHandle(tool, { hostName: 'test-host' });
 
@@ -439,12 +810,6 @@ describe('isolateHostTool', () => {
       mockEndpointAppContextService.getInternalResponseActionsClient = jest.fn(
         () => mockResponseActionsClient
       ) as unknown as EndpointAppContextService['getInternalResponseActionsClient'];
-      mockActionCompletion({
-        id: 'action-456',
-        status: 'accepted',
-        wasSuccessful: true,
-        hosts: { 'agent-123': { name: 'my-host' } },
-      });
 
       await confirmThenHandle(tool, { hostName: 'my-host' });
 

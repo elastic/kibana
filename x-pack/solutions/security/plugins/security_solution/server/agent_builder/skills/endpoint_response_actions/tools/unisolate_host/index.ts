@@ -40,7 +40,7 @@ export const unisolateHostTool = (
   return {
     id: UNISOLATE_TOOL_ID,
     type: ToolType.builtin,
-    description: `Un-isolates a host by its hostname or agent ID (pass the agent ID, from an ambiguous_hostname result, when several endpoints share the hostname). Re-establishes network connectivity on an endpoint that was previously isolated. The action is dispatched through the Elastic Defend Response Actions service.`,
+    description: `Un-isolates a host by its hostname, exact IP address, or agent ID (pass the selected agent ID after an ambiguous_hostname or ambiguous_ip result). Re-establishes network connectivity on an endpoint that was previously isolated. The action is dispatched through the Elastic Defend Response Actions service.`,
     schema: unisolateHostSchema,
     // HITL gate enforced by the framework, not skill prose: the runner prompts
     // the analyst for confirmation before every dispatch.
@@ -52,6 +52,7 @@ export const unisolateHostTool = (
             action: 'unisolate',
             params: {
               hostName: toolParams.hostName as string | undefined,
+              ip: toolParams.ip as string | undefined,
               agentId: toolParams.agentId as string | undefined,
             },
             context,
@@ -75,11 +76,12 @@ export const unisolateHostTool = (
       try {
         const requestedHostName = params.hostName as string | undefined;
         const requestedAgentId = params.agentId as string | undefined;
+        const requestedIp = params.ip as string | undefined;
         const comment = params.comment as string | undefined;
 
         const prepared = await prepareDispatch({
           action: 'unisolate',
-          params: { hostName: requestedHostName, agentId: requestedAgentId },
+          params: { hostName: requestedHostName, ip: requestedIp, agentId: requestedAgentId },
           context,
           endpointAppContextService,
           requiredPrivilege: 'canUnIsolateHost',
@@ -119,17 +121,16 @@ export const unisolateHostTool = (
           { hosts: { [endpointIds[0]]: { name: hostName } } }
         );
 
-        // The dispatch above returns the action's write-time snapshot
-        // (almost always `pending` — the endpoint agent hasn't checked in
-        // yet). Poll until Elastic Defend reports completion so the chat
-        // response reflects the actual outcome, not just "dispatched".
-        const actionDetails = await waitForActionCompletion(
-          endpointAppContextService,
-          spaceId,
-          dispatchedAction.id,
-          logger,
-          dispatchedAction
-        );
+        const actionDetails =
+          target.endpoint.status === 'offline'
+            ? dispatchedAction
+            : await waitForActionCompletion(
+                endpointAppContextService,
+                spaceId,
+                dispatchedAction.id,
+                logger,
+                dispatchedAction
+              );
 
         return {
           results: [
@@ -142,9 +143,13 @@ export const unisolateHostTool = (
                 actionId: actionDetails.id,
                 status: actionDetails.status,
                 wasSuccessful: actionDetails.wasSuccessful,
-                // Why a failed action failed (bounded); without it the model
-                // sees only `status: failed`.
-                ...(summarizeActionErrors(actionDetails.errors) ?? {}),
+                ...(target.endpoint.status === 'offline'
+                  ? {
+                      queued: true,
+                      message:
+                        'The action is queued and will execute when the endpoint reconnects.',
+                    }
+                  : summarizeActionErrors(actionDetails.errors) ?? {}),
                 hosts: actionDetails.hosts,
                 comment,
               },
