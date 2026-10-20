@@ -941,15 +941,12 @@ describe('Attack Discovery worker chain', () => {
       });
 
       // Impact reads the correlated alerts through the Security step, and nothing reads the
-      // attack from Elasticsearch. The only direct reads are the two that retire the
-      // correlated alerts, and they read the detection alerts index.
-      it('reads Elasticsearch only to retire the correlated alerts', () => {
+      // attack from Elasticsearch. The only direct read is the one that verifies the
+      // correlated alerts were retired, and it reads the detection alerts index.
+      it('reads Elasticsearch only to verify the retired alerts', () => {
         const reads = reviewSteps.filter((step) => step.type.startsWith('elasticsearch.'));
 
-        expect(reads.map((step) => step.name)).toEqual([
-          'find_open_correlated_alerts',
-          'verify_alerts_retired',
-        ]);
+        expect(reads.map((step) => step.name)).toEqual(['verify_alerts_retired']);
         expect(new Set(reads.map((step) => step.with?.index))).toEqual(
           new Set(['.alerts-security.alerts-{{ workflow.spaceId }}'])
         );
@@ -2050,20 +2047,19 @@ describe('Attack Discovery worker chain', () => {
     // Every step in order, between `resolve_escalation` and `escalation_gate`.
     const retireSteps = [
       'tag_correlated_alerts',
-      'find_open_correlated_alerts',
       'acknowledge_correlated_alerts',
       'verify_alerts_retired',
       'resolve_alerts_retired',
       'journal_alerts_retired',
     ] as const;
-    // Every step but the acknowledge, which runs only when there is an open alert.
-    const escalationGuarded = retireSteps.filter(
-      (name) => name !== 'acknowledge_correlated_alerts'
-    );
     const writes = ['tag_correlated_alerts', 'acknowledge_correlated_alerts'] as const;
+    const alertWriteTypes = [
+      'security.setAlertTags',
+      'security.setAlertStatus',
+      'kibana.SetAlertsStatus',
+    ];
     const retried = [
       'tag_correlated_alerts',
-      'find_open_correlated_alerts',
       'acknowledge_correlated_alerts',
       'verify_alerts_retired',
     ] as const;
@@ -2105,7 +2101,7 @@ describe('Attack Discovery worker chain', () => {
         }
       );
 
-    const searchFilters = (name: string) =>
+    const queryFilters = (name: string) =>
       ((stepIn(reviewSteps, name)?.with?.query as { bool?: { filter?: unknown[] } })?.bool
         ?.filter ?? []) as unknown[];
 
@@ -2125,8 +2121,7 @@ describe('Attack Discovery worker chain', () => {
 
     it.each([
       ['tag_correlated_alerts', 'security.setAlertTags'],
-      ['find_open_correlated_alerts', 'elasticsearch.search'],
-      ['acknowledge_correlated_alerts', 'security.setAlertStatus'],
+      ['acknowledge_correlated_alerts', 'kibana.SetAlertsStatus'],
       ['verify_alerts_retired', 'elasticsearch.search'],
       ['resolve_alerts_retired', 'data.set'],
       ['journal_alerts_retired', 'workflow.execute'],
@@ -2151,24 +2146,20 @@ describe('Attack Discovery worker chain', () => {
     // about the attack, so neither touches the alerts.
     it('writes to the alerts nowhere else', () => {
       expect(
-        reviewSteps
-          .filter((step) =>
-            ['security.setAlertTags', 'security.setAlertStatus'].includes(step.type)
-          )
-          .map((step) => step.name)
+        reviewSteps.filter((step) => alertWriteTypes.includes(step.type)).map((step) => step.name)
       ).toEqual([...writes]);
     });
 
-    it.each(escalationGuarded)('runs %s for an escalated attack with alerts', (name) => {
+    it.each(retireSteps)('runs %s for an escalated attack with alerts', (name) => {
       expect(evaluateIf(name, escalationContext(true, ['alert-1']))).toBe(true);
     });
 
-    it.each(escalationGuarded)('skips %s when the verdict does not escalate', (name) => {
+    it.each(retireSteps)('skips %s when the verdict does not escalate', (name) => {
       expect(evaluateIf(name, escalationContext(false, ['alert-1']))).toBe(false);
     });
 
-    // Both writes reject an empty id list.
-    it.each(escalationGuarded)('skips %s when the review was given no alerts', (name) => {
+    // The tag write rejects an empty id list.
+    it.each(retireSteps)('skips %s when the review was given no alerts', (name) => {
       expect(evaluateIf(name, escalationContext(true, []))).toBe(false);
       expect(evaluateIf(name, escalationContext(true))).toBe(false);
     });
@@ -2184,56 +2175,38 @@ describe('Attack Discovery worker chain', () => {
       expect(tagStep.tags_to_remove).toBeUndefined();
     });
 
-    // The status write has no current-status condition and drops `workflow_reason`, so a
-    // closed alert passed to it would be reopened and lose its close reason.
+    // The status script drops `workflow_reason`, so acknowledging a closed alert would
+    // reopen it and lose its close reason. By query, the status check and the write are
+    // one update-by-query: an alert closed before it starts does not match, and one closed
+    // while it runs is a version conflict, which `conflicts: proceed` skips.
     describe('acknowledging only open alerts', () => {
       const acknowledge = stepIn(reviewSteps, 'acknowledge_correlated_alerts');
-      const find = stepIn(reviewSteps, 'find_open_correlated_alerts');
 
-      it('looks up the correlated alerts in this space’s alerts index', () => {
-        expect(asWith(find).index).toBe('.alerts-security.alerts-{{ workflow.spaceId }}');
-        expect(searchFilters('find_open_correlated_alerts')).toContainEqual({
+      it('acknowledges by query, never by id', () => {
+        expect(acknowledge?.type).toBe('kibana.SetAlertsStatus');
+        expect(acknowledge?.with?.status).toBe('acknowledged');
+        expect(acknowledge?.with?.signal_ids).toBeUndefined();
+      });
+
+      it('targets exactly the correlated alerts', () => {
+        expect(queryFilters('acknowledge_correlated_alerts')).toContainEqual({
           ids: { values: '${{ inputs.alert_ids }}' },
         });
       });
 
-      it('keeps only the alerts that are still open', () => {
-        expect(searchFilters('find_open_correlated_alerts')).toContainEqual({
+      it('matches only the alerts that are still open', () => {
+        expect(queryFilters('acknowledge_correlated_alerts')).toContainEqual({
           term: { 'kibana.alert.workflow_status': 'open' },
         });
       });
 
-      // `alert_ids` holds at most 1000 ids, so a smaller page would leave open alerts
-      // unacknowledged.
-      it('returns every open alert the review could be given', () => {
-        expect(find?.with?.size).toBe(1000);
+      // `abort` would fail the step on a conflict, and the retry would then re-send it.
+      it('skips an alert changed mid-flight instead of failing', () => {
+        expect(acknowledge?.with?.conflicts).toBe('proceed');
       });
 
-      it('acknowledges exactly the open alerts it found', () => {
-        expect(asWith(acknowledge).alert_ids).toBe(
-          "${{ steps.find_open_correlated_alerts.output.hits.hits | map: '_id' }}"
-        );
-        expect(asWith(acknowledge).status).toBe('acknowledged');
-      });
-
-      it('acknowledges when an open alert was found', () => {
-        expect(
-          evaluateIf('acknowledge_correlated_alerts', {
-            steps: { find_open_correlated_alerts: { output: { hits: { hits: [{ _id: 'a' }] } } } },
-          })
-        ).toBe(true);
-      });
-
-      // Covers a skipped lookup too: its output is absent.
-      it.each([
-        ['no alert is open', { output: { hits: { hits: [] } } }],
-        ['the lookup failed', { error: { type: 'Error' } }],
-      ])('acknowledges nothing when %s', (_case, lookup) => {
-        expect(
-          evaluateIf('acknowledge_correlated_alerts', {
-            steps: { find_open_correlated_alerts: lookup },
-          })
-        ).toBe(false);
+      it('bounds the write well below the transport default', () => {
+        expect(acknowledge?.timeout).toBe('60s');
       });
     });
 

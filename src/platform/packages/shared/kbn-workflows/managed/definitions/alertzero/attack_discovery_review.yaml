@@ -874,11 +874,11 @@ steps:
   # failed status write after it still keeps the alerts out of the next run.
   #
   # Bookkeeping, not the lifecycle: no step here is a reason to cancel the escalation
-  # the verdict calls for, so each retries and then continues. The writes do not
-  # report what they changed (a 200 can update nothing), so `verify_alerts_retired`
-  # reads the alerts back and the journal note says what actually landed. One call
-  # each, because `alert_ids` holds at most 1000 ids. The `alert_ids` guard is
-  # required: both writes reject an empty id list.
+  # the verdict calls for, so each retries and then continues. A write can return 200
+  # and change nothing, so `verify_alerts_retired` reads the alerts back and the
+  # journal note says what actually landed. One call each, because `alert_ids` holds
+  # at most 1000 ids. The `alert_ids` guard is required: the tag write rejects an
+  # empty id list.
   #
   # Every alert is tagged, closed ones included: a tag changes no status, and it is
   # what traces an alert to this Worker.
@@ -902,23 +902,29 @@ steps:
   # Only the alerts that are still `open` are acknowledged. The ids were chosen at
   # generation, minutes before the verdict, and in that window an analyst or the
   # Alert Triage Worker can close one, typically as a false positive. The status
-  # write has no current-status condition and drops `workflow_reason`, so passing a
-  # closed alert to it would reopen it and erase a reason the Rule Tuning Worker
-  # harvests on. Read and write are separate calls, so this narrows that race to the
-  # gap between them rather than closing it.
+  # script drops `workflow_reason`, so acknowledging a closed alert would reopen it
+  # and erase a reason the Rule Tuning Worker harvests on.
   #
-  # An already-acknowledged alert needs no write. A failed read acknowledges nothing:
-  # leaving an alert open is safer than overwriting a close, and the journal note
-  # reports it.
-  - name: find_open_correlated_alerts
-    type: elasticsearch.search
+  # By query, so the status check and the write are one update-by-query: an alert
+  # closed before it starts does not match, and one closed while it runs is skipped
+  # as a version conflict. `conflicts: proceed` skips rather than failing, so the
+  # retry fires only on a real error and re-checks the status when it does. A by-id
+  # write (`security.setAlertStatus`) has no status condition, and its retry after a
+  # conflict would acknowledge exactly the alert that was just closed.
+  #
+  # `kibana.SetAlertsStatus` calls the same route as `security.setAlertStatus`, with
+  # the same privilege check, audit logging and status-changed event; only it can send
+  # the route's by-query body. An alert another writer updates mid-flight stays
+  # `open`, which the read-back reports.
+  - name: acknowledge_correlated_alerts
+    type: kibana.SetAlertsStatus
     if: >-
       ${{ steps.resolve_escalation.output.escalate == true
         and inputs.alert_ids != blank }}
+    timeout: "60s"
     with:
-      index: .alerts-security.alerts-{{ workflow.spaceId }}
-      size: 1000
-      _source: false
+      status: acknowledged
+      conflicts: proceed
       query:
         bool:
           filter:
@@ -926,18 +932,6 @@ steps:
                 values: "${{ inputs.alert_ids }}"
             - term:
                 kibana.alert.workflow_status: open
-    on-failure:
-      retry:
-        max-attempts: 3
-        delay: 5s
-      continue: true
-
-  - name: acknowledge_correlated_alerts
-    type: security.setAlertStatus
-    if: "${{ steps.find_open_correlated_alerts.output.hits.hits != blank }}"
-    with:
-      alert_ids: "${{ steps.find_open_correlated_alerts.output.hits.hits | map: '_id' }}"
-      status: acknowledged
     on-failure:
       retry:
         max-attempts: 3
