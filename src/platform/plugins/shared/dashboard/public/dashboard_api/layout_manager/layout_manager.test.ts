@@ -26,8 +26,6 @@ import { initializeTitleManager } from '@kbn/presentation-publishing';
 
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { getSampleDashboardState } from '../../mocks';
-import { usageCollectionService } from '../../services/kibana_services';
-import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
 import type { initializeTrackPanel } from '../track_panel';
 import type { initializeViewModeManager } from '../view_mode_manager';
 import { deserializeLayout } from './deserialize_layout';
@@ -332,35 +330,6 @@ describe('layout manager', () => {
         expandedPanelId$: new BehaviorSubject<string | undefined>('1'),
       });
       expect(layoutManager.api.canRemovePanels()).toBe(false);
-    });
-  });
-
-  describe('removePanel', () => {
-    test('reports a panel_remove counter with the panel type', () => {
-      const layoutManager = initializeLayoutManager(
-        viewModeManagerMock,
-        [panel1],
-        [],
-        trackPanelMock
-      );
-      layoutManager.api.removePanel(PANEL_ONE_ID);
-      expect(layoutManager.api.layout$.getValue().panels[PANEL_ONE_ID]).toBeUndefined();
-      expect(usageCollectionService?.reportUiCounter).toHaveBeenCalledWith(
-        DASHBOARD_UI_METRIC_ID,
-        'click',
-        'testPanelType.panel_remove'
-      );
-    });
-
-    test('does not report a counter when the panel does not exist', () => {
-      const layoutManager = initializeLayoutManager(
-        viewModeManagerMock,
-        [panel1],
-        [],
-        trackPanelMock
-      );
-      layoutManager.api.removePanel('unknownPanel');
-      expect(usageCollectionService?.reportUiCounter).not.toHaveBeenCalled();
     });
   });
 

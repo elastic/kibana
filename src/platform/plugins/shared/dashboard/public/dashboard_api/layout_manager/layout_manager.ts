@@ -363,18 +363,7 @@ export function initializeLayoutManager(
     const currentLayout = layout$.value;
     const panels = { ...currentLayout.panels };
     const pinnedPanels = { ...currentLayout.pinnedPanels };
-
     if (panels[uuid]) {
-      const panelType = panels[uuid]?.type;
-
-      if (panelType) {
-        usageCollectionService?.reportUiCounter(
-          DASHBOARD_UI_METRIC_ID,
-          METRIC_TYPE.CLICK,
-          `${panelType}.panel_remove`
-        );
-      }
-
       delete panels[uuid];
       layout$.next({ ...layout$.value, panels });
     } else if (pinnedPanels[uuid]) {
