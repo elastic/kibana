@@ -831,16 +831,27 @@ function convertTreeToOpenNodes(
 const getErrorMessage = (error: StepExecutionTreeRowProps['error']): string | undefined =>
   typeof error === 'string' ? error : error?.message;
 
+const isNodeExpanded = (
+  node: OpenTreeNode,
+  expandedIds: Set<string>,
+  leafList: boolean
+): boolean => {
+  if (leafList) return false;
+  if (node.row?.onToggleExpand) return Boolean(node.row.isExpanded);
+  return node.children.length > 0 && expandedIds.has(node.id);
+};
+
 const hasVisibleDescendantWithError = (
   nodes: OpenTreeNode[],
   message: string,
-  expandedIds: Set<string>
+  expandedIds: Set<string>,
+  leafList: boolean
 ): boolean =>
   nodes.some(
     (node) =>
       getErrorMessage(node.row?.error) === message ||
-      (expandedIds.has(node.id) &&
-        hasVisibleDescendantWithError(node.children, message, expandedIds))
+      (isNodeExpanded(node, expandedIds, leafList) &&
+        hasVisibleDescendantWithError(node.children, message, expandedIds, leafList))
   );
 
 const OpenTreeNodes = ({
@@ -912,19 +923,15 @@ const OpenTreeNodes = ({
           ? undefined
           : node.row.onToggleExpand ??
             (hasTreeChildren ? () => onToggleExpand(node.id) : undefined);
-        const isExpanded = leafList
-          ? false
-          : node.row.onToggleExpand
-          ? Boolean(node.row.isExpanded)
-          : hasTreeChildren && expandedIds.has(node.id);
-        // The engine copies a failed step's error onto every enclosing scope
-        // (iteration, foreach, ...); show it once, on the deepest visible row.
+        const isExpanded = isNodeExpanded(node, expandedIds, leafList);
         const showChildren = isExpanded && hasTreeChildren;
         const message = getErrorMessage(node.row.error);
+        // The engine copies a failed step's error onto every enclosing scope
+        // (iteration, foreach, ...); show it once, on the deepest visible row.
         const isErrorShownBelow =
           showChildren &&
           message != null &&
-          hasVisibleDescendantWithError(node.children, message, expandedIds);
+          hasVisibleDescendantWithError(node.children, message, expandedIds, leafList);
 
         return (
           <div

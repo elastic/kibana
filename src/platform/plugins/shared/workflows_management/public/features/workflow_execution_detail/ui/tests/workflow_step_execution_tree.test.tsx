@@ -2660,6 +2660,44 @@ describe('WorkflowStepExecutionTree', () => {
       expect(document.querySelector('[data-danger-fill="true"]')).toBeTruthy();
     });
 
+    it('passes the error only to the final attempt, which owns the error region', () => {
+      isTerminalStatus.mockReturnValue(true);
+      isDangerousStatus.mockImplementation((s) => s === ExecutionStatus.FAILED);
+      buildStepExecutionsTree.mockReturnValue(makeFailedRetryTree());
+
+      render(
+        <TestWrapper>
+          <WorkflowStepExecutionTree
+            execution={createMockExecution({
+              status: ExecutionStatus.FAILED,
+              stepExecutions: [1, 2, 3, 4].map((n) =>
+                createMockStepExecution({
+                  id: `attempt-${n}`,
+                  stepId: 'http_call',
+                  stepType: 'kibana.request',
+                  status: ExecutionStatus.FAILED,
+                  error: { type: 'Error', message: 'boom' },
+                })
+              ),
+            })}
+            definition={createMockDefinition()}
+            error={null}
+            onStepExecutionClick={mockOnStepExecutionClick}
+            selectedId={null}
+          />
+        </TestWrapper>
+      );
+
+      const getAttemptRow = (n: number) =>
+        screen
+          .getByText(`Attempt #${n}`)
+          .closest('[data-test-subj="step-execution-tree-item-label"]');
+      [1, 2, 3].forEach((n) =>
+        expect(getAttemptRow(n)).toHaveAttribute('data-has-error-panel', 'false')
+      );
+      expect(getAttemptRow(4)).toHaveAttribute('data-has-error-panel', 'true');
+    });
+
     it('shows recovered annotation and no error panel when retries eventually succeed', () => {
       isTerminalStatus.mockReturnValue(true);
       isDangerousStatus.mockImplementation((s) => s === ExecutionStatus.FAILED);
