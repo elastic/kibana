@@ -17,6 +17,7 @@ import { DataLayerContext } from '../data/data_layer_context';
 import { createRunCases } from '../data/run_cases';
 import { createRunEsqlQuery } from '../data/run_esql_query';
 import { createAppRuntime } from '../runtime/app_runtime';
+import { AppIdContext } from '../runtime/app_id_context';
 import { AppRuntimeContext } from '../runtime/app_runtime_context';
 import { createView, getViewKeys, isSameView, type ViewState } from '../runtime/view_state';
 import { TimeRangeControlContext } from '../runtime/time_range_context';
@@ -117,17 +118,19 @@ export const LiveApp = ({ document, appId, view, onViewChange }: LiveAppProps) =
 
   return (
     <div data-test-subj="customAppChatCard">
-      <AppRuntimeContext.Provider value={runtime}>
-        <TimeRangeControlContext.Provider value={timeRangeControl}>
-          <WorkflowRunnerProvider appId={appId}>
-            <DataLayerContext.Provider value={dataLayer}>
-              <AppFrame>
-                <NodeRenderer node={document.root} />
-              </AppFrame>
-            </DataLayerContext.Provider>
-          </WorkflowRunnerProvider>
-        </TimeRangeControlContext.Provider>
-      </AppRuntimeContext.Provider>
+      <AppIdContext.Provider value={appId}>
+        <AppRuntimeContext.Provider value={runtime}>
+          <TimeRangeControlContext.Provider value={timeRangeControl}>
+            <WorkflowRunnerProvider appId={appId}>
+              <DataLayerContext.Provider value={dataLayer}>
+                <AppFrame>
+                  <NodeRenderer node={document.root} />
+                </AppFrame>
+              </DataLayerContext.Provider>
+            </WorkflowRunnerProvider>
+          </TimeRangeControlContext.Provider>
+        </AppRuntimeContext.Provider>
+      </AppIdContext.Provider>
     </div>
   );
 };

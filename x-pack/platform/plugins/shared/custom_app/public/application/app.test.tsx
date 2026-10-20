@@ -152,6 +152,19 @@ const makeAgentBuilder = () => {
       ui: { activeConversation$ },
       getChatEvents$: jest.fn(() => chatEvents$),
     },
+    /** The agent has made an app, in the conversation that is open. */
+    made: (attachmentId: string, document: unknown, title?: string) => {
+      activeConversation$.next({ id: 'conversation-1' });
+      chatEvents$.next({
+        type: ChatEventType.toolUi,
+        data: {
+          tool_id: 'custom_app_create_app',
+          tool_call_id: 'call-0',
+          custom_event: 'custom_app:created',
+          data: { attachmentId, data: { document, ...(title ? { panel_title: title } : {}) } },
+        },
+      });
+    },
     /** The agent has changed the app of the attachment with this id. */
     answer: (attachmentId: string, document: unknown) => {
       activeConversation$.next({ id: 'conversation-1' });
@@ -223,7 +236,7 @@ const setup = ({
     initialEntries: [path],
     getUserConfirmation: (_message, callback) => callback(confirmLeave),
   });
-  const notifications = { toasts: { addDanger: jest.fn() } };
+  const notifications = { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } };
   const chrome = { setBreadcrumbs: jest.fn() };
   render(
     <MockAppHeaderProvider>
@@ -834,6 +847,103 @@ describe('the custom apps page', () => {
 
       expect(history.location.pathname).toBe('/create');
       expect(viewOf(history)).not.toBeNull();
+    });
+  });
+
+  describe('an app the agent makes while the list is open', () => {
+    const agentApp = { state: {}, root: { type: 'text', id: 'made', text: 'Made by the agent' } };
+
+    it('is kept and opened at once, with the title the agent gave it, with no card to save by hand', async () => {
+      const agentBuilder = makeAgentBuilder();
+      const { client, history, notifications } = setup({ agentBuilder });
+      await screen.findByText('Service explorer');
+
+      act(() => agentBuilder.made('att-1', agentApp, 'Triage board'));
+
+      await waitFor(() =>
+        expect(client.create).toHaveBeenCalledWith({
+          title: 'Triage board',
+          document: expect.objectContaining({ root: expect.objectContaining({ id: 'made' }) }),
+        })
+      );
+      await waitFor(() => expect(history.location.pathname).toBe('/view/new-1'));
+      expect(notifications.toasts.addSuccess).toHaveBeenCalledWith(
+        'The app "Triage board" was created'
+      );
+    });
+
+    it('is called something when the agent gave it no title, and a title that is too long is cut', async () => {
+      const agentBuilder = makeAgentBuilder();
+      const { client } = setup({ agentBuilder });
+      await screen.findByText('Service explorer');
+
+      act(() => agentBuilder.made('att-1', agentApp));
+      act(() => agentBuilder.made('att-2', agentApp, 'x'.repeat(400)));
+
+      await waitFor(() => expect(client.create).toHaveBeenCalledTimes(2));
+      expect(client.create.mock.calls[0][0].title).toBe('Custom app');
+      expect(client.create.mock.calls[1][0].title).toHaveLength(256);
+    });
+
+    it('is kept once, however often it is told', async () => {
+      const agentBuilder = makeAgentBuilder();
+      const { client } = setup({ agentBuilder });
+      await screen.findByText('Service explorer');
+
+      act(() => agentBuilder.made('att-1', agentApp, 'Once'));
+      act(() => agentBuilder.made('att-1', agentApp, 'Once'));
+
+      await waitFor(() => expect(client.create).toHaveBeenCalledTimes(1));
+    });
+
+    it('is not kept when it is not a valid app, which is left to the card', async () => {
+      const agentBuilder = makeAgentBuilder();
+      const { client } = setup({ agentBuilder });
+      await screen.findByText('Service explorer');
+
+      act(() => agentBuilder.made('att-1', { root: { type: 'nope', id: 'x' } }, 'Broken'));
+
+      expect(client.create).not.toHaveBeenCalled();
+    });
+
+    it('says why it could not be kept, that it is still in the chat, and stays on the list', async () => {
+      const agentBuilder = makeAgentBuilder();
+      const { client, history, notifications } = setup({
+        agentBuilder,
+        prepare: (c) => c.create.mockRejectedValue({ body: { message: 'Not allowed' } }),
+      });
+      await screen.findByText('Service explorer');
+
+      act(() => agentBuilder.made('att-1', agentApp, 'Triage board'));
+
+      await waitFor(() =>
+        expect(notifications.toasts.addDanger).toHaveBeenCalledWith({
+          title: 'The app could not be created',
+          text: 'Not allowed It is still in the chat, where you can save it.',
+        })
+      );
+      expect(history.location.pathname).toBe('/');
+      expect(client.create).toHaveBeenCalledTimes(1);
+    });
+
+    it('is left to the card for someone who may only read, who cannot keep it', async () => {
+      const agentBuilder = makeAgentBuilder();
+      const { client } = setup({ agentBuilder, canSave: false });
+      await screen.findByText('Service explorer');
+
+      act(() => agentBuilder.made('att-1', agentApp, 'Triage board'));
+
+      expect(client.create).not.toHaveBeenCalled();
+    });
+
+    it('is not kept by a page of an app, where what the agent makes is a draft to review', async () => {
+      const agentBuilder = makeAgentBuilder();
+      const { client } = setup({ agentBuilder, path: '/view/app-1' });
+      await screen.findByTestId('liveApp');
+
+      act(() => agentBuilder.made('att-1', agentApp, 'Triage board'));
+
+      expect(client.create).not.toHaveBeenCalled();
     });
   });
 

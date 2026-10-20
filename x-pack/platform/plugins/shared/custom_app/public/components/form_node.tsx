@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useId, useState, type FormEvent } from 'react';
+import React, { useEffect, useId, useState, type FormEvent } from 'react';
 import {
   EuiButton,
   EuiFieldText,
@@ -22,10 +22,12 @@ import {
   type AppNodeOfType,
   type FormField,
 } from '@kbn/custom-app-common';
+import { useAppId } from '../runtime/app_id_context';
 import { useStateValues } from '../runtime/app_runtime_context';
 import { useActionRunner } from '../workflows/use_action_runner';
-import { useWorkflowRunner } from '../workflows/workflow_runner';
+import { useWorkflowsGate } from '../workflows/use_workflows_gate';
 import { DroppedActions } from './dropped_actions';
+import { getFormAnswersKey, readFormAnswers, writeFormAnswers } from './form_answers_storage';
 
 const requiredLabel = i18n.translate('xpack.customApp.formNode.required', {
   defaultMessage: 'Required',
@@ -102,17 +104,26 @@ const FieldInput = ({
 export const FormNode = ({ node }: { node: AppNodeOfType<'form'> }) => {
   const state = useStateValues();
   const run = useActionRunner(node.id);
-  const { availability } = useWorkflowRunner();
   const baseId = useId();
-  /** What was typed, by value. A field that was not typed in shows the value as the app has it. */
-  const [typed, setTyped] = useState<Readonly<Record<string, string>>>({});
+  const appId = useAppId();
+  const storageKey = appId === undefined ? undefined : getFormAnswersKey(appId, node.id);
+  /**
+   * What was typed, by value. A field that was not typed in shows the value as the app has it. For a
+   * saved app it is kept in this tab's session, so that a refresh does not lose it: it stays out of
+   * the URL, which is shared.
+   */
+  const [typed, setTyped] = useState<Readonly<Record<string, string>>>(() =>
+    storageKey === undefined ? {} : readFormAnswers(storageKey, node.fields)
+  );
+  useEffect(() => {
+    if (storageKey !== undefined) writeFormAnswers(storageKey, typed);
+  }, [storageKey, typed]);
   const [missing, setMissing] = useState<ReadonlySet<string>>(new Set());
   const [dropped, setDropped] = useState<string[]>([]);
 
   const answerTo = ({ bind }: FormField): string => typed[bind] ?? String(state[bind] ?? '');
 
-  const runsWorkflow = node.onSubmit.some(({ type }) => type === 'runWorkflow');
-  const unavailableReason = runsWorkflow && !availability.canRun ? availability.reason : undefined;
+  const unavailableReason = useWorkflowsGate(node.onSubmit);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();

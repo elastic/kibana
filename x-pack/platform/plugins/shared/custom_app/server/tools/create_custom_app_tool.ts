@@ -16,6 +16,10 @@ import {
   type CustomAppContextAttachmentData,
 } from '../../common/app_context_attachment';
 import { CUSTOM_APP_AUTHORING_GUIDE } from '../../common/authoring_guide';
+import {
+  CUSTOM_APP_CREATED_UI_EVENT,
+  type CustomAppCreatedUiEventData,
+} from '../../common/ui_events';
 import { customAppCreateSchema } from '../../common/create_app_schema';
 import { resolveCustomContent } from './resolve_custom_content';
 import { CREATE_CUSTOM_APP_TOOL_ID, UPDATE_CUSTOM_APP_TOOL_ID } from './update_custom_app_tool';
@@ -56,7 +60,7 @@ ${CUSTOM_APP_AUTHORING_GUIDE}`,
   schema: customAppCreateSchema,
   handler: async (
     { title, document: requested },
-    { attachments, logger, modelProvider, esClient }
+    { attachments, events, logger, modelProvider, esClient }
   ) => {
     const resolved = await resolveCustomContent(
       requested,
@@ -85,6 +89,10 @@ ${CUSTOM_APP_AUTHORING_GUIDE}`,
         data,
         description: title ? `Custom app: ${title}` : 'Custom app',
       });
+      events.sendUiEvent<typeof CUSTOM_APP_CREATED_UI_EVENT, CustomAppCreatedUiEventData>(
+        CUSTOM_APP_CREATED_UI_EVENT,
+        { attachmentId: created.id, data }
+      );
       return {
         results: [
           {

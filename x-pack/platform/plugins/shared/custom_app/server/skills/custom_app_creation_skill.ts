@@ -30,9 +30,9 @@ Do **not** use it for a single chart (use the visualization skill) or to lay out
 
 1. Ground the index and its fields first. Every ES|QL query must use fields that exist.
 2. Try each query with ${platformCoreTools.executeEsql} before using it. Parameters (\`?name\`) cannot be tried without a value; give them a literal while testing.
-3. Call ${CREATE_CUSTOM_APP_TOOL_ID} with the complete app. Read the authoring guide in its description. If it reports problems, fix all of them and call it again.
-4. Render the result with \`<render_attachment id="{attachment_id}" version="{version}" />\`. Tell the user they can save it as an app, or to a dashboard, from the card.
-5. If a button needs a workflow that does not exist, do not invent an id and do not add the button yet. Draft the workflow with ${platformCoreTools.generateWorkflow}, tell the person to review it and save it in the Workflows application, and wait. Once they say it is saved, find its id with the workflow tools and add the button.
+3. If the app has a button or a form that must run a workflow, find one that does it with the workflow tools. If none exists, draft it now with ${platformCoreTools.generateWorkflow}, passing a \`workflowId\` that you chose (lowercase letters, digits and hyphens, such as "escalate-a-case") and that no existing workflow has, so that the draft is saved under it. Use the workflow's own input names.
+4. Call ${CREATE_CUSTOM_APP_TOOL_ID} with the complete app, buttons and forms included, using that workflow id. Do not leave the button or the form out because the draft is not saved yet: the app shows it as not ready until it is. Read the authoring guide in its description. If it reports problems, fix all of them and call it again.
+5. Render the result with \`<render_attachment id="{attachment_id}" version="{version}" />\`, and the workflow draft as the workflow tool says. Tell the user to save the workflow draft, which is the only thing left for them to do before the button works. Tell them they can save it as an app, or to a dashboard, from the card. You cannot save a workflow yourself.
 6. For changes, call ${UPDATE_CUSTOM_APP_TOOL_ID} with the \`attachment_id\` and the complete changed app, then render it again.`,
   getRegistryTools: () => [
     CREATE_CUSTOM_APP_TOOL_ID,

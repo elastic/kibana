@@ -55,6 +55,70 @@ describe('NodeRenderer', () => {
     expect(screen.getByText(/"sparkles" is unknown/)).toBeInTheDocument();
   });
 
+  describe('a text, which is written in Markdown', () => {
+    const show = (text: string, state: Record<string, unknown> = {}) => {
+      const document = appDocumentSchema.parse({ state, root: { type: 'text', id: 't', text } });
+      return renderWithRuntime(<NodeRenderer node={document.root} />, document);
+    };
+
+    it('shows bold text as bold and a list as a list, not the marks that were written', () => {
+      const { container } = show('**What to do next**\n\n- page the lead\n- open a war room');
+
+      expect(screen.getByText('What to do next').tagName).toBe('STRONG');
+      expect(screen.getAllByRole('listitem').map(({ textContent }) => textContent)).toEqual([
+        'page the lead',
+        'open a war room',
+      ]);
+      expect(container.textContent).not.toContain('**');
+      expect(container.textContent).not.toContain('- page');
+    });
+
+    it('still shows plain text as it is', () => {
+      show('All systems nominal');
+
+      expect(screen.getByText('All systems nominal')).toBeInTheDocument();
+    });
+
+    it('shows a link as a link', () => {
+      show('See [the runbook](https://example.com/runbook)');
+
+      expect(screen.getByRole('link', { name: /the runbook/ })).toHaveAttribute(
+        'href',
+        'https://example.com/runbook'
+      );
+    });
+
+    it('does not show HTML that was written in it as HTML', () => {
+      const { container } = show('<img src=x onerror=alert(1)> hello');
+
+      expect(container.querySelector('img')).toBeNull();
+    });
+
+    it('puts a value of the app in as it is, so one cannot bring formatting or a link with it', () => {
+      const { container } = show('Service {{state.service}}', {
+        service: {
+          type: 'string',
+          default: '**bold** [click](https://evil.example) https://bare.example www.bare.example',
+        },
+      });
+
+      expect(container.querySelector('strong')).toBeNull();
+      expect(screen.queryByRole('link')).not.toBeInTheDocument();
+      expect(container.textContent?.replace(/\u200b/g, '')).toContain(
+        '**bold** [click](https://evil.example) https://bare.example www.bare.example'
+      );
+    });
+
+    it('shows a value that cannot start a list or a heading by what it holds', () => {
+      const { container } = show('{{state.note}}', {
+        note: { type: 'string', default: '# heading\n- item' },
+      });
+
+      expect(container.querySelector('h1')).toBeNull();
+      expect(screen.queryAllByRole('listitem')).toHaveLength(0);
+    });
+  });
+
   describe('interpolation', () => {
     const document = appDocumentSchema.parse({
       state: { service: { type: 'string', default: 'checkout' } },

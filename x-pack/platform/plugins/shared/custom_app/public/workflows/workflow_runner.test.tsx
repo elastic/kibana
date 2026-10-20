@@ -360,3 +360,93 @@ describe('running the workflows an action asks for', () => {
     });
   });
 });
+
+describe('knowing whether the workflows of an app are saved', () => {
+  const Reader = ({ ids }: { ids: string[] }) => {
+    const { statuses, track } = useWorkflowRunner();
+    return (
+      <>
+        <button type="button" onClick={() => track(ids)}>
+          {'track'}
+        </button>
+        <output data-test-subj="statuses">{JSON.stringify(statuses)}</output>
+      </>
+    );
+  };
+  const read = (ids: string[]) => {
+    render(
+      <WorkflowRunnerProvider>
+        <Reader ids={ids} />
+      </WorkflowRunnerProvider>
+    );
+  };
+  const statuses = () => JSON.parse(screen.getByTestId('statuses').textContent ?? '{}');
+
+  beforeEach(() => {
+    mockCapabilities = CAN_RUN;
+    mockClient.get.mockReset();
+  });
+
+  it('knows a workflow that is there, and one that is not saved yet', async () => {
+    mockClient.get.mockImplementation(async (id: string) => {
+      if (id === 'gone') throw Object.assign(new Error('Not found'), { body: { statusCode: 404 } });
+      return workflow({ id });
+    });
+    read(['here', 'gone']);
+
+    await userEvent.click(screen.getByRole('button', { name: 'track' }));
+
+    await waitFor(() => expect(statuses()).toEqual({ here: 'found', gone: 'missing' }));
+  });
+
+  it('does not say a workflow is missing when it could only not be looked at', async () => {
+    mockClient.get.mockRejectedValue({ body: { statusCode: 403 } });
+    read(['hidden']);
+
+    await userEvent.click(screen.getByRole('button', { name: 'track' }));
+
+    await waitFor(() => expect(statuses()).toEqual({ hidden: 'unknown' }));
+  });
+
+  it('looks once for each workflow, however often it is asked', async () => {
+    mockClient.get.mockResolvedValue(workflow());
+    read(['isolate-host', 'isolate-host']);
+
+    await userEvent.click(screen.getByRole('button', { name: 'track' }));
+    await userEvent.click(screen.getByRole('button', { name: 'track' }));
+
+    await waitFor(() => expect(statuses()).toEqual({ 'isolate-host': 'found' }));
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not look for a workflow that is not named yet', async () => {
+    read(['']);
+
+    await userEvent.click(screen.getByRole('button', { name: 'track' }));
+
+    expect(mockClient.get).not.toHaveBeenCalled();
+  });
+
+  it('looks again for the ones that were missing when the person comes back, since they may have saved them', async () => {
+    mockClient.get.mockRejectedValueOnce({ body: { statusCode: 404 } });
+    read(['later']);
+    await userEvent.click(screen.getByRole('button', { name: 'track' }));
+    await waitFor(() => expect(statuses()).toEqual({ later: 'missing' }));
+
+    mockClient.get.mockResolvedValue(workflow({ id: 'later' }));
+    window.dispatchEvent(new Event('focus'));
+
+    await waitFor(() => expect(statuses()).toEqual({ later: 'found' }));
+  });
+
+  it('does not look again for the ones that are there when the person comes back', async () => {
+    mockClient.get.mockResolvedValue(workflow());
+    read(['isolate-host']);
+    await userEvent.click(screen.getByRole('button', { name: 'track' }));
+    await waitFor(() => expect(statuses()).toEqual({ 'isolate-host': 'found' }));
+
+    window.dispatchEvent(new Event('focus'));
+
+    expect(mockClient.get).toHaveBeenCalledTimes(1);
+  });
+});

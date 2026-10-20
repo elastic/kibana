@@ -13,6 +13,14 @@ import type { CustomAppContextAttachmentData } from './app_context_attachment';
  */
 export const CUSTOM_APP_UPDATED_UI_EVENT = 'custom_app:updated';
 
+/** Sent when the agent has made an app, so that a page that can keep it may do so. */
+export const CUSTOM_APP_CREATED_UI_EVENT = 'custom_app:created';
+
+export interface CustomAppCreatedUiEventData {
+  attachmentId: string;
+  data: CustomAppContextAttachmentData;
+}
+
 export interface CustomAppUpdatedUiEventData {
   attachmentId: string;
   data: CustomAppContextAttachmentData;

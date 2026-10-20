@@ -84,12 +84,21 @@ describe('the authoring guide', () => {
     );
   });
 
-  it('says what to do when no workflow does what a button needs: draft one, and wait until it is saved', () => {
-    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('do not make up an id and do not add the button');
+  it('says what to do when no workflow does what a button needs: draft one under an id it chooses, and build the whole app', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('"workflowId" that you choose');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain(
-      'A draft is not a workflow until the person has reviewed and saved it'
+      'build the whole app now, button or form included, and do not wait'
     );
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain(
+      'Never use an id that is neither a workflow you found nor a draft you made'
+    );
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('saving the draft is all that is left');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('You cannot save a workflow yourself');
+  });
+
+  it('no longer tells the agent to leave the button out and wait', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).not.toContain('do not add the button');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).not.toContain('wait for them to say it is saved');
   });
 
   it('says to look at the alert indices and fields first, since they differ', () => {
@@ -112,6 +121,11 @@ describe('the authoring guide', () => {
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('only when it is submitted');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('hands them over with { "fromState": "<bind>" }');
     expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('a form\'s "onSubmit"');
+  });
+
+  it('says a text is Markdown, and that a heading and a callout are not', () => {
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('A text is written in Markdown');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('so no Markdown in them');
   });
 
   it('says that a component has a query or a source, not both, and that a chart cannot show cases', () => {

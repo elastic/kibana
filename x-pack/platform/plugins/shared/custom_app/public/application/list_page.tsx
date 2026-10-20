@@ -22,7 +22,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import type { AppDocument } from '@kbn/custom-app-common';
+import { MAX_APP_TITLE_LENGTH } from '../../common/constants';
 import type { AppServices } from './app';
+import { useAppsMadeInChat } from './use_apps_made_in_chat';
 import type { SavedAppList, SavedAppListItem } from './saved_apps_client';
 
 const PAGE_SIZE = 20;
@@ -37,7 +40,7 @@ const toMessage = (error: unknown): string =>
   (error as { body?: { message?: string } })?.body?.message ??
   (error instanceof Error ? error.message : String(error));
 
-export const ListPage = ({ client, chrome, notifications, canSave }: AppServices) => {
+export const ListPage = ({ client, chrome, notifications, canSave, agentBuilder }: AppServices) => {
   const history = useHistory();
   const deleteTitleId = useId();
   const [search, setSearch] = useState('');
@@ -87,6 +90,41 @@ export const ListPage = ({ client, chrome, notifications, canSave }: AppServices
       });
     }
   }, [client, notifications, toDelete]);
+
+  // An app the agent makes while this page is open is kept, and opened: asking the agent for one
+  // from the list is asking for it to be there, not for a card to save by hand.
+  const keepApp = useCallback(
+    async ({ title, document }: { title?: string; document: AppDocument }) => {
+      const name = (
+        title?.trim() ||
+        i18n.translate('xpack.customApp.standalone.madeInChatTitle', {
+          defaultMessage: 'Custom app',
+        })
+      ).slice(0, MAX_APP_TITLE_LENGTH);
+      try {
+        const { id } = await client.create({ title: name, document });
+        notifications.toasts.addSuccess(
+          i18n.translate('xpack.customApp.standalone.madeInChat', {
+            defaultMessage: 'The app "{title}" was created',
+            values: { title: name },
+          })
+        );
+        history.push(`/view/${encodeURIComponent(id)}`);
+      } catch (error) {
+        notifications.toasts.addDanger({
+          title: i18n.translate('xpack.customApp.standalone.madeInChatError', {
+            defaultMessage: 'The app could not be created',
+          }),
+          text: i18n.translate('xpack.customApp.standalone.madeInChatErrorText', {
+            defaultMessage: '{reason} It is still in the chat, where you can save it.',
+            values: { reason: toMessage(error) },
+          }),
+        });
+      }
+    },
+    [client, history, notifications]
+  );
+  useAppsMadeInChat({ agentBuilder, isEnabled: canSave, onCreated: keepApp });
 
   const createButton = canSave ? (
     <EuiButton

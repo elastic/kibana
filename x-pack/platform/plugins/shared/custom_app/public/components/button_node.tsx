@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { EuiButton, EuiToolTip } from '@elastic/eui';
 import type { AppNodeOfType } from '@kbn/custom-app-common';
 import { useActionRunner } from '../workflows/use_action_runner';
-import { useWorkflowRunner } from '../workflows/workflow_runner';
+import { useWorkflowsGate } from '../workflows/use_workflows_gate';
 import { DroppedActions } from './dropped_actions';
 
 /**
@@ -19,11 +19,9 @@ import { DroppedActions } from './dropped_actions';
  */
 export const ButtonNode = ({ node }: { node: AppNodeOfType<'button'> }) => {
   const run = useActionRunner(node.id);
-  const { availability } = useWorkflowRunner();
   const [dropped, setDropped] = useState<string[]>([]);
 
-  const runsWorkflow = node.onClick.some(({ type }) => type === 'runWorkflow');
-  const unavailableReason = runsWorkflow && !availability.canRun ? availability.reason : undefined;
+  const unavailableReason = useWorkflowsGate(node.onClick);
 
   return (
     <div data-node-id={node.id}>

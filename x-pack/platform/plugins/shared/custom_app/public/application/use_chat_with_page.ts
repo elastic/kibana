@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import { EMPTY, distinctUntilChanged, switchMap, catchError } from 'rxjs';
 import { isToolUiEvent, type ToolUiEvent } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart, BrowserChatEvent } from '@kbn/agent-builder-browser';
 import { appDocumentSchema, type AppDocument } from '@kbn/custom-app-common';
@@ -14,6 +13,7 @@ import {
   CUSTOM_APP_UPDATED_UI_EVENT,
   type CustomAppUpdatedUiEventData,
 } from '../../common/ui_events';
+import { getChatEvents$ } from '../utils/chat_ui_events';
 import { buildCustomAppContextAttachment, createPageAttachmentId } from '../utils/chat_integration';
 
 const isCustomAppUpdatedUiEvent = (
@@ -42,23 +42,14 @@ export const useChatWithPage = ({ agentBuilder, getDocument, onDocument }: Optio
   useEffect(() => {
     if (!agentBuilder) return;
 
-    const subscription = agentBuilder.events.ui.activeConversation$
-      .pipe(
-        distinctUntilChanged((previous, next) => previous?.id === next?.id),
-        switchMap((conversation) =>
-          conversation?.id
-            ? agentBuilder.events.getChatEvents$(conversation.id).pipe(catchError(() => EMPTY))
-            : EMPTY
-        )
-      )
-      .subscribe((event) => {
-        if (!isCustomAppUpdatedUiEvent(event)) return;
-        const { attachmentId: answeredId, data } = event.data.data;
-        if (answeredId !== attachmentId.current) return;
+    const subscription = getChatEvents$(agentBuilder).subscribe((event) => {
+      if (!isCustomAppUpdatedUiEvent(event)) return;
+      const { attachmentId: answeredId, data } = event.data.data;
+      if (answeredId !== attachmentId.current) return;
 
-        const parsed = appDocumentSchema.safeParse(data.document);
-        if (parsed.success) onDocument(parsed.data);
-      });
+      const parsed = appDocumentSchema.safeParse(data.document);
+      if (parsed.success) onDocument(parsed.data);
+    });
 
     return () => subscription.unsubscribe();
   }, [agentBuilder, onDocument]);

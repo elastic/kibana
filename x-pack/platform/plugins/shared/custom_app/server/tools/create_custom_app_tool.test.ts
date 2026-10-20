@@ -22,13 +22,14 @@ const call = async (
   add = jest.fn().mockResolvedValue({ id: 'att-1', current_version: 1 })
 ) => {
   const tool = createCreateCustomAppTool();
-  const context = { attachments: { add }, logger: { error: jest.fn() } };
+  const sendUiEvent = jest.fn();
+  const context = { attachments: { add }, events: { sendUiEvent }, logger: { error: jest.fn() } };
   const ret = await tool.handler(
     customAppCreateSchema.parse(input),
     context as unknown as Parameters<typeof tool.handler>[1]
   );
   if (!('results' in ret)) throw new Error('Unexpected prompt from the handler');
-  return { result: ret.results[0], add };
+  return { result: ret.results[0], add, sendUiEvent };
 };
 
 describe('the create custom app tool', () => {
@@ -55,6 +56,27 @@ describe('the create custom app tool', () => {
     });
     expect(result.type).toBe(ToolResultType.other);
     expect(result.data).toMatchObject({ attachment_id: 'att-1', version: 1 });
+  });
+
+  it('tells the browser that the app was made, so that a page that can keep it may', async () => {
+    const { sendUiEvent } = await call({ title: 'Services', document: AUTHORING_GUIDE_EXAMPLE });
+
+    expect(sendUiEvent).toHaveBeenCalledWith('custom_app:created', {
+      attachmentId: 'att-1',
+      data: {
+        panel_title: 'Services',
+        document: customAppCreateSchema.parse({ document: AUTHORING_GUIDE_EXAMPLE }).document,
+      },
+    });
+  });
+
+  it('tells nothing when the app could not be kept in the conversation', async () => {
+    const { sendUiEvent } = await call(
+      { document: AUTHORING_GUIDE_EXAMPLE },
+      jest.fn().mockRejectedValue(new Error('no'))
+    );
+
+    expect(sendUiEvent).not.toHaveBeenCalled();
   });
 
   it('returns each problem of an app that is not valid, and saves nothing', async () => {

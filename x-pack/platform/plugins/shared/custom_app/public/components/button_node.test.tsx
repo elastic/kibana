@@ -15,6 +15,8 @@ import { renderWithRuntime } from './test_utils';
 
 const mockRunner: WorkflowRunner = {
   availability: { canRun: true },
+  statuses: {},
+  track: jest.fn(),
   request: jest.fn(),
 };
 jest.mock('../workflows/workflow_runner', () => ({
@@ -50,6 +52,8 @@ describe('the button', () => {
   beforeEach(() => {
     (mockRunner.request as jest.Mock).mockReset();
     mockRunner.availability = { canRun: true };
+    mockRunner.statuses = {};
+    (mockRunner.track as jest.Mock).mockReset();
   });
 
   it('is shown with what is written on it', () => {
@@ -136,5 +140,54 @@ describe('the button', () => {
     expect(mockRunner.request).not.toHaveBeenCalled();
     await userEvent.click(screen.getByRole('button', { name: /dismiss/i }));
     expect(screen.queryByText('Column "host.name" is not in the row')).not.toBeInTheDocument();
+  });
+});
+
+describe('a button whose workflow is not saved yet', () => {
+  beforeEach(() => {
+    mockRunner.availability = { canRun: true };
+    mockRunner.statuses = {};
+    (mockRunner.track as jest.Mock).mockReset();
+  });
+
+  const hover = async () =>
+    userEvent.hover(
+      screen.getByRole('button', { name: 'Isolate host' }).parentElement as HTMLElement
+    );
+
+  it('asks to know whether the workflow it runs is there', () => {
+    show(documentWith([run]));
+
+    expect(mockRunner.track).toHaveBeenCalledWith(['isolate-host']);
+  });
+
+  it('cannot be pressed, and says the workflow is not saved, which is what an app made with a draft is', async () => {
+    mockRunner.statuses = { 'isolate-host': 'missing' };
+    show(documentWith([run]));
+
+    expect(screen.getByRole('button', { name: 'Isolate host' })).toBeDisabled();
+    await hover();
+    expect(
+      await screen.findByText(/The workflow "isolate-host" has not been saved yet/)
+    ).toBeInTheDocument();
+  });
+
+  it('can be pressed when the workflow is there, or when it is not known', () => {
+    mockRunner.statuses = { 'isolate-host': 'found' };
+    const { unmount } = show(documentWith([run]));
+    expect(screen.getByRole('button', { name: 'Isolate host' })).toBeEnabled();
+    unmount();
+
+    mockRunner.statuses = { 'isolate-host': 'unknown' };
+    show(documentWith([run]));
+    expect(screen.getByRole('button', { name: 'Isolate host' })).toBeEnabled();
+  });
+
+  it('is not held back when what it runs is not a workflow, whatever is missing', () => {
+    mockRunner.statuses = { 'isolate-host': 'missing' };
+    show(documentWith([{ type: 'openFlyout', flyout: 'detail' }]));
+
+    expect(screen.getByRole('button', { name: 'Isolate host' })).toBeEnabled();
+    expect(mockRunner.track).toHaveBeenCalledWith([]);
   });
 });

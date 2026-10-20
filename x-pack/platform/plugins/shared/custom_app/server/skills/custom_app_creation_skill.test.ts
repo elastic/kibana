@@ -31,12 +31,19 @@ describe('the custom app creation skill', () => {
     );
   });
 
-  it('says to draft a workflow that does not exist, and to wait until it is saved, not to invent one', () => {
+  it('says to draft a workflow that does not exist under an id of its own choosing, and to build the whole app now', () => {
     const { content } = customAppCreationSkill;
 
     expect(content).toContain(platformCoreTools.generateWorkflow);
-    expect(content).toContain('do not invent an id');
-    expect(content).toContain('save it in the Workflows application');
+    expect(content).toContain('passing a `workflowId` that you chose');
+    expect(content).toContain('Do not leave the button or the form out');
+    expect(content).toContain('Tell the user to save the workflow draft');
+    expect(content).toContain('You cannot save a workflow yourself');
+  });
+
+  it('no longer says to wait for the workflow to be saved before adding the button', () => {
+    expect(customAppCreationSkill.content).not.toContain('do not add the button yet');
+    expect(customAppCreationSkill.content).not.toContain('and wait');
   });
 
   it('says that an app can be saved as an app, not only to a dashboard', () => {

@@ -15,6 +15,8 @@ import { renderWithRuntime } from './test_utils';
 
 const mockRunner: WorkflowRunner = {
   availability: { canRun: true },
+  statuses: {},
+  track: jest.fn(),
   request: jest.fn(),
 };
 jest.mock('../workflows/workflow_runner', () => ({
@@ -72,6 +74,8 @@ describe('the form', () => {
   beforeEach(() => {
     (mockRunner.request as jest.Mock).mockReset();
     mockRunner.availability = { canRun: true };
+    mockRunner.statuses = {};
+    (mockRunner.track as jest.Mock).mockReset();
   });
 
   it('shows each field with its label, and what is written on the button', () => {
@@ -262,6 +266,25 @@ describe('the form', () => {
       screen.getByRole('button', { name: 'Escalate' }).parentElement as HTMLElement
     );
     expect(await screen.findByText('You cannot run workflows')).toBeInTheDocument();
+  });
+
+  it('cannot be submitted while the workflow it runs is not saved, and says so', async () => {
+    mockRunner.statuses = { escalate: 'missing' };
+    show(documentWith());
+
+    expect(screen.getByRole('button', { name: 'Escalate' })).toBeDisabled();
+    await userEvent.hover(
+      screen.getByRole('button', { name: 'Escalate' }).parentElement as HTMLElement
+    );
+    expect(
+      await screen.findByText(/The workflow "escalate" has not been saved yet/)
+    ).toBeInTheDocument();
+  });
+
+  it('asks to know whether the workflow it runs is saved', () => {
+    show(documentWith());
+
+    expect(mockRunner.track).toHaveBeenCalledWith(['escalate']);
   });
 
   it('can be submitted when it runs no workflow, whatever the privileges', async () => {

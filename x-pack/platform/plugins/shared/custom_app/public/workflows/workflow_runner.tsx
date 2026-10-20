@@ -12,6 +12,7 @@ import React, {
   useEffect,
   useId,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from 'react';
@@ -84,8 +85,20 @@ export const getWorkflowAvailability = (capabilities: Capabilities): WorkflowAva
   return { canRun: true };
 };
 
+/**
+ * Whether a workflow an app names is there: not saved yet is `missing`, which is what an app made
+ * with a draft of its workflow is until the person saves it. Anything else that goes wrong in
+ * looking, such as not being allowed to read it, is `unknown` and does not stop anything: running
+ * is a privilege of its own.
+ */
+export type WorkflowStatus = 'found' | 'missing' | 'unknown';
+
 export interface WorkflowRunner {
   availability: WorkflowAvailability;
+  /** What is known of the workflows that were asked about with `track`, by id. */
+  statuses: Readonly<Record<string, WorkflowStatus>>;
+  /** Finds out, once for each, whether these workflows exist, so that `statuses` can say. */
+  track: (ids: readonly string[]) => void;
   /** Asks the user to confirm, then runs, the workflows an action asked for. */
   request: (requests: WorkflowRunRequest[], nodeId: string) => void;
 }
@@ -98,6 +111,8 @@ const NO_RUNNER: WorkflowRunner = {
       defaultMessage: 'Workflows cannot be run from here.',
     }),
   },
+  statuses: {},
+  track: () => {},
   request: () => {},
 };
 
@@ -343,6 +358,46 @@ export const WorkflowRunnerProvider = ({
   );
   const [pending, setPending] = useState<Pending>();
   const [isRunning, setIsRunning] = useState(false);
+  const [statuses, setStatuses] = useState<Readonly<Record<string, WorkflowStatus>>>({});
+  const asked = useRef(new Set<string>());
+
+  const look = useCallback(
+    async (id: string) => {
+      let status: WorkflowStatus = 'found';
+      try {
+        await client.get(id);
+      } catch (error) {
+        status =
+          (error as { body?: { statusCode?: number } })?.body?.statusCode === 404
+            ? 'missing'
+            : 'unknown';
+      }
+      setStatuses((current) => (current[id] === status ? current : { ...current, [id]: status }));
+    },
+    [client]
+  );
+
+  const track = useCallback(
+    (ids: readonly string[]) => {
+      new Set(ids).forEach((id) => {
+        if (id === '' || asked.current.has(id)) return;
+        asked.current.add(id);
+        void look(id);
+      });
+    },
+    [look]
+  );
+
+  // A workflow that was not saved is saved in another tab: looking again when the person comes
+  // back is how the app notices, without a refresh.
+  useEffect(() => {
+    const onFocus = () =>
+      Object.entries(statuses)
+        .filter(([, status]) => status === 'missing')
+        .forEach(([id]) => void look(id));
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [look, statuses]);
 
   const request = useCallback(
     (requests: WorkflowRunRequest[], nodeId: string) => {
@@ -407,7 +462,10 @@ export const WorkflowRunnerProvider = ({
     setPending(undefined);
   }, [appId, client, core, pending]);
 
-  const value = useMemo<WorkflowRunner>(() => ({ availability, request }), [availability, request]);
+  const value = useMemo<WorkflowRunner>(
+    () => ({ availability, statuses, track, request }),
+    [availability, statuses, track, request]
+  );
 
   return (
     <WorkflowRunnerContext.Provider value={value}>

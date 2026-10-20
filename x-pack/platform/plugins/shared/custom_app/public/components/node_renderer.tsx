@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiMarkdownFormat, EuiPanel, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { interpolate, type AppNode } from '@kbn/custom-app-common';
@@ -17,6 +17,7 @@ import {
   KbnWarningCallout,
 } from '@kbn/ui-callout';
 import { useStateValues } from '../runtime/app_runtime_context';
+import { escapeMarkdownValues } from '../utils/escape_markdown';
 import { ChartNode } from './chart_node';
 import { CustomContentNode } from './custom_content_node';
 import { ButtonGroupNode } from './button_group_node';
@@ -64,10 +65,14 @@ export const NodeRenderer = ({ node }: NodeRendererProps) => {
         </EuiTitle>
       );
     case 'text':
+      // Written in Markdown, so that bold, lists and links look as they are written. The values of
+      // the app are put in as plain text: one that came from a link cannot add to the formatting.
       return (
-        <EuiText size="s" data-node-id={node.id}>
-          <p>{text(node.text)}</p>
-        </EuiText>
+        <div data-node-id={node.id}>
+          <EuiMarkdownFormat textSize="s">
+            {interpolate(node.text, escapeMarkdownValues(state))}
+          </EuiMarkdownFormat>
+        </div>
       );
     case 'callout': {
       const Callout = CALLOUTS[node.color];
