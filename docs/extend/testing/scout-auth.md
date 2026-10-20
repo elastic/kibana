@@ -15,7 +15,11 @@ Scout uses [SAML](https://www.elastic.co/docs/deploy-manage/users-roles/cluster-
 | Stateful   | SAML via a mock Identity Provider (IdP) | SAML via the real IdP with pre-provisioned users |
 | Serverless | SAML via a mock Identity Provider (IdP) | SAML via the real IdP with pre-provisioned users |
 
-Roles come from the `roles.yml` files in the `@kbn/es` package. They are Kibana's local copy of the [Elastic Cloud roles](https://www.elastic.co/docs/deploy-manage/users-roles/cloud-organization/user-roles#general-assign-user-roles-table) (`admin`, `editor`, `viewer`, and so on). The serverless files are copied from `elasticsearch-controller`, so a role change must land there first and be mirrored in `roles.yml` right after. Serverless uses the roles of the selected project type and has the native realm disabled.
+Kibana's role definitions are defined in the `roles.yml` files in the `@kbn/es` package. They are Kibana's local copy of the [Elastic Cloud roles](https://www.elastic.co/docs/deploy-manage/users-roles/cloud-organization/user-roles#general-assign-user-roles-table) (`admin`, `editor`, `viewer`, and so on). Serverless uses the roles of the selected project type and has the native realm disabled.
+
+::::::{warning}
+The serverless files are copied from `elasticsearch-controller`, so a role change must land there first and be mirrored in `roles.yml` right after.
+::::::
 
 ## Why SAML realm roles [scout-auth-why-saml]
 
