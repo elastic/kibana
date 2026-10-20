@@ -8,46 +8,14 @@
 import { Client } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
 import { getFpTpScenario } from '../src/scenarios';
-import { FP_TP_TWIN_SEED_LABEL, joinKibanaUrl, seedTwinLive } from '../src/world';
+import {
+  assertServerlessSpace,
+  createLiveKbnRequest,
+  FP_TP_TWIN_SEED_LABEL,
+  seedTwinLive,
+  seedTwinLiveServerless,
+} from '../src/world';
 import type { FpTpLiveKbnRequest } from '../src/world';
-
-const createKbnRequest = ({
-  kibanaUrl,
-  username,
-  password,
-}: {
-  kibanaUrl: string;
-  username: string;
-  password: string;
-}): FpTpLiveKbnRequest => {
-  const authorization = `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`;
-
-  return async ({ method, path, body, version }) => {
-    const headers: Record<string, string> = {
-      Authorization: authorization,
-      'kbn-xsrf': 'true',
-      'x-elastic-internal-origin': 'kibana',
-      'Content-Type': 'application/json',
-    };
-    if (version !== undefined) {
-      headers['elastic-api-version'] = version;
-    }
-
-    const response = await fetch(joinKibanaUrl(kibanaUrl, path), {
-      method,
-      headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
-    });
-    const text = await response.text();
-    let parsed: unknown = text;
-    try {
-      parsed = text.length > 0 ? JSON.parse(text) : undefined;
-    } catch {
-      parsed = text;
-    }
-    return { statusCode: response.status, body: parsed };
-  };
-};
 
 run(
   async ({ flags, log }) => {
@@ -62,21 +30,55 @@ run(
 
     const kibanaUrl = flags.kibanaUrl as string;
     const elasticsearchUrl = flags.elasticsearchUrl as string;
-    const username = flags.username as string;
-    const password = flags.password as string;
+    const apiKey = flags.apiKey as string | undefined;
+    const username = flags.username as string | undefined;
+    const password = flags.password as string | undefined;
+    const space = flags.space as string;
+    const serverless = Boolean(flags.serverless);
+    const reasoningConnectorId = flags.reasoningConnectorId as string | undefined;
+
+    if (serverless && reasoningConnectorId === undefined) {
+      throw new Error(
+        '--serverless needs --reasoningConnectorId: the connector the space maps the ' +
+          'alertzero_reasoning inference feature to (and the validate workflow bookkeeps).'
+      );
+    }
+    if (serverless) {
+      assertServerlessSpace(space);
+    }
 
     const esClient = new Client({
       node: elasticsearchUrl,
-      auth: { username, password },
+      auth:
+        apiKey !== undefined && apiKey.length > 0
+          ? { apiKey }
+          : { username: String(username), password: String(password) },
     });
 
     try {
-      const kbnRequest = createKbnRequest({ kibanaUrl, username, password });
-      const summary = await seedTwinLive({
-        esClient,
-        kbnRequest,
-        twin: buildTwin(FP_TP_TWIN_SEED_LABEL),
+      const kbnRequest: FpTpLiveKbnRequest = createLiveKbnRequest({
+        kibanaUrl,
+        apiKey,
+        username,
+        password,
+        space,
       });
+
+      const summary = serverless
+        ? (
+            await seedTwinLiveServerless({
+              esClient,
+              kbnRequest,
+              twin: buildTwin(FP_TP_TWIN_SEED_LABEL),
+              space,
+              reasoningConnectorId: reasoningConnectorId as string,
+            })
+          ).summary
+        : await seedTwinLive({
+            esClient,
+            kbnRequest,
+            twin: buildTwin(FP_TP_TWIN_SEED_LABEL),
+          });
 
       log.success(`Seeded ${summary.twinId}`);
       log.info(`Attack Discovery id: ${summary.attackId}`);
@@ -90,9 +92,24 @@ run(
   },
   {
     description:
-      'Seeds one FP/TP scenario twin into a local Elasticsearch + Kibana for Workflows UI validation.',
+      'Seeds one FP/TP scenario twin into Elasticsearch + Kibana for Workflows UI validation. ' +
+      'Default is the classic-stack path (Basic auth, default space). --serverless seeds into a ' +
+      'Kibana space with an ApiKey: product-managed data streams are bootstrapped through their ' +
+      'APIs, raw events go to a seeder-owned logs-endpoint.events namespace, and the Attack ' +
+      'Discovery is persisted by the managed system-attack-discovery-validate workflow.',
     flags: {
-      string: ['scenario', 'variant', 'kibanaUrl', 'elasticsearchUrl', 'username', 'password'],
+      string: [
+        'scenario',
+        'variant',
+        'kibanaUrl',
+        'elasticsearchUrl',
+        'username',
+        'password',
+        'apiKey',
+        'space',
+        'reasoningConnectorId',
+      ],
+      boolean: ['serverless'],
       default: {
         scenario: 'encoded-powershell',
         variant: 'fp',
@@ -100,14 +117,24 @@ run(
         elasticsearchUrl: 'http://127.0.0.1:9200',
         username: 'elastic',
         password: 'changeme',
+        space: 'default',
       },
       help: `
         --scenario                      Scenario key (Default: encoded-powershell)
-        --variant                       Twin of the scenario to load, e.g. tp or fp (Default: fp). Only one at a time.
-        --kibanaUrl                     Kibana URL (Default: http://127.0.0.1:5601)
-        --elasticsearchUrl              Elasticsearch URL (Default: http://127.0.0.1:9200)
-        --username                      Username (Default: elastic)
-        --password                      Password (Default: changeme)
+        --variant                       Twin variant of the scenario (Default: fp)
+        --kibanaUrl                     Kibana base URL (Default: http://127.0.0.1:5601)
+        --elasticsearchUrl              Elasticsearch base URL (Default: http://127.0.0.1:9200)
+        --username                      Kibana/ES username for Basic auth (Default: elastic)
+        --password                      Kibana/ES password for Basic auth (Default: changeme)
+        --apiKey                        ApiKey for Kibana and ES auth; overrides Basic auth
+        --space                         Kibana space to seed into (Default: default; with
+                                        --serverless a dedicated non-default space is required)
+        --serverless                    Space-scoped serverless seeding: detection-engine
+                                        bootstrap + no-match rule, Entity Store CRUD,
+                                        seeder-owned event namespace, managed validate run
+        --reasoningConnectorId          Connector id mapped to the alertzero_reasoning
+                                        inference feature in the space (required with
+                                        --serverless)
       `,
     },
   }

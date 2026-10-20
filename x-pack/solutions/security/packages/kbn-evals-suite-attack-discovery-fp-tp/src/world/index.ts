@@ -19,9 +19,15 @@ export type { FpTpEntityRoleKey } from './chain_entities';
 export {
   FP_TP_ATTACK_ADHOC_INDEX,
   FP_TP_BASE_TIME,
+  FP_TP_BOOTSTRAP_RULE_ID,
   FP_TP_ENTITY_INDEX,
+  FP_TP_REASONING_FEATURE_ID,
   FP_TP_RAW_EVENT_WINDOW_MS,
   FP_TP_TWIN_SEED_LABEL,
+  fpTpAdhocAttackIndexForSpace,
+  fpTpAlertsIndexForSpace,
+  fpTpEntityReadAliasForSpace,
+  toServerlessEventIndex,
 } from './constants';
 export { toEntityCrudRequest } from './entity_crud';
 export type { FpTpEntityCrudRequest, FpTpEntityCrudType } from './entity_crud';
@@ -47,17 +53,26 @@ export {
 export {
   buildLiveSeedPlan,
   cleanupManualSeedLive,
+  cleanupServerlessSeed,
   ensureFpTpSeedPrerequisites,
   seedFixture,
   seedTwinLive,
+  seedTwinLiveServerless,
+  buildServerlessPlan,
   twinToWorld,
+  toAnonymizedAlerts,
+  toValidateAttackDiscovery,
+  assertServerlessSpace,
 } from './seed_live';
 export type {
   FpTpLiveKbnRequest,
   FpTpLiveSeedPlan,
   FpTpLiveSeedSummary,
   FpTpSeededFixture,
+  FpTpServerlessSeedPlan,
+  FpTpValidateInputs,
 } from './seed_live';
+export { createLiveKbnRequest } from './live_kbn_request';
 export { toSeededEvidence } from './seeded_evidence';
 export type { FpTpSeededEvidence } from './seeded_evidence';
 export { shiftTwinToNow } from './shift_timestamps';

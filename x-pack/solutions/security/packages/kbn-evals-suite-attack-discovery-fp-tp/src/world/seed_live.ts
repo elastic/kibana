@@ -13,8 +13,14 @@ import {
 import { toAttackAlertDocument } from './attack_alert';
 import {
   FP_TP_ATTACK_ADHOC_INDEX,
+  FP_TP_BOOTSTRAP_RULE_ID,
   FP_TP_ENTITY_READ_ALIAS,
+  FP_TP_REASONING_FEATURE_ID,
   FP_TP_TWIN_SEED_LABEL,
+  fpTpAdhocAttackIndexForSpace,
+  fpTpAlertsIndexForSpace,
+  fpTpEntityReadAliasForSpace,
+  toServerlessEventIndex,
 } from './constants';
 import { toEntityCrudRequest } from './entity_crud';
 import type { FpTpEntityCrudRequest } from './entity_crud';
@@ -282,13 +288,14 @@ const createEntity = async (
 
 const writeIdentityFields = async (
   esClient: EsClient,
-  request: FpTpEntityCrudRequest
+  request: FpTpEntityCrudRequest,
+  readAlias: string = FP_TP_ENTITY_READ_ALIAS
 ): Promise<void> => {
   if (request.identityFields === undefined) {
     return;
   }
   const { updated } = await esClient.updateByQuery({
-    index: FP_TP_ENTITY_READ_ALIAS,
+    index: readAlias,
     refresh: true,
     query: { term: { 'entity.id': request.entityId } },
     script: {
@@ -380,13 +387,14 @@ const ENTITIES_ON_HOSTS_PAGE_SIZE = 100;
 const deleteEntitiesOnHosts = async (
   esClient: EsClient,
   kbnRequest: FpTpLiveKbnRequest,
-  hostIds: readonly string[]
+  hostIds: readonly string[],
+  readAlias: string = FP_TP_ENTITY_READ_ALIAS
 ): Promise<void> => {
   if (hostIds.length === 0) {
     return;
   }
   const response = await esClient.search<{ entity?: { id?: string } }>({
-    index: FP_TP_ENTITY_READ_ALIAS,
+    index: readAlias,
     ignore_unavailable: true,
     size: ENTITIES_ON_HOSTS_PAGE_SIZE,
     _source: ['entity.id'],
@@ -510,4 +518,511 @@ export const seedTwinLive = async ({
     entityIds: plan.entities.map((entity) => entity.entityId),
     gold: twin.gold,
   };
+};
+
+// ---------------------------------------------------------------------------
+// Serverless (space-scoped) manual seeding.
+//
+// On a serverless project the seeder must not create dot-prefixed indices or
+// write product-managed data streams directly. Alerts go through the detection
+// engine bootstrap, entities through the Entity Store CRUD API, raw events into
+// a seeder-owned `logs-endpoint.events.<kind>-<space>` namespace, and the
+// Attack Discovery is persisted by running the managed
+// `system-attack-discovery-validate` workflow in the space — the managed FP/TP
+// analysis then reads it from the space's ad-hoc index.
+// ---------------------------------------------------------------------------
+
+const WORKFLOWS_API_VERSION = '2023-10-31';
+const INFERENCE_SETTINGS_API_VERSION = '1';
+const VALIDATE_WORKFLOW_ID = 'system-attack-discovery-validate';
+const BOOTSTRAP_RULE_QUERY = 'data_stream.dataset:never-matches-fptp-seeder-bootstrap';
+const ALERTS_STREAM_TIMEOUT_MS = 180_000;
+const ALERTS_STREAM_POLL_INTERVAL_MS = 5_000;
+const VALIDATE_EXECUTION_TIMEOUT_MS = 300_000;
+const VALIDATE_POLL_INTERVAL_MS = 3_000;
+const SPACE_ID_PATTERN = /^[a-z0-9][a-z0-9_-]{0,63}$/;
+
+/**
+ * Refuses to run the serverless path against the default space: its bootstrap
+ * is not undone by cleanup (shared reasoning mapping, stopped Entity Store
+ * extraction, enabled no-match rule), so it must stay in a dedicated space.
+ */
+export const assertServerlessSpace = (space: string | undefined): string => {
+  if (space === undefined || space.length === 0) {
+    throw new Error('--serverless needs an explicit --space (a dedicated one, not "default")');
+  }
+  if (space === 'default') {
+    throw new Error(
+      '--serverless refuses the default space: seeding there would stop Entity Store ' +
+        'extraction, rewrite the shared reasoning mapping and leave an enabled rule in the ' +
+        'space — none of which cleanup undoes. Use a dedicated space.'
+    );
+  }
+  if (!SPACE_ID_PATTERN.test(space)) {
+    throw new Error(
+      `--space "${space}" is not a valid Kibana space id (expected [a-z0-9][a-z0-9_-]{0,63})`
+    );
+  }
+  return space;
+};
+
+export interface FpTpServerlessSeedPlan extends FpTpLiveSeedPlan {
+  /** The space every Kibana call is scoped to. */
+  readonly space: string;
+  /** Alerts index (product-managed data stream) inside the space. */
+  readonly alertsIndex: string;
+  /** Ad-hoc Attack Discovery index inside the space. */
+  readonly adhocAttackIndex: string;
+  /** Events rewritten into the seeder-owned namespace. */
+  readonly serverlessEvents: ReadonlyArray<{ index: string; id: string }>;
+  /** Title the persisted discovery is found and removed by; absent when the world has no attack. */
+  readonly attackTitle?: string;
+}
+
+export interface FpTpValidateInputs {
+  readonly alerts_context_count: number;
+  readonly anonymized_alerts: ReadonlyArray<{ metadata: unknown; page_content: string }>;
+  readonly api_config: { readonly connector_id: string; readonly action_type_id?: string };
+  readonly attack_discoveries: readonly Record<string, unknown>[];
+  readonly generation_uuid: string;
+  readonly generation_source: string;
+}
+
+/** Maps an authored attack document onto a validate-workflow discovery payload. */
+export const toValidateAttackDiscovery = (
+  attack: Record<string, unknown>
+): Record<string, unknown> => {
+  const fields = attack as {
+    '@timestamp'?: unknown;
+    'kibana.alert.attack_discovery.alert_ids'?: unknown;
+    'kibana.alert.attack_discovery.details_markdown'?: unknown;
+    'kibana.alert.attack_discovery.entity_summary_markdown'?: unknown;
+    'kibana.alert.attack_discovery.mitre_attack_tactics'?: unknown;
+    'kibana.alert.attack_discovery.summary_markdown'?: unknown;
+    'kibana.alert.attack_discovery.title'?: unknown;
+  };
+  const alertIds = fields['kibana.alert.attack_discovery.alert_ids'];
+  if (!Array.isArray(alertIds) || alertIds.length === 0) {
+    throw new Error('Attack document has no kibana.alert.attack_discovery.alert_ids');
+  }
+  return {
+    alert_ids: alertIds,
+    details_markdown: fields['kibana.alert.attack_discovery.details_markdown'] ?? undefined,
+    entity_summary_markdown:
+      fields['kibana.alert.attack_discovery.entity_summary_markdown'] ?? undefined,
+    mitre_attack_tactics: fields['kibana.alert.attack_discovery.mitre_attack_tactics'] ?? undefined,
+    summary_markdown: fields['kibana.alert.attack_discovery.summary_markdown'] ?? undefined,
+    timestamp: fields['@timestamp'] ?? undefined,
+    title: fields['kibana.alert.attack_discovery.title'],
+  };
+};
+
+/** Minimal anonymized-alert Documents the validate workflow accepts. */
+export const toAnonymizedAlerts = (
+  alerts: ReadonlyArray<{ id: string; source: Record<string, unknown> }>
+): ReadonlyArray<{ metadata: unknown; page_content: string }> =>
+  alerts.map(({ id, source }) => {
+    const ruleName = source['kibana.alert.rule.name'];
+    const reason = source['kibana.alert.reason'];
+    const headline = typeof ruleName === 'string' ? ruleName : 'alert';
+    return {
+      metadata: { author: 'fptp-seeder' },
+      page_content: `${id}: ${headline}${typeof reason === 'string' ? ` — ${reason}` : ''}`,
+    };
+  });
+
+export const ensureBootstrapNoMatchRule = async (kbnRequest: FpTpLiveKbnRequest): Promise<void> => {
+  const existing = await kbnRequest({
+    method: 'GET',
+    path: `/api/detection_engine/rules?rule_id=${FP_TP_BOOTSTRAP_RULE_ID}`,
+    version: DETECTION_ENGINE_API_VERSION,
+  });
+  if (existing.statusCode < 400) {
+    return;
+  }
+  if (!isNotFound(existing.statusCode)) {
+    throw new Error(
+      `Failed to look up bootstrap rule (${existing.statusCode}): ${kbnErrorMessage(existing.body)}`
+    );
+  }
+  const created = await kbnRequest({
+    method: 'POST',
+    path: '/api/detection_engine/rules',
+    version: DETECTION_ENGINE_API_VERSION,
+    body: {
+      name: 'FP/TP seeder bootstrap no-match rule',
+      rule_id: FP_TP_BOOTSTRAP_RULE_ID,
+      enabled: true,
+      index: ['logs-*'],
+      query: BOOTSTRAP_RULE_QUERY,
+      from: 'now-1m',
+      interval: '1m',
+      severity: 'low',
+      risk_score: 1,
+      description: 'Always-on no-match rule that provisions the alerts data stream.',
+      type: 'query',
+      language: 'lucene',
+      max_signals: 1,
+      threat: [],
+    },
+  });
+  if (created.statusCode >= 400 && !isAlreadyExists(created.statusCode, created.body)) {
+    throw new Error(
+      `Failed to create bootstrap rule (${created.statusCode}): ${kbnErrorMessage(created.body)}`
+    );
+  }
+};
+
+export const waitForAlertsDataStream = async (esClient: EsClient, index: string): Promise<void> => {
+  const deadline = Date.now() + ALERTS_STREAM_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    if (await esClient.indices.exists({ index })) {
+      return;
+    }
+    await sleep(ALERTS_STREAM_POLL_INTERVAL_MS);
+  }
+  throw new Error(
+    `Alerts data stream ${index} did not appear within ${ALERTS_STREAM_TIMEOUT_MS}ms`
+  );
+};
+
+/**
+ * Reads the per-space inference feature settings. Throws when the read fails:
+ * callers build a PUT body from the result, so a silent failure would wipe
+ * every other feature mapping.
+ */
+const readInferenceFeatures = async (
+  kbnRequest: FpTpLiveKbnRequest
+): Promise<unknown[] | undefined> => {
+  const settings = await kbnRequest({
+    method: 'GET',
+    path: '/internal/search_inference_endpoints/settings',
+    version: INFERENCE_SETTINGS_API_VERSION,
+  });
+  if (settings.statusCode >= 400) {
+    throw new Error(
+      `Failed to read inference settings (${settings.statusCode}): ${kbnErrorMessage(
+        settings.body
+      )}`
+    );
+  }
+  return (settings.body as { data?: { features?: unknown[] } } | undefined)?.data?.features;
+};
+
+const connectorIdFromFeatures = (features: unknown[] | undefined): string | undefined => {
+  if (!Array.isArray(features)) {
+    return undefined;
+  }
+  for (const feature of features) {
+    const { feature_id: featureId, endpoints } = feature as {
+      feature_id?: string;
+      endpoints?: Array<{ id?: string }>;
+    };
+    if (featureId === FP_TP_REASONING_FEATURE_ID) {
+      const id = endpoints?.[0]?.id;
+      return typeof id === 'string' ? id : undefined;
+    }
+  }
+  return undefined;
+};
+
+/**
+ * Reads the per-space inference settings and returns the connector id mapped to
+ * the FP/TP reasoning feature, if any.
+ */
+export const readReasoningConnectorId = async (
+  kbnRequest: FpTpLiveKbnRequest
+): Promise<string | undefined> => connectorIdFromFeatures(await readInferenceFeatures(kbnRequest));
+
+export const ensureReasoningMapping = async (
+  kbnRequest: FpTpLiveKbnRequest,
+  connectorId: string
+): Promise<void> => {
+  // One read feeds both the no-op check and the PUT body, and a failed read
+  // throws: an empty `others` here would make the PUT wipe every other feature.
+  const features = await readInferenceFeatures(kbnRequest);
+  if (connectorIdFromFeatures(features) === connectorId) {
+    return;
+  }
+  const others = Array.isArray(features)
+    ? features.filter(
+        (feature) => (feature as { feature_id?: string }).feature_id !== FP_TP_REASONING_FEATURE_ID
+      )
+    : [];
+  const response = await kbnRequest({
+    method: 'PUT',
+    path: '/internal/search_inference_endpoints/settings',
+    version: INFERENCE_SETTINGS_API_VERSION,
+    body: {
+      features: [
+        ...others,
+        { feature_id: FP_TP_REASONING_FEATURE_ID, endpoints: [{ id: connectorId }] },
+      ],
+    },
+  });
+  if (response.statusCode >= 400) {
+    throw new Error(
+      `Failed to map ${FP_TP_REASONING_FEATURE_ID} to ${connectorId} (${
+        response.statusCode
+      }): ${kbnErrorMessage(response.body)}`
+    );
+  }
+};
+
+export const runValidateWorkflow = async (
+  kbnRequest: FpTpLiveKbnRequest,
+  inputs: FpTpValidateInputs
+): Promise<void> => {
+  const started = await kbnRequest({
+    method: 'POST',
+    path: `/api/workflows/workflow/${VALIDATE_WORKFLOW_ID}/run`,
+    version: WORKFLOWS_API_VERSION,
+    body: { inputs },
+  });
+  if (started.statusCode >= 400) {
+    throw new Error(
+      `Failed to run ${VALIDATE_WORKFLOW_ID} (${started.statusCode}): ${kbnErrorMessage(
+        started.body
+      )}`
+    );
+  }
+  const executionId = (started.body as { workflowExecutionId?: string } | undefined)
+    ?.workflowExecutionId;
+  if (typeof executionId !== 'string') {
+    throw new Error(`${VALIDATE_WORKFLOW_ID} run returned no workflowExecutionId`);
+  }
+
+  const deadline = Date.now() + VALIDATE_EXECUTION_TIMEOUT_MS;
+  while (Date.now() < deadline) {
+    await sleep(VALIDATE_POLL_INTERVAL_MS);
+    const execution = await kbnRequest({
+      method: 'GET',
+      path: `/api/workflows/executions/${executionId}`,
+      version: WORKFLOWS_API_VERSION,
+    });
+    if (execution.statusCode >= 400) {
+      throw new Error(
+        `Failed to read execution ${executionId} (${execution.statusCode}): ${kbnErrorMessage(
+          execution.body
+        )}`
+      );
+    }
+    const status = (execution.body as { status?: string } | undefined)?.status;
+    if (status === 'completed') {
+      return;
+    }
+    if (status === 'failed' || status === 'cancelled') {
+      throw new Error(`${VALIDATE_WORKFLOW_ID} execution ${executionId} ended "${status}"`);
+    }
+  }
+  throw new Error(
+    `${VALIDATE_WORKFLOW_ID} execution ${executionId} did not finish within ${VALIDATE_EXECUTION_TIMEOUT_MS}ms`
+  );
+};
+
+/**
+ * Locates the persisted Attack Discovery by its title. The validate workflow
+ * derives the document `_id` (== `kibana.alert.uuid`) from a hash including the
+ * authenticated user, so the seeder reads it back instead of recomputing it.
+ */
+export const findPersistedAttackId = async (
+  esClient: EsClient,
+  index: string,
+  title: string
+): Promise<string> => {
+  const response = await esClient.search<{ 'kibana.alert.attack_discovery.title'?: string }>({
+    index,
+    size: 1,
+    query: { match_phrase: { 'kibana.alert.attack_discovery.title': title } },
+  });
+  const id = response.hits.hits[0]?._id;
+  if (id === undefined) {
+    throw new Error(`No persisted Attack Discovery titled "${title}" in ${index}`);
+  }
+  return id;
+};
+
+const attackTitleOf = (attack: Record<string, unknown> | undefined): string | undefined => {
+  const title = attack?.['kibana.alert.attack_discovery.title'];
+  return typeof title === 'string' ? title : undefined;
+};
+
+export const buildServerlessPlan = (
+  world: FpTpWorld,
+  space: string,
+  now: Date = new Date()
+): FpTpServerlessSeedPlan => {
+  const base = buildLiveSeedPlan(world, now);
+  const alertsIndex = fpTpAlertsIndexForSpace(space);
+  const serverlessEvents = base.events.map(({ index, id }) => ({
+    index: toServerlessEventIndex(index, space),
+    id,
+  }));
+  // Re-scope the shifted documents to the space: alerts land in
+  // .alerts-security.alerts-<space> but are authored tagged to 'default', and
+  // events keep data_stream.namespace 'default' while indexing into
+  // logs-...-<space>. Copies only — the caller's world stays untouched.
+  const spaceWorld: FpTpWorld = {
+    ...base.world,
+    attack:
+      base.world.attack === undefined
+        ? undefined
+        : { ...base.world.attack, 'kibana.space_ids': [space] },
+    alerts: base.world.alerts.map((alert) => ({
+      ...alert,
+      source: { ...alert.source, 'kibana.space_ids': [space] },
+    })),
+    events: base.world.events.map((event, position) => ({
+      ...event,
+      index: serverlessEvents[position].index,
+      source: {
+        ...event.source,
+        data_stream: { ...(event.source.data_stream as object | undefined), namespace: space },
+      },
+    })),
+  };
+  return {
+    ...base,
+    world: spaceWorld,
+    space,
+    alertsIndex,
+    adhocAttackIndex: fpTpAdhocAttackIndexForSpace(space),
+    serverlessEvents,
+    attackTitle: attackTitleOf(world.attack),
+    // Bulk `create` (never `index`): the alerts index is a product-managed data
+    // stream on serverless, and create keeps a leftover id loud (409) instead
+    // of silently overwriting a previous seed.
+    alertOperations: spaceWorld.alerts.flatMap((alert) => [
+      { create: { _index: alertsIndex, _id: alert.id } },
+      alert.source,
+    ]),
+    eventOperations: spaceWorld.events.flatMap((event) => [
+      { create: { _index: event.index, _id: event.id } },
+      event.source,
+    ]),
+  };
+};
+
+export const cleanupServerlessSeed = async ({
+  esClient,
+  kbnRequest,
+  plan,
+}: {
+  esClient: EsClient;
+  kbnRequest: FpTpLiveKbnRequest;
+  plan: FpTpServerlessSeedPlan;
+}): Promise<void> => {
+  await deleteDocumentsById(esClient, [
+    ...plan.alertIds.map((id) => ({ index: plan.alertsIndex, id })),
+    ...plan.serverlessEvents,
+  ]);
+  // The persisted discovery's `_id` is a hash over alert ids, connector, user
+  // and space — unknown until after the validate run — so delete it by title.
+  if (plan.attackTitle !== undefined) {
+    try {
+      await esClient.deleteByQuery({
+        index: plan.adhocAttackIndex,
+        query: { match_phrase: { 'kibana.alert.attack_discovery.title': plan.attackTitle } },
+        conflicts: 'proceed',
+        refresh: true,
+      });
+    } catch (error) {
+      if (esStatusCode(error) !== 404) {
+        throw error;
+      }
+    }
+  }
+  for (const entity of plan.entities) {
+    await deleteEntity(kbnRequest, entity.entityId);
+  }
+  await deleteEntitiesOnHosts(
+    esClient,
+    kbnRequest,
+    plan.hostIds,
+    fpTpEntityReadAliasForSpace(plan.space)
+  );
+};
+
+/**
+ * Seeds one FP/TP twin into a Kibana space on a serverless project. Returns
+ * the summary plus a cleanup handle. `reasoningConnectorId` maps the space's
+ * `alertzero_reasoning` inference feature so the managed analysis (and the
+ * validate workflow's connector bookkeeping) resolve a connector in the space.
+ */
+export const seedTwinLiveServerless = async ({
+  esClient,
+  kbnRequest,
+  twin,
+  space,
+  reasoningConnectorId,
+  now = new Date(),
+}: {
+  esClient: EsClient;
+  kbnRequest: FpTpLiveKbnRequest;
+  twin: FpTpTwin;
+  space: string;
+  reasoningConnectorId: string;
+  now?: Date;
+}): Promise<{ summary: FpTpLiveSeedSummary; cleanup: () => Promise<void> }> => {
+  assertServerlessSpace(space);
+  const world = twinToWorld(twin);
+  const plan = buildServerlessPlan(world, space, now);
+
+  await ensureFpTpSeedPrerequisites(kbnRequest);
+  await ensureBootstrapNoMatchRule(kbnRequest);
+  await waitForAlertsDataStream(esClient, plan.alertsIndex);
+  await ensureReasoningMapping(kbnRequest, reasoningConnectorId);
+
+  const cleanup = () => cleanupServerlessSeed({ esClient, kbnRequest, plan });
+
+  try {
+    await cleanup();
+
+    assertBulkOk(
+      'alerts',
+      await esClient.bulk({ refresh: 'wait_for', operations: plan.alertOperations })
+    );
+    assertBulkOk(
+      'events',
+      await esClient.bulk({ refresh: 'wait_for', operations: plan.eventOperations })
+    );
+
+    for (const entity of plan.entities) {
+      await createEntity(kbnRequest, entity);
+      await writeIdentityFields(esClient, entity, fpTpEntityReadAliasForSpace(space));
+    }
+
+    let persistedAttackId = plan.attackId;
+    if (world.attack !== undefined && plan.attackTitle !== undefined) {
+      await runValidateWorkflow(kbnRequest, {
+        alerts_context_count: world.alerts.length,
+        anonymized_alerts: toAnonymizedAlerts(world.alerts),
+        api_config: { connector_id: reasoningConnectorId, action_type_id: '.inference' },
+        attack_discoveries: [toValidateAttackDiscovery(world.attack)],
+        generation_uuid: `${FP_TP_TWIN_SEED_LABEL}-${Date.now()}`,
+        generation_source: 'fptp-seeder',
+      });
+      persistedAttackId = await findPersistedAttackId(
+        esClient,
+        plan.adhocAttackIndex,
+        plan.attackTitle
+      );
+    }
+
+    return {
+      summary: {
+        twinId: twin.id,
+        attackId: persistedAttackId,
+        attackIndex: plan.adhocAttackIndex,
+        alertCount: twin.alerts.length,
+        eventCount: twin.events.length,
+        entityIds: plan.entities.map((entity) => entity.entityId),
+        gold: twin.gold,
+      },
+      cleanup,
+    };
+  } catch (error) {
+    await cleanup().catch(() => undefined);
+    throw error;
+  }
 };
