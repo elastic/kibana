@@ -60,12 +60,17 @@ import type { RuleUnbackedFilter } from './types';
 
 const SEARCH_SIZE_LIMIT = 10_000;
 const QUERY_FEATURE_ID = 'query.features.id';
+// `FUSE` passes `label` through as `FIRST(label, NULL)`, so a fused row carries it iff the semantic
+// branch contributed that row; the tie fallback gates on it.
+const RANK_LABEL_COLUMN = 'label';
+const SEMANTIC_LABEL = 'semantic';
 
 type RankedIndicatorRow = Record<string, unknown> & {
   id?: string;
   'source.id'?: string;
   type?: KnowledgeIndicatorType;
   '@timestamp'?: string;
+  [RANK_LABEL_COLUMN]?: string | null;
 };
 
 interface KeywordClause {
@@ -322,10 +327,25 @@ export class IndicatorSearcher {
   }
 
   /**
-   * `FUSE LINEAR` minmax normalizes every row to 0.0 when all raw scores tie (a single match, or
-   * identical copies of one feature across sources), so the threshold drops them all. Otherwise
-   * the best match normalizes to 1.0 and always passes, so an empty thresholded result can only be
-   * "no match" or that tie; retrying without the threshold returns exactly the tied rows.
+   * Minmax normalizes an all-tied semantic branch to 0.0 (Elasticsearch `MinMaxNormalizer` returns
+   * 0.0 when `min == max`), so a positive threshold drops every row. The branch ties when it holds
+   * one row (`min(semanticMatches, limit) == 1`) or identical copies of one indicator. A
+   * non-degenerate branch always keeps its 1.0 row, so no semantic row after thresholding means
+   * "no match" or that tie, and retrying without the threshold returns exactly the tied rows. The
+   * gate is a semantic-labeled row rather than an empty page because in hybrid mode a keyword hit
+   * would mask the tied branch.
+   *
+   * The gate reads the fused page after the final `LIMIT`, so it assumes a non-degenerate branch's
+   * rank-1 row survives the cut. That holds because both branches are sorted before `FUSE RRF`
+   * (rank is arrival order) and carry equal weight: the semantic rank-1 row scores
+   * `1 / (rank_constant + 1)`, ties keyword rank-1 and beats every other row, so `LIMIT >= 2` keeps
+   * it and `LIMIT 1` is the degenerate case. Weights, a third branch, or an unsorted branch break
+   * this, and a false retry drops the threshold on a legitimately non-degenerate branch.
+   *
+   * Only the all-tied case is recovered; with two distinct scores the lower still normalizes to
+   * 0.0. Once `INLINE STATS` is allowed after `LIMIT`
+   * (https://github.com/elastic/elasticsearch/issues/135543) the branch can normalize itself with
+   * `CASE(max == min, 1.0, ...)` and this retry goes away.
    */
   private async rankWithTieFallback(
     mode: SearchMode,
@@ -334,9 +354,12 @@ export class IndicatorSearcher {
     const rankedRows = esqlToObjects<RankedIndicatorRow>(
       await queryEsql({ esClient: this.esClient, query: build(this.config.semantic_min_score) })
     );
-    if (rankedRows.length > 0 || mode === 'keyword') {
+    if (mode === 'keyword' || rankedRows.some((row) => row[RANK_LABEL_COLUMN] === SEMANTIC_LABEL)) {
       return rankedRows;
     }
+    this.logger.debug(
+      `KnowledgeIndicator ${mode} search: semantic branch contributed no rows above ${this.config.semantic_min_score}; retrying without the threshold`
+    );
     return esqlToObjects<RankedIndicatorRow>(
       await queryEsql({ esClient: this.esClient, query: build(0) })
     );
@@ -350,6 +373,9 @@ export class IndicatorSearcher {
     limit: number,
     semanticMinScore: number
   ): ComposerQuery {
+    const label = esql.col(RANK_LABEL_COLUMN);
+    const semanticLabel = esql.str(SEMANTIC_LABEL);
+
     if (mode === 'semantic') {
       return esql`FROM ${KNOWLEDGE_INDICATORS_DATA_STREAM} METADATA _score, _id, _index
         | WHERE ${where}
@@ -358,9 +384,10 @@ export class IndicatorSearcher {
             | SORT _score DESC
             | LIMIT ${limit}
           )
+        | EVAL ${label} = ${semanticLabel}
         | FUSE LINEAR WITH {"normalizer":"minmax"}
         | WHERE _score >= ${semanticMinScore}
-        | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
+        | KEEP _id, _index, _score, ${label}, ${rankGroupKeyColumns()}
         | SORT _score DESC
         | LIMIT ${limit}`;
     }
@@ -385,10 +412,10 @@ export class IndicatorSearcher {
             WHERE MATCH(${esql.col(SEARCH_EMBEDDING)}, ${{ q: queryText }})
             | SORT _score DESC
             | LIMIT ${limit}
-            | EVAL label = "semantic"
-            | FUSE LINEAR GROUP BY label WITH {"normalizer":"minmax"}
+            | EVAL ${label} = ${semanticLabel}
+            | FUSE LINEAR GROUP BY ${label} WITH {"normalizer":"minmax"}
             | WHERE _score >= ${semanticMinScore}
-            | KEEP _id, _index, _score, ${rankGroupKeyColumns()}
+            | KEEP _id, _index, _score, ${label}, ${rankGroupKeyColumns()}
             | SORT _score DESC
             | LIMIT ${limit}
           )
@@ -402,7 +429,7 @@ export class IndicatorSearcher {
           )
       | FUSE RRF WITH {"rank_constant":${this.config.rrf_rank_constant}}
       | SORT _score DESC
-      | KEEP ${rankGroupKeyColumns()}, _score
+      | KEEP ${rankGroupKeyColumns()}, _score, ${label}
       | LIMIT ${limit}`;
   }
 
