@@ -24,7 +24,11 @@
       "alerting",
       "actions",
       "workflowsManagement",
-      "agentBuilder"
+      "agentBuilder",
+      "encryptedSavedObjects",
+      "spaces",
+      "maintenanceWindows",
+      "licensing"
     ]
   }
 }
