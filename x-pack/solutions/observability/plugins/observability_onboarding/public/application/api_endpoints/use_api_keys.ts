@@ -18,6 +18,8 @@ const CREATED_KEYS_STORAGE_KEY = 'observabilityOnboarding.apiEndpoints.createdKe
 
 export interface UseApiKeysResult {
   encodedApiKeys: Partial<Record<ApiEndpointId, string>>;
+  /** Ids of the keys created in this page session, used to verify ingest. */
+  apiKeyIds: Partial<Record<ApiEndpointId, string>>;
   keyCreatedBeforeByEndpointId: Partial<Record<ApiEndpointId, boolean>>;
   creatingEndpointId?: ApiEndpointId;
   createApiKey: (endpointId: ApiEndpointId) => Promise<void>;
@@ -28,6 +30,7 @@ export function useApiKeys(): UseApiKeysResult {
     services: { notifications },
   } = useKibana();
   const [encodedApiKeys, setEncodedApiKeys] = useState<Partial<Record<ApiEndpointId, string>>>({});
+  const [apiKeyIds, setApiKeyIds] = useState<Partial<Record<ApiEndpointId, string>>>({});
   const [creatingEndpointId, setCreatingEndpointId] = useState<ApiEndpointId | undefined>(
     undefined
   );
@@ -43,11 +46,12 @@ export function useApiKeys(): UseApiKeysResult {
       isCreatingRef.current = true;
       setCreatingEndpointId(endpointId);
       try {
-        const { encodedApiKey } = await callObservabilityOnboardingApi(
+        const { apiKeyId, encodedApiKey } = await callObservabilityOnboardingApi(
           'POST /internal/observability_onboarding/api_endpoints/create_key/{id}',
           { signal: null, params: { path: { id: endpointId } } }
         );
         setEncodedApiKeys((previous) => ({ ...previous, [endpointId]: encodedApiKey }));
+        setApiKeyIds((previous) => ({ ...previous, [endpointId]: apiKeyId }));
         setCreatedKeysInStorage({
           ...readStoredFlags(CREATED_KEYS_STORAGE_KEY),
           [endpointId]: true,
@@ -80,6 +84,7 @@ export function useApiKeys(): UseApiKeysResult {
 
   return {
     encodedApiKeys,
+    apiKeyIds,
     keyCreatedBeforeByEndpointId: sanitizeStoredFlags(createdKeysInStorage),
     creatingEndpointId,
     createApiKey,

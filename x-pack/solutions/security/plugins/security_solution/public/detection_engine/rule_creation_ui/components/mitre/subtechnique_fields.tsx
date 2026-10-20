@@ -14,28 +14,18 @@ import {
   EuiSuperSelect,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import type { Threats, ThreatSubtechnique } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { MitreSubtechniqueSummary } from '@kbn/security-mitre-attack-common';
+import { getMitreEntityDisplayName } from '@kbn/security-mitre-attack-common';
 import * as Rulei18n from '../../../common/translations';
 import type { FieldHook } from '../../../../shared_imports';
 import { MyAddItemButton } from '../add_item_form';
 import * as i18n from './translations';
-import type { MitreSubTechnique } from '../../../../../common/detection_engine/mitre/types';
 import { createUnsupportedMitreOption } from './unsupported_mitre_option';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-
-const lazyMitreConfiguration = () => {
-  /**
-   * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-   * See https://webpack.js.org/api/module-methods/#magic-comments
-   */
-  return import(
-    /* webpackChunkName: "lazy_mitre_configuration" */
-    '../../../../../common/detection_engine/mitre/mitre_tactics_techniques'
-  );
-};
 
 const SubtechniqueContainer = styled.div`
   margin-left: 48px;
@@ -48,6 +38,7 @@ interface AddSubtechniqueProps {
   idAria: string;
   isDisabled: boolean;
   onFieldChange: (threats: Threats) => void;
+  subtechniques: MitreSubtechniqueSummary[];
 }
 
 export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
@@ -57,22 +48,13 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   threatIndex,
   techniqueIndex,
   onFieldChange,
+  subtechniques,
 }): JSX.Element => {
   const isMitreAttackUpdatesUIEnabled = useIsExperimentalFeatureEnabled(
     'mitreAttackUpdatesUIEnabled'
   );
 
   const values = field.value as Threats;
-  const [subtechniquesOptions, setSubtechniquesOptions] = useState<MitreSubTechnique[]>([]);
-
-  useEffect(() => {
-    async function getMitre() {
-      const mitreConfig = await lazyMitreConfiguration();
-      setSubtechniquesOptions(mitreConfig.subtechniques);
-    }
-
-    getMitre();
-  }, []);
 
   const technique = useMemo(() => {
     return [...(values[threatIndex].technique ?? [])];
@@ -81,17 +63,15 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   const removeSubtechnique = useCallback(
     (index: number) => {
       const threats = [...(field.value as Threats)];
-      const subtechniques = technique[techniqueIndex].subtechnique ?? [];
-      if (subtechniques != null) {
-        subtechniques.splice(index, 1);
+      const subtechniqueList = technique[techniqueIndex].subtechnique ?? [];
+      subtechniqueList.splice(index, 1);
 
-        technique[techniqueIndex] = {
-          ...technique[techniqueIndex],
-          subtechnique: subtechniques,
-        };
-        threats[threatIndex].technique = technique;
-        onFieldChange(threats);
-      }
+      technique[techniqueIndex] = {
+        ...technique[techniqueIndex],
+        subtechnique: subtechniqueList,
+      };
+      threats[threatIndex].technique = technique;
+      onFieldChange(threats);
     },
     [field, onFieldChange, techniqueIndex, technique, threatIndex]
   );
@@ -99,12 +79,12 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   const addMitreAttackSubtechnique = useCallback(() => {
     const threats = [...(field.value as Threats)];
 
-    const subtechniques = technique[techniqueIndex].subtechnique;
+    const subtechniqueList = technique[techniqueIndex].subtechnique;
 
-    if (subtechniques != null) {
+    if (subtechniqueList != null) {
       technique[techniqueIndex] = {
         ...technique[techniqueIndex],
-        subtechnique: [...subtechniques, { id: 'none', name: 'none', reference: 'none' }],
+        subtechnique: [...subtechniqueList, { id: 'none', name: 'none', reference: 'none' }],
       };
     } else {
       technique[techniqueIndex] = {
@@ -119,57 +99,54 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
   const updateSubtechnique = useCallback(
     (index: number, optionId: string) => {
       const threats = [...(field.value as Threats)];
-      const { id, reference, name } = subtechniquesOptions.find((t) => t.id === optionId) ?? {
+      const { id, reference, name } = subtechniques.find((t) => t.id === optionId) ?? {
         id: '',
         name: '',
         reference: '',
       };
-      const subtechniques = technique[techniqueIndex].subtechnique;
-
-      if (subtechniques != null) {
-        onFieldChange([
-          ...threats.slice(0, threatIndex),
-          {
-            ...threats[threatIndex],
-            technique: [
-              ...technique.slice(0, techniqueIndex),
-              {
-                ...technique[techniqueIndex],
-                subtechnique: [
-                  ...subtechniques.slice(0, index),
-                  {
-                    id,
-                    reference,
-                    name,
-                  },
-                  ...subtechniques.slice(index + 1),
-                ],
-              },
-              ...technique.slice(techniqueIndex + 1),
-            ],
-          },
-          ...threats.slice(threatIndex + 1),
-        ]);
-      }
+      const subtechniqueList = technique[techniqueIndex].subtechnique ?? [];
+      onFieldChange([
+        ...threats.slice(0, threatIndex),
+        {
+          ...threats[threatIndex],
+          technique: [
+            ...technique.slice(0, techniqueIndex),
+            {
+              ...technique[techniqueIndex],
+              subtechnique: [
+                ...subtechniqueList.slice(0, index),
+                {
+                  id,
+                  reference,
+                  name,
+                },
+                ...subtechniqueList.slice(index + 1),
+              ],
+            },
+            ...technique.slice(techniqueIndex + 1),
+          ],
+        },
+        ...threats.slice(threatIndex + 1),
+      ]);
     },
-    [field.value, subtechniquesOptions, technique, techniqueIndex, onFieldChange, threatIndex]
+    [field.value, subtechniques, technique, techniqueIndex, onFieldChange, threatIndex]
   );
 
   const findCurrentSubtechniqueOption = useCallback(
     (subtechnique: ThreatSubtechnique) =>
-      subtechnique.name === 'none' || subtechniquesOptions.length === 0
+      subtechnique.name === 'none' || subtechniques.length === 0
         ? undefined
-        : subtechniquesOptions.find((s) => s.id === subtechnique.id),
-    [subtechniquesOptions]
+        : subtechniques.find((s) => s.id === subtechnique.id),
+    [subtechniques]
   );
 
   const isUnsupportedSubtechnique = useCallback(
     (subtechnique: ThreatSubtechnique) =>
       isMitreAttackUpdatesUIEnabled &&
-      subtechniquesOptions.length > 0 &&
+      subtechniques.length > 0 &&
       subtechnique.name !== 'none' &&
       findCurrentSubtechniqueOption(subtechnique) === undefined,
-    [findCurrentSubtechniqueOption, isMitreAttackUpdatesUIEnabled, subtechniquesOptions]
+    [findCurrentSubtechniqueOption, isMitreAttackUpdatesUIEnabled, subtechniques]
   );
 
   const getSubtechniqueRenamedFromName = useCallback(
@@ -185,9 +162,9 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
 
   const getSelectSubtechnique = useCallback(
     (index: number, disabled: boolean, subtechnique: ThreatSubtechnique) => {
-      const options = subtechniquesOptions.filter(
-        (t) => t.techniqueId === technique[techniqueIndex]?.id
-      );
+      // Filter subtechniques belonging to the parent technique. The managed source returns
+      // entities name-ordered, so the filtered subset is already in the correct display order.
+      const options = subtechniques.filter((t) => t.technique_id === technique[techniqueIndex]?.id);
       const isUnsupported = isUnsupportedSubtechnique(subtechnique);
 
       return (
@@ -213,7 +190,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
                   ]
                 : []),
               ...options.map((option) => ({
-                inputDisplay: <>{option.label}</>,
+                inputDisplay: <>{getMitreEntityDisplayName(option)}</>,
                 value: option.id,
                 disabled,
               })),
@@ -232,7 +209,7 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
       );
     },
     [
-      subtechniquesOptions,
+      subtechniques,
       isUnsupportedSubtechnique,
       field.label,
       updateSubtechnique,
@@ -241,14 +218,14 @@ export const MitreAttackSubtechniqueFields: React.FC<AddSubtechniqueProps> = ({
     ]
   );
 
-  const subtechniques = useMemo(() => {
+  const subtechniqueList = useMemo(() => {
     return technique[techniqueIndex].subtechnique;
   }, [technique, techniqueIndex]);
 
   return (
     <SubtechniqueContainer>
-      {subtechniques != null &&
-        subtechniques.map((subtechnique, index) => {
+      {subtechniqueList != null &&
+        subtechniqueList.map((subtechnique, index) => {
           const subtechniqueUnsupported = isUnsupportedSubtechnique(subtechnique);
           const subtechniqueRenamedFrom = getSubtechniqueRenamedFromName(subtechnique);
           return (

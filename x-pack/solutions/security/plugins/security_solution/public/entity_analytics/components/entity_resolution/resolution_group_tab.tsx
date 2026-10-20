@@ -7,9 +7,11 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { useQueryClient } from '@kbn/react-query';
 import type { EntityType } from '@kbn/entity-store/public';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { API_VERSIONS } from '../../../../common/entity_analytics/constants';
+import { useOnResolutionGroupUpdatedToolEvent } from '../../hooks/use_on_resolution_group_updated_tool_event';
 import {
   EntityPanelKeyByType,
   EntityPanelParamByType,
@@ -20,7 +22,11 @@ import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import type { EntityType as SecurityEntityType } from '../../../../common/entity_analytics/types';
 import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
-import { useResolutionGroup, RESOLUTION_GROUP_ROUTE } from './hooks/use_resolution_group';
+import {
+  useResolutionGroup,
+  RESOLUTION_GROUP_ROUTE,
+  RESOLUTION_GROUP_QUERY_KEY,
+} from './hooks/use_resolution_group';
 import type { ResolutionGroup } from './hooks/use_resolution_group';
 import { useLinkEntities } from './hooks/use_link_entities';
 import { useUnlinkEntities } from './hooks/use_unlink_entities';
@@ -75,6 +81,12 @@ export const ResolutionGroupTab: React.FC<ResolutionGroupTabProps> = ({
     },
   });
   const unlinkEntities = useUnlinkEntities();
+  const queryClient = useQueryClient();
+  useOnResolutionGroupUpdatedToolEvent(
+    useCallback(() => {
+      queryClient.invalidateQueries({ queryKey: [RESOLUTION_GROUP_QUERY_KEY] });
+    }, [queryClient])
+  );
 
   const [modalState, setModalState] = useState<{
     isOpen: boolean;

@@ -6,6 +6,7 @@ source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/common/env.sh
 source .buildkite/scripts/common/setup_job_env.sh
 source .buildkite/scripts/common/setup_executors.sh
+source .buildkite/scripts/common/setup_ipv6_only.sh
 
 source .buildkite/scripts/common/disk_usage.sh
 print_disk_usage "pre-command"

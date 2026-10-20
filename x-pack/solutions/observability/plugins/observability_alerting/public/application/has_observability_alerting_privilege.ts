@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type { PrivilegeCheck } from '@kbn/alerting-v2-plugin/public';
 import type { Capabilities } from '@kbn/core/public';
-import {
-  OBSERVABILITY_ALERTS_FEATURE_ID,
-  STACK_ALERTS_ONLY_FEATURE_ID,
-  AlertConsumers,
-} from '@kbn/rule-data-utils';
+import { STACK_ALERTS_ONLY_FEATURE_ID, canAccessTriggersActionsRules } from '@kbn/rule-data-utils';
 
 const ALERTING_V2_FEATURE_IDS: Record<string, string> = {
   rules: 'alerting_v2_rules',
@@ -20,30 +15,41 @@ const ALERTING_V2_FEATURE_IDS: Record<string, string> = {
   executionHistory: 'alerting_v2_execution_history',
 };
 
-const V1_ALERTING_FEATURE_IDS: readonly string[] = [
-  OBSERVABILITY_ALERTS_FEATURE_ID,
-  STACK_ALERTS_ONLY_FEATURE_ID,
-  AlertConsumers.LOGS,
-];
-
-/**
- * United privilege gate: v1 `show`/`write` or v2 `read`/`all` on every
- * requested alerting v2 feature.
- */
-export const hasObservabilityAlertingPrivilege = (
+/** Nav visibility gate per alerting feature (v1 capabilities or v2 read). */
+export const hasObservabilityAlertingCapabilities = (
   capabilities: Capabilities,
-  features: Parameters<PrivilegeCheck>[0],
-  capability: Parameters<PrivilegeCheck>[1]
-): boolean => {
-  const v1CapKey = capability === 'all' ? 'write' : 'show';
-  const hasV1 = V1_ALERTING_FEATURE_IDS.some(
-    (featureId) => capabilities[featureId]?.[v1CapKey] === true
-  );
+  feature: string
+): { v1: boolean; v2: boolean } => {
+  let v1: boolean;
+  switch (feature) {
+    case 'alerts':
+      v1 = hasObservabilityAlertsV1Capability(capabilities);
+      break;
+    case 'rules':
+      v1 = hasObservabilityRulesV1Capability(capabilities);
+      break;
+    default:
+      v1 = false;
+  }
 
-  const v2CapKey = capability === 'all' ? 'all' : 'read';
-  const hasV2 = features.every(
-    (f) => capabilities[ALERTING_V2_FEATURE_IDS[f]]?.[v2CapKey] === true
-  );
+  const v2 = capabilities[ALERTING_V2_FEATURE_IDS[feature]]?.read === true;
 
-  return hasV1 || hasV2;
+  return { v1, v2 };
+};
+
+/** Capability-based check: does the user have any observability alerting access? */
+export const hasObservabilityAlertsV1Capability = (capabilities: Capabilities): boolean =>
+  hasObservabilityRulesV1Capability(capabilities) ||
+  capabilities.observabilityAlerts?.show === true ||
+  capabilities[STACK_ALERTS_ONLY_FEATURE_ID]?.show === true;
+
+/** Capability-based check: does the user have any observability rules access? */
+export const hasObservabilityRulesV1Capability = (capabilities: Capabilities): boolean => {
+  const { apm, metrics, uptime, synthetics, slo } = capabilities.navLinks;
+  const logs = capabilities.logs?.show;
+  // Stack Rules (`stackAlerts`) registers no UI capability. It grants the
+  // Stack Management Rules page instead.
+  const stackRules = canAccessTriggersActionsRules(capabilities);
+
+  return Object.values({ apm, logs, metrics, uptime, synthetics, slo, stackRules }).some(Boolean);
 };

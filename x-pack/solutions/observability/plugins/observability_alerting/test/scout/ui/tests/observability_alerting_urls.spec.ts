@@ -41,7 +41,7 @@ import {
 
 /*
  * Lives under the default Scout config (`test/scout/`) so
- * `alerting:v2:enabled` stays unpinned and can be flipped at runtime. Flag
+ * `alerting:v2:enabled` is not pinned by a server arg and can be flipped at runtime. Flag
  * on/off URL mounts, tab switches, and classic v1 host-aware coverage share
  * this one describe so they cannot run on parallel workers against the same
  * global setting (Scout `fullyParallel: false`). Scout allows only one
@@ -117,7 +117,7 @@ test.describe(
         log,
         pageObjects,
       }) => {
-        await unsetAlertingV2EnabledSetting(kbnClient);
+        await setAlertingV2EnabledSetting(kbnClient, false);
 
         const requested = pageObjects.observabilityAlerting.urlFor(surface.path);
         log.debug(`[observability-alerting] requested ${requested}`);
@@ -236,7 +236,7 @@ test.describe(
       await rules.clickRuleName(ruleName);
       await expect(rules.backLink).toBeVisible({ timeout: 30_000 });
 
-      await test.step('back href stays on the observability list, not /rules/v1/rules', async () => {
+      await test.step('back href stays on the observability list, not /rules/classic/rules', async () => {
         await expect(rules.backLink).toHaveAttribute('href', OBS_V1_LIST_HREF_RE);
         await expectObservabilityHref(rules.backLink);
       });

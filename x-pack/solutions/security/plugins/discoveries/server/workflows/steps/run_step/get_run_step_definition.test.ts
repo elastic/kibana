@@ -287,11 +287,52 @@ describe('getRunStepDefinition', () => {
       await stepDefinition.handler(contextWithoutConnectorId as never);
 
       expect(mockResolveDefaultConnectorId).toHaveBeenCalledWith({
+        featureId: undefined,
         inference: undefined,
         logger: mockLogger,
         request: { headers: {} },
+        searchInferenceEndpoints: undefined,
         uiSettingsClient: mockUiSettingsClient,
       });
+    });
+
+    it('forwards feature_id so the step can name its tier instead of an endpoint', async () => {
+      const contextWithFeatureId = {
+        ...baseMockContext,
+        input: {
+          alert_retrieval_mode: 'custom_query' as const,
+          alert_retrieval_workflow_ids: [],
+          feature_id: 'alertzero_frontier',
+          mode: 'sync' as const,
+          validation_workflow_id: '',
+        },
+      };
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(contextWithFeatureId as never);
+
+      expect(mockResolveDefaultConnectorId).toHaveBeenCalledWith(
+        expect.objectContaining({ featureId: 'alertzero_frontier' })
+      );
+    });
+
+    // `connector_id` stays the top of the resolution order, so a caller that names
+    // an endpoint outright is never overridden by a tier.
+    it('does not resolve a tier when connector_id and feature_id are both provided', async () => {
+      const contextWithBoth = {
+        ...syncMockContext,
+        input: {
+          ...syncMockContext.input,
+          feature_id: 'alertzero_frontier',
+        },
+      };
+
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(contextWithBoth as never);
+
+      expect(mockResolveDefaultConnectorId).not.toHaveBeenCalled();
     });
 
     it('uses the resolved default connector id for connector details when connector_id is omitted', async () => {
@@ -679,6 +720,68 @@ describe('getRunStepDefinition', () => {
       const callArgs = mockExecuteGenerationWorkflow.mock.calls[0][0];
 
       expect(callArgs.workflowConfig).not.toHaveProperty('additional_context');
+    });
+  });
+
+  describe('ground_truth_gate_enabled', () => {
+    it('keeps the gate and the skill on when the input is omitted', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler(syncMockContext as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowConfig: expect.objectContaining({
+            ground_truth_gate_enabled: true,
+            skill_enabled: true,
+          }),
+        })
+      );
+    });
+
+    // With no deterministic source and the skill off, the config names no alert
+    // source, so `validateRetrievalResults` fails the run instead of leaving it to
+    // a gate that never runs (that throw is covered in its own tests).
+    it('leaves no alert source for custom_only without workflows when the gate is off', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler({
+        ...baseMockContext,
+        input: {
+          ...syncMockContext.input,
+          alert_retrieval_mode: 'custom_only',
+          alert_retrieval_workflow_ids: [],
+          ground_truth_gate_enabled: false,
+        },
+      } as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowConfig: expect.objectContaining({
+            alert_retrieval_workflows_enabled: false,
+            default_retrieval_enabled: false,
+            skill_enabled: false,
+          }),
+        })
+      );
+    });
+
+    it('turns off the gate and the skill when false', async () => {
+      const stepDefinition = getStepDefinition();
+
+      await stepDefinition.handler({
+        ...baseMockContext,
+        input: { ...syncMockContext.input, ground_truth_gate_enabled: false },
+      } as never);
+
+      expect(mockExecuteGenerationWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowConfig: expect.objectContaining({
+            ground_truth_gate_enabled: false,
+            skill_enabled: false,
+          }),
+        })
+      );
     });
   });
 

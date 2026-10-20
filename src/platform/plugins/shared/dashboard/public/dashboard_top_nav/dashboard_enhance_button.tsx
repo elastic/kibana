@@ -9,7 +9,7 @@
 
 import type { MouseEvent as ReactMouseEvent } from 'react';
 import React from 'react';
-import { useCurrentEuiBreakpoint } from '@elastic/eui';
+import { EuiToolTip, useCurrentEuiBreakpoint } from '@elastic/eui';
 import type { AppHeaderExperimentalDashboardAiAction } from '@kbn/app-header';
 import { useCurrentChromeApplicationBreakpoint } from '@kbn/core-chrome-layout-utils';
 import { i18n } from '@kbn/i18n';
@@ -36,23 +36,18 @@ export const DashboardEnhanceButton = ({
     });
   };
 
-  if (iconOnly) {
-    return (
-      <AiButton
-        iconOnly
-        variant="empty"
-        size="xs"
-        iconType="sparkles"
-        withToolTip
-        aria-label={ENHANCE_LABEL}
-        isDisabled={action.isDisabled}
-        data-test-subj={action.testId ?? 'dashboardEnhanceButton'}
-        onClick={handleClick}
-      />
-    );
-  }
-
-  return (
+  const button = iconOnly ? (
+    <AiButton
+      iconOnly
+      variant="empty"
+      size="xs"
+      iconType="sparkles"
+      aria-label={ENHANCE_LABEL}
+      isDisabled={action.isDisabled}
+      data-test-subj={action.testId ?? 'dashboardEnhanceButton'}
+      onClick={handleClick}
+    />
+  ) : (
     <AiButton
       variant="empty"
       size="xs"
@@ -65,4 +60,6 @@ export const DashboardEnhanceButton = ({
       {ENHANCE_LABEL}
     </AiButton>
   );
+
+  return <EuiToolTip content={action.tooltip}>{button}</EuiToolTip>;
 };

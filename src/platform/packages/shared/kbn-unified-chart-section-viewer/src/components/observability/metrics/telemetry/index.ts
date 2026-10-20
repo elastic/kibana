@@ -10,7 +10,10 @@
 export * from './constants';
 export * from './metrics_ebt_events';
 export * from './accumulate_metrics_row_telemetry';
+export { buildEsqlQueryFailureEvent } from './build_esql_query_failure_event';
 export type {
   MetricAggregationConfigChangedEvent,
   MetricAggregationConfigMetricType,
+  MetricsEsqlQueryFailureEvent,
+  MetricsEsqlQueryType,
 } from './types';

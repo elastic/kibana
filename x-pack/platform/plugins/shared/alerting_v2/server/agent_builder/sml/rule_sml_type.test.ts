@@ -22,21 +22,18 @@ const baseRuleAttrs: RuleSavedObjectAttributes = {
     name: 'High CPU',
     description: 'CPU breach detection',
     tags: ['ops', 'cpu'],
-    owner: 'observability',
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
-  },
-  state_transition: null,
+  query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
   enabled: true,
-  createdBy: 'elastic',
+  createdBy: { profile_uid: 'elastic' },
   createdAt: '2026-04-01T00:00:00.000Z',
-  updatedBy: 'elastic',
+  updatedBy: { profile_uid: 'elastic' },
   updatedAt: '2026-04-10T00:00:00.000Z',
-} as RuleSavedObjectAttributes;
+};
 
 // `getRule` returns the snake_case API response, not the saved object attributes.
 const { createdBy, createdAt, updatedBy, updatedAt, ...restRuleAttrs } = baseRuleAttrs;
@@ -46,7 +43,7 @@ const baseRuleResponse = {
   created_at: createdAt,
   updated_by: updatedBy,
   updated_at: updatedAt,
-  metadata: { ...baseRuleAttrs.metadata, version: baseRuleAttrs.metadata?.version ?? 1 },
+  metadata: baseRuleAttrs.metadata,
 };
 
 const buildToAttachmentContext = () => ({
@@ -204,7 +201,7 @@ describe('createRuleSmlType', () => {
           'CPU breach detection',
           'alert',
           'ops, cpu',
-          (baseRuleAttrs.query as { breach: { query: string } }).breach.query,
+          baseRuleAttrs.query.base,
         ].join('\n'),
       });
       expect(result).not.toHaveProperty('permissions');
@@ -265,12 +262,21 @@ describe('createRuleSmlType', () => {
         title: 'High CPU',
         content: '',
         permissions: { kibana: { privileges: [] } },
-        attributes: {
-          id: 'sml-1',
-          origin: { uri: `${RULE_KI_TYPE}://${originId}` },
-          created_at: '2026-04-10T00:00:00.000Z',
-          updated_at: '2026-04-10T00:00:00.000Z',
-          ingestion_method: 'crawled' as const,
+        id: 'sml-1',
+        '@timestamp': '2026-04-10T00:00:00.000Z',
+        updated_at: '2026-04-10T00:00:00.000Z',
+        references: [{ uri: `${RULE_KI_TYPE}://${originId}`, relation: 'derived_from' as const }],
+        governance: {
+          provenance: {
+            created_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+            updated_by: {
+              uri: 'crawler://sml',
+              metadata: { ingestion_method: 'crawled' as const },
+            },
+          },
         },
       };
     };

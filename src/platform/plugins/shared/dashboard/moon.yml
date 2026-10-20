@@ -17,6 +17,7 @@ project:
   owner: '@elastic/kibana-dashboards'
   sourceRoot: src/platform/plugins/shared/dashboard
 dependsOn:
+  - '@kbn/search-sessions-management-plugin'
   - '@kbn/core'
   - '@kbn/inspector-plugin'
   - '@kbn/kibana-react-plugin'
@@ -113,6 +114,7 @@ dependsOn:
   - '@kbn/as-code-filters-schema'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/as-code-export-flyout-component'
+  - '@kbn/as-code-import-flyout-component'
   - '@kbn/scout'
   - '@kbn/core-chrome-app-menu-components'
   - '@kbn/core-chrome-app-menu'
@@ -152,6 +154,7 @@ fileGroups:
     - test/scout_oas_schema/**/*.json
     - test/scout_anonymous_authc/**/*
     - test/scout_search_sessions/**/*
+    - test/scout_test_plugins/**/*
     - '!target/**/*'
   jest-config:
     - jest.config.js

@@ -81,77 +81,14 @@ export const SUBNAV_ARIA_LABEL = i18n.translate('xpack.alertzero.watches.subnav.
   defaultMessage: 'Watches section',
 });
 
-export const SUBNAV_COLLAPSE = i18n.translate('xpack.alertzero.watches.subnav.collapse', {
-  defaultMessage: 'Collapse Watches navigation',
-});
-
-export const SUBNAV_EXPAND = i18n.translate('xpack.alertzero.watches.subnav.expand', {
-  defaultMessage: 'Expand Watches navigation',
-});
-
 /**
  * `SUBNAV_WORKERS` and `SUBNAV_SKILLS` deliberately live in
  * `components/app_chrome/translations.ts`: `deep_links.ts` needs them and is page-load critical, so
  * importing them from here would pull every message in this module into the entry bundle.
  */
 
-export const viewWatchAriaLabel = (name: string) =>
-  i18n.translate('xpack.alertzero.watches.viewWatchAriaLabel', {
-    defaultMessage: 'View {name} settings',
-    values: { name },
+export const workerCountLabel = (count: number) =>
+  i18n.translate('xpack.alertzero.watches.header.workerCount', {
+    defaultMessage: '{count, plural, one {# Worker} other {# Workers}}',
+    values: { count },
   });
-
-/* -------------------------------------------------------------------------- */
-/* Lifecycle badges                                                           */
-/* -------------------------------------------------------------------------- */
-
-export const LIFECYCLE_BETA = i18n.translate('xpack.alertzero.watches.lifecycle.beta', {
-  defaultMessage: 'beta',
-});
-
-export const LIFECYCLE_PILOT = i18n.translate('xpack.alertzero.watches.lifecycle.pilot', {
-  defaultMessage: 'pilot',
-});
-
-/* -------------------------------------------------------------------------- */
-/* Relative time and run state                                                */
-/* -------------------------------------------------------------------------- */
-
-export const secondsAgoLabel = (seconds: number) =>
-  i18n.translate('xpack.alertzero.watches.relativeTime.secondsAgo', {
-    defaultMessage: '{seconds}s ago',
-    values: { seconds },
-  });
-
-export const minutesAgoLabel = (minutes: number) =>
-  i18n.translate('xpack.alertzero.watches.relativeTime.minutesAgo', {
-    defaultMessage: '{minutes}m ago',
-    values: { minutes },
-  });
-
-export const hoursAgoLabel = (hours: number) =>
-  i18n.translate('xpack.alertzero.watches.relativeTime.hoursAgo', {
-    defaultMessage: '{hours}h ago',
-    values: { hours },
-  });
-
-export const daysAgoLabel = (days: number) =>
-  i18n.translate('xpack.alertzero.watches.relativeTime.daysAgo', {
-    defaultMessage: '{days}d ago',
-    values: { days },
-  });
-
-export const RUN_STATE_PAUSED = i18n.translate('xpack.alertzero.watches.runState.paused', {
-  defaultMessage: 'Paused',
-});
-
-export const RUN_STATE_UNAVAILABLE = i18n.translate(
-  'xpack.alertzero.watches.runState.unavailable',
-  {
-    defaultMessage: 'Unavailable',
-  }
-);
-
-export const NOT_RUN_YET = i18n.translate('xpack.alertzero.watches.notRunYet', {
-  defaultMessage: 'Never run',
-});

@@ -17,13 +17,20 @@ export { getRuleChangesHistoryApiService } from './rule_changes_history_service'
 export type { RuleSavedObjectService } from './rule_saved_object_service';
 export { getRuleSavedObjectService } from './rule_saved_object_service';
 
+export type { ActionPolicySavedObjectService } from './action_policy_saved_object_service';
+export { getActionPolicySavedObjectService } from './action_policy_saved_object_service';
+
 export type { RuleTemplatesApiService, SeedRuleTemplateParams } from './rule_templates_api_service';
 export { getRuleTemplatesApiService } from './rule_templates_api_service';
 
 export type { RuleEventsApiService } from './rule_events_api_service';
 export { getRuleEventsApiService } from './rule_events_api_service';
 
-export type { RuleExecutionsApiService } from './rule_executions_api_service';
+export type {
+  ReportedRun,
+  ReportedRunStatus,
+  RuleExecutionsApiService,
+} from './rule_executions_api_service';
 export { getRuleExecutionsApiService } from './rule_executions_api_service';
 
 export type { AlertActionsEventsService, AlertActionsFilter } from './alert_actions_events_service';
@@ -46,6 +53,9 @@ export { getDispatcherApiService } from './dispatcher_api_service';
 
 export type { TaskManagerService } from './task_manager_service';
 export { getTaskManagerService } from './task_manager_service';
+
+export type { AlertActionsCleanupService } from './alert_actions_cleanup_service';
+export { getAlertActionsCleanupService } from './alert_actions_cleanup_service';
 
 export type { TelemetryService } from './telemetry_service';
 export { getTelemetryService } from './telemetry_service';

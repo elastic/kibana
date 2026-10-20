@@ -1,5 +1,5 @@
 {
-  "sha1": "4fee04a41c2367d9c02fc70592ea04a5cc3dc085",
+  "sha1": "e902f84e1bf6de7365e5936bec5a8c4b2cda98da",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -92,8 +92,22 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/create_monitor.spec.ts",
-        "line": 44,
+        "line": 46,
         "column": 25
+      }
+    },
+    {
+      "id": "219ae9c20262242-4178b6dbdd9b735",
+      "title": "AddNewMonitorsUI hydrates default kerberos/ntlm when omitted from the request",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/create_monitor.spec.ts",
+        "line": 53,
+        "column": 57
       }
     },
     {
@@ -106,8 +120,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/create_monitor.spec.ts",
-        "line": 51,
-        "column": 57
+        "line": 78,
+        "column": 10
       }
     },
     {
@@ -708,7 +722,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 59,
+        "line": 57,
         "column": 31
       }
     },
@@ -722,7 +736,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 61,
+        "line": 59,
         "column": 7
       }
     },
@@ -736,7 +750,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 64,
+        "line": 62,
         "column": 89
       }
     },
@@ -750,7 +764,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 68,
+        "line": 66,
         "column": 61
       }
     },
@@ -764,7 +778,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 71,
+        "line": 69,
         "column": 77
       }
     },
@@ -778,7 +792,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/monitor_validation.spec.ts",
-        "line": 75,
+        "line": 73,
         "column": 13
       }
     },
@@ -1087,8 +1101,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
-        "line": 143,
-        "column": 12
+        "line": 135,
+        "column": 5
       }
     },
     {
@@ -1100,8 +1114,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/synthetics/test/scout/monitor_crud/api/tests/synthetics_api_security.spec.ts",
-        "line": 161,
-        "column": 17
+        "line": 148,
+        "column": 25
       }
     },
     {
