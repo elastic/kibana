@@ -234,7 +234,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('using aggregations', () => {
-      it('should return 200 with valid response for a valid aggregation', async () =>
+      it('should return a 400 because aggregations are not supported on the HTTP _find route', async () =>
         await supertest
           .get(
             `/s/${SPACE_ID}/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
@@ -244,64 +244,13 @@ export default function ({ getService }: FtrProviderContext) {
             )}`
           )
           .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .expect(200)
-          .then((resp) => {
-            expect(resp.body).to.eql({
-              aggregations: {
-                type_count: {
-                  value: 1,
-                },
-              },
-              page: 1,
-              per_page: 0,
-              saved_objects: [],
-              total: 1,
-            });
-          }));
-
-      it('should return a 400 when referencing an invalid SO attribute', async () =>
-        await supertest
-          .get(
-            `/s/${SPACE_ID}/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
-              JSON.stringify({
-                type_count: { max: { field: 'dashboard.attributes.version' } },
-              })
-            )}`
-          )
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .expect(400)
           .then((resp) => {
-            expect(resp.body).to.eql({
-              error: 'Bad Request',
-              message:
-                'Invalid aggregation: [type_count.max.field] Invalid attribute path: dashboard.attributes.version: Bad Request',
-              statusCode: 400,
-            });
-          }));
-
-      it('should return a 400 when using a forbidden aggregation option', async () =>
-        await supertest
-          .get(
-            `/s/${SPACE_ID}/api/saved_objects/_find?type=visualization&per_page=0&aggs=${encodeURIComponent(
-              JSON.stringify({
-                type_count: {
-                  max: {
-                    field: 'visualization.attributes.version',
-                    script: 'Bad script is bad',
-                  },
-                },
-              })
-            )}`
-          )
-          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-          .expect(400)
-          .then((resp) => {
-            expect(resp.body).to.eql({
-              error: 'Bad Request',
-              message:
-                "Invalid aggregation: [type_count.max.script]: Additional properties are not allowed ('script' was unexpected): Bad Request",
-              statusCode: 400,
-            });
+            expect(resp.body.error).to.be('Bad Request');
+            expect(resp.body.statusCode).to.be(400);
+            expect(resp.body.message).to.contain(
+              "Additional properties are not allowed ('aggs' was unexpected)"
+            );
           }));
     });
 
