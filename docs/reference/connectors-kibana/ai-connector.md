@@ -25,6 +25,11 @@ The AI Connector uses the [Inference API](docs-content://explore-analyze/elastic
 
 ## Set up an AI connector
 
+```{applies_to}
+stack: preview 9.2-9.4, deprecated =9.5, removed 9.6+
+serverless: unavailable
+```
+
 1. Use the [global search field](docs-content://explore-analyze/find-and-organize/find-apps-and-objects.md) to find the **Connectors** page.
 2. Click **+ Create connector**. Select **AI Connector**.
 3. Name your connector and select which LLM service to use. 
