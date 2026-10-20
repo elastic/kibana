@@ -104,6 +104,7 @@ const basicConfigFields = {
     },
   ],
   extractObservables: true,
+  workflowTags: [],
 };
 
 const createConfigUpdateParams = (connector?: CaseConnector): Partial<ConfigurationAttributes> => ({
@@ -302,6 +303,7 @@ describe('CaseConfigureService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
+            "workflowTags": Array [],
           }
         `);
       });
@@ -655,6 +657,7 @@ describe('CaseConfigureService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
+            "workflowTags": Array [],
           }
         `);
       });

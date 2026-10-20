@@ -8,6 +8,7 @@
 import { Subject, ReplaySubject } from 'rxjs';
 import { ChatEventType, SELF_AGENT_ID, SubagentMode } from '@kbn/agent-builder-common';
 import type {
+  AgentApprovals,
   AutoApprovedApi,
   ChatEvent,
   ConversationRound,
@@ -268,6 +269,91 @@ describe('createSubagentTool', () => {
     await callHandler(tool, { description: 'test', prompt: 'Do something' }, context);
 
     expect(modelProvider.selectModel).toHaveBeenCalledWith({ effortLevel: 'medium' });
+  });
+
+  describe('when the sub-agent declares its own inference feature', () => {
+    const allowedSubagents = [
+      { id: 'solution-agent', description: 'Solution.', inferenceFeatureId: 'my_feature' },
+    ];
+
+    const completedEvents$ = () => {
+      const events$ = new ReplaySubject<ChatEvent>();
+      events$.next({ type: ChatEventType.roundComplete, data: { round: mockRound } } as ChatEvent);
+      events$.complete();
+      return events$.asObservable();
+    };
+
+    it('runs a one-shot sub-agent without passing the parent model', async () => {
+      const executeSubAgent = jest
+        .fn()
+        .mockResolvedValue({ executionId: 'sub-exec-id', events$: completedEvents$() });
+      const tool = createSubagentTool({
+        ownerAgentId: 'owner-agent',
+        allowedSubagents,
+        executionId: 'parent-exec-id',
+        subAgentExecutor: {
+          executeSubAgent,
+          getExecution: jest.fn(),
+          createSubAgent: jest.fn(),
+          sendToSubAgent: jest.fn(),
+        },
+      });
+
+      const { context, modelProvider } = createMockContext();
+      await callHandler(
+        tool,
+        {
+          agent_id: 'solution-agent',
+          description: 'test',
+          prompt: 'Do something',
+          effort: EffortLevels.low,
+        },
+        context
+      );
+
+      expect(modelProvider.selectModel).not.toHaveBeenCalled();
+      expect(executeSubAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ agentId: 'solution-agent', connectorId: undefined })
+      );
+    });
+
+    it('creates a persistent sub-agent without passing the parent model', async () => {
+      const createSubAgent = jest
+        .fn()
+        .mockResolvedValue({ executionId: 'child-exec', events$: completedEvents$() });
+      const tool = createSubagentTool({
+        ownerAgentId: 'owner-agent',
+        allowedSubagents,
+        executionId: 'parent-exec-id',
+        subAgentExecutor: {
+          executeSubAgent: jest.fn(),
+          getExecution: jest.fn(),
+          createSubAgent,
+          sendToSubAgent: jest.fn(),
+        },
+        parentConversationId: 'parent-convo',
+        subagentTracker: new SubagentTracker(),
+        conversationExists: jest.fn().mockResolvedValue(false),
+      });
+
+      const { context, modelProvider } = createMockContext();
+      await callHandler(
+        tool,
+        {
+          agent_id: 'solution-agent',
+          description: 'test',
+          prompt: 'Do something',
+          mode: SubagentMode.persistent,
+          name: 'solver',
+        },
+        context
+      );
+
+      expect(modelProvider.selectModel).not.toHaveBeenCalled();
+      expect(createSubAgent).toHaveBeenCalledWith(
+        expect.objectContaining({ agentId: 'solution-agent', connectorId: undefined })
+      );
+    });
   });
 
   it('returns execution_id immediately when run_in_background is true', async () => {
@@ -783,6 +869,7 @@ describe('createSubagentTool', () => {
       parentConversationId,
       childConversationExists = false,
       allowSelf = false,
+      subagentApprovals,
     }: {
       executeSubAgent?: jest.Mock;
       createSubAgent?: jest.Mock;
@@ -790,12 +877,13 @@ describe('createSubagentTool', () => {
       parentConversationId?: string;
       childConversationExists?: boolean;
       allowSelf?: boolean;
+      subagentApprovals?: AgentApprovals;
     } = {}) =>
       createSubagentTool({
         ownerAgentId: 'test-agent',
         allowedSubagents: allowSelf
           ? [{ id: SELF_AGENT_ID, description: 'Self.' }]
-          : [{ id: 'test-agent', description: 'Test.' }],
+          : [{ id: 'test-agent', description: 'Test.', approvals: subagentApprovals }],
         executionId: 'parent-exec-id',
         subAgentExecutor: {
           executeSubAgent,
@@ -1088,6 +1176,53 @@ describe('createSubagentTool', () => {
       );
     });
 
+    it("skips the prompt for APIs the sub-agent's own defaults already cover", async () => {
+      const executeSubAgent = jest
+        .fn()
+        .mockResolvedValue({ executionId: 'sub-exec-id', events$: completedEvents$() });
+      const tool = createTool({
+        executeSubAgent,
+        subagentApprovals: { auto_approved_apis: { elasticsearch: ['indices.*'] } },
+      });
+      const { context, prompts } = createMockContext();
+
+      const result = await callHandler(
+        tool,
+        {
+          description: 'x',
+          prompt: 'y',
+          auto_approved_apis: { elasticsearch: ['indices.delete'] },
+        },
+        context
+      );
+
+      expect(prompts.checkConfirmationStatus).not.toHaveBeenCalled();
+      expect(prompts.askForConfirmation).not.toHaveBeenCalled();
+      expect(executeSubAgent).toHaveBeenCalledWith(
+        expect.not.objectContaining({ autoApprovedApis: expect.anything() })
+      );
+      expect(result.results[0].data).toEqual(
+        expect.objectContaining({ destructive_access: 'granted' })
+      );
+    });
+
+    it("prompts only for the APIs the sub-agent's own defaults do not cover", async () => {
+      const tool = createTool({
+        subagentApprovals: { auto_approved_apis: { elasticsearch: ['indices.delete'] } },
+      });
+      const { context, prompts } = createMockContext();
+
+      await callHandler(
+        tool,
+        { description: 'x', prompt: 'y', auto_approved_apis: requestedApis },
+        context
+      );
+
+      const { message } = prompts.askForConfirmation.mock.calls[0][0];
+      expect(message).toContain('Kibana: `alerting.delete-alerting-rule-id`');
+      expect(message).not.toContain('`indices.delete`');
+    });
+
     it('rejects an API identifier that exists on neither backend, without prompting', async () => {
       const executeSubAgent = jest.fn();
       const tool = createTool({ executeSubAgent });
@@ -1159,6 +1294,85 @@ describe('createSubagentTool', () => {
         expect.not.objectContaining({ autoApprovedApis: expect.anything() })
       );
       expect(result.results[0].data).not.toHaveProperty('destructive_access');
+    });
+  });
+
+  describe('transient-only mode', () => {
+    const createTransientOnlyTool = () => {
+      const executeSubAgent = jest.fn();
+      const createSubAgent = jest.fn();
+      const tool = createSubagentTool({
+        ownerAgentId: 'test-agent',
+        allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
+        executionId: 'parent-exec-id',
+        subAgentExecutor: {
+          executeSubAgent,
+          getExecution: jest.fn(),
+          createSubAgent,
+          sendToSubAgent: jest.fn(),
+        },
+        abortSignal: new AbortController().signal,
+        parentConversationId: 'conversation-1',
+        subagentTracker: new SubagentTracker(),
+        transientOnly: true,
+      });
+      return { tool, executeSubAgent, createSubAgent };
+    };
+
+    it('refuses a persistent sub-agent without creating a child conversation', async () => {
+      const { tool, createSubAgent } = createTransientOnlyTool();
+      const { context } = createMockContext();
+
+      const result = await callHandler(
+        tool,
+        { description: 'task', prompt: 'Do it', mode: SubagentMode.persistent, name: 'researcher' },
+        context
+      );
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect(createSubAgent).not.toHaveBeenCalled();
+    });
+
+    it('refuses a background sub-agent', async () => {
+      const { tool, executeSubAgent } = createTransientOnlyTool();
+      const { context } = createMockContext();
+
+      const result = await callHandler(
+        tool,
+        { description: 'task', prompt: 'Do it', run_in_background: true },
+        context
+      );
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
+      expect(executeSubAgent).not.toHaveBeenCalled();
+    });
+
+    it('describes only transient foreground sub-agents', () => {
+      const { tool } = createTransientOnlyTool();
+      expect(tool.description).not.toContain('## Persistent sub-agents');
+      expect(tool.description).not.toContain('## Running agents in the background');
+      expect(tool.description).not.toContain('send_message');
+      expect(tool.description).toContain('only transient, foreground sub-agents');
+      expect(tool.description).toContain(
+        'Persistent sub-agents listed in the conversation history cannot be reached from this execution.'
+      );
+    });
+
+    it('keeps the full description by default', () => {
+      const tool = createSubagentTool({
+        ownerAgentId: 'test-agent',
+        allowedSubagents: [{ id: 'test-agent', description: 'Test.' }],
+        executionId: 'parent-exec-id',
+        subAgentExecutor: {
+          executeSubAgent: jest.fn(),
+          getExecution: jest.fn(),
+          createSubAgent: jest.fn(),
+          sendToSubAgent: jest.fn(),
+        },
+      });
+      expect(tool.description).toContain('## Persistent sub-agents');
+      expect(tool.description).toContain('## Running agents in the background');
+      expect(tool.description).not.toContain('only transient, foreground sub-agents');
     });
   });
 });

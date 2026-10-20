@@ -7,6 +7,7 @@
 
 import { expect } from '@kbn/scout/ui';
 import { RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
+import { trackCreateRuleRequests } from '../../../common/track_create_rule_requests';
 import { buildCreateRuleData, test } from '../fixtures';
 
 // Importing @kbn/alerting-v2-rule-form transitively pulls in monaco-editor CSS,
@@ -54,10 +55,11 @@ const TWO_DATE_FIELDS_RULE_NAME = 'scout-compose-discover-two-date-fields';
 
 test.describe(
   'ComposeDiscoverFlyout — create and edit flows',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
-    test.beforeAll(async ({ esClient, apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+    const createdRuleIds: string[] = [];
+
+    test.beforeAll(async ({ esClient }) => {
       await esClient.indices.create(
         {
           index: TEST_INDEX,
@@ -124,7 +126,9 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+      for (const id of createdRuleIds) {
+        await apiServices.alertingV2.rules.delete(id);
+      }
       await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
       await esClient.indices.delete({ index: TIMESTAMP_ONLY_INDEX }, { ignore: [404] });
       await esClient.indices.delete({ index: TWO_DATE_FIELDS_INDEX }, { ignore: [404] });
@@ -135,6 +139,8 @@ test.describe(
       pageObjects,
       apiServices,
     }) => {
+      const { createRequestUrls, installRequestUrls } = trackCreateRuleRequests(page);
+
       await test.step('open ComposeDiscoverFlyout via empty-state card', async () => {
         await pageObjects.composeDiscover.openCreateFlyout();
         await expect(pageObjects.composeDiscover.flyout).toBeVisible();
@@ -196,7 +202,7 @@ test.describe(
         await expect(pageObjects.composeDiscover.submitButton).toBeVisible();
       });
 
-      await test.step('submit and verify rule created', async () => {
+      await test.step('submit and capture rule for teardown', async () => {
         await pageObjects.composeDiscover.clickSubmit();
         await expect(pageObjects.composeDiscover.flyout).toBeHidden({ timeout: 30_000 });
 
@@ -206,14 +212,31 @@ test.describe(
               const { items } = await apiServices.alertingV2.rules.find({
                 search: RULE_NAME,
               });
-              return items[0]?.artifacts?.some(
-                (artifact) =>
-                  artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.data?.content === RUNBOOK_TEXT
-              );
+              if (items[0]?.id && !createdRuleIds.includes(items[0].id)) {
+                createdRuleIds.push(items[0].id);
+              }
+              return items.length;
             },
             { timeout: 30_000 }
           )
-          .toBe(true);
+          .toBeGreaterThanOrEqual(1);
+      });
+
+      await test.step('the persisted rule includes the runbook artifact', async () => {
+        const { items } = await apiServices.alertingV2.rules.find({ search: RULE_NAME });
+        expect(
+          items[0]?.artifacts?.some(
+            (artifact) =>
+              artifact.type === RUNBOOK_ARTIFACT_TYPE && artifact.data?.content === RUNBOOK_TEXT
+          )
+        ).toBe(true);
+      });
+
+      await test.step('the rule was created through the create API, not the rule template API', async () => {
+        const { items } = await apiServices.alertingV2.rules.find({ search: RULE_NAME });
+        expect(items[0]?.metadata.template).toBeUndefined();
+        expect(createRequestUrls).toHaveLength(1);
+        expect(installRequestUrls).toHaveLength(0);
       });
     });
 
@@ -242,6 +265,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('refresh the rules list', async () => {
@@ -299,6 +323,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('refresh the rules list', async () => {
@@ -358,6 +383,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('refresh the rules list and open the edit flyout', async () => {
@@ -411,6 +437,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
       });
 
       await test.step('refresh the rules list and open the edit flyout', async () => {
@@ -444,6 +471,7 @@ test.describe(
           })
         );
         ruleId = rule.id;
+        createdRuleIds.push(ruleId);
         expect(rule.metadata.tags).toStrictEqual(['prod', 'infra']);
       });
 
@@ -456,13 +484,13 @@ test.describe(
       });
 
       await test.step('remove the tags block from the YAML buffer', async () => {
-        const yaml = await pageObjects.composeDiscover.getYamlEditorValue();
+        const yaml = await pageObjects.composeDiscover.getYamlText();
         expect(yaml).toContain('tags:');
         // `tags` is serialized last under `metadata` as a block sequence; drop the
         // `tags:` line and its indented `- item` lines. The next key is top-level.
         const withoutTags = yaml.replace(/\n[ \t]*tags:[^\n]*(\n[ \t]+-[^\n]*)*/, '');
         expect(withoutTags).not.toContain('tags:');
-        await pageObjects.composeDiscover.setYamlEditorValue(withoutTags);
+        await pageObjects.composeDiscover.setYamlText(withoutTags);
       });
 
       await test.step('save via YAML and verify the rule has no tags', async () => {
@@ -521,11 +549,21 @@ test.describe(
               const { items } = await apiServices.alertingV2.rules.find({
                 search: TWO_DATE_FIELDS_RULE_NAME,
               });
+              if (items[0]?.id && !createdRuleIds.includes(items[0].id)) {
+                createdRuleIds.push(items[0].id);
+              }
               return items[0]?.time_field;
             },
             { timeout: 30_000 }
           )
           .toBe('event.ingested');
+      });
+
+      await test.step('the created rule does not record a rule template', async () => {
+        const { items } = await apiServices.alertingV2.rules.find({
+          search: TWO_DATE_FIELDS_RULE_NAME,
+        });
+        expect(items[0]?.metadata.template).toBeUndefined();
       });
     });
 
@@ -565,11 +603,21 @@ test.describe(
               const { items } = await apiServices.alertingV2.rules.find({
                 search: CREATE_SIGNAL_TIMESTAMP_RULE_NAME,
               });
+              if (items[0]?.id && !createdRuleIds.includes(items[0].id)) {
+                createdRuleIds.push(items[0].id);
+              }
               return items[0]?.time_field;
             },
             { timeout: 30_000 }
           )
           .toBe('timestamp');
+      });
+
+      await test.step('the created rule does not record a rule template', async () => {
+        const { items } = await apiServices.alertingV2.rules.find({
+          search: CREATE_SIGNAL_TIMESTAMP_RULE_NAME,
+        });
+        expect(items[0]?.metadata.template).toBeUndefined();
       });
     });
 

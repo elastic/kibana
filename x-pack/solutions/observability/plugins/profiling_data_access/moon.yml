@@ -27,6 +27,7 @@ dependsOn:
   - '@kbn/cloud-plugin'
   - '@kbn/observability-plugin'
   - '@kbn/core-spaces-common'
+  - '@kbn/config'
 tags:
   - plugin
   - prod
