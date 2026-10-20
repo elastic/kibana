@@ -42,9 +42,9 @@ describe('KiLifecycleStatusBadge', () => {
     expect(screen.getByTestId('kiStatus')).toHaveTextContent('deleted');
   });
 
-  it('renders verification failed when lifecycle is verification_failed', () => {
+  it('renders failed when lifecycle is verification_failed', () => {
     renderBadge({ lifecycleStatus: 'verification_failed', 'data-test-subj': 'kiStatus' });
-    expect(screen.getByTestId('kiStatus')).toHaveTextContent('verification failed');
+    expect(screen.getByTestId('kiStatus')).toHaveTextContent('failed');
   });
 
   it('renders expired when expires_at is in the past', () => {

@@ -29,6 +29,7 @@ export const KiLifecycleStatusBadge = ({
       color={KI_STATUS_BADGE_COLOR[status]}
       data-test-subj={dataTestSubj}
       css={kiLabelCapitalizeCss}
+      title={status === 'verification_failed' ? 'Verification failed' : undefined}
     >
       {KI_STATUS_LABEL[status]}
     </EuiBadge>

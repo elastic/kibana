@@ -59,7 +59,7 @@ describe('getViewKiHeaderBadges', () => {
 
     expect(badgeTestSubjs(badges)).toEqual(['contextViewKiTypeBadge', STATUS_BADGE_TEST_SUBJ]);
     expect(statusBadge(badges)?.color).toBe('warning');
-    expect(statusBadge(badges)?.label).toBe('verification failed');
+    expect(statusBadge(badges)?.label).toBe('failed');
   });
 
   it('includes status badge when expires_at is in the past', () => {

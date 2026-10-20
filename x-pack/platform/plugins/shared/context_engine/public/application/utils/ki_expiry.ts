@@ -19,7 +19,7 @@ export const KI_STATUS_BADGE_COLOR: Record<KiStatus, 'success' | 'danger' | 'war
 export const KI_STATUS_LABEL: Record<KiStatus, string> = {
   active: 'active',
   deleted: 'deleted',
-  verification_failed: 'verification failed',
+  verification_failed: 'failed',
   expired: 'expired',
 };
 
