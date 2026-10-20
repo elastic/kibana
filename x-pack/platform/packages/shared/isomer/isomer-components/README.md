@@ -26,7 +26,7 @@ Kibana's [Isomer](https://github.com/elastic/isomer) pack of content and layout 
 
 React and HTML are styled with [`@kbn/isomer-theme`](../isomer-theme): each primitive has a style module on Borealis tokens, and the pack's `styleAdapter` emits the CSS a render uses under the `.isomer` root, in light and dark. Rendered through `createKibanaIsomerRuntime`, React output is styled with no further setup.
 
-Every primitive declares `metrics.snapshotHeight`, its estimated height in `kibanaCardFrame`, through `snapshotMetrics` in `src/lib/snapshot_height.ts`: text wrapped at the card's width, plus the larger of its vertical margins. These are estimates calibrated against takumi, the renderer Studio draws PNGs with, and lean tall; they go once Isomer measures content (elastic/isomer#256).
+Every primitive declares `metrics.snapshotHeight`, its estimated height in `kibanaCardFrame`, through `snapshotMetrics` in `src/lib/snapshot_height.ts`: text wrapped at the card's width, plus the larger of its vertical margins. A `section` sizes its body through the heights the others register. These are estimates calibrated against takumi, the renderer Studio draws PNGs with, and lean tall; they go once Isomer measures content (elastic/isomer#256).
 
 Each primitive is a folder under `src/primitives/`, registered in `src/pack.ts`. `src/pack.test.ts` checks that registration and runs conformance for every example on every surface.
 
