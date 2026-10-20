@@ -8,7 +8,16 @@
  */
 
 import { applyConfigOverrides } from './serve';
-import { KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
+import { CA_CERT_PATH, KBN_CERT_PATH, KBN_KEY_PATH, kibanaDevServiceAccount } from '@kbn/dev-utils';
+
+const devServerConfig = {
+  ssl: {
+    enabled: true,
+    certificate: KBN_CERT_PATH,
+    key: KBN_KEY_PATH,
+    certificateAuthorities: CA_CERT_PATH,
+  },
+};
 
 describe('applyConfigOverrides', () => {
   it('merges empty objects to an empty config', () => {
@@ -93,6 +102,7 @@ describe('applyConfigOverrides', () => {
       },
       mockIdpPlugin: { uiam: { enabled: true } },
       plugins: { paths: [] },
+      server: devServerConfig,
       xpack: {
         cloud: {
           id: 'local-dev:ZG9ja2VyLmludGVybmFsOjkyMDAkaG9zdDo5MjAwJGtpYmFuYTo5MjAw',
@@ -138,6 +148,7 @@ describe('applyConfigOverrides', () => {
         password: 'changeme',
       },
       plugins: { paths: [] },
+      server: devServerConfig,
       xpack: {
         security: {
           authc: {
@@ -168,6 +179,7 @@ describe('applyConfigOverrides', () => {
         ssl: { certificateAuthorities: expect.stringContaining('ca.crt') },
       },
       plugins: { paths: [] },
+      server: devServerConfig,
       xpack: {
         security: {
           authc: {

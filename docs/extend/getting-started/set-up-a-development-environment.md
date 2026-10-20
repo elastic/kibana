@@ -58,7 +58,7 @@ In another terminal tab/window you can start Kibana.
 pnpm start
 ```
 
-Include developer [examples](https://github.com/elastic/kibana/tree/main/examples) by adding an optional `--run-examples` flag. You will find the development server running on (http://localhost:5601) - and you can log in with the `elastic:changeme` credential pair.
+Include developer [examples](https://github.com/elastic/kibana/tree/main/examples) by adding an optional `--run-examples` flag. You will find the development server running on (https://localhost:5601) - and you can log in with the `elastic:changeme` credential pair. Development mode uses HTTP/2 with TLS by default, including the base path proxy.
 
 ### Customizing `config/kibana.dev.yml`
 
@@ -66,9 +66,40 @@ The `config/kibana.yml` file stores user configuration directives. Since this fi
 
 To run Kibana with an alternate yml file entirely, use the `--config` option: `pnpm start --config=config/my_config.yml`
 
-### SSL
+### HTTPS and certificates
 
-{{kib}} includes self-signed certificates that can be used for development purposes in the browser and for communicating with {{es}}: `pnpm start --ssl` & `pnpm es snapshot --ssl`.
+`pnpm start` (or `node scripts/kibana --dev`) enables TLS using the bundled development certificate and key. You do not need to generate certificates or pass `--http2`. This default does not change the connection from {{kib}} to {{es}}. To enable TLS on that connection too, start both processes with `pnpm start --ssl` and `pnpm es snapshot --ssl`.
+
+The bundled certificate is signed by the development Certificate Authority (CA), which browsers do not trust by default. To avoid certificate warnings, import `src/platform/packages/shared/kbn-dev-utils/certs/ca.crt` into the trust store used by your browser:
+
+* **macOS:** Open the CA certificate in Keychain Access, add it to your login keychain, and configure its trust settings to trust it for Secure Sockets Layer (SSL).
+* **Windows:** Import the CA certificate into the current user's **Trusted Root Certification Authorities** store.
+* **Linux:** Import the CA certificate through your browser's certificate settings, or the system trust store if your browser uses it.
+* **Firefox:** If Firefox does not use your operating system's trust store, import the CA under **Settings → Privacy & Security → Certificates → View Certificates → Authorities**, and enable trust for identifying websites.
+
+Restart the browser if it does not immediately recognize the imported CA. Use `https://localhost:5601`: the bundled certificate does not cover the IP addresses `127.0.0.1` or `::1`. Trusting the CA does not fix a hostname mismatch.
+
+:::{warning}
+The bundled certificates and private keys are shared development fixtures. Only trust the development CA in a development environment, and never use these credentials in production. Starting {{kib}} does not install certificates into your trust store.
+:::
+
+Command-line clients can trust the CA for a single invocation without changing the system trust store:
+
+```sh
+curl --cacert src/platform/packages/shared/kbn-dev-utils/certs/ca.crt https://localhost:5601/
+NODE_EXTRA_CA_CERTS=src/platform/packages/shared/kbn-dev-utils/certs/ca.crt node your_script.js
+```
+
+To use your own certificate (for example, one generated with `mkcert`), configure it in `config/kibana.dev.yml`. Custom PEM certificates and PKCS#12 keystores take precedence over the bundled credentials:
+
+```yaml
+server.ssl.certificate: /absolute/path/to/localhost.crt
+server.ssl.key: /absolute/path/to/localhost.key
+```
+
+To use HTTP/1 without TLS, run `pnpm start --no-ssl`, or set `server.ssl.enabled: false` in `config/kibana.dev.yml`. To keep TLS but use HTTP/1, run `pnpm start --server.protocol=http1`, or set `server.protocol: http1`. The `--http2` flag remains available to explicitly enable HTTP/2 with TLS; it cannot be combined with `--no-ssl`.
+
+To verify the protocol, open your browser's developer tools, enable the **Protocol** column in the **Network** tab, and reload {{kib}}. Requests to {{kib}} should use `h2`.
 
 ### Base path
 
@@ -115,14 +146,14 @@ pnpm start --mockIdpPlugin.enabled=false --no-base-path
 **Custom base path** — both SAML and basic login are supported; SAML is the default.
 
 ```sh
-pnpm es snapshot --kibanaUrl http://localhost:5601/your_path
+pnpm es snapshot --kibanaUrl https://localhost:5601/your_path
 pnpm start --server.basePath=/your_path
 ```
 
 **No base path with SAML** — both SAML and basic login are supported; SAML is the default:
 
 ```sh
-pnpm es snapshot --kibanaUrl http://localhost:5601
+pnpm es snapshot --kibanaUrl https://localhost:5601
 pnpm start --no-base-path
 ```
 
