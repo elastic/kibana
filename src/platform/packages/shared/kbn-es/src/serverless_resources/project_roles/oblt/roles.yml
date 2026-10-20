@@ -154,6 +154,32 @@ _nightshift_agent:
       resources: ['*']
   run_as: []
 
+# Predefined role for the Nightshift detection service account, defined in elasticsearch-controller
+_nightshift_detection:
+  description: 'Privileges for the service account of the Nightshift detection engines. Assigned by Kibana; do not assign to users.'
+  metadata:
+    _public: true
+    _reserved: true
+  cluster:
+    - 'monitor_inference'
+    - 'read_project_routing'
+  indices:
+    - names: ['.significant_events-detections']
+      privileges: ['read', 'view_index_metadata']
+      allow_restricted_indices: false
+    - names: ['$.nightshift.sources.*']
+      privileges: ['read', 'read_view_metadata']
+      allow_restricted_indices: false
+  applications:
+    - application: 'kibana-.kibana'
+      privileges:
+        - 'feature_nightshift.all'
+        - 'feature_alerting_v2_rules.all'
+        - 'feature_agentBuilder.read'
+        - 'feature_actions.read'
+      resources: ['*']
+  run_as: []
+
 # temporarily added for testing purpose
 system_indices_superuser:
   cluster: ['all']
