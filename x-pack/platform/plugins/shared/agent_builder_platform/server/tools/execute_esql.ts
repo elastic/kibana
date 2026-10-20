@@ -17,6 +17,7 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { resolveTimeRange } from './screen_context_utils';
+import { includeFrozenSchema } from './include_frozen_schema';
 
 const executeEsqlToolSchema = z.object({
   query: z.string().describe('The ES|QL query to execute'),
@@ -40,6 +41,7 @@ const executeEsqlToolSchema = z.object({
     .optional()
     .default(100)
     .describe('(Optional) Can be set to limit the number of results to return. Defaults to 100.'),
+  include_frozen: includeFrozenSchema,
 });
 
 export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolSchema> => {
@@ -68,11 +70,18 @@ Note that this option can't be used to increase the number of results if the que
 
 ### Data tiers
 
-Indices on the frozen tier are always excluded, because querying them requires recovering searchable snapshots from object storage and can take several minutes.
-If results look incomplete for a time range that reaches far into the past, tell the user that frozen tier data was not searched.`,
+Indices on the frozen tier are excluded by default, because querying them requires recovering searchable snapshots from object storage and can take several minutes.
+Set \`include_frozen\` to true only when the user or your instructions explicitly ask for frozen tier data, and expect the query to be slow or to time out.
+If results look incomplete for a time range that reaches far into the past and \`include_frozen\` was not set, tell the user that frozen tier data was not searched.`,
     schema: executeEsqlToolSchema,
     handler: async (
-      { query: esqlQuery, params: esqlParams = {}, time_range: explicitTimeRange, limit = 100 },
+      {
+        query: esqlQuery,
+        params: esqlParams = {},
+        time_range: explicitTimeRange,
+        limit = 100,
+        include_frozen: includeFrozen = false,
+      },
       { esClient, attachments }
     ) => {
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
@@ -89,6 +98,7 @@ If results look incomplete for a time range that reaches far into the past, tell
         params,
         esClient: esClient.asCurrentUser,
         limit,
+        includeFrozen,
       });
 
       // need the interpolated query to return in the results / to display in the UI

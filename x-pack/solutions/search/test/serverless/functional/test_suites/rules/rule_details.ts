@@ -40,16 +40,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const openRulesSection = async () => {
     await svlSearchNavigation.navigateToLandingPage();
 
-    await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
+    // openPanel waits for the admin panel to be rendered before we click a link inside it;
+    // clicking the panel link while the panel is still animating in collapses it again.
+    await svlCommonNavigation.sidenav.openPanel('admin_and_settings');
     await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActions');
   };
 
   const navigateToConnectors = async () => {
     await svlSearchNavigation.navigateToLandingPage();
 
-    await svlCommonNavigation.sidenav.clickLink({ navId: 'admin_and_settings' });
+    await svlCommonNavigation.sidenav.openPanel('admin_and_settings');
     await svlCommonNavigation.sidenav.clickPanelLink('management:triggersActionsConnectors');
-    // await testSubjects.click('app-card-triggersActionsConnectors');
   };
 
   const deleteConnector = async (connectorName: string) => {
@@ -357,8 +358,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/259893
-    describe.skip('Edit rule with deleted connector', () => {
+    describe('Edit rule with deleted connector', () => {
       const RULE_TYPE_ID = '.es-query';
 
       afterEach(async () => {

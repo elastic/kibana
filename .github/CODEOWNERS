@@ -3713,12 +3713,6 @@ x-pack/solutions/observability/plugins/synthetics/server/saved_objects/synthetic
 /.github/workflows/deploy-my-kibana.yml   @elastic/observablt-robots @elastic/kibana-operations
 /.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots @elastic/kibana-operations
 
-# Appex QA to own auto-generated scout metadata
-/**/scout/.meta/**
-/**/scout/*/.meta/**
-/**/scout_*/.meta/**
-/**/scout_*/*/.meta/**
-
 # Macroscope Check Run Agents
 /.macroscope/backport-review.md @elastic/appex-qa
 /.macroscope/scout-review.md @elastic/appex-qa
@@ -3829,6 +3823,12 @@ pnpm-workspace.yaml @elastic/kibana-operations
 .pnpmfile.cjs @elastic/kibana-operations
 
 /knip.jsonc @elastic/kibana-security
+
+# Auto-generated Scout test metadata has no owner so the automated update PRs are auto-approved.
+/**/scout/.meta/**
+/**/scout/*/.meta/**
+/**/scout_*/.meta/**
+/**/scout_*/*/.meta/**
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
