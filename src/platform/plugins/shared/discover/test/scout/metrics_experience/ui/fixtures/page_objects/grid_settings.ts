@@ -10,7 +10,7 @@
 import type { Locator, ScoutPage } from '@kbn/scout';
 
 export type SimpleAggregationOption = 'avg' | 'sum' | 'min' | 'max';
-export type HistogramPercentileOption = 'distribution' | 'p50' | 'p75' | 'p90' | 'p95' | 'p99';
+export type HistogramPercentileOption = 'p50' | 'p75' | 'p90' | 'p95' | 'p99';
 
 export interface GridSettings {
   readonly editButton: Locator;
