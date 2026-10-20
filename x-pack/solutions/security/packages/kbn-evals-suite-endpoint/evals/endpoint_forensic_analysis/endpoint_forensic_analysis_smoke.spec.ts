@@ -11,12 +11,12 @@ import { evaluate } from '../../src/evaluate';
 import { waitForEndpointPackage } from '../../src/data_generators/endpoint_data';
 import { seedForensicTimeline } from '../../src/data_generators/forensic_data';
 import { cleanupForensicData } from '../../src/data_generators/cleanup';
+import { ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID } from '../../src/endpoint_forensic_tool_ids';
 
 const FORENSIC_ESQL_TRAJECTORY = [
   'platform.core.generate_esql',
   'platform.core.execute_esql',
 ] as const;
-const EXTRACT_IOCS_TOOL_ID = 'security.endpoint_forensic.extract_iocs' as const;
 
 evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.classic }, () => {
   evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
@@ -162,7 +162,7 @@ evaluate.describe('Endpoint Forensic Analysis — smoke', { tag: tags.stateful.c
                 'Reports Global\\AcmeRansom-7F3A as a mutex indicator without inventing mechanical mutex telemetry',
                 'Keeps registry keys and mutex in distinct structured or clearly labelled categories',
               ],
-              tool_sequence: [...FORENSIC_ESQL_TRAJECTORY, EXTRACT_IOCS_TOOL_ID],
+              tool_sequence: [...FORENSIC_ESQL_TRAJECTORY, ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID],
             },
             metadata: { golden_id: 'ef-013-registry-mutex-iocs', row_type: 'happy' },
           },

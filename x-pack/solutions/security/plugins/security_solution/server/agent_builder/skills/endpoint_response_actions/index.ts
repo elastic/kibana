@@ -71,13 +71,9 @@ from chat: say so and point the analyst to the Response Actions UI.
 2. **Write tools** — call directly; Agent Builder shows the confirmation card.
    Do not ask for chat confirmation first. If declined, report cancelled.
 
-3. **Report** — include the action ID whenever the tool returns one. If
-   \`queued: true\`, report that the action was dispatched and will execute when
-   the endpoint reconnects; do not call it completed. If \`noOp: true\`, report
-   that the endpoint was already in the requested isolation state and that no
-   response action was dispatched. For other pending actions, offer
-   \`get_response_action_status\` follow-up. See \`./reference\` for error codes
-   and best practices.
+3. **Report** — always include action ID, status, and output. For pending actions,
+   offer \`get_response_action_status\` follow-up. See \`./reference\` for error
+   codes and best practices.
 
 ## Guardrails
 
