@@ -956,6 +956,8 @@ describe('RulesClient', () => {
       // A disabled rule must never be re-armed by an unrelated property edit —
       // lifecycle transitions are owned exclusively by enableRule/disableRule.
       expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
+      // A stray task left behind by a failed disable is cleaned up.
+      expect(taskManager.removeIfExists).toHaveBeenCalledWith('task:fallback');
       // The stored (disabled) state is still persisted.
       expect(rulesSavedObjectService.update).toHaveBeenCalledWith({
         id: 'rule-id-disabled',
@@ -4825,6 +4827,147 @@ describe('RulesClient', () => {
         });
 
         expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('executor task ordering', () => {
+    const enabledDoc = { id: 'rule-id-1', attributes: baseSoAttrs, version: 'WzEsMV0=' };
+    const disabledDoc = { ...enabledDoc, attributes: { ...baseSoAttrs, enabled: false } };
+
+    const scheduleCallOrder = () => ensureRuleExecutorTaskScheduledMock.mock.invocationCallOrder[0];
+    const removeCallOrder = () => taskManager.removeIfExists.mock.invocationCallOrder[0];
+    const writeCallOrder = () => rulesSavedObjectService.update.mock.invocationCallOrder[0];
+
+    beforeEach(() => {
+      getRuleExecutorTaskIdMock.mockReturnValue('task:rule-id-1');
+    });
+
+    describe('disableRule', () => {
+      it('writes the saved object before removing the executor task', async () => {
+        const client = createClient();
+        rulesSavedObjectService.get.mockResolvedValueOnce(enabledDoc);
+
+        await client.disableRule({ id: 'rule-id-1' });
+
+        expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+          expect.objectContaining({ attrs: expect.objectContaining({ enabled: false }) })
+        );
+        expect(taskManager.removeIfExists).toHaveBeenCalledWith('task:rule-id-1');
+        expect(writeCallOrder()).toBeLessThan(removeCallOrder());
+      });
+
+      it('leaves the executor task untouched when the write fails', async () => {
+        const client = createClient();
+        rulesSavedObjectService.get.mockResolvedValueOnce(enabledDoc);
+        rulesSavedObjectService.update.mockRejectedValueOnce(
+          SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, 'rule-id-1')
+        );
+
+        await expect(client.disableRule({ id: 'rule-id-1' })).rejects.toMatchObject({
+          output: { statusCode: 409 },
+        });
+
+        expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+        expect(ruleEventPublisher.emitRuleDisabled).not.toHaveBeenCalled();
+      });
+
+      it('keeps the rule stored as disabled and still emits when the task removal fails', async () => {
+        const client = createClient();
+        rulesSavedObjectService.get.mockResolvedValueOnce(enabledDoc);
+        taskManager.removeIfExists.mockRejectedValueOnce(new Error('task manager unavailable'));
+
+        const rule = await client.disableRule({ id: 'rule-id-1' });
+
+        expect(rule.enabled).toBe(false);
+        expect(rulesSavedObjectService.update).toHaveBeenCalledTimes(1);
+        expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
+          expect.objectContaining({ attrs: expect.objectContaining({ enabled: false }) })
+        );
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.stringContaining('Failed to remove executor task for rule [rule-id-1]'),
+          expect.objectContaining({
+            labels: { code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT },
+          })
+        );
+        expect(ruleEventPublisher.emitRuleDisabled).toHaveBeenCalledWith(
+          { request, origin: 'user' },
+          [expect.objectContaining({ ruleId: 'rule-id-1', spaceId: 'space-1' })]
+        );
+      });
+    });
+
+    describe('enableRule', () => {
+      it('ensures the executor task before writing the saved object', async () => {
+        const client = createClient();
+        rulesSavedObjectService.get.mockResolvedValueOnce(disabledDoc);
+
+        await client.enableRule({ id: 'rule-id-1' });
+
+        expect(scheduleCallOrder()).toBeLessThan(writeCallOrder());
+        expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+      });
+
+      it('does not write the saved object when scheduling the task fails', async () => {
+        const client = createClient();
+        rulesSavedObjectService.get.mockResolvedValueOnce(disabledDoc);
+        ensureRuleExecutorTaskScheduledMock.mockRejectedValueOnce(
+          new Error('task manager unavailable')
+        );
+
+        await expect(client.enableRule({ id: 'rule-id-1' })).rejects.toThrow(
+          'task manager unavailable'
+        );
+
+        expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('updateRule', () => {
+      it('ensures the executor task before writing an enabled rule', async () => {
+        const client = createClient();
+        rulesSavedObjectService.get.mockResolvedValueOnce(enabledDoc);
+
+        await client.updateRule({ id: 'rule-id-1', data: { schedule: { every: '5m' } } });
+
+        expect(scheduleCallOrder()).toBeLessThan(writeCallOrder());
+        expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+      });
+
+      it('writes a disabled rule before removing a stray executor task', async () => {
+        const client = createClient();
+        rulesSavedObjectService.get.mockResolvedValueOnce(disabledDoc);
+
+        await client.updateRule({ id: 'rule-id-1', data: { schedule: { every: '5m' } } });
+
+        expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
+        expect(writeCallOrder()).toBeLessThan(removeCallOrder());
+      });
+    });
+
+    describe('upsertRule (replace)', () => {
+      it('ensures the executor task before writing an enabled rule', async () => {
+        const client = createClient();
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(enabledDoc)
+          .mockResolvedValueOnce(enabledDoc);
+
+        await client.upsertRule({ id: 'rule-id-1', data: baseCreateData });
+
+        expect(scheduleCallOrder()).toBeLessThan(writeCallOrder());
+        expect(taskManager.removeIfExists).not.toHaveBeenCalled();
+      });
+
+      it('writes a disabled rule before removing a stray executor task', async () => {
+        const client = createClient();
+        rulesSavedObjectService.get
+          .mockResolvedValueOnce(disabledDoc)
+          .mockResolvedValueOnce(disabledDoc);
+
+        await client.upsertRule({ id: 'rule-id-1', data: baseCreateData });
+
+        expect(ensureRuleExecutorTaskScheduledMock).not.toHaveBeenCalled();
+        expect(writeCallOrder()).toBeLessThan(removeCallOrder());
       });
     });
   });

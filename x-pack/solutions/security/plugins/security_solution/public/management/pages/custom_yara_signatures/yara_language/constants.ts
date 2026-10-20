@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-module.exports = {
-  rules: {
-    'import/no-default-export': 'off',
-  },
-};
+export const YARA_LANG_ID = 'yara';
+
+// The code editor defines language themes with the ID of the language.
+export const YARA_THEME_ID = YARA_LANG_ID;
