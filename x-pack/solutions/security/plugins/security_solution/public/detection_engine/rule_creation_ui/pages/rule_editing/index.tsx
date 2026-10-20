@@ -532,9 +532,13 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         disabled={tab.disabled}
         data-test-subj={tab['data-test-subj']}
       >
-        <EuiToolTip position="top" content={tab.tooltip}>
-          <span>{tab.name}</span>
-        </EuiToolTip>
+        {tab.tooltip !== undefined ? (
+          <EuiToolTip position="top" content={tab.tooltip}>
+            <span tabIndex={0}>{tab.name}</span>
+          </EuiToolTip>
+        ) : (
+          tab.name
+        )}
       </EuiTab>
     ));
   };
