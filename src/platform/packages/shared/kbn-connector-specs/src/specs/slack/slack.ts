@@ -1116,6 +1116,7 @@ export const Slack: ConnectorSpec = {
         const payload: Record<string, unknown> = {
           channel: typedInput.channel,
           text: typedInput.text,
+          ...(typedInput.blocks?.length ? { blocks: typedInput.blocks } : {}),
         };
 
         if (typedInput.threadTs) {
@@ -1170,7 +1171,7 @@ export const Slack: ConnectorSpec = {
       isTool: true,
       scope: 'destroy',
       description:
-        'Edit a message this app posted earlier, replacing its text (at most 4,000 characters). Identify it by channel and the ts that sendMessage returned (messageTs). The channel must be a conversation ID, not a name, except on the Elastic Slack app. This overwrites the existing message, and Slack removes any blocks it had, so a Block Kit or richly formatted message comes back as plain text. Confirm with the user before editing unless they have already made their intent explicit. To add to a conversation instead, use sendMessage.',
+        'Edit a message this app posted earlier, replacing its text (at most 4,000 characters). Identify it by channel and the ts that sendMessage returned (messageTs). The channel must be a conversation ID, not a name, except on the Elastic Slack app. This overwrites the existing message; without blocks, Slack removes any blocks it had, so a Block Kit or richly formatted message comes back as plain text. Confirm with the user before editing unless they have already made their intent explicit. To add to a conversation instead, use sendMessage.',
       input: SlackUpdateMessageInputSchema,
       handler: async (ctx, input) => {
         const typedInput: SlackUpdateMessageInput = SlackUpdateMessageInputSchema.parse(input);
@@ -1184,6 +1185,7 @@ export const Slack: ConnectorSpec = {
           channel: typedInput.channel,
           ts: typedInput.messageTs,
           text: typedInput.text,
+          ...(typedInput.blocks?.length ? { blocks: typedInput.blocks } : {}),
         };
 
         try {
@@ -1259,7 +1261,7 @@ export const Slack: ConnectorSpec = {
     'searchMessages requires a user token (EARS or OAuth). If this connector uses a bot token, searchMessages will fail — use getConversationHistory with a specific channel ID to read recent messages instead.',
     'To list Slack channels or answer which channels exist, use listChannels. When the response has hasMore true, call listChannels again with the nextCursor from the previous response until you have enough context.',
     'When sending to a channel whose name you know but whose ID you do not, call resolveChannelId to get the channel ID, then pass it to sendMessage.',
-    'sendMessage always posts a new message. To change a message this app already posted, call updateMessage with its channel ID and the ts sendMessage returned as messageTs; it overwrites the text (at most 4,000 characters) and removes any blocks, so confirm with the user first.',
+    'sendMessage always posts a new message. To change a message this app already posted, call updateMessage with its channel ID and the ts sendMessage returned as messageTs; it overwrites the text (at most 4,000 characters) and, unless new blocks are passed, removes any blocks, so confirm with the user first.',
     'Do not use resolveChannelId to discover channels—for example, do not use contains with a very short partial name to probe the workspace. Use listChannels for discovery instead.',
     'To read messages from a channel or DM, use getConversationHistory with a channel ID. Returns messages newest-first; pass nextCursor from the previous response (or use oldest/latest timestamps) to walk further back in time.',
     'getConversationInfo returns metadata (name, privacy, topic, purpose) for a single channel/DM by ID. Prefer it over listChannels when you already have the ID and only need that conversation’s details.',

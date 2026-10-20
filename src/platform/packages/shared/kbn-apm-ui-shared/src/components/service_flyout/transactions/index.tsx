@@ -201,11 +201,12 @@ export function ServiceFlyoutTransactionsSection({
         transactionName: item.name,
         transactionType: item.transactionType,
         rangeFrom: start,
-        rangeTo: end,
+        // Match currently-active badge counts (locator also forces alertStatus=active).
+        rangeTo: 'now',
         ...(environmentKuery ? { kuery: environmentKuery } : {}),
       });
     },
-    [serviceAlertsLocator, serviceName, environment, start, end]
+    [serviceAlertsLocator, serviceName, environment, start]
   );
 
   const maxGroupsTooltip = useMemo(

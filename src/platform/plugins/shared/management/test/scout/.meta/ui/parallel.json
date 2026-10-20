@@ -1,5 +1,5 @@
 {
-  "sha1": "0ef784bd779f5f502987e88b9f7b6627d74415f2",
+  "sha1": "ff924a25246f2de08b60e9d115df1d8091c3f862",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -102,8 +102,8 @@
       }
     },
     {
-      "id": "bad08ef0cbf2e37-dd7cc6062509486",
-      "title": "Stack Management — ingest, security, and stack sections manage_security sees only the security section with all four links",
+      "id": "bad08ef0cbf2e37-b4abddae2c2f331",
+      "title": "Stack Management — ingest, security, and stack sections manage_security sees only the security section with all five links",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -124,8 +124,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/other_sections.spec.ts",
-        "line": 71,
-        "column": 5
+        "line": 72,
+        "column": 12
       }
     }
   ]
