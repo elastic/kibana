@@ -294,6 +294,23 @@ describe('createProposalSlotResolver', () => {
       ).resolves.toMatchObject({ kind: 'converge' });
     });
 
+    it('ignores the pid when the entity id selects the process', async () => {
+      const service = createService({
+        [idAt(0)]: {
+          status: 'pending',
+          actionInput: { endpoint_ids: ['agent-a'], parameters: { entity_id: 'e1' } },
+        },
+      });
+      const { resolve } = resolver(service);
+
+      await expect(
+        resolve({
+          subjectKey: SUBJECT,
+          actionInput: { endpoint_ids: ['agent-a'], parameters: { entity_id: 'e1', pid: 4242 } },
+        })
+      ).resolves.toMatchObject({ kind: 'converge', live: { proposalId: idAt(0) } });
+    });
+
     it('holds a finding that carries no action input, like the recommendation', async () => {
       const service = createService({
         [idAt(0)]: { status: 'pending', actionInput: forHost('agent-b') },

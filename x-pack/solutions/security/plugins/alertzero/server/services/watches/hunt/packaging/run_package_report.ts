@@ -289,6 +289,7 @@ export const runPackageReport = async ({
     ? {
         proposals: [],
         converged: [],
+        alreadyOpenSubjectKeys: [],
         alreadyOpenCount: 0,
         existingProposalCount: 0,
         expectedProposalCount: 0,

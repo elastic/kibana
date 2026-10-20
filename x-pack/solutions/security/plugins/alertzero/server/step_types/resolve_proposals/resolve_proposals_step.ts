@@ -57,18 +57,21 @@ const splitByEndpoint = <T extends CandidateProposal>(proposal: T): T[] => {
  * names no target is keyed to this Investigation and the action, so only a rerun of the same
  * Investigation lands on it.
  *
- * `repeatedCount` is the proposals every part of which an earlier one in the list already covers.
- * They create nothing, so the caller has to count them or the run's summary under-reports.
+ * `repeats` is the proposals every part of which an earlier one in the list already covers, each
+ * as the subject keys of the candidates covering it. They create nothing, so the caller has to
+ * count them or the run's summary under-reports, and only a covering candidate's own resolution
+ * says whether the repeat is open on this Investigation.
  */
 export const keyCandidateProposals = <T extends CandidateProposal>(
   proposals: T[],
   investigationConversationId: string
-): { candidates: Array<T & { subjectKey: string }>; repeatedCount: number } => {
+): { candidates: Array<T & { subjectKey: string }>; repeats: string[][] } => {
   const seen = new Set<string>();
   const candidates: Array<T & { subjectKey: string }> = [];
-  let repeatedCount = 0;
+  const repeats: string[][] = [];
   for (const proposal of proposals) {
     let kept = 0;
+    const coveredBy: string[] = [];
     for (const part of splitByEndpoint(proposal)) {
       const subjectKey =
         buildProposalSubjectKeyFromActionInput(part) ??
@@ -77,6 +80,7 @@ export const keyCandidateProposals = <T extends CandidateProposal>(
           PROPOSAL_SUBJECT_UUID_NAMESPACE
         );
       if (seen.has(subjectKey)) {
+        coveredBy.push(subjectKey);
         continue;
       }
       seen.add(subjectKey);
@@ -84,10 +88,10 @@ export const keyCandidateProposals = <T extends CandidateProposal>(
       kept += 1;
     }
     if (kept === 0) {
-      repeatedCount += 1;
+      repeats.push(coveredBy);
     }
   }
-  return { candidates, repeatedCount };
+  return { candidates, repeats };
 };
 
 /**
@@ -122,11 +126,11 @@ export const getResolveProposalsStepDefinition = ({
         await retryTransient(() => privileges.assertCanRead(request));
         const conversationClient = await getConversations().getScopedClient({ request });
 
-        const { candidates, repeatedCount } = keyCandidateProposals(
+        const { candidates, repeats } = keyCandidateProposals(
           input.proposals,
           investigationConversationId
         );
-        const resolved: ResolveProposalsOutput = await resolveProposals({
+        const { alreadyOpenSubjectKeys = [], ...resolved } = await resolveProposals({
           candidates,
           investigationConversationId,
           spaceId,
@@ -156,11 +160,20 @@ export const getResolveProposalsStepDefinition = ({
           },
         });
 
-        // A repeat is covered by a proposal this run raises, so it counts as already open, unless
-        // the run minted nothing because it could not check what exists.
+        // A repeat is open on this Investigation only if a candidate covering it minted a proposal
+        // here or found this Investigation's own live one. One that converged onto another
+        // Investigation's proposal leaves nothing open here. Nothing counts when the run minted
+        // nothing because it could not check what exists.
+        const openHere = new Set([
+          ...resolved.proposals.map(({ subjectKey }) => subjectKey),
+          ...alreadyOpenSubjectKeys,
+        ]);
+        const repeatedOpenCount = repeats.filter((coveredBy) =>
+          coveredBy.some((subjectKey) => openHere.has(subjectKey))
+        ).length;
         const output: ResolveProposalsOutput =
           resolved.mintSuppression === 'none'
-            ? { ...resolved, alreadyOpenCount: resolved.alreadyOpenCount + repeatedCount }
+            ? { ...resolved, alreadyOpenCount: resolved.alreadyOpenCount + repeatedOpenCount }
             : resolved;
 
         return { output };

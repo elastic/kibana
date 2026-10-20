@@ -54,17 +54,17 @@ describe('keyCandidateProposals', () => {
   });
 
   it('drops a proposal that repeats an earlier one in the same list', () => {
-    const { candidates: keyed, repeatedCount } = keyCandidateProposals(
+    const { candidates: keyed, repeats } = keyCandidateProposals(
       [isolate('agent-a'), { ...isolate('agent-a'), title: 'Again' }, isolate('agent-b')],
       'conv-1'
     );
 
     expect(keyed.map(({ title }) => title)).toEqual(['Isolate agent-a', 'Isolate agent-b']);
-    expect(repeatedCount).toBe(1);
+    expect(repeats).toHaveLength(1);
   });
 
   it('splits a multi-endpoint proposal so no endpoint is dropped behind another', () => {
-    const { candidates: keyed, repeatedCount } = keyCandidateProposals(
+    const { candidates: keyed, repeats } = keyCandidateProposals(
       [
         isolate('a'),
         {
@@ -77,7 +77,7 @@ describe('keyCandidateProposals', () => {
     );
 
     expect(keyed.map(({ actionInput }) => actionInput?.endpoint_ids)).toEqual([['a'], ['b']]);
-    expect(repeatedCount).toBe(0);
+    expect(repeats).toHaveLength(0);
     expect(keyed[0].subjectKey).toBe(
       buildProposalSubjectKey({ subjectId: 'a', actionWorkflowId: ISOLATE })
     );
@@ -87,7 +87,7 @@ describe('keyCandidateProposals', () => {
   });
 
   it('counts a multi-endpoint proposal as repeated only when every endpoint is already covered', () => {
-    const { candidates, repeatedCount } = keyCandidateProposals(
+    const { candidates, repeats } = keyCandidateProposals(
       [
         isolate('a'),
         isolate('b'),
@@ -97,7 +97,7 @@ describe('keyCandidateProposals', () => {
     );
 
     expect(candidates).toHaveLength(2);
-    expect(repeatedCount).toBe(1);
+    expect(repeats).toHaveLength(1);
   });
 
   it('keeps a kill by pid apart from a kill by entity id on the same host', () => {
@@ -207,24 +207,62 @@ describe(`${RESOLVE_PROPOSALS_STEP_ID} step wiring`, () => {
     });
   });
 
-  it('counts proposals repeated within the list as already open, unless the check failed', async () => {
+  describe('a proposal repeated within the list', () => {
+    const [{ subjectKey }] = keyCandidateProposals([isolate('agent-a')], 'conv-1').candidates;
     const base = {
       proposals: [],
       converged: [],
-      alreadyOpenCount: 1,
+      alreadyOpenCount: 0,
+      alreadyOpenSubjectKeys: [] as string[],
       existingProposalCount: 0,
       expectedProposalCount: 0,
+      mintSuppression: 'none',
     };
     const input = {
       investigationConversationId: 'conv-1',
       proposals: [isolate('agent-a'), isolate('agent-a')],
     };
 
-    resolveProposalsMock.mockResolvedValueOnce({ ...base, mintSuppression: 'none' });
-    await expect(run(input)).resolves.toMatchObject({ output: { alreadyOpenCount: 2 } });
+    it("counts as already open when the proposal covering it is this Investigation's own", async () => {
+      resolveProposalsMock.mockResolvedValueOnce({
+        ...base,
+        alreadyOpenCount: 1,
+        alreadyOpenSubjectKeys: [subjectKey],
+      });
+      await expect(run(input)).resolves.toMatchObject({ output: { alreadyOpenCount: 2 } });
+    });
 
-    resolveProposalsMock.mockResolvedValueOnce({ ...base, mintSuppression: 'check_failed' });
-    await expect(run(input)).resolves.toMatchObject({ output: { alreadyOpenCount: 1 } });
+    it('counts as already open when the proposal covering it is minted here', async () => {
+      resolveProposalsMock.mockResolvedValueOnce({
+        ...base,
+        proposals: [{ ...isolate('agent-a'), subjectKey, proposalId: 'p-1' }],
+      });
+      await expect(run(input)).resolves.toMatchObject({ output: { alreadyOpenCount: 1 } });
+    });
+
+    it('does not count when the covering proposal converged onto another Investigation', async () => {
+      resolveProposalsMock.mockResolvedValueOnce({
+        ...base,
+        converged: [{ proposalId: 'live', ownerConversationId: 'conv-2' }],
+      });
+      await expect(run(input)).resolves.toMatchObject({ output: { alreadyOpenCount: 0 } });
+    });
+
+    it('does not count when the check failed', async () => {
+      resolveProposalsMock.mockResolvedValueOnce({
+        ...base,
+        alreadyOpenCount: 1,
+        alreadyOpenSubjectKeys: [subjectKey],
+        mintSuppression: 'check_failed',
+      });
+      await expect(run(input)).resolves.toMatchObject({ output: { alreadyOpenCount: 1 } });
+    });
+
+    it('does not leak the internal subject keys into the output', async () => {
+      resolveProposalsMock.mockResolvedValueOnce(base);
+      const { output } = (await run(input)) as { output: Record<string, unknown> };
+      expect(output).not.toHaveProperty('alreadyOpenSubjectKeys');
+    });
   });
 
   it('refuses a caller who cannot read Proposals before counting or resolving anything, even with no candidates', async () => {

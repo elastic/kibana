@@ -33,6 +33,14 @@ const MAX_GENERATIONS = 50;
 const TARGET_PATHS = ['endpoint_ids', 'parameters.entity_id', 'parameters.pid'] as const;
 
 /**
+ * The pid only selects the process when no entity id is given: the subject key prefers the entity
+ * id (`buildProposalSubjectKeyFromActionInput`), so a finding carrying both converges on a live
+ * Proposal that carries just the entity id.
+ */
+const isProcessSelector = (path: (typeof TARGET_PATHS)[number], wanted: unknown): boolean =>
+  path !== 'parameters.pid' || get(wanted, 'parameters.entity_id') === undefined;
+
+/**
  * Whether a live Proposal still holds the subject a finding is about: it acts on the same target.
  *
  * The target matters because `revise()` merges new action input over the old without touching the
@@ -45,7 +53,7 @@ const holdsSubject = (
   wanted: Record<string, unknown> | undefined,
   live: Record<string, unknown> | undefined
 ): boolean =>
-  TARGET_PATHS.every((path) => {
+  TARGET_PATHS.filter((path) => isProcessSelector(path, wanted)).every((path) => {
     const wantedValue = get(wanted, path);
     return wantedValue === undefined || isEqual(get(live, path), wantedValue);
   });

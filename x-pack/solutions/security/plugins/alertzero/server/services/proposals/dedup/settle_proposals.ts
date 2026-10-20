@@ -55,10 +55,13 @@ export const settleProposals = async <T extends SettleableProposal>({
   proposals: Array<T & { proposalId: string }>;
   converged: ConvergedProposal[];
   alreadyOpenCount: number;
+  /** The subject keys behind `alreadyOpenCount`, so a caller can attribute repeats of them. */
+  alreadyOpenSubjectKeys: string[];
 }> => {
   const proposals: Array<T & { proposalId: string }> = [];
   const converged: ConvergedProposal[] = [];
   let alreadyOpenCount = 0;
+  const alreadyOpenSubjectKeys: string[] = [];
 
   for (const proposal of candidates) {
     const slot = await deps.resolveProposalSlot({
@@ -79,6 +82,7 @@ export const settleProposals = async <T extends SettleableProposal>({
     // summary has to be able to say.
     if (outcome === 'same_investigation') {
       alreadyOpenCount += 1;
+      alreadyOpenSubjectKeys.push(proposal.subjectKey);
       continue;
     }
     converged.push({
@@ -90,7 +94,7 @@ export const settleProposals = async <T extends SettleableProposal>({
     });
   }
 
-  return { proposals, converged, alreadyOpenCount };
+  return { proposals, converged, alreadyOpenCount, alreadyOpenSubjectKeys };
 };
 
 /**
@@ -127,6 +131,7 @@ export interface ResolvedProposals<T extends SettleableProposal> {
   proposals: Array<T & { proposalId: string }>;
   converged: ConvergedProposal[];
   alreadyOpenCount: number;
+  alreadyOpenSubjectKeys: string[];
   existingProposalCount: number;
   expectedProposalCount: number;
   mintSuppression: MintSuppression;
@@ -153,9 +158,10 @@ export const resolveProposals = async <T extends SettleableProposal>({
   let proposals: Array<T & { proposalId: string }> = [];
   let converged: ConvergedProposal[] = [];
   let alreadyOpenCount = 0;
+  let alreadyOpenSubjectKeys: string[] = [];
   try {
     existingProposalCount = await deps.countExistingProposals(investigationConversationId);
-    ({ proposals, converged, alreadyOpenCount } = await settleProposals({
+    ({ proposals, converged, alreadyOpenCount, alreadyOpenSubjectKeys } = await settleProposals({
       candidates,
       investigationConversationId,
       spaceId,
@@ -173,6 +179,7 @@ export const resolveProposals = async <T extends SettleableProposal>({
     proposals,
     converged,
     alreadyOpenCount,
+    alreadyOpenSubjectKeys,
     existingProposalCount,
     expectedProposalCount: computeExpectedProposalCount({
       mintSuppression,

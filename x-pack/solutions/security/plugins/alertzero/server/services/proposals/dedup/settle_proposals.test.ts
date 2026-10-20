@@ -167,6 +167,7 @@ describe('resolveProposals', () => {
       proposals: [],
       converged: [],
       alreadyOpenCount: 0,
+      alreadyOpenSubjectKeys: [],
       existingProposalCount: 0,
       expectedProposalCount: 0,
       mintSuppression: 'check_failed',
