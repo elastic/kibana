@@ -18,7 +18,7 @@ import { RUNNING_LABEL } from '../translations';
 
 /**
  * The flyout header's live state: the severity, from the polled investigation (an agent sets it
- * mid-run) or else the conversation, and a running indicator while an agent works on it.
+ * mid-run) or else the conversation, and a running indicator while a worker runs for it.
  */
 export const InvestigationLiveState: React.FC<LiveStateSlotRenderProps> = ({
   conversationId,

@@ -1,5 +1,5 @@
 {
-  "sha1": "9502751567cc1d26a898e1d6209aa0d2b483b173",
+  "sha1": "5ff6ce863eefcb2b4f69d13a40786b0e87da6f94",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -56,8 +56,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_links.spec.ts",
-        "line": 47,
-        "column": 16
+        "line": 14,
+        "column": 42
       }
     },
     {
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_links.spec.ts",
-        "line": 61,
+        "line": 31,
         "column": 11
       }
     },
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_links.spec.ts",
-        "line": 74,
-        "column": 7
+        "line": 43,
+        "column": 73
       }
     },
     {
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/private/cloud_integrations/cloud_links/test/scout_cloud_links/ui/tests/cloud_links.spec.ts",
-        "line": 78,
-        "column": 23
+        "line": 47,
+        "column": 13
       }
     },
     {

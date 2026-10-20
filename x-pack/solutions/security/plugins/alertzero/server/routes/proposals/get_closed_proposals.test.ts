@@ -79,6 +79,23 @@ describe('registerGetClosedProposalsRoute', () => {
     expect(response.ok).toHaveBeenCalledWith({ body: { proposals: [], total: 0 } });
   });
 
+  it('passes the entity filter to listClosed', async () => {
+    const listClosed = jest.fn().mockResolvedValue({ proposals: [], total: 0 });
+    const { handler } = makeDeps({ listClosed });
+
+    await handler(
+      createRouteContextMock(),
+      httpServerMock.createKibanaRequest({ query: { size: '25', from: '0', entity: 'host-1' } }),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(listClosed).toHaveBeenCalledWith(
+      expect.anything(),
+      'default',
+      expect.objectContaining({ entity: 'host-1' })
+    );
+  });
+
   it('accepts size=0, so a collapsed accordion can read the total without the rows', () => {
     const { validateQuery } = makeDeps({ listClosed: jest.fn() });
 
