@@ -15,6 +15,9 @@ import { VerifyKiOutputSchema, kiVerifiersSchema } from './verify_ki_step';
 
 export const CREATE_KI_STEP_ID = 'context-engine.createKi' as const;
 
+export const KI_VERIFICATION_FAILURE_ACTIONS = ['drop', 'write_as_failed'] as const;
+export type KiVerificationFailureAction = (typeof KI_VERIFICATION_FAILURE_ACTIONS)[number];
+
 export const createKiInputSchema = z.object({
   ai_index_id: aiIndexIdSchema,
   ki_id: kiIdSchema
@@ -26,7 +29,13 @@ export const createKiInputSchema = z.object({
   verifiers: kiVerifiersSchema
     .optional()
     .describe(
-      'Optional verifiers to run before writing, in order: built-in verifier ids and custom verifier workflows (`workflow_id`). When any fails, the KI is not written.'
+      'Optional verifiers to run before writing, in order: built-in verifier ids and custom verifier workflows (`workflow_id`). When any fails, `on_verification_failure` decides what happens.'
+    ),
+  on_verification_failure: z
+    .enum(KI_VERIFICATION_FAILURE_ACTIONS)
+    .optional()
+    .describe(
+      'What to do with a KI that fails verification: `drop` (default) writes nothing; `write_as_failed` writes it with lifecycle status `verification_failed`, which keeps it out of search but visible in the AI index.'
     ),
   refresh: z
     .boolean()
@@ -40,7 +49,9 @@ export const createKiOutputSchema = z.object({
   id: z
     .string()
     .optional()
-    .describe('The id of the created knowledge indicator; absent when verification failed'),
+    .describe(
+      'The id of the created knowledge indicator; absent when verification failed and the KI was dropped'
+    ),
   verification: VerifyKiOutputSchema.optional().describe(
     'Verifier results; present when `verifiers` was given'
   ),
@@ -70,8 +81,10 @@ export const createKiStepCommonDefinition: CommonStepDefinition<
         'When the AI index does not exist yet, it is created automatically with an index backing ' +
         'store derived from its id. Pass ki_id to set a stable id; re-runs with the same id ' +
         'replace the KI on an index and append a new revision on a data stream. Pass verifiers to ' +
-        'run KI verifiers before writing: when any fails, nothing is written, the output carries ' +
-        'no id, and verification.results names the failing verifiers. The write is not refreshed ' +
+        'run KI verifiers before writing: when any fails, nothing is written and the output carries ' +
+        'no id, unless on_verification_failure is write_as_failed, which writes the KI with lifecycle ' +
+        'status verification_failed so it stays out of search but visible in the AI index. Either way ' +
+        'verification.results names the failing verifiers. The write is not refreshed ' +
         'unless refresh is true, so set it when a later step in the same run reads the KI back. ' +
         'The step returns the id of the created KI, which can be used by later steps to update ' +
         'or delete it.',
@@ -102,6 +115,7 @@ export const createKiStepCommonDefinition: CommonStepDefinition<
     verifiers:
       - ${ESQL_VALID_SYNTAX_VERIFIER_ID}
       - ${ESQL_VALID_RUNTIME_VERIFIER_ID}
+    on_verification_failure: write_as_failed
     ki:
       type: "detection"
       title: "Failed login burst"
@@ -111,7 +125,7 @@ export const createKiStepCommonDefinition: CommonStepDefinition<
   type: console
   if: "steps.create_ki.output.verification.passed : false"
   with:
-    message: "KI not written: {{ steps.create_ki.output.verification.results | json }}"
+    message: "KI written as verification_failed: {{ steps.create_ki.output.verification.results | json }}"
 \`\`\``,
     ],
   },

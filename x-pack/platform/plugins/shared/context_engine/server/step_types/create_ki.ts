@@ -6,9 +6,11 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import type { z } from '@kbn/zod/v4';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { createKiStepCommonDefinition } from '../../common/step_types/create_ki';
 import type { CreateKiOutput } from '../../common/step_types/create_ki';
+import type { VerifyKiOutputSchemaType } from '../../common/step_types/verify_ki_step';
 import { omitNullKiAttributes } from '../../common/step_types/ki';
 import type { KiStepDependencies } from './helpers';
 import {
@@ -20,6 +22,15 @@ import {
   withKiWriteTelemetry,
 } from './helpers';
 import type { VerifyKi } from './verify_ki';
+
+type VerifyKiOutput = z.infer<VerifyKiOutputSchemaType>;
+
+const toKiVerificationRecord = ({ passed, results }: VerifyKiOutput, verifiedAt: string) => ({
+  passed,
+  verified_at: verifiedAt,
+  failed_verifier_ids: results.filter((result) => !result.passed).map(({ verifier }) => verifier),
+  results,
+});
 
 export const getCreateKiStepDefinition = ({
   getAiIndexService,
@@ -36,7 +47,13 @@ export const getCreateKiStepDefinition = ({
       const spaceId = context.contextManager.getContext().workflow.spaceId;
       await assertContextEngineEnabled(isContextEngineEnabled, spaceId);
 
-      const { ai_index_id: aiIndexId, ki_id: kiId, verifiers, refresh = false } = context.input;
+      const {
+        ai_index_id: aiIndexId,
+        ki_id: kiId,
+        verifiers,
+        on_verification_failure: onVerificationFailure = 'drop',
+        refresh = false,
+      } = context.input;
       const ki = omitNullKiAttributes(context.input.ki);
       return withKiWriteTelemetry<CreateKiOutput>({
         action: 'create',
@@ -49,7 +66,8 @@ export const getCreateKiStepDefinition = ({
           const verification = verifiers
             ? await verifyKi({ context, ki, verifiers, aiIndexId })
             : undefined;
-          if (verification && !verification.passed) {
+          const verificationFailed = verification !== undefined && !verification.passed;
+          if (verificationFailed && onVerificationFailure === 'drop') {
             return { output: { verification } };
           }
 
@@ -73,7 +91,11 @@ export const getCreateKiStepDefinition = ({
                 ...ki,
                 id,
                 updated_at: now,
-                governance: { provenance: { created_by: writer, updated_by: writer } },
+                governance: {
+                  provenance: { created_by: writer, updated_by: writer },
+                  ...(verificationFailed && { lifecycle: { status: 'verification_failed' } }),
+                  ...(verification && { verification: toKiVerificationRecord(verification, now) }),
+                },
               },
               // Data streams only accept `create`.
               ...(dest.type === 'data_stream' ? { op_type: 'create' as const } : { id }),

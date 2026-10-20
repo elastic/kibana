@@ -618,6 +618,54 @@ describe('getCreateKiStepDefinition', () => {
       });
       expect(result).toEqual({ output: { id: expect.any(String), verification: passed } });
       expect(esClient.index).toHaveBeenCalledTimes(1);
+      expect(esClient.index.mock.calls[0][0].document.governance).toEqual({
+        provenance: { created_by: mockKiWriter, updated_by: mockKiWriter },
+        verification: {
+          passed: true,
+          verified_at: expect.any(String),
+          failed_verifier_ids: [],
+          results: passed.results,
+        },
+      });
+    });
+
+    it('writes the KI as verification_failed when on_verification_failure is write_as_failed', async () => {
+      verifyKi.mockResolvedValue(failed);
+      const esClient = { index: jest.fn().mockResolvedValue({ _id: 'ki-1' }) };
+      const context = createMockStepContext({
+        input: {
+          ai_index_id: 'my-ai-index',
+          ki: kiInput,
+          verifiers,
+          on_verification_failure: 'write_as_failed',
+        },
+        esClient,
+      });
+      const service = mockAiIndexService({ type: 'index', value: 'ai-index-idx-my-ai-index' });
+      const telemetry = mockKiStepTelemetry();
+
+      const { handler } = getCreateKiStepDefinition({
+        getAiIndexService: () => service,
+        isContextEngineEnabled: enabled,
+        checkWritePrivilege: allowed,
+        verifyKi,
+        ...telemetry,
+      });
+      const result = await handler(context);
+
+      expect(result).toEqual({ output: { id: expect.any(String), verification: failed } });
+      expect(esClient.index).toHaveBeenCalledTimes(1);
+      expect(esClient.index.mock.calls[0][0].document.governance).toEqual({
+        provenance: { created_by: mockKiWriter, updated_by: mockKiWriter },
+        lifecycle: { status: 'verification_failed' },
+        verification: {
+          passed: false,
+          verified_at: expect.any(String),
+          failed_verifier_ids: ['esql-valid-syntax'],
+          results: failed.results,
+        },
+      });
+      expect(telemetry.analyticsService.reportKiWrite).toHaveBeenCalledTimes(1);
     });
 
     it('skips the write when verification fails', async () => {

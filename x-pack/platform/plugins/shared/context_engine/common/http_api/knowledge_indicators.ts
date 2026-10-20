@@ -39,9 +39,21 @@ export interface KiDocumentProvenanceWriter {
   metadata?: Record<string, KiJsonValue>;
 }
 
+export interface KiDocumentVerificationResult {
+  verifier?: string;
+  passed?: boolean;
+  reason?: string;
+}
+
 export interface KiDocumentGovernance {
   lifecycle?: {
     status?: string;
+  };
+  verification?: {
+    passed?: boolean;
+    verified_at?: string;
+    failed_verifier_ids?: string[];
+    results?: KiDocumentVerificationResult[];
   };
   provenance?: {
     created_by?: KiJsonValue | KiDocumentProvenanceWriter;
