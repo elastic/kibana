@@ -27,7 +27,6 @@ const setup = ({
   spaceExists = true,
   runAs = AGENT_ACCOUNT,
   installError,
-  reinforcementEntries,
 }: {
   serviceAccountsEnabled?: boolean;
   canManageSecurity?: boolean;
@@ -36,19 +35,7 @@ const setup = ({
   spaceExists?: boolean;
   runAs?: string;
   installError?: Error;
-  /** Entries of the reinforcement agent; omit to run without decision trees. */
-  reinforcementEntries?: Array<Record<string, unknown>>;
 } = {}) => {
-  const registry = {
-    get: jest.fn().mockResolvedValue({ access_control: { entries: reinforcementEntries ?? [] } }),
-    updateAccessControl: jest.fn().mockResolvedValue({}),
-  };
-  const agentBuilder = {
-    agents: {
-      ensure: jest.fn().mockResolvedValue(undefined),
-      getRegistry: jest.fn().mockResolvedValue(registry),
-    },
-  };
   const esClient = {
     security: {
       hasPrivileges: jest.fn().mockResolvedValue({ has_all_requested: canManageSecurity }),
@@ -96,9 +83,6 @@ const setup = ({
     workflowsManagement,
     spaces,
     isServerless,
-    reinforcementAgent: reinforcementEntries
-      ? { agentBuilder: agentBuilder as never, availability: {} as never }
-      : undefined,
     logger: loggingSystemMock.createLogger(),
   });
   return {
@@ -107,8 +91,6 @@ const setup = ({
     serviceAccounts,
     managedWorkflows,
     getWorkflow,
-    agentBuilder,
-    registry,
   };
 };
 
@@ -256,49 +238,6 @@ describe('createInvestigatorServiceAccountService', () => {
     await expect(
       setup({ canManageSecurity: false }).service.getStatus(request, SPACE_ID)
     ).resolves.toMatchObject({ canModifyBoundWorkflows: false });
-  });
-
-  it('admits the agent account to the private reinforcement agent after the installs', async () => {
-    const { service, managedWorkflows, agentBuilder, registry } = setup({
-      reinforcementEntries: [{ type: 'user', id: 'u-1', role: 'manager' }],
-    });
-    registry.updateAccessControl.mockImplementation(async () => {
-      // The agent is only available once the entry point is installed.
-      expect(managedWorkflows.install).toHaveBeenCalledTimes(BOUND_WORKFLOW_IDS.length);
-      return {};
-    });
-
-    await service.enable(request, SPACE_ID);
-
-    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: SPACE_ID })
-    );
-    expect(registry.updateAccessControl).toHaveBeenCalledWith(
-      'significant-events.decision-tree-reinforcement',
-      {
-        entries: [
-          { type: 'user', id: 'u-1', role: 'manager' },
-          {
-            type: 'user',
-            id: `service_account:${AGENT_ACCOUNT}`,
-            name: AGENT_ACCOUNT,
-            role: 'user',
-          },
-        ],
-      }
-    );
-  });
-
-  it('leaves the reinforcement agent alone once the account is admitted', async () => {
-    const { service, registry } = setup({
-      reinforcementEntries: [
-        { type: 'user', id: `service_account:${AGENT_ACCOUNT}`, role: 'user' },
-      ],
-    });
-
-    await service.enable(request, SPACE_ID);
-
-    expect(registry.updateAccessControl).not.toHaveBeenCalled();
   });
 
   it('uninstalls every bound workflow on disable, entry point first, and keeps the accounts', async () => {

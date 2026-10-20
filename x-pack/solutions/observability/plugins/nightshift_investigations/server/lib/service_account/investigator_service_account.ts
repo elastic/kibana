@@ -9,9 +9,6 @@ import Boom from '@hapi/boom';
 import { parse as parseYaml } from 'yaml';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
-import { AgentAccessControlRole } from '@kbn/agent-builder-common';
-import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
-import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
 import { NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -31,8 +28,6 @@ import {
   NIGHTSHIFT_SERVICE_ACCOUNT_KINDS,
   type NightshiftServiceAccountKind,
 } from './constants';
-import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../../agents/decision_tree_reinforcement';
-import { installDecisionTreeReinforcementAgent } from '../install_decision_tree_reinforcement_agent';
 
 interface Deps {
   core: CoreStart;
@@ -41,11 +36,6 @@ interface Deps {
   spaces?: SpacesPluginStart;
   /** Serverless accounts hold the `_`-prefixed predefined roles. */
   isServerless: boolean;
-  /** Set when decision trees are on, so the reinforcement agent exists and must admit the agent. */
-  reinforcementAgent?: {
-    agentBuilder: AgentBuilderPluginStart;
-    availability: AgentAvailabilityConfig;
-  };
   logger: Logger;
 }
 
@@ -85,7 +75,6 @@ export const createInvestigatorServiceAccountService = ({
   workflowsManagement,
   spaces,
   isServerless,
-  reinforcementAgent,
   logger,
 }: Deps) => {
   const getServiceAccounts = (): NightshiftServiceAccountInfo[] =>
@@ -116,36 +105,6 @@ export const createInvestigatorServiceAccountService = ({
       .asScoped(request)
       .asCurrentUser.security.hasPrivileges({ cluster: ['manage_security'] });
     return allowed;
-  };
-
-  /**
-   * The decision-tree reinforcement agent is private and system-owned, so only admins can see or
-   * run it. Agent optimize runs it as the agent account, so the account gets the `user` role on it.
-   * Granted here, by the admin setting the space up, rather than by making the agent shared.
-   */
-  const admitAgentToReinforcementAgent = async (
-    request: KibanaRequest,
-    spaceId: string
-  ): Promise<void> => {
-    if (!reinforcementAgent) return;
-    const { agentBuilder, availability } = reinforcementAgent;
-    await installDecisionTreeReinforcementAgent({ agentBuilder, spaceId, availability });
-    const registry = await agentBuilder.agents.getRegistry({ request });
-    const agent = await registry.get(NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID);
-    const principalId = `service_account:${INVESTIGATOR_SERVICE_ACCOUNT_ID}`;
-    const entries = agent.access_control?.entries ?? [];
-    if (entries.some(({ id }) => id === principalId)) return;
-    await registry.updateAccessControl(NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID, {
-      entries: [
-        ...entries,
-        {
-          type: 'user',
-          id: principalId,
-          name: INVESTIGATOR_SERVICE_ACCOUNT_ID,
-          role: AgentAccessControlRole.User,
-        },
-      ],
-    });
   };
 
   // Setups of one space run one after another, so two clicks cannot interleave their installs.
@@ -286,8 +245,6 @@ export const createInvestigatorServiceAccountService = ({
       await ensureServiceAccount(request, kind);
     }
     await installBoundWorkflows(request, spaceId);
-    // After the installs: the agent is only available once the space's entry point is.
-    await admitAgentToReinforcementAgent(request, spaceId);
 
     const status = await getStatus(request, spaceId);
     assertAllBound(status, spaceId);

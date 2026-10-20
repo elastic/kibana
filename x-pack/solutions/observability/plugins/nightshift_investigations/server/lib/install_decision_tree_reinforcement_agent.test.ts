@@ -14,7 +14,7 @@ import {
 import { installDecisionTreeReinforcementAgent } from './install_decision_tree_reinforcement_agent';
 
 describe('installDecisionTreeReinforcementAgent', () => {
-  it('ensures a private persisted agent so users cannot converse with it directly', async () => {
+  it('ensures a private persisted agent that only the Nightshift agent service account may use besides admins', async () => {
     const agentBuilder = agentBuilderMocks.createStart();
     const availability = { cacheMode: 'space' as const, handler: jest.fn() };
 
@@ -27,6 +27,15 @@ describe('installDecisionTreeReinforcementAgent', () => {
     expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
       spaceId: 'space-1',
       availability,
+      // The Nightshift agent service account runs it from agent optimize.
+      accessControlEntries: [
+        {
+          type: 'user',
+          id: 'service_account:kibana/nightshift_agent',
+          name: 'kibana/nightshift_agent',
+          role: 'user',
+        },
+      ],
       agent: expect.objectContaining({
         id: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID,
         type: NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_TYPE_ID,
