@@ -12,6 +12,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import {
   ALERTZERO_UI_EVENTS,
   BRIEF_CARD_CONVERSATION_TYPES,
+  BRIEF_CARD_SECTIONS,
   QUEUE_FILTER_TYPES,
   QUEUE_SIZE_BUCKETS,
   UI_ERROR_CLASSES,
@@ -45,6 +46,7 @@ const FIXTURES: AlertZeroUiEventPayloads = {
     conversation_type: 'investigation',
     has_pending_proposal: true,
     position_in_list: 2,
+    section: 'investigate',
   },
   [ALERTZERO_UI_EVENTS.ErrorShown]: { error_class: 'forbidden', surface: 'watch_settings' },
 };
@@ -132,6 +134,7 @@ describe('AlertZero UI events', () => {
     [ALERTZERO_UI_EVENTS.HomeOpened, 'queue_size_bucket', QUEUE_SIZE_BUCKETS],
     [ALERTZERO_UI_EVENTS.QueueFiltered, 'filter_type', QUEUE_FILTER_TYPES],
     [ALERTZERO_UI_EVENTS.BriefCardClicked, 'conversation_type', BRIEF_CARD_CONVERSATION_TYPES],
+    [ALERTZERO_UI_EVENTS.BriefCardClicked, 'section', BRIEF_CARD_SECTIONS],
     [ALERTZERO_UI_EVENTS.ErrorShown, 'error_class', UI_ERROR_CLASSES],
     [ALERTZERO_UI_EVENTS.ErrorShown, 'surface', UI_ERROR_SURFACES],
   ] as const)(

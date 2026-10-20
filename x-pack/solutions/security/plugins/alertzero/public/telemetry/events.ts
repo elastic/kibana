@@ -8,6 +8,7 @@
 import type { EventTypeOpts } from '@kbn/core/public';
 import type {
   BriefCardConversationType,
+  BriefCardSection,
   QueueFilterType,
   QueueSizeBucket,
   UiErrorClass,
@@ -16,6 +17,7 @@ import type {
 import {
   ALERTZERO_UI_EVENTS,
   BRIEF_CARD_CONVERSATION_TYPES,
+  BRIEF_CARD_SECTIONS,
   QUEUE_FILTER_TYPES,
   QUEUE_SIZE_BUCKETS,
   UI_ERROR_CLASSES,
@@ -38,6 +40,7 @@ export interface AlertZeroUiBriefCardClickedPayload {
   conversation_type: BriefCardConversationType;
   has_pending_proposal: boolean;
   position_in_list: number;
+  section: BriefCardSection;
 }
 
 export interface AlertZeroUiErrorShownPayload {
@@ -69,7 +72,7 @@ export const ALERTZERO_UI_HOME_OPENED_EVENT: EventTypeOpts<AlertZeroUiHomeOpened
       _meta: {
         description: `How many proposals were open when the queue loaded, as a range: ${formatValues(
           QUEUE_SIZE_BUCKETS
-        )}`,
+        )}. \`unknown\` when the count failed to load`,
         optional: false,
       },
     },
@@ -82,9 +85,9 @@ export const ALERTZERO_UI_QUEUE_FILTERED_EVENT: EventTypeOpts<AlertZeroUiQueueFi
     filter_type: {
       type: 'keyword',
       _meta: {
-        description: `Which queue filter or sort the user changed: ${formatValues(
+        description: `Which queue filter or sort the user set: ${formatValues(
           QUEUE_FILTER_TYPES
-        )}. The filter value is never sent`,
+        )}. Clearing a filter is not reported, and the filter value is never sent`,
         optional: false,
       },
     },
@@ -115,7 +118,16 @@ export const ALERTZERO_UI_BRIEF_CARD_CLICKED_EVENT: EventTypeOpts<AlertZeroUiBri
         type: 'long',
         _meta: {
           description:
-            'Zero-based position of the card in the list it was rendered in (one queue section, after the Impact filter)',
+            'Zero-based position of the card in its queue section (`section`), after the Impact filter',
+          optional: false,
+        },
+      },
+      section: {
+        type: 'keyword',
+        _meta: {
+          description: `The queue section the card was rendered in: ${formatValues(
+            BRIEF_CARD_SECTIONS
+          )}`,
           optional: false,
         },
       },

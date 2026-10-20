@@ -15,8 +15,11 @@ export const ALERTZERO_UI_EVENTS = {
 
 export type AlertZeroUiEventType = (typeof ALERTZERO_UI_EVENTS)[keyof typeof ALERTZERO_UI_EVENTS];
 
-/** Half-open ranges the queue's open count is reported in, so the count itself never ships. */
-export const QUEUE_SIZE_BUCKETS = ['0', '1_10', '11_50', '51_200', 'gt_200'] as const;
+/**
+ * Half-open ranges the queue's open count is reported in, so the count itself never ships.
+ * `unknown` when the count failed to load.
+ */
+export const QUEUE_SIZE_BUCKETS = ['0', '1_10', '11_50', '51_200', 'gt_200', 'unknown'] as const;
 
 export type QueueSizeBucket = (typeof QUEUE_SIZE_BUCKETS)[number];
 
@@ -37,6 +40,11 @@ export const BRIEF_CARD_CONVERSATION_TYPES = ['investigation', 'escalation'] as 
 
 export type BriefCardConversationType = (typeof BRIEF_CARD_CONVERSATION_TYPES)[number];
 
+/** The queue sections a brief card can be rendered in. */
+export const BRIEF_CARD_SECTIONS = ['respond', 'investigate', 'configure', 'closed'] as const;
+
+export type BriefCardSection = (typeof BRIEF_CARD_SECTIONS)[number];
+
 /**
  * Fixed error classes. HTTP failures map from the status code, never from the message; the rest
  * name what the AlertZero UI itself reports.
@@ -47,7 +55,9 @@ export const UI_ERROR_CLASSES = [
   'unauthorized',
   'forbidden',
   'not_found',
+  'timeout',
   'conflict',
+  'rate_limited',
   'server',
   'partial_failure',
   'worker_scan_failed',

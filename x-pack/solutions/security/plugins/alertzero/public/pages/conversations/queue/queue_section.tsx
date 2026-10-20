@@ -98,17 +98,21 @@ export const QueueSection = ({
   const { reportEvent } = useAlertZeroTelemetry();
   const onClickBriefCard = useCallback(
     (proposalId: Investigation['id']) => {
-      reportEvent(ALERTZERO_UI_EVENTS.BriefCardClicked, {
-        conversation_type: 'investigation',
-        has_pending_proposal:
-          proposals.find((proposal) => proposal.id === proposalId)?.status === 'pending',
-        position_in_list: investigations.findIndex(
-          (investigation) => investigation.id === proposalId
-        ),
-      });
+      const position = investigations.findIndex((investigation) => investigation.id === proposalId);
+      // A card is rendered from this list, so it is always found; a miss reports nothing rather
+      // than a `-1` position.
+      if (position >= 0) {
+        reportEvent(ALERTZERO_UI_EVENTS.BriefCardClicked, {
+          conversation_type: 'investigation',
+          has_pending_proposal:
+            proposals.find((proposal) => proposal.id === proposalId)?.status === 'pending',
+          position_in_list: position,
+          section: id,
+        });
+      }
       onClickCard(proposalId);
     },
-    [investigations, onClickCard, proposals, reportEvent]
+    [id, investigations, onClickCard, proposals, reportEvent]
   );
 
   return (

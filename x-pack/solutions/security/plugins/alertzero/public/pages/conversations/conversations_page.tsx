@@ -169,10 +169,11 @@ const ConversationsPageContent: React.FC = () => {
   useAlertZeroDocTitle(QUEUE_PAGE_INFO.pageTitle);
   const { reportEvent } = useAlertZeroTelemetry();
 
-  // The Impact entity filter is the queue's only filter today. Its value is never reported.
+  // The Impact entity filter is the queue's only filter today. Only setting it reports, never
+  // clearing it, and its value is never reported.
   const onEntityFilterChange = useCallback(
     (next: string | null) => {
-      if (next !== effectiveEntityFilter) {
+      if (next !== null && next !== effectiveEntityFilter) {
         reportEvent(ALERTZERO_UI_EVENTS.QueueFiltered, { filter_type: 'impact' });
       }
       setEntityFilter(next);
@@ -233,7 +234,10 @@ const ConversationsPageContent: React.FC = () => {
     closedTotal === 0 &&
     proposalsById.size === 0;
   const hasSummaryError = Boolean(error) && chartsSummary === undefined;
-  useReportHomeOpened({ isLoaded: chartsSummary !== undefined, openCount });
+  useReportHomeOpened({
+    isSettled: chartsSummary !== undefined || hasSummaryError,
+    openCount: chartsSummary?.currentOpen,
+  });
   useReportErrorShown({
     errorClass: classifyError(error),
     isShown: hasSummaryError,

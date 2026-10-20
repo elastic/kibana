@@ -1260,6 +1260,26 @@ describe('ConversationsPage telemetry', () => {
       ]);
     });
 
+    it('reports an unknown queue size, alongside the error, when the open count fails to load', () => {
+      mockUseProposalChartsSummary.mockReturnValue({
+        data: undefined,
+        isLoading: false,
+        error: new Error('boom'),
+      });
+
+      const { core } = renderPage('/');
+
+      expect(reportedEvents(core, 'alertzero_ui_home_opened')).toEqual([
+        [
+          'alertzero_ui_home_opened',
+          { default_filters_changed: false, queue_size_bucket: 'unknown' },
+        ],
+      ]);
+      expect(reportedEvents(core, 'alertzero_ui_error_shown')).toEqual([
+        ['alertzero_ui_error_shown', { error_class: 'unknown', surface: 'queue' }],
+      ]);
+    });
+
     it('reports once under StrictMode, which runs effects twice', () => {
       mockOpenCount(3);
       const core = coreMock.createStart();
@@ -1291,7 +1311,7 @@ describe('ConversationsPage telemetry', () => {
   });
 
   describe('alertzero_ui_queue_filtered', () => {
-    it('reports an Impact filter change, and its clearing, without the entity', () => {
+    it('reports picking an Impact filter, without the entity, and not clearing it', () => {
       const { core } = renderPage('/');
 
       fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
@@ -1299,13 +1319,21 @@ describe('ConversationsPage telemetry', () => {
 
       expect(reportedEvents(core, 'alertzero_ui_queue_filtered')).toEqual([
         ['alertzero_ui_queue_filtered', { filter_type: 'impact' }],
-        ['alertzero_ui_queue_filtered', { filter_type: 'impact' }],
       ]);
+    });
+
+    it('reports switching from one Impact filter to another', () => {
+      const { core } = renderPage('/');
+
+      fireEvent.click(screen.getByRole('button', { name: 'host-1' }));
+      fireEvent.click(screen.getByRole('button', { name: 'user-1' }));
+
+      expect(reportedEvents(core, 'alertzero_ui_queue_filtered')).toHaveLength(2);
     });
   });
 
   describe('alertzero_ui_brief_card_clicked', () => {
-    it('reports the card position and whether its proposal is pending', () => {
+    it('reports the card section and position, and whether its proposal is pending', () => {
       const { core } = renderPage('/');
 
       fireEvent.click(screen.getByRole('button', { name: 'Second action' }));
@@ -1313,7 +1341,12 @@ describe('ConversationsPage telemetry', () => {
       expect(reportedEvents(core, 'alertzero_ui_brief_card_clicked')).toEqual([
         [
           'alertzero_ui_brief_card_clicked',
-          { conversation_type: 'investigation', has_pending_proposal: false, position_in_list: 1 },
+          {
+            conversation_type: 'investigation',
+            has_pending_proposal: false,
+            position_in_list: 1,
+            section: 'investigate',
+          },
         ],
       ]);
     });
@@ -1327,7 +1360,12 @@ describe('ConversationsPage telemetry', () => {
       expect(reportedEvents(core, 'alertzero_ui_brief_card_clicked')).toEqual([
         [
           'alertzero_ui_brief_card_clicked',
-          { conversation_type: 'investigation', has_pending_proposal: false, position_in_list: 0 },
+          {
+            conversation_type: 'investigation',
+            has_pending_proposal: false,
+            position_in_list: 0,
+            section: 'investigate',
+          },
         ],
       ]);
     });

@@ -13,7 +13,9 @@ const STATUS_CLASSES: Readonly<Record<number, UiErrorClass>> = {
   401: 'unauthorized',
   403: 'forbidden',
   404: 'not_found',
+  408: 'timeout',
   409: 'conflict',
+  429: 'rate_limited',
 };
 
 /**

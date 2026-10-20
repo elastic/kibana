@@ -15,16 +15,16 @@ The four events are registered when the app first mounts (`registerAlertZeroUiEv
 
 ### `alertzero_ui_home_opened`
 
-The AlertZero home page opened on the queue, once per mount, when the queue's open count first arrives. Not sent for onboarding (the home page decides between the queue and onboarding first), nor for refetches, window-focus polls or a count that changes during the visit. If the count never loads, nothing is sent.
+The AlertZero home page opened on the queue, once per mount, when the queue's open count first arrives or fails to load. Not sent for onboarding (the home page decides between the queue and onboarding first), nor for refetches, window-focus polls, a count that changes during the visit, or a failed count that a retry then loads. A failed count also sends its `alertzero_ui_error_shown`.
 
 | Field | Type | Description |
 |---|---|---|
-| `queue_size_bucket` | keyword | Open proposals when the queue loaded, as a range: `0`, `1_10`, `11_50`, `51_200` or `gt_200` |
+| `queue_size_bucket` | keyword | Open proposals when the queue loaded, as a range: `0`, `1_10`, `11_50`, `51_200` or `gt_200`, or `unknown` when the count failed to load |
 | `default_filters_changed` | boolean | Whether the queue opened with non-default filters. Always `false` today: the queue has no saved filters, so it always opens with the defaults |
 
 ### `alertzero_ui_queue_filtered`
 
-The user changed a queue filter or sort, including clearing it. The filter value is never sent.
+The user set a queue filter or sort, including switching from one value to another. Clearing a filter sends nothing, so the count is of filters chosen. The filter value is never sent.
 
 | Field | Type | Description |
 |---|---|---|
@@ -40,7 +40,8 @@ A queue card was clicked open into the Investigation flyout. A flyout opened fro
 |---|---|---|
 | `conversation_type` | keyword | `investigation` or `escalation` |
 | `has_pending_proposal` | boolean | Whether the card's proposal was still `pending` |
-| `position_in_list` | long | Zero-based position of the card in the list it was rendered in: its queue section, after the Impact filter |
+| `position_in_list` | long | Zero-based position of the card in its queue section (`section`), after the Impact filter |
+| `section` | keyword | The queue section the card was rendered in: `respond`, `investigate`, `configure` or `closed` |
 
 Sent today: `investigation`. Waiting on UI: `escalation`, for cards on the Escalations page, which doesn't report clicks yet.
 
@@ -50,7 +51,7 @@ An error toast, callout or error prompt was shown. The class is a fixed mapping,
 
 | Field | Type | Description |
 |---|---|---|
-| `error_class` | keyword | `network` (no response), `bad_request` (400), `unauthorized` (401), `forbidden` (403), `not_found` (404), `conflict` (409), `server` (5xx), `partial_failure`, `worker_scan_failed`, `clipboard` or `unknown` |
+| `error_class` | keyword | `network` (no response), `bad_request` (400), `unauthorized` (401), `forbidden` (403), `not_found` (404), `timeout` (408), `conflict` (409), `rate_limited` (429), `server` (5xx), `partial_failure`, `worker_scan_failed`, `clipboard` or `unknown` |
 | `surface` | keyword | `queue`, `flyout`, `onboarding`, `watch_detail`, `watch_settings` or `escalations` |
 
 Where it is sent:
