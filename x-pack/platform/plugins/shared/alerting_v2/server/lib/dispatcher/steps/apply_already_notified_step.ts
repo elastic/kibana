@@ -79,17 +79,17 @@ export class ApplyAlreadyNotifiedStep implements DispatcherStep {
       );
     }
 
-    const pendingGroups: ActionGroup[] = [];
+    const remainingGroups: ActionGroup[] = [];
     const alreadyNotified: ActionGroup[] = [];
     for (const group of groups) {
-      const [covered, pending] = partition(group.alerts, (alert) => {
+      const [covered, uncovered] = partition(group.alerts, (alert) => {
         const through = notifiedThrough.get(alreadyNotifiedPairKey(group.id, alert.alert_id));
         return through !== undefined && through >= Date.parse(alert.last_event_timestamp);
       });
       if (covered.length > 0) alreadyNotified.push({ ...group, alerts: covered });
-      if (pending.length > 0) pendingGroups.push({ ...group, alerts: pending });
+      if (uncovered.length > 0) remainingGroups.push({ ...group, alerts: uncovered });
     }
 
-    return { type: 'continue', data: { groups: pendingGroups, alreadyNotified } };
+    return { type: 'continue', data: { groups: remainingGroups, alreadyNotified } };
   }
 }

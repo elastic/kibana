@@ -1353,6 +1353,27 @@ describe('DispatchStep', () => {
         expect(firedSeries).toHaveLength(DISPATCH_CHUNK_SIZE - 1);
         expect(firedSeries).not.toContain('hash-0');
       });
+
+      it('still writes the records that need no dispatch when the signal already fired', async () => {
+        const controller = new AbortController();
+        controller.abort();
+
+        const result = await createStep().execute(
+          createDispatcherPipelineState({
+            dispatch: [groupFor(0)],
+            suppressed: [{ ...alertFor(900), reason: 'ack' }],
+            dispatchable: [alertFor(0), alertFor(901)],
+            policies,
+            input: createDispatcherPipelineInput({ signal: controller.signal }),
+          }),
+          loggerService
+        );
+
+        expect(result).toEqual({ type: 'halt', reason: 'aborted' });
+        expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
+        expect(mockStorageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
+        expect(actionTypes(docsOfCommit(0))).toEqual(['suppress', 'unmatched']);
+      });
     });
 
     describe('commit failures', () => {

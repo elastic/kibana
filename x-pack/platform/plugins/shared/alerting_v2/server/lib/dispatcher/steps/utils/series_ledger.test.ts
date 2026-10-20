@@ -38,52 +38,12 @@ const buildLedger = ({
     }),
   });
 
-const actionTypesOf = (docs: ReadonlyArray<{ action_type: string }>) =>
-  docs.map(({ action_type: actionType }) => actionType);
-
 describe('SeriesLedger', () => {
   const alertA = createAlert({ alert_id: 'alert-a', group_hash: 'hash-a' });
   const alertB = createAlert({ alert_id: 'alert-b', group_hash: 'hash-b' });
 
   it('is empty when there is nothing to record', () => {
     expect(buildLedger({}).isEmpty()).toBe(true);
-  });
-
-  it('releases series without a group to dispatch right away', () => {
-    const ledger = buildLedger({
-      suppressed: [{ ...alertA, reason: 'ack' }],
-      unmatched: [alertB],
-    });
-
-    expect(ledger.isEmpty()).toBe(false);
-    expect(ledger.takeReady()).toEqual([
-      expect.objectContaining({ group_hash: 'hash-a', action_type: 'suppress', reason: 'ack' }),
-      expect.objectContaining({
-        group_hash: 'hash-b',
-        action_type: 'unmatched',
-        reason: 'no matching action policy',
-      }),
-    ]);
-    expect(ledger.hasPending()).toBe(false);
-  });
-
-  it('holds the fire record of a dispatched alert until its group concludes', () => {
-    const group = createActionGroup({ id: 'g1', policyId: 'p1', alerts: [alertA] });
-    const ledger = buildLedger({ toDispatch: [group] });
-
-    expect(ledger.takeReady()).toEqual([]);
-    expect(ledger.hasPending()).toBe(true);
-
-    expect(ledger.conclude([group])).toEqual([
-      expect.objectContaining({
-        group_hash: 'hash-a',
-        action_type: 'fire',
-        reason: 'dispatched by policy p1',
-        last_series_event_timestamp: alertA.last_event_timestamp,
-      }),
-    ]);
-    expect(ledger.hasPending()).toBe(false);
-    expect(ledger.concludedGroups()).toEqual([group]);
   });
 
   it.each([
@@ -95,7 +55,7 @@ describe('SeriesLedger', () => {
     expect(buildLedger(buckets).isEmpty()).toBe(false);
   });
 
-  it('builds each ready record with its reason and the alert event time', () => {
+  it('releases every series without a group to dispatch at once, with its reason and event time', () => {
     const alertC = createAlert({ alert_id: 'alert-c', group_hash: 'hash-c' });
     const alertD = createAlert({
       alert_id: 'alert-d',
@@ -133,10 +93,31 @@ describe('SeriesLedger', () => {
       expect.objectContaining({
         group_hash: 'hash-d',
         action_type: 'unmatched',
+        reason: 'no matching action policy',
         last_series_event_timestamp: '2026-01-22T07:12:00.000Z',
       }),
     ]);
     expect(ledger.takeReady()).toEqual([]);
+    expect(ledger.hasUnattemptedGroups()).toBe(false);
+  });
+
+  it('holds the fire record of a dispatched alert until its group concludes', () => {
+    const group = createActionGroup({ id: 'g1', policyId: 'p1', alerts: [alertA] });
+    const ledger = buildLedger({ toDispatch: [group] });
+
+    expect(ledger.takeReady()).toEqual([]);
+    expect(ledger.hasUnattemptedGroups()).toBe(true);
+
+    expect(ledger.conclude([group])).toEqual([
+      expect.objectContaining({
+        group_hash: 'hash-a',
+        action_type: 'fire',
+        reason: 'dispatched by policy p1',
+        last_series_event_timestamp: alertA.last_event_timestamp,
+      }),
+    ]);
+    expect(ledger.hasUnattemptedGroups()).toBe(false);
+    expect(ledger.concludedGroups()).toEqual([group]);
   });
 
   it('releases an alert shared by two groups only once both concluded', () => {
@@ -164,15 +145,15 @@ describe('SeriesLedger', () => {
     expect(ledger.conclude([g2])).toHaveLength(2);
   });
 
-  it('releases only the series of an aggregated group that no pending group shares', () => {
+  it('releases only the series of an aggregated group that no unattempted group shares', () => {
     const aggregated = createActionGroup({ id: 'g-all', alerts: [alertA, alertB] });
-    const pending = createActionGroup({ id: 'g-other', alerts: [alertB] });
-    const ledger = buildLedger({ toDispatch: [aggregated, pending] });
+    const unattempted = createActionGroup({ id: 'g-other', alerts: [alertB] });
+    const ledger = buildLedger({ toDispatch: [aggregated, unattempted] });
 
     expect(ledger.conclude([aggregated])).toEqual([
       expect.objectContaining({ group_hash: 'hash-a', action_type: 'fire' }),
     ]);
-    expect(ledger.hasPending()).toBe(true);
+    expect(ledger.hasUnattemptedGroups()).toBe(true);
   });
 
   it('holds a throttled record while its series still has a group to dispatch', () => {
@@ -200,7 +181,7 @@ describe('SeriesLedger', () => {
 
     expect(ledger.conclude([g1, unplanned])).toEqual([]);
     expect(ledger.concludedGroups()).toEqual([g1]);
-    expect(ledger.hasPending()).toBe(true);
+    expect(ledger.hasUnattemptedGroups()).toBe(true);
   });
 
   it('narrows groups and alerts to the released series', () => {
@@ -216,58 +197,6 @@ describe('SeriesLedger', () => {
   });
 
   describe('records', () => {
-    const recordFor = (overrides: Record<string, unknown>) => ({
-      group_hash: 'hash-1',
-      last_series_event_timestamp: '2026-01-22T07:00:00.000Z',
-      actor: { type: 'internal' },
-      rule_id: 'rule-1',
-      source: 'internal',
-      space_id: 'default',
-      ...overrides,
-    });
-    const alert = createAlert({
-      rule_id: 'rule-1',
-      group_hash: 'hash-1',
-      last_event_timestamp: '2026-01-22T07:00:00.000Z',
-    });
-
-    it('records suppressed alerts with their suppression reason', () => {
-      const ledger = buildLedger({ suppressed: [{ ...alert, reason: 'user acknowledged' }] });
-
-      expect(ledger.takeReady()).toEqual([
-        recordFor({ action_type: 'suppress', reason: 'user acknowledged' }),
-      ]);
-    });
-
-    it('records throttled groups with the throttle reason', () => {
-      const ledger = buildLedger({
-        throttled: [createActionGroup({ id: 'group-1', policyId: 'policy-1', alerts: [alert] })],
-      });
-
-      expect(ledger.takeReady()).toEqual([
-        recordFor({ action_type: 'suppress', reason: 'suppressed by throttled policy policy-1' }),
-      ]);
-    });
-
-    it('records unmatched alerts', () => {
-      const ledger = buildLedger({ unmatched: [alert] });
-
-      expect(ledger.takeReady()).toEqual([
-        recordFor({ action_type: 'unmatched', reason: 'no matching action policy' }),
-      ]);
-    });
-
-    it('records each unmatched alert when only unmatched alerts exist', () => {
-      const ledger = buildLedger({
-        unmatched: [
-          createAlert({ rule_id: 'rule-1', group_hash: 'hash-1', alert_id: 'ep-1' }),
-          createAlert({ rule_id: 'rule-2', group_hash: 'hash-2', alert_id: 'ep-2' }),
-        ],
-      });
-
-      expect(actionTypesOf(ledger.takeReady())).toEqual(['unmatched', 'unmatched']);
-    });
-
     it('records every alert of a dispatched group', () => {
       const group = createActionGroup({
         id: 'group-1',
@@ -311,34 +240,18 @@ describe('SeriesLedger', () => {
       ]);
     });
 
-    describe('space_id', () => {
-      it('takes the space_id from the alert', () => {
-        const ledger = buildLedger({
-          suppressed: [{ ...alert, space_id: 'custom', reason: 'suppressed' }],
-        });
-
-        expect(ledger.takeReady()).toEqual([expect.objectContaining({ space_id: 'custom' })]);
+    it('takes the space_id of each record from its alert', () => {
+      const ledger = buildLedger({
+        suppressed: [
+          { ...createAlert({ space_id: 'space-a', group_hash: 'hash-1' }), reason: 'suppressed' },
+          { ...createAlert({ space_id: 'space-b', group_hash: 'hash-2' }), reason: 'suppressed' },
+        ],
       });
 
-      it('keeps the default space_id', () => {
-        const ledger = buildLedger({ suppressed: [{ ...alert, reason: 'suppressed' }] });
-
-        expect(ledger.takeReady()).toEqual([expect.objectContaining({ space_id: 'default' })]);
-      });
-
-      it('resolves a different space_id for alerts in different spaces', () => {
-        const ledger = buildLedger({
-          suppressed: [
-            { ...createAlert({ space_id: 'space-a', group_hash: 'hash-1' }), reason: 'suppressed' },
-            { ...createAlert({ space_id: 'space-b', group_hash: 'hash-2' }), reason: 'suppressed' },
-          ],
-        });
-
-        expect(ledger.takeReady().map(({ space_id: spaceId }) => spaceId)).toEqual([
-          'space-a',
-          'space-b',
-        ]);
-      });
+      expect(ledger.takeReady().map(({ space_id: spaceId }) => spaceId)).toEqual([
+        'space-a',
+        'space-b',
+      ]);
     });
   });
 });

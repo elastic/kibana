@@ -65,10 +65,16 @@ interface DispatchBatch {
   failedSpaces: Map<string, Error>;
 }
 
-interface PendingSchedule {
+interface PlannedSchedule {
   group: ActionGroup;
   workflowId: string;
   item: BulkScheduleWorkflowItem;
+}
+
+/** What scheduling produced so far this tick; read into the tick's `DispatchOutcome`. */
+interface DispatchProgress {
+  readonly executionsByGroup: Map<ActionGroupId, string[]>;
+  readonly failures: DispatchFailure[];
 }
 
 const toError = (err: unknown): Error => (isError(err) ? err : new Error(String(err)));
@@ -100,11 +106,11 @@ const addMapSet = <K, V>(map: Map<K, Set<V>>, key: K, value: V): void => {
  * `maxItems` gets a chunk of its own.
  */
 const chunkByGroup = (
-  itemsByGroup: ReadonlyMap<ActionGroupId, PendingSchedule[]>,
+  itemsByGroup: ReadonlyMap<ActionGroupId, PlannedSchedule[]>,
   maxItems: number
-): PendingSchedule[][] => {
-  const chunks: PendingSchedule[][] = [];
-  let current: PendingSchedule[] = [];
+): PlannedSchedule[][] => {
+  const chunks: PlannedSchedule[][] = [];
+  let current: PlannedSchedule[] = [];
   for (const groupItems of itemsByGroup.values()) {
     if (current.length > 0 && current.length + groupItems.length > maxItems) {
       chunks.push(current);
@@ -145,10 +151,8 @@ export class DispatchStep implements DispatcherStep {
       return { type: 'halt', reason: 'no_actions' };
     }
 
-    const dispatchedExecutions = new Map<ActionGroupId, string[]>();
-    const dispatchFailures: DispatchFailure[] = [];
-    const outcome = () =>
-      DispatchOutcome.of({ executionsByGroup: dispatchedExecutions, failures: dispatchFailures });
+    const progress: DispatchProgress = { executionsByGroup: new Map(), failures: [] };
+    const outcome = () => DispatchOutcome.of(progress);
 
     try {
       await this.commit(ledger.takeReady(), logger);
@@ -156,8 +160,7 @@ export class DispatchStep implements DispatcherStep {
         plan.toDispatch,
         policies,
         input.signal,
-        dispatchedExecutions,
-        dispatchFailures,
+        progress,
         logger
       )) {
         await this.commit(
@@ -189,7 +192,7 @@ export class DispatchStep implements DispatcherStep {
     }
 
     // Completing with groups never attempted would let the watermark advance past their alerts.
-    if (ledger.hasPending()) {
+    if (ledger.hasUnattemptedGroups()) {
       return { type: 'halt', reason: 'aborted' };
     }
 
@@ -248,17 +251,17 @@ export class DispatchStep implements DispatcherStep {
     groups: readonly ActionGroup[],
     policies: PolicyCatalog,
     signal: AbortSignal,
-    dispatchedExecutions: Map<ActionGroupId, string[]>,
-    dispatchFailures: DispatchFailure[],
+    progress: DispatchProgress,
     logger: LoggerServiceContract
   ): AsyncGenerator<ActionGroup[]> {
     if (groups.length === 0 || signal.aborted) {
       return;
     }
 
+    const { failures } = progress;
     const licenseState = await this.licenseService.getActionPoliciesLicenseState();
     if (!licenseState.isValid) {
-      this.recordLicenseNotSupported(groups, licenseState, dispatchFailures, logger);
+      this.recordLicenseNotSupported(groups, licenseState, failures, logger);
       yield [...groups];
       return;
     }
@@ -268,7 +271,7 @@ export class DispatchStep implements DispatcherStep {
     for (const group of groups) {
       const apiKey = policies.apiKeyOf(group.policyId);
       if (!apiKey) {
-        this.recordMissingApiKey(group, dispatchFailures, logger);
+        this.recordMissingApiKey(group, failures, logger);
         groupsWithoutApiKey.push(group);
         continue;
       }
@@ -292,30 +295,18 @@ export class DispatchStep implements DispatcherStep {
     await this.prefetchWorkflows(batches, logger);
     for (const { groups: batchGroups, request, workflowsBySpace, failedSpaces } of batches) {
       if (signal.aborted) return;
-      const pendingByGroup = Map.groupBy(
-        this.buildPendingSchedules(
-          batchGroups,
-          workflowsBySpace,
-          failedSpaces,
-          dispatchFailures,
-          logger
-        ),
+      const schedulesByGroup = Map.groupBy(
+        this.planSchedules(batchGroups, workflowsBySpace, failedSpaces, failures, logger),
         ({ group }) => group.id
       );
-      const unscheduledGroups = batchGroups.filter(({ id }) => !pendingByGroup.has(id));
+      const unscheduledGroups = batchGroups.filter(({ id }) => !schedulesByGroup.has(id));
       if (unscheduledGroups.length > 0) {
         yield unscheduledGroups;
       }
-      for (const chunk of chunkByGroup(pendingByGroup, DISPATCH_CHUNK_SIZE)) {
+      for (const chunk of chunkByGroup(schedulesByGroup, DISPATCH_CHUNK_SIZE)) {
         if (signal.aborted) return;
         await withDispatcherSpan('dispatch_chunk', () =>
-          this.dispatchChunk(
-            chunk,
-            this.workflowsManagement.getClient(request),
-            dispatchedExecutions,
-            dispatchFailures,
-            logger
-          )
+          this.dispatchChunk(chunk, this.workflowsManagement.getClient(request), progress, logger)
         );
         yield uniqBy(
           chunk.map(({ group }) => group),
@@ -407,14 +398,14 @@ export class DispatchStep implements DispatcherStep {
     });
   }
 
-  private buildPendingSchedules(
+  private planSchedules(
     groups: ActionGroup[],
     workflowsBySpace: Map<string, Map<string, WorkflowDetailDto>>,
     failedSpaces: Map<string, Error>,
     dispatchFailures: DispatchFailure[],
     logger: LoggerServiceContract
-  ): PendingSchedule[] {
-    const pending: PendingSchedule[] = [];
+  ): PlannedSchedule[] {
+    const schedules: PlannedSchedule[] = [];
 
     for (const group of groups) {
       const prefetchError = failedSpaces.get(group.spaceId);
@@ -458,7 +449,7 @@ export class DispatchStep implements DispatcherStep {
           );
           continue;
         }
-        pending.push({
+        schedules.push({
           group,
           workflowId: destination.id,
           item: this.buildScheduleItem(group, workflow),
@@ -466,7 +457,7 @@ export class DispatchStep implements DispatcherStep {
       }
     }
 
-    return pending;
+    return schedules;
   }
 
   private recordWarnFailure(
@@ -537,22 +528,15 @@ export class DispatchStep implements DispatcherStep {
   }
 
   private async dispatchChunk(
-    chunk: PendingSchedule[],
+    chunk: PlannedSchedule[],
     client: WorkflowsManagementClient,
-    dispatchedExecutions: Map<ActionGroupId, string[]>,
-    dispatchFailures: DispatchFailure[],
+    progress: DispatchProgress,
     logger: LoggerServiceContract
   ): Promise<void> {
     try {
-      const results = await client.bulkScheduleWorkflow(chunk.map((pending) => pending.item));
+      const results = await client.bulkScheduleWorkflow(chunk.map(({ item }) => item));
       for (let i = 0; i < chunk.length; i++) {
-        this.applyScheduleResult(
-          chunk[i],
-          results[i],
-          dispatchedExecutions,
-          dispatchFailures,
-          logger
-        );
+        this.applyScheduleResult(chunk[i], results[i], progress, logger);
       }
     } catch (err) {
       // Unlike a failed commit, a failed schedule leaves no workflow to record,
@@ -567,7 +551,7 @@ export class DispatchStep implements DispatcherStep {
           error.message,
       });
       for (const { group, workflowId } of chunk) {
-        dispatchFailures.push(
+        progress.failures.push(
           this.buildFailure(
             group,
             workflowId,
@@ -580,36 +564,35 @@ export class DispatchStep implements DispatcherStep {
   }
 
   private applyScheduleResult(
-    pending: PendingSchedule,
+    { group, workflowId }: PlannedSchedule,
     result: BulkScheduleWorkflowResult[number] | undefined,
-    dispatchedExecutions: Map<ActionGroupId, string[]>,
-    dispatchFailures: DispatchFailure[],
+    { executionsByGroup, failures }: DispatchProgress,
     logger: LoggerServiceContract
   ): void {
     if (result?.status === 'scheduled' && result.workflowExecutionId) {
-      pushMapList(dispatchedExecutions, pending.group.id, result.workflowExecutionId);
+      pushMapList(executionsByGroup, group.id, result.workflowExecutionId);
       return;
     }
 
     if (result?.status === 'error') {
       this.recordScheduleError(
-        pending.group,
-        pending.workflowId,
+        group,
+        workflowId,
         new Error(result.error.message),
-        dispatchFailures,
+        failures,
         logger
       );
       return;
     }
 
     this.recordWarnFailure(
-      pending.group,
-      pending.workflowId,
+      group,
+      workflowId,
       DISPATCH_FAILURE_REASONS.SCHEDULE_ERROR,
       ALERTING_LOG_CODES.DISPATCH_WORKFLOW_SCHEDULE_FAILED,
       'Workflow scheduling returned no execution id',
-      `Workflow ${pending.workflowId} scheduling returned no execution id for group ${pending.group.id}`,
-      dispatchFailures,
+      `Workflow ${workflowId} scheduling returned no execution id for group ${group.id}`,
+      failures,
       logger
     );
   }

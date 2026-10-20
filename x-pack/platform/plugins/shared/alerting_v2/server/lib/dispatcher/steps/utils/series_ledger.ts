@@ -16,7 +16,7 @@ interface SeriesRecords {
   /** `fire`, `suppress` and `unmatched` records of every policy and alert of the series. */
   docs: AlertActionDocument[];
   /** (toDispatch group, alert) pairs of the series not concluded yet; the docs wait for 0. */
-  pending: number;
+  unconcludedPairs: number;
   /**
    * Whether the docs were handed out for writing, so they are handed out once. Handed out is not
    * written: execution history reports the series even when the commit then fails.
@@ -60,7 +60,7 @@ export class SeriesLedger {
       const key = suppressionSeriesKey(alert);
       let records = recordsBySeries.get(key);
       if (!records) {
-        records = { docs: [], pending: 0, released: false };
+        records = { docs: [], unconcludedPairs: 0, released: false };
         recordsBySeries.set(key, records);
       }
       records.docs.push(toAction({ alert, actionType, reason, spaceId: alert.space_id }));
@@ -81,7 +81,7 @@ export class SeriesLedger {
     for (const group of plan.toDispatch) {
       const series = group.alerts.map((alert) => {
         const records = record(alert, 'fire', `dispatched by policy ${group.policyId}`);
-        records.pending += 1;
+        records.unconcludedPairs += 1;
         return records;
       });
       toDispatch.set(group.id, { group, series });
@@ -106,7 +106,7 @@ export class SeriesLedger {
   public takeReady(): AlertActionDocument[] {
     const docs: AlertActionDocument[] = [];
     for (const records of this.recordsBySeries.values()) {
-      if (records.pending === 0 && !records.released) {
+      if (records.unconcludedPairs === 0 && !records.released) {
         records.released = true;
         docs.push(...records.docs);
       }
@@ -127,8 +127,8 @@ export class SeriesLedger {
       }
       this.concluded.set(id, entry.group);
       for (const records of entry.series) {
-        records.pending -= 1;
-        if (records.pending === 0) {
+        records.unconcludedPairs -= 1;
+        if (records.unconcludedPairs === 0) {
           records.released = true;
           docs.push(...records.docs);
         }
@@ -138,7 +138,7 @@ export class SeriesLedger {
   }
 
   /** Whether a toDispatch group was never attempted, so the tick must not advance past it. */
-  public hasPending(): boolean {
+  public hasUnattemptedGroups(): boolean {
     return this.concluded.size < this.toDispatch.size;
   }
 
