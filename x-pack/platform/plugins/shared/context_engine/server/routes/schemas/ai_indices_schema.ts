@@ -40,8 +40,23 @@ import type { ImprovementAction } from '../../../common/http_api/improvement_act
 import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
 import {
   KI_LIFECYCLE_STATUSES,
+  KI_REFERENCE_RELATIONS,
+  MAX_KI_ATTRIBUTE_ARRAY_VALUES,
+  MAX_KI_ATTRIBUTE_KEY_LENGTH,
+  MAX_KI_ATTRIBUTE_VALUE_LENGTH,
+  MAX_KI_ATTRIBUTES,
+  MAX_KI_CONTENT_LENGTH,
+  MAX_KI_DESCRIPTION_LENGTH,
   MAX_KI_ID_LENGTH,
+  MAX_KI_REFERENCE_DESCRIPTION_LENGTH,
+  MAX_KI_REFERENCE_URI_LENGTH,
+  MAX_KI_REFERENCES,
+  MAX_KI_TAG_LENGTH,
+  MAX_KI_TAGS,
+  MAX_KI_TITLE_LENGTH,
+  MAX_KI_TYPE_LENGTH,
   type KiLifecycleStatus,
+  type KiReferenceRelation,
 } from '../../../common/step_types/ki';
 import {
   validateAbsoluteSignalWindow,
@@ -351,6 +366,128 @@ export const getKiQuerySchema = schema.object({
   lifecycle_status: schema.maybe(kiLifecycleStatusesQuerySchema),
 });
 
+export const updateKiQuerySchema = schema.object({
+  index: schema.maybe(
+    schema.string({
+      minLength: 1,
+      maxLength: MAX_INDEX_NAME_BYTES,
+      meta: {
+        description:
+          'Optional: the specific Elasticsearch index that stores this Knowledge Indicator. Only needed to disambiguate when the AI Index destination is a pattern matching more than one physical index; omit it for the common case of a single backing index.',
+      },
+    })
+  ),
+});
+
+export const kiReferenceBodySchema = schema.object({
+  uri: schema.string({
+    minLength: 1,
+    maxLength: MAX_KI_REFERENCE_URI_LENGTH,
+    meta: { description: 'The referenced URI, for example index://logs-*.' },
+  }),
+  relation: schema.maybe(
+    schema.oneOf(
+      KI_REFERENCE_RELATIONS.map((relation) => schema.literal(relation)) as [
+        Type<KiReferenceRelation>
+      ],
+      {
+        meta: { description: 'How the URI relates to this Knowledge Indicator.' },
+      }
+    )
+  ),
+  description: schema.maybe(
+    schema.string({
+      maxLength: MAX_KI_REFERENCE_DESCRIPTION_LENGTH,
+      meta: { description: 'Why this reference exists.' },
+    })
+  ),
+});
+
+const kiAttributeValueSchema = schema.oneOf([
+  schema.string({ maxLength: MAX_KI_ATTRIBUTE_VALUE_LENGTH }),
+  schema.number(),
+  schema.boolean(),
+  schema.arrayOf(schema.string({ maxLength: MAX_KI_ATTRIBUTE_VALUE_LENGTH }), {
+    maxSize: MAX_KI_ATTRIBUTE_ARRAY_VALUES,
+  }),
+]);
+
+export const updateKiBodySchema = schema.object({
+  ki: schema.object({
+    type: schema.maybe(
+      schema.string({
+        minLength: 1,
+        maxLength: MAX_KI_TYPE_LENGTH,
+        meta: {
+          description:
+            'The Knowledge Indicator type (for example index_metadata, document, detection).',
+        },
+      })
+    ),
+    title: schema.maybe(
+      schema.string({
+        minLength: 1,
+        maxLength: MAX_KI_TITLE_LENGTH,
+        meta: { description: 'A short title for the Knowledge Indicator.' },
+      })
+    ),
+    description: schema.maybe(
+      schema.string({
+        maxLength: MAX_KI_DESCRIPTION_LENGTH,
+        meta: { description: 'A one-line description of the Knowledge Indicator.' },
+      })
+    ),
+    content: schema.maybe(
+      schema.string({
+        maxLength: MAX_KI_CONTENT_LENGTH,
+        meta: { description: 'The knowledge content of the Knowledge Indicator.' },
+      })
+    ),
+    tags: schema.maybe(
+      schema.arrayOf(
+        schema.string({
+          minLength: 1,
+          maxLength: MAX_KI_TAG_LENGTH,
+        }),
+        {
+          maxSize: MAX_KI_TAGS,
+          meta: { description: 'Tags used to categorize the Knowledge Indicator.' },
+        }
+      )
+    ),
+    attributes: schema.maybe(
+      schema.recordOf(
+        schema.string({ minLength: 1, maxLength: MAX_KI_ATTRIBUTE_KEY_LENGTH }),
+        kiAttributeValueSchema,
+        {
+          validate: (attributes) =>
+            Object.keys(attributes).length > MAX_KI_ATTRIBUTES
+              ? `must not have more than ${MAX_KI_ATTRIBUTES} entries`
+              : undefined,
+          meta: {
+            description: 'Arbitrary key-value attributes attached to the Knowledge Indicator.',
+          },
+        }
+      )
+    ),
+    references: schema.maybe(
+      schema.arrayOf(kiReferenceBodySchema, {
+        maxSize: MAX_KI_REFERENCES,
+        meta: { description: 'URIs this Knowledge Indicator relates to.' },
+      })
+    ),
+    expires_at: schema.maybe(
+      schema.nullable(
+        schema.string({
+          meta: {
+            description: 'ISO 8601 expiry. `null` clears the expiry.',
+          },
+        })
+      )
+    ),
+  }),
+});
+
 export const queryAiIndicesBodySchema = schema.object({
   query: schema.string({
     minLength: 1,
@@ -603,6 +740,32 @@ export const deleteAiIndexResponseSchema = () =>
     // codeql[js/kibana/unbounded-array-in-schema] Response schema: validates server output, not request input
     errors: schema.arrayOf(schema.string(), {
       meta: { description: 'Best-effort cleanup errors after the entry was deleted, if any.' },
+    }),
+  });
+
+export const updateKiResponseSchema = () =>
+  schema.object({
+    id: schema.string({
+      meta: { description: 'The document ID of the updated Knowledge Indicator.' },
+    }),
+    result: schema.oneOf([schema.literal('updated'), schema.literal('noop')], {
+      meta: {
+        description: 'Whether Elasticsearch updated the document or reported no changes (`noop`).',
+      },
+    }),
+  });
+
+export const deleteKiResponseSchema = () =>
+  schema.object({
+    id: schema.string({
+      meta: { description: 'The document ID of the deleted (soft-deleted) Knowledge Indicator.' },
+    }),
+  });
+
+export const restoreKiResponseSchema = () =>
+  schema.object({
+    id: schema.string({
+      meta: { description: 'The document ID of the restored Knowledge Indicator.' },
     }),
   });
 

@@ -7,6 +7,7 @@
 
 import type { AuditLogger } from '@kbn/core/server';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
+import { isResponseError } from '@kbn/es-errors';
 import type { Logger } from '@kbn/logging';
 import type { StepContext } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
@@ -422,27 +423,39 @@ export const findKiRevision = async ({
   dest,
   kiId,
   abortSignal,
+  backingIndex,
+  includeSource,
 }: {
   esClient: ElasticsearchClient;
   aiIndexId: string;
   dest: AiIndexDest;
   kiId: string;
   abortSignal: AbortSignal;
+  backingIndex?: string;
+  /** Fetches the full `_source` for an index-type dest instead of just `id`/`governance`. */
+  includeSource?: boolean;
 }): Promise<KiRevision | undefined> => {
   const isDataStream = dest.type === 'data_stream';
+  const useBackingIndexFilter = !isDataStream && backingIndex !== undefined;
   // A dest with no physical backing index yet must resolve to empty hits, not an error.
   const response = await esClient.search<StoredKi>(
     {
       index: dest.value,
       ignore_unavailable: true,
       allow_no_indices: true,
-      query: kiIdQuery(kiId),
+      query: useBackingIndexFilter
+        ? {
+            bool: {
+              filter: [kiIdQuery(kiId), { term: { _index: backingIndex } }],
+            },
+          }
+        : kiIdQuery(kiId),
       ...(isDataStream && {
         sort: [{ '@timestamp': { order: 'desc' as const, unmapped_type: 'date' as const } }],
       }),
-      size: isDataStream ? REVISION_TIE_WINDOW : 2,
+      size: isDataStream ? REVISION_TIE_WINDOW : useBackingIndexFilter ? 1 : 2,
       seq_no_primary_term: true,
-      _source: isDataStream ? true : ['id', 'governance'],
+      _source: isDataStream || includeSource ? true : ['id', 'governance'],
     },
     { signal: abortSignal }
   );
@@ -469,4 +482,74 @@ export const findKiRevision = async ({
     primaryTerm: hit._primary_term,
     source: hit._source ?? {},
   };
+};
+
+/** Finds the current revision of a KI, failing with {@link kiNotFoundError} when it does not exist. */
+export const getKiRevision = async (
+  options: Parameters<typeof findKiRevision>[0]
+): Promise<KiRevision> => {
+  const revision = await findKiRevision(options);
+  if (!revision) {
+    throw kiNotFoundError(options.aiIndexId, options.kiId);
+  }
+  return revision;
+};
+
+/** Writes changes onto an already-resolved KI revision: appends a new revision for a
+ * data stream, or partial-merges them in place (with optimistic concurrency) otherwise. */
+export const writeKiRevision = async ({
+  esClient,
+  aiIndexId,
+  dest,
+  kiId,
+  revision,
+  changes,
+  refresh,
+  abortSignal,
+}: {
+  esClient: ElasticsearchClient;
+  aiIndexId: string;
+  dest: AiIndexDest;
+  kiId: string;
+  revision: KiRevision;
+  changes: KiRevisionChanges;
+  refresh: boolean;
+  abortSignal: AbortSignal;
+}): Promise<{ result: 'updated' | 'noop' }> => {
+  if (dest.type === 'data_stream') {
+    await appendKiRevision({
+      esClient,
+      destValue: dest.value,
+      kiId,
+      source: revision.source,
+      changes,
+      refresh,
+      abortSignal,
+    });
+    return { result: 'updated' };
+  }
+
+  const response = await esClient
+    .update(
+      {
+        index: revision.index,
+        id: revision.documentId,
+        doc: changes,
+        if_seq_no: revision.seqNo,
+        if_primary_term: revision.primaryTerm,
+        ...(refresh && { refresh: 'wait_for' as const }),
+      },
+      { signal: abortSignal }
+    )
+    .catch((error) => {
+      if (isResponseError(error) && error.statusCode === 404) {
+        throw kiNotFoundError(aiIndexId, kiId);
+      }
+      if (isResponseError(error) && error.statusCode === 409) {
+        throw kiConflictError(aiIndexId, kiId);
+      }
+      throw error;
+    });
+
+  return { result: response.result === 'noop' ? 'noop' : 'updated' };
 };

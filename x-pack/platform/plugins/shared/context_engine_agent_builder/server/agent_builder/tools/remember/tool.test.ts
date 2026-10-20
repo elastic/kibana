@@ -10,6 +10,7 @@ import { contextEngineMemoryTools } from '@kbn/agent-builder-common/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import { kiFieldsSchema } from '@kbn/context-engine-plugin/common/step_types/ki';
+import { kiIdQuery } from '@kbn/context-engine-plugin/server/ai_indices/ki_get';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import { coreMock } from '@kbn/core/server/mocks';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
@@ -288,8 +289,7 @@ describe('remember tool', () => {
         {
           type: ToolResultType.error,
           data: {
-            message:
-              "Failed to store memory: Memory 'missing-memory' was not found in AI index 'support'.",
+            message: "Failed to store memory: KI 'missing-memory' not found in AI index 'support'",
           },
         },
       ],
@@ -340,6 +340,7 @@ describe('remember tool', () => {
             _index: 'ai-index-idx-support',
             _source: {
               '@timestamp': '2026-09-01T00:00:00.000Z',
+              id: 'session-1',
               type: 'memory.session',
               title: 'Session summary',
               description: 'Summary',
@@ -466,10 +467,11 @@ describe('remember tool', () => {
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
         index: 'ai-index-ds-support',
-        query: { term: { id: 'memory-1' } },
-        sort: [{ '@timestamp': 'desc' }],
-        size: 1,
-      })
+        query: kiIdQuery('memory-1'),
+        sort: [{ '@timestamp': { order: 'desc', unmapped_type: 'date' } }],
+        size: 10,
+      }),
+      expect.objectContaining({ signal: expect.anything() })
     );
     expect(index).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -544,9 +546,10 @@ describe('remember tool', () => {
 
     expect(search).toHaveBeenCalledWith(
       expect.objectContaining({
-        query: { ids: { values: ['memory-1'] } },
+        query: kiIdQuery('memory-1'),
         seq_no_primary_term: true,
-      })
+      }),
+      expect.objectContaining({ signal: expect.anything() })
     );
     expect(index).toHaveBeenCalledWith(
       expect.objectContaining({

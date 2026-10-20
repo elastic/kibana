@@ -74,3 +74,30 @@ export interface GetKiResponse {
   id: string;
   document: KiDocument;
 }
+
+/** Body for a partial update (edit) of a Knowledge Indicator. */
+export interface UpdateKiBody {
+  ki: Partial<
+    Pick<
+      KiDocument,
+      'type' | 'title' | 'description' | 'content' | 'tags' | 'attributes' | 'references'
+    >
+  > & {
+    /** ISO 8601 expiry. `null` clears the expiry. */
+    expires_at?: string | null;
+  };
+}
+
+export interface UpdateKiResponse {
+  id: string;
+  result: 'updated' | 'noop';
+}
+
+/** Response of a soft-delete (lifecycle tombstone) of a Knowledge Indicator. */
+export interface DeleteKiResponse {
+  id: string;
+}
+
+export interface RestoreKiResponse {
+  id: string;
+}

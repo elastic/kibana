@@ -13,6 +13,13 @@ import { getAgentFromRunContext } from '@kbn/agent-builder-server';
 import { aiIndexIdFieldSchema } from '@kbn/context-engine-plugin/common/ai_index_schemas';
 import { MAX_KI_ID_LENGTH } from '@kbn/context-engine-plugin/common/step_types/ki';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
+import {
+  getKiRevision,
+  writeKiRevision,
+  isKiDeleted,
+  type KiWriter,
+  type StoredKi,
+} from '@kbn/context-engine-plugin/server/step_types/helpers';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { z } from '@kbn/zod/v4';
@@ -20,11 +27,7 @@ import dedent from 'dedent';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
 import { getWritableMemoryAiIndex } from '../get_writable_memory_ai_index';
-import {
-  createMemoryWriter,
-  type StoredMemoryDocument,
-  updateMemoryProvenance,
-} from '../memory_document';
+import { createMemoryWriter } from '../memory_document';
 
 const forgetSchema = z.object({
   aiIndexId: aiIndexIdFieldSchema.describe(
@@ -36,6 +39,12 @@ const forgetSchema = z.object({
     .max(MAX_KI_ID_LENGTH)
     .describe('The ID of the existing memory to mark as deleted'),
 });
+
+/** Narrows a stored KI to a memory document by its `type` discriminant. */
+const isMemoryDocument = (
+  source: StoredKi
+): source is StoredKi & { type: 'memory.session' | 'memory.session_fact' } =>
+  source.type === 'memory.session' || source.type === 'memory.session_fact';
 
 export const createForgetTool = ({
   getAiIndexService,
@@ -83,43 +92,23 @@ export const createForgetTool = ({
       });
 
       const currentUserClient = esClient.asCurrentUser;
-      const searchResponse = await currentUserClient.search<StoredMemoryDocument>({
-        index: aiIndex.dest.value,
-        ignore_unavailable: true,
-        allow_no_indices: true,
-        ...(aiIndex.dest.type === 'data_stream'
-          ? {
-              query: { term: { id: params.id } },
-              sort: [{ '@timestamp': 'desc' as const }],
-              size: 1,
-            }
-          : {
-              query: { ids: { values: [params.id] } },
-              seq_no_primary_term: true,
-              size: 2,
-            }),
+      const abortSignal = new AbortController().signal;
+
+      const revision = await getKiRevision({
+        esClient: currentUserClient,
+        aiIndexId: params.aiIndexId,
+        dest: aiIndex.dest,
+        kiId: params.id,
+        abortSignal,
+        includeSource: true,
       });
 
-      if (aiIndex.dest.type === 'index' && searchResponse.hits.hits.length > 1) {
-        throw new Error(
-          `Memory '${params.id}' exists in multiple indices matched by AI index '${params.aiIndexId}'.`
-        );
-      }
-
-      const [existingHit] = searchResponse.hits.hits;
-      if (!existingHit?._source) {
-        throw new Error(`Memory '${params.id}' was not found in AI index '${params.aiIndexId}'.`);
-      }
-      if (
-        existingHit._source.type !== 'memory.session' &&
-        existingHit._source.type !== 'memory.session_fact'
-      ) {
+      if (!isMemoryDocument(revision.source)) {
         throw new Error(
           `Document '${params.id}' in AI index '${params.aiIndexId}' is not a memory.`
         );
       }
-
-      if (existingHit._source.governance?.lifecycle?.status === 'deleted') {
+      if (isKiDeleted(revision.source)) {
         return {
           results: [
             {
@@ -132,41 +121,28 @@ export const createForgetTool = ({
 
       const now = new Date().toISOString();
       const agent = getAgentFromRunContext(runContext);
-      const writer = createMemoryWriter({
+      const writer: KiWriter = createMemoryWriter({
         toolId: contextEngineMemoryTools.forget,
         runId: runContext.runId,
         agentId: agent?.agentId,
       });
-      const tombstoneDocument: StoredMemoryDocument = {
-        ...existingHit._source,
-        '@timestamp': aiIndex.dest.type === 'data_stream' ? now : existingHit._source['@timestamp'],
+      const changes = {
         updated_at: now,
         governance: {
-          ...updateMemoryProvenance(existingHit._source.governance, writer, false),
-          lifecycle: {
-            ...existingHit._source.governance?.lifecycle,
-            status: 'deleted',
-          },
+          provenance: { updated_by: writer },
+          lifecycle: { status: 'deleted' as const },
         },
       };
 
-      if (
-        aiIndex.dest.type === 'index' &&
-        (existingHit._seq_no === undefined || existingHit._primary_term === undefined)
-      ) {
-        throw new Error(`Memory '${params.id}' is missing concurrency metadata.`);
-      }
-
-      await currentUserClient.index({
-        index: aiIndex.dest.type === 'index' ? existingHit._index : aiIndex.dest.value,
-        ...(aiIndex.dest.type === 'index' && {
-          id: params.id,
-          if_seq_no: existingHit._seq_no,
-          if_primary_term: existingHit._primary_term,
-        }),
-        document: tombstoneDocument,
-        ...(aiIndex.dest.type === 'data_stream' && { op_type: 'create' as const }),
-        refresh: 'wait_for',
+      await writeKiRevision({
+        esClient: currentUserClient,
+        aiIndexId: params.aiIndexId,
+        dest: aiIndex.dest,
+        kiId: params.id,
+        revision,
+        changes,
+        refresh: true,
+        abortSignal,
       });
 
       return {

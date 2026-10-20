@@ -22,6 +22,12 @@ import {
   MAX_KI_TITLE_LENGTH,
 } from '@kbn/context-engine-plugin/common/step_types/ki';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
+import {
+  getKiRevision,
+  isKiDeleted,
+  type KiWriter,
+  type StoredKi,
+} from '@kbn/context-engine-plugin/server/step_types/helpers';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { isoDateTime, z } from '@kbn/zod/v4';
@@ -38,6 +44,16 @@ import {
 
 const memoryTypeSchema = z.enum(MEMORY_KI_TYPES);
 const DEFAULT_MEMORY_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
+
+/** Narrows a stored KI to a memory document by its required fields and `type` discriminant. */
+const isMemoryDocument = (source: StoredKi): source is StoredKi & StoredMemoryDocument =>
+  (source.type === 'memory.session' || source.type === 'memory.session_fact') &&
+  typeof source['@timestamp'] === 'string' &&
+  typeof source.id === 'string' &&
+  typeof source.title === 'string' &&
+  typeof source.description === 'string' &&
+  typeof source.content === 'string' &&
+  typeof source.updated_at === 'string';
 
 const rememberSchema = z.object({
   aiIndexId: aiIndexIdFieldSchema.describe(
@@ -168,7 +184,7 @@ export const createRememberTool = ({
         currentDate.getTime() + DEFAULT_MEMORY_EXPIRATION_MS
       ).toISOString();
       const logicalId = params.id ?? generateId();
-      const writer = createMemoryWriter({
+      const writer: KiWriter = createMemoryWriter({
         toolId: contextEngineMemoryTools.remember,
         runId: runContext.runId,
         agentId: agent?.agentId,
@@ -179,54 +195,34 @@ export const createRememberTool = ({
       let existingDocument: StoredMemoryDocument | undefined;
 
       if (params.id) {
-        const searchResponse = await currentUserClient.search<StoredMemoryDocument>({
-          index: aiIndex.dest.value,
-          ignore_unavailable: true,
-          allow_no_indices: true,
-          ...(aiIndex.dest.type === 'data_stream'
-            ? {
-                query: { term: { id: params.id } },
-                sort: [{ '@timestamp': 'desc' as const }],
-                size: 1,
-              }
-            : {
-                query: { ids: { values: [params.id] } },
-                seq_no_primary_term: true,
-                size: 2,
-              }),
+        const abortSignal = new AbortController().signal;
+        const revision = await getKiRevision({
+          esClient: currentUserClient,
+          aiIndexId: params.aiIndexId,
+          dest: aiIndex.dest,
+          kiId: params.id,
+          abortSignal,
+          includeSource: true,
         });
 
-        if (aiIndex.dest.type === 'index' && searchResponse.hits.hits.length > 1) {
-          throw new Error(
-            `Memory '${params.id}' exists in multiple indices matched by AI index '${params.aiIndexId}'.`
-          );
-        }
-
-        const [existingHit] = searchResponse.hits.hits;
-        if (!existingHit?._source) {
-          throw new Error(`Memory '${params.id}' was not found in AI index '${params.aiIndexId}'.`);
-        }
-        if (
-          existingHit._source.type !== 'memory.session' &&
-          existingHit._source.type !== 'memory.session_fact'
-        ) {
+        if (!isMemoryDocument(revision.source)) {
           throw new Error(
             `Document '${params.id}' in AI index '${params.aiIndexId}' is not a memory.`
           );
         }
-        if (existingHit._source.type !== params.type) {
+        if (revision.source.type !== params.type) {
           throw new Error(
-            `Memory '${params.id}' has type '${existingHit._source.type}' and cannot be revised as '${params.type}'.`
+            `Memory '${params.id}' has type '${revision.source.type}' and cannot be revised as '${params.type}'.`
           );
         }
-        if (existingHit._source.governance?.lifecycle?.status === 'deleted') {
+        if (isKiDeleted(revision.source)) {
           throw new Error(`Memory '${params.id}' was deleted and cannot be revised.`);
         }
 
-        existingBackingIndex = existingHit._index;
-        existingSeqNo = existingHit._seq_no;
-        existingPrimaryTerm = existingHit._primary_term;
-        existingDocument = existingHit._source;
+        existingBackingIndex = revision.index;
+        existingSeqNo = revision.seqNo;
+        existingPrimaryTerm = revision.primaryTerm;
+        existingDocument = revision.source;
       }
 
       const document: StoredMemoryDocument = {

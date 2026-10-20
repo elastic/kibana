@@ -19,6 +19,7 @@ import type { RouteSecurity } from '@kbn/core-http-server';
 import { isResponseError } from '@kbn/es-errors';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
+import { ExecutionError } from '@kbn/workflows/server';
 import type { DeleteWorkflowsApi } from '../types';
 import {
   AI_INDEX_API_VERSION,
@@ -30,6 +31,7 @@ import {
   AI_INDEX_DESCRIBE_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
+  AI_INDEX_KI_RESTORE_PATH,
   AI_INDEX_KI_LIST_PATH,
   AI_INDEX_PATH,
   AI_INDEX_QUERY_PATH,
@@ -43,7 +45,13 @@ import type {
   PutAiIndexResponse,
   QueryAiIndicesResponse,
 } from '../../common/http_api/ai_indices';
-import type { GetKiResponse, ListKisResponse } from '../../common/http_api/knowledge_indicators';
+import type {
+  DeleteKiResponse,
+  GetKiResponse,
+  ListKisResponse,
+  RestoreKiResponse,
+  UpdateKiResponse,
+} from '../../common/http_api/knowledge_indicators';
 import { apiPrivileges } from '../../common/features';
 import {
   InvalidAiIndexDestError,
@@ -72,6 +80,7 @@ import type { ImprovementsServiceApi } from '../improvements/service';
 import type { GetAiIndexDataReadServiceParams } from '../types';
 import { getKi } from '../ai_indices/ki_get';
 import { getKis } from '../ai_indices/ki_list';
+import { buildKiApiWriter, restoreKi, softDeleteKi, updateKi } from '../ai_indices/ki_write';
 import { validateConnectorSources } from '../ai_indices/validate_connector_sources';
 import { validateEsqlSources } from '../ai_indices/validate_esql_sources';
 import { validateTraces } from '../ai_indices/validate_traces';
@@ -96,7 +105,14 @@ import {
   queryAiIndicesBodySchema,
   queryAiIndicesResponseSchema,
   updateAiIndexResponseSchema,
+  updateKiBodySchema,
+  updateKiQuerySchema,
+  updateKiResponseSchema,
+  deleteKiResponseSchema,
+  restoreKiResponseSchema,
 } from './schemas/ai_indices_schema';
+import type { ContextEngineAnalyticsService } from '../telemetry';
+import { withKiWriteTelemetry } from '../step_types/helpers';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
 const READ_SECURITY: RouteSecurity = {
@@ -171,6 +187,17 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
   ) {
     return response.conflict({ body: { message: error.message } });
   }
+  if (error instanceof ExecutionError) {
+    if (error.type === 'NotFoundError') {
+      return response.notFound({ body: { message: error.message } });
+    }
+    if (error.type === 'ConflictError') {
+      return response.conflict({ body: { message: error.message } });
+    }
+    if (error.type === 'ValidationError') {
+      return response.badRequest({ body: { message: error.message } });
+    }
+  }
   logger.error(error instanceof Error ? error.stack ?? error.message : String(error));
   const statusCode = isResponseError(error) ? error.statusCode ?? 500 : 500;
   return response.customError({
@@ -202,6 +229,7 @@ export const registerAiIndexRoutes = ({
   getAgentBuilder,
   getWorkflowsManagementApi,
   getSpaces,
+  analyticsService,
 }: {
   router: IRouter;
   logger: Logger;
@@ -217,6 +245,7 @@ export const registerAiIndexRoutes = ({
   getAgentBuilder: () => Promise<AgentBuilderPluginStart | undefined>;
   getWorkflowsManagementApi: () => Promise<DeleteWorkflowsApi | undefined>;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
+  analyticsService: ContextEngineAnalyticsService;
 }) => {
   const reconcileSchedule = async (aiIndexId: string, spaceId: string, request: KibanaRequest) => {
     try {
@@ -750,6 +779,213 @@ export const registerAiIndexRoutes = ({
         } catch (error) {
           auditLogger.log(
             aiIndexAuditEvent({ action: AiIndexAuditAction.GET, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response, logger);
+        }
+      })
+    );
+
+  router.versioned
+    .patch({
+      path: AI_INDEX_KI_BY_ID_PATH,
+      security: WRITE_SECURITY,
+      access: 'internal',
+      summary: 'Update a Knowledge Indicator',
+      description:
+        'Applies a partial update to a Knowledge Indicator in the backing store of the specified AI index. Fails with a 404 if the KI does not exist, or a 409 if it is soft-deleted.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: kiIdParamsSchema,
+            query: updateKiQuerySchema,
+            body: updateKiBodySchema,
+          },
+          response: {
+            200: {
+              body: updateKiResponseSchema,
+              description: 'The Knowledge Indicator was updated.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description: 'The KI or AI index does not exist.',
+            },
+            409: {
+              body: errorResponseSchema,
+              description: 'The KI is soft-deleted or was modified concurrently.',
+            },
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId, kiId } = request.params;
+        const { index: backingIndex } = request.query;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        try {
+          const { output } = await withKiWriteTelemetry({
+            action: 'update',
+            aiIndexId,
+            analyticsService,
+            logger,
+            run: async (setManaged) => {
+              const { dest, managed } = await getAiIndexService().get(aiIndexId, spaceId);
+              setManaged(managed);
+              const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+              const writer = buildKiApiWriter('update', spaceId);
+              const result = await updateKi(esClient, {
+                aiIndexId,
+                dest,
+                kiId,
+                ki: request.body.ki,
+                writer,
+                backingIndex,
+              });
+              return { output: result };
+            },
+          });
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
+          const body: UpdateKiResponse = output;
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response, logger);
+        }
+      })
+    );
+
+  router.versioned
+    .delete({
+      path: AI_INDEX_KI_BY_ID_PATH,
+      security: WRITE_SECURITY,
+      access: 'internal',
+      summary: 'Delete a Knowledge Indicator',
+      description:
+        'Marks a Knowledge Indicator as deleted via a lifecycle tombstone, without removing the underlying document (the backing store keeps the data for audit/history). Idempotent: deleting an already-deleted KI succeeds without rewriting it. Fails with a 404 if the KI does not exist.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: kiIdParamsSchema,
+            query: updateKiQuerySchema,
+          },
+          response: {
+            200: {
+              body: deleteKiResponseSchema,
+              description: 'The Knowledge Indicator was soft-deleted.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description: 'The KI or AI index does not exist.',
+            },
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId, kiId } = request.params;
+        const { index: backingIndex } = request.query;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        try {
+          const { output } = await withKiWriteTelemetry({
+            action: 'delete',
+            aiIndexId,
+            analyticsService,
+            logger,
+            run: async (setManaged) => {
+              const { dest, managed } = await getAiIndexService().get(aiIndexId, spaceId);
+              setManaged(managed);
+              const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+              const writer = buildKiApiWriter('delete', spaceId);
+              const result = await softDeleteKi(esClient, {
+                aiIndexId,
+                dest,
+                kiId,
+                writer,
+                backingIndex,
+              });
+              return { output: result };
+            },
+          });
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
+          const body: DeleteKiResponse = output;
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response, logger);
+        }
+      })
+    );
+
+  router.versioned
+    .post({
+      path: AI_INDEX_KI_RESTORE_PATH,
+      security: WRITE_SECURITY,
+      access: 'internal',
+      summary: 'Restore a deleted Knowledge Indicator',
+      description:
+        'Restores a Knowledge Indicator previously marked as deleted by setting its lifecycle status back to active. Idempotent: restoring an already-active KI succeeds without rewriting it. Fails with a 404 if the KI does not exist.',
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: kiIdParamsSchema,
+            query: updateKiQuerySchema,
+          },
+          response: {
+            200: {
+              body: restoreKiResponseSchema,
+              description: 'The Knowledge Indicator was restored.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description: 'The KI or AI index does not exist.',
+            },
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId, kiId } = request.params;
+        const { index: backingIndex } = request.query;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        try {
+          const { output } = await withKiWriteTelemetry({
+            action: 'update',
+            aiIndexId,
+            analyticsService,
+            logger,
+            run: async (setManaged) => {
+              const { dest, managed } = await getAiIndexService().get(aiIndexId, spaceId);
+              setManaged(managed);
+              const esClient = (await ctx.core).elasticsearch.client.asCurrentUser;
+              const writer = buildKiApiWriter('update', spaceId);
+              const result = await restoreKi(esClient, {
+                aiIndexId,
+                dest,
+                kiId,
+                writer,
+                backingIndex,
+              });
+              return { output: result };
+            },
+          });
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.RESTORE, id: aiIndexId }));
+          const body: RestoreKiResponse = output;
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.RESTORE, id: aiIndexId, error })
           );
           return handleAiIndexError(error, response, logger);
         }
