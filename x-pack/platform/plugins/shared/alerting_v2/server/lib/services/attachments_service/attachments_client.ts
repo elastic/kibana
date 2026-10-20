@@ -19,18 +19,28 @@ export interface WorkflowYamlAttachmentData {
 }
 
 export interface AttachmentEntry<TData> {
+  /**
+   * Conversation-scoped attachment id, used for `get`/`getDraft` and `<render_attachment id>`.
+   * Stable across saves and never equal to the persisted object id (see `origin`).
+   */
   id: string;
   type: string;
   version: number;
   description?: string;
-  /** Id of the persisted object the attachment was created from, if any. This is the field name used by agent builder */
+  /**
+   * Id of the persisted object backing this attachment (e.g. the rule, action policy, or
+   * workflow id); `undefined` while the attachment is an unsaved draft. For rules and action
+   * policies it matches `data.id`; for workflows it matches `data.workflowId`.
+   */
   origin?: string;
   data: TData;
 }
 
 export interface AttachmentDraft<TData> {
+  /** Conversation-scoped attachment id; see {@link AttachmentEntry.id}. */
   attachmentId: string;
   isNew: boolean;
+  /** Persisted object id, if the attachment has been saved; see {@link AttachmentEntry.origin}. */
   origin?: string;
   data: Partial<TData>;
 }
