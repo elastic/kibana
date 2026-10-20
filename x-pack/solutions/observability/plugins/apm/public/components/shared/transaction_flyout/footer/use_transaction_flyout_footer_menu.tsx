@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { FlyoutFooterMenuPanel } from '@kbn/flyout-template';
 import type { ReactElement } from 'react';
 import React, { useMemo, useState } from 'react';
@@ -15,6 +17,10 @@ import { CustomLinkFlyout } from '../../transaction_action_menu/custom_link_flyo
 import { TransactionActionMenuContent } from '../../transaction_action_menu/transaction_action_menu';
 
 const ROOT_PANEL_ID = 0;
+
+// The custom links empty state is a fixed 300px wide; with the 16px padding on each side, this is
+// the width of the page-level Investigate popover.
+const PANEL_WIDTH = 332;
 
 export interface TransactionFlyoutFooterMenu {
   panels: FlyoutFooterMenuPanel[];
@@ -38,6 +44,7 @@ export function useTransactionFlyoutFooterMenu({
   const license = useLicenseContext();
   const hasGoldLicense = !!(license?.isActive && license?.hasAtLeast('gold'));
   const { profilingLocators, isLoading: isProfilingLoading } = useProfilingPlugin();
+  const { euiTheme } = useEuiTheme();
 
   const [isCustomLinkFlyoutOpen, setIsCustomLinkFlyoutOpen] = useState(false);
 
@@ -49,25 +56,32 @@ export function useTransactionFlyoutFooterMenu({
     return [
       {
         id: ROOT_PANEL_ID,
+        width: PANEL_WIDTH,
         items: [
           {
             key: 'investigate',
             renderItem: ({ closeMenu }) => (
-              <TransactionActionMenuContent
-                transaction={transaction}
-                profilingLocators={profilingLocators}
-                hasGoldLicense={hasGoldLicense}
-                onCreateCustomLink={() => {
-                  setIsCustomLinkFlyoutOpen(true);
-                  closeMenu();
-                }}
-              />
+              <div
+                css={css`
+                  padding: ${euiTheme.size.base};
+                `}
+              >
+                <TransactionActionMenuContent
+                  transaction={transaction}
+                  profilingLocators={profilingLocators}
+                  hasGoldLicense={hasGoldLicense}
+                  onCreateCustomLink={() => {
+                    setIsCustomLinkFlyoutOpen(true);
+                    closeMenu();
+                  }}
+                />
+              </div>
             ),
           },
         ],
       },
     ];
-  }, [transaction, profilingLocators, hasGoldLicense]);
+  }, [transaction, profilingLocators, hasGoldLicense, euiTheme]);
 
   // `CustomLinkFlyout` fetches on mount, and without a transaction that request has no filters.
   const customLinkFlyout =
