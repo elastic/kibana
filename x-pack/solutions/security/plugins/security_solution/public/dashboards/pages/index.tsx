@@ -7,32 +7,25 @@
 import React from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
-import { DashboardsLandingPage } from './landing_page';
 import { DashboardView } from './details';
 import { DASHBOARDS_PATH } from '../../../common/constants';
-import { DashboardContextProvider } from '../context/dashboard_context';
 import { HashDashboardLinkRedirect } from '../components/hash_dashboard_link_redirect';
 
-const DashboardsContainerComponent = () => {
+const DashboardsViewContainerComponent = () => {
   return (
-    <DashboardContextProvider>
-      <Routes>
-        <Route strict path={`${DASHBOARDS_PATH}/create`}>
-          <DashboardView initialViewMode={'edit'} />
-        </Route>
-        <Route strict path={`${DASHBOARDS_PATH}/:detailName/edit`}>
-          <HashDashboardLinkRedirect />
-          <DashboardView initialViewMode={'edit'} />
-        </Route>
-        <Route strict path={`${DASHBOARDS_PATH}/:detailName`}>
-          <HashDashboardLinkRedirect />
-          <DashboardView initialViewMode={'view'} />
-        </Route>
-        <Route path={`${DASHBOARDS_PATH}`}>
-          <DashboardsLandingPage />
-        </Route>
-      </Routes>
-    </DashboardContextProvider>
+    <Routes>
+      <Route strict path={`${DASHBOARDS_PATH}/create`}>
+        <DashboardView initialViewMode={'edit'} />
+      </Route>
+      <Route strict path={`${DASHBOARDS_PATH}/:detailName/edit`}>
+        <HashDashboardLinkRedirect />
+        <DashboardView initialViewMode={'edit'} />
+      </Route>
+      <Route strict path={`${DASHBOARDS_PATH}/:detailName`}>
+        <HashDashboardLinkRedirect />
+        <DashboardView initialViewMode={'view'} />
+      </Route>
+    </Routes>
   );
 };
-export const DashboardsContainer = React.memo(DashboardsContainerComponent);
+export const DashboardsViewContainer = React.memo(DashboardsViewContainerComponent);

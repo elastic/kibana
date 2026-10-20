@@ -17,6 +17,7 @@ import { connectorTokenClientMock } from '../connector_token_client.mock';
 import { getEarsAccessToken } from '../ears/get_ears_access_token';
 import { resolveEarsUrl } from '../ears/url';
 import { EarsStrategy } from './ears_strategy';
+import { connectorAuthCounter } from '../connector_metrics';
 import type { AuthStrategyDeps } from './types';
 
 const mockGetEarsAccessToken = getEarsAccessToken as jest.MockedFunction<typeof getEarsAccessToken>;
@@ -61,6 +62,7 @@ describe('EarsStrategy', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.spyOn(connectorAuthCounter, 'add').mockImplementation(() => {});
     strategy = new EarsStrategy();
     mockResolveEarsUrl.mockImplementation((url) => `https://ears.example.com${url}`);
   });
@@ -121,7 +123,10 @@ describe('EarsStrategy', () => {
 
     it('refreshes token on 401 and retries the request', async () => {
       const { instance, mockRequest } = createMockAxiosInstance();
-      strategy.installResponseInterceptor(instance, baseDeps);
+      strategy.installResponseInterceptor(instance, {
+        ...baseDeps,
+        connectorTypeId: '.test_connector',
+      });
       const onRejected = getOnRejected(instance);
 
       mockGetEarsAccessToken.mockResolvedValue('Bearer newtoken');
@@ -139,11 +144,20 @@ describe('EarsStrategy', () => {
       );
       expect(error.config.headers.Authorization).toBe('Bearer newtoken');
       expect(mockRequest).toHaveBeenCalledWith(error.config);
+      expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+        'auth.phase': 'token',
+        'connector.auth_type': 'ears',
+        'connector.type': '.test_connector',
+        success: true,
+      });
     });
 
     it('rejects with message when token refresh returns null', async () => {
       const { instance } = createMockAxiosInstance();
-      strategy.installResponseInterceptor(instance, baseDeps);
+      strategy.installResponseInterceptor(instance, {
+        ...baseDeps,
+        connectorTypeId: '.test_connector',
+      });
       const onRejected = getOnRejected(instance);
 
       mockGetEarsAccessToken.mockResolvedValue(null);
@@ -157,6 +171,13 @@ describe('EarsStrategy', () => {
       expect((error as { message: string }).message).toContain(
         'Unable to refresh access token via EARS'
       );
+      expect(connectorAuthCounter.add).toHaveBeenCalledWith(1, {
+        'auth.phase': 'token',
+        'connector.auth_type': 'ears',
+        'connector.type': '.test_connector',
+        success: false,
+        'error.type': 'token_request_failed',
+      });
     });
 
     describe('Slack 200 + ok:false auth error', () => {

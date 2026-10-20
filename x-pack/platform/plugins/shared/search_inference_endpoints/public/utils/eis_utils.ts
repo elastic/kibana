@@ -91,6 +91,11 @@ export const getModelCreator = (endpoint: EisInferenceEndpoint): string => {
   return SERVICE_PROVIDERS[endpoint.service]?.name ?? endpoint.service;
 };
 
+export const getModelTitle = (modelName: string, modelCreator: string): string => {
+  const providerPrefix = `${modelCreator} `;
+  return modelName.startsWith(providerPrefix) ? modelName.slice(providerPrefix.length) : modelName;
+};
+
 export const getModelMetadata = (
   endpoint: EisInferenceEndpoint
 ): EisInferenceEndpointMetadata | undefined => {
@@ -360,38 +365,15 @@ export function getModelEOLDate(metadata: EisInferenceEndpointMetadata | undefin
 export function getModelEOLMessage(eolFormattedDate: string | null) {
   return eolFormattedDate
     ? i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.content',
+        'xpack.searchInferenceEndpoints.settings.defaultModel.error.unavailableSince',
         {
-          defaultMessage:
-            "This model's end of life date is {eolFormattedDate}. It is no longer available.",
+          defaultMessage: 'This model has been unavailable since {eolFormattedDate}.',
           values: { eolFormattedDate },
         }
       )
-    : i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedEOLBadge.tooltip.contentNoDate',
-        {
-          defaultMessage: 'This model has reached end of life and is no longer available.',
-        }
-      );
-}
-
-export function getModelDeprecatedMessage(deprecatedFormattedDate: string | null) {
-  return deprecatedFormattedDate
-    ? i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.content',
-        {
-          defaultMessage:
-            'This model will be deprecated on {deprecatedFormattedDate}. We recommend a newer model for optimal results.',
-          values: { deprecatedFormattedDate },
-        }
-      )
-    : i18n.translate(
-        'xpack.searchInferenceEndpoints.eisModelCard.deprecatedBadge.tooltip.contentNoDate',
-        {
-          defaultMessage:
-            'This model is deprecated. We recommend a newer model for optimal results.',
-        }
-      );
+    : i18n.translate('xpack.searchInferenceEndpoints.settings.defaultModel.error.endOfLife', {
+        defaultMessage: 'This model has reached end of life and is no longer available.',
+      });
 }
 
 const GEO_DISPLAY_NAMES: Record<string, string> = {

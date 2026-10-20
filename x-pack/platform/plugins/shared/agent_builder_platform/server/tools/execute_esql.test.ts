@@ -145,6 +145,30 @@ describe('executeEsqlTool', () => {
     expect(esqlResults?.data).not.toHaveProperty('time_range');
   });
 
+  describe('include_frozen', () => {
+    it('excludes frozen tier indices by default', async () => {
+      await executeEsqlTool().handler(
+        { query: 'FROM logs', limit: 100 },
+        createHandlerContext() as any
+      );
+
+      expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: false });
+    });
+
+    it('includes frozen tier indices when opted in', async () => {
+      await executeEsqlTool().handler(
+        { query: 'FROM logs', limit: 100, include_frozen: true },
+        createHandlerContext() as any
+      );
+
+      expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: true });
+    });
+
+    it('describes how to opt in to the frozen tier', () => {
+      expect(executeEsqlTool().description).toContain('include_frozen');
+    });
+  });
+
   describe('filter', () => {
     it('forwards a supplied filter to the ES|QL helper', async () => {
       const tool = executeEsqlTool();

@@ -80,13 +80,15 @@ describe('defineRoutes', () => {
       getSpaceId: jest.fn().mockReturnValue('default'),
     };
 
-    defineRoutes({ ...baseOpts(), inboundEvents });
+    const opts = baseOpts();
+    defineRoutes({ ...opts, inboundEvents });
 
     expect(inboundEventsRouteMock).toHaveBeenCalledWith({
       router: expect.any(Object),
       maxBodyBytes: 1024,
       inboundEventsClient: inboundEvents.client,
       getSpaceId: inboundEvents.getSpaceId,
+      logger: opts.logger,
     });
     expect(rotateInboundIngressRouteMock).toHaveBeenCalledWith(
       expect.any(Object),

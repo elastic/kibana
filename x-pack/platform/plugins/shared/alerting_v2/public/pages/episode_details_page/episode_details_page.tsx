@@ -419,6 +419,7 @@ export function EpisodeDetailsPage() {
         menu={headerMenu}
         tabs={headerTabs}
         spacing="bleed"
+        docLink={services.docLinks.links.alerting.investigateAlertEpisodes}
       />
       {isLoading ? (
         <KibanaPageTemplate.Section grow>
@@ -467,6 +468,7 @@ export function EpisodeDetailsPage() {
                 <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
                   <AlertEpisodeTimelineSection
                     episodeId={episodeId}
+                    seriesId={episode ? episode.series_id ?? null : undefined}
                     groupHash={groupHash}
                     services={{ data, spaces, userProfile: services.userProfile }}
                   />

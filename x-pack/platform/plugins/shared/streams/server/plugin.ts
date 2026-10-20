@@ -22,7 +22,6 @@ import type { RulesClient, RulesClientCreateOptions } from '@kbn/alerting-plugin
 import { ROOT_STREAM_NAMES, Streams } from '@kbn/streams-schema';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { Subscription } from 'rxjs';
-import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 import type { StreamsClient } from './lib/streams/client';
 import type { StreamsConfig } from '../common/config';
 import {
@@ -58,15 +57,14 @@ import { registerSuggestionsInferenceFeatures } from './register_suggestions_inf
 import type { AttachmentClient } from './lib/streams/attachments/attachment_client';
 import { registerStreamsSavedObjects } from './lib/saved_objects/register_saved_objects';
 import { createConfigDistributorClient } from './lib/unit_config/config_distributor_client';
+import { createEncryptionKeyStore } from './lib/unit_config/encryption_key_store';
+import { createCredentialPreparer } from './lib/unit_config/seal_credentials';
 import type { UnitConfigHooks } from './lib/unit_config/types';
 
 const STREAMS_MANAGED_WORKFLOW_OWNER = 'streams';
 const STREAMS_ALLOWED_PROJECT_TYPES = ['observability', 'security'];
 
 export interface StreamsPluginSetup {
-  registerKnowledgeIndicatorClientProvider(
-    provider: (request: KibanaRequest) => Promise<KnowledgeIndicatorClientContract>
-  ): void;
   getAttachmentClient(params: {
     request: KibanaRequest;
     rulesClientOptions?: RulesClientCreateOptions;
@@ -101,7 +99,6 @@ export class StreamsPlugin
   private streamsGetScopedClients?: GetScopedClients;
   private subscriptions: Subscription[] = [];
   private canEncrypt = false;
-  private kiProvider?: (request: KibanaRequest) => Promise<KnowledgeIndicatorClientContract>;
   private readonly isServerless: boolean;
 
   constructor(context: PluginInitializerContext<StreamsConfig>) {
@@ -186,24 +183,11 @@ export class StreamsPlugin
         contentService.getClient(),
       ]);
 
-      let getKnowledgeIndicatorClient:
-        | (() => Promise<KnowledgeIndicatorClientContract>)
-        | undefined;
-      if (this.kiProvider) {
-        let kiClientPromise: Promise<KnowledgeIndicatorClientContract> | undefined;
-        const provider = this.kiProvider;
-        getKnowledgeIndicatorClient = () => {
-          kiClientPromise ??= provider(request);
-          return kiClientPromise;
-        };
-      }
-
       const license = await licensing.getLicense();
       const isSecurityEnabled = license.getFeature('security').isEnabled;
 
       const streamsClient = await streamsService.getClient({
         attachmentClient,
-        getKnowledgeIndicatorClient,
         esClient: scopedClusterClient.asCurrentUser,
         esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
         uiSettingsClient,
@@ -222,7 +206,6 @@ export class StreamsPlugin
         canEncrypt: this.canEncrypt,
         attachmentClient,
         streamsClient,
-        getKnowledgeIndicatorClient,
         inferenceClient,
         contentClient,
         fieldsMetadataClient,
@@ -300,14 +283,23 @@ export class StreamsPlugin
     registerFeatureFlags(core);
     core.pricing.registerProductFeatures(STREAMS_TIERED_FEATURES);
 
-    // `encryptCredentials` is the distributor sidecar transform (project public
-    // key → `credentials[]`). It is not wired until the project public key is
-    // available. Publish then omits the credentials sidecar instead of sending
-    // plaintext or failing the unit write. At-rest encryption is Encrypted Saved Objects.
-    const unitConfigHooks: UnitConfigHooks = createConfigDistributorClient({
+    const { path: encryptionKeyPath } = this.config.encryptionKey;
+    const distributorClient = createConfigDistributorClient({
       config: this.config.distributor,
       logger: this.logger.get('config-distributor'),
+      fallbackTargetId: plugins.cloud?.serverless.projectId,
     });
+    const unitConfigHooks: UnitConfigHooks = {
+      validate: distributorClient.validate,
+      publish: distributorClient.publish,
+      prepareCredentials: encryptionKeyPath
+        ? createCredentialPreparer({
+            store: createEncryptionKeyStore({ path: encryptionKeyPath }),
+            resolveTargetId: distributorClient.resolveTargetId,
+            logger: this.logger.get('credential-sealer'),
+          })
+        : undefined,
+    };
 
     const routeRegistrationOptions = {
       dependencies: {
@@ -454,9 +446,6 @@ export class StreamsPlugin
     });
 
     return {
-      registerKnowledgeIndicatorClientProvider: (provider) => {
-        this.kiProvider = provider;
-      },
       getAttachmentClient: async ({ request }) => {
         const [coreStart, pluginsStart] = await core.getStartServices();
         const soClient = coreStart.savedObjects.getScopedClient(request);
@@ -474,12 +463,9 @@ export class StreamsPlugin
           soClient,
           rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
         });
-        const provider = this.kiProvider;
-        const getKnowledgeIndicatorClient = provider ? () => provider(request) : undefined;
         const license = await pluginsStart.licensing.getLicense();
         return this.streamsService!.getClient({
           attachmentClient,
-          getKnowledgeIndicatorClient,
           esClient: scopedClusterClient.asCurrentUser,
           esClientAsInternalUser: coreStart.elasticsearch.client.asInternalUser,
           uiSettingsClient,

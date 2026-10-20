@@ -32,15 +32,16 @@ describe('When a Console command is entered by the user', () => {
 
   it('should clear the command output history when `clear` is entered', async () => {
     render();
-    await enterCommand('help');
-    await enterCommand('help');
+    await enterCommand('cmd1');
+    await enterCommand('cmd1');
 
     expect(renderResult.getByTestId('test-historyOutput').childElementCount).toBe(2);
 
     await enterCommand('clear');
 
     expect(renderResult.getByTestId('test-historyOutput').childElementCount).toBe(0);
-  });
+    // Only test in this file that executes three commands, so it needs more than the 5s default
+  }, 30_000);
 
   it('should show individual command help when `--help` option is used', async () => {
     render();
