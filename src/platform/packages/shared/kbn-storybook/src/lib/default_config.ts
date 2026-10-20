@@ -79,7 +79,7 @@ export const defaultConfig: StorybookConfig = {
                         loaderContext.context || loaderContext.rootContext,
                         resolve(
                           REPO_ROOT,
-                          'src/core/public/styles/core_app/_globals_borealislight.scss'
+                          'src/core/packages/core/public/styles/core_app/_globals_borealislight.scss'
                         )
                       )
                     );

@@ -17,7 +17,6 @@ import { RULES_CONTENT_LIST_ID } from '../../constants';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useAlertingV2ExperimentalFeatures } from '../../hooks/use_alerting_v2_experimental_features';
-import { useCreateFromTemplateQuery } from '../../hooks/use_create_from_template_query';
 import { useNavigateToAgentBuilder } from '../../hooks/use_navigate_to_agent_builder';
 import { RuleCreateOptionsPanel } from '../../components/rule_create_options/rule_create_options_panel';
 import { RuleCreateOptionsFlyout } from '../../components/rule_create_options/rule_create_options_flyout';
@@ -49,7 +48,6 @@ export const RulesListPage = () => {
     confirmationModal,
     openCreateFlyout,
     openCreateBuilderFlyout,
-    openCreateFromTemplateFlyout,
     openEditFlyout,
     openCloneFlyout,
     isOpen: isAuthoringFlyoutOpen,
@@ -59,7 +57,6 @@ export const RulesListPage = () => {
     onDismiss: closeCreateOptionsFlyout,
   });
 
-  useCreateFromTemplateQuery(openCreateFromTemplateFlyout);
   const navigateToAgentBuilder = useNavigateToAgentBuilder();
   const showBuildSequence = useAlertingV2ExperimentalFeatures();
   const { rulesLocators } = useAlertingLocators();
