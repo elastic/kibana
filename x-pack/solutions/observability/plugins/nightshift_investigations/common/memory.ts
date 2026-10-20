@@ -43,6 +43,7 @@ export interface StoredMemoryPage {
     conversation_id?: string;
     round_id?: string;
     workflow_execution_id?: string;
+    version?: number;
     source?: string;
     merged_from?: string[];
     archive_reason?: MemoryArchiveReason;
@@ -67,6 +68,7 @@ export interface MemoryPage {
   conversation_id?: string;
   round_id?: string;
   workflow_execution_id?: string;
+  version?: number;
   agent_id?: string;
   categories: string[];
   references: string[];

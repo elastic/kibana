@@ -78,6 +78,7 @@ export interface MemoryPageWrite {
   conversation_id?: string;
   round_id?: string;
   workflow_execution_id?: string;
+  version?: number;
   telemetry?: {
     impressions: number;
     conversions: number;
@@ -233,6 +234,7 @@ const toPage = (id: string, source: StoredMemoryPage): MemoryPage | undefined =>
     conversation_id: source.attributes?.conversation_id,
     round_id: source.attributes?.round_id,
     workflow_execution_id: source.attributes?.workflow_execution_id,
+    version: source.attributes?.version,
     agent_id: source.attributes?.agent_id,
     categories: source.attributes?.categories ?? [],
     references: source.attributes?.references ?? [],
@@ -299,6 +301,7 @@ export const createMemoryPageStore = ({
         ...(page.workflow_execution_id !== undefined
           ? { workflow_execution_id: page.workflow_execution_id }
           : {}),
+        version: page.version ?? (existing?.version !== undefined ? existing.version + 1 : 1),
         categories: page.categories,
         ...(page.source !== undefined ? { source: page.source } : {}),
         ...(page.merged_from !== undefined ? { merged_from: page.merged_from } : {}),
