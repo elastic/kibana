@@ -13,7 +13,7 @@ import {
   VAULT_SECRET_STORAGE_DISABLED_MESSAGE,
 } from './format_synthetics_policy';
 import { SecretConnectionError, type HeartbeatVaultConfig } from '../../get_secret_connection';
-import { ConfigKey, MonitorTypeEnum } from '../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum, ScheduleUnit } from '../../../../common/runtime_types';
 
 const conn = (name: string): HeartbeatVaultConfig => ({
   type: 'vault',
@@ -59,7 +59,7 @@ describe('selectSecretConnections', () => {
 });
 
 describe('formatSyntheticsPolicy vault secret_stores', () => {
-  const buildPolicy = (withSecretStores = true): NewPackagePolicy =>
+  const buildPolicy = (withSecretStores = true, withProcessors = false): NewPackagePolicy =>
     ({
       name: 'policy',
       namespace: 'default',
@@ -80,6 +80,7 @@ describe('formatSyntheticsPolicy vault secret_stores', () => {
                 [ConfigKey.NAME]: { type: 'text', value: null },
                 [ConfigKey.REQUEST_HEADERS_CHECK]: { type: 'yaml', value: null },
                 [ConfigKey.TLS_KEY]: { type: 'yaml', value: null },
+                ...(withProcessors ? { processors: { type: 'yaml', value: null } } : {}),
                 ...(withSecretStores ? { secret_stores: { type: 'text', value: null } } : {}),
               },
             },
@@ -210,6 +211,25 @@ describe('formatSyntheticsPolicy vault secret_stores', () => {
       expect(() => formatConfig({ [key]: value })).toThrow(
         new RegExp(`Vault reference in "${key}"`)
       );
+    });
+
+    it('rejects a reference in a label, which only reaches the policy through processors', () => {
+      expect(() =>
+        formatSyntheticsPolicy(
+          buildPolicy(true, true),
+          MonitorTypeEnum.HTTP,
+          {
+            [ConfigKey.NAME]: 'm1',
+            [ConfigKey.SCHEDULE]: { number: '3', unit: ScheduleUnit.MINUTES },
+            [ConfigKey.LABELS]: { team: 'vault://prod@a#b' },
+            [ConfigKey.PASSWORD]: 'vault://prod@a#b',
+          },
+          {},
+          [],
+          false,
+          [conn('prod')]
+        )
+      ).toThrow(/Vault reference in "processors"/);
     });
 
     it('rejects an encoded reference in a disallowed field next to a valid one', () => {

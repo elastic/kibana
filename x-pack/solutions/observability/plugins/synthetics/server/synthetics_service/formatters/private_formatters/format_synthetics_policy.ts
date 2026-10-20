@@ -204,36 +204,6 @@ export const formatSyntheticsPolicy = (
     }
   });
 
-  // Collect the vault connections this monitor references. Heartbeat does not
-  // resolve references in the inline script, so it is left alone.
-  const referencedSecretConnections = new Set<string | undefined>();
-  Object.entries(dataStream?.vars ?? {}).forEach(([key, item]) => {
-    if (!item || key === ConfigKey.SOURCE_INLINE) return;
-    // Heartbeat also resolves references our strict grammar does not recognise (percent-encoded
-    // paths), which would slip past the field allowlist below.
-    const malformed = findMalformedVaultReferences(item.value);
-    if (malformed.length > 0) {
-      throw new SecretConnectionError(
-        `Monitor "${
-          config[ConfigKey.NAME] ?? ''
-        }" has a malformed Vault reference in "${key}": ${malformedVaultReferencesMessage(
-          malformed
-        )}`
-      );
-    }
-    const names = referencedConnectionNames(item.value);
-    if (names.size > 0 && !VAULT_REFERENCE_FIELDS.has(key)) {
-      throw new SecretConnectionError(
-        `Monitor "${
-          config[ConfigKey.NAME] ?? ''
-        }" uses a Vault reference in "${key}". References are only allowed in: ${[
-          ...VAULT_REFERENCE_FIELDS,
-        ].join(', ')}`
-      );
-    }
-    names.forEach((name) => referencedSecretConnections.add(name));
-  });
-
   // Heartbeat decodes inline scripts when source.inline.encoding=base64.
   // synthetics 1.10.0 added this var to the API input with the same name as
   // browser, so encode whenever the installed package exposes it.
@@ -280,6 +250,37 @@ export const formatSyntheticsPolicy = (
   if (currentInput && dataStream) {
     formattedPolicy.inputs = formattedPolicy.inputs.filter((input) => input.enabled);
   }
+
+  // Collect the vault connections this monitor references. Runs on the finished vars so
+  // generated ones (e.g. labels in `processors`) are covered. Heartbeat does not resolve
+  // references in the inline script, so it is left alone.
+  const referencedSecretConnections = new Set<string | undefined>();
+  Object.entries(dataStream?.vars ?? {}).forEach(([key, item]) => {
+    if (!item || key === ConfigKey.SOURCE_INLINE) return;
+    // Heartbeat also resolves references our strict grammar does not recognise (percent-encoded
+    // paths), which would slip past the field allowlist below.
+    const malformed = findMalformedVaultReferences(item.value);
+    if (malformed.length > 0) {
+      throw new SecretConnectionError(
+        `Monitor "${
+          config[ConfigKey.NAME] ?? ''
+        }" has a malformed Vault reference in "${key}": ${malformedVaultReferencesMessage(
+          malformed
+        )}`
+      );
+    }
+    const names = referencedConnectionNames(item.value);
+    if (names.size > 0 && !VAULT_REFERENCE_FIELDS.has(key)) {
+      throw new SecretConnectionError(
+        `Monitor "${
+          config[ConfigKey.NAME] ?? ''
+        }" uses a Vault reference in "${key}". References are only allowed in: ${[
+          ...VAULT_REFERENCE_FIELDS,
+        ].join(', ')}`
+      );
+    }
+    names.forEach((name) => referencedSecretConnections.add(name));
+  });
 
   // Vault: when this monitor references a vault secret (vault://<name>@<path>#<field>
   // in any resolved field) attach the connections it uses to the `secret_stores`
