@@ -148,6 +148,31 @@ describe('useTransactionFlyoutHeader', () => {
     expect(screen.queryByTestId('transactionFlyoutInfo-duration')).not.toBeInTheDocument();
   });
 
+  it.each([
+    ['a name and a version', { name: 'Chrome', version: '120.0' }, 'Chrome (120.0)'],
+    ['a name only', { name: 'Chrome' }, 'Chrome'],
+    ['a version only', { version: '120.0' }, '(120.0)'],
+  ])('renders the user agent with %s', (_, userAgent, expected) => {
+    const parts = renderHeader({
+      ...baseTransaction,
+      user_agent: userAgent,
+    } as unknown as Transaction);
+
+    renderParts(parts);
+    expect(screen.getByTestId('transactionFlyoutInfo-userAgent')).toHaveTextContent(
+      new RegExp(`^${expected.replace(/[()]/g, '\\$&')}$`)
+    );
+  });
+
+  it('renders no user agent block without a user agent name or version', () => {
+    const parts = renderHeader({
+      ...baseTransaction,
+      user_agent: { original: 'Mozilla/5.0' },
+    } as unknown as Transaction);
+
+    expect(getTestSubjects(parts.infoBlocks)).not.toContain('transactionFlyoutInfo-userAgent');
+  });
+
   it('splits the request and the response into separate meta blocks', () => {
     const httpTransaction = {
       ...baseTransaction,

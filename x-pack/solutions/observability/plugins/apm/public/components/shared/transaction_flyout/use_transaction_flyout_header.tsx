@@ -123,7 +123,12 @@ export function useTransactionFlyoutHeader({
     );
 
   const url = getTransactionUrl(transaction);
-  const userAgent = transaction.user_agent;
+  const userAgent = [
+    transaction.user_agent?.name,
+    transaction.user_agent?.version && `(${transaction.user_agent.version})`,
+  ]
+    .filter(Boolean)
+    .join(' ');
   const duration = transaction.transaction?.duration?.us;
 
   const metaBlocks = [
@@ -234,7 +239,7 @@ export function useTransactionFlyoutHeader({
         title={USER_AGENT_LABEL}
         data-test-subj="transactionFlyoutInfo-userAgent"
       >
-        {userAgent.version ? `${userAgent.name} (${userAgent.version})` : userAgent.name}
+        {userAgent}
       </InfoBlock>
     );
   }
