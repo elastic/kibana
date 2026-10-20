@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { buildStrictRouteValidationWithZod } from './utils/build_strict_route_validation';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
@@ -32,8 +32,8 @@ const paramsSchema = lazySchema(() =>
 
 const bodySchema = lazySchema(() =>
   z.object({
-    fromDateISO: z.string().datetime(),
-    toDateISO: z.string().datetime(),
+    fromDateISO: isoDateTime(),
+    toDateISO: isoDateTime(),
     /**
      * Which extraction process to run as. Defaults to the one this deployment actually runs.
      * `all` runs priority and non-priority at the same time, the way their tasks overlap.

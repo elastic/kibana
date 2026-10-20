@@ -177,7 +177,7 @@ git ls-remote --tags origin 'deploy@*^{}' |
 Set the solution mode separately from the image:
 
 ```sh
-export SOLUTION=oblt # oblt | security | es | workplaceai | vectordb
+export SOLUTION=oblt # oblt | security | es | vectordb
 export NAME="kibana-heap-$SOLUTION"
 ```
 
@@ -405,9 +405,10 @@ Output sections:
   snapshot was captured with allocation tracking. Walks each live
   node's allocation-time call stack to the first plugin frame, so
   schema libraries roll up to the plugin that triggered them.
-- **Allocated by Module (allocation site)** — same walk, reports
-  third-party `node_modules` libraries (zod, joi, require-in-the-middle,
-  etc.). Tells you *where the allocator code lives*.
+- **Allocated by Module (allocation site)** — same walk, reports the first
+  package frame, including third-party libraries (zod, joi,
+  require-in-the-middle, etc.) and Kibana packages. Tells you *where the
+  allocator code lives*.
 - **Allocated by Package (allocation site)** — same walk, reports
   `@kbn/*` Kibana packages, skipping library frames so wrapper packages
   get credit for the library bytes they trigger (e.g. `@kbn/connector-schemas`
@@ -426,8 +427,11 @@ Choose the view based on the question:
   breakdown to distinguish strings, arrays, compiled code, objects, and other
   runtime structures.
 - **Which package or plugin dominates memory now?** Use the retained tables.
-  Retained boundaries can contain nested boundaries owned by other packages,
-  so do not add rows together or subtract them from total heap size.
+  Retained is inclusive: a package's row includes the bytes it keeps alive,
+  even when those bytes belong to a nested package that also has its own row.
+  Do not add rows together or subtract them from total heap size. The
+  `(unattributed)` row is the self size of nodes with no owning package, so
+  it never overlaps a package row.
 - **What would disappear if a package were absent?** Use counterfactual
   `Saved`. This models an independent removal scenario for each package.
   Results can overlap and are not additive; increasing `--counterfactual=N`

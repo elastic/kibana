@@ -10,6 +10,7 @@ schema:
       - alert
       - assignees
       - attachment
+      - bulkAttachments
       - comment
       - connector
       - create_case

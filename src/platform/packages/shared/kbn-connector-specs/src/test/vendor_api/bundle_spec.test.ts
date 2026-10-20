@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { convertSwagger2, loadContractOperations } from '@kbn/connector-contract-mock';
+import { convertSwagger2, loadContractOperations } from '@kbn/connector-emulate';
 import type { LoadDocument } from './bundle_spec';
 import { bundleSpec } from './bundle_spec';
 

@@ -8,7 +8,6 @@
 import React from 'react';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import { QueryClient } from '@kbn/react-query';
-import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { createMockLocators, ListPageTestProviders } from '../../test_utils/test_providers';
 import { ManageRulesHrefProvider } from '../../application/manage_rules_href_context';
 import { AlertsListPage } from './alerts_list_page';
@@ -18,6 +17,7 @@ import { UnifiedDataTable, getRenderCustomToolbarWithElements } from '@kbn/unifi
 import { fetchAlertingEpisodes } from '@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes';
 import { fetchClassicAlertsAsEpisodes } from '@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_episodes';
 import { useAlertingEpisodesDataView } from '@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view';
+import { useBulkGetMaintenanceWindowsQuery } from '@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows';
 import { ALERT_EPISODES_LIST_PAGE_SIZE } from '@kbn/alerting-v2-episodes-ui/constants';
 import { queryKeys } from '@kbn/alerting-v2-episodes-ui/query_keys';
 import userEvent from '@testing-library/user-event';
@@ -42,6 +42,9 @@ jest.mock('@kbn/core-di-browser', () => {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
         return new ActualUserCapabilities({ capabilities: mockCapabilities });
+      }
+      if (token === 'notifications') {
+        return { tours: { isEnabled: () => true } };
       }
       return {};
     },
@@ -73,9 +76,12 @@ jest.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_episod
 // gets a ready dataView without going through the full data-view construction path.
 jest.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view');
 
+jest.mock('@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows', () => ({
+  useBulkGetMaintenanceWindowsQuery: jest.fn(() => ({ data: undefined, isFetching: false })),
+}));
+
 jest.mock('@kbn/alerting-v2-episodes-ui/actions', () => ({
   createEpisodeActions: jest.fn(() => []),
-  READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
 }));
 
 jest.mock('@kbn/alerting-v2-episodes-ui/components/details/details_flyout', () => ({
@@ -176,6 +182,13 @@ const mockServices = {
   uiActions: { getTriggerCompatibleActions: jest.fn().mockResolvedValue([]) },
   spaces: mockSpaces,
   storage: mockStorage,
+  docLinks: {
+    links: {
+      alerting: {
+        viewAndManageAlerts: 'https://docs.test/view-and-manage-alerts',
+      },
+    },
+  },
 };
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -257,11 +270,6 @@ describe('AlertsListPage', () => {
     });
   });
 
-  it('renders the experimental badge in the page header', () => {
-    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Alerts');
-    expect(screen.getByTestId('alertingV2ExperimentalBadge')).toBeInTheDocument();
-  });
-
   it('renders the manage rules link in the app header menu', async () => {
     const { rulesLocators } = mockLocators;
     const manageRulesLink = await screen.findByTestId('alertingV2EpisodesListManageRules');
@@ -297,6 +305,7 @@ describe('AlertsListPage', () => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastCall?.columns).toEqual([
       'episode.status',
+      'alerting_source',
       'severity',
       '@timestamp',
       'rule.id',
@@ -304,6 +313,7 @@ describe('AlertsListPage', () => {
       'tags',
       'rule_tags',
       'assignees',
+      'maintenance_windows',
     ]);
     expect(lastCall?.externalCustomRenderers).toHaveProperty('severity');
     expect(typeof lastCall?.externalCustomRenderers?.severity).toBe('function');
@@ -312,6 +322,7 @@ describe('AlertsListPage', () => {
   it.each([
     ['tags', 'Alert tags'],
     ['rule_tags', 'Rule tags'],
+    ['maintenance_windows', 'Maintenance windows'],
   ])('labels the %s column %p and takes its sort control away', (columnId, label) => {
     const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
@@ -322,6 +333,52 @@ describe('AlertsListPage', () => {
       displayAsText: label,
       isSortable: false,
     });
+  });
+
+  it.each([
+    'episode.status',
+    'alerting_source',
+    'severity',
+    '@timestamp',
+    'rule.id',
+    'duration',
+    'tags',
+    'rule_tags',
+    'assignees',
+    'maintenance_windows',
+  ])('takes the remove column action away from the %s column', (columnId) => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const customize = lastCall?.customGridColumnsConfiguration?.[columnId];
+
+    expect(customize).toBeDefined();
+    const column = customize!({
+      column: {
+        id: columnId,
+        actions: { showHide: { label: 'Remove column' }, showMoveLeft: true },
+      },
+      headerRowHeight: 1,
+    });
+    expect(column.actions).toEqual({ showHide: false, showMoveLeft: true });
+  });
+
+  it('keeps disabled column actions disabled', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const customize = lastCall?.customGridColumnsConfiguration?.['rule.id'];
+
+    expect(customize!({ column: { id: 'rule.id', actions: false } }).actions).toBe(false);
+  });
+
+  it('registers a cell renderer for the maintenance windows column', () => {
+    const lastCall = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+
+    expect(typeof lastCall?.externalCustomRenderers?.maintenance_windows).toBe('function');
+  });
+
+  it('resolves maintenance windows while the column is shown', () => {
+    expect(jest.mocked(useBulkGetMaintenanceWindowsQuery)).toHaveBeenLastCalledWith(
+      expect.objectContaining({ ids: [] }),
+      expect.objectContaining({ enabled: true })
+    );
   });
 
   it('does not pass key prop derived from tableKey (no tableKey state)', () => {
@@ -592,6 +649,7 @@ describe('privilege gating', () => {
     order: 50,
     displayName: 'Open in Discover',
     iconType: 'productDiscover',
+    enforcesOwnPrivileges: true,
     isCompatible: () => true,
     execute: jest.fn(async () => {}),
   };
@@ -754,12 +812,16 @@ describe('AlertsListPage fetch errors', () => {
     await waitFor(() => {
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'classic alerts failed' }),
-        expect.objectContaining({ title: 'Failed to fetch alerts for v1 alerts' })
+        expect.objectContaining({
+          title: 'Failed to fetch alerts for Classic Alerting',
+        })
       );
     });
     expect(screen.queryByText('Unable to load some alerts')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertingV2EpisodesListFetchError')).not.toBeInTheDocument();
-    expect(screen.queryByText('Failed to fetch alerts for v1 alerts')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText('Failed to fetch alerts for Classic Alerting')
+    ).not.toBeInTheDocument();
   });
 
   it.each([403, 503])('does not toast when classic alerts return %s', async (status) => {
@@ -789,7 +851,9 @@ describe('AlertsListPage fetch errors', () => {
     await waitFor(() => {
       expect(mockServices.notifications.toasts.addError).toHaveBeenCalledWith(
         expect.objectContaining({ message: 'v2 episodes failed' }),
-        expect.objectContaining({ title: 'Failed to fetch alerts for v2 alerts' })
+        expect.objectContaining({
+          title: 'Failed to fetch alerts for Universal Alerting',
+        })
       );
     });
     expect(screen.queryByText('Unable to load some alerts')).not.toBeInTheDocument();

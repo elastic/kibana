@@ -43,7 +43,7 @@ describe('builtinWorkflowInputDefinitions', () => {
     );
     expect(items?.properties?._id?.type).toBe('string');
     expect(items?.properties?._index?.pattern).toBe(
-      '^\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
+      '^(\\.ds-)?\\.(internal\\.)?(preview\\.)?alerts-security\\.alerts-[a-zA-Z0-9._-]+$'
     );
     expect(items?.properties?.['@timestamp']?.format).toBe('date-time');
   });
