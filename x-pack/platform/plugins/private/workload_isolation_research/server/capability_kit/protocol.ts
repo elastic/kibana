@@ -71,9 +71,17 @@ export type AsyncCallback = (...args: CodecInput[]) => CodecInput | Promise<Code
 export interface HostCallContext {
   invokeCallback(reference: CallbackRef, args: readonly CodecInput[]): Promise<CodecInput>;
 }
+export type TerminationReason = 'deadline' | 'cancelled' | 'shutdown' | 'stall' | 'crash';
+/** Why the worker signal aborted; `original` is the host AbortSignal.reason when it was codec-safe. */
+export interface CancellationInfo {
+  readonly reason: Exclude<TerminationReason, 'crash'>;
+  readonly hasOriginalReason: boolean;
+}
 export interface WorkerContext {
   readonly bundle: Bundle;
   readonly signal: AbortSignal;
+  /** 0.1.9: category of the cooperative abort (undefined until aborted). */
+  readonly cancellation?: () => CancellationInfo | undefined;
   call(capability: string, operation: string, args: CodecInput): Promise<CodecInput>;
   callSync(
     capability: string,
@@ -101,6 +109,8 @@ export type Packet =
       readonly input: WireValue;
       readonly moduleId: string;
       readonly registry: RegistrySnapshot;
+      /** 0.1.9: requested worker event-loop heartbeat interval (stall watchdog). */
+      readonly heartbeatMs?: number;
     }
   | {
       readonly version: 1;
@@ -133,9 +143,12 @@ export type Packet =
       readonly version: 1;
       readonly kind: 'cancel';
       readonly runId: string;
-      readonly reason: 'deadline' | 'cancelled' | 'shutdown';
+      readonly reason: Exclude<TerminationReason, 'crash'>;
+      /** 0.1.9: codec-encoded host AbortSignal.reason (absent for the default AbortError). */
+      readonly original?: WireValue;
     }
   | { readonly version: 1; readonly kind: 'abort_ack'; readonly runId: string }
+  | { readonly version: 1; readonly kind: 'heartbeat' }
   | {
       readonly version: 1;
       readonly kind: 'callback';
@@ -175,7 +188,8 @@ export type Outcome =
   | { readonly status: 'failure'; readonly error: Error }
   | {
       readonly status: 'terminated';
-      readonly reason: 'deadline' | 'cancelled' | 'shutdown' | 'crash';
+      /** 'stall' only occurs when the run opted into RunOptions.stallMs. */
+      readonly reason: TerminationReason;
       readonly graceful?: boolean;
       readonly terminal?: CodecInput;
       readonly collateral?: boolean;

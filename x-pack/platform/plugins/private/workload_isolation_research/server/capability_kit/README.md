@@ -1,4 +1,4 @@
-# Track 7 capability kit — 0.1.8 pre-release research slice
+# Track 7 capability kit — 0.1.9 pre-release research slice
 
 PRIVATE research code; no public Core API, plugin lifecycle hook, or automatic enablement.
 Base harness fd3138c. Only main owns TM claims/leases/results.
@@ -10,6 +10,44 @@ the whole slot: EVERY co-resident outcome is terminated, with collateral flag,
 initiatingRunId and all discardedRunIds (when multiple runs are lost). Slot crash
 also reports discarded IDs. Queue/admission/lease policy still belongs to TM.
 This is the minimal runner integration surface, NOT the complete 7.P acceptance.
+
+## 0.1.9 runner fixes (additive; 0.1.8 call sites unchanged)
+
+- **Long deadlines (P0 fix).** Node clamps setTimeout delays above 2^31-1 ms (~24.8 days)
+  to 1 ms. Before 0.1.9 a `deadlineMs` of 365 days fired a DEADLINE after 1 ms; under
+  `@kbn/setup-node-env` (dev) the TimeoutOverflowWarning exits the WHOLE process.
+  Deadlines are now re-armed in chunks; accepted range 1..Number.MAX_SAFE_INTEGER ms.
+- **Stall watchdog (opt-in).** `RunOptions.stallMs` (100..3600000) is separate from
+  `deadlineMs` (the wall-clock/TM timeout). The worker sends an event-loop heartbeat every
+  clamp(stallMs/4, 25, 1000) ms. Any packet counts as progress. If the slot is silent for
+  stallMs, the run gets cooperative abort, reason `'stall'` (worker sees a TimeoutError
+  DOMException), then grace, then a hard stop. Outcome: `{ status: 'terminated',
+  reason: 'stall' }`. Co-resident runs on that slot are collateral, as with any hard stop.
+  This detects a blocked isolate event loop. It does NOT detect application no-progress
+  (for example an awaited remote hang); keep using deadlines and app heartbeats for that.
+  `'stall'` only appears when the caller opted in.
+- **Abort reason.** If the host `signal` aborts with a codec-safe reason (for example
+  `controller.abort({ source: 'api', actor })` or an Error), the worker
+  `context.signal.reason` is the decoded original value. The default AbortError, or a
+  reason the codec can't encode, keeps the categorical DOMException (previous behaviour).
+  `context.cancellation?.()` returns `{ reason: 'cancelled'|'deadline'|'shutdown'|'stall',
+  hasOriginalReason }` so runners can tell a TM/API cancel from host shutdown or a deadline.
+  The shutdown DOMException message is now 'Execution host shutdown'.
+- **ES client errors.** `ResponseError`, `TimeoutError`, `ConnectionError`,
+  `NoLivingConnectionsError` and `RequestAbortedError` are rebuilt from the receiving
+  isolate's own `@elastic/elasticsearch`. So `instanceof`, `statusCode`, `body`, `meta`,
+  `isRetryableEsClientError` and 429/503 retry guards behave the same on both sides.
+  The diagnostic keeps body, statusCode, warnings, attempts, aborted, request
+  method/path/id, plus allowlisted response headers (retry-after, content-type,
+  warning, x-elastic-*, x-opaque-id, trace-id, x-found-*). Request headers/body/
+  querystring, the connection URL, context and set-cookie NEVER cross.
+- **Callback results.** A worker callback that returns an unencodable value now fails
+  only that callback call ('Callback result is not transportable'). Before 0.1.9 it
+  exited the slot, killing co-resident runs.
+- **Ordered bindings.** `Binding.ordered = true` runs that capability's calls for one run
+  strictly FIFO (each starts after the previous settles; a failure doesn't block later
+  calls). Use it for fire-and-forget audit/logger/event side effects whose order matters.
+  Default bindings may still complete out of order.
 
 ## Host (main)
 

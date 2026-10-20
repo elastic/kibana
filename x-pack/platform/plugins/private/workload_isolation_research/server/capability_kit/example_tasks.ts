@@ -208,3 +208,80 @@ export const cooperative = async (
 
 export const wrongGrant = async (_input: CodecInput, context: WorkerContext): Promise<CodecInput> =>
   context.call('notGranted', 'get', {});
+
+// 0.1.9 fixtures: abort reason/category, long deadlines, stall watchdog, callbacks, ordering, ES errors.
+export const abortProbe = async (
+  _input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  await new Promise<void>((resolve) => {
+    if (context.signal.aborted) resolve();
+    else context.signal.addEventListener('abort', () => resolve(), { once: true });
+  });
+  const reason: unknown = context.signal.reason;
+  return {
+    cancellation: context.cancellation?.() ?? null,
+    isDomException: reason instanceof DOMException,
+    name: reason instanceof Error ? reason.name : null,
+    value: reason instanceof Error ? null : (reason as CodecInput),
+  };
+};
+export const delayed = async (input: CodecInput): Promise<CodecInput> => {
+  const { ms } = input as { ms: number };
+  await new Promise((resolve) => setTimeout(resolve, ms));
+  return { waited: ms };
+};
+export const busyThenReturn = async (input: CodecInput): Promise<CodecInput> => {
+  const { ms } = input as { ms: number };
+  const end = performance.now() + ms;
+  while (performance.now() < end) {
+    // Synchronous block without yielding to the event loop.
+  }
+  return { busy: ms };
+};
+export const unencodableCallback = async (
+  _input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  const reference = context.exportCallback(async () => (() => 'not data') as unknown as CodecInput);
+  const outcome = await context.call('fixture', 'invoke', { reference });
+  return { outcome, stillAlive: threadId >= 0 };
+};
+export const unorderedBurst = async (
+  input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  const { capability, count } = input as { capability: string; count: number };
+  const sent = Array.from({ length: count }, (_, index) =>
+    context.call(capability, 'append', { index })
+  );
+  await Promise.all(sent);
+  return await context.call(capability, 'read', {});
+};
+export const esErrorRoundtrip = async (
+  _input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  const { errors } = await import('@elastic/elasticsearch');
+  const { isRetryableEsClientError } = await import('@kbn/core-elasticsearch-server-utils');
+  let fromMain: unknown;
+  try {
+    await context.call('fixture', 'throw429', {});
+  } catch (error) {
+    fromMain = error;
+  }
+  const typed = fromMain as InstanceType<typeof errors.ResponseError>;
+  const summary = {
+    instanceOf: fromMain instanceof errors.ResponseError,
+    retryable: fromMain instanceof Error && isRetryableEsClientError(typed),
+    statusCode: typed.statusCode,
+    bodyType: (typed.body as { error?: { type?: string } })?.error?.type ?? null,
+    retryAfter: typed.headers?.['retry-after'] ?? null,
+    leakedAuthorization: JSON.stringify(typed.meta ?? {}).includes('secret-key'),
+  };
+  // Reverse direction: the task's own ConnectionError must reach main as the real class.
+  throw new errors.ConnectionError('worker connection lost', undefined, {
+    cause: new Error(JSON.stringify(summary)),
+    redaction: { type: 'replace', additionalKeys: [] },
+  });
+};

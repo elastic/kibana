@@ -10,7 +10,7 @@ import { createRequire } from 'module';
 import { randomUUID } from 'crypto';
 import { encode, decode } from './codecs';
 import type { CodecInput, WireValue } from './codecs';
-import type { AsyncCallback, Packet, TaskEntry, WorkerContext } from './protocol';
+import type { AsyncCallback, CancellationInfo, Packet, TaskEntry, WorkerContext } from './protocol';
 
 const requireModule = createRequire(__filename);
 const send = (packet: Packet): void => {
@@ -23,6 +23,7 @@ interface RunState {
   readonly controller: AbortController;
   readonly callbacks: Map<string, AsyncCallback>;
   syncCalls: number;
+  cancellation?: CancellationInfo;
   readonly pending: Map<
     number,
     { resolve: (value: CodecInput) => void; reject: (error: Error) => void }
@@ -34,6 +35,16 @@ const startRuntime = (): void => {
   const runs = new Map<string, RunState>();
   let sequence = 0;
   let newestRegistry = -1;
+  let heartbeatMs = Infinity;
+  let heartbeat: NodeJS.Timeout | undefined;
+  // Event-loop heartbeat for the host stall watchdog; started only when a run opts in.
+  const ensureHeartbeat = (requested: number | undefined): void => {
+    if (requested === undefined || requested >= heartbeatMs) return;
+    heartbeatMs = requested;
+    if (heartbeat) clearInterval(heartbeat);
+    heartbeat = setInterval(() => send({ version: 1, kind: 'heartbeat' }), heartbeatMs);
+    heartbeat.unref();
+  };
   const onMessage = async (packet: Packet): Promise<void> => {
     if (packet.version !== 1) throw new Error('Capability protocol mismatch');
     if (packet.kind === 'callback') {
@@ -54,12 +65,20 @@ const startRuntime = (): void => {
         value = error instanceof Error ? error : new Error('Callback failed');
       }
       if (!runs.has(packet.runId)) return;
+      let encoded;
+      try {
+        encoded = encode(value);
+      } catch {
+        // An unencodable callback result fails that callback only, never the whole slot.
+        failed = true;
+        encoded = encode(new Error('Callback result is not transportable'));
+      }
       send({
         version: 1,
         kind: 'callback_result',
         runId: packet.runId,
         id: packet.id,
-        value: encode(value),
+        value: encoded,
         failed,
       });
       return;
@@ -67,12 +86,29 @@ const startRuntime = (): void => {
     if (packet.kind === 'cancel') {
       const run = runs.get(packet.runId);
       if (run) {
-        run.controller.abort(
-          new DOMException(
-            'Execution cancelled',
-            packet.reason === 'deadline' ? 'TimeoutError' : 'AbortError'
-          )
-        );
+        let reason: unknown;
+        let hasOriginalReason = false;
+        if (packet.original !== undefined) {
+          try {
+            reason = decode(packet.original);
+            hasOriginalReason = true;
+          } catch {
+            hasOriginalReason = false;
+          }
+        }
+        if (!hasOriginalReason)
+          reason = new DOMException(
+            packet.reason === 'stall'
+              ? 'Execution stalled (no isolate event-loop progress)'
+              : packet.reason === 'shutdown'
+              ? 'Execution host shutdown'
+              : 'Execution cancelled',
+            packet.reason === 'deadline' || packet.reason === 'stall'
+              ? 'TimeoutError'
+              : 'AbortError'
+          );
+        run.cancellation = { reason: packet.reason, hasOriginalReason };
+        run.controller.abort(reason);
         send({ version: 1, kind: 'abort_ack', runId: packet.runId });
       }
       return;
@@ -98,6 +134,7 @@ const startRuntime = (): void => {
       syncCalls: 0,
     };
     runs.set(bundle.runId, run);
+    ensureHeartbeat(packet.heartbeatMs);
     let value: CodecInput;
     let failed = false;
     try {
@@ -114,6 +151,7 @@ const startRuntime = (): void => {
       const context: WorkerContext = {
         bundle,
         signal: run.controller.signal,
+        cancellation: () => run.cancellation,
         load,
         callSync: (capability, operation, args, options = {}) => {
           if (!parentPort)

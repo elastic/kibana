@@ -23,7 +23,8 @@
     "@kbn/core-saved-objects-base-server-internal",
     "@kbn/core-saved-objects-migration-server-internal",
     "@kbn/core-saved-objects-api-server-internal",
-    "@kbn/encrypted-saved-objects-plugin"
+    "@kbn/encrypted-saved-objects-plugin",
+    "@kbn/core-elasticsearch-server-utils"
   ],
   "exclude": [
     "target/**/*"

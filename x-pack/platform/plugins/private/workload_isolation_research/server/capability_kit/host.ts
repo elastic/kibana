@@ -10,7 +10,15 @@ import { serialize } from 'v8';
 import { performance } from 'perf_hooks';
 import { encode, decode } from './codecs';
 import type { CodecInput } from './codecs';
-import type { Bundle, Crossing, HostHandler, Lever, Outcome, Packet } from './protocol';
+import type {
+  Bundle,
+  Crossing,
+  HostHandler,
+  Lever,
+  Outcome,
+  Packet,
+  TerminationReason,
+} from './protocol';
 import { GENERIC_LEVERS, LEVER_LABELS } from './protocol';
 import type { ModuleRegistry } from './registry';
 import { startEndpoint } from './transport';
@@ -21,7 +29,13 @@ export interface Binding {
   readonly lever: Lever;
   readonly onRunEnd?: (bundle: Bundle) => void;
   readonly syncHandler?: (operation: string, args: CodecInput, bundle: Bundle) => CodecInput;
+  /** 0.1.9: run this capability's calls for one run strictly in arrival order (FIFO). */
+  readonly ordered?: boolean;
 }
+/** Node clamps longer setTimeout delays to 1ms; longer deadlines are re-armed in chunks. */
+const MAX_TIMER_MS = 2_147_483_647;
+const MIN_STALL_MS = 100;
+const MAX_STALL_MS = 3_600_000;
 export interface RunOptions {
   readonly workloadClass: string;
   readonly moduleId: string;
@@ -33,6 +47,12 @@ export interface RunOptions {
   readonly deadlineMs: number;
   readonly signal?: AbortSignal;
   readonly abortGraceMs?: number;
+  /**
+   * 0.1.9 optional no-progress watchdog: if the slot's event loop sends no packet/heartbeat for
+   * stallMs, the run is cooperatively aborted (reason 'stall'), then hard-stopped after grace.
+   * Independent of deadlineMs (the wall-clock budget, which may be long, e.g. 365 days).
+   */
+  readonly stallMs?: number;
 }
 interface Execution {
   readonly options: RunOptions;
@@ -43,9 +63,12 @@ interface Execution {
     { resolve: (value: CodecInput) => void; reject: (error: Error) => void }
   >;
   timer?: NodeJS.Timeout;
+  stallTimer?: NodeJS.Timeout;
+  dispatchedAt?: number;
+  readonly chains: Map<string, Promise<void>>;
   abort?: () => void;
   termination?: {
-    readonly reason: 'deadline' | 'cancelled' | 'shutdown' | 'crash';
+    readonly reason: TerminationReason;
     readonly promise: Promise<void>;
     readonly resolve: () => void;
     acknowledged: boolean;
@@ -57,6 +80,7 @@ interface Slot {
   readonly endpoint: Endpoint;
   ready: boolean;
   stopping: boolean;
+  lastBeat: number;
   readonly active: Map<string, Execution>;
 }
 
@@ -91,8 +115,19 @@ export class ExecutionHost {
 
   public run(options: RunOptions): Promise<Outcome> {
     if (this.closing) return Promise.reject(new Error('Execution host is stopping'));
-    if (!Number.isFinite(options.deadlineMs) || options.deadlineMs < 1)
+    if (
+      !Number.isFinite(options.deadlineMs) ||
+      options.deadlineMs < 1 ||
+      options.deadlineMs > Number.MAX_SAFE_INTEGER
+    )
       return Promise.reject(new Error('Invalid deadline'));
+    if (
+      options.stallMs !== undefined &&
+      (!Number.isFinite(options.stallMs) ||
+        options.stallMs < MIN_STALL_MS ||
+        options.stallMs > MAX_STALL_MS)
+    )
+      return Promise.reject(new Error('stallMs must be between100 and3600000ms'));
     const grace = options.abortGraceMs ?? this.options.abortGraceMs ?? 250;
     if (!Number.isFinite(grace) || grace < 0 || grace > 30000)
       return Promise.reject(new Error('Abort grace must be between0 and30000ms'));
@@ -112,16 +147,21 @@ export class ExecutionHost {
       ...(options.data === undefined ? {} : { data: encode(options.data) }),
     });
     return new Promise((resolve) => {
-      const execution: Execution = { options, bundle, resolve, done: false, callbacks: new Map() };
+      const execution: Execution = {
+        options,
+        bundle,
+        resolve,
+        done: false,
+        callbacks: new Map(),
+        chains: new Map(),
+      };
       const abort = () => {
         void this.terminate(execution, 'cancelled');
       };
       execution.abort = abort;
       options.signal?.addEventListener('abort', abort, { once: true });
       // Deadline includes queue + cold bootstrap, not just user code.
-      execution.timer = setTimeout(() => {
-        void this.terminate(execution, 'deadline');
-      }, options.deadlineMs);
+      this.armDeadline(execution, Date.now() + options.deadlineMs);
       queue.push(execution);
       this.queues.set(options.workloadClass, queue);
       this.activeIds.add(bundle.runId);
@@ -179,7 +219,13 @@ export class ExecutionHost {
           });
         return;
       }
-      const slot: Slot = { endpoint, ready: false, stopping: false, active: new Map() };
+      const slot: Slot = {
+        endpoint,
+        ready: false,
+        stopping: false,
+        lastBeat: Date.now(),
+        active: new Map(),
+      };
       slots.push(slot);
       endpoint.onMessage((packet) => {
         void this.receive(slot, packet).catch(() => {
@@ -209,6 +255,7 @@ export class ExecutionHost {
     if (!execution) return;
     idle.active.set(execution.bundle.runId, execution);
     try {
+      const { stallMs } = execution.options;
       const packet: Packet = {
         version: 1,
         kind: 'run',
@@ -216,7 +263,11 @@ export class ExecutionHost {
         bundle: execution.bundle,
         input: encode(execution.options.input),
         registry: this.registry.snapshot(),
+        ...(stallMs === undefined
+          ? {}
+          : { heartbeatMs: Math.max(25, Math.min(1000, Math.floor(stallMs / 4))) }),
       };
+      if (stallMs !== undefined) this.watchStall(execution, idle, stallMs);
       this.record(execution, 'execution.run', 'capability_bundle', 'host_to_isolate', packet, 0);
       idle.endpoint.send(packet);
     } catch (error) {
@@ -231,6 +282,9 @@ export class ExecutionHost {
 
   private async receive(slot: Slot, packet: Packet): Promise<void> {
     if (packet.version !== 1 || slot.stopping) return;
+    // Any packet proves the isolate's event loop turned (stall watchdog input).
+    slot.lastBeat = Date.now();
+    if (packet.kind === 'heartbeat') return;
     if (packet.kind === 'ready') {
       slot.ready = true;
       for (const [workloadClass, slots] of this.pools)
@@ -390,40 +444,63 @@ export class ExecutionHost {
         packet,
         0
       );
-      const result = binding.handler(packet.operation, decode(packet.args), execution.bundle, {
-        invokeCallback: (reference, args) =>
-          new Promise((resolve, reject) => {
-            if (reference.runId !== execution.bundle.runId || execution.done || slot.stopping)
-              return reject(new Error('Foreign or expired callback handle'));
-            if (execution.callbacks.size >= 256) return reject(new Error('Pending callback limit'));
-            const id = ++this.callbackSequence;
-            execution.callbacks.set(id, { resolve, reject });
-            const callbackPacket: Packet = {
-              version: 1,
-              kind: 'callback',
-              runId: execution.bundle.runId,
-              id,
-              reference,
-              args: encode(args),
-            };
-            try {
-              this.record(
-                execution,
-                'handles.callback',
-                'capability_bundle',
-                'host_to_isolate',
-                callbackPacket,
-                0
-              );
-              slot.endpoint.send(callbackPacket);
-            } catch (error) {
-              execution.callbacks.delete(id);
-              reject(error instanceof Error ? error : new Error('Callback send failed'));
-            }
-          }),
-      });
-      const syncCpu = cpuStarted ? process.threadCpuUsage(cpuStarted) : { user: 0, system: 0 };
-      handlerSyncCpuUs = syncCpu.user + syncCpu.system;
+      const callArgs = decode(packet.args);
+      const invoke = (): Promise<CodecInput> => {
+        const syncStarted = cpuStarted ? process.threadCpuUsage() : undefined;
+        const pending = binding.handler(packet.operation, callArgs, execution.bundle, {
+          invokeCallback: (reference, args) =>
+            new Promise((resolve, reject) => {
+              if (reference.runId !== execution.bundle.runId || execution.done || slot.stopping)
+                return reject(new Error('Foreign or expired callback handle'));
+              if (execution.callbacks.size >= 256)
+                return reject(new Error('Pending callback limit'));
+              const id = ++this.callbackSequence;
+              execution.callbacks.set(id, { resolve, reject });
+              const callbackPacket: Packet = {
+                version: 1,
+                kind: 'callback',
+                runId: execution.bundle.runId,
+                id,
+                reference,
+                args: encode(args),
+              };
+              try {
+                this.record(
+                  execution,
+                  'handles.callback',
+                  'capability_bundle',
+                  'host_to_isolate',
+                  callbackPacket,
+                  0
+                );
+                slot.endpoint.send(callbackPacket);
+              } catch (error) {
+                execution.callbacks.delete(id);
+                reject(error instanceof Error ? error : new Error('Callback send failed'));
+              }
+            }),
+        });
+        if (syncStarted) {
+          const syncCpu = process.threadCpuUsage(syncStarted);
+          handlerSyncCpuUs = syncCpu.user + syncCpu.system;
+        }
+        return pending;
+      };
+      let result: Promise<CodecInput>;
+      if (binding.ordered) {
+        // FIFO per run+capability: a call starts only after the previous one settled.
+        const previous = execution.chains.get(packet.capability) ?? Promise.resolve();
+        result = previous.then(invoke);
+        execution.chains.set(
+          packet.capability,
+          result.then(
+            () => undefined,
+            () => undefined
+          )
+        );
+      } else {
+        result = invoke();
+      }
       value = await result;
     } catch (error) {
       failed = true;
@@ -460,10 +537,26 @@ export class ExecutionHost {
     slot.endpoint.send(reply);
   }
 
-  private async terminate(
-    execution: Execution,
-    reason: 'deadline' | 'cancelled' | 'shutdown' | 'crash'
-  ): Promise<void> {
+  private armDeadline(execution: Execution, deadlineAt: number): void {
+    const remaining = deadlineAt - Date.now();
+    execution.timer = setTimeout(() => {
+      if (execution.done) return;
+      if (deadlineAt - Date.now() > 0) this.armDeadline(execution, deadlineAt);
+      else void this.terminate(execution, 'deadline');
+    }, Math.max(0, Math.min(remaining, MAX_TIMER_MS)));
+  }
+
+  private watchStall(execution: Execution, slot: Slot, stallMs: number): void {
+    execution.dispatchedAt = Date.now();
+    const check = Math.max(25, Math.min(1000, Math.floor(stallMs / 4)));
+    execution.stallTimer = setInterval(() => {
+      if (execution.done || execution.termination) return;
+      const since = Date.now() - Math.max(slot.lastBeat, execution.dispatchedAt ?? 0);
+      if (slot.ready && since > stallMs) void this.terminate(execution, 'stall');
+    }, check);
+  }
+
+  private async terminate(execution: Execution, reason: TerminationReason): Promise<void> {
     if (execution.termination) return execution.termination.promise;
     if (execution.done) return;
     const slots = this.pools.get(execution.options.workloadClass) ?? [];
@@ -506,11 +599,13 @@ export class ExecutionHost {
       const grace =
         reason === 'crash' ? 0 : execution.options.abortGraceMs ?? this.options.abortGraceMs ?? 250;
       if (grace > 0 && reason !== 'crash') {
+        const original = reason === 'cancelled' ? originalAbortReason(execution) : undefined;
         const packet: Packet = {
           version: 1,
           kind: 'cancel',
           runId: execution.bundle.runId,
           reason,
+          ...(original === undefined ? {} : { original }),
         };
         try {
           this.record(
@@ -560,6 +655,8 @@ export class ExecutionHost {
   }
   private clear(execution: Execution): void {
     if (execution.timer) clearTimeout(execution.timer);
+    if (execution.stallTimer) clearInterval(execution.stallTimer);
+    execution.chains.clear();
     if (execution.termination?.timer) clearTimeout(execution.termination.timer);
     if (execution.abort) execution.options.signal?.removeEventListener('abort', execution.abort);
     this.activeIds.delete(execution.bundle.runId);
@@ -603,3 +700,17 @@ export class ExecutionHost {
     }
   }
 }
+
+/** Encodes a caller-supplied AbortSignal.reason; default AbortError and unencodable reasons stay local. */
+const originalAbortReason = (execution: Execution): ReturnType<typeof encode> | undefined => {
+  const signal = execution.options.signal;
+  if (!signal?.aborted) return undefined;
+  const reason: unknown = signal.reason;
+  if (reason === undefined) return undefined;
+  if (reason instanceof DOMException && reason.name === 'AbortError') return undefined;
+  try {
+    return encode(reason as CodecInput);
+  } catch {
+    return undefined;
+  }
+};

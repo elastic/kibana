@@ -27,4 +27,6 @@ export type {
   Crossing,
   Lever,
   ModuleDescriptor,
+  CancellationInfo,
+  TerminationReason,
 } from './protocol';
