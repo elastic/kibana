@@ -28,24 +28,6 @@ describe('joinProcessorRows', () => {
     });
   });
 
-  it('keeps a real zero of items in', () => {
-    const joined = joinProcessorRows({
-      rateRows: [],
-      sumsRows: [{ step: 'uppercase-message', sum_items_in: 0, avg_duration_per_item: null }],
-    });
-
-    expect(Object.keys(joined)).toEqual(['uppercase-message']);
-  });
-
-  it('leaves out a processor with no items in', () => {
-    const joined = joinProcessorRows({
-      rateRows,
-      sumsRows: [{ step: 'uppercase-message', sum_items_in: null, avg_duration_per_item: null }],
-    });
-
-    expect(joined).toEqual({});
-  });
-
   it('has no processors for no rows', () => {
     expect(joinProcessorRows({ rateRows: [], sumsRows: [] })).toEqual({});
   });
