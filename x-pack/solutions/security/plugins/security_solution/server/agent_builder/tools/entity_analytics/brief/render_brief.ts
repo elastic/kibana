@@ -31,10 +31,8 @@ const HEADINGS = {
   recommendation: '**Recommended next step**',
 };
 
-export const QUIET_LINE =
-  'Nothing in this view is flagged as needing attention. That does not mean the environment is safe.';
-export const NO_PRIORITIES_LINE =
-  'No entity in this view has enough evidence to prioritize. That does not mean the environment is safe.';
+export const QUIET_LINE = 'Nothing in this view is flagged as needing attention.';
+export const NO_PRIORITIES_LINE = 'No entity in this view has enough evidence to prioritize.';
 
 const ENTITY_TABLE_INTRO =
   '_The priority entities at a glance, with their current risk score and asset criticality from the Entity Store:_';
