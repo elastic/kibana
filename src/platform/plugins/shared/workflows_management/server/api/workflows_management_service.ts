@@ -69,6 +69,7 @@ import type { z } from '@kbn/zod/v4';
 import type { GetExecutionStepExecutionsResult } from './lib/get_execution_step_executions';
 import type { StepExecutionListResult } from './lib/search_step_executions';
 
+import { grantPageRunApiKey } from './pages/page_run_identity';
 import { WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './pages/page_saved_object';
 import { WorkflowPageStore } from './pages/page_store';
 import { WorkflowManagementAuditLog } from './routes/utils/workflow_audit_logging';
@@ -305,6 +306,7 @@ export class WorkflowsService {
       workflowExecutionsDataClient: this.workflowExecutionsDataClient,
       stepExecutionsDataClient,
       retirePage: (ref) => this.retirePage(ref),
+      setPageRunIdentity: (ref) => this.setPageRunIdentity(ref),
     });
 
     const { encryptedSavedObjects } = pluginsStart;
@@ -319,6 +321,9 @@ export class WorkflowsService {
         encryptedClient: encryptedSavedObjects.getClient({
           includedHiddenTypes: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE],
         }),
+        invalidateApiKey: async (apiKeyId) => {
+          await coreStart.security.authc.apiKeys.invalidateAsInternalUser({ ids: [apiKeyId] });
+        },
       });
     }
 
@@ -505,12 +510,71 @@ export class WorkflowsService {
     return (await this.getPageStore()).verify(ref);
   }
 
+  /** Returns the encoded API key a page run launches with. The public route needs no identity. */
+  public async getPageRunApiKey(ref: {
+    workflowId: string;
+    spaceId: string;
+  }): Promise<string | undefined> {
+    return (await this.getPageStore()).getRunApiKey(ref);
+  }
+
+  /** Returns the user whose key a page runs with. Callers authorize first. */
+  public async getPageRunAsUsername(
+    workflowId: string,
+    spaceId: string
+  ): Promise<string | undefined> {
+    return (await this.getPageStore()).getRunAsUsername({ workflowId, spaceId });
+  }
+
   private async getPageStore(): Promise<WorkflowPageStore> {
     await this.ensureInitialized();
     if (!this.pageStore) {
       throw new Error('Workflow pages need the encrypted saved objects plugin');
     }
     return this.pageStore;
+  }
+
+  /**
+   * Makes a page run as the user who just saved its workflow. A failure leaves the
+   * previous identity in place and never fails the save.
+   */
+  private async setPageRunIdentity({
+    workflowId,
+    spaceId,
+    request,
+  }: {
+    workflowId: string;
+    spaceId: string;
+    request: KibanaRequest;
+  }): Promise<void> {
+    if (!this.pageStore) {
+      return;
+    }
+    try {
+      const identity = await grantPageRunApiKey({
+        security: this.coreStart.security,
+        request,
+        workflowId,
+      });
+      if (!identity) {
+        this.logger.warn(
+          `No user to run the page of workflow ${workflowId} as; kept the previous identity`
+        );
+        return;
+      }
+      await this.pageStore.setRunIdentity(
+        { workflowId, spaceId },
+        {
+          apiKey: identity.apiKey,
+          apiKeyId: identity.apiKeyId,
+          runAsUsername: identity.username,
+        }
+      );
+    } catch (error) {
+      this.logger.warn(
+        `Failed to set the run identity of the page of workflow ${workflowId}: ${error}`
+      );
+    }
   }
 
   /** Deletes a page credential, so a re-added page trigger gets a new URL. */

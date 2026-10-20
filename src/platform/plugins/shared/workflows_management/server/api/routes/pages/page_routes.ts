@@ -60,17 +60,42 @@ const hasPageTrigger = (workflow: WorkflowDetailDto | null): workflow is Workflo
   Boolean(workflow?.definition?.triggers.some(isPageTrigger));
 
 /** Response body for the author-facing link and rotate routes. */
+/** Who a page submission runs as. `null` until someone saves the workflow with the page. */
+type PageRunAs =
+  | { type: 'service_account'; id: string }
+  | { type: 'user'; username: string }
+  | null;
+
 const toPageLinkBody = ({
   basePath,
   workflowId,
   secret,
   enabled,
+  runAs,
 }: {
   basePath: string;
   workflowId: string;
   secret: string;
   enabled: boolean;
-}) => ({ enabled, path: buildPageUrl({ basePath, workflowId, secret }) });
+  runAs: PageRunAs;
+}) => ({ enabled, path: buildPageUrl({ basePath, workflowId, secret }), runAs });
+
+/**
+ * A bound service account wins: the engine runs the steps as it. Otherwise the page runs
+ * with the key of the user who last saved the workflow.
+ */
+const getPageRunAs = async (
+  workflowsService: RouteDependencies['workflowsService'],
+  workflow: WorkflowDetailDto,
+  spaceId: string
+): Promise<PageRunAs> => {
+  const serviceAccountId = workflow.definition?.settings?.run_as;
+  if (serviceAccountId) {
+    return { type: 'service_account', id: serviceAccountId };
+  }
+  const username = await workflowsService.getPageRunAsUsername(workflow.id, spaceId);
+  return username ? { type: 'user', username } : null;
+};
 
 /** GET the hosted form for a workflow page. The secret in the URL is the credential. */
 export function registerPageFormRoute(deps: RouteDependencies) {
@@ -98,7 +123,7 @@ export function registerPageFormRoute(deps: RouteDependencies) {
 }
 
 /** POST a page submission, which validates the input and runs the workflow. */
-export function registerPageSubmitRoute(deps: RouteDependencies, runAsApiKey: string) {
+export function registerPageSubmitRoute(deps: RouteDependencies) {
   const { router, api, workflowsService, spaces, logger, audit } = deps;
 
   router.post(
@@ -121,13 +146,17 @@ export function registerPageSubmitRoute(deps: RouteDependencies, runAsApiKey: st
         const inputs = parsePageSubmission(request.body, page.inputsSchema);
         const submitter = getPageSubmitter(request.headers, request.socket?.remoteAddress);
 
-        // The visitor has no Kibana identity, so the run carries the configured one.
-        // Production uses the workflow's `run_as` service account instead.
+        // The visitor has no Kibana identity, so the run launches with the key of the user
+        // who last saved the workflow. A bound `run_as` service account runs the steps.
+        const runApiKey = await workflowsService.getPageRunApiKey({ workflowId, spaceId });
+        if (!runApiKey) {
+          throw new Error(`The page of workflow ${workflowId} has no run identity yet`);
+        }
         const { workflowExecutionId } = await api.runWorkflowWithAlertPreprocessing({
           workflow: toWorkflowExecutionEngineModel(page.workflow),
           spaceId,
           inputs,
-          request: buildPageRunRequest(runAsApiKey),
+          request: buildPageRunRequest(runApiKey),
           preprocessingContext: context,
           // The visitor is anonymous: its values must stay data, never expressions.
           metadata: {
@@ -151,7 +180,7 @@ export function registerPageSubmitRoute(deps: RouteDependencies, runAsApiKey: st
 
 /** Authenticated helper that returns the page URL to the workflow's author. */
 export function registerPageLinkRoute(deps: RouteDependencies) {
-  const { router, api, spaces, logger } = deps;
+  const { router, api, workflowsService, spaces, logger } = deps;
 
   router.versioned
     .get({
@@ -178,6 +207,7 @@ export function registerPageLinkRoute(deps: RouteDependencies) {
               workflowId,
               secret,
               enabled: workflow.enabled,
+              runAs: await getPageRunAs(workflowsService, workflow, spaceId),
             }),
           });
         } catch (error) {
@@ -189,7 +219,7 @@ export function registerPageLinkRoute(deps: RouteDependencies) {
 
 /** Retires the current page URL by replacing its secret, and returns the new URL. */
 export function registerPageRotateRoute(deps: RouteDependencies) {
-  const { router, api, spaces, audit, logger } = deps;
+  const { router, api, workflowsService, spaces, audit, logger } = deps;
 
   router.versioned
     .post({
@@ -216,6 +246,7 @@ export function registerPageRotateRoute(deps: RouteDependencies) {
               workflowId,
               secret,
               enabled: workflow.enabled,
+              runAs: await getPageRunAs(workflowsService, workflow, spaceId),
             }),
           });
         } catch (error) {

@@ -53,6 +53,12 @@ export interface WorkflowCrudDeps extends WorkflowStorageDeps {
   stepExecutionsDataClient: StepExecutionsDataClient;
   /** Deletes the page credential of a workflow that no longer has a page trigger. */
   retirePage?: (ref: { workflowId: string; spaceId: string }) => Promise<void>;
+  /** Makes a page run as the user who saved its workflow. Never throws. */
+  setPageRunIdentity?: (ref: {
+    workflowId: string;
+    spaceId: string;
+    request: KibanaRequest;
+  }) => Promise<void>;
 }
 
 /** Deps for WorkflowSearchService. */

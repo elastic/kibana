@@ -51,6 +51,29 @@ describe('WorkflowPageShareModal', () => {
     });
   });
 
+  it.each([
+    {
+      runAs: { type: 'user', username: 'alice' },
+      testId: 'workflowPageShareRunAsUser',
+      text: 'Submissions run with the privileges of alice',
+    },
+    {
+      runAs: { type: 'service_account', id: 'soc-bot' },
+      testId: 'workflowPageShareRunAsServiceAccount',
+      text: 'Submissions run as the service account soc-bot',
+    },
+    {
+      runAs: null,
+      testId: 'workflowPageShareRunAsMissing',
+      text: 'Save the workflow to activate the page',
+    },
+  ])('states who the page runs as: $text', async ({ runAs, testId, text }) => {
+    mockHttp.get.mockResolvedValue({ enabled: true, path: '/api/workflows/pages/wf/old', runAs });
+    renderModal();
+
+    expect(await screen.findByTestId(testId)).toHaveTextContent(text);
+  });
+
   it('warns that the page is offline while the workflow is disabled', async () => {
     mockHttp.get.mockResolvedValue({ enabled: false, path: '/api/workflows/pages/wf/old' });
     renderModal();

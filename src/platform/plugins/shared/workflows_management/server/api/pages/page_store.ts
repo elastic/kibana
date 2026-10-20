@@ -26,6 +26,8 @@ interface PageRef {
 export const getPageId = ({ spaceId, workflowId }: PageRef): string =>
   uuidv5(`${spaceId}|${workflowId}`, PAGE_ID_NAMESPACE);
 
+type PageRunIdentity = Pick<WorkflowPageAttributes, 'apiKey' | 'apiKeyId' | 'runAsUsername'>;
+
 /**
  * Stores page credentials. Callers authorize first: every method runs as the
  * internal user, because the public route has no Kibana identity.
@@ -33,17 +35,18 @@ export const getPageId = ({ spaceId, workflowId }: PageRef): string =>
 export class WorkflowPageStore {
   constructor(
     private readonly deps: {
-      /** Must run the encryption extension, or the secret is written in plaintext. */
+      /** Must run the encryption extension, or the secrets are written in plaintext. */
       client: SavedObjectsClientContract;
       encryptedClient: EncryptedSavedObjectsClient;
+      invalidateApiKey: (apiKeyId: string) => Promise<void>;
     }
   ) {}
 
   /** Returns the page secret, and creates the page the first time an author asks for it. */
   async getOrCreateSecret(ref: PageRef): Promise<string> {
-    const existing = await this.readSecret(ref);
+    const existing = await this.readPage(ref);
     if (existing) {
-      return existing;
+      return existing.secret;
     }
     try {
       return await this.write(ref, { overwrite: false });
@@ -52,21 +55,56 @@ export class WorkflowPageStore {
       if (!SavedObjectsErrorHelpers.isConflictError(error)) {
         throw error;
       }
-      const created = await this.readSecret(ref);
+      const created = await this.readPage(ref);
       if (!created) {
         throw error;
       }
-      return created;
+      return created.secret;
     }
   }
 
-  /** Replaces the secret. The old URL stops working at once. */
+  /** Replaces the secret. The old URL stops working at once. The run identity stays. */
   async rotate(ref: PageRef): Promise<string> {
-    return this.write(ref, { overwrite: true });
+    const existing = await this.readPage(ref);
+    return this.write(ref, { overwrite: true, identity: existing && pickIdentity(existing) });
   }
 
-  /** Deletes the page, so a page trigger added later gets a new secret. */
+  /**
+   * Makes the page run as the user who just saved the workflow. Keeps the URL, and
+   * invalidates the key of the previous saver.
+   */
+  async setRunIdentity(
+    ref: PageRef,
+    identity: Required<Pick<PageRunIdentity, 'apiKey' | 'apiKeyId' | 'runAsUsername'>>
+  ): Promise<void> {
+    const existing = await this.readPage(ref);
+    try {
+      await this.write(ref, { overwrite: true, secret: existing?.secret, identity });
+    } catch (error) {
+      await this.deps.invalidateApiKey(identity.apiKeyId);
+      throw error;
+    }
+    if (existing?.apiKeyId && existing.apiKeyId !== identity.apiKeyId) {
+      await this.deps.invalidateApiKey(existing.apiKeyId);
+    }
+  }
+
+  /** Returns the encoded API key a page run launches with, or `undefined` when none is set. */
+  async getRunApiKey(ref: PageRef): Promise<string | undefined> {
+    return (await this.readPage(ref))?.apiKey;
+  }
+
+  /** Returns the user a page runs as, without decrypting anything. */
+  async getRunAsUsername(ref: PageRef): Promise<string | undefined> {
+    return (await this.getPage(ref))?.runAsUsername;
+  }
+
+  /** Deletes the page and its key, so a page trigger added later gets a new secret. */
   async retire(ref: PageRef): Promise<void> {
+    const existing = await this.getPage(ref);
+    if (!existing) {
+      return;
+    }
     try {
       await this.deps.client.delete(WORKFLOW_PAGE_SAVED_OBJECT_TYPE, getPageId(ref), {
         namespace: SavedObjectsUtils.namespaceStringToId(ref.spaceId),
@@ -76,39 +114,32 @@ export class WorkflowPageStore {
         throw error;
       }
     }
+    if (existing.apiKeyId) {
+      await this.deps.invalidateApiKey(existing.apiKeyId);
+    }
   }
 
   /** Checks a presented secret against the stored hash. Never decrypts. */
   async verify(ref: PageRef & { secret: string }): Promise<boolean> {
     const { spaceId, workflowId, secret } = ref;
+    const page = await this.getPage(ref);
+    return Boolean(
+      page &&
+        page.enabled &&
+        page.workflowId === workflowId &&
+        isPageSecretValid({ workflowId, spaceId, secret, secretHash: page.secretHash })
+    );
+  }
+
+  /** Reads the page without its encrypted attributes. */
+  private async getPage(ref: PageRef): Promise<WorkflowPageAttributes | undefined> {
     try {
       const { attributes } = await this.deps.client.get<WorkflowPageAttributes>(
         WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
         getPageId(ref),
-        { namespace: SavedObjectsUtils.namespaceStringToId(spaceId) }
+        { namespace: SavedObjectsUtils.namespaceStringToId(ref.spaceId) }
       );
-      return (
-        attributes.enabled &&
-        attributes.workflowId === workflowId &&
-        isPageSecretValid({ workflowId, spaceId, secret, secretHash: attributes.secretHash })
-      );
-    } catch (error) {
-      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
-        return false;
-      }
-      throw error;
-    }
-  }
-
-  private async readSecret(ref: PageRef): Promise<string | undefined> {
-    try {
-      const { attributes } =
-        await this.deps.encryptedClient.getDecryptedAsInternalUser<WorkflowPageAttributes>(
-          WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
-          getPageId(ref),
-          { namespace: SavedObjectsUtils.namespaceStringToId(ref.spaceId) }
-        );
-      return attributes.secret;
+      return attributes;
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return undefined;
@@ -117,9 +148,36 @@ export class WorkflowPageStore {
     }
   }
 
-  private async write(ref: PageRef, { overwrite }: { overwrite: boolean }): Promise<string> {
+  private async readPage(ref: PageRef): Promise<WorkflowPageAttributes | undefined> {
+    try {
+      const { attributes } =
+        await this.deps.encryptedClient.getDecryptedAsInternalUser<WorkflowPageAttributes>(
+          WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
+          getPageId(ref),
+          { namespace: SavedObjectsUtils.namespaceStringToId(ref.spaceId) }
+        );
+      return attributes;
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
+        return undefined;
+      }
+      throw error;
+    }
+  }
+
+  /**
+   * Writes the whole page. ESO forbids partial updates of encrypted attributes, so every
+   * change rewrites the object. A new secret is generated unless one is passed.
+   */
+  private async write(
+    ref: PageRef,
+    {
+      overwrite,
+      secret = generatePageSecret(),
+      identity,
+    }: { overwrite: boolean; secret?: string; identity?: PageRunIdentity }
+  ): Promise<string> {
     const { spaceId, workflowId } = ref;
-    const secret = generatePageSecret();
     await this.deps.client.create<WorkflowPageAttributes>(
       WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
       {
@@ -128,6 +186,7 @@ export class WorkflowPageStore {
         secretHash: computePageSecretHash({ workflowId, spaceId, secret }),
         enabled: true,
         createdAt: new Date().toISOString(),
+        ...identity,
       },
       {
         id: getPageId(ref),
@@ -138,3 +197,9 @@ export class WorkflowPageStore {
     return secret;
   }
 }
+
+const pickIdentity = ({ apiKey, apiKeyId, runAsUsername }: PageRunIdentity): PageRunIdentity => ({
+  apiKey,
+  apiKeyId,
+  runAsUsername,
+});

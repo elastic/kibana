@@ -28,7 +28,7 @@ import React, { useState } from 'react';
 import { buildPath } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { useQuery, useQueryClient } from '@kbn/react-query';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import {
   INTERNAL_API_VERSION,
   PAGE_LINK_API_PATH,
@@ -36,9 +36,15 @@ import {
 } from '../../../../common/lib/api_constants';
 import { useKibana } from '../../../hooks/use_kibana';
 
+type PageRunAs =
+  | { type: 'service_account'; id: string }
+  | { type: 'user'; username: string }
+  | null;
+
 interface PageLinkResponse {
   enabled: boolean;
   path: string;
+  runAs: PageRunAs;
 }
 
 interface WorkflowPageShareModalProps {
@@ -57,6 +63,59 @@ const linkQueryKey = (workflowId: string) => ['workflowPageLink', workflowId];
 /** Prefixes the server path with the public origin, so the link works outside this browser. */
 const toAbsoluteUrl = (path: string, publicBaseUrl: string | undefined): string =>
   `${publicBaseUrl ? new URL(publicBaseUrl).origin : window.location.origin}${path}`;
+
+/** States whose privileges a page submission uses, so the author shares the link knowingly. */
+const PageRunAsCallout = ({ runAs }: { runAs: PageRunAs }) => {
+  if (!runAs) {
+    return (
+      <KbnWarningCallout
+        size="s"
+        data-test-subj="workflowPageShareRunAsMissing"
+        title={i18n.translate('workflows.pageShare.runAsMissingTitle', {
+          defaultMessage: 'Save the workflow to activate the page',
+        })}
+      >
+        {i18n.translate('workflows.pageShare.runAsMissingBody', {
+          defaultMessage:
+            'The page has no identity to run with yet. Submissions fail until someone saves the workflow.',
+        })}
+      </KbnWarningCallout>
+    );
+  }
+  if (runAs.type === 'service_account') {
+    return (
+      <KbnInfoCallout
+        size="s"
+        data-test-subj="workflowPageShareRunAsServiceAccount"
+        title={i18n.translate('workflows.pageShare.runAsServiceAccountTitle', {
+          defaultMessage: 'Submissions run as the service account {id}',
+          values: { id: runAs.id },
+        })}
+      >
+        {i18n.translate('workflows.pageShare.runAsServiceAccountBody', {
+          defaultMessage:
+            'Anyone with this link runs this workflow with the privileges of this service account.',
+        })}
+      </KbnInfoCallout>
+    );
+  }
+  return (
+    <KbnWarningCallout
+      size="s"
+      data-test-subj="workflowPageShareRunAsUser"
+      title={i18n.translate('workflows.pageShare.runAsUserTitle', {
+        defaultMessage: 'Submissions run with the privileges of {username}',
+        values: { username: runAs.username },
+      })}
+    >
+      {i18n.translate('workflows.pageShare.runAsUserBody', {
+        defaultMessage:
+          '{username} saved this workflow last. Anyone with this link can do what {username} can do in the workflow steps. When someone else saves the workflow, the page runs as them. To use fixed privileges, set a service account in settings.run_as.',
+        values: { username: runAs.username },
+      })}
+    </KbnWarningCallout>
+  );
+};
 
 /** Shows the shareable URL of a workflow page, with copy and rotate. */
 export const WorkflowPageShareModal = ({
@@ -132,6 +191,8 @@ export const WorkflowPageShareModal = ({
 
         {data && (
           <>
+            <PageRunAsCallout runAs={data.runAs} />
+            <EuiSpacer size="m" />
             {!data.enabled && (
               <>
                 <KbnWarningCallout

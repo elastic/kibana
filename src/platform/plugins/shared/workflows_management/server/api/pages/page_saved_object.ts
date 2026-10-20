@@ -18,11 +18,16 @@ const SECRET_HASH_HEX_LENGTH = 64;
 // The schema sees the stored value: ESO ciphertext of a 43-character secret, about 184 characters.
 const ENCRYPTED_SECRET_MAX_LENGTH = 1024;
 const CREATED_AT_MAX_LENGTH = 32;
+// ESO ciphertext of a `base64(id:key)` API key.
+const ENCRYPTED_API_KEY_MAX_LENGTH = 1024;
+const API_KEY_ID_MAX_LENGTH = 256;
+const USERNAME_MAX_LENGTH = 1024;
 
 /**
  * One per workflow with a page trigger. `secret` is the URL credential: encrypted, so
  * an author can see the URL again. `secretHash` lets the public route check a URL
- * without decrypting anything.
+ * without decrypting anything. `apiKey` is the run identity: a key of the user who last
+ * saved the workflow, minted on save and replaced by the next save.
  */
 export interface WorkflowPageAttributes {
   workflowId: string;
@@ -30,6 +35,9 @@ export interface WorkflowPageAttributes {
   secretHash: string;
   enabled: boolean;
   createdAt: string;
+  apiKey?: string;
+  apiKeyId?: string;
+  runAsUsername?: string;
 }
 
 const workflowPageSchemaV1 = schema.object({
@@ -41,6 +49,9 @@ const workflowPageSchemaV1 = schema.object({
   }),
   enabled: schema.boolean(),
   createdAt: schema.string({ maxLength: CREATED_AT_MAX_LENGTH }),
+  apiKey: schema.maybe(schema.string({ maxLength: ENCRYPTED_API_KEY_MAX_LENGTH })),
+  apiKeyId: schema.maybe(schema.string({ maxLength: API_KEY_ID_MAX_LENGTH })),
+  runAsUsername: schema.maybe(schema.string({ maxLength: USERNAME_MAX_LENGTH })),
 });
 
 export const registerWorkflowPageType = ({
@@ -75,7 +86,7 @@ export const registerWorkflowPageType = ({
   // `workflowId` never changes and names what the secret opens, so it is bound as AAD.
   encryptedSavedObjects?.registerType({
     type: WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
-    attributesToEncrypt: new Set(['secret']),
+    attributesToEncrypt: new Set(['secret', 'apiKey']),
     attributesToIncludeInAAD: new Set(['workflowId']),
   });
 };
