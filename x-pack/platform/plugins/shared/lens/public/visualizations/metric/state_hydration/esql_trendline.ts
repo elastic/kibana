@@ -360,7 +360,14 @@ export function hydrateEsqlMetricTrendlineAfterSuggestion({
     ? previousTextBasedState.layers[trendlineLayerId]
     : undefined;
   const mainLayer = textBasedState.layers[visualizationState.layerId];
-  const fallbackTimeField = mainLayer?.timeField ?? previousTrendlineLayer?.timeField;
+  const canReusePreviousDataset = Boolean(
+    mainLayer?.index &&
+      previousTrendlineLayer?.index &&
+      mainLayer.index === previousTrendlineLayer.index
+  );
+  const fallbackTimeField =
+    mainLayer?.timeField ??
+    (canReusePreviousDataset ? previousTrendlineLayer?.timeField : undefined);
   const textBasedStateWithTimeField =
     mainLayer && fallbackTimeField && !mainLayer.timeField
       ? {
@@ -381,7 +388,7 @@ export function hydrateEsqlMetricTrendlineAfterSuggestion({
     return rebuilt;
   }
 
-  if (!previousTrendlineLayer) {
+  if (!previousTrendlineLayer || !canReusePreviousDataset) {
     return undefined;
   }
 

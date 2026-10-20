@@ -9,7 +9,7 @@ Metric-specific runtime patches to visualization state and datasource layers. In
 
 When a metric sparkline is enabled, rebuilds the hidden ES|QL trendline layer from the main layer (query, time field, metric and breakdown columns).
 
-`hydrateEsqlMetricTrendlineAfterSuggestion` covers dashboard inline ES|QL editing. Suggestions rebuild only the main layer, so trendline accessors are taken from the previous visualization, then the layer is rebuilt from the new query. If the suggestion omits `timeField`, the previous trendline layer's time field is used. If rebuild still fails, the previous trendline layer is kept.
+`hydrateEsqlMetricTrendlineAfterSuggestion` covers dashboard inline ES|QL editing. Suggestions rebuild only the main layer, so trendline accessors are taken from the previous visualization, then the layer is rebuilt from the new query. If the suggestion omits `timeField` but still targets the same index, the previous trendline layer's time field is used. If rebuild still fails on that same index, the previous trendline layer is kept. A suggestion for a different index does not reuse the previous time field or trendline layer.
 
 ## `legacy_secondary_label.ts`
 

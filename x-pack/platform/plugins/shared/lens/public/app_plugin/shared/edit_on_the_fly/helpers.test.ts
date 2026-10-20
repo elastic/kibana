@@ -807,6 +807,105 @@ describe('Lens inline editing helpers', () => {
         expect(trendlineLayer.query?.esql).toContain('AVG(bytes)');
         expect(trendlineLayer.query?.esql).toContain('BUCKET');
       });
+
+      it('does not reuse the previous time field when switching to an index without one', async () => {
+        const metricAccessor = 'metric-accessor';
+        const newQuery = { esql: 'FROM untime-* | STATS avg_bytes = AVG(bytes)' };
+        const prevTextBasedState = prevAttributes.state.datasourceStates.textBased;
+        if (!prevTextBasedState) {
+          throw new Error('Expected textBased datasource state');
+        }
+        const prevMainLayer = prevTextBasedState.layers[mainLayerId];
+        const prevTrendlineLayer = prevTextBasedState.layers[trendlineLayerId];
+        if (!prevMainLayer || !prevTrendlineLayer) {
+          throw new Error('Expected previous main and trendline layers');
+        }
+
+        const prevAttributesWithOrderDate: TypedLensSerializedState['attributes'] = {
+          ...prevAttributes,
+          state: {
+            ...prevAttributes.state,
+            datasourceStates: {
+              textBased: {
+                layers: {
+                  [mainLayerId]: {
+                    ...prevMainLayer,
+                    index: 'ecommerce',
+                    timeField: 'order_date',
+                    query: { esql: 'FROM ecommerce | STATS COUNT(*)' },
+                  },
+                  [trendlineLayerId]: {
+                    ...prevTrendlineLayer,
+                    index: 'ecommerce',
+                    timeField: 'order_date',
+                    query: {
+                      esql: 'FROM ecommerce | STATS COUNT(*) BY BUCKET(order_date, 75, ?_tstart, ?_tend)',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        };
+
+        mockSuggestionApi.mockReturnValueOnce([
+          {
+            title: 'Metric',
+            score: 1,
+            visualizationId: 'lnsMetric',
+            previewIcon: 'metric',
+            visualizationState: {
+              layerId: mainLayerId,
+              layerType: 'data',
+              metricAccessor,
+            },
+            keptLayerIds: [mainLayerId],
+            datasourceState: {
+              layers: {
+                [mainLayerId]: {
+                  index: 'untime',
+                  query: newQuery,
+                  columns: [
+                    {
+                      columnId: metricAccessor,
+                      fieldName: 'avg_bytes',
+                      meta: { type: 'number' },
+                    },
+                  ],
+                  timeField: undefined,
+                },
+              },
+              fieldList: [],
+              indexPatternRefs: [],
+              initialContext: {},
+            },
+            datasourceId: 'textBased',
+            columns: 1,
+            changeType: 'initial',
+          },
+        ]);
+
+        const result = await getSuggestions(
+          newQuery,
+          startDependencies.data,
+          httpMock,
+          uiSettingsMock,
+          mockDatasourceMap(),
+          mockVisualizationMap(),
+          dataviewSpecArr,
+          jest.fn(),
+          undefined,
+          undefined,
+          [],
+          true,
+          prevAttributesWithOrderDate
+        );
+
+        const layers = getTextBasedLayers(result);
+        expect(layers[trendlineLayerId]).toBeUndefined();
+        expect(layers[mainLayerId].timeField).toBeUndefined();
+        expect(layers[mainLayerId].query?.esql).not.toContain('order_date');
+      });
     });
   });
 

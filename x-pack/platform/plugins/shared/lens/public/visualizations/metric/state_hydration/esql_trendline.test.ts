@@ -399,7 +399,59 @@ describe('hydrateEsqlMetricTrendlineAfterSuggestion', () => {
       timeField: '@timestamp',
       query: { esql: expect.stringContaining('BUCKET') },
     });
+    expect(result?.textBasedState.layers.layer_0.timeField).toBe('@timestamp');
     expect(result?.textBasedState.layers.layer_0_trendline.query?.esql).not.toContain('order_date');
+  });
+
+  it('does not reuse the previous time field when the suggestion targets a different index', () => {
+    const previousTrendlineLayer = {
+      index: 'esql-ecommerce',
+      query: {
+        esql: 'FROM ecommerce | STATS avg_bytes = AVG(bytes) BY BUCKET(order_date, 75, ?_tstart, ?_tend)',
+      },
+      timeField: 'order_date',
+      columns: [
+        {
+          columnId: 'x_date_histogram',
+          fieldName: 'order_date',
+          meta: { type: 'date' as const },
+        },
+      ],
+    };
+
+    const result = hydrateEsqlMetricTrendlineAfterSuggestion({
+      visualizationType: LENS_METRIC_ID,
+      visualizationState: {
+        layerId: 'layer_0',
+        layerType: 'data',
+        metricAccessor: 'metric_accessor_metric',
+      },
+      textBasedState: {
+        layers: {
+          layer_0: {
+            ...mainLayer,
+            index: 'esql-untime',
+            query: { esql: 'FROM untime-* | STATS avg_bytes = AVG(bytes)' },
+            timeField: undefined,
+          },
+        },
+      },
+      previousVisualizationState,
+      previousTextBasedState: {
+        layers: {
+          layer_0: {
+            ...mainLayer,
+            index: 'esql-ecommerce',
+            timeField: 'order_date',
+            query: { esql: 'FROM ecommerce | STATS avg_bytes = AVG(bytes)' },
+          },
+          layer_0_trendline: previousTrendlineLayer,
+        },
+      },
+      esqlQuery: 'FROM untime-* | STATS avg_bytes = AVG(bytes)',
+    });
+
+    expect(result).toBeUndefined();
   });
 
   it('keeps the previous trendline layer when the new query cannot be rebuilt', () => {
@@ -448,5 +500,46 @@ describe('hydrateEsqlMetricTrendlineAfterSuggestion', () => {
       })
     );
     expect(result?.textBasedState.layers.layer_0_trendline).toEqual(previousTrendlineLayer);
+  });
+
+  it('does not keep the previous trendline layer when rebuild fails on a different index', () => {
+    const previousTrendlineLayer = {
+      index: 'esql-logs',
+      query: {
+        esql: 'FROM logs-* | STATS avg_bytes = AVG(bytes) BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
+      },
+      timeField: '@timestamp',
+      columns: [
+        {
+          columnId: 'x_date_histogram',
+          fieldName: '@timestamp',
+          meta: { type: 'date' as const },
+        },
+      ],
+    };
+
+    const result = hydrateEsqlMetricTrendlineAfterSuggestion({
+      visualizationType: LENS_METRIC_ID,
+      visualizationState: {
+        layerId: 'layer_0',
+        layerType: 'data',
+        metricAccessor: 'metric_accessor_metric',
+      },
+      textBasedState: {
+        layers: {
+          layer_0: { ...mainLayer, index: 'esql-other', columns: [] },
+        },
+      },
+      previousVisualizationState,
+      previousTextBasedState: {
+        layers: {
+          layer_0: mainLayer,
+          layer_0_trendline: previousTrendlineLayer,
+        },
+      },
+      esqlQuery: 'FROM other-* | STATS avg_bytes = AVG(bytes)',
+    });
+
+    expect(result).toBeUndefined();
   });
 });
