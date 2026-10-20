@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { lookup as dnsLookup } from 'dns';
 import { isIPv4, isIPv6 } from 'net';
+import type { LookupFunction } from 'net';
 import type { UptimeConfig } from '../../../config';
 
 const stripBrackets = (host: string): string => host.replace(/^\[|\]$/g, '');
@@ -87,4 +89,20 @@ export const hostNotAllowedMessage = (address: string): string => {
     // keep the raw value
   }
   return `Vault host "${host}" is not added to the Kibana config xpack.synthetics.secretConnections.allowedHosts`;
+};
+
+/** DNS lookup that refuses names resolving to a blocked address (guards against rebinding). */
+export const guardedLookup: LookupFunction = (hostname, options, callback) => {
+  dnsLookup(hostname, options, (err, address, family) => {
+    if (err) {
+      callback(err, address, family);
+      return;
+    }
+    const addresses = Array.isArray(address) ? address.map((a) => a.address) : [address];
+    if (addresses.some(isBlockedAddress)) {
+      callback(new Error('address resolves to a blocked link-local IP'), '', 0);
+      return;
+    }
+    callback(null, address, family);
+  });
 };

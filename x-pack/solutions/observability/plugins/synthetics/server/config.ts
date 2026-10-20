@@ -24,7 +24,7 @@ const serviceConfig = schema.object({
 const secretConnectionsConfig = schema.object({
   // Off where private-location agents cannot resolve references yet.
   enabled: schema.boolean({ defaultValue: true }),
-  // Hostnames a secret provider (Vault) connection may point at. `*` allows any.
+  // Hostnames Kibana may contact for secret provider (Vault) connections. `*` allows any.
   allowedHosts: schema.arrayOf(schema.string({ minLength: 1, maxLength: 253 }), {
     defaultValue: ['*'],
     maxSize: 1000,
