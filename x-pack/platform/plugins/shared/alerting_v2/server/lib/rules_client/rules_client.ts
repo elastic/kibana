@@ -617,6 +617,37 @@ export class RulesClient {
     }
   }
 
+  /**
+   * Saves the rule and creates or removes its executor task to match `enabled`.
+   * The order makes sure an enabled rule is never left without a task.
+   */
+  private async commitRuleAttrs({
+    id,
+    attrs,
+    version,
+    references,
+  }: {
+    id: string;
+    attrs: RuleSavedObjectAttributes;
+    version?: string;
+    references: SavedObjectReference[];
+  }): Promise<void> {
+    const { spaceId } = this.getSpaceContext();
+
+    if (attrs.enabled) {
+      await this.scheduleRuleExecutorTask({
+        ruleId: id,
+        spaceId,
+        scheduleEvery: attrs.schedule.every,
+      });
+      await this.writeRuleAttrs({ id, attrs, version, references });
+      return;
+    }
+
+    await this.writeRuleAttrs({ id, attrs, version, references });
+    await this.taskManager.removeIfExists(getRuleExecutorTaskId({ ruleId: id, spaceId }));
+  }
+
   @withApm
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
@@ -720,7 +751,6 @@ export class RulesClient {
 
   @withApm
   public async updateRule({ id, data }: UpdateRuleParams): Promise<RuleResponse> {
-    const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
     if (parsed.artifacts !== undefined) {
       this.artifactTypeRegistry.validate(parsed.artifacts ?? undefined);
@@ -763,26 +793,15 @@ export class RulesClient {
       },
     ]);
 
-    // updateRule NEVER changes whether a rule runs — it only re-syncs the
-    // schedule interval of an already-enabled rule (Task Manager's
-    // `ensureScheduled` updates the interval of the existing task on conflict).
-    // Turning the run loop on/off stays exclusively with enableRule/disableRule,
-    // so a disabled rule is never resurrected by an unrelated property edit.
-    if (existingAttrs.enabled) {
-      await this.scheduleRuleExecutorTask({
-        ruleId: id,
-        spaceId,
-        scheduleEvery: nextAttrs.schedule.every,
-      });
-    }
-
     const references = rebuildArtifactReferences({
       artifacts: nextAttrs.artifacts,
       previousReferences: existingReferences,
       registry: this.artifactTypeRegistry,
     });
 
-    await this.writeRuleAttrs({
+    // Updates never enable or disable a rule. Enabled rules get their task
+    // interval updated, disabled rules only lose a leftover task.
+    await this.commitRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
@@ -927,8 +946,6 @@ export class RulesClient {
 
   @withApm
   public async enableRule({ id }: { id: string }): Promise<RuleResponse> {
-    const { spaceId } = this.getSpaceContext();
-
     const {
       attrs: existingAttrs,
       version: existingVersion,
@@ -953,13 +970,7 @@ export class RulesClient {
       await this.validateSchedule([{ updatedEvery: nextAttrs.schedule.every, checkLimit: true }]);
     }
 
-    await this.scheduleRuleExecutorTask({
-      ruleId: id,
-      spaceId,
-      scheduleEvery: nextAttrs.schedule.every,
-    });
-
-    await this.writeRuleAttrs({
+    await this.commitRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
@@ -979,8 +990,6 @@ export class RulesClient {
 
   @withApm
   public async disableRule({ id }: { id: string }): Promise<RuleResponse> {
-    const { spaceId } = this.getSpaceContext();
-
     const {
       attrs: existingAttrs,
       version: existingVersion,
@@ -1001,10 +1010,7 @@ export class RulesClient {
       version: this.getNextVersion(existingAttrs.version),
     };
 
-    const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
-    await this.taskManager.removeIfExists(taskId);
-
-    await this.writeRuleAttrs({
+    await this.commitRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
@@ -1812,7 +1818,6 @@ export class RulesClient {
       return { rule, created: true };
     }
 
-    const { spaceId } = this.getSpaceContext();
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
@@ -1862,7 +1867,7 @@ export class RulesClient {
         spaceId,
         scheduleEvery: nextAttrs.schedule.every,
       });
-      await this.writeRuleAttrs({
+      await this.commitRuleAttrs({
         id,
         attrs: nextAttrs,
         version: existingVersion,
