@@ -78,6 +78,18 @@ describe('resolveSearchWindow', () => {
     expect(schema.safeParse({ start: 'yesterday', end: 'today' }).success).toBe(false);
   });
 
+  it('accepts equal incident bounds and widens the instant by the margin', () => {
+    const instant = '2026-10-16T10:00:00.000Z';
+    expect(schema.safeParse({ start: instant, end: instant, margin_hours: 2 }).success).toBe(true);
+    expect(
+      resolveSearchWindow(schema.parse({ start: instant, end: instant, margin_hours: 2 }), NOW)
+    ).toEqual({
+      start: '2026-10-16T08:00:00.000Z',
+      end: '2026-10-16T12:00:00.000Z',
+      anchor: 'incident',
+    });
+  });
+
   it('bounds the margin and the lookback', () => {
     expect(schema.safeParse({ margin_hours: 73 }).success).toBe(false);
     expect(schema.safeParse({ time_window_hours: 721 }).success).toBe(false);

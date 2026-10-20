@@ -47,7 +47,11 @@ export const searchWindowShape = () => ({
 
 export type SearchWindowInput = z.infer<z.ZodObject<ReturnType<typeof searchWindowShape>>>;
 
-/** Adds the `start`/`end` pairing and ordering checks to a tool schema that includes `searchWindowShape`. */
+/**
+ * Adds the `start`/`end` pairing and ordering checks to a tool schema that includes `searchWindowShape`.
+ * Equal bounds are valid: a single cited alert, or a discovery with no alert times, is one instant that
+ * `margin_hours` then widens.
+ */
 export const withSearchWindowChecks = <T extends z.ZodType<{ start?: string; end?: string }>>(
   schema: T
 ): T =>
@@ -57,8 +61,8 @@ export const withSearchWindowChecks = <T extends z.ZodType<{ start?: string; end
     })
     .refine(
       ({ start, end }) =>
-        start === undefined || end === undefined || Date.parse(start) < Date.parse(end),
-      { message: '`start` must be before `end`' }
+        start === undefined || end === undefined || Date.parse(start) <= Date.parse(end),
+      { message: '`start` must not be after `end`' }
     ) as T;
 
 export interface ResolvedSearchWindow {

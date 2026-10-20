@@ -108,6 +108,24 @@ describe(`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID} handler`, () => {
     });
   });
 
+  it('scopes the ES|QL query to the padded window when start and end are the same instant', async () => {
+    const instant = '2026-10-16T10:00:00.000Z';
+    const results = await runExtractIocs(['azep-bd79f31511'], undefined, {
+      start: instant,
+      end: instant,
+      margin_hours: 2,
+    });
+
+    expect(mockEsqlQuery.mock.calls[0][0].query).toContain(
+      '@timestamp >= TO_DATETIME("2026-10-16T08:00:00.000Z") AND @timestamp <= TO_DATETIME("2026-10-16T12:00:00.000Z")'
+    );
+    expect((results[0].data as { searched_window: unknown }).searched_window).toEqual({
+      start: '2026-10-16T08:00:00.000Z',
+      end: '2026-10-16T12:00:00.000Z',
+      anchor: 'incident',
+    });
+  });
+
   it('does not attach osquery live-state guidance — Defend telemetry only', async () => {
     const data = await getData();
 

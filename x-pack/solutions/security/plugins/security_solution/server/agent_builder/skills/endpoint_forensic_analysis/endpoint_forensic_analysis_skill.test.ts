@@ -164,6 +164,23 @@ describe('endpointForensicAnalysisSkill', () => {
       expect(data.guidance).toContain('Events outside it are history');
     });
 
+    it('searches the padded window when the incident bounds are the same instant', async () => {
+      catIndices.mockResolvedValue([]);
+
+      const data = await runHandler({
+        hosts: ['WKSTN-RECV01'],
+        start: '2026-10-16T10:00:00.000Z',
+        end: '2026-10-16T10:00:00.000Z',
+        margin_hours: 2,
+      });
+
+      expect(data.searched_window).toEqual({
+        start: '2026-10-16T08:00:00.000Z',
+        end: '2026-10-16T12:00:00.000Z',
+        anchor: 'incident',
+      });
+    });
+
     it('rejects a start without an end', async () => {
       const tool = await getTool();
       await expect(
