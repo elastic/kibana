@@ -362,9 +362,19 @@ export const createMcpProtocol = (
     }
   };
 
+  const at = source === undefined ? {} : { source };
   return {
     endpoints: spec.endpoints.map((endpoint) => toEndpoint(new URL(endpoint))),
-    operations: operationNames,
+    operations: [
+      { name: 'tools/list', ...at, readOnly: true },
+      ...[...tools.values()].map(({ name, annotations }) => ({
+        name: `${TOOL_CALL}${name}`,
+        ...at,
+        readOnly: annotations?.readOnlyHint === true,
+      })),
+    ],
+    // `tools/list` answers from the spec's tools, never from a stored response.
+    answerable: operationNames,
     rejectedResponses,
     handle: async (request) => {
       if (request.method !== 'post') {

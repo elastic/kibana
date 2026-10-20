@@ -48,6 +48,37 @@ Requests aren't forwarded: the proxy answers each one with `fetch`, so the vendo
 
 Clients must trust the CA's certificate (`certificateAuthority.cert`, PEM). Kibana's actions plugin trusts it for a vendor host through `xpack.actions.customHostSettings` (`ssl.certificateAuthoritiesData`), or for every host through the `NODE_EXTRA_CA_CERTS` environment variable. `createCertificateAuthority({ cert, key })` loads a CA created earlier, so a Kibana configured to trust it keeps working when the mock restarts.
 
+### Control endpoints
+
+A test that drives Kibana can't read `mock.calls` across processes, so the proxy can serve control endpoints on its own origin:
+
+```ts
+import { createEmulatorControl, createEmulatorControlHandler } from '@kbn/connector-emulate';
+
+const proxy = createEmulatorProxy({
+  fetch: mock.fetch,
+  certificateAuthority,
+  control: createEmulatorControlHandler(mock),
+});
+const proxyUrl = await proxy.listen(8080);
+
+// In the test, possibly in another process:
+const control = createEmulatorControl(proxyUrl);
+const { calls, total } = await control.calls(); // GET /_mock/calls?since=0
+await control.reset(); // POST /_mock/reset
+const operations = await control.operations(); // GET /_mock/operations
+```
+
+| Endpoint | Answer |
+| --- | --- |
+| `GET /_mock/calls?since=<n>` | `{ calls, total }`: the calls from index `n` on (default 0); pass `total` as the next `since` to read only later calls |
+| `POST /_mock/reset` | **204** after emptying the calls (`mock.reset()`) |
+| `GET /_mock/operations` | `{ operations }`: each OpenAPI operation's method, path template, server URLs and spec name, and each GraphQL root field or MCP tool by the name calls give it |
+
+Only requests sent to the proxy itself (a path, not an absolute URL) reach them: requests through the proxy, plain or tunnelled, always go to the mock, so a vendor path under `/_mock` can't collide with them. Other paths sent to the proxy itself still get **400**. The endpoints take no credentials; like the proxy, they are for local and CI test runs.
+
+Each call says where its response came from in `responseSource`: `fixture`, `recording`, `generated` for the spec's examples and samples, or `responder` when a `respond` answered without deferring to the default chain. `createEmulatorFetch({ onCall })` is called with each call as it is recorded, e.g. to log requests as they arrive.
+
 ## GraphQL
 
 GraphQL APIs are specs too: the schema in SDL, and the URLs the vendor serves it at.

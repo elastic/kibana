@@ -12,6 +12,16 @@ export { createCertificateAuthority } from './src/server/certificate_authority';
 export type { CertificateAuthority, CertificateKeyPair } from './src/server/certificate_authority';
 export { createEmulatorProxy } from './src/server/create_emulator_proxy';
 export type { EmulatorProxy, EmulatorProxyOptions } from './src/server/create_emulator_proxy';
+export {
+  CONTROL_PATH,
+  createEmulatorControl,
+  createEmulatorControlHandler,
+} from './src/server/emulator_control';
+export type {
+  EmulatorCalls,
+  EmulatorControl,
+  EmulatorControlHandler,
+} from './src/server/emulator_control';
 export { sampleBoundaryResponse, sampleResponse } from './src/engine/sample_response';
 export { sampleJsonSchema } from './src/engine/sample_schema';
 export type { SampleJsonSchemaOptions } from './src/engine/sample_schema';
@@ -21,6 +31,11 @@ export type {
   EmulatorOptions,
   EmulatorSpec,
 } from './src/fetch/create_emulator_fetch';
+export type {
+  EmulatorHttpOperation,
+  EmulatorNamedOperation,
+  EmulatorOperation,
+} from './src/fetch/list_operations';
 export { isGraphQLSpec } from './src/graphql/graphql_protocol';
 export type { GraphQLSpec } from './src/graphql/graphql_protocol';
 export { isMcpSpec } from './src/mcp/mcp_protocol';

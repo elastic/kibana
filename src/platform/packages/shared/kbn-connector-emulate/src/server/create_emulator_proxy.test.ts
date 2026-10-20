@@ -19,6 +19,7 @@ import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import { createCertificateAuthority } from './certificate_authority';
 import type { EmulatorProxy } from './create_emulator_proxy';
 import { createEmulatorProxy } from './create_emulator_proxy';
+import { createEmulatorControl, createEmulatorControlHandler } from './emulator_control';
 
 const spec: OpenApiDocument = {
   openapi: '3.0.3',
@@ -254,5 +255,65 @@ describe('createEmulatorProxy', () => {
 
     expect(response.status).toBe(502);
     expect(JSON.parse(response.body).detail).toContain('boom');
+  });
+
+  describe('with control endpoints', () => {
+    beforeEach(async () => {
+      await proxy.close();
+      proxy = createEmulatorProxy({
+        fetch: mock.fetch,
+        certificateAuthority,
+        control: createEmulatorControlHandler(mock),
+      });
+      proxyUrl = await proxy.listen();
+    });
+
+    it('serves the calls, operations and reset to a control client', async () => {
+      const control = createEmulatorControl(proxyUrl);
+      const url = 'https://api.vendor.example/v1/items/42';
+      await send(url, { agent: trustingCa(url).httpsAgent });
+
+      const { calls, total } = await control.calls();
+      expect(total).toBe(1);
+      expect(calls).toEqual([
+        expect.objectContaining({
+          operation: 'getItem',
+          status: 200,
+          requestViolations: [],
+          responseViolations: [],
+        }),
+      ]);
+      expect((await control.operations()).map(({ protocol }) => protocol)).toEqual([
+        'openapi',
+        'openapi',
+      ]);
+
+      await control.reset();
+      expect(await control.calls()).toEqual({ calls: [], total: 0 });
+    });
+
+    it('keeps answering 400 to other requests sent to the proxy itself', async () => {
+      const response = await send(new URL('/items/7', proxyUrl).href, { agent: undefined });
+
+      expect(response.status).toBe(400);
+    });
+
+    it('sends requests through the proxy to the emulator, even under /_mock', async () => {
+      const plain = 'http://plain.vendor.example/_mock/calls';
+      const tunnelled = 'https://api.vendor.example/v1/_mock/reset';
+
+      const viaAbsoluteForm = await send(plain, { agent: kibanaAgents(plain).httpAgent });
+      const viaConnect = await send(tunnelled, {
+        method: 'POST',
+        agent: trustingCa(tunnelled).httpsAgent,
+      });
+
+      expect(viaAbsoluteForm.status).toBe(404);
+      expect(viaConnect.status).toBe(404);
+      expect(mock.calls.map(({ request }) => request)).toEqual([
+        'GET http://plain.vendor.example/_mock/calls',
+        'POST https://api.vendor.example/v1/_mock/reset',
+      ]);
+    });
   });
 });

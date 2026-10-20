@@ -36,6 +36,8 @@ import type { ContractOperation, OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
 import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
+import type { EmulatorOperation, LoadedProtocol } from './list_operations';
+import { listOperations } from './list_operations';
 
 /** One request the mock received, for assertions in tests. */
 export interface ContractCall {
@@ -57,6 +59,12 @@ export interface ContractCall {
   readonly protocolMessage?: true;
   /** Set for requests to the token URL of an OAuth 2 flow, which the mock answers itself. */
   readonly token?: true;
+  /**
+   * Set for answered OpenAPI operations: whether the response came from a fixture, a recording,
+   * the spec's examples and samples (`generated`), or a `respond` that answered without
+   * deferring to the default chain (`responder`).
+   */
+  readonly responseSource?: 'fixture' | 'recording' | 'generated' | 'responder';
   readonly status: number;
   readonly requestViolations: readonly Violation[];
   readonly responseViolations: readonly Violation[];
@@ -85,6 +93,8 @@ export interface EmulatorOptions extends PaginationOptions {
    * may be promises, and are validated like any other.
    */
   readonly respond?: Responder;
+  /** Called with each call as it is recorded, e.g. to log requests as they arrive. */
+  readonly onCall?: (call: ContractCall) => void;
   /**
    * How the default chain samples responses the spec has no example for: `typical` values, or
    * values at the schema's upper bounds (`boundary`), which also skips examples.
@@ -95,9 +105,11 @@ export interface EmulatorOptions extends PaginationOptions {
 export interface Emulator {
   readonly fetch: typeof fetch;
   readonly calls: ContractCall[];
+  /** The operations the specs declare, which is what the emulator answers. */
+  readonly operations: readonly EmulatorOperation[];
   /** Fixtures and recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
-  /** Empties `calls` and the responder state, e.g. between tests. */
+  /** Empties `calls` and the responder state, e.g. between tests; `calls` keeps its identity. */
   readonly reset: () => void;
 }
 
@@ -163,29 +175,23 @@ const loadSpecs = (specs: EmulatorOptions['specs']): ContractOperation[] =>
     isGraphQLSpec(spec) || isMcpSpec(spec) ? [] : loadSpec(spec, source)
   );
 
-interface LoadedProtocol {
-  readonly source?: string;
-  readonly protocol: ContractProtocol;
-}
-
 const loadProtocols = (
   specs: EmulatorOptions['specs'],
   responses: readonly NamedResponse[]
 ): LoadedProtocol[] =>
-  toNamedSpecs(specs).flatMap(([source, spec]) => {
+  toNamedSpecs(specs).flatMap(([source, spec]): LoadedProtocol[] => {
     const options = { source, responses };
-    const protocol = isGraphQLSpec(spec)
-      ? createGraphQLProtocol(spec, options)
+    return isGraphQLSpec(spec)
+      ? [{ source, protocol: 'graphql', instance: createGraphQLProtocol(spec, options) }]
       : isMcpSpec(spec)
-      ? createMcpProtocol(spec, options)
-      : undefined;
-    return protocol ? [{ source, protocol }] : [];
+      ? [{ source, protocol: 'mcp', instance: createMcpProtocol(spec, options) }]
+      : [];
   });
 
 const toProtocolEndpoints = (loaded: readonly LoadedProtocol[]): Map<string, ContractProtocol> =>
   new Map(
-    loaded.flatMap(({ protocol }) =>
-      protocol.endpoints.map((endpoint) => [endpoint, protocol] as const)
+    loaded.flatMap(({ instance }) =>
+      instance.endpoints.map((endpoint) => [endpoint, instance] as const)
     )
   );
 
@@ -223,6 +229,7 @@ export const createEmulatorFetch = ({
   collectionSize,
   respond,
   sampling = 'typical',
+  onCall,
 }: EmulatorOptions): Emulator => {
   const operations = loadSpecs(specs);
   const namedResponses = collectNamedResponses(fixtures, recordings);
@@ -242,14 +249,23 @@ export const createEmulatorFetch = ({
   );
   const contract = createOpenApiAdapter(operations, respond ?? defaultChain);
   const state = new Map<unknown, unknown>();
+  // The contexts whose responder deferred to the default chain, for `responseSource`.
+  const deferred = new WeakSet<ResponderContext>();
   const contextFor = (operation: ContractOperation, request: ContractRequest) => {
     const context: ResponderContext = {
       state,
-      next: async () => defaultChain(operation, request, context),
+      next: async () => {
+        deferred.add(context);
+        return defaultChain(operation, request, context);
+      },
     };
     return context;
   };
   const calls: ContractCall[] = [];
+  const record = (call: ContractCall) => {
+    calls.push(call);
+    onCall?.(call);
+  };
 
   const handle = async (request: ContractRequest): Promise<ContractResponse> => {
     const description = `${request.method.toUpperCase()} ${request.url.origin}${
@@ -271,14 +287,14 @@ export const createEmulatorFetch = ({
         responseViolations,
       };
       if (called.length === 0 && messages.length === 0) {
-        calls.push(base);
+        record(base);
       }
       for (const message of messages) {
-        calls.push({ ...base, operation: message, protocolMessage: true });
+        record({ ...base, operation: message, protocolMessage: true });
       }
       for (const { name, source, readOnly } of called) {
         const matched = { name, ...(source === undefined ? {} : { source }) };
-        calls.push({ ...base, operation: name, matched, readOnly });
+        record({ ...base, operation: name, matched, readOnly });
       }
       return response;
     }
@@ -286,7 +302,7 @@ export const createEmulatorFetch = ({
     const grants = 'operation' in routed ? undefined : tokenEndpoints(request.url);
     if (grants) {
       const { response, violations } = respondToTokenRequest(grants, request);
-      calls.push({
+      record({
         request: description,
         operation: 'OAuth token',
         token: true,
@@ -297,7 +313,7 @@ export const createEmulatorFetch = ({
       return response;
     }
     if (!('operation' in routed)) {
-      calls.push({
+      record({
         request: description,
         status: routed.status,
         requestViolations: [],
@@ -315,7 +331,7 @@ export const createEmulatorFetch = ({
       authViolations.length > 0 ? authViolations : contract.validateRequest(routed, request);
     if (requestViolations.length > 0) {
       const statusCode = authViolations.length > 0 ? 401 : 422;
-      calls.push({
+      record({
         request: description,
         operation: name,
         matched,
@@ -331,16 +347,17 @@ export const createEmulatorFetch = ({
     }
 
     const routedRequest = { ...request, pathParameters: routed.pathParameters };
-    const response = await contract.respond(
-      operation,
-      routedRequest,
-      contextFor(operation, routedRequest)
-    );
+    const context = contextFor(operation, routedRequest);
+    const response = await contract.respond(operation, routedRequest, context);
     const responseViolations = contract.validateResponse(operation, response);
-    calls.push({
+    record({
       request: description,
       operation: name,
       matched,
+      responseSource:
+        respond && !deferred.has(context)
+          ? 'responder'
+          : engine.servedFrom(operation, routedRequest) ?? 'generated',
       status: response.statusCode,
       requestViolations,
       responseViolations,
@@ -353,15 +370,16 @@ export const createEmulatorFetch = ({
 
   const rejectedResponses = [
     ...engine.rejected,
-    ...loadedProtocols.flatMap(({ protocol }) => protocol.rejectedResponses),
+    ...loadedProtocols.flatMap(({ instance }) => instance.rejectedResponses),
     ...rejectUnknownNamedResponses(
       namedResponses,
-      loadedProtocols.map(({ source, protocol }) => ({ source, operations: protocol.operations }))
+      loadedProtocols.map(({ source, instance }) => ({ source, operations: instance.answerable }))
     ),
   ];
   return {
     fetch: mockFetch,
     calls,
+    operations: listOperations(operations, loadedProtocols),
     rejectedResponses,
     reset: () => {
       calls.length = 0;

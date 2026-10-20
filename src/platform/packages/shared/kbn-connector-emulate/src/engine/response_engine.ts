@@ -86,6 +86,13 @@ export interface ResponseEngineOptions {
 
 export interface ResponseEngine {
   readonly respond: Responder;
+  /**
+   * Whether a request is answered with a fixture or a recording; undefined for the fallback.
+   */
+  readonly servedFrom: (
+    operation: ContractOperation,
+    request: ContractRequest
+  ) => RejectedResponse['source'] | undefined;
   readonly rejected: readonly RejectedResponse[];
   /**
    * The recorded success exchanges that conform to the spec, in recording order; none for
@@ -264,6 +271,7 @@ export const createResponseEngine = (
   return {
     respond: (operation, request, context) =>
       select(operation, request)?.response ?? fallback(operation, request, context),
+    servedFrom: (operation, request) => select(operation, request)?.origin,
     rejected,
     recordedExchanges: (operation) => recorded.get(operation) ?? [],
   };
