@@ -29,6 +29,14 @@ export const KNOWLEDGE_PAGE_TITLE = i18n.translate('xpack.nightshift.knowledgePa
   defaultMessage: 'Knowledge',
 });
 
+export const SOURCES_PAGE_TITLE = i18n.translate('xpack.nightshift.sourcesPage.title', {
+  defaultMessage: 'Sources',
+});
+
+const sourcesLabel = i18n.translate('xpack.nightshift.sourcesLinkLabel', {
+  defaultMessage: 'Sources',
+});
+
 const settingsLabel = i18n.translate('xpack.nightshift.settingsLinkLabel', {
   defaultMessage: 'Settings',
 });
@@ -60,6 +68,11 @@ const managementEbtProps = getEbtProps({
   element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
 });
 
+const sourcesEbtProps = getEbtProps({
+  action: NIGHTSHIFT_EBT_ACTIONS.VIEW_SOURCES,
+  element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
+});
+
 // App menu items do not expose arbitrary data attributes. Their run callback fires before the
 // delegated document click handler, so the EBT attributes are present when that handler inspects it.
 const applyEbtProps = (
@@ -76,9 +89,11 @@ const applyEbtProps = (
 };
 
 export interface NightshiftAppHeaderProps {
-  page?: 'landing' | 'automations' | 'knowledge' | 'settings';
+  page?: 'landing' | 'automations' | 'knowledge' | 'settings' | 'sources';
   onManagementClick: () => void | Promise<void>;
   managementHref: string;
+  onSourcesClick?: () => void | Promise<void>;
+  sourcesHref?: string;
   onKnowledgeClick?: () => void | Promise<void>;
   knowledgeHref?: string;
   onSettingsClick?: () => void | Promise<void>;
@@ -95,6 +110,8 @@ export function NightshiftAppHeader({
   page = 'landing',
   onManagementClick,
   managementHref,
+  onSourcesClick,
+  sourcesHref,
   onKnowledgeClick,
   knowledgeHref,
   onSettingsClick,
@@ -107,6 +124,7 @@ export function NightshiftAppHeader({
 }: NightshiftAppHeaderProps): React.ReactElement {
   const isAutomationsPage = page === 'automations';
   const isKnowledgePage = page === 'knowledge';
+  const isSourcesPage = page === 'sources';
   const isSettingsPage = page === 'settings';
   const menu = useMemo<AppMenuConfig>(
     () => ({
@@ -147,6 +165,22 @@ export function NightshiftAppHeader({
           testId: 'nightshiftManagementLink',
           overflow: true,
         },
+        ...(onSourcesClick && sourcesHref && !isSourcesPage
+          ? [
+              {
+                id: 'nightshiftSources',
+                label: sourcesLabel,
+                iconType: 'database' as const,
+                href: sourcesHref,
+                run: (params?: AppMenuRunActionParams) => {
+                  applyEbtProps(sourcesEbtProps, params);
+                  void onSourcesClick();
+                },
+                testId: 'nightshiftSourcesLink',
+                overflow: true,
+              },
+            ]
+          : []),
         ...(onKnowledgeClick && knowledgeHref && !isKnowledgePage
           ? [
               {
@@ -185,6 +219,7 @@ export function NightshiftAppHeader({
       automationsHref,
       isAutomationsPage,
       isKnowledgePage,
+      isSourcesPage,
       isSettingsPage,
       knowledgeHref,
       managementHref,
@@ -192,8 +227,10 @@ export function NightshiftAppHeader({
       onKnowledgeClick,
       onManagementClick,
       onSandboxSecretsClick,
+      onSourcesClick,
       onSettingsClick,
       settingsHref,
+      sourcesHref,
     ]
   );
 
@@ -206,12 +243,14 @@ export function NightshiftAppHeader({
           ? KNOWLEDGE_PAGE_TITLE
           : isSettingsPage
           ? SETTINGS_PAGE_TITLE
+          : isSourcesPage
+          ? SOURCES_PAGE_TITLE
           : nightshiftPageTitle
       }
       back={back}
       tabs={tabs}
       menu={menu}
-      spacing="standard"
+      spacing="compact"
     />
   );
 }

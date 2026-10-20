@@ -10,6 +10,7 @@ import {
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiPageTemplate,
@@ -24,6 +25,7 @@ import { markOnboardingSeen } from '../first_load';
 import { ConnectToProject } from '../connection_details/connect_to_project';
 import { useOnboardingCredentials } from '../hooks/use_onboarding_credentials';
 import { OnboardingPaths } from './components/onboarding_paths';
+import { OnboardingOptions } from './components/onboarding_options';
 import { useKibana } from '../services';
 
 export const OnboardingLandingPage = () => {
@@ -66,8 +68,6 @@ export const OnboardingLandingPage = () => {
                 elasticsearchUrl={elasticsearchUrl}
                 apiKey={apiKey}
                 isLoading={isLoading}
-                showConnectionTypeSelector
-                telemetryPage="pathSelection"
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -75,6 +75,11 @@ export const OnboardingLandingPage = () => {
           <EuiFlexItem>
             <OnboardingPaths />
           </EuiFlexItem>
+          <EuiSpacer size="m" />
+          <EuiFlexItem>
+            <OnboardingOptions elasticsearchUrl={elasticsearchUrl} />
+          </EuiFlexItem>
+          <EuiHorizontalRule margin="none" />
 
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
             <EuiFlexItem grow={false}>

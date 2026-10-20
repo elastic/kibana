@@ -1,9 +1,25 @@
 {
-  "sha1": "2f47c6916fb817ee494911698becfb16c20186f2",
+  "sha1": "50eaae39d8d9d9cebaa5df8126d843cc0acd2ed6",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "b5d95d71a5b1db5-4e8d7b869f4b346",
+      "title": "Dispatcher runs the workflow of an action policy a breaching rule fires the policy and its workflow runs to completion",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine_dispatcher/api/tests/dispatch_workflow_execution.spec.ts",
+        "line": 72,
+        "column": 25
+      }
+    },
     {
       "id": "bf3ddf78696d2df-57406c6ad330b4f",
       "title": "Dispatcher does not dispatch any episodes when there are no alert events",

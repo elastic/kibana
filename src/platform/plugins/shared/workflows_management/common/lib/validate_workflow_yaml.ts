@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLCallbacks } from '@kbn/esql-types';
 import {
   collectIgnoredKibanaFetcherOccurrences,
   IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
@@ -26,6 +27,7 @@ import {
 import type { z } from '@kbn/zod/v4';
 import { collectVariableDiagnostics } from './collect_variable_diagnostics';
 import { connectorParamsSchemaResolver } from './connector_params_schema_resolver';
+import { collectEsqlDiagnostics } from './esql_validation/collect_esql_diagnostics';
 import type { TriggerDefinitionForValidateTriggers } from './validate_triggers';
 import { validateTriggers } from './validate_triggers';
 
@@ -50,13 +52,23 @@ export interface ValidateWorkflowYamlOptions {
    * these rules, where the diagnostics are reported rather than enforced.
    */
   variableValidationRegistry?: WorkflowContextRegistry;
+  /**
+   * Callbacks for the ES|QL validator. Passing them runs the `esql` rule group
+   * over every `elasticsearch.esql.query` step: grammar, plus indices and
+   * fields when `getSources` / `getColumnsFor` are set.
+   *
+   * Omitted by default for the same reason as `variableValidationRegistry`:
+   * ES|QL errors would block create/update, and the cluster checked here can
+   * differ from the one the workflow runs against. Only reporting callers set it.
+   */
+  esqlCallbacks?: ESQLCallbacks;
 }
 
-export function validateWorkflowYaml(
+export async function validateWorkflowYaml(
   yaml: string,
   zodSchema: z.ZodType,
   options?: ValidateWorkflowYamlOptions
-): ValidateWorkflowResponseDto {
+): Promise<ValidateWorkflowResponseDto> {
   const diagnostics: WorkflowDiagnostic[] = [];
   const notChecked: string[] = [];
   let parsedWorkflow: WorkflowYaml | undefined;
@@ -188,6 +200,12 @@ export function validateWorkflowYaml(
       source: 'liquid',
       ruleId: 'liquidSyntaxError',
     });
+  }
+
+  if (options?.esqlCallbacks) {
+    const esqlValidation = await collectEsqlDiagnostics(yaml, options.esqlCallbacks);
+    diagnostics.push(...esqlValidation.diagnostics);
+    notChecked.push(...esqlValidation.notChecked);
   }
 
   return {
