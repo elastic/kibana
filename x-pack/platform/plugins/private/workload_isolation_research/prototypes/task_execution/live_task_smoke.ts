@@ -53,6 +53,7 @@ const esPort = Number(process.env.WIR_ES_PORT ?? 9221);
 const transportPort = Number(process.env.WIR_ES_TRANSPORT_PORT ?? 9321);
 const headless = process.env.WIR_HEADLESS === '1';
 const scored = process.env.WIR_SCORED === '1';
+const serverlessBoot = process.env.WIR_SERVERLESS_BOOT === '1';
 const capacityNegative = process.env.WIR_CAPACITY_NEGATIVE === '1';
 const benchLock =
   '/Users/jloleysens/.agentic-work/projects/kibana/workload-isolation-research/bench.lock';
@@ -178,7 +179,7 @@ const terminal = async (taskId: string): Promise<Sample> => {
   return found;
 };
 const runId = process.env.WIR_RUN_ID ?? 'unregistered';
-assert.match(runId, /^(t1-phase-b-live|t1-scoring-local)-\d{3}$/);
+assert.match(runId, /^(t1-phase-b-live|t1-scoring-local|t1-serverless-boot)-\d{3}$/);
 const configPath = join(evidence, `${runId}_runtime_config.json`);
 checkpoint('starting');
 try {
@@ -254,6 +255,9 @@ try {
       'scripts/kibana',
       '--no-watch',
       '--no-optimizer',
+      ...(serverlessBoot
+        ? ['--serverless=oblt', '--no-ssl', '--no-uiam', '--elasticsearch.maxResponseSize=100mb']
+        : []),
       '--no-base-path',
       `--server.port=${kibanaPort}`,
       '--server.host=127.0.0.1',
@@ -284,7 +288,7 @@ try {
           return false;
         }
       },
-      90000,
+      serverlessBoot ? 180000 : 90000,
       'local Kibana'
     );
   if (scored) {
@@ -448,6 +452,8 @@ try {
       JSON.stringify({
         run_id: runId,
         correctness_only: true,
+        serverless_config_boot: serverlessBoot,
+        explicit_max_response_size: serverlessBoot ? '100mb' : null,
         main_pid_unchanged: true,
         control_api_during_active_task: true,
         finite: finiteResult,

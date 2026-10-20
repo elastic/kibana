@@ -16,6 +16,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkloadIsolationResearchConfig } from '../config';
 import { epochNow } from './clock';
 import { RingBuffer } from './ring_buffer';
+import { readCgroupCpu } from './cgroup_cpu';
 
 /** diagnostics_channel name published by the research patch in Task Manager. */
 export const TM_RESEARCH_CHANNEL = 'kbn:research:task_manager';
@@ -189,6 +190,7 @@ export class Recorder {
     this.timers.push(
       setInterval(() => {
         const now = epochNow();
+        this.push({ source: 'cgroup_cpu', ts: now, ...readCgroupCpu(), roles: this.roles });
         const elu = performance.eventLoopUtilization(lastElu);
         lastElu = performance.eventLoopUtilization();
         const cpu = process.cpuUsage(lastCpu);

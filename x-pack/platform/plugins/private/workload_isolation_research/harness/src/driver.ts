@@ -180,6 +180,7 @@ const runPhase = async (
   opts: RunOptions,
   ctx: ActionContext
 ): Promise<Record<string, unknown> | undefined> => {
+  const phaseStarted = performance.now();
   let result: Record<string, unknown> | undefined;
   if (phase.offender) {
     const { status, body } = await kbn<Record<string, unknown>>(
@@ -224,7 +225,14 @@ const runPhase = async (
     result = await action(phase.actionParams ?? {}, ctx);
     if (result && result.completed_at === undefined) result.completed_at = Date.now();
   }
-  await sleep(phase.durationS * 1000);
+  if (phase.windowS !== undefined) {
+    const remaining = phase.windowS * 1000 - (performance.now() - phaseStarted);
+    if (remaining < 0)
+      throw new Error(`Phase ${phase.name} exceeded its fixed ${phase.windowS}s window`);
+    await sleep(remaining);
+  } else {
+    await sleep(phase.durationS * 1000);
+  }
   return result;
 };
 
@@ -327,7 +335,7 @@ export const runScenario = async (opts: RunOptions): Promise<{ runId: string; di
   }
   const totalS =
     scenario.phases.reduce(
-      (s, p) => s + p.durationS + (p.offender ? p.offender.doseMs / 1000 + 10 : 0),
+      (s, p) => s + (p.windowS ?? p.durationS + (p.offender ? p.offender.doseMs / 1000 + 10 : 0)),
       0
     ) + 120;
   const seriesId = runId.slice(-40);

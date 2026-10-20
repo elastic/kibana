@@ -28,6 +28,8 @@ export interface Phase {
   readonly name: string;
   /** Idle/measurement time after the phase action completes. */
   readonly durationS: number;
+  /** Optional fixed total window, including awaited work; overrun fails the run. */
+  readonly windowS?: number;
   readonly offender?: OffenderSpec;
   /** Arbitrary named action implemented by the driver (e.g. Tier B replays). */
   readonly action?: string;

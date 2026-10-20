@@ -35,6 +35,73 @@ export const isolatedTaskCurve = (execution: 'main' | 'thread'): Scenario => ({
 });
 
 export const ISOLATED_SCENARIOS: Record<string, Scenario> = {
+  't1-serverless-pools': {
+    name: 't1-serverless-pools',
+    description:
+      'Same-image/background-pod main/thread ABAB; five matched idle/treatment pairs per arm per dose;30s fixed windows.',
+    probe: { rps: 10, path: '/api/spaces/space' },
+    laptopProbe: { rps: 2, path: '/api/spaces/space' },
+    ticks: { intervalMs: 1000 },
+    phases: [
+      { name: 'warmup', durationS: 15 },
+      { name: 'baseline', durationS: 30 },
+      ...[1000, 10000].flatMap((doseMs) =>
+        Array.from({ length: 5 }, (_, pair) =>
+          (['main', 'thread'] as const).flatMap((execution) => [
+            { name: `idle-${doseMs}-${execution}-${pair + 1}`, durationS: 30 },
+            {
+              name: `cpu-${doseMs}-${execution}-${pair + 1}`,
+              durationS: 0,
+              windowS: 30,
+              offender: {
+                kind: 'cpu_spin' as const,
+                mode: 'task' as const,
+                doseMs,
+                execution,
+                ...(execution === 'thread' ? { killAfterMs: 20000 } : {}),
+              },
+            },
+          ])
+        ).flat()
+      ),
+      {
+        name: 'worker-prime',
+        durationS: 0,
+        windowS: 10,
+        offender: {
+          kind: 'cpu_spin',
+          mode: 'task',
+          doseMs: 10,
+          execution: 'thread',
+          killAfterMs: 20000,
+        },
+      },
+      {
+        name: 'infinite-worker-supervised',
+        durationS: 0,
+        windowS: 30,
+        offender: {
+          kind: 'infinite_loop',
+          mode: 'task',
+          doseMs: 10000,
+          execution: 'thread',
+          killAfterMs: 10000,
+        },
+      },
+      {
+        name: 'post-termination-recovery',
+        durationS: 0,
+        windowS: 30,
+        offender: {
+          kind: 'cpu_spin',
+          mode: 'task',
+          doseMs: 100,
+          execution: 'thread',
+          killAfterMs: 20000,
+        },
+      },
+    ],
+  },
   't1-capacity-starvation': {
     name: 't1-capacity-starvation',
     description:

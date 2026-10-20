@@ -21,5 +21,7 @@
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/es",
     "@kbn/tooling-log",
+    "@kbn/dev-utils",
+    "@kbn/mock-idp-utils",
   ]
 }
