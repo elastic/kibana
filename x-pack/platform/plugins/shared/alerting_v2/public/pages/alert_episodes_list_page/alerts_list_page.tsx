@@ -767,7 +767,11 @@ const AlertsListPageContent = () => {
                     customGridColumnsConfiguration={CUSTOM_GRID_COLUMNS_CONFIGURATION}
                     externalCustomRenderers={externalCustomRenderers}
                     rows={rows}
-                    totalHits={!episodesData?.length ? 0 : ALERT_EPISODES_LIST_PAGE_SIZE + 1}
+                    // Report one more hit than the cap only when the list is capped, so the
+                    // grid footer shows the max limit callout and nothing else
+                    totalHits={
+                      isEpisodeListCapped ? ALERT_EPISODES_LIST_PAGE_SIZE + 1 : loadedEpisodesCount
+                    }
                     loadingState={isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
                     isPaginationEnabled
                     paginationMode="singlePage"
