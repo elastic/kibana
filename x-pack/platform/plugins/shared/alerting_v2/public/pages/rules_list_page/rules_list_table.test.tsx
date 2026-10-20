@@ -59,6 +59,21 @@ const mockRulesWithLongTags = [
   },
 ];
 
+const mockRulesWithRoutingTags = [
+  {
+    id: 'rule-routing-tags',
+    kind: 'alert',
+    enabled: true,
+    metadata: {
+      name: 'Rule With Routing Tags',
+      tags: [],
+      routing_tags: ['team-a', 'team-b', 'team-c'],
+    },
+    schedule: { every: '1m' },
+    query: { base: 'FROM logs-* | LIMIT 1' },
+  },
+];
+
 const defaultProps: RulesListTableProps = {
   items: mockRules as any,
   totalItemCount: 2,
@@ -203,20 +218,20 @@ describe('RulesListTable', () => {
       expect(screen.getByText('prod')).toBeInTheDocument();
     });
 
-    it('truncates tags to show only the first 1 and a +N badge for overflow', () => {
+    it('shows the first 2 tags and a +N badge for overflow', () => {
       renderTable({
         items: mockRulesWithManyTags as any,
         totalItemCount: 1,
       });
 
-      // First tag should be visible
       expect(screen.getByText('new')).toBeInTheDocument();
+      expect(screen.getByText('rna')).toBeInTheDocument();
 
-      // Remaining 8 tags should be hidden behind +8 badge
-      expect(screen.getByTestId('overflowTagsBadge')).toHaveTextContent('+8');
+      // Remaining 7 tags should be hidden behind +7 badge
+      expect(screen.getByTestId('overflowTagsBadge')).toHaveTextContent('+7');
 
       // Overflow tags should not be directly visible
-      expect(screen.queryByText('rna')).not.toBeInTheDocument();
+      expect(screen.queryByText('production')).not.toBeInTheDocument();
     });
 
     it('renders long tag text with native EuiBadge truncation', () => {
@@ -229,6 +244,51 @@ describe('RulesListTable', () => {
       expect(
         screen.getByText('this-is-a-very-long-tag-name-that-should-be-truncated')
       ).toBeInTheDocument();
+    });
+  });
+
+  describe('routing tags column', () => {
+    it('renders the routing tags header with an info icon explaining them', async () => {
+      renderTable();
+
+      expect(screen.getByText('Routing tags')).toBeInTheDocument();
+
+      fireEvent.mouseOver(screen.getByTestId('routingTagsColumnInfoIcon'));
+
+      expect(
+        await screen.findByText(
+          'Action policies apply to a rule when they share at least one of its routing tags.'
+        )
+      ).toBeInTheDocument();
+    });
+
+    it('shows the first 2 routing tags and a +N badge, like regular tags', () => {
+      renderTable({
+        items: mockRulesWithRoutingTags as any,
+        totalItemCount: 1,
+      });
+
+      expect(screen.getByTestId('routingTagsContainer')).toHaveTextContent('team-a');
+      expect(screen.getByTestId('routingTagsContainer')).toHaveTextContent('team-b');
+      expect(screen.getByTestId('overflowRoutingTagsBadge')).toHaveTextContent('+1');
+      expect(screen.queryByText('team-c')).not.toBeInTheDocument();
+    });
+
+    it('shows the overflowing routing tags in a tooltip', async () => {
+      renderTable({
+        items: mockRulesWithRoutingTags as any,
+        totalItemCount: 1,
+      });
+
+      fireEvent.mouseOver(screen.getByTestId('overflowRoutingTagsBadge'));
+
+      expect(await screen.findByText('team-c')).toBeInTheDocument();
+    });
+
+    it('renders an empty value for rules without routing tags', () => {
+      renderTable();
+
+      expect(screen.queryByTestId('routingTagsContainer')).not.toBeInTheDocument();
     });
   });
 

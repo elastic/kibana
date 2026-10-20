@@ -32,6 +32,9 @@ const CUSTOM_YARA_RESCAN_INTERVAL_KEYS = [
   'linux.advanced.memory_protection.user_yara_rescan_interval_seconds',
 ] as const;
 
+const REGISTRY_CREDENTIAL_HARDENING_KEY =
+  'windows.advanced.kernel.registry_credential_hardening.descendants';
+
 describe('Policy Advanced Settings section', () => {
   const testSubj = getPolicySettingsFormTestSubjects('test').advancedSection;
 
@@ -103,7 +106,8 @@ describe('Policy Advanced Settings section', () => {
 
     const expectedRenderedOptions = AdvancedPolicySchema.filter(
       (advancedOption) =>
-        !(CUSTOM_YARA_RESCAN_INTERVAL_KEYS as readonly string[]).includes(advancedOption.key)
+        !(CUSTOM_YARA_RESCAN_INTERVAL_KEYS as readonly string[]).includes(advancedOption.key) &&
+        advancedOption.key !== REGISTRY_CREDENTIAL_HARDENING_KEY
     );
 
     expectedRenderedOptions.forEach((advancedOption) => {
@@ -354,6 +358,59 @@ describe('Policy Advanced Settings section', () => {
         for (const key of CUSTOM_YARA_RESCAN_INTERVAL_KEYS) {
           expect(renderResult.queryByTestId(getCysRowContainer(key))).toBeNull();
         }
+      });
+    });
+  });
+
+  describe('registry credential hardening advanced setting', () => {
+    const getRchRowContainer = () =>
+      testSubj.settingRowTestSubjects(REGISTRY_CREDENTIAL_HARDENING_KEY).container;
+
+    it('should hide the registry credential hardening option when the experimental flag is off', async () => {
+      await render(true);
+
+      expect(renderResult.queryByTestId(getRchRowContainer())).toBeNull();
+    });
+
+    describe('and the registryCredentialHardening experimental flag is enabled', () => {
+      beforeEach(() => {
+        mockedContext.setExperimentalFlag({ registryCredentialHardening: true });
+      });
+
+      it('should show the registry credential hardening option on Enterprise when no PLI upsell is present', async () => {
+        await render(true);
+
+        expect(renderResult.getByTestId(getRchRowContainer())).toBeInTheDocument();
+      });
+
+      describe('and license is lower than Enterprise', () => {
+        beforeEach(() => {
+          const licenseServiceMock = createLicenseServiceMock();
+          licenseServiceMock.isEnterprise.mockReturnValue(false);
+
+          useLicenseMock.mockReturnValue(licenseServiceMock);
+        });
+
+        afterEach(() => {
+          useLicenseMock.mockReturnValue(licenseServiceMocked);
+        });
+
+        it('should hide the registry credential hardening option when license is below Enterprise', async () => {
+          await render(true);
+
+          expect(renderResult.queryByTestId(getRchRowContainer())).toBeNull();
+        });
+      });
+
+      it('should hide the registry credential hardening option when a PLI upsell message is present', async () => {
+        mockedContext.startServices.upselling.setMessages({
+          endpoint_registry_credential_hardening:
+            'To apply registry credential hardening, you must add Endpoint Complete to your project.',
+        });
+
+        await render(true);
+
+        expect(renderResult.queryByTestId(getRchRowContainer())).toBeNull();
       });
     });
   });

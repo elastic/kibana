@@ -30,6 +30,7 @@ import {
   isInputOnlyPolicyTemplate,
   isIntegrationPolicyTemplate,
   filterPolicyTemplatesTiles,
+  shouldAddIntegrationFromCatalog,
 } from '../../../../../../../../common/services';
 
 import { ExperimentalFeaturesService } from '../../../../../services';
@@ -114,6 +115,9 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
         })
       : [];
 
+    // Classify before `policy_templates` is stripped from the tiles above
+    const addIntegrationFromCatalog = shouldAddIntegrationFromCatalog(pkg);
+
     const tiles = filterPolicyTemplatesTiles<PackageListItem>(
       pkg.policy_templates_behavior,
       topPackage,
@@ -122,6 +126,7 @@ const packageListToIntegrationsList = (packages: PackageList): PackageList => {
       return {
         ...tile,
         supportsAgentless: isAgentlessIntegration(pkg, tile.integration || tile.name),
+        addIntegrationFromCatalog,
       };
     });
 
