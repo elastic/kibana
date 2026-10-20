@@ -20,7 +20,7 @@ interface QueryFieldRulesProps {
  * Keeps `queryCommitted` in a ref so validate never reads a stale closure.
  */
 export const QueryFieldRules = ({ queryCommitted }: QueryFieldRulesProps): null => {
-  const { control, getValues } = useFormContext<FormValues>();
+  const { control } = useFormContext<FormValues>();
   const queryCommittedRef = useRef(queryCommitted);
   queryCommittedRef.current = queryCommitted;
 
@@ -28,8 +28,7 @@ export const QueryFieldRules = ({ queryCommitted }: QueryFieldRulesProps): null 
     name: 'query',
     control,
     rules: {
-      validate: (value) =>
-        validateCommittedQuery(value, getValues('kind'), queryCommittedRef.current),
+      validate: (value) => validateCommittedQuery(value, queryCommittedRef.current),
     },
   });
 

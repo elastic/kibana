@@ -17,6 +17,7 @@ import { hashContent } from '@kbn/agent-builder-common/attachments';
 import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { registerAttachmentRoutes } from './attachments';
+import { apiPrivileges } from '../../common/features';
 import type { RouteDependencies } from './types';
 
 describe('Attachment Routes', () => {
@@ -27,6 +28,8 @@ describe('Attachment Routes', () => {
     update: jest.MockedFunction<
       (params: { id: string; attachments: VersionedAttachment[] }) => Promise<void>
     >;
+    appendEvents: jest.MockedFunction<(params: { id: string }) => Promise<void>>;
+    getAuthor: jest.MockedFunction<() => { id: string; username?: string } | undefined>;
   };
   let mockGetInternalServices: jest.MockedFunction<
     () => {
@@ -93,6 +96,8 @@ describe('Attachment Routes', () => {
     mockConversationsClient = {
       get: jest.fn(),
       update: jest.fn().mockResolvedValue(undefined),
+      appendEvents: jest.fn().mockResolvedValue(undefined),
+      getAuthor: jest.fn().mockReturnValue({ id: 'user-1', username: 'test-user' }),
     };
 
     mockGetInternalServices = jest.fn().mockReturnValue({
@@ -372,7 +377,13 @@ describe('Attachment Routes', () => {
         current_version: 1,
       });
       expect(result.body.attachment.id).toBeDefined();
-      expect(mockConversationsClient.update).toHaveBeenCalled();
+      expect(mockConversationsClient.appendEvents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conv-1',
+          events: [expect.objectContaining({ type: 'attachment_added' })],
+        }),
+        { access: 'converse', source: 'http_api' }
+      );
     });
 
     it('creates attachment with client-provided ID', async () => {
@@ -718,7 +729,18 @@ describe('Attachment Routes', () => {
           permanent: false,
         },
       });
-      expect(mockConversationsClient.update).toHaveBeenCalled();
+      expect(mockConversationsClient.appendEvents).toHaveBeenCalledWith(
+        expect.objectContaining({
+          id: 'conv-1',
+          events: [
+            expect.objectContaining({
+              type: 'attachment_deleted',
+              data: expect.objectContaining({ hard_delete: false, source: 'http_api' }),
+            }),
+          ],
+        }),
+        { access: 'converse', source: 'http_api' }
+      );
     });
 
     it('permanently deletes unreferenced attachment when permanent=true', async () => {
@@ -898,6 +920,10 @@ describe('Attachment Routes', () => {
       const result = mockResponse.ok.mock.calls[0][0];
       expect(result.body.success).toBe(true);
       expect(result.body.attachment).toBeDefined();
+      expect(mockConversationsClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'conv-1' }),
+        { access: 'converse', source: 'http_api' }
+      );
     });
 
     it('returns 404 for non-existent attachment', async () => {
@@ -957,6 +983,10 @@ describe('Attachment Routes', () => {
       expect(result.body.attachment.description).toBe('New name');
       // Version should not change
       expect(result.body.attachment.current_version).toBe(1);
+      expect(mockConversationsClient.update).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'conv-1' }),
+        { access: 'converse', source: 'http_api' }
+      );
     });
 
     it('returns 404 for non-existent attachment', async () => {
@@ -973,6 +1003,129 @@ describe('Attachment Routes', () => {
       expect(mockResponse.notFound).toHaveBeenCalledWith({
         body: { message: "Attachment 'non-existent' not found" },
       });
+    });
+  });
+
+  describe('PUT /conversations/{conversation_id}/attachments/{attachment_id}/origin', () => {
+    const path = '/attachments/{attachment_id}/origin';
+    const request = {
+      params: { conversation_id: 'conv-1', attachment_id: 'att-1' },
+      body: { origin: 'so-1' },
+      authzResult: { [apiPrivileges.manageAgents]: true },
+    };
+
+    const mockTypeDefinition = (onOriginUpdated?: jest.Mock) => {
+      mockGetInternalServices().attachments.getTypeDefinition.mockImplementation(
+        (type: string) => ({
+          id: type,
+          validate: (input: unknown) => ({ valid: true, data: input }),
+          format: () => ({ getRepresentation: () => ({ type: 'text', value: '' }) }),
+          onOriginUpdated,
+        })
+      );
+    };
+
+    it('requires read access and surfaces manageAgents as a non-enforced extended privilege', () => {
+      const [originRouteConfig] = (mockRouter.versioned.put as jest.Mock).mock.calls
+        .map(([config]) => config)
+        .filter((config) => config.path.endsWith('/origin'));
+
+      expect(originRouteConfig.security.authz).toEqual({
+        requiredPrivileges: [apiPrivileges.readAgentBuilder],
+        extendedPrivileges: [apiPrivileges.manageAgents],
+      });
+    });
+
+    it('calls the type onOriginUpdated hook with the conversation agent', async () => {
+      mockConversationsClient.get.mockResolvedValue(
+        createMockConversation([createMockAttachment({ id: 'att-1' })])
+      );
+      const onOriginUpdated = jest.fn().mockResolvedValue(undefined);
+      mockTypeDefinition(onOriginUpdated);
+
+      await getHandler('PUT', path)(createMockContext(), request, mockResponse);
+
+      expect(onOriginUpdated).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'att-1', origin: 'so-1' }),
+        expect.objectContaining({
+          conversationId: 'conv-1',
+          agentId: 'agent-1',
+          canManageAgents: true,
+        })
+      );
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockResponse.ok.mock.calls[0][0].body).not.toHaveProperty('warnings');
+    });
+
+    it('tells the hook when the caller cannot manage agents', async () => {
+      mockConversationsClient.get.mockResolvedValue(
+        createMockConversation([createMockAttachment({ id: 'att-1' })])
+      );
+      const onOriginUpdated = jest.fn().mockResolvedValue(undefined);
+      mockTypeDefinition(onOriginUpdated);
+
+      await getHandler('PUT', path)(
+        createMockContext(),
+        { ...request, authzResult: { [apiPrivileges.manageAgents]: false } },
+        mockResponse
+      );
+
+      expect(onOriginUpdated).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({ canManageAgents: false })
+      );
+    });
+
+    it('succeeds without calling anything when the type has no onOriginUpdated hook', async () => {
+      mockConversationsClient.get.mockResolvedValue(
+        createMockConversation([createMockAttachment({ id: 'att-1' })])
+      );
+      mockTypeDefinition(undefined);
+
+      await getHandler('PUT', path)(createMockContext(), request, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockLogger.warn).not.toHaveBeenCalled();
+    });
+
+    it('does not call the hook when the attachment does not exist', async () => {
+      mockConversationsClient.get.mockResolvedValue(createMockConversation([]));
+      const onOriginUpdated = jest.fn();
+      mockTypeDefinition(onOriginUpdated);
+
+      await getHandler('PUT', path)(createMockContext(), request, mockResponse);
+
+      expect(mockResponse.notFound).toHaveBeenCalled();
+      expect(onOriginUpdated).not.toHaveBeenCalled();
+    });
+
+    it('does not call the hook when the attachment is deleted', async () => {
+      mockConversationsClient.get.mockResolvedValue(
+        createMockConversation([createMockAttachment({ id: 'att-1', active: false })])
+      );
+      const onOriginUpdated = jest.fn();
+      mockTypeDefinition(onOriginUpdated);
+
+      await getHandler('PUT', path)(createMockContext(), request, mockResponse);
+
+      expect(mockResponse.badRequest).toHaveBeenCalled();
+      expect(onOriginUpdated).not.toHaveBeenCalled();
+    });
+
+    it('still succeeds, logs a warning and returns it when the hook fails', async () => {
+      mockConversationsClient.get.mockResolvedValue(
+        createMockConversation([createMockAttachment({ id: 'att-1' })])
+      );
+      mockTypeDefinition(jest.fn().mockRejectedValue(new Error('boom')));
+
+      await getHandler('PUT', path)(createMockContext(), request, mockResponse);
+
+      expect(mockResponse.ok).toHaveBeenCalled();
+      expect(mockResponse.ok.mock.calls[0][0].body).toMatchObject({
+        success: true,
+        warnings: ['boom'],
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('boom'));
     });
   });
 });

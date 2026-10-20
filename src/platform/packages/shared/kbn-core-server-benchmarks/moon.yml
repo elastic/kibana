@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/bench'
   - '@kbn/tooling-log'
+  - '@kbn/std'
 tags:
   - shared-server
   - package

@@ -30,7 +30,6 @@ export const useFetchAllMaintenanceWindows = () => {
         // add/edit picker, instead of falling back to the raw window ID.
         per_page: 100,
       },
-      undefined,
       { signal }
     )
   );

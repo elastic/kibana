@@ -6,14 +6,15 @@
  */
 
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import { CHROME_HEADER_TEST_SUBJECTS } from '@kbn/core-chrome-browser-components';
 import { FtrService } from '../ftr_provider_context';
 
 interface SearchResult {
   label: string;
 }
 
-const SEARCH_BUTTON = 'chromeNextGlobalHeaderSearchButton';
-const SEARCH_MODAL = 'chromeNextSearchModal';
+const SEARCH_BUTTON = CHROME_HEADER_TEST_SUBJECTS.searchButton;
+const SEARCH_MODAL = 'globalSearchModal';
 
 export class NavigationalSearchPageObject extends FtrService {
   private readonly find = this.ctx.getService('find');
@@ -24,7 +25,7 @@ export class NavigationalSearchPageObject extends FtrService {
   async ensureSearchOpen() {
     // Poll the modal-open read so a transient re-render of the already-open modal isn't misread as
     // closed, which would click SEARCH_BUTTON — a toggle hidden under the modal's own overlay mask.
-    if (await this.testSubjects.exists(SEARCH_MODAL, { timeout: 2500 })) {
+    if (await this.testSubjects.waitForExists(SEARCH_MODAL, { timeout: 2500 })) {
       return;
     }
     await this.testSubjects.click(SEARCH_BUTTON);
@@ -38,7 +39,7 @@ export class NavigationalSearchPageObject extends FtrService {
   }
 
   async blur() {
-    if (!(await this.testSubjects.exists(SEARCH_MODAL, { timeout: 0 }))) {
+    if (!(await this.testSubjects.exists(SEARCH_MODAL))) {
       return;
     }
     await this.browser.pressKeys(this.browser.keys.ESCAPE);
@@ -71,7 +72,7 @@ export class NavigationalSearchPageObject extends FtrService {
   }
 
   async isPopoverDisplayed() {
-    return await this.testSubjects.exists(SEARCH_MODAL, { timeout: 0 });
+    return await this.testSubjects.exists(SEARCH_MODAL);
   }
 
   async clickOnOption(index: number) {

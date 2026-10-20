@@ -28,6 +28,7 @@ import {
   TAGS,
   TIMESTAMP,
   VERSION,
+  ALERT_TRACKED,
   ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
@@ -140,6 +141,7 @@ export const buildOngoingAlert = <
     [ALERT_MUTED]: isMuted,
     // Set per-alert snooze state
     [ALERT_SNOOZED]: isSnoozed,
+    [ALERT_TRACKED]: true,
     // Set the time range
     ...(alertState.start
       ? {

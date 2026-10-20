@@ -8,14 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const CONVERSATION_CARD_LABELS = Object.freeze({
-  templateTypes: {
-    investigation: i18n.translate('xpack.alertzero.conversationCard.templateTypes.investigation', {
-      defaultMessage: 'Investigation',
-    }),
-    incident: i18n.translate('xpack.alertzero.conversationCard.templateTypes.incident', {
-      defaultMessage: 'Incident',
-    }),
-  },
   watchedBy: i18n.translate('xpack.alertzero.conversationCard.watchedBy', {
     defaultMessage: 'Watched by',
   }),
@@ -42,8 +34,8 @@ export const WATCH_TIER_LABELS = Object.freeze({
   officer: i18n.translate('xpack.alertzero.conversationCard.watchTier.officer', {
     defaultMessage: 'Watch Officer',
   }),
-  dark: i18n.translate('xpack.alertzero.conversationCard.watchTier.dark', {
-    defaultMessage: 'Dark Watch',
+  hunt: i18n.translate('xpack.alertzero.conversationCard.watchTier.hunt', {
+    defaultMessage: 'Hunt Watch',
   }),
   deep: i18n.translate('xpack.alertzero.conversationCard.watchTier.deep', {
     defaultMessage: 'Deep Watch',

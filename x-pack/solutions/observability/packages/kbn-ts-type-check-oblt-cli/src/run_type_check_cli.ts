@@ -77,7 +77,7 @@ run(
     if (brokenRefs.length > 0) {
       if (process.env.KBN_TS_TYPE_CHECK_BOOTSTRAP_RETRIED === '1') {
         throw createFailError(
-          'Broken TypeScript project references remain after `yarn kbn bootstrap`. Fix manually: yarn kbn bootstrap'
+          'Broken TypeScript project references remain after `pnpm kbn bootstrap`. Fix manually: pnpm kbn bootstrap'
         );
       }
 
@@ -91,13 +91,13 @@ run(
       log.warning('');
       log.warning(
         '[Bootstrap] This usually happens after switching branches. ' +
-          'Running yarn kbn bootstrap to repair...'
+          'Running pnpm kbn bootstrap to repair...'
       );
 
       try {
         await execa('pnpm', ['kbn', 'bootstrap'], { cwd: REPO_ROOT, stdio: 'inherit' });
       } catch {
-        log.error('[Bootstrap] Bootstrap failed. Fix it manually: yarn kbn bootstrap');
+        log.error('[Bootstrap] Bootstrap failed. Fix it manually: pnpm kbn bootstrap');
         throw createFailError('Bootstrap failed');
       }
 

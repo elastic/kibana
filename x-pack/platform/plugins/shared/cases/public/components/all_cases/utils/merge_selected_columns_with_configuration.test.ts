@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CasesColumnsConfiguration } from '../use_cases_columns_configuration';
+import type { CasesColumnsConfiguration } from '../hooks/use_cases_columns_configuration';
 import {
   getColumnBaseKey,
   mergeSelectedColumnsWithConfiguration,

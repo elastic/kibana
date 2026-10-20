@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./scout_no_cross_boundary_imports');
+const rule = require('../oxlint_plugin').rules.scout_no_cross_boundary_imports;
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),

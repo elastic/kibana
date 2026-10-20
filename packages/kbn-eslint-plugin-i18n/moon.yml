@@ -18,6 +18,7 @@ project:
   sourceRoot: packages/kbn-eslint-plugin-i18n
 dependsOn:
   - '@kbn/repo-packages'
+  - '@kbn/swc-register'
 tags:
   - shared-common
   - package
@@ -28,6 +29,8 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
+    - oxlint_plugin.js
+    - rules/**/*.mjs
     - '!target/**/*'
   jest-config:
     - jest.config.js

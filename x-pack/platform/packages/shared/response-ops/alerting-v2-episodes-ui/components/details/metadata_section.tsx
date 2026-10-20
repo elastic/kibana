@@ -41,12 +41,16 @@ export interface AlertEpisodeMetadataSectionProps {
    * `DEFAULT_MARGIN_BOTTOM` (16px).
    */
   decreaseAvailableHeightBy?: number;
+  calloutMarginSize?: AlertEpisodeMetadataTableProps['calloutMarginSize'];
+  controlsPaddingSize?: AlertEpisodeMetadataTableProps['controlsPaddingSize'];
 }
 
 export const AlertEpisodeMetadataSection = ({
   episodeId,
   services,
   decreaseAvailableHeightBy,
+  calloutMarginSize,
+  controlsPaddingSize,
 }: AlertEpisodeMetadataSectionProps) => {
   const { data: episode, isLoading: isLoadingEpisode } = useFetchEpisodeQuery({
     episodeId,
@@ -147,6 +151,8 @@ export const AlertEpisodeMetadataSection = ({
       isStale={Boolean(eventData.isStale)}
       dataTimestamp={eventData.dataTimestamp}
       dateFormat={services.uiSettings.get('dateFormat') ?? undefined}
+      calloutMarginSize={calloutMarginSize}
+      controlsPaddingSize={controlsPaddingSize}
     />
   );
 };

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Runs yarn kbn bootstrap and verifies that @kbn/* workspaces were linked.
+# Runs pnpm kbn bootstrap and verifies that @kbn/* workspaces were linked.
 # Used by both the prebuild warmup and cold devcontainer starts.
 
 set -euo pipefail
@@ -14,7 +14,7 @@ export npm_config_cache="${KIBANA_ROOT}/target/npm-cache"
 mkdir -p "$npm_config_cache"
 
 echo "=== Bootstrapping ==="
-yarn kbn bootstrap
+pnpm kbn bootstrap
 
 echo "=== Verifying bootstrap linked workspaces ==="
 if ! node -e "require.resolve('@kbn/setup-node-env')" 2>/dev/null; then

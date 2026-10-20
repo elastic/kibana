@@ -28,3 +28,17 @@ export const fetchFleetLatestAvailableAgentVersion = async (
     .then((response) => response.data.items[0])
     .catch(catchHttpErrorFormatAndThrow);
 };
+
+/**
+ * Same as {@link fetchFleetLatestAvailableAgentVersion}, but safe to use as a docker image tag.
+ *
+ * Respin releases are published with SemVer build metadata (`9.5.4+build202609161310`), and `+`
+ * is not a legal character in a docker tag. The published image replaces it with `.`, so the
+ * suffix must be converted rather than stripped — stripping would resolve to the original
+ * release instead of the respin.
+ */
+export const fetchFleetLatestAvailableAgentDockerImageVersion = async (
+  kbnClient: KbnClient
+): Promise<string> => {
+  return (await fetchFleetLatestAvailableAgentVersion(kbnClient)).replace('+', '.');
+};
