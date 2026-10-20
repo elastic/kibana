@@ -16,6 +16,9 @@ import type {
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import {
   createWorkflowTriggerForwarder,
+  getEventChainContext,
+  setWorkflowEventChainContext,
+  type EventChainContext,
   type WorkflowsExtensionsServerPluginStart,
 } from '@kbn/workflows-extensions/server';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
@@ -39,6 +42,12 @@ interface TaskParams {
   spaceId: string;
   /** Epoch ms after which the task stops waiting for the ID */
   expiresAt: number;
+  /**
+   * Workflow event-chain context of the request that created the case, if it came from a workflow.
+   * Task Manager's `fakeRequest` doesn't carry it, so it is restored before emitting the trigger to
+   * keep the workflows loop guards (depth, visited workflows) working.
+   */
+  eventChainContext?: EventChainContext;
 }
 
 /** `RunResult` is not exported by Task Manager, this is the part of it that we use */
@@ -60,7 +69,8 @@ export const getIncrementalIdAssignedTriggerTaskId = (caseId: string) =>
  *
  * Emitting a workflow trigger needs a request carrying credentials, which the incremental ID
  * background task doesn't have. So when a case is created, a one-off task is scheduled with the
- * creator's request (Task Manager stores an API key and gives the task a `fakeRequest`). When the
+ * creator's request (Task Manager stores an API key and gives the task a `fakeRequest`), along with
+ * the workflow event-chain context of that request, if any. When the
  * incremental ID service has assigned IDs, `runSoon` is called on the tasks of those cases. The
  * task emits the trigger once the ID is on the case. If `runSoon` is missed, the task still runs on
  * its own, a bit later than the ID service does.
@@ -123,11 +133,13 @@ export class IncrementalIdAssignedTriggerTask {
     }
 
     const now = Date.now();
+    const eventChainContext = getEventChainContext(request);
     const params: TaskParams = {
       caseId,
       owner,
       spaceId: request.spaceId,
       expiresAt: now + INCREMENTAL_ID_ASSIGNED_TRIGGER_TTL_MS,
+      ...(eventChainContext && { eventChainContext }),
     };
 
     try {
@@ -198,7 +210,8 @@ export class IncrementalIdAssignedTriggerTask {
     taskInstance: ConcreteTaskInstance,
     fakeRequest?: KibanaRequest
   ): Promise<RunResult> {
-    const { caseId, owner, spaceId, expiresAt } = taskInstance.params as TaskParams;
+    const { caseId, owner, spaceId, expiresAt, eventChainContext } =
+      taskInstance.params as TaskParams;
     const checks = (taskInstance.state as TaskState).checks ?? 0;
     const done: RunResult = { state: {}, shouldDeleteTask: true };
 
@@ -221,6 +234,9 @@ export class IncrementalIdAssignedTriggerTask {
 
       const incrementalId = caseSo.attributes.incremental_id;
       if (typeof incrementalId === 'number') {
+        if (eventChainContext) {
+          setWorkflowEventChainContext(fakeRequest, eventChainContext);
+        }
         await this.forward(
           CaseUpdatedTriggerId,
           { caseId, owner, updatedFields: ['incremental_id'] },

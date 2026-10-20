@@ -16,6 +16,10 @@ import { brandSpaceId } from '@kbn/core-spaces-common';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import {
+  getEventChainContext,
+  setWorkflowEventChainContext,
+} from '@kbn/workflows-extensions/server';
+import {
   createWorkflowsClientMock,
   workflowsExtensionsMock,
 } from '@kbn/workflows-extensions/server/mocks';
@@ -103,6 +107,36 @@ describe('IncrementalIdAssignedTriggerTask', () => {
         },
         { request: expect.objectContaining({ spaceId: 'my-space' }) }
       );
+    });
+
+    it('keeps the workflow event-chain context of the request in the task params', async () => {
+      const eventChainContext = {
+        depth: 2,
+        visitedWorkflowIds: ['workflow-1'],
+        sourceExecutionId: 'execution-1',
+      };
+      const workflowRequest = httpServerMock.createKibanaRequest();
+      setWorkflowEventChainContext(workflowRequest, eventChainContext);
+
+      await task.schedule(
+        { ...workflowRequest, spaceId: brandSpaceId('my-space') },
+        { caseId: 'case-1', owner: 'cases' }
+      );
+
+      expect(taskManager.schedule).toHaveBeenCalledWith(
+        expect.objectContaining({ params: expect.objectContaining({ eventChainContext }) }),
+        expect.anything()
+      );
+    });
+
+    it('does not add an event-chain context when the request has none', async () => {
+      await task.schedule(
+        { ...request, spaceId: brandSpaceId('my-space') },
+        { caseId: 'case-1', owner: 'cases' }
+      );
+
+      const { params: scheduledParams } = taskManager.schedule.mock.calls[0][0];
+      expect(scheduledParams).not.toHaveProperty('eventChainContext');
     });
 
     it('does not throw when scheduling fails', async () => {
@@ -200,6 +234,31 @@ describe('IncrementalIdAssignedTriggerTask', () => {
         updatedFields: ['incremental_id'],
       });
       expect(result).toEqual({ state: {}, shouldDeleteTask: true });
+    });
+
+    it('restores the event-chain context on the request used to emit the trigger', async () => {
+      mockCase({ incremental_id: 44994 });
+      const eventChainContext = {
+        depth: 2,
+        visitedWorkflowIds: ['workflow-1'],
+        sourceExecutionId: 'execution-1',
+      };
+      const taskRequest = httpServerMock.createKibanaRequest();
+
+      await run(params({ eventChainContext }), {}, taskRequest);
+
+      const requestForClient = workflowsExtensions.getClient.mock.calls[0][0];
+      expect(getEventChainContext(requestForClient)).toEqual(eventChainContext);
+    });
+
+    it('does not set an event-chain context when the task has none', async () => {
+      mockCase({ incremental_id: 44994 });
+      const taskRequest = httpServerMock.createKibanaRequest();
+
+      await run(params(), {}, taskRequest);
+
+      const requestForClient = workflowsExtensions.getClient.mock.calls[0][0];
+      expect(getEventChainContext(requestForClient)).toBeUndefined();
     });
 
     it('checks again later with a growing delay while the case has no id', async () => {
