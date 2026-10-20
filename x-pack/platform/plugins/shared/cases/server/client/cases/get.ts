@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import * as rt from 'io-ts';
 import { chunk, uniqBy } from 'lodash';
 import pMap from 'p-map';
 import type {
@@ -27,8 +28,6 @@ import type {
   AllTagsFindRequest,
   CaseResolveResponse,
   CasesByAlertIDRequest,
-  CasesByAttachmentIDsRequest,
-  GetCaseIDsByAttachmentIDsResponse,
   GetRelatedCasesByAlertResponse,
 } from '../../../common/types/api';
 import {
@@ -37,8 +36,6 @@ import {
   AllTagsFindRequestRt,
   CaseResolveResponseRt,
   CasesByAlertIDRequestRt,
-  CasesByAttachmentIDsRequestRt,
-  GetCaseIDsByAttachmentIDsResponseRt,
   GetCategoriesResponseRt,
   GetRelatedCasesByAlertResponseRt,
   GetReportersResponseRt,
@@ -60,9 +57,14 @@ import { Operations } from '../../authorization';
 import { getOwnersFilter } from '../../authorization/utils';
 import {
   CASE_ATTACHMENT_SAVED_OBJECT,
+  MAX_ATTACHMENT_ID_LENGTH,
+  MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP,
+  MAX_ATTACHMENT_TYPE_LENGTH,
   MAX_BULK_GET_CASES,
   MAX_CONCURRENT_SEARCHES,
+  MAX_OWNER_LENGTH,
 } from '../../../common/constants';
+import { limitedArraySchema, limitedStringSchema } from '../../../common/schema';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
 import { CasesService } from '../../services';
 import type { CaseIdsOfAttachment } from '../../services/cases/types';
@@ -70,7 +72,54 @@ import type {
   CaseSavedObjectTransformed,
   CaseTransformedAttributes,
 } from '../../common/types/case';
-import { CaseRt } from '../../../common/types/domain';
+import { CaseRt, CaseStatusRt } from '../../../common/types/domain';
+
+export const CasesByAttachmentIDsRequestRt = rt.intersection([
+  rt.strict({
+    /**
+     * Only the cases of this owner. One owner per call, as a user may read one solution's cases
+     * and not another's.
+     */
+    owner: limitedStringSchema({ fieldName: 'owner', min: 1, max: MAX_OWNER_LENGTH }),
+    /**
+     * The attachment type, e.g. `security.entity`.
+     */
+    type: limitedStringSchema({ fieldName: 'type', min: 1, max: MAX_ATTACHMENT_TYPE_LENGTH }),
+    /**
+     * The ids the attachments point at (their `attachmentId`), not the attachment saved object ids.
+     */
+    attachmentIds: limitedArraySchema({
+      codec: limitedStringSchema({
+        fieldName: 'attachmentIds',
+        min: 1,
+        max: MAX_ATTACHMENT_ID_LENGTH,
+      }),
+      min: 1,
+      max: MAX_ATTACHMENT_IDS_PER_CASES_LOOKUP,
+      fieldName: 'attachmentIds',
+    }),
+  }),
+  rt.exact(
+    rt.partial({
+      /**
+       * Only the cases with one of these statuses.
+       */
+      status: rt.union([CaseStatusRt, rt.array(CaseStatusRt)]),
+    })
+  ),
+]);
+
+export const GetCaseIDsByAttachmentIDsResponseRt = rt.array(
+  rt.strict({
+    attachmentId: rt.string,
+    caseIds: rt.array(rt.string),
+  })
+);
+
+export type CasesByAttachmentIDsRequest = rt.TypeOf<typeof CasesByAttachmentIDsRequestRt>;
+export type GetCaseIDsByAttachmentIDsResponse = rt.TypeOf<
+  typeof GetCaseIDsByAttachmentIDsResponseRt
+>;
 
 /**
  * Parameters for finding cases IDs using an alert ID

@@ -17,8 +17,6 @@ import type {
   AllCategoriesFindRequest,
   AllReportersFindRequest,
   GetRelatedCasesByAlertResponse,
-  CasesByAttachmentIDsRequest,
-  GetCaseIDsByAttachmentIDsResponse,
   CasesBulkGetResponse,
   BulkCreateCasesRequest,
   BulkCreateCasesResponse,
@@ -40,7 +38,12 @@ import { create } from './create';
 import { deleteCases } from './delete';
 import { search } from './search';
 import { find } from './find';
-import type { CasesByAlertIDParams, GetParams } from './get';
+import type {
+  CasesByAlertIDParams,
+  CasesByAttachmentIDsRequest,
+  GetCaseIDsByAttachmentIDsResponse,
+  GetParams,
+} from './get';
 import {
   get,
   resolve,
