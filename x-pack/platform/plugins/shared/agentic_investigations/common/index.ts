@@ -23,15 +23,22 @@ export {
   MAX_EVIDENCE_CHART_LABEL_LENGTH,
   MAX_EVIDENCE_CHART_POINTS,
   MAX_EVIDENCE_CHART_SERIES,
+  MAX_EVIDENCE_RESOURCES,
+  MAX_EVIDENCE_RESOURCE_URL_LENGTH,
   MAX_EVIDENCE_SHORT_TEXT_LENGTH,
   MAX_EVIDENCE_TEXT_LENGTH,
   evidenceChartSchema,
+  evidenceResourceSchema,
   investigationEvidenceSchema,
+  isEvidenceLinkResource,
 } from './evidence';
 export type {
   EvidenceChart,
   EvidenceChartAnnotation,
   EvidenceChartSeries,
+  EvidenceLinkResource,
+  EvidenceQueryResource,
+  EvidenceResource,
   InvestigationEvidence,
 } from './evidence';
 

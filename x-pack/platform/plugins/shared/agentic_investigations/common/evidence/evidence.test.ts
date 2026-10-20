@@ -9,7 +9,7 @@ import {
   MAX_EVIDENCE_CHART_ANNOTATIONS,
   MAX_EVIDENCE_CHART_POINTS,
   MAX_EVIDENCE_CHART_SERIES,
-  MAX_EVIDENCE_REFERENCES,
+  MAX_EVIDENCE_RESOURCES,
   MAX_EVIDENCE_TEXT_LENGTH,
   investigationEvidenceSchema,
   type EvidenceChart,
@@ -81,31 +81,31 @@ describe('investigationEvidenceSchema', () => {
   });
 });
 
-describe('evidence references', () => {
-  it('accepts http(s) links and queries', () => {
+describe('evidence resources', () => {
+  it('accepts http(s) links, with or without a label, and queries', () => {
     expect(
       investigationEvidenceSchema.safeParse({
-        references: [
-          { type: 'link', url: 'https://github.com/elastic/kibana/pull/1', label: 'PR' },
-          { type: 'query', language: 'esql', query: 'FROM logs-* | LIMIT 10' },
+        resources: [
+          { url: 'https://github.com/elastic/kibana/pull/1', label: 'PR' },
+          { url: 'https://example.com' },
+          { query: 'FROM logs-* | LIMIT 10' },
         ],
       }).success
     ).toBe(true);
   });
 
-  it('rejects non-http links, empty queries, unknown types, and too many references', () => {
-    const parse = (references: unknown[]) =>
-      investigationEvidenceSchema.safeParse({ references }).success;
+  it('rejects non-http links, empty queries, mixed or unknown shapes, and too many resources', () => {
+    const parse = (resources: unknown[]) =>
+      investigationEvidenceSchema.safeParse({ resources }).success;
 
-    expect(parse([{ type: 'link', url: 'ftp://example.com/file' }])).toBe(false);
-    expect(parse([{ type: 'query', language: 'sql', query: '' }])).toBe(false);
-    expect(parse([{ type: 'trace', id: 'abc' }])).toBe(false);
+    expect(parse([{ url: 'ftp://example.com/file' }])).toBe(false);
+    expect(parse([{ query: '' }])).toBe(false);
+    expect(parse([{ query: 'FROM logs-*', language: 'esql' }])).toBe(false);
+    expect(parse([{ url: 'https://example.com', query: 'FROM logs-*' }])).toBe(false);
+    expect(parse([{ trace: 'abc' }])).toBe(false);
     expect(
       parse(
-        Array.from({ length: MAX_EVIDENCE_REFERENCES + 1 }, () => ({
-          type: 'link',
-          url: 'https://example.com',
-        }))
+        Array.from({ length: MAX_EVIDENCE_RESOURCES + 1 }, () => ({ url: 'https://example.com' }))
       )
     ).toBe(false);
   });

@@ -219,7 +219,6 @@ describe('ImpactView', () => {
     fireEvent.click(row);
 
     expect(row).toHaveAttribute('aria-expanded', 'true');
-    fireEvent.click(screen.getByRole('button', { name: 'Evidence' }));
     expect(screen.getByText('Latency doubled.')).toBeVisible();
 
     fireEvent.click(row);
@@ -249,7 +248,6 @@ describe('ImpactView', () => {
     expect(screen.queryByText('Errors tripled.')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { expanded: false }));
-    fireEvent.click(screen.getByRole('button', { name: 'Evidence' }));
     expect(screen.getByText('Errors tripled.')).toBeVisible();
 
     fireEvent.click(screen.getByTestId('investigationImpactEntityFlyout'));

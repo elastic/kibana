@@ -57,7 +57,7 @@ import type {
   EvidenceChart,
   EvidenceChartAnnotation,
   EvidenceChartSeries,
-  EvidenceReference,
+  EvidenceResource,
   Hypothesis,
   Impact,
   ImpactEntity,
@@ -179,11 +179,11 @@ const timeChart = ({
 const evidence = (
   description: string,
   chart?: EvidenceChart,
-  references?: EvidenceReference[]
+  resources?: EvidenceResource[]
 ): InvestigationEvidence => ({
   description,
   ...(chart && { chart }),
-  ...(references && { references }),
+  ...(resources && { resources }),
 });
 
 const hypothesis = (
@@ -457,15 +457,11 @@ const SCENARIOS: Scenario[] = [
         undefined,
         [
           {
-            type: 'link',
             url: 'https://github.com/elastic/kibana/pull/1',
             label: 'Price-sync job change',
           },
-          { type: 'link', url: 'https://example.com/dashboards/cache-service' },
+          { url: 'https://example.com/dashboards/cache-service' },
           {
-            type: 'query',
-            language: 'esql',
-            label: 'P99 latency per 20 minutes',
             query:
               'FROM metrics-*\n| WHERE service.name == "cache-service"\n| STATS p99 = PERCENTILE(latency, 99) BY BUCKET(@timestamp, 20 minutes)',
           },

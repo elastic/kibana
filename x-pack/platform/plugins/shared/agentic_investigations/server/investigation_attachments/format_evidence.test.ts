@@ -12,16 +12,16 @@ describe('formatEvidenceForAgent', () => {
     expect(
       formatEvidenceForAgent({
         description: 'Errors spiked.',
-        references: [
-          { type: 'link', url: 'https://github.com/elastic/kibana/pull/1', label: 'Deploy PR' },
-          { type: 'query', language: 'esql', query: 'FROM logs-* | LIMIT 1' },
+        resources: [
+          { url: 'https://github.com/elastic/kibana/pull/1', label: 'Deploy PR' },
+          { query: 'FROM logs-* | LIMIT 1' },
         ],
       })
     ).toBe(
       [
         'Errors spiked.',
         'Link: Deploy PR: https://github.com/elastic/kibana/pull/1',
-        'Query (esql): FROM logs-* | LIMIT 1',
+        'Query: FROM logs-* | LIMIT 1',
       ].join('\n')
     );
   });

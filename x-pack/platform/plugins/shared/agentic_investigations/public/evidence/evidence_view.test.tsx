@@ -27,7 +27,7 @@ const chart: EvidenceChart = {
 };
 
 describe('EvidenceView', () => {
-  const expand = () => fireEvent.click(screen.getByRole('button', { name: 'Evidence' }));
+  const expandResources = () => fireEvent.click(screen.getByRole('button', { name: /resource/ }));
 
   it('renders the chart followed by the Markdown description', () => {
     render(
@@ -36,31 +36,35 @@ describe('EvidenceView', () => {
       </EuiProvider>
     );
 
-    expand();
-
     expect(screen.getByTestId('mockEvidenceChart')).toHaveTextContent('Errors by service');
     expect(screen.getByRole('link', { name: /runbook/ })).toHaveAttribute(
       'href',
       'https://example.com'
     );
+    expect(screen.queryByTestId('investigationEvidenceResources')).not.toBeInTheDocument();
   });
 
-  it('is collapsed by default', () => {
+  it('keeps the description visible and the resources collapsed by default', () => {
     render(
       <EuiProvider>
-        <EvidenceView evidence={{ description: 'Hidden at first' }} />
+        <EvidenceView
+          evidence={{
+            description: 'Errors spiked.',
+            resources: [{ url: 'https://example.com' }, { query: 'FROM logs-*' }],
+          }}
+        />
       </EuiProvider>
     );
 
-    expect(screen.getByRole('button', { name: 'Evidence' })).toHaveAttribute(
-      'aria-expanded',
-      'false'
-    );
-    expect(screen.getByText('Hidden at first')).not.toBeVisible();
+    expect(screen.getByText('Errors spiked.')).toBeVisible();
+    const toggle = screen.getByRole('button', { name: '2 resources' });
+    expect(toggle).toHaveAttribute('aria-expanded', 'false');
+    expect(screen.getByTestId('evidenceResourceQuery')).not.toBeVisible();
 
-    expand();
+    expandResources();
 
-    expect(screen.getByText('Hidden at first')).toBeVisible();
+    expect(toggle).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByTestId('evidenceResourceQuery')).toBeVisible();
   });
 
   it('renders links in a new tab, with an icon for GitHub, and copyable queries', () => {
@@ -68,35 +72,26 @@ describe('EvidenceView', () => {
       <EuiProvider>
         <EvidenceView
           evidence={{
-            references: [
-              { type: 'link', url: 'https://github.com/elastic/kibana/pull/1', label: 'The PR' },
-              { type: 'link', url: 'https://example.com/dash' },
-              { type: 'query', language: 'esql', query: 'FROM logs-* | LIMIT 1', label: 'Logs' },
+            resources: [
+              { url: 'https://github.com/elastic/kibana/pull/1', label: 'The PR' },
+              { url: 'https://example.com/dash' },
+              { query: 'FROM logs-* | LIMIT 1' },
             ],
           }}
         />
       </EuiProvider>
     );
-    expand();
+    expandResources();
 
-    const [github, other] = screen.getAllByTestId('evidenceReferenceLink');
+    const [github, other] = screen.getAllByTestId('evidenceResourceLink');
     expect(github).toHaveAttribute('href', 'https://github.com/elastic/kibana/pull/1');
+    expect(github).toHaveTextContent('The PR');
     expect(github).toHaveAttribute('target', '_blank');
     expect(github).toHaveAttribute('rel', expect.stringContaining('noopener'));
     expect(other).toHaveAttribute('href', 'https://example.com/dash');
-    expect(screen.getAllByTestId('evidenceReferenceIcon')).toHaveLength(1);
-    expect(screen.getByTestId('evidenceReferenceQuery')).toHaveTextContent('FROM logs-* | LIMIT 1');
-    expect(screen.getByTestId('evidenceReferenceCopyQuery')).toBeInTheDocument();
-  });
-
-  it('renders references-only evidence', () => {
-    render(
-      <EuiProvider>
-        <EvidenceView evidence={{ references: [{ type: 'link', url: 'https://example.com' }] }} />
-      </EuiProvider>
-    );
-
-    expect(screen.getByTestId('investigationEvidenceReferences')).toBeInTheDocument();
+    expect(screen.getAllByTestId('evidenceResourceIcon')).toHaveLength(1);
+    expect(screen.getByTestId('evidenceResourceQuery')).toHaveTextContent('FROM logs-* | LIMIT 1');
+    expect(screen.getByTestId('evidenceResourceCopyQuery')).toBeInTheDocument();
   });
 
   it('renders nothing for empty evidence', () => {
@@ -112,7 +107,6 @@ describe('EvidenceView', () => {
       </EuiProvider>
     );
 
-    expect(await screen.findByRole('button', { name: 'Evidence' })).toBeInTheDocument();
-    expect(screen.getByTestId('mockEvidenceChart')).toBeInTheDocument();
+    expect(await screen.findByTestId('mockEvidenceChart')).toBeInTheDocument();
   });
 });
