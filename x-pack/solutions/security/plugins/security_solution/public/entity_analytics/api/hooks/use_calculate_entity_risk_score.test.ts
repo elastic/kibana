@@ -17,6 +17,11 @@ jest.mock('../api', () => ({
   }),
 }));
 
+const mockUseEntityEnginePrivileges = jest.fn();
+jest.mock('../../components/entity_store/hooks/use_entity_engine_privileges', () => ({
+  useEntityEnginePrivileges: () => mockUseEntityEnginePrivileges(),
+}));
+
 const mockAddError = jest.fn();
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: jest.fn().mockReturnValue({
@@ -36,7 +41,32 @@ describe('useCalculateEntityRiskScore', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCalculateEntityRiskScoreV2.mockResolvedValue({});
+    mockUseEntityEnginePrivileges.mockReturnValue({
+      data: { has_read_permissions: true, has_write_permissions: true },
+    });
   });
+
+  it.each([
+    ['write', { data: { has_read_permissions: true, has_write_permissions: false } }],
+    ['read', { data: { has_read_permissions: false, has_write_permissions: true } }],
+    ['the privileges are still loading', { data: undefined }],
+  ])(
+    'does not call the API when the user lacks entity store access (%s)',
+    async (_, privileges) => {
+      mockUseEntityEnginePrivileges.mockReturnValue(privileges);
+      const { result } = renderHook(() => useCalculateEntityRiskScore(params), {
+        wrapper: createReactQueryWrapper(),
+      });
+
+      await act(async () => {
+        await result.current.calculateEntityRiskScore();
+      });
+
+      expect(mockCalculateEntityRiskScoreV2).not.toHaveBeenCalled();
+      expect(mockAddError).not.toHaveBeenCalled();
+      expect(params.onSuccess).not.toHaveBeenCalled();
+    }
+  );
 
   it('calls calculateEntityRiskScoreV2 when the callback is invoked', async () => {
     const { result } = renderHook(() => useCalculateEntityRiskScore(params), {

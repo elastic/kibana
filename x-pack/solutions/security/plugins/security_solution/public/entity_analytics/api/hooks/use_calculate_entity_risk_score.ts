@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../api';
+import { useEntityEnginePrivileges } from '../../components/entity_store/hooks/use_entity_engine_privileges';
 
 export const useCalculateEntityRiskScore = ({
   identifierType,
@@ -25,6 +26,11 @@ export const useCalculateEntityRiskScore = ({
 }) => {
   const { addError } = useAppToasts();
   const { calculateEntityRiskScoreV2 } = useEntityAnalyticsRoutes();
+
+  const { data: entityStorePrivileges } = useEntityEnginePrivileges();
+  // the route requires read and write access to the entity store
+  const canCalculate =
+    !!entityStorePrivileges?.has_read_permissions && !!entityStorePrivileges?.has_write_permissions;
 
   const onError = useCallback(
     (error: unknown) => {
@@ -44,12 +50,14 @@ export const useCalculateEntityRiskScore = ({
   });
 
   const calculateEntityRiskScoreCb = useCallback(async () => {
+    // skip for users who can't trigger it
+    if (!canCalculate) return;
     mutateV2({
       identifier_type: identifierType,
       identifier,
       entity_id: entityId,
     });
-  }, [mutateV2, identifierType, identifier, entityId]);
+  }, [canCalculate, mutateV2, identifierType, identifier, entityId]);
 
   return {
     isLoading,

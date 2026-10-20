@@ -7,6 +7,7 @@
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { checkEntityStoreIndexPrivileges } from '@kbn/entity-store/server';
 import type { EntityStoreCRUDClient } from '@kbn/entity-store/server';
 import { RISK_SCORE_ENTITY_CALCULATION_V2_URL } from '../../../../../common/constants';
 import {
@@ -21,7 +22,6 @@ import type {
 import { configMock } from '../../../../config.mock';
 import { getRiskInputsIndex } from '../get_risk_inputs_index';
 import { riskScoreEntityCalculationRouteV2 } from './entity_calculation_v2';
-import { riskEnginePrivilegesMock } from '../../risk_engine/routes/risk_engine_privileges.mock';
 import { getConfiguration } from '../../risk_engine/utils/saved_object_configuration';
 import { scoreBaseEntities } from '../maintainer/steps/score_base_entities';
 import { runResolutionScoringStep } from '../maintainer/steps/run_resolution_scoring_step';
@@ -30,6 +30,10 @@ import { getIsIdBasedRiskScoringEnabled } from '../is_id_based_risk_scoring_enab
 import { buildAlertFilters } from '../maintainer/steps/build_alert_filters';
 
 const entityId = 'host:test-host-name';
+
+jest.mock('@kbn/entity-store/server', () => ({
+  checkEntityStoreIndexPrivileges: jest.fn(),
+}));
 
 jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
   euid: {
@@ -67,6 +71,7 @@ describe('entity risk score V2 calculation route', () => {
   let context: SecuritySolutionRequestHandlerContextMock;
   let logger: ReturnType<typeof loggerMock.create>;
   let getStartServicesMock: jest.Mock;
+  let createCRUDClientMock: jest.Mock;
   let mockCrudClient: jest.Mocked<EntityStoreCRUDClient>;
 
   const defaultBody = {
@@ -76,12 +81,10 @@ describe('entity risk score V2 calculation route', () => {
   };
 
   beforeEach(() => {
-    getStartServicesMock = jest.fn().mockResolvedValue([
-      {},
-      {
-        security: riskEnginePrivilegesMock.createMockSecurityStartWithFullRiskEngineAccess(),
-      },
-    ]);
+    (checkEntityStoreIndexPrivileges as jest.Mock).mockResolvedValue({
+      has_read_permissions: true,
+      has_write_permissions: true,
+    });
 
     server = serverMock.create();
     logger = loggerMock.create();
@@ -94,7 +97,14 @@ describe('entity risk score V2 calculation route', () => {
     mockCrudClient = {
       listEntities: jest.fn().mockResolvedValue({ entities: [entityDocMock] }),
     } as unknown as jest.Mocked<EntityStoreCRUDClient>;
-    context.securitySolution.getEntityStoreUpdateClient.mockReturnValue(mockCrudClient);
+    createCRUDClientMock = jest.fn().mockReturnValue(mockCrudClient);
+    getStartServicesMock = jest.fn().mockResolvedValue([
+      {},
+      {
+        security: {},
+        entityStore: { createCRUDClient: createCRUDClientMock },
+      },
+    ]);
 
     (getConfiguration as jest.Mock).mockResolvedValue(defaultEngineConfig);
     (getRiskInputsIndex as jest.Mock).mockResolvedValue({ index: 'default-alerts-index' });
@@ -130,6 +140,39 @@ describe('entity risk score V2 calculation route', () => {
 
     expect(response.status).toEqual(200);
   });
+
+  it('runs the scoring with the internal user', async () => {
+    const { elasticsearch } = await context.core;
+
+    await server.inject(buildRequest(), requestContextMock.convertContext(context));
+
+    expect(createCRUDClientMock).toHaveBeenCalledWith(
+      elasticsearch.client.asInternalUser,
+      context.securitySolution.getSpaceId(),
+      undefined
+    );
+    expect(scoreBaseEntities).toHaveBeenCalledWith(
+      expect.objectContaining({ esClient: elasticsearch.client.asInternalUser })
+    );
+  });
+
+  it.each([
+    ['write', { has_read_permissions: true, has_write_permissions: false }],
+    ['read', { has_read_permissions: false, has_write_permissions: true }],
+  ])(
+    'returns 403 and skips scoring when the user lacks entity store %s access',
+    async (_, perms) => {
+      (checkEntityStoreIndexPrivileges as jest.Mock).mockResolvedValue(perms);
+
+      const response = await server.inject(
+        buildRequest(),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(403);
+      expect(scoreBaseEntities).not.toHaveBeenCalled();
+    }
+  );
 
   it('throws an error when entity_id is missing', async () => {
     const response = await server.inject(
