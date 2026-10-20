@@ -68,6 +68,17 @@ describe('edit param route Vault connection checks', () => {
   });
 
   it.each([
+    ['a new value', { value: 'new' }, 'new'],
+    ['an edit without a value', { description: 'd' }, 'old'],
+  ])('returns the saved value for %s', async (_label, body, value) => {
+    const { routeContext } = setup(body);
+
+    const result = await editSyntheticsParamsRoute().handler(routeContext);
+
+    expect(result).toEqual(expect.objectContaining({ key: 'pw', value }));
+  });
+
+  it.each([
     ['an unknown connection', 'missing'],
     ['a connection that only exists in another space', 'other-space'],
   ])('rejects %s without writing', async (_label, name) => {

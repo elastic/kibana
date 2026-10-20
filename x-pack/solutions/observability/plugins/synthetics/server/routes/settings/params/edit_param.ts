@@ -99,8 +99,9 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         ...data,
       };
 
+      const { key: existingKey } = existingParam.attributes;
       // value from data since we aren't using encrypted client
-      const { value, key: existingKey } = existingParam.attributes;
+      const { value } = newParam;
       const {
         id: responseId,
         attributes: { key, tags, description },
