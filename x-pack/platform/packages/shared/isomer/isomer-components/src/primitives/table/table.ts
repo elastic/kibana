@@ -12,10 +12,11 @@ import { fromChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
-import { componentIcon, definePrimitive, plainText } from '../../lib';
+import { componentIcon, definePrimitive, plainText, snapshotMetrics } from '../../lib';
 import { tableReactRenderer } from './table_react';
 import { tableSlackRenderer } from './table_slack';
 import { tableView, textTable } from './table_model';
+import { tableSnapshotHeight } from './table_snapshot_height';
 
 const MAX_ROWS = 1000;
 
@@ -182,6 +183,7 @@ export const table = definePrimitive<TableNode, typeof tableSchema>({
     example,
   },
   icon,
+  metrics: snapshotMetrics<TableNode>('table', (node) => tableSnapshotHeight(tableView(node))),
   examples: [
     example,
     {
