@@ -103,6 +103,13 @@ describe('Content — graph/resolution navigation gating', () => {
     (useHasEntityResolutionLicense as jest.Mock).mockReturnValue(true);
   });
 
+  it('forwards the view mode to the resolution section so the target row stays linkable', () => {
+    render(<Content {...defaultProps} mode="resolved" />, { wrapper: TestProviders });
+    expect(mockResolutionSection).toHaveBeenLastCalledWith(
+      expect.objectContaining({ mode: 'resolved' })
+    );
+  });
+
   it('forwards openDetailsPanel to the graph and resolution sections by default', () => {
     render(<Content {...defaultProps} openDetailsPanel={openDetailsPanel} />, {
       wrapper: TestProviders,
