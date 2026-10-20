@@ -14,6 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { JsonValue } from '@kbn/utility-types';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionDataViewer } from '../../../shared/ui/execution_data_viewer';
+import { getStepFieldPathPrefix } from '../lib/get_step_field_path_prefix';
 
 const Titles = {
   output: i18n.translate('workflowsManagement.stepExecutionDataView.outputTitle', {
@@ -27,9 +28,41 @@ const Titles = {
   }),
 };
 
+export function buildForeachOutput(
+  stepExecution: WorkflowStepExecutionDto,
+  allStepExecutions: WorkflowStepExecutionDto[]
+): JsonValue {
+  const { stepId } = stepExecution;
+  const byIteration = new Map<number, Record<string, JsonValue>>();
+
+  for (const s of allStepExecutions) {
+    const frame = s.scopeStack?.find((f) => f.stepId === stepId);
+    const iterScope = frame?.nestedScopes.find((sc) => sc.scopeId !== undefined);
+    if (iterScope?.scopeId) {
+      const iterNum = parseInt(iterScope.scopeId, 10);
+      if (!isNaN(iterNum)) {
+        if (!byIteration.has(iterNum)) {
+          byIteration.set(iterNum, {});
+        }
+        if (s.output !== undefined && s.output !== null) {
+          const iteration = byIteration.get(iterNum);
+          if (iteration) {
+            iteration[s.stepId] = s.output as JsonValue;
+          }
+        }
+      }
+    }
+  }
+
+  if (byIteration.size === 0) return null;
+  const maxIter = Math.max(...byIteration.keys());
+  return Array.from({ length: maxIter + 1 }, (_, i) => byIteration.get(i) ?? null);
+}
+
 interface StepExecutionDataViewProps {
   stepExecution: WorkflowStepExecutionDto;
   mode: 'input' | 'output';
+  allStepExecutions?: WorkflowStepExecutionDto[];
 }
 
 export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
@@ -60,34 +93,16 @@ export const StepExecutionDataView = React.memo<StepExecutionDataViewProps>(
       }
     }, [mode, stepExecution]);
 
-    const fieldPathActionsPrefix: string | undefined = useMemo(() => {
-      const isOverviewStep = stepExecution.stepType === '__overview';
-      const isTriggerStep = stepExecution.stepType?.startsWith('trigger_');
-      const triggerType = isTriggerStep
-        ? stepExecution.stepType?.replace('trigger_', '')
-        : undefined;
-
-      if (isOverviewStep) {
-        return ''; // overview context: paths like "<fieldPath>"
-      }
-
-      if (!isTriggerStep) {
-        if (mode !== 'output' || stepExecution.error) {
-          return undefined; // Make field path actions available only for non-error output data.
-        }
-        return `steps.${stepExecution.stepId}.${mode}`;
-      }
-
-      if (mode === 'output') {
-        return ''; // trigger context: paths like "<fieldPath>"
-      }
-
-      if (triggerType === 'manual') {
-        return 'inputs'; // manual input: "inputs.<fieldPath>"
-      }
-
-      return 'event'; // alert/scheduled input: "event.<fieldPath>"
-    }, [mode, stepExecution.stepId, stepExecution.error, stepExecution.stepType]);
+    const fieldPathActionsPrefix = useMemo(
+      () =>
+        getStepFieldPathPrefix({
+          stepId: stepExecution.stepId,
+          stepType: stepExecution.stepType,
+          mode,
+          hasError: Boolean(stepExecution.error),
+        }),
+      [mode, stepExecution.error, stepExecution.stepId, stepExecution.stepType]
+    );
 
     if (data === undefined) {
       return (

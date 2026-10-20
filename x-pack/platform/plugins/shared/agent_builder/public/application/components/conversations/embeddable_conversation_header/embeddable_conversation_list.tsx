@@ -16,7 +16,6 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useConversationContext } from '../../../context/conversation/conversation_context';
-import { useStreamingContext } from '../../../context/streaming/streaming_context';
 import { useConversationList } from '../../../hooks/use_conversation_list';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
 import { getConversationTemplateIcon } from '../../../hooks/use_conversation_template_display';
@@ -38,30 +37,29 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
 }) => {
   const { euiTheme } = useEuiTheme();
   const { agentId, conversationId, setConversationId, resetAttachments } = useConversationContext();
-  const { removeAllErrors } = useStreamingContext();
   const { conversationTemplatesService } = useAgentBuilderServices();
   const {
-    conversations = [],
+    conversations: rawConversations,
     isLoading,
+    isSearching,
     hasNextPage,
     fetchNextPage,
     isFetchingNextPage,
-  } = useConversationList({ agentId });
+  } = useConversationList({ agentId, query: searchValue });
+
   const sentinelRef = useInfiniteScroll({ hasNextPage, isFetchingNextPage, fetchNextPage });
 
-  const sortedConversations = useMemo(
+  // Recency sort applies only to the unfiltered list — search results are already
+  // relevance-ranked, and re-sorting them by recency would discard that ranking.
+  const conversations = useMemo(
     () =>
-      [...conversations].sort(
-        (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
-      ),
-    [conversations]
+      isSearching
+        ? rawConversations
+        : [...rawConversations].sort(
+            (a, b) => new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()
+          ),
+    [rawConversations, isSearching]
   );
-
-  const filteredConversations = useMemo(() => {
-    if (!searchValue) return sortedConversations;
-    const lower = searchValue.toLowerCase();
-    return sortedConversations.filter((c) => c.title.toLowerCase().includes(lower));
-  }, [sortedConversations, searchValue]);
 
   const itemStyles = createConversationListItemStyles(euiTheme);
   const activeItemStyles = createActiveConversationListItemStyles(euiTheme);
@@ -82,20 +80,19 @@ export const EmbeddableConversationList: React.FC<EmbeddableConversationListProp
     );
   }
 
-  if (filteredConversations.length === 0) {
-    return <NoConversationsPrompt isFiltered={searchValue.length > 0} />;
+  if (conversations.length === 0) {
+    return <NoConversationsPrompt isFiltered={isSearching} />;
   }
 
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      {filteredConversations.map((conversation) => {
+      {conversations.map((conversation) => {
         const isActive = conversationId === conversation.id;
         return (
           <EuiFlexItem grow={false} key={conversation.id}>
             <button
               css={isActive ? activeItemStyles : itemStyles}
               onClick={() => {
-                removeAllErrors();
                 if (!isActive) {
                   resetAttachments?.();
                 }

@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+import type { SchemaOutput } from './schema_output';
+import type { syntheticsCCSSettingsSchema } from './schemas/settings';
 
-export const syntheticsCCSSettingsSchema = t.type({
-  useAllRemoteClusters: t.boolean,
-  selectedRemoteClusters: t.array(t.string),
-});
-
-export type SyntheticsCCSSettings = t.TypeOf<typeof syntheticsCCSSettingsSchema>;
+export type SyntheticsCCSSettings = SchemaOutput<typeof syntheticsCCSSettingsSchema>;

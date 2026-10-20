@@ -17,6 +17,7 @@ import {
   EuiFieldSearch,
   EuiSpacer,
 } from '@elastic/eui';
+import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 
 import type { MaintenanceWindowStatus, MaintenanceWindowUI } from '../../common';
@@ -31,7 +32,7 @@ import { TableActionsPopover } from './table_actions_popover';
 import { useFinishMaintenanceWindow } from '../hooks/use_finish_maintenance_window';
 import { useArchiveMaintenanceWindow } from '../hooks/use_archive_maintenance_window';
 import { useFinishAndArchiveMaintenanceWindow } from '../hooks/use_finish_and_archive_maintenance_window';
-import { useUiSetting } from '../utils/kibana_react';
+import { useKibana, useUiSetting } from '../utils/kibana_react';
 import { useDeleteMaintenanceWindow } from '../hooks/use_delete_maintenance_window';
 
 interface MaintenanceWindowsListProps {
@@ -50,8 +51,10 @@ interface MaintenanceWindowsListProps {
 
 const getColumns = ({
   dateFormat,
+  isUniversalAlertingEnabled,
 }: {
   dateFormat: string;
+  isUniversalAlertingEnabled: boolean;
 }): Array<EuiBasicTableColumn<MaintenanceWindowUI>> => [
   {
     field: 'title',
@@ -68,6 +71,30 @@ const getColumns = ({
       );
     },
     sortable: ({ status }) => STATUS_SORT[status],
+  },
+  {
+    field: 'scope',
+    name: i18n.TABLE_SCOPE,
+    'data-test-subj': 'maintenance-windows-column-scope',
+    render: (scope: MaintenanceWindowUI['scope']) => {
+      const showClassic = scope?.alerting?.enabled === true;
+      const showUniversal = isUniversalAlertingEnabled && scope?.alertingV2?.enabled === true;
+      if (!showClassic && !showUniversal) return null;
+      return (
+        <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+          {showClassic && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{i18n.TABLE_SCOPE_BADGE_CLASSIC_ALERTING}</EuiBadge>
+            </EuiFlexItem>
+          )}
+          {showUniversal && (
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{i18n.TABLE_SCOPE_BADGE_UNIVERSAL_ALERTING}</EuiBadge>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      );
+    },
   },
   {
     field: 'eventStartTime',
@@ -119,6 +146,8 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
       UI_SETTINGS.DATE_FORMAT,
       MAINTENANCE_WINDOW_DATE_FORMAT
     );
+    const { services } = useKibana();
+    const isUniversalAlertingEnabled = isAlertingV2Enabled(services);
 
     const { navigateToEditMaintenanceWindows } = useEditMaintenanceWindowsNavigation();
     const onEdit = useCallback<TableActionsPopoverProps['onEdit']>(
@@ -193,9 +222,12 @@ export const MaintenanceWindowsList = React.memo<MaintenanceWindowsListProps>(
     );
 
     const columns = useMemo(() => {
-      const result = getColumns({ dateFormat: systemDateFormat });
+      const result = getColumns({
+        dateFormat: systemDateFormat,
+        isUniversalAlertingEnabled,
+      });
       return readOnly ? result : result.concat(actions);
-    }, [actions, readOnly, systemDateFormat]);
+    }, [actions, isUniversalAlertingEnabled, readOnly, systemDateFormat]);
 
     const onInputChange = useCallback(
       (e: React.ChangeEvent<HTMLInputElement>) => {

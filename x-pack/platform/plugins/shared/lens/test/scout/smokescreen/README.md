@@ -18,15 +18,6 @@ palette, a formula edge case, drag-and-drop mechanics, or anything that needs fe
 non-default server config. Those stay in the `core` namespace. The value of this namespace comes
 from staying small.
 
-## Environment tags
-
-The end state is `tags.deploymentAgnostic` from `@kbn/scout`, so a single spec runs on stateful and
-on serverless search / observability_complete / security_complete.
-
-For the first round of the FTR-to-Scout migration the specs are tagged `@local-stateful-classic`
-only. Serverless coverage is a follow-up: it needs each spec verified against a serverless
-project first, since the seeded archives, default data views and available UI differ there.
-
 ## Current contents
 
 | Spec | Covers | Migrated from |
@@ -36,13 +27,16 @@ project first, since the seeded archives, default data views and available UI di
 | `chart_switching_from_scratch.spec.ts` | building a pie chart then switching to a datatable, and building a heatmap then switching to a bar chart | `apps/lens/group1/chart_switching.ts` |
 | `layers.spec.ts` | creating, duplicating, switching, and removing Lens layers; applying a treemap suggestion; keeping suggestions in sync with stacking subtype | `apps/lens/group1/layers.ts` |
 | `dimension_editor.spec.ts` | dimension label / format / color, style flyout curve and missing values, reference-based operations, incomplete columns, percentile metrics | `apps/lens/group1/dimension_editor.ts` |
+| `chart_style_settings.spec.ts` | multi-axis side switching, bar value labels, axis title and gridlines, legend filtering on XY and pie, line point visibility | `apps/lens/group1/chart_style_settings.ts` |
 
-`apps/lens/group1/chart_switching.ts`, `apps/lens/group1/layers.ts` and
-`apps/lens/group1/dimension_editor.ts` are still loaded by the FTR cross-cluster-search config
-(`x-pack/platform/test/functional/config.ccs.ts`), which Scout cannot reproduce yet; they no longer
-run in the plain stateful FTR config.
+`apps/lens/group1/chart_switching.ts`, `apps/lens/group1/layers.ts`,
+`apps/lens/group1/dimension_editor.ts` and `apps/lens/group1/chart_style_settings.ts` are still loaded
+by the FTR cross-cluster-search config (`x-pack/platform/test/functional/config.ccs.ts`), which Scout
+cannot reproduce yet; they no longer run in the plain stateful FTR config.
 
 ## Running
+
+Stateful:
 
 ```bash
 node scripts/scout.js start-server --arch stateful --domain classic
@@ -51,4 +45,15 @@ node scripts/playwright test --project local \
   --config x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel.playwright.config.ts
 ```
 
-See [`../README.md`](../README.md) for the other Lens namespaces and for serverless instructions.
+Serverless, one project type at a time (`search`, `observability_complete` or `security_complete`).
+Pass the matching `--grep` tag so Playwright only picks the tests for the project you started:
+
+```bash
+node scripts/scout.js start-server --arch serverless --domain search
+
+node scripts/playwright test --project local \
+  --grep @local-serverless-search \
+  --config x-pack/platform/plugins/shared/lens/test/scout/smokescreen/ui/parallel.playwright.config.ts
+```
+
+See [`../README.md`](../README.md) for the other Lens namespaces.

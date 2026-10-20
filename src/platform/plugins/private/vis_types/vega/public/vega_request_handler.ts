@@ -23,8 +23,8 @@ import { getData, getDataViews } from './services';
 import type { VegaInspectorAdapters } from './vega_inspector';
 
 interface VegaRequestHandlerParams {
-  query: Query;
-  filters: Filter[];
+  query: Query | Query[] | undefined;
+  filters: Filter[] | undefined;
   timeRange: TimeRange | undefined;
   visParams: VisParams;
   searchSessionId?: string;
@@ -85,14 +85,14 @@ export function createVegaRequestHandler(
     timeCache.setTimeRange(timeRange);
 
     let dataView: DataView;
-    const firstFilterIndex = filters[0]?.meta.index;
+    const firstFilterIndex = filters?.[0]?.meta.index;
     if (firstFilterIndex) {
       // @ts-expect-error upgrade typescript v5.9.3
       dataView = await dataViews.get(firstFilterIndex).catch(() => undefined);
     }
 
     const esQueryConfigs = getEsQueryConfig(uiSettings);
-    const filtersDsl = buildEsQuery(dataView, query, filters, esQueryConfigs);
+    const filtersDsl = buildEsQuery(dataView, query ?? [], filters ?? [], esQueryConfigs);
     const { VegaParser } = await import('./async_services');
 
     const vp = new VegaParser(

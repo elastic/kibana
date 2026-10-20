@@ -8,13 +8,20 @@
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom } from 'rxjs';
 import { z } from '@kbn/zod/v4';
-import { ToolType, isRoundCompleteEvent, internalTools } from '@kbn/agent-builder-common';
+import {
+  SELF_AGENT_ID,
+  ToolType,
+  isRoundCompleteEvent,
+  internalTools,
+} from '@kbn/agent-builder-common';
 import { EffortLevels, type EffortLevel } from '@kbn/agent-builder-common/model_provider';
 import type { ChatEvent, AssistantResponse } from '@kbn/agent-builder-common';
 import type { InternalBuiltinToolDefinition, SubAgentExecutor } from '@kbn/agent-builder-server';
 import { createErrorResult, createOtherResult } from '@kbn/agent-builder-server';
 import type { BackgroundExecutionService } from '../background_execution_service';
 import type { SubagentTracker } from '../subagent_tracker';
+import { filterReachableSubagents } from '../utils/filter_reachable_subagents';
+import { selectSubagentConnectorId } from '../utils/select_subagent_connector_id';
 
 const schema = z.object({
   to: z.string().describe('Name of the persistent sub-agent to talk to.'),
@@ -43,11 +50,14 @@ The sub-agent sees the full history of your prior exchanges with it.
 `;
 
 export const createSendMessageTool = ({
+  agentId: ownerAgentId,
   executionId: parentExecutionId,
   subAgentExecutor,
   abortSignal,
   backgroundExecutionService,
   subagentTracker,
+  allowedIds,
+  inferenceFeatureIdBySubagent,
 }: {
   agentId: string;
   executionId: string;
@@ -55,6 +65,8 @@ export const createSendMessageTool = ({
   abortSignal?: AbortSignal;
   backgroundExecutionService?: BackgroundExecutionService;
   subagentTracker?: SubagentTracker;
+  allowedIds: Set<string>;
+  inferenceFeatureIdBySubagent?: ReadonlyMap<string, string | undefined>;
 }): InternalBuiltinToolDefinition<typeof schema> => {
   return {
     id: internalTools.sendMessageToAgent,
@@ -76,15 +88,30 @@ export const createSendMessageTool = ({
         };
       }
 
-      const childId = subagentTracker.get(to);
-      if (!childId) {
-        const roster = Object.keys(subagentTracker.snapshot());
+      const snapshot = subagentTracker.snapshot();
+      const reachable = filterReachableSubagents({ entries: snapshot, allowedIds });
+      const entry = reachable[to];
+
+      if (!entry) {
+        const rawEntry = snapshot[to];
+        if (rawEntry) {
+          // The entry exists but its backing agent left the parent's allowlist.
+          return {
+            results: [
+              createErrorResult(
+                `Sub-agent "${to}" is backed by agent "${rawEntry.agent_id}", ` +
+                  `which is not in this agent's subagent_ids allowlist.`
+              ),
+            ],
+          };
+        }
+        const reachableNames = Object.keys(reachable);
         return {
           results: [
             createErrorResult(
               `No sub-agent named "${to}" exists in this conversation. ` +
-                (roster.length > 0
-                  ? `Available: ${roster.join(', ')}. `
+                (reachableNames.length > 0
+                  ? `Available: ${reachableNames.join(', ')}. `
                   : `No persistent sub-agents have been created yet. `) +
                 `Use run_subagent to create one first.`
             ),
@@ -93,14 +120,17 @@ export const createSendMessageTool = ({
       }
 
       try {
-        const subAgentModel = await modelProvider.selectModel({
+        const connectorId = await selectSubagentConnectorId({
+          modelProvider,
           effortLevel: effort as EffortLevel,
+          inferenceFeatureId: inferenceFeatureIdBySubagent?.get(entry.agent_id),
         });
         const { executionId, events$ } = await subAgentExecutor.sendToSubAgent({
+          agentId: entry.agent_id === SELF_AGENT_ID ? ownerAgentId : entry.agent_id,
           parentExecutionId,
-          conversationId: childId,
+          conversationId: entry.conversation_id,
           prompt,
-          connectorId: subAgentModel.connector.connectorId,
+          connectorId,
           ...(run_in_background ? {} : { abortSignal }),
         });
 

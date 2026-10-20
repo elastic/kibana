@@ -22,6 +22,7 @@ import {
   isSupportedEpisodeSeverity,
   normalizeEpisodeSeverity,
 } from './episode_severity';
+import { convertKqlToEsqlExpression } from './kql_to_esql';
 import { asTypedEsqlQuery, type TypedEsqlQuery } from './typed_esql_query';
 
 /**
@@ -44,10 +45,11 @@ export const ALERT_EPISODE_FIELDS = [
   'last_ack_action',
   'last_assignee_uid',
   'last_snooze_action',
-  'snooze_expiry',
+  'snoozed_until',
   'last_tags',
   'episode_data',
   'severity',
+  'source',
 ] as const;
 
 export interface EpisodesFilterState {
@@ -118,7 +120,7 @@ export const addEpisodeAggregation = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`EVAL extracted_data = JSON_EXTRACT(_source, "data")`
-    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
+    .pipe`INLINE STATS first_timestamp = MIN(@timestamp), last_timestamp = MAX(@timestamp), triggered_at = MIN(@timestamp) WHERE \`episode.status\` == "active", start_event_timestamp = MIN(@timestamp) WHERE \`episode.status\` == "pending" AND \`episode.status_count\` == 1, episode_data = LAST(extracted_data, @timestamp) WHERE extracted_data != "{}", severity = LAST(severity, @timestamp) WHERE status == "breached" AND severity IS NOT NULL BY episode.id`
     .pipe`EVAL duration = DATE_DIFF("ms", first_timestamp, last_timestamp)`
     .pipe`WHERE @timestamp == last_timestamp`;
 };
@@ -127,21 +129,22 @@ const addGroupHashActionStats = (query: ComposerQuery) => {
   // prettier-ignore
   query
     .pipe`INLINE STATS last_snooze_action = LAST(action_type, @timestamp) WHERE action_type IN ("snooze", "unsnooze"),
-                       snooze_expiry      = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
-                       last_tags          = LAST(tags, @timestamp)        WHERE action_type == "tag"
+                       snoozed_until      = LAST(expiry, @timestamp)      WHERE action_type == "snooze",
+                       first_series_event_timestamp = MIN(@timestamp)    WHERE type == "alert"
           BY group_hash`;
 };
 
 const addEpisodeIdActionStats = (query: ComposerQuery) => {
-  // `.rule-events` documents carry the nested `episode.id`, while `.alert-actions`
-  // documents carry a flat `episode_id` — unify them so INLINE STATS groups both
+  // `.rule-events` documents carry the nested `alert.id`, while `.alert-actions`
+  // documents carry a flat `alert_id` — unify them so INLINE STATS groups both
   // sides under the same key.
   // prettier-ignore
   query
-    .pipe`EVAL episode_id = COALESCE(\`episode.id\`, episode_id)`
+    .pipe`EVAL alert_id = COALESCE(\`alert.id\`, alert_id)`
     .pipe`INLINE STATS last_ack_action      = LAST(action_type,  @timestamp) WHERE action_type IN ("ack", "unack"),
-                       last_assignee_uid    = LAST(assignee_uid, @timestamp) WHERE action_type == "assign"
-          BY episode_id`;
+                       last_assignee_uid    = LAST(assignee_uid, @timestamp) WHERE action_type == "assign",
+                       last_tags            = LAST(tags,         @timestamp) WHERE action_type == "tag"
+          BY alert_id`;
 };
 
 const addTagsFilter = (query: ComposerQuery, tags: string[]) => {
@@ -188,6 +191,8 @@ const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
     parts.push('severity IS NULL');
   }
   if (!parts.length) {
+    // No selected severity is a v2 value — exclude all v2 rows
+    query.pipe('WHERE false');
     return;
   }
   query.pipe(`WHERE ${parts.join(' OR ')}`);
@@ -196,10 +201,14 @@ const addSeverityFilter = (query: ComposerQuery, severities: string[]) => {
 /**
  * Applies the filters that must run after the aggregations: they either read
  * columns the aggregations compute (tags, severity, assignee) or must only
- * narrow the aggregated rows (status). `ruleId`, `groupHash` and `queryString`
+ * narrow the aggregated rows (status and queryString). `ruleId` and `groupHash`
  * are applied before the aggregations by `buildEpisodesBaseQuery` instead.
  */
 export const applyFilterState = (query: ComposerQuery, filterState: EpisodesFilterState): void => {
+  const trimmedSearch = filterState.queryString?.trim();
+  if (trimmedSearch) {
+    query.pipe(`WHERE ${convertKqlToEsqlExpression(trimmedSearch)}`);
+  }
   if (filterState.status?.length) {
     addStatusFilter(query, filterState.status);
   }
@@ -253,16 +262,7 @@ export const buildEpisodesBaseQuery = (
     query.where`group_hash == ${filterState.groupHash}`;
   }
 
-  const trimmedSearch = filterState?.queryString?.trim();
-  if (trimmedSearch) {
-    query.pipe(
-      `WHERE ((type == "alert" AND QSTR(${escapeStringValue(
-        trimmedSearch
-      )})) OR (action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")))`
-    );
-  } else {
-    query.where`type == "alert" OR action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")`;
-  }
+  query.where`type == "alert" OR action_type IN ("snooze", "unsnooze", "tag", "ack", "unack", "assign")`;
 
   addGroupHashActionStats(query);
   addEpisodeIdActionStats(query);
@@ -270,6 +270,24 @@ export const buildEpisodesBaseQuery = (
   addEpisodeAggregation(query);
 
   return query;
+};
+
+export const DURATION_LOWER_BOUND_FIELD = 'duration_is_lower_bound';
+
+/**
+ * Flags the episodes whose first event was not part of the scanned rows, so
+ * `first_timestamp` and `duration` only cover the selected time range. The
+ * start was seen when the earliest row is the event that opened the episode
+ * (`pending` with `status_count` 1), or when an earlier alert event of the
+ * same series is present, which can only belong to a previous episode. Rules
+ * that skip the pending state and have no earlier episode in range still get
+ * the flag: showing a lower bound is always true, hiding a truncation is not.
+ */
+const addDurationLowerBoundFlag = (query: ComposerQuery) => {
+  // prettier-ignore
+  query.pipe(
+    `EVAL ${DURATION_LOWER_BOUND_FIELD} = (start_event_timestamp IS NULL OR start_event_timestamp != first_timestamp) AND first_series_event_timestamp >= first_timestamp`
+  );
 };
 
 /**
@@ -299,7 +317,17 @@ export const buildEpisodesQuery = (
 
   const sortField = resolveSortField(sortState.sortField);
 
+  addDurationLowerBoundFlag(query);
+
+  const sortedQuery =
+    sortState.sortField === 'severity'
+      ? query.sort([sortField, sortDir], ['@timestamp', sortDir])
+      : query.sort([sortField, sortDir]);
+
   return asTypedEsqlQuery<AlertEpisodeEsqlRow>(
-    query.sort([sortField, sortDir]).pipe`LIMIT ${pageSizeParam}`.keep(...ALERT_EPISODE_FIELDS)
+    sortedQuery.pipe`LIMIT ${pageSizeParam}`.keep(
+      ...ALERT_EPISODE_FIELDS,
+      DURATION_LOWER_BOUND_FIELD
+    )
   );
 };

@@ -11,6 +11,7 @@ import type { AlertingV2Feature } from '../../common/feature_privileges';
 import { UserCapabilities } from '../services/user_capabilities';
 import { getAlertingRequiredPrivileges } from '../lib/required_privileges';
 import { RequiredPrivilegesPrompt } from './required_privileges_prompt';
+import { usePrivilegeCheck } from '../application/privilege_check_context';
 
 export interface RequireAlertingPrivilegeProps {
   /**
@@ -29,9 +30,9 @@ export interface RequireAlertingPrivilegeProps {
 }
 
 /**
- * Gates an alerting_v2 management app behind the user's feature privileges.
- * Renders a "Privileges required" interstitial when the user lacks the minimum
- * `read` capability for the required feature set, otherwise renders the children.
+ * Gates an alerting_v2 page behind the user's privileges. When a host app
+ * provides a `PrivilegeCheck` via context, that callback is the sole authority
+ * on access. Otherwise the default v2 `UserCapabilities` check applies.
  */
 export const RequireAlertingPrivilege = ({
   features,
@@ -40,11 +41,17 @@ export const RequireAlertingPrivilege = ({
   children,
 }: RequireAlertingPrivilegeProps) => {
   const userCapabilities = useService(UserCapabilities);
-  const hasPrivilege = features.every((feature) =>
-    capability === 'all' ? userCapabilities.canWrite(feature) : userCapabilities.canRead(feature)
-  );
+  const solutionScopedCheck = usePrivilegeCheck();
 
-  if (!hasPrivilege) {
+  const hasAccess = solutionScopedCheck
+    ? solutionScopedCheck(features, capability)
+    : features.every((feature) =>
+        capability === 'all'
+          ? userCapabilities.canWrite(feature)
+          : userCapabilities.canRead(feature)
+      );
+
+  if (!hasAccess) {
     return (
       <RequiredPrivilegesPrompt
         pageName={pageName}

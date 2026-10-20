@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 
 import { dataSourceSchema, dataSourceEsqlTableSchema } from '../data_source';
 import { colorByValueSchema, autoColorSchema, AUTO_COLOR } from '../color';
@@ -29,94 +29,110 @@ import { orientationSchema } from '../enums';
 import { bucketOperationDefinitionSchema } from '../bucket_ops';
 import { positionSchema } from '../alignments';
 
-const legendSchema = z
-  .object({
-    truncate_after_lines: legendTruncateAfterLinesSchema,
-    visibility: baseLegendVisibilitySchema,
-    position: positionSchema.optional(),
-    size: legendSizeSchema,
-  })
-  .strict();
+const legendSchema = lazySchema(() =>
+  z
+    .object({
+      truncate_after_lines: legendTruncateAfterLinesSchema,
+      visibility: baseLegendVisibilitySchema,
+      position: positionSchema.optional(),
+      size: legendSizeSchema,
+    })
+    .strict()
+);
 
-const labelsSchema = z
-  .object({
-    visible: z.boolean().default(true).optional().meta({ description: 'Show axis labels' }),
-    orientation: orientationSchema.default('horizontal').optional().meta({
-      description: 'Orientation of the axis labels',
-    }),
-  })
-  .strict();
+const labelsSchema = lazySchema(() =>
+  z
+    .object({
+      visible: z.boolean().default(true).optional().meta({ description: 'Show axis labels' }),
+      orientation: orientationSchema.default('horizontal').optional().meta({
+        description: 'Orientation of the axis labels',
+      }),
+    })
+    .strict()
+);
 
-const simpleLabelsSchema = labelsSchema.omit({ orientation: true });
+const simpleLabelsSchema = lazySchema(() => labelsSchema.omit({ orientation: true }));
 
-const heatmapSortPredicateSchema = z
-  .union([z.literal('asc'), z.literal('desc')])
-  .meta({ description: 'Axis sort order; omit or use undefined for no sorting' });
+const heatmapSortPredicateSchema = lazySchema(() =>
+  z
+    .union([z.literal('asc'), z.literal('desc')])
+    .meta({ description: 'Axis sort order; omit or use undefined for no sorting' })
+);
 
-const heatmapStylingSchema = z
-  .object({
-    cells: z
-      .object({
-        labels: z
-          .object({
-            visible: z
-              .boolean()
-              .default(false)
-              .optional()
-              .meta({ description: 'Show cell labels' }),
-          })
-          .strict()
-          .optional(),
-      })
-      .strict()
-      .optional()
-      .meta({ id: 'visHeatmapCells', title: 'Cells', description: 'Cells configuration' }),
-  })
-  .strict()
-  .meta({
-    id: 'visHeatmapStyling',
-    title: 'Heatmap styling',
-    description: 'Visual chart styling options',
-  });
+const visHeatmapCellsSchema = lazySchema(() =>
+  z
+    .object({
+      labels: z
+        .object({
+          visible: z.boolean().default(false).optional().meta({ description: 'Show cell labels' }),
+        })
+        .strict()
+        .optional(),
+    })
+    .strict()
+    .optional()
+    .meta({ id: 'visHeatmapCells', title: 'Cells', description: 'Cells configuration' })
+);
 
-const heatmapSharedConfigSchema = z.object({
-  type: z.literal('heatmap'),
-  legend: legendSchema.optional().meta({
+const heatmapStylingSchema = lazySchema(() =>
+  z
+    .object({
+      cells: visHeatmapCellsSchema,
+    })
+    .strict()
+    .meta({
+      id: 'visHeatmapStyling',
+      title: 'Heatmap styling',
+      description: 'Visual chart styling options',
+    })
+);
+
+const visHeatmapLegendSchema = lazySchema(() =>
+  legendSchema.optional().meta({
     id: 'visHeatmapLegend',
     title: 'Legend',
     description: 'Legend configuration',
-  }),
-  ...sharedPanelInfoSchema.shape,
-  ...layerSettingsSchema.shape,
-  axis: z
+  })
+);
+
+const visHeatmapXAxisSchema = lazySchema(() =>
+  z
     .object({
-      x: z
-        .object({
-          title: axisTitleSchema.optional(),
-          labels: labelsSchema.optional(),
-          sort: heatmapSortPredicateSchema.optional(),
-          scale: xScaleSchema,
-        })
-        .strict()
-        .optional()
-        .meta({
-          id: 'visHeatmapXAxis',
-          title: 'X Axis',
-          description: 'X axis configuration',
-        }),
-      y: z
-        .object({
-          title: axisTitleSchema.optional(),
-          labels: simpleLabelsSchema.optional(),
-          sort: heatmapSortPredicateSchema.optional(),
-        })
-        .strict()
-        .optional()
-        .meta({
-          id: 'visHeatmapYAxis',
-          title: 'Y Axis',
-          description: 'Y axis configuration',
-        }),
+      title: axisTitleSchema.optional(),
+      labels: labelsSchema.optional(),
+      sort: heatmapSortPredicateSchema.optional(),
+      scale: xScaleSchema,
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visHeatmapXAxis',
+      title: 'X Axis',
+      description: 'X axis configuration',
+    })
+);
+
+const visHeatmapYAxisSchema = lazySchema(() =>
+  z
+    .object({
+      title: axisTitleSchema.optional(),
+      labels: simpleLabelsSchema.optional(),
+      sort: heatmapSortPredicateSchema.optional(),
+    })
+    .strict()
+    .optional()
+    .meta({
+      id: 'visHeatmapYAxis',
+      title: 'Y Axis',
+      description: 'Y axis configuration',
+    })
+);
+
+const visHeatmapAxesSchema = lazySchema(() =>
+  z
+    .object({
+      x: visHeatmapXAxisSchema,
+      y: visHeatmapYAxisSchema,
     })
     .strict()
     .optional()
@@ -124,8 +140,18 @@ const heatmapSharedConfigSchema = z.object({
       id: 'visHeatmapAxes',
       title: 'Axes',
       description: 'Axis configuration for X and Y axes',
-    }),
-});
+    })
+);
+
+const heatmapSharedConfigSchema = lazySchema(() =>
+  z.object({
+    type: z.literal('heatmap'),
+    legend: visHeatmapLegendSchema,
+    ...sharedPanelInfoSchema.shape,
+    ...layerSettingsSchema.shape,
+    axis: visHeatmapAxesSchema,
+  })
+);
 
 const heatmapAxesConfigShape = {
   x: bucketOperationDefinitionSchema,
@@ -145,44 +171,49 @@ const heatmapConfigMetricOptionsShape = {
     .meta({ description: 'Color scale configuration for the heatmap cells.' }),
 };
 
-export const heatmapConfigSchemaNoESQL = heatmapSharedConfigSchema
-  .extend({
-    ...heatmapAxesConfigShape,
-    ...dslOnlyPanelInfoSchema.shape,
-    ...dataSourceSchema.shape,
-    styling: heatmapStylingSchema.optional(),
-    metric: getMetricsWithChartDimensionSchemaWithRefBasedOps('heatmapMetric').and(
-      z.object(heatmapConfigMetricOptionsShape)
-    ),
-  })
-  .meta({
-    id: 'visHeatmapNoESQL',
-    title: 'Heatmap Chart (DSL)',
-    description: 'Heatmap configuration using a data view.',
-  });
+export const heatmapConfigSchemaNoESQL = lazySchema(() =>
+  heatmapSharedConfigSchema
+    .extend({
+      ...heatmapAxesConfigShape,
+      ...dslOnlyPanelInfoSchema.shape,
+      ...dataSourceSchema.shape,
+      styling: heatmapStylingSchema.optional(),
+      metric: getMetricsWithChartDimensionSchemaWithRefBasedOps('heatmapMetric').and(
+        z.object(heatmapConfigMetricOptionsShape)
+      ),
+    })
+    .meta({
+      id: 'visHeatmapNoESQL',
+      title: 'Heatmap Chart (DSL)',
+      description: 'Heatmap configuration using a data view.',
+    })
+);
 
-export const heatmapConfigSchemaESQL = heatmapSharedConfigSchema
-  .extend({
-    ...heatmapAxesConfigESQLShape,
-    ...dataSourceEsqlTableSchema.shape,
-    styling: heatmapStylingSchema.optional(),
-    metric: esqlColumnWithFormatSchema.extend(heatmapConfigMetricOptionsShape),
-  })
-  .meta({
-    id: 'visHeatmapESQL',
-    title: 'Heatmap Chart (ES|QL)',
-    description: 'Heatmap configuration using an ES|QL query.',
-  });
+export const heatmapConfigSchemaESQL = lazySchema(() =>
+  heatmapSharedConfigSchema
+    .extend({
+      ...heatmapAxesConfigESQLShape,
+      ...dataSourceEsqlTableSchema.shape,
+      styling: heatmapStylingSchema.optional(),
+      metric: esqlColumnWithFormatSchema.extend(heatmapConfigMetricOptionsShape),
+    })
+    .meta({
+      id: 'visHeatmapESQL',
+      title: 'Heatmap Chart (ES|QL)',
+      description: 'Heatmap configuration using an ES|QL query.',
+    })
+);
 
-export const heatmapConfigSchema = z
-  .union([heatmapConfigSchemaNoESQL, heatmapConfigSchemaESQL])
-  .meta({
+export const heatmapConfigSchema = lazySchema(() =>
+  z.union([heatmapConfigSchemaNoESQL, heatmapConfigSchemaESQL]).meta({
     id: 'visHeatmapChart',
     title: 'Heatmap Chart',
     description:
       'A grid of colored cells where color intensity represents the metric value at each X/Y intersection.',
-  });
+  })
+);
 
 export type HeatmapConfig = z.output<typeof heatmapConfigSchema>;
+export type HeatmapConfigInput = z.input<typeof heatmapConfigSchema>;
 export type HeatmapConfigNoESQL = z.output<typeof heatmapConfigSchemaNoESQL>;
 export type HeatmapConfigESQL = z.output<typeof heatmapConfigSchemaESQL>;

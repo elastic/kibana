@@ -33,15 +33,17 @@ import {
   CoreUserProfileRouteHandlerContext,
   type InternalUserProfileServiceStart,
 } from '@kbn/core-user-profile-server-internal';
-import { CoreFeatureFlagsRouteHandlerContext } from '@kbn/core-feature-flags-server-internal';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
+import {
+  CoreFeatureFlagsRouteHandlerContext,
+  type InternalFeatureFlagsStart,
+} from '@kbn/core-feature-flags-server-internal';
 
 /**
  * Subset of `InternalCoreStart` used by {@link CoreRouteHandlerContext}
  * @internal
  */
 export interface CoreRouteHandlerContextParams {
-  featureFlags: FeatureFlagsStart;
+  featureFlags: InternalFeatureFlagsStart;
   elasticsearch: InternalElasticsearchServiceStart;
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;

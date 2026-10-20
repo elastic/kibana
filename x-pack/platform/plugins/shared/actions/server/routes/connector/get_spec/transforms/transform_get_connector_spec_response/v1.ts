@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import type { ConnectorMetadata } from '@kbn/connector-specs';
+import type { ActionScope, ConnectorMetadata } from '@kbn/connector-specs';
 import type { GetConnectorSpecResponseV1 } from '../../../../../../common/routes/connector/response';
+
+export interface ConnectorActionDef {
+  name: string;
+  description?: string;
+  isTool: boolean;
+  scope?: ActionScope;
+}
 
 export interface GetConnectorSpecServiceResult {
   metadata: ConnectorMetadata;
   schema: Record<string, unknown>;
   isTestable: boolean;
+  actions: ConnectorActionDef[];
 }
 
 export const transformGetConnectorSpecResponse = (
@@ -31,4 +39,10 @@ export const transformGetConnectorSpecResponse = (
   },
   schema: spec.schema,
   is_testable: spec.isTestable,
+  actions: spec.actions.map(({ name, description, isTool, scope }) => ({
+    name,
+    is_tool: isTool,
+    ...(description !== undefined ? { description } : {}),
+    ...(scope !== undefined ? { scope } : {}),
+  })),
 });

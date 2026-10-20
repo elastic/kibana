@@ -62,6 +62,7 @@ describe('loadSkillFromDirectory', () => {
       basePath: BASE_PATH,
       description: 'A minimal skill.',
       experimental: undefined,
+      uiSettingRequired: undefined,
       content: 'Body content.',
       referencedContent: undefined,
     });
@@ -96,6 +97,25 @@ describe('loadSkillFromDirectory', () => {
       expect(skill.experimental).toBe(experimental);
     }
   );
+
+  it('passes through the uiSettingRequired frontmatter field', () => {
+    const dir = skillDir('ui-setting-required');
+    writeFile(
+      dir,
+      'SKILL.md',
+      skillMarkdown([
+        'name: my-skill',
+        'description: desc.',
+        'experimental: true',
+        'uiSettingRequired: myFeature:enabled',
+      ])
+    );
+
+    const skill = loadSkillFromDirectory(dir, BASE_PATH, { logger });
+
+    expect(skill.uiSettingRequired).toBe('myFeature:enabled');
+    expect(skill.experimental).toBe(true);
+  });
 
   it('derives relativePath from each reference position in the tree', () => {
     const dir = skillDir('nested-mixed');
@@ -360,6 +380,20 @@ describe('loadSkillFromDirectory', () => {
       fileName: 'SKILL.md',
       content: skillMarkdown(['name: my-skill', 'description: desc.', 'experimental: maybe']),
       expectedError: /invalid frontmatter/,
+      expectedCode: 'invalid_frontmatter',
+    },
+    {
+      label: 'uiSettingRequired is not a string',
+      fileName: 'SKILL.md',
+      content: skillMarkdown(['name: my-skill', 'description: desc.', 'uiSettingRequired: true']),
+      expectedError: /"uiSettingRequired" must be a string/,
+      expectedCode: 'invalid_frontmatter',
+    },
+    {
+      label: 'uiSettingRequired is empty',
+      fileName: 'SKILL.md',
+      content: skillMarkdown(['name: my-skill', 'description: desc.', "uiSettingRequired: ''"]),
+      expectedError: /"uiSettingRequired" must be non-empty/,
       expectedCode: 'invalid_frontmatter',
     },
     {

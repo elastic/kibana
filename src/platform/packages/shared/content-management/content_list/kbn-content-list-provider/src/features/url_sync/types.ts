@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SortState } from '../sorting';
+
 /** Parsed URL params after `query-string` parsing. */
 export type ParsedQuery = Record<string, string | string[] | null | undefined>;
 
 export interface UrlStateSlices {
   queryText?: string;
-  sort?: { field: string; direction: 'asc' | 'desc' };
+  sort?: SortState;
 }
 
 export interface HydratedUrlState {

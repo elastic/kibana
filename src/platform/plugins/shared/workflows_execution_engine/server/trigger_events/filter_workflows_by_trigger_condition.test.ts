@@ -8,7 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { WorkflowDetailDto } from '@kbn/workflows';
+import { ALL_CONNECTOR_IDS, type WorkflowDetailDto } from '@kbn/workflows';
 import {
   classifyWorkflowTriggerMatch,
   workflowMatchesTriggerCondition,
@@ -182,6 +182,50 @@ describe('workflowMatchesTriggerCondition', () => {
     ).toBe(false);
   });
 
+  it('returns false when event.connectorId does not match the trigger connector-id', () => {
+    const workflow = createMockWorkflow({
+      definition: {
+        triggers: [
+          {
+            type: 'inboundWebhook.received',
+            on: { condition: 'event.connectorId: "inbound-a"' },
+          },
+        ],
+        steps: [],
+      },
+    });
+    expect(
+      workflowMatchesTriggerCondition(
+        workflow,
+        'inboundWebhook.received',
+        { connectorId: 'inbound-b' },
+        mockLogger
+      )
+    ).toBe(false);
+  });
+
+  it('returns true when event.connectorId matches the trigger connector-id', () => {
+    const workflow = createMockWorkflow({
+      definition: {
+        triggers: [
+          {
+            type: 'inboundWebhook.received',
+            on: { condition: 'event.connectorId: "inbound-a"' },
+          },
+        ],
+        steps: [],
+      },
+    });
+    expect(
+      workflowMatchesTriggerCondition(
+        workflow,
+        'inboundWebhook.received',
+        { connectorId: 'inbound-a' },
+        mockLogger
+      )
+    ).toBe(true);
+  });
+
   it('should match when condition uses array field like Elasticsearch multi-valued semantics', () => {
     const workflow = createMockWorkflow({
       definition: {
@@ -260,6 +304,28 @@ describe('classifyWorkflowTriggerMatch', () => {
       'kql_error'
     );
     expect(mockLogger.warn).toHaveBeenCalled();
+  });
+
+  it('returns kql_false when connector-id does not match the event', () => {
+    const workflow = createMockWorkflow({
+      definition: {
+        triggers: [
+          {
+            type: 'inboundWebhook.received',
+            on: { condition: 'event.connectorId: "inbound-a"' },
+          },
+        ],
+        steps: [],
+      },
+    });
+    expect(
+      classifyWorkflowTriggerMatch(
+        workflow,
+        'inboundWebhook.received',
+        { connectorId: 'inbound-b' },
+        mockLogger
+      )
+    ).toBe('kql_false');
   });
 
   it('returns matched when trigger has no condition', () => {
@@ -351,9 +417,24 @@ describe('classifyWorkflowTriggerMatch', () => {
           steps: [],
         },
       });
+      const wildcard = createMockWorkflow({
+        definition: {
+          triggers: [{ type: 'inboundWebhook.received', 'connector-id': ALL_CONNECTOR_IDS }],
+          steps: [],
+        },
+      });
       expect(
         classifyWorkflowTriggerMatch(
           workflow,
+          'inboundWebhook.received',
+          {},
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('connector_id_mismatch');
+      expect(
+        classifyWorkflowTriggerMatch(
+          wildcard,
           'inboundWebhook.received',
           {},
           mockLogger,
@@ -447,6 +528,104 @@ describe('classifyWorkflowTriggerMatch', () => {
           workflow,
           'inboundWebhook.received',
           { connectorId: 'webhook-2', body: { action: 'created' } },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('kql_false');
+    });
+
+    it('matches a wildcard connector-id for any connector instance of the trigger type', () => {
+      const workflow = createMockWorkflow({
+        definition: {
+          triggers: [{ type: 'inboundWebhook.received', 'connector-id': ALL_CONNECTOR_IDS }],
+          steps: [],
+        },
+      });
+
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-2' },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('matched');
+    });
+
+    it('prefers an exact connector-id over a wildcard block', () => {
+      const workflow = createMockWorkflow({
+        definition: {
+          triggers: [
+            {
+              type: 'inboundWebhook.received',
+              'connector-id': ALL_CONNECTOR_IDS,
+              on: { condition: 'event.body.action: wildcard' },
+            },
+            {
+              type: 'inboundWebhook.received',
+              'connector-id': 'webhook-2',
+              on: { condition: 'event.body.action: exact' },
+            },
+          ],
+          steps: [],
+        },
+      });
+
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-2', body: { action: 'exact' } },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('matched');
+      // Exact connector-id wins, so the wildcard KQL is not evaluated.
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-2', body: { action: 'wildcard' } },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('kql_false');
+    });
+
+    it('uses the first wildcard block in YAML order when there is no exact match', () => {
+      const workflow = createMockWorkflow({
+        definition: {
+          triggers: [
+            {
+              type: 'inboundWebhook.received',
+              'connector-id': ALL_CONNECTOR_IDS,
+              on: { condition: 'event.body.action: first' },
+            },
+            {
+              type: 'inboundWebhook.received',
+              'connector-id': ALL_CONNECTOR_IDS,
+              on: { condition: 'event.body.action: second' },
+            },
+          ],
+          steps: [],
+        },
+      });
+
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-2', body: { action: 'first' } },
+          mockLogger,
+          connectorEventOptions
+        )
+      ).toBe('matched');
+      expect(
+        classifyWorkflowTriggerMatch(
+          workflow,
+          'inboundWebhook.received',
+          { connectorId: 'webhook-2', body: { action: 'second' } },
           mockLogger,
           connectorEventOptions
         )

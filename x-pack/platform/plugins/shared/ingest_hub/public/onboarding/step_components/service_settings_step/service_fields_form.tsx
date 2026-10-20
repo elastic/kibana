@@ -34,6 +34,7 @@ import { makeDsView } from '../../aws_service_matrix';
 import {
   REGION_FIELD_NAMES,
   getFlyoutFields,
+  getMissingSourceGroup,
   getRegionFieldName,
   getRequiredTextFields,
   isAdvancedVar,
@@ -88,7 +89,7 @@ function VarField({
   service: AwsServiceMatrixEntry;
   activeInput: string;
   fieldName: string;
-  draft: Record<string, Record<string, string>>;
+  draft: Record<string, Record<string, string | string[]>>;
   onFieldChange: (input: string, fieldName: string, value: string) => void;
   forceShowErrors?: boolean;
   datastreams?: InputFieldProps['datastreams'];
@@ -141,7 +142,25 @@ function VarField({
           <LazyPackagePolicyInputVarField
             varDef={varDef}
             value={value}
-            onChange={(next) => onFieldChange(activeInput, fieldName, toDraft(next))}
+            onChange={(next) => {
+              // DatasetComponent calls onChange with { dataset, package } — an object, not a
+              // string. toDraft() would produce "[object Object]"; extract the dataset name.
+              const raw =
+                fieldName === 'data_stream.dataset' &&
+                next !== null &&
+                typeof next === 'object' &&
+                !Array.isArray(next)
+                  ? (next as { dataset?: unknown }).dataset ?? ''
+                  : next;
+              const nextDraft = toDraft(raw);
+              // Compare against the effective displayed value (toTyped materializes manifest
+              // defaults for untouched fields). Using draft[activeInput]?.[fieldName] here
+              // would be undefined for untouched fields, making toDraft() return '' and
+              // silently swallowing a clear-to-empty action on a field whose default is non-empty.
+              if (nextDraft !== toDraft(value)) {
+                onFieldChange(activeInput, fieldName, nextDraft);
+              }
+            }}
             errors={errors}
             forceShowErrors={forceShowErrors}
             packageName={service.packageName}
@@ -162,7 +181,7 @@ function InputVarFields({
 }: {
   service: AwsServiceMatrixEntry;
   activeInput: string;
-  varsByInput: Record<string, Record<string, string>>;
+  varsByInput: Record<string, Record<string, string | string[]>>;
   globalRegion: string;
   onFieldChange: (input: string, fieldName: string, value: string) => void;
 }) {
@@ -222,6 +241,12 @@ function InputVarFields({
     if (Array.isArray(effective)) return effective.length === 0;
     return typeof effective === 'string' && !effective.trim();
   });
+
+  // At least one of the input's source vars (bucket ARN / queue URL, log group ...) is mandatory.
+  const missingSourceGroup = getMissingSourceGroup(service, activeInput, draft);
+  const missingSourceLabels = (missingSourceGroup ?? []).map(
+    (f) => resolveFieldMeta(service, activeInput, f)?.def.title ?? f
+  );
 
   return (
     <>
@@ -292,6 +317,25 @@ function InputVarFields({
               />
             </React.Fragment>
           ))}
+        </>
+      )}
+
+      {missingSourceGroup && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText
+            size="s"
+            color="danger"
+            data-test-subj="serviceSettingsFlyout-sourceRequiredHint"
+          >
+            <p>
+              <FormattedMessage
+                id="xpack.ingestHub.serviceSettingsStep.flyout.sourceRequiredHint"
+                defaultMessage="Provide at least one of: {fields}."
+                values={{ fields: missingSourceLabels.join(', ') }}
+              />
+            </p>
+          </EuiText>
         </>
       )}
 

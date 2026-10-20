@@ -14,6 +14,7 @@ import { execSync } from 'child_process';
 import fs from 'fs';
 import os from 'os';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
 import { BuildkiteClient } from '#pipeline-utils';
 
@@ -41,7 +42,12 @@ function getThreshold(): number {
 function sendSlackNotification(message: string): void {
   const channel = process.env.SLACK_NOTIFICATIONS_CHANNEL;
 
-  if (DRY_RUN || process.env.KIBANA_SLACK_NOTIFICATIONS_ENABLED !== 'true' || !channel) {
+  if (
+    DRY_RUN ||
+    (process.env.ELASTIC_SLACK_NOTIFICATIONS_ENABLED !== 'true' &&
+      process.env.KIBANA_SLACK_NOTIFICATIONS_ENABLED !== 'true') ||
+    !channel
+  ) {
     console.log(`Not sending slack message (DRY_RUN=${DRY_RUN}, channel=${channel}):\n${message}`);
     return;
   }
@@ -126,7 +132,7 @@ async function main() {
   sendSlackNotification(message);
 }
 
-if (require.main === module) {
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
   main().catch((error) => {
     console.error(error);
     process.exit(1);

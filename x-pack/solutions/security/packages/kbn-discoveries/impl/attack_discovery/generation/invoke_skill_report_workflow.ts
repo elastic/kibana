@@ -58,7 +58,7 @@ export const invokeSkillReportWorkflow = async ({
   workflowsManagementApi,
 }: InvokeSkillReportWorkflowParams): Promise<void> => {
   try {
-    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId);
+    const rawWorkflow = await workflowsManagementApi.getWorkflow(workflowId, spaceId, request);
 
     if (rawWorkflow == null || rawWorkflow.definition == null) {
       logger.warn(

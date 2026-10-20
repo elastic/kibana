@@ -26,6 +26,7 @@ import { getUnifiedDocViewerServices } from '../../plugin';
 import type { FieldRow } from './field_row';
 import { getPinColumnControl } from './get_pin_control';
 import { TableCell } from './table_cell';
+import { getCellPositionAfterPinToggle } from './utils';
 import {
   getFieldCellActions,
   getFieldValueCellActions,
@@ -221,11 +222,32 @@ export function TableGrid({
     [rows, filter, hideFilteringOnComputedColumns]
   );
 
+  const dataGridRef = useRef<EuiDataGridRefProps>(null);
+
   const leadingControlColumns = useMemo(() => {
-    return onTogglePinned && !hidePinColumn ? [getPinColumnControl({ rows, onTogglePinned })] : [];
+    if (!onTogglePinned || hidePinColumn) {
+      return [];
+    }
+
+    return [
+      getPinColumnControl({
+        rows,
+        onTogglePinned: (field, { isKeyboardEvent }) => {
+          onTogglePinned(field);
+
+          if (!isKeyboardEvent) {
+            return;
+          }
+
+          const pinnedRows = rows.filter((row) => row.isPinned);
+          const restRows = rows.filter((row) => !row.isPinned);
+          const rowIndex = getCellPositionAfterPinToggle({ field, pinnedRows, restRows });
+          dataGridRef.current?.setFocusedCell({ rowIndex, colIndex: 0 });
+        },
+      }),
+    ];
   }, [onTogglePinned, hidePinColumn, rows]);
 
-  const dataGridRef = useRef<EuiDataGridRefProps>(null);
   const scrollTopRef = useRestorableRef('scrollTop', 0);
   const isScrollRestored = useRef(false);
   const virtualizationOptions = useMemo<EuiDataGridProps['virtualizationOptions']>(

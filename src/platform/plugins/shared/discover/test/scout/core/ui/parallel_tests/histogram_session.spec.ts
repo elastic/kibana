@@ -9,14 +9,19 @@
 
 import { tags, type ApiServicesFixture } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
-import type { DiscoverSessionApiDataInput } from '../../../../../server/api/schema';
+import type {
+  DiscoverSessionApiClassicTab,
+  DiscoverSessionApiDataInput,
+} from '@kbn/as-code-discover-schema';
 import { spaceTest, testData, type DiscoverScoutSpace } from '../../../common/ui/fixtures';
 
 const createClassicSession = async (
   apiServices: ApiServicesFixture,
   discoverScoutSpace: DiscoverScoutSpace,
   title: string,
-  tab: Pick<DiscoverSessionApiDataInput['tabs'][number], 'hide_chart' | 'chart_interval'> & {
+  tab: {
+    hide_chart?: boolean;
+    chart_interval?: DiscoverSessionApiClassicTab['chart_interval'];
     dataViewTitle?: string;
   } = {}
 ) => {
@@ -40,8 +45,7 @@ const createClassicSession = async (
   );
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/289125
-spaceTest.describe.skip('histogram session', { tag: tags.deploymentAgnostic }, () => {
+spaceTest.describe('histogram session', { tag: tags.deploymentAgnostic }, () => {
   spaceTest.beforeAll(async ({ discoverScoutSpace }) => {
     await discoverScoutSpace.setupDiscoverDefaults({ loadLongWindowDataView: true });
     await discoverScoutSpace.uiSettings.setDefaultIndex(testData.LONG_WINDOW_LOGSTASH_DATA_VIEW);
