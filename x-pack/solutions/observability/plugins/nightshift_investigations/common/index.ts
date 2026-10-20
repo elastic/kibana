@@ -242,3 +242,8 @@ export {
   type InvestigationCompletedTriggerPayload,
   type InvestigationFailedTriggerPayload,
 } from './workflows/triggers';
+export type {
+  InvestigatorServiceAccountStatus,
+  NightshiftBoundWorkflowStatus,
+  NightshiftServiceAccountInfo,
+} from './service_account';

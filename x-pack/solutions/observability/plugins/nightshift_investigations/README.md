@@ -65,6 +65,46 @@ Starting an investigation also needs Agent Builder `all` (the start route's own 
 
 `read_investigations` lets a user with Nightshift `read` get, list, and count investigations through the shared query API; every write still needs `manage_investigations`. UI capabilities are scoped to the feature that owns them, so capabilities like `agenticInvestigations.showInvestigations` and `proposals.showProposals` still need the `agenticInvestigations` and `proposals` features. Opening the investigation conversation in Agent Builder still needs the Agent Builder feature privileges.
 
+## Service accounts (in progress)
+
+Nightshift is moving to running investigations, automations and detections as service accounts rather than as the user who starts them. The plan and the PRs are tracked in elastic/obs-execution#570. Investigations do not depend on any of this yet.
+
+### Accounts and roles
+
+There is one account of each kind per deployment, shared by every space. Each holds a built-in role that ships with Elasticsearch, so Nightshift never creates or changes a role. Stateful Elasticsearch ships them as reserved roles named like the account. Serverless ships them as elasticsearch-controller predefined roles, whose names start with `_`.
+
+| Account | Role (stateful / Serverless) | Used by |
+|---|---|---|
+| `kibana/nightshift_agent` | `nightshift_agent` / `_nightshift_agent` | Investigations, their sandbox tools and Agent Builder hooks |
+| `kibana/nightshift_automations` | `nightshift_automations` / `_nightshift_automations` | Automation workflows |
+| `kibana/nightshift_detection` | `nightshift_detection` / `_nightshift_detection` | Detection engines (KI discovery, onboarding, detection) |
+
+The roles cover every space. Where an account acts is decided by the workflows bound to it, which are installed per space.
+
+### Setting up a space
+
+```yaml
+xpack.security.serviceAccounts.enabled: true
+xpack.encryptedSavedObjects.encryptionKey: '<32+ characters>'
+```
+
+```
+POST /internal/nightshift/investigations/service_account/_enable   # needs manage_security
+GET  /internal/nightshift/investigations/service_account           # status, agentBuilder:read
+POST /internal/nightshift/investigations/service_account/_disable  # teardown
+```
+
+`_enable`:
+
+1. Refuses with 400 when service accounts are off, 403 without `manage_security`, and 404 when the space does not exist, before writing anything.
+2. Creates the accounts that are missing. Existing accounts are reused.
+3. Installs the space's bound workflows with `settings.run_as` set to the agent account, the entry point `system-nightshift-investigation-bound-<space>` last. A setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
+4. Checks that every installed workflow is bound to the agent account, and fails otherwise.
+
+Setups of one space run one after another. `_enable` is idempotent: running it again repairs a space whose workflows were removed or are bound to another account. A workflow can only be bound from an authenticated request with `manage_security`, so setup cannot happen at startup. On later boots, the dynamic-workflow upgrade reuses the existing bindings.
+
+A space counts as set up when its entry point is installed, enabled and bound to the agent account. `_disable` uninstalls the space's bound workflows and keeps the accounts, which other spaces share.
+
 ## How investigations are stored and run
 
 An investigation is an Agent Builder conversation with the `investigation` template. The investigation id is the conversation id. The `agenticInvestigations` plugin owns everything around it:
