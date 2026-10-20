@@ -14,9 +14,9 @@ import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { TopNavMenuProps } from '@kbn/navigation-plugin/public';
 
 import type { AppHeaderExperimentalDashboardAiAction } from '@kbn/app-header';
-import { coreServices } from '../services/kibana_services';
-import { DashboardEnhanceButton } from './dashboard_enhance_button';
-import { DashboardFavoriteButton } from './dashboard_favorite_button';
+import { coreServices } from '../../services/kibana_services';
+import { DashboardEnhanceButton } from '../dashboard_enhance_button';
+import { DashboardFavoriteButton } from '../dashboard_favorite_button';
 
 export interface LegacyDashboardHeaderProps {
   badges: NonNullable<TopNavMenuProps['badges']>;

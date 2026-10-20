@@ -31,17 +31,7 @@ import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import type { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { useHasEsqlPanel, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { AppHeader, ChromeAppHeaderRegistration } from '@kbn/app-header';
-import type {
-  AppHeaderBack,
-  AppHeaderBadge,
-  AppHeaderExperimentalDashboardAiAction,
-  AppHeaderShareAction,
-} from '@kbn/app-header';
-import { useFavorite } from '@kbn/content-management-favorites-public';
-import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
-import { useChromeStyle } from '@kbn/core-chrome-browser-hooks';
-import { DASHBOARD_APP_ID, LANDING_PAGE_PATH } from '../../common/page_bundle_constants';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 import {
@@ -65,9 +55,7 @@ import {
 } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getFullEditPath } from '../utils/urls';
-import { DashboardFavoritesProvider } from './dashboard_favorite_button';
-import { EmbeddedDashboardMenu } from './embedded_dashboard_menu';
-import { LegacyDashboardHeader } from './legacy_dashboard_header';
+import { DashboardHeader } from './dashboard_header';
 import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
 import { useEnhanceDashboardAction } from '../dashboard_app/enhance/use_enhance_dashboard_action';
 
@@ -81,92 +69,6 @@ export interface InternalDashboardTopNavProps {
   showResetChange?: boolean;
 }
 
-interface DashboardAppHeaderProps {
-  headerMode: 'inline' | 'registered';
-  title: string;
-  back: AppHeaderBack;
-  menu?: AppMenuConfig;
-  badges: AppHeaderBadge[];
-  dashboardId?: string;
-  viewMode: string;
-  share?: AppHeaderShareAction;
-  experimentalDashboardAiAction?: AppHeaderExperimentalDashboardAiAction;
-}
-
-/**
- * App header path. Must render inside `DashboardFavoritesProvider`.
- */
-const DashboardAppHeader = ({
-  headerMode,
-  title,
-  back,
-  menu,
-  badges,
-  dashboardId,
-  viewMode,
-  share,
-  experimentalDashboardAiAction,
-}: DashboardAppHeaderProps) => {
-  const favorite = useFavorite({ id: dashboardId });
-
-  if (headerMode === 'inline') {
-    if (viewMode === 'print') {
-      return null;
-    }
-
-    return (
-      <AppHeader
-        title={title}
-        back={back}
-        menu={menu}
-        badges={badges}
-        favorite={favorite}
-        share={share}
-        experimentalDashboardAiAction={experimentalDashboardAiAction}
-        spacing="compact"
-      />
-    );
-  }
-
-  return (
-    <ChromeAppHeaderRegistration
-      title={title}
-      menu={menu}
-      badges={badges}
-      favorite={favorite}
-      share={share}
-      experimentalDashboardAiAction={experimentalDashboardAiAction}
-      spacing="compact"
-    />
-  );
-};
-
-/**
- * Header rendering mode:
- *  - `embedded`: URL embed (`embed=true`), any chrome style. Chrome is hidden, so render the app menu
- *    inline, and only when `show-top-menu=true` forces it visible.
- *  - `legacy`: classic chrome -> push through the imperative chrome APIs.
- *  - `registered`: next chrome, hosted by an app that owns the layout and provides its own header slot
- *    (e.g. Security) -> register the content so chrome renders it in the app-header slot.
- *  - `inline`: next chrome, standalone -> we render `AppHeader`.
- */
-const getHeaderMode = ({
-  chromeStyle,
-  isEmbeddedViaUrl,
-  isHostedByApp,
-}: {
-  chromeStyle: ReturnType<typeof useChromeStyle>;
-  /** The page was loaded with the `embed=true` URL param. */
-  isEmbeddedViaUrl: boolean;
-  /** A host app provided `setCustomHeaderActionMenu`. */
-  isHostedByApp: boolean;
-}): 'embedded' | 'legacy' | 'registered' | 'inline' => {
-  if (isEmbeddedViaUrl) return 'embedded';
-  if (chromeStyle !== 'project') return 'legacy';
-  if (isHostedByApp) return 'registered';
-  return 'inline';
-};
-
 export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
   embedSettings,
@@ -178,13 +80,6 @@ export function InternalDashboardTopNav({
 }: InternalDashboardTopNavProps) {
   const [isChromeVisible, setIsChromeVisible] = useState(false);
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
-
-  const chromeStyle = useChromeStyle();
-  const headerMode = getHeaderMode({
-    chromeStyle,
-    isEmbeddedViaUrl: Boolean(embedSettings),
-    isHostedByApp: Boolean(setCustomHeaderActionMenu),
-  });
 
   const { onAppLeave } = useDashboardMountContext();
 
@@ -484,32 +379,7 @@ export function InternalDashboardTopNav({
     return allBadges;
   }, [isPopoverOpen, dashboardApi, redirectTo]);
 
-  const appHeaderBadges = useMemo<AppHeaderBadge[]>(
-    () =>
-      (badges ?? []).map((badge) => ({
-        label: badge.badgeText,
-        renderCustomBadge: badge.renderCustomBadge,
-      })),
-    [badges]
-  );
-
-  const appMenuConfig = useMemo(() => {
-    if (!visibilityProps.showTopNavMenu) {
-      return undefined;
-    }
-    return viewMode === 'edit' ? editModeTopNavConfig : viewModeTopNavConfig;
-  }, [visibilityProps.showTopNavMenu, viewMode, editModeTopNavConfig, viewModeTopNavConfig]);
-
-  // Project chrome hides the classic breadcrumbs, so the header carries its own back button that leads to the dashboard listing page.
-  const backToListing = useMemo<AppHeaderBack>(
-    () => ({
-      href: coreServices.application.getUrlForApp(DASHBOARD_APP_ID, {
-        path: `#${LANDING_PAGE_PATH}`,
-      }),
-      label: getDashboardBreadcrumb(),
-    }),
-    []
-  );
+  const appMenuConfig = viewMode === 'edit' ? editModeTopNavConfig : viewModeTopNavConfig;
 
   return (
     <div css={styles.container}>
@@ -519,30 +389,16 @@ export function InternalDashboardTopNav({
           ref={dashboardTitleRef}
         >{`${getDashboardBreadcrumb()} - ${dashboardTitle}`}</h1>
       </EuiScreenReaderOnly>
-      {(headerMode === 'inline' || headerMode === 'registered') && (
-        <DashboardFavoritesProvider>
-          <DashboardAppHeader
-            headerMode={headerMode}
-            title={dashboardTitle}
-            back={backToListing}
-            menu={appMenuConfig}
-            badges={appHeaderBadges}
-            dashboardId={lastSavedId}
-            viewMode={viewMode}
-            share={shareAction}
-            experimentalDashboardAiAction={experimentalDashboardAiAction}
-          />
-        </DashboardFavoritesProvider>
-      )}
-      {headerMode === 'embedded' && visibilityProps.showTopNavMenu && (
-        <EmbeddedDashboardMenu config={appMenuConfig} />
-      )}
-      {headerMode === 'legacy' && (
-        <LegacyDashboardHeader
+      {viewMode !== 'print' && (
+        <DashboardHeader
+          title={dashboardTitle}
+          menu={visibilityProps.showTopNavMenu ? appMenuConfig : undefined}
           badges={badges}
-          config={appMenuConfig}
-          lastSavedId={lastSavedId}
-          enhanceAction={experimentalDashboardAiAction}
+          dashboardId={lastSavedId}
+          share={shareAction}
+          experimentalDashboardAiAction={experimentalDashboardAiAction}
+          isEmbeddedViaUrl={Boolean(embedSettings)}
+          isHostedByApp={Boolean(setCustomHeaderActionMenu)}
         />
       )}
       {viewMode !== 'print' && visibilityProps.showSearchBar && (
