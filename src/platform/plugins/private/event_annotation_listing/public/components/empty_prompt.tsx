@@ -52,7 +52,7 @@ export const EmptyPrompt = ({ onCreateClick }: EmptyPromptProps) => (
         />
       ),
       onClick: onCreateClick,
-      iconType: 'lensApp',
+      iconType: 'productLens',
     }}
   />
 );

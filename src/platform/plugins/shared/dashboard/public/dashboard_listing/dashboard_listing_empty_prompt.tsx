@@ -122,7 +122,7 @@ export const DashboardListingEmptyPrompt = ({
 
   return (
     <EuiEmptyPrompt
-      iconType="dashboardApp"
+      iconType="productDashboard"
       title={
         <h1 id="dashboardListingHeading" data-test-subj="emptyListPrompt">
           {isEditingFirstDashboard
