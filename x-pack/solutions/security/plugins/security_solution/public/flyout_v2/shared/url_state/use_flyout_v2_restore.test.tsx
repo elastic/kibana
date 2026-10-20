@@ -341,6 +341,32 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       });
       expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(resolvedHost);
     });
+
+    it('restores entityResolution in resolved mode and reopens the host in resolved mode', () => {
+      const { history } = renderRestore('/');
+      act(() => {
+        history.push(
+          buildUrl([
+            {
+              kind: 'entityResolution',
+              entityId: 'host:my-host',
+              entityType: 'host',
+              entityName: 'my-host',
+              scopeId: 'entities-table',
+              mode: 'resolved',
+            },
+          ])
+        );
+        jest.runAllTimers();
+      });
+      expect(mockFlyoutApi.openEntityResolution).toHaveBeenCalledWith(
+        expect.objectContaining({ entityId: 'host:my-host', mode: 'resolved' })
+      );
+      act(() => {
+        mockFlyoutApi.openEntityResolution.mock.calls[0][0].onShowEntity?.();
+      });
+      expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(resolvedHost);
+    });
   });
 
   it('forwards the navigation origin to a restored entity tool and its child', () => {

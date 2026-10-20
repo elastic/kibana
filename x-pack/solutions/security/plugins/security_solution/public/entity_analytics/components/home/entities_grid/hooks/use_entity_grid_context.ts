@@ -36,6 +36,8 @@ export interface UseEntityGridDataOptions {
   rowsMode: RowsMode;
   /** Extra fields the rows keep, for the columns the user adds. */
   keepFields: readonly string[];
+  /** The grid columns the view shows; only these get enriched. */
+  columnIds: readonly string[];
   /** Which queries the data belongs to. Defaults to `page`. */
   keyScope?: EntityGridKeyScope;
 }

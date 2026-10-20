@@ -15,6 +15,13 @@ import type {
   AlertingV2RulesLocatorParams,
 } from './locators';
 
+/**
+ * The rules list search text that filters to the rules created from the given template. The
+ * `template` field name must match `TEMPLATE_FILTER_ID` on the rules list page.
+ */
+const buildTemplateQuery = (templateId: string): string =>
+  `template:"${templateId.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+
 export const getRulesLocation = (params: AlertingV2RulesLocatorParams): KibanaLocation => {
   const { app, pathPrefix } = params.host;
 
@@ -24,12 +31,9 @@ export const getRulesLocation = (params: AlertingV2RulesLocatorParams): KibanaLo
   if (params.ruleId) {
     return { app, path: `${pathPrefix}/${encodeURIComponent(params.ruleId)}`, state: {} };
   }
-  if (params.templateId) {
-    return {
-      app,
-      path: `${pathPrefix}?templateId=${encodeURIComponent(params.templateId)}`,
-      state: {},
-    };
+  if (params.derivedFromTemplateId) {
+    const search = new URLSearchParams({ q: buildTemplateQuery(params.derivedFromTemplateId) });
+    return { app, path: `${pathPrefix}?${search.toString()}`, state: {} };
   }
   return { app, path: pathPrefix, state: {} };
 };

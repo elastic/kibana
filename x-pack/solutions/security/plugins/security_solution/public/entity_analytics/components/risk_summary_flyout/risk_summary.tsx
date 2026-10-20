@@ -47,7 +47,7 @@ import { EntityEventTypes } from '../../../common/lib/telemetry';
 const entityRiskScoreMetricLabel = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.riskSummary.entityRiskScoreLabel',
   {
-    defaultMessage: 'Entity risk score',
+    defaultMessage: 'Risk score',
   }
 );
 
@@ -324,7 +324,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   const entityPanelTitle = (
     <FormattedMessage
       id="xpack.securitySolution.flyout.entityDetails.entityRiskInputs"
-      defaultMessage="Entity risk contributions"
+      defaultMessage="Risk contributions"
     />
   );
   const resolutionPanelTitle = (

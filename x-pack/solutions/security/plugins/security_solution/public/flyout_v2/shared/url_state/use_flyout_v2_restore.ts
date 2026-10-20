@@ -555,12 +555,14 @@ export const openDescriptorAsStart = (
         entityType: d.entityType as EntityType,
         entityName: d.entityName,
         scopeId: d.scopeId,
+        mode: d.mode,
         ...originParams,
         onShowEntity: buildShowEntityCallback(api, {
           entityType: d.entityType,
           entityName: d.entityName,
           entityId: d.entityId,
           scopeId: d.scopeId,
+          mode: d.mode,
         }),
       });
       break;
