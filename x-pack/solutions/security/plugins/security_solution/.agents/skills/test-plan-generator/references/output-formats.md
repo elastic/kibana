@@ -33,7 +33,7 @@ If a lower verbosity level would require dropping a ⚠️ flag or a reason clau
 
 ### Invocation grammar and keyword detection
 
-Only the **keyword** is captured from the user's invocation here — resolution to `VERBOSITY_LEVEL` happens once per flow and is defined in one place per flow (do not resolve it in this file). Same matching applies to `generate`, `create`, `write`, `update`, and `regenerate`:
+This table only defines the **keyword** captured from the user's invocation. Same matching applies to `generate`, `create`, `write`, `update`, and `regenerate`:
 
 | Invocation matches (case-insensitive) | `INVOCATION_VERBOSITY_KEYWORD` |
 |---|---|
@@ -42,11 +42,7 @@ Only the **keyword** is captured from the user's invocation here — resolution 
 | `<verb> a detailed test plan …` / `<verb> detailed test plan …` | `detailed` |
 | Anything else (no level keyword at all) | *unset* |
 
-Flow-based resolution of `VERBOSITY_LEVEL` from `INVOCATION_VERBOSITY_KEYWORD`:
-
-- **Fresh draft** (fresh `generate` / `create` / `write`, or `update` / `regenerate` when no published plan exists) — keyword if set; otherwise `standard`. Resolved before Step 1 per [`../SKILL.md` § Modes of operation](../SKILL.md#modes-of-operation) and not revisited.
-- **Update against an existing published plan** — keyword if set; otherwise the published `<!-- verbosity: … -->` marker if present; otherwise `standard`. Resolved in [`mode-update.md`](mode-update.md) Step 1, which parses `PUBLISHED_VERBOSITY_LEVEL` unconditionally first.
-- **Publish** — level-independent; neither the keyword nor `VERBOSITY_LEVEL` is consulted.
+How `VERBOSITY_LEVEL` is resolved from the keyword is defined once per flow, not here: fresh drafts in [`../SKILL.md` § Modes of operation](../SKILL.md#modes-of-operation), updates in [`mode-update.md`](mode-update.md) Step 1 (`scripts/resolve_verbosity.sh`). Publish does not use the level.
 
 ### What each level renders
 
@@ -60,7 +56,7 @@ Flow-based resolution of `VERBOSITY_LEVEL` from `INVOCATION_VERBOSITY_KEYWORD`:
 
 ### Draft-save marker
 
-At draft-save time (see [`SKILL.md` § Step 3 saving-the-draft](../SKILL.md#saving-the-draft) sub-step 7 or [`mode-update.md`](mode-update.md) Step 6), always prepend `<!-- verbosity: <level> -->` as the top marker of the draft file. This marker is **always emitted regardless of level** — absent markers on already-published plans are handled by the *Update against an existing published plan* bullet in *Flow-based resolution* above (fall back to `standard` when neither an invocation keyword nor a published marker is present).
+At draft-save time (see [`SKILL.md` § Step 3 saving-the-draft](../SKILL.md#saving-the-draft) sub-step 7 or [`mode-update.md`](mode-update.md) Step 6), always put `<!-- verbosity: <level> -->` at the top of the draft file. This marker is **always emitted regardless of level**. Published plans without it are handled in [`mode-update.md`](mode-update.md) Step 1.
 
 ### AC/⚠️ safeguard
 
@@ -177,7 +173,7 @@ Before saving the draft to `.agents/tmp/`, review every scenario in the test pla
 - [ ] Footer is present at the end of the file with the correct model identifier and today's date
 - [ ] **Verbosity invariants hold across levels.** Same scenario count, same priorities, same set of ⚠️ entries in *Known Limitations*, same *Out of scope* reasons, same always-evaluated coverage decisions as would be produced at any other level. Verbosity is prose-density-only. See [Verbosity levels § Non-negotiable constraint](#non-negotiable-constraint).
 - [ ] **Level-appropriate prose sections.** `Overview` and `Feature Background` render at the length prescribed for `VERBOSITY_LEVEL`. `Assumptions` under `lean` uses the compact inline form (or the *See Known Limitations* one-liner when no bullet was confirmed); under `detailed` every confirmed value carries a provenance suffix.
-- [ ] **Verbosity marker present.** `<!-- verbosity: <level> -->` is the top marker in the draft file, immediately above `<!-- tokens: … -->` (when tokens is captured) or as the only top marker (when tokens is not captured).
+- [ ] **Verbosity marker present.** `<!-- verbosity: <level> -->` is at the top of the draft file, together with `<!-- tokens: … -->` when tokens is captured.
 
 If any item fails, fix the scenario before saving. If fixing requires information that is not available, apply the Core rule: stop and ask the user.
 
@@ -250,7 +246,7 @@ Both are produced from `x-pack/solutions/security/plugins/security_solution/.age
 
 ### Comment marker format
 
-Prepended near the **top** of the draft file at draft-save time, *before* `<!-- test-plan-generated -->` and `<!-- generated-by: … -->`, and *below* `<!-- verbosity: … -->`. Step 4 (publish) does not invoke the script or modify this marker — its presence is set at draft-save time, and its absence is a legitimate signal that the generation ran on a harness without a session transcript.
+At draft-save time the top markers are `verbosity` and then `tokens`. At publish time, `scripts/publish_test_plan.sh` adds the two publish markers above them (see *Final marker order* below). Step 4 does not invoke the token script or change this marker's value — its presence is set at draft-save time, and its absence is a legitimate signal that the generation ran on a harness without a session transcript.
 
 ```
 <!-- tokens: input=X output=Y cache_create=W cache_read=Z total=T -->
@@ -269,7 +265,7 @@ Final marker order in the published comment after Step 4 publish:
 <!-- tokens: input=… output=… cache_create=… cache_read=… total=… -->
 ```
 
-Step 4 prepends `<!-- test-plan-generated -->` and `<!-- generated-by: … -->` above the verbosity and tokens markers — preserve both unmodified. The verbosity marker is always present (see [Verbosity levels § Draft-save marker](#verbosity-levels)); the tokens marker may be absent (see *Absence is meaningful* above).
+`scripts/publish_test_plan.sh` writes this block from the draft's markers and its `--model` flag; nobody edits the order by hand. The verbosity marker is always present (see [Verbosity levels § Draft-save marker](#verbosity-levels)); the tokens marker may be absent (see *Absence is meaningful* above).
 
 ### Chat line format
 

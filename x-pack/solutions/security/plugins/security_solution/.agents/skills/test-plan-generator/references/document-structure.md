@@ -151,9 +151,7 @@ This file defines the required sections of a test plan, their order, and the con
 
 ## Verbosity levels
 
-The template above shows the `standard` (default) rendering. Three levels — `lean`, `standard`, `detailed` — control **prose density and per-scenario metadata only** for `Overview`, `Feature Background`, `Assumptions`, `Automation coverage`, and the `detailed`-only `**Source:**` line. Non-negotiable invariants (scenario count, priorities, ⚠️ entries in *Known Limitations*, *Out of scope* reasons) are identical across all levels.
-
-The **canonical per-level render rules, invocation grammar, and non-negotiable constraint** live in [`output-formats.md` § Verbosity levels](output-formats.md#verbosity-levels). This file does not restate them — read that section (and the surrounding [Scenario format](output-formats.md#scenario-format)) when writing sections whose shape changes with the level. Per-section placeholders in the template above are correct for `standard`; under `lean` / `detailed` follow `output-formats.md`, not the template.
+The template shows the `standard` shape only; every level rule lives in [`output-formats.md` § Verbosity levels](output-formats.md#verbosity-levels) (see the note above the template).
 
 ## Pending work pattern
 
