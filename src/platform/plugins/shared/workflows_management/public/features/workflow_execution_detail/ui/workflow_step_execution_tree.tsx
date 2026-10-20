@@ -689,6 +689,7 @@ function convertTreeToOpenNodes(
       if (
         item.retryAttemptCount != null &&
         item.retryAttemptCount > 0 &&
+        !item.isRetryAttempt &&
         item.children.length > 0
       ) {
         const attempts = item.children.filter((c) => c.isRetryAttempt);

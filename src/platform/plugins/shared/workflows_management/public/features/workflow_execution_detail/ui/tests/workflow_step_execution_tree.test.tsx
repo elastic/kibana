@@ -2550,6 +2550,74 @@ describe('WorkflowStepExecutionTree', () => {
       );
     });
 
+    it('keeps the own time of an attempt that has nested children', () => {
+      isTerminalStatus.mockReturnValue(true);
+      const makeAttempt = (n: number) => ({
+        stepExecutionId: `attempt-${n}`,
+        stepId: 'loop',
+        stepType: 'foreach',
+        executionIndex: n - 1,
+        status: ExecutionStatus.COMPLETED,
+        attemptNumber: n,
+        isFinalAttempt: n === 2,
+        isRetryAttempt: true,
+        retryAttemptCount: 2,
+        children: [
+          {
+            stepExecutionId: undefined,
+            stepId: '0',
+            stepType: 'foreach-iteration',
+            executionIndex: 0,
+            status: ExecutionStatus.COMPLETED,
+            children: [],
+          },
+        ],
+      });
+      buildStepExecutionsTree.mockReturnValue([
+        {
+          stepExecutionId: null,
+          stepId: 'loop',
+          stepType: 'foreach',
+          executionIndex: 0,
+          status: ExecutionStatus.COMPLETED,
+          retryAttemptCount: 2,
+          children: [makeAttempt(1), makeAttempt(2)],
+        },
+      ]);
+
+      render(
+        <TestWrapper>
+          <WorkflowStepExecutionTree
+            execution={createMockExecution({
+              status: ExecutionStatus.COMPLETED,
+              stepExecutions: [1, 2].map((n) =>
+                createMockStepExecution({
+                  id: `attempt-${n}`,
+                  stepId: 'loop',
+                  stepType: 'foreach',
+                  status: ExecutionStatus.COMPLETED,
+                  executionTimeMs: n * 40,
+                })
+              ),
+            })}
+            definition={createMockDefinition()}
+            error={null}
+            onStepExecutionClick={mockOnStepExecutionClick}
+            selectedId={null}
+          />
+        </TestWrapper>
+      );
+
+      expect(screen.getByText('Attempt #1').closest('[data-step-id]')).toHaveAttribute(
+        'data-execution-time-ms',
+        '40'
+      );
+      expect(screen.getByText('Attempt #2').closest('[data-step-id]')).toHaveAttribute(
+        'data-execution-time-ms',
+        '80'
+      );
+    });
+
     it('borders the final-attempt error region when any attempt of the step is selected', () => {
       isTerminalStatus.mockReturnValue(true);
       isDangerousStatus.mockImplementation((s) => s === ExecutionStatus.FAILED);
