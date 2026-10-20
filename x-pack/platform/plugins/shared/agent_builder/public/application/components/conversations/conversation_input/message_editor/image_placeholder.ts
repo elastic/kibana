@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { insertNodeAtCursor, insertSpaceAfter, placeCursorAfter } from './utils';
+import {
+  insertHtmlAtCursor,
+  insertNodeWithRange,
+  insertSpaceAfter,
+  NON_BREAKING_SPACE,
+  placeCursorAfter,
+} from './utils';
 
 export const IMAGE_PLACEHOLDER_ATTRIBUTE = 'data-image-placeholder';
 export const IMAGE_PLACEHOLDER_ICON_ATTRIBUTE = 'data-image-placeholder-icon';
@@ -90,7 +96,16 @@ export const createImagePlaceholderElement = (label: string): HTMLSpanElement =>
 export const insertImagePlaceholderChip = (label: string): void => {
   const chipEl = createImagePlaceholderElement(label);
   chipEl.setAttribute('data-uploading', 'true');
-  insertNodeAtCursor(chipEl);
+
+  // Chip and trailing space go in one call so they form a single undo step
+  const fragment = document.createDocumentFragment();
+  fragment.appendChild(chipEl);
+  fragment.appendChild(document.createTextNode(NON_BREAKING_SPACE));
+  if (insertHtmlAtCursor(fragment)) {
+    return;
+  }
+
+  insertNodeWithRange(chipEl);
   const sel = window.getSelection();
   if (sel) {
     const space = insertSpaceAfter(chipEl, chipEl.parentNode as HTMLElement);

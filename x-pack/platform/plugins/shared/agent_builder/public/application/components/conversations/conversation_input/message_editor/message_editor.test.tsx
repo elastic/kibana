@@ -682,6 +682,114 @@ describe('MessageEditor', () => {
     expect(editor.textContent).toContain('hello world');
   });
 
+  describe('native undo step via execCommand', () => {
+    const originalExecCommand = Object.getOwnPropertyDescriptor(document, 'execCommand');
+
+    const setup = () => {
+      const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
+      const { messageEditor } = createMockMessageEditor();
+      render(
+        <MessageEditor
+          messageEditor={messageEditor}
+          onSubmit={mockOnSubmit}
+          onPasteFile={onPasteFile}
+          data-test-subj="messageEditor"
+        />
+      );
+      const editor = screen.getByTestId('messageEditor');
+      editor.focus();
+      const range = document.createRange();
+      range.setStart(editor, 0);
+      range.collapse(true);
+      window.getSelection()!.removeAllRanges();
+      window.getSelection()!.addRange(range);
+      return editor;
+    };
+
+    const mockExecCommand = (result: boolean) => {
+      const execCommand = jest.fn().mockReturnValue(result);
+      Object.defineProperty(document, 'execCommand', { value: execCommand, configurable: true });
+      return execCommand;
+    };
+
+    afterEach(() => {
+      if (originalExecCommand) {
+        Object.defineProperty(document, 'execCommand', originalExecCommand);
+      } else {
+        delete (document as unknown as Record<string, unknown>).execCommand;
+      }
+    });
+
+    it('inserts pasted text with a single insertHTML command', () => {
+      const editor = setup();
+      const execCommand = mockExecCommand(true);
+
+      fireEvent.paste(editor, {
+        clipboardData: {
+          getData: (type: string) => (type === 'text/plain' ? 'line 1\nline 2' : ''),
+          items: [],
+        },
+      });
+
+      expect(execCommand).toHaveBeenCalledTimes(1);
+      expect(execCommand).toHaveBeenCalledWith('insertHTML', false, 'line 1<br>line 2');
+    });
+
+    it('inserts a pasted image chip and trailing space with a single insertHTML command', () => {
+      const editor = setup();
+      const execCommand = mockExecCommand(true);
+      const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
+
+      fireEvent.paste(editor, {
+        clipboardData: {
+          getData: jest.fn().mockReturnValue(''),
+          items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
+        },
+      });
+
+      expect(execCommand).toHaveBeenCalledTimes(1);
+      const [command, , html] = execCommand.mock.calls[0];
+      expect(command).toBe('insertHTML');
+      expect(html).toContain('data-image-placeholder="true"');
+      expect(html).toContain('data-uploading="true"');
+      expect(html.endsWith('&nbsp;')).toBe(true);
+    });
+
+    it('falls back to Range insertion when execCommand returns false', () => {
+      const editor = setup();
+      const execCommand = mockExecCommand(false);
+
+      fireEvent.paste(editor, {
+        clipboardData: {
+          getData: (type: string) => (type === 'text/plain' ? 'hello world' : ''),
+          items: [],
+        },
+      });
+
+      expect(execCommand).toHaveBeenCalledTimes(1);
+      expect(editor.textContent).toContain('hello world');
+    });
+
+    it('falls back to Range insertion for the image chip when execCommand returns false', () => {
+      const editor = setup();
+      const execCommand = mockExecCommand(false);
+      const pngFile = new File([new Uint8Array(4)], 'screenshot.png', { type: 'image/png' });
+
+      fireEvent.paste(editor, {
+        clipboardData: {
+          getData: jest.fn().mockReturnValue(''),
+          items: [{ kind: 'file', type: 'image/png', getAsFile: () => pngFile }],
+        },
+      });
+
+      expect(execCommand).toHaveBeenCalledTimes(1);
+      const chip = editor.querySelector('[data-image-placeholder]') as HTMLElement;
+      expect(chip).not.toBeNull();
+      expect(chip.getAttribute('data-uploading')).toBe('true');
+      expect(chip.nextSibling?.textContent).toBe(NON_BREAKING_SPACE);
+    });
+  });
+
   it('clicking the cross icon removes the chip and fires onChange and onAfterInput', () => {
     const onAfterInput = jest.fn();
     const { messageEditor } = createMockMessageEditor();

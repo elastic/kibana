@@ -23,7 +23,7 @@ export interface UseImageUploadParams {
 export interface UseImageUploadResult {
   uploadingNames: Set<string>;
   handlePasteFile?: (file: File) => string | undefined;
-  handleAfterInput: () => void;
+  handleAfterInput: (inputType?: string) => void;
   handleRemoveAttachment?: (attachment: ConversationAttachment) => void;
 }
 
@@ -118,39 +118,61 @@ export const useImageUpload = ({
     ]
   );
 
-  const handleAfterInput = useCallback(() => {
-    const placeholderNames = new Set(messageEditorController.getPlaceholderNames());
+  const handleAfterInput = useCallback(
+    (inputType?: string) => {
+      const placeholderNames = new Set(messageEditorController.getPlaceholderNames());
 
-    const abortUpload = (name: string) => {
-      uploadControllers.current.get(name)?.abort();
-      uploadControllers.current.delete(name);
-      setUploadingNames((prev) => {
-        const next = new Set(prev);
-        next.delete(name);
-        return next;
-      });
-    };
-
-    const current = attachmentsRef.current;
-    if (current && removeAttachment) {
-      for (let i = current.length - 1; i >= 0; i--) {
-        const a = current[i];
-        if ('items' in a || a.type !== AttachmentType.image) continue;
-        const name = (a.data as { name?: string }).name;
-        if (name && !placeholderNames.has(name)) {
-          abortUpload(name);
-          removeAttachment(i);
+      // Redo cannot bring back the attachment, so a chip without one is not restored
+      if (inputType === 'historyRedo') {
+        const attachedNames = new Set(
+          (attachmentsRef.current ?? []).flatMap((a) =>
+            !('items' in a) && a.type === AttachmentType.image
+              ? [(a.data as { name?: string }).name ?? '']
+              : []
+          )
+        );
+        const hasOrphanChip = [...placeholderNames].some(
+          (name) => !attachedNames.has(name) && !uploadControllers.current.has(name)
+        );
+        if (hasOrphanChip) {
+          // The browser rejects a nested undo, so it must wait until the redo has finished
+          setTimeout(() => document.execCommand('undo'), 0);
+          return;
         }
       }
-    }
 
-    // To remove a pill if a placeholder was removed before upload completes.
-    for (const name of uploadingNames) {
-      if (!placeholderNames.has(name)) {
-        abortUpload(name);
+      const abortUpload = (name: string) => {
+        uploadControllers.current.get(name)?.abort();
+        uploadControllers.current.delete(name);
+        setUploadingNames((prev) => {
+          const next = new Set(prev);
+          next.delete(name);
+          return next;
+        });
+      };
+
+      const current = attachmentsRef.current;
+      if (current && removeAttachment) {
+        for (let i = current.length - 1; i >= 0; i--) {
+          const a = current[i];
+          if ('items' in a || a.type !== AttachmentType.image) continue;
+          const name = (a.data as { name?: string }).name;
+          if (name && !placeholderNames.has(name)) {
+            abortUpload(name);
+            removeAttachment(i);
+          }
+        }
       }
-    }
-  }, [removeAttachment, messageEditorController, uploadingNames]);
+
+      // To remove a pill if a placeholder was removed before upload completes.
+      for (const name of uploadingNames) {
+        if (!placeholderNames.has(name)) {
+          abortUpload(name);
+        }
+      }
+    },
+    [removeAttachment, messageEditorController, uploadingNames]
+  );
 
   const handleRemoveAttachment = useCallback(
     (attachment: ConversationAttachment) => {
