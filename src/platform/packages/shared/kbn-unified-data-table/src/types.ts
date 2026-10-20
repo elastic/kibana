@@ -69,8 +69,8 @@ export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
 
 /**
  * Render mode of the grid: 'interactive' (default), 'non-interactive', which renders it without
- * interactive controls (sorting, column actions/resizing, drag-and-drop, etc.) but keeps pagination,
- * or 'print', which additionally removes pagination and the footer.
+ * interactive controls (sorting, column actions/resizing, drag-and-drop, etc.) but keeps pagination
+ * and the full screen selector, or 'print', which additionally removes those and the footer.
  */
 export type DataGridRenderMode = 'interactive' | 'non-interactive' | 'print';
 

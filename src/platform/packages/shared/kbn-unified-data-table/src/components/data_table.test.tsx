@@ -2244,6 +2244,19 @@ describe('UnifiedDataTable', () => {
       expect(screen.getByTestId('dataGridHeaderCellSortingIcon-bytes')).toBeInTheDocument();
     });
 
+    it('keeps the full screen selector in non-interactive mode', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['bytes'],
+        renderMode: 'non-interactive',
+        showFullScreenButton: true,
+      });
+
+      expect(getLastEuiDataGridProps().toolbarVisibility).toMatchObject({
+        showFullScreenSelector: true,
+      });
+    });
+
     it('hides additional controls in the toolbar', async () => {
       await renderComponent({
         ...getProps(),
