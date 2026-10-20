@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiIconTip, EuiScreenReaderOnly, EuiText, EuiToolTip } from '@elastic/eui';
 import type {
@@ -16,6 +16,7 @@ import type {
   EuiDataGridStyleCellPaddings,
   EuiThemeComputed,
 } from '@elastic/eui';
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { i18n } from '@kbn/i18n';
 import { escapeStringValue } from '@kbn/esql-utils';
 import { renderEntityCell } from './entities_cell_renderer';
@@ -139,13 +140,18 @@ const nameContentCss = css`
   overflow: hidden;
 `;
 
-// As wide as its rows, so only the grid scrolls sideways.
 const groupRecordsCss = css`
-  inline-size: fit-content;
-  min-inline-size: 100%;
   overflow-y: auto;
   overscroll-behavior: contain;
 `;
+
+const groupRecordCss = css`
+  position: absolute;
+  min-inline-size: 100%;
+`;
+
+/** Records rendered above and below the visible ones, so fast scrolling rarely shows a gap. */
+const OVERSCAN_GROUP_RECORDS = 10;
 
 const mainEntityIconCss = css`
   flex-shrink: 0;
@@ -311,25 +317,47 @@ export const ExpandedEntityGroup: React.FC<ExpandedEntityGroupProps> = ({
     [columns]
   );
   const { euiTheme, cellPadding } = rowProps;
+  const rowHeight = ROW_HEIGHT_PX[cellPadding];
+  // Only the records in view render: rendering all 100 blocked the page on every update.
+  const [scrollElement, setScrollElement] = useState<HTMLDivElement | null>(null);
+  const virtualizer = useVirtualizer({
+    count: rows.length,
+    getScrollElement: () => scrollElement,
+    estimateSize: () => rowHeight,
+    overscan: OVERSCAN_GROUP_RECORDS,
+  });
   return (
     <>
       <div
+        ref={setScrollElement}
         css={css`
           ${groupRecordsCss}
-          max-block-size: ${ROW_HEIGHT_PX[cellPadding] * MAX_VISIBLE_GROUP_RECORDS}px;
+          max-block-size: ${rowHeight * MAX_VISIBLE_GROUP_RECORDS}px;
+          /* A record not rendered yet shows as an empty record, not as the page behind it. */
+          background: ${euiTheme.colors.body};
         `}
       >
-        {rows.map((child, i) => (
-          <ExpandedEntityRow
-            key={getEntityId(child) ?? i}
-            child={child}
-            isLast={i === rows.length - 1}
-            isEnriching={isEnriching}
-            isMainEntity={getEntityId(child) === entityId}
-            columnsById={columnsById}
-            {...rowProps}
-          />
-        ))}
+        <div style={{ blockSize: virtualizer.getTotalSize(), position: 'relative' }}>
+          {virtualizer.getVirtualItems().map(({ index, start }) => {
+            const child = rows[index];
+            return (
+              <div
+                key={getEntityId(child) ?? index}
+                css={groupRecordCss}
+                style={{ insetBlockStart: start }}
+              >
+                <ExpandedEntityRow
+                  child={child}
+                  isLast={index === rows.length - 1}
+                  isEnriching={isEnriching}
+                  isMainEntity={getEntityId(child) === entityId}
+                  columnsById={columnsById}
+                  {...rowProps}
+                />
+              </div>
+            );
+          })}
+        </div>
       </div>
       {total != null && total > rows.length && rows.length > 0 && (
         <div
