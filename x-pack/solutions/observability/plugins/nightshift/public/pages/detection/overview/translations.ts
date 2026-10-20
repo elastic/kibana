@@ -43,20 +43,11 @@ export const getSourcesLabel = (count: number): string =>
     values: { count },
   });
 
-export const SOURCES_TOOLTIP = i18n.translate('xpack.nightshift.detectionPage.sourcesTooltip', {
-  defaultMessage: 'Sources in this space',
-});
-
 export const getKnowledgeIndicatorsLabel = (count: number): string =>
   i18n.translate('xpack.nightshift.detectionPage.knowledgeIndicatorsCountLabel', {
     defaultMessage: '{count, plural, one {knowledge indicator} other {knowledge indicators}}',
     values: { count },
   });
-
-export const KNOWLEDGE_INDICATORS_TOOLTIP = i18n.translate(
-  'xpack.nightshift.detectionPage.knowledgeIndicatorsTooltip',
-  { defaultMessage: 'Features and queries' }
-);
 
 export const getRulesLabel = (count: number): string =>
   i18n.translate('xpack.nightshift.detectionPage.rulesCountLabel', {
@@ -64,31 +55,17 @@ export const getRulesLabel = (count: number): string =>
     values: { count },
   });
 
-export const RULES_TOOLTIP = i18n.translate('xpack.nightshift.detectionPage.activeRulesTooltip', {
-  defaultMessage: 'Alerting rules',
-});
-
 export const getDiscoveriesLabel = (count: number): string =>
   i18n.translate('xpack.nightshift.detectionPage.discoveriesCountLabel', {
     defaultMessage: '{count, plural, one {discovery} other {discoveries}}',
     values: { count },
   });
 
-export const DISCOVERIES_TOOLTIP = i18n.translate(
-  'xpack.nightshift.detectionPage.detectionsTooltip',
-  { defaultMessage: 'Change-point detections in the selected time range' }
-);
-
 export const getSignificantEventsLabel = (count: number): string =>
   i18n.translate('xpack.nightshift.detectionPage.significantEventsCountLabel', {
     defaultMessage: '{count, plural, one {significant event} other {significant events}}',
     values: { count },
   });
-
-export const SIGNIFICANT_EVENTS_TOOLTIP = i18n.translate(
-  'xpack.nightshift.detectionPage.significantEventsTooltip',
-  { defaultMessage: 'Significant events in the selected time range, any status' }
-);
 
 export const OVERVIEW_ERROR_TITLE = i18n.translate(
   'xpack.nightshift.detectionPage.overviewErrorTitle',

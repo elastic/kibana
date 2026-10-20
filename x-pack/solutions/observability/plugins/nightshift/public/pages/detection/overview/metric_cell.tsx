@@ -5,18 +5,8 @@
  * 2.0.
  */
 
-import { css } from '@emotion/react';
 import type { IconType } from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiSkeletonRectangle,
-  EuiText,
-  EuiTitle,
-  EuiToolTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiAvatar, EuiFlexGroup, EuiFlexItem, EuiStat, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
@@ -27,7 +17,6 @@ export interface MetricCellProps {
   tone: MetricTone;
   value: number | undefined;
   getLabel: (count: number) => string;
-  tooltip: string;
   isLoading: boolean;
   testSubject: string;
 }
@@ -37,53 +26,45 @@ export const MetricCell = ({
   tone,
   value,
   getLabel,
-  tooltip,
   isLoading,
   testSubject,
 }: MetricCellProps): React.ReactElement => {
-  const { euiTheme } = useEuiTheme();
-  const toneStyles = {
-    neutral: { background: euiTheme.colors.backgroundLightNeutral, icon: 'text' },
-    warning: { background: euiTheme.colors.backgroundLightWarning, icon: 'warning' },
-    danger: { background: euiTheme.colors.backgroundLightDanger, icon: 'danger' },
+  const { colors } = useEuiTheme().euiTheme;
+  const label = getLabel(value ?? 0);
+  const { background, iconColor } = {
+    neutral: { background: colors.backgroundLightText, iconColor: colors.textSubdued },
+    warning: { background: colors.backgroundLightWarning, iconColor: colors.textWarning },
+    danger: { background: colors.backgroundLightDanger, iconColor: colors.textDanger },
   }[tone];
 
   return (
-    <EuiToolTip content={tooltip} position="bottom">
-      <EuiFlexGroup
-        alignItems="center"
-        gutterSize="m"
-        responsive={false}
-        data-test-subj={testSubject}
-        tabIndex={0}
-      >
-        <EuiFlexItem grow={false}>
-          <div
-            css={css`
-              display: flex;
-              padding: ${euiTheme.size.s};
-              border-radius: ${euiTheme.border.radius.medium};
-              background: ${toneStyles.background};
-            `}
-          >
-            <EuiIcon type={icon} size="m" color={toneStyles.icon} aria-hidden={true} />
-          </div>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xxs">
-            <div>
-              {isLoading ? (
-                <EuiSkeletonRectangle width={40} height={16} borderRadius="s" />
-              ) : (
-                value?.toLocaleString(i18n.getLocale())
-              )}
-            </div>
-          </EuiTitle>
-          <EuiText size="xs">
-            <span>{getLabel(value ?? 0)}</span>
-          </EuiText>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiToolTip>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="m"
+      responsive={false}
+      data-test-subj={testSubject}
+    >
+      <EuiFlexItem grow={false}>
+        <EuiAvatar
+          type="space"
+          size="l"
+          name={label}
+          iconType={icon}
+          color={background}
+          iconColor={iconColor}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiStat
+          title={value?.toLocaleString(i18n.getLocale()) ?? ''}
+          description={label}
+          titleSize="xs"
+          reverse
+          isLoading={isLoading}
+          descriptionElement="span"
+          titleElement="span"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };

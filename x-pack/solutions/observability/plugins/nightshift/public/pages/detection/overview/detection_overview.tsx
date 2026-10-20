@@ -21,19 +21,14 @@ import { DetectionStatusBadge } from './detection_status_badge';
 import { MetricCell, type MetricCellProps } from './metric_cell';
 import {
   DETECTION_ENGINE_LABEL,
-  DISCOVERIES_TOOLTIP,
   getDiscoveriesLabel,
   getKnowledgeIndicatorsLabel,
   getRulesLabel,
   getSignificantEventsLabel,
   getSourcesLabel,
-  KNOWLEDGE_INDICATORS_TOOLTIP,
   OVERVIEW_ERROR_MESSAGE,
   OVERVIEW_ERROR_TITLE,
   OVERVIEW_RETRY_LABEL,
-  RULES_TOOLTIP,
-  SIGNIFICANT_EVENTS_TOOLTIP,
-  SOURCES_TOOLTIP,
 } from './translations';
 
 export interface DetectionOverviewCounts {
@@ -70,7 +65,6 @@ export const DetectionOverview = ({
       tone: 'neutral',
       value: counts?.knowledge_indicators,
       getLabel: getKnowledgeIndicatorsLabel,
-      tooltip: KNOWLEDGE_INDICATORS_TOOLTIP,
       testSubject: 'nightshiftDetectionOverviewKnowledgeIndicators',
     },
     {
@@ -78,7 +72,6 @@ export const DetectionOverview = ({
       tone: 'neutral',
       value: counts?.sources,
       getLabel: getSourcesLabel,
-      tooltip: SOURCES_TOOLTIP,
       testSubject: 'nightshiftDetectionOverviewSources',
     },
     {
@@ -86,7 +79,6 @@ export const DetectionOverview = ({
       tone: 'neutral',
       value: counts?.active_rules,
       getLabel: getRulesLabel,
-      tooltip: RULES_TOOLTIP,
       testSubject: 'nightshiftDetectionOverviewActiveRules',
     },
     {
@@ -94,7 +86,6 @@ export const DetectionOverview = ({
       tone: 'warning',
       value: counts?.detections,
       getLabel: getDiscoveriesLabel,
-      tooltip: DISCOVERIES_TOOLTIP,
       testSubject: 'nightshiftDetectionOverviewDetections',
     },
     {
@@ -102,7 +93,6 @@ export const DetectionOverview = ({
       tone: 'danger',
       value: counts?.significant_events,
       getLabel: getSignificantEventsLabel,
-      tooltip: SIGNIFICANT_EVENTS_TOOLTIP,
       testSubject: 'nightshiftDetectionOverviewSignificantEvents',
     },
   ];
@@ -141,13 +131,12 @@ export const DetectionOverview = ({
           }}
         />
       ) : (
-        <EuiFlexGroup gutterSize="none" wrap>
+        <EuiFlexGroup gutterSize="none" justifyContent="spaceBetween" wrap>
           {metrics.map((metric) => (
             <EuiFlexItem
               key={metric.testSubject}
-              grow={1}
+              grow={false}
               css={css`
-                min-width: 9rem;
                 padding-inline: ${euiTheme.size.l};
 
                 &:first-of-type {

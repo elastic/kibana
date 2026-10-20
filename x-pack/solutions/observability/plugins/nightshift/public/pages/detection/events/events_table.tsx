@@ -7,14 +7,12 @@
 
 import { css } from '@emotion/react';
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLoadingSpinner,
-  EuiSpacer,
   EuiText,
   EuiTextBlockTruncate,
   EuiToolTip,
@@ -47,7 +45,6 @@ import {
   INVESTIGATE_LABEL,
   INVESTIGATION_COLUMN_LABEL,
   SEVERITY_COLUMN_LABEL,
-  SIGNIFICANT_EVENT_KIND_LABEL,
   STATUS_COLUMN_LABEL,
   TIME_COLUMN_LABEL,
   VIEW_INVESTIGATION_LABEL,
@@ -110,10 +107,6 @@ export const EventsTable = ({
             <EuiText size="xs" color="subdued">
               <EuiTextBlockTruncate lines={2}>{event.summary}</EuiTextBlockTruncate>
             </EuiText>
-            <EuiSpacer size="xs" />
-            <EuiBadge color="danger" iconType="warning">
-              {SIGNIFICANT_EVENT_KIND_LABEL}
-            </EuiBadge>
           </div>
         ),
       },

@@ -43,10 +43,6 @@ export const VIEW_INVESTIGATION_LABEL = i18n.translate(
   'xpack.nightshift.detectionPage.events.viewInvestigation',
   { defaultMessage: 'View investigation' }
 );
-export const SIGNIFICANT_EVENT_KIND_LABEL = i18n.translate(
-  'xpack.nightshift.detectionPage.events.significantEventKind',
-  { defaultMessage: 'Significant event' }
-);
 export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.nightshift.detectionPage.events.searchPlaceholder',
   { defaultMessage: 'Search events' }
