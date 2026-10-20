@@ -9,6 +9,7 @@
 
 import { asFloat } from './as_float';
 import { BROWSER_PROFILES, pickBrowserProfile, type BrowserProfile } from './browser_profiles';
+import { planDocuments } from './edot_browser_session';
 import { HEALTH_PROFILES, getWebVitalRating } from './health_profiles';
 import type { EdotBrowserSpanDocument } from './edot_browser_span';
 import { edotBrowser, type EdotBrowserDocument, type EdotBrowserSite } from '.';
@@ -472,6 +473,48 @@ describe('edotBrowser', () => {
 
       expect(log.attributes?.['session.id']).toBe('session-1');
       expect(span.attributes['session.id']).toBe('session-1');
+    });
+  });
+
+  describe('planDocuments', () => {
+    const plan = (seed: number, pageViews: number, hardNavigationRate = 0.2) =>
+      planDocuments(
+        { site: SITE, random: seededRandom(seed) },
+        { start: TIMESTAMP, pageViews, sessionDurationMs: 60_000, hardNavigationRate }
+      );
+
+    it('splits the session into consecutive page views, starting with a full load', () => {
+      for (let seed = 1; seed <= 30; seed++) {
+        const documents = plan(seed, 5);
+        const pageViews = documents.flatMap((document) => document.pageViews);
+
+        expect(documents[0].navigationType).toBe('navigate');
+        expect(pageViews).toHaveLength(5);
+        expect(pageViews[0].start).toBe(TIMESTAMP);
+        pageViews.forEach(({ start, end }, index) => {
+          expect(start).toBeLessThan(end);
+          expect(end).toBeLessThan(TIMESTAMP + 60_000);
+          if (index > 0) {
+            expect(start).toBeGreaterThan(pageViews[index - 1].end);
+          }
+        });
+      }
+    });
+
+    it('hides each document right before the next one loads, and the last at the session end', () => {
+      for (let seed = 1; seed <= 30; seed++) {
+        const documents = plan(seed, 5);
+
+        documents.forEach(({ hiddenAt }, index) => {
+          const next = documents[index + 1];
+          expect(hiddenAt).toBe(next ? next.pageViews[0].start - 1 : TIMESTAMP + 60_000);
+        });
+      }
+    });
+
+    it('turns page views into route changes or full loads by hardNavigationRate', () => {
+      expect(plan(1, 5, 0)).toHaveLength(1);
+      expect(plan(1, 5, 1)).toHaveLength(5);
     });
   });
 

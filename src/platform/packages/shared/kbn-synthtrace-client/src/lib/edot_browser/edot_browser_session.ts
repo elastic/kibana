@@ -131,13 +131,26 @@ interface SessionContext {
   slowdown: number;
 }
 
-/** State of the document currently shown, which CLS and INP are reported for once it is hidden. */
+/** One page shown during the session. Its events stay within `[start, end]`. */
+interface PageView {
+  page: EdotBrowserPage;
+  start: number;
+  end: number;
+}
+
+/** A full page load and its SPA route changes, until the next full load or the session end. */
+export interface DocumentPlan {
+  navigationType: NavigationTimingType;
+  /** The first page view loads the document, the others are route changes. */
+  pageViews: [PageView, ...PageView[]];
+  hiddenAt: number;
+}
+
+/** A loaded document, and the CLS and INP values reported for it once it is hidden. */
 interface DocumentState {
   /** Resource timings are relative to the time origin of the document. */
   timeOrigin: number;
   navigationType: string;
-  /** Times of the clicks on the document; INP is reported for one of them. */
-  interactionTimes: number[];
   clsValue: number;
   /** Time of the largest layout shift, unset when nothing shifted. */
   largestShiftTime?: number;
@@ -175,14 +188,9 @@ const stacktrace = (
  */
 const hideDocument = (
   { client, random }: SessionContext,
-  {
-    timeOrigin,
-    navigationType,
-    interactionTimes,
-    clsValue,
-    largestShiftTime,
-    inpValue,
-  }: DocumentState,
+  { timeOrigin, navigationType, clsValue, largestShiftTime, inpValue }: DocumentState,
+  /** Times of the clicks on the document; INP is reported for one of them. */
+  interactionTimes: number[],
   time: number
 ): EdotBrowserEvent[] => {
   const events: EdotBrowserEvent[] = [
@@ -306,14 +314,12 @@ const sendRequest = (
 /** A full document load: navigation, sub-resources, navigation timing and load web vitals. */
 const loadDocument = (
   ctx: SessionContext,
-  page: EdotBrowserPage,
-  pageStart: number,
-  slotEnd: number,
+  { page, start: pageStart, end }: PageView,
   navigationType: NavigationTimingType
 ): { events: EdotBrowserEvent[]; document: DocumentState; loadedAt: number } => {
   const { client, site, health, random, slowdown } = ctx;
   const url = toUrl(site, page.path);
-  const at = (offset: number) => Math.min(Math.floor(pageStart + offset), slotEnd);
+  const at = (offset: number) => Math.min(Math.floor(pageStart + offset), end);
   const vitalNavigationType = navigationType === 'back_forward' ? 'back-forward' : navigationType;
 
   // Document request
@@ -446,7 +452,6 @@ const loadDocument = (
     document: {
       timeOrigin: pageStart,
       navigationType: vitalNavigationType,
-      interactionTimes: [],
       clsValue,
       // Layout shifts happen while the page renders
       largestShiftTime:
@@ -457,13 +462,15 @@ const loadDocument = (
   };
 };
 
-/** What the user does on a page view: requests fired by the page, clicks and uncaught exceptions. */
+/**
+ * What the user does on a page view from `from` on: requests fired by the page, clicks and
+ * uncaught exceptions.
+ */
 const interactWithPage = (
   ctx: SessionContext,
   document: DocumentState,
-  page: EdotBrowserPage,
-  from: number,
-  slotEnd: number
+  { page, end: slotEnd }: PageView,
+  from: number
 ): { events: EdotBrowserEvent[]; clickTimes: number[] } => {
   const { client, site, health, random } = ctx;
   const events: EdotBrowserEvent[] = [];
@@ -507,6 +514,85 @@ const interactWithPage = (
   return { events, clickTimes };
 };
 
+/** An SPA route change, which the navigation instrumentation reports as a soft navigation. */
+const routeChange = (
+  { client, site }: SessionContext,
+  { page, start }: PageView
+): EdotBrowserEvent =>
+  client
+    .navigation({ url: toUrl(site, page.path), sameDocument: true, type: 'push' })
+    .timestamp(start);
+
+type SessionTiming = Required<
+  Pick<
+    EdotBrowserSessionOptions,
+    'start' | 'pageViews' | 'sessionDurationMs' | 'hardNavigationRate'
+  >
+>;
+
+/**
+ * Splits a session into equally long page views and groups them into documents: the first page
+ * view and a share of the later ones are full page loads, the others are SPA route changes.
+ */
+export const planDocuments = (
+  { site, random }: Pick<SessionContext, 'site' | 'random'>,
+  { start, pageViews, sessionDurationMs, hardNavigationRate }: SessionTiming
+): DocumentPlan[] => {
+  const sessionEnd = start + sessionDurationMs;
+  const slotDuration = sessionDurationMs / pageViews;
+  const documents: Array<Omit<DocumentPlan, 'hiddenAt'>> = [];
+
+  for (let i = 0; i < pageViews; i++) {
+    const slotStart = start + i * slotDuration;
+    const view: PageView = {
+      page: pick(random, site.pages),
+      // The session opens with its first page, later page views start shortly into their slot
+      start: Math.floor(i === 0 ? start : slotStart + between(random, 0, slotDuration * 0.1)),
+      end: Math.floor(Math.min(slotStart + slotDuration, sessionEnd) - 1),
+    };
+    const current = documents[documents.length - 1];
+    if (current && random() >= hardNavigationRate) {
+      current.pageViews.push(view);
+    } else {
+      documents.push({
+        navigationType: current && random() < RELOAD_RATE ? 'reload' : 'navigate',
+        pageViews: [view],
+      });
+    }
+  }
+
+  // A document is hidden right before the next one loads
+  return documents.map((document, index) => ({
+    ...document,
+    hiddenAt:
+      index + 1 < documents.length ? documents[index + 1].pageViews[0].start - 1 : sessionEnd,
+  }));
+};
+
+/** Everything that happens to one document, from its load until it is hidden. */
+const simulateDocument = (
+  ctx: SessionContext,
+  { navigationType, pageViews: [load, ...routeChanges], hiddenAt }: DocumentPlan
+): EdotBrowserEvent[] => {
+  const { events, document, loadedAt } = loadDocument(ctx, load, navigationType);
+  const visits = [
+    interactWithPage(ctx, document, load, loadedAt),
+    ...routeChanges.map((view) => interactWithPage(ctx, document, view, view.start)),
+  ];
+
+  return [
+    ...events,
+    ...routeChanges.map((view) => routeChange(ctx, view)),
+    ...visits.flatMap((visit) => visit.events),
+    ...hideDocument(
+      ctx,
+      document,
+      visits.flatMap(({ clickTimes }) => clickTimes),
+      hiddenAt
+    ),
+  ];
+};
+
 /** Builds a realistic EDOT Browser session: page loads, SPA navigations, interactions and requests. */
 export const session = ({
   client,
@@ -525,45 +611,8 @@ export const session = ({
     random,
     slowdown: client.isMobile ? MOBILE_SLOWDOWN : 1,
   };
-  const sessionEnd = start + sessionDurationMs;
-  const slotDuration = sessionDurationMs / pageViews;
-  const events: EdotBrowserEvent[] = [];
-  let currentDocument: DocumentState | undefined;
 
-  for (let i = 0; i < pageViews; i++) {
-    const slotStart = start + i * slotDuration;
-    const slotEnd = Math.floor(Math.min(slotStart + slotDuration, sessionEnd) - 1);
-    const pageStart = Math.floor(
-      i === 0 ? start : slotStart + between(random, 0, slotDuration * 0.1)
-    );
-    const page = pick(random, site.pages);
-
-    let interactiveFrom = pageStart;
-    if (!currentDocument || random() < hardNavigationRate) {
-      if (currentDocument) {
-        events.push(...hideDocument(ctx, currentDocument, pageStart - 1));
-      }
-      const isReload = currentDocument !== undefined && random() < RELOAD_RATE;
-      const load = loadDocument(ctx, page, pageStart, slotEnd, isReload ? 'reload' : 'navigate');
-      events.push(...load.events);
-      currentDocument = load.document;
-      interactiveFrom = load.loadedAt;
-    } else {
-      events.push(
-        client
-          .navigation({ url: toUrl(site, page.path), sameDocument: true, type: 'push' })
-          .timestamp(pageStart)
-      );
-    }
-
-    const interaction = interactWithPage(ctx, currentDocument, page, interactiveFrom, slotEnd);
-    events.push(...interaction.events);
-    currentDocument.interactionTimes.push(...interaction.clickTimes);
-  }
-
-  if (currentDocument) {
-    events.push(...hideDocument(ctx, currentDocument, sessionEnd));
-  }
-
-  return events;
+  return planDocuments(ctx, { start, pageViews, sessionDurationMs, hardNavigationRate }).flatMap(
+    (plan) => simulateDocument(ctx, plan)
+  );
 };
