@@ -4,6 +4,7 @@
     ".abuseipdb",
     ".alienvault-otx",
     ".amazon_s3",
+    ".ansible_controller",
     ".aws_lambda",
     ".azure-blob",
     ".bedrock",
@@ -121,6 +122,20 @@
     "amazon_s3.downloadFile",
     "amazon_s3.listBucketObjects",
     "amazon_s3.listBuckets",
+    "ansible_controller.cancelJob",
+    "ansible_controller.getJob",
+    "ansible_controller.getJobStdout",
+    "ansible_controller.getJobTemplate",
+    "ansible_controller.getJobTemplateLaunchOptions",
+    "ansible_controller.getMe",
+    "ansible_controller.launchJobTemplate",
+    "ansible_controller.listHosts",
+    "ansible_controller.listInventories",
+    "ansible_controller.listJobEvents",
+    "ansible_controller.listJobTemplates",
+    "ansible_controller.listJobs",
+    "ansible_controller.listProjects",
+    "ansible_controller.request",
     "aws_lambda.getFunction",
     "aws_lambda.invoke",
     "aws_lambda.listFunctions",
@@ -186,6 +201,7 @@
     "cases.addObservables",
     "cases.addTags",
     "cases.assignCase",
+    "cases.bulkDeleteObservables",
     "cases.closeCase",
     "cases.createCase",
     "cases.createCaseFromTemplate",
@@ -610,9 +626,11 @@
     "nightshift.decisionTreePrepare",
     "nightshift.decisionTreeReinforce",
     "nightshift.ensureInvestigationAgent",
+    "nightshift.handleInvestigationFailure",
     "nightshift.memoryMaterializeToSandbox",
     "nightshift.memoryOptimize",
     "nightshift.obtainSandbox",
+    "nightshift.renderSlackMessage",
     "nightshift.resolveModel",
     "nightshift.sendNotifications",
     "nightshift.triggerInvestigation",
@@ -982,6 +1000,7 @@
     "alerting.ruleEventsGenerated",
     "alerting.ruleExecutionFailed",
     "alerting.ruleUpdated",
+    "alerting.v1.alertStatusChanged",
     "cases.attachmentsAdded",
     "cases.attachmentsDeleted",
     "cases.caseCreated",
@@ -1012,11 +1031,11 @@
   "variants": {
     "strict": {
       "path": "strict/schema.json",
-      "sha256": "004804ef217fd163360b3a0579fd275a0389ee80b72104f58dc22061afe4f827"
+      "sha256": "fd9a661b3216f97227d6c57a5e8125b5b5781af8cca14fcabf0fac1ba20b81fd"
     },
     "template": {
       "path": "template/schema.json",
-      "sha256": "815392cf46be0037a4c42ce7223296b92177743c82d0adbac8602f71d8f68c75"
+      "sha256": "0a586f9e431ff86f6f55597e82121650331ab1aadc851cf88e62295361f20428"
     }
   }
 }

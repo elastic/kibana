@@ -11,6 +11,7 @@ import { css } from '@emotion/react';
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
 import { useAlertZeroDocumentationLink } from '../../hooks/use_alertzero_documentation_link';
+import { BRAND_TITLE, NAV_ESCALATIONS } from './translations';
 
 /**
  * Routes that rely on the chrome's application scroll container (`#kbnChromeLayoutApplication`).
@@ -52,11 +53,12 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
   const isChromeScrolled = isWatchesShell || CHROME_SCROLLED_EXACT_ROUTES.includes(pathname);
   const overflow = isChromeScrolled ? 'visible' : 'auto';
   const hideAppHeading = isWatchesShell;
+  const appHeadingTitle = matchesRoute(pathname, ['/escalations']) ? NAV_ESCALATIONS : BRAND_TITLE;
 
   return (
     <>
       {hideAppHeading ? null : (
-        <AppHeaderView title="AlertZero" spacing="compact" docLink={docLink} />
+        <AppHeaderView title={appHeadingTitle} spacing="compact" docLink={docLink} />
       )}
       <div
         css={css`

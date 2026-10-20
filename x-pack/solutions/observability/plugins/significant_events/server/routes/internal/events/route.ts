@@ -8,11 +8,12 @@
 import {
   significantEventInvestigationSchema,
   significantEventStatusSchema,
+  significantEventManualStatusSchema,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   CHANGE_POINT_TYPES,
   severitySchema,
   MAX_ID_LENGTH,
-  MAX_ASSESSMENT_NOTE_LENGTH,
+  MAX_TEXT_LENGTH,
   type ChangePointType,
   type Detection,
   type InvestigationRunStatus,
@@ -25,7 +26,6 @@ import { notFound, serverUnavailable } from '@hapi/boom';
 import { z, isoDateTime } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
-import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import {
   cleanupStaleEvents,
   type CleanupStaleEventsResult,
@@ -37,6 +37,7 @@ import { createServerRoute } from '../../create_server_route';
 import { assertNotPaused } from '../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { MAX_SOURCE_IDS_PER_REQUEST, sourceIdsQuerySchema } from '../../utils/resolve_source_ids';
+import { StatusChange } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
 
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
@@ -371,23 +372,19 @@ const eventsUpdateRoute = createServerRoute({
       id: z.string().max(255),
     }),
     body: z.object({
-      status: significantEventStatusSchema,
-      assessment_note: z.string().max(MAX_ASSESSMENT_NOTE_LENGTH).optional(),
+      status: significantEventManualStatusSchema,
+      assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
-    const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
-      await getScopedClients({ request });
+    const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    return updateSignificantEventStatus({
-      eventSearchClient: await getEventSearchClient(),
+    return (await getEventSearchClient()).updateEventStatus({
       eventId: params.path.id,
-      status: params.body.status,
+      change: StatusChange.byOperator(params.body.status),
       assessmentNote: params.body.assessment_note,
-      alertEventsClient: await getAlertEventsClient(),
-      emitTrigger,
     });
   },
 });
@@ -419,7 +416,7 @@ const cleanupStaleEventsRoute = createServerRoute({
     logger,
   }): Promise<CleanupStaleEventsResult> => {
     const scopedClients = await getScopedClients({ request });
-    const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } = scopedClients;
+    const { getEventSearchClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -429,8 +426,6 @@ const cleanupStaleEventsRoute = createServerRoute({
       eventSearchClient: await getEventSearchClient(),
       rulesClient,
       candidateRuleIds: params?.body?.candidateRuleIds,
-      alertEventsClient: await getAlertEventsClient(),
-      emitTrigger,
     });
   },
 });
@@ -441,7 +436,7 @@ const investigationStatusesRoute = createServerRoute({
     access: 'internal',
     summary: 'Resolve the outcome of investigation runs',
     description:
-      'Reports whether each investigation run is pending, complete, failed, or unavailable, resolved from its workflow execution. Missing executions are omitted from the response.',
+      'Reports whether each investigation is pending (an agent works on it) or complete, from the shared investigations API. The ids are the investigation ids a significant event records in `workflow_execution_id`. Investigations that do not exist or cannot be read are omitted.',
   },
   security: {
     authz: {
@@ -459,7 +454,6 @@ const investigationStatusesRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-    getSpaceId,
   }): Promise<{ statuses: Record<string, InvestigationRunStatus> }> => {
     const { licensing } = await getScopedClients({ request });
 
@@ -467,9 +461,8 @@ const investigationStatusesRoute = createServerRoute({
 
     const statuses = await resolveInvestigationStatuses({
       request,
-      workflowsManagement: server.workflowsManagement,
-      spaceId: await getSpaceId(request),
-      workflowExecutionIds: params.body.workflow_execution_ids,
+      agenticInvestigations: server.agenticInvestigations,
+      investigationIds: params.body.workflow_execution_ids,
       logger,
     });
 

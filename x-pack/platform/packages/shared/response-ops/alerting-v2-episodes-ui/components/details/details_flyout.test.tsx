@@ -332,6 +332,33 @@ describe('AlertEpisodeDetailsFlyout', () => {
     expect(screen.getByTestId('runbookSectionStub')).toBeInTheDocument();
   });
 
+  it('renders Related for an episode from an external source that has no rule', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      ruleState: { status: RuleStateStatus.idle },
+      episode: { ...mockEpisode, source: 'zabbix' } as AlertEpisode,
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.getByTestId('relatedSectionStub')).toBeInTheDocument();
+    expect(screen.queryByTestId('runbookSectionStub')).not.toBeInTheDocument();
+  });
+
+  it('hides the Investigation accordion for an episode with neither a rule nor an external source', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      ruleState: { status: RuleStateStatus.idle },
+      episode: mockEpisode,
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(
+      screen.queryByTestId('alertingV2EpisodeFlyoutAccordionInvestigation')
+    ).not.toBeInTheDocument();
+  });
+
   it('renders the severity header value as a colored dot with its label', () => {
     mockUseEpisodeDetailsHeaderData.mockReturnValue({ ...baseHeaderData, severity: 'high' });
 
@@ -361,11 +388,28 @@ describe('AlertEpisodeDetailsFlyout', () => {
 
     render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
 
-    expect(screen.getByText('Source')).toBeInTheDocument();
+    expect(screen.getByText('Alert URL')).toBeInTheDocument();
     expect(screen.getByTestId('alertingV2EpisodeFlyoutAlertUrl')).toHaveAttribute(
       'href',
       'https://monitoring.example/alerts/1'
     );
+  });
+
+  it('shows the alerting system as the Source for native Universal alerts', () => {
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.getByTestId('alertingV2EpisodeFlyoutSourceBadge')).toHaveTextContent('Universal');
+  });
+
+  it('shows the connector as the Source for alerts ingested from an external system', () => {
+    mockUseEpisodeDetailsHeaderData.mockReturnValue({
+      ...baseHeaderData,
+      episode: { ...mockEpisode, source: 'zabbix' } as AlertEpisode,
+    });
+
+    render(<AlertEpisodeDetailsFlyout {...baseProps} />, { wrapper: Wrapper });
+
+    expect(screen.getByTestId('alertingV2EpisodeFlyoutSourceBadge')).toHaveTextContent('zabbix');
   });
 
   it.each([

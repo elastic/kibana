@@ -141,6 +141,45 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           });
         });
+
+        it('returns an ATLAS-only rule as unmapped and excludes ATLAS ids from coverage', async () => {
+          const rule1 = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              threat: [
+                {
+                  framework: 'MITRE ATLAS',
+                  tactic: {
+                    id: 'AML.TA0000',
+                    name: 'Reconnaissance',
+                    reference: 'https://atlas.mitre.org/tactics/AML.TA0000',
+                  },
+                  technique: [
+                    {
+                      id: 'AML.T0044',
+                      name: 'Full ML Model Access',
+                      reference: 'https://atlas.mitre.org/techniques/AML.T0044',
+                      subtechnique: [
+                        {
+                          id: 'AML.T0024.002',
+                          name: 'Extract ML Model',
+                          reference: 'https://atlas.mitre.org/techniques/AML.T0024.002',
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            })
+          );
+
+          const body = await getCoverageOverview(supertest);
+
+          // The coverage overview UI renders ATT&CK Enterprise only (see security-team#14858)
+          expect(Object.keys(body.coverage).filter((id) => id.startsWith('AML.'))).to.eql([]);
+          expect(body.unmapped_rule_ids).to.contain(rule1.id);
+        });
       });
 
       describe('with filters', () => {
