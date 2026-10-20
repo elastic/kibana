@@ -18,14 +18,26 @@ import { asErr, asOk, map } from '../lib/result_type';
 
 export const UNHEALTHY_LOG_THROTTLE_MS = 5 * 60 * 1000; // 5 min
 
-export interface HealthStatusLogger {
+export interface HealthStatusLogger extends Logger {
   healthy: (reason: string) => void;
   unhealthy: (reason: string) => void;
 }
 export function createHealthStatusLogger(logger: Logger): HealthStatusLogger {
   let lastUnhealthyWarnAt = 0;
   return {
-    healthy: (reason) => logger.debug(reason),
+    trace: (message, meta) => logger.trace(message, meta),
+    debug: (message, meta) => logger.debug(message, meta),
+    info: (message, meta) => logger.info(message, meta),
+    warn: (errorOrMessage, meta) => logger.warn(errorOrMessage, meta),
+    error: (errorOrMessage, meta) => logger.error(errorOrMessage, meta),
+    fatal: (errorOrMessage, meta) => logger.fatal(errorOrMessage, meta),
+    log: (record) => logger.log(record),
+    isLevelEnabled: (level) => logger.isLevelEnabled(level),
+    get: (...childContextPaths) => logger.get(...childContextPaths),
+    healthy: (reason) => {
+      lastUnhealthyWarnAt = 0;
+      logger.debug(reason);
+    },
     unhealthy: (reason) => {
       const now = Date.now();
       if (now - lastUnhealthyWarnAt < UNHEALTHY_LOG_THROTTLE_MS) {
@@ -69,9 +81,9 @@ function isCapacityEstimationParams(
 }
 
 export function estimateCapacity(
+  logger: HealthStatusLogger,
   capacityStats: CapacityEstimationParams,
-  assumedKibanaInstances: number,
-  healthStatusLogger: HealthStatusLogger
+  assumedKibanaInstances: number
 ): RawMonitoredStat<CapacityEstimationStat> {
   const workload = capacityStats.workload.value;
 
@@ -214,7 +226,7 @@ export function estimateCapacity(
     averageCapacityUsedByNonRecurringTasksPerKibana +
     averageRecurringRequiredPerMinute / assumedKibanaInstances;
 
-  const { status, reason } = getHealthStatus(healthStatusLogger, {
+  const { status, reason } = getHealthStatus(logger, {
     assumedRequiredThroughputPerMinutePerKibana,
     assumedAverageRecurringRequiredThroughputPerMinutePerKibana,
     capacityPerMinutePerKibana,
@@ -263,7 +275,7 @@ interface GetHealthStatusParams {
 }
 
 function getHealthStatus(
-  healthStatusLogger: HealthStatusLogger,
+  logger: HealthStatusLogger,
   params: GetHealthStatusParams
 ): { status: HealthStatus; reason?: string } {
   const {
@@ -273,36 +285,31 @@ function getHealthStatus(
   } = params;
   if (assumedRequiredThroughputPerMinutePerKibana < capacityPerMinutePerKibana) {
     const reason = `Task Manager is healthy, the assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) < capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
-    healthStatusLogger.healthy(reason);
+    logger.healthy(reason);
     return { status: HealthStatus.OK, reason };
   }
 
   if (assumedAverageRecurringRequiredThroughputPerMinutePerKibana > capacityPerMinutePerKibana) {
     const reason = `Task Manager is unhealthy, the assumedAverageRecurringRequiredThroughputPerMinutePerKibana (${assumedAverageRecurringRequiredThroughputPerMinutePerKibana}) > capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
-    healthStatusLogger.unhealthy(reason);
+    logger.unhealthy(reason);
     return { status: HealthStatus.OK, reason };
   }
 
   const reason = `Task Manager is unhealthy, the assumedRequiredThroughputPerMinutePerKibana (${assumedRequiredThroughputPerMinutePerKibana}) >= capacityPerMinutePerKibana (${capacityPerMinutePerKibana})`;
-  healthStatusLogger.unhealthy(reason);
+  logger.unhealthy(reason);
   return { status: HealthStatus.OK, reason };
 }
 
 export function withCapacityEstimate(
-  logger: Logger,
+  logger: HealthStatusLogger,
   monitoredStats: RawMonitoringStats['stats'],
-  assumedKibanaInstances: number,
-  healthStatusLogger: HealthStatusLogger
+  assumedKibanaInstances: number
 ): RawMonitoringStats['stats'] {
   if (isCapacityEstimationParams(monitoredStats)) {
     try {
       return {
         ...monitoredStats,
-        capacity_estimation: estimateCapacity(
-          monitoredStats,
-          assumedKibanaInstances,
-          healthStatusLogger
-        ),
+        capacity_estimation: estimateCapacity(logger, monitoredStats, assumedKibanaInstances),
       };
     } catch (e) {
       // Return monitoredStats with out capacity estimation

@@ -29,6 +29,7 @@ describe('estimateCapacity', () => {
   test('estimates the max throughput per minute based on the workload and the assumed kibana instances', async () => {
     expect(
       estimateCapacity(
+        healthStatusLogger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -66,8 +67,7 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1,
-        healthStatusLogger
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -79,6 +79,7 @@ describe('estimateCapacity', () => {
   test('reduces the available capacity per kibana when average task duration exceeds the poll interval', async () => {
     expect(
       estimateCapacity(
+        healthStatusLogger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -116,8 +117,7 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1,
-        healthStatusLogger
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -131,6 +131,7 @@ describe('estimateCapacity', () => {
   test('estimates the max throughput per minute when duration by persistence is empty', async () => {
     expect(
       estimateCapacity(
+        healthStatusLogger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -155,8 +156,7 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1,
-        healthStatusLogger
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -168,6 +168,7 @@ describe('estimateCapacity', () => {
   test('estimates the max throughput per minute based on the workload and the assumed kibana instances when there are tasks that repeat each hour or day', async () => {
     expect(
       estimateCapacity(
+        healthStatusLogger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -205,8 +206,7 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1,
-        healthStatusLogger
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -218,6 +218,7 @@ describe('estimateCapacity', () => {
   test('estimates the max throughput available when there are no active Kibana', async () => {
     expect(
       estimateCapacity(
+        healthStatusLogger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -256,8 +257,7 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1,
-        healthStatusLogger
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -269,6 +269,7 @@ describe('estimateCapacity', () => {
   test('estimates the max throughput available to handle the workload when there are multiple active kibana instances', async () => {
     expect(
       estimateCapacity(
+        healthStatusLogger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -306,8 +307,7 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        3,
-        healthStatusLogger
+        3
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 3,
@@ -325,6 +325,7 @@ describe('estimateCapacity', () => {
 
     expect(
       estimateCapacity(
+        healthStatusLogger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -368,8 +369,7 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        2,
-        healthStatusLogger
+        2
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: provisionedKibanaInstances,
@@ -399,6 +399,7 @@ describe('estimateCapacity', () => {
 
     expect(
       estimateCapacity(
+        healthStatusLogger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -442,8 +443,7 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        2,
-        healthStatusLogger
+        2
       ).value
     ).toMatchObject({
       observed: {
@@ -474,6 +474,7 @@ describe('estimateCapacity', () => {
   test('marks estimated capacity as OK state when workload and load suggest capacity is sufficient', async () => {
     expect(
       estimateCapacity(
+        healthStatusLogger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -520,8 +521,7 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1,
-        healthStatusLogger
+        1
       )
     ).toMatchObject({
       status: 'OK',
@@ -536,6 +536,7 @@ describe('estimateCapacity', () => {
   test('marks estimated capacity as Warning state when capacity is insufficient for recent spikes of non-recurring workload, but sufficient for the recurring workload', async () => {
     expect(
       estimateCapacity(
+        healthStatusLogger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -579,8 +580,7 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1,
-        healthStatusLogger
+        1
       )
     ).toMatchObject({
       status: 'OK',
@@ -595,6 +595,7 @@ describe('estimateCapacity', () => {
   test('marks estimated capacity as Error state when workload and load suggest capacity is insufficient', async () => {
     expect(
       estimateCapacity(
+        healthStatusLogger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -638,8 +639,7 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1,
-        healthStatusLogger
+        1
       )
     ).toMatchObject({
       status: 'OK',
@@ -654,6 +654,7 @@ describe('estimateCapacity', () => {
   test('recommmends a 20% increase in kibana when a spike in non-recurring tasks forces recurring task capacity to zero', async () => {
     expect(
       estimateCapacity(
+        healthStatusLogger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -696,8 +697,7 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1,
-        healthStatusLogger
+        1
       )
     ).toMatchObject({
       status: 'OK',
@@ -724,6 +724,7 @@ describe('estimateCapacity', () => {
   test('recommmends a 20% increase in kibana when a spike in non-recurring tasks in a system with insufficient capacity even for recurring tasks', async () => {
     expect(
       estimateCapacity(
+        healthStatusLogger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -766,8 +767,7 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1,
-        healthStatusLogger
+        1
       )
     ).toMatchObject({
       status: 'OK',
@@ -796,6 +796,7 @@ describe('estimateCapacity', () => {
   test("estimates minutes_to_drain_overdue even if there isn't any overdue task", async () => {
     expect(
       estimateCapacity(
+        healthStatusLogger,
         mockStats(
           { capacity: { config: 10, as_cost: 20, as_workers: 10 }, poll_interval: 3000 },
           {
@@ -834,8 +835,7 @@ describe('estimateCapacity', () => {
             },
           }
         ),
-        1,
-        healthStatusLogger
+        1
       ).value.observed
     ).toMatchObject({
       observed_kibana_instances: 1,
@@ -847,6 +847,7 @@ describe('estimateCapacity', () => {
     expect(
       () =>
         estimateCapacity(
+          healthStatusLogger,
           mockStats(
             {},
             {},
@@ -854,8 +855,7 @@ describe('estimateCapacity', () => {
               load: {} as AveragedStat,
             }
           ),
-          2,
-          healthStatusLogger
+          2
         ).value.observed
     ).toThrowErrorMatchingInlineSnapshot(
       `"Task manager had an issue calculating capacity estimation. averageLoadPercentage: undefined"`
@@ -898,9 +898,9 @@ describe('estimateCapacity', () => {
         }
       );
     const requiredThroughputUnhealthy = () =>
-      estimateCapacity(unhealthyStats(175, 40), 1, healthStatusLogger);
+      estimateCapacity(healthStatusLogger, unhealthyStats(175, 40), 1);
     const recurringThroughputUnhealthy = () =>
-      estimateCapacity(unhealthyStats(210, 80), 1, healthStatusLogger);
+      estimateCapacity(healthStatusLogger, unhealthyStats(210, 80), 1);
 
     test('logs a warning on the first unhealthy call', () => {
       requiredThroughputUnhealthy();
@@ -933,6 +933,26 @@ describe('estimateCapacity', () => {
       expect(logger.warn).toHaveBeenCalledWith(requiredThroughputReason);
       expect(logger.debug).toHaveBeenCalledWith(recurringThroughputReason);
     });
+
+    test('logs a warning immediately for a new unhealthy episode after recovering', () => {
+      requiredThroughputUnhealthy();
+      estimateCapacity(healthStatusLogger, unhealthyStats(100, 40), 1);
+      requiredThroughputUnhealthy();
+
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('Task Manager is healthy'));
+      expect(logger.warn).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  test('createHealthStatusLogger passes standard Logger methods through', () => {
+    const error = new Error('boom');
+    healthStatusLogger.info('info message');
+    healthStatusLogger.warn('warn message');
+    healthStatusLogger.error(error);
+
+    expect(logger.info).toHaveBeenCalledWith('info message', undefined);
+    expect(logger.warn).toHaveBeenCalledWith('warn message', undefined);
+    expect(logger.error).toHaveBeenCalledWith(error, undefined);
   });
 });
 

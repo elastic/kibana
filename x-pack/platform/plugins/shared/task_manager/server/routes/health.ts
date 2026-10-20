@@ -95,11 +95,10 @@ export function healthRoute(params: HealthRouteParams): {
 
   function getHealthStatus(monitoredStats: MonitoringStats) {
     const summarizedStats = summarizeMonitoringStats(
-      logger,
+      healthStatusLogger,
       monitoredStats,
       config,
-      numOfKibanaInstances,
-      healthStatusLogger
+      numOfKibanaInstances
     );
     const { status, reason } = calculateHealthStatus(
       summarizedStats,
