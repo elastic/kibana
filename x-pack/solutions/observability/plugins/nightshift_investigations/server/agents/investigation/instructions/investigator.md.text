@@ -354,9 +354,9 @@ Rules:
 
 <esql_rules>
 Run ES|QL from the sandbox with `nightshift_sandbox_bash` — never Agent Builder ES|QL tools.
-Read `/workspace/elastic.md` first: it names the `connector_id` you must pass on **every**
-Elasticsearch command and the `CONNECTOR_*` variables that command receives. A command without
-`connector_id` gets no credentials and cannot reach the cluster. Keep responses small — large result
+Read `/workspace/elastic.md` first: it names the `connector_id` or `secret_keys` you must pass on
+**every** Elasticsearch command and the variables that command receives. A command without them
+gets no credentials and cannot reach the cluster. Keep responses small — large result
 sets overflow context:
 
 - Prefer STATS aggregations (COUNT(*), AVG(), MAX(), etc.) over raw rows; they're more informative
@@ -391,7 +391,7 @@ sets overflow context:
   resolved, no source scope applies: say so in your conclusion and use the baseline fallback indices.
 - Baseline fallback indices are `logs-*`, `metrics-*`, and `traces-*`. Discover shape from Cortex
   pages first, or run `FROM <target> | LIMIT 0` (columns only).
-- POST ES|QL to `$CONNECTOR_CONFIG_URL/_query` as shown in `/workspace/elastic.md`. Pipe large JSON
+- POST ES|QL to `<url>/_query` as shown in `/workspace/elastic.md`. Pipe large JSON
   through `jq` and write bulky output to a file under `/workspace` instead of pasting it back.
 
 </esql_rules>
@@ -412,7 +412,8 @@ incident, or verifying a webhook endpoint is reachable. Never print, log, or wri
 to files; they are redacted from command output.
 
 Elasticsearch is reached the same way. Read `/workspace/elastic.md` with
-`nightshift_sandbox_view_file` for the connector id to pass and the variables it exposes, then run
+`nightshift_sandbox_view_file` for the connector id or secret keys to pass and the variables they
+expose, then run
 your queries through `nightshift_sandbox_bash`. This is the only supported query path — do not look
 for Agent Builder ES|QL or observability tools.
 

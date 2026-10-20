@@ -19,6 +19,7 @@ jest.mock('./connector_manifest', () => ({
   writeConnectorManifest: jest.fn().mockResolvedValue(undefined),
 }));
 jest.mock('./elastic_manifest', () => ({
+  ...jest.requireActual('./elastic_manifest'),
   writeElasticManifest: jest.fn().mockResolvedValue(undefined),
 }));
 
@@ -252,6 +253,40 @@ describe('createSandboxWorkspaceManager', () => {
       );
     });
 
+    it('documents Elasticsearch secrets in the telemetry manifest without a connector', async () => {
+      const listKeysForSandbox = jest
+        .fn()
+        .mockResolvedValue(['ELASTICSEARCH_ENDPOINT', 'ELASTICSEARCH_API_KEY']);
+      const session = createSessionMock(true);
+
+      await createManagerWithSecrets(listKeysForSandbox).ensureWorkspaceReady({
+        session,
+        callContext: createCallContext([]),
+      });
+
+      expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          credentials: {
+            kind: 'secrets',
+            urlKey: 'ELASTICSEARCH_ENDPOINT',
+            apiKeyKey: 'ELASTICSEARCH_API_KEY',
+          },
+        })
+      );
+    });
+
+    it('does not document an incomplete Elasticsearch secret pair', async () => {
+      const listKeysForSandbox = jest.fn().mockResolvedValue(['ELASTICSEARCH_API_KEY']);
+      const session = createSessionMock(true);
+
+      await createManagerWithSecrets(listKeysForSandbox).ensureWorkspaceReady({
+        session,
+        callContext: createCallContext([]),
+      });
+
+      expect(mockWriteElasticManifest).not.toHaveBeenCalled();
+    });
+
     it('rewrites the manifest when the secret keys change', async () => {
       const listKeysForSandbox = jest
         .fn()
@@ -328,7 +363,10 @@ describe('createSandboxWorkspaceManager', () => {
       });
 
       expect(mockWriteElasticManifest).toHaveBeenCalledWith(
-        expect.objectContaining({ connectorId: 'elasticsearch-telemetry', session })
+        expect.objectContaining({
+          credentials: { kind: 'connector', connectorId: 'elasticsearch-telemetry' },
+          session,
+        })
       );
     });
 
