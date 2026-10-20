@@ -323,11 +323,15 @@ Controlled HTTP fixture checks actual Core transport headers/CPS/opaqueId/output
 including401 after fixture revocation; not live ES security or actual UIAM server.
 No stack/QAF, real runner, cgroup/pod fit, exact slices or scored latency claim.
 
+Measured (see tracks/track-7/7.P-kit/report.md): dev-loader service floor per isolate is
+~90 MiB post-GC heap with kit + local ES client + SO/ESO kernel. 185 types add +0.5 MiB.
+Transport per-call/per-MB and telemetry overhead: t7p-transport-002 (see report).
 Outstanding 7.P: live scoped local SO security/audit parity and production readiness capture;
-scoped live SO security matrix; session refresh bridge (capture is a per-run snapshot,
-not token renewal); process sync transport; telemetry overhead and per-MB/call measurement;
-distribution-shaped initialized-service floor; bounded envelope sizes/backpressure;
-broader SO operations, additional custom error codecs, logger metadata and production bootstrap.
+session refresh bridge (capture is a per-run snapshot, not token renewal); process sync
+transport; distribution/pointer-compression floor; general envelope-size caps on ordinary
+calls/run packets (streams and sync are bounded; plain calls are not); broader SO operations;
+arbitrary custom error subclasses; production bootstrap. Logger metadata: use
+bindService(logger, {positional, ordered}). The trust domain is the isolate (see 0.1.11).
 
 0.1.4 also repairs two Grok findings on0.1: actual Core start client facade now
 aliases its concrete client's private capture; waiting-run timeout retires a
