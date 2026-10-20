@@ -12,6 +12,7 @@ import {
 } from '../../services/logger_service/logger_service';
 import type { EbtServiceContract } from '../../services/ebt_service/ebt_service';
 import { EbtServiceToken } from '../../services/ebt_service/tokens';
+import type { RuleEbtEventType } from '../../telemetry/rule_ebt_schema';
 import {
   buildRuleChangedEventData,
   RULE_EBT_EVENT_TYPE_BY_OPERATION,
@@ -27,6 +28,14 @@ import type { EventBus, Subscription } from '../event_bus';
 import type { RuleEvent } from '../rule_event_publisher/events';
 
 type ReportedRuleEvent = Extract<RuleEvent, { type: RuleOperation }>;
+
+/**
+ * The operation map is exhaustive today. Treating it as partial lets a new
+ * domain operation reach this subscriber before it has an EBT event type
+ * without reporting `undefined`.
+ */
+const eventTypeByOperation: Partial<Record<RuleOperation, RuleEbtEventType>> =
+  RULE_EBT_EVENT_TYPE_BY_OPERATION;
 
 /**
  * Singleton bus subscriber that reports rule-lifecycle domain events as
@@ -78,10 +87,15 @@ export class RuleTelemetrySubscriber {
 
   #reportRuleChanged(event: ReportedRuleEvent, { origin: actor }: AlertingPublisherContext): void {
     const { type: operation, payload } = event;
+    const eventType = eventTypeByOperation[operation];
+    if (eventType === undefined) {
+      return;
+    }
+
     const { ruleId, rule, origin } = payload;
 
     this.ebtService.reportEvent(
-      RULE_EBT_EVENT_TYPE_BY_OPERATION[operation],
+      eventType,
       buildRuleChangedEventData(rule, { ...origin, actor }, ruleId)
     );
   }

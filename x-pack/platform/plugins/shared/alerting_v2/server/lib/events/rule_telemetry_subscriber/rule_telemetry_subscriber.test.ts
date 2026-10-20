@@ -186,6 +186,21 @@ describe('RuleTelemetrySubscriber', () => {
       expect(data).not.toHaveProperty('builder_type');
     });
 
+    it('skips reporting when the operation has no EBT event type', async () => {
+      subscriber.start();
+
+      await handler()(
+        eventOfType('rule.unmapped' as RuleEvent['type'], {
+          ruleId: 'rule-1',
+          spaceId: 'default',
+          rule,
+        }),
+        context
+      );
+
+      expect(ebtService.reportEvent).not.toHaveBeenCalled();
+    });
+
     it('reports rule_id and origin when the domain rule is missing', async () => {
       subscriber.start();
 

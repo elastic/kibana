@@ -38,6 +38,8 @@ export interface WaitForRuleChangedEventsParams {
 export interface EbtService {
   /** Opts the server in to EBT so reported events reach the helpers shipper. */
   optIn: () => Promise<void>;
+  /** Restores the opted-out default so later suites on the shared server stop shipping events. */
+  optOut: () => Promise<void>;
   /**
    * Resolves with the rule-lifecycle events of `eventType` reported for the rule.
    * Returns as soon as `count` events arrived and throws if they do not within the timeout.
@@ -54,18 +56,19 @@ export const getEbtService = ({
   log: ScoutLogger;
   kbnClient: KbnClient;
 }): EbtService => {
-  const optIn = () =>
-    measurePerformanceAsync(log, 'ebt.optIn', async () => {
+  const setConsent = (consent: boolean) =>
+    measurePerformanceAsync(log, consent ? 'ebt.optIn' : 'ebt.optOut', async () => {
       await kbnClient.request({
         method: 'POST',
         path: `${EBT_HELPERS_PATH}/opt_in`,
         headers: COMMON_HEADERS,
-        query: { consent: true },
+        query: { consent },
       });
     });
 
   return {
-    optIn,
+    optIn: () => setConsent(true),
+    optOut: () => setConsent(false),
     waitForRuleChangedEvents: ({
       ruleId,
       eventType,

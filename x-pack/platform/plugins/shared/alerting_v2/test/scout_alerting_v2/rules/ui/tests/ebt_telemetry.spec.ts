@@ -5,51 +5,54 @@
  * 2.0.
  */
 
+import { randomUUID } from 'crypto';
 import { expect } from '@kbn/scout/ui';
 import { RULE_CREATED_EBT_EVENT_TYPE } from '../../../../../server/lib/telemetry/rule_ebt_schema';
 import type { RulesApiService } from '../../../common/services';
 import { test } from '../fixtures';
 
-const SOURCE_INDEX = 'test-ebt-telemetry';
-const DISCOVER_RULE_NAME = 'scout-ebt-discover-create';
-const COMPOSE_RULE_NAME = 'scout-ebt-compose-create';
+const RUN_ID = randomUUID();
+const SOURCE_INDEX = `test-ebt-telemetry-${RUN_ID}`;
+const DISCOVER_RULE_NAME = `scout-ebt-discover-create-${RUN_ID}`;
+const COMPOSE_RULE_NAME = `scout-ebt-compose-create-${RUN_ID}`;
 
 test.describe(
   'Rule changed EBT telemetry',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
-    const createdRuleIds: string[] = [];
-
     const findRuleIdByName = async (rules: RulesApiService, name: string): Promise<string> => {
       let ruleId = '';
       await expect
         .poll(
           async () => {
             const { items } = await rules.find({ search: name });
-            ruleId = items[0]?.id ?? '';
+            ruleId = items.find((item) => item.metadata.name === name)?.id ?? '';
             return ruleId;
           },
           { timeout: 30_000 }
         )
         .not.toBe('');
-      createdRuleIds.push(ruleId);
       return ruleId;
+    };
+
+    const deleteRulesNamed = async (rules: RulesApiService, name: string): Promise<void> => {
+      const { items } = await rules.find({ search: name });
+      await Promise.all(
+        items.filter((item) => item.metadata.name === name).map((item) => rules.delete(item.id))
+      );
     };
 
     test.beforeAll(async ({ esClient, apiServices }) => {
       await apiServices.alertingV2.ebt.optIn();
-      await esClient.indices.create(
-        {
-          index: SOURCE_INDEX,
-          mappings: {
-            properties: {
-              '@timestamp': { type: 'date' },
-              message: { type: 'text' },
-            },
+      await esClient.indices.create({
+        index: SOURCE_INDEX,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            message: { type: 'text' },
           },
         },
-        { ignore: [400] }
-      );
+      });
       await esClient.index({
         index: SOURCE_INDEX,
         document: { '@timestamp': new Date().toISOString(), message: 'hello' },
@@ -62,10 +65,14 @@ test.describe(
     });
 
     test.afterAll(async ({ esClient, apiServices }) => {
-      for (const id of createdRuleIds) {
-        await apiServices.alertingV2.rules.delete(id);
+      try {
+        const rules = apiServices.alertingV2.rules;
+        await deleteRulesNamed(rules, DISCOVER_RULE_NAME);
+        await deleteRulesNamed(rules, COMPOSE_RULE_NAME);
+        await esClient.indices.delete({ index: SOURCE_INDEX }, { ignore: [404] });
+      } finally {
+        await apiServices.alertingV2.ebt.optOut();
       }
-      await esClient.indices.delete({ index: SOURCE_INDEX }, { ignore: [404] });
     });
 
     test('reports a rule created from Discover with the discover app', async ({

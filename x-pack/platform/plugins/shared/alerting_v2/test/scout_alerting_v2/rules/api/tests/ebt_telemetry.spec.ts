@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+/**
+ * This spec asserts the EBT events produced by rule changes, not the HTTP
+ * contract of the rules API. Rules are managed through
+ * `apiServices.alertingV2.rules`, so the apiClient requirement does not apply.
+ */
+
+/* eslint-disable @kbn/eslint/scout_require_api_client_in_api_test */
+
 import { expect } from '@kbn/scout/api';
 import {
   RULE_CREATED_EBT_EVENT_TYPE,
@@ -13,30 +21,16 @@ import {
   RULE_ENABLED_EBT_EVENT_TYPE,
   RULE_UPDATED_EBT_EVENT_TYPE,
 } from '../../../../../server/lib/telemetry/rule_ebt_schema';
-import {
-  ALERTING_V2_RULES_ALL_ROLE,
-  apiTest,
-  buildCreateRuleData,
-  getDisableRuleUrl,
-  getEnableRuleUrl,
-  getRuleUrl,
-  testData,
-} from '../fixtures';
+import { apiTest, buildCreateRuleData } from '../fixtures';
 
-// An API-key request is reported on the `api` channel with no app.
+// The rules service sends a non-UI request, reported on the `api` channel with no app.
 const API_ORIGIN = { actor: 'user', channel: 'api' } as const;
 
 apiTest.describe(
   'Rule changed EBT telemetry',
   { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
-    let writerHeaders: Record<string, string>;
-
-    apiTest.beforeAll(async ({ requestAuth, apiServices }) => {
-      const writerCredentials = await requestAuth.getApiKeyForCustomRole(
-        ALERTING_V2_RULES_ALL_ROLE
-      );
-      writerHeaders = { ...testData.COMMON_HEADERS, ...writerCredentials.apiKeyHeader };
+    apiTest.beforeAll(async ({ apiServices }) => {
       await apiServices.alertingV2.ebt.optIn();
     });
 
@@ -45,23 +39,23 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiServices }) => {
-      await apiServices.alertingV2.rules.cleanUp();
+      try {
+        await apiServices.alertingV2.rules.cleanUp();
+      } finally {
+        await apiServices.alertingV2.ebt.optOut();
+      }
     });
 
-    apiTest('reports rule.created', async ({ apiClient, apiServices }) => {
+    apiTest('reports rule.created', async ({ apiServices }) => {
       const body = buildCreateRuleData({ metadata: { name: 'ebt-created-rule' } });
-      const response = await apiClient.post(testData.RULE_API_PATH, {
-        headers: writerHeaders,
-        body,
-      });
-      expect(response).toHaveStatusCode(201);
+      const created = await apiServices.alertingV2.rules.create(body);
 
       const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
-        ruleId: response.body.id,
+        ruleId: created.id,
         eventType: RULE_CREATED_EBT_EVENT_TYPE,
       });
       expect(event.properties).toMatchObject({
-        rule_id: response.body.id,
+        rule_id: created.id,
         kind: body.kind,
         enabled: true,
         origin: API_ORIGIN,
@@ -69,15 +63,13 @@ apiTest.describe(
       expect(event.properties.origin.app).toBeUndefined();
     });
 
-    apiTest('reports rule.updated', async ({ apiClient, apiServices }) => {
+    apiTest('reports rule.updated', async ({ apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'ebt-rule-to-update' } })
       );
-      const response = await apiClient.patch(getRuleUrl(created.id), {
-        headers: writerHeaders,
-        body: { metadata: { name: 'ebt-renamed-rule' } },
+      await apiServices.alertingV2.rules.update(created.id, {
+        metadata: { name: 'ebt-renamed-rule' },
       });
-      expect(response).toHaveStatusCode(200);
 
       const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
         ruleId: created.id,
@@ -91,41 +83,32 @@ apiTest.describe(
       expect(event.properties.origin.app).toBeUndefined();
     });
 
-    apiTest(
-      'reports rule.deleted with the enabled state at deletion',
-      async ({ apiClient, apiServices }) => {
-        const created = await apiServices.alertingV2.rules.create(
-          buildCreateRuleData({ metadata: { name: 'ebt-rule-to-delete' } })
-        );
-        const response = await apiClient.delete(getRuleUrl(created.id), {
-          headers: writerHeaders,
-        });
-        expect(response).toHaveStatusCode(204);
+    apiTest('reports rule.deleted with the enabled state at deletion', async ({ apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'ebt-rule-to-delete' } })
+      );
+      await apiServices.alertingV2.rules.delete(created.id);
 
-        const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
-          ruleId: created.id,
-          eventType: RULE_DELETED_EBT_EVENT_TYPE,
-        });
-        expect(event.properties).toMatchObject({
-          rule_id: created.id,
-          enabled: true,
-          origin: API_ORIGIN,
-        });
-        expect(event.properties.origin.app).toBeUndefined();
-      }
-    );
+      const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
+        ruleId: created.id,
+        eventType: RULE_DELETED_EBT_EVENT_TYPE,
+      });
+      expect(event.properties).toMatchObject({
+        rule_id: created.id,
+        enabled: true,
+        origin: API_ORIGIN,
+      });
+      expect(event.properties.origin.app).toBeUndefined();
+    });
 
-    apiTest('reports rule.enabled', async ({ apiClient, apiServices }) => {
+    apiTest('reports rule.enabled', async ({ apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'ebt-rule-to-enable' } })
       );
-      // Start the rule disabled so the endpoint has an actual transition to make.
-      await apiServices.alertingV2.rules.bulkDisable({ ids: [created.id] });
+      // Start the rule disabled so enable has an actual transition to make.
+      await apiServices.alertingV2.rules.disable(created.id);
 
-      const response = await apiClient.post(getEnableRuleUrl(created.id), {
-        headers: writerHeaders,
-      });
-      expect(response).toHaveStatusCode(200);
+      await apiServices.alertingV2.rules.enable(created.id);
 
       const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
         ruleId: created.id,
@@ -139,14 +122,11 @@ apiTest.describe(
       expect(event.properties.origin.app).toBeUndefined();
     });
 
-    apiTest('reports rule.disabled', async ({ apiClient, apiServices }) => {
+    apiTest('reports rule.disabled', async ({ apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
         buildCreateRuleData({ metadata: { name: 'ebt-rule-to-disable' } })
       );
-      const response = await apiClient.post(getDisableRuleUrl(created.id), {
-        headers: writerHeaders,
-      });
-      expect(response).toHaveStatusCode(200);
+      await apiServices.alertingV2.rules.disable(created.id);
 
       const [event] = await apiServices.alertingV2.ebt.waitForRuleChangedEvents({
         ruleId: created.id,
