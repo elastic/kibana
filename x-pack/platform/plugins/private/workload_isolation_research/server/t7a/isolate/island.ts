@@ -461,13 +461,9 @@ export const createCoreLite = (
         resolveReplica('string', key, fallback, platform.stringFlag(key)),
       getNumberValue: (key: string, fallback: number) =>
         resolveReplica('number', key, fallback, platform.numberFlag(key)),
-      getBooleanValue$: (key: string, fallback: boolean) => {
-        const hit = platform.booleanFlag(key);
-        if (hit !== undefined) return of(hit);
-        return of(
-          bridgeSync<boolean>('replica', 'featureFlag', toData({ kind: 'boolean', key, fallback }) as never)
-        );
-      },
+      getBooleanValue$: (key: string, fallback: boolean) => platform.booleanFlag$(key, fallback),
+      getStringValue$: (key: string, fallback: string) => platform.stringFlag$(key, fallback),
+      getNumberValue$: (key: string, fallback: number) => platform.numberFlag$(key, fallback),
     }),
     pricing: strict('core.pricing', {
       isFeatureAvailable: (featureId: string) => {
@@ -944,6 +940,7 @@ export interface Island {
   }>;
   readonly applyReplicas: (next: IslandSnapshot) => void;
   readonly observePlatform: (token: string) => Promise<Record<string, unknown>>;
+  readonly platform: ReturnType<typeof createPlatformReplica>;
 }
 
 /** Boots the real alerting execution plugin set inside this isolate. */
@@ -1178,8 +1175,9 @@ export const bootIsland = async (
     })),
     applyReplicas: (next: IslandSnapshot) => {
       if (next.replicas) core.platform.apply(next.replicas);
-      if (localSo) verifyRegistryReadiness(next.readiness, core.registeredSoTypes);
+      if (localSo && next.readiness) verifyRegistryReadiness(next.readiness, core.registeredSoTypes);
     },
     observePlatform: (token: string) => core.observePlatform(token),
+    platform: core.platform,
   };
 };

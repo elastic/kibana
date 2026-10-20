@@ -71,6 +71,10 @@ export function createPluginInitializerContext({
     if (typeof holder[key] !== 'function') {
       holder[key] = (path: string) => coreContext.configService.atPathSync(path);
     }
+    const observeKey = Symbol.for('kbn.research.config.atPath');
+    if (typeof holder[observeKey] !== 'function') {
+      holder[observeKey] = (path: string) => coreContext.configService.atPath(path);
+    }
   }
   return {
     opaqueId,

@@ -9,7 +9,7 @@
  * Values that look like secrets are never placed in forwarded log text. */
 
 import { AsyncLocalStorage } from 'async_hooks';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, distinctUntilChanged, map } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 
 export interface ReplicaEnvelope<T> {
@@ -23,10 +23,33 @@ export interface FeatureFlagReplica {
   readonly numbers: Readonly<Record<string, number>>;
 }
 
+export interface PricingProductReplica {
+  readonly type?: string;
+  readonly tier?: string;
+  readonly name?: string;
+  readonly product_lines?: readonly string[];
+}
+
 export interface PricingReplica {
   readonly available: Readonly<Record<string, boolean>>;
-  readonly activeProduct?: string;
+  readonly activeProduct: PricingProductReplica | null;
 }
+
+/** Null is legitimate when pricing tiers are off. Non-null products keep their fields. */
+export const captureActiveProduct = (product: unknown): PricingProductReplica | null => {
+  if (!product || typeof product !== 'object' || Array.isArray(product)) return null;
+  const record = product as Record<string, unknown>;
+  const lines = Array.isArray(record.product_lines)
+    ? record.product_lines.filter((item): item is string => typeof item === 'string')
+    : undefined;
+  const captured: PricingProductReplica = {
+    ...(typeof record.type === 'string' ? { type: record.type } : {}),
+    ...(typeof record.tier === 'string' ? { tier: record.tier } : {}),
+    ...(typeof record.name === 'string' ? { name: record.name } : {}),
+    ...(lines ? { product_lines: lines } : {}),
+  };
+  return Object.keys(captured).length > 0 ? captured : null;
+};
 
 export interface StatusReplica {
   readonly elasticsearch: string;
@@ -273,10 +296,14 @@ export const createPlatformReplica = (initial: PlatformReplicas) => {
   let current = initial;
   const license$ = new BehaviorSubject(initial.license.value);
   const status$ = new BehaviorSubject(initial.status.value);
+  const featureFlags$ = new BehaviorSubject(initial.featureFlags);
   const cache = new Map<string, unknown>();
   const apply = (next: PlatformReplicas) => {
     if (next.license.generation !== current.license.generation) license$.next(next.license.value);
     if (next.status.generation !== current.status.generation) status$.next(next.status.value);
+    if (next.featureFlags.generation !== current.featureFlags.generation) {
+      featureFlags$.next(next.featureFlags);
+    }
     if (
       next.featureFlags.generation !== current.featureFlags.generation ||
       next.pricing.generation !== current.pricing.generation ||
@@ -298,6 +325,29 @@ export const createPlatformReplica = (initial: PlatformReplicas) => {
       features: current.features.generation,
     }),
     booleanFlag: (key: string) => lookupBooleanFlag(current.featureFlags.value, key),
+    booleanFlag$: (key: string, fallback: boolean) =>
+      featureFlags$.pipe(
+        map((envelope) => lookupBooleanFlag(envelope.value, key) ?? fallback),
+        distinctUntilChanged()
+      ),
+    stringFlag$: (key: string, fallback: string) =>
+      featureFlags$.pipe(
+        map((envelope) =>
+          Object.prototype.hasOwnProperty.call(envelope.value.strings, key)
+            ? envelope.value.strings[key]
+            : fallback
+        ),
+        distinctUntilChanged()
+      ),
+    numberFlag$: (key: string, fallback: number) =>
+      featureFlags$.pipe(
+        map((envelope) =>
+          Object.prototype.hasOwnProperty.call(envelope.value.numbers, key)
+            ? envelope.value.numbers[key]
+            : fallback
+        ),
+        distinctUntilChanged()
+      ),
     stringFlag: (key: string) =>
       Object.prototype.hasOwnProperty.call(current.featureFlags.value.strings, key)
         ? current.featureFlags.value.strings[key]
@@ -319,10 +369,37 @@ export const createPlatformReplica = (initial: PlatformReplicas) => {
   };
 };
 
+/** Resolves waiters whose seen fingerprint is no longer current. An unchanged publish waits. */
+export const createReplicaWaitQueue = () => {
+  const pending: Array<{ seen: string; resolve: (fingerprint: string) => void }> = [];
+  return {
+    wait: (seen: string) =>
+      new Promise<string>((resolve) => {
+        pending.push({ seen, resolve });
+      }),
+    publish: (fingerprint: string) => {
+      const ready = pending.filter((item) => item.seen !== fingerprint);
+      const still = pending.filter((item) => item.seen === fingerprint);
+      pending.length = 0;
+      pending.push(...still);
+      for (const item of ready) item.resolve(fingerprint);
+    },
+  };
+};
+
+export const replicaFingerprint = (generation: {
+  readonly license: number;
+  readonly featureFlags: number;
+  readonly pricing: number;
+  readonly status: number;
+  readonly features: number;
+}): string =>
+  `license:${generation.license}|featureFlags:${generation.featureFlags}|pricing:${generation.pricing}|status:${generation.status}|features:${generation.features}`;
+
 export const emptyPlatformReplicas = (): PlatformReplicas => ({
   license: { generation: 1, value: {} },
   featureFlags: { generation: 1, value: emptyFlags },
-  pricing: { generation: 1, value: { available: {} } },
+  pricing: { generation: 1, value: { available: {}, activeProduct: null } },
   status: {
     generation: 1,
     value: { elasticsearch: 'available', savedObjects: 'available', overall: 'available' },

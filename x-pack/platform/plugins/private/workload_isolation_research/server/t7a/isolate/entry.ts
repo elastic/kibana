@@ -22,7 +22,7 @@ import { encodeRunResult, encodeTaskError } from '../task_codec';
 import { bootIsland } from './island';
 import type { Island } from './island';
 import { diffDefinitionParity } from '@kbn/task-manager-plugin/server/lib/research_runner_override';
-import { runWithExecutionContext } from '../../capability_kit/worker_core';
+import { replicaFingerprint, runWithExecutionContext } from '../../capability_kit/worker_core';
 import { edgeStats, fenceStats, missStats, runContext } from './bridge';
 
 let island: Promise<Island> | undefined;
@@ -31,7 +31,7 @@ const slotStartedAt = performance.now();
 let runs = 0;
 
 interface RunInput {
-  readonly phase: 'run' | 'cleanup' | 'stats' | 'boot' | 'platform';
+  readonly phase: 'run' | 'cleanup' | 'stats' | 'boot' | 'platform' | 'platform-watch' | 'replicas';
   readonly taskType: string;
   readonly taskInstance: Record<string, unknown>;
   readonly executionUuid?: string;
@@ -96,6 +96,43 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
       if (input.taskType === 'gc') forceGc();
       return stats() as CodecInput;
     }
+    if (input.phase === 'replicas') {
+      const current = await getIsland(context);
+      current.applyReplicas(dataSnapshot(context));
+      return { ok: true, generations: current.platform.generation() } as CodecInput;
+    }
+    if (input.phase === 'platform-watch') {
+      const current = await getIsland(context);
+      current.applyReplicas(dataSnapshot(context));
+      const seen: boolean[] = [];
+      const subscription = current.platform
+        .booleanFlag$('workerCore.liveProbe', false)
+        .subscribe((value) => seen.push(value));
+      const licenseSeen: string[] = [];
+      const statusSeen: string[] = [];
+      const licenseSub = current.platform.license$.subscribe((value) => {
+        licenseSeen.push(String((value as { type?: string }).type ?? ''));
+      });
+      const statusSub = current.platform.status$.subscribe((value) => statusSeen.push(value.overall));
+      try {
+        const next = (await context.call('replica', 'wait', {
+          fingerprint: replicaFingerprint(current.platform.generation()),
+        })) as IslandSnapshot['replicas'];
+        current.applyReplicas({ replicas: next } as IslandSnapshot);
+        return {
+          seen,
+          licenseSeen,
+          statusSeen,
+          generations: current.platform.generation(),
+          probeFlag: current.platform.booleanFlag('workerCore.liveProbe') ?? null,
+          activeProduct: current.platform.activeProduct(),
+        } as CodecInput;
+      } finally {
+        subscription.unsubscribe();
+        licenseSub.unsubscribe();
+        statusSub.unsubscribe();
+      }
+    }
     if (input.phase === 'platform') {
       const current = await getIsland(context);
       current.applyReplicas(dataSnapshot(context));
@@ -123,6 +160,21 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
     const wasCold = !island;
     const current = await getIsland(context);
     current.applyReplicas(dataSnapshot(context));
+    let watchStopped = false;
+    const watchReplicas = async () => {
+      while (!watchStopped && !context.signal.aborted) {
+        try {
+          const next = (await context.call('replica', 'wait', {
+            fingerprint: replicaFingerprint(current.platform.generation()),
+          })) as IslandSnapshot['replicas'];
+          if (watchStopped || !next) return;
+          current.applyReplicas({ replicas: next } as IslandSnapshot);
+        } catch {
+          return;
+        }
+      }
+    };
+    void watchReplicas();
     const parity = diffDefinitionParity(
       ((dataSnapshot(context).taskDefinitionMeta as readonly {
         type: string;
@@ -188,6 +240,7 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
         } as unknown as CodecInput;
       }
     } finally {
+      watchStopped = true;
       context.signal.removeEventListener('abort', onAbort);
     }
   });

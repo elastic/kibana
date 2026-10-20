@@ -24,9 +24,15 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import {
   CONFIG_CAPTURE_KEY,
+  CONFIG_OBSERVE_KEY,
+  advanceGeneration,
+  captureActiveProduct,
   classifyFlagOverrides,
   configKeyPaths,
+  createReplicaWaitQueue,
+  emptyPlatformReplicas,
   fingerprintSavedObjectType,
+  replicaFingerprint,
   taskManagerExecutionContext,
   toPlainConfig,
 } from '../capability_kit/worker_core';
@@ -122,13 +128,13 @@ export class T7aController {
   private snapshot?: IslandSnapshot;
   private license?: Obj;
   private licenseGeneration = 0;
-  private pricingGeneration = 0;
-  private flagGeneration = 1;
-  private flagSeen = false;
   private probeFlag: boolean | undefined;
-  private featuresGeneration = 1;
-  private featuresHash = '';
+  private flagsState = { hash: '', generation: 1 };
+  private featuresState = { hash: '', generation: 1 };
+  private pricingState = { hash: '', generation: 1 };
+  private cachedFlags = classifyFlagOverrides(undefined);
   private featureList: unknown[] = [];
+  private readonly replicaQueue = createReplicaWaitQueue();
   private configKeyCount = 0;
   private configErrors: string[] = [];
   private readonly forwarded = { log: 0, audit: 0, analytics: 0 };
@@ -149,19 +155,19 @@ export class T7aController {
       this.license = next;
       if (!same) {
         this.licenseGeneration += 1;
-        this.pricingGeneration += 1;
-        this.snapshot = undefined;
+        this.notifyReplicas();
       }
     });
     deps.core.featureFlags.getBooleanValue$('workerCore.liveProbe', false).subscribe((value) => {
-      const changed = this.flagSeen && this.probeFlag !== value;
-      this.flagSeen = true;
       this.probeFlag = value;
-      if (changed) {
-        this.flagGeneration += 1;
-        this.snapshot = undefined;
-      }
+      this.refreshFlags();
     });
+    const observe = (
+      globalThis as Record<symbol, (path: string) => { subscribe: (fn: () => void) => void }>
+    )[CONFIG_OBSERVE_KEY];
+    if (typeof observe === 'function') {
+      observe('feature_flags').subscribe(() => this.refreshFlags());
+    }
     registerExecutionClass({
       id: WORKLOAD_CLASS,
       taskTypes: (taskType) => OFFMAIN_TASK_TYPES.has(taskType),
@@ -175,7 +181,7 @@ export class T7aController {
   }
 
   public refreshStatus(): void {
-    this.snapshot = undefined;
+    this.notifyReplicas();
   }
 
   public async configure(next: Partial<T7aConfig>): Promise<T7aConfig> {
@@ -215,7 +221,20 @@ export class T7aController {
   }
 
   /** Dispatches a control phase (stats/gc/platform) to warm slots; used by memory probes. */
-  public async probe(kind: 'stats' | 'gc' | 'boot' | 'coldstart' | 'platform'): Promise<Obj> {
+  public async probe(kind: 'stats' | 'gc' | 'boot' | 'coldstart' | 'platform' | 'platform-watch'): Promise<Obj> {
+    if (kind === 'platform-watch') {
+      const outcome: Outcome = await this.getHost().run(
+        this.runOptions(
+          'alerting:.es-query',
+          { phase: 'platform-watch', taskType: 'platform-watch', taskInstance: {} },
+          'default',
+          undefined
+        )
+      );
+      return outcome.status === 'failure'
+        ? { status: 'failure', error: `${outcome.error.name}: ${outcome.error.message}` }
+        : (outcome as unknown as Obj);
+    }
     if (kind === 'platform') return this.platformProbe();
     if (kind === 'coldstart') {
       await this.stopHost();
@@ -312,52 +331,54 @@ export class T7aController {
     return this.snapshot;
   }
 
-  private activeProductName(): string | undefined {
-    const product = (
-      this.deps.core.pricing as {
-        getActiveProduct?: () => { name?: string; type?: string; tier?: string } | undefined;
-      }
-    ).getActiveProduct?.();
-    if (!product) return undefined;
-    if (typeof product.name === 'string' && product.name.length > 0) return product.name;
-    const parts = [product.type, product.tier].filter((part): part is string => Boolean(part));
-    return parts.length > 0 ? parts.join(':') : undefined;
+  private refreshFlags(): void {
+    const flags = classifyFlagOverrides(readResearchConfig('feature_flags'));
+    if (this.probeFlag !== undefined) flags.booleans['workerCore.liveProbe'] = this.probeFlag;
+    const next = advanceGeneration(this.flagsState.hash, this.flagsState.generation, flags);
+    const changed = next.hash !== this.flagsState.hash && this.flagsState.hash !== '';
+    this.flagsState = next;
+    this.cachedFlags = flags;
+    if (changed) this.notifyReplicas();
   }
 
   private featureSnapshot(): unknown[] {
     let list: unknown[] = [];
     try {
-      list = JSON.parse(
-        JSON.stringify(this.deps.features?.getKibanaFeatures?.() ?? [])
-      ) as unknown[];
+      list = JSON.parse(JSON.stringify(this.deps.features?.getKibanaFeatures?.() ?? [])) as unknown[];
     } catch (error) {
       this.configErrors = [...this.configErrors, `features: ${(error as Error).name ?? 'Error'}`];
       list = this.featureList;
     }
-    const ids = list.map((item) =>
-      item && typeof item === 'object' && 'id' in item ? String((item as { id: unknown }).id) : ''
-    );
-    const hash = `${list.length}:${ids.join(',')}`;
-    if (hash !== this.featuresHash) {
-      if (this.featuresHash !== '') this.featuresGeneration += 1;
-      this.featuresHash = hash;
+    const next = advanceGeneration(this.featuresState.hash, this.featuresState.generation, list);
+    if (next.hash !== this.featuresState.hash) {
+      const changed = this.featuresState.hash !== '';
+      this.featuresState = next;
       this.featureList = list;
+      if (changed) this.snapshot = undefined;
     }
     return this.featureList;
   }
 
+  private pricingReplica(): PlatformReplicas['pricing'] {
+    const value = {
+      available: {},
+      activeProduct: captureActiveProduct(
+        (
+          this.deps.core.pricing as { getActiveProduct?: () => unknown }
+        ).getActiveProduct?.()
+      ),
+    };
+    const next = advanceGeneration(this.pricingState.hash, this.pricingState.generation, value);
+    if (next.hash !== this.pricingState.hash && this.pricingState.hash !== '') this.snapshot = undefined;
+    this.pricingState = next;
+    return { generation: next.generation, value };
+  }
+
   private replicas(_unused?: unknown): PlatformReplicas {
-    const flags = classifyFlagOverrides(readResearchConfig('feature_flags'));
-    if (this.flagGeneration > 1 && this.probeFlag !== undefined) {
-      flags.booleans['workerCore.liveProbe'] = this.probeFlag;
-    }
     return {
       license: { generation: Math.max(this.licenseGeneration, 1), value: this.license ?? {} },
-      featureFlags: { generation: this.flagGeneration, value: flags },
-      pricing: {
-        generation: Math.max(this.pricingGeneration, 1),
-        value: { available: {}, activeProduct: this.activeProductName() },
-      },
+      featureFlags: { generation: this.flagsState.generation, value: this.cachedFlags },
+      pricing: this.pricingReplica(),
       status: {
         generation: this.statusSource.generation,
         value: {
@@ -366,8 +387,61 @@ export class T7aController {
           overall: this.statusSource.overall,
         },
       },
-      features: { generation: this.featuresGeneration, value: { kibana: this.featureSnapshot() } },
+      features: { generation: this.featuresState.generation, value: { kibana: this.featureSnapshot() } },
     };
+  }
+
+  private notifyReplicas(): void {
+    this.snapshot = undefined;
+    const snapshot = this.buildSnapshot();
+    const replicas = snapshot.replicas;
+    if (!replicas) return;
+    this.replicaQueue.publish(
+      replicaFingerprint({
+        license: replicas.license.generation,
+        featureFlags: replicas.featureFlags.generation,
+        pricing: replicas.pricing.generation,
+        status: replicas.status.generation,
+        features: replicas.features.generation,
+      })
+    );
+    if (!this.host || this.config.mode !== 'offmain') return;
+    void this.getHost()
+      .run(
+        this.runOptions(
+          'alerting:.es-query',
+          { phase: 'replicas', taskType: 'replicas', taskInstance: {} },
+          'default',
+          undefined
+        )
+      )
+      .catch(() => undefined);
+  }
+
+  private waitForReplicaChange(seen: string, signal?: AbortSignal): Promise<PlatformReplicas> {
+    const current = this.buildSnapshot().replicas;
+    if (!current) return Promise.resolve(emptyPlatformReplicas());
+    const fingerprint = replicaFingerprint({
+      license: current.license.generation,
+      featureFlags: current.featureFlags.generation,
+      pricing: current.pricing.generation,
+      status: current.status.generation,
+      features: current.features.generation,
+    });
+    if (fingerprint !== seen || signal?.aborted) return Promise.resolve(current);
+    return new Promise((resolve) => {
+      let settled = false;
+      const finish = () => {
+        if (settled) return;
+        settled = true;
+        clearTimeout(timer);
+        signal?.removeEventListener('abort', finish);
+        resolve(this.buildSnapshot().replicas ?? current);
+      };
+      const timer = setTimeout(finish, 30_000);
+      signal?.addEventListener('abort', finish, { once: true });
+      void this.replicaQueue.wait(seen).then(finish);
+    });
   }
 
   private async platformProbe(): Promise<Obj> {
@@ -489,14 +563,27 @@ export class T7aController {
         this.forwarded.analytics += 1;
         return { ok: true };
       }),
-      replica: asBinding(async (op, args) => {
-        if (op === 'pricing') return core.pricing.isFeatureAvailable(String(args.featureId));
-        if (op !== 'featureFlag') throw new Error('t7a replica: op not allowlisted');
-        const flags = core.featureFlags;
-        if (args.kind === 'string') return flags.getStringValue(String(args.key), String(args.fallback ?? ''));
-        if (args.kind === 'number') return flags.getNumberValue(String(args.key), Number(args.fallback ?? 0));
-        return flags.getBooleanValue(String(args.key), Boolean(args.fallback));
-      }),
+      replica: {
+        lever: 'capability_bundle',
+        handler: async (operation, args, _bundle, context) => {
+          const record = (args ?? {}) as Obj;
+          if (operation === 'pricing') return toData(core.pricing.isFeatureAvailable(String(record.featureId)));
+          if (operation === 'wait') {
+            return toData(
+              await this.waitForReplicaChange(String(record.fingerprint ?? ''), context?.signal)
+            );
+          }
+          if (operation !== 'featureFlag') throw new Error('t7a replica: op not allowlisted');
+          const flags = core.featureFlags;
+          if (record.kind === 'string') {
+            return toData(flags.getStringValue(String(record.key), String(record.fallback ?? '')));
+          }
+          if (record.kind === 'number') {
+            return toData(flags.getNumberValue(String(record.key), Number(record.fallback ?? 0)));
+          }
+          return toData(flags.getBooleanValue(String(record.key), Boolean(record.fallback)));
+        },
+      },
       so: asBinding(async (op, args) => {
         const client = soClient(args);
         const method = client[op] as AnyFn | undefined;

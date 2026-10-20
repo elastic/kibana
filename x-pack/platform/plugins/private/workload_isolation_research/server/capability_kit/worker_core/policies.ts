@@ -323,3 +323,21 @@ export const toPlainConfig = (value: unknown, depth = 0): unknown => {
 };
 
 export const CONFIG_CAPTURE_KEY = Symbol.for('kbn.research.config.atPathSync');
+export const CONFIG_OBSERVE_KEY = Symbol.for('kbn.research.config.atPath');
+
+/** Stable hash of replica content. Id lists and counts are not a substitute. */
+export const contentHash = (value: unknown): string =>
+  createHash('sha256').update(stableStringify(value)).digest('hex');
+
+/**
+ * Bumps generation when content changes. The first observation keeps the starting generation.
+ */
+export const advanceGeneration = (
+  previousHash: string,
+  generation: number,
+  value: unknown
+): { readonly hash: string; readonly generation: number } => {
+  const hash = contentHash(value);
+  if (hash === previousHash) return { hash, generation };
+  return { hash, generation: previousHash === '' ? generation : generation + 1 };
+};

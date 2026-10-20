@@ -21,8 +21,11 @@ import {
 import {
   ALERTING_BOOT_ES_WRITE_ALLOW,
   NAMED_EVENT_EXCLUSIONS,
+  advanceGeneration,
+  captureActiveProduct,
   configKeyPaths,
   classifyFlagOverrides,
+  createReplicaWaitQueue,
   createBootEsWriteFence,
   createEventForwarder,
   createExecutionContextService,
@@ -149,12 +152,80 @@ test('replicas refresh on generation change and do not invent flag or price defa
     },
     pricing: {
       generation: 2,
-      value: { available: { 'platinum-only': false }, activeProduct: 'basic' },
+      value: {
+        available: { 'platinum-only': false },
+        activeProduct: { name: 'basic' },
+      },
     },
   });
   assert.equal(replica.booleanFlag('alertingFeature'), false);
   assert.equal(replica.price('platinum-only'), false);
-  assert.equal(replica.activeProduct(), 'basic');
+  assert.deepEqual(replica.activeProduct(), { name: 'basic' });
+});
+
+test('replica subscriptions and content hashes observe warm owner changes', async () => {
+  const replica = createPlatformReplica(emptyPlatformReplicas());
+  const flags: boolean[] = [];
+  let completed = false;
+  const subscription = replica.booleanFlag$('workerCore.liveProbe', false).subscribe({
+    next: (value: boolean) => flags.push(value),
+    complete: () => {
+      completed = true;
+    },
+  });
+  const statuses: string[] = [];
+  replica.status$.subscribe((value) => statuses.push(value.overall));
+  replica.apply({
+    ...emptyPlatformReplicas(),
+    featureFlags: {
+      generation: 2,
+      value: {
+        booleans: { 'workerCore.liveProbe': true, 'alerting.other': false },
+        strings: {},
+        numbers: {},
+      },
+    },
+    license: { generation: 2, value: { type: 'gold' } },
+    status: {
+      generation: 2,
+      value: { elasticsearch: 'available', savedObjects: 'degraded', overall: 'degraded' },
+    },
+  });
+  assert.deepEqual(flags, [false, true]);
+  assert.equal(completed, false);
+  assert.equal(statuses[statuses.length - 1], 'degraded');
+  subscription.unsubscribe();
+  const sameIds = [
+    { id: 'alerting', privileges: { disabled: false } },
+    { id: 'actions', privileges: { disabled: false } },
+  ];
+  const changedPrivileges = [
+    { id: 'alerting', privileges: { disabled: true } },
+    { id: 'actions', privileges: { disabled: false } },
+  ];
+  assert.equal(
+    `${sameIds.length}:${sameIds.map((item) => item.id).join(',')}`,
+    `${changedPrivileges.length}:${changedPrivileges.map((item) => item.id).join(',')}`
+  );
+  const first = advanceGeneration('', 1, sameIds);
+  const second = advanceGeneration(first.hash, first.generation, changedPrivileges);
+  assert.equal(second.generation, 2);
+  assert.equal(captureActiveProduct(undefined), null);
+  assert.deepEqual(
+    captureActiveProduct({ type: 'security', tier: 'complete', product_lines: ['endpoint'] }),
+    { type: 'security', tier: 'complete', product_lines: ['endpoint'] }
+  );
+  const queue = createReplicaWaitQueue();
+  let published = '';
+  const waiting = queue.wait('license:1|featureFlags:1').then((fingerprint: string) => {
+    published = fingerprint;
+  });
+  queue.publish('license:1|featureFlags:1');
+  await Promise.resolve();
+  assert.equal(published, '');
+  queue.publish('license:2|featureFlags:2');
+  await waiting;
+  assert.equal(published, 'license:2|featureFlags:2');
 });
 
 test('logger and events forward to the sink and redact secret-looking meta', () => {
