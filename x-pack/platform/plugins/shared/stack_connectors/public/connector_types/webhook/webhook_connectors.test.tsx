@@ -167,6 +167,7 @@ describe('WebhookActionConnectorFields renders', () => {
         'http://localhost:10200',
         'http://127.0.0.1:10200',
         'http://[::1]:10200',
+        'https://dev-logstash:10200/logs%20archive?source=kibana',
       ])('accepts an HTTP or HTTPS endpoint: %s', async (url) => {
         render(
           <ConnectorFormTestProvider
@@ -202,8 +203,24 @@ describe('WebhookActionConnectorFields renders', () => {
         });
       });
 
-      it.each(['', 'dev-logstash:10200', 'http://', 'https://', 'ftp://dev-logstash:10200'])(
-        'rejects an endpoint without an HTTP or HTTPS URL: %s',
+      it.each([
+        '',
+        'dev-logstash:10200',
+        'http://',
+        'https://',
+        'ftp://dev-logstash:10200',
+        'http://a b',
+        'http://dev-logstash:10200/logs with spaces',
+        'http://dev-logstash:10200/\tlogs',
+        'http://dev-logstash:10200/\nlogs',
+        'http://dev-logstash:10200/\r\nlogs',
+        'http://dev-logstash:10200/\n',
+        'http://dev-logstash:10200/\r',
+        'http://dev-logstash:10200/\r\n',
+        'http://dev-logstash:10200/\u2028',
+        'http://dev-logstash:10200/\u2029',
+      ])(
+        'rejects an invalid HTTP or HTTPS endpoint: %s',
         async (url) => {
           render(
             <ConnectorFormTestProvider
