@@ -57,6 +57,17 @@ jest.mock('./sources/page', () => {
     ),
   };
 });
+jest.mock('./pages/detection/page', () => {
+  const { NightshiftAppHeader } = jest.requireActual('./app/app_header');
+  return {
+    DetectionPage: ({ headerProps }: { headerProps: NightshiftAppHeaderProps }) => (
+      <>
+        <NightshiftAppHeader {...headerProps} page="detection" />
+        <div data-test-subj="detectionPageStub" />
+      </>
+    ),
+  };
+});
 jest.mock('./settings/page', () => ({
   SettingsPage: ({ headerProps }: { headerProps: { onSandboxSecretsClick?: () => void } }) => {
     const [draft, setDraft] = React.useState('');
@@ -299,6 +310,14 @@ describe('NightshiftPage', () => {
         expect(screen.getByTestId('nightshiftKnowledgeLink')).toBeInTheDocument();
       }
     );
+  });
+
+  it('renders the lazy Detection page at /detection', async () => {
+    renderPage('/detection');
+
+    expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Detection');
+    expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
   });
 
   describe('sandbox secrets', () => {

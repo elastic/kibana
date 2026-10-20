@@ -21,6 +21,7 @@ import { getNightshiftCapabilities, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightsh
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftApp } from './app/app';
 import {
+  DETECTION_PAGE_TITLE,
   KNOWLEDGE_PAGE_TITLE,
   NightshiftAppHeader,
   SETTINGS_PAGE_TITLE,
@@ -43,6 +44,10 @@ const KnowledgePage = React.lazy(() =>
 
 const SourcesPage = React.lazy(() =>
   import('./sources/page').then(({ SourcesPage: Page }) => ({ default: Page }))
+);
+
+const DetectionPage = React.lazy(() =>
+  import('./pages/detection/page').then(({ DetectionPage: Page }) => ({ default: Page }))
 );
 
 export function NightshiftPage(): React.ReactElement | null {
@@ -101,6 +106,7 @@ export function NightshiftPage(): React.ReactElement | null {
   );
   const isKnowledgePage = pathname === '/knowledge' || pathname.startsWith('/knowledge/');
   const isSourcesPage = pathname === '/sources' || pathname.startsWith('/sources/');
+  const isDetectionPage = pathname === '/detection' || pathname.startsWith('/detection/');
   const isSettingsPage = pathname === '/settings' || pathname.startsWith('/settings/');
   const canUseAutomationsPage = canUseAutomations && pathname.startsWith('/automations');
   const isAutomationDetailRoute = pathname.startsWith('/automations/');
@@ -168,6 +174,7 @@ export function NightshiftPage(): React.ReactElement | null {
       ...(isSettingsPage ? [{ text: SETTINGS_PAGE_TITLE }] : []),
       ...(isKnowledgePage ? [{ text: KNOWLEDGE_PAGE_TITLE }] : []),
       ...(isSourcesPage ? [{ text: SOURCES_PAGE_TITLE }] : []),
+      ...(isDetectionPage ? [{ text: DETECTION_PAGE_TITLE }] : []),
     ],
     { serverless }
   );
@@ -196,6 +203,7 @@ export function NightshiftPage(): React.ReactElement | null {
     !isSettingsPage &&
     !isKnowledgePage &&
     !isSourcesPage &&
+    !isDetectionPage &&
     !canUseAutomationsPage &&
     !isOnboarding &&
     !onboarding.isLoading;
@@ -240,6 +248,34 @@ export function NightshiftPage(): React.ReactElement | null {
             />
           </Route>
         </Routes>
+      ) : isDetectionPage ? (
+        <React.Suspense
+          fallback={
+            <EuiPageTemplate.Section component="div" restrictWidth={false}>
+              <EuiLoadingSpinner size="xl" data-test-subj="nightshiftDetectionPageLazyLoading" />
+            </EuiPageTemplate.Section>
+          }
+        >
+          <Routes>
+            <Route path="/detection">
+              <DetectionPage
+                headerProps={{
+                  onSourcesClick: navigateToSources,
+                  sourcesHref,
+                  onKnowledgeClick: navigateToKnowledge,
+                  knowledgeHref,
+                  onSettingsClick: canManageAndConfigure ? navigateToSettings : undefined,
+                  settingsHref: canManageAndConfigure ? settingsHref : undefined,
+                  onSandboxSecretsClick: canManageSandboxSecrets
+                    ? openSandboxSecretsFlyout
+                    : undefined,
+                  onAutomationsClick: canUseAutomations ? navigateToAutomations : undefined,
+                  automationsHref: canUseAutomations ? automationsHref : undefined,
+                }}
+              />
+            </Route>
+          </Routes>
+        </React.Suspense>
       ) : isSourcesPage ? (
         <React.Suspense
           fallback={
