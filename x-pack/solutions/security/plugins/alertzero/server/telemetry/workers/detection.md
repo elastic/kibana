@@ -27,7 +27,7 @@ Both reviews report a manual entry gate the same way: the gate's own arm reports
 
 Neither sweep reports `items_failed`. The sweeps start their reviews without waiting for them, so the review decisions come from each review's own event.
 
-- **Rule Tuning:** `failed_source_unavailable` when the harvest or the enabled-rules lookup fails, `produced` when it requested a review, `empty_at_capacity` when it requested none while reviews are in flight, `empty_nothing_found` otherwise. The harvest drops rules already under review, so `empty_at_capacity` means nothing new to review, not a limit; it keeps `degraded_reason: none`. It can also cover a sweep that found no noisy rule at all while unrelated reviews run.
+- **Rule Tuning:** `failed_source_unavailable` when the harvest or the enabled-rules lookup fails, `produced` when it requested a review, `empty_nothing_found` otherwise. The harvest drops rules already under review, so a sweep that finds only those reports `empty_nothing_found` with a non-zero `items_in_flight`, as Rule Coverage reports `empty_nothing_pending`.
 - **Rule Coverage:** `failed_source_unavailable` when the search fails, `empty_nothing_pending` with no pending indicator, `empty_at_capacity` when indicators are pending but no review slot is free (`degraded_reason: capacity`), `produced` otherwise.
 - A failed lookup that either sweep carries on without gives `degraded_reason: dependency_unavailable`.
 

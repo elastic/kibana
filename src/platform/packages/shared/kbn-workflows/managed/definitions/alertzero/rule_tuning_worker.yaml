@@ -338,13 +338,10 @@ steps:
       degraded_reason: "{% if steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null or steps.list_active_reviews.error != null %}dependency_unavailable{% else %}none{% endif %}"
       run_outcome: |-
         {%- assign requested = steps.resolve_fanout_rows.output.rows | default: consts.no_rows | size -%}
-        {%- assign active = steps.collect_active_rules.output.expected | default: 0 -%}
         {%- if steps.harvest_fp_alerts_by_rule.error != null or steps.list_enabled_candidates.error != null -%}
         failed_source_unavailable
         {%- elsif requested > 0 -%}
         produced
-        {%- elsif active > 0 -%}
-        empty_at_capacity
         {%- else -%}
         empty_nothing_found
         {%- endif -%}

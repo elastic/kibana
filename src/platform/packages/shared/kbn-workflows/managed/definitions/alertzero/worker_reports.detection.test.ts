@@ -189,7 +189,7 @@ describe('Rule Tuning outcome reports', () => {
         },
       ],
       [
-        // The harvest drops rules already under review, so nothing new is left to start.
+        // The harvest drops rules already under review, so the sweep finds nothing new.
         'nothing new to review while reviews are in flight',
         { activeReviews: 2 },
         {
@@ -198,7 +198,7 @@ describe('Rule Tuning outcome reports', () => {
           items_dispatched: 0,
           items_in_flight: '2',
           lookup_failed: false,
-          run_outcome: 'empty_at_capacity',
+          run_outcome: 'empty_nothing_found',
           source_read_failed: false,
         },
       ],
