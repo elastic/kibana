@@ -59,6 +59,9 @@ describe('digital experience apps', () => {
       expect(() => parseDigitalExperienceScenarioOpts({ sessionId: true })).toThrow(
         'Unknown scenarioOpts: sessionId'
       );
+      expect(() => parseDigitalExperienceScenarioOpts({ toString: 'x' })).toThrow(
+        'Unknown scenarioOpts: toString'
+      );
       expect(() => parseDigitalExperienceScenarioOpts({ scale: 0 })).toThrow(
         'scale must be a positive number'
       );

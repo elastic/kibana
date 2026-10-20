@@ -357,7 +357,9 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
 export const parseDigitalExperienceScenarioOpts = (
   opts: Record<string, unknown> | undefined
 ): DigitalExperienceScenarioOpts => {
-  const unknownKeys = Object.keys(opts ?? {}).filter((key) => !(key in DEFAULT_SCENARIO_OPTS));
+  const unknownKeys = Object.keys(opts ?? {}).filter(
+    (key) => !Object.hasOwn(DEFAULT_SCENARIO_OPTS, key)
+  );
   if (unknownKeys.length) {
     throw new Error(`Unknown scenarioOpts: ${unknownKeys.join(', ')}`);
   }
