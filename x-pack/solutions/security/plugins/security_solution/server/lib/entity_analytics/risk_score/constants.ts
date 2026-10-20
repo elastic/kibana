@@ -6,7 +6,7 @@
  */
 
 /**
- * The risk scoring algorithm uses a Riemann zeta function to sum an entity's risk inputs to a known, finite value (@see RIEMANN_ZETA_VALUE).
+ * The risk scoring algorithm uses a Riemann zeta function to sum an entity's risk inputs to a known, finite value (@see getRiemannZetaValue).
  * It does so by assigning each input a weight based on its position in the list (ordered by score) of inputs.
  * This value represents the complex variable s of Re(s) in traditional Riemann zeta function notation.
  *
@@ -31,13 +31,16 @@ const partialZetaSum = (s: number, terms: number): number => {
   return sum;
 };
 
+const zetaBySampleSize = new Map<number, number>();
+
 /**
- * Represents the value calculated by Riemann Zeta function for RIEMANN_ZETA_S_VALUE with DEFAULT_ALERT_SAMPLE_SIZE iterations (inputs).
+ * Returns the value calculated by Riemann Zeta function for RIEMANN_ZETA_S_VALUE with `sampleSize` iterations (inputs).
  * The maximum unnormalized risk score value is calculated by multiplying this value by the maximum alert risk_score (100),
  * so normalization maps an entity whose sampled alerts all score 100 to a normalized score of 100.
  *
- * It's derived from RIEMANN_ZETA_S_VALUE and DEFAULT_ALERT_SAMPLE_SIZE so the two can't drift apart. It was 2.5924 while
- * the default sample size was 10,000; moving to 500 raised every normalized score by about 2.8%.
+ * Normalize with the sample size the scoring query actually used, which `alertSampleSizePerShard` can override.
+ * Dividing by the value for another sample size pushes saturated scores past 100 (larger sample size) or below it (smaller).
+ * Results are memoized per sample size, since the sum is O(sampleSize).
  *
  * The Riemann Zeta value for different number of inputs is:
  * | 𝑍(s,inputs)  |
@@ -55,7 +58,16 @@ const partialZetaSum = (s: number, terms: number): number => {
  *
  * Read more: https://en.wikipedia.org/wiki/Riemann_zeta_function
  */
-export const RIEMANN_ZETA_VALUE = partialZetaSum(RIEMANN_ZETA_S_VALUE, DEFAULT_ALERT_SAMPLE_SIZE);
+export const getRiemannZetaValue = (sampleSize: number): number => {
+  const terms = Math.max(1, Math.floor(sampleSize));
+  const cached = zetaBySampleSize.get(terms);
+  if (cached !== undefined) {
+    return cached;
+  }
+  const value = partialZetaSum(RIEMANN_ZETA_S_VALUE, terms);
+  zetaBySampleSize.set(terms, value);
+  return value;
+};
 
 /**
  * This value represents the maximum possible risk score after normalization.

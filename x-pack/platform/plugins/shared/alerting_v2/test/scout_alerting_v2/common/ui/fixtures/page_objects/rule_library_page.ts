@@ -8,7 +8,7 @@
 import type { Locator, ScoutPage } from '@kbn/scout';
 import type { AlertingMountConfig } from './alerting_mount_config';
 
-/** Drives the Rule library page, where rule templates are installed as rules. */
+/** Drives the Rule library page, where rules are created from templates. */
 export class RuleLibraryPage {
   public readonly page: Locator;
   /** Success toast action that opens the rule that was just created. */
@@ -41,8 +41,13 @@ export class RuleLibraryPage {
     return this.page.getByRole('row').filter({ hasText: templateName });
   }
 
+  createButton(templateName: string) {
+    return this.templateRow(templateName).getByTestId('ruleLibraryCreateAction');
+  }
+
+  /** @deprecated Use {@link createButton} instead. */
   installButton(templateName: string) {
-    return this.templateRow(templateName).getByTestId('ruleLibraryInstallAction');
+    return this.createButton(templateName);
   }
 
   createdToast(ruleName: string) {
