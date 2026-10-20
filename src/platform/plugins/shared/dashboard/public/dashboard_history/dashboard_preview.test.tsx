@@ -13,75 +13,14 @@ import React from 'react';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { ChangeHistoryDetail } from '@kbn/change-history-ui';
 
+import * as dashboardApiModule from '../dashboard_api/get_dashboard_api';
 import { DashboardPreview } from './dashboard_preview';
 
-/**
- * The renderer is replaced with a stand-in that behaves like the real one with respect to `setState`:
- * it renders whatever panels it was last given, and keeps the previous time range when a new state has none.
- */
-const mockSetStateControl = {
-  manual: false,
-  /** `setState` calls that have started but not yet been settled; only populated in manual mode */
-  calls: [] as Array<{ resolve: () => void; reject: (error: Error) => void }>,
-};
-
-jest.mock('..', () => {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { useEffect, useRef, useState } = require('react');
-  return {
-    DASHBOARD_APP_ID: 'dashboards',
-    DashboardRenderer: ({
-      getCreationOptions,
-      onApiAvailable,
-    }: {
-      getCreationOptions: () => Promise<{ getInitialInput: () => Record<string, unknown> }>;
-      onApiAvailable: (api: unknown) => void;
-    }) => {
-      const [state, setState] = useState(undefined as Record<string, any> | undefined);
-      const mountCount = useRef(0);
-      useEffect(() => {
-        mountCount.current += 1;
-        let cancelled = false;
-        getCreationOptions().then(({ getInitialInput }) => {
-          if (cancelled) return;
-          setState(getInitialInput());
-          onApiAvailable({
-            setState: async (next: Record<string, any>) => {
-              if (mockSetStateControl.manual) {
-                await new Promise<void>((resolve, reject) => {
-                  mockSetStateControl.calls.push({ resolve, reject });
-                });
-              }
-              setState((prev: Record<string, any>) => ({
-                ...next,
-                viewMode: prev?.viewMode,
-                time_range: next.time_range ?? prev?.time_range,
-              }));
-            },
-          });
-        });
-        return () => {
-          cancelled = true;
-        };
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-      }, []);
-      if (!state) return null;
-      return (
-        <div data-test-subj="dashboardRenderer" data-mount-count={mountCount.current}>
-          <div data-test-subj="viewMode">{state.viewMode}</div>
-          <div data-test-subj="renderedTimeRange">{JSON.stringify(state.time_range ?? null)}</div>
-          {(state.panels ?? []).map((panel: { uid: string }) => (
-            <div key={panel.uid} data-test-subj="renderedPanel">
-              {panel.uid}
-            </div>
-          ))}
-        </div>
-      );
-    },
-  };
-});
+/** the renderer is replaced with a stand-in that builds the real dashboard API */
+jest.mock('..', () => jest.requireActual('./mock_dashboard_renderer'));
 
 jest.mock('../services/kibana_services', () => ({
+  ...jest.requireActual('../services/kibana_services'),
   unifiedSearchService: {
     ui: {
       SearchBar: (props: Record<string, unknown>) => (
@@ -111,8 +50,8 @@ const getChange = (id: string, snapshot: Partial<DashboardState>): ChangeHistory
     snapshot: { title: `Title ${id}`, panels: [], ...snapshot },
   } as unknown as ChangeHistoryDetail);
 
-const panel = (uid: string) => ({
-  uid,
+const panel = (id: string) => ({
+  id,
   type: 'markdown',
   grid: { x: 0, y: 0, w: 12, h: 8 },
   config: {},
@@ -157,10 +96,15 @@ const renderedPanels = () => screen.queryAllByTestId('renderedPanel').map((el) =
 const searchBar = () => screen.getByTestId('searchBar');
 
 describe('DashboardPreview', () => {
-  beforeEach(() => {
-    mockSetStateControl.manual = false;
-    mockSetStateControl.calls = [];
-  });
+  /** makes the first `setState` on the next mounted dashboard API reject */
+  const failNextApplication = () => {
+    const { getDashboardApi } = dashboardApiModule;
+    jest.spyOn(dashboardApiModule, 'getDashboardApi').mockImplementationOnce((...args) => {
+      const dashboard = getDashboardApi(...args);
+      jest.spyOn(dashboard.api, 'setState').mockRejectedValueOnce(new Error('failed to apply'));
+      return dashboard;
+    });
+  };
 
   it('renders the snapshot panels in a non-interactive dashboard and reports the title', async () => {
     const { setPreviewTitle } = renderPreview(fullSnapshot);
@@ -259,44 +203,25 @@ describe('DashboardPreview', () => {
       expect(searchBar().dataset.from).toBe('now-1h');
     });
 
-    describe('while a previous snapshot is still being applied', () => {
+    it('applies each snapshot in order when selections change in quick succession', async () => {
+      const { rerender, setPreviewTitle } = renderPreview(bareSnapshot);
+      await waitFor(() => expect(renderedPanels()).toEqual(['panel-c']));
+
+      rerender(<Wrapper change={fullSnapshot} setPreviewTitle={setPreviewTitle} />);
+      rerender(<Wrapper change={bareSnapshot} setPreviewTitle={setPreviewTitle} />);
+      rerender(<Wrapper change={fullSnapshot} setPreviewTitle={setPreviewTitle} />);
+
+      await waitFor(() => expect(renderedPanels()).toEqual(['panel-a', 'panel-b']));
+      expect(screen.getByTestId('dashboardRenderer')).toHaveAttribute('data-mount-count', '1');
+    });
+
+    describe('when a snapshot fails to apply', () => {
       beforeEach(() => {
-        mockSetStateControl.manual = true;
-      });
-
-      it('waits for the in-flight application before applying the next snapshot', async () => {
-        const { rerender, setPreviewTitle } = renderPreview(bareSnapshot);
-        await waitFor(() => expect(mockSetStateControl.calls).toHaveLength(1));
-
-        rerender(<Wrapper change={fullSnapshot} setPreviewTitle={setPreviewTitle} />);
-        await waitFor(() => expect(setPreviewTitle).toHaveBeenLastCalledWith('Title full'));
-        expect(mockSetStateControl.calls).toHaveLength(1);
-
-        mockSetStateControl.calls[0].resolve();
-        await waitFor(() => expect(mockSetStateControl.calls).toHaveLength(2));
-        mockSetStateControl.calls[1].resolve();
-
-        await waitFor(() => expect(renderedPanels()).toEqual(['panel-a', 'panel-b']));
-      });
-
-      it('still applies the next snapshot after an application fails', async () => {
-        const { rerender, setPreviewTitle } = renderPreview(bareSnapshot);
-        await waitFor(() => expect(mockSetStateControl.calls).toHaveLength(1));
-        rerender(<Wrapper change={fullSnapshot} setPreviewTitle={setPreviewTitle} />);
-
-        mockSetStateControl.calls[0].reject(new Error('failed to apply'));
-        await waitFor(() => expect(mockSetStateControl.calls).toHaveLength(2));
-        mockSetStateControl.calls[1].resolve();
-
-        await waitFor(() => expect(renderedPanels()).toEqual(['panel-a', 'panel-b']));
+        failNextApplication();
       });
 
       it('shows an error for the selection whose application failed', async () => {
         renderPreview(bareSnapshot);
-        await waitFor(() => expect(mockSetStateControl.calls).toHaveLength(1));
-        expect(screen.queryByTestId('dashboardPreviewApplyError')).not.toBeInTheDocument();
-
-        mockSetStateControl.calls[0].reject(new Error('failed to apply'));
 
         expect(await screen.findByTestId('dashboardPreviewApplyError')).toBeInTheDocument();
         expect(screen.queryByTestId('searchBar')).not.toBeInTheDocument();
@@ -304,16 +229,12 @@ describe('DashboardPreview', () => {
 
       it('clears the error when a later selection applies successfully', async () => {
         const { rerender, setPreviewTitle } = renderPreview(bareSnapshot);
-        await waitFor(() => expect(mockSetStateControl.calls).toHaveLength(1));
-        mockSetStateControl.calls[0].reject(new Error('failed to apply'));
         await screen.findByTestId('dashboardPreviewApplyError');
 
         rerender(<Wrapper change={fullSnapshot} setPreviewTitle={setPreviewTitle} />);
+
         /** the error state unmounts the renderer, so recovering remounts it and applies the snapshot on the new API */
-        await waitFor(() => {
-          mockSetStateControl.calls.slice(1).forEach(({ resolve }) => resolve());
-          expect(renderedPanels()).toEqual(['panel-a', 'panel-b']);
-        });
+        await waitFor(() => expect(renderedPanels()).toEqual(['panel-a', 'panel-b']));
         expect(screen.queryByTestId('dashboardPreviewApplyError')).not.toBeInTheDocument();
       });
     });
