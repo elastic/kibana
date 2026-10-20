@@ -76,9 +76,106 @@ describe('createEmulatorFetch', () => {
         request: 'GET https://api.example.com/v1/items',
         operation: 'listItems',
         matched: { method: 'get', path: '/items' },
+        responseSource: 'generated',
         status: 200,
         requestViolations: [],
         responseViolations: [],
+      },
+    ]);
+  });
+
+  it('records whether a fixture, a recording or the responder answered each call', async () => {
+    const { fetch, calls } = createEmulatorFetch({
+      specs: [spec],
+      fixtures: [
+        { operation: { method: 'GET', path: '/items' }, response: { status: 200, body: [] } },
+      ],
+      recordings: [
+        {
+          exchanges: [
+            {
+              operation: { method: 'POST', path: '/items' },
+              response: { status: 201, body: { name: 'recorded' } },
+            },
+          ],
+        },
+      ],
+    });
+
+    await fetch(`${BASE_URL}/items`);
+    await fetch(`${BASE_URL}/items`, postJson({ name: 'a' }));
+    await fetch(`${BASE_URL}/items?limit=500`);
+
+    expect(calls.map(({ operation, responseSource }) => ({ operation, responseSource }))).toEqual([
+      { operation: 'listItems', responseSource: 'fixture' },
+      { operation: 'createItem', responseSource: 'recording' },
+      // Rejected requests get no response from any source.
+      { operation: 'listItems', responseSource: undefined },
+    ]);
+  });
+
+  it('reports each call to onCall as it is recorded', async () => {
+    const onCall = jest.fn();
+    const { fetch, calls } = createEmulatorFetch({ specs: [spec], respond: listResponder, onCall });
+
+    await fetch(`${BASE_URL}/items`);
+    await fetch(`${BASE_URL}/unknown`);
+
+    expect(onCall.mock.calls.map(([call]) => call)).toEqual(calls);
+    expect(calls).toHaveLength(2);
+  });
+
+  it('empties calls on reset, keeping the array that tests hold', async () => {
+    const emulator = createEmulatorFetch({ specs: [spec], respond: listResponder });
+    const { calls } = emulator;
+
+    await emulator.fetch(`${BASE_URL}/items`);
+    emulator.reset();
+    await emulator.fetch(`${BASE_URL}/unknown`);
+
+    expect(emulator.calls).toBe(calls);
+    expect(calls).toEqual([expect.objectContaining({ status: 404 })]);
+  });
+
+  it('lists the operations it answers, for OpenAPI and protocol specs', () => {
+    const graphql = {
+      format: 'graphql' as const,
+      sdl: 'type Query { boards: [String] } type Mutation { createBoard(name: String): String }',
+      endpoints: ['https://api.example.com/graphql'],
+    };
+
+    const { operations } = createEmulatorFetch({ specs: { rest: spec, graphql } });
+
+    expect(operations).toEqual([
+      {
+        protocol: 'openapi',
+        id: 'listItems',
+        method: 'GET',
+        path: '/items',
+        servers: [BASE_URL],
+        source: 'rest',
+      },
+      {
+        protocol: 'openapi',
+        id: 'createItem',
+        method: 'POST',
+        path: '/items',
+        servers: [BASE_URL],
+        source: 'rest',
+      },
+      {
+        protocol: 'graphql',
+        name: 'query boards',
+        readOnly: true,
+        endpoints: ['https://api.example.com/graphql'],
+        source: 'graphql',
+      },
+      {
+        protocol: 'graphql',
+        name: 'mutation createBoard',
+        readOnly: false,
+        endpoints: ['https://api.example.com/graphql'],
+        source: 'graphql',
       },
     ]);
   });

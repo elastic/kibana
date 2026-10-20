@@ -62,6 +62,8 @@ export interface ProtocolExchange {
 export interface ContractProtocol {
   /** The `origin` and `pathname` of each URL it answers, without a trailing slash. */
   readonly endpoints: readonly string[];
+  /** Every operation the spec declares, named as `ProtocolExchange.operations` names them. */
+  readonly operations: readonly NamedOperation[];
   handle(request: ContractRequest): Promise<ProtocolExchange>;
 }
 

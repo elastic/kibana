@@ -259,8 +259,17 @@ export const createMcpProtocol = (spec: McpSpec, source?: string): ContractProto
     }
   };
 
+  const at = source === undefined ? {} : { source };
   return {
     endpoints: spec.endpoints.map((endpoint) => toEndpoint(new URL(endpoint))),
+    operations: [
+      { name: 'tools/list', ...at, readOnly: true },
+      ...[...tools.values()].map(({ name, annotations }) => ({
+        name: `tools/call ${name}`,
+        ...at,
+        readOnly: annotations?.readOnlyHint === true,
+      })),
+    ],
     handle: async (request) => {
       if (request.method !== 'post') {
         return notAllowed(request.method);

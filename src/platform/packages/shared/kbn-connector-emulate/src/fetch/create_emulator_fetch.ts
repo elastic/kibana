@@ -33,6 +33,8 @@ import type { ContractOperation, OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
 import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
+import type { EmulatorOperation, LoadedProtocol } from './list_operations';
+import { listOperations } from './list_operations';
 
 /** One request the mock received, for assertions in tests. */
 export interface ContractCall {
@@ -54,6 +56,11 @@ export interface ContractCall {
   readonly protocolMessage?: true;
   /** Set for requests to the token URL of an OAuth 2 flow, which the mock answers itself. */
   readonly token?: true;
+  /**
+   * Set for answered OpenAPI operations: whether the response came from a fixture, a recording,
+   * or the `respond` fallback (the spec's examples and samples by default).
+   */
+  readonly responseSource?: 'fixture' | 'recording' | 'generated';
   readonly status: number;
   readonly requestViolations: readonly Violation[];
   readonly responseViolations: readonly Violation[];
@@ -77,13 +84,19 @@ export interface EmulatorOptions extends PaginationOptions {
    * then deterministic samples of its schemas.
    */
   readonly respond?: Responder;
+  /** Called with each call as it is recorded, e.g. to log requests as they arrive. */
+  readonly onCall?: (call: ContractCall) => void;
 }
 
 export interface Emulator {
   readonly fetch: typeof fetch;
   readonly calls: ContractCall[];
+  /** The operations the specs declare, which is what the emulator answers. */
+  readonly operations: readonly EmulatorOperation[];
   /** Fixtures and recordings that aren't served because the spec contradicts them. */
   readonly rejectedResponses: readonly RejectedResponse[];
+  /** Empties `calls`, e.g. between tests; the array keeps its identity. */
+  readonly reset: () => void;
 }
 
 const JSON_HEADERS = { 'content-type': 'application/json' };
@@ -148,18 +161,21 @@ const loadSpecs = (specs: EmulatorOptions['specs']): ContractOperation[] =>
     isGraphQLSpec(spec) || isMcpSpec(spec) ? [] : loadSpec(spec, source)
   );
 
-const loadProtocols = (specs: EmulatorOptions['specs']): Map<string, ContractProtocol> => {
-  const protocols = new Map<string, ContractProtocol>();
-  for (const [source, spec] of toNamedSpecs(specs)) {
-    const protocol = isGraphQLSpec(spec)
-      ? createGraphQLProtocol(spec, source)
+const loadProtocols = (specs: EmulatorOptions['specs']): LoadedProtocol[] =>
+  toNamedSpecs(specs).flatMap(([source, spec]): LoadedProtocol[] =>
+    isGraphQLSpec(spec)
+      ? [{ protocol: 'graphql', instance: createGraphQLProtocol(spec, source) }]
       : isMcpSpec(spec)
-      ? createMcpProtocol(spec, source)
-      : undefined;
-    protocol?.endpoints.forEach((endpoint) => protocols.set(endpoint, protocol));
-  }
-  return protocols;
-};
+      ? [{ protocol: 'mcp', instance: createMcpProtocol(spec, source) }]
+      : []
+  );
+
+const byEndpoint = (loaded: readonly LoadedProtocol[]): Map<string, ContractProtocol> =>
+  new Map(
+    loaded.flatMap(({ instance }) =>
+      instance.endpoints.map((endpoint) => [endpoint, instance] as const)
+    )
+  );
 
 const toOperationRef = ({ method, path, spec: { source } }: ContractOperation): OperationRef => ({
   method,
@@ -194,9 +210,11 @@ export const createEmulatorFetch = ({
   pagination,
   collectionSize,
   respond = sampleResponse,
+  onCall,
 }: EmulatorOptions): Emulator => {
   const operations = loadSpecs(specs);
-  const protocols = loadProtocols(specs);
+  const loadedProtocols = loadProtocols(specs);
+  const protocols = byEndpoint(loadedProtocols);
   const tokenEndpoints = findTokenEndpoints(operations);
   const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });
   const contract = createOpenApiAdapter(
@@ -208,6 +226,10 @@ export const createEmulatorFetch = ({
     )
   );
   const calls: ContractCall[] = [];
+  const record = (call: ContractCall) => {
+    calls.push(call);
+    onCall?.(call);
+  };
 
   const handle = async (request: ContractRequest): Promise<ContractResponse> => {
     const description = `${request.method.toUpperCase()} ${request.url.origin}${
@@ -223,14 +245,14 @@ export const createEmulatorFetch = ({
       } = await protocol.handle(request);
       const base = { request: description, status: response.statusCode, requestViolations };
       if (called.length === 0 && messages.length === 0) {
-        calls.push({ ...base, responseViolations: [] });
+        record({ ...base, responseViolations: [] });
       }
       for (const message of messages) {
-        calls.push({ ...base, operation: message, protocolMessage: true, responseViolations: [] });
+        record({ ...base, operation: message, protocolMessage: true, responseViolations: [] });
       }
       for (const { name, source, readOnly } of called) {
         const matched = { name, ...(source === undefined ? {} : { source }) };
-        calls.push({ ...base, operation: name, matched, readOnly, responseViolations: [] });
+        record({ ...base, operation: name, matched, readOnly, responseViolations: [] });
       }
       return response;
     }
@@ -238,7 +260,7 @@ export const createEmulatorFetch = ({
     const grants = tokenEndpoints.get(`${request.url.origin}${request.url.pathname}`);
     if (!('operation' in routed) && grants) {
       const response = respondToTokenRequest(grants, request);
-      calls.push({
+      record({
         request: description,
         operation: 'OAuth token',
         token: true,
@@ -249,7 +271,7 @@ export const createEmulatorFetch = ({
       return response;
     }
     if (!('operation' in routed)) {
-      calls.push({
+      record({
         request: description,
         status: routed.status,
         requestViolations: [],
@@ -267,7 +289,7 @@ export const createEmulatorFetch = ({
       authViolations.length > 0 ? authViolations : contract.validateRequest(routed, request);
     if (requestViolations.length > 0) {
       const statusCode = authViolations.length > 0 ? 401 : 422;
-      calls.push({
+      record({
         request: description,
         operation: name,
         matched,
@@ -284,10 +306,11 @@ export const createEmulatorFetch = ({
 
     const response = contract.respond(operation, request);
     const responseViolations = contract.validateResponse(operation, response);
-    calls.push({
+    record({
       request: description,
       operation: name,
       matched,
+      responseSource: engine.servedFrom(operation) ?? 'generated',
       status: response.statusCode,
       requestViolations,
       responseViolations,
@@ -298,5 +321,13 @@ export const createEmulatorFetch = ({
   const mockFetch: typeof fetch = async (input, init) =>
     toResponse(await handle(await toContractRequest(new Request(input, init))));
 
-  return { fetch: mockFetch, calls, rejectedResponses: engine.rejected };
+  return {
+    fetch: mockFetch,
+    calls,
+    operations: listOperations(operations, loadedProtocols),
+    rejectedResponses: engine.rejected,
+    reset: () => {
+      calls.length = 0;
+    },
+  };
 };

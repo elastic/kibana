@@ -172,8 +172,15 @@ const buildCachedSchema = (sdl: string): GraphQLSchema => {
  */
 export const createGraphQLProtocol = (spec: GraphQLSpec, source?: string): ContractProtocol => {
   const schema = buildCachedSchema(spec.sdl);
+  const rootFields = (type: 'query' | 'mutation'): NamedOperation[] =>
+    Object.keys(schema.getRootType(type)?.getFields() ?? {}).map((field) => ({
+      name: `${type} ${field}`,
+      ...(source === undefined ? {} : { source }),
+      readOnly: type === 'query',
+    }));
   return {
     endpoints: spec.endpoints.map((endpoint) => toEndpoint(new URL(endpoint))),
+    operations: [...rootFields('query'), ...rootFields('mutation')],
     handle: async (request) => {
       if (request.method !== 'get' && request.method !== 'post') {
         return rejected(
