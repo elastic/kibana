@@ -185,9 +185,6 @@ export function opbeans({
                 spanType: 'db',
                 spanSubtype: 'postgresql',
               })
-              .defaults({
-                'span.db.statement': 'SELECT * FROM product WHERE id = $1',
-              })
               .timestamp(timestamp)
               .duration(50)
               .failure()

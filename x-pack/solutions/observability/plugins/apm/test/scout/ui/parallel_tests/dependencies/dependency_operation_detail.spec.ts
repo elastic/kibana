@@ -85,20 +85,6 @@ test.describe(
       });
     });
 
-    test('TEMP database statement span flyout', async ({
-      page,
-      pageObjects: { dependencyDetailsPage },
-    }) => {
-      await page
-        .getByRole('button', { name: `View details for ${dependencyDetailsPage.SPAN_NAME}` })
-        .first()
-        .click();
-      await expect(page.testSubj.locator('spanFlyoutDatabaseSection')).toBeVisible();
-      const cdp = await page.context().newCDPSession(page);
-      await cdp.send('Emulation.clearDeviceMetricsOverride');
-      await page.pause();
-    });
-
     test('Service badge in waterfall links to service overview', async ({
       page,
       pageObjects: { dependencyDetailsPage },
