@@ -10,11 +10,8 @@
 export { createEmulatorFetch } from './src/fetch/create_emulator_fetch';
 export { createCertificateAuthority } from './src/server/certificate_authority';
 export type { CertificateAuthority, CertificateKeyPair } from './src/server/certificate_authority';
-export { createContractMockProxy } from './src/server/create_contract_mock_proxy';
-export type {
-  ContractMockProxy,
-  ContractMockProxyOptions,
-} from './src/server/create_contract_mock_proxy';
+export { createEmulatorProxy } from './src/server/create_emulator_proxy';
+export type { EmulatorProxy, EmulatorProxyOptions } from './src/server/create_emulator_proxy';
 export { sampleBoundaryResponse, sampleResponse } from './src/engine/sample_response';
 export { sampleJsonSchema } from './src/engine/sample_schema';
 export type { SampleJsonSchemaOptions } from './src/engine/sample_schema';
@@ -22,7 +19,7 @@ export type {
   ContractCall,
   Emulator,
   EmulatorOptions,
-  ContractMockSpec,
+  EmulatorSpec,
 } from './src/fetch/create_emulator_fetch';
 export { isGraphQLSpec } from './src/graphql/graphql_protocol';
 export type { GraphQLSpec } from './src/graphql/graphql_protocol';

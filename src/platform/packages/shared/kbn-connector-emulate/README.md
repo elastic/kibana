@@ -37,10 +37,10 @@ Each call's `matched.source` then says which spec answered it. Fixtures, recordi
 A running Kibana can't use an in-process `fetch`, so the mock can also sit behind an HTTP forward proxy, which Kibana reaches through `xpack.actions.proxyUrl`:
 
 ```ts
-import { createCertificateAuthority, createContractMockProxy } from '@kbn/connector-emulate';
+import { createCertificateAuthority, createEmulatorProxy } from '@kbn/connector-emulate';
 
 const certificateAuthority = createCertificateAuthority();
-const proxy = createContractMockProxy({ fetch: mock.fetch, certificateAuthority });
+const proxy = createEmulatorProxy({ fetch: mock.fetch, certificateAuthority });
 const proxyUrl = await proxy.listen(8080);
 ```
 

@@ -15,14 +15,14 @@ import type { SecureContext } from 'tls';
 import { createSecureContext, TLSSocket } from 'tls';
 import type { CertificateAuthority } from './certificate_authority';
 
-export interface ContractMockProxyOptions {
+export interface EmulatorProxyOptions {
   /** Answers every request the proxy receives, typically a contract mock's `fetch`. */
   readonly fetch: typeof fetch;
   /** Issues the certificates presented for HTTPS hosts; clients must trust its certificate. */
   readonly certificateAuthority: CertificateAuthority;
 }
 
-export interface ContractMockProxy {
+export interface EmulatorProxy {
   /** Starts listening, by default on a free port of 127.0.0.1, and resolves to the proxy URL. */
   readonly listen: (port?: number, host?: string) => Promise<URL>;
   readonly close: () => Promise<void>;
@@ -100,10 +100,10 @@ const sendError = (response: ServerResponse, statusCode: number, title: string, 
  * Plain HTTP requests arrive in absolute form; HTTPS ones through `CONNECT` tunnels, whose TLS
  * the proxy terminates with a certificate for the requested host issued by `certificateAuthority`.
  */
-export const createContractMockProxy = ({
+export const createEmulatorProxy = ({
   fetch: answer,
   certificateAuthority,
-}: ContractMockProxyOptions): ContractMockProxy => {
+}: EmulatorProxyOptions): EmulatorProxy => {
   const tunnelOrigins = new WeakMap<Socket, string>();
   const secureContexts = new Map<string, SecureContext>();
   const sockets = new Set<Socket>();

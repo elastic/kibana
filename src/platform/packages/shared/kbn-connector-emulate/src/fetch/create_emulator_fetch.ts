@@ -60,14 +60,14 @@ export interface ContractCall {
 }
 
 /** An OpenAPI document, or a spec of a protocol with its own endpoints: GraphQL or MCP. */
-export type ContractMockSpec = OpenApiDocument | GraphQLSpec | McpSpec;
+export type EmulatorSpec = OpenApiDocument | GraphQLSpec | McpSpec;
 
 export interface EmulatorOptions extends PaginationOptions {
   /**
    * The vendor specs the connector targets, e.g. both API versions it calls. Named specs (such
    * as `{ v1, v2 }`) let `calls`, fixtures, recordings and pagination tell their operations apart.
    */
-  readonly specs: readonly ContractMockSpec[] | Readonly<Record<string, ContractMockSpec>>;
+  readonly specs: readonly EmulatorSpec[] | Readonly<Record<string, EmulatorSpec>>;
   /** Hand-written responses, served in preference to everything else. */
   readonly fixtures?: readonly ResponseFixture[];
   /** Responses captured from the vendor, served when they still conform to the spec. */
@@ -123,12 +123,12 @@ const toContractRequest = async (request: Request): Promise<ContractRequest> => 
   };
 };
 
-const isSpecList = (specs: EmulatorOptions['specs']): specs is readonly ContractMockSpec[] =>
+const isSpecList = (specs: EmulatorOptions['specs']): specs is readonly EmulatorSpec[] =>
   Array.isArray(specs);
 
 const toNamedSpecs = (
   specs: EmulatorOptions['specs']
-): Array<readonly [string | undefined, ContractMockSpec]> =>
+): Array<readonly [string | undefined, EmulatorSpec]> =>
   isSpecList(specs) ? specs.map((spec) => [undefined, spec] as const) : Object.entries(specs);
 
 // Loading copies and normalizes the document, which takes seconds and gigabytes for specs such

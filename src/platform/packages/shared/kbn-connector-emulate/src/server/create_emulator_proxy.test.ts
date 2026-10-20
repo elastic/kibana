@@ -17,8 +17,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { OpenApiDocument } from '../openapi';
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import { createCertificateAuthority } from './certificate_authority';
-import type { ContractMockProxy } from './create_contract_mock_proxy';
-import { createContractMockProxy } from './create_contract_mock_proxy';
+import type { EmulatorProxy } from './create_emulator_proxy';
+import { createEmulatorProxy } from './create_emulator_proxy';
 
 const spec: OpenApiDocument = {
   openapi: '3.0.3',
@@ -99,10 +99,10 @@ const send = (url: string, { method = 'GET', body, agent }: SentRequest) =>
     request.end(body);
   });
 
-describe('createContractMockProxy', () => {
+describe('createEmulatorProxy', () => {
   const certificateAuthority = createCertificateAuthority();
   let mock: ReturnType<typeof createEmulatorFetch>;
-  let proxy: ContractMockProxy;
+  let proxy: EmulatorProxy;
   let proxyUrl: URL;
 
   // The agents Kibana's actions plugin builds for `xpack.actions.proxyUrl`, trusting the mock's CA
@@ -129,7 +129,7 @@ describe('createContractMockProxy', () => {
 
   beforeEach(async () => {
     mock = createEmulatorFetch({ specs: [spec] });
-    proxy = createContractMockProxy({ fetch: mock.fetch, certificateAuthority });
+    proxy = createEmulatorProxy({ fetch: mock.fetch, certificateAuthority });
     proxyUrl = await proxy.listen();
   });
 
@@ -198,7 +198,7 @@ describe('createContractMockProxy', () => {
 
   it('answers 502 when the mock throws', async () => {
     await proxy.close();
-    proxy = createContractMockProxy({
+    proxy = createEmulatorProxy({
       fetch: () => Promise.reject(new Error('boom')),
       certificateAuthority,
     });
