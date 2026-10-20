@@ -672,6 +672,27 @@ describe('SlackAppService', () => {
       });
     });
 
+    it('returns who connected the workspace and when', async () => {
+      const { server, soClient } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          tenantKey: 'tenant-A',
+          apiKeyId: 'key-1',
+          createdBy: 'alice',
+          createdAt: '2026-10-19T12:00:00.000Z',
+        },
+      });
+
+      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+        available: true,
+        status: RELAY_APP_CONNECTION_STATUS.connected,
+        workspace: { tenantKey: 'tenant-A' },
+        createdBy: 'alice',
+        createdAt: '2026-10-19T12:00:00.000Z',
+      });
+    });
+
     it('reports an in-progress install that has a tenant key as awaiting confirmation, without polling the Relay', async () => {
       const { server, soClient } = createHarness();
       soClient.get.mockResolvedValue({

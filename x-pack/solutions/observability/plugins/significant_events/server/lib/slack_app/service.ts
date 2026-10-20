@@ -599,6 +599,8 @@ export class SlackAppService {
         : connection.status,
       ...(connection.error ? { error: connection.error } : {}),
       ...(workspace ? { workspace } : {}),
+      ...(workspace && connection.createdBy ? { createdBy: connection.createdBy } : {}),
+      ...(workspace && connection.createdAt ? { createdAt: connection.createdAt } : {}),
     };
   }
 
