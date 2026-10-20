@@ -255,12 +255,13 @@ search.
 
 1. **Activate paths.** Only `confirms` signals activate paths. If no signal is `confirms`, emit empty
    `causal_features` and `blast_radius` and skip the remaining sub-steps. For each confirming signal:
-   - Identify the failed service or component from the query KI first: `query.features[]`, then the
-     identity literals in its predicate (such as `service.name == "<service>"`), matched exactly and
-     uniquely to a fetched feature's `feature.id` or `properties.name`. Use its title and description
-     only to disambiguate. Use the service or component named in the found row only when the KI
-     identifies none, or to corroborate. Match the result to a fetched dependency's `source`. A matching
-     `target`, shared technology, or another signal's affected service does not activate a path.
+   - Identify the failed entity or infrastructure from the query KI first: `query.features[]`, then
+     any value its predicate pins to a field that names a resource (a service, host, pod, database,
+     or queue, whatever the field), matched exactly and uniquely to a fetched feature's `feature.id`
+     or `properties.name`. Use its title and description only to disambiguate. Use the component
+     named in the found row only when the KI identifies none, or to corroborate. Match the result to
+     a fetched dependency's `source`. A matching `target`, shared technology, or another signal's
+     affected service does not activate a path.
    - After that source match, if the dependency's fetched `evidence`, `description`, or `meta`
      documents a connection, timeout, refusal, or protocol failure, activate the path, even when the
      row does not repeat the target and the dependency is absent from `query.features[]`.
