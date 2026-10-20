@@ -35,7 +35,7 @@ export const useAttackRunWorkflowContextMenuItems = ({
   // entry name the attack and render the button that reopens its flyout.
   const originAttackId = attacksWithIndex.length === 1 ? attacksWithIndex[0].attackId : undefined;
 
-  const bulkActionItems = useBulkAttackRunWorkflowItems({ telemetrySource, originAttackId });
+  const bulkActionItems = useBulkAttackRunWorkflowItems({ originAttackId });
 
   const attackItems = useMemo(
     () =>
