@@ -1019,6 +1019,10 @@ describe('getAlreadyNotifiedQueries', () => {
     expect(query).toContain('action_type == "notified"');
     expect(query).toContain('action_group_id IN ("group-1", "group-2")');
     expect(query).toContain('alert_id IN ("alert-a", "alert-b")');
+    expect(query).toContain('_pair_key = CONCAT(action_group_id, "::", alert_id)');
+    expect(query).toContain(
+      '_pair_key IN ("group-1::alert-a", "group-1::alert-b", "group-2::alert-a")'
+    );
     expect(query).toContain('notified_through = MAX(last_series_event_timestamp)');
     expect(query).toContain('BY action_group_id, alert_id');
     expect(query).toContain('KEEP action_group_id, alert_id, notified_through');
@@ -1032,6 +1036,19 @@ describe('getAlreadyNotifiedQueries', () => {
 
     expect(query).toContain('action_group_id IN ("group-1")');
     expect(query).toContain('alert_id IN ("alert-a")');
+    expect(query).toContain('_pair_key IN ("group-1::alert-a")');
+  });
+
+  it('filters on the requested pairs after the indexed IN lists and before STATS', () => {
+    const [{ query }] = getAlreadyNotifiedQueries([
+      createActionGroup({ id: 'group-1', alerts: [alertA] }),
+    ]);
+
+    const preFilter = query.indexOf('action_group_id IN (');
+    const pairFilter = query.indexOf('_pair_key IN (');
+    expect(preFilter).toBeGreaterThan(-1);
+    expect(pairFilter).toBeGreaterThan(preFilter);
+    expect(pairFilter).toBeLessThan(query.indexOf('| STATS'));
   });
 
   it('never puts more pairs in a chunk than the row limit returns', () => {

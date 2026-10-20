@@ -101,9 +101,10 @@ export const ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES = 600_000;
 // under the 1 MB ES|QL statement cap.
 export const SUPPRESSIONS_IN_CLAUSE_LITERAL_BUDGET_BYTES = 300_000;
 
-// Pair budget for the already-notified query. Each chunk emits two IN lists (group ids and alert
-// ids), so this budget is smaller than the default to keep both lists plus the static body under
-// the 1 MB ES|QL statement cap.
+// Pair budget for the already-notified query. Each chunk emits the pair keys plus two pre-filter
+// IN lists (group ids and alert ids) that together are no longer than the keys, so this budget is
+// smaller than the default to keep all three lists plus the static body under the 1 MB ES|QL
+// statement cap.
 export const ALREADY_NOTIFIED_IN_CLAUSE_LITERAL_BUDGET_BYTES = 300_000;
 
 // `"<value>", ` = 2 quotes + comma + space (4 bytes) + 2 escape-margin bytes per literal.
@@ -355,12 +356,13 @@ export const getAlertDataQueries = (
   });
 };
 
-// Returns one request per chunk (see ALREADY_NOTIFIED_IN_CLAUSE_LITERAL_BUDGET_BYTES). The two IN
-// lists can also match pairs that were not requested, and a pair can come back from two chunks:
-// the step looks up requested pairs only, and every row of a pair carries the same MAX.
+// Returns one request per chunk (see ALREADY_NOTIFIED_IN_CLAUSE_LITERAL_BUDGET_BYTES). The group
+// and alert IN lists alone also match unrequested combinations of the two, which could push
+// requested pairs past the row limit; the pair-key filter keeps at most one row per requested pair.
+// The IN lists must stay in front of it: they are served by the index, the computed key is not.
 //
 // Matches only `notified` records carrying an alert_id. Records written before notified became
-// per-alert have none, so they never mark content as delivered: a legacy record can cause a
+// per-alert have none, so they never mark content as handled: a legacy record can cause a
 // duplicate, never a loss.
 export const getAlreadyNotifiedQueries = (groups: readonly ActionGroup[]): EsqlRequest[] => {
   const pairsByKey = new Map<string, { groupId: ActionGroupId; alertId: string }>();
@@ -383,6 +385,8 @@ export const getAlreadyNotifiedQueries = (groups: readonly ActionGroup[]): EsqlR
 
     return esql`FROM ${ALERT_ACTIONS_DATA_STREAM}
         | WHERE action_type == "notified" AND action_group_id IN (${groupIds}) AND alert_id IN (${alertIds})
+        | EVAL _pair_key = CONCAT(action_group_id, ${PAIR_SEPARATOR}, alert_id)
+        | WHERE _pair_key IN (${toUniqueString(chunk)})
         | STATS notified_through = MAX(last_series_event_timestamp) BY action_group_id, alert_id
         | KEEP action_group_id, alert_id, notified_through
         | LIMIT ${ESQL_QUERY_ROW_LIMIT}`.toRequest();
