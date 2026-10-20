@@ -29,6 +29,10 @@ INDEX_NS="motel-index-collector"
 MOTEL_PORT="${STREAMS_MOTEL_PORT:-14318}"
 MANAGED_OTLP_URL="http://localhost:${MOTEL_PORT}"
 SOURCE_ID="${STREAMS_SOURCE_ID:-input}"
+# Demo traffic: logs per env per round, records per request, seconds between rounds.
+TRAFFIC_COUNT="${STREAMS_TRAFFIC_COUNT:-30}"
+TRAFFIC_BATCH="${STREAMS_TRAFFIC_BATCH:-10}"
+TRAFFIC_EVERY="${STREAMS_TRAFFIC_EVERY:-5}"
 LOGS_DEV_DS="logs-application.otel-dev"
 LOGS_PROD_DS="logs-application.otel-prod"
 METRICS_DS="metrics-streams.otel-default"
@@ -591,52 +595,96 @@ publish_unit() {
   wait_for_unit_artifact
 }
 
+# Rewrites the TLS block under every Elasticsearch exporter in the artifact: the local ES CA
+# and the host.docker.internal SNI. It removes whatever tls block is there first, so running
+# it on a clean, an already patched, or a stacked artifact gives the same result. (An older
+# version appended a block on every run, and the collector then crashed on the duplicate key.)
+# Exit 0 when it changed something, 10 when the artifact was already patched.
+normalize_artifact_tls() {
+  python3 - "$1" "$CA" "$2" <<'PY'
+import re
+import sys
+from pathlib import Path
+
+artifact, ca_path, out_path = sys.argv[1:4]
+original = Path(artifact).read_text()
+lines = original.splitlines()
+ca_lines = Path(ca_path).read_text().splitlines()
+endpoint = re.compile(r"^(\s*)endpoint: \$\{env:STREAMS_ES_ENDPOINT\}\s*$")
+out = []
+i = 0
+while i < len(lines):
+    line = lines[i]
+    out.append(line)
+    i += 1
+    match = endpoint.match(line)
+    if not match:
+        continue
+    indent = match.group(1)
+    while i < len(lines) and lines[i].rstrip() == indent + "tls:":
+        i += 1
+        while i < len(lines) and (not lines[i].strip() or lines[i].startswith(indent + " ")):
+            i += 1
+    out.append(indent + "tls:")
+    out.append(indent + "    server_name_override: host.docker.internal")
+    out.append(indent + "    ca_pem: |")
+    out.extend(indent + "        " + ca_line for ca_line in ca_lines)
+patched = "\n".join(out) + "\n"
+Path(out_path).write_text(patched)
+sys.exit(10 if patched == original.rstrip("\n") + "\n" else 0)
+PY
+}
+
+# Status and logs of the newest collector pod. `logs deploy/...` would pick any pod, often
+# an older healthy one, and hide why the new one fails.
+report_unready_collector() {
+  local pod
+  pod="$(kubectl_ctx -n "$UNIT_NS" get pods -l "app.kubernetes.io/instance=$UNIT_ID" \
+    --sort-by=.metadata.creationTimestamp -o name 2>/dev/null | tail -1)"
+  warn "collector did not become ready. Newest pod: ${pod:-<none>}"
+  [[ -n "$pod" ]] || return 0
+  kubectl_ctx -n "$UNIT_NS" get "$pod" || true
+  kubectl_ctx -n "$UNIT_NS" logs "$pod" --previous --tail=30 2>/dev/null \
+    || kubectl_ctx -n "$UNIT_NS" logs "$pod" --tail=30 || true
+}
+
+# `rollout status` right after the artifact patch can run before the unit operator has applied
+# it, and then reports the stale "progress deadline exceeded" left by an earlier broken rollout.
+# A failure that comes back at once is that case, so wait and ask again. A real failure (a pod
+# that never gets ready) takes the whole timeout and is not retried.
+wait_for_collector_rollout() {
+  local attempt started
+  for attempt in 1 2 3 4 5 6; do
+    started=$SECONDS
+    kubectl_ctx -n "$UNIT_NS" rollout status "deployment/$UNIT_ID" --timeout=180s && return 0
+    (( SECONDS - started < 20 )) || return 1
+    log "rollout status failed at once, probably a stale condition. Retrying in 10s ($attempt/6)"
+    sleep 10
+  done
+  return 1
+}
+
 patch_artifact_tls() {
   log "patching StreamUnit artifact TLS (local ES CA + host.docker.internal SNI)"
   [[ -f "$CA" ]] || die "missing Kibana CA at $CA"
   local artifact="$STATE_DIR/artifact.yaml"
   local patched="$STATE_DIR/artifact.patched.yaml"
   kubectl_ctx -n "$UNIT_NS" get "streamunit/$UNIT_ID" -o jsonpath='{.spec.artifact}' > "$artifact"
-  python3 - "$artifact" "$patched" "$CA" <<'PY'
-from pathlib import Path
-import sys
-
-src, dst, cert_path = Path(sys.argv[1]), Path(sys.argv[2]), Path(sys.argv[3])
-endpoint = "        endpoint: ${env:STREAMS_ES_ENDPOINT}"
-tls_lines = [
-    "        tls:\n",
-    "            server_name_override: host.docker.internal\n",
-    "            ca_pem: |\n",
-]
-tls_lines.extend(f"                {line}" for line in cert_path.read_text().splitlines(True))
-if tls_lines[-1][-1] != "\n":
-    tls_lines[-1] += "\n"
-
-lines = src.read_text().splitlines(True)
-out = []
-i = 0
-while i < len(lines):
-    out.append(lines[i])
-    if lines[i].rstrip("\n") == endpoint:
-        i += 1
-        while i < len(lines) and lines[i].rstrip("\n") == "        tls:":
-            i += 1
-            while i < len(lines) and (
-                lines[i].startswith("            ") or lines[i].strip() == ""
-            ):
-                i += 1
-        out.extend(tls_lines)
-        continue
-    i += 1
-dst.write_text("".join(out))
-PY
-  kubectl_ctx -n "$UNIT_NS" patch "streamunit/$UNIT_ID" --type=merge \
-    -p "{\"spec\":{\"artifact\":$(jq -Rs . < "$patched")}}" >/dev/null
+  local rc=0
+  normalize_artifact_tls "$artifact" "$patched" || rc=$?
+  case "$rc" in
+    0)
+      kubectl_ctx -n "$UNIT_NS" patch "streamunit/$UNIT_ID" --type=merge \
+        -p "{\"spec\":{\"artifact\":$(jq -Rs . < "$patched")}}" >/dev/null
+      log "artifact TLS patched"
+      ;;
+    10) log "artifact TLS is already patched, leaving it as is" ;;
+    *) die "could not normalize the artifact TLS (python exit $rc)" ;;
+  esac
   log "waiting for collector Deployment $UNIT_NS/$UNIT_ID rollout"
-  if ! kubectl_ctx -n "$UNIT_NS" rollout status "deployment/$UNIT_ID" --timeout=180s; then
-    warn "collector did not become ready. Recent logs:"
-    kubectl_ctx -n "$UNIT_NS" logs "deploy/$UNIT_ID" --tail=30 || true
-    die "collector rollout failed (unknown otlp_http: image is too old; set STREAMS_COLLECTOR_TAG)"
+  if ! wait_for_collector_rollout; then
+    report_unready_collector
+    die "collector rollout failed. The newest pod's status and logs are above. Older pods keep serving until it is fixed. Fix the cause and re-run; the TLS patch is safe to repeat."
   fi
 }
 
@@ -754,6 +802,34 @@ PY
   log "writing 10 failure-store docs (invalid @timestamp on $LOGS_DEV_DS / $LOGS_PROD_DS)"
   index_failure_docs "$LOGS_DEV_DS" dev 90 5
   index_failure_docs "$LOGS_PROD_DS" prod 95 5
+}
+
+motel_logs_url() {
+  normalize_otlp_logs_url "$MANAGED_OTLP_URL/inputs/otlp/$SOURCE_ID"
+}
+
+# One OTLP/HTTP logs request through motel: $2 records for env $1, to url $3 with API key $4.
+send_log_batch() {
+  local env="$1" records="$2" url="$3" key="$4" body
+  body="$(jq -nc --arg env "$env" --argjson n "$records" --arg ts "$(date +%s)000000000" '
+    {resourceLogs: [{
+      resource: {attributes: [{key: "env", value: {stringValue: $env}}]},
+      scopeLogs: [{logRecords: [range(0; $n) | {timeUnixNano: $ts, body: {stringValue: "hi from \($env) \(.)"}}]}]
+    }]}')"
+  post_otlp_payload "$url" "$key" "$body" | grep -q 'partialSuccess'
+}
+
+# One round: $1 logs per env, in requests of $2 records, for the envs in $4, to url $3 with API key $5.
+send_traffic_round() {
+  local count="$1" batch="$2" url="$3" envs="$4" key="$5" env left n
+  for env in $envs; do
+    left="$count"
+    while (( left > 0 )); do
+      n=$(( left < batch ? left : batch ))
+      send_log_batch "$env" "$n" "$url" "$key" || { warn "motel did not accept a batch for env=$env"; return 1; }
+      left=$(( left - n ))
+    done
+  done
 }
 
 print_ready() {
@@ -978,6 +1054,79 @@ PY
   die "UI-flow docs did not appear in logs-*"
 }
 
+usage_traffic() {
+  cat <<EOF
+Usage: $0 traffic [flags]
+
+Keeps sending demo OTLP logs through motel, so the unit collector writes fresh stats
+documents. Runs until Ctrl-C unless --once is given.
+
+Flags:
+  --count N      logs per env per round        (default $TRAFFIC_COUNT)
+  --batch N      records per request           (default $TRAFFIC_BATCH)
+  --env E        prod, dev or both             (default both; env=prod routes to es-prod)
+  --every S      seconds between rounds        (default $TRAFFIC_EVERY)
+  --once         send one round and stop
+  --url URL      OTLP logs endpoint            (default the motel source $SOURCE_ID)
+  --key KEY      encoded API key for --url     (default the cached source key)
+EOF
+}
+
+cmd_traffic() {
+  local count="$TRAFFIC_COUNT" batch="$TRAFFIC_BATCH" every="$TRAFFIC_EVERY"
+  local envs="prod dev" once=0 url="" key=""
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --count) count="${2:?--count needs a number}"; shift 2 ;;
+      --batch) batch="${2:?--batch needs a number}"; shift 2 ;;
+      --every) every="${2:?--every needs a number of seconds}"; shift 2 ;;
+      --url) url="${2:?--url needs a URL}"; shift 2 ;;
+      --key) key="${2:?--key needs an encoded API key}"; shift 2 ;;
+      --once) once=1; shift ;;
+      --env)
+        case "${2:-}" in
+          prod | dev) envs="$2" ;;
+          both) envs="prod dev" ;;
+          *) die "--env must be prod, dev or both" ;;
+        esac
+        shift 2
+        ;;
+      -h | --help) usage_traffic; return 0 ;;
+      *) usage_traffic >&2; die "unknown traffic flag: $1" ;;
+    esac
+  done
+  [[ "$count" =~ ^[1-9][0-9]*$ ]] || die "--count must be a positive number"
+  [[ "$batch" =~ ^[1-9][0-9]*$ ]] || die "--batch must be a positive number"
+  [[ "$every" =~ ^[0-9]+$ ]] || die "--every must be a number of seconds"
+  need curl
+  need jq
+  if [[ -z "$url" ]]; then
+    need kubectl
+    ensure_motel_forward
+    url="$(motel_logs_url)"
+    if [[ -z "$key" ]]; then
+      detect_kibana
+      mint_source_api_key
+      key="$SOURCE_KEY"
+    fi
+  fi
+
+  local rounds=0 sent=0 per_round
+  per_round=$(( count * $(printf '%s' "$envs" | wc -w) ))
+  trap 'echo; log "stopped after $rounds rounds, $sent logs sent"; exit 0' INT TERM
+  while true; do
+    if send_traffic_round "$count" "$batch" "$url" "$envs" "$key"; then
+      rounds=$(( rounds + 1 ))
+      sent=$(( sent + per_round ))
+      log "round $rounds: $count logs per env (${envs// /, }), batches of $batch  [$sent sent]"
+    elif [[ "$rounds" -eq 0 ]]; then
+      die "the first round failed. Is the motel port-forward up? Try: $0 status"
+    fi
+    [[ "$once" -eq 1 ]] && return 0
+    sleep "$every"
+  done
+}
+
 restore_controller_patches() {
   if [[ -z "${STREAMS_CONTROLLER:-}" || ! -d "$STREAMS_CONTROLLER/.git" ]]; then
     warn "streams-controller checkout not found; skip reverting local patches"
@@ -1037,6 +1186,7 @@ Usage:
   $0 setup          local patches, motel ingest + index collectors, print managed_otlp.url
   $0 seed           publish unit, mint dest + source API keys, send 100 docs (90 ok, 10 failures)
   $0 test_ui_flow   prompt for a Map source endpoint + API key, send 100 docs
+  $0 traffic        keep sending demo logs until Ctrl-C (see $0 traffic --help)
   $0 status         what is running
   $0 reset          drop Map unit, demo data, StreamUnit CR, controller patches
   $0                setup + seed
@@ -1063,6 +1213,7 @@ main() {
     setup) cmd_setup ;;
     seed) cmd_seed ;;
     test_ui_flow | test-ui-flow) cmd_test_ui_flow ;;
+    traffic) shift; cmd_traffic "$@" ;;
     reset) cmd_reset ;;
     all)
       cmd_setup
