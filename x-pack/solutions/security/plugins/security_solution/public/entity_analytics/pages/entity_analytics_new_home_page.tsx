@@ -805,7 +805,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         title: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.title',
           {
-            defaultMessage: 'Entities with alerts',
+            defaultMessage: 'Severely alerting',
           }
         ),
         value: severeAlertsCount,
@@ -818,9 +818,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {
-            defaultMessage:
-              'Entities with at least one high or critical alert in the last {timeRange}',
-            values: { timeRange },
+            defaultMessage: 'Have at least one high- or critical-severity alert',
           }
         ),
         filterLabel: i18n.translate(
@@ -836,7 +834,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         title: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.title',
           {
-            defaultMessage: 'Entities with anomalies',
+            defaultMessage: 'Anomalous',
           }
         ),
         value: anomaliesCount,
@@ -849,8 +847,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
           {
-            defaultMessage: 'Entities with at least one ML anomaly in the last {timeRange}',
-            values: { timeRange },
+            defaultMessage: 'Flagged by at least one ML anomaly',
           }
         ),
         filterLabel: i18n.translate(
@@ -882,23 +879,13 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
               defaultMessage: 'Requires risk score history data',
             })
           : undefined,
-        description:
-          timeRange === '24h'
-            ? i18n.translate(
-                'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description24h',
-                {
-                  defaultMessage: 'Entities whose risk score rose ≥{points} points vs yesterday',
-                  values: { points: RISK_MOVER_MIN_SCORE_CHANGE },
-                }
-              )
-            : i18n.translate(
-                'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description',
-                {
-                  defaultMessage:
-                    'Entities whose risk score rose ≥{points} points vs the previous {timeRange}',
-                  values: { timeRange, points: RISK_MOVER_MIN_SCORE_CHANGE },
-                }
-              ),
+        description: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description',
+          {
+            defaultMessage: 'Risk score up by {points} or more',
+            values: { points: RISK_MOVER_MIN_SCORE_CHANGE },
+          }
+        ),
         filterLabel: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.filterLabel',
           {
@@ -911,7 +898,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         title: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.title',
           {
-            defaultMessage: 'Newly high/critical',
+            defaultMessage: 'Newly high-risk',
           }
         ),
         value: newlyHCCount,
@@ -930,23 +917,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
               }
             )
           : undefined,
-        description:
-          timeRange === '24h'
-            ? i18n.translate(
-                'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description24h',
-                {
-                  defaultMessage:
-                    'Entities that crossed into High or Critical risk since yesterday',
-                }
-              )
-            : i18n.translate(
-                'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description',
-                {
-                  defaultMessage:
-                    'Entities that crossed into High or Critical risk in the last {timeRange}',
-                  values: { timeRange },
-                }
-              ),
+        description: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description',
+          {
+            defaultMessage: 'Risk level climbed to high or critical',
+          }
+        ),
         filterLabel: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.filterLabel',
           {
@@ -959,7 +935,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         title: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.title',
           {
-            defaultMessage: 'Watchlisted',
+            defaultMessage: 'Watchlisted & alerting',
           }
         ),
         value: watchlistedCount,
@@ -972,9 +948,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
           {
-            defaultMessage:
-              'Entities on a watchlist with at least one alert in the last {timeRange}',
-            values: { timeRange },
+            defaultMessage: 'On a watchlist with at least one alert in this period',
           }
         ),
         filterLabel: i18n.translate(
@@ -987,7 +961,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       {
         id: 'newEntity',
         title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.newEntity.title', {
-          defaultMessage: 'New entity',
+          defaultMessage: 'New & alerting',
         }),
         value: newEntityCount,
         delta: newEntityDelta,
@@ -998,9 +972,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
           {
-            defaultMessage:
-              'Entities first seen in the last {timeRange} with a risk score above zero',
-            values: { timeRange },
+            defaultMessage: 'First seen in this period with at least one alert',
           }
         ),
         filterLabel: i18n.translate(
