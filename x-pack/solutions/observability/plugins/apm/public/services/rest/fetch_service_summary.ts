@@ -43,23 +43,27 @@ const average = (series: SeriesPoint[]): number | null => {
   return values.reduce((sum, value) => sum + value, 0) / values.length;
 };
 
-// Drop empty buckets at the edges of the range. The `detailed_statistics` histogram aligns to the
-// epoch with `extended_bounds`, so the first/last bucket is a partial window that is often empty
-// (`y === null`) even when the range has data — which would otherwise render as a leading/trailing
-// dotted edge. Interior gaps are kept so genuine missing data still shows as a dotted segment.
-const trimEmptyEdges = (series: SeriesPoint[]): SeriesPoint[] => {
-  let start = 0;
-  let end = series.length - 1;
-  while (start <= end && !isFilledPoint(series[start])) start++;
-  while (end >= start && !isFilledPoint(series[end])) end--;
-  return series.slice(start, end + 1);
+// The `detailed_statistics` histogram is epoch-aligned with `extended_bounds`, so its first bucket's
+// key can fall before the requested `start`. When that out-of-range padding bucket is empty it is an
+// alignment artifact (an empty sub-interval sliver), not a real gap, and would otherwise render as a
+// leading dotted edge. Drop it while keeping every in-range point, so genuine edge gaps stay dotted.
+const dropLeadingPaddingBucket = (series: SeriesPoint[], startMs: number): SeriesPoint[] => {
+  const [first] = series;
+  if (first && first.x < startMs && !isFilledPoint(first)) {
+    return series.slice(1);
+  }
+  return series;
 };
 
 const toMetric = (
   coordinates: Coordinate[],
-  format: (value: number | null) => string
+  format: (value: number | null) => string,
+  startMs: number
 ): ObservabilityTracesServiceSummaryMetric => {
-  const series = trimEmptyEdges(coordinates.map(({ x, y }) => ({ x, y: y ?? null })));
+  const series = dropLeadingPaddingBucket(
+    coordinates.map(({ x, y }) => ({ x, y: y ?? null })),
+    startMs
+  );
   return { series, valueLabel: format(average(series)) };
 };
 
@@ -161,12 +165,15 @@ export const fetchServiceSummary = async (
   ]);
 
   const current = statistics.currentPeriod[serviceName];
+  const startMs = new Date(start).getTime();
 
   return {
-    latency: toMetric(current?.latency ?? [], asMillisecondDuration),
-    throughput: toMetric(current?.throughput ?? [], asTransactionRate),
-    failedTransactionRate: toMetric(current?.transactionErrorRate ?? [], (value) =>
-      asPercent(value, 1)
+    latency: toMetric(current?.latency ?? [], asMillisecondDuration, startMs),
+    throughput: toMetric(current?.throughput ?? [], asTransactionRate, startMs),
+    failedTransactionRate: toMetric(
+      current?.transactionErrorRate ?? [],
+      (value) => asPercent(value, 1),
+      startMs
     ),
     activeAlertCount: alerts.alertsCount,
     slo: toSlo(slo),
