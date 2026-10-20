@@ -54,9 +54,9 @@ export class CpsPlugin
       });
 
       // Register project picker only after the default project routing is known. It renders
-      // nothing for a single project, so skip it to keep the header from reserving its slot.
+      // nothing without linked projects, so skip it to keep the header from reserving its slot.
       manager.whenReady().then(() => {
-        if (manager.getTotalProjectCount() <= 1) return;
+        if (!manager.hasLinkedProjects()) return;
         return import('@kbn/cps-utils').then(({ ProjectPickerContainer }) => {
           core.chrome.controls.projectPicker.set(<ProjectPickerContainer cpsManager={manager} />);
         });
