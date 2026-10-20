@@ -23,6 +23,13 @@ import type { SandboxSecretsClient } from '../../sandbox_secrets';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
+/**
+ * Upper bound (and default) for a sandbox command's own timeout. The sandbox client adds a 10s
+ * margin to derive the RPC deadline, so no command call can block an investigation for more than
+ * 5 minutes; a slow command returns "Command timed out." with its partial output.
+ */
+export const MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS = 290;
+
 const sandboxBashSchema = z.object({
   command: z
     .string()
@@ -38,12 +45,14 @@ const sandboxBashSchema = z.object({
   timeout_seconds: z
     .number()
     .optional()
-    .describe('Timeout in seconds; 0 or omitted uses the server default of 600s'),
+    .describe(
+      `Timeout in seconds; 0 or omitted uses ${MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS}s, which is also the maximum`
+    ),
   connector_id: z
     .string()
     .optional()
     .describe(
-      'Connector whose credentials this command needs (see /workspace/connectors.md). Its config and secrets are exposed to this command only, as CONNECTOR_CONFIG_<KEY> / CONNECTOR_SECRET_<KEY> environment variables, and are gone when the command exits.'
+      'Connector whose credentials this command needs (see /workspace/connectors.md). Its config and auth headers are exposed to this command only, as CONNECTOR_CONFIG_<KEY> / CONNECTOR_HEADER_<NAME> environment variables, and are gone when the command exits.'
     ),
   secret_keys: z
     .array(z.string().max(MAX_SANDBOX_SECRET_KEY_LENGTH))
@@ -70,7 +79,7 @@ export const createSandboxBashTool = ({
   id: SANDBOX_BASH_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace. To call an external service through a Kibana connector, read /workspace/connectors.md and pass the connector id as `connector_id`: the connector credentials are then available to that single command as CONNECTOR_* environment variables (e.g. `curl -H "Authorization: Bearer $CONNECTOR_SECRET_TOKEN" "$CONNECTOR_CONFIG_APIURL/..."`). To use a sandbox secret listed in /workspace/connectors.md, pass its name in `secret_keys`: it is then available to that single command as an environment variable of the same name (e.g. `secret_keys: ["GITHUB_TOKEN"]` with `curl -H "Authorization: Bearer $GITHUB_TOKEN" ...`).',
+    'Execute a bash command inside a sandboxed container. Use this to run shell commands, scripts, or any computation that requires a shell environment. Python 3 is available as `python` (via /home/appuser/.venv/bin/python). The default working directory is /workspace. To call an external service through a Kibana connector, read /workspace/connectors.md and pass the connector id as `connector_id`: the connector credentials are then available to that single command as CONNECTOR_* environment variables (e.g. `curl -H "Authorization: $CONNECTOR_HEADER_AUTHORIZATION" "$CONNECTOR_CONFIG_APIURL/..."`). To use a sandbox secret listed in /workspace/connectors.md, pass its name in `secret_keys`: it is then available to that single command as an environment variable of the same name (e.g. `secret_keys: ["GITHUB_TOKEN"]` with `curl -H "Authorization: Bearer $GITHUB_TOKEN" ...`).',
   tags: ['sandbox', 'bash'],
   schema: sandboxBashSchema,
   annotations: {
@@ -187,7 +196,10 @@ export const createSandboxBashTool = ({
         command,
         directory: working_directory,
         env: mergedEnv,
-        timeout_seconds,
+        timeout_seconds:
+          timeout_seconds && timeout_seconds > 0
+            ? Math.min(timeout_seconds, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS)
+            : MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS,
       });
 
       const { exit_code, timed_out } = result;

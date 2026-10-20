@@ -7,7 +7,7 @@
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { buildFindReportFilters, findThreatReports } from './find_threat_reports';
-import { USABLE_REPORT_FILTER } from '../lib/usable_report_filter';
+import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from '../lib/usable_report_filter';
 import { encodeCursor, InvalidCursorError } from '../lib/report_cursor';
 
 const buildHit = ({
@@ -98,10 +98,33 @@ describe('buildFindReportFilters', () => {
     );
   });
 
-  it('returns the usable-bar filter when usableOnly is true', () => {
+  it('returns the hunt-usable filter when usableOnly is true', () => {
     expect(buildFindReportFilters({ ...defaultArgs, usableOnly: true })).toEqual(
-      expect.arrayContaining([USABLE_REPORT_FILTER])
+      expect.arrayContaining([HUNT_USABLE_FILTER])
     );
+  });
+
+  it('does not return the indicator-eligible filter when only usableOnly is true', () => {
+    expect(buildFindReportFilters({ ...defaultArgs, usableOnly: true })).not.toContainEqual(
+      INDICATOR_ELIGIBLE_FILTER
+    );
+  });
+
+  it('returns both filters when indicatorEligibleOnly is true', () => {
+    expect(buildFindReportFilters({ ...defaultArgs, indicatorEligibleOnly: true })).toEqual(
+      expect.arrayContaining([HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER])
+    );
+  });
+
+  it('returns each filter exactly once when both flags are true', () => {
+    const filters = buildFindReportFilters({
+      ...defaultArgs,
+      usableOnly: true,
+      indicatorEligibleOnly: true,
+    });
+    expect(
+      filters.filter((f) => f === HUNT_USABLE_FILTER || f === INDICATOR_ELIGIBLE_FILTER)
+    ).toHaveLength(2);
   });
 });
 

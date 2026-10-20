@@ -285,6 +285,7 @@ export function createTestEsCluster<
           password: config.password,
           basePath: config.basePath,
           esArgs: config.esArgs,
+          resources: config.resources,
         }));
       } else if (esFrom === 'snapshot') {
         ({ installPath, disableEsTmpDir } = await firstNode.installSnapshot(config));
