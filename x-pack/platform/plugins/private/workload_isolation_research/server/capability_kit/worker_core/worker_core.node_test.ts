@@ -31,9 +31,11 @@ import {
   decideTaskManagerCall,
   emptyPlatformReplicas,
   fingerprintSavedObjectType,
+  hasExplicitNamespace,
   isEsWrite,
   lookupBooleanFlag,
   routeSavedObject,
+  savedObjectCallOptions,
   runInTmPhase,
   runWithExecutionContext,
   toPlainConfig,
@@ -245,6 +247,31 @@ test('saved object routing is an exact client-options allowlist and bridges unkn
       operation: 'get',
       types: ['alert'],
       providerOptions: demonstrated,
+    }),
+    'bridge'
+  );
+  const bulkOptions = savedObjectCallOptions('bulkGet', [
+    [{ type: 'action', id: '1' }],
+    { namespace: 'space-a' },
+  ]);
+  assert.equal(hasExplicitNamespace(bulkOptions), true);
+  assert.equal(
+    routeSavedObject({
+      ...scoped,
+      options: bulkOptions,
+    }),
+    'bridge'
+  );
+  const conflictOptions = savedObjectCallOptions('checkConflicts', [
+    [{ type: 'action', id: '1', namespace: 'not-the-options' }],
+    { namespace: 'space-b' },
+  ]);
+  assert.deepEqual(conflictOptions, { namespace: 'space-b' });
+  assert.equal(
+    routeSavedObject({
+      ...scoped,
+      operation: 'checkConflicts',
+      options: conflictOptions,
     }),
     'bridge'
   );

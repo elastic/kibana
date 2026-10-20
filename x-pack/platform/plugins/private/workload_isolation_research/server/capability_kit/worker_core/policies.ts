@@ -140,6 +140,55 @@ export const hasExplicitNamespace = (options?: object): boolean => {
   );
 };
 
+/** Argument index of the options object for each saved-object client method. */
+const SAVED_OBJECT_OPTION_ARGUMENT: Readonly<Record<string, number>> = {
+  find: 0,
+  search: 0,
+  esql: 0,
+  bulkGet: 1,
+  bulkCreate: 1,
+  bulkUpdate: 1,
+  bulkDelete: 1,
+  bulkResolve: 1,
+  checkConflicts: 1,
+  openPointInTimeForType: 1,
+  get: 2,
+  resolve: 2,
+  delete: 2,
+  create: 2,
+  update: 3,
+  incrementCounter: 3,
+};
+
+const asOptionBag = (value: unknown): object | undefined =>
+  value !== null && typeof value === 'object' && !Array.isArray(value)
+    ? (value as object)
+    : undefined;
+
+const itemsCarryNamespace = (args: readonly unknown[]): boolean => {
+  const objects = args[0];
+  if (!Array.isArray(objects)) return false;
+  return objects.some(
+    (item) => item !== null && typeof item === 'object' && hasExplicitNamespace(item as object)
+  );
+};
+
+/**
+ * Options for one saved-object call. Bulk and checkConflicts read the options
+ * argument, not the objects array. A namespace on a bulk item still bridges.
+ */
+export const savedObjectCallOptions = (
+  method: string,
+  args: readonly unknown[]
+): object | undefined => {
+  const index = SAVED_OBJECT_OPTION_ARGUMENT[method];
+  if (index === undefined) return undefined;
+  const declared = asOptionBag(args[index]);
+  if (declared) return declared;
+  if (itemsCarryNamespace(args)) return { namespace: 'item' };
+  return undefined;
+};
+
 const tmPhaseStore = new AsyncLocalStorage<'boot' | 'run'>();
 
 export const currentTmPhase = (): 'boot' | 'run' => tmPhaseStore.getStore() ?? 'run';

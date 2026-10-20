@@ -45,6 +45,7 @@ export {
   decideTaskManagerCall,
   fingerprintSavedObjectType,
   hasExplicitNamespace,
+  savedObjectCallOptions,
   providerOptionsAllowed,
   routeSavedObject,
   runInTmPhase,

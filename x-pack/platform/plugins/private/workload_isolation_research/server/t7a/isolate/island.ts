@@ -66,6 +66,7 @@ import {
   emptyPlatformReplicas,
   routeSavedObject,
   runInTmPhase,
+  savedObjectCallOptions,
   verifyRegistryReadiness,
 } from '../../capability_kit/worker_core';
 import type { ForwardedEvent, ForwardedLog, SoTypeFingerprintInput } from '../../capability_kit/worker_core';
@@ -323,15 +324,8 @@ export const createCoreLite = (
     ((request as KibanaRequest & { spaceId?: string }).spaceId ?? DEFAULT_SPACE_ID) ===
     DEFAULT_SPACE_ID;
   const registeredNames = () => registeredSoTypes.map((type) => type.name);
-  const optionBag = (method: string, args: unknown[]): object | undefined => {
-    if (method === 'find' || method === 'checkConflicts') {
-      return args[0] && typeof args[0] === 'object' ? (args[0] as object) : undefined;
-    }
-    const last = args[args.length - 1];
-    return args.length >= 3 && last && typeof last === 'object' && !Array.isArray(last)
-      ? (last as object)
-      : undefined;
-  };
+  const optionBag = (method: string, args: unknown[]): object | undefined =>
+    savedObjectCallOptions(method, args);
   const typesOf = (method: string, args: unknown[]): string[] => {
     const [first] = args;
     if (typeof first === 'string') return [first];
