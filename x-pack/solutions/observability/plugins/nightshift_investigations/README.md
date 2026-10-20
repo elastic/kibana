@@ -77,7 +77,6 @@ There is one account of each kind per deployment, shared by every space. Each ho
 |---|---|---|
 | `kibana/nightshift_agent` | `nightshift_agent` / `_nightshift_agent` | Investigations, their sandbox tools and Agent Builder hooks |
 | `kibana/nightshift_automations` | `nightshift_automations` / `_nightshift_automations` | Automation workflows |
-| `kibana/nightshift_detection` | `nightshift_detection` / `_nightshift_detection` | Detection engines (KI discovery, onboarding, detection) |
 
 The roles cover every space. Where an account acts is decided by the workflows bound to it, which are installed per space.
 

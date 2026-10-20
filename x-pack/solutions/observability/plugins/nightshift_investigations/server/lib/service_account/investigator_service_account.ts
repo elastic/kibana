@@ -63,7 +63,6 @@ interface Deps {
 const ACCOUNT_DESCRIPTION: Record<NightshiftServiceAccountKind, string> = {
   agent: 'Runs Nightshift investigations, their sandbox tools and learning hooks.',
   automations: 'Runs Nightshift automations, which start investigations.',
-  detection: 'Runs Nightshift detections, KI discovery and onboarding.',
 };
 
 const getStatusCode = (error: unknown): number | undefined => {
