@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { TestProviders } from '../../common/mock';
 import { EntityAnalyticsNewHomePage } from './entity_analytics_new_home_page';
 import * as tileHooks from '../components/home/needs_attention_tiles/hooks';
 import { useEntityStoreStatus } from '../components/entity_store/hooks/use_entity_store';
@@ -35,7 +36,11 @@ jest.mock('../../common/hooks/use_global_filter_query', () => ({
   useGlobalFilterQuery: () => ({ filterQuery: undefined }),
 }));
 jest.mock('../components/home/use_entity_store_data_view', () => ({
-  useEntityStoreDataView: () => ({ dataView: {}, isLoading: false, error: undefined }),
+  useEntityStoreDataView: () => ({
+    dataView: { fields: { getAll: () => [] } },
+    isLoading: false,
+    error: undefined,
+  }),
 }));
 jest.mock('../api/hooks/use_get_watchlists', () => ({
   useGetWatchlists: () => ({ data: [], error: undefined }),
@@ -44,12 +49,39 @@ jest.mock('../../common/hooks/use_error_toast', () => ({ useErrorToast: jest.fn(
 jest.mock('../../common/hooks/use_app_toasts', () => ({
   useAppToasts: () => ({ addWarning: jest.fn() }),
 }));
-jest.mock('../components/home/use_time_range_param', () => ({
-  useTimeRangeParam: () => ['7d', jest.fn()],
+jest.mock('../components/home/entities_grid/hooks/use_entity_analytics_url_state', () => ({
+  useEntityAnalyticsUrlState: () => ({
+    timeRange: '7d',
+    setTimeRange: jest.fn(),
+    entityFilters: jest.requireActual('../components/home/entities_grid/common')
+      .EMPTY_ENTITY_FILTERS,
+    setEntityFilters: jest.fn(),
+    rowsMode: 'individual',
+    setRowsMode: jest.fn(),
+    sortField: 'entity.risk.calculated_score_norm',
+    sortDirection: 'desc',
+    setSort: jest.fn(),
+    activeTile: null,
+    setActiveTile: jest.fn(),
+    expandedIds: [],
+    toggleExpandedId: jest.fn(),
+  }),
 }));
-jest.mock('../components/home/use_entity_filters_param', () => ({
-  useEntityFiltersParam: () => ({ entityFilters: {}, setEntityFilters: jest.fn() }),
-  getEntityFilterTerms: () => [],
+jest.mock('../components/home/entities_grid/components/entities_grid', () => ({
+  EntitiesGrid: () => null,
+}));
+jest.mock('../components/home/entities_grid/components/entities_groups', () => ({
+  EntitiesGroups: () => null,
+}));
+jest.mock('../../flyout_v2/use_flyout_api', () => ({
+  useFlyoutApi: () => ({ openEntityFlyout: jest.fn(), openGraphFlyout: jest.fn() }),
+}));
+jest.mock('../../common/hooks/timeline/use_investigate_in_timeline', () => ({
+  useInvestigateInTimeline: () => ({ investigateInTimeline: jest.fn() }),
+}));
+jest.mock('@kbn/entity-store/public', () => ({
+  ...jest.requireActual('@kbn/entity-store/public'),
+  useEntityStoreEuidApi: () => undefined,
 }));
 jest.mock('../components/home/entity_search_bar', () => ({ EntitySearchBar: () => null }));
 jest.mock('../components/home/entity_filters_bar', () => ({ EntityFiltersBar: () => null }));
@@ -192,7 +224,7 @@ describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
 
   it('releases and runs every delta and sparkline once all the counts have settled and the store runs', () => {
     mockTiles();
-    render(<EntityAnalyticsNewHomePage />);
+    render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
     TILES.forEach((tile) => {
       expect(deltaIsReady(tile)).toBe(true);
@@ -205,7 +237,7 @@ describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
     'holds all the deltas and sparklines back while the %s count is pending',
     (stuck) => {
       mockTiles({ [stuck]: { isCountPending: true } });
-      render(<EntityAnalyticsNewHomePage />);
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
       TILES.forEach((tile) => {
         expect(deltaIsReady(tile)).toBe(false);
@@ -219,7 +251,7 @@ describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
     (status) => {
       (useEntityStoreStatus as jest.Mock).mockReturnValue({ data: { status }, isLoading: false });
       mockTiles();
-      render(<EntityAnalyticsNewHomePage />);
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
       TILES.forEach((tile) => {
         expect(lastOptions(DELTA_HOOKS[tile]).skip).toBe(true);
@@ -233,7 +265,7 @@ describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
       'hold back only the sparkline that reads the %s delta until it has loaded',
       (loading) => {
         mockTiles({ [loading]: { isDeltaLoading: true } });
-        render(<EntityAnalyticsNewHomePage />);
+        render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
         // The two risk tiles share one sparkline query, which waits for both deltas.
         const isRisk = (tile: Tile) => tile === 'riskMovers' || tile === 'newlyHighCritical';
@@ -245,12 +277,12 @@ describe('EntityAnalyticsNewHomePage: the tiles wait for every count', () => {
 
     it.each(TILES)('pass the history result of the %s delta on to its sparkline', (tile) => {
       mockTiles({ [tile]: { reachesBack: false } });
-      render(<EntityAnalyticsNewHomePage />);
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
       expect(seriesReachesBack(tile)).toBe(false);
 
       jest.clearAllMocks();
       mockTiles({ [tile]: { reachesBack: undefined } });
-      render(<EntityAnalyticsNewHomePage />);
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
       expect(seriesReachesBack(tile)).toBeUndefined();
     });
   });
