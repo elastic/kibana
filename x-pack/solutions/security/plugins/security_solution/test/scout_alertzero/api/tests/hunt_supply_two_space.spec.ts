@@ -44,7 +44,9 @@ apiTest.describe.serial(
     let adminHeaders: Record<string, string>;
     let prereqA: HuntPrerequisites;
     let prereqB: HuntPrerequisites;
-    let initialDefaultAlertZeroEnabled: boolean | undefined;
+    // Captured only once beforeAll reads it, so a setup failure before that point does not
+    // make afterAll clear a setting this suite never touched.
+    let defaultAlertZeroBaseline: { enabled: boolean | undefined } | undefined;
     const initialSupplyEnabled: Partial<Record<SupplyWorkflowKey, boolean>> = {};
 
     apiTest.beforeAll(async ({ apiServices, samlAuth, apiClient }) => {
@@ -54,11 +56,13 @@ apiTest.describe.serial(
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       adminHeaders = withHuntHeaders(cookieHeader);
 
-      initialDefaultAlertZeroEnabled = await readAlertZeroEnabledInSpace({
-        apiClient,
-        headers: adminHeaders,
-        spaceId: 'default',
-      });
+      defaultAlertZeroBaseline = {
+        enabled: await readAlertZeroEnabledInSpace({
+          apiClient,
+          headers: adminHeaders,
+          spaceId: 'default',
+        }),
+      };
       await enableAlertZeroInSpace({
         apiClient,
         headers: adminHeaders,
@@ -125,7 +129,7 @@ apiTest.describe.serial(
       const after = await readSupplyStatus(apiClient, adminHeaders, 'default');
       for (const key of DEPLOYMENT_SUPPLY_KEYS) {
         const initial = initialSupplyEnabled[key];
-        const current = workflowByKey(after.body, key);
+        const current = after.statusCode === 200 ? workflowByKey(after.body, key) : undefined;
         if (initial !== undefined && current?.installed && current.enabled !== initial) {
           await setSupplyWorkflowEnabled({
             apiClient,
@@ -140,12 +144,14 @@ apiTest.describe.serial(
       await prereqB?.cleanup();
       await apiServices.spaces.delete(SPACE_A);
       await apiServices.spaces.delete(SPACE_B);
-      await setAlertZeroEnabledInSpace({
-        apiClient,
-        headers: adminHeaders,
-        spaceId: 'default',
-        enabled: initialDefaultAlertZeroEnabled,
-      });
+      if (defaultAlertZeroBaseline) {
+        await setAlertZeroEnabledInSpace({
+          apiClient,
+          headers: adminHeaders,
+          spaceId: 'default',
+          enabled: defaultAlertZeroBaseline.enabled,
+        });
+      }
     });
 
     apiTest(
