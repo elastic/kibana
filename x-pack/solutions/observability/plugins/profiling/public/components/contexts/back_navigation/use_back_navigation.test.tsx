@@ -39,7 +39,7 @@ const dependencies = {
 // The only back target the hook ever returns: the plugin root, labelled with the app name.
 const pluginRootTarget: AppHeaderBack = {
   href: '/base/app/profiling',
-  label: 'Universal Profiling',
+  label: 'Profiling',
 };
 
 const CONTENT_ROUTES = ['/stacktraces/threads', '/flamegraphs/flamegraph', '/functions/topn', '/'];
@@ -215,6 +215,28 @@ describe('useBackNavigation', () => {
       expect(result.current.back).toEqual(pluginRootTarget);
     });
 
+    it('keeps the kuery of the current URL, but not its time range', () => {
+      const { result } = renderBackNavigation({
+        initialEntry: '/storage-explorer?rangeFrom=now-15m&rangeTo=now&kuery=foo',
+        initialStatus: withData,
+      });
+      expect(result.current.back).toEqual({
+        ...pluginRootTarget,
+        href: '/base/app/profiling?kuery=foo',
+      });
+    });
+
+    it('keeps both the kuery and the schema of the current URL', () => {
+      const { result } = renderBackNavigation({
+        initialEntry: `/settings?kuery=foo&schema=${ProfilingSchema.OTEL}`,
+        initialStatus: withData,
+      });
+      expect(result.current.back).toEqual({
+        ...pluginRootTarget,
+        href: `/base/app/profiling?kuery=foo&schema=${ProfilingSchema.OTEL}`,
+      });
+    });
+
     it('drops the back button again when navigating to a content route', () => {
       const { result } = renderBackNavigation({
         initialEntry: '/storage-explorer',
@@ -305,13 +327,13 @@ describe('useBackNavigation', () => {
       expect(result.current.back).toEqual(pluginRootTarget);
     });
 
-    it('returns undefined when the Universal Profiling data is not set up', () => {
-      // Going back would only be redirected to this page again until the setup is done.
+    it('returns the plugin root when there is Universal Profiling data and its setup is incomplete', () => {
+      // The app can be used with that data, so users can leave the setup prompt.
       const { result } = renderBackNavigation({
         initialEntry: '/add-data-instructions',
         initialStatus: makeStatus({ universalProfilingData: true, universalProfilingSetup: false }),
       });
-      expect(result.current.back).toBeUndefined();
+      expect(result.current.back).toEqual(pluginRootTarget);
     });
 
     it('returns undefined when profiling is disabled in Elasticsearch', () => {

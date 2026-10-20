@@ -1,5 +1,5 @@
 {
-  "sha1": "40ee702078a72135ccedd89924fd3e74dc8cb835",
+  "sha1": "5d4a2248acafffbcb027ca9f3d59593ae18cecdf",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1978,6 +1978,38 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/ml_anomaly_summary/ml_anomaly_summary.spec.ts",
         "line": 981,
         "column": 39
+      }
+    },
+    {
+      "id": "ff1db85b2923667-6d3ae5c8a84dc92",
+      "title": "Risk score maintainer resolution inputs includes every group member's alerts, with their own timestamps",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/resolution_inputs.spec.ts",
+        "line": 154,
+        "column": 23
+      }
+    },
+    {
+      "id": "f788f1b4abedbd0-895c7fcf5dc3c85",
+      "title": "Risk score maintainer risk inputs ranks risk inputs by their numeric risk score",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/api/tests/risk_score/risk_inputs_ranking.spec.ts",
+        "line": 132,
+        "column": 11
       }
     }
   ]
