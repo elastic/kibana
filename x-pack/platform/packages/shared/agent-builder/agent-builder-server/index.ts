@@ -227,6 +227,7 @@ export type {
   CallbackTransportDefinition,
   CallbacksSetup,
 } from './callbacks';
+export { CallbackDeliveryError, isCallbackDeliveryError, throwIfNotDelivered } from './callbacks';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {
   AvailabilityContext,

@@ -11,3 +11,4 @@ export type {
   CallbackTransportDefinition,
   CallbacksSetup,
 } from './types';
+export { CallbackDeliveryError, isCallbackDeliveryError, throwIfNotDelivered } from './errors';

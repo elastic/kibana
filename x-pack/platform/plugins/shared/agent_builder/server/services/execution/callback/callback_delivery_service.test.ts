@@ -7,6 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { AgentBuilderErrorCode, ConversationOriginType } from '@kbn/agent-builder-common';
+import { CallbackDeliveryError } from '@kbn/agent-builder-server';
 import type { ChatCallbackFailureResponse } from '../../../../common/http_api/chat_callback';
 import {
   createConversationClientMock,
@@ -249,8 +250,11 @@ describe('makeCallbackRequest', () => {
     return service.makeCallbackRequest({ callbackUrl, payload: failurePayload, retry });
   };
 
+  const serverError = () => new CallbackDeliveryError('server error', { retryable: true });
+  const rejected = () => new CallbackDeliveryError('rejected', { retryable: false });
+
   it('posts the payload once when the request succeeds', async () => {
-    const transport = jest.fn().mockResolvedValue({ status: 200 });
+    const transport = jest.fn().mockResolvedValue(undefined);
 
     await deliverThrough(transport, true);
 
@@ -276,13 +280,13 @@ describe('makeCallbackRequest', () => {
     expect(transport).toHaveBeenCalledTimes(3);
   });
 
-  it('retries network errors and 5xx responses when retry is true', async () => {
+  it('retries network errors and retryable delivery errors when retry is true', async () => {
     jest.useFakeTimers();
     const transport = jest
       .fn()
       .mockRejectedValueOnce(new Error('network down'))
-      .mockResolvedValueOnce({ status: 503 })
-      .mockResolvedValueOnce({ status: 204 });
+      .mockRejectedValueOnce(serverError())
+      .mockResolvedValueOnce(undefined);
 
     const delivery = deliverThrough(transport, true);
     const deliveryExpectation = expect(delivery).resolves.toBeUndefined();
@@ -294,33 +298,27 @@ describe('makeCallbackRequest', () => {
   });
 
   it('does not retry when retry is false', async () => {
-    const transport = jest.fn().mockResolvedValue({ status: 503 });
+    const transport = jest.fn().mockRejectedValue(serverError());
 
-    await expect(deliverThrough(transport, false)).rejects.toThrow(
-      'Callback delivery failed with status 503'
-    );
+    await expect(deliverThrough(transport, false)).rejects.toThrow('server error');
 
     expect(transport).toHaveBeenCalledTimes(1);
   });
 
-  it('does not retry 4xx responses', async () => {
-    const transport = jest.fn().mockResolvedValue({ status: 400 });
+  it('does not retry a delivery error that is not retryable', async () => {
+    const transport = jest.fn().mockRejectedValue(rejected());
 
-    await expect(deliverThrough(transport, true)).rejects.toThrow(
-      'Callback delivery failed with status 400'
-    );
+    await expect(deliverThrough(transport, true)).rejects.toThrow('rejected');
 
     expect(transport).toHaveBeenCalledTimes(1);
   });
 
-  it('throws after exhausting retryable 5xx responses', async () => {
+  it('throws after exhausting retryable delivery errors', async () => {
     jest.useFakeTimers();
-    const transport = jest.fn().mockResolvedValue({ status: 503 });
+    const transport = jest.fn().mockRejectedValue(serverError());
 
     const delivery = deliverThrough(transport, true);
-    const deliveryExpectation = expect(delivery).rejects.toThrow(
-      'Callback delivery failed with status 503'
-    );
+    const deliveryExpectation = expect(delivery).rejects.toThrow('server error');
 
     await jest.advanceTimersByTimeAsync(700);
 

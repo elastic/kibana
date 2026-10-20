@@ -7,6 +7,7 @@
 
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server';
 import type { CallbackTransportDefinition } from '@kbn/agent-builder-server';
+import { throwIfNotDelivered } from '@kbn/agent-builder-server';
 
 /** Delivers to Relay callback URLs through the Actions Relay client. */
 export const createRelayTransport = ({
@@ -16,13 +17,13 @@ export const createRelayTransport = ({
 }): CallbackTransportDefinition => ({
   id: 'relay',
   handles: (callbackUrl) => actions.getRelayClient()?.isRelayOrigin(callbackUrl) ?? false,
-  send: (callbackUrl, payload, signal) => {
+  send: async (callbackUrl, payload, signal) => {
     const relayClient = actions.getRelayClient();
 
     if (!relayClient) {
       throw new Error('The Relay client is not available');
     }
 
-    return relayClient.postCallback(callbackUrl, payload, signal);
+    throwIfNotDelivered(await relayClient.postCallback(callbackUrl, payload, signal));
   },
 });

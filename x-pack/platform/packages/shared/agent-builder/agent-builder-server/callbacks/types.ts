@@ -26,11 +26,8 @@ export interface CallbackTransportDefinition {
   id: string;
   /** Whether this transport delivers to the given callback URL. */
   handles(callbackUrl: string): boolean;
-  send(
-    callbackUrl: string,
-    payload: ChatCallbackResponse,
-    signal: AbortSignal
-  ): Promise<{ status: number }>;
+  /** Resolves once delivered; throws a `CallbackDeliveryError` to say whether to retry. */
+  send(callbackUrl: string, payload: ChatCallbackResponse, signal: AbortSignal): Promise<void>;
 }
 
 /** AgentBuilder callbacks setup contract. */

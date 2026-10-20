@@ -12,6 +12,7 @@ import type {
   CallbackConversationResolverContext,
   CallbacksSetup,
 } from '@kbn/agent-builder-server';
+import { isCallbackDeliveryError } from '@kbn/agent-builder-server';
 import type { ChatCallbackResponse } from '../../../../common/http_api/chat_callback';
 import type { ConversationService } from '../../conversation';
 import { CallbackTransportRegistry } from './callback_transport_registry';
@@ -96,27 +97,17 @@ export class CallbackDeliveryService {
         const abortController = new AbortController();
         const timeoutId = setTimeout(() => abortController.abort(), timeout);
 
-        let response: { status: number };
-
         try {
-          response = await transport.send(callbackUrl, payload, abortController.signal);
+          await transport.send(callbackUrl, payload, abortController.signal);
         } catch (error) {
+          if (isCallbackDeliveryError(error) && !error.retryable) {
+            throw new AbortError(error);
+          }
+
           throw error instanceof Error ? error : new Error(String(error));
         } finally {
           clearTimeout(timeoutId);
         }
-
-        if (response.status >= 200 && response.status < 300) {
-          return;
-        }
-
-        const error = new Error(`Callback delivery failed with status ${response.status}`);
-
-        if (response.status >= 500) {
-          throw error;
-        }
-
-        throw new AbortError(error);
       },
       retry ? callbackRetryOptions : { retries: 0 }
     );

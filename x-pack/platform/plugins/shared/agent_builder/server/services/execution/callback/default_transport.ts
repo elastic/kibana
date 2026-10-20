@@ -6,13 +6,14 @@
  */
 
 import type { CallbackTransportDefinition } from '@kbn/agent-builder-server';
+import { throwIfNotDelivered } from '@kbn/agent-builder-server';
 
 /** Delivers to any callback URL with fetch, when no registered transport handles it. */
 export const defaultTransport: CallbackTransportDefinition = {
   id: 'default',
   handles: () => true,
-  send: (callbackUrl, payload, signal) =>
-    fetch(callbackUrl, {
+  send: async (callbackUrl, payload, signal) => {
+    const response = await fetch(callbackUrl, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -20,5 +21,8 @@ export const defaultTransport: CallbackTransportDefinition = {
       body: JSON.stringify(payload),
       redirect: 'error',
       signal,
-    }),
+    });
+
+    throwIfNotDelivered(response);
+  },
 };
