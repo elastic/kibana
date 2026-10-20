@@ -95,7 +95,9 @@ const mockTaskManagerSchedule = jest.fn();
 const mockTaskManagerEnsureScheduled = jest.fn();
 const mockTaskManagerRunSoon = jest.fn();
 
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { createAgentExecutionService } from './execution_service';
+import { CallbackDeliveryService } from './callback';
 import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
 
 describe('AgentExecutionService', () => {
@@ -155,7 +157,10 @@ describe('AgentExecutionService', () => {
 
   const agentRegistry = createMockedAgentRegistry();
   const agentService = createAgentsServiceStartMock();
-  const resolveConversation = jest.fn();
+  const callbackDeliveryService = new CallbackDeliveryService({
+    actions: actionsMock.createSetup(),
+  });
+  const resolveConversation = jest.spyOn(callbackDeliveryService, 'resolveConversation');
 
   const service = createAgentExecutionService({
     logger,
@@ -171,7 +176,7 @@ describe('AgentExecutionService', () => {
     savedObjects,
     meteringService,
     searchInferenceEndpoints,
-    callbackDeliveryService: { resolveConversation },
+    callbackDeliveryService,
   });
 
   beforeEach(() => {

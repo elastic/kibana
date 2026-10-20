@@ -88,8 +88,7 @@ export interface AgentExecutionServiceDeps extends AgentExecutionDeps {
   taskManager: TaskManagerStartContract;
   spaces?: SpacesPluginStart;
   attachmentsService: AttachmentServiceStart;
-  /** Finds the conversation a request's origin continues: the registered resolver, else by origin. */
-  callbackDeliveryService: Pick<CallbackDeliveryService, 'resolveConversation'>;
+  callbackDeliveryService: CallbackDeliveryService;
 }
 
 export const createAgentExecutionService = (

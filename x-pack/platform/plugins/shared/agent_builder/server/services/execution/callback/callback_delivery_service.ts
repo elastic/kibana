@@ -79,7 +79,6 @@ export class CallbackDeliveryService {
     this.actions.getActionsConfigurationUtilities().ensureUriAllowed(callbackUrl);
   }
 
-  /** Delivers the payload through the transport that handles the callback URL. */
   async makeCallbackRequest({
     callbackUrl,
     payload,

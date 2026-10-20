@@ -8,7 +8,6 @@
 import type { CallbackTransportDefinition } from '@kbn/agent-builder-server';
 import { defaultTransport } from './default_transport';
 
-/** Holds the registered callback transports, in registration order, and the default fetch transport. */
 export class CallbackTransportRegistry {
   private readonly transports = new Map<string, CallbackTransportDefinition>();
 

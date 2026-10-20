@@ -305,7 +305,7 @@ export interface AgentBuilderPluginSetup {
    */
   conversations: ConversationsSetup;
   /**
-   * Callbacks setup contract, which can be used to resolve the conversation a callback turn
+   * Callbacks setup contract, which can be used to resolve the conversation an execution's origin
    * continues and to register callback transports.
    */
   callbacks: CallbacksSetup;

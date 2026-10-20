@@ -175,7 +175,6 @@ describe('resolveConversation', () => {
     request: {} as KibanaRequest,
   };
 
-  /** A started service whose default lookup by origin finds `byOrigin`, if given. */
   const startService = (byOrigin?: string) => {
     const client = createConversationClientMock();
     client.getByOrigin.mockResolvedValue(
