@@ -365,8 +365,8 @@ export const SEVERITY_CONTRACT_RULE = dedent`
 
     Decide in order and stop at the first match:
     - "critical": a global outage affecting all or most customers; several distinct core operations confirmed blocked at once (for example balance, history, and payment together); a mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the component can no longer perform its primary function — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high"; or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
-    - "high": the affected operation fails or is blocked on the verified path — a confirming row or measure shows it not completing (failed requests or jobs, refused or timed-out calls); the test is whether a found row reports the operation's own request or job as not completing — or is broadly degraded, intermittent, or partially failing for a significant subset. A single endpoint or lookup path stays here even when every caller hits it. An error signature on the operation's path with no row or measure showing the operation failing to complete is not enough: that is "medium".
-      A share of attempts or a breadth that was not measured changes nothing here: a confirming row showing the operation failing or timing out is enough for "high". If the operation fails to complete, the severity is "high" even if the share or breadth was not measured.
+    - "high": the affected operation fails or is blocked on the verified path — a confirming row or measure shows it not completing (failed requests or jobs, refused or timed-out calls); the test is whether a found row reports the operation's own request or job as not completing — or is broadly degraded, intermittent, or partially failing for a significant subset. A single endpoint or lookup path stays here even when every caller hits it.  : that is "medium".
+      A share of attempts or a breadth that was not measured changes nothing here: a confirming row showing the operation failing or timing out is enough for "high". A found row that reports the operation's own request or job as not completing makes it "high" whether or not the share or breadth was measured; a row that reports only an error, a warning, or a slowdown does not.
     - "medium": minor confirmed degradation with limited reach, or the evidence never settled whether the operation fails to complete versus only logs an error or slows (no found row reports the operation's own request or job as not completing). Not for a confirmed failing operation merely because its share or breadth was not measured.
     - "low": confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
 
@@ -374,8 +374,6 @@ export const SEVERITY_CONTRACT_RULE = dedent`
     A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply.
 
     Tie-break: when two adjacent tiers fit the same evidence, choose the lower only when it is genuinely unresolved whether the operation still completes.
-
-    Nothing established: when no signal on the event shows a failure, degradation, or exposure (every query returned nothing, errored, or found only healthy rows), the event is "low".
   `;
 
 /** Canonical severity used by storage, APIs, and tools. */
