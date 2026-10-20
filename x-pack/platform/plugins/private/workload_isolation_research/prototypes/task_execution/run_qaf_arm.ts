@@ -24,8 +24,7 @@ interface Project {
 const root = process.cwd();
 assert.equal(root, '/Users/jloleysens/repos/work/kibana-t1-isolated-tasks');
 const projectName = process.env.WIR_QAF_PROJECT;
-assert.ok(projectName === 'wir-shared-baseline-1019c' || projectName === 'wir-t1-exp-1019');
-const baseline = projectName === 'wir-shared-baseline-1019c';
+assert.equal(projectName, 'wir-t1-exp-1020', 'Only the freshly authorised experiment is writable');
 const evidence = process.env.WIR_EVIDENCE_DIR;
 const digest = process.env.WIR_IMAGE_DIGEST;
 const expectedBuild = process.env.WIR_EXPECTED_BUILD_SHA;
@@ -73,9 +72,7 @@ writeFileSync(
     2
   )
 );
-const scenarios = baseline
-  ? ['t1-task-curve-main']
-  : ['t1-task-curve-thread', 't1-worker-supervised', 't1-field-caps-bytes'];
+const scenarios = ['t1-serverless-pools'];
 const resources: Array<{ pid: number; scenario: string; stopped: boolean }> = [];
 const remoteCleanup: Array<{ endpoint: string; status: number }> = [];
 const controller = new AbortController();
@@ -103,7 +100,7 @@ try {
         '--lane',
         'track-1',
         '--variant',
-        baseline ? 'qaf-control' : 'qaf-isolated',
+        'qaf-same-image-main-thread-abab',
         '--target',
         'qaf',
         '--qaf-project-id',
@@ -117,13 +114,24 @@ try {
         '--expected',
         JSON.stringify({
           primary: 'p95',
-          ui_probe_p95_ratio_max: 2,
+          ui_probe_p95_ratio_max: 1.2,
           control_bg_gap_at_10s_ms_min: 9000,
-          isolated_bg_gap_at_10s_ms_max: 1000,
+          isolated_bg_overlap_gap_at_10s_ms_max: 1000,
+          isolated_vs_main_tm_poll_max_ratio_max: 0.5,
+          control_missed_cycles_min: 1,
+          isolated_missed_cycles_max: 0,
+          isolated_vs_main_tick_drift_ratio_max: 0.5,
+          termination_ms_min: 10000,
+          termination_ms_max: 12000,
+          discarded_runs: 1,
+          collateral_runs: 0,
+          expected_cpu_quota_cores: 2,
+          cgroup_cpu_bracketing: true,
+          throttle_fraction_assumed_zero: false,
           p99_inference: false,
-          paired_per_arm: 1,
+          paired_per_arm_per_dose: 5,
           slice_50ms_claim: false,
-          field_caps_bytes_off_main: true,
+          real_runner_adoption: false,
         }),
       ],
       {

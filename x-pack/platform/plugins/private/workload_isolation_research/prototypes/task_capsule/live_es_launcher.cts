@@ -26,7 +26,8 @@ const logSink = new Writable({
 });
 const cluster = new Cluster({ log: new ToolingLog({ level: 'warning', writeTo: logSink }) });
 const runId = process.env.WIR_RUN_ID;
-if (!runId || !/^(t1-phase-b-live|t1-scoring-local|t1-serverless-boot)-\d{3}$/.test(runId)) throw new Error('Invalid local run ID');
+if (!runId || !/^(t1-phase-b-live|t1-scoring-local|t1-serverless-boot)-\d{3}$/.test(runId))
+  throw new Error('Invalid local run ID');
 const esArgs = [`transport.port=${transportPort}`];
 void cluster
   .installSnapshot({
