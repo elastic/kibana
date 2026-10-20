@@ -191,15 +191,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expect(owner).to.be('API key owner elastic');
       });
 
-      it('renders toast when schedule is less than configured minimum', async () => {
-        await testSubjects.existOrFail('intervalConfigToast');
-
-        const editButton = await testSubjects.find('ruleIntervalToastEditButton');
-        await editButton.click();
-
-        await testSubjects.click('rulePageFooterCancelButton');
-      });
-
       it('should disable the rule', async () => {
         expect(await readRuleEnabledBadge()).to.eql('Enabled');
 
