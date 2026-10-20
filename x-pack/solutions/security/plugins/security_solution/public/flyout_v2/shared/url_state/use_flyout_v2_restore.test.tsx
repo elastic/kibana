@@ -229,6 +229,7 @@ describe('useFlyoutV2RestoreFromUrl', () => {
   describe('resolved-mode entity tools', () => {
     const restoreTool = (
       kind:
+        | 'entityAnomalyInsights'
         | 'entityAlertsInsights'
         | 'entityMisconfigurationInsights'
         | 'entityVulnerabilityInsights'
@@ -258,6 +259,15 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       hostName: 'my-host',
       entityId: 'host:my-host',
       mode: 'resolved',
+    });
+
+    it('restores entityAnomalyInsights in resolved mode and reopens the host in resolved mode', () => {
+      restoreTool('entityAnomalyInsights');
+      expect(mockFlyoutApi.openEntityAnomalyInsights).toHaveBeenCalledWith(resolvedTool);
+      act(() => {
+        mockFlyoutApi.openEntityAnomalyInsights.mock.calls[0][0].onOpenEntity?.();
+      });
+      expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(resolvedHost);
     });
 
     it('restores entityAlertsInsights in resolved mode and reopens the host in resolved mode', () => {

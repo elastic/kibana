@@ -16,9 +16,14 @@ const mockCreateRule = jest.fn().mockResolvedValue({ id: 'generated-rule-id' });
 const mockRulesNavigateSync = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockUseQueryClient = jest.requireActual('@kbn/react-query').useQueryClient;
+const mockUseAlertingLocators = jest.requireActual(
+  '../../application/locator_context'
+).useAlertingLocators;
+const mockBindLocatorsToHost = jest.fn((locators: unknown, host: unknown) => ({ locators, host }));
 let capturedSummaryRule: Record<string, unknown> = {};
 
 jest.mock('../../application/bind_locators_to_host', () => ({
+  bindLocatorsToHost: (...args: [unknown, unknown]) => mockBindLocatorsToHost(...args),
   getAlertingV2Locators: () => ({
     rulesLocators: { navigateSync: (...args: unknown[]) => mockRulesNavigateSync(...args) },
   }),
@@ -49,8 +54,13 @@ jest.mock('../../components/rule/rule_summary', () => ({
   RuleSummaryInvestigationSection: () => <div data-test-subj="mockInvestigationSection" />,
   RuleSummaryArtifactsSection: () => {
     const queryClient = mockUseQueryClient();
+    const locators = mockUseAlertingLocators();
     return (
-      <div data-test-subj="mockArtifactsSection" data-has-query-client={Boolean(queryClient)} />
+      <div
+        data-test-subj="mockArtifactsSection"
+        data-has-query-client={Boolean(queryClient)}
+        data-has-locators={Boolean(locators)}
+      />
     );
   },
 }));
@@ -129,6 +139,11 @@ describe('RuleCanvasContent', () => {
       expect(getByTestId('mockInvestigationSection')).toBeDefined();
       expect(getByTestId('mockQueryPreviewSection')).toBeDefined();
       expect(getByTestId('mockArtifactsSection')).toHaveAttribute('data-has-query-client', 'true');
+      expect(getByTestId('mockArtifactsSection')).toHaveAttribute('data-has-locators', 'true');
+      expect(mockBindLocatorsToHost).toHaveBeenCalledWith(
+        expect.anything(),
+        OBSERVABILITY_ALERTING_HOST
+      );
 
       const sectionOrder = Array.from(getByTestId('mockRuleSummaryBody').children).map((section) =>
         section.getAttribute('data-test-subj')

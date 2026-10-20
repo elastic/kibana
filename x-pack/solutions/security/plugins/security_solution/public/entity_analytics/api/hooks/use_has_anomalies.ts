@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { useAnomalyOverview } from './use_anomaly_overview';
 
 interface UseHasAnomaliesParams {
   entityId: string;
   entityType: string;
+  mode?: EntityViewMode;
   enabled?: boolean;
 }
 
@@ -24,9 +26,10 @@ interface UseHasAnomaliesParams {
 export const useHasAnomalies = ({
   entityId,
   entityType,
+  mode,
   enabled = true,
 }: UseHasAnomaliesParams) => {
-  const { data } = useAnomalyOverview({ entityId, entityType, enabled });
+  const { data } = useAnomalyOverview({ entityId, entityType, mode, enabled });
   if (data === undefined) return undefined;
   return data.totalAnomaliesCount > 0;
 };

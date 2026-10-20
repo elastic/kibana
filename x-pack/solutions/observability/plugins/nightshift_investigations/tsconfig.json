@@ -61,6 +61,7 @@
     "@kbn/proposals-plugin",
     "@kbn/proposals-common",
     "@kbn/core-security-common",
-    "@kbn/eval-kql"
+    "@kbn/eval-kql",
+    "@kbn/rrule"
   ]
 }
