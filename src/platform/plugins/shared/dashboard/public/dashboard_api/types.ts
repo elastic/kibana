@@ -87,10 +87,6 @@ export interface DashboardSetStateOptions {
    * state, or discarded before a save is not reported.
    */
   changedBy?: DashboardChangeSource[];
-  /**
-   * Controls whether or not we trigger a save after setting the state
-   */
-  save?: boolean;
 }
 
 export const ReservedLayoutItemTypes: readonly string[] = ['section'] as const;
@@ -234,7 +230,7 @@ export type DashboardApi = CanExpandPanels &
     isManaged: boolean;
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
     runInteractiveSave: (redirectTo?: DashboardRedirect) => Promise<{ id: string } | undefined>;
-    runQuickSave: () => Promise<void>;
+    runQuickSave: (options?: { restored?: boolean }) => Promise<void>;
     scrollToPanel: (panelRef: HTMLDivElement) => void;
     scrollToPanelId$: PublishingSubject<string | undefined>;
     scrollToTop: () => void;

@@ -170,12 +170,6 @@ export function getDashboardApi({
     if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
       forcePublishOnReset$.next();
     }
-
-    if (options?.save) {
-      onSave$.next({
-        dashboardState: state,
-      });
-    }
   }
 
   function getState() {
@@ -380,19 +374,24 @@ export function getDashboardApi({
 
       return promise;
     },
-    runQuickSave: async () => {
+    runQuickSave: async (options: { restored?: boolean } = {}) => {
       if (isManaged) return;
       const latestChangeBySource = changeSourceTracker.getLatestChanges();
       const dashboardState = getState();
       const previousDashboardId = savedObjectId$.value;
-      const saveResult = await saveDashboard({
-        dashboardState,
-        saveOptions: {},
-        lastSavedId: savedObjectId$.value,
-        accessMode: accessControlManager.api.accessControl$.value?.accessMode,
-      });
 
-      if ('error' in saveResult) return;
+      // do not update the saved object when restoring a dashboard, since this would result in duplicate change history entries
+      const saveResult = options.restored
+        ? undefined
+        : await saveDashboard({
+            dashboardState,
+            saveOptions: {},
+            lastSavedId: savedObjectId$.value,
+            accessMode: accessControlManager.api.accessControl$.value?.accessMode,
+          });
+
+      if (saveResult && 'error' in saveResult) return;
+
       publishSave(
         {
           previousDashboardId,
@@ -401,8 +400,6 @@ export function getDashboardApi({
         },
         latestChangeBySource
       );
-
-      return;
     },
     savedObjectId$,
     setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),

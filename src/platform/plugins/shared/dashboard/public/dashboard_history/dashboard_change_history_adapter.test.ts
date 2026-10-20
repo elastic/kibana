@@ -28,6 +28,7 @@ const getDashboardApi = (hasUnsavedChanges: boolean) =>
     hasUnsavedChanges$: { getValue: () => hasUnsavedChanges },
     getSerializedState: () => ({ attributes: { title: 'Unsaved' } }),
     setState: jest.fn(),
+    runQuickSave: jest.fn(),
   } as unknown as jest.Mocked<DashboardApi>);
 
 describe('createDashboardChangeHistoryAdapter', () => {
@@ -108,7 +109,8 @@ describe('createDashboardChangeHistoryAdapter', () => {
         { signal: undefined }
       );
       expect(dashboardClient.invalidateCache).toHaveBeenCalledWith('dash-1');
-      expect(dashboardApi.setState).toHaveBeenCalledWith(restored, { save: true });
+      expect(dashboardApi.setState).toHaveBeenCalledWith(restored);
+      expect(dashboardApi.runQuickSave).toHaveBeenCalledWith({ restored: true });
     });
   });
 });

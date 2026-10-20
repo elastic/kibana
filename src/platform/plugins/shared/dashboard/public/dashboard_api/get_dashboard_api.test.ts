@@ -392,7 +392,7 @@ describe('dashboard_saved telemetry', () => {
   });
 });
 
-describe('setState with save: true (restoring a saved version)', () => {
+describe('restoring a saved version (setState + runQuickSave with restored)', () => {
   beforeEach(() => {
     jest.useFakeTimers();
   });
@@ -420,10 +420,8 @@ describe('setState with save: true (restoring a saved version)', () => {
     await settle();
     expect(api.hasUnsavedChanges$.value).toBe(true);
 
-    await api.setState(
-      { ...api.getSerializedState().attributes, title: 'Restored' },
-      { save: true }
-    );
+    await api.setState({ ...api.getSerializedState().attributes, title: 'Restored' });
+    await api.runQuickSave({ restored: true });
     await settle();
 
     expect(getTitle(dashboard)).toBe('Restored');
@@ -434,10 +432,8 @@ describe('setState with save: true (restoring a saved version)', () => {
   test('makes discarding later edits return to the restored version', async () => {
     const dashboard = await setup();
     const { api } = dashboard;
-    await api.setState(
-      { ...api.getSerializedState().attributes, title: 'Restored' },
-      { save: true }
-    );
+    await api.setState({ ...api.getSerializedState().attributes, title: 'Restored' });
+    await api.runQuickSave({ restored: true });
     await settle();
 
     api.setState({ ...api.getSerializedState().attributes, title: 'Edit after restore' });
@@ -454,10 +450,8 @@ describe('setState with save: true (restoring a saved version)', () => {
   test('does not return to the pre-restore version when resetting', async () => {
     const dashboard = await setup();
     const { api } = dashboard;
-    await api.setState(
-      { ...api.getSerializedState().attributes, title: 'Restored' },
-      { save: true }
-    );
+    await api.setState({ ...api.getSerializedState().attributes, title: 'Restored' });
+    await api.runQuickSave({ restored: true });
     await settle();
 
     await api.asyncResetToLastSavedState();

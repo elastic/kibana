@@ -62,7 +62,8 @@ export const createDashboardChangeHistoryAdapter = (
           );
           // the restore route bypasses dashboardClient.update(), so evict the stale cached read
           await dashboardClient.invalidateCache(objectId);
-          await dashboardApi.setState(response, { save: true });
+          await dashboardApi.setState(response);
+          await dashboardApi.runQuickSave({ restored: true });
         } catch (e) {
           throw mapChangeHistoryHttpError(e);
         }

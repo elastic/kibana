@@ -85,7 +85,7 @@ export const DashboardChangeHistoryProvider = ({
         previewTitle,
       }}
       features={{ compare: false, restore: true, unsavedChanges: hasUnsavedChanges }}
-      permissions={{ canRestore: true }}
+      permissions={{ canRestore: !dashboardApi.isManaged }}
       scope={scope}
       analytics={analytics}
     >
