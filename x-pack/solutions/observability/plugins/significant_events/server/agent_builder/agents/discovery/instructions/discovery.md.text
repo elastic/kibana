@@ -339,10 +339,12 @@ For events returned by `platform_sig_events_event_search`, derive:
 
 Before either routing search, derive each remaining detection's topology ID set from grounded
 `causal_features[].feature_id`, `blast_radius[].feature_id`, and the matched query KI's
-`features[].id`. Build `topology_feature_ids` as their distinct union. Dispatch the **Rule Match**
-and **Topology Match** searches in the **same tool-call group**. When `topology_feature_ids` is
-non-empty, always call Topology Match, even if Rule Match returns no events. Do not start Step 3
-until both searches have returned.
+`features[].id`. Build `topology_feature_ids` as their distinct union, using only ids that appear in
+those sources; never add a name of your own. The set is empty only when the matched query KIs list
+no `features[]` and nothing is grounded. Dispatch the **Rule Match** and **Topology Match** searches
+in the **same tool-call group**. When `topology_feature_ids` is non-empty, always call Topology
+Match, even if Rule Match returns no events or you expect no match. Do not start Step 3 until both
+searches have returned.
 
 **Rule Match**
 
@@ -379,7 +381,10 @@ Match never skips it, and a Topology hit is not waiting for a rule-uuid match.
      Compact search has no per-signal prose. Reuse that `event_id`. Compact `signal_rule_uuids` need
      not contain the new rule.
    - Reject when `<incident_matching>` rejects, or when `<grounding_evidence>` identifies a distinct
-     resource or dependency path. On accept, bind topology as in Rule Match.
+     resource or dependency path. When the first condition holds, the topology connection of
+     `<incident_matching>` criterion 1 exists: a different local signature on that path (a caller
+     timeout against the event's failing node, a pool error against a backend error) is not a
+     reason to reject. On accept, bind topology as in Rule Match.
 
 Every continuation item must carry its recorded exact `event_id`.
 
