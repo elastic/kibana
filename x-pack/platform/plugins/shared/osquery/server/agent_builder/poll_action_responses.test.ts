@@ -157,7 +157,10 @@ describe('pollActionResponses', () => {
     expect(search).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        index: ['logs-osquery_manager.action.responses*', '.logs-osquery_manager.action.responses*'],
+        index: [
+          'logs-osquery_manager.action.responses*',
+          '.logs-osquery_manager.action.responses*',
+        ],
         size: 0,
         aggs: {
           distinct_agents: { cardinality: { field: 'agent_id' } },
