@@ -71,7 +71,7 @@ Nightshift is moving to running investigations and automations as service accoun
 
 ### Accounts and roles
 
-There is one account of each kind per deployment, shared by every space. Each holds a built-in role that ships with Elasticsearch, so Nightshift never creates or changes a role. Stateful Elasticsearch ships them as reserved roles named like the account. Serverless ships them as elasticsearch-controller predefined roles, whose names start with `_`.
+There is one account of each kind per deployment, shared by every space. Each holds a role that Nightshift never creates or changes. On Serverless, where Nightshift ships, the roles are elasticsearch-controller predefined roles, whose names start with `_`. Stateful Elasticsearch has no such roles; for local development and stateful CI, `@kbn/es` defines them, named like the account, in `src/platform/packages/shared/kbn-es/src/stateful_resources/roles.yml`.
 
 | Account | Role (stateful / Serverless) | Used by |
 |---|---|---|
