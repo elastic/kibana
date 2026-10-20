@@ -170900,13 +170900,7 @@ components:
                     - type: string
                     - type: number
                     - type: boolean
-                    - items:
-                        anyOf:
-                          - type: string
-                          - type: number
-                          - type: boolean
-                      maxItems: 100
-                      type: array
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiValueCell'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangeKey'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiFieldKey'
                   nullable: true
@@ -172394,13 +172388,7 @@ components:
                     - type: string
                     - type: number
                     - type: boolean
-                    - items:
-                        anyOf:
-                          - type: string
-                          - type: number
-                          - type: boolean
-                      maxItems: 100
-                      type: array
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiValueCell'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangeKey'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiFieldKey'
                   nullable: true
@@ -174132,6 +174120,7 @@ components:
       type: object
     Kibana_HTTP_APIs_visMultiFieldKey:
       additionalProperties: false
+      description: Composite key from a multi-terms bucket.
       properties:
         keys:
           items:
@@ -174147,6 +174136,16 @@ components:
         - keys
       title: Multi Field Key
       type: object
+    Kibana_HTTP_APIs_visMultiValueCell:
+      description: Values of a multi-value cell.
+      items:
+        anyOf:
+          - type: string
+          - type: number
+          - type: boolean
+      maxItems: 100
+      title: Multi Value Cell
+      type: array
     Kibana_HTTP_APIs_visNoColor:
       additionalProperties: false
       description: Explicitly disables coloring
@@ -174569,6 +174568,7 @@ components:
       type: object
     Kibana_HTTP_APIs_visRangeKey:
       additionalProperties: false
+      description: Identifies a range bucket. Omit either bound for an open end.
       properties:
         from:
           anyOf:
