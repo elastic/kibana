@@ -537,6 +537,9 @@ describe('getEndpointArtifactsTool', () => {
         expect(tool.description).toContain('custom YARA signatures');
         expect(tool.description).toContain('`rule.custom_yara_signature.entry_id`');
         expect(tool.description).toContain('truncated preview');
+        expect(tool.description).toContain(
+          'When a rule entry has `string_truncated: true`, do not explain why the signature matches or does not match'
+        );
         expect(tool.description).toContain('only treat items whose `name` matches it');
       });
 

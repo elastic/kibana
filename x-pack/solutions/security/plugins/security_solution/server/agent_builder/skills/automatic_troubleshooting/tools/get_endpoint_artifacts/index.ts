@@ -66,7 +66,7 @@ const getEnabledArtifactTypes = ({
     : BASE_ARTIFACT_TYPES;
 
 const CUSTOM_YARA_SIGNATURES_DESCRIPTION =
-  ' Custom YARA signature items include the artifact `id`, which custom YARA signature alerts reference as `rule.custom_yara_signature.entry_id`; it is not the `item_id`. Their rule text is a truncated preview, not the full rule. The `search` filter also matches rule text, so results can include signatures whose rule merely mentions the search term. When the user names a signature, only treat items whose `name` matches it as that signature. If none match, say so instead of substituting a text match.';
+  ' Custom YARA signature items include the artifact `id`, which custom YARA signature alerts reference as `rule.custom_yara_signature.entry_id`; it is not the `item_id`. Their rule text is a truncated preview, not the full rule. When a rule entry has `string_truncated: true`, do not explain why the signature matches or does not match based on that preview; say that the full rule needs to be reviewed in Kibana. The `search` filter also matches rule text, so results can include signatures whose rule merely mentions the search term. When the user names a signature, only treat items whose `name` matches it as that signature. If none match, say so instead of substituting a text match.';
 
 type ArtifactErrorType = 'not_authorized' | 'feature_disabled' | 'unknown_error';
 
