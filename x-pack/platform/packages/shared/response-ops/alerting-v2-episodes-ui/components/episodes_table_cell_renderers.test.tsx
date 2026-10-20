@@ -17,7 +17,7 @@ import { EpisodeDataSourceProvider } from '../context/episode_data_source_contex
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import {
   EpisodeDurationCell,
-  EpisodeMaintenanceWindowsCell,
+  EpisodeSuppressedCell,
   EpisodeSourceCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
@@ -870,10 +870,10 @@ describe('EpisodeRuleCell', () => {
   });
 });
 
-describe('EpisodeMaintenanceWindowsCell', () => {
+describe('EpisodeSuppressedCell', () => {
   const renderCell = (maintenanceWindowIds: string[] | undefined) =>
     renderWithI18n(
-      <EpisodeMaintenanceWindowsCell
+      <EpisodeSuppressedCell
         {...baseCellProps}
         columnId="suppressed"
         row={makeRow({ maintenance_window_ids: maintenanceWindowIds })}

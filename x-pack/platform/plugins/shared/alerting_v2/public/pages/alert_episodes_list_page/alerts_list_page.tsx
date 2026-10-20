@@ -54,7 +54,7 @@ import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
 import {
   EpisodeDurationCell,
-  EpisodeMaintenanceWindowsCell,
+  EpisodeSuppressedCell,
   EpisodeSourceCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
@@ -131,7 +131,7 @@ const COLUMN_CUSTOMIZATIONS: CustomGridColumnsConfiguration = {
   }),
   [SUPPRESSED_COLUMN_ID]: ({ column }) => ({
     ...column,
-    displayAsText: i18n.EPISODES_LIST_COLUMN_MAINTENANCE_WINDOWS,
+    displayAsText: i18n.EPISODES_LIST_COLUMN_SUPPRESSED,
     isSortable: false,
   }),
 };
@@ -590,7 +590,7 @@ const AlertsListPageContent = () => {
     () => ({
       'episode.status': (props) => <EpisodeStatusCell {...props} />,
       alerting_source: (props) => <EpisodeSourceCell {...props} />,
-      [SUPPRESSED_COLUMN_ID]: (props) => <EpisodeMaintenanceWindowsCell {...props} />,
+      [SUPPRESSED_COLUMN_ID]: (props) => <EpisodeSuppressedCell {...props} />,
       duration: (props) => <EpisodeDurationCell {...props} />,
       severity: (props) => <EpisodeSeverityCell {...props} />,
       tags: (props) => <EpisodeTagsCell {...props} />,
