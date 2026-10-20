@@ -18,7 +18,6 @@ apiTest.describe('Notification Center - unread status', { tag: [...tags.stateful
 
   apiTest.beforeAll(async ({ samlAuth, systemEsClient, apiClient }) => {
     ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
-    await h.getNotifications(apiClient);
     const markAll = await h.markAllRead(apiClient);
     const marker = Date.parse(markAll.body.read_all_before);
 

@@ -6,13 +6,25 @@
  */
 
 import { of } from 'rxjs';
+import type { BulkRequest, BulkResponse, ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import type { CoreSetup } from '@kbn/core/server';
-import { dataStreamServiceMock } from '@kbn/core-data-streams-server-mocks';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { NOTIFICATION_TYPES, SEVERITY } from '../../common';
+import type { NotificationDocument } from '../../common/types';
 import { buildForType, buildIdAndTimestamp, NotificationValidationError } from './submit';
 import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
 
 const modelStatus = NOTIFICATION_TYPES.inference.modelStatus;
+
+const bulkResponse = (error?: ErrorCause): BulkResponse => ({
+  took: 1,
+  errors: error !== undefined,
+  items: [{ create: { _index: '.ds-kibana-notifications-000001', status: 201, error } }],
+});
+
+/** The document the single `create` operation appended. */
+const appendedDocument = (request?: BulkRequest) =>
+  request?.operations?.[1] as NotificationDocument;
 
 const content = {
   entity: 'my-endpoint',
@@ -22,34 +34,36 @@ const content = {
 };
 
 const createCoreMock = ({ enabled = true }: { enabled?: boolean } = {}) => {
-  const create = jest.fn().mockResolvedValue({ errors: false, items: [{ create: {} }] });
-  const dataStreams = dataStreamServiceMock.createStartContract();
-  dataStreams.initializeClient.mockResolvedValue({ create } as never);
+  const elasticsearch = elasticsearchServiceMock.createStart();
+  const { bulk } = elasticsearch.client.asInternalUser;
+  bulk.mockResolvedValue(bulkResponse());
   const getBooleanValue$ = jest.fn().mockReturnValue(of(enabled));
   const core = {
     getStartServices: jest
       .fn()
-      .mockResolvedValue([{ dataStreams, featureFlags: { getBooleanValue$ } }]),
+      .mockResolvedValue([{ elasticsearch, featureFlags: { getBooleanValue$ } }]),
   } as unknown as CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>;
-  return { core, create, getBooleanValue$ };
+  return { core, bulk, getBooleanValue$ };
 };
 
 const setup = (opts: { enabled?: boolean } = {}) => {
-  const { core, create, getBooleanValue$ } = createCoreMock(opts);
-  return { forType: buildForType(core), create, getBooleanValue$ };
+  const { core, bulk, getBooleanValue$ } = createCoreMock(opts);
+  return { forType: buildForType(core), bulk, getBooleanValue$ };
 };
 
 describe('buildForType', () => {
   it('appends one document with the id built from the type + id parts, a stamped @timestamp, and defaulted severity', async () => {
-    const { forType, create } = setup();
+    const { forType, bulk } = setup();
 
     const result = await forType(modelStatus).submit(content);
 
     expect(result).toEqual({ status: 'submitted' });
-    expect(create).toHaveBeenCalledTimes(1);
-    const [{ documents }] = create.mock.calls[0];
-    expect(documents).toHaveLength(1);
-    const [document] = documents;
+    expect(bulk).toHaveBeenCalledTimes(1);
+    const [request] = bulk.mock.calls[0];
+    expect(request?.index).toBe('.kibana-notifications');
+    // One `create` action and the document it appends; a data stream accepts no other action.
+    expect(request?.operations).toEqual([{ create: {} }, expect.any(Object)]);
+    const document = appendedDocument(request);
     expect(document.notification_id).toBe('inference:modelStatus:my-endpoint:deprecated');
     expect(document.namespace).toBe('inference');
     expect(document.type).toBe('modelStatus');
@@ -60,12 +74,12 @@ describe('buildForType', () => {
   });
 
   it('stores a producer-provided severity', async () => {
-    const { forType, create } = setup();
+    const { forType, bulk } = setup();
 
     await forType(modelStatus).submit({ ...content, severity: SEVERITY.warning });
 
-    const [{ documents }] = create.mock.calls[0];
-    expect(documents[0].severity).toBe('warning');
+    const [request] = bulk.mock.calls[0];
+    expect(appendedDocument(request).severity).toBe('warning');
   });
 
   it('evaluates the feature flag keyed to the notification namespace/type', async () => {
@@ -80,12 +94,12 @@ describe('buildForType', () => {
   });
 
   it('skips the write and reports skipped_disabled when the type flag is off', async () => {
-    const { forType, create } = setup({ enabled: false });
+    const { forType, bulk } = setup({ enabled: false });
 
     const result = await forType(modelStatus).submit(content);
 
     expect(result).toEqual({ status: 'skipped_disabled' });
-    expect(create).not.toHaveBeenCalled();
+    expect(bulk).not.toHaveBeenCalled();
   });
 
   it('submits immediately without evaluating a flag when the type declares none', async () => {
@@ -97,31 +111,30 @@ describe('buildForType', () => {
         NOTIFICATION_TYPE_ENABLED_DEFAULT: false,
       }));
       const { buildForType: buildIsolated } = await import('./submit');
-      const { core, create, getBooleanValue$ } = createCoreMock();
+      const { core, bulk, getBooleanValue$ } = createCoreMock();
 
       const result = await buildIsolated(core)(modelStatus).submit(content);
 
       expect(getBooleanValue$).not.toHaveBeenCalled();
-      expect(create).toHaveBeenCalledTimes(1);
+      expect(bulk).toHaveBeenCalledTimes(1);
       expect(result).toEqual({ status: 'submitted' });
     });
   });
 
   it('rejects invalid content with a typed error and writes nothing', async () => {
-    const { forType, create } = setup();
+    const { forType, bulk } = setup();
 
     await expect(forType(modelStatus).submit({ ...content, title: '' })).rejects.toBeInstanceOf(
       NotificationValidationError
     );
-    expect(create).not.toHaveBeenCalled();
+    expect(bulk).not.toHaveBeenCalled();
   });
 
   it('throws when the bulk create reports a failure', async () => {
-    const { forType, create } = setup();
-    create.mockResolvedValueOnce({
-      errors: true,
-      items: [{ create: { error: { reason: 'mapping conflict' } } }],
-    });
+    const { forType, bulk } = setup();
+    bulk.mockResolvedValueOnce(
+      bulkResponse({ type: 'document_parsing_exception', reason: 'mapping conflict' })
+    );
 
     await expect(forType(modelStatus).submit(content)).rejects.toThrow('mapping conflict');
   });

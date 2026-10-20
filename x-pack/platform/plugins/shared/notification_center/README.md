@@ -270,9 +270,9 @@ node $SEED --kibana-url http://localhost:5611/kbn --es-url http://localhost:9201
 ```
 
 `--kibana-url` must include the base path, which a dev Kibana mounts itself under. The script
-reads the list route once before writing anything: that is what makes the plugin create the data
-stream, and writing first would let Elasticsearch auto-create a plain index under the same name,
-permanently blocking the plugin from creating it.
+writes straight to Elasticsearch: `.kibana-notifications` resolves to the system data stream
+descriptor, so the first write creates the data stream from it and nothing has to touch Kibana
+first.
 
 Elasticsearch and Kibana take separate credentials because they need different users.
 

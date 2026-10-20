@@ -30,13 +30,8 @@ apiTest.describe(
     let cookieHeader: Record<string, string>;
     const h = createHelpers(() => cookieHeader);
 
-    apiTest.beforeAll(async ({ samlAuth, systemEsClient, apiClient }) => {
+    apiTest.beforeAll(async ({ samlAuth, systemEsClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
-      // The plugin creates the backing data stream lazily, on the first read. Touch the route
-      // before seeding: a direct bulk write to a name with no data stream behind it makes ES
-      // auto-create a plain index, and the plugin's later data-stream creation then fails with
-      // a name conflict.
-      await h.getNotifications(apiClient);
       await seedNotifications(systemEsClient, [
         makeDoc('get-info', { namespace: NAMESPACE, severity: 'info' }),
         makeDoc('get-warning', { namespace: NAMESPACE, severity: 'warning' }),

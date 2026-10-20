@@ -16,7 +16,6 @@ import { buildChunk, buildTick, validateFixture } from './fixtures';
 import {
   clearNotifications,
   clearReadHorizon,
-  createDataStream,
   createEsClient,
   setReadHorizon,
   writeNotifications,
@@ -111,7 +110,6 @@ run(
     addCleanupTask(() => {
       void esClient.close();
     });
-    await createDataStream(target);
 
     if (flags.clean === true) {
       log.info(`Deleted ${await clearNotifications(esClient)} notification(s).`);

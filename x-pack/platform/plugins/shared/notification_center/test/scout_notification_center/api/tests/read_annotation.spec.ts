@@ -40,9 +40,6 @@ apiTest.describe(
     apiTest.beforeAll(async ({ samlAuth, requestAuth, systemEsClient, apiClient }) => {
       ({ cookieHeader } = await samlAuth.asInteractiveUser('admin'));
       ({ apiKeyHeader } = await requestAuth.getApiKey('admin'));
-      // The plugin creates the backing data stream lazily, on the first read. Touch the route
-      // before seeding so the bulk write below lands in a data stream, not a conflicting index.
-      await asUser.getNotifications(apiClient);
 
       const markAll = await asUser.markAllRead(apiClient);
       const marker: string = markAll.body.read_all_before;

@@ -7,17 +7,11 @@
 
 import { of } from 'rxjs';
 import type { CoreSetup } from '@kbn/core/server';
-import type { DataStreamsStart } from '@kbn/core-data-streams-server';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { DataStreamClient } from '@kbn/data-streams';
 import type { EsTestCluster } from '@kbn/test';
 import { createTestEsCluster } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import { NOTIFICATION_TYPES } from '../../common';
-import {
-  NOTIFICATION_DATA_STREAM_NAME,
-  notificationDataStreamDefinition,
-} from '../storage/notification_data_stream';
+import { NOTIFICATION_DATA_STREAM_NAME } from '../storage/notification_data_stream';
 import { buildForType, NotificationValidationError } from '../lib/submit';
 import type { NotificationCenterPluginStart, NotificationCenterStartDependencies } from '../types';
 
@@ -54,21 +48,12 @@ describe('notificationCenter forType().submit() [integration]', () => {
     await esServer.start();
     esClient = esServer.getClient();
 
-    const client = await DataStreamClient.initialize({
-      logger: loggingSystemMock.createLogger(),
-      elasticsearchClient: esClient,
-      dataStream: notificationDataStreamDefinition,
-    });
-    if (!client) {
-      throw new Error('Failed to initialize the notification data stream client');
-    }
-
-    // submit resolves its client via core.getStartServices().dataStreams,
-    // so mock the start service to return the test client bound to the test ES cluster.
-    const dataStreams = { initializeClient: async () => client } as unknown as DataStreamsStart;
+    // submit resolves its client via core.getStartServices().elasticsearch, so mock the start
+    // service to hand back the test cluster's client.
+    const elasticsearch = { client: { asInternalUser: esClient } };
     const featureFlags = { getBooleanValue$: () => of(true) };
     const core = {
-      getStartServices: async () => [{ dataStreams, featureFlags }],
+      getStartServices: async () => [{ elasticsearch, featureFlags }],
     } as unknown as CoreSetup<NotificationCenterStartDependencies, NotificationCenterPluginStart>;
     forType = buildForType(core);
   });
