@@ -17,6 +17,7 @@ import * as i18n from './translations';
 type MenuItem = NonNullable<AppHeaderMenu['items']>[number];
 
 const TEST_SUBJ_PREFIX = 'exceptionListManagement';
+const LINKED_RULES_POPOVER_WIDTH = 320;
 
 interface ListDetailsAppHeaderProps {
   name: string;
@@ -98,6 +99,7 @@ export const ListDetailsAppHeader = React.memo<ListDetailsAppHeaderProps>(
           label: i18n.LINKED_RULES(linkedRules.length),
           iconType: 'check',
           disableButton: linkedRules.length === 0,
+          popoverWidth: LINKED_RULES_POPOVER_WIDTH,
           testId: `${TEST_SUBJ_PREFIX}LinkedRulesMenu`,
           items: linkedRules.map((rule) => ({
             id: `linkedRule-${rule.id}`,
