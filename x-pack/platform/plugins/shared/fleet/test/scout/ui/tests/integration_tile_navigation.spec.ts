@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { escapeRegExp } from 'lodash';
 import { expect } from '@kbn/scout/ui';
 import { tags } from '@kbn/scout';
 
@@ -38,7 +39,9 @@ test.describe('Integration tile navigation', { tag: tags.stateful.classic }, () 
     await integrationHome.scrollToIntegration(pkgName);
     await integrationHome.clickIntegrationCard(pkgName);
 
-    await expect(page).toHaveURL(new RegExp(`/app/integrations/detail/${pkgkey}/add-integration`));
+    await expect(page).toHaveURL(
+      new RegExp(`/app/integrations/detail/${escapeRegExp(pkgkey)}/add-integration`)
+    );
   });
 
   test('clicking a tile as a user without integrations write privileges opens the overview page', async ({
@@ -55,6 +58,8 @@ test.describe('Integration tile navigation', { tag: tags.stateful.classic }, () 
     await integrationHome.scrollToIntegration(pkgName);
     await integrationHome.clickIntegrationCard(pkgName);
 
-    await expect(page).toHaveURL(new RegExp(`/app/integrations/detail/${pkgkey}/overview`));
+    await expect(page).toHaveURL(
+      new RegExp(`/app/integrations/detail/${escapeRegExp(pkgkey)}/overview`)
+    );
   });
 });
