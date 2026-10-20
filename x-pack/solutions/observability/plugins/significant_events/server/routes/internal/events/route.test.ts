@@ -22,6 +22,7 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
 const investigateRoute =
   internalEventsRoutes['POST /internal/significant_events/events/{id}/investigate'];
 const eventsSearchRoute = internalEventsRoutes['GET /internal/significant_events/events'];
+const eventsFacetsRoute = internalEventsRoutes['GET /internal/significant_events/events/_facets'];
 const lifecycleRoute =
   internalEventsRoutes['GET /internal/significant_events/events/{id}/lifecycle'];
 const eventsGetRoute = internalEventsRoutes['GET /internal/significant_events/events/{id}'];
@@ -142,6 +143,9 @@ describe('GET /internal/significant_events/events', () => {
           source_id: 'logs.test',
           topology_feature_id: 'checkout-service',
           search: 'noise',
+          investigation_state: 'in_progress',
+          sort_field: 'severity',
+          sort_order: 'asc',
           page: 2,
           perPage: 10,
         },
@@ -163,6 +167,9 @@ describe('GET /internal/significant_events/events', () => {
       sourceIds: ['logs.test'],
       topologyFeatureIds: ['checkout-service'],
       search: 'noise',
+      investigationStates: ['in_progress'],
+      sortField: 'severity',
+      sortOrder: 'asc',
       page: 2,
       perPage: 10,
     });
@@ -204,6 +211,44 @@ describe('GET /internal/significant_events/events', () => {
       page: 1,
       perPage: 25,
       total: 1,
+    });
+  });
+});
+
+describe('GET /internal/significant_events/events/_facets', () => {
+  it('counts facets with the same filters as the list', async () => {
+    const facets = {
+      severity: { critical: 1, high: 0, medium: 0, low: 0 },
+      status: { active: 1, recovering: 0, inactive: 0 },
+      investigation: { not_started: 1, in_progress: 0, completed: 0 },
+    };
+    const countFacets = jest.fn().mockResolvedValue(facets);
+
+    const response = await eventsFacetsRoute.handler({
+      params: {
+        query: {
+          from: '2026-01-01T00:00:00.000Z',
+          to: '2026-01-02T00:00:00.000Z',
+          severity: ['critical', 'high'],
+          investigation_state: 'not_started',
+          search: 'checkout',
+        },
+      },
+      request: {},
+      getScopedClients: jest.fn().mockResolvedValue({
+        licensing: {},
+        getEventSearchClient: () => ({ countFacets }),
+      }),
+      server: {},
+    } as never);
+
+    expect(response).toEqual(facets);
+    expect(countFacets).toHaveBeenCalledWith({
+      from: '2026-01-01T00:00:00.000Z',
+      to: '2026-01-02T00:00:00.000Z',
+      severity: ['critical', 'high'],
+      investigationStates: ['not_started'],
+      search: 'checkout',
     });
   });
 });
