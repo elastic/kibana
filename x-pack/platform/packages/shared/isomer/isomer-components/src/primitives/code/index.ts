@@ -6,3 +6,4 @@
  */
 
 export { type CodeNode, code } from './code';
+export { CODE_COPY_ENHANCEMENT, codeCopyEnhancement } from './code_copy';
