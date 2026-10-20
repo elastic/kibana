@@ -35,5 +35,19 @@ export const services = async (input: CodecInput, context: WorkerContext): Promi
     await clients.close();
   }
 };
+export const cooperative = async (
+  _input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  const aborted = new Promise<void>((resolve) => {
+    if (context.signal.aborted) resolve();
+    else context.signal.addEventListener('abort', () => resolve(), { once: true });
+  });
+  await context.call('fixture', 'started', {});
+  await aborted;
+  await context.call('fixture', 'persistTerminal', { aborted: context.signal.aborted });
+  return { cancelled: context.signal.aborted, persisted: true };
+};
+
 export const wrongGrant = async (_input: CodecInput, context: WorkerContext): Promise<CodecInput> =>
   context.call('notGranted', 'get', {});

@@ -1,4 +1,4 @@
-# Track 7 capability kit — 0.1 research slice
+# Track 7 capability kit — 0.1.1 pre-release research slice
 
 PRIVATE research code; no public Core API, plugin lifecycle hook, or automatic enablement.
 Base harness fd3138c. Only main owns TM claims/leases/results. One slot runs one task.
@@ -82,8 +82,17 @@ export/specifier works. Replacing executable file contents under the SAME specif
 requires pool restart (Node caches modules); do not call revision a code hot-reloader.
 
 Thread and child-process adapters use the same protocol. Main never Atomics-waits;
-rare worker-to-main sync API is not in 0.1. Independent host deadlines include queue
-and bootstrap; hard stop waits for actual exit, discards only the affected slot.
+rare worker-to-main sync API is not yet implemented. Deadlines include queue
+and bootstrap. In0.1.1, cancellation/deadline/shutdown FIRST send a cancel packet:
+WorkerContext.signal aborts with AbortError (TimeoutError for deadline), then sends
+an acknowledgement. Task code can perform bounded terminal persistence and return.
+Host abortGraceMs (per-host or per-run, default250ms, allowed0–30000ms) bounds this
+grace, then hard-stops and awaits actual exit. Grace is ADDITIONAL to deadlineMs;
+set0 for immediate hard kill. A cancelled task NEVER becomes success: its outcome
+is terminated; graceful=true proves abort acknowledgement preceded outcome,
+and terminal carries the task's terminal value/error. Main may race an already
+finishing task: graceful=false then honestly records no abort acknowledgement.
+Queued/pre-aborted work terminates without invoking task code. Other class slots survive.
 Late host replies are fenced by run ID + slot identity. Other class slots survive.
 
 SO supports get/resolve/create/update/delete/find (single type). Namespace/namespaces/
@@ -115,7 +124,7 @@ including401 after fixture revocation; not live ES security or actual UIAM serve
 No stack/QAF, real runner, cgroup/pod fit, exact slices or scored latency claim.
 
 Outstanding 7.P: worker-local composed real SO/ESO + readiness/auth/audit parity;
-live key revocation mid-run; session refresh bridge (capture is a per-run snapshot,
+scoped live SO security matrix; session refresh bridge (capture is a per-run snapshot,
 not token renewal); rare sync lane; telemetry overhead and per-MB/call measurement;
 distribution-shaped initialized-service floor; bounded envelope sizes/backpressure;
 broader SO operations, typed error codecs, logger metadata and production bootstrap.

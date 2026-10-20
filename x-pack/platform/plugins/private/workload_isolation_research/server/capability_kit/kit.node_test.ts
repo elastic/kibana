@@ -107,6 +107,48 @@ for (const transport of ['thread', 'process'] as const) {
     }
   );
   test(
+    transport + ': cooperative abort signals before terminal persistence/outcome',
+    { timeout: 30000 },
+    async () => {
+      const specifier = require.resolve('./example_tasks');
+      const registry = new ModuleRegistry(new Set([specifier]));
+      registry.register('cooperative', specifier, 'cooperative');
+      const host = new ExecutionHost(registry, { transport, abortGraceMs: 2000 });
+      const controller = new AbortController();
+      let persisted = false;
+      try {
+        const outcome = await host.run({
+          workloadClass: 'fixture',
+          principal: 'alice',
+          space: 'space-a',
+          moduleId: 'cooperative',
+          input: {},
+          deadlineMs: 10000,
+          signal: controller.signal,
+          capabilities: {
+            fixture: {
+              lever: 'capability_bundle',
+              handler: async (operation, args) => {
+                if (operation === 'started') controller.abort();
+                if (operation === 'persistTerminal')
+                  persisted = (args as { aborted: boolean }).aborted;
+              },
+            },
+          },
+        });
+        assert.equal(outcome.status, 'terminated');
+        if (outcome.status === 'terminated') {
+          assert.equal(outcome.reason, 'cancelled');
+          assert.equal(outcome.graceful, true);
+          assert.deepEqual(outcome.terminal, { cancelled: true, persisted: true });
+        }
+        assert.ok(persisted);
+      } finally {
+        await host.stop();
+      }
+    }
+  );
+  test(
     transport + ': cancellation fences late host replies without killing another class',
     { timeout: 30000 },
     async () => {

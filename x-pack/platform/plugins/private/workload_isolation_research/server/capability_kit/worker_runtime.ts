@@ -22,6 +22,7 @@ const send = (packet: Packet): void => {
 /** Runs exactly one discardable execution at a time; never exposes the host's service graph. */
 const startRuntime = (): void => {
   let active: Bundle | undefined;
+  let controller: AbortController | undefined;
   let sequence = 0;
   let registry: RegistrySnapshot = { revision: -1, modules: [] };
   const pending = new Map<
@@ -30,6 +31,18 @@ const startRuntime = (): void => {
   >();
   const onMessage = async (packet: Packet): Promise<void> => {
     if (packet.version !== 1) throw new Error('Capability protocol mismatch');
+    if (packet.kind === 'cancel') {
+      if (packet.runId === active?.runId && controller) {
+        controller.abort(
+          new DOMException(
+            'Execution cancelled',
+            packet.reason === 'deadline' ? 'TimeoutError' : 'AbortError'
+          )
+        );
+        send({ version: 1, kind: 'abort_ack', runId: packet.runId });
+      }
+      return;
+    }
     if (packet.kind === 'reply') {
       if (packet.runId !== active?.runId) return;
       const call = pending.get(packet.id);
@@ -45,7 +58,8 @@ const startRuntime = (): void => {
     if (active) throw new Error('Concurrent run in a single capability slot');
     active = packet.bundle;
     const { bundle } = packet;
-    const controller = new AbortController();
+    const runController = new AbortController();
+    controller = runController;
     let value: CodecInput;
     let failed = false;
     try {
@@ -61,7 +75,7 @@ const startRuntime = (): void => {
       };
       const context: WorkerContext = {
         bundle,
-        signal: controller.signal,
+        signal: runController.signal,
         load,
         call: (capability, operation, args) =>
           new Promise((resolve, reject) => {
@@ -109,7 +123,7 @@ const startRuntime = (): void => {
       heapUsed: process.memoryUsage().heapUsed,
       rss: process.memoryUsage().rss,
     });
-    controller.abort();
+    controller = undefined;
     for (const entry of pending.values()) entry.reject(new Error('Run ended'));
     pending.clear();
     active = undefined;

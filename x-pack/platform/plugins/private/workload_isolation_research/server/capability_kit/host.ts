@@ -30,6 +30,7 @@ export interface RunOptions {
   readonly data?: CodecInput;
   readonly deadlineMs: number;
   readonly signal?: AbortSignal;
+  readonly abortGraceMs?: number;
 }
 interface Execution {
   readonly options: RunOptions;
@@ -37,6 +38,13 @@ interface Execution {
   readonly resolve: (outcome: Outcome) => void;
   timer?: NodeJS.Timeout;
   abort?: () => void;
+  termination?: {
+    readonly reason: 'deadline' | 'cancelled' | 'shutdown' | 'crash';
+    readonly promise: Promise<void>;
+    readonly resolve: () => void;
+    acknowledged: boolean;
+    timer?: NodeJS.Timeout;
+  };
   done: boolean;
 }
 interface Slot {
@@ -59,6 +67,7 @@ export class ExecutionHost {
       readonly transport?: 'thread' | 'process';
       readonly slotsPerClass?: number;
       readonly maxQueuePerClass?: number;
+      readonly abortGraceMs?: number;
       readonly onCrossing?: (crossing: Crossing) => void;
     } = {}
   ) {
@@ -71,6 +80,9 @@ export class ExecutionHost {
     if (this.closing) return Promise.reject(new Error('Execution host is stopping'));
     if (!Number.isFinite(options.deadlineMs) || options.deadlineMs < 1)
       return Promise.reject(new Error('Invalid deadline'));
+    const grace = options.abortGraceMs ?? this.options.abortGraceMs ?? 250;
+    if (!Number.isFinite(grace) || grace < 0 || grace > 30000)
+      return Promise.reject(new Error('Abort grace must be between0 and30000ms'));
     if (options.signal?.aborted)
       return Promise.resolve({ status: 'terminated', reason: 'cancelled' });
     const queue = this.queues.get(options.workloadClass) ?? [];
@@ -118,6 +130,13 @@ export class ExecutionHost {
         }
       }
     await Promise.all(jobs);
+    // Graceful outcomes leave reusable slots; shutdown must close those too.
+    await Promise.all(
+      [...this.pools.values()].flat().map(async (slot) => {
+        slot.stopping = true;
+        await slot.endpoint.stop();
+      })
+    );
     this.pools.clear();
     this.queues.clear();
   }
@@ -199,6 +218,18 @@ export class ExecutionHost {
       packet.runId !== execution.bundle.runId
     )
       return;
+    if (packet.kind === 'abort_ack') {
+      if (execution.termination) execution.termination.acknowledged = true;
+      this.record(
+        execution,
+        'execution.abort_ack',
+        'capability_bundle',
+        'isolate_to_host',
+        packet,
+        0
+      );
+      return;
+    }
     if (packet.kind === 'outcome') {
       this.record(
         execution,
@@ -212,7 +243,14 @@ export class ExecutionHost {
       slot.active = undefined;
       this.finish(
         execution,
-        packet.failed
+        execution.termination
+          ? {
+              status: 'terminated',
+              reason: execution.termination.reason,
+              graceful: execution.termination.acknowledged,
+              terminal: value,
+            }
+          : packet.failed
           ? { status: 'failure', error: value instanceof Error ? value : new Error('Task failed') }
           : { status: 'success', value, heapUsed: packet.heapUsed, rss: packet.rss }
       );
@@ -272,17 +310,57 @@ export class ExecutionHost {
     execution: Execution,
     reason: 'deadline' | 'cancelled' | 'shutdown' | 'crash'
   ): Promise<void> {
+    if (execution.termination) return execution.termination.promise;
     if (execution.done) return;
     const slots = this.pools.get(execution.options.workloadClass) ?? [];
     const slot = slots.find((entry) => entry.active === execution);
     if (slot) {
-      slot.stopping = true;
-      // Fence before awaiting the actual stop acknowledgement.
-      execution.done = true;
-      this.clear(execution);
-      await slot.endpoint.stop();
-      slot.active = undefined;
-      execution.resolve({ status: 'terminated', reason });
+      let resolveTermination: () => void = () => {};
+      const promise = new Promise<void>((resolve) => {
+        resolveTermination = resolve;
+      });
+      execution.termination = { reason, promise, resolve: resolveTermination, acknowledged: false };
+      const hardStop = async (): Promise<void> => {
+        if (execution.done) return;
+        slot.stopping = true;
+        // Fence before awaiting the actual stop acknowledgement.
+        execution.done = true;
+        this.clear(execution);
+        await slot.endpoint.stop();
+        slot.active = undefined;
+        execution.resolve({ status: 'terminated', reason });
+        resolveTermination();
+        this.dispatch(execution.options.workloadClass);
+      };
+      const grace =
+        reason === 'crash' ? 0 : execution.options.abortGraceMs ?? this.options.abortGraceMs ?? 250;
+      if (grace > 0 && reason !== 'crash') {
+        const packet: Packet = {
+          version: 1,
+          kind: 'cancel',
+          runId: execution.bundle.runId,
+          reason,
+        };
+        try {
+          this.record(
+            execution,
+            'execution.cancel',
+            'capability_bundle',
+            'host_to_isolate',
+            packet,
+            0
+          );
+          slot.endpoint.send(packet);
+          execution.termination.timer = setTimeout(() => {
+            void hardStop();
+          }, grace);
+        } catch {
+          await hardStop();
+        }
+      } else {
+        await hardStop();
+      }
+      return promise;
     } else {
       const queue = this.queues.get(execution.options.workloadClass);
       const index = queue?.indexOf(execution) ?? -1;
@@ -297,9 +375,11 @@ export class ExecutionHost {
     execution.done = true;
     this.clear(execution);
     execution.resolve(outcome);
+    execution.termination?.resolve();
   }
   private clear(execution: Execution): void {
     if (execution.timer) clearTimeout(execution.timer);
+    if (execution.termination?.timer) clearTimeout(execution.termination.timer);
     if (execution.abort) execution.options.signal?.removeEventListener('abort', execution.abort);
     this.activeIds.delete(execution.bundle.runId);
   }

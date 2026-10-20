@@ -107,6 +107,13 @@ export type Packet =
       readonly heapUsed: number;
       readonly rss: number;
     }
+  | {
+      readonly version: 1;
+      readonly kind: 'cancel';
+      readonly runId: string;
+      readonly reason: 'deadline' | 'cancelled' | 'shutdown';
+    }
+  | { readonly version: 1; readonly kind: 'abort_ack'; readonly runId: string }
   | { readonly version: 1; readonly kind: 'ready' };
 
 export type Outcome =
@@ -120,4 +127,6 @@ export type Outcome =
   | {
       readonly status: 'terminated';
       readonly reason: 'deadline' | 'cancelled' | 'shutdown' | 'crash';
+      readonly graceful?: boolean;
+      readonly terminal?: CodecInput;
     };
