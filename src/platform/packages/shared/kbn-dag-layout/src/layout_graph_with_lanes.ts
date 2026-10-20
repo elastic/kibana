@@ -8,11 +8,10 @@
  */
 
 import { applyDagre } from './apply_dagre';
-import { translateEdgePoints } from './align_cross_axis';
+import { FORK_HEAD_ALIGN_EPSILON, LANE_CROSS_SHIFT_EPSILON } from './constants';
 import type {
   DagEdge,
   DagNode,
-  DagPositionedEdge,
   DagPositionedNode,
   DagReservedLane,
   DagReservedLanePlacement,
@@ -35,6 +34,470 @@ const shiftCross = (n: DagPositionedNode, delta: number, isLR: boolean): DagPosi
 const intervalsOverlap = (aStart: number, aEnd: number, bStart: number, bEnd: number) =>
   aStart < bEnd && bStart < aEnd;
 
+// ── lane validation ──────────────────────────────────────────────────────────
+
+/**
+ * Rejects lane sets the cascade cannot place: a node in two lanes, an owner
+ * inside its own lane, lanes owning each other in a cycle, or a lane owned by a
+ * spine node at a non-zero depth (only depth-0 lanes are levelled from the spine).
+ */
+const validateLanes = (nodes: readonly DagNode[], lanes: readonly DagReservedLane[]): void => {
+  if (lanes.length === 0) return;
+
+  const laneByNodeId = new Map<string, DagReservedLane>();
+  for (const lane of lanes) {
+    for (const nid of lane.nodeIds) {
+      if (laneByNodeId.has(nid)) {
+        throw new Error(`reservedLane invariant: node "${nid}" appears in two lanes`);
+      }
+      laneByNodeId.set(nid, lane);
+    }
+  }
+
+  const nodeIds = new Set(nodes.map((n) => n.id));
+  for (const lane of lanes) {
+    const { ownerId, depth } = lane;
+    const ownerLane = laneByNodeId.get(ownerId);
+    if (ownerLane === lane) {
+      throw new Error(`reservedLane invariant: owner "${ownerId}" is inside its own lane`);
+    }
+    if (!ownerLane && nodeIds.has(ownerId) && depth !== 0) {
+      throw new Error(
+        `reservedLane invariant: lane owned by spine node "${ownerId}" has depth ${depth}, expected 0`
+      );
+    }
+  }
+
+  // Each lane has one owner, hence at most one parent lane, so following the
+  // parent chain from every lane finds any ownership cycle.
+  const settled = new Set<DagReservedLane>();
+  for (const start of lanes) {
+    const chain = new Set<DagReservedLane>();
+    let current: DagReservedLane | undefined = start;
+    while (current && !settled.has(current)) {
+      if (chain.has(current)) {
+        throw new Error(
+          `reservedLane invariant: ownership cycle through owner "${current.ownerId}"`
+        );
+      }
+      chain.add(current);
+      current = laneByNodeId.get(current.ownerId);
+    }
+    for (const lane of chain) settled.add(lane);
+  }
+};
+
+// ── shared state ─────────────────────────────────────────────────────────────
+
+type Adjacency = ReadonlyMap<string, readonly string[]>;
+
+/** Everything the post-dagre phases read; `spineById` and `laneNodeById` are mutated in place. */
+interface LaneLayoutContext {
+  readonly isLR: boolean;
+  readonly nodeSep: number;
+  readonly rankSep: number;
+  /** Lanes ordered by depth, then by the owner's main position after dagre. */
+  readonly sortedLanes: readonly DagReservedLane[];
+  /** Lanes grouped by owner, each bucket in `sortedLanes` order. */
+  readonly lanesByOwner: ReadonlyMap<string, readonly DagReservedLane[]>;
+  /** Each owner's first position in `sortedLanes`. */
+  readonly ownerRank: ReadonlyMap<string, number>;
+  /** Each lane's nodes as dagre placed them; live positions are tracked in `laneNodeById`. */
+  readonly laneLayouts: ReadonlyMap<DagReservedLane, readonly DagPositionedNode[]>;
+  readonly spineById: Map<string, DagPositionedNode>;
+  readonly laneNodeById: Map<string, DagPositionedNode>;
+  readonly spineAdj: Adjacency;
+  readonly spineRevAdj: Adjacency;
+  readonly spineSuccessorsOf: (startId: string) => Set<string>;
+  readonly laneSuccessorsOf: (startId: string) => Set<string>;
+}
+
+// ── graph helpers ────────────────────────────────────────────────────────────
+
+const appendTo = (map: Map<string, string[]>, key: string, value: string): void => {
+  const bucket = map.get(key);
+  if (bucket) {
+    bucket.push(value);
+  } else {
+    map.set(key, [value]);
+  }
+};
+
+/** Breadth-first reachability from `startId`, excluding it unless a cycle returns to it. */
+const bfs = (adjacency: Adjacency, startId: string): Set<string> => {
+  const visited = new Set<string>();
+  const queue = [startId];
+  for (let head = 0; head < queue.length; head++) {
+    for (const next of adjacency.get(queue[head]) ?? []) {
+      if (!visited.has(next)) {
+        visited.add(next);
+        queue.push(next);
+      }
+    }
+  }
+  return visited;
+};
+
+/** Memoised `bfs`: avoids repeated traversals for the same start node. */
+const memoizeReachability = (adjacency: Adjacency): ((startId: string) => Set<string>) => {
+  const cache = new Map<string, Set<string>>();
+  return (startId) => {
+    const cached = cache.get(startId);
+    if (cached) return cached;
+    const reachable = bfs(adjacency, startId);
+    cache.set(startId, reachable);
+    return reachable;
+  };
+};
+
+/** Current positions of a lane's nodes, in the lane's dagre order. */
+const currentLanePositions = (ctx: LaneLayoutContext, lane: DagReservedLane): DagPositionedNode[] =>
+  (ctx.laneLayouts.get(lane) ?? []).map((n) => ctx.laneNodeById.get(n.id) ?? n);
+
+/**
+ * Pushes every node of `successorIds` found in `store` down the main axis by the
+ * same amount so the earliest of them starts at `required`. No-op when none exist
+ * or the earliest already starts at or past `required`.
+ */
+const pushSuccessors = (
+  store: Map<string, DagPositionedNode>,
+  successorIds: Iterable<string>,
+  required: number,
+  isLR: boolean
+): void => {
+  // Only the earliest successor's main start is read, so a min scan stands in
+  // for sorting every successor.
+  let successorMainStart = Infinity;
+  let hasSuccessor = false;
+  for (const id of successorIds) {
+    const successor = store.get(id);
+    if (!successor) continue;
+    hasSuccessor = true;
+    successorMainStart = Math.min(successorMainStart, mainOf(successor, isLR));
+  }
+  if (!hasSuccessor) return;
+
+  const deficit = Math.max(0, required - successorMainStart);
+  if (deficit === 0) return;
+
+  for (const id of successorIds) {
+    const n = store.get(id);
+    if (n) store.set(id, shiftMain(n, deficit, isLR));
+  }
+};
+
+// ── 1. Partition nodes ───────────────────────────────────────────────────────
+
+const partitionNodes = (nodes: readonly DagNode[], lanes: readonly DagReservedLane[]) => {
+  const laneByNodeId = new Map<string, DagReservedLane>();
+  for (const lane of lanes) {
+    for (const nid of lane.nodeIds) {
+      laneByNodeId.set(nid, lane);
+    }
+  }
+
+  const spineNodes = nodes.filter((n) => !laneByNodeId.has(n.id));
+
+  // First node wins for a repeated id, matching `Array.prototype.find`.
+  const inputNodeById = new Map<string, DagNode>();
+  for (const n of nodes) {
+    if (!inputNodeById.has(n.id)) inputNodeById.set(n.id, n);
+  }
+
+  // Nodes per lane (maintaining their DagNode size info for dagre).
+  const laneNodes = new Map<DagReservedLane, DagNode[]>();
+  for (const lane of lanes) {
+    laneNodes.set(
+      lane,
+      lane.nodeIds.map((id) => {
+        const n = inputNodeById.get(id);
+        if (!n) throw new Error(`reservedLane node "${id}" not found in input nodes`);
+        return n;
+      })
+    );
+  }
+
+  return { laneByNodeId, spineNodes, laneNodes };
+};
+
+// ── 2. Partition edges ───────────────────────────────────────────────────────
+
+const partitionEdges = (
+  edges: readonly DagEdge[],
+  lanes: readonly DagReservedLane[],
+  laneByNodeId: ReadonlyMap<string, DagReservedLane>
+) => {
+  const spineEdges: DagEdge[] = [];
+  const laneInternalEdges = new Map<DagReservedLane, DagEdge[]>();
+
+  for (const lane of lanes) laneInternalEdges.set(lane, []);
+
+  for (const edge of edges) {
+    const sourceLane = laneByNodeId.get(edge.source);
+    const targetLane = laneByNodeId.get(edge.target);
+    if (!sourceLane && !targetLane) {
+      spineEdges.push(edge);
+    } else if (sourceLane && targetLane && sourceLane === targetLane) {
+      laneInternalEdges.get(sourceLane)?.push(edge);
+    }
+    // Otherwise the edge crosses a lane boundary and must NOT enter any dagre run.
+  }
+
+  return { spineEdges, laneInternalEdges };
+};
+
+// ── 4+5. Level heads and push spine (interleaved, top-down per spine owner) ──
+//
+// The cascade rule (D3, revised): each lane head starts one rank below its
+// owner — `headMainStart = ownerMainEnd + rankSep`. Applied recursively so
+// nested lanes cascade like a staircase (D12). The band starts at the owner's
+// main start so the owner is always an obstacle for cross-origin placement (Fix 5).
+//
+// Interleaved with the spine push (D7): for each spine owner top-down:
+//   1. levelLaneCascade — drop the head one rank below the owner, recurse.
+//   2. subtreeMainEnd   — full main extent of this lane and all nested lanes.
+//   3. pushSpineAfter   — first spine successor starts at extent + rankSep.
+//
+// Interleaving means a push from O1 moves O2 before O2's cascade is levelled,
+// so O2's head lands correctly relative to O2's pushed position (Fix 2).
+
+/** Full main extent of a lane plus all lanes nested under it (Fix 3, D7). */
+const subtreeMainEnd = (ctx: LaneLayoutContext, lane: DagReservedLane): number => {
+  const { isLR, lanesByOwner, laneLayouts } = ctx;
+  const positions = currentLanePositions(ctx, lane);
+  if (positions.length === 0) return -Infinity;
+  let maxEnd = Math.max(...positions.map((n) => mainOf(n, isLR) + mainSpanOf(n, isLR)));
+  for (const { id } of laneLayouts.get(lane) ?? []) {
+    for (const nestedLane of lanesByOwner.get(id) ?? []) {
+      maxEnd = Math.max(maxEnd, subtreeMainEnd(ctx, nestedLane));
+    }
+  }
+  return maxEnd;
+};
+
+/**
+ * Level this lane and all nested lanes recursively (depth-first pre-order).
+ * ownerId is looked up fresh from spineById / laneNodeById on each call so
+ * it reflects any pushes already applied to the owner.
+ */
+const levelLaneCascade = (ctx: LaneLayoutContext, lane: DagReservedLane, ownerId: string): void => {
+  const { isLR, rankSep, spineById, laneNodeById, lanesByOwner, ownerRank } = ctx;
+  const currentOwner = spineById.get(ownerId) ?? laneNodeById.get(ownerId);
+  if (!currentOwner) return;
+  const positions = currentLanePositions(ctx, lane);
+  if (positions.length === 0) return;
+
+  // head = first lane node in dagre's main-axis order (minimum main start).
+  const currentHead = positions.reduce((min, cur) =>
+    mainOf(cur, isLR) < mainOf(min, isLR) ? cur : min
+  );
+
+  // Cascade: head starts one rank below the owner (Fix 1, D3-revised).
+  const ownerMainEnd = mainOf(currentOwner, isLR) + mainSpanOf(currentOwner, isLR);
+  const headMainStart = mainOf(currentHead, isLR);
+  const mainDelta = Math.round(ownerMainEnd + rankSep - headMainStart);
+
+  if (mainDelta !== 0) {
+    for (const cur of positions) {
+      laneNodeById.set(cur.id, shiftMain(cur, mainDelta, isLR));
+    }
+  }
+
+  // Recursively cascade nested lanes, top-down by owner's current main position
+  // (depth-first pre-order). After each nested lane is cascaded, push THIS lane's
+  // own in-lane successors of the nested owner so they clear the nested lane's
+  // full subtree — the same D7 rule the spine loop applies below (§5), scoped to
+  // lane-internal topology so a sibling branch inside this lane is not pushed
+  // (Fix 6 parity). Without this, a `continue` rejoin out of a nested fallback
+  // can run backward into a sibling step that never moved.
+  const laneNodeIdSet = new Set(positions.map((n) => n.id));
+  const laneNodeMain = (id: string): number => {
+    const n = laneNodeById.get(id);
+    return n ? mainOf(n, isLR) : 0;
+  };
+  // Rank-ordering first keeps the first-owner-in-`sortedLanes` order as the sort tie-break.
+  const nestedOwnerIds = [...laneNodeIdSet]
+    .filter((id) => lanesByOwner.has(id))
+    .sort((a, b) => (ownerRank.get(a) ?? 0) - (ownerRank.get(b) ?? 0))
+    .sort((a, b) => laneNodeMain(a) - laneNodeMain(b));
+
+  for (const nestedOwnerId of nestedOwnerIds) {
+    for (const nestedLane of lanesByOwner.get(nestedOwnerId) ?? []) {
+      levelLaneCascade(ctx, nestedLane, nestedOwnerId);
+
+      // Measure the nested lane's (and anything nested under it) full extent,
+      // then push this lane's in-lane successors of nestedOwnerId to clear it.
+      const required = subtreeMainEnd(ctx, nestedLane) + rankSep;
+      const nestedOwnerSuccessors = ctx.laneSuccessorsOf(nestedOwnerId);
+      const successorsInLane = [...laneNodeIdSet].filter((id) => nestedOwnerSuccessors.has(id));
+      pushSuccessors(laneNodeById, successorsInLane, required, isLR);
+    }
+  }
+};
+
+// ── 3.5. Align fork heads (post-dagre rank correction) ──────────────────────
+//
+// Dagre's tight-tree ranker assigns the shorter branch of an if/switch/parallel
+// fork to a later rank to tighten the edge to the merge node. For example, with
+// then: [A, B] and else: [C], dagre puts C at rank 2 (tight C→merge) instead of
+// rank 1 (parallel to A). The D7 topology push then leaves C stranded between
+// the then head and the pushed loop step, producing an asymmetric fork.
+//
+// Fix: for each spine node with 2+ outgoing edges (a fork), move all fork heads
+// to the minimum main position among them. After this, all fork heads share rank 1
+// and the topology push correctly skips them (they are not successors of the owner).
+//
+// Guards — only align a target when ALL of these hold:
+//   1. No sibling target is reachable from it (transitive-successor / shortcut
+//      edge guard). Shape a→b, a→c, b→c: c is reachable from b, so c is excluded
+//      and the pair is not alignable.
+//   2. Its sole spine predecessor is the fork source. If a target has an external
+//      predecessor p→q→c (with a→c also present), dagre placed c at a later rank
+//      to satisfy p→q→c. Pulling c up to b's rank would make q→c same-rank or
+//      backward. Only genuine fork heads have exactly one predecessor (the gate).
+
+const alignForkHeads = (ctx: LaneLayoutContext): void => {
+  const { isLR, spineById, spineAdj, spineRevAdj, spineSuccessorsOf } = ctx;
+  for (const [forkSource, targets] of spineAdj) {
+    if (targets.length < 2) continue;
+    const targetNodes = targets.flatMap((t) => {
+      const n = spineById.get(t);
+      return n ? [n] : [];
+    });
+    if (targetNodes.length < 2) continue;
+    // Guard 1: exclude any target reachable from a sibling target (shortcut edge).
+    // Guard 2: exclude any target whose spine predecessor is not solely the fork source.
+    const alignable = targetNodes.filter((n) => {
+      const reachableFromSibling = targetNodes.some(
+        (o) => o.id !== n.id && spineSuccessorsOf(o.id).has(n.id)
+      );
+      if (reachableFromSibling) return false;
+      const predecessors = spineRevAdj.get(n.id) ?? [];
+      const hasExternalPredecessor = predecessors.some((p) => p !== forkSource);
+      return !hasExternalPredecessor;
+    });
+    if (alignable.length < 2) continue;
+    const minMain = Math.min(...alignable.map((n) => mainOf(n, isLR)));
+    for (const n of alignable) {
+      const curMain = mainOf(n, isLR);
+      if (curMain > minMain + FORK_HEAD_ALIGN_EPSILON) {
+        spineById.set(n.id, shiftMain(n, minMain - curMain, isLR));
+      }
+    }
+  }
+};
+
+/**
+ * Process spine owners top-down; each push applies before the next owner is
+ * visited so every owner's position is final when we level its lanes.
+ */
+const levelLanesAndPushSpine = (ctx: LaneLayoutContext): void => {
+  const { isLR, rankSep, spineById, sortedLanes, lanesByOwner } = ctx;
+  const depth0OwnerIds = new Set(sortedLanes.filter((l) => l.depth === 0).map((l) => l.ownerId));
+  const spineOwnersTopDown = [...spineById.values()]
+    .filter((n) => depth0OwnerIds.has(n.id))
+    .sort((a, b) => mainOf(a, isLR) - mainOf(b, isLR));
+
+  for (const ownerSnapshot of spineOwnersTopDown) {
+    // Read current position — may have been pushed by a prior owner.
+    const owner = spineById.get(ownerSnapshot.id);
+    if (!owner) continue;
+    const depth0OwnedLanes = (lanesByOwner.get(owner.id) ?? []).filter((l) => l.depth === 0);
+
+    for (const lane of depth0OwnedLanes) {
+      // 1. Level this lane's cascade.
+      levelLaneCascade(ctx, lane, owner.id);
+
+      // 2. Measure the subtree's main extent.
+      const required = subtreeMainEnd(ctx, lane) + rankSep;
+
+      // 3. Push the spine so the first successor starts at `required`.
+      //    Use topology (transitive reachability via spine edges) to select only
+      //    real successors — parallel branches must not be pushed (Fix 6). Using
+      //    `mainOf(n) >= successorMainStart` would also move parallel branches that
+      //    happen to share the same Y as the first successor, e.g. the else-branch
+      //    of an if-fork whose owner is in the then-branch.
+      pushSuccessors(spineById, ctx.spineSuccessorsOf(owner.id), required, isLR);
+    }
+  }
+};
+
+// ── 6. Compute cross origins (shallowest-first, top-down within each depth) ─
+//
+// Placed lanes are accumulated as additional obstacles for later (deeper) lanes.
+// Shallowest-first ensures a parent lane is placed before its child, making the
+// parent an obstacle for the child — guaranteeing depth monotonicity outward.
+//
+// The band starts at the OWNER's main start, not the lane head (Fix 5, D5).
+// Required because after the cascade drop (Fix 1) and spine push (D7), the
+// lane's own node band sits below the owner and contains no spine node (D7
+// pushed them away). Without Fix 5 the owner would not be an obstacle, maxCrossEnd
+// would fall back to -Infinity, origin to 0, and every lane would land on the spine.
+
+const placeLanesOnCross = (ctx: LaneLayoutContext): DagReservedLanePlacement[] => {
+  const { isLR, nodeSep, spineById, laneNodeById, sortedLanes } = ctx;
+  const placedLanePlacements: DagReservedLanePlacement[] = [];
+
+  // Spine bands are final from here on; measure them once for the per-lane obstacle scans.
+  const spineBands = [...spineById.values()].map((n) => ({
+    mainStart: mainOf(n, isLR),
+    mainEnd: mainOf(n, isLR) + mainSpanOf(n, isLR),
+    crossEnd: crossOf(n, isLR) + crossSpanOf(n, isLR),
+  }));
+
+  for (const lane of sortedLanes) {
+    const laneNodePositions = currentLanePositions(ctx, lane);
+    if (laneNodePositions.length === 0) continue;
+
+    // Band: owner main start → lane node max end (Fix 5).
+    const ownerPos = spineById.get(lane.ownerId) ?? laneNodeById.get(lane.ownerId);
+    const laneMainStart = ownerPos
+      ? mainOf(ownerPos, isLR)
+      : Math.min(...laneNodePositions.map((n) => mainOf(n, isLR)));
+    const laneMainEnd = Math.max(
+      ...laneNodePositions.map((n) => mainOf(n, isLR) + mainSpanOf(n, isLR))
+    );
+
+    // Max cross right-edge across obstacles: spine nodes and already-placed lanes
+    // whose main interval intersects band(L).
+    let maxObstacleCrossEnd = -Infinity;
+    for (const band of spineBands) {
+      if (intervalsOverlap(laneMainStart, laneMainEnd, band.mainStart, band.mainEnd)) {
+        maxObstacleCrossEnd = Math.max(maxObstacleCrossEnd, band.crossEnd);
+      }
+    }
+    for (const pl of placedLanePlacements) {
+      if (intervalsOverlap(laneMainStart, laneMainEnd, pl.mainStart, pl.mainEnd)) {
+        maxObstacleCrossEnd = Math.max(maxObstacleCrossEnd, pl.crossEnd);
+      }
+    }
+
+    const origin = maxObstacleCrossEnd === -Infinity ? 0 : maxObstacleCrossEnd + nodeSep;
+    const laneCrossMin = Math.min(...laneNodePositions.map((n) => crossOf(n, isLR)));
+    const crossDelta = origin - laneCrossMin;
+
+    // Apply cross shift to lane nodes.
+    if (Math.abs(crossDelta) > LANE_CROSS_SHIFT_EPSILON) {
+      for (const n of laneNodePositions) {
+        laneNodeById.set(n.id, shiftCross(n, crossDelta, isLR));
+      }
+    }
+
+    // Record this lane's placement for use as an obstacle by later (deeper) lanes.
+    const updatedPositions = currentLanePositions(ctx, lane);
+    const crossStart = Math.min(...updatedPositions.map((n) => crossOf(n, isLR)));
+    const crossEnd = Math.max(
+      ...updatedPositions.map((n) => crossOf(n, isLR) + crossSpanOf(n, isLR))
+    );
+    const mainStart = Math.min(...updatedPositions.map((n) => mainOf(n, isLR)));
+    const mainEnd = Math.max(...updatedPositions.map((n) => mainOf(n, isLR) + mainSpanOf(n, isLR)));
+
+    placedLanePlacements.push({ ownerId: lane.ownerId, crossStart, crossEnd, mainStart, mainEnd });
+  }
+
+  return placedLanePlacements;
+};
+
 // ── main export ──────────────────────────────────────────────────────────────
 
 /**
@@ -53,7 +516,7 @@ const intervalsOverlap = (aStart: number, aEnd: number, bStart: number, bEnd: nu
  * - Deeper lanes are always further out than shallower lanes containing their
  *   owner (depth monotonicity within a chain).
  * - Lane nodes are tagged `crossPinned: true`.
- * - Boundary edges (exactly one endpoint in a lane) are returned with `points: []`.
+ * - Boundary edges (exactly one endpoint in a lane) take no part in any dagre run.
  *
  * Handles an empty `lanes` array like `applyDagre` plus fork-head alignment (§3.5).
  */
@@ -66,99 +529,34 @@ export function layoutGraphWithLanes(
   rankSep: number
 ): {
   nodes: DagPositionedNode[];
-  edges: DagPositionedEdge[];
   lanePlacements: DagReservedLanePlacement[];
 } {
   const isLR = direction === 'LR';
 
-  // ── 1. Partition nodes ───────────────────────────────────────────────────
+  validateLanes(nodes, lanes);
 
-  const laneByNodeId = new Map<string, DagReservedLane>();
-  for (const lane of lanes) {
-    for (const nid of lane.nodeIds) {
-      laneByNodeId.set(nid, lane);
-    }
-  }
-
-  const spineNodes = nodes.filter((n) => !laneByNodeId.has(n.id));
-
-  // Nodes per lane (maintaining their DagNode size info for dagre).
-  const laneNodes = new Map<DagReservedLane, DagNode[]>();
-  for (const lane of lanes) {
-    laneNodes.set(
-      lane,
-      lane.nodeIds.map((id) => {
-        const n = nodes.find((x) => x.id === id);
-        if (!n) throw new Error(`reservedLane node "${id}" not found in input nodes`);
-        return n;
-      })
-    );
-  }
-
-  // ── 2. Partition edges ───────────────────────────────────────────────────
-
-  const spineEdges: DagEdge[] = [];
-  const laneInternalEdges = new Map<DagReservedLane, DagEdge[]>();
-  const boundaryEdges: DagEdge[] = [];
-
-  for (const lane of lanes) laneInternalEdges.set(lane, []);
-
-  for (const edge of edges) {
-    const sourceLane = laneByNodeId.get(edge.source);
-    const targetLane = laneByNodeId.get(edge.target);
-    if (!sourceLane && !targetLane) {
-      spineEdges.push(edge);
-    } else if (sourceLane && targetLane && sourceLane === targetLane) {
-      laneInternalEdges.get(sourceLane)!.push(edge);
-    } else {
-      // Crosses a lane boundary — boundary edge: must NOT enter any dagre run.
-      boundaryEdges.push(edge);
-    }
-  }
+  const { laneByNodeId, spineNodes, laneNodes } = partitionNodes(nodes, lanes);
+  const { spineEdges, laneInternalEdges } = partitionEdges(edges, lanes, laneByNodeId);
 
   // ── 3. Run dagre on spine and each lane independently ────────────────────
 
   const spineLayout =
-    spineNodes.length > 0
-      ? applyDagre(spineNodes, spineEdges, direction, nodeSep, rankSep)
-      : { nodes: [], edges: [] };
+    spineNodes.length > 0 ? applyDagre(spineNodes, spineEdges, direction, nodeSep, rankSep) : [];
 
-  const laneLayouts = new Map<
-    DagReservedLane,
-    { nodes: DagPositionedNode[]; edges: DagPositionedEdge[] }
-  >();
+  const laneLayouts = new Map<DagReservedLane, DagPositionedNode[]>();
   for (const lane of lanes) {
-    const ln = laneNodes.get(lane)!;
-    const le = laneInternalEdges.get(lane)!;
-    if (ln.length > 0) {
-      laneLayouts.set(lane, applyDagre(ln, le, direction, nodeSep, rankSep));
-    } else {
-      laneLayouts.set(lane, { nodes: [], edges: [] });
-    }
+    const ln = laneNodes.get(lane) ?? [];
+    const le = laneInternalEdges.get(lane) ?? [];
+    laneLayouts.set(lane, ln.length > 0 ? applyDagre(ln, le, direction, nodeSep, rankSep) : []);
   }
 
   // Mutable node store — update in place throughout.
-  const spineById = new Map<string, DagPositionedNode>(spineLayout.nodes.map((n) => [n.id, n]));
+  const spineById = new Map<string, DagPositionedNode>(spineLayout.map((n) => [n.id, n]));
 
   const laneNodeById = new Map<string, DagPositionedNode>();
   for (const [, layout] of laneLayouts) {
-    for (const n of layout.nodes) laneNodeById.set(n.id, n);
+    for (const n of layout) laneNodeById.set(n.id, n);
   }
-
-  // ── 4+5. Level heads and push spine (interleaved, top-down per spine owner) ──
-  //
-  // The cascade rule (D3, revised): each lane head starts one rank below its
-  // owner — `headMainStart = ownerMainEnd + rankSep`. Applied recursively so
-  // nested lanes cascade like a staircase (D12). The band starts at the owner's
-  // main start so the owner is always an obstacle for cross-origin placement (Fix 5).
-  //
-  // Interleaved with the spine push (D7): for each spine owner top-down:
-  //   1. levelLaneCascade — drop the head one rank below the owner, recurse.
-  //   2. subtreeMainEnd   — full main extent of this lane and all nested lanes.
-  //   3. pushSpineAfter   — first spine successor starts at extent + rankSep.
-  //
-  // Interleaving means a push from O1 moves O2 before O2's cascade is levelled,
-  // so O2's head lands correctly relative to O2's pushed position (Fix 2).
 
   const sortedLanes = [...lanes].sort((a, b) => {
     if (a.depth !== b.depth) return a.depth - b.depth;
@@ -167,136 +565,27 @@ export function layoutGraphWithLanes(
     return (aOwner ? mainOf(aOwner, isLR) : 0) - (bOwner ? mainOf(bOwner, isLR) : 0);
   });
 
-  // Level this lane and all nested lanes recursively (depth-first pre-order).
-  // ownerId is looked up fresh from spineById / laneNodeById on each call so
-  // it reflects any pushes already applied to the owner.
-  function levelLaneCascade(lane: DagReservedLane, ownerId: string): void {
-    const currentOwner = spineById.get(ownerId) ?? laneNodeById.get(ownerId);
-    if (!currentOwner) return;
-    const laneLayout = laneLayouts.get(lane)!;
-    if (laneLayout.nodes.length === 0) return;
-
-    // head = first lane node in dagre's main-axis order (minimum main start).
-    const head = laneLayout.nodes.reduce((min, n) => {
-      const cur = laneNodeById.get(n.id) ?? n;
-      const minN = laneNodeById.get(min.id) ?? min;
-      return mainOf(cur, isLR) < mainOf(minN, isLR) ? n : min;
-    });
-    const currentHead = laneNodeById.get(head.id) ?? head;
-
-    // Cascade: head starts one rank below the owner (Fix 1, D3-revised).
-    const ownerMainEnd = mainOf(currentOwner, isLR) + mainSpanOf(currentOwner, isLR);
-    const headMainStart = mainOf(currentHead, isLR);
-    const mainDelta = Math.round(ownerMainEnd + rankSep - headMainStart);
-
-    if (mainDelta !== 0) {
-      for (const n of laneLayout.nodes) {
-        const cur = laneNodeById.get(n.id) ?? n;
-        laneNodeById.set(n.id, shiftMain(cur, mainDelta, isLR));
-      }
-      laneLayouts.set(lane, {
-        nodes: laneLayout.nodes.map((n) => laneNodeById.get(n.id)!),
-        edges: laneLayout.edges.map((e) => ({
-          ...e,
-          points: translateEdgePoints(e.points, isLR ? mainDelta : 0, isLR ? 0 : mainDelta),
-        })),
-      });
-    }
-
-    // Recursively cascade nested lanes, top-down by owner's current main position
-    // (depth-first pre-order). After each nested lane is cascaded, push THIS lane's
-    // own in-lane successors of the nested owner so they clear the nested lane's
-    // full subtree — the same D7 rule the spine loop applies below (§5), scoped to
-    // lane-internal topology so a sibling branch inside this lane is not pushed
-    // (Fix 6 parity). Without this, a `continue` rejoin out of a nested fallback
-    // can run backward into a sibling step that never moved.
-    const laneNodeIdSet = new Set(laneLayout.nodes.map((n) => n.id));
-    const nestedOwnerIds = [
-      ...new Set(sortedLanes.filter((nl) => laneNodeIdSet.has(nl.ownerId)).map((nl) => nl.ownerId)),
-    ].sort((a, b) => mainOf(laneNodeById.get(a)!, isLR) - mainOf(laneNodeById.get(b)!, isLR));
-
-    for (const nestedOwnerId of nestedOwnerIds) {
-      const ownedNestedLanes = sortedLanes.filter(
-        (nl) => nl.ownerId === nestedOwnerId && laneNodeIdSet.has(nl.ownerId)
-      );
-      for (const nestedLane of ownedNestedLanes) {
-        levelLaneCascade(nestedLane, nestedOwnerId);
-
-        // Measure the nested lane's (and anything nested under it) full extent,
-        // then push this lane's in-lane successors of nestedOwnerId to clear it.
-        const required = subtreeMainEnd(nestedLane) + rankSep;
-        const nestedOwnerSuccessors = getLaneTransitiveSuccessors(nestedOwnerId);
-        const successorsInLane = [...laneNodeIdSet]
-          .filter((id) => nestedOwnerSuccessors.has(id))
-          .map((id) => laneNodeById.get(id)!)
-          .sort((a, b) => mainOf(a, isLR) - mainOf(b, isLR));
-
-        if (successorsInLane.length === 0) continue;
-
-        const deficit = Math.max(0, required - mainOf(successorsInLane[0], isLR));
-        if (deficit === 0) continue;
-
-        for (const id of laneNodeIdSet) {
-          if (nestedOwnerSuccessors.has(id)) {
-            laneNodeById.set(id, shiftMain(laneNodeById.get(id)!, deficit, isLR));
-          }
-        }
-
-        // Translate/clear this lane's internal edges across the push boundary,
-        // mirroring the spine push's edge handling below (§5).
-        const currentLaneLayout = laneLayouts.get(lane)!;
-        laneLayouts.set(lane, {
-          nodes: currentLaneLayout.nodes.map((n) => laneNodeById.get(n.id)!),
-          edges: currentLaneLayout.edges.map((e) => {
-            if (!nestedOwnerSuccessors.has(e.target)) return e;
-            if (e.source === nestedOwnerId) {
-              // Owner → successor is straight (same column), clear waypoints.
-              return { ...e, points: [] };
-            } else if (nestedOwnerSuccessors.has(e.source)) {
-              // Both endpoints were pushed — translate.
-              return {
-                ...e,
-                points: translateEdgePoints(e.points, isLR ? deficit : 0, isLR ? 0 : deficit),
-              };
-            } else {
-              // Edge crosses the push boundary — clear waypoints.
-              return { ...e, points: [] };
-            }
-          }),
-        });
-      }
+  // Lanes grouped by owner, each bucket in `sortedLanes` order; `ownerRank` is the
+  // owner's first position in `sortedLanes`. Built once so the recursive passes
+  // look nested lanes up by owner instead of re-filtering every lane per call.
+  const lanesByOwner = new Map<string, DagReservedLane[]>();
+  const ownerRank = new Map<string, number>();
+  for (const lane of sortedLanes) {
+    const bucket = lanesByOwner.get(lane.ownerId);
+    if (bucket) {
+      bucket.push(lane);
+    } else {
+      lanesByOwner.set(lane.ownerId, [lane]);
+      ownerRank.set(lane.ownerId, ownerRank.size);
     }
   }
 
-  // Full main extent of a lane plus all lanes nested under it (Fix 3, D7).
-  function subtreeMainEnd(lane: DagReservedLane): number {
-    const laneLayout = laneLayouts.get(lane)!;
-    if (laneLayout.nodes.length === 0) return -Infinity;
-    let maxEnd = Math.max(
-      ...laneLayout.nodes.map((n) => {
-        const cur = laneNodeById.get(n.id)!;
-        return mainOf(cur, isLR) + mainSpanOf(cur, isLR);
-      })
-    );
-    const laneNodeIdSet = new Set(laneLayout.nodes.map((n) => n.id));
-    for (const nestedLane of sortedLanes) {
-      if (laneNodeIdSet.has(nestedLane.ownerId)) {
-        maxEnd = Math.max(maxEnd, subtreeMainEnd(nestedLane));
-      }
-    }
-    return maxEnd;
-  }
-
-  // Build a spine adjacency list for topology-based successor lookup (Fix 6).
-  // D7 push must only move actual spine successors of the owner — not parallel
-  // branches that happen to share a similar main-axis position. Using centre-y
-  // comparison would push else-branch nodes when they are at the same rank as
-  // a then-branch owner, moving them far below the Loop Step.
-  //
-  // Hoisted above §3.5: the same adjacency map and reachability function serve
-  // as the shortcut-edge guard inside §3.5, and outTargetsBySource (which §3.5
-  // formerly built separately) is structurally identical to spineAdj — one map
-  // is sufficient.
+  // Spine adjacency for topology-based successor lookup (Fix 6): D7 push must only
+  // move actual spine successors of the owner — not parallel branches that happen to
+  // share a similar main-axis position. Using centre-y comparison would push
+  // else-branch nodes when they are at the same rank as a then-branch owner, moving
+  // them far below the Loop Step. The same map and reachability function also serve
+  // as the shortcut-edge guard inside §3.5.
   const spineAdj = new Map<string, string[]>();
   // Reverse adjacency: target → sources. Used by §3.5 to exclude any fork-head
   // candidate that has an external predecessor (i.e. one that is not the fork
@@ -305,30 +594,8 @@ export function layoutGraphWithLanes(
   // same-rank or backward edge from its external predecessor.
   const spineRevAdj = new Map<string, string[]>();
   for (const e of spineEdges) {
-    if (!spineAdj.has(e.source)) spineAdj.set(e.source, []);
-    spineAdj.get(e.source)!.push(e.target);
-    if (!spineRevAdj.has(e.target)) spineRevAdj.set(e.target, []);
-    spineRevAdj.get(e.target)!.push(e.source);
-  }
-
-  // Memoised reachability: avoids repeated BFS for the same fork source in §3.5.
-  const successorCache = new Map<string, Set<string>>();
-  function getTransitiveSuccessors(startId: string): Set<string> {
-    const cached = successorCache.get(startId);
-    if (cached) return cached;
-    const visited = new Set<string>();
-    const queue = [startId];
-    while (queue.length > 0) {
-      const id = queue.shift()!;
-      for (const next of spineAdj.get(id) ?? []) {
-        if (!visited.has(next)) {
-          visited.add(next);
-          queue.push(next);
-        }
-      }
-    }
-    successorCache.set(startId, visited);
-    return visited;
+    appendTo(spineAdj, e.source, e.target);
+    appendTo(spineRevAdj, e.target, e.source);
   }
 
   // Lane-internal adjacency, used by levelLaneCascade's in-lane D7 push: the
@@ -339,261 +606,35 @@ export function layoutGraphWithLanes(
   // L, are excluded from laneInternalEdges), so this naturally stays lane-scoped.
   const laneAdj = new Map<string, string[]>();
   for (const [, laneEdges] of laneInternalEdges) {
-    for (const e of laneEdges) {
-      if (!laneAdj.has(e.source)) laneAdj.set(e.source, []);
-      laneAdj.get(e.source)!.push(e.target);
-    }
+    for (const e of laneEdges) appendTo(laneAdj, e.source, e.target);
   }
 
-  const laneSuccessorCache = new Map<string, Set<string>>();
-  function getLaneTransitiveSuccessors(startId: string): Set<string> {
-    const cached = laneSuccessorCache.get(startId);
-    if (cached) return cached;
-    const visited = new Set<string>();
-    const queue = [startId];
-    while (queue.length > 0) {
-      const id = queue.shift()!;
-      for (const next of laneAdj.get(id) ?? []) {
-        if (!visited.has(next)) {
-          visited.add(next);
-          queue.push(next);
-        }
-      }
-    }
-    laneSuccessorCache.set(startId, visited);
-    return visited;
-  }
+  const ctx: LaneLayoutContext = {
+    isLR,
+    nodeSep,
+    rankSep,
+    sortedLanes,
+    lanesByOwner,
+    ownerRank,
+    laneLayouts,
+    spineById,
+    laneNodeById,
+    spineAdj,
+    spineRevAdj,
+    spineSuccessorsOf: memoizeReachability(spineAdj),
+    laneSuccessorsOf: memoizeReachability(laneAdj),
+  };
 
-  // ── 3.5. Align fork heads (post-dagre rank correction) ──────────────────────
-  //
-  // Dagre's tight-tree ranker assigns the shorter branch of an if/switch/parallel
-  // fork to a later rank to tighten the edge to the merge node. For example, with
-  // then: [A, B] and else: [C], dagre puts C at rank 2 (tight C→merge) instead of
-  // rank 1 (parallel to A). The D7 topology push then leaves C stranded between
-  // the then head and the pushed loop step, producing an asymmetric fork.
-  //
-  // Fix: for each spine node with 2+ outgoing edges (a fork), move all fork heads
-  // to the minimum main position among them. After this, all fork heads share rank 1
-  // and the topology push correctly skips them (they are not successors of the owner).
-  //
-  // Guards — only align a target when ALL of these hold:
-  //   1. No sibling target is reachable from it (transitive-successor / shortcut
-  //      edge guard). Shape a→b, a→c, b→c: c is reachable from b, so c is excluded
-  //      and the pair is not alignable.
-  //   2. Its sole spine predecessor is the fork source. If a target has an external
-  //      predecessor p→q→c (with a→c also present), dagre placed c at a later rank
-  //      to satisfy p→q→c. Pulling c up to b's rank would make q→c same-rank or
-  //      backward. Only genuine fork heads have exactly one predecessor (the gate).
-  const repositionedByAlignment = new Set<string>();
-  {
-    for (const [forkSource, targets] of spineAdj) {
-      if (targets.length < 2) continue;
-      const targetNodes = targets.flatMap((t) => {
-        const n = spineById.get(t);
-        return n ? [n] : [];
-      });
-      if (targetNodes.length < 2) continue;
-      // Guard 1: exclude any target reachable from a sibling target (shortcut edge).
-      // Guard 2: exclude any target whose spine predecessor is not solely the fork source.
-      const alignable = targetNodes.filter((n) => {
-        const reachableFromSibling = targetNodes.some(
-          (o) => o.id !== n.id && getTransitiveSuccessors(o.id).has(n.id)
-        );
-        if (reachableFromSibling) return false;
-        const predecessors = spineRevAdj.get(n.id) ?? [];
-        const hasExternalPredecessor = predecessors.some((p) => p !== forkSource);
-        return !hasExternalPredecessor;
-      });
-      if (alignable.length < 2) continue;
-      const minMain = Math.min(...alignable.map((n) => mainOf(n, isLR)));
-      for (const n of alignable) {
-        const curMain = mainOf(n, isLR);
-        if (curMain > minMain + 0.001) {
-          spineById.set(n.id, shiftMain(n, minMain - curMain, isLR));
-          repositionedByAlignment.add(n.id);
-        }
-      }
-    }
-    // Clear stale dagre waypoints for edges whose endpoint was realigned.
-    if (repositionedByAlignment.size > 0) {
-      spineLayout.edges.forEach((e, i) => {
-        if (repositionedByAlignment.has(e.source) || repositionedByAlignment.has(e.target)) {
-          spineLayout.edges[i] = { ...e, points: [] };
-        }
-      });
-    }
-  }
+  alignForkHeads(ctx);
+  levelLanesAndPushSpine(ctx);
+  const placedLanePlacements = placeLanesOnCross(ctx);
 
-  // Process spine owners top-down; each push applies before the next owner is
-  // visited so every owner's position is final when we level its lanes.
-  const spineOwnersTopDown = [...spineById.values()]
-    .filter((n) => sortedLanes.some((l) => l.depth === 0 && l.ownerId === n.id))
-    .sort((a, b) => mainOf(a, isLR) - mainOf(b, isLR));
-
-  for (const ownerSnapshot of spineOwnersTopDown) {
-    // Read current position — may have been pushed by a prior owner.
-    const owner = spineById.get(ownerSnapshot.id)!;
-    const depth0OwnedLanes = sortedLanes.filter((l) => l.depth === 0 && l.ownerId === owner.id);
-
-    for (const lane of depth0OwnedLanes) {
-      // 1. Level this lane's cascade.
-      levelLaneCascade(lane, owner.id);
-
-      // 2. Measure the subtree's main extent.
-      const required = subtreeMainEnd(lane) + rankSep;
-
-      // 3. Push the spine so the first successor starts at `required`.
-      //    Use topology (transitive reachability via spine edges) to select only
-      //    real successors — parallel branches must not be pushed (Fix 6).
-      const ownerSuccessors = getTransitiveSuccessors(owner.id);
-      const successors = [...spineById.values()]
-        .filter((n) => ownerSuccessors.has(n.id))
-        .sort((a, b) => mainOf(a, isLR) - mainOf(b, isLR));
-
-      if (successors.length === 0) continue; // owner is the last spine node
-
-      const firstSuccessor = successors[0];
-      const successorMainStart = mainOf(firstSuccessor, isLR);
-      const deficit = Math.max(0, required - successorMainStart);
-
-      if (deficit > 0) {
-        // Shift only topological successors of the owner (Fix 6).
-        // Using `mainOf(n) >= successorMainStart` would also move parallel
-        // branches that happen to share the same Y as the first successor, e.g.
-        // the else-branch of an if-fork whose owner is in the then-branch.
-        for (const n of [...spineById.values()]) {
-          if (ownerSuccessors.has(n.id)) {
-            spineById.set(n.id, shiftMain(n, deficit, isLR));
-          }
-        }
-        // Translate spine edges across the push boundary.
-        spineLayout.edges.forEach((e, i) => {
-          const targetPushed = ownerSuccessors.has(e.target);
-          const sourcePushed = ownerSuccessors.has(e.source);
-          if (targetPushed) {
-            if (e.source === owner.id) {
-              // Owner → successor is straight (same column), clear waypoints.
-              spineLayout.edges[i] = { ...e, points: [] };
-            } else if (sourcePushed) {
-              // Both endpoints were pushed — translate.
-              spineLayout.edges[i] = {
-                ...e,
-                points: translateEdgePoints(e.points, isLR ? deficit : 0, isLR ? 0 : deficit),
-              };
-            } else {
-              // Edge crosses the push boundary — clear waypoints.
-              spineLayout.edges[i] = { ...e, points: [] };
-            }
-          }
-        });
-      }
-    }
-  }
-
-  // ── 6. Compute cross origins (shallowest-first, top-down within each depth) ─
-  //
-  // Placed lanes are accumulated as additional obstacles for later (deeper) lanes.
-  // Shallowest-first ensures a parent lane is placed before its child, making the
-  // parent an obstacle for the child — guaranteeing depth monotonicity outward.
-  //
-  // The band starts at the OWNER's main start, not the lane head (Fix 5, D5).
-  // Required because after the cascade drop (Fix 1) and spine push (D7), the
-  // lane's own node band sits below the owner and contains no spine node (D7
-  // pushed them away). Without Fix 5 the owner would not be an obstacle, maxCrossEnd
-  // would fall back to -Infinity, origin to 0, and every lane would land on the spine.
-
-  const placedLanePlacements: DagReservedLanePlacement[] = [];
-
-  for (const lane of sortedLanes) {
-    const laneLayout = laneLayouts.get(lane)!;
-    if (laneLayout.nodes.length === 0) continue;
-
-    const laneNodePositions = laneLayout.nodes.map((n) => laneNodeById.get(n.id) ?? n);
-
-    // Band: owner main start → lane node max end (Fix 5).
-    const ownerPos = spineById.get(lane.ownerId) ?? laneNodeById.get(lane.ownerId);
-    const laneMainStart = ownerPos
-      ? mainOf(ownerPos, isLR)
-      : Math.min(...laneNodePositions.map((n) => mainOf(n, isLR)));
-    const laneMainEnd = Math.max(
-      ...laneNodePositions.map((n) => mainOf(n, isLR) + mainSpanOf(n, isLR))
-    );
-
-    // Spine nodes whose main interval intersects band(L).
-    const obstacleSpineNodes = [...spineById.values()].filter((n) => {
-      const nMain = mainOf(n, isLR);
-      const nMainEnd = nMain + mainSpanOf(n, isLR);
-      return intervalsOverlap(laneMainStart, laneMainEnd, nMain, nMainEnd);
-    });
-
-    // Already-placed lanes whose main interval intersects band(L).
-    const obstacleFromPlacedLanes = placedLanePlacements.filter((pl) =>
-      intervalsOverlap(laneMainStart, laneMainEnd, pl.mainStart, pl.mainEnd)
-    );
-
-    // Max cross right-edge across all obstacles.
-    const maxObstacleCrossEnd = Math.max(
-      ...obstacleSpineNodes.map((n) => crossOf(n, isLR) + crossSpanOf(n, isLR)),
-      ...obstacleFromPlacedLanes.map((pl) => pl.crossEnd),
-      -Infinity
-    );
-
-    const origin = maxObstacleCrossEnd === -Infinity ? 0 : maxObstacleCrossEnd + nodeSep;
-    const laneCrossMin = Math.min(...laneNodePositions.map((n) => crossOf(n, isLR)));
-    const crossDelta = origin - laneCrossMin;
-
-    // Apply cross shift to lane nodes.
-    if (Math.abs(crossDelta) > 0.001) {
-      for (let i = 0; i < laneLayout.nodes.length; i++) {
-        const n = laneNodeById.get(laneLayout.nodes[i].id) ?? laneLayout.nodes[i];
-        const shifted = shiftCross(n, crossDelta, isLR);
-        laneNodeById.set(n.id, shifted);
-      }
-      // Also shift internal edge waypoints.
-      laneLayouts.set(lane, {
-        nodes: laneLayout.nodes.map((n) => laneNodeById.get(n.id)!),
-        edges: laneLayout.edges.map((e) => ({
-          ...e,
-          points: translateEdgePoints(e.points, isLR ? 0 : crossDelta, isLR ? crossDelta : 0),
-        })),
-      });
-    }
-
-    // Record this lane's placement for use as an obstacle by later (deeper) lanes.
-    const updatedPositions = laneLayout.nodes.map((n) => laneNodeById.get(n.id) ?? n);
-    const crossStart = Math.min(...updatedPositions.map((n) => crossOf(n, isLR)));
-    const crossEnd = Math.max(
-      ...updatedPositions.map((n) => crossOf(n, isLR) + crossSpanOf(n, isLR))
-    );
-    const mainStart = Math.min(...updatedPositions.map((n) => mainOf(n, isLR)));
-    const mainEnd = Math.max(...updatedPositions.map((n) => mainOf(n, isLR) + mainSpanOf(n, isLR)));
-
-    placedLanePlacements.push({ ownerId: lane.ownerId, crossStart, crossEnd, mainStart, mainEnd });
-  }
-
-  // ── 7. Merge nodes and edges ─────────────────────────────────────────────
+  // ── 7. Merge nodes ───────────────────────────────────────────────────────
 
   const finalNodes: DagPositionedNode[] = [
-    ...[...spineById.values()],
-    ...[...laneNodeById.values()].map((n) => ({ ...n, crossPinned: true as const })),
+    ...spineById.values(),
+    ...[...laneNodeById.values()].map((n) => ({ ...n, crossPinned: true })),
   ];
 
-  // Spine edges (with any push-boundary clears applied above).
-  const finalEdges: DagPositionedEdge[] = [...spineLayout.edges];
-
-  // Lane-internal edges.
-  for (const [, layout] of laneLayouts) {
-    finalEdges.push(...layout.edges);
-  }
-
-  // Boundary edges: clear waypoints (they span a spine↔lane boundary).
-  for (const e of boundaryEdges) {
-    finalEdges.push({ ...e, points: [] });
-  }
-
-  // Restore input edge order (applyDagre contract: every input edge appears exactly once).
-  const edgeOrder = new Map(edges.map((e, i) => [e.id, i]));
-  finalEdges.sort((a, b) => (edgeOrder.get(a.id) ?? 0) - (edgeOrder.get(b.id) ?? 0));
-
-  return { nodes: finalNodes, edges: finalEdges, lanePlacements: placedLanePlacements };
+  return { nodes: finalNodes, lanePlacements: placedLanePlacements };
 }

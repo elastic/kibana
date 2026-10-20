@@ -136,8 +136,7 @@ describe('WorkflowDetailBottomBar', () => {
     });
 
     // Now leave the expanded bar.
-    const barContainer = screen.getByTestId('workflowDetailBottomBar');
-    const expandedInner = barContainer.querySelector('div > div') as HTMLElement;
+    const expandedInner = screen.getByTestId('workflowDetailBottomBarContent');
     act(() => {
       expandedInner.dispatchEvent(new MouseEvent('mouseleave', { bubbles: true }));
     });
@@ -167,5 +166,166 @@ describe('WorkflowDetailBottomBar', () => {
       />
     );
     expect(screen.getByTestId('run-btn')).toBeInTheDocument();
+  });
+
+  it('shows the actions slot in both yaml and graph views', () => {
+    const slot = (
+      <button type="button" data-test-subj="actions-slot">
+        {'Actions'}
+      </button>
+    );
+    const { rerender } = render(
+      <WorkflowDetailBottomBar {...defaultProps} editorView="yaml" yamlActionsSlot={slot} />
+    );
+    expect(screen.getByTestId('actions-slot')).toBeInTheDocument();
+
+    rerender(
+      <WorkflowDetailBottomBar {...defaultProps} editorView="graph" yamlActionsSlot={slot} />
+    );
+    expect(screen.getByTestId('actions-slot')).toBeInTheDocument();
+  });
+});
+
+describe('WorkflowDetailBottomBar keyboard access', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
+  afterEach(() => {
+    cleanup();
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
+    jest.useRealTimers();
+  });
+
+  const collapse = () =>
+    act(() => {
+      jest.advanceTimersByTime(5001);
+    });
+
+  it('takes the collapsed bar controls out of the tab order and a11y tree', () => {
+    render(<WorkflowDetailBottomBar {...defaultProps} />);
+    expect(screen.getByTestId('workflowEditorViewToggle-graph')).toBeVisible();
+
+    collapse();
+
+    expect(getComputedStyle(screen.getByTestId('workflowDetailBottomBarContent')).visibility).toBe(
+      'hidden'
+    );
+  });
+
+  it('lands on the pill first when tabbing into a collapsed bar, then into the revealed bar', async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    render(<WorkflowDetailBottomBar {...defaultProps} />);
+    collapse();
+
+    await user.tab();
+    expect(screen.getByRole('button', { name: 'Show toolbar' })).toHaveFocus();
+
+    await user.tab();
+    expect(screen.getByTestId('workflowEditorViewToggle-graph')).toHaveFocus();
+  });
+
+  it('keeps the bar expanded while focus is inside it', async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    render(<WorkflowDetailBottomBar {...defaultProps} />);
+    collapse();
+
+    await user.tab();
+    await user.tab();
+    // The pill blurred on the way in, which used to arm the 600ms collapse.
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
+
+    const toggle = screen.getByTestId('workflowEditorViewToggle-graph');
+    expect(toggle).toHaveFocus();
+    expect(toggle).toBeVisible();
+  });
+
+  it('collapses once focus leaves the bar', async () => {
+    const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
+    render(
+      <div>
+        <WorkflowDetailBottomBar {...defaultProps} />
+        <button type="button" data-test-subj="outside">
+          {'outside'}
+        </button>
+      </div>
+    );
+    collapse();
+
+    await user.tab();
+    await user.tab();
+    // Move through the remaining bar controls to the outside button.
+    await user.tab();
+    await user.tab();
+    expect(screen.getByTestId('outside')).toHaveFocus();
+    act(() => {
+      jest.advanceTimersByTime(601);
+    });
+
+    expect(screen.getByTestId('workflowEditorViewToggle-graph')).not.toBeVisible();
+  });
+});
+
+describe('WorkflowDetailBottomBar compact tools menu', () => {
+  const originalResizeObserver = global.ResizeObserver;
+
+  beforeEach(() => {
+    // Report a narrow container so the bar renders its compact (⋮) tools menu.
+    class NarrowResizeObserver {
+      constructor(
+        private readonly callback: (entries: Array<{ contentRect: { width: number } }>) => void
+      ) {}
+
+      observe() {
+        this.callback([{ contentRect: { width: 500 } }]);
+      }
+
+      unobserve() {}
+
+      disconnect() {}
+    }
+    Object.defineProperty(global, 'ResizeObserver', {
+      value: NarrowResizeObserver,
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  afterEach(() => {
+    Object.defineProperty(global, 'ResizeObserver', {
+      value: originalResizeObserver,
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  it('renders items with an href as links that keep their target', async () => {
+    const user = userEvent.setup();
+    render(
+      <WorkflowDetailBottomBar
+        {...defaultProps}
+        toolsMenuItems={[
+          {
+            iconType: 'documentation',
+            label: 'Docs',
+            href: 'https://example.com/docs',
+            target: '_blank',
+          },
+          { iconType: 'gear', label: 'Settings', onClick: jest.fn() },
+        ]}
+      />
+    );
+
+    await user.click(screen.getByTestId('workflowBottomBarToolsMenu'));
+
+    const link = screen.getByRole('link', { name: 'Docs' });
+    expect(link).toHaveAttribute('href', 'https://example.com/docs');
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
+    expect(screen.getByRole('button', { name: 'Settings' })).toBeInTheDocument();
   });
 });

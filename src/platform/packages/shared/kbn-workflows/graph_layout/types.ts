@@ -13,20 +13,17 @@ export type Step = WorkflowYaml['steps'][number];
 
 export const DEFAULT_NODE_STYLE = { width: 300, height: 52 } as const;
 
-export const FLOW_CONTROL_STEP_TYPES: ReadonlySet<string> = new Set([
-  'if',
-  'merge',
-  'parallel',
-  'foreach',
-  'while',
-  'atomic',
-]);
+// Minimum height for a foreachGroup container when its body is empty.
+// dagLayout preserves caller-provided dimensions for groups with no inner nodes,
+// so this must be large enough to visually distinguish a container from a step.
+// Derived from WORKFLOW_COMPOUND_PADDING (top: 70, bottom: 32) + button area (~38).
+export const FOREACH_GROUP_EMPTY_HEIGHT = 140 as const;
 
 /**
  * Step types that render as a group container node (one-in/one-out "folder"
  * with inner steps rendered inside). This is the single source of truth
  * consumed by both the transform and any code that needs to enumerate
- * child-bearing container types — keeps it in sync with `visitStepChildren`.
+ * child-bearing container types.
  *
  * `atomic` is intentionally excluded: it is an internal implementation detail
  * never exposed in user-authored workflows.
@@ -40,7 +37,7 @@ export const TRIGGER_STEP_TYPES: ReadonlySet<string> = new Set([
   'document',
 ]);
 
-export type EdgeBranchType = 'then' | 'else' | 'switch';
+export type EdgeBranchType = 'then' | 'else' | 'switch' | 'parallel';
 
 export interface NodeStyle {
   width: number;
@@ -175,15 +172,6 @@ export interface FallbackLane {
   readonly graphId?: string;
 }
 
-/**
- * A `GraphEdge` after dagre layout has run. The `points` array holds the
- * orthogonal waypoints dagre computed so the renderer can route the edge
- * around other nodes instead of cutting through them.
- */
-export interface LayoutedEdge extends GraphEdge {
-  points: Array<{ x: number; y: number }>;
-}
-
 export interface ForeachGroup {
   id: string;
   innerNodes: PreLayoutNode[];
@@ -269,15 +257,6 @@ export type NodeRef =
 
 /** Side a node anchors its source/target handle on. Maps to `@xyflow/react`'s `Position`. */
 export type HandleSide = 'top' | 'right' | 'bottom' | 'left';
-
-export interface LayoutedNode extends PreLayoutNodeBase {
-  data: StepNodeData | TriggerNodeData | ForeachGroupNodeData;
-  position: { x: number; y: number };
-  /** Where the incoming-edge handle should attach (set by `applyGraphLayout`). */
-  targetPosition?: HandleSide;
-  /** Where the outgoing-edge handle should attach (set by `applyGraphLayout`). */
-  sourcePosition?: HandleSide;
-}
 
 export function isStep(value: unknown): value is Step {
   if (typeof value !== 'object' || value === null) return false;

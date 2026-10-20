@@ -47,6 +47,12 @@ export const componentStyles = {
       overflow: 'hidden',
       borderRight: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued}`,
     }),
+  leftColumnCompact: css({
+    flex: '1 1 auto',
+    display: 'flex',
+    flexDirection: 'column',
+    overflow: 'hidden',
+  }),
   listFill: ({ euiTheme }: UseEuiTheme) =>
     css({
       flex: 1,

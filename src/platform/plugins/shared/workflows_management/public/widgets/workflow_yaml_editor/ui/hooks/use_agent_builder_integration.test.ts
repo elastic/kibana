@@ -690,7 +690,38 @@ describe('useAgentBuilderIntegration', () => {
       );
     });
 
-    it('does not re-emit chat-opened when the user opens the chat after an auto-open', async () => {
+    it('tags chat-opened and session-completed telemetry with autoOpened=true on restore', async () => {
+      mockConsumeSidebarRestoreFor.mockImplementation((id: string) => id === 'wf-restored');
+      const agentBuilder = createMockAgentBuilder();
+      setupKibanaMock(agentBuilder);
+      const editor = createMockEditor(mockModel);
+
+      const { unmount } = renderHook(() =>
+        useAgentBuilderIntegration({
+          editorRef: { current: editor },
+          isEditorMounted: true,
+          workflowId: 'wf-restored',
+        })
+      );
+
+      await flushChatAccessCheck();
+
+      expect(agentBuilder.openChat).toHaveBeenCalledTimes(1);
+      expect(mockTelemetry.reportWorkflowAiChatOpened).toHaveBeenCalledWith({
+        entryPoint: 'workflow_editor',
+        sessionType: 'edit',
+        workflowId: 'wf-restored',
+        autoOpened: true,
+      });
+
+      unmount();
+      expect(mockTelemetry.reportWorkflowAiSessionCompleted).toHaveBeenCalledWith(
+        expect.objectContaining({ autoOpened: true })
+      );
+    });
+
+    it('does not re-emit chat-opened when the user opens the chat after a restore', async () => {
+      mockConsumeSidebarRestoreFor.mockImplementation((id: string) => id === 'wf-restored');
       const agentBuilder = createMockAgentBuilder();
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
@@ -699,7 +730,7 @@ describe('useAgentBuilderIntegration', () => {
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
-          autoOpenAgentChat: true,
+          workflowId: 'wf-restored',
         })
       );
 
@@ -745,7 +776,7 @@ describe('useAgentBuilderIntegration', () => {
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
 
-      const { unmount } = renderHook(() =>
+      const { result, unmount } = renderHook(() =>
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
@@ -755,7 +786,10 @@ describe('useAgentBuilderIntegration', () => {
 
       await flushChatAccessCheck();
 
-      // Auto-open path opened the chat; unmount must close it.
+      act(() => {
+        result.current.openAgentChat();
+      });
+
       unmount();
 
       expect(chatRef.close).toHaveBeenCalled();
@@ -776,7 +810,7 @@ describe('useAgentBuilderIntegration', () => {
         isEditorMounted: boolean;
         workflowId?: string;
       }
-      const { rerender } = renderHook((props: Props) => useAgentBuilderIntegration(props), {
+      const { result, rerender } = renderHook((props: Props) => useAgentBuilderIntegration(props), {
         initialProps: {
           editorRef: { current: editor },
           isEditorMounted: true,
@@ -785,6 +819,10 @@ describe('useAgentBuilderIntegration', () => {
       });
 
       await flushChatAccessCheck();
+
+      act(() => {
+        result.current.openAgentChat();
+      });
 
       // Flip from create (no id) to saved detail (real id). The main effect
       // cleanup+rerun fires; the sidebar close must NOT.
@@ -804,7 +842,7 @@ describe('useAgentBuilderIntegration', () => {
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
 
-      const { rerender } = renderHook(
+      const { result, rerender } = renderHook(
         (props: {
           editorRef: React.MutableRefObject<any>;
           isEditorMounted: boolean;
@@ -820,6 +858,10 @@ describe('useAgentBuilderIntegration', () => {
       );
 
       await flushChatAccessCheck();
+
+      act(() => {
+        result.current.openAgentChat();
+      });
 
       rerender({
         editorRef: { current: editor },
@@ -837,7 +879,7 @@ describe('useAgentBuilderIntegration', () => {
       setupKibanaMock(agentBuilder);
       const editor = createMockEditor(mockModel);
 
-      renderHook(() =>
+      const { result } = renderHook(() =>
         useAgentBuilderIntegration({
           editorRef: { current: editor },
           isEditorMounted: true,
@@ -847,7 +889,10 @@ describe('useAgentBuilderIntegration', () => {
 
       await flushChatAccessCheck();
 
-      // Auto-open ran → sidebar marked open.
+      act(() => {
+        result.current.openAgentChat();
+      });
+
       expect(mockSetSidebarOpen).toHaveBeenCalledWith(true);
 
       // Simulate the user closing the sidebar from its own chrome — the

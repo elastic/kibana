@@ -19,6 +19,15 @@ import type { WorkflowEsqlCompletionServices } from './suggestions/workflow_esql
 import type { WorkflowKqlCompletionServices } from './suggestions/workflow_kql_completion_services';
 import { isDeprecatedStepType } from '../../../../../common/schema';
 import type { WorkflowDetailState } from '../../../../entities/workflows/store';
+import { resolveFocusForLine } from '../../../../entities/workflows/store/workflow_detail/utils/trigger_finder';
+import {
+  isStepFragmentModel,
+  resolveStepFragmentTarget,
+} from '../step_fragment/step_fragment_models';
+import {
+  toFragmentSuggestion,
+  toVirtualPosition,
+} from '../step_fragment/step_fragment_virtual_yaml';
 
 // Unique identifier for the workflow completion provider
 export const WORKFLOW_COMPLETION_PROVIDER_ID = 'workflows-yaml-completion-provider';
@@ -151,124 +160,176 @@ export function getCompletionItemProvider(
   getPropertyHandler?: GetStepPropertyHandler,
   getEsqlServices?: () => WorkflowEsqlCompletionServices
 ): monaco.languages.CompletionItemProvider {
+  const provideForModel = async (
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    completionContext: monaco.languages.CompletionContext,
+    editorState: WorkflowDetailState
+  ): Promise<monaco.languages.CompletionList> => {
+    const autocompleteContext = buildAutocompleteContext({
+      registry,
+      editorState,
+      model,
+      position,
+      completionContext,
+    });
+    if (!autocompleteContext) {
+      return {
+        suggestions: [],
+        incomplete: false,
+      };
+    }
+
+    const { focusedStepInfo, focusedYamlPair } = autocompleteContext;
+    const identityField = focusedYamlPair?.path;
+    if (
+      (focusedStepInfo?.stepType === 'workflow.execute' ||
+        focusedStepInfo?.stepType === 'workflow.executeAsync') &&
+      identityField?.length === 2 &&
+      identityField[0] === 'with' &&
+      identityField[1] === 'run-as-mode'
+    ) {
+      return { suggestions: [], incomplete: false };
+    }
+
+    // Incremental deduplication accumulator
+    const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
+
+    // Skip the YAML providers when one of our specialized providers owns the
+    // popup completely:
+    //   - workflow.output's `with:` block — only declared output names belong.
+    //   - ES|QL query body — the ES|QL provider knows the grammar; YAML
+    //     schema's `query` / `with` keys would only confuse.
+    const shouldUseExclusiveSuggestions =
+      isInWorkflowOutputWithBlock(autocompleteContext.focusedStepInfo) ||
+      autocompleteContext.isInEsqlQueryField;
+
+    const matchType = autocompleteContext.lineParseResult?.matchType ?? '';
+    const isInTemplateExpression =
+      TEMPLATE_EXPRESSION_MATCH_TYPES.has(matchType) ||
+      (matchType === 'liquid-block-keyword' && autocompleteContext.isInLiquidBlock);
+
+    let isIncomplete = false;
+
+    if (!shouldUseExclusiveSuggestions && !isInTemplateExpression) {
+      const allYamlProviders = getAllYamlProviders();
+
+      for (const yamlProvider of allYamlProviders) {
+        if (yamlProvider.provideCompletionItems) {
+          try {
+            const result = await yamlProvider.provideCompletionItems(
+              model,
+              position,
+              completionContext,
+              {} as monaco.CancellationToken
+            );
+            if (result) {
+              // Deduplicate across YAML providers only (snippet beats plain)
+              mapSuggestions(
+                deduplicatedMap,
+                (result.suggestions || []).map(quoteKibanaBuiltinRefSuggestion)
+              );
+              if (result.incomplete) {
+                isIncomplete = true;
+              }
+            }
+          } catch (error) {
+            // Continue with other providers if one fails
+          }
+        }
+      }
+    }
+
+    const workflowSuggestions = await getSuggestions(
+      {
+        ...autocompleteContext,
+        model,
+        position,
+      },
+      getKqlServices?.(),
+      getPropertyHandler,
+      getEsqlServices?.()
+    );
+    // Workflow suggestions always win over YAML duplicates.
+    for (const suggestion of workflowSuggestions) {
+      const key = getDeduplicationKey(suggestion);
+      if (!isDeprecatedStepType(key)) {
+        deduplicatedMap.set(key, suggestion);
+      }
+    }
+
+    let suggestions = Array.from(deduplicatedMap.values());
+
+    if (!isInsideLoopBody(autocompleteContext)) {
+      suggestions = suggestions.filter((s) => {
+        const label = typeof s.label === 'string' ? s.label : s.label.label;
+        const text = typeof s.insertText === 'string' ? s.insertText : '';
+        return !LOOP_ONLY_STEP_TYPES.has(label) && !LOOP_ONLY_STEP_TYPES.has(text);
+      });
+    }
+
+    // ES|QL completions must be marked incomplete so Monaco re-queries on
+    // every keystroke. The grammar is contextual — what's valid after
+    // `FROM logs | ` differs from what's valid after `STATS ` — and
+    // Monaco's client-side filter would otherwise hold stale items until
+    // the next trigger character.
+    return {
+      suggestions,
+      incomplete: isIncomplete || autocompleteContext.isInEsqlQueryField,
+    };
+  };
+
+  /**
+   * Step-fragment editors (the graph flyout's YAML tab) show one de-indented
+   * step. Autocomplete still runs the full pipeline above, but against a
+   * hidden shadow model holding the full workflow YAML with the live fragment
+   * text spliced back into the step's position (see
+   * `attachStepFragmentYamlSupport`) — so suggestions see the whole document,
+   * not just the fragment. Positions and ranges are mapped to/from that
+   * virtual document; `focusedStepId` is recomputed because the fragment's
+   * cursor line doesn't correspond to the main editor's cursor.
+   */
+  const provideForStepFragment = async (
+    model: monaco.editor.ITextModel,
+    position: monaco.Position,
+    completionContext: monaco.languages.CompletionContext
+  ): Promise<monaco.languages.CompletionList> => {
+    const target = resolveStepFragmentTarget(model);
+    if (!target) {
+      return { suggestions: [], incomplete: false };
+    }
+
+    const virtualPosition = toVirtualPosition(position, target.virtual);
+    const lookup = target.computed.workflowLookup;
+    const focus = lookup
+      ? resolveFocusForLine(virtualPosition.lineNumber, lookup)
+      : { focusedStepId: undefined, focusedTriggerId: undefined };
+
+    const result = await provideForModel(
+      target.model,
+      new monaco.Position(virtualPosition.lineNumber, virtualPosition.column),
+      completionContext,
+      { ...getState(), computed: target.computed, ...focus }
+    );
+
+    return {
+      ...result,
+      // A command (e.g. "create connector") would act on virtual-document
+      // coordinates in the *main* editor — drop it rather than mis-apply it.
+      suggestions: result.suggestions
+        .filter((suggestion) => !suggestion.command)
+        .map((suggestion) => toFragmentSuggestion(suggestion, target.virtual)),
+    };
+  };
+
   const provider: monaco.languages.CompletionItemProvider & { __providerId?: string } = {
     // Unique identifier to distinguish our provider from others
     __providerId: WORKFLOW_COMPLETION_PROVIDER_ID,
     triggerCharacters: [...WORKFLOW_TRIGGER_CHARACTERS],
-    provideCompletionItems: async (model, position, completionContext) => {
-      const editorState = getState();
-      const autocompleteContext = buildAutocompleteContext({
-        registry,
-        editorState,
-        model,
-        position,
-        completionContext,
-      });
-      if (!autocompleteContext) {
-        return {
-          suggestions: [],
-          incomplete: false,
-        };
-      }
-
-      const { focusedStepInfo, focusedYamlPair } = autocompleteContext;
-      const identityField = focusedYamlPair?.path;
-      if (
-        (focusedStepInfo?.stepType === 'workflow.execute' ||
-          focusedStepInfo?.stepType === 'workflow.executeAsync') &&
-        identityField?.length === 2 &&
-        identityField[0] === 'with' &&
-        identityField[1] === 'run-as-mode'
-      ) {
-        return { suggestions: [], incomplete: false };
-      }
-
-      // Incremental deduplication accumulator
-      const deduplicatedMap = new Map<string, monaco.languages.CompletionItem>();
-
-      // Skip the YAML providers when one of our specialized providers owns the
-      // popup completely:
-      //   - workflow.output's `with:` block — only declared output names belong.
-      //   - ES|QL query body — the ES|QL provider knows the grammar; YAML
-      //     schema's `query` / `with` keys would only confuse.
-      const shouldUseExclusiveSuggestions =
-        isInWorkflowOutputWithBlock(autocompleteContext.focusedStepInfo) ||
-        autocompleteContext.isInEsqlQueryField;
-
-      const matchType = autocompleteContext.lineParseResult?.matchType ?? '';
-      const isInTemplateExpression =
-        TEMPLATE_EXPRESSION_MATCH_TYPES.has(matchType) ||
-        (matchType === 'liquid-block-keyword' && autocompleteContext.isInLiquidBlock);
-
-      let isIncomplete = false;
-
-      if (!shouldUseExclusiveSuggestions && !isInTemplateExpression) {
-        const allYamlProviders = getAllYamlProviders();
-
-        for (const yamlProvider of allYamlProviders) {
-          if (yamlProvider.provideCompletionItems) {
-            try {
-              const result = await yamlProvider.provideCompletionItems(
-                model,
-                position,
-                completionContext,
-                {} as monaco.CancellationToken
-              );
-              if (result) {
-                // Deduplicate across YAML providers only (snippet beats plain)
-                mapSuggestions(
-                  deduplicatedMap,
-                  (result.suggestions || []).map(quoteKibanaBuiltinRefSuggestion)
-                );
-                if (result.incomplete) {
-                  isIncomplete = true;
-                }
-              }
-            } catch (error) {
-              // Continue with other providers if one fails
-            }
-          }
-        }
-      }
-
-      const workflowSuggestions = await getSuggestions(
-        {
-          ...autocompleteContext,
-          model,
-          position,
-        },
-        getKqlServices?.(),
-        getPropertyHandler,
-        getEsqlServices?.()
-      );
-      // Workflow suggestions always win over YAML duplicates.
-      for (const suggestion of workflowSuggestions) {
-        const key = getDeduplicationKey(suggestion);
-        if (!isDeprecatedStepType(key)) {
-          deduplicatedMap.set(key, suggestion);
-        }
-      }
-
-      let suggestions = Array.from(deduplicatedMap.values());
-
-      if (!isInsideLoopBody(autocompleteContext)) {
-        suggestions = suggestions.filter((s) => {
-          const label = typeof s.label === 'string' ? s.label : s.label.label;
-          const text = typeof s.insertText === 'string' ? s.insertText : '';
-          return !LOOP_ONLY_STEP_TYPES.has(label) && !LOOP_ONLY_STEP_TYPES.has(text);
-        });
-      }
-
-      // ES|QL completions must be marked incomplete so Monaco re-queries on
-      // every keystroke. The grammar is contextual — what's valid after
-      // `FROM logs | ` differs from what's valid after `STATS ` — and
-      // Monaco's client-side filter would otherwise hold stale items until
-      // the next trigger character.
-      return {
-        suggestions,
-        incomplete: isIncomplete || autocompleteContext.isInEsqlQueryField,
-      };
-    },
+    provideCompletionItems: async (model, position, completionContext) =>
+      isStepFragmentModel(model)
+        ? provideForStepFragment(model, position, completionContext)
+        : provideForModel(model, position, completionContext, getState()),
   };
   return provider;
 }

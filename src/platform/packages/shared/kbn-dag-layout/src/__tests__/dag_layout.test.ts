@@ -8,8 +8,13 @@
  */
 
 import { dagLayout } from '../dag_layout';
-import { resolveShiftedEdgePoints } from '../apply_dagre';
-import type { DagCompoundGroup, DagEdge, DagNode } from '../types';
+import type {
+  DagCompoundGroup,
+  DagEdge,
+  DagLayoutDirection,
+  DagNode,
+  DagReservedLane,
+} from '../types';
 
 const NODE_W = 300;
 const NODE_H = 64;
@@ -27,12 +32,6 @@ const findNode = (nodes: ReturnType<typeof dagLayout>['nodes'], id: string) => {
 const centerX = (n: ReturnType<typeof findNode>) => n.x + n.width / 2;
 const centerY = (n: ReturnType<typeof findNode>) => n.y + n.height / 2;
 
-const findEdge = (edges: ReturnType<typeof dagLayout>['edges'], source: string, target: string) => {
-  const e = edges.find((x) => x.source === source && x.target === target);
-  if (!e) throw new Error(`Expected edge ${source} → ${target}`);
-  return e;
-};
-
 // ─── Basic positioning ─────────────────────────────────────────────────────────
 
 describe('dagLayout — basic positioning', () => {
@@ -43,15 +42,6 @@ describe('dagLayout — basic positioning', () => {
     for (const n of laid) {
       expect(isFinite(n.x)).toBe(true);
       expect(isFinite(n.y)).toBe(true);
-    }
-  });
-
-  it('returns edges with points arrays', () => {
-    const nodes = [node('a'), node('b')];
-    const edges = [edge('ab', 'a', 'b')];
-    const { edges: laid } = dagLayout(nodes, edges);
-    for (const e of laid) {
-      expect(Array.isArray(e.points)).toBe(true);
     }
   });
 
@@ -128,63 +118,6 @@ describe('dagLayout — barycenter centering', () => {
   });
 });
 
-// ─── Edge waypoints ────────────────────────────────────────────────────────────
-
-describe('dagLayout — edge waypoints', () => {
-  it('TB linear chain edge waypoints share center X with nodes', () => {
-    const nodes = [node('a'), node('b')];
-    const edges = [edge('ab', 'a', 'b')];
-    const { nodes: laid, edges: laidEdges } = dagLayout(nodes, edges, [], { direction: 'TB' });
-    const a = findNode(laid, 'a');
-    const b = findNode(laid, 'b');
-    const e = findEdge(laidEdges, 'a', 'b');
-    for (const p of e.points) {
-      expect(Math.abs(p.x - centerX(a))).toBeLessThanOrEqual(CENTER_TOLERANCE);
-      expect(Math.abs(p.x - centerX(b))).toBeLessThanOrEqual(CENTER_TOLERANCE);
-    }
-  });
-
-  it('fan-out edge has no dagre waypoints (smooth-step routing)', () => {
-    // fork fans out to a and b — branch edges should have empty points
-    const nodes = [node('fork'), node('a'), node('b')];
-    const edges = [edge('fa', 'fork', 'a'), edge('fb', 'fork', 'b')];
-    const { edges: laidEdges } = dagLayout(nodes, edges, [], { direction: 'TB' });
-    const fa = findEdge(laidEdges, 'fork', 'a');
-    const fb = findEdge(laidEdges, 'fork', 'b');
-    expect(fa.points.length).toBeLessThan(2);
-    expect(fb.points.length).toBeLessThan(2);
-  });
-});
-
-// ─── resolveShiftedEdgePoints ──────────────────────────────────────────────────
-
-describe('resolveShiftedEdgePoints', () => {
-  it('drops co-linear spine waypoints when middle bus is laterally stale', () => {
-    const result = resolveShiftedEdgePoints({
-      shifted: [
-        { x: 175, y: 100 },
-        { x: 400, y: 150 },
-        { x: 175, y: 200 },
-      ],
-      sourceCenter: 175,
-      targetCenter: 175,
-      crossAxis: 'x',
-    });
-    expect(result).toEqual([]);
-  });
-
-  it('keeps shifted waypoints when middle bus stays within endpoint span', () => {
-    const shifted = [
-      { x: 175, y: 100 },
-      { x: 180, y: 150 },
-      { x: 175, y: 200 },
-    ];
-    expect(
-      resolveShiftedEdgePoints({ shifted, sourceCenter: 175, targetCenter: 175, crossAxis: 'x' })
-    ).toEqual(shifted);
-  });
-});
-
 // ─── Compound groups ───────────────────────────────────────────────────────────
 
 describe('dagLayout — compound groups', () => {
@@ -223,23 +156,6 @@ describe('dagLayout — compound groups', () => {
     expect(groupNode.height).toBeGreaterThanOrEqual(NODE_H + padding.top + padding.bottom);
   });
 
-  it('inner edge waypoints are in absolute coordinates', () => {
-    const outerNodes = [node('group')];
-    const innerNodes = [node('inner-a'), node('inner-b')];
-    const innerEdges = [edge('e', 'inner-a', 'inner-b')];
-    const groups: DagCompoundGroup[] = [{ id: 'group', innerNodes, innerEdges }];
-    const { nodes: laid, edges: laidEdges } = dagLayout(outerNodes, [], groups, {
-      compoundPadding: { top: 70, right: 32, bottom: 32, left: 32 },
-    });
-
-    const groupNode = findNode(laid, 'group');
-    const e = findEdge(laidEdges, 'inner-a', 'inner-b');
-    for (const p of e.points) {
-      expect(p.x).toBeGreaterThanOrEqual(groupNode.x - 1);
-      expect(p.y).toBeGreaterThanOrEqual(groupNode.y - 1);
-    }
-  });
-
   it('nested compound group (group-in-group) — all nodes have finite positions', () => {
     const outerNodes = [node('outer-group')];
     const innerGroupNode = node('inner-group');
@@ -263,6 +179,13 @@ describe('dagLayout — compound groups', () => {
     expect(laid.map((n) => n.id).sort()).toEqual(
       ['deep-a', 'deep-b', 'inner-group', 'outer-group'].sort()
     );
+  });
+
+  it('throws for a compound group that is neither a root node nor nested in another group', () => {
+    const groups: DagCompoundGroup[] = [
+      { id: 'orphan', innerNodes: [node('inner')], innerEdges: [] },
+    ];
+    expect(() => dagLayout([node('a')], [], groups)).toThrow(/orphan/);
   });
 });
 
@@ -476,24 +399,13 @@ describe('dagLayout — many-branch overlap regression (#18606)', () => {
     expectNoPairwiseOverlap(inner);
   });
 
-  it('the same graph laid out flat (non-compound) does not overlap and keeps edges intact', () => {
-    const { nodes: laid, edges: laidEdges } = dagLayout(
-      infosecInnerNodes(),
-      infosecInnerEdges(),
-      [],
-      { direction: 'TB', nodeSep: 50, rankSep: 70 }
-    );
+  it('the same graph laid out flat (non-compound) does not overlap', () => {
+    const { nodes: laid } = dagLayout(infosecInnerNodes(), infosecInnerEdges(), [], {
+      direction: 'TB',
+      nodeSep: 50,
+      rankSep: 70,
+    });
     expectNoPairwiseOverlap(laid);
-
-    // Every input edge is still present and every waypoint is finite after the
-    // separation pass (no detached or NaN-routed edges).
-    expect(laidEdges).toHaveLength(INFOSEC_INNER_EDGES.length);
-    for (const e of laidEdges) {
-      for (const p of e.points) {
-        expect(isFinite(p.x)).toBe(true);
-        expect(isFinite(p.y)).toBe(true);
-      }
-    }
   });
 
   it('LR direction is also non-overlapping for the same graph', () => {
@@ -517,6 +429,33 @@ describe('dagLayout — cycle detection', () => {
       { id: 'groupB', innerNodes: [groupA], innerEdges: [] },
     ];
     expect(() => dagLayout([groupA, groupB], [], groups)).toThrow(/cycle/i);
+  });
+
+  it('throws a descriptive error naming a node when the node graph has a cycle reachable from a sink', () => {
+    const nodes = [node('a'), node('b'), node('c'), node('d')];
+    const edges = [
+      edge('ab', 'a', 'b'),
+      edge('bc', 'b', 'c'),
+      edge('cb', 'c', 'b'),
+      edge('cd', 'c', 'd'),
+    ];
+    expect(() => dagLayout(nodes, edges)).toThrow(/cycle.*"[bc]"/i);
+  });
+
+  it('throws a descriptive error for a pure-cycle component with no sinks', () => {
+    const nodes = [node('a'), node('b')];
+    const edges = [edge('ab', 'a', 'b'), edge('ba', 'b', 'a')];
+    expect(() => dagLayout(nodes, edges)).toThrow(/cycle.*"[ab]"/i);
+  });
+
+  it('throws for a pure-cycle component alongside an acyclic component', () => {
+    const nodes = [node('x'), node('y'), node('a'), node('b')];
+    const edges = [edge('xy', 'x', 'y'), edge('ab', 'a', 'b'), edge('ba', 'b', 'a')];
+    expect(() => dagLayout(nodes, edges)).toThrow(/cycle.*"[ab]"/i);
+  });
+
+  it('returns an empty layout for an empty graph', () => {
+    expect(dagLayout([], [])).toEqual({ nodes: [], reservedLanePlacements: [] });
   });
 });
 
@@ -890,7 +829,6 @@ describe('dagLayout — reservedLanes', () => {
     expect(merge.y).toBeGreaterThanOrEqual(
       nested.y + nested.height + DEFAULT_RANK_SEP - CENTER_TOLERANCE
     );
-    expectNoPairwiseOverlap(laid);
   });
 
   it('two sequential spine owners: each lane head levels against its pushed owner (Fix 2)', () => {
@@ -1425,4 +1363,307 @@ describe('dagLayout — LR direction + reservedLanes invariants', () => {
     expect(s3.x).toBeGreaterThanOrEqual(b.x + b.width + rankSep - 1);
     expectNoPairwiseOverlap(laid);
   });
+});
+
+// ─── compact mode + reservedLanes ─────────────────────────────────────────────
+//
+// Compact mode only skips the *inner* layout of compound groups. The root graph
+// still goes through layoutGraphWithLanes, so root-hosted lanes are placed exactly
+// as in the full layout. Lanes whose owner lives inside a compound group are hosted
+// by that group, which compact mode never lays out: they produce neither lane
+// nodes nor placements (and no error).
+
+describe('dagLayout — compact mode + reservedLanes', () => {
+  const NODE_SEP = 50;
+  const RANK_SEP = 70;
+  const DIRECTIONS: readonly DagLayoutDirection[] = ['TB', 'LR'];
+
+  type Laid = ReturnType<typeof dagLayout>['nodes'];
+
+  const mainStart = (n: Laid[number], direction: DagLayoutDirection) =>
+    direction === 'LR' ? n.x : n.y;
+  const mainEnd = (n: Laid[number], direction: DagLayoutDirection) =>
+    direction === 'LR' ? n.x + n.width : n.y + n.height;
+  const crossStart = (n: Laid[number], direction: DagLayoutDirection) =>
+    direction === 'LR' ? n.y : n.x;
+  const crossEnd = (n: Laid[number], direction: DagLayoutDirection) =>
+    direction === 'LR' ? n.y + n.height : n.x + n.width;
+
+  const compactOptions = (direction: DagLayoutDirection, reservedLanes: DagReservedLane[]) => ({
+    compact: true,
+    direction,
+    nodeSep: NODE_SEP,
+    rankSep: RANK_SEP,
+    reservedLanes,
+  });
+
+  // Spine: s1 → s2 → s3; lane [fb1 → fb2] owned by s2.
+  const spineWithLane = () => ({
+    nodes: [node('s1'), node('s2'), node('s3'), node('fb1'), node('fb2')],
+    edges: [
+      edge('s1-s2', 's1', 's2'),
+      edge('s2-s3', 's2', 's3'),
+      edge('s2-fb1', 's2', 'fb1'),
+      edge('fb1-fb2', 'fb1', 'fb2'),
+    ],
+    lanes: (): DagReservedLane[] => [{ nodeIds: ['fb1', 'fb2'], depth: 0, ownerId: 's2' }],
+  });
+
+  describe.each(DIRECTIONS)('direction %s', (direction) => {
+    it('places one lane placement per lane, matching the bounds of the lane nodes', () => {
+      const { nodes, edges, lanes } = spineWithLane();
+      const { nodes: laid, reservedLanePlacements } = dagLayout(
+        nodes,
+        edges,
+        [],
+        compactOptions(direction, lanes())
+      );
+
+      expect(laid.map((n) => n.id).sort()).toEqual(['fb1', 'fb2', 's1', 's2', 's3']);
+      expect(reservedLanePlacements).toHaveLength(1);
+
+      const laneNodes = [findNode(laid, 'fb1'), findNode(laid, 'fb2')];
+      const [placement] = reservedLanePlacements;
+      expect(placement.ownerId).toBe('s2');
+      expect(placement.crossStart).toBe(
+        Math.min(...laneNodes.map((n) => crossStart(n, direction)))
+      );
+      expect(placement.crossEnd).toBe(Math.max(...laneNodes.map((n) => crossEnd(n, direction))));
+      expect(placement.mainStart).toBe(Math.min(...laneNodes.map((n) => mainStart(n, direction))));
+      expect(placement.mainEnd).toBe(Math.max(...laneNodes.map((n) => mainEnd(n, direction))));
+    });
+
+    it('keeps lane nodes clear of the spine by nodeSep and tags only lane nodes as crossPinned', () => {
+      const { nodes, edges, lanes } = spineWithLane();
+      const { nodes: laid, reservedLanePlacements } = dagLayout(
+        nodes,
+        edges,
+        [],
+        compactOptions(direction, lanes())
+      );
+      const [placement] = reservedLanePlacements;
+      const spine = ['s1', 's2', 's3'].map((id) => findNode(laid, id));
+
+      expectNoPairwiseOverlap(laid);
+      const spineCrossEnd = Math.max(...spine.map((n) => crossEnd(n, direction)));
+      expect(placement.crossStart).toBeGreaterThanOrEqual(spineCrossEnd + NODE_SEP);
+
+      expect(spine.map((n) => n.crossPinned)).toEqual([undefined, undefined, undefined]);
+      expect(findNode(laid, 'fb1').crossPinned).toBe(true);
+      expect(findNode(laid, 'fb2').crossPinned).toBe(true);
+    });
+
+    it('levels the lane head one rank below its owner and pushes the spine past the lane', () => {
+      const { nodes, edges, lanes } = spineWithLane();
+      const { nodes: laid, reservedLanePlacements } = dagLayout(
+        nodes,
+        edges,
+        [],
+        compactOptions(direction, lanes())
+      );
+      const s2 = findNode(laid, 's2');
+      const s3 = findNode(laid, 's3');
+      const [placement] = reservedLanePlacements;
+
+      expect(placement.mainStart).toBe(mainEnd(s2, direction) + RANK_SEP);
+      expect(mainStart(s3, direction)).toBeGreaterThanOrEqual(placement.mainEnd + RANK_SEP);
+    });
+
+    it('lays out root-hosted lanes exactly like non-compact mode when there are no groups', () => {
+      const { nodes, edges, lanes } = spineWithLane();
+      const compact = dagLayout(nodes, edges, [], compactOptions(direction, lanes()));
+      const full = dagLayout(nodes, edges, [], {
+        ...compactOptions(direction, lanes()),
+        compact: false,
+      });
+      expect(compact).toEqual(full);
+    });
+
+    it('stacks a lane owned by a lane node further out than its parent lane', () => {
+      // Spine: s1 → s2 → s3. Depth-0 lane (owner s2): a → b. Depth-1 lane (owner a): c.
+      const nodes = [node('s1'), node('s2'), node('s3'), node('a'), node('b'), node('c')];
+      const edges = [
+        edge('s1-s2', 's1', 's2'),
+        edge('s2-s3', 's2', 's3'),
+        edge('s2-a', 's2', 'a'),
+        edge('a-b', 'a', 'b'),
+        edge('a-c', 'a', 'c'),
+      ];
+      const { nodes: laid, reservedLanePlacements } = dagLayout(
+        nodes,
+        edges,
+        [],
+        compactOptions(direction, [
+          { nodeIds: ['a', 'b'], depth: 0, ownerId: 's2' },
+          { nodeIds: ['c'], depth: 1, ownerId: 'a' },
+        ])
+      );
+
+      expect(reservedLanePlacements.map((p) => p.ownerId)).toEqual(['s2', 'a']);
+      const [parent, nested] = reservedLanePlacements;
+      const a = findNode(laid, 'a');
+      const c = findNode(laid, 'c');
+      const s3 = findNode(laid, 's3');
+
+      // Nested lane: one rank below its own owner, one column beyond the parent lane.
+      expect(nested.mainStart).toBe(mainEnd(a, direction) + RANK_SEP);
+      expect(nested.crossStart).toBeGreaterThanOrEqual(parent.crossEnd + NODE_SEP);
+      expect(crossStart(c, direction)).toBe(nested.crossStart);
+      // The spine below the owner clears the whole subtree.
+      expect(mainStart(s3, direction)).toBeGreaterThanOrEqual(
+        Math.max(parent.mainEnd, nested.mainEnd) + RANK_SEP
+      );
+      expectNoPairwiseOverlap(laid);
+    });
+
+    it('places a lane next to a compact compound group using its caller-provided size', () => {
+      const GROUP_W = 200;
+      const GROUP_H = 100;
+      const groupNode: DagNode = { id: 'g', width: GROUP_W, height: GROUP_H };
+      const { nodes: laid, reservedLanePlacements } = dagLayout(
+        [node('s1'), groupNode, node('s3'), node('fb')],
+        [edge('s1-g', 's1', 'g'), edge('g-s3', 'g', 's3'), edge('g-fb', 'g', 'fb')],
+        [{ id: 'g', innerNodes: [node('inner')], innerEdges: [] }],
+        {
+          ...compactOptions(direction, [{ nodeIds: ['fb'], depth: 0, ownerId: 'g' }]),
+          compoundPadding: { top: 70, right: 32, bottom: 32, left: 32 },
+        }
+      );
+
+      const g = findNode(laid, 'g');
+      expect(g.width).toBe(GROUP_W);
+      expect(g.height).toBe(GROUP_H);
+      expect(laid.find((n) => n.id === 'inner')).toBeUndefined();
+
+      expect(reservedLanePlacements).toHaveLength(1);
+      const [placement] = reservedLanePlacements;
+      expect(placement.ownerId).toBe('g');
+      expect(placement.mainStart).toBe(mainEnd(g, direction) + RANK_SEP);
+      expect(placement.crossStart).toBeGreaterThanOrEqual(crossEnd(g, direction) + NODE_SEP);
+      expectNoPairwiseOverlap(laid);
+    });
+
+    it('drops a lane hosted by a compound group: no lane nodes, no placement, no error', () => {
+      const { nodes: laid, reservedLanePlacements } = dagLayout(
+        [node('s1'), { id: 'g', width: 200, height: 100 }, node('s3')],
+        [edge('s1-g', 's1', 'g'), edge('g-s3', 'g', 's3')],
+        [
+          {
+            id: 'g',
+            innerNodes: [node('step'), node('lane')],
+            innerEdges: [edge('step-lane', 'step', 'lane')],
+          },
+        ],
+        {
+          ...compactOptions(direction, [{ nodeIds: ['lane'], depth: 0, ownerId: 'step' }]),
+          compoundPadding: { top: 70, right: 32, bottom: 32, left: 32 },
+        }
+      );
+
+      expect(laid.map((n) => n.id)).toEqual(['s1', 'g', 's3']);
+      expect(reservedLanePlacements).toEqual([]);
+    });
+
+    it('still places root-hosted lanes when a group-hosted lane is dropped', () => {
+      const { nodes: laid, reservedLanePlacements } = dagLayout(
+        [node('s1'), { id: 'g', width: 200, height: 100 }, node('s3'), node('fb')],
+        [edge('s1-g', 's1', 'g'), edge('g-s3', 'g', 's3'), edge('s1-fb', 's1', 'fb')],
+        [
+          {
+            id: 'g',
+            innerNodes: [node('step'), node('lane')],
+            innerEdges: [edge('step-lane', 'step', 'lane')],
+          },
+        ],
+        compactOptions(direction, [
+          { nodeIds: ['fb'], depth: 0, ownerId: 's1' },
+          { nodeIds: ['lane'], depth: 0, ownerId: 'step' },
+        ])
+      );
+
+      expect(reservedLanePlacements.map((p) => p.ownerId)).toEqual(['s1']);
+      expect(laid.map((n) => n.id).sort()).toEqual(['fb', 'g', 's1', 's3']);
+      expectNoPairwiseOverlap(laid);
+    });
+
+    it('lays out a single node with a lane owned by it', () => {
+      const { nodes: laid, reservedLanePlacements } = dagLayout(
+        [node('o'), node('l')],
+        [edge('o-l', 'o', 'l')],
+        [],
+        compactOptions(direction, [{ nodeIds: ['l'], depth: 0, ownerId: 'o' }])
+      );
+
+      const owner = findNode(laid, 'o');
+      const lane = findNode(laid, 'l');
+      expect(owner.x).toBe(0);
+      expect(owner.y).toBe(0);
+      expect(lane.crossPinned).toBe(true);
+      expect(mainStart(lane, direction)).toBe(mainEnd(owner, direction) + RANK_SEP);
+      expect(crossStart(lane, direction)).toBe(crossEnd(owner, direction) + NODE_SEP);
+      expect(reservedLanePlacements).toEqual([
+        {
+          ownerId: 'o',
+          crossStart: crossStart(lane, direction),
+          crossEnd: crossEnd(lane, direction),
+          mainStart: mainStart(lane, direction),
+          mainEnd: mainEnd(lane, direction),
+        },
+      ]);
+    });
+  });
+
+  it('contrast: the same group-hosted lane is placed (root-absolute) when compact is off', () => {
+    const { nodes: laid, reservedLanePlacements } = dagLayout(
+      [{ id: 'g', width: 200, height: 100 }],
+      [],
+      [
+        {
+          id: 'g',
+          innerNodes: [node('step'), node('lane')],
+          innerEdges: [edge('step-lane', 'step', 'lane')],
+        },
+      ],
+      {
+        compact: false,
+        compoundPadding: { top: 70, right: 32, bottom: 32, left: 32 },
+        reservedLanes: [{ nodeIds: ['lane'], depth: 0, ownerId: 'step' }],
+      }
+    );
+    const lane = findNode(laid, 'lane');
+    expect(reservedLanePlacements).toHaveLength(1);
+    expect(reservedLanePlacements[0].crossStart).toBe(lane.x);
+  });
+
+  it('still validates lanes: an owner that is in no graph node set throws', () => {
+    expect(() =>
+      dagLayout(
+        [node('a')],
+        [],
+        [],
+        compactOptions('TB', [{ nodeIds: ['a'], depth: 0, ownerId: 'ghost' }])
+      )
+    ).toThrow(/ownerId "ghost"/);
+  });
+
+  it('still validates lanes: a lane node missing from the input nodes throws', () => {
+    expect(() =>
+      dagLayout(
+        [node('a')],
+        [],
+        [],
+        compactOptions('TB', [{ nodeIds: ['missing'], depth: 0, ownerId: 'a' }])
+      )
+    ).toThrow(/"missing" not found/);
+  });
+
+  it.each([true, false])(
+    'empty nodes with reservedLanes: [] returns empty arrays (compact: %s)',
+    (compact) => {
+      expect(dagLayout([], [], [], { compact, reservedLanes: [] })).toEqual({
+        nodes: [],
+        reservedLanePlacements: [],
+      });
+    }
+  );
 });

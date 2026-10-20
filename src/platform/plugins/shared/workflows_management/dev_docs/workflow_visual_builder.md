@@ -65,8 +65,8 @@ Fallback lane nodes render and are fully positioned. They do not yet have ports 
 
 | Package | Role in authoring |
 |---|---|
-| `@kbn/workflows` (`graph_layout/`) | Logical graph construction; `visitStepChildSlots` (shared traversal); topology fingerprint |
-| `@kbn/dag-layout` | Dagre wrapper; `dagLayout`, `DagPositionedNode`, `DagPositionedEdge`; `separatePositionedOverlapsInPlace` (PAVA overlap repair; no longer used by the pipeline) |
+| `@kbn/workflows` (`graph_layout/`) | Logical graph construction; `visitStepChildSlots` (shared traversal) |
+| `@kbn/dag-layout` | Dagre wrapper; `dagLayout` returns positioned nodes (`DagPositionedNode`) only; edge routing is computed in `@kbn/workflows-ui` |
 | `@kbn/workflows-ui` | ReactFlow rendering; structure-driven cross-axis packing after `dagLayout` (`pack_workflow_structure.ts`, `workflow_layout_pipeline.ts`; ADR-0013); `WorkflowGraphEditActions` seam; `port_geometry.ts` |
 | `@kbn/workflows-yaml` (`lib/yaml_edit`) | YAML AST utilities; `getStepNode`, `buildWorkflowLookup` |
 | `workflows_management` | Redux store; snippet mutation path; `insertStepSnippet`; `WorkflowVisualEditor` |

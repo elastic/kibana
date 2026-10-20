@@ -7,11 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { usePager } from '@kbn/discover-utils';
 import { I18nProvider } from '@kbn/i18n-react';
 import { JSONDataTable } from './json_data_table';
+import {
+  clearActiveDataReferenceInsertTarget,
+  setActiveDataReferenceInsertTarget,
+} from '../../lib/active_data_reference_insert_target';
 
 // Helper function to render with I18n provider
 const renderWithIntl = (component: React.ReactElement) => {
@@ -297,6 +301,42 @@ describe('JSONDataTable', () => {
 
       // Grid should still render but without copy actions
       expect(screen.getByRole('grid')).toBeInTheDocument();
+    });
+
+    it('drags the reference token, not the literal value', () => {
+      render(
+        <JSONDataTable
+          data={{ permalink: 'https://example.com' }}
+          fieldPathActionsPrefix="steps.vt.output"
+        />
+      );
+
+      // Name + value cells are both sources; either must transfer the reference.
+      const source = screen.getAllByTestId('workflowExecutionOutputField-permalink')[0];
+      const dataTransfer = { setData: jest.fn(), effectAllowed: '' };
+      fireEvent.dragStart(source, { dataTransfer });
+
+      expect(dataTransfer.setData).toHaveBeenCalledWith(
+        'text/plain',
+        '{{ steps.vt.output.permalink }}'
+      );
+      expect(dataTransfer.setData).not.toHaveBeenCalledWith('text/plain', 'https://example.com');
+    });
+
+    it('click-to-insert delivers the reference token to the active target', () => {
+      const target = jest.fn();
+      setActiveDataReferenceInsertTarget(target);
+      render(
+        <JSONDataTable
+          data={{ permalink: 'https://example.com' }}
+          fieldPathActionsPrefix="steps.vt.output"
+        />
+      );
+
+      fireEvent.click(screen.getAllByTestId('workflowExecutionOutputField-permalink')[0]);
+
+      expect(target).toHaveBeenCalledWith('{{ steps.vt.output.permalink }}');
+      clearActiveDataReferenceInsertTarget(target);
     });
   });
 

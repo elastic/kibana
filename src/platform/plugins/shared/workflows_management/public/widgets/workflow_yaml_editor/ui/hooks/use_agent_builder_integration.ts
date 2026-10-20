@@ -574,9 +574,10 @@ export const useAgentBuilderIntegration = ({
   }, [readOnlyReason, executionsTabYaml, editorRef]);
 
   // Auto-open only on an unsaved workflow that asked for it, or on a saved
-  // workflow whose sidebar the save thunk requested we restore. Never on an
-  // existing workflow the user navigated to directly. Guarded per-mount so a
-  // manual close stays.
+  // workflow whose sidebar the save thunk requested we restore. Plain /create
+  // never auto-opens: the canvas creation panel owns the AI entry point there.
+  // Never on an existing workflow the user navigated to directly. Guarded
+  // per-mount so a manual close stays.
   useEffect(() => {
     if (!isEditorMounted || !agentBuilder || !isChatAccessible) return;
     if (hasAutoOpenedRef.current) return;

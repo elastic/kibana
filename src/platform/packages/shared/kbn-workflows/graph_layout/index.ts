@@ -8,6 +8,8 @@
  */
 
 export {
+  CONTAINER_STEP_TYPES,
+  FOREACH_GROUP_EMPTY_HEIGHT,
   TRIGGER_STEP_TYPES,
   type EdgeBranchType,
   type FallbackLane,
@@ -25,7 +27,6 @@ export {
   type StructureSequence,
   type StructureStep,
 } from './types';
-export { computeTopologyFingerprint } from './compute_topology_fingerprint';
 export { transformWorkflowToGraph, type TransformResult } from './transform_workflow_to_graph';
 export {
   visitStepChildSlots,

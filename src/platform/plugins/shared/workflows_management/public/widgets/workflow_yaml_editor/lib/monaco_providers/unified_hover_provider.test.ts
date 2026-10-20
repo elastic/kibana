@@ -19,6 +19,7 @@ import type {
   ExecutionContext,
   StepExecutionData,
 } from '../execution_context/build_execution_context';
+import { createStepFragmentModelUri } from '../step_fragment/step_fragment_models';
 
 jest.mock('../hover/get_intercepted_hover', () => ({
   getInterceptedHover: jest.fn().mockResolvedValue(null),
@@ -582,6 +583,22 @@ describe('UnifiedHoverProvider - lazy-loading step I/O', () => {
 
       expect(result).toBeNull();
       expect(getModelMarkersSpy).not.toHaveBeenCalled();
+      expect(getInterceptedHover).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('step-fragment models', () => {
+    it('returns null without resolving custom hover on a step-fragment editor model', async () => {
+      const fragmentModel = {
+        ...createMockModel('type: kibana.createCaseDefaultSpace'),
+        uri: createStepFragmentModelUri(),
+      } as unknown as monaco.editor.ITextModel;
+
+      const result = await provider.provideHover(fragmentModel, createMockPosition(1, 15), {
+        isCancellationRequested: false,
+      } as monaco.CancellationToken);
+
+      expect(result).toBeNull();
       expect(getInterceptedHover).not.toHaveBeenCalled();
     });
   });

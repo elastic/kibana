@@ -24,6 +24,7 @@ import { isHttpFetchError } from '@kbn/core-http-browser';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/workflows';
 import { useWorkflowsCapabilities, type WorkflowsCreateRouteState } from '@kbn/workflows-ui';
 import { workflowDefaultYaml } from './workflow_default_yml';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
@@ -38,11 +39,11 @@ import type { WorkflowDetailTab } from '../../../common/lib/telemetry/events/wor
 import { AgenticFirstEmptyStateLive } from '../../../components';
 import { WorkflowsPageName } from '../../../deep_links';
 import {
+  seedCreateYaml,
   setActiveTab,
   setExecution,
   setIsTestModalOpen,
   setReplayExecutionId,
-  setYamlString,
 } from '../../../entities/workflows/store';
 import {
   selectActiveTab,
@@ -69,6 +70,7 @@ import {
   useWorkflowUrlState,
   type WorkflowUrlUpdateOptions,
 } from '../../../hooks/use_workflow_url_state';
+import { useWorkflowsExperimentalUiSetting } from '../../../hooks/use_workflows_experimental_ui_setting';
 import {
   navigateToWorkflowsList,
   type WorkflowDetailRouteState,
@@ -128,6 +130,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     replayExecutionId,
     replayIsTestRun,
     clearReplayExecutionId,
+    editorView,
   } = useWorkflowUrlState();
 
   useEffect(() => {
@@ -162,6 +165,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   // already seeded so URL-state churn and re-renders never clobber in-progress
   // edits or re-fire telemetry.
   const seededRef = useRef(false);
+  // Read at seed time only — must not be an effect dependency or Graph↔YAML
+  // toggles re-run this effect and reload the workflow (skeleton flash).
+  const editorViewRef = useRef(editorView);
+  editorViewRef.current = editorView;
 
   // A navigation can hand `/create` its initial content through history
   // state (`WorkflowsCreateRouteState`) — e.g. the Template Library's
@@ -171,7 +178,7 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   // on `location.state`, which `useWorkflowUrlState` rewrites on URL updates.
   const { initialYaml } = location.state ?? {};
 
-  // Load workflow when id changes
+  // Load workflow when id changes; seed create once.
   useEffect(() => {
     if (id) {
       seededRef.current = false;
@@ -183,8 +190,10 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
     }
     seededRef.current = true;
 
-    dispatch(setYamlString(initialYaml || workflowDefaultYaml));
-    telemetry.reportWorkflowCreateOpened({ editorType: 'yaml' });
+    dispatch(seedCreateYaml(initialYaml || workflowDefaultYaml));
+    telemetry.reportWorkflowCreateOpened({
+      editorType: editorViewRef.current === 'graph' ? 'visual' : 'yaml',
+    });
   }, [loadWorkflow, id, dispatch, telemetry, initialYaml]);
 
   // Sync activeTab from URL state to store
@@ -280,7 +289,11 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   }, [clearSelectedExecution]);
 
   // `/create` starts on the agentic-first landing. `?startBlank=true` ("Start manually"
-  // on the empty list) skips it.
+  // on the empty list) skips it, and so does the visual editor: its canvas creation
+  // panel owns the AI entry point and the recommended templates there.
+  const isVisualEditorEnabled = useWorkflowsExperimentalUiSetting(
+    WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID
+  );
   const startBlank = new URLSearchParams(location.search).get('startBlank') === 'true';
   // Prompt from this page's landing or from the empty list (`location.state`).
   const [pendingPrompt, setPendingPrompt] = useState<PendingAgentPrompt | undefined>(() => {
@@ -291,7 +304,8 @@ export function WorkflowDetailPage({ id }: { id?: string }) {
   });
   // "Remix with AI" arrives with the template YAML, so it skips the landing too.
   const shouldShowAgenticLandingRef = useRef(false);
-  shouldShowAgenticLandingRef.current = !id && !startBlank && !pendingPrompt && !initialYaml;
+  shouldShowAgenticLandingRef.current =
+    !id && !isVisualEditorEnabled && !startBlank && !pendingPrompt && !initialYaml;
   const [showAgenticLanding, setShowAgenticLanding] = useState(shouldShowAgenticLandingRef.current);
   // Re-check only when the route switches between `/create` and `/:id`. URL
   // churn on `/create` (view toggle, run selection) drops the query and the
