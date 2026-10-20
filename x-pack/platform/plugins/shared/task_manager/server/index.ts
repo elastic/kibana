@@ -156,6 +156,10 @@ export {
   armResearchLease,
   markResearchExecutionStarted,
   clearResearchLease,
+  researchClaimRetryAt,
+  researchPersistedRetryAt,
+  researchPersistedAttempts,
+  researchFirstRetryDelayMs,
   researchExecutionBudgetMs,
   setResearchTaskDefinitionSource,
 } from './lib/research_runner_override';

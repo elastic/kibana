@@ -133,58 +133,96 @@ const isReadRoute = (method: string, path: string): boolean => {
   );
 };
 
-const queryEntries = (
-  path: string,
-  querystring?: string | Readonly<Record<string, unknown>>
-): Array<[string, string]> => {
+/**
+ * Names the alerting subset's clients put on read calls. Record-mode paths had no
+ * query string. `refresh` is admitted only as the explicit value `false`.
+ * `routing`, `preference`, `pipeline`, and `wait_for_active_shards` are unknown.
+ */
+export const READ_QUERY_ALLOW = [
+  'allow_no_indices',
+  'expand_wildcards',
+  'ignore_unavailable',
+  'refresh',
+] as const;
+
+const ALLOWED_QUERY = new Set<string>(READ_QUERY_ALLOW);
+
+/** Strict query grammar. `;`, a second `?`, or a duplicate key is not a read. */
+const parseQueryText = (raw: string): Array<[string, string]> | undefined => {
+  if (raw.includes(';') || raw.includes('?')) return undefined;
+  const seen = new Set<string>();
   const entries: Array<[string, string]> = [];
-  const raw = path.split('?')[1];
-  if (raw) {
-    for (const part of raw.split('&')) {
-      if (!part) continue;
-      const splitAt = part.indexOf('=');
-      const key = splitAt === -1 ? part : part.slice(0, splitAt);
-      const value = splitAt === -1 ? '' : part.slice(splitAt + 1);
-      try {
-        entries.push([decodeURIComponent(key), decodeURIComponent(value)]);
-      } catch {
-        entries.push([key, value]);
-      }
+  for (const part of raw.split('&')) {
+    if (!part) continue;
+    const splitAt = part.indexOf('=');
+    let key: string;
+    let value: string;
+    try {
+      key = decodeURIComponent(splitAt === -1 ? part : part.slice(0, splitAt));
+      value = splitAt === -1 ? '' : decodeURIComponent(part.slice(splitAt + 1));
+    } catch {
+      return undefined;
     }
-  }
-  if (typeof querystring === 'string') return entries.concat(queryEntries(`/?${querystring}`));
-  if (querystring && typeof querystring === 'object') {
-    for (const [key, value] of Object.entries(querystring)) {
-      entries.push([key, value == null ? '' : String(value)]);
-    }
+    const name = key.toLowerCase();
+    if (seen.has(name)) return undefined;
+    seen.add(name);
+    entries.push([name, value]);
   }
   return entries;
 };
 
-/**
- * `refresh` other than `false`, plus `pipeline` and `wait_for_active_shards`,
- * mutate. They count on the path and on a separately supplied `params.querystring`.
- */
-export const hasMutatingQuery = (
+const collectQuery = (
   path: string,
   querystring?: string | Readonly<Record<string, unknown>>
-): boolean =>
-  queryEntries(path, querystring).some(([key, value]) => {
-    const name = key.toLowerCase();
-    if (name === 'refresh') return value.toLowerCase() !== 'false';
-    return name === 'pipeline' || name === 'wait_for_active_shards';
+): Array<[string, string]> | undefined => {
+  const mark = path.indexOf('?');
+  const fromPath = mark === -1 ? [] : parseQueryText(path.slice(mark + 1));
+  if (!fromPath) return undefined;
+  const seen = new Set(fromPath.map(([name]) => name));
+  if (typeof querystring === 'string' && querystring.length > 0) {
+    const body = querystring.startsWith('?') ? querystring.slice(1) : querystring;
+    const extra = parseQueryText(body);
+    if (!extra) return undefined;
+    for (const [name] of extra) {
+      if (seen.has(name)) return undefined;
+      seen.add(name);
+    }
+    return fromPath.concat(extra);
+  }
+  if (querystring && typeof querystring === 'object') {
+    const extra: Array<[string, string]> = [];
+    for (const [key, value] of Object.entries(querystring)) {
+      const name = key.toLowerCase();
+      if (seen.has(name)) return undefined;
+      seen.add(name);
+      const text = value == null ? '' : String(value);
+      if (text.includes(';') || text.includes('?') || text.includes('&')) return undefined;
+      extra.push([name, text]);
+    }
+    return fromPath.concat(extra);
+  }
+  return fromPath;
+};
+
+const queryAllowed = (entries: readonly (readonly [string, string])[]): boolean =>
+  entries.every(([name, value]) => {
+    if (!ALLOWED_QUERY.has(name)) return false;
+    if (name === 'refresh') return value.toLowerCase() === 'false';
+    return true;
   });
 
 /**
  * True for mutations. GET and HEAD are writes unless the path is an allowlisted
- * read route. Unknown verbs are writes. A mutating query makes any verb a write.
+ * read route and every query parameter is on {@link READ_QUERY_ALLOW}.
+ * Unknown verbs are writes. A query that fails the strict grammar is a write.
  */
 export const isEsWrite = (
   method: string,
   path: string,
   querystring?: string | Readonly<Record<string, unknown>>
 ): boolean => {
-  if (hasMutatingQuery(path, querystring)) return true;
+  const entries = collectQuery(path, querystring);
+  if (!entries || !queryAllowed(entries)) return true;
   const verb = method.toUpperCase();
   if (isReadRoute(verb, path)) return false;
   return true;

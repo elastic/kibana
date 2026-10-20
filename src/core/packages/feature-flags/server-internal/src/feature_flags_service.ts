@@ -47,6 +47,14 @@ import { setProviderWithRetries } from './set_provider_with_retries';
 import { type FeatureFlagsConfig, featureFlagsConfig } from './feature_flags_config';
 import { incrementCounter } from './increment_counter';
 
+/** Research replicas observe provider and context invalidation through this symbol. */
+const RESEARCH_FLAG_INVALIDATION = Symbol.for('kbn.research.featureFlags.invalidation');
+
+const noteResearchFlagInvalidation = (): void => {
+  const note = (globalThis as Record<symbol, (() => void) | undefined>)[RESEARCH_FLAG_INVALIDATION];
+  if (typeof note === 'function') note();
+};
+
 /**
  * Core-internal contract for the setup lifecycle step.
  * @internal
@@ -146,7 +154,10 @@ export class FeatureFlagsService {
         }
         setProviderWithRetries(provider, this.logger);
         // Emit a context change event when the provider is ready to force the reevaluation of the subscribed flags.
-        OpenFeature.addHandler(ServerProviderEvents.Ready, () => this.contextChanged$.next());
+        OpenFeature.addHandler(ServerProviderEvents.Ready, () => {
+          this.contextChanged$.next();
+          noteResearchFlagInvalidation();
+        });
       },
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
     };
@@ -161,6 +172,9 @@ export class FeatureFlagsService {
       if (event?.flagsChanged) {
         featureFlagsChanged$.next(event.flagsChanged);
       }
+      // An empty flagsChanged list is still a provider invalidation. Research
+      // replicas subscribe through this hook because the public contract has no stream.
+      noteResearchFlagInvalidation();
     });
     this.overrides$.pipe(pairwise()).subscribe(([prev, next]) => {
       const mergedObject = { ...prev, ...next };
@@ -298,6 +312,7 @@ export class FeatureFlagsService {
     this.context = deepMerge(this.context, formattedContextToAppend);
     OpenFeature.setContext(this.context);
     this.contextChanged$.next();
+    noteResearchFlagInvalidation();
   }
 
   private registerCounterRoute(http: InternalHttpServiceSetup): void {

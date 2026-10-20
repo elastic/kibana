@@ -25,9 +25,11 @@ import type { Result } from '../lib/result_type';
 import { asErr, asOk, eitherAsync, isErr, isOk, mapErr, mapOk, unwrap } from '../lib/result_type';
 import { getExecutionContextRunner } from '../lib/execution_context';
 import {
-  consumeCollateralReschedule,
   createTaskRunnerWithResearchOverride,
   researchExpiration,
+  researchFirstRetryDelayMs,
+  researchPersistedAttempts,
+  researchPersistedRetryAt,
 } from '../lib/research_runner_override';
 import type { TaskMarkRunning, TaskRun, TaskTiming, TaskManagerStat } from '../task_events';
 import {
@@ -859,8 +861,8 @@ export class TaskManagerRunner implements TaskRunner {
   ): Result<SuccessfulRunResult, FailedTaskResult> => {
     const { state, error } = failureResult;
     const { schedule, attempts } = this.instance.task;
-    const collateral = consumeCollateralReschedule(this.instance.task.id, error);
-    const attemptsForRetry = collateral.refunded ? Math.max(attempts - 1, 0) : attempts;
+    const attemptsForRetry = researchPersistedAttempts(this.instance.task.id, attempts, error);
+    const collateral = { refunded: attemptsForRetry < attempts };
 
     if ((this.shouldTryToScheduleRetry() || collateral.refunded) && !isUnrecoverableError(error)) {
       // if we're retrying, keep the number of attempts
@@ -1219,7 +1221,7 @@ export class TaskManagerRunner implements TaskRunner {
         const taskInstance = this.instance.task;
         try {
           // A worker boot holds the claim through bootstrap + the rule budget, not now+5m.
-          const leased = researchExpiration(this.id);
+          const leased = researchPersistedRetryAt(this.id);
           const updatedRetryAt = leased ?? new Date(Date.now() + 5 * 60 * 1000);
           this.logger.debug(
             `Attempting to update retryAt to ${updatedRetryAt.toISOString()} for long running task: ${
@@ -1278,7 +1280,7 @@ export class TaskManagerRunner implements TaskRunner {
       }
     };
 
-    const firstDelay = researchExpiration(this.id) ? 0 : UPDATE_RETRY_AT_INTERVAL;
+    const firstDelay = researchFirstRetryDelayMs(this.id);
     let timer = setTimeout(updateRetryAt, firstDelay);
 
     const stop = () => {

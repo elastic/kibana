@@ -54,6 +54,7 @@ import { selectTasksByCapacity } from './lib/task_selector_by_capacity';
 import { getTaskCost } from './lib/get_task_cost';
 import type { TaskPartitioner } from '../lib/task_partitioner';
 import { getRetryAt } from '../lib/get_retry_at';
+import { researchClaimRetryAt } from '../lib/research_runner_override';
 
 interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;
@@ -193,7 +194,15 @@ async function claimAvailableTasks(opts: TaskClaimerOpts): Promise<ClaimOwnershi
         status: TaskStatus.Running,
         startedAt: now,
         attempts: task.attempts + 1,
-        retryAt: getRetryAt(task, definitions.get(task.taskType)) ?? null,
+        retryAt:
+          researchClaimRetryAt({
+            id: task.id,
+            taskType: task.taskType,
+            schedule: task.schedule,
+            timeoutOverride: task.timeoutOverride,
+          }) ??
+          getRetryAt(task, definitions.get(task.taskType)) ??
+          null,
         ownerId: taskStore.taskManagerId,
       });
     } catch (error) {

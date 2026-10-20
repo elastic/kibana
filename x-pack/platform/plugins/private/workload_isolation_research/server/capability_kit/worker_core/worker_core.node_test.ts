@@ -16,7 +16,14 @@ import {
   consumeCollateralReschedule,
   deriveCancelGraceMs,
   markResearchExecutionStarted,
+  researchClaimRetryAt,
+  researchExecutionBudgetMs,
   researchExpiration,
+  researchFirstRetryDelayMs,
+  researchPersistedAttempts,
+  researchPersistedRetryAt,
+  RESEARCH_BOOTSTRAP_DEADLINE_MS,
+  RESEARCH_RECOVERY_CAP_MS,
   diffDefinitionParity,
   markCollateralLoss,
   registerExecutionClass,
@@ -848,6 +855,17 @@ test('read classification is anchored and document ids cannot impersonate endpoi
     (candidate) => !isEsWrite(candidate.method, candidate.path, candidate.query)
   );
   assert.deepEqual(queryAdmitted, []);
+  assert.equal(isEsWrite('GET', '/orders/_doc/1?routing=1;refresh=true'), true);
+  assert.equal(isEsWrite('HEAD', '/orders/_doc/1?routing=1?&refresh=true'), true);
+  assert.equal(isEsWrite('POST', '/orders/_mget', 'preference=a;refresh=true'), true);
+  assert.equal(isEsWrite('GET', '/orders/_doc/1', 'routing=1?&refresh=true'), true);
+  const grammar = grammarRefreshCandidates();
+  assert.equal(grammar.length, 32);
+  const grammarAdmitted = grammar.filter(
+    (candidate) => !isEsWrite(candidate.method, candidate.path, candidate.query)
+  );
+  assert.deepEqual(grammarAdmitted, []);
+  assert.equal(isEsWrite('GET', '/.kibana-event-log-*/_settings', { expand_wildcards: 'all' }), false);
 });
 
 /** Recreates the 242-path set: document ids, bulk shapes, underscore ids, encoding, slashes, queries. */
@@ -921,6 +939,36 @@ const adversarialWriteCandidates = (): string[] => {
     '/_nodes/reload_secure_settings'
   );
   return paths;
+};
+
+/** Semicolon, a second '?', duplicate keys, and unknown names. All 32 must be writes. */
+const grammarRefreshCandidates = (): Array<{
+  method: string;
+  path: string;
+  query?: string | Record<string, string>;
+}> => {
+  const bases = [
+    { method: 'GET', path: '/orders/_doc/1' },
+    { method: 'HEAD', path: '/orders/_doc/1' },
+    { method: 'POST', path: '/orders/_mget' },
+    { method: 'GET', path: '/orders/_search' },
+  ];
+  const candidates: Array<{
+    method: string;
+    path: string;
+    query?: string | Record<string, string>;
+  }> = [];
+  for (const base of bases) {
+    candidates.push({ ...base, path: `${base.path}?routing=1;refresh=true` });
+    candidates.push({ ...base, path: `${base.path}?routing=1?&refresh=true` });
+    candidates.push({ ...base, query: 'preference=a;refresh=true' });
+    candidates.push({ ...base, query: 'routing=1?&refresh=true' });
+    candidates.push({ ...base, path: `${base.path}?refresh=true&refresh=false` });
+    candidates.push({ ...base, query: { preference: 'a;refresh=true' } });
+    candidates.push({ ...base, path: `${base.path}?routing=1` });
+    candidates.push({ ...base, query: 'refresh=true' });
+  }
+  return candidates;
 };
 
 /** Query-param and admin-GET writes. A refresh=false document get stays out of this set. */
@@ -1306,6 +1354,50 @@ test('a boot that never starts execution dies at the bootstrap deadline', async 
   await host.stop();
 });
 
+test('a late execution_start after the bootstrap deadline is rejected', async () => {
+  const registry = new ModuleRegistry(new Set());
+  const host = new ExecutionHost(
+    registry,
+    { abortGraceMs: 40 },
+    scriptedEndpoint((runId, send) => {
+      setTimeout(() => {
+        // Block the host loop so the bootstrap timer is overdue but has not run yet.
+        const end = Date.now() + 80;
+        while (Date.now() < end) {
+          /* spin */
+        }
+        send({ version: 1, kind: 'execution_start', runId });
+        setTimeout(
+          () =>
+            send({
+              version: 1,
+              kind: 'outcome',
+              runId,
+              value: encode({ ok: true }),
+              failed: false,
+              heapUsed: 1,
+              rss: 1,
+            }),
+          30
+        );
+      }, 10);
+    })
+  );
+  const outcome = await host.run({
+    workloadClass: 'late-start',
+    moduleId: 'unused',
+    input: {},
+    principal: 'alice',
+    space: 'default',
+    capabilities: {},
+    deadlineMs: 500,
+    bootstrapDeadlineMs: 40,
+  });
+  assert.equal(outcome.status, 'terminated');
+  if (outcome.status === 'terminated') assert.equal(outcome.reason, 'deadline');
+  await host.stop();
+});
+
 test('a duplicate execution_start does not extend the rule budget', async () => {
   const registry = new ModuleRegistry(new Set());
   const host = new ExecutionHost(
@@ -1398,4 +1490,60 @@ test('a research lease keeps the claim through boot and starts the rule budget o
   assert.equal(researchExpiration('lease-1')?.getTime(), 6_000);
   clearResearchLease('lease-1');
   assert.equal(researchExpiration('lease-1'), undefined);
+});
+
+test('claim arms a protected lease before a later stub and refunds persisted attempts', () => {
+  resetResearchExecutionClasses();
+  setResearchTaskDefinitionSource({
+    get: (type) =>
+      type === 'alerting:.es-query'
+        ? { type, timeout: '1s', stateSchemaByVersion: { 1: {} } }
+        : undefined,
+  });
+  registerExecutionClass({
+    id: 'alerting-lease',
+    taskTypes: (type) => type === 'alerting:.es-query',
+    createRunner: () => ({ run: async () => ({ state: {} }) }),
+  });
+  const now = 1_000_000;
+  const claimed = researchClaimRetryAt(
+    { id: 'rule-1', taskType: 'alerting:.es-query', schedule: { interval: '1m' } },
+    now
+  );
+  assert.equal(claimed?.getTime(), now + RESEARCH_BOOTSTRAP_DEADLINE_MS + 1000);
+  assert.equal(researchFirstRetryDelayMs('rule-1'), 0);
+  armResearchLease({
+    taskId: 'rule-1',
+    claimedAt: now + 50_000,
+    bootstrapMs: 1,
+    executionMs: 1,
+  });
+  assert.equal(
+    researchExpiration('rule-1')?.getTime(),
+    now + RESEARCH_BOOTSTRAP_DEADLINE_MS + 1000
+  );
+  markResearchExecutionStarted('rule-1', now + 4_000);
+  const renewed = researchPersistedRetryAt('rule-1', now + 4_000);
+  const grace = deriveCancelGraceMs('1s', 0);
+  assert.equal(renewed?.getTime(), now + 4_000 + 1000 + grace);
+  assert.ok((renewed?.getTime() ?? 0) - (now + 4_000) <= RESEARCH_RECOVERY_CAP_MS);
+  const adHoc = researchExecutionBudgetMs('alerting:.es-query', 60_000, '2s');
+  assert.equal(adHoc, 2000);
+  const scheduled = researchExecutionBudgetMs('alerting:.es-query', 60_000);
+  assert.equal(scheduled, 1000);
+  const error = markCollateralLoss(new Error('slot stopped'));
+  assert.equal(researchPersistedAttempts('rule-1', 1, error), 0);
+  assert.equal(researchPersistedAttempts('rule-1', 1, new Error('real')), 1);
+  clearResearchLease('rule-1');
+  resetResearchExecutionClasses();
+  setResearchTaskDefinitionSource(undefined);
+});
+
+test('an owner invalidation bumps the flag generation when the override map is unchanged', () => {
+  const flags = { booleans: { 'workerCore.liveProbe': false }, strings: {}, numbers: {} };
+  const first = advanceGeneration('', 1, { flags, invalidation: 0 });
+  const same = advanceGeneration(first.hash, first.generation, { flags, invalidation: 0 });
+  const invalidated = advanceGeneration(first.hash, first.generation, { flags, invalidation: 1 });
+  assert.equal(same.generation, first.generation);
+  assert.equal(invalidated.generation, first.generation + 1);
 });

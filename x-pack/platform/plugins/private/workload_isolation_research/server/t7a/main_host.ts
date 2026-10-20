@@ -140,6 +140,7 @@ export class T7aController {
   private licenseGeneration = 0;
   private probeFlag: boolean | undefined;
   private flagsState = { hash: '', generation: 1 };
+  private flagInvalidation = 0;
   private featuresState = { hash: '', generation: 1 };
   private pricingState = { hash: '', generation: 1 };
   private cachedFlags = classifyFlagOverrides(undefined);
@@ -179,6 +180,11 @@ export class T7aController {
     if (typeof observe === 'function') {
       observe('feature_flags').subscribe(() => this.refreshFlags());
     }
+    (globalThis as Record<symbol, () => void>)[Symbol.for('kbn.research.featureFlags.invalidation')] =
+      () => {
+        this.flagInvalidation += 1;
+        this.refreshFlags();
+      };
     registerExecutionClass({
       id: WORKLOAD_CLASS,
       taskTypes: (taskType) => OFFMAIN_TASK_TYPES.has(taskType),
@@ -350,7 +356,10 @@ export class T7aController {
   private refreshFlags(): void {
     const flags = classifyFlagOverrides(readResearchConfig('feature_flags'));
     if (this.probeFlag !== undefined) flags.booleans['workerCore.liveProbe'] = this.probeFlag;
-    const next = advanceGeneration(this.flagsState.hash, this.flagsState.generation, flags);
+    const next = advanceGeneration(this.flagsState.hash, this.flagsState.generation, {
+      flags,
+      invalidation: this.flagInvalidation,
+    });
     const changed = next.hash !== this.flagsState.hash && this.flagsState.hash !== '';
     this.flagsState = next;
     this.cachedFlags = flags;
@@ -737,7 +746,11 @@ export class T7aController {
       ...(context.fakeRequest ? { fakeRequest: encodeFakeRequest(context.fakeRequest) } : {}),
     };
     const taskId = String((taskInstance as Obj).id ?? '');
-    const executionMs = researchExecutionBudgetMs(taskType, this.config.deadlineMs);
+    const override =
+      !(taskInstance as Obj).schedule && typeof (taskInstance as Obj).timeoutOverride === 'string'
+        ? String((taskInstance as Obj).timeoutOverride)
+        : undefined;
+    const executionMs = researchExecutionBudgetMs(taskType, this.config.deadlineMs, override);
     const dispatch = async (phase: 'run' | 'cleanup') => {
       const t0 = performance.now();
       if (taskId) {

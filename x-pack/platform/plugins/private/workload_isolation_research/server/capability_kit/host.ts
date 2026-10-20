@@ -72,6 +72,8 @@ interface Execution {
   startedAt?: number;
   readonly dispatchedAt: number;
   executionStarted: boolean;
+  /** Bootstrap + rule budget + one cancel grace. Hard stop cannot pass this. */
+  absoluteCapAt?: number;
   readonly chains: Map<string, Promise<void>>;
   /** Main-side per-run signal handed to bindings so in-flight main work can stop too. */
   readonly hostAbort: AbortController;
@@ -461,17 +463,20 @@ export class ExecutionHost {
         execution.options.bootstrapDeadlineMs === undefined
       )
         return;
+      const now = Date.now();
+      const bootstrapEnds = execution.dispatchedAt + execution.options.bootstrapDeadlineMs;
+      if (now > bootstrapEnds) {
+        execution.absoluteCapAt = bootstrapEnds;
+        void this.terminate(execution, 'deadline');
+        return;
+      }
       execution.executionStarted = true;
       if (execution.timer) clearTimeout(execution.timer);
-      const now = Date.now();
       if (execution.options.taskId)
         this.options.onExecutionStart?.(execution.options.taskId, now);
       const grace = execution.options.abortGraceMs ?? this.options.abortGraceMs ?? 250;
-      const cap =
-        execution.dispatchedAt +
-        execution.options.bootstrapDeadlineMs +
-        execution.options.deadlineMs +
-        grace;
+      const cap = bootstrapEnds + execution.options.deadlineMs + grace;
+      execution.absoluteCapAt = cap;
       this.armDeadline(execution, Math.min(now + execution.options.deadlineMs, cap));
       return;
     }
@@ -724,8 +729,13 @@ export class ExecutionHost {
         resolveTermination();
         this.dispatch(execution.options.workloadClass);
       };
-      const grace =
+      const requested =
         reason === 'crash' ? 0 : execution.options.abortGraceMs ?? this.options.abortGraceMs ?? 250;
+      const capRemaining =
+        execution.absoluteCapAt === undefined
+          ? requested
+          : Math.max(0, execution.absoluteCapAt - Date.now());
+      const grace = Math.min(requested, capRemaining);
       if (grace > 0 && reason !== 'crash') {
         const original = reason === 'cancelled' ? originalAbortReason(execution) : undefined;
         const packet: Packet = {

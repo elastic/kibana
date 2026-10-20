@@ -207,7 +207,14 @@ export const consumeCollateralReschedule = (
 /** Island boot is inside the claim, not the rule timeout. Cold boot measured ~4s. */
 export const RESEARCH_BOOTSTRAP_DEADLINE_MS = 30_000;
 
+/** Main's rolling recovery window. A persisted reclaim must not outlive this. */
+export const RESEARCH_RECOVERY_CAP_MS = 5 * 60 * 1000;
+
+/** Delay Task Manager uses when no research lease is armed yet. */
+export const RESEARCH_RETRY_INTERVAL_MS = 60_000;
+
 interface ResearchLease {
+  readonly taskType: string;
   readonly claimedAt: number;
   readonly bootstrapMs: number;
   readonly executionMs: number;
@@ -216,15 +223,19 @@ interface ResearchLease {
 
 const leases = new Map<string, ResearchLease>();
 
-/** Replaces any previous lease for this task. The rule budget is not running yet. */
+/**
+ * Arms a lease once. A later call from the worker stub must not reset the claim clock.
+ */
 export const armResearchLease = (lease: {
   readonly taskId: string;
+  readonly taskType?: string;
   readonly claimedAt: number;
   readonly bootstrapMs: number;
   readonly executionMs: number;
 }): void => {
-  if (!lease.taskId) return;
+  if (!lease.taskId || leases.has(lease.taskId)) return;
   leases.set(lease.taskId, {
+    taskType: lease.taskType ?? '',
     claimedAt: lease.claimedAt,
     bootstrapMs: lease.bootstrapMs,
     executionMs: lease.executionMs,
@@ -256,15 +267,92 @@ export const clearResearchLease = (taskId: string): void => {
   leases.delete(taskId);
 };
 
-/** Rule timeout from the task definition, or the caller fallback. */
-export const researchExecutionBudgetMs = (taskType: string, fallbackMs: number): number => {
-  const timeout = researchDefinitionMeta(taskType)?.timeout;
+/**
+ * Rule timeout. An ad-hoc task with `timeoutOverride` uses that duration.
+ * A scheduled task uses the definition timeout.
+ */
+export const researchExecutionBudgetMs = (
+  taskType: string,
+  fallbackMs: number,
+  timeoutOverride?: string
+): number => {
+  const timeout =
+    timeoutOverride && isInterval(timeoutOverride)
+      ? timeoutOverride
+      : researchDefinitionMeta(taskType)?.timeout;
   if (!timeout || !isInterval(timeout)) return fallbackMs;
   try {
     return parseIntervalAsMillisecond(timeout);
   } catch {
     return fallbackMs;
   }
+};
+
+const enabledClass = (taskType: string): ResearchExecutionClass | undefined =>
+  classes.find((item) => (item.enabled?.() ?? true) && item.taskTypes(taskType));
+
+/**
+ * Claim-time retryAt for a routed task. Arms the lease before the document is
+ * visible as running. The hold is bootstrap plus the rule budget, and never
+ * longer than {@link RESEARCH_RECOVERY_CAP_MS}.
+ */
+export const researchClaimRetryAt = (
+  task: {
+    readonly id: string;
+    readonly taskType: string;
+    readonly schedule?: unknown;
+    readonly timeoutOverride?: string | null;
+  },
+  now = Date.now()
+): Date | undefined => {
+  if (!enabledClass(task.taskType)) return undefined;
+  const executionMs = researchExecutionBudgetMs(
+    task.taskType,
+    0,
+    task.schedule ? undefined : task.timeoutOverride ?? undefined
+  );
+  if (!executionMs) return undefined;
+  armResearchLease({
+    taskId: task.id,
+    taskType: task.taskType,
+    claimedAt: now,
+    bootstrapMs: RESEARCH_BOOTSTRAP_DEADLINE_MS,
+    executionMs,
+  });
+  const hold = Math.min(RESEARCH_BOOTSTRAP_DEADLINE_MS + executionMs, RESEARCH_RECOVERY_CAP_MS);
+  return new Date(now + hold);
+};
+
+/**
+ * Document retryAt while the lease is held. After execution_start this includes
+ * one cancel grace, still capped at the recovery window.
+ */
+export const researchPersistedRetryAt = (taskId: string, now = Date.now()): Date | undefined => {
+  const lease = leases.get(taskId);
+  if (!lease) return undefined;
+  const grace =
+    lease.executionStartedAt === undefined ? 0 : resolveCancelGraceMs(lease.taskType, 0);
+  const target =
+    lease.executionStartedAt === undefined
+      ? lease.claimedAt + lease.bootstrapMs + lease.executionMs
+      : lease.executionStartedAt + lease.executionMs + grace;
+  return new Date(Math.min(target, now + RESEARCH_RECOVERY_CAP_MS));
+};
+
+/** 0 when the claim already armed a lease, otherwise Task Manager's 60s interval. */
+export const researchFirstRetryDelayMs = (taskId: string): number =>
+  researchExpiration(taskId) ? 0 : RESEARCH_RETRY_INTERVAL_MS;
+
+/**
+ * Attempts written back after a failure. A collateral loss refunds one, up to the cap.
+ */
+export const researchPersistedAttempts = (
+  taskId: string,
+  attempts: number,
+  error: unknown
+): number => {
+  const collateral = consumeCollateralReschedule(taskId, error);
+  return collateral.refunded ? Math.max(attempts - 1, 0) : attempts;
 };
 
 /** Creates the task runner. An execution class wins, then the legacy override, then the real runner. */
