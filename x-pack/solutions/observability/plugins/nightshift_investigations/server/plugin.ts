@@ -28,6 +28,7 @@ import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigati
 import type { NightshiftInvestigationsConfig } from './config';
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
+import { createIsNightshiftEnabled } from './is_nightshift_enabled';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
@@ -148,6 +149,8 @@ export class NightshiftInvestigationsPlugin
       new InvestigationLocatorDefinition()
     );
     registerInvestigationsWorkflowTriggers(plugins.workflowsExtensions);
+    const isNightshiftEnabled = createIsNightshiftEnabled(core.getStartServices);
+    plugins.alerting?.enableAlertStatusChanged({ isEnabled: isNightshiftEnabled });
     const telemetry = setupNightshiftTelemetry({
       analytics: core.analytics,
       logger: this.logger.get('telemetry'),
@@ -265,11 +268,12 @@ export class NightshiftInvestigationsPlugin
           getDeps: () => ({ actions: this.actionsStart }),
           logger: sandboxLogger.get('connector_credentials'),
         });
+        const outputRedactionLogger = sandboxLogger.get('output_redaction');
         const redaction = {
           getOutputRedactor: createSandboxOutputRedactorProvider({
             getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
           }),
-          logger: sandboxLogger.get('output_redaction'),
+          logger: outputRedactionLogger,
         };
         const availability = createSandboxToolAvailability({
           getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),

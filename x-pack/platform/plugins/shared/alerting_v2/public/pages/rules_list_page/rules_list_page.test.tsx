@@ -9,8 +9,9 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor, within, act } from '@testing-library/react';
 import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import { contentListQueryClient } from '@kbn/content-list-provider';
-import { ListPageTestProviders } from '../../test_utils/test_providers';
+import { createMockLocators, ListPageTestProviders } from '../../test_utils/test_providers';
 import { CREATE_WITH_AGENT_INITIAL_PROMPT } from '../../constants';
+import { getRulesLocation } from '../../locator_get_location';
 import type { RuleApiResponse } from '../../services/rules_api';
 import { RulesListPage } from './rules_list_page';
 
@@ -270,28 +271,51 @@ describe('RulesListPage', () => {
     resolveRules();
   });
 
-  it('marks the sequence builder entry point as experimental', async () => {
-    renderPage();
-    await waitForRules();
-
-    const overflowButton = screen.queryByTestId('app-menu-overflow-button');
-    if (overflowButton) {
-      fireEvent.click(overflowButton);
-    }
-
-    await waitFor(() =>
-      expect(screen.getByTestId('createSequenceRuleButton')).toHaveTextContent(
-        'Build a sequence (Experimental)'
-      )
-    );
-  });
-
-  it('hides the sequence builder entry point when Alerting V2 experimental features are disabled', async () => {
-    mockAlertingV2ExperimentalFeaturesEnabled = false;
+  it('does not render a sequence builder entry point in the header', async () => {
     renderPage();
     await waitForRules();
 
     expect(screen.queryByTestId('createSequenceRuleButton')).not.toBeInTheDocument();
+  });
+
+  it('shows an experimental "Build a sequence" card in the create rule flyout', async () => {
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    const card = screen.getByTestId('createSequenceRuleCard');
+    expect(card).toHaveTextContent('Build a sequence');
+    expect(screen.getByTestId('createSequenceRuleExperimentalBadge')).toHaveTextContent(
+      'Experimental'
+    );
+  });
+
+  it('closes the flyout and navigates to the sequence builder when the card is clicked', async () => {
+    const locators = createMockLocators();
+    render(
+      <ListPageTestProviders locators={locators}>
+        <RulesListPage />
+      </ListPageTestProviders>
+    );
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+    fireEvent.click(screen.getByTestId('createSequenceRuleCard'));
+
+    expect(screen.queryByTestId('ruleCreateOptionsFlyout')).not.toBeInTheDocument();
+    expect(locators.rulesLocators.navigateSync).toHaveBeenCalledWith({ page: 'sequence_create' });
+  });
+
+  it('hides the sequence card when Alerting V2 experimental features are disabled', async () => {
+    mockAlertingV2ExperimentalFeaturesEnabled = false;
+    renderPage();
+    await waitFor(() => expect(screen.getByTestId('createRuleButton')).toBeInTheDocument());
+
+    fireEvent.click(screen.getByTestId('createRuleButton'));
+
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+    expect(screen.queryByTestId('createSequenceRuleCard')).not.toBeInTheDocument();
   });
 
   it('renders loading state', async () => {
@@ -523,6 +547,42 @@ describe('RulesListPage', () => {
     });
   });
 
+  it('passes the template from a ?q=template:"<id>" link to findItems', async () => {
+    render(
+      <ListPageTestProviders initialEntries={['/?q=template:"nginx-error-rate"']}>
+        <RulesListPage />
+      </ListPageTestProviders>
+    );
+    await waitForRules();
+
+    await waitFor(() => {
+      expect(lastFindItemsArgs().filters.template).toMatchObject({
+        include: ['nginx-error-rate'],
+      });
+    });
+  });
+
+  it.each(['kubernetes_otel-1.2.0-pod.crashloop', 'with space/and:colon', 'quote"and\\slash'])(
+    'applies the template filter from the locator link for template id %s',
+    async (templateId) => {
+      const { path } = getRulesLocation({
+        derivedFromTemplateId: templateId,
+        host: { app: 'alerting', pathPrefix: '/' },
+      });
+
+      render(
+        <ListPageTestProviders initialEntries={[path]}>
+          <RulesListPage />
+        </ListPageTestProviders>
+      );
+      await waitForRules();
+
+      await waitFor(() => {
+        expect(lastFindItemsArgs().filters.template).toMatchObject({ include: [templateId] });
+      });
+    }
+  );
+
   it('uses name ascending as the default sort', async () => {
     renderPage();
     await waitForRules();
@@ -720,9 +780,7 @@ describe('RulesListPage', () => {
     expect(
       screen.getByTestId('createWithAgentButton').querySelector('[data-euiicon-type="sparkles"]')
     ).toBeInTheDocument();
-    expect(screen.getByTestId('createWithAgentButton')).toHaveTextContent(
-      'Create with agent (Experimental)'
-    );
+    expect(screen.getByTestId('createWithAgentButton')).toHaveTextContent('Create with agent');
 
     fireEvent.click(screen.getByTestId('createWithAgentButton'));
 
@@ -732,18 +790,20 @@ describe('RulesListPage', () => {
     });
   });
 
-  it('hides all Create with AI Agent entry points when Alerting V2 experimental features are disabled', async () => {
+  it('still shows Create with AI Agent entry points when experimental features are disabled', async () => {
+    mockExperimentalFeaturesEnabled = false;
     mockAlertingV2ExperimentalFeaturesEnabled = false;
     resolveRules([], 0);
 
     renderPage();
 
     await waitFor(() => expect(screen.getByTestId('createEsqlRuleCard')).toBeInTheDocument());
-    expect(screen.queryByTestId('createWithAgentCard')).not.toBeInTheDocument();
+    expect(screen.getByTestId('createWithAgentCard')).toBeInTheDocument();
     expect(screen.queryByTestId('createWithAgentExperimentalBadge')).not.toBeInTheDocument();
   });
 
-  it('hides the populated-list Create with AI Agent menu option when Alerting V2 experimental features are disabled', async () => {
+  it('still shows the populated-list Create with AI Agent menu option when experimental features are disabled', async () => {
+    mockExperimentalFeaturesEnabled = false;
     mockAlertingV2ExperimentalFeaturesEnabled = false;
     renderPage();
 
@@ -753,12 +813,11 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('createRuleButton-secondary-button'));
 
     await waitFor(() => expect(screen.getByTestId('createEsqlRuleButton')).toBeInTheDocument());
-    expect(screen.queryByTestId('createWithAgentButton')).not.toBeInTheDocument();
+    expect(screen.getByTestId('createWithAgentButton')).toBeEnabled();
   });
 
   it('disables the split button agent option (does not hide it) when agent builder is not available', async () => {
     mockAgentBuilderShow = false;
-    mockExperimentalFeaturesEnabled = false;
 
     renderPage();
     await waitFor(() =>
@@ -781,7 +840,6 @@ describe('RulesListPage', () => {
 
   it('disables the empty state agent card (does not hide it) when agent builder is not available', async () => {
     mockAgentBuilderShow = false;
-    mockExperimentalFeaturesEnabled = false;
     resolveRules([], 0);
 
     renderPage();

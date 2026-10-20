@@ -412,7 +412,9 @@ const scoreResolutionPage = async ({
     { requestTimeout: RISK_SCORING_REQUEST_TIMEOUT }
   );
   return {
-    parsedScores: (esqlResponse.values ?? []).map(parseEsqlResolutionScoreRow(alertsIndex)),
+    parsedScores: (esqlResponse.values ?? []).map(
+      parseEsqlResolutionScoreRow(alertsIndex, sampleSize)
+    ),
     esqlRows: esqlResponse.values?.length ?? 0,
   };
 };
