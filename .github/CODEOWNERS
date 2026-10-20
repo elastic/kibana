@@ -1381,6 +1381,7 @@ x-pack/solutions/observability/packages/utils-server @elastic/observability-ui
 x-pack/solutions/observability/plugins/apm @elastic/obs-signals-traces-team
 x-pack/solutions/observability/plugins/apm_data_access @elastic/obs-signals-traces-team
 x-pack/solutions/observability/plugins/client_apps @elastic/apm-agent-approvers
+x-pack/solutions/observability/plugins/digital_experience @elastic/obs-signals-rum-team
 x-pack/solutions/observability/plugins/entity_inventory @elastic/obs-signals-metrics-team
 x-pack/solutions/observability/plugins/exploratory_view @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/infra @elastic/obs-signals-metrics-team
@@ -1815,9 +1816,6 @@ x-pack/solutions/observability/plugins/observability/server/lib/esql_extensions 
 /x-pack/solutions/observability/plugins/observability/test/scout_nightshift_investigations @elastic/nightshift
 
 # Observability AI Assistant
-/x-pack/platform/test/serverless/api_integration/test_suites/data_usage @elastic/kibana-management
-/x-pack/platform/test/serverless/functional/test_suites/data_usage @elastic/kibana-management
-/x-pack/platform/test/serverless/functional/page_objects/svl_data_usage.ts @elastic/kibana-management
 /x-pack/solutions/observability/test/observability_ai_assistant_functional @elastic/nightshift-context-and-research-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/ai_assistant @elastic/nightshift-context-and-research-team
 /x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/stateful/oblt.ai_assistant.index.ts @elastic/nightshift-context-and-research-team

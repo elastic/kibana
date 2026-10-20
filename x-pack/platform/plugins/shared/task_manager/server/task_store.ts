@@ -440,6 +440,7 @@ export class TaskStore {
       return await this.apiKeyStrategy.grantApiKeys(taskInstances, request, this.security, {
         ...(options?.onEsKey === true ? { onEsKey: true } : {}),
         ...(options?.cloneApiKey === true ? { cloneApiKey: true } : {}),
+        ...(options?.refreshApiKey !== undefined ? { refreshApiKey: options.refreshApiKey } : {}),
         onApiKeyCreated: (target) => createdTargets.push(target),
       });
     } catch (e) {

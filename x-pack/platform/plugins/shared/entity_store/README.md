@@ -31,7 +31,7 @@ Each process keeps its own cursor, status and error on the engine descriptor (`l
 5. Per-type overrides (`logExtractionConfig`), set with `logExtraction` on internal `PUT /internal/security/entity_store/{entityType}`
 6. Non-priority overrides (`nonPriorityLogExtractionConfig`, incl. `samplingRate`), set with `nonPriorityOverride` on the same route
 
-`null` clears a field, so it falls back to the layer below. Arrays such as `additionalIndexPatterns` replace the lower layer, they do not merge. For non-priority, layers 4 and 5 cannot set the volume fields (`NON_PRIORITY_EXCLUSIVE_FIELDS`); only layer 6 can.
+`null` clears a field, so it falls back to the layer below. Arrays such as `additionalIndexPatterns` replace the lower layer, they do not merge. For non-priority, layers 4 and 5 cannot set the cap behaviour (`NON_PRIORITY_EXCLUSIVE_FIELDS`); only layer 6 can. Every other field, including the volume fields (`maxLogsPerPage`, `maxTimeWindowSize`, `maxLogsPerWindow`, `docsLimit`), is shared and reaches non-priority from layers 4/5 like any other config field; layer 6 remains available as a ceiling for an operator who wants non-priority to diverge intentionally.
 
 Pagination, sampling, the volume cap and crash recovery are described in [server/domain/logs_extraction/PAGINATION.md](server/domain/logs_extraction/PAGINATION.md).
 
