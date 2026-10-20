@@ -90,6 +90,7 @@ import {
 } from '../components/home/needs_attention_tiles/hooks';
 import { RISK_MOVER_MIN_SCORE_CHANGE } from '../components/home/needs_attention_tiles/queries/risk_history';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
+import { HuntWithAiButton } from '../components/home/hunt_with_ai_button';
 import { getEntityAnalyticsNewHomeScopeId } from '../common/alert_time_range_overrides';
 import {
   MAX_TILE_FILTER_ENTITY_IDS,
@@ -1030,6 +1031,12 @@ export const EntityAnalyticsNewHomePage: React.FC = () => {
               padding-inline: ${euiTheme.size.base};
             `}
           >
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <HuntWithAiButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
             <SignalCards
               activeTile={activeTile}
               cards={signalCards}
