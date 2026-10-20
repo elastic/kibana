@@ -88,7 +88,8 @@ const getIndexedSpaceIds = async (
     });
 
     const aggregation = response.aggregations?.space_ids;
-    const buckets = (aggregation?.buckets ?? []) as estypes.AggregationsCompositeBucket[];
+    const aggregationBuckets = aggregation?.buckets;
+    const buckets = Array.isArray(aggregationBuckets) ? aggregationBuckets : [];
     spaceIds.push(...buckets.map(({ key }) => String(key.space_id)));
     after = aggregation?.after_key;
   } while (after != null && !signal.aborted);
