@@ -224,7 +224,8 @@ export type DispatcherHaltReason =
   | 'no_alerts'
   | 'no_actions'
   | 'aborted'
-  | 'inline_stats_too_large';
+  | 'inline_stats_too_large'
+  | 'commit_failed';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }

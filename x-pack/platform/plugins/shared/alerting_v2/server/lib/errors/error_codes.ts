@@ -362,13 +362,16 @@ export const ALERTING_LOG_CODES = {
   /** Scheduling a workflow execution for a dispatch group failed. */
   DISPATCH_WORKFLOW_SCHEDULE_FAILED: 'DISPATCH_WORKFLOW_SCHEDULE_FAILED',
   /**
-   * Writing the `.alert-actions` records of a dispatch commit failed, so
-   * scheduling stopped. The groups of that commit were dispatched but not
-   * recorded, and the next tick dispatches them again.
+   * Writing the `.alert-actions` records of a dispatch commit failed (the
+   * request threw, or Elasticsearch rejected every record), so scheduling
+   * stopped and the tick halts `commit_failed` with the watermark held. The
+   * groups of that commit were dispatched but not recorded, and the next tick
+   * dispatches them again.
    */
   DISPATCH_COMMIT_FAILED: 'DISPATCH_COMMIT_FAILED',
   /**
-   * Elasticsearch rejected some records of a dispatch commit. Their series are
+   * Elasticsearch rejected some, but not all, records of a dispatch commit;
+   * scheduling continues. Their series are
    * fetched again on the next tick, and a group whose `notified` record was
    * rejected can be dispatched again.
    */

@@ -1338,7 +1338,7 @@ describe('DispatcherService', () => {
       ]);
     });
 
-    it('stops dispatching and fails the tick when a commit cannot be written', async () => {
+    it('stops dispatching and holds the watermark when a commit cannot be written', async () => {
       const bulkScheduleWorkflow = jest.fn();
       const logEventSpy = jest.spyOn(mockEventLogService, 'logEvent');
       const { loggerService, mockLogger } = createLoggerService();
@@ -1347,10 +1347,10 @@ describe('DispatcherService', () => {
       scheduleAll(bulkScheduleWorkflow);
       mockTickQueries(alerts, []);
 
-      await expect(service.run({ eventWatermark, taskId: 'task-1' })).rejects.toThrow(
-        'es unavailable'
-      );
+      const result = await service.run({ eventWatermark, stuckTicks: 2, taskId: 'task-1' });
 
+      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
+      expect(result.nextStuckTicks).toBe(3);
       expect(bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
       const dispatchedEvents = logEventSpy.mock.calls.filter(
         ([event]) => event?.event?.action === 'dispatched'
@@ -1359,12 +1359,9 @@ describe('DispatcherService', () => {
       expect(dispatchedEvents[0][0]?.kibana?.alerting_v2?.dispatcher?.alert_count).toBe(
         DISPATCH_CHUNK_SIZE
       );
-      expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.anything(),
-        expect.objectContaining({
-          labels: expect.objectContaining({ code: 'DISPATCH_COMMIT_FAILED' }),
-        })
-      );
+      const errorCodes = mockLogger.error.mock.calls.map(([, meta]) => meta?.labels?.code);
+      expect(errorCodes.filter((code) => code === 'DISPATCH_COMMIT_FAILED')).toHaveLength(1);
+      expect(errorCodes).not.toContain('DISPATCH_STEP_FAILED');
     });
   });
 
@@ -1405,26 +1402,30 @@ describe('DispatcherService', () => {
       };
     }
 
-    it('nextStuckTicks increments when the watermark does not advance', async () => {
-      const { storageService: noopStorage } = createStorageService();
-      const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
+    it.each<DispatcherHaltReason>(['aborted', 'commit_failed'])(
+      'nextStuckTicks increments when the watermark does not advance (halt_reason: %s)',
+      async (haltReason) => {
+        const { storageService: noopStorage } = createStorageService();
+        const eventWatermark = new Date('2026-01-22T07:30:00.000Z');
 
-      // Stuck pipeline — alerts present but the tick aborted → watermark won't advance
-      const mockPipeline = buildStuckPipeline([
-        createAlert({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' }),
-      ]);
-      const service = new DispatcherService(
-        mockPipeline,
-        noopStorage,
-        createLoggerService().loggerService
-      );
+        // Stuck pipeline — alerts present but the tick halted early → watermark won't advance
+        const mockPipeline = buildStuckPipeline(
+          [createAlert({ alert_id: 'e1', last_event_timestamp: '2026-01-22T07:31:00.000Z' })],
+          haltReason
+        );
+        const service = new DispatcherService(
+          mockPipeline,
+          noopStorage,
+          createLoggerService().loggerService
+        );
 
-      const result = await service.run({ eventWatermark, stuckTicks: 4, taskId: 'task-1' });
+        const result = await service.run({ eventWatermark, stuckTicks: 4, taskId: 'task-1' });
 
-      // Watermark did not advance → stuckTicks was 4 → nextStuckTicks = 5
-      expect(result.nextStuckTicks).toBe(5);
-      expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
-    });
+        // Watermark did not advance → stuckTicks was 4 → nextStuckTicks = 5
+        expect(result.nextStuckTicks).toBe(5);
+        expect(result.nextWatermark.toISOString()).toBe(eventWatermark.toISOString());
+      }
+    );
 
     it('nextStuckTicks resets to 0 when watermark advances', async () => {
       const { storageService: noopStorage } = createStorageService();

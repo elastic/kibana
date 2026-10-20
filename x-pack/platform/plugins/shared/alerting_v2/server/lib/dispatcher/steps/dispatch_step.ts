@@ -52,6 +52,7 @@ import { withDispatcherSpan } from '../with_dispatcher_span';
 import { DISPATCH_FAILURE_REASONS, type DispatchFailureReason } from './constants';
 import { WorkflowsManagementApiToken } from './dispatch_step_tokens';
 import { toNotifiedActions } from './utils/action_documents';
+import { CommitFailedError } from './utils/commit_failed_error';
 import { emitExecutionHistory } from './utils/execution_history';
 import { SeriesLedger } from './utils/series_ledger';
 
@@ -169,6 +170,11 @@ export class DispatchStep implements DispatcherStep {
           logger
         );
       }
+    } catch (err) {
+      if (err instanceof CommitFailedError) {
+        return { type: 'halt', reason: 'commit_failed' };
+      }
+      throw err;
     } finally {
       emitExecutionHistory({
         eventLogService: this.eventLogService,
@@ -192,8 +198,9 @@ export class DispatchStep implements DispatcherStep {
 
   /**
    * Writes the records the latest chunk made safe. Runs even after the tick signal fired: the
-   * workflows they describe are already scheduled. A failed write rethrows to stop scheduling:
-   * every workflow scheduled after it would also lack its record and be dispatched again next tick.
+   * workflows they describe are already scheduled. A write that records nothing throws
+   * `CommitFailedError` to stop scheduling: every workflow scheduled after it would also lack its
+   * record and be dispatched again next tick.
    */
   private async commit(docs: AlertActionDocument[], logger: LoggerServiceContract): Promise<void> {
     if (docs.length === 0) {
@@ -207,6 +214,9 @@ export class DispatchStep implements DispatcherStep {
           docs,
         })
       );
+      if (errors.length === docs.length) {
+        throw new Error(`${errors[0].code}: ${errors[0].message}`);
+      }
       if (errors.length > 0) {
         logger.warn({
           code: ALERTING_LOG_CODES.DISPATCH_COMMIT_DEGRADED,
@@ -224,7 +234,7 @@ export class DispatchStep implements DispatcherStep {
           `Failed to record ${docs.length} alert action records; scheduling stopped. ` +
           `Groups dispatched in this chunk are dispatched again next tick. ${error.message}`,
       });
-      throw error;
+      throw new CommitFailedError(error);
     }
   }
 

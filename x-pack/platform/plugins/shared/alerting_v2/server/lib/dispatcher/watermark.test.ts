@@ -80,6 +80,17 @@ describe('computeNextWatermark', () => {
     });
   });
 
+  describe('commit_failed halt', () => {
+    it('does not advance the watermark', () => {
+      const result = computeNextWatermark({
+        input: BASE_INPUT,
+        result: makeResult({ completed: false, haltReason: 'commit_failed' }),
+      });
+
+      expect(result.toISOString()).toBe('2026-01-22T07:30:00.000Z');
+    });
+  });
+
   describe('no_alerts halt', () => {
     it('advances to windowEnd', () => {
       const result = computeNextWatermark({

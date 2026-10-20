@@ -1356,20 +1356,20 @@ describe('DispatchStep', () => {
     });
 
     describe('commit failures', () => {
-      it('stops scheduling, emits history and rethrows when a commit fails', async () => {
+      it('stops scheduling, emits history and halts commit_failed when a commit throws', async () => {
         mockStorageService.bulkIndexDocs.mockRejectedValueOnce(new Error('es unavailable'));
 
-        await expect(
-          createStep().execute(
-            createDispatcherPipelineState({
-              dispatch: groupsFor(DISPATCH_CHUNK_SIZE + 1),
-              policies,
-            }),
-            loggerService
-          )
-        ).rejects.toThrow('es unavailable');
+        const result = await createStep().execute(
+          createDispatcherPipelineState({
+            dispatch: groupsFor(DISPATCH_CHUNK_SIZE + 1),
+            policies,
+          }),
+          loggerService
+        );
 
+        expect(result).toEqual({ type: 'halt', reason: 'commit_failed' });
         expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
+        expect(mockLogger.error).toHaveBeenCalledTimes(1);
         expect(mockLogger.error).toHaveBeenCalledWith(
           expect.anything(),
           expect.objectContaining({
@@ -1380,6 +1380,57 @@ describe('DispatchStep', () => {
         expect(
           mockEventLogger.logEvent.mock.calls[0][0]?.kibana?.alerting_v2?.dispatcher
         ).toMatchObject({ action_group_count: DISPATCH_CHUNK_SIZE });
+      });
+
+      it('schedules nothing and halts commit_failed when the first commit throws', async () => {
+        mockStorageService.bulkIndexDocs.mockRejectedValueOnce(new Error('es unavailable'));
+
+        const result = await createStep().execute(
+          createDispatcherPipelineState({
+            dispatch: [groupFor(0)],
+            suppressed: [{ ...alertFor(900), reason: 'ack' }],
+            dispatchable: [alertFor(0)],
+            policies,
+          }),
+          loggerService
+        );
+
+        expect(result).toEqual({ type: 'halt', reason: 'commit_failed' });
+        expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
+        expect(mockStorageService.bulkIndexDocs).toHaveBeenCalledTimes(1);
+      });
+
+      it('stops scheduling and halts commit_failed when every record of a commit is rejected', async () => {
+        mockStorageService.bulkIndexDocs.mockImplementationOnce(async ({ docs }) => ({
+          attempted: docs.length,
+          docs: [],
+          errors: docs.map((document) => ({
+            code: 'cluster_block_exception',
+            message: 'index blocked',
+            index: '.alert-actions',
+            document,
+          })),
+        }));
+
+        const result = await createStep().execute(
+          createDispatcherPipelineState({ dispatch: groupsFor(DISPATCH_CHUNK_SIZE + 1), policies }),
+          loggerService
+        );
+
+        expect(result).toEqual({ type: 'halt', reason: 'commit_failed' });
+        expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(1);
+        expect(mockLogger.error).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            labels: expect.objectContaining({ code: ALERTING_LOG_CODES.DISPATCH_COMMIT_FAILED }),
+          })
+        );
+        expect(mockLogger.warn).not.toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            labels: expect.objectContaining({ code: ALERTING_LOG_CODES.DISPATCH_COMMIT_DEGRADED }),
+          })
+        );
       });
 
       it('logs rejected records and keeps dispatching', async () => {

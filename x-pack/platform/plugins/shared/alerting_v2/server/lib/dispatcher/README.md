@@ -67,6 +67,7 @@ The window caps **event** rows only. Action rows are not upper-bounded, so `last
 | Truncated (`ESQL_QUERY_ROW_LIMIT` rows returned) | `last_event_timestamp` of the last returned alert   |
 | `no_alerts` or `no_actions` halt                | `windowEnd`                                         |
 | `aborted` halt                                  | `eventWatermark` (no advance)                       |
+| `commit_failed` halt                            | `eventWatermark` (no advance)                       |
 | `inline_stats_too_large` halt                   | `eventWatermark` (no advance)                       |
 | Normal completion                               | `windowEnd`                                         |
 
@@ -219,7 +220,7 @@ Step order is defined in `setup/bind_dispatcher_executor.ts`.
 | 10  | `BuildGroupsStep`            | Build `ActionGroup` objects based on policy grouping settings.                                   |
 | 11  | `ApplyAlreadyNotifiedStep`   | Move the alerts whose `notified` record (per group and alert) covers their current content out of their groups, into `alreadyNotified`. |
 | 12  | `ApplyThrottlingStep`        | Compare candidate groups with action history and split them into dispatch vs throttled.          |
-| 13  | `DispatchStep`               | Perform delivery side effects for eligible groups, commit the `.alert-actions` records each chunk made safe, and emit per-policy `dispatched` / `throttled` / `unmatched` / `dispatch_failed` event-log summaries once. Halts `aborted` while groups are left unattempted. |
+| 13  | `DispatchStep`               | Perform delivery side effects for eligible groups, commit the `.alert-actions` records each chunk made safe, and emit per-policy `dispatched` / `throttled` / `unmatched` / `dispatch_failed` event-log summaries once. Halts `commit_failed` when a commit cannot be written, and `aborted` while groups are left unattempted. |
 
 ### Suppression queries
 
@@ -253,6 +254,7 @@ An aggregated group keeps the same id from tick to tick and gets one `notified` 
 | `no_alerts`              | Nothing relevant was found for this run; watermark advances to `windowEnd`.                                                                                      |
 | `no_actions`             | The run produced no stored outcomes after evaluation; watermark advances to `windowEnd`.                                                                         |
 | `aborted`                | The pipeline was stopped early by the TM signal or the soft deadline (`TICK_DEADLINE_MS`), or `DispatchStep` stopped with groups left unattempted. The watermark does not advance; the records already committed keep the progress. |
+| `commit_failed`          | `DispatchStep` could not write a commit's `.alert-actions` records (the bulk request threw, or ES rejected every record) and stopped scheduling. Logged once as `DISPATCH_COMMIT_FAILED`. Watermark held; tick counts toward stuck-tick limit (see below). |
 | `inline_stats_too_large` | ES rejected the INLINE STATS pre-fetch query with `illegal_argument_exception: sub-plan execution results too large`. Watermark held; tick counts toward stuck-tick limit (see below). |
 
 ## Watermark contract
@@ -292,7 +294,7 @@ Alerts in the skipped window are **not dispatched** (accepted data loss). Once t
 
 ## Delivery guarantees and limits
 
-- Delivery is effectively at-least-once. `DispatchStep` records each chunk right after it returns, so an abort re-delivers nothing; a crash, or a commit write that fails, re-delivers at most the chunk in flight. A failed commit write stops scheduling for the rest of the tick.
+- Delivery is effectively at-least-once. `DispatchStep` records each chunk right after it returns, so an abort re-delivers nothing; a crash, or a commit write that fails, re-delivers at most the chunk in flight. A failed commit write stops scheduling for the rest of the tick, which halts `commit_failed`. When the first commit (the series with no group to dispatch) fails, nothing is scheduled. A commit with only some records rejected logs `DISPATCH_COMMIT_DEGRADED` and scheduling continues.
 - An aborted tick keeps its progress: concluded series get their `fire` / `suppress` / `unmatched` records, so the next scan does not return them, and `ApplyAlreadyNotifiedStep` drops the (group, alert) pairs whose `notified` record covers their content.
 - Commits use `refresh: false`. The next tick sees them after the `.alert-actions` refresh interval (about 1 s); if it runs first, the last chunk of an aborted tick can be delivered again.
 - Destination handlers should therefore be idempotent.
