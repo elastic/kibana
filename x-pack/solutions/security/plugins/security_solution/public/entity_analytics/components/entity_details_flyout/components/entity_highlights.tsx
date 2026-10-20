@@ -65,8 +65,6 @@ export const EntityHighlightsAccordion: React.FC<{
    * fetching with a placeholder identifier and re-laying out once the record arrives.
    */
   isEntityRecordLoading?: boolean;
-  /** Scope the flyout was opened from; a scope that pins a time range bounds the anomalies in the summary. */
-  scopeId?: string;
 }> = ({
   entityType,
   entityIdentifier,
@@ -74,7 +72,6 @@ export const EntityHighlightsAccordion: React.FC<{
   refetchEntityRecord,
   mode = 'single',
   isEntityRecordLoading = false,
-  scopeId,
 }) => {
   // Degrade gracefully on surfaces that render outside `AssistantProvider` (e.g. the Agent
   // Builder attachment Canvas). The Elastic Assistant–backed summary cannot work without it.
@@ -182,7 +179,6 @@ export const EntityHighlightsAccordion: React.FC<{
     refetchPersistedSummary,
     // Persist only when the user can read the metadata index, otherwise keep it in-session only
     persistSummary: canReadPersistedSummary,
-    scopeId,
   });
 
   // Staleness check — compare stored snapshot against current entity signals.

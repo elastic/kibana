@@ -187,7 +187,6 @@ export const Content = ({
           refetchEntityRecord={refetchEntityRecord}
           mode={mode}
           isEntityRecordLoading={isEntityRecordLoading}
-          scopeId={scopeId}
         />
       )}
       {!noEntityInStore &&

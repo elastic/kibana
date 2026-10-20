@@ -440,59 +440,6 @@ describe('useFetchEntityDetailsHighlights', () => {
     });
   });
 
-  describe('anomaly window', () => {
-    const NOW = new Date('2024-06-15T12:00:00.000Z');
-    beforeEach(() => {
-      jest.useFakeTimers().setSystemTime(NOW);
-    });
-    afterEach(() => {
-      jest.useRealTimers();
-    });
-
-    it('uses the default 30-day lookback when the flyout has no pinned range', async () => {
-      mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
-      mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
-      const { result } = renderHook(() => useFetchEntityDetailsHighlights(mockProps));
-
-      await act(async () => {
-        await result.current.fetchEntityHighlights();
-      });
-
-      expect(mockFetchEntityDetailsHighlights).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            from: NOW.valueOf() - 30 * 24 * 60 * 60 * 1000,
-            to: NOW.valueOf(),
-          }),
-        })
-      );
-    });
-
-    it('uses the pinned time range when opened from the new Entity Analytics home', async () => {
-      mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);
-      mockInferenceOutput.mockResolvedValueOnce(mockSuccessfulInferenceOutput);
-      const { result } = renderHook(() =>
-        useFetchEntityDetailsHighlights({
-          ...mockProps,
-          scopeId: 'entity-analytics-new-entities-table-7d',
-        })
-      );
-
-      await act(async () => {
-        await result.current.fetchEntityHighlights();
-      });
-
-      expect(mockFetchEntityDetailsHighlights).toHaveBeenCalledWith(
-        expect.objectContaining({
-          params: expect.objectContaining({
-            from: NOW.valueOf() - 7 * 24 * 60 * 60 * 1000,
-            to: NOW.valueOf(),
-          }),
-        })
-      );
-    });
-  });
-
   describe('generation baseline', () => {
     it('captures the entity snapshot as the generation baseline on generation', async () => {
       mockFetchEntityDetailsHighlights.mockResolvedValueOnce(mockEntityDetailsResponse);

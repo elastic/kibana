@@ -24,7 +24,6 @@ import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useCurrentUser } from '../../../../common/lib/kibana';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
-import { getScopeFlyoutTimeRangeMs } from '../../../common/scope_time_ranges';
 import {
   buildExecutionContext,
   EA_EXECUTION_CONTEXT_NAMES,
@@ -118,7 +117,6 @@ export const useFetchEntityDetailsHighlights = ({
   refetchPersistedSummary,
   persistSummary,
   mode = 'single',
-  scopeId,
 }: {
   connectorId: string;
   anonymizationFields: AnonymizationFieldResponse[];
@@ -133,8 +131,6 @@ export const useFetchEntityDetailsHighlights = ({
   /** Refetch the persisted summary from the metadata datastream after a new one is saved. */
   refetchPersistedSummary?: () => void;
   persistSummary: boolean;
-  /** Scope the flyout was opened from; a scope that pins a time range bounds the anomalies fed to the summary. */
-  scopeId?: string;
 }) => {
   const { inference } = useKibana().services;
   const { fetchEntityDetailsHighlights, saveEntityAiSummary } = useEntityAnalyticsRoutes();
@@ -187,12 +183,8 @@ export const useFetchEntityDetailsHighlights = ({
     setIsGeneratingSummary(true);
 
     try {
-      // Anomalies feeding the summary use the opener's pinned range when its scope has one
-      // (resolved at generation time so a long-open flyout still gets a fresh window).
-      const flyoutRangeMs = getScopeFlyoutTimeRangeMs(scopeId);
-      const toDate = flyoutRangeMs?.to ?? Date.now();
-      const fromDate =
-        flyoutRangeMs?.from ?? toDate - ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
+      const toDate = Date.now();
+      const fromDate = toDate - ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS * 24 * 60 * 60 * 1000;
       const { summary, replacements, prompt } = await fetchEntityDetailsHighlights({
         params: {
           entityType,
@@ -329,7 +321,6 @@ export const useFetchEntityDetailsHighlights = ({
     entityType,
     entityIdentifier,
     mode,
-    scopeId,
     anonymizationFields,
     connectorId,
     inference,
