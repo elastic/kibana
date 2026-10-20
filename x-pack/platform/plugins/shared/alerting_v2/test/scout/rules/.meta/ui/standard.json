@@ -1,5 +1,5 @@
 {
-  "sha1": "bcaafaae011b6628df832cb63043c34187ce6796",
+  "sha1": "5d60eb178798f150394254af4067f401a65764f9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -162,6 +162,20 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/install_rule_template.spec.ts",
         "line": 64,
         "column": 82
+      }
+    },
+    {
+      "id": "a541e6efd066336-1d2597bde6b013c",
+      "title": "Rule library - install a rule template the rule count links to the rules created from the template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/install_rule_template.spec.ts",
+        "line": 128,
+        "column": 23
       }
     },
     {

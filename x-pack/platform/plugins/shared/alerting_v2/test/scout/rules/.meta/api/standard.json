@@ -1,5 +1,5 @@
 {
-  "sha1": "f4ca2fe9d2b84d46d61d00ae48a11523025da9bb",
+  "sha1": "ca27412b8c6a5c71d961d91d8afcf6910818484d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2468,8 +2468,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 34,
-        "column": 42
+        "line": 35,
+        "column": 5
+      }
+    },
+    {
+      "id": "f98bd3f273330a0-b66932d23696278",
+      "title": "Find rule templates API rule_count: should count the rules created from each template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
+        "line": 62,
+        "column": 97
       }
     },
     {
@@ -2484,8 +2500,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 60,
-        "column": 97
+        "line": 117,
+        "column": 27
       }
     },
     {
@@ -2500,8 +2516,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 79,
-        "column": 9
+        "line": 142,
+        "column": 13
       }
     },
     {
@@ -2516,8 +2532,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 100,
-        "column": 57
+        "line": 161,
+        "column": 65
       }
     },
     {
@@ -2532,8 +2548,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 123,
-        "column": 63
+        "line": 184,
+        "column": 77
       }
     },
     {
@@ -2548,8 +2564,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 139,
-        "column": 25
+        "line": 202,
+        "column": 21
       }
     },
     {
@@ -2564,8 +2580,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 166,
-        "column": 29
+        "line": 227,
+        "column": 67
       }
     },
     {
@@ -2580,8 +2596,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 200,
-        "column": 14
+        "line": 264,
+        "column": 4
       }
     },
     {
@@ -2596,8 +2612,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 234,
-        "column": 28
+        "line": 297,
+        "column": 27
       }
     },
     {
@@ -2612,8 +2628,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 270,
-        "column": 17
+        "line": 332,
+        "column": 55
       }
     },
     {
@@ -2628,8 +2644,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 289,
-        "column": 65
+        "line": 352,
+        "column": 5
       }
     },
     {
@@ -2644,8 +2660,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 317,
-        "column": 13
+        "line": 379,
+        "column": 35
       }
     },
     {
@@ -2660,8 +2676,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 340,
-        "column": 74
+        "line": 402,
+        "column": 16
       }
     },
     {
@@ -2676,8 +2692,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 348,
-        "column": 91
+        "line": 410,
+        "column": 80
       }
     },
     {
@@ -2692,8 +2708,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 358,
-        "column": 5
+        "line": 420,
+        "column": 30
       }
     },
     {
@@ -2708,8 +2724,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 365,
-        "column": 14
+        "line": 430,
+        "column": 11
       }
     },
     {
@@ -2724,8 +2740,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 375,
-        "column": 74
+        "line": 437,
+        "column": 16
       }
     },
     {
@@ -2740,8 +2756,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 386,
-        "column": 25
+        "line": 449,
+        "column": 21
       }
     },
     {
@@ -2756,8 +2772,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rule_templates.spec.ts",
-        "line": 404,
-        "column": 23
+        "line": 465,
+        "column": 38
       }
     },
     {
@@ -2772,7 +2788,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 46,
+        "line": 47,
         "column": 5
       }
     },
@@ -2788,7 +2804,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 59,
+        "line": 60,
         "column": 5
       }
     },
@@ -2804,7 +2820,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 78,
+        "line": 79,
         "column": 49
       }
     },
@@ -2820,7 +2836,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 98,
+        "line": 99,
         "column": 25
       }
     },
@@ -2836,7 +2852,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 113,
+        "line": 114,
         "column": 5
       }
     },
@@ -2852,7 +2868,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 136,
+        "line": 137,
         "column": 41
       }
     },
@@ -2868,7 +2884,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 147,
+        "line": 148,
         "column": 18
       }
     },
@@ -2884,7 +2900,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 181,
+        "line": 182,
         "column": 20
       }
     },
@@ -2900,7 +2916,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 192,
+        "line": 193,
         "column": 11
       }
     },
@@ -2916,7 +2932,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 213,
+        "line": 214,
         "column": 14
       }
     },
@@ -2932,7 +2948,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 237,
+        "line": 238,
         "column": 25
       }
     },
@@ -2948,8 +2964,24 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 269,
+        "line": 270,
         "column": 59
+      }
+    },
+    {
+      "id": "b21f5c01ac788e5-f8f0493c2887461",
+      "title": "Find rules API filter: should filter rules by the template they were created from",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
+        "line": 293,
+        "column": 88
       }
     },
     {
@@ -2964,8 +2996,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 292,
-        "column": 88
+        "line": 332,
+        "column": 10
       }
     },
     {
@@ -2980,8 +3012,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 318,
-        "column": 41
+        "line": 362,
+        "column": 8
       }
     },
     {
@@ -2996,7 +3028,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 337,
+        "line": 383,
         "column": 25
       }
     },
@@ -3012,8 +3044,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 345,
-        "column": 32
+        "line": 390,
+        "column": 8
       }
     },
     {
@@ -3028,8 +3060,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 354,
-        "column": 64
+        "line": 398,
+        "column": 87
       }
     },
     {
@@ -3044,8 +3076,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 360,
-        "column": 12
+        "line": 406,
+        "column": 91
       }
     },
     {
@@ -3060,8 +3092,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 366,
-        "column": 7
+        "line": 415,
+        "column": 11
       }
     },
     {
@@ -3076,8 +3108,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 373,
-        "column": 73
+        "line": 421,
+        "column": 12
       }
     },
     {
@@ -3092,8 +3124,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 382,
-        "column": 22
+        "line": 427,
+        "column": 7
       }
     },
     {
@@ -3108,8 +3140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 390,
-        "column": 89
+        "line": 435,
+        "column": 16
       }
     },
     {
@@ -3124,8 +3156,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 399,
-        "column": 11
+        "line": 443,
+        "column": 69
       }
     },
     {
@@ -3140,8 +3172,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 410,
-        "column": 54
+        "line": 457,
+        "column": 12
       }
     },
     {
@@ -3156,8 +3188,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/find_rules.spec.ts",
-        "line": 425,
-        "column": 14
+        "line": 475,
+        "column": 23
       }
     },
     {
@@ -5006,8 +5038,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/run_rule.spec.ts",
-        "line": 29,
-        "column": 31
+        "line": 41,
+        "column": 23
       }
     },
     {
@@ -5022,8 +5054,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/run_rule.spec.ts",
-        "line": 37,
-        "column": 71
+        "line": 48,
+        "column": 89
       }
     },
     {
@@ -5038,8 +5070,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/run_rule.spec.ts",
-        "line": 41,
-        "column": 22
+        "line": 53,
+        "column": 60
       }
     },
     {
@@ -5054,8 +5086,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/run_rule.spec.ts",
-        "line": 57,
-        "column": 43
+        "line": 69,
+        "column": 41
       }
     },
     {
@@ -5070,8 +5102,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/run_rule.spec.ts",
-        "line": 65,
-        "column": 9
+        "line": 76,
+        "column": 14
       }
     },
     {
@@ -5086,8 +5118,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/api/tests/run_rule.spec.ts",
-        "line": 79,
-        "column": 9
+        "line": 91,
+        "column": 4
       }
     },
     {

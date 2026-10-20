@@ -1,5 +1,5 @@
 {
-  "sha1": "0883089262df24c6f14bf98e18512510e6ee031e",
+  "sha1": "0aad5d4df31c87790d318e79d2ac8d134bba11f7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -22,6 +22,32 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "699d2d843800e4b-38a863d2228c7ae",
+      "title": "Alert actions cleanup task is scheduled to run daily",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/alert_actions_cleanup.spec.ts",
+        "line": 39,
+        "column": 49
+      }
+    },
+    {
+      "id": "699d2d843800e4b-e72c64b0c42bb49",
+      "title": "Alert actions cleanup task deletes expired dispatcher docs and keeps every other action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine/api/tests/alert_actions_cleanup.spec.ts",
+        "line": 43,
+        "column": 29
       }
     },
     {
