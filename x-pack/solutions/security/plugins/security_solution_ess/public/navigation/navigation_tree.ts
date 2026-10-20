@@ -178,12 +178,12 @@ export const createNavigationTree = (
             children: [
               { link: 'streams' },
               { link: 'management:index_management' },
-              { link: 'management:data_federation' },
               { link: 'management:index_lifecycle_management' },
               { link: 'management:snapshot_restore' },
               { link: 'management:transform' },
               { link: 'management:rollup_jobs' },
               { link: 'management:esql_views' },
+              { link: 'management:data_federation' },
               { link: 'management:data_quality' },
             ],
           },
