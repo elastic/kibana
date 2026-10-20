@@ -14,7 +14,7 @@ The OpenAI, {{bedrock}}, {{gemini}}, and AI Connector types are deprecated. Exis
 For new AI integrations, create an {{es}} {{infer}} endpoint with the `chat_completion` task type instead. To get started, refer to [Elastic Inference](docs-content://explore-analyze/elastic-inference.md) and [External inference](docs-content://explore-analyze/elastic-inference/external.md).
 ::::
 
-Use these connectors to connect to third-party large language model (LLM) services and Elastic's own LLM offerings.
+These connectors connect {{kib}} to third-party large language model (LLM) services and to Elastic Managed LLMs.
 
 ## Available connectors
 
