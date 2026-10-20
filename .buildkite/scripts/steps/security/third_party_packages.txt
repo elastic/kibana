@@ -1,4 +1,4 @@
-cbor2
+@jsonjoy.com/json-pack
 @launchdarkly/js-client-sdk
 @eslint-community/eslint-plugin-eslint-comments
 eslint-plugin-n
