@@ -332,14 +332,26 @@ export const createCoreLite = (
       ? (last as object)
       : undefined;
   };
+  const typesOf = (method: string, args: unknown[]): string[] => {
+    const [first] = args;
+    if (typeof first === 'string') return [first];
+    if (Array.isArray(first)) {
+      return first.map((item) =>
+        item && typeof item === 'object' ? String((item as Obj).type) : String(item)
+      );
+    }
+    if ((method === 'find' || method === 'checkConflicts') && first && typeof first === 'object') {
+      const type = (first as Obj).type;
+      return Array.isArray(type) ? type.map(String) : [String(type)];
+    }
+    return [];
+  };
   const guardLocal = (
     repo: object,
     route: {
       target: 'internal' | 'scoped';
-      types: string[];
       defaultSpace: boolean;
-      securityExcluded: boolean;
-      options?: object;
+      providerOptions?: object;
     },
     bridged: (method: string, args: unknown[]) => unknown
   ) =>
@@ -349,17 +361,17 @@ export const createCoreLite = (
         const value = Reflect.get(target, prop);
         if (typeof value !== 'function') return value;
         return (...args: unknown[]) => {
-          const options = optionBag(prop, args) ?? route.options;
+          const types = typesOf(prop, args);
           if (
             routeSavedObject({
               localSo,
               target: route.target,
-              types: route.types,
+              types,
               registeredTypes: registeredNames(),
               operation: prop,
-              options,
+              providerOptions: route.providerOptions,
+              options: optionBag(prop, args),
               defaultSpace: route.defaultSpace,
-              securityExcluded: route.securityExcluded,
             }) === 'bridge'
           ) {
             return bridged(prop, args);
@@ -379,7 +391,6 @@ export const createCoreLite = (
         target: 'internal' as const,
         types: concrete,
         defaultSpace: true,
-        securityExcluded: true,
       };
       if (
         routeSavedObject({
@@ -393,24 +404,23 @@ export const createCoreLite = (
       countFence('so.local.internalRepository');
       return guardLocal(
         localRepository(clusterClient.asInternalUser, list) as object,
-        route,
+        { target: 'internal', defaultSpace: true },
         (method, args) => (facade[method] as (...inner: unknown[]) => unknown)(...args)
       );
     },
     getScopedClient: (request: KibanaRequest, options?: Obj) => {
-      const excluded = (options?.excludedExtensions as string[] | undefined) ?? [];
       const hidden = (options?.includedHiddenTypes as string[] | undefined) ?? [];
       const facade = soFacade({
         target: 'scoped',
         request: encodeFakeRequest(request),
         options: options ?? {},
       });
+      const providerOptions = options ?? {};
       const route = {
         target: 'scoped' as const,
-        types: hidden.length > 0 ? hidden : registeredNames(),
+        types: hidden,
         defaultSpace: isDefaultSpace(request),
-        securityExcluded: excluded.includes('security'),
-        options,
+        providerOptions,
       };
       if (
         routeSavedObject({
@@ -427,7 +437,7 @@ export const createCoreLite = (
         : clusterClient.asScoped(request).asCurrentUser;
       return guardLocal(
         new SavedObjectsClient(localRepository(esClient, hidden, request)) as object,
-        route,
+        { target: 'scoped', defaultSpace: route.defaultSpace, providerOptions },
         (method, args) => (facade[method] as (...inner: unknown[]) => unknown)(...args)
       );
     },

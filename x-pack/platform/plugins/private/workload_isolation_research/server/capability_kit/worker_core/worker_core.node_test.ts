@@ -37,7 +37,7 @@ import {
   runWithExecutionContext,
   toPlainConfig,
   verifyRegistryReadiness,
-} from './index';
+} from '.';
 
 const registered = ['alert', 'action'];
 const baseRoute = {
@@ -47,7 +47,6 @@ const baseRoute = {
   registeredTypes: registered,
   operation: 'get',
   defaultSpace: true,
-  securityExcluded: true,
 };
 
 test('elasticsearch write classification treats search as read and bulk as write', () => {
@@ -60,7 +59,8 @@ test('elasticsearch write classification treats search as read and bulk as write
   const wrapped = fence.wrap(() => () => undefined);
   const handler = wrapped({ logger: {} as never });
   assert.throws(
-    () => handler({ scoped: false }, { method: 'PUT', path: '/secret-index/_doc/1' }, {}, {} as never),
+    () =>
+      handler({ scoped: false }, { method: 'PUT', path: '/secret-index/_doc/1' }, {}, {} as never),
     /boot ES write denied/
   );
   assert.equal(fence.summary().denied, 1);
@@ -94,8 +94,14 @@ test('replicas refresh on generation change and do not invent flag or price defa
   assert.equal(replica.price('platinum-only'), undefined);
   replica.apply({
     ...emptyPlatformReplicas(),
-    featureFlags: { generation: 2, value: { booleans: { alertingFeature: false }, strings: {}, numbers: {} } },
-    pricing: { generation: 2, value: { available: { 'platinum-only': false }, activeProduct: 'basic' } },
+    featureFlags: {
+      generation: 2,
+      value: { booleans: { alertingFeature: false }, strings: {}, numbers: {} },
+    },
+    pricing: {
+      generation: 2,
+      value: { available: { 'platinum-only': false }, activeProduct: 'basic' },
+    },
   });
   assert.equal(replica.booleanFlag('alertingFeature'), false);
   assert.equal(replica.price('platinum-only'), false);
@@ -124,21 +130,77 @@ test('execution context is visible to nested calls and absent outside the run', 
   assert.equal(service.get(), undefined);
   const seen = service.withContext({ name: 'run task', id: 'abc' }, () => service.get());
   assert.deepEqual(seen, { name: 'run task', id: 'abc' });
-  assert.equal(runWithExecutionContext(undefined, () => service.get()), undefined);
+  assert.equal(
+    runWithExecutionContext(undefined, () => service.get()),
+    undefined
+  );
 });
 
-test('saved object routing is an explicit allowlist and bridges everything else', () => {
-  assert.equal(routeSavedObject(baseRoute), 'local');
-  assert.equal(routeSavedObject({ ...baseRoute, operation: 'openPointInTimeForType' }), 'bridge');
-  assert.equal(routeSavedObject({ ...baseRoute, types: ['not-registered'] }), 'bridge');
-  assert.equal(routeSavedObject({ ...baseRoute, defaultSpace: false }), 'bridge');
-  assert.equal(routeSavedObject({ ...baseRoute, securityExcluded: false }), 'bridge');
-  assert.equal(routeSavedObject({ ...baseRoute, target: 'unsafeInternal' }), 'bridge');
+test('saved object routing is an exact client-options allowlist and bridges unknown combos', () => {
+  const demonstrated = {
+    excludedExtensions: ['security'],
+    includedHiddenTypes: ['action', 'action_task_params'],
+  };
+  const scoped = {
+    ...baseRoute,
+    target: 'scoped' as const,
+    operation: 'bulkGet',
+    types: ['action'],
+    registeredTypes: ['action', 'action_task_params', 'alert', 'rules-settings'],
+    providerOptions: demonstrated,
+    defaultSpace: true,
+  };
+  assert.equal(routeSavedObject(scoped), 'local');
   assert.equal(
-    routeSavedObject({ ...baseRoute, options: { namespace: 'space-a' } }),
+    routeSavedObject({
+      ...scoped,
+      providerOptions: {
+        excludedExtensions: ['security', 'encryptedSavedObjects'],
+        includedHiddenTypes: ['action', 'action_task_params'],
+      },
+    }),
     'bridge'
   );
-  assert.equal(routeSavedObject({ ...baseRoute, target: 'internal', securityExcluded: false }), 'local');
+  assert.equal(
+    routeSavedObject({
+      ...scoped,
+      providerOptions: {
+        excludedExtensions: ['encryptedSavedObjects', 'security'],
+        includedHiddenTypes: ['action_task_params', 'action'],
+      },
+    }),
+    'bridge'
+  );
+  assert.equal(routeSavedObject({ ...scoped, operation: 'get', types: ['alert'] }), 'bridge');
+  assert.equal(routeSavedObject({ ...scoped, operation: 'openPointInTimeForType' }), 'bridge');
+  assert.equal(routeSavedObject({ ...scoped, types: ['not-registered'] }), 'bridge');
+  assert.equal(routeSavedObject({ ...scoped, defaultSpace: false }), 'bridge');
+  assert.equal(
+    routeSavedObject({ ...scoped, providerOptions: { excludedExtensions: ['security'] } }),
+    'bridge'
+  );
+  assert.equal(routeSavedObject({ ...scoped, target: 'unsafeInternal' }), 'bridge');
+  assert.equal(routeSavedObject({ ...scoped, options: { namespace: 'space-a' } }), 'bridge');
+  assert.equal(
+    routeSavedObject({
+      ...baseRoute,
+      target: 'internal',
+      operation: 'get',
+      types: ['alert'],
+      providerOptions: undefined,
+    }),
+    'local'
+  );
+  assert.equal(
+    routeSavedObject({
+      ...baseRoute,
+      target: 'internal',
+      operation: 'get',
+      types: ['alert'],
+      providerOptions: demonstrated,
+    }),
+    'bridge'
+  );
 });
 
 test('task manager policy is boot versus run, not a task-type prefix', () => {
@@ -154,7 +216,10 @@ test('task manager policy is boot versus run, not a task-type prefix', () => {
 });
 
 test('readiness token mismatch fails closed and a matching fingerprint passes', () => {
-  const type = { name: 'alert', mappings: { properties: { b: { type: 'long' }, a: { type: 'keyword' } } } };
+  const type = {
+    name: 'alert',
+    mappings: { properties: { b: { type: 'long' }, a: { type: 'keyword' } } },
+  };
   const fingerprint = fingerprintSavedObjectType(type);
   const reordered = fingerprintSavedObjectType({
     name: 'alert',
@@ -207,9 +272,16 @@ test('execution class parity fails closed and collateral losses refund at most t
     id: 'alerting',
     taskTypes: (type) => type.startsWith('alerting:'),
     enabled: () => true,
-    createRunner: () => ({ run: async () => { ran += 1; return { state: {} }; } }),
+    createRunner: () => ({
+      run: async () => {
+        ran += 1;
+        return { state: {} };
+      },
+    }),
   });
-  const { createTaskRunnerWithResearchOverride } = require('@kbn/task-manager-plugin/server/lib/research_runner_override');
+  const {
+    createTaskRunnerWithResearchOverride,
+  } = require('@kbn/task-manager-plugin/server/lib/research_runner_override');
   const runner = createTaskRunnerWithResearchOverride(
     'alerting:.es-query',
     () => ({ run: async () => ({ state: { from: 'main' } }) }),

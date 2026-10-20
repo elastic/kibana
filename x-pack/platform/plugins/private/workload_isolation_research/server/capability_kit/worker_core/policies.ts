@@ -11,21 +11,95 @@
 import { AsyncLocalStorage } from 'async_hooks';
 import { createHash } from 'crypto';
 
-/** Operations the alerting island has demonstrated locally (internal user, or security excluded). */
-export const LOCAL_SO_OPERATIONS = [
-  'get',
-  'bulkGet',
-  'create',
-  'bulkCreate',
-  'update',
-  'bulkUpdate',
-  'delete',
-  'bulkDelete',
-  'find',
-  'checkConflicts',
-] as const;
+/**
+ * Eight method:type pairs from the 7.A D replay (commit 40e0064fe45b).
+ * Scoped pairs run only on a client whose provider options are an exact signature below.
+ */
+export const LOCAL_SO_PAIRS = {
+  internal: new Set<string>([
+    'get:alert',
+    'update:alert',
+    'get:action_task_params',
+    'delete:action_task_params',
+    'get:action',
+  ]),
+  scoped: new Set<string>([
+    'get:rules-settings',
+    'bulkGet:action',
+    'bulkCreate:action_task_params',
+  ]),
+} as const;
 
-const LOCAL_OP_SET = new Set<string>(LOCAL_SO_OPERATIONS);
+const stringSet = (value: unknown): string | undefined => {
+  if (!Array.isArray(value) || value.some((item) => typeof item !== 'string')) return undefined;
+  return [...new Set(value as string[])].sort().join(',');
+};
+
+/**
+ * Canonical SavedObjectsClientProviderOptions. Unknown keys and non-string lists
+ * return undefined so the caller bridges them.
+ */
+export const canonicalClientOptions = (options?: object): string | undefined => {
+  if (!options) return '';
+  const record = options as Record<string, unknown>;
+  const keys = Object.keys(record);
+  if (keys.some((key) => key !== 'excludedExtensions' && key !== 'includedHiddenTypes')) {
+    return undefined;
+  }
+  const parts: string[] = [];
+  if ('excludedExtensions' in record) {
+    const list = stringSet(record.excludedExtensions);
+    if (list === undefined) return undefined;
+    parts.push(`excludedExtensions=${list}`);
+  }
+  if ('includedHiddenTypes' in record) {
+    const list = stringSet(record.includedHiddenTypes);
+    if (list === undefined) return undefined;
+    parts.push(`includedHiddenTypes=${list}`);
+  }
+  return parts.sort().join('|');
+};
+
+/**
+ * Provider-option signatures whose extension set matches the local repository:
+ * security excluded, encryption still installed. Order of ids does not matter.
+ * `excludedExtensions: ['security', 'encryptedSavedObjects']` is not in this set.
+ * Sources: 7.A dprobe unsecured client, rules-settings unsecured client, actions
+ * unsecured client (plugin.ts includedHiddenTypes, without the optional user token).
+ */
+export const LOCAL_SCOPED_CLIENT_OPTION_SIGNATURES = new Set<string>([
+  canonicalClientOptions({
+    excludedExtensions: ['security'],
+    includedHiddenTypes: ['action', 'action_task_params'],
+  })!,
+  canonicalClientOptions({
+    excludedExtensions: ['security'],
+    includedHiddenTypes: ['rules-settings'],
+  })!,
+  canonicalClientOptions({
+    excludedExtensions: ['security'],
+    includedHiddenTypes: [
+      'action',
+      'alert',
+      'action_task_params',
+      'connector_ingress_credential',
+      'connector_signing_key',
+      'connector_token',
+    ],
+  })!,
+]);
+
+/** Internal repositories take no provider options. A present bag is unknown. */
+export const providerOptionsAllowed = (
+  target: 'internal' | 'scoped' | 'unsafeInternal',
+  options?: object
+): boolean => {
+  const canonical = canonicalClientOptions(options);
+  if (canonical === undefined) return false;
+  if (target === 'internal') return canonical === '';
+  if (target === 'scoped') return LOCAL_SCOPED_CLIENT_OPTION_SIGNATURES.has(canonical);
+  return false;
+};
 
 export interface SoRouteInput {
   readonly localSo: boolean;
@@ -33,20 +107,29 @@ export interface SoRouteInput {
   readonly types: readonly string[];
   readonly registeredTypes: readonly string[];
   readonly operation?: string;
+  /** SavedObjectsClientProviderOptions. Absent for createInternalRepository. */
+  readonly providerOptions?: object;
+  /** Per-call options. An explicit namespace bridges. */
   readonly options?: object;
   readonly defaultSpace: boolean;
-  readonly securityExcluded: boolean;
 }
 
-/** Local only for the explicit operation list, registered types, and the demonstrated space/security case. */
+/**
+ * Local only for an 8-pair method:type and an exact provider-option signature.
+ * Unknown option combinations, including excludedExtensions that also names
+ * encryptedSavedObjects, bridge to main. Omit `operation` to place the client.
+ */
 export const routeSavedObject = (input: SoRouteInput): 'local' | 'bridge' => {
   if (!input.localSo) return 'bridge';
-  if (input.target === 'unsafeInternal') return 'bridge';
-  if (input.operation && !LOCAL_OP_SET.has(input.operation)) return 'bridge';
+  if (!providerOptionsAllowed(input.target, input.providerOptions)) return 'bridge';
   if (hasExplicitNamespace(input.options)) return 'bridge';
   const registered = new Set(input.registeredTypes);
-  if (input.types.length === 0 || input.types.some((type) => !registered.has(type))) return 'bridge';
-  if (input.target === 'scoped' && !(input.securityExcluded && input.defaultSpace)) return 'bridge';
+  if (input.types.length === 0 || input.types.some((type) => !registered.has(type)))
+    return 'bridge';
+  if (input.target === 'scoped' && !input.defaultSpace) return 'bridge';
+  if (!input.operation) return 'local';
+  const pairs = input.target === 'internal' ? LOCAL_SO_PAIRS.internal : LOCAL_SO_PAIRS.scoped;
+  if (!input.types.every((type) => pairs.has(`${input.operation}:${type}`))) return 'bridge';
   return 'local';
 };
 
@@ -61,7 +144,8 @@ const tmPhaseStore = new AsyncLocalStorage<'boot' | 'run'>();
 
 export const currentTmPhase = (): 'boot' | 'run' => tmPhaseStore.getStore() ?? 'run';
 
-export const runInTmPhase = <T>(phase: 'boot' | 'run', fn: () => T): T => tmPhaseStore.run(phase, fn);
+export const runInTmPhase = <T>(phase: 'boot' | 'run', fn: () => T): T =>
+  tmPhaseStore.run(phase, fn);
 
 /** Maintenance scheduling stays on main in both phases. */
 export const ALWAYS_FENCED_TM_METHODS = ['ensureScheduled'] as const;
@@ -159,7 +243,8 @@ export const configKeyPaths = (value: unknown, prefix = ''): string[] => {
   for (const key of Object.keys(value as Record<string, unknown>)) {
     const next = prefix ? `${prefix}.${key}` : key;
     const child = (value as Record<string, unknown>)[key];
-    if (child && typeof child === 'object' && !Array.isArray(child)) paths.push(...configKeyPaths(child, next));
+    if (child && typeof child === 'object' && !Array.isArray(child))
+      paths.push(...configKeyPaths(child, next));
     else paths.push(next);
   }
   return paths;

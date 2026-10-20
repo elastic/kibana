@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-export {
-  ALERTING_BOOT_ES_WRITE_ALLOW,
-  createBootEsWriteFence,
-  isEsWrite,
+export { ALERTING_BOOT_ES_WRITE_ALLOW, createBootEsWriteFence, isEsWrite } from './es_write_fence';
+export type {
+  BootEsWriteFence,
+  EsRequestRecord,
+  EsWriteAllow,
+  EsWriteSummary,
 } from './es_write_fence';
-export type { BootEsWriteFence, EsRequestRecord, EsWriteAllow, EsWriteSummary } from './es_write_fence';
 export {
   NAMED_EVENT_EXCLUSIONS,
   classifyFlagOverrides,
@@ -36,12 +37,15 @@ export type {
 export {
   ALWAYS_FENCED_TM_METHODS,
   CONFIG_CAPTURE_KEY,
-  LOCAL_SO_OPERATIONS,
+  LOCAL_SCOPED_CLIENT_OPTION_SIGNATURES,
+  LOCAL_SO_PAIRS,
+  canonicalClientOptions,
   configKeyPaths,
   currentTmPhase,
   decideTaskManagerCall,
   fingerprintSavedObjectType,
   hasExplicitNamespace,
+  providerOptionsAllowed,
   routeSavedObject,
   runInTmPhase,
   toPlainConfig,
