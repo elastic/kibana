@@ -319,6 +319,16 @@ describe('source knowledge write coordination', () => {
       expect(run).not.toHaveBeenCalled();
     });
 
+    it('does not start a write whose request was already aborted', async () => {
+      const { client } = setup();
+      const run = jest.fn(async () => 'written');
+
+      await expect(
+        client.write({ sourceId: 'source', signal: AbortSignal.abort(), run })
+      ).rejects.toMatchObject({ name: 'AbortError' });
+      expect(run).not.toHaveBeenCalled();
+    });
+
     it('does not retry a stale revision', async () => {
       const { client, source } = setup();
       await client.write({ sourceId: 'source', run: async () => {} });

@@ -85,6 +85,7 @@ const retryWhileLeaseHeld = async <T>(
   attempt: () => Promise<T>,
   signal?: AbortSignal
 ): Promise<T> => {
+  signal?.throwIfAborted();
   const startedAt = Date.now();
   let delayMs = LEASE_RETRY_MIN_DELAY_MS;
   for (;;) {
