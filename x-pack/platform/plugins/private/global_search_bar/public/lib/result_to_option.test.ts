@@ -161,12 +161,17 @@ describe('resultToOption', () => {
         expect.objectContaining({
           text: 'A is part of the B collection',
           highlightSearchString: true,
-          css: expect.objectContaining({
-            styles: expect.stringContaining('text-overflow:ellipsis'),
-          }),
+          'data-test-subj': 'nav-search-option-description',
         }),
       ]);
-      expect(option.append).toBeDefined();
+      expect(option.append).toEqual(
+        expect.objectContaining({
+          props: expect.objectContaining({
+            'data-test-subj': 'nav-search-option-trailing-label',
+            children: 'Collection of 3',
+          }),
+        })
+      );
     });
 
     it('shows only the trailing label when there is no description', () => {

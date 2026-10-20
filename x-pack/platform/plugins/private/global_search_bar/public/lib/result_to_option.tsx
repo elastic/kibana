@@ -63,7 +63,8 @@ export const resultToOption = (
       ? [{ text: categoryLabel }]
       : [{ text: cleanMeta((meta.displayName as string) ?? type) }];
 
-  // Providers can show a subtitle under the title and a label on the right of the row.
+  // Providers can show a subtitle under the title and a label on the right of the row. Either one
+  // replaces the default type label, so a row with only a trailing label shows no subtitle.
   if (typeof description === 'string' || typeof trailingLabel === 'string') {
     option.meta =
       typeof description === 'string'
@@ -71,15 +72,15 @@ export const resultToOption = (
             {
               text: description,
               highlightSearchString: true,
-              // A long subtitle is truncated with an ellipsis. EUI puts the full text in the
-              // option's `title`, so it stays available as a tooltip.
+              // A long subtitle is cut with an ellipsis.
               css: truncatedMetaStyles,
+              'data-test-subj': 'nav-search-option-description',
             },
           ]
         : [];
     if (typeof trailingLabel === 'string') {
       option.append = (
-        <EuiText size="xs" color="subdued">
+        <EuiText size="xs" color="subdued" data-test-subj="nav-search-option-trailing-label">
           {trailingLabel}
         </EuiText>
       );
