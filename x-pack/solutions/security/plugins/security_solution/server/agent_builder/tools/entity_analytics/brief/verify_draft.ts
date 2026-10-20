@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { uniqBy } from 'lodash';
+import { escapeRegExp, orderBy, uniqBy } from 'lodash';
 import type { BriefDraft, BriefPriority } from './prompts';
 import { MAX_PRIORITIES } from './prompts';
 import type { EntityFacts } from './types';
@@ -28,6 +28,13 @@ export interface VerifiedBrief {
 export const verifyDraft = (draft: BriefDraft, facts: EntityFacts[]): VerifiedBrief => {
   const flaggedIds = new Set(facts.map(({ entityId }) => entityId));
   const mention = (entityId: string) => `{{ entity.id ${entityId} }}`;
+  // Longest first, so an EUID is never matched by a shorter one it starts with.
+  const writtenId = new RegExp(
+    orderBy([...flaggedIds], 'length', 'desc')
+      .map(escapeRegExp)
+      .join('|'),
+    'g'
+  );
   // Mentions sit at odd indexes. In the prose between them, a flagged entity's EUID written out
   // becomes its mention, so it reads as the entity's name.
   const keepFlaggedMentions = (text: string): string =>
@@ -37,10 +44,7 @@ export const verifyDraft = (draft: BriefDraft, facts: EntityFacts[]): VerifiedBr
         if (index % 2 === 1) {
           return flaggedIds.has(part) ? mention(part) : '';
         }
-        return [...flaggedIds].reduce(
-          (prose, entityId) => prose.split(entityId).join(mention(entityId)),
-          part
-        );
+        return flaggedIds.size > 0 ? part.replace(writtenId, mention) : part;
       })
       .join('')
       .trim();

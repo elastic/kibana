@@ -10,12 +10,14 @@ import type { EntityFacts } from './types';
 import type { VerifiedBrief } from './verify_draft';
 import { verifyDraft } from './verify_draft';
 
-const facts: EntityFacts[] = ['host:a', 'user:b', 'user:c', 'user:d'].map((entityId) => ({
-  entityId,
-  name: entityId,
-  type: 'host',
-  flaggedFor: ['riskMovers'],
-}));
+const facts: EntityFacts[] = ['host:a', 'host:ab', 'user:b', 'user:c', 'user:d'].map(
+  (entityId) => ({
+    entityId,
+    name: entityId,
+    type: 'host',
+    flaggedFor: ['riskMovers'],
+  })
+);
 
 const priority = (entityId: string, observed = 'Observed.'): BriefPriority => ({
   entityId,
@@ -52,8 +54,12 @@ describe('verifyDraft', () => {
     ],
     [
       "turns a flagged entity's EUID written out into its mention",
-      draft([priority('host:a', 'Seen on user:b.')]),
-      { priorities: [priority('host:a', 'Seen on {{ entity.id user:b }}.')] },
+      draft([priority('host:a', 'Seen on user:b and host:ab.')]),
+      {
+        priorities: [
+          priority('host:a', 'Seen on {{ entity.id user:b }} and {{ entity.id host:ab }}.'),
+        ],
+      },
     ],
     [
       'has no summary or recommendation without a priority',
