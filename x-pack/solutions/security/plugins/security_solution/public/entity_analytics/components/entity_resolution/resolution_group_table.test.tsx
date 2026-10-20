@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 import { TestProviders } from '../../../common/mock';
 import { ResolutionGroupTable } from './resolution_group_table';
 import { RESOLUTION_GROUP_TABLE_TEST_ID, RESOLUTION_EMPTY_STATE_TEST_ID } from './test_ids';
@@ -125,7 +125,7 @@ describe('ResolutionGroupTable', () => {
   });
 
   it('exposes the permission explanation to screen readers when the user cannot modify', async () => {
-    const { getAllByLabelText, findByText } = render(
+    const { getAllByLabelText } = render(
       <TestProviders>
         <ResolutionGroupTable
           group={mockGroup}
@@ -139,8 +139,9 @@ describe('ResolutionGroupTable', () => {
 
     const removeButtons = getAllByLabelText(/remove from resolution group/i);
     fireEvent.mouseOver(removeButtons[1].parentElement!);
-    const tooltip = await findByText(INSUFFICIENT_PRIVILEGES_TOOLTIP);
-    expect(tooltip).toBeInTheDocument();
+    await waitFor(() =>
+      expect(removeButtons[1]).toHaveAccessibleDescription(INSUFFICIENT_PRIVILEGES_TOOLTIP)
+    );
   });
 
   it('disables expand button for current entity', () => {

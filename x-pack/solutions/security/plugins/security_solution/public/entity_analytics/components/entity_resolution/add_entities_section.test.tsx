@@ -139,8 +139,11 @@ describe('AddEntitiesSection', () => {
 
     const [addButton] = getAllByLabelText(/add to resolution group/i);
     fireEvent.mouseOver(addButton.parentElement!);
-    const tooltip = await findByText(INSUFFICIENT_PRIVILEGES_TOOLTIP);
-    expect(tooltip).toBeInTheDocument();
+    expect(await findByText(INSUFFICIENT_PRIVILEGES_TOOLTIP)).toBeInTheDocument();
+    // EuiToolTip only links the trigger to its content via `aria-describedby` when it is not
+    // screen-reader-disabled. The accessible description can't be asserted here because EUI's
+    // test build gives every generated id the same value (the accordion button shares it).
+    expect(addButton).toHaveAttribute('aria-describedby');
   });
 
   it('calls onEntityNameClick when expand button is clicked', () => {
