@@ -38,6 +38,7 @@ import {
   monitorTypeRequiresPrivateLocations,
 } from '../../../common/utils/monitor_location_support';
 import { privateLocationCoversAllMonitorSpaces } from './monitor_locations_utils';
+import { valueContainsVaultReference } from '../../synthetics_service/formatters/vault_param_formatter';
 import {
   APIFieldsCodec,
   BrowserFieldsCodec,
@@ -186,6 +187,22 @@ export function validateMonitor(
       valid: false,
       reason: INVALID_SCHEMA_ERROR(monitorType),
       details: formatZodErrors(decodedMonitor.error, { input: monitorFields }).join(' | '),
+      payload: monitorFields,
+    };
+  }
+
+  // Only Heartbeat on a private location resolves Vault references; a managed location
+  // would run the monitor with the literal reference. Heartbeat never resolves scripts.
+  if (
+    hasPublicServiceLocation(monitorFields.locations) &&
+    valueContainsVaultReference(
+      omit(monitorFields, [ConfigKey.SOURCE_INLINE, ConfigKey.SOURCE_PROJECT_CONTENT])
+    )
+  ) {
+    return {
+      valid: false,
+      reason: VAULT_PUBLIC_LOCATION_ERROR,
+      details: VAULT_PUBLIC_LOCATION_DETAILS,
       payload: monitorFields,
     };
   }
@@ -805,6 +822,21 @@ export const LOCATION_REQUIRED_ERROR = i18n.translate(
   {
     defaultMessage:
       'At least one location is required, either elastic managed or private e.g locations: ["us-east"] or private_locations:["test private location"]',
+  }
+);
+
+const VAULT_PUBLIC_LOCATION_ERROR = i18n.translate(
+  'xpack.synthetics.server.monitors.vaultPublicLocationErrorMessage',
+  {
+    defaultMessage: 'Vault references cannot be used on Elastic managed locations',
+  }
+);
+
+const VAULT_PUBLIC_LOCATION_DETAILS = i18n.translate(
+  'xpack.synthetics.server.monitors.vaultPublicLocationDetailsErrorMessage',
+  {
+    defaultMessage:
+      'Vault references are resolved by the agent on a private location. Remove the Elastic managed locations from this monitor, or remove the vault:// references.',
   }
 );
 

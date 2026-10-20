@@ -114,11 +114,11 @@ const toText = (value: unknown): string => {
 export const hasVaultReference = (strVal: string): boolean => matchAll(strVal).length > 0;
 
 /**
- * Checks whether an arbitrary value (string, object, or array) contains a Vault
- * reference. Objects/arrays are stringified before matching.
+ * Checks whether an arbitrary value (string, object, or array) contains anything Heartbeat
+ * would treat as a Vault reference, well-formed or not. Objects/arrays are stringified.
  */
 export const valueContainsVaultReference = (value: unknown): boolean =>
-  hasVaultReference(toText(value));
+  tokenContents(toText(value)).length > 0;
 
 /**
  * Extracts the { connection?, path, field } tuples referenced in a string. Used to
