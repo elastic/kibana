@@ -8,6 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiEmptyPrompt } from '@elastic/eui';
 import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
+import { getRemoveFromCaseActions } from '@kbn/cases-plugin/public';
 import { getManualAlertIds } from '@kbn/cases-plugin/common';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { BulkActionsPanelConfig } from '@kbn/response-ops-alerts-table/types';
@@ -48,37 +49,20 @@ export function AlertTabContent({ caseData, onRemove }: CommonAttachmentListView
     [data, http, notifications, fieldFormats, application, licensing, cases, settings]
   );
 
-  // Disabled on "select all", which also matches alerts the table's time range hides.
-  const removeBulkActions = useMemo<BulkActionsPanelConfig[] | undefined>(
+  const removeActions = useMemo(
     () =>
-      onRemove
-        ? [
-            {
-              id: 0,
-              items: [
-                {
-                  key: REMOVE_OBSERVABILITY_ALERTS_FROM_CASE_TEST_ID,
-                  label: REMOVE_FROM_CASE,
-                  icon: 'trash',
-                  'data-test-subj': REMOVE_OBSERVABILITY_ALERTS_FROM_CASE_TEST_ID,
-                  disableOnQuery: true,
-                  onClick: (alerts, _isAllSelected, _setIsBulkActionsLoading, clearSelection) =>
-                    onRemove(
-                      { attachmentIds: alerts.map(({ _id }) => _id) },
-                      { onSuccess: clearSelection }
-                    ),
-                },
-              ],
-            },
-          ]
-        : undefined,
+      getRemoveFromCaseActions({
+        onRemove,
+        key: REMOVE_OBSERVABILITY_ALERTS_FROM_CASE_TEST_ID,
+        label: REMOVE_FROM_CASE,
+      }),
     [onRemove]
   );
 
-  const onRemoveFromCase = useMemo(
-    () => (onRemove ? (alertId: string) => onRemove({ attachmentIds: [alertId] }) : undefined),
-    [onRemove]
-  );
+  // Not memoized: the alerts table appends its default bulk actions to this panel in place.
+  const removeBulkActions: BulkActionsPanelConfig[] | undefined = removeActions && [
+    { id: 0, items: [removeActions.bulkAction] },
+  ];
 
   if (alertIdsQuery.ids?.values?.length === 0) {
     return (
@@ -106,7 +90,7 @@ export function AlertTabContent({ caseData, onRemove }: CommonAttachmentListView
         showAlertStatusWithFlapping
         services={alertsTableServices}
         additionalBulkActions={removeBulkActions}
-        onRemoveFromCase={onRemoveFromCase}
+        onRemoveFromCase={removeActions?.onRemoveFromCase}
       />
     </EuiFlexItem>
   );

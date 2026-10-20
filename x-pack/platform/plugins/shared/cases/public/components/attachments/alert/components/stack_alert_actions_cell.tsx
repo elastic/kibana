@@ -48,7 +48,7 @@ export const StackAlertActionsCell = ({ alert, onRemoveFromCase }: StackAlertAct
             color="text"
             data-test-subj={STACK_ALERT_ROW_ACTIONS_TEST_ID}
             display="empty"
-            iconType="boxesVertical"
+            iconType="ellipsis"
             onClick={togglePopover}
             size="s"
           />
@@ -59,7 +59,6 @@ export const StackAlertActionsCell = ({ alert, onRemoveFromCase }: StackAlertAct
       panelPaddingSize="none"
     >
       <EuiContextMenuPanel
-        size="s"
         items={[
           <EuiContextMenuItem
             key={REMOVE_STACK_ALERT_FROM_CASE_TEST_ID}

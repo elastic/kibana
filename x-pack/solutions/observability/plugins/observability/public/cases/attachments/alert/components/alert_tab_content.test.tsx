@@ -81,6 +81,16 @@ describe('AlertTabContent', () => {
     );
   });
 
+  it('passes a new bulk actions panel on each render', () => {
+    const onRemove = jest.fn();
+    const { rerender } = render(<AlertTabContent caseData={caseData} onRemove={onRemove} />);
+    const [firstPanel] = getBulkActions() ?? [];
+
+    rerender(<AlertTabContent caseData={caseData} onRemove={onRemove} />);
+
+    expect(getBulkActions()?.[0]).not.toBe(firstPanel);
+  });
+
   it('adds no row action without onRemove', () => {
     render(<AlertTabContent caseData={caseData} />);
 

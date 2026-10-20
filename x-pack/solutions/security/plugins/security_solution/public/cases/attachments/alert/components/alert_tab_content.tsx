@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { CommonAttachmentListViewProps } from '@kbn/cases-plugin/public';
+import { getRemoveFromCaseActions } from '@kbn/cases-plugin/public';
 import type {
   AlertsTableOnLoadedProps,
   BulkActionsConfig,
@@ -52,31 +53,19 @@ export const AlertTabContent: React.FC<CommonAttachmentListViewProps> = ({
     [onAlertsTableLoaded]
   );
 
-  // Disabled on "select all", which also matches alerts the table's time range hides.
-  const removeBulkActionItems = useMemo<BulkActionsConfig[] | undefined>(
+  const removeActions = useMemo(
     () =>
-      onRemove
-        ? [
-            {
-              key: REMOVE_ALERTS_FROM_CASE_TEST_ID,
-              label: REMOVE_FROM_CASE,
-              icon: 'trash',
-              'data-test-subj': REMOVE_ALERTS_FROM_CASE_TEST_ID,
-              disableOnQuery: true,
-              onClick: (alerts, _isAllSelected, _setIsBulkActionsLoading, clearSelection) =>
-                onRemove(
-                  { attachmentIds: alerts.map(({ _id }) => _id) },
-                  { onSuccess: clearSelection }
-                ),
-            },
-          ]
-        : undefined,
+      getRemoveFromCaseActions({
+        onRemove,
+        key: REMOVE_ALERTS_FROM_CASE_TEST_ID,
+        label: REMOVE_FROM_CASE,
+      }),
     [onRemove]
   );
 
-  const onRemoveFromCase = useMemo(
-    () => (onRemove ? (alertId: string) => onRemove({ attachmentIds: [alertId] }) : undefined),
-    [onRemove]
+  const removeBulkActionItems = useMemo<BulkActionsConfig[] | undefined>(
+    () => removeActions && [removeActions.bulkAction],
+    [removeActions]
   );
 
   if (!hasAlertsRead) {
@@ -116,7 +105,7 @@ export const AlertTabContent: React.FC<CommonAttachmentListViewProps> = ({
           onLoaded={onLoaded}
           query={alertIdsQuery}
           additionalBulkActionItems={removeBulkActionItems}
-          onRemoveFromCase={onRemoveFromCase}
+          onRemoveFromCase={removeActions?.onRemoveFromCase}
         />
       )}
     </EuiFlexItem>

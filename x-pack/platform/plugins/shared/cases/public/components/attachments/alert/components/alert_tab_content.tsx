@@ -16,6 +16,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useGetFeatureIds } from '../../../../containers/use_get_feature_ids';
 import { getManualAlertIds } from '../../../../../common/utils/attachments/manual_alert_ids';
 import type { CommonAttachmentListViewProps } from '../../../../client/attachment_framework/types';
+import { getRemoveFromCaseActions } from '../../../../client/attachment_framework/remove_from_case_actions';
 import type { StackAlertsTableContext } from './stack_alert_actions_cell';
 import { StackAlertActionsCell } from './stack_alert_actions_cell';
 
@@ -39,41 +40,25 @@ export const StackAlertTabContent = ({ caseData, onRemove }: CommonAttachmentLis
     [data, http, notifications, fieldFormats, application, settings, licensing]
   );
 
-  // Disabled on "select all", which also matches alerts the table's time range hides.
-  const removeBulkActions = useMemo<BulkActionsPanelConfig[] | undefined>(
+  const removeActions = useMemo(
     () =>
-      onRemove
-        ? [
-            {
-              id: 0,
-              items: [
-                {
-                  key: REMOVE_STACK_ALERTS_FROM_CASE_TEST_ID,
-                  label: REMOVE_FROM_CASE,
-                  icon: 'trash',
-                  'data-test-subj': REMOVE_STACK_ALERTS_FROM_CASE_TEST_ID,
-                  disableOnQuery: true,
-                  onClick: (alerts, _isAllSelected, _setIsBulkActionsLoading, clearSelection) =>
-                    onRemove(
-                      { attachmentIds: alerts.map(({ _id }) => _id) },
-                      { onSuccess: clearSelection }
-                    ),
-                },
-              ],
-            },
-          ]
-        : undefined,
+      getRemoveFromCaseActions({
+        onRemove,
+        key: REMOVE_STACK_ALERTS_FROM_CASE_TEST_ID,
+        label: REMOVE_FROM_CASE,
+      }),
     [onRemove]
   );
 
   const additionalContext = useMemo<StackAlertsTableContext>(
-    () => ({
-      onRemoveFromCase: onRemove
-        ? (alertId: string) => onRemove({ attachmentIds: [alertId] })
-        : undefined,
-    }),
-    [onRemove]
+    () => ({ onRemoveFromCase: removeActions?.onRemoveFromCase }),
+    [removeActions]
   );
+
+  // Not memoized: the alerts table appends its default bulk actions to this panel in place.
+  const removeBulkActions: BulkActionsPanelConfig[] | undefined = removeActions && [
+    { id: 0, items: [removeActions.bulkAction] },
+  ];
 
   const { isLoading, data: alertData } = useGetFeatureIds(alertIds, true);
 
@@ -114,7 +99,7 @@ export const StackAlertTabContent = ({ caseData, onRemove }: CommonAttachmentLis
         services={alertsTableServices}
         additionalBulkActions={removeBulkActions}
         additionalContext={additionalContext}
-        renderActionsCell={onRemove ? StackAlertActionsCell : undefined}
+        renderActionsCell={removeActions ? StackAlertActionsCell : undefined}
       />
     </EuiFlexItem>
   );
