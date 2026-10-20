@@ -265,10 +265,10 @@
     "connectorSpecs": "src/platform/packages/shared/kbn-connector-specs",
     "esqlLanguage": "src/platform/packages/shared/esql/kbn-esql-language",
     "indexEditor": "src/platform/packages/private/kbn-index-editor",
-    "kbnMockIdpPlugin": "packages/kbn-mock-idp-plugin",
     "palettes": "src/platform/packages/shared/kbn-palettes"
   },
   "exclude": [
+    "packages/kbn-mock-idp-plugin",
     "src/platform/packages/shared/kbn-workflows-ui",
     "src/platform/plugins/shared/workflows_management"
   ],
