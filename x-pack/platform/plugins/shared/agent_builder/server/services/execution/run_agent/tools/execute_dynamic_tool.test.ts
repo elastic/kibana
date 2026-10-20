@@ -6,9 +6,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { internalTools, ToolOrigin, ToolResultType, ToolType } from '@kbn/agent-builder-common';
+import {
+  ChatEventType,
+  internalTools,
+  ToolOrigin,
+  ToolResultType,
+  ToolType,
+} from '@kbn/agent-builder-common';
 import { isExcludedFromFilestore, isInternalTool } from '@kbn/agent-builder-common/tools';
 import { AgentPromptType } from '@kbn/agent-builder-common/agents/prompts';
+import { toDynamicToolEvent, type AgentBuilderToolEvent } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 import { createToolManagerMock, type ToolManagerMock } from '../../../../test_utils/runner';
 import { createExecuteDynamicTool } from './execute_dynamic_tool';
@@ -88,10 +95,47 @@ describe('execute_dynamic_tool', () => {
       toolParams: { query: 'open', limit: 5 },
       toolCallId: 'call-1',
       source: 'agent',
-      onEvent,
+      onEvent: expect.any(Function),
       abortSignal,
     });
     expect(result).toEqual({ results: [{ type: 'other', data: { ok: 1 } }] });
+  });
+
+  it("tags the inner tool's events with its id so they are attributed to it", async () => {
+    const onEvent = jest.fn();
+    const uiEvent: AgentBuilderToolEvent = {
+      type: ChatEventType.toolUi,
+      data: { custom_event: 'ev', data: {} },
+    };
+    const progress: AgentBuilderToolEvent = {
+      type: ChatEventType.toolProgress,
+      data: { message: 'hi' },
+    };
+    (inner.execute as jest.Mock).mockImplementation(async (params) => {
+      params.onEvent(uiEvent);
+      params.onEvent(progress);
+      return { results: [] };
+    });
+
+    await createExecuteDynamicTool({ toolManager }).execute({
+      toolParams: { tool_id: inner.id, params: { query: 'x' } },
+      toolCallId: 'call-1',
+      source: 'agent',
+      onEvent,
+    });
+
+    expect(onEvent).toHaveBeenNthCalledWith(1, toDynamicToolEvent(inner.id, uiEvent));
+    expect(onEvent).toHaveBeenNthCalledWith(2, toDynamicToolEvent(inner.id, progress));
+    expect(onEvent.mock.calls[0][0]).toEqual({
+      type: 'dynamic_tool_event',
+      data: { tool_id: 'platform.core.cases', event: uiEvent },
+    });
+  });
+
+  it('passes no onEvent to the inner tool when the outer call has none', async () => {
+    await execute({ tool_id: inner.id, params: { query: 'x' } });
+
+    expect(inner.execute).toHaveBeenCalledWith(expect.objectContaining({ onEvent: undefined }));
   });
 
   it('passes an interrupt return through untouched', async () => {

@@ -22,6 +22,7 @@ import type {
   ToolProvider,
 } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
+import { isDynamicToolEvent } from '@kbn/agent-builder-server/runner';
 import type { ToolCall } from './messages';
 
 export type ToolIdMapping = Map<string, string>;
@@ -205,6 +206,11 @@ export function reverseMap<K, V>(map: Map<K, V>): Map<V, K> {
 
 const getToolEventConverter = ({ toolId, toolCallId }: { toolId: string; toolCallId: string }) => {
   return (toolEvent: AgentBuilderToolEvent): ChatAgentEvent => {
+    if (isDynamicToolEvent(toolEvent)) {
+      return getToolEventConverter({ toolId: toolEvent.data.tool_id, toolCallId })(
+        toolEvent.data.event
+      );
+    }
     if (toolEvent.type === ChatEventType.toolProgress) {
       return {
         type: ChatEventType.toolProgress,

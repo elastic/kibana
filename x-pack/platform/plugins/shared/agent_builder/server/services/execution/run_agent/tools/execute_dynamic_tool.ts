@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import { internalTools, ToolOrigin, ToolType } from '@kbn/agent-builder-common';
-import { createErrorResult } from '@kbn/agent-builder-server';
-import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import { type AgentBuilderToolEvent, createErrorResult } from '@kbn/agent-builder-server';
+import { toDynamicToolEvent, type ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 
 const schema = z.object({
@@ -68,10 +68,14 @@ Dynamic tools are not in your tool list: their definitions appear in the convers
       };
     }
 
+    const onDynamicEvent = onEvent
+      ? (event: AgentBuilderToolEvent) => onEvent(toDynamicToolEvent(tool.id, event))
+      : undefined;
+
     return tool.execute({
       toolParams: validation.data,
       toolCallId,
-      onEvent,
+      onEvent: onDynamicEvent,
       source: source ?? 'agent',
       abortSignal,
     });

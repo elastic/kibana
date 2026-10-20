@@ -30,6 +30,9 @@ export {
   type ToolEventHandlerFn,
   type ToolEventEmitter,
   type InternalToolProgressEvent,
+  type DynamicToolEvent,
+  isDynamicToolEvent,
+  toDynamicToolEvent,
 } from './events';
 export type {
   ToolProvider,
