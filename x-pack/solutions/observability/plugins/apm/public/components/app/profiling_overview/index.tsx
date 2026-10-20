@@ -147,6 +147,7 @@ export function ProfilingOverview() {
     environment,
     isJavaAgent,
     kuery,
+    onJavaFallback,
     preferred?.source,
     rangeFrom,
     rangeTo,
