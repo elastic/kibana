@@ -53,9 +53,11 @@ function makeCapabilities({ alerts = true, slos = true } = {}) {
   };
 }
 
+const mockNavigateToUrl = jest.fn();
+
 function setupContext({ alerts = true, slos = true } = {}) {
   mockUseServiceFlyoutContext.mockReturnValue({
-    deps: {},
+    deps: { core: { application: { navigateToUrl: mockNavigateToUrl } } },
     service: { name: 'opbeans-java' },
     capabilities: makeCapabilities({ alerts, slos }),
     filters: {
@@ -283,6 +285,23 @@ describe('ServiceFlyoutFooter', () => {
       fireEvent.click(screen.getByTestId('serviceFlyoutActionsMenuItem-openTracesInDiscover'));
 
       expect(mockOpenInDiscoverTab).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('when openInDiscoverTab is not provided', () => {
+    it.each([
+      ['openTracesInDiscover', '/app/discover/traces'],
+      ['openLogsInDiscover', '/app/discover/logs'],
+    ])('navigates in-app instead of reloading the page for %s', (id, href) => {
+      renderFooter();
+      openActionsMenu();
+
+      const clickAllowed = fireEvent.click(
+        screen.getByTestId(`serviceFlyoutActionsMenuItem-${id}`)
+      );
+
+      expect(clickAllowed).toBe(false); // default (full page load) prevented
+      expect(mockNavigateToUrl).toHaveBeenCalledWith(href);
     });
   });
 });

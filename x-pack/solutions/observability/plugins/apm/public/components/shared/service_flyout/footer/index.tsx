@@ -8,14 +8,17 @@
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiFlyoutFooter } from '@elastic/eui';
 import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { ActionsContextMenu, type ActionGroups } from '../../actions_context_menu';
 import { SERVICE_FLYOUT_EBT_ELEMENTS } from '../ebt_constants';
 import { useServiceFlyoutLinks } from '../hooks/use_service_flyout_links';
 import { useServiceFlyoutContext } from '../service_flyout_context';
 
 export function ServiceFlyoutFooter() {
-  const { capabilities } = useServiceFlyoutContext();
+  const {
+    capabilities,
+    deps: { core },
+  } = useServiceFlyoutContext();
   const {
     apm: { overviewTab: serviceOverviewHref },
     alerts: alertsHref,
@@ -25,6 +28,13 @@ export function ServiceFlyoutFooter() {
       logs: { href: logsDiscoverHref, openInDiscoverTab: logsOpenInDiscoverTab },
     },
   } = useServiceFlyoutLinks();
+
+  // Without an "open in a Discover tab" handler, navigate in-app on a plain click. A full page load
+  // would unmount hosts that live beside the page, e.g. the agent chat sidebar and its conversation.
+  const navigateInApp = useCallback(
+    (href: string | undefined) => (href ? () => core.application.navigateToUrl(href) : undefined),
+    [core]
+  );
 
   const showServiceOverview = Boolean(
     serviceOverviewHref && (capabilities.header?.serviceNameLink ?? false)
@@ -70,7 +80,7 @@ export function ServiceFlyoutFooter() {
                       defaultMessage: 'Open traces in Discover',
                     }),
                 href: tracesDiscoverHref,
-                onClick: tracesOpenInDiscoverTab,
+                onClick: tracesOpenInDiscoverTab ?? navigateInApp(tracesDiscoverHref),
                 ebt: {
                   action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
                   element: SERVICE_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
@@ -89,7 +99,7 @@ export function ServiceFlyoutFooter() {
                       defaultMessage: 'Open logs in Discover',
                     }),
                 href: logsDiscoverHref,
-                onClick: logsOpenInDiscoverTab,
+                onClick: logsOpenInDiscoverTab ?? navigateInApp(logsDiscoverHref),
                 ebt: {
                   action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
                   element: SERVICE_FLYOUT_EBT_ELEMENTS.ACTIONS_MENU,
@@ -147,6 +157,7 @@ export function ServiceFlyoutFooter() {
 
     return groups;
   }, [
+    navigateInApp,
     logsDiscoverHref,
     logsOpenInDiscoverTab,
     serviceOverviewHref,
