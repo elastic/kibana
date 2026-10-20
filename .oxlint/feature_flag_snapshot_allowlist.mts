@@ -31,6 +31,7 @@ export const featureFlagSnapshotAllowlist: readonly string[] = [
   'x-pack/platform/plugins/shared/elastic_console/server/routes/is_enabled.ts',
   'x-pack/platform/plugins/shared/entity_store/server/infra/feature_flags/dual_process.ts',
   'x-pack/platform/plugins/shared/entity_store/server/infra/feature_flags/legacy_security_assets_migration.ts',
+  'x-pack/platform/plugins/shared/fleet/server/services/epm/packages/install_state_machine/steps/step_install_workflows.ts',
   'x-pack/platform/plugins/shared/fleet/server/services/outputs/helpers.ts',
   'x-pack/platform/plugins/shared/fleet/server/services/outputs/kafka_auth_feature_flags.ts',
   'x-pack/platform/plugins/shared/fleet/server/services/utils/iac_provisioner.ts',
