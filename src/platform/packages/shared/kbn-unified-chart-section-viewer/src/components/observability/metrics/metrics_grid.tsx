@@ -460,7 +460,7 @@ const ChartItem = React.memo(
 
     const lensConfig = useMemo(() => {
       if (heatmapConfig) {
-        return { ...heatmapConfig, description };
+        return heatmapConfig;
       }
 
       // Bounds are loading or failed. No series yet; the empty XY config keeps the

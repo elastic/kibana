@@ -1274,7 +1274,7 @@ describe('discover session API transforms', () => {
       });
 
       expect(sessionState.tabs[0]).not.toHaveProperty('tabTypeState');
-      expect(sessionState.tabs[0]).not.toHaveProperty('histogram_distribution');
+      expect(sessionState.tabs[0]).not.toHaveProperty('histogram_visualization');
 
       const { attributes: writtenBack } = transformDiscoverSessionIn(
         discoverSessionApiDataSchema.parse(sessionState)

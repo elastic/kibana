@@ -29,6 +29,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   HISTOGRAM_VISUALIZATION_CHART,
+  isHistogramVisualization,
   type HistogramVisualization,
   type MetricsGridSettings,
 } from '@kbn/discover-utils';
@@ -142,13 +143,12 @@ export const GridSettingsFlyout = ({
   );
 
   const onHistogramDisplayChange = useCallback((id: string) => {
-    const choice = HISTOGRAM_VISUALIZATION_OPTIONS.find((option) => option.id === id);
-    if (!choice) {
+    if (!isHistogramVisualization(id)) {
       return;
     }
     setDraftSettings((current) => ({
       ...current,
-      histogramVisualization: choice.id,
+      histogramVisualization: id,
     }));
   }, []);
 
