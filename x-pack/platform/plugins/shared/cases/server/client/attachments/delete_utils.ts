@@ -24,11 +24,14 @@ interface OwnedAttachment extends AttachmentForDeletion {
   owner: string;
 }
 
-interface DecodedAttachment extends OwnedAttachment {
+export interface DecodedAttachment extends OwnedAttachment {
   attributes: AttachmentAttributesV2;
   /** The attachment fields recorded in the deletion user action. */
   requestAttributes: AttachmentRequestV2;
 }
+
+/** Records the deletion in place of the default user action per attachment. */
+export type RecordUserActions = (args: { attachments: DecodedAttachment[] }) => Promise<void>;
 
 export const doNotExistOnCaseMessage = (ids: string[], caseId: string): string =>
   ids.length === 1
@@ -41,6 +44,7 @@ interface DeleteCaseAttachmentsArgs {
   operation: OperationDetails;
   /** Message of the not found error thrown for attachments of another case. */
   notInCaseMessage?: (ids: string[]) => string;
+  recordUserActions?: RecordUserActions;
 }
 
 /** Deletes attachments read for deletion and their files; shared by the comment delete routes. */
@@ -50,6 +54,7 @@ export const deleteCaseAttachments = async (
     attachments,
     operation,
     notInCaseMessage = (ids) => doNotExistOnCaseMessage(ids, caseId),
+    recordUserActions,
   }: DeleteCaseAttachmentsArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
@@ -136,6 +141,7 @@ export const deleteCaseAttachments = async (
         caseId,
         attachments: decodedAttachments.filter(({ id }) => deletedIds.has(id)),
         fileIds: fileEntities.filter(({ id }) => !keptFileIds.has(id)).map(({ id }) => id),
+        recordUserActions,
       },
       clientArgs
     );
@@ -154,10 +160,11 @@ interface RecordDeletionArgs {
   caseId: string;
   attachments: DecodedAttachment[];
   fileIds: string[];
+  recordUserActions?: RecordUserActions;
 }
 
 const recordDeletion = async (
-  { caseId, attachments, fileIds }: RecordDeletionArgs,
+  { caseId, attachments, fileIds, recordUserActions }: RecordDeletionArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
   const {
@@ -185,7 +192,9 @@ const recordDeletion = async (
     user,
   });
 
-  if (attachments.length > 0) {
+  if (recordUserActions != null) {
+    await recordUserActions({ attachments });
+  } else if (attachments.length > 0) {
     await userActionService.creator.bulkCreateAttachmentDeletion({
       caseId,
       attachments: attachments.map(({ id, owner, type, requestAttributes }) => ({
