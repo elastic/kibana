@@ -47,7 +47,17 @@ export interface LiquidMaskedRange {
 
 export type LiquidPositionClass =
   | { kind: 'safe'; maskedRanges: ReadonlyArray<LiquidMaskedRange> }
-  | { kind: 'has-structural' };
+  | {
+      kind: 'has-structural';
+      /**
+       * Every Liquid span, split by position. Absent when a span is unclosed,
+       * because its extent is then unknown.
+       */
+      spans?: {
+        masked: ReadonlyArray<LiquidMaskedRange>;
+        structural: ReadonlyArray<LiquidMaskedRange>;
+      };
+    };
 
 const TRIPLE_QUOTE = '"""';
 const LINE_COMMENT_OPEN = '//';
@@ -68,21 +78,25 @@ export function classifyLiquidPosition(text: string): LiquidPositionClass {
   }
 
   const masked: LiquidMaskedRange[] = [];
+  const structural: LiquidMaskedRange[] = [];
   let state: ScannerState = 'normal';
   let i = 0;
 
   while (i < text.length) {
     const step = scanLiquidStep(text, i, state);
-    if (step.hasStructural) {
+    if (step.hasStructural && !step.maskedRange) {
       return { kind: 'has-structural' };
     }
     if (step.maskedRange) {
-      masked.push(step.maskedRange);
+      (step.hasStructural ? structural : masked).push(step.maskedRange);
     }
     state = step.nextState;
     i = step.nextIndex;
   }
 
+  if (structural.length > 0) {
+    return { kind: 'has-structural', spans: { masked, structural } };
+  }
   return { kind: 'safe', maskedRanges: masked };
 }
 
@@ -90,6 +104,7 @@ interface ScanStep {
   nextState: ScannerState;
   nextIndex: number;
   maskedRange?: LiquidMaskedRange;
+  /** Set for a structural span; without `maskedRange`, the span is unclosed. */
   hasStructural?: boolean;
 }
 
@@ -131,7 +146,16 @@ function scanNormalState(text: string, i: number): ScanStep {
     return { nextState: 'block-comment', nextIndex: i + BLOCK_COMMENT_OPEN.length };
   }
   if (startsAt(text, i, LIQUID_VAR_OPEN) || startsAt(text, i, LIQUID_TAG_OPEN)) {
-    return { nextState: 'normal', nextIndex: i, hasStructural: true };
+    const opener = matchLiquidOpen(text, i);
+    if (opener === null) {
+      return { nextState: 'normal', nextIndex: i, hasStructural: true };
+    }
+    return {
+      nextState: 'normal',
+      nextIndex: opener.end,
+      maskedRange: { start: i, end: opener.end, kind: opener.kind },
+      hasStructural: true,
+    };
   }
   if (startsAt(text, i, LIQUID_COMMENT_OPEN)) {
     const close = text.indexOf(LIQUID_COMMENT_CLOSE, i + LIQUID_COMMENT_OPEN.length);
@@ -171,21 +195,28 @@ function maskLiquidOrAdvance(text: string, i: number, state: ScannerState): Scan
 }
 
 /**
- * Replaces every span in `ranges` with a run of spaces of identical length so
+ * Replaces every span in `ranges` with a run of `fill` of identical length so
  * line/column offsets in the surrounding ES|QL stay valid for the parser.
- * Caller is responsible for having computed the ranges (typically via
- * {@link classifyLiquidPosition}).
+ * Caller is responsible for having computed the ranges, in order (typically
+ * via {@link classifyLiquidPosition}).
  */
-export function applyLiquidMask(text: string, ranges: ReadonlyArray<LiquidMaskedRange>): string {
+export function applyLiquidMask(
+  text: string,
+  ranges: ReadonlyArray<LiquidMaskedRange>,
+  fill = ' '
+): string {
   if (ranges.length === 0) {
     return text;
   }
-  let out = text;
-  for (const range of ranges) {
-    const len = range.end - range.start;
-    out = out.slice(0, range.start) + ' '.repeat(len) + out.slice(range.end);
+  // One pass over the text: rebuilding the string per span is O(spans × length).
+  const parts: string[] = [];
+  let cursor = 0;
+  for (const { start, end } of ranges) {
+    parts.push(text.slice(cursor, start), fill.repeat(end - start));
+    cursor = end;
   }
-  return out;
+  parts.push(text.slice(cursor));
+  return parts.join('');
 }
 
 /** True if `offset` lies inside any of `ranges` (end-exclusive). */
