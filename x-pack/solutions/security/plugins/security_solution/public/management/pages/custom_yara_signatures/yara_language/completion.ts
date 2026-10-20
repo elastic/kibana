@@ -228,22 +228,20 @@ const getStringReferenceSuggestions = (
     }));
 };
 
+// Rules can only reference the rules declared before them.
 const getWordSuggestions = (
-  text: string,
-  typedWord: string,
+  precedingRulesText: string,
   range: monaco.IRange,
   isMetaKeyPosition: boolean
 ): monaco.languages.CompletionItem[] => {
-  const ruleSuggestions = getCapturedNames(text, RULE_DEFINITION_REGEX)
-    .filter((ruleName) => ruleName !== typedWord)
-    .map(
-      (ruleName): Suggestion => ({
-        label: ruleName,
-        kind: CompletionItemKind.Reference,
-        detail: COMPLETION_DETAILS.ruleReference,
-        insertText: ruleName,
-      })
-    );
+  const ruleSuggestions = getCapturedNames(precedingRulesText, RULE_DEFINITION_REGEX).map(
+    (ruleName): Suggestion => ({
+      label: ruleName,
+      kind: CompletionItemKind.Reference,
+      detail: COMPLETION_DETAILS.ruleReference,
+      insertText: ruleName,
+    })
+  );
 
   return [
     ...(isMetaKeyPosition ? META_KEY_SUGGESTIONS : []),
@@ -306,15 +304,14 @@ export const yaraCompletionProvider: monaco.languages.CompletionItemProvider = {
       };
     }
 
-    const { word, startColumn, endColumn } = model.getWordUntilPosition(position);
+    const { startColumn, endColumn } = model.getWordUntilPosition(position);
 
     const isMetaKeyPosition =
       META_KEY_POSITION_REGEX.test(linePrefix) && isInsideMetaSection(textUntilPosition);
 
     return {
       suggestions: getWordSuggestions(
-        text,
-        word,
+        text.slice(0, currentRuleRange.start),
         { startLineNumber: lineNumber, endLineNumber: lineNumber, startColumn, endColumn },
         isMetaKeyPosition
       ),

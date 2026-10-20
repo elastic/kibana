@@ -213,9 +213,14 @@ describe('YARA completion', () => {
   });
 
   describe('rule references', () => {
-    it('should suggest the rules defined in the editor', async () => {
+    it('should only suggest the rules declared before the current rule', async () => {
       const suggestions = await getSuggestions(
-        `rule Foo { condition: true }\nrule Bar { condition: ${CURSOR} }`
+        [
+          'rule Foo { condition: true }',
+          'rule Bar { condition: true }',
+          `rule Baz { condition: Foo and ${CURSOR} }`,
+          'rule Qux { condition: true }',
+        ].join('\n')
       );
 
       expect(getLabels(suggestions, CompletionItemKind.Reference)).toEqual(['Foo', 'Bar']);
