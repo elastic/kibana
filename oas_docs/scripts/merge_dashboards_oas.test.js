@@ -7,6 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const { spawnSync } = require('node:child_process');
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const { stringify } = require('yaml');
 const { mergeDashboards } = require('./merge_dashboards_oas');
 
 const schemaRef = (name) => ({ $ref: `#/components/schemas/${name}` });
@@ -204,5 +209,61 @@ describe('mergeDashboards', () => {
     delete (which === 'kibana' ? kibana : dashboards).paths['/api/dashboards/{id}'];
 
     expect(() => mergeDashboards(kibana, dashboards)).toThrow(/missing expected paths/);
+  });
+});
+
+describe('merge_dashboards_oas CLI', () => {
+  const script = path.join(__dirname, 'merge_dashboards_oas.js');
+  let dir;
+
+  const run = (kibana, ...flags) => {
+    fs.writeFileSync(path.join(dir, 'kibana.yaml'), stringify(kibana));
+    fs.writeFileSync(path.join(dir, 'dashboards.yaml'), stringify(dashboardsSpec()));
+    return spawnSync(
+      process.execPath,
+      [
+        script,
+        ...flags,
+        path.join(dir, 'kibana.yaml'),
+        path.join(dir, 'dashboards.yaml'),
+        path.join(dir, 'out.yaml'),
+      ],
+      { encoding: 'utf8' }
+    );
+  };
+
+  const kibanaWithoutDashboards = () => {
+    const spec = kibanaSpec();
+    delete spec.paths['/api/dashboards'];
+    delete spec.paths['/api/dashboards/{id}'];
+    return spec;
+  };
+
+  beforeEach(() => {
+    dir = fs.mkdtempSync(path.join(os.tmpdir(), 'merge-dashboards-oas-'));
+  });
+
+  afterEach(() => {
+    fs.rmSync(dir, { recursive: true, force: true });
+  });
+
+  it('fails without a dashboards path in the Kibana spec by default', () => {
+    expect(run(kibanaWithoutDashboards()).status).not.toBe(0);
+  });
+
+  it('copies a Kibana spec without dashboards paths unchanged with --allow-missing-dashboards', () => {
+    const result = run(kibanaWithoutDashboards(), '--allow-missing-dashboards');
+
+    expect(result.status).toBe(0);
+    expect(fs.readFileSync(path.join(dir, 'out.yaml'), 'utf8')).toBe(
+      fs.readFileSync(path.join(dir, 'kibana.yaml'), 'utf8')
+    );
+  });
+
+  it('still merges when --allow-missing-dashboards is set and the paths exist', () => {
+    const result = run(kibanaSpec(), '--allow-missing-dashboards');
+
+    expect(result.status).toBe(0);
+    expect(fs.readFileSync(path.join(dir, 'out.yaml'), 'utf8')).toContain('post-dashboards');
   });
 });

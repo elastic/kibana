@@ -11,7 +11,10 @@
  * Replaces the placeholder Dashboards operations in the bundled Kibana spec with the full ones
  * from the separately hosted Dashboards API spec, and writes the result to a new file.
  *
- * Usage: node merge_dashboards_oas.js <kibana.yaml> <dashboards-openapi.yaml> <output.yaml>
+ * Usage: node merge_dashboards_oas.js [--allow-missing-dashboards] <kibana.yaml> <dashboards-openapi.yaml> <output.yaml>
+ *
+ * With --allow-missing-dashboards, a Kibana spec that has no dashboards paths at all (a branch
+ * from before the Dashboards API) is written to the output unchanged instead of failing.
  *
  * Only depends on the `yaml` package so it can run in CI without bootstrapping the repo.
  * Remove it, together with the publish workflow, once kibana.yaml carries the full schemas.
@@ -44,6 +47,8 @@ const rewriteSchemaRefs = (node, renames) => {
     }
   }
 };
+
+const hasDashboardsPaths = (spec) => DASHBOARDS_PATHS.some((p) => spec.paths?.[p]);
 
 const assertDashboardsPaths = (spec, label) => {
   const missing = DASHBOARDS_PATHS.filter((p) => !spec.paths?.[p]);
@@ -101,15 +106,24 @@ const mergeDashboards = (kibana, dashboards) => {
 };
 
 const main = () => {
-  const [kibanaFile, dashboardsFile, outputFile] = process.argv.slice(2);
+  const args = process.argv.slice(2);
+  const allowMissing = args.includes('--allow-missing-dashboards');
+  const [kibanaFile, dashboardsFile, outputFile] = args.filter((arg) => !arg.startsWith('--'));
   if (!kibanaFile || !dashboardsFile || !outputFile) {
     console.error(
-      'Usage: node merge_dashboards_oas.js <kibana.yaml> <dashboards-openapi.yaml> <output.yaml>'
+      'Usage: node merge_dashboards_oas.js [--allow-missing-dashboards] <kibana.yaml> <dashboards-openapi.yaml> <output.yaml>'
     );
     process.exit(1);
   }
 
-  const { spec, renamed, added } = mergeDashboards(readYaml(kibanaFile), readYaml(dashboardsFile));
+  const kibana = readYaml(kibanaFile);
+  if (allowMissing && !hasDashboardsPaths(kibana)) {
+    fs.copyFileSync(kibanaFile, outputFile);
+    console.log(`Wrote ${outputFile}: ${kibanaFile} has no dashboards paths, copied unchanged`);
+    return;
+  }
+
+  const { spec, renamed, added } = mergeDashboards(kibana, readYaml(dashboardsFile));
   // YAML 1.1 mode keeps timestamp-like strings quoted, as in kibana.yaml, for 1.1 readers.
   fs.writeFileSync(outputFile, stringify(spec, { version: '1.1', lineWidth: 0 }));
   console.log(

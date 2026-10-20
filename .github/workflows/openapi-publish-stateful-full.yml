@@ -8,12 +8,14 @@ on:
   push:
     branches:
       - main
+      - '[0-9]+.[0-9]+'
     paths:
       - 'oas_docs/output/kibana.yaml'
       - 'oas_docs/scripts/merge_dashboards_oas.js'
       - '.github/workflows/openapi-publish-stateful-full.yml'
   # The Dashboards spec lives in its own repo. That repo can send a `dashboards-api-spec-updated`
   # repository_dispatch event to publish right away, and the daily run catches up otherwise.
+  # Scheduled and dispatch events only run on main, so release branches publish on their own pushes.
   repository_dispatch:
     types: [dashboards-api-spec-updated]
   schedule:
@@ -21,7 +23,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: openapi-publish-stateful-full
+  group: openapi-publish-stateful-full-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -34,8 +36,9 @@ env:
 
 jobs:
   publish:
-    # The object key uses the branch name, so only main may publish.
-    if: github.repository == 'elastic/kibana' && github.ref == 'refs/heads/main'
+    # The object key uses the branch name. Pushes are limited to main and release branches by the
+    # trigger, everything else (manual runs, schedule, dispatch) may only publish main.
+    if: github.repository == 'elastic/kibana' && (github.event_name == 'push' || github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -60,8 +63,12 @@ jobs:
           node scripts/filter-openapi.mjs
 
       - name: Merge the Dashboards API spec into kibana.yaml
+        env:
+          # Branches from before the Dashboards API (8.19) are published as they are, so the docs
+          # keep a kibana-full entry for that version. On main a missing API must fail the job.
+          ALLOW_MISSING: ${{ github.ref_name != 'main' && '--allow-missing-dashboards' || '' }}
         run: |
-          NODE_PATH="$GITHUB_WORKSPACE/$DASHBOARDS_REPO_PATH/node_modules" node oas_docs/scripts/merge_dashboards_oas.js \
+          NODE_PATH="$GITHUB_WORKSPACE/$DASHBOARDS_REPO_PATH/node_modules" node oas_docs/scripts/merge_dashboards_oas.js $ALLOW_MISSING \
             oas_docs/output/kibana.yaml "$DASHBOARDS_REPO_PATH/generated/dashboards-openapi.yaml" "$FULL_SPEC_PATH"
 
       - uses: elastic/docs-actions/openapi/lint@v1
