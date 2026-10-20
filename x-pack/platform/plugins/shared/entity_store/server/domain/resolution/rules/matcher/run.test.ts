@@ -18,10 +18,6 @@ import { runEsqlMatcherRule } from './run';
 import type { RunEsqlMatcherDeps } from './run';
 import type { PerRuleState } from '../maintainers/automated_resolution/types';
 
-jest.mock('../../../asset_manager/resolve_entity_store_indices', () => ({
-  resolveLatestEntitiesIndexName: jest.fn().mockResolvedValue('.entities.v2.latest.default'),
-}));
-
 const EMAIL_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH)!.matcher!;
 const SID_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE)!.matcher!;
 const CROWDSTRIKE_SID_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE)!
@@ -42,7 +38,7 @@ const createDeps = (
   overrides: Partial<RunEsqlMatcherDeps> = {}
 ): RunEsqlMatcherDeps => ({
   state,
-  namespace: 'default',
+  index: '.entities.v2.latest.default',
   esClient,
   logger: loggerMock.create(),
   resolutionClient,
@@ -842,6 +838,85 @@ describe('runEsqlMatcherRule', () => {
     expect(result.lastProcessedTimestamp).toBe('2026-08-01T00:00:00Z');
     expect(result.lastRun).toBeNull();
     expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
+  });
+
+  describe('aborted mid-scan', () => {
+    const PRIOR = '2026-08-01T00:00:00Z';
+    const oktaEntraPair = (letter: string) =>
+      matchGroup({
+        matchValue: `${letter}@corp.com`,
+        members: [
+          [`user-${letter}1`, 'okta'],
+          [`user-${letter}2`, 'entra_id'],
+        ],
+      });
+
+    it('keeps the prior watermark and stops between groups of a page', async () => {
+      const abortCtrl = new AbortController();
+      mockGroupPages(['a', 'b', 'c'].map(oktaEntraPair));
+      mockCascadeLink.mockImplementationOnce(async () => {
+        abortCtrl.abort();
+        return { linked: ['user-a2'], retargeted: [], skipped: [], cascadesBlocked: 0 };
+      });
+
+      const result = await runEsqlMatcherRule(
+        createDeps(
+          createInitialState({ lastProcessedTimestamp: PRIOR }),
+          mockEsClient,
+          mockResolutionClient,
+          { signal: abortCtrl.signal }
+        )
+      );
+
+      expect(result.lastProcessedTimestamp).toBe(PRIOR);
+      expect(mockCascadeLink).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the prior watermark and reads no further page after the last group of a full page', async () => {
+      const abortCtrl = new AbortController();
+      mockGroupPages(['a', 'b', 'c', 'd', 'e'].map(oktaEntraPair), ['f'].map(oktaEntraPair));
+      mockCascadeLink
+        .mockResolvedValueOnce({ linked: ['x'], retargeted: [], skipped: [], cascadesBlocked: 0 })
+        .mockResolvedValueOnce({ linked: ['x'], retargeted: [], skipped: [], cascadesBlocked: 0 })
+        .mockResolvedValueOnce({ linked: ['x'], retargeted: [], skipped: [], cascadesBlocked: 0 })
+        .mockResolvedValueOnce({ linked: ['x'], retargeted: [], skipped: [], cascadesBlocked: 0 })
+        .mockImplementationOnce(async () => {
+          abortCtrl.abort();
+          return { linked: ['x'], retargeted: [], skipped: [], cascadesBlocked: 0 };
+        });
+
+      const result = await runEsqlMatcherRule(
+        createDeps(
+          createInitialState({ lastProcessedTimestamp: PRIOR }),
+          mockEsClient,
+          mockResolutionClient,
+          { signal: abortCtrl.signal, pageSize: 5 }
+        )
+      );
+
+      expect(result.lastProcessedTimestamp).toBe(PRIOR);
+      expect(mockCascadeLink).toHaveBeenCalledTimes(5);
+      // The watermark query plus one page; the second page is never read.
+      expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  it('reports a custom rule under the shared telemetry id, not its own id', async () => {
+    const telemetry = { report: jest.fn() };
+    mockGroupPages([]);
+
+    await runEsqlMatcherRule(
+      createDeps(createInitialState(), mockEsClient, mockResolutionClient, {
+        telemetry,
+        ruleId: 'custom:abc',
+        telemetryRuleId: 'custom',
+      })
+    );
+
+    expect(telemetry.report).toHaveBeenCalledWith(
+      expect.objectContaining({ scope: { kind: 'rule', value: 'custom' } })
+    );
+    expect(JSON.stringify(telemetry.report.mock.calls)).not.toContain('abc');
   });
 
   it('forwards the abort signal on the watermark query', async () => {

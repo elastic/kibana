@@ -11,6 +11,7 @@ import {
   BOUNDARY_WINDOW_HOURS,
   RISK_MOVER_MIN_SCORE_CHANGE,
   buildRiskScoreAndLevelEvals,
+  groupMarkerEval,
 } from './risk_history';
 import { getSeriesWindow } from './tile_series_window';
 
@@ -103,13 +104,19 @@ export const buildRiskTilesSeriesQuery = (
     // Keep only the docs in the two hours before a moment a dot needs.
     `| WHERE ${HOURS_BACK_COLUMN} % ${stepHours} < ${BOUNDARY_WINDOW_HOURS}`,
     ...buildRiskScoreAndLevelEvals(''),
+    groupMarkerEval(''),
     // The moments whose window holds the doc: more than one when the windows overlap (a 1 hour step).
     `| EVAL ${SLOT_COLUMN} = MV_DEDUPE(MV_APPEND(${HOURS_BACK_COLUMN} / ${stepHours}, (${HOURS_BACK_COLUMN} - 1) / ${stepHours}))`,
     `| MV_EXPAND ${SLOT_COLUMN}`,
     `| WHERE ${SLOT_COLUMN} >= 0 AND ${HOURS_BACK_COLUMN} <= ${SLOT_COLUMN} * ${stepHours} + ${
       BOUNDARY_WINDOW_HOURS - 1
     }`,
-    `| STATS slot_score = LAST(risk_score, @timestamp), slot_level = LAST(level_num, @timestamp) BY entity_euid, ${SLOT_COLUMN}`,
+    // The last value of each score type, then the group's if the entity has one, else its own (LAST
+    // does not skip nulls, so the type is a grouping key; see pickGroupValueFirst in risk_history.ts).
+    `| STATS slot_score = LAST(risk_score, @timestamp), slot_level = LAST(level_num, @timestamp) BY entity_euid, ${SLOT_COLUMN}, is_group`,
+    `| EVAL group_score = CASE(is_group == 1, slot_score, null), own_score = CASE(is_group == 0, slot_score, null), group_level = CASE(is_group == 1, slot_level, null), own_level = CASE(is_group == 0, slot_level, null)`,
+    `| STATS group_score = MAX(group_score), own_score = MAX(own_score), group_level = MAX(group_level), own_level = MAX(own_level) BY entity_euid, ${SLOT_COLUMN}`,
+    `| EVAL slot_score = COALESCE(group_score, own_score), slot_level = COALESCE(group_level, own_level)`,
     `| STATS`,
     `    ${valueColumns.join(',\n    ')}`,
     `    BY entity_euid`,
@@ -118,7 +125,8 @@ export const buildRiskTilesSeriesQuery = (
     `| WHERE ${anyFlag}`,
     `| RENAME entity_euid AS \`entity.id\``,
     `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
-    `| WHERE entity.name IS NOT NULL`,
+    // Aliases are left out: the group is judged by its main entity, whose history holds the group's score.
+    `| WHERE entity.name IS NOT NULL AND \`entity.relationships.resolution.resolved_to\` IS NULL`,
     ...entityFilterClauses,
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
     // One row per resolved entity, flagged in the dots where any of its ids counts; then an exact COUNT.

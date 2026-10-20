@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useMemo, useRef } from 'react';
+import { useCallback, useMemo, useRef } from 'react';
+import { chunk as toChunks } from 'lodash';
 import { useQueries } from '@kbn/react-query';
 import type { QueryFunctionContext, UseQueryResult } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
@@ -22,12 +23,18 @@ import {
   getReadyContext,
   getViewKey,
 } from './use_entity_grid_context';
-import type { GridContext, RowsBatch, UseEntityGridDataOptions } from './use_entity_grid_context';
+import type { GridContext, UseEntityGridDataOptions } from './use_entity_grid_context';
 
 const ENRICH_ERROR_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.home.entitiesGrid.enrichError',
   { defaultMessage: 'Some columns of the entities table could not be loaded' }
 );
+
+/** Rows per enrich request: a virtualized grid enriches only the chunks of rows in view. */
+export const ENRICH_CHUNK_SIZE = 50;
+
+/** How long a chunk's computed columns stay fresh: scrolling back to it within this reads nothing. */
+const ENRICH_STALE_TIME_MS = 60_000;
 
 /** A sort query may already have read an enricher's fields, e.g. the alert sort its counts. */
 const isMissingFields = (rows: readonly Row[], { fields }: PageEnricher): boolean =>
@@ -77,7 +84,11 @@ export const fetchEnrichedRows = async (
   };
 };
 
-const getEnrichKey = (context: GridContext, options: UseEntityGridDataOptions, batch: RowsBatch) =>
+const getEnrichKey = (
+  context: GridContext,
+  options: UseEntityGridDataOptions,
+  chunk: readonly Row[]
+) =>
   [
     'entity-grid',
     getKeyScope(options),
@@ -85,60 +96,87 @@ const getEnrichKey = (context: GridContext, options: UseEntityGridDataOptions, b
     {
       ...getViewKey(context, options),
       sortDirection: options.sortDirection,
-      entityIds: getEntityIds(batch.rows).join('\0'),
+      entityIds: getEntityIds(chunk).join('\0'),
       anomalyJobIds: context.anomalyJobIds.join('\0'),
     },
   ] as const;
 
-/** The computed columns of a batch's rows. */
-const fetchEnrichedBatch = (
+const fetchEnrichedChunk = (
   context: GridContext,
   options: UseEntityGridDataOptions,
-  batch: RowsBatch,
+  chunk: readonly Row[],
   signal?: AbortSignal
 ): Promise<EnrichedRows> => {
   const ready = getReadyContext(context);
   if (!ready) return Promise.resolve({ rows: [], errors: [] });
   return fetchEnrichedRows(
-    batch.rows,
-    buildQueryArgs(ready, options, null),
+    chunk,
+    buildQueryArgs(ready, options),
     { runQuery: createEsqlRunner(context.searchService, signal), http: context.http, signal },
     PAGE_ENRICHERS[options.rowsMode]
   );
 };
 
-/**
- * The loaded rows: each batch's rows with its computed columns once they are read. The rows
- * come from the batch, so a refetch shows fresh entity fields right away; the computed
- * columns come from the batch's enrich data, matched by entity id.
- */
+/** Rows come from the rows query, so a refetch shows fresh fields; computed columns match by entity id. */
 export const getLoadedRows = (
-  batches: ReadonlyArray<{ rows: readonly Row[]; enriched?: readonly Row[] }>
+  chunks: ReadonlyArray<{ rows: readonly Row[]; enriched?: readonly Row[] }>
 ): Row[] =>
-  batches.flatMap(({ rows, enriched }) => {
+  chunks.flatMap(({ rows, enriched }) => {
     if (!enriched) return [...rows];
     const enrichedById = new Map(enriched.map((row) => [getEntityId(row), row]));
     return rows.map((row) => ({ ...enrichedById.get(getEntityId(row)), ...row }));
   });
 
+const canEnrich = (context: GridContext, isPreviousData: boolean): boolean =>
+  getReadyContext(context) != null && !isPreviousData && !context.isAnomalyJobsLoading;
+
+const getEnrichQuery = (
+  context: GridContext,
+  options: UseEntityGridDataOptions,
+  chunk: readonly Row[]
+) => ({
+  queryKey: getEnrichKey(context, options, chunk),
+  queryFn: ({ signal }: QueryFunctionContext) =>
+    fetchEnrichedChunk(context, options, chunk, signal),
+  staleTime: ENRICH_STALE_TIME_MS,
+});
+
+/** With `enrichRowsInView` these only read the cache; `onRowsInViewChange` fills it. */
 const useEnrichQueries = (
   context: GridContext,
   options: UseEntityGridDataOptions,
-  batches: readonly RowsBatch[],
-  isPreviousData: boolean
+  chunks: ReadonlyArray<readonly Row[]>,
+  isPreviousData: boolean,
+  enrichRowsInView: boolean
 ) =>
   useQueries({
-    queries: batches.map((batch) => ({
-      queryKey: getEnrichKey(context, options, batch),
-      queryFn: ({ signal }: QueryFunctionContext) =>
-        fetchEnrichedBatch(context, options, batch, signal),
-      enabled:
-        getReadyContext(context) != null &&
-        !isPreviousData &&
-        batch.rows.length > 0 &&
-        !context.isAnomalyJobsLoading,
+    queries: chunks.map((chunk) => ({
+      ...getEnrichQuery(context, options, chunk),
+      enabled: !enrichRowsInView && canEnrich(context, isPreviousData),
     })),
   });
+
+/** Not state: a new range re-renders nothing, only the data it fetches does. */
+const useEnrichRowsInView = (
+  context: GridContext,
+  options: UseEntityGridDataOptions,
+  chunks: ReadonlyArray<readonly Row[]>,
+  isPreviousData: boolean
+) =>
+  useCallback(
+    (firstRow: number, lastRow: number) => {
+      if (!canEnrich(context, isPreviousData)) return;
+      chunks
+        .slice(
+          Math.floor(firstRow / ENRICH_CHUNK_SIZE),
+          Math.floor(lastRow / ENRICH_CHUNK_SIZE) + 1
+        )
+        .forEach((chunk) => {
+          void context.queryClient.prefetchQuery(getEnrichQuery(context, options, chunk));
+        });
+    },
+    [context, options, chunks, isPreviousData]
+  );
 
 /** The previous array while every item is the same, so memos that depend on it hold. */
 const useStableArray = <T>(items: readonly T[]): readonly T[] => {
@@ -157,29 +195,34 @@ const useStableArray = <T>(items: readonly T[]): readonly T[] => {
  * change, and useQueries returns new results on every render.
  */
 const useLoadedRows = (
-  batches: readonly RowsBatch[],
+  chunks: ReadonlyArray<readonly Row[]>,
   enrichQueries: ReadonlyArray<UseQueryResult<EnrichedRows>>
 ) => {
   const enrichedRows = useStableArray(enrichQueries.map(({ data }) => data?.rows));
   return useMemo(
-    () => getLoadedRows(batches.map(({ rows }, i) => ({ rows, enriched: enrichedRows[i] }))),
-    [batches, enrichedRows]
+    () => getLoadedRows(chunks.map((rows, i) => ({ rows, enriched: enrichedRows[i] }))),
+    [chunks, enrichedRows]
   );
 };
 
-/**
- * The computed columns of the loaded batches: each batch's enrichers run after its rows arrive,
- * keyed on the batch's entity ids, so a refetch with the same rows keeps showing them while it
- * runs.
- */
+/** Chunks keyed on entity ids, so a refetch with the same rows keeps showing their columns. */
 export const useEntityGridRowsEnrichment = (
   context: GridContext,
   options: UseEntityGridDataOptions,
-  batches: readonly RowsBatch[],
-  isPreviousData: boolean
+  loadedRows: readonly Row[] | undefined,
+  isPreviousData: boolean,
+  enrichRowsInView: boolean
 ) => {
-  const enrichQueries = useEnrichQueries(context, options, batches, isPreviousData);
-  const rows = useLoadedRows(batches, enrichQueries);
+  const chunks = useMemo(() => toChunks(loadedRows ?? [], ENRICH_CHUNK_SIZE), [loadedRows]);
+  const enrichQueries = useEnrichQueries(
+    context,
+    options,
+    chunks,
+    isPreviousData,
+    enrichRowsInView
+  );
+  const onRowsInViewChange = useEnrichRowsInView(context, options, chunks, isPreviousData);
+  const rows = useLoadedRows(chunks, enrichQueries);
   // Columns whose enricher failed show no value; say so, as an empty cell also means none.
   useErrorToast(
     ENRICH_ERROR_TITLE,
@@ -188,7 +231,8 @@ export const useEntityGridRowsEnrichment = (
 
   return {
     rows,
-    // Computed cells of a batch stay blank, rather than empty, until its enrich data arrives.
+    onRowsInViewChange,
+    // Computed cells of a chunk stay blank, rather than empty, until its enrich data arrives.
     isEnriching: enrichQueries.some(({ data, isFetching }) => data == null && isFetching),
     isFetching: enrichQueries.some((q) => q.isFetching),
     dataUpdatedAt: Math.max(0, ...enrichQueries.map((q) => q.dataUpdatedAt)),

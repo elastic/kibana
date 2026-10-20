@@ -1,5 +1,5 @@
 {
-  "sha1": "9fb1836cec653c09aa81a1c72b72f97a841b737f",
+  "sha1": "208d40b6770f9bf08c0f06e3a9021755b08dcac7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -21,9 +21,9 @@
       }
     },
     {
-      "id": "6395ba18a958586-9c37f7f90173447",
-      "title": "Nightshift sources authorization reports unknown health to a reader without Elasticsearch view privileges",
-      "expectedStatus": "passed",
+      "id": "6395ba18a958586-49190653b419991",
+      "title": "Nightshift sources authorization reports ok health to a reader with only the implicit view grant",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -32,7 +32,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 75,
+        "line": 79,
         "column": 14
       }
     },
@@ -48,8 +48,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 86,
-        "column": 14
+        "line": 91,
+        "column": 7
       }
     },
     {
@@ -64,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 95,
-        "column": 42
+        "line": 98,
+        "column": 27
       }
     },
     {
