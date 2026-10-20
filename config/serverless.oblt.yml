@@ -48,8 +48,8 @@ xpack.fleet.eventIngestedEnabled: true
 xpack.apm.serverlessOnboarding: true
 
 # Synthetics mTLS cert locations
-xpack.synthetics.service.tls.certificate: /mnt/elastic-internal/http-certs/tls.crt
-xpack.synthetics.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
+xpack.uptime.service.tls.certificate: /mnt/elastic-internal/http-certs/tls.crt
+xpack.uptime.service.tls.key: /mnt/elastic-internal/http-certs/tls.key
 
 # Fleet specific configuration
 xpack.fleet.internal.registry.capabilities: ['apm', 'observability', 'uptime']

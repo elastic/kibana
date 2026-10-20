@@ -43,7 +43,7 @@ const kbnServerArgsFromController = {
   oblt: [
     '--coreApp.allowDynamicConfigOverrides=true',
     // defined in MKI control plane
-    '--xpack.synthetics.service.manifestUrl=mockDevUrl',
+    '--xpack.uptime.service.manifestUrl=mockDevUrl',
   ],
   security: [
     '--coreApp.allowDynamicConfigOverrides=true',
@@ -96,10 +96,10 @@ export function createServerlessFeatureFlagTestConfig<T extends DeploymentAgnost
           ...(options.serverlessProject === 'oblt'
             ? [
                 // defined in MKI control plane. Necessary for Synthetics app testing
-                '--xpack.synthetics.service.password=test',
-                '--xpack.synthetics.service.username=localKibanaIntegrationTestsUser',
-                '--xpack.synthetics.service.devUrl=mockDevUrl',
-                '--xpack.synthetics.service.manifestUrl=mockDevUrl',
+                '--xpack.uptime.service.password=test',
+                '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+                '--xpack.uptime.service.devUrl=mockDevUrl',
+                '--xpack.uptime.service.manifestUrl=mockDevUrl',
                 `--xpack.productDocBase.artifactRepositoryUrl=file:///${LOCAL_PRODUCT_DOC_PATH}`,
               ]
             : []),
