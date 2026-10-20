@@ -9,6 +9,7 @@ import { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useKibana } from './use_kibana';
+import { invalidateSignificantEventQueries } from '../data/significant_events/invalidate_significant_event_queries';
 import {
   NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
   type NightshiftSignificantEventsQueryData,
@@ -36,13 +37,6 @@ interface UseCloseSignificantEventResult {
   closeSignificantEvent: (eventId: string, assessmentNote?: string) => void;
   closingEventId?: string;
 }
-
-const EVENT_QUERY_KEYS = [
-  NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
-  ['nightshift.significantEventsList'],
-  ['nightshift.eventById'],
-  ['nightshift.eventLifecycle'],
-] as const;
 
 export const useCloseSignificantEvent = ({
   onClosed,
@@ -108,11 +102,7 @@ export const useCloseSignificantEvent = ({
     },
     onSettled: async () => {
       setClosingEventId(undefined);
-      await Promise.all(
-        EVENT_QUERY_KEYS.map((queryKey) =>
-          queryClient.invalidateQueries({ queryKey, exact: false })
-        )
-      );
+      await invalidateSignificantEventQueries(queryClient);
     },
   });
 

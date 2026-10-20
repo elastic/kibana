@@ -22,14 +22,10 @@ import {
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
 import React, { useState } from 'react';
+import { SIGNIFICANT_EVENT_STATUS_LABELS } from '../../../components/entities/significant_event/significant_event_status';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { DetectionTimeRange } from '../use_detection_time_range';
-import {
-  SEARCH_PLACEHOLDER,
-  SEVERITY_FILTER_LABEL,
-  STATUS_FILTER_LABEL,
-  STATUS_LABELS,
-} from './translations';
+import { SEARCH_PLACEHOLDER, SEVERITY_FILTER_LABEL, STATUS_FILTER_LABEL } from './translations';
 
 interface EventsFilterPopoverProps<Value extends string> {
   label: string;
@@ -139,7 +135,7 @@ export const EventsFilters = ({
             label={STATUS_FILTER_LABEL}
             options={SIGNIFICANT_EVENT_STATUS_OPTIONS}
             selected={status}
-            getLabel={(value) => STATUS_LABELS[value]}
+            getLabel={(value) => SIGNIFICANT_EVENT_STATUS_LABELS[value]}
             onChange={onStatusChange}
             testSubject="nightshiftDetectionEventsStatusFilter"
           />

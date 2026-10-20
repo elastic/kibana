@@ -10,7 +10,7 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useState } from 'react';
 import { getFormattedError } from '../../common/errors';
 import { useKibana } from '../../hooks/use_kibana';
-import { NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY } from '../../hooks/use_fetch_significant_events';
+import { invalidateSignificantEventQueries } from './invalidate_significant_event_queries';
 
 const TRIGGER_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.nightshift.triggerEventInvestigation.successToastTitle',
@@ -29,13 +29,6 @@ const TRIGGER_ERROR_TOAST_TITLE = i18n.translate(
   'xpack.nightshift.triggerEventInvestigation.errorToastTitle',
   { defaultMessage: 'Failed to start investigation' }
 );
-
-const EVENT_QUERY_KEYS = [
-  NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
-  ['nightshift.significantEventsList'],
-  ['nightshift.eventById'],
-  ['nightshift.eventLifecycle'],
-] as const;
 
 export const useTriggerEventInvestigation = ({
   onTriggered,
@@ -71,11 +64,7 @@ export const useTriggerEventInvestigation = ({
     },
     onSettled: async () => {
       setTriggeringEventId(undefined);
-      await Promise.all(
-        EVENT_QUERY_KEYS.map((queryKey) =>
-          queryClient.invalidateQueries({ queryKey, exact: false })
-        )
-      );
+      await invalidateSignificantEventQueries(queryClient);
     },
   });
 

@@ -5,17 +5,31 @@
  * 2.0.
  */
 
+import dateMath from '@kbn/datemath';
 import { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { DEFAULT_DETECTION_TIME_RANGE } from './constants';
 
-const RANGE_FROM_QUERY_PARAM = 'rangeFrom';
-const RANGE_TO_QUERY_PARAM = 'rangeTo';
+export const RANGE_FROM_QUERY_PARAM = 'rangeFrom';
+export const RANGE_TO_QUERY_PARAM = 'rangeTo';
 
 export interface DetectionTimeRange {
   from: string;
   to: string;
 }
+
+const isValidDate = (value: string | null, roundUp: boolean): value is string =>
+  value != null && dateMath.parse(value, { roundUp })?.isValid() === true;
+
+const getTimeRange = (params: URLSearchParams): DetectionTimeRange => {
+  const from = params.get(RANGE_FROM_QUERY_PARAM);
+  const to = params.get(RANGE_TO_QUERY_PARAM);
+
+  // A hand-edited or stale URL falls back to the default rather than failing every request.
+  return isValidDate(from, false) && isValidDate(to, true)
+    ? { from, to }
+    : DEFAULT_DETECTION_TIME_RANGE;
+};
 
 export const useDetectionTimeRange = (): {
   timeRange: DetectionTimeRange;
@@ -24,16 +38,13 @@ export const useDetectionTimeRange = (): {
   const history = useHistory();
   const { pathname, search } = useLocation();
   const params = useMemo(() => new URLSearchParams(search), [search]);
-  const timeRange = useMemo(
-    () => ({
-      from: params.get(RANGE_FROM_QUERY_PARAM) ?? DEFAULT_DETECTION_TIME_RANGE.from,
-      to: params.get(RANGE_TO_QUERY_PARAM) ?? DEFAULT_DETECTION_TIME_RANGE.to,
-    }),
-    [params]
-  );
+  const timeRange = useMemo(() => getTimeRange(params), [params]);
 
   useEffect(() => {
-    if (params.has(RANGE_FROM_QUERY_PARAM) && params.has(RANGE_TO_QUERY_PARAM)) {
+    if (
+      params.get(RANGE_FROM_QUERY_PARAM) === timeRange.from &&
+      params.get(RANGE_TO_QUERY_PARAM) === timeRange.to
+    ) {
       return;
     }
 
@@ -45,12 +56,16 @@ export const useDetectionTimeRange = (): {
 
   const setTimeRange = useCallback(
     (nextTimeRange: DetectionTimeRange) => {
+      // A refresh resubmits the same range; don't add a duplicate history entry.
+      if (nextTimeRange.from === timeRange.from && nextTimeRange.to === timeRange.to) {
+        return;
+      }
       const nextParams = new URLSearchParams(search);
       nextParams.set(RANGE_FROM_QUERY_PARAM, nextTimeRange.from);
       nextParams.set(RANGE_TO_QUERY_PARAM, nextTimeRange.to);
       history.push({ pathname, search: nextParams.toString() });
     },
-    [history, pathname, search]
+    [history, pathname, search, timeRange]
   );
 
   return { timeRange, setTimeRange };

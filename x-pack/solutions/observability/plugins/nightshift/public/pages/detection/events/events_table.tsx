@@ -27,6 +27,7 @@ import {
   getStatusColor,
   isInvestigationRunning,
   isNeedsActionStatus,
+  SIGNIFICANT_EVENT_STATUS_LABELS,
 } from '../../../components/entities/significant_event/significant_event_status';
 import { MarkSignificantEventInactiveModal } from '../../../components/entities/significant_event/mark_significant_event_inactive_modal';
 import { SeverityBadge } from '../../../components/ui/severity_badge';
@@ -53,7 +54,6 @@ import {
   SEVERITY_COLUMN_LABEL,
   SOURCES_COLUMN_LABEL,
   STATUS_COLUMN_LABEL,
-  STATUS_LABELS,
 } from './translations';
 
 const PAGE_SIZE_OPTIONS = [10, 25, 50];
@@ -134,7 +134,9 @@ export const EventsTable = ({
         name: STATUS_COLUMN_LABEL,
         width: '120px',
         render: (status: SignificantEventResponse['status']) => (
-          <EuiHealth color={getStatusColor(status)}>{STATUS_LABELS[status]}</EuiHealth>
+          <EuiHealth color={getStatusColor(status)}>
+            {SIGNIFICANT_EVENT_STATUS_LABELS[status]}
+          </EuiHealth>
         ),
       },
       {

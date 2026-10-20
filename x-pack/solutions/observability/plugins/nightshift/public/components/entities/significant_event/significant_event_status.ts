@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   type SignificantEvent,
@@ -36,6 +37,18 @@ export const NEEDS_ACTION_STATUSES: SignificantEventStatus[] =
 export const RESOLVED_STATUSES: SignificantEventStatus[] = SIGNIFICANT_EVENT_STATUS_OPTIONS.filter(
   (status) => STATUS_GROUP[status] === 'resolved'
 );
+
+export const SIGNIFICANT_EVENT_STATUS_LABELS: Record<SignificantEventStatus, string> = {
+  active: i18n.translate('xpack.nightshift.significantEvent.status.active', {
+    defaultMessage: 'Active',
+  }),
+  recovering: i18n.translate('xpack.nightshift.significantEvent.status.recovering', {
+    defaultMessage: 'Recovering',
+  }),
+  inactive: i18n.translate('xpack.nightshift.significantEvent.status.inactive', {
+    defaultMessage: 'Inactive',
+  }),
+};
 
 export type StatusColor = 'danger' | 'success';
 

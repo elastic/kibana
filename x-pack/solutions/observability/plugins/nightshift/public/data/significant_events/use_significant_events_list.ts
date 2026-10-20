@@ -13,10 +13,13 @@ import type {
   SignificantEventStatus,
 } from '@kbn/significant-events-schema';
 import { useFetchErrorToast } from '../../hooks/use_fetch_error_toast';
+import { applyPendingInvestigationCompletions } from '../../hooks/use_fetch_significant_events';
 import { useKibana } from '../../hooks/use_kibana';
 import { significantEventsListQueryKey } from '../query_keys';
 
 const RUNNING_INVESTIGATIONS_REFETCH_INTERVAL_MS = 5_000;
+
+// Local copy: data/ must not import from components/.
 const hasRunningInvestigations = (events: SignificantEvent[]): boolean =>
   events.some(({ investigations }) => {
     const latestInvestigation = investigations?.at(-1);
@@ -55,22 +58,28 @@ export const useSignificantEventsList = ({
       status,
       severity,
     }),
-    queryFn: ({ signal }) => {
+    queryFn: async ({ signal }) => {
       const absoluteRange = getAbsoluteTimeRange({ from, to }, { forceNow: new Date() });
 
-      return significantEventsRepositoryClient.fetch('GET /internal/significant_events/events', {
-        params: {
-          query: {
-            ...absoluteRange,
-            page,
-            perPage,
-            search: search || undefined,
-            status: status.length > 0 ? status : undefined,
-            severity: severity.length > 0 ? severity : undefined,
+      const response = await significantEventsRepositoryClient.fetch(
+        'GET /internal/significant_events/events',
+        {
+          params: {
+            query: {
+              ...absoluteRange,
+              page,
+              perPage,
+              search: search || undefined,
+              status: status.length > 0 ? status : undefined,
+              severity: severity.length > 0 ? severity : undefined,
+            },
           },
-        },
-        signal: signal ?? null,
-      });
+          signal: signal ?? null,
+        }
+      );
+
+      // Keep completions the flyout saw before the server records them.
+      return { ...response, hits: applyPendingInvestigationCompletions(response.hits) };
     },
     keepPreviousData: true,
     refetchInterval: (data) =>

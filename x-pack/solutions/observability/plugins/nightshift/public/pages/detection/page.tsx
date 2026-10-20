@@ -20,7 +20,11 @@ import { useKibana } from '../../hooks/use_kibana';
 import type { DetectionTabId } from './detection_tabs';
 import { DETECTION_TAB_IDS, DETECTION_TAB_LABELS } from './detection_tabs';
 import { DetectionOverview } from './overview/detection_overview';
-import { useDetectionTimeRange } from './use_detection_time_range';
+import {
+  RANGE_FROM_QUERY_PARAM,
+  RANGE_TO_QUERY_PARAM,
+  useDetectionTimeRange,
+} from './use_detection_time_range';
 
 const EventsTab = React.lazy(() =>
   import('./events/events_tab').then(({ EventsTab: Tab }) => ({ default: Tab }))
@@ -51,16 +55,21 @@ export const DetectionPage = ({
   const maintenanceStatus = useMaintenanceStatus();
   const { timeRange, setTimeRange } = useDetectionTimeRange();
   const overview = useDetectionOverview(timeRange);
+  // Tabs share only the time range; filters and the open flyout belong to one tab.
+  const tabSearch = `?${new URLSearchParams({
+    [RANGE_FROM_QUERY_PARAM]: timeRange.from,
+    [RANGE_TO_QUERY_PARAM]: timeRange.to,
+  }).toString()}`;
   const tabs = DETECTION_TAB_IDS.map((id) => ({
     id,
     label: DETECTION_TAB_LABELS[id],
     isSelected: tab === id,
     href: application.getUrlForApp(NIGHTSHIFT_APP_ID, {
-      path: `/detection/${id}${history.location.search}`,
+      path: `/detection/${id}${tabSearch}`,
     }),
     onClick: (event?: React.MouseEvent) => {
       event?.preventDefault();
-      history.push(`/detection/${id}${history.location.search}`);
+      history.push(`/detection/${id}${tabSearch}`);
     },
     'data-test-subj': `nightshiftDetectionTab-${id}`,
   }));

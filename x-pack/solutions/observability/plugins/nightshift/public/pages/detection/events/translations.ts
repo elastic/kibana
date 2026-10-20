@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 
 export const EVENTS_TABLE_CAPTION = i18n.translate(
   'xpack.nightshift.detectionPage.events.tableCaption',
@@ -83,14 +82,14 @@ export const EVENT_NOT_FOUND_TOAST_TITLE = i18n.translate(
   { defaultMessage: 'The significant event could not be found' }
 );
 
-export const STATUS_LABELS: Record<SignificantEventStatus, string> = {
-  active: i18n.translate('xpack.nightshift.detectionPage.events.status.active', {
-    defaultMessage: 'Active',
-  }),
-  recovering: i18n.translate('xpack.nightshift.detectionPage.events.status.recovering', {
-    defaultMessage: 'Recovering',
-  }),
-  inactive: i18n.translate('xpack.nightshift.detectionPage.events.status.inactive', {
-    defaultMessage: 'Inactive',
-  }),
-};
+export const LIST_ERROR_TITLE = i18n.translate(
+  'xpack.nightshift.detectionPage.events.listErrorTitle',
+  { defaultMessage: 'Unable to load significant events' }
+);
+export const LIST_ERROR_MESSAGE = i18n.translate(
+  'xpack.nightshift.detectionPage.events.listErrorMessage',
+  { defaultMessage: "The significant events list couldn't be loaded." }
+);
+export const RETRY_LABEL = i18n.translate('xpack.nightshift.detectionPage.events.retryLabel', {
+  defaultMessage: 'Try again',
+});

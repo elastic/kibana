@@ -6,21 +6,19 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEuiTheme } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { FlyoutTemplate, type FlyoutFooterMenuPanel } from '@kbn/flyout-template';
 import { i18n } from '@kbn/i18n';
 import { useInvestigation } from '@kbn/investigation-output';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useQueryClient } from '@kbn/react-query';
-import {
-  getSeverityLabel,
-  type SignificantEvent,
-  type SignificantEventStatus,
-} from '@kbn/significant-events-schema';
+import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { DetectionFlyout } from '../detection/detection_flyout';
 import { DetectionsList } from './detections_list';
 import { EventInvestigation } from './event_investigation';
 import { TruncatableSummary } from '../../../common/truncatable_summary';
+import { SIGNIFICANT_EVENT_SEVERITY } from '../../ui/severity_badge';
 import {
   getInvestigationWorkflowStatusLabel,
   isInvestigationInvestigated,
@@ -43,6 +41,7 @@ import {
   getStatusColor,
   isInvestigationRunning,
   isNeedsActionStatus,
+  SIGNIFICANT_EVENT_STATUS_LABELS,
 } from './significant_event_status';
 import { useKibana } from '../../../hooks/use_kibana';
 import { useBlocksNewActivity } from '../../../data/maintenance/use_significant_events_maintenance';
@@ -57,23 +56,6 @@ import { MarkSignificantEventInactiveModal } from './mark_significant_event_inac
 
 const EVENT_FLYOUT_HISTORY_KEY = Symbol('nightshiftEventFlyout');
 const INVESTIGATION_MENU_TITLE_MAX_LENGTH = 48;
-const SEVERITY_BADGE_COLORS = {
-  critical: 'danger',
-  high: 'risk',
-  medium: 'warning',
-  low: 'default',
-} as const;
-const STATUS_LABELS: Record<SignificantEventStatus, string> = {
-  active: i18n.translate('xpack.nightshift.flyout.status.active', {
-    defaultMessage: 'Active',
-  }),
-  recovering: i18n.translate('xpack.nightshift.flyout.status.recovering', {
-    defaultMessage: 'Recovering',
-  }),
-  inactive: i18n.translate('xpack.nightshift.flyout.status.inactive', {
-    defaultMessage: 'Inactive',
-  }),
-};
 const SUMMARY_TITLE = i18n.translate('xpack.nightshift.flyout.summaryTitle', {
   defaultMessage: 'Summary',
 });
@@ -142,6 +124,7 @@ export interface EventFlyoutProps {
 
 export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactElement {
   const formatTimestamp = useFormatTimestamp();
+  const { euiTheme } = useEuiTheme();
   const queryClient = useQueryClient();
   const { agentBuilder, application, http } = useKibana().services;
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
@@ -351,13 +334,18 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
       >
         <FlyoutTemplate.Header
           title={event.title}
-          description={formatTimestamp(event['@timestamp'])}
+          description={i18n.translate('xpack.nightshift.flyout.lastUpdatedDescription', {
+            defaultMessage: 'Last updated {timestamp}',
+            values: { timestamp: formatTimestamp(event['@timestamp']) },
+          })}
         >
-          <FlyoutTemplate.Header.Badge color={SEVERITY_BADGE_COLORS[event.severity]}>
-            {getSeverityLabel(event.severity)}
+          <FlyoutTemplate.Header.Badge
+            color={euiTheme.colors.severity[SIGNIFICANT_EVENT_SEVERITY[event.severity].color]}
+          >
+            {SIGNIFICANT_EVENT_SEVERITY[event.severity].label}
           </FlyoutTemplate.Header.Badge>
           <FlyoutTemplate.Header.Badge color={getStatusColor(event.status)}>
-            {STATUS_LABELS[event.status]}
+            {SIGNIFICANT_EVENT_STATUS_LABELS[event.status]}
           </FlyoutTemplate.Header.Badge>
           {investigationBadgeLabel ? (
             <FlyoutTemplate.Header.Badge color="hollow">
@@ -378,7 +366,6 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
               isLoadingOccurrences={occurrencesQuery.isLoading}
               selectedDetectionId={selectedDetectionId}
               onDetectionClick={(detection) => handleDetectionClick(detection.detection_id)}
-              showTitle={false}
             />
           </FlyoutTemplate.Body.Section>
           <FlyoutTemplate.Body.Section title={INVESTIGATION_TITLE}>
@@ -387,7 +374,6 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
               status={investigationStatus}
               details={investigationDetails}
               error={investigationError}
-              showTitle={false}
             />
           </FlyoutTemplate.Body.Section>
         </FlyoutTemplate.Body>

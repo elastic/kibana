@@ -13,6 +13,10 @@ export const FEATURES_QUERY_KEY = ['features'] as const;
 export const detectionOverviewQueryKey = ({ from, to }: { from: string; to: string }) =>
   ['nightshift.detectionOverview', from, to] as const;
 
+export const SIGNIFICANT_EVENTS_LIST_QUERY_KEY = ['nightshift.significantEventsList'] as const;
+export const EVENT_BY_ID_QUERY_KEY = ['nightshift.eventById'] as const;
+export const EVENT_LIFECYCLE_QUERY_KEY = ['nightshift.eventLifecycle'] as const;
+
 export const significantEventsListQueryKey = ({
   from,
   to,
@@ -30,4 +34,13 @@ export const significantEventsListQueryKey = ({
   status: readonly string[];
   severity: readonly string[];
 }) =>
-  ['nightshift.significantEventsList', from, to, page, perPage, search, status, severity] as const;
+  [
+    ...SIGNIFICANT_EVENTS_LIST_QUERY_KEY,
+    from,
+    to,
+    page,
+    perPage,
+    search,
+    status,
+    severity,
+  ] as const;

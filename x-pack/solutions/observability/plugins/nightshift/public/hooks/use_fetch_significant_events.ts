@@ -12,6 +12,7 @@ import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from './use_kibana';
 import { NIGHTSHIFT_LANDING_SEVERITIES } from '../common/constants';
+import { SIGNIFICANT_EVENTS_LIST_QUERY_KEY } from '../data/query_keys';
 import { hasRunningInvestigations } from '../components/entities/significant_event/significant_event_status';
 
 /**
@@ -45,7 +46,9 @@ export const clearPendingInvestigationCompletionsForTests = (): void => {
   pendingInvestigationCompletions.clear();
 };
 
-const applyPendingInvestigationCompletions = (hits: SignificantEvent[]): SignificantEvent[] => {
+export const applyPendingInvestigationCompletions = <Event extends SignificantEvent>(
+  hits: Event[]
+): Event[] => {
   if (pendingInvestigationCompletions.size === 0) {
     return hits;
   }
@@ -166,48 +169,54 @@ export const markEventInvestigationCompleteInCache = (
   eventId: string,
   completedAt: string = new Date().toISOString()
 ): void => {
-  queryClient.setQueryData<NightshiftSignificantEventsQueryData>(
-    NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY,
-    (current) => {
-      if (!current) {
-        return current;
+  const markComplete = <Data extends { hits: SignificantEvent[] }>(
+    current: Data | undefined
+  ): Data | undefined => {
+    if (!current) {
+      return current;
+    }
+
+    let changed = false;
+    const hits = current.hits.map((hit) => {
+      if (hit.event_id !== eventId) {
+        return hit;
       }
 
-      let changed = false;
-      const hits = current.hits.map((hit) => {
-        if (hit.event_id !== eventId) {
-          return hit;
-        }
+      const investigations = hit.investigations;
+      if (!investigations?.length) {
+        return hit;
+      }
 
-        const investigations = hit.investigations;
-        if (!investigations?.length) {
-          return hit;
-        }
+      const latestIndex = investigations.length - 1;
+      const latestInvestigation = investigations[latestIndex];
+      if (latestInvestigation.completed_at != null) {
+        return hit;
+      }
 
-        const latestIndex = investigations.length - 1;
-        const latestInvestigation = investigations[latestIndex];
-        if (latestInvestigation.completed_at != null) {
-          return hit;
-        }
+      pendingInvestigationCompletions.set(
+        pendingInvestigationCompletionKey(hit.event_id, latestInvestigation.workflow_execution_id),
+        completedAt
+      );
 
-        pendingInvestigationCompletions.set(
-          pendingInvestigationCompletionKey(
-            hit.event_id,
-            latestInvestigation.workflow_execution_id
-          ),
-          completedAt
-        );
+      changed = true;
+      const updatedInvestigations = [...investigations];
+      updatedInvestigations[latestIndex] = {
+        ...latestInvestigation,
+        completed_at: completedAt,
+      };
+      return { ...hit, investigations: updatedInvestigations };
+    });
 
-        changed = true;
-        const updatedInvestigations = [...investigations];
-        updatedInvestigations[latestIndex] = {
-          ...latestInvestigation,
-          completed_at: completedAt,
-        };
-        return { ...hit, investigations: updatedInvestigations };
-      });
+    return changed ? { ...current, hits } : current;
+  };
 
-      return changed ? { ...current, hits } : current;
-    }
+  // The landing list and the Detection page list both cache this event.
+  queryClient.setQueriesData<NightshiftSignificantEventsQueryData>(
+    { queryKey: NIGHTSHIFT_SIGNIFICANT_EVENTS_QUERY_KEY },
+    markComplete
+  );
+  queryClient.setQueriesData<{ hits: SignificantEvent[] }>(
+    { queryKey: SIGNIFICANT_EVENTS_LIST_QUERY_KEY },
+    markComplete
   );
 };

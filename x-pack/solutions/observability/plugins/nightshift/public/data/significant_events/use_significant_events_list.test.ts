@@ -72,6 +72,7 @@ describe('useSignificantEventsList', () => {
   });
 
   it('requests one page with the selected range and filters', async () => {
+    mockSignificantEventsFetch.mockResolvedValue({ hits: [], page: 2, perPage: 25, total: 0 });
     renderHook(() =>
       useSignificantEventsList({
         from: 'now-24h',

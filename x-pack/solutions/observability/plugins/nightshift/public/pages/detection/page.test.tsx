@@ -37,11 +37,11 @@ const mockUseDetectionOverview = useDetectionOverview as jest.Mock;
 const mockUseMaintenanceStatus = useMaintenanceStatus as jest.Mock;
 const refetch = jest.fn();
 
-const renderPage = () =>
+const renderPage = (initialPath = '/detection/events') =>
   render(
     <I18nProvider>
       <EuiProvider>
-        <Router history={createMemoryHistory({ initialEntries: ['/detection/events'] })}>
+        <Router history={createMemoryHistory({ initialEntries: [initialPath] })}>
           <DetectionPage headerProps={{}} tab="events" />
         </Router>
       </EuiProvider>
@@ -102,5 +102,12 @@ describe('DetectionPage', () => {
     expect(screen.getByTestId('nightshiftDetectionOverviewError')).toBeInTheDocument();
     expect(screen.queryByText('0')).not.toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftDetectionOverviewSources')).not.toBeInTheDocument();
+  });
+
+  it('falls back to the default time range when the URL range is malformed', async () => {
+    renderPage('/detection/events?rangeFrom=now-5zz&rangeTo=now');
+
+    expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
+    expect(mockUseDetectionOverview).toHaveBeenLastCalledWith({ from: 'now-24h', to: 'now' });
   });
 });

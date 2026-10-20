@@ -228,6 +228,23 @@ describe('EventsTab', () => {
     expect(params.getAll('severity')).toEqual(['high']);
   });
 
+  it('shows an error with a retry when the list fails to load', () => {
+    mockUseSignificantEventsList.mockReturnValue({
+      data: undefined,
+      isError: true,
+      isLoading: false,
+      isFetching: false,
+      refetch: mockRefreshEvents,
+    });
+
+    renderTab();
+
+    expect(screen.getByTestId('nightshiftDetectionEventsError')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftDetectionEventsTable')).not.toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('nightshiftDetectionEventsRetryButton'));
+    expect(mockRefreshEvents).toHaveBeenCalled();
+  });
+
   it('opens the selected row in the addressed flyout', () => {
     const history = renderTab();
 

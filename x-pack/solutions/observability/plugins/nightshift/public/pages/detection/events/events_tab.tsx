@@ -7,6 +7,7 @@
 
 import { EuiButton, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { EventFlyout } from '../../../components/entities/significant_event/event_flyout';
 import { useFetchEventById } from '../../../data/significant_events/use_fetch_event_by_id';
@@ -20,6 +21,9 @@ import {
   EMPTY_BODY,
   EMPTY_TITLE,
   EVENT_NOT_FOUND_TOAST_TITLE,
+  LIST_ERROR_MESSAGE,
+  LIST_ERROR_TITLE,
+  RETRY_LABEL,
 } from './translations';
 import { useEventsUrlState } from './use_events_url_state';
 
@@ -131,7 +135,23 @@ export const EventsTab = ({
         onSeverityChange={setSeverity}
       />
       <EuiSpacer size="m" />
-      {!eventsQuery.isLoading && eventsQuery.data && events.length === 0 ? (
+      {eventsQuery.isError && !eventsQuery.data ? (
+        <KbnDangerCallout
+          announceOnMount
+          title={LIST_ERROR_TITLE}
+          text={LIST_ERROR_MESSAGE}
+          size="s"
+          data-test-subj="nightshiftDetectionEventsError"
+          actionProps={{
+            primary: {
+              children: RETRY_LABEL,
+              iconType: 'refresh',
+              onClick: () => void eventsQuery.refetch(),
+              'data-test-subj': 'nightshiftDetectionEventsRetryButton',
+            },
+          }}
+        />
+      ) : !eventsQuery.isLoading && eventsQuery.data && events.length === 0 ? (
         <EuiEmptyPrompt
           data-test-subj="nightshiftDetectionEventsEmpty"
           iconType="search"
