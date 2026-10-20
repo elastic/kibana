@@ -11,7 +11,6 @@ import {
 } from '@kbn/nightshift-investigations-plugin/common';
 import type { Automation } from '../../hooks/use_automations';
 
-export type AlertStatus = 'any' | 'active' | 'inactive';
 export type ScheduleUnit = 'hour' | 'day' | 'week';
 export type InstructionMode = 'ask' | 'investigate';
 export type SlackTarget = 'channel' | 'self' | 'thread';
@@ -35,7 +34,6 @@ export type TriggerFormValues =
       ruleNamePattern: string;
       ruleNames: string[];
       ruleTags: string[];
-      alertStatus: AlertStatus;
     }
   | {
       kind: 'every';
@@ -81,7 +79,7 @@ export const createTriggerFormValues = (kind: TriggerFormValues['kind']): Trigge
     return { kind, channels: [], users: [], messageFilter: '' };
   }
   if (kind === 'alert') {
-    return { kind, ruleNamePattern: '', ruleNames: [], ruleTags: [], alertStatus: 'any' };
+    return { kind, ruleNamePattern: '', ruleNames: [], ruleTags: [] };
   }
   return {
     kind,
@@ -143,7 +141,6 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
           ruleNamePattern: row.ruleNamePattern ?? '',
           ruleNames: row.ruleNames ?? [],
           ruleTags: row.tags ?? [],
-          alertStatus: row.alertStatus ?? 'any',
         }
       : row?.kind === 'slack'
       ? {
