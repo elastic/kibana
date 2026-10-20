@@ -7,6 +7,7 @@
 
 import { getStackAlertAttachmentType } from '.';
 import { STACK_ALERT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
+import { StackAlertAttachmentPayloadSchema } from '../../../../common/types/domain_zod/attachment/alert/v2';
 
 describe('getStackAlertAttachmentType', () => {
   const registration = getStackAlertAttachmentType();
@@ -15,48 +16,27 @@ describe('getStackAlertAttachmentType', () => {
     expect(registration.id).toBe(STACK_ALERT_ATTACHMENT_TYPE);
   });
 
-  it('exposes a schemaValidator that accepts valid metadata', () => {
-    expect(() =>
-      registration.schemaValidator?.({
-        index: '.alerts',
-        rule: { id: 'rule-1', name: 'Test Rule' },
-      })
-    ).not.toThrow();
+  it('registers the zod payload schema', () => {
+    expect(registration.schema).toBe(StackAlertAttachmentPayloadSchema);
   });
 
-  it('accepts undefined metadata', () => {
-    expect(() => registration.schemaValidator?.(undefined)).not.toThrow();
-  });
-
-  it('accepts null rule', () => {
-    expect(() => registration.schemaValidator?.({ rule: null })).not.toThrow();
-  });
-
-  it('exposes a schemaValidator that rejects invalid metadata', () => {
-    expect(() => registration.schemaValidator?.({ index: 123 })).toThrow();
-  });
-
-  it('rejects metadata with a non-object rule', () => {
-    expect(() => registration.schemaValidator?.({ rule: 'not-an-object' })).toThrow();
-  });
-
-  describe('getAttachmentRemovalObject', () => {
-    const getAttachmentRemovalObject = registration.getAttachmentRemovalObject!;
+  describe('getRemovalActivity', () => {
+    const getRemovalActivity = registration.getRemovalActivity!;
 
     it('returns a singular removal event when there is one alert id', () => {
-      const removal = getAttachmentRemovalObject({ attachmentId: 'a1' } as never);
+      const removal = getRemovalActivity({ attachmentId: 'a1' } as never);
       expect(removal.event).toBeDefined();
     });
 
     it('returns a plural removal event when there are multiple alert ids', () => {
-      const removal = getAttachmentRemovalObject({ attachmentId: ['a1', 'a2'] } as never);
+      const removal = getRemovalActivity({ attachmentId: ['a1', 'a2'] } as never);
       expect(removal.event).toBeDefined();
     });
   });
 
-  describe('getAttachmentTabViewObject', () => {
+  describe('getAttachmentList', () => {
     it('returns the stack alert tab content', () => {
-      const tab = registration.getAttachmentTabViewObject?.();
+      const tab = registration.getAttachmentList?.();
       expect(tab?.children).toBeDefined();
     });
   });

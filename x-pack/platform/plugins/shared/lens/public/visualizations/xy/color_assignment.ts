@@ -77,7 +77,7 @@ export function getColorAssignments(
                   let value = row[column.id];
                   if (value && !isPrimitive(value)) {
                     const columnFormatter = formatFactory(column.meta.params);
-                    value = columnFormatter?.convert(value) ?? value;
+                    value = columnFormatter?.convertToText(value) ?? value;
                   } else {
                     value = String(value);
                   }

@@ -18,7 +18,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
-import { createMockedIndexPattern } from '../../../mocks';
+import { createMockedIndexPattern, createMockedIndexPatternWithoutType } from '../../../mocks';
 import { ValuesInput } from './values_input';
 import type {
   TermsIndexPatternColumn,
@@ -35,7 +35,13 @@ import { getOperationSupportMatrix } from '../../../dimension_panel/operation_su
 import { FieldSelect } from '../../../dimension_panel/field_select';
 import { ReferenceEditor } from '../../../dimension_panel/reference_editor';
 import { IncludeExcludeRow } from './include_exclude_options';
-import { TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS } from '../../../../../user_messages_ids';
+import {
+  TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS,
+  TERMS_CUSTOM_RANK_LAST_VALUE_NO_DATE_FIELD,
+  TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_INVALID_TYPE,
+  TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_NOT_FOUND,
+} from '../../../../../user_messages_ids';
+import type { TermsColumnWithLastValueOrderAgg } from './helpers';
 
 jest.mock('@kbn/unified-field-list/src/services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({
@@ -160,6 +166,29 @@ describe('terms', () => {
       },
     };
   }
+
+  const createLastValueRankedTermsColumn = (
+    sortField?: string
+  ): TermsColumnWithLastValueOrderAgg => ({
+    label: 'Top values of source',
+    dataType: 'string',
+    isBucketed: true,
+    operationType: 'terms',
+    sourceField: 'source',
+    params: {
+      orderBy: { type: 'custom' },
+      orderDirection: 'desc',
+      size: 3,
+      orderAgg: {
+        label: 'Last value of bytes',
+        dataType: 'number',
+        isBucketed: false,
+        operationType: 'last_value',
+        sourceField: 'bytes',
+        ...(sortField ? { params: { sortField } } : {}),
+      },
+    },
+  });
 
   describe('toEsAggsFn', () => {
     it('should reflect params correctly', () => {
@@ -429,6 +458,69 @@ describe('terms', () => {
           }),
         })
       );
+    });
+
+    describe('custom last_value order-agg missing sortField', () => {
+      const expectOrderAggSortField = (sortField: string) =>
+        expect.objectContaining({
+          arguments: expect.objectContaining({
+            orderAgg: [
+              expect.objectContaining({
+                chain: [
+                  expect.objectContaining({
+                    arguments: expect.objectContaining({ sortField: [sortField] }),
+                  }),
+                ],
+              }),
+            ],
+          }),
+        });
+
+      it('should auto-fill the default date field when the last_value sortField is missing', () => {
+        const esAggsFn = termsOperation.toEsAggsFn(
+          createLastValueRankedTermsColumn(undefined),
+          'col1',
+          createMockedIndexPattern(),
+          layer,
+          uiSettingsMock,
+          [],
+          operationDefinitionMap
+        );
+
+        expect(esAggsFn).toEqual(expectOrderAggSortField('timestamp'));
+      });
+
+      it('should preserve an explicit sortField instead of overriding it with the default', () => {
+        const esAggsFn = termsOperation.toEsAggsFn(
+          createLastValueRankedTermsColumn('start_date'),
+          'col1',
+          createMockedIndexPattern(),
+          layer,
+          uiSettingsMock,
+          [],
+          operationDefinitionMap
+        );
+
+        expect(esAggsFn).toEqual(expectOrderAggSortField('start_date'));
+      });
+
+      it('should not throw when the order-agg has no params and the data view has no date field', () => {
+        // `createLastValueRankedTermsColumn(undefined)` omits `params` entirely, mirroring an
+        // API-authored order-agg that dropped `time_field`. With no date field to fall back to, the
+        // config is a blocking-error case, but `toEsAggsFn` must still build without throwing so the
+        // error panel can render instead of crashing the editor.
+        expect(() =>
+          termsOperation.toEsAggsFn(
+            createLastValueRankedTermsColumn(undefined),
+            'col1',
+            createMockedIndexPatternWithoutType('date'),
+            layer,
+            uiSettingsMock,
+            [],
+            operationDefinitionMap
+          )
+        ).not.toThrow();
+      });
     });
   });
 
@@ -2854,6 +2946,57 @@ describe('terms', () => {
           message: 'Scripted fields are not supported when using multiple fields, found scripted',
         },
       ]);
+    });
+
+    describe('custom last_value rank-by', () => {
+      const buildLastValueTermsLayer = (sortField: string | undefined): FormBasedLayer => ({
+        columnOrder: ['col1'],
+        indexPatternId: '1',
+        columns: {
+          col1: createLastValueRankedTermsColumn(sortField),
+        },
+      });
+
+      it('does not block when the sortField is missing but a default date field exists', () => {
+        expect(
+          termsOperation.getErrorMessage!(buildLastValueTermsLayer(undefined), 'col1', indexPattern)
+        ).toHaveLength(0);
+      });
+
+      it('blocks when the sortField is missing and the data view has no date field', () => {
+        const errors = termsOperation.getErrorMessage!(
+          buildLastValueTermsLayer(undefined),
+          'col1',
+          createMockedIndexPatternWithoutType('date')
+        );
+        expect(errors).toEqual([
+          expect.objectContaining({ uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_NO_DATE_FIELD }),
+        ]);
+      });
+
+      it('blocks when the sortField does not exist in the data view', () => {
+        const errors = termsOperation.getErrorMessage!(
+          buildLastValueTermsLayer('nonexistent'),
+          'col1',
+          indexPattern
+        );
+        expect(errors).toEqual([
+          expect.objectContaining({ uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_NOT_FOUND }),
+        ]);
+      });
+
+      it('blocks when the sortField is not a date field', () => {
+        const errors = termsOperation.getErrorMessage!(
+          buildLastValueTermsLayer('bytes'),
+          'col1',
+          indexPattern
+        );
+        expect(errors).toEqual([
+          expect.objectContaining({
+            uniqueId: TERMS_CUSTOM_RANK_LAST_VALUE_SORT_FIELD_INVALID_TYPE,
+          }),
+        ]);
+      });
     });
 
     describe('time shift error', () => {

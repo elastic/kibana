@@ -109,95 +109,7 @@ describe('transformRuleDomainToRule', () => {
       createdBy: 'user',
       createdAt: new Date('2019-02-12T21:01:22.479Z'),
       updatedAt: new Date('2019-02-12T21:01:22.479Z'),
-      muteAll: false,
-      mutedInstanceIds: [],
-      snoozedInstances,
-      snoozeSchedule: [],
-      scheduledTaskId: 'task-123',
-      executionStatus: {
-        lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
-        status: 'pending' as const,
-      },
-      throttle: null,
-      notifyWhen: null,
-      revision: 0,
-      updatedBy: 'user',
-      apiKeyOwner: 'user',
-      flapping: {
-        lookBackWindow: 20,
-        statusChangeThreshold: 20,
-      },
-    });
-  });
-
-  it('should remove public fields if isPublic is true', () => {
-    const result = transformRuleDomainToRule(rule, {
-      isPublic: true,
-    });
-
-    expect(result).toEqual({
-      id: 'test',
-      enabled: false,
-      name: 'my rule name',
-      tags: ['foo'],
-      alertTypeId: 'myType',
-      consumer: 'myApp',
-      schedule: { interval: '1m' },
-      actions: [defaultAction],
-      systemActions: [systemAction],
-      params: {},
-      mapped_params: {},
-      createdBy: 'user',
-      createdAt: new Date('2019-02-12T21:01:22.479Z'),
-      updatedAt: new Date('2019-02-12T21:01:22.479Z'),
-      muteAll: false,
-      mutedInstanceIds: [],
-      scheduledTaskId: 'task-123',
-      executionStatus: {
-        lastExecutionDate: new Date('2019-02-12T21:01:22.479Z'),
-        status: 'pending' as const,
-      },
-      throttle: null,
-      notifyWhen: null,
-      revision: 0,
-      updatedBy: 'user',
-      apiKeyOwner: 'user',
-      flapping: {
-        lookBackWindow: 20,
-        statusChangeThreshold: 20,
-      },
-    });
-  });
-
-  it('should not expose snoozedInstances if isPublic is true', () => {
-    const result = transformRuleDomainToRule(rule, {
-      isPublic: true,
-    });
-
-    expect(result).not.toHaveProperty('snoozedInstances');
-  });
-
-  it('should include legacy id if includeLegacyId is true', () => {
-    const result = transformRuleDomainToRule(rule, {
-      includeLegacyId: true,
-    });
-
-    expect(result).toEqual({
-      id: 'test',
-      enabled: false,
-      name: 'my rule name',
-      tags: ['foo'],
-      alertTypeId: 'myType',
-      consumer: 'myApp',
-      schedule: { interval: '1m' },
       legacyId: 'legacyId',
-      actions: [defaultAction],
-      systemActions: [systemAction],
-      params: {},
-      mapped_params: {},
-      createdBy: 'user',
-      createdAt: new Date('2019-02-12T21:01:22.479Z'),
-      updatedAt: new Date('2019-02-12T21:01:22.479Z'),
       muteAll: false,
       mutedInstanceIds: [],
       snoozedInstances,
@@ -280,6 +192,7 @@ describe('transformRuleDomainToRule', () => {
       createdBy: 'user',
       createdAt: new Date('2019-02-12T21:01:22.479Z'),
       updatedAt: new Date('2019-02-12T21:01:22.479Z'),
+      legacyId: 'legacyId',
       muteAll: false,
       mutedInstanceIds: [],
       snoozeSchedule: [],
@@ -311,5 +224,23 @@ describe('transformRuleDomainToRule', () => {
     const result = transformRuleDomainToRule(rule);
 
     expect(result.snoozedInstances).toEqual(snoozedInstances);
+  });
+
+  it('should include createdByProfileUid and updatedByProfileUid when present', () => {
+    const result = transformRuleDomainToRule({
+      ...rule,
+      createdByProfileUid: 'u_profile_created',
+      updatedByProfileUid: 'u_profile_updated',
+    });
+
+    expect(result.createdByProfileUid).toBe('u_profile_created');
+    expect(result.updatedByProfileUid).toBe('u_profile_updated');
+  });
+
+  it('should omit createdByProfileUid and updatedByProfileUid when absent', () => {
+    const result = transformRuleDomainToRule(rule);
+
+    expect(result).not.toHaveProperty('createdByProfileUid');
+    expect(result).not.toHaveProperty('updatedByProfileUid');
   });
 });

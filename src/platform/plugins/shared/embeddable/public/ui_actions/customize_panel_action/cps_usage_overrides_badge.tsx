@@ -15,6 +15,7 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import React, { useState } from 'react';
 import { map } from 'rxjs';
 import {
+  EuiBadge,
   EuiPopover,
   EuiText,
   EuiButtonEmpty,
@@ -52,7 +53,13 @@ export class CpsUsageOverridesBadge
     return strings.displayName;
   }
 
-  public readonly MenuItem = ({ context }: { context: EmbeddableApiContext }) => {
+  public readonly MenuItem = ({
+    context,
+    dataTestSubj,
+  }: {
+    context: EmbeddableApiContext;
+    dataTestSubj?: string;
+  }) => {
     const { embeddable } = context;
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
     const { euiTheme } = useEuiTheme();
@@ -65,12 +72,14 @@ export class CpsUsageOverridesBadge
     return (
       <EuiPopover
         button={
-          <button
+          <EuiBadge
+            iconType="crossProjectSearch"
             onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-            css={{ fontWeight: euiTheme.font.weight.semiBold }}
+            onClickAriaLabel={strings.badgeLabel}
+            data-test-subj={dataTestSubj}
           >
             {strings.badgeLabel}
-          </button>
+          </EuiBadge>
         }
         isOpen={isPopoverOpen}
         closePopover={() => setIsPopoverOpen(false)}

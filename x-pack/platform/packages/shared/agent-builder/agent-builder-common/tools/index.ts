@@ -10,13 +10,18 @@ export {
   ToolOrigin,
   type ToolDefinition,
   type ToolDefinitionWithSchema,
+  type ToolConfirmationPolicyMode,
+  type ToolConfirmationPolicy,
 } from './definition';
 export { isReservedToolId, validateToolId, toolIdRegexp, toolIdMaxLength } from './tool_ids';
 export {
   platformCoreTools,
-  platformStreamsSigEventsTools,
+  platformCoreCasesTools,
+  platformSignificantEventsTools,
+  contextEngineAiIndexTools,
+  contextEngineMemoryTools,
+  contextEngineAutomationTools,
   attachmentTools,
-  filestoreTools,
   internalTools,
   activeToolsCountWarningThreshold,
   defaultAgentToolIds,
@@ -24,7 +29,6 @@ export {
   isInternalTool,
   isExcludedFromFilestore,
   isAttachmentTool,
-  isFilestoreTool,
 } from './constants';
 export {
   type ByIdsToolSelection,
@@ -82,7 +86,9 @@ export {
   type VisualizationResult,
   type OtherResult,
   type FileReferenceResult,
+  NON_INTERACTIVE_DECLINED_REASON,
   isErrorResult,
+  isNonInteractiveDeclinedResult,
   isOtherResult,
   isQueryResult,
   isEsqlResultsResult,

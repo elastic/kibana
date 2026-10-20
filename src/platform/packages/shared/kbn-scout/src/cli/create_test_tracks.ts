@@ -7,38 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import path from 'node:path';
+import { REPO_ROOT } from '@kbn/repo-info';
+import { findPackageForPath } from '@kbn/repo-packages';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { Command } from '@kbn/dev-cli-runner';
-import type { ScoutTestConfig } from '@kbn/scout-reporting';
-import { ScoutTestConfigStats, testConfigs } from '@kbn/scout-reporting';
-import { ScoutTestTarget, testTargets } from '@kbn/scout-info';
-import { SCOUT_CI_CONFIG_PATH } from '@kbn/scout-info';
-import { SCOUT_OUTPUT_ROOT, SCOUT_TEST_CONFIG_STATS_PATH } from '@kbn/scout-info';
-import yaml from 'js-yaml';
-import { mkdirSync, readFileSync } from 'node:fs';
 import { createFlagError } from '@kbn/dev-cli-errors';
+import type { ScoutTargetAttribute, ScoutTestChannel } from '@kbn/scout-info';
+import {
+  ScoutTestTarget,
+  SCOUT_CI_CONFIG_PATH,
+  SCOUT_OUTPUT_ROOT,
+  SCOUT_TEST_CONFIG_STATS_PATH,
+  targetAttributes,
+  testTargets,
+  testChannel,
+  testChannels,
+} from '@kbn/scout-info';
+import { type ScoutTestConfig, ScoutTestConfigStats, testConfigs } from '@kbn/scout-reporting';
+import { parse } from 'yaml';
 import CliTable3 from 'cli-table3';
 import dedent from 'dedent';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { writeFileSync } from 'node:fs';
-import path from 'path';
-import { findPackageForPath } from '@kbn/repo-packages';
-import { REPO_ROOT } from '@kbn/repo-info';
-import type { TestTrackLoad } from '../execution/test_track';
+import type { TestTrackLane, TestTrackLoad } from '../execution/test_track';
 import { TestTrack } from '../execution/test_track';
+import { getPlaywrightLimitOptions } from '../playwright/tags';
 import type { SerializedScoutTestingScope } from '../tests_discovery/testing_scope';
 import { readScoutTestingScope } from '../tests_discovery/testing_scope';
+import {
+  isTestAllowedForTargetAttributes,
+  resolveTargetAttributes,
+} from '../tests_discovery/tag_utils';
 
 /**
  * Selects which Scout test configs are eligible for distribution into lanes.
  *
- * - `null`            → no filter (full suite)
  * - `kind: 'modules'` → keep configs whose owning @kbn/ module ID is in `ids`
  * - `kind: 'configs'` → keep configs whose repo-relative path is in `paths`
+ * - `kind: 'channels'` → keep configs that match any of the test channels in `channels`
+ * - `kind: 'targetAttributes'` → keep configs with at least one test for the target that
+ *   isn't limited out by the declared attributes
  */
 export type TestLoadFilter =
   | { kind: 'modules'; ids: ReadonlySet<string> }
   | { kind: 'configs'; paths: ReadonlySet<string> }
-  | null;
+  | { kind: 'channels'; channels: ReadonlySet<ScoutTestChannel> }
+  | { kind: 'targetAttributes'; attributes: ReadonlySet<ScoutTargetAttribute> };
 
 export interface ScoutCIConfig {
   plugins: {
@@ -54,7 +68,7 @@ export interface ScoutCIConfig {
 
 function loadScoutCIConfig(): ScoutCIConfig {
   try {
-    return yaml.load(readFileSync(SCOUT_CI_CONFIG_PATH, 'utf-8')) as ScoutCIConfig;
+    return parse(readFileSync(SCOUT_CI_CONFIG_PATH, 'utf-8')) as ScoutCIConfig;
   } catch (e) {
     const message = e instanceof Error ? e.message : String(e);
     throw createFlagError(`Failed to load Scout CI config: ${message}`);
@@ -80,9 +94,49 @@ export function identifyTestLoads(
   scoutCIConfig: ScoutCIConfig,
   testConfigStats: ScoutTestConfigStats,
   testTarget: ScoutTestTarget,
-  filter: TestLoadFilter,
+  testLoadFilters: TestLoadFilter[],
   log: ToolingLog
 ): ScoutCITestLoad[] {
+  // Runtime statistics are recorded per attribute set, so a lane prefers history gathered
+  // under the same attributes it is about to run with.
+  const runTargetAttributeKey = targetAttributes.key(
+    testLoadFilters.find(
+      (filter): filter is Extract<TestLoadFilter, { kind: 'targetAttributes' }> =>
+        filter.kind === 'targetAttributes'
+    )?.attributes ?? []
+  );
+
+  let statsFallbackCount = 0;
+
+  const findStats = (configPath: string) => {
+    const candidates = testConfigStats.data.configs.filter(
+      (statsEntry) =>
+        statsEntry.path === configPath && statsEntry.test_target.tag === testTarget.tag
+    );
+
+    const exactMatch = candidates.find(
+      (statsEntry) => targetAttributes.key(statsEntry.target_attributes) === runTargetAttributeKey
+    );
+
+    if (exactMatch !== undefined) {
+      return exactMatch;
+    }
+
+    // Attribute history can be missing for a long time — the events may live in a pipeline the
+    // stats query does not look at, or the attribute may be new. An estimate measured without
+    // the attribute is still far closer than `buildTrack`'s "assume a whole lane" fallback,
+    // which would open one lane per config.
+    const attributeBlindMatch = candidates.find(
+      (statsEntry) => statsEntry.target_attributes.length === 0
+    );
+
+    if (attributeBlindMatch !== undefined) {
+      statsFallbackCount++;
+    }
+
+    return attributeBlindMatch;
+  };
+
   const testLoads = testConfigs.all
     .filter((config) => !scoutCIConfig.excluded_configs.includes(config.path))
     .filter((config) =>
@@ -90,16 +144,34 @@ export function identifyTestLoads(
         return test.tags.includes(testTarget.playwrightTag);
       })
     )
-    .filter((config) => {
-      if (!filter) return true;
-      if (filter.kind === 'configs') {
-        return filter.paths.has(config.path);
-      }
-      // kind === 'modules'
-      if (filter.ids.size === 0) return true;
-      const resolvedModuleID = findPackageForPath(REPO_ROOT, config.path)?.id;
-      return resolvedModuleID ? filter.ids.has(resolvedModuleID) : false;
-    })
+    .filter(
+      (config) =>
+        testLoadFilters.length === 0 ||
+        testLoadFilters.every((filter) => {
+          switch (filter.kind) {
+            case 'configs':
+              return filter.paths.has(config.path);
+            case 'modules':
+              if (filter.ids.size === 0) return false;
+              const resolvedModuleID = findPackageForPath(REPO_ROOT, config.path)?.id;
+              return resolvedModuleID ? filter.ids.has(resolvedModuleID) : false;
+            case 'channels':
+              if (filter.channels.size === 0) return true;
+              return filter.channels
+                .values()
+                .some((channel) => config.manifest.testChannels.includes(channel));
+            case 'targetAttributes':
+              // Limits are evaluated together with the target tag on the *same* test: a
+              // config may well hold a limited test for one target and an unlimited test
+              // for another, and only the former must be able to disqualify it.
+              return config.manifest.tests.some(
+                (test) =>
+                  test.tags.includes(testTarget.playwrightTag) &&
+                  isTestAllowedForTargetAttributes(test, filter.attributes)
+              );
+          }
+        })
+    )
     .map((config) => {
       let enabled: boolean;
       switch (config.module.type) {
@@ -115,10 +187,7 @@ export function identifyTestLoads(
       return {
         config,
         enabled,
-        stats: testConfigStats.data.configs.find(
-          (statsEntry) =>
-            statsEntry.path === config.path && statsEntry.test_target.tag === testTarget.tag
-        ),
+        stats: findStats(config.path),
       };
     });
 
@@ -126,6 +195,14 @@ export function identifyTestLoads(
   if (testLoads.length === 0) {
     log.warning(`No test loads discovered for test target '${testTarget.tag}'`);
     return testLoads;
+  }
+
+  if (statsFallbackCount > 0) {
+    log.warning(
+      `No runtime stats recorded under target attributes '${runTargetAttributeKey}' for ` +
+        `${statsFallbackCount} of ${testLoads.length} test loads; falling back to stats ` +
+        'measured without attributes, so lane runtime estimates will be less accurate'
+    );
   }
 
   const enabledTestLoadCount = testLoads.filter((load) => load.enabled).length;
@@ -225,6 +302,96 @@ export function buildTrack(
   });
 
   return track;
+}
+
+export interface CombinedLaneLoadGroup {
+  configSet: string;
+  loads: string[];
+}
+
+interface ShortLaneGroup {
+  testTarget: ScoutTestTarget;
+  agentQueue: string;
+  lanes: Array<{ configSet: string; lane: TestTrackLane }>;
+}
+
+/**
+ * Moves lanes shorter than the given threshold into combined tracks (one per test target and agent queue),
+ * packing them into as few lanes as the runtime target allows. Each combined lane lists its loads
+ * per server config set in `metadata.loadGroups`, as the server needs to be restarted for each group.
+ */
+export function combineShortLanes(
+  tracks: TestTrack[],
+  shortLaneThreshold: number,
+  log: ToolingLog
+): TestTrack[] {
+  const shortLanesByGroup = new Map<string, ShortLaneGroup>();
+
+  tracks.forEach((track) => {
+    track.lanes
+      .filter((lane) => lane.runtimeEstimate < shortLaneThreshold)
+      .forEach((lane) => {
+        const testTarget: ScoutTestTarget = track.metadata.testTarget;
+        const { agentQueue } = lane.metadata.buildkite;
+        const groupKey = `${testTarget.tag}/${agentQueue}`;
+        const group: ShortLaneGroup = shortLanesByGroup.get(groupKey) ?? {
+          testTarget,
+          agentQueue,
+          lanes: [],
+        };
+        group.lanes.push({ configSet: track.metadata.server.configSet, lane });
+        shortLanesByGroup.set(groupKey, group);
+      });
+  });
+
+  const movedLanes = new Set<TestTrackLane>();
+
+  const combinedTracks = shortLanesByGroup
+    .values()
+    // A single short lane has nothing to be combined with
+    .filter((group) => group.lanes.length > 1)
+    .map(({ testTarget, agentQueue, lanes }) => {
+      const combinedTrack = new TestTrack({ runtimeTarget: lanes[0].lane.runtimeTarget });
+      combinedTrack.metadata.testTarget = testTarget;
+
+      lanes
+        // Same as with loads: placing the longest lanes first gives the highest lane saturation
+        .sort((a, b) => b.lane.runtimeEstimate - a.lane.runtimeEstimate)
+        .forEach(({ configSet, lane: shortLane }) => {
+          const lane =
+            combinedTrack.lanes.find(
+              (candidate) =>
+                candidate.runtimeEstimate + shortLane.runtimeEstimate <= candidate.runtimeTarget
+            ) ?? combinedTrack.addLane();
+
+          // Every group needs its own server, so the setup duration adds up
+          lane.estimatedSetupDuration += shortLane.estimatedSetupDuration;
+          lane.loads.push(...shortLane.loads);
+          lane.metadata.buildkite = { agentQueue };
+          lane.metadata.loadGroups = [
+            ...(lane.metadata.loadGroups ?? []),
+            { configSet, loads: shortLane.loads.map((load) => load.id) },
+          ] satisfies CombinedLaneLoadGroup[];
+
+          movedLanes.add(shortLane);
+        });
+
+      log.info(
+        `Combined ${lanes.length} short lanes for test target '${testTarget.tag}' (${agentQueue})` +
+          ` into ${combinedTrack.laneCount} lane(s)`
+      );
+      return combinedTrack;
+    })
+    .toArray();
+
+  tracks.forEach((track) => {
+    track.lanes = track.lanes.filter((lane) => !movedLanes.has(lane));
+    track.lanes.forEach((lane, index) => {
+      lane.number = index + 1;
+    });
+  });
+
+  return [...tracks.filter((track) => track.laneCount > 0), ...combinedTracks];
 }
 
 export function msToHuman(ms: number): string {
@@ -416,7 +583,11 @@ function displayMultiTrackSummary(
         track.metadata.testTarget.location,
         track.metadata.testTarget.arch,
         track.metadata.testTarget.domain,
-        track.metadata.server.configSet,
+        lane.metadata.loadGroups
+          ? lane.metadata.loadGroups
+              .map((group: CombinedLaneLoadGroup) => group.configSet)
+              .join('\n')
+          : track.metadata.server.configSet,
         msToHuman(lane.runtimeEstimate),
         lane.loads.length,
         msToHuman(lane.availableCapacity),
@@ -437,22 +608,36 @@ export const createTestTracks: Command<void> = {
   flags: {
     string: [
       'testTarget',
+      'testChannel',
+      'targetAttribute',
       'serverConfigSet',
       'targetRuntimeMinutes',
       'minRuntimeMinutes',
       'estimatedLaneSetupMinutes',
+      'shortLaneThresholdMinutes',
       'testing-scope',
     ],
-    boolean: ['showIndividualTrackSummaries', 'showMultiTrackSummary'],
+    boolean: ['combineShortLanes', 'showIndividualTrackSummaries', 'showMultiTrackSummary'],
     default: {
       outputPath: `${SCOUT_OUTPUT_ROOT}/test_tracks/${Date.now()}.json`,
     },
     help: `
     --testTarget                    (required)  One or more test target in the {location}-{arch}-{domain} format
+    --testChannel                   (optional)  Limit the test selection to one or more test channels
+                                                Valid channels: ${testChannels.all.join(', ')}
+    --targetAttribute               (optional)  Attribute(s) of the test target the tests will run against;
+                                                defaults to SCOUT_TARGET_ATTRIBUTES. Tests carrying an
+                                                unsatisfied '@limit/<selection-method>-<target-attr>' tag are
+                                                excluded, and configs left without a runnable test are not
+                                                distributed. Valid attributes: ${targetAttributes.all.join(
+                                                  ', '
+                                                )}
     --outputPath                    (optional)  Where to write the test track specification [default: ${SCOUT_OUTPUT_ROOT}/test_tracks/{timestamp}.json]
     --targetRuntimeMinutes          (optional)  How long the test track should run [default: longest estimated load runtime]
     --minRuntimeMinutes             (optional)  Target runtime minutes shouldn't be lower than this
     --estimatedLaneSetupMinutes     (optional)  How long a lane setup is expected to take
+    --combineShortLanes             (optional)  Combine short lanes of different server config sets into shared lanes
+    --shortLaneThresholdMinutes     (optional)  Lanes shorter than this are combined [default: half of the runtime target]
     --showIndividualTrackSummaries  (optional)  Display individual test track summaries
     --showMultiTrackSummary         (optional)  Display multi-track summary
     --testing-scope                 (optional)  Path to a 'testing_scope.json' produced by 'scout resolve-testing-scope'.
@@ -468,21 +653,25 @@ export const createTestTracks: Command<void> = {
       ? readScoutTestingScope(testingScopePath)
       : { kind: 'full', affectedModules: [] };
 
-    let filter: TestLoadFilter = null;
-    if (scope.kind === 'tests-only') {
-      const paths = new Set(scope.affectedConfigs ?? []);
-      filter = { kind: 'configs', paths };
-      log.info(
-        `Selective testing (tests-only): limiting distribution to ${paths.size} affected config(s)`
-      );
-    } else if (scope.kind === 'dependency-tree') {
-      const ids = new Set(scope.affectedModules);
-      filter = { kind: 'modules', ids };
-      log.info(
-        `Selective testing (dependency-tree): limiting distribution to ${ids.size} affected module(s)`
-      );
-    } else {
-      log.info('Distributing all eligible configs (full scope)');
+    const filters: TestLoadFilter[] = [];
+
+    switch (scope.kind) {
+      case 'tests-only':
+        const paths = new Set(scope.affectedConfigs ?? []);
+        filters.push({ kind: 'configs', paths });
+        log.info(
+          `Selective testing (tests-only): limiting distribution to ${paths.size} affected config(s)`
+        );
+        break;
+      case 'dependency-tree':
+        const ids = new Set(scope.affectedModules);
+        filters.push({ kind: 'modules', ids });
+        log.info(
+          `Selective testing (dependency-tree): limiting distribution to ${ids.size} affected module(s)`
+        );
+        break;
+      default:
+        log.info('Distributing all eligible configs (full scope)');
     }
 
     const selectedTestTargets: ScoutTestTarget[] = flagsReader
@@ -504,13 +693,49 @@ export const createTestTracks: Command<void> = {
         selectedTestTargets.map((target) => target.tag).join(', ')
     );
 
+    const rawChannels: string[] = flagsReader.arrayOfStrings('testChannel') || [];
+
+    const selectedTestChannels: Set<ScoutTestChannel> = new Set(
+      (rawChannels.length > 0 ? rawChannels : testChannels.current()).map((channel) => {
+        try {
+          return testChannel.fromString(channel);
+        } catch (e) {
+          throw createFlagError(String(e));
+        }
+      })
+    );
+
+    log.info(
+      'Only configs in the following test channels will be considered: ' +
+        `${Array.from(selectedTestChannels).join(', ')}`
+    );
+    filters.push({ kind: 'channels', channels: selectedTestChannels });
+
+    let selectedTargetAttributes: Set<ScoutTargetAttribute>;
+    try {
+      selectedTargetAttributes = new Set(
+        resolveTargetAttributes(flagsReader.arrayOfStrings('targetAttribute'))
+      );
+    } catch (e) {
+      throw createFlagError(String(e));
+    }
+
+    log.info(
+      selectedTargetAttributes.size > 0
+        ? `Test targets are assumed to have the following attributes: ${Array.from(
+            selectedTargetAttributes
+          ).join(', ')}`
+        : 'Test targets are assumed to have no attributes'
+    );
+    filters.push({ kind: 'targetAttributes', attributes: selectedTargetAttributes });
+
     const testConfigStats = loadTestConfigStats();
     const scoutCIConfig = loadScoutCIConfig();
 
     const testLoadsByTarget = selectedTestTargets.reduce((loadsByTarget, target) => {
       loadsByTarget.set(
         target,
-        identifyTestLoads(scoutCIConfig, testConfigStats, target, filter, log)
+        identifyTestLoads(scoutCIConfig, testConfigStats, target, filters, log)
       );
       return loadsByTarget;
     }, new Map<ScoutTestTarget, ScoutCITestLoad[]>());
@@ -553,7 +778,7 @@ export const createTestTracks: Command<void> = {
 
     log.info(`All tracks will use a runtime target of ${msToHuman(runtimeTarget)}`);
 
-    const tracks = testLoadsByTarget
+    let tracks = testLoadsByTarget
       .entries()
       .flatMap(([target, loads]) => {
         if (target.location === 'cloud') {
@@ -569,22 +794,49 @@ export const createTestTracks: Command<void> = {
             : [...new Set(loads.map((load) => load.config.server.configSet))];
 
         // Each server config set gets its own track
-        return configSets.map((configSet) => {
+        return configSets.flatMap((configSet): TestTrack[] => {
           log.info(
             `Building test track for test target '${target.tag}' with server config set '${configSet}'`
           );
+
+          const enabledLoads = loads.filter(
+            (load) => load.enabled && load.config.server.configSet === configSet
+          );
+
+          if (enabledLoads.length === 0) {
+            log.warning(
+              `No enabled test loads found for test target '${target.tag}' and server config set '${configSet}'`
+            );
+            return [];
+          }
+
           const track = buildTrack(
             Math.max(minimumRuntime, runtimeTarget),
             estimatedLaneSetupDuration,
             target,
-            loads.filter((load) => load.enabled && load.config.server.configSet === configSet),
+            enabledLoads,
             log
           );
           track.metadata.server = { configSet };
-          return track;
+          return [track];
         });
       })
       .toArray();
+
+    if (flagsReader.boolean('combineShortLanes')) {
+      // Half of the runtime target guarantees that at least two short lanes fit into a combined lane
+      const shortLaneThreshold =
+        (flagsReader.number('shortLaneThresholdMinutes') || 0) * 60 * 1000 || runtimeTarget / 2;
+      log.info(`Combining lanes shorter than ${msToHuman(shortLaneThreshold)}`);
+      tracks = combineShortLanes(tracks, shortLaneThreshold, log);
+    }
+
+    // Lanes run the Playwright binary directly, so they apply the limits through the same
+    // options `scout run-tests` passes, decided here once for the whole run.
+    const playwrightOptions = getPlaywrightLimitOptions(selectedTargetAttributes);
+    tracks.forEach((track) => {
+      track.metadata.playwright = { options: playwrightOptions };
+    });
 
     // Write track specifications
     const outputPath = flagsReader.requiredString('outputPath');

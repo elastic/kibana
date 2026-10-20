@@ -7,7 +7,15 @@
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
-import { EuiSpacer, EuiPanel, EuiText, EuiBasicTable, EuiIcon, EuiButtonIcon } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiButtonIcon,
+  EuiIcon,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import type {
@@ -18,10 +26,7 @@ import {
   useVulnerabilitiesFindings,
   VULNERABILITY_FINDING,
 } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_findings';
-import type {
-  FindingsVulnerabilityPanelExpandableFlyoutPropsPreview,
-  MultiValueCellAction,
-} from '@kbn/cloud-security-posture';
+import type { MultiValueCellAction } from '@kbn/cloud-security-posture';
 import {
   getVulnerabilityStats,
   CVSScoreBadge,
@@ -43,15 +48,18 @@ import { useGetSeverityStatusColor } from '@kbn/cloud-security-posture/src/hooks
 import { useHasVulnerabilities } from '@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities';
 import { get } from 'lodash/fp';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 
 import type { EntityType } from '@kbn/entity-store/public';
 import { FF_ENABLE_ENTITY_STORE_V2, useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
-import { VulnerabilityFindingsPreviewPanelKey } from '../../../flyout/csp_details/vulnerabilities_flyout/constants';
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { useUiSetting } from '../../../common/lib/kibana';
 import { useEntityFromStore } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import {
+  combineEntityGroupFilters,
+  getEntityGroupRecords,
+} from '../../../flyout/entity_details/shared/entity_store_group_utils';
+import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import type { CloudPostureEntityIdentifier } from '../entity_insight';
 
 type VulnerabilitySortFieldType =
@@ -115,15 +123,25 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
   ({
     identityField,
     value,
-    scopeId,
     entityId,
     entityType,
+    mode,
+    onShowVulnerability,
   }: {
     identityField: CloudPostureEntityIdentifier;
     value: string;
-    scopeId: string;
     entityId?: string;
     entityType?: string;
+    /** Entity-store lookup mode; in `resolved` mode findings of the entities resolving to `entityId` are included. */
+    mode?: EntityViewMode;
+    /** Callback executed after expanding a vulnerability finding. */
+    onShowVulnerability: (params: {
+      vulnerabilityId: string;
+      resourceId: string;
+      packageName: string;
+      packageVersion: string;
+      eventId: string;
+    }) => void;
   }) => {
     const { getSeverityStatusColor } = useGetSeverityStatusColor();
 
@@ -140,8 +158,6 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
     );
     const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 
-    const { openPreviewPanel } = useExpandableFlyoutApi();
-
     const sortFieldDirection: { [key: string]: string } = {};
     sortFieldDirection[sortField === 'score' ? 'vulnerability.score.base' : sortField] =
       sortDirection;
@@ -155,8 +171,13 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
 
     const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
 
-    const { entityRecord, isLoading: isEntityRecordLoading } = useEntityFromStore({
+    const {
+      entityRecord,
+      aliasRecords,
+      isLoading: isEntityRecordLoading,
+    } = useEntityFromStore({
       entityId,
+      mode,
       entityType,
       skip: !entityStoreV2Enabled || !entityId,
     });
@@ -166,8 +187,12 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
       if (!euidApi?.euid || entityRecord == null || entityType == null) {
         return undefined;
       }
-      return euidApi.euid.dsl.getEuidFilterBasedOnDocument(entityType as EntityType, entityRecord);
-    }, [euidApi?.euid, entityType, entityRecord]);
+      const definition = euidApi.getBuiltInEntityDefinition(entityType as EntityType);
+      return combineEntityGroupFilters(
+        getEntityGroupRecords(entityRecord, aliasRecords),
+        (record) => euidApi.euid.dsl.getEuidFilterBasedOnDocument(definition, record)
+      );
+    }, [euidApi, entityType, entityRecord, aliasRecords]);
 
     const cspQueriesEnabled =
       entityRecord !== null && Boolean(euidEntityFilter) && Boolean(euidApi?.euid);
@@ -322,41 +347,37 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
           vulnerability: VulnerabilitiesPackage,
           finding: VulnerabilitiesFindingDetailFields
         ) => (
-          <EuiButtonIcon
-            iconType="maximize"
-            onClick={() => {
-              const previewPanelProps: FindingsVulnerabilityPanelExpandableFlyoutPropsPreview = {
-                id: VulnerabilityFindingsPreviewPanelKey,
-                params: {
-                  vulnerabilityId: vulnerability?.id,
-                  resourceId: finding?.resource?.id,
-                  packageName: finding?.[VULNERABILITY_FINDING.PACKAGE_NAME],
-                  packageVersion: finding?.[VULNERABILITY_FINDING.PACKAGE_VERSION],
-                  eventId: finding?.event?.id,
-                  scopeId,
-                  isPreviewMode: true,
-                  banner: {
-                    title: i18n.translate(
-                      'xpack.securitySolution.flyout.right.vulnerabilityFinding.PreviewTitle',
-                      {
-                        defaultMessage: 'Preview vulnerability details',
-                      }
-                    ),
-                    backgroundColor: 'warning',
-                    textColor: 'warning',
-                  },
-                },
-              };
-
-              openPreviewPanel(previewPanelProps);
-            }}
-            aria-label={i18n.translate(
-              'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel',
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonTooltip',
               {
                 defaultMessage: 'Preview vulnerability details',
               }
             )}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="maximize"
+              onClick={() => {
+                const vulnerabilityId = Array.isArray(vulnerability?.id)
+                  ? vulnerability.id[0]
+                  : vulnerability?.id;
+                onShowVulnerability({
+                  vulnerabilityId: vulnerabilityId ?? '',
+                  resourceId: finding?.resource?.id ?? '',
+                  packageName: finding?.[VULNERABILITY_FINDING.PACKAGE_NAME],
+                  packageVersion: finding?.[VULNERABILITY_FINDING.PACKAGE_VERSION],
+                  eventId: finding?.event?.id ?? '',
+                });
+              }}
+              aria-label={i18n.translate(
+                'xpack.securitySolution.flyout.left.insights.vulnerability.table.previewDetailsButtonAriaLabel',
+                {
+                  defaultMessage: 'Preview vulnerability details',
+                }
+              )}
+            />
+          </EuiToolTip>
         ),
       },
       {
@@ -367,7 +388,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
           </EuiText>
         ),
         name: i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
+          'xpack.securitySolution.flyout.left.insights.vulnerability.table.cvssColumnName',
           { defaultMessage: 'CVSS' }
         ),
         width: '10%',
@@ -410,7 +431,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
           </>
         ),
         name: i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
+          'xpack.securitySolution.flyout.left.insights.vulnerability.table.severityColumnName',
           { defaultMessage: 'Severity' }
         ),
         width: '10%',
@@ -421,7 +442,7 @@ export const VulnerabilitiesFindingsDetailsTable = memo(
         render: (packageName: string, finding: VulnerabilitiesFindingDetailFields) =>
           renderMultiValueCell(VULNERABILITY_FINDING.PACKAGE_NAME, finding),
         name: i18n.translate(
-          'xpack.securitySolution.flyout.left.insights.vulnerability.table.ruleColumnName',
+          'xpack.securitySolution.flyout.left.insights.vulnerability.table.packageColumnName',
           { defaultMessage: 'Package' }
         ),
         width: '30%',

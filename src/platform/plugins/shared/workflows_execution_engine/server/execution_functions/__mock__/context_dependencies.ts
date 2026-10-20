@@ -22,6 +22,7 @@ export const mockContextDependencies = () => ({
   workflowsExtensions: workflowsExtensionsMock.createStart(),
   config: {
     enabled: true,
+    storage: { source: 'plain_index' as const, dataRetention: '90d' },
     eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
     maxWorkflowDepth: 10,
     logging: { console: false },
@@ -31,5 +32,6 @@ export const mockContextDependencies = () => ({
       minPayloadSize: new ByteSizeValue(10 * 1024), // 10kb
     },
     collectQueueMetrics: false,
+    hitlExternalResume: { enabled: true },
   },
 });

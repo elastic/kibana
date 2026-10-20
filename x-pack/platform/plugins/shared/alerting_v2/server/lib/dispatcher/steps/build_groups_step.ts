@@ -8,6 +8,8 @@
 import { injectable } from 'inversify';
 import { get } from 'lodash';
 import objectHash from 'object-hash';
+import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
+import { RuleCatalog } from '../state';
 import type {
   ActionGroup,
   DispatcherPipelineState,
@@ -20,25 +22,31 @@ import type {
 export class BuildGroupsStep implements DispatcherStep {
   public readonly name = 'build_groups';
 
-  public async execute(state: Readonly<DispatcherPipelineState>): Promise<DispatcherStepOutput> {
-    const { matched = [] } = state;
+  public async execute(
+    state: Readonly<DispatcherPipelineState>,
+    _: LoggerServiceContract
+  ): Promise<DispatcherStepOutput> {
+    const { matched = [], rules = RuleCatalog.empty() } = state;
 
-    const groups = buildActionGroups(matched);
+    const groups = buildActionGroups(matched, rules);
 
     return { type: 'continue', data: { groups } };
   }
 }
 
-export function buildActionGroups(matched: readonly MatchedPair[]): ActionGroup[] {
+export function buildActionGroups(
+  matched: readonly MatchedPair[],
+  rules: RuleCatalog = RuleCatalog.empty()
+): ActionGroup[] {
   const groupMap = new Map<string, ActionGroup>();
 
-  for (const { episode, policy } of matched) {
+  for (const { alert, policy } of matched) {
     let groupKey: Record<string, unknown>;
-    switch (policy.groupingMode ?? 'per_episode') {
-      case 'per_episode':
+    switch (policy.grouping.mode) {
+      case 'per_alert':
         groupKey = {
-          groupHash: episode.group_hash,
-          episodeId: episode.episode_id,
+          groupHash: alert.group_hash,
+          alertId: alert.alert_id,
         };
         break;
       case 'all':
@@ -46,7 +54,7 @@ export function buildActionGroups(matched: readonly MatchedPair[]): ActionGroup[
         break;
       case 'per_field':
         groupKey = Object.fromEntries(
-          policy.groupBy.map((field) => [field, get(episode, field, null)])
+          policy.grouping.fields.map((field) => [field, get(alert, field, null)])
         );
         break;
     }
@@ -63,11 +71,18 @@ export function buildActionGroups(matched: readonly MatchedPair[]): ActionGroup[
         policyId: policy.id,
         destinations: policy.destinations,
         groupKey,
-        episodes: [],
+        alerts: [],
+        rules: {},
       });
     }
 
-    groupMap.get(actionGroupId)!.episodes.push(episode);
+    const group = groupMap.get(actionGroupId)!;
+    group.alerts.push(alert);
+    const ruleId = alert.rule_id;
+    const rule = rules.forAlert(alert);
+    if (rule && ruleId != null) {
+      group.rules[ruleId] = { name: rule.name };
+    }
   }
 
   return [...groupMap.values()];

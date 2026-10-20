@@ -8,12 +8,13 @@
 import { memoize } from 'lodash';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import React from 'react';
-import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public/client/attachment_framework/types';
+import type { UnifiedValueAttachmentViewProps } from '@kbn/cases-plugin/public';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiDescriptionList } from '@elastic/eui';
 import deepEqual from 'fast-deep-equal';
+import type { ChangePointChartAttachmentData } from '../../common/utils';
 import {
   normalizeChangePointChartLegacyFields,
   type RawChangePointChartState,
@@ -26,13 +27,15 @@ import type {
 // Pre-9.5 case attachments stored time_range as timeRange.
 type RawAttachmentState = RawChangePointChartState & { timeRange?: TimeRange };
 
+type ChangePointChartViewProps = UnifiedValueAttachmentViewProps<ChangePointChartAttachmentData>;
+
 export const initComponent = memoize(
   (
     fieldFormats: FieldFormatsStart,
     ChangePointDetectionComponent: ChangePointDetectionSharedComponent
   ) => {
     return React.memo(
-      (props: UnifiedValueAttachmentViewProps) => {
+      (props: ChangePointChartViewProps) => {
         const dataFormatter = fieldFormats.deserialize({
           id: FIELD_FORMAT_IDS.DATE,
         });
@@ -58,9 +61,9 @@ export const initComponent = memoize(
                 defaultMessage="Time range"
               />
             ),
-            description: `${dataFormatter.convert(
+            description: `${dataFormatter.convertToText(
               inputProps.timeRange.from
-            )} - ${dataFormatter.convert(inputProps.timeRange.to)}`,
+            )} - ${dataFormatter.convertToText(inputProps.timeRange.to)}`,
           },
         ];
 

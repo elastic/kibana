@@ -78,8 +78,9 @@ export default function ({ getPageObject, getService, getPageObjects }: FtrProvi
       });
       await commonScreenshots.takeScreenshot('cases-ui-open', screenshotDirectories, 1400, 1024);
 
-      const filesTab = await testSubjects.find('case-view-tab-title-files');
-      await filesTab.click();
+      const attachmentsTab = await testSubjects.find('case-view-tab-title-attachments');
+      await attachmentsTab.click();
+      await testSubjects.existOrFail('case-view-attachment-accordion-file');
       await commonScreenshots.takeScreenshot('cases-files', screenshotDirectories, 1400, 1024);
     });
   });

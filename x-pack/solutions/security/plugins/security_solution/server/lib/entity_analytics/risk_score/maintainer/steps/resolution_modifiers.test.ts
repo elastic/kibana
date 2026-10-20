@@ -42,6 +42,7 @@ describe('buildResolutionModifierEntity', () => {
     });
 
     expect(result.asset?.criticality).toBeNull();
+    expect(result.criticalityContributorEUID).toBeUndefined();
   });
 
   it('ignores missing members and still picks up criticality from present ones', () => {
@@ -83,6 +84,7 @@ describe('buildResolutionModifierEntity', () => {
     });
 
     expect(result.asset?.criticality).toBe('medium_impact');
+    expect(result.criticalityContributorEUID).toBe('user:alias-1');
   });
 
   it('uses max criticality and unions watchlists across group members', () => {
@@ -139,8 +141,57 @@ describe('buildResolutionModifierEntity', () => {
     });
 
     expect(result.asset?.criticality).toBe('extreme_impact');
+    expect(result.criticalityContributorEUID).toBe('user:alias-1');
     expect(result.entity?.attributes?.watchlists).toEqual(
       expect.arrayContaining(['wl-1', 'wl-2', 'wl-3'])
     );
+  });
+
+  it('attributes ties to the first member holding the max criticality', () => {
+    const result = buildResolutionModifierEntity({
+      score: {
+        resolution_target_id: 'user:target-1',
+        alert_count: 1,
+        score: 50,
+        normalized_score: 40,
+        risk_inputs: [],
+        related_entities: [
+          {
+            entity_id: 'user:alias-1',
+            relationship_type: 'entity.relationships.resolution.resolved_to',
+          },
+          {
+            entity_id: 'user:alias-2',
+            relationship_type: 'entity.relationships.resolution.resolved_to',
+          },
+        ],
+      },
+      memberEntities: new Map([
+        [
+          'user:target-1',
+          {
+            entity: { id: 'user:target-1', attributes: {} },
+            asset: { criticality: 'high_impact' },
+          },
+        ],
+        [
+          'user:alias-1',
+          {
+            entity: { id: 'user:alias-1', attributes: {} },
+            asset: { criticality: 'high_impact' },
+          },
+        ],
+        [
+          'user:alias-2',
+          {
+            entity: { id: 'user:alias-2', attributes: {} },
+            asset: { criticality: 'low_impact' },
+          },
+        ],
+      ]),
+    });
+
+    expect(result.asset?.criticality).toBe('high_impact');
+    expect(result.criticalityContributorEUID).toBe('user:target-1');
   });
 });

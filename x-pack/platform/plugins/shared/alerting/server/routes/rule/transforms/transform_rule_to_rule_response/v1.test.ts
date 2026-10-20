@@ -70,7 +70,7 @@ describe('transformRuleToRuleResponse', () => {
       expect(res.actions).toEqual([
         {
           alerts_filter: {
-            query: { dsl: '{test:1}', filters: [], kql: 'test:1s' },
+            query: { filters: [], kql: 'test:1s' },
             timeframe: {
               days: [1, 2, 3],
               hours: { end: '15:00', start: '00:00' },

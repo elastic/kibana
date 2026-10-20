@@ -46,12 +46,22 @@ export const GoogleCalendar: ConnectorSpec = {
     }),
     minimumLicense: 'enterprise',
     isTechnicalPreview: true,
-    supportedFeatureIds: ['workflows', 'agentBuilder'],
+    supportedFeatureIds: ['workflows', 'agentBuilder', 'contextEngine'],
   },
 
   auth: {
     types: [
-      'bearer',
+      {
+        type: 'ears',
+        isRecommended: true,
+        overrides: {
+          meta: { scope: { disabled: true } },
+        },
+        defaults: {
+          provider: 'google',
+          scope: 'https://www.googleapis.com/auth/calendar.readonly',
+        },
+      },
       {
         type: 'oauth_authorization_code',
         overrides: {
@@ -67,16 +77,7 @@ export const GoogleCalendar: ConnectorSpec = {
           scope: 'https://www.googleapis.com/auth/calendar.readonly',
         },
       },
-      {
-        type: 'ears',
-        overrides: {
-          meta: { scope: { disabled: true } },
-        },
-        defaults: {
-          provider: 'google',
-          scope: 'https://www.googleapis.com/auth/calendar.readonly',
-        },
-      },
+      { type: 'bearer', isLegacy: true, defaults: {} },
     ],
     headers: {
       Accept: 'application/json',
@@ -86,6 +87,7 @@ export const GoogleCalendar: ConnectorSpec = {
   actions: {
     searchEvents: {
       isTool: true,
+      scope: 'read',
       description:
         'Search for events in Google Calendar by keywords. Matches against event summary, description, location, and attendee names. Results include high-level metadata like title, time, location, and attendees.',
       input: SearchEventsInputSchema,
@@ -119,6 +121,7 @@ export const GoogleCalendar: ConnectorSpec = {
 
     getEvent: {
       isTool: true,
+      scope: 'read',
       description:
         'Retrieve full details of a specific Google Calendar event by its ID. Returns comprehensive metadata including summary, description, location, start/end times, organizer, attendees with response status, recurrence info, conference/hangout links, and attachments.',
       input: GetEventInputSchema,
@@ -141,6 +144,7 @@ export const GoogleCalendar: ConnectorSpec = {
 
     listCalendars: {
       isTool: true,
+      scope: 'read',
       description:
         'List all calendars accessible to the user. Returns calendar ID, name, description, whether it is the primary calendar, access role, and time zone. Use this to discover available calendars before searching or listing events.',
       input: ListCalendarsInputSchema,
@@ -166,6 +170,7 @@ export const GoogleCalendar: ConnectorSpec = {
 
     listEvents: {
       isTool: true,
+      scope: 'read',
       description:
         'List events from a Google Calendar, optionally filtered by time range. Returns events in chronological order with high-level metadata. Use this to browse upcoming or past events without a specific search query.',
       input: ListEventsInputSchema,
@@ -203,6 +208,7 @@ export const GoogleCalendar: ConnectorSpec = {
 
     freeBusy: {
       isTool: true,
+      scope: 'read',
       description:
         "Check free/busy availability for one or more people or calendars over a time range. Returns busy time slots for each requested calendar. More token-efficient than listing full events when you only need to know if someone is available. Use a person's email address as their calendar ID.",
       input: FreeBusyInputSchema,
@@ -243,29 +249,11 @@ export const GoogleCalendar: ConnectorSpec = {
       defaultMessage: 'Verifies Google Calendar connection by fetching calendar list',
     }),
     handler: async (ctx) => {
-      try {
-        const response = await ctx.client.get(`${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList`, {
-          params: {
-            maxResults: 1,
-          },
-        });
-
-        if (response.status !== 200) {
-          return { ok: false, message: 'Failed to connect to Google Calendar API' };
-        }
-
-        return {
-          ok: true,
-          message: 'Successfully connected to Google Calendar API',
-        };
-      } catch (error) {
-        return {
-          ok: false,
-          message: `Failed to connect to Google Calendar API: ${
-            error instanceof Error ? error.message : 'Unknown error'
-          }`,
-        };
-      }
+      await ctx.client.get(`${GOOGLE_CALENDAR_API_BASE}/users/me/calendarList`, {
+        params: { maxResults: 1 },
+      });
+      return {};
     },
+    enabled: true,
   },
 };

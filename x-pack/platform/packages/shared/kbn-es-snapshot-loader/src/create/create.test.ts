@@ -58,6 +58,7 @@ describe('createSnapshot', () => {
       esClient,
       log,
       repoName: expect.stringContaining('snapshot-loader-repo-'),
+      verify: true,
     });
     expect(create).toHaveBeenCalledWith({
       repository: expect.stringContaining('snapshot-loader-repo-'),

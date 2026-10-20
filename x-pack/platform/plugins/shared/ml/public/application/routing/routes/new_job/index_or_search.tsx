@@ -16,8 +16,6 @@ import {
   getMlManagementBreadcrumb,
 } from '../../breadcrumbs';
 import { PageWrapper, MODE } from './index_or_search_page_wrapper';
-export { dataVizIndexOrSearchRouteFactory } from '../data_view_select';
-
 const getBreadcrumbs = (navigateToApp: NavigateToApp) => [
   getStackManagementBreadcrumb(navigateToApp),
   getMlManagementBreadcrumb('ANOMALY_DETECTION_MANAGEMENT_BREADCRUMB', navigateToApp),

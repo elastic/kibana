@@ -23,6 +23,9 @@ import {
   getRuleMigrationStats,
   getRuleMigrationsStatsAll,
   addRulesToMigration,
+  addRulesToQRadarMigration,
+  addRulesToSentinelMigration,
+  deleteMigration,
 } from '../api';
 import { createTelemetryServiceMock } from '../../../common/lib/telemetry/telemetry_service.mock';
 import {
@@ -32,11 +35,16 @@ import {
 import type { StartPluginsDependencies } from '../../../types';
 import * as i18n from './translations';
 import { SiemRulesMigrationsService } from './rule_migrations_service';
-import type { CreateRuleMigrationRulesRequestBody } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import type {
+  CreateRuleMigrationRulesRequestBody,
+  CreateQRadarRuleMigrationRulesRequestBody,
+  CreateSentinelRuleMigrationRulesRequestBody,
+} from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { TASK_STATS_POLLING_SLEEP_SECONDS } from '../../common/constants';
 import { getMissingCapabilitiesChecker } from '../../common/service';
 import { raiseSuccessToast } from './notification/success_notification';
 import { MigrationSource } from '../../common/types';
+import { SiemMigrationsRuleEventTypes } from '../../../common/lib/telemetry/events/siem_migrations/types';
 
 // --- Mocks for external modules ---
 
@@ -50,6 +58,9 @@ jest.mock('../api', () => ({
   getMissingResources: jest.fn(),
   getIntegrations: jest.fn(),
   addRulesToMigration: jest.fn(),
+  addRulesToQRadarMigration: jest.fn(),
+  addRulesToSentinelMigration: jest.fn(),
+  deleteMigration: jest.fn(),
 }));
 
 jest.mock('../../common/service/capabilities', () => ({
@@ -86,6 +97,11 @@ const mockGetRuleMigrationsStatsAll = getRuleMigrationsStatsAll as jest.Mock;
 const mockStartRuleMigrationAPI = startRuleMigrationAPI as jest.Mock;
 const mockStopRuleMigrationAPI = stopRuleMigrationAPI as jest.Mock;
 const mockGetMissingCapabilitiesChecker = getMissingCapabilitiesChecker as jest.Mock;
+const mockCreateRuleMigration = createRuleMigration as jest.Mock;
+const mockAddRulesToMigration = addRulesToMigration as jest.Mock;
+const mockAddRulesToQRadarMigration = addRulesToQRadarMigration as jest.Mock;
+const mockAddRulesToSentinelMigration = addRulesToSentinelMigration as jest.Mock;
+const mockDeleteMigration = deleteMigration as jest.Mock;
 
 // --- End of mocks ---
 
@@ -206,6 +222,73 @@ describe('SiemRulesMigrationsService', () => {
       });
 
       expect(migrationId).toBe('mig-1');
+    });
+
+    it('should delete the migration when Splunk rule upload fails', async () => {
+      const body = [{ id: 'rule1' }] as CreateRuleMigrationRulesRequestBody;
+      const uploadError = new Error('Invalid rule data');
+      mockCreateRuleMigration.mockResolvedValueOnce({ migration_id: 'mig-1' });
+      mockAddRulesToMigration.mockRejectedValueOnce(uploadError);
+      mockDeleteMigration.mockResolvedValue(undefined);
+
+      await expect(
+        service.createRuleMigration({
+          rules: body,
+          migrationName: 'test',
+          vendor: MigrationSource.SPLUNK,
+        })
+      ).rejects.toThrow('Invalid rule data');
+
+      expect(mockDeleteMigration).toHaveBeenCalledWith({ migrationId: 'mig-1' });
+      const eventTypes = (mockTelemetry.reportEvent as jest.Mock).mock.calls.map((c) => c[0]);
+      expect(eventTypes).toContain(SiemMigrationsRuleEventTypes.SetupMigrationCreated);
+      expect(eventTypes).not.toContain(SiemMigrationsRuleEventTypes.SetupMigrationDeleted);
+    });
+
+    it('should delete the migration when QRadar rule upload fails', async () => {
+      const rules = {
+        xml: ['<rule>...</rule>'],
+      } as unknown as CreateQRadarRuleMigrationRulesRequestBody;
+      const uploadError = new Error('Invalid QRadar rule data');
+      mockCreateRuleMigration.mockResolvedValueOnce({ migration_id: 'mig-1' });
+      mockAddRulesToQRadarMigration.mockRejectedValueOnce(uploadError);
+      mockDeleteMigration.mockResolvedValue(undefined);
+
+      await expect(
+        service.createRuleMigration({
+          rules,
+          migrationName: 'test',
+          vendor: MigrationSource.QRADAR,
+        })
+      ).rejects.toThrow('Invalid QRadar rule data');
+
+      expect(mockDeleteMigration).toHaveBeenCalledWith({ migrationId: 'mig-1' });
+      const eventTypes = (mockTelemetry.reportEvent as jest.Mock).mock.calls.map((c) => c[0]);
+      expect(eventTypes).toContain(SiemMigrationsRuleEventTypes.SetupMigrationCreated);
+      expect(eventTypes).not.toContain(SiemMigrationsRuleEventTypes.SetupMigrationDeleted);
+    });
+
+    it('should delete the migration when Sentinel rule upload fails', async () => {
+      const rules = {
+        resources: [{ id: 'res1' }],
+      } as unknown as CreateSentinelRuleMigrationRulesRequestBody;
+      const uploadError = new Error('Invalid Sentinel rule data');
+      mockCreateRuleMigration.mockResolvedValueOnce({ migration_id: 'mig-1' });
+      mockAddRulesToSentinelMigration.mockRejectedValueOnce(uploadError);
+      mockDeleteMigration.mockResolvedValue(undefined);
+
+      await expect(
+        service.createRuleMigration({
+          rules,
+          migrationName: 'test',
+          vendor: MigrationSource.SENTINEL,
+        })
+      ).rejects.toThrow('Invalid Sentinel rule data');
+
+      expect(mockDeleteMigration).toHaveBeenCalledWith({ migrationId: 'mig-1' });
+      const eventTypes = (mockTelemetry.reportEvent as jest.Mock).mock.calls.map((c) => c[0]);
+      expect(eventTypes).toContain(SiemMigrationsRuleEventTypes.SetupMigrationCreated);
+      expect(eventTypes).not.toContain(SiemMigrationsRuleEventTypes.SetupMigrationDeleted);
     });
   });
 

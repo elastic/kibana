@@ -6,7 +6,6 @@
  */
 
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { ConsolePluginSetup, ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
@@ -46,7 +45,6 @@ export interface AppPluginStartDependencies {
 }
 
 export interface AppPluginSetupDependencies {
-  actions: ActionsPublicPluginSetup;
   cloud?: CloudSetup;
   console?: ConsolePluginSetup;
   features: FeaturesPluginSetup;
@@ -94,4 +92,25 @@ export interface EndpointDeprecationInfo {
   name: string;
   status: EisModelStatus;
   metadata: EisInferenceEndpointMetadata;
+}
+
+/** Ordered list of EIS geo codes for display in the region picker. */
+export const GEO_ORDER = ['apac', 'eu', 'us', 'other'] as const;
+
+/** Whether the region policy is expressed as geo zones or specific CSP regions. Mutually exclusive. */
+export type PolicyMode = 'geo' | 'regions';
+
+export type EisViewMode = 'card' | 'table';
+
+export type RegionPolicyConflictArtifactType = 'index' | 'pipeline';
+
+export interface RegionPolicyConflictArtifact {
+  type: RegionPolicyConflictArtifactType;
+  name: string;
+  endpointIds: string[];
+}
+
+export interface RegionOption {
+  key: string;
+  label: string;
 }

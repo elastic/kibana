@@ -7,7 +7,7 @@
 
 import type { SavedObject } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   ConfigKey,
   PrivateLocationHealthStatusValue,
@@ -18,10 +18,12 @@ import {
   type MonitorsHealthResponse,
 } from '../../common/runtime_types';
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
-import { getPrivateLocations } from '../synthetics_service/get_private_locations';
+import { PackagePolicyService } from '../synthetics_service/private_location/package_policy_service';
+import { getPrivateLocationsForNamespaces } from '../synthetics_service/get_private_locations';
 import type { PrivateLocationAttributes } from '../runtime_types/private_locations';
 import type { SyntheticsServerSetup } from '../types';
 import type { MonitorConfigRepository } from './monitor_config_repository';
+import { parseArrayFilters } from '../routes/common';
 
 const STATUS_REASONS: Record<
   Exclude<PrivateLocationHealthStatusValue, PrivateLocationHealthStatusValue.Healthy>,
@@ -65,21 +67,68 @@ export class MonitorIntegrationHealthApi {
   }
 
   async getHealth(monitorIds: string[]): Promise<MonitorsHealthResponse> {
-    const { foundMonitors, errors } = await this.fetchMonitors(monitorIds);
+    const privateLocationAPI = new SyntheticsPrivateLocation(this.server);
+    const allSpaces = await this.getAllSpaces(privateLocationAPI);
 
+    const { foundMonitors, errors } = await this.fetchMonitors(monitorIds, allSpaces);
+
+    return {
+      monitors: await this.computeHealth(foundMonitors, allSpaces, privateLocationAPI),
+      errors,
+    };
+  }
+
+  /**
+   * Health of every monitor in the current space that runs on one of the given private locations.
+   */
+  async getHealthForLocations(locationIds: string[]): Promise<MonitorsHealthResponse> {
+    const privateLocationAPI = new SyntheticsPrivateLocation(this.server);
+    const allSpaces = await this.getAllSpaces(privateLocationAPI);
+
+    const { filtersStr } = parseArrayFilters({ locations: locationIds });
+    const monitors =
+      await this.monitorConfigRepository.getAll<EncryptedSyntheticsMonitorAttributes>({
+        filter: filtersStr,
+        fields: [
+          ConfigKey.NAME,
+          ConfigKey.LOCATIONS,
+          ConfigKey.MONITOR_QUERY_ID,
+          ConfigKey.MONITOR_SOURCE_TYPE,
+        ],
+      });
+
+    return {
+      monitors: await this.computeHealth(
+        monitors.map((so) => ({ id: so.id, so })),
+        allSpaces,
+        privateLocationAPI
+      ),
+      errors: [],
+    };
+  }
+
+  // Every space that may host a relevant monitor or package policy, so monitor
+  // and package-policy lookups can both look across spaces — see issue #270477.
+  private async getAllSpaces(privateLocationAPI: SyntheticsPrivateLocation) {
+    const allSpacesWithMonitors = await privateLocationAPI.getAllSpacesWithMonitors();
+    return new Set([this.spaceId, ...allSpacesWithMonitors]);
+  }
+
+  private async computeHealth(
+    foundMonitors: FoundMonitor[],
+    allSpaces: Set<string>,
+    privateLocationAPI: SyntheticsPrivateLocation
+  ): Promise<MonitorHealthStatus[]> {
     if (foundMonitors.length === 0) {
-      return { monitors: [], errors };
+      return [];
     }
 
-    const allPrivateLocations = await getPrivateLocations(this.savedObjectsClient);
+    const allPrivateLocations = await getPrivateLocationsForNamespaces(this.savedObjectsClient, [
+      ...allSpaces,
+    ]);
     const allPrivateLocationsMap = new Map<string, PrivateLocationAttributes>(
       allPrivateLocations.map((loc) => [loc.id, loc])
     );
-
-    const privateLocationAPI = new SyntheticsPrivateLocation(this.server);
-
-    const allSpacesWithMonitors = await privateLocationAPI.getAllSpacesWithMonitors();
-    const allSpaces = new Set([this.spaceId, ...allSpacesWithMonitors]);
 
     const referencedAgentPolicyIds = [
       ...new Set(allPrivateLocations.map((loc) => loc.agentPolicyId)),
@@ -87,9 +136,10 @@ export class MonitorIntegrationHealthApi {
     const [existingPackagePoliciesMap, existingAgentPoliciesMap, agentStatusMap] =
       await Promise.all([
         this.getExistingPackagePoliciesMap(
-          this.getExpectedPackagePolicyIds(foundMonitors, privateLocationAPI, allSpaces)
+          this.getExpectedPackagePolicyIds(foundMonitors, privateLocationAPI, allSpaces),
+          allSpaces
         ),
-        this.getExistingAgentPoliciesMap(referencedAgentPolicyIds),
+        this.getExistingAgentPoliciesMap(referencedAgentPolicyIds, allSpaces),
         this.getAgentStatusMap(referencedAgentPolicyIds),
       ]);
 
@@ -194,15 +244,22 @@ export class MonitorIntegrationHealthApi {
       };
     });
 
-    return { monitors, errors };
+    return monitors;
   }
 
-  private async fetchMonitors(monitorIds: string[]) {
+  private async fetchMonitors(monitorIds: string[], allSpaces: Set<string>) {
     const errors: MonitorHealthError[] = [];
     const foundMonitors: FoundMonitor[] = [];
 
+    // Use an internal saved-objects repository (un-scoped) so monitors created
+    // in any space — not just the request's space — can be resolved.
+    const internalSoRepository = this.server.coreStart.savedObjects.createInternalRepository();
+    const namespaces = [...allSpaces];
+
     const settledResults = await Promise.allSettled(
-      monitorIds.map((id) => this.monitorConfigRepository.get(id))
+      monitorIds.map((id) =>
+        this.monitorConfigRepository.getAcrossSpaces(id, namespaces, internalSoRepository)
+      )
     );
 
     for (let i = 0; i < monitorIds.length; i++) {
@@ -253,32 +310,49 @@ export class MonitorIntegrationHealthApi {
     return [...ids];
   }
 
-  private async getExistingPackagePoliciesMap(expectedPackagePolicyIds: string[]) {
+  private async getExistingPackagePoliciesMap(
+    expectedPackagePolicyIds: string[],
+    allSpaces: Set<string>
+  ) {
     if (expectedPackagePolicyIds.length === 0) {
-      return new Map<string, PackagePolicy>();
+      return new Map<string, { id: string }>();
     }
 
-    const internalSoClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const existingPackagePolicies = await this.server.fleet.packagePolicyService.getByIDs(
-      internalSoClient,
-      expectedPackagePolicyIds,
-      { ignoreMissing: true }
-    );
+    // The Synthetics wrapper queries all relevant namespaces in one bulk read,
+    // so package policies created for monitors in any space are visible
+    // regardless of the caller's space.
+    const packagePolicyService = new PackagePolicyService(this.server);
+    const additionalSpaceIds = [...allSpaces].filter((space) => space !== this.spaceId);
+    const existingPackagePolicies = await packagePolicyService.getByIds({
+      spaceId: this.spaceId,
+      packagePolicyIds: expectedPackagePolicyIds,
+      additionalSpaceIds,
+      fields: ['name'],
+    });
     return new Map((existingPackagePolicies ?? []).map((policy) => [policy.id, policy]));
   }
 
-  private async getExistingAgentPoliciesMap(agentPolicyIds: string[]) {
+  private async getExistingAgentPoliciesMap(agentPolicyIds: string[], allSpaces: Set<string>) {
     if (agentPolicyIds.length === 0) {
-      return new Map<string, AgentPolicy>();
+      return new Map<string, { id: string }>();
     }
 
-    const internalSoClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const existingAgentPolicies = await this.server.fleet.agentPolicyService.getByIds(
-      internalSoClient,
-      agentPolicyIds,
-      { ignoreMissing: true, withPackagePolicies: false }
+    // Agent policies can be scoped to a non-default space via space_ids. A plain
+    // createInternalRepository() defaults to the 'default' namespace and misses
+    // those policies. Query every relevant space with a namespace-scoped internal
+    // client (same pattern as PackagePolicyService.getByIds) — see issue #270477.
+    const spaces = new Set<string>([this.spaceId, DEFAULT_SPACE_ID, ...allSpaces]);
+    const unsafeClient = this.server.coreStart.savedObjects.getUnsafeInternalClient();
+    const results = await Promise.all(
+      [...spaces].map((space) =>
+        this.server.fleet.agentPolicyService.getByIds(
+          unsafeClient.asScopedToNamespace(space),
+          agentPolicyIds,
+          { ignoreMissing: true, withPackagePolicies: false, fields: ['name'] }
+        )
+      )
     );
-    return new Map((existingAgentPolicies ?? []).map((policy) => [policy.id, policy]));
+    return new Map(results.flat().map((policy) => [policy.id, policy]));
   }
 
   private async getAgentStatusMap(

@@ -37,7 +37,7 @@ spaceTest.describe(
     });
 
     spaceTest(
-      'successfully triggers generation via UI without error',
+      'successfully triggers generation via UI without error from Attacks page',
       async ({ pageObjects, page }) => {
         const { detectionsAttackDiscoveryPage } = pageObjects;
 
@@ -80,7 +80,7 @@ spaceTest.describe(
           });
         });
 
-        await detectionsAttackDiscoveryPage.navigateToAttackDiscoveryPage();
+        await detectionsAttackDiscoveryPage.navigateToAttacksPage();
 
         // Ensure the run button is enabled
         await expect(detectionsAttackDiscoveryPage.runButton).toBeEnabled({ timeout: 15000 });

@@ -9,9 +9,11 @@ import '@kbn/code-editor-mock/jest_helper';
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
+
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 
 import { API_BASE_PATH } from '../../common/constants';
 import { PipelinesCreate } from '../../public/application/sections/pipelines_create';
@@ -28,6 +30,7 @@ const getInput = (testSubj: string) => {
 };
 
 type TestHttpSetup = ReturnType<typeof setupEnvironment>['httpSetup'];
+type TestHttpRequestsMockHelpers = ReturnType<typeof setupEnvironment>['httpRequestsMockHelpers'];
 
 const renderPipelinesCreate = async (httpSetup: TestHttpSetup, queryParams: string = '') => {
   const history = createMemoryHistory({
@@ -43,22 +46,32 @@ const renderPipelinesCreate = async (httpSetup: TestHttpSetup, queryParams: stri
 
   await screen.findByTestId('pipelineForm');
   await screen.findByTestId('descriptionField');
+  // Wait for the processors editor context to mount and register its onUpdate handler.
+  // pipelineProcessorsMoveAnnouncement lives inside PipelineProcessorsContextProvider
+  // alongside the onUpdate useEffect, so its presence guarantees the effect has run.
+  await screen.findByTestId('pipelineProcessorsMoveAnnouncement');
 };
 
-// Failing: See https://github.com/elastic/kibana/issues/253406
-// Failing: See https://github.com/elastic/kibana/issues/253362
-describe.skip('<PipelinesCreate />', () => {
-  const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
+describe('<PipelinesCreate />', () => {
+  // Each test gets a fresh httpSetup + mockResponses Map so mock state can't leak
+  // between tests. jest.clearAllMocks() only clears call history, not the Map.
+  let httpSetup!: TestHttpSetup;
+  let httpRequestsMockHelpers!: TestHttpRequestsMockHelpers;
 
   beforeEach(() => {
+    const env = setupEnvironment();
+    httpSetup = env.httpSetup;
+    httpRequestsMockHelpers = env.httpRequestsMockHelpers;
+
     jest.clearAllMocks();
   });
 
   test('should render the correct page header', async () => {
     await renderPipelinesCreate(httpSetup);
 
-    expect(screen.getByTestId('pageTitle')).toHaveTextContent('Create pipeline');
-    expect(screen.getByTestId('documentationLink')).toHaveTextContent('Create pipeline docs');
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Create pipeline');
+    await openAppMenuOverflow();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toBeInTheDocument();
   });
 
   test('should toggle the version field', async () => {
@@ -108,11 +121,10 @@ describe.skip('<PipelinesCreate />', () => {
   });
 
   test('should send the correct payload', async () => {
-    const user = userEvent.setup();
     await renderPipelinesCreate(httpSetup);
 
-    await user.type(getInput('nameField'), 'my_pipeline');
-    await user.type(getInput('descriptionField'), 'pipeline description');
+    fireEvent.change(getInput('nameField'), { target: { value: 'my_pipeline' } });
+    fireEvent.change(getInput('descriptionField'), { target: { value: 'pipeline description' } });
 
     fireEvent.click(screen.getByTestId('metaToggle'));
     await screen.findByTestId('metaEditor');
@@ -122,25 +134,17 @@ describe.skip('<PipelinesCreate />', () => {
       target: { value: JSON.stringify(metaData) },
     });
 
-    const postCallsBefore = httpSetup.post.mock.calls.length;
     fireEvent.click(screen.getByTestId('submitButton'));
+    await waitFor(() => expect(httpSetup.post).toHaveBeenCalled());
 
-    await waitFor(() => expect(httpSetup.post.mock.calls.length).toBeGreaterThan(postCallsBefore));
-    const createRequest = httpSetup.post.mock.results[postCallsBefore]?.value as
-      | Promise<unknown>
-      | undefined;
-    expect(createRequest).toBeDefined();
-    await waitFor(async () => {
-      await createRequest;
-    });
-
-    expect(httpSetup.post).toHaveBeenLastCalledWith(
+    expect(httpSetup.post).toHaveBeenCalledWith(
       API_BASE_PATH,
       expect.objectContaining({
         body: JSON.stringify({
           name: 'my_pipeline',
           description: 'pipeline description',
           _meta: metaData,
+          field_access_pattern: 'classic',
           processors: [],
         }),
       })
@@ -148,11 +152,10 @@ describe.skip('<PipelinesCreate />', () => {
   });
 
   test('should surface API errors from the request', async () => {
-    const user = userEvent.setup();
     await renderPipelinesCreate(httpSetup);
 
-    await user.type(getInput('nameField'), 'my_pipeline');
-    await user.type(getInput('descriptionField'), 'pipeline description');
+    fireEvent.change(getInput('nameField'), { target: { value: 'my_pipeline' } });
+    fireEvent.change(getInput('descriptionField'), { target: { value: 'pipeline description' } });
 
     const error = {
       statusCode: 409,
@@ -168,11 +171,10 @@ describe.skip('<PipelinesCreate />', () => {
   });
 
   test('displays nested pipeline errors as a flat list', async () => {
-    const user = userEvent.setup();
     await renderPipelinesCreate(httpSetup);
 
-    await user.type(getInput('nameField'), 'my_pipeline');
-    await user.type(getInput('descriptionField'), 'pipeline description');
+    fireEvent.change(getInput('nameField'), { target: { value: 'my_pipeline' } });
+    fireEvent.change(getInput('descriptionField'), { target: { value: 'pipeline description' } });
 
     httpRequestsMockHelpers.setCreatePipelineResponse(undefined, {
       statusCode: 409,
@@ -190,5 +192,51 @@ describe.skip('<PipelinesCreate />', () => {
     await waitFor(() => expect(within(callout).queryByTestId('showErrorsButton')).toBeNull());
     expect(within(callout).getByTestId('hideErrorsButton')).toBeInTheDocument();
     expect(within(callout).getAllByRole('listitem')).toHaveLength(8);
+  });
+});
+
+describe('<PipelinesCreate /> field access pattern', () => {
+  const { httpSetup } = setupEnvironment();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  test('should toggle the field access pattern', async () => {
+    await renderPipelinesCreate(httpSetup);
+
+    expect(screen.getByTestId('fieldAccessPatternToggle')).toHaveAttribute('aria-checked', 'false');
+    fireEvent.click(screen.getByTestId('fieldAccessPatternToggle'));
+    expect(screen.getByTestId('fieldAccessPatternToggle')).toHaveAttribute('aria-checked', 'true');
+  });
+
+  test('should send the flexible field access pattern when enabled', async () => {
+    await renderPipelinesCreate(httpSetup);
+
+    fireEvent.change(getInput('nameField'), { target: { value: 'my_pipeline' } });
+
+    fireEvent.click(screen.getByTestId('fieldAccessPatternToggle'));
+
+    const postCallsBefore = httpSetup.post.mock.calls.length;
+    fireEvent.click(screen.getByTestId('submitButton'));
+
+    await waitFor(() => expect(httpSetup.post.mock.calls.length).toBeGreaterThan(postCallsBefore));
+    const createRequest = httpSetup.post.mock.results[postCallsBefore]?.value as
+      | Promise<unknown>
+      | undefined;
+    await waitFor(async () => {
+      await createRequest;
+    });
+
+    expect(httpSetup.post).toHaveBeenLastCalledWith(
+      API_BASE_PATH,
+      expect.objectContaining({
+        body: JSON.stringify({
+          name: 'my_pipeline',
+          field_access_pattern: 'flexible',
+          processors: [],
+        }),
+      })
+    );
   });
 });

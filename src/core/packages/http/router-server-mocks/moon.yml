@@ -20,6 +20,7 @@ dependsOn:
   - '@kbn/hapi-mocks'
   - '@kbn/config-schema'
   - '@kbn/core-http-server'
+  - '@kbn/core-spaces-common'
   - '@kbn/core-http-server-utils'
   - '@kbn/lazy-object'
 tags:

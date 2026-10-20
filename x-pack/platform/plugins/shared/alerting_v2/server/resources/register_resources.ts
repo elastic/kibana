@@ -7,30 +7,42 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
+import type { ChangeHistoryClient } from '@kbn/change-history';
+import type { RetentionConfig } from '../config';
 import type { ResourceManagerContract } from '../lib/services/resource_service/resource_manager';
+import {
+  RuleChangesHistoryInitializer,
+  RULE_CHANGES_HISTORY_RESOURCE_KEY,
+} from '../lib/rule_changes_history';
 import { registerDatastreams } from './datastreams/register';
 import { registerEsqlViews } from './esql_views/register';
-import { registerIndices } from './indices/register';
 
 export interface InitializeResourcesOptions {
   resourceManager: ResourceManagerContract;
   esClient: ElasticsearchClient;
-  logger: Logger;
-  experimentalFeaturesEnabled: boolean;
+  coreLogger: Logger;
+  changeHistoryClient: ChangeHistoryClient;
+  retention: RetentionConfig;
+  userProfileService: UserProfileServiceStart;
 }
 
 export function initializeResources({
   resourceManager,
   esClient,
-  logger,
-  experimentalFeaturesEnabled,
+  coreLogger,
+  changeHistoryClient,
+  retention,
+  userProfileService,
 }: InitializeResourcesOptions): void {
-  registerDatastreams({ resourceManager, esClient, logger });
-  registerEsqlViews({ resourceManager, esClient, logger });
+  registerDatastreams({ resourceManager, esClient, logger: coreLogger, retention });
+  registerEsqlViews({ resourceManager, esClient, logger: coreLogger });
 
-  if (experimentalFeaturesEnabled) {
-    registerIndices({ resourceManager, esClient, logger });
-  }
+  resourceManager.registerResource(
+    RULE_CHANGES_HISTORY_RESOURCE_KEY,
+    new RuleChangesHistoryInitializer(changeHistoryClient, esClient, userProfileService),
+    { optional: true }
+  );
 
   resourceManager.startInitialization();
 }

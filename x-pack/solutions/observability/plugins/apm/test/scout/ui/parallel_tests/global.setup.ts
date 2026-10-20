@@ -23,6 +23,9 @@ import { testData } from '../fixtures';
 import { serviceDataWithRecentErrors } from '../fixtures/synthtrace/recent_errors';
 import { distributedTrace } from '../fixtures/synthtrace/distributed_trace';
 import { serviceMapMultiEnv } from '../fixtures/synthtrace/service_map_multi_env';
+import { infrastructure } from '../fixtures/synthtrace/infrastructure';
+import { generateMultipleServicesData } from '../fixtures/synthtrace/multiple_services';
+import { generateMobileMostUsedData } from '../fixtures/synthtrace/mobile_most_used';
 
 globalSetupHook(
   'Ingest data to Elasticsearch',
@@ -39,17 +42,24 @@ globalSetupHook(
       from: new Date(testData.START_DATE).getTime(),
       to: new Date(testData.END_DATE).getTime(),
     });
+    const infrastructureDataGenerator = infrastructure({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
 
     await apmSynthtraceEsClient.index(opbeansDataGenerator);
+    await apmSynthtraceEsClient.index(infrastructureDataGenerator);
     await apmSynthtraceEsClient.index(servicesDataFromTheLast24Hours());
 
-    // Generate service map multi-environment data for embeddable tests
-    // Use current time range so the service map shows data in the default "last 15 minutes" view
+    // Generate service map multi-environment data for embeddable tests.
+    // Include future timestamps so delayed cloud/serverless shards still
+    // have data in relative "now" ranges when the spec finally runs.
     const now = Date.now();
     const fifteenMinutesAgo = now - 15 * 60 * 1000;
+    const twentyFourHoursFromNow = now + 24 * 60 * 60 * 1000;
     const serviceMapMultiEnvData = serviceMapMultiEnv({
       from: fifteenMinutesAgo,
-      to: now,
+      to: twentyFourHoursFromNow,
     });
     await apmSynthtraceEsClient.index(serviceMapMultiEnvData);
     log.info('Service map multi-environment data indexed');
@@ -100,6 +110,22 @@ globalSetupHook(
     });
     await apmSynthtraceEsClient.index(azureFunctionsData);
     log.info('Azure Functions service data indexed');
+
+    // Bulk services dataset for service inventory pagination tests.
+    const multipleServicesData = generateMultipleServicesData({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(multipleServicesData);
+    log.info('Multiple services data indexed');
+
+    // Mobile app data with device/os/network dimensions for most-used charts.
+    const mobileMostUsedData = generateMobileMostUsedData({
+      from: new Date(testData.START_DATE).getTime(),
+      to: new Date(testData.END_DATE).getTime(),
+    });
+    await apmSynthtraceEsClient.index(mobileMostUsedData);
+    log.info('Mobile most-used charts data indexed');
 
     // Shared APM metrics dataset (classic + OTel synth metrics, AWS Lambda
     // transactions fixture, OTel-native Java bulk-indexed metrics). Single

@@ -16,20 +16,20 @@ Some tests are designed to run sequentially:
 
 ```bash
 // ESS
-npx playwright test --config x-pack/solutions/observability/plugins/slo/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/solutions/observability/plugins/slo/test/scout/ui/playwright.config.ts --project=local --grep stateful-classic
 
 // Serverless
-npx playwright test --config x-pack/solutions/observability/plugins/slo/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability_complete
+node scripts/playwright test --config x-pack/solutions/observability/plugins/slo/test/scout/ui/playwright.config.ts --project=local --grep serverless-observability_complete
 ```
 
 Add `--headed` to turn off headless
 
 ```bash
 // ESS
-npx playwright test --config x-pack/solutions/observability/plugins/slo/test/scout/ui/playwright.config.ts --headed --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/solutions/observability/plugins/slo/test/scout/ui/playwright.config.ts --headed --project=local --grep stateful-classic
 
 // Serverless
-npx playwright test --config x-pack/solutions/observability/plugins/slo/test/scout/ui/playwright.config.ts --headed --project=local --grep serverless-observability_complete
+node scripts/playwright test --config x-pack/solutions/observability/plugins/slo/test/scout/ui/playwright.config.ts --headed --project=local --grep serverless-observability_complete
 ```
 
 Test results are available in `x-pack/solutions/observability/plugins/slo/test/scout/ui/output`

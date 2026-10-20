@@ -5,35 +5,36 @@
  * 2.0.
  */
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-  type ChangeEvent,
-  type SetStateAction,
-} from 'react';
+import React, { useCallback, useEffect, useMemo, useState, type SetStateAction } from 'react';
 import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiFilterGroup,
-  EuiFieldSearch,
-  EuiSuperDatePicker,
+  euiContainerCSS,
+  euiContainerQuery,
+  useEuiContainerQuery,
+  useEuiTheme,
 } from '@elastic/eui';
-import type { EpisodesFilterState } from '@kbn/alerting-v2-episodes-ui/queries/episodes_query';
+import type { EpisodesFilterState } from '@kbn/alerting-v2-common-queries';
 import type { TimeRange } from '@kbn/es-query';
 import { AlertEpisodesStatusFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/status_filter';
+import { AlertEpisodesSeverityFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/severity_filter';
 import { AlertEpisodesRuleFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/rule_filter';
 import { AlertEpisodesTagFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/tag_filter';
 import { AlertEpisodesAssigneeFilter } from '@kbn/alerting-v2-episodes-ui/components/filters/assignee_filter';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { HttpStart } from '@kbn/core-http-browser';
+import type {
+  ApplicationStart,
+  FeatureFlagsStart,
+  IUiSettingsClient,
+  NotificationsStart,
+} from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import useDebounce from 'react-use/lib/useDebounce';
-import deepEqual from 'fast-deep-equal';
-import { DEFAULT_EPISODES_LIST_FILTER } from '../utils/episodes_list_url_state';
+import { AlertingDateRangePicker } from '@kbn/alerting-v2-browser-shared';
+import { css } from '@emotion/react';
+import { EpisodesKqlInput } from './episodes_kql_input';
 import * as i18n from '../translations';
+import { validateEpisodeKql, type EpisodeKqlValidation } from '../utils/episodes_query_filter';
 
 export interface EpisodesFilterBarProps {
   filterState: EpisodesFilterState;
@@ -44,8 +45,60 @@ export interface EpisodesFilterBarProps {
   assigneeUids: string[];
   onRefresh?: () => void;
   isLoading?: boolean;
-  services: { http: HttpStart; expressions: ExpressionsStart; spaces: SpacesPluginStart };
+  services: {
+    http: HttpStart;
+    expressions: ExpressionsStart;
+    spaces: SpacesPluginStart;
+    data: DataPublicPluginStart;
+    notifications: NotificationsStart;
+    application: ApplicationStart;
+    uiSettings: IUiSettingsClient;
+    featureFlags: FeatureFlagsStart;
+  };
 }
+
+const filterBarContainerCss = euiContainerCSS('inline-size');
+
+const searchCss = css`
+  grid-area: search;
+  min-width: 0;
+`;
+
+const filtersCss = css`
+  grid-area: filters;
+  min-width: 0;
+`;
+
+const timePickerCss = css`
+  grid-area: time;
+`;
+
+const filterGroupCss = css`
+  width: 100%;
+  max-width: 100%;
+`;
+
+const getValidationTooltip = (validation: EpisodeKqlValidation): string | undefined => {
+  if (validation.isValid) {
+    return undefined;
+  }
+  if (validation.error.type === 'syntax') {
+    return i18n.EPISODES_FILTER_BAR_SEARCH_SYNTAX_ERROR;
+  }
+  const { field, reason } = validation.error;
+  if (reason === 'numericValue') {
+    return i18n.getEpisodesFilterBarNumericValueError(field);
+  }
+  if (reason === 'dateValue') {
+    return i18n.getEpisodesFilterBarDateValueError(field);
+  }
+  if (reason === 'wildcard') {
+    return i18n.getEpisodesFilterBarWildcardError(field);
+  }
+  if (reason === 'stringOrNumericRangeValue') {
+    return i18n.getEpisodesFilterBarRangeValueError(field);
+  }
+};
 
 export const EpisodesFilterBar = ({
   filterState,
@@ -58,26 +111,30 @@ export const EpisodesFilterBar = ({
   isLoading = false,
   services,
 }: EpisodesFilterBarProps) => {
+  const { euiTheme } = useEuiTheme();
+  const { ref: filterBarRef, matches: isNarrowContainer } = useEuiContainerQuery<HTMLDivElement>(
+    `(width < ${euiTheme.breakpoint.s}px)`
+  );
   const [queryStringInput, setQueryStringInput] = useState(filterState.queryString ?? '');
+  const queryValidation = useMemo(() => validateEpisodeKql(queryStringInput), [queryStringInput]);
+  const normalizedQueryStringInput = queryStringInput.trim() || undefined;
+  const appliedQueryString = filterState.queryString?.trim() || undefined;
+  const queryNeedsUpdate = normalizedQueryStringInput !== appliedQueryString;
 
   useEffect(() => {
     setQueryStringInput(filterState.queryString ?? '');
   }, [filterState.queryString]);
 
-  useDebounce(
-    () => {
-      const trimmedValue = queryStringInput.trim() || undefined;
-      onFilterChange((prev) =>
-        trimmedValue !== prev.queryString ? { ...prev, queryString: trimmedValue } : prev
-      );
+  const onStatusesChange = useCallback(
+    (status: string[] | undefined) => {
+      onFilterChange((prev) => ({ ...prev, status }));
     },
-    300,
-    [queryStringInput]
+    [onFilterChange]
   );
 
-  const onStatusChange = useCallback(
-    (status: string | undefined) => {
-      onFilterChange((prev) => ({ ...prev, status }));
+  const onSeveritiesChange = useCallback(
+    (severity: string[] | undefined) => {
+      onFilterChange((prev) => ({ ...prev, severity }));
     },
     [onFilterChange]
   );
@@ -103,95 +160,131 @@ export const EpisodesFilterBar = ({
     [onFilterChange]
   );
 
-  const onKueryChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
-    setQueryStringInput(e.target.value);
+  const onKueryChange = useCallback((value: string) => {
+    setQueryStringInput(value);
   }, []);
 
-  const hasActiveFilters = useMemo(
-    () => !deepEqual(filterState, DEFAULT_EPISODES_LIST_FILTER) || queryStringInput.trim() !== '',
-    [filterState, queryStringInput]
-  );
+  const submitQuery = useCallback(() => {
+    if (!queryValidation.isValid || !queryNeedsUpdate) {
+      return;
+    }
+    onFilterChange((prev) => ({ ...prev, queryString: normalizedQueryStringInput }));
+  }, [normalizedQueryStringInput, onFilterChange, queryNeedsUpdate, queryValidation.isValid]);
 
-  const onClearFilters = useCallback(() => {
-    setQueryStringInput('');
-    onFilterChange({ ...DEFAULT_EPISODES_LIST_FILTER });
-  }, [onFilterChange]);
+  const handleRefresh = useCallback(() => {
+    if (queryNeedsUpdate) {
+      submitQuery();
+      return;
+    }
+    onRefresh?.();
+  }, [onRefresh, queryNeedsUpdate, submitQuery]);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false}>
-      <EuiFlexItem grow>
-        <EuiFieldSearch
-          fullWidth
-          compressed
-          placeholder={i18n.EPISODES_FILTER_BAR_SEARCH_PLACEHOLDER}
-          value={queryStringInput}
-          onChange={onKueryChange}
-          data-test-subj="episodesFilterBar-search"
-        />
-      </EuiFlexItem>
+    <section
+      role="search"
+      aria-label={i18n.EPISODES_FILTER_BAR_SEARCH_ARIA_LABEL}
+      css={filterBarContainerCss}
+    >
+      <div
+        ref={filterBarRef}
+        css={css`
+          display: grid;
+          grid-template-areas: 'search filters time';
+          grid-template-columns: minmax(min(${euiTheme.base * 15}px, 100%), 1fr) auto auto;
+          align-items: center;
+          gap: ${euiTheme.size.s};
 
-      <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiFilterGroup compressed>
-              <AlertEpisodesStatusFilter
-                selectedStatus={filterState.status}
-                onStatusChange={onStatusChange}
-                data-test-subj="episodesFilterBar-status"
-              />
+          ${euiContainerQuery(`(width < ${euiTheme.breakpoint.xl}px)`)} {
+            grid-template-areas:
+              'search time'
+              'filters filters';
+            grid-template-columns: ${isNarrowContainer
+                ? 'minmax(0, 1fr)'
+                : `minmax(min(${euiTheme.base * 15}px, 100%), 1fr)`} auto;
+          }
+        `}
+      >
+        <div css={searchCss}>
+          <EpisodesKqlInput
+            value={queryStringInput}
+            onChange={onKueryChange}
+            onSubmit={submitQuery}
+            placeholder={i18n.EPISODES_FILTER_BAR_SEARCH_PLACEHOLDER}
+            data-test-subj="episodesFilterBar-search"
+            http={services.http}
+          />
+        </div>
+        <div css={filtersCss}>
+          <EuiFilterGroup
+            compressed
+            css={[
+              filterGroupCss,
+              css`
+                ${euiContainerQuery(`(width < ${euiTheme.breakpoint.xl}px)`)} {
+                  display: grid;
+                  grid-template-columns: repeat(
+                    auto-fit,
+                    minmax(min(${euiTheme.base * 8}px, 100%), 1fr)
+                  );
+                }
+              `,
+            ]}
+          >
+            <AlertEpisodesStatusFilter
+              selectedStatuses={filterState.status}
+              onStatusesChange={onStatusesChange}
+              data-test-subj="episodesFilterBar-status"
+            />
 
-              <AlertEpisodesRuleFilter
-                selectedRuleId={filterState.ruleId}
-                onRuleChange={onRuleChange}
-                ruleOptions={ruleOptions}
-                data-test-subj="episodesFilterBar-rule"
-                services={services}
-              />
+            <AlertEpisodesSeverityFilter
+              selectedSeverities={filterState.severity}
+              onSeveritiesChange={onSeveritiesChange}
+              data-test-subj="episodesFilterBar-severity"
+            />
 
-              <AlertEpisodesTagFilter
-                selectedTags={filterState.tags}
-                onTagsChange={onTagsChange}
-                services={services}
-                timeRange={timeRange}
-                data-test-subj="episodesFilterBar-tags"
-              />
+            <AlertEpisodesRuleFilter
+              selectedRuleId={filterState.ruleId}
+              onRuleChange={onRuleChange}
+              ruleOptions={ruleOptions}
+              data-test-subj="episodesFilterBar-rule"
+              services={services}
+            />
 
-              <AlertEpisodesAssigneeFilter
-                selectedAssigneeUid={filterState.assigneeUid}
-                onAssigneeChange={onAssigneeChange}
-                assigneeUids={assigneeUids}
-                data-test-subj="episodesFilterBar-assignee"
-              />
-            </EuiFilterGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonEmpty
-          size="xs"
-          iconType="cross"
-          disabled={!hasActiveFilters}
-          onClick={onClearFilters}
-          data-test-subj="episodesFilterBar-resetFilters"
-        >
-          {i18n.EPISODES_FILTER_BAR_RESET_FILTERS}
-        </EuiButtonEmpty>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiSuperDatePicker
-          compressed
-          start={timeRange.from}
-          end={timeRange.to}
-          onTimeChange={({ start, end }) => onTimeChange({ from: start, to: end })}
-          onRefresh={onRefresh}
-          isLoading={isLoading}
-          showUpdateButton="iconOnly"
-          updateButtonProps={{
-            fill: false,
-          }}
-          width="auto"
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            <AlertEpisodesTagFilter
+              selectedTags={filterState.tags}
+              onTagsChange={onTagsChange}
+              services={services}
+              timeRange={timeRange}
+              data-test-subj="episodesFilterBar-tags"
+            />
+
+            <AlertEpisodesAssigneeFilter
+              selectedAssigneeUid={filterState.assigneeUid}
+              onAssigneeChange={onAssigneeChange}
+              assigneeUids={assigneeUids}
+              data-test-subj="episodesFilterBar-assignee"
+            />
+          </EuiFilterGroup>
+        </div>
+        <div css={timePickerCss}>
+          <AlertingDateRangePicker
+            from={timeRange.from}
+            to={timeRange.to}
+            onChange={onTimeChange}
+            services={services}
+            onRefresh={onRefresh}
+            onManualRefresh={handleRefresh}
+            isLoading={isLoading}
+            needsUpdate={queryNeedsUpdate}
+            isRefreshDisabled={!queryValidation.isValid}
+            refreshTooltip={getValidationTooltip(queryValidation)}
+            showTimeWindowButtons={!isNarrowContainer}
+            width="auto"
+            collapsed={isNarrowContainer}
+            data-test-subj="episodesFilterBar-datePicker"
+          />
+        </div>
+      </div>
+    </section>
   );
 };

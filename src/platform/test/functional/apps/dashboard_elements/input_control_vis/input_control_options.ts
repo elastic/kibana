@@ -24,8 +24,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const comboBox = getService('comboBox');
   const retry = getService('retry');
+  const browser = getService('browser');
   const FIELD_NAME = 'machine.os.raw';
 
+  /**
+   * Purpose: Input control options smoke test
+   *
+   * Migration: migrate to scout - move to legacy control vis plugin
+   */
   describe('input control options', () => {
     before(async () => {
       await visualize.initTests();
@@ -41,10 +47,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('filter bar', () => {
+      // Close the Add filter popover in a hook so it can't overlay the next suite's editor tabs.
+      afterEach(async () => {
+        await browser.pressKeys(browser.keys.ESCAPE);
+        await testSubjects.missingOrFail('addFilterPopover');
+      });
+
       it('should show the default index pattern when clicking "Add filter"', async () => {
         await testSubjects.click('addFilter');
         const fields = await filterBar.getFilterEditorFields();
-        await filterBar.ensureFieldEditorModalIsClosed();
         expect(fields.length).to.be.greaterThan(0);
       });
     });
@@ -66,20 +77,18 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should stage filter when item selected but not create filter pill', async () => {
-        await comboBox.set('listControlSelect0', 'ios', { retryCount: 3 });
+        await comboBox.set('listControlSelect0', 'ios', { timeout: 20_000 });
 
         const selectedOptions = await comboBox.getComboBoxSelectedOptions('listControlSelect0');
         expect(selectedOptions[0].trim()).to.equal('ios');
 
-        const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilter).to.equal(false);
+        await filterBar.expectNoFilter(FIELD_NAME, 'ios');
       });
 
       it('should add filter pill when submit button is clicked', async () => {
         await visEditor.inputControlSubmit();
 
-        const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilter).to.equal(true);
+        await filterBar.expectFilter(FIELD_NAME, 'ios');
       });
 
       it('should replace existing filter pill(s) when new item is selected', async () => {
@@ -88,14 +97,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return (await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0')) === false;
         });
         await common.sleep(500); // Wait for DOM to stabilize after clear
-        await comboBox.set('listControlSelect0', 'osx', { retryCount: 3 });
+        await comboBox.set('listControlSelect0', 'osx', { timeout: 20_000 });
         await visEditor.inputControlSubmit();
         await common.sleep(1000);
 
-        const hasOldFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        const hasNewFilter = await filterBar.hasFilter(FIELD_NAME, 'osx');
-        expect(hasOldFilter).to.equal(false);
-        expect(hasNewFilter).to.equal(true);
+        await filterBar.expectNoFilter(FIELD_NAME, 'ios');
+        await filterBar.expectFilter(FIELD_NAME, 'osx');
       });
 
       it('should clear dropdown when filter pill removed', async () => {
@@ -107,23 +114,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should clear form when Clear button is clicked but not remove filter pill', async () => {
-        await comboBox.set('listControlSelect0', 'ios', { retryCount: 3 });
+        await comboBox.set('listControlSelect0', 'ios', { timeout: 20_000 });
         await visEditor.inputControlSubmit();
-        const hasFilterBeforeClearBtnClicked = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilterBeforeClearBtnClicked).to.equal(true);
+        await filterBar.expectFilter(FIELD_NAME, 'ios');
 
         await visEditor.inputControlClear();
         const hasValue = await comboBox.doesComboBoxHaveSelectedOptions('listControlSelect0');
         expect(hasValue).to.equal(false);
 
-        const hasFilterAfterClearBtnClicked = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilterAfterClearBtnClicked).to.equal(true);
+        await filterBar.expectFilter(FIELD_NAME, 'ios');
       });
 
       it('should remove filter pill when cleared form is submitted', async () => {
         await visEditor.inputControlSubmit();
-        const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilter).to.equal(false);
+        await filterBar.expectNoFilter(FIELD_NAME, 'ios');
       });
     });
 
@@ -150,18 +154,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should add filter pill when item selected', async () => {
-        await comboBox.set('listControlSelect0', 'ios', { retryCount: 3 });
+        await comboBox.set('listControlSelect0', 'ios', { timeout: 20_000 });
 
         const selectedOptions = await comboBox.getComboBoxSelectedOptions('listControlSelect0');
         expect(selectedOptions[0].trim()).to.equal('ios');
 
-        const hasFilter = await filterBar.hasFilter(FIELD_NAME, 'ios');
-        expect(hasFilter).to.equal(true);
+        await filterBar.expectFilter(FIELD_NAME, 'ios');
       });
     });
 
     describe('useTimeFilter', () => {
       it('should use global time filter when getting terms', async () => {
+        // Pin the global time filter to a window with no logstash-* data (that index only
+        // spans Sep 2015) so enabling "Use time filter" deterministically disables the control.
+        await timePicker.setAbsoluteRange(
+          'Jan 1, 2020 @ 00:00:00.000',
+          'Jan 1, 2021 @ 00:00:00.000'
+        );
         await visEditor.clickVisEditorTab('options');
         await testSubjects.setCheckbox('inputControlEditorUseTimeFilterCheckbox', 'check');
         await visEditor.clickGo();

@@ -13,12 +13,18 @@ import type {
 import { v4 as uuidv4 } from 'uuid';
 
 import pMap from 'p-map';
+import { escapeQuotes } from '@kbn/es-query';
 
 import { appContextService } from '..';
 import * as AgentService from '../agents';
 import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS } from '../../constants';
+import { NOT_OPAMP_AGENT_KUERY } from '../../../common/constants';
 import { throwIfAborted } from '../../tasks/utils';
-import { splitVersionSuffixFromPolicyId } from '../../../common/services/version_specific_policies_utils';
+import {
+  splitVersionSuffixFromPolicyId,
+  getSentinelVersionPolicyId,
+  buildAgentVersionVariantsKueryFragment,
+} from '../../../common/services/version_specific_policies_utils';
 
 const TASK_TYPE = 'fleet:reassign_agents_to_version_specific_policies';
 
@@ -32,10 +38,10 @@ export function registerReassignAgentsToVersionSpecificPoliciesTask(
       maxAttempts: 3,
       createTaskRunner: ({
         taskInstance,
-        abortController,
+        signal,
       }: {
         taskInstance: ConcreteTaskInstance;
-        abortController: AbortController;
+        signal: AbortSignal;
       }) => {
         return {
           async run() {
@@ -46,7 +52,7 @@ export function registerReassignAgentsToVersionSpecificPoliciesTask(
               versionSpecificAgentPolicyIds,
               async (versionedAgentPolicyId) => {
                 await reassignAgentsToVersionSpecificPolicies(versionedAgentPolicyId);
-                throwIfAborted(abortController);
+                throwIfAborted(signal);
               },
               {
                 concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS,
@@ -91,7 +97,11 @@ export async function reassignAgentsToVersionSpecificPolicies(versionedAgentPoli
 
   const { baseId: agentPolicyId, version } = splitVersionSuffixFromPolicyId(versionedAgentPolicyId);
   // agents enrolled to parent policy or agents using child policy but upgraded to new version
-  const kueryToReassignAgents = `(policy_id:"${agentPolicyId}" AND agent.version:${version}.*) OR (policy_id:${agentPolicyId}* AND agent.version:${version}.* AND upgraded_at:*)`;
+  const kueryToReassignAgents = `((policy_id:("${escapeQuotes(agentPolicyId)}" or "${escapeQuotes(
+    getSentinelVersionPolicyId(agentPolicyId)
+  )}") AND agent.version:${version}.*) OR (${buildAgentVersionVariantsKueryFragment(
+    agentPolicyId
+  )} AND agent.version:${version}.* AND upgraded_at:*)) AND ${NOT_OPAMP_AGENT_KUERY}`;
 
   try {
     const { total } = await AgentService.getAgentsByKuery(esClient, soClient, {
@@ -116,6 +126,8 @@ export async function reassignAgentsToVersionSpecificPolicies(versionedAgentPoli
     {
       kuery: kueryToReassignAgents,
       showInactive: false,
+      spaceId: '*',
+      _internalCrossSpace: true,
     },
     versionedAgentPolicyId
   );

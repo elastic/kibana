@@ -12,14 +12,16 @@ import {
   type AttachmentRenderProps,
   type CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
+import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { WorkflowApi } from '@kbn/workflows-ui';
+import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
+import { getAlertingV2Locators } from '../../application/bind_locators_to_host';
 import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
-import { paths } from '../../constants';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
-import { RulesApi } from '../../services/rules_api';
-import { WorkflowsApi } from '../../services/workflows_api';
-import { buildActionPolicyPayload } from '../../../common/agent_builder/action_policy_mappers';
+import { OBSERVABILITY_ALERTING_HOST } from '../../observability_alerting_host';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
 const EMPTY_VALUE = '-';
@@ -36,10 +38,8 @@ export const ActionPolicyCanvasContent = ({
   updateOrigin,
 }: ActionPolicyCanvasContentProps) => {
   const actionPoliciesApi = useService(ActionPoliciesApi);
-  const rulesApi = useService(RulesApi);
-  const workflowsApi = useService(WorkflowsApi);
-  const application = useService(CoreStart('application'));
-  const basePath = useService(CoreStart('http')).basePath;
+  const workflowApi = useService(WorkflowApi);
+  const share = useService(PluginStart('share')) as SharePluginStart;
   const notifications = useService(CoreStart('notifications'));
 
   const { data: rawData, origin } = attachment;
@@ -51,26 +51,16 @@ export const ActionPolicyCanvasContent = ({
   const [dependenciesReady, setDependenciesReady] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checks: Array<Promise<{ workflow?: boolean; rule?: boolean }>> = [];
+    const checks: Array<Promise<{ workflow?: boolean }>> = [];
     const abortController = new AbortController();
 
     const workflowDestinations = (data.destinations ?? []).filter((d) => d.type === 'workflow');
     for (const dest of workflowDestinations) {
       checks.push(
-        workflowsApi
-          .getWorkflow(dest.id, abortController.signal)
+        workflowApi
+          .getWorkflow(dest.id)
           .then(() => ({ workflow: true }))
           .catch(() => ({ workflow: false }))
-      );
-    }
-
-    const matcherRuleId = extractRuleIdFromMatcher(data.matcher);
-    if (matcherRuleId) {
-      checks.push(
-        rulesApi
-          .getRule(matcherRuleId, abortController.signal)
-          .then(() => ({ rule: true }))
-          .catch(() => ({ rule: false }))
       );
     }
 
@@ -83,14 +73,14 @@ export const ActionPolicyCanvasContent = ({
 
     Promise.all(checks).then((results) => {
       if (!abortController.signal.aborted) {
-        setDependenciesReady(results.every((result) => result.workflow || result.rule));
+        setDependenciesReady(results.every((result) => result.workflow));
       }
     });
 
     return () => {
       abortController.abort();
     };
-  }, [workflowsApi, rulesApi, data.destinations, data.matcher]);
+  }, [workflowApi, data.destinations]);
 
   const hasDraftDependencies = dependenciesReady !== true;
 
@@ -114,13 +104,16 @@ export const ActionPolicyCanvasContent = ({
           type: ActionButtonType.PRIMARY,
           disabled: hasDraftDependencies,
           disabledReason: hasDraftDependencies
-            ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveRuleAndWorkflowFirst', {
-                defaultMessage: 'Save rule and workflow before saving policy.',
+            ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveWorkflowFirst', {
+                defaultMessage: 'Save workflow before saving policy.',
               })
             : undefined,
           handler: async () => {
             try {
-              await actionPoliciesApi.upsertActionPolicy(data.id, buildActionPolicyPayload(data));
+              await actionPoliciesApi.upsertActionPolicy(
+                data.id,
+                attachmentDataToActionPolicyPayload(data)
+              );
               await updateOrigin(data.id);
               notifications.toasts.addSuccess(
                 i18n.translate('xpack.alertingV2.actionPolicyAttachment.createdSuccess', {
@@ -157,7 +150,10 @@ export const ActionPolicyCanvasContent = ({
           : undefined,
         handler: async () => {
           try {
-            await actionPoliciesApi.upsertActionPolicy(data.id, buildActionPolicyPayload(data));
+            await actionPoliciesApi.upsertActionPolicy(
+              data.id,
+              attachmentDataToActionPolicyPayload(data)
+            );
             notifications.toasts.addSuccess(
               i18n.translate('xpack.alertingV2.actionPolicyAttachment.updatedSuccess', {
                 defaultMessage: 'Policy "{name}" updated',
@@ -178,10 +174,14 @@ export const ActionPolicyCanvasContent = ({
         label: i18n.translate('xpack.alertingV2.actionPolicyAttachment.viewInPolicies', {
           defaultMessage: 'View in Policies',
         }),
-        icon: 'popout',
+        icon: 'external',
         type: ActionButtonType.OVERFLOW,
         handler: () => {
-          application.navigateToUrl(basePath.prepend(paths.actionPolicyEdit(data.id)));
+          getAlertingV2Locators(share).actionPolicyLocators.navigateSync({
+            page: 'edit',
+            actionPolicyId: data.id,
+            host: OBSERVABILITY_ALERTING_HOST.actionPolicies,
+          });
         },
       },
     ]);
@@ -191,8 +191,7 @@ export const ActionPolicyCanvasContent = ({
     registerActionButtons,
     updateOrigin,
     actionPoliciesApi,
-    application,
-    basePath,
+    share,
     notifications,
     data,
     hasDraftDependencies,
@@ -207,15 +206,4 @@ export const ActionPolicyCanvasContent = ({
       <ActionPolicyDefinitionList policy={data} />
     </EuiPanel>
   );
-};
-
-/**
- * Extracts a rule ID from a KQL matcher string if it contains a `rule.id` clause.
- * Supports both quoted (`rule.id: "abc"`) and unquoted (`rule.id: abc`) values.
- * Returns `undefined` when the matcher is absent or doesn't reference `rule.id`.
- */
-const extractRuleIdFromMatcher = (matcher: string | null | undefined): string | undefined => {
-  if (!matcher) return undefined;
-  const match = matcher.match(/rule\.id\s*:\s*"?([^"\s]+)"?/);
-  return match?.[1];
 };

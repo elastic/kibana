@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SavedObject } from '../..';
+import type { SavedObjectBulkResult } from '../..';
 
 /**
  * Base options used by most of the savedObject APIs.
@@ -30,6 +30,6 @@ export type MutatingOperationRefreshSetting = boolean | 'wait_for';
  * @public
  */
 export interface SavedObjectsBulkResponse<T = unknown> {
-  /** array of saved objects */
-  saved_objects: Array<SavedObject<T>>;
+  /** array of saved objects, each of which is either a successful result or an error result */
+  saved_objects: Array<SavedObjectBulkResult<T>>;
 }

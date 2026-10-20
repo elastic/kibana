@@ -12,6 +12,7 @@ export {
   MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_DAYS,
   MAX_SCHEDULE_BACKFILL_LOOKBACK_WINDOW_MS,
 } from './backfill';
+export * from './limits';
 export { PLUGIN } from './plugin';
 export { gapStatus, gapFillStatus } from './gap_status';
 export type { GapStatus, GapFillStatus } from './gap_status';
@@ -25,3 +26,7 @@ export { validFields } from './valid_fields_with_read_auth';
 export { gapAutoFillSchedulerLimits } from './gap_auto_fill_scheduler';
 export { GAP_AUTO_FILL_STATUS } from './gap_auto_fill_scheduler';
 export type { GapAutoFillStatus } from './gap_auto_fill_scheduler';
+export {
+  MISSING_UIAM_API_KEY_TAG,
+  LEGACY_MISSING_UIAM_API_KEY_TAG,
+} from './missing_uiam_api_key_tag';

@@ -5,25 +5,20 @@
  * 2.0.
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { renderHook, waitFor, act } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import type { EntityType } from '../../../../../common/api/entity_analytics/entity_store/common.gen';
+import type { EntityType } from '@kbn/entity-store/common';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import { useEntitiesListQuery } from './use_entities_list_query';
 import { useEntityAnalyticsRoutes } from '../../../api/api';
-import { useUiSetting } from '../../../../common/lib/kibana';
 import React from 'react';
 
 jest.mock('../../../api/api');
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: () => ({ services: { http: {} } }),
-  useUiSetting: jest.fn(),
-}));
-jest.mock('@kbn/entity-store/public', () => ({
-  FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
 }));
 
 describe('useEntitiesListQuery', () => {
-  const fetchEntitiesListMock = jest.fn();
   const fetchEntitiesListV2Mock = jest.fn();
   const TestWrapper = ({ children }: { children: React.ReactNode }) => (
     <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
@@ -31,33 +26,12 @@ describe('useEntitiesListQuery', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useUiSetting as jest.Mock).mockReturnValue(false);
     (useEntityAnalyticsRoutes as jest.Mock).mockReturnValue({
-      fetchEntitiesList: fetchEntitiesListMock,
       fetchEntitiesListV2: fetchEntitiesListV2Mock,
     });
   });
 
-  it('should call fetchEntitiesList with correct parameters', async () => {
-    const searchParams = { entityTypes: [], page: 7 };
-
-    fetchEntitiesListMock.mockResolvedValueOnce({ data: 'test data' });
-
-    const { result } = renderHook(() => useEntitiesListQuery({ ...searchParams, skip: false }), {
-      wrapper: TestWrapper,
-    });
-
-    await waitFor(() => {
-      expect(fetchEntitiesListMock).toHaveBeenCalledWith({
-        params: searchParams,
-        signal: expect.any(AbortSignal),
-      });
-      expect(result.current.data).toEqual({ data: 'test data' });
-    });
-  });
-
-  it('should call fetchEntitiesListV2 when Entity Store v2 is enabled', async () => {
-    (useUiSetting as jest.Mock).mockReturnValue(true);
+  it('calls fetchEntitiesListV2 with correct parameters', async () => {
     const searchParams = {
       entityTypes: ['host'] as EntityType[],
       page: 2,
@@ -84,20 +58,81 @@ describe('useEntitiesListQuery', () => {
           sortOrder: 'desc',
         },
         signal: expect.any(AbortSignal),
+        context: undefined,
       });
-      expect(fetchEntitiesListMock).not.toHaveBeenCalled();
       expect(result.current.data).toEqual(v2Response);
     });
   });
 
-  it('should not call fetchEntitiesList if skip is true', async () => {
-    const searchParams = { entityTypes: [], page: 7 };
+  it('forwards a caller-supplied executionContext to fetchEntitiesListV2', async () => {
+    const executionContext = {
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:entity_store_management',
+        id: 'entities_list',
+      },
+    };
+    const searchParams = {
+      entityTypes: ['host'] as EntityType[],
+      page: 1,
+      perPage: 20,
+      sortField: '@timestamp',
+      sortOrder: 'desc' as const,
+    };
+    fetchEntitiesListV2Mock.mockResolvedValueOnce({ records: [] });
+
+    renderHook(() => useEntitiesListQuery({ ...searchParams, skip: false, executionContext }), {
+      wrapper: TestWrapper,
+    });
+
+    await waitFor(() => {
+      expect(fetchEntitiesListV2Mock).toHaveBeenCalledWith(
+        expect.objectContaining({ context: executionContext })
+      );
+    });
+  });
+
+  it('does not re-fetch when only executionContext changes', async () => {
+    // React Query hashes query keys structurally, so the context values must differ
+    // between rerenders for this to fail if executionContext ever enters the queryKey.
+    const makeContext = (id: string): KibanaExecutionContext => ({
+      child: {
+        type: 'security_solution',
+        name: 'entity_analytics:entity_store_management',
+        id,
+      },
+    });
+    const searchParams = {
+      entityTypes: ['host'] as EntityType[],
+      page: 1,
+      perPage: 20,
+      sortField: '@timestamp',
+      sortOrder: 'desc' as const,
+    };
+    fetchEntitiesListV2Mock.mockResolvedValue({ records: [] });
+
+    const { rerender } = renderHook(
+      ({ executionContext }: { executionContext: KibanaExecutionContext }) =>
+        useEntitiesListQuery({ ...searchParams, skip: false, executionContext }),
+      { wrapper: TestWrapper, initialProps: { executionContext: makeContext('caller_0') } }
+    );
+
+    await waitFor(() => expect(fetchEntitiesListV2Mock).toHaveBeenCalledTimes(1));
+
+    for (let i = 1; i <= 5; i++) {
+      act(() => rerender({ executionContext: makeContext(`caller_${i}`) }));
+    }
+
+    expect(fetchEntitiesListV2Mock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not call fetchEntitiesListV2 when skip is true', async () => {
+    const searchParams = { entityTypes: [] as EntityType[], page: 7 };
 
     const { result } = renderHook(() => useEntitiesListQuery({ ...searchParams, skip: true }), {
       wrapper: TestWrapper,
     });
 
-    expect(fetchEntitiesListMock).not.toHaveBeenCalled();
     expect(fetchEntitiesListV2Mock).not.toHaveBeenCalled();
     expect(result.current.data).toBeUndefined();
   });

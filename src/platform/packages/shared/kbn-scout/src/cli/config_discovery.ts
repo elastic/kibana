@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createFailError, createFlagError } from '@kbn/dev-cli-errors';
 import type { Command, FlagsReader } from '@kbn/dev-cli-runner';
-import { SCOUT_PLAYWRIGHT_CONFIGS_PATH } from '@kbn/scout-info';
+import { SCOUT_PLAYWRIGHT_CONFIGS_PATH, targetAttributes, testTags } from '@kbn/scout-info';
+import type { ScoutTargetAttribute, ScoutTestTagIssueKind } from '@kbn/scout-info';
 import { testableModules } from '@kbn/scout-reporting/src/registry';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { saveFlattenedConfigGroups, saveModuleDiscoveryInfo } from '../tests_discovery/file_utils';
@@ -25,6 +27,9 @@ import {
   collectUniqueTags,
   getServerRunFlagsFromTags,
   getTestTagsForTarget,
+  isScoutTestFile,
+  resolveTargetAttributes,
+  selectTestsForTargetAttributes,
 } from '../tests_discovery/tag_utils';
 import {
   countModulesByType,
@@ -40,30 +45,67 @@ import { TARGET_TYPES } from '../tests_discovery/types';
 // Re-export types for backward compatibility
 export type { FlattenedConfigGroup, ModuleDiscoveryInfo } from '../tests_discovery/types';
 
-// Builds module discovery info from testable modules
+// Builds module discovery info from testable modules.
+// Limited-out tests are dropped first so they can neither make a config look runnable nor
+// contribute their target tags.
 
-const buildModuleDiscoveryInfo = (): ModuleDiscoveryInfo[] => {
+const buildModuleDiscoveryInfo = (
+  runTargetAttributes: readonly ScoutTargetAttribute[]
+): ModuleDiscoveryInfo[] => {
   return testableModules.allIncludingConfigs.map((module) => ({
     name: module.name,
     group: module.group,
     type: module.type,
     configs: module.configs.map((config) => {
-      const runnableTest = config.manifest.tests.find(
-        (test) => test.expectedStatus === 'passed' && test.location.file.endsWith('.spec.ts')
+      const eligibleTests = selectTestsForTargetAttributes(
+        config.manifest.tests,
+        runTargetAttributes
       );
+      const runnableTest = eligibleTests.find((test) => isScoutTestFile(test));
 
       const usesParallelWorkers = config.type === 'parallel';
-      const allTags = collectUniqueTags(config.manifest.tests);
+      const allTags = collectUniqueTags(eligibleTests);
 
       return {
         path: config.path,
         hasTests: !!runnableTest,
         tags: allTags,
+        testChannels: config.manifest.testChannels,
         serverRunFlags: [], // Will be computed from tags after cross-tag filtering
         usesParallelWorkers,
       };
     }),
   }));
+};
+
+// The `validateTags` fixture only sees UI tests that actually run, and a test without a
+// selection tag or with conflicting limits is filtered out before it ever does. API tests have
+// never been tag-validated and some carry tags Playwright derives from their titles, so the
+// generic unsupported-tag rule is left to the fixture.
+const MANIFEST_TAG_ISSUE_KINDS: ReadonlySet<ScoutTestTagIssueKind> = new Set([
+  'invalid-limit-tag',
+  'missing-selection-tag',
+  'conflicting-limit-tags',
+]);
+
+export const validateTestTags = (): void => {
+  const issues = testableModules.allIncludingConfigs.flatMap((module) =>
+    module.configs.flatMap((config) =>
+      config.manifest.tests.filter(isScoutTestFile).flatMap((test) =>
+        testTags
+          .findIssues(test.tags)
+          .filter(({ kind }) => MANIFEST_TAG_ISSUE_KINDS.has(kind))
+          .map(({ message }) => `${test.location.file}: test "${test.title}": ${message}`)
+      )
+    )
+  );
+
+  if (issues.length > 0) {
+    throw createFailError(
+      `Found ${issues.length} invalid Scout test tag usage(s):\n` +
+        issues.map((issue) => `  - ${issue}`).join('\n')
+    );
+  }
 };
 
 // Filters modules by target tags and computes server run flags
@@ -129,6 +171,56 @@ const filterModulesByExcludedConfigPaths = (
     .filter((module) => module.configs.length > 0);
 };
 
+const normalizeConfigPath = (configPath: string): string => configPath.trim().replace(/^\.\//, '');
+
+const parseRequestedConfigPaths = (raw: string | undefined): string[] => {
+  if (!raw) {
+    return [];
+  }
+  return [
+    ...new Set(
+      raw
+        .split(',')
+        .map(normalizeConfigPath)
+        .filter((configPath) => configPath.length > 0)
+    ),
+  ];
+};
+
+const filterModulesByRequestedConfigPaths = (
+  modules: ModuleDiscoveryInfo[],
+  requestedConfigPaths: string[]
+): ModuleDiscoveryInfo[] => {
+  const requestedSet = new Set(requestedConfigPaths);
+
+  return modules
+    .map((module) => ({
+      ...module,
+      configs: module.configs.filter((config) => requestedSet.has(config.path)),
+    }))
+    .filter((module) => module.configs.length > 0);
+};
+
+const assertRequestedConfigsExist = (
+  modules: ModuleDiscoveryInfo[],
+  requestedConfigPaths: string[]
+): void => {
+  const knownPaths = new Set(
+    modules.flatMap((module) => module.configs.map((config) => config.path))
+  );
+  const missing = requestedConfigPaths.filter((configPath) => !knownPaths.has(configPath));
+
+  if (missing.length > 0) {
+    throw createFailError(
+      `The following requested Scout config(s) were not found among discovered Playwright configs:\n${missing
+        .map((configPath) => `- ${configPath}`)
+        .join(
+          '\n'
+        )}\nEnsure the path is repo-relative and that a committed manifest exists for it (run 'node scripts/scout update-test-config-manifests').`
+    );
+  }
+};
+
 // Logs discovered modules in non-flattened format
 const logDiscoveredModules = (modules: ModuleDiscoveryInfo[], log: ToolingLog): void => {
   const { plugins: pluginCount, packages: packageCount } = countModulesByType(modules);
@@ -162,12 +254,16 @@ const logFlattenedConfigs = (flattenedConfigs: FlattenedConfigGroup[], log: Tool
 const handleFlattenedOutput = (
   filteredModules: ModuleDiscoveryInfo[],
   flagsReader: FlagsReader,
-  log: ToolingLog
+  log: ToolingLog,
+  bypassCiFilter: boolean
 ): void => {
-  // Apply CI filtering if save flag is set (for consistency with non-flattened behavior)
-  const modulesToFlatten = flagsReader.boolean('save')
-    ? filterModulesByScoutCiConfig(log, filteredModules)
-    : filteredModules;
+  // Apply CI filtering if save flag is set (for consistency with non-flattened behavior).
+  // When configs are explicitly requested (--configs), the CI enabled/disabled/registration
+  // state is irrelevant, so the filter is skipped entirely.
+  const modulesToFlatten =
+    flagsReader.boolean('save') && !bypassCiFilter
+      ? filterModulesByScoutCiConfig(log, filteredModules)
+      : filteredModules;
 
   const flattenedConfigs = flattenModulesByServerRunFlag(modulesToFlatten);
 
@@ -183,16 +279,25 @@ const handleNonFlattenedOutput = (
   filteredModules: ModuleDiscoveryInfo[],
   flagsReader: FlagsReader,
   log: ToolingLog,
-  isSelective: boolean
+  isSelective: boolean,
+  bypassCiFilter: boolean
 ): void => {
   if (flagsReader.boolean('save')) {
-    const filteredForCiModules = filterModulesByScoutCiConfig(log, filteredModules);
+    // When configs are explicitly requested (--configs), skip the CI enabled/disabled/registration
+    // filter and save exactly the resolved modules.
+    const filteredForCiModules = bypassCiFilter
+      ? filteredModules
+      : filterModulesByScoutCiConfig(log, filteredModules);
     saveModuleDiscoveryInfo(filteredForCiModules, log);
 
     const { plugins: savedPluginCount, packages: savedPackageCount } =
       countModulesByType(filteredForCiModules);
 
-    const runScope = isSelective ? 'selective' : 'full suite';
+    const runScope = bypassCiFilter
+      ? 'requested configs'
+      : isSelective
+      ? 'selective'
+      : 'full suite';
     log.info(
       `Scout configs saved for CI (${runScope}): ${savedPluginCount} plugin(s) and ${savedPackageCount} package(s) written to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'`
     );
@@ -200,7 +305,9 @@ const handleNonFlattenedOutput = (
   }
 
   if (flagsReader.boolean('validate')) {
-    filterModulesByScoutCiConfig(log, filteredModules);
+    if (!bypassCiFilter) {
+      filterModulesByScoutCiConfig(log, filteredModules);
+    }
     return;
   }
 
@@ -214,6 +321,22 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   const flatten = flagsReader.boolean('flatten');
   const includeCustomServers = flagsReader.boolean('include-custom-servers');
   const testingScopePath = flagsReader.string('testing-scope');
+  const requestedConfigPaths = parseRequestedConfigPaths(flagsReader.string('configs'));
+  // Explicitly-requested configs form an allow-list: registration/enabled/disabled/excluded and
+  // custom-server state are all ignored so the caller gets exactly the configs it named.
+  const hasRequestedConfigs = requestedConfigPaths.length > 0;
+  let runTargetAttributes: ScoutTargetAttribute[];
+  try {
+    runTargetAttributes = resolveTargetAttributes(flagsReader.arrayOfStrings('targetAttribute'));
+  } catch (e) {
+    throw createFlagError(String(e));
+  }
+
+  log.info(
+    runTargetAttributes.length > 0
+      ? `Test target attributes: ${runTargetAttributes.join(', ')}`
+      : 'No test target attributes declared for this run'
+  );
 
   // Read the resolved scope produced upstream by `scout resolve-testing-scope`.
   // The CLI is intentionally a pure consumer: it never re-derives the scope
@@ -221,8 +344,18 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
   const scope = testingScopePath ? readScoutTestingScope(testingScopePath) : null;
   const isSelective = scope ? scope.kind !== 'full' : false;
 
+  // Ahead of discovery, which would otherwise throw on the first malformed limit tag it meets
+  // instead of reporting every tag issue together.
+  if (flagsReader.boolean('validate')) {
+    validateTestTags();
+  }
+
   // Build initial module discovery info.
-  const modulesWithTests = buildModuleDiscoveryInfo();
+  const modulesWithTests = buildModuleDiscoveryInfo(runTargetAttributes);
+
+  if (hasRequestedConfigs) {
+    assertRequestedConfigsExist(modulesWithTests, requestedConfigPaths);
+  }
 
   // Annotate every module with isAffected so CI step labels can carry an
   // "affected " prefix even on full-suite runs that have a scope artifact.
@@ -233,7 +366,16 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
 
   // Translate the scope into a concrete module list for the target-tag step.
   let modulesForTargetTags: ModuleDiscoveryInfo[];
-  if (!scope || scope.kind === 'full') {
+  if (hasRequestedConfigs) {
+    // Explicit config allow-list wins over any testing-scope selection.
+    modulesForTargetTags = filterModulesByRequestedConfigPaths(
+      modulesAfterMark,
+      requestedConfigPaths
+    );
+    log.info(
+      `Scout discovery limited to ${requestedConfigPaths.length} requested config(s) (${modulesForTargetTags.length} module(s))`
+    );
+  } else if (!scope || scope.kind === 'full') {
     modulesForTargetTags = modulesAfterMark;
     if (!scope) {
       log.info(
@@ -258,18 +400,31 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
 
   // Filter modules by target tags and compute server run flags
   const filteredModulesByTags = filterModulesByTargetTags(modulesForTargetTags, targetTags);
-  const filteredModules = filterModulesByCustomServerPaths(
-    filteredModulesByTags,
-    includeCustomServers
-  );
-  const filteredModulesWithExcludedConfigs = process.env.CI
-    ? filterModulesByExcludedConfigPaths(filteredModules, getScoutCiExcludedConfigs())
-    : filteredModules;
+  // An explicit config allow-list bypasses the custom-server and excluded-config filters:
+  // the caller named these paths on purpose, so honor them regardless of CI defaults.
+  const filteredModules = hasRequestedConfigs
+    ? filteredModulesByTags
+    : filterModulesByCustomServerPaths(filteredModulesByTags, includeCustomServers);
+  const filteredModulesWithExcludedConfigs =
+    process.env.CI && !hasRequestedConfigs
+      ? filterModulesByExcludedConfigPaths(filteredModules, getScoutCiExcludedConfigs())
+      : filteredModules;
   // Handle output based on flatten flag
   if (flatten) {
-    handleFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log);
+    handleFlattenedOutput(
+      filteredModulesWithExcludedConfigs,
+      flagsReader,
+      log,
+      hasRequestedConfigs
+    );
   } else {
-    handleNonFlattenedOutput(filteredModulesWithExcludedConfigs, flagsReader, log, isSelective);
+    handleNonFlattenedOutput(
+      filteredModulesWithExcludedConfigs,
+      flagsReader,
+      log,
+      isSelective,
+      hasRequestedConfigs
+    );
   }
 };
 
@@ -300,6 +455,13 @@ export const runDiscoverPlaywrightConfigs = (flagsReader: FlagsReader, log: Tool
  *   - kind: 'dependency-tree'  -> filter to modules in scope.affectedModules
  *   In all cases, scope.affectedModules is used to mark each module's `isAffected`
  *   flag so CI step labels can carry an "affected " prefix.
+ *
+ * Test target attributes:
+ * - Attributes describe the environment the tests will run in (e.g. `fips` for a
+ *   FIPS-enabled Kibana) and must be declared by the caller via --targetAttribute or
+ *   SCOUT_TARGET_ATTRIBUTES; they are never auto-detected. Tests carrying a
+ *   `@limit/<selection-method>-<target-attr>` tag that the declared attributes don't
+ *   satisfy are excluded, and configs left without a runnable test drop out entirely.
  */
 export const discoverPlaywrightConfigsCmd: Command<void> = {
   name: 'discover-playwright-configs',
@@ -323,6 +485,16 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
                               isAffected marking (from scope.affectedModules).
                               When omitted, the command runs in full-suite mode
                               with no isAffected marking.
+    --configs <paths>         Comma-separated repo-relative Playwright config paths to resolve.
+                              Acts as an explicit allow-list: only these configs are output, and
+                              custom-server, excluded-config, and CI registration/enabled/disabled
+                              filtering are bypassed (the caller named them on purpose). Fails if a
+                              requested path is not a known Scout config. Used by the flaky-test runner.
+    --targetAttribute <attr>  Attribute of the test target the tests will run against. Repeatable
+                              and/or comma-separated; defaults to SCOUT_TARGET_ATTRIBUTES.
+                              Valid attributes: ${targetAttributes.all.join(', ')}.
+                              Drops tests whose '@limit/<selection-method>-<target-attr>' tags
+                              aren't satisfied, and configs left without a runnable test.
     --include-custom-servers  Include configs under 'test/scout_*' paths for custom server setups
     --validate                Validate that all discovered modules are registered in Scout CI config
     --save                    Validate and save enabled modules to '${SCOUT_PLAYWRIGHT_CONFIGS_PATH}'
@@ -345,9 +517,16 @@ export const discoverPlaywrightConfigsCmd: Command<void> = {
 
     # Save flattened configs for Cloud test execution
     node scripts/scout discover-playwright-configs --flatten --save
+
+    # Resolve only specific configs (flaky-test runner); bypasses CI registration/enabled filtering
+    node scripts/scout discover-playwright-configs --target local --save \\
+      --configs x-pack/plugins/foo/test/scout/ui/playwright.config.ts,src/plugins/bar/test/scout/api/playwright.config.ts
+
+    # Discover configs for a FIPS-enabled Kibana
+    node scripts/scout discover-playwright-configs --target local --targetAttribute fips --save
   `,
   flags: {
-    string: ['target', 'testing-scope'],
+    string: ['target', 'testing-scope', 'configs', 'targetAttribute'],
     boolean: ['save', 'validate', 'flatten', 'include-custom-servers'],
     default: {
       target: 'all',

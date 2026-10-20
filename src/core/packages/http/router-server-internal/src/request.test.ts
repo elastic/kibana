@@ -470,6 +470,27 @@ describe('CoreKibanaRequest', () => {
       });
     });
 
+    describe('route.options.httpResponseLogLevel property', () => {
+      it.each`
+        value        | expected
+        ${'info'}    | ${'info'}
+        ${undefined} | ${undefined}
+      `('handles httpResponseLogLevel: $value', ({ value, expected }) => {
+        const request = hapiMocks.createRequest({
+          route: {
+            settings: {
+              app: {
+                httpResponseLogLevel: value,
+              },
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.route.options.httpResponseLogLevel).toBe(expected);
+      });
+    });
+
     describe('route.options.excludeFromRateLimiter property', () => {
       it.each`
         value        | expected
@@ -558,7 +579,6 @@ describe('CoreKibanaRequest', () => {
       it('should be true', () => {
         const request: FakeRawRequest = {
           headers: {},
-          path: '/',
         };
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.isFakeRequest).toBe(true);
@@ -569,7 +589,6 @@ describe('CoreKibanaRequest', () => {
       it('should be 1.0', () => {
         const request: FakeRawRequest = {
           headers: {},
-          path: '/',
         };
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.httpVersion).toEqual('1.0');
@@ -583,7 +602,6 @@ describe('CoreKibanaRequest', () => {
             foo: 'bar',
             hello: 'dolly',
           },
-          path: '/',
         };
         const kibanaRequest = CoreKibanaRequest.from(request);
         expect(kibanaRequest.headers).toEqual({

@@ -9,16 +9,18 @@ import React, { memo } from 'react';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';
 import { act, fireEvent } from '@testing-library/react';
-import type { AnyArtifact } from './types';
+import type { AnyArtifact, ArtifactInfo } from './types';
 import { getTrustedAppProviderMock, getExceptionProviderMock } from './test_utils';
 import type { ArtifactEntryCollapsibleCardProps } from './artifact_entry_collapsible_card';
 import { ArtifactEntryCollapsibleCard } from './artifact_entry_collapsible_card';
 import type { ArtifactEntryCardDecoratorProps } from './artifact_entry_card';
+import type { CriteriaConditionsProps } from './components/criteria_conditions';
+import { DISABLED_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
 
 describe.each([
-  ['trusted apps', getTrustedAppProviderMock],
-  ['exceptions/event filters', getExceptionProviderMock],
-])('when using the ArtifactEntryCard component with %s', (_, generateItem) => {
+  ['trusted apps' as const, getTrustedAppProviderMock],
+  ['exceptions/event filters' as const, getExceptionProviderMock],
+])('when using the ArtifactEntryCard component with %s', (artifactType, generateItem) => {
   let item: AnyArtifact;
   let appTestContext: AppContextTestRender;
   let renderResult: ReturnType<AppContextTestRender['render']>;
@@ -78,20 +80,20 @@ describe.each([
   it('should display tooltip if collapsed', () => {
     render();
 
-    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(2);
+    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(3);
   });
 
   it('should display tooltip when collapsed but only if not empty', () => {
     item.description = '';
     render();
 
-    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(1);
+    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(2);
   });
 
   it('should NOT display a tooltip if expanded', () => {
     render({ expanded: true });
 
-    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(0);
+    expect(renderResult.baseElement.querySelectorAll('.euiToolTipAnchor')).toHaveLength(1);
   });
 
   it('should call `onExpandCollapse` callback when button is clicked', () => {
@@ -147,5 +149,42 @@ describe.each([
 
     expect(renderResult.queryByText('mock decorator')).not.toBeInTheDocument();
     expect(passedItem).toBe(null);
+  });
+
+  it('should not show an enabled status by default', () => {
+    render();
+
+    expect(renderResult.queryByTestId('testCard-header-enabledStatus')).toBeNull();
+  });
+
+  it('should show Enabled when showEnabledColumn is set', () => {
+    render({ showEnabledColumn: true });
+
+    expect(renderResult.getByTestId('testCard-header-enabledStatus')).toHaveTextContent('Enabled');
+  });
+
+  if (artifactType === 'exceptions/event filters') {
+    it('should show Disabled when the artifact has the disabled tag', () => {
+      (item as unknown as ArtifactInfo).tags = [
+        ...(item as unknown as ArtifactInfo).tags,
+        DISABLED_ARTIFACT_TAG,
+      ];
+
+      render({ showEnabledColumn: true });
+
+      expect(renderResult.getByTestId('testCard-header-enabledStatus')).toHaveTextContent(
+        'Disabled'
+      );
+    });
+  }
+
+  it('should replace criteria conditions when CriteriaComponent is provided', () => {
+    const MockCriteria = memo<CriteriaConditionsProps>(() => <p>{'custom criteria'}</p>);
+    MockCriteria.displayName = 'MockCriteria';
+
+    render({ CriteriaComponent: MockCriteria, expanded: true });
+
+    expect(renderResult.getByText('custom criteria')).toBeInTheDocument();
+    expect(renderResult.queryByTestId('testCard-criteriaConditions-condition')).toBeNull();
   });
 });

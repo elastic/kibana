@@ -6,13 +6,15 @@
  */
 
 import type {
+  AgentBuilderClient,
   DefaultEvaluators,
   EvaluationDataset,
   Evaluator,
   EvalsExecutorClient,
   Example,
 } from '@kbn/evals';
-import type { SecurityEvalChatClient } from './chat_client';
+import type { EndpointResponseActionsRouting } from './endpoint_response_actions_routing_evaluator';
+import { converseQuestionToTaskOutput } from './converse_task';
 
 export interface SecurityDatasetExample extends Example {
   input: {
@@ -20,6 +22,9 @@ export interface SecurityDatasetExample extends Example {
   };
   output: {
     criteria: string[];
+    /** Optional deterministic routing contract enforced by extra evaluators. */
+    routing?: EndpointResponseActionsRouting;
+    required_tool?: string;
   };
 }
 
@@ -29,6 +34,7 @@ export type EvaluateSecurityDataset = (options: {
     description: string;
     examples: SecurityDatasetExample[];
   };
+  extraEvaluators?: Evaluator[];
 }) => Promise<void>;
 
 export function createEndpointCriteriaEvaluator({
@@ -39,6 +45,7 @@ export function createEndpointCriteriaEvaluator({
   return {
     name: 'Criteria',
     kind: 'LLM' as const,
+    direction: 'maximize',
     evaluate: async ({ expected, ...rest }) => {
       const criteria: string[] = (expected as SecurityDatasetExample['output'])?.criteria ?? [];
       return evaluators.criteria(criteria).evaluate({ expected, ...rest });
@@ -49,20 +56,22 @@ export function createEndpointCriteriaEvaluator({
 export function createEvaluateSecurityDataset({
   evaluators,
   executorClient,
-  chatClient,
+  agentBuilderClient,
 }: {
   evaluators: DefaultEvaluators;
   executorClient: EvalsExecutorClient;
-  chatClient: SecurityEvalChatClient;
+  agentBuilderClient: AgentBuilderClient;
 }): EvaluateSecurityDataset {
   return async function evaluateSecurityDataset({
     dataset: { name, description, examples },
+    extraEvaluators = [],
   }: {
     dataset: {
       name: string;
       description: string;
       examples: SecurityDatasetExample[];
     };
+    extraEvaluators?: Evaluator[];
   }) {
     const dataset = {
       name,
@@ -72,19 +81,10 @@ export function createEvaluateSecurityDataset({
 
     await executorClient.runExperiment(
       {
-        dataset,
-        task: async ({ input }) => {
-          const response = await chatClient.converse({ message: input.question });
-
-          return {
-            messages: response.messages,
-            steps: response.steps,
-            errors: response.errors,
-            traceId: response.traceId,
-          };
-        },
+        datasets: [dataset],
+        task: async ({ input }) => converseQuestionToTaskOutput(agentBuilderClient, input.question),
       },
-      [createEndpointCriteriaEvaluator({ evaluators })]
+      [createEndpointCriteriaEvaluator({ evaluators }), ...extraEvaluators]
     );
   };
 }

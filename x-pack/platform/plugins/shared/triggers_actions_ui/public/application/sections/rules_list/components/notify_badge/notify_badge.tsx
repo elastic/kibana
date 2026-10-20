@@ -254,18 +254,20 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
     // a default behaviour of this component.
     const showOnHoverClass = showOnHover ? 'ruleSidebarItem__action' : '';
     return (
-      <EuiButtonIcon
-        size="s"
-        isLoading={isLoading}
-        disabled={isLoading || isDisabled}
-        display={isLoading ? 'base' : 'empty'}
-        data-test-subj="rulesListNotifyBadge-unsnoozed"
-        aria-label={snoozeButtonAriaLabel}
-        className={isPopoverOpen || isLoading ? '' : showOnHoverClass}
-        iconType="bell"
-        onClick={togglePopover}
-        buttonRef={focusTrapButtonRef}
-      />
+      <EuiToolTip content={snoozeButtonAriaLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          size="s"
+          isLoading={isLoading}
+          disabled={isLoading || isDisabled}
+          display={isLoading ? 'base' : 'empty'}
+          data-test-subj="rulesListNotifyBadge-unsnoozed"
+          aria-label={snoozeButtonAriaLabel}
+          className={isPopoverOpen || isLoading ? '' : showOnHoverClass}
+          iconType="bell"
+          onClick={togglePopover}
+          buttonRef={focusTrapButtonRef}
+        />
+      </EuiToolTip>
     );
   }, [showOnHover, isLoading, isDisabled, snoozeButtonAriaLabel, isPopoverOpen, togglePopover]);
 
@@ -289,18 +291,20 @@ export const RulesListNotifyBadge: React.FunctionComponent<RulesListNotifyBadgeP
 
   const indefiniteSnoozeButton = useMemo(() => {
     return (
-      <EuiButtonIcon
-        size="s"
-        isLoading={isLoading}
-        disabled={isLoading || isDisabled}
-        display="base"
-        data-test-subj="rulesListNotifyBadge-snoozedIndefinitely"
-        aria-label={snoozeButtonAriaLabel}
-        iconType="bellSlash"
-        color="accent"
-        onClick={togglePopover}
-        buttonRef={focusTrapButtonRef}
-      />
+      <EuiToolTip content={snoozeButtonAriaLabel} disableScreenReaderOutput>
+        <EuiButtonIcon
+          size="s"
+          isLoading={isLoading}
+          disabled={isLoading || isDisabled}
+          display="base"
+          data-test-subj="rulesListNotifyBadge-snoozedIndefinitely"
+          aria-label={snoozeButtonAriaLabel}
+          iconType="bellSlash"
+          color="accent"
+          onClick={togglePopover}
+          buttonRef={focusTrapButtonRef}
+        />
+      </EuiToolTip>
     );
   }, [isLoading, isDisabled, snoozeButtonAriaLabel, togglePopover]);
 

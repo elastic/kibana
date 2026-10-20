@@ -11,6 +11,7 @@ import { Command } from '@langchain/langgraph';
 import { ToolMessage } from '@langchain/core/messages';
 import { z } from '@kbn/zod/v4';
 import type { CallbackManagerForToolRun } from '@langchain/core/callbacks/manager';
+import { MAX_STRING_LENGTH } from '../../../common';
 
 interface CreateSubmitToolConfig {
   name: string;
@@ -23,8 +24,8 @@ interface CreateSubmitToolConfig {
 
 export const createSubmitTool = (config: CreateSubmitToolConfig): DynamicStructuredTool => {
   const schema = z.object({
-    content: z.string().describe(config.contentDescription),
-    summary: z.string().describe(config.summaryDescription),
+    content: z.string().max(MAX_STRING_LENGTH.description).describe(config.contentDescription),
+    summary: z.string().max(MAX_STRING_LENGTH.description).describe(config.summaryDescription),
   });
 
   return new DynamicStructuredTool({

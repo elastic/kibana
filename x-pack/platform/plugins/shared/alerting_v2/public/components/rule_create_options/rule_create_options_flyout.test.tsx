@@ -7,13 +7,44 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import { RuleCreateOptionsFlyout } from './rule_create_options_flyout';
+
+type CapturedFlyoutOnClose = EuiFlyoutProps['onClose'];
+
+let latestFlyoutOnClose: CapturedFlyoutOnClose | undefined;
+
+jest.mock('@elastic/eui', () => {
+  const ReactActual = jest.requireActual('react') as typeof import('react');
+  const actual = jest.requireActual('@elastic/eui') as typeof import('@elastic/eui');
+  const EuiFlyoutActual = actual.EuiFlyout;
+  return {
+    ...actual,
+    EuiFlyout: ReactActual.forwardRef<HTMLElement, React.ComponentProps<typeof EuiFlyoutActual>>(
+      (props, ref) => {
+        latestFlyoutOnClose = props.onClose as CapturedFlyoutOnClose;
+        return ReactActual.createElement(EuiFlyoutActual, { ...props, ref });
+      }
+    ),
+  };
+});
+
+let mockAreAgentBuilderSkillsAvailable = true;
+let mockAgentBuilderSkillsRequirements = {
+  hasAgentBuilderCapability: true,
+};
+
+jest.mock('../../hooks/use_are_agent_builder_skills_available', () => ({
+  useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
+  useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+}));
 
 const onClose = jest.fn();
 const onCreateEsqlRule = jest.fn();
 const onCreateWithAgent = jest.fn();
+const onCreateThresholdRule = jest.fn();
 
 const renderFlyout = () =>
   render(
@@ -22,13 +53,19 @@ const renderFlyout = () =>
         onClose={onClose}
         onCreateEsqlRule={onCreateEsqlRule}
         onCreateWithAgent={onCreateWithAgent}
+        onCreateThresholdRule={onCreateThresholdRule}
       />
     </I18nProvider>
   );
 
 describe('RuleCreateOptionsFlyout', () => {
   beforeEach(() => {
+    latestFlyoutOnClose = undefined;
     jest.clearAllMocks();
+    mockAreAgentBuilderSkillsAvailable = true;
+    mockAgentBuilderSkillsRequirements = {
+      hasAgentBuilderCapability: true,
+    };
   });
 
   it('renders the flyout with create rule options', () => {
@@ -36,10 +73,35 @@ describe('RuleCreateOptionsFlyout', () => {
 
     expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
     expect(screen.getByRole('heading', { level: 2, name: 'Create rule' })).toBeInTheDocument();
-    expect(screen.getByText('Create ES|QL rule')).toBeInTheDocument();
-    expect(screen.getByText('Create with AI Agent')).toBeInTheDocument();
-    expect(screen.getByText('Threshold Alert')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleCreateOptionsFlyoutUniversalBadge')).toHaveTextContent(
+      'Universal'
+    );
+    expect(screen.getByText('ES|QL rule')).toBeInTheDocument();
+    expect(screen.getByText('With AI Agent')).toBeInTheDocument();
+    expect(screen.getByText('Threshold rule')).toBeInTheDocument();
     expect(screen.queryByText(/welcome to the new alerting experience/i)).not.toBeInTheDocument();
+  });
+
+  it('shows the Create rule title and closes from the header when stacked', () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsFlyout
+          historyKey={Symbol('rulesListCreateRule')}
+          retainOnCascade
+          onClose={onClose}
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          onCreateThresholdRule={onCreateThresholdRule}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByRole('heading', { level: 2, name: 'Create rule' })).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('ruleCreateOptionsFlyoutCloseButton'));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
   });
 
   it('calls onClose when the close button is clicked', () => {
@@ -50,10 +112,52 @@ describe('RuleCreateOptionsFlyout', () => {
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 
+  it('does not dismiss when EUI cascade-closes a stacked session the form is still using', () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsFlyout
+          historyKey={Symbol('rulesListCreateRule')}
+          retainOnCascade
+          onClose={onClose}
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          onCreateThresholdRule={onCreateThresholdRule}
+        />
+      </I18nProvider>
+    );
+
+    act(() => {
+      latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-cascade' });
+    });
+
+    expect(onClose).not.toHaveBeenCalled();
+    expect(screen.getByTestId('ruleCreateOptionsFlyout')).toBeInTheDocument();
+  });
+
+  it('dismisses a stacked picker when a cascade is not from the open form', () => {
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsFlyout
+          historyKey={Symbol('rulesListCreateRule')}
+          onClose={onClose}
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          onCreateThresholdRule={onCreateThresholdRule}
+        />
+      </I18nProvider>
+    );
+
+    act(() => {
+      latestFlyoutOnClose?.(new MouseEvent('click'), { reason: 'navigation-cascade' });
+    });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
   it('calls onCreateEsqlRule when the ES|QL option is selected', () => {
     renderFlyout();
 
-    fireEvent.click(screen.getByRole('button', { name: /create es\|ql rule/i }));
+    fireEvent.click(screen.getByTestId('createEsqlRuleCard'));
 
     expect(onCreateEsqlRule).toHaveBeenCalledTimes(1);
   });
@@ -61,8 +165,48 @@ describe('RuleCreateOptionsFlyout', () => {
   it('calls onCreateWithAgent when the AI Agent option is selected', () => {
     renderFlyout();
 
-    fireEvent.click(screen.getByRole('button', { name: /create with ai agent/i }));
+    fireEvent.click(screen.getByTestId('createWithAgentCard'));
 
     expect(onCreateWithAgent).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the builder divider before the Threshold rule option', () => {
+    renderFlyout();
+
+    expect(screen.getByText('or start from a builder')).toBeInTheDocument();
+    expect(screen.queryByText('Start from a rule builder')).not.toBeInTheDocument();
+  });
+
+  it('calls onCreateThresholdRule when the Threshold rule option is selected', () => {
+    renderFlyout();
+
+    fireEvent.click(screen.getByRole('button', { name: /threshold rule/i }));
+
+    expect(onCreateThresholdRule).toHaveBeenCalledTimes(1);
+  });
+
+  it('renders the AI Agent option disabled and does not fire onCreateWithAgent when agent builder is unavailable', () => {
+    mockAreAgentBuilderSkillsAvailable = false;
+    mockAgentBuilderSkillsRequirements = {
+      hasAgentBuilderCapability: false,
+    };
+    render(
+      <I18nProvider>
+        <RuleCreateOptionsFlyout
+          onClose={onClose}
+          onCreateEsqlRule={onCreateEsqlRule}
+          onCreateWithAgent={onCreateWithAgent}
+          onCreateThresholdRule={onCreateThresholdRule}
+        />
+      </I18nProvider>
+    );
+
+    const agentCard = screen.getByTestId('createWithAgentCard');
+    expect(agentCard).toBeInTheDocument();
+    // Kept focusable (aria-disabled) rather than natively disabled so the tooltip stays reachable.
+    expect(agentCard).toHaveAttribute('aria-disabled', 'true');
+
+    fireEvent.click(screen.getByTestId('createWithAgentCard'));
+    expect(onCreateWithAgent).not.toHaveBeenCalled();
   });
 });

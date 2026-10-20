@@ -11,7 +11,6 @@ import { catchRetryableEsClientErrors } from './catch_retryable_es_client_errors
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { updateAliases } from './update_aliases';
-import { setWriteBlock } from './set_write_block';
 
 jest.mock('./catch_retryable_es_client_errors');
 
@@ -47,10 +46,7 @@ describe('updateAliases', () => {
     expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
   });
   it('re-throws non retry-able errors', async () => {
-    const task = setWriteBlock({
-      client: clientWithNonRetryableError,
-      index: 'my_index',
-    });
+    const task = updateAliases({ client: clientWithNonRetryableError, aliasActions: [] });
     await task();
     expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(nonRetryableError);
   });

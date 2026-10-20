@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { badData } from '@hapi/boom';
-import { Streams } from '@kbn/streams-schema';
+import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
 import { OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS } from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import type { UpsertStreamResponse } from '../../../lib/streams/client';
@@ -62,7 +62,9 @@ export const readStreamRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string().describe('The name of the stream.') }),
+    path: z.object({
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
+    }),
   }),
   handler: async ({
     params,
@@ -71,15 +73,12 @@ export const readStreamRoute = createServerRoute({
     server,
     logger,
   }): Promise<Streams.all.GetResponse> => {
-    const { getQueryClient, attachmentClient, streamsClient, scopedClusterClient } =
-      await getScopedClients({
-        request,
-      });
+    const { attachmentClient, streamsClient, scopedClusterClient } = await getScopedClients({
+      request,
+    });
 
-    const queryClient = await getQueryClient();
     const body = await readStream({
       name: params.path.name,
-      queryClient,
       attachmentClient,
       scopedClusterClient,
       streamsClient,
@@ -176,7 +175,7 @@ export const editStreamRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().describe('The name of the stream.'),
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
     }),
     body: Streams.all.UpsertRequest.right,
   }),
@@ -189,7 +188,7 @@ export const editStreamRoute = createServerRoute({
     const { streamsClient } = await getScopedClients({ request });
 
     // Replicated data streams are managed by the source cluster via CCR.
-    // Only Kibana-side data (description, dashboards, queries) can be updated.
+    // Only Kibana-side data (description, dashboards, rules) can be updated.
     if (Streams.ClassicStream.UpsertRequest.is(params.body)) {
       const dataStream = await streamsClient.getDataStream(params.path.name).catch(() => null);
       if (dataStream?.replicated && classicIngestHasEsLevelChanges(params.body.stream.ingest)) {
@@ -254,7 +253,7 @@ export const deleteStreamRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().describe('The name of the stream.'),
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<{ acknowledged: true }> => {

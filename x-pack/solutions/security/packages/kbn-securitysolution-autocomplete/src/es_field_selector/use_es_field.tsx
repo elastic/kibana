@@ -96,6 +96,7 @@ const getComboBoxProps = (fields: ComboBoxFields): GetFieldComboBoxPropsReturn =
 
   const genericProps = getGenericComboBoxProps<DataViewFieldBase>({
     getLabel: (field) => field.name,
+    getOptionTestSubj: (field) => `filterFieldOption-${field.name}`,
     options: availableFields,
     selectedOptions: selectedFields,
   });
@@ -191,7 +192,7 @@ export const useEsField = ({
           content={labelTooltipText}
           position="bottom"
         >
-          <span>{label}</span>
+          <span tabIndex={0}>{label}</span>
         </EuiToolTip>
       );
     }

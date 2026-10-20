@@ -8,20 +8,22 @@
 import type { ComponentType } from 'react';
 import React from 'react';
 import { ErrorDistribution } from '.';
-import { MockApmPluginStorybook } from '../../../../context/apm_plugin/mock_apm_plugin_storybook';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 export default {
   title: 'app/ErrorGroupDetails/distribution',
   component: ErrorDistribution,
+  parameters: {
+    routePath:
+      '/services/{serviceName}/errors/{groupId}?kuery=&rangeFrom=now-15m&rangeTo=now&environment=ENVIRONMENT_ALL&serviceGroup=&comparisonEnabled=true&transactionType=request&offset=1d',
+  },
   decorators: [
-    (Story: ComponentType) => {
-      return (
-        <MockApmPluginStorybook routePath="/services/{serviceName}/errors/{groupId}?kuery=&rangeFrom=now-15m&rangeTo=now&environment=ENVIRONMENT_ALL&serviceGroup=&comparisonEnabled=true&transactionType=request&offset=1d">
-          <Story />
-        </MockApmPluginStorybook>
-      );
-    },
+    (Story: ComponentType) => (
+      <ChartPointerEventContextProvider>
+        <Story />
+      </ChartPointerEventContextProvider>
+    ),
   ],
 };
 

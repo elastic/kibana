@@ -8,6 +8,10 @@
 import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import type { UseCspOptions } from '@kbn/cloud-security-posture-common/types/findings';
 import type { EntityStoreEuidApi, EntityType } from '@kbn/entity-store/public';
+import {
+  combineEntityGroupFilters,
+  getEntityGroupRecords,
+} from '../../flyout/entity_details/shared/entity_store_group_utils';
 
 /**
  * Picks host / user / service / generic from flattened identity field keys for CSP/EUID queries.
@@ -91,31 +95,37 @@ const legacyFieldAndValue = (
 };
 
 export interface BuildEuidCspPreviewOptionsContext {
-  entityStoreV2Enabled: boolean;
   /**
    * ECS-style identity used when the primary document is missing or insufficient
    * (e.g. `host.name` / `user.name` from the panel when the entity store record is absent).
    */
   legacyIdentityFields?: Record<string, string | undefined>;
+  /**
+   * Resolution-group aliases of the primary document (entity-store records). When present, the
+   * EUID filter matches findings of any record in the group (primary or alias).
+   */
+  aliasRecords?: readonly unknown[];
 }
 
 /**
- * Builds {@link UseCspOptions} for CSP preview hooks from entity-store EUID filters when
- * Entity Store v2 is enabled and the document yields an EUID filter; otherwise falls back to
- * term filters on `user.name` / `host.name` (and `service.name` for service entities).
+ * Builds {@link UseCspOptions} for CSP preview hooks from entity-store EUID filters when the
+ * document (or any alias record) yields an EUID filter; otherwise falls back to term filters on
+ * `user.name` / `host.name` (and `service.name` for service entities).
  */
 export const buildEuidCspPreviewOptions = (
   entityType: EntityType,
   identityDocument: unknown,
   euidApi: EntityStoreEuidApi | null,
-  context: BuildEuidCspPreviewOptionsContext
+  context: BuildEuidCspPreviewOptionsContext = {}
 ): UseCspOptions => {
-  const { entityStoreV2Enabled, legacyIdentityFields } = context;
+  const { legacyIdentityFields, aliasRecords } = context;
 
-  if (entityStoreV2Enabled && euidApi?.euid) {
-    const euidEntityFilter = euidApi.euid.dsl.getEuidFilterBasedOnDocument(
-      entityType,
-      identityDocument
+  if (euidApi?.euid) {
+    const { dsl } = euidApi.euid;
+    const euidEntityFilter = combineEntityGroupFilters(
+      getEntityGroupRecords(identityDocument, aliasRecords),
+      (document) =>
+        dsl.getEuidFilterBasedOnDocument(euidApi.getBuiltInEntityDefinition(entityType), document)
     );
     if (euidEntityFilter != null) {
       return {

@@ -10,6 +10,7 @@ import type { IRuleDataClient, RuleDataPluginService } from '@kbn/rule-registry-
 
 import { registerTrialCompanionRoutes } from '../lib/trial_companion/register_routes';
 import type { EndpointAppContext } from '../endpoint/types';
+import type { SecuritySolutionEventBus } from '../events/event_bus';
 import type { SecuritySolutionPluginRouter } from '../types';
 
 import { registerFleetIntegrationsRoutes } from '../lib/detection_engine/fleet_integrations';
@@ -54,12 +55,17 @@ import { suggestUserProfilesRoute } from '../lib/detection_engine/routes/users/s
 import { registerTimelineRoutes } from '../lib/timeline/routes';
 import { getFleetManagedIndexTemplatesRoute } from '../lib/security_integrations/cribl/routes';
 import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_entity_analytics_routes';
+import { registerInferenceConnectorRoutes } from '../lib/inference_connector/register_inference_connector_routes';
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
 import type { TrialCompanionRoutesDeps } from '../lib/trial_companion/types';
 import { registerDataGeneratorRoutes } from './data_generator/register_data_generator_routes';
 import { registerInitializationRoutes } from '../lib/initialization';
+import { registerAlertAnalysisRoutes } from '../lib/alert_analysis/routes/register_alert_analysis_routes';
+import { registerAttacksRoutes } from '../lib/detection_engine/routes/attacks/register_attacks_routes';
+import { registerAlertAnalysisWorkflowSettingsRoutes } from '../workflows/alert_analysis_workflow/settings_routes';
+import { registerAlertAnalysisWorkflowRuleAttachmentRoutes } from '../workflows/alert_analysis_workflow/rule_attachment_routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -79,7 +85,9 @@ export const initRoutes = (
   docLinks: DocLinksServiceSetup,
   endpointContext: EndpointAppContext,
   trialCompanionDeps: TrialCompanionRoutesDeps,
-  enableDataGeneratorRoutes: boolean
+  enableDataGeneratorRoutes: boolean,
+  platformCpsEnabled: boolean,
+  eventBus?: SecuritySolutionEventBus
 ) => {
   registerFleetIntegrationsRoutes(router, logger);
   registerLegacyRuleActionsRoutes(router, logger);
@@ -100,16 +108,16 @@ export const initRoutes = (
     isServerless
   );
 
-  registerResolverRoutes(router, getStartServices);
+  registerResolverRoutes(router, getStartServices, platformCpsEnabled);
 
-  registerTimelineRoutes(router, config, getStartServices);
+  registerTimelineRoutes(router, config, getStartServices, logger, eventBus);
 
   // Detection Engine Signals routes that have the REST endpoints of /api/detection_engine/signals
   // POST /api/detection_engine/signals/status
   // Example usage can be found in security_solution/server/lib/detection_engine/scripts/signals
-  setSignalsStatusRoute(router, logger, telemetrySender);
-  setAlertTagsRoute(router);
-  setAlertAssigneesRoute(router);
+  setSignalsStatusRoute(router, logger, telemetrySender, eventBus);
+  setAlertTagsRoute(router, eventBus);
+  setAlertAssigneesRoute(router, eventBus);
   querySignalsRoute(router, ruleDataClient);
   getSignalsMigrationStatusRoute(router, docLinks);
   createSignalsMigrationRoute(router, docLinks);
@@ -119,9 +127,9 @@ export const initRoutes = (
 
   // Detection Engine Extended Alerts routes that have the REST endpoints of /internal/detection_engine/unified_alerts
   searchUnifiedAlertsRoute(router, ruleDataClient);
-  setUnifiedAlertsWorkflowStatusRoute(router, ruleDataClient);
-  setUnifiedAlertsTagsRoute(router, ruleDataClient);
-  setUnifiedAlertsAssigneesRoute(router, ruleDataClient);
+  setUnifiedAlertsWorkflowStatusRoute(router, ruleDataClient, logger, eventBus);
+  setUnifiedAlertsTagsRoute(router, ruleDataClient, logger, eventBus);
+  setUnifiedAlertsAssigneesRoute(router, ruleDataClient, logger, eventBus);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces
@@ -136,6 +144,8 @@ export const initRoutes = (
   // Dashboards
   registerDashboardsRoutes(router, logger);
   registerTagsRoutes(router, logger);
+
+  registerAttacksRoutes(router, ruleDataClient, telemetrySender, eventBus, logger);
 
   const { previewTelemetryUrlEnabled } = config.experimentalFeatures;
 
@@ -152,13 +162,17 @@ export const initRoutes = (
     logger,
     telemetrySender,
     ml,
+    hasEncryptionKey,
   });
+  registerInferenceConnectorRoutes({ router, getStartServices, logger });
   registerSiemMigrationsRoutes(router, config, logger);
 
   // Security Integrations
   getFleetManagedIndexTemplatesRoute(router);
 
   registerWorkflowInsightsRoutes(router, config, endpointContext);
+  registerAlertAnalysisWorkflowSettingsRoutes(router, getStartServices, logger);
+  registerAlertAnalysisWorkflowRuleAttachmentRoutes(router);
 
   registerAssetInventoryRoutes({ router, logger });
 
@@ -167,6 +181,7 @@ export const initRoutes = (
   registerTrialCompanionRoutes(trialCompanionDeps);
 
   registerInitializationRoutes({ router, logger });
+  registerAlertAnalysisRoutes(router, logger);
 
   if (enableDataGeneratorRoutes) {
     registerDataGeneratorRoutes(router, getStartServices);

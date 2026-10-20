@@ -35,7 +35,7 @@ function getParams(path: string, param: string) {
 }
 
 describe('Lens url generator', () => {
-  test('can create a link to Lens with no state and no saved viz', async () => {
+  test('can create a link to Lens with no state and no saved vis', async () => {
     const { locator } = await setup();
     const { app, path, state } = await locator.getLocation({});
 
@@ -45,7 +45,7 @@ describe('Lens url generator', () => {
     expect(Object.keys(state.payload)).toHaveLength(0);
   });
 
-  test('can create a link to a saved viz in Lens', async () => {
+  test('can create a link to a saved vis in Lens', async () => {
     const { locator } = await setup();
     const { path } = await locator.getLocation({ savedObjectId });
 

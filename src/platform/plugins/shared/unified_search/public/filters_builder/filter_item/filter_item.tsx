@@ -292,7 +292,7 @@ export function FilterItem({
                           show={!draggable}
                         >
                           <EuiIcon
-                            type="grab"
+                            type="dragVertical"
                             size="s"
                             className={getGrabIconCss(euiTheme)}
                             {...(!draggable ? { color: euiTheme.colors.disabled } : {})}

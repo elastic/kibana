@@ -9,6 +9,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import type { SecuritySolutionDataViewBase } from '../../../../common/types';
+import type { EqlOptions } from '../../../../../common/search_strategy';
+import type { FieldHook } from '../../../../shared_imports';
 import { mockIndexPattern, TestProviders, useFormFieldMock } from '../../../../common/mock';
 import { mockQueryBar } from '../../../rule_management_ui/components/rules_table/__mocks__/mock';
 import { selectEuiComboBoxOption } from '../../../../common/test/eui/combobox';
@@ -175,24 +177,26 @@ describe('EqlQueryBar', () => {
       title: 'test-*',
     };
 
-    it('updates EQL options', async () => {
-      let eqlOptions = {};
+    // Records the merged result so each test can seed prior selections and assert the merge.
+    const trackEqlOptions = (initialEqlOptions: EqlOptions) => {
+      let eqlOptions: EqlOptions = initialEqlOptions;
 
-      const mockEqlOptionsField = useFormFieldMock({
-        value: {},
-        setValue: (updater) => {
-          if (typeof updater === 'function') {
-            eqlOptions = updater(eqlOptions);
-          }
-        },
-      });
+      const setValue: FieldHook<EqlOptions>['setValue'] = (updater) => {
+        if (typeof updater === 'function') {
+          eqlOptions = updater(eqlOptions);
+        }
+      };
 
-      const { getByTestId } = render(
+      return { initialEqlOptions, setValue, getEqlOptions: () => eqlOptions };
+    };
+
+    const renderEqlQueryBar = (eqlOptionsField: FieldHook<EqlOptions>) => {
+      const utils = render(
         <TestProviders>
           <EqlQueryBar
             dataTestSubj="myQueryBar"
             field={mockField}
-            eqlOptionsField={mockEqlOptionsField}
+            eqlOptionsField={eqlOptionsField}
             isLoading={false}
             indexPattern={mockIndexPatternWithEqlOptionsFields}
           />
@@ -200,28 +204,59 @@ describe('EqlQueryBar', () => {
       );
 
       // open options popover
-      fireEvent.click(getByTestId('eql-settings-trigger'));
+      fireEvent.click(utils.getByTestId('eql-settings-trigger'));
+
+      return utils;
+    };
+
+    it('sets the event category field', async () => {
+      const { initialEqlOptions, setValue, getEqlOptions } = trackEqlOptions({});
+      const { getByTestId } = renderEqlQueryBar(
+        useFormFieldMock<EqlOptions>({ value: initialEqlOptions, setValue })
+      );
 
       await selectEuiComboBoxOption({
         comboBoxToggleButton: within(getByTestId('eql-event-category-field')).getByRole('combobox'),
         optionText: 'category',
       });
 
-      expect(eqlOptions).toEqual({ eventCategoryField: 'category' });
+      expect(getEqlOptions()).toEqual({ eventCategoryField: 'category' });
+    });
+
+    it('merges the tiebreaker field with existing options', async () => {
+      const { initialEqlOptions, setValue, getEqlOptions } = trackEqlOptions({
+        eventCategoryField: 'category',
+      });
+      const { getByTestId } = renderEqlQueryBar(
+        useFormFieldMock<EqlOptions>({ value: initialEqlOptions, setValue })
+      );
 
       await selectEuiComboBoxOption({
         comboBoxToggleButton: within(getByTestId('eql-tiebreaker-field')).getByRole('combobox'),
         optionText: 'tiebreaker',
       });
 
-      expect(eqlOptions).toEqual({ eventCategoryField: 'category', tiebreakerField: 'tiebreaker' });
+      expect(getEqlOptions()).toEqual({
+        eventCategoryField: 'category',
+        tiebreakerField: 'tiebreaker',
+      });
+    });
+
+    it('merges the timestamp field with existing options', async () => {
+      const { initialEqlOptions, setValue, getEqlOptions } = trackEqlOptions({
+        eventCategoryField: 'category',
+        tiebreakerField: 'tiebreaker',
+      });
+      const { getByTestId } = renderEqlQueryBar(
+        useFormFieldMock<EqlOptions>({ value: initialEqlOptions, setValue })
+      );
 
       await selectEuiComboBoxOption({
         comboBoxToggleButton: within(getByTestId('eql-timestamp-field')).getByRole('combobox'),
         optionText: 'timestamp',
       });
 
-      expect(eqlOptions).toEqual({
+      expect(getEqlOptions()).toEqual({
         eventCategoryField: 'category',
         tiebreakerField: 'tiebreaker',
         timestampField: 'timestamp',

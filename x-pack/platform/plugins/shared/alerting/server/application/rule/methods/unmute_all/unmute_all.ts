@@ -48,10 +48,6 @@ async function unmuteAllWithOCC(context: RulesClientContext, params: UnmuteAllRu
       operation: WriteOperations.UnmuteAll,
       entity: AlertingAuthorizationEntity.Rule,
     });
-
-    if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
-    }
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
@@ -74,12 +70,15 @@ async function unmuteAllWithOCC(context: RulesClientContext, params: UnmuteAllRu
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
   const indices = context.getAlertIndicesAlias([attributes.alertTypeId], context.spaceId);
+  const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
 
   const updateAttributes = updateMetaAttributes(context, {
     muteAll: false,
     mutedInstanceIds: [],
     snoozeSchedule: clearUnscheduledSnoozeAttributes(attributes),
-    updatedBy: await context.getUserName(),
+    updatedBy: username,
+    updatedByProfileUid: profileUid,
     updatedAt: new Date().toISOString(),
   });
   const updateOptions = { version };

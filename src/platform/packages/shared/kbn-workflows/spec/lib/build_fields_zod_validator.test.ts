@@ -13,6 +13,9 @@ import {
   convertJsonSchemaToZod,
   convertJsonSchemaToZodWithRefs,
 } from './build_fields_zod_validator';
+import { getSchemaAtPath } from '../../common/utils/zod/get_schema_at_path';
+import { mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema } from '../builtin_workflow_input_definitions';
+import type { JsonModelSchemaType } from '../schema/common/json_model_schema';
 
 describe('convertJsonSchemaToZod', () => {
   it('should convert a string schema to Zod', () => {
@@ -62,6 +65,78 @@ describe('convertJsonSchemaToZod', () => {
     // Note: The converter may not enforce required fields in all cases
     // The important thing is that it returns a valid Zod schema
     expect(zodSchema).toBeDefined();
+  });
+
+  it('should preserve and validate schema-valued additional properties', () => {
+    const jsonSchema: JSONSchema7 = {
+      type: 'object',
+      properties: { name: { type: 'string' } },
+      additionalProperties: { type: 'number' },
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+
+    expect(zodSchema.safeParse({ name: 'Alice', extra: 42 }).success).toBe(true);
+    expect(zodSchema.safeParse({ name: 'Alice', extra: 'not a number' }).success).toBe(false);
+  });
+
+  it('accepts null when a typed map type includes null', () => {
+    const jsonSchema: JSONSchema7 = {
+      type: ['object', 'null'],
+      additionalProperties: { type: 'string' },
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+
+    expect(zodSchema.safeParse(null).success).toBe(true);
+    expect(zodSchema.safeParse({ extra: 'ok' }).success).toBe(true);
+    expect(zodSchema.safeParse({ extra: 1 }).success).toBe(false);
+  });
+
+  it('keeps named properties when a nullable typed map also declares them', () => {
+    const jsonSchema: JSONSchema7 = {
+      type: ['object', 'null'],
+      properties: { name: { type: 'string' } },
+      additionalProperties: { type: 'string' },
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+
+    expect(zodSchema.safeParse(null).success).toBe(true);
+    expect(zodSchema.safeParse({ name: 'Alice', extra: 'ok' }).success).toBe(true);
+    expect(zodSchema.safeParse({ name: 'Alice', extra: 1 }).success).toBe(false);
+  });
+
+  it('validates the object branch when a typed map is unioned with another type', () => {
+    const jsonSchema: JSONSchema7 = {
+      type: ['object', 'string'],
+      additionalProperties: { type: 'number' },
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+
+    expect(zodSchema.safeParse({ count: 2 }).success).toBe(true);
+    expect(zodSchema.safeParse({ count: 'not a number' }).success).toBe(false);
+    expect(zodSchema.safeParse('plain').success).toBe(true);
+    expect(zodSchema.safeParse(null).success).toBe(false);
+  });
+
+  it('enforces typed additionalProperties when type is omitted', () => {
+    const jsonSchema: JSONSchema7 = {
+      properties: { known: { type: 'string' } },
+      additionalProperties: { type: 'number' },
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+
+    expect(zodSchema.safeParse({ known: 'ok', extra: 42 }).success).toBe(true);
+    expect(zodSchema.safeParse({ known: 'ok', extra: 'not a number' }).success).toBe(false);
+  });
+
+  it('keeps anyOf composition when a branch is a typed map', () => {
+    const jsonSchema: JSONSchema7 = {
+      anyOf: [{ type: 'object', additionalProperties: { type: 'string' } }, { type: 'null' }],
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+
+    expect(zodSchema.safeParse(null).success).toBe(true);
+    expect(zodSchema.safeParse({ extra: 'ok' }).success).toBe(true);
+    expect(zodSchema.safeParse({ extra: 1 }).success).toBe(false);
   });
 
   it('should convert a nested object schema to Zod', () => {
@@ -385,6 +460,102 @@ describe('convertJsonSchemaToZodWithRefs', () => {
 });
 
 describe('buildFieldsZodValidator', () => {
+  it('validates payloads that use built-in #/kibana/definitions $ref when schema is merged at root', () => {
+    const inputs: JsonModelSchemaType = {
+      properties: {
+        notificationGroup: {
+          $ref: '#/kibana/definitions/alertingV2NotificationGroup',
+        },
+      },
+      required: ['notificationGroup'],
+    };
+
+    const mergedInputs = mergeKibanaBuiltinWorkflowInputDefinitionsIntoRootSchema(
+      inputs as object
+    ) as JsonModelSchemaType;
+
+    const validator = buildFieldsZodValidator(mergedInputs);
+    const invalid = validator.safeParse({
+      notificationGroup: { alerts: [] },
+    });
+    expect(invalid.success).toBe(false);
+
+    const valid = validator.safeParse({
+      notificationGroup: {
+        id: 'group-1',
+        policyId: 'policy-1',
+        groupKey: {},
+        alerts: [
+          {
+            last_event_timestamp: '2024-01-01T00:00:00Z',
+            rule_id: 'rule-1',
+            source: 'internal',
+            space_id: 'default',
+            group_hash: 'hash-1',
+            alert_id: 'alert-1',
+            alert_status: 'active',
+          },
+        ],
+        rules: {},
+      },
+    });
+    expect(valid.success).toBe(true);
+  });
+
+  it('walks typed additionalProperties on a built-in $ref (rules[id].name)', () => {
+    const inputs: JsonModelSchemaType = {
+      properties: {
+        payload: {
+          $ref: '#/kibana/definitions/alertingV2NotificationGroup',
+        },
+      },
+    };
+
+    const validator = buildFieldsZodValidator(inputs);
+    expect(getSchemaAtPath(validator, 'payload.rules.rule-1.name').schema).not.toBeNull();
+    expect(getSchemaAtPath(validator, 'payload.rules.rule-1.nmae').schema).toBeNull();
+    expect(getSchemaAtPath(validator, 'payload.rules[ep.rule_id].name').schema).not.toBeNull();
+    expect(getSchemaAtPath(validator, 'payload.rules[ep.rule_id].nmae').schema).toBeNull();
+  });
+
+  it('validates a map-only root additionalProperties schema', () => {
+    const schema = {
+      type: 'object',
+      additionalProperties: { type: 'string' },
+    } as Parameters<typeof buildFieldsZodValidator>[0];
+    const validator = buildFieldsZodValidator(schema);
+
+    expect(validator.safeParse({ anyKey: 'ok' }).success).toBe(true);
+    expect(validator.safeParse({ anyKey: 1 }).success).toBe(false);
+    expect(validator.safeParse(null).success).toBe(false);
+  });
+
+  it('enforces required keys on a map-only root schema', () => {
+    const schema = {
+      type: 'object',
+      additionalProperties: { type: 'string' },
+      required: ['token'],
+    } as Parameters<typeof buildFieldsZodValidator>[0];
+    const validator = buildFieldsZodValidator(schema);
+
+    expect(validator.safeParse({ token: 'abc' }).success).toBe(true);
+    expect(validator.safeParse({ token: 'abc', extra: 'ok' }).success).toBe(true);
+    expect(validator.safeParse({}).success).toBe(false);
+    expect(validator.safeParse({ extra: 'ok' }).success).toBe(false);
+  });
+
+  it('enforces required keys named like Object.prototype members', () => {
+    const schema = {
+      type: 'object',
+      additionalProperties: { type: 'string' },
+      required: ['toString'],
+    } as Parameters<typeof buildFieldsZodValidator>[0];
+    const validator = buildFieldsZodValidator(schema);
+
+    expect(validator.safeParse({ toString: 'ok' }).success).toBe(true);
+    expect(validator.safeParse({}).success).toBe(false);
+  });
+
   it('should return empty object schema when schema has no properties', () => {
     const validator = buildFieldsZodValidator(null);
     expect(validator.parse({})).toEqual({});
@@ -419,6 +590,25 @@ describe('buildFieldsZodValidator', () => {
     const result = validator.parse({}) as { name: string; count: number };
     expect(result.name).toBe('unknown');
     expect(result.count).toBe(0);
+  });
+
+  it('rejects unknown fields on a typed additionalProperties map', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        rules: {
+          type: 'object',
+          additionalProperties: {
+            type: 'object',
+            properties: { name: { type: 'string' } },
+            additionalProperties: false,
+          },
+        },
+      },
+    } as Parameters<typeof buildFieldsZodValidator>[0];
+    const validator = buildFieldsZodValidator(schema);
+    expect(validator.safeParse({ rules: { r1: { name: 'CPU spike' } } }).success).toBe(true);
+    expect(validator.safeParse({ rules: { r1: { nmae: 'CPU spike' } } }).success).toBe(false);
   });
 
   it('should reject extra properties when additionalProperties is false', () => {

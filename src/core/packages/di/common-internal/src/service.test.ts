@@ -16,7 +16,7 @@ jest.mock('./modules/plugin', () => ({
 
 import { Container } from 'inversify';
 import { CoreInjectionService } from './service';
-import { Fork, Scope } from './modules/plugin';
+import { Fork, Plugin } from './modules/plugin';
 
 describe('CoreInjectionService', () => {
   let container: Container;
@@ -35,7 +35,7 @@ describe('CoreInjectionService', () => {
     let setup: ReturnType<CoreInjectionService['setup']>;
 
     beforeEach(() => {
-      jest.spyOn(Container.prototype, 'loadSync').mockReturnValue(undefined);
+      jest.spyOn(Container.prototype, 'load').mockReturnValue(undefined);
       setup = service.setup();
     });
 
@@ -46,7 +46,7 @@ describe('CoreInjectionService', () => {
     });
 
     it('should load the plugin module into the root container', () => {
-      expect(Container.prototype.loadSync).toHaveBeenCalledWith(pluginModuleMock);
+      expect(Container.prototype.load).toHaveBeenCalledWith(pluginModuleMock);
     });
 
     describe('getContainer', () => {
@@ -54,7 +54,7 @@ describe('CoreInjectionService', () => {
         const id = Symbol.for('test');
         const plugin = {} as Container;
         const pluginFactory = jest.fn(() => plugin);
-        container.bind(Scope).toConstantValue(pluginFactory);
+        container.bind(Plugin).toConstantValue(pluginFactory);
 
         expect(setup.getContainer(id, container)).toBe(plugin);
         expect(pluginFactory).toHaveBeenCalledWith(id);

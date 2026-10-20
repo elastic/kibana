@@ -14,16 +14,19 @@ import type { TimePickerTimeDefaults } from '../components/shared/date_picker/ty
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { isInactiveHistoryError } from '../components/shared/links/url_helpers';
 
-function tryParseDate(date: string | string[] | null | undefined): Moment | undefined {
-  return typeof date === 'string' ? datemath.parse(date) : undefined;
+function tryParseDate(
+  date: string | Array<string | null> | null | undefined,
+  options?: { roundUp?: boolean }
+): Moment | undefined {
+  return typeof date === 'string' ? datemath.parse(date, options) : undefined;
 }
 
 function isValidDateRange(
-  from: string | string[] | null | undefined,
-  to: string | string[] | null | undefined
+  from: string | Array<string | null> | null | undefined,
+  to: string | Array<string | null> | null | undefined
 ): boolean {
   const start = tryParseDate(from);
-  const end = tryParseDate(to);
+  const end = tryParseDate(to, { roundUp: true });
 
   return Boolean(start?.isValid() && end?.isValid() && start.isBefore(end));
 }
@@ -49,7 +52,7 @@ export function useDateRangeRedirect() {
     const resolvedFrom = tryParseDate(query.rangeFrom)?.isValid()
       ? query.rangeFrom
       : timePickerSharedState.from;
-    const resolvedTo = tryParseDate(query.rangeTo)?.isValid()
+    const resolvedTo = tryParseDate(query.rangeTo, { roundUp: true })?.isValid()
       ? query.rangeTo
       : timePickerSharedState.to;
     const isResolvedRangeValid = isValidDateRange(resolvedFrom, resolvedTo);

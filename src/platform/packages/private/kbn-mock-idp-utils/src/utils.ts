@@ -39,6 +39,7 @@ import {
 import { seedTestApiKey, seedTestUser } from './cosmos_db_seeder';
 import { encodeWithChecksum } from './jwt-codecs/encoder-checksum';
 import { prefixWithEssuDev } from './jwt-codecs/encoder-prefix';
+import { buildMockIdpUiamRoleAssignments } from './uiam_role_assignments';
 
 /**
  * Creates XML metadata for our mock identity provider.
@@ -98,6 +99,11 @@ export async function createSAMLResponse(options: {
   authnRequestId?: string;
   /** SP entity ID for AudienceRestriction (required by UIAM, optional for ES) */
   spEntityId?: string;
+  /**
+   * AssertionConsumerService URL used for the assertion `Recipient` and response `Destination`.
+   * Defaults to Kibana's SAML callback. Pass an explicit value for external SPs (e.g. UIAM).
+   */
+  acsUrl?: string;
   username: string;
   full_name?: string;
   email?: string;
@@ -112,6 +118,8 @@ export async function createSAMLResponse(options: {
         refreshTokenLifetimeSec?: number;
       };
 }) {
+  const acsUrl = options.acsUrl ?? `${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback`;
+
   const issueInstant = new Date().toISOString();
   const notOnOrAfter = new Date(Date.now() + 3600 * 1000).toISOString();
 
@@ -145,7 +153,7 @@ export async function createSAMLResponse(options: {
         <saml:SubjectConfirmation Method="urn:oasis:names:tc:SAML:2.0:cm:bearer">
           <saml:SubjectConfirmationData NotOnOrAfter="${notOnOrAfter}" ${
     options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
-  } Recipient="${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback" />
+  } Recipient="${acsUrl}" />
         </saml:SubjectConfirmation>
       </saml:Subject>${conditionsXml}
       <saml:AuthnStatement AuthnInstant="${issueInstant}" SessionIndex="4464894646681600">
@@ -229,7 +237,7 @@ export async function createSAMLResponse(options: {
     `
     <samlp:Response xmlns:samlp="urn:oasis:names:tc:SAML:2.0:protocol" ID="_bdf1d51245ed0f71aa23" Version="2.0" IssueInstant="${issueInstant}" ${
       options.authnRequestId ? `InResponseTo="${options.authnRequestId}"` : ''
-    } Destination="${MOCK_IDP_SP_BASE_URL}/api/security/saml/callback">
+    } Destination="${acsUrl}">
       <saml:Issuer xmlns:saml="urn:oasis:names:tc:SAML:2.0:assertion">${MOCK_IDP_ENTITY_ID}</saml:Issuer>
       <samlp:Status>
         <samlp:StatusCode Value="urn:oasis:names:tc:SAML:2.0:status:Success"/>
@@ -268,7 +276,7 @@ export async function ensureSAMLRoleMapping(client: Client) {
 }
 
 export function generateCosmosDBApiRequestHeaders(
-  httpVerb: 'POST' | 'PUT',
+  httpVerb: 'POST' | 'PUT' | 'DELETE',
   resourceType: 'dbs' | 'colls' | 'docs',
   resourceId: string
 ) {
@@ -300,7 +308,6 @@ export const projectTypeToAlias = new Map<string, string>([
   ['observability', 'oblt'],
   ['security', 'security'],
   ['search', 'es'],
-  ['workplaceai', 'workplaceai'],
   ['vectordb', 'vectordb'],
 ]);
 
@@ -352,7 +359,6 @@ export async function createUiamSessionTokens({
   const userSeedResult = await seedTestUser({
     userId: username,
     organizationId,
-    roleId: 'cloud-role-id',
     projectType,
     applicationRoles: roles,
     email,
@@ -383,17 +389,12 @@ export async function createUiamSessionTokens({
 
       ras: {
         platform: [],
-        organization: [],
         user: [],
-        project: [
-          {
-            role_id: 'cloud-role-id',
-            organization_id: organizationId,
-            project_type: projectType,
-            application_roles: roles,
-            project_scope: { scope: 'all' },
-          },
-        ],
+        ...buildMockIdpUiamRoleAssignments({
+          organizationId,
+          projectType,
+          applicationRoles: roles,
+        }),
       },
 
       nbf: iat,
@@ -444,7 +445,7 @@ export async function createUiamSessionTokens({
 export async function createUiamOAuthAccessToken({
   username,
   organizationId,
-  projectType,
+  projectType: rawProjectType,
   roles,
   audience,
   fullName,
@@ -460,6 +461,7 @@ export async function createUiamOAuthAccessToken({
   email?: string;
   accessTokenLifetimeSec?: number;
 }) {
+  const projectType = normalizeProjectType(rawProjectType);
   const iat = Math.floor(Date.now() / 1000);
 
   const givenName = fullName ? fullName.split(' ')[0] : 'Test';
@@ -468,7 +470,6 @@ export async function createUiamOAuthAccessToken({
   const userSeedResult = await seedTestUser({
     userId: username,
     organizationId,
-    roleId: 'cloud-role-id',
     projectType,
     applicationRoles: roles,
     email,
@@ -499,17 +500,12 @@ export async function createUiamOAuthAccessToken({
 
       ras: {
         platform: [],
-        organization: [],
         user: [],
-        project: [
-          {
-            role_id: 'cloud-role-id',
-            organization_id: organizationId,
-            project_type: projectType,
-            application_roles: roles,
-            project_scope: { scope: 'all' },
-          },
-        ],
+        ...buildMockIdpUiamRoleAssignments({
+          organizationId,
+          projectType,
+          applicationRoles: roles,
+        }),
       },
 
       nbf: iat,

@@ -7,13 +7,7 @@
 
 import type { Moment } from 'moment';
 import type { ReactNode } from 'react';
-import type {
-  ALERT_SEVERITY_CRITICAL,
-  ALERT_SEVERITY_HIGH,
-  ALERT_SEVERITY_MEDIUM,
-  ALERT_SEVERITY_LOW,
-  ALERT_SEVERITY_INFO,
-} from '@kbn/rule-data-utils';
+import type { AlertSeverity } from '@kbn/rule-data-utils';
 
 export type SnoozeUnit = 'm' | 'h' | 'd' | 'w' | 'M';
 export type QuickDurationId = 'indefinitely' | '1h' | '8h' | '24h' | 'custom';
@@ -27,12 +21,7 @@ export interface CustomDurationState {
   dateTime: Moment | null;
 }
 
-export type AlertSeverityLevel =
-  | typeof ALERT_SEVERITY_CRITICAL
-  | typeof ALERT_SEVERITY_HIGH
-  | typeof ALERT_SEVERITY_MEDIUM
-  | typeof ALERT_SEVERITY_LOW
-  | typeof ALERT_SEVERITY_INFO;
+export type AlertSeverityLevel = AlertSeverity;
 
 /**
  * Built-in data condition type identifiers.

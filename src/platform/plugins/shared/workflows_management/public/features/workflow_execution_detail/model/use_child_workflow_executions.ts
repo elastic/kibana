@@ -7,11 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { useQuery } from '@kbn/react-query';
 import type { ChildWorkflowExecutionItem, WorkflowExecutionDto } from '@kbn/workflows';
 import { isExecuteSyncStepType, isTerminalStatus } from '@kbn/workflows';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
+import { CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS } from '../../../hooks/polling_constants';
+import { useSerialPolling } from '../../../hooks/use_serial_polling';
 
 export type ChildWorkflowExecutionsMap = Map<string, ChildWorkflowExecutionItem>;
 
@@ -20,18 +22,21 @@ export function useChildWorkflowExecutions(
 ): { childExecutions: ChildWorkflowExecutionsMap; isLoading: boolean } {
   const api = useWorkflowsApi();
 
-  // Derive a key that changes when workflow.execute steps reach terminal status,
-  // so react-query invalidates cached results and fetches newly available children.
-  const terminalChildKey = useMemo(() => {
+  // Derive a key that changes whenever a workflow.execute step appears or changes status,
+  // so react-query fetches the child run as it starts rather than on the next poll tick.
+  const executeStepKey = useMemo(() => {
     if (!parentExecution?.stepExecutions) return '';
     return parentExecution.stepExecutions
-      .filter((step) => isExecuteSyncStepType(step.stepType) && isTerminalStatus(step.status))
-      .map((step) => step.id)
+      .filter((step) => isExecuteSyncStepType(step.stepType))
+      .map((step) => `${step.id}:${step.status}`)
       .join(',');
   }, [parentExecution?.stepExecutions]);
 
-  const { data, isLoading } = useQuery({
-    queryKey: ['childWorkflowExecutions', parentExecution?.id, terminalChildKey],
+  const parentExecutionRef = useRef(parentExecution);
+  parentExecutionRef.current = parentExecution;
+
+  const query = useQuery({
+    queryKey: ['childWorkflowExecutions', parentExecution?.id, executeStepKey],
     queryFn: async (): Promise<ChildWorkflowExecutionsMap> => {
       const executionId = parentExecution?.id ?? '';
       const items = await api.getChildrenExecutions(executionId);
@@ -42,12 +47,30 @@ export function useChildWorkflowExecutions(
       return map;
     },
     enabled: !!parentExecution?.id,
-    staleTime: parentExecution && isTerminalStatus(parentExecution.status) ? Infinity : 5000,
-    refetchInterval: parentExecution && isTerminalStatus(parentExecution.status) ? false : 5000,
+    // Keep resolved children across executeStepKey changes, so a selected child step
+    // is never briefly resolved against the parent execution.
+    keepPreviousData: true,
+    staleTime:
+      parentExecution && isTerminalStatus(parentExecution.status)
+        ? Infinity
+        : CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS,
+    refetchInterval: false,
+  });
+
+  useSerialPolling({
+    poll: () => query.refetch(),
+    enabled: !!parentExecution?.id,
+    immediate: false,
+    intervalMs: CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS,
+    shouldStop: () => {
+      const execution = parentExecutionRef.current;
+      return execution !== undefined && execution !== null && isTerminalStatus(execution.status);
+    },
+    pollKey: parentExecution?.id,
   });
 
   return {
-    childExecutions: data ?? new Map(),
-    isLoading,
+    childExecutions: query.data ?? new Map(),
+    isLoading: query.isLoading,
   };
 }

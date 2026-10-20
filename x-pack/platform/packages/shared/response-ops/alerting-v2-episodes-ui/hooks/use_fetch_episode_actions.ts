@@ -10,6 +10,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { EpisodeActionState } from '../types/action';
 import { fetchEpisodeActions } from '../apis/fetch_episode_actions';
+import { QUERY_STALE_TIME } from '../constants';
 import { queryKeys } from '../query_keys';
 import { useSpaceId } from './use_space_id';
 
@@ -27,16 +28,19 @@ export const useFetchEpisodeActions = ({ episodeIds, services }: UseFetchEpisode
       fetchEpisodeActions({ spaceId, episodeIds, abortSignal: signal, expressions }),
     enabled: episodeIds.length > 0,
     keepPreviousData: true,
+    staleTime: QUERY_STALE_TIME,
     select: (rows) => {
       const map = new Map<string, EpisodeActionState>();
       for (const row of rows) {
-        map.set(row.episode_id, {
-          episodeId: row.episode_id,
+        map.set(row.alert_id, {
+          episodeId: row.alert_id,
           ruleId: row.rule_id ?? null,
           groupHash: row.group_hash ?? null,
           lastAckAction: row.last_ack_action ?? null,
           lastAssigneeUid: row.last_assignee_uid ?? null,
           lastAckActor: row.last_ack_actor ?? null,
+          lastDeactivateAction: row.last_deactivate_action ?? null,
+          lastDeactivateActor: row.last_deactivate_actor ?? null,
         });
       }
       return map;

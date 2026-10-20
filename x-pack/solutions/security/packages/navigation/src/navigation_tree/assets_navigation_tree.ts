@@ -7,6 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { NodeDefinition } from '@kbn/core-chrome-browser';
+import type { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { SecurityGroupName, SecurityPageName } from '../constants';
 import { SecurityLinkGroup } from '../link_groups';
 import { securityLink } from '../links';
@@ -16,14 +17,16 @@ import { i18nStrings } from '../i18n_strings';
 // Used to keep the Artifacts nav node active regardless of which tab is open,
 // since the deep link only points to the first allowed tab path.
 const SECURITY_MANAGEMENT_PATH = '/app/security/administration';
-const ARTIFACT_TAB_PATHS = [
-  `${SECURITY_MANAGEMENT_PATH}/trusted_apps`,
-  `${SECURITY_MANAGEMENT_PATH}/trusted_devices`,
-  `${SECURITY_MANAGEMENT_PATH}/event_filters`,
-  `${SECURITY_MANAGEMENT_PATH}/host_isolation_exceptions`,
-  `${SECURITY_MANAGEMENT_PATH}/blocklist`,
-  `${SECURITY_MANAGEMENT_PATH}/endpoint_exceptions`,
-] as const;
+const ARTIFACT_TAB_PATHS_RECORD: Record<keyof typeof ENDPOINT_ARTIFACT_LISTS, string> = {
+  trustedApps: `${SECURITY_MANAGEMENT_PATH}/trusted_apps`,
+  trustedDevices: `${SECURITY_MANAGEMENT_PATH}/trusted_devices`,
+  eventFilters: `${SECURITY_MANAGEMENT_PATH}/event_filters`,
+  hostIsolationExceptions: `${SECURITY_MANAGEMENT_PATH}/host_isolation_exceptions`,
+  blocklists: `${SECURITY_MANAGEMENT_PATH}/blocklist`,
+  endpointExceptions: `${SECURITY_MANAGEMENT_PATH}/endpoint_exceptions`,
+  customYaraSignatures: `${SECURITY_MANAGEMENT_PATH}/custom_yara_signatures`,
+} as const;
+const ARTIFACT_TAB_PATHS = Object.values(ARTIFACT_TAB_PATHS_RECORD);
 
 export const createAssetsNavigationTree = (_core: CoreStart): NodeDefinition => {
   return {
@@ -84,7 +87,6 @@ export const createAssetsNavigationTree = (_core: CoreStart): NodeDefinition => 
           {
             id: SecurityPageName.scriptLibrary,
             link: securityLink(SecurityPageName.scriptLibrary),
-            badgeType: 'new',
           },
         ],
       },

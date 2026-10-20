@@ -74,6 +74,7 @@ const translations = {
   'ja-JP': require('./translations/ja-JP.json'),
   'zh-CN': require('./translations/zh-CN.json'),
   'de-DE': require('./translations/de-DE.json'),
+  'pt-BR': require('./translations/pt-BR.json'),
 };
 /* eslint-enable @kbn/imports/no_unresolvable_imports */
 
@@ -81,6 +82,8 @@ export const OneConsole = ({
   lang = 'en',
   http: customHttp,
   notifications: customNotifications,
+  storagePrefix,
+  defaultEditorContent,
 }: OneConsoleProps) => {
   const [apiLoaded, setApiLoaded] = useState(false);
 
@@ -143,9 +146,18 @@ export const OneConsole = ({
     });
     setStorage(storage);
 
-    const storageHistory = createHistory({ storage });
+    // When a storagePrefix is provided (e.g. a per-deployment ID from cloud-ui),
+    // history and the editor buffer are stored under that prefix so each
+    // deployment gets its own isolated state. Settings, variables, and panel
+    // sizes always use the shared 'sense:' prefix via the singleton above.
+    const scopedStorage =
+      storagePrefix && storagePrefix !== 'sense:'
+        ? createStorage({ engine: window.localStorage, prefix: storagePrefix })
+        : storage;
+
+    const storageHistory = createHistory({ storage: scopedStorage });
     const settings = createSettings({ storage });
-    const objectStorageClient = localStorageObjectClient.create(storage);
+    const objectStorageClient = localStorageObjectClient.create(scopedStorage);
     const api = createApi({ http });
     const esHostService = createEsHostService({ api });
 
@@ -250,6 +262,7 @@ export const OneConsole = ({
           config: {
             isDevMode: false,
             isPackagedEnvironment: true,
+            defaultEditorContent,
           },
         }}
       >

@@ -10,12 +10,15 @@ import { useKibana } from './use_kibana';
 
 export const useGettingStartChatEnabled = () => {
   const {
-    services: { cloud, featureFlags },
+    services: { agentBuilder, cloud, featureFlags },
   } = useKibana();
 
-  return (
-    cloud &&
-    cloud.isServerlessEnabled &&
-    featureFlags.getBooleanValue(SEARCH_GETTING_STARTED_CHAT_FEATURE_FLAG, false)
+  const chatFlagEnabled = featureFlags.useBooleanValue(
+    SEARCH_GETTING_STARTED_CHAT_FEATURE_FLAG,
+    false
   );
+
+  if (!cloud || !agentBuilder) return false;
+
+  return cloud.isServerlessEnabled && chatFlagEnabled;
 };

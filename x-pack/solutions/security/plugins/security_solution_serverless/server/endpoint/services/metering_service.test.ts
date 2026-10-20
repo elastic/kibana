@@ -32,7 +32,7 @@ describe.skip('EndpointMeteringService', () => {
         },
       } as CloudSetup,
       esClient: elasticsearchServiceMock.createElasticsearchClient(),
-      abortController: new AbortController(),
+      signal: new AbortController().signal,
       lastSuccessfulReport: new Date(),
       config: {
         productTypes: [

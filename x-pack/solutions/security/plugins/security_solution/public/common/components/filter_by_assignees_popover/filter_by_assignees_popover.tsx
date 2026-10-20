@@ -89,6 +89,10 @@ export const FilterByAssigneesPopover: FC<FilterByAssigneesPopoverProps> = memo(
     return (
       <EuiFilterGroup compressed={compressed}>
         <EuiPopover
+          aria-label={i18n.translate(
+            'xpack.securitySolution.filtersGroup.assignees.popoverAriaLabel',
+            { defaultMessage: 'Filter by assignees' }
+          )}
           panelPaddingSize="none"
           initialFocus={`[id="${searchInputId}"]`}
           button={button}

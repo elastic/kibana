@@ -16,7 +16,9 @@ jest.mock('../../hooks/use_host_metrics_charts');
 jest.mock('./kpi', () => ({
   // Kibana config sets Testing Library's testIdAttribute to `data-test-subj`,
   // so `screen.getByTestId()` queries that attribute (not `data-testid`).
-  Kpi: ({ id }: { id: string }) => <div data-test-subj={`kpi-${id}`} />,
+  Kpi: ({ id, valueOverride }: { id: string; valueOverride?: number }) => (
+    <div data-test-subj={`kpi-${id}`} data-value-override={String(valueOverride)} />
+  ),
 }));
 
 const useHostKpiChartsMock = useHostKpiCharts as jest.MockedFunction<typeof useHostKpiCharts>;
@@ -49,6 +51,28 @@ describe('HostKpiCharts', () => {
     expect(screen.getByTestId('kpi-normalizedLoad1m')).toBeInTheDocument();
     expect(screen.getByTestId('kpi-memoryUsage')).toBeInTheDocument();
     expect(screen.getByTestId('kpi-diskUsage')).toBeInTheDocument();
+  });
+
+  it('overrides unavailable metric data with NaN', () => {
+    renderWithI18n(
+      <HostKpiCharts
+        dateRange={dateRange}
+        metricDataAvailability={{
+          cpuUsage: false,
+          normalizedLoad1m: true,
+          memoryUsage: false,
+          diskUsage: true,
+        }}
+      />
+    );
+
+    expect(screen.getByTestId('kpi-cpuUsage')).toHaveAttribute('data-value-override', 'NaN');
+    expect(screen.getByTestId('kpi-normalizedLoad1m')).toHaveAttribute(
+      'data-value-override',
+      'undefined'
+    );
+    expect(screen.getByTestId('kpi-memoryUsage')).toHaveAttribute('data-value-override', 'NaN');
+    expect(screen.getByTestId('kpi-diskUsage')).toHaveAttribute('data-value-override', 'undefined');
   });
 
   it('renders empty placeholders when hasData is false', () => {

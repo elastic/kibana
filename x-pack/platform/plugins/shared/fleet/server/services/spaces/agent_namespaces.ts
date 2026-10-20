@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { ALL_SPACES_ID } from '../../../common/constants';
 import type { Agent } from '../../types';
@@ -39,7 +39,8 @@ export async function isAgentInNamespace(agent: Agent, namespace?: string) {
 
 export async function agentsKueryNamespaceFilter(namespace?: string) {
   const useSpaceAwareness = await isSpaceAwarenessEnabled();
-  if (!useSpaceAwareness || !namespace) {
+  // undefined or '*' both mean "all spaces" — omit the filter entirely
+  if (!useSpaceAwareness || !namespace || namespace === '*') {
     return;
   }
   return namespace === DEFAULT_SPACE_ID

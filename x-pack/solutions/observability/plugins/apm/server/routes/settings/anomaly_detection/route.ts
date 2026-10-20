@@ -5,10 +5,16 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import Boom from '@hapi/boom';
 import { maxSuggestions } from '@kbn/observability-plugin/common';
 import type { ElasticsearchClient } from '@kbn/core/server';
+import {
+  routeDefinitions,
+  type AnomalyDetectionJobsResponse,
+  type CreateAnomalyDetectionJobsResponse,
+  type AnomalyDetectionEnvironmentsResponse,
+  type AnomalyDetectionUpdateToV3Response,
+} from '@kbn/apm-api-shared';
 import { getESCapabilities } from '../../../lib/helpers/get_es_capabilities';
 import { isActivePlatinumLicense } from '../../../../common/license_check';
 import { ML_ERRORS } from '../../../../common/anomaly_detection';
@@ -19,24 +25,18 @@ import { getAllEnvironments } from '../../environments/get_all_environments';
 import { getSearchTransactionsEvents } from '../../../lib/helpers/transactions';
 import { notifyFeatureUsage } from '../../../feature';
 import { updateToV3 } from './update_to_v3';
-import { environmentStringRt } from '../../../../common/environment_rt';
 import { getMlJobsWithAPMGroup } from '../../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 import { getApmEventClient } from '../../../lib/helpers/get_apm_event_client';
-import type { ApmMlJob } from '../../../../common/anomaly_detection/apm_ml_job';
+
 // get ML anomaly detection jobs for each environment
 const anomalyDetectionJobsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/settings/anomaly-detection/jobs',
+  endpoint: routeDefinitions.anomalyDetection.jobs.endpoint,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'ml:canGetJobs'],
     },
   },
-  handler: async (
-    resources
-  ): Promise<{
-    jobs: ApmMlJob[];
-    hasLegacyJobs: boolean;
-  }> => {
+  handler: async (resources): Promise<AnomalyDetectionJobsResponse> => {
     const mlClient = await getMlClient(resources);
     const { context } = resources;
     const licensingContext = await context.licensing;
@@ -60,18 +60,14 @@ const anomalyDetectionJobsRoute = createApmServerRoute({
 
 // create new ML anomaly detection jobs for each given environment
 const createAnomalyDetectionJobsRoute = createApmServerRoute({
-  endpoint: 'POST /internal/apm/settings/anomaly-detection/jobs',
+  endpoint: routeDefinitions.anomalyDetection.createJobs.endpoint,
+  params: routeDefinitions.anomalyDetection.createJobs.params,
   security: {
     authz: {
       requiredPrivileges: ['apm', 'apm_settings_write', 'ml:canCreateJob'],
     },
   },
-  params: t.type({
-    body: t.type({
-      environments: t.array(environmentStringRt),
-    }),
-  }),
-  handler: async (resources): Promise<{ jobCreated: true }> => {
+  handler: async (resources): Promise<CreateAnomalyDetectionJobsResponse> => {
     const { params, context, logger, getApmIndices } = resources;
     const { environments } = params.body;
     const licensingContext = await context.licensing;
@@ -105,9 +101,9 @@ const createAnomalyDetectionJobsRoute = createApmServerRoute({
 
 // get all available environments to create anomaly detection jobs for
 const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/settings/anomaly-detection/environments',
+  endpoint: routeDefinitions.anomalyDetection.environments.endpoint,
   security: { authz: { requiredPrivileges: ['apm'] } },
-  handler: async (resources): Promise<{ environments: string[] }> => {
+  handler: async (resources): Promise<AnomalyDetectionEnvironmentsResponse> => {
     const apmEventClient = await getApmEventClient(resources);
     const coreContext = await resources.context.core;
 
@@ -129,7 +125,7 @@ const anomalyDetectionEnvironmentsRoute = createApmServerRoute({
 });
 
 const anomalyDetectionUpdateToV3Route = createApmServerRoute({
-  endpoint: 'POST /internal/apm/settings/anomaly-detection/update_to_v3',
+  endpoint: routeDefinitions.anomalyDetection.updateToV3.endpoint,
   security: {
     authz: {
       requiredPrivileges: [
@@ -141,7 +137,7 @@ const anomalyDetectionUpdateToV3Route = createApmServerRoute({
       ],
     },
   },
-  handler: async (resources): Promise<{ update: boolean }> => {
+  handler: async (resources): Promise<AnomalyDetectionUpdateToV3Response> => {
     const { getApmIndices } = resources;
     const [indices, mlClient, esClient] = await Promise.all([
       getApmIndices(),

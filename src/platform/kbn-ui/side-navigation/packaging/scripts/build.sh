@@ -3,13 +3,14 @@
 # Build script for @kbn/ui-side-navigation standalone package.
 #
 # Steps:
+#   0. Build kbn-ui dependencies if their targets are missing.
 #   1. Validate types (packaging types match source types).
 #   2. Bundle via webpack (source + aliases -> single JS file).
 #   3. Generate TypeScript declarations from the standalone types.
 #   4. Copy package.json into the output directory.
 #   5. Stamp a content-hash version onto target/package.json.
 #   6. Generate metadata.json (name, version, git SHA, timestamp, peerDeps).
-#   7. Pack into .tgz (installable via npm/yarn).
+#   7. Pack into .tgz (installable via npm).
 
 set -e
 
@@ -21,6 +22,14 @@ KIBANA_ROOT="$(cd "$KBN_UI_ROOT/../../.." && pwd)"
 TOOLING_DIR="$KBN_UI_ROOT/_tooling"
 TARGET_DIR="${BUILD_OUTPUT_DIR:-$NAV_ROOT/target}"
 KBN_BIN="$KIBANA_ROOT/node_modules/.bin"
+
+echo "==> Step 0: Dependencies"
+if [[ ! -f "$KBN_UI_ROOT/chrome-layout/target/index.js" ]]; then
+  echo "    Building @kbn/ui-chrome-layout (missing target)..."
+  bash "$KBN_UI_ROOT/chrome-layout/packaging/scripts/build.sh"
+else
+  echo "    @kbn/ui-chrome-layout target OK"
+fi
 
 echo "==> Step 1: Type validation"
 "$KBN_BIN/tsc" --project "$PACKAGING_DIR/tsconfig.json" --noEmit
@@ -37,9 +46,11 @@ echo "==> Step 3: TypeScript declarations"
   --declaration --emitDeclarationOnly \
   --outDir "$TARGET_DIR" \
   --rootDir "$PACKAGING_DIR/react" \
-  --moduleResolution node \
+  --module preserve \
+  --moduleResolution bundler \
   --esModuleInterop \
-  --skipLibCheck
+  --skipLibCheck \
+  --ignoreConfig
 mv "$TARGET_DIR/types.d.ts" "$TARGET_DIR/index.d.ts"
 echo "    Declarations OK"
 

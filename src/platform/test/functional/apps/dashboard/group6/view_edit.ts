@@ -76,8 +76,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Sep 19, 2013 @ 00:00:00.000',
           'Sep 19, 2013 @ 07:00:00.000'
         );
-        await dashboard.saveDashboard(copyOfDashboardName, {
+        await dashboard.modifySettings({
           storeTimeWithDashboard: true,
+        });
+        await dashboard.saveDashboard(copyOfDashboardName, {
           saveAsNew: false,
         });
         const isViewMode = await dashboard.getIsInViewMode();

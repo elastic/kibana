@@ -5,14 +5,25 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core/server/mocks';
-import type { AttachmentFormatContext } from '@kbn/agent-builder-server/attachments';
+import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import type {
+  AttachmentFormatContext,
+  AttachmentResolveContext,
+} from '@kbn/agent-builder-server/attachments';
 
 type AttachmentFormatContextMock = AttachmentFormatContext;
+type AttachmentResolveContextMock = AttachmentResolveContext;
 
 export const createFormatContextMock = (): AttachmentFormatContextMock => {
   return {
     spaceId: 'default',
     request: httpServerMock.createKibanaRequest(),
+  };
+};
+
+export const createResolveContextMock = (): AttachmentResolveContextMock => {
+  return {
+    ...createFormatContextMock(),
+    savedObjectsClient: savedObjectsClientMock.create(),
   };
 };

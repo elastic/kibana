@@ -13,7 +13,7 @@ import { createRoot } from 'react-dom/client';
 import { EuiProvider } from '@elastic/eui';
 import { EuiThemeBorealis } from '@elastic/eui-theme-borealis';
 import { flushSync } from 'react-dom';
-import { setImportant } from '../../../edit_engine/clone_element';
+import { setImportant } from '../../../lib/dom/set_important';
 import { DEVTOOL_MANAGED_ATTR, DEVTOOL_LIVE_ATTR } from '../../../lib/constants';
 import { getPageColorMode } from '../../../lib/dom/get_page_color_mode';
 import { SerializedStateContext } from './serializable_state';

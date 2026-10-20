@@ -14,6 +14,7 @@ import { deleteKibanaAssets } from '../../remove';
 import type { KibanaAssetReference } from '../../../../../../common/types';
 import { INSTALL_STATES, KibanaSavedObjectType } from '../../../../../../common/types';
 import { installKibanaAssetsWithStreaming } from '../../../kibana/assets/install_with_streaming';
+import { indexPatternTypes } from '../../../kibana/index_pattern/install';
 
 export async function stepInstallKibanaAssets(context: InstallContext) {
   const { savedObjectsClient, logger, installedPkg, packageInstallContext, spaceId } = context;
@@ -40,7 +41,7 @@ export async function stepInstallKibanaAssets(context: InstallContext) {
 }
 
 export async function stepInstallKibanaAssetsWithStreaming(context: InstallContext) {
-  const { savedObjectsClient, packageInstallContext, spaceId } = context;
+  const { savedObjectsClient, packageInstallContext, spaceId, installedPkg } = context;
   const { packageInfo } = packageInstallContext;
   const { name: pkgName } = packageInfo;
 
@@ -52,6 +53,7 @@ export async function stepInstallKibanaAssetsWithStreaming(context: InstallConte
         pkgName,
         packageInstallContext,
         spaceId,
+        installedPkg,
       })
   );
 
@@ -125,12 +127,18 @@ export async function cleanUpUnusedKibanaAssetsStep(context: InstallContext) {
   const nextAssetRefKeys = new Set(
     installedKibanaAssetsRefs.map((asset: KibanaAssetReference) => `${asset.id}-${asset.type}`)
   );
-  // Do not remove alerting rules or alerting rule templates (they are managed separately)
+  const reservedIndexPatternIds = new Set(indexPatternTypes.map((pattern) => `${pattern}-*`));
+
+  // Do not remove alerting rules, alerting rule templates, or reserved Fleet index patterns
   const assetsToRemove = previousAssetRefs.filter(
     (existingAsset) =>
       !nextAssetRefKeys.has(`${existingAsset.id}-${existingAsset.type}`) &&
       existingAsset.type !== KibanaSavedObjectType.alert &&
-      existingAsset.type !== KibanaSavedObjectType.alertingRuleTemplate
+      existingAsset.type !== KibanaSavedObjectType.alertingRuleTemplate &&
+      !(
+        existingAsset.type === KibanaSavedObjectType.indexPattern &&
+        reservedIndexPatternIds.has(existingAsset.id)
+      )
   );
 
   if (assetsToRemove.length === 0) {

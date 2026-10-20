@@ -847,4 +847,34 @@ describe('fetcher test', () => {
       );
     });
   });
+
+  describe('stats query options', () => {
+    it('forwards timeRange and shouldExcludeColdAndFrozenTiers to the StatsQuery constructor', async () => {
+      LifecycleQuery.prototype.search = jest.fn().mockImplementationOnce(async () => []);
+      DescendantsQuery.prototype.search = jest.fn().mockImplementationOnce(async () => []);
+
+      const timeRange = { from: 'now-1d', to: 'now' };
+      const options: TreeOptions = {
+        agentId: 'agent-1',
+        descendantLevels: 0,
+        descendants: 0,
+        ancestors: 0,
+        timeRange,
+        shouldExcludeColdAndFrozenTiers: true,
+        schema: schemaIDParent,
+        indexPatterns: [''],
+        nodes: ['0'],
+      };
+
+      const fetcher = new Fetcher(client);
+      await fetcher.tree(options);
+
+      const StatsQueryMock = StatsQuery as jest.MockedClass<typeof StatsQuery>;
+      const lastCallArgs = StatsQueryMock.mock.calls[StatsQueryMock.mock.calls.length - 1][0];
+      expect(lastCallArgs).toMatchObject({
+        timeRange,
+        shouldExcludeColdAndFrozenTiers: true,
+      });
+    });
+  });
 });

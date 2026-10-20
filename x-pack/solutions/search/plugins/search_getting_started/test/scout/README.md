@@ -14,10 +14,10 @@ Then you can run the parallel tests in another terminal:
 
 ```bash
 // ESS
-npx playwright test --config x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel.playwright.config.ts --project=local --grep stateful-classic
+node scripts/playwright test --config x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel.playwright.config.ts --project=local --grep stateful-classic
 
 // Serverless
-npx playwright test --project local --config x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel.playwright.config.ts --grep serverless-search
+node scripts/playwright test --project local --config x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/parallel.playwright.config.ts --grep serverless-search
 ```
 
 Test results are available in `x-pack/solutions/search/plugins/search_getting_started/test/scout/ui/output`

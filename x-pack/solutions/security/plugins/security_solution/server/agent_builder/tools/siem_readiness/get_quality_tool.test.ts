@@ -16,13 +16,16 @@ import {
 } from '../../__mocks__/test_helpers';
 import { getQualityTool } from './get_quality_tool';
 import { getQuality } from '../../../lib/siem_readiness/dimensions';
-import { fetchCategories } from '../../../lib/siem_readiness/fetchers';
+import { getSiemReadinessSharedContext } from '../../../lib/siem_readiness/fetchers';
 
 jest.mock('../../../lib/siem_readiness/dimensions', () => ({ getQuality: jest.fn() }));
-jest.mock('../../../lib/siem_readiness/fetchers', () => ({ fetchCategories: jest.fn() }));
+jest.mock('../../../lib/siem_readiness/fetchers', () => ({
+  getSiemReadinessSharedContext: jest.fn(),
+  fetchSiemReadinessSharedContext: jest.fn(),
+}));
 
 const mockGetQuality = getQuality as jest.Mock;
-const mockFetchCategories = fetchCategories as jest.Mock;
+const mockGetSharedContext = getSiemReadinessSharedContext as jest.Mock;
 
 // Quality uses exact-match: DataQualityResultDocument.indexName must be in the category index list.
 const IDENTITY_INDEX = 'logs-identity.auth-default';
@@ -34,6 +37,18 @@ const mockCategories: CategoriesResponse = {
     { category: 'Identity', indices: [{ indexName: IDENTITY_INDEX, docs: 300 }] },
     { category: 'Cloud', indices: [{ indexName: CLOUD_INDEX, docs: 150 }] },
   ],
+};
+
+const mockSharedContext = {
+  reverseMapResult: {
+    indexToRules: new Map(),
+    pipelineToIndices: new Map(),
+    categoryToIndices: new Map(),
+    tacticTotals: new Map(),
+    mlRules: [],
+  },
+  categoriesResult: mockCategories,
+  indexToPlatform: new Map(),
 };
 
 const makePayload = (overrides: Partial<QualityPayload> = {}): QualityPayload => ({
@@ -74,7 +89,7 @@ describe('getQualityTool', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setupMockCoreStartServices(mockCore, mockEsClient);
-    mockFetchCategories.mockResolvedValue(mockCategories);
+    mockGetSharedContext.mockResolvedValue(mockSharedContext);
   });
 
   describe('handler — category filtering (exact-match)', () => {
@@ -134,7 +149,7 @@ describe('getQualityTool', () => {
         makePayload({
           items: [makeQualityResult(CLOUD_INDEX, 3)],
           actionableFindings: [
-            { severity: 'warning', message: '3 incompatible fields', resource: CLOUD_INDEX },
+            { severity: 'WARNING', message: '3 incompatible fields', resource: CLOUD_INDEX },
           ],
         })
       );
@@ -153,7 +168,7 @@ describe('getQualityTool', () => {
         makePayload({
           items: [],
           actionableFindings: [
-            { severity: 'warning', message: 'incompatible', resource: 'logs-not-categorized' },
+            { severity: 'WARNING', message: 'incompatible', resource: 'logs-not-categorized' },
           ],
         })
       );
@@ -183,8 +198,8 @@ describe('getQualityTool', () => {
             makeQualityResult('logs-uncategorized-3', 0),
           ],
           actionableFindings: [
-            { severity: 'warning', message: '2 incompatible fields', resource: IDENTITY_INDEX },
-            { severity: 'warning', message: '3 incompatible', resource: 'logs-uncategorized-1' },
+            { severity: 'WARNING', message: '2 incompatible fields', resource: IDENTITY_INDEX },
+            { severity: 'WARNING', message: '3 incompatible', resource: 'logs-uncategorized-1' },
           ],
         })
       );

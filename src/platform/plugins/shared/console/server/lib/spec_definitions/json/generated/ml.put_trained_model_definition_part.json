@@ -6,6 +6,11 @@
       "human": "__flag__",
       "pretty": "__flag__"
     },
+    "data_autocomplete_rules": {
+      "definition": "",
+      "total_definition_length": "",
+      "total_parts": ""
+    },
     "methods": [
       "PUT"
     ],

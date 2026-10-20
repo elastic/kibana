@@ -6,7 +6,7 @@ Array [
     "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-launchpad nav-item-id-launchpad",
     "href": "/jom/app/security/get_started",
-    "iconType": "launch",
+    "iconType": "rocket",
     "id": "launchpad",
     "label": "Launchpad",
     "sections": Array [
@@ -60,7 +60,7 @@ Array [
     "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-dev_tools nav-item-deepLinkId-undefined nav-item-id-dev_tools",
     "href": "/jom/app/dev_tools",
-    "iconType": "editorCodeBlock",
+    "iconType": "code",
     "id": "dev_tools",
     "label": "Developer Tools",
     "sections": undefined,
@@ -526,6 +526,15 @@ exports[`toNavigationItems should return primary items from navigation tree 1`] 
 Array [
   Object {
     "badgeType": undefined,
+    "data-test-subj": "nav-item nav-item-security_solution_home nav-item-deepLinkId-undefined nav-item-id-security_solution_home",
+    "href": "/jom/app/security/get_started",
+    "iconType": "home",
+    "id": "security_solution_home",
+    "label": "Home",
+    "sections": undefined,
+  },
+  Object {
+    "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-discover nav-item-deepLinkId-undefined nav-item-id-discover",
     "href": "/jom/app/discover#/?_tab=(tabId:'06892a05-71de-4ca9-ad58-0e0a970dde44')&_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now%2Fd,to:now%2Fd))&_a=(columns:!(),dataSource:(dataViewId:'90943e30-9a47-11e8-b64d-95841ca0b247',type:dataView),filters:!(),hideChart:!t,interval:auto,query:(language:kuery,query:''),sort:!(!(timestamp,desc)))",
     "iconType": "discoverApp",
@@ -546,7 +555,7 @@ Array [
     "badgeType": undefined,
     "data-test-subj": "nav-item nav-item-securityGroup:rules nav-item-id-securityGroup:rules",
     "href": "/jom/app/security/rules",
-    "iconType": "securitySignal",
+    "iconType": "radar",
     "id": "securityGroup:rules",
     "label": "Rules",
     "sections": Array [

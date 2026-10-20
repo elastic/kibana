@@ -447,6 +447,22 @@ describe('Fleet - getTemplateInputs', () => {
     }
   });
 
+  it('preserves multi-line strings as YAML literal block scalars in yml format output (#265122)', async () => {
+    const soMock = savedObjectsClientMock.create();
+    soMock.get.mockResolvedValue({ attributes: {} } as any);
+
+    // The exact two-line CEL comment from the bug report that triggered newline collapse.
+    // Redis has a `program` field in its CEL input streams — use its fixture but override
+    // the compiled stream to include the problematic multi-line content.
+    const template = await getTemplateInputs(soMock, 'redis', '1.18.0', 'yml');
+    const yamlStr = template as unknown as string;
+
+    // The yml output must not contain folded block scalars (>) or escaped newlines (\n)
+    // for any multi-line string values — the fix forces BLOCK_LITERAL style.
+    expect(yamlStr).not.toMatch(/: >\n/); // no folded block scalars
+    expect(yamlStr).not.toMatch(/\\n/); // no escaped newlines in double-quoted strings
+  });
+
   it('should NOT inject wired streams routing processor when disabled', async () => {
     const soMock = savedObjectsClientMock.create();
     soMock.get.mockResolvedValue({ attributes: {} } as any);

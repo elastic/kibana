@@ -121,6 +121,105 @@ describe('DataLifecycleTimeline', () => {
       expect(screen.getAllByTestId('dataLifecycleTimeline-value-0d-invalid')).toHaveLength(1);
     });
 
+    it('marks an out-of-order delete boundary invalid when segments outnumber phases', () => {
+      // frozen_after=7d while delete/retention=1d, with downsample steps adding extra columns so
+      // segments (5) outnumber phases (3). The delete boundary (1d) must still turn red.
+      const phases: LifecyclePhase[] = [
+        { grow: true, color: '#FF0000', name: 'hot', min_age: '0d', label: 'hot' },
+        { grow: true, color: '#00FFFF', name: 'frozen', min_age: '7d', label: 'frozen' },
+        {
+          grow: false,
+          color: '#000000',
+          name: 'delete',
+          label: 'delete',
+          min_age: '1d',
+          isDelete: true,
+        },
+      ];
+
+      const dslSegments = buildDslSegments(
+        [
+          { grow: true, min_age: '0d', label: 'hot' },
+          { grow: true, min_age: '7d', label: 'frozen' },
+          { grow: false, min_age: '1d', isDelete: true },
+        ],
+        [
+          { after: '1d', fixed_interval: '1h' },
+          { after: '2d', fixed_interval: '1d' },
+        ]
+      );
+
+      render(
+        <DataLifecycleTimeline
+          {...defaultProps}
+          phases={phases}
+          timelineSegments={dslSegments.timelineSegments}
+          gridTemplateColumns="1fr 1fr 1fr 1fr 50px"
+          invalidPhases={['delete'] as PhaseName[]}
+        />
+      );
+
+      // The delete boundary (retention 1d) is marked invalid...
+      expect(screen.getByTestId('dataLifecycleTimeline-value-1d-invalid')).toBeInTheDocument();
+      // ...while the coincident 1d downsample-step boundary stays a normal (valid) point.
+      expect(screen.getByTestId('dataLifecycleTimeline-value-1d')).toBeInTheDocument();
+    });
+
+    it('marks an invalid frozen boundary red by identity without flagging the coincident hot 0d', () => {
+      // frozen_after=-1d: the preview keeps the frozen phase (label '-1d', clamped right after hot)
+      // tagged isFrozen. It must turn red via identity — not by matching its value, which would also
+      // hit hot's 0d mark.
+      const phases: LifecyclePhase[] = [
+        { grow: true, color: '#FF0000', name: 'hot', min_age: '0d', label: 'hot' },
+        {
+          grow: true,
+          color: '#00FFFF',
+          name: 'frozen',
+          isFrozen: true,
+          min_age: '-1d',
+          label: 'frozen',
+        },
+        {
+          grow: false,
+          color: '#000000',
+          name: 'delete',
+          label: 'delete',
+          min_age: '30d',
+          isDelete: true,
+        },
+      ];
+
+      const dslSegments = buildDslSegments(
+        [
+          { grow: true, min_age: '0d', label: 'hot' },
+          { grow: true, min_age: '-1d', label: 'frozen', isFrozen: true },
+          { grow: false, min_age: '30d', isDelete: true },
+        ],
+        [
+          { after: '1d', fixed_interval: '1h' },
+          { after: '2d', fixed_interval: '1d' },
+        ]
+      );
+
+      render(
+        <DataLifecycleTimeline
+          {...defaultProps}
+          phases={phases}
+          timelineSegments={dslSegments.timelineSegments}
+          gridTemplateColumns="1fr 1fr 1fr 1fr 50px"
+          invalidPhases={['frozen'] as PhaseName[]}
+        />
+      );
+
+      // The frozen point (its typed '-1d' label) is red...
+      expect(screen.getByTestId('dataLifecycleTimeline-value--1d-invalid')).toBeInTheDocument();
+      // ...while hot's coincident 0d point stays normal.
+      expect(screen.getByTestId('dataLifecycleTimeline-value-0d')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('dataLifecycleTimeline-value-0d-invalid')
+      ).not.toBeInTheDocument();
+    });
+
     it('should mark invalid step indices using DSL segment stepIndex mapping', () => {
       const phases: LifecyclePhase[] = [
         { grow: true, color: '#FF0000', name: 'hot', min_age: '0d', label: 'hot' },

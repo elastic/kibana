@@ -43,7 +43,7 @@ export async function applyNamespaceCustomizationChange(
   if (error) {
     notifications.toasts.addError(error, {
       title: i18n.translate('xpack.fleet.packagePolicy.namespaceCustomizationApplyErrorTitle', {
-        defaultMessage: 'Could not update namespace index template for {title}',
+        defaultMessage: 'Could not update namespace index templates for {title}',
         values: { title: packageTitle },
       }),
     });
@@ -52,10 +52,10 @@ export async function applyNamespaceCustomizationChange(
 
   notifications.toasts.addSuccess({
     title: i18n.translate('xpack.fleet.packagePolicy.namespaceCustomizationApplySuccessTitle', {
-      defaultMessage: 'Namespace index template updated',
+      defaultMessage: 'Namespace index templates updated',
     }),
     text: i18n.translate('xpack.fleet.packagePolicy.namespaceCustomizationApplySuccessText', {
-      defaultMessage: 'Applying namespace index template changes for {title}.',
+      defaultMessage: 'Applying changes to namespace index templates for {title}.',
       values: { title: packageTitle },
     }),
   });

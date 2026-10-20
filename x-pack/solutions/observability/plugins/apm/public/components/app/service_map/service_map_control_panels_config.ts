@@ -13,6 +13,11 @@ export interface ServiceMapControlConfig {
   title: string;
   width: 'small' | 'medium' | 'large';
   grow: boolean;
+  /**
+   * When `true`, the underlying options list control allows only one selected
+   * value at a time. Defaults to `false` (multi-select).
+   */
+  single_select?: boolean;
 }
 
 /**
@@ -27,6 +32,10 @@ export const SERVICE_MAP_CONTROLS_CONFIG: ServiceMapControlConfig[] = [
     }),
     width: 'small',
     grow: true,
+    // APM uses a single-value `?environment=` URL param everywhere else, so the
+    // service map env filter must also be single-select to stay consistent and
+    // round-trip correctly through the URL.
+    single_select: true,
   },
   {
     field_name: 'service.name',

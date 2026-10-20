@@ -9,9 +9,9 @@
 
 import type {
   SeriesType,
-  XYAnnotationLayerConfig,
   XYDataLayerConfig,
   XYPersistedByReferenceAnnotationLayerConfig,
+  XYPersistedByValueAnnotationLayerConfig,
   XYPersistedLayerConfig,
   XYReferenceLineLayerConfig,
   YConfig,
@@ -35,7 +35,7 @@ import {
   getIdForLayer,
   getAccessorNameForXY,
   isAPIDataLayer,
-  xyIconCompat,
+  annotationIconCompat,
 } from './helpers';
 import { fromMetricAPItoLensState } from '../../columns/metric';
 import { fromBucketLensApiToLensState } from '../../columns/buckets';
@@ -67,13 +67,13 @@ export function getValueColumns(
     xAxisScale === 'temporal' ? 'date' : xAxisScale === 'linear' ? 'number' : undefined;
   return [
     ...(layer.x
-      ? [getValueColumn(getAccessorNameForXY(layer, X_ACCESSOR), layer.x, xColumnType)]
+      ? [getValueColumn(getAccessorNameForXY(layer, i, X_ACCESSOR), layer.x, xColumnType)]
       : []),
     ...layer.y.map((y, index) =>
-      getValueColumn(getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index), y, 'number')
+      getValueColumn(getAccessorNameForXY(layer, i, METRIC_ACCESSOR_PREFIX, index), y, 'number')
     ),
     ...(layer.breakdown_by
-      ? [getValueColumn(getAccessorNameForXY(layer, BREAKDOWN_ACCESSOR), layer.breakdown_by)]
+      ? [getValueColumn(getAccessorNameForXY(layer, i, BREAKDOWN_ACCESSOR), layer.breakdown_by)]
       : []),
   ];
 }
@@ -89,7 +89,7 @@ function buildDataLayer(config: XYConfig, layer: DataLayerType, i: number): XYDa
     return {
       ...(yMetric.color && !isAutoColor(yMetric.color) ? { color: yMetric.color?.color } : {}),
       axisMode,
-      forAccessor: getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),
+      forAccessor: getAccessorNameForXY(layer, i, METRIC_ACCESSOR_PREFIX, index),
     };
   });
   const meaningFulYConfig = yConfig.filter((y) => Object.values(y).length > 1);
@@ -99,10 +99,10 @@ function buildDataLayer(config: XYConfig, layer: DataLayerType, i: number): XYDa
     accessors: yConfig.map(({ forAccessor }) => forAccessor),
     layerType: 'data',
     seriesType: seriesTypeLabel,
-    ...(layer.x ? { xAccessor: getAccessorNameForXY(layer, X_ACCESSOR) } : {}),
+    ...(layer.x ? { xAccessor: getAccessorNameForXY(layer, i, X_ACCESSOR) } : {}),
     ...(meaningFulYConfig.length ? { yConfig: meaningFulYConfig } : {}),
     ...(layer.breakdown_by
-      ? { splitAccessors: [getAccessorNameForXY(layer, BREAKDOWN_ACCESSOR)] }
+      ? { splitAccessors: [getAccessorNameForXY(layer, i, BREAKDOWN_ACCESSOR)] }
       : {}),
     ...(layer.breakdown_by && 'collapse_by' in layer.breakdown_by
       ? { collapseFn: layer.breakdown_by.collapse_by }
@@ -115,13 +115,17 @@ function buildDataLayer(config: XYConfig, layer: DataLayerType, i: number): XYDa
 
 function buildByValueAnnotationLayer(
   layer: AnnotationLayerByValueType,
-  i: number,
-  dataViewId: string
-): XYAnnotationLayerConfig {
+  i: number
+): XYPersistedByValueAnnotationLayerConfig {
+  // Emit a persisted by-value annotation layer (no `indexPatternId` by design). The Lens
+  // XY runtime injects the data view at load time from the
+  // `xy-visualization-layer-<layerId>` reference, falling back to the first
+  // index-pattern reference when the layer has no dedicated data view.
+  // See x-pack/.../lens/public/visualizations/xy/persistence.ts.
   return {
     layerType: 'annotations',
+    persistanceType: 'byValue',
     layerId: getIdForLayer(layer, i),
-    indexPatternId: dataViewId,
     ignoreGlobalFilters: layer.ignore_global_filters,
     annotations: layer.events.map((annotation, index) => {
       if (annotation.type === 'range') {
@@ -155,7 +159,7 @@ function buildByValueAnnotationLayer(
           label: annotation.label ?? 'Event',
           ...(annotation.visible != null ? { isHidden: !annotation.visible } : {}),
           ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
-          ...(annotation.icon ? { icon: xyIconCompat.toState(annotation.icon) } : {}),
+          ...(annotation.icon ? { icon: annotationIconCompat.toState(annotation.icon) } : {}),
           ...(annotation.line?.stroke_width != null
             ? { lineWidth: annotation.line.stroke_width }
             : {}),
@@ -179,7 +183,7 @@ function buildByValueAnnotationLayer(
         ...(annotation.extra_fields ? { extraFields: annotation.extra_fields } : {}),
         ...(annotation.text?.visible != null ? { textVisibility: annotation.text.visible } : {}),
         ...(annotation.text?.field ? { textField: annotation.text.field } : {}),
-        ...(annotation.icon ? { icon: xyIconCompat.toState(annotation.icon) } : {}),
+        ...(annotation.icon ? { icon: annotationIconCompat.toState(annotation.icon) } : {}),
         ...(annotation.line?.stroke_width != null
           ? { lineWidth: annotation.line.stroke_width }
           : {}),
@@ -199,7 +203,7 @@ function buildReferenceLineLayer(
   const yConfig = layer.thresholds.map<YConfig>((threshold, index) => {
     const axisMode = threshold.axis === 'y2' ? 'right' : threshold.axis === 'x' ? 'bottom' : 'left';
     return {
-      icon: xyIconCompat.toState(threshold.icon),
+      icon: annotationIconCompat.toState(threshold.icon),
       iconPosition: threshold.position,
       lineWidth: threshold.stroke_width,
       lineStyle: threshold.stroke_dash,
@@ -207,7 +211,7 @@ function buildReferenceLineLayer(
       fill: threshold.fill,
       ...(threshold.color && !isAutoColor(threshold.color) ? { color: threshold.color.color } : {}),
       axisMode,
-      forAccessor: getAccessorNameForXY(layer, REFERENCE_LINE_ACCESSOR_PREFIX, index),
+      forAccessor: getAccessorNameForXY(layer, i, REFERENCE_LINE_ACCESSOR_PREFIX, index),
     };
   });
   return {
@@ -222,7 +226,6 @@ export function buildXYLayer(
   config: XYConfig,
   layer: unknown,
   i: number,
-  dataViewId: string,
   annotationGroupReferences: SavedObjectReference[]
 ): XYPersistedLayerConfig | undefined {
   if (!isAPIXYLayer(layer)) {
@@ -251,7 +254,7 @@ export function buildXYLayer(
     }
 
     // by-value annotation layer
-    return buildByValueAnnotationLayer(layer, i, dataViewId);
+    return buildByValueAnnotationLayer(layer, i);
   }
   if (isAPIReferenceLineLayer(layer)) {
     return buildReferenceLineLayer(layer, i);
@@ -274,7 +277,7 @@ export function buildFormBasedXYLayer(layer: unknown, i: number) {
       const columns = fromMetricAPItoLensState(column);
       addLayerColumn(
         newLayer,
-        getAccessorNameForXY(layer, REFERENCE_LINE_ACCESSOR_PREFIX, Number(index)),
+        getAccessorNameForXY(layer, i, REFERENCE_LINE_ACCESSOR_PREFIX, Number(index)),
         columns
       );
     }
@@ -283,23 +286,24 @@ export function buildFormBasedXYLayer(layer: unknown, i: number) {
   if (isAPIDataLayer(layer)) {
     // convert metrics in buckets, do not flat yet
     const yColumnsConverted = layer.y.map((col) => fromMetricAPItoLensState(col));
-    const yColumnsWithIds = processMetricColumnsWithReferences(
+    const { metricColumns, referencesColumns } = processMetricColumnsWithReferences(
       yColumnsConverted,
-      (index) => getAccessorNameForXY(layer, METRIC_ACCESSOR_PREFIX, index),
-      (index) => getAccessorNameForXY(layer, `${METRIC_ACCESSOR_PREFIX}_ref`, index)
+      (index) => getAccessorNameForXY(layer, i, METRIC_ACCESSOR_PREFIX, index),
+      (index) => getAccessorNameForXY(layer, i, `${METRIC_ACCESSOR_PREFIX}_ref`, index)
     );
-    const xColumns = layer.x ? fromBucketLensApiToLensState(layer.x, yColumnsWithIds) : undefined;
+    // fromBucketLensApiToLensState resolves rank_by.metric_index against visible metrics only.
+    const xColumns = layer.x ? fromBucketLensApiToLensState(layer.x, metricColumns) : undefined;
     const breakdownColumns = layer.breakdown_by
-      ? fromBucketLensApiToLensState(layer.breakdown_by, yColumnsWithIds)
+      ? fromBucketLensApiToLensState(layer.breakdown_by, metricColumns)
       : undefined;
 
     // Add bucketed coluns first
     if (xColumns) {
-      addLayerColumn(newLayer, getAccessorNameForXY(layer, X_ACCESSOR), xColumns);
+      addLayerColumn(newLayer, getAccessorNameForXY(layer, i, X_ACCESSOR), xColumns);
     }
 
     if (breakdownColumns) {
-      const breakdownById = getAccessorNameForXY(layer, BREAKDOWN_ACCESSOR);
+      const breakdownById = getAccessorNameForXY(layer, i, BREAKDOWN_ACCESSOR);
       addLayerColumn(
         newLayer,
         breakdownById,
@@ -309,7 +313,10 @@ export function buildFormBasedXYLayer(layer: unknown, i: number) {
     }
 
     // then metric ones
-    for (const { id, column } of yColumnsWithIds) {
+    for (const { id, column } of metricColumns) {
+      addLayerColumn(newLayer, id, column);
+    }
+    for (const { id, column } of referencesColumns) {
       addLayerColumn(newLayer, id, column);
     }
   }

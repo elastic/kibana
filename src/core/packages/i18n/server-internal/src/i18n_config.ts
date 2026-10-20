@@ -19,6 +19,8 @@ const configSchema = schema.object(
   {
     locales: schema.arrayOf(schema.string(), { defaultValue: DEFAULT_LOCALES, maxSize: 10 }),
     defaultLocale: schema.string({ defaultValue: 'en' }),
+    allowLocaleCookie: schema.boolean({ defaultValue: true }),
+    detectBrowserLocale: schema.boolean({ defaultValue: true }),
   },
   {
     validate: ({ locales, defaultLocale }) => {

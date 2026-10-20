@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { screen, render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { merge } from 'lodash';
@@ -15,7 +15,6 @@ import type { UseMessagesStorage } from '../../common/containers/local_storage/u
 import { useMessagesStorage } from '../../common/containers/local_storage/use_messages_storage';
 import { Overview } from '.';
 import { useUserPrivileges } from '../../common/components/user_privileges';
-import { useSourcererDataView } from '../../sourcerer/containers';
 import { useFetchIndex } from '../../common/containers/source';
 import { useAllTiDataSources } from '../containers/overview_cti_links/use_all_ti_data_sources';
 import { mockCtiLinksResponse, mockTiDataSources } from '../components/overview_cti_links/mock';
@@ -26,9 +25,21 @@ import type { EndpointPrivileges } from '../../../common/endpoint/types';
 import { mockCasesContract } from '@kbn/cases-plugin/public/mocks';
 import { useRiskScore } from '../../entity_analytics/api/hooks/use_risk_score';
 import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
+import { DASHBOARDS, OVERVIEW } from '../../app/translations';
+import { PageScope } from '../../data_view_manager/constants';
 
 const mockNavigateToApp = jest.fn();
 jest.mock('../../common/components/empty_prompt');
+jest.mock('../../common/components/link_to', () => ({
+  ...jest.requireActual('../../common/components/link_to'),
+  useGetSecuritySolutionUrl:
+    () =>
+    ({ deepLinkId }: { deepLinkId: string }) =>
+      `/app/security/${deepLinkId}`,
+}));
 jest.mock('../../common/lib/kibana', () => {
   const original = jest.requireActual('../../common/lib/kibana');
 
@@ -49,7 +60,6 @@ jest.mock('../../common/lib/kibana', () => {
   };
 });
 jest.mock('../../common/containers/source');
-jest.mock('../../sourcerer/containers');
 jest.mock('../../common/components/visualization_actions/lens_embeddable');
 jest.mock('../../common/containers/use_global_time', () => ({
   useGlobalTime: jest.fn().mockReturnValue({
@@ -68,13 +78,17 @@ jest.mock('../../common/components/search_bar', () => ({
 jest.mock('../../common/components/query_bar', () => ({
   QueryBar: () => null,
 }));
+jest.mock('../../common/components/search_with_data_view', () => ({
+  SearchWithDataView: ({ scope }: { scope?: string }) => (
+    <div data-test-subj="mockSearchWithDataView" data-scope={scope} />
+  ),
+}));
 jest.mock('../../common/components/user_privileges');
 jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../common/containers/local_storage/use_messages_storage');
-
 jest.mock('../containers/overview_cti_links');
-
 jest.mock('../../common/components/visualization_actions/actions');
+jest.mock('../../data_view_manager/hooks/use_data_view');
 
 const useCtiDashboardLinksMock = useCtiDashboardLinks as jest.Mock;
 useCtiDashboardLinksMock.mockReturnValue(mockCtiLinksResponse);
@@ -90,15 +104,6 @@ useRiskScoreMock.mockReturnValue({ loading: false, data: [], hasEngineBeenInstal
 jest.mock('../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
 useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
-
-jest.mock('../../sourcerer/containers', () => ({
-  useSourcererDataView: jest.fn().mockReturnValue({
-    selectedPatterns: ['auditbeat-mytest-*'],
-    dataViewId: 'security-solution-my-test',
-    indicesExist: true,
-    sourcererDataView: {},
-  }),
-}));
 
 const defaultAlertsPrivileges = {
   hasAlertsAll: true,
@@ -123,7 +128,6 @@ const endpointNoticeMessage = (hasMessageValue: boolean) => {
   };
 };
 
-const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
 const mockUseUserPrivileges = useUserPrivileges as jest.Mock;
 const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
 const mockUseFetchIndex = useFetchIndex as jest.Mock;
@@ -151,16 +155,17 @@ describe('Overview', () => {
         indexExists: true,
       },
     ]);
+    (useDataView as jest.Mock).mockReturnValue({
+      dataView: {
+        hasMatchedIndices: jest.fn(),
+        matchedIndices: ['index-1'],
+      },
+      status: 'ready',
+    });
   });
 
   describe('rendering', () => {
     test('it DOES NOT render the Getting started text when an index is available', () => {
-      mockUseSourcererDataView.mockReturnValue({
-        selectedPatterns: [],
-        indicesExist: true,
-        indexPattern: {},
-      });
-
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
 
       render(
@@ -181,12 +186,6 @@ describe('Overview', () => {
           indexExists: false,
         },
       ]);
-      mockUseSourcererDataView.mockReturnValue({
-        selectedPatterns: [],
-        indicesExist: true,
-        indexPattern: {},
-      });
-
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
 
       render(
@@ -207,12 +206,6 @@ describe('Overview', () => {
           indexExists: false,
         },
       ]);
-      mockUseSourcererDataView.mockReturnValueOnce({
-        selectedPatterns: [],
-        indicesExist: true,
-        indexPattern: {},
-      });
-
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
 
       render(
@@ -227,12 +220,6 @@ describe('Overview', () => {
     });
 
     test('it does NOT render the Endpoint banner when the endpoint index is available AND storage is set', () => {
-      mockUseSourcererDataView.mockReturnValue({
-        selectedPatterns: [],
-        indexExists: true,
-        indexPattern: {},
-      });
-
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
 
       render(
@@ -247,12 +234,6 @@ describe('Overview', () => {
     });
 
     test('it does NOT render the Endpoint banner when an index IS available but storage is NOT set', () => {
-      mockUseSourcererDataView.mockReturnValue({
-        selectedPatterns: [],
-        indicesExist: true,
-        indexPattern: {},
-      });
-
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
 
       render(
@@ -266,12 +247,6 @@ describe('Overview', () => {
     });
 
     test('it does NOT render the Endpoint banner when Ingest is NOT available', () => {
-      mockUseSourcererDataView.mockReturnValue({
-        selectedPatterns: [],
-        indicesExist: true,
-        indexPattern: {},
-      });
-
       mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(true));
       mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: false }));
 
@@ -288,15 +263,18 @@ describe('Overview', () => {
 
     describe('when no index is available', () => {
       beforeEach(() => {
-        mockUseSourcererDataView.mockReturnValue({
-          selectedPatterns: [],
-          indicesExist: false,
-        });
         mockUseUserPrivileges.mockReturnValue(loadedUserPrivilegesState({ canAccessFleet: false }));
         mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
       });
 
       it('renders getting started page', () => {
+        (useDataView as jest.Mock).mockReturnValue({
+          dataView: {
+            matchedIndices: [],
+          },
+          status: 'ready',
+        });
+
         render(
           <TestProviders>
             <MemoryRouter>
@@ -307,6 +285,85 @@ describe('Overview', () => {
 
         expect(screen.getByTestId('empty-prompt')).toBeInTheDocument();
       });
+    });
+  });
+
+  describe('header', () => {
+    beforeEach(() => {
+      mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
+    });
+
+    const renderOverview = () =>
+      render(
+        <TestProviders>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
+        </TestProviders>
+      );
+
+    it('renders the Overview title in the app header', () => {
+      renderOverview();
+
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(OVERVIEW);
+    });
+
+    it('renders a back button that points to the Dashboards page', () => {
+      renderOverview();
+
+      const backButton = screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back);
+      expect(backButton).toHaveAttribute('href', '/app/security/dashboards');
+      expect(backButton).toHaveAttribute('aria-label', expect.stringContaining(DASHBOARDS));
+    });
+
+    it('renders a documentation item in the app menu that points to the Security documentation', async () => {
+      renderOverview();
+
+      await openAppMenuOverflow();
+
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.menuDocumentation)).toHaveAttribute(
+        'href',
+        'https://www.elastic.co/docs/solutions/security'
+      );
+    });
+
+    it('passes the default page scope to the search band', () => {
+      renderOverview();
+
+      expect(screen.getByTestId('mockSearchWithDataView')).toHaveAttribute(
+        'data-scope',
+        PageScope.default
+      );
+    });
+
+    it('renders the search band with the data view picker instead of the global filters strip', () => {
+      renderOverview();
+
+      expect(screen.getByTestId('mockSearchWithDataView')).toBeInTheDocument();
+      expect(screen.queryByTestId('filters-global-container')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('header when no index is available', () => {
+    it('still renders the header and the back button, but not the search band', () => {
+      mockUseMessagesStorage.mockImplementation(() => endpointNoticeMessage(false));
+      (useDataView as jest.Mock).mockReturnValue({
+        dataView: { matchedIndices: [] },
+        status: 'ready',
+      });
+
+      render(
+        <TestProviders>
+          <MemoryRouter>
+            <Overview />
+          </MemoryRouter>
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(OVERVIEW);
+      expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.back)).toBeInTheDocument();
+      expect(screen.getByTestId('empty-prompt')).toBeInTheDocument();
+      expect(screen.queryByTestId('mockSearchWithDataView')).not.toBeInTheDocument();
     });
   });
 

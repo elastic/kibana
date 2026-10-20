@@ -58,3 +58,16 @@ export const GetUninstallTokenResponseSchema = schema.object({
     token: schema.string(),
   }),
 });
+
+export const RotateUninstallTokenRequestSchema = {
+  params: schema.object({
+    agentPolicyId: schema.string({
+      maxLength: 255,
+      meta: { description: 'The ID of the agent policy whose uninstall token should be rotated' },
+    }),
+  }),
+};
+
+export const RotateUninstallTokenResponseSchema = schema.object({
+  message: schema.string(),
+});

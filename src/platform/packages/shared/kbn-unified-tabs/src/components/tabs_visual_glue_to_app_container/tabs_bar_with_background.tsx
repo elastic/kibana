@@ -19,8 +19,7 @@ const globalCss = cssString`
   overscroll-behavior: none;
 
   // Removes the shadow from the global header
-  .header__secondBar,
-  [data-test-subj='kibanaProjectHeaderActionMenu'] {
+  .header__secondBar {
     box-shadow: none;
   }
 `;
@@ -51,7 +50,7 @@ export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({
       {...otherProps}
       css={css`
         // tabs bar background
-        background: ${euiTheme.colors.lightestShade};
+        background: ${euiTheme.colors.backgroundBasePlain};
       `}
     >
       {children}

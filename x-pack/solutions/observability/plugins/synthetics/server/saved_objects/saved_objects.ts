@@ -13,6 +13,7 @@ import {
   SYNTHETICS_MONITOR_ENCRYPTED_TYPE,
 } from './synthetics_monitor/synthetics_monitor_config';
 import { syntheticsSettings } from './synthetics_settings';
+import { syntheticsSettingsMultiSpace } from './synthetics_settings_multi_space';
 import {
   SYNTHETICS_PARAMS_SECRET_ENCRYPTED_TYPE,
   syntheticsParamSavedObjectType,
@@ -35,6 +36,7 @@ export const registerSyntheticsSavedObjects = (
   savedObjectsService.registerType(PRIVATE_LOCATION_SAVED_OBJECT_TYPE);
 
   savedObjectsService.registerType(syntheticsSettings);
+  savedObjectsService.registerType(syntheticsSettingsMultiSpace);
 
   // legacy synthetics monitor saved object type which is single namespace
   savedObjectsService.registerType(

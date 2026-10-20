@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { APMIndices } from '@kbn/apm-sources-access-plugin/server';
 import type { CreateDataViewResponse } from './create_static_data_view';
 import { createOrUpdateStaticDataView } from './create_static_data_view';

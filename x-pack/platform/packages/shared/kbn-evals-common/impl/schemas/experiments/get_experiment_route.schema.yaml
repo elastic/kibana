@@ -1,0 +1,168 @@
+openapi: 3.0.0
+info:
+  title: Get Evaluation Experiment API endpoint
+  version: '1'
+paths:
+  /internal/evals/experiments/{experimentId}:
+    get:
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      operationId: GetEvaluationExperiment
+      description: Get details and statistics for a single evaluation experiment
+      summary: Get evaluation experiment detail
+      tags:
+        - Evals API
+      parameters:
+        - name: experimentId
+          in: path
+          required: true
+          schema:
+            type: string
+            maxLength: 1024
+        - name: suite_id
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 256
+          description: Filter stats by suite ID
+        - name: model_id
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 256
+          description: Filter stats by task model ID
+        - name: execution_id
+          in: query
+          required: false
+          schema:
+            type: string
+            maxLength: 1024
+          description: When provided, fetches all experiments in this execution instead of the single experiment from the path param
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  experiment_id:
+                    type: string
+                    maxLength: 1024
+                  experiment_name:
+                    type: string
+                    maxLength: 256
+                    nullable: true
+                  timestamp:
+                    type: string
+                    maxLength: 64
+                  task_model:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                  evaluator_model:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                  evaluator_models:
+                    type: array
+                    maxItems: 20
+                    items:
+                      $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+                    description: >-
+                      The distinct models this experiment's evaluators judged with, the one that
+                      produced the most scores first, so consumers can tell that they differ.
+                      `evaluator_model` is the first. Capped at 20, which no realistic experiment
+                      reaches. Empty when only code evaluators scored the experiment.
+                  execution_id:
+                    type: string
+                    maxLength: 1024
+                  suite_id:
+                    type: string
+                    maxLength: 256
+                    nullable: true
+                    description: The suite ID when this experiment belongs to a suite run
+                  total_repetitions:
+                    type: integer
+                  git_branch:
+                    type: string
+                    maxLength: 256
+                    nullable: true
+                  git_commit_sha:
+                    type: string
+                    maxLength: 256
+                    nullable: true
+                  ci:
+                    $ref: '../common_attributes.schema.yaml#/components/schemas/BuildkiteMetadata'
+                  hostname:
+                    type: string
+                    maxLength: 256
+                    description: Host the experiment ran on, when recorded.
+                  first_score_at:
+                    type: string
+                    maxLength: 64
+                    description: Timestamp of the experiment's earliest score document.
+                  last_score_at:
+                    type: string
+                    maxLength: 64
+                    description: Timestamp of the experiment's latest score document.
+                  evaluators:
+                    type: array
+                    maxItems: 1000
+                    items:
+                      $ref: '#/components/schemas/ExperimentEvaluatorSummary'
+                    description: >-
+                      Every evaluator that scored the experiment, with the version and kind it
+                      ran as and, for evaluators that invoked a judge, that judge's model.
+                  stats:
+                    type: array
+                    items:
+                      $ref: '../common_attributes.schema.yaml#/components/schemas/EvaluatorStats'
+                required:
+                  - experiment_id
+                  - stats
+        '404':
+          description: Experiment not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                  error:
+                    type: string
+                    maxLength: 256
+                  message:
+                    type: string
+                    maxLength: 1024
+components:
+  schemas:
+    ExperimentEvaluatorSummary:
+      type: object
+      description: An evaluator as the experiment's score documents recorded it.
+      properties:
+        name:
+          type: string
+          maxLength: 256
+        version:
+          type: string
+          maxLength: 64
+          description: Absent on experiments recorded before evaluator versions were persisted.
+        kind:
+          type: string
+          enum:
+            - llm
+            - code
+          description: >-
+            Whether the evaluator invoked a model. Absent on experiments recorded
+            before per-evaluator attribution was introduced.
+        model:
+          $ref: '../common_attributes.schema.yaml#/components/schemas/Model'
+          description: >-
+            Model this evaluator judged with. Never present for code evaluators,
+            which invoke no model.
+        score_count:
+          type: integer
+          description: How many score documents this evaluator produced.
+      required:
+        - name
+        - score_count

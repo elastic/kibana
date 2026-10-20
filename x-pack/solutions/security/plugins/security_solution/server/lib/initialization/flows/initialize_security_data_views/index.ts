@@ -6,7 +6,10 @@
  */
 
 import type { DataView, DataViewListItem, DataViewsService } from '@kbn/data-views-plugin/common';
-import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
+import {
+  ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
+  ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
+} from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   DataViewPayload,
@@ -201,6 +204,22 @@ export const getOrCreateAttackDataView = async ({
     };
   }
 
+  const currentPatterns = ensurePatternFormat(existing.title.split(','));
+  const arePatternsDifferent = patternListAsTitle !== currentPatterns.join();
+  const isCorrectName = existing.name === DEFAULT_SECURITY_ATTACK_DATA_VIEW_NAME;
+
+  // If the data view's index patterns have changed (e.g. adding the ad-hoc alerts index)
+  // or if the name is incorrect, we update the existing data view instead of creating a new one.
+  if (arePatternsDifferent || !isCorrectName) {
+    const dataView = await dataViewsService.get(dataViewId);
+    if (arePatternsDifferent) {
+      dataView.title = patternListAsTitle;
+    }
+    dataView.name = DEFAULT_SECURITY_ATTACK_DATA_VIEW_NAME;
+
+    await dataViewsService.updateSavedObject(dataView);
+  }
+
   return {
     id: dataViewId,
     title: patternListAsTitle,
@@ -259,7 +278,11 @@ export const initializeSecurityDataViewsFlow: InitializationFlowDefinition<
         allDataViews,
         dataViewId: attackDataViewId,
         dataViewsService,
-        patternList: [`${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`, signalIndexName],
+        patternList: [
+          `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`,
+          `${ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`,
+          signalIndexName,
+        ],
       });
     }
 

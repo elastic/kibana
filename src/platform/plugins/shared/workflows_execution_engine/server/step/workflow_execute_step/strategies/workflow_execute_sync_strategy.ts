@@ -11,16 +11,25 @@ import { omit } from 'lodash';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { JsonValue } from '@kbn/utility-types';
 import type { EsWorkflow } from '@kbn/workflows';
-import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import {
+  ExecutionStatus,
+  isTerminalStatus,
+  toWorkflowExecutionEngineModel,
+  WORKFLOW_STEP_TRIGGER_SOURCE,
+} from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
-import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
+import type {
+  EsWorkflowExecution,
+  EsWorkflowStepExecution,
+  WorkflowStepExecutionDto,
+} from '@kbn/workflows/types/v1';
 import type { StepExecutionRepository } from '../../../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../../../repositories/workflow_execution_repository';
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
+import { buildChildLineageContext } from '../build_child_lineage_context';
 import type { StrategyResult } from '../types';
-import { toExecutionModel } from '../utils';
 
 export type { StrategyResult } from '../types';
 
@@ -44,14 +53,24 @@ export class WorkflowExecuteSyncStrategy {
     inputs: Record<string, unknown>,
     spaceId: string,
     request: KibanaRequest,
-    parentDepth: number
+    parentDepth: number,
+    inheritParentIdentity: boolean,
+    parentStepName: string
   ): Promise<StrategyResult> {
     const currentState = this.stepExecutionRuntime.getCurrentStepState() as
       | SubWorkflowWaitState
       | undefined;
 
     if (!currentState) {
-      return this.initiateSubWorkflowExecution(workflow, inputs, spaceId, request, parentDepth);
+      return this.initiateSubWorkflowExecution(
+        workflow,
+        inputs,
+        spaceId,
+        request,
+        parentDepth,
+        inheritParentIdentity,
+        parentStepName
+      );
     }
 
     return this.readChildExecutionFromEs(currentState, spaceId);
@@ -94,22 +113,26 @@ export class WorkflowExecuteSyncStrategy {
     inputs: Record<string, unknown>,
     spaceId: string,
     request: KibanaRequest,
-    parentDepth: number
+    parentDepth: number,
+    inheritParentIdentity: boolean,
+    parentStepName: string
   ): Promise<StrategyResult> {
     try {
       const workflowExecution = this.stepExecutionRuntime.workflowExecution;
       const isTestRun = !!this.stepExecutionRuntime.workflowExecution.isTestRun;
       const { workflowExecutionId } = await this.workflowsExecutionEngine.executeWorkflow(
-        toExecutionModel(workflow, isTestRun),
+        toWorkflowExecutionEngineModel(workflow, { isTestRun, isEphemeral: false }),
         {
           spaceId,
           inputs,
-          triggeredBy: 'workflow-step',
+          triggeredBy: WORKFLOW_STEP_TRIGGER_SOURCE,
           parentWorkflowInvocation: 'sync',
           parentWorkflowId: workflowExecution.workflowId,
           parentWorkflowExecutionId: workflowExecution.id,
           parentStepId: this.stepExecutionRuntime.node.stepId,
           parentDepth,
+          ...buildChildLineageContext({ invocation: 'sync', parent: workflowExecution }),
+          ...(inheritParentIdentity ? { inheritParentIdentity: true, parentStepName } : {}),
         },
         request
       );
@@ -161,13 +184,7 @@ export class WorkflowExecuteSyncStrategy {
       }
 
       if (execution.status !== ExecutionStatus.COMPLETED) {
-        const error = execution.error
-          ? new ExecutionError(execution.error)
-          : new ExecutionError({
-              type: 'Error',
-              message: `Sub-workflow execution ${execution.status}`,
-            });
-        return { status: 'failed', error };
+        return { status: 'failed', error: await this.buildChildFailureError(execution) };
       }
 
       let output: JsonValue;
@@ -191,6 +208,73 @@ export class WorkflowExecuteSyncStrategy {
       };
     } catch (error) {
       return { status: 'failed', error: error as Error };
+    }
+  }
+
+  /**
+   * Builds the error a parent step reports when a sub-workflow did not complete,
+   * preferring the most specific detail available over a bare status string.
+   */
+  private async buildChildFailureError(execution: EsWorkflowExecution): Promise<ExecutionError> {
+    if (execution.error) {
+      return new ExecutionError(execution.error);
+    }
+
+    if (execution.cancellationReason) {
+      return new ExecutionError({
+        type: 'Error',
+        message: `Sub-workflow execution ${execution.status}: ${execution.cancellationReason}`,
+      });
+    }
+
+    const failingStep = await this.findFailingChildStep(execution);
+    if (failingStep) {
+      const stepType = failingStep.stepType ? ` (${failingStep.stepType})` : '';
+      const detail = failingStep.error?.message ? `: ${failingStep.error.message}` : '';
+      return new ExecutionError({
+        type: 'Error',
+        message: `Sub-workflow execution ${execution.status} at step '${failingStep.stepId}'${stepType}${detail}`,
+      });
+    }
+
+    return new ExecutionError({
+      type: 'Error',
+      message: `Sub-workflow execution ${execution.status}`,
+    });
+  }
+
+  /**
+   * Finds the child step most responsible for the failure. On timeout the zone
+   * fails the running step with a `TimeoutError` and clears the workflow-level
+   * error, so we look for the latest step carrying an error (or still running)
+   * rather than a top-level error that is no longer there.
+   */
+  private async findFailingChildStep(
+    execution: EsWorkflowExecution
+  ): Promise<EsWorkflowStepExecution | undefined> {
+    try {
+      const stepExecutions =
+        await this.stepExecutionRepository.getStepExecutionsByWorkflowExecution(
+          execution.id,
+          execution.stepExecutionIds
+        );
+      const candidates = stepExecutions.filter(
+        (step) => step.error != null || !isTerminalStatus(step.status)
+      );
+      if (candidates.length === 0) {
+        return undefined;
+      }
+      return candidates.reduce((latest, step) =>
+        step.globalExecutionIndex > latest.globalExecutionIndex ? step : latest
+      );
+    } catch (error) {
+      // Best-effort: a read failure must not crash the parent step.
+      this.workflowLogger.logDebug(
+        `Failed to read child step executions for failure enrichment: ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return undefined;
     }
   }
 

@@ -29,7 +29,7 @@ import { launchPadLinks, onboardingLinks } from '../../onboarding/links';
 import { findingsLinks } from '../../cloud_security_posture/links';
 import type { StartPlugins } from '../../types';
 import { dashboardsLinks } from '../../dashboards/links';
-import { entityAnalyticsLinks, entityAnalyticsV2Links } from '../../entity_analytics/links';
+import { entityAnalyticsLinks } from '../../entity_analytics/links';
 
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
@@ -69,23 +69,36 @@ export const getFilteredLinks = async (
   );
   const chatExperience: AIChatExperience = await firstValueFrom(chatExperience$);
   const filteredConfigurationsLinks = getConfigurationsLinks(chatExperience);
+  const enableAlertsAndAttacksAlignment = core.uiSettings.get(
+    ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING,
+    experimentalFeatures.enableAlertsAndAttacksAlignment
+  );
 
   return Object.freeze([
     dashboardsLinks,
-    core.uiSettings.get(ENABLE_ALERTS_AND_ATTACKS_ALIGNMENT_SETTING, false)
-      ? alertDetectionsLinks
-      : alertsLink,
+    enableAlertsAndAttacksAlignment ? alertDetectionsLinks : alertsLink,
     alertSummaryLink,
-    attackDiscoveryLinks,
+    // When the new Attacks page is enabled, we hide the legacy Attack Discovery link from the
+    // side navigation, the global navigation, and global search. However, we keep it in the
+    // appLinks array so that SecurityRoutePageWrapper still considers the route
+    // authorized/available, allowing the redirect logic in attack_discovery/routes.tsx to run.
+    ...(enableAlertsAndAttacksAlignment
+      ? [
+          {
+            ...attackDiscoveryLinks,
+            sideNavDisabled: true,
+            globalNavPosition: undefined,
+            globalSearchDisabled: true,
+          },
+        ]
+      : [attackDiscoveryLinks]),
     findingsLinks,
     casesLinks,
     filteredConfigurationsLinks,
     timelinesLinks,
     indicatorsLinks,
     exploreLinks,
-    experimentalFeatures.entityAnalyticsNewHomePageEnabled
-      ? entityAnalyticsV2Links
-      : entityAnalyticsLinks,
+    entityAnalyticsLinks,
     assetInventoryLinks,
     rulesLinks,
     siemMigrationsLinks,

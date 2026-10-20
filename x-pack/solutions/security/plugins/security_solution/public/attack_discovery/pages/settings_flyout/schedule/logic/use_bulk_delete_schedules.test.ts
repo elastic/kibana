@@ -14,11 +14,14 @@ import { renderMutation } from '../../../../../management/hooks/test_utils';
 import { useInvalidateFindAttackDiscoverySchedule } from './use_find_schedules';
 import { bulkDeleteAttackDiscoverySchedules } from '../api';
 import { useInvalidateGetAttackDiscoverySchedule } from './use_get_schedule';
+import { useKibana } from '../../../../../common/lib/kibana';
+import { AttackDiscoverySchedulesEventTypes } from '../../../../../common/lib/telemetry';
 
 jest.mock('./use_find_schedules');
 jest.mock('./use_get_schedule');
 jest.mock('../api');
 jest.mock('../../../../../common/hooks/use_app_toasts');
+jest.mock('../../../../../common/lib/kibana');
 
 const bulkDeleteAttackDiscoverySchedulesMock =
   bulkDeleteAttackDiscoverySchedules as jest.MockedFunction<
@@ -39,10 +42,20 @@ const mockUseInvalidateGetAttackDiscoverySchedule =
 
 describe('useBulkDeleteAttackDiscoverySchedules', () => {
   let appToastsMock: jest.Mocked<ReturnType<typeof useAppToastsMock.create>>;
+  let reportEventMock: jest.Mock;
   const ids = ['test-0', 'test-1'];
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    reportEventMock = jest.fn();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        telemetry: {
+          reportEvent: reportEventMock,
+        },
+      },
+    });
 
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
@@ -74,13 +87,19 @@ describe('useBulkDeleteAttackDiscoverySchedules', () => {
     });
   });
 
-  it('should invoke `addSuccess`', async () => {
+  it('should invoke `addSuccess` and `reportEvent`', async () => {
     const result = await renderMutation(() => useBulkDeleteAttackDiscoverySchedules());
 
     await act(async () => {
       await result.mutateAsync({ ids });
       expect(appToastsMock.addSuccess).toHaveBeenCalledWith(
         '2 attack discovery schedules deleted successfully.'
+      );
+      expect(reportEventMock).toHaveBeenCalledWith(
+        AttackDiscoverySchedulesEventTypes.BulkDeleteSuccess,
+        {
+          count: ids.length,
+        }
       );
     });
   });
@@ -105,7 +124,7 @@ describe('useBulkDeleteAttackDiscoverySchedules', () => {
     });
   });
 
-  it('should invoke `addError`', async () => {
+  it('should invoke `addError` and `reportEvent`', async () => {
     bulkDeleteAttackDiscoverySchedulesMock.mockRejectedValue('Royally failed!');
 
     const result = await renderMutation(() => useBulkDeleteAttackDiscoverySchedules());
@@ -117,6 +136,12 @@ describe('useBulkDeleteAttackDiscoverySchedules', () => {
         expect(appToastsMock.addError).toHaveBeenCalledWith('Royally failed!', {
           title: 'Failed to delete 2 attack discovery schedules',
         });
+        expect(reportEventMock).toHaveBeenCalledWith(
+          AttackDiscoverySchedulesEventTypes.BulkDeleteFailed,
+          {
+            count: ids.length,
+          }
+        );
       }
     });
   });

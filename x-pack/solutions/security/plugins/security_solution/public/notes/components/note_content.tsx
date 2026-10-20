@@ -15,6 +15,13 @@ const OPEN_POPOVER = i18n.translate('xpack.securitySolution.notes.expandRow.butt
   defaultMessage: 'Expand',
 });
 
+const NOTE_CONTENT_POPOVER_LABEL = i18n.translate(
+  'xpack.securitySolution.notes.expandRow.popoverAriaLabel',
+  {
+    defaultMessage: 'Note content',
+  }
+);
+
 export interface NoteContentProps {
   /**
    * The note content to display
@@ -62,6 +69,7 @@ export const NoteContent = memo(({ note }: NoteContentProps) => {
       isOpen={isPopoverOpen}
       closePopover={closePopover}
       panelStyle={{ maxWidth: '50%', maxHeight: '50%', overflow: 'auto' }}
+      aria-label={NOTE_CONTENT_POPOVER_LABEL}
     >
       <EuiMarkdownFormat textSize="s" data-test-subj={NOTE_CONTENT_POPOVER_TEST_ID}>
         {note}

@@ -16,7 +16,10 @@ import type {
 import { withSecuritySpan } from '../../../../../utils/with_security_span';
 import { findRules } from '../../../rule_management/logic/search/find_rules';
 import { internalRuleToAPIResponse } from '../../../rule_management/logic/detection_rules_client/converters/internal_rule_to_api_response';
-import { convertRulesFilterToKQL } from '../../../../../../common/detection_engine/rule_management/rule_filtering';
+import {
+  convertRulesFilterToKQL,
+  KQL_FILTER_IMMUTABLE_RULES,
+} from '../../../../../../common/detection_engine/rule_management/rule_filtering';
 import type {
   FindRulesSortField,
   PrebuiltRulesFilter,
@@ -33,7 +36,7 @@ interface FetchAllInstalledRulesArgs {
 }
 
 interface FetchAllInstalledRuleVersionsArgs {
-  filter?: PrebuiltRulesFilter;
+  kqlFilter?: string;
   sortField?: FindRulesSortField;
   sortOrder?: SortOrder;
 }
@@ -147,18 +150,16 @@ export const createPrebuiltRuleObjectsClient = (
         }
       );
     },
-    fetchInstalledRuleVersions: ({ filter, sortField, sortOrder } = {}) => {
+    fetchInstalledRuleVersions: ({ kqlFilter, sortField, sortOrder } = {}) => {
       return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRuleVersions', async () => {
-        const filterKQL = convertRulesFilterToKQL({
-          showElasticRules: true,
-          filter: filter?.name,
-          tags: filter?.tags,
-          customizationStatus: filter?.customization_status,
-        });
+        const combinedKQL =
+          kqlFilter && kqlFilter.length > 0
+            ? `${KQL_FILTER_IMMUTABLE_RULES} AND (${kqlFilter})`
+            : KQL_FILTER_IMMUTABLE_RULES;
 
         const rulesData = await findRules({
           rulesClient,
-          filter: filterKQL,
+          filter: combinedKQL,
           perPage: MAX_PREBUILT_RULES_COUNT,
           page: 1,
           sortField,

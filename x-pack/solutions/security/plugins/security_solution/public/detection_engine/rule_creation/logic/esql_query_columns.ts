@@ -16,12 +16,20 @@ const DEFAULT_STALE_TIME = 60 * 1000;
 interface FetchEsqlQueryColumnsParams {
   esqlQuery: string;
   queryClient: QueryClient;
+  signal?: AbortSignal;
 }
 
 export async function fetchEsqlQueryColumns({
   esqlQuery,
   queryClient,
+  signal,
 }: FetchEsqlQueryColumnsParams): Promise<DatatableColumn[]> {
+  signal?.addEventListener(
+    'abort',
+    () => queryClient.cancelQueries({ queryKey: [esqlQuery.trim()] }),
+    { once: true }
+  );
+
   const data = await queryClient.fetchQuery(createSharedTanstackQueryOptions(esqlQuery));
 
   if (data instanceof Error) {

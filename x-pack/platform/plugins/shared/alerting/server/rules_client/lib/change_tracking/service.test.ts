@@ -10,11 +10,11 @@ import {
   elasticsearchServiceMock,
   httpServerMock,
   loggingSystemMock,
+  userProfileServiceMock,
 } from '@kbn/core/server/mocks';
 import { ChangeHistoryClient } from '@kbn/change-history';
-import type { RawRule } from '../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
-import type { RuleChange, RuleSnapshot } from './types';
+import type { RuleChange, RuleChangeHistorySnapshot } from './types';
 import { ChangeTrackingService } from './service';
 
 jest.mock('@kbn/change-history', () => ({
@@ -25,7 +25,7 @@ const ChangeHistoryClientMock = ChangeHistoryClient as jest.MockedClass<typeof C
 
 interface MockChangeHistoryClient {
   isInitialized: jest.Mock<boolean, []>;
-  initialize: jest.Mock<Promise<void>, [unknown]>;
+  initialize: jest.Mock<Promise<void>, [unknown, unknown?]>;
   logBulk: jest.Mock<Promise<void>, [unknown, unknown]>;
   getHistory: jest.Mock<
     Promise<{ items: unknown[]; total: number }>,
@@ -45,10 +45,8 @@ describe('ChangeTrackingService', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let service: ChangeTrackingService;
 
-  const ruleSnapshot = (name: string): RuleSnapshot => ({
-    attributes: { name } as RawRule,
-    references: [],
-  });
+  const ruleSnapshot = (name: string): RuleChangeHistorySnapshot =>
+    ({ name } as unknown as RuleChangeHistorySnapshot);
 
   const initializeService = (user: { username: string; profile_uid?: string } | null) => {
     const authService = coreMock.createStart().security.authc;
@@ -56,6 +54,7 @@ describe('ChangeTrackingService', () => {
     service.initialize({
       elasticsearchClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
       authService,
+      userProfileService: userProfileServiceMock.createStart(),
     });
     return { authService };
   };
@@ -117,12 +116,17 @@ describe('ChangeTrackingService', () => {
 
       const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
       const authService = coreMock.createStart().security.authc;
-      service.initialize({ elasticsearchClient, authService });
+      const userProfileService = userProfileServiceMock.createStart();
+      service.initialize({ elasticsearchClient, authService, userProfileService });
 
       await new Promise(process.nextTick);
 
-      expect(stackClient.initialize).toHaveBeenCalledWith(elasticsearchClient);
-      expect(securityClient.initialize).toHaveBeenCalledWith(elasticsearchClient);
+      expect(stackClient.initialize).toHaveBeenCalledWith(elasticsearchClient, {
+        userProfileService,
+      });
+      expect(securityClient.initialize).toHaveBeenCalledWith(elasticsearchClient, {
+        userProfileService,
+      });
 
       expect(logger.error).not.toHaveBeenCalled();
     });
@@ -133,7 +137,7 @@ describe('ChangeTrackingService', () => {
       module: 'stack',
       objectType: RULE_SAVED_OBJECT_TYPE,
       objectId: 'rule-1',
-      snapshot: { attributes: { name: 'after' } as RawRule, references: [] },
+      snapshot: { name: 'after' } as unknown as RuleChangeHistorySnapshot,
     };
 
     describe('log', () => {
@@ -169,7 +173,7 @@ describe('ChangeTrackingService', () => {
           expect.objectContaining({
             action: 'rule_update',
             spaceId: 'default',
-            fieldsToHash: { attributes: { apiKey: true, uiamApiKey: true } },
+            fieldsToHash: { apiKey: true, uiamApiKey: true },
             correlationId: expect.any(String),
           })
         );
@@ -272,6 +276,7 @@ describe('ChangeTrackingService', () => {
             action: 'rule_update',
             spaceId: 'default',
             correlationId: expect.any(String),
+            spanLabels: { solution: 'stack', action: 'write' },
           })
         );
       });
@@ -363,6 +368,14 @@ describe('ChangeTrackingService', () => {
 
         expect(stackClient.logBulk).toHaveBeenCalledTimes(1);
         expect(securityClient.logBulk).toHaveBeenCalledTimes(1);
+        expect(stackClient.logBulk).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({ spanLabels: { solution: 'stack', action: 'write' } })
+        );
+        expect(securityClient.logBulk).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({ spanLabels: { solution: 'security', action: 'write' } })
+        );
 
         const stackOpts = stackClient.logBulk.mock.calls[0]![1] as { correlationId: string };
         const securityOpts = securityClient.logBulk.mock.calls[0]![1] as { correlationId: string };
@@ -441,7 +454,7 @@ describe('ChangeTrackingService', () => {
           'default',
           RULE_SAVED_OBJECT_TYPE,
           'rule-1',
-          opts
+          expect.objectContaining({ size: 10, spanLabels: { solution: 'stack', action: 'read' } })
         );
       });
 

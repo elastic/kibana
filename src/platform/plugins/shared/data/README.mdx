@@ -136,6 +136,90 @@ function unmount() {
 
 Provides access to Elasticsearch using the high-level `SearchSource` API or low-level `Search Strategies`.
 
+### Search Methods
+
+The data search service provides type-safe, Promise-based methods for executing Elasticsearch searches across various search strategies. These methods abstract away the complexity of Observable-based search execution and provide built-in pagination support.
+
+**Available search methods:**
+
+- `esql` - ES|QL queries for columnar data analysis
+- `dsl` - Query DSL searches
+- `dslPaginated` - Query DSL searches with built-in pagination
+- `eql` - Event Query Language for sequence queries
+- `sql` - SQL syntax queries
+
+#### ES|QL Search
+
+```.ts
+const result = await data.search.esql(
+  {
+    query: 'FROM logs-* | WHERE status >= 400 | STATS count = COUNT(*) BY status',
+    timeZone: 'America/New_York'
+  }
+);
+
+console.log(result.rawResponse.values);
+```
+
+#### Basic DSL Search
+
+```.ts
+const result = await data.search.dsl(
+  {
+    index: 'logs-*',
+    query: { match: { message: 'error' } },
+    size: 100,
+  }
+);
+
+console.log(result.rawResponse.hits.total);
+```
+
+#### DSL Search with Pagination
+
+```.ts
+const result = await data.search.dslPaginated({
+  index: 'logs-*',
+  query: { range: { '@timestamp': { gte: 'now-1d' } } },
+  size: 1000,
+  sort: [{ '@timestamp': 'desc' }]
+});
+
+// Fetch next page
+if (result.pagination.hasNextPage) {
+  const nextPage = await result.pagination.nextPage();
+}
+```
+
+#### EQL Search
+
+```.ts
+const result = await data.search.eql(
+  {
+    index: 'logs-*',
+    query: 'process where process.name == "cmd.exe"',
+    fields: ['process.name', 'process.pid', '@timestamp']
+  }
+);
+
+console.log(result.rawResponse.hits.events);
+```
+
+#### SQL Search
+
+```.ts
+const result = await data.search.sql(
+  {
+    query: 'SELECT status, COUNT(*) FROM "logs-*" GROUP BY status',
+    fetchSize: 1000
+  },
+  { timeZone: 'UTC' }
+);
+
+console.log(result.rawResponse.rows);
+console.log(result.took); // Elasticsearch query execution time in ms
+```
+
 ### SearchSource
 
 The `SearchSource` API is a convenient way to construct and run an Elasticsearch search query.

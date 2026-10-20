@@ -64,12 +64,8 @@ export const AgentActivityFlyout: React.FunctionComponent<{
   const defaultNActions = 20;
   const [nActions, setNActions] = useState(defaultNActions);
   const [dateFilter, setDateFilter] = useState<moment.Moment | null>(null);
-  const { currentActions, abortUpgrade, isFirstLoading, areActionsFullyLoaded } = useActionStatus(
-    onAbortSuccess,
-    refreshAgentActivity,
-    nActions,
-    dateFilter
-  );
+  const { currentActions, abortUpgrade, abortUnenroll, isFirstLoading, areActionsFullyLoaded } =
+    useActionStatus(onAbortSuccess, refreshAgentActivity, nActions, dateFilter);
 
   const getAgentPolicyName = useCallback(
     (policyId: string) => {
@@ -169,6 +165,7 @@ export const AgentActivityFlyout: React.FunctionComponent<{
           isFirstLoading={isFirstLoading}
           currentActions={currentActionsEnriched}
           abortUpgrade={abortUpgrade}
+          abortUnenroll={abortUnenroll}
           onClickViewAgents={onClickViewAgents}
           onClickManageAutoUpgradeAgents={onClickManageAutoUpgradeAgents}
           areActionsFullyLoaded={areActionsFullyLoaded}

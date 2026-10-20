@@ -21,7 +21,7 @@ import { bulkEditRulesRequestBodySchemaV1 } from '../../../../../common/routes/r
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import type { Rule } from '../../../../application/rule/types';
 
-import { transformRuleToRuleResponseV1 } from '../../transforms';
+import { transformRuleToRuleResponseInternalV1 } from '../../transforms';
 import { validateRequiredGroupInDefaultActionsV1 } from '../../validation';
 import { transformOperationsV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
@@ -83,7 +83,9 @@ const buildBulkEditRulesRoute = ({ licenseState, path, router }: BuildBulkEditRu
                 rules: bulkEditResults.rules.map((rule) => {
                   // TODO (http-versioning): Remove this cast, this enables us to move forward
                   // without fixing all of other solution types
-                  return transformRuleToRuleResponseV1<RuleParamsV1>(rule as Rule<RuleParamsV1>);
+                  return transformRuleToRuleResponseInternalV1<RuleParamsV1>(
+                    rule as Rule<RuleParamsV1>
+                  );
                 }),
               },
             };

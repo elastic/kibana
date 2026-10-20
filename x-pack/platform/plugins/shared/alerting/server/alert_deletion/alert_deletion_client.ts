@@ -21,6 +21,7 @@ import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { RulesSettingsAlertDeleteProperties } from '@kbn/alerting-types';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import type { GetAlertIndicesAlias } from '../lib';
 import type { RuleTypeRegistry } from '../types';
 import { getLastRun, previewTask, runTask, scheduleTask } from './lib';
@@ -80,14 +81,14 @@ export class AlertDeletionClient {
         maxAttempts: 1,
         createTaskRunner: ({
           taskInstance,
-          abortController,
+          signal,
         }: {
           taskInstance: ConcreteTaskInstance;
-          abortController: AbortController;
+          signal: AbortSignal;
         }) => {
           return {
             run: async () => {
-              return this.runTask(taskInstance, abortController);
+              return this.runTask(taskInstance, signal);
             },
             cancel: async () => {},
           };
@@ -112,13 +113,10 @@ export class AlertDeletionClient {
     settings: RulesSettingsAlertDeleteProperties,
     spaceId: string
   ): Promise<number> {
-    return await previewTask(this.context, settings, spaceId);
+    return await previewTask(this.context, settings, brandSpaceId(spaceId));
   }
 
-  private runTask = async (
-    taskInstance: ConcreteTaskInstance,
-    abortController: AbortController
-  ) => {
-    await runTask(this.context, taskInstance, abortController);
+  private runTask = async (taskInstance: ConcreteTaskInstance, signal: AbortSignal) => {
+    await runTask(this.context, taskInstance, signal);
   };
 }

@@ -20,12 +20,14 @@ jest.mock('@kbn/cell-actions', () => {
     ...actual,
     CellActions: ({ data, metadata }: CellActionsProps) => {
       const entry = Array.isArray(data) ? data[0] : data;
+      const meta = metadata as Record<string, unknown> | undefined;
       return (
         <div
           data-test-subj="mock-cell-actions"
           data-field={entry?.field?.name}
           data-value={entry?.value as string}
-          data-dataviewid={(metadata as { dataViewId?: string } | undefined)?.dataViewId}
+          data-dataviewid={meta?.dataViewId as string}
+          data-include-null-values={String(meta?.includeNullValues ?? false)}
         />
       );
     },
@@ -225,6 +227,47 @@ describe('RiskLevelBreakdownTable', () => {
     );
 
     expect(screen.queryAllByTestId('mock-cell-actions')).toHaveLength(0);
+  });
+
+  describe('getCellActionsMetadata', () => {
+    it('should set includeNullValues: true only for the Unknown row', () => {
+      render(
+        <TestProviders>
+          <RiskLevelBreakdownTable
+            severityCount={EMPTY_SEVERITY_COUNT}
+            entityDataView={buildEntityDataView()}
+          />
+        </TestProviders>
+      );
+
+      const cellActions = screen.getAllByTestId('mock-cell-actions');
+      const unknownRow = cellActions.find(
+        (el) => el.getAttribute('data-value') === RiskSeverity.Unknown
+      );
+      const otherRows = cellActions.filter(
+        (el) => el.getAttribute('data-value') !== RiskSeverity.Unknown
+      );
+
+      expect(unknownRow).toHaveAttribute('data-include-null-values', 'true');
+      otherRows.forEach((el) => {
+        expect(el).toHaveAttribute('data-include-null-values', 'false');
+      });
+    });
+
+    it('should include the dataViewId from entityDataView in all rows', () => {
+      render(
+        <TestProviders>
+          <RiskLevelBreakdownTable
+            severityCount={EMPTY_SEVERITY_COUNT}
+            entityDataView={buildEntityDataView()}
+          />
+        </TestProviders>
+      );
+
+      screen.getAllByTestId('mock-cell-actions').forEach((el) => {
+        expect(el).toHaveAttribute('data-dataviewid', 'entity-store-dv-id');
+      });
+    });
   });
 
   it('should render a CellActions cell per row using the resolved entity data view field spec', () => {

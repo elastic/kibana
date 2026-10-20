@@ -125,7 +125,7 @@ const createService = () => {
       .mockImplementation(({ id }: { id: string } | DeepPartial<{ id: string }>) => {
         if (id === 'date') {
           return {
-            convert: jest
+            convertToText: jest
               .fn()
               .mockImplementation(
                 (value: number, _type?: string, options?: { timezone?: string }) =>
@@ -135,7 +135,7 @@ const createService = () => {
         }
 
         return {
-          convert: jest.fn().mockImplementation((value: number) => value.toString()),
+          convertToText: jest.fn().mockImplementation((value: number) => value.toString()),
         };
       }),
   }) as jest.Mocked<FieldFormatsRegistryProvider>;

@@ -8,23 +8,10 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { IlmPolicyPhases, PhaseName } from '@kbn/streams-schema';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
-  EuiFlyoutHeader,
-  EuiToolTip,
-  EuiTitle,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
-import { isEqual } from 'lodash';
+import { useGeneratedHtmlId } from '@elastic/eui';
 import { FormProvider, useForm, useFormState, useWatch, type FieldPath } from 'react-hook-form';
 import { PHASE_ORDER } from '@kbn/data-lifecycle-phases';
-import type { EditIlmPhasesFlyoutChangeMeta, EditIlmPhasesFlyoutProps } from './types';
+import type { EditIlmPhasesFlyoutProps } from './types';
 import {
   createMapFormValuesToIlmPolicyPhases,
   getIlmPhasesFlyoutFormSchema,
@@ -35,9 +22,17 @@ import {
   zodResolver,
 } from './form';
 import { DEFAULT_NEW_PHASE_MIN_AGE } from './constants';
-import { GlobalFieldsMount, PhasePanel, PhaseTabsRow } from './sections';
-import { useStyles } from './use_styles';
-import { getDoubledDurationFromPrevious, type PreservedTimeUnit } from '../shared';
+import { GlobalFieldsMount, PhasePanel } from './sections';
+import { useDataPhasesFlyoutStyles } from '../shared';
+import {
+  type EditDataPhasesFlyoutChangeMeta,
+  FlyoutShell,
+  getDoubledDurationFromPrevious,
+  PhaseTabsRow,
+  syncSelectedPhase,
+  type PreservedTimeUnit,
+} from '../shared';
+import { useDebouncedOnChangeEmit } from '../shared/use_debounced_on_change_emit';
 
 export const EditIlmPhasesFlyout = ({
   initialPhases,
@@ -59,7 +54,7 @@ export const EditIlmPhasesFlyout = ({
   const flyoutTitleId = useGeneratedHtmlId({ prefix: 'streamsEditIlmPhasesFlyoutTitle' });
   const formId = useGeneratedHtmlId({ prefix: 'streamsEditIlmPhasesFlyoutForm' });
   const dataTestSubj = dataTestSubjProp ?? 'streamsEditIlmPhasesFlyout';
-  const { footerStyles, headerStyles, sectionStyles } = useStyles();
+  const { sectionStyles } = useDataPhasesFlyoutStyles();
 
   const initialPhasesRef = useRef<IlmPolicyPhases>(initialPhases);
 
@@ -98,95 +93,24 @@ export const EditIlmPhasesFlyout = ({
   );
 
   const { tabHasErrors } = useIlmPhasesFlyoutTabErrors(formData, errors);
-
-  const onChangeRef = useRef(onChange);
-  useEffect(() => {
-    onChangeRef.current = onChange;
-  }, [onChange]);
   const buildInvalidPhases = useCallback(
     () => PHASE_ORDER.filter((p) => tabHasErrors(p)),
     [tabHasErrors]
   );
 
-  const lastEmittedMetaRef = useRef<EditIlmPhasesFlyoutChangeMeta>({
-    invalidPhases: [],
+  const buildMeta = useCallback<() => EditDataPhasesFlyoutChangeMeta>(
+    () => ({ invalidPhases: buildInvalidPhases() }),
+    [buildInvalidPhases]
+  );
+
+  useDebouncedOnChangeEmit<IlmPolicyPhases, EditDataPhasesFlyoutChangeMeta>({
+    getOutput: () => mapFormValuesToIlmPolicyPhases(methods.getValues()),
+    initialOutput: initialPhasesRef.current,
+    onChange,
+    buildMeta,
+    onChangeDebounceMs,
+    emitSignal: meta ? formData : null,
   });
-
-  const lastEmittedOutputRef = useRef<IlmPolicyPhases>(initialPhasesRef.current);
-  const pendingOnChangeTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const pendingOnChangeEmitScheduledRef = useRef(false);
-  const pendingOnChangeEmitScheduleIdRef = useRef(0);
-
-  const scheduleOnChangeEmit = useCallback(() => {
-    pendingOnChangeEmitScheduleIdRef.current += 1;
-    const scheduledId = pendingOnChangeEmitScheduleIdRef.current;
-
-    if (pendingOnChangeTimeoutRef.current) {
-      clearTimeout(pendingOnChangeTimeoutRef.current);
-      pendingOnChangeTimeoutRef.current = null;
-    }
-
-    pendingOnChangeEmitScheduledRef.current = true;
-
-    const emit = () => {
-      pendingOnChangeEmitScheduledRef.current = false;
-      const toEmit = mapFormValuesToIlmPolicyPhases(methods.getValues());
-
-      const metaToEmit: EditIlmPhasesFlyoutChangeMeta = {
-        invalidPhases: buildInvalidPhases(),
-      };
-
-      if (
-        isEqual(toEmit, lastEmittedOutputRef.current) &&
-        isEqual(metaToEmit, lastEmittedMetaRef.current)
-      ) {
-        return;
-      }
-
-      lastEmittedOutputRef.current = toEmit;
-      lastEmittedMetaRef.current = metaToEmit;
-      onChangeRef.current(toEmit, metaToEmit);
-    };
-
-    if (onChangeDebounceMs === 0) {
-      pendingOnChangeTimeoutRef.current = setTimeout(() => {
-        pendingOnChangeTimeoutRef.current = null;
-        if (pendingOnChangeEmitScheduleIdRef.current !== scheduledId) return;
-        emit();
-      }, 0);
-      return;
-    }
-
-    pendingOnChangeTimeoutRef.current = setTimeout(() => {
-      pendingOnChangeTimeoutRef.current = null;
-      if (pendingOnChangeEmitScheduleIdRef.current !== scheduledId) return;
-      emit();
-    }, onChangeDebounceMs);
-  }, [buildInvalidPhases, mapFormValuesToIlmPolicyPhases, methods, onChangeDebounceMs]);
-
-  useEffect(() => {
-    return () => {
-      if (pendingOnChangeTimeoutRef.current) {
-        clearTimeout(pendingOnChangeTimeoutRef.current);
-        pendingOnChangeTimeoutRef.current = null;
-      }
-      pendingOnChangeEmitScheduledRef.current = false;
-      pendingOnChangeEmitScheduleIdRef.current += 1;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (!meta) return;
-    scheduleOnChangeEmit();
-  }, [formData, meta, scheduleOnChangeEmit]);
-
-  useEffect(() => {
-    // Re-emit meta when tab errors change without any form data change.
-    // If we already have a scheduled emit (due to form changes), that emit will compute meta at
-    // emit-time, so we don't need to reschedule.
-    if (pendingOnChangeEmitScheduledRef.current) return;
-    scheduleOnChangeEmit();
-  }, [buildInvalidPhases, scheduleOnChangeEmit]);
 
   const canSelectFrozen = canCreateRepository || searchableSnapshotRepositories.length > 0;
 
@@ -312,137 +236,74 @@ export const EditIlmPhasesFlyout = ({
       return;
     }
 
-    const isPhaseCorrectlyEnabled = ensurePhaseEnabledWithDefaults(selectedPhase);
-    if (!isPhaseCorrectlyEnabled) {
-      setSelectedPhase(enabledPhases[0]);
+    const result = syncSelectedPhase({
+      selectedPhase,
+      enabledPhases,
+      ensurePhaseEnabledWithDefaults,
+      getFallbackPhase: () => enabledPhases[0],
+    });
+    if (result.action === 'set') {
+      setSelectedPhase(result.phase);
     }
   }, [enabledPhases, ensurePhaseEnabledWithDefaults, meta, selectedPhase, setSelectedPhase]);
 
   const hasFormErrors = Object.keys(errors).length > 0;
   const isSaveDisabledDueToInvalid = hasFormErrors;
-  const isSaveDisabled = isSaveDisabledDueToInvalid || isSubmitting;
 
-  const renderSaveButton = () => {
-    const button = (
-      <EuiButton
-        fill
-        type="submit"
-        form={formId}
-        isLoading={Boolean(isSaving) || isSubmitting}
-        data-test-subj={`${dataTestSubj}SaveButton`}
-        disabled={isSaveDisabled}
-      >
-        {i18n.translate('xpack.streams.editIlmPhasesFlyout.save', {
-          defaultMessage: 'Save',
-        })}
-      </EuiButton>
-    );
+  const title = i18n.translate('xpack.streams.editIlmPhasesFlyout.titleIlm', {
+    defaultMessage: 'Edit ILM policy',
+  });
 
-    return isSaveDisabledDueToInvalid ? (
-      <EuiToolTip
-        content={i18n.translate('xpack.streams.editIlmPhasesFlyout.saveDisabledTooltip', {
-          defaultMessage: 'Fix the form errors before saving.',
-        })}
-      >
-        {button}
-      </EuiToolTip>
-    ) : (
-      button
-    );
-  };
+  const tabsRow = (
+    <PhaseTabsRow
+      enabledPhases={enabledPhases}
+      searchableSnapshotRepositories={searchableSnapshotRepositories}
+      canCreateRepository={canCreateRepository}
+      selectedPhase={selectedPhase}
+      setSelectedPhase={setSelectedPhase}
+      tabHasErrors={tabHasErrors}
+      dataTestSubj={dataTestSubj}
+    />
+  );
 
   return (
-    <EuiFlyout
-      type="push"
-      size="s"
-      paddingSize="none"
-      ownFocus={false}
+    <FlyoutShell
+      dataTestSubj={dataTestSubj}
+      flyoutTitleId={flyoutTitleId}
+      formId={formId}
       onClose={onClose}
-      aria-labelledby={flyoutTitleId}
-      data-test-subj={dataTestSubj}
+      title={title}
+      tabsRow={tabsRow}
+      isSubmitting={isSubmitting}
+      isSaving={isSaving}
+      isSaveDisabledDueToInvalid={isSaveDisabledDueToInvalid}
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup direction="column" gutterSize="s" responsive={false} css={headerStyles}>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={true}>
-                <EuiTitle size="m">
-                  <h2 id={flyoutTitleId}>
-                    {i18n.translate('xpack.streams.editIlmPhasesFlyout.title', {
-                      defaultMessage: 'Edit data phases',
-                    })}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiFlexItem grow={false}>
-            <PhaseTabsRow
+      <FormProvider {...methods}>
+        <form
+          id={formId}
+          onSubmit={methods.handleSubmit((data) => onSave(mapFormValuesToIlmPolicyPhases(data)))}
+          noValidate
+        >
+          <GlobalFieldsMount />
+          {PHASE_ORDER.map((phase) => (
+            <PhasePanel
+              key={phase}
+              phase={phase}
+              selectedPhase={selectedPhase}
               enabledPhases={enabledPhases}
+              setSelectedPhase={setSelectedPhase}
+              dataTestSubj={dataTestSubj}
+              sectionStyles={sectionStyles}
               searchableSnapshotRepositories={searchableSnapshotRepositories}
               canCreateRepository={canCreateRepository}
-              selectedPhase={selectedPhase}
-              setSelectedPhase={setSelectedPhase}
-              tabHasErrors={tabHasErrors}
-              dataTestSubj={dataTestSubj}
+              isLoadingSearchableSnapshotRepositories={isLoadingSearchableSnapshotRepositories}
+              onRefreshSearchableSnapshotRepositories={onRefreshSearchableSnapshotRepositories}
+              onCreateSnapshotRepository={onCreateSnapshotRepository}
+              isMetricsStream={isMetricsStream}
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutHeader>
-
-      <EuiFlyoutBody>
-        <FormProvider {...methods}>
-          <form
-            id={formId}
-            onSubmit={methods.handleSubmit((data) => onSave(mapFormValuesToIlmPolicyPhases(data)))}
-            noValidate
-          >
-            <GlobalFieldsMount />
-
-            {PHASE_ORDER.map((phase) => (
-              <PhasePanel
-                key={phase}
-                phase={phase}
-                selectedPhase={selectedPhase}
-                enabledPhases={enabledPhases}
-                setSelectedPhase={setSelectedPhase}
-                dataTestSubj={dataTestSubj}
-                sectionStyles={sectionStyles}
-                searchableSnapshotRepositories={searchableSnapshotRepositories}
-                canCreateRepository={canCreateRepository}
-                isLoadingSearchableSnapshotRepositories={isLoadingSearchableSnapshotRepositories}
-                onRefreshSearchableSnapshotRepositories={onRefreshSearchableSnapshotRepositories}
-                onCreateSnapshotRepository={onCreateSnapshotRepository}
-                isMetricsStream={isMetricsStream}
-              />
-            ))}
-          </form>
-        </FormProvider>
-      </EuiFlyoutBody>
-
-      <EuiFlyoutFooter>
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          responsive={false}
-          css={footerStyles}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              type="button"
-              data-test-subj={`${dataTestSubj}CancelButton`}
-              onClick={onClose}
-              flush="left"
-            >
-              {i18n.translate('xpack.streams.editIlmPhasesFlyout.cancel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>{renderSaveButton()}</EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlyoutFooter>
-    </EuiFlyout>
+          ))}
+        </form>
+      </FormProvider>
+    </FlyoutShell>
   );
 };

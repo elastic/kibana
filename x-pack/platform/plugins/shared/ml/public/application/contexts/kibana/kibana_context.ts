@@ -28,8 +28,8 @@ import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
@@ -46,6 +46,7 @@ interface StartPlugins {
   dashboard: DashboardStart;
   data: DataPublicPluginStart;
   dataViewEditor: DataViewEditorStart;
+  dataViewFieldEditor: DataViewFieldEditorStart;
   dataViews: DataViewsPublicPluginStart;
   dataVisualizer?: DataVisualizerPluginStart;
   embeddable: EmbeddableStart;
@@ -55,7 +56,6 @@ interface StartPlugins {
   licenseManagement?: LicenseManagementUIPluginSetup;
   maps?: MapsStartApi;
   observabilityAIAssistant?: ObservabilityAIAssistantPublicStart;
-  presentationUtil: PresentationUtilPluginStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   savedSearch: SavedSearchPublicPluginStart;
   security?: SecurityPluginStart;

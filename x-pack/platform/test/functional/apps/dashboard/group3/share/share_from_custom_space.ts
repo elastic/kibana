@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { DASHBOARD_APP_ID } from '@kbn/deeplinks-analytics';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function sharingFromSpace({ getPageObjects, getService }: FtrProviderContext) {
@@ -22,6 +23,11 @@ export default function sharingFromSpace({ getPageObjects, getService }: FtrProv
 
   const spaceId = 'another-space';
 
+  /**
+   * Purpose: Verify share URL contains space
+   *
+   * Migration: Replace with unit test
+   */
   describe('Dashboard Custom Space share', () => {
     before(async () => {
       await spacesService.create({
@@ -49,7 +55,7 @@ export default function sharingFromSpace({ getPageObjects, getService }: FtrProv
 
       await spaceSelector.clickSpaceCard(spaceId);
 
-      await common.navigateToApp(dashboard.APP_ID, { basePath: `/s/${spaceId}` });
+      await common.navigateToApp(DASHBOARD_APP_ID, { basePath: `/s/${spaceId}` });
       await dashboard.preserveCrossAppState();
       await dashboard.loadDashboardInEditMode('few panels');
       await dashboard.waitForRenderComplete();

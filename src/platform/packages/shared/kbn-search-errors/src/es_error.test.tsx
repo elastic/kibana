@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement } from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { createEsError } from './create_es_error';
-import { renderSearchError } from './render_search_error';
-import { shallow } from 'enzyme';
 import { coreMock } from '@kbn/core/public/mocks';
+import { createEsError } from './create_es_error';
+import { screen } from '@testing-library/react';
+import { renderSearchError } from './render_search_error';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 const services = {
   application: coreMock.createStart().application,
@@ -45,21 +45,26 @@ describe('EsError', () => {
     services
   );
 
-  test('should set error.message to root "error cause" reason', () => {
+  it('should set error.message to root "error cause" reason', () => {
     expect(esError.message).toEqual(
       'The supplied interval [2q] could not be parsed as a calendar interval.'
     );
   });
 
-  test('should render error message', () => {
+  it('should render error message', () => {
     const searchErrorDisplay = renderSearchError(esError);
     expect(searchErrorDisplay).not.toBeUndefined();
-    const wrapper = shallow(searchErrorDisplay?.body as ReactElement);
-    expect(wrapper).toMatchSnapshot();
+
+    renderWithKibanaRenderContext(searchErrorDisplay?.body);
+
+    expect(screen.getByTestId('errMessage')).toHaveTextContent(
+      'The supplied interval [2q] could not be parsed as a calendar interval.'
+    );
   });
 
-  test('should return 1 action', () => {
+  it('should return 1 action', () => {
     const searchErrorDisplay = renderSearchError(esError);
+
     expect(searchErrorDisplay).not.toBeUndefined();
     expect(searchErrorDisplay?.actions?.length).toBe(1);
   });

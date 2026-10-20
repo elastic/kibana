@@ -1,0 +1,12 @@
+{
+  "name": "@kbn/esql-scripts",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "sideEffects": false,
+  "scripts": {
+    "generate": "./generate.sh",
+    "make:defs": "./generate.sh definitions",
+    "make:docs": "./generate.sh documentation"
+  }
+}

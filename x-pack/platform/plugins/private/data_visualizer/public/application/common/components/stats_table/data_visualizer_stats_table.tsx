@@ -63,6 +63,7 @@ interface DataVisualizerTableProps<T extends object> {
   renderFieldName?: FieldStatisticTableEmbeddableProps['renderFieldName'];
   error?: Error | string;
   isEsql?: boolean;
+  isInteractive?: boolean;
 }
 
 const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
@@ -79,6 +80,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
   renderFieldName,
   error,
   isEsql = false,
+  isInteractive = true,
 }: DataVisualizerTableProps<T>) => {
   const { euiTheme } = useEuiTheme();
 
@@ -89,7 +91,8 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
     items,
     pageState,
     updatePageState,
-    isEsql
+    isEsql,
+    isInteractive
   );
   const [showDistributions, setShowDistributions] = useState<boolean>(showPreviewByDefault ?? true);
   const [dimensions, setDimensions] = useState(calculateTableColumnsDimensions());
@@ -147,12 +150,8 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
         // EUI will automatically show an expander button when table is mobile view (where width <700)
         // so we need to not render any addition button
         dimensions.breakPoint !== 'small' ? (
-          <EuiButtonIcon
-            data-test-subj={`dataVisualizerToggleDetailsForAllRowsButton ${
-              expandAll ? 'expanded' : 'collapsed'
-            }`}
-            onClick={() => toggleExpandAll(!expandAll)}
-            aria-label={
+          <EuiToolTip
+            content={
               !expandAll
                 ? i18n.translate('xpack.dataVisualizer.dataGrid.expandDetailsForAllAriaLabel', {
                     defaultMessage: 'Expand details for all fields',
@@ -161,8 +160,25 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                     defaultMessage: 'Collapse details for all fields',
                   })
             }
-            iconType={expandAll ? 'chevronSingleDown' : 'chevronSingleRight'}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj={`dataVisualizerToggleDetailsForAllRowsButton ${
+                expandAll ? 'expanded' : 'collapsed'
+              }`}
+              onClick={() => toggleExpandAll(!expandAll)}
+              aria-label={
+                !expandAll
+                  ? i18n.translate('xpack.dataVisualizer.dataGrid.expandDetailsForAllAriaLabel', {
+                      defaultMessage: 'Expand details for all fields',
+                    })
+                  : i18n.translate('xpack.dataVisualizer.dataGrid.collapseDetailsForAllAriaLabel', {
+                      defaultMessage: 'Collapse details for all fields',
+                    })
+              }
+              iconType={expandAll ? 'chevronSingleDown' : 'chevronSingleRight'}
+            />
+          </EuiToolTip>
         ) : null,
       align: RIGHT_ALIGNMENT,
       width: dimensions.expander,
@@ -174,10 +190,8 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
           ? 'chevronSingleDown'
           : 'chevronSingleRight';
         return (
-          <EuiButtonIcon
-            data-test-subj={`dataVisualizerDetailsToggle-${item.fieldName}-${direction}`}
-            onClick={() => toggleDetails(item)}
-            aria-label={
+          <EuiToolTip
+            content={
               expandedRowItemIds.includes(item.fieldName)
                 ? i18n.translate('xpack.dataVisualizer.dataGrid.rowCollapse', {
                     defaultMessage: 'Hide details for {fieldName}',
@@ -188,8 +202,25 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                     values: { fieldName: displayName },
                   })
             }
-            iconType={direction}
-          />
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              data-test-subj={`dataVisualizerDetailsToggle-${item.fieldName}-${direction}`}
+              onClick={() => toggleDetails(item)}
+              aria-label={
+                expandedRowItemIds.includes(item.fieldName)
+                  ? i18n.translate('xpack.dataVisualizer.dataGrid.rowCollapse', {
+                      defaultMessage: 'Hide details for {fieldName}',
+                      values: { fieldName: displayName },
+                    })
+                  : i18n.translate('xpack.dataVisualizer.dataGrid.rowExpand', {
+                      defaultMessage: 'Show details for {fieldName}',
+                      values: { fieldName: displayName },
+                    })
+              }
+              iconType={direction}
+            />
+          </EuiToolTip>
         );
       },
       'data-test-subj': 'dataVisualizerTableColumnDetailsToggle',
@@ -298,7 +329,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
             {i18n.translate('xpack.dataVisualizer.dataGrid.distributionsColumnName', {
               defaultMessage: 'Distributions',
             })}
-            {
+            {isInteractive && (
               <EuiToolTip
                 content={
                   !showDistributions
@@ -327,7 +358,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
                   }
                 />
               </EuiToolTip>
-            }
+            )}
           </div>
         ),
         render: (item: DataVisualizerTableItem) => {
@@ -498,11 +529,7 @@ const UnmemoizedDataVisualizerTable = <T extends DataVisualizerTableItem>({
   return (
     <EuiResizeObserver onResize={resizeHandler}>
       {(resizeRef) => (
-        <div
-          data-test-subj="dataVisualizerTableContainer"
-          ref={resizeRef}
-          data-shared-item="" // TODO: Remove data-shared-item as part of https://github.com/elastic/kibana/issues/179376
-        >
+        <div data-test-subj="dataVisualizerTableContainer" ref={resizeRef}>
           <EuiInMemoryTable<T>
             noItemsMessage={message}
             css={dvTableCss}

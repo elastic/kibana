@@ -94,7 +94,7 @@ export const createMockedIndexPattern = (
     hasRestrictions: false,
     fields,
     getFieldByName: getFieldByNameFactory(fields),
-    getFormatterForField: () => ({ convert: (v: unknown) => v }),
+    getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
     isPersisted: true,
     spec: {},
     ...someProps,
@@ -129,7 +129,7 @@ export const createMockedRestrictedIndexPattern = () => {
     fieldFormatMap: { bytes: { id: 'bytes', params: { pattern: '0.0' } } },
     fields,
     getFieldByName: getFieldByNameFactory(fields),
-    getFormatterForField: () => ({ convert: (v: unknown) => v }),
+    getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
     isPersisted: true,
     spec: {},
     typeMeta: {
@@ -190,7 +190,7 @@ export const createMockedIndexPatternWithoutType = (
     ...otherIndexPatternProps,
     fields: filteredFields,
     getFieldByName: getFieldByNameFactory(filteredFields),
-    getFormatterForField: () => ({ convert: (v: unknown) => v }),
+    getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
   };
 };
 
@@ -203,6 +203,6 @@ export const createMockedIndexPatternWithAdditionalFields = (
     ...otherIndexPatternProps,
     fields: completeFields,
     getFieldByName: getFieldByNameFactory(completeFields),
-    getFormatterForField: () => ({ convert: (v: unknown) => v }),
+    getFormatterForField: () => ({ convertToText: (v: unknown) => v }),
   };
 };

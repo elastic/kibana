@@ -25,6 +25,21 @@ export interface DataViewPickerProps {
    */
   trigger: ChangeDataViewTriggerProps;
   /**
+   * When false, renders the trigger at standard (non-compressed) height.
+   * Defaults to true to preserve the default compact toolbar appearance.
+   */
+  compressed?: boolean;
+  /**
+   * Whether to prepend the data view type label to the trigger.
+   * Defaults to true.
+   */
+  showDataViewLabel?: boolean;
+  /**
+   * Whether to render the dropdown icon outside the trigger.
+   * Defaults to true.
+   */
+  showDropdownIcon?: boolean;
+  /**
    * Flag that should be enabled when the current dataview is missing.
    */
   isMissingCurrent?: boolean;
@@ -95,6 +110,9 @@ export const DataViewPicker = ({
   onCreateDefaultAdHocDataView,
   isDisabled,
   getDataViewHelpText,
+  compressed = true,
+  showDataViewLabel = true,
+  showDropdownIcon = true,
 }: DataViewPickerProps) => {
   return (
     <ChangeDataView
@@ -112,6 +130,9 @@ export const DataViewPicker = ({
       selectableProps={selectableProps}
       isDisabled={isDisabled}
       getDataViewHelpText={getDataViewHelpText}
+      compressed={compressed}
+      showDataViewLabel={showDataViewLabel}
+      showDropdownIcon={showDropdownIcon}
     />
   );
 };

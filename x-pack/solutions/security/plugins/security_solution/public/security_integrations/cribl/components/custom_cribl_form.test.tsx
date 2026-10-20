@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { NewPackagePolicy, PackageInfo, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { render, waitFor, within } from '@testing-library/react';
+import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { TestProviders } from '../../../common/mock';
@@ -83,6 +83,49 @@ describe('<CustomCriblForm />', () => {
         vars: {
           route_entries: {
             value: '[{"dataId":"myDataId","datastream":"logs-destination1.cloud"}]',
+          },
+        },
+      },
+    });
+  });
+
+  it('rejects invalid dataId input without rewriting it', async () => {
+    (getFleetManagedIndexTemplates as jest.Mock).mockReturnValue({
+      indexTemplates: datastreamOpts,
+      permissionsError: false,
+      generalError: false,
+    });
+
+    const { getByLabelText, getByTestId } = render(
+      <WrappedComponent newPolicy={mockPackagePolicy} />
+    );
+    const dataId = getByLabelText('Cribl _dataId field');
+
+    await waitFor(() => {
+      expect(dataId).toBeInTheDocument();
+    });
+
+    const invalidDataId = `evil' || true || '`;
+    fireEvent.change(dataId, { target: { value: invalidDataId } });
+
+    const datastreamComboBox = getByTestId('comboBoxSearchInput');
+    await userEvent.type(datastreamComboBox, datastreamOpts[0]);
+
+    const datastreamComboBoxOpts = getByTestId('comboBoxOptionsList');
+    await waitFor(() => {
+      expect(datastreamComboBoxOpts).toBeInTheDocument();
+    });
+
+    const ourOption = within(datastreamComboBoxOpts).getByRole('option');
+    ourOption.click();
+
+    expect(onChange).toHaveBeenLastCalledWith({
+      isValid: false,
+      updatedPolicy: {
+        ...mockPackagePolicy,
+        vars: {
+          route_entries: {
+            value: `[{"dataId":"${invalidDataId}","datastream":"logs-destination1.cloud"}]`,
           },
         },
       },

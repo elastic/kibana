@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiPageHeaderContentProps } from '@elastic/eui';
+import type { AppHeaderTab } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { TopNComparisonFunctionSortField } from '@kbn/profiling-utils';
@@ -32,8 +32,9 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
 
   const isDifferentialView = routePath === '/functions/differential';
 
-  const tabs: Required<EuiPageHeaderContentProps>['tabs'] = [
+  const tabs: AppHeaderTab[] = [
     {
+      id: 'topn-functions',
       label: i18n.translate('xpack.profiling.functionsView.functionsTabLabel', {
         defaultMessage: 'TopN functions',
       }),
@@ -41,6 +42,7 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
       href: profilingRouter.link('/functions/topn', { query }),
     },
     {
+      id: 'differential-topn-functions',
       label: i18n.translate('xpack.profiling.functionsView.differentialFunctionsTabLabel', {
         defaultMessage: 'Differential TopN functions',
       }),
@@ -67,6 +69,7 @@ export function FunctionsView({ children }: { children: React.ReactElement }) {
   return (
     <ProfilingAppPageTemplate
       tabs={tabs}
+      showSchemaSelector
       customSearchBar={isDifferentialView ? <DifferentialTopNSearchPanel /> : undefined}
       pageTitle={i18n.translate('xpack.profiling.functionsView.pageTitle', {
         defaultMessage: 'Functions',

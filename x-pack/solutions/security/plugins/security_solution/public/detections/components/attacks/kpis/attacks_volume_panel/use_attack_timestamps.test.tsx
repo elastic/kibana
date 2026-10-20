@@ -8,17 +8,28 @@
 import { renderHook } from '@testing-library/react';
 import { useAttackTimestamps } from './use_attack_timestamps';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
+import { fetchQueryAttacks } from '../../../../containers/detection_engine/alerts/api';
+import { useGlobalTime } from '../../../../../common/containers/use_global_time';
+import { useInspectButton } from '../../../alerts_kpis/common/hooks';
 
 jest.mock('../../../../containers/detection_engine/alerts/use_query', () => ({
   useQueryAlerts: jest.fn(),
 }));
+jest.mock('../../../../../common/containers/use_global_time');
+jest.mock('../../../alerts_kpis/common/hooks');
 
 describe('useAttackTimestamps', () => {
   const mockSetQuery = jest.fn();
+  const mockDeleteQuery = jest.fn();
+  const mockSetGlobalQuery = jest.fn();
   const mockRefetch = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
+    (useGlobalTime as jest.Mock).mockReturnValue({
+      deleteQuery: mockDeleteQuery,
+      setQuery: mockSetGlobalQuery,
+    });
   });
 
   it('skips query when no attack IDs provided', () => {
@@ -26,6 +37,8 @@ describe('useAttackTimestamps', () => {
       data: undefined,
       loading: false,
       refetch: mockRefetch,
+      request: 'request',
+      response: 'response',
       setQuery: mockSetQuery,
     });
 
@@ -64,6 +77,7 @@ describe('useAttackTimestamps', () => {
     });
     expect(useQueryAlerts).toHaveBeenCalledWith(
       expect.objectContaining({
+        fetchMethod: fetchQueryAttacks,
         skip: false,
         query: expect.objectContaining({
           query: { ids: { values: ['attack-1', 'attack-2'] } },
@@ -77,11 +91,35 @@ describe('useAttackTimestamps', () => {
       data: undefined,
       loading: false,
       refetch: mockRefetch,
+      request: 'request',
+      response: 'response',
       setQuery: mockSetQuery,
     });
 
     renderHook(() => useAttackTimestamps({ attackIds: ['attack-1'] }));
 
     expect(mockSetQuery).toHaveBeenCalled();
+  });
+
+  it('uses fetchQueryAttacks', () => {
+    renderHook(() => useAttackTimestamps({ attackIds: ['attack-1'] }));
+
+    expect(useQueryAlerts).toHaveBeenCalledWith(
+      expect.objectContaining({
+        fetchMethod: fetchQueryAttacks,
+      })
+    );
+  });
+
+  it('registers the query for global refetch after mutations', () => {
+    renderHook(() => useAttackTimestamps({ attackIds: ['attack-1'] }));
+
+    expect(useInspectButton).toHaveBeenCalledWith(
+      expect.objectContaining({
+        deleteQuery: mockDeleteQuery,
+        setQuery: mockSetGlobalQuery,
+        uniqueQueryId: 'attacks-kpi-attack-timestamps',
+      })
+    );
   });
 });

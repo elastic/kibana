@@ -27,10 +27,13 @@ import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_ent
 
 jest.mock('@kbn/entity-store/public', () => {
   const actual = jest.requireActual('@kbn/entity-store/public');
-  const { euid } = jest.requireActual('@kbn/entity-store/common/euid_helpers');
+  const { euid, getBuiltInEntityDefinition } = jest.requireActual(
+    '@kbn/entity-store/common/euid_helpers'
+  );
+  const euidApi = { euid, getBuiltInEntityDefinition };
   return {
     ...actual,
-    useEntityStoreEuidApi: jest.fn(() => ({ euid })),
+    useEntityStoreEuidApi: jest.fn(() => euidApi),
   };
 });
 
@@ -48,8 +51,8 @@ jest.mock('react-router-dom', () => {
 jest.mock('../../../../resolver/view/use_resolver_query_params_cleaner');
 
 const mockDispatch = jest.fn();
-jest.mock('react-redux', () => {
-  const original = jest.requireActual('react-redux');
+jest.mock('react-redux-v7', () => {
+  const original = jest.requireActual('react-redux-v7');
 
   return {
     ...original,
@@ -79,12 +82,6 @@ const mockUseMlUserPermissions = useMlCapabilities as jest.Mock;
 const mockUseHasSecurityCapability = jest.fn().mockReturnValue(false);
 jest.mock('../../../../helper_hooks', () => ({
   useHasSecurityCapability: () => mockUseHasSecurityCapability(),
-}));
-
-jest.mock('../../../../sourcerer/containers', () => ({
-  useSourcererDataView: jest
-    .fn()
-    .mockReturnValue({ selectedPatterns: ['index'], sourcererDataView: {} }),
 }));
 
 jest.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => ({
@@ -255,6 +252,25 @@ describe('<EntitiesDetails />', () => {
       refetch: jest.fn(),
     });
     const { queryByText, getByTestId } = renderEntitiesDetails(mockContextValue);
+    expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
+    expect(getByTestId(USER_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(HOST_TEST_ID)).toBeInTheDocument();
+  });
+
+  it('renders host panel from document fields when EUID host identifiers are unavailable (mirrors the user fallback)', () => {
+    // dataAsNestedObject is what EUID identifier extraction reads from. Emptying `host` here
+    // means getEntityIdentifiersFromDocument(getBuiltInEntityDefinition('host'), ...) returns
+    // nothing, even though the fields API (getFieldsData, via mockGetFieldsData) still resolves
+    // host.name. This reproduces the flyout_v2 Entities tool bug where the host was dropped
+    // because its visibility gate incorrectly required EUID identifiers while the user gate did not.
+    const contextValue = {
+      ...mockContextValue,
+      dataAsNestedObject: {
+        ...mockContextValue.dataAsNestedObject,
+        host: {},
+      },
+    } as DocumentDetailsContext;
+    const { queryByText, getByTestId } = renderEntitiesDetails(contextValue);
     expect(queryByText(NO_DATA_MESSAGE)).not.toBeInTheDocument();
     expect(getByTestId(USER_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(HOST_TEST_ID)).toBeInTheDocument();

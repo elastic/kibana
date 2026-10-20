@@ -119,6 +119,51 @@ describe('FormattedRelativeEnhanced', () => {
     });
   });
 
+  describe('month boundary fix', () => {
+    it('uses days when selectUnit returns month but diff is less than 7 days', () => {
+      // Simulate: selectUnit returns month=-1 (because calendar month rolled over)
+      // but the actual difference is only 5 days
+      mockSelectUnit.mockReturnValue({ value: -1, unit: 'month' });
+
+      // Set current time to Jul 1, 2026 — matches the reported bug scenario
+      jest.setSystemTime(new Date('2026-07-01T12:00:00Z'));
+
+      // The date is Jun 26, 2026 (~5 days ago, crosses month boundary)
+      renderWithI18n(<FormattedRelativeEnhanced value={new Date('2026-06-26T12:00:00Z')} />);
+
+      // Should render days ago instead of "1 month ago"
+      expect(screen.queryByText('1 month ago')).not.toBeInTheDocument();
+      expect(screen.getByText('5 days ago')).toBeInTheDocument();
+    });
+
+    it('uses weeks when selectUnit returns month but diff is between 7 and 28 days', () => {
+      mockSelectUnit.mockReturnValue({ value: -1, unit: 'month' });
+
+      // Set current time to Jul 1, 2026
+      jest.setSystemTime(new Date('2026-07-01T12:00:00Z'));
+
+      // The date is Jun 15, 2026 (~16 days ago, crosses month boundary)
+      renderWithI18n(<FormattedRelativeEnhanced value={new Date('2026-06-15T12:00:00Z')} />);
+
+      // Should render weeks ago instead of "1 month ago"
+      expect(screen.queryByText('1 month ago')).not.toBeInTheDocument();
+      expect(screen.getByText('2 weeks ago')).toBeInTheDocument();
+    });
+
+    it('allows month unit when diff is 28 days or more', () => {
+      mockSelectUnit.mockReturnValue({ value: -2, unit: 'month' });
+
+      // Set current time to Jul 1, 2026
+      jest.setSystemTime(new Date('2026-07-01T12:00:00Z'));
+
+      // The date is May 1, 2026 (~61 days ago, well past 28)
+      renderWithI18n(<FormattedRelativeEnhanced value={new Date('2026-05-01T12:00:00Z')} />);
+
+      // Should keep the month unit
+      expect(screen.getByText('2 months ago')).toBeInTheDocument();
+    });
+  });
+
   describe('fullDateTooltip', () => {
     it('does not render tooltip when fullDateTooltip is false', () => {
       mockSelectUnit.mockReturnValue({ value: -5, unit: 'minute' });

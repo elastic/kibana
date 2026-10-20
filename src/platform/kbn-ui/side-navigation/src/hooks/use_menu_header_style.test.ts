@@ -13,6 +13,7 @@ import { useMenuHeaderStyle } from './use_menu_header_style';
 
 jest.mock('@elastic/eui', () => ({
   useEuiTheme: jest.fn(),
+  useEuiFontSize: jest.fn(() => ({ fontSize: '14px', lineHeight: '20px' })),
 }));
 
 const { useEuiTheme } = jest.requireMock('@elastic/eui');
@@ -22,6 +23,7 @@ const baseTheme = {
     width: { thin: '1px' },
   },
   size: { base: '16px', xs: '8px' },
+  levels: { content: 0 },
   colors: {},
 };
 

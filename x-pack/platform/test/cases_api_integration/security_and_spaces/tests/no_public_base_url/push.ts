@@ -10,13 +10,13 @@ import type { RecordingServiceNowSimulator } from '../../../../alerting_api_inte
 import { ObjectRemover as ActionsRemover } from '../../../../alerting_api_integration/common/lib';
 import { arraysToEqual } from '../../../common/lib/validation';
 import {
-  postCommentUserReq,
-  postCommentAlertReq,
-  postCommentAlertMultipleIdsReq,
-  postCommentActionsReq,
-  postCommentActionsReleaseReq,
-  postExternalReferenceESReq,
-  persistableStateAttachment,
+  postUnifiedCommentReq,
+  postUnifiedAlertReq,
+  postUnifiedAlertMultipleIdsReq,
+  postUnifiedActionsReq,
+  postUnifiedActionsReleaseReq,
+  postUnifiedIndicatorReq,
+  postUnifiedLensReq,
 } from '../../../common/lib/mock';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
 
@@ -89,13 +89,13 @@ export default ({ getService }: FtrProviderContext): void => {
           supertest,
           caseId: postedCase.id,
           params: [
-            postCommentUserReq,
-            postCommentAlertReq,
-            postCommentAlertMultipleIdsReq,
-            postCommentActionsReq,
-            postCommentActionsReleaseReq,
-            postExternalReferenceESReq,
-            persistableStateAttachment,
+            postUnifiedCommentReq,
+            postUnifiedAlertReq,
+            postUnifiedAlertMultipleIdsReq,
+            postUnifiedActionsReq,
+            postUnifiedActionsReleaseReq,
+            postUnifiedIndicatorReq,
+            postUnifiedLensReq,
           ],
         });
 
@@ -117,18 +117,15 @@ export default ({ getService }: FtrProviderContext): void => {
         const allWorkNotes: string[] = allCommentRequests.map((request) => request.work_notes);
         const expectedNotes = [
           'This is a cool comment\n\nAdded by elastic.',
-          'Isolated host host-name with comment: comment text\n\nAdded by elastic.',
-          'Released host host-name with comment: comment text\n\nAdded by elastic.',
-          'Elastic Alerts attached to the case: 3',
+          'Elastic Alerts attached to the case: 3 added (3 total)',
         ];
 
         /**
          * For each of these comments a request is made:
-         * postCommentUserReq, postCommentActionsReq, postCommentActionsReleaseReq, and a comment with the
-         * total alerts attach to a case. All other type of comments should be filtered. Specifically,
-         * postCommentAlertReq, postCommentAlertMultipleIdsReq, postExternalReferenceESReq, and persistableStateAttachment
+         * postCommentUserReq and a comment with the total alerts attached to a case.
+         * All other type of comments should be filtered.
          */
-        expect(allCommentRequests.length).be(4);
+        expect(allCommentRequests.length).be(2);
 
         // since we're using a bulk create we can't guarantee the ordering so we'll check that the values exist but not
         // there specific order in the results

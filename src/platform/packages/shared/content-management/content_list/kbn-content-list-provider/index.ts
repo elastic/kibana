@@ -60,6 +60,7 @@ export {
   CREATED_BY_FILTER_ID,
   DEFAULT_SORT_FIELDS,
   DEFAULT_INITIAL_SORT,
+  getSortFieldDirections,
   DeleteConfirmationModal,
   DeleteConfirmationComponent,
   useDeleteConfirmation,
@@ -91,6 +92,8 @@ export type {
   FilterFacetConfig,
   SortField,
   SortOption,
+  SortState,
+  SortDirection,
   SortingConfig,
   UseContentListSortReturn,
   PaginationConfig,
@@ -123,7 +126,12 @@ export type {
   FieldDefinition,
   FlagDefinition,
 } from './src/query_model';
-export { EMPTY_MODEL, toFindItemsFilters, useQueryModel } from './src/query_model';
+export {
+  EMPTY_MODEL,
+  toFindItemsFilters,
+  useActiveFilters,
+  useQueryModel,
+} from './src/query_model';
 
 // Services.
 export {

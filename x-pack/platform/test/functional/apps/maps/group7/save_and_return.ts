@@ -8,6 +8,11 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Purpose: Create maps from dashboard smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { dashboard, header, maps, timePicker } = getPageObjects([
     'dashboard',
@@ -19,6 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dashboardPanelActions = getService('dashboardPanelActions');
   const testSubjects = getService('testSubjects');
   const security = getService('security');
+  const retry = getService('retry');
 
   describe('save and return work flow', () => {
     before(async () => {
@@ -64,7 +70,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           );
           await maps.waitForLayersToLoad();
           await testSubjects.missingOrFail('mapSaveAndReturnButton');
-          await testSubjects.existOrFail('mapSaveButton');
+          await maps.expectSaveButtonExists();
         });
       });
     });
@@ -100,7 +106,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await maps.expectMissingSaveAndReturnButton();
 
           // return to origin should not be present in save modal
-          await testSubjects.click('mapSaveButton');
+          await maps.clickSaveButton();
           const redirectToOriginCheckboxExists = await testSubjects.exists(
             'returnToOriginModeSwitch'
           );
@@ -111,7 +117,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('save as', () => {
         it('should return to dashboard and add new panel', async () => {
           await maps.saveMap('Clone of map embeddable example');
-          await header.waitUntilLoadingHasFinished();
+          await dashboard.waitForRenderComplete();
+          await retry.waitForWithTimeout(
+            'new map panel to appear on dashboard',
+            10000,
+            async () => (await dashboard.getPanelCount()) === 3
+          );
           const panelCount = await dashboard.getPanelCount();
           expect(panelCount).to.equal(3);
         });
@@ -122,7 +133,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           await maps.saveMap('Clone 2 of map embeddable example', false);
           await maps.waitForLayersToLoad();
           await testSubjects.missingOrFail('mapSaveAndReturnButton');
-          await testSubjects.existOrFail('mapSaveButton');
+          await maps.expectSaveButtonExists();
         });
       });
     });

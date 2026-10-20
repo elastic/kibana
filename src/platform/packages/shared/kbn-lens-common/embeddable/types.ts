@@ -40,6 +40,7 @@ import type {
   BrushTriggerEvent,
   ClickTriggerEvent,
   MultiClickTriggerEvent,
+  AnnotationClickTriggerEvent,
 } from '@kbn/charts-plugin/public';
 import type { PaletteOutput } from '@kbn/coloring';
 import type { ESQLControlVariable } from '@kbn/esql-types';
@@ -187,6 +188,9 @@ export interface LensPublicCallbacks extends LensApiProps {
   onFilter?: (
     data: Simplify<(ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) & PreventableEvent>
   ) => void;
+  onAnnotationClick?: (
+    data: Simplify<AnnotationClickTriggerEvent['data'] & PreventableEvent>
+  ) => void;
   onTableRowClick?: (
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
@@ -235,6 +239,7 @@ export interface LensSharedProps {
   viewMode?: ViewMode;
   forceDSL?: boolean;
   esqlVariables?: ESQLControlVariable[];
+  isApproximate?: boolean;
 }
 
 export interface LensRequestHandlersProps {
@@ -295,17 +300,17 @@ export type LensComponentProps = Simplify<
        */
       disabledActions?: string[];
       /**
-       * Toggles the inspector
-       */
-      showInspector?: boolean;
-      /**
        * Toggle inline editing feature
        */
       canEditInline?: boolean;
       /**
-       * Optional search term to highlight in the panel title
+       * Optional search terms to highlight in the panel title
        */
-      titleHighlight?: string;
+      titleHighlight?: string | string[];
+      /**
+       * Callback invoked with the Lens embeddable API once it is available
+       */
+      onApiAvailable?: (api: unknown) => void;
     }
 >;
 
@@ -335,6 +340,7 @@ type LensRendererPrivateProps = ComponentSerializedProps & ComponentProps;
 export type LensRendererProps = Omit<LensRendererPrivateProps, 'hide_title' | 'time_range'> & {
   hidePanelTitles?: boolean;
   timeRange?: TimeRange;
+  parentApi?: unknown;
 };
 
 /**
@@ -378,7 +384,7 @@ export type LensInternalApi = Simplify<
       esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
       attributes$: PublishingSubject<LensRuntimeState['attributes']>;
       overrides$: PublishingSubject<LensOverrides['overrides']>;
-      disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;
+      disableTriggers$: PublishingSubject<boolean>;
       dataLoading$: PublishingSubject<boolean | undefined>;
       hasRenderCompleted$: PublishingSubject<boolean>;
       isNewlyCreated$: PublishingSubject<boolean>;
@@ -389,18 +395,16 @@ export type LensInternalApi = Simplify<
       updateDataLoading: (newDataLoading: boolean | undefined) => void;
       expressionParams$: PublishingSubject<ExpressionWrapperProps | null>;
       updateExpressionParams: (newParams: ExpressionWrapperProps | null) => void;
-      expressionAbortController$: PublishingSubject<AbortController | undefined>;
-      updateAbortController: (newAbortController: AbortController | undefined) => void;
+      expressionAbortController$: PublishingSubject<AbortController>;
+      updateAbortController: (newAbortController: AbortController) => void;
       renderCount$: PublishingSubject<number>;
       updateDataViews: (dataViews: DataView[] | undefined) => void;
-      updateDisabledTriggers: (disableTriggers: LensPanelProps['disableTriggers']) => void;
       messages$: PublishingSubject<UserMessage[]>;
       updateMessages: (newMessages: UserMessage[]) => void;
       validationMessages$: PublishingSubject<UserMessage[]>;
       updateValidationMessages: (newMessages: UserMessage[]) => void;
       blockingError$: PublishingSubject<Error | undefined>;
       updateBlockingError: (newBlockingError: Error | undefined) => void;
-      resetAllMessages: () => void;
       getDisplayOptions: () => VisualizationDisplayOptions;
       updateEditingState: (inProgress: boolean) => void;
       isEditingInProgress: () => boolean;
@@ -415,10 +419,7 @@ export interface ExpressionWrapperProps {
   searchContext: ExecutionContextSearch;
   searchSessionId?: string;
   handleEvent: (event: ExpressionRendererEvent) => void;
-  onData$: (
-    data: unknown,
-    inspectorAdapters?: Partial<DefaultInspectorAdapters> | undefined
-  ) => void;
+  onData$: ReactExpressionRendererProps['onData$'];
   onRender$: (count: number) => void;
   renderMode?: RenderMode;
   syncColors?: boolean;

@@ -76,7 +76,7 @@ describe('callout', () => {
       </TestProviders>
     );
     wrapper.find('button[data-test-subj="callout-dismiss-btn"]').first().simulate('click');
-    expect(onDismiss).toBeCalledWith(message);
+    expect(onDismiss).toHaveBeenCalledWith(message);
   });
 
   test('dismissButtonText can be set', () => {
@@ -96,9 +96,7 @@ describe('callout', () => {
         <CallOut message={message} />
       </TestProviders>
     );
-    expect(wrapper.find('[data-test-subj="callout-some-id"]').first().prop('iconType')).toEqual(
-      'info'
-    );
+    expect(wrapper.find('EuiNotificationIcon').first().prop('type')).toEqual('info');
   });
 
   test('icon type can be changed from the type within the message', () => {

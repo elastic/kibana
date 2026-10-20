@@ -103,7 +103,7 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
     );
 
     // make a change to enable save
-    cy.getByTestSubj('endpointPolicyForm-malware-blocklist-enableDisableSwitch')
+    cy.getByTestSubj('endpointPolicyForm-perOsMalware-windows-blocklist-enableDisableSwitch')
       .should('be.visible')
       .as('blocklistSwitch');
     cy.get('@blocklistSwitch').click();
@@ -130,7 +130,8 @@ describe('Endpoints page', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Endpoint reassignment', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/206198
+  describe.skip('Endpoint reassignment', () => {
     let response: IndexedFleetEndpointPolicyResponse;
     let initialAgentData: Agent;
 

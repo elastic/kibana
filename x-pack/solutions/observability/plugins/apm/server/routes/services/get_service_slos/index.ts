@@ -5,30 +5,14 @@
  * 2.0.
  */
 
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import type { ServiceSlosResponse, StatusCounts } from '@kbn/apm-api-shared';
+import { ALL_VALUE, SLO_GROUPINGS_PREFIX } from '@kbn/slo-schema';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { ApmSloClient } from '../../../lib/helpers/get_apm_slo_client';
 import type { SloAlertsClient } from '../../../lib/helpers/get_slo_alerts_client';
 import { APM_SLO_INDICATOR_TYPES } from '../../../../common/slo_indicator_types';
 import { SERVICE_NAME, SERVICE_ENVIRONMENT } from '../../../../common/es_fields/apm';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
-
-export interface StatusCounts {
-  violated: number;
-  degrading: number;
-  healthy: number;
-  noData: number;
-}
-
-export interface ServiceSlosResponse {
-  results: SLOWithSummaryResponse[];
-  total: number;
-  page: number;
-  perPage: number;
-  activeAlerts: Record<string, number>;
-  statusCounts: StatusCounts;
-}
 
 export async function getServiceSlos({
   sloClient,
@@ -68,7 +52,15 @@ export async function getServiceSlos({
   }
 
   const filters: Array<Record<string, unknown>> = [
-    { term: { [SERVICE_NAME]: serviceName } },
+    {
+      bool: {
+        should: [
+          { term: { [SERVICE_NAME]: serviceName } },
+          { term: { [`${SLO_GROUPINGS_PREFIX}${SERVICE_NAME}`]: serviceName } },
+        ],
+        minimum_should_match: 1,
+      },
+    },
     {
       terms: {
         'slo.indicator.type': APM_SLO_INDICATOR_TYPES,

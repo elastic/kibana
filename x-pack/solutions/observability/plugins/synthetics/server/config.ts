@@ -25,22 +25,17 @@ const uptimeConfig = schema.object({
   index: schema.maybe(schema.string()),
   service: schema.maybe(serviceConfig),
   enabled: schema.boolean({ defaultValue: true }),
-  experimental: schema.maybe(
-    schema.object({
-      ccs: schema.object({
-        enabled: schema.boolean({ defaultValue: false }),
-      }),
-    })
-  ),
 });
 
 export const config: PluginConfigDescriptor = {
   schema: uptimeConfig,
-  exposeToBrowser: {
-    experimental: true,
-  },
+  deprecations: ({ renameFromRoot, unused }) => [
+    // Must run first so the `unused` checks below see the renamed keys.
+    renameFromRoot('xpack.uptime', 'xpack.synthetics', { level: 'warning' }),
+    unused('experimental.ccs.enabled', { level: 'warning' }),
+    unused('rebalancePrivateLocationShardsTaskEnabled', { level: 'warning' }),
+  ],
 };
 
 export type UptimeConfig = TypeOf<typeof uptimeConfig>;
 export type ServiceConfig = TypeOf<typeof serviceConfig>;
-export type ExperimentalFeatures = UptimeConfig['experimental'];

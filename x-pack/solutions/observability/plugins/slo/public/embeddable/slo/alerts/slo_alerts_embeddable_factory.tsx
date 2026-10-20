@@ -10,9 +10,10 @@ import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { FetchContext } from '@kbn/presentation-publishing';
+import type { FetchContext, ViewMode } from '@kbn/presentation-publishing';
 import {
   fetch$,
+  getViewModeSubject,
   initializeStateManager,
   initializeTitleManager,
   titleComparators,
@@ -22,7 +23,7 @@ import {
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { useEffect } from 'react';
 import { BehaviorSubject, Subject, merge } from 'rxjs';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { PluginContext } from '../../../context/plugin_context';
 import type { SLOPublicPluginsStart, SLORepositoryClient } from '../../../types';
 import {
@@ -85,18 +86,14 @@ export function getAlertsEmbeddableFactory({
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getAlertsPanelTitle());
       const reload$ = new Subject<FetchContext>();
 
-      function serializeState(): SloAlertsEmbeddableState {
-        return {
+      const stateApi = initializeStateApi<SloAlertsEmbeddableState>({
+        uuid,
+        parentApi,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           ...drilldownsManager.getLatestState(),
           ...sloAlertsStateManager.getLatestState(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<SloAlertsEmbeddableState>({
-        uuid,
-        parentApi,
-        serializeState,
+        }),
         anyStateChange$: merge(
           drilldownsManager.anyStateChange$,
           titleManager.anyStateChange$,
@@ -107,16 +104,16 @@ export function getAlertsEmbeddableFactory({
           ...drilldownsManager.comparators,
           slos: 'referenceEquality',
         }),
-        onReset: (lastSaved) => {
-          drilldownsManager.reinitializeState(lastSaved ?? {});
-          titleManager.reinitializeState(lastSaved);
-          sloAlertsStateManager.reinitializeState(lastSaved);
+        applySerializedState: (nextState) => {
+          drilldownsManager.reinitializeState(nextState);
+          titleManager.reinitializeState(nextState);
+          sloAlertsStateManager.reinitializeState(nextState);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
+        ...stateApi,
         ...drilldownsManager.api,
         defaultTitle$,
         supportedTriggers: () => SLO_ALERTS_SUPPORTED_TRIGGERS,
@@ -128,7 +125,6 @@ export function getAlertsEmbeddableFactory({
         onEdit: async () => {
           onEdit();
         },
-        serializeState,
         getSloAlertsConfig: () => ({
           slos: sloAlertsStateManager.api.slos$.getValue(),
         }),
@@ -143,10 +139,15 @@ export function getAlertsEmbeddableFactory({
           reload$.next(next);
         });
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       return {
         api,
         Component: () => {
-          const [slos] = useBatchedPublishingSubjects(sloAlertsStateManager.api.slos$);
+          const [slos, viewMode] = useBatchedPublishingSubjects(
+            sloAlertsStateManager.api.slos$,
+            viewMode$
+          );
           const fetchContext = useFetchContext(api);
           const I18nContext = deps.i18n.Context;
 
@@ -182,6 +183,7 @@ export function getAlertsEmbeddableFactory({
                       slos={slos}
                       timeRange={fetchContext.timeRange ?? { from: 'now-15m/m', to: 'now' }}
                       reloadSubject={reload$}
+                      isInteractive={viewMode !== 'non-interactive'}
                     />
                   </QueryClientProvider>
                 </PluginContext.Provider>

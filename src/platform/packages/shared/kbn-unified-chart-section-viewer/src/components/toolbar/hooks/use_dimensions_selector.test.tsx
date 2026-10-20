@@ -16,16 +16,19 @@ import { useDimensionsSelector } from './use_dimensions_selector';
 import type { Dimension, ParsedMetricItem } from '../../../types';
 import { DEBOUNCE_TIME, MAX_DIMENSIONS_SELECTIONS } from '../../../common/constants';
 import type { DimensionEntry } from '../dimensions_selector_helpers';
+import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 
 const wrapper = ({ children }: { children: ReactNode }) => (
-  <IntlProvider locale="en">{children}</IntlProvider>
+  <IntlProvider locale="en">
+    <EventBasedTelemetryProvider>{children}</EventBasedTelemetryProvider>
+  </IntlProvider>
 );
 
 const dim = (name: string, type: string = 'keyword'): Dimension => ({ name, type });
 
 const makeMetric = (metricName: string, dimensionFields: Dimension[]): ParsedMetricItem => ({
   metricName,
-  dataStream: 'metrics-test',
+  indexName: 'metrics-test',
   units: [],
   metricTypes: [],
   fieldTypes: [],
@@ -280,6 +283,33 @@ describe('useDimensionsSelector', () => {
 
       expect(onChange).toHaveBeenCalledTimes(1);
       expect(onChange).toHaveBeenCalledWith([dim('host.name'), dim('service.name')]);
+    });
+
+    it('commits a pending selection when the selector unmounts mid-debounce', () => {
+      const onChange = jest.fn();
+      const { result, unmount } = renderDimensionsHook({
+        dimensions: [dim('host.name'), dim('service.name'), dim('cloud.region')],
+        selectedDimensions: [],
+        onChange,
+        singleSelection: false,
+        isLoading: false,
+      });
+      const hostOption = (result.current.options as DimensionEntry[]).find(
+        (o) => o.value === 'host.name'
+      )!;
+
+      act(() => {
+        result.current.handleChange([{ ...hostOption, checked: 'on' }]);
+      });
+
+      expect(onChange).not.toHaveBeenCalled();
+
+      act(() => {
+        unmount();
+      });
+
+      expect(onChange).toHaveBeenCalledTimes(1);
+      expect(onChange).toHaveBeenCalledWith([dim('host.name')]);
     });
 
     it('caps the emitted selection at MAX_DIMENSIONS_SELECTIONS', () => {

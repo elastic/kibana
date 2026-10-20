@@ -14,7 +14,7 @@ import type { KibanaServerProvider } from './services/kibana_server';
 export { KibanaServerProvider } from './services/kibana_server';
 export type KibanaServer = ProvidedType<typeof KibanaServerProvider>;
 
-export { RetryService, type TryWithRetriesOptions } from './services/retry';
+export { RetryService, type RetryOptions } from './services/retry';
 
 import type { EsArchiverProvider } from './services/es_archiver';
 export type EsArchiver = ProvidedType<typeof EsArchiverProvider>;
@@ -47,3 +47,5 @@ export { RandomnessService } from './services/randomness';
 export { KibanaSupertestProvider, ElasticsearchSupertestProvider } from './services/supertest';
 export { retryForSuccess } from './services/retry/retry_for_success';
 export { SecurityService } from './services/security';
+export { fetchSessionCookie } from './services/cookie_auth';
+export type { SessionCookie, FetchSessionCookieParams } from './services/cookie_auth';

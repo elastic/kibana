@@ -143,7 +143,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await pageObjects.header.waitUntilLoadingHasFinished();
       await testSubjects.setValue('ruleSearchField', ruleName);
       const rulesList = await testSubjects.find('rulesList');
-      const alertRule = await rulesList.findByCssSelector(`[title="${ruleName}"]`);
+      const alertRule = await rulesList.findByCssSelector(
+        `[data-test-subj="rulesListTableRowName-${ruleName}"]`
+      );
       await alertRule.click();
       await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot(

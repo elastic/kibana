@@ -13,9 +13,14 @@ import { createCommonUpdateUserActionBuilder } from './common';
 import * as i18n from './translations';
 
 const getLabelTitle = (userAction: SnakeToCamelCase<TemplateUserAction>): React.ReactNode => {
-  return userAction.payload.template != null
-    ? i18n.APPLIED_TEMPLATE_LABEL
-    : i18n.REMOVED_TEMPLATE_LABEL;
+  const { template } = userAction.payload;
+  if (template == null) {
+    return i18n.REMOVED_TEMPLATE_LABEL;
+  }
+  // Older user actions may not carry the template name; fall back to the generic label.
+  return template.name
+    ? i18n.APPLIED_NAMED_TEMPLATE_LABEL(template.name)
+    : i18n.APPLIED_TEMPLATE_LABEL;
 };
 
 export const createTemplateUserActionBuilder: UserActionBuilder = ({

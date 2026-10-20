@@ -8,4 +8,5 @@
  */
 
 export { useEsqlQueryInfo } from './use_esql_query_info';
+export { useFeatureFlag } from './use_feature_flag';
 export { useGridNavigation } from './use_grid_navigation';

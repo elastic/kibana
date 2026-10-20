@@ -60,9 +60,13 @@ const migrationSchema = schema.object({
     runOnRoles: schema.arrayOf(schema.string(), { defaultValue: ['migrator'] }),
   }),
   /**
-   * Skip logging migration progress unless there are any errors.
+   * When enabled, migration progress logs are buffered and only emitted if the migration fails,
+   * which reduces log volume during successful startups at the cost of losing visibility while a
+   * migration is stuck or fails via FATAL / timeout (the buffer is only dumped on uncaught
+   * exceptions). Defaults to `false` so migration steps are logged continuously; Serverless
+   * re-enables it via config to keep startup logs quiet across its frequent releases.
    */
-  useCumulativeLogger: schema.boolean({ defaultValue: true }),
+  useCumulativeLogger: schema.boolean({ defaultValue: false }),
   /**
    * List of WIP (work-in-progress) saved object type names that Kibana is explicitly allowed to
    * start with. Kibana will refuse to start if any type listed in `wip_types.json` is registered

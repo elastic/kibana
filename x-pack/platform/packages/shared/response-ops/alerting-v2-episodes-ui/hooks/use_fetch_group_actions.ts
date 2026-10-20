@@ -8,16 +8,28 @@
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { AlertEpisodeGroupAction } from '../types/action';
 import { fetchGroupActions } from '../apis/fetch_group_actions';
+import { QUERY_STALE_TIME } from '../constants';
 import { queryKeys } from '../query_keys';
-import { normalizeTags } from '../utils/normalize_tags';
 import { useSpaceId } from './use_space_id';
 
 export interface UseFetchGroupActionsOptions {
   groupHashes: string[];
   services: { expressions: ExpressionsStart; spaces: SpacesPluginStart };
 }
+
+export const getGroupActionKey = (ruleId: string | null | undefined, groupHash: string) =>
+  `${ruleId ?? ''}:${groupHash}`;
+
+export const getGroupAction = (
+  groupActionsMap: ReadonlyMap<string, AlertEpisodeGroupAction> | undefined,
+  ruleId: string | null | undefined,
+  groupHash: string
+) =>
+  groupActionsMap?.get(getGroupActionKey(ruleId, groupHash)) ??
+  groupActionsMap?.get(getGroupActionKey(null, groupHash));
 
 export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupActionsOptions) => {
   const { expressions } = services;
@@ -28,15 +40,16 @@ export const useFetchGroupActions = ({ groupHashes, services }: UseFetchGroupAct
       fetchGroupActions({ spaceId, groupHashes, abortSignal: signal, expressions }),
     enabled: groupHashes.length > 0,
     keepPreviousData: true,
+    staleTime: QUERY_STALE_TIME,
     select: (rows) => {
       const map = new Map<string, AlertEpisodeGroupAction>();
       for (const row of rows) {
-        map.set(row.group_hash, {
+        map.set(getGroupActionKey(row.rule_id, row.group_hash), {
           groupHash: row.group_hash,
           ruleId: row.rule_id ?? null,
           lastDeactivateAction: row.last_deactivate_action ?? null,
           lastSnoozeAction: row.last_snooze_action ?? null,
-          snoozeExpiry: row.snooze_expiry ?? null,
+          snoozedUntil: row.snoozed_until ?? null,
           tags: normalizeTags(row.tags),
           lastSnoozeActor: row.last_snooze_actor ?? null,
           lastDeactivateActor: row.last_deactivate_actor ?? null,

@@ -11,7 +11,7 @@ import { getTargetEuidEsqlEvaluation, getTargetEuidSourceFields } from './target
 describe('getTargetEuidEsqlEvaluation', () => {
   describe('user type', () => {
     it('generates ESQL referencing target-namespace fields', () => {
-      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.user);
+      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.user, '_target_user_euid');
 
       expect(esql).toContain('user.target.email');
       expect(esql).toContain('user.target.id');
@@ -21,13 +21,13 @@ describe('getTargetEuidEsqlEvaluation', () => {
     });
 
     it('prepends the entity type by default', () => {
-      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.user);
+      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.user, '_target_user_euid');
 
       expect(esql).toContain('CONCAT("user:"');
     });
 
     it('preserves entity.namespace references (computed field, not transformed)', () => {
-      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.user);
+      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.user, '_target_user_euid');
 
       expect(esql).toContain('entity.namespace');
       // entity.namespace should NOT be transformed to entity.target.namespace
@@ -35,7 +35,7 @@ describe('getTargetEuidEsqlEvaluation', () => {
     });
 
     it('does not reference actor-namespace user fields', () => {
-      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.user);
+      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.user, '_target_user_euid');
 
       // Check that un-namespaced actor fields are not present by verifying
       // the specific patterns. We need to be careful because "user.target.email"
@@ -47,11 +47,27 @@ describe('getTargetEuidEsqlEvaluation', () => {
       expect(withoutTargetRefs).not.toContain('user.name');
       expect(withoutTargetRefs).not.toContain('user.domain');
     });
+
+    it('rewrites user.entity.id to the target field and keeps the cloud.provider routing', () => {
+      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.user, '_target_user_euid');
+
+      expect(esql).toContain('user.target.entity.id');
+      expect(esql).not.toContain('cloud.target.provider');
+
+      const awsBranchCondition = esql
+        .split('\n')
+        .find((line) => line.includes('_euid_branch_1_cond ='));
+      expect(awsBranchCondition).toContain('cloud.provider');
+      expect(awsBranchCondition).toContain('"aws"');
+
+      const withoutTargetRefs = esql.replace(/user\.target\./g, 'USER_TARGET_REPLACED.');
+      expect(withoutTargetRefs).not.toContain('user.entity.id');
+    });
   });
 
   describe('host type', () => {
     it('generates ESQL referencing target-namespace fields', () => {
-      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.host);
+      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.host, '_target_host_euid');
 
       expect(esql).toContain('host.target.id');
       expect(esql).toContain('host.target.name');
@@ -59,7 +75,7 @@ describe('getTargetEuidEsqlEvaluation', () => {
     });
 
     it('prepends the entity type', () => {
-      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.host);
+      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.host, '_target_host_euid');
 
       expect(esql).toContain('CONCAT("host:"');
     });
@@ -67,13 +83,13 @@ describe('getTargetEuidEsqlEvaluation', () => {
 
   describe('service type', () => {
     it('generates ESQL referencing service.target.name', () => {
-      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.service);
+      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.service, '_target_service_euid');
 
       expect(esql).toContain('service.target.name');
     });
 
     it('prepends the entity type', () => {
-      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.service);
+      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.service, '_target_service_euid');
 
       expect(esql).toContain('CONCAT("service:"');
     });
@@ -81,13 +97,13 @@ describe('getTargetEuidEsqlEvaluation', () => {
 
   describe('generic type', () => {
     it('generates ESQL referencing entity.target.id', () => {
-      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.generic);
+      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.generic, '_target_generic_euid');
 
       expect(esql).toContain('entity.target.id');
     });
 
     it('does not prepend entity type (skipTypePrepend)', () => {
-      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.generic);
+      const esql = getTargetEuidEsqlEvaluation(EntityType.enum.generic, '_target_generic_euid');
 
       expect(esql).not.toContain('CONCAT("generic:"');
     });
@@ -117,6 +133,10 @@ describe('getTargetEuidSourceFields', () => {
     expect(fields).not.toContain('user.email');
     expect(fields).not.toContain('user.id');
     expect(fields).not.toContain('user.name');
+  });
+
+  it('includes user.target.entity.id for user', () => {
+    expect(getTargetEuidSourceFields(EntityType.enum.user)).toContain('user.target.entity.id');
   });
 
   it('returns target-namespace singleField for service', () => {

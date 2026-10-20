@@ -6,7 +6,7 @@ $schema: https://moonrepo.dev/schemas/project.json
 id: '@kbn/evals-suite-llm-tasks'
 layer: unknown
 owners:
-  defaultOwner: '@elastic/appex-ai-infra'
+  defaultOwner: '@elastic/search-ml-ux'
 toolchains:
   default: node
 language: typescript
@@ -14,7 +14,7 @@ project:
   title: '@kbn/evals-suite-llm-tasks'
   description: Moon project for @kbn/evals-suite-llm-tasks
   channel: ''
-  owner: '@elastic/appex-ai-infra'
+  owner: '@elastic/search-ml-ux'
   sourceRoot: x-pack/platform/packages/shared/ai-infra/kbn-evals-suite-llm-tasks
 dependsOn:
   - '@kbn/evals'

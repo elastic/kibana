@@ -14,14 +14,21 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 import {
   PackName,
   PackDescriptionOrUndefined,
   ECSMappingArrayOrUndefined,
+  ScheduleTypeOrUndefined,
+  RRuleScheduleConfigOrUndefined,
+  QueryEnabled,
+  ResultType,
   EnabledOrUndefined,
   PolicyIdsOrUndefined,
+  PackIntervalOrUndefined,
+  MinOsqueryVersion,
+  PackPlatform,
 } from '../model/schema/common_attributes.gen';
 
 /**
@@ -33,7 +40,7 @@ export const CopyPacksResponse = lazySchema(() =>
       /**
        * The saved object ID of the copied pack.
        */
-      saved_object_id: z.string(),
+      saved_object_id: z.string().describe('The saved object ID of the copied pack.'),
       name: PackName,
       description: PackDescriptionOrUndefined.optional(),
       /**
@@ -51,18 +58,25 @@ export const CopyPacksResponse = lazySchema(() =>
             removed: z.boolean().optional(),
             timeout: z.number().int().optional(),
             ecs_mapping: ECSMappingArrayOrUndefined.optional(),
+            schedule_type: ScheduleTypeOrUndefined.optional(),
+            rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+            enabled: QueryEnabled.optional(),
+            result_type: ResultType.optional(),
           })
         )
-        .optional(),
+        .optional()
+        .describe(
+          'Pack queries in saved-object storage format (array). Note: the read endpoint returns object format.'
+        ),
       /**
        * The pack version number.
        */
-      version: z.number().int().optional(),
+      version: z.number().int().optional().describe('The pack version number.'),
       enabled: EnabledOrUndefined.optional(),
-      created_at: z.string().datetime().optional(),
+      created_at: isoDateTime().optional(),
       created_by: z.string().nullable().optional(),
       created_by_profile_uid: z.string().optional(),
-      updated_at: z.string().datetime().optional(),
+      updated_at: isoDateTime().optional(),
       updated_by: z.string().nullable().optional(),
       updated_by_profile_uid: z.string().optional(),
       policy_ids: PolicyIdsOrUndefined.optional(),
@@ -76,7 +90,14 @@ export const CopyPacksResponse = lazySchema(() =>
             value: z.number().optional(),
           })
         )
-        .optional(),
+        .optional()
+        .describe('Shard configuration as an array of key-value pairs.'),
+      schedule_type: ScheduleTypeOrUndefined.optional(),
+      interval: PackIntervalOrUndefined.optional(),
+      rrule_schedule: RRuleScheduleConfigOrUndefined.optional(),
+      min_osquery_version: MinOsqueryVersion.optional(),
+      result_type: ResultType.optional(),
+      platform: PackPlatform.optional(),
     }),
   })
 );

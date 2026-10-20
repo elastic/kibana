@@ -9,6 +9,7 @@
 
 export {
   useDataGridInTableSearch,
+  InTableSearchCellContext,
   type UseDataGridInTableSearchProps,
   type UseDataGridInTableSearchReturn,
 } from './src';

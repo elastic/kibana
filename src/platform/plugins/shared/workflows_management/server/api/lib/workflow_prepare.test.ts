@@ -7,14 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { parse, stringify } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 
 import {
   applyFieldUpdates,
   applyYamlUpdate,
   getTriggerTypesFromDefinition,
+  prepareWorkflowDocumentFromYaml,
   workflowYamlDeclaresTopLevelEnabled,
 } from './workflow_prepare';
+import { getWorkflowZodSchema } from '../../../common/schema';
 import type { WorkflowProperties } from '../../storage/workflow_storage';
 
 describe('getTriggerTypesFromDefinition', () => {
@@ -62,7 +65,7 @@ describe('workflowYamlDeclaresTopLevelEnabled', () => {
     expect(workflowYamlDeclaresTopLevelEnabled('name: Test\ndescription: A workflow')).toBe(false);
   });
 
-  it('returns false for malformed YAML', () => {
+  it('returns false for malformed YAML', async () => {
     expect(workflowYamlDeclaresTopLevelEnabled('{{{')).toBe(false);
   });
 
@@ -111,16 +114,84 @@ describe('applyFieldUpdates', () => {
     expect(patch.tags).toEqual(['a', 'b']);
   });
 
-  it('allows disabling a workflow', () => {
-    const { patch } = applyFieldUpdates({ enabled: false }, baseSource);
-    expect(patch.enabled).toBe(false);
+  it.each([{ tags: ['action'] }, { tags: [] }, { tags: ['action', 'new-delegation-tag'] }])(
+    'synchronizes field-only tags with YAML and the definition: %j',
+    ({ tags }) => {
+      const definition = {
+        name: 'Original',
+        enabled: true,
+        version: '1',
+        triggers: [{ type: 'manual' }],
+        steps: [],
+        tags: ['action', 'auto-approvable'],
+      } satisfies WorkflowYaml;
+      const source = {
+        ...baseSource,
+        definition,
+        tags: definition.tags,
+        yaml: stringify(definition),
+      };
+      const { patch } = applyFieldUpdates({ tags }, source);
+      const updated = { ...source, ...patch };
+      expect(updated.tags).toEqual(tags);
+      expect(parse(updated.yaml).tags).toEqual(tags);
+      expect(updated.definition).toEqual({ ...definition, tags });
+      expect(source.definition.tags).toEqual(['action', 'auto-approvable']);
+    }
+  );
+
+  it('preserves both tags and enabled when updating them together', () => {
+    const definition: WorkflowYaml = {
+      name: 'Original',
+      enabled: true,
+      version: '1',
+      triggers: [{ type: 'manual' }],
+      steps: [],
+      tags: ['auto-approvable'],
+    };
+    const { patch } = applyFieldUpdates(
+      { tags: [], enabled: false },
+      { ...baseSource, definition, yaml: stringify(definition) }
+    );
+    expect(patch.definition).toEqual({ ...definition, tags: [], enabled: false });
   });
 
-  it('allows enabling a workflow only if it has a definition', () => {
-    const sourceWithDefinition = { ...baseSource, enabled: false, definition: {} as WorkflowYaml };
+  it('does not create a definition when updating tags on an invalid workflow', () => {
+    const { patch } = applyFieldUpdates({ tags: [] }, baseSource);
+    expect(patch.tags).toEqual([]);
+    expect(patch).not.toHaveProperty('definition');
+  });
+
+  it('allows disabling a workflow and syncs definition.enabled', () => {
+    const sourceWithDef = {
+      ...baseSource,
+      definition: { name: 'Original', enabled: true, version: '1' } as WorkflowYaml,
+    };
+    const { patch } = applyFieldUpdates({ enabled: false }, sourceWithDef);
+    expect(patch.enabled).toBe(false);
+    expect(patch.definition).toBeDefined();
+    expect(patch.definition?.enabled).toBe(false);
+    // other definition fields must be preserved
+    expect(patch.definition?.name).toBe('Original');
+  });
+
+  it('allows enabling a workflow only if it has a definition, and syncs definition.enabled', () => {
+    const sourceWithDefinition = {
+      ...baseSource,
+      enabled: false,
+      definition: { name: 'Original', enabled: false, version: '1' } as WorkflowYaml,
+    };
     const { patch, validationErrors } = applyFieldUpdates({ enabled: true }, sourceWithDefinition);
     expect(patch.enabled).toBe(true);
+    expect(patch.definition).toBeDefined();
+    expect(patch.definition?.enabled).toBe(true);
     expect(validationErrors).toEqual([]);
+  });
+
+  it('does not set definition in patch when definition is null', () => {
+    const { patch } = applyFieldUpdates({ enabled: false }, baseSource); // baseSource has definition: null
+    expect(patch.enabled).toBe(false);
+    expect(patch.definition).toBeUndefined();
   });
 
   it('surfaces a validation error and does not rewrite YAML when enabling a workflow without a definition', () => {
@@ -149,8 +220,8 @@ describe('applyYamlUpdate', () => {
     safeParse: () => ({ success: false, error: { issues: [] } }),
   } as any;
 
-  it('coerces definition to null (not undefined) on the invalid branch so full-replace index does not drop the field', () => {
-    const result = applyYamlUpdate({
+  it('coerces definition to null (not undefined) on the invalid branch so full-replace index does not drop the field', async () => {
+    const result = await applyYamlUpdate({
       workflowYaml: 'not: valid: yaml:',
       zodSchema: failingSchema,
       triggerDefinitions: [],
@@ -161,5 +232,396 @@ describe('applyYamlUpdate', () => {
     expect(result.updatedDataPatch.enabled).toBe(false);
     expect(result.updatedDataPatch.valid).toBe(false);
     expect(result.updatedDataPatch.triggerTypes).toEqual([]);
+  });
+
+  it('surfaces validation errors when the renamed YAML still fails schema validation', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const invalidYamlWithName = [
+      'version: "1"',
+      'name: Renamed Invalid Workflow',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step1',
+      '    type: nonexistent_connector_type_xyz',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
+
+    const result = await applyYamlUpdate({
+      workflowYaml: invalidYamlWithName,
+      zodSchema,
+      triggerDefinitions: [],
+    });
+
+    expect(result.validationErrors.length).toBeGreaterThan(0);
+  });
+
+  it('recovers tags from YAML that has valid tags but fails schema validation', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const invalidYamlWithTags = [
+      'version: "1"',
+      'name: Tagged Invalid Workflow',
+      'tags:',
+      '  - alpha',
+      '  - beta',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step1',
+      '    type: nonexistent_connector_type_xyz',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
+
+    const result = await applyYamlUpdate({
+      workflowYaml: invalidYamlWithTags,
+      zodSchema,
+      triggerDefinitions: [],
+    });
+
+    expect(result.updatedDataPatch.tags).toEqual(['alpha', 'beta']);
+    expect(result.updatedDataPatch.valid).toBe(false);
+  });
+
+  it('recovers name/description from YAML that has a valid title but fails schema validation', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const invalidYamlWithName = [
+      'version: "1"',
+      'name: Multi-Source IOC Enrichment and Tiered Response',
+      'description: Check an IOC against six threat-intel sources in parallel, aggregate the risk, then route to a tiered response.',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step1',
+      '    type: nonexistent_connector_type_xyz',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
+
+    const result = await applyYamlUpdate({
+      workflowYaml: invalidYamlWithName,
+      zodSchema,
+      triggerDefinitions: [],
+    });
+
+    expect(result.updatedDataPatch.name).toBe('Multi-Source IOC Enrichment and Tiered Response');
+    expect(result.updatedDataPatch.description).toBe(
+      'Check an IOC against six threat-intel sources in parallel, aggregate the risk, then route to a tiered response.'
+    );
+    expect(result.updatedDataPatch.valid).toBe(false);
+    expect(result.updatedDataPatch.definition).toBeNull();
+  });
+
+  it('omits name/description from the patch when invalid YAML has no title, so the stored name is preserved', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const invalidYamlWithoutName = [
+      'version: "1"',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step1',
+      '    type: nonexistent_connector_type_xyz',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
+
+    const result = await applyYamlUpdate({
+      workflowYaml: invalidYamlWithoutName,
+      zodSchema,
+      triggerDefinitions: [],
+    });
+
+    expect(result.updatedDataPatch).not.toHaveProperty('name');
+    expect(result.updatedDataPatch).not.toHaveProperty('description');
+    expect(result.updatedDataPatch).not.toHaveProperty('tags');
+  });
+
+  it('logs kibana.request fetcher on YAML updates when the self-client path is on', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
+    const yaml = [
+      "version: '1'",
+      'name: kibana-fetcher',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: status',
+      '    type: kibana.request',
+      '    with:',
+      '      method: GET',
+      '      path: /api/status',
+      '      fetcher:',
+      '        skip_ssl_verification: true',
+    ].join('\n');
+
+    await applyYamlUpdate({
+      workflowYaml: yaml,
+      zodSchema,
+      triggerDefinitions: [],
+      logger,
+      warnIgnoredKibanaFetcher: true,
+      workflowId: 'wf-1',
+    });
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('fetcher'),
+      expect.objectContaining({
+        labels: expect.objectContaining({ workflow_id: 'wf-1', step_names: 'status' }),
+      })
+    );
+  });
+
+  it('does not log kibana.request fetcher on YAML updates when the self-client path is off', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
+    const yaml = [
+      "version: '1'",
+      'name: kibana-fetcher',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: status',
+      '    type: kibana.request',
+      '    with:',
+      '      method: GET',
+      '      path: /api/status',
+      '      fetcher:',
+      '        skip_ssl_verification: true',
+    ].join('\n');
+
+    await applyYamlUpdate({
+      workflowYaml: yaml,
+      zodSchema,
+      triggerDefinitions: [],
+      logger,
+    });
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+});
+
+describe('prepareWorkflowDocumentFromYaml', () => {
+  const now = new Date('2024-01-01T00:00:00.000Z');
+
+  it('recovers name/description from YAML that has a valid title but fails schema validation', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const invalidYamlWithName = [
+      'version: "1"',
+      'name: Multi-Source IOC Enrichment and Tiered Response',
+      'description: Check an IOC against six threat-intel sources in parallel, aggregate the risk, then route to a tiered response.',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step1',
+      '    type: nonexistent_connector_type_xyz',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
+
+    const result = await prepareWorkflowDocumentFromYaml({
+      yaml: invalidYamlWithName,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+    });
+
+    expect(result.workflowData.name).toBe('Multi-Source IOC Enrichment and Tiered Response');
+    expect(result.workflowData.description).toBe(
+      'Check an IOC against six threat-intel sources in parallel, aggregate the risk, then route to a tiered response.'
+    );
+    expect(result.workflowData.valid).toBe(false);
+    expect(result.workflowData.definition).toBeNull();
+  });
+
+  it('falls back to "Untitled workflow" when invalid YAML has no name', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const invalidYamlWithoutName = [
+      'version: "1"',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step1',
+      '    type: nonexistent_connector_type_xyz',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
+
+    const result = await prepareWorkflowDocumentFromYaml({
+      yaml: invalidYamlWithoutName,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+    });
+
+    expect(result.workflowData.name).toBe('Untitled workflow');
+    expect(result.workflowData.description).toBeUndefined();
+    expect(result.workflowData.tags).toEqual([]);
+  });
+
+  it('recovers tags from YAML that has valid tags but fails schema validation', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const invalidYamlWithTags = [
+      'version: "1"',
+      'name: Tagged Invalid Workflow',
+      'tags:',
+      '  - alpha',
+      '  - beta',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: step1',
+      '    type: nonexistent_connector_type_xyz',
+      '    with:',
+      '      message: hello',
+    ].join('\n');
+
+    const result = await prepareWorkflowDocumentFromYaml({
+      yaml: invalidYamlWithTags,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+    });
+
+    expect(result.workflowData.tags).toEqual(['alpha', 'beta']);
+    expect(result.workflowData.valid).toBe(false);
+  });
+
+  it('uses nameFallback when the YAML root cannot carry a name (e.g. cloning invalid YAML)', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+
+    // A scalar root has no `name` key to extract, so without the fallback this would
+    // collapse to "Untitled workflow".
+    const result = await prepareWorkflowDocumentFromYaml({
+      yaml: 'not-a-workflow',
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      nameFallback: 'Original Copy',
+    });
+
+    expect(result.workflowData.name).toBe('Original Copy');
+    expect(result.workflowData.valid).toBe(false);
+  });
+
+  it('prefers the YAML-embedded name over nameFallback', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+
+    const result = await prepareWorkflowDocumentFromYaml({
+      yaml: 'name: From YAML\ndescription: still broken',
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      nameFallback: 'Fallback Name',
+    });
+
+    expect(result.workflowData.name).toBe('From YAML');
+  });
+
+  it('logs once when kibana YAML still includes fetcher', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
+    const yaml = [
+      "version: '1'",
+      'name: kibana-fetcher',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: status',
+      '    type: kibana.request',
+      '    with:',
+      '      method: GET',
+      '      path: /api/status',
+      '      fetcher:',
+      '        skip_ssl_verification: true',
+    ].join('\n');
+
+    await prepareWorkflowDocumentFromYaml({
+      yaml,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      logger,
+      warnIgnoredKibanaFetcher: true,
+    });
+
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('fetcher'),
+      expect.objectContaining({
+        tags: expect.arrayContaining(['deprecated']),
+        labels: expect.objectContaining({ step_names: 'status' }),
+      })
+    );
+  });
+
+  it('does not log kibana fetcher when the self-client path is off', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
+    const yaml = [
+      "version: '1'",
+      'name: kibana-fetcher',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: status',
+      '    type: kibana.request',
+      '    with:',
+      '      method: GET',
+      '      path: /api/status',
+      '      fetcher:',
+      '        skip_ssl_verification: true',
+    ].join('\n');
+
+    await prepareWorkflowDocumentFromYaml({
+      yaml,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      logger,
+    });
+
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it('does not log generated kibana.* fetcher when the self-client flag is off', async () => {
+    const zodSchema = getWorkflowZodSchema({});
+    const logger = { warn: jest.fn() } as unknown as import('@kbn/logging').Logger;
+    const yaml = [
+      "version: '1'",
+      'name: kibana-generated-fetcher',
+      'enabled: true',
+      'triggers:',
+      '  - type: manual',
+      'steps:',
+      '  - name: get-case',
+      '    type: kibana.getCase',
+      '    with:',
+      '      caseId: test-case',
+      '      fetcher:',
+      '        skip_ssl_verification: true',
+    ].join('\n');
+
+    await prepareWorkflowDocumentFromYaml({
+      yaml,
+      zodSchema,
+      authenticatedUser: 'user1',
+      now,
+      spaceId: 'default',
+      logger,
+    });
+
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 });

@@ -58,17 +58,11 @@ module.exports = {
   resolve: {
     extensions: ['.js', '.ts', '.tsx'],
 
-    // Redirect @kbn/* imports to local stubs so the source files can be
-    // bundled without any Kibana-specific packages installed at runtime.
     alias: {
       '@kbn/i18n$': path.resolve(__dirname, 'react/services/i18n.tsx'),
       '@kbn/i18n/react': path.resolve(__dirname, 'react/services/i18n.tsx'),
       '@kbn/i18n-react': path.resolve(__dirname, 'react/services/i18n.tsx'),
-      '@kbn/core-chrome-layout-constants': path.resolve(
-        __dirname,
-        'react/services/layout_constants.ts'
-      ),
-      '@kbn/core-chrome-layout-utils': path.resolve(__dirname, 'react/services/layout_utils.ts'),
+      '@kbn/ui-chrome-layout': path.resolve(__dirname, '../../chrome-layout/target/index.js'),
     },
   },
 
@@ -81,6 +75,7 @@ module.exports = {
     new CleanWebpackPlugin({
       cleanOnceBeforeBuildPatterns: ['**/*'],
       dangerouslyAllowCleanPatternsOutsideProject: true,
+      dry: false,
     }),
   ],
 };

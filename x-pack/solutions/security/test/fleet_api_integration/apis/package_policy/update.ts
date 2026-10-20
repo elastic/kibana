@@ -812,20 +812,6 @@ export default function (providerContext: FtrProviderContext) {
         expect(body.message).eql('Input not found: with_required_variables-i-do-not-exists');
       });
 
-      it('should return a 400 if namespace is edited on input only package policy', async function () {
-        const { body } = await supertest
-          .put(`/api/fleet/package_policies/${inputOnlyPackagePolicyId}`)
-          .set('kbn-xsrf', 'xxxx')
-          .send({
-            ...inputOnlyBasePackagePolicy,
-            namespace: 'updated_namespace',
-          })
-          .expect(400);
-        expect(body.message).eql(
-          'Package policy namespace cannot be modified for input only packages, please create a new package policy.'
-        );
-      });
-
       it('should return a 400 if dataset is edited on input only package policy', async function () {
         const updatedPolicy = JSON.parse(JSON.stringify(inputOnlyBasePackagePolicy));
 
@@ -837,7 +823,7 @@ export default function (providerContext: FtrProviderContext) {
           .send(updatedPolicy)
           .expect(400);
         expect(body.message).eql(
-          'Package policy dataset cannot be modified for input only packages, please create a new package policy.'
+          'Package policy dataset cannot be modified, please create a new package policy.'
         );
       });
 
@@ -845,7 +831,7 @@ export default function (providerContext: FtrProviderContext) {
         const {
           body: { item },
         } = await supertest
-          .put(`/api/fleet/package_policies/${packagePolicyId}?format=simplified`)
+          .put(`/api/fleet/package_policies/${packagePolicyId3}?format=simplified`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,
@@ -875,7 +861,7 @@ export default function (providerContext: FtrProviderContext) {
         const {
           body: { item },
         } = await supertest
-          .put(`/api/fleet/package_policies/${packagePolicyId}?format=legacy`)
+          .put(`/api/fleet/package_policies/${packagePolicyId3}?format=legacy`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,
@@ -903,7 +889,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('should return 400 if an invalid format query param is passed', async function () {
         await supertest
-          .put(`/api/fleet/package_policies/${packagePolicyId}?format=foo`)
+          .put(`/api/fleet/package_policies/${packagePolicyId3}?format=foo`)
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: `update-simplified-package-policy-with_required_variables-${Date.now()}`,

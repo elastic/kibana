@@ -31,6 +31,18 @@ const EventTriggersConfigSchema = schema.object({
 
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
+  storage: schema.object({
+    source: schema.oneOf([schema.literal('plain_index'), schema.literal('data_stream')], {
+      defaultValue: 'plain_index',
+    }),
+    dataRetention: schema.string({
+      defaultValue: '90d',
+      validate: (value) =>
+        /^[1-9]\d*(d|h|m|s)$/.test(value)
+          ? undefined
+          : 'must be a positive duration like "90d", "12h", "30m" or "45s"',
+    }),
+  }),
   eventDriven: EventTriggersConfigSchema,
   /**
    * Maximum depth of nested workflow execution (workflow calling workflow via workflow.execute step).
@@ -64,6 +76,14 @@ const configSchema = schema.object({
         'When enabled, stores queue delay metrics (scheduledAt, runAt, queueDelayMs, scheduleDelayMs) in workflow executions. ' +
         'Useful for observability but adds to document size. Disabled by default for performance.',
     },
+  }),
+  /**
+   * External HITL resume (API-key public routes + channel notifications).
+   * Disable via `workflowsExecutionEngine.hitlExternalResume.enabled` and
+   * `workflowsManagement.hitlExternalResume.enabled` in `kibana.yml`.
+   */
+  hitlExternalResume: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
   }),
 });
 

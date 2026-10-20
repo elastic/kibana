@@ -48,7 +48,9 @@ const useAddSecurityProps = (activeIntegrations: GetInstalledPackagesResponse['i
         onCardClick: () => {
           const trackId = `${TELEMETRY_INTEGRATION_CARD}_${card.id}`;
           telemetry.reportLinkClick?.(trackId);
-          if (url.startsWith(APP_INTEGRATIONS_PATH)) {
+          if (card.onCardClick) {
+            card.onCardClick();
+          } else if (url.startsWith(APP_INTEGRATIONS_PATH)) {
             navigateTo({
               appId: INTEGRATION_APP_ID,
               path: url.slice(integrationRootUrl.length),

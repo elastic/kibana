@@ -45,6 +45,7 @@ export const createStepInfo = (overrides: Partial<StepInfo> = {}): StepInfo => (
   stepId: 'step-1',
   stepType: 'action',
   stepYamlNode: getDefaultStepYamlNode(),
+  path: ['steps', 0],
   lineStart: 1,
   lineEnd: 10,
   propInfos: {},
@@ -62,9 +63,18 @@ export const createStepInfo = (overrides: Partial<StepInfo> = {}): StepInfo => (
  * ]);
  * ```
  */
-export const createWorkflowLookup = (steps: StepInfo[]): WorkflowLookup => ({
-  steps: steps.reduce<Record<string, StepInfo>>((acc, step) => {
-    acc[step.stepId] = step;
-    return acc;
-  }, {}),
-});
+export const createWorkflowLookup = (
+  steps: StepInfo[],
+  { triggersLineStart }: { triggersLineStart?: number } = {}
+): WorkflowLookup => {
+  const lineStarts = steps.map((s) => s.lineStart);
+  const stepsLineStart = lineStarts.length > 0 ? Math.min(...lineStarts) : undefined;
+  return {
+    steps: steps.reduce<Record<string, StepInfo>>((acc, step) => {
+      acc[step.stepId] = step;
+      return acc;
+    }, {}),
+    triggersLineStart,
+    stepsLineStart,
+  };
+};

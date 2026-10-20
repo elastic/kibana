@@ -134,8 +134,8 @@ source .buildkite/scripts/common/util.sh
 
 echo --- Security Solution OpenAPI Code Generation
 
-(cd x-pack/solutions/security/plugins/security_solution && yarn openapi:generate)
-check_for_changed_files "yarn openapi:generate" true
+(cd x-pack/solutions/security/plugins/security_solution && pnpm openapi:generate)
+check_for_changed_files "pnpm openapi:generate" true
 ```
 
 This script sets up the minimal environment required for code generation and runs the code generation script. Then it checks if there are any changes and commits them if there are any using the `check_for_changed_files` function.
@@ -144,11 +144,10 @@ Then add the code generation script to the build pipeline. Open the buildkite ch
 
 ```sh
 ...
-.buildkite/scripts/steps/checks/saved_objects_definition_change.sh
 .buildkite/scripts/steps/code_generation/elastic_assistant_codegen.sh
 .buildkite/scripts/steps/code_generation/security_solution_codegen.sh
 .buildkite/scripts/steps/code_generation/osquery_codegen.sh
-.buildkite/scripts/steps/checks/yarn_deduplicate.sh
+.buildkite/scripts/steps/checks/deduplicate_dependencies.sh
 ...
 ```
 

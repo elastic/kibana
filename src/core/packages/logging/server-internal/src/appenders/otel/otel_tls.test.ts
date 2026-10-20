@@ -10,7 +10,7 @@
 import { mkdirSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import type { PeerCertificate } from 'tls';
+import { rootCertificates, type PeerCertificate } from 'tls';
 
 import {
   buildGrpcVerifyOptions,
@@ -137,13 +137,17 @@ describe('buildGrpcVerifyOptions', () => {
 });
 
 describe('toGrpcRootCerts', () => {
-  it('returns null when no CA is configured', () => {
-    expect(toGrpcRootCerts({ verificationMode: 'full' })).toBeNull();
+  it("returns Node's built-in roots when no CA is configured", () => {
+    expect(toGrpcRootCerts({ verificationMode: 'full' }).toString()).toEqual(
+      rootCertificates.join('\n')
+    );
   });
 
   it('returns a single buffer for one CA', () => {
     const b = Buffer.from('ca');
-    expect(toGrpcRootCerts({ verificationMode: 'full', ca: b })).toEqual(b);
+    expect(toGrpcRootCerts({ verificationMode: 'full', ca: b }).toString()).toEqual(
+      `ca\n${rootCertificates.join('\n')}`
+    );
   });
 
   it('concatenates multiple CAs', () => {
@@ -151,6 +155,6 @@ describe('toGrpcRootCerts', () => {
       verificationMode: 'full',
       ca: [Buffer.from('a'), Buffer.from('b')],
     });
-    expect(merged?.toString()).toBe('a\nb');
+    expect(merged?.toString()).toEqual(`a\nb\n${rootCertificates.join('\n')}`);
   });
 });

@@ -21,6 +21,7 @@ export * from './action_frequency_types';
 export const PLUGIN_ID = 'triggersActions';
 export const ALERTS_PAGE_ID = 'triggersActionsAlerts';
 export const CONNECTORS_PLUGIN_ID = 'triggersActionsConnectors';
+
 export {
   I18N_WEEKDAY_OPTIONS,
   I18N_WEEKDAY_OPTIONS_DDD,

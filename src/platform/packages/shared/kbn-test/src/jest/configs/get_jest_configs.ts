@@ -59,9 +59,12 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
         .map((file) => resolve(REPO_ROOT, file))
         .filter((file) => existsSync(file));
     } else {
-      // Merge both git commands into one for better performance
+      // Merge both git commands into one for better performance.
+      // Exclude __fixtures__ so fixture tests/configs (e.g. the negative-testing
+      // canaries) are never treated as real tests or orphaned. This mirrors CI's
+      // discoverJestUnitConfigs, which already ignores **/__fixtures__/**.
       const combinedResult = await execAsync(
-        `git ls-files -- '*.test.ts' '*.test.tsx' '**/jest.config.js' '**/*/jest.config.js' '**/jest.integration.config.js' '**/*/jest.integration.config.js'`,
+        `git ls-files -- '*.test.ts' '*.test.tsx' '**/jest.config.js' '**/*/jest.config.js' '**/jest.config.cjs' '**/*/jest.config.cjs' '**/jest.integration.config.js' '**/*/jest.integration.config.js' '**/jest.integration.config.cjs' '**/*/jest.integration.config.cjs' ':(glob,exclude)**/__fixtures__/**'`,
         { cwd: REPO_ROOT, maxBuffer: 1024 * 1024 * 10 }
       );
 
@@ -72,7 +75,7 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
         .filter((file) => existsSync(file));
 
       // Separate configs from test files using regex patterns
-      const configPattern = /jest(\.integration)?\.config\.(j|t)s$/;
+      const configPattern = /jest(\.integration)?\.config\.(c?js|ts)$/;
       const testPattern = /\.(test|spec)\.(ts|tsx)$/;
 
       configFiles = allFiles.filter((file) => configPattern.test(file));

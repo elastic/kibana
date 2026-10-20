@@ -14,6 +14,7 @@ import {
   AgentBuilderConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { ToolType, isMcpTool, type McpToolDefinition } from '@kbn/agent-builder-common/tools';
+import { hasWorkflowReadPrivilege } from '@kbn/agent-builder-tools-base/workflows';
 import type { RouteDependencies } from '../types';
 import { getHandlerWrapper } from '../wrap_handler';
 import type {
@@ -43,7 +44,6 @@ import { AGENT_BUILDER_READ_SECURITY, TOOLS_WRITE_SECURITY } from '../route_secu
 import { getToolTypeInfo, bulkCreateMcpTools } from '../../services/tools/utils';
 import { toConnectorItem } from '../utils';
 
-const USER_CONNECTOR_TOKEN_TYPE = 'user_connector_token';
 const PER_USER_AUTH_MODE = 'per-user';
 
 export function registerInternalToolsRoutes({
@@ -54,6 +54,12 @@ export function registerInternalToolsRoutes({
   pluginsSetup: { workflowsManagement },
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
+
+  // Resolves the security plugin start contract, used by the workflow privilege helpers.
+  const getSecurity = async () => {
+    const [, startDeps] = await coreSetup.getStartServices();
+    return startDeps.security;
+  };
 
   // bulk delete tools
   router.post(
@@ -307,9 +313,19 @@ export function registerInternalToolsRoutes({
 
       const toolTypes = tools.getToolDefinitions();
 
+      // Only advertise the workflow tool type as creatable to users who can reference workflows.
+      const spaceId = (await ctx.agentBuilder).spaces.getSpaceId();
+      const workflowToolsCreatable = workflowsManagement
+        ? await hasWorkflowReadPrivilege({
+            security: await getSecurity(),
+            request,
+            spaceId,
+          })
+        : false;
+
       return response.ok<GetToolTypeInfoResponse>({
         body: {
-          toolTypes: getToolTypeInfo(toolTypes),
+          toolTypes: getToolTypeInfo(toolTypes, { workflowToolsCreatable }),
         },
       });
     })
@@ -339,9 +355,20 @@ export function registerInternalToolsRoutes({
 
       const currentSpace = (await ctx.agentBuilder).spaces.getSpaceId();
 
+      // Listing workflows requires `workflowsManagement:read`; without it, return an empty set
+      const canRead = await hasWorkflowReadPrivilege({
+        security: await getSecurity(),
+        request,
+        spaceId: currentSpace,
+      });
+      if (!canRead) {
+        return response.ok<ListWorkflowsResponse>({ body: { results: [] } });
+      }
+
       const { results } = await workflowsManagement.management.getWorkflows(
-        { page: request.query.page, size: request.query.limit, enabled: [true] },
-        currentSpace
+        { page: request.query.page, size: request.query.limit },
+        currentSpace,
+        { request }
       );
 
       return response.ok<ListWorkflowsResponse>({
@@ -350,6 +377,7 @@ export function registerInternalToolsRoutes({
             id: workflow.id,
             name: workflow.name,
             description: workflow.description,
+            enabled: workflow.enabled,
           })),
         },
       });
@@ -381,16 +409,32 @@ export function registerInternalToolsRoutes({
 
       const currentSpace = (await ctx.agentBuilder).spaces.getSpaceId();
 
+      // Reading a workflow definition requires `workflowsManagement:read`.
+      const canRead = await hasWorkflowReadPrivilege({
+        security: await getSecurity(),
+        request,
+        spaceId: currentSpace,
+      });
+      if (!canRead) {
+        return response.forbidden({
+          body: {
+            message: `Unauthorized to read workflow '${request.params.id}'. The 'workflowsManagement' read privilege is required.`,
+          },
+        });
+      }
+
       const workflow = await workflowsManagement.management.getWorkflow(
         request.params.id,
-        currentSpace
+        currentSpace,
+        request
       );
 
+      if (!workflow) return response.notFound();
       return response.ok<GetWorkflowResponse>({
         body: {
-          id: workflow!.id,
-          name: workflow!.name,
-          description: workflow!.description,
+          id: workflow.id,
+          name: workflow.name,
+          description: workflow.description,
         },
       });
     })
@@ -459,7 +503,7 @@ export function registerInternalToolsRoutes({
       security: AGENT_BUILDER_READ_SECURITY,
     },
     wrapHandler(async (ctx, request, response) => {
-      const [coreStart, pluginsStart] = await coreSetup.getStartServices();
+      const [, pluginsStart] = await coreSetup.getStartServices();
       const actionsClient = await pluginsStart.actions.getActionsClientWithRequest(request);
       const [allConnectors, compatibleTypes] = await Promise.all([
         actionsClient.getAll(),
@@ -473,35 +517,16 @@ export function registerInternalToolsRoutes({
         .filter((connector) => compatibleTypeIds.has(connector.actionTypeId))
         .filter((connector) => (type ? connector.actionTypeId === type : true));
 
-      // Check OAuth authorization status for per-user connectors.
-      // Batch query user_connector_token saved objects to determine which
-      // OAuth connectors the current user has authorized.
+      // OAuth connectors count as authorized only while the user's token is usable
+      // (unexpired, or refreshable).
       const oauthConnectorIds = filteredConnectors
         .filter((connector) => connector.authMode === PER_USER_AUTH_MODE)
         .map((connector) => connector.id);
 
-      const authorizedConnectorIds = new Set<string>();
-      if (oauthConnectorIds.length > 0) {
-        const currentUser = coreStart.security.authc.getCurrentUser(request);
-        if (currentUser?.profile_uid) {
-          const soClient = coreStart.savedObjects.getScopedClient(request, {
-            includedHiddenTypes: [USER_CONNECTOR_TOKEN_TYPE],
-          });
-          const connectorIdFilter = oauthConnectorIds
-            .map((id) => `${USER_CONNECTOR_TOKEN_TYPE}.attributes.connectorId: "${id}"`)
-            .join(' OR ');
-          const tokenResults = await soClient.find<{ connectorId: string }>({
-            type: USER_CONNECTOR_TOKEN_TYPE,
-            perPage: oauthConnectorIds.length,
-            filter: `${USER_CONNECTOR_TOKEN_TYPE}.attributes.profileUid: "${currentUser.profile_uid}" AND (${connectorIdFilter})`,
-          });
-          for (const token of tokenResults.saved_objects) {
-            if (token.attributes.connectorId) {
-              authorizedConnectorIds.add(token.attributes.connectorId);
-            }
-          }
-        }
-      }
+      const authorizedConnectorIds = await pluginsStart.actions.getUsableUserOAuthConnectorIds(
+        request,
+        oauthConnectorIds
+      );
 
       const connectors: ConnectorItem[] = filteredConnectors.map((connector) => {
         const isOAuth = connector.authMode === PER_USER_AUTH_MODE;
@@ -541,9 +566,20 @@ export function registerInternalToolsRoutes({
 
       const connector = await actionsClient.get({ id: connectorId });
 
+      let oauthStatus;
+      if (connector.authMode === PER_USER_AUTH_MODE) {
+        const usableConnectorIds = await pluginsStart.actions.getUsableUserOAuthConnectorIds(
+          request,
+          [connectorId]
+        );
+        oauthStatus = usableConnectorIds.has(connectorId)
+          ? OAUTH_STATUS.AUTHORIZED
+          : OAUTH_STATUS.DISCONNECTED;
+      }
+
       return response.ok<GetConnectorResponse>({
         body: {
-          connector: toConnectorItem(connector),
+          connector: toConnectorItem(connector, { oauthStatus }),
         },
       });
     })

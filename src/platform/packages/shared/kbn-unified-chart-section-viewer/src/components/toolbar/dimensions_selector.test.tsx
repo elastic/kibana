@@ -17,6 +17,14 @@ import {
   METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ,
 } from '../../common/constants';
 
+const mockTrackMaxDimensionsReached = jest.fn();
+
+jest.mock('../../context/ebt_telemetry_context', () => ({
+  useTelemetry: () => ({
+    trackMaxDimensionsReached: mockTrackMaxDimensionsReached,
+  }),
+}));
+
 jest.mock('@kbn/shared-ux-toolbar-selector', () => {
   const actual = jest.requireActual('@kbn/shared-ux-toolbar-selector');
   return {
@@ -106,6 +114,8 @@ jest.mock('lodash', () => {
     debounce: (fn: any) => {
       const debounced = (...args: any[]) => fn(...args);
       debounced.cancel = jest.fn();
+      // This mock invokes synchronously, so there is never a pending call to flush.
+      debounced.flush = jest.fn();
       return debounced;
     },
   };
@@ -332,6 +342,51 @@ describe('DimensionsSelector', () => {
       expect(unselectedOption).toHaveAttribute('data-disabled', 'true');
     });
 
+    it('tracks when the selection reaches the maximum', () => {
+      const selectedDimensions = mockDimensions.slice(0, MAX_DIMENSIONS_SELECTIONS - 1);
+      renderWithIntl(
+        <DimensionsSelector {...defaultProps} selectedDimensions={selectedDimensions} />
+      );
+
+      fireEvent.click(
+        screen.getByTestId(
+          `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${
+            mockDimensions[MAX_DIMENSIONS_SELECTIONS - 1].name
+          }`
+        )
+      );
+
+      expect(mockTrackMaxDimensionsReached).toHaveBeenCalledTimes(1);
+      expect(mockTrackMaxDimensionsReached).toHaveBeenCalledWith(MAX_DIMENSIONS_SELECTIONS);
+    });
+
+    it('does not track when the initial selection is already at the maximum', () => {
+      const maxSelected = mockDimensions.slice(0, MAX_DIMENSIONS_SELECTIONS);
+      renderWithIntl(<DimensionsSelector {...defaultProps} selectedDimensions={maxSelected} />);
+
+      expect(mockTrackMaxDimensionsReached).not.toHaveBeenCalled();
+    });
+
+    it('does not track selections below the maximum or when clearing the selection', () => {
+      renderWithIntl(
+        <DimensionsSelector
+          {...defaultProps}
+          selectedDimensions={mockDimensions.slice(0, MAX_DIMENSIONS_SELECTIONS - 2)}
+        />
+      );
+
+      fireEvent.click(
+        screen.getByTestId(
+          `${METRICS_BREAKDOWN_SELECTOR_DATA_TEST_SUBJ}Option-${
+            mockDimensions[MAX_DIMENSIONS_SELECTIONS - 2].name
+          }`
+        )
+      );
+      fireEvent.click(screen.getByText('Clear selection'));
+
+      expect(mockTrackMaxDimensionsReached).not.toHaveBeenCalled();
+    });
+
     it('does not disable already selected options when at max limit', () => {
       const maxSelected = mockDimensions.slice(0, MAX_DIMENSIONS_SELECTIONS);
       renderWithIntl(<DimensionsSelector {...defaultProps} selectedDimensions={maxSelected} />);
@@ -544,7 +599,7 @@ describe('DimensionsSelector', () => {
       dimensionFields: Dimension[]
     ): ParsedMetricItem => ({
       metricName,
-      dataStream: 'metrics-test',
+      indexName: 'metrics-test',
       units: [],
       metricTypes: [],
       fieldTypes: [],

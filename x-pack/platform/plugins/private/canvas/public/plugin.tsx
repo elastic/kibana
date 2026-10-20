@@ -26,7 +26,6 @@ import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import { CanvasAppLocatorDefinition } from '../common/locator';
@@ -65,7 +64,6 @@ export interface CanvasStartDeps {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
-  presentationUtil: PresentationUtilPluginStart;
   spaces?: SpacesPluginStart;
   contentManagement: ContentManagementPublicStart;
 }

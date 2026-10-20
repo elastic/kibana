@@ -12,10 +12,10 @@ import {
   EuiCode,
   EuiSpacer,
   EuiText,
-  EuiCallOut,
   EuiLink,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 
 import type { useComponentTemplatesContext } from '../../component_templates_context';
 import { documentationService } from '../../../../services/documentation';
@@ -85,7 +85,7 @@ export const MappingsDsRolloverModal: React.FunctionComponent<Props> = ({
     >
       {error && (
         <>
-          <EuiCallOut
+          <KbnDangerCallout
             announceOnMount
             title={
               <FormattedMessage
@@ -93,12 +93,9 @@ export const MappingsDsRolloverModal: React.FunctionComponent<Props> = ({
                 defaultMessage="Unable to apply rollover"
               />
             }
-            color="danger"
-            iconType="warning"
             data-test-subj="applyMappingsRolloverError"
-          >
-            <div>{error.message}</div>
-          </EuiCallOut>
+            text={error.message}
+          />
           <EuiSpacer size="m" />
         </>
       )}

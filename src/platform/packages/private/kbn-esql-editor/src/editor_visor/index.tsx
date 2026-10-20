@@ -6,88 +6,293 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIconTip,
-  useEuiTheme,
-  type EuiComboBoxOptionOption,
-} from '@elastic/eui';
-import { getIndexPatternFromESQLQuery, getESQLAdHocDataview } from '@kbn/esql-utils';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { css } from '@emotion/react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
+import { EuiButtonEmpty, EuiButtonIcon, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { getIndexPatternFromESQLQuery, getSourceCommandQueryFromESQLQuery } from '@kbn/esql-utils';
+import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
-import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
-import { isEqual } from 'lodash';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SourcesDropdown } from './sources_dropdown';
-import { ModeSelector, VisorMode } from './mode_selector';
-import { NoConnectorMessage } from './no_connector_message';
-import { NLInput } from './nl_input';
-import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
-import type { ESQLEditorDeps } from '../types';
+import { createRestorableStateProvider } from '@kbn/restorable-state';
+import { SvgAiGradientDefs, useSvgAiGradient } from '@kbn/ui-ai-components';
+import {
+  getEffectiveProjectRouting,
+  usePickerProjectRouting,
+} from '../hooks/use_effective_project_routing';
+import { SubmitButton } from './submit_button';
+import { VisorMode } from './visor_mode';
+import { useNlGeneration } from './use_nl_generation';
+import {
+  searchPlaceholder,
+  nlPlaceholder,
+  nlEmptyEditorPlaceholder,
+  generatingLabel,
+  stopLabel,
+  aiModeTooltip,
+  kqlModeLabel,
+  kqlModeNoSourceTooltip,
+  kqlNoSourcePlaceholder,
+  visorModeLegend,
+  enterHintFilterLabel,
+  enterHintGenerateLabel,
+} from './visor_i18n';
+import { NLInput, type NLInputApi } from './nl_input';
+import { visorStyles } from './visor.styles';
+import { SparklesIcon } from './sparkles_icon';
+import type { ESQLEditorDeps, VisorNlResultHandler } from '../types';
 import { useNlToEsqlCheck } from '../hooks/use_nl_to_esql_check';
-import { reportEsqlError } from '../report_error';
-import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
+import { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 
-export { VisorMode } from './mode_selector';
+type VisorStyles = ReturnType<typeof visorStyles>;
 
-export interface QuickSearchVisorProps {
-  // Current ESQL query
-  query: string;
-  // Handling smaller space for the visor
-  isSpaceReduced?: boolean;
-  // Whether the visor is visible
-  isVisible: boolean;
-  // Callback when the query is updated and submitted
-  onUpdateAndSubmitQuery: (query: string) => void;
-  // Callback to toggle the visor visibility
-  onToggleVisor: () => void;
-  telemetryService?: ESQLEditorTelemetryService;
+function AskAiButton({
+  isSelected,
+  onSelect,
+  styles,
+}: {
+  isSelected: boolean;
+  onSelect: () => void;
+  styles: VisorStyles;
+}) {
+  const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant: 'outlined' });
+  const hoverIconCss = css`
+    &:hover,
+    &:focus-visible {
+      .euiIcon,
+      .euiIcon [fill]:not([fill='none']) {
+        fill: url(#${gradientId}) !important;
+      }
+    }
+  `;
+
+  return (
+    <>
+      <SvgAiGradientDefs gradientId={gradientId} colors={colors} />
+      <EuiToolTip content={aiModeTooltip} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType={SparklesIcon}
+          size="xs"
+          iconSize="m"
+          color="text"
+          display="empty"
+          aria-label={aiModeTooltip}
+          aria-pressed={isSelected}
+          isSelected={isSelected}
+          onClick={onSelect}
+          data-test-subj="esqlVisorAskAiButton"
+          css={[
+            styles.modeIconButton,
+            isSelected
+              ? styles.aiButtonSelected
+              : [styles.aiButtonSparkleHover, styles.aiButtonIdleHover],
+            isSelected ? iconGradientCss : hoverIconCss,
+          ]}
+        />
+      </EuiToolTip>
+    </>
+  );
 }
 
-export const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
-  defaultMessage: 'Filter your data using KQL',
-});
+function VisorModeToggle({
+  isKqlMode,
+  isKqlDisabled,
+  onModeChange,
+  styles,
+}: {
+  isKqlMode: boolean;
+  isKqlDisabled: boolean;
+  onModeChange: (mode: VisorMode) => void;
+  styles: VisorStyles;
+}) {
+  return (
+    <div role="group" aria-label={visorModeLegend} css={styles.modeToggle}>
+      <EuiToolTip
+        content={isKqlDisabled ? kqlModeNoSourceTooltip : kqlModeLabel}
+        disableScreenReaderOutput
+      >
+        <EuiButtonIcon
+          iconType="magnify"
+          size="xs"
+          iconSize="m"
+          color="text"
+          display="empty"
+          aria-label={kqlModeLabel}
+          aria-pressed={isKqlMode}
+          isSelected={isKqlMode}
+          isDisabled={isKqlDisabled}
+          onClick={() => onModeChange(VisorMode.KQL)}
+          data-test-subj="esqlVisorModeKql"
+          css={[styles.modeIconButton, isKqlMode && styles.modeIconButtonActive]}
+        />
+      </EuiToolTip>
+      <AskAiButton
+        isSelected={!isKqlMode}
+        onSelect={() => onModeChange(VisorMode.NaturalLanguage)}
+        styles={styles}
+      />
+    </div>
+  );
+}
 
-const nlPlaceholder = i18n.translate('esqlEditor.visor.nlPlaceholder', {
-  defaultMessage: 'Describe the query you want in plain language',
-});
-
-const closeButtonAriaLabel = i18n.translate('esqlEditor.visor.closeButtonAriaLabel', {
-  defaultMessage: 'Close quick search visor',
-});
-
-const techPreviewTooltip = i18n.translate('esqlEditor.visor.techPreviewTooltip', {
-  defaultMessage: 'Technical preview',
-});
-
-export function QuickSearchVisor({
-  query,
-  isSpaceReduced,
+function VisorLayout({
+  showModeToggle,
+  isKqlMode,
+  isKqlDisabled,
+  onModeChange,
+  styles,
   isVisible,
+  children,
+}: {
+  showModeToggle: boolean;
+  isKqlMode: boolean;
+  isKqlDisabled: boolean;
+  onModeChange: (mode: VisorMode) => void;
+  styles: VisorStyles;
+  isVisible: boolean;
+  children: ReactNode;
+}) {
+  return (
+    <div
+      css={styles.visorContainer}
+      data-test-subj="ESQLEditor-quick-search-visor"
+      {...(!isVisible && { inert: '' })}
+    >
+      {showModeToggle && (
+        <VisorModeToggle
+          isKqlMode={isKqlMode}
+          isKqlDisabled={isKqlDisabled}
+          onModeChange={onModeChange}
+          styles={styles}
+        />
+      )}
+      {children}
+    </div>
+  );
+}
+
+function NlVisorActions({
+  isLoading,
+  value,
+  onSubmit,
+  onStop,
+  styles,
+}: {
+  isLoading: boolean;
+  value: string;
+  onSubmit: () => void;
+  onStop: () => void;
+  styles: VisorStyles;
+}) {
+  if (isLoading) {
+    return (
+      <div css={styles.generating}>
+        <EuiText size="xs" color="subdued">
+          {generatingLabel}
+        </EuiText>
+        <EuiButtonEmpty
+          size="s"
+          color="primary"
+          iconType="stop"
+          iconSide="left"
+          onClick={onStop}
+          data-test-subj="esqlVisorStopGeneration"
+        >
+          {stopLabel}
+        </EuiButtonEmpty>
+      </div>
+    );
+  }
+
+  if (!value.trim()) {
+    return null;
+  }
+
+  return (
+    <SubmitButton
+      tooltip={enterHintGenerateLabel}
+      onClick={onSubmit}
+      data-test-subj="esqlVisorNLSubmit"
+    />
+  );
+}
+
+export interface QuickSearchVisorRestorableState {
+  // Unset until the user picks a mode
+  visorMode?: VisorMode;
+}
+
+const { withRestorableState, useRestorableState } =
+  createRestorableStateProvider<QuickSearchVisorRestorableState>();
+
+interface QuickSearchVisorPropsInternal {
+  // Current ESQL query
+  query: string;
+  // Whether the visor is rendered inside an inline editor (uses shorter placeholders)
+  isInline?: boolean;
+  // Whether the visor is currently visible (controls CSS transition for inline toggle)
+  isVisible?: boolean;
+  // Called with the LLM-generated ES|QL so the parent editor can show the diff review UI
+  onNlResult?: VisorNlResultHandler;
+  // Callback when the query is updated and submitted
+  onUpdateAndSubmitQuery: (query: string) => void;
+  // When true, every visor submit is a no-op (e.g. invalid date range or a disabled caller)
+  isDisabled?: boolean;
+  // When true, KQL submit is a no-op. Natural language is still allowed while the editor query is empty
+  disableSubmitAction?: boolean;
+  // Called after a KQL filter is submitted so the parent can move focus back to the editor
+  onKqlSubmitted?: () => void;
+  // Insets the visor from an outlined editor so its controls do not sit on the border
+  hasOutline?: boolean;
+}
+
+// React.memo is applied inside the withRestorableState HOC (called below)
+function QuickSearchVisorInternal({
+  query,
+  isInline,
+  isVisible = true,
+  onNlResult,
   onUpdateAndSubmitQuery,
-  onToggleVisor,
-  telemetryService,
-}: QuickSearchVisorProps) {
+  isDisabled = false,
+  disableSubmitAction = false,
+  onKqlSubmitted,
+  hasOutline = false,
+}: QuickSearchVisorPropsInternal) {
   const kibana = useKibana<ESQLEditorDeps>();
-  const { kql, core, data } = kibana.services;
+  const { kql, data, core } = kibana.services;
   const isNlToEsqlEnabled = useNlToEsqlCheck();
   const euiThemeContext = useEuiTheme();
-  const [selectedSources, setSelectedSources] = useState<EuiComboBoxOptionOption[]>([]);
   const [searchValue, setSearchValue] = useState('');
-  const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
-  const [nlValue, setNlValue] = useState('');
-  const [isNlLoading, setIsNlLoading] = useState(false);
-  const [hasConnector, setHasConnector] = useState<boolean | undefined>(undefined);
-  const connectorCheckRef = useRef(false);
-  const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
-  const kqlInputRef = useRef<HTMLDivElement>(null);
-  const initializedRef = useRef(false);
-  const userSelectedSourceRef = useRef(false);
+  const [visorMode, setVisorMode] = useRestorableState('visorMode', undefined);
+  const [kqlDataView, setKqlDataView] = useState<{ sourceQuery: string; dataView: DataView }>();
+  const [isKqlFocused, setIsKqlFocused] = useState(false);
+  const wasVisibleRef = useRef(isVisible);
+  const nlInputRef = useRef<NLInputApi>(null);
+  // No-op while the input is unmounted (KQL mode) or inert (closed inline visor)
+  const focusNlInput = useCallback(() => nlInputRef.current?.focus(), []);
+  const telemetryService = useMemo(
+    () => new ESQLEditorTelemetryService(core.analytics),
+    [core.analytics]
+  );
+
+  const {
+    nlValue,
+    setNlValue,
+    isNlLoading,
+    hasConnector,
+    onNlSubmit: submitNl,
+    onStopGeneration,
+  } = useNlGeneration({
+    query,
+    onNlResult,
+    onNlReject: focusNlInput,
+    onUpdateAndSubmitQuery,
+    telemetryService,
+  });
+  const showAskAiButton = isNlToEsqlEnabled && hasConnector === true;
   const KQLComponent = kql.autocomplete.hasQuerySuggestions('kuery') ? kql.QueryStringInput : null;
+
+  const pickerProjectRouting = usePickerProjectRouting();
 
   const onKqlValueChange = useCallback((kqlQuery: string) => {
     setSearchValue(kqlQuery);
@@ -95,282 +300,165 @@ export function QuickSearchVisor({
 
   const onKqlSubmit = useCallback(
     (kqlQuery: string) => {
-      if (selectedSources.length > 0 && kqlQuery.trim()) {
-        const selectedSourceNames = selectedSources.map((source) => source.label).join(', ');
-        if (selectedSourceNames && kqlQuery.trim()) {
-          // Support of time_series
-          const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
-          const newQuery = `${sourceCommand} ${selectedSourceNames} | WHERE KQL("""${kqlQuery.trim()}""")`;
-          onUpdateAndSubmitQuery(newQuery);
-          // Clear the search value after submitting the query
-          setSearchValue('');
-          // Reset user selection tracking when visor closes
-          userSelectedSourceRef.current = false;
-        }
+      if (isDisabled || disableSubmitAction) return;
+      const sourcesKey = getIndexPatternFromESQLQuery(query);
+      if (sourcesKey && kqlQuery.trim()) {
+        const sourceCommand = query.trim().toUpperCase().startsWith('TS ') ? 'TS' : 'FROM';
+        const newQuery = `${sourceCommand} ${sourcesKey} | WHERE KQL("""${kqlQuery.trim()}""")`;
+        onUpdateAndSubmitQuery(newQuery);
+        setSearchValue('');
+        onKqlSubmitted?.();
       }
     },
-    [selectedSources, query, onUpdateAndSubmitQuery]
+    [isDisabled, disableSubmitAction, query, onUpdateAndSubmitQuery, onKqlSubmitted]
   );
 
-  const trackNlResult = useCallback(
-    (
-      nlLength: number,
-      contextQueryLength: number,
-      startTime: number,
-      success: boolean,
-      errorCode?: string,
-      generatedQueryLength?: number
-    ) =>
-      telemetryService?.trackVisorNlSubmitted({
-        nlLength,
-        contextQueryLength,
-        success,
-        durationMs: Date.now() - startTime,
-        ...(errorCode ? { errorCode } : {}),
-        ...(generatedQueryLength !== undefined ? { generatedQueryLength } : {}),
-      }),
-    [telemetryService]
-  );
+  const onNlSubmit = useCallback(() => {
+    if (isDisabled) return;
+    // NL does not need an existing query, unlike KQL, so an empty editor can still submit it.
+    if (disableSubmitAction && query.trim()) return;
+    submitNl();
+  }, [isDisabled, disableSubmitAction, query, submitNl]);
 
-  const onNlSubmit = useCallback(async () => {
-    const trimmed = nlValue.trim();
-    if (!trimmed || isNlLoading) return;
-
-    setIsNlLoading(true);
-    const startTime = Date.now();
-    try {
-      const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
-        body: JSON.stringify({
-          nlInstruction: trimmed,
-          currentQuery: query,
-        }),
-      });
-      if (result.content) {
-        trackNlResult(
-          trimmed.length,
-          query.length,
-          startTime,
-          true,
-          undefined,
-          result.content.length
-        );
-        onUpdateAndSubmitQuery(result.content);
-        setNlValue('');
-      }
-    } catch (error) {
-      reportEsqlError(error, { errorType: 'NlToEsql' });
-      const errorCode = String(
-        (error as { body?: { statusCode?: number } })?.body?.statusCode ?? ''
-      );
-      trackNlResult(trimmed.length, query.length, startTime, false, errorCode || undefined);
-      const message =
-        (error as { body?: { message?: string } })?.body?.message ??
-        i18n.translate('esqlEditor.visor.nlError', {
-          defaultMessage: 'Failed to generate ES|QL query',
-        });
-      core.notifications.toasts.addDanger({ title: message });
-    } finally {
-      setIsNlLoading(false);
-    }
-  }, [
-    nlValue,
-    isNlLoading,
-    core.http,
-    core.notifications.toasts,
-    onUpdateAndSubmitQuery,
-    query,
-    trackNlResult,
-  ]);
-
-  const checkConnectorAvailability = useCallback(async () => {
-    if (connectorCheckRef.current) return;
-    connectorCheckRef.current = true;
-    try {
-      const res = await core.http.get<{ connectors: unknown[] }>('/internal/inference/connectors');
-      setHasConnector(res.connectors.length > 0);
-    } catch {
-      setHasConnector(false);
-    }
-  }, [core.http]);
-
-  const onModeChange = useCallback(
-    (mode: VisorMode) => {
-      setVisorMode(mode);
-      if (mode === VisorMode.NaturalLanguage) {
-        checkConnectorAvailability();
+  const onVisorModeChange = useCallback(
+    (id: VisorMode) => {
+      setVisorMode(id);
+      if (id === VisorMode.KQL) {
+        onStopGeneration();
       }
     },
-    [checkConnectorAvailability]
+    [setVisorMode, onStopGeneration]
   );
 
   useEffect(() => {
-    const sourceFromUpdatedQuery = getIndexPatternFromESQLQuery(query);
-    const sources = sourceFromUpdatedQuery
-      ? sourceFromUpdatedQuery.split(',').map((source) => ({ label: source.trim() }))
-      : [];
-    if (!initializedRef.current) {
-      if (sources.length > 0) {
-        setSelectedSources(sources);
-      }
-      setSearchValue('');
-      initializedRef.current = true;
-    } else if (sources.length > 0 && !userSelectedSourceRef.current) {
-      // Update from query prop only if user hasn't manually selected a source
-      if (!isEqual(selectedSources, sources)) {
-        setSelectedSources(sources);
-      }
-    }
-  }, [query, selectedSources]);
-
-  const sourcesKey = useMemo(
-    () => selectedSources.map((source) => source.label).join(', '),
-    [selectedSources]
-  );
+    const becameVisible = Boolean(isInline) && isVisible && !wasVisibleRef.current;
+    wasVisibleRef.current = isVisible;
+    if (!becameVisible) return;
+    document
+      .querySelector<HTMLTextAreaElement>(
+        '[data-test-subj="ESQLEditor-quick-search-visor"] textarea'
+      )
+      ?.focus();
+  }, [isInline, isVisible]);
 
   useEffect(() => {
-    if (!isVisible || !sourcesKey) {
-      setAdHocDataView(null);
+    if (!isVisible) {
+      setKqlDataView(undefined);
       return;
     }
+    // The fields only serve KQL suggestions, shown while the KQL input is focused: derive the
+    // source and look it up only then, never while the ES|QL query is typed. They are kept after
+    // blur and reused for the same source.
+    if (!isKqlFocused) {
+      return;
+    }
+    const sourceQuery = getSourceCommandQueryFromESQLQuery(query);
+    if (!sourceQuery) {
+      setKqlDataView(undefined);
+      return;
+    }
+    // Fields loaded for another source are stale.
+    setKqlDataView((current) => (current?.sourceQuery === sourceQuery ? current : undefined));
     let cancelled = false;
-    getESQLAdHocDataview({
-      dataViewsService: data.dataViews,
-      query: `FROM ${sourcesKey}`,
-      options: { idPrefix: 'esql-visor' },
-    }).then((dataView) => {
-      if (!cancelled) {
-        setAdHocDataView(dataView);
-      }
-    });
+    // Only the fields are needed, as before: skip the time field request.
+    EsqlSource.create({
+      query: sourceQuery,
+      http: core.http,
+      projectRouting: getEffectiveProjectRouting(query, pickerProjectRouting),
+      resolveTimeField: false,
+    })
+      .then((source) => registerEsqlSourceInDataViewsCache(data.dataViews, source, core.http))
+      .then(
+        (dataView) => !cancelled && setKqlDataView({ sourceQuery, dataView }),
+        () => !cancelled && setKqlDataView(undefined)
+      );
     return () => {
       cancelled = true;
     };
-  }, [isVisible, sourcesKey, data.dataViews]);
+  }, [isVisible, isKqlFocused, query, pickerProjectRouting, data.dataViews, core.http]);
 
-  useEffect(() => {
-    if (isVisible && visorMode === VisorMode.KQL && kqlInputRef.current) {
-      const textArea = kqlInputRef.current.querySelector('textarea');
-      textArea?.focus();
-    }
-  }, [isVisible, visorMode]);
-
-  const comboBoxWidth = useMemo(() => {
-    const labelLength = selectedSources.map((s) => s.label).join(', ').length || 0;
-    const maxComboBoxWidth = window.innerWidth * visorWidthPercentage * dropdownWidthPercentage;
-    return calculateWidthFromCharCount(labelLength, { maxWidth: maxComboBoxWidth });
-  }, [selectedSources]);
-
-  const styles = visorStyles(
-    euiThemeContext,
-    comboBoxWidth,
-    Boolean(isSpaceReduced),
-    isVisible,
-    visorMode
-  );
+  const hasNoSource = useMemo(() => !getIndexPatternFromESQLQuery(query), [query]);
+  // Natural language is the default once AI is available; without it there is no toggle, so KQL it is.
+  // KQL needs a source from the editor, so AI is the only usable mode while there is none.
+  const isKqlMode =
+    (!showAskAiButton || (visorMode ?? VisorMode.NaturalLanguage) === VisorMode.KQL) &&
+    !(hasNoSource && showAskAiButton);
+  const styles = visorStyles(euiThemeContext, Boolean(isInline), isVisible, hasOutline);
 
   if (!KQLComponent) {
     return null;
   }
 
+  if (isKqlMode) {
+    return (
+      <VisorLayout
+        showModeToggle={showAskAiButton}
+        isKqlMode
+        isKqlDisabled={hasNoSource}
+        onModeChange={onVisorModeChange}
+        styles={styles}
+        isVisible={isVisible}
+      >
+        <div css={[styles.inputSlot, styles.searchWrapper]}>
+          <KQLComponent
+            iconType=""
+            disableLanguageSwitcher={true}
+            indexPatterns={kqlDataView ? [kqlDataView.dataView] : []}
+            bubbleSubmitEvent={false}
+            query={{ query: searchValue, language: 'kuery' }}
+            disableAutoFocus={true}
+            isDisabled={hasNoSource}
+            placeholder={hasNoSource ? kqlNoSourcePlaceholder : searchPlaceholder}
+            onChange={(newQuery) => onKqlValueChange(newQuery.query as string)}
+            onSubmit={(newQuery) => onKqlSubmit(newQuery.query as string)}
+            appName="esqlEditorVisor"
+            dataTestSubj="esqlVisorKQLQueryInput"
+            onChangeQueryInputFocus={setIsKqlFocused}
+            size={isInline ? 's' : undefined}
+            isClearable={false}
+          />
+        </div>
+        {searchValue.trim() && (
+          <SubmitButton
+            tooltip={enterHintFilterLabel}
+            onClick={() => onKqlSubmit(searchValue)}
+            data-test-subj="esqlVisorKQLSubmit"
+          />
+        )}
+      </VisorLayout>
+    );
+  }
+
   return (
-    <EuiFlexGroup
-      gutterSize="none"
-      alignItems="center"
-      justifyContent="center"
-      responsive={false}
-      css={styles.visorContainer}
-      data-test-subj="ESQLEditor-quick-search-visor"
-      {...(!isVisible && { inert: '' })}
+    <VisorLayout
+      showModeToggle={showAskAiButton}
+      isKqlMode={false}
+      isKqlDisabled={hasNoSource}
+      onModeChange={onVisorModeChange}
+      styles={styles}
+      isVisible={isVisible}
     >
-      <EuiFlexItem grow={false} css={styles.visorWrapper}>
-        <EuiFlexGroup
-          gutterSize="none"
-          alignItems="center"
-          justifyContent="flexStart"
-          responsive={false}
-          css={styles.visorBox}
-        >
-          {isNlToEsqlEnabled && (
-            <>
-              <EuiFlexItem grow={false} css={styles.techPreviewIcon}>
-                <EuiIconTip type="flask" size="s" color="subdued" content={techPreviewTooltip} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} css={styles.modeSelectWrapper}>
-                <ModeSelector onModeChange={onModeChange} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} css={styles.separator} />
-            </>
-          )}
-          {visorMode === VisorMode.KQL || !isNlToEsqlEnabled ? (
-            <>
-              <EuiFlexItem css={styles.comboBoxWrapper}>
-                <SourcesDropdown
-                  currentSources={selectedSources.map((source) => source.label)}
-                  onChangeSources={(newSources) => {
-                    setSelectedSources(newSources.map((source) => ({ label: source })));
-                    userSelectedSourceRef.current = true;
-                  }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false} css={styles.separator} />
-              <EuiFlexItem css={styles.searchWrapper}>
-                <div ref={kqlInputRef}>
-                  <KQLComponent
-                    isDisabled={!isVisible}
-                    // If we remove the prop, the icon still appears (!!)
-                    iconType=""
-                    disableLanguageSwitcher={true}
-                    indexPatterns={adHocDataView ? [adHocDataView] : []}
-                    bubbleSubmitEvent={false}
-                    query={{
-                      query: searchValue,
-                      language: 'kuery',
-                    }}
-                    disableAutoFocus={false}
-                    placeholder={searchPlaceholder}
-                    onChange={(newQuery) => {
-                      onKqlValueChange(newQuery.query as string);
-                    }}
-                    onSubmit={(newQuery) => {
-                      onKqlSubmit(newQuery.query as string);
-                    }}
-                    appName="esqlEditorVisor"
-                    dataTestSubj="esqlVisorKQLQueryInput"
-                    size="s"
-                  />
-                </div>
-              </EuiFlexItem>
-            </>
-          ) : (
-            <EuiFlexItem css={styles.nlInputWrapper}>
-              {hasConnector === false ? (
-                <NoConnectorMessage basePath={core.http.basePath} />
-              ) : (
-                <NLInput
-                  value={nlValue}
-                  placeholder={nlPlaceholder}
-                  disabled={!isVisible || isNlLoading}
-                  onChange={setNlValue}
-                  onSubmit={onNlSubmit}
-                  inputStyles={styles.nlInput}
-                />
-              )}
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false} css={styles.closeButtonWrapper}>
-        <EuiButtonIcon
-          color="text"
-          display="base"
-          size="s"
-          iconSize="m"
-          onClick={onToggleVisor}
-          iconType="cross"
-          aria-label={closeButtonAriaLabel}
-          css={styles.closeButton}
+      <div css={styles.inputSlot}>
+        <NLInput
+          ref={nlInputRef}
+          value={nlValue}
+          placeholder={hasNoSource ? nlEmptyEditorPlaceholder : nlPlaceholder}
+          disabled={isNlLoading}
+          onChange={setNlValue}
+          onSubmit={onNlSubmit}
+          inputStyles={styles.nlInput}
         />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </div>
+      <NlVisorActions
+        isLoading={isNlLoading}
+        value={nlValue}
+        onSubmit={onNlSubmit}
+        onStop={onStopGeneration}
+        styles={styles}
+      />
+    </VisorLayout>
   );
 }
+
+export const QuickSearchVisor = withRestorableState(QuickSearchVisorInternal);
+export type QuickSearchVisorProps = ComponentPropsWithoutRef<typeof QuickSearchVisor>;

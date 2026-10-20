@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { ALERTS, DISCOVER, ONBOARDING } from '../../screens/serverless_security_header';
+import {
+  ALERTS,
+  DISCOVER,
+  ONBOARDING,
+  openNavigationPanelFor,
+} from '../../screens/serverless_security_header';
 
 const navigateTo = (page: string) => {
+  openNavigationPanelFor(page);
   cy.get(page).click();
 };
 

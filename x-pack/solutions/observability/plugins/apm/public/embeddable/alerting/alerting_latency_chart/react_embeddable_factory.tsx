@@ -12,7 +12,7 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { initializeUnsavedChanges } from '@kbn/presentation-publishing';
+import { initializeStateApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 import { APM_ALERTING_LATENCY_CHART_EMBEDDABLE } from '@kbn/apm-embeddable-common';
 import type { EmbeddableApmAlertingLatencyVizProps } from '../types';
@@ -43,8 +43,10 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
       const kuery$ = new BehaviorSubject(state.kuery);
       const filters$ = new BehaviorSubject(state.filters);
 
-      function serializeState(): EmbeddableApmAlertingLatencyVizProps {
-        return {
+      const stateApi = initializeStateApi<EmbeddableApmAlertingLatencyVizProps>({
+        parentApi,
+        uuid,
+        serializeState: () => ({
           ...titleManager.getLatestState(),
           serviceName: serviceName$.getValue(),
           transactionType: transactionType$.getValue(),
@@ -57,13 +59,7 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
           alert: alert$.getValue(),
           kuery: kuery$.getValue(),
           filters: filters$.getValue(),
-        };
-      }
-
-      const unsavedChangesApi = initializeUnsavedChanges<EmbeddableApmAlertingLatencyVizProps>({
-        parentApi,
-        uuid,
-        serializeState,
+        }),
         anyStateChange$: merge(
           titleManager.anyStateChange$,
           serviceName$.pipe(
@@ -125,26 +121,25 @@ export const getApmAlertingLatencyChartEmbeddableFactory = (deps: EmbeddableDeps
           kuery: 'referenceEquality',
           filters: 'referenceEquality',
         }),
-        onReset: (lastSaved) => {
-          titleManager.reinitializeState(lastSaved);
-          serviceName$.next(lastSaved?.serviceName ?? '');
-          transactionType$.next(lastSaved?.transactionType);
-          transactionName$.next(lastSaved?.transactionName);
-          environment$.next(lastSaved?.environment);
-          latencyThresholdInMicroseconds$.next(lastSaved?.latencyThresholdInMicroseconds);
-          rangeFrom$.next(lastSaved?.rangeFrom);
-          rangeTo$.next(lastSaved?.rangeTo);
-          rule$.next(lastSaved?.rule as EmbeddableApmAlertingLatencyVizProps['rule']);
-          alert$.next(lastSaved?.alert as EmbeddableApmAlertingLatencyVizProps['alert']);
-          kuery$.next(lastSaved?.kuery);
-          filters$.next(lastSaved?.filters);
+        applySerializedState: (nextState) => {
+          titleManager.reinitializeState(nextState);
+          serviceName$.next(nextState.serviceName ?? '');
+          transactionType$.next(nextState.transactionType);
+          transactionName$.next(nextState.transactionName);
+          environment$.next(nextState.environment);
+          latencyThresholdInMicroseconds$.next(nextState.latencyThresholdInMicroseconds);
+          rangeFrom$.next(nextState.rangeFrom);
+          rangeTo$.next(nextState.rangeTo);
+          rule$.next(nextState.rule as EmbeddableApmAlertingLatencyVizProps['rule']);
+          alert$.next(nextState.alert as EmbeddableApmAlertingLatencyVizProps['alert']);
+          kuery$.next(nextState.kuery);
+          filters$.next(nextState.filters);
         },
       });
 
       const api = finalizeApi({
         ...titleManager.api,
-        ...unsavedChangesApi,
-        serializeState,
+        ...stateApi,
       });
 
       return {

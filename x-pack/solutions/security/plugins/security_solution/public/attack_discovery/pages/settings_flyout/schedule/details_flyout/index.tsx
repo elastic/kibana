@@ -32,18 +32,19 @@ import * as i18n from './translations';
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { ConfirmationModal } from '../confirmation_modal';
-import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { Footer } from '../../footer';
 import { MIN_FLYOUT_WIDTH } from '../../constants';
 import type { AttackDiscoveryScheduleSchema } from '../edit_form/types';
-import { useUpdateAttackDiscoverySchedule } from '../logic/use_update_schedule';
-import { useGetAttackDiscoverySchedule } from '../logic/use_get_schedule';
+import { useScheduleApi } from '../logic/use_schedule_api';
 import { getDefaultQuery } from '../../../helpers';
 import { useEditForm } from '../edit_form/use_edit_form';
 import { ScheduleDefinition } from './definition';
 import { Header } from './header';
 import { ScheduleExecutionLogs } from './execution_logs';
-import { convertFormDataInBaseSchedule } from '../utils/convert_form_data';
+import {
+  convertFormDataInBaseSchedule,
+  convertFormDataToWorkflowSchedule,
+} from '../utils/convert_form_data';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { WithMissingPrivileges } from '../missing_privileges';
 
@@ -81,18 +82,19 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     featureId: 'attack_discovery',
     settings,
   });
+  const { isWorkflowsEnabled, useGetSchedule, useUpdateSchedule } = useScheduleApi();
+
   const { data: { schedule } = { schedule: undefined }, isLoading: isLoadingSchedule } =
-    useGetAttackDiscoverySchedule({
+    useGetSchedule({
       id: scheduleId,
     });
 
-  const { sourcererDataView } = useSourcererDataView();
-  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
+  const { dataView } = useDataView(PageScope.alerts);
 
   const [isEditing, setIsEditing] = useState(false);
 
   const { mutateAsync: updateAttackDiscoverySchedule, isLoading: isLoadingQuery } =
-    useUpdateAttackDiscoverySchedule();
+    useUpdateSchedule();
 
   const onUpdateSchedule = useCallback(
     async (scheduleData: AttackDiscoveryScheduleSchema) => {
@@ -102,15 +104,26 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
       }
 
       try {
-        const scheduleToUpdate = convertFormDataInBaseSchedule(
+        const convertFn = isWorkflowsEnabled
+          ? convertFormDataToWorkflowSchedule
+          : convertFormDataInBaseSchedule;
+
+        const scheduleToUpdate = convertFn(
           scheduleData,
           alertsIndexPattern ?? '',
           connector,
-          sourcererDataView,
           uiSettings,
-          experimentalDataView
+          dataView
         );
-        await updateAttackDiscoverySchedule({ id: scheduleId, scheduleToUpdate });
+        // `updateAttackDiscoverySchedule` is a union of public/workflow mutation
+        // functions with incompatible parameter types. `isWorkflowsEnabled`
+        // guarantees the correct converter was used above, making this safe.
+        await (
+          updateAttackDiscoverySchedule as (params: {
+            id: string;
+            scheduleToUpdate: typeof scheduleToUpdate;
+          }) => Promise<unknown>
+        )({ id: scheduleId, scheduleToUpdate });
         setHasUnsavedChanges(false);
         setIsEditing(false);
       } catch (err) {
@@ -120,11 +133,11 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     [
       aiConnectors,
       alertsIndexPattern,
-      sourcererDataView,
-      uiSettings,
-      experimentalDataView,
-      updateAttackDiscoverySchedule,
+      dataView,
+      isWorkflowsEnabled,
       scheduleId,
+      uiSettings,
+      updateAttackDiscoverySchedule,
     ]
   );
 
@@ -134,23 +147,25 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
     if (schedule) {
       const params = schedule.params;
       return {
-        name: schedule.name,
-        connectorId: params.apiConfig.connectorId,
+        actions: schedule.actions as RuleAction[],
         alertsSelectionSettings: {
-          query: params.query ?? getDefaultQuery(),
+          end: params.end ?? DEFAULT_END,
           filters: (params.filters as Filter[]) ?? [],
+          query: params.query ?? getDefaultQuery(),
           size: params.size,
           start: params.start ?? DEFAULT_START,
-          end: params.end ?? DEFAULT_END,
         },
+        connectorId: params.apiConfig.connectorId,
         interval: schedule.schedule.interval,
-        actions: schedule.actions as RuleAction[],
+        name: schedule.name,
+        ...(params.workflowConfig != null ? { workflowConfig: params.workflowConfig } : {}),
       };
     }
   }, [schedule]);
   const { editForm, actionButtons: editingActionButtons } = useEditForm({
     initialValue: formInitialValue,
     isLoading,
+    isWorkflowsEnabled,
     onFormMutated,
     onSave: onUpdateSchedule,
     saveButtonTitle: i18n.SCHEDULE_SAVE_BUTTON_TITLE,
@@ -185,7 +200,7 @@ export const DetailsFlyout: React.FC<Props> = React.memo(({ scheduleId, onClose 
           grow={false}
         >
           <EuiFlexItem grow={false}>
-            <WithMissingPrivileges>
+            <WithMissingPrivileges requireWorkflowsExecute>
               {(enabled) => (
                 <EuiButton
                   data-test-subj="edit"

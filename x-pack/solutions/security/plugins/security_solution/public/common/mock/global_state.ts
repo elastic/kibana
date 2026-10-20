@@ -6,8 +6,6 @@
  */
 
 import { TableId } from '@kbn/securitysolution-data-table';
-import type { DataViewSpec } from '@kbn/data-views-plugin/public';
-import { PageScope } from '../../data_view_manager/constants';
 import { AssociatedFilter } from '../../../common/notes/constants';
 import { ReqStatus } from '../../notes/store/notes.slice';
 import { HostsFields } from '../../../common/api/search_strategy/hosts/model/sort';
@@ -30,7 +28,6 @@ import {
   DEFAULT_INDEX_PATTERN,
   DEFAULT_INTERVAL_TYPE,
   DEFAULT_INTERVAL_VALUE,
-  DEFAULT_SIGNALS_INDEX,
   DEFAULT_TO,
   VIEW_SELECTION,
 } from '../../../common/constants';
@@ -39,35 +36,13 @@ import { TimelineId, TimelineTabs } from '../../../common/types/timeline';
 import { TimelineStatusEnum, TimelineTypeEnum } from '../../../common/api/timeline';
 import { mockManagementState } from '../../management/store/reducer';
 import type { ManagementState } from '../../management/types';
-import { initialSourcererState } from '../../sourcerer/store/model';
 import { allowedExperimentalValues } from '../../../common/experimental_features';
-import { getScopePatternListSelection } from '../../sourcerer/store/helpers';
-import { mockBrowserFields, mockIndexFields } from '../containers/source/mock';
 import { usersModel } from '../../explore/users/store';
 import { UsersFields } from '../../../common/search_strategy/security_solution/users/common';
 import { initialGroupingState } from '../store/grouping/reducer';
-import type { SourcererState } from '../../sourcerer/store';
 import { EMPTY_RESOLVER } from '../../resolver/store/helpers';
 import { getMockDiscoverInTimelineState } from './mock_discover_state';
 import { mockDataViewManagerState } from '../../data_view_manager/redux/mock';
-
-const mockFieldMap: DataViewSpec['fields'] = Object.fromEntries(
-  mockIndexFields.map((field) => [field.name, field])
-);
-
-export const mockSourcererState: SourcererState = {
-  ...initialSourcererState,
-  signalIndexName: `${DEFAULT_SIGNALS_INDEX}-spacename`,
-  defaultDataView: {
-    ...initialSourcererState.defaultDataView,
-    browserFields: mockBrowserFields,
-    id: DEFAULT_DATA_VIEW_ID,
-    fields: mockFieldMap,
-    loading: false,
-    patternList: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`],
-    title: [...DEFAULT_INDEX_PATTERN, `${DEFAULT_SIGNALS_INDEX}-spacename`].join(','),
-  },
-};
 
 export const mockGlobalState: State = {
   app: {
@@ -444,82 +419,6 @@ export const mockGlobalState: State = {
     [TimelineId.test]: EMPTY_RESOLVER,
     [TimelineId.active]: EMPTY_RESOLVER,
     [`securitySolution-${TableId.test}`]: EMPTY_RESOLVER,
-  },
-  sourcerer: {
-    ...mockSourcererState,
-    defaultDataView: {
-      ...mockSourcererState.defaultDataView,
-      title: `${mockSourcererState.defaultDataView.title},fakebeat-*`,
-    },
-    kibanaDataViews: [
-      {
-        ...mockSourcererState.defaultDataView,
-        title: `${mockSourcererState.defaultDataView.title},fakebeat-*`,
-      },
-    ],
-    sourcererScopes: {
-      ...mockSourcererState.sourcererScopes,
-      [PageScope.default]: {
-        ...mockSourcererState.sourcererScopes[PageScope.default],
-        selectedDataViewId: mockSourcererState.defaultDataView.id,
-        selectedPatterns: getScopePatternListSelection(
-          mockSourcererState.defaultDataView,
-          PageScope.default,
-          mockSourcererState.signalIndexName,
-          true
-        ),
-      },
-      [PageScope.alerts]: {
-        ...mockSourcererState.sourcererScopes[PageScope.alerts],
-        selectedDataViewId: mockSourcererState.defaultDataView.id,
-        selectedPatterns: getScopePatternListSelection(
-          mockSourcererState.defaultDataView,
-          PageScope.alerts,
-          mockSourcererState.signalIndexName,
-          true
-        ),
-      },
-      [PageScope.attacks]: {
-        ...mockSourcererState.sourcererScopes[PageScope.attacks],
-        selectedDataViewId: mockSourcererState.defaultDataView.id,
-        selectedPatterns: getScopePatternListSelection(
-          mockSourcererState.defaultDataView,
-          PageScope.attacks,
-          mockSourcererState.signalIndexName,
-          true
-        ),
-      },
-      [PageScope.timeline]: {
-        ...mockSourcererState.sourcererScopes[PageScope.timeline],
-        selectedDataViewId: mockSourcererState.defaultDataView.id,
-        selectedPatterns: getScopePatternListSelection(
-          mockSourcererState.defaultDataView,
-          PageScope.timeline,
-          mockSourcererState.signalIndexName,
-          true
-        ),
-      },
-      [PageScope.analyzer]: {
-        ...mockSourcererState.sourcererScopes[PageScope.default],
-        selectedDataViewId: mockSourcererState.defaultDataView.id,
-        selectedPatterns: getScopePatternListSelection(
-          mockSourcererState.defaultDataView,
-          PageScope.default,
-          mockSourcererState.signalIndexName,
-          true
-        ),
-      },
-      [PageScope.explore]: {
-        ...mockSourcererState.sourcererScopes[PageScope.default],
-        selectedDataViewId: mockSourcererState.defaultDataView.id,
-        selectedPatterns: getScopePatternListSelection(
-          mockSourcererState.defaultDataView,
-          PageScope.default,
-          mockSourcererState.signalIndexName,
-          true
-        ),
-      },
-    },
   },
   globalUrlParam: {},
   /**

@@ -9,6 +9,8 @@ export {
   splitSizeAndUnits,
   serializeAsESLifecycle,
   deserializeESLifecycle,
+  resolveLogisticsLifecycle,
+  HOT_ONLY_INFINITE_DATA_RETENTION,
 } from './data_stream_utils';
 
 export {
@@ -20,7 +22,7 @@ export {
   serializeLegacyTemplate,
 } from './template_serialization';
 
-export { getTemplateParameter } from './utils';
+export { getTemplateParameter, isRecord } from './utils';
 
 export {
   deserializeComponentTemplate,

@@ -7,7 +7,10 @@
 
 import { KIBANA_NAVIGATION_TOGGLE } from '../screens/kibana_navigation';
 
-export const navigateFromKibanaCollapsibleTo = (page: string) => {
+export const navigateFromKibanaCollapsibleTo = (page: string, panelOpener?: string) => {
+  if (panelOpener) {
+    cy.get(panelOpener).click();
+  }
   cy.get(page).click();
 };
 

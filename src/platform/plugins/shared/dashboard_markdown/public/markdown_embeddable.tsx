@@ -14,7 +14,7 @@ import {
   apiCanAddNewPanel,
   apiCanFocusPanel,
   apiIsPresentationContainer,
-  initializeUnsavedChanges,
+  initializeStateApi,
   getViewModeSubject,
   initializeTitleManager,
   titleComparators,
@@ -90,9 +90,6 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
       };
     };
 
-    const serializeState = () =>
-      isByReference ? serializeByReference(libraryId) : serializeByValue();
-
     const resetEditingState = () => {
       isEditing$.next(false);
       overrideHoverActions$.next(false);
@@ -102,10 +99,10 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
       }
     };
 
-    const unsavedChangesApi = initializeUnsavedChanges<MarkdownEmbeddableState>({
+    const stateApi = initializeStateApi<MarkdownEmbeddableState>({
       uuid,
       parentApi,
-      serializeState,
+      serializeState: () => (isByReference ? serializeByReference(libraryId) : serializeByValue()),
       anyStateChange$: merge(
         titleManager.anyStateChange$,
         content$.pipe(
@@ -125,23 +122,22 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
           ref_id: 'skip',
         };
       },
-      onReset: (lastSaved) => {
-        titleManager.reinitializeState(lastSaved);
+      applySerializedState: (nextState) => {
+        titleManager.reinitializeState(nextState);
         // There are no unsaved changes to reset for
         // by reference 'content' or 'settings' since they are saved on apply.
         if (!isByReference) {
-          content$.next((initialState as MarkdownByValueState).content);
-          settings$.next((initialState as MarkdownByValueState).settings);
+          content$.next((nextState as MarkdownByValueState).content);
+          settings$.next((nextState as MarkdownByValueState).settings);
         }
       },
     });
 
     const api = finalizeApi({
-      ...unsavedChangesApi,
+      ...stateApi,
       ...titleManager.api,
       defaultTitle$,
       defaultDescription$,
-      serializeState,
       onEdit: async ({ isNewPanel = false } = {}) => {
         if (!apiCanAddNewPanel(parentApi)) throw new IncompatibleActionError();
         isEditing$.next(true);
@@ -180,6 +176,7 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
       canLinkToLibrary: async () => !isByReference,
       canUnlinkFromLibrary: async () => isByReference,
       hasLibraryItemWithTitle,
+      supportsJsonExport: true,
     });
 
     return {
@@ -201,9 +198,12 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
           uiPlugins,
         } = getDefaultEuiMarkdownPlugins({
           processingConfig: {
-            linkProps: {
-              target: settings?.open_links_in_new_tab ? '_blank' : '_self',
-            },
+            linkProps:
+              viewMode === 'non-interactive'
+                ? { href: undefined, disabled: true }
+                : {
+                    target: settings?.open_links_in_new_tab ? '_blank' : '_self',
+                  },
           },
         });
 
@@ -220,7 +220,7 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
         );
 
         const editorContent =
-          viewMode === 'view' || !isEditing ? (
+          viewMode !== 'edit' || !isEditing ? (
             <MarkdownRenderer
               parsingPluginList={parsingPluginList}
               processingPluginList={processingPluginList}
@@ -263,15 +263,7 @@ export const markdownEmbeddableFactory: EmbeddablePublicDefinition<
             />
           );
 
-        return (
-          <div
-            css={flexCss}
-            data-shared-item
-            data-rendering-count={1} // TODO: Fix this as part of https://github.com/elastic/kibana/issues/179376
-          >
-            {editorContent}
-          </div>
-        );
+        return <div css={flexCss}>{editorContent}</div>;
       },
     };
   },

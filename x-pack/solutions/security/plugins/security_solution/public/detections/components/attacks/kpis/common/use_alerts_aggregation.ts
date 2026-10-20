@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo } from 'react';
+import { useCallback, useEffect, useMemo } from 'react';
 import { buildEsQuery } from '@kbn/es-query';
 import type { Filter, Query } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
@@ -15,6 +15,7 @@ import { useGlobalTime } from '../../../../../common/containers/use_global_time'
 import type { AlertsQueryName } from '../../../../containers/detection_engine/alerts/use_query';
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
 import { fetchQueryUnifiedAlerts } from '../../../../containers/detection_engine/alerts/api';
+import { useInspectButton } from '../../../alerts_kpis/common/hooks';
 
 export interface UseAlertsAggregationProps {
   /** Optional array of filters to apply to the query */
@@ -25,6 +26,8 @@ export interface UseAlertsAggregationProps {
   aggs: Record<string, estypes.AggregationsAggregationContainer>;
   /** Name of the query for APM tracking */
   queryName: AlertsQueryName;
+  /** Optional unique ID for global query registration (defaults to queryName) */
+  uniqueQueryId?: string;
   /** Optional size for the query (defaults to 0 as this is an aggregation query) */
   size?: number;
 }
@@ -39,9 +42,10 @@ export const useAlertsAggregation = <Aggs>({
   query,
   aggs,
   queryName,
+  uniqueQueryId,
   size = 0,
 }: UseAlertsAggregationProps) => {
-  const { from, to } = useGlobalTime();
+  const { from, to, deleteQuery, setQuery } = useGlobalTime();
   const { uiSettings } = useKibana().services;
 
   const additionalFilters = useMemo(() => {
@@ -75,7 +79,14 @@ export const useAlertsAggregation = <Aggs>({
   );
 
   // Get the aggregation data
-  const { data, loading, refetch, setQuery } = useQueryAlerts<{}, Aggs>({
+  const {
+    data,
+    loading,
+    refetch: refetchQuery,
+    request,
+    response,
+    setQuery: setAlertsQuery,
+  } = useQueryAlerts<{}, Aggs>({
     fetchMethod: fetchQueryUnifiedAlerts,
     query: alertsQuery,
     skip: false,
@@ -84,8 +95,24 @@ export const useAlertsAggregation = <Aggs>({
 
   // Set the aggregation query
   useEffect(() => {
-    setQuery(alertsQuery);
-  }, [alertsQuery, setQuery]);
+    setAlertsQuery(alertsQuery);
+  }, [alertsQuery, setAlertsQuery]);
+
+  const refetch = useCallback(() => {
+    if (refetchQuery) {
+      refetchQuery();
+    }
+  }, [refetchQuery]);
+
+  useInspectButton({
+    deleteQuery,
+    loading,
+    response,
+    setQuery,
+    refetch,
+    request,
+    uniqueQueryId: uniqueQueryId ?? queryName,
+  });
 
   return {
     data,

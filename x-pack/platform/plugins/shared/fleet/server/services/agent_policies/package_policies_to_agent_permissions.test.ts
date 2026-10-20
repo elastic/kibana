@@ -8,6 +8,8 @@
 jest.mock('../epm/packages');
 jest.mock('../app_context');
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+
 import { DATA_STREAM_TYPE_VAR_NAME, DATASET_VAR_NAME } from '../../../common/constants';
 import type { PackagePolicy } from '../../types';
 import { PackagePolicyValidationError } from '../../errors';
@@ -21,6 +23,7 @@ import {
   getDataStreamPrivileges,
   storedPackagePoliciesToAgentPermissions,
   UNIVERSAL_PROFILING_PERMISSIONS,
+  UNIVERSAL_PROFILING_QUEUE_PERMISSIONS,
 } from './package_policies_to_agent_permissions';
 
 const packageInfoCache = new Map();
@@ -691,6 +694,113 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
     });
   });
 
+  it('Filters out disallowed cluster privileges and logs a warning', async () => {
+    const mockLogger = loggingSystemMock.createLogger();
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-123',
+        name: 'test-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        elasticsearch: {
+          privileges: {
+            cluster: ['monitor', 'all'],
+          },
+        },
+        inputs: [
+          {
+            type: 'test-logs',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'some-logs' },
+                compiled_stream: { data_stream: { dataset: 'compiled' } },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions).toMatchObject({
+      'package-policy-uuid-test-123': {
+        cluster: ['monitor'],
+      },
+    });
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('package-policy-uuid-test-123')
+    );
+    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('all'));
+  });
+
+  it('Omits cluster descriptor when all declared cluster privileges are disallowed', async () => {
+    const mockLogger = loggingSystemMock.createLogger();
+    jest.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
+
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-uuid-test-123',
+        name: 'test-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        elasticsearch: {
+          privileges: {
+            cluster: ['all', 'manage_security'],
+          },
+        },
+        inputs: [
+          {
+            type: 'test-logs',
+            enabled: true,
+            streams: [
+              {
+                id: 'test-logs',
+                enabled: true,
+                data_stream: { type: 'logs', dataset: 'some-logs' },
+                compiled_stream: { data_stream: { dataset: 'compiled' } },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    expect(permissions?.['package-policy-uuid-test-123']).not.toHaveProperty('cluster');
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('package-policy-uuid-test-123')
+    );
+  });
+
   it('Returns the dataset for osquery_manager package', async () => {
     const packagePolicies: PackagePolicy[] = [
       {
@@ -775,8 +885,12 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       'package-policy-uuid-test-123': {
         indices: [
           {
-            names: ['profiling-*'],
+            names: ['profiling-*', 'profiles-*'],
             privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+          },
+          {
+            names: ['.profiling-sq-*'],
+            privileges: UNIVERSAL_PROFILING_QUEUE_PERMISSIONS,
           },
         ],
       },
@@ -817,7 +931,56 @@ describe('storedPackagePoliciesToAgentPermissions()', () => {
       'package-policy-uuid-test-123': {
         indices: [
           {
-            names: ['profiling-*'],
+            names: ['profiling-*', 'profiles-*'],
+            privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+          },
+        ],
+      },
+    });
+  });
+
+  it('Returns Universal Profiling permissions for a non-dynamic OTel profiles input', async () => {
+    const packagePolicies: PackagePolicy[] = [
+      {
+        id: 'package-policy-otel-profiles',
+        name: 'profiling-otel-policy',
+        namespace: 'test',
+        enabled: true,
+        package: { name: 'test_package', version: '0.0.0', title: 'Test Package' },
+        inputs: [
+          {
+            type: 'otelcol',
+            enabled: true,
+            streams: [
+              {
+                id: 'otel-profiles',
+                enabled: true,
+                data_stream: { type: 'profiles', dataset: 'profilingreceiver' },
+              },
+            ],
+          },
+        ],
+        created_at: '',
+        updated_at: '',
+        created_by: '',
+        updated_by: '',
+        revision: 1,
+        policy_id: '',
+        policy_ids: [''],
+      },
+    ];
+
+    const permissions = await storedPackagePoliciesToAgentPermissions(
+      packageInfoCache,
+      'test',
+      packagePolicies
+    );
+    // profiles is owned end-to-end by Universal Profiling, not managed as a profiles-<dataset> data stream.
+    expect(permissions).toMatchObject({
+      'package-policy-otel-profiles': {
+        indices: [
+          {
+            names: ['profiling-*', 'profiles-*'],
             privileges: UNIVERSAL_PROFILING_PERMISSIONS,
           },
         ],
@@ -2470,6 +2633,34 @@ describe('getDataStreamPrivileges()', () => {
     expect(privileges).toMatchObject({
       names: ['logs-*-*'],
       privileges: ['auto_configure', 'create_doc'],
+    });
+  });
+
+  it('targets Universal Profiling index patterns for the profiles signal regardless of dataset/namespace', () => {
+    const dataStream = { type: 'profiles', dataset: 'profilingreceiver' } as DataStreamMeta;
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
+
+    // profiles is owned end-to-end by Universal Profiling; permissions cover both legacy
+    // profiling-* custom indices and future profiles-* data streams.
+    expect(privileges).toEqual({
+      names: ['profiling-*', 'profiles-*'],
+      privileges: UNIVERSAL_PROFILING_PERMISSIONS,
+    });
+  });
+
+  it('uses custom privileges for the profiles signal when present', () => {
+    const dataStream = {
+      type: 'profiles',
+      dataset: 'profilingreceiver',
+      elasticsearch: {
+        privileges: { indices: ['create_doc'] },
+      },
+    } as DataStreamMeta;
+    const privileges = getDataStreamPrivileges(dataStream, 'namespace');
+
+    expect(privileges).toEqual({
+      names: ['profiling-*', 'profiles-*'],
+      privileges: ['create_doc'],
     });
   });
 });

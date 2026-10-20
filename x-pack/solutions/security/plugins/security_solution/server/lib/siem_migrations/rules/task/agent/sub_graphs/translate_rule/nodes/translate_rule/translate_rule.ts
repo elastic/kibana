@@ -13,6 +13,7 @@ import {
   type GetTranslateSplToEsqlParams,
 } from '../../../../../../../common/task/agent/helpers/translate_spl_to_esql';
 import type { GraphNode } from '../../types';
+import { formatLookupResourcesContext } from '../../../../../../../common/task/util/format_lookup_resource';
 import {
   getElasticRiskScoreFromOriginalRule,
   getElasticSeverityFromOriginalRule,
@@ -28,12 +29,15 @@ export const getTranslateRuleNode = (params: GetTranslateSplToEsqlParams): Graph
       state.integration?.data_streams?.map((dataStream) => dataStream.index_pattern).join(',') ||
       'logs-*';
 
-    const knowledgeBase = state.integration?.knowledge_base ?? '';
+    const lookupResourcesContext = formatLookupResourcesContext(state.resources.lookup ?? []);
+    const knowledgeBase = [state.integration?.knowledge_base ?? '', lookupResourcesContext]
+      .filter((value) => value.trim() !== '')
+      .join('\n\n');
 
     let esqlQuery: string | undefined;
     let comments: MigrationComments = [];
 
-    if (vendor === 'qradar') {
+    if (vendor === 'qradar' || vendor === 'microsoft-sentinel') {
       params.logger.debug(
         `Translating rule "${state.original_rule.title}" using NL to ESQL for vendor: ${vendor}`
       );

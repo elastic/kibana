@@ -73,7 +73,7 @@ class TagModal extends FtrService {
       // Close the popover before moving to the next input, as it can get in the way of interacting with other elements
       await this.testSubjects.existOrFail('euiSaturation');
       await this.retry.try(async () => {
-        if (await this.testSubjects.exists('euiSaturation', { timeout: 10 })) {
+        if (await this.testSubjects.exists('euiSaturation')) {
           await this.browser.pressKeys(this.browser.keys.ENTER);
         }
         await this.testSubjects.missingOrFail('euiSaturation', { timeout: 250 });
@@ -187,7 +187,6 @@ class TagModal extends FtrService {
  */
 class TagAssignmentFlyout extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
-  private readonly find = this.ctx.getService('find');
 
   constructor(ctx: FtrProviderContext, private readonly page: TagManagementPageObject) {
     super(ctx);
@@ -233,9 +232,7 @@ class TagAssignmentFlyout extends FtrService {
    * Wait until the assignable object results are displayed in the flyout.
    */
   async waitUntilResultsAreLoaded() {
-    return this.find.waitForDeletedByCssSelector(
-      '*[data-test-subj="assignFlyoutResultList"] .euiLoadingSpinner'
-    );
+    return this.testSubjects.waitForDeleted('assignFlyoutResultList-loading');
   }
 
   /**

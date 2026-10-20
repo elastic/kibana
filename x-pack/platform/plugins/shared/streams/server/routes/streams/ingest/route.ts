@@ -7,7 +7,7 @@
 
 import { badData, badRequest } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
-import { Streams } from '@kbn/streams-schema';
+import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
 import { WiredIngestUpsertRequest, IngestUpsertRequest } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
@@ -52,7 +52,9 @@ const readIngestRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string().describe('The name of the stream.') }),
+    path: z.object({
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
+    }),
   }),
   handler: async ({
     params,
@@ -109,14 +111,14 @@ const upsertIngestRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string().describe('The name of the stream.'),
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
     }),
     body: z.object({
       ingest: IngestUpsertRequest.right,
     }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
-    const { streamsClient, getQueryClient, attachmentClient } = await getScopedClients({
+    const { streamsClient, attachmentClient } = await getScopedClients({
       request,
     });
 
@@ -138,12 +140,9 @@ const upsertIngestRoute = createServerRoute({
       );
     }
 
-    const queryClient = await getQueryClient();
-
     if (WiredIngestUpsertRequest.is(ingest)) {
       return await updateWiredIngest({
         streamsClient,
-        queryClient,
         attachmentClient,
         name,
         ingest,
@@ -152,7 +151,6 @@ const upsertIngestRoute = createServerRoute({
 
     return await updateClassicIngest({
       streamsClient,
-      queryClient,
       attachmentClient,
       name,
       ingest,

@@ -8,9 +8,26 @@
  */
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
-import { METRICS_INFO_EVENT_TYPE } from './constants';
+import {
+  MAX_DIMENSIONS_REACHED_EVENT_TYPE,
+  METRIC_AGGREGATION_CONFIG_CHANGED_EVENT_TYPE,
+  METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE,
+  METRICS_INFO_EVENT_TYPE,
+} from './constants';
 
 export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
+  analytics.registerEventType({
+    eventType: MAX_DIMENSIONS_REACHED_EVENT_TYPE,
+    schema: {
+      max_dimensions: {
+        type: 'integer',
+        _meta: {
+          description: 'Maximum number of dimensions allowed in the Metrics experience',
+        },
+      },
+    },
+  });
+
   analytics.registerEventType({
     eventType: METRICS_INFO_EVENT_TYPE,
     schema: {
@@ -40,10 +57,10 @@ export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
       },
       multi_value_counts: {
         properties: {
-          data_streams: {
+          index_names: {
             type: 'integer',
             _meta: {
-              description: 'Count of METRICS_INFO rows where data_stream had more than one value',
+              description: 'Count of METRICS_INFO rows where index_name had more than one value',
             },
           },
           field_types: {
@@ -64,6 +81,72 @@ export const registerMetricsEbtEvents = (analytics: AnalyticsServiceSetup) => {
               description: 'Count of METRICS_INFO rows where unit had more than one value',
             },
           },
+        },
+      },
+    },
+  });
+
+  analytics.registerEventType({
+    eventType: METRIC_AGGREGATION_CONFIG_CHANGED_EVENT_TYPE,
+    schema: {
+      metric_type: {
+        type: 'keyword',
+        _meta: {
+          description: 'Metric type whose aggregation configuration changed',
+        },
+      },
+      previous_aggregation: {
+        type: 'keyword',
+        _meta: {
+          description: 'Aggregation configuration before the change',
+        },
+      },
+      new_aggregation: {
+        type: 'keyword',
+        _meta: {
+          description: 'Aggregation configuration after the change',
+        },
+      },
+    },
+  });
+
+  // Only bounded, non-sensitive values: never the query text or the
+  // Elasticsearch failure reason, both of which can carry user data.
+  analytics.registerEventType({
+    eventType: METRICS_ESQL_QUERY_FAILURE_EVENT_TYPE,
+    schema: {
+      error_type: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'Elasticsearch error type of the failed ES|QL query, read from the cause chain so a generic wrapper does not hide the reason (e.g. circuit_breaking_exception, verification_exception, parsing_exception)',
+          optional: true,
+        },
+      },
+      error_category: {
+        type: 'keyword',
+        _meta: {
+          description:
+            'High-level failure classification: user_input, resource_limit, application, or unknown',
+        },
+      },
+      status_code: {
+        type: 'integer',
+        _meta: {
+          description: 'HTTP status returned by Elasticsearch, when one could be recovered',
+          optional: true,
+        },
+      },
+      query_type: {
+        type: 'keyword',
+        _meta: {
+          description: 'ES|QL source command of the failed query: TS, FROM, or unknown',
+        },
+      },
+      profile: {
+        type: 'keyword',
+        _meta: {
+          description: 'Discover profile that owns the failing chart section, to allow filtering',
         },
       },
     },

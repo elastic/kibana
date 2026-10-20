@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { ApiPrivileges } from '@kbn/core-security-server';
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/server';
 import { PLUGIN_NAME } from '../common';
 import { CLOUD_CONNECT_API_KEY_TYPE } from '../common/constants';
@@ -35,7 +36,10 @@ export const cloudConnectedFeature: KibanaFeatureConfig = {
         read: [CLOUD_CONNECT_API_KEY_TYPE],
       },
       ui: ['show', 'configure'],
-      api: [],
+      api: [
+        ApiPrivileges.manage(CLOUD_CONNECTED_FEATURE_ID),
+        ApiPrivileges.read(CLOUD_CONNECTED_FEATURE_ID),
+      ],
     },
     read: {
       app: [CLOUD_CONNECTED_APP_ID, 'kibana'],
@@ -48,7 +52,7 @@ export const cloudConnectedFeature: KibanaFeatureConfig = {
         read: [CLOUD_CONNECT_API_KEY_TYPE],
       },
       ui: ['show'],
-      api: [],
+      api: [ApiPrivileges.read(CLOUD_CONNECTED_FEATURE_ID)],
     },
   },
 };

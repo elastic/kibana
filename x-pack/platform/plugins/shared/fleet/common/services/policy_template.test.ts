@@ -23,7 +23,10 @@ import {
   isIntegrationPolicyTemplate,
   getNormalizedInputs,
   getNormalizedDataStreams,
+  getPolicyTemplateDataStreamPaths,
   filterPolicyTemplatesTiles,
+  getEnabledPolicyTemplates,
+  getEnabledInputsByPolicyTemplate,
   hasMultipleEnabledPolicyTemplates,
   getPolicyTemplateInputDefinition,
   registryInputAllowsDynamicSignalTypes,
@@ -631,6 +634,48 @@ describe('getNormalizedDataStreams', () => {
   });
 });
 
+describe('getPolicyTemplateDataStreamPaths', () => {
+  it('returns the declared data_streams for integration templates', () => {
+    expect(
+      getPolicyTemplateDataStreamPaths({ name: 'nginx' }, {
+        name: 'nginx',
+        data_streams: ['access', 'error'],
+        inputs: [{ type: 'logfile' }],
+      } as any)
+    ).toEqual(['access', 'error']);
+  });
+
+  it('returns an empty array for integration templates without data_streams', () => {
+    expect(
+      getPolicyTemplateDataStreamPaths({ name: 'nginx' }, {
+        name: 'nginx',
+        inputs: [{ type: 'logfile' }],
+      } as any)
+    ).toEqual([]);
+  });
+
+  it('returns the synthesized data stream path for input-only templates', () => {
+    expect(
+      getPolicyTemplateDataStreamPaths({ name: 'aws_cloudwatch' }, {
+        name: 'ec2',
+        input: 'otelcol',
+        title: 'EC2',
+        description: 'EC2',
+      } as any)
+    ).toEqual(['aws_cloudwatch.ec2']);
+  });
+
+  it('scopes each input-only template to its own data stream path', () => {
+    const packageInfo = { name: 'aws_cloudwatch' };
+    expect(
+      getPolicyTemplateDataStreamPaths(packageInfo, { name: 'rds', input: 'otelcol' } as any)
+    ).toEqual(['aws_cloudwatch.rds']);
+    expect(
+      getPolicyTemplateDataStreamPaths(packageInfo, { name: 'sqs', input: 'otelcol' } as any)
+    ).toEqual(['aws_cloudwatch.sqs']);
+  });
+});
+
 describe('getNormalizedInputs - dynamic_signal_types propagation', () => {
   it('should propagate dynamic_signal_types from input-only template into the returned RegistryInput', () => {
     const template: RegistryPolicyInputOnlyTemplate = {
@@ -1075,6 +1120,73 @@ describe('filterPolicyTemplatesTiles', () => {
         status: 'not_installed',
       },
     ]);
+  });
+});
+
+describe('getEnabledPolicyTemplates', () => {
+  it('returns the distinct templates of enabled inputs in first-appearance order', () => {
+    expect(
+      getEnabledPolicyTemplates({
+        inputs: [
+          { enabled: true, policy_template: 'cspm' },
+          { enabled: true, policy_template: 'cspm' },
+          { enabled: false, policy_template: 'kspm' },
+          { enabled: true },
+          { enabled: true, policy_template: 'cloudtrail' },
+        ],
+      })
+    ).toEqual(['cspm', 'cloudtrail']);
+  });
+
+  it('returns an empty array for an undefined policy or missing inputs', () => {
+    expect(getEnabledPolicyTemplates(undefined)).toEqual([]);
+    expect(getEnabledPolicyTemplates({})).toEqual([]);
+  });
+});
+
+describe('getEnabledInputsByPolicyTemplate', () => {
+  it('groups the enabled input types by policy template, templates in first-appearance order', () => {
+    expect(
+      getEnabledInputsByPolicyTemplate({
+        inputs: [
+          { type: 'cloudbeat/cis_aws', enabled: true, policy_template: 'cspm' },
+          { type: 'aws-s3', enabled: true, policy_template: 'cloudtrail' },
+          { type: 'cloudbeat/asset_inventory_aws', enabled: true, policy_template: 'cspm' },
+        ],
+      })
+    ).toEqual([
+      { name: 'cspm', enabledInputs: ['cloudbeat/asset_inventory_aws', 'cloudbeat/cis_aws'] },
+      { name: 'cloudtrail', enabledInputs: ['aws-s3'] },
+    ]);
+  });
+
+  it('deduplicates repeated input types within a policy template', () => {
+    expect(
+      getEnabledInputsByPolicyTemplate({
+        inputs: [
+          { type: 'aws-s3', enabled: true, policy_template: 'guardduty' },
+          { type: 'aws-s3', enabled: true, policy_template: 'guardduty' },
+        ],
+      })
+    ).toEqual([{ name: 'guardduty', enabledInputs: ['aws-s3'] }]);
+  });
+
+  it('ignores disabled inputs and inputs with no policy template', () => {
+    expect(
+      getEnabledInputsByPolicyTemplate({
+        inputs: [
+          { type: 'aws-s3', enabled: true, policy_template: 'guardduty' },
+          { type: 'aws-cloudwatch', enabled: false, policy_template: 'guardduty' },
+          { type: 'httpjson', enabled: false, policy_template: 'cloudtrail' },
+          { type: 'cel', enabled: true },
+        ],
+      })
+    ).toEqual([{ name: 'guardduty', enabledInputs: ['aws-s3'] }]);
+  });
+
+  it('returns an empty array for an undefined policy or missing inputs', () => {
+    expect(getEnabledInputsByPolicyTemplate(undefined)).toEqual([]);
+    expect(getEnabledInputsByPolicyTemplate({})).toEqual([]);
   });
 });
 

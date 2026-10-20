@@ -27,6 +27,12 @@ describe('alert_url', () => {
       const url = getAlertUrlErrorCount('service name', 'serviceEnv');
       expect(url).toBe('/app/apm/services/service%20name/errors?environment=serviceEnv');
     });
+
+    it('falls back to the service inventory when the service name is missing', () => {
+      expect(getAlertUrlErrorCount(undefined, 'serviceEnv')).toBe(
+        '/app/apm/services?environment=serviceEnv'
+      );
+    });
   });
 
   describe('getAlertUrlErrorDetail', () => {
@@ -67,6 +73,18 @@ describe('alert_url', () => {
       const url = getAlertUrlTransaction('service name', 'serviceEnv', 'transactionType');
       expect(url).toBe(
         '/app/apm/services/service%20name?transactionType=transactionType&environment=serviceEnv'
+      );
+    });
+
+    it('falls back to the service inventory when the service name is missing', () => {
+      expect(getAlertUrlTransaction(undefined, 'serviceEnv', 'transactionType')).toBe(
+        '/app/apm/services?transactionType=transactionType&environment=serviceEnv'
+      );
+    });
+
+    it('encodes a missing transaction type as an empty query value', () => {
+      expect(getAlertUrlTransaction('serviceName', 'serviceEnv', undefined)).toBe(
+        '/app/apm/services/serviceName?transactionType=&environment=serviceEnv'
       );
     });
   });

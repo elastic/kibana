@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { map } from 'rxjs';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 
 /** Subscribes to `services.spaces.getActiveSpace$()` and returns the active space id. */

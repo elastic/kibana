@@ -38,9 +38,10 @@ export function getEsdsl({
       }
       const request = getKibanaRequest();
       const savedObjectsClient = core.savedObjects.getScopedClient(request);
+      const scopedClient = search.asScoped(request);
       return {
         uiSettingsClient: core.uiSettings.asScopedToClient(savedObjectsClient),
-        search: search.asScoped(request).search,
+        searchService: scopedClient,
       };
     },
   });

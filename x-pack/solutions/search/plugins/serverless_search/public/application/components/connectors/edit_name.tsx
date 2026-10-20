@@ -9,15 +9,16 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
 import {
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiTitle,
+  EuiButton,
   EuiButtonIcon,
   EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiForm,
-  EuiButton,
   EuiFormLabel,
   EuiSpacer,
+  EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import type { Connector } from '@kbn/search-connectors';
@@ -42,9 +43,12 @@ export const EditName: React.FC<EditNameProps> = ({ connector, isDisabled }) => 
   const { isLoading, mutate } = useMutation({
     mutationFn: async (inputName: string) => {
       const body = { name: inputName };
-      await http.post(`/internal/serverless_search/connectors/${connector.id}/name`, {
-        body: JSON.stringify(body),
-      });
+      await http.post(
+        `/internal/serverless_search/connectors/${encodeURIComponent(connector.id)}/name`,
+        {
+          body: JSON.stringify(body),
+        }
+      );
       return inputName;
     },
     onSuccess: (successData) => {
@@ -76,16 +80,23 @@ export const EditName: React.FC<EditNameProps> = ({ connector, isDisabled }) => 
               justify-content: center;
             `}
           >
-            <EuiButtonIcon
-              data-test-subj="serverlessSearchEditNameButton"
-              isDisabled={isDisabled}
-              color="text"
-              iconType="pencil"
-              aria-label={i18n.translate('xpack.serverlessSearch.connectors.editNameLabel', {
+            <EuiToolTip
+              content={i18n.translate('xpack.serverlessSearch.connectors.editNameLabel', {
                 defaultMessage: 'Edit connector name',
               })}
-              onClick={() => setIsEditing(true)}
-            />
+              disableScreenReaderOutput
+            >
+              <EuiButtonIcon
+                data-test-subj="serverlessSearchEditNameButton"
+                isDisabled={isDisabled}
+                color="text"
+                iconType="pencil"
+                aria-label={i18n.translate('xpack.serverlessSearch.connectors.editNameLabel', {
+                  defaultMessage: 'Edit connector name',
+                })}
+                onClick={() => setIsEditing(true)}
+              />
+            </EuiToolTip>
           </EuiFlexItem>
         </>
       ) : (

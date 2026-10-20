@@ -12,6 +12,7 @@ import type {
   SuspendProcessActionOutputContent,
   ResponseActionParametersWithEntityId,
   ResponseActionParametersWithPid,
+  ResponseActionParametersWithProcessData,
 } from '../../../../../common/endpoint/types';
 import { useSendSuspendProcessRequest } from '../../../hooks/response_actions/use_send_suspend_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
@@ -38,7 +39,11 @@ export const SuspendProcessActionResult = memo<
       : undefined;
   }, [command.args.args, command.commandDefinition?.meta]);
 
-  return useConsoleActionSubmitter<SuspendProcessRequestBody, SuspendProcessActionOutputContent>({
+  return useConsoleActionSubmitter<
+    SuspendProcessRequestBody,
+    SuspendProcessActionOutputContent,
+    ResponseActionParametersWithProcessData
+  >({
     ResultComponent,
     // @ts-expect-error upgrade typescript v5.4.5
     setStore,

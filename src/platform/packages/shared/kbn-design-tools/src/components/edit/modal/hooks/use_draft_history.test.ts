@@ -15,7 +15,8 @@ import type {
   DraftMediaEdit,
 } from '../../../../lib/history/draft_history';
 import type { DimensionRecord } from '../../../../edit_engine/clone_element';
-import { setImportant } from '../../../../edit_engine/clone_element';
+import { setImportant } from '../../../../lib/dom/set_important';
+import { EUI_CARD_ROOT_CLASS, EUI_CARD_IMAGE_CLASS } from '../../../../lib/constants';
 
 describe('useDraftHistory', () => {
   const makeStyleEdit = (overrides: Partial<DraftStyleEdit> = {}): DraftStyleEdit => {
@@ -279,6 +280,38 @@ describe('useDraftHistory', () => {
       act(() => result.current.redo());
       expect(el.style.getPropertyValue('width')).toBe('');
       expect(el.style.getPropertyValue('height')).toBe('');
+    });
+
+    it('should re-run padding reflow on redo after undo', () => {
+      const { result } = renderHook(() => useDraftHistory());
+      const wrapper = document.createElement('div');
+      const cloneEl = document.createElement('div');
+      cloneEl.classList.add(EUI_CARD_ROOT_CLASS);
+      cloneEl.style.padding = '16px';
+      const imageWrapper = document.createElement('div');
+      imageWrapper.classList.add(EUI_CARD_IMAGE_CLASS);
+      wrapper.appendChild(cloneEl);
+      cloneEl.appendChild(imageWrapper);
+
+      const edit = makeStyleEdit({
+        cloneElement: cloneEl,
+        property: 'padding',
+        before: '16px',
+        after: '12px',
+        reflowRoot: wrapper,
+      });
+      const records: DimensionRecord[] = [
+        { element: imageWrapper, property: 'width', value: '', priority: '' },
+      ];
+
+      act(() => result.current.push(edit, records));
+      imageWrapper.style.removeProperty('width');
+
+      act(() => result.current.undo());
+      expect(imageWrapper.style.getPropertyValue('width')).toBe('');
+
+      act(() => result.current.redo());
+      expect(imageWrapper.style.getPropertyValue('width')).toBe('calc(100% + 24px)');
     });
 
     it('should restore dimensions on undo after pushBatch with dimensions', () => {

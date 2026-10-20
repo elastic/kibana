@@ -7,6 +7,7 @@
 
 import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 import type { GraphResponse } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import type { ProjectRouting } from '@kbn/cloud-security-posture-common/schema/graph/v1';
 import { fetchGraph } from './fetch_graph';
 import type { EsQuery, EntityId, OriginEventId } from './types';
 import { parseRecords } from './parse_records';
@@ -27,9 +28,11 @@ export interface GetGraphParams {
     esQuery?: EsQuery;
     entityIds?: EntityId[];
     pinnedIds?: string[];
+    projectRouting?: ProjectRouting;
   };
   showUnknownTarget: boolean;
   nodesLimit?: number;
+  integrationRuntimeEvalsEnabled?: boolean;
 }
 
 export const getGraph = async ({
@@ -43,16 +46,20 @@ export const getGraph = async ({
     esQuery,
     entityIds,
     pinnedIds,
+    projectRouting,
   },
   showUnknownTarget,
   nodesLimit,
+  integrationRuntimeEvalsEnabled,
 }: GetGraphParams): Promise<Pick<GraphResponse, 'nodes' | 'edges' | 'messages'>> => {
   indexPatterns = indexPatterns ?? [`.alerts-security.alerts-${spaceId}`, 'logs-*'];
 
   logger.trace(
     `Fetching graph for [originEventIds: ${
       originEventIds?.map((e) => e.id).join(', ') ?? 'none'
-    }] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}]`
+    }] in [spaceId: ${spaceId}] [indexPatterns: ${indexPatterns.join(',')}] [projectRouting: ${
+      projectRouting ?? 'default'
+    }]`
   );
 
   const { events, relationships, entities } = await fetchGraph({
@@ -67,6 +74,8 @@ export const getGraph = async ({
     esQuery,
     pinnedIds,
     entityIds,
+    projectRouting,
+    integrationRuntimeEvalsEnabled,
   });
 
   return parseRecords(logger, events, relationships, entities, nodesLimit);

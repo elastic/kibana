@@ -13,6 +13,8 @@ import type { Action } from '../../components/content_framework/section/section_
 import {
   OPEN_IN_DISCOVER_LABEL,
   OPEN_IN_DISCOVER_ARIA_LABEL,
+  OPEN_IN_A_DISCOVER_TAB_LABEL,
+  OPEN_IN_A_DISCOVER_TAB_ARIA_LABEL,
 } from '../../components/observability/traces/common/constants';
 import { useDocViewerExtensionActionsContext } from '../use_doc_viewer_extension_actions';
 
@@ -48,9 +50,9 @@ export function useOpenInDiscoverSectionAction(
 
     const actionBase = {
       dataTestSubj,
-      label: OPEN_IN_DISCOVER_LABEL,
-      icon: 'discoverApp',
-      ariaLabel: OPEN_IN_DISCOVER_ARIA_LABEL,
+      label: canOpenInNewTab ? OPEN_IN_A_DISCOVER_TAB_LABEL : OPEN_IN_DISCOVER_LABEL,
+      icon: canOpenInNewTab ? 'productDiscover' : 'discoverApp',
+      ariaLabel: canOpenInNewTab ? OPEN_IN_A_DISCOVER_TAB_ARIA_LABEL : OPEN_IN_DISCOVER_ARIA_LABEL,
       ebt: {
         action: EBT_CLICK_ACTIONS.OPEN_IN_DISCOVER,
         element: ebt?.element,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Store } from 'redux';
+import type { Store } from 'redux-v4';
 import type { ReactWrapper as GenericReactWrapper } from 'enzyme';
 import type { LocationDescriptor } from 'history';
 

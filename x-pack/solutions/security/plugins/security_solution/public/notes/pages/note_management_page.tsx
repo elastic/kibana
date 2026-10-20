@@ -15,10 +15,11 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux-v7';
 import { css } from '@emotion/react';
 import { DeleteNoteButtonIcon } from '../components/delete_note_button';
-import { Title } from '../../common/components/header_page/title';
+import { SecurityAppHeader } from '../../common/components/app_header';
+import { useKibana } from '../../common/lib/kibana';
 import { useSuggestUsers } from '../../common/components/user_profiles/use_suggest_users';
 // TODO unify this type from the api with the one in public/common/lib/note
 import type { Note } from '../../../common/api/timeline';
@@ -120,6 +121,9 @@ const pageSizeOptions = [10, 25, 50, 100];
  */
 export const NoteManagementPage = () => {
   const dispatch = useDispatch();
+  const {
+    services: { docLinks },
+  } = useKibana();
   const notes = useSelector(selectAllNotes);
   const isPlatinumPlus = useLicense().isPlatinumPlus();
   const notesReversed = useSelector(selectAllReversed);
@@ -245,7 +249,11 @@ export const NoteManagementPage = () => {
 
   return (
     <>
-      <Title title={i18n.NOTES} />
+      <SecurityAppHeader
+        title={i18n.NOTES}
+        spacing="largeBleed"
+        docLink={docLinks.links.siem.notesPage}
+      />
       <EuiSpacer size="m" />
       <SearchRow />
       <EuiSpacer size="m" />

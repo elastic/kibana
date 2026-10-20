@@ -43,23 +43,7 @@ export interface LogsByLevelParams extends BaseLogsParams {
   level: string;
 }
 
-export interface IWorkflowEventLoggerService {
-  createLogger(context: WorkflowEventLoggerContext): IWorkflowEventLogger;
-  createWorkflowLogger(workflowId: string, workflowName?: string): IWorkflowEventLogger;
-  createExecutionLogger(
-    workflowId: string,
-    executionId: string,
-    workflowName?: string
-  ): IWorkflowEventLogger;
-  createStepLogger(
-    workflowId: string,
-    executionId: string,
-    stepId: string,
-    stepName?: string,
-    stepType?: string,
-    workflowName?: string
-  ): IWorkflowEventLogger;
-
+export interface IWorkflowLogsQueryService {
   getExecutionLogs(params: ExecutionLogsParams): Promise<LogSearchResult>;
   getStepLogs(params: StepLogsParams): Promise<LogSearchResult>;
   getLogsByLevel(params: LogsByLevelParams): Promise<LogSearchResult>;
@@ -85,6 +69,10 @@ export interface WorkflowEventLoggerOptions {
   enableConsoleLogging?: boolean;
 }
 
+export interface WorkflowEventFlushOptions {
+  signal?: AbortSignal;
+}
+
 export interface IWorkflowEventLogger {
   logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
   logError(message: string, error?: Error, additionalData?: Partial<WorkflowLogEvent>): void;
@@ -98,5 +86,4 @@ export interface IWorkflowEventLogger {
     stepName?: string,
     stepType?: string
   ): IWorkflowEventLogger;
-  flushEvents(): Promise<void>;
 }

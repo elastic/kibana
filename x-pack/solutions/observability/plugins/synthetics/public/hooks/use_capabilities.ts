@@ -15,16 +15,37 @@ export const useCanEditSynthetics = () => {
   return !!useKibana().services?.application?.capabilities.uptime.save;
 };
 
+/**
+ * Whether the current user can trigger manual test runs. True when they can edit
+ * Synthetics (write) OR have been granted the run-only `canRunTestManually` sub-feature.
+ */
+export const useCanRunTestManually = () => {
+  const capabilities = useKibana().services?.application?.capabilities.uptime;
+  return !!(capabilities?.save || capabilities?.canRunTestManually);
+};
+
+/**
+ * Whether the current user can manage Synthetics/Uptime alert rules. True when
+ * they can edit Synthetics (write) OR have been granted the `canManageRules`
+ * sub-feature.
+ */
+export const useCanManageRules = () => {
+  const capabilities = useKibana().services?.application?.capabilities.uptime;
+  return !!(capabilities?.save || capabilities?.canManageRules);
+};
+
+export const useCanUsePublicLocationsPermission = (): boolean =>
+  !!(useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true);
+
 export const useCanUsePublicLocations = (monLocations?: MonitorLocations) => {
-  const canUsePublicLocations =
-    useKibana().services?.application?.capabilities.uptime.elasticManagedLocationsEnabled ?? true;
+  const canUsePublicLocations = useCanUsePublicLocationsPermission();
   const publicLocations = monLocations?.some((loc) => loc.isServiceManaged);
 
   if (!publicLocations) {
     return true;
   }
 
-  return !!canUsePublicLocations;
+  return canUsePublicLocations;
 };
 
 export const useCanReadSyntheticsIndex = () => {

@@ -15,6 +15,7 @@ import {
   getWatchlistRiskModifierValidation,
   useResetEditsOnFlyoutOpen,
 } from './use_watchlist_form_state_shared';
+import { useRuleBasedSourceState } from './use_rule_based_source_state';
 
 export interface UseEditWatchlistFormStateParams {
   watchlistId?: string;
@@ -38,7 +39,6 @@ export const useEditWatchlistFormState = ({
     useState<CreateWatchlistRequestBodyInput>(defaultWatchlist);
   const [watchlist, setWatchlist] = useState<CreateWatchlistRequestBodyInput>(defaultWatchlist);
   const [hasUserEdits, setHasUserEdits] = useState(false);
-  const [isSourceValid, setSourceValid] = useState(true);
 
   const setWatchlistField = <K extends keyof CreateWatchlistRequestBodyInput>(
     key: K,
@@ -48,8 +48,11 @@ export const useEditWatchlistFormState = ({
     setHasUserEdits(true);
   };
 
-  const { initialWatchlist: fetchedWatchlist, ruleBasedSourceIds } =
-    useGetWatchlistFormData(normalizedWatchlistId);
+  const {
+    initialWatchlist: fetchedWatchlist,
+    ruleBasedSourceIds,
+    indexSourceWithMissingApiKey,
+  } = useGetWatchlistFormData(normalizedWatchlistId);
 
   useResetEditsOnFlyoutOpen(setHasUserEdits);
 
@@ -68,6 +71,14 @@ export const useEditWatchlistFormState = ({
     }
   }, [normalizedWatchlistId]);
 
+  const ruleBasedSource = useRuleBasedSourceState({
+    watchlistName: watchlist.name,
+    isEditMode: true,
+    isManaged: watchlist.managed ?? false,
+    initialEntitySources: watchlist.entitySources,
+    onFieldChange: setWatchlistField,
+  });
+
   const isMissingId = !normalizedWatchlistId;
   const hasChanges =
     watchlist.name.trim() !== initialWatchlist.name.trim() ||
@@ -83,18 +94,20 @@ export const useEditWatchlistFormState = ({
     isNameTooLong ||
     isDescriptionTooLong ||
     isRiskModifierInvalid ||
-    !isSourceValid;
+    !ruleBasedSource.isValid ||
+    ruleBasedSource.isValidatingTimestamp;
 
   return {
     watchlist,
     normalizedWatchlistId,
     ruleBasedSourceIds: ruleBasedSourceIds ?? {},
+    indexSourceWithMissingApiKey,
     isEditMode: true,
     isDisabled,
     isNameTooLong,
     isDescriptionTooLong,
     isRiskModifierInvalid,
     setWatchlistField,
-    setSourceValid,
+    ruleBasedSource,
   };
 };

@@ -153,6 +153,23 @@ describe('getApmErrorCountRuleData', () => {
       );
     });
 
+    it('excludes documents with an environment when ENVIRONMENT_NOT_DEFINED', () => {
+      const alert: TopAlert = {
+        ...mockAlert,
+        fields: {
+          ...mockAlert.fields,
+          [SERVICE_ENVIRONMENT]: 'ENVIRONMENT_NOT_DEFINED',
+        },
+      } as unknown as TopAlert;
+
+      const result = getApmErrorCountRuleData({ alert, rule: baseRule })!;
+
+      expect(result).toBeDefined();
+      expect(result.discoverAppLocatorParams?.query?.query).toBe(
+        '(service.name:"my-service" AND NOT service.environment:* AND processor.event:"error")'
+      );
+    });
+
     it('uses kuery as query language', () => {
       const result = getApmErrorCountRuleData({ alert: mockAlert, rule: baseRule })!;
 

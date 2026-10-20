@@ -5,222 +5,166 @@
  * 2.0.
  */
 
-import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
-import {
-  prepareAttachmentPresentation,
-  getConversationAttachmentsSection,
-  getConversationAttachmentsSystemMessages,
-} from './attachment_presentation';
+import type {
+  AttachmentVersionRef,
+  VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
+import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import { formatAttachmentsMetadata } from './attachment_presentation';
 
-const createMockAttachment = (
+const makeVersionedAttachment = (
   id: string,
   type: string,
-  data: unknown,
-  options: { active?: boolean; description?: string; estimatedTokens?: number } = {}
+  options: {
+    version?: number;
+    description?: string;
+    estimatedTokens?: number;
+    data?: unknown;
+  } = {}
 ): VersionedAttachment => ({
   id,
   type,
   versions: [
     {
-      version: 1,
-      data,
+      version: options.version ?? 1,
+      data: options.data ?? {},
       created_at: new Date().toISOString(),
       content_hash: 'hash123',
       estimated_tokens: options.estimatedTokens ?? 100,
     },
   ],
-  current_version: 1,
-  active: options.active ?? true,
+  current_version: options.version ?? 1,
+  active: true,
   description: options.description,
 });
 
-describe('attachment_presentation', () => {
-  describe('prepareAttachmentPresentation', () => {
-    it('should return empty content for no attachments', async () => {
-      const result = await prepareAttachmentPresentation([]);
+const makeRef = (
+  attachment: VersionedAttachment,
+  options: {
+    version?: AttachmentVersionRef['version'];
+    operation?: AttachmentVersionRef['operation'];
+    actor?: AttachmentVersionRef['actor'];
+  } = {}
+): AttachmentVersionRef => ({
+  attachment_id: attachment.id,
+  version: options?.version ? options.version : attachment.versions[0].version,
+  ...(options?.operation ? { operation: options.operation } : {}),
+  ...(options?.actor ? { actor: options.actor } : {}),
+});
 
-      expect(result.mode).toBe('inline');
-      expect(result.content).toBe('');
-      expect(result.activeCount).toBe(0);
-    });
+const makeStateManager = (records: VersionedAttachment[]): AttachmentStateManager =>
+  ({
+    getAttachmentRecord: (id: string) => records.find((r) => r.id === id),
+  } as AttachmentStateManager);
 
-    it('should choose inline mode for few attachments (<=5)', async () => {
-      const attachments = [
-        createMockAttachment('1', 'text', 'Hello world', { description: 'Test' }),
-        createMockAttachment('2', 'json', { key: 'value' }),
-        createMockAttachment('3', 'text', 'Another text'),
-      ];
-
-      const result = await prepareAttachmentPresentation(attachments);
-
-      expect(result.mode).toBe('inline');
-      expect(result.activeCount).toBe(3);
-      expect(result.content).toContain('mode="inline"');
-      expect(result.content).toContain('count="3"');
-      expect(result.content).toContain('Hello world');
-    });
-
-    it('should choose summary mode for many attachments (>5)', async () => {
-      const attachments = Array.from({ length: 6 }, (_, i) =>
-        createMockAttachment(`${i}`, 'text', `Content ${i}`)
-      );
-
-      const result = await prepareAttachmentPresentation(attachments);
-
-      expect(result.mode).toBe('summary');
-      expect(result.activeCount).toBe(6);
-      expect(result.content).toContain('mode="summary"');
-      expect(result.content).toContain('Too many attachments');
-      expect(result.content).not.toContain('Content 0'); // Data not shown in summary
-    });
-
-    it('should allow configurable threshold', async () => {
-      const attachments = [
-        createMockAttachment('1', 'text', 'Content 1'),
-        createMockAttachment('2', 'text', 'Content 2'),
-        createMockAttachment('3', 'text', 'Content 3'),
-      ];
-
-      const result = await prepareAttachmentPresentation(attachments, { threshold: 2 });
-
-      expect(result.mode).toBe('summary'); // 3 > 2 threshold
-    });
-
-    it('should exclude deleted attachments from count', async () => {
-      const attachments = [
-        createMockAttachment('1', 'text', 'Active', { active: true }),
-        createMockAttachment('2', 'text', 'Deleted', { active: false }),
-        createMockAttachment('3', 'text', 'Active 2', { active: true }),
-      ];
-
-      const result = await prepareAttachmentPresentation(attachments);
-
-      expect(result.activeCount).toBe(2);
-      expect(result.content).toContain('count="2"');
-    });
-
-    it('should truncate large content in inline mode', async () => {
-      const largeContent = 'x'.repeat(15000);
-      const attachments = [createMockAttachment('1', 'text', largeContent)];
-
-      const result = await prepareAttachmentPresentation(attachments, { maxContentLength: 10000 });
-
-      expect(result.content).toContain('[content truncated');
-      expect(result.content.length).toBeLessThan(largeContent.length);
-    });
-
-    it('should handle visualization type as JSON', async () => {
-      const attachments = [
-        createMockAttachment('1', 'visualization', {
-          query: 'My Chart',
-          visualization: { layers: [] },
-          chart_type: 'bar',
-          esql: 'FROM index',
-        }),
-      ];
-
-      const result = await prepareAttachmentPresentation(attachments);
-
-      expect(result.content).toContain('My Chart');
-      expect(result.content).toContain('"chart_type"'); // Full JSON stringified content shown
-    });
-
-    it('should include description in XML attributes', async () => {
-      const attachments = [
-        createMockAttachment('1', 'text', 'Content', { description: 'My notes' }),
-      ];
-
-      const result = await prepareAttachmentPresentation(attachments);
-
-      expect(result.content).toContain('description="My notes"');
-    });
-
-    it('should escape XML special characters in description', async () => {
-      const attachments = [
-        createMockAttachment('1', 'text', 'Content', { description: 'Test <>&"\'' }),
-      ];
-
-      const result = await prepareAttachmentPresentation(attachments);
-
-      expect(result.content).toContain('&lt;');
-      expect(result.content).toContain('&gt;');
-      expect(result.content).toContain('&amp;');
-    });
-
-    it('should prefer formatted content when formatter is provided', async () => {
-      const attachments = [createMockAttachment('1', 'text', 'raw')];
-      const formatter = jest.fn(async () => 'formatted content');
-
-      const result = await prepareAttachmentPresentation(attachments, undefined, formatter);
-
-      expect(formatter).toHaveBeenCalledTimes(1);
-      expect(result.content).toContain('formatted content');
-    });
+describe('formatAttachmentsMetadata', () => {
+  it('returns empty string for no attachment refs', () => {
+    const stateManager = makeStateManager([]);
+    expect(formatAttachmentsMetadata([], stateManager)).toBe('');
   });
 
-  describe('getConversationAttachmentsSection', () => {
-    it('should return empty string when presentation is undefined', () => {
-      expect(getConversationAttachmentsSection(undefined)).toBe('');
+  it('renders metadata for a single attachment ref', () => {
+    const attachment = makeVersionedAttachment('1', 'text', {
+      description: 'Test',
+      estimatedTokens: 42,
+      data: 'Hello world',
     });
+    const stateManager = makeStateManager([attachment]);
 
-    it('should return empty string for no attachments', async () => {
-      const presentation = await prepareAttachmentPresentation([]);
-      expect(getConversationAttachmentsSection(presentation)).toBe('');
-    });
+    const result = formatAttachmentsMetadata(
+      [makeRef(attachment, { operation: 'created', actor: 'user' })],
+      stateManager
+    );
 
-    it('should return inline mode instructions for few attachments', async () => {
-      const attachments = [createMockAttachment('1', 'text', 'Content')];
-      const presentation = await prepareAttachmentPresentation(attachments);
-      const section = getConversationAttachmentsSection(presentation);
-
-      expect(section).toContain('1 attachment');
-      expect(section).toContain('attachment_read');
-      expect(section).toContain('content truncated');
-      expect(section).not.toContain('MUST use attachment tools');
-    });
-
-    it('should return summary mode instructions for many attachments', async () => {
-      const attachments = Array.from({ length: 6 }, (_, i) =>
-        createMockAttachment(`${i}`, 'text', `Content ${i}`)
-      );
-      const presentation = await prepareAttachmentPresentation(attachments);
-      const section = getConversationAttachmentsSection(presentation);
-
-      expect(section).toContain('6 attachment');
-      expect(section).toContain('MUST use attachment tools');
-      expect(section).toContain('attachment_read');
-    });
-
-    it('should place the XML content between preamble and instructions', async () => {
-      const attachments = [createMockAttachment('1', 'text', 'Hello world')];
-      const presentation = await prepareAttachmentPresentation(attachments);
-      const section = getConversationAttachmentsSection(presentation);
-
-      const titleIndex = section.indexOf('## Conversation Attachments');
-      const xmlIndex = section.indexOf('<conversation-attachments');
-      const instructionsIndex = section.indexOf('You can:');
-
-      expect(titleIndex).toBeGreaterThanOrEqual(0);
-      expect(xmlIndex).toBeGreaterThan(titleIndex);
-      expect(instructionsIndex).toBeGreaterThan(xmlIndex);
-    });
+    expect(result).toContain('count="1"');
+    expect(result).toContain('attachment_id="1"');
+    expect(result).toContain('type="text"');
+    expect(result).toContain('version="1"');
+    expect(result).toContain('estimated_tokens="42"');
+    expect(result).toContain('description="Test"');
+    expect(result).toContain('operation="created"');
+    expect(result).toContain('actor="user"');
+    // Content is never inlined — only metadata.
+    expect(result).not.toContain('Hello world');
   });
 
-  describe('getConversationAttachmentsSystemMessages', () => {
-    it('should return empty array when there are no attachments', async () => {
-      const presentation = await prepareAttachmentPresentation([]);
-      expect(getConversationAttachmentsSystemMessages(presentation)).toEqual([]);
-    });
+  it('renders metadata for multiple attachment refs', () => {
+    const attachments = Array.from({ length: 6 }, (_, i) =>
+      makeVersionedAttachment(`${i}`, 'text')
+    );
+    const stateManager = makeStateManager(attachments);
+    const refs = attachments.map((a) => makeRef(a));
 
-    it('should wrap the section content as a system message', async () => {
-      const attachments = [createMockAttachment('1', 'text', 'Content')];
-      const presentation = await prepareAttachmentPresentation(attachments);
-      const messages = getConversationAttachmentsSystemMessages(presentation);
+    const result = formatAttachmentsMetadata(refs, stateManager);
 
-      expect(messages).toHaveLength(1);
-      const [role, content] = messages[0] as [string, string];
-      expect(role).toBe('system');
-      expect(content).toBe(getConversationAttachmentsSection(presentation));
+    expect(result).toContain('count="6"');
+    for (let i = 0; i < 6; i++) {
+      expect(result).toContain(`attachment_id="${i}"`);
+    }
+  });
+
+  it('returns undefined if all refs getAttachmentRecord returns undefined', () => {
+    const stateManager = makeStateManager([]);
+
+    const result = formatAttachmentsMetadata(
+      [{ attachment_id: 'missing-id', version: 1 }],
+      stateManager
+    );
+
+    expect(result).toBe('');
+  });
+
+  it('falls back to latest version when the requested version does not exist on the record', () => {
+    const attachment = makeVersionedAttachment('1', 'text', { version: 1 });
+    const stateManager = makeStateManager([attachment]);
+
+    const result = formatAttachmentsMetadata([makeRef(attachment, { version: 99 })], stateManager);
+
+    expect(result).toContain('attachment_id="1"');
+  });
+
+  it('includes operation and actor from the ref in XML attributes', () => {
+    const attachment = makeVersionedAttachment('1', 'text');
+    const stateManager = makeStateManager([attachment]);
+
+    const result = formatAttachmentsMetadata(
+      [makeRef(attachment, { operation: 'created', actor: 'agent' })],
+      stateManager
+    );
+
+    expect(result).toContain('operation="created"');
+    expect(result).toContain('actor="agent"');
+  });
+
+  it('excludes operation and actor from XML attributes when not present on ref', () => {
+    const attachment = makeVersionedAttachment('1', 'text');
+    const stateManager = makeStateManager([attachment]);
+
+    const result = formatAttachmentsMetadata([makeRef(attachment)], stateManager);
+
+    expect(result).not.toContain('operation=');
+    expect(result).not.toContain('actor=');
+  });
+
+  it('includes description in XML attributes', () => {
+    const attachment = makeVersionedAttachment('1', 'text', { description: 'My notes' });
+    const stateManager = makeStateManager([attachment]);
+
+    const result = formatAttachmentsMetadata([makeRef(attachment)], stateManager);
+
+    expect(result).toContain('description="My notes"');
+  });
+
+  it('escapes XML special characters in description', () => {
+    const attachment = makeVersionedAttachment('1', 'text', {
+      description: 'Test <>&"\'',
     });
+    const stateManager = makeStateManager([attachment]);
+
+    const result = formatAttachmentsMetadata([makeRef(attachment)], stateManager);
+
+    expect(result).toContain('&lt;');
+    expect(result).toContain('&gt;');
+    expect(result).toContain('&amp;');
   });
 });

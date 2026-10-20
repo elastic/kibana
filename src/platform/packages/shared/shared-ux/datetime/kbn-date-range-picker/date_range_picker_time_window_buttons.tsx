@@ -14,7 +14,8 @@ import moment from 'moment';
 import { EuiButtonGroup, type EuiButtonGroupOptionProps } from '@elastic/eui';
 
 import { useDateRangePickerContext } from './date_range_picker_context';
-import { formatDateRange } from './utils';
+import { durationToDisplayFullText } from './format';
+import { formatInputDateRange } from './utils';
 import { timeWindowButtonsTexts as translations } from './translations';
 
 /** Configuration for time window buttons. */
@@ -57,8 +58,9 @@ const BUTTON_ID_NEXT = 'next';
  * Provides step forward/backward and zoom out/in actions.
  */
 export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig }) {
-  const { timeRange, applyRange, compressed, disabled, settings } = useDateRangePickerContext();
-  const timePrecision = settings.timePrecision ?? 's';
+  const { timeRange, applyRange, compressed, disabled, disabledTooltip, readOnly } =
+    useDateRangePickerContext();
+  const isDisabled = disabled || readOnly;
   const {
     showShiftArrows = true,
     showZoomOut = true,
@@ -66,15 +68,22 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
     zoomFactor = DEFAULT_ZOOM_FACTOR,
   } = config;
 
-  const { stepForward, stepBackward, expandWindow, shrinkWindow, isWindowDurationZero, isInvalid } =
-    useTimeWindow(
-      timeRange.start,
-      timeRange.end,
-      timeRange.startDate,
-      timeRange.endDate,
-      applyRange,
-      { zoomFactor, timePrecision }
-    );
+  const {
+    stepForward,
+    stepBackward,
+    expandWindow,
+    shrinkWindow,
+    isWindowDurationZero,
+    isInvalid,
+    durationText,
+  } = useTimeWindow(
+    timeRange.start,
+    timeRange.end,
+    timeRange.startDate,
+    timeRange.endDate,
+    applyRange,
+    { zoomFactor }
+  );
 
   const onChange = useCallback(
     (id: string) => {
@@ -92,6 +101,8 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
     [stepBackward, expandWindow, shrinkWindow, stepForward]
   );
 
+  const disabledReason = isDisabled ? disabledTooltip : undefined;
+
   const options = useMemo<EuiButtonGroupOptionProps[]>(() => {
     const items: EuiButtonGroupOptionProps[] = [];
 
@@ -101,8 +112,12 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         label: translations.previousLabel,
         title: '',
         iconType: 'chevronSingleLeft',
-        isDisabled: disabled || isInvalid || isWindowDurationZero,
-        toolTipContent: isInvalid ? translations.cannotShiftInvalid : translations.previousTooltip,
+        isDisabled: isDisabled || isInvalid || isWindowDurationZero,
+        toolTipContent:
+          disabledReason ??
+          (isInvalid
+            ? translations.cannotShiftInvalid
+            : translations.previousTooltip(durationText)),
         'data-test-subj': 'dateRangePickerPreviousButton',
       });
     }
@@ -113,8 +128,10 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         label: translations.zoomOutLabel,
         title: '',
         iconType: 'magnifyMinus',
-        isDisabled: disabled || isInvalid,
-        toolTipContent: isInvalid ? translations.cannotZoomOutInvalid : translations.zoomOutTooltip,
+        isDisabled: isDisabled || isInvalid,
+        toolTipContent:
+          disabledReason ??
+          (isInvalid ? translations.cannotZoomOutInvalid : translations.zoomOutTooltip),
         'data-test-subj': 'dateRangePickerZoomOutButton',
       });
     }
@@ -125,12 +142,14 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         label: translations.zoomInLabel,
         title: '',
         iconType: 'magnifyPlus',
-        isDisabled: disabled || isInvalid || isWindowDurationZero,
-        toolTipContent: isInvalid
-          ? translations.cannotZoomInInvalid
-          : isWindowDurationZero
-          ? translations.cannotZoomInFurther
-          : translations.zoomInTooltip,
+        isDisabled: isDisabled || isInvalid || isWindowDurationZero,
+        toolTipContent:
+          disabledReason ??
+          (isInvalid
+            ? translations.cannotZoomInInvalid
+            : isWindowDurationZero
+            ? translations.cannotZoomInFurther
+            : translations.zoomInTooltip),
         'data-test-subj': 'dateRangePickerZoomInButton',
       });
     }
@@ -141,14 +160,25 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
         label: translations.nextLabel,
         title: '',
         iconType: 'chevronSingleRight',
-        isDisabled: disabled || isInvalid || isWindowDurationZero,
-        toolTipContent: isInvalid ? translations.cannotShiftInvalid : translations.nextTooltip,
+        isDisabled: isDisabled || isInvalid || isWindowDurationZero,
+        toolTipContent:
+          disabledReason ??
+          (isInvalid ? translations.cannotShiftInvalid : translations.nextTooltip(durationText)),
         'data-test-subj': 'dateRangePickerNextButton',
       });
     }
 
     return items;
-  }, [showShiftArrows, showZoomOut, showZoomIn, disabled, isInvalid, isWindowDurationZero]);
+  }, [
+    showShiftArrows,
+    showZoomOut,
+    showZoomIn,
+    isDisabled,
+    isInvalid,
+    isWindowDurationZero,
+    durationText,
+    disabledReason,
+  ]);
 
   if (options.length === 0) {
     return null;
@@ -165,7 +195,7 @@ export function TimeWindowButtons({ config }: { config: TimeWindowButtonsConfig 
       idToSelectedMap={{}}
       onChange={onChange}
       isIconOnly
-      isDisabled={disabled}
+      isDisabled={isDisabled}
       buttonSize={compressed ? 's' : 'm'}
       color="text"
       data-test-subj="dateRangePickerTimeWindowButtons"
@@ -208,7 +238,7 @@ function useTimeWindow(
   startDate: Date | null,
   endDate: Date | null,
   apply: (range: { start: string; end: string }, textOverride?: string) => void,
-  options: { zoomFactor: number | string; timePrecision: import('./types').TimePrecision }
+  options: { zoomFactor: number | string }
 ) {
   // Prefer pre-parsed dates when available to avoid passing non-standard date
   // strings (e.g. "Jan 2, 2025, 01:00:00") through dateMath.parse → moment(),
@@ -218,28 +248,36 @@ function useTimeWindow(
   const isInvalid = !min || !min.isValid() || !max || !max.isValid();
   const windowDuration = isInvalid ? -1 : max.diff(min);
   const isWindowDurationZero = windowDuration === 0;
+  const durationText = isInvalid ? '' : durationToDisplayFullText(min.toDate(), max.toDate());
   const zoomMultiplier = parseZoomFactor(options.zoomFactor);
   const zoomDelta = windowDuration * (zoomMultiplier / 2);
-  const { timePrecision } = options;
 
   const applyDates = useCallback(
     (s: moment.Moment, e: moment.Moment) => {
       apply(
         { start: s.toISOString(), end: e.toISOString() },
-        formatDateRange(s.toDate(), e.toDate(), timePrecision)
+        formatInputDateRange(s.toDate(), e.toDate())
       );
     },
-    [apply, timePrecision]
+    [apply]
   );
 
+  // Shifts by the elapsed duration of the current window. Range bounds are
+  // inclusive, so the adjacent window starts one ms after the current end
+  // (and ends one ms before the current start); otherwise the boundary ms
+  // would belong to both windows. Since the shift is a fixed number of ms,
+  // a window spanning whole local days drifts by an hour when it crosses a
+  // DST transition.
   const stepForward = useCallback(() => {
     if (isInvalid || isWindowDurationZero) return;
-    applyDates(moment(max), moment(max).add(windowDuration, 'ms'));
+    const nextStart = moment(max).add(1, 'ms');
+    applyDates(nextStart, moment(nextStart).add(windowDuration, 'ms'));
   }, [isInvalid, isWindowDurationZero, max, windowDuration, applyDates]);
 
   const stepBackward = useCallback(() => {
     if (isInvalid || isWindowDurationZero) return;
-    applyDates(moment(min).subtract(windowDuration, 'ms'), moment(min));
+    const previousEnd = moment(min).subtract(1, 'ms');
+    applyDates(moment(previousEnd).subtract(windowDuration, 'ms'), previousEnd);
   }, [isInvalid, isWindowDurationZero, min, windowDuration, applyDates]);
 
   const expandWindow = useCallback(() => {
@@ -253,5 +291,13 @@ function useTimeWindow(
     applyDates(moment(min).add(zoomDelta, 'ms'), moment(max).subtract(zoomDelta, 'ms'));
   }, [isInvalid, isWindowDurationZero, min, max, zoomDelta, applyDates]);
 
-  return { stepForward, stepBackward, expandWindow, shrinkWindow, isWindowDurationZero, isInvalid };
+  return {
+    stepForward,
+    stepBackward,
+    expandWindow,
+    shrinkWindow,
+    isWindowDurationZero,
+    isInvalid,
+    durationText,
+  };
 }

@@ -68,7 +68,6 @@ export const PolicyEndpointCount = memo<
     );
   }
   return (
-    // eslint-disable-next-line @elastic/eui/href-or-on-click
     <EuiLink href={toRouteUrl} data-test-subj={dataTestSubj} onClick={clickHandler} {...otherProps}>
       {children}
     </EuiLink>

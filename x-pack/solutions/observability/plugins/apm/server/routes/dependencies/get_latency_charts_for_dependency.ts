@@ -6,6 +6,7 @@
  */
 
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { LatencyChartsDependencyResponse } from '@kbn/apm-api-shared';
 import { SPAN_DESTINATION_SERVICE_RESOURCE, SPAN_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getMetricsDateHistogramParams } from '../../lib/helpers/metrics';
@@ -104,11 +105,6 @@ async function getLatencyChartsForDependencyForTimeRange({
       };
     }) ?? []
   );
-}
-
-export interface LatencyChartsDependencyResponse {
-  currentTimeseries: Array<{ x: number; y: number }>;
-  comparisonTimeseries: Array<{ x: number; y: number }> | null;
 }
 
 export async function getLatencyChartsForDependency({

@@ -11,6 +11,7 @@ import React from 'react';
 import { act, render, screen, within, fireEvent } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { SERVICE_PROVIDERS, ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 import { TabularPage } from './tabular_page';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 
@@ -145,25 +146,21 @@ jest.mock('@kbn/kibana-react-plugin/public', () => {
     ...actual,
     useKibana: jest.fn(() => ({
       services: {
-        cloud: {
-          isCloudEnabled: false,
-        },
+        cloud: { isCloudEnabled: false },
         application: {
           capabilities: {
-            cloudConnect: {
-              show: true,
-              configure: true,
-            },
+            cloudConnect: { show: true, configure: true },
+            searchInferenceEndpoints: { show: true, manage: true },
           },
           navigateToApp: jest.fn(),
         },
-        uiSettings: {
-          get: jest.fn().mockReturnValue(true),
-        },
+        uiSettings: { get: jest.fn().mockReturnValue(true) },
       },
     })),
   };
 });
+
+const mockUseKibana = jest.requireMock('@kbn/kibana-react-plugin/public').useKibana as jest.Mock;
 
 const renderTabularPageWithProviders = () => {
   return render(
@@ -365,7 +362,7 @@ describe('When the tabular page is loaded', () => {
         },
         {
           groupId: 'openai',
-          label: 'OpenAI',
+          label: SERVICE_PROVIDERS[ServiceProviderKeys.openai].name,
           countLabel: '1 endpoint',
         },
       ];
@@ -423,5 +420,41 @@ describe('When the tabular page is loaded', () => {
 
     // 11 endpoints total
     expect(screen.getByTestId('endpointStatsEndpointsCount')).toHaveTextContent('11');
+  });
+
+  describe('read-only mode (manage: false)', () => {
+    beforeEach(() => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          cloud: { isCloudEnabled: false },
+          application: {
+            capabilities: {
+              cloudConnect: { show: true, configure: true },
+              searchInferenceEndpoints: { show: true, manage: false },
+            },
+            navigateToApp: jest.fn(),
+          },
+          uiSettings: { get: jest.fn().mockReturnValue(true) },
+        },
+      });
+      window.history.pushState({}, '', '?groupBy=none');
+      renderTabularPageWithProviders();
+    });
+
+    afterEach(() => {
+      mockUseKibana.mockReset();
+      window.history.pushState({}, '', '/');
+    });
+
+    it('should not show the three-dots actions menu when view and delete are hidden', () => {
+      expect(screen.queryByTestId('euiCollapsedItemActionsButton')).not.toBeInTheDocument();
+    });
+
+    it('should still display all endpoints in the table', () => {
+      const table = screen.getByTestId('inferenceEndpointTable');
+      const rows = within(table).getAllByRole('row');
+      // 11 data rows + 1 header row
+      expect(rows).toHaveLength(12);
+    });
   });
 });

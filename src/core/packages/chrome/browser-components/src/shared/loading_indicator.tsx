@@ -8,6 +8,7 @@
  */
 
 import { Global, css } from '@emotion/react';
+import type { EuiIconProps } from '@elastic/eui';
 import { EuiLoadingSpinner, EuiProgress, EuiIcon, EuiImage } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -16,9 +17,14 @@ import { useIsLoading } from './chrome_hooks';
 export interface LoadingIndicatorProps {
   showAsBar?: boolean;
   customLogo?: string;
+  elasticLogoColor?: EuiIconProps['color'];
 }
 
-export const LoadingIndicator = ({ showAsBar = false, customLogo }: LoadingIndicatorProps) => {
+export const LoadingIndicator = ({
+  showAsBar = false,
+  customLogo,
+  elasticLogoColor,
+}: LoadingIndicatorProps) => {
   const isLoading = useIsLoading();
 
   const loadingSubj = isLoading ? 'globalLoadingIndicator' : 'globalLoadingIndicator-hidden';
@@ -42,6 +48,7 @@ export const LoadingIndicator = ({ showAsBar = false, customLogo }: LoadingIndic
     <EuiIcon
       type={'logoElastic'}
       size="l"
+      color={elasticLogoColor}
       data-test-subj={testSubj}
       aria-label={i18n.translate('core.ui.chrome.headerGlobalNav.logoAriaLabel', {
         defaultMessage: 'Elastic Logo',

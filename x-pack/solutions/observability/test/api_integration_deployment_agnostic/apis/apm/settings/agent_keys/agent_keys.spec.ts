@@ -5,7 +5,7 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { PrivilegeType, ClusterPrivilegeType } from '@kbn/apm-plugin/common/privilege_type';
+import { PrivilegeType, ClusterPrivilegeType } from '@kbn/apm-types';
 import { expectToReject } from '../../../../../apm_api_integration/common/utils/expect_to_reject';
 import type { RoleCredentials } from '../../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';

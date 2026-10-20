@@ -24,6 +24,7 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { createCoreStartMock } from './core_start.mock';
 import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-browser-mocks';
 import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { userStorageServiceMock } from '@kbn/core-user-storage-browser-mocks';
 import { lazyObject } from '@kbn/lazy-object';
 
 export function createCoreSetupMock({
@@ -56,6 +57,7 @@ export function createCoreSetupMock({
     theme: themeServiceMock.createSetupContract(),
     security: securityServiceMock.createSetup(),
     userProfile: userProfileServiceMock.createSetup(),
+    userStorage: userStorageServiceMock.createSetupContract(),
     plugins: lazyObject({
       onSetup: jest.fn(),
       onStart: jest.fn(),

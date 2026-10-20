@@ -63,9 +63,9 @@ const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as jest.MockedFu
 >;
 
 const defaultProps = {
+  isSample: false as const,
   from: '2023-01-01T00:00:00.000Z',
   to: '2023-01-31T23:59:59.999Z',
-  isLoading: false,
   minutesPerAlert: 10,
   analystHourlyRate: 100,
 };
@@ -149,5 +149,12 @@ describe('CostSavingsTrend', () => {
   it('calls useSignalIndexWithDefault hook', () => {
     render(<CostSavingsTrend {...defaultProps} />, { wrapper });
     expect(mockUseSignalIndexWithDefault).toHaveBeenCalled();
+  });
+
+  it('does not render VisualizationEmbeddable if isSample is set to true', () => {
+    render(<CostSavingsTrend {...defaultProps} isSample={true} />, { wrapper });
+    expect(VisualizationEmbeddable).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('mock-visualization-embeddable')).not.toBeInTheDocument();
+    expect(screen.getByTestId('sample-cost-savings-trend')).toBeInTheDocument();
   });
 });

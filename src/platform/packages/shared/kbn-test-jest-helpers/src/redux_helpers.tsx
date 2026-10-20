@@ -9,7 +9,7 @@
 
 import type { ComponentType } from 'react';
 import React from 'react';
-import { Provider } from 'react-redux';
+import { Provider } from 'react-redux-v7';
 
 export function WithStore<T extends object = Record<string, any>>(store: any) {
   return (WrappedComponent: ComponentType<T>) => (props: any) =>

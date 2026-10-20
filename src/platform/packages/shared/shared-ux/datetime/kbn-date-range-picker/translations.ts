@@ -18,10 +18,11 @@ export const timeWindowButtonsTexts = {
     'sharedUXPackages.dateRangePicker.timeWindowButtons.previousLabel',
     { defaultMessage: 'Previous' }
   ),
-  previousTooltip: i18n.translate(
-    'sharedUXPackages.dateRangePicker.timeWindowButtons.previousTooltip',
-    { defaultMessage: 'Previous time window' }
-  ),
+  previousTooltip: (duration: string) =>
+    i18n.translate('sharedUXPackages.dateRangePicker.timeWindowButtons.previousTooltip', {
+      defaultMessage: 'Previous {duration}',
+      values: { duration },
+    }),
   cannotShiftInvalid: i18n.translate(
     'sharedUXPackages.dateRangePicker.timeWindowButtons.cannotShiftInvalid',
     { defaultMessage: 'Cannot shift invalid time window' }
@@ -30,9 +31,11 @@ export const timeWindowButtonsTexts = {
   nextLabel: i18n.translate('sharedUXPackages.dateRangePicker.timeWindowButtons.nextLabel', {
     defaultMessage: 'Next',
   }),
-  nextTooltip: i18n.translate('sharedUXPackages.dateRangePicker.timeWindowButtons.nextTooltip', {
-    defaultMessage: 'Next time window',
-  }),
+  nextTooltip: (duration: string) =>
+    i18n.translate('sharedUXPackages.dateRangePicker.timeWindowButtons.nextTooltip', {
+      defaultMessage: 'Next {duration}',
+      values: { duration },
+    }),
 
   zoomOutLabel: i18n.translate('sharedUXPackages.dateRangePicker.timeWindowButtons.zoomOutLabel', {
     defaultMessage: 'Zoom out',
@@ -67,6 +70,9 @@ export const inputControlTexts = {
   hintTextPrefix: i18n.translate('sharedUXPackages.dateRangePicker.inputControl.hintTextPrefix', {
     defaultMessage: 'Type',
   }),
+  roundedSuffix: i18n.translate('sharedUXPackages.dateRangePicker.inputControl.roundedSuffix', {
+    defaultMessage: '(rounded)',
+  }),
 };
 
 export const dialogTexts = {
@@ -92,10 +98,6 @@ export const calendarPanelTexts = {
   applyButton: i18n.translate('sharedUXPackages.dateRangePicker.calendarPanel.applyButton', {
     defaultMessage: 'Apply',
   }),
-  selectEndDateTooltip: i18n.translate(
-    'sharedUXPackages.dateRangePicker.calendarPanel.selectEndDateTooltip',
-    { defaultMessage: 'Select an end date to apply' }
-  ),
 };
 
 export const documentationPanelTexts = {
@@ -130,7 +132,7 @@ export const documentationPanelTexts = {
     'sharedUXPackages.dateRangePicker.documentationPanel.combinationsBody',
     {
       defaultMessage:
-        'Custom time ranges are combinations of the aforementioned formats, e.g. `now to Fri, 1 Dec 2025 00:00:00 GMT` or `-12d to now`.',
+        'Custom ranges are combinations of the aforementioned formats, e.g. `now to Fri, 1 Dec 2025 00:00:00 GMT` or `-12d to now`.',
     }
   ),
   detailedDocumentationLink: i18n.translate(
@@ -141,7 +143,7 @@ export const documentationPanelTexts = {
 
 export const customTimeRangePanelTexts = {
   heading: i18n.translate('sharedUXPackages.dateRangePicker.customTimeRangePanel.heading', {
-    defaultMessage: 'Custom time range',
+    defaultMessage: 'Custom range',
   }),
   startDateLabel: i18n.translate(
     'sharedUXPackages.dateRangePicker.customTimeRangePanel.startDateLabel',
@@ -339,7 +341,7 @@ export const mainPanelTexts = {
   ),
   customTimeRangePanelTitle: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.customTimeRangePanelTitle',
-    { defaultMessage: 'Custom time range' }
+    { defaultMessage: 'Custom range' }
   ),
   savePresetTooltip: i18n.translate(
     'sharedUXPackages.dateRangePicker.mainPanel.savePresetTooltip',

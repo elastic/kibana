@@ -54,27 +54,21 @@ test.describe(
 
     // === Embedded Console Tests ===
     test('should have embedded dev console that can be toggled', async ({ pageObjects }) => {
-      await pageObjects.homepage.expectEmbeddedConsoleControlBarExists();
+      await expect(pageObjects.embeddedConsole.section).toBeVisible();
 
       // Console body should be hidden initially
-      const consoleBodyInitial = await pageObjects.homepage.getEmbeddedConsoleBody();
-      await expect(consoleBodyInitial).toBeHidden();
+      await expect(pageObjects.embeddedConsole.body).toBeHidden();
 
       // Click to open console
-      await pageObjects.homepage.clickEmbeddedConsoleControlBar();
+      await pageObjects.embeddedConsole.toggle();
 
       // Verify console is open and fullscreen toggle is visible
-      const fullscreenToggle = await pageObjects.homepage.getFullscreenToggleButton();
-      await expect(fullscreenToggle).toBeVisible();
-
-      const consoleBodyOpen = await pageObjects.homepage.getEmbeddedConsoleBody();
-      await expect(consoleBodyOpen).toBeVisible();
+      await expect(pageObjects.embeddedConsole.fullscreenToggle).toBeVisible();
+      await expect(pageObjects.embeddedConsole.body).toBeVisible();
 
       // Click to close console
-      await pageObjects.homepage.clickEmbeddedConsoleControlBar();
-
-      const consoleBodyClosed = await pageObjects.homepage.getEmbeddedConsoleBody();
-      await expect(consoleBodyClosed).toBeHidden();
+      await pageObjects.embeddedConsole.toggle();
+      await expect(pageObjects.embeddedConsole.body).toBeHidden();
     });
 
     // === Endpoint Copy Functionality Tests ===
@@ -104,7 +98,7 @@ test.describe(
     // === Navigation Cards Tests ===
     test('navigation cards should navigate to correct places', async ({ pageObjects, page }) => {
       const navigationCards = await pageObjects.homepage.getNavigationCards();
-      await expect(navigationCards).toHaveCount(5);
+      await expect(navigationCards).toHaveCount(6);
 
       const navCardTests = [
         {
@@ -126,6 +120,10 @@ test.describe(
         {
           cardTestId: 'searchHomepageNavLinks-dataManagement',
           expectedUrl: 'index_management',
+        },
+        {
+          cardTestId: 'searchHomepageNavLinks-workflows',
+          expectedUrl: 'workflows',
         },
       ];
 

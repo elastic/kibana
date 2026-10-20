@@ -9,7 +9,7 @@ import { Send } from '@langchain/langgraph';
 import { generateAssistantComment } from '../../../../../common/task/util/comments';
 import type { ParsedPanel } from '../../../../../../../../common/siem_migrations/parsers/types';
 import { DashboardResourceIdentifier } from '../../../../../../../../common/siem_migrations/dashboards/resources';
-import type { MigrationResources } from '../../../../../common/task/retrievers/resource_retriever';
+import type { EnrichedMigrationResources } from '../../../../../common/task/util/enrich_lookup_resources';
 import type {
   MigrateDashboardState,
   TranslatePanelNodeParams,
@@ -127,10 +127,10 @@ export const getTranslatePanelNode = (params: MigrateDashboardGraphParams): Tran
  * and returns only the resources that have been identified for each specific panel query.
  */
 async function filterIdentifiedResources(
-  resources: MigrationResources,
+  resources: EnrichedMigrationResources,
   panel: ParsedPanel,
   resourceIdentifier: DashboardResourceIdentifier
-): Promise<MigrationResources> {
+): Promise<EnrichedMigrationResources> {
   const identifiedResources = await resourceIdentifier.fromQuery(panel.query);
 
   const { macros, lookups } = identifiedResources.reduce<{ macros: string[]; lookups: string[] }>(
@@ -144,7 +144,7 @@ async function filterIdentifiedResources(
     },
     { macros: [], lookups: [] }
   );
-  const filteredResources: MigrationResources = {};
+  const filteredResources: EnrichedMigrationResources = {};
 
   const macro = resources.macro?.filter((m) => macros.includes(m.name));
   if (macro?.length) {

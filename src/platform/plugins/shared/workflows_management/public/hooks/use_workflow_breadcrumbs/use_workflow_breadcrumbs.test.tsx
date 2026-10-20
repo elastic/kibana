@@ -8,7 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useWorkflowsBreadcrumbs } from './use_workflow_breadcrumbs';
+import { useSetWorkflowsBreadcrumbs, useWorkflowsBreadcrumbs } from './use_workflow_breadcrumbs';
 import { PLUGIN_ID } from '../../../common';
 import { createStartServicesMock } from '../../mocks';
 import type { WorkflowsServices } from '../../types';
@@ -46,7 +46,6 @@ describe('useWorkflowsBreadcrumbs', () => {
           {
             text: 'Workflows',
             href: '/app/workflows',
-            onClick: expect.any(Function),
           },
         ],
         { project: { value: [] } }
@@ -64,7 +63,6 @@ describe('useWorkflowsBreadcrumbs', () => {
           {
             text: 'Workflows',
             href: '/app/workflows',
-            onClick: expect.any(Function),
           },
           {
             text: workflowTitle,
@@ -77,26 +75,6 @@ describe('useWorkflowsBreadcrumbs', () => {
         workflowTitle,
         'Workflows',
       ]);
-    });
-
-    it('should handle breadcrumb click event correctly', () => {
-      renderHook(useWorkflowsBreadcrumbs);
-
-      const [[breadcrumbs]] = mockServices.chrome.setBreadcrumbs.mock.calls;
-      const mainBreadcrumb = breadcrumbs[0];
-
-      // Test with preventDefault
-      const mockEvent = { preventDefault: jest.fn() };
-      mainBreadcrumb.onClick?.(mockEvent as any);
-
-      expect(mockEvent.preventDefault).toHaveBeenCalled();
-      expect(mockServices.application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
-
-      // Test without event object
-      mockServices.application.navigateToApp.mockClear();
-      mainBreadcrumb.onClick?.(null as any);
-
-      expect(mockServices.application.navigateToApp).toHaveBeenCalledWith(PLUGIN_ID);
     });
 
     it('should get URL for app correctly', () => {
@@ -114,7 +92,6 @@ describe('useWorkflowsBreadcrumbs', () => {
           {
             text: 'Workflows',
             href: '/app/workflows',
-            onClick: expect.any(Function),
           },
         ],
         { project: { value: [] } }
@@ -130,7 +107,6 @@ describe('useWorkflowsBreadcrumbs', () => {
           {
             text: 'Workflows',
             href: '/app/workflows',
-            onClick: expect.any(Function),
           },
           {
             text: newWorkflowTitle,
@@ -154,7 +130,6 @@ describe('useWorkflowsBreadcrumbs', () => {
             {
               text: 'Workflows',
               href: '/app/workflows',
-              onClick: expect.any(Function),
             },
           ],
           { project: { value: [] } }
@@ -172,7 +147,6 @@ describe('useWorkflowsBreadcrumbs', () => {
             {
               text: 'Workflows',
               href: '/app/workflows',
-              onClick: expect.any(Function),
             },
           ],
           { project: { value: [] } }
@@ -225,5 +199,57 @@ describe('useWorkflowsBreadcrumbs', () => {
         'Workflows',
       ]);
     });
+  });
+});
+
+describe('useSetWorkflowsBreadcrumbs', () => {
+  let mockServices: ReturnType<typeof createStartServicesMock>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockServices = createStartServicesMock();
+    mockServices.application.getUrlForApp.mockReturnValue('/app/workflows');
+    mockUseKibana.mockReturnValue({ services: mockServices });
+  });
+
+  it('should prepend the Workflows root to the provided trailing breadcrumbs (non-serverless)', () => {
+    (mockServices as WorkflowsServices).serverless = undefined;
+    const trailing = [{ text: 'Library' }, { text: 'My Template' }];
+
+    const { result } = renderHook(useSetWorkflowsBreadcrumbs);
+    result.current(trailing);
+
+    expect(mockServices.chrome.setBreadcrumbs).toHaveBeenCalledWith(
+      [
+        {
+          text: 'Workflows',
+          href: '/app/workflows',
+        },
+        ...trailing,
+      ],
+      { project: { value: trailing } }
+    );
+
+    // docTitle uses the trailing titles most-specific first, then the app name.
+    expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith([
+      'My Template',
+      'Library',
+      'Workflows',
+    ]);
+  });
+
+  it('should only set trailing breadcrumbs in serverless', () => {
+    const trailing = [{ text: 'Library' }, { text: 'My Template' }];
+
+    const { result } = renderHook(useSetWorkflowsBreadcrumbs);
+    result.current(trailing);
+
+    expect(mockServices.serverless.setBreadcrumbs).toHaveBeenCalledWith(trailing);
+    expect(mockServices.chrome.setBreadcrumbs).not.toHaveBeenCalled();
+    expect(mockServices.chrome.docTitle.change).toHaveBeenCalledWith([
+      'My Template',
+      'Library',
+      'Workflows',
+    ]);
   });
 });

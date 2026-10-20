@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsBaseOptions } from './base';
-import type { SavedObject } from '../..';
+import type { SavedObjectBulkResult } from '../..';
 
 /**
  * Options for the saved objects get operation
@@ -26,9 +26,9 @@ export interface SavedObjectsResolveOptions extends SavedObjectsBaseOptions {
  */
 export interface SavedObjectsResolveResponse<T = unknown> {
   /**
-   * The saved object that was found.
+   * The saved object that was found, or an error result if the operation failed for this object.
    */
-  saved_object: SavedObject<T>;
+  saved_object: SavedObjectBulkResult<T>;
   /**
    * The outcome for a successful `resolve` call is one of the following values:
    *

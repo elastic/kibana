@@ -9,6 +9,11 @@ import expect from '@kbn/expect';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
+/**
+ * Purpose: Map embeddable smoke test
+ *
+ * Migration: migrate to scout
+ */
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { dashboard, maps } = getPageObjects(['dashboard', 'maps']);
   const kibanaServer = getService('kibanaServer');

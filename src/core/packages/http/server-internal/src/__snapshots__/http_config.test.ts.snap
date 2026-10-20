@@ -87,7 +87,9 @@ Object {
   "protocol": "http1",
   "prototypeHardening": true,
   "rateLimiter": Object {
+    "elu": 0.8,
     "enabled": false,
+    "term": "medium",
   },
   "requestId": Object {
     "allowFromAnyIp": false,
@@ -102,6 +104,13 @@ Object {
     "referrerPolicy": "strict-origin-when-cross-origin",
     "strictTransportSecurity": null,
     "xContentTypeOptions": "nosniff",
+  },
+  "selfHttp": Object {
+    "maxRedirects": 0,
+    "ssl": Object {
+      "verificationMode": "full",
+    },
+    "target": "auto",
   },
   "serverTiming": false,
   "serverTimingElasticsearch": false,
@@ -149,6 +158,7 @@ Object {
     "versionResolution": "oldest",
   },
   "xsrf": Object {
+    "allowedSchemes": Array [],
     "allowlist": Array [],
     "disableProtection": false,
   },

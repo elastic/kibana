@@ -13,7 +13,27 @@ export type { ContentListClientProviderProps } from './src/provider';
 
 // Strategy.
 export { createClientStrategy } from './src/strategy';
-export type { ClientStrategy } from './src/strategy';
+export type { ClientStrategy, ItemsSnapshotListener } from './src/strategy';
+
+// Client filters.
+export { defineContentListFilter } from './src/filters';
+export type {
+  ContentListFilterDefinition,
+  ContentListFilterMap,
+  ContentListFilterOption,
+  ResolvedContentListFilter,
+} from './src/filters';
+export { useClientFilterCounts } from './src/use_client_filter_counts';
+export { CustomFilterRenderer } from './src/custom_filter_renderer';
+export type { CustomFilterRendererProps, CustomFilterOption } from './src/custom_filter_renderer';
+export { createFilterControl } from './src/create_filter_control';
+export type { CreateFilterControlOptions } from './src/create_filter_control';
+export { defineContentListSortField } from './src/sorting';
+export type {
+  ContentListSortField,
+  ContentListSortFieldConfig,
+  ContentListSortFieldMap,
+} from './src/sorting';
 
 // Content editor.
 export type { ContentEditorConfig } from './src/content_editor';

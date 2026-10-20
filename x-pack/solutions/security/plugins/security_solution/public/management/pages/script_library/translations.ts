@@ -266,7 +266,7 @@ export const SCRIPT_LIBRARY_LABELS = Object.freeze({
           script: i18n.translate(
             'xpack.securitySolution.scriptLibrary.table.flyout.body.edit.fileType.scriptOptionLabel',
             {
-              defaultMessage: 'Script file (.py, .sh, .ps1, etc.)',
+              defaultMessage: 'Script file (.bat, .ps1 or .sh)',
             }
           ),
           validationErrorMessage: i18n.translate(

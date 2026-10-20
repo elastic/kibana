@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, render, waitFor } from '@testing-library/react';
 import { SearchBarComponent } from '.';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
@@ -83,31 +83,63 @@ describe('SearchBarComponent', () => {
     savedQuery: undefined,
   };
 
-  const pollForSignalIndex = jest.fn();
   beforeEach(() => {
     jest.clearAllMocks();
 
     (useKibana as jest.Mock).mockReturnValue(useKibanaMock);
   });
 
-  it('calls pollForSignalIndex on Refresh button click', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <SearchBarComponent {...props} pollForSignalIndex={pollForSignalIndex} />
+  it('passes dashboard data views to the filter bar with the page data view', () => {
+    const panelDataView = createStubDataView({
+      spec: { id: 'panel-data-view', title: 'kibana_sample_data_ecommerce' },
+    });
+    const store = createMockStore();
+
+    render(
+      <TestProviders store={store}>
+        <SearchBarComponent {...props} additionalDataViews={[panelDataView]} />
       </TestProviders>
     );
-    fireEvent.click(getByTestId('querySubmitButton'));
-    expect(pollForSignalIndex).toHaveBeenCalled();
+
+    expect(useKibanaMock.services.unifiedSearch.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatterns: [dataView, panelDataView],
+      }),
+      expect.anything()
+    );
   });
 
-  it('does not call pollForSignalIndex on Refresh button click if pollForSignalIndex not passed', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <SearchBarComponent {...props} />
+  it('deduplicates dashboard data views that repeat the page data view or each other', () => {
+    const pageDataView = createStubDataView({
+      spec: { id: 'page-data-view', title: 'security-solution-*' },
+    });
+    const duplicatePageDataView = createStubDataView({
+      spec: { id: 'page-data-view', title: 'security-solution-*' },
+    });
+    const panelDataView = createStubDataView({
+      spec: { id: 'panel-data-view', title: 'kibana_sample_data_ecommerce' },
+    });
+    const repeatedPanelDataView = createStubDataView({
+      spec: { id: 'panel-data-view', title: 'kibana_sample_data_ecommerce' },
+    });
+    const store = createMockStore();
+
+    render(
+      <TestProviders store={store}>
+        <SearchBarComponent
+          {...props}
+          dataView={pageDataView}
+          additionalDataViews={[duplicatePageDataView, panelDataView, repeatedPanelDataView]}
+        />
       </TestProviders>
     );
-    fireEvent.click(getByTestId('querySubmitButton'));
-    expect(pollForSignalIndex).not.toHaveBeenCalled();
+
+    expect(useKibanaMock.services.unifiedSearch.ui.SearchBar).toHaveBeenCalledWith(
+      expect.objectContaining({
+        indexPatterns: [pageDataView, panelDataView],
+      }),
+      expect.anything()
+    );
   });
 
   it('calls useUpdateUrlParam for filter and query', () => {

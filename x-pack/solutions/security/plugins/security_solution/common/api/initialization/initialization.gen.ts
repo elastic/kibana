@@ -80,7 +80,9 @@ export const PackageInstallReadyResult = lazySchema(() =>
       /**
        * Fleet package installation status (e.g., installed, already_installed).
        */
-      install_status: z.string(),
+      install_status: z
+        .string()
+        .describe('Fleet package installation status (e.g., installed, already_installed).'),
     }),
   })
 );

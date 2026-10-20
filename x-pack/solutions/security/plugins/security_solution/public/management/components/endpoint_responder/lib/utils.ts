@@ -10,16 +10,23 @@ import type {
   ResponseActionParametersWithProcessName,
 } from '../../../../../common/endpoint/types';
 
-export const parsedKillOrSuspendParameter = (parameters: {
-  pid?: string[];
-  entityId?: string[];
-  processName?: string[];
-}):
+export const parsedKillOrSuspendParameter = (
+  parameters: {
+    pid?: string[];
+    entityId?: string[];
+    processName?: string[];
+  },
+  /** Only applicable to the `kill-process` command for the `endpoint` agent type */
+  killDescendants?: boolean
+):
   | ResponseActionParametersWithPid
   | ResponseActionParametersWithEntityId
   | ResponseActionParametersWithProcessName => {
   if (parameters.pid) {
-    return { pid: Number(parameters.pid[0]) };
+    return {
+      pid: Number(parameters.pid[0]),
+      ...(killDescendants ? { kill_descendants: true } : {}),
+    };
   }
 
   if (parameters.processName) {
@@ -30,6 +37,7 @@ export const parsedKillOrSuspendParameter = (parameters: {
 
   return {
     entity_id: parameters?.entityId?.[0] ?? '',
+    ...(killDescendants ? { kill_descendants: true } : {}),
   };
 };
 

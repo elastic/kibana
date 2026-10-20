@@ -194,6 +194,7 @@ exports[`Flyout conflicts should allow conflict resolution 2`] = `
           "patch": [MockFunction],
           "post": [MockFunction],
           "put": [MockFunction],
+          "spaceId": "default",
           "staticAssets": Object {
             "getPluginAssetHref": [MockFunction],
           },
@@ -312,7 +313,7 @@ exports[`Flyout should render import step 1`] = `
           </EuiTitle>
         }
       >
-        <EuiFilePickerClass
+        <EuiFilePicker
           accept=".ndjson"
           fullWidth={true}
           initialPromptText={

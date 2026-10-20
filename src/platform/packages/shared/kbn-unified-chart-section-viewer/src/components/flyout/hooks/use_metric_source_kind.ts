@@ -10,12 +10,8 @@
 import type { DataViewsPublicPluginStart, MatchedItem } from '@kbn/data-views-plugin/public';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { useExternalServices } from '../../../context/external_services';
-
-// Tag key emitted by data_views.getIndices() / responseToItemArray for plain
-// indices (vs data streams). Coupled to that plugin's response shape.
-// TODO: import from @kbn/data-views-plugin once exported
-// (https://github.com/elastic/kibana/issues/265126).
-const DATA_VIEWS_INDEX_TAG_KEY = 'index';
+import { useReportChartSectionError } from '../../chart/hooks/use_report_chart_section_error';
+import { useMetricsExperienceState } from '../../observability/metrics/context/metrics_experience_state_provider';
 
 export const METRIC_SOURCE_KIND = {
   DATA_STREAM: 'data_stream',
@@ -48,11 +44,18 @@ export const useMetricSourceKind = ({
   fallback,
 }: UseMetricSourceKindParams): UseMetricSourceKindResult => {
   const dataViewsService = useExternalServices()?.dataViews;
+  const { profileId } = useMetricsExperienceState();
+  const reportError = useReportChartSectionError();
 
   const { value } = useAbortableAsync<ClassifiedSource | undefined>(async () => {
     if (!dataViewsService || !name) return undefined;
-    return resolveSourceKind(dataViewsService, name);
-  }, [dataViewsService, name]);
+    try {
+      return await resolveSourceKind(dataViewsService, name);
+    } catch (error) {
+      reportError({ error, source: 'useMetricSourceKind', labels: { profile_id: profileId } });
+      return undefined;
+    }
+  }, [dataViewsService, name, profileId, reportError]);
 
   // Guard against stale results: `useAbortableAsync` keeps the previous value
   // while a new request is in flight, so without this check we could briefly
@@ -107,13 +110,7 @@ const resolveSourceKind = async (
         if (cache.get(name) === pending) cache.delete(name);
       });
   }
-  try {
-    return { name, kind: await pending };
-  } catch {
-    // TODO: add monitoring/telemetry to track resolution failures
-    // (https://github.com/elastic/kibana/issues/265117)
-    return { name, kind: undefined };
-  }
+  return { name, kind: await pending };
 };
 
 const fetchSourceKind = async (
@@ -127,7 +124,7 @@ const fetchSourceKind = async (
   });
   const item = matched.find((m) => m.name === name);
   if (!item) return undefined;
-  return item.tags.some((t) => t.key === DATA_VIEWS_INDEX_TAG_KEY)
+  return item.tags.some((t) => t.key === 'index')
     ? METRIC_SOURCE_KIND.INDEX
     : METRIC_SOURCE_KIND.DATA_STREAM;
 };

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { Logger, RequestHandler } from '@kbn/core/server';
 import { isAgentBuilderError } from '@kbn/agent-builder-common';
 import { isInferenceError } from '@kbn/inference-common';
@@ -13,10 +14,11 @@ import type { AgentBuilderHandlerContext } from '../request_handler_context';
 
 export interface RouteWrapConfig {
   /**
-   * The feature flag to gate this route behind.
+   * The feature flag(s) to gate this route behind. Pass a single flag or an
+   * array of flags; when an array is given, every flag must be enabled (AND).
    * Defaults to false (no feature flag gating).
    */
-  featureFlag?: string | false;
+  featureFlag?: string | string[] | false;
   /**
    * If true, will not check license level
    */
@@ -32,8 +34,11 @@ export const getHandlerWrapper =
     return async (ctx, req, res) => {
       if (featureFlag !== false) {
         const { uiSettings } = await ctx.core;
-        const enabled = await uiSettings.client.get(featureFlag);
-        if (!enabled) {
+        const featureFlags = Array.isArray(featureFlag) ? featureFlag : [featureFlag];
+        const flagValues = await Promise.all(
+          featureFlags.map((flag) => uiSettings.client.get(flag))
+        );
+        if (!flagValues.every(Boolean)) {
           return res.notFound();
         }
       }
@@ -77,6 +82,16 @@ export const getHandlerWrapper =
               },
             },
             statusCode: e.meta?.statusCode ?? 500,
+          });
+        }
+        // A 4xx Boom is a refusal the caller can act on, for example a service account that
+        // can't be granted the API key a scheduled task needs.
+        if (Boom.isBoom(e) && e.output.statusCode < 500) {
+          logger.warn(`Request refused: ${e.message}`);
+          return res.customError({
+            body: { message: e.message },
+            statusCode: e.output.statusCode,
+            headers: e.output.headers as { [key: string]: string },
           });
         }
         logger.error(`Unexpected error in handler: ${e.stack ?? e.message}`);

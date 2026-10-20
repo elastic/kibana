@@ -21,6 +21,7 @@ import type { EndpointAppContextService } from '../../endpoint/endpoint_app_cont
 import { EndpointAuthorizationError } from '../../endpoint/errors';
 import { parseRequest } from './parse_request';
 import { buildIndexNameWithNamespace } from '../../../common/endpoint/utils/index_name_utilities';
+import { prefixIndexPatternsWithCcs } from '../../endpoint/utils/ccs_utils';
 
 /**
  * EndpointFieldProvider mimics indexField provider from timeline plugin: x-pack/solutions/security/plugins/timelines/server/search_strategy/index_fields/index.ts
@@ -51,6 +52,7 @@ export const requestEndpointFieldsSearch = async (
   indexPatterns: DataViewsServerPluginStart
 ): Promise<IndexFieldsStrategyResponse> => {
   const isTAAdvancedModeFeatureFlagEnabled = context.experimentalFeatures.trustedAppsAdvancedMode;
+  const ccsEnabled = await context.isCcsEnabled();
   let parsedRequest = parseRequest(request);
 
   if (
@@ -91,6 +93,18 @@ export const requestEndpointFieldsSearch = async (
   ) {
     throw new EndpointAuthorizationError();
   }
+
+  const ccsIndexPattern = prefixIndexPatternsWithCcs(parsedRequest.indices[0], ccsEnabled);
+
+  parsedRequest = {
+    ...parsedRequest,
+    // CCS prefixing yields `local,*:local`. The downstream existence check
+    // (`findExistingIndices`) runs `field_caps` with `allow_no_indices: false`, which
+    // errors on the local entry when all endpoint data lives on the remote cluster
+    // (remote-output topology). Passing each pattern separately lets the remote (`*:`)
+    // entry resolve on its own instead of the empty local entry failing the whole call.
+    indices: ccsEnabled ? ccsIndexPattern.split(',') : [ccsIndexPattern],
+  };
 
   return requestIndexFieldSearch(parsedRequest, deps, beatFields, indexPatterns, true);
 };

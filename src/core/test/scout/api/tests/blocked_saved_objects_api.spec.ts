@@ -16,7 +16,7 @@ const SERVERLESS_TAGS = [
   ...tags.serverless.search,
   ...tags.serverless.observability.complete,
   ...tags.serverless.security.complete,
-  ...tags.serverless.workplaceai,
+  ...tags.serverless.vectordb,
 ];
 
 const BLOCKED_APIS: Array<{ path: string; method: 'get' | 'post' | 'put' | 'delete' }> = [

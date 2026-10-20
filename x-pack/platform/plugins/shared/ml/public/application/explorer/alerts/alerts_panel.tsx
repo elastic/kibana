@@ -130,7 +130,7 @@ const sort: AlertsTableSortCombinations[] = [
 ];
 
 export const AlertsPanel: FC = () => {
-  const { data, http, notifications, fieldFormats, application, licensing, settings } =
+  const { data, http, notifications, rendering, fieldFormats, application, licensing, settings } =
     useMlKibana().services;
 
   const [isOpen, setIsOpen] = useState(true);
@@ -219,14 +219,13 @@ export const AlertsPanel: FC = () => {
               appId: MANAGEMENT_APP_ID,
               featureId: CASE_GENERAL_ID,
               owner: [CASE_APP_ID],
-              syncAlerts: false,
-              extractObservables: false,
             }}
             showAlertStatusWithFlapping
             services={{
               data,
               http,
               notifications,
+              rendering,
               fieldFormats,
               application,
               licensing,

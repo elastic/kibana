@@ -90,6 +90,9 @@ const VarMigrationTooltip = ({
 
 const FixedHeightDiv = styled.div`
   height: 300px;
+  border: ${(props) => props.theme.eui.euiBorderThin};
+  border-radius: ${(props) => props.theme.eui.euiBorderRadius};
+  overflow: hidden;
 `;
 
 const FormRow = styled(EuiFormRow)`
@@ -164,7 +167,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       return null;
     }
 
-    if (name === DATASET_VAR_NAME && packageType === 'input') {
+    if (name === DATASET_VAR_NAME) {
       return (
         <DatasetComponent
           pkgName={packageName}
@@ -359,7 +362,7 @@ function getInputComponent({
       return (
         <EuiSwitch
           label={fieldLabel}
-          checked={value}
+          checked={Boolean(value)}
           showLabel={false}
           onChange={(e) => onChange(e.target.checked)}
           onBlur={() => setIsDirty(true)}

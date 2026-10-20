@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { useAlertingRulesCache } from './use_alerting_rules_cache';
+import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
+import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_RULE_API_PATH } from '@kbn/alerting-v2-constants';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
@@ -15,6 +18,8 @@ jest.mock('react-use/lib/useAsync', () => ({
   __esModule: true,
   default: jest.fn((fn: () => Promise<void>) => {
     const result = fn();
+    // The real hook captures rejections as `error`; swallow them so they don't go unhandled.
+    result.catch(() => {});
     return { loading: false, error: undefined, value: result };
   }),
 }));
@@ -30,10 +35,13 @@ describe('useAlertingRulesCache', () => {
     const ruleId = 'rule-1';
     const fetchedRule = {
       id: ruleId,
-      name: 'Fetched Rule',
+      metadata: { name: 'Fetched Rule' },
     } as unknown as FindRulesResponse['items'][number];
     mockHttp.get.mockResolvedValue({
       items: [fetchedRule],
+      total: 1,
+      page: 1,
+      per_page: 1,
     } as FindRulesResponse);
 
     const { result, rerender } = renderHook(
@@ -57,10 +65,13 @@ describe('useAlertingRulesCache', () => {
     const ruleId = 'rule-2';
     const fetchedRule = {
       id: ruleId,
-      name: 'Fetched Rule',
-    } as unknown as FindRulesResponse['items'][number];
+      metadata: { name: 'Fetched Rule' },
+    } as FindRulesResponse['items'][number];
     mockHttp.get.mockResolvedValue({
       items: [fetchedRule],
+      total: 1,
+      page: 1,
+      per_page: 1,
     } as FindRulesResponse);
 
     const { result } = renderHook(() =>
@@ -71,8 +82,12 @@ describe('useAlertingRulesCache', () => {
     );
 
     await waitFor(() =>
-      expect(mockHttp.get).toHaveBeenCalledWith(`${ALERTING_V2_RULE_API_PATH}/_bulk`, {
-        query: { ids: [ruleId] },
+      expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
+        query: {
+          filter: `id: "${ruleId}"`,
+          per_page: 1,
+          page: 1,
+        },
       })
     );
     expect(result.current.rulesCache).toEqual({ [ruleId]: fetchedRule });
@@ -92,5 +107,123 @@ describe('useAlertingRulesCache', () => {
     expect(result.current.rulesCache).toEqual({});
     expect(result.current.loading).toBe(false);
     expect(result.current.error).toBeUndefined();
+  });
+
+  it('does not re-fetch rule ids that were not returned by find', async () => {
+    const presentRuleId = 'rule-present';
+    const missingRuleId = 'rule-missing';
+    const fetchedRule = {
+      id: presentRuleId,
+      metadata: { name: 'Fetched Rule' },
+    } as unknown as FindRulesResponse['items'][number];
+    mockHttp.get.mockResolvedValue({
+      items: [fetchedRule],
+      total: 1,
+      page: 1,
+      per_page: 2,
+    } as FindRulesResponse);
+
+    const { result, rerender } = renderHook(
+      ({ ruleIds }: { ruleIds: string[] } = { ruleIds: [presentRuleId, missingRuleId] }) =>
+        useAlertingRulesCache({
+          ruleIds,
+          services: { http: mockHttp },
+        })
+    );
+
+    await waitFor(() =>
+      expect(result.current.rulesCache).toEqual({ [presentRuleId]: fetchedRule })
+    );
+    expect(mockHttp.get).toHaveBeenCalledWith(ALERTING_V2_RULE_API_PATH, {
+      query: {
+        filter: `(id: "${presentRuleId}" OR id: "${missingRuleId}")`,
+        per_page: 2,
+        page: 1,
+      },
+    });
+
+    const callsAfterFirstFetch = mockHttp.get.mock.calls.length;
+    rerender({ ruleIds: [presentRuleId, missingRuleId] });
+
+    expect(mockHttp.get).toHaveBeenCalledTimes(callsAfterFirstFetch);
+  });
+
+  it('resolves rules only from the additional source when queryV2Source is false', async () => {
+    const ruleId = 'classic-rule';
+    const classicRule = {
+      id: ruleId,
+      metadata: { name: 'Classic Rule' },
+    } as unknown as FindRulesResponse['items'][number];
+    const dataSource = createTestEpisodeSource({
+      resolveRules: jest.fn().mockResolvedValue([classicRule]),
+    });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(
+        EpisodeDataSourceProvider,
+        { dataSource, queryV2Source: false },
+        children
+      );
+
+    const { result } = renderHook(
+      () => useAlertingRulesCache({ ruleIds: [ruleId], services: { http: mockHttp } }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.rulesCache).toEqual({ [ruleId]: classicRule }));
+    expect(mockHttp.get).not.toHaveBeenCalled();
+  });
+
+  it('falls back to the additional source when the v2 rules lookup is forbidden', async () => {
+    const ruleId = 'classic-rule';
+    const classicRule = {
+      id: ruleId,
+      metadata: { name: 'Classic Rule' },
+    } as unknown as FindRulesResponse['items'][number];
+    mockHttp.get.mockRejectedValue({
+      name: 'Error',
+      message: 'Forbidden',
+      response: { status: 403 },
+    });
+    const dataSource = createTestEpisodeSource({
+      resolveRules: jest.fn().mockResolvedValue([classicRule]),
+    });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(EpisodeDataSourceProvider, { dataSource }, children);
+
+    const { result } = renderHook(
+      () => useAlertingRulesCache({ ruleIds: [ruleId], services: { http: mockHttp } }),
+      { wrapper }
+    );
+
+    await waitFor(() => expect(result.current.rulesCache).toEqual({ [ruleId]: classicRule }));
+    expect(mockHttp.get).toHaveBeenCalled();
+    expect(dataSource.resolveRules).toHaveBeenCalledWith(
+      expect.objectContaining({ ids: [ruleId] })
+    );
+  });
+
+  it('does not cache rule ids as missing when the v2 rules lookup is unavailable', async () => {
+    const ruleId = 'v2-rule';
+    mockHttp.get.mockRejectedValue({
+      name: 'Error',
+      message: 'Service Unavailable',
+      response: { status: 503 },
+    });
+    const dataSource = createTestEpisodeSource({ resolveRules: jest.fn().mockResolvedValue([]) });
+    const wrapper = ({ children }: { children: React.ReactNode }) =>
+      React.createElement(EpisodeDataSourceProvider, { dataSource }, children);
+
+    const { rerender } = renderHook(
+      ({ ruleIds }: { ruleIds: string[] }) =>
+        useAlertingRulesCache({ ruleIds, services: { http: mockHttp } }),
+      { wrapper, initialProps: { ruleIds: [ruleId] } }
+    );
+
+    await waitFor(() => expect(mockHttp.get).toHaveBeenCalledTimes(1));
+    expect(dataSource.resolveRules).not.toHaveBeenCalled();
+
+    rerender({ ruleIds: [ruleId] });
+
+    await waitFor(() => expect(mockHttp.get).toHaveBeenCalledTimes(2));
   });
 });

@@ -15,9 +15,9 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import type {
+  ManagedWorkflowsSystemApi,
   ManagedWorkflowsSystemApiProvider,
   PluginScopedManagedWorkflowsApi,
-  RegisteredManagedWorkflowsLifecycleApi,
   WorkflowsClient,
   WorkflowsClientProvider,
 } from '@kbn/workflows/server/types';
@@ -25,7 +25,6 @@ import { registerGetStepDefinitionsRoute } from './routes/get_step_definitions';
 import { registerGetTriggerDefinitionsRoute } from './routes/get_trigger_definitions';
 import { ServerStepRegistry } from './step_registry';
 import { registerInternalStepDefinitions } from './steps';
-import { registerInferenceFeatures } from './steps/ai/register_inference_features';
 import { TriggerRegistry } from './trigger_registry';
 import { registerInternalTriggerDefinitions } from './triggers';
 import type {
@@ -75,15 +74,11 @@ export class WorkflowsExtensionsServerPlugin
 
     const router = core.http.createRouter();
 
-    registerGetStepDefinitionsRoute(router, this.stepRegistry);
+    registerGetStepDefinitionsRoute(router, this.stepRegistry, this.logger);
     registerGetTriggerDefinitionsRoute(router, this.triggerRegistry);
 
-    registerInternalStepDefinitions(core, this.stepRegistry);
+    registerInternalStepDefinitions(this.stepRegistry);
     registerInternalTriggerDefinitions(this.triggerRegistry);
-
-    if (plugins.searchInferenceEndpoints) {
-      registerInferenceFeatures(plugins.searchInferenceEndpoints);
-    }
 
     return {
       registerStepDefinition: (definition) => {
@@ -149,11 +144,11 @@ export class WorkflowsExtensionsServerPlugin
           throw new Error('pluginId is required to initialize managed workflows client');
         }
 
-        const lifecycleClient = this.managedWorkflowsSystemApiProvider
+        const systemClient = this.managedWorkflowsSystemApiProvider
           ? await this.managedWorkflowsSystemApiProvider(pluginId)
-          : this.getNoopManagedWorkflowsLifecycleClient();
+          : this.getNoopManagedWorkflowsSystemClient();
 
-        return this.createPluginScopedManagedWorkflowsClient(pluginId, lifecycleClient);
+        return this.createPluginScopedManagedWorkflowsClient(pluginId, systemClient);
       },
       getManagedWorkflowPluginIds: () => Array.from(this.managedWorkflowPluginIds),
     };
@@ -191,11 +186,17 @@ export class WorkflowsExtensionsServerPlugin
           );
           throw new Error('Workflows client provider is not available');
         },
+        getWorkflowStatus: async () => {
+          this.logger.warn(
+            'No workflows client provider set, using noop managedWorkflows.getWorkflowStatus to avoid errors.'
+          );
+          throw new Error('Workflows client provider is not available');
+        },
       },
     };
   }
 
-  private getNoopManagedWorkflowsLifecycleClient(): RegisteredManagedWorkflowsLifecycleApi {
+  private getNoopManagedWorkflowsSystemClient(): ManagedWorkflowsSystemApi {
     return {
       install: async () => {
         this.logger.warn(
@@ -212,17 +213,38 @@ export class WorkflowsExtensionsServerPlugin
           'No managed workflows system API provider set, using noop ready to avoid errors.'
         );
       },
+      getWorkflowStatus: async () => {
+        this.logger.warn(
+          'No managed workflows system API provider set, using noop getWorkflowStatus to avoid errors.'
+        );
+        throw new Error('Managed workflows system API provider is not available');
+      },
+      getInstalledWorkflowState: async () => {
+        this.logger.warn(
+          'No managed workflows system API provider set, using noop state read to avoid errors.'
+        );
+        throw new Error('Managed workflows system API provider is not available');
+      },
+      listInstalledWorkflowStates: async () => {
+        this.logger.warn(
+          'No managed workflows system API provider set, using noop state list to avoid errors.'
+        );
+        throw new Error('Managed workflows system API provider is not available');
+      },
     };
   }
 
   private createPluginScopedManagedWorkflowsClient(
     pluginId: string,
-    lifecycleClient: RegisteredManagedWorkflowsLifecycleApi
+    systemClient: ManagedWorkflowsSystemApi
   ): PluginScopedManagedWorkflowsApi {
     return {
-      install: lifecycleClient.install,
-      uninstall: lifecycleClient.uninstall,
-      ready: lifecycleClient.ready,
+      install: systemClient.install,
+      uninstall: systemClient.uninstall,
+      ready: systemClient.ready,
+      getWorkflowStatus: systemClient.getWorkflowStatus,
+      getInstalledWorkflowState: systemClient.getInstalledWorkflowState,
+      listInstalledWorkflowStates: systemClient.listInstalledWorkflowStates,
       execute: async (request, id, options) => {
         const requestClient = this.workflowsClientProvider
           ? await this.workflowsClientProvider(request)

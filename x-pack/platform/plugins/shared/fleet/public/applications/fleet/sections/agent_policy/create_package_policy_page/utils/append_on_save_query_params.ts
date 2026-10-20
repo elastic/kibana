@@ -4,28 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { parse, stringify } from 'query-string';
+import qs from 'query-string';
 
 import type {
   CreatePackagePolicyRouteState,
   OnSaveQueryParamOpts,
-  PackagePolicy,
   OnSaveQueryParamKeys,
 } from '../../../../types';
+import type { SavedPolicyResult } from '../types';
 
 export function appendOnSaveQueryParamsToPath({
   path,
-  policy,
+  savedPolicyResult,
   paramsToApply,
   mappingOptions = {},
 }: {
   path: string;
-  policy: PackagePolicy;
+  savedPolicyResult: SavedPolicyResult;
   paramsToApply: OnSaveQueryParamKeys[];
   mappingOptions?: CreatePackagePolicyRouteState['onSaveQueryParams'];
 }) {
   const [basePath, queryStringIn] = path.split('?');
-  const queryParams = parse(queryStringIn);
+  const queryParams = qs.parse(queryStringIn);
+  // Agentless policies have no agent policies; use their own id. TODO handle multiple.
+  const policyId =
+    savedPolicyResult.type === 'agentless'
+      ? savedPolicyResult.policy.id
+      : savedPolicyResult.policy.policy_ids[0];
 
   paramsToApply.forEach((paramName) => {
     const paramOptions = mappingOptions[paramName];
@@ -33,7 +38,7 @@ export function appendOnSaveQueryParamsToPath({
       const [paramKey, paramValue] = createQueryParam(
         paramName,
         paramOptions,
-        (policy.policy_ids && policy.policy_ids[0]) || undefined // TODO handle multiple
+        policyId || undefined
       );
       if (paramKey && paramValue) {
         queryParams[paramKey] = paramValue;
@@ -41,7 +46,7 @@ export function appendOnSaveQueryParamsToPath({
     }
   });
 
-  const queryString = stringify(queryParams);
+  const queryString = qs.stringify(queryParams);
 
   return basePath + (queryString ? `?${queryString}` : '');
 }

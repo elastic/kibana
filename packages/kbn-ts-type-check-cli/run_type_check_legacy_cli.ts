@@ -25,6 +25,12 @@ import { archiveTSBuildArtifacts } from './src/archive/archive_ts_build_artifact
 import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifacts';
 import { isCiEnvironment } from './src/archive/utils';
 import { normalizeProjectPath } from './src/normalize_project_path';
+import { resolveTypeCheckCompiler } from './src/resolve_compiler';
+import {
+  buildConcurrencyArgs,
+  resolveMemoryLimit,
+  resolveTypeCheckConcurrency,
+} from './src/resolve_concurrency';
 
 /** Runs the legacy direct-target `scripts/type_check` CLI flow. */
 export const runLegacyTypeCheckCli = () => {
@@ -79,17 +85,22 @@ export const runLegacyTypeCheckCli = () => {
           projects.length === 1 ? projects[0].typeCheckConfigPath : ROOT_REFS_CONFIG_PATH
         );
 
+        const concurrency = resolveTypeCheckConcurrency();
+        log.info(
+          `tsgo build concurrency: --builders ${concurrency.builders} --checkers ${concurrency.checkers}`
+        );
         await procRunner.run(TSC_LABEL, {
-          cmd: Path.relative(REPO_ROOT, require.resolve('typescript/bin/tsc')),
+          cmd: Path.relative(REPO_ROOT, resolveTypeCheckCompiler()),
           args: [
             '-b',
             buildTarget,
+            ...buildConcurrencyArgs(concurrency),
             '--pretty',
             ...(flagsReader.boolean('verbose') ? ['--verbose'] : []),
             ...(flagsReader.boolean('extended-diagnostics') ? ['--extendedDiagnostics'] : []),
           ],
           env: {
-            NODE_OPTIONS: '--max-old-space-size=12288',
+            GOMEMLIMIT: resolveMemoryLimit(),
           },
           cwd: REPO_ROOT,
           wait: true,
@@ -102,7 +113,7 @@ export const runLegacyTypeCheckCli = () => {
         const localChanges = shouldUploadArchive ? await detectLocalChanges() : [];
         const hasLocalChanges = localChanges.length > 0;
 
-        if (shouldUploadArchive) {
+        if (shouldUploadArchive && !tscFailed) {
           if (hasLocalChanges) {
             const changedFiles = localChanges.join('\n');
             const message = `uncommitted changes were detected after the TypeScript build. TypeScript cache artifacts must be generated from a clean working tree.\nChanged files:\n${changedFiles}`;

@@ -7,13 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
 import type { VisParams } from '@kbn/visualizations-common';
 import type { SerializedVis } from './vis';
+import { getTypes } from './services';
 
 export const createVisAsync = async <TVisParams extends VisParams = VisParams>(
-  visType: string,
+  visTypeName: string,
   visState: SerializedVis<TVisParams> = {} as any
 ) => {
+  const visType = await getTypes().get<TVisParams>(visTypeName);
+  if (!visType) {
+    throw new Error(
+      i18n.translate('visualizations.visualizationTypeInvalidMessage', {
+        defaultMessage: 'Invalid visualization type "{visType}"',
+        values: {
+          visType: visTypeName,
+        },
+      })
+    );
+  }
+
   const { Vis } = await import('./vis');
   const vis = new Vis(visType, visState);
 

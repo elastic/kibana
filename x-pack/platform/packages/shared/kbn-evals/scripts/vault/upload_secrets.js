@@ -5,21 +5,31 @@
  * 2.0.
  */
 
-require('@kbn/babel-register').install();
-const { uploadConfigToVault } = require('./manage_secrets');
+require('@kbn/swc-register').install();
+const {
+  uploadConfigToVault,
+  resolveVaultTarget,
+  describeVaultTarget,
+} = require('./manage_secrets');
+const { KBN_EVALS_VAULT_TYPES } = require('../../src/cli/utils');
 const minimist = require('minimist');
 
 async function uploadSecrets() {
-  const argv = minimist(process.argv.slice(2));
-  const vault = argv.vault || 'ci-prod';
+  const argv = minimist(process.argv.slice(2), { string: ['suite'] });
+  const vault = argv.vault;
 
-  if (vault !== 'ci-prod') {
-    console.error('Error: vault parameter must be "ci-prod"');
+  if (!vault || !KBN_EVALS_VAULT_TYPES.includes(vault)) {
+    // eslint-disable-next-line no-console
+    console.error(`Error: --vault is required (${KBN_EVALS_VAULT_TYPES.join(' | ')})`);
     process.exit(1);
   }
 
-  console.log(`Using ${vault} vault...`);
-  await uploadConfigToVault(vault);
+  const target = resolveVaultTarget(vault, argv.suite);
+  // eslint-disable-next-line no-console
+  console.log(describeVaultTarget(target));
+  await uploadConfigToVault(target);
+  // eslint-disable-next-line no-console
+  console.log(`Uploaded ${target.vaultPath}`);
 }
 
 uploadSecrets();

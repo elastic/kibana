@@ -9,13 +9,10 @@
 
 import type { ElementRegistry } from '../../edit_engine/element_registry';
 import { revertEdits, applyEditChanges } from '../../edit_engine/element_registry';
-import {
-  setImportant,
-  softHideElement,
-  restoreHiddenElement,
-} from '../../edit_engine/clone_element';
+import { softHideElement, restoreHiddenElement } from '../../edit_engine/clone_element';
 import { buildTransform } from '../../edit_engine/resize_helpers';
 import { DEVTOOL_HIDDEN_ATTR } from '../constants';
+import { setImportant } from '../dom/set_important';
 import { restoreSession } from './snapshot';
 import type {
   Transaction,

@@ -10,10 +10,13 @@ import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { createEntitySourcesService } from '../entity_sources/entity_sources_service';
+import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
+import { ENTITY_ANALYTICS_SPAN_NAMES, runWithSpan } from '../../telemetry/traces';
 
 export interface WatchlistMaintainerDeps {
   getStartServices: EntityAnalyticsRoutesDeps['getStartServices'];
   logger: Logger;
+  hasEncryptionKey: EntityAnalyticsRoutesDeps['hasEncryptionKey'];
 }
 
 type WatchlistMaintainerConfig = Pick<RegisterEntityMaintainerConfig, 'setup' | 'run'>;
@@ -21,6 +24,7 @@ type WatchlistMaintainerConfig = Pick<RegisterEntityMaintainerConfig, 'setup' | 
 export const createWatchlistMaintainer = ({
   getStartServices,
   logger,
+  hasEncryptionKey,
 }: WatchlistMaintainerDeps): WatchlistMaintainerConfig => ({
   setup: async ({ status }) => {
     const namespace = status.metadata.namespace;
@@ -28,7 +32,7 @@ export const createWatchlistMaintainer = ({
     logger.info(`Watchlist maintainer setup completed for namespace "${namespace}"`);
     return status.state;
   },
-  run: async ({ status, esClient, fakeRequest, abortController }) => {
+  run: async ({ status, esClient, fakeRequest, signal }) => {
     const namespace = status.metadata.namespace;
 
     const [coreStart, pluginsStart] = await getStartServices();
@@ -47,6 +51,7 @@ export const createWatchlistMaintainer = ({
     // request with empty headers and no auth credentials.
     const soClient = coreStart.savedObjects.getScopedClient(fakeRequest, {
       excludedExtensions: [SECURITY_EXTENSION_ID],
+      includedHiddenTypes: [watchlistEntitySourceTypeName],
     });
 
     const entitySourcesService = createEntitySourcesService({
@@ -54,9 +59,15 @@ export const createWatchlistMaintainer = ({
       soClient,
       logger,
       namespace,
+      getStartServices,
+      hasEncryptionKey,
     });
 
-    await entitySourcesService.syncAllWatchlists({ abortSignal: abortController.signal });
+    await runWithSpan({
+      name: ENTITY_ANALYTICS_SPAN_NAMES.watchlistTaskRun,
+      namespace,
+      cb: () => entitySourcesService.syncAllWatchlists({ abortSignal: signal }),
+    });
 
     return status.state;
   },

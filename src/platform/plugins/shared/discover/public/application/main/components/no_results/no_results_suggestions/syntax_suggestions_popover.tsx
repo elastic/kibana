@@ -12,12 +12,13 @@ import { css } from '@emotion/react';
 import {
   EuiBasicTable,
   EuiButtonIcon,
+  EuiCode,
   EuiPanel,
   EuiPopover,
   EuiPopoverTitle,
-  EuiCode,
-  EuiText,
   EuiSpacer,
+  EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -41,11 +42,13 @@ export const SyntaxSuggestionsPopover: React.FC<SyntaxSuggestionsPopoverProps> =
   const { title, items, footer } = meta;
 
   const helpButton = (
-    <EuiButtonIcon
-      onClick={() => setIsOpen((prev) => !prev)}
-      iconType="documentation"
-      aria-label={title}
-    />
+    <EuiToolTip content={title} disableScreenReaderOutput>
+      <EuiButtonIcon
+        onClick={() => setIsOpen((prev) => !prev)}
+        iconType="documentation"
+        aria-label={title}
+      />
+    </EuiToolTip>
   );
 
   const columns = [

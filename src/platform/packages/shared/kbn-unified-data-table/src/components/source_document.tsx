@@ -10,16 +10,13 @@
 import React, { Fragment, type ReactNode } from 'react';
 import { css } from '@emotion/react';
 import type {
-  DataTableColumnsMeta,
   DataTableRecord,
-  EsHitRecord,
   FormattedHit,
   ShouldShowFieldInTableHandler,
 } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { formatFieldValueReact, formatHitReact } from '@kbn/discover-utils';
-import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
 import {
   EuiDescriptionList,
   EuiDescriptionListDescription,
@@ -29,9 +26,12 @@ import {
 } from '@elastic/eui';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import classnames from 'classnames';
+import type { DataSource } from '@kbn/data-source';
+import { getDataViewFieldFromDataSource } from '@kbn/discover-utils';
 import { getInnerColumns } from '../utils/columns';
 
 const CELL_CLASS = 'unifiedDataTable__cellValue';
+const SKIP_NULLISH_VALUES_FORMAT_OPTIONS = { skipNullishValues: true };
 
 export function SourceDocument({
   useTopLevelObjectColumns,
@@ -40,12 +40,12 @@ export function SourceDocument({
   dataView,
   shouldShowFieldHandler,
   maxEntries,
-  isPlainRecord,
   fieldFormats,
   dataTestSubj = 'discoverCellDescriptionList',
   className,
   isCompressed = true,
-  columnsMeta,
+  dataSource,
+  isInteractive = true,
 }: {
   useTopLevelObjectColumns: boolean;
   row: DataTableRecord;
@@ -53,31 +53,34 @@ export function SourceDocument({
   dataView: DataView;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
   maxEntries: number;
-  isPlainRecord?: boolean;
   fieldFormats: FieldFormatsStart;
   dataTestSubj?: string;
   className?: string;
   isCompressed?: boolean;
-  columnsMeta: DataTableColumnsMeta | undefined;
+  dataSource: DataSource | undefined;
+  isInteractive?: boolean;
 }) {
   const styles = useMemoCss(componentStyles);
+  const isEsql = dataSource?.kind === 'esql';
   const pairs: FormattedHit = useTopLevelObjectColumns
     ? getTopLevelObjectPairsReact(
-        row.raw,
+        row,
         columnId,
         dataView,
         shouldShowFieldHandler,
         fieldFormats,
-        columnsMeta
+        dataSource,
+        isEsql,
+        isInteractive
       ).slice(0, maxEntries)
-    : formatHitReact(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats, columnsMeta);
+    : formatHitReact(row, dataView, shouldShowFieldHandler, maxEntries, fieldFormats, dataSource, {
+        ...(isEsql ? SKIP_NULLISH_VALUES_FORMAT_OPTIONS : undefined),
+        isInteractive,
+      });
 
   const renderedPairs: ReactNode[] = [];
 
-  for (const [fieldDisplayName, value, fieldName] of pairs) {
-    // temporary solution for text based mode. As there are a lot of unsupported fields we want to
-    // hide the empty one from the Document view
-    if (isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null) continue;
+  for (const [fieldDisplayName, value] of pairs) {
     renderedPairs.push(
       <Fragment key={fieldDisplayName}>
         <EuiDescriptionListTitle className="unifiedDataTable__descriptionListTitle">
@@ -90,7 +93,7 @@ export function SourceDocument({
     );
   }
 
-  if (isPlainRecord && renderedPairs.length === 0) {
+  if (isEsql && renderedPairs.length === 0) {
     return <span className={classnames(CELL_CLASS, className)}>—</span>;
   }
 
@@ -112,24 +115,26 @@ export function SourceDocument({
  * this is used for legacy stuff like displaying products of our ecommerce dataset
  */
 function getTopLevelObjectPairsReact(
-  row: EsHitRecord,
+  row: DataTableRecord,
   columnId: string,
   dataView: DataView,
   shouldShowFieldHandler: ShouldShowFieldInTableHandler,
   fieldFormats: FieldFormatsStart,
-  columnsMeta: DataTableColumnsMeta | undefined
+  dataSource: DataSource | undefined,
+  skipNullishValues: boolean,
+  isInteractive: boolean
 ): FormattedHit {
-  const innerColumns = getInnerColumns(row.fields as Record<string, unknown[]>, columnId);
+  const innerColumns = getInnerColumns(row.raw.fields as Record<string, unknown[]>, columnId);
   // Put the most important fields first
-  const highlights: Record<string, unknown> = (row.highlight as Record<string, unknown>) ?? {};
+  const highlights: Record<string, unknown> = (row.raw.highlight as Record<string, unknown>) ?? {};
   const highlightPairs: FormattedHit = [];
   const sourcePairs: FormattedHit = [];
   Object.entries(innerColumns).forEach(([key, values]) => {
-    const subField = getDataViewFieldOrCreateFromColumnMeta({
-      dataView,
-      fieldName: key,
-      columnMeta: columnsMeta?.[key],
-    });
+    if (skipNullishValues && (row.flattened[key] ?? null) === null) {
+      return;
+    }
+
+    const subField = getDataViewFieldFromDataSource({ dataView, dataSource, fieldName: key });
     const displayKey = dataView.fields.getByName
       ? dataView.fields.getByName(key)?.displayName
       : undefined;
@@ -137,7 +142,14 @@ function getTopLevelObjectPairsReact(
     const formatted: ReactNode = values.map((value: unknown, idx) => (
       <Fragment key={`${key}-${idx}`}>
         {idx > 0 ? ', ' : null}
-        {formatFieldValueReact({ value, hit: row, fieldFormats, dataView, field: subField })}
+        {formatFieldValueReact({
+          value,
+          hit: row.raw,
+          fieldFormats,
+          dataView,
+          field: subField,
+          options: { isInteractive },
+        })}
       </Fragment>
     ));
     const pairs = highlights[key] ? highlightPairs : sourcePairs;

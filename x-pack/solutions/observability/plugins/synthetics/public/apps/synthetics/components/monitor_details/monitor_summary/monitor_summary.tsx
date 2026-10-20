@@ -22,7 +22,8 @@ import { MonitorMWsCallout } from '../../common/mws_callout/monitor_mws_callout'
 import { MissingIntegrationCallout } from '../../monitor_add_edit/steps/missing_integration_callout';
 import { SummaryPanel } from './summary_panel';
 
-import { useMonitorDetailsPage } from '../use_monitor_details_page';
+import { useGetUrlParams } from '../../../hooks';
+import { MonitorDetailsPage } from '../../common/app_header';
 import { useMonitorRangeFrom } from '../hooks/use_monitor_range_from';
 import { MonitorAlerts } from './monitor_alerts';
 import { MonitorStatusPanel } from '../monitor_status/monitor_status_panel';
@@ -36,6 +37,7 @@ import { useMonitorAttachmentConfig } from '../hooks/use_monitor_attachment_conf
 
 export const MonitorSummary = () => {
   const { monitorId: configId } = useParams<{ monitorId: string }>();
+  const { remoteName } = useGetUrlParams();
   const { from, to } = useMonitorRangeFrom();
 
   const dateLabel = from === 'now-30d/d' ? LAST_30_DAYS_LABEL : TO_DATE_LABEL;
@@ -44,13 +46,8 @@ export const MonitorSummary = () => {
   // Configure the agent builder flyout with the monitor details
   useMonitorAttachmentConfig();
 
-  const redirect = useMonitorDetailsPage();
-  if (redirect) {
-    return redirect;
-  }
-
   return (
-    <>
+    <MonitorDetailsPage selectedTab="overview">
       <MissingIntegrationCallout configId={configId} />
       <MonitorPendingWrapper>
         <MonitorMWsCallout />
@@ -84,6 +81,7 @@ export const MonitorSummary = () => {
           to={'now'}
           brushable={false}
           showViewHistoryButton={true}
+          remoteName={remoteName}
         />
         <EuiSpacer size="m" />
         <EuiFlexGroup gutterSize="m" wrap={true}>
@@ -101,7 +99,7 @@ export const MonitorSummary = () => {
           <TestRunsTable paginable={false} from={from} to={to} />
         </LoadWhenInView>
       </MonitorPendingWrapper>
-    </>
+    </MonitorDetailsPage>
   );
 };
 

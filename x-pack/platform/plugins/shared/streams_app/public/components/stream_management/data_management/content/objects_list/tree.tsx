@@ -15,6 +15,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { ContentPackStream } from '@kbn/content-packs-schema';
 import {
@@ -116,7 +117,10 @@ export function StreamTree({
               </EuiLink>
             )}
             <EuiText color="subdued" size="s">
-              {selectedCount}/{Object.values(rows).length} selected
+              {selectedCount}/{Object.values(rows).length}{' '}
+              {i18n.translate('xpack.streams.streamTree.selectedTextLabel', {
+                defaultMessage: 'selected',
+              })}
             </EuiText>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -138,39 +142,53 @@ export function StreamTree({
               {item.parent ? (
                 item.expanded ? (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      aria-label={i18n.translate('xpack.streams.contentPack.tree.collapse', {
+                    <EuiToolTip
+                      content={i18n.translate('xpack.streams.contentPack.tree.collapse', {
                         defaultMessage: 'Collapse',
                       })}
-                      iconType="chevronSingleDown"
-                      color="text"
-                      onClick={() => {
-                        setRows((prevRows) => {
-                          const updated = { ...prevRows };
-                          updated[item.name].expanded = false;
-                          onSelectionChange(updated);
-                          return updated;
-                        });
-                      }}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        aria-label={i18n.translate('xpack.streams.contentPack.tree.collapse', {
+                          defaultMessage: 'Collapse',
+                        })}
+                        iconType="chevronSingleDown"
+                        color="text"
+                        onClick={() => {
+                          setRows((prevRows) => {
+                            const updated = { ...prevRows };
+                            updated[item.name].expanded = false;
+                            onSelectionChange(updated);
+                            return updated;
+                          });
+                        }}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 ) : (
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      aria-label={i18n.translate('xpack.streams.contentPack.tree.expand', {
+                    <EuiToolTip
+                      content={i18n.translate('xpack.streams.contentPack.tree.expand', {
                         defaultMessage: 'Expand',
                       })}
-                      iconType="chevronSingleRight"
-                      color="text"
-                      onClick={() => {
-                        setRows((prevRows) => {
-                          const updated = { ...prevRows };
-                          updated[item.name].expanded = true;
-                          onSelectionChange(updated);
-                          return updated;
-                        });
-                      }}
-                    />
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        aria-label={i18n.translate('xpack.streams.contentPack.tree.expand', {
+                          defaultMessage: 'Expand',
+                        })}
+                        iconType="chevronSingleRight"
+                        color="text"
+                        onClick={() => {
+                          setRows((prevRows) => {
+                            const updated = { ...prevRows };
+                            updated[item.name].expanded = true;
+                            onSelectionChange(updated);
+                            return updated;
+                          });
+                        }}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 )
               ) : (

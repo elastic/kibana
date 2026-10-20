@@ -25,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
   const riskEngineRoutesWithNamespace = riskEngineRouteHelpersFactory(supertest, customSpaceName);
 
-  describe('@ess @serverless @serverlessQA init_and_status_apis', () => {
+  describe('@ess @serverless @serverlessQA @skipInServerlessMKI init_and_status_apis', () => {
     before(async () => {
       await spaces.create({
         id: customSpaceName,

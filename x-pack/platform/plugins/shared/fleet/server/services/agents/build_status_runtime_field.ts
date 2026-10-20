@@ -14,7 +14,10 @@ import { DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT } from '../../../com
 import { AGENT_POLLING_THRESHOLD_MS } from '../../constants';
 import { agentPolicyService } from '../agent_policy';
 import { appContextService } from '../app_context';
-const MISSED_INTERVALS_BEFORE_OFFLINE = 10;
+
+const escapePainlessString = (s: string) => s.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
+const MISSED_INTERVALS_BEFORE_OFFLINE = 12;
 const MS_BEFORE_OFFLINE = MISSED_INTERVALS_BEFORE_OFFLINE * AGENT_POLLING_THRESHOLD_MS;
 export type InactivityTimeouts = Awaited<
   ReturnType<(typeof agentPolicyService)['getInactivityTimeouts']>
@@ -80,9 +83,9 @@ const _buildInactiveCondition = (opts: {
   const policyClauses = inactivityTimeouts
     .map(({ inactivityTimeout, policyIds }) => {
       const inactivityTimeoutMs = inactivityTimeout * 1000;
-      const policyIdMatches = `[${policyIds.map((id) => `'${id}'`).join(',')}].contains(${field(
-        'policy_id'
-      )}.value)`;
+      const policyIdMatches = `[${policyIds
+        .map((id) => `'${escapePainlessString(id)}'`)
+        .join(',')}].contains(${field('policy_id')}.value)`;
 
       return `${policyIdMatches} && lastCheckinMillis < ${now - inactivityTimeoutMs}L`;
     })
