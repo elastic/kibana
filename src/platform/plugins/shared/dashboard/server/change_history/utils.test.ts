@@ -22,7 +22,7 @@ import {
   getHistorySnapshot,
   getNextHistorySequence,
   hasContentChanged,
-} from './util';
+} from './utils';
 
 jest.mock('./change_history_service');
 const mockUseRbacForRequest = jest.fn();

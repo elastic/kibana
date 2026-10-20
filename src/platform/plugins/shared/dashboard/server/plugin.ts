@@ -61,7 +61,7 @@ import {
 
 export const DEFER_BELOW_FOLD = `labs:dashboard:deferBelowFold` as const;
 
-export interface SetupDeps {
+interface SetupDeps {
   embeddable: EmbeddableSetup;
   usageCollection?: UsageCollectionSetup;
   taskManager: TaskManagerSetupContract;

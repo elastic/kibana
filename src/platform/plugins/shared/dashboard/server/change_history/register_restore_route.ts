@@ -12,7 +12,7 @@ import { z } from '@kbn/zod';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 import { getDashboardStateSchema } from '../api/dashboard_state_schemas';
-import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './util';
+import { CHANGE_HISTORY_ROUTE_SECURITY, getChangeHistoryContext } from './utils';
 import { update } from '../api/update/update';
 
 export type RestoreChangeResponse = DashboardState;

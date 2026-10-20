@@ -20,7 +20,7 @@ import {
   getHistorySnapshot,
   getNextHistorySequence,
   INITIAL_HISTORY_SEQUENCE,
-} from '../../change_history/util';
+} from '../../change_history/utils';
 
 export interface CreateOptions {
   id?: string;

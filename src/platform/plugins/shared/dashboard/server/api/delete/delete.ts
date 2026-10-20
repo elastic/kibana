@@ -17,7 +17,7 @@ import {
   addToHistory,
   getHistorySnapshot,
   getNextHistorySequence,
-} from '../../change_history/util';
+} from '../../change_history/utils';
 
 export async function deleteDashboard(
   requestCtx: RequestHandlerContext,

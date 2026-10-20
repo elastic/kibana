@@ -28,7 +28,7 @@ import {
   getHistorySnapshot,
   getNextHistorySequence,
   hasContentChanged,
-} from '../../change_history/util';
+} from '../../change_history/utils';
 
 export interface UpdateOptions extends Omit<CreateOptions, 'id'> {
   /** Sequence number of the history version this update restores */
