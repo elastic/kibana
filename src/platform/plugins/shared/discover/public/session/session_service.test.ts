@@ -148,7 +148,7 @@ describe('Discover session service', () => {
       const saveResponse: DiscoverSessionApiResponse = {
         id: savedId,
         data,
-        meta: { managed: true },
+        meta: { managed: true, version: 'saved-version' },
       };
       apiClient.create.mockResolvedValue(saveResponse);
       apiClient.upsert.mockResolvedValue(saveResponse);
@@ -168,6 +168,7 @@ describe('Discover session service', () => {
         ...beforeSave,
         id: savedId,
         managed: true,
+        version: 'saved-version',
         references: [{ id: 'tag-1', type: 'tag', name: 'tag-ref-tag-1' }],
       });
       expect(submittedSession).toStrictEqual(beforeSave);

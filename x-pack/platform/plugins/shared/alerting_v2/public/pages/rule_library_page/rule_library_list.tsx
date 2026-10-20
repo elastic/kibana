@@ -6,13 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiBadge,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
+import { EuiBadge, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   ContentList,
   ContentListFooter,
@@ -24,8 +18,8 @@ import type { ContentListItem, ContentListItemConfig } from '@kbn/content-list';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { RULE_TEMPLATES_CONTENT_LIST_ID } from '../../constants';
-import { useInstallRuleTemplate } from '../../hooks/use_install_rule_template';
 import { UserCapabilities } from '../../services/user_capabilities';
 import {
   useRuleTemplatesDataSource,
@@ -40,40 +34,39 @@ const RULE_LIBRARY_LIST_TITLE = i18n.translate('xpack.alertingV2.ruleLibrary.pag
   defaultMessage: 'Rule library',
 });
 
-const INSTALL_ACTION_NAME = i18n.translate('xpack.alertingV2.ruleLibrary.installButtonLabel', {
-  defaultMessage: 'Install',
+const CREATE_ACTION_NAME = i18n.translate('xpack.alertingV2.ruleLibrary.createButtonLabel', {
+  defaultMessage: 'Create',
 });
 
-const INSTALL_RESTRICTED_REASON = i18n.translate(
-  'xpack.alertingV2.ruleLibrary.installRestrictedTooltip',
+const CREATE_RESTRICTED_REASON = i18n.translate(
+  'xpack.alertingV2.ruleLibrary.createRestrictedTooltip',
   {
-    defaultMessage: 'You do not have permission to install rule templates',
+    defaultMessage: 'You do not have permission to create rules from templates',
   }
 );
 
 const toTemplate = (item: ContentListItem) => (item as RuleTemplateContentListItem).template;
 
-export const RuleLibraryList = () => {
+export interface RuleLibraryListProps {
+  onCreateFromTemplate: (template: RuleTemplateResponse) => void;
+}
+
+export const RuleLibraryList = ({ onCreateFromTemplate }: RuleLibraryListProps) => {
   const canWrite = useService(UserCapabilities).canWrite('rules');
   const dataSource = useRuleTemplatesDataSource();
-  const {
-    mutate: installTemplate,
-    isLoading: isInstalling,
-    variables: installingTemplate,
-  } = useInstallRuleTemplate();
 
   const itemConfig = useMemo(
     (): ContentListItemConfig => ({
       actions: {
-        install: {
+        create: {
           onItemAction: (item) => {
-            installTemplate(toTemplate(item));
+            onCreateFromTemplate(toTemplate(item));
           },
-          restriction: canWrite ? undefined : () => INSTALL_RESTRICTED_REASON,
+          restriction: canWrite ? undefined : () => CREATE_RESTRICTED_REASON,
         },
       },
     }),
-    [canWrite, installTemplate]
+    [canWrite, onCreateFromTemplate]
   );
 
   const emptyState = (
@@ -175,20 +168,12 @@ export const RuleLibraryList = () => {
           />
           <Column.Actions width="14em" sticky={false}>
             <Action
-              id="install"
-              name={(item: ContentListItem) =>
-                isInstalling && installingTemplate?.id === item.id ? (
-                  <EuiLoadingSpinner size="m" data-test-subj="ruleLibraryInstallLoading" />
-                ) : (
-                  INSTALL_ACTION_NAME
-                )
-              }
-              description={INSTALL_ACTION_NAME}
+              id="create"
+              name={CREATE_ACTION_NAME}
+              description={CREATE_ACTION_NAME}
               type="button"
-              enabled={(item: ContentListItem) =>
-                canWrite && !(isInstalling && installingTemplate?.id === item.id)
-              }
-              data-test-subj="ruleLibraryInstallAction"
+              enabled={(item: ContentListItem) => canWrite}
+              data-test-subj="ruleLibraryCreateAction"
             />
           </Column.Actions>
         </ContentListTable>

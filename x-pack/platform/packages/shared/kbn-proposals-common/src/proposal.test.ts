@@ -6,7 +6,7 @@
  */
 
 import { MAX_CHARTS_SUMMARY_BUCKETS } from './constants';
-import { isProposalSettling, proposalChartsSummaryQuerySchema } from './proposal';
+import { isProposalSettling, isTerminal, proposalChartsSummaryQuerySchema } from './proposal';
 import { reviseProposalResponseSchema } from './revision';
 
 describe('proposalChartsSummaryQuerySchema', () => {
@@ -70,6 +70,19 @@ describe('isProposalSettling', () => {
 
   it('reads false for a proposal nobody has decided yet', () => {
     expect(isProposalSettling({ decision: undefined, status: 'pending' })).toBe(false);
+  });
+});
+
+describe('isTerminal', () => {
+  it.each(['succeeded', 'failed', 'expired', 'no_action', 'superseded'] as const)(
+    'treats %s as settled',
+    (status) => {
+      expect(isTerminal(status)).toBe(true);
+    }
+  );
+
+  it.each(['pending', 'executing'] as const)('treats %s as still open', (status) => {
+    expect(isTerminal(status)).toBe(false);
   });
 });
 

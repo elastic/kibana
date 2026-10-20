@@ -8,6 +8,7 @@
  */
 
 import { cloneDeep, differenceBy, omit } from 'lodash';
+import { i18n } from '@kbn/i18n';
 import type { DataViewSpec, QueryState } from '@kbn/data-plugin/common';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import { isEmptyEsqlQuery, isOfAggregateQueryType } from '@kbn/es-query';
@@ -28,6 +29,7 @@ import {
 import {
   createTabRuntimeState,
   selectCurrentProfileUrlState,
+  getTabDataView,
   selectTabRuntimeState,
   selectInitialUnifiedHistogramLayoutPropsMap,
   selectTabRuntimeInternalState,
@@ -52,6 +54,7 @@ import { fetchData } from './tab_state';
 import { initializeAndSync, stopSyncing } from './tab_sync';
 import { applyInlineDataViewLoadState } from './apply_inline_data_view_load_state';
 import { loadDataViewList } from './data_views';
+import { clearOutdatedTabUrlState } from '../../utils/cleanup_url_state';
 import { showSessionWarnings } from '../../../../../session';
 
 export const setTabs: InternalStateThunkActionCreator<
@@ -237,10 +240,14 @@ export const updateTabs: InternalStateThunkActionCreator<
           stateTypes: [ProfileStateType.Persistent, ProfileStateType.Url],
           defaultsHandling: 'strip',
         });
+        tab.uiState = {
+          ...tab.uiState,
+          visor: recentlyClosedTabToRestore.uiState.visor,
+        };
       } else if (!('appState' in item)) {
         // the new tab is a fresh one
         const currentQuery = currentTab.appState.query;
-        const currentDataView = currentTabRuntimeState.currentDataView$.getValue();
+        const currentDataView = getTabDataView(currentTabRuntimeState);
 
         tab.skipInitialFetch = true;
         const currentRefreshInterval =
@@ -248,13 +255,6 @@ export const updateTabs: InternalStateThunkActionCreator<
         tab.globalState = {
           ...tab.globalState,
           refreshInterval: { ...currentRefreshInterval, pause: true },
-        };
-        tab.uiState = {
-          ...tab.uiState,
-          esqlEditor: {
-            ...tab.uiState.esqlEditor,
-            isHistoryOpen: true,
-          },
         };
 
         if (!currentQuery || !currentDataView) {
@@ -479,16 +479,21 @@ export const initializeTabs = createInternalStateAsyncThunk(
     }
 
     const savedDataViewIds = getState().savedDataViews.map(({ id }) => id);
-    const { inlineDataViewIds, draftSessionTitle, ...initialTabsState } =
-      tabsStorageManager.loadLocally({
-        userId,
-        spaceId,
-        persistedDiscoverSession,
-        shouldClearAllTabs,
-        defaultTab: services.embeddableEditor.getByValueTab(),
-        navigationDataViewSpec: initialTabState?.dataViewSpec,
-        savedDataViewIds,
-      });
+    const {
+      inlineDataViewIds,
+      draftSessionTitle,
+      outdatedSelectedTab,
+      hasNewSavedVersion,
+      ...initialTabsState
+    } = tabsStorageManager.loadLocally({
+      userId,
+      spaceId,
+      persistedDiscoverSession,
+      shouldClearAllTabs,
+      defaultTab: services.embeddableEditor.getByValueTab(),
+      navigationDataViewSpec: initialTabState?.dataViewSpec,
+      savedDataViewIds,
+    });
     const selectedTab = initialTabsState.allTabs.find(
       ({ id }) => id === initialTabsState.selectedTabId
     );
@@ -500,6 +505,16 @@ export const initializeTabs = createInternalStateAsyncThunk(
       })
     );
 
+    // Clear a stale draft URL unless navigation explicitly supplies initial tab state.
+    if (!initialTabState && outdatedSelectedTab) {
+      await clearOutdatedTabUrlState({
+        tab: outdatedSelectedTab,
+        timeRestore: selectedTab?.attributes.timeRestore ?? false,
+        urlStateStorage,
+        profileStateRegistry: services.profileStateRegistry,
+      });
+    }
+
     // Replace instead of push the tab ID to the URL on initialization in order to
     // avoid capturing a browser history entry with a potentially empty _tab state
     await tabsStorageManager.pushSelectedTabIdToUrl(initialTabsState.selectedTabId, {
@@ -508,6 +523,19 @@ export const initializeTabs = createInternalStateAsyncThunk(
 
     dispatch(internalStateSlice.actions.setDraftSessionTitle(draftSessionTitle));
     dispatch(setTabs(initialTabsState));
+
+    if (hasNewSavedVersion) {
+      services.toastNotifications.addInfo({
+        title: i18n.translate('discover.sessionReplacedToast.title', {
+          defaultMessage: 'Discover session updated externally',
+        }),
+        text: i18n.translate('discover.sessionReplacedToast.text', {
+          defaultMessage:
+            'The latest saved version has been loaded. Any unsaved changes are available in recently closed tabs.',
+        }),
+        'data-test-subj': 'discoverSessionReplacedToast',
+      });
+    }
 
     return {
       userId,

@@ -28,6 +28,7 @@ import {
   type UnifiedFieldListSidebarContainerProps,
   type UnifiedFieldListSidebarContainerApi,
   type UnifiedFieldListRestorableState,
+  type AddOtherFilterHandler,
   FieldsGroupNames,
 } from '@kbn/unified-field-list';
 import { calcFieldCounts } from '@kbn/discover-utils/src/utils/calc_field_counts';
@@ -121,6 +122,10 @@ export interface DiscoverSidebarResponsiveProps {
    */
   onAddFilter?: (field: DataViewField | string, value: unknown, type: '+' | '-') => void;
   /**
+   * Callback function when adding a filter for the "Other" top values bucket from sidebar
+   */
+  onAddOtherFilter?: AddOtherFilterHandler;
+  /**
    * Callback function when changing an data view
    */
   onChangeDataView: (id: string) => void;
@@ -190,6 +195,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     trackUiMetric,
     onAddBreakdownField,
     onAddFilter,
+    onAddOtherFilter,
     onFieldEdited,
     onDataViewCreated,
     onChangeDataView,
@@ -472,6 +478,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
             onAddBreakdownField={onAddBreakdownField}
             onAddFieldToWorkspace={onAddFieldToWorkspace}
             onAddFilter={onAddFilter}
+            onAddOtherFilter={onAddOtherFilter}
             onEditField={fieldEditor.editField}
             onDeleteField={fieldEditor.deleteField}
             onMoveFieldInWorkspace={onMoveFieldInWorkspace}

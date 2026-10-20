@@ -384,6 +384,8 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p99',
+        gridSortField: 'recency',
+        gridSortDirection: 'desc',
       };
 
       const attributes: DiscoverSessionAttributes = {
@@ -437,6 +439,8 @@ apiTest.describe('PUT /api/discover_sessions/{id}', { tag: tags.deploymentAgnost
         counter_aggregation: 'max',
         gauge_aggregation: 'min',
         histogram_percentile: 'p99',
+        grid_sort_field: 'recency',
+        grid_sort_direction: 'desc',
         data_source: {
           type: 'esql',
           query: 'TS metrics-* | LIMIT 10',

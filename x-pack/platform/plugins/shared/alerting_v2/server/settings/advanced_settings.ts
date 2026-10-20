@@ -33,13 +33,14 @@ export const alertingGlobalAdvancedSettings = {
       defaultMessage: 'Universal Alerting',
     }),
     type: 'boolean',
-    value: false,
+    value: true,
     description: i18n.translate('xpack.alertingVTwo.enabledSettingDescription', {
-      defaultMessage: 'Enables the Universal Alerting APIs and UI.',
+      defaultMessage:
+        'Enables the Universal Alerting APIs and UI. Turning this setting off hides the UI and rejects API requests, but existing rules keep running and writing alert events. <strong>Disable your rules before turning this setting off.</strong>',
+      ignoreTag: true,
     }),
     schema: schema.boolean(),
     requiresPageReload: true,
-    experimental: true,
   },
 } satisfies AlertingV2AdvancedSettingsRegistration<typeof ALERTING_V2_ENABLED_SETTING_ID>;
 
@@ -47,7 +48,7 @@ export const alertingSpaceAdvancedSettings = {
   [ALERTING_V2_SHOW_V1_OBSERVABILITY_ALERTS_TABLE_SETTING_ID]: {
     category: [ALERTING_CATEGORY],
     name: i18n.translate('xpack.alertingVTwo.showV1ObservabilityAlertsTableSettingName', {
-      defaultMessage: 'Show V1 Observability alerts table',
+      defaultMessage: 'Classic Alerting: Show Classic Alerts table',
     }),
     type: 'boolean',
     value: false,
@@ -55,17 +56,16 @@ export const alertingSpaceAdvancedSettings = {
       'xpack.alertingVTwo.showV1ObservabilityAlertsTableSettingDescription',
       {
         defaultMessage:
-          'Show the V1 Observability alerts table in navigation. Only shows alerts from V1 alerting rules.',
+          'Show the Classic Observability alerts table in navigation. Only shows alerts from Classic rules.',
       }
     ),
     schema: schema.boolean(),
     requiresPageReload: true,
-    experimental: true,
   },
   [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: {
     category: [ALERTING_CATEGORY],
     name: i18n.translate('xpack.alertingV2.experimentalFeaturesSettingName', {
-      defaultMessage: 'Universal Alerting experimental features',
+      defaultMessage: 'Universal Alerting: Experimental Features',
     }),
     type: 'boolean',
     value: false,

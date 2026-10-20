@@ -10,6 +10,7 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 import dateMath from '@kbn/datemath';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { significantSecurityEventAttachmentDataSchema } from '../../../../../common/significant_security_event_schema';
+import type { HuntModels } from '../types';
 import { huntCoordinator } from '../hunt_coordinator';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
 import { buildSseData, buildSseAttachmentId } from './sse_mapper';
@@ -166,6 +167,11 @@ const logger = loggingSystemMock.createLogger();
 const esClient = {} as ElasticsearchClient;
 /** Truthy stand-in so the coordinator does not skip Tier 2 with `no_inference`. */
 const mockModel = {} as ScopedModel;
+const mockModels: HuntModels = {
+  efficient: mockModel,
+  balanced: mockModel,
+  frontier: mockModel,
+};
 
 const DEFAULT_INDEX_PATTERNS = ['logs-aws.*'];
 
@@ -174,7 +180,7 @@ const runCoordinator = (
     indexPatterns?: string[];
   }
 ): ReturnType<typeof huntCoordinator> =>
-  huntCoordinator({ esClient, reportsEsClient: esClient }, mockModel, logger, {
+  huntCoordinator({ esClient, reportsEsClient: esClient }, mockModels, logger, {
     indexPatterns: DEFAULT_INDEX_PATTERNS,
     ...params,
   });

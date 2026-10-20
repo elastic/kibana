@@ -22,7 +22,7 @@ export const CREATE_CASE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.createCase.documentation.details',
   {
     defaultMessage:
-      'This step creates a new case in the cases system. You can specify title, description, tags, assignees, severity, category, connector configuration, sync settings, and custom fields. The step returns the complete created case object.',
+      'This step creates a new case in the cases system. You can specify title, description, tags, assignees, severity, category, connector configuration, and sync settings. Custom fields are deprecated; set field values via `extended_fields` instead. The step returns the complete created case object.',
   }
 );
 
@@ -108,7 +108,7 @@ export const SET_CUSTOM_FIELD_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   'xpack.cases.workflowSteps.setCustomField.documentation.details',
   {
     defaultMessage:
-      'This step updates one custom field on a case by field name. Use `field_name` to select the field key and `value` to set the new value.',
+      'This step updates one custom field on a case by field name. Use `field_name` to select the field key and `value` to set the new value. Custom fields are deprecated; use the `cases.setExtendedFields` step instead, providing a `fields` map of storage key to value, and discover valid keys with the get case fields API.',
   }
 );
 
@@ -763,6 +763,28 @@ export const DELETE_OBSERVABLE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   {
     defaultMessage:
       'This step deletes the specified observable from the case. The step echoes back the case_id and observable_id that were removed.',
+  }
+);
+
+export const BULK_DELETE_OBSERVABLES_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.bulkDeleteObservables.label',
+  {
+    defaultMessage: 'Cases - Bulk delete observables',
+  }
+);
+
+export const BULK_DELETE_OBSERVABLES_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.bulkDeleteObservables.description',
+  {
+    defaultMessage: 'Removes multiple observables from a case in one step',
+  }
+);
+
+export const BULK_DELETE_OBSERVABLES_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.bulkDeleteObservables.documentation.details',
+  {
+    defaultMessage:
+      'This step deletes the specified observables from the case. The operation is atomic: if any of the observable IDs is not found on the case, the step fails and no observables are deleted. The step echoes back the case_id and the observable_ids that were requested.',
   }
 );
 

@@ -61,6 +61,7 @@ export const fromDiscoverSessionApiResponse = (
     tags: data.tags,
     tabs: tabsWithReferences.map(({ tab }) => tab),
     managed: meta.managed ?? false,
+    version: meta.version,
     references: [...tagReferences, ...tabsWithReferences.flatMap(({ references }) => references)],
     ...(resolve?.outcome !== undefined && { sharingSavedObjectProps: resolve }),
   });

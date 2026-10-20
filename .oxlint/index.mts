@@ -26,6 +26,8 @@ import { reactRules } from './react.mts';
 import { kibanaOverrides, kibanaRules } from './kibana.mts';
 import { licenseHeaderOverrides } from './license_headers.mts';
 import { scoutOverrides } from './scout.mts';
+import { i18nOverrides } from './i18n.mts';
+import { telemetryOverrides } from './telemetry.mts';
 import { kbnUiOverrides, kbnUiRules } from './kbn_ui.mts';
 import { alertingV2Overrides } from './alerting_v2.mts';
 import { securityImportsOverrides } from './security_imports.mts';
@@ -36,6 +38,14 @@ export default defineConfig<OxlintConfig>({
     {
       name: '@kbn/eslint',
       specifier: './packages/kbn-eslint-plugin-eslint/oxlint_plugin.js',
+    },
+    {
+      name: '@kbn/i18n',
+      specifier: './packages/kbn-eslint-plugin-i18n/oxlint_plugin.js',
+    },
+    {
+      name: '@kbn/telemetry',
+      specifier: './packages/kbn-eslint-plugin-telemetry/oxlint_plugin.js',
     },
     {
       name: '@kbn/disable',
@@ -65,6 +75,8 @@ export default defineConfig<OxlintConfig>({
     ...licenseHeaderOverrides,
     ...kibanaOverrides,
     ...scoutOverrides,
+    ...i18nOverrides,
+    ...telemetryOverrides,
     ...securityImportsOverrides,
     ...kbnUiOverrides,
     ...alertingV2Overrides,

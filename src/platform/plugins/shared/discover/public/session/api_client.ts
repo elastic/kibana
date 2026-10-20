@@ -53,12 +53,10 @@ export type DiscoverSessionClientGetResult = DiscoverSessionGetResponse & {
 /** Loads and saves sessions through the public API, where inline views are defined without IDs. */
 export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionClient => ({
   create: (data) =>
-    requestWithReadableError(() =>
-      http.post<DiscoverSessionApiResponse>(DISCOVER_SESSION_API_BASE_PATH, {
-        version: DISCOVER_SESSION_API_VERSION,
-        body: JSON.stringify(data),
-      })
-    ),
+    http.post<DiscoverSessionApiResponse>(DISCOVER_SESSION_API_BASE_PATH, {
+      version: DISCOVER_SESSION_API_VERSION,
+      body: JSON.stringify(data),
+    }),
 
   get: (id) =>
     requestWithReadableError(
@@ -84,12 +82,10 @@ export const createDiscoverSessionClient = (http: HttpStart): DiscoverSessionCli
     ),
 
   upsert: (id, data) =>
-    requestWithReadableError(() =>
-      http.put<DiscoverSessionApiResponse>(buildDiscoverSessionPath(id), {
-        version: DISCOVER_SESSION_API_VERSION,
-        body: JSON.stringify(data),
-      })
-    ),
+    http.put<DiscoverSessionApiResponse>(buildDiscoverSessionPath(id), {
+      version: DISCOVER_SESSION_API_VERSION,
+      body: JSON.stringify(data),
+    }),
   // TODO: Add DELETE when connecting Discover's session deletion flow to the HTTP API.
 });
 

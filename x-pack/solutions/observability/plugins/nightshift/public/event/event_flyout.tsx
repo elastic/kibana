@@ -21,11 +21,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useInvestigationState } from '@kbn/investigation-output';
+import { useInvestigation } from '@kbn/investigation-output';
 import { useQueryClient } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftMarkIcon } from '@kbn/observability-shared-plugin/public';
-import { DetectionFlyout } from '../detection/detection_flyout';
+import { DetectionFlyout } from '../components/entities/detection/detection_flyout';
 import { DetectionsList } from './detections_list';
 import { EventInvestigation } from './event_investigation';
 import { EventFlyoutChatFooter } from './event_flyout_chat_footer';
@@ -43,7 +43,7 @@ import { useFetchDetectionOccurrences } from '../hooks/use_fetch_detection_occur
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 import { markEventInvestigationCompleteInCache } from '../hooks/use_fetch_significant_events';
 import { useFetchInvestigationStatuses } from '../hooks/use_fetch_investigation_statuses';
-import { findDetectionSignal } from '../detection/resolve_detection_signal';
+import { findDetectionSignal } from '../components/entities/detection/resolve_detection_signal';
 import { isNeedsActionStatus } from './significant_event_status';
 import { useKibana } from '../hooks/use_kibana';
 import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
@@ -79,19 +79,16 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     latestRunStatus === undefined;
   const availableInvestigation = investigationNotFound ? undefined : latestInvestigation;
 
+  // The recorded id is the investigation (Agent Builder conversation) id.
   const {
-    conversationId,
+    investigation: investigationDetails,
     error: investigationError,
-    state: investigationState,
     status: investigationStatus,
-  } = useInvestigationState({
+  } = useInvestigation({
     http,
-    workflowExecutionId: availableInvestigation?.workflow_execution_id,
-    isRunning:
-      latestRunStatus != null
-        ? latestRunStatus === 'pending'
-        : availableInvestigation != null && availableInvestigation.completed_at == null,
+    investigationId: availableInvestigation?.workflow_execution_id,
   });
+  const conversationId = investigationDetails?.id;
 
   useEffect(() => {
     if (latestInvestigation == null || latestInvestigation.completed_at != null) {
@@ -250,12 +247,10 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
         <EuiSpacer size="l" />
 
         <EventInvestigation
-          event={event}
           investigation={availableInvestigation}
           status={investigationStatus}
-          state={investigationState}
+          details={investigationDetails}
           error={investigationError}
-          conversationId={conversationId}
         />
       </EuiFlyoutBody>
 
