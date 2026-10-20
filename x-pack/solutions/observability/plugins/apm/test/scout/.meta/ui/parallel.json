@@ -1,5 +1,5 @@
 {
-  "sha1": "2875446a912f27f22244cad28af0cd6548568136",
+  "sha1": "8d962390cf5c8c75992754dea1d5cd84b52c0089",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -58,7 +58,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 82,
+        "line": 83,
         "column": 43
       }
     },
@@ -72,7 +72,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 82,
+        "line": 83,
         "column": 66
       }
     },
@@ -86,7 +86,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 85,
+        "line": 86,
         "column": 5
       }
     },
@@ -100,7 +100,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 90,
+        "line": 91,
         "column": 5
       }
     },
@@ -114,7 +114,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 96,
+        "line": 97,
         "column": 5
       }
     },
@@ -128,7 +128,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/alerts/alert_details_chart_layout.spec.ts",
-        "line": 102,
+        "line": 103,
         "column": 5
       }
     },
@@ -1884,7 +1884,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -1900,7 +1900,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -1916,7 +1916,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -1932,7 +1932,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -1948,7 +1948,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -1964,7 +1964,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -1980,7 +1980,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -1996,7 +1996,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -2012,7 +2012,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -2028,7 +2028,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -2044,7 +2044,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -2060,7 +2060,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -2076,7 +2076,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -2092,7 +2092,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -2108,7 +2108,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -2124,7 +2124,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -2140,7 +2140,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/service_overview/metrics_dashboards.spec.ts",
-        "line": 239,
+        "line": 242,
         "column": 28
       }
     },
@@ -3164,8 +3164,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 34,
-        "column": 66
+        "line": 36,
+        "column": 26
       }
     },
     {
@@ -3180,8 +3180,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 38,
-        "column": 26
+        "line": 41,
+        "column": 22
       }
     },
     {
@@ -3196,8 +3196,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links_template_validation.spec.ts",
-        "line": 53,
-        "column": 62
+        "line": 57,
+        "column": 13
       }
     },
     {
@@ -3212,8 +3212,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links.spec.ts",
-        "line": 45,
-        "column": 40
+        "line": 25,
+        "column": 7
       }
     },
     {
@@ -3228,8 +3228,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/apm/test/scout/ui/parallel_tests/settings/custom_links.spec.ts",
-        "line": 55,
-        "column": 39
+        "line": 32,
+        "column": 25
       }
     },
     {

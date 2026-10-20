@@ -13,11 +13,13 @@ import useDebounce from 'react-use/lib/useDebounce';
 import {
   AGENTIC_INVESTIGATIONS_API_VERSION,
   ESCALATION_ASSIGN_URL,
+  ESCALATION_LINK_URL,
   ESCALATION_LINKED_INVESTIGATIONS_URL,
   ESCALATIONS_INTERNAL_URL,
-  ESCALATION_BY_ID_URL,
   ESCALATION_STATUS_URL,
+  ESCALATION_SYNC_URL,
   ESCALATION_CLOSE_PREVIEW_URL,
+  MAX_ESCALATIONS_PAGE_SIZE,
 } from '../../../common';
 import type {
   CreateEscalationRequest,
@@ -28,6 +30,7 @@ import type {
   SetEscalationStatusRequest,
   SetEscalationStatusResponse,
   EscalationClosePreviewResponse,
+  SyncEscalationResponse,
 } from '../../../common';
 import { retryOnTransientError } from '../../retry_on_transient_error';
 import { escalationQueryKeys } from '../query_keys';
@@ -46,18 +49,24 @@ export const useListEscalations = ({
   page,
   perPage,
   searchQuery,
+  entity,
+  enabled = true,
 }: {
   status?: 'open' | 'closed' | 'all';
   page?: number;
   perPage?: number;
   searchQuery?: string;
+  /** Only escalations whose linked investigations impact this entity id. */
+  entity?: string | null;
+  /** Set to false to skip fetching (e.g. when the current user lacks escalation read access). */
+  enabled?: boolean;
 } = {}) => {
   const { services } = useKibana<CoreStart>();
   const [debouncedSearch, setDebouncedSearch] = useState(searchQuery);
   useDebounce(() => setDebouncedSearch(searchQuery), 300, [searchQuery]);
 
   return useQuery({
-    queryKey: escalationQueryKeys.list(status, page, perPage, debouncedSearch),
+    queryKey: escalationQueryKeys.list(status, page, perPage, debouncedSearch, entity),
     queryFn: async (): Promise<ListEscalationsResponse> =>
       services.http.get<ListEscalationsResponse>(ESCALATIONS_INTERNAL_URL, {
         version: AGENTIC_INVESTIGATIONS_API_VERSION,
@@ -66,9 +75,40 @@ export const useListEscalations = ({
           ...(page !== undefined ? { page } : {}),
           ...(perPage !== undefined ? { per_page: perPage } : {}),
           ...(debouncedSearch ? { search: debouncedSearch } : {}),
+          ...(entity ? { entity } : {}),
         },
       }),
+    enabled,
     keepPreviousData: true,
+    retry: retryOnTransientError,
+  });
+};
+
+/**
+ * Returns the open escalations that already contain the given investigation id in their
+ * `metadata.linked_investigations` array. Used by the escalation creation modal to warn the
+ * user before they open a duplicate escalation.
+ *
+ * Pass `enabled: false` when the current user lacks escalation read access so no request is made.
+ */
+export const useEscalationsForInvestigation = (
+  investigationId: string | undefined,
+  { enabled }: { enabled: boolean }
+) => {
+  const { services } = useKibana<CoreStart>();
+
+  return useQuery({
+    queryKey: escalationQueryKeys.forInvestigation(investigationId ?? ''),
+    queryFn: async (): Promise<ListEscalationsResponse> =>
+      services.http.get<ListEscalationsResponse>(ESCALATIONS_INTERNAL_URL, {
+        version: AGENTIC_INVESTIGATIONS_API_VERSION,
+        query: {
+          status: 'open',
+          linked_investigation_id: investigationId,
+          per_page: MAX_ESCALATIONS_PAGE_SIZE,
+        },
+      }),
+    enabled: enabled && Boolean(investigationId),
     retry: retryOnTransientError,
   });
 };
@@ -87,7 +127,7 @@ export const useCreateEscalation = () => {
   });
 };
 
-export const useAddToEscalation = () => {
+export const useAttachToEscalation = () => {
   const { services } = useKibana<CoreStart>();
   const queryClient = useQueryClient();
 
@@ -99,8 +139,8 @@ export const useAddToEscalation = () => {
       escalationId: string;
       linkedInvestigationId: string;
     }): Promise<EscalationConversation> =>
-      services.http.patch<EscalationConversation>(
-        ESCALATION_BY_ID_URL.replace('{id}', encodeURIComponent(escalationId)),
+      services.http.post<EscalationConversation>(
+        ESCALATION_LINK_URL.replace('{id}', encodeURIComponent(escalationId)),
         {
           version: AGENTIC_INVESTIGATIONS_API_VERSION,
           body: JSON.stringify({ linked_investigations: [linkedInvestigationId] }),
@@ -223,5 +263,25 @@ export const useEscalationClosePreview = (
     cacheTime: 0,
     // Keep the list current while the dialog is open.
     refetchInterval: 10_000,
+  });
+};
+
+/**
+ * Syncs the escalation's attachments with its linked investigations. Resolves with how many
+ * attachments were copied; invalidates the escalation queries only when something changed.
+ */
+export const useSyncEscalation = () => {
+  const { services } = useKibana<CoreStart>();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ escalationId }: { escalationId: string }): Promise<SyncEscalationResponse> =>
+      services.http.post<SyncEscalationResponse>(
+        ESCALATION_SYNC_URL.replace('{id}', encodeURIComponent(escalationId)),
+        { version: AGENTIC_INVESTIGATIONS_API_VERSION }
+      ),
+    onSuccess: ({ copied }) => {
+      if (copied > 0) invalidateEscalations(queryClient);
+    },
   });
 };

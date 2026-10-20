@@ -11,7 +11,7 @@ import type { EuiThemeComputed } from '@elastic/eui';
 // DOMPurify requires a real DOM — pass-through in Jest
 jest.mock('dompurify', () => ({
   __esModule: true,
-  default: { sanitize: (html: string) => html },
+  default: { sanitize: (html: string) => html, addHook: jest.fn(), removeHook: jest.fn() },
 }));
 
 jest.mock('./fetch_esql_data');
@@ -34,7 +34,7 @@ const mockGetEsQueryConfig = getEsQueryConfig as jest.MockedFunction<typeof getE
 const mockFetchEsqlData = fetchEsqlData as jest.MockedFunction<typeof fetchEsqlData>;
 const mockFillTemplate = fillTemplate as jest.MockedFunction<typeof fillTemplate>;
 
-const mockHttp = {} as unknown as HttpStart;
+const mockHttp = { basePath: { get: () => '', serverBasePath: '' } } as unknown as HttpStart;
 const mockSearch = jest.fn();
 
 const defaultEsQueryConfig: EsQueryConfig = {
@@ -96,6 +96,7 @@ const baseParams: Parameters<typeof useCustomContentHtml>[0] = {
   query: undefined,
   filters: undefined,
   esqlVariables: undefined,
+  isInteractive: true,
 };
 
 const VALID_HTML = `<html><body><p>hello</p></body></html>`;
@@ -480,6 +481,27 @@ describe('useCustomContentHtml', () => {
         expect.any(AbortSignal),
         expect.objectContaining({ esqlVariables: variables })
       );
+    });
+  });
+
+  describe('isInteractive — read-only views', () => {
+    it('does not re-fetch when the dashboard switches to a non-interactive view', async () => {
+      const { rerender } = renderHook(
+        ({ isInteractive }: { isInteractive: boolean }) =>
+          useCustomContentHtml({
+            ...baseParams,
+            esqlQuery: 'FROM logs | LIMIT 10',
+            savedTemplate: '<p>hello</p>',
+            isInteractive,
+          }),
+        { initialProps: { isInteractive: true } }
+      );
+
+      await waitFor(() => expect(mockFetchEsqlData).toHaveBeenCalledTimes(1));
+
+      rerender({ isInteractive: false });
+
+      expect(mockFetchEsqlData).toHaveBeenCalledTimes(1);
     });
   });
 

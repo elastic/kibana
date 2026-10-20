@@ -20,8 +20,8 @@ const renderTip = (groupingMode: GroupingMode) =>
   );
 
 describe('FrequencyHelpTip', () => {
-  it('lists every per_episode frequency option with its explanation when opened', async () => {
-    renderTip('per_episode');
+  it('lists every per_alert frequency option with its explanation when opened', async () => {
+    renderTip('per_alert');
 
     await userEvent.click(screen.getByTestId('frequencyHelpTip'));
 
@@ -30,7 +30,7 @@ describe('FrequencyHelpTip', () => {
     expect(screen.getByText('Every evaluation')).toBeInTheDocument();
     expect(
       screen.getByText(
-        'Notifies once when an episode opens and once when it recovers. No repeat notifications while it remains active.'
+        'Notifies once when an alert opens and once when it recovers. No repeat notifications while it remains active.'
       )
     ).toBeInTheDocument();
   });
@@ -42,12 +42,12 @@ describe('FrequencyHelpTip', () => {
 
     expect(await screen.findByText('At most once every...')).toBeInTheDocument();
     expect(screen.getByText('Every evaluation')).toBeInTheDocument();
-    // The per_episode-only option must not appear in aggregate mode.
+    // The per_alert-only option must not appear in aggregate mode.
     expect(screen.queryByText('On status change + repeat at interval')).not.toBeInTheDocument();
   });
 
   it('shows a hover tooltip on the icon for sighted users', async () => {
-    renderTip('per_episode');
+    renderTip('per_alert');
 
     await userEvent.hover(screen.getByTestId('frequencyHelpTip'));
 

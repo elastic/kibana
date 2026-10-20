@@ -66,6 +66,13 @@ export interface BaseExecutionParams {
    */
   reasoningLevel?: ChatCompletionReasoningEffort;
   projectRouting?: string;
+  /**
+   * Id of the workflow execution whose `ai.agent` step started this execution, inherited by the
+   * sub-agents it spawns. Reported on round telemetry so a round joins to the workflow run, and
+   * sent to EIS as the `interactionId` of every LLM call the main agent's execution makes (not a
+   * sub-agent's). Set by the workflow step from its own context; no route accepts it.
+   */
+  workflowExecutionId?: string;
 }
 
 /**
@@ -254,6 +261,12 @@ interface ExecuteAgentBaseParams {
    * - `undefined` (default): auto-decide based on context.
    */
   useTaskManager?: boolean;
+  /**
+   * When the execution runs on Task Manager, asks background nodes to claim its task right away
+   * instead of on their next poll. Meant for executions a user is actively waiting on, as each
+   * request triggers an extra claim cycle. Best effort, and ignored for local executions.
+   */
+  requestImmediateClaim?: boolean;
   /**
    * Interactivity configuration for this execution.
    */

@@ -12,7 +12,7 @@ import type { LoggerServiceContract } from '../../services/logger_service/logger
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import { getLastNotifiedTimestampsQueries } from '../queries';
-import { DispatchPlan, EpisodeTriage, PolicyCatalog } from '../state';
+import { DispatchPlan, AlertTriage, PolicyCatalog } from '../state';
 import type {
   ActionGroup,
   ActionGroupId,
@@ -39,7 +39,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
     const {
       groups = [],
       policies = PolicyCatalog.empty(),
-      triage = EpisodeTriage.empty(),
+      triage = AlertTriage.empty(),
       input,
     } = state;
     const { dispatchable } = triage;
@@ -85,7 +85,7 @@ export class ApplyThrottlingStep implements DispatcherStep {
         record.action_group_id,
         {
           lastNotified: new Date(record.last_notified),
-          episodeStatus: record.episode_status,
+          alertStatus: record.alert_status,
         },
       ])
     );
@@ -153,15 +153,14 @@ function shouldDispatch(
 ): boolean {
   if (!lastRecord) return true;
 
-  const { groupingMode } = policy;
+  const { mode } = policy.grouping;
   const strategy =
-    policy.throttle?.strategy ??
-    (groupingMode === 'per_episode' ? 'on_status_change' : 'time_interval');
+    policy.throttle?.strategy ?? (mode === 'per_alert' ? 'on_status_change' : 'time_interval');
 
   if (strategy === 'every_time') return true;
 
   // Aggregate modes (per_field, all): throttle by interval only
-  if (groupingMode !== 'per_episode') {
+  if (mode !== 'per_alert') {
     return (
       !policy.throttle?.interval ||
       !isWithinInterval(
@@ -174,8 +173,8 @@ function shouldDispatch(
     );
   }
 
-  // per_episode: always dispatch on status change
-  const statusChanged = lastRecord.episodeStatus !== group.episodes[0]?.episode_status;
+  // per_alert: always dispatch on status change
+  const statusChanged = lastRecord.alertStatus !== group.alerts[0]?.alert_status;
   if (statusChanged) return true;
 
   // per_status_interval: also dispatch when interval has elapsed

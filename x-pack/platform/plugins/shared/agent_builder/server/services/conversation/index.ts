@@ -6,6 +6,6 @@
  */
 
 export { type ConversationService, ConversationServiceImpl } from './conversation_service';
-export type { ConversationClient } from './client';
+export type { ConversationClient, ActivityContext } from './client';
 export type { GetEventsOptions } from './client/types';
 export { eventsToRounds } from './client/events_to_rounds';

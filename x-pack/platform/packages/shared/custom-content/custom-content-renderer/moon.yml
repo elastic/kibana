@@ -31,6 +31,8 @@ dependsOn:
   - '@kbn/shared-ux-ai-components'
   - '@kbn/ui-callout'
   - '@kbn/core'
+  - '@kbn/std'
+  - '@kbn/core-spaces-common'
 tags:
   - shared-browser
   - package

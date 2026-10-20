@@ -10,11 +10,7 @@ import { fireEvent, render, screen, waitFor, within } from '@testing-library/rea
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ApprovalProposal } from '@kbn/proposals-ui';
-import {
-  ProposedActionButton,
-  type DismissProposalParams,
-  type ProposedActionButtonProps,
-} from './proposed_action_button';
+import { ProposedActionButton, type ProposedActionButtonProps } from './proposed_action_button';
 
 const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <I18nProvider>
@@ -23,38 +19,22 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 const mockProposal: ApprovalProposal = {
+  title: 'Isolate cfo-mbp-14 — host isolation',
   comment: 'Isolate the host to cut off the replayed session.',
   impact: 'critical',
   status: 'pending',
-  expired: false,
   category: 'Response action',
-  action: { name: 'Isolate cfo-mbp-14 — host isolation', reversible: false },
+  action: {
+    name: 'Isolate cfo-mbp-14 — host isolation',
+    reversible: false,
+    approvalPolicy: 'always-gate',
+  },
 };
-
-/**
- * Stands in for a host's real dismiss-reason modal (e.g. `DismissProposalModal`): a button that
- * calls `onConfirm` with a fixed reason/rationale, so a test can drive the row's own "Declining"
- * lifecycle without depending on a host-specific form.
- */
-const FakeDismissModal: React.FC<{
-  onClose: () => void;
-  onConfirm: (params: DismissProposalParams) => Promise<void>;
-}> = ({ onClose, onConfirm }) => (
-  <div role="dialog" aria-label="Fake dismiss modal">
-    <button onClick={onClose}>Cancel</button>
-    <button onClick={() => onConfirm({ dismissReason: 'wrong', rationale: 'Not needed.' })}>
-      Confirm dismiss
-    </button>
-  </div>
-);
 
 const baseProps: ProposedActionButtonProps = {
   proposal: mockProposal,
   onConfirm: jest.fn().mockResolvedValue(undefined),
   onDismiss: jest.fn().mockResolvedValue(undefined),
-  renderDismissModal: ({ onClose, onConfirm }) => (
-    <FakeDismissModal onClose={onClose} onConfirm={onConfirm} />
-  ),
   'data-test-subj': 'proposedAction',
 };
 
@@ -80,6 +60,58 @@ describe('ProposedActionButton', () => {
         name: 'Review proposed action: Isolate cfo-mbp-14 — host isolation, Needs review',
       })
     ).toBeInTheDocument();
+  });
+
+  it('renders as a list item holding a native button, for a ProposedActionsList', () => {
+    renderButton();
+
+    const row = screen.getByTestId('proposedAction');
+    expect(row.tagName).toBe('BUTTON');
+    expect(row.closest('li')).not.toBeNull();
+  });
+
+  it('shows no tooltip while the title fits on one line', () => {
+    renderButton();
+
+    fireEvent.mouseOver(screen.getByTestId('proposedAction'));
+
+    expect(screen.queryByRole('tooltip')).not.toBeInTheDocument();
+  });
+
+  describe('a title too long for the row', () => {
+    const scrollWidth = jest.spyOn(HTMLElement.prototype, 'scrollWidth', 'get');
+    const clientWidth = jest.spyOn(HTMLElement.prototype, 'clientWidth', 'get');
+
+    beforeEach(() => {
+      // jsdom lays nothing out, so stand in for a title wider than the space it has.
+      scrollWidth.mockReturnValue(400);
+      clientWidth.mockReturnValue(200);
+    });
+
+    afterAll(() => {
+      scrollWidth.mockRestore();
+      clientWidth.mockRestore();
+    });
+
+    it('offers the full title in a tooltip', async () => {
+      renderButton();
+
+      fireEvent.mouseOver(screen.getByTestId('proposedAction'));
+
+      await waitFor(() =>
+        expect(screen.getByRole('tooltip')).toHaveTextContent('Isolate cfo-mbp-14 — host isolation')
+      );
+    });
+
+    it('anchors that tooltip on the focusable button, so keyboard focus reveals it too', () => {
+      renderButton();
+
+      // EuiToolTip opens on its anchor's focus (jsdom cannot satisfy its :focus-visible check, so
+      // the hover case above proves it opens; this proves the anchor is the button, not a span
+      // inside it that focus never reaches).
+      const row = screen.getByTestId('proposedAction');
+      expect(row.parentElement).toHaveClass('euiToolTipAnchor');
+    });
   });
 
   it('opens the approval modal on click, matching the one the card recommended-action opens', () => {
@@ -115,31 +147,30 @@ describe('ProposedActionButton', () => {
     expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
   });
 
-  it('hands Dismiss off to the host dismiss modal rather than recording it directly', () => {
+  it('shows the reason form in the same modal rather than opening a second one', () => {
     renderButton();
     fireEvent.click(screen.getByTestId('proposedAction'));
     fireEvent.click(screen.getByTestId('proposedAction-modal-dismiss'));
 
-    // The approval modal closes and the host's dismiss modal takes over for the same proposal.
-    expect(screen.queryByTestId('proposedAction-modal-dismiss')).not.toBeInTheDocument();
-    expect(screen.getByRole('dialog', { name: 'Fake dismiss modal' })).toBeInTheDocument();
+    // Still one dialog — the approval modal's own body swapped to the reason form.
+    expect(screen.getAllByRole('dialog')).toHaveLength(1);
+    expect(screen.getByTestId('proposedAction-modal-decline-form-reason')).toBeInTheDocument();
     expect(baseProps.onDismiss).not.toHaveBeenCalled();
   });
 
-  it('records the dismissal and closes the dismiss modal once it resolves', async () => {
+  it('records the dismissal with its reason once confirmed', async () => {
     renderButton();
     fireEvent.click(screen.getByTestId('proposedAction'));
     fireEvent.click(screen.getByTestId('proposedAction-modal-dismiss'));
 
-    fireEvent.click(screen.getByText('Confirm dismiss'));
+    fireEvent.click(screen.getByTestId('proposedAction-modal-confirm-decline'));
 
-    expect(baseProps.onDismiss).toHaveBeenCalledWith({
-      dismissReason: 'wrong',
-      rationale: 'Not needed.',
-    });
-    await waitFor(() => {
-      expect(screen.queryByRole('dialog', { name: 'Fake dismiss modal' })).not.toBeInTheDocument();
-    });
+    await waitFor(() =>
+      expect(baseProps.onDismiss).toHaveBeenCalledWith({
+        dismissReason: 'no_reason',
+        rationale: undefined,
+      })
+    );
   });
 
   it('shows a Declining badge on the row itself when isSubmitting is set', () => {
@@ -180,6 +211,17 @@ describe('ProposedActionButton', () => {
       expect(screen.getByText('Declined')).toBeInTheDocument();
     });
 
+    it.each<[string, Partial<ApprovalProposal>, RegExp]>([
+      ['approved', {}, /^Approved by\s/],
+      ['declined', { decision: 'dismissed' }, /^Declined by\s/],
+      ['failed', { status: 'failed' }, /^Executed by\s/],
+    ])('captions a %s proposal with who acted and when', (_, overrides, caption) => {
+      renderButton({ proposal: { ...decidedProposal, ...overrides } });
+
+      expect(screen.getByText(caption)).toBeInTheDocument();
+      expect(screen.getByText('Bonnie Fishel')).toBeInTheDocument();
+    });
+
     it('is still clickable, opening a read-only modal for the closed record', () => {
       renderButton({ proposal: decidedProposal });
 
@@ -206,10 +248,43 @@ describe('ProposedActionButton', () => {
       expect(screen.queryByText('Applied')).not.toBeInTheDocument();
     });
 
+    it('keeps the badge label as the caption for an expired proposal that has an actor', () => {
+      renderButton({ proposal: { ...decidedProposal, status: 'expired' } });
+
+      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
+      expect(screen.queryByText(/Approved by/)).not.toBeInTheDocument();
+    });
+
     it('names the decider without a time when the record carries no decidedAt', () => {
       renderButton({ proposal: { ...decidedProposal, decidedAt: undefined } });
 
       expect(screen.getByText(/Bonnie Fishel/)).toBeInTheDocument();
+    });
+  });
+
+  describe('an expired proposal', () => {
+    // Nobody decided it — the gate timed out — so it carries no `decision` at all, unlike the
+    // decided cases above.
+    const expiredProposal: ApprovalProposal = { ...mockProposal, status: 'expired' };
+
+    it('shows an Expired badge instead of Needs review, though nobody ever decided it', () => {
+      renderButton({ proposal: expiredProposal });
+
+      // The badge and the caption below it both read "Expired": nobody names a decider, so the
+      // caption falls back to the same label rather than a fabricated "by Unknown".
+      expect(screen.getAllByText('Expired').length).toBeGreaterThanOrEqual(2);
+      expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    });
+
+    it('is still clickable, opening a read-only modal with no actions to take', () => {
+      renderButton({ proposal: expiredProposal });
+
+      fireEvent.click(screen.getByTestId('proposedAction'));
+
+      const dialog = screen.getByRole('dialog');
+      expect(within(dialog).getByText('Expired')).toBeInTheDocument();
+      expect(screen.queryByTestId('proposedAction-modal-confirm')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('proposedAction-modal-dismiss')).not.toBeInTheDocument();
     });
   });
 });

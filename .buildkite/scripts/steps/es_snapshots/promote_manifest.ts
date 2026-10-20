@@ -9,7 +9,20 @@
 
 import fs from 'fs';
 import { execSync } from 'child_process';
+import { isAllowedArchiveUrl, isAllowedGcsObjectUrl } from './archive_url.ts';
 import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config.ts';
+
+const ALLOWED_MANIFEST_URL_PREFIX = `https://storage.googleapis.com/${BASE_BUCKET_DAILY}/`;
+
+const VERSION_PATTERN = /^\d+\.\d+\.\d+(-SNAPSHOT)?$/;
+const SHA_PATTERN = /^[0-9a-f]{40}$/;
+const SNAPSHOT_ID_PATTERN = /^[\w-]+$/;
+const ES_BRANCH_PATTERN = /^(main|\d+\.\d+)$/;
+
+/** e.g. kibana-ci-es-snapshots-daily/9.6.0/archives/20260930-022144_09876e4a */
+function getExpectedSnapshotBucket(version: string, id: string) {
+  return `${BASE_BUCKET_DAILY}/${version}/archives/${id}`;
+}
 
 (async () => {
   try {
@@ -19,9 +32,8 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config.ts';
       throw Error('Manifest URL missing');
     }
 
-    const allowedManifestUrlPrefix = `https://storage.googleapis.com/${BASE_BUCKET_DAILY}/`;
-    if (!new URL(MANIFEST_URL).href.startsWith(allowedManifestUrlPrefix)) {
-      throw Error(`Manifest URL must start with ${allowedManifestUrlPrefix}: ${MANIFEST_URL}`);
+    if (!isAllowedGcsObjectUrl(MANIFEST_URL, BASE_BUCKET_DAILY)) {
+      throw Error(`Manifest URL must start with ${ALLOWED_MANIFEST_URL_PREFIX}: ${MANIFEST_URL}`);
     }
 
     const projectRoot = process.cwd();
@@ -35,18 +47,26 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config.ts';
     const manifestJson = await manifestResponse.text();
     fs.writeFileSync('manifest.json', manifestJson);
     const manifest = JSON.parse(manifestJson);
-    const { id, bucket, version, sha } = manifest;
-    if (!/^\d+\.\d+\.\d+(-SNAPSHOT)?$/.test(version)) {
+    const { id, bucket, branch, version, sha, archives } = manifest;
+    if (!VERSION_PATTERN.test(version)) {
       throw Error(`Invalid version format: ${version}`);
     }
-    if (!/^[0-9a-f]{40}$/.test(sha)) {
+    if (!SHA_PATTERN.test(sha)) {
       throw Error(`Invalid sha format: ${sha}`);
     }
-    if (!/^[\w./-]+$/.test(id)) {
+    if (!SNAPSHOT_ID_PATTERN.test(id)) {
       throw Error(`Invalid id format: ${id}`);
     }
-    if (!/^[\w./-]+$/.test(bucket)) {
-      throw Error(`Invalid bucket format: ${bucket}`);
+    if (bucket !== getExpectedSnapshotBucket(version, id)) {
+      throw Error(`Unexpected bucket: ${bucket}`);
+    }
+    if (!ES_BRANCH_PATTERN.test(branch)) {
+      throw Error(`Invalid branch: ${branch}`);
+    }
+    for (const { url } of archives) {
+      if (!isAllowedArchiveUrl(url, bucket)) {
+        throw Error(`Unexpected archive url: ${url}`);
+      }
     }
 
     const manifestPermanentJson = manifestJson
@@ -64,7 +84,8 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config.ts';
       cp manifest.json manifest-latest-verified.json
       gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" manifest-latest-verified.json gs://${BASE_BUCKET_DAILY}/${version}/
       rm manifest.json
-      ${projectRoot}/.buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_PERMANENT}
+      # Recursive archive copy can outlive the 60-minute shared token; impersonation refreshes it.
+      ${projectRoot}/.buildkite/scripts/common/activate_service_account.sh --auto-refresh ${BASE_BUCKET_PERMANENT}
       cp manifest-permanent.json manifest.json
       gcloud storage cp --recursive gs://${bucket}/* gs://${BASE_BUCKET_PERMANENT}/${version}/
       gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" manifest.json gs://${BASE_BUCKET_PERMANENT}/${version}/

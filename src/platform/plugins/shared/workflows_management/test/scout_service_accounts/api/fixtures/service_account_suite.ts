@@ -51,7 +51,7 @@ steps:
 ${steps}`;
 
 /** Builds isolated account and workflow fixtures for one execution-flow suite. */
-export const createServiceAccountSuite = () => {
+export const createServiceAccountSuite = (options: { testWritePermissions?: boolean } = {}) => {
   let headers: Record<string, string>;
 
   let accountId: string;
@@ -63,6 +63,9 @@ export const createServiceAccountSuite = () => {
   let readOnlyAccountId: string;
 
   const dataIndex = `cp2-sa-permissions-${Date.now()}`;
+
+  const writerRole = `${dataIndex}-writer`;
+  let writerRoleCreated = false;
 
   const workflowIds = new Set<string>();
 
@@ -185,6 +188,13 @@ export const createServiceAccountSuite = () => {
     initiatingUser = user.body;
     expect(typeof initiatingUser.username).toBe('string');
     expect(initiatingUser.username).not.toBe('');
+    if (options.testWritePermissions && !config.serverless) {
+      await esClient.security.putRole({
+        name: writerRole,
+        indices: [{ names: [dataIndex], privileges: ['read', 'write'] }],
+      });
+      writerRoleCreated = true;
+    }
     const accounts: string[] = [];
     for (const name of ['primary', 'child', 'read-only']) {
       const response = await apiClient.post('internal/security/service_account', {
@@ -197,7 +207,14 @@ export const createServiceAccountSuite = () => {
           : headers,
         body: {
           name: `cp2-${name}-${Date.now()}`,
-          roles: [name === 'read-only' ? 'viewer' : config.serverless ? 'admin' : 'superuser'],
+          roles:
+            name === 'read-only'
+              ? ['viewer']
+              : config.serverless
+              ? ['admin']
+              : options.testWritePermissions
+              ? ['editor', writerRole]
+              : ['superuser'],
         },
         responseType: 'json',
       });
@@ -324,6 +341,13 @@ export const createServiceAccountSuite = () => {
       await esClient.indices.delete({ index: dataIndex }, { ignore: [404] });
     } catch (error) {
       failures.push(new Error('Permission fixture cleanup failed', { cause: error }));
+    }
+    if (writerRoleCreated) {
+      try {
+        await esClient.security.deleteRole({ name: writerRole });
+      } catch (error) {
+        failures.push(new Error('Permission role cleanup failed', { cause: error }));
+      }
     }
     if (failures.length) throw new AggregateError(failures, 'Service-account suite cleanup failed');
   };

@@ -50,14 +50,16 @@ export const getCreateProposalStepDefinition = ({
         const proposal = await getProposalsService().create(
           {
             conversationId: input.conversationId,
+            title: input.title,
             comment: input.comment,
             actionWorkflowId: input.actionWorkflowId,
             actionInput: input.actionInput,
             impact: input.impact,
             category: input.category,
             confidence: input.confidence ?? 'medium',
-            origin: input.origin ?? 'worker',
+            origin: input.origin,
             expiresAt: resolveExpiresAt(input.expiresIn),
+            id: input.proposalId,
             workflowExecutionId,
           },
           {
@@ -74,10 +76,10 @@ export const getCreateProposalStepDefinition = ({
         );
 
         // Fail closed when the action did not resolve: `create` swallows both a
-        // workflow read failure and invalid `consts.actionMetadata`, and they
-        // arrive here indistinguishable from an action that simply declares no
-        // policy. Reading that as "auto-approval allowed" would run an action
-        // whose author forbade it on nothing more than a transient lookup error.
+        // workflow read failure and invalid `consts.actionMetadata` (which
+        // includes a missing policy). Reading that as "auto-approval allowed"
+        // would run an action whose author forbade it on nothing more than a
+        // transient lookup error.
         const alwaysGate = !proposal.action || proposal.action.approvalPolicy === 'always-gate';
 
         context.logger.debug(

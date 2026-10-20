@@ -101,6 +101,74 @@ const createByValuePersistableState = (type: string) =>
   } as unknown as Parameters<typeof toUnifiedAttributes>[0]['attributes']);
 
 describe('toUnifiedAttributes', () => {
+  describe('convertibility gate (independent of the registry)', () => {
+    const asAttributes = (attributes: Record<string, unknown>) =>
+      ({ ...attributes, ...basicAttributes } as unknown as Parameters<
+        typeof toUnifiedAttributes
+      >[0]['attributes']);
+
+    const createLegacyExternalReference = (externalReferenceAttachmentTypeId: string) =>
+      asAttributes({
+        type: 'externalReference',
+        owner: 'securitySolutionFixture',
+        externalReferenceAttachmentTypeId,
+        externalReferenceId: 'ref-1',
+        externalReferenceStorage: { type: 'elasticSearchDoc' },
+        externalReferenceMetadata: null,
+      });
+
+    // ML/AIOps only register on platinum+, so after a downgrade their rows must still read.
+    it('folds a legacy ML persistable-state row to unified', () => {
+      const out = toUnifiedAttributes({
+        attributes: asAttributes({
+          type: 'persistableState',
+          owner: 'securitySolutionFixture',
+          persistableStateAttachmentTypeId: 'ml_anomaly_swimlane',
+          persistableStateAttachmentState: { jobIds: ['job-1'] },
+        }),
+      });
+      expect(out.isUnified).toBe(true);
+      if (out.isUnified) {
+        expect(out.attributes.type).toBe(ML_ANOMALY_SWIMLANE_ATTACHMENT_TYPE);
+      }
+    });
+
+    it('keeps a legacy external reference with an unmapped subtype on the legacy branch', () => {
+      expect(
+        toUnifiedAttributes({ attributes: createLegacyExternalReference('.test') }).isUnified
+      ).toBe(false);
+    });
+
+    it('keeps an unmapped subtype legacy even when its id collides with a unified type', () => {
+      expect(
+        toUnifiedAttributes({ attributes: createLegacyExternalReference('comment') }).isUnified
+      ).toBe(false);
+    });
+
+    it('keeps a legacy persistable-state row stored with the unified lens id on the legacy branch', () => {
+      const out = toUnifiedAttributes({
+        attributes: asAttributes({
+          type: 'persistableState',
+          owner: 'securitySolutionFixture',
+          persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
+          persistableStateAttachmentState: { attributes: { title: 'Lens title' } },
+        }),
+      });
+      expect(out.isUnified).toBe(false);
+    });
+
+    it('keeps an already-unified row of an unknown type on the unified branch', () => {
+      const out = toUnifiedAttributes({
+        attributes: asAttributes({
+          type: 'custom.type',
+          owner: 'securitySolutionFixture',
+          data: { foo: 'bar' },
+        }),
+      });
+      expect(out.isUnified).toBe(true);
+    });
+  });
+
   it('maps legacy user comments to unified schema', () => {
     const attrs = createUserAttachment().attributes;
     const out = toUnifiedAttributes({ attributes: attrs });
@@ -265,6 +333,19 @@ describe('isUnifiedOnlyAttachment', () => {
   it('is true for a Lens-by-reference attachment (no legacy form)', () => {
     expect(isUnifiedOnlyAttachment(createByReferenceLens())).toBe(true);
     expect(isUnifiedOnlyAttachment(createByReferenceLens(true))).toBe(true);
+  });
+
+  it.each([
+    ['externalReference', { externalReferenceAttachmentTypeId: '.test' }],
+    ['persistableState', { persistableStateAttachmentTypeId: '.test' }],
+  ])('is false for a legacy %s row with an unmapped subtype', (type, subtype) => {
+    expect(isUnifiedOnlyAttachment({ type, owner: 'cases', ...subtype })).toBe(false);
+  });
+
+  it('is true for an unknown unified-shaped type (no legacy mapping)', () => {
+    expect(
+      isUnifiedOnlyAttachment({ type: 'custom.type', owner: 'cases', attachmentId: 'x' })
+    ).toBe(true);
   });
 
   // Runs on the raw request body (before decode), so a payload whose type can't be

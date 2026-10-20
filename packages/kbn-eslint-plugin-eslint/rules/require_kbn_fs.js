@@ -36,15 +36,11 @@ module.exports = {
       },
     ],
   },
-  create: (context) => {
-    const {
-      restrictedMethods = DEFAULT_RESTRICTED_METHODS,
-      disallowedMessage = DEFAULT_ERROR_MSG,
-    } = context.options[0] || {};
-    const restrictAll = restrictedMethods.length === 0;
-
-    // Track variables imported from fs modules (default/namespace imports)
-    const fsImportedVars = new Set();
+  createOnce: (context) => {
+    let restrictedMethods;
+    let disallowedMessage;
+    let restrictAll;
+    let fsImportedVars;
 
     const isRestrictedMethod = (methodName) => {
       return restrictAll || restrictedMethods.includes(methodName);
@@ -76,6 +72,12 @@ module.exports = {
     };
 
     return {
+      before() {
+        ({ restrictedMethods = DEFAULT_RESTRICTED_METHODS, disallowedMessage = DEFAULT_ERROR_MSG } =
+          context.options[0] || {});
+        restrictAll = restrictedMethods.length === 0;
+        fsImportedVars = new Set();
+      },
       ImportDeclaration(node) {
         const modulePath = node.source.value;
         if (isFsModule(modulePath)) {

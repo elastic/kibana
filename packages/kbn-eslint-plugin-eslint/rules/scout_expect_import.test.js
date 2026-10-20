@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./scout_expect_import');
+const rule = require('../oxlint_plugin').rules.scout_expect_import;
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
@@ -97,17 +97,17 @@ import { expect } from '@playwright/test';`,
     },
     {
       filename: OBLT_UI_FILE,
-      code: `import { test, expect } from '@kbn/scout-oblt/ui';
+      code: `import { test, expect as existingExpect } from '@kbn/scout-oblt/ui';
 import { expect } from '@playwright/test';`,
-      output: `import { test, expect } from '@kbn/scout-oblt/ui';
+      output: `import { test, expect as existingExpect } from '@kbn/scout-oblt/ui';
 `,
       errors: [{ messageId: 'wrongImportPath' }],
     },
     {
       filename: OBLT_API_FILE,
-      code: `import { test, page } from '@kbn/scout-oblt/api';
+      code: `import { test, page as scoutPage } from '@kbn/scout-oblt/api';
 import { page, expect } from '@playwright/test';`,
-      output: `import { test, page, expect } from '@kbn/scout-oblt/api';
+      output: `import { test, page as scoutPage, expect } from '@kbn/scout-oblt/api';
 import { page } from '@playwright/test';`,
       errors: [{ messageId: 'wrongImportPath' }],
     },

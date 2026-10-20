@@ -12,6 +12,7 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 
 import type SuperTest from 'supertest';
 import {
+  CASE_ATTACHMENT_SAVED_OBJECT,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_REPORTERS_URL,
@@ -20,6 +21,7 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
   CASES_INTERNAL_URL,
   CASES_URL,
+  COMMENT_ATTACHMENT_TYPE,
   INTERNAL_CASE_METRICS_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
@@ -56,6 +58,7 @@ import type {
   UserActionInternalFindResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import {
+  getCaseBulkDeleteObservablesUrl,
   getCaseCreateObservableUrl,
   getCaseDeleteObservableUrl,
   getCaseFindUserActionsUrl,
@@ -201,6 +204,60 @@ export const deleteUnifiedAttachments = async (es: Client): Promise<void> => {
     conflicts: 'proceed',
   });
 };
+
+/**
+ * Writes a unified comment attachment with no owner straight to the index, emulating a corrupted
+ * row that the API cannot create.
+ */
+export const seedOwnerlessAttachment = async ({
+  es,
+  caseId,
+  id = 'ownerless-attachment',
+  space = 'default',
+}: {
+  es: Client;
+  caseId: string;
+  id?: string;
+  space?: string;
+}): Promise<string> => {
+  await es.index({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    id: `${CASE_ATTACHMENT_SAVED_OBJECT}:${id}`,
+    refresh: 'wait_for',
+    document: {
+      type: CASE_ATTACHMENT_SAVED_OBJECT,
+      [CASE_ATTACHMENT_SAVED_OBJECT]: {
+        type: COMMENT_ATTACHMENT_TYPE,
+        data: { content: 'ownerless comment' },
+        created_at: '2024-01-01T00:00:00.000Z',
+        created_by: { username: 'elastic', full_name: null, email: null },
+        pushed_at: null,
+        pushed_by: null,
+        updated_at: null,
+        updated_by: null,
+      },
+      references: [{ type: CASE_SAVED_OBJECT, id: caseId, name: 'associated-cases' }],
+      namespaces: [space],
+      updated_at: '2024-01-01T00:00:00.000Z',
+      coreMigrationVersion: '8.8.0',
+    },
+  });
+
+  return id;
+};
+
+/** Checks the index directly, since the read APIs cannot return a corrupted row. */
+export const unifiedAttachmentExists = async ({
+  es,
+  id,
+}: {
+  es: Client;
+  id: string;
+}): Promise<boolean> =>
+  es.exists({
+    index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+    id: `${CASE_ATTACHMENT_SAVED_OBJECT}:${id}`,
+  });
 
 export const deleteConfiguration = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
@@ -934,6 +991,36 @@ export const deleteObservable = async ({
     .set(headers)
     .send()
     .expect(expectedHttpCode);
+};
+
+export const bulkDeleteObservables = async ({
+  supertest,
+  caseId,
+  observableIds,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+  headers = {},
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  observableIds: string[];
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+  headers?: Record<string, string | string[]>;
+}): Promise<Case | { message: string }> => {
+  const apiCall = supertest.post(
+    `${getSpaceUrlPrefix(auth?.space)}${getCaseBulkDeleteObservablesUrl(caseId)}`
+  );
+  void setupAuth({ apiCall, headers, auth });
+
+  const { body: updatedCase } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .set(headers)
+    .send({ observableIds })
+    .expect(expectedHttpCode);
+
+  return updatedCase;
 };
 
 export const similarCases = async ({

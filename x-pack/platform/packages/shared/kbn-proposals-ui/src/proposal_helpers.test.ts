@@ -14,10 +14,10 @@ import {
 import type { ApprovalProposal } from './types';
 
 const proposal = (overrides: Partial<ApprovalProposal> = {}): ApprovalProposal => ({
+  title: 'Tune the Okta rule',
   comment: 'Tune the noisy rule',
   impact: 'low',
   status: 'pending',
-  expired: false,
   ...overrides,
 });
 
@@ -32,14 +32,22 @@ describe('getProposalTone', () => {
 
   it('shows a revised impact rather than the action metadata it replaced', () => {
     expect(
-      getProposalTone(proposal({ impact: 'high', action: { name: 'Isolate host', impact: 'low' } }))
+      getProposalTone(
+        proposal({
+          impact: 'high',
+          action: { name: 'Isolate host', impact: 'low', approvalPolicy: 'always-gate' },
+        })
+      )
     ).toBe('danger');
   });
 
   it("falls back to the action's impact when the proposal sets none", () => {
     expect(
       getProposalTone(
-        proposal({ impact: undefined, action: { name: 'Isolate host', impact: 'critical' } })
+        proposal({
+          impact: undefined,
+          action: { name: 'Isolate host', impact: 'critical', approvalPolicy: 'always-gate' },
+        })
       )
     ).toBe('danger');
   });
@@ -53,7 +61,10 @@ describe('getProposalCaption', () => {
   it('joins category and reversibility, capitalizing the stored-lowercase category', () => {
     expect(
       getProposalCaption(
-        proposal({ category: 'configure', action: { name: 'Isolate host', reversible: true } })
+        proposal({
+          category: 'configure',
+          action: { name: 'Isolate host', reversible: true, approvalPolicy: 'always-gate' },
+        })
       )
     ).toBe('Configure • Reversible');
   });
@@ -63,7 +74,12 @@ describe('getProposalCaption', () => {
       getProposalCaption(
         proposal({
           category: 'configure',
-          action: { name: 'Isolate host', category: 'response', reversible: false },
+          action: {
+            name: 'Isolate host',
+            category: 'response',
+            reversible: false,
+            approvalPolicy: 'always-gate',
+          },
         })
       )
     ).toBe('Response • Irreversible');
@@ -75,7 +91,11 @@ describe('getProposalCaption', () => {
 
   it('omits category when neither the proposal nor its action declares one', () => {
     expect(
-      getProposalCaption(proposal({ action: { name: 'Isolate host', reversible: true } }))
+      getProposalCaption(
+        proposal({
+          action: { name: 'Isolate host', reversible: true, approvalPolicy: 'always-gate' },
+        })
+      )
     ).toBe('Reversible');
   });
 
@@ -118,7 +138,7 @@ describe('getProposalCaption', () => {
         proposal({
           category: 'configure',
           impact: 'high',
-          expired: true,
+          status: 'expired',
           expiresAt: '2024-01-05T17:00:00.000Z',
         }),
         { includeRiskDetails: true }
@@ -206,15 +226,27 @@ describe('getProposalDecision', () => {
       )
     ).toMatchObject({ status: 'declined' });
   });
+
+  it("reports a failed action's error as its reason", () => {
+    expect(
+      getProposalDecision(
+        proposal({
+          decision: 'approved',
+          status: 'failed',
+          executionError: 'The rule was changed after this proposal was created',
+          rationale: 'Looks right',
+        })
+      )
+    ).toMatchObject({
+      status: 'failed',
+      reason: 'The rule was changed after this proposal was created',
+    });
+  });
 });
 
 describe('isProposalExpired', () => {
-  it('is true once the computed deadline flag is set', () => {
-    expect(isProposalExpired(proposal({ expired: true }))).toBe(true);
-  });
-
-  it('is true for an expiry the workflow settled before the deadline', () => {
-    expect(isProposalExpired(proposal({ expired: false, status: 'expired' }))).toBe(true);
+  it('is true once the workflow settles the status as expired', () => {
+    expect(isProposalExpired(proposal({ status: 'expired' }))).toBe(true);
   });
 
   it('is false for a proposal still awaiting a decision', () => {

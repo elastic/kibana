@@ -123,7 +123,8 @@ export const AttachmentHeader: React.FC<AttachmentHeaderProps> = ({
     left: 50%;
     bottom: 0;
     transform: translate(-50%, 50%);
-    z-index: ${euiTheme.levels.content};
+    /* Above the canvas body, which can start right at the header (canvasHideTopPadding). */
+    z-index: ${Number(euiTheme.levels.content) + 1};
   `;
 
   const hasCloseButton = Boolean(onClose);

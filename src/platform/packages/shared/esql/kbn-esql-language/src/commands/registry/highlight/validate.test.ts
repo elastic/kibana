@@ -59,10 +59,76 @@ describe('HIGHLIGHT Validation', () => {
       ]);
     });
 
-    it('reports a missing ON clause', () => {
-      highlightExpectErrors('FROM index | HIGHLIGHT "ring"', [
-        '[HIGHLIGHT] Missing ON clause. Specify the fields to highlight.',
+    it('does not report errors when ON is omitted', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT "ring"', []);
+    });
+
+    it('accepts a parameter in the ON list', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON ?field', []);
+    });
+  });
+
+  describe('ON wildcard validation', () => {
+    it('accepts a lone *', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON *', []);
+    });
+
+    it('rejects a wildcard pattern other than *', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON text*', [
+        '[HIGHLIGHT] Invalid pattern [text*] in ON, expected field names or [*]',
       ]);
+    });
+
+    it('rejects * combined with other fields', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT "ring" ON *, textField', [
+        '[HIGHLIGHT] [*] cannot be combined with other fields in ON',
+      ]);
+    });
+  });
+
+  describe('query and ON consistency', () => {
+    it('reports a query field missing from ON when both are explicit', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT MATCH(textField, "ring") ON keywordField', [
+        '[HIGHLIGHT] Query field [textField] is not in the ON fields [keywordField]',
+      ]);
+    });
+
+    it('accepts a query field that is in ON', () => {
+      highlightExpectErrors(
+        'FROM index | HIGHLIGHT textField : "ring" ON keywordField, textField',
+        []
+      );
+    });
+
+    it('accepts any query field when ON holds a parameter', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT MATCH(textField, "ring") ON ?field', []);
+      highlightExpectErrors(
+        'FROM index | HIGHLIGHT MATCH(textField, "ring") ON keywordField, ?field',
+        []
+      );
+    });
+
+    it('does not check a query field that is a parameter', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT MATCH(?field, "ring") ON textField', []);
+      highlightExpectErrors('FROM index | HIGHLIGHT ??field : "ring" ON textField', []);
+    });
+
+    it('accepts any query field when ON is *', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT MATCH(textField, "ring") ON *', []);
+    });
+
+    it('does not check the fields of a query that targets none', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT QSTR("ring") ON keywordField', []);
+    });
+  });
+
+  describe('omitted query', () => {
+    it('does not report errors, with or without an earlier WHERE', () => {
+      highlightExpectErrors('FROM index | HIGHLIGHT', []);
+      highlightExpectErrors(
+        'FROM index | WHERE MATCH(textField, "ring") | HIGHLIGHT ON textField',
+        []
+      );
     });
   });
 
@@ -152,7 +218,43 @@ describe('HIGHLIGHT Validation', () => {
 
     it('accepts an enum value in a different case', () => {
       highlightExpectErrors(
-        'FROM index | HIGHLIGHT "ring" ON textField WITH { "order": "SCORE" }',
+        'FROM index | HIGHLIGHT "ring" ON textField WITH { "order": "SCORE", "boundary_scanner": "Word" }',
+        []
+      );
+    });
+
+    it('treats the encoder value as case-sensitive', () => {
+      highlightExpectErrors(
+        'FROM index | HIGHLIGHT "ring" ON textField WITH { "encoder": "html" }',
+        []
+      );
+      highlightExpectErrors(
+        'FROM index | HIGHLIGHT "ring" ON textField WITH { "encoder": "HTML" }',
+        ['Invalid value "HTML" for parameter "encoder". Expected one of: default, html.']
+      );
+    });
+
+    it('accepts a single pre_tags value as a string or one-element array', () => {
+      highlightExpectErrors(
+        'FROM index | HIGHLIGHT "ring" ON textField WITH { "pre_tags": "<b>" }',
+        []
+      );
+      highlightExpectErrors(
+        'FROM index | HIGHLIGHT "ring" ON textField WITH { "pre_tags": ["<b>"] }',
+        []
+      );
+    });
+
+    it('rejects multiple pre_tags values', () => {
+      highlightExpectErrors(
+        'FROM index | HIGHLIGHT "ring" ON textField WITH { "pre_tags": ["<b>", "<i>"] }',
+        ['Invalid value "["<b>","<i>"]" for parameter "pre_tags". Expected one of: a single tag.']
+      );
+    });
+
+    it('accepts -1 to unset max_analyzed_offset', () => {
+      highlightExpectErrors(
+        'FROM index | HIGHLIGHT "ring" ON textField WITH { "max_analyzed_offset": -1 }',
         []
       );
     });

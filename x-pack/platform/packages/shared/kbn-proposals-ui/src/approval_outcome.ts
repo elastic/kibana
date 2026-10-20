@@ -31,6 +31,7 @@ export type ApprovalPhase =
   | 'declining'
   | ApprovalOutcomeStatus
   | 'failed'
+  | 'expired'
   | 'no_action';
 
 export interface ApprovalOutcomeBadge {
@@ -43,12 +44,9 @@ export interface ApprovalOutcomeBadge {
 export interface ApprovalOutcomeBanner {
   color: 'success' | 'primary' | 'danger';
   title: string;
-  hint?: string;
   /** Swaps the icon for a spinner, for a decision that is still being submitted. */
   isLoading: boolean;
 }
-
-const IN_PROGRESS_HINT = APPROVAL_MODAL_TRANSLATIONS.inProgressHint;
 
 /** `undefined` for `pending`: that state keeps whatever badge/caption the caller already renders. */
 export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBadge | undefined => {
@@ -88,6 +86,13 @@ export const getApprovalOutcomeBadge = (phase: ApprovalPhase): ApprovalOutcomeBa
         label: APPROVAL_MODAL_TRANSLATIONS.failedBadge,
         isLoading: false,
       };
+    case 'expired':
+      return {
+        color: 'warning',
+        iconType: 'clock',
+        label: APPROVAL_MODAL_TRANSLATIONS.expiredBadge,
+        isLoading: false,
+      };
     case 'no_action':
       return {
         color: 'default',
@@ -120,14 +125,12 @@ export const getApprovalOutcomeBanner = (
       return {
         color: 'primary',
         title: APPROVAL_MODAL_TRANSLATIONS.applyingBannerTitle,
-        hint: IN_PROGRESS_HINT,
         isLoading: true,
       };
     case 'declining':
       return {
         color: 'primary',
         title: APPROVAL_MODAL_TRANSLATIONS.decliningBannerTitle,
-        hint: IN_PROGRESS_HINT,
         isLoading: true,
       };
     case 'failed':

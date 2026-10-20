@@ -12,7 +12,6 @@ import {
   EuiPanel,
   EuiSkeletonRectangle,
   EuiSkeletonTitle,
-  EuiSpacer,
   EuiText,
   EuiTitle,
   useEuiTheme,
@@ -32,8 +31,15 @@ interface ProposalsTrendChartCardProps {
   /** The window the series was fetched for; labels and tooltips read from it. */
   windowHours: number;
   bucketMinutes: number;
+  /** Peak shared across the row so the three sparklines sit on one scale. */
+  yMax: number;
 }
 
+/**
+ * One trend tile: quiet label, the current count, a sparkline over the window, and the
+ * window bounds as a footer. Label and figure stay small so the row reads as a summary
+ * strip above the queue rather than a dashboard of KPIs.
+ */
 export const ProposalsTrendChartCard: React.FC<ProposalsTrendChartCardProps> = ({
   id,
   label,
@@ -43,9 +49,9 @@ export const ProposalsTrendChartCard: React.FC<ProposalsTrendChartCardProps> = (
   isLoading,
   windowHours,
   bucketMinutes,
+  yMax,
 }) => {
   const { euiTheme } = useEuiTheme();
-
   // @elastic/charts needs a real colour value, not an EUI token name, and the
   // `vis` palette rather than the status colours: visualization colours are
   // curated for charts and stay correct as the palette evolves.
@@ -61,52 +67,66 @@ export const ProposalsTrendChartCard: React.FC<ProposalsTrendChartCardProps> = (
   return (
     <EuiPanel
       hasBorder
+      hasShadow={false}
       paddingSize="m"
-      css={{ borderRadius: euiTheme.size.s }}
       data-test-subj={`alertZeroProposalsTrendChartCard-${id}`}
     >
-      <EuiTitle size="xxs">
-        <h3 css={{ fontWeight: euiTheme.font.weight.semiBold }}>{label}</h3>
-      </EuiTitle>
-      {isLoading ? (
-        <EuiSkeletonTitle
-          size="l"
-          data-test-subj={`alertZeroProposalsTrendChartCountLoading-${id}`}
-        />
-      ) : (
-        <EuiTitle size="l">
-          <p data-test-subj={`alertZeroProposalsTrendChartCount-${id}`}>{count}</p>
-        </EuiTitle>
-      )}
-      <EuiSpacer size="s" />
-      {isLoading ? (
-        <EuiSkeletonRectangle
-          width="100%"
-          height={sparklineHeight}
-          borderRadius="m"
-          data-test-subj={`alertZeroProposalsTrendChartLoading-${id}`}
-        />
-      ) : (
-        <TrendSparkline
-          series={series}
-          color={resolvedColor}
-          ariaLabel={CHART_ARIA_LABEL(label, count, windowHours)}
-          panelId={id}
-          seriesName={CHART_SERIES_NAME(label)}
-          bucketMinutes={bucketMinutes}
-        />
-      )}
-      <EuiSpacer size="xs" />
-      <EuiFlexGroup justifyContent="spaceBetween" gutterSize="none" responsive={false}>
+      <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiText size="xs" color="subdued">
-            {HOURS_AGO(windowHours)}
+            <h3>{label}</h3>
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {NOW}
-          </EuiText>
+          {isLoading ? (
+            <EuiSkeletonTitle
+              size="s"
+              data-test-subj={`alertZeroProposalsTrendChartCountLoading-${id}`}
+            />
+          ) : (
+            <EuiTitle size="s">
+              <p data-test-subj={`alertZeroProposalsTrendChartCount-${id}`}>{count}</p>
+            </EuiTitle>
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {isLoading ? (
+            <EuiSkeletonRectangle
+              width="100%"
+              height={sparklineHeight}
+              borderRadius="m"
+              data-test-subj={`alertZeroProposalsTrendChartLoading-${id}`}
+            />
+          ) : (
+            <TrendSparkline
+              series={series}
+              color={resolvedColor}
+              ariaLabel={CHART_ARIA_LABEL(label, count, windowHours)}
+              panelId={id}
+              seriesName={CHART_SERIES_NAME(label)}
+              bucketMinutes={bucketMinutes}
+              yMax={yMax}
+            />
+          )}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup
+            justifyContent="spaceBetween"
+            alignItems="center"
+            gutterSize="none"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {HOURS_AGO(windowHours)}
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="xs" color="subdued">
+                {NOW}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>

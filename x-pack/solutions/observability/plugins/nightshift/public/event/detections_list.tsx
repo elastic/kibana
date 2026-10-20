@@ -37,8 +37,8 @@ import {
   filterOccurrencesForDetection,
   getChangePointLabel,
   type OccurrencePoint,
-} from '../detection/change_point';
-import { ChangePointSparkline } from '../detection/change_point_visualization';
+} from '../components/entities/detection/change_point';
+import { ChangePointSparkline } from '../components/entities/detection/change_point_visualization';
 
 import { nightshiftBackgroundTransition } from '../common/transition';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
@@ -53,7 +53,7 @@ export const MAX_VISIBLE_DETECTIONS = 3;
 
 export interface DetectionsListProps {
   event: SignificantEvent;
-  eventUuid: string;
+  eventId: string;
   occurrencesByRuleUuid?: ReadonlyMap<string, OccurrencePoint[]>;
   isLoadingOccurrences?: boolean;
   selectedDetectionId?: string;
@@ -395,14 +395,14 @@ function DetectionListPanel({ items, footer }: DetectionListPanelProps): React.R
 
 export function DetectionsList({
   event,
-  eventUuid,
+  eventId,
   occurrencesByRuleUuid,
   isLoadingOccurrences = false,
   selectedDetectionId,
   onDetectionClick,
   lifecycleQuery: lifecycleQueryFromParent,
 }: DetectionsListProps): React.ReactElement {
-  const internalLifecycleQuery = useFetchEventLifecycle(eventUuid, {
+  const internalLifecycleQuery = useFetchEventLifecycle(eventId, {
     enabled: !lifecycleQueryFromParent,
   });
   const lifecycleQuery = lifecycleQueryFromParent ?? internalLifecycleQuery;

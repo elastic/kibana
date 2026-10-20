@@ -65,6 +65,7 @@ import {
   useAvailableConnectors,
   useFetchConnector,
 } from '../../../entities/connectors/model/use_available_connectors';
+import { ServiceAccountName } from '../../../entities/service_accounts';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { selectStepExecutionsTotal } from '../../../entities/workflows/store/workflow_detail/selectors';
 import { useNavigateToExecution } from '../../../hooks/navigation/use_navigate_to_execution';
@@ -92,7 +93,12 @@ import { normalizeStepAi } from '../lib/normalize_step_ai';
 import { resolveSelectedStepExecution } from '../model/resolve_selected_step_execution';
 import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
 import { useStepExecution } from '../model/use_step_execution';
-import { useWaitingStepResume } from '../model/use_waiting_step_resume';
+import {
+  approvalLabelsForStepExecution,
+  resumeMessageForStepExecution,
+  resumeSchemaForStepExecution,
+  useWaitingStepResume,
+} from '../model/use_waiting_step_resume';
 
 export interface WorkflowExecutionFlyoutProps {
   executionId: string;
@@ -198,12 +204,14 @@ const StepDataSection = ({
   data,
   fieldPathPrefix,
   isFieldPathCopyable,
+  'data-test-subj': dataTestSubj,
 }: {
   label: string;
   data: unknown;
   fieldPathPrefix?: string;
   /** Hides copy on rows whose field is not a real template path. Copy is on for all rows if omitted. */
   isFieldPathCopyable?: (field: string) => boolean;
+  'data-test-subj'?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const [view, setView] = useState<'table' | 'code'>(() => (isTableable(data) ? 'table' : 'code'));
@@ -338,6 +346,7 @@ const StepDataSection = ({
   return (
     <StepDetailAccordionSection
       title={label}
+      data-test-subj={dataTestSubj}
       toggleAriaLabel={i18n.translate('workflows.executionFlyout.stepDetail.toggleNamedSection', {
         defaultMessage: '{label} section',
         values: { label },
@@ -357,6 +366,7 @@ const StepDataSection = ({
                 size="xs"
                 iconType="chevronSingleDown"
                 iconSide="right"
+                data-test-subj="workflowStepDataViewToggle"
                 onClick={() => setIsViewPopoverOpen((v) => !v)}
               >
                 {effectiveView === 'table'
@@ -386,6 +396,7 @@ const StepDataSection = ({
                 <EuiContextMenuItem
                   key="code"
                   icon={effectiveView === 'code' ? 'check' : 'empty'}
+                  data-test-subj="workflowViewMode_json"
                   onClick={() => {
                     setView('code');
                     setIsViewPopoverOpen(false);
@@ -408,6 +419,7 @@ const StepDataSection = ({
           paddingSize="m"
           overflowHeight={300}
           isCopyable
+          data-test-subj="workflowStepResultJsonCode"
           css={`
             & .euiCodeBlock__controls {
               background: transparent;
@@ -797,6 +809,16 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       }
       return selectedLightStep ?? fullStepExecution ?? pseudoStepExecution;
     }, [isPseudoStep, pseudoStepExecution, selectedLightStep, fullStepExecution]);
+    const selectedStepWaitingForInput =
+      !isPseudoStep &&
+      (selectedLightStep?.status === ExecutionStatus.WAITING_FOR_INPUT ||
+        activeStepExecution?.status === ExecutionStatus.WAITING_FOR_INPUT);
+    // An injected child step is not the parent run's wait. Resume that child run.
+    const resumeSelectedChildStep =
+      selectedStepWaitingForInput && resolvedExecutionId !== executionId;
+    const resumeSelectedOwnStep =
+      Boolean(waitingStepExecutionId) && selectedStepExecutionId === waitingStepExecutionId;
+    const selectedStepForResume = activeStepExecution ?? selectedLightStep;
     const stepName = selectedLightStep?.stepId ?? activeStepExecution?.stepId ?? '';
 
     const activeStepType = selectedLightStep?.stepType ?? activeStepExecution?.stepType;
@@ -1000,6 +1022,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                 ) : activeStepExecution?.stepType === 'enter-case-branch' ? (
                   <StepDataSection
                     key={`status-${selectedStepExecutionId}`}
+                    data-test-subj="workflowStepDataSection_status"
                     label={i18n.translate('workflows.executionFlyout.caseBranch.statusLabel', {
                       defaultMessage: 'Status',
                     })}
@@ -1049,6 +1072,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     )}
                     <StepDataSection
                       key={`input-${selectedStepExecutionId}`}
+                      data-test-subj="workflowStepDataSection_input"
                       label={i18n.translate('workflows.executionFlyout.stepDetail.input', {
                         defaultMessage: 'Input',
                       })}
@@ -1061,6 +1085,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     {executionMetadata && (
                       <StepDataSection
                         key={`metadata-${selectedStepExecutionId}`}
+                        data-test-subj="workflowStepDataSection_metadata"
                         label={i18n.translate('workflows.executionFlyout.stepDetail.metadata', {
                           defaultMessage: 'Metadata',
                         })}
@@ -1072,33 +1097,48 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                     {!isPseudoStep && stepAiWithModel && (
                       <AiStepSection ai={stepAiWithModel} connectorName={aiConnectorName} />
                     )}
-                    {!isPseudoStep &&
-                      selectedStepExecutionId === waitingStepExecutionId &&
-                      waitingStepExecutionId && (
-                        <div
-                          css={{
-                            paddingTop: euiTheme.size.m,
-                            paddingBottom: euiTheme.size.m,
-                          }}
-                        >
-                          <ResumeExecutionButton
-                            executionId={executionId}
-                            workflowId={workflowExecution?.workflowId}
-                            stepStartedAt={
-                              selectedLightStep?.startedAt ??
-                              activeStepExecution?.startedAt ??
-                              waitingStepStartedAt
-                            }
-                            resumeMessage={resumeMessage}
-                            resumeSchema={resumeSchema}
-                            approvalLabels={approvalLabels}
-                            waitingStepExecutionId={selectedStepExecutionId}
-                            submitState={resumeSubmitState}
-                          />
-                        </div>
-                      )}
+                    {!isPseudoStep && (resumeSelectedOwnStep || resumeSelectedChildStep) && (
+                      <div
+                        css={{
+                          paddingTop: euiTheme.size.m,
+                          paddingBottom: euiTheme.size.m,
+                        }}
+                      >
+                        <ResumeExecutionButton
+                          executionId={resumeSelectedChildStep ? resolvedExecutionId : executionId}
+                          workflowId={
+                            resumeSelectedChildStep
+                              ? selectedStepForResume?.workflowId
+                              : workflowExecution?.workflowId
+                          }
+                          stepStartedAt={
+                            selectedLightStep?.startedAt ??
+                            activeStepExecution?.startedAt ??
+                            waitingStepStartedAt
+                          }
+                          resumeMessage={
+                            resumeSelectedChildStep
+                              ? resumeMessageForStepExecution(selectedStepForResume ?? undefined)
+                              : resumeMessage
+                          }
+                          resumeSchema={
+                            resumeSelectedChildStep
+                              ? resumeSchemaForStepExecution(selectedStepForResume ?? undefined)
+                              : resumeSchema
+                          }
+                          approvalLabels={
+                            resumeSelectedChildStep
+                              ? approvalLabelsForStepExecution(selectedStepForResume ?? {})
+                              : approvalLabels
+                          }
+                          waitingStepExecutionId={selectedStepExecutionId ?? undefined}
+                          submitState={resumeSelectedChildStep ? undefined : resumeSubmitState}
+                        />
+                      </div>
+                    )}
                     <StepDataSection
                       key={`input-${selectedStepExecutionId}`}
+                      data-test-subj="workflowStepDataSection_input"
                       label={i18n.translate('workflows.executionFlyout.stepDetail.input', {
                         defaultMessage: 'Input',
                       })}
@@ -1121,6 +1161,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                       (hasStepError ? (
                         <StepDataSection
                           key={`error-${selectedStepExecutionId}`}
+                          data-test-subj="workflowStepDataSection_error"
                           label={i18n.translate('workflows.executionFlyout.stepDetail.error', {
                             defaultMessage: 'Error',
                           })}
@@ -1129,6 +1170,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                       ) : stepOutputData != null ? (
                         <StepDataSection
                           key={`output-${selectedStepExecutionId}`}
+                          data-test-subj="workflowStepDataSection_output"
                           label={i18n.translate('workflows.executionFlyout.stepDetail.output', {
                             defaultMessage: 'Output',
                           })}
@@ -1173,6 +1215,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                   color="text"
                   flush="left"
                   onClick={onClose}
+                  data-test-subj="workflowBackToExecutionsLink"
                 >
                   {i18nTexts.back}
                 </EuiButtonEmpty>
@@ -1269,6 +1312,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
 
                 {workflowExecution ? (
                   <div
+                    data-execution-status={workflowExecution.status}
                     css={{
                       border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
                       borderRadius: '10px',
@@ -1341,7 +1385,11 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                                     })}
                               </EuiLink>
                             ) : (
-                              <EuiText size="s" css={{ fontWeight: 600, fontSize: '12px' }}>
+                              <EuiText
+                                size="s"
+                                css={{ fontWeight: 600, fontSize: '12px' }}
+                                data-test-subj="workflowExecutionStatus"
+                              >
                                 {getStatusLabel(workflowExecution.status)}
                               </EuiText>
                             )}
@@ -1468,11 +1516,15 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                         </EuiFlexGroup>
                         {workflowExecution?.effectiveIdentity?.type === 'service_account' && (
                           <EuiText size="s" data-test-subj="workflowExecutionFlyoutRunAs">
-                            {i18n.translate('workflows.executionFlyout.runAs', {
-                              defaultMessage: 'Run as',
-                            })}
+                            {workflowExecution.effectiveIdentity.inheritedFrom
+                              ? i18n.translate('workflows.execution.inheritedRunAsLabel', {
+                                  defaultMessage: 'Run as (inherited from parent)',
+                                })
+                              : i18n.translate('workflows.executionFlyout.runAs', {
+                                  defaultMessage: 'Run as',
+                                })}
                             {': '}
-                            {workflowExecution.effectiveIdentity.id}
+                            <ServiceAccountName id={workflowExecution.effectiveIdentity.id} />
                           </EuiText>
                         )}
                       </div>
