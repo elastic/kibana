@@ -47,6 +47,7 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
   private readonly recorder: Recorder;
   private ticks?: TickScheduler;
   private t7a?: Promise<T7aController | undefined>;
+  private analyticsSetup?: { registerEventType: (definition: unknown) => void };
   private readonly statusSource: PlatformStatusSource = {
     elasticsearch: 'unknown',
     savedObjects: 'unknown',
@@ -101,6 +102,7 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
       core.status.overall$.subscribe((value) => {
         publishStatus({ overall: String(value.level) });
       });
+      this.analyticsSetup = core.analytics;
     }
     const router = core.http.createRouter();
     registerTierBRoutes(router, API_BASE, getRecorder, getStart);
@@ -148,7 +150,8 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
             { core, ...plugins },
             this.context.env,
             this.logger.get('t7a'),
-            this.statusSource
+            this.statusSource,
+            this.analyticsSetup
           )
       );
     }
