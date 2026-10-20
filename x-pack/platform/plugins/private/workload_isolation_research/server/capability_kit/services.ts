@@ -169,17 +169,32 @@ const createBufferedLogger = (
   };
 };
 
+const silent = (): void => {};
+const agentLogger: Logger = {
+  trace: silent,
+  debug: silent,
+  info: silent,
+  warn: silent,
+  error: silent,
+  fatal: silent,
+  log: silent,
+  isLevelEnabled: () => false,
+  get: () => agentLogger,
+};
+let isolateAgentManager: AgentManager | undefined;
+const getAgentManager = (): AgentManager => {
+  // Metrics callbacks must never retain a per-run logger/bundle/credential closure.
+  isolateAgentManager ??= new AgentManager(agentLogger, { dnsCacheTtlInSeconds: 0 });
+  return isolateAgentManager;
+};
+
 /** Constructs worker-owned ES data access plus explicit scoped SO/TM bridges for one run. */
 export const createRunServices = (context: WorkerContext) => {
   const { logger, flush } = createBufferedLogger(context);
   const data = context.bundle.data ? record(decode(context.bundle.data)) : {};
   const capability = data.elasticsearch as ResearchEsCapability | undefined;
   const elasticsearch = capability
-    ? createResearchEsClient(
-        capability,
-        logger,
-        new AgentManager(logger, { dnsCacheTtlInSeconds: 0 })
-      )
+    ? createResearchEsClient(capability, logger, getAgentManager())
     : undefined;
   return {
     logger,

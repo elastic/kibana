@@ -15,3 +15,5 @@ require('./batch_stream.node_test');
 require('./errors.node_test');
 require('./async_handles.node_test');
 require('./sync.node_test');
+require('./collections.node_test');
+require('./local_so.node_test');

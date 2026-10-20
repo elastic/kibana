@@ -31,7 +31,8 @@
     "@kbn/core-status-common",
     "@kbn/security-authorization-core",
     "@kbn/share-plugin",
-    "@kbn/licensing-plugin"
+    "@kbn/licensing-plugin",
+    "@kbn/encrypted-saved-objects-plugin"
   ],
   "exclude": [
     "target/**/*"

@@ -15,6 +15,7 @@ import { createRunServices } from './services';
 import { createBatchStream } from './batch_stream';
 import { createAsyncServiceClient } from './async_handles';
 import type { ServiceHandle } from './async_handles';
+import { createLocalSavedObjects } from './local_saved_objects';
 
 export const echo = async (input: CodecInput): Promise<CodecInput> => input;
 export const alternate = async (): Promise<CodecInput> => 'new-revision';
@@ -42,6 +43,63 @@ export const services = async (input: CodecInput, context: WorkerContext): Promi
     await clients.close();
   }
 };
+export const localSoProbe = async (
+  input: CodecInput,
+  context: WorkerContext
+): Promise<CodecInput> => {
+  const { id } = input as { id: string };
+  const clients = createRunServices(context);
+  try {
+    if (!clients.elasticsearch) throw new Error('Local SO requires ES capability');
+    const so = await createLocalSavedObjects(context, clients.elasticsearch, clients.logger);
+    const object = await so.get('wir_t7p_fixture', id).catch((cause: Error) => {
+      throw new Error('probe-stage:get', { cause });
+    });
+    const attrs = object.attributes as { secret?: string; migrated?: boolean };
+    let foreignDenied = false;
+    try {
+      await so.get('wir_t7p_fixture', id, { namespace: 'space-b' });
+    } catch {
+      foreignDenied = true;
+    }
+    let aadUpdateDenied = false;
+    try {
+      await so.update('wir_t7p_fixture', id, { stable: 'tamper' });
+    } catch {
+      aadUpdateDenied = true;
+    }
+    await so.update('wir_t7p_fixture', id, { mutable: 'after' }).catch((cause: Error) => {
+      throw new Error('probe-stage:update', { cause });
+    });
+    const secret = (await so
+      .getDecryptedAsInternalUser('wir_t7p_fixture', id)
+      .catch((cause: Error) => {
+        throw new Error('probe-stage:decrypt', { cause });
+      })) as {
+      secret?: string;
+      mutable?: string;
+    };
+    if (global.gc) {
+      global.gc();
+      global.gc();
+    }
+    return {
+      migrated: attrs.migrated === true,
+      stripped: attrs.secret === undefined,
+      foreignDenied,
+      aadUpdateDenied,
+      partialSecretPreserved: secret.secret === 'fixture-sensitive-value',
+      partialMutable: secret.mutable === 'after',
+      info: so.info,
+      heapUsed: process.memoryUsage().heapUsed,
+      rss: process.memoryUsage().rss,
+      forcedGc: !!global.gc,
+    };
+  } finally {
+    await clients.close();
+  }
+};
+
 export const syncLookup = async (input: CodecInput, context: WorkerContext): Promise<CodecInput> =>
   context.callSync('fixture', String(input), { value: 'sync-fixture' }, { maxReplyBytes: 256 });
 
