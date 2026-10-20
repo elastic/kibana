@@ -33,7 +33,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { KbnDangerCallout, KbnInfoCallout, KbnSuccessCallout } from '@kbn/ui-callout';
+import {
+  KbnDangerCallout,
+  KbnInfoCallout,
+  KbnSuccessCallout,
+  KbnWarningCallout,
+} from '@kbn/ui-callout';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import type {
@@ -514,6 +519,10 @@ export const SecretConnectionPanel = () => {
                   </>
                 )}
                 <EuiSpacer size="l" />
+                <KbnWarningCallout size="s" title={ACCESS_NOTE_TITLE}>
+                  {ACCESS_NOTE}
+                </KbnWarningCallout>
+                <EuiSpacer size="m" />
                 <KbnInfoCallout size="s" title={TEST_NOTE_TITLE}>
                   {TEST_NOTE}
                 </KbnInfoCallout>
@@ -662,6 +671,13 @@ const REFRESH_BUTTON = i18n.translate('xpack.synthetics.secretConnection.refresh
 });
 const TEST_LABEL = i18n.translate('xpack.synthetics.secretConnection.test', {
   defaultMessage: 'Test connection',
+});
+const ACCESS_NOTE_TITLE = i18n.translate('xpack.synthetics.secretConnection.accessNoteTitle', {
+  defaultMessage: 'Use a dedicated, least-privilege credential',
+});
+const ACCESS_NOTE = i18n.translate('xpack.synthetics.secretConnection.accessNote', {
+  defaultMessage:
+    'Anyone who can edit monitors or global parameters in this space can reference any secret this credential can read. Use a token or AppRole that can only read the paths your monitors need.',
 });
 const TEST_NOTE_TITLE = i18n.translate('xpack.synthetics.secretConnection.testNoteTitle', {
   defaultMessage: 'Testing runs from Kibana',
