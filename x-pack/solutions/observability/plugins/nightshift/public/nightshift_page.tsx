@@ -34,6 +34,11 @@ import { CustomContextFlyout } from './custom_context/custom_context_flyout';
 import { NightshiftOnboarding } from './onboarding/onboarding';
 import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility';
 import { SettingsPage } from './settings/page';
+import { NightshiftSetupOnboarding } from './onboarding/setup_onboarding';
+import {
+  isNightshiftSetUp,
+  useInvestigatorServiceAccount,
+} from './service_account/use_investigator_service_account';
 
 /** Onboarding has a second column for the "Get started" card. */
 const ONBOARDING_MAX_WIDTH = '1040px';
@@ -137,6 +142,14 @@ export function NightshiftPage(): React.ReactElement | null {
   // Before the first investigation the page is only about onboarding, as in the design.
   const hidesHeaderActions = isOnboarding && !onboarding.latestInvestigation;
 
+  // Nightshift only works as its service account, so a space that is not set up shows the setup
+  // step instead of the app. A failed status read (e.g. missing privileges) does not block it.
+  const requiresSetup = nightshiftEnabled && nightshiftInvestigations?.investigationsClient != null;
+  const serviceAccount = useInvestigatorServiceAccount();
+  const isSetupPending = requiresSetup && serviceAccount.isLoading;
+  const needsSetup =
+    requiresSetup && serviceAccount.isSuccess && !isNightshiftSetUp(serviceAccount.data);
+
   useBreadcrumbs(
     [
       {
@@ -190,6 +203,28 @@ export function NightshiftPage(): React.ReactElement | null {
 
   if (isSettingsPage && !canManageAndConfigure) {
     return null;
+  }
+
+  // Until the space is set up, every page shows onboarding with its "Enable Elastic Nightshift"
+  // step, for everyone: only users with manage_security can complete it.
+  if (isSetupPending || needsSetup) {
+    return (
+      <ObservabilityPageTemplate
+        data-test-subj="nightshiftPage"
+        restrictWidth={false}
+        pageSectionProps={{ paddingSize: 'none' }}
+      >
+        {/* Nothing behind the other header actions works before setup. */}
+        <NightshiftAppHeader
+          page="landing"
+          onManagementClick={navigateToManagement}
+          managementHref={managementHref}
+        />
+        <EuiPageTemplate.Section component="div" restrictWidth={ONBOARDING_MAX_WIDTH}>
+          <NightshiftSetupOnboarding status={serviceAccount.data} isLoading={isSetupPending} />
+        </EuiPageTemplate.Section>
+      </ObservabilityPageTemplate>
+    );
   }
 
   const isHomePage =

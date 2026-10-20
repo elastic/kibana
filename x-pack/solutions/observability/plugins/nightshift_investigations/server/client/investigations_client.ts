@@ -10,7 +10,10 @@ import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
-import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import {
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE,
+} from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart, ConversationPublicClient } from '@kbn/agent-builder-server';
@@ -39,6 +42,11 @@ import {
 import { investigationNotificationDestinationsSchema } from '../../common/schemas';
 import type { InvestigationNotificationDestination } from '../../common/schemas';
 import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
+import {
+  getBoundInvestigationWorkflowId,
+  INVESTIGATOR_SERVICE_ACCOUNT_ID,
+  isEntryPointReady,
+} from '../lib/service_account/constants';
 import type { InvestigationQuotaCallback } from '../types';
 import type {
   AlertInvestigationContext,
@@ -285,6 +293,25 @@ const toNotifiableInvestigation = (
     })),
 });
 
+const SERVICE_ACCOUNT_REQUIRED_MESSAGE =
+  'Nightshift is not set up in this space. An admin with manage_security must enable the Nightshift service account.';
+
+/**
+ * Whether a run executes as the Nightshift service account. The investigation workflow is
+ * installed globally, so anyone allowed to run workflows can start it directly, as themselves;
+ * such a run must not act on an investigation.
+ */
+const runsAsInvestigator = ({
+  effectiveIdentity,
+}: {
+  effectiveIdentity?: { type: string; id?: string };
+}): boolean =>
+  effectiveIdentity?.type === 'service_account' &&
+  effectiveIdentity.id === INVESTIGATOR_SERVICE_ACCOUNT_ID;
+
+const NOT_RUN_AS_INVESTIGATOR_MESSAGE =
+  'Investigations only run as the Nightshift service account, through the entry point of the space.';
+
 export interface NightshiftInvestigationsClientDeps {
   request: KibanaRequest;
   workflowsManagement?: WorkflowsServerPluginSetup;
@@ -306,6 +333,8 @@ export interface NightshiftInvestigationsClientDeps {
   uiSettings?: CoreStart['uiSettings'];
   isAvailable: (connectorId?: string) => Promise<boolean>;
   isInfrastructureAvailable: () => Promise<boolean>;
+  /** `xpack.security.serviceAccounts.enabled`; investigations only run as the service account. */
+  isServiceAccountExecutionEnabled?: () => boolean;
 }
 
 export class NightshiftInvestigationsClient {
@@ -323,6 +352,7 @@ export class NightshiftInvestigationsClient {
   private readonly uiSettings?: CoreStart['uiSettings'];
   private readonly checkAvailability: (connectorId?: string) => Promise<boolean>;
   private readonly checkInfrastructureAvailability: () => Promise<boolean>;
+  private readonly isServiceAccountExecutionEnabled: () => boolean;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
@@ -339,6 +369,7 @@ export class NightshiftInvestigationsClient {
     this.uiSettings = deps.uiSettings;
     this.checkAvailability = deps.isAvailable;
     this.checkInfrastructureAvailability = deps.isInfrastructureAvailable;
+    this.isServiceAccountExecutionEnabled = deps.isServiceAccountExecutionEnabled ?? (() => false);
   }
 
   public isAvailable = (connectorId?: string): Promise<boolean> =>
@@ -429,18 +460,23 @@ export class NightshiftInvestigationsClient {
     const spaceId = this.getSpaceId();
     this.warnOnSpaceMismatch(spaceId);
 
-    const workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
+    // Investigations only run as the Nightshift service account, through the entry point an admin
+    // binds in each space. There is no fallback that runs as the caller.
+    if (!this.isServiceAccountExecutionEnabled()) {
+      throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
+    }
+    const workflowId = getBoundInvestigationWorkflowId(spaceId);
     const workflow = await workflowsManagement.management.getWorkflow(
       workflowId,
       spaceId,
       this.request
     );
 
-    if (!workflow?.definition) {
-      this.logger.error(
-        `Investigation workflow "${workflowId}" is not installed in space "${spaceId}"`
+    if (!workflow?.definition || !isEntryPointReady(workflow)) {
+      this.logger.warn(
+        `Investigation workflow "${workflowId}" is not set up in space "${spaceId}"; an admin must enable the Nightshift service account`
       );
-      throw new InvestigationUnavailableError('Investigations are not configured in this space');
+      throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
     }
 
     const { alerts } = prepared;
@@ -523,7 +559,8 @@ export class NightshiftInvestigationsClient {
       spaceId,
       inputs,
       this.request,
-      'nightshift-investigations'
+      // The entry point refuses runs without it.
+      NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE
     );
 
     if (!isFollowUp) {
@@ -816,6 +853,9 @@ export class NightshiftInvestigationsClient {
       (asString(inputs?.investigation_id) ?? executionId) !== investigationId
     ) {
       throw new InvestigationNotFoundError(investigationId);
+    }
+    if (!runsAsInvestigator(execution)) {
+      throw new InvestigationUnavailableError(NOT_RUN_AS_INVESTIGATOR_MESSAGE);
     }
     return { execution, inputs };
   }

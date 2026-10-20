@@ -147,7 +147,7 @@ export class NightshiftInvestigationsPlugin
   constructor(private readonly ctx: PluginInitializerContext<NightshiftInvestigationsConfig>) {
     this.logger = ctx.logger.get();
     this.resolveHookWorkflowId = createResolveHookWorkflowId({
-      isServiceAccountExecutionEnabled: () => this.security?.serviceAccounts.isEnabled() ?? false,
+      isServiceAccountExecutionEnabled: () => this.isServiceAccountExecutionEnabled(),
       getWorkflowsManagement: () => this.workflowsManagement,
       logger: this.logger.get('service_account'),
     });
@@ -606,6 +606,7 @@ export class NightshiftInvestigationsPlugin
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
+          isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
         }),
     };
   }
@@ -627,6 +628,7 @@ export class NightshiftInvestigationsPlugin
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
+          isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
         };
       },
     });
@@ -653,6 +655,7 @@ export class NightshiftInvestigationsPlugin
       inference: this.inference,
       savedObjects: this.savedObjects,
       uiSettings: this.uiSettings,
+      isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
       isAvailable: (connectorId) =>
         isInvestigationRunAvailable({
           request,
@@ -667,6 +670,7 @@ export class NightshiftInvestigationsPlugin
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
+          isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
         }),
       isInfrastructureAvailable: () =>
         isInvestigationInfrastructureAvailable({
@@ -681,9 +685,13 @@ export class NightshiftInvestigationsPlugin
           spaces: this.spaces,
           workflowsExtensions: this.workflowsExtensionsStart,
           workflowsManagement: this.workflowsManagement,
+          isServiceAccountExecutionEnabled: this.isServiceAccountExecutionEnabled,
         }),
     });
   };
+
+  private isServiceAccountExecutionEnabled = (): boolean =>
+    this.security?.serviceAccounts.isEnabled() ?? false;
 
   /** One instance, so setups of a space queue behind each other across requests. */
   private getInvestigatorServiceAccountService = (): InvestigatorServiceAccountService => {
@@ -764,6 +772,10 @@ export class NightshiftInvestigationsPlugin
     const client = await workflowsExtensions.initManagedWorkflowsClient(
       NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER
     );
+    // Each space reaches the global investigation through an entry point bound to the Nightshift
+    // service account, installed with the bound Slack thread workflow when an admin sets the space
+    // up (see lib/service_account). Not installing the Slack thread's global copy here lets
+    // ready() remove any left from earlier versions.
     await installInvestigationWorkflow({ client });
     await client.install(NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID, {
       spaceId: GLOBAL_WORKFLOW_SPACE_ID,
