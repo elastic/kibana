@@ -115,10 +115,17 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
       });
       const statusSub = current.platform.status$.subscribe((value) => statusSeen.push(value.overall));
       try {
-        const next = (await context.call('replica', 'wait', {
-          fingerprint: replicaFingerprint(current.platform.generation()),
-        })) as IslandSnapshot['replicas'];
-        current.applyReplicas({ replicas: next } as IslandSnapshot);
+        // Status can move on its own. Keep waiting until the flag value changes so a
+        // mid-run override is observed on this warm island, not only on the next task.
+        const deadline = Date.now() + 20_000;
+        let fingerprint = replicaFingerprint(current.platform.generation());
+        while (Date.now() < deadline && new Set(seen).size < 2) {
+          const next = (await context.call('replica', 'wait', {
+            fingerprint,
+          })) as IslandSnapshot['replicas'];
+          current.applyReplicas({ replicas: next } as IslandSnapshot);
+          fingerprint = replicaFingerprint(current.platform.generation());
+        }
         return {
           seen,
           licenseSeen,

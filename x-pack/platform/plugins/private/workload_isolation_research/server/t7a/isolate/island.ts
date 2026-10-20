@@ -562,7 +562,8 @@ export const createCoreLite = (
       await bridge(capability, operation, toData(payload) as never);
       return null;
     } catch (error) {
-      return (error as Error).name || 'Error';
+      const err = error as Error;
+      return `${err.name || 'Error'}: ${String(err.message ?? '').slice(0, 180)}`;
     }
   };
   const observePlatform = async (token: string) => {
@@ -582,8 +583,12 @@ export const createCoreLite = (
     };
     events.send('audit', auditEvent);
     const auditError = await safeBridge('audit', 'write', auditEvent);
-    const analyticsEvent = parseAnalyticsReport('worker_core_live', { properties: { token } });
+    const analyticsEvent = parseAnalyticsReport('worker_core_live', { token });
     events.send('analytics', analyticsEvent);
+    await safeBridge('analytics', 'registerEventType', {
+      eventType: 'worker_core_live',
+      schema: { token: { type: 'keyword', _meta: { description: 'Worker Core live probe token' } } },
+    });
     const analyticsError = await safeBridge('analytics', 'write', analyticsEvent);
     events.send('usage.collector.fetch', { collector: 'worker-core' });
     const localBefore = fenceStats.get('so.local.internal.get') ?? 0;
