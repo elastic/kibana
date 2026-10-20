@@ -255,10 +255,12 @@ const getGroupCollections = (
         icon: getEuiIconType(memberPackages[0], basePath),
         url: `${browsePath}?${COLLECTION_QUERYPARAM}=${encodeURIComponent(groupId)}`,
         members: memberPackages.map(({ name, title }) => ({ name, title })),
-        // The titles the packages' own results had, so a search for a policy template still finds
-        // the collection.
+        // The package titles, plus the titles the packages' own results had so a search for a policy
+        // template still finds the collection. `individual_policies` packages have no result of
+        // their own, so their title has to be added explicitly.
         searchTitles: memberPackages.flatMap((pkg) => [
           pkg.name,
+          pkg.title,
           ...toSearchResult(pkg, application, basePath).map(({ title }) => title),
         ]),
       };

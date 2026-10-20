@@ -668,7 +668,14 @@ describe('Package search provider', () => {
               { name: 'logs', title: 'Access and error logs' },
             ],
           }),
-          makePackage('nginx_ingress_controller', 'Nginx Ingress Controller', { group: 'nginx' }),
+          makePackage('nginx_ingress_controller', 'Nginx Ingress Controller', {
+            group: 'nginx',
+            policy_templates_behavior: 'individual_policies',
+            policy_templates: [
+              { name: 'access', title: 'Nginx access logs' },
+              { name: 'error', title: 'Nginx error logs' },
+            ],
+          }),
           ...['One', 'Two', 'Three', 'Four', 'Five'].map((n) =>
             makePackage(`kafka_${n.toLowerCase()}`, `Stream ${n}`, { group: 'kafka' })
           ),
@@ -772,6 +779,14 @@ describe('Package search provider', () => {
             expect(await find({ search: { term: 'stub status' } })).toEqual([nginxResult()]);
           });
 
+          test('a search for the title of an individual_policies package finds the collection', async () => {
+            expect(await find({ search: { term: 'ingress controller' } })).toEqual([
+              nginxResult({
+                description: 'Nginx Ingress Controller is part of the Nginx collection',
+              }),
+            ]);
+          });
+
           test('a search matching many members names the first three and counts the rest', async () => {
             const [result] = await find({ search: { term: 'stream' } });
 
@@ -799,7 +814,8 @@ describe('Package search provider', () => {
               search: { term: 'nginx' },
             });
 
-            expect(ids(results)).toEqual(['nginx', 'nginx_ingress_controller']);
+            // `nginx_ingress_controller` is `individual_policies`: it is listed by its templates
+            expect(ids(results)).toEqual(['nginx', 'access', 'error']);
           });
         });
 
