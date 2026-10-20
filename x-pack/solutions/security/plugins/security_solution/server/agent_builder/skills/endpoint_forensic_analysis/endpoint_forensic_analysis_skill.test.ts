@@ -114,7 +114,7 @@ describe('endpointForensicAnalysisSkill', () => {
       ]);
       expect(data.available_indices).toEqual([]);
       expect(data.scoped_hosts).toEqual(['WKSTN-RECV01']);
-      expect(data.time_window_hours).toBe(72);
+      expect(data.searched_window).toMatchObject({ anchor: 'lookback' });
     });
 
     it('lists available Defend indices from cat.indices', async () => {
@@ -136,7 +136,48 @@ describe('endpointForensicAnalysisSkill', () => {
         'logs-endpoint.events.network-default',
       ]);
       expect(data.scoped_hosts).toEqual(['SRV-DC01']);
-      expect(data.time_window_hours).toBe(24);
+      const searched = data.searched_window as { start: string; end: string; anchor: string };
+      expect(searched.anchor).toBe('lookback');
+      expect(Date.parse(searched.end) - Date.parse(searched.start)).toBe(24 * 60 * 60 * 1000);
     });
+
+    // The worker hands the agent an incident window. The tool is what applies the margin and
+    // hands back the exact range, so the agent never does date arithmetic itself.
+    it('anchors on the incident window and tells the agent the exact range to query', async () => {
+      catIndices.mockResolvedValue([]);
+
+      const data = await runHandler({
+        hosts: ['azep-bd79f31511'],
+        start: '2026-10-16T10:00:00.000Z',
+        end: '2026-10-16T11:30:00.000Z',
+        margin_hours: 2,
+      });
+
+      expect(data.searched_window).toEqual({
+        start: '2026-10-16T08:00:00.000Z',
+        end: '2026-10-16T13:30:00.000Z',
+        anchor: 'incident',
+      });
+      expect(data.guidance).toContain(
+        '@timestamp >= TO_DATETIME("2026-10-16T08:00:00.000Z") AND @timestamp <= TO_DATETIME("2026-10-16T13:30:00.000Z")'
+      );
+      expect(data.guidance).toContain('Events outside it are history');
+    });
+
+    it('rejects a start without an end', async () => {
+      const tool = await getTool();
+      await expect(
+        tool.handler({ hosts: ['h'], start: '2026-10-16T10:00:00.000Z' }, context)
+      ).rejects.toThrow();
+    });
+  });
+
+  it('tells the agent to anchor on the incident and keep history apart from it', () => {
+    const { content } = endpointForensicAnalysisSkill;
+    expect(content).toContain('## Incident window');
+    expect(content).toContain("Pass the incident's `start` and `end`");
+    expect(content).toContain('Do not do date arithmetic yourself');
+    expect(content).toContain('Containment based on history needs a concrete tie to this incident');
+    expect(content).toContain('Always state the window that was searched');
   });
 });
