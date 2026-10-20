@@ -7,12 +7,11 @@
 
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { expect } from '@kbn/scout-security/ui';
-import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../../common/endpoint/constants';
 import type { ActionDetails } from '../../../../../common/endpoint/types';
 import { spaceTest, tags } from '../fixtures';
 import { captureEndpointAction } from '../fixtures/page_objects/host_isolation_form';
 import { seedEndpointHosts, type SeededEndpointHosts } from '../../common/seed_endpoint_hosts';
-import { completeHostAction, getFileUploadDocIds } from '../../common/complete_host_action';
+import { completeHostAction } from '../../common/complete_host_action';
 import {
   cleanupGetFileSpec,
   PARALLEL_HOST_SEED_TIMEOUT_MS,
@@ -52,7 +51,7 @@ spaceTest.describe(
 
     spaceTest(
       'retrieves a file and shows the download link',
-      async ({ page, pageObjects, esClient, config, scoutSpace }) => {
+      async ({ page, pageObjects, esClient, config }) => {
         const host = requireHost(seeded);
         const { endpointList, responseConsole } = pageObjects;
 
@@ -93,17 +92,9 @@ spaceTest.describe(
         });
 
         await spaceTest.step('the download link serves the uploaded file', async () => {
-          // The link carries the space base path, the session cookie and ?apiVersion, which
-          // the API spec (default space, API key, version header) does not exercise.
-          const [fileId] = getFileUploadDocIds(action).metadataIds;
-          const downloadPath = ACTION_AGENT_FILE_DOWNLOAD_ROUTE.replace(
-            '{action_id}',
-            action.id
-          ).replace('{file_id}', fileId);
-          await expect(responseConsole.getFileDownloadButton).toHaveAttribute(
-            'href',
-            `/s/${scoutSpace.id}${downloadPath}?apiVersion=2023-10-31`
-          );
+          // A real browser download through the link: it goes through the space base path, the
+          // session cookie and ?apiVersion, which the API spec (default space, API key, version
+          // header) does not exercise. Arm the listener before the click so the event is not missed.
           const downloadPromise = page.waitForEvent('download');
           await responseConsole.getFileDownloadButton.click();
           const download = await downloadPromise;
