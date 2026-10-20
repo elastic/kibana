@@ -59,7 +59,7 @@ export const DEFAULT_SOURCES: readonly DefaultSource[] = [
     id: 'rss:uk-ncsc',
     adapter_type: 'rss',
     name: 'UK National Cyber Security Centre',
-    tags: ['government', 'advisories', 'research', 'guidance'],
+    tags: ['government', 'uk', 'advisories', 'news'],
     enabled: true,
   },
   {

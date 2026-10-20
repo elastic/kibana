@@ -19,8 +19,11 @@ export const CATALOG_SOURCE_URLS = {
   'rss:cisa-alerts': 'https://www.cisa.gov/cybersecurity-advisories/all.xml',
   // Open Government Licence v3.0 (attribution required):
   // https://www.ncsc.gov.uk/section/about-this-website/terms-and-conditions
-  // The aggregate feed carries reports, guidance, and blog posts, not only advisories.
-  'rss:uk-ncsc': 'https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml',
+  // News only, by product decision. NCSC's aggregate feed (`all-rss-feed.xml`) is mostly
+  // blog posts and guidance; the news feed is where exploitation and state-actor
+  // advisories and incident notices land. Per-type siblings: `report-`, `guidance-`,
+  // `blog-post-rss-feed.xml`.
+  'rss:uk-ncsc': 'https://www.ncsc.gov.uk/api/1/services/v1/news-rss-feed.xml',
   // Licence Ouverte / Open Licence 2.0 (attribution required):
   // https://cert.cyber.gouv.fr/mentions-legales/
   // CERT-FR's IOC feed (`/ioc/feed/`) is deliberately not here: it has published nothing

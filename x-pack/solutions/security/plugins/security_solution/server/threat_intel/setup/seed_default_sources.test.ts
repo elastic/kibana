@@ -79,7 +79,7 @@ describe('DEFAULT_SOURCES approved catalog', () => {
   const APPROVED_ENDPOINTS: Record<string, string> = {
     'vendor_api:elastic-security-labs': 'https://www.elastic.co/security-labs/rss/feed.xml',
     'rss:cisa-alerts': 'https://www.cisa.gov/cybersecurity-advisories/all.xml',
-    'rss:uk-ncsc': 'https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml',
+    'rss:uk-ncsc': 'https://www.ncsc.gov.uk/api/1/services/v1/news-rss-feed.xml',
     'rss:cert-fr-alerts': 'https://cert.cyber.gouv.fr/alerte/feed/',
     'rss:cert-fr-threats': 'https://cert.cyber.gouv.fr/cti/feed/',
     'rss:cert-eu-advisories': 'https://cert.europa.eu/publications/security-advisories-rss',

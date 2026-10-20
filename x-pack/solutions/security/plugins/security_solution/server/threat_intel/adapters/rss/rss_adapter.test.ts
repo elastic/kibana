@@ -149,10 +149,10 @@ describe('rssAdapter', () => {
     expect(requested).not.toContain('https://acme.example/2');
   });
 
-  it('resolves the UK NCSC catalog URL and keeps every entry of the aggregate feed', async () => {
+  it('resolves the UK NCSC news feed URL and keeps every entry', async () => {
     const feed = FEED_BODY.replace(
       'https://acme.example/1',
-      'https://www.ncsc.gov.uk/report/example'
+      'https://www.ncsc.gov.uk/news/example-advisory'
     ).replace('https://acme.example/2', 'https://www.ncsc.gov.uk/news/example');
     const fetchMock = jest.fn().mockResolvedValue(okResponse(feed));
 
@@ -165,10 +165,10 @@ describe('rssAdapter', () => {
     );
 
     expect(fetchMock.mock.calls[0][0]).toBe(
-      'https://www.ncsc.gov.uk/api/1/services/v1/all-rss-feed.xml'
+      'https://www.ncsc.gov.uk/api/1/services/v1/news-rss-feed.xml'
     );
     expect(reports.map(({ content }) => content.article_url)).toEqual([
-      'https://www.ncsc.gov.uk/report/example',
+      'https://www.ncsc.gov.uk/news/example-advisory',
       'https://www.ncsc.gov.uk/news/example',
     ]);
   });
