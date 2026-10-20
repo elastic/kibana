@@ -653,6 +653,40 @@ describe('events_write tool', () => {
     );
   });
 
+  it('refuses a feature_id that names no Knowledge Indicator of a source that has some', async () => {
+    getFeatures.mockImplementation((_sourceIds, options) => {
+      const known = {
+        id: 'checkout-api',
+        uuid: 'uuid-checkout',
+        source_id: 'logs.test',
+        type: 'entity',
+        subtype: 'service',
+      };
+      return Promise.resolve({
+        hits: options && ('featureIds' in options || 'id' in options) ? [] : [known],
+      });
+    });
+
+    const result = await invokeHandler(
+      createTool({ trackAgentToolEventsWrite: jest.fn() }) as never,
+      {
+        items: [
+          {
+            ...input,
+            causal_features: [
+              { feature_id: 'feature:checkout-api', name: 'Checkout API', source_id: 'logs.test' },
+            ],
+          },
+        ],
+      },
+      createMockToolContext()
+    );
+
+    expect(eventsWriteBulkHandler).not.toHaveBeenCalled();
+    expect(JSON.stringify(result)).toContain('feature:checkout-api');
+    expect(JSON.stringify(result)).toContain('not a Knowledge Indicator id');
+  });
+
   it('returns aligned results and tracks each item', async () => {
     (eventsWriteBulkHandler as jest.Mock).mockResolvedValue([
       {

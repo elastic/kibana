@@ -467,7 +467,7 @@ For each event candidate, decide from all signals that will appear in the final 
    verdict, evidence result. Then read the narrative fields and state the strongest case for each
    alternative outcome (event ↔ no event). If the challenge surfaces a more credible alternative,
    adopt it. Resolve remaining uncertainty with the write gate in `<eligibility>`: a new candidate
-   whose evidence points to no error is not written. Only a continuation records refuting verdicts.
+   whose signals point to no error is not written. Only a continuation records refuting verdicts.
 2. **Decide whether each candidate is written.** Classify each event from the verdicts in
    `signals[]` alone, before reading `symptom_hypothesis`, `summary`, or `title`. Then read them
    and state the strongest case for the alternative outcome (event ↔ no event); adopt it if it is

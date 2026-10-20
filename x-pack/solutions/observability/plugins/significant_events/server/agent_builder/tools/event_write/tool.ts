@@ -31,6 +31,8 @@ import { assertSignificantEventsAccess } from '../../../routes/utils/assert_sign
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
+  BulkWriteError,
+  createBulkWriteValidationError,
   getBulkWriteToolErrorCode,
   MAX_BULK_WRITE_ITEMS,
   trackTelemetryBestEffort,
@@ -282,6 +284,36 @@ const enrichCausalFeatures = async (
       return (scoped.length === 1 ? scoped : matches.length === 1 ? matches : [])[0];
     };
 
+    // A feature_id that names no Knowledge Indicator of a source that has some cannot be matched by
+    // a later topology search, so it is refused rather than written.
+    const unresolved = [
+      ...new Set(
+        items.flatMap((item) =>
+          [...(item.causal_features ?? []), ...(item.blast_radius ?? [])].flatMap((reference) =>
+            resolveFeature(reference.feature_id, reference.source_id, item.source_ids)
+              ? []
+              : [reference.feature_id]
+          )
+        )
+      ),
+    ];
+    if (unresolved.length > 0) {
+      const { hits: anyFeature } = await kiClient.getFeatures(sourceIds, {
+        limit: 1,
+        includeExcluded: true,
+        includeExpired: true,
+      });
+      if (anyFeature.length > 0) {
+        throw createBulkWriteValidationError(
+          `feature_id ${unresolved
+            .map((id) => JSON.stringify(id))
+            .join(
+              ', '
+            )} is not a Knowledge Indicator id. Copy each feature_id exactly as ki_search returned it (no prefix, no change of case), or leave that node out.`
+        );
+      }
+    }
+
     return items.map((item) => ({
       ...item,
       causal_features: item.causal_features?.map((causalFeature) => {
@@ -313,6 +345,7 @@ const enrichCausalFeatures = async (
       }),
     }));
   } catch (error) {
+    if (error instanceof BulkWriteError) throw error;
     const message = error instanceof Error ? error.message : 'Unknown error';
     logger.warn(`Failed to enrich causal features; writing them unenriched: ${message}`);
     return items;

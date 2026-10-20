@@ -21,6 +21,8 @@ import {
 } from './constants';
 import { detectionSchema } from './detections';
 
+const FEATURE_ID_COPY_RULE = 'Copy it exactly as ki_search returns it.';
+
 const blastRadiusDependencySchema = lazySchema(() =>
   z.object({
     type: z.literal('dependency'),
@@ -28,7 +30,7 @@ const blastRadiusDependencySchema = lazySchema(() =>
       .string()
       .max(MAX_ID_LENGTH)
       .describe(
-        'The feature.id value of the Knowledge Indicator this dependency entry is based on.'
+        `The feature.id value of the Knowledge Indicator this dependency entry is based on. ${FEATURE_ID_COPY_RULE}`
       ),
     subtype: z
       .string()
@@ -70,7 +72,7 @@ const blastRadiusInfrastructureSchema = lazySchema(() =>
       .string()
       .max(MAX_ID_LENGTH)
       .describe(
-        'The feature.id value of the Knowledge Indicator this infrastructure entry is based on.'
+        `The feature.id value of the Knowledge Indicator this infrastructure entry is based on. ${FEATURE_ID_COPY_RULE}`
       ),
     subtype: z
       .string()
@@ -104,7 +106,9 @@ const blastRadiusEntitySchema = lazySchema(() =>
     feature_id: z
       .string()
       .max(MAX_ID_LENGTH)
-      .describe('The feature.id value of the Knowledge Indicator this entity entry is based on.'),
+      .describe(
+        `The feature.id value of the Knowledge Indicator this entity entry is based on. ${FEATURE_ID_COPY_RULE}`
+      ),
     subtype: z
       .string()
       .max(MAX_ID_LENGTH)
@@ -146,7 +150,7 @@ export const causalFeatureSchema = lazySchema(() =>
       .string()
       .max(MAX_ID_LENGTH)
       .describe(
-        'The feature.id value of the Knowledge Indicator identified as a symptom hypothesis.'
+        `The feature.id value of the Knowledge Indicator identified as a symptom hypothesis. ${FEATURE_ID_COPY_RULE}`
       ),
     type: z
       .string()
@@ -365,11 +369,11 @@ export const SEVERITY_CONTRACT_RULE = dedent`
 
     Decide in order and stop at the first match:
     - "critical": a global outage affecting all or most customers; several distinct core operations confirmed blocked at once (for example balance, history, and payment together); a mandatory service, job, or platform-critical operation confirmed blocked end-to-end so the component can no longer perform its primary function — unless the block is confined to a single endpoint or lookup path affecting only that one operation, which stays at "high"; or confirmed active exposure of PII, PCI DSS data, SSNs, credentials, secrets, or tokens.
-    - "high": the affected operation fails or is blocked on the verified path — the signal descriptions say the operation is failing or blocked (failed requests or jobs, refused or timed-out calls) — or is broadly degraded, intermittent, or partially failing for a significant subset. A single endpoint or lookup path stays here even when every caller hits it. An error signature on the operation's path with no row or measure showing the operation failing to complete is not enough: that is "medium".
-    - "medium": minor confirmed degradation with limited reach, or the signal descriptions say the operation is slow, or cannot say whether it is failing or completing. Not for a confirmed failing operation.
+    - "high": the affected operation fails or is blocked on the verified path, or is broadly degraded, intermittent, or partially failing for a significant subset. A single endpoint or lookup path stays here even when every caller hits it. An error signature on the operation's path with no signals showing the operation failing to complete is not enough: that is "medium".
+    - "medium": minor confirmed degradation with limited reach, signals say the operation is slow, or cannot say whether it is failing or completing. Not for a confirmed failing operation.
     - "low": confirmed recovery, or confirmed absence of impact: noise, a false alarm, or a non-issue, including an internal dependency error the system demonstrably tolerates.
 
-    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate it from its most direct failure measure (the share of attempts that fail, otherwise the share of log lines), never by adding shares across signals or taking the highest of differently scoped ones.
+    Rate what the evidence shows, with the numbers measured: how much of the operation fails, how many parties are affected, and whether it is still happening. Signal's evidence that could not be collected (a query that timed out or returned nothing) leaves the question unsettled, and the ladder rates unsettled evidence "low"; it is never grounds for "medium". Weigh scope by what the operations do, not by how many detections fired. Signals on the same operation overlap: rate it from its most direct failure measure (the share of attempts that fail, otherwise the share of log lines), never by adding shares across signals or taking the highest of differently scoped ones.
     A mandatory component is one that the event's blast_radius shows other services depending on; when it shows none, that clause does not apply.
 
     Tie-break: when two adjacent tiers fit the same evidence, choose the lower only when it is genuinely unresolved whether the operation still completes.
