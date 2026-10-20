@@ -85,6 +85,7 @@ const createMutableSessionMock = (): {
 const createCallContext = (allowedConnectorIds: readonly string[]): SandboxCallContext => ({
   request: httpServerMock.createKibanaRequest(),
   allowedConnectorIds,
+  resolvedCredentials: new Map(),
 });
 
 describe('createSandboxWorkspaceManager', () => {

@@ -30,14 +30,18 @@ const describeCredentials = (credentials: ElasticCredentials) => {
   if (credentials.kind === 'connector') {
     return {
       urlVar: 'CONNECTOR_CONFIG_URL',
-      apiKeyVar: 'CONNECTOR_SECRET_PASSWORD',
+      authVar: 'CONNECTOR_HEADER_AUTHORIZATION',
+      authDescription: 'full Authorization header value (`ApiKey <key>`)',
+      authHeader: '$CONNECTOR_HEADER_AUTHORIZATION',
       parameterName: 'connector_id',
       parameter: `connector_id: "${credentials.connectorId}"`,
     };
   }
   return {
     urlVar: credentials.urlKey,
-    apiKeyVar: credentials.apiKeyKey,
+    authVar: credentials.apiKeyKey,
+    authDescription: 'Elasticsearch API key, used as `Authorization: ApiKey <key>`',
+    authHeader: `ApiKey $${credentials.apiKeyKey}`,
     parameterName: 'secret_keys',
     parameter: `secret_keys: ["${credentials.urlKey}", "${credentials.apiKeyKey}"]`,
   };
@@ -48,9 +52,9 @@ export const renderElasticManifest = (
   credentials: ElasticCredentials,
   { readableIndices }: { readableIndices?: string } = {}
 ): string => {
-  const { urlVar, apiKeyVar, parameterName, parameter } = describeCredentials(credentials);
+  const { urlVar, authVar, authDescription, authHeader, parameterName, parameter } =
+    describeCredentials(credentials);
   const url = `$${urlVar}`;
-  const apiKey = `$${apiKeyVar}`;
   return [
     '# Elasticsearch telemetry',
     '',
@@ -58,7 +62,7 @@ export const renderElasticManifest = (
     'Credentials are not stored here: for that single command only, the environment contains',
     '',
     `- \`${urlVar}\` — Elasticsearch URL`,
-    `- \`${apiKeyVar}\` — Elasticsearch API key, used as \`Authorization: ApiKey <key>\``,
+    `- \`${authVar}\` — ${authDescription}`,
     '',
     'Reference those variables directly and never hard-code their values. A command that omits',
     `\`${parameterName}\` gets no credentials and cannot reach Elasticsearch.`,
@@ -88,10 +92,10 @@ export const renderElasticManifest = (
     '',
     '```bash',
     `# ${parameterName} must be set on every one of these commands`,
-    `curl --fail-with-body -sS --max-time 120 -H "Authorization: ApiKey ${apiKey}" \\`,
+    `curl --fail-with-body -sS --max-time 120 -H "Authorization: ${authHeader}" \\`,
     `  "${url}/_remote/info"`,
     '',
-    `curl --fail-with-body -sS --max-time 120 -H "Authorization: ApiKey ${apiKey}" \\`,
+    `curl --fail-with-body -sS --max-time 120 -H "Authorization: ${authHeader}" \\`,
     '  -H "Content-Type: application/json" \\',
     `  "${url}/_query?format=txt" \\`,
     '  -d \'{"query":"FROM logs-* | WHERE @timestamp >= \\"2026-01-01T00:00:00Z\\" AND @timestamp < \\"2026-01-01T01:00:00Z\\" | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 20"}\'',
@@ -99,13 +103,13 @@ export const renderElasticManifest = (
     '# Same query on every remote whose name starts with logging-, 8 at a time, each line prefixed',
     '# with its remote; failed requests print their error',
     'q() {',
-    `  curl --fail-with-body -sS --max-time 30 -H "Authorization: ApiKey ${apiKey}" \\`,
+    `  curl --fail-with-body -sS --max-time 30 -H "Authorization: ${authHeader}" \\`,
     `    -H "Content-Type: application/json" "${url}/_query?format=txt" \\`,
     '    -d "{\\"query\\":\\"FROM $1:logs-* | WHERE @timestamp >= \\\\\\"2026-01-01T00:00:00Z\\\\\\" AND @timestamp < \\\\\\"2026-01-01T06:00:00Z\\\\\\" | STATS count = COUNT(*)\\"}" \\',
     '    2>&1 | sed "s/^/$1\\t/"',
     '}',
     'export -f q',
-    `curl --fail-with-body -sS --max-time 120 -H "Authorization: ApiKey ${apiKey}" \\`,
+    `curl --fail-with-body -sS --max-time 120 -H "Authorization: ${authHeader}" \\`,
     `  "${url}/_remote/info" | jq -r 'keys[] | select(startswith("logging-"))' \\`,
     '  | xargs -P 8 -n 1 bash -c \'q "$0"\'',
     '```',
