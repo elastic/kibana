@@ -272,7 +272,7 @@ describe('generateWorkflowYaml', () => {
 
     it('isolates scheduled and alert steps when both sources are configured', () => {
       const automation = scheduledAutomation();
-      automation.trigger.rows.push({ kind: 'alert', alertStatus: 'active' });
+      automation.trigger.rows.push({ kind: 'alert' });
       const yaml = parse(generateWorkflowYaml('auto-123', automation));
       expect(yaml.triggers.map((trigger: { type: string }) => trigger.type)).toEqual([
         'alerting.v1.alertStatusChanged',
@@ -289,7 +289,7 @@ describe('generateWorkflowYaml', () => {
     it('isolates all three trigger sources and only sends Slack payload to the Slack step', () => {
       const automation = scheduledAutomation();
       automation.trigger.rows.push(
-        { kind: 'alert', alertStatus: 'active' },
+        { kind: 'alert' },
         { kind: 'slack', event: 'message', channels: ['C1'] }
       );
       automation.completions = [{ action: 'post_to_slack', targetMode: 'thread' }];
