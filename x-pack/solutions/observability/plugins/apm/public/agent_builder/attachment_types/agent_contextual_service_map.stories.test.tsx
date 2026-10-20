@@ -20,6 +20,10 @@ import * as stories from './__stories__/agent_contextual_service_map.stories';
 const { DepthTwoTopology, WithAlertAndSloBadges, BidirectionalConnections } =
   composeStories(stories);
 
+// The first render loads the real graph and its dependencies, which exceeds the
+// default 5s timeout when the suite runs alongside others.
+jest.setTimeout(30000);
+
 describe('AgentContextualServiceMap stories (real graph)', () => {
   it('renders the contextual graph focused on the service with its 1-hop neighborhood', async () => {
     render(<DepthTwoTopology />);
