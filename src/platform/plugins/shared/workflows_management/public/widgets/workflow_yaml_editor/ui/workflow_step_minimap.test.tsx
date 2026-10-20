@@ -184,6 +184,15 @@ describe('WorkflowStepMinimap', () => {
     const getPills = () => ['step-a', 'step-b', 'step-c'].map((id) => screen.getByTitle(id));
     const getTabStops = () => getPills().filter((pill) => pill.tabIndex === 0);
 
+    it('groups the step buttons in a labelled, vertical toolbar inside the navigation landmark', async () => {
+      renderMinimap(THREE_STEP_YAML);
+
+      const toolbar = await screen.findByRole('toolbar', { name: 'Workflow steps' });
+      expect(toolbar).toHaveAttribute('aria-orientation', 'vertical');
+      expect(screen.getByRole('navigation')).toContainElement(toolbar);
+      getPills().forEach((pill) => expect(toolbar).toContainElement(pill));
+    });
+
     it('exposes a single tab stop on the first step when no step is current', async () => {
       renderMinimap(THREE_STEP_YAML);
 
