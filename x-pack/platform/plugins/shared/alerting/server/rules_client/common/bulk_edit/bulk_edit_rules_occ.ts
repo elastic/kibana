@@ -103,6 +103,7 @@ export async function bulkEditRulesOcc<Params extends RuleParams>(
           errors,
           username,
           profileUid,
+          hasMigratedLegacyActions: migratedRuleIds.has(rule.id),
         }),
       { concurrency: API_KEY_GENERATE_CONCURRENCY }
     );

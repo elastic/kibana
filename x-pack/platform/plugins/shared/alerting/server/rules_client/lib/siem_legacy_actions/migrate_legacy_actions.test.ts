@@ -69,7 +69,6 @@ const buildSidecar = (ruleThrottle: string): SavedObject<LegacyIRuleActionsAttri
     { name: 'alert_0', type: RULE_SAVED_OBJECT_TYPE, id: RULE_ID },
     { name: 'action_0', type: 'action', id: 'slack-1' },
   ],
-  score: 1,
 });
 
 const mockLegacyObjects = ({

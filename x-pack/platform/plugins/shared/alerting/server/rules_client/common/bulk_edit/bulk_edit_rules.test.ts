@@ -434,6 +434,7 @@ describe('bulkEditRules', () => {
     expect(updateFn).toHaveBeenNthCalledWith(1, {
       apiKeysMap: expect.any(Map),
       errors: [],
+      hasMigratedLegacyActions: false,
       rule: decryptedRule1,
       rules: [],
       skipped: [],
@@ -443,6 +444,7 @@ describe('bulkEditRules', () => {
     expect(updateFn).toHaveBeenNthCalledWith(2, {
       apiKeysMap: expect.any(Map),
       errors: [],
+      hasMigratedLegacyActions: false,
       rule: decryptedRule2,
       rules: [],
       skipped: [],

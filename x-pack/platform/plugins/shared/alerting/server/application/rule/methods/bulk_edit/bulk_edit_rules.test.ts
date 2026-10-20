@@ -284,6 +284,32 @@ describe('bulkEdit()', () => {
       ).toBeLessThan((deleteLegacyActionsForRules as jest.Mock).mock.invocationCallOrder[0]);
     });
 
+    test('saves a rule with migrated legacy actions even when the edit changes nothing', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({ saved_objects: [savedRule] });
+
+      // the rule already has the tag, so the operation alone would skip it
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags' as const, operation: 'add' as const, value: ['foo'] }],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).toHaveBeenCalledTimes(1);
+      expect(result.rules).toHaveLength(1);
+      expect(deleteLegacyActionsForRules).toHaveBeenCalledWith(expect.anything(), ['1']);
+    });
+
+    test('skips a rule without migrated legacy actions when the edit changes nothing', async () => {
+      (bulkMigrateLegacyActions as jest.Mock).mockResolvedValue([]);
+
+      const result = await rulesClient.bulkEdit({
+        filter: '',
+        operations: [{ field: 'tags' as const, operation: 'add' as const, value: ['foo'] }],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate).not.toHaveBeenCalled();
+      expect(result.rules).toHaveLength(0);
+    });
+
     test('keeps the legacy actions of a rule that failed to save', async () => {
       unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
         saved_objects: [
