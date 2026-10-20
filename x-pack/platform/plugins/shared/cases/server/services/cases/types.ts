@@ -135,7 +135,7 @@ export interface CaseIdsOfAttachment {
 }
 
 /** The cases one attachment id is attached to, with their owners for authorization. */
-export interface CasesOfAttachment {
+export interface CasesWithOwnerOfAttachment {
   attachmentId: string;
   cases: Array<{ id: string; owner: string }>;
 }

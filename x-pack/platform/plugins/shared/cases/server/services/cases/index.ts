@@ -91,7 +91,7 @@ import {
 import type {
   GetCaseIdsByAlertIdArgs,
   GetCaseIdsByAlertIdAggs,
-  CasesOfAttachment,
+  CasesWithOwnerOfAttachment,
   GetCaseIdsByAttachmentIdsArgs,
   GetCaseIdsByAttachmentIdsAggs,
   CasesMapWithPageInfo,
@@ -352,7 +352,7 @@ export class CasesService {
     type,
     attachmentIds,
     filter,
-  }: GetCaseIdsByAttachmentIdsArgs): Promise<CasesOfAttachment[]> {
+  }: GetCaseIdsByAttachmentIdsArgs): Promise<CasesWithOwnerOfAttachment[]> {
     try {
       this.log.debug(`Attempting to GET cases for attachment ids ${attachmentIds.join(', ')}`);
 
@@ -364,7 +364,6 @@ export class CasesService {
         type: CASE_ATTACHMENT_SAVED_OBJECT,
         page: 1,
         perPage: 0,
-        sortField: defaultSortField,
         aggs: {
           attachmentIds: {
             terms: {
@@ -388,6 +387,9 @@ export class CasesService {
                       caseIds: {
                         terms: {
                           field: `${CASE_ATTACHMENT_SAVED_OBJECT}.references.id`,
+                          // A ceiling, not an allocation: ES makes one bucket per (attachment id, case)
+                          // pair that exists, and past `search.max_buckets` it fails rather than
+                          // returning fewer cases.
                           size: MAX_DOCS_PER_PAGE,
                         },
                         aggregations: {
@@ -409,9 +411,12 @@ export class CasesService {
         },
         filter: combineFilters([
           nodeBuilder.is(`${attributes}.type`, type),
-          nodeBuilder.or(
-            attachmentIds.map((id) => nodeBuilder.is(`${attributes}.attachmentId`, id))
-          ),
+          buildFilter({
+            filters: attachmentIds,
+            field: 'attachmentId',
+            operator: 'or',
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+          }),
           filter,
         ]),
       });
