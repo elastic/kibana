@@ -11,7 +11,7 @@ import { get } from 'lodash';
 import { schema } from '../..';
 import { internals } from '../internals';
 import type { TypeOptions } from './type';
-import { Type } from './type';
+import { Type, setLazyConfigSchemaDisabled } from './type';
 import { UnionType } from './union_type';
 import {
   META_FIELD_X_OAS_AVAILABILITY,
@@ -118,5 +118,39 @@ describe('options snapshot', () => {
     const unionType = new UnionType(unionTypes);
     unionTypes.push(schema.literal('b'));
     expect(() => unionType.validate('b')).toThrow();
+  });
+});
+
+describe('setLazyConfigSchemaDisabled', () => {
+  afterEach(() => setLazyConfigSchemaDisabled(false));
+
+  it('builds the Joi schema on first use by default', () => {
+    const factory = jest.fn(() => internals.any());
+    const type = new MyType({}, factory);
+    expect(factory).not.toHaveBeenCalled();
+
+    type.validate(1);
+    expect(factory).toHaveBeenCalledTimes(1);
+  });
+
+  it('builds the Joi schema in the constructor when disabled', () => {
+    setLazyConfigSchemaDisabled(true);
+    const factory = jest.fn(() => internals.any());
+    const type = new MyType({}, factory);
+    expect(factory).toHaveBeenCalledTimes(1);
+
+    type.validate(1);
+    type.validate(2);
+    expect(factory).toHaveBeenCalledTimes(1);
+  });
+
+  it('surfaces invalid Joi definitions at construction only when disabled', () => {
+    const invalidIdSchema = () => schema.object({}, { meta: { id: 'has.period' } });
+
+    expect(invalidIdSchema).not.toThrow();
+    expect(() => invalidIdSchema().validate({})).toThrow('id cannot contain period character');
+
+    setLazyConfigSchemaDisabled(true);
+    expect(invalidIdSchema).toThrow('id cannot contain period character');
   });
 });

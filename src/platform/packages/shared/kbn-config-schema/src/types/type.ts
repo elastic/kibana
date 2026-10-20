@@ -123,7 +123,20 @@ export const convertValidationFunction = <T = unknown>(
   };
 };
 
+let lazyDisabled =
+  typeof process !== 'undefined' && process.env?.KBN_DISABLE_LAZY_CONFIG_SCHEMA === 'true';
+
+/**
+ * Turns off lazy Joi construction: new schemas are built in their constructor (so invalid
+ * definitions throw at definition time, as before) and built schemas are held strongly.
+ * Also enabled at load time by `KBN_DISABLE_LAZY_CONFIG_SCHEMA=true`.
+ */
+export const setLazyConfigSchemaDisabled = (value: boolean): void => {
+  lazyDisabled = value;
+};
+
 const internalSchemaCache = new WeakMap<Type<any>, WeakRef<Schema>>();
+const strongSchemaCache = new WeakMap<Type<any>, Schema>();
 
 export abstract class Type<V> {
   // This is just to enable the `TypeOf` helper, and because TypeScript would
@@ -143,10 +156,14 @@ export abstract class Type<V> {
     this.baseTypeOptions = { ...options };
     this.schemaFactory =
       typeof schemaOrFactory === 'function' ? schemaOrFactory : () => schemaOrFactory;
+
+    if (lazyDisabled) {
+      this.getSchema();
+    }
   }
 
   protected get internalSchema(): Schema {
-    const cached = internalSchemaCache.get(this)?.deref();
+    const cached = strongSchemaCache.get(this) ?? internalSchemaCache.get(this)?.deref();
     if (cached) {
       return cached;
     }
@@ -198,7 +215,11 @@ export abstract class Type<V> {
       schema = schema.error(([error]) => this.onError(error));
     }
 
-    internalSchemaCache.set(this, new WeakRef(schema));
+    if (lazyDisabled) {
+      strongSchemaCache.set(this, schema);
+    } else {
+      internalSchemaCache.set(this, new WeakRef(schema));
+    }
     return schema;
   }
 
