@@ -39,38 +39,13 @@ import {
 } from '../../../state/global_params';
 import type { ClientPluginsStart } from '../../../../../plugin';
 import type { ListParamItem } from './params_list';
-import type { SyntheticsParamRequest } from '../../../../../../common/runtime_types';
+import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
 import { AddParamForm } from './add_param_form';
-import type { ParamFormData } from './add_param_form';
 import {
   useHasSettingsHeaderAction,
   useRegisterSettingsHeaderAction,
 } from '../settings_header_action';
-
-const toFormData = (item: ListParamItem | null): ParamFormData => {
-  if (!item) {
-    return {
-      key: '',
-      tags: [],
-      description: '',
-      value: '',
-      sourceType: 'value',
-      source: { type: 'vault', path: '', field: '', connection: '' },
-    };
-  }
-  const { id: _id, source, ...rest } = item;
-  return {
-    ...rest,
-    sourceType: source?.type === 'vault' ? 'vault' : 'value',
-    source: {
-      type: 'vault',
-      path: source?.path ?? '',
-      field: source?.field ?? '',
-      connection: source?.connection ?? '',
-    },
-  };
-};
 
 export const AddParamFlyout = ({
   items,
@@ -83,23 +58,28 @@ export const AddParamFlyout = ({
 }) => {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
-  const { id } = isEditingItem ?? {};
-
   // Announced by screen readers when a param is saved, since the toast that carries the
   // success message is not reliably announced once the flyout closes and focus moves.
   const [announcement, setAnnouncement] = useState('');
 
-  const form = useFormWrapped<ParamFormData>({
+  const { id, ...dataToSave } = isEditingItem ?? {};
+
+  const form = useFormWrapped<SyntheticsParams>({
     mode: 'onSubmit',
     reValidateMode: 'onChange',
     shouldFocusError: true,
-    defaultValues: toFormData(isEditingItem),
+    defaultValues: dataToSave ?? {
+      key: '',
+      tags: [],
+      description: '',
+      value: '',
+    },
   });
 
   const closeFlyout = useCallback(() => {
     setIsFlyoutVisible(false);
     setIsEditingItem(null);
-    form.reset(toFormData(null));
+    form.reset({ key: '', tags: [], description: '', value: '' });
     // no need to add form value, it keeps changing on reset
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [setIsEditingItem]);
@@ -128,30 +108,32 @@ export const AddParamFlyout = ({
   const { isSaving, savedData } = useSelector(selectGlobalParamState);
   const wasSavingRef = useRef(false);
 
-  const onSubmit = (formData: ParamFormData) => {
-    const { namespaces, sourceType, source, value, key, description, tags } = formData;
+  const onSubmit = (formData: SyntheticsParams) => {
+    const { namespaces, ...paramRequest } = formData;
     const shareAcrossSpaces = namespaces?.includes(ALL_SPACES_ID);
-    const isVault = sourceType === 'vault';
+    const newParamData = {
+      ...paramRequest,
+    };
 
-    const paramRequest: SyntheticsParamRequest = { key, description, tags };
-    if (isVault) {
-      paramRequest.source = {
-        type: 'vault',
-        path: (source?.path ?? '').trim(),
-        field: (source?.field ?? '').trim(),
-        connection: (source?.connection ?? '').trim(),
-      };
-    } else if (!(isEditingItem && id && isEmpty(value))) {
-      // include the literal value unless editing and left blank (keep current)
-      paramRequest.value = value;
+    if (isEditingItem && id) {
+      // omit value if it's empty
+      if (isEmpty(newParamData.value)) {
+        // @ts-ignore this is a valid check
+        delete newParamData.value;
+      }
     }
 
     if (isEditingItem && id) {
-      dispatch(editGlobalParamAction.get({ id, paramRequest }));
+      dispatch(
+        editGlobalParamAction.get({
+          id,
+          paramRequest,
+        })
+      );
     } else {
       dispatch(
         addNewGlobalParamAction.get({
-          ...paramRequest,
+          ...newParamData,
           share_across_spaces: shareAcrossSpaces,
         })
       );
@@ -185,8 +167,9 @@ export const AddParamFlyout = ({
 
   useEffect(() => {
     if (isEditingItem) {
+      const { id: _id, ...dataToEdit } = isEditingItem;
       setIsFlyoutVisible(true);
-      form.reset(toFormData(isEditingItem));
+      form.reset(dataToEdit);
     }
     // no need to add form value, it keeps changing on reset
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -11,6 +11,7 @@ import { syntheticsSecretConnectionType } from '../../../../common/types/saved_o
 import { addSyntheticsParamsRoute, ParamsObjectSchema } from './add_param';
 import {
   SECRET_CONNECTIONS_DISABLED_MESSAGE,
+  UNNAMED_VAULT_REFERENCE_MESSAGE,
   unknownConnectionsMessage,
 } from '../secret_connection/connection_utils';
 
@@ -36,7 +37,7 @@ describe('ParamsObjectSchema', () => {
 describe('add param route Vault checks', () => {
   const vaultParam = (key: string, connection: string) => ({
     key,
-    source: { type: 'vault', path: 'app/creds', field: 'password', connection },
+    value: `vault://${connection}@app/creds#password`,
   });
 
   const setup = (body: unknown, secretConnections: { enabled?: boolean } = {}) => {
@@ -107,9 +108,26 @@ describe('add param route Vault checks', () => {
   });
 
   it.each([
-    ['a vault source', vaultParam('pw', 'prod')],
-    ['a literal reference', { key: 'pw', value: 'vault://prod@app/creds#password' }],
-    ['an encoded literal reference', { key: 'pw', value: 'vault://prod@app%2Fcreds#password' }],
+    ['a malformed reference', vaultParam('pw', 'pr%6Fd'), /^Malformed Vault reference "vault:/],
+    [
+      'a reference without a connection name',
+      { key: 'pw', value: 'vault://app/creds#password' },
+      UNNAMED_VAULT_REFERENCE_MESSAGE,
+    ],
+  ])('rejects %s without writing', async (_label, body, message) => {
+    const { routeContext, response, bulkCreate } = setup(body);
+
+    await addSyntheticsParamsRoute().handler(routeContext);
+
+    expect(response.badRequest).toHaveBeenCalledWith({
+      body: { message: expect.stringMatching(message) },
+    });
+    expect(bulkCreate).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['a reference', vaultParam('pw', 'prod')],
+    ['an encoded reference', { key: 'pw', value: 'vault://prod@app%2Fcreds#password' }],
   ])('rejects %s while secret connections are disabled', async (_label, body) => {
     const { routeContext, response, bulkCreate } = setup(body, { enabled: false });
 

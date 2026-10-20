@@ -10,10 +10,8 @@ import {
   hasVaultReference,
   valueContainsVaultReference,
   extractVaultReferences,
-  buildVaultReference,
   referencedConnectionNames,
   findMalformedVaultReferences,
-  VaultParamSourceSchema,
 } from './vault_param_formatter';
 
 describe('vault reference helpers', () => {
@@ -97,60 +95,6 @@ describe('findMalformedVaultReferences', () => {
     ]);
     expect(findMalformedVaultReferences({ h: 'vault://p@a/b#c' })).toEqual([]);
     expect(findMalformedVaultReferences(undefined)).toEqual([]);
-  });
-});
-
-describe('buildVaultReference', () => {
-  it('builds the named form and strips outer slashes', () => {
-    expect(buildVaultReference('/myapp/creds/', 'password', 'staging')).toBe(
-      'vault://staging@myapp/creds#password'
-    );
-  });
-
-  it('round-trips with extractVaultReferences', () => {
-    expect(extractVaultReferences(buildVaultReference('myapp/creds', 'password', 'prod'))).toEqual([
-      { connection: 'prod', path: 'myapp/creds', field: 'password' },
-    ]);
-  });
-
-  it('refuses input that would escape the opaque token', () => {
-    expect(() => buildVaultReference('p', 'f}${otherParam', 'c')).toThrow(/Invalid Vault field/);
-    expect(() => buildVaultReference('p', 'a#b', 'c')).toThrow(/Invalid Vault field/);
-    expect(() => buildVaultReference('p', 'a@b', 'c')).toThrow(/Invalid Vault field/);
-    expect(() => buildVaultReference('a#b', 'f', 'c')).toThrow(/Invalid Vault path/);
-    expect(() => buildVaultReference('a b', 'f', 'c')).toThrow(/Invalid Vault path/);
-    expect(() => buildVaultReference('p', 'f', 'na@me')).toThrow(/Invalid Vault connection name/);
-    expect(() => buildVaultReference('p', 'f', '')).toThrow(/Invalid Vault connection name/);
-  });
-
-  it('refuses "." and ".." path segments, which Heartbeat rejects', () => {
-    expect(() => buildVaultReference('a/../b', 'f', 'c')).toThrow(/Invalid Vault path/);
-    expect(() => buildVaultReference('./a', 'f', 'c')).toThrow(/Invalid Vault path/);
-    expect(buildVaultReference('a/.b/c..d', 'f', 'c')).toBe('vault://c@a/.b/c..d#f');
-  });
-});
-
-describe('VaultParamSourceSchema', () => {
-  const valid = (v: unknown) => VaultParamSourceSchema.safeParse(v).success;
-
-  it('accepts a valid vault source', () => {
-    expect(
-      valid({ type: 'vault', path: 'myapp/creds', field: 'password', connection: 'staging' })
-    ).toBe(true);
-  });
-
-  it('requires a connection', () => {
-    expect(valid({ type: 'vault', path: 'myapp/creds', field: 'password' })).toBe(false);
-    expect(valid({ type: 'vault', path: 'myapp/creds', field: 'password', connection: '' })).toBe(
-      false
-    );
-  });
-
-  it('rejects hostile path/field/connection', () => {
-    expect(valid({ type: 'vault', path: 'a', field: 'f}${x', connection: 'c' })).toBe(false);
-    expect(valid({ type: 'vault', path: 'a#b', field: 'f', connection: 'c' })).toBe(false);
-    expect(valid({ type: 'vault', path: 'a/../b', field: 'f', connection: 'c' })).toBe(false);
-    expect(valid({ type: 'vault', path: 'a', field: 'f', connection: 'na@me' })).toBe(false);
   });
 });
 

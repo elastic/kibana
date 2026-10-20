@@ -15,12 +15,6 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
 import { isSavedObjectErrorResult } from '@kbn/core-saved-objects-server';
-import {
-  findUnknownConnections,
-  SECRET_CONNECTIONS_DISABLED_MESSAGE,
-  unknownConnectionsMessage,
-} from '../secret_connection/connection_utils';
-import { isSecretConnectionsEnabled } from '../../../config';
 import { MAX_PARAM_BULK_SIZE, MAX_PARAM_VALUE_LENGTH, MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
 import type {
@@ -31,13 +25,7 @@ import type {
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
-import {
-  buildVaultReference,
-  findMalformedVaultReferences,
-  malformedVaultReferencesMessage,
-  valueContainsVaultReference,
-  VaultParamSourceSchema,
-} from '../../../synthetics_service/formatters/vault_param_formatter';
+import { findParamVaultReferenceError } from '../secret_connection/connection_utils';
 
 export const ParamsObjectSchema = z
   .strictObject({
@@ -46,13 +34,7 @@ export const ParamsObjectSchema = z
       .string()
       .min(1)
       .max(MAX_PARAM_VALUE_LENGTH)
-      .optional()
-      .describe(
-        'The value associated with the parameter. Provide either `value` or `source`, not both.'
-      ),
-    source: VaultParamSourceSchema.optional().describe(
-      'Resolve the value from HashiCorp Vault at runtime instead of storing it. Provide either `value` or `source`, not both.'
-    ),
+      .describe('The value associated with the parameter.'),
     description: z.string().max(4096).optional().describe('A description of the parameter.'),
     tags: z
       .array(z.string().max(256))
@@ -100,59 +82,13 @@ export const addSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         id: DEFAULT_SPACE_ID,
       };
 
-      const paramsToValidate = Array.isArray(request.body) ? request.body : [request.body];
-      const invalid = (paramsToValidate as SyntheticsParamRequest[]).find(
-        (param) => !param.value && !param.source
+      const params = [request.body].flat() as SyntheticsParamRequest[];
+      const vaultReferenceError = await findParamVaultReferenceError(
+        { savedObjectsClient, server },
+        params.map(({ value }) => value)
       );
-      if (invalid) {
-        return response.badRequest({
-          body: { message: `Param "${invalid.key}" must have either a value or a vault source` },
-        });
-      }
-      // D4: a param is either a literal value or a vault source, not both.
-      const ambiguous = (paramsToValidate as SyntheticsParamRequest[]).find(
-        (param) => param.value && param.source
-      );
-      if (ambiguous) {
-        return response.badRequest({
-          body: {
-            message: `Param "${ambiguous.key}" must not set both a value and a vault source`,
-          },
-        });
-      }
-
-      if (
-        !isSecretConnectionsEnabled(server.config) &&
-        (paramsToValidate as SyntheticsParamRequest[]).some(
-          (param) => param.source || valueContainsVaultReference(param.value)
-        )
-      ) {
-        return response.badRequest({ body: { message: SECRET_CONNECTIONS_DISABLED_MESSAGE } });
-      }
-
-      for (const param of paramsToValidate as SyntheticsParamRequest[]) {
-        const malformed = findMalformedVaultReferences(param.value);
-        if (malformed.length > 0) {
-          return response.badRequest({
-            body: {
-              message: `Param "${
-                param.key
-              }" has a malformed Vault reference: ${malformedVaultReferencesMessage(malformed)}`,
-            },
-          });
-        }
-      }
-
-      const unknownConnections = await findUnknownConnections(
-        { savedObjectsClient },
-        (paramsToValidate as SyntheticsParamRequest[]).flatMap((param) =>
-          param.source ? [param.source.connection] : []
-        )
-      );
-      if (unknownConnections.length > 0) {
-        return response.badRequest({
-          body: { message: unknownConnectionsMessage(unknownConnections) },
-        });
+      if (vaultReferenceError) {
+        return response.badRequest({ body: { message: vaultReferenceError } });
       }
 
       const savedObjectsData = parseParamBody(
@@ -288,7 +224,7 @@ const findConflictingKeyInNamespaces = async (
 
 const toClientResponse = (savedObject: SavedObject<Omit<SyntheticsParamSOAttributes, 'id'>>) => {
   const { id, attributes: data, namespaces } = savedObject;
-  const { description, key, tags, source } = data;
+  const { description, key, tags } = data;
   return {
     id,
     description,
@@ -296,27 +232,6 @@ const toClientResponse = (savedObject: SavedObject<Omit<SyntheticsParamSOAttribu
     namespaces,
     tags,
     value: data.value,
-    source,
-  };
-};
-
-/**
- * Builds the stored SO attributes for a param request. For a vault-backed param
- * the effective `value` is derived as an edge-resolved reference token
- * (vault://[<connection>@]<path>#<field>) and the structured `source` is persisted so the UI
- * can round-trip it. Kibana never resolves the reference — Heartbeat does.
- */
-const toParamAttributes = (
-  param: SyntheticsParamRequest
-): Omit<SyntheticsParamSOAttributes, 'id'> => {
-  const { share_across_spaces: _shareAcrossSpaces, value, source, ...rest } = param;
-  const effectiveValue = source
-    ? buildVaultReference(source.path, source.field, source.connection)
-    : value ?? '';
-  return {
-    ...rest,
-    ...(source ? { source } : {}),
-    value: effectiveValue,
   };
 };
 
@@ -324,10 +239,24 @@ const parseParamBody = (
   spaceId: string,
   body: SyntheticsParamRequest[] | SyntheticsParamRequest
 ): Array<SavedObjectsBulkCreateObject<Omit<SyntheticsParamSOAttributes, 'id'>>> => {
-  const params = Array.isArray(body) ? body : [body];
-  return params.map((param) => ({
-    type: syntheticsParamType,
-    attributes: toParamAttributes(param),
-    initialNamespaces: param.share_across_spaces ? [ALL_SPACES_ID] : [spaceId],
-  }));
+  if (Array.isArray(body)) {
+    const params = body as SyntheticsParamRequest[];
+    return params.map((param) => {
+      const { share_across_spaces: shareAcrossSpaces, ...data } = param;
+      return {
+        type: syntheticsParamType,
+        attributes: data,
+        initialNamespaces: shareAcrossSpaces ? [ALL_SPACES_ID] : [spaceId],
+      };
+    });
+  }
+
+  const { share_across_spaces: shareAcrossSpaces, ...data } = body;
+  return [
+    {
+      type: syntheticsParamType,
+      attributes: data,
+      initialNamespaces: shareAcrossSpaces ? [ALL_SPACES_ID] : [spaceId],
+    },
+  ];
 };

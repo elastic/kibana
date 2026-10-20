@@ -10,12 +10,6 @@ import { z } from '@kbn/zod';
 import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import {
-  findUnknownConnections,
-  SECRET_CONNECTIONS_DISABLED_MESSAGE,
-  unknownConnectionsMessage,
-} from '../secret_connection/connection_utils';
-import { isSecretConnectionsEnabled } from '../../../config';
 import { MAX_PARAM_VALUE_LENGTH, MAX_ROUTE_ID_LENGTH, routeId } from '../../zod_query';
 import { validateRouteSpaceName } from '../../common';
 import type { SyntheticsRestApiRouteFactory } from '../../types';
@@ -23,13 +17,7 @@ import type { SyntheticsParamRequest, SyntheticsParams } from '../../../../commo
 import { syntheticsParamType } from '../../../../common/types/saved_objects';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
-import {
-  buildVaultReference,
-  findMalformedVaultReferences,
-  malformedVaultReferencesMessage,
-  valueContainsVaultReference,
-  VaultParamSourceSchema,
-} from '../../../synthetics_service/formatters/vault_param_formatter';
+import { findParamVaultReferenceError } from '../secret_connection/connection_utils';
 
 const RequestParamsSchema = z.strictObject({
   id: routeId.describe('The unique identifier for the parameter.'),
@@ -68,9 +56,6 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
             .max(MAX_PARAM_VALUE_LENGTH)
             .optional()
             .describe('The updated value associated with the parameter.'),
-          source: VaultParamSourceSchema.optional().describe(
-            'Resolve the value from HashiCorp Vault at runtime instead of storing it.'
-          ),
           description: z
             .string()
             .max(4096)
@@ -95,37 +80,9 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
     if (isEmpty(data)) {
       return response.badRequest({ body: { message: 'Request body cannot be empty' } });
     }
-    // D4: a parameter is either a literal value or a vault source, not both.
-    if (data.value && data.source) {
-      return response.badRequest({
-        body: { message: 'A parameter cannot set both a value and a vault source' },
-      });
-    }
-    if (
-      (data.source || valueContainsVaultReference(data.value)) &&
-      !isSecretConnectionsEnabled(server.config)
-    ) {
-      return response.badRequest({ body: { message: SECRET_CONNECTIONS_DISABLED_MESSAGE } });
-    }
-    const malformed = findMalformedVaultReferences(data.value);
-    if (malformed.length > 0) {
-      return response.badRequest({
-        body: {
-          message: `The parameter has a malformed Vault reference: ${malformedVaultReferencesMessage(
-            malformed
-          )}`,
-        },
-      });
-    }
-    if (data.source) {
-      const unknownConnections = await findUnknownConnections(routeContext, [
-        data.source.connection,
-      ]);
-      if (unknownConnections.length > 0) {
-        return response.badRequest({
-          body: { message: unknownConnectionsMessage(unknownConnections) },
-        });
-      }
+    const vaultReferenceError = await findParamVaultReferenceError(routeContext, [data.value]);
+    if (vaultReferenceError) {
+      return response.badRequest({ body: { message: vaultReferenceError } });
     }
     const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
@@ -137,34 +94,13 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
           { namespace: spaceId }
         );
 
-      const newParam: SyntheticsParams = {
+      const newParam = {
         ...existingParam.attributes,
         ...data,
       };
 
-      // For a vault-backed edit, derive the effective value from the source and
-      // persist the structured source. When switching (back) to a literal value,
-      // drop any previously-stored vault source.
-      let clearingSource = false;
-      if (data.source) {
-        newParam.value = buildVaultReference(
-          data.source.path,
-          data.source.field,
-          data.source.connection
-        );
-        newParam.source = data.source;
-      } else if (data.value) {
-        newParam.value = data.value;
-        delete newParam.source;
-        clearingSource = true;
-      }
-
-      const { key: existingKey } = existingParam.attributes;
-
-      // A merge update never removes an absent key, so clearing `source` (vault →
-      // literal) would leave a stale `source` on the stored doc — the UI would keep
-      // showing the Vault badge and the param would still look vault-backed. Replace
-      // the full attribute set in that case so `source` is actually dropped.
+      // value from data since we aren't using encrypted client
+      const { value, key: existingKey } = existingParam.attributes;
       const {
         id: responseId,
         attributes: { key, tags, description },
@@ -172,8 +108,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       } = (await savedObjectsClient.update<SyntheticsParams>(
         syntheticsParamType,
         paramId,
-        newParam,
-        clearingSource ? { mergeAttributes: false } : undefined
+        newParam
       )) as SavedObject<SyntheticsParams>;
 
       // Include both old and new key if the key was renamed
@@ -185,9 +120,7 @@ export const editSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
         modifiedParamKeys,
       });
 
-      // The update result never carries `value`: encrypted attributes are stripped from it.
-      const { value, source } = newParam;
-      return { id: responseId, key, tags, description, namespaces, value, source };
+      return { id: responseId, key, tags, description, namespaces, value };
     } catch (getErr) {
       if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
         return response.notFound({ body: { message: 'Param not found' } });

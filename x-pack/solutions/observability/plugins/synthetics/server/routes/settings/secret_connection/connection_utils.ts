@@ -18,7 +18,12 @@ import { ConfigKey } from '../../../../common/runtime_types';
 import { syntheticsSecretConnectionType } from '../../../../common/types/saved_objects';
 import { asyncGlobalParamsPropagation } from '../../../tasks/sync_global_params_task';
 import { getParamsForSpace } from '../../../synthetics_service/formatters/param_utils';
-import { referencedConnectionNames } from '../../../synthetics_service/formatters/vault_param_formatter';
+import {
+  findMalformedVaultReferences,
+  malformedVaultReferencesMessage,
+  referencedConnectionNames,
+  valueContainsVaultReference,
+} from '../../../synthetics_service/formatters/vault_param_formatter';
 import { normalizeSecrets } from '../../../synthetics_service/utils';
 
 // Whether the connection has its provider secret stored, so the UI can render
@@ -88,6 +93,32 @@ export const whenSecretConnectionsEnabled =
 
 export const unknownConnectionsMessage = (names: string[]): string =>
   `Vault connection ${names.map((name) => `"${name}"`).join(', ')} is not configured in this space`;
+
+export const UNNAMED_VAULT_REFERENCE_MESSAGE =
+  'A Vault reference must name its connection: vault://<connection>@<path>#<field>';
+
+/** Why Vault references in these param values cannot be saved, or `undefined` when they can. */
+export const findParamVaultReferenceError = async (
+  routeContext: Pick<RouteContext, 'savedObjectsClient' | 'server'>,
+  values: Array<string | undefined>
+): Promise<string | undefined> => {
+  const withReferences = values.filter(valueContainsVaultReference);
+  if (withReferences.length === 0) return undefined;
+  if (!isSecretConnectionsEnabled(routeContext.server.config)) {
+    return SECRET_CONNECTIONS_DISABLED_MESSAGE;
+  }
+  const malformed = withReferences.flatMap(findMalformedVaultReferences);
+  if (malformed.length > 0) {
+    return `Malformed Vault reference ${malformedVaultReferencesMessage(malformed)}`;
+  }
+  const names = withReferences.flatMap((value) => [...referencedConnectionNames(value)]);
+  if (names.includes(undefined)) return UNNAMED_VAULT_REFERENCE_MESSAGE;
+  const unknown = await findUnknownConnections(
+    routeContext,
+    names.filter((name): name is string => name !== undefined)
+  );
+  return unknown.length > 0 ? unknownConnectionsMessage(unknown) : undefined;
+};
 
 export interface ConnectionReferences {
   params: string[];

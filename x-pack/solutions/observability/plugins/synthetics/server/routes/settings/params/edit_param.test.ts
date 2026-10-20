@@ -18,12 +18,7 @@ jest.mock('../../../tasks/sync_global_params_task', () => ({
   asyncGlobalParamsPropagation: jest.fn(),
 }));
 
-const vaultSource = (connection: string) => ({
-  type: 'vault',
-  path: 'app/creds',
-  field: 'password',
-  connection,
-});
+const vaultReference = (connection: string) => `vault://${connection}@app/creds#password`;
 
 const setup = (body: Record<string, unknown>, secretConnections: { enabled?: boolean } = {}) => {
   // The route's saved objects client is space-scoped, so it only sees this space's connections.
@@ -33,9 +28,8 @@ const setup = (body: Record<string, unknown>, secretConnections: { enabled?: boo
     },
     close: jest.fn().mockResolvedValue(undefined),
   }));
-  // Like the real client, the update result has no `value`: it is an encrypted attribute.
   const update = jest.fn(
-    async (_type: string, id: string, { value, ...attributes }: Record<string, unknown>) => ({
+    async (_type: string, id: string, attributes: Record<string, unknown>) => ({
       id,
       attributes,
       namespaces: ['default'],
@@ -65,7 +59,7 @@ describe('edit param route Vault connection checks', () => {
   });
 
   it('saves a param that uses a connection of this space', async () => {
-    const { routeContext, update } = setup({ source: vaultSource('prod') });
+    const { routeContext, update } = setup({ value: vaultReference('prod') });
 
     await editSyntheticsParamsRoute().handler(routeContext);
 
@@ -74,22 +68,11 @@ describe('edit param route Vault connection checks', () => {
   });
 
   it.each([
-    ['a literal value', { value: 'new' }, 'new'],
-    ['a vault source', { source: vaultSource('prod') }, 'vault://prod@app/creds#password'],
-  ])('returns the saved value for %s', async (_label, body, value) => {
-    const { routeContext } = setup(body);
-
-    const result = await editSyntheticsParamsRoute().handler(routeContext);
-
-    expect(result).toEqual(expect.objectContaining({ key: 'pw', value }));
-  });
-
-  it.each([
     ['an unknown connection', 'missing'],
     ['a connection that only exists in another space', 'other-space'],
   ])('rejects %s without writing', async (_label, name) => {
     const { routeContext, response, update, createPointInTimeFinder } = setup({
-      source: vaultSource(name),
+      value: vaultReference(name),
     });
 
     await editSyntheticsParamsRoute().handler(routeContext);
@@ -105,11 +88,11 @@ describe('edit param route Vault connection checks', () => {
     expect(asyncGlobalParamsPropagation).not.toHaveBeenCalled();
   });
 
-  it.each([
-    ['a vault source', { source: vaultSource('prod') }],
-    ['a literal reference', { value: 'vault://prod@app/creds#password' }],
-  ])('rejects %s while secret connections are disabled', async (_label, body) => {
-    const { routeContext, response, update } = setup(body, { enabled: false });
+  it('rejects a reference while secret connections are disabled', async () => {
+    const { routeContext, response, update } = setup(
+      { value: vaultReference('prod') },
+      { enabled: false }
+    );
 
     await editSyntheticsParamsRoute().handler(routeContext);
 

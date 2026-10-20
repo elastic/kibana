@@ -7,20 +7,6 @@
 
 import { z, lazySchema } from '@kbn/zod';
 
-/**
- * A vault-backed param resolves its value from HashiCorp Vault at runtime, inside
- * Heartbeat. Kibana only stores this reference; it never fetches the plaintext.
- */
-export const SyntheticsParamVaultSourceCodec = lazySchema(() =>
-  z.looseObject({
-    type: z.literal('vault'),
-    path: z.string(),
-    field: z.string(),
-    // Name of the Vault connection to resolve the secret with.
-    connection: z.string(),
-  })
-);
-
 export const SyntheticsParamsReadonlyCodec = lazySchema(() =>
   z.looseObject({
     id: z.string(),
@@ -28,7 +14,6 @@ export const SyntheticsParamsReadonlyCodec = lazySchema(() =>
     description: z.string().optional(),
     tags: z.array(z.string()).optional(),
     namespaces: z.array(z.string()).optional(),
-    source: SyntheticsParamVaultSourceCodec.optional(),
   })
 );
 
@@ -53,9 +38,7 @@ export const DeleteParamsResponseCodec = lazySchema(() =>
 export const SyntheticsParamRequestCodec = lazySchema(() =>
   z.looseObject({
     key: z.string(),
-    // Either `value` (literal) or `source` (vault-backed) must be provided.
-    value: z.string().optional(),
-    source: SyntheticsParamVaultSourceCodec.optional(),
+    value: z.string(),
     description: z.string().optional(),
     tags: z.array(z.string()).optional(),
     share_across_spaces: z.boolean().optional(),

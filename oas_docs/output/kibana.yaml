@@ -137529,35 +137529,6 @@ paths:
                   maxLength: 1024
                   minLength: 1
                   type: string
-                source:
-                  additionalProperties: false
-                  description: Resolve the value from HashiCorp Vault at runtime instead of storing it.
-                  type: object
-                  properties:
-                    connection:
-                      description: Name of the Vault connection to resolve the secret with.
-                      maxLength: 1024
-                      minLength: 1
-                      type: string
-                    field:
-                      description: Field of the secret to read.
-                      maxLength: 1024
-                      minLength: 1
-                      type: string
-                    path:
-                      description: Secret path under the KV mount, for example `myapp/creds`.
-                      maxLength: 1024
-                      minLength: 1
-                      type: string
-                    type:
-                      enum:
-                        - vault
-                      type: string
-                  required:
-                    - type
-                    - path
-                    - field
-                    - connection
                 tags:
                   description: An array of updated tags to categorize the parameter.
                   items:
@@ -178329,35 +178300,6 @@ components:
         share_across_spaces:
           description: Specify whether the parameter should be shared across spaces.
           type: boolean
-        source:
-          additionalProperties: false
-          description: Resolve the value from HashiCorp Vault at runtime instead of storing it. Provide either `value` or `source`, not both.
-          type: object
-          properties:
-            connection:
-              description: Name of the Vault connection to resolve the secret with.
-              maxLength: 1024
-              minLength: 1
-              type: string
-            field:
-              description: Field of the secret to read.
-              maxLength: 1024
-              minLength: 1
-              type: string
-            path:
-              description: Secret path under the KV mount, for example `myapp/creds`.
-              maxLength: 1024
-              minLength: 1
-              type: string
-            type:
-              enum:
-                - vault
-              type: string
-          required:
-            - type
-            - path
-            - field
-            - connection
         tags:
           description: An array of tags to categorize the parameter.
           items:
@@ -178366,12 +178308,13 @@ components:
           maxItems: 100
           type: array
         value:
-          description: The value associated with the parameter. Provide either `value` or `source`, not both.
+          description: The value associated with the parameter.
           maxLength: 1000000
           minLength: 1
           type: string
       required:
         - key
+        - value
       title: Single parameter
       type: object
     Kibana_HTTP_APIs_pieLibItemNoESQL:

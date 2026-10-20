@@ -7,14 +7,12 @@
 
 import type { SchemaOutput } from '../schema_output';
 import type {
-  SyntheticsParamVaultSourceCodec,
   SyntheticsParamsReadonlyCodec,
   SyntheticsParamsCodec,
   DeleteParamsResponseCodec,
   SyntheticsParamRequestCodec,
 } from '../schemas/synthetics_params';
 
-export type SyntheticsParamVaultSource = SchemaOutput<typeof SyntheticsParamVaultSourceCodec>;
 export type SyntheticsParamsReadonly = SchemaOutput<typeof SyntheticsParamsReadonlyCodec>;
 export type SyntheticsParams = SchemaOutput<typeof SyntheticsParamsCodec>;
 export type SyntheticsParamSOAttributes = SchemaOutput<typeof SyntheticsParamsCodec>;
