@@ -279,10 +279,7 @@ Elasticsearch and Kibana take separate credentials because they need different u
 `.kibana-notifications` is a system data stream, so the writes need a user holding
 `allow_restricted_indices`. `superuser` role grants that for reads only, so `elastic` cannot seed.
 `--es-username` therefore defaults to `system_indices_superuser`, the test-only role `kbn-es`
-creates for exactly this. It exists on both architectures, defined identically in
-`kbn-es/src/stateful_resources/roles.yml` and in every
-`kbn-es/src/serverless_resources/project_roles/<project>/roles.yml`, so the default carries over
-to serverless unchanged.
+creates for exactly this.
 
 The client also sends `x-elastic-product-origin: kibana`, which Elasticsearch requires before
 it serves the stream at all.
