@@ -385,6 +385,21 @@ describe('useAvailablePackages', () => {
       expect(result.current.allCards[0]).toMatchObject({ canAddIntegration: false });
     });
 
+    it('should allow adding integrations when authz is not available', () => {
+      mockUseAuthz.mockReturnValue(undefined);
+      mockUseGetPackagesQuery.mockReturnValue({
+        data: { items: [mockBasicPackage] },
+        isLoading: false,
+        error: null,
+      });
+
+      const { result } = renderHook(() =>
+        useAvailablePackages({ prereleaseIntegrationsEnabled: false })
+      );
+
+      expect(result.current.allCards[0]).toMatchObject({ canAddIntegration: true });
+    });
+
     it('should pass the integrations write privilege to applyGrouping', () => {
       mockExperimentalFeaturesServiceGet.mockReturnValue({
         enableIntegrationCollectionTiles: true,

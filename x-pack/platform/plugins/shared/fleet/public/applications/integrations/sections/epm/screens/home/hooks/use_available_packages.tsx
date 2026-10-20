@@ -230,7 +230,9 @@ export const useAvailablePackages = ({
     );
 
   const { enableIntegrationCollectionTiles } = ExperimentalFeaturesService.get();
-  const canAddIntegration = useAuthz().integrations.all;
+  // `authz` is not provided when the hook is used outside of Fleet (e.g. Observability onboarding),
+  // where the privileges are enforced by the destination page.
+  const canAddIntegration = useAuthz()?.integrations?.all ?? true;
 
   // All cards before any filter (no agentless filter, no category filter).
   // Used by useBrowseIntegrationHook which applies both filters from the live URL.
