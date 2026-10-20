@@ -85,11 +85,11 @@ _SECURITY_RE = re.compile(
     r"|\b(?:Bearer|ApiKey)\s+(?=[A-Za-z0-9+/=_.-]*\d)[A-Za-z0-9+/=_.-]{20,}"
     r"|\bAKIA[0-9A-Z]{16}\b"
     r"|\bAuthorization:\s*Basic\s+[A-Za-z0-9+/]{12,}={0,2}"
-    r"|\bcurl\b[^\n]*\s(?:-u|--user)\s+[^\s:]+:(?!\*|<)[^\s]{4,}"
-    r"|\b[a-z][a-z0-9+.-]*://[^\s/:@*<]+:(?!\*|<)[^\s/@]{4,}@"
+    r"|\bcurl\b[^\n]*\s(?:-u|--user)\s+[^\s:]+:(?!\*|<|\$)[^\s]{4,}"
+    r"|\b[a-z][a-z0-9+.-]*://[^\s/:@*<]+:(?!\*|<|\$)[^\s/@]{4,}@"
     r"|\b(?:password|passwd|secret|api[_-]?key|token)\s*[:=]\s*"
     r"(?!(?:undefined|null|none|redacted|changeme|example)\b)"
-    r"(?:(?=[^\s'\"]*\d)[^\s'\"*]{8,}|[^\s'\"*]{12,})",
+    r"(?=[^\s'\"]*\d)[^\s'\"*]{8,}",
     re.I,
 )
 # Soft: common Security Solution UI wording too. Never gates; it prompts a re-read for a signal.
