@@ -36,7 +36,7 @@ export class DigitalExperiencePage {
     this.breadcrumbs = page.getByTestId('breadcrumbs');
     this.navEntry = page.getByTestId('observability-nav-digital_experience-applications');
     this.legacyNavEntry = page.getByTestId('observability-nav-ux-dashboard');
-    this.projectNavEntry = page.testSubj.locator('~nav-item-deepLinkId-digital_experience');
+    this.projectNavEntry = page.getByTestId(/nav-item-deepLinkId-digital_experience/);
     this.apmTracesNavEntry = page.getByTestId('observability-nav-apm-traces');
     this.fatalErrorScreen = page.getByTestId('fatalErrorScreen');
     this.appNotFound = page.getByTestId('appNotFoundPageContent');
