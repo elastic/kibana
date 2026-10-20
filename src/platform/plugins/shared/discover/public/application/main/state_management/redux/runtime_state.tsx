@@ -66,8 +66,6 @@ export type ReactiveTabRuntimeState = ReactiveRuntimeState<
 
 export type RuntimeStateManager = ReactiveRuntimeState<DiscoverRuntimeState> & {
   tabs: { byId: Record<string, ReactiveTabRuntimeState> };
-  /** Initial data view list request, shared by all tabs of this Discover instance. */
-  initialDataViewListRequest?: Promise<void>;
 };
 
 export const createRuntimeStateManager = (): RuntimeStateManager => {

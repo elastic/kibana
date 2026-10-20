@@ -231,29 +231,37 @@ describe('Discover topnav component', () => {
     '%s waits for the pending data view list before opening the modal',
     async (actionId) => {
       const { toolkit, props } = await setup();
-      const catalog = Promise.withResolvers<void>();
-      toolkit.runtimeStateManager.initialDataViewListRequest = catalog.promise;
-      jest.mocked(mockDiscoverService.dataViews.getIdsWithTitle).mockClear();
-      renderTestComponent({ toolkit, props });
+      const dataViewList = Promise.withResolvers<void>();
+      const loadInitialDataViewListSpy = jest
+        .spyOn(internalStateActions, 'loadInitialDataViewList')
+        .mockReturnValue(() => dataViewList.promise);
 
-      const saveAction = capturedTopNavMenu?.primaryActionItem;
-      const action =
-        actionId === 'save'
-          ? saveAction
-          : saveAction?.splitButtonProps?.items?.find((item) => item.id === actionId);
+      try {
+        renderTestComponent({ toolkit, props });
 
-      act(() => {
-        action?.run?.({ triggerElement: document.createElement('button'), returnFocus: jest.fn() });
-      });
+        const saveAction = capturedTopNavMenu?.primaryActionItem;
+        const action =
+          actionId === 'save'
+            ? saveAction
+            : saveAction?.splitButtonProps?.items?.find((item) => item.id === actionId);
 
-      expect(screen.queryByTestId('savedObjectSaveModal')).not.toBeInTheDocument();
+        act(() => {
+          action?.run?.({
+            triggerElement: document.createElement('button'),
+            returnFocus: jest.fn(),
+          });
+        });
 
-      await act(async () => {
-        catalog.resolve();
-      });
+        expect(screen.queryByTestId('savedObjectSaveModal')).not.toBeInTheDocument();
 
-      expect(await screen.findByTestId('savedObjectSaveModal')).toBeVisible();
-      expect(mockDiscoverService.dataViews.getIdsWithTitle).not.toHaveBeenCalled();
+        await act(async () => {
+          dataViewList.resolve();
+        });
+
+        expect(await screen.findByTestId('savedObjectSaveModal')).toBeVisible();
+      } finally {
+        loadInitialDataViewListSpy.mockRestore();
+      }
     }
   );
 
