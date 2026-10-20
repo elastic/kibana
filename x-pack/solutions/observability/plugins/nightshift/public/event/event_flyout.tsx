@@ -25,7 +25,7 @@ import { useInvestigation } from '@kbn/investigation-output';
 import { useQueryClient } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NightshiftMarkIcon } from '@kbn/observability-shared-plugin/public';
-import { DetectionFlyout } from '../detection/detection_flyout';
+import { DetectionFlyout } from '../components/entities/detection/detection_flyout';
 import { DetectionsList } from './detections_list';
 import { EventInvestigation } from './event_investigation';
 import { EventFlyoutChatFooter } from './event_flyout_chat_footer';
@@ -43,7 +43,7 @@ import { useFetchDetectionOccurrences } from '../hooks/use_fetch_detection_occur
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 import { markEventInvestigationCompleteInCache } from '../hooks/use_fetch_significant_events';
 import { useFetchInvestigationStatuses } from '../hooks/use_fetch_investigation_statuses';
-import { findDetectionSignal } from '../detection/resolve_detection_signal';
+import { findDetectionSignal } from '../components/entities/detection/resolve_detection_signal';
 import { isNeedsActionStatus } from './significant_event_status';
 import { useKibana } from '../hooks/use_kibana';
 import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';

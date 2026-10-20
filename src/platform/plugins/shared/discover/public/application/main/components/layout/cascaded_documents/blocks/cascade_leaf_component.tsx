@@ -275,6 +275,7 @@ export const ESQLDataCascadeLeafCell = React.memo(
         services={services}
         sort={EMPTY_SORT}
         isSortEnabled={false}
+        enableComparisonMode
         enableInTableSearch={false}
         showKeyboardShortcuts={false}
         ariaLabelledBy="data-cascade-leaf-cell"

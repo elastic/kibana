@@ -197,6 +197,33 @@ describe('ServiceOverviewInstancesTable', () => {
     expect(screen.getByText('instance-2')).toBeInTheDocument();
   });
 
+  it('spells out latency and throughput units for screen readers', () => {
+    const mockItems = [
+      {
+        serviceNodeName: 'instance-1',
+        latency: 1500,
+        throughput: 100,
+        errorRate: 0.05,
+        cpuUsage: 0.5,
+        memoryUsage: 0.6,
+      },
+    ];
+
+    render(
+      <ServiceOverviewInstancesTable
+        {...defaultProps}
+        mainStatsItems={mockItems}
+        mainStatsItemCount={1}
+      />,
+      { wrapper: Wrapper }
+    );
+
+    expect(screen.getByText('1.5 ms')).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.getByText('1.5 milliseconds')).toBeInTheDocument();
+    expect(screen.getByText('100.0 tpm')).toHaveAttribute('aria-hidden', 'true');
+    expect(screen.getByText('100.0 transactions per minute')).toBeInTheDocument();
+  });
+
   it('calls onChangeTableOptions when sorting is changed', () => {
     const onChangeTableOptions = jest.fn();
     const mockItems = [

@@ -114,10 +114,10 @@ export const registerUISettings = (
   uiSettings.registerGlobal({
     [WORKFLOWS_LIBRARY_ENABLED_SETTING_ID]: {
       name: i18n.translate('workflowsManagement.uiSettings.libraryEnabled.name', {
-        defaultMessage: 'Workflow Template Library',
+        defaultMessage: 'Workflow Template library',
       }),
       description: i18n.translate('workflowsManagement.uiSettings.libraryEnabled.description', {
-        defaultMessage: 'Enables the Workflow Template Library.',
+        defaultMessage: 'Enables the Workflow Template library.',
       }),
       schema: schema.boolean(),
       value: true,
