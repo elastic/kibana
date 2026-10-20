@@ -45,11 +45,18 @@ const buildReferenceScoreDocs = ({ namespace, timeRange, rowsMode }: QueryArgs):
   ];
 };
 
-/** Resolved rows compare to their group's last score, else their own; others skip the group docs beside theirs. */
+/**
+ * Resolved rows compare to their group's last score, else their own; others skip the group docs
+ * beside theirs. The score type is a grouping key, not a `LAST(...) WHERE`, which drops groups on
+ * multi-shard indices (elastic/elasticsearch#162505).
+ */
 const buildReferenceScoreStats = ({ rowsMode }: QueryArgs, key: string): string[] =>
   rowsMode === 'resolved'
     ? [
-        `| STATS group_reference = LAST(score, \`@timestamp\`) WHERE ${RISK_SCORE_TYPE} == "resolution", own_reference = LAST(score, \`@timestamp\`) WHERE ${OWN_RISK_SCORE_CONDITION} BY ${key}`,
+        `| EVAL is_group = CASE(${RISK_SCORE_TYPE} == "resolution", 1, 0)`,
+        `| STATS last_score = LAST(score, \`@timestamp\`) BY ${key}, is_group`,
+        '| EVAL group_part = CASE(is_group == 1, last_score, null), own_part = CASE(is_group == 0, last_score, null)',
+        `| STATS group_reference = MAX(group_part), own_reference = MAX(own_part) BY ${key}`,
         '| EVAL reference_score = COALESCE(group_reference, own_reference)',
         `| KEEP ${key}, reference_score`,
       ]
