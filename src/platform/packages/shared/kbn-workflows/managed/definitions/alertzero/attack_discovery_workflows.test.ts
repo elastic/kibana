@@ -3469,6 +3469,11 @@ describe('Attack Discovery worker chain', () => {
           'resolve_context',
           'apply_verdict',
           'resolve_escalation',
+          'tag_correlated_alerts',
+          'acknowledge_correlated_alerts',
+          'verify_alerts_retired',
+          'resolve_alerts_retired',
+          'journal_alerts_retired',
           'escalation_gate',
           'read_proposal_decision',
           'record_decision',
@@ -3490,8 +3495,8 @@ describe('Attack Discovery worker chain', () => {
         expect(ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW.version).toBe(5);
       });
 
-      it('bumps the review to version 9 for its report steps, including both close reports', () => {
-        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(9);
+      it('bumps the review to version 10 for its report steps, including both close reports', () => {
+        expect(ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW.version).toBe(10);
       });
     });
   });
