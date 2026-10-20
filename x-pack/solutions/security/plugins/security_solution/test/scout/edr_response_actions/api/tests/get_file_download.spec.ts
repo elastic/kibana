@@ -14,15 +14,15 @@ import {
   GET_FILE_ROUTE,
 } from '../../../../../common/endpoint/constants';
 import type { ActionDetails } from '../../../../../common/endpoint/types';
-import { getResponseActionsAccessRole } from '../../ui/fixtures/response_actions_access_role';
+import { getResponseActionsAccessRole } from '../../common/response_actions_access_role';
 import { apiTest, tags } from '../fixtures';
 import { seedEndpointHosts, type SeededEndpointHosts } from '../../common/seed_endpoint_hosts';
+import { completeHostAction, getFileUploadDocIds } from '../../common/complete_host_action';
 import {
-  completeHostAction,
-  deleteGetFileUploads,
-  deleteSubmittedHostActions,
-  getFileUploadDocIds,
-} from '../../common/complete_host_action';
+  cleanupGetFileSpec,
+  HOST_SEED_TIMEOUT_MS,
+  requireHost,
+} from '../../common/get_file_spec_helpers';
 
 interface FileInfoBody {
   data: { id: string; name: string; status: string; actionId: string; agentId: string };
@@ -30,17 +30,6 @@ interface FileInfoBody {
 
 /** Every zip file starts with the local file header signature `PK\x03\x04`. */
 const ZIP_SIGNATURE = Buffer.from([0x50, 0x4b, 0x03, 0x04]);
-
-// One host seed waits up to 4 minutes for the current index and 4 for the united index.
-const SEED_TIMEOUT_MS = 600_000;
-
-const requireHost = (seeded: SeededEndpointHosts | undefined) => {
-  const host = seeded?.hosts[0];
-  if (!host) {
-    throw new Error('Endpoint host was not seeded');
-  }
-  return host;
-};
 
 const fileRoute = (route: string, actionId: string, fileId: string): string =>
   route
@@ -58,7 +47,7 @@ apiTest.describe(
     const submittedActions: ActionDetails[] = [];
 
     apiTest.beforeAll(async ({ esClient, kbnClient, config, requestAuth }) => {
-      apiTest.setTimeout(SEED_TIMEOUT_MS);
+      apiTest.setTimeout(HOST_SEED_TIMEOUT_MS);
       const { apiKeyHeader } = await requestAuth.getApiKeyForCustomRole(
         getResponseActionsAccessRole()
       );
@@ -77,29 +66,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ esClient, config }) => {
-      const failures: unknown[] = [];
-      for (const cleanup of [
-        () => deleteGetFileUploads({ esClient, config, actions: submittedActions }),
-        () =>
-          deleteSubmittedHostActions({
-            esClient,
-            config,
-            actionIds: submittedActions.map((action) => action.id),
-          }),
-        () => seeded?.cleanup(),
-      ]) {
-        try {
-          await cleanup();
-        } catch (error) {
-          failures.push(error);
-        }
-      }
-      if (failures.length === 1) {
-        throw failures[0];
-      }
-      if (failures.length > 1) {
-        throw new AggregateError(failures, 'Failed to clean up the get-file host and its action');
-      }
+      await cleanupGetFileSpec({ esClient, config, submittedActions, seeded });
     });
 
     apiTest(

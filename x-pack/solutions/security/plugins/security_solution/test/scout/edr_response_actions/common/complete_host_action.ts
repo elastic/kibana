@@ -29,7 +29,10 @@ interface AgentStatusResponse {
 }
 
 /**
- * Writes a successful agent acknowledgement and updates `Endpoint.state.isolation`.
+ * Writes a successful Fleet and Endpoint response for `action`, plus the command's side
+ * effects: for isolate and release it updates `Endpoint.state.isolation`; for get-file
+ * (also execute and runscript) it uploads the file metadata and its single data chunk
+ * to Fleet file storage (see `getFileUploadDocIds`).
  * This is the Scout equivalent of the Cypress `sendHostActionResponse` task.
  */
 export const completeHostAction = async ({
@@ -61,7 +64,8 @@ const FLEET_ACTION_INDICES = [AGENT_ACTIONS_INDEX, AGENT_ACTIONS_RESULTS_INDEX];
 const ENDPOINT_ACTION_INDICES = [ENDPOINT_ACTIONS_INDEX, ENDPOINT_ACTION_RESPONSES_INDEX];
 
 /**
- * Deletes isolate and release requests and responses written during the test.
+ * Deletes the Fleet and Endpoint requests and responses of the given actions, whatever
+ * the command (isolate, release, get-file...). File uploads are left to `deleteGetFileUploads`.
  * Host teardown only removes action ids captured at seed time.
  */
 export const deleteSubmittedHostActions = async ({

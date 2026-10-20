@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRole } from '@kbn/scout-security';
-import { getWithResponseActionsRole } from '../../../../../scripts/endpoint/common/roles_users/with_response_actions_role';
+import { getWithResponseActionsRole } from '../../../../scripts/endpoint/common/roles_users/with_response_actions_role';
 
 /**
  * Same privileges as the Cypress `endpoint_response_actions_access` user.

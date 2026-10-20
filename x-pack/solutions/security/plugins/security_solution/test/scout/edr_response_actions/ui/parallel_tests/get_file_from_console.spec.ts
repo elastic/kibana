@@ -7,26 +7,17 @@
 
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { expect } from '@kbn/scout-security/ui';
+import { ACTION_AGENT_FILE_DOWNLOAD_ROUTE } from '../../../../../common/endpoint/constants';
 import type { ActionDetails } from '../../../../../common/endpoint/types';
 import { spaceTest, tags } from '../fixtures';
 import { captureEndpointAction } from '../fixtures/page_objects/host_isolation_form';
 import { seedEndpointHosts, type SeededEndpointHosts } from '../../common/seed_endpoint_hosts';
+import { completeHostAction, getFileUploadDocIds } from '../../common/complete_host_action';
 import {
-  completeHostAction,
-  deleteGetFileUploads,
-  deleteSubmittedHostActions,
-} from '../../common/complete_host_action';
-
-// One host seed waits up to 8 minutes, after the other worker's metadata-transform lock.
-const SEED_TIMEOUT_MS = 1_200_000;
-
-const requireHost = (seeded: SeededEndpointHosts | undefined) => {
-  const host = seeded?.hosts[0];
-  if (!host) {
-    throw new Error('Endpoint host was not seeded');
-  }
-  return host;
-};
+  cleanupGetFileSpec,
+  PARALLEL_HOST_SEED_TIMEOUT_MS,
+  requireHost,
+} from '../../common/get_file_spec_helpers';
 
 spaceTest.describe(
   'Response console get-file from the endpoint list',
@@ -36,7 +27,7 @@ spaceTest.describe(
     const submittedActions: ActionDetails[] = [];
 
     spaceTest.beforeAll(async ({ esClient, kbnClient, scoutSpace, config }) => {
-      spaceTest.setTimeout(SEED_TIMEOUT_MS);
+      spaceTest.setTimeout(PARALLEL_HOST_SEED_TIMEOUT_MS);
       await scoutSpace.setSolutionView('security');
       seeded = await seedEndpointHosts({
         esClient,
@@ -56,34 +47,12 @@ spaceTest.describe(
     });
 
     spaceTest.afterAll(async ({ esClient, config }) => {
-      const failures: unknown[] = [];
-      for (const cleanup of [
-        () => deleteGetFileUploads({ esClient, config, actions: submittedActions }),
-        () =>
-          deleteSubmittedHostActions({
-            esClient,
-            config,
-            actionIds: submittedActions.map((action) => action.id),
-          }),
-        () => seeded?.cleanup(),
-      ]) {
-        try {
-          await cleanup();
-        } catch (error) {
-          failures.push(error);
-        }
-      }
-      if (failures.length === 1) {
-        throw failures[0];
-      }
-      if (failures.length > 1) {
-        throw new AggregateError(failures, 'Failed to clean up the get-file host and its action');
-      }
+      await cleanupGetFileSpec({ esClient, config, submittedActions, seeded });
     });
 
     spaceTest(
       'retrieves a file and shows the download link',
-      async ({ page, pageObjects, esClient, config }) => {
+      async ({ page, pageObjects, esClient, config, scoutSpace }) => {
         const host = requireHost(seeded);
         const { endpointList, responseConsole } = pageObjects;
 
@@ -113,7 +82,6 @@ spaceTest.describe(
         });
 
         await spaceTest.step('the result shows the download link and file notes', async () => {
-          // The browser download is not exercised here; the API spec covers the download route.
           await expect(responseConsole.getFileDownloadButton).toBeVisible();
           await expect(responseConsole.getFileDownloadButton).toHaveText('Click here to download');
           await expect(responseConsole.getFilePasscodeMessage).toHaveText(
@@ -122,6 +90,25 @@ spaceTest.describe(
           await expect(responseConsole.getFileDeleteMessage).toHaveText(
             'Files are periodically deleted to clear storage space. Download and save file locally if needed.'
           );
+        });
+
+        await spaceTest.step('the download link serves the uploaded file', async () => {
+          // The link carries the space base path, the session cookie and ?apiVersion, which
+          // the API spec (default space, API key, version header) does not exercise.
+          const [fileId] = getFileUploadDocIds(action).metadataIds;
+          const downloadPath = ACTION_AGENT_FILE_DOWNLOAD_ROUTE.replace(
+            '{action_id}',
+            action.id
+          ).replace('{file_id}', fileId);
+          await expect(responseConsole.getFileDownloadButton).toHaveAttribute(
+            'href',
+            `/s/${scoutSpace.id}${downloadPath}?apiVersion=2023-10-31`
+          );
+          const downloadPromise = page.waitForEvent('download');
+          await responseConsole.getFileDownloadButton.click();
+          const download = await downloadPromise;
+          expect(await download.failure()).toBeNull();
+          expect(download.suggestedFilename()).toBe('upload.zip');
         });
       }
     );
