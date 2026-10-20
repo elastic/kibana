@@ -167,6 +167,10 @@ describe('bin/kibana Node selection', () => {
     expect((await runLauncher({}, DOWNLOAD_PLATFORMS[0], true))[0]).toBe('pointer-compression');
   });
 
+  it('ignores forced pointer compression on macOS', async () => {
+    expect((await runLauncher({}, DOWNLOAD_PLATFORMS[2], true))[0]).toBe('default');
+  });
+
   it('selects pointer compression with an explicit heap size', async () => {
     const [variant, options] = await runLauncher({
       KBN_ENABLE_POINTER_COMPRESSION: 'true',
