@@ -144,7 +144,11 @@
     "xpack.agentBuilderPlatform": "platform/plugins/shared/agent_builder_platform",
     "xpack.osquery": ["platform/plugins/shared/osquery"],
     "xpack.painlessLab": "platform/plugins/private/painless_lab",
-    "xpack.alertzero": ["solutions/security/plugins/alertzero", "solutions/security/packages/kbn-alertzero-common", "platform/packages/shared/kbn-agentic-investigations-common"],
+    "xpack.alertzero": [
+      "solutions/security/plugins/alertzero",
+      "solutions/security/packages/kbn-alertzero-common",
+      "platform/packages/shared/kbn-agentic-investigations-common"
+    ],
     "xpack.queryActivity": "platform/plugins/shared/query_activity",
     "xpack.profiling": ["solutions/observability/plugins/profiling"],
     "xpack.reindexService": "platform/plugins/private/reindex_service",
@@ -234,7 +238,6 @@
     "xpack.sloShared": "platform/plugins/shared/slo_shared",
     "xpack.workplaceai": "solutions/workplaceai/plugins/workplace_ai_app",
     "xpack.entityInventoryApp": ["solutions/observability/plugins/entity_inventory_app"]
-
   },
   "exclude": [
     "examples",
