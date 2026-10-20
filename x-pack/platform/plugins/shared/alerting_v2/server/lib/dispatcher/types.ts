@@ -175,7 +175,7 @@ export interface LastNotifiedInfo {
 
 /**
  * A single failed attempt to dispatch one action group to one workflow
- * destination. Carries everything the execution-history step needs to emit a
+ * destination. Carries everything `DispatchStep` needs to emit a
  * `dispatch_failed` event: the parent policy, the failing group + workflow, the
  * affected alerts, and a machine-readable + human-readable cause.
  */

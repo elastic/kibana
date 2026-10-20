@@ -11,7 +11,7 @@ import type { DispatcherPipelineInput, DispatcherPipelineResult } from './types'
  * Derives the next persisted watermark from a tick's outcome.
  *
  * Rules (applied in order):
- * - Aborted (DispatchStep left groups unattempted, or the tick stopped before it),
+ * - Aborted (the tick stopped in any step, or DispatchStep left groups unattempted),
  *   commit_failed (an alert action write failed), or inline_stats_too_large (scan query
  *   rejected): no advance.
  * - No actions: window fully consumed. Advance to windowEnd.
@@ -39,8 +39,8 @@ export const computeNextWatermark = ({
     haltReason === 'inline_stats_too_large'
   ) {
     // Pipeline stopped before every alert was recorded — do not advance.
-    //   'aborted': TM signal or tick deadline stopped the pipeline; DispatchStep is the last
-    //     step, so some groups were never attempted and their alerts have no record yet.
+    //   'aborted': TM signal or tick deadline stopped the pipeline in any step, or
+    //     DispatchStep stopped with groups never attempted; their alerts have no record yet.
     //   'commit_failed': DispatchStep could not write alert action records and stopped
     //     scheduling; the unrecorded groups are dispatched again next tick.
     //   'inline_stats_too_large': ES rejected the INLINE STATS pre-fetch query (sub-plan
