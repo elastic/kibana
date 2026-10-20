@@ -15,6 +15,7 @@ import {
   ensureBootstrapNoMatchRule,
   ensureAnonymizationFields,
   ensureReasoningMapping,
+  ensureWorkerModeSpace,
   seedWorkerModePlan,
 } from './seed';
 
@@ -249,5 +250,39 @@ describe('ensureBootstrapNoMatchRule', () => {
     const kbnRequest = okKbnRequest({ id: 'rule' });
     await ensureBootstrapNoMatchRule(kbnRequest);
     expect(kbnRequest.mock.calls.filter(([{ method }]) => method === 'POST')).toEqual([]);
+  });
+});
+
+describe('ensureWorkerModeSpace', () => {
+  it('creates the space when it does not exist', async () => {
+    const kbnRequest = jest.fn(async ({ method }: KbnCall) =>
+      method === 'GET' ? { statusCode: 404, body: {} } : { statusCode: 200, body: {} }
+    ) as jest.Mock & FpTpLiveKbnRequest;
+    expect(await ensureWorkerModeSpace(kbnRequest, 'qa-fp')).toBe(true);
+    expect(kbnRequest).toHaveBeenCalledWith(
+      expect.objectContaining({ method: 'GET', path: '/api/spaces/space/qa-fp' })
+    );
+    expect(kbnRequest).toHaveBeenCalledWith({
+      method: 'POST',
+      path: '/api/spaces/space',
+      body: { id: 'qa-fp', name: 'qa-fp' },
+    });
+  });
+
+  it('keeps an existing space', async () => {
+    const kbnRequest = okKbnRequest({ id: 'qa-fp' });
+    expect(await ensureWorkerModeSpace(kbnRequest, 'qa-fp')).toBe(false);
+    expect(kbnRequest.mock.calls.filter(([{ method }]) => method === 'POST')).toEqual([]);
+  });
+
+  it('throws when the lookup fails for another reason', async () => {
+    const kbnRequest = jest.fn(async () => ({
+      statusCode: 403,
+      body: { message: 'forbidden' },
+    })) as jest.Mock & FpTpLiveKbnRequest;
+    await expect(ensureWorkerModeSpace(kbnRequest, 'qa-fp')).rejects.toThrow(
+      'Failed to look up space qa-fp (403): forbidden'
+    );
+    expect(kbnRequest).toHaveBeenCalledTimes(1);
   });
 });

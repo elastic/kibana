@@ -88,6 +88,40 @@ export const ensureBootstrapNoMatchRule = async (kbnRequest: FpTpLiveKbnRequest)
   }
 };
 
+/**
+ * Creates the dedicated space when it does not exist yet and returns whether it did.
+ * `kbnRequest` must not be scoped to that space. Seeding a missing space is not
+ * rejected by Kibana: the Entity Store install half-runs there and stays `installing`.
+ */
+export const ensureWorkerModeSpace = async (
+  kbnRequest: FpTpLiveKbnRequest,
+  space: string
+): Promise<boolean> => {
+  const existing = await kbnRequest({
+    method: 'GET',
+    path: `/api/spaces/space/${encodeURIComponent(space)}`,
+  });
+  if (existing.statusCode < 400) {
+    return false;
+  }
+  if (existing.statusCode !== 404) {
+    throw new Error(
+      `Failed to look up space ${space} (${existing.statusCode}): ${kbnErrorMessage(existing.body)}`
+    );
+  }
+  const created = await kbnRequest({
+    method: 'POST',
+    path: '/api/spaces/space',
+    body: { id: space, name: space },
+  });
+  if (created.statusCode >= 400 && created.statusCode !== 409) {
+    throw new Error(
+      `Failed to create space ${space} (${created.statusCode}): ${kbnErrorMessage(created.body)}`
+    );
+  }
+  return created.statusCode < 400;
+};
+
 export const waitForAlertsIndex = async (
   esClient: EsClient,
   index: string,
