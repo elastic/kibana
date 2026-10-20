@@ -74,8 +74,12 @@ apiTest.describe(
 
     const packLiveQuery = () => ({ agent_all: true, kuery: '', pack_id: packSavedObjectId });
 
-    // Allowed cases assert "not 403": without enrolled agents dispatch may still fail, but the
-    // authorization boundary is what is under test.
+    // 200: the query was dispatched. 400: authorization passed, then no agent matched
+    // (`No agents found for selection`). 403 is a privilege denial. 500 is what the route
+    // returns when authorization itself throws, so it must not count as allowed.
+    const expectAuthorized = (statusCode: number) => {
+      expect([200, 400]).toContain(statusCode);
+    };
 
     apiTest('returns 403 when running a pack without Packs read', async ({ apiClient }) => {
       const response = await runLiveQuery(apiClient, 'runSavedMinimal', packLiveQuery());
@@ -83,10 +87,10 @@ apiTest.describe(
       expect(response).toHaveStatusCode(403);
     });
 
-    apiTest('is not rejected when running a pack with Packs read', async ({ apiClient }) => {
+    apiTest('authorizes a pack run when the caller can read packs', async ({ apiClient }) => {
       const response = await runLiveQuery(apiClient, 'runSavedWithPacksRead', packLiveQuery());
 
-      expect(response.statusCode).not.toBe(403);
+      expectAuthorized(response.statusCode);
     });
 
     apiTest(
@@ -103,7 +107,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'is not rejected when running a saved query with Saved queries read',
+      'authorizes a saved query run when the caller can read saved queries',
       async ({ apiClient }) => {
         const response = await runLiveQuery(
           apiClient,
@@ -111,7 +115,7 @@ apiTest.describe(
           testData.getSavedQueryLiveQuery(savedQueryId)
         );
 
-        expect(response.statusCode).not.toBe(403);
+        expectAuthorized(response.statusCode);
       }
     );
 
@@ -125,7 +129,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'is not rejected when a live query writer without Packs read runs its own query',
+      'authorizes an ad-hoc query for a live query writer without Packs read',
       async ({ apiClient }) => {
         const response = await runLiveQuery(
           apiClient,
@@ -133,16 +137,16 @@ apiTest.describe(
           testData.getMinimalLiveQuery()
         );
 
-        expect(response.statusCode).not.toBe(403);
+        expectAuthorized(response.statusCode);
       }
     );
 
     apiTest(
-      'is not rejected when a t1_analyst (osquery read + run saved queries) runs a pack',
+      'authorizes a pack run for t1_analyst (osquery read + run saved queries)',
       async ({ apiClient }) => {
         const response = await runLiveQuery(apiClient, 't1Analyst', packLiveQuery());
 
-        expect(response.statusCode).not.toBe(403);
+        expectAuthorized(response.statusCode);
       }
     );
   }

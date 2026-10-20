@@ -605,11 +605,6 @@ describe('isOsqueryResponseActionAuthorized', () => {
         params: { pack_id: PACK_ID },
       },
       {
-        scenario: 'runSavedQueries with only readPacks names a pack and a saved query',
-        capabilities: { ...RUN_SAVED_NO_READS, readPacks: true },
-        params: { pack_id: PACK_ID, saved_query_id: SAVED_QUERY_ID },
-      },
-      {
         scenario: 'runSavedQueries with only readSavedQueries runs a saved query',
         capabilities: { ...RUN_SAVED_NO_READS, readSavedQueries: true },
         params: { saved_query_id: SAVED_QUERY_ID, query: STORED_QUERY },
@@ -631,6 +626,25 @@ describe('isOsqueryResponseActionAuthorized', () => {
       await expect(isOsqueryResponseActionAuthorized(coreStart, request, params)).resolves.toBe(
         true
       );
+    });
+
+    it('should authorize a pack without reading the saved query when both ids are supplied', async () => {
+      const coreStart = withSavedQuery({ ...RUN_SAVED_NO_READS, readPacks: true });
+
+      await expect(
+        isOsqueryResponseActionAuthorized(coreStart, request, {
+          pack_id: PACK_ID,
+          saved_query_id: SAVED_QUERY_ID,
+        })
+      ).resolves.toBe(true);
+
+      // Pack resolution wins, as in `resolveQueryReference`. Loading the saved query here would
+      // return its SQL to a caller who does not have `readSavedQueries`.
+      const soClient = (coreStart.savedObjects.getScopedClient as jest.Mock).mock.results[0].value;
+      expect(soClient.get).toHaveBeenCalledTimes(1);
+      expect(soClient.get).toHaveBeenCalledWith(packSavedObjectType, PACK_ID);
+      expect(soClient.find).not.toHaveBeenCalled();
+      expect(soClient.resolve).not.toHaveBeenCalled();
     });
 
     it('should resolve capabilities once per request across pack and saved query checks', async () => {
