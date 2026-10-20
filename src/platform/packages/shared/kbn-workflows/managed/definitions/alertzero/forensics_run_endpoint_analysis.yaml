@@ -68,9 +68,6 @@ consts:
   # alert) for the telemetry check and the agent's searches. Same ±2h the FP/TP
   # analysis reads raw events over.
   incident_margin_hours: 2
-  # Cited alert ids listed in the agent's message. The full set stays on the
-  # Attack Discovery alert.
-  max_cited_alert_ids_in_prompt: 50
 
 steps:
   # A read error fails the run, leaving the indicator pending for the next
@@ -405,8 +402,6 @@ steps:
               title: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.title_with_replacements'] | default: '' }}"
               summary: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.summary_markdown_with_replacements'] | default: '' }}"
               details: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.details_markdown_with_replacements'] | default: '' }}"
-              alert_count: "${{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] | size }}"
-              alert_ids: "{{ steps.fetch_attack_discovery_alert.output.hits.hits[0]._source['kibana.alert.attack_discovery.alert_ids'] | slice: 0, consts.max_cited_alert_ids_in_prompt | join: ', ' }}"
               verdict: "{{ steps.read_ad_verdict.output.data.verdict | default: steps.resolve_request.output.classification }}"
               verdict_summary: "{{ steps.read_ad_verdict.output.data.summary_markdown | default: '' }}"
               verdict_rationale: "{{ steps.read_ad_verdict.output.data.rationale_markdown | default: '' }}"
@@ -470,9 +465,6 @@ steps:
                 Verdict rationale:
                 {{ steps.resolve_incident_context.output.verdict_rationale }}
                 {%- endif %}
-
-                Cited alerts ({{ steps.resolve_incident_context.output.alert_count }}):
-                {{ steps.resolve_incident_context.output.alert_ids }}
 
                 Incident window: `{{ steps.resolve_incident_window.output.start }}` to
                 `{{ steps.resolve_incident_window.output.end }}`
