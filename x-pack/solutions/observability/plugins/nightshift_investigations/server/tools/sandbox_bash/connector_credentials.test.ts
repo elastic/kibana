@@ -232,7 +232,7 @@ describe('createConnectorCredentialResolver', () => {
     expect(JSON.stringify(result)).not.toContain('oauth-client-secret');
   });
 
-  it('points to the manifest without advertising assigned connectors before any lookup', async () => {
+  it('denies connectors outside the agent allow-list before any lookup', async () => {
     const { resolve, actions, actionsClient } = setup();
 
     const result = await resolve('other-connector', createCallContext([CONNECTOR_ID, 'jira-1']));
