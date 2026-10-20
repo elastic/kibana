@@ -9,6 +9,7 @@ import React, { lazy, useEffect, useMemo } from 'react';
 import { rulesAppDetailsRoute } from '@kbn/rule-data-utils';
 import { useGetRuleTypesPermissions } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
+import { OBSERVABILITY_OVERVIEW_APP_ID } from '@kbn/deeplinks-observability';
 import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import { useHistory } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';
@@ -27,7 +28,7 @@ export const RulesListContainer = () => {
   const {
     application: {
       getUrlForApp,
-      capabilities: { rulesSettings = {} },
+      capabilities: { rulesSettings = {}, navLinks },
     },
     chrome: { docTitle },
     http,
@@ -54,7 +55,8 @@ export const RulesListContainer = () => {
   const canShowSettings = Boolean(show && (readFlappingSettingsUI || readQueryDelaySettingsUI));
 
   const docLink = docLinks.links.alerting.guide;
-  const alertsBackHref = getUrlForApp('observability-overview', { path: '/alerts' });
+  const alertsBackHref = getUrlForApp(OBSERVABILITY_OVERVIEW_APP_ID, { path: '/alerts' });
+  const showBackButton = !hideListBackButton && Boolean(navLinks?.[OBSERVABILITY_OVERVIEW_APP_ID]);
   const mode = useRulesPageMode();
 
   useEffect(() => {
@@ -115,14 +117,14 @@ export const RulesListContainer = () => {
     <>
       <RulesPageHeader
         back={
-          hideListBackButton
-            ? undefined
-            : {
+          showBackButton
+            ? {
                 href: alertsBackHref,
                 label: i18n.translate('xpack.triggersActionsUI.rulesPage.backButtonLabel', {
                   defaultMessage: 'Alerts',
                 }),
               }
+            : undefined
         }
         tabs={rulesListTabs}
         menu={rulesListMenu}

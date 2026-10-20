@@ -94,6 +94,10 @@ describe('rulesPage', () => {
     useKibanaMock().services.http.basePath.prepend = jest.fn(
       (path: string) => `${MOCK_BASE_PATH}${path}`
     );
+    useKibanaMock().services.application.capabilities = {
+      ...useKibanaMock().services.application.capabilities,
+      navLinks: { 'observability-overview': true },
+    };
     useKibanaMock().services.hideListBackButton = undefined;
     useKibanaMock().services.tabs = undefined;
   });
@@ -134,6 +138,18 @@ describe('rulesPage', () => {
 
   it('omits the list back button when hideListBackButton is set', async () => {
     useKibanaMock().services.hideListBackButton = true;
+    const history = createMemoryHistory({ initialEntries: ['/'] });
+    renderRulesPage(history);
+
+    expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Rules');
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
+  });
+
+  it('omits the list back button when the observability-overview app is unavailable', async () => {
+    useKibanaMock().services.application.capabilities = {
+      ...useKibanaMock().services.application.capabilities,
+      navLinks: {},
+    };
     const history = createMemoryHistory({ initialEntries: ['/'] });
     renderRulesPage(history);
 
