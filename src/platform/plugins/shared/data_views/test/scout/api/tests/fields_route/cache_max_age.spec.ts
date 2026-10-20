@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { apiTest, tags, type ApiClientResponse, type RoleApiCredentials } from '@kbn/scout';
+import {
+  apiTest,
+  tags,
+  type ApiClientFixture,
+  type ApiClientResponse,
+  type RoleApiCredentials,
+} from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   ES_ARCHIVE_BASIC_INDEX,
@@ -25,14 +31,31 @@ apiTest.describe(
   () => {
     let viewerApiCredentials: RoleApiCredentials;
 
+    const getFields = (apiClient: ApiClientFixture) =>
+      apiClient.get(`${FIELDS_ROUTE_PATH}?pattern=b*&include_unmapped=true`, {
+        headers: {
+          ...INTERNAL_COMMON_HEADERS,
+          ...viewerApiCredentials.apiKeyHeader,
+        },
+        responseType: 'json',
+      });
+
     apiTest.beforeAll(async ({ esArchiver, requestAuth }) => {
       // Route only reads field metadata, so `viewer` is sufficient.
       viewerApiCredentials = await requestAuth.getApiKey('viewer');
       await esArchiver.loadIfNeeded(ES_ARCHIVE_BASIC_INDEX);
     });
 
-    apiTest.afterAll(async ({ kbnClient }) => {
+    apiTest.afterAll(async ({ apiClient, kbnClient }) => {
       await kbnClient.uiSettings.unset(CACHE_MAX_AGE_SETTING);
+
+      // `cache.spec.ts` asserts the default `max-age` seconds later, so the revert has to converge too.
+      await expect
+        .poll(async () => (await getFields(apiClient)).headers['cache-control'], {
+          timeout: SETTINGS_PROPAGATION_TIMEOUT,
+          intervals: [1_000],
+        })
+        .toContain('max-age');
     });
 
     apiTest(
@@ -45,16 +68,7 @@ apiTest.describe(
         await expect
           .poll(
             async () => {
-              response = await apiClient.get(
-                `${FIELDS_ROUTE_PATH}?pattern=b*&include_unmapped=true`,
-                {
-                  headers: {
-                    ...INTERNAL_COMMON_HEADERS,
-                    ...viewerApiCredentials.apiKeyHeader,
-                  },
-                  responseType: 'json',
-                }
-              );
+              response = await getFields(apiClient);
 
               // Returned, not thrown: throwing inside expect.poll aborts polling instead of retrying.
               return response.statusCode === 200
