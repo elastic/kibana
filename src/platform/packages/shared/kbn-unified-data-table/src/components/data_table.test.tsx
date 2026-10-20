@@ -2349,18 +2349,25 @@ describe('UnifiedDataTable', () => {
       expect(screen.queryByTestId('pagination-button-1')).not.toBeInTheDocument();
     });
 
-    it('renders the footer in non-interactive mode but not in print mode', async () => {
-      const props = {
+    it('renders the footer in non-interactive mode', async () => {
+      await renderComponent({
         ...getProps(),
         columns: ['bytes'],
         totalHits: 1000,
-      };
+        renderMode: 'non-interactive',
+      });
 
-      const { unmount } = await renderComponent({ ...props, renderMode: 'non-interactive' });
       expect(screen.getByTestId('unifiedDataTableFooter')).toBeInTheDocument();
-      unmount();
+    });
 
-      await renderComponent({ ...props, renderMode: 'print' });
+    it('does not render the footer in print mode', async () => {
+      await renderComponent({
+        ...getProps(),
+        columns: ['bytes'],
+        totalHits: 1000,
+        renderMode: 'print',
+      });
+
       expect(screen.queryByTestId('unifiedDataTableFooter')).not.toBeInTheDocument();
     });
 
