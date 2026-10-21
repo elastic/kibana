@@ -206,6 +206,7 @@ export const AlertBulkActionsComponent = React.memo<StatefulAlertBulkActionsProp
       // loaded rows, so the run-workflow action has to resolve the rest from the query.
       isAllSelected: showClearSelection,
       selectionScope,
+      totalItems,
     });
 
     return (
