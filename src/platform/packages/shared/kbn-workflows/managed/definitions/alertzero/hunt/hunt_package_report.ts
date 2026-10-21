@@ -10,9 +10,9 @@
 import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-} from './constants';
+} from '../constants';
 import HUNT_PACKAGE_REPORT_YAML from './hunt_package_report.yaml';
-import type { ManagedWorkflowDefinition } from '../../types';
+import type { ManagedWorkflowDefinition } from '../../../types';
 
 export const ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID = 'system-security-hunt-package-report';
 

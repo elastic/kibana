@@ -22,7 +22,7 @@ import {
   renderValue,
   stepNamed,
   topLevelSteps,
-} from './worker_reports.test_helpers';
+} from '../worker_reports.test_helpers';
 
 /**
  * The Continuous Threat Hunt Worker's reports (`alertzero.reportWorkerOutcome`), rendered the way

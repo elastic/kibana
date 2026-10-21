@@ -10,9 +10,9 @@
 import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-} from './constants';
+} from '../constants';
 import FIND_OR_CREATE_INVESTIGATION_YAML from './find_or_create_investigation.yaml';
-import type { ManagedWorkflowDefinition } from '../../types';
+import type { ManagedWorkflowDefinition } from '../../../types';
 
 export const ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID =
   'system-security-hunt-find-or-create-investigation';

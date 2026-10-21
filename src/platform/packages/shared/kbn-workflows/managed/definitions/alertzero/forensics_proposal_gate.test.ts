@@ -13,7 +13,7 @@ import {
   ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW,
   ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
 } from './forensics_proposal_gate';
-import { ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW } from './hunt_proposal_gate';
+import { ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW } from './hunt';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface YamlStep {

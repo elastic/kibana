@@ -10,9 +10,9 @@
 import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-} from './constants';
+} from '../constants';
 import HUNT_PROPOSAL_GATE_YAML from './hunt_proposal_gate.yaml';
-import type { ManagedWorkflowDefinition } from '../../types';
+import type { ManagedWorkflowDefinition } from '../../../types';
 
 export const ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID = 'system-security-hunt-proposal-gate';
 
