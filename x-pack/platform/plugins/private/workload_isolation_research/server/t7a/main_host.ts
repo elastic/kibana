@@ -240,7 +240,7 @@ export class T7aController {
 
   /** Dispatches a control phase (stats/gc/platform) to warm slots; used by memory probes. */
   public async probe(
-    kind: 'stats' | 'gc' | 'boot' | 'coldstart' | 'platform' | 'platform-watch'
+    kind: 'stats' | 'gc' | 'boot' | 'coldstart' | 'platform' | 'platform-watch' | 'phases'
   ): Promise<Obj> {
     if (kind === 'platform-watch') {
       const outcome: Outcome = await this.getHost().run(
@@ -262,12 +262,11 @@ export class T7aController {
       const result = await this.probe('boot');
       return { ...result, coldStartMs: performance.now() - t0, transport: this.config.transport };
     }
+    const phase = kind === 'boot' ? 'boot' : kind === 'phases' ? 'phases' : 'stats';
     const outcome: Outcome = await this.getHost().run(
       this.runOptions(
         'alerting:.es-query',
-        kind === 'boot'
-          ? { phase: 'boot', taskType: 'boot', taskInstance: {} }
-          : { phase: 'stats', taskType: kind, taskInstance: {} },
+        { phase, taskType: kind === 'boot' ? 'boot' : kind, taskInstance: {} },
         'default',
         undefined
       )

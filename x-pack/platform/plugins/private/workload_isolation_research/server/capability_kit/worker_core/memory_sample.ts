@@ -20,6 +20,7 @@ export interface ProcessMemorySample {
   readonly v8External: number;
   readonly codeSpaceUsed: number;
   readonly codeSpaceSize: number;
+  readonly heapSizeLimit: number;
   readonly pointerCompression: boolean;
 }
 
@@ -42,6 +43,7 @@ export const sampleProcessMemory = (): ProcessMemorySample => {
     v8External: heap.external_memory,
     codeSpaceUsed: code?.space_used_size ?? 0,
     codeSpaceSize: code?.space_size ?? 0,
+    heapSizeLimit: heap.heap_size_limit,
     pointerCompression: variables?.v8_enable_pointer_compression === 1,
   };
 };

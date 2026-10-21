@@ -34,7 +34,15 @@ const slotStartedAt = performance.now();
 let runs = 0;
 
 interface RunInput {
-  readonly phase: 'run' | 'cleanup' | 'stats' | 'boot' | 'platform' | 'platform-watch' | 'replicas';
+  readonly phase:
+    | 'run'
+    | 'cleanup'
+    | 'stats'
+    | 'boot'
+    | 'phases'
+    | 'platform'
+    | 'platform-watch'
+    | 'replicas';
   readonly taskType: string;
   readonly taskInstance: Record<string, unknown>;
   readonly executionUuid?: string;
@@ -89,6 +97,96 @@ const stats = () => ({
   runs,
   slotAgeMs: performance.now() - slotStartedAt,
 });
+
+/**
+ * Times one warm dispatch prefix. Does not call runner.run().
+ * Boot and run stay on their own paths.
+ */
+const measureDispatchPhases = async (context: WorkerContext): Promise<CodecInput> => {
+  const workerStart = performance.now();
+  const reentryStart = performance.now();
+  const current = await getIsland(context);
+  const islandReentryMs = performance.now() - reentryStart;
+  const decodeStart = performance.now();
+  const snapshot = dataSnapshot(context);
+  const snapshotDecodeMs = performance.now() - decodeStart;
+  const replicaStart = performance.now();
+  if (snapshot.replicas) current.applyReplicas({ replicas: snapshot.replicas } as IslandSnapshot);
+  const replicaRefreshMs = performance.now() - replicaStart;
+  const readinessStart = performance.now();
+  if (snapshot.readiness) current.applyReplicas({ readiness: snapshot.readiness } as IslandSnapshot);
+  const readinessMs = performance.now() - readinessStart;
+  const bootBodyMs = performance.now() - workerStart;
+  const parityStart = performance.now();
+  const parityDiffs = diffDefinitionParity(
+    (snapshot.taskDefinitionMeta ?? []) as Parameters<typeof diffDefinitionParity>[0],
+    current.taskDefinitionMeta as Parameters<typeof diffDefinitionParity>[1]
+  );
+  const definitionParityMs = performance.now() - parityStart;
+  const workloadStart = performance.now();
+  let workloadSetupMs = 0;
+  let workloadType: string | null = null;
+  let workloadNote = 'no alerting task definition';
+  const definitions = current.taskCapture.definitions;
+  workloadType = definitions.has('alerting:.es-query')
+    ? 'alerting:.es-query'
+    : ([...definitions.keys()].find((type) => type.startsWith('alerting:')) ?? null);
+  const definition = workloadType ? definitions.get(workloadType) : undefined;
+  if (definition) {
+    try {
+      const create = definition.createTaskRunner as (ctx: {
+        taskInstance: Record<string, unknown>;
+        signal: AbortSignal;
+        executionUuid: string;
+        setCustomTaskRunEventFields: (fields: Record<string, unknown>) => void;
+      }) => unknown;
+      create({
+        taskInstance: {
+          id: 't7p-phase-probe',
+          taskType: workloadType,
+          params: { alertId: 't7p-phase-probe', spaceId: 'default' },
+          state: {},
+          startedAt: null,
+          attempts: 0,
+        },
+        signal: new AbortController().signal,
+        executionUuid: 't7p-phase-probe',
+        setCustomTaskRunEventFields: () => undefined,
+      });
+      workloadSetupMs = performance.now() - workloadStart;
+      workloadNote = 'createTaskRunner only; run() not called';
+    } catch (error) {
+      workloadSetupMs = performance.now() - workloadStart;
+      workloadNote = `createTaskRunner threw: ${
+        error instanceof Error ? error.message : String(error)
+      }`.slice(0, 300);
+    }
+  }
+  const secondDecodeStart = performance.now();
+  void dataSnapshot(context);
+  const secondDecodeMs = performance.now() - secondDecodeStart;
+  const workerTotalMs = performance.now() - workerStart;
+  return {
+    bootMs: current.bootMs,
+    waitedMs: bootBodyMs,
+    phases: {
+      islandReentryMs,
+      snapshotDecodeMs,
+      replicaRefreshMs,
+      readinessMs,
+      definitionParityMs,
+      parityDiffs: parityDiffs.length,
+      workloadSetupMs,
+      workloadType,
+      workloadNote,
+      secondDecodeMs,
+      bootBodyMs,
+      workerTotalMs,
+      soTypeCount: current.registeredSoTypes.length,
+      fingerprintCount: Object.keys(snapshot.readiness?.fingerprints ?? {}).length,
+    },
+  } as CodecInput;
+};
 
 /** Runs one TM task phase with the island's real runner. */
 export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerContext) =>
@@ -151,6 +249,9 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
       return (await runWithExecutionContext(input.executionContext, () =>
         current.observePlatform(String(input.token ?? ''))
       )) as CodecInput;
+    }
+    if (input.phase === 'phases') {
+      return measureDispatchPhases(context);
     }
     if (input.phase === 'boot') {
       const t = performance.now();
