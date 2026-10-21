@@ -13,6 +13,7 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
+    "fixtures/*.json",
     ".storybook/**/*.ts"
   ],
   "exclude": [

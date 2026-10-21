@@ -141,7 +141,7 @@ export const Timeline = ({
   const markerStyles = css`
     position: absolute;
     top: 0;
-    width: ${euiTheme.size.s};
+    width: ${euiTheme.size.xs};
     height: ${euiTheme.size.base};
     padding: 0;
     border: 0;
