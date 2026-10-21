@@ -376,23 +376,6 @@ describe('useTopNavLinks', () => {
     });
   });
 
-  describe('profile menu item', () => {
-    it('shows Profile query for an ES|QL tab', async () => {
-      const appMenuConfig = await setup({ isEsqlMode: true });
-
-      const profileItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.profile);
-      expect(profileItem).toBeDefined();
-      expect(profileItem?.label).toBe('Profile query');
-    });
-
-    it('hides Profile query in Classic mode', async () => {
-      const appMenuConfig = await setup({ isEsqlMode: false });
-
-      const profileItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.profile);
-      expect(profileItem).toBeUndefined();
-    });
-  });
-
   describe('save as button', () => {
     it('should disable save as button when session is not persisted', async () => {
       const appMenuConfig = await setup({

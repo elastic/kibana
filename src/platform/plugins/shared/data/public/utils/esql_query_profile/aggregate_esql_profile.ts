@@ -44,6 +44,11 @@ export interface AggregatedOperator {
   processNanos: number;
   /** Share of summed process time, from 0 to 1. */
   share: number;
+  /**
+   * Position in the data driver's pipeline. Operators that only appear on other
+   * drivers are appended after that pipeline.
+   */
+  pipelineIndex: number;
   rowsReceived: number;
   rowsEmitted: number;
   bytesRead?: number;
@@ -90,7 +95,7 @@ export function formatOperatorLabel(operator: string): { title: string; detail?:
   };
 }
 
-/** Turns an ES|QL `profile` payload into the summary the profiler flyout renders. */
+/** Turns an ES|QL `profile` payload into the summary the query profile view renders. */
 export function aggregateEsqlProfile(profile: unknown): QueryProfileView {
   const parsed = parseProfile(profile);
   const queryTookMillis = readTookMillis(parsed?.query);
@@ -100,14 +105,15 @@ export function aggregateEsqlProfile(profile: unknown): QueryProfileView {
       ? undefined
       : Math.max(0, queryTookMillis - planningTookMillis);
 
-  const operators = aggregateOperators(parsed?.drivers ?? []);
+  const drivers = parsed?.drivers ?? [];
+  const operators = aggregateOperators(drivers, readPipelineIndex(drivers));
 
   return {
     queryTookMillis,
     planningTookMillis,
     executionTookMillis,
     planningPhases: readPlanningPhases(parsed),
-    driverCount: parsed?.drivers?.length ?? 0,
+    driverCount: drivers.length,
     operators,
     plans: (parsed?.plans ?? []).filter(
       (plan) => typeof plan.plan === 'string' && plan.plan.length > 0
@@ -138,7 +144,33 @@ function readPlanningPhases(profile: EsqlQueryProfile | undefined): PlanningPhas
   });
 }
 
-function aggregateOperators(drivers: EsqlProfileDriver[]): AggregatedOperator[] {
+/**
+ * Pipeline order follows the first `data` driver. Other drivers only contribute
+ * operators that the data pipeline did not already list.
+ */
+function readPipelineIndex(drivers: EsqlProfileDriver[]): Map<string, number> {
+  const dataDrivers = drivers.filter((driver) => driver.description === 'data');
+  const ordered = dataDrivers.length > 0 ? [...dataDrivers, ...drivers] : drivers;
+  const index = new Map<string, number>();
+
+  ordered.forEach((driver) => {
+    (driver.operators ?? []).forEach((entry) => {
+      if (!entry || typeof entry.operator !== 'string' || entry.operator.length === 0) {
+        return;
+      }
+      if (!index.has(entry.operator)) {
+        index.set(entry.operator, index.size);
+      }
+    });
+  });
+
+  return index;
+}
+
+function aggregateOperators(
+  drivers: EsqlProfileDriver[],
+  pipelineIndex: Map<string, number>
+): AggregatedOperator[] {
   const byOperator = new Map<string, OperatorAccumulator>();
 
   drivers.forEach((driver, index) => {
@@ -189,13 +221,23 @@ function aggregateOperators(drivers: EsqlProfileDriver[]): AggregatedOperator[] 
   );
 
   return [...byOperator.values()]
-    .map((operator) => toAggregatedOperator(operator, totalProcessNanos))
-    .sort((left, right) => right.processNanos - left.processNanos);
+    .map((operator) =>
+      toAggregatedOperator(
+        operator,
+        totalProcessNanos,
+        pipelineIndex.get(operator.operator) ?? pipelineIndex.size
+      )
+    )
+    .sort(
+      (left, right) =>
+        right.processNanos - left.processNanos || left.pipelineIndex - right.pipelineIndex
+    );
 }
 
 function toAggregatedOperator(
   operator: OperatorAccumulator,
-  totalProcessNanos: number
+  totalProcessNanos: number,
+  pipelineIndex: number
 ): AggregatedOperator {
   const { title, detail } = formatOperatorLabel(operator.operator);
   const bytesDecoded = operator.bytesDecoded;
@@ -216,6 +258,7 @@ function toAggregatedOperator(
     detail,
     processNanos: operator.processNanos,
     share: totalProcessNanos > 0 ? operator.processNanos / totalProcessNanos : 0,
+    pipelineIndex,
     rowsReceived: operator.rowsReceived,
     rowsEmitted: operator.rowsEmitted,
     bytesRead: hasDecodedBytes ? bytesRead : undefined,

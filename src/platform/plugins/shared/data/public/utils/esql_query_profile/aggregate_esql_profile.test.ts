@@ -127,6 +127,44 @@ describe('aggregateEsqlProfile', () => {
     expect(view.operators.map((operator) => operator.title)).toEqual(['Slow', 'Fast']);
     expect(view.operators[0].share).toBe(0.75);
     expect(view.operators[1].share).toBe(0.25);
+    expect(view.operators.map((operator) => operator.pipelineIndex)).toEqual([1, 0]);
+  });
+
+  it('records pipeline order from the data driver when another driver is logged first', () => {
+    const view = aggregateEsqlProfile({
+      drivers: [
+        {
+          description: 'node_reduce',
+          operators: [
+            {
+              operator: 'ExchangeOperator',
+              status: { process_nanos: 5, rows_received: 1, rows_emitted: 1 },
+            },
+          ],
+        },
+        {
+          description: 'data',
+          operators: [
+            {
+              operator: 'LuceneSourceOperator',
+              status: { process_nanos: 1, rows_received: 1, rows_emitted: 1 },
+            },
+            {
+              operator: 'EvalOperator',
+              status: { process_nanos: 9, rows_received: 1, rows_emitted: 1 },
+            },
+          ],
+        },
+      ],
+    });
+
+    expect(
+      Object.fromEntries(view.operators.map((operator) => [operator.title, operator.pipelineIndex]))
+    ).toEqual({
+      LuceneSource: 0,
+      Eval: 1,
+      Exchange: 2,
+    });
   });
 
   it('returns an empty view when the profile is missing', () => {

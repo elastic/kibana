@@ -7,17 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiAccordion,
+  EuiButtonGroup,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiIcon,
-  EuiLoadingSpinner,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -26,12 +24,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { KbnDangerCallout } from '@kbn/ui-callout';
 import type {
+  AggregatedOperator,
   PlanningPhaseId,
   QueryProfileView,
-  AggregatedOperator,
 } from './aggregate_esql_profile';
+import { operatorIconType } from './operator_icon';
 import {
   formatBytes,
   formatCount,
@@ -41,111 +39,16 @@ import {
   formatThroughput,
 } from './query_profile_format';
 
-export interface QueryProfileFlyoutProps {
-  loadProfile: (signal: AbortSignal) => Promise<QueryProfileView>;
-}
+type SortMode = 'slowest' | 'pipeline';
 
-export function QueryProfileFlyout({ loadProfile }: QueryProfileFlyoutProps) {
-  const [view, setView] = useState<QueryProfileView | undefined>();
-  const [error, setError] = useState<string | undefined>();
+export function QueryProfileBody({ view }: { view: QueryProfileView }) {
+  const [sortMode, setSortMode] = useState<SortMode>('slowest');
   const [expandedOperator, setExpandedOperator] = useState<string | undefined>();
-
-  useEffect(() => {
-    const controller = new AbortController();
-    loadProfile(controller.signal)
-      .then((next) => {
-        if (!controller.signal.aborted) {
-          setView(next);
-        }
-      })
-      .catch((caught: unknown) => {
-        if (controller.signal.aborted) {
-          return;
-        }
-        setError(
-          caught instanceof Error
-            ? caught.message
-            : i18n.translate('discover.queryProfile.unknownError', {
-                defaultMessage: 'The query profile failed.',
-              })
-        );
-      });
-
-    return () => {
-      controller.abort();
-    };
-  }, [loadProfile]);
-
-  return (
-    <>
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="m">
-          <h2 id="discoverQueryProfileTitle">
-            <FormattedMessage id="discover.queryProfile.title" defaultMessage="Query profile" />
-          </h2>
-        </EuiTitle>
-        <EuiSpacer size="s" />
-        <EuiText size="s" color="subdued">
-          <p>
-            <FormattedMessage
-              id="discover.queryProfile.description"
-              defaultMessage="Profiles the table query, including its filters and time range. The chart query is not included."
-            />
-          </p>
-        </EuiText>
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        <div data-test-subj="discoverQueryProfileFlyout">
-          {error ? (
-            <KbnDangerCallout
-              announceOnMount
-              title={i18n.translate('discover.queryProfile.errorTitle', {
-                defaultMessage: 'Unable to profile this query',
-              })}
-              text={error}
-            />
-          ) : !view ? (
-            <EuiFlexGroup
-              alignItems="center"
-              gutterSize="s"
-              data-test-subj="discoverQueryProfileLoading"
-            >
-              <EuiFlexItem grow={false}>
-                <EuiLoadingSpinner size="m" />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText size="s">
-                  <FormattedMessage
-                    id="discover.queryProfile.loading"
-                    defaultMessage="Running the query with profiling."
-                  />
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : (
-            <QueryProfileBody
-              view={view}
-              expandedOperator={expandedOperator}
-              onToggleOperator={(operator) =>
-                setExpandedOperator((current) => (current === operator ? undefined : operator))
-              }
-            />
-          )}
-        </div>
-      </EuiFlyoutBody>
-    </>
+  const operators = useMemo(
+    () => sortOperators(view.operators, sortMode),
+    [view.operators, sortMode]
   );
-}
 
-function QueryProfileBody({
-  view,
-  expandedOperator,
-  onToggleOperator,
-}: {
-  view: QueryProfileView;
-  expandedOperator?: string;
-  onToggleOperator: (operator: string) => void;
-}) {
   return (
     <>
       <DurationBar view={view} />
@@ -153,41 +56,87 @@ function QueryProfileBody({
       <EuiText size="xs" color="subdued">
         <p>
           <FormattedMessage
-            id="discover.queryProfile.driverCount"
+            id="data.inspector.queryProfile.driverCountDescription"
             defaultMessage="{driverCount, plural, one {# driver} other {# drivers}}"
             values={{ driverCount: view.driverCount }}
           />
         </p>
       </EuiText>
-      <EuiSpacer size="m" />
-      {view.operators.length === 0 ? (
-        <EuiText size="s" color="subdued">
-          <p>
-            <FormattedMessage
-              id="discover.queryProfile.noOperators"
-              defaultMessage="This profile did not include any operators."
-            />
-          </p>
-        </EuiText>
-      ) : (
-        view.operators.map((operator) => (
-          <OperatorRow
-            key={operator.operator}
-            operator={operator}
-            isExpanded={expandedOperator === operator.operator}
-            onToggle={() => onToggleOperator(operator.operator)}
+      {view.operators.length > 0 ? (
+        <>
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            <p>
+              <FormattedMessage
+                id="data.inspector.queryProfile.cpuTimeDescription"
+                defaultMessage="Operator times are CPU time summed across drivers, so they will not add up to the total query time."
+              />
+            </p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiButtonGroup
+            legend={i18n.translate('data.inspector.queryProfile.operatorOrderLabel', {
+              defaultMessage: 'Operator order',
+            })}
+            options={[
+              {
+                id: 'slowest',
+                label: i18n.translate('data.inspector.queryProfile.slowestFirstButtonLabel', {
+                  defaultMessage: 'Slowest first',
+                }),
+              },
+              {
+                id: 'pipeline',
+                label: i18n.translate('data.inspector.queryProfile.pipelineOrderButtonLabel', {
+                  defaultMessage: 'Pipeline order',
+                }),
+              },
+            ]}
+            idSelected={sortMode}
+            onChange={(id) => {
+              if (id === 'slowest' || id === 'pipeline') {
+                setSortMode(id);
+              }
+            }}
+            buttonSize="compressed"
+            data-test-subj="esqlQueryProfileSort"
           />
-        ))
+          <EuiSpacer size="l" />
+          {operators.map((operator) => (
+            <OperatorRow
+              key={operator.operator}
+              operator={operator}
+              isExpanded={expandedOperator === operator.operator}
+              onToggle={() =>
+                setExpandedOperator((current) =>
+                  current === operator.operator ? undefined : operator.operator
+                )
+              }
+            />
+          ))}
+        </>
+      ) : (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="s" color="subdued">
+            <p>
+              <FormattedMessage
+                id="data.inspector.queryProfile.noOperatorsDescription"
+                defaultMessage="This profile did not include any operators."
+              />
+            </p>
+          </EuiText>
+        </>
       )}
       {view.plans.length > 0 ? (
         <>
           <EuiSpacer size="m" />
           <EuiAccordion
-            id="discoverQueryProfilePlan"
-            buttonContent={i18n.translate('discover.queryProfile.planLabel', {
+            id="esqlQueryProfilePlan"
+            buttonContent={i18n.translate('data.inspector.queryProfile.physicalPlanButtonLabel', {
               defaultMessage: 'Physical plan',
             })}
-            data-test-subj="discoverQueryProfilePlan"
+            data-test-subj="esqlQueryProfilePlan"
           >
             <EuiSpacer size="s" />
             {view.plans.map((plan, index) => (
@@ -209,6 +158,14 @@ function QueryProfileBody({
   );
 }
 
+function sortOperators(operators: AggregatedOperator[], sortMode: SortMode): AggregatedOperator[] {
+  return [...operators].sort((left, right) =>
+    sortMode === 'pipeline'
+      ? left.pipelineIndex - right.pipelineIndex
+      : right.processNanos - left.processNanos || left.pipelineIndex - right.pipelineIndex
+  );
+}
+
 function DurationBar({ view }: { view: QueryProfileView }) {
   const styles = useProfileStyles();
   const planning = view.planningTookMillis;
@@ -220,14 +177,14 @@ function DurationBar({ view }: { view: QueryProfileView }) {
   const hasSplit = planning !== undefined && execution !== undefined && (total ?? 0) > 0;
 
   return (
-    <div data-test-subj="discoverQueryProfileDuration">
+    <div data-test-subj="esqlQueryProfileDuration">
       <EuiFlexGroup gutterSize="s" alignItems="baseline" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h3>
               {view.queryTookMillis !== undefined
                 ? formatDurationMillis(view.queryTookMillis)
-                : i18n.translate('discover.queryProfile.durationUnknown', {
+                : i18n.translate('data.inspector.queryProfile.durationUnknownTitle', {
                     defaultMessage: 'Duration unavailable',
                   })}
             </h3>
@@ -237,7 +194,7 @@ function DurationBar({ view }: { view: QueryProfileView }) {
           <EuiText size="xs" color="subdued">
             <p>
               <FormattedMessage
-                id="discover.queryProfile.totalTimeLabel"
+                id="data.inspector.queryProfile.totalTimeLabel"
                 defaultMessage="Total query time"
               />
             </p>
@@ -263,7 +220,7 @@ function DurationBar({ view }: { view: QueryProfileView }) {
               <EuiToolTip content={<PlanningTooltip view={view} />}>
                 <LegendSwatch
                   colorCss={styles.planningSwatch}
-                  label={i18n.translate('discover.queryProfile.planningLegend', {
+                  label={i18n.translate('data.inspector.queryProfile.planningLegendLabel', {
                     defaultMessage: 'Planning {time}',
                     values: { time: formatDurationMillis(planning ?? 0) },
                   })}
@@ -273,7 +230,7 @@ function DurationBar({ view }: { view: QueryProfileView }) {
             <EuiFlexItem grow={false}>
               <LegendSwatch
                 colorCss={styles.executionSwatch}
-                label={i18n.translate('discover.queryProfile.executionLegend', {
+                label={i18n.translate('data.inspector.queryProfile.executionLegendLabel', {
                   defaultMessage: 'Execution {time}',
                   values: { time: formatDurationMillis(execution ?? 0) },
                 })}
@@ -290,7 +247,7 @@ function PlanningTooltip({ view }: { view: QueryProfileView }) {
   if (view.planningPhases.length === 0) {
     return (
       <FormattedMessage
-        id="discover.queryProfile.planningTooltip"
+        id="data.inspector.queryProfile.planningTooltip"
         defaultMessage="Planning {time}"
         values={{ time: formatDurationMillis(view.planningTookMillis ?? 0) }}
       />
@@ -301,7 +258,7 @@ function PlanningTooltip({ view }: { view: QueryProfileView }) {
     <>
       {view.planningPhases.map((phase) => (
         <div key={phase.id}>
-          {i18n.translate('discover.queryProfile.planningPhase', {
+          {i18n.translate('data.inspector.queryProfile.planningPhaseLabel', {
             defaultMessage: '{phase} {time}',
             values: {
               phase: planningPhaseLabel(phase.id),
@@ -330,24 +287,32 @@ function OperatorRow({
     operator.bytesDecoded !== undefined && operator.throughputBytesPerSecond !== undefined;
 
   return (
-    <div css={styles.operator} data-test-subj="discoverQueryProfileOperator">
+    <div css={styles.operator} data-test-subj="esqlQueryProfileOperator">
       <button
         type="button"
         css={styles.operatorButton}
         onClick={onToggle}
         aria-expanded={isExpanded}
-        aria-label={i18n.translate('discover.queryProfile.operatorButtonLabel', {
+        aria-label={i18n.translate('data.inspector.queryProfile.operatorButtonAriaLabel', {
           defaultMessage: '{title}, {time}, {share}',
           values: { title: operator.title, time, share },
         })}
       >
         <span css={styles.operatorHeader}>
-          <EuiIcon
-            type={isExpanded ? 'arrowDown' : 'arrowRight'}
-            size="s"
-            css={styles.chevron}
-            aria-hidden="true"
-          />
+          <span css={styles.operatorIcons}>
+            <EuiIcon
+              type={isExpanded ? 'chevronSingleDown' : 'chevronSingleRight'}
+              size="s"
+              color="subdued"
+              aria-hidden="true"
+            />
+            <EuiIcon
+              type={operatorIconType(operator.title)}
+              size="m"
+              color="subdued"
+              aria-hidden="true"
+            />
+          </span>
           <span css={styles.operatorName}>
             <span css={styles.operatorTitle}>{operator.title}</span>
             {operator.detail ? (
@@ -362,12 +327,15 @@ function OperatorRow({
         <span css={styles.track} aria-hidden="true">
           <span
             css={styles.operatorSegment}
-            style={{ width: `${Math.max(operator.share * 100, operator.share > 0 ? 1 : 0)}%` }}
+            style={{
+              width: `${Math.max(operator.share * 100, operator.share > 0 ? 1 : 0)}%`,
+              background: shareColor(styles, operator.share),
+            }}
           />
         </span>
         <span css={styles.operatorMeta}>
           <FormattedMessage
-            id="discover.queryProfile.rowsInOut"
+            id="data.inspector.queryProfile.rowsInOutLabel"
             defaultMessage="{rowsIn} in, {rowsOut} out"
             values={{
               rowsIn: formatCount(operator.rowsReceived),
@@ -378,14 +346,14 @@ function OperatorRow({
             <>
               {' · '}
               <FormattedMessage
-                id="discover.queryProfile.readSummary"
+                id="data.inspector.queryProfile.readSummaryLabel"
                 defaultMessage="{stored} stored, {decoded} decoded{expansion} at {rate}"
                 values={{
                   stored: formatBytes(operator.bytesRead ?? 0),
                   decoded: formatBytes(operator.bytesDecoded ?? 0),
                   expansion:
                     operator.expansion !== undefined
-                      ? i18n.translate('discover.queryProfile.expansionClause', {
+                      ? i18n.translate('data.inspector.queryProfile.expansionClauseLabel', {
                           defaultMessage: ' ({expansion})',
                           values: { expansion: formatExpansion(operator.expansion) },
                         })
@@ -402,9 +370,19 @@ function OperatorRow({
   );
 }
 
+function shareColor(styles: ReturnType<typeof useProfileStyles>, share: number): string {
+  if (share >= 0.5) {
+    return styles.hot;
+  }
+  if (share >= 0.25) {
+    return styles.warm;
+  }
+  return styles.cool;
+}
+
 function OperatorDetails({ operator }: { operator: AggregatedOperator }) {
   return (
-    <div data-test-subj="discoverQueryProfileOperatorDetails">
+    <div data-test-subj="esqlQueryProfileOperatorDetails">
       <EuiSpacer size="xs" />
       <EuiText size="xs" color="subdued">
         <p>{operator.operator}</p>
@@ -412,7 +390,7 @@ function OperatorDetails({ operator }: { operator: AggregatedOperator }) {
       {operator.drivers.map((driver) => (
         <EuiText key={driver.label} size="xs" color="subdued">
           <p>
-            {i18n.translate('discover.queryProfile.driverLine', {
+            {i18n.translate('data.inspector.queryProfile.driverLineLabel', {
               defaultMessage: '{label}: {time}, {rowsIn} in, {rowsOut} out',
               values: {
                 label: driver.label,
@@ -468,19 +446,19 @@ const LegendSwatch = React.forwardRef<
 
 function durationAriaLabel(view: QueryProfileView): string {
   if (view.queryTookMillis === undefined) {
-    return i18n.translate('discover.queryProfile.durationAriaUnknown', {
+    return i18n.translate('data.inspector.queryProfile.durationUnknownAriaLabel', {
       defaultMessage: 'Query duration is unavailable',
     });
   }
 
   if (view.planningTookMillis === undefined || view.executionTookMillis === undefined) {
-    return i18n.translate('discover.queryProfile.durationAriaTotal', {
+    return i18n.translate('data.inspector.queryProfile.durationTotalAriaLabel', {
       defaultMessage: 'Query took {time}',
       values: { time: formatDurationMillis(view.queryTookMillis) },
     });
   }
 
-  return i18n.translate('discover.queryProfile.durationAriaSplit', {
+  return i18n.translate('data.inspector.queryProfile.durationSplitAriaLabel', {
     defaultMessage: 'Query took {time}. Planning {planning}, execution {execution}.',
     values: {
       time: formatDurationMillis(view.queryTookMillis),
@@ -493,33 +471,37 @@ function durationAriaLabel(view: QueryProfileView): string {
 function planningPhaseLabel(id: PlanningPhaseId): string {
   switch (id) {
     case 'parsing':
-      return i18n.translate('discover.queryProfile.phaseParsing', { defaultMessage: 'Parsing' });
+      return i18n.translate('data.inspector.queryProfile.phaseParsingLabel', {
+        defaultMessage: 'Parsing',
+      });
     case 'view_resolution':
-      return i18n.translate('discover.queryProfile.phaseViewResolution', {
+      return i18n.translate('data.inspector.queryProfile.phaseViewResolutionLabel', {
         defaultMessage: 'View resolution',
       });
     case 'dataset_resolution':
-      return i18n.translate('discover.queryProfile.phaseDatasetResolution', {
+      return i18n.translate('data.inspector.queryProfile.phaseDatasetResolutionLabel', {
         defaultMessage: 'Dataset resolution',
       });
     case 'preanalysis':
-      return i18n.translate('discover.queryProfile.phasePreanalysis', {
+      return i18n.translate('data.inspector.queryProfile.phasePreanalysisLabel', {
         defaultMessage: 'Pre-analysis',
       });
     case 'indices_resolution':
-      return i18n.translate('discover.queryProfile.phaseIndicesResolution', {
+      return i18n.translate('data.inspector.queryProfile.phaseIndicesResolutionLabel', {
         defaultMessage: 'Index resolution',
       });
     case 'enrich_resolution':
-      return i18n.translate('discover.queryProfile.phaseEnrichResolution', {
+      return i18n.translate('data.inspector.queryProfile.phaseEnrichResolutionLabel', {
         defaultMessage: 'Enrich resolution',
       });
     case 'inference_resolution':
-      return i18n.translate('discover.queryProfile.phaseInferenceResolution', {
+      return i18n.translate('data.inspector.queryProfile.phaseInferenceResolutionLabel', {
         defaultMessage: 'Inference resolution',
       });
     case 'analysis':
-      return i18n.translate('discover.queryProfile.phaseAnalysis', { defaultMessage: 'Analysis' });
+      return i18n.translate('data.inspector.queryProfile.phaseAnalysisLabel', {
+        defaultMessage: 'Analysis',
+      });
   }
 }
 
@@ -527,6 +509,9 @@ const useProfileStyles = () => {
   const { euiTheme } = useEuiTheme();
 
   return {
+    hot: euiTheme.colors.danger,
+    warm: euiTheme.colors.warning,
+    cool: euiTheme.colors.primary,
     summaryTrack: css`
       display: flex;
       width: 100%;
@@ -538,8 +523,8 @@ const useProfileStyles = () => {
     track: css`
       display: flex;
       width: 100%;
-      height: ${euiTheme.size.xs};
-      margin-block: ${euiTheme.size.xs};
+      height: ${euiTheme.size.s};
+      margin-block: ${euiTheme.size.s};
       overflow: hidden;
       background: ${euiTheme.colors.backgroundBaseFormsControlDisabled};
       border-radius: ${euiTheme.border.radius.medium};
@@ -554,7 +539,6 @@ const useProfileStyles = () => {
     `,
     operatorSegment: css`
       height: 100%;
-      background: ${euiTheme.colors.primary};
     `,
     planningSwatch: css`
       background: ${euiTheme.colors.warning};
@@ -563,13 +547,12 @@ const useProfileStyles = () => {
       background: ${euiTheme.colors.primary};
     `,
     operator: css`
-      padding-bottom: ${euiTheme.size.m};
+      padding-bottom: ${euiTheme.size.l};
     `,
     operatorButton: css`
       display: block;
       width: 100%;
-      padding: ${euiTheme.size.xs};
-      margin: -${euiTheme.size.xs};
+      padding: ${euiTheme.size.s};
       text-align: start;
       background: transparent;
       border: none;
@@ -583,14 +566,15 @@ const useProfileStyles = () => {
     `,
     operatorHeader: css`
       display: flex;
-      align-items: flex-start;
-      gap: ${euiTheme.size.s};
+      align-items: center;
+      gap: ${euiTheme.size.m};
       min-width: 0;
     `,
-    chevron: css`
+    operatorIcons: css`
+      display: flex;
       flex-shrink: 0;
-      margin-top: 2px;
-      color: ${euiTheme.colors.textSubdued};
+      align-items: center;
+      gap: ${euiTheme.size.s};
     `,
     operatorName: css`
       min-width: 0;
@@ -607,6 +591,7 @@ const useProfileStyles = () => {
     `,
     operatorDetail: css`
       display: block;
+      margin-top: ${euiTheme.size.xs};
       overflow: hidden;
       color: ${euiTheme.colors.textSubdued};
       font-size: ${euiTheme.font.scale.xs * euiTheme.base}px;

@@ -8,7 +8,6 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getInitialESQLQuery } from '@kbn/esql-utils';
@@ -31,8 +30,6 @@ import {
   shouldShowAlertingV2CreateRuleFlyout,
 } from '@kbn/alerting-v2-utils';
 import type { DiscoverAppLocatorParams } from '../../../../../common';
-import { loadEsqlQueryProfile } from '../query_profile/load_esql_profile';
-import { openQueryProfileFlyout } from '../query_profile/open_query_profile_flyout';
 import { createDataViewDataSource } from '../../../../../common/data_sources';
 import type { DiscoverServices } from '../../../../build_services';
 import type { AppMenuDiscoverParams } from './app_menu_actions';
@@ -44,14 +41,12 @@ import {
   getOpenSearchAppMenuItem,
   getShareAppMenuItem,
   getInspectAppMenuItem,
-  getProfileAppMenuItem,
   getBackgroundSearchFlyout,
   enhanceAppMenuItemWithRunAction,
 } from './app_menu_actions';
 import { useProfileAccessor } from '../../../../context_awareness';
 import {
   internalStateActions,
-  selectTabRuntimeState,
   selectTabSavedSearchByValueAttributes,
   useCurrentDataView,
   useCurrentTabSelector,
@@ -71,7 +66,6 @@ const TAB_SCOPED_APP_MENU_ITEM_IDS = new Set<string>([
   AppMenuActionId.alerts,
   AppMenuActionId.export,
   AppMenuActionId.inspect,
-  AppMenuActionId.profile,
 ]);
 
 export interface UseTopNavLinksParams {
@@ -121,46 +115,6 @@ export const useTopNavLinks = ({
   const totalHitsState = useDataState(totalHits$);
   const { canSwitchLanguageMode, isDataViewMode, openInspector, switchLanguageMode } =
     useCurrentTabMenuActions({ currentDataView });
-
-  const openProfile = useCallback(
-    (onClose?: () => void) => {
-      const query = currentTab.appState.query;
-      if (!isOfAggregateQueryType(query)) {
-        return;
-      }
-
-      const dataSource = selectTabRuntimeState(
-        runtimeStateManager,
-        currentTab.id
-      )?.currentDataSource$.getValue();
-      const timeFieldName = dataSource?.kind === 'esql' ? dataSource.timeFieldName : undefined;
-      const filters = [
-        ...(currentTab.globalState.filters ?? []),
-        ...(currentTab.appState.filters ?? []),
-      ];
-
-      openQueryProfileFlyout({
-        core: services.core,
-        onClose,
-        loadProfile: (abortSignal) =>
-          loadEsqlQueryProfile({
-            search: services.data.search,
-            query: query.esql,
-            filters,
-            timeRange:
-              currentTab.dataRequestParams.timeRangeAbsolute ??
-              services.data.query.timefilter.timefilter.getAbsoluteTime(),
-            timeFieldName,
-            esqlVariables: currentTab.esqlVariables,
-            uiSettings: services.uiSettings,
-            approximation: currentTab.appState.esqlApproximation,
-            projectRouting: services.cps?.cpsManager?.getProjectRouting(),
-            abortSignal,
-          }),
-      });
-    },
-    [currentTab, runtimeStateManager, services]
-  );
 
   const getAuthorizedWriteConsumerIds = (ruleTypes: RuleTypeWithDescription[]): string[] =>
     ruleTypes
@@ -342,10 +296,6 @@ export const useTopNavLinks = ({
 
     items.push(getInspectAppMenuItem({ onOpenInspector: openInspector }));
 
-    if (isEsqlMode) {
-      items.push(getProfileAppMenuItem({ onOpenProfile: openProfile }));
-    }
-
     const firstTabScopedMenuItem = items
       .filter(({ id }) => TAB_SCOPED_APP_MENU_ITEM_IDS.has(id))
       .sort((left, right) => left.order - right.order)[0];
@@ -375,7 +325,6 @@ export const useTopNavLinks = ({
     runtimeStateManager,
     isDataViewMode,
     openInspector,
-    openProfile,
     persistedDiscoverSession,
     hasUnsavedChanges,
     totalHitsState,

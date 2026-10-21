@@ -17,13 +17,13 @@ const trimNumber = (value: number): string => {
 /** Formats a profile duration for the duration bar and operator rows. */
 export function formatDurationMillis(millis: number): string {
   if (millis >= 1000) {
-    return i18n.translate('discover.queryProfile.durationSeconds', {
+    return i18n.translate('data.inspector.queryProfile.durationSecondsLabel', {
       defaultMessage: '{seconds} s',
       values: { seconds: trimNumber(millis / 1000) },
     });
   }
 
-  return i18n.translate('discover.queryProfile.durationMillis', {
+  return i18n.translate('data.inspector.queryProfile.durationMillisLabel', {
     defaultMessage: '{millis} ms',
     values: { millis: trimNumber(millis) },
   });
@@ -33,7 +33,7 @@ export function formatDurationMillis(millis: number): string {
 export function formatBytes(bytes: number): string {
   const megabytes = bytes / 1e6;
   if (megabytes >= 1) {
-    return i18n.translate('discover.queryProfile.megabytes', {
+    return i18n.translate('data.inspector.queryProfile.megabytesLabel', {
       defaultMessage: '{size} MB',
       values: { size: trimNumber(megabytes) },
     });
@@ -41,13 +41,13 @@ export function formatBytes(bytes: number): string {
 
   const kilobytes = bytes / 1e3;
   if (kilobytes >= 1) {
-    return i18n.translate('discover.queryProfile.kilobytes', {
+    return i18n.translate('data.inspector.queryProfile.kilobytesLabel', {
       defaultMessage: '{size} KB',
       values: { size: trimNumber(kilobytes) },
     });
   }
 
-  return i18n.translate('discover.queryProfile.bytes', {
+  return i18n.translate('data.inspector.queryProfile.bytesLabel', {
     defaultMessage: '{size} B',
     values: { size: trimNumber(bytes) },
   });
@@ -55,7 +55,7 @@ export function formatBytes(bytes: number): string {
 
 /** Formats decoded-bytes throughput. */
 export function formatThroughput(bytesPerSecond: number): string {
-  return i18n.translate('discover.queryProfile.megabytesPerSecond', {
+  return i18n.translate('data.inspector.queryProfile.megabytesPerSecondLabel', {
     defaultMessage: '{rate} MB/s',
     values: { rate: trimNumber(bytesPerSecond / 1e6) },
   });
@@ -65,7 +65,7 @@ export function formatThroughput(bytesPerSecond: number): string {
 export function formatShare(share: number): string {
   const percent = share * 100;
   const rounded = percent >= 10 || percent === 0 ? String(Math.round(percent)) : percent.toFixed(1);
-  return i18n.translate('discover.queryProfile.percent', {
+  return i18n.translate('data.inspector.queryProfile.percentLabel', {
     defaultMessage: '{percent}%',
     values: { percent: rounded },
   });
@@ -73,7 +73,7 @@ export function formatShare(share: number): string {
 
 /** Formats how far stored bytes expanded into decoded values. */
 export function formatExpansion(expansion: number): string {
-  return i18n.translate('discover.queryProfile.expansion', {
+  return i18n.translate('data.inspector.queryProfile.expansionLabel', {
     defaultMessage: '{ratio}×',
     values: { ratio: trimNumber(expansion) },
   });
@@ -81,7 +81,7 @@ export function formatExpansion(expansion: number): string {
 
 /** Formats a row count. */
 export function formatCount(count: number): string {
-  return i18n.translate('discover.queryProfile.count', {
+  return i18n.translate('data.inspector.queryProfile.countLabel', {
     defaultMessage: '{count, number}',
     values: { count },
   });
