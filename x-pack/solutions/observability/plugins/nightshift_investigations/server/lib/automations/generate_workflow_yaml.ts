@@ -57,16 +57,16 @@ const OVERLAP_POLICY_TO_STRATEGY: Record<OverlapPolicy, string> = {
 };
 
 /** Generates a workflow document from an automation, serializing user input safely. */
-export function generateWorkflowYaml(
-  automationId: string,
-  automation: NightshiftAutomationAttributes,
-  {
-    serviceAccountId,
-  }: {
-    /** The account the automation runs as (`settings.run_as`); unbound when omitted. */
-    serviceAccountId?: string;
-  } = {}
-): string {
+export function generateWorkflowYaml({
+  automationId,
+  automation,
+  serviceAccountId,
+}: {
+  automationId: string;
+  automation: NightshiftAutomationAttributes;
+  /** The account the automation runs as (`settings.run_as`); unbound when omitted. */
+  serviceAccountId?: string;
+}): string {
   const alertRows = automation.trigger.rows.filter((row): row is AlertRow => row.kind === 'alert');
   const slackRows = automation.trigger.rows.filter(isSlackRow);
   const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
