@@ -32,6 +32,11 @@ interface DataStreamTimelineProps {
   estimates?: DataStreamPeriodEstimates;
   /** Whether hovering or focusing a period shows its search cost per hour and VCUs. */
   showsCost?: boolean;
+  /**
+   * The background the timeline sits on, which its track is two shades darker than: a plain one,
+   * such as a panel's, or a subdued one, such as a flyout footer's.
+   */
+  background?: 'plain' | 'subdued';
   /** Prefixes the test subjects of the timeline and each period. */
   testSubj: string;
 }
@@ -90,6 +95,7 @@ export const DataStreamTimeline = ({
   maxAges,
   estimates,
   showsCost = false,
+  background = 'subdued',
   testSubj,
 }: DataStreamTimelineProps) => {
   const { euiTheme } = useEuiTheme();
@@ -151,9 +157,12 @@ export const DataStreamTimeline = ({
             display: 'grid',
             gridTemplateColumns: 'var(--boostPeriodColumns)',
             padding: `${euiTheme.size.xs} ${euiTheme.size.xxs}`,
-            // Two shades darker than subdued backgrounds, such as a flyout footer's. EUI has no
-            // background color at this step of the neutral scale, only this border color.
-            backgroundColor: euiTheme.colors.borderBaseSubdued,
+            // EUI has no background color two shades darker than a subdued one, only this border
+            // color.
+            backgroundColor:
+              background === 'plain'
+                ? euiTheme.colors.lightestShade
+                : euiTheme.colors.borderBaseSubdued,
             borderRadius: euiTheme.border.radius.panel,
           }}
         >

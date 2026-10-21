@@ -16,15 +16,19 @@ import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import { BoostPage } from './components/boost_page';
 import { ProfileDetailsPage } from './components/profiles/profile_details_page';
 import { RuleDetailsPage } from './components/rules/rule_details_page';
-import type { BoostServices } from './types';
+import type { BoostServices, BoostStartDependencies } from './types';
 
 interface BoostAppProps {
   core: CoreStart;
+  deps: BoostStartDependencies;
   params: ManagementAppMountParams;
 }
 
-const BoostApp = ({ core, params }: BoostAppProps) => {
-  const services = useMemo<BoostServices>(() => ({ ...core, appParams: params }), [core, params]);
+const BoostApp = ({ core, deps, params }: BoostAppProps) => {
+  const services = useMemo<BoostServices>(
+    () => ({ ...core, ...deps, appParams: params }),
+    [core, deps, params]
+  );
   const queryClient = useMemo(
     () => new QueryClient({ defaultOptions: { queries: { refetchOnWindowFocus: false } } }),
     []
@@ -47,8 +51,12 @@ const BoostApp = ({ core, params }: BoostAppProps) => {
   );
 };
 
-export const renderApp = (core: CoreStart, params: ManagementAppMountParams) => {
-  ReactDOM.render(<BoostApp core={core} params={params} />, params.element);
+export const renderApp = (
+  core: CoreStart,
+  deps: BoostStartDependencies,
+  params: ManagementAppMountParams
+) => {
+  ReactDOM.render(<BoostApp core={core} deps={deps} params={params} />, params.element);
 
   return () => {
     ReactDOM.unmountComponentAtNode(params.element);

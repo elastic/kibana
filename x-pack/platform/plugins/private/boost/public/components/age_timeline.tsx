@@ -60,6 +60,7 @@ export const AgeTimeline = ({ profile, dataStreams, appliesThrough }: AgeTimelin
         maxAges={{ recent: profile.recent.max_age, standard: profile.standard.max_age }}
         estimates={estimates}
         showsCost
+        background="plain"
         testSubj="boostAgeTimelinePeriods"
       />
       <EuiSpacer size="m" />

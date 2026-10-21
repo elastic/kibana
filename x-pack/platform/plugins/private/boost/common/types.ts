@@ -112,6 +112,8 @@ export interface BoostDataSource {
   type: DataSourceType;
   /** Dataset size, or 0 when Elasticsearch doesn't report one. */
   size_in_bytes: number;
+  /** How many documents it holds, when Elasticsearch reports it. */
+  docs_count?: number;
   /** A data stream's data by age, which decides the boost period each part is in. */
   data_ages?: BoostDataAge[];
 }

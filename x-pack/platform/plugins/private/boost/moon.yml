@@ -29,6 +29,8 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/app-header'
   - '@kbn/core-chrome-browser-components'
+  - '@kbn/share-plugin'
+  - '@kbn/index-management-shared-types'
 tags:
   - plugin
   - prod

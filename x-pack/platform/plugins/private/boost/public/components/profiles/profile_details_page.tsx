@@ -294,7 +294,8 @@ export const ProfileDetailsPage = () => {
       isFound
       badges={[
         { label: PROFILE_TYPE_LABELS[profile.type], color: 'hollow' },
-        ...(profile.is_builtin ? [{ label: MANAGED_BADGE_LABEL }] : []),
+        // The same color as the badge in the profiles list.
+        ...(profile.is_builtin ? [{ label: MANAGED_BADGE_LABEL, color: 'default' as const }] : []),
       ]}
       // Elastic-managed profiles can't change, so they can only be copied.
       menu={

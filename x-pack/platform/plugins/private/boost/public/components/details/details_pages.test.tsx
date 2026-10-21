@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { Route } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -35,7 +36,7 @@ jest.mock('@kbn/app-header', () => {
       menu,
     }: {
       title: string;
-      badges?: Array<{ label: string }>;
+      badges?: Array<{ label: string; color?: string }>;
       menu?: {
         primaryActionItem?: { label: string };
         items?: Array<{ id: string; label: string; disableButton?: boolean }>;
@@ -45,7 +46,9 @@ jest.mock('@kbn/app-header', () => {
         'div',
         { 'data-test-subj': 'mockAppHeader' },
         createElement('h1', null, title),
-        ...badges.map(({ label }) => createElement('span', { key: label }, label)),
+        ...badges.map(({ label, color = 'hollow' }) =>
+          createElement('span', { key: label, 'data-color': color }, label)
+        ),
         menu?.primaryActionItem &&
           createElement('button', { key: 'primary' }, menu.primaryActionItem.label),
         ...(menu?.items ?? []).map(({ id, label, disableButton }) =>
@@ -58,9 +61,19 @@ jest.mock('@kbn/app-header', () => {
 
 const mockCapabilities = { boost: { save: true } };
 
+// Index Management's locator, which links indices and data streams to their details.
+const mockIndexManagementLocator = {
+  getUrl: async (params: { page: string; indexName?: string; dataStreamName?: string }) =>
+    params.page === 'index_details'
+      ? `/app/management/data/index_management/indices/index_details?indexName=${params.indexName}`
+      : `/app/management/data/index_management/data_streams/${params.dataStreamName}`,
+  navigate: jest.fn(),
+};
+
 jest.mock('../../hooks/use_boost_services', () => ({
   useBoostServices: () => ({
     application: { capabilities: mockCapabilities },
+    share: { url: { locators: { get: () => mockIndexManagementLocator } } },
     appParams: { setBreadcrumbs: jest.fn() },
     chrome: { docTitle: { change: jest.fn() } },
     notifications: { toasts: { addSuccess: jest.fn() } },
@@ -115,10 +128,10 @@ const mockState: BoostState = {
   ],
   suspended_rules: [],
   data_sources: [
-    { name: 'catalog-fall', type: 'index', size_in_bytes: 4e9 },
-    { name: 'catalog-spring', type: 'index', size_in_bytes: 2e9 },
+    { name: 'catalog-fall', type: 'index', size_in_bytes: 4e9, docs_count: 4000 },
+    { name: 'catalog-spring', type: 'index', size_in_bytes: 2e9, docs_count: 2000 },
     { name: 'products', type: 'index', size_in_bytes: 1e9 },
-    { name: 'logs-app', type: 'data_stream', size_in_bytes: 3e9 },
+    { name: 'logs-app', type: 'data_stream', size_in_bytes: 3e9, docs_count: 3000 },
   ],
 };
 
@@ -173,7 +186,8 @@ describe('ProfileDetailsPage', () => {
   it('only offers to duplicate an Elastic-managed profile', () => {
     renderAt(`/profiles/${BUILTIN_INDICES_PROFILE_NAMES.performant}`);
 
-    expect(getHeader().getByText('Managed')).toBeInTheDocument();
+    // The same color as the badge in the profiles list, not the header's hollow default.
+    expect(getHeader().getByText('Managed')).toHaveAttribute('data-color', 'default');
     expect(getHeader().getByRole('button', { name: 'Duplicate' })).toBeInTheDocument();
     expect(getHeader().queryByRole('button', { name: 'Edit profile' })).not.toBeInTheDocument();
     expect(getHeader().queryByRole('button', { name: 'Delete' })).not.toBeInTheDocument();
@@ -225,12 +239,71 @@ describe('RuleDetailsPage', () => {
     expect(usage).toHaveTextContent('Applies to1 index');
 
     const matched = screen.getByTestId('boostRuleMatched');
-    expect(within(matched).getByText('catalog-spring').closest('tr')).toHaveTextContent(
-      'This rule'
+    const springRow = within(matched).getByText('catalog-spring').closest('tr');
+    expect(springRow).toHaveTextContent('This rule');
+    expect(springRow).toHaveTextContent('2,000');
+    const fallRow = within(matched).getByText('catalog-fall').closest('tr');
+    expect(fallRow).toHaveTextContent('catalog-first');
+    expect(fallRow).toHaveTextContent('4,000');
+  });
+
+  it('links matches to their details in Index Management, striking through outranked ones', async () => {
+    renderAt('/rules/catalogs');
+    const matched = screen.getByTestId('boostRuleMatched');
+
+    expect(await within(matched).findByRole('link', { name: 'catalog-spring' })).toHaveAttribute(
+      'href',
+      '/app/management/data/index_management/indices/index_details?indexName=catalog-spring'
     );
-    expect(within(matched).getByText('catalog-fall').closest('tr')).toHaveTextContent(
-      'catalog-first'
+    // A higher-ranked rule applies to catalog-fall instead, so its name is struck through.
+    expect(within(matched).getByTestId('boostSupersededTarget')).toHaveTextContent('catalog-fall');
+    expect(within(matched).getByRole('link', { name: 'catalog-fall' })).toBeInTheDocument();
+
+    await userEvent.click(within(matched).getByRole('link', { name: 'catalog-spring' }));
+    expect(mockIndexManagementLocator.navigate).toHaveBeenCalledWith({
+      page: 'index_details',
+      indexName: 'catalog-spring',
+    });
+  });
+
+  it('links a data stream to its details in Index Management, and counts its documents', async () => {
+    renderAt(`/rules/${DEFAULT_DATA_STREAMS_RULE_NAME}`);
+    const matched = screen.getByTestId('boostRuleMatched');
+
+    expect(await within(matched).findByRole('link', { name: 'logs-app' })).toHaveAttribute(
+      'href',
+      '/app/management/data/index_management/data_streams/logs-app'
     );
+    expect(within(matched).getByText('logs-app').closest('tr')).toHaveTextContent('3,000');
+  });
+
+  it('filters matches by name, and by whether the rule applies to them', async () => {
+    renderAt('/rules/catalogs');
+    const matched = within(screen.getByTestId('boostRuleMatched'));
+    const getNames = () =>
+      matched
+        .getAllByRole('row')
+        .slice(1)
+        .map(
+          (row) => row.querySelector('[data-test-subj="boostIndexManagementLink"]')?.textContent
+        );
+
+    await userEvent.type(matched.getByRole('searchbox', { name: 'Search indices' }), 'spring');
+    expect(getNames()).toEqual(['catalog-spring']);
+
+    await userEvent.clear(matched.getByRole('searchbox', { name: 'Search indices' }));
+    await userEvent.click(matched.getByTestId('boostMatchedFilter-outranked'));
+    expect(getNames()).toEqual(['catalog-fall']);
+
+    await userEvent.click(matched.getByTestId('boostMatchedFilter-applied'));
+    expect(getNames()).toEqual(['catalog-spring']);
+
+    // Turning the filter off again shows both.
+    await userEvent.click(matched.getByTestId('boostMatchedFilter-applied'));
+    expect(getNames()).toEqual(['catalog-fall', 'catalog-spring']);
+
+    await userEvent.type(matched.getByRole('searchbox', { name: 'Search indices' }), 'products');
+    expect(matched.getByText('No indices match your search or filter.')).toBeInTheDocument();
   });
 
   it("shows a data streams rule's data in each period of its profile", () => {
@@ -251,7 +324,8 @@ describe('RuleDetailsPage', () => {
   it('only offers to edit a default rule', () => {
     renderAt(`/rules/${DEFAULT_INDICES_RULE_NAME}`);
 
-    expect(getHeader().getByText('Default')).toBeInTheDocument();
+    // The same color as the badge in the rules list, not the header's hollow default.
+    expect(getHeader().getByText('Default')).toHaveAttribute('data-color', 'default');
     expect(screen.getByTestId('boostRuleSettings')).toHaveTextContent('All unmatched indices');
     expect(getHeader().getByRole('button', { name: 'Edit rule' })).toBeInTheDocument();
     expect(getHeader().queryByRole('button', { name: 'Duplicate' })).not.toBeInTheDocument();

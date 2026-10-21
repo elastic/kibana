@@ -16,7 +16,8 @@
     ],
     "requiredPlugins": [
       "management",
-      "features"
+      "features",
+      "share"
     ],
     "requiredBundles": [
       "kibanaReact"

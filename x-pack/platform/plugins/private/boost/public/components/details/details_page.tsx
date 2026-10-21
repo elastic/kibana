@@ -128,17 +128,48 @@ export const DetailsPage = ({
   );
 };
 
-interface DetailsPanelProps {
+interface DetailsSectionProps {
   title: string;
-  /** Fills its row's height, so panels side by side line up. */
-  fillsHeight?: boolean;
   /** Shown at the title's end, such as a button. */
   titleAppend?: ReactNode;
   children: ReactNode;
   'data-test-subj'?: string;
 }
 
-/** A titled section of a details page. */
+const DetailsTitle = ({
+  title,
+  titleAppend,
+}: Pick<DetailsSectionProps, 'title' | 'titleAppend'>) => (
+  <>
+    <div css={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <EuiTitle size="xs">
+        <h2>{title}</h2>
+      </EuiTitle>
+      {titleAppend}
+    </div>
+    <EuiSpacer size="m" />
+  </>
+);
+
+/** A titled section of a details page without a panel, such as a table, which has its own lines. */
+export const DetailsSection = ({
+  title,
+  titleAppend,
+  children,
+  'data-test-subj': dataTestSubj,
+}: DetailsSectionProps) => (
+  <div data-test-subj={dataTestSubj}>
+    <DetailsTitle title={title} titleAppend={titleAppend} />
+    {children}
+  </div>
+);
+
+interface DetailsPanelProps extends DetailsSectionProps {
+  /** Fills its row's height, so panels side by side line up. */
+  fillsHeight?: boolean;
+}
+
+/** A titled section of a details page, in a panel. */
 export const DetailsPanel = ({
   title,
   fillsHeight = false,
@@ -152,13 +183,7 @@ export const DetailsPanel = ({
     css={fillsHeight ? { blockSize: '100%' } : undefined}
     data-test-subj={dataTestSubj}
   >
-    <div css={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-      <EuiTitle size="xs">
-        <h2>{title}</h2>
-      </EuiTitle>
-      {titleAppend}
-    </div>
-    <EuiSpacer size="m" />
+    <DetailsTitle title={title} titleAppend={titleAppend} />
     {children}
   </EuiPanel>
 );

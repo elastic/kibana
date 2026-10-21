@@ -9,24 +9,26 @@ import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { BOOST_SAMPLE_DATA_API_PATH, PLUGIN_ID } from '../common/constants';
 import { BOOST_APP_TITLE } from './translations';
-import type { BoostSetupDependencies } from './types';
+import type { BoostSetupDependencies, BoostStartDependencies } from './types';
 
-export class BoostPlugin implements Plugin<void, void, BoostSetupDependencies> {
+export class BoostPlugin
+  implements Plugin<void, void, BoostSetupDependencies, BoostStartDependencies>
+{
   private unregisterPrototypeMenu?: () => void;
 
-  public setup(core: CoreSetup, { management }: BoostSetupDependencies) {
+  public setup(core: CoreSetup<BoostStartDependencies>, { management }: BoostSetupDependencies) {
     management.sections.section.data.registerApp({
       id: PLUGIN_ID,
       title: BOOST_APP_TITLE,
       order: 2,
       keywords: ['boost', 'search power', 'search boost window', 'performance'],
       async mount(params: ManagementAppMountParams) {
-        const [{ renderApp }, [coreStart]] = await Promise.all([
+        const [{ renderApp }, [coreStart, depsStart]] = await Promise.all([
           import('./application'),
           core.getStartServices(),
         ]);
 
-        return renderApp(coreStart, params);
+        return renderApp(coreStart, depsStart, params);
       },
     });
   }

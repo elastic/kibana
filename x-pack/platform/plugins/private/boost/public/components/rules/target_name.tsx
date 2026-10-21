@@ -16,7 +16,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { splitByIndexPattern } from '../../../common/resolution';
+import type { DataSourceType } from '../../../common/types';
 import { DetailsLink } from '../details_link';
+import { IndexManagementLink } from '../index_management_link';
 
 /** Marks a rule that ranks higher than another, so it applies instead. */
 const SUPERSEDING_ICON = 'sortAscending';
@@ -31,14 +33,38 @@ interface TargetNameProps {
   pattern?: string;
   /** A higher-ranked rule that applies to this target instead. */
   supersededBy?: string;
+  /**
+   * Links the name to the index's or data stream's details in Index Management, outside forms that
+   * would lose their changes.
+   */
+  linkedAs?: DataSourceType;
 }
 
 /**
  * A target's name, struck through and disabled when a higher-ranked rule applies to it instead, since
  * the rule targets it but doesn't apply.
  */
-export const TargetName = ({ name, pattern, supersededBy }: TargetNameProps) => {
+export const TargetName = ({ name, pattern, supersededBy, linkedAs }: TargetNameProps) => {
   const { euiTheme } = useEuiTheme();
+  // A disabled name's highlight and link are disabled too.
+  const inheritsColor = supersededBy ? { color: 'inherit' } : undefined;
+
+  const text =
+    pattern === undefined
+      ? name
+      : splitByIndexPattern(pattern, name).map(({ text: part, isLiteral }, index) => (
+          <Fragment key={index}>
+            {/* The name already says what matched, so screen readers skip the highlights. */}
+            {isLiteral ? (
+              <EuiMark hasScreenReaderHelpText={false} css={inheritsColor}>
+                {part}
+              </EuiMark>
+            ) : (
+              part
+            )}
+          </Fragment>
+        ));
+
   return (
     <span
       css={
@@ -48,24 +74,13 @@ export const TargetName = ({ name, pattern, supersededBy }: TargetNameProps) => 
       }
       data-test-subj={supersededBy ? 'boostSupersededTarget' : undefined}
     >
-      {pattern === undefined
-        ? name
-        : splitByIndexPattern(pattern, name).map(({ text, isLiteral }, index) => (
-            <Fragment key={index}>
-              {/* The name already says what matched, so screen readers skip the highlights. */}
-              {isLiteral ? (
-                <EuiMark
-                  hasScreenReaderHelpText={false}
-                  // A disabled name's highlight is disabled too.
-                  css={supersededBy ? { color: 'inherit' } : undefined}
-                >
-                  {text}
-                </EuiMark>
-              ) : (
-                text
-              )}
-            </Fragment>
-          ))}
+      {linkedAs ? (
+        <IndexManagementLink type={linkedAs} name={name} css={inheritsColor}>
+          {text}
+        </IndexManagementLink>
+      ) : (
+        text
+      )}
     </span>
   );
 };

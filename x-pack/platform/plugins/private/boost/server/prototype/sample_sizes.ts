@@ -25,6 +25,13 @@ export const SAMPLE_DATA_SIZES_GB: Readonly<Record<string, number>> = {
   'events-app': 30,
 };
 
+// Their documents are counted at an illustrative average size, so the counts match the sizes.
+const SAMPLE_BYTES_PER_DOC = 1_000;
+
+/** An illustrative document count for a sample index or data stream of the given size. */
+export const getSampleDocsCount = (sizeInBytes: number): number =>
+  Math.round(sizeInBytes / SAMPLE_BYTES_PER_DOC);
+
 // The sample data streams are also only days old, so they get an illustrative history: 90 days of
 // steady ingest, rolled over daily for the last 30 days and weekly before that.
 const SAMPLE_HISTORY_DAYS = 90;

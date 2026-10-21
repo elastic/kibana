@@ -7,22 +7,12 @@
 
 import React, { useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
-import type { EuiBasicTableColumn } from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiCode,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiInMemoryTable,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiBadge, EuiCode, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { AppHeaderLoading } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../../../common/constants';
 import { getModeRules } from '../../../common/mode_switch';
 import { getAppliedRules, getRuleCoverage } from '../../../common/resolution';
-import type { BoostDataSource } from '../../../common/types';
 import { estimateDataSourcesVcuRange } from '../../../common/vcu_estimate';
 import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
@@ -35,10 +25,10 @@ import { PROFILE_TYPE_LABELS, formatDataSourceCount } from '../format';
 import { LoadError } from '../load_error';
 import { MANAGED_BADGE_LABEL } from '../profiles/profiles_tab';
 import { DeleteRuleModal } from './delete_rule_modal';
+import { MatchedTable } from './matched_table';
 import { RuleFlyout } from './rule_flyout';
 import { getAllUnmatchedLabel } from './rule_matches';
 import { DEFAULT_BADGE_LABEL } from './rules_tab';
-import { SupersedingRule } from './target_name';
 
 type FlyoutState = 'edit' | 'duplicate' | undefined;
 
@@ -79,7 +69,6 @@ export const RuleDetailsPage = () => {
   const applied = matched.filter((dataSource) => appliedRules.get(dataSource.name)?.name === name);
   const sizeInBytes = applied.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
   const vcus = profile ? estimateDataSourcesVcuRange(applied, profile) : { atRest: 0, atPeak: 0 };
-  const supersededCount = matched.length - applied.length;
   const isAdvanced = state.settings.mode === 'advanced';
   const existingNames = new Set(dataSources.map(({ name: dataSourceName }) => dataSourceName));
   const [firstPattern = ''] = patterns;
@@ -103,42 +92,6 @@ export const RuleDetailsPage = () => {
     })
   );
 
-  const columns: Array<EuiBasicTableColumn<BoostDataSource>> = [
-    {
-      field: 'name',
-      name:
-        type === 'data_streams'
-          ? i18n.translate('xpack.boost.ruleDetails.dataStreamColumn', {
-              defaultMessage: 'Data stream',
-            })
-          : i18n.translate('xpack.boost.ruleDetails.indexColumn', { defaultMessage: 'Index' }),
-      sortable: true,
-    },
-    {
-      name: i18n.translate('xpack.boost.ruleDetails.appliedByColumn', {
-        defaultMessage: 'Applied by',
-      }),
-      render: ({ name: dataSourceName }: BoostDataSource) => {
-        const appliedRule = appliedRules.get(dataSourceName);
-        return appliedRule && appliedRule.name !== name ? (
-          <EuiText size="s">
-            <SupersedingRule rule={appliedRule.name} isLinked />
-          </EuiText>
-        ) : (
-          i18n.translate('xpack.boost.ruleDetails.thisRule', { defaultMessage: 'This rule' })
-        );
-      },
-    },
-    {
-      field: 'size_in_bytes',
-      name: i18n.translate('xpack.boost.ruleDetails.sizeColumn', { defaultMessage: 'Size' }),
-      width: '9em',
-      sortable: true,
-      dataType: 'number',
-      render: formatSize,
-    },
-  ];
-
   return (
     <DetailsPage
       list="rules"
@@ -146,7 +99,8 @@ export const RuleDetailsPage = () => {
       isFound
       badges={[
         ...(type ? [{ label: PROFILE_TYPE_LABELS[type], color: 'hollow' as const }] : []),
-        ...(isDefaultRule ? [{ label: DEFAULT_BADGE_LABEL }] : []),
+        // The same color as the badge in the rules list.
+        ...(isDefaultRule ? [{ label: DEFAULT_BADGE_LABEL, color: 'default' as const }] : []),
       ]}
       // Default rules can only change their profile, so they can't be copied or deleted.
       menu={
@@ -315,47 +269,12 @@ export const RuleDetailsPage = () => {
         </>
       )}
 
-      <EuiSpacer size="l" />
-      <DetailsPanel
-        title={
-          type === 'data_streams'
-            ? i18n.translate('xpack.boost.ruleDetails.matchedDataStreamsTitle', {
-                defaultMessage: 'Matched data streams',
-              })
-            : i18n.translate('xpack.boost.ruleDetails.matchedIndicesTitle', {
-                defaultMessage: 'Matched indices',
-              })
-        }
-        data-test-subj="boostRuleMatched"
-      >
-        {supersededCount > 0 && (
-          <>
-            <EuiText size="s" color="subdued">
-              <p>
-                {i18n.translate('xpack.boost.ruleDetails.supersededDescription', {
-                  defaultMessage:
-                    'A higher-ranked rule applies to {count} of them instead. To outrank it, increase this rule’s priority.',
-                  values: { count: supersededCount },
-                })}
-              </p>
-            </EuiText>
-            <EuiSpacer size="s" />
-          </>
-        )}
-        <EuiInMemoryTable
-          tableCaption={i18n.translate('xpack.boost.ruleDetails.matchedCaption', {
-            defaultMessage: 'Indices or data streams this rule matches',
-          })}
-          items={matched}
-          columns={columns}
-          sorting={{ sort: { field: 'name', direction: 'asc' } }}
-          pagination={matched.length > 10 ? { pageSizeOptions: [10, 25, 50] } : undefined}
-          search={matched.length > 10 ? { box: { incremental: true } } : undefined}
-          noItemsMessage={i18n.translate('xpack.boost.ruleDetails.noMatches', {
-            defaultMessage: 'This rule matches nothing yet.',
-          })}
-        />
-      </DetailsPanel>
+      <EuiSpacer size="xl" />
+      <MatchedTable
+        type={type}
+        matched={matched}
+        supersededBy={coverage?.supersededBy ?? new Map()}
+      />
 
       {flyout && (
         <RuleFlyout

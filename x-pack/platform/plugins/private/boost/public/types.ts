@@ -7,11 +7,17 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 export interface BoostSetupDependencies {
   management: ManagementSetup;
 }
 
-export type BoostServices = CoreStart & {
-  appParams: ManagementAppMountParams;
-};
+export interface BoostStartDependencies {
+  share: SharePluginStart;
+}
+
+export type BoostServices = CoreStart &
+  BoostStartDependencies & {
+    appParams: ManagementAppMountParams;
+  };

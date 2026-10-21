@@ -21,7 +21,9 @@
     "@kbn/react-kibana-context-render",
     "@kbn/shared-ux-router",
     "@kbn/app-header",
-    "@kbn/core-chrome-browser-components"
+    "@kbn/core-chrome-browser-components",
+    "@kbn/share-plugin",
+    "@kbn/index-management-shared-types"
   ],
   "exclude": ["target/**/*"]
 }
