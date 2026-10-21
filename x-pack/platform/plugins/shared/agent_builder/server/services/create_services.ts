@@ -331,6 +331,7 @@ export class ServiceManager {
       plugins,
       consumption,
       searchInferenceEndpoints,
+      inference,
       callbackDeliveryService: this.services.callbackDelivery,
       spaceSettings,
       conversationTemplates: conversationTemplatesStart,

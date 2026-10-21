@@ -375,6 +375,12 @@ export const ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID = 'alertzero_efficient' as
 export const ALERTZERO_BALANCED_INFERENCE_FEATURE_ID = 'alertzero_balanced' as const;
 /** Complex, single-pass work where output quality matters most. Most capable model. */
 export const ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID = 'alertzero_frontier' as const;
+/**
+ * Optional model for the calls that can send an EIS prompt template: Attack Discovery,
+ * alert triage, and the FP/TP judge. Empty until an operator saves a model. Those calls
+ * list this id first in `connector-id-by-feature` and keep their tier until a model is saved.
+ */
+export const ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID = 'alertzero_template_models' as const;
 
 /** Agent Builder conversation template ids. A proposal is an attachment, not a template. */
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;

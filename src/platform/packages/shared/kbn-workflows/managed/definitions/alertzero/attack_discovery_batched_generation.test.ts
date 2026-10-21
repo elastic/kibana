@@ -343,6 +343,15 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       expect(fanOut().steps?.[0].with?.ground_truth_gate_enabled).toBe(false);
     });
 
+    // An unset cyber-domain row resolves to nothing, so the frontier tier stays
+    // in charge. The order is the resolution order.
+    it('tries the cyber-domain row before the frontier tier', () => {
+      expect(fanOut().steps?.[0].with?.feature_id).toEqual([
+        'alertzero_template_models',
+        'alertzero_frontier',
+      ]);
+    });
+
     // Step IO is keyed by step id and returns the latest execution, so two
     // concurrent branches running the same step name would race.
     it('keeps the branch body to a single step', () => {

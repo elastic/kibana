@@ -76,6 +76,25 @@ describe('default_model_section_combo', () => {
 
       expect(opts.map((g) => g.label)).toEqual(['Pre-configured', 'Custom models']);
     });
+
+    it('omits endpoints that accept only a prompt template', () => {
+      const opts = getGlobalModelComboOptions(
+        [
+          ...connectors,
+          {
+            ...baseMockConnector,
+            connectorId: 'template-only',
+            name: 'Cyber template model',
+            isPreconfigured: true,
+            metadata: { capabilities: { templates: { policy: 'required' } } },
+          },
+        ],
+        false
+      );
+
+      const labels = opts.flatMap((group) => group.options?.map((option) => option.label) ?? []);
+      expect(labels).toEqual(['Elastic Model', 'My Connector']);
+    });
   });
 
   describe('getGlobalModelSelectedOptions', () => {

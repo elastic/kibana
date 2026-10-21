@@ -89,6 +89,13 @@ export interface EisInferenceEndpointCapabilities {
     max_input_tokens?: number;
     max_output_tokens?: number;
   };
+  /**
+   * Present only when this endpoint rejects caller-authored messages.
+   * The only value is `required`. An omitted block means templates are optional.
+   */
+  templates?: {
+    policy: 'required';
+  };
 }
 
 export type EisInferenceEndpointMetadata = {

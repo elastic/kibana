@@ -35,6 +35,11 @@ import {
   reportWorkflowSuccess,
 } from '../../lib/telemetry/report_workflow_telemetry';
 import type { MisconfigurationType } from '../../lib/telemetry/event_based_telemetry';
+import {
+  attackDiscoveryTemplateOmissionMessage,
+  capAttackDiscoveryTemplateCount,
+  getAttackDiscoveryTemplateAlertLimit,
+} from '../graphs/template_completion';
 import { getSpaceId } from '../../lib/helpers/get_space_id';
 import { isWorkflowsEnabled } from '../../lib/helpers/is_workflows_enabled';
 import { AttackDiscoveryError } from '../../lib/errors/attack_discovery_error';
@@ -558,7 +563,37 @@ export async function executeGenerationWorkflow({
     // the catch below routes through handleGenerationFailure.
     await assertAuthorizedToExecuteWorkflows({ authz, request, spaceId });
 
-    parsedApiConfig = getParsedApiConfig(apiConfig);
+    const resolvedApiConfig = getParsedApiConfig(apiConfig);
+    parsedApiConfig = resolvedApiConfig;
+
+    const inference = (
+      pluginsStart as {
+        inference?: {
+          getConnectorById: (id: string, request: KibanaRequest) => Promise<unknown>;
+        };
+      }
+    ).inference;
+    const templateAlertLimit =
+      inference?.getConnectorById != null
+        ? await getAttackDiscoveryTemplateAlertLimit(() =>
+            inference.getConnectorById(resolvedApiConfig.connector_id, request)
+          )
+        : undefined;
+    let retrievalSize = size;
+    const cappedRetrievalSize = capAttackDiscoveryTemplateCount(
+      templateAlertLimit != null ? retrievalSize : undefined
+    );
+    if (
+      templateAlertLimit != null &&
+      retrievalSize != null &&
+      cappedRetrievalSize != null &&
+      cappedRetrievalSize < retrievalSize
+    ) {
+      logger.warn(
+        attackDiscoveryTemplateOmissionMessage(retrievalSize - cappedRetrievalSize, retrievalSize)
+      );
+      retrievalSize = cappedRetrievalSize;
+    }
 
     assertAttackDiscoveryType({ type });
 
@@ -570,7 +605,7 @@ export async function executeGenerationWorkflow({
         end,
         esql_query: workflowConfig.esql_query,
         filter,
-        size,
+        size: retrievalSize,
         space_id: spaceId,
         start,
         validation_workflow_id: workflowConfig.validation_workflow_id,
@@ -744,8 +779,9 @@ export async function executeGenerationWorkflow({
       filter,
       logger,
       request: pipelineRequest,
-      size,
+      size: retrievalSize,
       source,
+      templateAlertLimit,
       sourceMetadata,
       spaceId,
       start,

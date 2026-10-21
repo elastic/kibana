@@ -12,6 +12,7 @@ import {
   ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
   ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
   ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+  ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
 } from '@kbn/alertzero-common';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 
@@ -37,7 +38,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
   });
 
   // Registration order is render order, so this also pins the rows to cheapest-first.
-  it('registers the parent ahead of the three tiers', () => {
+  it('registers the parent ahead of the three tiers and the template row', () => {
     const { setup, register } = createSetupMock();
 
     registerAlertZeroInferenceFeatures(setup, logger);
@@ -47,6 +48,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
       ALERTZERO_EFFICIENT_INFERENCE_FEATURE_ID,
       ALERTZERO_BALANCED_INFERENCE_FEATURE_ID,
       ALERTZERO_FRONTIER_INFERENCE_FEATURE_ID,
+      ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
     ]);
   });
 
@@ -131,6 +133,25 @@ describe('registerAlertZeroInferenceFeatures', () => {
     });
   });
 
+  it('registers the prompt-template row with no recommended model', () => {
+    const { setup, register } = createSetupMock();
+
+    registerAlertZeroInferenceFeatures(setup, logger);
+
+    expect(registeredTier(register, ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID)).toEqual({
+      parentFeatureId: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
+      taskType: 'chat_completion',
+      isTechPreview: true,
+      ignoreGlobalDefault: true,
+      allowTemplateRequiredModels: true,
+      featureId: ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
+      featureName: 'Cyber domain models',
+      featureDescription:
+        'OpenAI Daybreak models for Attack Discovery, alert triage, and the false-positive judge. A Daybreak endpoint requires a prompt template, so it is listed only here. A model saved here replaces the tier those calls use. Leave this empty to keep Attack Discovery and the judge on Frontier models and alert triage on Efficient models.',
+      recommendedEndpoints: [],
+    });
+  });
+
   // The tiers sit on deliberately different rungs. If the cluster-wide default were allowed to
   // win, all three would collapse onto one model, losing the cost saving on the efficient tier and
   // the quality on the frontier one.
@@ -174,7 +195,7 @@ describe('registerAlertZeroInferenceFeatures', () => {
 
     registerAlertZeroInferenceFeatures(setup, logger);
 
-    expect(logger.warn).toHaveBeenCalledTimes(4);
+    expect(logger.warn).toHaveBeenCalledTimes(5);
   });
 
   it('registers every tier even when the parent is rejected', () => {
@@ -188,6 +209,6 @@ describe('registerAlertZeroInferenceFeatures', () => {
       logger
     );
 
-    expect(register).toHaveBeenCalledTimes(4);
+    expect(register).toHaveBeenCalledTimes(5);
   });
 });

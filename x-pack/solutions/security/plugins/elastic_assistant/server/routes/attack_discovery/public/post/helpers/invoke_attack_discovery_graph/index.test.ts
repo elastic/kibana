@@ -178,6 +178,48 @@ describe('invokeAttackDiscoveryGraph', () => {
     });
   });
 
+  it('caps a template connector at 100 alerts and forwards the connector timeout', async () => {
+    const chatComplete = jest.fn().mockResolvedValue({ content: '{}' });
+    const apiConfig: ApiConfig = {
+      actionTypeId: '.inference',
+      connectorId: 'daybreak',
+    };
+    logger = {
+      debug: jest.fn(),
+      warn: jest.fn(),
+    } as unknown as Logger;
+
+    await invokeAttackDiscoveryGraph({
+      actionsClient,
+      alertsIndexPattern: 'alerts-*',
+      anonymizationFields: [{ id: 'mock-id', field: '_id', allowed: true }],
+      apiConfig,
+      connectorTimeout: 600_000,
+      esClient,
+      inferenceClient: {
+        chatComplete,
+        getConnectorById: jest.fn().mockResolvedValue({
+          metadata: { capabilities: { templates: { policy: 'required' } } },
+        }),
+      } as unknown as InferenceClient,
+      latestReplacements: {},
+      logger,
+      onNewReplacements: jest.fn(),
+      savedObjectsClient,
+      size: 500,
+    });
+
+    expect(getDefaultAttackDiscoveryGraph).toHaveBeenCalledWith(
+      expect.objectContaining({ size: 100 })
+    );
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('omitting 400 of 500'));
+
+    const completeWithTemplate = (getDefaultAttackDiscoveryGraph as jest.Mock).mock.calls[0][0]
+      .completeWithTemplate as (request: { alerts: string[]; phase: string }) => Promise<string>;
+    await completeWithTemplate({ alerts: ['alert'], phase: 'generate' });
+    expect(chatComplete).toHaveBeenCalledWith(expect.objectContaining({ timeout: 600_000 }));
+  });
+
   it('throws if throwIfErrorCountsExceeded throws', async () => {
     const apiConfig: ApiConfig = {
       actionTypeId: '.bedrock',
