@@ -8,6 +8,8 @@
 /* RESEARCH ONLY. Boots the alerting island once and prints boot ES-write and fence summaries.
  * Credentials stay in memory. The JSON result contains methods and paths, never bodies. */
 
+import type { Island } from './isolate/island';
+
 require('@kbn/setup-node-env');
 
 const moment = require('moment');
@@ -70,12 +72,12 @@ const elasticsearch = {
 const context = {
   bundle: { runId: 'measure', principal: 'measure', space: 'default', grants: {} },
   signal: new AbortController().signal,
-  async call(capability, operation, args) {
+  async call(capability: string, operation: string, args: { fallback?: unknown }) {
     if (capability === 'replica' && operation === 'featureFlag') return args.fallback;
     if (capability === 'replica' && operation === 'pricing') return true;
     return undefined;
   },
-  callSync(capability, operation, args) {
+  callSync(capability: string, operation: string, args: { fallback?: unknown }) {
     if (capability === 'replica' && operation === 'featureFlag') return args.fallback;
     if (capability === 'replica' && operation === 'pricing') return true;
     return undefined;
@@ -84,7 +86,7 @@ const context = {
 
 runContext
   .run(context, () => bootIsland(snapshot, elasticsearch, false))
-  .then((island) => {
+  .then((island: Island) => {
     const result = {
       bootMs: island.bootMs,
       esWrites: island.esWrites,
@@ -101,7 +103,8 @@ runContext
     setTimeout(() => process.exit(0), 1500);
     return island.clusterClient.close();
   })
-  .catch((error) => {
-    process.stderr.write(`${error && error.stack ? error.stack : error}\n`);
+  .catch((error: unknown) => {
+    const text = error instanceof Error ? error.stack ?? error.message : String(error);
+    process.stderr.write(`${text}\n`);
     process.exit(1);
   });

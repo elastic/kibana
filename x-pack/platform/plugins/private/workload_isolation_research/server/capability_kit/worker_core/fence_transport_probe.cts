@@ -18,7 +18,7 @@ const { Agent } = require('http');
 const { ClusterClient } = require('@kbn/core-elasticsearch-client-server-internal');
 const { createBootEsWriteFence } = require('./es_write_fence');
 
-const duration = (ms) => moment.duration(ms, 'ms');
+const duration = (ms: number) => moment.duration(ms, 'ms');
 
 const logger = {
   debug() {},
@@ -37,14 +37,23 @@ const logger = {
 };
 
 const main = async () => {
-  const seen = [];
-  const server = http.createServer((req, res) => {
-    seen.push(req.url);
-    res.writeHead(200, { 'content-type': 'application/json', 'x-elastic-product': 'Elasticsearch' });
-    res.end(JSON.stringify({ _index: 'orders', _id: '1', found: true, _source: {} }));
-  });
-  await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
-  const { port } = server.address();
+  const seen: string[] = [];
+  const server = http.createServer(
+    (req: import('node:http').IncomingMessage, res: import('node:http').ServerResponse) => {
+      seen.push(req.url ?? '');
+      res.writeHead(200, {
+        'content-type': 'application/json',
+        'x-elastic-product': 'Elasticsearch',
+      });
+      res.end(JSON.stringify({ _index: 'orders', _id: '1', found: true, _source: {} }));
+    }
+  );
+  await new Promise<void>((resolve) => server.listen(0, '127.0.0.1', resolve));
+  const address = server.address();
+  if (address == null || typeof address === 'string') {
+    throw new Error('fixture did not bind a port');
+  }
+  const { port } = address;
   const fence = createBootEsWriteFence({ mode: 'deny', allow: [] });
   const client = new ClusterClient({
     config: {
@@ -68,28 +77,25 @@ const main = async () => {
     onRequestHandlerFactory: fence.wrap(() => () => undefined),
   });
   const calls = [
-    () => client.asInternalUser.get({ index: 'orders', id: '1' }, { querystring: { refresh: true } }),
+    () =>
+      client.asInternalUser.get({ index: 'orders', id: '1' }, { querystring: { refresh: true } }),
     () =>
       client.asInternalUser.get(
         { index: 'orders', id: '1', refresh: false },
         { querystring: { refresh: true } }
       ),
   ];
-  const errors = [];
+  const errors: string[] = [];
   for (const call of calls) {
     try {
       await call();
       errors.push('admitted');
     } catch (error) {
-      errors.push(error.message);
+      errors.push(error instanceof Error ? error.message : String(error));
     }
   }
   console.log(JSON.stringify({ uris: seen, summary: fence.summary(), errors }));
-  assert.deepEqual(
-    seen,
-    [],
-    'refresh=true reached the fixture'
-  );
+  assert.deepEqual(seen, [], 'refresh=true reached the fixture');
   assert.equal(fence.summary().denied, 2);
   assert.equal(fence.summary().reads, 0);
   await client.close();

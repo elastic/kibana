@@ -20,17 +20,17 @@ const {
 } = require('@kbn/core-elasticsearch-client-server-internal');
 const { ExecutionHost } = require('../host');
 const { T7aController } = require('../../t7a/main_host');
-const { TaskManagerRunner } = require('../../../../../../../platform/plugins/shared/task_manager/server/task_running/task_runner');
+const { TaskManagerRunner } = require('@kbn/task-manager-plugin/server/task_running/task_runner');
 const {
   markResearchExecutionStarted,
   resetResearchExecutionClasses,
   setResearchTaskDefinitionSource,
   clearResearchLease,
-} = require('../../../../../../../platform/plugins/shared/task_manager/server/lib/research_runner_override');
+} = require('@kbn/task-manager-plugin/server/lib/research_runner_override');
 
 const TYPE = 'alerting:.es-query';
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
-const duration = (ms) => moment.duration(ms, 'ms');
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
+const duration = (ms: number) => moment.duration(ms, 'ms');
 
 const logger = {
   debug() {},
@@ -50,7 +50,7 @@ const logger = {
 
 const main = async () => {
   process.env.KBN_RESEARCH_CAPABILITY_KIT = 'true';
-  globalThis[Symbol.for('kbn.research.config.atPathSync')] = () => ({});
+  Reflect.set(globalThis, Symbol.for('kbn.research.config.atPathSync'), () => ({}));
   const id = `lease-life-${Date.now().toString(36)}`;
   const es = new ClusterClient({
     config: {
@@ -74,7 +74,7 @@ const main = async () => {
     onRequestHandlerFactory: getRequestHandlerFactory(false, false),
   });
   setResearchTaskDefinitionSource({
-    get: (type) =>
+    get: (type: string) =>
       type === TYPE ? { type, timeout: '1s', stateSchemaByVersion: { 1: {} } } : undefined,
   });
   const core = {
@@ -96,7 +96,13 @@ const main = async () => {
     { core, taskManager: {} },
     {
       instanceUuid: 'lease-life',
-      packageInfo: { dist: false, version: '9.6.0', buildFlavor: 'traditional', buildNum: 1, buildSha: 'probe' },
+      packageInfo: {
+        dist: false,
+        version: '9.6.0',
+        buildFlavor: 'traditional',
+        buildNum: 1,
+        buildSha: 'probe',
+      },
       mode: { dev: true },
     },
     logger,
@@ -119,10 +125,10 @@ const main = async () => {
     ownerId: 'probe',
     version: '1:1',
   };
-  const writes = [];
+  const writes: Array<Record<string, unknown>> = [];
   const store = {
     taskManagerId: 'probe',
-    async partialUpdate(partial) {
+    async partialUpdate(partial: Record<string, unknown>) {
       writes.push({ ...partial });
       task = {
         ...task,
@@ -137,7 +143,7 @@ const main = async () => {
     async remove() {
       task = { ...task, status: 'dead' };
     },
-    async update(doc) {
+    async update(doc: Record<string, unknown>) {
       return this.partialUpdate(doc);
     },
   };
@@ -167,9 +173,9 @@ const main = async () => {
           },
         ],
       ]),
-      beforeRun: async (context) => context,
+      beforeRun: async (context: unknown) => context,
       defaultMaxAttempts: 3,
-      executionContext: { withContext: (_context, fn) => fn() },
+      executionContext: { withContext: (_context: unknown, fn: () => unknown) => fn() },
       config: { event_loop_delay: { monitor: false, warn_threshold: 10_000 } },
       allowReadingInvalidState: true,
       getPollInterval: () => 3000,

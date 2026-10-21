@@ -16,21 +16,22 @@ const assert = require('node:assert/strict');
 const { randomUUID } = require('crypto');
 const { Subject } = require('rxjs');
 const { Client } = require('@elastic/elasticsearch');
-const { asOk, asErr } = require('../../../../../../../platform/plugins/shared/task_manager/server/lib/result_type');
-const { TaskTypeDictionary } = require('../../../../../../../platform/plugins/shared/task_manager/server/task_type_dictionary');
-const { TaskManagerRunner } = require('../../../../../../../platform/plugins/shared/task_manager/server/task_running/task_runner');
-const { claimAvailableTasksMget } = require('../../../../../../../platform/plugins/shared/task_manager/server/task_claimers/strategy_mget');
+const { asOk, asErr } = require('@kbn/task-manager-plugin/server/lib/result_type');
+const { TaskTypeDictionary } = require('@kbn/task-manager-plugin/server/task_type_dictionary');
+const { TaskManagerRunner } = require('@kbn/task-manager-plugin/server/task_running/task_runner');
+const {
+  claimAvailableTasksMget,
+} = require('@kbn/task-manager-plugin/server/task_claimers/strategy_mget');
 const {
   RESEARCH_BOOTSTRAP_DEADLINE_MS,
   RESEARCH_RECOVERY_CAP_MS,
-  clearResearchLease,
   deriveCancelGraceMs,
   markCollateralLoss,
   markResearchExecutionStarted,
   registerExecutionClass,
   resetResearchExecutionClasses,
   setResearchTaskDefinitionSource,
-} = require('../../../../../../../platform/plugins/shared/task_manager/server/lib/research_runner_override');
+} = require('@kbn/task-manager-plugin/server/lib/research_runner_override');
 
 const INDEX = '.kibana_task_manager_9.6.0_001';
 const TYPE = 'research:lease-probe';
@@ -44,14 +45,14 @@ const logger = {
   trace() {},
   debug() {},
   info() {},
-  warn(message) {
+  warn(message: unknown) {
     if (String(message).includes('no assigned partitions')) return;
     console.warn(String(message));
   },
-  error(message) {
+  error(message: unknown) {
     console.error(message instanceof Error ? message.stack ?? message.message : String(message));
   },
-  fatal(message) {
+  fatal(message: unknown) {
     console.error(message instanceof Error ? message.message : String(message));
   },
   log() {},
@@ -63,15 +64,60 @@ const logger = {
   },
 };
 
-const dateOf = (value) => (value ? new Date(value) : null);
-const objectOf = (value) => {
+interface StoredTask {
+  taskType?: string;
+  schedule?: { interval?: string };
+  attempts?: number;
+  retryAt?: string | null;
+  runAt?: string | null;
+  scheduledAt?: string | null;
+  startedAt?: string | null;
+  status?: string;
+  enabled?: boolean;
+  state?: unknown;
+  params?: unknown;
+  ownerId?: string | null;
+  partition?: unknown;
+  [key: string]: unknown;
+}
+
+interface EsHit {
+  _id?: string;
+  _seq_no?: number;
+  _primary_term?: number;
+  found?: boolean;
+  error?: unknown;
+  _source?: { task?: StoredTask };
+  hits?: { hits?: EsHit[] };
+}
+
+interface SearchBody {
+  query?: unknown;
+  sort?: unknown;
+  size?: number;
+}
+
+interface TaskUpdate {
+  id: string;
+  version?: string;
+  [key: string]: unknown;
+}
+
+interface ClaimDoc {
+  id: string;
+}
+
+const dateOf = (value: unknown) => (value ? new Date(String(value)) : null);
+const objectOf = (value: unknown): Record<string, unknown> => {
   if (value == null || value === '') return {};
-  if (typeof value === 'string') return JSON.parse(value);
-  return value;
+  if (typeof value === 'string') return JSON.parse(value) as Record<string, unknown>;
+  if (typeof value === 'object') return value as Record<string, unknown>;
+  return {};
 };
 
-const toConcrete = (hit) => {
-  const task = hit._source.task;
+const toConcrete = (hit: EsHit) => {
+  const task = hit._source?.task;
+  if (!task) throw new Error('task source missing');
   return {
     id: String(hit._id).slice('task:'.length),
     version: `${hit._seq_no}:${hit._primary_term}`,
@@ -91,7 +137,7 @@ const toConcrete = (hit) => {
   };
 };
 
-const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 const main = async () => {
   const id = randomUUID();
@@ -99,12 +145,12 @@ const main = async () => {
   let hold = Promise.resolve();
   let releaseHold = () => {};
   let resolveEntered = () => {};
-  const entered = new Promise((resolve) => {
-    resolveEntered = resolve;
+  const entered = new Promise<void>((resolve) => {
+    resolveEntered = () => resolve();
   });
   const armHold = () => {
-    hold = new Promise((resolve) => {
-      releaseHold = resolve;
+    hold = new Promise<void>((resolve) => {
+      releaseHold = () => resolve();
     });
   };
 
@@ -121,14 +167,14 @@ const main = async () => {
   });
   if (!red) {
     setResearchTaskDefinitionSource({
-      get: (type) =>
+      get: (type: string) =>
         type === TYPE
           ? { type: TYPE, timeout: '1s', maxAttempts: 5, stateSchemaByVersion: {} }
           : undefined,
     });
     registerExecutionClass({
       id: 'lease-probe',
-      taskTypes: (taskType) => taskType === TYPE,
+      taskTypes: (taskType: string) => taskType === TYPE,
       createRunner: () => ({
         run: async () => {
           console.log(JSON.stringify({ phase: 'task-enter', t: Date.now() }));
@@ -142,7 +188,7 @@ const main = async () => {
 
   const store = {
     taskManagerId: 'wir-lease-probe',
-    async msearch(searches) {
+    async msearch(searches: SearchBody[]) {
       const response = await es.msearch({
         index: INDEX,
         searches: searches.flatMap((search) => [
@@ -155,14 +201,15 @@ const main = async () => {
           },
         ]),
       });
-      const docs = [];
-      const versionMap = new Map();
+      const docs: Array<ReturnType<typeof toConcrete>> = [];
+      const versionMap = new Map<string, { esId: string; seqNo: number; primaryTerm: number }>();
       for (const part of response.responses) {
         if (part.error) throw new Error(`msearch failed: ${JSON.stringify(part.error)}`);
         for (const hit of part.hits?.hits ?? []) {
           if (!String(hit._id).startsWith('task:')) continue;
           const concrete = toConcrete(hit);
           docs.push(concrete);
+          if (hit._id == null || hit._seq_no == null || hit._primary_term == null) continue;
           versionMap.set(concrete.id, {
             esId: hit._id,
             seqNo: hit._seq_no,
@@ -172,11 +219,12 @@ const main = async () => {
       }
       return { docs, versionMap };
     },
-    async getDocVersions(esIds) {
+    async getDocVersions(esIds: string[]) {
       const response = await es.mget({ index: INDEX, ids: esIds });
-      const versions = new Map();
+      const versions = new Map<string, { esId: string; seqNo: number; primaryTerm: number }>();
       for (const doc of response.docs) {
         if (doc.found === false || doc._seq_no == null) continue;
+        if (doc._id == null || doc._seq_no == null || doc._primary_term == null) continue;
         versions.set(doc._id, {
           esId: doc._id,
           seqNo: doc._seq_no,
@@ -185,7 +233,7 @@ const main = async () => {
       }
       return versions;
     },
-    async bulkPartialUpdate(updates) {
+    async bulkPartialUpdate(updates: TaskUpdate[]) {
       const results = [];
       for (const update of updates) {
         const current = await es.get({ index: INDEX, id: `task:${update.id}` });
@@ -205,37 +253,39 @@ const main = async () => {
       }
       return results;
     },
-    async bulkGet(ids) {
+    async bulkGet(ids: string[]) {
       if (!ids.length) return [];
       const response = await es.mget({
         index: INDEX,
         ids: ids.map((taskId) => `task:${taskId}`),
       });
-      return response.docs.map((doc) => {
+      return response.docs.map((doc: EsHit & { found?: boolean; _id?: string }) => {
         if (doc.found === false) {
           return asErr({ id: doc._id, type: TYPE, error: new Error('missing') });
         }
         return asOk(toConcrete(doc));
       });
     },
-    async partialUpdate(partial) {
+    async partialUpdate(partial: TaskUpdate) {
       const current = await es.get({ index: INDEX, id: `task:${partial.id}` });
       return write(partial.id, partial, current);
     },
-    async get(taskId) {
+    async get(taskId: string) {
       const current = await es.get({ index: INDEX, id: `task:${taskId}` });
       return toConcrete(current);
     },
-    async remove(taskId) {
+    async remove(taskId: string) {
       await es.delete({ index: INDEX, id: `task:${taskId}`, refresh: 'wait_for' });
     },
-    async update(doc) {
+    async update(doc: TaskUpdate) {
       return this.partialUpdate(doc);
     },
   };
 
-  const write = async (taskId, partial, current) => {
-    const task = { ...current._source.task };
+  const write = async (taskId: string, partial: TaskUpdate, current: EsHit) => {
+    const sourceTask = current._source?.task;
+    if (!sourceTask) throw new Error('task source missing');
+    const task: StoredTask = { ...sourceTask };
     for (const [key, value] of Object.entries(partial)) {
       if (key === 'id' || key === 'version') continue;
       if (value instanceof Date) task[key] = value.toISOString();
@@ -279,15 +329,15 @@ const main = async () => {
       },
     });
 
-  const runnerFor = (doc) =>
+  const runnerFor = (doc: ClaimDoc) =>
     new TaskManagerRunner({
       instance: doc,
       definitions,
       logger,
       store,
-      beforeRun: async (context) => context,
+      beforeRun: async (context: unknown) => context,
       defaultMaxAttempts: 5,
-      executionContext: { withContext: (_context, fn) => fn() },
+      executionContext: { withContext: (_context: unknown, fn: () => unknown) => fn() },
       config: { event_loop_delay: { monitor: false, warn_threshold: 10_000 } },
       allowReadingInvalidState: true,
       getPollInterval: () => 3000,
@@ -331,7 +381,11 @@ const main = async () => {
       },
     });
 
-    const first = await claim();
+    const asClaim = (value: { docs?: ClaimDoc[]; stats?: unknown }) => ({
+      docs: value.docs ?? [],
+      stats: value.stats,
+    });
+    const first = asClaim(await claim());
     assert.equal(first.docs.length, 1, `claim missed the probe: ${JSON.stringify(first.stats)}`);
     assert.equal(first.docs[0].id, id);
     const claimed = await reload();
@@ -358,7 +412,7 @@ const main = async () => {
 
     if (red) return;
 
-    const second = await claim();
+    const second = asClaim(await claim());
     assert.equal(
       second.docs.some((doc) => doc.id === id),
       false,
@@ -373,11 +427,11 @@ const main = async () => {
     const executionStartedAt = Date.now();
     markResearchExecutionStarted(id, executionStartedAt);
     const expectedRetry = executionStartedAt + 1000 + grace;
-    let seen;
+    let seen: StoredTask | undefined;
     const deadline = Date.now() + 2500;
     while (Date.now() < deadline) {
       seen = await reload();
-      if (seen.retryAt && new Date(seen.retryAt).getTime() === expectedRetry) break;
+      if (seen?.retryAt && new Date(seen.retryAt).getTime() === expectedRetry) break;
       await sleep(20);
     }
     console.log(
@@ -388,8 +442,9 @@ const main = async () => {
         capMs: RESEARCH_RECOVERY_CAP_MS,
       })
     );
+    if (!seen?.retryAt) throw new Error('lease retryAt was not renewed');
     assert.equal(new Date(seen.retryAt).getTime(), expectedRetry);
-    const duringRun = await claim();
+    const duringRun = asClaim(await claim());
     assert.equal(
       duringRun.docs.some((doc) => doc.id === id),
       false,
@@ -397,7 +452,7 @@ const main = async () => {
     );
     const untilExpiry = Math.max(0, expectedRetry - Date.now() + 50);
     await sleep(untilExpiry);
-    const atExpiry = await claim();
+    const atExpiry = asClaim(await claim());
     console.log(
       JSON.stringify({
         phase: 'at-expiry',
@@ -405,14 +460,16 @@ const main = async () => {
         waitedMs: untilExpiry,
       })
     );
-    assert.equal(atExpiry.docs.some((doc) => doc.id === id), true, 'claimer missed the expired lease');
+    assert.equal(
+      atExpiry.docs.some((doc) => doc.id === id),
+      true,
+      'claimer missed the expired lease'
+    );
     releaseHold();
-    await Promise.race([outcome.catch((error) => error), sleep(5000)]);
+    await Promise.race([outcome.catch((error: unknown) => error), sleep(5000)]);
   } finally {
     releaseHold();
-    await es
-      .delete({ index: INDEX, id: docId, refresh: 'wait_for' })
-      .catch(() => undefined);
+    await es.delete({ index: INDEX, id: docId, refresh: 'wait_for' }).catch(() => undefined);
     resetResearchExecutionClasses();
     setResearchTaskDefinitionSource(undefined);
     await es.close();

@@ -12,6 +12,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { createAnalytics } from '@elastic/ebt/client';
 import { ExecutionContextContainer } from '@kbn/core-execution-context-server-internal/src/execution_context_container';
+import type { LogMeta } from '@kbn/logging';
 import {
   armResearchLease,
   createTaskRunnerWithResearchOverride,
@@ -369,7 +370,10 @@ void test('replica subscriptions and content hashes observe warm owner changes',
 void test('logger and events forward to the sink and redact secret-looking meta', () => {
   const logs: string[] = [];
   const logger = createForwardingLogger('alerting', (record) => logs.push(record.message));
-  logger.warn('booting', { encryptionKey: 'super-secret', count: 2 });
+  logger.warn<LogMeta & { encryptionKey: string; count: number }>('booting', {
+    encryptionKey: 'super-secret',
+    count: 2,
+  });
   assert.equal(logs.length, 1);
   assert.equal(logs[0].includes('super-secret'), false);
   assert.match(logs[0], /\[redacted\]/);
@@ -477,7 +481,10 @@ void test('execution context matches Core opaque ids for concurrent tasks', asyn
     service.withContext(taskA, async () => {
       await Promise.resolve();
       const current = service.get();
-      assert.equal(typeof current?.toJSON, 'function');
+      if (current == null) {
+        throw new Error('execution context missing');
+      }
+      assert.equal(typeof current.toJSON, 'function');
       assert.equal(current.toJSON().id, 'task-a');
       assert.equal(current.toJSON().description, 'run task');
       return service.getAsHeader('req-a');
@@ -485,6 +492,9 @@ void test('execution context matches Core opaque ids for concurrent tasks', asyn
     service.withContext(taskB, async () => {
       await Promise.resolve();
       const current = service.get();
+      if (current == null) {
+        throw new Error('execution context missing');
+      }
       assert.equal(current.toJSON().id, 'task-b');
       return service.getAsHeader('req-b');
     }),
