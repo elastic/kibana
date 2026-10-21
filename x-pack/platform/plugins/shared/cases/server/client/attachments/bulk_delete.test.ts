@@ -530,7 +530,7 @@ describe('bulk_delete', () => {
       relatedArgs.unifiedAttachmentTypeRegistry.register({
         id: PARENT_TYPE,
         schema: z.object({}),
-        getRelatedAttachments: getRelated,
+        relatedAttachments: { readTypes: [], get: getRelated },
       });
       const { attachmentService, caseService } = relatedArgs.services;
 

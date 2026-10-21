@@ -180,6 +180,9 @@ export const getAttackAttachmentType = (
 ): UnifiedAttachmentTypeSetup => ({
   id: SECURITY_ATTACK_ATTACHMENT_TYPE,
   schema: deps.isAttachEnabled ? AttackAttachmentPayloadSchema : AttachDisabledSchema,
-  getRelatedAttachments: getAttackRelatedAttachments(deps),
+  relatedAttachments: {
+    readTypes: [SECURITY_ATTACK_ATTACHMENT_TYPE, SECURITY_ALERT_ATTACHMENT_TYPE],
+    get: getAttackRelatedAttachments(deps),
+  },
   workflow: { validateTargets: validateAttackWorkflowTargets },
 });
