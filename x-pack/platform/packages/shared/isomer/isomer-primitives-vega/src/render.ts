@@ -11,6 +11,16 @@ import { compile, type TopLevelSpec } from 'vega-lite';
 import { expressionEvaluator } from './interpreter';
 import { inertLoader } from './loader';
 import { safeBackground, scrubScene } from './scene';
+import {
+  newReadRecord,
+  pruneToReads,
+  recordReads,
+  replaceMarkers,
+  resultMarker,
+  type VegaResult,
+  withoutTooltips,
+  withResults,
+} from './results';
 import { hardenVegaSpec, isSpecObject, setOwn, type SpecObject, stripSpec } from './spec';
 import { vegaConfig, vegaLiteConfig, type VegaTheme } from './theme';
 
@@ -22,12 +32,23 @@ export interface VegaChartInput {
   spec: SpecObject;
   width: number;
   height: number;
+  /** Query results that replace data sources' `url`s, by path. */
+  results?: readonly VegaResult[];
 }
 
 /** Vega-Lite views whose size is per cell, not the whole chart. */
 const COMPOSITE_KEYS = ['concat', 'hconcat', 'vconcat', 'facet', 'repeat'];
 
 const FIT = { type: 'fit', contains: 'padding' } as const;
+
+/** Kibana fits a Vega spec to its panel unless the spec turns autosize off (`_compileWithAutosize`). */
+const autosizeOf = (autosize: unknown) =>
+  autosize === 'none' ||
+  (typeof autosize === 'object' &&
+    autosize !== null &&
+    (autosize as { type?: unknown }).type === 'none')
+    ? autosize
+    : FIT;
 
 /** Objects merge key by key; anything else in `over` replaces `base`. */
 const mergeDeep = (base: SpecObject, over: unknown): SpecObject => {
@@ -65,11 +86,11 @@ const silentLogger = (log: VegaLog = { errors: [], warnings: [] }) =>
  * the spec's own `config`.
  */
 export const toVegaSpec = (
-  { mode, spec, width, height }: VegaChartInput,
+  { mode, spec, width, height, results }: VegaChartInput,
   theme: VegaTheme,
   log: VegaLog = { errors: [], warnings: [] }
 ): SpecObject => {
-  const safe = stripSpec(spec);
+  const safe = stripSpec(withResults(spec, results));
   if (mode === 'vega-lite') {
     const composite = COMPOSITE_KEYS.some((key) => key in safe);
     const sized = composite ? safe : { ...safe, width, height, autosize: FIT };
@@ -83,7 +104,7 @@ export const toVegaSpec = (
     ...safe,
     width,
     height,
-    autosize: FIT,
+    autosize: autosizeOf(safe.autosize),
     config: mergeDeep(vegaConfig(theme), safe.config),
   });
 };
@@ -219,48 +240,55 @@ export interface VegaSvg {
  * numbered per chart and prefixed with a hash of its spec, so the output is
  * deterministic and two charts in one document never share an id.
  */
+/** Runs `view` to completion and draws its scene as an SVG string, scrubbed of anything that fetches. */
+const drawView = (view: View, log: VegaLog): string => {
+  resetSVGDefIds();
+  settle(view, log);
+  const [failure] = log.errors;
+  if (failure !== undefined) {
+    throw new VegaRenderError(`vega: ${failure}`);
+  }
+  const scene = view.scenegraph() as unknown as { root: unknown };
+  scrubScene(scene.root);
+  const internals = view as unknown as ViewInternals;
+  const padding = view.padding() as {
+    left: number;
+    right: number;
+    top: number;
+    bottom: number;
+  };
+  const markup = svgRenderer()
+    .initialize(
+      null,
+      Math.max(0, internals._viewWidth + padding.left + padding.right),
+      Math.max(0, internals._viewHeight + padding.top + padding.bottom),
+      [padding.left + internals._origin[0], padding.top + internals._origin[1]],
+      1
+    )
+    .background(safeBackground(view.background()))
+    .render(scene.root)
+    .svg();
+  if (!markup) {
+    throw new VegaRenderError('vega: the renderer produced no SVG');
+  }
+  if (ESCAPED.test(markup)) {
+    throw new VegaRenderError(
+      'vega: the rendered SVG holds a link, an image source, or a fetching style'
+    );
+  }
+  return markup;
+};
+
 export const renderVegaSvg = (
   vegaSpec: SpecObject,
   { width, height }: { width: number; height: number }
 ): VegaSvg => {
   const log: VegaLog = { errors: [], warnings: [] };
   const idPrefix = `isomer-vega-${specHash(vegaSpec)}-`;
-  const view = createVegaView(vegaSpec, log);
+  // A tooltip only shows on hover, which a static drawing never has.
+  const view = createVegaView(withoutTooltips(vegaSpec), log);
   try {
-    resetSVGDefIds();
-    settle(view, log);
-    const [failure] = log.errors;
-    if (failure !== undefined) {
-      throw new VegaRenderError(`vega: ${failure}`);
-    }
-    const scene = view.scenegraph() as unknown as { root: unknown };
-    scrubScene(scene.root);
-    const internals = view as unknown as ViewInternals;
-    const padding = view.padding() as {
-      left: number;
-      right: number;
-      top: number;
-      bottom: number;
-    };
-    const markup = svgRenderer()
-      .initialize(
-        null,
-        Math.max(0, internals._viewWidth + padding.left + padding.right),
-        Math.max(0, internals._viewHeight + padding.top + padding.bottom),
-        [padding.left + internals._origin[0], padding.top + internals._origin[1]],
-        1
-      )
-      .background(safeBackground(view.background()))
-      .render(scene.root)
-      .svg();
-    if (!markup) {
-      throw new VegaRenderError('vega: the renderer produced no SVG');
-    }
-    if (ESCAPED.test(markup)) {
-      throw new VegaRenderError(
-        'vega: the rendered SVG holds a link, an image source, or a fetching style'
-      );
-    }
+    const markup = drawView(view, log);
     return {
       svg: markup
         .replace(
@@ -272,5 +300,67 @@ export const renderVegaSvg = (
     };
   } finally {
     view.finalize();
+  }
+};
+
+/** The SVG without its per-spec def-id prefix, to compare two drawings of one chart. */
+const comparable = (svg: string) => svg.replace(/isomer-vega-[a-z0-9]+-/g, '');
+
+/**
+ * `input` with each result holding only what its static drawing reads, under every theme given. The drawing runs
+ * once with each result behind read-recording proxies, then the pruned input must draw the same SVG as the full
+ * one under each theme, or `input` comes back unchanged.
+ */
+export const pruneVegaResults = <T extends VegaChartInput>(
+  input: T,
+  themes: readonly VegaTheme[]
+): T => {
+  const results = input.results ?? [];
+  if (results.length === 0) return input;
+  const records = results.map(() => newReadRecord());
+  const marked = {
+    ...input,
+    results: results.map((result, index) => ({ ...result, values: resultMarker(index) })),
+  };
+  try {
+    for (const theme of themes) {
+      const log: VegaLog = { errors: [], warnings: [] };
+      const compiled = withoutTooltips(toVegaSpec(marked, theme, log));
+      const found = replaceMarkers(compiled, (index) =>
+        // A copy: Vega writes into rows as it runs, and the result must stay as the query returned it.
+        recordReads(structuredClone(results[index]!.values), records[index]!)
+      );
+      // A result the compiled spec carries some other way is kept whole.
+      records.forEach((record, index) => {
+        if (!found.has(index)) record.all = true;
+      });
+      // Not `createVegaView`: its JSON copy would read everything.
+      const view = new View(parse(compiled, undefined, { ast: true }), {
+        renderer: 'none',
+        loader: inertLoader,
+        expr: expressionEvaluator,
+        logger: silentLogger(log),
+      });
+      try {
+        drawView(view, log);
+      } finally {
+        view.finalize();
+      }
+    }
+    const pruned = {
+      ...input,
+      results: results.map((result, index) => ({
+        ...result,
+        values: pruneToReads(result.values, records[index]!),
+      })),
+    };
+    for (const theme of themes) {
+      const full = renderVegaSvg(toVegaSpec(input, theme), input).svg;
+      const kept = renderVegaSvg(toVegaSpec(pruned, theme), input).svg;
+      if (comparable(full) !== comparable(kept)) return input;
+    }
+    return pruned;
+  } catch {
+    return input;
   }
 };

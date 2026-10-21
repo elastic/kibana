@@ -27,6 +27,8 @@ export {
   type VegaNode,
   type VegaPrimitiveOptions,
   MAX_CHART_SIDE,
+  MAX_RESULTS,
+  MAX_RESULTS_CHARS,
   MAX_SPEC_CHARS,
   MIN_CHART_SIDE,
   VEGA_INTERACTIVE,
@@ -40,6 +42,7 @@ export {
   type VegaMode,
   type VegaSvg,
   createVegaView,
+  pruneVegaResults,
   renderVegaSvg,
   toVegaSpec,
   VegaRenderError,
@@ -72,3 +75,4 @@ export {
 } from './src/theme';
 
 export { type HydratedVega, hydrateVega } from './src/client';
+export { type VegaResult, withoutTooltips, withResults } from './src/results';

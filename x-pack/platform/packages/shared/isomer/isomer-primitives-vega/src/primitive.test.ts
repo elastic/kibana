@@ -267,3 +267,25 @@ describe('vega rendering', () => {
     );
   });
 });
+
+describe('vega basemap', () => {
+  const tile = 'data:image/png;base64,iVBORw0KGgo=';
+  const mapNode = (src: string) =>
+    ({
+      ...withSpec({ ...vegaExample.spec, background: 'transparent' }),
+      basemap: { tiles: [{ src, x: -10, y: 0, width: 256, height: 256 }] },
+    } as VegaNode);
+
+  it('draws host tiles under the chart, in its pixel frame', () => {
+    expect(errors(mapNode(tile))).toEqual([]);
+    const { html } = runtime.surfaces.html.render(view(mapNode(tile)));
+    const svg = html.slice(html.indexOf('<svg'));
+    expect(svg.indexOf(`<image href="${tile}" x="-10"`)).toBeGreaterThan(0);
+    expect(svg.indexOf('<image')).toBeLessThan(svg.indexOf('<path'));
+  });
+
+  it('accepts only an inline raster, so a tile cannot fetch', () => {
+    expect(errors(mapNode('https://tiles.example/0/0/0.png'))).not.toEqual([]);
+    expect(errors(mapNode('data:image/svg+xml;base64,PHN2Zz4='))).not.toEqual([]);
+  });
+});
