@@ -76,7 +76,10 @@ const sweepCreatedRules = async (
   createdRuleIds.clear();
 };
 
-evaluate.describe(
+// Skipped: the rule-creation workflow can no longer be started by hand, so this test never
+// reaches the approval. Rebuild it to start from the Detection Coverage worker:
+// https://github.com/elastic/security-team/issues/20396
+evaluate.describe.skip(
   'Rule Creation Worker — approval gate',
   { tag: tags.serverless.security.complete },
   () => {
