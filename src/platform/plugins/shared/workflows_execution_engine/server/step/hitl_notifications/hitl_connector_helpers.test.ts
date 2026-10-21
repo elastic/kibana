@@ -130,6 +130,9 @@ describe('generated notification text', () => {
       '\\\\\\[Approve\\](/\u2060/evil.example)'
     );
     expect(escapeHitlEmailMarkdown('//evil.example')).toBe('/\u2060/evil.example');
+    expect(escapeHitlEmailMarkdown('\\'.repeat(8))).toBe('\\'.repeat(8));
+    expect(escapeHitlEmailMarkdown(`${'\\'.repeat(8)}[`)).toBe(`${'\\'.repeat(9)}[`);
+    expect(escapeHitlEmailMarkdown(`${'\\'.repeat(7)}[`)).toBe(`${'\\'.repeat(7)}[`);
   });
 
   it('escapes Slack mrkdwn link syntax and keeps a scheme URL from autolinking', () => {

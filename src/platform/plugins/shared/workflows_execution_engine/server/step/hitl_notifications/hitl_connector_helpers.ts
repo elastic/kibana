@@ -33,21 +33,54 @@ function breakHitlSchemeUrls(value: string): string {
   );
 }
 
-/** Adds a backslash only when the matched character is not already escaped. */
-function escapeUnescaped(value: string, pattern: RegExp): string {
-  return value.replace(pattern, (match, slashes: string) => {
-    if (slashes.length % 2 === 1) {
-      return match;
+function needsEmailMarkdownEscape(value: string, index: number): boolean {
+  const char = value[index];
+  if (char === '[' || char === ']' || char === '`' || char === '~') {
+    return true;
+  }
+  if (char !== '<') {
+    return false;
+  }
+  const scheme = value.slice(index + 1, index + 9).toLowerCase();
+  return (
+    scheme.startsWith('https://') || scheme.startsWith('http://') || scheme.startsWith('mailto:')
+  );
+}
+
+/** Escapes markdown characters in one pass. An odd run of backslashes already escapes the next one. */
+function escapeHitlEmailMarkdownChars(value: string): string {
+  const parts: string[] = [];
+  let slashCount = 0;
+
+  const pushSlashes = (escapeNext: boolean) => {
+    if (slashCount > 0) {
+      parts.push('\\'.repeat(slashCount));
     }
-    return `${slashes}\\${match.slice(slashes.length)}`;
-  });
+    if (escapeNext && slashCount % 2 === 0) {
+      parts.push('\\');
+    }
+    slashCount = 0;
+  };
+
+  for (let index = 0; index < value.length; index++) {
+    const char = value[index];
+    if (char === '\\') {
+      slashCount++;
+    } else {
+      pushSlashes(needsEmailMarkdownEscape(value, index));
+      parts.push(char);
+    }
+  }
+  if (slashCount > 0) {
+    parts.push('\\'.repeat(slashCount));
+  }
+
+  return parts.join('');
 }
 
 /** Escapes generated email text so it cannot add a markdown link or code fence. */
 export function escapeHitlEmailMarkdown(value: string): string {
-  return breakHitlSchemeUrls(
-    escapeUnescaped(escapeUnescaped(value, /(\\*)<(?=https?:\/\/|mailto:)/gi), /(\\*)[\[\]`~]/g)
-  );
+  return breakHitlSchemeUrls(escapeHitlEmailMarkdownChars(value));
 }
 
 /** Escapes an email link label, including a trailing backslash. */
