@@ -17,7 +17,7 @@ import type { AwsServiceMatrixEntry, DataFormat, DeploymentMethod } from './aws_
 import { applyDeploymentMethodView } from './aws_service_matrix';
 import { useAwsServiceMatrix } from './use_aws_service_matrix';
 import { useDefaultDataFormat } from './use_default_data_format';
-import { getOnboardingSessionKey } from './onboarding_session_storage';
+import { getOnboardingSessionKey } from './core/onboarding_session_storage';
 import type { ExistingSecretRefs } from './step_components/authenticate_and_deploy_step/secret_refs';
 import { useIsSelfManaged } from './use_is_self_managed';
 

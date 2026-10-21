@@ -9,7 +9,11 @@ import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { getToolResultId, createErrorResult } from '@kbn/agent-builder-server';
+import {
+  getToolResultId,
+  createErrorResult,
+  resolveAllowedConnectorIds,
+} from '@kbn/agent-builder-server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { SmlSearchFilterType } from '@kbn/agent-builder-sml-plugin/server';
 import type { SmlToolsOptions } from './types';
@@ -110,8 +114,9 @@ export const createSmlSearchTool = ({
     // configuration. The LLM has no say in this — it's part of the trust boundary.
     // When an agent configuration is present, undefined/null connector_ids means no
     // connectors are assigned; scoping is omitted only when there is no agent context at all.
-    const scoping = agentConfiguration
-      ? { [SmlSearchFilterType.connector]: { ids: agentConfiguration.connector_ids ?? [] } }
+    const allowedConnectorIds = resolveAllowedConnectorIds(agentConfiguration);
+    const scoping = allowedConnectorIds
+      ? { [SmlSearchFilterType.connector]: { ids: allowedConnectorIds } }
       : undefined;
 
     // Agent-discoverable filters: forwarded only when the LLM supplied them.

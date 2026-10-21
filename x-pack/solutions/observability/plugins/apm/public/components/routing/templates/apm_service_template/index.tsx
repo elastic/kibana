@@ -10,6 +10,7 @@ import type { AppMenuConfig } from '@kbn/core-chrome-app-menu-components';
 import type { AgentName } from '@kbn/elastic-agent-utils';
 import { i18n } from '@kbn/i18n';
 import { OBSERVABILITY_SERVICE_ATTACHMENT_TYPE_ID } from '@kbn/observability-agent-builder-plugin/public';
+import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { isMobileAgentName } from '../../../../../common/agent_name';
@@ -108,7 +109,14 @@ function TemplateWithContext({
 
   const alertsTabHref = router.link('/services/{serviceName}/alerts' as const, {
     path: { serviceName },
-    query,
+    query: {
+      ...query,
+      // Badge counts ignore page kuery; clear it so click-through matches the count.
+      kuery: '',
+      // Match currently-active badge counts (rangeTo=now + active).
+      rangeTo: 'now',
+      alertStatus: ALERT_STATUS_ACTIVE,
+    },
   });
 
   const serviceInventoryHref = router.link('/services', { query });

@@ -7,7 +7,7 @@ steps:
     key: pre_build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
@@ -34,7 +34,7 @@ steps:
           no_cone: true
           paths:
             - '/.buildkite/'
-            - '/.node-version'
+            - '/.nvmrc'
             - '/package.json'
             - '/tsconfig.base.json'
             - '/versions.json'
@@ -223,7 +223,7 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
@@ -264,6 +264,7 @@ steps:
     depends_on:
       - build
     build:
+      message: '${BUILDKITE_MESSAGE}'
       branch: '${BUILDKITE_BRANCH}'
       commit: '${BUILDKITE_COMMIT}'
       env:
@@ -291,7 +292,7 @@ steps:
   - command: .buildkite/scripts/steps/openapi_publishing/publish_oas_docs.sh
     label: 'Publish OAS docs to bump.sh'
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
@@ -338,7 +339,7 @@ steps:
       - sparse-checkout#v1.6.0:
           paths:
             - .buildkite
-            - .node-version
+            - .nvmrc
             - package.json
             - tsconfig.base.json
             - versions.json
@@ -350,7 +351,7 @@ steps:
     label: Trigger container image build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2

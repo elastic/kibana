@@ -271,6 +271,20 @@ describe('SlackParamsFields', () => {
       expect(screen.getByTestId('webApiTextTextArea')).toBeInTheDocument();
     });
 
+    it('renders the channels validation error', () => {
+      appMockRenderer.render(
+        <SlackParamsFields
+          actionParams={params}
+          editAction={editAction}
+          index={0}
+          errors={{ channels: ['Channel ID is required.'], message: [] }}
+          actionConnector={actionConnector}
+        />
+      );
+
+      expect(screen.getByText('Channel ID is required.')).toBeInTheDocument();
+    });
+
     it('changes the message type correctly', async () => {
       appMockRenderer.render(
         <SlackParamsFields
