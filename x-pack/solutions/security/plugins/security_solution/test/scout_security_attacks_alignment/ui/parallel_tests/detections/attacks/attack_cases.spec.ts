@@ -25,7 +25,8 @@
  *  - Selecting rows raises a bulk action bar carrying those same take-action verbs across the
  *    selection, plus "Remove from case".
  *  - Removing an attack from its grid row's "Remove from case" item takes the attack and the
- *    alerts no other attached attack still claims off the case.
+ *    alerts no other attached attack still claims off the case, and that "Remove attack only"
+ *    leaves the alerts on the case.
  *
  * Attaching a `security.attack` requires `attackAttachmentsEnabled`; the attacks-alignment
  * Scout config boots with it (see
@@ -555,6 +556,31 @@ spaceTest.describe(
             await expect(attackCases.attackAccordionBadge).toHaveText('1');
             await expect(attackCases.alertAccordionBadge).toHaveText('2');
             await expect(attackCases.attackGridRowTitles).toHaveCount(1);
+          }
+        );
+
+        await spaceTest.step(
+          '"Remove attack only" removes the last attack and keeps its alerts',
+          async () => {
+            const [manualAttachment] = getAttackAttachments(
+              await findCaseAttachments(kbnClient, scoutSpace.id, caseId)
+            );
+
+            if (manualAttachment == null) {
+              throw new Error('The manual attack is no longer attached to the case');
+            }
+
+            await attackCases.removeAttackFromGrid(manualAttachment.id, { includeRelated: false });
+
+            await expect(attackCases.attackGridRowTitles).toHaveCount(0);
+
+            const attachments = await findCaseAttachments(kbnClient, scoutSpace.id, caseId);
+
+            expect(getAttackAttachments(attachments)).toHaveLength(0);
+            expect(getAttachedAlertIds(attachments)).toStrictEqual(
+              [SHARED_ALERT_ID, MANUAL_ONLY_ALERT_ID].sort()
+            );
+            await expect(attackCases.alertAccordionBadge).toHaveText('2');
           }
         );
       }
