@@ -134,8 +134,8 @@ finish and verify concurrent commands can allocate before launching a larger dat
 
 #### What the run does
 
-Investigations only run as the Nightshift agent service account, so the eval first sets up the
-space with `POST /internal/nightshift/investigations/service_account/_enable` (idempotent; the eval
+Investigations only run as the Nightshift agent service account, so the eval first creates the
+account's roles on stateful (`ensureNightshiftServiceAccountRoles`) and sets up the space with `POST /internal/nightshift/investigations/service_account/_enable` (idempotent; the eval
 user holds `manage_security`). The `evals_nightshift_investigations` config set turns on
 `xpack.security.serviceAccounts.enabled`.
 
