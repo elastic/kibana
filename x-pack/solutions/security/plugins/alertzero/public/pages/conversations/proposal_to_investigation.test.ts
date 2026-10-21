@@ -113,6 +113,15 @@ describe('proposalToInvestigation', () => {
       expect(result.recommendedAction).toBe('closed');
     });
 
+    it('carries createdAt and decidedAt in proposalCreatedAt and proposalDecidedAt', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        decidedAt: '2026-09-10T11:00:00.000Z',
+      });
+      expect(result.proposalDecidedAt).toBe('2026-09-10T11:00:00.000Z');
+      expect(result.proposalCreatedAt).toBe(baseProposal.createdAt);
+    });
+
     it('does not set "closed" when decidedAt is absent', () => {
       const result = proposalToInvestigation({ ...baseProposal, category: 'respond' });
       expect(result.recommendedAction).toBe('respond');

@@ -1,5 +1,5 @@
 {
-  "sha1": "9024843ec06bda9f908d9b2f5f05554804f58058",
+  "sha1": "e30a7c2720f5f99bfc1cf72314d6435a6cd11c75",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,7 +14,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
-        "line": 15,
+        "line": 24,
         "column": 17
       }
     },
@@ -28,7 +28,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
-        "line": 33,
+        "line": 42,
         "column": 21
       }
     },
@@ -42,8 +42,36 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
-        "line": 47,
+        "line": 56,
         "column": 12
+      }
+    },
+    {
+      "id": "d24bb69b5ed3341-601e52012c00bfe",
+      "title": "[NON-MKI] Inbound UIAM ephemeral token client authentication omits client authentication for an external API key on direct UIAM calls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
+        "line": 70,
+        "column": 20
+      }
+    },
+    {
+      "id": "d24bb69b5ed3341-cd16271c81b43df",
+      "title": "[NON-MKI] Inbound UIAM ephemeral token client authentication preserves the API key authorization scheme for direct UIAM calls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
+        "line": 85,
+        "column": 16
       }
     },
     {
@@ -56,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
-        "line": 61,
-        "column": 20
+        "line": 138,
+        "column": 27
       }
     },
     {
@@ -70,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
-        "line": 97,
-        "column": 66
+        "line": 170,
+        "column": 13
       }
     },
     {
@@ -84,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_uiam_oauth_local/api/tests/uiam_client_authentication.spec.ts",
-        "line": 97,
-        "column": 66
+        "line": 170,
+        "column": 13
       }
     },
     {
