@@ -6,12 +6,12 @@
  */
 
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { ApiInferenceConnector, InferenceConnector } from '@kbn/inference-common';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
 } from '@kbn/management-settings-ids';
-import { mergeConnectors, type ApiInferenceConnector } from './merge_connectors';
+import { mergeConnectors } from './merge_connectors';
 import type { GetForFeatureOptions, ResolvedInferenceEndpoints } from '../types';
 
 export const NO_DEFAULT_CONNECTOR = 'NO_DEFAULT_CONNECTOR';

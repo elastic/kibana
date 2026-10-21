@@ -9,8 +9,7 @@ import type { KibanaRequest } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
-import type { InferenceConnector } from '@kbn/inference-common';
-import type { ApiInferenceConnector } from './lib/merge_connectors';
+import type { ApiInferenceConnector, InferenceConnector } from '@kbn/inference-common';
 
 export type { InferenceTaskType, InferenceConnector };
 

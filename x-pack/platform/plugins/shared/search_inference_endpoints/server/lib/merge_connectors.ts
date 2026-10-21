@@ -8,8 +8,6 @@
 import type { ApiInferenceConnector, InferenceConnector } from '@kbn/inference-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
-export type { ApiInferenceConnector };
-
 /**
  * Produces the ordered connector list the UI consumes.
  *
