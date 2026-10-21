@@ -40,11 +40,13 @@ describe('getAggregationConfigChanges', () => {
         metric_type: 'histogram',
         previous_aggregation: 'p95',
         new_aggregation: 'p99',
+        previous_visualization: 'lnsXY',
+        new_visualization: 'lnsXY',
       },
     ]);
   });
 
-  it('reports distribution separately from the stored percentile', () => {
+  it('reports the chart change and keeps the percentile as the type', () => {
     expect(
       getAggregationConfigChanges(gridSettings, {
         histogramVisualization: 'lnsHeatmap',
@@ -53,18 +55,28 @@ describe('getAggregationConfigChanges', () => {
       {
         metric_type: 'histogram',
         previous_aggregation: 'p95',
-        new_aggregation: 'lnsHeatmap',
+        new_aggregation: 'p95',
+        previous_visualization: 'lnsXY',
+        new_visualization: 'lnsHeatmap',
       },
     ]);
   });
 
-  it('ignores a percentile change while distribution stays selected', () => {
+  it('reports a percentile fallback change while the heatmap stays selected', () => {
     expect(
       getAggregationConfigChanges(
         { ...gridSettings, histogramVisualization: 'lnsHeatmap' },
         { histogramPercentile: 'p50' }
       )
-    ).toEqual([]);
+    ).toEqual([
+      {
+        metric_type: 'histogram',
+        previous_aggregation: 'p95',
+        new_aggregation: 'p50',
+        previous_visualization: 'lnsHeatmap',
+        new_visualization: 'lnsHeatmap',
+      },
+    ]);
   });
 
   it('ignores missing settings', () => {

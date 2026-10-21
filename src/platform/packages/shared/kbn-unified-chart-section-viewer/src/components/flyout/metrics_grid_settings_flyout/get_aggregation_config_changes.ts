@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  HistogramPercentile,
-  HistogramVisualization,
-  MetricsGridSettings,
-} from '@kbn/discover-utils';
+import type { MetricsGridSettings } from '@kbn/discover-utils';
 import type {
   MetricAggregationConfigChangedEvent,
   MetricAggregationConfigMetricType,
@@ -23,13 +19,6 @@ const METRIC_TYPE_BY_SETTING: Record<AggregationSetting, MetricAggregationConfig
   counterAggregation: 'counter',
   gaugeAggregation: 'gauge',
 };
-
-const histogramAggregation = (
-  settings: Pick<MetricsGridSettings, 'histogramPercentile' | 'histogramVisualization'>
-): HistogramPercentile | Exclude<HistogramVisualization, 'lnsXY'> =>
-  settings.histogramVisualization === 'lnsXY'
-    ? settings.histogramPercentile
-    : settings.histogramVisualization;
 
 export const getAggregationConfigChanges = (
   gridSettings: MetricsGridSettings,
@@ -53,20 +42,21 @@ export const getAggregationConfigChanges = (
     ];
   });
 
-  const nextHistogram = histogramAggregation({
-    histogramPercentile: update.histogramPercentile ?? gridSettings.histogramPercentile,
-    histogramVisualization: update.histogramVisualization ?? gridSettings.histogramVisualization,
-  });
-  const previousHistogram = histogramAggregation(gridSettings);
-
-  if (
+  const previousAggregation = gridSettings.histogramPercentile;
+  const nextAggregation = update.histogramPercentile ?? previousAggregation;
+  const previousVisualization = gridSettings.histogramVisualization;
+  const nextVisualization = update.histogramVisualization ?? previousVisualization;
+  const histogramChanged =
     (update.histogramPercentile !== undefined || update.histogramVisualization !== undefined) &&
-    nextHistogram !== previousHistogram
-  ) {
+    (nextAggregation !== previousAggregation || nextVisualization !== previousVisualization);
+
+  if (histogramChanged) {
     events.push({
       metric_type: 'histogram',
-      previous_aggregation: previousHistogram,
-      new_aggregation: nextHistogram,
+      previous_aggregation: previousAggregation,
+      new_aggregation: nextAggregation,
+      previous_visualization: previousVisualization,
+      new_visualization: nextVisualization,
     });
   }
 

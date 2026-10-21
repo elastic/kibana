@@ -161,8 +161,10 @@ describe('GridSettingsFlyout', () => {
     });
     expect(mockTrackAggregationConfigChanged).toHaveBeenNthCalledWith(2, {
       metric_type: 'histogram',
-      previous_aggregation: 'lnsHeatmap',
+      previous_aggregation: 'p95',
       new_aggregation: 'p95',
+      previous_visualization: 'lnsHeatmap',
+      new_visualization: 'lnsXY',
     });
     expect(onGridSettingsChange).toHaveBeenCalledWith({
       gaugeAggregation: 'min',
@@ -188,11 +190,13 @@ describe('GridSettingsFlyout', () => {
     expect(mockTrackAggregationConfigChanged).toHaveBeenCalledWith({
       metric_type: 'histogram',
       previous_aggregation: 'p95',
-      new_aggregation: 'lnsHeatmap',
+      new_aggregation: 'p95',
+      previous_visualization: 'lnsXY',
+      new_visualization: 'lnsHeatmap',
     });
   });
 
-  it('changes the percentile without turning Distribution off', async () => {
+  it('changes the percentile fallback without turning Distribution off', async () => {
     const onGridSettingsChange = jest.fn();
     renderFlyout(
       <GridSettingsFlyout
@@ -206,7 +210,13 @@ describe('GridSettingsFlyout', () => {
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
 
     expect(onGridSettingsChange).toHaveBeenCalledWith({ histogramPercentile: 'p99' });
-    expect(mockTrackAggregationConfigChanged).not.toHaveBeenCalled();
+    expect(mockTrackAggregationConfigChanged).toHaveBeenCalledWith({
+      metric_type: 'histogram',
+      previous_aggregation: 'p95',
+      new_aggregation: 'p99',
+      previous_visualization: 'lnsHeatmap',
+      new_visualization: 'lnsHeatmap',
+    });
   });
 
   it('discards the draft and does not call onGridSettingsChange when Cancel is clicked', async () => {

@@ -29,12 +29,8 @@ export interface MetricsEsqlQueryFailureEvent {
 
 export interface MetricAggregationConfigChangedEvent {
   metric_type: MetricAggregationConfigMetricType;
-  previous_aggregation:
-    | SimpleAggregation
-    | HistogramPercentile
-    | Exclude<HistogramVisualization, 'lnsXY'>;
-  new_aggregation:
-    | SimpleAggregation
-    | HistogramPercentile
-    | Exclude<HistogramVisualization, 'lnsXY'>;
+  previous_aggregation: SimpleAggregation | HistogramPercentile;
+  new_aggregation: SimpleAggregation | HistogramPercentile;
+  previous_visualization?: HistogramVisualization;
+  new_visualization?: HistogramVisualization;
 }
