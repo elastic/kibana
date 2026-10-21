@@ -2570,15 +2570,6 @@
       "enabled": true
     },
     {
-      "groupName": "tar-fs",
-      "matchDepNames": ["tar-fs"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "browserslist",
       "matchDepNames": ["browserslist"],
       "reviewers": ["team:kibana-operations"],
