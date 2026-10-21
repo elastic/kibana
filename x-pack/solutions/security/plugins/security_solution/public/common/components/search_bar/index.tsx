@@ -16,6 +16,7 @@ import deepEqual from 'fast-deep-equal';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { FilterManager, SavedQuery } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { OnTimeChangeProps } from '@elastic/eui';
 import { inputsActions } from '../../store/inputs';
 import type { InputsRange } from '../../store/inputs/model';
@@ -47,7 +48,7 @@ interface SiemSearchBarProps {
    * Data views from the current page, such as dashboard panels, used to resolve
    * filters that target a data view other than `dataView`.
    */
-  additionalDataViews?: DataView[];
+  additionalDataViews?: FilterableSource[];
   hideFilterBar?: boolean;
   hideQueryInput?: boolean;
   id: InputsModelId.global | InputsModelId.timeline;
@@ -306,11 +307,11 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const dataViews: DataView[] | null = useMemo(() => {
+    const dataViews: FilterableSource[] | null = useMemo(() => {
       if (dataView == null) {
         return null;
       }
-      const extras = new Map<string, DataView>();
+      const extras = new Map<string, FilterableSource>();
       for (const view of additionalDataViews ?? []) {
         if (view.id && view.id !== dataView.id && !extras.has(view.id)) {
           extras.set(view.id, view);

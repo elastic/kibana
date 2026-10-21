@@ -13,7 +13,7 @@ import { pick } from 'lodash/fp';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableSource } from '@kbn/data-source';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { SecurityPageName } from '../../../../common/constants';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
@@ -62,7 +62,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
 
   const { dashboardContainer, dashboardInternalApi, handleDashboardLoaded } =
     useDashboardRenderer(savedObjectId);
-  const [dashboardDataViews, setDashboardDataViews] = useState<DataView[] | undefined>();
+  const [dashboardDataViews, setDashboardDataViews] = useState<FilterableSource[] | undefined>();
   useEffect(() => {
     if (!dashboardContainer) {
       setDashboardDataViews(undefined);

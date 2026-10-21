@@ -8,8 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import { pick } from 'lodash';
 import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
-import type { DataView } from '@kbn/data-views-plugin/common';
-import type { FilterableSource } from '@kbn/data-source';
 import { DimensionType } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { LensApi, TextBasedPersistedState } from '@kbn/lens-plugin/public';
@@ -46,10 +44,11 @@ export const loadAlertRuleFlyoutContent = async ({
 
   const { query } = embeddableData;
   const datatable = getDataTableFromEmbeddable(embeddable);
-  const publishedSource = query
-    ? undefined
-    : embeddable.dataViews$.getValue()?.find((view) => view.id === datatable?.meta?.source);
-  const dataView = publishedSource && isDataView(publishedSource) ? publishedSource : undefined;
+  const dataViewId = datatable?.meta?.source;
+  const dataView =
+    query || !dataViewId
+      ? undefined
+      : await startDependencies.dataViews.get(dataViewId, false).catch(() => undefined);
 
   // TODO: refactor this to use the new Lens api format
   const { state } = embeddable.getLegacySerializedState().attributes ?? {};
@@ -131,8 +130,6 @@ export const loadAlertRuleFlyoutContent = async ({
   );
   return ruleFlyoutComponent;
 };
-
-const isDataView = (source: FilterableSource): source is DataView => 'matchedIndices' in source;
 
 const getDataTableFromEmbeddable = (embeddable: LensApi) =>
   Object.values(embeddable.getInspectorAdapters().tables.tables ?? {})[0] as unknown as
