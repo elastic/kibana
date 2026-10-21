@@ -18,7 +18,11 @@ describe('pdf converter', () => {
   const logger = loggingSystemMock.createLogger();
   const esClient = {} as ElasticsearchClient;
   const mockIsAvailable = jest.fn();
-  const extractionAvailability = { isAvailable: mockIsAvailable, check: jest.fn() };
+  const extractionAvailability = {
+    isAvailable: mockIsAvailable,
+    start: jest.fn(),
+    stop: jest.fn(),
+  };
   const converter = createPdfConverter({
     getEsClient: async () => esClient,
     extractionAvailability,
