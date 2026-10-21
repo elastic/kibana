@@ -20,9 +20,12 @@ import {
 export abstract class DiscoverNavigation extends DiscoverAppBase {
   async goto(options: DiscoverGotoOptions) {
     await this.setQueryMode(options.queryMode);
+    // Resolve on 'commit' so a slow bundle load can't exhaust the 20s navigationTimeout;
+    // `waitForDiscoverPage` below is the readiness gate, with a budget that fits Kibana's bootstrap.
     await this.page.gotoApp(
       'discover',
-      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined
+      options.savedSearchId ? { hash: `/view/${options.savedSearchId}` } : undefined,
+      { waitUntil: 'commit' }
     );
     await this.waitForDiscoverPage();
     if (options.queryMode === 'esql') {
