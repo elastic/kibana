@@ -89,3 +89,19 @@ export const describeScopeForAgent = (attachmentId: string, scope: EntityAnalyti
     ...scope,
     tiles: mapValues(scope.tiles, (tile) => tile && omit(tile, 'entityIds')),
   });
+
+/** A date as "20 Oct", in UTC. */
+export const formatMonthDay = (iso: string): string => {
+  const date = new Date(iso);
+  const month = date.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' });
+  return `${date.getUTCDate()} ${month}`;
+};
+
+/** A date and time as "20 Oct 2026, 10:53 UTC". */
+export const formatDateTime = (iso: string): string => {
+  const date = new Date(iso);
+  const time = [date.getUTCHours(), date.getUTCMinutes()]
+    .map((part) => String(part).padStart(2, '0'))
+    .join(':');
+  return `${formatMonthDay(iso)} ${date.getUTCFullYear()}, ${time} UTC`;
+};

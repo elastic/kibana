@@ -6,6 +6,7 @@
  */
 
 import { compact } from 'lodash';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/core/server';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
@@ -220,3 +221,23 @@ const describeQuietView = ({ tiles }: EntityAnalyticsScope): string => {
   );
   return isFlagged ? NO_PRIORITIES_LINE : QUIET_LINE;
 };
+
+/** The parts of the card's title: the period, the selected count, the filters and the space. */
+export const getTitleParts = ({ scope }: BriefViewModel): string[] => [
+  `Last ${scope.periodLabel}`,
+  ...(scope.focusTileTitle ? [`Selected: ${scope.focusTileTitle}`] : []),
+  ...scope.entityFilters,
+  ...(scope.spaceId === DEFAULT_SPACE_ID ? [] : [`Space ${scope.spaceId}`]),
+];
+
+/** What wasn't found or checked, and that the brief covers a sample. */
+export const getNotes = ({ notes, scope }: BriefViewModel): string[] =>
+  scope.sample ? [...notes, scope.sample] : notes;
+
+/** A zero that didn't change says nothing, so it gets no count. */
+export const getShownCounts = ({ counts }: BriefViewModel): BriefViewModel['counts'] =>
+  counts.filter(({ value, delta }) => value > 0 || (delta ?? 0) !== 0);
+
+/** Without priorities a summary already says why, as in a brief with no model call, so only a brief without a summary needs the section. */
+export const hasPrioritiesSection = ({ priorities, summary }: BriefViewModel): boolean =>
+  priorities.length > 0 || !summary;

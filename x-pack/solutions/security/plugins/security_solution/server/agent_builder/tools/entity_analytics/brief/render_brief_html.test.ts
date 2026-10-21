@@ -121,6 +121,13 @@ describe('renderBriefHtml', () => {
     expect(html).not.toContain('<footer');
   });
 
+  it('loads its template and its stylesheet', () => {
+    const { html } = renderBriefHtml(fixtureViewModel);
+
+    expect(html).toContain('<div class="brief">');
+    expect(html).toContain('.brief .priority{');
+  });
+
   it('shows only the counts above zero or changed, and says when there is nothing to compare', () => {
     const { html } = renderBriefHtml(fixtureViewModel);
 
