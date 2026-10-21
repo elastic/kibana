@@ -74,6 +74,15 @@ jest.mock('@kbn/workflows-ui', () => ({
     mgetWorkflows: mockMgetWorkflows,
     createWorkflow: mockCreateWorkflow,
   }),
+  useWorkflowsCapabilities: () => ({
+    canExecuteWorkflow: true,
+  }),
+  useRunWorkflow: () => ({
+    mutate: jest.fn(),
+    isLoading: false,
+  }),
+  RunWorkflowInputsModal: () => null,
+  requiresUserSuppliedInputs: () => false,
 }));
 
 const mockUseListKi = jest.fn();
@@ -768,7 +777,10 @@ describe('AiIndexDetailPage', () => {
       'My workflow'
     );
     expect(screen.getByTestId('contextAiIndexAutomationRow')).toHaveTextContent('Enabled');
-    expect(mockMgetWorkflows).toHaveBeenCalledWith({ ids: ['wf-1'] });
+    expect(mockMgetWorkflows).toHaveBeenCalledWith({
+      ids: ['wf-1'],
+      source: ['id', 'name', 'enabled', 'definition'],
+    });
   });
 
   it('creates a workflow, attaches it, and opens the editor', async () => {
