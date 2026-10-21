@@ -118,7 +118,17 @@ tags:
       ## When to use this API
 
       - Use this API to define a complete, self-contained dashboard in a single payload, including inline visualizations (both data view and ES|QL based), controls, and filters.
-      - Use the [Visualizations API](visualizations#tag/Visualizations/operation/create-visualization) to create reusable charts saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library). You can then embed them in dashboards as linked panels using their ID.
+      - Use the [Visualizations API](../operation/operation-create-visualization) to create reusable charts saved to your [visualization library](https://www.elastic.co/docs/explore-analyze/visualize/visualize-library). You can then embed them in dashboards as linked panels using their ID.
+
+      ## Stability
+
+      | 9.4 | 9.5 | Serverless |
+      | --- | --- | --- |
+      | Experimental | Generally available ¹ | Generally available ² |
+
+      ¹ This version introduces breaking changes. Refer to the [Kibana release notes](https://www.elastic.co/docs/release-notes/kibana/breaking-changes).
+
+      ² On July 13, 2026, a new version of this API released on Elastic Cloud Serverless and introduced breaking changes. Refer to the [Elastic Cloud Serverless release notes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes).
 
       ## Get started
 
@@ -239,11 +249,32 @@ tags:
       > info
       > The following panel types are supported in the Kibana UI but not yet by the REST API: `map`, `legacy_vis`, `alerts_table`. Write operations (`POST`, `PUT`) return a `400` error when these panel types are included. Read operations (`GET`) strip these panels from the response and include them in a list of warnings.
 
+      ### Panel type availability
+
+      You can specify a panel **inline** so it exists only in that dashboard, or reference a panel already saved to the library and link it from multiple dashboards. Support for some panel types is added over time, so the available types depend on your Kibana version.
+
+      | Panel type | Inline | Linked from library |
+      | --- | --- | --- |
+      | Visualizations | Since 9.4 | Since 9.4 |
+      | Discover sessions | Since 9.4 | Since 9.4 |
+      | Images | Since 9.4 | N/A |
+      | Markdown | Since 9.4 | Since 9.4 |
+      | Links | Since 9.5 | Since 9.5 |
+      | Controls | Since 9.4 | N/A |
+      | SLO | Since 9.4 | N/A |
+      | Synthetics | Since 9.4 | N/A |
+      | APM service map | Since 9.5 | N/A |
+      | Machine learning and AIOps | Since 9.5 | N/A |
+      | Maps | Coming soon | Coming soon |
+      | Vega | Coming soon | Coming soon |
+      | Alerts table | Coming soon | N/A |
+      | Legacy visualizations | N/A | N/A |
+
       ### Embedding library items
 
       `vis`, `discover_session`, `markdown`, and `links` panels can be embedded **inline** (full config stored in the dashboard) or **linked from library** (references a library item by ID).
 
-      For the full `config` schema for visualization panels, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](visualizations#tag/Visualizations/operation/create-visualization).
+      For the full `config` schema for visualization panels, including chart types, metric operations, and breakdowns, refer to the [Visualizations API](../operation/operation-create-visualization).
 
       - **Inline**: use when the panel is specific to this dashboard or must work across Kibana spaces. The panel configuration goes directly inside `config`:
 
@@ -275,7 +306,7 @@ tags:
         }
         ```
 
-      - **Linked from library**: references an item in your library by its ID. Use `ref_id` with any supported panel type (`vis`, `discover_session`, `markdown`, `links`). Use the [Visualizations API](visualizations#tag/Visualizations/operation/create-visualization) to create and retrieve IDs for visualization items.
+      - **Linked from library**: references an item in your library by its ID. Use `ref_id` with any supported panel type (`vis`, `discover_session`, `markdown`, `links`). Use the [Visualizations API](../operation/operation-create-visualization) to create and retrieve IDs for visualization items.
 
         ```json
         {
@@ -324,7 +355,7 @@ tags:
         }
         ```
 
-      - **`xy` charts**: `data_source` goes inside each layer. Use `BUCKET(@timestamp, 75, ?_tstart, ?_tend)` to align time-series buckets with the dashboard's selected time range. For a complete xy chart example, see the [Create a dashboard](#operation/create-dashboard) endpoint.
+      - **`xy` charts**: `data_source` goes inside each layer. Use `BUCKET(@timestamp, 75, ?_tstart, ?_tend)` to align time-series buckets with the dashboard's selected time range. For a complete xy chart example, see the [Create a dashboard](../operation/operation-create-dashboard) endpoint.
     externalDocs:
       description: Dashboards documentation
       url: https://www.elastic.co/docs/explore-analyze/dashboards
@@ -347,7 +378,7 @@ tags:
       ## When to use this API
 
       - Use this API to define a complete, self-contained Discover session in a single payload, including tabs based on ES|QL queries or data views.
-      - Use the [Dashboards API](https://elastic.github.io/dashboards-api-spec/dashboards#tag/Dashboards/operation/create-dashboard) to embed Discover sessions in dashboards as `discover_session` panels, either inline or linked by ID.
+      - Use the [Dashboards API](../operation/operation-create-dashboard) to embed Discover sessions in dashboards as `discover_session` panels, either inline or linked by ID.
 
       ## Get started
 
@@ -755,8 +786,18 @@ tags:
 
       ## When to use this API
 
-      - Use this API to create reusable charts saved to the visualization library. You can then embed them in dashboards by referencing their ID from the [Dashboards API](dashboards#tag/Dashboards/operation/create-dashboard).
-      - Use the [Dashboards API](dashboards#tag/Dashboards/operation/create-dashboard) when you want to define a complete dashboard in one request, or when you need ES|QL-based visualizations.
+      - Use this API to create reusable charts saved to the visualization library. You can then embed them in dashboards by referencing their ID from the [Dashboards API](../operation/operation-create-dashboard).
+      - Use the [Dashboards API](../operation/operation-create-dashboard) when you want to define a complete dashboard in one request, or when you need ES|QL-based visualizations.
+
+      ## Stability
+
+      | 9.4 | 9.5 | Serverless |
+      | --- | --- | --- |
+      | Experimental | Generally available ¹ | Generally available ² |
+
+      ¹ This version introduces breaking changes. Refer to the [Kibana release notes](https://www.elastic.co/docs/release-notes/kibana/breaking-changes).
+
+      ² On July 13, 2026, a new version of this API released on Elastic Cloud Serverless and introduced breaking changes. Refer to the [Elastic Cloud Serverless release notes](https://www.elastic.co/docs/release-notes/cloud-serverless/breaking-changes).
 
       ## Get started
 
@@ -807,11 +848,11 @@ tags:
       Every visualization requires at minimum:
 
       - **`type`**: the chart to render. Each chart type has its own required fields, so the full structure of the request body depends on which `type` you specify.
-      - **`data_source`**: how data is fetched. You can reference an existing Kibana data view by ID (`"type": "data_view_reference"`), define a data view inline using an index pattern (`"type": "data_view_spec"`), or use an ES|QL query (`"type": "esql"`). Note that ES|QL is only supported via the [Dashboards API](dashboards#tag/Dashboards/operation/create-dashboard). For most chart types, `data_source` is a top-level field. For XY charts, it belongs inside each layer in `layers[]`.
+      - **`data_source`**: how data is fetched. You can reference an existing Kibana data view by ID (`"type": "data_view_reference"`), define a data view inline using an index pattern (`"type": "data_view_spec"`), or use an ES|QL query (`"type": "esql"`). Note that ES|QL is only supported via the [Dashboards API](../operation/operation-create-dashboard). For most chart types, `data_source` is a top-level field. For XY charts, it belongs inside each layer in `layers[]`.
 
       You can also include `query` and `filters` to apply KQL or Lucene filters to all chart data. Both are optional and can be omitted.
 
-      Everything else is chart-specific: `layers` for XY charts, `metrics` for metric charts, and so on. Refer to the request schema on the [Create a visualization](#operation/create-visualization) endpoint for the full shape of each type.
+      Everything else is chart-specific: `layers` for XY charts, `metrics` for metric charts, and so on. Refer to the request schema on the [Create a visualization](../operation/operation-create-visualization) endpoint for the full shape of each type.
 
       ### Chart types
 
@@ -13604,6 +13645,7 @@ paths:
           required: false
           schema:
             format: date-time
+            maxLength: 64
             type: string
         - description: Inclusive ISO datetime upper bound on the event timestamp.
           in: query
@@ -13611,6 +13653,7 @@ paths:
           required: false
           schema:
             format: date-time
+            maxLength: 64
             type: string
         - description: Alert filter. Narrows events to those referencing at least one of the provided alert IDs.
           in: query
@@ -13835,6 +13878,7 @@ paths:
           required: false
           schema:
             format: date-time
+            maxLength: 64
             type: string
         - description: Inclusive ISO datetime upper bound on event.start.
           in: query
@@ -13842,6 +13886,7 @@ paths:
           required: false
           schema:
             format: date-time
+            maxLength: 64
             type: string
         - description: Sort field. Defaults to started_at.
           in: query
@@ -25994,21 +26039,21 @@ paths:
           source: |
             GET kbn:/api/dashboards?query=web+logs&per_page=10
         - label: Filter by tag name - cURL
-          lang: cURL_tag_names
+          lang: cURL
           source: |
             curl -X GET "${KIBANA_URL}/api/dashboards?tag_names=Security&tag_names=Observability" \
               -H "Authorization: ApiKey ${API_KEY}"
         - label: Filter by tag name - Console
-          lang: Console_tag_names
+          lang: Console
           source: |
             GET kbn:/api/dashboards?tag_names=Security&tag_names=Observability
         - label: Exclude by tag name - cURL
-          lang: cURL_excluded_tag_names
+          lang: cURL
           source: |
             curl -X GET "${KIBANA_URL}/api/dashboards?excluded_tag_names=Deprecated" \
               -H "Authorization: ApiKey ${API_KEY}"
         - label: Exclude by tag name - Console
-          lang: Console_excluded_tag_names
+          lang: Console
           source: |
             GET kbn:/api/dashboards?excluded_tag_names=Deprecated
       x-state: Generally available; added in 9.5.0
@@ -26419,558 +26464,6 @@ paths:
       summary: Create a dashboard
       tags:
         - Dashboards
-      x-codeSamples:
-        - label: Create a dashboard (simple) - cURL
-          lang: cURL_simple
-          source: |
-            curl -X POST "${KIBANA_URL}/api/dashboards" \
-              -H "Authorization: ApiKey ${API_KEY}" \
-              -H "kbn-xsrf: true" \
-              -H "Content-Type: application/json" \
-              -d '{
-              "title": "Web logs overview",
-              "access_control": {
-                "access_mode": "write_restricted"
-              },
-              "panels": [
-                {
-                  "grid": {
-                    "x": 0,
-                    "y": 0,
-                    "w": 24,
-                    "h": 15
-                  },
-                  "type": "markdown",
-                  "config": {
-                    "content": "## Web logs overview\n\n&nbsp;\n\nCreated with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n- This markdown panel\n- 2 metrics, showing request count and average response size\n- A line chart based on an ES|QL query\n\n&nbsp;\n\n&nbsp;\n\n[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)"
-                  }
-                },
-                {
-                  "grid": {
-                    "x": 24,
-                    "y": 0,
-                    "w": 12,
-                    "h": 5
-                  },
-                  "type": "vis",
-                  "config": {
-                    "type": "metric",
-                    "data_source": {
-                      "type": "data_view_spec",
-                      "index_pattern": "kibana_sample_data_logs",
-                      "time_field": "timestamp"
-                    },
-                    "metrics": [
-                      {
-                        "type": "primary",
-                        "operation": "count"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "grid": {
-                    "x": 36,
-                    "y": 0,
-                    "w": 12,
-                    "h": 5
-                  },
-                  "type": "vis",
-                  "config": {
-                    "type": "metric",
-                    "data_source": {
-                      "type": "data_view_spec",
-                      "index_pattern": "kibana_sample_data_logs",
-                      "time_field": "timestamp"
-                    },
-                    "metrics": [
-                      {
-                        "type": "primary",
-                        "operation": "average",
-                        "field": "bytes"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "grid": {
-                    "x": 24,
-                    "y": 5,
-                    "w": 24,
-                    "h": 10
-                  },
-                  "type": "vis",
-                  "config": {
-                    "type": "xy",
-                    "title": "Requests over time",
-                    "layers": [
-                      {
-                        "type": "line",
-                        "data_source": {
-                          "type": "esql",
-                          "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
-                        },
-                        "x": {
-                          "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
-                        },
-                        "y": [
-                          {
-                            "column": "count"
-                          }
-                        ]
-                      }
-                    ],
-                    "axis": {
-                      "x": {
-                        "title": {
-                          "visible": false
-                        }
-                      }
-                    }
-                  }
-                }
-              ]
-            }'
-        - label: Create a dashboard (simple) - Console
-          lang: Console_simple
-          source: |
-            POST kbn:/api/dashboards
-            {
-              "title": "Web logs overview",
-              "panels": [
-                {
-                  "grid": {
-                    "x": 0,
-                    "y": 0,
-                    "w": 24,
-                    "h": 15
-                  },
-                  "type": "markdown",
-                  "config": {
-                    "content": "## Web logs overview\n\n&nbsp;\n\nCreated with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n- This markdown panel\n- 2 metrics, showing request count and average response size\n- A line chart based on an ES|QL query\n\n&nbsp;\n\n&nbsp;\n\n[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)"
-                  }
-                },
-                {
-                  "grid": {
-                    "x": 24,
-                    "y": 0,
-                    "w": 12,
-                    "h": 5
-                  },
-                  "type": "vis",
-                  "config": {
-                    "type": "metric",
-                    "data_source": {
-                      "type": "data_view_spec",
-                      "index_pattern": "kibana_sample_data_logs",
-                      "time_field": "timestamp"
-                    },
-                    "metrics": [
-                      {
-                        "type": "primary",
-                        "operation": "count"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "grid": {
-                    "x": 36,
-                    "y": 0,
-                    "w": 12,
-                    "h": 5
-                  },
-                  "type": "vis",
-                  "config": {
-                    "type": "metric",
-                    "data_source": {
-                      "type": "data_view_spec",
-                      "index_pattern": "kibana_sample_data_logs",
-                      "time_field": "timestamp"
-                    },
-                    "metrics": [
-                      {
-                        "type": "primary",
-                        "operation": "average",
-                        "field": "bytes"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "grid": {
-                    "x": 24,
-                    "y": 5,
-                    "w": 24,
-                    "h": 10
-                  },
-                  "type": "vis",
-                  "config": {
-                    "type": "xy",
-                    "title": "Requests over time",
-                    "layers": [
-                      {
-                        "type": "line",
-                        "data_source": {
-                          "type": "esql",
-                          "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
-                        },
-                        "x": {
-                          "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
-                        },
-                        "y": [
-                          {
-                            "column": "count"
-                          }
-                        ]
-                      }
-                    ],
-                    "axis": {
-                      "x": {
-                        "title": {
-                          "visible": false
-                        }
-                      }
-                    }
-                  }
-                }
-              ]
-            }
-        - label: Create a dashboard (with sections and controls) - cURL
-          lang: cURL_Sections
-          source: |
-            curl -X POST "${KIBANA_URL}/api/dashboards" \
-              -H "Authorization: ApiKey ${API_KEY}" \
-              -H "kbn-xsrf: true" \
-              -H "Content-Type: application/json" \
-              -d '{
-              "title": "Operations overview",
-              "time_range": {
-                "from": "now-7d",
-                "to": "now"
-              },
-              "pinned_panels": [
-                {
-                  "type": "options_list_control",
-                  "width": "medium",
-                  "grow": true,
-                  "config": {
-                    "title": "Response code",
-                    "data_view_id": "90943e30-9a47-11e8-b64d-95841ca0b247",
-                    "field_name": "response.keyword"
-                  }
-                }
-              ],
-              "panels": [
-                {
-                  "title": "Key metrics",
-                  "collapsed": false,
-                  "grid": {
-                    "y": 0
-                  },
-                  "panels": [
-                    {
-                      "grid": {
-                        "x": 0,
-                        "y": 0,
-                        "w": 12,
-                        "h": 5
-                      },
-                      "type": "vis",
-                      "config": {
-                        "type": "metric",
-                        "data_source": {
-                          "type": "data_view_spec",
-                          "index_pattern": "kibana_sample_data_logs",
-                          "time_field": "timestamp"
-                        },
-                        "metrics": [
-                          {
-                            "type": "primary",
-                            "operation": "count"
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "grid": {
-                        "x": 12,
-                        "y": 0,
-                        "w": 12,
-                        "h": 5
-                      },
-                      "type": "vis",
-                      "config": {
-                        "type": "metric",
-                        "data_source": {
-                          "type": "data_view_spec",
-                          "index_pattern": "kibana_sample_data_logs",
-                          "time_field": "timestamp"
-                        },
-                        "metrics": [
-                          {
-                            "type": "primary",
-                            "operation": "average",
-                            "field": "bytes"
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                },
-                {
-                  "title": "Traffic trends",
-                  "collapsed": false,
-                  "grid": {
-                    "y": 8
-                  },
-                  "panels": [
-                    {
-                      "grid": {
-                        "x": 0,
-                        "y": 0,
-                        "w": 24,
-                        "h": 10
-                      },
-                      "type": "vis",
-                      "config": {
-                        "type": "xy",
-                        "title": "Requests over time",
-                        "layers": [
-                          {
-                            "type": "line",
-                            "data_source": {
-                              "type": "data_view_spec",
-                              "index_pattern": "kibana_sample_data_logs",
-                              "time_field": "timestamp"
-                            },
-                            "x": {
-                              "operation": "date_histogram",
-                              "field": "timestamp"
-                            },
-                            "y": [
-                              {
-                                "operation": "count"
-                              }
-                            ]
-                          }
-                        ],
-                        "axis": {
-                          "x": {
-                            "title": {
-                              "visible": false
-                            }
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "grid": {
-                        "x": 24,
-                        "y": 0,
-                        "w": 24,
-                        "h": 10
-                      },
-                      "type": "vis",
-                      "config": {
-                        "type": "xy",
-                        "title": "Requests over time (ES|QL)",
-                        "layers": [
-                          {
-                            "type": "line",
-                            "data_source": {
-                              "type": "esql",
-                              "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
-                            },
-                            "x": {
-                              "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
-                            },
-                            "y": [
-                              {
-                                "column": "count"
-                              }
-                            ]
-                          }
-                        ],
-                        "axis": {
-                          "x": {
-                            "title": {
-                              "visible": false
-                            }
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              ]
-            }'
-        - label: Create a dashboard (with sections and controls) - Console
-          lang: Console_sections
-          source: |
-            POST kbn:/api/dashboards
-            {
-              "title": "Operations overview",
-              "time_range": {
-                "from": "now-7d",
-                "to": "now"
-              },
-              "pinned_panels": [
-                {
-                  "type": "options_list_control",
-                  "width": "medium",
-                  "grow": true,
-                  "config": {
-                    "title": "Response code",
-                    "data_view_id": "90943e30-9a47-11e8-b64d-95841ca0b247",
-                    "field_name": "response.keyword"
-                  }
-                }
-              ],
-              "panels": [
-                {
-                  "title": "Key metrics",
-                  "collapsed": false,
-                  "grid": {
-                    "y": 0
-                  },
-                  "panels": [
-                    {
-                      "grid": {
-                        "x": 0,
-                        "y": 0,
-                        "w": 12,
-                        "h": 5
-                      },
-                      "type": "vis",
-                      "config": {
-                        "type": "metric",
-                        "data_source": {
-                          "type": "data_view_spec",
-                          "index_pattern": "kibana_sample_data_logs",
-                          "time_field": "timestamp"
-                        },
-                        "metrics": [
-                          {
-                            "type": "primary",
-                            "operation": "count"
-                          }
-                        ]
-                      }
-                    },
-                    {
-                      "grid": {
-                        "x": 12,
-                        "y": 0,
-                        "w": 12,
-                        "h": 5
-                      },
-                      "type": "vis",
-                      "config": {
-                        "type": "metric",
-                        "data_source": {
-                          "type": "data_view_spec",
-                          "index_pattern": "kibana_sample_data_logs",
-                          "time_field": "timestamp"
-                        },
-                        "metrics": [
-                          {
-                            "type": "primary",
-                            "operation": "average",
-                            "field": "bytes"
-                          }
-                        ]
-                      }
-                    }
-                  ]
-                },
-                {
-                  "title": "Traffic trends",
-                  "collapsed": false,
-                  "grid": {
-                    "y": 8
-                  },
-                  "panels": [
-                    {
-                      "grid": {
-                        "x": 0,
-                        "y": 0,
-                        "w": 24,
-                        "h": 10
-                      },
-                      "type": "vis",
-                      "config": {
-                        "type": "xy",
-                        "title": "Requests over time",
-                        "layers": [
-                          {
-                            "type": "line",
-                            "data_source": {
-                              "type": "data_view_spec",
-                              "index_pattern": "kibana_sample_data_logs",
-                              "time_field": "timestamp"
-                            },
-                            "x": {
-                              "operation": "date_histogram",
-                              "field": "timestamp"
-                            },
-                            "y": [
-                              {
-                                "operation": "count"
-                              }
-                            ]
-                          }
-                        ],
-                        "axis": {
-                          "x": {
-                            "title": {
-                              "visible": false
-                            }
-                          }
-                        }
-                      }
-                    },
-                    {
-                      "grid": {
-                        "x": 24,
-                        "y": 0,
-                        "w": 24,
-                        "h": 10
-                      },
-                      "type": "vis",
-                      "config": {
-                        "type": "xy",
-                        "title": "Requests over time (ES|QL)",
-                        "layers": [
-                          {
-                            "type": "line",
-                            "data_source": {
-                              "type": "esql",
-                              "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
-                            },
-                            "x": {
-                              "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
-                            },
-                            "y": [
-                              {
-                                "column": "count"
-                              }
-                            ]
-                          }
-                        ],
-                        "axis": {
-                          "x": {
-                            "title": {
-                              "visible": false
-                            }
-                          }
-                        }
-                      }
-                    }
-                  ]
-                }
-              ]
-            }
       x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
@@ -27656,244 +27149,6 @@ paths:
       summary: Upsert a dashboard
       tags:
         - Dashboards
-      x-codeSamples:
-        - label: Update a dashboard - cURL
-          lang: cURL
-          source: |
-            curl -X PUT "${KIBANA_URL}/api/dashboards/3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b" \
-              -H "Authorization: ApiKey ${API_KEY}" \
-              -H "kbn-xsrf: true" \
-              -H "Content-Type: application/json" \
-              -d '{
-              "title": "Web logs overview",
-              "panels": [
-                {
-                  "grid": {
-                    "x": 0,
-                    "y": 0,
-                    "w": 12,
-                    "h": 5
-                  },
-                  "type": "vis",
-                  "config": {
-                    "type": "metric",
-                    "data_source": {
-                      "type": "data_view_spec",
-                      "index_pattern": "kibana_sample_data_logs",
-                      "time_field": "timestamp"
-                    },
-                    "metrics": [
-                      {
-                        "type": "primary",
-                        "operation": "count"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "grid": {
-                    "x": 12,
-                    "y": 0,
-                    "w": 12,
-                    "h": 5
-                  },
-                  "type": "vis",
-                  "config": {
-                    "type": "metric",
-                    "data_source": {
-                      "type": "data_view_spec",
-                      "index_pattern": "kibana_sample_data_logs",
-                      "time_field": "timestamp"
-                    },
-                    "metrics": [
-                      {
-                        "type": "primary",
-                        "operation": "average",
-                        "field": "bytes"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "grid": {
-                    "x": 0,
-                    "y": 8,
-                    "w": 24,
-                    "h": 10
-                  },
-                  "type": "vis",
-                  "config": {
-                    "type": "xy",
-                    "title": "Requests over time",
-                    "layers": [
-                      {
-                        "type": "line",
-                        "data_source": {
-                          "type": "esql",
-                          "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
-                        },
-                        "x": {
-                          "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
-                        },
-                        "y": [
-                          {
-                            "column": "count"
-                          }
-                        ]
-                      }
-                    ],
-                    "axis": {
-                      "x": {
-                        "title": {
-                          "visible": false
-                        }
-                      }
-                    }
-                  }
-                },
-                {
-                  "grid": {
-                    "x": 24,
-                    "y": 8,
-                    "w": 12,
-                    "h": 5
-                  },
-                  "type": "vis",
-                  "config": {
-                    "type": "metric",
-                    "data_source": {
-                      "type": "data_view_spec",
-                      "index_pattern": "kibana_sample_data_logs",
-                      "time_field": "timestamp"
-                    },
-                    "metrics": [
-                      {
-                        "type": "primary",
-                        "operation": "unique_count",
-                        "field": "clientip"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }'
-        - label: Update a dashboard - Console
-          lang: Console
-          source: |
-            PUT kbn:/api/dashboards/3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b
-            {
-              "title": "Web logs overview",
-              "panels": [
-                {
-                  "grid": {
-                    "x": 0,
-                    "y": 0,
-                    "w": 12,
-                    "h": 5
-                  },
-                  "type": "vis",
-                  "config": {
-                    "type": "metric",
-                    "data_source": {
-                      "type": "data_view_spec",
-                      "index_pattern": "kibana_sample_data_logs",
-                      "time_field": "timestamp"
-                    },
-                    "metrics": [
-                      {
-                        "type": "primary",
-                        "operation": "count"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "grid": {
-                    "x": 12,
-                    "y": 0,
-                    "w": 12,
-                    "h": 5
-                  },
-                  "type": "vis",
-                  "config": {
-                    "type": "metric",
-                    "data_source": {
-                      "type": "data_view_spec",
-                      "index_pattern": "kibana_sample_data_logs",
-                      "time_field": "timestamp"
-                    },
-                    "metrics": [
-                      {
-                        "type": "primary",
-                        "operation": "average",
-                        "field": "bytes"
-                      }
-                    ]
-                  }
-                },
-                {
-                  "grid": {
-                    "x": 0,
-                    "y": 8,
-                    "w": 24,
-                    "h": 10
-                  },
-                  "type": "vis",
-                  "config": {
-                    "type": "xy",
-                    "title": "Requests over time",
-                    "layers": [
-                      {
-                        "type": "line",
-                        "data_source": {
-                          "type": "esql",
-                          "query": "FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
-                        },
-                        "x": {
-                          "column": "BUCKET(@timestamp, 75, ?_tstart, ?_tend)"
-                        },
-                        "y": [
-                          {
-                            "column": "count"
-                          }
-                        ]
-                      }
-                    ],
-                    "axis": {
-                      "x": {
-                        "title": {
-                          "visible": false
-                        }
-                      }
-                    }
-                  }
-                },
-                {
-                  "grid": {
-                    "x": 24,
-                    "y": 8,
-                    "w": 12,
-                    "h": 5
-                  },
-                  "type": "vis",
-                  "config": {
-                    "type": "metric",
-                    "data_source": {
-                      "type": "data_view_spec",
-                      "index_pattern": "kibana_sample_data_logs",
-                      "time_field": "timestamp"
-                    },
-                    "metrics": [
-                      {
-                        "type": "primary",
-                        "operation": "unique_count",
-                        "field": "clientip"
-                      }
-                    ]
-                  }
-                }
-              ]
-            }
       x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
@@ -76471,6 +75726,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -76584,14 +75840,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -77013,6 +76272,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -77089,6 +76349,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -77202,14 +76463,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -77631,6 +76895,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     host:
                       additionalProperties: false
@@ -77739,6 +77004,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -77852,14 +77118,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -78281,6 +77550,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -78364,6 +77634,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -78524,14 +77795,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -78952,6 +78226,7 @@ paths:
                       properties:
                         ingested:
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -79145,6 +78420,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -79258,14 +78534,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -79687,6 +78966,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -79763,6 +79043,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -79876,14 +79157,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -80305,6 +79589,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     host:
                       additionalProperties: false
@@ -80413,6 +79698,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -80526,14 +79812,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -80955,6 +80244,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -81038,6 +80328,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -81198,14 +80489,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -81626,6 +80920,7 @@ paths:
                       properties:
                         ingested:
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -81819,6 +81114,7 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
+                                maxLength: 64
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -81932,14 +81228,17 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -82361,6 +81660,7 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
+                                    maxLength: 64
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -82437,6 +81737,7 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
+                                maxLength: 64
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -82550,14 +81851,17 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -82979,6 +82283,7 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
+                                    maxLength: 64
                                     type: string
                               host:
                                 additionalProperties: false
@@ -83087,6 +82392,7 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
+                                maxLength: 64
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -83200,14 +82506,17 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -83629,6 +82938,7 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
+                                    maxLength: 64
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -83712,6 +83022,7 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
+                                maxLength: 64
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -83872,14 +83183,17 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -84300,6 +83614,7 @@ paths:
                                 properties:
                                   ingested:
                                     format: date-time
+                                    maxLength: 64
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -142819,264 +142134,6 @@ paths:
       summary: Create visualization
       tags:
         - Visualizations
-      x-codeSamples:
-        - label: Create a metric visualization - cURL
-          lang: cURL_metric
-          source: |
-            curl -X POST "${KIBANA_URL}/api/visualizations" \
-              -H "Authorization: ApiKey ${API_KEY}" \
-              -H "kbn-xsrf: true" \
-              -H "Content-Type: application/json" \
-              -d '{
-              "type": "metric",
-              "title": "Total requests",
-              "data_source": {
-                "type": "data_view_spec",
-                "index_pattern": "kibana_sample_data_logs",
-                "time_field": "timestamp"
-              },
-              "metrics": [
-                {
-                  "type": "primary",
-                  "operation": "count"
-                }
-              ]
-            }'
-        - label: Create a metric visualization - Console
-          lang: Console_metric
-          source: |
-            POST kbn:/api/visualizations
-            {
-              "type": "metric",
-              "title": "Total requests",
-              "data_source": {
-                "type": "data_view_spec",
-                "index_pattern": "kibana_sample_data_logs",
-                "time_field": "timestamp"
-              },
-              "metrics": [
-                {
-                  "type": "primary",
-                  "operation": "count"
-                }
-              ]
-            }
-        - label: Create an XY line chart - cURL
-          lang: cURL_xy
-          source: |
-            curl -X POST "${KIBANA_URL}/api/visualizations" \
-              -H "Authorization: ApiKey ${API_KEY}" \
-              -H "kbn-xsrf: true" \
-              -H "Content-Type: application/json" \
-              -d '{
-              "type": "xy",
-              "title": "Log entries over time",
-              "layers": [
-                {
-                  "type": "line",
-                  "data_source": {
-                    "type": "data_view_spec",
-                    "index_pattern": "kibana_sample_data_logs",
-                    "time_field": "timestamp"
-                  },
-                  "x": {
-                    "operation": "date_histogram",
-                    "field": "timestamp"
-                  },
-                  "y": [
-                    {
-                      "operation": "count"
-                    }
-                  ]
-                }
-              ]
-            }'
-        - label: Create an XY line chart - Console
-          lang: Console_xy
-          source: |
-            POST kbn:/api/visualizations
-            {
-              "type": "xy",
-              "title": "Log entries over time",
-              "layers": [
-                {
-                  "type": "line",
-                  "data_source": {
-                    "type": "data_view_spec",
-                    "index_pattern": "kibana_sample_data_logs",
-                    "time_field": "timestamp"
-                  },
-                  "x": {
-                    "operation": "date_histogram",
-                    "field": "timestamp"
-                  },
-                  "y": [
-                    {
-                      "operation": "count"
-                    }
-                  ]
-                }
-              ]
-            }
-        - label: Create a pie/donut chart - cURL
-          lang: cURL_pie
-          source: |
-            curl -X POST "${KIBANA_URL}/api/visualizations" \
-              -H "Authorization: ApiKey ${API_KEY}" \
-              -H "kbn-xsrf: true" \
-              -H "Content-Type: application/json" \
-              -d '{
-              "type": "pie",
-              "title": "Requests by response code",
-              "data_source": {
-                "type": "data_view_spec",
-                "index_pattern": "kibana_sample_data_logs",
-                "time_field": "timestamp"
-              },
-              "metrics": [
-                {
-                  "operation": "count"
-                }
-              ],
-              "group_by": [
-                {
-                  "operation": "terms",
-                  "fields": [
-                    "response.keyword"
-                  ],
-                  "limit": 5
-                }
-              ],
-              "styling": {
-                "donut_hole": "m"
-              }
-            }'
-        - label: Create a pie/donut chart - Console
-          lang: Console_pie
-          source: |
-            POST kbn:/api/visualizations
-            {
-              "type": "pie",
-              "title": "Requests by response code",
-              "data_source": {
-                "type": "data_view_spec",
-                "index_pattern": "kibana_sample_data_logs",
-                "time_field": "timestamp"
-              },
-              "metrics": [
-                {
-                  "operation": "count"
-                }
-              ],
-              "group_by": [
-                {
-                  "operation": "terms",
-                  "fields": [
-                    "response.keyword"
-                  ],
-                  "limit": 5
-                }
-              ],
-              "styling": {
-                "donut_hole": "m"
-              }
-            }
-        - label: Create a data table - cURL
-          lang: cURL_table
-          source: |
-            curl -X POST "${KIBANA_URL}/api/visualizations" \
-              -H "Authorization: ApiKey ${API_KEY}" \
-              -H "kbn-xsrf: true" \
-              -H "Content-Type: application/json" \
-              -d '{
-              "type": "data_table",
-              "title": "Top response codes",
-              "data_source": {
-                "type": "data_view_spec",
-                "index_pattern": "kibana_sample_data_logs",
-                "time_field": "timestamp"
-              },
-              "metrics": [
-                {
-                  "operation": "count"
-                }
-              ],
-              "rows": [
-                {
-                  "operation": "terms",
-                  "fields": [
-                    "response.keyword"
-                  ],
-                  "limit": 5
-                }
-              ]
-            }'
-        - label: Create a data table - Console
-          lang: Console_table
-          source: |
-            POST kbn:/api/visualizations
-            {
-              "type": "data_table",
-              "title": "Top response codes",
-              "data_source": {
-                "type": "data_view_spec",
-                "index_pattern": "kibana_sample_data_logs",
-                "time_field": "timestamp"
-              },
-              "metrics": [
-                {
-                  "operation": "count"
-                }
-              ],
-              "rows": [
-                {
-                  "operation": "terms",
-                  "fields": [
-                    "response.keyword"
-                  ],
-                  "limit": 5
-                }
-              ]
-            }
-        - label: Create a visualization using a library data view - cURL
-          lang: cURL_library
-          source: |
-            curl -X POST "${KIBANA_URL}/api/visualizations" \
-              -H "Authorization: ApiKey ${API_KEY}" \
-              -H "kbn-xsrf: true" \
-              -H "Content-Type: application/json" \
-              -d '{
-              "type": "metric",
-              "title": "Total requests (library data view)",
-              "data_source": {
-                "type": "data_view_reference",
-                "ref_id": "90943e30-9a47-11e8-b64d-95841ca0b247"
-              },
-              "metrics": [
-                {
-                  "type": "primary",
-                  "operation": "count"
-                }
-              ]
-            }'
-        - label: Create a visualization using a library data view - Console
-          lang: Console_library
-          source: |
-            POST kbn:/api/visualizations
-            {
-              "type": "metric",
-              "title": "Total requests (library data view)",
-              "data_source": {
-                "type": "data_view_reference",
-                "ref_id": "90943e30-9a47-11e8-b64d-95841ca0b247"
-              },
-              "metrics": [
-                {
-                  "type": "primary",
-                  "operation": "count"
-                }
-              ]
-            }
       x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
@@ -143377,48 +142434,6 @@ paths:
       summary: Upsert visualization
       tags:
         - Visualizations
-      x-codeSamples:
-        - label: Update a visualization - cURL
-          lang: cURL
-          source: |
-            curl -X PUT "${KIBANA_URL}/api/visualizations/1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d" \
-              -H "Authorization: ApiKey ${API_KEY}" \
-              -H "kbn-xsrf: true" \
-              -H "Content-Type: application/json" \
-              -d '{
-              "type": "metric",
-              "title": "Total requests (updated)",
-              "data_source": {
-                "type": "data_view_spec",
-                "index_pattern": "kibana_sample_data_logs",
-                "time_field": "timestamp"
-              },
-              "metrics": [
-                {
-                  "type": "primary",
-                  "operation": "count"
-                }
-              ]
-            }'
-        - label: Update a visualization - Console
-          lang: Console
-          source: |
-            PUT kbn:/api/visualizations/1e4f0a30-b3c5-11ef-bd7a-2b6b1a8c0f3d
-            {
-              "type": "metric",
-              "title": "Total requests (updated)",
-              "data_source": {
-                "type": "data_view_spec",
-                "index_pattern": "kibana_sample_data_logs",
-                "time_field": "timestamp"
-              },
-              "metrics": [
-                {
-                  "type": "primary",
-                  "operation": "count"
-                }
-              ]
-            }
       x-state: Generally available; added in 9.5.0
       x-metaTags:
         - content: Kibana
@@ -158177,6 +157192,7 @@ components:
         created_at:
           description: The ISO datetime when the action policy was created.
           format: date-time
+          maxLength: 64
           type: string
         created_by:
           allOf:
@@ -158231,6 +157247,7 @@ components:
         updated_at:
           description: The ISO datetime when the action policy was last updated.
           format: date-time
+          maxLength: 64
           type: string
         updated_by:
           allOf:
@@ -158676,6 +157693,7 @@ components:
         snoozed_until:
           description: The ISO datetime until which the targeted action policies should be snoozed.
           format: date-time
+          maxLength: 64
           type: string
       required:
         - ids
@@ -158931,6 +157949,7 @@ components:
           type: array
         dispatched_at:
           format: date-time
+          maxLength: 64
           type: string
         error:
           additionalProperties: false
@@ -159202,6 +158221,7 @@ components:
       properties:
         ended_at:
           format: date-time
+          maxLength: 64
           type: string
         error:
           additionalProperties: false
@@ -159242,6 +158262,7 @@ components:
           type: string
         started_at:
           format: date-time
+          maxLength: 64
           type: string
         timings:
           additionalProperties: false
@@ -159644,6 +158665,7 @@ components:
         created_at:
           description: ISO timestamp when the rule was created.
           format: date-time
+          maxLength: 64
           type: string
         created_by:
           allOf:
@@ -159745,6 +158767,7 @@ components:
         updated_at:
           description: ISO timestamp when the rule was last updated.
           format: date-time
+          maxLength: 64
           type: string
         updated_by:
           allOf:
@@ -159912,6 +158935,7 @@ components:
         snoozed_until:
           description: The ISO datetime until which the action policy should be snoozed.
           format: date-time
+          maxLength: 64
           type: string
       required:
         - snoozed_until
