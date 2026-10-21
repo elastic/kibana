@@ -15,6 +15,7 @@ export type {
   ToolAvailabilityHandler,
   ToolAvailabilityResult,
   ToolAvailabilityConfig,
+  ToolSchemaContext,
   ToolReturnSummarizerFn,
   BuiltInToolConfirmationPolicy,
   BuiltInToolConfirmationContext,

@@ -71,6 +71,11 @@ export type ToolAvailabilityResult = AvailabilityResult;
 export type ToolAvailabilityHandler = AvailabilityHandler;
 export type ToolAvailabilityConfig = AvailabilityConfig;
 
+/**
+ * Request-scoped context passed to {@link BuiltinToolDefinition.getSchema}.
+ */
+export type ToolSchemaContext = AvailabilityContext;
+
 export type ToolPolicyConfirmationDefinition = Omit<ConfirmPromptDefinition, 'id'>;
 
 export interface BuiltInToolConfirmationContext<
@@ -163,6 +168,12 @@ export interface BuiltinToolDefinition<
    */
   schema: RunInput;
   /**
+   * Optional request-scoped variant of {@link schema}, used in its place when exposing the tool
+   * to agents and MCP clients and when validating its input, e.g. for parameter defaults that
+   * depend on the current space's settings.
+   */
+  getSchema?: (context: ToolSchemaContext) => MaybePromise<RunInput>;
+  /**
    * Handler to call to execute the tool.
    */
   handler: ToolHandlerFn<z.infer<RunInput>, TResult>;
@@ -186,7 +197,7 @@ export interface BuiltinToolDefinition<
 export type InternalBuiltinToolDefinition<
   RunInput extends ZodObject<any> = ZodObject<any>,
   TResult extends ToolResult = ToolResult
-> = Omit<BuiltinToolDefinition<RunInput, TResult>, 'annotations'>;
+> = Omit<BuiltinToolDefinition<RunInput, TResult>, 'annotations' | 'getSchema'>;
 
 type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly' | 'experimental'> &
   BuiltInToolSpecificConfig;

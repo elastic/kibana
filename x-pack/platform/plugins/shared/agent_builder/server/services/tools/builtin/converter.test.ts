@@ -150,6 +150,47 @@ describe('convertTool (builtin)', () => {
     });
     expect(result.annotations).toEqual(defaultAnnotations);
   });
+
+  it('uses the static schema when the tool has no request-scoped schema', async () => {
+    const schema = z.object({ foo: z.string() });
+    const tool = makeBuiltinRegistration({ schema });
+    const result = convertTool({
+      tool,
+      definition: builtinDefinition,
+      context: baseContext,
+      cache: new ToolAvailabilityCache(),
+    });
+    expect(await result.getSchema()).toBe(schema);
+  });
+
+  it('resolves the request-scoped schema with the schema context', async () => {
+    const dynamicSchema = z.object({ bar: z.string() });
+    const getSchema = jest.fn().mockResolvedValue(dynamicSchema);
+    const schemaContext = { ...baseContext, uiSettings: {} as any };
+    const tool = makeBuiltinRegistration({ getSchema });
+    const result = convertTool({
+      tool,
+      definition: builtinDefinition,
+      context: baseContext,
+      getSchemaContext: () => schemaContext,
+      cache: new ToolAvailabilityCache(),
+    });
+
+    expect(await result.getSchema()).toBe(dynamicSchema);
+    expect(getSchema).toHaveBeenCalledWith(schemaContext);
+  });
+
+  it('throws when a request-scoped schema is defined without a schema context', () => {
+    const tool = makeBuiltinRegistration({ getSchema: jest.fn() });
+    expect(() =>
+      convertTool({
+        tool,
+        definition: builtinDefinition,
+        context: baseContext,
+        cache: new ToolAvailabilityCache(),
+      })
+    ).toThrow(/defines getSchema but no schema context is set/);
+  });
 });
 
 describe('convertTool (static/non-builtin) — default annotations', () => {

@@ -11,6 +11,7 @@ import type {
   McpToolAnnotations,
   StaticToolRegistration,
   InternalToolDefinition,
+  ToolSchemaContext,
 } from '@kbn/agent-builder-server/tools';
 import type {
   ToolTypeDefinition,
@@ -24,14 +25,21 @@ export const convertTool = ({
   tool,
   definition,
   context,
+  getSchemaContext,
   cache,
 }: {
   tool: StaticToolRegistration;
   definition: ToolTypeDefinition | BuiltinToolTypeDefinition;
   context: ToolDynamicPropsContext;
+  /** Required to convert built-in tools defining a request-scoped `getSchema`. */
+  getSchemaContext?: () => ToolSchemaContext;
   cache: ToolAvailabilityCache;
 }): InternalToolDefinition => {
   if (isBuiltinToolRegistration(tool)) {
+    const { getSchema } = tool;
+    if (getSchema && !getSchemaContext) {
+      throw new Error(`Built-in tool '${tool.id}' defines getSchema but no schema context is set`);
+    }
     return {
       id: tool.id,
       type: ToolType.builtin,
@@ -48,7 +56,8 @@ export const convertTool = ({
           return { status: 'available' };
         }
       },
-      getSchema: () => tool.schema,
+      getSchema: () =>
+        getSchema && getSchemaContext ? getSchema(getSchemaContext()) : tool.schema,
       getHandler: () => tool.handler,
       summarizeToolReturn: tool.summarizeToolReturn,
       maxResultTokens: tool.maxResultTokens,

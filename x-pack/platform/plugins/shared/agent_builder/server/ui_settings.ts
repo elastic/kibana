@@ -13,6 +13,7 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AGENT_BUILDER_BASH_SUPPORT_SETTING_ID,
   AGENT_BUILDER_API_DISCOVERY_SETTING_ID,
+  AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID,
   AGENT_BUILDER_TRACING_ENABLED_SETTING_ID,
   AGENT_BUILDER_TRACING_USER_PROMPTS_SETTING_ID,
   AGENT_BUILDER_TRACING_LLM_RESPONSES_SETTING_ID,
@@ -80,6 +81,22 @@ export const registerUISettings = ({ uiSettings }: { uiSettings: UiSettingsServi
       schema: schema.boolean(),
       value: false,
       experimental: true,
+      requiresPageReload: false,
+      readonly: false,
+    },
+    [AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID]: {
+      description: i18n.translate(
+        'xpack.agentBuilder.uiSettings.includeFrozenByDefault.description',
+        {
+          defaultMessage:
+            'Makes the built-in Elastic Agent Builder tools include frozen tier data unless the agent explicitly excludes it. Querying the frozen tier recovers searchable snapshots from object storage, which is slow and can make tool calls time out. Custom tools are not affected and keep their own setting.',
+        }
+      ),
+      name: i18n.translate('xpack.agentBuilder.uiSettings.includeFrozenByDefault.name', {
+        defaultMessage: 'Elastic Agent Builder: Include frozen tier data by default',
+      }),
+      schema: schema.boolean(),
+      value: false,
       requiresPageReload: false,
       readonly: false,
     },

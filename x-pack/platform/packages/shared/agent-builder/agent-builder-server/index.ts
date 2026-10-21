@@ -63,6 +63,7 @@ export type {
   ToolAvailabilityHandler,
   ToolAvailabilityResult,
   ToolAvailabilityConfig,
+  ToolSchemaContext,
   InternalToolAvailabilityHandler,
   InternalToolDefinition,
   ToolReturnSummarizerFn,
