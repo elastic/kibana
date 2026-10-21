@@ -100,9 +100,7 @@ export async function reassignBatch(
     if (errorList.length > 0 && errorList.every((e) => e instanceof AgentAlreadyAssignedError)) {
       throw new AgentAlreadyAssignedError('No agents to reassign, all agents are already assigned');
     }
-    throw new AgentReassignmentError(
-      'No agents to reassign, already assigned, hosted or agentless agents'
-    );
+    throw new AgentReassignmentError('No agents to reassign, already assigned or hosted agents');
   }
 
   await bulkUpdateAgents(
