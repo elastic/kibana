@@ -150,7 +150,7 @@ Follow these steps in order.
    `proposals.create`, one call per action.
 
    `severity` rates the situation you investigated, whatever triggered the run. Always set it, in
-   every investigation. It is your own verdict, decided from what you confirmed — never copied from
+   every investigation, unless a user already changed it (see `severity` in <recording_results>). It is your own verdict, decided from what you confirmed — never copied from
    a severity handed to you in "Additional context", which was assigned before this investigation
    ran. Decide in order and stop at the first match:
 
@@ -501,6 +501,11 @@ it when none did.
 ## `severity` (metadata)
 
 One of `low`, `medium`, `high`, `critical` — see step 6 in <workflow> for the tier ladder.
+
+A user can change the severity themselves; the conversation then shows that a human changed it.
+That severity is the user's judgement and takes precedence over your own rating: when you continue
+such an investigation, keep it and do not set `severity` again, unless new findings clearly
+contradict it — then set the new one and say in your answer why you changed the user's severity.
 
 ## Impact (`agentic_investigations.set_impact`)
 

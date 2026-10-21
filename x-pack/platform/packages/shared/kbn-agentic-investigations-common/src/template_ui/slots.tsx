@@ -23,6 +23,7 @@ import {
 import type {
   RenderAssignees,
   RenderStatus,
+  RenderSeverity,
   RenderLinkedInvestigations,
   RenderOverview,
   RenderLiveState,
@@ -90,6 +91,7 @@ export const OverviewSlot = ({
 export interface HeaderSlotProps extends InvestigationSlotProps {
   renderAssignees?: RenderAssignees;
   renderStatus?: RenderStatus;
+  renderSeverity?: RenderSeverity;
   renderLiveState?: RenderLiveState;
   renderTitle?: RenderTitle;
 }
@@ -98,6 +100,7 @@ export const HeaderSlot = ({
   conversation,
   renderAssignees,
   renderStatus,
+  renderSeverity,
   renderLiveState,
   renderTitle,
   refetchConversation,
@@ -120,11 +123,19 @@ export const HeaderSlot = ({
         refetchConversation,
       })
     : undefined;
+  const severityNode = renderSeverity
+    ? renderSeverity({
+        conversationId: conversation.id,
+        severity: investigation.severity,
+        refetchConversation,
+      })
+    : undefined;
   return (
     <ConversationDetailsFlyoutHeader
       investigation={investigation}
       assigneesNode={assigneesNode}
       statusNode={statusNode}
+      severityNode={severityNode}
       liveStateNode={renderLiveState?.({
         conversationId: conversation.id,
         severity: investigation.severity,
