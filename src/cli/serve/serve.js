@@ -140,26 +140,44 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
       }
     }
 
+    if (opts.http2 && opts.ssl === false) {
+      throw new Error("Can't use --http2 with --no-ssl. HTTP/2 requires TLS.");
+    }
+
     if (opts.http2) {
       set('server.protocol', 'http2');
     }
 
-    // HTTP TLS configuration
-    if (opts.ssl || opts.http2) {
+    if (opts.ssl !== undefined) {
+      set('server.ssl.enabled', opts.ssl);
+    } else if (opts.http2 || (opts.devConfig !== false && !has('server.ssl.enabled'))) {
+      set('server.ssl.enabled', true);
+    }
+
+    // Inspect all configuration sources before choosing fallback TLS credentials.
+    const serverSslConfig = _.merge(
+      {},
+      get('server.ssl', {}),
+      _.get(extraCliOptions, 'server.ssl', {}),
+      _.get(keystoreConfig, 'server.ssl', {})
+    );
+    const hasCustomCredentials = ['certificate', 'key', 'keystore.path'].some((path) =>
+      _.has(serverSslConfig, path)
+    );
+
+    if (serverSslConfig.enabled === true && !hasCustomCredentials) {
       // @kbn/dev-utils is part of devDependencies
       // eslint-disable-next-line import/no-extraneous-dependencies
       const { CA_CERT_PATH, KBN_KEY_PATH, KBN_CERT_PATH } = require('@kbn/dev-utils');
 
-      ensureNotDefined('server.ssl.certificate');
-      ensureNotDefined('server.ssl.key');
-      ensureNotDefined('server.ssl.keystore.path');
-      ensureNotDefined('server.ssl.truststore.path');
-      ensureNotDefined('server.ssl.certificateAuthorities');
-
-      set('server.ssl.enabled', true);
       set('server.ssl.certificate', KBN_CERT_PATH);
       set('server.ssl.key', KBN_KEY_PATH);
-      set('server.ssl.certificateAuthorities', CA_CERT_PATH);
+      if (
+        !_.has(serverSslConfig, 'certificateAuthorities') &&
+        !_.has(serverSslConfig, 'truststore.path')
+      ) {
+        set('server.ssl.certificateAuthorities', CA_CERT_PATH);
+      }
     }
   }
 
@@ -280,10 +298,10 @@ export default function (program) {
 
   if (DEV_MODE_SUPPORTED) {
     command
-      .option('--dev', 'Run the server with development mode defaults')
-      .option('--ssl', 'Run the dev server using HTTPS')
-      .option('--no-ssl', 'Run the server without HTTPS')
-      .option('--http2', 'Run the dev server using HTTP2 with TLS')
+      .option('--dev', 'Run the server with development mode defaults, including HTTP/2 with TLS')
+      .option('--ssl', 'Run the dev server using HTTPS and connect to Elasticsearch using HTTPS')
+      .option('--no-ssl', 'Disable HTTPS for the dev server (defaults to HTTP/1)')
+      .option('--http2', 'Explicitly enable HTTP/2 with TLS for the dev server')
       .option('--dist', 'Use production assets from kbn/optimizer')
       .option(
         '--no-base-path',
@@ -292,7 +310,10 @@ export default function (program) {
       .option('--no-watch', 'Prevents automatic restarts of the server in --dev mode')
       .option('--no-optimizer', 'Disable the kbn/optimizer completely')
       .option('--no-cache', 'Disable the kbn/optimizer cache')
-      .option('--no-dev-config', 'Prevents loading the kibana.dev.yml file in --dev mode')
+      .option(
+        '--no-dev-config',
+        'Prevents loading the kibana.dev.yml file and enabling TLS by default in --dev mode'
+      )
       .option(
         '--no-dev-credentials',
         'Prevents setting default values for `elasticsearch.username` and `elasticsearch.password` in --dev mode'
@@ -335,7 +356,7 @@ export default function (program) {
       watch: !!opts.watch,
       runExamples: !!opts.runExamples,
       // We want to run without base path when the `--run-examples` flag is given so that we can use local
-      // links in other documentation sources, like "View this tutorial [here](http://localhost:5601/app/tutorial/xyz)".
+      // links in other documentation sources, like "View this tutorial [here](https://localhost:5601/app/tutorial/xyz)".
       // We can tell users they only have to run with `pnpm start --run-examples` to get those
       // local links to work.  Similar to what we do for "View in Console" links in our
       // elastic.co links.

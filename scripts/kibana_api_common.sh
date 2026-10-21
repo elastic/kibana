@@ -26,7 +26,7 @@ KIBANA_USE_SESSION="${KIBANA_USE_SESSION:-false}"
 _SESSION_COOKIE_JAR=""
 
 # Candidates to try: protocol x auth permutations
-_URLS=("http://localhost:5601" "https://localhost:5601")
+_URLS=("https://localhost:5601" "http://localhost:5601")
 _AUTHS=("elastic:changeme" "elastic_serverless:changeme")
 
 _try_kibana() {
@@ -35,7 +35,7 @@ _try_kibana() {
   local http_code
 
   # First check if Kibana is reachable at all (/api/status is unauthenticated)
-  http_code="$(curl -s -o /dev/null -w "%{http_code}" -k "$url/api/status" 2>/dev/null || echo "000")"
+  http_code="$(curl -s -o /dev/null -w "%{http_code}" -k "$url/api/status" 2>/dev/null || true)"
   if [[ "$http_code" == "000" ]]; then
     return 1  # Not reachable
   fi
@@ -45,7 +45,7 @@ _try_kibana() {
   http_code="$(curl -s -o /dev/null -w "%{http_code}" -k -u "$auth" \
     -H "kbn-xsrf: true" \
     -H "x-elastic-internal-origin: Kibana" \
-    "$url/api/security/v1/me" 2>/dev/null || echo "000")"
+    "$url/api/security/v1/me" 2>/dev/null || true)"
   [[ "$http_code" != "000" && "$http_code" != "401" ]]
 }
 

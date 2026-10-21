@@ -68,7 +68,7 @@ done
 
 echo "=== Starting Kibana ==="
 NODE_OPTIONS="${NODE_OPTIONS:+${NODE_OPTIONS} }--max-old-space-size=8192" \
-  pnpm start --no-base-path --server.host=0.0.0.0 >target/river-kibana-warmup.log 2>&1 &
+  pnpm start --no-base-path --no-ssl --server.host=0.0.0.0 >target/river-kibana-warmup.log 2>&1 &
 KIBANA_PID=$!
 
 for attempt in $(seq 1 120); do

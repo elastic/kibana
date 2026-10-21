@@ -7,25 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { readFileSync } from 'fs';
 import type { Server } from '@hapi/hapi';
 import { EMPTY } from 'rxjs';
-import moment from 'moment';
 import supertest from 'supertest';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
-import { getServerOptions, createServer, type IHttpConfig } from '@kbn/server-http-tools';
-import { ByteSizeValue } from '@kbn/config-schema';
+import { getServerOptions, createServer } from '@kbn/server-http-tools';
 
-import type { BasePathProxyServerOptions } from '../base_path_proxy';
-import { Http2BasePathProxyServer } from '../base_path_proxy';
+import type { BasePathProxyServer, BasePathProxyServerOptions } from '../base_path_proxy';
+import { getBasePathProxyServer } from '../base_path_proxy';
 import { DevConfig } from '../config/dev_config';
+import { HttpConfig, httpConfigSchema } from '../config/http_config';
 import { TestLog } from '../log';
 
 describe('Http2BasePathProxyServer', () => {
   let server: Server;
-  let proxyServer: Http2BasePathProxyServer;
+  let proxyServer: BasePathProxyServer;
   let logger: TestLog;
-  let config: IHttpConfig;
+  let config: HttpConfig;
   let basePath: string;
   let proxySupertest: supertest.Agent;
 
@@ -37,36 +35,29 @@ describe('Http2BasePathProxyServer', () => {
   beforeEach(async () => {
     logger = new TestLog();
 
-    config = {
-      protocol: 'http2',
-      host: '127.0.0.1',
-      port: 10012,
-      shutdownTimeout: moment.duration(30, 'seconds'),
-      keepaliveTimeout: 1000,
-      socketTimeout: 1000,
-      payloadTimeout: 1000,
-      cors: {
-        enabled: false,
-        allowCredentials: false,
-        allowOrigin: [],
-      },
-      ssl: {
-        enabled: true,
-        certificate: await readFileSync(KBN_CERT_PATH, 'utf-8'),
-        key: await readFileSync(KBN_KEY_PATH, 'utf-8'),
-        cipherSuites: ['TLS_AES_256_GCM_SHA384'],
-      },
-      maxPayload: new ByteSizeValue(1024),
-      restrictInternalApis: false,
-    };
+    config = new HttpConfig(
+      httpConfigSchema.validate({
+        host: '127.0.0.1',
+        port: 10012,
+        keepaliveTimeout: 1000,
+        socketTimeout: 1000,
+        payloadTimeout: 1000,
+        ssl: {
+          enabled: true,
+          certificate: KBN_CERT_PATH,
+          key: KBN_KEY_PATH,
+          cipherSuites: ['TLS_AES_256_GCM_SHA384'],
+        },
+      })
+    );
 
     const serverOptions = getServerOptions(config);
     server = createServer(serverOptions);
 
     // setup and start the proxy server
-    const proxyConfig: IHttpConfig = { ...config, port: 10013 };
+    const proxyConfig: HttpConfig = { ...config, port: 10013 };
     const devConfig = new DevConfig({ basePathProxyTarget: config.port });
-    proxyServer = new Http2BasePathProxyServer(logger, proxyConfig, devConfig);
+    proxyServer = getBasePathProxyServer({ log: logger, httpConfig: proxyConfig, devConfig });
     const options: BasePathProxyServerOptions = {
       shouldRedirectFromOldBasePath: () => true,
       delayUntil: () => EMPTY,
@@ -252,5 +243,52 @@ describe('Http2BasePathProxyServer', () => {
     await requestAborted;
 
     expect(propagated).toEqual(true);
+  });
+
+  describe('shouldRedirect', () => {
+    let proxyServerWithoutShouldRedirect: BasePathProxyServer;
+    let proxyWithoutShouldRedirectSupertest: supertest.Agent;
+
+    beforeEach(async () => {
+      // setup and start a proxy server which does not use "shouldRedirectFromOldBasePath"
+      const proxyConfig: HttpConfig = { ...config, port: 10014 };
+      const devConfig = new DevConfig({ basePathProxyTarget: config.port });
+      proxyServerWithoutShouldRedirect = getBasePathProxyServer({
+        log: logger,
+        httpConfig: proxyConfig,
+        devConfig,
+      });
+      await proxyServerWithoutShouldRedirect.start({
+        shouldRedirectFromOldBasePath: () => false,
+        delayUntil: () => EMPTY,
+      });
+      proxyWithoutShouldRedirectSupertest = supertest(`https://127.0.0.1:${proxyConfig.port}`, {
+        http2: true,
+      });
+    });
+
+    afterEach(async () => {
+      await proxyServerWithoutShouldRedirect.stop();
+    });
+
+    test('it will do a redirect if it detects what looks like a stale or previously used base path', async () => {
+      const fakeBasePath = basePath !== '/abc' ? 'abc' : 'efg';
+      const res = await proxySupertest.get(`/${fakeBasePath}/app/home?foo=bar`).expect(302);
+      expect(res.header.location).toEqual(`${basePath}/app/home?foo=bar`);
+    });
+
+    test('it will NOT do a redirect if it detects what looks like a stale or previously used base path if we intentionally turn it off', async () => {
+      const fakeBasePath = basePath !== '/abc' ? 'abc' : 'efg';
+      await proxyWithoutShouldRedirectSupertest.get(`/${fakeBasePath}`).expect(404);
+    });
+
+    test('it will NOT redirect if it detects a larger path than 3 characters', async () => {
+      await proxySupertest.get('/abcde').expect(404);
+    });
+
+    test('it will NOT redirect if it is not a GET verb', async () => {
+      const fakeBasePath = basePath !== '/abc' ? 'abc' : 'efg';
+      await proxySupertest.put(`/${fakeBasePath}`).expect(404);
+    });
   });
 });

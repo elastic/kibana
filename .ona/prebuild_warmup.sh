@@ -43,7 +43,7 @@ for i in $(seq 1 60); do
 done
 
 echo "=== Starting Kibana ==="
-pnpm start --no-base-path --server.host=0.0.0.0 &
+pnpm start --no-base-path --no-ssl --server.host=0.0.0.0 &
 
 echo "Waiting for Kibana to be available..."
 for i in $(seq 1 120); do

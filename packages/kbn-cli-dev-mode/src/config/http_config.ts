@@ -15,9 +15,16 @@ import type { Duration } from 'moment';
 
 export const httpConfigSchema = schema.object(
   {
-    protocol: schema.oneOf([schema.literal('http1'), schema.literal('http2')], {
-      defaultValue: 'http1',
-    }),
+    protocol: schema.conditional(
+      schema.siblingRef('ssl.enabled'),
+      schema.literal(true),
+      schema.oneOf([schema.literal('http1'), schema.literal('http2')], {
+        defaultValue: 'http2',
+      }),
+      schema.oneOf([schema.literal('http1'), schema.literal('http2')], {
+        defaultValue: 'http1',
+      })
+    ),
     host: schema.string({
       defaultValue: 'localhost',
       hostname: true,

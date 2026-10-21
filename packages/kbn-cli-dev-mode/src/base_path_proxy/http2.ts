@@ -72,7 +72,7 @@ export class Http2BasePathProxyServer implements BasePathProxyServer {
 
     const proxyUrl = Url.format({
       protocol: this.httpConfig.ssl.enabled ? 'https' : 'http',
-      host: this.httpConfig.host,
+      host: `${this.httpConfig.host}:${this.httpConfig.port}`,
       pathname: this.httpConfig.basePath,
     });
     this.log.write(
@@ -100,7 +100,10 @@ export class Http2BasePathProxyServer implements BasePathProxyServer {
     }
   }
 
-  private async setupServer({ delayUntil }: Readonly<BasePathProxyServerOptions>) {
+  private async setupServer({
+    delayUntil,
+    shouldRedirectFromOldBasePath,
+  }: Readonly<BasePathProxyServerOptions>) {
     const tlsOptions = getServerTLSOptions(this.httpConfig.ssl);
     this.server = http2.createSecureServer({
       ...tlsOptions,
@@ -181,6 +184,26 @@ export class Http2BasePathProxyServer implements BasePathProxyServer {
               }
             }
           );
+        } else {
+          // It may happen that basepath has changed, but user still uses the old one,
+          // so we can try to check if that's the case and just redirect user to the
+          // same URL, but with valid basepath.
+          const { pathname, search } = Url.parse(inboundRequest.url);
+          const [, oldBasePath = '', ...kbnPathSegments] = (pathname ?? '/').split('/');
+          const kbnPath = kbnPathSegments.join('/');
+
+          const isGet = inboundRequest.method === 'GET';
+          const isBasepathLike = oldBasePath.length === 3;
+
+          if (isGet && isBasepathLike && shouldRedirectFromOldBasePath(kbnPath)) {
+            inboundResponse.writeHead(302, {
+              location: `${this.httpConfig.basePath}/${kbnPath}${search ?? ''}`,
+            });
+            inboundResponse.end();
+          } else {
+            inboundResponse.writeHead(404);
+            inboundResponse.end('Not Found');
+          }
         }
       });
     });
