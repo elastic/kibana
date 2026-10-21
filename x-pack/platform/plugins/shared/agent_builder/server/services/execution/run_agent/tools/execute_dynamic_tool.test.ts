@@ -55,6 +55,7 @@ describe('execute_dynamic_tool', () => {
     toolManager.getDynamicTool.mockImplementation((id) => (id === inner.id ? inner : undefined));
     toolManager.getExecutable.mockImplementation((id) => (id === inner.id ? inner : undefined));
     toolManager.listDynamicTools.mockReturnValue([inner]);
+    toolManager.getToolMeta.mockReturnValue({ origin: undefined, type: undefined });
   });
 
   const execute = (toolParams: Record<string, unknown>) =>
@@ -201,16 +202,41 @@ describe('execute_dynamic_tool', () => {
     ]);
   });
 
-  it('tells the model to call a natively bound tool directly', async () => {
-    const native = createInnerTool({ id: 'platform.core.search' });
+  it('falls back to a natively bound tool called by the wrong path', async () => {
+    const native = createInnerTool({ id: 'platform.core.search', origin: ToolOrigin.registry });
     toolManager.getDynamicTool.mockReturnValue(undefined);
     toolManager.getExecutable.mockImplementation((id) => (id === native.id ? native : undefined));
+    toolManager.getToolMeta.mockImplementation((id) =>
+      id === native.id
+        ? { origin: ToolOrigin.registry, type: ToolType.builtin }
+        : { origin: undefined, type: undefined }
+    );
 
-    const result = await execute({ tool_id: native.id, params: {} });
+    const result = await execute({ tool_id: native.id, params: { query: 'x' } });
+
+    expect(native.execute).toHaveBeenCalledWith(
+      expect.objectContaining({ toolParams: { query: 'x' }, toolCallId: 'call-1' })
+    );
+    expect(result).toMatchObject({ dynamicToolId: 'platform.core.search' });
+  });
+
+  it('never falls back to an internal tool', async () => {
+    const internal = createInnerTool({ id: 'ask_user_question', origin: ToolOrigin.internal });
+    toolManager.getDynamicTool.mockReturnValue(undefined);
+    toolManager.getExecutable.mockImplementation((id) =>
+      id === internal.id ? internal : undefined
+    );
+    toolManager.getToolMeta.mockImplementation((id) =>
+      id === internal.id
+        ? { origin: ToolOrigin.internal, type: ToolType.builtin }
+        : { origin: undefined, type: undefined }
+    );
+
+    const result = await execute({ tool_id: internal.id, params: {} });
 
     expect(errorMessages(result)).toEqual([
-      "Tool 'platform.core.search' is in your tool list: call it directly, not through execute_dynamic_tool.",
+      "Tool 'ask_user_question' is an internal tool in your tool list: call it directly, not through execute_dynamic_tool.",
     ]);
-    expect(native.execute).not.toHaveBeenCalled();
+    expect(internal.execute).not.toHaveBeenCalled();
   });
 });

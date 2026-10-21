@@ -7,7 +7,11 @@
 
 import { z } from '@kbn/zod/v4';
 import { internalTools, ToolOrigin, ToolType } from '@kbn/agent-builder-common';
-import { type AgentBuilderToolEvent, createErrorResult } from '@kbn/agent-builder-server';
+import {
+  type AgentBuilderToolEvent,
+  type ExecutableTool,
+  createErrorResult,
+} from '@kbn/agent-builder-server';
 import { toDynamicToolEvent, type ToolManager } from '@kbn/agent-builder-server/runner';
 import type { ExecutableToolWithOrigin } from '@kbn/agent-builder-server/runner/tool_manager';
 
@@ -55,7 +59,7 @@ Dynamic tools are not in your tool list: their definitions appear in the convers
     // The provider already validated the outer shape; this only narrows the type.
     const { tool_id: toolId, params } = schema.parse(toolParams);
 
-    const tool = toolManager.getDynamicTool(toolId);
+    const tool = resolveTool({ toolId, toolManager });
     if (!tool) {
       return {
         results: [createErrorResult(unavailableToolMessage({ toolId, toolManager }))],
@@ -85,6 +89,29 @@ Dynamic tools are not in your tool list: their definitions appear in the convers
   },
 });
 
+/**
+ * The dynamic tool for `toolId`, or, as a fallback for a model calling a native tool by the wrong
+ * path, the natively bound tool of that id. Internal tools are never reachable this way (mirrors
+ * bash `exec_tool`): some have a dedicated step lifecycle keyed on the outer tool id.
+ */
+const resolveTool = ({
+  toolId,
+  toolManager,
+}: {
+  toolId: string;
+  toolManager: ToolManager;
+}): ExecutableTool | undefined => {
+  const dynamicTool = toolManager.getDynamicTool(toolId);
+  if (dynamicTool) {
+    return dynamicTool;
+  }
+  const { origin } = toolManager.getToolMeta(toolId);
+  if (origin === ToolOrigin.internal) {
+    return undefined;
+  }
+  return toolManager.getExecutable(toolId);
+};
+
 const unavailableToolMessage = ({
   toolId,
   toolManager,
@@ -93,7 +120,8 @@ const unavailableToolMessage = ({
   toolManager: ToolManager;
 }): string => {
   if (toolManager.getExecutable(toolId)) {
-    return `Tool '${toolId}' is in your tool list: call it directly, not through ${internalTools.executeDynamicTool}.`;
+    // only internal tools reach this: any other native tool was dispatched as a fallback
+    return `Tool '${toolId}' is an internal tool in your tool list: call it directly, not through ${internalTools.executeDynamicTool}.`;
   }
   const available = toolManager.listDynamicTools().map((tool) => tool.id);
   const hint =

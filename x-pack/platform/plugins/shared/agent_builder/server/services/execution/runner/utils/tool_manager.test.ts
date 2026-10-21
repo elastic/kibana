@@ -1002,19 +1002,21 @@ describe('ToolManager', () => {
   });
 
   describe('dynamic tool registry', () => {
-    it('registers tools without binding them to the model', () => {
+    const addDynamic = (tools: ExecutableToolWithOrigin[]) =>
+      toolManager.addTools({ type: ToolManagerToolType.dynamic, tools });
+
+    it('registers tools without binding them to the model', async () => {
       const tool = createMockExecutableTool('dynamic-1');
 
-      const registered = toolManager.registerDynamicTools([tool]);
+      await addDynamic([tool]);
 
-      expect(registered).toEqual([tool]);
       expect(toolManager.listDynamicTools()).toEqual([tool]);
       expect(toolManager.getDynamicTool('dynamic-1')).toBe(tool);
       expect(toolManager.list()).toEqual([]);
       expect(toolManager.getDynamicToolIds()).toEqual([]);
     });
 
-    it('skips ids already bound natively and returns only what it registered', async () => {
+    it('skips ids already bound natively', async () => {
       await toolManager.addTools({
         type: ToolManagerToolType.executable,
         tools: createMockExecutableTool('native-1'),
@@ -1023,29 +1025,29 @@ describe('ToolManager', () => {
       const shadowed = createMockExecutableTool('native-1', 'dynamic copy');
       const dynamic = createMockExecutableTool('dynamic-1');
 
-      const registered = toolManager.registerDynamicTools([shadowed, dynamic]);
+      await addDynamic([shadowed, dynamic]);
 
-      expect(registered).toEqual([dynamic]);
+      expect(toolManager.listDynamicTools()).toEqual([dynamic]);
       expect(toolManager.getDynamicTool('native-1')).toBeUndefined();
       expect(toolManager.getExecutable('native-1')?.description).toBe('Test tool');
     });
 
-    it('replaces a dynamic tool registered again under the same id', () => {
-      toolManager.registerDynamicTools([createMockExecutableTool('dynamic-1', 'first')]);
+    it('replaces a dynamic tool registered again under the same id', async () => {
+      await addDynamic([createMockExecutableTool('dynamic-1', 'first')]);
       const second = createMockExecutableTool('dynamic-1', 'second');
 
-      toolManager.registerDynamicTools([second]);
+      await addDynamic([second]);
 
       expect(toolManager.listDynamicTools()).toEqual([second]);
     });
 
-    it('resolves executable, meta and summarizer from the registry when not bound natively', () => {
+    it('resolves executable, meta and summarizer from the registry when not bound natively', async () => {
       const summarizer = jest.fn();
       const tool = {
         ...createMockExecutableTool('dynamic-1', 'Dynamic', ToolOrigin.inline),
         summarizeToolReturn: summarizer,
       };
-      toolManager.registerDynamicTools([tool]);
+      await addDynamic([tool]);
 
       expect(toolManager.getExecutable('dynamic-1')).toBe(tool);
       expect(toolManager.getToolMeta('dynamic-1')).toEqual({
@@ -1098,10 +1100,11 @@ describe('ToolManager', () => {
       });
     });
 
-    it('applies the registered inner tool budget to a tagged return', () => {
-      toolManager.registerDynamicTools([
-        { ...createMockExecutableTool('inner.tool'), maxResultTokens: Infinity },
-      ]);
+    it('applies the registered inner tool budget to a tagged return', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.dynamic,
+        tools: { ...createMockExecutableTool('inner.tool'), maxResultTokens: Infinity },
+      });
 
       const content = lastBuildContent()({
         results: hugeResults,
@@ -1113,8 +1116,11 @@ describe('ToolManager', () => {
       expect(content).toEqual(JSON.stringify({ results: hugeResults }));
     });
 
-    it('names the inner tool in the recovery path of a truncated tagged return', () => {
-      toolManager.registerDynamicTools([createMockExecutableTool('inner.tool')]);
+    it('names the inner tool in the recovery path of a truncated tagged return', async () => {
+      await toolManager.addTools({
+        type: ToolManagerToolType.dynamic,
+        tools: createMockExecutableTool('inner.tool'),
+      });
 
       const content = lastBuildContent()({
         results: hugeResults,

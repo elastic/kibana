@@ -23,13 +23,24 @@ import type {
   AddToolOptions,
   AddToolInput,
   ExecutableToolWithOrigin,
+  ExecutableToolInput,
+  BrowserToolInput,
+  DynamicToolInput,
 } from '@kbn/agent-builder-server/runner/tool_manager';
+import { ToolManagerToolType } from '@kbn/agent-builder-server/runner/tool_manager';
 import { browserToolsToLangchain } from '../../../tools/browser_tool_adapter';
 import {
   buildGuardedToolContent,
   DEFAULT_MAX_TOOL_RESULT_TOKENS,
 } from '../../run_agent/utils/tool_result_guardrail';
 import { DynamicToolRegistry } from './dynamic_tool_registry';
+
+/** What an input converts to before `addTools` binds it: the LangChain tools and their id mapping. */
+interface ConvertedTools {
+  langchainTools: StructuredTool[];
+  /** LangChain tool name → internal tool id */
+  idMappings: Map<string, string>;
+}
 
 export const createToolManager = (): ToolManager => {
   return new ToolManager({
@@ -77,8 +88,9 @@ export class ToolManager implements IToolManager {
 
   /**
    * Adds tools to the tool manager.
-   * Supports both executable tools and browser API tools.
-   * @param input - The tool input configuration (executable or browser)
+   * Supports executable tools, browser API tools and dynamic tools (reachable only through the
+   * `execute_dynamic_tool` meta-tool, see `DynamicToolRegistry`).
+   * @param input - The tool input configuration (executable, browser or dynamic)
    * @param options - Optional configuration for tool storage (static vs dynamic)
    */
   public async addTools(input: AddToolInput, options: AddToolOptions = {}): Promise<void> {
@@ -87,46 +99,16 @@ export class ToolManager implements IToolManager {
     let langchainTools: StructuredTool[];
     let idMappings: Map<string, string>;
 
-    if (input.type === 'executable') {
-      const toolsWithOrigin = Array.isArray(input.tools) ? input.tools : [input.tools];
-      const tools: ExecutableTool[] = toolsWithOrigin.map(({ origin, ...tool }) => {
-        this.toolOrigins.set(tool.id, origin);
-        this.toolTypes.set(tool.id, tool.type);
-        this.executableTools.set(tool.id, tool);
-        return tool;
-      });
-
-      const toolIdMapping = createToolIdMappings(tools);
-      langchainTools = await Promise.all(
-        tools.map((tool) =>
-          toolToLangchain({
-            tool,
-            logger: input.logger,
-            sendEvent: this.eventEmitter,
-            toolId: toolIdMapping.get(tool.id),
-            addReasoningParam: false,
-            buildContent: ({ results, toolId, toolCallId, dynamicToolId }) =>
-              buildGuardedToolContent({
-                results,
-                toolId: dynamicToolId ?? toolId,
-                toolCallId,
-                maxTokens: this.getMaxToolTokens(tool, dynamicToolId),
-              }),
-          })
-        )
-      );
-
-      idMappings = reverseMap(toolIdMapping);
-    } else {
-      const browserToolsWithOrigin = Array.isArray(input.tools) ? input.tools : [input.tools];
-      const browserApiTools = browserToolsWithOrigin.map(({ origin, ...tool }) => {
-        this.toolOrigins.set(sanitizeToolId(`browser_${tool.id}`), origin);
-        return tool;
-      });
-      const browserLangchainTools = browserToolsToLangchain({ browserApiTools });
-
-      langchainTools = browserLangchainTools.tools;
-      idMappings = browserLangchainTools.idMappings;
+    switch (input.type) {
+      case ToolManagerToolType.executable:
+        ({ langchainTools, idMappings } = await this.convertExecutableTools(input));
+        break;
+      case ToolManagerToolType.browser:
+        ({ langchainTools, idMappings } = this.convertBrowserTools(input));
+        break;
+      case ToolManagerToolType.dynamic:
+        this.addDynamicTools(input);
+        return;
     }
 
     this.toolIdMappings = new Map([...this.toolIdMappings, ...idMappings]);
@@ -201,12 +183,6 @@ export class ToolManager implements IToolManager {
     return this.getExecutable(toolId)?.summarizeToolReturn;
   }
 
-  public registerDynamicTools(tools: ExecutableToolWithOrigin[]): ExecutableToolWithOrigin[] {
-    const registrable = tools.filter((tool) => !this.executableTools.has(tool.id));
-    this.dynamicToolRegistry.register(registrable);
-    return registrable;
-  }
-
   public getDynamicTool(toolId: string): ExecutableToolWithOrigin | undefined {
     return this.dynamicToolRegistry.get(toolId);
   }
@@ -236,6 +212,64 @@ export class ToolManager implements IToolManager {
   private getMaxToolTokens(tool: ExecutableTool, dynamicToolId?: string): number {
     const dynamicTool = dynamicToolId ? this.getDynamicTool(dynamicToolId) : undefined;
     return dynamicTool?.maxResultTokens ?? tool.maxResultTokens ?? this.maxToolResultTokens;
+  }
+
+  private async convertExecutableTools(input: ExecutableToolInput): Promise<ConvertedTools> {
+    const toolsWithOrigin = Array.isArray(input.tools) ? input.tools : [input.tools];
+    const tools: ExecutableTool[] = toolsWithOrigin.map(({ origin, ...tool }) => {
+      this.toolOrigins.set(tool.id, origin);
+      this.toolTypes.set(tool.id, tool.type);
+      this.executableTools.set(tool.id, tool);
+      return tool;
+    });
+
+    const toolIdMapping = createToolIdMappings(tools);
+    const langchainTools = await Promise.all(
+      tools.map((tool) =>
+        toolToLangchain({
+          tool,
+          logger: input.logger,
+          sendEvent: this.eventEmitter,
+          toolId: toolIdMapping.get(tool.id),
+          addReasoningParam: false,
+          buildContent: ({ results, toolId, toolCallId, dynamicToolId }) =>
+            buildGuardedToolContent({
+              results,
+              toolId: dynamicToolId ?? toolId,
+              toolCallId,
+              maxTokens: this.getMaxToolTokens(tool, dynamicToolId),
+            }),
+        })
+      )
+    );
+
+    const idMappings = reverseMap(toolIdMapping);
+
+    return {
+      langchainTools,
+      idMappings,
+    };
+  }
+
+  private convertBrowserTools(input: BrowserToolInput): ConvertedTools {
+    const browserToolsWithOrigin = Array.isArray(input.tools) ? input.tools : [input.tools];
+    const browserApiTools = browserToolsWithOrigin.map(({ origin, ...tool }) => {
+      this.toolOrigins.set(sanitizeToolId(`browser_${tool.id}`), origin);
+      return tool;
+    });
+    const browserLangchainTools = browserToolsToLangchain({ browserApiTools });
+
+    return {
+      langchainTools: browserLangchainTools.tools,
+      idMappings: browserLangchainTools.idMappings,
+    };
+  }
+
+  private addDynamicTools(input: DynamicToolInput): void {
+    const tools = Array.isArray(input.tools) ? input.tools : [input.tools];
+    // ids bound natively are skipped: the model calls those directly
+    this.dynamicToolRegistry.register(tools.filter((tool) => !this.executableTools.has(tool.id)));
+    return;
   }
 }
 
