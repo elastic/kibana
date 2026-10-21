@@ -36,6 +36,7 @@ import {
   SubjectClaimsService,
 } from './subjects/services/subject_claims_service';
 import { createSubjectsClient } from './subjects/services/subjects_client';
+import { createThreadConversationResolver } from './subjects/services/thread_conversation_resolver';
 import { hypothesesAttachment, registerHypothesesAttachment } from './hypotheses/attachments';
 import { HypothesesService } from './hypotheses/services/hypotheses_service';
 import { createSetHypothesesTool } from './hypotheses/tools/set_hypotheses_tool';
@@ -136,6 +137,14 @@ export class AgenticInvestigationsPlugin
       assertCanReadConversation,
       logger: this.logger,
     });
+
+    agentBuilder.callbacks.registerConversationResolver(
+      createThreadConversationResolver({
+        getSubjectsService: () => this.requireSubjectsService(),
+        getConversationClient: (request) => this.getConversationClient(request),
+        logger: this.logger,
+      })
+    );
 
     agentBuilder.tools.register(
       createSetImpactTool({

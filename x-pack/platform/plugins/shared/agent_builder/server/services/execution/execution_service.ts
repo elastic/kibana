@@ -168,6 +168,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const conversation = resolvedConversation?.conversation;
     const validatedParams = conversationParams ?? (await this.validateAttachments(params, request));
     const receivedAt = resolvedConversation?.receivedAt ?? new Date();
+    const executionAgentId = conversationParams?.agentId ?? agentId;
 
     // Reserved for the round this run opens, so its events are named after it.
     const roundId = uuidv4();
@@ -177,7 +178,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       execution = await executionClient.create({
         executionMode: mode,
         executionId,
-        agentId,
+        agentId: executionAgentId,
         spaceId,
         owner: {
           id: owner.id,
@@ -293,7 +294,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const result = useScheduledTask
       ? await this.executeWithScheduledTask({
           executionId,
-          agentId,
+          agentId: executionAgentId,
           request,
           requestImmediateClaim,
         })
@@ -838,7 +839,16 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       subagentCreation: validatedParams.subagentCreation,
     });
 
-    return { validatedParams, conversation, receivedAt };
+    // A conversation the origin continues runs on its own agent, not the one the caller names.
+    const continuesOrigin = !conversationId && resolvedConversationId !== undefined;
+
+    return {
+      validatedParams: continuesOrigin
+        ? { ...validatedParams, agentId: conversation.agent_id }
+        : validatedParams,
+      conversation,
+      receivedAt,
+    };
   }
 
   /**

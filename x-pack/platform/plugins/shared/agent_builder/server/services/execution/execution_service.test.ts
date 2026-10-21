@@ -1385,7 +1385,7 @@ describe('AgentExecutionService', () => {
         schema_version: CONVERSATION_SCHEMA_VERSION,
       });
 
-      it('continues the conversation the origin resolves to, on the requested agent', async () => {
+      it('continues the conversation the origin resolves to, on its stored agent', async () => {
         resolveConversation.mockResolvedValueOnce('investigation-1');
         conversationClient.get.mockResolvedValueOnce(boundConversation);
 
@@ -1401,9 +1401,9 @@ describe('AgentExecutionService', () => {
         );
         expect(conversationClient.get).toHaveBeenCalledWith('investigation-1');
         const [{ agentId, agentParams }] = mockExecutionClient.create.mock.calls[0];
-        expect(agentId).toBe('agent-1');
+        expect(agentId).toBe('investigation-agent');
         expect(agentParams).toMatchObject({
-          agentId: 'agent-1',
+          agentId: 'investigation-agent',
           conversationId: 'investigation-1',
           conversationOperation: 'UPDATE',
         });
@@ -1417,10 +1417,14 @@ describe('AgentExecutionService', () => {
         expect(agentParams).toMatchObject({ agentId: 'agent-1', conversationOperation: 'CREATE' });
       });
 
-      it('does not resolve the origin when the request names its conversation', async () => {
-        await converse({ conversationId: 'conversation-1', origin });
+      it('does not resolve the origin when the request names its conversation, and keeps the requested agent', async () => {
+        conversationClient.get.mockResolvedValueOnce(boundConversation);
+
+        await converse({ conversationId: 'investigation-1', origin });
 
         expect(resolveConversation).not.toHaveBeenCalled();
+        const [{ agentId }] = mockExecutionClient.create.mock.calls[0];
+        expect(agentId).toBe('agent-1');
       });
 
       it('propagates a resolver error', async () => {
