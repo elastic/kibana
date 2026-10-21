@@ -153,7 +153,7 @@ export function InternalDashboardTopNav({
   const dashboardTitleRef = useRef<HTMLHeadingElement>(null);
 
   const headerMode = useHeaderMode({
-    isEmbeddedViaUrl: Boolean(embedSettings),
+    isEmbeddedViaUrl: Boolean(embedSettings?.isEmbeddedViaUrl),
     isHostedByApp: Boolean(setCustomHeaderActionMenu),
   });
 
