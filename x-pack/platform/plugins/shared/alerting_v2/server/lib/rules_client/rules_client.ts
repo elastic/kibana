@@ -34,6 +34,8 @@ import { TaskAlreadyRunningError } from '@kbn/task-manager-plugin/server/lib/err
 import { stringifyZodError } from '@kbn/zod-helpers/v4';
 import { treeifyError, type z } from '@kbn/zod/v4';
 import { inject, injectable } from 'inversify';
+import { resolveRuleEventOrigin } from '../event_origin/rule_event_origin';
+import type { RuleEventOrigin } from '../event_origin/origin_schemas';
 import { type RuleSavedObjectAttributes } from '../../saved_objects';
 import { withApm as withApmDecorator } from '../apm/with_apm_decorator';
 import {
@@ -75,8 +77,10 @@ import type { UserServiceContract } from '../services/user_service/user_service'
 import { UserService } from '../services/user_service/user_service';
 import type { PluginConfig } from '../../config';
 import { convertEveryToSchedulesPerMinute, parseDurationToMs } from '../duration';
+import type { CreateRulesClientOptions } from './types';
 import { buildMatchingRulesFilter, buildRuleSoFilter } from './build_rule_filter';
 import { buildSoSearch, RULE_SEARCH_FIELDS } from './build_so_search';
+import { RulesClientOptionsToken } from './tokens';
 import type {
   BulkByIdsParams,
   BulkByQueryParams,
@@ -205,6 +209,7 @@ export class RulesClient {
   private readonly config: PluginConfig;
   private readonly logger: LoggerServiceContract;
   private readonly eventContext: AlertingPublisherContext;
+  private readonly rulesClientOptions: CreateRulesClientOptions;
 
   constructor(
     @inject(Request) private readonly request: KibanaRequest,
@@ -221,15 +226,22 @@ export class RulesClient {
     @inject(RuleEventPublisher) private readonly ruleEventPublisher: RuleEventPublisher,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(ArtifactTypeRegistry) private readonly artifactTypeRegistry: ArtifactTypeRegistry,
-    @inject(EventOriginToken) origin: EventOrigin
+    @inject(EventOriginToken) origin: EventOrigin,
+    @inject(RulesClientOptionsToken) rulesClientOptions: CreateRulesClientOptions
   ) {
     this.eventContext = { request, origin };
+    this.rulesClientOptions = rulesClientOptions;
     this.config = pluginConfigAccessor.get<PluginConfig>();
     this.logger = loggerService.forSubsystem('rulesClient');
   }
 
   private getSpaceContext(): { spaceId: string } {
     return { spaceId: this.spaceId };
+  }
+
+  /** Channel and app for a rule-change event. */
+  private resolveRuleEventOrigin(): RuleEventOrigin {
+    return resolveRuleEventOrigin(this.request, this.rulesClientOptions);
   }
 
   /**
@@ -617,6 +629,51 @@ export class RulesClient {
     }
   }
 
+  /**
+   * Saves the rule and creates or removes its executor task to match `enabled`.
+   * The order makes sure an enabled rule is never left without a task.
+   */
+  private async commitRuleAttrs({
+    id,
+    attrs,
+    version,
+    references,
+  }: {
+    id: string;
+    attrs: RuleSavedObjectAttributes;
+    version?: string;
+    references: SavedObjectReference[];
+  }): Promise<void> {
+    const { spaceId } = this.getSpaceContext();
+
+    if (attrs.enabled) {
+      await this.scheduleRuleExecutorTask({
+        ruleId: id,
+        spaceId,
+        scheduleEvery: attrs.schedule.every,
+      });
+      await this.writeRuleAttrs({ id, attrs, version, references });
+      return;
+    }
+
+    await this.writeRuleAttrs({ id, attrs, version, references });
+
+    // The rule is already saved as disabled, so a failed removal doesn't fail
+    // the request. The leftover task halts on its next run, like in bulk disable.
+    try {
+      await this.taskManager.removeIfExists(getRuleExecutorTaskId({ ruleId: id, spaceId }));
+    } catch (e) {
+      this.logger.error({
+        error: new Error(
+          `Failed to remove executor task for rule [${id}]; the task may still exist but the executor defense halts it: ${errorMessage(
+            e
+          )}`
+        ),
+        code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT,
+      });
+    }
+  }
+
   @withApm
   public async createRule(params: CreateRuleParams): Promise<RuleResponse> {
     const parsed = this.parseRuleData(createRuleDataSchema, params.data, 'create');
@@ -651,7 +708,7 @@ export class RulesClient {
       references: persisted.references,
     });
     this.ruleEventPublisher.emitRuleCreated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
     ]);
     return rule;
   }
@@ -710,7 +767,12 @@ export class RulesClient {
         references: doc.references,
       });
       items.push(rule);
-      createdRules.push({ ruleId: rule.id, spaceId, rule });
+      createdRules.push({
+        ruleId: rule.id,
+        spaceId,
+        rule,
+        origin: this.resolveRuleEventOrigin(),
+      });
     }
 
     this.ruleEventPublisher.emitRuleCreated(this.eventContext, createdRules);
@@ -720,7 +782,6 @@ export class RulesClient {
 
   @withApm
   public async updateRule({ id, data }: UpdateRuleParams): Promise<RuleResponse> {
-    const { spaceId } = this.getSpaceContext();
     const parsed = this.parseRuleData(updateRuleDataSchema, data, 'update');
     if (parsed.artifacts !== undefined) {
       this.artifactTypeRegistry.validate(parsed.artifacts ?? undefined);
@@ -763,26 +824,15 @@ export class RulesClient {
       },
     ]);
 
-    // updateRule NEVER changes whether a rule runs — it only re-syncs the
-    // schedule interval of an already-enabled rule (Task Manager's
-    // `ensureScheduled` updates the interval of the existing task on conflict).
-    // Turning the run loop on/off stays exclusively with enableRule/disableRule,
-    // so a disabled rule is never resurrected by an unrelated property edit.
-    if (existingAttrs.enabled) {
-      await this.scheduleRuleExecutorTask({
-        ruleId: id,
-        spaceId,
-        scheduleEvery: nextAttrs.schedule.every,
-      });
-    }
-
     const references = rebuildArtifactReferences({
       artifacts: nextAttrs.artifacts,
       previousReferences: existingReferences,
       registry: this.artifactTypeRegistry,
     });
 
-    await this.writeRuleAttrs({
+    // Updates never enable or disable a rule. Enabled rules get their task
+    // interval updated, disabled rules only lose a leftover task.
+    await this.commitRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
@@ -796,7 +846,7 @@ export class RulesClient {
     });
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
     ]);
 
     return rule;
@@ -866,7 +916,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDeleted(this.eventContext, [
-      { ruleId: id, spaceId: this.spaceId, rule },
+      { ruleId: id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
     ]);
   }
 
@@ -927,8 +977,6 @@ export class RulesClient {
 
   @withApm
   public async enableRule({ id }: { id: string }): Promise<RuleResponse> {
-    const { spaceId } = this.getSpaceContext();
-
     const {
       attrs: existingAttrs,
       version: existingVersion,
@@ -953,13 +1001,7 @@ export class RulesClient {
       await this.validateSchedule([{ updatedEvery: nextAttrs.schedule.every, checkLimit: true }]);
     }
 
-    await this.scheduleRuleExecutorTask({
-      ruleId: id,
-      spaceId,
-      scheduleEvery: nextAttrs.schedule.every,
-    });
-
-    await this.writeRuleAttrs({
+    await this.commitRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
@@ -972,15 +1014,13 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleEnabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
     ]);
     return rule;
   }
 
   @withApm
   public async disableRule({ id }: { id: string }): Promise<RuleResponse> {
-    const { spaceId } = this.getSpaceContext();
-
     const {
       attrs: existingAttrs,
       version: existingVersion,
@@ -1001,10 +1041,7 @@ export class RulesClient {
       version: this.getNextVersion(existingAttrs.version),
     };
 
-    const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
-    await this.taskManager.removeIfExists(taskId);
-
-    await this.writeRuleAttrs({
+    await this.commitRuleAttrs({
       id,
       attrs: nextAttrs,
       version: existingVersion,
@@ -1017,7 +1054,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleDisabled(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
     ]);
     return rule;
   }
@@ -1041,6 +1078,12 @@ export class RulesClient {
       size: params.size,
       field: 'routing_tags',
     });
+  }
+
+  /** Returns how many rules were created from each of the given rule templates. */
+  @withApm
+  public async getRuleCountsByTemplateId(templateIds: string[]): Promise<Record<string, number>> {
+    return this.rulesSavedObjectService.countByTemplateIds(templateIds);
   }
 
   @withApm
@@ -1222,8 +1265,9 @@ export class RulesClient {
                 attrs: { ...doc.attrs, version: this.getNextVersion(doc.attrs.version) },
                 references: doc.references,
               }),
+              origin: this.resolveRuleEventOrigin(),
             }
-          : { ruleId: result.id, spaceId }
+          : { ruleId: result.id, spaceId, origin: this.resolveRuleEventOrigin() }
       );
     }
 
@@ -1344,7 +1388,12 @@ export class RulesClient {
           attrs: item.attrs,
           references: item.references,
         });
-        enabledRules.push({ ruleId: rule.id, spaceId, rule });
+        enabledRules.push({
+          ruleId: rule.id,
+          spaceId,
+          rule,
+          origin: this.resolveRuleEventOrigin(),
+        });
       }
 
       await this.removeExecutorTasks({
@@ -1425,7 +1474,12 @@ export class RulesClient {
           references: item.references,
         });
         affectedCount += 1;
-        disabledRules.push({ ruleId: rule.id, spaceId, rule });
+        disabledRules.push({
+          ruleId: rule.id,
+          spaceId,
+          rule,
+          origin: this.resolveRuleEventOrigin(),
+        });
       }
     }
 
@@ -1549,7 +1603,12 @@ export class RulesClient {
         attrs: item.attrs,
         references: item.references,
       });
-      updatedRules.push({ ruleId: rule.id, spaceId, rule });
+      updatedRules.push({
+        ruleId: rule.id,
+        spaceId,
+        rule,
+        origin: this.resolveRuleEventOrigin(),
+      });
     }
 
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, updatedRules);
@@ -1812,7 +1871,6 @@ export class RulesClient {
       return { rule, created: true };
     }
 
-    const { spaceId } = this.getSpaceContext();
     const actor = await this.userService.getCurrentActor();
     const nowIso = new Date().toISOString();
 
@@ -1851,33 +1909,14 @@ export class RulesClient {
       registry: this.artifactTypeRegistry,
     });
 
-    // Enable schedules before writing; disable writes before removing — each
-    // order keeps a failure from leaving the rule in a worse state than
-    // before. Also self-heals like `enableRule`/`disableRule`: the task state
-    // is always reapplied for `nextEnabled`, not just on a transition, so a
-    // leftover task from a prior bug or failed write also gets cleaned up.
-    if (nextEnabled) {
-      await this.scheduleRuleExecutorTask({
-        ruleId: id,
-        spaceId,
-        scheduleEvery: nextAttrs.schedule.every,
-      });
-      await this.writeRuleAttrs({
-        id,
-        attrs: nextAttrs,
-        version: existingVersion,
-        references,
-      });
-    } else {
-      await this.writeRuleAttrs({
-        id,
-        attrs: nextAttrs,
-        version: existingVersion,
-        references,
-      });
-      const taskId = getRuleExecutorTaskId({ ruleId: id, spaceId });
-      await this.taskManager.removeIfExists(taskId);
-    }
+    // Always reapplies the task state for `nextEnabled`, not just on a
+    // transition, so a leftover task gets cleaned up too.
+    await this.commitRuleAttrs({
+      id,
+      attrs: nextAttrs,
+      version: existingVersion,
+      references,
+    });
 
     const rule = this.toRuleApiResponse({
       id,
@@ -1885,7 +1924,7 @@ export class RulesClient {
       references,
     });
     this.ruleEventPublisher.emitRuleUpdated(this.eventContext, [
-      { ruleId: rule.id, spaceId: this.spaceId, rule },
+      { ruleId: rule.id, spaceId: this.spaceId, rule, origin: this.resolveRuleEventOrigin() },
     ]);
     return { rule, created: false };
   }

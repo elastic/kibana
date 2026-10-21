@@ -38,6 +38,10 @@ const MAX_BODY_BYTES = 20 * 1024 * 1024; // 20MB
 // Long agent sessions accumulate many messages; the body size limit bounds the total payload.
 export const MAX_MESSAGES = 10_000;
 export const MAX_CONTENT_PARTS = 2_000;
+// Identifier-like fields (model / connector ids, roles, tool names, tool call ids).
+export const MAX_IDENTIFIER_LENGTH = 1_024;
+// Free-form text (message content, tool call arguments, tool descriptions) is bounded by the body size limit.
+export const MAX_TEXT_LENGTH = MAX_BODY_BYTES;
 
 export const registerChatCompletionsRoute = ({
   router,
@@ -66,33 +70,37 @@ export const registerChatCompletionsRoute = ({
       validate: {
         body: schema.object(
           {
-            model: schema.string({ defaultValue: 'default' }),
+            model: schema.string({ defaultValue: 'default', maxLength: MAX_IDENTIFIER_LENGTH }),
             messages: schema.arrayOf(
               schema.object({
-                role: schema.string(),
+                role: schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }),
                 content: schema.nullable(
                   schema.oneOf([
-                    schema.string(),
-                    schema.arrayOf(schema.recordOf(schema.string(), schema.any()), {
-                      maxSize: MAX_CONTENT_PARTS,
-                    }),
+                    schema.string({ maxLength: MAX_TEXT_LENGTH }),
+                    schema.arrayOf(
+                      schema.recordOf(
+                        schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }),
+                        schema.any()
+                      ),
+                      { maxSize: MAX_CONTENT_PARTS }
+                    ),
                   ])
                 ),
                 tool_calls: schema.maybe(
                   schema.arrayOf(
                     schema.object({
-                      id: schema.string(),
-                      type: schema.string(),
+                      id: schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }),
+                      type: schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }),
                       function: schema.object({
-                        name: schema.string(),
-                        arguments: schema.string(),
+                        name: schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }),
+                        arguments: schema.string({ maxLength: MAX_TEXT_LENGTH }),
                       }),
                     }),
                     { maxSize: 128 }
                   )
                 ),
-                tool_call_id: schema.maybe(schema.string()),
-                name: schema.maybe(schema.string()),
+                tool_call_id: schema.maybe(schema.string({ maxLength: MAX_IDENTIFIER_LENGTH })),
+                name: schema.maybe(schema.string({ maxLength: MAX_IDENTIFIER_LENGTH })),
               }),
               { minSize: 1, maxSize: MAX_MESSAGES }
             ),
@@ -102,11 +110,16 @@ export const registerChatCompletionsRoute = ({
             tools: schema.maybe(
               schema.arrayOf(
                 schema.object({
-                  type: schema.string(),
+                  type: schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }),
                   function: schema.object({
-                    name: schema.string(),
-                    description: schema.maybe(schema.string()),
-                    parameters: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+                    name: schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }),
+                    description: schema.maybe(schema.string({ maxLength: MAX_TEXT_LENGTH })),
+                    parameters: schema.maybe(
+                      schema.recordOf(
+                        schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }),
+                        schema.any()
+                      )
+                    ),
                   }),
                 }),
                 { maxSize: 256 }
@@ -114,12 +127,12 @@ export const registerChatCompletionsRoute = ({
             ),
             tool_choice: schema.maybe(
               schema.oneOf([
-                schema.string(),
+                schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }),
                 schema.object({
-                  type: schema.string(),
+                  type: schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }),
                   function: schema.maybe(
                     schema.object({
-                      name: schema.string(),
+                      name: schema.string({ maxLength: MAX_IDENTIFIER_LENGTH }),
                     })
                   ),
                 }),
