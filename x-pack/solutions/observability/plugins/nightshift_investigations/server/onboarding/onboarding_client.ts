@@ -18,10 +18,9 @@ import type {
   StartOnboardingSuggestionsResponse,
 } from '../../common/onboarding';
 import { OnboardingUnavailableError } from './errors';
-import { OnboardingValidationError } from './validation_error';
 import { parseSuggestions } from './parse_suggestions';
 
-export { OnboardingUnavailableError, OnboardingValidationError };
+export { OnboardingUnavailableError };
 
 export interface OnboardingClientDeps {
   workflowsManagement?: WorkflowsServerPluginSetup;

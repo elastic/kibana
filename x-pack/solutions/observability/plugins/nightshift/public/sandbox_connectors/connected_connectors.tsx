@@ -35,6 +35,7 @@ import {
   useFetchSandboxConnectors,
   useRefreshSandboxConnectors,
 } from './use_fetch_sandbox_connectors';
+import { SandboxConnectorsError } from './sandbox_connectors_error';
 
 const CONNECTORS_MANAGEMENT_PATH = '/insightsAndAlerting/triggersActionsConnectors';
 
@@ -47,14 +48,23 @@ export function ConnectedConnectors({
 }: {
   collapseSignal?: number;
 }): React.ReactElement | null {
-  const { data, error, isLoading } = useFetchSandboxConnectors();
+  const { data, error, isLoading, refetch } = useFetchSandboxConnectors();
   const [isOpen, setIsOpen] = useState(true);
   useEffect(() => {
     if (collapseSignal > 0) setIsOpen(false);
   }, [collapseSignal]);
   const accordionId = useGeneratedHtmlId({ prefix: 'nightshiftConnectedConnectors' });
 
-  if (isLoading || error || !data || data.connectors.length === 0) return null;
+  if (isLoading) return null;
+  if (error) {
+    return (
+      <SandboxConnectorsError
+        onRetry={() => refetch()}
+        data-test-subj="nightshiftConnectedConnectorsError"
+      />
+    );
+  }
+  if (!data || data.connectors.length === 0) return null;
 
   return (
     <EuiAccordion

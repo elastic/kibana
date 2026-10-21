@@ -5,23 +5,17 @@
  * 2.0.
  */
 
-import { badRequest, serverUnavailable } from '@hapi/boom';
+import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import type {
   GetOnboardingResponse,
   StartOnboardingSuggestionsResponse,
 } from '../../common/onboarding';
-import {
-  OnboardingUnavailableError,
-  OnboardingValidationError,
-} from '../onboarding/onboarding_client';
+import { OnboardingUnavailableError } from '../onboarding/onboarding_client';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 
 const rethrowOnboardingError = (error: unknown): never => {
-  if (error instanceof OnboardingValidationError) {
-    throw badRequest(error.message);
-  }
   if (error instanceof OnboardingUnavailableError) {
     throw serverUnavailable(error.message);
   }

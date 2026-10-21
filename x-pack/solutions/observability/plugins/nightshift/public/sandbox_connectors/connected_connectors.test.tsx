@@ -29,16 +29,26 @@ const connector = (id: string, is_preconfigured = false): SandboxConnector => ({
   is_preconfigured,
 });
 
+const forbiddenError = (): Error =>
+  Object.assign(new Error('Forbidden'), {
+    name: 'HttpFetchError',
+    request: {},
+    response: { status: 403 },
+  });
+
 const setup = ({
   connectors,
+  fetchError,
   collapseSignal = 0,
   capabilities = { save: true, delete: true },
 }: {
   connectors: SandboxConnector[];
+  fetchError?: Error;
   collapseSignal?: number;
   capabilities?: { save?: boolean; delete?: boolean };
 }) => {
   const fetch = jest.fn().mockResolvedValue({ connectors });
+  if (fetchError) fetch.mockRejectedValueOnce(fetchError);
   const http = { delete: jest.fn().mockResolvedValue({}) };
   const getEditConnectorFlyout = jest.fn(() => <div data-test-subj="editConnectorFlyoutStub" />);
   mockFetchConnector.mockResolvedValue({ id: 'github', actionTypeId: '.github', name: 'x' });
@@ -96,6 +106,19 @@ describe('ConnectedConnectors', () => {
 
     await new Promise((resolve) => setTimeout(resolve, 0));
     expect(screen.queryByTestId('nightshiftConnectedConnectors')).not.toBeInTheDocument();
+  });
+
+  it('shows an error with a retry when the connectors cannot be loaded', async () => {
+    const { fetch } = setup({ connectors: [connector('github')], fetchError: forbiddenError() });
+
+    expect(await screen.findByTestId('nightshiftConnectedConnectorsError')).toHaveTextContent(
+      'Could not load the connectors.'
+    );
+
+    fireEvent.click(screen.getByTestId('nightshiftConnectedConnectorsErrorRetry'));
+
+    expect(await screen.findByTestId('nightshiftConnectedConnectors')).toHaveTextContent('1');
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 
   it('opens the edit flyout with the loaded connector', async () => {

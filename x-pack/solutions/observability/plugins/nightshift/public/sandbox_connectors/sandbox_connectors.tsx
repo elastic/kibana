@@ -25,6 +25,7 @@ import {
   useFetchSandboxConnectors,
   useRefreshSandboxConnectors,
 } from './use_fetch_sandbox_connectors';
+import { SandboxConnectorsError } from './sandbox_connectors_error';
 
 const CONNECTORS_MANAGEMENT_PATH = '/insightsAndAlerting/triggersActionsConnectors';
 
@@ -114,7 +115,7 @@ const useConnectorTypeColumn = (): EuiBasicTableColumn<SandboxConnector> => {
 };
 
 export function SandboxConnectorsTable(): React.ReactElement | null {
-  const { data, error, isLoading } = useFetchSandboxConnectors();
+  const { data, error, isLoading, refetch } = useFetchSandboxConnectors();
   const typeColumn = useConnectorTypeColumn();
   const columns = useMemo(
     (): Array<EuiBasicTableColumn<SandboxConnector>> => [
@@ -144,7 +145,8 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
   );
 
   if (isLoading) return <EuiLoadingSpinner size="m" />;
-  if (error || !data) return null;
+  if (error) return <SandboxConnectorsError onRetry={() => refetch()} />;
+  if (!data) return null;
   if (data.connectors.length === 0) {
     return (
       <EuiText size="s" color="subdued" data-test-subj="nightshiftSandboxConnectorsEmpty">

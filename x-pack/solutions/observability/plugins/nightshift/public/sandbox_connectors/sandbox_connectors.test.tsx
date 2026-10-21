@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
@@ -28,18 +28,28 @@ const connector = (id: string, is_preconfigured = false): SandboxConnector => ({
   is_preconfigured,
 });
 
+const forbiddenError = (): Error =>
+  Object.assign(new Error('Forbidden'), {
+    name: 'HttpFetchError',
+    request: {},
+    response: { status: 403 },
+  });
+
 const setup = ({
   connectors,
+  fetchError,
   capabilities = { show: true, save: true },
   withTriggersActionsUi = true,
   ui = <SandboxConnectorsTable />,
 }: {
   connectors: SandboxConnector[];
+  fetchError?: Error;
   capabilities?: { show?: boolean; save?: boolean };
   withTriggersActionsUi?: boolean;
   ui?: React.ReactElement;
 }) => {
   const fetch = jest.fn().mockResolvedValue({ connectors });
+  if (fetchError) fetch.mockRejectedValueOnce(fetchError);
   const getAddConnectorFlyout = jest.fn(() => <div data-test-subj="addConnectorFlyoutStub" />);
   mockUseKibana.mockReturnValue({
     services: {
@@ -89,6 +99,20 @@ describe('SandboxConnectorsTable', () => {
     expect(await screen.findByTestId('nightshiftSandboxConnectorsEmpty')).toHaveTextContent(
       'Create one and the investigation agent can use it from its sandbox'
     );
+  });
+
+  it('shows an error with a retry when the connectors cannot be loaded', async () => {
+    const { fetch } = setup({ connectors: [connector('github')], fetchError: forbiddenError() });
+
+    expect(await screen.findByTestId('nightshiftSandboxConnectorsError')).toHaveTextContent(
+      'Could not load the connectors.'
+    );
+    expect(screen.queryByTestId('nightshiftSandboxConnectorsEmpty')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('nightshiftSandboxConnectorsErrorRetry'));
+
+    expect(await screen.findByText('Connector github')).toBeInTheDocument();
+    expect(fetch).toHaveBeenCalledTimes(2);
   });
 });
 

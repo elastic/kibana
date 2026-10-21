@@ -15,9 +15,14 @@ import {
 import { useKibana } from '../hooks/use_kibana';
 import { useFetchSandboxConnectorTypes } from './use_fetch_sandbox_connector_types';
 import { useRefreshSandboxConnectors } from './use_fetch_sandbox_connectors';
+import { SandboxConnectorsError } from './sandbox_connectors_error';
 
 const noPermissionReason = i18n.translate('xpack.nightshift.connectSources.noPermission', {
   defaultMessage: 'You need permission to create connectors.',
+});
+
+const typesLoadErrorTitle = i18n.translate('xpack.nightshift.connectSources.loadError', {
+  defaultMessage: 'Could not load the connector types.',
 });
 
 export function ConnectSourcesGrid({
@@ -26,7 +31,7 @@ export function ConnectSourcesGrid({
   onConnected?: () => void;
 }): React.ReactElement | null {
   const { application, triggersActionsUi } = useKibana().services;
-  const { data: types, isLoading, error } = useFetchSandboxConnectorTypes();
+  const { data: types, isLoading, error, refetch } = useFetchSandboxConnectorTypes();
   const refresh = useRefreshSandboxConnectors();
   const [connectingTypeId, setConnectingTypeId] = useState<string | undefined>();
 
@@ -43,7 +48,16 @@ export function ConnectSourcesGrid({
   }, [connectingTypeId, onConnected, refresh, triggersActionsUi]);
 
   if (isLoading) return <EuiLoadingSpinner size="m" />;
-  if (error || !types || types.length === 0 || !triggersActionsUi) return null;
+  if (error) {
+    return (
+      <SandboxConnectorsError
+        title={typesLoadErrorTitle}
+        onRetry={() => refetch()}
+        data-test-subj="nightshiftConnectSourcesError"
+      />
+    );
+  }
+  if (!types || types.length === 0 || !triggersActionsUi) return null;
   const canConnect = application.capabilities.actions?.save === true;
 
   return (

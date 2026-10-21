@@ -55,7 +55,15 @@ export const ConnectorTypeCard = ({
       data-test-subj={`${item.actionType.id}-card`}
       icon={<EuiIcon size={size === 's' ? 'l' : 'xl'} type={item.iconClass} aria-hidden={true} />}
       title={item.name}
-      description={size === 's' ? <EuiText size="xs">{body}</EuiText> : body}
+      description={
+        size === 's' ? (
+          <EuiText size="xs" component="span">
+            {body}
+          </EuiText>
+        ) : (
+          body
+        )
+      }
       isDisabled={!enabledCheck.isEnabled || disabledReason !== undefined}
       onClick={onClick}
     />

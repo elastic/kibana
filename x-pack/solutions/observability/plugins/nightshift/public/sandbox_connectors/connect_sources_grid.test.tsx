@@ -35,6 +35,13 @@ const type = (id: string, overrides: Partial<ActionType> = {}): ActionType => ({
   ...overrides,
 });
 
+const forbiddenError = (): Error =>
+  Object.assign(new Error('Forbidden'), {
+    name: 'HttpFetchError',
+    request: {},
+    response: { status: 403 },
+  });
+
 const setup = ({
   types,
   canSave = true,
@@ -106,6 +113,22 @@ describe('ConnectSourcesGrid', () => {
     setup({ types: [type('.github', { enabledInLicense: false })] });
 
     expect(await githubCard()).toBeDisabled();
+  });
+
+  it('shows an error with a retry when the connector types cannot be loaded', async () => {
+    mockFetchConnectorTypes.mockRejectedValueOnce(forbiddenError());
+    setup({ types: [type('.github')] });
+
+    expect(await screen.findByTestId('nightshiftConnectSourcesError')).toHaveTextContent(
+      'Could not load the connector types.'
+    );
+    expect(screen.queryByTestId('nightshiftConnectSourcesGrid')).not.toBeInTheDocument();
+
+    const callsBeforeRetry = mockFetchConnectorTypes.mock.calls.length;
+    fireEvent.click(screen.getByTestId('nightshiftConnectSourcesErrorRetry'));
+
+    expect(await githubCard()).toBeInTheDocument();
+    expect(mockFetchConnectorTypes).toHaveBeenCalledTimes(callsBeforeRetry + 1);
   });
 
   it('disables the card when the user cannot create connectors', async () => {
