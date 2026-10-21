@@ -122,7 +122,7 @@ export const GridSettingsFlyout = ({
   const histogramDisplayLabel = i18n.translate(
     'metricsExperience.gridSettingsFlyout.histogramDisplayLabel',
     {
-      defaultMessage: 'Show as',
+      defaultMessage: 'Data display',
     }
   );
   const percentileFieldLabel = isHeatmapsEnabled
@@ -194,7 +194,19 @@ export const GridSettingsFlyout = ({
     <>
       {isHeatmapsEnabled ? (
         <>
-          <EuiFormRow fullWidth label={histogramDisplayLabel}>
+          <EuiFormRow
+            fullWidth
+            label={histogramDisplayLabel}
+            labelAppend={
+              <EuiIconTip
+                type="info"
+                color="subdued"
+                position="right"
+                aria-label={dataDisplayGroupDescription}
+                content={dataDisplayGroupDescription}
+              />
+            }
+          >
             <EuiButtonGroup
               isFullWidth
               buttonSize="s"

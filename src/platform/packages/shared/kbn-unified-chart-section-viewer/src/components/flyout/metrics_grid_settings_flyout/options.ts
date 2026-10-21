@@ -96,19 +96,19 @@ export interface HistogramVisualizationChoice {
 /** Histogram choices shown in the flyout. */
 export const HISTOGRAM_VISUALIZATION_OPTIONS: HistogramVisualizationChoice[] = [
   {
-    id: 'percentile',
-    label: i18n.translate('metricsExperience.gridSettingsFlyout.percentileChoiceLabel', {
-      defaultMessage: 'Percentile',
-    }),
-    iconType: 'chartLine',
-    'data-test-subj': 'metricsExperienceGridSettingsPercentileChoice',
-  },
-  {
     id: 'distribution',
     label: i18n.translate('metricsExperience.gridSettingsFlyout.distributionChoiceLabel', {
       defaultMessage: 'Distribution',
     }),
     iconType: 'chartHeatmap',
     'data-test-subj': 'metricsExperienceGridSettingsDistributionChoice',
+  },
+  {
+    id: 'percentile',
+    label: i18n.translate('metricsExperience.gridSettingsFlyout.percentileChoiceLabel', {
+      defaultMessage: 'Percentile',
+    }),
+    iconType: 'chartLine',
+    'data-test-subj': 'metricsExperienceGridSettingsPercentileChoice',
   },
 ];
