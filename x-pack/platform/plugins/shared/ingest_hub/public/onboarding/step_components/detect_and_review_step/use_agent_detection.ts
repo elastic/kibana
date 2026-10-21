@@ -16,6 +16,7 @@ import {
   getComponentAlertLevel,
   getPackagePolicyUnitSummary,
   sendGetAgentIncomingData,
+  useAgentsForPolicyIds,
   useBulkGetAgentPoliciesQuery,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -37,7 +38,6 @@ import {
   type InstanceAgentSummary,
   type NotRunningSince,
 } from './agent_detection';
-import { usePolicyAgents } from './use_policy_agents';
 
 const POLL_INTERVAL_MS = 10_000;
 
@@ -116,7 +116,9 @@ export function useAgentDetection({
     [policiesData?.items]
   );
 
-  const { agents, dataUpdatedAt } = usePolicyAgents({ policyIds: allPolicyIds, shouldPoll });
+  const { agents, dataUpdatedAt } = useAgentsForPolicyIds(allPolicyIds, {
+    refetchInterval: shouldPoll ? POLL_INTERVAL_MS : false,
+  });
   // Remembers when an agent was first seen not running the integration, across polls.
   const notRunningSinceRef = useRef<NotRunningSince>({});
 

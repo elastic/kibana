@@ -13,22 +13,22 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
   getComponentAlertLevel: jest.fn(),
   getPackagePolicyUnitSummary: jest.fn(),
   sendGetAgentIncomingData: jest.fn(),
+  useAgentsForPolicyIds: jest.fn(),
   useBulkGetAgentPoliciesQuery: jest.fn(),
 }));
-jest.mock('./use_policy_agents', () => ({ usePolicyAgents: jest.fn() }));
 
 import { useQuery } from '@kbn/react-query';
 import {
   getComponentAlertLevel,
   getPackagePolicyUnitSummary,
   sendGetAgentIncomingData,
+  useAgentsForPolicyIds,
   useBulkGetAgentPoliciesQuery,
 } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { NOT_RUNNING_GRACE_MS, OTEL_NOT_RUNNING_GRACE_MS } from './agent_detection';
 import { useAgentDetection } from './use_agent_detection';
-import { usePolicyAgents } from './use_policy_agents';
 
 const mockUseQuery = useQuery as jest.Mock;
 const mockUseOnboardingFlow = useOnboardingFlow as jest.Mock;
@@ -36,7 +36,7 @@ const mockGetComponentAlertLevel = getComponentAlertLevel as jest.Mock;
 const mockGetUnitSummary = getPackagePolicyUnitSummary as jest.Mock;
 const mockSendIncomingData = sendGetAgentIncomingData as jest.Mock;
 const mockUseBulkPolicies = useBulkGetAgentPoliciesQuery as jest.Mock;
-const mockUsePolicyAgents = usePolicyAgents as jest.Mock;
+const mockUsePolicyAgents = useAgentsForPolicyIds as jest.Mock;
 
 const entry = (id: string, overrides: Record<string, unknown> = {}) =>
   ({ id, packageName: 'aws', ...overrides } as unknown as AwsServiceMatrixEntry);
@@ -125,7 +125,7 @@ describe('useAgentDetection', () => {
         [],
         expect.objectContaining({ enabled: false })
       );
-      expect(mockUsePolicyAgents).toHaveBeenCalledWith({ policyIds: [], shouldPoll: true });
+      expect(mockUsePolicyAgents).toHaveBeenCalledWith([], { refetchInterval: 10_000 });
       expect(mockUseQuery.mock.calls[0][0].enabled).toBe(false);
     });
 
@@ -136,9 +136,8 @@ describe('useAgentDetection', () => {
         ['policy-s3'],
         expect.objectContaining({ full: true, enabled: true })
       );
-      expect(mockUsePolicyAgents).toHaveBeenCalledWith({
-        policyIds: ['policy-s3'],
-        shouldPoll: true,
+      expect(mockUsePolicyAgents).toHaveBeenCalledWith(['policy-s3'], {
+        refetchInterval: 10_000,
       });
     });
 
@@ -152,7 +151,7 @@ describe('useAgentDetection', () => {
       });
 
       expect(mockUseBulkPolicies.mock.calls[0][0]).toEqual(['agent-policy-1']);
-      expect(mockUsePolicyAgents.mock.calls[0][0].policyIds).toEqual(['agent-policy-1']);
+      expect(mockUsePolicyAgents.mock.calls[0][0]).toEqual(['agent-policy-1']);
     });
 
     it('resolves agent-based instances through every selected existing policy', () => {
@@ -537,14 +536,14 @@ describe('useAgentDetection', () => {
     it('polls agents and data every 10s while services are settling', () => {
       setup({ shouldPoll: true });
 
-      expect(mockUsePolicyAgents.mock.calls[0][0].shouldPoll).toBe(true);
+      expect(mockUsePolicyAgents.mock.calls[0][1].refetchInterval).toBe(10_000);
       expect(mockUseQuery.mock.calls[0][0].refetchInterval).toBe(10_000);
     });
 
     it('stops polling once everything has settled', () => {
       setup({ shouldPoll: false });
 
-      expect(mockUsePolicyAgents.mock.calls[0][0].shouldPoll).toBe(false);
+      expect(mockUsePolicyAgents.mock.calls[0][1].refetchInterval).toBe(false);
       expect(mockUseQuery.mock.calls[0][0].refetchInterval).toBe(false);
     });
   });

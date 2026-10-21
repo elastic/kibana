@@ -311,13 +311,10 @@ export { sendCreateAgentPolicyWithPackagePolicies } from './hooks/use_request/ag
 // Package policy creation — used by the existing-agent-policy path in ingest_hub
 export { sendCreatePackagePolicyForRq as sendCreatePackagePolicy } from './hooks/use_request/package_policy';
 
-// Agents query and incoming-data check — used by step 4 to resolve the deployed agents and
-// detect data per agent (immune to a customised data_stream.dataset).
-export {
-  useGetAgentsQuery,
-  sendGetAgents,
-  sendGetAgentIncomingData,
-} from './hooks/use_request/agents';
+// Agents of a set of agent policies and the incoming-data check — used by step 4 to resolve the
+// deployed agents and detect data per agent (immune to a customised data_stream.dataset).
+export { useAgentsForPolicyIds } from './hooks/use_agents_for_policy_ids';
+export { sendGetAgentIncomingData } from './hooks/use_request/agents';
 
 // Agent status badge — the same badge the Agent list and Managed integrations table render.
 export const LazyAgentHealth = lazy(() =>
