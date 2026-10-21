@@ -262,7 +262,6 @@ export const useRuleDetailsMenu = ({
                 label: actionI18n.DELETE_RULE,
                 iconType: 'trash' as const,
                 overflow: true as const,
-                isDestructive: true,
                 disableButton: !isExistingRule || !canEditRules,
                 testId: 'rules-details-delete-rule',
                 run: async () => {
