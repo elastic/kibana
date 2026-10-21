@@ -46,6 +46,7 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Partially update an action policy.',
     description: ACTION_POLICY_PATCH_SEMANTICS_DESCRIPTION,
     oasOperationObject: updateActionPolicyOasExamples,

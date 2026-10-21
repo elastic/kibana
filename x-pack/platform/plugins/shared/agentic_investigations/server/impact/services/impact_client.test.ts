@@ -154,7 +154,7 @@ describe('createImpactClient', () => {
           [
             'c1',
             [
-              { id: 'host-1', type: 'host' },
+              { id: 'host-1', type: 'host', name: 'Host 1' },
               { id: 'thing', type: undefined },
             ],
           ],

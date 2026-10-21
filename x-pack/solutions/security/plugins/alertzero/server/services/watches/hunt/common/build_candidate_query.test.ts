@@ -121,7 +121,12 @@ describe('buildCandidateQuery', () => {
           esClient,
           logger,
           { trigger: 'scheduled', spaceId: 'default', limit: 100 },
-          async () => new Set(pool.map(buildHuntInvestigationConversationId))
+          async () =>
+            new Set(
+              pool.map((reportId) =>
+                buildHuntInvestigationConversationId({ spaceId: 'default', reportId })
+              )
+            )
         )
       ).rejects.toThrow('timed out');
     });
@@ -281,7 +286,21 @@ describe('buildCandidateQuery', () => {
   describe('the open-proposal guard', () => {
     const hunted = 'rpt-open';
     const free = 'rpt-free';
-    const readOpenProposals = async () => new Set([buildHuntInvestigationConversationId(hunted)]);
+    const readOpenProposals = async () =>
+      new Set([buildHuntInvestigationConversationId({ spaceId: 'default', reportId: hunted })]);
+
+    it("does not skip a report because another space's Hunt Proposal is open", async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([hunted, free]));
+      const result = await buildCandidateQuery(
+        esClient,
+        logger,
+        { trigger: 'scheduled', spaceId: 'default' },
+        async () =>
+          new Set([buildHuntInvestigationConversationId({ spaceId: 'hunt-b', reportId: hunted })])
+      );
+      expect(result.ids).toEqual([hunted, free]);
+    });
 
     it('drops a report whose Hunt Proposal is still open', async () => {
       const esClient = elasticsearchServiceMock.createElasticsearchClient();
@@ -344,7 +363,11 @@ describe('buildCandidateQuery', () => {
     // reports behind that run permanently out of reach.
     const parkedIds = (count: number) => Array.from({ length: count }, (_, i) => `rpt-parked-${i}`);
     const readOpenProposals = (parked: string[]) => async () =>
-      new Set(parked.map((id) => buildHuntInvestigationConversationId(id)));
+      new Set(
+        parked.map((id) =>
+          buildHuntInvestigationConversationId({ spaceId: 'default', reportId: id })
+        )
+      );
 
     it('selects reports ranked behind a full page of open Proposals', async () => {
       const parked = parkedIds(30);
@@ -522,7 +545,10 @@ describe('buildCandidateQuery', () => {
         esClient,
         logger,
         { trigger: 'scheduled', spaceId: 'default' },
-        async () => new Set([buildHuntInvestigationConversationId('rpt-open')])
+        async () =>
+          new Set([
+            buildHuntInvestigationConversationId({ spaceId: 'default', reportId: 'rpt-open' }),
+          ])
       );
       expect(result.ids).toEqual(['rpt-free']);
       expect(result.skipped).toEqual([{ id: 'rpt-open', reason: 'open_proposal' }]);

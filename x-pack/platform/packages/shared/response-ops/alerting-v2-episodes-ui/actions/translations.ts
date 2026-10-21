@@ -53,6 +53,20 @@ export const OPEN_IN_DISCOVER = i18n.translate(
   }
 );
 
+export const OPEN_ALERT_EVENTS_HISTORY = i18n.translate(
+  'xpack.alertingV2.episodesUi.actions.openAlertEventsHistoryLabel',
+  {
+    defaultMessage: 'Open alert events history',
+  }
+);
+
+export const OPEN_ALERT_EVENTS_HISTORY_UNAVAILABLE = i18n.translate(
+  'xpack.alertingV2.episodesUi.actions.openAlertEventsHistoryUnavailableTooltip',
+  {
+    defaultMessage: 'Discover with ES|QL is required to open alert events history.',
+  }
+);
+
 export const TAGS_FLYOUT_TITLE = i18n.translate(
   'xpack.alertingV2.episodesUi.tagsAction.flyoutTitle',
   {
@@ -118,6 +132,24 @@ export const UNRESOLVE_NOT_AVAILABLE = i18n.translate(
   'xpack.alertingV2Episodes.actions.unresolveNotAvailable',
   {
     defaultMessage: 'Unresolve is not available for classic alerts',
+  }
+);
+
+export const ADD_TO_CASE = i18n.translate('xpack.alertingV2.episodesUi.addToCaseAction.addToCase', {
+  defaultMessage: 'Add to case',
+});
+
+export const NO_ALERTS_ADDED_TO_CASE = i18n.translate(
+  'xpack.alertingV2.episodesUi.addToCaseAction.noAlertsAddedTitle',
+  {
+    defaultMessage: 'No alerts added to the case',
+  }
+);
+
+export const ALERTS_ALREADY_ATTACHED_TO_CASE = i18n.translate(
+  'xpack.alertingV2.episodesUi.addToCaseAction.alertsAlreadyAttached',
+  {
+    defaultMessage: 'All selected alerts are already attached to the case',
   }
 );
 

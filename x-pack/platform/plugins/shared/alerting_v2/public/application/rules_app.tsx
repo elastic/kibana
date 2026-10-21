@@ -14,6 +14,7 @@ import { RulesListPage } from '../pages/rules_list_page/rules_list_page';
 import { RuleDetailsRoute } from '../routes/rule_details_route';
 import { RequireAlertingPrivilege } from '../components/require_alerting_privilege';
 import { useAlertingV2ExperimentalFeatures } from '../hooks/use_alerting_v2_experimental_features';
+import { useV2RulesTabNewBadge } from '../hooks/use_v2_rules_tab_new_badge';
 
 const SequenceBuilderPage = lazy(() =>
   import('../pages/sequence_builder_page').then((m) => ({ default: m.SequenceBuilderPage }))
@@ -30,6 +31,9 @@ export const RulesApp = () => {
   const { path } = useRouteMatch();
   const base = path.endsWith('/') ? path.slice(0, -1) : path;
   const showExperimentalFeatures = useAlertingV2ExperimentalFeatures();
+  // Stable shell for list + details: dismiss new-dot on real Universal leave (navigateToApp),
+  // not when RulesListHeader unmounts for rule details.
+  useV2RulesTabNewBadge(true, { persistOnUnmount: true });
   return (
     <RequireAlertingPrivilege
       features={['rules']}
