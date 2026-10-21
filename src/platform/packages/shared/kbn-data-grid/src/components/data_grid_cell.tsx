@@ -31,7 +31,12 @@ import {
 } from '../constants';
 import type { DataGridStyles } from '../styles';
 import { getPopoverAnchorStyles, popoverContentStyles } from '../styles';
-import type { DataGridExpandedCell, DataGridInternalColumn, DataGridProps } from '../types';
+import type {
+  DataGridCellKey,
+  DataGridExpandedCell,
+  DataGridInternalColumn,
+  DataGridProps,
+} from '../types';
 import type { CellActionsBubbleAction } from './cell_actions_bubble/cell_actions_bubble';
 import { CellActionsBubble } from './cell_actions_bubble/cell_actions_bubble';
 
@@ -48,7 +53,7 @@ interface UseCellExpansionParams {
   columnId: string;
   anchorRect?: DOMRect;
   onOpenExpansion: (cell: DataGridExpandedCell) => void;
-  onCloseExpansion: () => void;
+  onCloseExpansion: (cell: DataGridCellKey) => void;
 }
 
 const useCellExpansion = ({
@@ -74,6 +79,11 @@ const useCellExpansion = ({
     [cellRef, rowId, columnId, onOpenExpansion]
   );
 
+  const close = useCallback(
+    () => onCloseExpansion({ rowId, columnId }),
+    [onCloseExpansion, rowId, columnId]
+  );
+
   // The popover is anchored to a fixed rect, so it would be left behind when the cell scrolls.
   useEffect(() => {
     if (!isOpen) {
@@ -81,17 +91,14 @@ const useCellExpansion = ({
     }
     const onScroll = (event: Event) => {
       if (event.target instanceof Node && event.target.contains(cellRef.current)) {
-        onCloseExpansion();
+        close();
       }
     };
     window.addEventListener('scroll', onScroll, true);
     return () => window.removeEventListener('scroll', onScroll, true);
-  }, [isOpen, cellRef, onCloseExpansion]);
+  }, [isOpen, cellRef, close]);
 
-  return useMemo(
-    () => ({ anchorRect, open, close: onCloseExpansion }),
-    [anchorRect, open, onCloseExpansion]
-  );
+  return useMemo(() => ({ anchorRect, open, close }), [anchorRect, open, close]);
 };
 
 const CellActionIconButton: typeof EuiButtonIcon = ({
@@ -273,7 +280,7 @@ interface DataGridCellProps<TRow> {
   /** Set when this cell's expansion popover is open. */
   expandedAnchorRect?: DOMRect;
   onOpenExpansion: (cell: DataGridExpandedCell) => void;
-  onCloseExpansion: () => void;
+  onCloseExpansion: (cell: DataGridCellKey) => void;
   styles: DataGridStyles;
   layoutCss: SerializedStyles;
   getCellProps?: DataGridProps<TRow>['getCellProps'];

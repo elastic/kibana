@@ -13,7 +13,12 @@ import type { Virtualizer } from '@tanstack/react-virtual';
 import type { SerializedStyles } from '@emotion/react';
 import { DATA_GRID_ROW_CLASS } from '../constants';
 import type { DataGridStyles } from '../styles';
-import type { DataGridExpandedCell, DataGridInternalColumn, DataGridProps } from '../types';
+import type {
+  DataGridCellKey,
+  DataGridExpandedCell,
+  DataGridInternalColumn,
+  DataGridProps,
+} from '../types';
 import { DataGridCell } from './data_grid_cell';
 
 interface DataGridRowProps<TRow> {
@@ -25,7 +30,7 @@ interface DataGridRowProps<TRow> {
   /** Set only for the row that has the open expansion popover. */
   expandedCell?: DataGridExpandedCell;
   onOpenExpansion: (cell: DataGridExpandedCell) => void;
-  onCloseExpansion: () => void;
+  onCloseExpansion: (cell: DataGridCellKey) => void;
   ariaRowIndex: number;
   isStriped: boolean;
   styles: DataGridStyles;

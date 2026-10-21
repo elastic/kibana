@@ -29,6 +29,7 @@ import { useColumnSizing } from '../hooks/use_column_sizing';
 import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { componentStyles, getColumnLayoutStyles } from '../styles';
 import type {
+  DataGridCellKey,
   DataGridControlColumn,
   DataGridExpandedCell,
   DataGridInternalColumn,
@@ -197,7 +198,15 @@ export const DataGrid = <TRow,>({
 
   // Only one cell can be expanded: opening another replaces it.
   const [expandedCell, setExpandedCell] = useState<DataGridExpandedCell>();
-  const closeExpansion = useCallback(() => setExpandedCell(undefined), []);
+  // Only closes the cell that asks for it: the popover of a previously expanded cell can report
+  // its close (outside click, focus trap) after another cell was opened, which must stay open.
+  const closeExpansion = useCallback(
+    ({ rowId, columnId }: DataGridCellKey) =>
+      setExpandedCell((prev) =>
+        prev?.rowId === rowId && prev.columnId === columnId ? undefined : prev
+      ),
+    []
+  );
   useEffect(() => {
     if (expandedCell && !rows.some((row) => getRowId(row) === expandedCell.rowId)) {
       setExpandedCell(undefined);
