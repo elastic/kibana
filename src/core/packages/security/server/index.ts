@@ -50,6 +50,7 @@ export type {
 export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,
+  AuthorizationServiceContract,
   AuditServiceContract,
   ServiceAccountsServiceContract,
   CoreSecurityDelegateHandle,
@@ -100,4 +101,13 @@ export {
   flattenSecurityPrivileges,
 } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';
-export type { UiamProjectType, UiamClientAuthenticationParams } from './src/uiam';
+export type {
+  UiamProjectType,
+  UiamClientAuthenticationParams,
+  UiamAuthorizationCheck,
+  UiamAuthorizationCheckResult,
+  UiamAuthorizationResource,
+  UiamAuthorizationResult,
+  UiamAuthorizationType,
+} from './src/uiam';
+export type { CoreAuthorizationService } from './src/authorization';

@@ -77,6 +77,11 @@ const createStartMock = (): SecurityStartMock => {
       getRedactedSessionId: jest.fn().mockResolvedValue(undefined),
       apiKeys: apiKeysMock.create(),
     }),
+    authz: lazyObject({
+      uiam: lazyObject({
+        checkAuthorization: jest.fn().mockResolvedValue({ permitted: false, checks: [] }),
+      }),
+    }),
     audit: auditServiceMock.create(),
     serviceAccounts: createServiceAccountsStartMock(),
   });
@@ -116,6 +121,11 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
       getPrincipal: jest.fn(),
       getRedactedSessionId: jest.fn().mockResolvedValue(undefined),
       apiKeys: apiKeysMock.create(),
+    }),
+    authz: lazyObject({
+      uiam: lazyObject({
+        checkAuthorization: jest.fn().mockResolvedValue({ permitted: false, checks: [] }),
+      }),
     }),
     audit: auditServiceMock.create(),
     serviceAccounts: lazyObject({

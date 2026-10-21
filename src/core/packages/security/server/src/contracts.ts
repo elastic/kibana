@@ -9,6 +9,7 @@
 
 import type { CoreFipsService } from './fips';
 import type { CoreAuthenticationService, FakeRequestEnricher } from './authc';
+import type { CoreAuthorizationService } from './authorization';
 import type { CoreSecurityDelegateContract, CoreSecurityDelegateHandle } from './api_provider';
 import type { CoreAuditService } from './audit';
 import type { CoreServiceAccountsService } from './service_accounts';
@@ -66,6 +67,10 @@ export interface SecurityServiceStart {
    * The {@link CoreAuthenticationService | authentication service}
    */
   authc: CoreAuthenticationService;
+  /**
+   * The {@link CoreAuthorizationService | authorization service}
+   */
+  authz: CoreAuthorizationService;
   /**
    * The {@link CoreAuditService | audit service}
    */
