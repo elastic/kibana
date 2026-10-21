@@ -92,11 +92,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should render different data in response to filter change', async function () {
           const { spec, isValid } = await PageObjects.vegaChart.getSpecAsJSON();
           expect(isValid).to.be(true);
-          // name the index so the filter bar resolves this data view instead of the ambient default
           const updatedSpec = {
             ...spec,
             data: {
               ...spec.data,
+              // name the index so the filter bar resolves this data view instead of the ambient default
               url: { ...spec.data.url, index: PageObjects.visualize.index.LOGSTASH_TIME_BASED },
             },
             // add SVG renderer to read the Y axis labels
