@@ -38,7 +38,30 @@ void test('a runtime doc keeps the allowlist and rejects a bad cap', () => {
     childCapMb: 384,
     localSo: false,
     sampleRequest: 4,
+    bootArm: 'baseline',
+    warm: false,
+    slots: 1,
   });
+  assert.equal(
+    parseRuntimeDoc({
+      mode: 'offmain-thread',
+      generation: 1,
+      childCapMb: 384,
+      sampleRequest: 0,
+      bootArm: 'classy',
+    }),
+    null
+  );
+  assert.equal(
+    parseRuntimeDoc({
+      mode: 'offmain-thread',
+      generation: 1,
+      childCapMb: 384,
+      sampleRequest: 0,
+      slots: 3,
+    }),
+    null
+  );
   assert.throws(() => buildRuntimeDoc(null, { mode: 'main', childCapMb: 32 }), /128 to 2048/);
 });
 
@@ -69,6 +92,9 @@ void test('applying the doc uses process transport and the doc cap, not the imag
     childCapMb: 512,
     localSo: true,
     sampleRequest: 0,
+    bootArm: 'baseline',
+    warm: false,
+    slots: 1,
   });
   await applyRuntime(controller, {
     generation: 2,
@@ -76,6 +102,9 @@ void test('applying the doc uses process transport and the doc cap, not the imag
     childCapMb: 384,
     localSo: true,
     sampleRequest: 0,
+    bootArm: 'baseline',
+    warm: false,
+    slots: 1,
   });
   assert.equal(seen[0].transport, 'process');
   assert.equal(seen[0].processOldSpaceMb, 512);
@@ -99,6 +128,9 @@ void test('offmain-thread sets the thread cap and clears the process cap', async
     childCapMb: 384,
     localSo: true,
     sampleRequest: 0,
+    bootArm: 'baseline',
+    warm: false,
+    slots: 1,
   });
   const parsed = parseRuntimeDoc({
     mode: 'offmain-thread',
@@ -111,6 +143,33 @@ void test('offmain-thread sets the thread cap and clears the process cap', async
   assert.equal(seen[0].mode, 'offmain');
   assert.equal(seen[0].threadOldSpaceMb, 384);
   assert.equal(seen[0].processOldSpaceMb, undefined);
+  assert.equal(parsed?.bootArm, 'baseline');
+  assert.equal(parsed?.warm, false);
+});
+
+void test('class warm keeps the thread cap and asks for two slots only when asked', async () => {
+  const seen: Array<Partial<T7aConfig>> = [];
+  const controller = {
+    configure: async (next: Partial<T7aConfig>) => {
+      seen.push(next);
+      return next as T7aConfig;
+    },
+  };
+  const doc = buildRuntimeDoc(null, {
+    mode: 'offmain-thread',
+    childCapMb: 384,
+    bootArm: 'class',
+    warm: true,
+    slots: 2,
+  });
+  assert.equal(doc.bootArm, 'class');
+  assert.equal(doc.warm, true);
+  assert.equal(doc.slots, 2);
+  await applyRuntime(controller, doc);
+  assert.equal(seen[0].bootArm, 'class');
+  assert.equal(seen[0].slots, 2);
+  assert.equal(seen[0].threadOldSpaceMb, 384);
+  assert.throws(() => buildRuntimeDoc(null, { mode: 'main', slots: 3 }), /slots must be 1 or 2/);
 });
 
 void test('an explicit child cap beats the parent env and roles select the background process', () => {

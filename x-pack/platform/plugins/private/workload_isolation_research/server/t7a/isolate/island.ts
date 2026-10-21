@@ -53,6 +53,8 @@ import { License } from '@kbn/licensing-plugin/common/license';
 import { map } from 'rxjs';
 import { encodeFakeRequest } from '../request_codec';
 import type { IslandSnapshot } from '../snapshot';
+import { decideOptional, loadClassIndexConnector, pluginsFor, readBootArm } from './boot_policy';
+import type { BootArm } from './boot_policy';
 import {
   bridge,
   bridgeSync,
@@ -1027,13 +1029,18 @@ export interface Island {
   readonly applyReplicas: (next: IslandSnapshot) => void;
   readonly observePlatform: (token: string) => Promise<Record<string, unknown>>;
   readonly platform: ReturnType<typeof createPlatformReplica>;
+  readonly bootArm: BootArm;
+  readonly bootedPlugins: readonly string[];
+  readonly ruleTypeIds: readonly string[];
+  readonly actionTypeIds: readonly string[];
 }
 
 /** Boots the real alerting execution plugin set inside this isolate. */
 export const bootIsland = async (
   snapshot: IslandSnapshot,
   es: ResearchEsCapability,
-  localSo = false
+  localSo = false,
+  bootArm: BootArm = readBootArm(undefined)
 ): Promise<Island> => {
   const t0 = performance.now();
   const core = createCoreLite(snapshot, es, localSo);
@@ -1098,7 +1105,10 @@ export const bootIsland = async (
     : undefined;
   const eventLog = await load('@kbn/event-log-plugin/server', 'eventLog');
   const actions = await load('@kbn/actions-plugin/server', 'actions');
-  const stackConnectors = await load('@kbn/stack-connectors-plugin/server', 'stackConnectors');
+  const bootStackConnectors = decideOptional(bootArm, 'stackConnectors') === 'boot';
+  const stackConnectors = bootStackConnectors
+    ? await load('@kbn/stack-connectors-plugin/server', 'stackConnectors')
+    : undefined;
   const alerting = await load('@kbn/alerting-plugin/server', 'alerting');
   const stackAlerts = await load('@kbn/stack-alerts-plugin/server', 'stackAlerts');
 
@@ -1117,6 +1127,9 @@ export const bootIsland = async (
     stackAlerts: deferred<object>(),
   };
 
+  const ruleTypeIds: string[] = [];
+  const actionTypeIds: string[] = [];
+  const bootedPlugins = pluginsFor(bootArm, localSo);
   await runInTmPhase('boot', async () => {
     // ---- setup (Core's topological order) ----
     const esoStartDeferred = deferred<unknown>();
@@ -1142,11 +1155,31 @@ export const bootIsland = async (
         spaces: deps.spacesSetup,
         security: deps.securitySetup,
       }
-    ) as object;
-    stackConnectors.setup(
-      core.setupFor(depsStart.stackConnectors.promise, starts.stackConnectors.promise),
-      { actions: actionsSetup }
-    );
+    ) as {
+      registerType?: (type: { id?: string }) => void;
+      registerSubActionConnectorType?: (type: { id?: string }) => void;
+    };
+    const wrapActionRegister = (method: 'registerType' | 'registerSubActionConnectorType') => {
+      const current = actionsSetup[method];
+      if (typeof current !== 'function') return;
+      const bound = current.bind(actionsSetup);
+      actionsSetup[method] = (type) => {
+        if (typeof type?.id === 'string') actionTypeIds.push(type.id);
+        return bound(type);
+      };
+    };
+    wrapActionRegister('registerType');
+    wrapActionRegister('registerSubActionConnectorType');
+    if (bootStackConnectors && stackConnectors) {
+      stackConnectors.setup(
+        core.setupFor(depsStart.stackConnectors.promise, starts.stackConnectors.promise),
+        { actions: actionsSetup }
+      );
+    } else if (typeof actionsSetup.registerType === 'function') {
+      actionsSetup.registerType(await loadClassIndexConnector());
+    } else {
+      throw new Error('t7a class connector: actions.registerType missing');
+    }
     const alertingSetup = alerting.setup(
       core.setupFor(depsStart.alerting.promise, starts.alerting.promise),
       {
@@ -1166,7 +1199,14 @@ export const bootIsland = async (
         security: deps.securitySetup,
         spaces: deps.spacesSetup,
       }
-    ) as object;
+    ) as { registerType?: (type: { id?: string }) => void };
+    if (typeof alertingSetup.registerType === 'function') {
+      const registerType = alertingSetup.registerType.bind(alertingSetup);
+      alertingSetup.registerType = (type) => {
+        if (typeof type?.id === 'string') ruleTypeIds.push(type.id);
+        return registerType(type);
+      };
+    }
     stackAlerts.setup(core.setupFor(depsStart.stackAlerts.promise, starts.stackAlerts.promise), {
       alerting: alertingSetup,
       features: deps.features,
@@ -1202,7 +1242,9 @@ export const bootIsland = async (
       licensing: deps.licensingStart,
     };
     depsStart.stackConnectors.resolve(connectorsDeps);
-    starts.stackConnectors.resolve(stackConnectors.start(core.start, connectorsDeps));
+    starts.stackConnectors.resolve(
+      stackConnectors ? stackConnectors.start(core.start, connectorsDeps) : {}
+    );
 
     const alertingDeps = {
       actions: actionsStart,
@@ -1271,5 +1313,9 @@ export const bootIsland = async (
     },
     observePlatform: (token: string) => core.observePlatform(token),
     platform: core.platform,
+    bootArm,
+    bootedPlugins,
+    ruleTypeIds,
+    actionTypeIds,
   };
 };

@@ -20,6 +20,7 @@ export const CHILD_CAP_MIN = 128;
 export const CHILD_CAP_MAX = 2048;
 
 export type RuntimeMode = 'main' | 'offmain-process' | 'offmain-thread';
+export type RuntimeBootArm = 'baseline' | 'class';
 
 export interface RuntimeDoc {
   readonly generation: number;
@@ -27,12 +28,19 @@ export interface RuntimeDoc {
   readonly childCapMb: number;
   readonly localSo: boolean;
   readonly sampleRequest: number;
+  readonly bootArm: RuntimeBootArm;
+  /** When true, the background process boots the island as it applies this generation. */
+  readonly warm: boolean;
+  readonly slots: 1 | 2;
 }
 
 export interface RuntimeInput {
   readonly mode: RuntimeMode;
   readonly childCapMb?: number;
   readonly localSo?: boolean;
+  readonly bootArm?: RuntimeBootArm;
+  readonly warm?: boolean;
+  readonly slots?: number;
 }
 
 const isCap = (value: unknown): value is number =>
@@ -53,12 +61,20 @@ export const parseRuntimeDoc = (source: unknown): RuntimeDoc | null => {
   }
   if (!isCount(doc.generation) || !isCap(doc.childCapMb) || !isCount(doc.sampleRequest))
     return null;
+  if (doc.bootArm !== undefined && doc.bootArm !== 'baseline' && doc.bootArm !== 'class') {
+    return null;
+  }
+  if (doc.warm !== undefined && typeof doc.warm !== 'boolean') return null;
+  if (doc.slots !== undefined && doc.slots !== 1 && doc.slots !== 2) return null;
   return {
     generation: doc.generation,
     mode: doc.mode,
     childCapMb: doc.childCapMb,
     localSo: doc.localSo !== false,
     sampleRequest: doc.sampleRequest,
+    bootArm: doc.bootArm === 'class' ? 'class' : 'baseline',
+    warm: doc.warm === true,
+    slots: doc.slots === 2 ? 2 : 1,
   };
 };
 
@@ -66,12 +82,21 @@ export const parseRuntimeDoc = (source: unknown): RuntimeDoc | null => {
 export const buildRuntimeDoc = (previous: RuntimeDoc | null, input: RuntimeInput): RuntimeDoc => {
   const childCapMb = input.childCapMb ?? previous?.childCapMb ?? 384;
   if (!isCap(childCapMb)) throw new Error('child cap must be an integer from 128 to 2048');
+  const slots = input.slots ?? previous?.slots ?? 1;
+  if (slots !== 1 && slots !== 2) throw new Error('slots must be 1 or 2');
+  const bootArm = input.bootArm ?? previous?.bootArm ?? 'baseline';
+  if (bootArm !== 'baseline' && bootArm !== 'class') {
+    throw new Error('boot arm must be baseline or class');
+  }
   return {
     generation: (previous?.generation ?? 0) + 1,
     mode: input.mode,
     childCapMb,
     localSo: input.localSo ?? previous?.localSo ?? true,
     sampleRequest: previous?.sampleRequest ?? 0,
+    bootArm,
+    warm: input.warm ?? previous?.warm ?? false,
+    slots,
   };
 };
 
@@ -82,6 +107,9 @@ export const bumpSampleRequest = (previous: RuntimeDoc | null): RuntimeDoc => ({
   childCapMb: previous?.childCapMb ?? 384,
   localSo: previous?.localSo ?? true,
   sampleRequest: (previous?.sampleRequest ?? 0) + 1,
+  bootArm: previous?.bootArm ?? 'baseline',
+  warm: previous?.warm ?? false,
+  slots: previous?.slots ?? 1,
 });
 
 /** Applies a doc on the process that owns the island. Main clears both caps. */
@@ -98,26 +126,30 @@ export const applyRuntime = async (
     });
     return;
   }
+  const slots = doc.slots === 2 ? 2 : 1;
+  const bootArm = doc.bootArm === 'class' ? 'class' : 'baseline';
   if (doc.mode === 'offmain-thread') {
     await controller.configure({
       mode: 'offmain',
       transport: 'thread',
-      slots: 1,
+      slots,
       concurrency: 1,
       localSo: doc.localSo,
       processOldSpaceMb: undefined,
       threadOldSpaceMb: doc.childCapMb,
+      bootArm,
     });
     return;
   }
   await controller.configure({
     mode: 'offmain',
     transport: 'process',
-    slots: 1,
+    slots,
     concurrency: 1,
     localSo: doc.localSo,
     processOldSpaceMb: doc.childCapMb,
     threadOldSpaceMb: undefined,
+    bootArm,
   });
 };
 
@@ -227,6 +259,8 @@ export const startResearchRuntime = (options: {
   let running = false;
   let cgroupReady = false;
   let appliedGeneration = 0;
+  let bootAtStartMs: number | null = null;
+  let bootAtStartWallMs: number | null = null;
   let seq = 0;
   const pod = podName(hostname());
   const bootId = readKernelBootId();
@@ -243,8 +277,25 @@ export const startResearchRuntime = (options: {
       if (controller && doc && doc.generation !== appliedGeneration && doc.generation > 0) {
         await applyRuntime(controller, doc);
         appliedGeneration = doc.generation;
+        bootAtStartMs = null;
+        bootAtStartWallMs = null;
+        if (doc.mode !== 'main' && doc.warm) {
+          const started = performance.now();
+          const boots = await Promise.all(
+            Array.from({ length: doc.slots }, () => controller.probe('boot'))
+          );
+          bootAtStartWallMs = performance.now() - started;
+          const first = boots[0] as { status?: string; value?: { bootMs?: unknown } };
+          bootAtStartMs =
+            first?.status === 'success' && typeof first.value?.bootMs === 'number'
+              ? first.value.bootMs
+              : null;
+        }
       }
       const config = controller?.getConfig();
+      const heaps = controller?.workerHeaps() ?? [];
+      const worker = heaps[0];
+      const second = heaps[1];
       const memory = sampleProcessMemory();
       const account = accountFromFiles(readFile);
       seq += 1;
@@ -268,6 +319,20 @@ export const startResearchRuntime = (options: {
           transport: config?.transport ?? null,
           process_old_space_mb: config?.processOldSpaceMb ?? null,
           thread_old_space_mb: config?.threadOldSpaceMb ?? null,
+          boot_arm: config?.bootArm ?? null,
+          warm: doc?.warm ?? false,
+          slots: doc?.slots ?? config?.slots ?? null,
+          boot_at_start_ms: bootAtStartMs,
+          boot_at_start_wall_ms: bootAtStartWallMs,
+          worker_heap_size_limit: worker?.heapSizeLimit ?? null,
+          worker_heap_used: worker?.heapUsed ?? null,
+          worker_heap_total: worker?.heapTotal ?? null,
+          worker_boot_ms: worker?.bootMs ?? null,
+          worker_rule_type_ids: worker?.ruleTypeIds ?? [],
+          worker_action_type_ids: worker?.actionTypeIds ?? [],
+          worker_slot_count: heaps.length,
+          worker_heap_size_limit_2: second?.heapSizeLimit ?? null,
+          worker_heap_used_2: second?.heapUsed ?? null,
           parent_old_space_mb: parentOldSpaceMb(process.env.NODE_OPTIONS),
           pointer_compression: memory.pointerCompression,
           jemalloc:

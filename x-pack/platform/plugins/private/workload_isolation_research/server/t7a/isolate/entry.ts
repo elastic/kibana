@@ -23,6 +23,8 @@ import type { FakeRequestDescriptor } from '../request_codec';
 import { encodeRunResult, encodeTaskError } from '../task_codec';
 import { bootIsland } from './island';
 import type { Island } from './island';
+import { readBootArm } from './boot_policy';
+import { setWorkerInventory } from '../../capability_kit/worker_heap_state';
 import { replicaFingerprint, runWithExecutionContext } from '../../capability_kit/worker_core';
 import { edgeStats, fenceStats, missStats, runContext } from './bridge';
 import { guardReplicaWatch } from './replica_watch';
@@ -59,11 +61,24 @@ const getIsland = (context: WorkerContext): Promise<Island> => {
       snapshot: IslandSnapshot;
       elasticsearch: ResearchEsCapability;
       localSo?: boolean;
+      bootArm?: string;
     };
     bootStartedAt = performance.now();
-    island = bootIsland(data.snapshot, data.elasticsearch, Boolean(data.localSo));
+    island = bootIsland(
+      data.snapshot,
+      data.elasticsearch,
+      Boolean(data.localSo),
+      readBootArm(data.bootArm)
+    );
     island
-      .then((i) => (islandTaskTypes = [...i.taskCapture.definitions.keys()]))
+      .then((current) => {
+        islandTaskTypes = [...current.taskCapture.definitions.keys()];
+        setWorkerInventory({
+          bootMs: current.bootMs,
+          ruleTypeIds: current.ruleTypeIds,
+          actionTypeIds: current.actionTypeIds,
+        });
+      })
       .catch(() => undefined);
     island.catch(() => {
       island = undefined;
@@ -268,6 +283,10 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
         taskDefinitionMeta: current.taskDefinitionMeta,
         fences: Object.fromEntries(fenceStats),
         misses: Object.fromEntries(missStats),
+        bootArm: current.bootArm,
+        bootedPlugins: current.bootedPlugins,
+        ruleTypeIds: current.ruleTypeIds,
+        actionTypeIds: current.actionTypeIds,
       } as CodecInput;
     }
     const t0 = performance.now();

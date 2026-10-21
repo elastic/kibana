@@ -12,6 +12,8 @@ import { encode, decode } from './codecs';
 import type { CodecInput, WireValue } from './codecs';
 import type { AsyncCallback, CancellationInfo, Packet, TaskEntry, WorkerContext } from './protocol';
 import { runWithParentSpan } from './worker_core/parent_span';
+import { sampleProcessMemory } from './worker_core/memory_sample';
+import { currentWorkerInventory, registerHeapPublisher } from './worker_heap_state';
 
 const requireModule = createRequire(__filename);
 const send = (packet: Packet): void => {
@@ -357,6 +359,24 @@ const startRuntime = (): void => {
   };
   if (parentPort) parentPort.on('message', receive);
   else process.on('message', receive);
+  const reportHeap = () => {
+    const sample = sampleProcessMemory();
+    const extra = currentWorkerInventory();
+    send({
+      version: 1,
+      kind: 'heap',
+      heapSizeLimit: sample.heapSizeLimit,
+      heapUsed: sample.heapUsed,
+      heapTotal: sample.heapTotal,
+      bootMs: extra.bootMs,
+      ruleTypeIds: [...extra.ruleTypeIds],
+      actionTypeIds: [...extra.actionTypeIds],
+    });
+  };
+  registerHeapPublisher(reportHeap);
+  reportHeap();
+  const heapTimer = setInterval(reportHeap, 2000);
+  heapTimer.unref();
   send({ version: 1, kind: 'ready' });
 };
 

@@ -136,6 +136,11 @@ export const registerT7aRoutes = (
           ]),
           childCapMb: schema.maybe(schema.number({ min: CHILD_CAP_MIN, max: CHILD_CAP_MAX })),
           localSo: schema.maybe(schema.boolean()),
+          bootArm: schema.maybe(
+            schema.oneOf([schema.literal('baseline'), schema.literal('class')])
+          ),
+          warm: schema.maybe(schema.boolean()),
+          slots: schema.maybe(schema.number({ min: 1, max: 2 })),
         }),
       },
     },
@@ -146,6 +151,9 @@ export const registerT7aRoutes = (
           mode: 'main' | 'offmain-process' | 'offmain-thread';
           childCapMb?: number;
           localSo?: boolean;
+          bootArm?: 'baseline' | 'class';
+          warm?: boolean;
+          slots?: number;
         };
       },
       response: {
@@ -181,6 +189,9 @@ export const registerT7aRoutes = (
           childCapMb: 384,
           localSo: true,
           sampleRequest: 0,
+          bootArm: 'baseline',
+          warm: false,
+          slots: 1,
         },
       });
     } catch (error) {

@@ -170,6 +170,17 @@ export type Packet =
     }
   | { readonly version: 1; readonly kind: 'abort_ack'; readonly runId: string }
   | { readonly version: 1; readonly kind: 'heartbeat' }
+  /** Worker V8 heap, sampled inside the isolate. Not a run and not the parent heap. */
+  | {
+      readonly version: 1;
+      readonly kind: 'heap';
+      readonly heapSizeLimit: number;
+      readonly heapUsed: number;
+      readonly heapTotal: number;
+      readonly bootMs: number | null;
+      readonly ruleTypeIds: readonly string[];
+      readonly actionTypeIds: readonly string[];
+    }
   /** 0.1.12: task module loaded, user code starting (stall watchdog arms here, not at dispatch). */
   | { readonly version: 1; readonly kind: 'started'; readonly runId: string }
   /** Once, after island boot and parity, immediately before runner.run(). */

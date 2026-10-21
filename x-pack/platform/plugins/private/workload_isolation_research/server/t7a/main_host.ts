@@ -102,6 +102,8 @@ export interface T7aConfig {
   readonly processOldSpaceMb?: number;
   /** UNSUPPORTED-API RESEARCH SHIM. Thread old-space cap in MiB. */
   readonly threadOldSpaceMb?: number;
+  /** baseline boots every stack connector. class boots only the `.index` connector. */
+  readonly bootArm: 'baseline' | 'class';
 }
 
 interface EdgeAgg {
@@ -131,6 +133,7 @@ export class T7aController {
     abortGraceMs: 2000,
     deadlineMs: 10 * 60_000,
     localSo: false,
+    bootArm: 'baseline',
   };
   private host?: ExecutionHost;
   private readonly registry: ModuleRegistry;
@@ -217,9 +220,22 @@ export class T7aController {
       previous.abortGraceMs !== this.config.abortGraceMs ||
       previous.localSo !== this.config.localSo ||
       previous.processOldSpaceMb !== this.config.processOldSpaceMb ||
-      previous.threadOldSpaceMb !== this.config.threadOldSpaceMb;
+      previous.threadOldSpaceMb !== this.config.threadOldSpaceMb ||
+      previous.bootArm !== this.config.bootArm;
     if (hostChanged || this.config.mode === 'main') await this.stopHost();
     return this.config;
+  }
+
+  /** In-worker heap samples. Empty until a slot has published one. */
+  public workerHeaps(): ReadonlyArray<{
+    heapSizeLimit: number;
+    heapUsed: number;
+    heapTotal: number;
+    bootMs: number | null;
+    ruleTypeIds: readonly string[];
+    actionTypeIds: readonly string[];
+  }> {
+    return this.host?.workerHeaps() ?? [];
   }
 
   public async stopHost(): Promise<void> {
@@ -734,6 +750,7 @@ export class T7aController {
       data: {
         snapshot: this.buildSnapshot(),
         localSo: this.config.localSo,
+        bootArm: this.config.bootArm,
         elasticsearch: (this.esCapability ??= captureResearchEsCapability(
           this.deps.core.elasticsearch.client as never,
           fake,

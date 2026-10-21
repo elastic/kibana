@@ -25,6 +25,8 @@ import { startEndpoint } from './transport';
 import type { Endpoint } from './transport';
 import { captureParentSpan } from './worker_core/parent_span';
 import type { ParentSpanContext } from './worker_core/parent_span';
+import { acceptHeapPacket } from './worker_heap_state';
+import type { WorkerHeapReport } from './worker_heap_state';
 
 export interface Binding {
   readonly handler: HostHandler;
@@ -100,6 +102,7 @@ interface Slot {
   stopping: boolean;
   lastBeat: number;
   readonly active: Map<string, Execution>;
+  workerHeap?: WorkerHeapReport;
 }
 
 /**
@@ -258,6 +261,13 @@ export class ExecutionHost {
     this.queues.clear();
   }
 
+  /** Latest in-worker heap samples, one per live slot. Empty when no isolate is up. */
+  public workerHeaps(): WorkerHeapReport[] {
+    return [...this.pools.values()]
+      .flat()
+      .flatMap((slot) => (slot.workerHeap ? [slot.workerHeap] : []));
+  }
+
   private dispatch(workloadClass: string): void {
     if (this.closing) return;
     const queue = this.queues.get(workloadClass);
@@ -361,6 +371,11 @@ export class ExecutionHost {
     // Any packet proves the isolate's event loop turned (stall watchdog input).
     slot.lastBeat = Date.now();
     if (packet.kind === 'heartbeat') return;
+    if (packet.kind === 'heap') {
+      const accepted = acceptHeapPacket(packet);
+      if (accepted) slot.workerHeap = accepted;
+      return;
+    }
     if (packet.kind === 'ready') {
       slot.ready = true;
       for (const [workloadClass, slots] of this.pools)

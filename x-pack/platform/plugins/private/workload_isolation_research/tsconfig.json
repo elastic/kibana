@@ -40,6 +40,7 @@
   ],
   "exclude": [
     "target/**/*",
-    "server/capability_kit/worker_core/reconstruct_config.node_test.ts"
+    "server/capability_kit/worker_core/reconstruct_config.node_test.ts",
+    "server/t7w/resume_schedule.node_test.ts"
   ]
 }
