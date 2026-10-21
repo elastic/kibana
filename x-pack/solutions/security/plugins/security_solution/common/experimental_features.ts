@@ -304,6 +304,11 @@ export const allowedExperimentalValues = Object.freeze({
   elasticDefendPolicyManagementSkill: true,
 
   /**
+   * POC: registers the awaitable `security.isolateHost` workflow step. Shipped dark by default.
+   */
+  responseActionsWorkflowStepsEnabled: false,
+
+  /**
    * Enables the investigate-rule Agent Builder skill.
    */
   investigateRuleSkill: true,

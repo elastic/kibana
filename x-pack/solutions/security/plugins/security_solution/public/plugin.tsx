@@ -108,6 +108,8 @@ import { registerTimelineFlyoutGroupedAttachment } from './agent_builder/attachm
 import { registerRulesFlyoutGroupedAttachment } from './agent_builder/attachment_types/rule/register_rules_flyout_grouped_attachment';
 import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/security_redux_embedded_provider';
 import { registerWorkflowSteps } from './workflows/step_types';
+import { isolateHostStepDefinition } from './workflows/step_types/isolate_host_step/isolate_host_step';
+import { getRunningProcessesStepDefinition } from './workflows/step_types/get_running_processes_step/get_running_processes_step';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 import { registerThreatIntelWorkflowSteps } from './threat_intel/workflows/step_types';
 
@@ -171,6 +173,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     if (workflowsExtensions) {
       registerWorkflowSteps(workflowsExtensions);
+      if (this.experimentalFeatures.responseActionsWorkflowStepsEnabled) {
+        workflowsExtensions.registerStepDefinition(isolateHostStepDefinition);
+        workflowsExtensions.registerStepDefinition(getRunningProcessesStepDefinition);
+      }
       registerSecurityWorkflowTriggers(workflowsExtensions);
       if (plugins.alertzero?.enabled) {
         registerThreatIntelWorkflowSteps(workflowsExtensions);

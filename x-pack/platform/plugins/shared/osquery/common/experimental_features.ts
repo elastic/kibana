@@ -32,6 +32,11 @@ export const allowedExperimentalValues = Object.freeze({
    * with no linked projects reads exactly as it did before CPS. Has no effect on stateful Kibana.
    */
   crossProjectSearch: true,
+  /**
+   * POC: registers the awaitable `osquery.runQuery` workflow step when the optional
+   * `workflowsExtensions` plugin is available. Shipped dark by default.
+   */
+  workflowsExtensionsEnabled: false,
 });
 
 type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };

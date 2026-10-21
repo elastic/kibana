@@ -77,6 +77,8 @@
     "@kbn/openapi-bundler",
     "@kbn/repo-info",
     "@kbn/zod",
+    "@kbn/workflows",
+    "@kbn/workflows-extensions",
     "@kbn/core-lifecycle-server",
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-http-server-utils",

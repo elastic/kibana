@@ -16,6 +16,7 @@ import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 
 import type { Subscription } from 'rxjs';
+import { registerOsqueryWorkflowSteps } from './workflows/register';
 import { getInternalSavedObjectsClient } from './utils/get_internal_saved_object_client';
 import { upgradeIntegration } from './utils/upgrade_integration';
 import { getPackagePolicyCreateCallback } from './lib/create_package_policy_callback';
@@ -77,6 +78,10 @@ export class OsqueryPlugin implements Plugin<OsqueryPluginSetup, OsqueryPluginSt
     this.rruleSchedulingEnabled = experimentalFeatures.rruleScheduling;
 
     registerFeatures(plugins.features);
+
+    if (experimentalFeatures.workflowsExtensionsEnabled && plugins.workflowsExtensions) {
+      registerOsqueryWorkflowSteps(plugins.workflowsExtensions);
+    }
 
     const router = core.http.createRouter<DataRequestHandlerContext>();
 
