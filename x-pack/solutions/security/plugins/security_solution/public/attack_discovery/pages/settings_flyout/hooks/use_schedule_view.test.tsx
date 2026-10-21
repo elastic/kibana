@@ -30,9 +30,7 @@ jest.mock('../schedule/logic/use_schedule_api');
 jest.mock('../schedule/create_flyout', () => ({
   CreateFlyout: ({ onClose }: { onClose: () => void }) => (
     <div data-test-subj="scheduleCreateFlyout">
-      <button type="button" data-test-subj="close" onClick={onClose}>
-        close
-      </button>
+      <button type="button" data-test-subj="close" onClick={onClose} />
     </div>
   ),
 }));
