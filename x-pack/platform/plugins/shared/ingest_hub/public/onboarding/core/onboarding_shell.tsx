@@ -19,6 +19,7 @@ import {
   EuiStepsHorizontal,
   EuiText,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -49,11 +50,11 @@ const stepLayoutCss = css`
   flex-direction: column;
   flex-grow: 1;
 
-  > * {
+  && > * {
     flex-grow: 0;
   }
 
-  > [data-test-subj='onboardingStepContainer'] {
+  && > [data-test-subj='onboardingStepContainer'] {
     flex-grow: 1;
   }
 `;
@@ -65,14 +66,14 @@ const stepFillCss = css`
   display: flex;
   flex-direction: column;
 
-  > [data-test-subj^='onboardingStep-'] {
+  && > [data-test-subj^='onboardingStep-'] {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+  }
 
-    > * {
-      flex-grow: 0;
-    }
+  && > [data-test-subj^='onboardingStep-'] > * {
+    flex-grow: 0;
   }
 `;
 
@@ -98,6 +99,7 @@ export function OnboardingShell() {
   const { services } = useKibana<CoreStart>();
   const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
   const cancelModalTitleId = useGeneratedHtmlId();
+  const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
     if (!meta) {
@@ -201,32 +203,45 @@ export function OnboardingShell() {
         restrictWidth
         contentProps={{ css: stepLayoutCss }}
       >
-        <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
-          <EuiFlexGroup direction="row" alignItems="flexEnd" gutterSize="m">
-            <EuiIcon type={meta.icon} size="xl" aria-hidden={true} />
-            <EuiTitle
-              size="l"
-              css={css`
-                text-align: center;
-              `}
-            >
-              <h1>{meta.title}</h1>
-            </EuiTitle>
+        {/* The title and the stepper stay at the top while the step scrolls underneath. The offset
+            keeps them below Kibana's fixed header. */}
+        <div
+          css={css`
+            position: sticky;
+            top: var(--euiFixedHeadersOffset, 0);
+            z-index: 2;
+            padding-bottom: ${euiTheme.size.s};
+            background-color: ${euiTheme.colors.backgroundBasePlain};
+          `}
+          data-test-subj="onboardingStickyHeader"
+        >
+          <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
+            <EuiFlexGroup direction="row" alignItems="flexEnd" gutterSize="m">
+              <EuiIcon type={meta.icon} size="xl" aria-hidden={true} />
+              <EuiTitle
+                size="l"
+                css={css`
+                  text-align: center;
+                `}
+              >
+                <h1>{meta.title}</h1>
+              </EuiTitle>
+            </EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiText
+                size="m"
+                color="subdued"
+                css={css`
+                  text-align: center;
+                `}
+              >
+                <p>{meta.description}</p>
+              </EuiText>
+            </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFlexItem grow={false}>
-            <EuiText
-              size="m"
-              color="subdued"
-              css={css`
-                text-align: center;
-              `}
-            >
-              <p>{meta.description}</p>
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="xs" />
-        <EuiStepsHorizontal steps={horizontalStepsConfig} />
+          <EuiSpacer size="xs" />
+          <EuiStepsHorizontal steps={horizontalStepsConfig} />
+        </div>
         <EuiSpacer size="xl" />
         {awsServiceMatrixError ? (
           <KbnDangerCallout
