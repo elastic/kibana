@@ -223,7 +223,7 @@ describe('CreateSLO', () => {
 
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await expect(createSLO.execute(sloParams)).rejects.toThrowError(
+      await expect(createSLO.execute(sloParams)).rejects.toThrow(
         "Missing ['read', 'view_index_metadata'] privileges on the source index [metrics-apm*]"
       );
     });
@@ -232,9 +232,7 @@ describe('CreateSLO', () => {
       mockTransformManager.install.mockRejectedValue(new Error('Rollup transform install error'));
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await expect(createSLO.execute(sloParams)).rejects.toThrowError(
-        'Rollup transform install error'
-      );
+      await expect(createSLO.execute(sloParams)).rejects.toThrow('Rollup transform install error');
 
       expect(mockRepository.deleteById).toHaveBeenCalled();
       expect(
@@ -251,9 +249,7 @@ describe('CreateSLO', () => {
       );
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await expect(createSLO.execute(sloParams)).rejects.toThrowError(
-        'Summary transform install error'
-      );
+      await expect(createSLO.execute(sloParams)).rejects.toThrow('Summary transform install error');
 
       expect(mockRepository.deleteById).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
@@ -269,9 +265,7 @@ describe('CreateSLO', () => {
       );
       const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
 
-      await expect(createSLO.execute(sloParams)).rejects.toThrowError(
-        'temporary document index failed'
-      );
+      await expect(createSLO.execute(sloParams)).rejects.toThrow('temporary document index failed');
 
       expect(mockRepository.deleteById).toHaveBeenCalled();
       expect(mockTransformManager.uninstall).toHaveBeenCalled();

@@ -10,8 +10,13 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { ReplayConfig, LoadResult } from '../types';
 import { extractDataStreamName, getMissingDataStreams, getErrorMessage } from '../utils';
 import { getSnapshotMetadata, deleteRepository, generateRepoName } from '../repository';
-import { filterIndicesToRestore, restoreIndices } from '../restore/restore';
+import {
+  filterIndicesToRestore,
+  restoreIndices,
+  waitForRestoredIndicesToBeActive,
+} from '../restore/restore';
 import { createTimestampPipeline, deletePipeline } from './pipeline';
+import { copySourceMappings } from './mappings';
 import { getDestinationInfo, reindexAllIndices } from './reindex';
 
 export const TEMP_INDEX_PREFIX = 'snapshot-loader-temp-';
@@ -61,6 +66,7 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
     concurrency,
     shouldUseInlineScript,
     beforeReindex,
+    indexSettings,
   } = config;
 
   const result: LoadResult = {
@@ -111,8 +117,13 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       indices: indicesToRestore,
       renamePattern: '(.+)',
       renameReplacement: `${TEMP_INDEX_PREFIX}$1`,
+      indexSettings,
     });
     result.restoredIndices = restoredIndices;
+
+    if (indexSettings !== undefined) {
+      await waitForRestoredIndicesToBeActive({ esClient, restoredIndices });
+    }
 
     const destinationIndices = [
       ...new Set(indicesToRestore.map((idx) => getDestinationInfo(idx).destIndex)),
@@ -137,12 +148,21 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       throw new Error('Failed to derive max timestamp from restored data');
     }
     result.maxTimestamp = maxTimestamp;
+    const nowMs = Date.now();
 
     await createTimestampPipeline({
       esClient,
       log,
       pipelineName,
       maxTimestamp,
+      nowMs,
+    });
+
+    await copySourceMappings({
+      esClient,
+      log,
+      restoredIndices,
+      originalIndices: indicesToRestore,
     });
 
     log.info('Step 4/4: Reindexing with timestamp transformation...');
@@ -154,6 +174,7 @@ export async function replaySnapshot(config: ReplayConfig): Promise<LoadResult> 
       concurrency,
       pipelineName,
       maxTimestamp,
+      nowMs,
       shouldUseInlineScript,
     });
     result.reindexedIndices = reindexedIndices;

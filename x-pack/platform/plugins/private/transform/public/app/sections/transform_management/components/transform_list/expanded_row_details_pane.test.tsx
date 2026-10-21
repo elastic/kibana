@@ -73,7 +73,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
     expect(screen.getAllByText(item.id).length).toBeGreaterThan(0);
     expect(screen.getByText('source_index')).toBeInTheDocument();
     expect(screen.getByText('farequote-2019')).toBeInTheDocument();
-    expect(screen.queryByText('Project routing')).not.toBeInTheDocument();
+    expect(screen.queryByText('project_routing')).not.toBeInTheDocument();
     expect(screen.getByText('destination_index')).toBeInTheDocument();
     expect(screen.getAllByText('fq_date_histogram_1m_1441').length).toBeGreaterThan(0);
 
@@ -135,7 +135,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
 
     renderWithI18n(<ExpandedRowDetailsPane item={item} onAlertEdit={onAlertEdit} />);
 
-    expect(screen.getByText('Project routing')).toBeInTheDocument();
+    expect(screen.getByText('project_routing')).toBeInTheDocument();
     expect(screen.getByText('_alias:*')).toBeInTheDocument();
   });
 
@@ -179,7 +179,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
     await waitFor(() => {
       expect(fetchProjects).toHaveBeenCalled();
     });
-    expect(screen.queryByText('Project routing')).not.toBeInTheDocument();
+    expect(screen.queryByText('project_routing')).not.toBeInTheDocument();
     expect(screen.queryByText('_alias:*')).not.toBeInTheDocument();
   });
 
@@ -215,7 +215,7 @@ describe('Transform: Transform List Expanded Row <ExpandedRowDetailsPane />', ()
     await waitFor(() => {
       expect(fetchProjects).toHaveBeenCalled();
     });
-    expect(screen.getByText('Project routing')).toBeInTheDocument();
+    expect(screen.getByText('project_routing')).toBeInTheDocument();
     expect(screen.getByText('_alias:*')).toBeInTheDocument();
   });
 

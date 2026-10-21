@@ -30,11 +30,6 @@ describe('config validation', () => {
           "attachments": Object {
             "enabled": true,
           },
-          "casesRedesign": Object {
-            "details": true,
-            "list": true,
-            "settings": true,
-          },
           "chat": Object {
             "enabled": true,
           },
@@ -140,7 +135,7 @@ describe('config validation', () => {
             "lens": true,
           },
           "runWorkflows": Object {
-            "enabled": false,
+            "enabled": true,
           },
           "stack": Object {
             "enabled": true,
@@ -202,14 +197,14 @@ describe('config validation', () => {
       expect(config.templates.enabled).toBe(false);
     });
 
-    it('sets runWorkflows.enabled default to false', () => {
+    it('sets runWorkflows.enabled default to true', () => {
       const config = ConfigSchema.validate({});
-      expect(config.runWorkflows.enabled).toBe(false);
+      expect(config.runWorkflows.enabled).toBe(true);
     });
 
-    it('allows runWorkflows.enabled to be set to true explicitly', () => {
-      const config = ConfigSchema.validate({ runWorkflows: { enabled: true } });
-      expect(config.runWorkflows.enabled).toBe(true);
+    it('allows runWorkflows.enabled to be set to false explicitly', () => {
+      const config = ConfigSchema.validate({ runWorkflows: { enabled: false } });
+      expect(config.runWorkflows.enabled).toBe(false);
     });
   });
 });

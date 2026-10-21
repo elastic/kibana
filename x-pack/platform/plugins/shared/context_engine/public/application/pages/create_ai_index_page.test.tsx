@@ -16,24 +16,11 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
 import { CONTEXT_ENGINE_PATHS } from '../paths';
+import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
+import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
+import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { CreateAiIndexPage } from './create_ai_index_page';
-
-jest.mock('@kbn/esql/public', () => ({
-  ESQLLangEditor: ({
-    query,
-    onTextLangQueryChange,
-  }: {
-    query: { esql: string };
-    onTextLangQueryChange: (query: { esql: string }) => void;
-  }) => (
-    <textarea
-      data-test-subj="mockEsqlEditor"
-      value={query.esql}
-      onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
-    />
-  ),
-}));
 
 jest.mock('../hooks/use_data_connectors', () => ({
   useDataConnectors: () => ({
@@ -43,6 +30,12 @@ jest.mock('../hooks/use_data_connectors', () => ({
     isLoading: false,
   }),
 }));
+
+jest.mock('../hooks/use_memory_enabled', () => ({
+  useMemoryEnabled: jest.fn(),
+}));
+
+const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
 
 const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -67,11 +60,6 @@ const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) 
   );
 };
 
-const addEsqlSource = (query: string) => {
-  fireEvent.change(screen.getByTestId('mockEsqlEditor'), { target: { value: query } });
-  fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
-};
-
 const typeId = (id: string) => {
   fireEvent.change(screen.getByTestId('contextAiIndexNameInput'), { target: { value: id } });
 };
@@ -85,6 +73,10 @@ const typeDescription = (description: string) => {
 const VALID_ID = 'support-ticket-triage';
 
 describe('CreateAiIndexPage', () => {
+  beforeEach(() => {
+    mockUseMemoryEnabled.mockReturnValue(false);
+  });
+
   afterEach(() => {
     jest.clearAllMocks();
   });
@@ -133,6 +125,62 @@ describe('CreateAiIndexPage', () => {
     expect(screen.getByTestId('contextCreateAiIndexButton')).toBeEnabled();
   });
 
+  it('creates with memory enabled by default when the global memory feature is enabled', async () => {
+    mockUseMemoryEnabled.mockReturnValue(true);
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+
+    renderWithProviders(services);
+
+    expect(screen.getByTestId('contextCreateAiIndexMemoryToggle')).toBeChecked();
+
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.http.post).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index',
+        expect.objectContaining({
+          body: expect.stringContaining('"memory_enabled":true'),
+        })
+      );
+    });
+  });
+
+  it('does not show memory settings when the global memory feature is disabled', () => {
+    renderWithProviders(coreMock.createStart());
+
+    expect(screen.queryByTestId('contextCreateAiIndexMemoryToggle')).not.toBeInTheDocument();
+  });
+
+  it('creates the AI index with the selected memory setting', async () => {
+    mockUseMemoryEnabled.mockReturnValue(true);
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+
+    renderWithProviders(services);
+
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexMemoryToggle'));
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.http.post).toHaveBeenCalledWith(
+        '/api/context_engine/ai_index',
+        expect.objectContaining({
+          body: JSON.stringify({
+            id: VALID_ID,
+            memory_enabled: false,
+            dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
+            automations: [],
+            sources: [],
+            traces: [],
+          }),
+        })
+      );
+    });
+  });
+
   it('creates an AI index without any source', async () => {
     const services = coreMock.createStart();
     services.http.post.mockResolvedValue({});
@@ -151,6 +199,7 @@ describe('CreateAiIndexPage', () => {
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [],
+            traces: [],
           }),
         })
       );
@@ -177,6 +226,7 @@ describe('CreateAiIndexPage', () => {
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
             sources: [],
+            traces: [],
           }),
         })
       );
@@ -190,7 +240,6 @@ describe('CreateAiIndexPage', () => {
     renderWithProviders(services);
 
     typeId(VALID_ID);
-    addEsqlSource('FROM logs-* | LIMIT 10');
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
@@ -201,7 +250,8 @@ describe('CreateAiIndexPage', () => {
             id: VALID_ID,
             dest: { type: 'index', value: 'ai-index-idx-support-ticket-triage' },
             automations: [],
-            sources: [{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }],
+            sources: [],
+            traces: [],
           }),
         })
       );
@@ -209,32 +259,7 @@ describe('CreateAiIndexPage', () => {
 
     expect(services.application.navigateToApp).toHaveBeenCalledWith(CONTEXT_ENGINE_APP_ID, {
       path: '/ai_index/support-ticket-triage',
-    });
-  });
-
-  it('creates a data-stream-backed AI index when that storage type is selected', async () => {
-    const services = coreMock.createStart();
-    services.http.post.mockResolvedValue({});
-
-    renderWithProviders(services);
-
-    typeId(VALID_ID);
-    addEsqlSource('FROM logs-* | LIMIT 10');
-    fireEvent.click(screen.getByTestId('contextAiIndexStorageType-data_stream'));
-    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
-
-    await waitFor(() => {
-      expect(services.http.post).toHaveBeenCalledWith(
-        '/api/context_engine/ai_index',
-        expect.objectContaining({
-          body: JSON.stringify({
-            id: VALID_ID,
-            dest: { type: 'data_stream', value: 'ai-index-ds-support-ticket-triage' },
-            automations: [],
-            sources: [{ type: 'esql', value: 'FROM logs-* | LIMIT 10' }],
-          }),
-        })
-      );
+      state: AI_INDEX_CREATED_LOCATION_STATE,
     });
   });
 
@@ -245,13 +270,32 @@ describe('CreateAiIndexPage', () => {
     renderWithProviders(services);
 
     typeId(VALID_ID);
-    addEsqlSource('FROM logs-* | LIMIT 10');
     fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
 
     await waitFor(() => {
       expect(services.notifications.toasts.addError).toHaveBeenCalled();
     });
     expect(services.application.navigateToApp).not.toHaveBeenCalled();
+  });
+
+  it('shows a warning when the description is within 5% of the max length', () => {
+    renderWithProviders(coreMock.createStart());
+
+    typeId(VALID_ID);
+    typeDescription('a'.repeat(MAX_AI_INDEX_DESCRIPTION_LENGTH - 10));
+
+    expect(screen.getByText(/10 characters remaining/)).toBeInTheDocument();
+    expect(screen.getByTestId('contextCreateAiIndexButton')).toBeEnabled();
+  });
+
+  it('shows an error and disables create when the description exceeds the max length', () => {
+    renderWithProviders(coreMock.createStart());
+
+    typeId(VALID_ID);
+    typeDescription('a'.repeat(MAX_AI_INDEX_DESCRIPTION_LENGTH + 1));
+
+    expect(screen.getByText(/1 character over the 2,048 character limit/)).toBeInTheDocument();
+    expect(screen.getByTestId('contextCreateAiIndexButton')).toBeDisabled();
   });
 
   it('shows an error and stays disabled when the id contains invalid characters', () => {

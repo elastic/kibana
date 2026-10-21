@@ -7,6 +7,7 @@
 
 import type { MaybePromise } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
+import type { AvailabilityConfig } from '../availability';
 import type { SkillBoundedTool } from './tools';
 import type {
   Directory,
@@ -33,6 +34,7 @@ export type SkillsDirectoryStructure = Directory<{
       dashboard: FileDirectory;
       discover: FileDirectory;
       evals: FileDirectory;
+      proposals: FileDirectory;
       streams: FileDirectory;
       visualization: FileDirectory;
       workflows: FileDirectory;
@@ -54,6 +56,7 @@ export type SkillsDirectoryStructure = Directory<{
       rules: FileDirectory;
       entities: FileDirectory<{}>;
       watchlists: FileDirectory<{}>;
+      entity_resolution: FileDirectory<{}>;
       endpoint: FileDirectory<{}>;
       ml: FileDirectory<{}>;
       siem_readiness: FileDirectory<{}>;
@@ -131,6 +134,20 @@ export interface SkillDefinition<
    * Defaults to false.
    */
   excludeFromElasticCapabilities?: boolean;
+  /**
+   * When true, the skill is left out of registry listings (skill library, agent skill pickers,
+   * the elastic-capabilities auto-include) but stays resolvable by id, so explicit `skill_ids`
+   * references and runtime injection keep working. Use for skills Agent Builder grants as a
+   * built-in capability rather than something the user picks.
+   * Defaults to false.
+   */
+  hidden?: boolean;
+  /**
+   * Optional dynamic availability configuration.
+   * When provided, the framework evaluates the handler per-request to decide
+   * whether the skill should be visible. See {@link AvailabilityConfig}.
+   */
+  availability?: AvailabilityConfig;
   /**
    * Content of the skill.
    */

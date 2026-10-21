@@ -8,23 +8,28 @@
 import React, { useMemo } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { reactRouterNavigate, useKibana } from '@kbn/kibana-react-plugin/public';
-import { syntheticsAddMonitorLocatorID } from '@kbn/observability-plugin/common';
 import { useHistory } from 'react-router-dom';
 import type { ObservabilityOnboardingAppServices } from '../..';
-import type { CuratedCategory, MiniTile } from '../add_data_grid';
+import type { CuratedCategory, CuratedTile, MiniTile } from '../add_data_grid';
 import { VariantCountBadge } from '../add_data_grid';
 import type { LogoIconProps } from '../shared/logo_icon';
 import { LogoIcon } from '../shared/logo_icon';
 import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_service_availability';
 import { addPathParamToUrl } from '../package_list_search_form/use_card_url_rewrite';
+import { ObservabilityOnboardingPricingFeature } from '../../../common/pricing_features';
 import { IS_INGEST_HUB_ONBOARDING_ENABLED } from '../../../common/feature_flags';
 import { INTEGRATION_TILES } from './integration_tiles';
 import { INTEGRATION_MINI_TILES } from './integration_mini_tiles';
 import { useCollectionCards } from './use_collection_cards';
+import { useTrackTileClick } from './use_track_tile_click';
+import { usePricingFeature } from '../quickstart_flows/shared/use_pricing_feature';
 
 const tileIcon = (logo: LogoIconProps['logo'], color: LogoIconProps['color']) => (
   <LogoIcon logo={logo} isAvatar size="l" avatarType="space" hasBorder color={color} />
 );
+
+const opensInNewTab = (event: React.MouseEvent) =>
+  event.button !== 0 || event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 
 /**
  * The o11y flavor of the Add Data grid: plugin tile content plus everything
@@ -36,17 +41,24 @@ export const useObservabilityCuratedCategories = ({
   onOpenCollection: (groupId: string) => void;
 }): CuratedCategory[] => {
   const history = useHistory();
+  const trackTileClick = useTrackTileClick();
   const { euiTheme, colorMode } = useEuiTheme();
   const collections = useCollectionCards();
   const {
     services: {
       application,
       featureFlags,
-      share,
       context: { isServerless },
     },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
+  const isIngestHubOnboardingEnabled = featureFlags.useBooleanValue(
+    IS_INGEST_HUB_ONBOARDING_ENABLED,
+    false
+  );
+  const metricsOnboardingEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
 
   return useMemo(() => {
     const getUrlForApp = application?.getUrlForApp;
@@ -60,19 +72,35 @@ export const useObservabilityCuratedCategories = ({
     };
 
     const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
-    const syntheticsLocator = share?.url.locators.get(syntheticsAddMonitorLocatorID);
+    const apmHref = isServerless ? apmUrl : addPathParamToUrl(apmUrl, {});
+    const syntheticsUrl = getUrlForApp?.('synthetics', { path: '/add-monitor' });
     const dynamicNavigation: Record<string, { href?: string; onClick?: React.MouseEventHandler }> =
       {
         // ingest_hub's guided AWS flow wins over the CloudWatch quickstart
         // while it rolls out behind its own flag.
-        aws: featureFlags.getBooleanValue(IS_INGEST_HUB_ONBOARDING_ENABLED, false)
-          ? { href: getUrlForApp?.('onboarding', { path: '/aws' }) }
+        // An href cannot carry router state, so the click handler passes `newSession`.
+        aws: isIngestHubOnboardingEnabled
+          ? {
+              href: getUrlForApp?.('onboarding', { path: '/aws' }),
+              onClick: (event: React.MouseEvent) => {
+                if (opensInNewTab(event)) {
+                  return;
+                }
+                event.preventDefault();
+                application?.navigateToApp('onboarding', {
+                  path: '/aws',
+                  state: { newSession: true },
+                });
+              },
+            }
           : reactRouterNavigate(history, '/aws'),
         opentelemetry: isManagedOtlpServiceAvailable
           ? reactRouterNavigate(history, '/otel-apm')
-          : { href: apmUrl },
-        apm: { href: apmUrl },
-        synthetic_monitor: { href: syntheticsLocator?.getRedirectUrl({ scope: 'create' }) },
+          : { href: apmHref },
+        apm: { href: apmHref },
+        synthetic_monitor: {
+          href: syntheticsUrl ? addPathParamToUrl(syntheticsUrl, {}) : undefined,
+        },
       };
 
     // A grouped tile opens the chooser like a collection search result. Without a
@@ -86,13 +114,18 @@ export const useObservabilityCuratedCategories = ({
       };
     };
 
-    return INTEGRATION_TILES.map((category) => ({
+    // Logs Essentials (metrics onboarding off) drops the Applications category,
+    // mirroring how V1 hid the Application use case on that tier.
+    return INTEGRATION_TILES.filter(
+      (category) => metricsOnboardingEnabled || category.id !== 'applications'
+    ).map((category) => ({
       id: category.id,
       label: category.label,
       tiles: category.tiles.map((tile) => {
         const resolvedLogo = colorMode === 'DARK' ? tile.darkLogo ?? tile.logo : tile.logo;
-        const navigation =
-          collectionNavigation(tile.collectionGroup) ??
+        const chooserNavigation = collectionNavigation(tile.collectionGroup);
+        const navigation: Pick<CuratedTile, 'href' | 'onClick' | 'badge'> =
+          chooserNavigation ??
           (tile.route
             ? reactRouterNavigate(history, tile.route)
             : tile.eprPackage
@@ -106,6 +139,14 @@ export const useObservabilityCuratedCategories = ({
           icon: tileIcon(resolvedLogo, euiTheme.colors.backgroundBaseSubdued),
           'data-test-subj': `observabilityOnboardingIntegrationTile-${tile.id}`,
           ...navigation,
+          onClick: trackTileClick(
+            {
+              tile_id: tile.id,
+              surface: 'tile',
+              collection_id: chooserNavigation ? tile.collectionGroup : undefined,
+            },
+            navigation.onClick
+          ),
         };
       }),
     }));
@@ -114,12 +155,13 @@ export const useObservabilityCuratedCategories = ({
     colorMode,
     euiTheme,
     application,
-    featureFlags,
-    share,
+    isIngestHubOnboardingEnabled,
     isServerless,
     isManagedOtlpServiceAvailable,
+    metricsOnboardingEnabled,
     collections,
     onOpenCollection,
+    trackTileClick,
   ]);
 };
 
@@ -129,20 +171,42 @@ export const useObservabilityMiniTiles = ({
   onOpenCollection: (groupId: string) => void;
 }): MiniTile[] => {
   const history = useHistory();
+  const trackTileClick = useTrackTileClick();
   const { euiTheme } = useEuiTheme();
   const {
-    services: { application },
+    services: {
+      application,
+      context: { isServerless },
+    },
   } = useKibana<ObservabilityOnboardingAppServices>();
   const collections = useCollectionCards();
+  const isManagedOtlpServiceAvailable = useManagedOtlpServiceAvailability();
+  const metricsOnboardingEnabled = usePricingFeature(
+    ObservabilityOnboardingPricingFeature.METRICS_ONBOARDING
+  );
 
   return useMemo(() => {
     const getUrlForApp = application?.getUrlForApp;
-    const dynamicNavigation: Record<string, { href?: string }> = {
-      auto_import: { href: getUrlForApp?.('integrations', { path: '/create' }) },
-      upload_file: { href: `${getUrlForApp?.('home')}#/tutorial_directory/fileDataViz` },
-    };
+    const createUrl = getUrlForApp?.('integrations', { path: '/create' });
+    const apmUrl = `${getUrlForApp?.('apm')}/${isServerless ? 'onboarding' : 'tutorial'}`;
+    const apmHref = isServerless ? apmUrl : addPathParamToUrl(apmUrl, {});
+    const dynamicNavigation: Record<string, { href?: string; onClick?: React.MouseEventHandler }> =
+      {
+        opentelemetry: isManagedOtlpServiceAvailable
+          ? reactRouterNavigate(history, '/otel-apm')
+          : { href: apmHref },
+        auto_import: {
+          href: createUrl ? addPathParamToUrl(createUrl, {}) : undefined,
+        },
+        upload_file: {
+          href: addPathParamToUrl(`${getUrlForApp?.('home')}#/tutorial_directory/fileDataViz`, {}),
+        },
+      };
 
-    return INTEGRATION_MINI_TILES.map((tile) => {
+    const pricingState = metricsOnboardingEnabled ? 'metrics' : 'logs-essentials';
+    return INTEGRATION_MINI_TILES.filter(
+      (tile) => !tile.visibleOn || tile.visibleOn === pricingState
+    ).map((tile) => {
       const collectionGroup = tile.collectionGroup;
       const collection = collectionGroup ? collections.get(collectionGroup) : undefined;
       const eprUrl = tile.eprPackage
@@ -150,7 +214,7 @@ export const useObservabilityMiniTiles = ({
             path: `/detail/${tile.eprPackage}/overview`,
           })
         : undefined;
-      const navigation =
+      const navigation: Pick<MiniTile, 'href' | 'onClick' | 'badge'> =
         collectionGroup && collection
           ? {
               onClick: () => onOpenCollection(collectionGroup),
@@ -168,7 +232,25 @@ export const useObservabilityMiniTiles = ({
         icon: tileIcon(tile.logo, euiTheme.colors.backgroundBaseSubdued),
         'data-test-subj': `observabilityOnboardingIntegrationMiniTile-${tile.id}`,
         ...navigation,
+        onClick: trackTileClick(
+          {
+            tile_id: tile.id,
+            surface: 'mini_tile',
+            collection_id: collection ? collectionGroup : undefined,
+          },
+          navigation.onClick
+        ),
       };
     });
-  }, [history, euiTheme, application, collections, onOpenCollection]);
+  }, [
+    history,
+    euiTheme,
+    application,
+    isServerless,
+    isManagedOtlpServiceAvailable,
+    metricsOnboardingEnabled,
+    collections,
+    onOpenCollection,
+    trackTileClick,
+  ]);
 };

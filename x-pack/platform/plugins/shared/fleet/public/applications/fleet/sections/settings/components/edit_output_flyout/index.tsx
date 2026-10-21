@@ -114,7 +114,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const isESOutput = inputs.typeInput.value === outputType.Elasticsearch;
   const isKafkaOutput = inputs.typeInput.value === outputType.Kafka;
   const supportsPresets = inputs.typeInput.value
-    ? outputTypeSupportPresets(inputs.typeInput.value as ValueOf<OutputType>)
+    ? outputTypeSupportPresets({ type: inputs.typeInput.value as ValueOf<OutputType> })
     : false;
   const supportsOtelExporter = outputTypeSupportsOtelExporter(
     inputs.typeInput.value as ValueOf<OutputType> | undefined

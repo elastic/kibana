@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/286382
-type: bug-fix
-products:
-- product: cloud-serverless
-  target: 2026-08-25
-- product: kibana
-title: Fix alert flyout crash when MITRE ATT&CK tactic or technique is missing

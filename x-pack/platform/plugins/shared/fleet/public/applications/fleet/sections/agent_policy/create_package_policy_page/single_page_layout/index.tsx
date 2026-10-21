@@ -16,10 +16,13 @@ import {
   EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLink,
   EuiOverlayMask,
+  EuiPanel,
   EuiSpacer,
   EuiSteps,
+  EuiText,
 } from '@elastic/eui';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
@@ -96,6 +99,7 @@ import { SetupTechnologySelector } from '../../../../../../services/setup_techno
 import {
   AddIntegrationFlyoutConfigureHeader,
   CreatePackagePolicySinglePageLayout,
+  PackageDocumentationModal,
   PostInstallAddAgentModal,
 } from './components';
 import { useDevToolsRequest, useOnSubmit } from './hooks';
@@ -149,6 +153,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   const [withSysMonitoring, setWithSysMonitoring] = useState<boolean>(true);
+  const [isDocModalOpen, setIsDocModalOpen] = useState<boolean>(false);
   /*
    * if there is no extension - will remain undefined
    * if there is an extension and it is loaded - will be set to true, otherwise false
@@ -178,10 +183,20 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     { enabled: !!pkgName }
   );
   const packageInfo = useMemo(() => {
-    if (packageInfoData && packageInfoData.item) {
-      return packageInfoData.item;
+    // The form initializes its inputs once from the package info, so wait for the FIPS status
+    // to avoid initializing them from the unfiltered templates.
+    if (!packageInfoData?.item || fleetStatus.isLoading) {
+      return undefined;
     }
-  }, [packageInfoData]);
+    const item = packageInfoData.item;
+    if (!fleetStatus.isFipsEnabled || !item.policy_templates) {
+      return item;
+    }
+    const fipsCompatibleTemplates = item.policy_templates.filter(
+      (t) => t.fips_compatible !== false
+    );
+    return { ...item, policy_templates: fipsCompatibleTemplates };
+  }, [packageInfoData, fleetStatus.isFipsEnabled, fleetStatus.isLoading]);
 
   const [agentCount, setAgentCount] = useState<number>(0);
 
@@ -267,9 +282,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   // Derive var_group_selections from policy for StepConfigurePackagePolicy
   // Note: StepDefinePackagePolicy handles its own initialization and state management
-  const { enableVarGroups } = ExperimentalFeaturesService.get();
-  const varGroups =
-    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const varGroups = packageInfo?.var_groups;
   // Options unsupported by the policy template the page is scoped to (e.g. opened
   // from the integrations browse page) are hidden from selectors and defaults
   const hiddenVarGroupOptions = useMemo(
@@ -557,6 +570,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   const { getAgentlessStatusForPackage } = useAgentless();
   const { isAgentless, isDefaultDeploymentMode } = getAgentlessStatusForPackage(packageInfo);
   const enableSimplifiedAgentlessUX = ExperimentalFeaturesService.get().enableSimplifiedAgentlessUX;
+  const { enableIntegrationTileClickToAdd } = ExperimentalFeaturesService.get();
 
   const useCheckableCardsForSetupTechnologySelector = useMemo(() => {
     return !replaceDefineStepView && enableSimplifiedAgentlessUX && isDefaultDeploymentMode;
@@ -778,6 +792,52 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const children = (
     <>
+      {enableIntegrationTileClickToAdd && packageInfo?.readme && (
+        <>
+          <EuiPanel hasBorder paddingSize="m" data-test-subj="packageDocumentationCallout">
+            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiIcon type="document" size="l" aria-hidden={true} />
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiText size="s">
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.documentationCallout.title"
+                      defaultMessage="New to this integration?"
+                    />
+                  </strong>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.fleet.createPackagePolicy.documentationCallout.description"
+                      defaultMessage="See what data it collects and how to configure it."
+                    />
+                  </p>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  onClick={() => setIsDocModalOpen(true)}
+                  data-test-subj="packageDocumentationButton"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.createPackagePolicy.documentationCallout.buttonLabel"
+                    defaultMessage="View documentation"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiPanel>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {isDocModalOpen && packageInfo && (
+        <PackageDocumentationModal
+          packageInfo={packageInfo}
+          onClose={() => setIsDocModalOpen(false)}
+        />
+      )}
       {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
         <>
           <RootPrivilegesCallout dataStreams={rootPrivilegedDataStreams} />
@@ -868,7 +928,11 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
   );
 
   return !addIntegrationFlyoutProps ? (
-    <CreatePackagePolicySinglePageLayout {...layoutProps} data-test-subj="createPackagePolicy">
+    <CreatePackagePolicySinglePageLayout
+      {...layoutProps}
+      useWidePageLayout={replaceDefineStepView?.useWidePageLayout}
+      data-test-subj="createPackagePolicy"
+    >
       <Suspense fallback={<Loading />}>
         <PliAuthBlockWrapper>
           <EuiErrorBoundary>

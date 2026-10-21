@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/285327
-type: enhancement
-products:
-- product: cloud-serverless
-  target: 2026-08-25
-- product: kibana
-title: Warn in Synthetics when a private-location agent predates maintenance window support
-description: Shows a warning in Synthetics when a monitor has a maintenance window but its private-location Elastic Agent is older than 8.19.0 and may not honor the window.

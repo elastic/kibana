@@ -14,6 +14,7 @@ import { calculateEndpointAuthz } from '../../common/endpoint/service/authz';
 import type { StartPlugins } from '../types';
 import { getFirstAllowedArtifactPath, getManagementFilteredLinks, links } from './links';
 import {
+  getCustomYaraSignaturesListPath,
   getEndpointExceptionsListPath,
   getEventFiltersListPath,
   getTrustedAppsListPath,
@@ -113,6 +114,7 @@ describe('links', () => {
             canReadEventFilters: true,
             showHostIsolationExceptions: true,
             canReadBlocklist: true,
+            canReadCustomYaraSignatures: true,
           },
           experimentalDefaults
         )
@@ -129,6 +131,7 @@ describe('links', () => {
             canReadEventFilters: false,
             showHostIsolationExceptions: false,
             canReadBlocklist: false,
+            canReadCustomYaraSignatures: false,
           },
           experimentalDefaults
         )
@@ -145,6 +148,7 @@ describe('links', () => {
             canReadEventFilters: true,
             showHostIsolationExceptions: false,
             canReadBlocklist: false,
+            canReadCustomYaraSignatures: false,
           },
           experimentalDefaults
         )
@@ -161,6 +165,7 @@ describe('links', () => {
             canReadEventFilters: false,
             showHostIsolationExceptions: false,
             canReadBlocklist: false,
+            canReadCustomYaraSignatures: false,
           },
           {
             ...allowedExperimentalValues,
@@ -181,8 +186,49 @@ describe('links', () => {
             canReadEventFilters: false,
             showHostIsolationExceptions: false,
             canReadBlocklist: false,
+            canReadCustomYaraSignatures: false,
           },
           experimentalDefaults
+        )
+      ).toBe(getTrustedAppsListPath());
+    });
+
+    it('should return custom YARA signatures path when that is the only readable artifact and FF is on', () => {
+      expect(
+        getFirstAllowedArtifactPath(
+          {
+            canReadEndpointExceptions: false,
+            canReadTrustedApplications: false,
+            canReadTrustedDevices: false,
+            canReadEventFilters: false,
+            showHostIsolationExceptions: false,
+            canReadBlocklist: false,
+            canReadCustomYaraSignatures: true,
+          },
+          {
+            ...experimentalDefaults,
+            customYaraSignaturesEnabled: true,
+          }
+        )
+      ).toBe(getCustomYaraSignaturesListPath());
+    });
+
+    it('should not return custom YARA signatures path when FF is off even if user can read them', () => {
+      expect(
+        getFirstAllowedArtifactPath(
+          {
+            canReadEndpointExceptions: false,
+            canReadTrustedApplications: false,
+            canReadTrustedDevices: false,
+            canReadEventFilters: false,
+            showHostIsolationExceptions: false,
+            canReadBlocklist: false,
+            canReadCustomYaraSignatures: true,
+          },
+          {
+            ...experimentalDefaults,
+            customYaraSignaturesEnabled: false,
+          }
         )
       ).toBe(getTrustedAppsListPath());
     });
@@ -245,6 +291,7 @@ describe('links', () => {
           canReadHostIsolationExceptions: false,
           canAccessHostIsolationExceptions: false,
           canReadBlocklist: false,
+          canReadCustomYaraSignatures: false,
         })
       );
 
@@ -296,6 +343,30 @@ describe('links', () => {
 
       const artifactsLink = filteredLinks.links?.find((l) => l.id === SecurityPageName.artifacts);
       expect(artifactsLink?.path).toBe(getEventFiltersListPath());
+    });
+
+    it('should show Artifacts and set path to custom YARA signatures when that is the only privilege and FF is on', async () => {
+      (calculateEndpointAuthz as jest.Mock).mockReturnValue(
+        getEndpointAuthzInitialStateMock({
+          canReadEndpointExceptions: false,
+          canReadTrustedApplications: false,
+          canReadTrustedDevices: false,
+          canReadEventFilters: false,
+          canReadHostIsolationExceptions: false,
+          canAccessHostIsolationExceptions: false,
+          canReadBlocklist: false,
+          canReadCustomYaraSignatures: true,
+        })
+      );
+
+      const filteredLinks = await getManagementFilteredLinks(coreMockStarted, getPlugins(), {
+        ...allowedExperimentalValues,
+        customYaraSignaturesEnabled: true,
+      });
+
+      const artifactsLink = filteredLinks.links?.find((l) => l.id === SecurityPageName.artifacts);
+      expect(artifactsLink).toBeDefined();
+      expect(artifactsLink?.path).toBe(getCustomYaraSignaturesListPath());
     });
   });
 

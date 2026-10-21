@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SortState } from '../features/sorting';
 import type { ContentListItem } from '../item';
 
 /**
@@ -98,12 +99,7 @@ export interface FindItemsParams {
    * When sorting is disabled via `features.sorting: false`, this will be `undefined`.
    * Implementations should return items in their natural order (e.g., server default).
    */
-  sort?: {
-    /** Field name to sort by. */
-    field: string;
-    /** Sort direction. */
-    direction: 'asc' | 'desc';
-  };
+  sort?: SortState;
 
   /** Pagination configuration. */
   page: {

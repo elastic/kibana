@@ -55,7 +55,6 @@ export interface FleetConfigType {
     };
   };
   iacProvisioner?: {
-    enabled: boolean;
     api?: {
       url?: string;
       tls?: {
@@ -107,7 +106,7 @@ export interface FleetConfigType {
     onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;
     retrySetupOnBoot: boolean;
-    allowRegistryPackageUploads?: boolean;
+    skipUploadPackageValidation?: boolean;
     registry: {
       kibanaVersionCheckEnabled: boolean;
       capabilities: string[];
@@ -146,6 +145,7 @@ export interface FleetConfigType {
   };
   versionSpecificPolicyAssignment?: {
     taskInterval?: string;
+    orphanSweepIntervalMs?: number;
   };
   unenrollInactiveAgents?: {
     taskInterval?: string;

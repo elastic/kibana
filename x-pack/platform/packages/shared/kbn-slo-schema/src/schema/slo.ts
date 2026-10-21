@@ -11,6 +11,15 @@ import { allOrAnyStringOrArray, dateType } from './common';
 import { durationType } from './duration';
 import { indicatorSchema } from './indicators';
 import { timeWindowSchema } from './time_window';
+import {
+  MAX_PROJECT_ROUTINGS_LENGTH,
+  MAX_SLO_ID_LENGTH,
+  MIN_SLO_ID_LENGTH,
+  PROJECT_ROUTINGS_EMPTY_MESSAGE,
+  PROJECT_ROUTINGS_TOO_LONG_MESSAGE,
+  SLO_ID_INVALID_MESSAGE,
+  SLO_ID_REGEX,
+} from './validation_constants';
 
 const occurrencesBudgetingMethodSchema = t.literal('occurrences');
 const timeslicesBudgetingMethodSchema = t.literal('timeslices');
@@ -27,10 +36,6 @@ const objectiveSchema = t.intersection([
   t.partial({ timesliceTarget: t.number, timesliceWindow: durationType }),
 ]);
 
-// A `snapshot` project routing encodes every selected project id, so the bound scales with
-// the number of linked projects rather than with the number of exclusions.
-const MAX_PROJECT_ROUTINGS_LENGTH = 8192;
-
 const boundedProjectRoutingSchema = new t.Type<string, string, unknown>(
   'boundedProjectRoutingSchema',
   t.string.is,
@@ -40,15 +45,11 @@ const boundedProjectRoutingSchema = new t.Type<string, string, unknown>(
     }
 
     if (input.trim().length === 0) {
-      return t.failure(input, context, 'Invalid projectRoutings, must not be empty');
+      return t.failure(input, context, PROJECT_ROUTINGS_EMPTY_MESSAGE);
     }
 
     if (input.length > MAX_PROJECT_ROUTINGS_LENGTH) {
-      return t.failure(
-        input,
-        context,
-        `Invalid projectRoutings, must be at most ${MAX_PROJECT_ROUTINGS_LENGTH} characters`
-      );
+      return t.failure(input, context, PROJECT_ROUTINGS_TOO_LONG_MESSAGE);
     }
 
     return t.success(input);
@@ -92,11 +93,7 @@ const sloIdSchema = new t.Type<string, string, unknown>(
     if (typeof input === 'string') {
       const valid = isValidId(input);
       if (!valid) {
-        return t.failure(
-          input,
-          context,
-          'Invalid slo id, must be between 8 and 48 characters and contain only letters, numbers, hyphens, and underscores'
-        );
+        return t.failure(input, context, SLO_ID_INVALID_MESSAGE);
       }
 
       return t.success(input);
@@ -108,10 +105,8 @@ const sloIdSchema = new t.Type<string, string, unknown>(
 );
 
 function isValidId(id: string): boolean {
-  const MIN_ID_LENGTH = 8;
-  const MAX_ID_LENGTH = 48;
-  const validLength = MIN_ID_LENGTH <= id.length && id.length <= MAX_ID_LENGTH;
-  return validLength && /^[a-z0-9-_]+$/.test(id);
+  const validLength = MIN_SLO_ID_LENGTH <= id.length && id.length <= MAX_SLO_ID_LENGTH;
+  return validLength && SLO_ID_REGEX.test(id);
 }
 
 const requiredSloFields = t.type({

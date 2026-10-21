@@ -10,27 +10,28 @@
 import * as Fs from 'fs';
 
 import { minimatch } from 'minimatch';
-import { getAffectedPackages, listChangedFiles } from '../../affected-packages';
-import type { BuildkiteStep } from '../../buildkite';
-import { BuildkiteClient } from '../../buildkite';
-import { getTrackedBranch } from '../../utils';
-import { CiStatsClient } from '../client';
+import { getAffectedPackages } from '../../affected-packages/index.ts';
+import type { BuildkiteStep } from '../../buildkite/index.ts';
+import { BuildkiteClient } from '../../buildkite/index.ts';
+import { getTrackedBranch } from '../../utils.ts';
+import { CiStatsClient } from '../client.ts';
 
-import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources';
-import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const';
-import { loadRunOrderConfig } from './env_config';
-import { ftrManifest } from './ftr_manifests';
-import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs';
-import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups';
-import { shouldSkipFtrTests } from './selective_ftr';
-import { isScoutPathOnlyDiff } from './selective_scout';
+import { buildCiStatsGroups, buildCiStatsSources } from './ci_stats_sources.ts';
+import { AGENT_DISK_GIB, DURATION_PERCENTILE, STEP_KEYS } from './const.ts';
+import { loadRunOrderConfig } from './env_config.ts';
+import { ftrManifest } from './ftr_manifests.ts';
+import { discoverJestIntegrationConfigs, discoverJestUnitConfigs } from './jest_configs.ts';
+import { getRunGroup, getRunGroups, labelJestSubgroups } from './run_groups.ts';
+import { shouldSkipFtrTests } from './selective_ftr.ts';
+import { isScoutPathOnlyDiff } from './selective_scout.ts';
+import { resolveSelectiveTestingChanges } from './selective_changes.ts';
 import {
   filterJestIntegrationConfigsByAffected,
   filterJestUnitConfigsByAffected,
   resolveSelectiveTestingContext,
-} from './selective_testing';
-import { buildFunctionalStepGroup, buildJestStep, registerCancelKeys } from './steps';
-import type { FtrRunOrder, FunctionalGroup } from './types';
+} from './selective_testing.ts';
+import { buildFunctionalStepGroup, buildJestStep, registerCancelKeys } from './steps.ts';
+import type { FtrRunOrder, FunctionalGroup } from './types.ts';
 
 /**
  * Orchestrates the per-build test group sizing for Buildkite:
@@ -45,26 +46,20 @@ export async function pickTestGroupRunOrder() {
   const ciStats = new CiStatsClient();
   const config = loadRunOrderConfig();
 
-  const selectiveTestingMergeBase = config.useSelectiveTesting ? config.prMergeBase : undefined;
+  const selectiveChangedFiles = config.useSelectiveTesting
+    ? resolveSelectiveTestingChanges(config.selectionBase, config.isMergeQueue)
+    : null;
 
-  // Fast path: a PR whose diff is exclusively Scout test files cannot affect
-  // any Jest unit/integration or FTR config — skip emitting them entirely.
-  // The Scout pipeline still runs its own selective testing in parallel.
-  let selectiveChangedFiles: string[] | undefined;
-  if (selectiveTestingMergeBase) {
-    selectiveChangedFiles = listChangedFiles({
-      mergeBase: selectiveTestingMergeBase,
-      commit: 'HEAD',
-    });
-    if (isScoutPathOnlyDiff(selectiveChangedFiles)) {
-      console.log('Scout-test-tree-only diff detected — skipping Jest/FTR test steps');
-      bk.setAnnotation(
-        'selective-testing-scout-tests-only',
-        'info',
-        'Selective testing: Scout-test-tree-only diff — Jest/FTR test steps were skipped.'
-      );
-      return;
-    }
+  // A diff containing only Scout test files cannot affect any Jest unit/integration
+  // or FTR config, so skip those steps.
+  if (selectiveChangedFiles !== null && isScoutPathOnlyDiff(selectiveChangedFiles)) {
+    console.log('Scout-test-tree-only diff detected — skipping Jest/FTR test steps');
+    bk.setAnnotation(
+      'selective-testing-scout-tests-only',
+      'info',
+      'Selective testing: Scout-test-tree-only diff — Jest/FTR test steps were skipped.'
+    );
+    return;
   }
 
   const unitIncluded = config.limitConfigType.includes('unit');
@@ -95,8 +90,9 @@ export async function pickTestGroupRunOrder() {
 
   if (!ftrConfigsIncluded) ftrManifestEntriesByQueue.clear();
 
-  if (selectiveTestingMergeBase && selectiveChangedFiles) {
-    const directlyAffected = await getAffectedPackages(selectiveTestingMergeBase, {
+  if (selectiveChangedFiles !== null) {
+    const directlyAffected = await getAffectedPackages(undefined, {
+      changedFiles: selectiveChangedFiles,
       strategy: 'git',
       includeDownstream: false,
       ignoreUncategorizedChanges: true,
@@ -119,13 +115,17 @@ export async function pickTestGroupRunOrder() {
       ftrManifestEntriesByQueue.clear();
     }
 
-    const selectiveCtx = await resolveSelectiveTestingContext(selectiveTestingMergeBase);
+    const selectiveCtx = await resolveSelectiveTestingContext(selectiveChangedFiles);
     if (selectiveCtx !== null) {
-      jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx);
-      jestIntegrationConfigs = filterJestIntegrationConfigsByAffected(
-        jestIntegrationConfigs,
-        selectiveCtx
-      );
+      if (unitIncluded) {
+        jestUnitConfigs = filterJestUnitConfigsByAffected(jestUnitConfigs, selectiveCtx);
+      }
+      if (integrationIncluded) {
+        jestIntegrationConfigs = filterJestIntegrationConfigsByAffected(
+          jestIntegrationConfigs,
+          selectiveCtx
+        );
+      }
     }
   }
 
@@ -162,8 +162,7 @@ export async function pickTestGroupRunOrder() {
       ownBranch: config.ownBranch,
       pipelineSlug: config.pipelineSlug,
       prNumber: config.prNumber,
-      prMergeBase: config.prMergeBase,
-      mergeQueueMergeBase: config.mergeQueueMergeBase,
+      timingBase: config.timingBase,
     }),
     groups: buildCiStatsGroups({
       jestUnitConfigs,

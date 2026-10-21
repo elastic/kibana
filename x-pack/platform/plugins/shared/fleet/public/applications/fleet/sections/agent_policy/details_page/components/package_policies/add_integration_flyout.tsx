@@ -53,12 +53,8 @@ export const AddIntegrationFlyout: React.FunctionComponent<{
     }
   }, [settings?.item]);
 
-  // Collection tiles are not appropriate here: the flyout presents a flat dropdown
-  // and there is no UX for choosing between collection members. Disable grouping so
-  // all individual integrations appear directly in the list.
   const { filteredCards, isLoading } = useAvailablePackages({
     prereleaseIntegrationsEnabled: prerelease,
-    disableCollectionGrouping: true,
   });
 
   const options = useMemo(() => {

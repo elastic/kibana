@@ -41,6 +41,7 @@ interface ExplorerAnomaliesContainerProps {
   chartsService: ChartsPluginStart;
   timeRange: { from: string; to: string } | undefined;
   showFilterIcons: boolean;
+  isInteractive?: boolean;
 }
 
 const tooManyBucketsCalloutMsg = i18n.translate(
@@ -66,16 +67,17 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
   chartsService,
   timeRange,
   showFilterIcons,
+  isInteractive = true,
 }) => {
   return (
-    // TODO: Remove data-shared-item and data-rendering-count as part of https://github.com/elastic/kibana/issues/179376
-    // These attributes are temporarily needed for reporting to not have any warning
-    <div data-shared-item="" data-rendering-count={1}>
-      <EuiFlexGroup id={id} direction="row" gutterSize="l" responsive={true}>
-        <EuiFlexItem grow={false}>
-          <SelectSeverityUI severity={severity} onChange={setSeverity} />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+    <div>
+      {isInteractive && (
+        <EuiFlexGroup id={id} direction="row" gutterSize="l" responsive={true}>
+          <EuiFlexItem grow={false}>
+            <SelectSeverityUI severity={severity} onChange={setSeverity} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
       <EuiSpacer size="m" />
       {Array.isArray(chartsData.seriesToPlot) &&
         chartsData.seriesToPlot.length === 0 &&
@@ -94,6 +96,7 @@ export const ExplorerAnomaliesContainer: FC<ExplorerAnomaliesContainerProps> = (
           {...{
             ...chartsData,
             isEmbeddable: true,
+            isInteractive,
             severity,
             mlLocator,
             tableData,

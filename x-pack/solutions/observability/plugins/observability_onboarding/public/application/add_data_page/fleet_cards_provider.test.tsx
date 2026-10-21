@@ -65,14 +65,13 @@ const wrap = (ui: React.ReactNode, { path = '/', canReadSettings = true }: WrapO
   </KibanaContextProvider>
 );
 
-const providerTree = (enabled: boolean) => (
-  <FleetCardsProvider enabled={enabled}>
+const providerTree = () => (
+  <FleetCardsProvider>
     <Consumer />
   </FleetCardsProvider>
 );
 
-const renderProvider = (enabled = true, options: WrapOptions = {}) =>
-  render(wrap(providerTree(enabled), options));
+const renderProvider = (options: WrapOptions = {}) => render(wrap(providerTree(), options));
 
 const prereleaseFlagOf = (call: unknown[]) =>
   (call[0] as { prereleaseIntegrationsEnabled: boolean }).prereleaseIntegrationsEnabled;
@@ -118,20 +117,6 @@ describe('FleetCardsProvider', () => {
     await waitFor(() => expect(mockUseAvailablePackages).toHaveBeenCalled());
     expect(onRender.mock.calls.length).toBeLessThan(10);
   });
-
-  // A page with no search and no grouping flag has nothing to show for the
-  // packages, so it should not reach the registry at all.
-  it('loads nothing while disabled, then loads once enabled', async () => {
-    const { rerender } = render(wrap(providerTree(false)));
-
-    expect(await screen.findByText('0')).toBeInTheDocument();
-    expect(mockAvailablePackagesHook).not.toHaveBeenCalled();
-
-    rerender(wrap(providerTree(true)));
-
-    expect(await screen.findByText('1')).toBeInTheDocument();
-    expect(mockAvailablePackagesHook).toHaveBeenCalled();
-  });
 });
 
 // Fleet dropped its beta toggle, so the catalog is GA only unless the url or the
@@ -156,14 +141,14 @@ describe('FleetCardsProvider prerelease packages', () => {
   });
 
   it('asks for prerelease packages when the url opts in', async () => {
-    renderProvider(true, { path: '/?prerelease=true' });
+    renderProvider({ path: '/?prerelease=true' });
 
     await screen.findByText('1');
     expect(prereleaseFlagOf(mockUseAvailablePackages.mock.calls[0])).toBe(true);
   });
 
   it('leaves the settings query disabled without the read privilege', async () => {
-    renderProvider(true, { canReadSettings: false });
+    renderProvider({ canReadSettings: false });
 
     await screen.findByText('1');
     expect(mockUseGetSettingsQuery).toHaveBeenCalledWith({ enabled: false });

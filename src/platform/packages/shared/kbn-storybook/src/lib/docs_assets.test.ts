@@ -210,7 +210,7 @@ describe('createDocsManifest', () => {
           includeAllStories: true,
         },
       })
-    ).toThrowError('Duplicate Storybook docs ID [duplicate] in alias [shared_ux]');
+    ).toThrow('Duplicate Storybook docs ID [duplicate] in alias [shared_ux]');
   });
 });
 
@@ -298,7 +298,7 @@ describe('buildDocsAssets', () => {
         iframeBaseUrl: IFRAME_BASE_URL,
         renderMode: 'inline',
       })
-    ).rejects.toThrowError(
+    ).rejects.toThrow(
       'Inline Storybook docs assets require previewAnnotationsImportPath or configDir.'
     );
   });
@@ -489,7 +489,7 @@ describe('createDocsRegistry', () => {
         },
         manifests: [manifest, manifest],
       })
-    ).toThrowError('Duplicate Storybook docs ID [kibana:shared_ux:components-button--regular]');
+    ).toThrow('Duplicate Storybook docs ID [kibana:shared_ux:components-button--regular]');
   });
 });
 

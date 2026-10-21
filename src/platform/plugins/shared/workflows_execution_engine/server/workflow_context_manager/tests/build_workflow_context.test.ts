@@ -11,7 +11,7 @@ import type { EsWorkflowExecution, ExecutionStatus } from '@kbn/workflows';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { mockContextDependencies } from '../../execution_functions/__mock__/context_dependencies';
-import { buildWorkflowContext } from '../build_workflow_context';
+import { buildWorkflowContext, buildWorkflowRenderContext } from '../build_workflow_context';
 
 jest.mock('../../utils', () => ({
   getKibanaUrl: jest.fn().mockReturnValue('http://localhost:5601'),
@@ -590,6 +590,43 @@ describe('buildWorkflowContext', () => {
     });
   });
 
+  describe('execution chain', () => {
+    const childExecution: EsWorkflowExecution = {
+      ...baseExecution,
+      context: {
+        executionChain: [
+          { executionId: 'root-exec-1', invocation: 'sync', workflowId: 'root-workflow-id' },
+          { executionId: 'parent-exec-1', invocation: 'async', workflowId: 'parent-workflow-id' },
+        ],
+        parentWorkflowExecutionId: 'parent-exec-1',
+        parentWorkflowId: 'parent-workflow-id',
+        parentDepth: 1,
+      },
+    };
+
+    it('should keep the stored chain out of the Liquid render context', () => {
+      const rendered = JSON.stringify(
+        buildWorkflowRenderContext(childExecution, undefined, dependencies)
+      );
+
+      expect({
+        chain: rendered.includes('executionChain'),
+        firstHopExecution: rendered.includes('root-exec-1'),
+        firstHopWorkflow: rendered.includes('root-workflow-id'),
+      }).toEqual({ chain: false, firstHopExecution: false, firstHopWorkflow: false });
+    });
+
+    it('should still expose only the direct parent for a child execution with a stored chain', () => {
+      const context = buildWorkflowRenderContext(childExecution, undefined, dependencies);
+
+      expect(context.parent).toEqual({
+        workflowId: 'parent-workflow-id',
+        executionId: 'parent-exec-1',
+        depth: 2,
+      });
+    });
+  });
+
   describe('metadata context', () => {
     it('should include metadata from execution document when present', () => {
       const execution: EsWorkflowExecution = {
@@ -638,6 +675,107 @@ describe('buildWorkflowContext', () => {
       const context = buildWorkflowContext(execution, undefined, dependencies);
 
       expect(context.metadata).toEqual({ agent_id: 'from-execution' });
+    });
+  });
+
+  describe('event.inputs aliasing for manual triggers', () => {
+    it('does not persist a minted event when inputs exist and no event was stored', () => {
+      setInputsSchema({
+        type: 'object',
+        properties: { severity: { type: 'string', default: 'medium' } },
+        required: [],
+        additionalProperties: false,
+      });
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        spaceId: 'default',
+        context: { inputs: { severity: 'high' } },
+      };
+
+      const result = buildWorkflowContext(execution, undefined, dependencies);
+
+      expect(result.event).toBeUndefined();
+      expect(result.inputs).toEqual({ severity: 'high' });
+    });
+
+    it('aliases event.inputs from fully-defaulted inputs when no event is persisted', () => {
+      setInputsSchema({
+        type: 'object',
+        properties: { severity: { type: 'string', default: 'medium' } },
+        required: [],
+        additionalProperties: false,
+      });
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        spaceId: 'default',
+        context: { inputs: { severity: 'high' } },
+      };
+
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
+
+      expect((result.event as Record<string, unknown>).inputs).toEqual({ severity: 'high' });
+      expect((result.event as Record<string, unknown>).spaceId).toBe('default');
+    });
+
+    it('includes default-filled fields in event.inputs even when raw inputs is empty', () => {
+      setInputsSchema({
+        type: 'object',
+        properties: { severity: { type: 'string', default: 'medium' } },
+        required: [],
+        additionalProperties: false,
+      });
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: { inputs: {} },
+      };
+
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
+
+      expect((result.event as Record<string, unknown>).inputs).toEqual({ severity: 'medium' });
+    });
+
+    it('does not mint an event when context is empty and there are no inputs', () => {
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: {},
+      };
+
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
+
+      expect(result.event).toBeUndefined();
+      expect(result.inputs).toBeUndefined();
+    });
+
+    it('does not alias event.inputs for non-manual triggers that have a real event', () => {
+      const alertEvent = { type: 'alert', alerts: [{ id: 'a1' }], spaceId: 'default' };
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: { event: alertEvent, inputs: { ticketId: 'T-1' } },
+      };
+
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
+
+      expect(result.event).toEqual(alertEvent);
+      expect((result.event as Record<string, unknown>).inputs).toBeUndefined();
+    });
+
+    it('merges event.inputs into a previously-synthesized manual event for backwards compat', () => {
+      setInputsSchema({
+        type: 'object',
+        properties: { severity: { type: 'string', default: 'medium' } },
+        required: [],
+        additionalProperties: false,
+      });
+      const oldSynthesizedEvent = { type: 'manual', inputs: {}, spaceId: 'default' };
+      const execution: EsWorkflowExecution = {
+        ...baseExecution,
+        context: { event: oldSynthesizedEvent, inputs: {} },
+      };
+
+      const result = buildWorkflowRenderContext(execution, undefined, dependencies);
+
+      // event.inputs is refreshed to the defaulted value, not the stale empty object
+      expect((result.event as Record<string, unknown>).inputs).toEqual({ severity: 'medium' });
     });
   });
 });

@@ -13,6 +13,7 @@ import type {
   TaskPriority,
   TaskCost,
   TaskTypeGroup,
+  TaskRunAsDefinition,
 } from './task';
 import { taskDefinitionSchema } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
@@ -50,6 +51,10 @@ export const REMOVED_TYPES: string[] = [
   // one-off cleanup task removed after completing in its target project (added in #273285)
   'alerting:clear_stale_uiam_api_keys',
 
+  // UIAM API key backfill tasks removed after provisioning completed
+  'alerting:api_key_provisioning',
+  'task_manager:uiam_api_key_provisioning',
+
   // Legacy streams KI task types removed after migrating onboarding, feature
   // identification, and queries generation to managed workflows (https://github.com/elastic/kibana/pull/271468)
   'streams_onboarding',
@@ -85,11 +90,16 @@ export interface TaskRegisterDefinition {
    */
   timeout?: string;
   /**
-   * An optional definition of task priority. Tasks will be sorted by priority prior to claiming
-   * so high priority tasks will always be claimed before normal priority, which will always be
-   * claimed before low priority
+   * An optional definition of task priority, describing what the task is for. Tasks are sorted
+   * by priority descending prior to claiming, so `UserInteractive` is claimed before `Standard`,
+   * which is claimed before `Deferrable`, which is claimed before `Maintenance`.
+   * Defaults to `TaskPriority.Standard` when omitted.
    */
   priority?: TaskPriority;
+  /**
+   * Allows `runSoon({ priority })` and a successful run result to change this task's stored priority.
+   */
+  allowPriorityOverride?: boolean;
   /**
    * An optional definition of the cost associated with running the task.
    */
@@ -127,6 +137,12 @@ export interface TaskRegisterDefinition {
 
   paramsSchema?: ObjectType;
   taskTypeGroup?: TaskTypeGroup;
+
+  /**
+   * Present when tasks of this type may run as the plugin's bound service accounts. The workload
+   * type `task_identity` is reserved for Task Manager.
+   */
+  runAs?: TaskRunAsDefinition;
 }
 
 /**

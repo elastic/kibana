@@ -178,7 +178,7 @@ describe('AssetCriticalityService', () => {
       });
 
       it('throws an error if an empty array is provided', async () => {
-        await expect(() => service.getCriticalitiesByIdentifiers([])).rejects.toThrowError(
+        await expect(() => service.getCriticalitiesByIdentifiers([])).rejects.toThrow(
           'At least one identifier must be provided'
         );
       });
@@ -186,7 +186,7 @@ describe('AssetCriticalityService', () => {
       it('throws an error if no identifier values are provided', async () => {
         await expect(() =>
           service.getCriticalitiesByIdentifiers([{ id_field: 'host.name', id_value: '' }])
-        ).rejects.toThrowError('At least one identifier must contain a valid field and value');
+        ).rejects.toThrow('At least one identifier must contain a valid field and value');
       });
 
       it('throws an error if no valid identifier field/value pair is provided', async () => {
@@ -194,7 +194,7 @@ describe('AssetCriticalityService', () => {
           { id_field: '', id_value: 'foo' },
           { id_field: 'user.name', id_value: '' },
         ];
-        await expect(() => service.getCriticalitiesByIdentifiers(identifiers)).rejects.toThrowError(
+        await expect(() => service.getCriticalitiesByIdentifiers(identifiers)).rejects.toThrow(
           'At least one identifier must contain a valid field and value'
         );
       });
@@ -205,9 +205,9 @@ describe('AssetCriticalityService', () => {
         (mockAssetCriticalityDataClient.search as jest.Mock)
           .mockReset()
           .mockRejectedValueOnce(new Error('foo'));
-        await expect(() =>
-          service.getCriticalitiesByIdentifiers([baseIdentifier])
-        ).rejects.toThrowError('foo');
+        await expect(() => service.getCriticalitiesByIdentifiers([baseIdentifier])).rejects.toThrow(
+          'foo'
+        );
       });
     });
   });

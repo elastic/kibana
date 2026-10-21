@@ -17,7 +17,6 @@ import { EuiCallOut, EuiCheckbox, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { StreamTree } from './tree';
 import { containsMappings } from '../helpers';
-import { useSignificantEventsApp } from '../../../../../hooks/use_significant_events_app';
 
 export function ContentPackObjectsList({
   objects,
@@ -29,7 +28,6 @@ export function ContentPackObjectsList({
   const streamEntries = objects.filter(
     (entry): entry is ContentPackStream => entry.type === 'stream'
   );
-  const { isAvailable: isSignificantEventsAvailable } = useSignificantEventsApp();
   const [includeMappings, setIncludeMappings] = useState<boolean>(containsMappings(streamEntries));
   const [selection, setSelection] = useState<Record<string, { selected: boolean }>>({
     ...objects
@@ -65,17 +63,10 @@ export function ContentPackObjectsList({
         announceOnMount
         size="s"
         iconType="info"
-        title={
-          isSignificantEventsAvailable
-            ? i18n.translate('xpack.streams.contentPackObjectsList.structuralOnlyCallout', {
-                defaultMessage:
-                  'Content packs include stream structure only: routing, mappings, and child streams. Significant events and other detections are not included and are managed from the Significant Events app.',
-              })
-            : i18n.translate('xpack.streams.contentPackObjectsList.structuralOnlyCalloutNoTab', {
-                defaultMessage:
-                  'Content packs include stream structure only: routing, mappings, and child streams. Significant events and other detections are not included and are managed separately.',
-              })
-        }
+        title={i18n.translate('xpack.streams.contentPackObjectsList.structuralOnlyCallout', {
+          defaultMessage:
+            'Content packs include stream structure only: routing, mappings, and child streams. Significant events and other detections are not included and are managed separately.',
+        })}
       />
 
       <EuiSpacer size="m" />

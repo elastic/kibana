@@ -10,6 +10,7 @@ import { PluginInitializer } from '@kbn/core-di-server';
 import type { PluginInitializerContext } from '@kbn/core/server';
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { DispatcherTaskDefinition } from '../lib/dispatcher/task_definition';
+import { AlertActionsCleanupTaskDefinition } from '../lib/tasks/alert_actions_cleanup/task_definition';
 import { ApiKeyInvalidationTaskDefinition } from '../lib/tasks/invalidate_pending_api_keys/task_definition';
 import { RuleExecutorTaskDefinition } from '../lib/rule_executor/task_definition';
 import { TelemetryTaskDefinition } from '../lib/usage/task_definition';
@@ -46,10 +47,13 @@ export function bindTasks({ bind, onActivation }: ContainerModuleLoadOptions) {
     taskManager.registerTaskDefinitions({
       [definition.taskType]: {
         title: definition.title,
+        description: definition.description,
         timeout,
         paramsSchema: definition.paramsSchema,
         stateSchemaByVersion: definition.stateSchemaByVersion,
         maxAttempts: definition.maxAttempts,
+        cost: definition.cost,
+        priority: definition.priority,
         createTaskRunner,
       },
     });
@@ -62,6 +66,7 @@ export function bindTasks({ bind, onActivation }: ContainerModuleLoadOptions) {
   bind(TaskDefinition).toConstantValue(DispatcherTaskDefinition);
   bind(TaskDefinition).toConstantValue(ApiKeyInvalidationTaskDefinition);
   bind(TaskDefinition).toConstantValue(TelemetryTaskDefinition);
+  bind(TaskDefinition).toConstantValue(AlertActionsCleanupTaskDefinition);
 
   // Resolve every bound task definition during setup so the onActivation hook
   // above runs once per task and registers it with Task Manager.

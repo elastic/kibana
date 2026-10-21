@@ -34,7 +34,6 @@ export const ChartSelect: React.FC<Props> = ({
       idSelected={alertViewSelection}
       onChange={(id) => setAlertViewSelection(id as AlertViewSelection)}
       buttonSize="compressed"
-      color="primary"
       data-test-subj="chart-select-tabs"
     />
   );

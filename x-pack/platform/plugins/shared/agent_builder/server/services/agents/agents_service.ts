@@ -14,7 +14,11 @@ import type {
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { isAllowedBuiltinAgent } from '@kbn/agent-builder-server/allow_lists';
-import type { AgentAvailabilityConfig, AgentTypeRegistry } from '@kbn/agent-builder-server/agents';
+import type {
+  AgentAvailabilityConfig,
+  AgentTypeRegistry,
+  AiIndexResolver,
+} from '@kbn/agent-builder-server/agents';
 import { chatAgentTypeId } from '@kbn/agent-builder-common';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { defaultAiIndices } from './default_ai_indices';
@@ -57,6 +61,9 @@ export class AgentsService {
   private typeRegistry: AgentTypeRegistry;
   /** In-memory availability for persisted agents, keyed by agent id. Filled by `ensure`. */
   private readonly availabilityByAgentId = new Map<string, AgentAvailabilityConfig>();
+  /** In-memory UI visibility overrides for persisted agents, keyed by agent id. Filled by `ensure`. */
+  private readonly hiddenByAgentId = new Map<string, boolean>();
+  private aiIndexResolver?: AiIndexResolver;
 
   private setupDeps?: AgentsServiceSetupDeps;
 
@@ -83,6 +90,12 @@ export class AgentsService {
       },
       registerType: (type) => {
         this.typeRegistry.register(type);
+      },
+      registerAiIndexResolver: (resolver) => {
+        if (this.aiIndexResolver) {
+          throw new Error('An AI index resolver is already registered');
+        }
+        this.aiIndexResolver = resolver;
       },
     };
   }
@@ -119,6 +132,7 @@ export class AgentsService {
       toolsService,
       logger,
       availabilityByAgentId: this.availabilityByAgentId,
+      hiddenByAgentId: this.hiddenByAgentId,
     });
 
     const getAgentClient = async ({ request }: { request: KibanaRequest }) => {
@@ -146,7 +160,12 @@ export class AgentsService {
       });
     };
 
-    const ensure: AgentsServiceStart['ensure'] = async ({ spaceId, agent, availability }) => {
+    const ensure: AgentsServiceStart['ensure'] = async ({
+      spaceId,
+      agent,
+      availability,
+      hidden,
+    }) => {
       if (this.builtinRegistry.has(agent.id)) {
         throw new Error(
           `Cannot ensure persisted agent "${agent.id}": a built-in agent uses this id`
@@ -158,6 +177,9 @@ export class AgentsService {
 
       if (availability) {
         this.availabilityByAgentId.set(agent.id, availability);
+      }
+      if (hidden !== undefined) {
+        this.hiddenByAgentId.set(agent.id, hidden);
       }
 
       const systemClient = createSystemClient({ space: spaceId, elasticsearch, logger });
@@ -243,6 +265,7 @@ export class AgentsService {
       getAgentsUsingPlugins,
       removeSkillRefsFromAgents,
       getAgentsUsingSkills,
+      getAiIndexResolver: () => this.aiIndexResolver,
     };
   }
 }

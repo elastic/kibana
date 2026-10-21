@@ -6,11 +6,12 @@
  */
 
 import React from 'react';
-import { render, fireEvent, waitFor } from '@testing-library/react';
+import { render, fireEvent } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
+import { I18nProvider } from '@kbn/i18n-react';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useDeleteBackfill } from '../../api/hooks/use_delete_backfill';
 import { StopBackfill } from './stop_backfill';
-import { TestProviders } from '../../../../common/mock';
 import { useKibana } from '../../../../common/lib/kibana';
 import * as i18n from '../../translations';
 import type { BackfillRow } from '../../types';
@@ -23,6 +24,12 @@ jest.mock('../../../../common/lib/kibana');
 const mockUseAppToasts = useAppToasts as jest.Mock;
 const mockUseDeleteBackfill = useDeleteBackfill as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
+
+const TestWrapper = ({ children }: { children?: React.ReactNode }) => (
+  <I18nProvider>
+    <EuiProvider highContrastMode={false}>{children}</EuiProvider>
+  </I18nProvider>
+);
 
 describe('StopBackfill', () => {
   const mockTelemetry = {
@@ -74,7 +81,7 @@ describe('StopBackfill', () => {
     });
   });
 
-  it('should call deleteBackfillMutation and telemetry when confirmed', async () => {
+  it('should call deleteBackfillMutation and telemetry when confirmed', () => {
     mockUseDeleteBackfill.mockImplementation((options) => ({
       mutate: () => {
         if (options.onSuccess) {
@@ -84,27 +91,25 @@ describe('StopBackfill', () => {
     }));
 
     const { getByTestId } = render(<StopBackfill backfill={backfill} />, {
-      wrapper: TestProviders,
+      wrapper: TestWrapper,
     });
 
     fireEvent.click(getByTestId('rule-backfills-delete-button'));
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
 
-    await waitFor(() => {
-      expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
-        ManualRuleRunEventTypes.ManualRuleRunCancelJob,
-        {
-          totalTasks: backfill.total,
-          completedTasks: backfill.complete,
-          errorTasks: backfill.error,
-        }
-      );
-    });
+    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
+      ManualRuleRunEventTypes.ManualRuleRunCancelJob,
+      {
+        totalTasks: backfill.total,
+        completedTasks: backfill.complete,
+        errorTasks: backfill.error,
+      }
+    );
 
     expect(addSuccess).toHaveBeenCalledWith(i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_SUCCESS);
   });
 
-  it('should call addError on deleteBackfillMutation error', async () => {
+  it('should call addError on deleteBackfillMutation error', () => {
     mockUseDeleteBackfill.mockImplementation((options) => ({
       mutate: () => {
         if (options.onError) {
@@ -114,17 +119,15 @@ describe('StopBackfill', () => {
     }));
 
     const { getByTestId } = render(<StopBackfill backfill={backfill} />, {
-      wrapper: TestProviders,
+      wrapper: TestWrapper,
     });
 
     fireEvent.click(getByTestId('rule-backfills-delete-button'));
     fireEvent.click(getByTestId('confirmModalConfirmButton'));
 
-    await waitFor(() => {
-      expect(addError).toHaveBeenCalledWith(expect.any(Error), {
-        title: i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_ERROR,
-        toastMessage: 'Error stopping backfill',
-      });
+    expect(addError).toHaveBeenCalledWith(expect.any(Error), {
+      title: i18n.BACKFILLS_TABLE_STOP_CONFIRMATION_ERROR,
+      toastMessage: 'Error stopping backfill',
     });
   });
 });
