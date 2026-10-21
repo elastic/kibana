@@ -33,7 +33,7 @@ export async function requestDiagnostics(
     soClient,
     esClient,
     agentId,
-    `Cannot request diagnostics for agentless agent ${agentId}`
+    `Cannot request diagnostics for managed integration agent ${agentId}`
   );
 
   const currentSpaceId = getCurrentNamespace(soClient);

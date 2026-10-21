@@ -54,7 +54,7 @@ async function unenrollAgentIsAllowed(
   }
 
   if (!options?.skipAgentlessValidation && agentPolicy?.supports_agentless) {
-    throw new AgentlessAgentRestrictionError(`Cannot unenroll agentless agent ${agentId}`);
+    throw new AgentlessAgentRestrictionError(`Cannot unenroll managed integration agent ${agentId}`);
   }
 
   return true;

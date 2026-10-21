@@ -46,7 +46,7 @@ export async function sendUpgradeAgentAction({
       `Cannot upgrade agent ${agentId} in hosted agent policy ${agentPolicy.id}`
     );
   }
-  throwIfAgentlessAgentPolicy(agentPolicy, `Cannot upgrade agentless agent ${agentId}`);
+  throwIfAgentlessAgentPolicy(agentPolicy, `Cannot upgrade managed integration agent ${agentId}`);
 
   const currentSpaceId = getCurrentNamespace(soClient);
 

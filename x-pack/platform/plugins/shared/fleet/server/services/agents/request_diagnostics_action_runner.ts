@@ -59,7 +59,7 @@ export async function requestDiagnosticsBatch(
   givenAgents.forEach((agent: Agent) => {
     if (isAgentlessAgent(restrictions, agent)) {
       errors[agent.id] = new AgentlessAgentRestrictionError(
-        `Cannot request diagnostics for agentless agent ${agent.id}`
+        `Cannot request diagnostics for managed integration agent ${agent.id}`
       );
     } else if (!isAgentRequestDiagnosticsSupported(agent)) {
       errors[agent.id] = new FleetError(

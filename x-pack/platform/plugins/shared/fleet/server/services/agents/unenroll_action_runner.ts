@@ -84,7 +84,7 @@ export async function unenrollBatch(
     // force skips the unenrolled/hosted validations, but never the agentless one
     if (!options.skipAgentlessValidation && isAgentlessAgent(restrictions, agent)) {
       outgoingErrors[agent.id] = new AgentlessAgentRestrictionError(
-        `Cannot unenroll agentless agent ${agent.id}`
+        `Cannot unenroll managed integration agent ${agent.id}`
       );
     } else if (options.force) {
       agents.push(agent);

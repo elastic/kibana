@@ -184,7 +184,7 @@ export const updateAgentHandler: FleetRequestHandler<
       soClient,
       esClient,
       request.params.agentId,
-      `Cannot update agentless agent ${request.params.agentId}`
+      `Cannot update managed integration agent ${request.params.agentId}`
     );
 
     await AgentService.updateAgent(esClient, request.params.agentId, partialAgent);

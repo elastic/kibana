@@ -86,7 +86,7 @@ export async function sendRollbackAgentAction(
   }
   throwIfAgentlessAgentPolicy(
     agentPolicy,
-    `Cannot roll back upgrade for agentless agent ${agent.id}`
+    `Cannot roll back upgrade for managed integration agent ${agent.id}`
   );
 
   const now = new Date().toISOString();

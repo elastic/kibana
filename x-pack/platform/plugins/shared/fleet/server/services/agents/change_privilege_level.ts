@@ -42,7 +42,7 @@ export async function changeAgentPrivilegeLevel(
     soClient,
     esClient,
     agentId,
-    `Cannot remove root privilege for agentless agent ${agentId}`
+    `Cannot remove root privilege for managed integration agent ${agentId}`
   );
 
   // Return fast if agent is already unprivileged.
