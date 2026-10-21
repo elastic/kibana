@@ -29,7 +29,7 @@ const axisOf = (lens: LensHint | undefined) =>
       };
 
 /** The converter's Lens-shaped hint as the Elastic Charts engine's presentation contract. */
-export const engineHint = (
+export const engineHintFromLens = (
   hint: LensHint,
   node: { annotations?: Array<{ key: string }> } | undefined
 ): ChartHint => {

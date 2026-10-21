@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/isomer-charts-elastic'
   - '@kbn/isomer-charts-elastic-node'
   - '@kbn/isomer-components'
+  - '@kbn/isomer-lowering'
   - '@kbn/isomer-primitives-charts'
   - '@kbn/isomer-primitives-maps'
   - '@kbn/isomer-primitives-vega'

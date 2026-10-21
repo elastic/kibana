@@ -1,0 +1,56 @@
+{
+  "id": "lens-donut-traffic-source",
+  "type": "lens",
+  "attributes": {
+    "title": "Traffic by source",
+    "description": "Top sources for the last 24h.",
+    "visualizationType": "lnsPie",
+    "state": {
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "layer-1": {
+              "indexPatternId": "web-*",
+              "columns": {
+                "col-source": {
+                  "operationType": "terms",
+                  "sourceField": "source.name",
+                  "isBucketed": true,
+                  "dataType": "string",
+                  "params": { "size": 10 },
+                  "label": "Top source"
+                },
+                "col-count": {
+                  "operationType": "count",
+                  "isBucketed": false,
+                  "dataType": "number",
+                  "label": "Count of records"
+                }
+              },
+              "columnOrder": ["col-source", "col-count"]
+            }
+          }
+        }
+      },
+      "visualization": {
+        "shape": "donut",
+        "layers": [
+          {
+            "layerId": "layer-1",
+            "primaryGroups": ["col-source"],
+            "metrics": ["col-count"]
+          }
+        ]
+      },
+      "filters": [],
+      "query": { "query": "", "language": "kuery" }
+    }
+  },
+  "references": [
+    {
+      "id": "web-data-view",
+      "name": "indexpattern-datasource-layer-layer-1",
+      "type": "index-pattern"
+    }
+  ]
+}

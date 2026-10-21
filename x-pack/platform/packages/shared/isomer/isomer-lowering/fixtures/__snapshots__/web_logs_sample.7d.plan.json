@@ -1,0 +1,2004 @@
+{
+  "diagnostics": [
+    {
+      "code": "lens.textBased.time-range-injected",
+      "level": "info",
+      "message": "injected dashboard time range on "@timestamp" into the ES|QL query",
+      "panelId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:11",
+    },
+    {
+      "code": "lens.formBased.lowered-to-esql",
+      "level": "info",
+      "message": "Lens panel uses the form-based datasource; converter synthesized an ES|QL query",
+      "panelId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:15",
+    },
+    {
+      "code": "lens.xy.annotations-dropped",
+      "level": "info",
+      "message": "1 annotation layer(s) dropped (no Adaptive UI equivalent)",
+      "panelId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:15",
+    },
+    {
+      "code": "lens.textBased.time-range-injected",
+      "level": "info",
+      "message": "injected dashboard time range on "@timestamp" into the ES|QL query",
+      "panelId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:bb94016e-f4a6-49ca-87a9-296a2869d570",
+    },
+    {
+      "code": "lens.textBased.time-range-injected",
+      "level": "info",
+      "message": "injected dashboard time range on "@timestamp" into the ES|QL query",
+      "panelId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:8c1456d4-1993-4ba2-b701-04aca02c9fef",
+    },
+    {
+      "code": "lens.textBased.time-range-injected",
+      "level": "info",
+      "message": "injected dashboard time range on "@timestamp" into the ES|QL query",
+      "panelId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:01d8e435-91c0-484f-a11e-856747050b0a",
+    },
+    {
+      "code": "lens.textBased.time-range-injected",
+      "level": "info",
+      "message": "injected dashboard time range on "@timestamp" into the ES|QL query",
+      "panelId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:21bb0939-ee09-4021-8848-6552b3a6a788",
+    },
+    {
+      "code": "lens.datatable.color-palette-preserved",
+      "level": "info",
+      "message": "column "Unique Visits (Last hour)" Lens palette colors preserved (5 stop(s))",
+      "panelId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:21bb0939-ee09-4021-8848-6552b3a6a788",
+    },
+    {
+      "code": "lens.datatable.color-palette-preserved",
+      "level": "info",
+      "message": "column "Unique Visits (Total)" Lens palette colors preserved (5 stop(s))",
+      "panelId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:21bb0939-ee09-4021-8848-6552b3a6a788",
+    },
+    {
+      "code": "lens.textBased.time-range-injected",
+      "level": "info",
+      "message": "injected dashboard time range on "@timestamp" into the ES|QL query",
+      "panelId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:cbca842c-b9fa-4523-9ce0-14e350866e33",
+    },
+    {
+      "code": "lens.textBased.time-range-injected",
+      "level": "info",
+      "message": "injected dashboard time range on "@timestamp" into the ES|QL query",
+      "panelId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:1d5f0b3f-d9d2-4b26-997b-83bc5ca3090b",
+    },
+    {
+      "code": "lens.datatable.color-palette-preserved",
+      "level": "info",
+      "message": "column "count_5xx" Lens palette colors preserved (5 stop(s))",
+      "panelId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:1d5f0b3f-d9d2-4b26-997b-83bc5ca3090b",
+    },
+    {
+      "code": "lens.datatable.color-palette-preserved",
+      "level": "info",
+      "message": "column "0089839c-ab91-420e-bdec-9583ce4d6015" Lens palette colors preserved (5 stop(s))",
+      "panelId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:1d5f0b3f-d9d2-4b26-997b-83bc5ca3090b",
+    },
+  ],
+  "panels": [
+    {
+      "binding": {
+        "chart": {
+          "kind": "metric",
+          "primary": {
+            "id": "Unique Visitors",
+            "label": "Unique Visitors",
+          },
+        },
+        "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:11",
+        "specPath": [
+          "body",
+          0,
+          "items",
+          1,
+          "node",
+        ],
+      },
+      "dimensions": {},
+      "panelId": "11",
+      "query": {
+        "chart": {
+          "kind": "metric",
+          "primary": {
+            "id": "Unique Visitors",
+            "label": "Unique Visitors",
+          },
+        },
+        "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:11",
+        "label": "",
+        "query": {
+          "esql": "FROM kibana_sample_data_logs | WHERE `@timestamp` >= NOW() - 7 day AND `@timestamp` <= NOW() | STATS COUNT_DISTINCT(clientip) | RENAME `COUNT_DISTINCT(clientip)` as `Unique Visitors`",
+          "indexPattern": "e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a",
+          "params": {
+            "_tend": "now",
+            "_tstart": "now-7d",
+          },
+        },
+      },
+      "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:11",
+    },
+    {
+      "binding": {
+        "chart": {
+          "kind": "xy",
+          "mode": "area",
+          "series": [
+            {
+              "color": "rgba(115,216,255,1)",
+              "id": "896c5eb2-81c5-44f1-a4a1-57344161ea62",
+              "label": "Response Code Count",
+              "splitOnField": "43f5bb0f-c6da-43a0-8a0a-50e9838ed34b",
+            },
+          ],
+          "stack": "percentage",
+          "stacked": true,
+          "xAxis": {
+            "id": "8986e393-d24f-49b0-96ca-118fd66d75e5",
+            "label": "timestamp",
+          },
+          "yAxis": {
+            "id": "896c5eb2-81c5-44f1-a4a1-57344161ea62",
+            "label": "Response Code Count",
+          },
+        },
+        "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:15",
+        "specPath": [
+          "body",
+          0,
+          "items",
+          3,
+          "node",
+        ],
+      },
+      "dimensions": {
+        "8986e393-d24f-49b0-96ca-118fd66d75e5": {
+          "field": "timestamp",
+          "intervalMs": 3600000,
+          "kind": "date_histogram",
+        },
+      },
+      "panelId": "15",
+      "query": {
+        "chart": {
+          "kind": "xy",
+          "mode": "area",
+          "series": [
+            {
+              "color": "rgba(115,216,255,1)",
+              "id": "896c5eb2-81c5-44f1-a4a1-57344161ea62",
+              "label": "Response Code Count",
+              "splitOnField": "43f5bb0f-c6da-43a0-8a0a-50e9838ed34b",
+            },
+          ],
+          "stack": "percentage",
+          "stacked": true,
+          "xAxis": {
+            "id": "8986e393-d24f-49b0-96ca-118fd66d75e5",
+            "label": "timestamp",
+          },
+          "yAxis": {
+            "id": "896c5eb2-81c5-44f1-a4a1-57344161ea62",
+            "label": "Response Code Count",
+          },
+        },
+        "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:15",
+        "label": "[Logs] Response Codes Over Time + Annotations",
+        "query": {
+          "esql": "FROM kibana_sample_data_logs | WHERE timestamp >= NOW() - 7 day AND timestamp < NOW() AND ((TO_DOUBLE(`response.keyword`) >= 200 AND TO_DOUBLE(`response.keyword`) < 400) OR (TO_DOUBLE(`response.keyword`) >= 400 AND TO_DOUBLE(`response.keyword`) < 500) OR TO_DOUBLE(`response.keyword`) >= 500) | EVAL `43f5bb0f-c6da-43a0-8a0a-50e9838ed34b` = CASE((TO_DOUBLE(`response.keyword`) >= 200 AND TO_DOUBLE(`response.keyword`) < 400), "HTTP 2xx and 3xx", (TO_DOUBLE(`response.keyword`) >= 400 AND TO_DOUBLE(`response.keyword`) < 500), "HTTP 4xx", TO_DOUBLE(`response.keyword`) >= 500, "HTTP 5xx") | STATS `896c5eb2-81c5-44f1-a4a1-57344161ea62` = COUNT(*) BY `8986e393-d24f-49b0-96ca-118fd66d75e5` = BUCKET(timestamp, 1h), `43f5bb0f-c6da-43a0-8a0a-50e9838ed34b` | SORT `8986e393-d24f-49b0-96ca-118fd66d75e5`",
+          "indexPattern": "kibana_sample_data_logs",
+          "params": {
+            "_tend": "now",
+            "_tstart": "now-7d",
+          },
+        },
+      },
+      "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:15",
+    },
+    {
+      "binding": {
+        "chart": {
+          "kind": "metric",
+          "primary": {
+            "id": "Visits",
+            "label": "Visits",
+          },
+        },
+        "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:bb94016e-f4a6-49ca-87a9-296a2869d570",
+        "specPath": [
+          "body",
+          0,
+          "items",
+          5,
+          "node",
+        ],
+      },
+      "dimensions": {},
+      "panelId": "bb94016e-f4a6-49ca-87a9-296a2869d570",
+      "query": {
+        "chart": {
+          "kind": "metric",
+          "primary": {
+            "id": "Visits",
+            "label": "Visits",
+          },
+        },
+        "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:bb94016e-f4a6-49ca-87a9-296a2869d570",
+        "label": "",
+        "query": {
+          "esql": "FROM kibana_sample_data_logs | WHERE `@timestamp` >= NOW() - 7 day AND `@timestamp` <= NOW() | STATS COUNT(*) | RENAME `COUNT(*)` as `Visits`",
+          "indexPattern": "e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a",
+          "params": {
+            "_tend": "now",
+            "_tstart": "now-7d",
+          },
+        },
+      },
+      "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:bb94016e-f4a6-49ca-87a9-296a2869d570",
+    },
+    {
+      "binding": {
+        "chart": {
+          "kind": "metric",
+          "primary": {
+            "id": "HTTP 5xx (%)",
+            "label": "HTTP 5xx (%)",
+          },
+        },
+        "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:8c1456d4-1993-4ba2-b701-04aca02c9fef",
+        "specPath": [
+          "body",
+          0,
+          "items",
+          6,
+          "node",
+        ],
+      },
+      "dimensions": {},
+      "panelId": "8c1456d4-1993-4ba2-b701-04aca02c9fef",
+      "query": {
+        "chart": {
+          "kind": "metric",
+          "primary": {
+            "id": "HTTP 5xx (%)",
+            "label": "HTTP 5xx (%)",
+          },
+        },
+        "format": {
+          "kind": "percent",
+          "precision": 2,
+        },
+        "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:8c1456d4-1993-4ba2-b701-04aca02c9fef",
+        "label": "",
+        "query": {
+          "esql": "FROM kibana_sample_data_logs | WHERE `@timestamp` >= NOW() - 7 day AND `@timestamp` <= NOW() | EVAL type = CASE(TO_INTEGER(response.keyword) >= 500, "5xx", "Other")
+| STATS count = COUNT(*) by type
+| EVAL count_5xx = CASE(type == "5xx", count), count_rest = CASE(type == "Other", count)
+| DROP count, type
+| STATS count_5xx = MAX(count_5xx), count_rest = MAX(count_rest)
+| EVAL percentage = ROUND(count_5xx / TO_DOUBLE(count_5xx + count_rest), 3)
+| RENAME percentage as `HTTP 5xx (%)`
+| DROP count_5xx, count_rest",
+          "indexPattern": "e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a",
+          "params": {
+            "_tend": "now",
+            "_tstart": "now-7d",
+          },
+        },
+      },
+      "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:8c1456d4-1993-4ba2-b701-04aca02c9fef",
+    },
+    {
+      "binding": {
+        "chart": {
+          "kind": "metric",
+          "primary": {
+            "id": "HTTP 4xx (%)",
+            "label": "HTTP 4xx (%)",
+          },
+        },
+        "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:01d8e435-91c0-484f-a11e-856747050b0a",
+        "specPath": [
+          "body",
+          0,
+          "items",
+          7,
+          "node",
+        ],
+      },
+      "dimensions": {},
+      "panelId": "01d8e435-91c0-484f-a11e-856747050b0a",
+      "query": {
+        "chart": {
+          "kind": "metric",
+          "primary": {
+            "id": "HTTP 4xx (%)",
+            "label": "HTTP 4xx (%)",
+          },
+        },
+        "format": {
+          "kind": "percent",
+          "precision": 2,
+        },
+        "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:01d8e435-91c0-484f-a11e-856747050b0a",
+        "label": "",
+        "query": {
+          "esql": "FROM kibana_sample_data_logs | WHERE `@timestamp` >= NOW() - 7 day AND `@timestamp` <= NOW() | EVAL type = CASE(TO_INTEGER(response.keyword) >= 400 and TO_INTEGER(response.keyword) < 500, "4xx", "Other")
+| STATS count = COUNT(*) by type
+| EVAL count_4xx = CASE(type == "4xx", count), count_rest = CASE(type == "Other", count)
+| DROP count, type
+| STATS count_4xx = MAX(count_4xx), count_rest = MAX(count_rest)
+| EVAL percentage = ROUND(count_4xx / TO_DOUBLE(count_4xx + count_rest), 3)
+| RENAME percentage as `HTTP 4xx (%)`
+| DROP count_4xx, count_rest",
+          "indexPattern": "e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a",
+          "params": {
+            "_tend": "now",
+            "_tstart": "now-7d",
+          },
+        },
+      },
+      "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:01d8e435-91c0-484f-a11e-856747050b0a",
+    },
+    {
+      "binding": {
+        "chart": {
+          "columns": [
+            {
+              "colorScale": {
+                "mode": "text",
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#24c292",
+                    "tone": "neutral",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#aee8d2",
+                    "tone": "primary",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#fcd883",
+                    "tone": "warning",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#ffc9c2",
+                    "tone": "risk",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#f6726a",
+                    "tone": "danger",
+                  },
+                ],
+              },
+              "id": "Unique Visits (Last hour)",
+              "label": "Unique Visits (Last hour)",
+            },
+            {
+              "colorScale": {
+                "mode": "text",
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#24c292",
+                    "tone": "neutral",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#aee8d2",
+                    "tone": "primary",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#fcd883",
+                    "tone": "warning",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#ffc9c2",
+                    "tone": "risk",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#f6726a",
+                    "tone": "danger",
+                  },
+                ],
+              },
+              "id": "Unique Visits (Total)",
+              "label": "Unique Visits (Total)",
+            },
+            {
+              "format": {
+                "kind": "bytes",
+                "precision": 2,
+              },
+              "id": "Bytes(Total)",
+              "label": "Bytes(Total)",
+            },
+            {
+              "format": {
+                "kind": "bytes",
+                "precision": 2,
+              },
+              "id": "Bytes(Last hour)",
+              "label": "Bytes(Last hour)",
+            },
+            {
+              "id": "Type",
+              "label": "Type",
+            },
+          ],
+          "kind": "datatable",
+        },
+        "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:21bb0939-ee09-4021-8848-6552b3a6a788",
+        "specPath": [
+          "body",
+          0,
+          "items",
+          9,
+          "node",
+        ],
+      },
+      "dimensions": {},
+      "panelId": "21bb0939-ee09-4021-8848-6552b3a6a788",
+      "query": {
+        "chart": {
+          "columns": [
+            {
+              "colorScale": {
+                "mode": "text",
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#24c292",
+                    "tone": "neutral",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#aee8d2",
+                    "tone": "primary",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#fcd883",
+                    "tone": "warning",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#ffc9c2",
+                    "tone": "risk",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#f6726a",
+                    "tone": "danger",
+                  },
+                ],
+              },
+              "id": "Unique Visits (Last hour)",
+              "label": "Unique Visits (Last hour)",
+            },
+            {
+              "colorScale": {
+                "mode": "text",
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#24c292",
+                    "tone": "neutral",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#aee8d2",
+                    "tone": "primary",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#fcd883",
+                    "tone": "warning",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#ffc9c2",
+                    "tone": "risk",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#f6726a",
+                    "tone": "danger",
+                  },
+                ],
+              },
+              "id": "Unique Visits (Total)",
+              "label": "Unique Visits (Total)",
+            },
+            {
+              "format": {
+                "kind": "bytes",
+                "precision": 2,
+              },
+              "id": "Bytes(Total)",
+              "label": "Bytes(Total)",
+            },
+            {
+              "format": {
+                "kind": "bytes",
+                "precision": 2,
+              },
+              "id": "Bytes(Last hour)",
+              "label": "Bytes(Last hour)",
+            },
+            {
+              "id": "Type",
+              "label": "Type",
+            },
+          ],
+          "kind": "datatable",
+        },
+        "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:21bb0939-ee09-4021-8848-6552b3a6a788",
+        "label": "",
+        "query": {
+          "esql": "FROM kibana_sample_data_logs | WHERE `@timestamp` >= NOW() - 7 day AND `@timestamp` <= NOW() | SORT @timestamp
+| EVAL t = now()
+| EVAL buckets = CASE(timestamp <= t AND timestamp >= t - 1 hour, "Last hour", "Other")
+| STATS sum = SUM(bytes), count = COUNT_DISTINCT(clientip) by buckets, extension.keyword
+| EVAL sum_last_hour = CASE(buckets == "Last hour", sum), sum_rest = CASE(buckets == "Other", sum), count_last_hour = CASE(buckets == "Last hour", count), count_rest = CASE(buckets == "Other", count)
+| STATS sum_last_hour = MAX(sum_last_hour), sum_rest = MAX(sum_rest), count_last_hour = MAX(count_last_hour), count_rest = MAX(count_rest) by buckets, extension.keyword
+| EVAL total_bytes = TO_DOUBLE(COALESCE(sum_last_hour, 0::LONG) + COALESCE(sum_rest, 0::LONG))
+| EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))
+| KEEP count_last_hour, total_visits, total_bytes, sum_last_hour, extension.keyword
+| STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits), bytes_transform = SUM(total_bytes), bytes_transform_last_hour = SUM(sum_last_hour) BY extension.keyword
+| RENAME total_visits as `Unique Visits (Total)`, count_last_hour as `Unique Visits (Last hour)`, bytes_transform as `Bytes(Total)`, bytes_transform_last_hour as `Bytes(Last hour)`, extension.keyword as `Type`
+| SORT `Unique Visits (Total)` DESC",
+          "indexPattern": "e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a",
+          "params": {
+            "_tend": "now",
+            "_tstart": "now-7d",
+          },
+        },
+      },
+      "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:21bb0939-ee09-4021-8848-6552b3a6a788",
+    },
+    {
+      "binding": {
+        "chart": {
+          "kind": "xy",
+          "mode": "bar",
+          "series": [
+            {
+              "id": "percentage",
+              "label": "percentage",
+            },
+          ],
+          "stack": "stacked",
+          "stacked": true,
+          "xAxis": {
+            "id": "bytes",
+            "label": "bytes",
+          },
+          "yAxis": {
+            "id": "percentage",
+            "label": "percentage",
+          },
+        },
+        "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:cbca842c-b9fa-4523-9ce0-14e350866e33",
+        "specPath": [
+          "body",
+          0,
+          "items",
+          10,
+          "node",
+        ],
+      },
+      "dimensions": {
+        "bytes": {
+          "derived": true,
+          "field": "bytes",
+          "kind": "histogram",
+          "width": 100,
+        },
+      },
+      "panelId": "cbca842c-b9fa-4523-9ce0-14e350866e33",
+      "query": {
+        "chart": {
+          "kind": "xy",
+          "mode": "bar",
+          "series": [
+            {
+              "id": "percentage",
+              "label": "percentage",
+            },
+          ],
+          "stack": "stacked",
+          "stacked": true,
+          "xAxis": {
+            "id": "bytes",
+            "label": "bytes",
+          },
+          "yAxis": {
+            "id": "percentage",
+            "label": "percentage",
+          },
+        },
+        "format": {
+          "kind": "percent",
+          "precision": 1,
+        },
+        "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:cbca842c-b9fa-4523-9ce0-14e350866e33",
+        "label": "[Logs] Bytes distribution",
+        "query": {
+          "esql": "FROM kibana_sample_data_logs | WHERE `@timestamp` >= NOW() - 7 day AND `@timestamp` <= NOW() | INLINESTATS total_visits = COUNT()
+| STATS visits = COUNT() by bytes = bucket(bytes, 1000, 0, 100000), total_visits
+| EVAL percentage = (TO_DOUBLE(visits) / total_visits)
+| EVAL percentage = ROUND(percentage, 3)
+| DROP total_visits, visits",
+          "indexPattern": "e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a",
+          "params": {
+            "_tend": "now",
+            "_tstart": "now-7d",
+          },
+        },
+      },
+      "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:cbca842c-b9fa-4523-9ce0-14e350866e33",
+    },
+    {
+      "binding": {
+        "chart": {
+          "columns": [
+            {
+              "id": "Unique",
+              "label": "Unique",
+            },
+            {
+              "format": {
+                "kind": "bytes",
+                "precision": 0,
+              },
+              "id": "95th percentile of bytes",
+              "label": "95th percentile of bytes",
+            },
+            {
+              "format": {
+                "kind": "bytes",
+                "precision": 0,
+              },
+              "id": "Median of bytes",
+              "label": "Median of bytes",
+            },
+            {
+              "colorScale": {
+                "mode": "cell",
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#ffd2cc",
+                    "tone": "neutral",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#ffbbb3",
+                    "tone": "primary",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#fea39a",
+                    "tone": "warning",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#fb8b82",
+                    "tone": "risk",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#f6726a",
+                    "tone": "danger",
+                  },
+                ],
+              },
+              "format": {
+                "kind": "percent",
+                "precision": 1,
+              },
+              "id": "HTTP 5xx",
+              "label": "HTTP 5xx",
+            },
+            {
+              "colorScale": {
+                "mode": "cell",
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#ffd2cc",
+                    "tone": "neutral",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#ffbbb3",
+                    "tone": "primary",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#fea39a",
+                    "tone": "warning",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#fb8b82",
+                    "tone": "risk",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#f6726a",
+                    "tone": "danger",
+                  },
+                ],
+              },
+              "format": {
+                "kind": "percent",
+                "precision": 1,
+              },
+              "id": "HTTP 4xx",
+              "label": "HTTP 4xx",
+            },
+            {
+              "id": "url.keyword",
+              "label": "url.keyword",
+            },
+            {
+              "id": "Visits",
+              "label": "Visits",
+            },
+          ],
+          "kind": "datatable",
+          "sort": {
+            "column": "HTTP 5xx",
+            "direction": "desc",
+          },
+        },
+        "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:1d5f0b3f-d9d2-4b26-997b-83bc5ca3090b",
+        "specPath": [
+          "body",
+          0,
+          "items",
+          11,
+          "node",
+        ],
+      },
+      "dimensions": {},
+      "panelId": "1d5f0b3f-d9d2-4b26-997b-83bc5ca3090b",
+      "query": {
+        "chart": {
+          "columns": [
+            {
+              "id": "Unique",
+              "label": "Unique",
+            },
+            {
+              "format": {
+                "kind": "bytes",
+                "precision": 0,
+              },
+              "id": "95th percentile of bytes",
+              "label": "95th percentile of bytes",
+            },
+            {
+              "format": {
+                "kind": "bytes",
+                "precision": 0,
+              },
+              "id": "Median of bytes",
+              "label": "Median of bytes",
+            },
+            {
+              "colorScale": {
+                "mode": "cell",
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#ffd2cc",
+                    "tone": "neutral",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#ffbbb3",
+                    "tone": "primary",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#fea39a",
+                    "tone": "warning",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#fb8b82",
+                    "tone": "risk",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#f6726a",
+                    "tone": "danger",
+                  },
+                ],
+              },
+              "format": {
+                "kind": "percent",
+                "precision": 1,
+              },
+              "id": "HTTP 5xx",
+              "label": "HTTP 5xx",
+            },
+            {
+              "colorScale": {
+                "mode": "cell",
+                "stops": [
+                  {
+                    "at": 0,
+                    "color": "#ffd2cc",
+                    "tone": "neutral",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#ffbbb3",
+                    "tone": "primary",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#fea39a",
+                    "tone": "warning",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#fb8b82",
+                    "tone": "risk",
+                  },
+                  {
+                    "at": 1,
+                    "color": "#f6726a",
+                    "tone": "danger",
+                  },
+                ],
+              },
+              "format": {
+                "kind": "percent",
+                "precision": 1,
+              },
+              "id": "HTTP 4xx",
+              "label": "HTTP 4xx",
+            },
+            {
+              "id": "url.keyword",
+              "label": "url.keyword",
+            },
+            {
+              "id": "Visits",
+              "label": "Visits",
+            },
+          ],
+          "kind": "datatable",
+          "sort": {
+            "column": "HTTP 5xx",
+            "direction": "desc",
+          },
+        },
+        "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:1d5f0b3f-d9d2-4b26-997b-83bc5ca3090b",
+        "label": "[Logs] Errors by host",
+        "query": {
+          "esql": "FROM kibana_sample_data_logs | WHERE `@timestamp` >= NOW() - 7 day AND `@timestamp` <= NOW() | KEEP bytes, clientip, url.keyword, response.keyword
+| EVAL type = CASE(TO_INTEGER(response.keyword) >= 400 and TO_INTEGER(response.keyword) < 500, "4xx", TO_INTEGER(response.keyword) >= 500, "5xx", "Other")
+| STATS Visits = COUNT(), Unique = COUNT_DISTINCT(clientip), p95 = percentile(bytes, 95), median = median(bytes) by type, url.keyword
+| EVAL count_4xx = CASE(type == "4xx", Visits), count_5xx = CASE(type == "5xx", Visits), count_rest =  CASE(type == "Other", Visits)
+| STATS count_4xx = SUM(count_4xx), count_5xx  = SUM(count_5xx), count_rest = SUM(count_rest), Unique = SUM(Unique),`95th percentile of bytes` = MAX(p95), `Median of bytes` = MAX(median), Visits = SUM(Visits) BY url.keyword
+| EVAL count_4xx = COALESCE(count_4xx, 0::LONG), count_5xx = COALESCE(count_5xx, 0::LONG), count_rest = COALESCE(count_rest, 0::LONG)
+| EVAL total_records = TO_DOUBLE(count_4xx + count_5xx + count_rest)
+| EVAL percentage_4xx = count_4xx / total_records, percentage_5xx = count_5xx / total_records
+| EVAL percentage_4xx = ROUND(percentage_4xx, 3)
+| EVAL percentage_5xx = ROUND(percentage_5xx, 3)
+| DROP count_4xx, count_rest, total_records
+| SORT percentage_5xx DESC
+| RENAME percentage_4xx as `HTTP 4xx`, percentage_5xx as `HTTP 5xx`",
+          "indexPattern": "e3465e67bdeced2befff9f9dca7ecf9c48504cad68a10efd881f4c7dd5ade28a",
+          "params": {
+            "_tend": "now",
+            "_tstart": "now-7d",
+          },
+        },
+      },
+      "queryId": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b:panel:1d5f0b3f-d9d2-4b26-997b-83bc5ca3090b",
+    },
+  ],
+  "spec": {
+    "body": [
+      {
+        "columns": 48,
+        "items": [
+          {
+            "h": 18,
+            "node": {
+              "caption": "[Logs] Visitors Map",
+              "height": 336,
+              "mode": "vega",
+              "spec": {
+                "$schema": "https://vega.github.io/schema/vega/v5.json",
+                "config": {
+                  "kibana": {
+                    "latitude": 30,
+                    "longitude": -120,
+                    "type": "map",
+                    "zoom": 3,
+                  },
+                },
+                "data": [
+                  {
+                    "format": {
+                      "property": "aggregations.gridSplit.buckets",
+                    },
+                    "name": "table",
+                    "transform": [
+                      {
+                        "fields": [
+                          "gridCentroid.location.lon",
+                          "gridCentroid.location.lat",
+                        ],
+                        "projection": "projection",
+                        "type": "geopoint",
+                      },
+                    ],
+                    "url": {
+                      "%context%": true,
+                      "%timefield%": "timestamp",
+                      "body": {
+                        "aggs": {
+                          "gridSplit": {
+                            "aggs": {
+                              "gridCentroid": {
+                                "geo_centroid": {
+                                  "field": "geo.coordinates",
+                                },
+                              },
+                            },
+                            "geotile_grid": {
+                              "field": "geo.coordinates",
+                              "precision": 5,
+                              "size": 10000,
+                            },
+                          },
+                        },
+                        "size": 0,
+                      },
+                      "index": "kibana_sample_data_logs",
+                    },
+                  },
+                ],
+                "marks": [
+                  {
+                    "encode": {
+                      "update": {
+                        "fill": {
+                          "field": "doc_count",
+                          "scale": "bubbleColor",
+                        },
+                        "size": {
+                          "field": "doc_count",
+                          "scale": "gridSize",
+                        },
+                        "tooltip": {
+                          "signal": "{flights: datum.doc_count}",
+                        },
+                        "xc": {
+                          "signal": "datum.x",
+                        },
+                        "yc": {
+                          "signal": "datum.y",
+                        },
+                      },
+                    },
+                    "from": {
+                      "data": "table",
+                    },
+                    "name": "gridMarker",
+                    "type": "symbol",
+                  },
+                ],
+                "scales": [
+                  {
+                    "domain": {
+                      "data": "table",
+                      "field": "doc_count",
+                    },
+                    "name": "gridSize",
+                    "range": [
+                      50,
+                      1000,
+                    ],
+                    "type": "linear",
+                  },
+                  {
+                    "domain": {
+                      "data": "table",
+                      "field": "doc_count",
+                    },
+                    "name": "bubbleColor",
+                    "range": [
+                      "rgb(249, 234, 197)",
+                      "rgb(243, 200, 154)",
+                      "rgb(235, 166, 114)",
+                      "rgb(231, 102, 76)",
+                    ],
+                    "type": "linear",
+                  },
+                ],
+                "title": "[Logs] Visitors Map",
+              },
+              "type": "vega",
+              "width": 600,
+            },
+            "w": 24,
+            "x": 0,
+            "y": 14,
+          },
+          {
+            "h": 7,
+            "node": {
+              "body": "Loading metric...",
+              "title": "",
+              "tone": "neutral",
+              "type": "callout",
+            },
+            "w": 12,
+            "x": 36,
+            "y": 0,
+          },
+          {
+            "h": 33,
+            "node": {
+              "caption": "[Logs] Machine OS and Destination Sankey Chart",
+              "height": 636,
+              "mode": "vega",
+              "spec": {
+                "$schema": "https://vega.github.io/schema/vega/v5.json",
+                "axes": [
+                  {
+                    "encode": {
+                      "labels": {
+                        "update": {
+                          "text": {
+                            "field": "value",
+                            "scale": "stackNames",
+                          },
+                        },
+                      },
+                    },
+                    "orient": "bottom",
+                    "scale": "x",
+                  },
+                  {
+                    "orient": "left",
+                    "scale": "y",
+                  },
+                ],
+                "data": [
+                  {
+                    "format": {
+                      "property": "aggregations.table.buckets",
+                    },
+                    "name": "rawData",
+                    "transform": [
+                      {
+                        "as": "stk1",
+                        "expr": "datum.key.stk1",
+                        "type": "formula",
+                      },
+                      {
+                        "as": "stk2",
+                        "expr": "datum.key.stk2",
+                        "type": "formula",
+                      },
+                      {
+                        "as": "size",
+                        "expr": "datum.doc_count",
+                        "type": "formula",
+                      },
+                    ],
+                    "url": {
+                      "%context%": true,
+                      "%timefield%": "timestamp",
+                      "body": {
+                        "aggs": {
+                          "table": {
+                            "composite": {
+                              "size": 10000,
+                              "sources": [
+                                {
+                                  "stk1": {
+                                    "terms": {
+                                      "field": "machine.os.keyword",
+                                    },
+                                  },
+                                },
+                                {
+                                  "stk2": {
+                                    "terms": {
+                                      "field": "geo.dest",
+                                    },
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                        "size": 0,
+                      },
+                      "index": "kibana_sample_data_logs",
+                    },
+                  },
+                  {
+                    "name": "nodes",
+                    "source": "rawData",
+                    "transform": [
+                      {
+                        "expr": "!groupSelector || groupSelector.stk1 == datum.stk1 || groupSelector.stk2 == datum.stk2",
+                        "type": "filter",
+                      },
+                      {
+                        "as": "key",
+                        "expr": "datum.stk1+datum.stk2",
+                        "type": "formula",
+                      },
+                      {
+                        "as": [
+                          "stack",
+                          "grpId",
+                        ],
+                        "fields": [
+                          "stk1",
+                          "stk2",
+                        ],
+                        "type": "fold",
+                      },
+                      {
+                        "as": "sortField",
+                        "expr": "datum.stack == 'stk1' ? datum.stk1+datum.stk2 : datum.stk2+datum.stk1",
+                        "type": "formula",
+                      },
+                      {
+                        "field": "size",
+                        "groupby": [
+                          "stack",
+                        ],
+                        "sort": {
+                          "field": "sortField",
+                          "order": "descending",
+                        },
+                        "type": "stack",
+                      },
+                      {
+                        "as": "yc",
+                        "expr": "(datum.y0+datum.y1)/2",
+                        "type": "formula",
+                      },
+                    ],
+                  },
+                  {
+                    "name": "groups",
+                    "source": "nodes",
+                    "transform": [
+                      {
+                        "as": [
+                          "total",
+                        ],
+                        "fields": [
+                          "size",
+                        ],
+                        "groupby": [
+                          "stack",
+                          "grpId",
+                        ],
+                        "ops": [
+                          "sum",
+                        ],
+                        "type": "aggregate",
+                      },
+                      {
+                        "field": "total",
+                        "groupby": [
+                          "stack",
+                        ],
+                        "sort": {
+                          "field": "grpId",
+                          "order": "descending",
+                        },
+                        "type": "stack",
+                      },
+                      {
+                        "as": "scaledY0",
+                        "expr": "scale('y', datum.y0)",
+                        "type": "formula",
+                      },
+                      {
+                        "as": "scaledY1",
+                        "expr": "scale('y', datum.y1)",
+                        "type": "formula",
+                      },
+                      {
+                        "as": "rightLabel",
+                        "expr": "datum.stack == 'stk1'",
+                        "type": "formula",
+                      },
+                      {
+                        "as": "percentage",
+                        "expr": "datum.total/domain('y')[1]",
+                        "type": "formula",
+                      },
+                    ],
+                  },
+                  {
+                    "name": "destinationNodes",
+                    "source": "nodes",
+                    "transform": [
+                      {
+                        "expr": "datum.stack == 'stk2'",
+                        "type": "filter",
+                      },
+                    ],
+                  },
+                  {
+                    "name": "edges",
+                    "source": "nodes",
+                    "transform": [
+                      {
+                        "expr": "datum.stack == 'stk1'",
+                        "type": "filter",
+                      },
+                      {
+                        "as": [
+                          "target",
+                        ],
+                        "fields": [
+                          "key",
+                        ],
+                        "from": "destinationNodes",
+                        "key": "key",
+                        "type": "lookup",
+                      },
+                      {
+                        "orient": "horizontal",
+                        "shape": "diagonal",
+                        "sourceX": {
+                          "expr": "scale('x', 'stk1') + bandwidth('x')",
+                        },
+                        "sourceY": {
+                          "expr": "scale('y', datum.yc)",
+                        },
+                        "targetX": {
+                          "expr": "scale('x', 'stk2')",
+                        },
+                        "targetY": {
+                          "expr": "scale('y', datum.target.yc)",
+                        },
+                        "type": "linkpath",
+                      },
+                      {
+                        "as": "strokeWidth",
+                        "expr": "range('y')[0]-scale('y', datum.size)",
+                        "type": "formula",
+                      },
+                      {
+                        "as": "percentage",
+                        "expr": "datum.size/domain('y')[1]",
+                        "type": "formula",
+                      },
+                    ],
+                  },
+                ],
+                "marks": [
+                  {
+                    "clip": true,
+                    "encode": {
+                      "hover": {
+                        "strokeOpacity": {
+                          "value": 1,
+                        },
+                      },
+                      "update": {
+                        "path": {
+                          "field": "path",
+                        },
+                        "stroke": [
+                          {
+                            "field": "stk2",
+                            "scale": "color",
+                            "test": "groupSelector && groupSelector.stack=='stk1'",
+                          },
+                          {
+                            "field": "stk1",
+                            "scale": "color",
+                          },
+                        ],
+                        "strokeOpacity": {
+                          "signal": "!groupSelector && (groupHover.stk1 == datum.stk1 || groupHover.stk2 == datum.stk2) ? 0.9 : 0.3",
+                        },
+                        "strokeWidth": {
+                          "field": "strokeWidth",
+                        },
+                        "tooltip": {
+                          "signal": "datum.stk1 + ' → ' + datum.stk2 + '	' + format(datum.size, ',.0f') + '   (' + format(datum.percentage, '.1%') + ')'",
+                        },
+                        "zindex": {
+                          "signal": "!groupSelector && (groupHover.stk1 == datum.stk1 || groupHover.stk2 == datum.stk2) ? 1 : 0",
+                        },
+                      },
+                    },
+                    "from": {
+                      "data": "edges",
+                    },
+                    "name": "edgeMark",
+                    "type": "path",
+                  },
+                  {
+                    "encode": {
+                      "enter": {
+                        "fill": {
+                          "field": "grpId",
+                          "scale": "color",
+                        },
+                        "width": {
+                          "band": 1,
+                          "scale": "x",
+                        },
+                      },
+                      "hover": {
+                        "fillOpacity": {
+                          "value": 1,
+                        },
+                      },
+                      "update": {
+                        "fillOpacity": {
+                          "value": 0.6,
+                        },
+                        "tooltip": {
+                          "signal": "datum.grpId + '   ' + format(datum.total, ',.0f') + '   (' + format(datum.percentage, '.1%') + ')'",
+                        },
+                        "x": {
+                          "field": "stack",
+                          "scale": "x",
+                        },
+                        "y": {
+                          "field": "scaledY0",
+                        },
+                        "y2": {
+                          "field": "scaledY1",
+                        },
+                      },
+                    },
+                    "from": {
+                      "data": "groups",
+                    },
+                    "name": "groupMark",
+                    "type": "rect",
+                  },
+                  {
+                    "encode": {
+                      "update": {
+                        "align": {
+                          "signal": "datum.rightLabel ? 'left' : 'right'",
+                        },
+                        "baseline": {
+                          "value": "middle",
+                        },
+                        "fontWeight": {
+                          "value": "bold",
+                        },
+                        "text": {
+                          "signal": "abs(datum.scaledY0-datum.scaledY1) > 13 ? datum.grpId : ''",
+                        },
+                        "x": {
+                          "signal": "scale('x', datum.stack) + (datum.rightLabel ? bandwidth('x') + 8 : -8)",
+                        },
+                        "yc": {
+                          "signal": "(datum.scaledY0 + datum.scaledY1)/2",
+                        },
+                      },
+                    },
+                    "from": {
+                      "data": "groups",
+                    },
+                    "interactive": false,
+                    "type": "text",
+                  },
+                  {
+                    "data": [
+                      {
+                        "name": "dataForShowAll",
+                        "transform": [
+                          {
+                            "expr": "groupSelector",
+                            "type": "filter",
+                          },
+                        ],
+                        "values": [
+                          {},
+                        ],
+                      },
+                    ],
+                    "encode": {
+                      "enter": {
+                        "height": {
+                          "value": 30,
+                        },
+                        "width": {
+                          "value": 80,
+                        },
+                        "xc": {
+                          "signal": "width/2",
+                        },
+                        "y": {
+                          "value": 30,
+                        },
+                      },
+                    },
+                    "marks": [
+                      {
+                        "encode": {
+                          "enter": {
+                            "cornerRadius": {
+                              "value": 6,
+                            },
+                            "fill": {
+                              "value": "#F5F7FA",
+                            },
+                            "height": {
+                              "field": {
+                                "group": "height",
+                              },
+                            },
+                            "stroke": {
+                              "value": "#c1c1c1",
+                            },
+                            "strokeWidth": {
+                              "value": 2,
+                            },
+                            "width": {
+                              "field": {
+                                "group": "width",
+                              },
+                            },
+                          },
+                          "hover": {
+                            "opacity": {
+                              "value": 0.7,
+                            },
+                          },
+                          "update": {
+                            "opacity": {
+                              "value": 1,
+                            },
+                          },
+                        },
+                        "from": {
+                          "data": "dataForShowAll",
+                        },
+                        "marks": [
+                          {
+                            "encode": {
+                              "enter": {
+                                "align": {
+                                  "value": "center",
+                                },
+                                "baseline": {
+                                  "value": "middle",
+                                },
+                                "fontWeight": {
+                                  "value": "bold",
+                                },
+                                "text": {
+                                  "value": "Show All",
+                                },
+                                "xc": {
+                                  "field": {
+                                    "group": "width",
+                                  },
+                                  "mult": 0.5,
+                                },
+                                "yc": {
+                                  "field": {
+                                    "group": "height",
+                                  },
+                                  "mult": 0.5,
+                                  "offset": 2,
+                                },
+                              },
+                            },
+                            "interactive": false,
+                            "type": "text",
+                          },
+                        ],
+                        "name": "groupReset",
+                        "type": "group",
+                      },
+                    ],
+                    "type": "group",
+                  },
+                ],
+                "scales": [
+                  {
+                    "domain": [
+                      "stk1",
+                      "stk2",
+                    ],
+                    "name": "x",
+                    "paddingInner": 0.95,
+                    "paddingOuter": 0.05,
+                    "range": "width",
+                    "type": "band",
+                  },
+                  {
+                    "domain": {
+                      "data": "nodes",
+                      "field": "y1",
+                    },
+                    "name": "y",
+                    "range": "height",
+                    "type": "linear",
+                  },
+                  {
+                    "domain": {
+                      "data": "rawData",
+                      "field": "stk1",
+                    },
+                    "name": "color",
+                    "range": "category",
+                    "type": "ordinal",
+                  },
+                  {
+                    "domain": [
+                      "stk1",
+                      "stk2",
+                    ],
+                    "name": "stackNames",
+                    "range": [
+                      "Source",
+                      "Destination",
+                    ],
+                    "type": "ordinal",
+                  },
+                ],
+                "signals": [
+                  {
+                    "name": "groupHover",
+                    "on": [
+                      {
+                        "events": "@groupMark:mouseover",
+                        "update": "{stk1:datum.stack=='stk1' && datum.grpId, stk2:datum.stack=='stk2' && datum.grpId}",
+                      },
+                      {
+                        "events": "mouseout",
+                        "update": "{}",
+                      },
+                    ],
+                    "value": {},
+                  },
+                  {
+                    "name": "groupSelector",
+                    "on": [
+                      {
+                        "events": "@groupMark:click!",
+                        "update": "{stack:datum.stack, stk1:datum.stack=='stk1' && datum.grpId, stk2:datum.stack=='stk2' && datum.grpId}",
+                      },
+                      {
+                        "events": [
+                          {
+                            "markname": "groupReset",
+                            "type": "click",
+                          },
+                          {
+                            "type": "dblclick",
+                          },
+                        ],
+                        "update": "false",
+                      },
+                    ],
+                    "value": false,
+                  },
+                ],
+                "title": "[Logs] Machine OS and Destination Sankey Chart",
+              },
+              "type": "vega",
+              "width": 600,
+            },
+            "w": 24,
+            "x": 24,
+            "y": 14,
+          },
+          {
+            "h": 7,
+            "node": {
+              "body": "Loading time series chart...",
+              "title": "[Logs] Response Codes Over Time + Annotations",
+              "tone": "neutral",
+              "type": "callout",
+            },
+            "w": 24,
+            "x": 0,
+            "y": 7,
+          },
+          {
+            "h": 7,
+            "node": {
+              "body": "## Sample Logs Data
+This dashboard contains sample data for you to play with. You can view it, search it, and interact with the visualizations. For more information about Kibana, check our [docs](https://www.elastic.co/guide/en/kibana/current/index.html).",
+              "format": "markdown",
+              "title": "[Logs] Markdown Instructions",
+              "type": "text",
+            },
+            "w": 24,
+            "x": 0,
+            "y": 0,
+          },
+          {
+            "h": 7,
+            "node": {
+              "body": "Loading metric...",
+              "title": "",
+              "tone": "neutral",
+              "type": "callout",
+            },
+            "w": 12,
+            "x": 24,
+            "y": 0,
+          },
+          {
+            "h": 7,
+            "node": {
+              "body": "Loading metric...",
+              "title": "",
+              "tone": "neutral",
+              "type": "callout",
+            },
+            "w": 12,
+            "x": 36,
+            "y": 7,
+          },
+          {
+            "h": 7,
+            "node": {
+              "body": "Loading metric...",
+              "title": "",
+              "tone": "neutral",
+              "type": "callout",
+            },
+            "w": 12,
+            "x": 24,
+            "y": 7,
+          },
+          {
+            "h": 15,
+            "node": {
+              "caption": "[Logs] Unique Destination Heatmap",
+              "height": 276,
+              "mode": "vega-lite",
+              "spec": {
+                "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
+                "data": {
+                  "format": {
+                    "property": "aggregations.countries.buckets",
+                  },
+                  "url": {
+                    "%context%": true,
+                    "%timefield%": "@timestamp",
+                    "body": {
+                      "aggs": {
+                        "countries": {
+                          "aggs": {
+                            "hours": {
+                              "aggs": {
+                                "unique": {
+                                  "cardinality": {
+                                    "field": "clientip",
+                                  },
+                                },
+                              },
+                              "histogram": {
+                                "field": "hour_of_day",
+                                "interval": 1,
+                              },
+                            },
+                          },
+                          "terms": {
+                            "field": "geo.dest",
+                            "size": 25,
+                          },
+                        },
+                      },
+                      "size": 0,
+                    },
+                    "index": "kibana_sample_data_logs",
+                  },
+                },
+                "encoding": {
+                  "color": {
+                    "axis": {
+                      "title": false,
+                    },
+                    "field": "buckets.unique.value",
+                    "scale": {
+                      "scheme": "blues",
+                    },
+                    "type": "quantitative",
+                  },
+                  "x": {
+                    "axis": {
+                      "labelAngle": 0,
+                      "title": false,
+                    },
+                    "field": "buckets.key",
+                    "scale": {
+                      "domain": {
+                        "expr": "sequence(0, 24)",
+                      },
+                    },
+                    "type": "nominal",
+                  },
+                  "y": {
+                    "axis": {
+                      "title": false,
+                    },
+                    "field": "key",
+                    "sort": {
+                      "field": "-buckets.unique.value",
+                    },
+                    "type": "nominal",
+                  },
+                },
+                "mark": {
+                  "tooltip": {
+                    "expr": "{"Unique Visitors": datum.buckets.unique.value,"geo.src": datum.key,"Hour": datum.buckets.key}",
+                  },
+                  "type": "rect",
+                },
+                "title": "[Logs] Unique Destination Heatmap",
+                "transform": [
+                  {
+                    "as": [
+                      "buckets",
+                    ],
+                    "flatten": [
+                      "hours.buckets",
+                    ],
+                  },
+                  {
+                    "filter": "datum.buckets.unique.value > 0",
+                  },
+                ],
+              },
+              "type": "vega",
+              "width": 600,
+            },
+            "w": 24,
+            "x": 0,
+            "y": 32,
+          },
+          {
+            "h": 13,
+            "node": {
+              "body": "Loading table...",
+              "title": "",
+              "tone": "neutral",
+              "type": "callout",
+            },
+            "w": 24,
+            "x": 0,
+            "y": 47,
+          },
+          {
+            "h": 13,
+            "node": {
+              "body": "Loading time series chart...",
+              "title": "[Logs] Bytes distribution",
+              "tone": "neutral",
+              "type": "callout",
+            },
+            "w": 24,
+            "x": 24,
+            "y": 47,
+          },
+          {
+            "h": 19,
+            "node": {
+              "body": "Loading table...",
+              "title": "[Logs] Errors by host",
+              "tone": "neutral",
+              "type": "callout",
+            },
+            "w": 48,
+            "x": 0,
+            "y": 60,
+          },
+        ],
+        "mode": "grid",
+        "rowHeight": 20,
+        "type": "dashboardGrid",
+      },
+    ],
+    "meta": {
+      "source": "Kibana saved object dashboard/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+    },
+    "subtitle": "Analyze mock web traffic log data for Elastic's website",
+    "title": "[Logs] Web Traffic",
+    "type": "view",
+  },
+  "title": "[Logs] Web Traffic",
+  "vegaPanels": [
+    {
+      "panelId": "4",
+      "sources": [
+        {
+          "path": [
+            "data",
+            0,
+          ],
+          "runtimeMappings": {
+            "hour_of_day": {
+              "script": {
+                "source": "emit(doc['timestamp'].value.getHour());",
+              },
+              "type": "long",
+            },
+          },
+          "url": {
+            "%context%": true,
+            "%timefield%": "timestamp",
+            "body": {
+              "aggs": {
+                "gridSplit": {
+                  "aggs": {
+                    "gridCentroid": {
+                      "geo_centroid": {
+                        "field": "geo.coordinates",
+                      },
+                    },
+                  },
+                  "geotile_grid": {
+                    "field": "geo.coordinates",
+                    "precision": 5,
+                    "size": 10000,
+                  },
+                },
+              },
+              "size": 0,
+            },
+            "index": "kibana_sample_data_logs",
+          },
+        },
+      ],
+      "specPath": [
+        "body",
+        0,
+        "items",
+        0,
+        "node",
+      ],
+    },
+    {
+      "panelId": "14",
+      "sources": [
+        {
+          "path": [
+            "data",
+            0,
+          ],
+          "runtimeMappings": {
+            "hour_of_day": {
+              "script": {
+                "source": "emit(doc['timestamp'].value.getHour());",
+              },
+              "type": "long",
+            },
+          },
+          "url": {
+            "%context%": true,
+            "%timefield%": "timestamp",
+            "body": {
+              "aggs": {
+                "table": {
+                  "composite": {
+                    "size": 10000,
+                    "sources": [
+                      {
+                        "stk1": {
+                          "terms": {
+                            "field": "machine.os.keyword",
+                          },
+                        },
+                      },
+                      {
+                        "stk2": {
+                          "terms": {
+                            "field": "geo.dest",
+                          },
+                        },
+                      },
+                    ],
+                  },
+                },
+              },
+              "size": 0,
+            },
+            "index": "kibana_sample_data_logs",
+          },
+        },
+      ],
+      "specPath": [
+        "body",
+        0,
+        "items",
+        2,
+        "node",
+      ],
+    },
+    {
+      "panelId": "8e59c7cf-6e42-4343-a113-c4a255fcf2ce",
+      "sources": [
+        {
+          "path": [
+            "data",
+          ],
+          "runtimeMappings": {
+            "hour_of_day": {
+              "script": {
+                "source": "emit(doc['timestamp'].value.getHour());",
+              },
+              "type": "long",
+            },
+          },
+          "url": {
+            "%context%": true,
+            "%timefield%": "@timestamp",
+            "body": {
+              "aggs": {
+                "countries": {
+                  "aggs": {
+                    "hours": {
+                      "aggs": {
+                        "unique": {
+                          "cardinality": {
+                            "field": "clientip",
+                          },
+                        },
+                      },
+                      "histogram": {
+                        "field": "hour_of_day",
+                        "interval": 1,
+                      },
+                    },
+                  },
+                  "terms": {
+                    "field": "geo.dest",
+                    "size": 25,
+                  },
+                },
+              },
+              "size": 0,
+            },
+            "index": "kibana_sample_data_logs",
+          },
+        },
+      ],
+      "specPath": [
+        "body",
+        0,
+        "items",
+        8,
+        "node",
+      ],
+    },
+  ],
+}

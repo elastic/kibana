@@ -1,0 +1,67 @@
+{
+  "id": "lens-gauge-cpu-headroom",
+  "type": "lens",
+  "attributes": {
+    "title": "CPU headroom",
+    "visualizationType": "lnsGauge",
+    "state": {
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "layer-1": {
+              "indexPatternId": "metrics-*",
+              "columns": {
+                "col-cpu": {
+                  "operationType": "average",
+                  "sourceField": "system.cpu.total.norm.pct",
+                  "isBucketed": false,
+                  "dataType": "number",
+                  "label": "Avg CPU"
+                }
+              },
+              "columnOrder": ["col-cpu"]
+            }
+          }
+        }
+      },
+      "visualization": {
+        "layerId": "layer-1",
+        "metricAccessor": "col-cpu",
+        "shape": "horizontalBullet",
+        "min": 0,
+        "max": 1,
+        "goal": 0.8,
+        "palette": {
+          "params": {
+            "stops": [
+              {
+                "stop": 0.5,
+                "color": "#36a2a2"
+              },
+              {
+                "stop": 0.7,
+                "color": "#e2bd3a"
+              },
+              {
+                "stop": 0.9,
+                "color": "#cc3d4c"
+              }
+            ]
+          }
+        }
+      },
+      "filters": [],
+      "query": {
+        "query": "",
+        "language": "kuery"
+      }
+    }
+  },
+  "references": [
+    {
+      "id": "metrics-data-view",
+      "name": "indexpattern-datasource-layer-layer-1",
+      "type": "index-pattern"
+    }
+  ]
+}
