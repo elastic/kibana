@@ -42,7 +42,6 @@ export interface ResolvedConnectorsForFeature {
  * @param getForFeature  Resolves feature-specific endpoints (without the global default).
  * @param getConnectorList  Returns the full connector catalog (not called when `opts.onlyReturnConfigured` is true).
  * @param getConnectorById  Fetches a single connector by ID (used for the global default).
- * @param getDeclaredParameters  Returns the parameters the feature chain declares for an endpoint ID (used for the prepended global default).
  * @param uiSettingsClient  Scoped UI-settings client to read the default connector setting.
  * @param featureId  The feature to resolve connectors for.
  * @param opts  Optional resolution options (see {@link GetForFeatureOptions}).
@@ -52,7 +51,6 @@ export const resolveModelsForFeature = async ({
   getForFeature,
   getConnectorList,
   getConnectorById,
-  getDeclaredParameters,
   uiSettingsClient,
   featureId,
   ignoreGlobalDefault = false,
@@ -62,7 +60,6 @@ export const resolveModelsForFeature = async ({
   getForFeature: (featureId: string) => Promise<ResolvedInferenceEndpoints>;
   getConnectorList: () => Promise<InferenceConnector[]>;
   getConnectorById: (id: string) => Promise<InferenceConnector>;
-  getDeclaredParameters: (endpointId: string) => ApiInferenceConnector['parameters'];
   uiSettingsClient: IUiSettingsClient;
   featureId: string;
   ignoreGlobalDefault?: boolean;
@@ -133,7 +130,9 @@ export const resolveModelsForFeature = async ({
   ) {
     const defaultConnector = await fetchConnectorById(defaultConnectorId);
     if (defaultConnector) {
-      const parameters = getDeclaredParameters(defaultConnectorId);
+      const parameters = featureResult.endpoints.find(
+        ({ connectorId }) => connectorId === defaultConnectorId
+      )?.parameters;
       connectors = [
         parameters ? { ...defaultConnector, parameters } : defaultConnector,
         ...merged.filter((c) => c.connectorId !== defaultConnectorId),

@@ -14,7 +14,6 @@ import type { ResolvedInferenceEndpoints } from '../types';
 import type { InferenceFeatureRegistry } from '../inference_feature_registry';
 import { errorHandler } from '../utils/error_handler';
 import { resolveModelsForFeature } from '../lib/resolve_models_for_feature';
-import { getDeclaredParameters } from '../inference_endpoints';
 
 export const defineInferenceConnectorsRoute = ({
   logger,
@@ -70,8 +69,6 @@ export const defineInferenceConnectorsRoute = ({
           getForFeature: (fId) => getForFeature(fId, request),
           getConnectorList: () => getConnectorList(request),
           getConnectorById: (id) => getConnectorById(id, request),
-          getDeclaredParameters: (endpointId) =>
-            getDeclaredParameters(featureRegistry, featureId, endpointId),
           uiSettingsClient,
           featureId,
           ignoreGlobalDefault: feature?.ignoreGlobalDefault ?? false,

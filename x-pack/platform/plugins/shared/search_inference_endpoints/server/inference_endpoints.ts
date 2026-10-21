@@ -94,50 +94,6 @@ interface ResolvedFeatureEndpoints {
 
 type SoFeatureSetting = InferenceSettingsAttributes['features'][number];
 
-const getFeatureChain = (
-  registry: InferenceFeatureRegistry,
-  featureId: string
-): RegisteredInferenceFeature[] => {
-  const chain: RegisteredInferenceFeature[] = [];
-  let feature = registry.get(featureId);
-  while (feature && !chain.includes(feature)) {
-    chain.push(feature);
-    feature = feature.parentFeatureId ? registry.get(feature.parentFeatureId) : undefined;
-  }
-  return chain;
-};
-
-const findDeclaredEndpoint = (
-  registry: InferenceFeatureRegistry,
-  featureId: string,
-  endpointId: string
-): RecommendedEndpoint => {
-  const declared = getFeatureChain(registry, featureId)
-    .flatMap(({ recommendedEndpoints }) => recommendedEndpoints)
-    .find(({ id }) => id === endpointId);
-  return declared ?? { id: endpointId };
-};
-
-const withDeclaredParameters = (
-  registry: InferenceFeatureRegistry,
-  featureId: string,
-  endpoints: Array<{ id: string }>
-): RecommendedEndpoint[] =>
-  endpoints.map(({ id }) => findDeclaredEndpoint(registry, featureId, id));
-
-/**
- * Returns a copy of the parameters the feature chain declares for an endpoint id, regardless of
- * whether that endpoint is in the feature's resolved list.
- */
-export const getDeclaredParameters = (
-  registry: InferenceFeatureRegistry,
-  featureId: string,
-  endpointId: string
-): RecommendedEndpoint['parameters'] => {
-  const { parameters } = findDeclaredEndpoint(registry, featureId, endpointId);
-  return parameters && structuredClone(parameters);
-};
-
 /**
  * Pure resolution logic that walks the fallback chain for a feature using
  * pre-fetched data. Exported so the settings route can reuse it without
@@ -149,9 +105,8 @@ export const getDeclaredParameters = (
  * 3. First non-empty recommendedEndpoints found in the chain
  * 4. Kibana default chat-completion endpoint
  *
- * Each endpoint carries the parameters of the nearest feature in the chain, starting from the
- * requested feature, that lists the same endpoint id. A plain id lists the endpoint without
- * parameters, so it drops any parameters a parent declares for that id.
+ * Endpoints carry the parameters declared in the first non-empty recommendedEndpoints list in
+ * the chain. Parameters from other features in the chain are never applied.
  */
 export const resolveFeatureEndpoints = (
   registry: InferenceFeatureRegistry,
@@ -160,8 +115,8 @@ export const resolveFeatureEndpoints = (
   logger: Logger,
   opts?: GetForFeatureOptions
 ): ResolvedFeatureEndpoints => {
-  let current = registry.get(featureId);
-  if (!current) {
+  const requested = registry.get(featureId);
+  if (!requested) {
     logger.warn(
       i18n.translate('xpack.searchInferenceEndpoints.endpoints.featureNotFound', {
         defaultMessage: 'Feature with id "{featureId}" is not registered.',
@@ -170,84 +125,59 @@ export const resolveFeatureEndpoints = (
     );
     return { endpoints: [], warnings: [], soEntryFound: false };
   }
-  let recEntry = current.recommendedEndpoints?.length
-    ? { featureId: current.featureId, recommendedEndpoints: current.recommendedEndpoints }
-    : undefined;
 
-  // Walk the fallback chain for the feature:
-  // 1. Check for an admin-configured SO override for the current feature
-  // 2. Follow the parentFeatureId link and repeat
-  // 3. Fall back to the feature's recommendedEndpoints
-  // The visited set prevents infinite loops from circular parent references.
-  const visited = new Set<string>();
-  let currentId = featureId;
-
-  const initialSoEntry = soFeaturesMap.get(currentId);
-  if (initialSoEntry && initialSoEntry.endpoints.length > 0) {
-    return {
-      endpoints: withDeclaredParameters(registry, featureId, initialSoEntry.endpoints),
-      warnings: [],
-      soEntryFound: true,
-    };
-  }
-  if (initialSoEntry && initialSoEntry.endpoints.length === 0) {
-    return { endpoints: [], warnings: [], soEntryFound: true };
+  // Collect the feature and its parents. A parent that is already in the chain marks a cycle.
+  const chain: RegisteredInferenceFeature[] = [];
+  let cyclicFeatureId: string | undefined;
+  let current: RegisteredInferenceFeature | undefined = requested;
+  while (current) {
+    chain.push(current);
+    const { parentFeatureId } = current;
+    if (!parentFeatureId) {
+      break;
+    }
+    if (chain.some((feature) => feature.featureId === parentFeatureId)) {
+      cyclicFeatureId = parentFeatureId;
+      break;
+    }
+    current = registry.get(parentFeatureId);
   }
 
-  visited.add(currentId);
-  if (current.parentFeatureId) {
-    currentId = current?.parentFeatureId;
+  const recommendedEndpoints = chain.find(
+    (feature) => feature.recommendedEndpoints.length > 0
+  )?.recommendedEndpoints;
+  const declaredEndpoints = new Map(
+    recommendedEndpoints?.map((endpoint) => [endpoint.id, endpoint])
+  );
 
-    while (true) {
-      if (visited.has(currentId)) {
-        return {
-          endpoints: [],
-          warnings: [
-            i18n.translate('xpack.searchInferenceEndpoints.endpoints.cyclicDependency', {
-              defaultMessage:
-                'Cyclic dependency detected in feature fallback chain: "{featureId}" references back to "{currentId}".',
-              values: { featureId, currentId },
-            }),
-          ],
-          soEntryFound: false,
-        };
-      }
-
-      visited.add(currentId);
-      current = registry.get(currentId);
-      if (!current) {
-        break;
-      }
-      if (!recEntry && current.recommendedEndpoints.length) {
-        recEntry = {
-          featureId: current.featureId,
-          recommendedEndpoints: current.recommendedEndpoints,
-        };
-      }
-
-      const soEntry = soFeaturesMap.get(currentId);
-      if (soEntry && soEntry.endpoints.length > 0) {
-        return {
-          endpoints: withDeclaredParameters(registry, featureId, soEntry.endpoints),
-          warnings: [],
-          soEntryFound: true,
-        };
-      }
-      if (soEntry && soEntry.endpoints.length === 0) {
-        return { endpoints: [], warnings: [], soEntryFound: true };
-      }
-
-      if (current.parentFeatureId) {
-        currentId = current.parentFeatureId;
-      } else {
-        break;
-      }
+  for (const feature of chain) {
+    const soEntry = soFeaturesMap.get(feature.featureId);
+    if (soEntry) {
+      return {
+        endpoints: soEntry.endpoints.map(({ id }) => declaredEndpoints.get(id) ?? { id }),
+        warnings: [],
+        soEntryFound: true,
+      };
     }
   }
 
+  if (cyclicFeatureId) {
+    return {
+      endpoints: [],
+      warnings: [
+        i18n.translate('xpack.searchInferenceEndpoints.endpoints.cyclicDependency', {
+          defaultMessage:
+            'Cyclic dependency detected in feature fallback chain: "{featureId}" references back to "{currentId}".',
+          values: { featureId, currentId: cyclicFeatureId },
+        }),
+      ],
+      soEntryFound: false,
+    };
+  }
+
   return {
-    endpoints: recEntry
-      ? withDeclaredParameters(registry, featureId, recEntry.recommendedEndpoints)
+    endpoints: recommendedEndpoints
+      ? recommendedEndpoints
       : opts?.onlyReturnConfigured
       ? []
       : [{ id: defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION }],

@@ -16,7 +16,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { InferenceFeatureConfig } from './types';
 import type { InferenceSettingsAttributes } from '../common/types';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
-import { getDeclaredParameters, getForFeature } from './inference_endpoints';
+import { getForFeature } from './inference_endpoints';
 
 const createValidFeature = (
   overrides: Partial<InferenceFeatureConfig> = {}
@@ -599,7 +599,7 @@ describe('getForFeature', () => {
       expect(result.endpoints).toEqual([{ ...createConnector('rec1'), parameters: lowEffort }]);
     });
 
-    it('applies parent parameters when the child declares other endpoints but not the SO override one', async () => {
+    it('drops parent parameters for a parent SO override when the child has its own recommended list', async () => {
       registry.register(
         createValidFeature({
           featureId: 'parent',
@@ -620,10 +620,10 @@ describe('getForFeature', () => {
         'child',
         logger
       );
-      expect(result.endpoints).toEqual([{ ...createConnector('rec1'), parameters: lowEffort }]);
+      expect(result.endpoints).toEqual([createConnector('rec1')]);
     });
 
-    it('applies parent parameters to an SO override on the child for an endpoint only the parent declares', async () => {
+    it('drops parent parameters for a child SO override when the child has its own recommended list', async () => {
       registry.register(
         createValidFeature({
           featureId: 'parent',
@@ -644,10 +644,10 @@ describe('getForFeature', () => {
         'child',
         logger
       );
-      expect(result.endpoints).toEqual([{ ...createConnector('rec1'), parameters: lowEffort }]);
+      expect(result.endpoints).toEqual([createConnector('rec1')]);
     });
 
-    it('uses the nearest declaration of each SO override endpoint across the chain', async () => {
+    it('applies only the parameters from the winning recommended list to SO override endpoints', async () => {
       const highEffort = { reasoning: { effort: 'high' as const } };
       const lowTemperature = { temperature: 0.2 };
       registry.register(
@@ -660,17 +660,13 @@ describe('getForFeature', () => {
         })
       );
       registry.register(
-        createValidFeature({
-          featureId: 'parent',
-          parentFeatureId: 'grandparent',
-          recommendedEndpoints: [{ id: 'gpt', parameters: highEffort }],
-        })
+        createValidFeature({ featureId: 'parent', parentFeatureId: 'grandparent' })
       );
       registry.register(
         createValidFeature({
           featureId: 'child',
           parentFeatureId: 'parent',
-          recommendedEndpoints: ['haiku'],
+          recommendedEndpoints: [{ id: 'gpt', parameters: highEffort }, 'haiku'],
         })
       );
       const result = await getForFeature(
@@ -687,10 +683,10 @@ describe('getForFeature', () => {
       );
       expect(result.endpoints).toEqual([
         { ...createConnector('gpt'), parameters: highEffort },
-        { ...createConnector('claude'), parameters: lowTemperature },
+        createConnector('claude'),
         createConnector('gemini'),
       ]);
-      expect(result.endpoints[2]).not.toHaveProperty('parameters');
+      expect(result.endpoints[1]).not.toHaveProperty('parameters');
     });
 
     it('drops parent parameters when the child recommends the same endpoint as a plain id', async () => {
@@ -917,65 +913,5 @@ describe('getForFeature', () => {
       expect(result.warnings[0]).toContain('missing');
       expect(result.soEntryFound).toBe(false);
     });
-  });
-});
-
-describe('getDeclaredParameters', () => {
-  const highEffort = { reasoning: { effort: 'high' as const } };
-  let registry: InferenceFeatureRegistry;
-
-  beforeEach(() => {
-    registry = new InferenceFeatureRegistry(loggingSystemMock.createLogger());
-    registry.register(
-      createValidFeature({
-        featureId: 'parent',
-        recommendedEndpoints: [{ id: 'declared', parameters: highEffort }, 'plain'],
-      })
-    );
-    registry.register(
-      createValidFeature({
-        featureId: 'child',
-        parentFeatureId: 'parent',
-        recommendedEndpoints: ['other'],
-      })
-    );
-  });
-
-  it('returns the parameters a parent declares even when the endpoint is not in the child list', () => {
-    expect(getDeclaredParameters(registry, 'child', 'declared')).toEqual(highEffort);
-  });
-
-  it('returns undefined for endpoints without declared parameters', () => {
-    expect(getDeclaredParameters(registry, 'child', 'plain')).toBeUndefined();
-    expect(getDeclaredParameters(registry, 'child', 'unknown')).toBeUndefined();
-    expect(getDeclaredParameters(registry, 'unregistered', 'declared')).toBeUndefined();
-  });
-
-  it('returns undefined when the child lists a parent-declared endpoint as a plain id', () => {
-    registry.register(
-      createValidFeature({
-        featureId: 'plain_child',
-        parentFeatureId: 'parent',
-        recommendedEndpoints: ['declared'],
-      })
-    );
-    expect(getDeclaredParameters(registry, 'plain_child', 'declared')).toBeUndefined();
-  });
-
-  it('returns the child parameters when the child declares different parameters', () => {
-    const lowTemperature = { temperature: 0 };
-    registry.register(
-      createValidFeature({
-        featureId: 'override_child',
-        parentFeatureId: 'parent',
-        recommendedEndpoints: [{ id: 'declared', parameters: lowTemperature }],
-      })
-    );
-    expect(getDeclaredParameters(registry, 'override_child', 'declared')).toEqual(lowTemperature);
-  });
-
-  it('returns a copy that does not change the registered parameters', () => {
-    const parameters = getDeclaredParameters(registry, 'child', 'declared');
-    expect(parameters).not.toBe(registry.get('parent')?.recommendedEndpoints[0].parameters);
   });
 });
