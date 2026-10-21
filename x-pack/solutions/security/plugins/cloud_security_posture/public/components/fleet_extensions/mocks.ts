@@ -354,6 +354,22 @@ export const getPackageInfoMock = () => {
               },
             ],
           },
+          {
+            input: 'cloudbeat/cis_gcp',
+            template_path: 'gcp.yml.hbs',
+            title: 'CIS GCP Benchmark',
+            vars: [
+              {
+                name: 'gcp.credentials.json',
+                type: 'text',
+                secret: true,
+                title: 'Credentials JSON',
+                multi: false,
+                required: false,
+                show_user: true,
+              },
+            ],
+          },
         ],
       },
     ],
