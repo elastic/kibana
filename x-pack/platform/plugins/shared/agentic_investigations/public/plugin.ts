@@ -27,7 +27,7 @@ import type {
   AgenticInvestigationsPublicStartDependencies,
   ImpactEntityOpener,
 } from './types';
-import type { SubjectHrefResolver } from './subjects/attachments/subject_href';
+import type { SubjectHrefResolver, SubjectLinks } from './subjects/attachments/subject_href';
 
 const LazyInvestigationCardComponent = React.lazy(async () => {
   const { InvestigationCard } = await import(
@@ -93,6 +93,10 @@ export class AgenticInvestigationsPublicPlugin
     startDeps: AgenticInvestigationsPublicStartDependencies
   ): AgenticInvestigationsPublicPluginStart {
     const { agentBuilder } = startDeps;
+    const subjectLinks: SubjectLinks = {
+      resolveSubjectHref: this.resolveSubjectHref,
+      navigateToUrl: core.application.navigateToUrl,
+    };
     if (agentBuilder) {
       registerImpactAttachmentTypes(agentBuilder, () => this.impactEntityOpener);
       registerInvestigationConversationEventUiDefinitions(agentBuilder.conversationEvents);
@@ -102,7 +106,7 @@ export class AgenticInvestigationsPublicPlugin
           application: core.application,
         });
       }
-      registerSubjectAttachmentTypes(agentBuilder, this.resolveSubjectHref);
+      registerSubjectAttachmentTypes(agentBuilder, subjectLinks);
       registerHypothesesAttachmentTypes(agentBuilder);
       registerTemplate({
         core,
@@ -112,7 +116,7 @@ export class AgenticInvestigationsPublicPlugin
         escalationsEnabled: this.escalationsEnabled,
         groupedAttachments: this.groupedAttachments,
         getImpactEntityOpener: () => this.impactEntityOpener,
-        resolveSubjectHref: this.resolveSubjectHref,
+        subjectLinks,
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],
