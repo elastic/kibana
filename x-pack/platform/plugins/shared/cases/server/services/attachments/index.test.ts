@@ -795,6 +795,33 @@ describe('AttachmentService', () => {
       expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
     });
 
+    it('skips the saved object type lookup when the caller passes the type', async () => {
+      unsecuredSavedObjectsClient.bulkGet.mockImplementation((objects) => {
+        const requests = objects as Array<{ id: string; type: string }>;
+        return Promise.resolve({
+          saved_objects: requests.map(({ id, type }) => ({
+            ...createErrorSO(type),
+            id,
+          })) as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+      });
+      unsecuredSavedObjectsClient.update.mockResolvedValue(soClientRes);
+
+      await service.update({
+        savedObjectId: '1',
+        updatedAttributes: persistableStateAttachment,
+        options: { references: [] },
+        savedObjectType: CASE_COMMENT_SAVED_OBJECT,
+      });
+
+      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalledWith(
+        CASE_COMMENT_SAVED_OBJECT,
+        '1',
+        expect.anything(),
+        expect.anything()
+      );
+    });
+
     it('should inject the references to the attributes correctly (persistable state)', async () => {
       unsecuredSavedObjectsClient.update.mockResolvedValue(soClientRes);
 

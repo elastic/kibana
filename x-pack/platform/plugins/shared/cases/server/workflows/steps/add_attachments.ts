@@ -50,12 +50,16 @@ export const addAttachmentsStepDefinition = (
             owner,
           })) as UnifiedAttachmentPayload[];
 
-          const updatedCase = await client.attachments.bulkCreate({
+          await client.attachments.bulkCreate({
             caseId: input.case_id,
             attachments,
           });
-          // The client returns unified comments; the output schema mirrors the
-          // public (legacy) wire shape, so convert back before validating.
+          const updatedCase = await client.attachments.getCaseWithAttachments({
+            caseId: input.case_id,
+            writeOperation: 'create',
+          });
+          // The output schema mirrors the public (legacy) wire shape, so convert
+          // back before validating.
           return safeParseCaseForWorkflowOutput(
             definition.outputSchema.shape.case,
             toLegacyCaseResponse(updatedCase)

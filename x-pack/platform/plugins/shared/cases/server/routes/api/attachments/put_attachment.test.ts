@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { createCasesClientMock } from '../../../client/mocks';
 import type { CaseError } from '../../../common/error';
 import { mockCaseUnifiedAttachments } from '../../../mocks';
@@ -45,9 +46,8 @@ describe('putAttachmentRoute', () => {
   afterEach(() => jest.clearAllMocks());
 
   it('returns the replaced attachment', async () => {
-    casesClientMock.attachments.update.mockResolvedValue({
-      comments: [{ id: attachmentSO.id, version: '2', ...attachmentSO.attributes }],
-    } as never);
+    const attachment = { id: attachmentSO.id, version: '2', ...attachmentSO.attributes };
+    casesClientMock.attachments.update.mockResolvedValue(attachment as never);
 
     await callHandler();
 
@@ -55,9 +55,7 @@ describe('putAttachmentRoute', () => {
       caseID: 'case-1',
       updateRequest: { ...request.body, id: attachmentSO.id },
     });
-    expect(response.ok).toHaveBeenCalledWith({
-      body: expect.objectContaining({ id: attachmentSO.id, type: 'comment' }),
-    });
+    expect(response.ok).toHaveBeenCalledWith({ body: attachment });
   });
 
   it('rejects a file attachment with a 400 before calling the client', async () => {
@@ -72,15 +70,12 @@ describe('putAttachmentRoute', () => {
     expect(casesClientMock.attachments.update).not.toHaveBeenCalled();
   });
 
-  it('throws a 500 when the replaced attachment is missing from the case', async () => {
-    casesClientMock.attachments.update.mockResolvedValue({ comments: [] } as never);
+  it('keeps the status code of a client error', async () => {
+    casesClientMock.attachments.update.mockRejectedValue(Boom.conflict('stale version'));
 
     const error = await getHandlerError();
 
-    expect(error.wrappedError?.message).toBe(
-      `Failed to locate replaced attachment ${attachmentSO.id} on case case-1`
-    );
-    expect(error.boomify().output.statusCode).toBe(500);
+    expect(error.boomify().output.statusCode).toBe(409);
     expect(response.ok).not.toHaveBeenCalled();
   });
 });

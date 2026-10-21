@@ -20,7 +20,6 @@ import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import { createZodRouteValidation, throwIfFileAttachment } from '../utils';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
-import { toUnifiedAttachment } from '../../../services/attachments/operations/utils';
 
 export const putAttachmentRoute = createCasesRoute<
   { case_id: string; id: string },
@@ -52,17 +51,10 @@ export const putAttachmentRoute = createCasesRoute<
       const client = await caseContext.getCasesClient();
       const { case_id: caseID, id } = request.params;
 
-      const updatedCase = await client.attachments.update({
+      const attachment: attachmentDomainV2.UnifiedAttachment = await client.attachments.update({
         caseID,
         updateRequest: { ...request.body, id },
       });
-
-      const replaced = updatedCase.comments?.find((comment) => comment.id === id);
-      if (replaced == null) {
-        throw new Error(`Failed to locate replaced attachment ${id} on case ${caseID}`);
-      }
-
-      const attachment: attachmentDomainV2.UnifiedAttachment = toUnifiedAttachment(replaced);
 
       return response.ok({
         body: attachment,

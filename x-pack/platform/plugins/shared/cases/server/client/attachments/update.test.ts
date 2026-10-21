@@ -56,7 +56,7 @@ describe('update', () => {
     );
   });
 
-  it('returns the case with comments', async () => {
+  it('returns the updated attachment read back after the write', async () => {
     userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({ [caseID]: 0 });
 
     const theCase = { ...mockCases[0], id: caseID };
@@ -86,30 +86,27 @@ describe('update', () => {
 
     caseService.getCase.mockResolvedValue(theCase);
     caseService.patchCase.mockResolvedValue(theCase);
-    caseService.getAllCaseComments.mockResolvedValue({
-      saved_objects: [updatedAttachment],
-      total: 1,
-      per_page: 1,
-      page: 1,
-    });
     attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(
       new Map([[caseID, { alerts: 0, userComments: 1, events: 0 }]])
     );
-    attachmentService.getter.get.mockResolvedValue(
-      existingComment as unknown as Awaited<ReturnType<typeof attachmentService.getter.get>>
+    attachmentService.getter.get.mockImplementation(
+      async () =>
+        (attachmentService.update.mock.calls.length > 0
+          ? updatedAttachment
+          : existingComment) as unknown as Awaited<ReturnType<typeof attachmentService.getter.get>>
     );
     attachmentService.update.mockResolvedValue(updatedAttachment);
 
     const res = await update({ updateRequest: unifiedUpdateRequest, caseID }, clientArgs);
 
-    expect(res.id).toEqual(caseID);
-    expect(res.comments).toEqual([
+    expect(res).toEqual(
       expect.objectContaining({
         id: commentId,
         type: updatedAttachment.attributes.type,
         data: updatedAttachment.attributes.data,
-      }),
-    ]);
+      })
+    );
+    expect(caseService.getAllCaseComments).not.toHaveBeenCalled();
 
     expect(clientArgs.authorization.ensureAuthorized).toHaveBeenCalledWith(
       expect.objectContaining({

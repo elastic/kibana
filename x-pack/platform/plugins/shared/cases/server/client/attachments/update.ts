@@ -10,8 +10,10 @@ import Boom from '@hapi/boom';
 import { UnifiedAttachmentPutRequestSchema } from '../../../common/types/api';
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
-import type { Case } from '../../../common/types/domain';
+import type { UnifiedAttachment } from '../../../common/types/domain';
 import { decodeWithExcessOrThrowZod } from '../../common/runtime_types';
+import { flattenAttachmentSavedObject } from '../../common/utils';
+import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
 import { CASE_SAVED_OBJECT } from '../../../common/constants';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
@@ -22,7 +24,7 @@ import { validateUnifiedAttachments } from './validators';
 export async function update(
   { caseID, updateRequest: queryParams }: UpdateArgs,
   clientArgs: CasesClientArgs
-): Promise<Case> {
+): Promise<UnifiedAttachment> {
   const {
     services: { attachmentService, userActionService },
     logger,
@@ -85,17 +87,17 @@ export async function update(
 
     const updatedDate = new Date().toISOString();
 
-    const updatedModel = await model.updateComment({
+    const updatedAttachment = await model.updateComment({
       updateRequest: {
         id: queryCommentId,
         version: queryCommentVersion,
         ...queryRestAttributes,
       },
       updatedAt: updatedDate,
-      owner: myComment.attributes.owner,
+      currentAttachment: myComment,
     });
 
-    return await updatedModel.encodeWithComments();
+    return toUnifiedAttachment(flattenAttachmentSavedObject(updatedAttachment));
   } catch (error) {
     throw createCaseError({
       message: `Failed to replace attachment case id: ${caseID}: ${error}`,

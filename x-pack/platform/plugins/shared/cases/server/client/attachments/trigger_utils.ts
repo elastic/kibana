@@ -13,15 +13,15 @@ import type { CasesClientArgs } from '..';
 
 export function emitAttachmentsAddedEvent(
   clientArgs: CasesClientArgs,
-  updatedCase: Case,
+  { id: caseId, owner }: Pick<Case, 'id' | 'owner'>,
   ids: string[],
   attachmentType: string
 ): void {
   clientArgs.casesEventBus?.emitAttachmentsAdded(clientArgs.request, {
-    caseId: updatedCase.id,
+    caseId,
     ids,
     attachmentType,
-    owner: updatedCase.owner as Owner,
+    owner: owner as Owner,
   });
 }
 
