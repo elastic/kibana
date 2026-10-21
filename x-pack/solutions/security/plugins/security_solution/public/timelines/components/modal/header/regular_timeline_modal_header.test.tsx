@@ -95,7 +95,7 @@ describe('RegularTimelineModalHeader', () => {
 
     renderComponent();
 
-    expect(screen.getByTestId('timeline-modal-attach-to-case-dropdown-button')).toBeInTheDocument();
+    expect(screen.getByTestId('timeline-modal-attach-to-case-button')).toBeInTheDocument();
   });
 
   it('close button has correct aria-label for a default timeline', () => {

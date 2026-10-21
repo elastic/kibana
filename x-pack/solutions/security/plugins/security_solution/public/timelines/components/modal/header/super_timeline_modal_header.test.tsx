@@ -70,9 +70,7 @@ describe('SuperTimelineModalHeader', () => {
     renderComponent();
 
     expect(screen.queryByTestId('timeline-modal-save-timeline')).not.toBeInTheDocument();
-    expect(
-      screen.queryByTestId('timeline-modal-attach-to-case-dropdown-button')
-    ).not.toBeInTheDocument();
+    expect(screen.queryByTestId('timeline-modal-attach-to-case-button')).not.toBeInTheDocument();
     expect(screen.queryByTestId('timeline-favorite-empty-star')).not.toBeInTheDocument();
   });
 

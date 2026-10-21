@@ -8,11 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import {
-  openAddToExistingCaseModalMock,
-  openAddToNewCaseFlyoutMock,
-} from '@kbn/cases-plugin/public/mocks';
+import { openAddToExistingCaseModalMock } from '@kbn/cases-plugin/public/mocks';
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { mockTimelineModel, TestProviders } from '../../../../common/mock';
@@ -60,29 +56,19 @@ describe('AttachToCaseButton', () => {
     };
   });
 
-  it('should render the 2 options in the popover when clicking on the button', async () => {
-    const { getByTestId } = renderAttachToCaseButton();
+  it('should render a single button that is not a dropdown', () => {
+    const { getByTestId, queryByTestId } = renderAttachToCaseButton();
 
-    const button = getByTestId('timeline-modal-attach-to-case-dropdown-button');
+    const button = getByTestId('timeline-modal-attach-to-case-button');
 
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent('Attach to case');
-
-    await userEvent.click(button);
-
-    expect(getByTestId('timeline-modal-attach-timeline-to-new-case')).toBeInTheDocument();
-    expect(getByTestId('timeline-modal-attach-timeline-to-new-case')).toHaveTextContent(
-      'Attach to new case'
-    );
-
-    expect(getByTestId('timeline-modal-attach-timeline-to-existing-case')).toBeInTheDocument();
-    expect(getByTestId('timeline-modal-attach-timeline-to-existing-case')).toHaveTextContent(
-      'Attach to existing case'
-    );
+    expect(queryByTestId('timeline-modal-attach-timeline-to-new-case')).toBeNull();
+    expect(queryByTestId('timeline-modal-attach-timeline-to-existing-case')).toBeNull();
   });
 
   describe('legacy flow (attachments framework disabled)', () => {
-    it('navigates to the create case page when clicking on attach to new case', async () => {
+    it('navigates to the create case page when creating a case from the modal', async () => {
       useKibanaMock().services.cases.ui.getAllCasesSelectorModal = jest
         .fn()
         .mockImplementation(({ onRowClick }) => {
@@ -92,9 +78,7 @@ describe('AttachToCaseButton', () => {
 
       const { getByTestId } = renderAttachToCaseButton();
 
-      await userEvent.click(getByTestId('timeline-modal-attach-to-case-dropdown-button'));
-      await waitForEuiPopoverOpen();
-      await userEvent.click(getByTestId('timeline-modal-attach-timeline-to-existing-case'));
+      await userEvent.click(getByTestId('timeline-modal-attach-to-case-button'));
 
       expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
         path: '/create',
@@ -102,7 +86,7 @@ describe('AttachToCaseButton', () => {
       });
     });
 
-    it('opens modal and navigates to the case page when clicking on attach to existing case', async () => {
+    it('opens modal and navigates to the case page when selecting a case in the modal', async () => {
       useKibanaMock().services.cases.ui.getAllCasesSelectorModal = jest
         .fn()
         .mockImplementation(({ onRowClick }) => {
@@ -112,9 +96,7 @@ describe('AttachToCaseButton', () => {
 
       const { getByTestId } = renderAttachToCaseButton();
 
-      await userEvent.click(getByTestId('timeline-modal-attach-to-case-dropdown-button'));
-      await waitForEuiPopoverOpen();
-      await userEvent.click(getByTestId('timeline-modal-attach-timeline-to-existing-case'));
+      await userEvent.click(getByTestId('timeline-modal-attach-to-case-button'));
 
       expect(navigateToApp).toHaveBeenCalledWith('securitySolutionUI', {
         path: '/case-id',
@@ -122,14 +104,11 @@ describe('AttachToCaseButton', () => {
       });
     });
 
-    it('does not invoke the unified attachments hooks', async () => {
+    it('does not invoke the unified attachments hook', async () => {
       const { getByTestId } = renderAttachToCaseButton();
 
-      await userEvent.click(getByTestId('timeline-modal-attach-to-case-dropdown-button'));
-      await waitForEuiPopoverOpen();
-      await userEvent.click(getByTestId('timeline-modal-attach-timeline-to-new-case'));
+      await userEvent.click(getByTestId('timeline-modal-attach-to-case-button'));
 
-      expect(openAddToNewCaseFlyoutMock).not.toHaveBeenCalled();
       expect(openAddToExistingCaseModalMock).not.toHaveBeenCalled();
     });
   });
@@ -142,32 +121,10 @@ describe('AttachToCaseButton', () => {
       };
     });
 
-    it('opens the cases create-new flyout with a security.timeline attachment', async () => {
-      const { getByTestId } = renderAttachToCaseButton();
-
-      await userEvent.click(getByTestId('timeline-modal-attach-to-case-dropdown-button'));
-      await waitForEuiPopoverOpen();
-      await userEvent.click(getByTestId('timeline-modal-attach-timeline-to-new-case'));
-
-      expect(openAddToNewCaseFlyoutMock).toHaveBeenCalledTimes(1);
-      expect(openAddToNewCaseFlyoutMock).toHaveBeenCalledWith({
-        attachments: [
-          {
-            type: SECURITY_TIMELINE_ATTACHMENT_TYPE,
-            attachmentId: mockTimelineModel.savedObjectId,
-            metadata: { title: mockTimelineModel.title },
-          },
-        ],
-      });
-      expect(navigateToApp).not.toHaveBeenCalled();
-    });
-
     it('opens the cases add-to-existing modal with a getAttachments returning the timeline attachment', async () => {
       const { getByTestId } = renderAttachToCaseButton();
 
-      await userEvent.click(getByTestId('timeline-modal-attach-to-case-dropdown-button'));
-      await waitForEuiPopoverOpen();
-      await userEvent.click(getByTestId('timeline-modal-attach-timeline-to-existing-case'));
+      await userEvent.click(getByTestId('timeline-modal-attach-to-case-button'));
 
       expect(openAddToExistingCaseModalMock).toHaveBeenCalledTimes(1);
       const args = openAddToExistingCaseModalMock.mock.calls[0][0];
@@ -187,9 +144,7 @@ describe('AttachToCaseButton', () => {
 
       const { getByTestId, queryByTestId } = renderAttachToCaseButton();
 
-      await userEvent.click(getByTestId('timeline-modal-attach-to-case-dropdown-button'));
-      await waitForEuiPopoverOpen();
-      await userEvent.click(getByTestId('timeline-modal-attach-timeline-to-existing-case'));
+      await userEvent.click(getByTestId('timeline-modal-attach-to-case-button'));
 
       expect(legacyModal).not.toHaveBeenCalled();
       expect(queryByTestId('legacy-modal')).toBeNull();

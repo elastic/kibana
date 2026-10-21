@@ -49094,8 +49094,6 @@
     "xpack.securitySolution.timeline.kpis.sourceIpKpiTitle": "IPs de origem",
     "xpack.securitySolution.timeline.kpis.userKpiTitle": "Usuários",
     "xpack.securitySolution.timeline.modal.attachToCaseButtonLabel": "Anexar ao caso",
-    "xpack.securitySolution.timeline.modal.attachToExistingCaseButtonLabel": "Anexar ao caso existente",
-    "xpack.securitySolution.timeline.modal.attachToNewCaseButtonLabel": "Anexar a um novo caso",
     "xpack.securitySolution.timeline.modal.newTimeline": "Nova linha do tempo",
     "xpack.securitySolution.timeline.modal.newTimelineBtn": "Nova",
     "xpack.securitySolution.timeline.modal.newTimelineTemplate": "Novo modelo de linha do tempo",
