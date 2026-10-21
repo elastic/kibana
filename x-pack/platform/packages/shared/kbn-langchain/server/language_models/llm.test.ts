@@ -131,6 +131,7 @@ describe('ActionsClientLlm', () => {
     });
     it('rejects an empty unified completion when llmType is inference', async () => {
       actionsClient.execute.mockResolvedValue({
+        actionId: connectorId,
         data: { choices: [{ message: { content: '', tool_calls: [] } }] },
         status: 'ok',
       });
