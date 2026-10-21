@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable no-console */
 /* RESEARCH ONLY (Track 7.A). ACTUAL lever map: joins the 7.0 alerting atlas (predictions) with
  * what the island port actually does (island.ts / main_host.ts), and with observed host
  * crossings (t7a/stats). Rules are explicit and ordered; every edge gets exactly one row.

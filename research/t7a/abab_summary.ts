@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable no-console */
 /* RESEARCH ONLY (Track 7.A). Derives the ABAB table from harness scorecards.
  * usage: node abab_summary.ts <runsDir> <runIdPrefix> <out.json> */
 import { readdirSync, readFileSync, writeFileSync } from 'fs';

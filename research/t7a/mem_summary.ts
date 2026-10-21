@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable no-console */
 /* RESEARCH ONLY (Track 7.A). Summarises a memprobe.sh directory (MiB). usage: node mem_summary.ts <dir> */
 import { readFileSync, existsSync, writeFileSync } from 'fs';
 import { join } from 'path';

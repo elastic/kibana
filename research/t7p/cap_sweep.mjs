@@ -71,6 +71,16 @@ const callOnce = async (method, path, body, timeoutMs = 180000) => {
   return { status: res.status, body: parsed };
 };
 
+const inspectContainer = async () => {
+  const { stdout } = await exec('docker', [
+    'inspect',
+    '-f',
+    '{{.State.Status}} oom={{.State.OOMKilled}} exit={{.State.ExitCode}} mem={{.HostConfig.Memory}} swap={{.HostConfig.MemorySwap}} nano={{.HostConfig.NanoCpus}}',
+    CONTAINER,
+  ]);
+  return stdout.trim();
+};
+
 const call = async (method, path, body, timeoutMs = 180000) => {
   let last;
   for (let attempt = 0; attempt < 4; attempt++) {
@@ -126,16 +136,6 @@ const readCgroup = async () => {
     account: accountCgroup(current, parseMemoryStat(statText)),
     stat: parseMemoryStat(statText),
   };
-};
-
-const inspectContainer = async () => {
-  const { stdout } = await exec('docker', [
-    'inspect',
-    '-f',
-    '{{.State.Status}} oom={{.State.OOMKilled}} exit={{.State.ExitCode}} mem={{.HostConfig.Memory}} swap={{.HostConfig.MemorySwap}} nano={{.HostConfig.NanoCpus}}',
-    CONTAINER,
-  ]);
-  return stdout.trim();
 };
 
 const oomKilled = async () => {
@@ -274,16 +274,12 @@ const persist = (state) => {
 const assertPrereg = () => {
   if (!PREREG || !OUT) throw new Error('T7P_PREREG and T7P_OUT are required');
   const prereg = JSON.parse(readFileSync(PREREG, 'utf8'));
-  const expected =
-    MODE === 'rootcause'
-      ? ['t7p-prod-shape-mem-003']
-      : MODE === 'effective'
-      ? ['t7p-prod-shape-mem-004', 't7p-prod-shape-mem-007']
-      : MODE === 'phases'
-      ? ['t7p-prod-shape-mem-005', 't7p-prod-shape-mem-006', 't7p-prod-shape-mem-009']
-      : MODE === 'process'
-      ? ['t7p-prod-shape-mem-008']
-      : ['t7p-prod-shape-mem-002'];
+  let expected = ['t7p-prod-shape-mem-002'];
+  if (MODE === 'rootcause') expected = ['t7p-prod-shape-mem-003'];
+  else if (MODE === 'effective') expected = ['t7p-prod-shape-mem-004', 't7p-prod-shape-mem-007'];
+  else if (MODE === 'phases')
+    expected = ['t7p-prod-shape-mem-005', 't7p-prod-shape-mem-006', 't7p-prod-shape-mem-009'];
+  else if (MODE === 'process') expected = ['t7p-prod-shape-mem-008'];
   if (!expected.includes(prereg.run_id)) throw new Error(`unexpected prereg ${prereg.run_id}`);
   if (Date.parse(prereg.written_at) > Date.now())
     throw new Error('prereg written_at is in the future');
@@ -376,7 +372,9 @@ const oneCell = async (cell, mainOnlyAccount) => {
     call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'coldstart' })
   );
   const inspect = await inspectContainer();
-  const killed = inspect.includes('oom=true') ? inspect : polled.error ? await oomKilled() : null;
+  let killed = null;
+  if (inspect.includes('oom=true')) killed = inspect;
+  else if (polled.error) killed = await oomKilled();
   const http = polled.result;
   const outcome =
     http && http.status < 300
@@ -399,7 +397,9 @@ const oneCell = async (cell, mainOnlyAccount) => {
   const limitLog = await recentLimitLog();
   const applied = cell.old === 'inherit' || limitLogMatches(cell, limitLog);
   const survived = Boolean(outcome.survived) && !killed && applied;
-  const reason = !applied ? 'cap-not-applied' : killed ? `oom ${killed}` : outcome.reason ?? null;
+  let reason = outcome.reason ?? null;
+  if (!applied) reason = 'cap-not-applied';
+  else if (killed) reason = `oom ${killed}`;
   return {
     id: cell.id,
     old: cell.old,
@@ -517,7 +517,7 @@ const percentileOf = (rows, key) => {
   return { n: rows.length, p50: percentile(values, 50), p95: percentile(values, 95) };
 };
 
-const scored = async (prereg) => {
+const scored = async () => {
   const prior = JSON.parse(readFileSync(OUT, 'utf8'));
   const winner = prior.winner ?? winningCap(prior.cells ?? []);
   if (!winner) throw new Error('no surviving cap to score');
@@ -1004,7 +1004,7 @@ const processArm = async (prereg) => {
 const main = async () => {
   const prereg = assertPrereg();
   if (MODE === 'sweep') await sweep(prereg);
-  else if (MODE === 'scored') await scored(prereg);
+  else if (MODE === 'scored') await scored();
   else if (MODE === 'rootcause') await rootcause(prereg);
   else if (MODE === 'effective') await effective(prereg);
   else if (MODE === 'phases') await phases(prereg);

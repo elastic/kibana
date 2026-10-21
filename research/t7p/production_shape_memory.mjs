@@ -69,6 +69,12 @@ const probe = (kind) => call('POST', '/internal/workload_isolation_research/t7a/
 
 const valueOf = (outcome) => outcome?.value ?? outcome;
 
+const slotVerdict = (slots) => {
+  if (slots === 0) return 'doesnt-fit';
+  if (Number.isFinite(slots)) return `fits-with-${slots}-slots`;
+  return 'fits';
+};
+
 const summarize = (samples) => {
   const cold = samples.cold.map((row) => row.coldStartMs);
   const warm = samples.warm.map((row) => row.waitedMs);
@@ -95,7 +101,7 @@ const summarize = (samples) => {
       limitBytes: pod.limitBytes,
       heapCapMiB: pod.heapCapMiB,
       alertingSlotsThatFit: n,
-      verdict: n === 0 ? 'doesnt-fit' : Number.isFinite(n) ? `fits-with-${n}-slots` : 'fits',
+      verdict: slotVerdict(n),
       mix631Rss: mix631 == null ? null : main.rss + mix631,
       mix221Rss: mix221 == null ? null : main.rss + mix221,
       mix631Fits: mix631 == null ? null : main.rss + mix631 <= pod.limitBytes,

@@ -264,7 +264,7 @@ const startRuntime = (): void => {
               return;
             }
             const id = ++sequence;
-            const packet: Packet = {
+            const callPacket: Packet = {
               version: 1,
               kind: 'call',
               runId: bundle.runId,
@@ -277,7 +277,7 @@ const startRuntime = (): void => {
             if (options?.detached) {
               run.detached.set(id, { resolve, reject });
               try {
-                send(packet);
+                send(callPacket);
               } catch (error) {
                 run.detached.delete(id);
                 reject(error instanceof Error ? error : new Error('Capability send failed'));
@@ -301,7 +301,7 @@ const startRuntime = (): void => {
             run.pending.set(id, { resolve, reject, capability, operation, signal, onAbort });
             signal?.addEventListener('abort', onAbort, { once: true });
             try {
-              send(packet);
+              send(callPacket);
             } catch (error) {
               run.pending.delete(id);
               signal?.removeEventListener('abort', onAbort);
@@ -318,7 +318,7 @@ const startRuntime = (): void => {
         const open = [...run.pending.values()]
           .map((entry) => `${entry.capability}.${entry.operation}`)
           .join(',');
-        console.error(`worker-core outstanding capability calls: ${open}`);
+        process.stderr.write(`worker-core outstanding capability calls: ${open}\n`);
         throw new Error('Task returned with outstanding capability calls');
       }
     } catch (error) {

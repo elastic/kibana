@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable no-console */
 /* RESEARCH ONLY (Track 7.A). Replays the Tier-B alerting rule once and dumps normalised outputs.
  *
  * usage:
@@ -435,7 +436,7 @@ const diff = (a: string, b: string) => {
   const canon = (v: unknown) =>
     JSON.stringify(v, (_k, x) =>
       x && typeof x === 'object' && !Array.isArray(x)
-        ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => (a < b ? -1 : 1)))
+        ? Object.fromEntries(Object.entries(x).sort(([left], [right]) => (left < right ? -1 : 1)))
         : x
     );
   for (const k of ['counts', 'event_summary'])

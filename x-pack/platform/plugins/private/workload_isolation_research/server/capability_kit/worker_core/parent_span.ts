@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import { createRequire } from 'node:module';
 import { context, ROOT_CONTEXT, trace } from '@opentelemetry/api';
 import type { SpanContext } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
+
+const requireApm = createRequire(__filename);
 
 /** Non-recording parent copied from main. Not an exported span. */
 export interface ParentSpanContext {
@@ -35,7 +38,7 @@ const fromOtel = (): ParentSpanContext | undefined => {
  * which drops the OTel span. The APM transaction started just above that call is still current.
  */
 const fromApm = (): ParentSpanContext | undefined => {
-  const apm = require('elastic-apm-node') as { currentTraceparent?: string | null };
+  const apm = requireApm('elastic-apm-node') as { currentTraceparent?: string | null };
   const parts = apm.currentTraceparent?.split('-');
   if (!parts || parts.length !== 4) return undefined;
   const traceId = parts[1];
