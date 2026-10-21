@@ -22,15 +22,13 @@ import {
 import { MEMORY_WORKSPACE_ROOT } from '../memory/materialize';
 import { isCanonicalMemoryId, slugFromMemoryId, toMemoryKiId } from '../memory/page_store';
 import { SANDBOX_BASH_TOOL_ID } from '../tools/sandbox_bash/tool';
-import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_tool';
-import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_tool';
 import {
-  extractResultSummary,
   stepsFromRound,
   type InvestigationTranscriptStep,
   type RawRoundResult,
 } from './round_loader';
+import { FILE_TOOL_IDS, splitBashSegmentsWithCwd } from './seeded_filter';
 
 export interface WorkspaceReadsSummary {
   /** Canonical Cortex page IDs (`cortex_<entityType>_<slug>`) opened by the agent (excludes `README.md` / `INDEX.md`). */
@@ -47,34 +45,55 @@ export interface WorkspaceReadsSummary {
   };
 }
 
-const FILE_TOOL_IDS = new Set<string>([
-  SANDBOX_VIEW_FILE_TOOL_ID,
-  SANDBOX_STR_REPLACE_TOOL_ID,
-  SANDBOX_WRITE_FILE_TOOL_ID,
-]);
-
 const BUCKET_TO_ENTITY_TYPE = new Map<string, CortexEntityType>(
   CORTEX_ENTITY_TYPES.map((entityType) => [CORTEX_ENTITY_TYPE_BUCKETS[entityType], entityType])
 );
 
-const CORTEX_BUCKET_PATTERN = [...BUCKET_TO_ENTITY_TYPE.keys()].join('|');
-
-// Matches Cortex file references in bash commands, e.g. `/workspace/cortex/services/checkout.md` or `cortex/alerts/high-cpu.md`
-const BASH_CORTEX_FILE_RE = new RegExp(
-  `(?:^|[\\s'"=(:<])(?:/workspace/|\\./)?cortex/(?:(${CORTEX_BUCKET_PATTERN})/([a-z0-9][a-z0-9-]*\\.md)|((?:INDEX|README)\\.md))(?=[^a-z0-9._-]|$)`,
-  'gi'
-);
-
-// Matches Semantic Memory file references in bash commands, e.g. `/workspace/memories/redis-timeout.md` or `memories/.index.json`
-const BASH_MEMORY_FILE_RE =
-  /(?:^|[\s'"=(:<])(?:\/workspace\/|\.\/)?memories\/([a-z0-9][a-z0-9-]*\.md|\.index\.json|README\.md)(?=[^a-z0-9._-]|$)/gi;
-
-// Matches Decision Tree file references in bash commands (either `decision_tree_<slug>.md` or `decision-trees/monitors.md`)
 const BASH_DECISION_TREE_FILE_RE =
   /(?:^|\/)decision_tree_([a-z0-9]+(?:-[a-z0-9]+)*)\.md(?:$|[^a-z0-9-])/g;
 
-const BASH_DECISION_TREE_INDEX_RE =
-  /(?:^|[\s'"=(:<])(?:\/workspace\/|\.\/)?decision-trees\/monitors\.md(?=[^a-z0-9._-]|$)/i;
+const BASH_QUOTED_STRING_RE = /'[^']*'|"(?:[^"\\]|\\.)*"/g;
+const BASH_UNQUOTED_STDOUT_REDIRECT_RE = /(?:^|[^\d&>])(?:1|&)?>>?\|?\s*(?!&)(?!\/dev\/stdout\b)/;
+const BASH_WRITE_CALL_RE =
+  /\b(?:sed|perl)\b[^;|&\n]*\s-[a-zA-Z]*i|\b(?:write_text|writeFileSync)\s*\(|\bopen\s*\([^)]*,\s*['"][wa+]/;
+const BASH_LEADING_KEYWORDS_RE =
+  /^(?:\s*(?:do|then|else|elif|while|until|if|time|!|\(|env|command|sudo)\b)+/;
+const BASH_LEADING_ENV_ASSIGN_RE = /^(?:\s*[A-Za-z_][A-Za-z0-9_]*=(?:'[^']*'|"[^"]*"|\S+))+/;
+
+// Commands whose arguments are never read and printed as file contents to stdout.
+const NON_FILE_READING_VERBS = new Set<string>([
+  'echo',
+  'printf',
+  'tee',
+  'rm',
+  'mv',
+  'cp',
+  'touch',
+  'mkdir',
+  'rmdir',
+  'ln',
+  'chmod',
+  'chown',
+  'chgrp',
+  'truncate',
+  'dd',
+  'install',
+  'mktemp',
+  'cd',
+  'export',
+  'unset',
+  'true',
+  'false',
+  'sleep',
+  'kill',
+  'pkill',
+  'curl',
+  'wget',
+]);
+
+// Matches relative or absolute `.md` or `.index.json` file tokens in a bash read command.
+const BASH_FILE_TOKEN_RE =
+  /(?:^|[\s'"=(:<])((?:\/workspace\/|\.\.?\/|[a-z0-9_.-]+\/)*(?:[a-z0-9][a-z0-9_-]*\.md|\.index\.json))(?=[^a-z0-9._/-]|$)/gi;
 
 interface MutableReads {
   cortexIds: Set<string>;
@@ -88,10 +107,10 @@ interface MutableReads {
 const recordResolvedFilePath = (
   rawPath: string,
   acc: MutableReads,
-  options?: { allowCortexAndMemory?: boolean }
+  options?: { allowCortexAndMemory?: boolean; baseDir?: string }
 ): void => {
   const allowCortexAndMemory = options?.allowCortexAndMemory ?? true;
-  const resolved = Path.posix.resolve('/workspace', rawPath);
+  const resolved = Path.posix.resolve(options?.baseDir ?? '/workspace', rawPath);
 
   if (resolved.startsWith(`${CORTEX_WORKSPACE_ROOT}/`)) {
     if (!allowCortexAndMemory) {
@@ -146,7 +165,6 @@ const recordResolvedFilePath = (
     }
   }
 
-  // Also match `decision_tree_<slug>.md` anywhere in a file path (matching existing `extractAccessedTreeIds` behavior)
   BASH_DECISION_TREE_FILE_RE.lastIndex = 0;
   let match = BASH_DECISION_TREE_FILE_RE.exec(rawPath);
   while (match) {
@@ -155,50 +173,21 @@ const recordResolvedFilePath = (
   }
 };
 
-const BASH_RELATIVE_MEMORY_FILE_RE =
-  /(?:^|[\s'"=(:<])(?:\.\/)?([a-z0-9][a-z0-9-]*\.md|\.index\.json|README\.md)(?=[^a-z0-9._/-]|$)/gi;
-
-const BASH_RELATIVE_CORTEX_BUCKET_FILE_RE = new RegExp(
-  `(?:^|[\\s'"=(:<])(?:\\.\\/)?(?:(${CORTEX_BUCKET_PATTERN})/([a-z0-9][a-z0-9-]*\\.md)|((?:INDEX|README)\\.md))(?=[^a-z0-9._/-]|$)`,
-  'gi'
-);
-
-const BASH_RELATIVE_SLUG_MD_RE =
-  /(?:^|[\s'"=(:<])(?:\.\/)?([a-z0-9][a-z0-9-]*\.md)(?=[^a-z0-9._/-]|$)/gi;
-
-const BASH_RELATIVE_MONITORS_RE = /(?:^|[\s'"=(:<])(?:\.\/)?monitors\.md(?=[^a-z0-9._/-]|$)/i;
+const extractSegmentVerb = (segment: string): string | undefined => {
+  const stripped = segment
+    .replace(BASH_LEADING_KEYWORDS_RE, '')
+    .replace(BASH_LEADING_ENV_ASSIGN_RE, '')
+    .trim();
+  const match = /^([A-Za-z0-9_./-]+)/.exec(stripped);
+  return match ? Path.posix.basename(match[1]).toLowerCase() : undefined;
+};
 
 const recordBashCommandReads = (
   command: string,
   acc: MutableReads,
   workingDirectory?: string
 ): void => {
-  BASH_CORTEX_FILE_RE.lastIndex = 0;
-  let cortexMatch = BASH_CORTEX_FILE_RE.exec(command);
-  while (cortexMatch) {
-    const [, bucket, fileWithMd, indexOrReadme] = cortexMatch;
-    if (indexOrReadme && indexOrReadme.toUpperCase() === 'INDEX.MD') {
-      acc.cortexIndex = true;
-    } else if (bucket && fileWithMd) {
-      recordResolvedFilePath(`${CORTEX_WORKSPACE_ROOT}/${bucket}/${fileWithMd}`, acc);
-    }
-    cortexMatch = BASH_CORTEX_FILE_RE.exec(command);
-  }
-
-  BASH_MEMORY_FILE_RE.lastIndex = 0;
-  let memoryMatch = BASH_MEMORY_FILE_RE.exec(command);
-  while (memoryMatch) {
-    const [, fileName] = memoryMatch;
-    if (fileName) {
-      recordResolvedFilePath(`${MEMORY_WORKSPACE_ROOT}/${fileName}`, acc);
-    }
-    memoryMatch = BASH_MEMORY_FILE_RE.exec(command);
-  }
-
-  if (BASH_DECISION_TREE_INDEX_RE.test(command)) {
-    acc.decisionTreeIndex = true;
-  }
-
+  // Decision tree attribution includes both reads and edits anywhere in the command.
   BASH_DECISION_TREE_FILE_RE.lastIndex = 0;
   let treeMatch = BASH_DECISION_TREE_FILE_RE.exec(command);
   while (treeMatch) {
@@ -206,51 +195,22 @@ const recordBashCommandReads = (
     treeMatch = BASH_DECISION_TREE_FILE_RE.exec(command);
   }
 
-  const resolvedCwd =
-    typeof workingDirectory === 'string' && workingDirectory.trim().length > 0
-      ? Path.posix.resolve('/workspace', workingDirectory.trim())
-      : '/workspace';
+  for (const { segment, cwd } of splitBashSegmentsWithCwd(command, workingDirectory)) {
+    const unquoted = segment.replace(BASH_QUOTED_STRING_RE, '');
+    if (BASH_UNQUOTED_STDOUT_REDIRECT_RE.test(unquoted) || BASH_WRITE_CALL_RE.test(segment)) {
+      continue;
+    }
+    const verb = extractSegmentVerb(segment);
+    if (!verb || NON_FILE_READING_VERBS.has(verb)) {
+      continue;
+    }
 
-  if (
-    resolvedCwd === MEMORY_WORKSPACE_ROOT ||
-    resolvedCwd.startsWith(`${MEMORY_WORKSPACE_ROOT}/`)
-  ) {
-    BASH_RELATIVE_MEMORY_FILE_RE.lastIndex = 0;
-    let relMem = BASH_RELATIVE_MEMORY_FILE_RE.exec(command);
-    while (relMem) {
-      recordResolvedFilePath(Path.posix.resolve(resolvedCwd, relMem[1]), acc);
-      relMem = BASH_RELATIVE_MEMORY_FILE_RE.exec(command);
+    BASH_FILE_TOKEN_RE.lastIndex = 0;
+    let fileMatch = BASH_FILE_TOKEN_RE.exec(segment);
+    while (fileMatch) {
+      recordResolvedFilePath(fileMatch[1], acc, { baseDir: cwd });
+      fileMatch = BASH_FILE_TOKEN_RE.exec(segment);
     }
-  } else if (
-    resolvedCwd === CORTEX_WORKSPACE_ROOT ||
-    resolvedCwd.startsWith(`${CORTEX_WORKSPACE_ROOT}/`)
-  ) {
-    if (resolvedCwd === CORTEX_WORKSPACE_ROOT) {
-      BASH_RELATIVE_CORTEX_BUCKET_FILE_RE.lastIndex = 0;
-      let relCortex = BASH_RELATIVE_CORTEX_BUCKET_FILE_RE.exec(command);
-      while (relCortex) {
-        const [, bucket, fileWithMd, indexOrReadme] = relCortex;
-        if (indexOrReadme && indexOrReadme.toUpperCase() === 'INDEX.MD') {
-          acc.cortexIndex = true;
-        } else if (bucket && fileWithMd) {
-          recordResolvedFilePath(`${CORTEX_WORKSPACE_ROOT}/${bucket}/${fileWithMd}`, acc);
-        }
-        relCortex = BASH_RELATIVE_CORTEX_BUCKET_FILE_RE.exec(command);
-      }
-    } else {
-      BASH_RELATIVE_SLUG_MD_RE.lastIndex = 0;
-      let relSlug = BASH_RELATIVE_SLUG_MD_RE.exec(command);
-      while (relSlug) {
-        recordResolvedFilePath(Path.posix.resolve(resolvedCwd, relSlug[1]), acc);
-        relSlug = BASH_RELATIVE_SLUG_MD_RE.exec(command);
-      }
-    }
-  } else if (
-    (resolvedCwd === DECISION_TREE_WORKSPACE_ROOT ||
-      resolvedCwd.startsWith(`${DECISION_TREE_WORKSPACE_ROOT}/`)) &&
-    BASH_RELATIVE_MONITORS_RE.test(command)
-  ) {
-    acc.decisionTreeIndex = true;
   }
 };
 
@@ -258,8 +218,8 @@ const recordBashCommandReads = (
  * Extracts canonical IDs of Cortex pages, Semantic Memories, and Decision Trees whose contents
  * the investigator actually saw (`opened_ids` impressions).
  *
- * Failed tool calls (`step.isError === true` or non-zero bash exit code) are excluded so a failed
- * `view_file` or `cat` on a nonexistent path never counts as an impression.
+ * Failed tool calls (`step.isError === true` or non-zero bash exit code) and write-only operations
+ * are excluded so a failed read or blind overwrite never counts as an impression.
  */
 export const extractWorkspaceReads = (
   steps: readonly InvestigationTranscriptStep[]
@@ -315,27 +275,15 @@ export const extractWorkspaceReads = (
  */
 export const extractWorkspaceReadsFromToolCalls = (
   toolCalls: readonly InvestigationToolCall[]
-): WorkspaceReadsSummary => {
-  const steps = stepsFromRound(
-    toolCalls.map((call) => {
-      const results = call.results as RawRoundResult[] | undefined;
-      return {
+): WorkspaceReadsSummary =>
+  extractWorkspaceReads(
+    stepsFromRound(
+      toolCalls.map((call) => ({
         type: 'tool_call',
         tool_id: call.tool_id ?? 'unknown_tool',
         tool_call_id: call.tool_call_id,
         params: call.params ?? {},
-        results,
-      };
-    })
+        results: call.results as RawRoundResult[] | undefined,
+      }))
+    )
   );
-  // Ensure `extractResultSummary` error detection is honored when results are present
-  return extractWorkspaceReads(
-    steps.map((step) => {
-      if (step.kind !== 'tool' || !step.results) {
-        return step;
-      }
-      const { isError } = extractResultSummary(step.results as RawRoundResult[]);
-      return { ...step, isError };
-    })
-  );
-};
