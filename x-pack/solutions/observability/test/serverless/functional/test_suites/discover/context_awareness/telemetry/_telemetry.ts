@@ -38,7 +38,7 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
       `${fieldName} column to be ${shouldBeAdded ? 'added to' : 'removed from'} the data grid`,
       30 * 1000,
       async () => {
-        if ((await testSubjects.exists(headerCell, { timeout: 2000 })) === shouldBeAdded) {
+        if ((await testSubjects.exists(headerCell)) === shouldBeAdded) {
           return true;
         }
 
@@ -46,7 +46,9 @@ export default function ({ getService, getPageObjects }: ObservabilityTelemetryF
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
 
-        return (await testSubjects.exists(headerCell, { timeout: 5000 })) === shouldBeAdded;
+        return shouldBeAdded
+          ? await testSubjects.waitForExists(headerCell, { timeout: 5000 })
+          : !(await testSubjects.exists(headerCell));
       }
     );
   };

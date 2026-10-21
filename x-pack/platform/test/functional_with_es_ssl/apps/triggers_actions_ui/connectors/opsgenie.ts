@@ -180,10 +180,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await testSubjects.selectValue('opsgenie-subActionSelect', 'closeAlert');
 
           await testSubjects.missingOrFail('messageInput');
-          await retry.waitFor('message input to be displayed', async () => {
-            await testSubjects.selectValue('opsgenie-subActionSelect', 'createAlert');
-            return await testSubjects.exists('messageInput');
-          });
+          await testSubjects.click('opsgenie-subActionSelect');
+          await browser.pressKeys(browser.keys.ARROW_UP, browser.keys.ENTER);
+          expect(await testSubjects.getAttribute('opsgenie-subActionSelect', 'value')).to.be(
+            'createAlert'
+          );
+          await testSubjects.existOrFail('messageInput', { timeout: 15000 });
 
           expect(await testSubjects.getAttribute('messageInput', 'value')).to.be('');
         });

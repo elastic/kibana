@@ -169,7 +169,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await dashboardAddPanel.addSavedSearch(SAVED_SEARCH_NAME);
 
       await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentSampleSizeValue()).to.be(CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH);
+      await retry.try(async () => {
+        expect(await dataGrid.getCurrentSampleSizeValue()).to.be(
+          CUSTOM_SAMPLE_SIZE_FOR_SAVED_SEARCH
+        );
+      });
 
       await dataGrid.changeSampleSizeValue(CUSTOM_SAMPLE_SIZE_FOR_DASHBOARD_PANEL);
 
