@@ -191,6 +191,8 @@ spaceTest.describe('HITL waitForInput resume', { tag: tags.deploymentAgnostic },
             workflowExecutionId,
             status: ExecutionStatus.WAITING_FOR_INPUT,
             timeout: WAITING_TIMEOUT,
+            // Step docs refresh separately from the execution doc, so wait for the step itself.
+            until: ({ stepExecutions }) => (findAskStep(stepExecutions)?.id ?? '').length > 0,
           })
         )
       );

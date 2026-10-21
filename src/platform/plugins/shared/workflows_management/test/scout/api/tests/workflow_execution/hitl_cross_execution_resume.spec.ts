@@ -10,6 +10,7 @@
 import { randomUUID } from 'node:crypto';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
+import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/latest';
 import { ExecutionStatus } from '@kbn/workflows/types/latest';
 import { WorkflowsApiService } from '../../../common/apis/workflows';
 
@@ -34,6 +35,9 @@ steps:
 
 const WAITING_TIMEOUT = 30_000;
 const TERMINAL_TIMEOUT = 30_000;
+
+const findAskStepId = (stepExecutions: WorkflowStepExecutionDto[]): string =>
+  stepExecutions.find((step) => step.stepId === 'ask')?.id ?? '';
 
 // Private workflows are only exercised on local stateful, like access_control.spec.ts.
 apiTest.describe(
@@ -110,11 +114,13 @@ apiTest.describe(
               workflowExecutionId,
               status: ExecutionStatus.WAITING_FOR_INPUT,
               timeout: WAITING_TIMEOUT,
+              // Step docs refresh separately from the execution doc, so wait for the step itself.
+              until: ({ stepExecutions }) => findAskStepId(stepExecutions).length > 0,
             })
           )
         );
-        const stepA = pausedA.stepExecutions.find((step) => step.stepId === 'ask')?.id ?? '';
-        const stepB = pausedB.stepExecutions.find((step) => step.stepId === 'ask')?.id ?? '';
+        const stepA = findAskStepId(pausedA.stepExecutions);
+        const stepB = findAskStepId(pausedB.stepExecutions);
         expect(stepA.length).toBeGreaterThan(0);
         expect(stepB.length).toBeGreaterThan(0);
 
