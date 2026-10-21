@@ -285,6 +285,29 @@ export interface ReadinessToken {
   readonly fingerprints: Readonly<Record<string, string>>;
 }
 
+interface ReadinessCacheEntry {
+  readonly generation: number;
+  readonly expected: string | undefined;
+  readonly type: SoTypeFingerprintInput;
+}
+
+const readinessCache = new Map<string, ReadinessCacheEntry>();
+
+/**
+ * Skips the saved-object hash while the token and the registered type object are unchanged.
+ * A new generation, a new fingerprint, or a different type object hashes again.
+ */
+const readinessUnchanged = (
+  cached: ReadinessCacheEntry | undefined,
+  generation: number,
+  expected: string | undefined,
+  type: SoTypeFingerprintInput
+): boolean =>
+  cached !== undefined &&
+  cached.generation === generation &&
+  cached.expected === expected &&
+  cached.type === type;
+
 /** Fails closed when the worker's type registry does not match the token main minted. */
 export const verifyRegistryReadiness = (
   token: ReadinessToken | undefined,
@@ -296,10 +319,14 @@ export const verifyRegistryReadiness = (
   if (registered.length === 0) return;
   for (const type of registered) {
     const expected = token.fingerprints[type.name];
+    const cached = readinessCache.get(type.name);
+    if (readinessUnchanged(cached, token.generation, expected, type)) continue;
     const actual = fingerprintSavedObjectType(type);
     if (expected !== actual) {
+      readinessCache.delete(type.name);
       throw new Error(`worker-core readiness mismatch for saved object type ${type.name}`);
     }
+    readinessCache.set(type.name, { generation: token.generation, expected, type });
   }
 };
 

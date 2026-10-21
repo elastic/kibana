@@ -673,6 +673,37 @@ test('readiness token mismatch fails closed and a matching fingerprint passes', 
   assert.throws(() => verifyRegistryReadiness(undefined, [type]), /readiness token missing/);
 });
 
+test('readiness hash runs once per type and token, then again when the token changes', () => {
+  let reads = 0;
+  const mappings = { properties: { a: { type: 'keyword' } } };
+  const type = {
+    name: 'alert',
+    get mappings() {
+      reads++;
+      return mappings;
+    },
+  };
+  const fingerprint = fingerprintSavedObjectType({ name: 'alert', mappings });
+  const token = { generation: 4, fingerprints: { alert: fingerprint } };
+  verifyRegistryReadiness(token, [type]);
+  const afterFirst = reads;
+  assert.ok(afterFirst > 0);
+  verifyRegistryReadiness(token, [type]);
+  assert.equal(reads, afterFirst);
+  verifyRegistryReadiness({ generation: 5, fingerprints: { alert: fingerprint } }, [type]);
+  assert.ok(reads > afterFirst);
+  assert.throws(
+    () => verifyRegistryReadiness({ generation: 5, fingerprints: { alert: 'stale' } }, [type]),
+    /readiness mismatch for saved object type alert/
+  );
+  const other = { name: 'alert', mappings: { properties: { a: { type: 'text' } } } };
+  assert.throws(
+    () =>
+      verifyRegistryReadiness({ generation: 5, fingerprints: { alert: fingerprint } }, [other]),
+    /readiness mismatch for saved object type alert/
+  );
+});
+
 test('config capture keeps values in memory and exposes only key paths', () => {
   const plain = toPlainConfig({
     enabled: true,
