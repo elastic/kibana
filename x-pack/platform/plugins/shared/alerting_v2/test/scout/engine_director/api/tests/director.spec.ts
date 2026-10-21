@@ -1522,6 +1522,9 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
         .poll(
           async () => {
             await keepSteadyHostFresh();
+            // Drive the execution ourselves: the scheduler interval is far longer
+            // than this poll budget, so the three extra runs must come from `_run`.
+            await apiServices.alertingV2.rules.run(rule.id);
             return (await breachesForHost(STEADY_HOST)).length;
           },
           {
@@ -1542,10 +1545,15 @@ apiTest.describe('Director', { tag: testData.API_ENGINE_TAG }, () => {
       await indexHostDoc(ABSENT_HOST);
       await expect
         .poll(
-          async () =>
-            (
-              await breachesForHost(ABSENT_HOST)
-            ).filter((event) => (event.scheduled_timestamp ?? '') > markerScheduledAt).length,
+          async () => {
+            await keepSteadyHostFresh();
+            // Drive the execution ourselves so the returned data is evaluated within
+            // the poll budget instead of waiting for the next scheduled run.
+            await apiServices.alertingV2.rules.run(rule.id);
+            return (await breachesForHost(ABSENT_HOST)).filter(
+              (event) => (event.scheduled_timestamp ?? '') > markerScheduledAt
+            ).length;
+          },
           { timeout: POLL_TIMEOUT_MS, intervals: [POLL_INTERVAL_MS] }
         )
         .toBeGreaterThanOrEqual(1);
