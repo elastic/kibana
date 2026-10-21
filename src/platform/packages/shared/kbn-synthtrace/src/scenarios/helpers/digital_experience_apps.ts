@@ -29,7 +29,7 @@ export interface DigitalExperienceApp {
 }
 
 export interface DigitalExperienceScenarioOpts {
-  /** Write `attributes.session.id`, which EDOT Browser `main` does not emit yet. */
+  /** Write `attributes.session.id`. Turn off to match EDOT Browser `main`, which doesn't emit it yet. */
   withSessionId: boolean;
   /** Write the web vital attribution as a JSON body, which EDOT Browser only does when opted in. */
   includeRawAttribution: boolean;
@@ -38,7 +38,7 @@ export interface DigitalExperienceScenarioOpts {
 }
 
 const DEFAULT_SCENARIO_OPTS: DigitalExperienceScenarioOpts = {
-  withSessionId: false,
+  withSessionId: true,
   includeRawAttribution: false,
   scale: 1,
 };

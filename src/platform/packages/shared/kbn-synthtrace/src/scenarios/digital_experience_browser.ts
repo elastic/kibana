@@ -27,15 +27,15 @@
  * - docs-web: healthy, low traffic, desktop-heavy
  *
  * Scenario options:
- * - withSessionId (boolean, default: false): write `attributes.session.id`. EDOT Browser `main`
- *   does not emit it yet (elastic/opentelemetry-dev#1410).
+ * - withSessionId (boolean, default: true): write `attributes.session.id`. Set to false to match
+ *   EDOT Browser `main`, which does not emit it yet (elastic/opentelemetry-dev#1410).
  * - includeRawAttribution (boolean, default: false): write the web-vitals attribution as a JSON
  *   body on `browser.web_vital` events, like the instrumentation's experimental opt-in option
  * - scale (number, default: 1): multiplies the number of sessions per minute of every app
  *
  * Run:
  *   node scripts/synthtrace digital_experience_browser --from=now-30m --to=now
- *   node scripts/synthtrace digital_experience_browser --live --scenarioOpts withSessionId=true
+ *   node scripts/synthtrace digital_experience_browser --live --scenarioOpts withSessionId=false
  */
 
 import type { Scenario } from '../cli/scenario';

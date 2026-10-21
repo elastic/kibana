@@ -908,7 +908,7 @@ The data is written through the `otelEsClient`, which indexes documents as-is. I
 
 **Options (both scenarios):**
 
-- `withSessionId` (boolean, default `false`): writes `attributes.session.id`. EDOT Browser does not emit it yet.
+- `withSessionId` (boolean, default `true`): writes `attributes.session.id`. Set it to `false` to match EDOT Browser, which does not emit it yet.
 - `includeRawAttribution` (boolean, default `false`): writes the web-vitals attribution as a JSON string body on `browser.web_vital` events, as the web-vitals instrumentation does when its experimental `includeRawAttribution` option is on.
 - `scale` (number, default `1`): multiplies the number of sessions per minute of every app
 
@@ -928,7 +928,7 @@ Generates EDOT Browser data for five apps in different states of health:
 
 ```sh
 node scripts/synthtrace digital_experience_browser --from=now-30m --to=now
-node scripts/synthtrace digital_experience_browser --live --scenarioOpts withSessionId=true
+node scripts/synthtrace digital_experience_browser --live --scenarioOpts withSessionId=false
 node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts scale=3
 ```
 

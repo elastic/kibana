@@ -19,7 +19,7 @@
  *   `traces-apm.rum-default`. Minimal on purpose: no marks or experience metrics.
  *
  * Scenario options:
- * - withSessionId (boolean, default: false): write `attributes.session.id` on EDOT Browser data
+ * - withSessionId (boolean, default: true): write `attributes.session.id` on EDOT Browser data
  * - includeRawAttribution (boolean, default: false): write web vital attribution JSON bodies
  * - scale (number, default: 1): multiplies the number of sessions/page loads per minute
  *

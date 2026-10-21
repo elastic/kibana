@@ -34,9 +34,9 @@ const collect = (withSessionId: boolean, includeRawAttribution: boolean = false)
 
 describe('digital experience apps', () => {
   describe('parseDigitalExperienceScenarioOpts', () => {
-    it('defaults to no session.id, no raw attribution and scale 1', () => {
+    it('defaults to session.id, no raw attribution and scale 1', () => {
       expect(parseDigitalExperienceScenarioOpts(undefined)).toEqual({
-        withSessionId: false,
+        withSessionId: true,
         includeRawAttribution: false,
         scale: 1,
       });
