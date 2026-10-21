@@ -321,7 +321,7 @@ const ConversationsPageContent: React.FC = () => {
     async (proposal: ProposalItem, { dismissReason, rationale }: DeclineParams) => {
       try {
         await dismissDecision({ id: proposal.id, body: { dismissReason, rationale } });
-        dropDecided(proposal.id);
+        void dropDecided(proposal.id);
       } catch (err) {
         onDecisionError(err);
         throw err;
@@ -353,7 +353,7 @@ const ConversationsPageContent: React.FC = () => {
           onConfirm={async ({ dismissReason, rationale }) => {
             try {
               await dismissDecision({ id: recordId, body: { dismissReason, rationale } });
-              dropDecided(recordId);
+              void dropDecided(recordId);
               onClose();
             } catch (err) {
               onDecisionError(err);
