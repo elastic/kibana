@@ -19,9 +19,17 @@ export interface NotifiableInvestigation {
   title: string;
   severity?: Severity;
   summary?: string;
-  impact?: { entities?: ReadonlyArray<{ name: string }> };
+  /** The conclusion: what caused it. */
+  verdict?: string;
+  impact?: { summary?: string; entities?: ReadonlyArray<{ name: string }> };
+  hypotheses?: ReadonlyArray<{
+    candidate: string;
+    confidence: number;
+    status: string;
+    reason?: string;
+  }>;
   /** Proposed actions; the message names the first. */
-  recommendations?: ReadonlyArray<{ title: string }>;
+  recommendations?: ReadonlyArray<{ title: string; impact?: string; confidence?: string }>;
   error?: string;
 }
 

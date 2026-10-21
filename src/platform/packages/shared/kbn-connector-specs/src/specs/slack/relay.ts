@@ -27,8 +27,16 @@ const RELAY_CHANNEL_SOURCE = 'relay-bindings' as const;
 const createChannelNotConnectedError = (channel: string): Error =>
   new Error(`Channel ${channel} is not connected. Connect it in the Elastic Slack app settings.`);
 
+export type SlackRelayClient = Omit<RelayActionClient, 'trigger'> & {
+  trigger(
+    input: Parameters<RelayActionClient['trigger']>[0] & {
+      blocks?: Array<Record<string, unknown>>;
+    }
+  ): ReturnType<RelayActionClient['trigger']>;
+};
+
 export interface SlackRelayConnection {
-  client: RelayActionClient;
+  client: SlackRelayClient;
   tenantKey: string;
 }
 
@@ -114,6 +122,7 @@ export async function relaySendMessage(
       tenantKey: connection.tenantKey,
       channel,
       message: input.text,
+      ...(input.blocks?.length ? { blocks: input.blocks } : {}),
       ...(input.threadTs ? { threadTs: input.threadTs } : {}),
     });
 
@@ -147,6 +156,7 @@ export async function relayUpdateMessage(
       tenantKey: connection.tenantKey,
       channel,
       message: input.text,
+      ...(input.blocks?.length ? { blocks: input.blocks } : {}),
       messageTs: input.messageTs,
     });
 

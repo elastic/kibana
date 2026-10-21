@@ -184,11 +184,29 @@ const executeDestinationDelivery = async (
     return { status: 'failed', error: diagnostic || 'Notification delivery is unavailable' };
   }
   try {
-    const response = await execute({
+    let response = await execute({
       actionId: destination.connector_id,
       signal,
       params: delivery.params,
     });
+    const subActionParams = delivery.params.subActionParams;
+    if (
+      !signal.aborted &&
+      response.status !== 'ok' &&
+      subActionParams &&
+      typeof subActionParams === 'object' &&
+      'blocks' in subActionParams &&
+      /invalid_blocks|msg_blocks_too_long|failed to post outbound message/i.test(
+        response.serviceMessage || response.message || ''
+      )
+    ) {
+      const { blocks, ...textOnlyParams } = subActionParams;
+      response = await execute({
+        actionId: destination.connector_id,
+        signal,
+        params: { ...delivery.params, subActionParams: textOnlyParams },
+      });
+    }
     return signal.aborted
       ? { status: 'unconfirmed', error: 'Cancelled during notification delivery' }
       : delivery.getOutcome(response);

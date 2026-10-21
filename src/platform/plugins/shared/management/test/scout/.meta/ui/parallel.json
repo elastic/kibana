@@ -1,5 +1,5 @@
 {
-  "sha1": "0ef784bd779f5f502987e88b9f7b6627d74415f2",
+  "sha1": "2912059093413b2d13d4043b631770ccea98d75e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -46,8 +46,8 @@
       }
     },
     {
-      "id": "a85e30db18dd980-94855b8ec67dddd",
-      "title": "Stack Management — data section index_management_user sees index_management and transform in the data section",
+      "id": "a85e30db18dd980-63340f362f8cde5",
+      "title": "Stack Management — data section index_management_user sees index_management, esql_views, and transform in the data section",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -102,8 +102,8 @@
       }
     },
     {
-      "id": "bad08ef0cbf2e37-dd7cc6062509486",
-      "title": "Stack Management — ingest, security, and stack sections manage_security sees only the security section with all four links",
+      "id": "bad08ef0cbf2e37-b4abddae2c2f331",
+      "title": "Stack Management — ingest, security, and stack sections manage_security sees only the security section with all five links",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -124,8 +124,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/management/test/scout/ui/parallel_tests/other_sections.spec.ts",
-        "line": 71,
-        "column": 5
+        "line": 72,
+        "column": 12
       }
     }
   ]
