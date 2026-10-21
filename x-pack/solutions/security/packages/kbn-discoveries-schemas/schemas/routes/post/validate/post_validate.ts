@@ -14,23 +14,25 @@
  *   version: 2023-10-31
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 import { CreateAttackDiscoveryAlertsParams } from '../../../attack_discovery/create_attack_discovery_alerts_params.gen';
 import { AttackDiscoveryApiAlert } from '../../../attack_discovery/attack_discovery_api_alert.gen';
 
 export type PostValidateRequestBody = z.infer<typeof PostValidateRequestBody>;
-export const PostValidateRequestBody = CreateAttackDiscoveryAlertsParams;
+export const PostValidateRequestBody = lazySchema(() => CreateAttackDiscoveryAlertsParams);
 export type PostValidateRequestBodyInput = z.input<typeof PostValidateRequestBody>;
 
 export type PostValidateResponse = z.infer<typeof PostValidateResponse>;
-export const PostValidateResponse = z.object({
-  /**
-   * Number of discoveries dropped because they were duplicates of existing ones
-   */
-  duplicates_dropped_count: z.number().int(),
-  /**
-   * Successfully validated attack discovery alerts
-   */
-  validated_discoveries: z.array(AttackDiscoveryApiAlert),
-});
+export const PostValidateResponse = lazySchema(() =>
+  z.object({
+    /**
+     * Number of discoveries dropped because they were duplicates of existing ones
+     */
+    duplicates_dropped_count: z.number().int(),
+    /**
+     * Successfully validated attack discovery alerts
+     */
+    validated_discoveries: z.array(AttackDiscoveryApiAlert),
+  })
+);

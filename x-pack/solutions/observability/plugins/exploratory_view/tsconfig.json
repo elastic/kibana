@@ -54,7 +54,8 @@
     "@kbn/config-schema",
     "@kbn/chart-expressions-common",
     "@kbn/scout-oblt",
-    "@kbn/app-header"
+    "@kbn/app-header",
+    "@kbn/event-annotation-common"
   ],
   "exclude": ["target/**/*"]
 }

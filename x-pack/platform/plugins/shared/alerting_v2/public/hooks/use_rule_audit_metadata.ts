@@ -10,7 +10,7 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import moment from 'moment';
 import { EMPTY_VALUE } from '../utils/rule_display';
 import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
-import { resolveDisplayName } from '../utils/resolve_display_name';
+import { collectActorUids, resolveDisplayName } from '../utils/resolve_display_name';
 
 type RuleAuditFields = Pick<
   RuleResponse,
@@ -27,9 +27,7 @@ export interface RuleAuditMetadata {
 export const useRuleAuditMetadata = (rule?: RuleAuditFields): RuleAuditMetadata => {
   const uiSettings = useService(CoreStart('uiSettings'));
   const dateFormat: string = uiSettings.get('dateFormat');
-  const auditUids = [rule?.created_by, rule?.updated_by].filter((uid): uid is string =>
-    Boolean(uid)
-  );
+  const auditUids = collectActorUids([rule?.created_by, rule?.updated_by]);
   const { data: profileByUid } = useBulkGetUserProfiles({ uids: auditUids });
 
   const formatDate = (date: string | undefined): string =>

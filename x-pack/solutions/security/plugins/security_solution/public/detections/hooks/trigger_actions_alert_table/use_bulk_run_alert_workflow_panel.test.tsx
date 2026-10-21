@@ -22,6 +22,11 @@ jest.mock('@kbn/workflows-ui', () => ({
 }));
 jest.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
 
+const mockUseCaseAttachmentWorkflowRouting = jest.fn();
+jest.mock('@kbn/cases-plugin/public', () => ({
+  useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
+}));
+
 const useWorkflowsCapabilitiesMock = useWorkflowsCapabilities as jest.MockedFunction<
   typeof useWorkflowsCapabilities
 >;
@@ -48,10 +53,12 @@ jest.mock('../../components/alerts_table/timeline_actions/use_run_alert_workflow
   );
   const MockAlertWorkflowsPanel = ({
     alertIds,
+    isBulk,
   }: {
     alertIds: Array<{ _id: string; _index: string }>;
+    isBulk?: boolean;
   }) => (
-    <div data-test-subj="bulk-alert-workflows-panel">
+    <div data-test-subj="bulk-alert-workflows-panel" data-is-bulk={String(isBulk)}>
       {alertIds.map((a) => (
         <span key={a._id} data-test-subj={`alert-id-${a._id}`}>
           {`${a._id}:${a._index}`}
@@ -70,6 +77,7 @@ describe('useBulkRunAlertWorkflowPanel', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
     useWorkflowsCapabilitiesMock.mockReturnValue(createCapabilities());
     useWorkflowsUIEnabledSettingMock.mockReturnValue(true);
+    mockUseCaseAttachmentWorkflowRouting.mockReturnValue('outside');
   });
 
   afterEach(() => {
@@ -136,6 +144,28 @@ describe('useBulkRunAlertWorkflowPanel', () => {
       expect(result.current.runWorkflowItems).toEqual([]);
       expect(result.current.runWorkflowPanels).toEqual([]);
     });
+
+    it('returns empty arrays inside a case where Cases workflow runs are unavailable', () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('unavailable');
+
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.runWorkflowItems).toEqual([]);
+      expect(result.current.runWorkflowPanels).toEqual([]);
+    });
+
+    it('returns run workflow items inside a case where Cases workflow runs are available', () => {
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
+
+      const { result } = renderHook(() => useBulkRunAlertWorkflowPanel(), {
+        wrapper: TestProviders,
+      });
+
+      expect(result.current.runWorkflowItems).toHaveLength(1);
+      expect(result.current.runWorkflowPanels).toHaveLength(1);
+    });
   });
 
   describe('panel renderContent', () => {
@@ -159,6 +189,10 @@ describe('useBulkRunAlertWorkflowPanel', () => {
       render(<TestProviders>{renderContent(props)}</TestProviders>);
 
       expect(screen.getByTestId('bulk-alert-workflows-panel')).toBeInTheDocument();
+      expect(screen.getByTestId('bulk-alert-workflows-panel')).toHaveAttribute(
+        'data-is-bulk',
+        'true'
+      );
       expect(screen.getByTestId('alert-id-alert-1')).toHaveTextContent('alert-1:index-1');
       expect(screen.getByTestId('alert-id-alert-2')).toHaveTextContent('alert-2:index-2');
     });

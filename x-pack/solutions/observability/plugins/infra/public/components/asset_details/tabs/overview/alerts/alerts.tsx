@@ -40,7 +40,7 @@ export const AlertsSummaryContent = ({
   const [collapsibleStatus, setCollapsibleStatus] =
     useState<EuiAccordionProps['forceState']>('open');
   const [activeAlertsCount, setActiveAlertsCount] = useState<number | undefined>(undefined);
-  const createAlertRuleButtonRef = useRef<HTMLButtonElement>(null);
+  const createAlertRuleButtonRef = useRef<HTMLButtonElement | HTMLAnchorElement>(null);
 
   const focusTrapProps = createFocusTrapProps(createAlertRuleButtonRef.current);
 

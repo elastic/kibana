@@ -9,7 +9,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('X-Pack Observability Accessibility Tests', function () {
-    loadTestFile(require.resolve('./uptime'));
     loadTestFile(require.resolve('./observability'));
   });
 }

@@ -12,16 +12,18 @@ import type {
   BoundOptions,
   BoundInferenceClient,
   InferenceClient,
-  AnonymizationRule,
   InferenceCallbacks,
 } from '@kbn/inference-common';
+import type { AnonymizationRule } from '@kbn/ai-anonymization-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import type {
+  InferenceAnonymizationOptions,
+  RegexWorkerService,
+} from '@kbn/ai-anonymization-server';
 import type { ActionsClientProvider } from '../types';
 import { createInferenceClient } from './inference_client';
 import { bindClient } from '../../common/inference_client/bind_client';
-import type { RegexWorkerService } from '../chat_complete/anonymization/regex_worker_service';
-import type { InferenceAnonymizationOptions } from './anonymization_options';
 import type { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 import type { TokenUsageLogger } from '../token_usage';
 
@@ -41,6 +43,8 @@ interface CreateClientOptions {
   isTokenUsageTrackingEnabled?: () => Promise<boolean>;
   isDefaultConnectorOnly?: () => Promise<boolean>;
   getDefaultConnectorId?: () => Promise<string | undefined>;
+  resolveConnectorId?: (connectorId: string) => Promise<string>;
+  shouldStreamInferenceEndpoint?: (service?: string) => Promise<boolean>;
 }
 
 interface BoundCreateClientOptions extends CreateClientOptions {
@@ -68,6 +72,8 @@ export function createClient(
     isTokenUsageTrackingEnabled,
     isDefaultConnectorOnly,
     getDefaultConnectorId,
+    resolveConnectorId,
+    shouldStreamInferenceEndpoint,
   } = options;
   const client = createInferenceClient({
     request,
@@ -85,6 +91,8 @@ export function createClient(
     isTokenUsageTrackingEnabled,
     isDefaultConnectorOnly,
     getDefaultConnectorId,
+    resolveConnectorId,
+    shouldStreamInferenceEndpoint,
   });
   if ('bindTo' in options) {
     return bindClient(client, options.bindTo);
@@ -107,7 +115,8 @@ interface CreateClientWithoutRequestOptions {
  * but no HTTP request context.
  *
  * Internally wraps the actionsClient in an actions-like object so that the underlying
- * createInferenceClient can resolve connectors. Anonymization is not available.
+ * createInferenceClient can resolve connectors. Anonymization is not available, and
+ * inference endpoints always stream since the per-space streaming setting cannot be read.
  */
 export const createClientWithoutRequest = ({
   actionsClient,

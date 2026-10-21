@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ProposalConfidence, ProposalImpact } from '@kbn/agentic-investigations-plugin/common';
+import type { ProposalConfidence, ProposalImpact } from '@kbn/proposals-common';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
 import type { ProposalItem } from '../../../common/proposals/list';
 import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
@@ -15,16 +15,11 @@ import { CLOSED_GROUP_KEY } from '../../../common/proposals/list';
  * Category an action declares → queue bucket. Keyed loosely because a category is an
  * arbitrary keyword (`actionCategorySchema` is a bounded string, not an enum), so an
  * action can declare one this page has never heard of.
- *
- * `tune` is retained for back-compatibility only: the shipped catalog now declares
- * `configure` directly, but proposals created before that snapshot their category at
- * creation and are never re-scored.
  */
 const CATEGORY_TO_BUCKET: Record<string, RecommendedAction> = {
   respond: 'respond',
   investigate: 'investigate',
   configure: 'configure',
-  tune: 'configure',
 };
 
 /**
@@ -59,16 +54,17 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  * Data gaps — fields that cannot be faithfully mapped from a ProposalItem:
  *
  * - `template_id`      fabricated `'investigation'`; a proposal is not an investigation.
- * - `watch_id`         fabricated `''`; no equivalent on a proposal.
- * - `watch_execution_id` fabricated `''`; no equivalent.
+ * - `worker_execution_ids` empty; no equivalent on a proposal.
  * - `events`           `[]`; proposals have no timeline. The flyout renders an empty list.
- * - `affectedSurface`  `undefined`; Impact self-hides (returns null) with no surfaces.
+ * - `affectedSurface`  first Impact entity id, when hydrated; otherwise undefined.
+ * - `entityIds`        from the conversation's Impact document; omitted when none.
  * - `status`           deliberately `undefined`. A proposal's own statuses (`'pending'`,
  *                      `'succeeded'`, …) are not investigation statuses, and mapping them
  *                      across would be inventing a meaning. The bucket carries the part
  *                      the queue actually needs: decided proposals land in `closed`.
  * - `severity`         lossy 4→3 collapse: `critical` → `'high'` so the danger icon fires.
- * - `updatedAt`        approximated as `decidedAt ?? createdAt`; proposals have no mtime.
+ * - `proposalCreatedAt` / `proposalDecidedAt` the proposal's own timestamps. The decision time
+ *                      dates the closed rows.
  * - `recordId`         repurposed as the proposal id; the page gates dismiss/assign modals
  *                      on `modalState.recordId`, so this must be non-null for the ⋮ menu
  *                      items to work.
@@ -85,21 +81,17 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
 
   const impactRank = IMPACT_RANK[proposal.impact];
   const confidenceRank = CONFIDENCE_RANK[proposal.confidence];
+  const conversationTitle = proposal.conversationTitle ?? UNTITLED_INVESTIGATION;
 
   return {
     id: proposal.id,
     template_id: 'investigation',
-    // A card is titled by the investigation it belongs to, never by its action: the
-    // action name is already the call to action, and repeating it as the title loses
-    // the only thing that says which incident this decision is about.
-    title: proposal.conversationTitle ?? UNTITLED_INVESTIGATION,
+    title: proposal.title,
     createdAt: proposal.createdAt,
-    // Proposals have no modification timestamp; decidedAt is the closest event.
-    updatedAt: proposal.decidedAt ?? proposal.createdAt,
-    // watch_id and watch_execution_id are required by the type but have no
-    // equivalent on a proposal — fabricated as empty strings.
-    watch_id: '',
-    watch_execution_id: '',
+    proposalCreatedAt: proposal.createdAt,
+    proposalDecidedAt: proposal.decidedAt,
+    // Proposals do not carry worker execution IDs.
+    worker_execution_ids: [],
     // status is deliberately omitted — see the data-gap note above.
     pendingProposalCount: proposal.decidedAt ? 0 : 1,
     recommendedAction: bucket,
@@ -112,13 +104,20 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     // recordId is repurposed to carry the proposal id into the ⋮ modal system.
     // The page renders dismiss/assign modals only if modalState.recordId is set.
     recordId: proposal.id,
-    summary: proposal.comment,
-    primaryActionLabel: proposal.action?.name,
+    conversationId: proposal.conversationId,
+    summary: conversationTitle,
+    // Decided rows have no action button, and the compact row prints this after the title.
+    primaryActionLabel: isClosed ? conversationTitle : proposal.title,
     // `conversationAssignees` is an array but `Investigation.assignee` is singular,
     // because the flyout header renders one avatar. First entry wins, as in the
     // conversation adapter.
     assignee: proposal.conversationAssignees[0] ?? null,
+    assignees: proposal.conversationAssignees,
     events: [],
-    // affectedSurface left undefined → Impact self-hides (returns null).
+    entityIds: proposal.entityIds,
+    entityTypes: proposal.entityTypes,
+    // First id feeds the flyout Overview "Compromised" row until that surface
+    // reads `entityIds` directly. Pills and the queue filter use `entityIds`.
+    affectedSurface: proposal.entityIds?.[0],
   };
 };

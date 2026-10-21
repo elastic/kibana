@@ -1,0 +1,6 @@
+# newer versions go on top
+- version: "1.0.0"
+  changes:
+    - description: Initial test package for cloud connector integration tests
+      type: enhancement
+      link: https://github.com/elastic/kibana/issues/291250

@@ -8,48 +8,24 @@
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
+import { mockEcfOnlyServicePackages } from '../helpers/ecf_only_services';
+import {
+  expectOnboardingStepVisible,
+  navigateToOnboardingStep,
+  useOnboardingFeatureFlag,
+} from '../helpers/onboarding';
 
 // Services are grouped by category; only the active category's rows are rendered in the DOM.
 // Default active category: security_identity_compliance (first in CATEGORY_ORDER).
 // No services are selected by default — the user must pick them.
 
 test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => {
-  test.beforeAll(async ({ apiServices, config }) => {
-    // The /internal/core/_settings route is only registered when
-    // coreApp.allowDynamicConfigOverrides=true (Scout's local stateful base config).
-    // ECH deployments don't carry that override, so the PUT 404s. Skip on Cloud.
-    // eslint-disable-next-line playwright/no-skipped-test
-    test.skip(
-      config.isCloud === true,
-      `Core API returns 404 for 'ingestHub.onboardingEnabled' on ECH`
-    );
-    // skip() in beforeAll only skips the tests, not the hook body itself.
-    if (config.isCloud) {
-      return;
-    }
-
-    await apiServices.core.settings({
-      'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': 'true',
-      },
-    });
-  });
-
-  test.afterAll(async ({ apiServices, config }) => {
-    if (config.isCloud) {
-      return;
-    }
-    await apiServices.core.settings({
-      'feature_flags.overrides': {
-        'ingestHub.onboardingEnabled': 'false',
-      },
-    });
-  });
+  useOnboardingFeatureFlag();
 
   test('renders step header and default category view', async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    await expectOnboardingStepVisible(page, 'services');
 
     await expect(page.getByText('Which AWS services do you want to monitor?')).toBeVisible();
 
@@ -65,7 +41,7 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
   test('select and deselect a service', async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    await expectOnboardingStepVisible(page, 'services');
 
     // guardduty starts unchecked; click to select
     await expect(page.testSubj.locator('servicesStep-toggle-guardduty')).not.toBeChecked();
@@ -80,7 +56,7 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
   test('per-category select all and deselect all', async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    await expectOnboardingStepVisible(page, 'services');
 
     // nothing selected → "Select all" is shown for Security
     await expect(page.testSubj.locator('servicesStep-selectAllButton')).toBeVisible();
@@ -103,7 +79,7 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
   test('Continue is disabled when no services are selected', async ({ browserAuth, page }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    await expectOnboardingStepVisible(page, 'services');
 
     // no services selected on first load — Continue is disabled
     await expect(page.testSubj.locator('servicesStep-continueButton')).toBeDisabled();
@@ -119,7 +95,7 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
   }) => {
     await browserAuth.loginAsAdmin();
     await page.gotoApp('onboarding/aws#services');
-    await expect(page.testSubj.locator('onboardingStep-services')).toBeVisible();
+    await expectOnboardingStepVisible(page, 'services');
 
     // Databases is visible in "All" mode (dynamodb, rds are metrics-only)
     await expect(page.testSubj.locator('servicesStep-category-databases')).toBeVisible();
@@ -143,5 +119,48 @@ test.describe('Onboarding services step', { tag: tags.stateful.classic }, () => 
     // Metrics filter on Databases view — dynamodb stays visible (it is a metrics service)
     await page.testSubj.locator('servicesStep-signalFilter').getByText('Metrics').click();
     await expect(page.testSubj.locator('servicesStep-serviceRow-dynamodb')).toBeVisible();
+  });
+
+  // ECF-only services (OTel format) can only be deployed through ECF. `waf_otel` is in the default
+  // category (security_identity_compliance).
+  test('ecf-only services: warns when one is selected', async ({ browserAuth, page }) => {
+    await mockEcfOnlyServicePackages(page);
+    await navigateToOnboardingStep(browserAuth, page, 'services', {
+      dataFormat: 'otel',
+      selectedServiceIds: [],
+    });
+    const callout = page.testSubj.locator('servicesStep-ecfOnlyCallout');
+    await expect(callout).toBeHidden();
+
+    await page.testSubj.locator('servicesStep-toggle-waf_otel').click();
+    await expect(callout).toBeVisible();
+    await expect(callout).toContainText('AWS WAF');
+
+    await page.testSubj.locator('servicesStep-toggle-waf_otel').click();
+    await expect(callout).toBeHidden();
+  });
+
+  test('ecf-only services: cannot be selected while agent-based is the deployment method', async ({
+    browserAuth,
+    page,
+  }) => {
+    await mockEcfOnlyServicePackages(page);
+    await navigateToOnboardingStep(browserAuth, page, 'services', {
+      dataFormat: 'otel',
+      selectedServiceIds: [],
+      authenticateAndDeployStep: { deploymentMethod: 'agent_based' },
+    });
+
+    const toggle = page.testSubj.locator('servicesStep-toggle-waf_otel');
+    await expect(toggle).toBeDisabled();
+
+    await page.testSubj.locator('servicesStep-serviceRow-waf_otel').hover();
+    await expect(
+      page.getByText("Agent-based deployment doesn't support this service.")
+    ).toBeVisible();
+
+    // Select all skips the unavailable services.
+    await page.testSubj.locator('servicesStep-selectAllButton').click();
+    await expect(toggle).not.toBeChecked();
   });
 });

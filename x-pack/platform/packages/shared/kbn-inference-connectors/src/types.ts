@@ -10,6 +10,7 @@ import type { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 import type { EisInferenceEndpointMetadata } from '@kbn/inference-common';
 
 export type AIConnector = ActionConnector & {
+  isInferenceEndpoint?: boolean;
   // related to OpenAI connectors, ex: Azure OpenAI, OpenAI
   apiProvider?: OpenAiProviderType;
   isRecommended?: boolean;
