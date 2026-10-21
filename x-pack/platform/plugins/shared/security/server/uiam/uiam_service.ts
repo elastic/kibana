@@ -35,6 +35,7 @@ import type {
   GrantUiamAPIKeyParams,
 } from '@kbn/security-plugin-types-server';
 
+import type { UiamAuthorizationCheck, UiamAuthorizationResult } from './authorization_types';
 import {
   getUiamClientAuthentication,
   type UiamClientAuthentication,
@@ -159,6 +160,23 @@ export type ResolvedUsersResponse = UiamResolvedUsersResponse;
  * Maximum number of user IDs in a single request (aligned with UIAM limit).
  */
 const RESOLVE_USERS_BATCH_SIZE = 100;
+
+type UiamAuthorizationDecision = 'permit' | 'deny';
+
+/**
+ * Represents the request body for an authorization check via UIAM.
+ */
+interface UiamCheckAuthorizationRequestBody {
+  checks: UiamAuthorizationCheck[];
+}
+
+/**
+ * Represents the response from an authorization check via UIAM, in the order of the request's checks.
+ */
+interface UiamCheckAuthorizationResponse {
+  decision: UiamAuthorizationDecision;
+  checks: Array<{ check: UiamAuthorizationCheck; decision: UiamAuthorizationDecision }>;
+}
 
 /**
  * Shape of the `error` object inside a UIAM non-2xx response payload, mirroring
@@ -454,6 +472,16 @@ export interface UiamServicePublic {
    * @param userIds The user IDs to resolve.
    */
   resolveUsers(request: KibanaRequest, userIds: string[]): Promise<ResolvedUsersResponse>;
+
+  /**
+   * Asks UIAM whether the principal behind the request may perform each action on each resource.
+   * @param request The request carrying the UIAM access token and optional client authentication.
+   * @param checks The checks to evaluate.
+   */
+  checkAuthorization(
+    request: KibanaRequest,
+    checks: UiamAuthorizationCheck[]
+  ): Promise<UiamAuthorizationResult>;
 }
 
 interface UiamServiceOptions {
@@ -1440,6 +1468,47 @@ export class UiamService implements UiamServicePublic {
 
     this.#logger.debug('Successfully resolved users.');
     return { users };
+  }
+
+  /**
+   * See {@link UiamServicePublic.checkAuthorization}.
+   */
+  async checkAuthorization(
+    request: KibanaRequest,
+    checks: UiamAuthorizationCheck[]
+  ): Promise<UiamAuthorizationResult> {
+    this.#logger.debug(`Attempting to check authorization for ${checks.length} check(s).`);
+
+    try {
+      const body: UiamCheckAuthorizationRequestBody = { checks };
+      const requestOptions: RequestInit & { dispatcher?: Agent } = {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'User-Agent': this.#userAgentHeader,
+          ...this.#getRequestAuthenticationHeaders(request),
+        },
+        body: JSON.stringify(body),
+        dispatcher: this.#dispatcher,
+      };
+
+      const response: UiamCheckAuthorizationResponse = await UiamService.#parseUiamResponse(
+        await fetch(`${this.#config.url}/uiam/api/v1/authorization/_check`, requestOptions)
+      );
+
+      this.#logger.debug(`Successfully checked authorization: ${response.decision}.`);
+      return {
+        permitted: response.decision === 'permit',
+        checks: response.checks.map(({ check, decision }) => ({
+          ...check,
+          permitted: decision === 'permit',
+        })),
+      };
+    } catch (err) {
+      this.#logger.error(() => `Failed to check authorization: ${getDetailedErrorMessage(err)}`);
+
+      throw err;
+    }
   }
 
   /**
