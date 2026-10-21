@@ -323,6 +323,46 @@ describe('CreateMaintenanceWindowForm', () => {
       await user.click(within(modal).getByRole('button', { name: 'Apply to all alerts' }));
     };
 
+    it('creates with the title entered by the user', async () => {
+      appMockRenderer.render(<CreateMaintenanceWindowForm {...formProps} />);
+
+      const titleInput = await screen.findByTestId('createMaintenanceWindowFormNameInput');
+      await user.click(titleInput);
+      await user.paste('My entered title');
+      await user.click(screen.getByTestId('create-submit'));
+
+      expect(createMutate).not.toHaveBeenCalled();
+      await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
+
+      await waitFor(() => {
+        expect(createMutate).toHaveBeenCalledTimes(1);
+        expect(createMutate.mock.calls[0][0]).toMatchObject({
+          title: 'My entered title',
+          scope: { alerting: { enabled: true } },
+        });
+      });
+    });
+
+    it('creates with only unfiltered Episodes after toggling Alerts off and Episodes on', async () => {
+      renderCreateMode();
+
+      await user.click(await screen.findByTestId('maintenanceWindowScopedQuerySwitch'));
+      await user.click(screen.getByTestId('alertingV2ScopedQuerySwitch'));
+      await user.click(screen.getByTestId('create-submit'));
+
+      expect(createMutate).not.toHaveBeenCalled();
+      expect(screen.queryByTestId('saveWithoutScopesConfirmModal')).not.toBeInTheDocument();
+      await confirmApplyToAllAlerts(APPLY_TO_ALL_BODY);
+
+      await waitFor(() => {
+        expect(createMutate).toHaveBeenCalledTimes(1);
+        expect(createMutate.mock.calls[0][0]).toMatchObject({ title: 'My window' });
+        expect(createMutate.mock.calls[0][0].scope).toEqual({
+          alertingV2: { enabled: true },
+        });
+      });
+    });
+
     it('creates with the default scope when Alerts is on and no filters are set', async () => {
       renderCreateMode();
 
