@@ -10,10 +10,17 @@ import { test as baseTest, createLazyPageObject } from '@kbn/scout';
 // The globalSearch page object is owned by the global_search plugin; reuse its fixture wiring.
 import type { GlobalSearchPageObjects } from '@kbn/global-search-plugin/test/scout/ui/fixtures/page_objects';
 import { extendPageObjects as extendPageObjectsWithGlobalSearch } from '@kbn/global-search-plugin/test/scout/ui/fixtures/page_objects';
-import { RuleDetailsPage, StackAlertsPage } from './page_objects';
+import {
+  ClassicRulesPage,
+  ProjectManagementNav,
+  RuleDetailsPage,
+  StackAlertsPage,
+} from './page_objects';
 
 export interface ExtScoutTestFixtures extends ScoutTestFixtures {
   pageObjects: GlobalSearchPageObjects & {
+    classicRulesPage: ClassicRulesPage;
+    projectManagementNav: ProjectManagementNav;
     ruleDetailsPage: RuleDetailsPage;
     stackAlertsPage: StackAlertsPage;
   };
@@ -32,6 +39,8 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
   ) => {
     const extendedPageObjects = {
       ...extendPageObjectsWithGlobalSearch(pageObjects, page),
+      classicRulesPage: createLazyPageObject(ClassicRulesPage, page),
+      projectManagementNav: createLazyPageObject(ProjectManagementNav, page),
       ruleDetailsPage: createLazyPageObject(RuleDetailsPage, page),
       stackAlertsPage: createLazyPageObject(StackAlertsPage, page),
     };
@@ -56,6 +65,8 @@ export {
 } from './constants';
 export {
   makeEsQueryRule,
+  makeV1EsQueryRuleTemplateAttributes,
+  RULE_TEMPLATE_SO_TYPE,
   makeIndexThresholdRule,
   fillIndexThresholdForm,
   defineIndexThresholdRule,
@@ -76,3 +87,13 @@ export {
   closeFlyoutIfOpen,
   cancelRuleCreation,
 } from './connector_helpers';
+export {
+  CLASSIC_RULES_CREATE_URL_RE,
+  CLASSIC_RULES_DETAILS_URL_RE,
+  CLASSIC_RULES_EDIT_URL_RE,
+  CLASSIC_RULES_LIST_URL_RE,
+  CLASSIC_RULES_NESTED_RULES_URL_RE,
+  CLASSIC_RULES_LOGS_URL_RE,
+  MANAGEMENT_ALERTING_V2_URL_RE,
+  STANDALONE_RULES_APP_URL_RE,
+} from './page_objects';

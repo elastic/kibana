@@ -12,12 +12,12 @@ import type {
   Logger,
   Plugin,
   PluginInitializerContext,
+  SavedObjectsClientContract,
+  SavedObjectsServiceStart,
 } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { ApiPrivileges } from '@kbn/core-security-server';
 
-import type { SearchInferenceEndpointsConfig } from './config';
-import { DynamicConnectorsPoller } from './lib/dynamic_connectors';
 import { defineRoutes } from './routes';
 import { InferenceFeatureRegistry } from './inference_feature_registry';
 import { getForFeature as getForFeatureFn } from './inference_endpoints';
@@ -31,7 +31,6 @@ import type {
   SearchInferenceEndpointsPluginStartDependencies,
 } from './types';
 import {
-  DYNAMIC_CONNECTORS_POLLING_START_DELAY,
   ELASTIC_INFERENCE_SERVICE_APP_ID,
   INFERENCE_ENDPOINTS_APP_ID,
   INFERENCE_SETTINGS_SO_TYPE,
@@ -40,6 +39,20 @@ import {
   PLUGIN_ID,
   PLUGIN_NAME,
 } from '../common/constants';
+
+// Model settings are admin policy that must apply to every user, including those
+// without read access to the settings saved object, so the read bypasses user authz
+// while staying scoped to the request's active space.
+const getInferenceSettingsClient = (
+  savedObjects: SavedObjectsServiceStart,
+  request: KibanaRequest
+): SavedObjectsClientContract => {
+  const internalClient = savedObjects.getUnsafeInternalClient({
+    includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
+  });
+  const namespace = savedObjects.getScopedClient(request).getCurrentNamespace();
+  return namespace ? internalClient.asScopedToNamespace(namespace) : internalClient;
+};
 
 export class SearchInferenceEndpointsPlugin
   implements
@@ -51,13 +64,10 @@ export class SearchInferenceEndpointsPlugin
     >
 {
   private readonly logger: Logger;
-  private readonly config: SearchInferenceEndpointsConfig;
-  private dynamicConnectorsPoller?: DynamicConnectorsPoller;
   private readonly featureRegistry: InferenceFeatureRegistry;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
-    this.config = initializerContext.config.get<SearchInferenceEndpointsConfig>();
     this.featureRegistry = new InferenceFeatureRegistry(this.logger);
   }
 
@@ -77,9 +87,7 @@ export class SearchInferenceEndpointsPlugin
 
     const getForFeature = async (featureId: string, request: KibanaRequest) => {
       const [coreStart, pluginsStart] = await core.getStartServices();
-      const soClient = coreStart.savedObjects.getScopedClient(request, {
-        includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
-      });
+      const soClient = getInferenceSettingsClient(coreStart.savedObjects, request);
       const getConnectorById = (id: string) => pluginsStart.inference.getConnectorById(id, request);
       return getForFeatureFn(featureRegistry, soClient, getConnectorById, featureId, this.logger);
     };
@@ -164,22 +172,6 @@ export class SearchInferenceEndpointsPlugin
   }
 
   public start(core: CoreStart, plugins: SearchInferenceEndpointsPluginStartDependencies) {
-    if (this.config.dynamicConnectors.enabled) {
-      this.logger.debug(
-        `dynamic connectors enabled: ${this.config.dynamicConnectors.enabled} - polling ${this.config.dynamicConnectors.pollingIntervalMins} mins`
-      );
-      this.dynamicConnectorsPoller = new DynamicConnectorsPoller(
-        this.logger,
-        plugins.actions,
-        core.elasticsearch.client.asInternalUser,
-        this.config.dynamicConnectors.pollingIntervalMins
-      );
-
-      setTimeout(() => {
-        this.dynamicConnectorsPoller?.start();
-      }, DYNAMIC_CONNECTORS_POLLING_START_DELAY);
-    }
-
     const featureRegistry = this.featureRegistry;
 
     return {
@@ -196,9 +188,7 @@ export class SearchInferenceEndpointsPlugin
           request: KibanaRequest,
           opts?: GetForFeatureOptions
         ) => {
-          const soClient = core.savedObjects.getScopedClient(request, {
-            includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
-          });
+          const soClient = getInferenceSettingsClient(core.savedObjects, request);
           const getConnectorById = (id: string) => plugins.inference.getConnectorById(id, request);
           const uiSettingsClient = core.uiSettings.asScopedToClient(
             core.savedObjects.getScopedClient(request)
@@ -228,13 +218,5 @@ export class SearchInferenceEndpointsPlugin
         },
       },
     };
-  }
-
-  public stop() {
-    if (this.dynamicConnectorsPoller) {
-      const dynamicConnectorsPoller = this.dynamicConnectorsPoller;
-      this.dynamicConnectorsPoller = undefined;
-      dynamicConnectorsPoller.stop();
-    }
   }
 }

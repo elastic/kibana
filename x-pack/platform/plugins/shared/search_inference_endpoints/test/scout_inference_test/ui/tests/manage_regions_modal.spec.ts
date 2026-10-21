@@ -110,11 +110,11 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     await eisModels.manageRegionsSaveButton.click();
 
     await test.step('confirmation modal appears', async () => {
-      await expect(eisModels.confirmRegionChangeModal).toBeVisible();
+      await expect(eisModels.confirmRegionSelectionModal).toBeVisible();
     });
 
     await test.step('geo list shows only the selected geos', async () => {
-      const geoList = eisModels.confirmRegionChangeModalGeoList;
+      const geoList = eisModels.confirmRegionSelectionGeoList;
       await expect(geoList).toBeVisible();
       await expect(geoList).not.toContainText('Asia Pacific');
       await expect(geoList).toContainText('Europe');
@@ -133,11 +133,11 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
 
     await eisModels.geoZoneCheckbox('eu').click();
     await eisModels.manageRegionsSaveButton.click();
-    await expect(eisModels.confirmRegionChangeModal).toBeVisible();
+    await expect(eisModels.confirmRegionSelectionModal).toBeVisible();
 
-    await eisModels.confirmRegionChangeCancelButton.click();
+    await eisModels.confirmRegionSelectionCancelButton.click();
 
-    await expect(eisModels.confirmRegionChangeModal).toBeHidden();
+    await expect(eisModels.confirmRegionSelectionModal).toBeHidden();
     await expect(eisModels.manageRegionsModal).toBeVisible();
   });
 
@@ -150,11 +150,11 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
 
     await eisModels.geoZoneCheckbox('eu').click();
     await eisModels.manageRegionsSaveButton.click();
-    await expect(eisModels.confirmRegionChangeModal).toBeVisible();
+    await expect(eisModels.confirmRegionSelectionModal).toBeVisible();
 
-    await eisModels.confirmRegionChangeSaveButton.click();
+    await eisModels.confirmRegionSelectionSaveButton.click();
 
-    await expect(eisModels.confirmRegionChangeModal).toBeHidden();
+    await expect(eisModels.confirmRegionSelectionModal).toBeHidden();
     await expect(eisModels.manageRegionsModal).toBeHidden();
   });
 
@@ -171,8 +171,8 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
 
     await eisModels.geoZoneCheckbox('eu').click();
     await eisModels.manageRegionsSaveButton.click();
-    await expect(eisModels.confirmRegionChangeModal).toBeVisible();
-    await eisModels.confirmRegionChangeSaveButton.click();
+    await expect(eisModels.confirmRegionSelectionModal).toBeVisible();
+    await eisModels.confirmRegionSelectionSaveButton.click();
     await expect(eisModels.manageRegionsModal).toBeHidden();
 
     await eisModels.manageRegionsButton.click();
@@ -247,9 +247,9 @@ test.describe('Manage Region Preferences modal', { tag: [...INFERENCE_LOCAL_TAGS
     await eisModels.manageRegionsSaveButton.click();
 
     await test.step('confirmation modal appears with region list', async () => {
-      await expect(eisModels.confirmRegionChangeModal).toBeVisible();
-      await expect(eisModels.confirmRegionChangeModalRegionList).toBeVisible();
-      await expect(eisModels.confirmRegionChangeModalGeoList).toBeHidden();
+      await expect(eisModels.confirmRegionSelectionModal).toBeVisible();
+      await expect(eisModels.confirmRegionSelectionRegionList).toBeVisible();
+      await expect(eisModels.confirmRegionSelectionGeoList).toBeHidden();
     });
   });
 

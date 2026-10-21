@@ -13,7 +13,6 @@ import {
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   apiTest,
   buildCreateActionPolicyData,
-  buildCreateRuleData,
   getActionPolicyUrl,
   NO_ACCESS_ROLE,
   testData,
@@ -45,9 +44,9 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
           name: 'policy-name',
           description: 'policy-description',
           destinations: [{ type: 'workflow', id: 'policy-workflow-id' }],
-          matcher: "env == 'production' && region == 'us-east-1'",
-          group_by: ['service.name'],
-          throttle: { interval: '10m' },
+          matcher: { expression: "env == 'production' && region == 'us-east-1'" },
+          grouping: { mode: 'per_field', fields: ['service.name'] },
+          throttle: { strategy: 'time_interval', interval: '10m' },
         })
       );
 
@@ -57,19 +56,26 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
 
       expect(response).toHaveStatusCode(200);
       expect(response.body.id).toBe(created.id);
-      expect(typeof response.body.version).toBe('string');
       expect(response.body.name).toBe('policy-name');
       expect(response.body.description).toBe('policy-description');
       expect(response.body.destinations).toStrictEqual([
         { type: 'workflow', id: 'policy-workflow-id' },
       ]);
-      expect(response.body.matcher).toBe("env == 'production' && region == 'us-east-1'");
-      expect(response.body.group_by).toStrictEqual(['service.name']);
-      expect(response.body.throttle).toStrictEqual({ interval: '10m' });
+      expect(response.body.matcher).toMatchObject({
+        expression: "env == 'production' && region == 'us-east-1'",
+      });
+      expect(response.body.grouping).toStrictEqual({ mode: 'per_field', fields: ['service.name'] });
+      expect(response.body.throttle).toStrictEqual({
+        strategy: 'time_interval',
+        interval: '10m',
+      });
       expect(new Date(response.body.created_at).toISOString()).toBe(response.body.created_at);
       expect(new Date(response.body.updated_at).toISOString()).toBe(response.body.updated_at);
-      expect(typeof response.body.auth.owner).toBe('string');
-      expect(response.body.auth.apiKey).toBeUndefined();
+      // Actors are structured objects, not the legacy bare profile-UID string.
+      expect(typeof response.body.created_by.profile_uid).toBe('string');
+      expect(typeof response.body.updated_by.profile_uid).toBe('string');
+      // API key ownership is server-side only and must never be exposed over the wire.
+      expect(response.body.auth).toBeUndefined();
     }
   );
 
@@ -87,28 +93,21 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toMatchObject({
-        id: created.id,
-        enabled: true,
-        snoozed_until: null,
-        matcher: null,
-        group_by: null,
-        grouping_mode: null,
-        throttle: null,
-      });
+      expect(response.body).toMatchObject({ id: created.id, enabled: true });
+      expect(response.body.matcher).toBeUndefined();
+      expect(response.body.grouping).toBeUndefined();
+      expect(response.body.throttle).toBeUndefined();
+      expect(response.body.snoozed_until).toBeUndefined();
     }
   );
 
   apiTest(
-    'get: returns the rule.id matcher for a rule-scoped policy',
+    'get: returns the tags matcher for a tag-scoped policy',
     async ({ apiClient, apiServices }) => {
-      const rule = await apiServices.alertingV2.rules.create(
-        buildCreateRuleData({ metadata: { name: 'rule-for-get-scoped' } })
-      );
-      const matcher = `rule.id: "${rule.id}"`;
+      const matcher = { tags: ['notify-get-scoped'] };
       const created = await apiServices.alertingV2.actionPolicies.create(
         buildCreateActionPolicyData({
-          name: 'rule-scoped-policy',
+          name: 'tag-scoped-policy',
           matcher,
         })
       );
@@ -118,7 +117,7 @@ apiTest.describe('Get action policy API', { tag: '@local-stateful-classic' }, ()
       });
 
       expect(response).toHaveStatusCode(200);
-      expect(response.body.matcher).toBe(matcher);
+      expect(response.body.matcher).toStrictEqual(matcher);
     }
   );
 

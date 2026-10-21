@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import {
-  createAlertEventDataSchema,
-  createAlertEventPathBodySchema,
-} from './create_alert_event_data_schema';
+import { createAlertEventDataSchema } from './create_alert_event_data_schema';
 import {
   ID_MAX_LENGTH,
   MAX_ALERT_EVENT_DATA_KEYS,
@@ -30,13 +27,8 @@ describe('create alert event body schemas', () => {
     ).toBe(true);
   });
 
-  it('accepts a well-formed path body without source', () => {
-    expect(createAlertEventPathBodySchema.safeParse(baseWithoutSource).success).toBe(true);
-  });
-
   it('requires source on the canonical schema and not on the path body schema', () => {
     expect(createAlertEventDataSchema.safeParse(baseWithoutSource).success).toBe(false);
-    expect(createAlertEventPathBodySchema.safeParse(baseWithoutSource).success).toBe(true);
   });
 
   it('rejects oversized fingerprint / source / fingerprint_fields', () => {
@@ -74,13 +66,11 @@ describe('create alert event body schemas', () => {
     ).toBe(false);
   });
 
-  it('requires one of fingerprint, fingerprint_fields, or rule_id on both schemas', () => {
+  it('requires one of fingerprint, fingerprint_fields, or rule_id on schema', () => {
     expect(createAlertEventDataSchema.safeParse({ source: 'datadog' }).success).toBe(false);
     expect(
       createAlertEventDataSchema.safeParse({ source: 'datadog', rule_id: 'mon-1' }).success
     ).toBe(true);
-    expect(createAlertEventPathBodySchema.safeParse({}).success).toBe(false);
-    expect(createAlertEventPathBodySchema.safeParse({ rule_id: 'mon-1' }).success).toBe(true);
   });
 
   it('rejects unknown top-level keys (closed schema, no passthrough)', () => {
@@ -88,12 +78,6 @@ describe('create alert event body schemas', () => {
       createAlertEventDataSchema.safeParse({
         ...baseWithSource,
         monitor_id: '55501',
-      }).success
-    ).toBe(false);
-    expect(
-      createAlertEventPathBodySchema.safeParse({
-        ...baseWithoutSource,
-        scope: 'host:web-01',
       }).success
     ).toBe(false);
   });

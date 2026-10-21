@@ -86,7 +86,7 @@ const mockUseUiSetting = useUiSetting as jest.MockedFunction<typeof useUiSetting
 
 const mockProfilingTab: Tab = {
   id: ContentTabIds.PROFILING,
-  name: 'Universal Profiling',
+  name: 'Profiling',
 };
 
 const mockOverviewTab: Tab = {
@@ -154,7 +154,7 @@ describe('usePageHeader', () => {
       expect(profilingTabEntry).toBeDefined();
       expect(profilingTabEntry?.id).toBe(ContentTabIds.PROFILING);
       expect(profilingTabEntry?.['data-test-subj']).toBe('infraAssetDetailsProfilingTab');
-      expect(profilingTabEntry?.label).toBe('Universal Profiling');
+      expect(profilingTabEntry?.label).toBe('Profiling');
     });
 
     it('should exclude profiling tab when profiling plugin is disabled', () => {
@@ -196,6 +196,38 @@ describe('usePageHeader', () => {
       );
 
       expect(profilingTabEntry?.isSelected).toBe(true);
+    });
+
+    it('should expose AppHeader tabs with the same selection and click behavior', () => {
+      const showTabMock = jest.fn();
+      useProfilingPluginSettingMock.mockReturnValue(true);
+      useTabSwitcherContextMock.mockReturnValue({
+        showTab: showTabMock,
+        activeTabId: ContentTabIds.OVERVIEW,
+        renderedTabsSet: { current: new Set([ContentTabIds.OVERVIEW, ContentTabIds.PROFILING]) },
+      } as unknown as ReturnType<typeof useTabSwitcherContext>);
+
+      const { result } = renderHook(() => usePageHeader([mockOverviewTab, mockProfilingTab], []));
+
+      expect(result.current.appHeaderTabs).toEqual([
+        {
+          id: ContentTabIds.OVERVIEW,
+          label: 'Overview',
+          isSelected: true,
+          onClick: expect.any(Function),
+          'data-test-subj': 'infraAssetDetailsOverviewTab',
+        },
+        {
+          id: ContentTabIds.PROFILING,
+          label: 'Profiling',
+          isSelected: false,
+          onClick: expect.any(Function),
+          'data-test-subj': 'infraAssetDetailsProfilingTab',
+        },
+      ]);
+
+      result.current.appHeaderTabs[1].onClick?.();
+      expect(showTabMock).toHaveBeenCalledWith(ContentTabIds.PROFILING);
     });
 
     it('should call showTab with profiling tab id when profiling tab is clicked', () => {

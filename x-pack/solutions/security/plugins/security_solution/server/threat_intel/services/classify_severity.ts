@@ -7,18 +7,18 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
-import { z } from '@kbn/zod/v4';
-import {
-  SEVERITY_LEVELS,
-  type SeverityLevel,
-  type ThreatCategory,
-} from '../../../common/threat_intel';
+import { isContextLengthExceededError } from '@kbn/inference-common';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { type SeverityLevel, type ThreatCategory } from '../../../common/threat_intel';
 import { severityScore } from './severity';
 import { logStageUsage } from '../lib/cost_tracker';
+import {
+  furtherShrinkOverflowArticleContext,
+  selectOverflowRetryArticleContext,
+} from './article_context';
+import { requireParsedStructuredOutput } from './structured_output';
 
-const SEVERITY_BODY_CHAR_LIMIT = 30_000;
-
-const severityLevelSchema = z.enum(['low', 'medium', 'high', 'critical']);
+const severityLevelSchema = lazySchema(() => z.enum(['low', 'medium', 'high', 'critical']));
 
 /**
  * Bounds a free-text model field before it is stored. Truncates rather than
@@ -29,10 +29,12 @@ const boundedText = (max: number) => z.string().transform((v) => v.slice(0, max)
 /** A sentence or two justifying the level, not an essay. */
 const SEVERITY_RATIONALE_CHAR_LIMIT = 2_000;
 
-export const classifySeverityLlmOutputSchema = z.object({
-  level: severityLevelSchema,
-  rationale: boundedText(SEVERITY_RATIONALE_CHAR_LIMIT).optional(),
-});
+export const classifySeverityLlmOutputSchema = lazySchema(() =>
+  z.object({
+    level: severityLevelSchema,
+    rationale: boundedText(SEVERITY_RATIONALE_CHAR_LIMIT).optional(),
+  })
+);
 
 export type ClassifySeverityLlmOutput = z.infer<typeof classifySeverityLlmOutputSchema>;
 
@@ -58,7 +60,6 @@ export const toSeverityResult = (level: SeverityLevel): ClassifySeverityResult =
 });
 
 const buildSeverityPrompt = (params: ClassifySeverityParams): string => {
-  const truncated = params.text.slice(0, SEVERITY_BODY_CHAR_LIMIT);
   const reportIdLine = params.report_id ? `Report id: ${params.report_id}\n` : '';
   const titleLine = params.title ? `Report title: ${params.title}\n` : '';
   const categoriesLine =
@@ -91,7 +92,7 @@ Do not invent urgency. Prefer medium when uncertain between medium and high.
 Prefer low for clearly non-actionable commentary.
 
 ${reportIdLine}${titleLine}${categoriesLine}${iocLine}Report text:
-${truncated}`;
+${params.text}`;
 };
 
 /**
@@ -111,17 +112,44 @@ export const classifySeverity = async (
   logger: Logger,
   params: ClassifySeverityParams
 ): Promise<ClassifySeverityResult> => {
-  const prompt = buildSeverityPrompt(params);
   const inferenceEndpointId = model.connector.connectorId;
 
   const structured = model.chatModel.withStructuredOutput(classifySeverityLlmOutputSchema, {
     includeRaw: true,
   });
 
-  const result = (await structured.invoke(prompt)) as {
+  const invokeSeverity = async (
+    promptText: string
+  ): Promise<{
     raw: { response_metadata: Record<string, unknown> };
-    parsed: ClassifySeverityLlmOutput | undefined;
+    parsed: ClassifySeverityLlmOutput | null;
+  }> => {
+    return (await structured.invoke(buildSeverityPrompt({ ...params, text: promptText }))) as {
+      raw: { response_metadata: Record<string, unknown> };
+      parsed: ClassifySeverityLlmOutput | null;
+    };
   };
+
+  let text = params.text;
+  let result: {
+    raw: { response_metadata: Record<string, unknown> };
+    parsed: ClassifySeverityLlmOutput | null;
+  };
+  try {
+    result = await invokeSeverity(text);
+  } catch (error) {
+    if (!isContextLengthExceededError(error as Error)) throw error;
+    let context = selectOverflowRetryArticleContext(params.text);
+    text = context.text;
+    try {
+      result = await invokeSeverity(text);
+    } catch (retryError) {
+      if (!isContextLengthExceededError(retryError as Error)) throw retryError;
+      context = furtherShrinkOverflowArticleContext(context);
+      text = context.text;
+      result = await invokeSeverity(text);
+    }
+  }
 
   logStageUsage(
     logger,
@@ -130,14 +158,9 @@ export const classifySeverity = async (
     result.raw.response_metadata ?? {}
   );
 
-  const level = result.parsed?.level;
-  if (!level || !(SEVERITY_LEVELS as readonly string[]).includes(level)) {
-    throw new Error(
-      `classify_severity returned invalid level=${String(level)} report_id=${params.report_id}`
-    );
-  }
+  const { parsed } = requireParsedStructuredOutput(result, 'classify_severity');
 
-  const classified = toSeverityResult(level);
+  const classified = toSeverityResult(parsed.level);
   logger.debug(
     `classify_severity ok level=${classified.level} score=${classified.score} ` +
       `report_id=${params.report_id}`
@@ -145,6 +168,6 @@ export const classifySeverity = async (
 
   return {
     ...classified,
-    ...(result.parsed?.rationale ? { rationale: result.parsed.rationale } : {}),
+    ...(parsed.rationale ? { rationale: parsed.rationale } : {}),
   };
 };

@@ -6,16 +6,16 @@
  */
 
 import type { BaseMessageLike } from '@langchain/core/messages';
-import type { ToolManager } from '@kbn/agent-builder-server/runner';
+import type { Logger } from '@kbn/core/server';
+import type { ToolManager, ToolResultStore } from '@kbn/agent-builder-server/runner';
 import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
-import type { ExperimentalFeatures } from '@kbn/agent-builder-server';
+import type { DeploymentContext, ExperimentalFeatures } from '@kbn/agent-builder-server';
 import type { RendererTypeDefinition } from '@kbn/agent-builder-server/renderers';
 import type { InternalSkillDefinition } from '@kbn/agent-builder-server/skills';
 import type { ResolvedConfiguration } from '../types';
 import type { ProcessedConversation } from '../utils/prepare_conversation';
 import type { ToolCallResultTransformer } from '../utils/tool_summarization';
-import type { ResearchAgentAction, AnswerAgentAction } from '../actions';
-import type { RelevantSkillSelection } from '../utils/relevant_skills/select_relevant_skills';
+import type { CurrentRun } from '../transient_state';
 
 /** Never call from the tool-result path — image bytes must not enter tool results. */
 export type PromptImageResolver = (ref: {
@@ -30,17 +30,18 @@ export interface PromptFactoryParams {
    * system prompt does not break prompt caching.
    */
   spaceId: string;
+  deployment: DeploymentContext;
   processedConversation: ProcessedConversation;
   skills: InternalSkillDefinition[];
-  /**
-   * Tool manager, used by intra-round compaction to map tool ids and look up summarizers.
-   */
   toolManager: ToolManager;
   /**
-   * Transformer for tool call results in conversation history.
-   * Used to summarize/substitute large results to optimize context.
+   * Transformer for tool call results in conversation history (tool-specific summarization).
+   * Results marked by a substitution step are additionally rendered as file references.
    */
   resultTransformer: ToolCallResultTransformer;
+  /** Source of the file references substituted tool results are rendered as. */
+  resultStore: ToolResultStore;
+  logger: Logger;
   outputSchema?: Record<string, unknown>;
   conversationTimestamp: string;
   experimentalFeatures: ExperimentalFeatures;
@@ -52,20 +53,24 @@ export interface PromptFactoryParams {
    * is only the flag.
    */
   relevantSkillsEnabled: boolean;
-  relevantSkills?: RelevantSkillSelection;
   imageResolver?: PromptImageResolver;
   conversationTemplates: ConversationTemplatesService;
+  /** Whether the run can write the conversation's metadata (`set_conversation_metadata` is registered). */
+  conversationMetadataWritable: boolean;
+}
+
+export interface HandoverParams {
+  message: string;
+  forceful: boolean;
 }
 
 export interface ResearchAgentPromptRuntimeParams {
-  cycleLimit: number;
-  actions: ResearchAgentAction[];
+  run: CurrentRun;
 }
 
 export interface AnswerAgentPromptRuntimeParams {
-  cycleLimit: number;
-  actions: ResearchAgentAction[];
-  answerActions: AnswerAgentAction[];
+  run: CurrentRun;
+  handover?: HandoverParams;
 }
 
 export interface PromptFactory {

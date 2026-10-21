@@ -9,20 +9,30 @@
 
 import React from 'react';
 import type { ReactNode } from 'react';
-import { EuiText, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { useShowMore } from '../../hooks/use_show_more';
 
 export interface SecondaryMenuSectionProps {
   children: ReactNode;
+  id?: string;
+  isPaginated?: boolean;
   label?: string;
 }
 
 export const SecondaryMenuSectionComponent = ({
   children,
+  id,
+  isPaginated = false,
   label,
 }: SecondaryMenuSectionProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
   const { euiTheme, highContrastMode } = euiThemeContext;
+
+  const { hasMore, listRef, showMore, visibleItems } = useShowMore(children, isPaginated);
 
   const sectionId = label ? label.replace(/\s+/g, '-').toLowerCase() : undefined;
 
@@ -60,6 +70,11 @@ export const SecondaryMenuSectionComponent = ({
     display: block;
   `;
 
+  // Same inline padding as items, so the chevron lines up with item labels.
+  const showMoreStyles = css`
+    padding-inline: ${euiTheme.size.s};
+  `;
+
   const listStyles = css`
     display: flex;
     flex-direction: column;
@@ -74,8 +89,26 @@ export const SecondaryMenuSectionComponent = ({
           {label}
         </EuiText>
       )}
-      <ul css={listStyles} role="none">
-        {children}
+      <ul css={listStyles} ref={listRef} role="none">
+        {visibleItems}
+        {hasMore && (
+          <li role="none">
+            <EuiButtonEmpty
+              color="text"
+              css={showMoreStyles}
+              data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-section-${
+                id ?? sectionId ?? 'untitled'
+              }-showMore`}
+              iconType="chevronSingleDown"
+              onClick={showMore}
+              size="xs"
+            >
+              {i18n.translate('kbnUI.sideNavigation.section.showMore', {
+                defaultMessage: 'Show more',
+              })}
+            </EuiButtonEmpty>
+          </li>
+        )}
       </ul>
     </div>
   );

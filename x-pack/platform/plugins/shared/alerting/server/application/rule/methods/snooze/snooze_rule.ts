@@ -101,6 +101,7 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
   }
 
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
   const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
 
   const updatedRuleRaw = await updateRuleSo({
@@ -110,6 +111,7 @@ async function snoozeWithOCC<Params extends RuleParams = never>(
     updateRuleAttributes: updateMetaAttributes(context, {
       ...newAttrs,
       updatedBy: username,
+      updatedByProfileUid: profileUid,
       updatedAt: new Date().toISOString(),
     }),
   });

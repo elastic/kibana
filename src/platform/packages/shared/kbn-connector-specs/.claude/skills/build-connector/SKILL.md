@@ -55,6 +55,12 @@ connector's PR (Task 12) — every row will read `⚠️ Not validated — needs
 testing happens, but the table itself is not optional; see
 `create-connector/reference/pr-validation-table.md`.
 
+Building several connectors in one session also leaks entries between them. Shared files (`toc.yml`,
+the connector-list snippet, `all_specs.ts`, `connector_icons_map.ts`, `CODEOWNERS`) are edited for every
+connector, and an entry for one can end up on another's branch: the AKS PR shipped a dangling Azure
+DevOps entry in two docs files. Before committing each connector, diff those files and confirm every
+added line belongs to that connector.
+
 ---
 
 ## Task 1: Create the Connector Code
@@ -116,8 +122,8 @@ Use `AskUserQuestion` to ask the user to start Elasticsearch and Kibana:
 > To test the connector, I need Elasticsearch and Kibana running. Please start them if they aren't already:
 >
 > ```
-> yarn es snapshot          # in one terminal
-> yarn start                # in another terminal
+> pnpm es snapshot          # in one terminal
+> pnpm start                # in another terminal
 > ```
 >
 > Let me know when both are ready.
@@ -145,13 +151,13 @@ Skill: activate-connector
 Args: $ARGUMENTS
 ```
 
-This will list available types, ask the user for credentials, and create the connector instance via the Actions API. When `agentBuilder:experimentalFeatures` is true, the connector's sub-actions become available to agents.
+This will list available types, ask the user for credentials, and create the connector instance via the Actions API. Creating the connector does not by itself grant any agent access to it — its ID must be added to an agent's assigned connectors before that agent can call its sub-actions.
 
-**If the user reports `Error: No widget found for schema type: ZodNumberFormat...`** when opening the
-connector creation form in the Kibana UI, a `z.number()` field was used in the connector's config
-`schema` — the form-generator has no numeric widget. Fix it per "There is no widget for `z.number()`
-config fields" in `create-connector/reference/connector-patterns.md` (regex-validated string + `text`
-widget, coerced to a number in the handler), then ask the user to retry.
+**If the user reports `Error: No widget found for schema type: ...`** when opening the connector
+creation form in the Kibana UI, a config field in the connector's `schema` uses a Zod type the
+form-generator has no widget for (a boolean, array, or record — numbers are supported). Fix it per
+"Config fields must use a type the form-generator has a widget for" in
+`create-connector/reference/connector-patterns.md`, then ask the user to retry.
 
 Mark task 5 as `completed`.
 
@@ -188,6 +194,15 @@ Args: <agent-id-from-task-6>
 ```
 
 Capture and analyze the full output (reasoning, tool calls, tool results, response).
+
+This prompt only exercises reads. The bugs that most often ship are in mutating actions (a wrong HTTP
+method, a wrong body envelope, a nested object that loses a field), and a read-only chat never reaches
+them. After the chat test, call **every mutating action once directly** through
+`POST /api/actions/connector/<id>/_execute` against a disposable resource, then read the resource back
+to confirm the change took effect. Where the vendor documents resource variants (e.g. a DNS-only
+cluster, a System node pool), run at least one action against each variant you can create. If a
+mutation cannot be tested safely, record it as `⚠️ Not validated` in Task 12 rather than skipping it
+silently.
 
 Mark task 7 as `completed`.
 
@@ -235,6 +250,10 @@ If tools failed (tool results contain `"status":"failed"`):
      specific param belongs, fix the handler, and check any sibling action (e.g. the corresponding
      mute/unmute or enable/disable pair) for the same mistake — don't assume the sibling is correct just
      because it wasn't the one that failed.
+   - An error that names the wrong cause on a **mutating** call — e.g. Azure ARM's `InvalidAPIVersion`
+     for a method the route does not support, or `UnmarshalError: unknown field "properties"` for a body
+     wrapped in an envelope the route does not use. Before changing API versions or field names, check
+     the route's method and body shape in the vendor's OpenAPI/swagger entry for that exact route.
 3. If the error is a **sub-action issue** (wrong name, invalid parameters) — this needs code fixes.
 4. If the error is a **connector issue** (wrong auth config, wrong server URL) — this needs code fixes.
 

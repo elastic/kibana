@@ -6,10 +6,12 @@
  */
 
 import type { ChromeBreadcrumb, CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { AppHeaderTab } from '@kbn/app-header';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { LocatorHost } from '@kbn/rule-data-utils';
 import type { ActionTypeRegistryContract, RuleTypeRegistryContract } from '../types';
 import type { TriggersAndActionsUiServices } from './rules_app';
 
@@ -18,6 +20,11 @@ export interface ClassicRulesPageProps {
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
   /** Host app history. Falls back to an isolated memory history when omitted. */
   history?: ScopedHistory;
+  /** When true the rules-list page header omits its back-navigation link. */
+  hideListBackButton?: boolean;
+  /** Host app and in-app path prefix for v1 locators. Defaults to Stack Management. */
+  host?: LocatorHost;
+  tabs?: AppHeaderTab[];
 }
 
 export type ClassicRulesPagePluginsStart = Pick<

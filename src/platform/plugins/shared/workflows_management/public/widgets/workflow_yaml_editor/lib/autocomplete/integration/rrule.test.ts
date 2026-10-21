@@ -9,8 +9,11 @@
 
 import type { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
+import { createMockWorkflowContextRegistry } from '../../../../../../common/lib/create_workflow_context_registry.mock';
 import { getFakeAutocompleteContextParams } from '../context/build_autocomplete_context.test';
 import { getCompletionItemProvider } from '../get_completion_item_provider';
+
+const emptyRegistry = createMockWorkflowContextRegistry();
 
 async function getSuggestions(
   yamlContent: string,
@@ -21,6 +24,7 @@ async function getSuggestions(
     connectorTypes
   );
   const completionProvider = getCompletionItemProvider(
+    emptyRegistry,
     () => fakeAutocompleteContextParams.editorState
   );
 

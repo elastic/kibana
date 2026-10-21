@@ -6,8 +6,8 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import {
@@ -34,7 +34,6 @@ describe('SearchInferenceEndpointsPlugin', () => {
     const context = coreMock.createPluginInitializerContext<SearchInferenceEndpointsConfig>({
       enabled: true,
       ui: { enabled: true },
-      dynamicConnectors: { enabled: false, pollingIntervalMins: 15 },
     });
     plugin = new SearchInferenceEndpointsPlugin(context);
     coreSetup = coreMock.createSetup();
@@ -111,19 +110,96 @@ describe('SearchInferenceEndpointsPlugin', () => {
       inference.getConnectorList.mockResolvedValue([]);
       inference.getConnectorById.mockRejectedValue(new Error('not found'));
 
-      startContract = plugin.start(coreStart, {
-        actions: actionsMock.createStart(),
-        inference,
-      });
+      startContract = plugin.start(coreStart, { inference });
     });
 
-    it('endpoints.getForFeature reads inference settings with getScopedClient', async () => {
+    it('endpoints.getForFeature reads inference settings with the internal client', async () => {
       const request = httpServerMock.createKibanaRequest();
       await startContract.endpoints.getForFeature('any_feature', request);
 
-      expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request, {
+      expect(coreStart.savedObjects.getUnsafeInternalClient).toHaveBeenCalledWith({
         includedHiddenTypes: [INFERENCE_SETTINGS_SO_TYPE],
       });
+    });
+
+    it('scopes the internal settings client to the namespace of the request', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const scopedClient = savedObjectsClientMock.create();
+      scopedClient.getCurrentNamespace.mockReturnValue('applications');
+      coreStart.savedObjects.getScopedClient.mockReturnValue(scopedClient);
+
+      const internalClient = savedObjectsClientMock.create();
+      const spaceScopedClient = savedObjectsClientMock.create();
+      internalClient.asScopedToNamespace.mockReturnValue(spaceScopedClient);
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(internalClient);
+
+      await startContract.endpoints.getForFeature('any_feature', request);
+
+      expect(internalClient.asScopedToNamespace).toHaveBeenCalledWith('applications');
+      expect(spaceScopedClient.get).toHaveBeenCalledWith(INFERENCE_SETTINGS_SO_TYPE, 'default');
+      expect(internalClient.get).not.toHaveBeenCalled();
+    });
+
+    it('does not scope the internal settings client when the request is in the default space', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const internalClient = savedObjectsClientMock.create();
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(internalClient);
+
+      await startContract.endpoints.getForFeature('any_feature', request);
+
+      expect(internalClient.asScopedToNamespace).not.toHaveBeenCalled();
+      expect(internalClient.get).toHaveBeenCalledWith(INFERENCE_SETTINGS_SO_TYPE, 'default');
+    });
+
+    it('applies the admin-configured model list to users who cannot read the settings saved object', async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const scopedClient = savedObjectsClientMock.create();
+      scopedClient.get.mockRejectedValue(
+        SavedObjectsErrorHelpers.decorateForbiddenError(
+          new Error(`Unable to get ${INFERENCE_SETTINGS_SO_TYPE}`)
+        )
+      );
+      coreStart.savedObjects.getScopedClient.mockReturnValue(scopedClient);
+
+      const internalClient = savedObjectsClientMock.create();
+      internalClient.get.mockResolvedValue({
+        id: 'default',
+        type: INFERENCE_SETTINGS_SO_TYPE,
+        references: [],
+        attributes: { features: [{ feature_id: 'any_feature', endpoints: [{ id: 'allowed' }] }] },
+      });
+      coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(internalClient);
+
+      const createConnector = (connectorId: string) => ({
+        connectorId,
+        name: connectorId,
+        type: '.gen-ai',
+        config: {},
+        capabilities: {},
+        isPreconfigured: false,
+        isInferenceEndpoint: false,
+      });
+      const inference = inferenceMock.createStartContract();
+      inference.getConnectorList.mockResolvedValue([
+        createConnector('allowed'),
+        createConnector('hidden'),
+      ] as any);
+      inference.getConnectorById.mockImplementation(
+        async (id: string) => createConnector(id) as any
+      );
+
+      const contract = plugin.start(coreStart, { inference });
+      contract.features.register({
+        featureId: 'any_feature',
+        featureName: 'Any feature',
+        featureDescription: 'Any feature',
+        taskType: 'chat_completion',
+        recommendedEndpoints: [],
+      });
+      const result = await contract.endpoints.getForFeature('any_feature', request);
+
+      expect(result.soEntryFound).toBe(true);
+      expect(result.endpoints.map((e) => e.connectorId)).toEqual(['allowed']);
     });
 
     it('creates a separate scoped SO client per request, ensuring space isolation', async () => {
@@ -175,10 +251,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
         inference.getConnectorList.mockResolvedValue([]);
         inference.getConnectorById.mockResolvedValue(defaultConnector as any);
 
-        const contractWithDefaultOnly = plugin.start(coreStart, {
-          actions: actionsMock.createStart(),
-          inference,
-        });
+        const contractWithDefaultOnly = plugin.start(coreStart, { inference });
 
         const result = await contractWithDefaultOnly.endpoints.getForFeature(
           'any_feature',
@@ -208,10 +281,7 @@ describe('SearchInferenceEndpointsPlugin', () => {
         inference.getConnectorList.mockResolvedValue([]);
         inference.getConnectorById.mockRejectedValue(new Error('not found'));
 
-        const contractWithDefaultOnly = plugin.start(coreStart, {
-          actions: actionsMock.createStart(),
-          inference,
-        });
+        const contractWithDefaultOnly = plugin.start(coreStart, { inference });
 
         const result = await contractWithDefaultOnly.endpoints.getForFeature(
           'any_feature',

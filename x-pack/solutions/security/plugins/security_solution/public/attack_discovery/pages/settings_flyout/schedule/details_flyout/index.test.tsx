@@ -85,7 +85,7 @@ const setupUseKibana = (
         },
       },
       featureFlags: {
-        getBooleanValue: jest.fn().mockReturnValue(isWorkflowsEnabled),
+        useBooleanValue: jest.fn().mockReturnValue(isWorkflowsEnabled),
       },
       lens: {
         EmbeddableComponent: () => <div data-test-subj="mockEmbeddableComponent" />,

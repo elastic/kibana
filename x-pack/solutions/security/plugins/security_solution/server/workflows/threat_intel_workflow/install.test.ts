@@ -6,6 +6,7 @@
  */
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import {
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
@@ -14,6 +15,7 @@ import {
 } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import {
+  ensureThreatIntelSupplyWorkflowsForSpace,
   installThreatIntelManagedWorkflows,
   reconcileThreatIntelAttributeWorkflows,
   uninstallThreatIntelManagedWorkflows,
@@ -48,30 +50,198 @@ beforeEach(() => {
 });
 
 describe('threat intel managed workflow install', () => {
-  it('installs ingest and enrich once globally and attribute per space', async () => {
-    const client = createClient();
+  const supplyWorkflowIds = [
+    THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+    THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID,
+  ];
 
-    await installThreatIntelManagedWorkflows({
-      managedWorkflowsClient: client as never,
-      spaceIds: ['default', 'space-a'],
-      logger,
+  describe('installThreatIntelManagedWorkflows', () => {
+    const runInstall = async (client: ReturnType<typeof createClient>) =>
+      installThreatIntelManagedWorkflows({
+        managedWorkflowsClient: client as never,
+        spaceIds: ['default', 'space-a'],
+        logger,
+      });
+
+    it.each(supplyWorkflowIds)('returns %s installed in the default space', async (workflowId) => {
+      const client = createClient();
+
+      await runInstall(client);
+
+      expect(client.install).toHaveBeenCalledWith(workflowId, { spaceId: DEFAULT_SPACE_ID });
     });
 
-    expect(client.install).toHaveBeenCalledWith(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID, {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+    it.each(supplyWorkflowIds)(
+      'returns the legacy global %s uninstalled before the default-space install',
+      async (workflowId) => {
+        const client = createClient();
+
+        await runInstall(client);
+
+        const uninstallOrder =
+          client.uninstall.mock.invocationCallOrder[
+            client.uninstall.mock.calls.findIndex(
+              ([id, options]) => id === workflowId && options.spaceId === GLOBAL_WORKFLOW_SPACE_ID
+            )
+          ];
+        const installOrder =
+          client.install.mock.invocationCallOrder[
+            client.install.mock.calls.findIndex(
+              ([id, options]) => id === workflowId && options.spaceId === DEFAULT_SPACE_ID
+            )
+          ];
+        expect(uninstallOrder).toBeLessThan(installOrder);
+      }
+    );
+
+    it('returns no supply install in the global workflow space', async () => {
+      const client = createClient();
+
+      await runInstall(client);
+
+      expect(
+        client.install.mock.calls.filter(
+          ([, options]) => options.spaceId === GLOBAL_WORKFLOW_SPACE_ID
+        )
+      ).toEqual([]);
     });
-    expect(client.install).toHaveBeenCalledWith(THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID, {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+
+    it('returns attribute installed per space', async () => {
+      const client = createClient();
+
+      await runInstall(client);
+
+      expect(
+        client.install.mock.calls.filter(([id]) => id === THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID)
+      ).toEqual([
+        [
+          THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
+          { spaceId: 'default', workflowIdSuffix: 'default' },
+        ],
+        [
+          THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID,
+          { spaceId: 'space-a', workflowIdSuffix: 'space-a' },
+        ],
+      ]);
     });
-    expect(client.install).toHaveBeenCalledWith(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
-      spaceId: 'default',
-      workflowIdSuffix: 'default',
+
+    describe('when the legacy global uninstall fails', () => {
+      let client: ReturnType<typeof createClient>;
+
+      beforeEach(async () => {
+        client = createClient();
+        client.uninstall.mockRejectedValue(new Error('forbidden'));
+        await runInstall(client);
+      });
+
+      it.each(supplyWorkflowIds)(
+        'returns %s tracked in the global space so it is not orphan-cleaned',
+        (workflowId) => {
+          expect(client.install).toHaveBeenCalledWith(workflowId, {
+            spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+          });
+        }
+      );
+
+      it.each(supplyWorkflowIds)(
+        'returns %s tracked in the default space so it is not orphan-cleaned',
+        (workflowId) => {
+          expect(client.install).toHaveBeenCalledWith(workflowId, {
+            spaceId: DEFAULT_SPACE_ID,
+          });
+        }
+      );
+
+      it('returns each supply workflow install attempted once per space', () => {
+        expect(
+          client.install.mock.calls.filter(([id]) => id === THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID)
+        ).toHaveLength(2);
+      });
+
+      it('returns the attribute workflows still installed', () => {
+        expect(client.install).toHaveBeenCalledWith(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
+          spaceId: 'space-a',
+          workflowIdSuffix: 'space-a',
+        });
+      });
     });
-    expect(client.install).toHaveBeenCalledWith(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
-      spaceId: 'space-a',
-      workflowIdSuffix: 'space-a',
+  });
+
+  describe('ensureThreatIntelSupplyWorkflowsForSpace', () => {
+    const defaultArgs = { spaceId: 'another' };
+
+    it.each(supplyWorkflowIds)('returns %s installed in the default space', async (workflowId) => {
+      const client = createClient();
+
+      await ensureThreatIntelSupplyWorkflowsForSpace({
+        ...defaultArgs,
+        managedWorkflowsClient: client as never,
+      });
+
+      expect(client.install).toHaveBeenCalledWith(workflowId, { spaceId: DEFAULT_SPACE_ID });
     });
-    expect(client.install).toHaveBeenCalledTimes(4);
+
+    it.each(supplyWorkflowIds)(
+      'returns the legacy global %s uninstalled before the default-space install',
+      async (workflowId) => {
+        const client = createClient();
+
+        await ensureThreatIntelSupplyWorkflowsForSpace({
+          ...defaultArgs,
+          managedWorkflowsClient: client as never,
+        });
+
+        const uninstallOrder =
+          client.uninstall.mock.invocationCallOrder[
+            client.uninstall.mock.calls.findIndex(
+              ([id, options]) => id === workflowId && options.spaceId === GLOBAL_WORKFLOW_SPACE_ID
+            )
+          ];
+        const installOrder =
+          client.install.mock.invocationCallOrder[
+            client.install.mock.calls.findIndex(([id]) => id === workflowId)
+          ];
+        expect(uninstallOrder).toBeLessThan(installOrder);
+      }
+    );
+
+    it('returns attribute installed for that space', async () => {
+      const client = createClient();
+
+      await ensureThreatIntelSupplyWorkflowsForSpace({
+        ...defaultArgs,
+        managedWorkflowsClient: client as never,
+      });
+
+      expect(client.install).toHaveBeenCalledWith(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
+        spaceId: 'another',
+        workflowIdSuffix: 'another',
+      });
+    });
+
+    it('returns a rejection when the legacy uninstall fails', async () => {
+      const client = createClient();
+      client.uninstall.mockRejectedValueOnce(new Error('uninstall denied'));
+
+      await expect(
+        ensureThreatIntelSupplyWorkflowsForSpace({
+          ...defaultArgs,
+          managedWorkflowsClient: client as never,
+        })
+      ).rejects.toThrow('uninstall denied');
+    });
+
+    it('returns a rejection when an install fails', async () => {
+      const client = createClient();
+      client.install.mockRejectedValueOnce(new Error('install denied'));
+
+      await expect(
+        ensureThreatIntelSupplyWorkflowsForSpace({
+          ...defaultArgs,
+          managedWorkflowsClient: client as never,
+        })
+      ).rejects.toThrow('install denied');
+    });
   });
 
   it('reconciles attribute installs for the given spaces only', async () => {
@@ -90,31 +260,47 @@ describe('threat intel managed workflow install', () => {
     });
   });
 
-  it('uninstalls the two global workflows and attribute per space', async () => {
-    const client = createClient();
-    client.listInstalledWorkflowStates.mockResolvedValue([
-      installedState({ workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID }),
-    ]);
+  describe('uninstallThreatIntelManagedWorkflows', () => {
+    const runUninstall = async () => {
+      const client = createClient();
+      client.listInstalledWorkflowStates.mockResolvedValue([
+        installedState({ workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID }),
+      ]);
+      await uninstallThreatIntelManagedWorkflows({
+        managedWorkflowsClient: client as never,
+        getSpaceIds: async () => ['default', 'space-a'],
+        logger,
+      });
+      return client;
+    };
 
-    await uninstallThreatIntelManagedWorkflows({
-      managedWorkflowsClient: client as never,
-      getSpaceIds: async () => ['default', 'space-a'],
-      logger,
-    });
+    it.each(supplyWorkflowIds)(
+      'returns %s uninstalled in the default space',
+      async (workflowId) => {
+        const client = await runUninstall();
 
-    expect(client.uninstall).toHaveBeenCalledWith(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID, {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-    });
-    expect(client.uninstall).toHaveBeenCalledWith(THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID, {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
-    });
-    expect(client.uninstall).toHaveBeenCalledWith(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
-      spaceId: 'default',
-      workflowIdSuffix: 'default',
-    });
-    expect(client.uninstall).toHaveBeenCalledWith(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
-      spaceId: 'space-a',
-      workflowIdSuffix: 'space-a',
+        expect(client.uninstall).toHaveBeenCalledWith(workflowId, { spaceId: DEFAULT_SPACE_ID });
+      }
+    );
+
+    it.each(supplyWorkflowIds)(
+      'returns %s uninstalled in the legacy global space',
+      async (workflowId) => {
+        const client = await runUninstall();
+
+        expect(client.uninstall).toHaveBeenCalledWith(workflowId, {
+          spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+        });
+      }
+    );
+
+    it.each(['default', 'space-a'])('returns attribute uninstalled in %s', async (spaceId) => {
+      const client = await runUninstall();
+
+      expect(client.uninstall).toHaveBeenCalledWith(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
+        spaceId,
+        workflowIdSuffix: spaceId,
+      });
     });
   });
 
@@ -132,7 +318,7 @@ describe('threat intel managed workflow install', () => {
         logger,
       })
     ).resolves.toBeUndefined();
-    expect(client.uninstall).toHaveBeenCalledTimes(3);
+    expect(client.uninstall).toHaveBeenCalledTimes(5);
   });
 
   // Not-found is the expected case on a deployment that never had the flag on,
@@ -179,7 +365,7 @@ describe('threat intel managed workflow install', () => {
     expect(getSpaceIds).not.toHaveBeenCalled();
   });
 
-  it('still uninstalls when only one of the two global workflows is installed', async () => {
+  it('still uninstalls when only one of the two supply workflows is installed', async () => {
     const client = createClient();
     client.listInstalledWorkflowStates.mockResolvedValue([
       installedState({ workflowId: THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID }),
@@ -197,6 +383,26 @@ describe('threat intel managed workflow install', () => {
     expect(client.uninstall).toHaveBeenCalledWith(THREAT_INTEL_ATTRIBUTE_ALERTS_WORKFLOW_ID, {
       spaceId: 'default',
       workflowIdSuffix: 'default',
+    });
+  });
+
+  it('still uninstalls when the supply workflow is installed in the default space', async () => {
+    const client = createClient();
+    client.listInstalledWorkflowStates.mockResolvedValue([
+      installedState({
+        workflowId: THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID,
+        spaceId: DEFAULT_SPACE_ID,
+      }),
+    ]);
+
+    await uninstallThreatIntelManagedWorkflows({
+      managedWorkflowsClient: client as never,
+      getSpaceIds: async () => ['default'],
+      logger,
+    });
+
+    expect(client.uninstall).toHaveBeenCalledWith(THREAT_INTEL_INGEST_FEEDS_WORKFLOW_ID, {
+      spaceId: DEFAULT_SPACE_ID,
     });
   });
 
@@ -246,7 +452,7 @@ describe('threat intel managed workflow install', () => {
 
 /**
  * These loops used to be bare `await`s. One failing install (a space whose
- * workflows index is not writable, or a global workflow whose definition failed
+ * workflows index is not writable, or a supply workflow whose definition failed
  * validation) rejected out of the whole loop, so every install after it was
  * skipped on every pass, and the caller's `warn` swallowed the rejection. A
  * deployment could be one space deep and look fully covered.
@@ -263,11 +469,11 @@ describe('one failing install does not cancel the others', () => {
     });
 
     expect(client.install).toHaveBeenCalledWith(THREAT_INTEL_ENRICH_REPORT_WORKFLOW_ID, {
-      spaceId: GLOBAL_WORKFLOW_SPACE_ID,
+      spaceId: DEFAULT_SPACE_ID,
     });
   });
 
-  it('still reaches the per-space installs when a global install fails', async () => {
+  it('still reaches the per-space installs when a supply install fails', async () => {
     const client = createClient();
     client.install.mockRejectedValueOnce(new Error('bad definition'));
 

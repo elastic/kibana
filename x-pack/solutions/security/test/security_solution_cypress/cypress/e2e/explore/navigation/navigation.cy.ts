@@ -65,7 +65,6 @@ import {
   CSP_BENCHMARKS_URL,
   CSP_FINDINGS_URL,
   POLICIES_URL,
-  ENTITY_ANALYTICS_URL,
   INDICATORS_URL,
   DISCOVER_URL,
   RULES_COVERAGE_URL,
@@ -160,12 +159,6 @@ describe(
       );
     });
 
-    it('navigates to the Entity Analytics page from dashboard', () => {
-      cy.visit(DASHBOARDS_URL);
-      verifyNavigatesFromDashboardLandingTo('entity_analytics', ENTITY_ANALYTICS_URL);
-      cy.url().should('include', ENTITY_ANALYTICS_URL);
-    });
-
     it('navigates to Data quality page from dashboard', () => {
       cy.visit(DASHBOARDS_URL);
       verifyNavigatesFromDashboardLandingTo('data_quality', DATA_QUALITY_URL);
@@ -221,7 +214,7 @@ describe(
       cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Detection rules (SIEM)');
       cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Benchmarks');
       cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'Shared exception lists');
-      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'MITRE ATT&CK® Coverage');
+      cy.get(SOLUTION_SIDE_NAV_PANEL).should('contain.text', 'MITRE coverage');
     });
 
     it('navigates to the Exceptions page', () => {

@@ -9,8 +9,17 @@ import {
   loadSourceReportStatsByAdapterId,
   loadSourceForMutation,
   mapSourceHit,
-  updateSourceBodySchema,
 } from './list_sources';
+import { resolveCatalogSourceUrl, updateSourceBodySchema } from '../../../common/threat_intel';
+
+jest.mock('../../../common/threat_intel', () => {
+  const actual = jest.requireActual('../../../common/threat_intel');
+  return { ...actual, resolveCatalogSourceUrl: jest.fn(actual.resolveCatalogSourceUrl) };
+});
+
+const resolveCatalogSourceUrlMock = resolveCatalogSourceUrl as jest.MockedFunction<
+  typeof resolveCatalogSourceUrl
+>;
 
 describe('loadSourceReportStatsByAdapterId', () => {
   const logger = {
@@ -36,7 +45,7 @@ describe('loadSourceReportStatsByAdapterId', () => {
                 key: 'rss:ti-rss-okta',
                 doc_count: 3,
                 last_ingested: { value_as_string: '2026-07-22T12:00:00.000Z' },
-                env_hits: { value: 5 },
+                env_hits: { this_space: { total: { value: 5 } } },
               },
             ],
           },
@@ -64,8 +73,16 @@ describe('loadSourceReportStatsByAdapterId', () => {
         aggregations: {
           by_adapter_id: {
             buckets: [
-              { key: 'rss:private-copy', doc_count: 2, env_hits: { value: 1 } },
-              { key: 'rss:global-copy', doc_count: 7, env_hits: { value: 4 } },
+              {
+                key: 'rss:private-copy',
+                doc_count: 2,
+                env_hits: { this_space: { total: { value: 1 } } },
+              },
+              {
+                key: 'rss:global-copy',
+                doc_count: 7,
+                env_hits: { this_space: { total: { value: 4 } } },
+              },
             ],
           },
         },
@@ -102,6 +119,68 @@ describe('loadSourceReportStatsByAdapterId', () => {
         }),
       })
     );
+  });
+
+  it('sums env hits through a nested agg filtered to the caller space', async () => {
+    // `evidence` is nested (v30). A plain `sum` on a nested field silently
+    // returns 0, and an unfiltered nested sum would count every space's element.
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        aggregations: { by_adapter_id: { buckets: [] } },
+      }),
+    };
+
+    await loadSourceReportStatsByAdapterId({
+      ...defaultArgs,
+      esClient: esClient as never,
+    });
+
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggs: expect.objectContaining({
+          by_adapter_id: expect.objectContaining({
+            aggs: expect.objectContaining({
+              env_hits: {
+                nested: { path: 'evidence' },
+                aggs: {
+                  this_space: {
+                    filter: { term: { 'evidence.space_id': 'default' } },
+                    aggs: {
+                      total: { sum: { field: 'evidence.alert_hits_total' } },
+                    },
+                  },
+                },
+              },
+            }),
+          }),
+        }),
+      })
+    );
+  });
+
+  it('reads env hits from the nested this_space bucket', async () => {
+    const esClient = {
+      search: jest.fn().mockResolvedValue({
+        aggregations: {
+          by_adapter_id: {
+            buckets: [
+              {
+                key: 'rss:ti-rss-okta',
+                doc_count: 3,
+                env_hits: { this_space: { total: { value: 5 } } },
+              },
+            ],
+          },
+        },
+      }),
+    };
+
+    const stats = await loadSourceReportStatsByAdapterId({
+      ...defaultArgs,
+      esClient: esClient as never,
+    });
+
+    expect(stats.get('rss:ti-rss-okta')?.env_hits_total).toBe(5);
   });
 
   it('applies time_range to the report enrichment query', async () => {
@@ -172,6 +251,22 @@ describe('mapSourceHit', () => {
 
     expect(mapped.url).toBeUndefined();
   });
+
+  // The shipped catalog carries no credentials, so these drive the resolver directly to
+  // prove the route strips userinfo before a Security Read caller sees the URL.
+  it.each([
+    ['username and password', 'https://feed-user:s3cret@example.com/feed.xml'],
+    ['username only', 'https://api-token@example.com/feed.xml'],
+  ])('strips %s from a credential-bearing catalog URL', (_label, catalogUrl) => {
+    resolveCatalogSourceUrlMock.mockReturnValueOnce(catalogUrl);
+
+    const mapped = mapSourceHit({
+      _id: 'vendor_api:credentialed',
+      _source: { name: 'Credentialed', adapter_type: 'rss' },
+    });
+
+    expect(mapped.url).toBe('https://example.com/feed.xml');
+  });
 });
 
 describe('loadSourceForMutation', () => {
@@ -189,6 +284,16 @@ describe('loadSourceForMutation', () => {
     });
 
     expect(access.allowed).toBe(true);
+  });
+
+  it('denies mutation of a global catalog source from every space', async () => {
+    const access = await loadSourceForMutation({
+      esClient: globalSource('*') as never,
+      sourceId: 'rss:mandiant-research',
+      spaceId: 'default',
+    });
+
+    expect(access).toEqual({ allowed: false });
   });
 
   // A 403 told the caller a source with this id exists in some other space, which

@@ -15,8 +15,8 @@ import type { EsClient, ScoutLogger } from '@kbn/scout-security';
  *
  * Seeded fields must stay in sync with `artifact_tabs_test_data.ts` and
  * `policy_artifacts.ts` form fills: `@timestamp` (Event Filters create),
- * `agent.version` (Endpoint Exceptions create), `process.name` (API-created
- * Event Filters / Endpoint Exceptions items).
+ * `agent.version` and `agent.type` (Endpoint Exceptions create and OR groups),
+ * `process.name` (API-created items and an Endpoint Exceptions OR group).
  *
  * These targets are data streams: index only accepts `op_type: 'create'`, and
  * delete-by-id cannot use the stream name. `agent.id` is the teardown marker.

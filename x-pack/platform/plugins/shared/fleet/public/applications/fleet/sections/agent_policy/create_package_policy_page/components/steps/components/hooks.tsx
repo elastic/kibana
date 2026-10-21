@@ -9,7 +9,7 @@ import { useMemo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 
 import { LICENCE_FOR_OUTPUT_PER_INTEGRATION } from '../../../../../../../../../common/constants';
-import type { NewPackagePolicy } from '../../../../../../../../../common/types';
+import type { AgentPolicy, NewPackagePolicy } from '../../../../../../../../../common/types';
 import type { RegistryVarGroup } from '../../../../../../types';
 import { getAllowedOutputTypesForPackagePolicy } from '../../../../../../../../../common/services/output_helpers';
 import { inferVarGroupSelections } from '../../../../../../../../../common/services';
@@ -34,7 +34,8 @@ export function useOutputs(
   packagePolicy: Pick<NewPackagePolicy, 'supports_agentless'> & {
     inputs?: Array<{ type: string; enabled: boolean }>;
   },
-  packageName: string
+  packageName: string,
+  agentPolicies?: Array<Pick<AgentPolicy, 'data_output_id'>>
 ) {
   const licenseService = useLicense();
   const canUseOutputPerIntegration =
@@ -50,10 +51,32 @@ export function useOutputs(
       (output) => allowedOutputTypes.includes(output.type) && !output.is_internal
     );
   }, [allowedOutputTypes, canUseOutputPerIntegration, outputsData]);
+
+  // Name of the output the integration uses when it defines no override of its own: the
+  // parent agent policy's data output, or the Fleet default output when that is unset.
+  // Undefined when the parent policies disagree, since no single name would be accurate.
+  const inheritedOutputName = useMemo(() => {
+    if (!outputsData) {
+      return undefined;
+    }
+    const defaultOutputId = outputsData.items.find((output) => output.is_default)?.id;
+    const inheritedIds = new Set(
+      (agentPolicies ?? []).map((policy) => policy.data_output_id ?? defaultOutputId)
+    );
+    if (inheritedIds.size > 1) {
+      return undefined;
+    }
+    // No agent policy yet (create flow): a new policy inherits the Fleet default output.
+    const inheritedId = inheritedIds.size === 1 ? [...inheritedIds][0] : defaultOutputId;
+
+    return outputsData.items.find((output) => output.id === inheritedId)?.name;
+  }, [agentPolicies, outputsData]);
+
   return {
     isLoading,
     canUseOutputPerIntegration,
     allowedOutputs,
+    inheritedOutputName,
   };
 }
 

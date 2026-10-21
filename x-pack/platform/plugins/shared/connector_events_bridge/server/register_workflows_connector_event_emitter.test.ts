@@ -6,7 +6,9 @@
  */
 
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import type { ConnectorEventEmitter } from '@kbn/actions-plugin/server';
+import type { ConnectorEventEmitParams, ConnectorEventEmitter } from '@kbn/actions-plugin/server';
+import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
 
 import {
@@ -14,6 +16,20 @@ import {
   registerWorkflowsConnectorEventEmitter,
   resetConnectorEventEmitFailureCountForTests,
 } from './register_workflows_connector_event_emitter';
+
+const createEmitParams = (
+  overrides: Partial<ConnectorEventEmitParams> = {}
+): ConnectorEventEmitParams => ({
+  eventId: 'inboundWebhook.received',
+  payload: { body: {} },
+  spaceId: DEFAULT_SPACE_ID,
+  connectorId: 'c1',
+  connectorTypeId: '.inboundWebhook',
+  request: httpServerMock.createKibanaRequest({
+    headers: { authorization: 'ApiKey encoded-key' },
+  }),
+  ...overrides,
+});
 
 describe('registerWorkflowsConnectorEventEmitter', () => {
   beforeEach(() => {
@@ -53,18 +69,15 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
   it('registers an emitter that forwards to workflows emitEvent with enriched payload', async () => {
     const { emitter, emitEvent, getClient } = registerAndGetEmitter();
 
-    await emitter.emit({
-      eventId: 'inboundWebhook.received',
+    const params = createEmitParams({
       payload: { body: { hello: 'world' } },
-      spaceId: 'default',
-      connectorId: 'c1',
-      connectorTypeId: '.inboundWebhook',
       correlationKey: 'corr-1',
     });
+    await emitter.emit(params);
 
     expect(getClient).toHaveBeenCalledTimes(1);
-    const requestArg = getClient.mock.calls[0][0];
-    expect(requestArg.headers.authorization).toBeUndefined();
+    expect(getClient).toHaveBeenCalledWith(params.request);
+    expect(params.request.headers.authorization).toBe('ApiKey encoded-key');
     expect(emitEvent).toHaveBeenCalledWith('inboundWebhook.received', {
       body: { hello: 'world' },
       connectorId: 'c1',
@@ -77,13 +90,14 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
   it('enriches emit payload even when spoke payload omits connectorId', async () => {
     const { emitter, emitEvent } = registerAndGetEmitter();
 
-    await emitter.emit({
-      eventId: 'myConnector.received',
-      payload: { body: {} },
-      spaceId: 'space-a',
-      connectorId: 'connector-99',
-      connectorTypeId: '.myConnector',
-    });
+    await emitter.emit(
+      createEmitParams({
+        eventId: 'myConnector.received',
+        spaceId: asSpaceId('space-a'),
+        connectorId: 'connector-99',
+        connectorTypeId: '.myConnector',
+      })
+    );
 
     expect(emitEvent).toHaveBeenCalledWith('myConnector.received', {
       body: {},
@@ -96,13 +110,12 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
   it('omits correlationKey from enriched payload when undefined', async () => {
     const { emitter, emitEvent } = registerAndGetEmitter();
 
-    await emitter.emit({
-      eventId: 'myConnector.received',
-      payload: { body: {} },
-      spaceId: 'default',
-      connectorId: 'c1',
-      connectorTypeId: '.myConnector',
-    });
+    await emitter.emit(
+      createEmitParams({
+        eventId: 'myConnector.received',
+        connectorTypeId: '.myConnector',
+      })
+    );
 
     expect(emitEvent.mock.calls[0][1]).not.toHaveProperty('correlationKey');
   });
@@ -112,15 +125,9 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
       getWorkflowsExtensionsStart: async () => undefined,
     });
 
-    await expect(
-      emitter.emit({
-        eventId: 'inboundWebhook.received',
-        payload: { body: {} },
-        spaceId: 'default',
-        connectorId: 'c1',
-        connectorTypeId: '.inboundWebhook',
-      })
-    ).rejects.toThrow('Workflows extensions unavailable');
+    await expect(emitter.emit(createEmitParams())).rejects.toThrow(
+      'Workflows extensions unavailable'
+    );
 
     expect(getClient).not.toHaveBeenCalled();
     expect(emitEvent).not.toHaveBeenCalled();
@@ -132,15 +139,7 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     const getClient = jest.fn().mockResolvedValue({ emitEvent });
     const { emitter } = registerAndGetEmitter({ getClient });
 
-    await expect(
-      emitter.emit({
-        eventId: 'inboundWebhook.received',
-        payload: { body: {} },
-        spaceId: 'default',
-        connectorId: 'c1',
-        connectorTypeId: '.inboundWebhook',
-      })
-    ).rejects.toThrow('emit boom');
+    await expect(emitter.emit(createEmitParams())).rejects.toThrow('emit boom');
 
     expect(getConnectorEventEmitFailureCount()).toBe(1);
   });
@@ -149,16 +148,24 @@ describe('registerWorkflowsConnectorEventEmitter', () => {
     const getClient = jest.fn().mockRejectedValue(new Error('client boom'));
     const { emitter } = registerAndGetEmitter({ getClient });
 
-    await expect(
-      emitter.emit({
-        eventId: 'inboundWebhook.received',
-        payload: { body: {} },
-        spaceId: 'default',
-        connectorId: 'c1',
-        connectorTypeId: '.inboundWebhook',
-      })
-    ).rejects.toThrow('client boom');
+    await expect(emitter.emit(createEmitParams())).rejects.toThrow('client boom');
 
+    expect(getConnectorEventEmitFailureCount()).toBe(1);
+  });
+
+  it('throws when the emit request has no Authorization header', async () => {
+    const { emitter, getClient, emitEvent } = registerAndGetEmitter();
+
+    await expect(
+      emitter.emit(
+        createEmitParams({
+          request: httpServerMock.createKibanaRequest({ headers: {} }),
+        })
+      )
+    ).rejects.toThrow('authenticated request');
+
+    expect(getClient).not.toHaveBeenCalled();
+    expect(emitEvent).not.toHaveBeenCalled();
     expect(getConnectorEventEmitFailureCount()).toBe(1);
   });
 });

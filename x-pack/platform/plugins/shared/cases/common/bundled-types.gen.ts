@@ -14,7 +14,7 @@
  *   version: 0.1
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 /**
  * An array containing users that are assigned to the case.
@@ -388,14 +388,14 @@ export const Settings = lazySchema(() =>
      */
     syncAlerts: z.boolean().describe('Turns alert syncing on or off.'),
     /**
-      * When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. Optional; defaults to false when omitted.
+      * When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.
 
       */
     extractObservables: z
       .boolean()
       .optional()
       .describe(
-        'When true, observables (e.g. IPs, hashes, URLs) are automatically extracted from case comments. Optional; defaults to false when omitted.\n'
+        "When true, observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments. When omitted on create, the space configuration default is used. Falls back to the owner's default when no space configuration exists: `true` for Security, `false` for Stack and Observability. Precedence: explicit value > template setting > space config > owner default. For owners that do not support observable extraction (currently Observability), an omitted value resolves to `false` regardless of the space configuration.\n"
       ),
   })
 );
@@ -429,7 +429,7 @@ export const CaseTitle = lazySchema(() => z.string().max(160));
 export type CaseTitle = z.infer<typeof CaseTitle>;
 
 /**
-  * Case field values keyed by storage key. Keys follow the `<field_name>_as_<storage_type>` convention (for example `priority_as_keyword`) and map to the owner's global (library-wide) fields plus, when a template is applied to the case, that template's fields. On update, the keys provided are merged into the stored map; unlisted keys are left untouched. To discover the writable keys, use the get case fields API (`GET /api/cases/fields`).
+  * Case field values keyed by storage key (for example, `priority_as_keyword`). Keys are validated against the fields exposed by the case's active template and global field library. On update, provided keys are merged into the stored map; unlisted keys are left untouched. Template-linked fields require the `xpack.cases.templates.enabled` setting (enabled by default); global fields are always available. Use the get case fields API to discover valid keys.
 
   */
 export const CaseExtendedFields = lazySchema(() => z.object({}).catchall(z.string().max(30000)));
@@ -458,7 +458,7 @@ export const CreateCaseRequest = lazySchema(() =>
     category: CaseCategory.optional(),
     title: CaseTitle,
     /**
-      * Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
+      * Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.
 
       */
     customFields: z
@@ -496,7 +496,7 @@ export const CreateCaseRequest = lazySchema(() =>
       .max(10)
       .optional()
       .describe(
-        'Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n'
+        'Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.\n'
       ),
     extended_fields: CaseExtendedFields.optional(),
     /**
@@ -548,7 +548,7 @@ export type CaseResponseClosedByProperties = z.infer<typeof CaseResponseClosedBy
 export const AlertCommentResponseProperties = lazySchema(() =>
   z.object({
     alertId: z.array(z.string()).optional(),
-    created_at: z.string().datetime().optional(),
+    created_at: isoDateTime().optional(),
     created_by: z
       .object({
         email: z.string().nullable(),
@@ -560,7 +560,7 @@ export const AlertCommentResponseProperties = lazySchema(() =>
     id: z.string().optional(),
     index: z.array(z.string()).optional(),
     owner: Owner.optional(),
-    pushed_at: z.string().datetime().nullable().optional(),
+    pushed_at: isoDateTime().nullable().optional(),
     pushed_by: z
       .object({
         email: z.string().nullable(),
@@ -583,7 +583,7 @@ export const AlertCommentResponseProperties = lazySchema(() =>
       })
       .optional(),
     type: z.literal('alert'),
-    updated_at: z.string().datetime().nullable().optional(),
+    updated_at: isoDateTime().nullable().optional(),
     updated_by: z
       .object({
         email: z.string().nullable(),
@@ -634,16 +634,16 @@ export type CaseResponseUpdatedByProperties = z.infer<typeof CaseResponseUpdated
 
 export const EventCommentResponseProperties = lazySchema(() =>
   z.object({
-    created_at: z.string().datetime().optional(),
+    created_at: isoDateTime().optional(),
     created_by: CaseResponseCreatedByProperties.optional(),
     eventId: z.array(z.string()).optional(),
     id: z.string().optional(),
     index: z.array(z.string()).optional(),
     owner: Owner.optional(),
-    pushed_at: z.string().datetime().nullable().optional(),
+    pushed_at: isoDateTime().nullable().optional(),
     pushed_by: CaseResponsePushedByProperties.optional(),
     type: z.literal('event'),
-    updated_at: z.string().datetime().nullable().optional(),
+    updated_at: isoDateTime().nullable().optional(),
     updated_by: CaseResponseUpdatedByProperties.optional(),
     version: z.string().optional(),
   })
@@ -653,19 +653,26 @@ export type EventCommentResponseProperties = z.infer<typeof EventCommentResponse
 export const UserCommentResponseProperties = lazySchema(() =>
   z.object({
     comment: z.string().optional(),
-    created_at: z.string().datetime().optional(),
+    created_at: isoDateTime().optional(),
     created_by: CaseResponseCreatedByProperties.optional(),
     id: z.string().optional(),
     owner: Owner.optional(),
-    pushed_at: z.string().datetime().nullable().optional(),
+    pushed_at: isoDateTime().nullable().optional(),
     pushed_by: CaseResponsePushedByProperties.optional(),
     type: z.literal('user'),
-    updated_at: z.string().datetime().nullable().optional(),
+    updated_at: isoDateTime().nullable().optional(),
     updated_by: CaseResponseUpdatedByProperties.optional(),
     version: z.string().optional(),
   })
 );
 export type UserCommentResponseProperties = z.infer<typeof UserCommentResponseProperties>;
+
+/**
+  * A read-only, response-only map from active field definition storage keys to their human-readable labels. Entries reflect currently applicable global and template field definitions — not every stored `extended_fields` key is guaranteed a label, because values retained after switching templates may have no matching current definition. Only populated by the get case and search cases endpoints; absent on create, update, push, and comment responses. Including this field in a write request returns a 400 error.
+
+  */
+export const CaseExtendedFieldsLabels = lazySchema(() => z.object({}).catchall(z.string()));
+export type CaseExtendedFieldsLabels = z.infer<typeof CaseExtendedFieldsLabels>;
 
 export const ExternalService = lazySchema(() =>
   z
@@ -675,7 +682,7 @@ export const ExternalService = lazySchema(() =>
       external_id: z.string().optional(),
       external_title: z.string().optional(),
       external_url: z.string().optional(),
-      pushed_at: z.string().datetime().optional(),
+      pushed_at: isoDateTime().optional(),
       pushed_by: z
         .object({
           email: z.string().nullable().optional(),
@@ -714,11 +721,11 @@ export const CaseObservable = lazySchema(() =>
     /**
      * When the observable was created.
      */
-    createdAt: z.string().datetime().describe('When the observable was created.'),
+    createdAt: isoDateTime().describe('When the observable was created.'),
     /**
      * When the observable was last updated.
      */
-    updatedAt: z.string().datetime().nullable().describe('When the observable was last updated.'),
+    updatedAt: isoDateTime().nullable().describe('When the observable was last updated.'),
   })
 );
 export type CaseObservable = z.infer<typeof CaseObservable>;
@@ -738,7 +745,7 @@ export const CaseResponseProperties = lazySchema(() =>
      * The case category.
      */
     category: z.string().nullable().optional().describe('The case category.'),
-    closed_at: z.string().datetime().nullable(),
+    closed_at: isoDateTime().nullable(),
     closed_by: CaseResponseClosedByProperties,
     /**
      * An array of comment objects for the case.
@@ -762,10 +769,10 @@ export const CaseResponseProperties = lazySchema(() =>
       ConnectorPropertiesServicenowSir,
       ConnectorPropertiesSwimlane,
     ]),
-    created_at: z.string().datetime(),
+    created_at: isoDateTime(),
     created_by: CaseResponseCreatedByProperties,
     /**
-     * Custom field values for the case.
+     * Deprecated. Use `extended_fields` instead. Custom field values for the case.
      */
     customFields: z
       .array(
@@ -803,7 +810,8 @@ export const CaseResponseProperties = lazySchema(() =>
         })
       )
       .optional()
-      .describe('Custom field values for the case.'),
+      .describe('Deprecated. Use `extended_fields` instead. Custom field values for the case.'),
+    extended_fields_labels: CaseExtendedFieldsLabels.optional(),
     description: z.string(),
     /**
       * The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
@@ -865,7 +873,7 @@ export const CaseResponseProperties = lazySchema(() =>
      * The number of events attached to the case.
      */
     totalEvents: z.number().int().optional().describe('The number of events attached to the case.'),
-    updated_at: z.string().datetime().nullable(),
+    updated_at: isoDateTime().nullable(),
     updated_by: CaseResponseUpdatedByProperties,
     version: z.string(),
   })
@@ -925,7 +933,7 @@ export const UpdateCaseRequest = lazySchema(() =>
             ])
             .optional(),
           /**
-      * Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.
+      * Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.
 
       */
           customFields: z
@@ -963,7 +971,38 @@ export const UpdateCaseRequest = lazySchema(() =>
             .max(10)
             .optional()
             .describe(
-              'Custom field values for a case. Any optional custom fields that are not specified in the request are set to null.\n'
+              'Custom field values for a case. Omitted optional fields default to null. Deprecated: use `extended_fields` instead.\n'
+            ),
+          /**
+      * The case template to apply, clear, or leave unchanged. Requires the `xpack.cases.templates.enabled` setting. Omit to keep the current template; set to `null` to clear it; set to `{ id, version }` to switch. Switching is an explicit versioned action: both `id` and `version` are required. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields. Use the get case fields API to see what fields the new template exposes.
+
+      */
+          template: z
+            .object({
+              /**
+               * The template identifier. Retrieve template ids with `GET /api/cases/templates`.
+               */
+              id: z
+                .string()
+                .describe(
+                  'The template identifier. Retrieve template ids with `GET /api/cases/templates`.'
+                ),
+              /**
+      * The template version to apply. Required on update: switching a template is an explicit versioned action, so the version must be specified.
+
+      */
+              version: z
+                .number()
+                .int()
+                .min(1)
+                .describe(
+                  'The template version to apply. Required on update: switching a template is an explicit versioned action, so the version must be specified.\n'
+                ),
+            })
+            .nullable()
+            .optional()
+            .describe(
+              "The case template to apply, clear, or leave unchanged. Requires the `xpack.cases.templates.enabled` setting. Omit to keep the current template; set to `null` to clear it; set to `{ id, version }` to switch. Switching is an explicit versioned action: both `id` and `version` are required. If `extended_fields` is also provided in the same request, those values are validated against the new template's fields. Use the get case fields API to see what fields the new template exposes.\n"
             ),
           description: CaseDescription.optional(),
           extended_fields: CaseExtendedFields.optional(),
@@ -1061,7 +1100,7 @@ export const RelatedCase = lazySchema(() =>
     /**
      * When the case was created.
      */
-    createdAt: z.string().datetime().describe('When the case was created.'),
+    createdAt: isoDateTime().describe('When the case was created.'),
     totals: AttachmentTotals,
   })
 );
@@ -1100,6 +1139,11 @@ export const ConnectorTypesEnum = ConnectorTypes.enum;
 export const TemplateTags = lazySchema(() => z.array(z.string().max(256)).max(200));
 export type TemplateTags = z.infer<typeof TemplateTags>;
 
+/**
+  * Configuration-embedded templates. Deprecated: use the templates API (`GET /api/cases/templates`) and case `extended_fields` instead.
+
+  * @deprecated
+  */
 export const Templates = lazySchema(() =>
   z.array(
     z.object({
@@ -1242,8 +1286,9 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
       })
       .describe('An object that contains the connector configuration.'),
     /**
-     * Custom fields case configuration.
-     */
+      * Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
+
+      */
     customFields: z
       .array(
         z.object({
@@ -1293,9 +1338,32 @@ export const SetCaseConfigurationRequest = lazySchema(() =>
       )
       .max(10)
       .optional()
-      .describe('Custom fields case configuration.'),
+      .describe(
+        'Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n'
+      ),
+    /**
+      * Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.
+
+      */
+    extractObservables: z
+      .boolean()
+      .optional()
+      .describe(
+        "Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events. When omitted, defaults to the owner's default: `true` for Security, `false` for Stack and Observability. For owners that do not support observable extraction (currently Observability), setting this to `true` has no effect on case creation; new cases for those owners always use `false`.\n"
+      ),
     owner: Owner,
     templates: Templates.optional(),
+    /**
+      * Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+
+      */
+    workflowTags: z
+      .array(z.string().min(1).max(1024))
+      .max(100)
+      .optional()
+      .describe(
+        'Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n'
+      ),
   })
 );
 export type SetCaseConfigurationRequest = z.infer<typeof SetCaseConfigurationRequest>;
@@ -1342,8 +1410,9 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
       .optional()
       .describe('An object that contains the connector configuration.'),
     /**
-     * Custom fields case configuration.
-     */
+      * Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.
+
+      */
     customFields: z
       .array(
         z.object({
@@ -1392,8 +1461,31 @@ export const UpdateCaseConfigurationRequest = lazySchema(() =>
         })
       )
       .optional()
-      .describe('Custom fields case configuration.'),
+      .describe(
+        'Custom fields case configuration. Deprecated. Use the field library (`/api/cases/field_definitions`) to manage field definitions and `extended_fields` on case create/update to set field values.\n'
+      ),
+    /**
+      * Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.
+
+      */
+    extractObservables: z
+      .boolean()
+      .optional()
+      .describe(
+        'Indicates whether observables (for example, IPs, hashes, and URLs) are automatically extracted from case comments and events.\n'
+      ),
     templates: Templates.optional(),
+    /**
+      * Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+
+      */
+    workflowTags: z
+      .array(z.string().min(1).max(1024))
+      .max(100)
+      .optional()
+      .describe(
+        'Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.\n'
+      ),
     /**
       * The version of the connector. To retrieve the version value, use the get configuration API.
 
@@ -1445,9 +1537,7 @@ export const TemplateV2Response = lazySchema(() =>
     /**
      * The date the template was soft-deleted, or null if active.
      */
-    deletedAt: z
-      .string()
-      .datetime()
+    deletedAt: isoDateTime()
       .nullable()
       .describe('The date the template was soft-deleted, or null if active.'),
     /**
@@ -1496,9 +1586,7 @@ export const TemplateV2Response = lazySchema(() =>
     /**
      * The date the template was last used to create a case.
      */
-    lastUsedAt: z
-      .string()
-      .datetime()
+    lastUsedAt: isoDateTime()
       .optional()
       .describe('The date the template was last used to create a case.'),
     /**
@@ -1619,6 +1707,221 @@ export const TemplateDryRunResponse = lazySchema(() =>
 export type TemplateDryRunResponse = z.infer<typeof TemplateDryRunResponse>;
 
 /**
+  * A field definition from the field library. The `legacyKey` attribute, which is a server-managed link to a migrated custom field, is not included in the public API response.
+
+  */
+export const FieldDefinitionResponse = lazySchema(() =>
+  z.object({
+    /**
+      * Unique server-assigned identifier for the field definition (UUID). May be UUIDv4 for definitions created through the public API, or UUIDv5 for definitions created by internal migration processes.
+
+      */
+    fieldDefinitionId: z
+      .string()
+      .max(36)
+      .describe(
+        'Unique server-assigned identifier for the field definition (UUID). May be UUIDv4 for definitions created through the public API, or UUIDv5 for definitions created by internal migration processes.\n'
+      ),
+    /**
+      * The field name. Must match the `name` property in the YAML definition and is unique per owner (case-insensitive). Immutable after creation.
+
+      */
+    name: z
+      .string()
+      .describe(
+        'The field name. Must match the `name` property in the YAML definition and is unique per owner (case-insensitive). Immutable after creation.\n'
+      ),
+    /**
+      * The field definition as a YAML string. New definitions are limited to 30 000 characters, but existing definitions created via internal tooling may be longer.
+
+      */
+    definition: z
+      .string()
+      .describe(
+        'The field definition as a YAML string. New definitions are limited to 30 000 characters, but existing definitions created via internal tooling may be longer.\n'
+      ),
+    /**
+     * The application that owns this field definition.
+     */
+    owner: z.string().max(50).describe('The application that owns this field definition.'),
+    /**
+     * Optional human-readable description of the field's purpose.
+     */
+    description: z
+      .string()
+      .optional()
+      .describe("Optional human-readable description of the field's purpose."),
+    /**
+      * When true, this field is rendered in every case regardless of which template the case uses.
+
+      */
+    isGlobal: z
+      .boolean()
+      .optional()
+      .describe(
+        'When true, this field is rendered in every case regardless of which template the case uses.\n'
+      ),
+    /**
+      * Position of a global field in the case details view. Assigned by the server and changed via the Field Library reorder controls.
+
+      */
+    displayOrder: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        'Position of a global field in the case details view. Assigned by the server and changed via the Field Library reorder controls.\n'
+      ),
+  })
+);
+export type FieldDefinitionResponse = z.infer<typeof FieldDefinitionResponse>;
+
+/**
+ * A paginated list of reusable field definitions.
+ */
+export const GetCaseFieldDefinitionsResponse = lazySchema(() =>
+  z.object({
+    fieldDefinitions: z.array(FieldDefinitionResponse),
+    /**
+     * The current page number.
+     */
+    page: z.number().int().min(1).describe('The current page number.'),
+    /**
+     * The number of items per page.
+     */
+    perPage: z.number().int().min(1).max(100).describe('The number of items per page.'),
+    /**
+     * The total number of field definitions matching the query (before pagination).
+     */
+    total: z
+      .number()
+      .int()
+      .min(0)
+      .describe('The total number of field definitions matching the query (before pagination).'),
+  })
+);
+export type GetCaseFieldDefinitionsResponse = z.infer<typeof GetCaseFieldDefinitionsResponse>;
+
+/**
+  * The body for creating or updating a field definition.
+
+Resource limits (enforced on write; a violation returns `400`): an owner may have at most 200 field definitions per space. The `definition` string may not exceed 30000 characters.
+
+Identity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. Once created, a field's `name` and YAML `type` are immutable — they determine the key under which case values are stored. An attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
+
+  */
+export const FieldDefinitionWriteRequest = lazySchema(() =>
+  z
+    .object({
+      /**
+      * The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.
+
+      */
+      name: z
+        .string()
+        .min(1)
+        .max(50)
+        .optional()
+        .describe(
+          'The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation.\n'
+        ),
+      /**
+       * The application that owns this field definition.
+       */
+      owner: z.string().min(1).max(30).describe('The application that owns this field definition.'),
+      /**
+       * The field definition as a YAML string describing a single field (type, label, control, metadata).
+       */
+      definition: z
+        .string()
+        .max(30000)
+        .describe(
+          'The field definition as a YAML string describing a single field (type, label, control, metadata).'
+        ),
+      /**
+       * Optional human-readable description of the field's purpose.
+       */
+      description: z
+        .string()
+        .max(1000)
+        .optional()
+        .describe("Optional human-readable description of the field's purpose."),
+      /**
+      * When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.
+
+      */
+      isGlobal: z
+        .boolean()
+        .optional()
+        .describe(
+          'When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.\n'
+        ),
+    })
+    .strict()
+);
+export type FieldDefinitionWriteRequest = z.infer<typeof FieldDefinitionWriteRequest>;
+
+/**
+  * The body for updating a field definition.
+
+Identity constraints: the `name` property must match the `name` key in the YAML `definition`. When `name` is omitted, the server extracts it from the `definition` YAML automatically. A field's `name` and YAML `type` are immutable — an attempt to change either returns `409` with `attributes.code = "field_identity_immutable"` and `attributes.changed` listing which identity attributes were modified.
+
+Unlike the POST endpoint, PUT allows an unchanged `definition` to be submitted even if it exceeds 30 000 characters, so that field definitions created through internal tooling remain modifiable. When the submitted `definition` differs from the stored value, the 30 000-character limit is enforced. A hard upper bound of 1 000 000 characters always applies regardless of whether the definition is changed.
+
+  */
+export const FieldDefinitionPutRequest = lazySchema(() =>
+  z
+    .object({
+      /**
+      * The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation. Unlike POST, the 50-character limit is not enforced on PUT so that definitions with legacy names that exceed the limit remain modifiable.
+
+      */
+      name: z
+        .string()
+        .min(1)
+        .max(1000)
+        .optional()
+        .describe(
+          'The field name, unique per owner (case-insensitive). Must match the `name` key inside the YAML definition. When omitted, the name is extracted from the definition YAML automatically. Immutable after creation. Unlike POST, the 50-character limit is not enforced on PUT so that definitions with legacy names that exceed the limit remain modifiable.\n'
+        ),
+      /**
+       * The application that owns this field definition.
+       */
+      owner: z.string().min(1).max(30).describe('The application that owns this field definition.'),
+      /**
+       * The field definition as a YAML string describing a single field (type, label, control, metadata).
+       */
+      definition: z
+        .string()
+        .max(1000000)
+        .describe(
+          'The field definition as a YAML string describing a single field (type, label, control, metadata).'
+        ),
+      /**
+       * Optional human-readable description of the field's purpose.
+       */
+      description: z
+        .string()
+        .max(1000)
+        .optional()
+        .describe("Optional human-readable description of the field's purpose."),
+      /**
+      * When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.
+
+      */
+      isGlobal: z
+        .boolean()
+        .optional()
+        .describe(
+          'When true, this field is rendered in every case for this owner, regardless of the template used. Global fields cannot be demoted (set to false) while they are linked to an active custom field in the Cases configuration.\n'
+        ),
+    })
+    .strict()
+);
+export type FieldDefinitionPutRequest = z.infer<typeof FieldDefinitionPutRequest>;
+
+/**
   * The fields a caller may apply to a case's `extended_fields`. When no template is in scope, this is the owner's global (library-wide) fields; when a template is applied, it also includes that template's fields. Migrated legacy custom fields appear here as `global` fields, so existing automations can look up the exact key to write.
 
   */
@@ -1725,7 +2028,7 @@ export const CaseResponseGetCase = lazySchema(() =>
      * The case category.
      */
     category: z.string().nullable().optional().describe('The case category.'),
-    closed_at: z.string().datetime().nullable(),
+    closed_at: isoDateTime().nullable(),
     closed_by: CaseResponseClosedByProperties,
     connector: z.discriminatedUnion('type', [
       ConnectorPropertiesNone,
@@ -1736,10 +2039,10 @@ export const CaseResponseGetCase = lazySchema(() =>
       ConnectorPropertiesServicenowSir,
       ConnectorPropertiesSwimlane,
     ]),
-    created_at: z.string().datetime(),
+    created_at: isoDateTime(),
     created_by: CaseResponseCreatedByProperties,
     /**
-     * Custom field values for the case.
+     * Deprecated. Use `extended_fields` instead. Custom field values for the case.
      */
     customFields: z
       .array(
@@ -1777,7 +2080,19 @@ export const CaseResponseGetCase = lazySchema(() =>
         })
       )
       .optional()
-      .describe('Custom field values for the case.'),
+      .describe('Deprecated. Use `extended_fields` instead. Custom field values for the case.'),
+    /**
+      * The case's stored field values, keyed by storage key (for example `priority_as_keyword`).
+
+      */
+    extended_fields: z
+      .object({})
+      .catchall(z.string())
+      .optional()
+      .describe(
+        "The case's stored field values, keyed by storage key (for example `priority_as_keyword`).\n"
+      ),
+    extended_fields_labels: CaseExtendedFieldsLabels.optional(),
     description: z.string(),
     /**
       * The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
@@ -1836,7 +2151,7 @@ export const CaseResponseGetCase = lazySchema(() =>
      * The number of events attached to the case.
      */
     totalEvents: z.number().int().optional().describe('The number of events attached to the case.'),
-    updated_at: z.string().datetime().nullable(),
+    updated_at: isoDateTime().nullable(),
     updated_by: CaseResponseUpdatedByProperties,
     version: z.string(),
   })
@@ -1845,7 +2160,7 @@ export type CaseResponseGetCase = z.infer<typeof CaseResponseGetCase>;
 
 export const AlertResponseProperties = lazySchema(() =>
   z.object({
-    attached_at: z.string().datetime().optional(),
+    attached_at: isoDateTime().optional(),
     /**
      * The alert identifier.
      */
@@ -2088,6 +2403,27 @@ export const PayloadAssignees = lazySchema(() =>
   })
 );
 export type PayloadAssignees = z.infer<typeof PayloadAssignees>;
+
+/**
+ * The payload for a bulk attachments user action, recorded when a user removes one or more attachments of the same type from a case in a single action.
+ */
+export const PayloadBulkAttachments = lazySchema(() =>
+  z.object({
+    bulkAttachments: z.object({
+      /**
+       * The attachment type, such as `security.alert` or `file`.
+       */
+      attachmentType: z
+        .string()
+        .describe('The attachment type, such as `security.alert` or `file`.'),
+      /**
+       * The number of attachments of this type.
+       */
+      count: z.number().int().describe('The number of attachments of this type.'),
+    }),
+  })
+);
+export type PayloadBulkAttachments = z.infer<typeof PayloadBulkAttachments>;
 
 export const PayloadConnector = lazySchema(() =>
   z.object({
@@ -2475,11 +2811,113 @@ export const PayloadUserComment = lazySchema(() =>
 );
 export type PayloadUserComment = z.infer<typeof PayloadUserComment>;
 
+/**
+ * The payload for a workflow user action, recorded when a user runs a workflow from a case.
+ */
+export const PayloadWorkflow = lazySchema(() =>
+  z.object({
+    /**
+     * Identifies the workflow that was run.
+     */
+    workflow: z
+      .object({
+        /**
+         * The workflow ID.
+         */
+        id: z.string().describe('The workflow ID.'),
+        /**
+         * The workflow name at the time the run was triggered.
+         */
+        name: z.string().describe('The workflow name at the time the run was triggered.'),
+        /**
+         * The execution ID returned by the Workflows engine.
+         */
+        executionId: z.string().describe('The execution ID returned by the Workflows engine.'),
+      })
+      .describe('Identifies the workflow that was run.'),
+    /**
+     * The context from which the workflow was triggered.
+     */
+    origin: z
+      .union([
+        z.object({
+          type: z.literal('cases.case'),
+          /**
+           * The case ID.
+           */
+          id: z.string().describe('The case ID.'),
+        }),
+        z.object({
+          type: z.literal('cases.observable'),
+          /**
+           * The observable ID.
+           */
+          id: z.string().describe('The observable ID.'),
+          /**
+           * The observable type key.
+           */
+          typeKey: z.string().optional().describe('The observable type key.'),
+          /**
+           * The observable value.
+           */
+          value: z.string().optional().describe('The observable value.'),
+        }),
+        z.object({
+          type: z.literal('cases.observables'),
+          /**
+           * The case ID.
+           */
+          id: z.string().describe('The case ID.'),
+          /**
+           * The number of selected observables.
+           */
+          count: z.number().optional().describe('The number of selected observables.'),
+        }),
+        z.object({
+          type: z.literal('cases.attachment'),
+          /**
+           * The attachment target ID.
+           */
+          id: z.string().describe('The attachment target ID.'),
+          /**
+           * The normalized registered attachment type.
+           */
+          attachmentType: z.string().describe('The normalized registered attachment type.'),
+          /**
+           * The Elasticsearch index the target document lives in.
+           */
+          index: z
+            .string()
+            .optional()
+            .describe('The Elasticsearch index the target document lives in.'),
+        }),
+        z.object({
+          type: z.literal('cases.attachments'),
+          /**
+           * The case ID.
+           */
+          id: z.string().describe('The case ID.'),
+          /**
+           * The normalized registered attachment type.
+           */
+          attachmentType: z.string().describe('The normalized registered attachment type.'),
+          /**
+           * The number of selected attachment targets.
+           */
+          count: z.number().optional().describe('The number of selected attachment targets.'),
+        }),
+      ])
+      .optional()
+      .describe('The context from which the workflow was triggered.'),
+  })
+);
+export type PayloadWorkflow = z.infer<typeof PayloadWorkflow>;
+
 export const UserActionsFindResponseProperties = lazySchema(() =>
   z.object({
     action: Actions,
     comment_id: z.string().nullable(),
-    created_at: z.string().datetime(),
+    created_at: isoDateTime(),
     created_by: z.object({
       email: z.string().nullable(),
       full_name: z.string().nullable(),
@@ -2491,6 +2929,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
     payload: z.union([
       PayloadAlertComment,
       PayloadAssignees,
+      PayloadBulkAttachments,
       PayloadConnector,
       PayloadCreateCase,
       PayloadDelete,
@@ -2502,6 +2941,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
       PayloadTags,
       PayloadTitle,
       PayloadUserComment,
+      PayloadWorkflow,
     ]),
     version: z.string(),
     /**
@@ -2510,6 +2950,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
     type: z
       .enum([
         'assignees',
+        'bulkAttachments',
         'category',
         'comment',
         'connector',
@@ -2525,6 +2966,7 @@ export const UserActionsFindResponseProperties = lazySchema(() =>
         'status',
         'tags',
         'title',
+        'workflow',
       ])
       .describe('The type of action.'),
   })

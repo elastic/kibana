@@ -6,7 +6,11 @@
  */
 import type { estypes } from '@elastic/elasticsearch';
 
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentAlreadyAssignedError,
+  AgentReassignmentError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 
 import { appContextService } from '../app_context';
 import { createAppContextStartContractMock } from '../../mocks';
@@ -142,6 +146,36 @@ describe('reassignAgent', () => {
       expect(calledWithActionResults.operations?.[1]).toEqual(expectedObject);
     });
 
+    it('throws AgentAlreadyAssignedError when all agents are already assigned to the policy', async () => {
+      const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO } = mocks;
+
+      esClient.search.mockResponse({ hits: { hits: [agentInRegularDoc] } } as any);
+
+      await expect(
+        reassignAgents(
+          soClient,
+          esClient,
+          { agentIds: [agentInRegularDoc._id] },
+          regularAgentPolicySO.id
+        )
+      ).rejects.toThrow(AgentAlreadyAssignedError);
+    });
+
+    it('throws AgentReassignmentError, not AgentAlreadyAssignedError, when the agents are hosted', async () => {
+      const { soClient, esClient, agentInHostedDoc, regularAgentPolicySO2 } = mocks;
+
+      esClient.search.mockResponse({ hits: { hits: [agentInHostedDoc] } } as any);
+
+      const error = await reassignAgents(
+        soClient,
+        esClient,
+        { agentIds: [agentInHostedDoc._id] },
+        regularAgentPolicySO2.id
+      ).catch((e) => e);
+      expect(error).toBeInstanceOf(AgentReassignmentError);
+      expect(error).not.toBeInstanceOf(AgentAlreadyAssignedError);
+    });
+
     it('should report errors from ES agent update call', async () => {
       const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO2 } = mocks;
 
@@ -221,6 +255,34 @@ describe('reassignAgents kuery construction', () => {
       expect.objectContaining({
         kuery: `(namespaces:custom_space) AND (${kuery})`,
       })
+    );
+  });
+
+  it('skips namespace filter for cross-space kuery (spaceId "*") so non-default-space agents are matched', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    // simulate an unscoped internal client by overriding getCurrentNamespace to return undefined
+    soClient.getCurrentNamespace = jest.fn().mockReturnValue(undefined);
+    const unscopedClient = soClient;
+
+    // make the filter return an empty string for undefined so buildFilterWithNamespace is a no-op
+    mockAgentsKueryNamespaceFilter.mockResolvedValueOnce(undefined);
+
+    await reassignAgents(
+      unscopedClient,
+      esClient,
+      { kuery: 'status:online', spaceId: '*', _internalCrossSpace: true },
+      regularAgentPolicySO2.id
+    );
+
+    // The key regression guard: agentsKueryNamespaceFilter must receive undefined,
+    // meaning no space restriction is applied. If the default-space filter were applied
+    // instead, non-default-space agents would be invisible to this query.
+    expect(mockAgentsKueryNamespaceFilter).toHaveBeenCalledWith(undefined);
+    // buildFilterWithNamespace wraps the single kuery in parens even without a namespace prefix
+    expect(mockGetAgentsByKuery).toHaveBeenCalledWith(
+      esClient,
+      unscopedClient,
+      expect.objectContaining({ kuery: '(status:online)' })
     );
   });
 });
@@ -405,6 +467,59 @@ describe('reassignAgents kuery path — cheap count and sync/async branching', (
 
     expect(result).toEqual({ count: 2 });
     expect(mockReassignBatch).not.toHaveBeenCalled();
+    mockGetAgentsById.mockRestore();
+  });
+
+  it('throws when spaceId "*" is used without _internalCrossSpace flag', async () => {
+    const { esClient, regularAgentPolicySO2 } = createClientMock();
+    const scopedClient = { getCurrentNamespace: jest.fn().mockReturnValue(undefined) } as any;
+
+    await expect(
+      reassignAgents(
+        scopedClient,
+        esClient,
+        { agentIds: ['agent-1'], spaceId: '*' },
+        regularAgentPolicySO2.id
+      )
+    ).rejects.toThrow(`spaceId '*' requires _internalCrossSpace: true`);
+  });
+
+  it('throws when spaceId "*" with _internalCrossSpace is used with a custom-space scoped soClient', async () => {
+    const { esClient, regularAgentPolicySO2 } = createClientMock();
+    const scopedClient = { getCurrentNamespace: jest.fn().mockReturnValue('space-a') } as any;
+
+    await expect(
+      reassignAgents(
+        scopedClient,
+        esClient,
+        { agentIds: ['agent-1'], spaceId: '*', _internalCrossSpace: true },
+        regularAgentPolicySO2.id
+      )
+    ).rejects.toThrow(`spaceId '*' requires an unscoped SO client`);
+  });
+
+  it('with spaceId "*", passes skipNamespaceFilter to getAgentsById and spaceId to reassignBatch', async () => {
+    const { soClient, esClient, regularAgentPolicySO2 } = createClientMock();
+    const mockGetAgentsById = jest
+      .spyOn(crud, 'getAgentsById')
+      .mockResolvedValue([{ id: 'agent-1', policy_id: 'other-policy' } as any]);
+
+    await reassignAgents(
+      soClient,
+      esClient,
+      { agentIds: ['agent-1'], spaceId: '*', _internalCrossSpace: true },
+      regularAgentPolicySO2.id
+    );
+
+    expect(mockGetAgentsById).toHaveBeenCalledWith(esClient, soClient, ['agent-1'], {
+      skipNamespaceFilter: true,
+    });
+    expect(mockReassignBatch).toHaveBeenCalledWith(
+      esClient,
+      expect.objectContaining({ spaceId: '*' }),
+      expect.anything(),
+      expect.anything()
+    );
     mockGetAgentsById.mockRestore();
   });
 });

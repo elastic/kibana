@@ -6,7 +6,7 @@
  */
 
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { generateFilters, type DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { generateFilters } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { EmbeddablePublicDefinition } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
@@ -19,6 +19,8 @@ import {
   useFetchContext,
   titleComparators,
   timeRangeComparators,
+  getViewModeSubject,
+  type ViewMode,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import React, { useEffect } from 'react';
@@ -59,10 +61,6 @@ import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { FieldStatsComponentType } from '../../constants/field_stats_component_type';
 import { FIELD_STATS_EMBEDDABLE_TYPE } from '../../../../../common/embeddables/constants';
 
-export interface EmbeddableFieldStatsChartStartServices {
-  data: DataPublicPluginStart;
-}
-
 const FieldStatisticsWrapper = dynamic(() => import('../grid_embeddable/field_stats_wrapper'));
 
 const ERROR_MSG = {
@@ -75,29 +73,6 @@ const ERROR_MSG = {
       defaultMessage: 'Error updating settings for field statistics.',
     }
   ),
-};
-
-export const getDependencies = async (
-  getStartServices: StartServicesAccessor<
-    DataVisualizerStartDependencies,
-    DataVisualizerPluginStart
-  >
-) => {
-  const [
-    { http, uiSettings, notifications, ...startServices },
-    { lens, data, usageCollection, fieldFormats },
-  ] = await getStartServices();
-
-  return {
-    http,
-    uiSettings,
-    data,
-    notifications,
-    lens,
-    usageCollection,
-    fieldFormats,
-    ...startServices,
-  };
 };
 
 export const getFieldStatsChartEmbeddableFactory = (
@@ -127,6 +102,9 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldFormats,
         ...startServices,
       };
+
+      const viewMode$ = getViewModeSubject(parentApi) ?? new BehaviorSubject<ViewMode>('view');
+
       const timeRangeManager = initializeTimeRangeManager(initialState);
       const titleManager = initializeTitleManager(initialState);
 
@@ -327,8 +305,9 @@ export const getFieldStatsChartEmbeddableFactory = (
           }
 
           const { filters: globalFilters, query: globalQuery, timeRange } = useFetchContext(api);
-          const [dataViews, esqlQuery, viewType, showPreviewByDefault] =
+          const [viewMode, dataViews, esqlQuery, viewType, showPreviewByDefault] =
             useBatchedPublishingSubjects(
+              viewMode$,
               api.dataViews$,
               api.query$,
               api.viewType$,
@@ -431,6 +410,7 @@ export const getFieldStatsChartEmbeddableFactory = (
                 resetData$={reset$}
                 timeRange={timeRange}
                 onRenderComplete={dataLoadingApi.onRenderComplete}
+                isInteractive={viewMode !== 'non-interactive'}
               />
             </EuiFlexItem>
           );

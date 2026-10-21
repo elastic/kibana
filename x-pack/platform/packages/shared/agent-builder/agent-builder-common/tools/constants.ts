@@ -28,6 +28,7 @@ export const platformCoreTools = {
   executeEsql: platformCoreTool('execute_esql'),
   executeWorkflow: platformCoreTool('execute_workflow'),
   createVisualization: platformCoreTool('create_visualization'),
+  createDiscoverSession: platformCoreTool('create_discover_session'),
   getWorkflowExecutionStatus: platformCoreTool('get_workflow_execution_status'),
   resumeWorkflowExecution: platformCoreTool('resume_workflow_execution'),
   listWorkflowExecutions: platformCoreTool('list_workflow_executions'),
@@ -79,7 +80,26 @@ export const platformSignificantEventsTools = {
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
   eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
-  reportInvestigationProgress: `${internalNamespaces.platformStreams}.investigation_progress_report`,
+} as const;
+
+/** AI-index tools, registered by the Context Engine Agent Builder plugin. */
+export const contextEngineAiIndexTools = {
+  listAiIndices: `${internalNamespaces.platformContextEngine}.list_ai_indices`,
+  describeAiIndex: `${internalNamespaces.platformContextEngine}.describe_ai_index`,
+  queryAiIndices: `${internalNamespaces.platformContextEngine}.query_ai_indices`,
+} as const;
+
+/** AI-index memory tools, registered by the Context Engine Agent Builder plugin. */
+export const contextEngineMemoryTools = {
+  remember: `${internalNamespaces.platformContextEngine}.remember`,
+  forget: `${internalNamespaces.platformContextEngine}.forget`,
+} as const;
+
+/** AI-index automation tools, registered by the Context Engine Agent Builder plugin. */
+export const contextEngineAutomationTools = {
+  installAutomationTemplate: `${internalNamespaces.platformContextEngine}.install_automation_template`,
+  saveAutomation: `${internalNamespaces.platformContextEngine}.save_automation`,
+  runAutomation: `${internalNamespaces.platformContextEngine}.run_automation`,
 } as const;
 
 export const attachmentTools = {
@@ -165,6 +185,7 @@ export const defaultAgentToolIds = [
   platformCoreTools.smlSearch,
   platformCoreTools.smlAttach,
   platformCoreTools.executeConnectorSubAction,
+  platformCoreTools.productDocumentation,
 ];
 
 /**

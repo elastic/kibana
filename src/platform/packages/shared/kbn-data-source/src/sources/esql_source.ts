@@ -7,17 +7,42 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LRUCache } from 'lru-cache';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';
+import { isFilterable } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { Column, DataSource, SerializedDataSource } from '../types';
-import { columnFromDatatableColumn } from '../to_column';
+import type { HttpStart } from '@kbn/core/public';
+import {
+  getIndexPatternFromESQLQuery,
+  getSourceCommandQueryFromESQLQuery,
+  getESQLSourceInfo,
+  ESQL_SOURCE_INFO_CACHE_TTL,
+  getESQLTimeField,
+  buildEsqlSourceCacheKey,
+  isComputedColumn,
+  getQuerySummary,
+  getProjectRoutingFromEsqlQuery,
+  getESQLAdHocDataviewId,
+  type ESQLSourceInfoColumn,
+} from '@kbn/esql-utils';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
+import type { Column, DataSourceBase, SerializedDataSource } from '../types';
+import { columnFromDatatableColumn, columnToFieldBase } from '../to_column';
 import { sha256 } from '../sha256';
+import { buildFilterableFieldSpecs } from '../filterable_fields';
+import type { FilterableSource } from '../filterable_source';
 
 export interface EsqlSourceArgs {
   query: string;
-  resultColumns: readonly DatatableColumn[];
+  /**
+   * When provided, skips `getESQLSourceInfo` even if `http` is set.
+   * Use after a real fetch, or in tests. The instance cache is keyed by query
+   * identity, not columns — later `create` calls ignore a new `resultColumns`.
+   * Use {@link EsqlSource.withColumns} to replace columns on an existing id.
+   */
+  resultColumns?: readonly DatatableColumn[];
   timeFieldName?: string;
   /**
    * CPS project routing string. When present it is included in the id hash so
@@ -25,30 +50,104 @@ export interface EsqlSourceArgs {
    * filter state does not bleed across project boundaries.
    */
   projectRouting?: string;
+  /**
+   * When provided, the factory resolves the time field (`getESQLTimeField`) and
+   * the result schema (`getESQLSourceInfo` / LIMIT 0) in parallel, unless
+   * `timeFieldName` / `resultColumns` are already set.
+   */
+  http?: HttpStart;
+  /**
+   * Set to `false` when only the schema is needed (e.g. KQL field suggestions): the time field
+   * is then taken only if already resolved for this source, never requested. Defaults to `true`.
+   */
+  resolveTimeField?: boolean;
+  /**
+   * Passed to the source_info route so that queries using `?_tstart` / `?_tend`
+   * named parameters can be executed for schema discovery.
+   */
+  timeRange?: { from: string; to: string };
+  /**
+   * Passed to the source_info route so that queries using ES|QL control
+   * variables (`?variable_name`) can be executed for schema discovery.
+   */
+  esqlVariables?: ESQLControlVariable[];
+}
+
+export interface EsqlDatasetArgs {
+  query: string;
+  timeFieldName?: string;
+  projectRouting?: string;
+  http?: HttpStart;
+}
+
+/** Identity of the FROM target of an ES|QL query, without the query's schema. */
+export interface EsqlDataset {
+  datasetId: string;
+  title: string;
+  timeFieldName: string | undefined;
+  projectRouting: string | undefined;
+}
+
+function columnsFromSourceInfo(columns: ESQLSourceInfoColumn[], query: string): DatatableColumn[] {
+  const querySummary = getQuerySummary(query);
+  return columns.map(({ name, esType }) => ({
+    id: name,
+    name,
+    meta: {
+      type: esFieldTypeToKibanaFieldType(esType) as DatatableColumn['meta']['type'],
+      esType,
+    },
+    isNull: false,
+    isComputedColumn: isComputedColumn(name, querySummary),
+  }));
 }
 
 interface EsqlSourceConstructorArgs {
   id: string;
+  datasetId: string;
+  query: string;
   title: string;
   timeFieldName: string | undefined;
+  projectRouting: string | undefined;
   resultColumns: readonly DatatableColumn[];
 }
 
 /**
  * `DataSource` implementation for ES|QL queries.
  *
- * Built directly from `(query, resultColumns)` — does not require or create a
- * `DataView`. Identity is derived from the FROM clause's target string and the
- * (caller-provided) time field name; columns come from the query response.
+ * Does not require or create a `DataView`. Identity is derived from the trimmed
+ * query, optional project routing, control variables, and time field name.
+ * When `http` is provided, {@link EsqlSource.create} resolves the time field
+ * and LIMIT 0 schema in parallel unless `timeFieldName` / `resultColumns` are
+ * already set. Source-info failures still return an empty-column instance
+ * but are not cached.
+ *
+ * Instances are cached by query identity. The first `create` for a key wins;
+ * use {@link withColumns} to attach fetch-result columns without changing `id`.
  *
  * Construct via the async {@link EsqlSource.create} factory; the constructor
  * is private because id derivation uses `crypto.subtle.digest` (async).
  */
-export class EsqlSource implements DataSource {
+export class EsqlSource implements DataSourceBase {
+  // Expires with the source info cache, so a source picks up new fields without a reload.
+  private static readonly instanceCache = new LRUCache<string, EsqlSource>({
+    max: 100,
+    ttl: ESQL_SOURCE_INFO_CACHE_TTL,
+  });
+
   public readonly kind = 'esql' as const;
   public readonly id: string;
+  /**
+   * Identity of the FROM target + time field + effective project routing, independent of the
+   * query-instance {@link id}: SORT / WHERE / EVAL keep it, a different FROM, time field or
+   * project does not. Equals the id of the dataset's DataView shim and of the legacy ad-hoc
+   * DataView, so persisted filters (`meta.index`) and Lens layers keep resolving it.
+   */
+  public readonly datasetId: string;
+  public readonly query: string;
   public readonly title: string;
   public readonly timeFieldName: string | undefined;
+  public readonly projectRouting: string | undefined;
   public readonly references: SavedObjectReference[];
   public readonly fields: DataViewFieldBase[];
 
@@ -61,40 +160,159 @@ export class EsqlSource implements DataSource {
   public readonly resultColumns: readonly DatatableColumn[];
 
   private readonly columns: readonly Column[];
+  private filterableSource?: FilterableSource;
   private readonly columnsByName: ReadonlyMap<string, Column>;
 
-  private constructor({ id, title, timeFieldName, resultColumns }: EsqlSourceConstructorArgs) {
+  private constructor({
+    id,
+    datasetId,
+    query,
+    title,
+    timeFieldName,
+    projectRouting,
+    resultColumns,
+  }: EsqlSourceConstructorArgs) {
     this.id = id;
+    this.datasetId = datasetId;
+    this.query = query;
     this.title = title;
     this.timeFieldName = timeFieldName;
+    this.projectRouting = projectRouting;
     this.references = [{ type: 'index-pattern', id, name: 'data-source' }];
 
     this.resultColumns = resultColumns;
     this.columns = resultColumns.map(columnFromDatatableColumn);
     this.columnsByName = new Map(this.columns.map((c) => [c.name, c]));
-    this.fields = this.columns.map((c) => ({
-      name: c.name,
-      type: c.type,
-      esTypes: c.esType ? [c.esType] : undefined,
-    }));
+    this.fields = this.columns.map(columnToFieldBase);
   }
 
-  /** Async factory — id derivation via `crypto.subtle` requires async. */
+  /**
+   * Async factory. Identity (and the LRU cache key) is the trimmed query, project
+   * routing, control variables, and time field — not columns. The first successful
+   * `create` for a key wins; later calls return that instance. Use {@link withColumns}
+   * to attach fetch-result columns without changing `id`.
+   */
   public static async create(args: EsqlSourceArgs): Promise<EsqlSource> {
-    const title = getIndexPatternFromESQLQuery(args.query);
+    const query = args.query.trim();
+    const { cacheKey: baseKey, cleanVariables } = buildEsqlSourceCacheKey(
+      query,
+      args.projectRouting,
+      args.esqlVariables
+    );
+    // An explicit time field is part of the key, so a different one gets its own entry. An
+    // instance created without resolving the time field is kept apart, so it is never returned
+    // to a caller that needs the time field.
+    const skipsTimeField = args.timeFieldName == null && args.resolveTimeField === false;
+    const instanceKey =
+      args.timeFieldName != null
+        ? `${baseKey}\0${args.timeFieldName}`
+        : skipsTimeField
+        ? `${baseKey}\0without-time-field`
+        : baseKey;
+
+    // A caller that skips the time field prefers an instance that has it.
+    const cached =
+      (skipsTimeField ? EsqlSource.instanceCache.get(baseKey) : undefined) ??
+      EsqlSource.instanceCache.get(instanceKey);
+    if (cached) return cached;
+
+    const title = getIndexPatternFromESQLQuery(query);
+    const projectRouting = getProjectRoutingFromEsqlQuery(query) ?? args.projectRouting;
+
+    // Without `http`, getESQLTimeField only returns an already resolved time field.
+    let timeFieldName: string | undefined = skipsTimeField
+      ? await getESQLTimeField({ query, projectRouting: args.projectRouting })
+      : args.timeFieldName;
+    let resultColumns: readonly DatatableColumn[] = args.resultColumns ?? [];
+    let discoveredSchema: Awaited<ReturnType<typeof getESQLSourceInfo>> | null | undefined;
+
+    const { http } = args;
+    const shouldResolveTimeField = Boolean(http) && timeFieldName === undefined && !skipsTimeField;
+    const shouldResolveSchema = Boolean(http) && args.resultColumns === undefined;
+
+    if (http && (shouldResolveTimeField || shouldResolveSchema)) {
+      const [resolvedTimeField, info] = await Promise.all([
+        shouldResolveTimeField
+          ? getESQLTimeField({
+              query,
+              http,
+              projectRouting: args.projectRouting,
+            })
+          : Promise.resolve(timeFieldName),
+        shouldResolveSchema
+          ? getESQLSourceInfo({
+              query,
+              http,
+              projectRouting: args.projectRouting,
+              timeRange: args.timeRange,
+              timeFieldName: args.timeFieldName,
+              esqlVariables: cleanVariables,
+            }).catch(() => null)
+          : Promise.resolve(null),
+      ]);
+
+      timeFieldName = resolvedTimeField;
+      if (shouldResolveSchema) {
+        discoveredSchema = info;
+      }
+      if (info) {
+        resultColumns = columnsFromSourceInfo(info.columns, query);
+      }
+    }
+
     const hashInput = JSON.stringify([
       'esql',
-      title,
+      query,
       args.projectRouting ?? null,
-      args.timeFieldName ?? null,
+      cleanVariables ?? null,
+      timeFieldName ?? null,
     ]);
-    const hash = await sha256(hashInput);
-    return new EsqlSource({
+    const [hash, datasetId] = await Promise.all([
+      sha256(hashInput),
+      getESQLAdHocDataviewId({ indexPattern: title, timeFieldName, projectRouting }),
+    ]);
+    const instance = new EsqlSource({
       id: `esql-${hash}`,
+      datasetId,
+      query,
       title,
-      timeFieldName: args.timeFieldName,
-      resultColumns: args.resultColumns,
+      timeFieldName,
+      projectRouting,
+      resultColumns,
     });
+
+    // Only cache a known schema: given columns or a successful lookup. A failed lookup
+    // (`info === null`) or a create without `http` or columns is retried by a later create.
+    const isSchemaKnown =
+      args.resultColumns !== undefined || (shouldResolveSchema && discoveredSchema !== null);
+    if (isSchemaKnown) {
+      EsqlSource.instanceCache.set(instanceKey, instance);
+    }
+    return instance;
+  }
+
+  /**
+   * Resolves the dataset identity (FROM target, time field, project routing) of a query without
+   * its schema: no `LIMIT 0` request and nothing is added to the instance cache. For consumers
+   * that only need the {@link EsqlSource.datasetId} and time field, e.g. persisted Lens layers.
+   */
+  public static async resolveDataset(args: EsqlDatasetArgs): Promise<EsqlDataset> {
+    const query = args.query.trim();
+    const title = getIndexPatternFromESQLQuery(query);
+    const projectRouting = getProjectRoutingFromEsqlQuery(query) ?? args.projectRouting;
+    const timeFieldName =
+      args.timeFieldName ??
+      (await getESQLTimeField({ query, http: args.http, projectRouting: args.projectRouting }));
+    const datasetId = await getESQLAdHocDataviewId({
+      indexPattern: title,
+      timeFieldName,
+      projectRouting,
+    });
+    return { datasetId, title, timeFieldName, projectRouting };
+  }
+
+  public static clearCache(): void {
+    EsqlSource.instanceCache.clear();
   }
 
   public get name(): string {
@@ -111,6 +329,70 @@ export class EsqlSource implements DataSource {
 
   public isTimeBased(): boolean {
     return !!this.timeFieldName;
+  }
+
+  public withColumns(resultColumns: readonly DatatableColumn[]): EsqlSource {
+    return new EsqlSource({
+      id: this.id,
+      datasetId: this.datasetId,
+      query: this.query,
+      title: this.title,
+      timeFieldName: this.timeFieldName,
+      projectRouting: this.projectRouting,
+      resultColumns,
+    });
+  }
+
+  /**
+   * The source of the queried dataset: the source command alone (`FROM x | STATS ...` → `FROM x`),
+   * resolved once per dataset by the instance cache. The source itself when the query is only that.
+   */
+  private async getDatasetSource(http?: HttpStart): Promise<EsqlSource> {
+    const sourceQuery = getSourceCommandQueryFromESQLQuery(this.query);
+    if (!sourceQuery) {
+      return this;
+    }
+    return EsqlSource.create({
+      query: sourceQuery,
+      timeFieldName: this.timeFieldName,
+      // Only the columns are needed.
+      resolveTimeField: false,
+      projectRouting: this.projectRouting,
+      http,
+    });
+  }
+
+  /**
+   * Fields of the queried dataset, which is what filters and KQL apply to: the columns of the
+   * source command alone (`FROM x | STATS ...` → `FROM x`), resolved once per dataset.
+   * Without `http`, only an already resolved schema is returned; otherwise no fields.
+   */
+  public async getFilterableFields(http?: HttpStart): Promise<readonly Column[]> {
+    return (await this.getDatasetSource(http)).getColumns();
+  }
+
+  /**
+   * The dataset identity that filtering needs: see {@link FilterableSource}. It is kept on the
+   * source of the dataset, so queries on the same dataset share one object, as long as the instance
+   * cache keeps that source, and consumers keep getting the same value while a query is edited.
+   */
+  public async toFilterableSource(http?: HttpStart): Promise<FilterableSource> {
+    const dataset = await this.getDatasetSource(http);
+    dataset.filterableSource ??= {
+      id: dataset.datasetId,
+      title: dataset.title,
+      name: dataset.name,
+      timeFieldName: dataset.timeFieldName,
+      fields: Object.values(
+        buildFilterableFieldSpecs(dataset.getColumns(), dataset.timeFieldName)
+      ).map((field) => ({ ...field, filterable: isFilterable(field) })),
+      isTimeBased: () => dataset.isTimeBased(),
+    };
+    return dataset.filterableSource;
+  }
+
+  public isRollup(): boolean {
+    return false;
   }
 
   public isPersisted(): boolean {

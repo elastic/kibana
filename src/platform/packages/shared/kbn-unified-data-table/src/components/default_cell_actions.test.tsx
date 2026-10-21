@@ -16,6 +16,7 @@ import {
   buildCopyValueButton,
   FilterInBtn,
   FilterOutBtn,
+  ReverseCategorizeBtn,
 } from './default_cell_actions';
 import { dataTableContextMock } from '../../__mocks__/table_context';
 import { buildDataTableRecord } from '@kbn/discover-utils';
@@ -23,6 +24,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { servicesMock } from '../../__mocks__/services';
 import { UnifiedDataTableContext } from '../table_context';
 
@@ -54,18 +56,10 @@ describe('Default cell actions ', () => {
     jest.clearAllMocks();
   });
 
-  const CopyBtn = buildCopyValueButton(
-    createCellActionProps({
-      colIndex: 0,
-      columnId: 'extension',
-    }),
-    servicesMock.toastNotifications,
-    dataTableContextMock.valueToStringConverter,
-    'table'
-  );
   const extensionField = getField('extension');
   const messageField = getField('message');
   const sourceField = getField('_source');
+  const bytesField = getField('bytes');
 
   it('should not show cell actions for unfilterable fields', () => {
     const cellActions = buildCellActions(
@@ -80,10 +74,10 @@ describe('Default cell actions ', () => {
       cellActions[0](
         createCellActionProps({
           colIndex: 1,
-          columnId: 'extension',
+          columnId: 'message',
         })
       )!.props['aria-label']
-    ).toEqual(CopyBtn.props['aria-label']);
+    ).toEqual('Copy value of message');
   });
 
   it('should show filter actions for filterable fields', () => {
@@ -110,10 +104,41 @@ describe('Default cell actions ', () => {
       cellActions[0](
         createCellActionProps({
           colIndex: 1,
-          columnId: 'extension',
+          columnId: '_source',
         })
       )!.props['aria-label']
-    ).toEqual(CopyBtn.props['aria-label']);
+    ).toEqual('Copy value of _source');
+  });
+
+  it('should use the field display name in the action labels', () => {
+    const cellActions = buildCellActions(
+      bytesField,
+      servicesMock.toastNotifications,
+      dataTableContextMock.valueToStringConverter,
+      'table',
+      jest.fn()
+    );
+
+    renderWithI18n(
+      <UnifiedDataTableContext.Provider value={dataTableContextMock}>
+        {cellActions.map((CellAction, index) => (
+          <CellAction
+            key={index}
+            {...createCellActionProps({ colIndex: 1, columnId: 'bytes', rowIndex: 1 })}
+          />
+        ))}
+      </UnifiedDataTableContext.Provider>
+    );
+
+    expect(
+      screen.getByRole('button', { name: 'Filter for this bytesDisplayName' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Filter out this bytesDisplayName' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Copy value of bytesDisplayName' })
+    ).toBeInTheDocument();
   });
 
   it('triggers filter function when FilterInBtn is clicked', async () => {
@@ -223,6 +248,58 @@ describe('Default cell actions ', () => {
     expect(execCommandMock).toHaveBeenCalledWith('copy');
     expect(servicesMock.toastNotifications.addInfo).toHaveBeenCalledWith({
       title: 'Copied to clipboard',
+    });
+  });
+
+  describe('ReverseCategorizeBtn', () => {
+    it('passes the Discover openInNewTab callback in the trigger context', async () => {
+      const executeTriggerActions = jest.fn();
+      const onOpenInNewTab = jest.fn();
+      const textField = {
+        name: 'message',
+        esTypes: ['text'],
+      } as unknown as DataViewField;
+
+      renderWithI18n(
+        <UnifiedDataTableContext.Provider
+          value={{
+            ...dataTableContextMock,
+            dataView: { ...dataTableContextMock.dataView, isTimeBased: () => true } as never,
+            getRowByIndex: () =>
+              buildDataTableRecord(
+                { _index: 'i', _id: '0', _source: { message: 'hi' } },
+                dataViewMock
+              ),
+            onOpenInNewTab,
+            queryContext: {
+              query: { esql: 'FROM logs-*' },
+              filters: [],
+              filterQuery: { language: 'kuery', query: 'host: a' },
+              timeRange: { from: 'now-1h', to: 'now' },
+            },
+          }}
+        >
+          <ReverseCategorizeBtn
+            cellActionProps={createCellActionProps({ columnId: 'message' })}
+            field={textField}
+            uiActions={{ executeTriggerActions } as unknown as UiActionsStart}
+          />
+        </UnifiedDataTableContext.Provider>
+      );
+
+      await userEvent.click(screen.getByTestId('reverseCategorizeButton'));
+
+      expect(executeTriggerActions).toHaveBeenCalledWith(
+        'REVERSE_CATEGORIZE_FIELD_TRIGGER',
+        expect.objectContaining({
+          field: textField,
+          openInNewTab: onOpenInNewTab,
+          query: { esql: 'FROM logs-*' },
+          filters: [],
+          filterQuery: { language: 'kuery', query: 'host: a' },
+          timeRange: { from: 'now-1h', to: 'now' },
+        })
+      );
     });
   });
 

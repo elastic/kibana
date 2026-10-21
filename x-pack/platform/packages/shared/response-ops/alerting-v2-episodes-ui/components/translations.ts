@@ -63,9 +63,30 @@ export const getRuleCellCopyRuleIdTooltip = (ruleId: string) =>
     values: { ruleId },
   });
 
+export const getDurationLowerBoundLabel = (duration: string) =>
+  i18n.translate('xpack.alertingV2EpisodesUi.durationCell.lowerBoundLabel', {
+    defaultMessage: '≥ {duration}',
+    values: { duration },
+  });
+
+export const DURATION_LOWER_BOUND_TOOLTIP = i18n.translate(
+  'xpack.alertingV2EpisodesUi.durationCell.lowerBoundTooltip',
+  {
+    defaultMessage:
+      'The alert started before the selected time range, so its actual duration is longer. Widen the time range or open the alert to see it.',
+  }
+);
+
 export const RULE_CELL_RULE_ID_COPIED = i18n.translate(
   'xpack.alertingV2EpisodesUi.ruleCell.ruleIdCopied',
   {
     defaultMessage: 'Rule ID copied',
+  }
+);
+
+export const SUPPRESSED_BY_MAINTENANCE_WINDOW = i18n.translate(
+  'xpack.alertingV2EpisodesUi.suppressedCell.suppressedByMWBadge',
+  {
+    defaultMessage: 'Suppressed by maintenance window',
   }
 );
