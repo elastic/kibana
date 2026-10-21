@@ -236,7 +236,6 @@
   },
   "exclude": [
     "examples",
-    "platform/plugins/shared/agent_builder_workflows",
     "platform/packages/shared/file-upload",
     "platform/packages/shared/kbn-ingest-pipeline-json-editor",
     "platform/packages/shared/kbn-search-index-documents",

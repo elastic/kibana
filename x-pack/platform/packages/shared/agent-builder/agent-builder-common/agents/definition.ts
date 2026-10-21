@@ -35,6 +35,12 @@ export const agentBuilderDefaultAgentId = 'elastic-ai-agent';
 export const agentBuilderDefaultAiIndexId = 'elastic';
 
 /**
+ * ID of the Context Engine retrieval skill. Agent Builder grants it at runtime to any agent that
+ * can reach an AI Index; it is never part of the agent's own configuration.
+ */
+export const kiRetrievalSkillId = 'ki-retrieval';
+
+/**
  * Definition of a agentBuilder agent.
  */
 export interface AgentDefinition {

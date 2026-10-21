@@ -41,8 +41,9 @@ import type {
 } from '../../../../common/api/entity_analytics/entity_details/highlights.gen';
 import type { EntityViewMode } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import {
+  buildAliasesFilter,
+  RESOLUTION_GROUP_RISK_SORT_FIELD,
   RESOLVED_MODE_MAX_RECORDS,
-  RESOLVED_TO_FIELD,
 } from '../../../../common/entity_analytics/entity_store/resolution_group';
 import { getThreshold } from '../../../../common/utils/ml';
 import { isSecurityJob } from '../../../../common/machine_learning/is_security_job';
@@ -696,11 +697,11 @@ export const entityDetailsHighlightsServiceFactory = ({
       isResolved
         ? enrichedEntityService.getEnrichedEntities({
             ...sharedOpts,
-            filter: { term: { [RESOLVED_TO_FIELD]: entityIdentifier } },
+            filter: buildAliasesFilter(entityIdentifier),
             // The target takes one of the member slots.
             size: RESOLVED_MODE_MAX_RECORDS - 1,
             // Highest-risk aliases first, so truncation drops the least risky ones.
-            sort: [{ 'entity.risk.calculated_score_norm': 'desc' }],
+            sort: [{ [RESOLUTION_GROUP_RISK_SORT_FIELD]: 'desc' }],
           })
         : Promise.resolve({ entities: [] as EnrichedEntity[] }),
     ]);
