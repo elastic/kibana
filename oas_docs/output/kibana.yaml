@@ -50525,8 +50525,9 @@ paths:
                   maxLength: 255
                   type: string
                 description:
-                  description: Integration description from the Service Settings step.
+                  description: Integration description from the Service Settings step. Send null to clear it.
                   maxLength: 2048
+                  nullable: true
                   type: string
                 ecfStacks:
                   description: ECF CloudFormation stacks to record for this deployment.
