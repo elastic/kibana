@@ -48,4 +48,12 @@ describe('parseEsqlCached', () => {
 
     expect(parseEsqlCached(mediumQuery(1))).not.toBe(first);
   });
+
+  it('parses and caches an empty query', () => {
+    const first = parseEsqlCached('');
+    const second = parseEsqlCached('');
+
+    expect(first.root.commands).toHaveLength(0);
+    expect(second).toBe(first);
+  });
 });

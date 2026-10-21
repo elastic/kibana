@@ -15,7 +15,7 @@ import { LRUCache } from 'lru-cache';
 const parseCache = new LRUCache<string, ParseResult>({
   max: 50,
   maxSize: 50_000,
-  sizeCalculation: (_result, query) => query.length,
+  sizeCalculation: (_result, query) => Math.max(1, query.length),
 });
 
 /**
