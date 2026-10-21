@@ -17,10 +17,7 @@ export const API_ENGINE_NON_MKI_TAG = [
   ...getPlaywrightTagsFor('serverless', 'observability_complete', 'local'),
 ];
 
-export const UI_TAG = [
-  ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
-  ...getPlaywrightTagsFor('serverless', 'observability_complete', 'local'),
-];
+export const UI_TAG = [...tags.stateful.all, ...tags.serverless.observability.complete];
 
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',

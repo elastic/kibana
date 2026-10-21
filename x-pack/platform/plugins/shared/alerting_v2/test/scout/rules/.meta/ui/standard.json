@@ -10,7 +10,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
@@ -24,7 +26,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
@@ -38,7 +42,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
@@ -52,7 +58,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
@@ -66,7 +74,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
@@ -80,7 +90,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/discover_query_sync.spec.ts",
@@ -94,7 +106,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/esql_rule_flyout_validation.spec.ts",
@@ -108,7 +122,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/esql_rule_flyout_validation.spec.ts",
@@ -122,7 +138,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/install_rule_template.spec.ts",
@@ -136,7 +154,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/install_rule_template.spec.ts",
@@ -150,7 +170,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/install_rule_template.spec.ts",
@@ -164,7 +186,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
@@ -178,7 +202,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
@@ -192,7 +218,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
@@ -206,7 +234,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
@@ -220,7 +250,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
@@ -234,7 +266,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_builder_threshold.spec.ts",
@@ -248,7 +282,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_name_validation_flyout.spec.ts",
@@ -262,7 +298,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_name_validation_flyout.spec.ts",
@@ -276,7 +314,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_name_validation_flyout.spec.ts",
@@ -290,7 +330,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_routing_tags_edit.spec.ts",
@@ -304,7 +346,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rule_tags_edit.spec.ts",
@@ -318,7 +362,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rules_list_bulk_respects_filters.spec.ts",
@@ -332,7 +378,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rules_list_privileges.spec.ts",
@@ -346,7 +394,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rules_list_privileges.spec.ts",
@@ -360,7 +410,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rules_list_tabs_privileges.spec.ts",
@@ -374,7 +426,9 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@local-serverless-observability_complete"
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/rules_list_tabs_privileges.spec.ts",
