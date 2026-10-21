@@ -20,8 +20,8 @@ export const RunStepTypeId = 'security.attack-discovery.run';
 /**
  * Input schema for the Run step.
  *
- * All fields are optional. When `connector_id` is omitted, the server resolves
- * `feature_id` if given, then the configured default AI connector
+ * All fields are optional. When `connector_id` is omitted, the server tries
+ * each `feature_id` in order, then the configured default AI connector
  * (`genAiSettings:defaultAIConnector`, with an `inference.getDefaultConnector`
  * fallback). Provide `connector_id` to override both.
  */
@@ -38,17 +38,20 @@ export const RunStepInputSchema = lazySchema(() =>
     end: z.string().optional(),
     esql_query: z.string().optional(),
     /**
-     * Model Management > Feature settings feature id whose configured model this
-     * run should use. Lets a caller pick a tier without naming an endpoint, so a
-     * leaf step can state its own tier rather than having a `connector_id`
-     * threaded down to it through `workflow.execute` inputs.
+     * Model Management > Feature settings feature id, or an ordered list of them,
+     * whose configured model this run should use. Lets a caller pick a tier
+     * without naming an endpoint, so a leaf step can state its own tier rather
+     * than having a `connector_id` threaded down to it through `workflow.execute`
+     * inputs.
      *
-     * Consulted only when `connector_id` is omitted, and skipped when the id is
-     * not a registered `chat_completion` feature — resolution then continues to
-     * the configured default, which is what happens when the plugin owning the
+     * Consulted only when `connector_id` is omitted. Each id is tried in order
+     * and the first registered `chat_completion` feature with a configured model
+     * wins. An id that is not registered, or that resolves no connector, is
+     * skipped — resolution then continues to the next id and finally the
+     * configured default, which is what happens when the plugin owning the
      * feature is disabled.
      */
-    feature_id: z.string().max(256).optional(),
+    feature_id: z.union([z.string().max(256), z.array(z.string().max(256)).max(8)]).optional(),
     filter: z.record(z.string(), z.unknown()).optional(),
     /**
      * Whether the generation-phase ground-truth gate runs. Defaults to `true`.
