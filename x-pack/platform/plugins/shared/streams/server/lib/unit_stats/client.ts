@@ -8,9 +8,10 @@
 import type { ComposerQuery } from '@elastic/esql';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
-import type { StreamsUnit } from '@kbn/streams-schema';
+import { MAX_STREAMS_UNIT_STATS_COMPONENTS, type StreamsUnit } from '@kbn/streams-schema';
 import { isEsqlUnknownIndexError } from '@kbn/storage-adapter';
 import { chunk } from 'lodash';
+import { StatusError } from '../streams/errors/status_error';
 import { toEsqlRequest } from '../streams/helpers/esql';
 import { UNIT_STATS_DEFAULT_WINDOW_MS, UNIT_STATS_REQUEST_TIMEOUT_MS } from './constants';
 import { toSearchError } from './errors/search_errors';
@@ -92,15 +93,18 @@ export class UnitStatsClient {
     const destinationConfigs = new Map((unit.destinations ?? []).map((d) => [d.id, d]));
     const processorConfigs = new Map((unit.processors ?? []).map((p) => [p.id, p]));
 
-    // Omitted or empty: every destination and processor in the unit.
-    const refs = dedupe(
-      request.components?.length
-        ? request.components
-        : [
-            ...(unit.destinations ?? []).map(({ id }) => ({ kind: 'destination' as const, id })),
-            ...(unit.processors ?? []).map(({ id }) => ({ kind: 'processor' as const, id })),
-          ]
-    );
+    // Omitted or empty: every destination and processor in the unit, if one request can hold them.
+    const unitRefs = [
+      ...(unit.destinations ?? []).map(({ id }) => ({ kind: 'destination' as const, id })),
+      ...(unit.processors ?? []).map(({ id }) => ({ kind: 'processor' as const, id })),
+    ];
+    if (!request.components?.length && unitRefs.length > MAX_STREAMS_UNIT_STATS_COMPONENTS) {
+      throw new StatusError(
+        `This unit has ${unitRefs.length} components, and one request can name at most ${MAX_STREAMS_UNIT_STATS_COMPONENTS}. Pass "components" to choose which ones.`,
+        400
+      );
+    }
+    const refs = dedupe(request.components?.length ? request.components : unitRefs);
 
     const destinations: Record<string, StreamsUnit.StatsDestinationResult> = {};
     const processors: Record<string, StreamsUnit.StatsProcessorResult> = {};

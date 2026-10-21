@@ -8,7 +8,11 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { streamsUnitStatsResponseSchema, type StreamsUnit } from '@kbn/streams-schema';
+import {
+  MAX_STREAMS_UNIT_STATS_COMPONENTS,
+  streamsUnitStatsResponseSchema,
+  type StreamsUnit,
+} from '@kbn/streams-schema';
 import { UnitStatsClient } from './client';
 
 const unit: StreamsUnit.Configuration = {
@@ -188,6 +192,29 @@ describe('UnitStatsClient.getStats', () => {
       queries.forEach((query) => expect(query).toContain('IN ("es-prod")'));
     });
 
+    it('answers only for the kind that is named, and does not fall back to the rest of the unit', async () => {
+      const destinationsOnly = makeEsql();
+      const processorsOnly = makeEsql();
+
+      const destinationResponse = await run(destinationsOnly, {
+        components: [{ kind: 'destination', id: 'es-prod' }],
+      });
+      const processorResponse = await run(processorsOnly, {
+        components: [{ kind: 'processor', id: 'uppercase-message' }],
+      });
+
+      expect(Object.keys(destinationResponse.components.destinations)).toEqual(['es-prod']);
+      expect(destinationResponse.components.processors).toEqual({});
+      statsQueries(destinationsOnly).forEach((query) =>
+        expect(query).toContain('attributes.streams.destination.id')
+      );
+      expect(processorResponse.components.destinations).toEqual({});
+      expect(Object.keys(processorResponse.components.processors)).toEqual(['uppercase-message']);
+      statsQueries(processorsOnly).forEach((query) =>
+        expect(query).toContain('attributes.streams.step.id')
+      );
+    });
+
     it('answers not_found from the config without querying', async () => {
       const esql = makeEsql();
 
@@ -245,42 +272,53 @@ describe('UnitStatsClient.getStats', () => {
       );
     });
 
-    describe('with many destinations', () => {
-      const manyDestinations: StreamsUnit.Configuration = {
+    describe('with the most destinations one request allows', () => {
+      const destinationsOf = (count: number): StreamsUnit.Configuration => ({
         ...unit,
-        destinations: Array.from({ length: 1250 }, (_, index) => ({
+        processors: [],
+        destinations: Array.from({ length: count }, (_, index) => ({
           id: `destination-${index}`,
           type: 'elasticsearch',
           supported_telemetry: ['logs' as const],
         })),
-      };
+      });
+      const maxDestinations = destinationsOf(MAX_STREAMS_UNIT_STATS_COMPONENTS);
       const sumsQueries = (esql: jest.Mock) =>
         statsQueries(esql).filter((query) => !isRateQuery(query) && query.includes('destination'));
 
-      it('splits the sums query by what the window allows, and asks for the rates once', async () => {
+      it('asks for the sums once and the rates once when the window allows every id', async () => {
         const esql = makeEsql();
 
-        await run(esql, {}, manyDestinations);
+        await run(esql, {}, maxDestinations);
 
-        // The default window allows 625 ids per series query.
-        expect(sumsQueries(esql)).toHaveLength(2);
+        // The default window allows 588 ids per series query.
+        expect(sumsQueries(esql)).toHaveLength(1);
         const rateQueries = statsQueries(esql).filter(
           (query) => isRateQuery(query) && query.includes('destination')
         );
         expect(rateQueries).toHaveLength(1);
       });
 
-      it('splits it into more queries for a longer window', async () => {
+      it('splits the sums query for the longest window', async () => {
         const esql = makeEsql();
 
         await run(
           esql,
-          { filter: { time_range: { start: '2026-10-18T12:00:00.000Z', end: now.toISOString() } } },
-          manyDestinations
+          { filter: { time_range: { start: '2025-10-18T12:00:00.000Z', end: now.toISOString() } } },
+          maxDestinations
         );
 
-        // A 24 hour window has 15 minute buckets and allows 103 ids per series query.
-        expect(sumsQueries(esql)).toHaveLength(13);
+        // A 366 day window has 367 day buckets and allows 27 ids per series query.
+        expect(sumsQueries(esql)).toHaveLength(4);
+      });
+
+      it('rejects an omitted components list when the unit has more components than a request can name', async () => {
+        const esql = makeEsql();
+
+        await expect(
+          run(esql, {}, destinationsOf(MAX_STREAMS_UNIT_STATS_COMPONENTS + 1))
+        ).rejects.toMatchObject({ statusCode: 400 });
+        expect(esql).not.toHaveBeenCalled();
       });
     });
 
