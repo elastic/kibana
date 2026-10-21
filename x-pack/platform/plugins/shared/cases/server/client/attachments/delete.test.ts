@@ -10,9 +10,12 @@ import { mockCaseComments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
 import { deleteComment, deleteAll } from './delete';
 import { toAttachmentForDeletion } from './test_utils/deletion';
-import { deleteRelatedAttachments } from './bulk_delete';
+import { deleteRelatedAttachments } from './delete_utils';
 
-jest.mock('./bulk_delete', () => ({ deleteRelatedAttachments: jest.fn() }));
+jest.mock('./delete_utils', () => ({
+  ...jest.requireActual('./delete_utils'),
+  deleteRelatedAttachments: jest.fn(),
+}));
 
 describe('delete', () => {
   const clientArgs = createCasesClientMockArgs();
