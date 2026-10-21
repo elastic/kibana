@@ -21,6 +21,8 @@ import type {
   RejectedResponse,
   ResponseFixture,
 } from '../engine/response_engine';
+import type { NamedResponse } from '../engine/named_responses';
+import { collectNamedResponses, rejectUnknownNamedResponses } from '../engine/named_responses';
 import { createResponseEngine } from '../engine/response_engine';
 import type { PaginationOptions } from '../engine/paginate';
 import { withPagination } from '../engine/paginate';
@@ -68,7 +70,10 @@ export interface EmulatorOptions extends PaginationOptions {
    * as `{ v1, v2 }`) let `calls`, fixtures, recordings and pagination tell their operations apart.
    */
   readonly specs: readonly EmulatorSpec[] | Readonly<Record<string, EmulatorSpec>>;
-  /** Hand-written responses, served in preference to everything else. */
+  /**
+   * Hand-written responses, served in preference to everything else. They name an OpenAPI
+   * operation by method and path template, and a GraphQL or MCP one by name.
+   */
   readonly fixtures?: readonly ResponseFixture[];
   /** Responses captured from the vendor, served when they still conform to the spec. */
   readonly recordings?: readonly Recording[];
@@ -148,18 +153,31 @@ const loadSpecs = (specs: EmulatorOptions['specs']): ContractOperation[] =>
     isGraphQLSpec(spec) || isMcpSpec(spec) ? [] : loadSpec(spec, source)
   );
 
-const loadProtocols = (specs: EmulatorOptions['specs']): Map<string, ContractProtocol> => {
-  const protocols = new Map<string, ContractProtocol>();
-  for (const [source, spec] of toNamedSpecs(specs)) {
+interface LoadedProtocol {
+  readonly source?: string;
+  readonly protocol: ContractProtocol;
+}
+
+const loadProtocols = (
+  specs: EmulatorOptions['specs'],
+  responses: readonly NamedResponse[]
+): LoadedProtocol[] =>
+  toNamedSpecs(specs).flatMap(([source, spec]) => {
+    const options = { source, responses };
     const protocol = isGraphQLSpec(spec)
-      ? createGraphQLProtocol(spec, source)
+      ? createGraphQLProtocol(spec, options)
       : isMcpSpec(spec)
-      ? createMcpProtocol(spec, source)
+      ? createMcpProtocol(spec, options)
       : undefined;
-    protocol?.endpoints.forEach((endpoint) => protocols.set(endpoint, protocol));
-  }
-  return protocols;
-};
+    return protocol ? [{ source, protocol }] : [];
+  });
+
+const toProtocolEndpoints = (loaded: readonly LoadedProtocol[]): Map<string, ContractProtocol> =>
+  new Map(
+    loaded.flatMap(({ protocol }) =>
+      protocol.endpoints.map((endpoint) => [endpoint, protocol] as const)
+    )
+  );
 
 const toOperationRef = ({ method, path, spec: { source } }: ContractOperation): OperationRef => ({
   method,
@@ -196,7 +214,9 @@ export const createEmulatorFetch = ({
   respond = sampleResponse,
 }: EmulatorOptions): Emulator => {
   const operations = loadSpecs(specs);
-  const protocols = loadProtocols(specs);
+  const namedResponses = collectNamedResponses(fixtures, recordings);
+  const loadedProtocols = loadProtocols(specs, namedResponses);
+  const protocols = toProtocolEndpoints(loadedProtocols);
   const tokenEndpoints = findTokenEndpoints(operations);
   const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });
   const contract = createOpenApiAdapter(
@@ -220,17 +240,23 @@ export const createEmulatorFetch = ({
         operations: called,
         messages = [],
         requestViolations,
+        responseViolations = [],
       } = await protocol.handle(request);
-      const base = { request: description, status: response.statusCode, requestViolations };
+      const base = {
+        request: description,
+        status: response.statusCode,
+        requestViolations,
+        responseViolations,
+      };
       if (called.length === 0 && messages.length === 0) {
-        calls.push({ ...base, responseViolations: [] });
+        calls.push(base);
       }
       for (const message of messages) {
-        calls.push({ ...base, operation: message, protocolMessage: true, responseViolations: [] });
+        calls.push({ ...base, operation: message, protocolMessage: true });
       }
       for (const { name, source, readOnly } of called) {
         const matched = { name, ...(source === undefined ? {} : { source }) };
-        calls.push({ ...base, operation: name, matched, readOnly, responseViolations: [] });
+        calls.push({ ...base, operation: name, matched, readOnly });
       }
       return response;
     }
@@ -298,5 +324,13 @@ export const createEmulatorFetch = ({
   const mockFetch: typeof fetch = async (input, init) =>
     toResponse(await handle(await toContractRequest(new Request(input, init))));
 
-  return { fetch: mockFetch, calls, rejectedResponses: engine.rejected };
+  const rejectedResponses = [
+    ...engine.rejected,
+    ...loadedProtocols.flatMap(({ protocol }) => protocol.rejectedResponses),
+    ...rejectUnknownNamedResponses(
+      namedResponses,
+      loadedProtocols.map(({ source, protocol }) => ({ source, operations: protocol.operations }))
+    ),
+  ];
+  return { fetch: mockFetch, calls, rejectedResponses };
 };

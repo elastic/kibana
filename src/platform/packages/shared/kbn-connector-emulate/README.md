@@ -65,6 +65,8 @@ Requests to an endpoint (`GET` with `query`, `operationName` and `variables` in 
 
 Each root field a request selects is recorded in `calls` as its own operation, named by the operation type and field, such as `query items`. Its `matched` has that `name` instead of a method and path, and `readOnly` is `true` for queries.
 
+Fixtures and recordings name a root field the same way, `{ name: 'query boards' }`, and store the body the vendor answers a document selecting only that field, unaliased: `{ data: { boards: [...] } }`. The field then resolves from the stored value whatever the request's arguments and aliases: selected fields read the stored ones, fields the value lacks are sampled, and abstract types resolve by the value's `__typename`. A recording is served only while its value fits the schema; fields the schema doesn't declare, `null` in non-null fields, and scalars or enum values the type can't represent put it in `rejectedResponses`. A fixture is always served: where it breaks the schema, the response carries GraphQL `errors` and partial data, as a vendor's would, and the call's `responseViolations` list them. Every request gets the same stored value, so a stored page of a connection should end paging (`hasNextPage: false`).
+
 ## MCP
 
 MCP servers are specs too: the tools their `tools/list` describes, and the URLs of their Streamable HTTP endpoint.
@@ -82,6 +84,8 @@ The mock answers as a stateless server that replies with JSON: `POST`s must name
 `tools/call` arguments are validated against the tool's `inputSchema`, and arguments it doesn't declare are reported when it declares its `properties` and doesn't allow others, as servers ignore them. Calls that break the schema, or name a tool the spec doesn't list, get a JSON-RPC `InvalidParams` error. Valid calls answer a sample of the tool's `outputSchema` as JSON text, and as `structuredContent` when the sample is an object; tools without one answer `{}`.
 
 `tools/list` and each `tools/call` are recorded in `calls` as operations named by the method and tool, such as `tools/call get_me`, with `readOnly` from the tool's `readOnlyHint` annotation. The other messages, such as `initialize`, are recorded with `protocolMessage: true`.
+
+Fixtures and recordings name a tool call the same way, `{ name: 'tools/call get_me' }`, and store the `result` of the vendor's JSON-RPC reply (`content`, and `structuredContent` when the tool returns it). A recording is served only while it is a `tools/call` result whose `structuredContent` matches the tool's `outputSchema`; others are listed in `rejectedResponses`. A fixture is always served, with where it breaks the `outputSchema` in the call's `responseViolations`, unless it isn't a `tools/call` result at all, which gets a JSON-RPC `InternalError`.
 
 ## Credentials
 
@@ -108,7 +112,7 @@ Responses come from, in order of preference:
 3. **Spec examples**: the response media type's `example` or `examples`, when they match the schema;
 4. **Samples** of the response schema.
 
-Fixtures and recordings name their operation by method and path template, not by URL, so they apply whatever the request's parameters are:
+Fixtures and recordings name their operation by method and path template, not by URL, so they apply whatever the request's parameters are (GraphQL and MCP operations by name, see above):
 
 ```ts
 const { fetch, rejectedResponses } = createEmulatorFetch({

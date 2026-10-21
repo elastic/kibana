@@ -227,4 +227,139 @@ describe('GraphQL specs', () => {
     expect(response.status).toBe(404);
     expect(calls[0].matched).toBeUndefined();
   });
+
+  describe('stored responses', () => {
+    const stored = (name: string, body: unknown, status = 200) => ({
+      operation: { name },
+      response: { status, body },
+    });
+
+    it('answers root fields from fixtures, sampling the selected fields they lack', async () => {
+      const { fetch: mockFetch, calls } = createEmulatorFetch({
+        specs: { monday: spec },
+        fixtures: [
+          stored('query boards', {
+            data: {
+              boards: [
+                {
+                  id: '7',
+                  name: 'Roadmap',
+                  state: 'archived',
+                  items_page: { has_more: false, items: [{ id: '1', name: 'Ship' }] },
+                },
+              ],
+            },
+          }),
+        ],
+      });
+
+      const response = await post(mockFetch, {
+        query: `{
+          all: boards { id state updated_at items_page { has_more items { title: name } } }
+          board(id: "1") { name }
+        }`,
+      });
+
+      expect(await response.json()).toEqual({
+        data: {
+          all: [
+            {
+              id: '7',
+              state: 'archived',
+              updated_at: '2026-01-01T00:00:00Z',
+              items_page: { has_more: false, items: [{ title: 'Ship' }] },
+            },
+          ],
+          board: { name: 'string' },
+        },
+      });
+      expect(calls).toEqual([
+        expect.objectContaining({ operation: 'query boards', responseViolations: [] }),
+        expect.objectContaining({ operation: 'query board' }),
+      ]);
+    });
+
+    it('serves the first conforming recording, and rejects the others', async () => {
+      const { fetch: mockFetch, rejectedResponses } = createEmulatorFetch({
+        specs: { monday: spec },
+        recordings: [
+          {
+            exchanges: [
+              stored('query board', { data: { board: { name: 'Old', title: 'Renamed' } } }),
+              stored('query board', { data: { board: { name: 'Old', state: 'deleted' } } }),
+              stored('query board', { data: {} }),
+              stored('query board', { errors: [{ message: 'Not found' }] }, 404),
+              stored('query board', { data: { board: { name: 'Roadmap' } } }),
+              stored('query sprints', { data: { sprints: [] } }),
+              {
+                ...stored('query board', { data: { board: null } }),
+                operation: { name: 'query board', source: 'jira' },
+              },
+            ],
+          },
+        ],
+      });
+
+      const response = await post(mockFetch, { query: '{ board(id: "1") { name } }' });
+
+      expect(await response.json()).toEqual({ data: { board: { name: 'Roadmap' } } });
+      const rejected = (operation: string, path: string[], code: string) => ({
+        source: 'recording',
+        operation,
+        violations: [expect.objectContaining({ path, code })],
+      });
+      expect(rejectedResponses).toEqual([
+        rejected('query board', ['body', 'data', 'board', 'title'], 'undeclared'),
+        rejected('query board', ['body', 'data', 'board', 'state'], 'type'),
+        rejected('query board', ['body', 'data', 'board'], 'required'),
+        rejected('query sprints', [], 'operation'),
+        rejected('query board', [], 'operation'),
+      ]);
+    });
+
+    it('resolves stored values of abstract types by their __typename', async () => {
+      const { fetch: mockFetch } = createEmulatorFetch({
+        specs: [spec],
+        fixtures: [
+          stored('query node', { data: { node: { __typename: 'Item', id: '9', name: 'Task' } } }),
+        ],
+      });
+
+      const response = await post(mockFetch, {
+        query: '{ node(id: "9") { __typename ... on Item { name } ... on Board { state } } }',
+      });
+
+      expect(await response.json()).toEqual({
+        data: { node: { __typename: 'Item', name: 'Task' } },
+      });
+    });
+
+    it('answers fixtures that break the schema with errors, and reports them', async () => {
+      const {
+        fetch: mockFetch,
+        calls,
+        rejectedResponses,
+      } = createEmulatorFetch({
+        specs: [spec],
+        fixtures: [stored('query boards', { data: { boards: [{ state: 'deleted' }] } })],
+      });
+
+      const response = await post(mockFetch, { query: '{ boards { state } }' });
+
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({
+        data: null,
+        errors: [{ message: expect.stringContaining('deleted'), path: ['boards', 0, 'state'] }],
+      });
+      expect(calls[0]).toEqual(
+        expect.objectContaining({
+          requestViolations: [],
+          responseViolations: [
+            expect.objectContaining({ path: ['body', 'data', 'boards', '0', 'state'] }),
+          ],
+        })
+      );
+      expect(rejectedResponses).toEqual([]);
+    });
+  });
 });
