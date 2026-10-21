@@ -6,7 +6,10 @@
  */
 
 import { createMockEbtService } from '../../services/ebt_service/ebt_service.mock';
-import { WORKFLOW_DISPATCHED_EBT_EVENT_TYPE } from '../../telemetry/workflow_ebt_schema';
+import {
+  WORKFLOW_DISPATCHED_EBT_EVENT_TYPE,
+  type WorkflowDispatchedEbtData,
+} from '../../telemetry/workflow_ebt_schema';
 import {
   createActionGroup,
   createActionPolicy,
@@ -17,6 +20,13 @@ import {
 import { ReportTelemetryStep } from './report_telemetry_step';
 
 const logger = createStepLogger();
+
+const reportedDispatches = (
+  ebtService: ReturnType<typeof createMockEbtService>
+): WorkflowDispatchedEbtData[] =>
+  ebtService.reportEvent.mock.calls
+    .map(([, data]) => data)
+    .filter((data): data is WorkflowDispatchedEbtData => 'workflow_id' in data);
 
 describe('ReportTelemetryStep', () => {
   let ebtService: ReturnType<typeof createMockEbtService>;
@@ -114,10 +124,7 @@ describe('ReportTelemetryStep', () => {
 
     expect(ebtService.reportEvent).toHaveBeenCalledTimes(2);
     expect(
-      ebtService.reportEvent.mock.calls.map(([, data]) => [
-        data.workflow_id,
-        data.workflow_execution_id,
-      ])
+      reportedDispatches(ebtService).map((data) => [data.workflow_id, data.workflow_execution_id])
     ).toEqual([
       ['wf-1', 'exec-1'],
       ['wf-2', 'exec-2'],
