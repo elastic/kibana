@@ -14,6 +14,7 @@ import {
   getSourcePolicyName,
   groupByPackage,
 } from './deploy_group_helpers';
+import { MAX_INTEGRATION_NAME_LENGTH } from '../service_settings_step/integration_settings';
 import { planPolicyUpdates } from './plan_policy_updates';
 
 const original = (id: string, packageName = 'aws') => ({
@@ -172,9 +173,27 @@ describe('deriveGroupPolicyName', () => {
     expect(new Set(names).size).toBe(2);
   });
 
-  it('truncates to the Fleet name limit', () => {
-    const groups = groupsFor([original('elb'), original('bedrock', 'aws_bedrock')]);
-    expect(deriveGroupPolicyName(groups[1], 'x'.repeat(250))!.length).toBe(255);
+  it('stays within the Fleet name limit for the longest allowed name, without cutting a suffix', () => {
+    const longPackage = 'p'.repeat(100);
+    const longNamespace = 'n'.repeat(100);
+    const groups = groupsFor(
+      [original('a', longPackage), original('b', longPackage), original('c')],
+      { a: withNamespace(longNamespace), b: withNamespace(`${longNamespace}x`) }
+    );
+    const names = groups.map((g) =>
+      deriveGroupPolicyName(g, 'x'.repeat(MAX_INTEGRATION_NAME_LENGTH))
+    );
+
+    expect(Math.max(...names.map((n) => n!.length))).toBeLessThanOrEqual(255);
+    // Two namespaces that only differ after the stem limit still end up with different names.
+    expect(new Set(names).size).toBe(groups.length);
+  });
+
+  it('never cuts a name that is already within the limit', () => {
+    const [group] = groupsFor([original('elb')]);
+    expect(deriveGroupPolicyName(group, 'x'.repeat(MAX_INTEGRATION_NAME_LENGTH))).toBe(
+      'x'.repeat(MAX_INTEGRATION_NAME_LENGTH)
+    );
   });
 
   describe('when the deploy has a single package', () => {

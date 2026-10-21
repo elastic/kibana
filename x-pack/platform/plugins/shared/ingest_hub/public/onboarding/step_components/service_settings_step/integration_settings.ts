@@ -9,11 +9,16 @@ import { i18n } from '@kbn/i18n';
 
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
 
+/** Fleet's package policy name limit. */
+export const MAX_POLICY_NAME_LENGTH = 255;
+
 /**
- * Fleet allows 255 characters in a package policy name. The integration name leaves room for the
- * `-<package>-<namespace>` suffix the deploy adds to the policies of other packages.
+ * The longest integration name. A policy name is the integration name plus `-<suffix>`, and a
+ * suffix is at most 88 characters (an 80-character package and namespace stem plus two
+ * uniqueness counters). Capping the name here keeps every derived name within Fleet's limit, so
+ * no name is ever cut, which would make two different suffixes collide.
  */
-export const MAX_INTEGRATION_NAME_LENGTH = 200;
+export const MAX_INTEGRATION_NAME_LENGTH = 160;
 
 /** Fleet's package policy description limit. */
 export const MAX_DESCRIPTION_LENGTH = 2048;

@@ -9,6 +9,7 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
 import type { DeployGroup } from './deploy_groups';
 import { extractErrorMessage } from './deploy_errors';
+import { MAX_POLICY_NAME_LENGTH } from '../service_settings_step/integration_settings';
 
 /**
  * Reconcile persisted instances against the current selectedServiceIds.
@@ -50,8 +51,15 @@ export const DEFAULT_NAMESPACE = 'default';
 /** The package whose services share the integration name exactly; other packages get a suffix. */
 export const AWS_MAIN_PACKAGE_NAME = 'aws';
 
-/** Fleet's package policy name limit. */
-const MAX_POLICY_NAME_LENGTH = 255;
+/** The package every service uses with the OTel data format; no other package is deployed then. */
+export const AWS_OTEL_PACKAGE_NAME = 'aws_cloudwatch_input_otel';
+
+/**
+ * Packages the integration name already stands for, so a default name needs no package suffix:
+ * `aws`, and the OTel package, which is the only one an OTel deploy uses.
+ */
+export const isMainPackageName = (packageName: string): boolean =>
+  packageName === AWS_MAIN_PACKAGE_NAME || packageName === AWS_OTEL_PACKAGE_NAME;
 
 /**
  * The package whose policy keeps the integration name as entered: the only package when a deploy

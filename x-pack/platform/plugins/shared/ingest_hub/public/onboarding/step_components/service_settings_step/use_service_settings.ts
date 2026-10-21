@@ -20,7 +20,7 @@ import { makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
-import { toSOSettings } from '../authenticate_and_deploy_step/so_settings';
+import { toSOSettingsUpdate } from '../authenticate_and_deploy_step/so_settings';
 import {
   getMissingSourceGroup,
   getRequiredTextFields,
@@ -31,6 +31,7 @@ import type { SignalFilter } from '../services_step/use_services_step';
 import {
   AWS_MAIN_PACKAGE_NAME,
   getBareNamePackage,
+  isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import {
   getDescriptionError,
@@ -312,8 +313,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   const defaultNamePackagesRef = useRef(defaultNamePackages);
   defaultNamePackagesRef.current = defaultNamePackages;
   const toAutoName = useCallback(
-    (base: string) =>
-      bareNamePackage === AWS_MAIN_PACKAGE_NAME ? base : `${base}-${bareNamePackage}`,
+    (base: string) => (isMainPackageName(bareNamePackage) ? base : `${base}-${bareNamePackage}`),
     [bareNamePackage]
   );
 
@@ -552,7 +552,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     // again.
     const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
     if (deploymentId) {
-      updateDeployment(deploymentId, toSOSettings(persisted));
+      updateDeployment(deploymentId, toSOSettingsUpdate(persisted));
     }
     onContinue();
   }, [

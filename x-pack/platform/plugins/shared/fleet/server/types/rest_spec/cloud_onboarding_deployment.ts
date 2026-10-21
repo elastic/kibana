@@ -342,10 +342,15 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       })
     ),
     description: schema.maybe(
-      schema.string({
-        maxLength: 2048,
-        meta: { description: 'Integration description from the Service Settings step.' },
-      })
+      schema.nullable(
+        schema.string({
+          maxLength: 2048,
+          meta: {
+            description:
+              'Integration description from the Service Settings step. Send null to clear it.',
+          },
+        })
+      )
     ),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
     services: schema.maybe(

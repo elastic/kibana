@@ -20,3 +20,17 @@ export const toSOSettings = (
     ...(description ? { description } : {}),
   };
 };
+
+/**
+ * Same fields for an update: a blank description is sent as `null`, because an omitted field keeps
+ * the stored value and the user may just have cleared it.
+ */
+export const toSOSettingsUpdate = (
+  serviceSettings: { integrationName?: string; description?: string } | null | undefined
+): { integrationName?: string; description: string | null } => {
+  const { integrationName, description } = toSOSettings(serviceSettings);
+  return {
+    ...(integrationName ? { integrationName } : {}),
+    description: description ?? null,
+  };
+};

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { toSOSettings } from './so_settings';
+import { toSOSettings, toSOSettingsUpdate } from './so_settings';
 
 describe('toSOSettings', () => {
   it('returns the trimmed name and description', () => {
@@ -19,5 +19,33 @@ describe('toSOSettings', () => {
     expect(toSOSettings({ integrationName: '  ', description: '' })).toEqual({});
     expect(toSOSettings(undefined)).toEqual({});
     expect(toSOSettings(null)).toEqual({});
+  });
+});
+
+describe('toSOSettingsUpdate', () => {
+  it('returns the trimmed name and description', () => {
+    expect(
+      toSOSettingsUpdate({ integrationName: ' my-aws ', description: ' Production ' })
+    ).toEqual({
+      integrationName: 'my-aws',
+      description: 'Production',
+    });
+  });
+
+  it('sends null for a blank description so a cleared one is removed from the record', () => {
+    expect(toSOSettingsUpdate({ integrationName: 'my-aws', description: '  ' })).toEqual({
+      integrationName: 'my-aws',
+      description: null,
+    });
+    expect(toSOSettingsUpdate({ integrationName: 'my-aws' })).toEqual({
+      integrationName: 'my-aws',
+      description: null,
+    });
+  });
+
+  it('never sends a blank name', () => {
+    expect(toSOSettingsUpdate({ integrationName: ' ', description: 'x' })).toEqual({
+      description: 'x',
+    });
   });
 });

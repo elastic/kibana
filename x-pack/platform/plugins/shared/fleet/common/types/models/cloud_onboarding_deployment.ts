@@ -91,8 +91,13 @@ export type CreateCloudOnboardingDeploymentInput = Omit<
 >;
 
 export type UpdateCloudOnboardingDeploymentInput = Partial<
-  Omit<CloudOnboardingDeployment, 'id' | 'provider' | 'connectorId' | 'globalRegion' | 'authMethod'>
+  Omit<
+    CloudOnboardingDeployment,
+    'id' | 'provider' | 'connectorId' | 'globalRegion' | 'authMethod' | 'description'
+  >
 > & {
+  /** Set to null to clear the description. */
+  description?: string | null;
   /** Set to null to clear the connector association (e.g. on MI→ECF transition). */
   connectorId?: string | null;
   /** Set to null to clear the auth method (e.g. on MI→ECF transition). */
