@@ -11,8 +11,6 @@ import { z, lazySchema } from '@kbn/zod';
 
 const rangeValueSchema = lazySchema(() => z.union([z.string(), z.number()]));
 
-const primitiveValueSchema = lazySchema(() => z.union([z.string(), z.number(), z.boolean()]));
-
 const rangeKeySchema = lazySchema(() =>
   z
     .object({
@@ -54,11 +52,17 @@ const multiFieldKeySchema = lazySchema(() =>
 );
 
 const multiValueCellSchema = lazySchema(() =>
-  z.array(primitiveValueSchema).max(100).meta({
-    id: 'visMultiValueCell',
-    title: 'Multi Value Cell',
-    description: 'Values of a multi-value cell.',
-  })
+  z
+    .union([
+      z.array(z.string()).max(100),
+      z.array(z.number()).max(100),
+      z.array(z.boolean()).max(100),
+    ])
+    .meta({
+      id: 'visMultiValueCell',
+      title: 'Multi Value Cell',
+      description: 'Values of a multi-value cell.',
+    })
 );
 
 export const serializedValueSchema = lazySchema(() =>

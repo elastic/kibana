@@ -438,6 +438,7 @@ describe('Color Schema', () => {
         { from: 0, to: 1000, label: 'Small' },
         { from: 1000, label: 'Large' },
         { to: 0, label: 'Negative' },
+        { label: 'Full open' },
       ];
 
       const cases: Array<[string, SerializableValueType]> = [
@@ -550,6 +551,22 @@ describe('Color Schema', () => {
             {
               color: { type: 'color_code', value: '#ff0000' },
               values: [['a', null]],
+            },
+          ],
+        };
+
+        const result = colorMappingSchema.safeParse(input);
+        expectPrettyError(result).toMatchInlineSnapshot(`"✖ Invalid input"`);
+      });
+
+      it('rejects a mixed-type multi-value array', () => {
+        const input = {
+          palette: 'kibana_palette',
+          mode: 'categorical',
+          mapping: [
+            {
+              color: { type: 'color_code', value: '#ff0000' },
+              values: [[1, true, 'hey']],
             },
           ],
         };

@@ -1355,11 +1355,13 @@ describe('Color util transforms', () => {
             { from: 0, to: 1000, label: 'Small' },
             { from: 1000, to: null, label: 'Large' },
             { from: null, to: 0, label: 'Negative' },
+            { from: null, to: null, label: 'Full open' },
           ];
           const apiRanges = [
             { from: 0, to: 1000, label: 'Small' },
             { from: 1000, label: 'Large' },
             { to: 0, label: 'Negative' },
+            { label: 'Full open' },
           ];
           const openEndedRangeKey = { type: 'rangeKey', from: 1000, to: null, ranges };
           const openStartRangeKey = { type: 'rangeKey', from: null, to: 0, ranges };
