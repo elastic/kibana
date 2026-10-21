@@ -72,10 +72,9 @@ export const buildRelatedBaseQuery = (
   scope: RelatedEpisodesScope,
   excludeEpisodeId: string
 ) => {
-  // Because addEpisodeAggregation uses JSON_EXTRACT(_source, "data"),
-  // _source must be included here.
-  const query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source']).where`space_id == ${spaceId}`
-    .where`type == "alert"`;
+  // addEpisodeAggregation reads _source (JSON_EXTRACT) and _id (tie-break)
+  const query = esql.from([ALERT_EVENTS_DATA_STREAM], ['_source', '_id'])
+    .where`space_id == ${spaceId}`.where`type == "alert"`;
 
   return scope.type === 'rule'
     ? query.where`rule.id == ${scope.ruleId} AND episode.id != ${excludeEpisodeId}`
