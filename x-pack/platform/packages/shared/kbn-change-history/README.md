@@ -92,7 +92,7 @@ This package stores `object.snapshot` unmapped, exactly as you logged it, and ne
 
 If your feature reads snapshots back, for example to show a diff or to restore an object to an earlier version, your code must understand every snapshot shape your feature has ever written. Snapshots from older Kibana versions stay in the data stream until an admin applies retention (see [Retention](#retention)). `service.version` records the Kibana version that wrote each document.
 
-To keep old snapshots readable:
+Ways to keep old snapshots readable:
 
 - Store an application-layer type, not the raw storage format of the tracked object. If that storage format changes later, an application-layer snapshot usually stays readable without a compensating transform. See [#273561](https://github.com/elastic/kibana/pull/273561) for an example.
 - Change the snapshot shape only by adding optional fields. A rename, a removal, or a new required field breaks older snapshots unless your read path handles both the old and the new shape.

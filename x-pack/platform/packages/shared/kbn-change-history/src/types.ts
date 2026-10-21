@@ -131,7 +131,7 @@ export interface ChangeHistoryDocument {
       /** Full paths of fields replaced with a `[redacted]` placeholder (low-entropy sensitive data, large blobs). */
       redacted: string[];
     };
-    /** Full snapshot after the change, as written. An older Kibana version may have written it, so treat every field as optional. */
+    /** Full snapshot after the change, as written. It may come from an older Kibana version. See "Reading snapshots back" in the README. */
     snapshot: Record<string, unknown>;
   };
 
@@ -169,7 +169,7 @@ export interface ObjectChange {
   /**
    * Full snapshot of the object **after** the change (post-write state). Persisted as
    * `object.snapshot` and never migrated, so later Kibana versions read it back as written.
-   * Evolve its shape only by adding optional fields. See "Reading snapshots back" in the README.
+   * See "Reading snapshots back" in the README.
    */
   snapshot: Record<string, any>;
 }
