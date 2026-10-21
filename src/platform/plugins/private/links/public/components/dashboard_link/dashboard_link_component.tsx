@@ -182,6 +182,9 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     '&.linkCurrent': {
       borderRadius: 0,
       cursor: 'default',
+      '& .euiListItemLayout__text': {
+        color: euiTheme.colors.textPrimary,
+      },
     },
 
     // vertical layout - current dashboard border offset styles
@@ -196,7 +199,7 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
         // add left border for current dashboard
         content: "''",
         position: 'absolute',
-        height: '75%',
+        height: '70%',
         width: `calc(.5 * ${euiTheme.size.xs})`,
         backgroundColor: euiTheme.colors.primary,
       },
@@ -209,6 +212,9 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
         // add bottom border for current dashboard
         boxShadow: `${euiTheme.colors.textPrimary} 0 calc(-.5 * ${euiTheme.size.xs}) inset`,
         paddingInline: 0,
+        // trade 2px of EUI's 6px bottom padding for margin to raise the border without moving the text
+        paddingBlockEnd: euiTheme.size.xs,
+        marginBlockEnd: euiTheme.size.xxs,
       },
     },
 
