@@ -8,10 +8,10 @@
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 export const NIGHTSHIFT_DEFAULT_MODELS = {
-  discovery: defaultInferenceEndpoints.OPENAI_GPT_5_4,
+  discovery: defaultInferenceEndpoints.OPENAI_GPT_6_LUNA_PRO,
   investigation: defaultInferenceEndpoints.ANTHROPIC_CLAUDE_5_5_SONNET,
-  kiExtraction: defaultInferenceEndpoints.OPENAI_GPT_5_4,
-  kiQueryGeneration: defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
+  kiExtraction: defaultInferenceEndpoints.OPENAI_GPT_6_LUNA_PRO,
+  kiQueryGeneration: defaultInferenceEndpoints.OPENAI_GPT_6_LUNA_PRO,
 } as const;
 
 export type NightshiftModelStep = keyof typeof NIGHTSHIFT_DEFAULT_MODELS;

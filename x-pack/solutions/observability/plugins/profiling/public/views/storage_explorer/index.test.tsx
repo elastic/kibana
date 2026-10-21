@@ -67,6 +67,19 @@ describe('StorageExplorerView', () => {
       refresh: jest.fn(),
     });
 
+  const storageExplorerQuery = {
+    rangeFrom: 'now-1h',
+    rangeTo: 'now',
+    kuery: 'host.name:my-host',
+    indexLifecyclePhase: IndexLifecyclePhaseSelectOption.All,
+  };
+
+  const mockSchema = (schema: ProfilingSchema | undefined) =>
+    jest.mocked(useProfilingParams).mockReturnValue({
+      path: {},
+      query: { ...storageExplorerQuery, schema },
+    } as ReturnType<typeof useProfilingParams>);
+
   const renderView = () =>
     render(
       <TimeRangeContextProvider>
@@ -79,15 +92,7 @@ describe('StorageExplorerView', () => {
     jest
       .mocked(useProfilingRouter)
       .mockReturnValue({ replace } as unknown as ReturnType<typeof useProfilingRouter>);
-    jest.mocked(useProfilingParams).mockReturnValue({
-      path: {},
-      query: {
-        rangeFrom: 'now-1h',
-        rangeTo: 'now',
-        kuery: 'host.name:my-host',
-        indexLifecyclePhase: IndexLifecyclePhaseSelectOption.All,
-      },
-    } as ReturnType<typeof useProfilingParams>);
+    mockSchema(ProfilingSchema.ECS);
     jest.mocked(useTimeRangeAsync).mockReturnValue({
       status: AsyncStatus.Loading,
       refresh: jest.fn(),
@@ -142,6 +147,23 @@ describe('StorageExplorerView', () => {
     expect(replace).toHaveBeenCalledWith('/', {
       path: {},
       query: { rangeFrom: 'now-1h', rangeTo: 'now', kuery: 'host.name:my-host' },
+    });
+    expect(queryByTestId('storageExplorerPage')).not.toBeInTheDocument();
+    expect(useTimeRangeAsync).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['the OTel schema', ProfilingSchema.OTEL],
+    ['no schema', undefined],
+  ])('selects the Universal Profiling schema with %s', (_name, schema) => {
+    mockUniversalProfilingStatus({});
+    mockSchema(schema);
+
+    const { queryByTestId } = renderView();
+
+    expect(replace).toHaveBeenCalledWith('/storage-explorer', {
+      path: {},
+      query: { ...storageExplorerQuery, schema: ProfilingSchema.ECS },
     });
     expect(queryByTestId('storageExplorerPage')).not.toBeInTheDocument();
     expect(useTimeRangeAsync).not.toHaveBeenCalled();

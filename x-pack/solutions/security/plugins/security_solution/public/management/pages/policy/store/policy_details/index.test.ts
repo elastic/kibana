@@ -356,6 +356,7 @@ describe('policy details: ', () => {
                         enabled: false,
                       },
                     },
+                    ai_data_collection: { enabled: true },
                     popup: {
                       malware: {
                         enabled: true,
@@ -429,6 +430,7 @@ describe('policy details: ', () => {
                       capture_env_vars:
                         'DYLD_INSERT_LIBRARIES,DYLD_FRAMEWORK_PATH,DYLD_LIBRARY_PATH,LD_PRELOAD',
                     },
+                    ai_data_collection: { enabled: true },
                   },
                   linux: {
                     events: {
@@ -473,6 +475,7 @@ describe('policy details: ', () => {
                     advanced: {
                       capture_env_vars: 'LD_PRELOAD,LD_LIBRARY_PATH',
                     },
+                    ai_data_collection: { enabled: true },
                   },
                 } as PolicyConfig,
               },

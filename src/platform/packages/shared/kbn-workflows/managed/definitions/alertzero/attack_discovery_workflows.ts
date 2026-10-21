@@ -36,7 +36,7 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
   id: ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
+  version: 5,
   yaml: ATTACK_DISCOVERY_RUNNER_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -49,14 +49,17 @@ export const ALERTZERO_ATTACK_DISCOVERY_WORKER_WORKFLOW = {
  *
  * Version 8 carries the impact steps, which record the hosts and users an attack
  * touched on its Investigation, so the landing page's Impact pills match Attack
- * Discovery proposals.
+ * Discovery proposals. Version 9 acknowledges and tags `az:ad_correlated` the
+ * detection alerts behind a true-positive or inconclusive attack.
+ *
+ * Version 10 carries the telemetry report steps.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
   management: ALERTZERO_RULE_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 8,
+  version: 10,
   yaml: ATTACK_DISCOVERY_REVIEW_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 
@@ -69,15 +72,16 @@ export const ALERTZERO_ATTACK_DISCOVERY_REVIEW_WORKFLOW = {
  * Version 3 carried the YAML's switch to a per-batch ES|QL retrieval, which lets
  * each batch persist the replacements its discoveries use. Version 4 turns off the
  * run step's ground-truth gate, so false-positive triage happens only in the
- * review's FP/TP analysis. Both bumps are deliberate rollout signals; the YAML
- * change alone already rolls out through `definitionHash`.
+ * review's FP/TP analysis. Version 5 skips alerts the review tagged
+ * `az:ad_correlated`. Each bump is a deliberate rollout signal; the YAML change
+ * alone already rolls out through `definitionHash`.
  */
 export const ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW = {
   billable: false,
   id: ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 4,
+  version: 5,
   yaml: ATTACK_DISCOVERY_BATCHED_GENERATION_YAML,
 } as const satisfies ManagedWorkflowDefinition;
 

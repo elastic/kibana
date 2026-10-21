@@ -58,6 +58,7 @@ export function initializeInternalApi(
   const isNewlyCreated$ = new BehaviorSubject<boolean>(initialState.isNewPanel || false);
 
   const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
+  const loadError$ = new BehaviorSubject<Error | undefined>(initialState.loadError);
   const visualizationContext$ = new BehaviorSubject<VisualizationContext>({
     // doc can point to a different set of attributes for the visualization
     // i.e. when inline editing or applying a suggestion
@@ -79,6 +80,7 @@ export function initializeInternalApi(
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it
   return {
+    loadError$,
     attributes$,
     overrides$,
     disableTriggers$,
@@ -115,6 +117,7 @@ export function initializeInternalApi(
     updateMessages: (newMessages: UserMessage[]) => messages$.next(newMessages),
     updateValidationMessages: (newMessages: UserMessage[]) => validationMessages$.next(newMessages),
     updateBlockingError: (blockingError: Error | undefined) => blockingError$.next(blockingError),
+    updateLoadError: (loadError: Error | undefined) => loadError$.next(loadError),
     setAsCreated: () => isNewlyCreated$.next(false),
     getDisplayOptions: () => {
       const latestAttributes = attributes$.getValue();
