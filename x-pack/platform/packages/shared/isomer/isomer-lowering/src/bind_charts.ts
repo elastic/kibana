@@ -515,13 +515,45 @@ const TABLE_MAX_ROWS = 1000;
 const TABLE_MAX_CELL = 500;
 
 /** A Lens data table as the components pack's `table`: cells formatted as Lens shows them, in Lens's sort. */
+// A saved search without columns shows whole documents; as a table, it shows this many of their fields.
+const DOCUMENT_COLUMNS = 6;
+
+type TableColumn = AdaptiveDatatableChart['columns'][number];
+
+/**
+ * The columns a table shows: the chart's, as far as the response has them. A saved search without columns
+ * (`_source`) shows the documents' own fields instead, time first, skipping metadata and `.keyword` copies.
+ */
+const tableColumns = (chart: AdaptiveDatatableChart, response: EsqlResponse): TableColumn[] => {
+  const named = new Set(response.columns.map(({ name }) => name));
+  const present = chart.columns.filter(({ id }) => named.has(id));
+  if (present.length > 0 && !chart.columns.some(({ id }) => id === '_source')) {
+    return present;
+  }
+  return response.columns
+    .filter(({ name }) => !name.startsWith('_') && !name.endsWith('.keyword'))
+    .sort((a, b) => Number(b.type === 'date') - Number(a.type === 'date'))
+    .slice(0, DOCUMENT_COLUMNS)
+    .map(({ name }) => ({ id: name, label: name }));
+};
+
+/** A Lens data table or saved search as the components pack's `table`: cells formatted as Lens shows them. */
 const bindDatatable = (chart: AdaptiveDatatableChart, response: EsqlResponse): ChartNode => {
-  const columns = chart.columns.slice(0, TABLE_MAX_COLUMNS);
+  const columns = tableColumns(chart, response).slice(0, TABLE_MAX_COLUMNS);
   const indices = columns.map(({ id }) => columnIndex(response, id));
+  const types = indices.map((index) => response.columns[index]?.type);
+  // Documents read newest first, as Discover lists them.
+  const timeIndex = chart.sort ? -1 : types.indexOf('date');
+  const values =
+    timeIndex < 0
+      ? response.values
+      : [...response.values].sort((a, b) =>
+          String(b[indices[timeIndex]!] ?? '').localeCompare(String(a[indices[timeIndex]!] ?? ''))
+        );
   const cap = Math.min(TABLE_MAX_ROWS, Math.floor(TABLE_MAX_CELLS / Math.max(1, columns.length)));
-  const rows = response.values.slice(0, cap).map((row) =>
+  const rows = values.slice(0, cap).map((row) =>
     columns.map(({ format }, index) => {
-      const cell = tableCell(row[indices[index]!], format);
+      const cell = tableCell(row[indices[index]!], format, types[index]);
       return typeof cell === 'string' ? cell.slice(0, TABLE_MAX_CELL) || null : cell;
     })
   );

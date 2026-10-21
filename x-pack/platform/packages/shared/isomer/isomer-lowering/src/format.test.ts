@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { formatValue } from './esql_response';
+import { formatDate, formatValue } from './esql_response';
 
 describe('formatValue', () => {
   it.each([
@@ -20,5 +20,12 @@ describe('formatValue', () => {
     [1234.5678, undefined, 1234.57],
   ] as const)('formats %s with %j as %s', (value, format, expected) => {
     expect(formatValue(value, format)).toBe(expected);
+  });
+});
+
+describe('formatDate', () => {
+  it('prints a time as Kibana does, dropping midnight', () => {
+    expect(formatDate('2026-10-14T02:47:10.000Z')).toBe('Oct 14, 2026 @ 02:47:10');
+    expect(formatDate('2026-10-14T00:00:00.000Z')).toBe('Oct 14, 2026');
   });
 });

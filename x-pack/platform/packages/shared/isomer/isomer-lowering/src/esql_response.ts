@@ -57,11 +57,33 @@ export const formatValue = (value: number, format: ValueFormatter | undefined): 
 };
 
 /** A cell as Lens would show it: formatted when the column has a format, other numbers rounded to two places. */
-export const tableCell = (value: unknown, format: ValueFormatter | undefined): string | number => {
+export const tableCell = (
+  value: unknown,
+  format: ValueFormatter | undefined,
+  type?: string
+): string | number => {
   if (value === null || value === undefined) {
     return '';
   }
+  if (type === 'date' && typeof value === 'string' && !Number.isNaN(Date.parse(value))) {
+    return formatDate(value);
+  }
   return typeof value === 'number' ? formatValue(value, format) : String(value);
+};
+
+const pad = (n: number) => String(n).padStart(2, '0');
+
+/** A time as Kibana's default `dateFormat` prints it, in UTC: `Oct 14, 2026 @ 02:47:10`, the time dropped at midnight. */
+export const formatDate = (iso: string): string => {
+  const at = new Date(iso);
+  const day = at.toLocaleDateString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+    timeZone: 'UTC',
+  });
+  const time = [at.getUTCHours(), at.getUTCMinutes(), at.getUTCSeconds()];
+  return time.every((part) => part === 0) ? day : `${day} @ ${time.map(pad).join(':')}`;
 };
 
 /** A column of an ES|QL response by name; throws naming the columns it has. */
