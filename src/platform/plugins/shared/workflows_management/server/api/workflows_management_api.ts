@@ -553,7 +553,12 @@ export class WorkflowsManagementApi {
         spaceId
       );
       for (const { id } of existing) {
-        await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+        try {
+          await this.assertWorkflowAccess(id, spaceId, 'edit', request);
+        } catch (error) {
+          // A hidden workflow is reported per item by the service, like an id taken by anyone else.
+          if (!(error instanceof WorkflowNotFoundError)) throw error;
+        }
       }
     }
     const result = await this.workflowsService.bulkCreateWorkflows(
@@ -663,12 +668,17 @@ export class WorkflowsManagementApi {
       });
       if (workflow?.access_control) {
         const access = await this.workflowsService.getAccessControl();
-        await access.assertAccess(
-          workflow,
-          getWorkflowDeleteOperation(workflow, options?.force),
-          request,
-          { allowAdminOverride: options?.force === true }
-        );
+        try {
+          await access.assertAccess(
+            workflow,
+            getWorkflowDeleteOperation(workflow, options?.force),
+            request,
+            { allowAdminOverride: options?.force === true }
+          );
+        } catch (error) {
+          // The service skips a hidden workflow like an unknown one.
+          if (!(error instanceof WorkflowNotFoundError)) throw error;
+        }
       }
     }
     const workflows = await this.workflowsService.getWorkflowsByIds(workflowIds, spaceId);

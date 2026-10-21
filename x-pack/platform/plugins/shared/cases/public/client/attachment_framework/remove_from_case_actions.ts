@@ -37,6 +37,7 @@ export const getRemoveFromCaseActions = ({
       key,
       label,
       icon: 'trash',
+      groupId: 'caseRemoval',
       'data-test-subj': key,
       // "Select all" also matches alerts that the table's time range hides.
       disableOnQuery: true,
