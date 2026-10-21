@@ -56,6 +56,20 @@ const setup = () => {
         return document;
       }
     ),
+    delete: jest.fn(async (_type: string, id: string, options: { namespace?: string }) => {
+      documents.delete(key(id, options.namespace));
+      return {};
+    }),
+    createPointInTimeFinder: jest.fn(({ namespaces: [namespace] }: { namespaces: string[] }) => ({
+      async *find() {
+        yield {
+          saved_objects: [...documents.keys()]
+            .filter((documentKey) => documentKey.startsWith(`${namespace}:`))
+            .map((documentKey) => ({ id: documentKey.slice(namespace.length + 1) })),
+        };
+      },
+      close: jest.fn(),
+    })),
   };
   const source = { enabled: true, esql_updated_at: 'revision-1' };
   const sourcesClient = { get: jest.fn(async () => ({ source })) } as unknown as SourcesClient;
@@ -140,6 +154,46 @@ describe('source knowledge write coordination', () => {
     );
   });
 
+  it('deletes the state object of a retired source only after its cleanup succeeded', async () => {
+    const { client, documents, repository } = setup();
+
+    await expect(
+      client.retire({
+        sourceId: 'source',
+        run: async () => {
+          throw new Error('cleanup failed');
+        },
+      })
+    ).rejects.toThrow('cleanup failed');
+    expect(documents.has('default:source')).toBe(true);
+
+    repository.delete.mockRejectedValueOnce(new Error('delete failed'));
+    await expect(client.retire({ sourceId: 'source', run: async () => {} })).rejects.toThrow(
+      'delete failed'
+    );
+    expect(documents.get('default:source')?.attributes.lease).toBeNull();
+
+    await client.retire({ sourceId: 'source', run: async () => {} });
+    expect(documents.has('default:source')).toBe(false);
+  });
+
+  it('keeps other writes out until the state object of a retired source is deleted', async () => {
+    const { client, repository } = setup();
+    const competingWrite = jest.fn(async () => {});
+    let competingResult: Promise<void> = Promise.resolve();
+    const deleteDocument = repository.delete.getMockImplementation();
+    repository.delete.mockImplementationOnce(async (...args) => {
+      competingResult = client.runExclusive({ sourceId: 'source', run: competingWrite });
+      await competingResult.catch(() => {});
+      return deleteDocument?.(...args) ?? {};
+    });
+
+    await client.retire({ sourceId: 'source', run: async () => {} });
+
+    await expect(competingResult).rejects.toThrow('being updated');
+    expect(competingWrite).not.toHaveBeenCalled();
+  });
+
   it('isolates equal source ids in different spaces', async () => {
     const { clientForSpace, documents } = setup();
     await Promise.all(
@@ -148,6 +202,24 @@ describe('source knowledge write coordination', () => {
       )
     );
     expect([...documents.keys()]).toEqual(['a:same-id', 'b:same-id']);
+    await clientForSpace('a').write({ sourceId: 'only-in-a', run: async () => {} });
+    await expect(clientForSpace('a').listSourceIds()).resolves.toEqual(['same-id', 'only-in-a']);
+    await expect(clientForSpace('b').listSourceIds()).resolves.toEqual(['same-id']);
+  });
+
+  it('closes the point-in-time finder when listing the state objects fails', async () => {
+    const { client, repository } = setup();
+    const close = jest.fn();
+    repository.createPointInTimeFinder.mockImplementationOnce(() => ({
+      async *find() {
+        yield { saved_objects: [{ id: 'first-page' }] };
+        throw new Error('search failed');
+      },
+      close,
+    }));
+
+    await expect(client.listSourceIds()).rejects.toThrow('search failed');
+    expect(close).toHaveBeenCalledTimes(1);
   });
 
   it('rejects disabled sources before writing', async () => {

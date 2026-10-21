@@ -15,7 +15,7 @@ export type {
   SerializedDataSource,
 } from './src/types';
 
-export type { FilterableSource } from './src/filterable_source';
+export type { FilterableField, FilterableSource } from './src/filterable_source';
 export { DataViewSource } from './src/sources/data_view_source';
 export { EsqlSource } from './src/sources/esql_source';
 export type { EsqlSourceArgs, EsqlDataset, EsqlDatasetArgs } from './src/sources/esql_source';
