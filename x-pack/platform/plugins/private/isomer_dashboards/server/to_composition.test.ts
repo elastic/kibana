@@ -59,12 +59,12 @@ describe('toDashboardComposition', () => {
   });
   const [{ panels, period }] = composition.body;
 
-  it('moves a chart’s title to its panel, unless the chart draws its own', () => {
+  it('moves a chart’s title to its panel, unless the chart draws its own; every panel keeps its frame', () => {
     expect(panels[0]).toMatchObject({ title: 'Requests', body: { type: 'xyChart' } });
     expect(panels[0].body).not.toHaveProperty('title');
     expect(panels[1]).not.toHaveProperty('title');
-    expect(panels[1]).toMatchObject({ frame: 'none', body: { title: 'Visitors' } });
-    expect(panels[0]).not.toHaveProperty('frame');
+    expect(panels[1]).toMatchObject({ body: { title: 'Visitors' } });
+    expect(panels.filter((panel) => 'frame' in panel)).toEqual([]);
   });
 
   it('gives panels without a node, or with an invalid one, a linked placeholder', () => {

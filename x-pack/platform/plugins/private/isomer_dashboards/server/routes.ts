@@ -14,8 +14,13 @@ import {
   type EsqlResponse,
   type PinnedControl,
 } from '@kbn/isomer-lowering';
-import { dashboardChartSize } from '@kbn/isomer-primitives-dashboard';
-import { cardContentWidth, kibanaCardFrame } from '@kbn/isomer-theme';
+import {
+  DASHBOARD_FRAME,
+  DASHBOARD_PAGE_PADDING,
+  dashboardChartSize,
+  panelBodySize,
+} from '@kbn/isomer-primitives-dashboard';
+import { borealisLight } from '@kbn/isomer-theme';
 
 import { API_BASE, type DashboardLayout, PAGE_WIDTH, VIEW_BASE } from '../common';
 import type { IsomerDashboardsStartDeps } from './types';
@@ -97,6 +102,9 @@ export const registerRoutes = (
   ) => {
     const [, { isomer, dataViews }] = await getStartServices();
     const drawing = await isomer.getDrawing();
+    // The page, and the dashboard's grid inside the frame's padding.
+    const page = width ?? PAGE_WIDTH[layout];
+    const gridWidth = page - 2 * DASHBOARD_PAGE_PADDING;
     const ems = isomer.getEms();
     const core = await context.core;
     const exporter = core.savedObjects.getExporter(core.savedObjects.client);
@@ -131,6 +139,9 @@ export const registerRoutes = (
         const field = dataView?.getFieldByName(fieldName);
         return dataView && field ? { dataView, field } : undefined;
       },
+      // Every panel's content is lowered at the box the dashboard draws it in.
+      panelSize: (grid, { titled }) =>
+        panelBodySize({ grid, titled }, { width: gridWidth, layout }),
       esQueryConfig: {
         ignoreFilterIfFieldNotInIndex,
         allowLeadingWildcards,
@@ -160,12 +171,10 @@ export const registerRoutes = (
         return error ? `${error.path}: ${error.message}` : undefined;
       },
     });
-    const page = width ?? PAGE_WIDTH[layout];
     const options: DrawOptions = {
       width: page,
-      sizeFor: dashboardChartSize(
-        page - (kibanaCardFrame.defaultWidth - cardContentWidth())
-      ) as DrawOptions['sizeFor'],
+      frame: DASHBOARD_FRAME,
+      sizeFor: dashboardChartSize(gridWidth) as DrawOptions['sizeFor'],
       hintFor: (node) => {
         const hint = node.id === undefined ? undefined : hints[node.id];
         return hint
@@ -295,7 +304,9 @@ export const registerRoutes = (
         return response.renderHtml({
           body: `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(
             converted.title
-          )}</title></head><body style="margin:0;padding:16px;background:#fff">${html}</body></html>`,
+          )}</title></head><body style="margin:0;padding:16px;background:${
+            borealisLight.color.background.recessed
+          }">${html}</body></html>`,
         });
       } catch (error) {
         return notFound(error)
