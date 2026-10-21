@@ -38,14 +38,7 @@ interface BuildDatatableArgs {
 
 const toColumnAlign = (
   alignment: 'left' | 'right' | 'center' | undefined
-): 'left' | 'right' | undefined => {
-  if (alignment === 'left' || alignment === 'right') {
-    return alignment;
-  }
-  // The table primitive has no `center`; fall back to `left` and let the
-  // diagnostic surface the loss.
-  return undefined;
-};
+): 'left' | 'center' | 'right' | undefined => alignment;
 
 const toTableDensity = (
   rowHeight: DatatableVisualizationState['rowHeight']
@@ -159,13 +152,6 @@ export const buildDatatableLens = ({
       continue;
     }
     const source = resolved.formBased;
-    if (config?.alignment === 'center') {
-      diagnostics.push({
-        level: 'info',
-        code: 'lens.datatable.center-alignment-dropped',
-        message: `column "${accessor}" requested center alignment; table primitive only supports left/right — falling back to default`,
-      });
-    }
     const align =
       toColumnAlign(config?.alignment) ?? (source?.dataType === 'number' ? 'right' : undefined);
     const label = resolved.label ?? accessor;
@@ -182,6 +168,10 @@ export const buildDatatableLens = ({
       ...(summary ? { summary } : {}),
       ...(resolved.format ? { format: resolved.format } : {}),
       ...(colorScale ? { colorScale } : {}),
+      ...(typeof config?.width === 'number' ? { width: Math.round(config.width) } : {}),
+      ...(config?.palette && (config.colorMode === 'cell' || config.colorMode === 'text')
+        ? { valueColor: { mode: config.colorMode, palette: config.palette } }
+        : {}),
     });
     seenColumns.add(accessor);
   }

@@ -23,6 +23,7 @@ dependsOn:
   - '@kbn/isomer-primitives-charts'
   - '@kbn/isomer-primitives-maps'
   - '@kbn/isomer-primitives-vega'
+  - '@kbn/lens-common'
 tags:
   - shared-common
   - package

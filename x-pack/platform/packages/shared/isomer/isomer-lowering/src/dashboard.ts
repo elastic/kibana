@@ -324,12 +324,21 @@ export const planDashboard = (
     (index.get(`${type}:${id}`)?.attributes as { title?: string } | undefined)?.title;
   const dataView = (id: string, type: string) =>
     index.get(`${type}:${id}`)?.attributes as
-      | { timeFieldName?: string; fieldFormatMap?: string }
+      | { timeFieldName?: string; fieldFormatMap?: string; fieldAttrs?: string }
       | undefined;
   const { dashboard: lowered, diagnostics } = fromKibanaDashboardSavedObject(dashboard, {
     resolvePanelEnvelope: ({ type, id }) => index.get(`${type}:${id}`),
     resolveReferenceTitle: (_name, id, type) => titleOf(id, type),
     resolveDataViewTimeField: (_name, id, type) => dataView(id, type)?.timeFieldName,
+    // A field's custom label, as the data view's field list names it.
+    resolveDataViewFieldLabels: (_name, id, type) => {
+      const attrs = dataView(id, type)?.fieldAttrs;
+      if (!attrs) return undefined;
+      const labels = Object.entries(
+        JSON.parse(attrs) as Record<string, { customLabel?: string }>
+      ).flatMap(([field, { customLabel }]) => (customLabel ? [[field, customLabel] as const] : []));
+      return labels.length ? Object.fromEntries(labels) : undefined;
+    },
     resolveDataViewFieldFormats: (_name, id, type) => {
       const map = dataView(id, type)?.fieldFormatMap;
       return map ? (JSON.parse(map) as ReturnType<NonNullable<FieldFormatsResolver>>) : undefined;

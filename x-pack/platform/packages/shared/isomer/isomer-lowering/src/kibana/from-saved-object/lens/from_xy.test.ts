@@ -23,9 +23,10 @@ describe('fromKibanaSavedObject (XY)', () => {
     if (lens?.chart.kind === 'xy') {
       expect(lens.chart.mode).toBe('line');
       expect(lens.chart.stacked).toBe(false);
+      // Lens names a date histogram column by its field; the axis title adds the interval.
       expect(lens.chart.xAxis).toEqual({
         id: 'col-time',
-        label: '@timestamp per hour',
+        label: '@timestamp',
       });
       expect(lens.chart.series).toHaveLength(1);
       expect(lens.chart.series[0]?.id).toBe('col-p95');
@@ -253,6 +254,7 @@ describe('fromKibanaSavedObject (XY)', () => {
           dataType: 'number',
           isBucketed: false,
           label: 'SLO',
+          customLabel: true,
           operationType: 'static_value',
           params: { value: '250' },
         },

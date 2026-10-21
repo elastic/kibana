@@ -15,7 +15,8 @@
                   "operationType": "count",
                   "isBucketed": false,
                   "dataType": "number",
-                  "label": "Order count"
+                  "label": "Order count",
+                  "customLabel": true
                 }
               },
               "columnOrder": ["col-count"]
@@ -35,7 +36,8 @@
                   "operationType": "count",
                   "isBucketed": false,
                   "dataType": "number",
-                  "label": "Hourly orders"
+                  "label": "Hourly orders",
+                  "customLabel": true
                 }
               },
               "columnOrder": ["col-trend-time", "col-trend-count"]

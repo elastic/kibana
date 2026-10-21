@@ -380,6 +380,42 @@
               },
               "id": "Unique Visits (Last hour)",
               "label": "Unique Visits (Last hour)",
+              "valueColor": {
+                "mode": "text",
+                "palette": {
+                  "name": "status",
+                  "params": {
+                    "continuity": "above",
+                    "name": "status",
+                    "rangeMax": null,
+                    "rangeMin": 0,
+                    "reverse": false,
+                    "stops": [
+                      {
+                        "color": "#24c292",
+                        "stop": 0,
+                      },
+                      {
+                        "color": "#aee8d2",
+                        "stop": 20,
+                      },
+                      {
+                        "color": "#fcd883",
+                        "stop": 40,
+                      },
+                      {
+                        "color": "#ffc9c2",
+                        "stop": 60,
+                      },
+                      {
+                        "color": "#f6726a",
+                        "stop": 80,
+                      },
+                    ],
+                  },
+                  "type": "palette",
+                },
+              },
             },
             {
               "colorScale": {
@@ -414,6 +450,42 @@
               },
               "id": "Unique Visits (Total)",
               "label": "Unique Visits (Total)",
+              "valueColor": {
+                "mode": "text",
+                "palette": {
+                  "name": "status",
+                  "params": {
+                    "continuity": "above",
+                    "name": "status",
+                    "rangeMax": null,
+                    "rangeMin": 0,
+                    "reverse": false,
+                    "stops": [
+                      {
+                        "color": "#24c292",
+                        "stop": 0,
+                      },
+                      {
+                        "color": "#aee8d2",
+                        "stop": 20,
+                      },
+                      {
+                        "color": "#fcd883",
+                        "stop": 40,
+                      },
+                      {
+                        "color": "#ffc9c2",
+                        "stop": 60,
+                      },
+                      {
+                        "color": "#f6726a",
+                        "stop": 80,
+                      },
+                    ],
+                  },
+                  "type": "palette",
+                },
+              },
             },
             {
               "format": {
@@ -485,6 +557,42 @@
               },
               "id": "Unique Visits (Last hour)",
               "label": "Unique Visits (Last hour)",
+              "valueColor": {
+                "mode": "text",
+                "palette": {
+                  "name": "status",
+                  "params": {
+                    "continuity": "above",
+                    "name": "status",
+                    "rangeMax": null,
+                    "rangeMin": 0,
+                    "reverse": false,
+                    "stops": [
+                      {
+                        "color": "#24c292",
+                        "stop": 0,
+                      },
+                      {
+                        "color": "#aee8d2",
+                        "stop": 20,
+                      },
+                      {
+                        "color": "#fcd883",
+                        "stop": 40,
+                      },
+                      {
+                        "color": "#ffc9c2",
+                        "stop": 60,
+                      },
+                      {
+                        "color": "#f6726a",
+                        "stop": 80,
+                      },
+                    ],
+                  },
+                  "type": "palette",
+                },
+              },
             },
             {
               "colorScale": {
@@ -519,6 +627,42 @@
               },
               "id": "Unique Visits (Total)",
               "label": "Unique Visits (Total)",
+              "valueColor": {
+                "mode": "text",
+                "palette": {
+                  "name": "status",
+                  "params": {
+                    "continuity": "above",
+                    "name": "status",
+                    "rangeMax": null,
+                    "rangeMin": 0,
+                    "reverse": false,
+                    "stops": [
+                      {
+                        "color": "#24c292",
+                        "stop": 0,
+                      },
+                      {
+                        "color": "#aee8d2",
+                        "stop": 20,
+                      },
+                      {
+                        "color": "#fcd883",
+                        "stop": 40,
+                      },
+                      {
+                        "color": "#ffc9c2",
+                        "stop": 60,
+                      },
+                      {
+                        "color": "#f6726a",
+                        "stop": 80,
+                      },
+                    ],
+                  },
+                  "type": "palette",
+                },
+              },
             },
             {
               "format": {
@@ -656,6 +800,7 @@
             {
               "id": "Unique",
               "label": "Unique",
+              "width": 140,
             },
             {
               "format": {
@@ -664,6 +809,7 @@
               },
               "id": "95th percentile of bytes",
               "label": "95th percentile of bytes",
+              "width": 227,
             },
             {
               "format": {
@@ -672,6 +818,7 @@
               },
               "id": "Median of bytes",
               "label": "Median of bytes",
+              "width": 240,
             },
             {
               "colorScale": {
@@ -710,6 +857,43 @@
               },
               "id": "HTTP 5xx",
               "label": "HTTP 5xx",
+              "valueColor": {
+                "mode": "cell",
+                "palette": {
+                  "name": "warm",
+                  "params": {
+                    "continuity": "above",
+                    "name": "warm",
+                    "rangeMax": null,
+                    "rangeMin": 0,
+                    "reverse": false,
+                    "stops": [
+                      {
+                        "color": "#ffd2cc",
+                        "stop": 0,
+                      },
+                      {
+                        "color": "#ffbbb3",
+                        "stop": 20,
+                      },
+                      {
+                        "color": "#fea39a",
+                        "stop": 40,
+                      },
+                      {
+                        "color": "#fb8b82",
+                        "stop": 60,
+                      },
+                      {
+                        "color": "#f6726a",
+                        "stop": 80,
+                      },
+                    ],
+                  },
+                  "type": "palette",
+                },
+              },
+              "width": 249,
             },
             {
               "colorScale": {
@@ -748,6 +932,43 @@
               },
               "id": "HTTP 4xx",
               "label": "HTTP 4xx",
+              "valueColor": {
+                "mode": "cell",
+                "palette": {
+                  "name": "warm",
+                  "params": {
+                    "continuity": "above",
+                    "name": "warm",
+                    "rangeMax": null,
+                    "rangeMin": 0,
+                    "reverse": false,
+                    "stops": [
+                      {
+                        "color": "#ffd2cc",
+                        "stop": 0,
+                      },
+                      {
+                        "color": "#ffbbb3",
+                        "stop": 20,
+                      },
+                      {
+                        "color": "#fea39a",
+                        "stop": 40,
+                      },
+                      {
+                        "color": "#fb8b82",
+                        "stop": 60,
+                      },
+                      {
+                        "color": "#f6726a",
+                        "stop": 80,
+                      },
+                    ],
+                  },
+                  "type": "palette",
+                },
+              },
+              "width": 277,
             },
             {
               "id": "url.keyword",
@@ -756,6 +977,7 @@
             {
               "id": "Visits",
               "label": "Visits",
+              "width": 159,
             },
           ],
           "kind": "datatable",
@@ -781,6 +1003,7 @@
             {
               "id": "Unique",
               "label": "Unique",
+              "width": 140,
             },
             {
               "format": {
@@ -789,6 +1012,7 @@
               },
               "id": "95th percentile of bytes",
               "label": "95th percentile of bytes",
+              "width": 227,
             },
             {
               "format": {
@@ -797,6 +1021,7 @@
               },
               "id": "Median of bytes",
               "label": "Median of bytes",
+              "width": 240,
             },
             {
               "colorScale": {
@@ -835,6 +1060,43 @@
               },
               "id": "HTTP 5xx",
               "label": "HTTP 5xx",
+              "valueColor": {
+                "mode": "cell",
+                "palette": {
+                  "name": "warm",
+                  "params": {
+                    "continuity": "above",
+                    "name": "warm",
+                    "rangeMax": null,
+                    "rangeMin": 0,
+                    "reverse": false,
+                    "stops": [
+                      {
+                        "color": "#ffd2cc",
+                        "stop": 0,
+                      },
+                      {
+                        "color": "#ffbbb3",
+                        "stop": 20,
+                      },
+                      {
+                        "color": "#fea39a",
+                        "stop": 40,
+                      },
+                      {
+                        "color": "#fb8b82",
+                        "stop": 60,
+                      },
+                      {
+                        "color": "#f6726a",
+                        "stop": 80,
+                      },
+                    ],
+                  },
+                  "type": "palette",
+                },
+              },
+              "width": 249,
             },
             {
               "colorScale": {
@@ -873,6 +1135,43 @@
               },
               "id": "HTTP 4xx",
               "label": "HTTP 4xx",
+              "valueColor": {
+                "mode": "cell",
+                "palette": {
+                  "name": "warm",
+                  "params": {
+                    "continuity": "above",
+                    "name": "warm",
+                    "rangeMax": null,
+                    "rangeMin": 0,
+                    "reverse": false,
+                    "stops": [
+                      {
+                        "color": "#ffd2cc",
+                        "stop": 0,
+                      },
+                      {
+                        "color": "#ffbbb3",
+                        "stop": 20,
+                      },
+                      {
+                        "color": "#fea39a",
+                        "stop": 40,
+                      },
+                      {
+                        "color": "#fb8b82",
+                        "stop": 60,
+                      },
+                      {
+                        "color": "#f6726a",
+                        "stop": 80,
+                      },
+                    ],
+                  },
+                  "type": "palette",
+                },
+              },
+              "width": 277,
             },
             {
               "id": "url.keyword",
@@ -881,6 +1180,7 @@
             {
               "id": "Visits",
               "label": "Visits",
+              "width": 159,
             },
           ],
           "kind": "datatable",
