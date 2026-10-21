@@ -43,8 +43,9 @@ export const DRAFT_SYSTEM_PROMPT = `You write a short Entity Analytics brief for
 - summary: one or two sentences on the pattern of the period, never the counts the page shows. Never comment on which or how many entities are listed: the brief states its coverage itself.
 - priorities: up to ${MAX_PRIORITIES} entities to look at first, most important first. Entities flagged several ways, with high criticality, privilege or high risk usually come first. Use fewer when the data doesn't support ${MAX_PRIORITIES}; never pad. Always include the field.
 - A priority's text sits under the entity's name: never name, mention or refer back to the entity in it ("its alerts", not "this user's alerts").
-- assessment: what the evidence suggests taken together, and why that puts the entity ahead of the others. Never repeat any number or name the reader already sees, such as the risk score, the alert count or a rule name: say what they point to. Write it as a hypothesis to confirm, never as a finding.
-  Good: "Credential access on a laptop, then remote sessions to a jump box two days later, is the shape of credential theft and should be confirmed first."
+- assessment: two sentences, at most ${WORD_LIMITS.assessment} words together. The first says what the evidence looks like taken together, the second why that puts the entity ahead of the others. Never repeat any number or name the reader already sees, such as the risk score, the alert count or a rule name: say what they point to.
+- The assessment names what to confirm, never what happened. Words such as "lateral movement", "compromise", "attack", "pivot", "breakout", "coordinated" and "exfiltration" state a finding: never use them. Say "looks like", "is the shape of" or "worth confirming" instead.
+  Good: "A service account that never used interactive logins now has them, from a host it had not touched before. The change in behaviour, not the volume, is what to check first."
   Bad: "Has three alerts, two for Potential Credential Access via LSASS Memory Dump, and risk score 76 (High)."
 - recommendation: the one step to take first across the whole view, not only for the first priority. It must make sense on its own.
 - Mention an entity only as {{ entity.id <entityId> }}, copied exactly; the reader sees its name. Never write a name or EUID yourself, or refer to an entity any other way, such as "this account", "this identity" or "this host".
@@ -119,7 +120,7 @@ export const BriefDraft = lazySchema(() =>
           assessment: z
             .string()
             .describe(
-              `What the evidence suggests together, and why it puts the entity ahead of the others, in at most ${WORD_LIMITS.assessment} words. Repeat no number or name the reader already sees. Don't start with the entity name.`
+              `Two sentences, at most ${WORD_LIMITS.assessment} words together: what the evidence looks like taken together, then why it puts the entity ahead of the others. Repeat no number or name the reader already sees. Don't start with the entity name.`
             ),
           nextStep: z
             .string()
