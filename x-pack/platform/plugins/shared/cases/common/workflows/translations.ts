@@ -766,6 +766,28 @@ export const DELETE_OBSERVABLE_STEP_DOCUMENTATION_DETAILS = i18n.translate(
   }
 );
 
+export const DELETE_ATTACHMENTS_STEP_LABEL = i18n.translate(
+  'xpack.cases.workflowSteps.deleteAttachments.label',
+  {
+    defaultMessage: 'Cases - Delete attachments',
+  }
+);
+
+export const DELETE_ATTACHMENTS_STEP_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowSteps.deleteAttachments.description',
+  {
+    defaultMessage: 'Deletes one or more attachments from a case',
+  }
+);
+
+export const DELETE_ATTACHMENTS_STEP_DOCUMENTATION_DETAILS = i18n.translate(
+  'xpack.cases.workflowSteps.deleteAttachments.documentation.details',
+  {
+    defaultMessage:
+      "This step deletes the specified attachments from the case in a single request and records each deletion in the case activity. If any attachment isn't on the case, the step fails and deletes nothing. The step returns the case_id and the ids it deleted.",
+  }
+);
+
 export const BULK_DELETE_OBSERVABLES_STEP_LABEL = i18n.translate(
   'xpack.cases.workflowSteps.bulkDeleteObservables.label',
   {
