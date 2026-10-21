@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import {
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   type SignificantEvent,
   type SignificantEventStatus,
 } from '@kbn/significant-events-schema';
-import { getInvestigationProgressStatusLabel } from '../common/investigation_progress_status';
+import type { SignificantEventInvestigationState } from '@kbn/significant-events-plugin/common';
+import { getInvestigationProgressStatusLabel } from '../../../common/investigation_progress_status';
 
 export { getInvestigationProgressStatusLabel };
 
@@ -36,6 +38,28 @@ export const NEEDS_ACTION_STATUSES: SignificantEventStatus[] =
 export const RESOLVED_STATUSES: SignificantEventStatus[] = SIGNIFICANT_EVENT_STATUS_OPTIONS.filter(
   (status) => STATUS_GROUP[status] === 'resolved'
 );
+
+export const SIGNIFICANT_EVENT_STATUS_LABELS: Record<SignificantEventStatus, string> = {
+  active: i18n.translate('xpack.nightshift.significantEvent.status.active', {
+    defaultMessage: 'Active',
+  }),
+  recovering: i18n.translate('xpack.nightshift.significantEvent.status.recovering', {
+    defaultMessage: 'Recovering',
+  }),
+  inactive: i18n.translate('xpack.nightshift.significantEvent.status.inactive', {
+    defaultMessage: 'Inactive',
+  }),
+};
+
+/** Status marks for lists: live states stand out, inactive recedes. */
+export const SIGNIFICANT_EVENT_STATUS_ICONS: Record<
+  SignificantEventStatus,
+  { iconType: string; color: 'primary' | 'subdued' }
+> = {
+  active: { iconType: 'checkCircle', color: 'primary' },
+  recovering: { iconType: 'clock', color: 'subdued' },
+  inactive: { iconType: 'crossCircle', color: 'subdued' },
+};
 
 export type StatusColor = 'danger' | 'success';
 
@@ -103,3 +127,18 @@ export const hasRunningInvestigations = (events: SignificantEvent[]): boolean =>
 export const getInvestigationStatusLabel = (
   event: Pick<SignificantEvent, 'investigations'>
 ): string => getInvestigationProgressStatusLabel(isEventInvestigated(event));
+
+export const SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS: Record<
+  SignificantEventInvestigationState,
+  string
+> = {
+  not_started: i18n.translate('xpack.nightshift.significantEvent.investigationState.notStarted', {
+    defaultMessage: 'Not started',
+  }),
+  in_progress: i18n.translate('xpack.nightshift.significantEvent.investigationState.inProgress', {
+    defaultMessage: 'In progress',
+  }),
+  completed: i18n.translate('xpack.nightshift.significantEvent.investigationState.completed', {
+    defaultMessage: 'Completed',
+  }),
+};

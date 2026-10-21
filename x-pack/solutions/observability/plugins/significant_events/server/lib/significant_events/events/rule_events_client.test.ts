@@ -537,6 +537,71 @@ describe('RuleEventsClient', () => {
     });
   });
 
+  describe('list sorting and investigation filter', () => {
+    it('sorts by severity rank, then newest first', async () => {
+      const { client, query } = createClient(async (request) =>
+        request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
+      );
+
+      await client.findLatestByCurrentStatePaginated({ sortField: 'severity', sortOrder: 'desc' });
+
+      const { commands } = getPageRequest(query);
+      expect(commands).toContainEqual(
+        'EVAL sort_rank = CASE(severity == "critical", 4, severity == "high", 3, severity == "low", 1, 2)'
+      );
+      expect(commands).toContainEqual('SORT sort_rank DESC, created_at DESC, _id ASC');
+    });
+
+    it('filters on the investigation state derived from the investigations entries', async () => {
+      const { client, query } = createClient(async (request) =>
+        request.query.includes('STATS total') ? countResponse(0) : sourceResponse([])
+      );
+
+      await client.findLatestByCurrentStatePaginated({ investigationStates: ['in_progress'] });
+
+      const q = lastQuery(query, (query_) => !query_.includes('STATS total'));
+      expect(q).toContain(
+        'EVAL investigation_state = CASE(COALESCE(MV_COUNT(FIELD_EXTRACT(data, "investigations.workflow_execution_id")), 0) == 0, "not_started", COALESCE(MV_COUNT(FIELD_EXTRACT(data, "investigations.completed_at")), 0) < COALESCE(MV_COUNT(FIELD_EXTRACT(data, "investigations.workflow_execution_id")), 0), "in_progress", "completed")'
+      );
+      expect(q).toContain('WHERE investigation_state IN ("in_progress")');
+    });
+  });
+
+  describe('countFacets', () => {
+    it('counts each dimension without its own filter and fills missing options with zero', async () => {
+      const { client, query } = createClient(async (request) => {
+        if (request.query.includes('BY severity')) {
+          return {
+            columns: [
+              { name: 'count', type: 'long' },
+              { name: 'severity', type: 'keyword' },
+            ],
+            values: [[3, 'high']],
+          } as unknown as ESQLSearchResponse;
+        }
+        return { columns: [], values: [] } as unknown as ESQLSearchResponse;
+      });
+
+      const facets = await client.countFacets({
+        severity: ['critical'],
+        status: ['active'],
+        investigationStates: ['completed'],
+      });
+
+      expect(facets.severity).toEqual({ critical: 0, high: 3, medium: 0, low: 0 });
+      expect(facets.status).toEqual({ active: 0, recovering: 0, inactive: 0 });
+      const queries = query.mock.calls.map(([request]) => request.query);
+      const severityQuery = queries.find((q) => q.includes('BY severity'));
+      const statusQuery = queries.find((q) => q.includes('BY event_status'));
+      const investigationQuery = queries.find((q) => q.includes('BY investigation_state'));
+      expect(severityQuery).not.toContain('severity IN');
+      expect(severityQuery).toContain('`alert.status` IN ("active")');
+      expect(statusQuery).not.toContain('`alert.status` IN');
+      expect(investigationQuery).not.toContain('investigation_state IN');
+      expect(investigationQuery).toContain('severity IN ("critical")');
+    });
+  });
+
   describe('findLatestPaginated', () => {
     it('delegates to findLatestByCurrentStatePaginated with no filters', async () => {
       const { client, query } = createClient(async (request) =>

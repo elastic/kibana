@@ -18,6 +18,7 @@ import {
   SIGNIFICANT_EVENT_LIVE_STATUS_OPTIONS,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   SIGNIFICANT_EVENTS_ALERT_SOURCE,
+  SEVERITY_OPTIONS,
   type SignificantEvent,
   type SignificantEventResponse,
   type Severity,
@@ -32,10 +33,19 @@ import {
 import {
   applyLifetimeOverlap,
   applyTimeRange,
+  esqlToObjects,
   executeCountQuery,
   executeEsqlQuery,
+  isIndexNotFoundError,
   pickLatestPerGroup,
+  queryEsql,
 } from '../latest_source_query';
+import {
+  SIGNIFICANT_EVENT_INVESTIGATION_STATES,
+  type SignificantEventsFacets,
+  type SignificantEventsSortField,
+  type SignificantEventsSortOrder,
+} from '../../../../common/events_list';
 import { RULE_EVENTS_INDEX } from '../alerting/rule_events_metric_series';
 import type { EventsFilterOptions, EventsPaginatedSearchOptions } from './types';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
@@ -210,6 +220,99 @@ const topologyFeatureIdsIntersects = (values: string[]): ESQLAstExpression => {
   )}), [${literals}]))`;
 };
 
+const INVESTIGATION_STATE_COLUMN = 'investigation_state';
+
+/**
+ * Derives `not_started` / `in_progress` / `completed` from the flattened `investigations` entries:
+ * an entry without `completed_at` means a run is still open. Mirrors the browser's
+ * `getInvestigationState` so the filter and the list agree. `FIELD_EXTRACT` drops duplicate
+ * values, so two runs finishing in the same millisecond would read as in progress (verified live).
+ */
+const withInvestigationState = (query: ComposerQuery): ComposerQuery => {
+  const dataCol = esql.col('data');
+  const started = esql.exp`COALESCE(MV_COUNT(FIELD_EXTRACT(${dataCol}, ${esql.str(
+    'investigations.workflow_execution_id'
+  )})), 0)`;
+  const completed = esql.exp`COALESCE(MV_COUNT(FIELD_EXTRACT(${dataCol}, ${esql.str(
+    'investigations.completed_at'
+  )})), 0)`;
+  return query.pipe`EVAL ${esql.col(INVESTIGATION_STATE_COLUMN)} = CASE(${started} == 0, ${esql.str(
+    'not_started'
+  )}, ${completed} < ${started}, ${esql.str('in_progress')}, ${esql.str('completed')})`;
+};
+
+const SORT_RANK_COLUMN = 'sort_rank';
+
+/** Orders the latest revisions for the paginated list; ties fall back to newest first. */
+const applySort = (
+  query: ComposerQuery,
+  sortField: SignificantEventsSortField | undefined,
+  sortOrder: SignificantEventsSortOrder = 'desc'
+): ComposerQuery => {
+  const direction = sortOrder === 'asc' ? 'ASC' : 'DESC';
+  switch (sortField) {
+    case 'created_at':
+      return query.sort(['created_at', direction], ['@timestamp', 'DESC'], ['_id', 'ASC']);
+    case 'severity':
+      return query.pipe`EVAL ${esql.col(SORT_RANK_COLUMN)} = CASE(${esql.col(
+        'severity'
+      )} == ${esql.str('critical')}, 4, ${esql.col('severity')} == ${esql.str(
+        'high'
+      )}, 3, ${esql.col('severity')} == ${esql.str('low')}, 1, 2)`.sort(
+        [SORT_RANK_COLUMN, direction],
+        ['created_at', 'DESC'],
+        ['_id', 'ASC']
+      );
+    case 'status':
+      // A missing alert.status decodes as active (see decodeSignificantEvent).
+      return query.pipe`EVAL ${esql.col(SORT_RANK_COLUMN)} = CASE(${esql.col(
+        'alert.status'
+      )} == ${esql.str(ALERT_EPISODE_STATUS.INACTIVE)}, 1, ${esql.col(
+        'alert.status'
+      )} == ${esql.str(ALERT_EPISODE_STATUS.RECOVERING)}, 2, 3)`.sort(
+        [SORT_RANK_COLUMN, direction],
+        ['created_at', 'DESC'],
+        ['_id', 'ASC']
+      );
+    default:
+      return query.sort(['@timestamp', 'DESC'], ['_id', 'ASC']);
+  }
+};
+
+const countBy = async <Key extends string>({
+  esClient,
+  query,
+  column,
+  keys,
+}: {
+  esClient: ElasticsearchClient;
+  query: ComposerQuery;
+  column: string;
+  keys: readonly Key[];
+}): Promise<Record<Key, number>> => {
+  const counts = Object.fromEntries(keys.map((key) => [key, 0])) as Record<Key, number>;
+  try {
+    const rows = esqlToObjects<Record<string, unknown>>(
+      await queryEsql({
+        esClient,
+        query: query.pipe`STATS count = COUNT(*) BY ${esql.col(column)}`,
+      })
+    );
+    for (const row of rows) {
+      const key = row[column];
+      if (typeof key === 'string' && key in counts) {
+        counts[key as Key] = Number(row.count) || 0;
+      }
+    }
+    return counts;
+  } catch (error) {
+    if (isIndexNotFoundError(error)) {
+      return counts;
+    }
+    throw error;
+  }
+};
+
 export type UpdateEventResult =
   | { updated: true }
   /** Not written: another writer got there first (`head`), or the series could not be read back. */
@@ -292,6 +395,11 @@ export class RuleEventsClient {
     if (options.topologyFeatureIds?.length) {
       query = query.where`${topologyFeatureIdsIntersects(options.topologyFeatureIds)}`;
     }
+    if (options.investigationStates?.length) {
+      query = withInvestigationState(query).where`${esql.col(
+        INVESTIGATION_STATE_COLUMN
+      )} IN (${options.investigationStates.map((state) => esql.str(state))})`;
+    }
 
     return query;
   }
@@ -325,8 +433,11 @@ export class RuleEventsClient {
     const page = options.page ?? 1;
     const perPage = options.perPage ?? 25;
 
-    const dataQuery = withDataJsonProjection(this.buildLatestByCurrentStateQuery(options))
-      .sort(['@timestamp', 'DESC'], ['_id', 'ASC'])
+    const dataQuery = applySort(
+      withDataJsonProjection(this.buildLatestByCurrentStateQuery(options)),
+      options.sortField,
+      options.sortOrder
+    )
       .limit(page * perPage)
       .keep('_source', 'data_json', 'created_at');
     const countQuery = this.buildLatestByCurrentStateQuery(options)
@@ -350,6 +461,41 @@ export class RuleEventsClient {
       perPage,
       total,
     };
+  }
+
+  /** Counts the latest revisions per severity, status and investigation state. */
+  async countFacets(
+    options: RuleEventsCurrentStateSearchOptions
+  ): Promise<SignificantEventsFacets> {
+    const { esClient } = this.clients;
+    const [severity, status, investigation] = await Promise.all([
+      countBy({
+        esClient,
+        query: this.buildLatestByCurrentStateQuery({ ...options, severity: undefined }),
+        column: 'severity',
+        keys: SEVERITY_OPTIONS,
+      }),
+      countBy({
+        esClient,
+        // A missing alert.status decodes as active (see decodeSignificantEvent).
+        query: this.buildLatestByCurrentStateQuery({ ...options, status: undefined })
+          .pipe`EVAL event_status = COALESCE(${esql.col('alert.status')}, ${esql.str(
+          ALERT_EPISODE_STATUS.ACTIVE
+        )})`,
+        column: 'event_status',
+        keys: SIGNIFICANT_EVENT_STATUS_OPTIONS,
+      }),
+      countBy({
+        esClient,
+        query: withInvestigationState(
+          this.buildLatestByCurrentStateQuery({ ...options, investigationStates: undefined })
+        ),
+        column: INVESTIGATION_STATE_COLUMN,
+        keys: SIGNIFICANT_EVENT_INVESTIGATION_STATES,
+      }),
+    ]);
+
+    return { severity, status, investigation };
   }
 
   async findLatestByCurrentStateBatch(

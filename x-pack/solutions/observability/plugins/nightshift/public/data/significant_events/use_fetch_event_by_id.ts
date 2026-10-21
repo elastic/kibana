@@ -7,7 +7,8 @@
 
 import { useQuery, type UseQueryResult } from '@kbn/react-query';
 import type { SignificantEvent } from '@kbn/significant-events-schema';
-import { useKibana } from './use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
+import { EVENT_BY_ID_QUERY_KEY } from '../query_keys';
 
 /** Fetches one significant event by its stable `event_id`, unfiltered by the landing list's severity and time range. */
 export const useFetchEventById = (
@@ -19,7 +20,7 @@ export const useFetchEventById = (
   } = useKibana().services;
 
   return useQuery<SignificantEvent | null, Error>({
-    queryKey: ['nightshift.eventById', eventId],
+    queryKey: [...EVENT_BY_ID_QUERY_KEY, eventId],
     enabled: enabled && Boolean(eventId),
     queryFn: async ({ signal }) => {
       const response = await significantEventsRepositoryClient.fetch(

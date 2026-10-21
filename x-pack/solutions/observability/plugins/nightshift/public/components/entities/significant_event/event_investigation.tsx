@@ -6,21 +6,14 @@
  */
 
 import React, { useCallback } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import { InvestigationOutput, type InvestigationStatus } from '@kbn/investigation-output';
 import type { SignificantEventInvestigation } from '@kbn/significant-events-schema';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
-import { useKibana } from '../hooks/use_kibana';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export interface EventInvestigationProps {
   /** The latest investigation the significant event records. */
@@ -43,6 +36,7 @@ export function EventInvestigation({
 }: EventInvestigationProps): React.ReactElement {
   const { agentBuilder } = useKibana().services;
   const conversationId = details?.id;
+  const showDetailsButton = Boolean(agentBuilder && conversationId);
 
   const openDetails = useCallback(() => {
     if (conversationId) {
@@ -52,38 +46,30 @@ export function EventInvestigation({
 
   return (
     <>
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <EuiTitle size="xs">
-            <h3>
-              {i18n.translate('xpack.nightshift.flyout.investigationTitle', {
-                defaultMessage: 'Investigation',
-              })}
-            </h3>
-          </EuiTitle>
-        </EuiFlexItem>
-        {agentBuilder && conversationId && (
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              color="primary"
-              data-test-subj="nightshiftInvestigationShowDetailsButton"
-              onClick={openDetails}
-              {...getEbtProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
-                element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT_INVESTIGATION,
-                detail: status,
-              })}
-            >
-              {i18n.translate('xpack.nightshift.flyout.investigationShowDetails', {
-                defaultMessage: 'Show details',
-              })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-
-      <EuiSpacer size="s" />
+      {showDetailsButton ? (
+        <>
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                color="primary"
+                data-test-subj="nightshiftInvestigationShowDetailsButton"
+                onClick={openDetails}
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.VIEW_INVESTIGATION,
+                  element: NIGHTSHIFT_EBT_ELEMENTS.EVENT_FLYOUT_INVESTIGATION,
+                  detail: status,
+                })}
+              >
+                {i18n.translate('xpack.nightshift.flyout.investigationShowDetails', {
+                  defaultMessage: 'Show details',
+                })}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
 
       {!investigation ? (
         <EuiText size="s" color="subdued" data-test-subj="nightshiftInvestigationEmptyState">

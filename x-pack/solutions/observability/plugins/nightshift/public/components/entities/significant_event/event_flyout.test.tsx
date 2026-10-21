@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, within } from '@testing-library/react';
+import { act, render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import type { FlyoutTemplateProps } from '@kbn/flyout-template';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { UseInvestigationResult } from '@kbn/investigation-output';
@@ -17,6 +18,21 @@ import type { InvestigationRunStatus, SignificantEvent } from '@kbn/significant-
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },
+});
+
+let mockFlyoutTemplateProps: FlyoutTemplateProps | undefined;
+
+jest.mock('@kbn/flyout-template', () => {
+  const actual = jest.requireActual<typeof import('@kbn/flyout-template')>('@kbn/flyout-template');
+  const react = jest.requireActual<typeof import('react')>('react');
+  const CapturingFlyoutTemplate = (props: FlyoutTemplateProps) => {
+    mockFlyoutTemplateProps = props;
+    return react.createElement(actual.FlyoutTemplate, props);
+  };
+  return {
+    ...actual,
+    FlyoutTemplate: Object.assign(CapturingFlyoutTemplate, actual.FlyoutTemplate),
+  };
 });
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -49,13 +65,13 @@ const investigationDetails = {
 
 const mockOpenConversationDetails = jest.fn();
 
-jest.mock('../hooks/use_fetch_investigation_statuses', () => ({
+jest.mock('../../../hooks/use_fetch_investigation_statuses', () => ({
   useFetchInvestigationStatuses: () => ({ data: mockInvestigationRunStatuses }),
 }));
 
 let mockInvestigationRunStatuses: Record<string, InvestigationRunStatus> | undefined;
 
-jest.mock('../hooks/use_fetch_source_features', () => ({
+jest.mock('../../../hooks/use_fetch_source_features', () => ({
   useFetchSourceFeatures: () => ({
     features: [],
     failedSourceIds: [],
@@ -66,11 +82,11 @@ jest.mock('../hooks/use_fetch_source_features', () => ({
   }),
 }));
 
-jest.mock('../components/entities/detection/change_point_lens_chart', () => ({
+jest.mock('../detection/change_point_lens_chart', () => ({
   ChangePointLensChart: () => <div data-test-subj="nightshiftDetectionLensChart" />,
 }));
 
-jest.mock('../hooks/use_fetch_detection_occurrences', () => ({
+jest.mock('../../../hooks/use_fetch_detection_occurrences', () => ({
   useFetchDetectionOccurrences: () => ({
     data: new Map([
       [
@@ -87,7 +103,7 @@ jest.mock('../hooks/use_fetch_detection_occurrences', () => ({
   }),
 }));
 
-jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
+jest.mock('../../../hooks/use_fetch_event_lifecycle', () => ({
   useFetchEventLifecycle: () => ({
     data: {
       detections: [
@@ -109,8 +125,18 @@ jest.mock('../hooks/use_fetch_event_lifecycle', () => ({
 }));
 
 const mockOpenChat = jest.fn();
+const mockAddSuccess = jest.fn();
+const mockSignificantEventsFetch = jest.fn();
+let mockCanManage = false;
 
-jest.mock('../hooks/use_kibana', () => ({
+jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => ({
+  useBlocksNewActivity: () => ({
+    blocksActivity: false,
+    activityBlockTooltip: undefined,
+  }),
+}));
+
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       http: { basePath: { prepend: (path: string) => path } },
@@ -120,7 +146,7 @@ jest.mock('../hooks/use_kibana', () => ({
       },
       notifications: {
         toasts: {
-          addSuccess: jest.fn(),
+          addSuccess: mockAddSuccess,
         },
       },
       charts: {
@@ -140,9 +166,15 @@ jest.mock('../hooks/use_kibana', () => ({
         capabilities: {
           nightshift: {
             show: true,
+            manage: mockCanManage,
           },
         },
         getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
+      },
+      significantEvents: {
+        significantEventsRepositoryClient: {
+          fetch: mockSignificantEventsFetch,
+        },
       },
     },
   }),
@@ -163,8 +195,15 @@ const mockEvent: SignificantEvent = {
 describe('EventFlyout', () => {
   beforeEach(() => {
     mockOpenChat.mockClear();
+    mockAddSuccess.mockClear();
     mockInvestigationRunStatuses = undefined;
     mockOpenConversationDetails.mockClear();
+    mockCanManage = false;
+    mockSignificantEventsFetch.mockImplementation((route: string) =>
+      route === 'POST /internal/significant_events/events/{id}/investigate'
+        ? Promise.resolve({ executionId: 'exec-new' })
+        : Promise.resolve({ updated: 1, ignored: 0, status: 'inactive' })
+    );
     mockUseInvestigation.mockReturnValue({
       status: 'complete',
       investigation: investigationDetails,
@@ -187,16 +226,15 @@ describe('EventFlyout', () => {
     renderFlyout();
 
     expect(screen.getByText(mockEvent.title)).toBeInTheDocument();
-    expect(screen.getByText('Significant Event')).toBeInTheDocument();
-    expect(screen.getByText('Needs action')).toBeInTheDocument();
+    expect(screen.getByText('Critical')).toBeInTheDocument();
+    expect(screen.getByText('Active')).toBeInTheDocument();
     expect(screen.queryByText('Investigating')).not.toBeInTheDocument();
   });
 
   it('hides the investigation badge when the event has no investigations', () => {
     renderFlyout({ event: { ...mockEvent, status: 'inactive' } });
 
-    expect(screen.queryByText('Needs action')).not.toBeInTheDocument();
-    expect(screen.queryByText('Resolved')).not.toBeInTheDocument();
+    expect(screen.getByText('Inactive')).toBeInTheDocument();
     expect(screen.queryByText('Investigating')).not.toBeInTheDocument();
     expect(screen.queryByText('Investigated')).not.toBeInTheDocument();
   });
@@ -217,7 +255,6 @@ describe('EventFlyout', () => {
     });
 
     expect(screen.getAllByText('Investigated').length).toBeGreaterThan(0);
-    expect(screen.getByTestId('nightshiftInvestigatedStatus')).toBeInTheDocument();
   });
 
   it('formats the event timestamp using the dateFormat advanced setting', () => {
@@ -248,6 +285,66 @@ describe('EventFlyout', () => {
         initialMessage: expect.stringContaining(mockEvent.title),
       })
     );
+  });
+
+  it('uses a plain chat button while the latest investigation is still running', () => {
+    mockUseInvestigation.mockReturnValue({ status: 'running' });
+    renderFlyout({
+      event: {
+        ...mockEvent,
+        investigations: [{ workflow_execution_id: 'exec-1', started_at: '2026-07-10T12:00:00Z' }],
+      },
+    });
+
+    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutChatButton'));
+    expect(screen.queryByTestId('nightshiftEventFlyoutStartNewChatItem')).not.toBeInTheDocument();
+    expect(mockOpenChat).toHaveBeenCalledWith(expect.objectContaining({ newConversation: true }));
+  });
+
+  it('runs an investigation from the footer for users with manage access', async () => {
+    mockCanManage = true;
+    renderFlyout();
+
+    fireEvent.click(screen.getByTestId('nightshiftEventFlyoutRunInvestigationButton'));
+
+    await waitFor(() =>
+      expect(mockSignificantEventsFetch).toHaveBeenCalledWith(
+        'POST /internal/significant_events/events/{id}/investigate',
+        {
+          params: { path: { id: mockEvent.event_id } },
+          signal: null,
+        }
+      )
+    );
+  });
+
+  it('marks an active event inactive from the flyout menu', async () => {
+    mockCanManage = true;
+    const onClose = jest.fn();
+    renderFlyout({ onClose });
+
+    const markInactiveAction = mockFlyoutTemplateProps?.flyoutMenuProps?.trailingActions?.find(
+      (action) => action['aria-label'] === 'Mark significant event inactive'
+    );
+    act(() => markInactiveAction?.onClick?.({} as React.MouseEvent<HTMLElement>));
+    fireEvent.change(screen.getByTestId('nightshiftMarkSignificantEventInactiveReason'), {
+      target: { value: 'Known maintenance' },
+    });
+    fireEvent.click(screen.getByTestId('nightshiftMarkSignificantEventInactiveConfirm'));
+
+    await waitFor(() =>
+      expect(mockSignificantEventsFetch).toHaveBeenCalledWith(
+        'POST /internal/significant_events/events/{id}/update',
+        {
+          params: {
+            path: { id: mockEvent.event_id },
+            body: { status: 'inactive', assessment_note: 'Known maintenance' },
+          },
+          signal: null,
+        }
+      )
+    );
+    await waitFor(() => expect(onClose).toHaveBeenCalled());
   });
 
   it('renders the summary section with the summary text', () => {
@@ -323,10 +420,7 @@ describe('EventFlyout', () => {
       },
     });
 
-    expect(screen.getByTestId('nightshiftInvestigationFailedStatus')).toHaveTextContent(
-      'Investigation unavailable'
-    );
-    expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
+    expect(screen.getByText('Investigation unavailable')).toBeInTheDocument();
     expect(
       screen.queryByTestId('nightshiftInvestigationShowDetailsButton')
     ).not.toBeInTheDocument();
@@ -349,7 +443,6 @@ describe('EventFlyout', () => {
     });
 
     expect(screen.getByText('No investigation yet.')).toBeInTheDocument();
-    expect(screen.queryByTestId('nightshiftInvestigatedStatus')).not.toBeInTheDocument();
     expect(mockUseInvestigation).toHaveBeenCalledWith(
       expect.objectContaining({ investigationId: undefined })
     );
