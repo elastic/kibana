@@ -29,6 +29,7 @@ jobs:
               { user: 'elastic-vault-github-plugin-prod[bot]', branchPrefix: 'scout_metadata_update' },
               { user: 'kibanamachine', branchPrefix: 'update-pipeline-resource-defs', baseMatch: /^main$/ },
               { user: 'kibanamachine', branchPrefix: 'bump-versions' },
+              { user: 'kibanamachine', branchPrefix: 'workflow_step_schema_sync', paths: ['src/platform/packages/private/kbn-workflow-step-schema-cli/generated/*'] },
               { user: 'elastic-vault-github-plugin-prod[bot]', branchPrefix: 'update-bundled-packages', paths: ['fleet_packages.json'] },
             ];
 

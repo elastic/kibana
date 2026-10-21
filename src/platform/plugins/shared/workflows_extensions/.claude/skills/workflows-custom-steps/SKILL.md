@@ -196,7 +196,7 @@ When adding a new step:
    - [ ] All `registerStepDefinition` calls happen in `setup()`, never `start()`
 
 6. **Approval gate** — see [STEPS.md Step Definition Approval Process](../../dev_docs/STEPS.md#step-definition-approval-process)
-   - [ ] Local Scout API test was run; it printed an `echo … > approved_step_definitions/<step.id>.txt` command per offending step
+   - [ ] The step schema generation check was run locally (see STEPS.md); it printed an `echo … > approved_step_definitions/<step.id>.txt` command per offending step
    - [ ] Ran the printed `echo` command(s) from the kibana directory to create/update the per-step approval file(s)
    - [ ] PR description requests review from `@elastic/workflows-eng`
 
