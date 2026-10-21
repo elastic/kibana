@@ -301,7 +301,8 @@ export const LogCategorizationEmbeddable: FC<LogCategorizationEmbeddableProps> =
         });
       }
     } catch (error) {
-      if (error.name !== 'AbortError') {
+      // A cancellation aborts with a custom reason, which core fetch reports as a non-AbortError.
+      if (!requestCancellationManager?.signal.aborted && error.name !== 'AbortError') {
         toasts.addError(error, {
           title: i18n.translate('xpack.aiops.logCategorization.errorLoadingCategories', {
             defaultMessage: 'Error loading categories',

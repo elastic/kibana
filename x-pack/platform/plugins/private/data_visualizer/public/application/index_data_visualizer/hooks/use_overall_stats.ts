@@ -123,6 +123,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
         populatedFieldsAbortCtrl.current.abort();
         populatedFieldsAbortCtrl.current =
           requestCancellationManager?.createChildController() ?? new AbortController();
+        const { signal } = populatedFieldsAbortCtrl.current;
 
         // Trick to avoid duplicate getFieldsForWildcard requests
         // wouldn't make sense to make time-based query if either earliest & latest timestamps is undefined
@@ -144,11 +145,13 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
             },
             includeEmptyFields: false,
             projectRouting,
+            abortSignal: signal,
           }),
           populatedFieldsAbortCtrl.current
         );
 
-        if (!unmounted) {
+        // A cancelled request isn't a timeout: leave the state untouched so a later load retries.
+        if (!unmounted && !signal.aborted) {
           if (Array.isArray(nonEmptyFields)) {
             setPopulatedFieldsInIndex(new Set([...nonEmptyFields.map((field) => field.name)]));
           } else {

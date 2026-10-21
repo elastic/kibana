@@ -59,8 +59,9 @@ export async function* fetchStream<B extends object, R extends Reducer<any, any>
 
     stream = response.response;
   } catch (error) {
-    // An aborted request is a cancellation by the caller, not an error.
-    if (error.name !== 'AbortError') {
+    // An aborted request is a cancellation by the caller, not an error. Check the signal as well
+    // as the error name: aborting with a custom reason makes core fetch throw a different error.
+    if (!abortCtrl.current.signal.aborted && error.name !== 'AbortError') {
       yield [error.toString(), undefined];
     }
     return;

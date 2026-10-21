@@ -113,6 +113,12 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   /** Signal of the focus load currently in flight, used to tell cancellation apart from empty data. */
   focusLoadSignal;
 
+  /**
+   * True from the start of a context load until its automatic (debounced) focus load starts.
+   * That focus load isn't a user action, so it must not lift a cancellation made in between.
+   */
+  autoFocusLoadPending = false;
+
   getBoundsRoundedToInterval;
   mlTimeSeriesExplorer;
   mlForecastService;
@@ -318,6 +324,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     );
 
     this.contextChartSelectedInitCallDone = false;
+    this.autoFocusLoadPending = true;
 
     this.props.onLoading?.(true);
 
@@ -472,8 +479,12 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
         getBoundsRoundedToInterval: this.getBoundsRoundedToInterval,
         getFocusData$: (selection) => {
           const { requestCancellationManager } = this.props;
-          // A new brush is a user action, so it lifts an earlier cancellation.
-          requestCancellationManager?.resumeAfterCancellation();
+          // A new brush is a user action, so it lifts an earlier cancellation. The automatic
+          // focus load that follows a context load is not, so it stays cancelled.
+          if (!this.autoFocusLoadPending) {
+            requestCancellationManager?.resumeAfterCancellation();
+          }
+          this.autoFocusLoadPending = false;
           this.focusLoadSignal = requestCancellationManager?.signal;
           return this.getFocusData(selection)?.pipe(takeUntilAborted(this.focusLoadSignal));
         },

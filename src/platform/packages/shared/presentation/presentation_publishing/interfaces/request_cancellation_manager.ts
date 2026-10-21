@@ -73,7 +73,12 @@ export class RequestCancellationManager {
     if (parent.aborted) {
       child.abort(parent.reason);
     } else {
-      parent.addEventListener('abort', () => child.abort(parent.reason), { once: true });
+      // Tying the listener to the child's own signal removes it from the parent once the
+      // child is aborted (e.g. by an in-panel cancel), so long-lived managers don't accumulate them.
+      parent.addEventListener('abort', () => child.abort(parent.reason), {
+        once: true,
+        signal: child.signal,
+      });
     }
     return child;
   }

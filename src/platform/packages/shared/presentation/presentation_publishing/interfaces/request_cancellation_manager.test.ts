@@ -118,5 +118,18 @@ describe('RequestCancellationManager', () => {
       child.abort();
       expect(manager.signal.aborted).toBe(false);
     });
+
+    it('ties its listener on the manager signal to the child so it is removed on child abort', () => {
+      const manager = new RequestCancellationManager();
+      manager.startLoad();
+      const addSpy = jest.spyOn(manager.signal, 'addEventListener');
+
+      const child = manager.createChildController();
+
+      expect(addSpy).toHaveBeenCalledWith('abort', expect.any(Function), {
+        once: true,
+        signal: child.signal,
+      });
+    });
   });
 });

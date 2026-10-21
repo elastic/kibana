@@ -64,6 +64,7 @@ export function useCancellableSearch(
       }
 
       return new Promise((resolve, reject) => {
+        const { signal } = abortController.current;
         data.search
           .search<RequestBody, ResponseType>(requestBody, {
             abortSignal: abortController.current.signal,
@@ -76,6 +77,10 @@ export function useCancellableSearch(
           )
           .subscribe({
             next: (result) => {
+              // Don't hand a result that arrived after cancellation to callers as a completed one.
+              if (signal.aborted) {
+                return resolve(null);
+              }
               if (!isRunningResponse(result)) {
                 setIsFetching(false);
                 resolve(result);
@@ -86,7 +91,8 @@ export function useCancellableSearch(
               }
             },
             error: (error) => {
-              if (error.name === 'AbortError') {
+              // Aborting with a custom reason may surface as a different error than AbortError.
+              if (signal.aborted || error.name === 'AbortError') {
                 return resolve(null);
               }
               setIsFetching(false);
