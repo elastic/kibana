@@ -70,7 +70,7 @@ describe('ObservedDataSectionContent anomalies time range', () => {
       to: GLOBAL_TO,
       isInitializing: false,
     } as ReturnType<typeof useGlobalTime>);
-    mockUseAnomaliesTableData.mockReturnValue([false, []]);
+    mockUseAnomaliesTableData.mockReturnValue([false, null]);
   });
 
   afterEach(() => {
