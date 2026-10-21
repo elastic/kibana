@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PublicLastRunSetters } from '../types';
+import { RuleExecutionStatusErrorReasons, type PublicLastRunSetters } from '../types';
 
 export interface RuleResultServiceResults {
   errors: LastRunError[];
@@ -16,7 +16,18 @@ export interface RuleResultServiceResults {
 interface LastRunError {
   message: string;
   userError: boolean;
+  reason?: RuleExecutionStatusErrorReasons;
 }
+
+/** Reason stored for an error a rule executor reports through addLastRunError. */
+export const reasonForReportedError = (
+  userError: boolean,
+  reason?: RuleExecutionStatusErrorReasons
+): RuleExecutionStatusErrorReasons =>
+  reason ??
+  (userError
+    ? RuleExecutionStatusErrorReasons.Configuration
+    : RuleExecutionStatusErrorReasons.Execute);
 
 export class RuleResultService {
   private errors: LastRunError[] = [];
@@ -51,8 +62,16 @@ export class RuleResultService {
     };
   }
 
-  private addLastRunError(message: string, userError = false) {
-    this.errors.push({ message, userError });
+  private addLastRunError(
+    message: string,
+    userError = false,
+    reason?: RuleExecutionStatusErrorReasons
+  ) {
+    this.errors.push({
+      message,
+      userError,
+      reason: reasonForReportedError(userError, reason),
+    });
   }
 
   private addLastRunWarning(warning: string) {

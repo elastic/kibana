@@ -8,6 +8,7 @@
 import type { MakeSchemaFrom, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { RuleExecutionStatusErrorReasons } from '../../common';
 import type { AlertingUsage } from './types';
 
 const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
@@ -202,11 +203,20 @@ const byReasonSchema: MakeSchemaFrom<AlertingUsage>['count_rules_executions_fail
     DYNAMIC_KEY: { type: 'long' },
     read: { type: 'long' },
     decrypt: { type: 'long' },
-    license: { type: 'long' },
+    execute: { type: 'long' },
+    configuration: { type: 'long' },
     unknown: { type: 'long' },
+    license: { type: 'long' },
+    timeout: { type: 'long' },
+    disabled: { type: 'long' },
+    validate: { type: 'long' },
   };
 
-export const NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES = Object.keys(byReasonSchema).length;
+// DYNAMIC_KEY is a schema placeholder, not an event.reason value. Size must cover every
+// defined reason or the least common buckets are omitted from the breakdown.
+export const NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES = Object.values(
+  RuleExecutionStatusErrorReasons
+).length;
 
 const byPercentileSchema: MakeSchemaFrom<AlertingUsage>['percentile_num_generated_actions_per_day'] =
   {
@@ -228,8 +238,13 @@ const byReasonSchemaByType: MakeSchemaFrom<AlertingUsage>['count_rules_execution
     DYNAMIC_KEY: byTypeSchema,
     read: byTypeSchema,
     decrypt: byTypeSchema,
-    license: byTypeSchema,
+    execute: byTypeSchema,
+    configuration: byTypeSchema,
     unknown: byTypeSchema,
+    license: byTypeSchema,
+    timeout: byTypeSchema,
+    disabled: byTypeSchema,
+    validate: byTypeSchema,
   };
 
 const byTaskStatusSchema: MakeSchemaFrom<AlertingUsage>['count_failed_and_unrecognized_rule_tasks_by_status_per_day'] =

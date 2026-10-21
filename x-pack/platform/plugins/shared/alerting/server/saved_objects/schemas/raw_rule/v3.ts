@@ -26,6 +26,7 @@ export const executionStatusErrorReason = schema.oneOf([
   schema.literal(RuleExecutionStatusErrorReasons.Read), // change
   schema.literal(RuleExecutionStatusErrorReasons.Decrypt), // change
   schema.literal(RuleExecutionStatusErrorReasons.Execute), // change
+  schema.literal(RuleExecutionStatusErrorReasons.Configuration), // change
   schema.literal(RuleExecutionStatusErrorReasons.Unknown), // change
   schema.literal(RuleExecutionStatusErrorReasons.License), // change
   schema.literal(RuleExecutionStatusErrorReasons.Timeout), // change

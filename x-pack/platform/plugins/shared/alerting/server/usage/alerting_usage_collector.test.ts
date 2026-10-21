@@ -6,7 +6,11 @@
  */
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { registerAlertingUsageCollector } from './alerting_usage_collector';
+import { RuleExecutionStatusErrorReasons } from '../../common';
+import {
+  NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES,
+  registerAlertingUsageCollector,
+} from './alerting_usage_collector';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type {
   ConcreteTaskInstance,
@@ -78,5 +82,31 @@ describe('registerAlertingUsageCollector', () => {
     expect(await usageCollectionMock.makeUsageCollector.mock.calls[0][0].fetch()).toEqual(
       mockStats
     );
+  });
+
+  it('declares every execution failure reason and excludes the schema placeholder from the agg size', () => {
+    registerAlertingUsageCollector(
+      usageCollectionMock as UsageCollectionSetup,
+      new Promise(() => taskManagerStart)
+    );
+    const collector = usageCollectionMock.makeUsageCollector.mock.calls[0][0] as {
+      schema: {
+        count_rules_executions_failured_by_reason_per_day: Record<string, unknown>;
+        count_rules_executions_failured_by_reason_by_type_per_day: Record<string, unknown>;
+      };
+    };
+    const reasons = Object.values(RuleExecutionStatusErrorReasons);
+    expect(NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES).toBe(reasons.length);
+
+    for (const reasonSchema of [
+      collector.schema.count_rules_executions_failured_by_reason_per_day,
+      collector.schema.count_rules_executions_failured_by_reason_by_type_per_day,
+    ]) {
+      expect(
+        Object.keys(reasonSchema)
+          .filter((key) => key !== 'DYNAMIC_KEY')
+          .sort()
+      ).toEqual([...reasons].sort());
+    }
   });
 });
