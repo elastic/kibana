@@ -84,5 +84,24 @@ export type WorkflowsExecutionEngineConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsExecutionEngineConfig> = {
   schema: configSchema,
-  deprecations: ({ unused }) => [unused('http', { level: 'warning' })],
+  deprecations: ({ unused }) => [
+    unused('http', {
+      level: 'warning',
+      message: i18n.translate('workflowsExecutionEngine.deprecations.httpUnusedMessage', {
+        defaultMessage:
+          'workflowsExecutionEngine.http is not used. HTTP step hosts are checked against xpack.actions.allowedHosts.',
+      }),
+      correctiveActions: {
+        manualSteps: [
+          i18n.translate(
+            'workflowsExecutionEngine.deprecations.httpUnused.manualStepOneMessage',
+            {
+              defaultMessage:
+                'Remove workflowsExecutionEngine.http from the Kibana config file, CLI flag, or environment variable. If allowedHosts listed specific hosts, set those hosts on xpack.actions.allowedHosts.',
+            }
+          ),
+        ],
+      },
+    }),
+  ],
 };
