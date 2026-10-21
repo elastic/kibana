@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { encodeKqlTemplateValue } from '@kbn/eval-kql';
 import type { OrStringRecursive } from '@kbn/utility-types';
 import { dataFilterStepDefinition } from './data_filter_step';
 import type { StepHandlerContext } from '../../step_registry/types';
@@ -29,6 +30,7 @@ describe('dataFilterStepDefinition', () => {
       getFakeRequest: jest.fn(),
       getScopedEsClient: jest.fn(),
       renderInputTemplate: jest.fn((val) => val),
+      renderKqlConditionTemplate: jest.fn((val) => val),
       callKibanaApi: jest.fn(),
     },
     logger: {
@@ -295,6 +297,35 @@ describe('dataFilterStepDefinition', () => {
 
       expect(result.error).toBeDefined();
       expect(result.error?.message).toContain('aborted');
+    });
+  });
+
+  describe('templated values in the condition', () => {
+    const items = [{ owner: 'a' }, { owner: 'b' }, { owner: 'a or item.owner: b' }];
+    const injected = 'a or item.owner: b';
+
+    it('matches interpolated values as literals', async () => {
+      const context = createMockContext({ items }, { condition: `item.owner: ${injected}` });
+      context.rawInput = { condition: 'item.owner: {{ inputs.owner }}' };
+      (context.contextManager.renderKqlConditionTemplate as jest.Mock).mockReturnValue(
+        `item.owner: ${encodeKqlTemplateValue(injected)}`
+      );
+
+      const result = await dataFilterStepDefinition.handler(context);
+
+      expect(context.contextManager.renderKqlConditionTemplate).toHaveBeenCalledWith(
+        'item.owner: {{ inputs.owner }}'
+      );
+      expect(result.output).toEqual([{ owner: injected }]);
+    });
+
+    it('fails instead of using the generically rendered condition when the engine cannot render it', async () => {
+      const context = createMockContext({ items }, { condition: `item.owner: ${injected}` });
+      context.contextManager.renderKqlConditionTemplate = undefined;
+
+      const result = await dataFilterStepDefinition.handler(context);
+
+      expect(result.error?.message).toContain('cannot safely render KQL conditions');
     });
   });
 });

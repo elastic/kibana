@@ -8,7 +8,25 @@
  */
 
 import { KQLSyntaxError } from '@kbn/es-query';
+import type { ContextManager } from '../../step_registry/types';
 
 export function isKqlSyntaxError(error: unknown): error is KQLSyntaxError {
   return error instanceof KQLSyntaxError;
+}
+
+/**
+ * Renders the raw `condition` input so that interpolated values stay literals. Throws instead of
+ * falling back to the generically rendered input, which would let them be parsed as KQL.
+ */
+export function renderKqlCondition(
+  contextManager: ContextManager,
+  rawCondition: string | undefined
+): string {
+  if (!rawCondition) {
+    return '';
+  }
+  if (!contextManager.renderKqlConditionTemplate) {
+    throw new Error('The workflow engine cannot safely render KQL conditions');
+  }
+  return contextManager.renderKqlConditionTemplate(rawCondition);
 }

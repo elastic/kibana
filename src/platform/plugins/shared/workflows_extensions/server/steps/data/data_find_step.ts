@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { evaluateKql } from '@kbn/eval-kql';
-import { isKqlSyntaxError } from './kql_utils';
+import { decodeKqlTemplateValues, evaluateKql, parseKqlTemplate } from '@kbn/eval-kql';
+import { isKqlSyntaxError, renderKqlCondition } from './kql_utils';
 import { dataFindStepCommonDefinition } from '../../../common/steps/data';
 import type { StepHandlerContext } from '../../step_registry/types';
 import { createServerStepDefinition } from '../../step_registry/types';
@@ -41,7 +41,7 @@ function searchForMatch(
       );
     } else {
       try {
-        const matches = evaluateKql(condition, { item, index: i });
+        const matches = evaluateKql(parseKqlTemplate(condition), { item, index: i });
 
         if (matches) {
           context.logger.debug(`Found match at index ${i}`);
@@ -64,7 +64,8 @@ export const dataFindStepDefinition = createServerStepDefinition({
   handler: async (context) => {
     try {
       const items = context.config.items;
-      const { condition, errorIfEmpty } = context.input;
+      const { errorIfEmpty } = context.input;
+      const condition = renderKqlCondition(context.contextManager, context.rawInput.condition);
 
       if (!Array.isArray(items)) {
         context.logger.error(`Input items has invalid type: ${typeof items}`);
@@ -88,7 +89,9 @@ export const dataFindStepDefinition = createServerStepDefinition({
       }
 
       context.logger.debug(
-        `Finding first match in ${items.length} item(s) with condition: ${condition}`
+        `Finding first match in ${items.length} item(s) with condition: ${decodeKqlTemplateValues(
+          condition
+        )}`
       );
 
       const { aborted, ...result } = searchForMatch(items, condition, context);
