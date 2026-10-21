@@ -18,16 +18,20 @@ import {
   EuiModalHeaderTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import type { RelatedRemovalChoice } from '../../client/attachment_framework/types';
+import type {
+  RelatedRemovalChoice,
+  RelatedRemovalOptions,
+} from '../../client/attachment_framework/types';
 import { CANCEL_BUTTON } from './property_actions/translations';
 import { useFocusButtonTrap } from '../use_focus_button';
 
 export const REMOVE_WITH_RELATED_MODAL_TEST_ID = 'remove-with-related-modal';
+const REMOVE_WITH_RELATED_BUTTON_TEST_ID = `${REMOVE_WITH_RELATED_MODAL_TEST_ID}-remove-with-related`;
 
 interface Props {
   title: string;
   relatedRemoval: RelatedRemovalChoice;
-  onConfirm: (options: { includeRelated: boolean }) => void;
+  onConfirm: (options: RelatedRemovalOptions) => void;
   onCancel: () => void;
   /**
    * The ref of the button to focus when the modal is closed
@@ -55,6 +59,7 @@ const RemoveWithRelatedConfirmationModalComponent: React.FC<Props> = ({
       data-test-subj={REMOVE_WITH_RELATED_MODAL_TEST_ID}
       onClose={onCancel}
       focusTrapProps={focusTrapProps}
+      initialFocus={`[data-test-subj="${REMOVE_WITH_RELATED_BUTTON_TEST_ID}"]`}
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={modalTitleId}>{title}</EuiModalHeaderTitle>
@@ -88,7 +93,7 @@ const RemoveWithRelatedConfirmationModalComponent: React.FC<Props> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
-                  data-test-subj={`${REMOVE_WITH_RELATED_MODAL_TEST_ID}-remove-with-related`}
+                  data-test-subj={REMOVE_WITH_RELATED_BUTTON_TEST_ID}
                   color="danger"
                   fill
                   onClick={onRemoveWithRelated}

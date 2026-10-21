@@ -173,13 +173,13 @@ describe('Attack attachment', () => {
 
     expect(attackType.getRelatedRemoval?.({ count: 1 })).toEqual({
       description:
-        'Also remove the alerts this attack added to the case? Alerts that another attack on the case includes stay.',
+        'Also remove the alerts this attack added to the case? Alerts that also belong to another attack in this case stay.',
       removeOnlyLabel: 'Remove attack only',
       removeWithRelatedLabel: 'Remove attack and alerts',
     });
     expect(attackType.getRelatedRemoval?.({ count: 2 })).toEqual({
       description:
-        'Also remove the alerts these attacks added to the case? Alerts that another attack on the case includes stay.',
+        'Also remove the alerts these attacks added to the case? Alerts that also belong to another attack in this case stay.',
       removeOnlyLabel: 'Remove attacks only',
       removeWithRelatedLabel: 'Remove attacks and alerts',
     });

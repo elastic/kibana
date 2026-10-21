@@ -1173,24 +1173,6 @@ describe('Cases API', () => {
       );
       expect(resp).toBe(undefined);
     });
-
-    it('goes through the bulk route to keep the related attachments', async () => {
-      await deleteComment({
-        caseId: basicCaseId,
-        commentId,
-        includeRelated: false,
-        signal: abortCtrl.signal,
-      });
-
-      expect(fetchMock).toHaveBeenCalledWith(
-        INTERNAL_BULK_DELETE_ATTACHMENTS_URL.replace('{case_id}', basicCaseId),
-        {
-          method: 'POST',
-          body: JSON.stringify({ ids: [commentId], include_related: false }),
-          signal: abortCtrl.signal,
-        }
-      );
-    });
   });
 
   describe('bulkDeleteAttachments', () => {

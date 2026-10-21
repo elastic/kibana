@@ -10,6 +10,7 @@ import type {
   AttachmentRemovalOptions,
   AttachmentRemovalRequest,
   RegisteredUnifiedAttachmentType,
+  RelatedRemovalOptions,
 } from '../../../client/attachment_framework/types';
 import { useBulkDeleteAttachments } from '../../../containers/use_bulk_delete_attachments';
 import { useCasesContext } from '../../cases_context/use_cases_context';
@@ -90,7 +91,7 @@ export const useAttachmentRemoval = (
 
   const onConfirm = useCallback(() => remove(), [remove]);
   const onConfirmRelated = useCallback(
-    ({ includeRelated }: { includeRelated: boolean }) => remove(includeRelated),
+    ({ includeRelated }: RelatedRemovalOptions) => remove(includeRelated),
     [remove]
   );
 

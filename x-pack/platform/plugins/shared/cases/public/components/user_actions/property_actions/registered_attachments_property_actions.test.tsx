@@ -97,6 +97,18 @@ describe('RegisteredAttachmentsPropertyActions', () => {
         relatedRemoval.description
       );
       expect(screen.queryByTestId('property-actions-confirm-modal')).toBeNull();
+      expect(screen.getByText('Remove attachment')).toBeInTheDocument();
+    });
+
+    it('cancels without deleting', async () => {
+      await openModal();
+
+      await user.click(await screen.findByTestId('remove-with-related-modal-cancel'));
+
+      await waitFor(() => {
+        expect(screen.queryByTestId('remove-with-related-modal')).not.toBeInTheDocument();
+      });
+      expect(props.onDelete).not.toHaveBeenCalled();
     });
 
     it('keeps the related attachments', async () => {

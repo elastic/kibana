@@ -103,7 +103,7 @@ const getAttackRelatedRemoval = (count: number): RelatedRemovalChoice => ({
     'xpack.securitySolution.attackDiscovery.cases.relatedRemoval.description',
     {
       defaultMessage:
-        'Also remove the alerts {count, plural, one {this attack} other {these attacks}} added to the case? Alerts that another attack on the case includes stay.',
+        'Also remove the alerts {count, plural, one {this attack} other {these attacks}} added to the case? Alerts that also belong to another attack in this case stay.',
       values: { count },
     }
   ),

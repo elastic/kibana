@@ -11,6 +11,7 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 import type { CaseConnectors, CaseUI, CasesConfigurationUI } from '../../../containers/types';
 import type { CurrentUserProfile } from '../../types';
+import type { RelatedRemovalOptions } from '../../../client/attachment_framework/types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 
 interface UseBuilderContextArgs {
@@ -26,7 +27,7 @@ interface UseBuilderContextArgs {
   handleDeleteComment: (
     id: string,
     successToasterTitle: string,
-    options?: { includeRelated: boolean }
+    options?: RelatedRemovalOptions
   ) => void;
 }
 

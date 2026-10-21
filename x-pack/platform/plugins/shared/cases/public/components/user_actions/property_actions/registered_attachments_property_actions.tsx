@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 
 import type {
   AttachmentAction,
   RelatedRemovalChoice,
+  RelatedRemovalOptions,
 } from '../../../client/attachment_framework/types';
 
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
@@ -23,7 +24,7 @@ import { useDeletePropertyAction } from './use_delete_property_action';
 interface Props {
   isLoading: boolean;
   registeredAttachmentActions: AttachmentAction[];
-  onDelete: (options?: { includeRelated: boolean }) => void;
+  onDelete: (options?: RelatedRemovalOptions) => void;
   hideDefaultActions: boolean;
   /** Offers to keep the attachments the deletion would also remove. */
   relatedRemoval?: RelatedRemovalChoice;
@@ -37,17 +38,9 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
   relatedRemoval,
 }) => {
   const { permissions } = useCasesContext();
-  const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
-    onDelete,
-  });
+  const { showDeletionModal, onModalOpen, onConfirm, onConfirmWithOptions, onCancel } =
+    useDeletePropertyAction<RelatedRemovalOptions>({ onDelete });
   const buttonRef = React.useRef<HTMLAnchorElement>(null);
-  const onConfirmRelated = useCallback(
-    (options: { includeRelated: boolean }) => {
-      onCancel();
-      onDelete(options);
-    },
-    [onCancel, onDelete]
-  );
 
   const propertyActions = useMemo(() => {
     const showTrashIcon = permissions.delete && !hideDefaultActions;
@@ -69,6 +62,30 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
     ];
   }, [permissions.delete, hideDefaultActions, onModalOpen, registeredAttachmentActions]);
 
+  const renderModal = (): React.ReactNode => {
+    if (!showDeletionModal) {
+      return null;
+    }
+
+    return relatedRemoval != null ? (
+      <RemoveWithRelatedConfirmationModal
+        title={i18n.REMOVE_ATTACHMENT}
+        relatedRemoval={relatedRemoval}
+        onCancel={onCancel}
+        onConfirm={onConfirmWithOptions}
+        focusButtonRef={buttonRef}
+      />
+    ) : (
+      <DeleteAttachmentConfirmationModal
+        title={i18n.DELETE_ATTACHMENT}
+        confirmButtonText={i18n.DELETE}
+        onCancel={onCancel}
+        onConfirm={onConfirm}
+        focusButtonRef={buttonRef}
+      />
+    );
+  };
+
   return (
     <>
       <UserActionPropertyActions
@@ -76,24 +93,7 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
         propertyActions={propertyActions}
         buttonRef={buttonRef}
       />
-      {showDeletionModal && relatedRemoval != null ? (
-        <RemoveWithRelatedConfirmationModal
-          title={i18n.DELETE_ATTACHMENT}
-          relatedRemoval={relatedRemoval}
-          onCancel={onCancel}
-          onConfirm={onConfirmRelated}
-          focusButtonRef={buttonRef}
-        />
-      ) : null}
-      {showDeletionModal && relatedRemoval == null ? (
-        <DeleteAttachmentConfirmationModal
-          title={i18n.DELETE_ATTACHMENT}
-          confirmButtonText={i18n.DELETE}
-          onCancel={onCancel}
-          onConfirm={onConfirm}
-          focusButtonRef={buttonRef}
-        />
-      ) : null}
+      {renderModal()}
     </>
   );
 };

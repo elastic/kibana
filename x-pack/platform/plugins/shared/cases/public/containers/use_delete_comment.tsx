@@ -10,13 +10,14 @@ import { casesMutationsKeys } from './constants';
 import type { ServerError } from '../types';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 import { useCasesToast } from '../common/use_cases_toast';
-import { deleteComment } from './api';
+import { bulkDeleteAttachments, deleteComment } from './api';
 import * as i18n from './translations';
 
 interface MutationArgs {
   caseId: string;
   commentId: string;
   successToasterTitle: string;
+  /** Set when the user chose whether the related attachments go too; only the bulk route takes it. */
   includeRelated?: boolean;
 }
 
@@ -26,7 +27,9 @@ export const useDeleteComment = () => {
 
   return useMutation(
     ({ caseId, commentId, includeRelated }: MutationArgs) =>
-      deleteComment({ caseId, commentId, includeRelated }),
+      includeRelated == null
+        ? deleteComment({ caseId, commentId })
+        : bulkDeleteAttachments({ caseId, request: { ids: [commentId] }, includeRelated }),
     {
       mutationKey: casesMutationsKeys.deleteComment,
       onSuccess: (_, { successToasterTitle }) => {

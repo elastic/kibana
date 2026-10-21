@@ -484,19 +484,12 @@ export const patchComment = async ({
 export const deleteComment = async ({
   caseId,
   commentId,
-  includeRelated,
   signal,
 }: {
   caseId: string;
   commentId: string;
-  /** Only the internal bulk route can keep the related attachments. */
-  includeRelated?: boolean;
   signal?: AbortSignal;
 }): Promise<void> => {
-  if (includeRelated === false) {
-    return bulkDeleteAttachments({ caseId, request: { ids: [commentId] }, includeRelated, signal });
-  }
-
   await KibanaServices.get().http.fetch(getCaseAttachmentDetailsUrl(caseId, commentId), {
     method: 'DELETE',
     signal,
