@@ -74,14 +74,19 @@ describe('StartInvestigationPanel', () => {
     expect(startInvestigation).toHaveBeenCalledTimes(2);
   });
 
-  it('closes with Escape and with the cancel button', () => {
+  it('closes with Escape', () => {
     renderPanel();
 
     fireEvent.keyDown(getInput(), { key: 'Escape' });
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
 
-    fireEvent.click(screen.getByTestId('nightshiftStartInvestigationCancelButton'));
-    expect(onClose).toHaveBeenCalledTimes(2);
+  it('renders as a modal that closes from the close button', () => {
+    renderPanel();
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    fireEvent.click(screen.getByLabelText('Closes this modal window'));
+    expect(onClose).toHaveBeenCalledTimes(1);
   });
 
   it('does not submit again while an investigation is starting', () => {
