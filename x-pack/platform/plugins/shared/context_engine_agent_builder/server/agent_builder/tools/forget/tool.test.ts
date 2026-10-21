@@ -21,15 +21,16 @@ const assertContextEngineWriteAccessMock = jest.mocked(assertContextEngineWriteA
 
 describe('forget tool', () => {
   const forgetMemory = jest.fn();
+  const getMemoryWriteService = jest.fn(async () => ({
+    createMemory: jest.fn(),
+    reviseMemory: jest.fn(),
+    forgetMemory,
+  }));
   const params = { aiIndexId: 'support', id: 'memory-1' };
 
   const createTool = () =>
     createForgetTool({
-      getMemoryWriteService: async () => ({
-        createMemory: jest.fn(),
-        reviseMemory: jest.fn(),
-        forgetMemory,
-      }),
+      getMemoryWriteService,
       getCoreStart: async () => coreMock.createStart(),
       getSecurityStart: async () => undefined,
     });
@@ -53,13 +54,16 @@ describe('forget tool', () => {
     } as ToolHandlerContext;
   };
 
-  const run = async () => {
+  const runWithContext = async () => {
     const handler = createTool().handler;
     if (!handler) {
       throw new Error('Expected forget tool handler');
     }
-    return handler(params, createContext());
+    const context = createContext();
+    return { result: await handler(params, context), context };
   };
+
+  const run = async () => (await runWithContext()).result;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -78,9 +82,18 @@ describe('forget tool', () => {
   });
 
   it('adapts Agent Builder metadata to the shared service', async () => {
-    const result = await run();
+    const { result, context } = await runWithContext();
 
-    expect(assertContextEngineWriteAccessMock).toHaveBeenCalled();
+    expect(assertContextEngineWriteAccessMock).toHaveBeenCalledWith({
+      request: context.request,
+      spaceId: 'space-1',
+      getCoreStart: expect.any(Function),
+      getSecurityStart: expect.any(Function),
+    });
+    expect(getMemoryWriteService).toHaveBeenCalledWith({
+      esClient: context.esClient.asCurrentUser,
+      request: context.request,
+    });
     expect(forgetMemory).toHaveBeenCalledWith({
       aiIndexId: 'support',
       id: 'memory-1',

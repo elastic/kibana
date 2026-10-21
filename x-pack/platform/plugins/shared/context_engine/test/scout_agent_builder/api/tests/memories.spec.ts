@@ -15,11 +15,15 @@ const AI_INDEX_ID = 'scout_memory_public_api';
 const DEST = 'ai-index-idx-scout-memory-public-api';
 const DATA_STREAM_AI_INDEX_ID = 'scout_memory_public_api_data_stream';
 const DATA_STREAM_DEST = 'ai-index-ds-scout-memory-public-api';
+const SPACE_RESOLUTION_AI_INDEX_ID = 'scout_memory_public_api_space_resolution';
+const OTHER_SPACE_DEST = 'ai-index-idx-scout-memory-public-api-other-space';
 const OTHER_SPACE = 'scout-memory-public-api-other';
 const AI_INDEX_PATH = `${testData.AI_INDEX_COLLECTION_PATH}/${AI_INDEX_ID}`;
 const MEMORIES_PATH = `${AI_INDEX_PATH}/memories`;
 const DATA_STREAM_AI_INDEX_PATH = `${testData.AI_INDEX_COLLECTION_PATH}/${DATA_STREAM_AI_INDEX_ID}`;
 const DATA_STREAM_MEMORIES_PATH = `${DATA_STREAM_AI_INDEX_PATH}/memories`;
+const SPACE_RESOLUTION_AI_INDEX_PATH = `${testData.AI_INDEX_COLLECTION_PATH}/${SPACE_RESOLUTION_AI_INDEX_ID}`;
+const SPACE_RESOLUTION_MEMORIES_PATH = `${SPACE_RESOLUTION_AI_INDEX_PATH}/memories`;
 const inOtherSpace = (path: string) => `s/${OTHER_SPACE}/${path}`;
 const AI_INDEX_BODY = {
   dest: { type: 'index', value: DEST },
@@ -67,14 +71,37 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
       headers,
       responseType: 'json',
     });
-    await esClient.indices.delete({ index: DEST }, { ignore: [404] });
+    await apiClient.delete(SPACE_RESOLUTION_AI_INDEX_PATH, { headers, responseType: 'json' });
+    await apiClient.delete(inOtherSpace(SPACE_RESOLUTION_AI_INDEX_PATH), {
+      headers,
+      responseType: 'json',
+    });
+    for (const index of [DEST, OTHER_SPACE_DEST]) {
+      await esClient.indices.delete({ index }, { ignore: [404] });
+    }
     await esClient.indices.deleteDataStream({ name: DATA_STREAM_DEST }, { ignore: [404] });
-    await esClient.indices.create({ index: DEST }, { ignore: [400] });
+    for (const index of [DEST, OTHER_SPACE_DEST]) {
+      await esClient.indices.create({ index }, { ignore: [400] });
+    }
     for (const path of [AI_INDEX_PATH, inOtherSpace(AI_INDEX_PATH)]) {
       const response = await apiClient.put(path, {
         headers,
         responseType: 'json',
         body: AI_INDEX_BODY,
+      });
+      expect(response).toHaveStatusCode(201);
+    }
+    for (const [path, destination] of [
+      [SPACE_RESOLUTION_AI_INDEX_PATH, DEST],
+      [inOtherSpace(SPACE_RESOLUTION_AI_INDEX_PATH), OTHER_SPACE_DEST],
+    ] as const) {
+      const response = await apiClient.put(path, {
+        headers,
+        responseType: 'json',
+        body: {
+          ...AI_INDEX_BODY,
+          dest: { type: 'index', value: destination },
+        },
       });
       expect(response).toHaveStatusCode(201);
     }
@@ -104,7 +131,14 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
       headers,
       responseType: 'json',
     });
-    await esClient.indices.delete({ index: DEST }, { ignore: [404] });
+    await apiClient.delete(SPACE_RESOLUTION_AI_INDEX_PATH, { headers, responseType: 'json' });
+    await apiClient.delete(inOtherSpace(SPACE_RESOLUTION_AI_INDEX_PATH), {
+      headers,
+      responseType: 'json',
+    });
+    for (const index of [DEST, OTHER_SPACE_DEST]) {
+      await esClient.indices.delete({ index }, { ignore: [404] });
+    }
     await esClient.indices.deleteDataStream({ name: DATA_STREAM_DEST }, { ignore: [404] });
     await kbnClient.spaces.delete(OTHER_SPACE);
     if (previousMemoryEnabled === undefined) {
@@ -240,6 +274,45 @@ apiTest.describe('context engine memories API', { tag: tags.stateful.classic }, 
         }
       );
       expect(reviseResponse).toHaveStatusCode(200);
+    }
+  );
+
+  apiTest(
+    'uses the active space registration for every memory operation',
+    async ({ apiClient, esClient }) => {
+      const headers = { ...credentials.apiKeyHeader, ...testData.API_HEADERS };
+      const memoriesPath = inOtherSpace(SPACE_RESOLUTION_MEMORIES_PATH);
+      const createResponse = await apiClient.post(memoriesPath, {
+        headers,
+        responseType: 'json',
+        body: memoryBody({ title: 'Other-space memory' }),
+      });
+      expect(createResponse).toHaveStatusCode(201);
+
+      const { id } = createResponse.body;
+      const itemPath = `${memoriesPath}/${id}`;
+      const reviseResponse = await apiClient.patch(itemPath, {
+        headers,
+        responseType: 'json',
+        body: { title: 'Other-space memory revised' },
+      });
+      expect(reviseResponse).toHaveStatusCode(200);
+      const deleteResponse = await apiClient.delete(itemPath, {
+        headers,
+        responseType: 'json',
+      });
+      expect(deleteResponse).toHaveStatusCode(200);
+
+      const stored = await esClient.get({ index: OTHER_SPACE_DEST, id });
+      expect(stored._source).toMatchObject({
+        title: 'Other-space memory revised',
+        governance: { lifecycle: { status: 'deleted' } },
+      });
+      const defaultDestination = await esClient.search({
+        index: DEST,
+        query: { ids: { values: [id] } },
+      });
+      expect(defaultDestination.hits.hits).toHaveLength(0);
     }
   );
 

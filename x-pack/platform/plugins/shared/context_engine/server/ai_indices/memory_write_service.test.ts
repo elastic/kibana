@@ -85,6 +85,14 @@ describe('AiIndexMemoryWriteService', () => {
     generateRevisionId: () => 'revision-id',
     getCurrentDate: () => new Date('2026-09-24T12:00:00.000Z'),
   });
+  const expectSuccessfulAudit = (action: string, message: string) =>
+    expect(auditLogger.log).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message,
+        event: expect.objectContaining({ action, outcome: 'success' }),
+        kibana: { saved_object: { type: 'ai_index', id: 'support' } },
+      })
+    );
 
   const useDataStreamDestination = () =>
     aiIndexService.get.mockResolvedValue({
@@ -164,13 +172,9 @@ describe('AiIndexMemoryWriteService', () => {
       op_type: 'create',
       refresh: 'wait_for',
     });
-    expect(auditLogger.log).toHaveBeenCalledWith(
-      expect.objectContaining({
-        event: expect.objectContaining({
-          action: 'context_engine_memory_create',
-          outcome: 'success',
-        }),
-      })
+    expectSuccessfulAudit(
+      'context_engine_memory_create',
+      'User has created memory [id=logical-memory-id] in AI index [id=support]'
     );
   });
 
@@ -303,6 +307,10 @@ describe('AiIndexMemoryWriteService', () => {
         }),
       })
     );
+    expectSuccessfulAudit(
+      'context_engine_memory_revise',
+      'User has revised memory [id=memory-1] in AI index [id=support]'
+    );
   });
 
   it('preserves references when a revision does not supply replacements', async () => {
@@ -362,6 +370,22 @@ describe('AiIndexMemoryWriteService', () => {
 
     await reviseMemory();
 
+    expect(getIndexedDocument()).not.toHaveProperty('expires_at');
+  });
+
+  it('replaces or clears expiry when a revision supplies it', async () => {
+    mockCurrentMemory({
+      source: {
+        ...existingDocument,
+        expires_at: '2027-01-01T00:00:00.000Z',
+      },
+    });
+
+    await reviseMemory({ expiresAt: '2026-10-01T03:00:00+03:00' });
+    expect(getIndexedDocument().expires_at).toBe('2026-10-01T00:00:00.000Z');
+
+    index.mockClear();
+    await reviseMemory({ expiresAt: null });
     expect(getIndexedDocument()).not.toHaveProperty('expires_at');
   });
 
@@ -626,6 +650,10 @@ describe('AiIndexMemoryWriteService', () => {
       },
       refresh: 'wait_for',
     });
+    expectSuccessfulAudit(
+      'context_engine_memory_delete',
+      'User has deleted memory [id=memory-1] in AI index [id=support]'
+    );
   });
 
   it('appends a tombstone for a data-stream-backed Memory', async () => {

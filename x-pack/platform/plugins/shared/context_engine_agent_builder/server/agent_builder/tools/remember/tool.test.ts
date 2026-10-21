@@ -22,6 +22,11 @@ const assertContextEngineWriteAccessMock = jest.mocked(assertContextEngineWriteA
 describe('remember tool', () => {
   const createMemory = jest.fn();
   const reviseMemory = jest.fn();
+  const getMemoryWriteService = jest.fn(async () => ({
+    createMemory,
+    reviseMemory,
+    forgetMemory: jest.fn(),
+  }));
 
   const params = {
     aiIndexId: 'support',
@@ -33,11 +38,7 @@ describe('remember tool', () => {
 
   const createTool = () =>
     createRememberTool({
-      getMemoryWriteService: async () => ({
-        createMemory,
-        reviseMemory,
-        forgetMemory: jest.fn(),
-      }),
+      getMemoryWriteService,
       getCoreStart: async () => coreMock.createStart(),
       getSecurityStart: async () => undefined,
     });
@@ -62,7 +63,7 @@ describe('remember tool', () => {
     } as ToolHandlerContext;
   };
 
-  const run = async (
+  const runWithContext = async (
     input: Parameters<NonNullable<ReturnType<typeof createTool>['handler']>>[0] = params,
     conversationId?: string,
     callSource?: 'mcp'
@@ -71,8 +72,15 @@ describe('remember tool', () => {
     if (!handler) {
       throw new Error('Expected remember tool handler');
     }
-    return handler(input, createContext(conversationId, callSource));
+    const context = createContext(conversationId, callSource);
+    return { result: await handler(input, context), context };
   };
+
+  const run = async (
+    input: Parameters<NonNullable<ReturnType<typeof createTool>['handler']>>[0] = params,
+    conversationId?: string,
+    callSource?: 'mcp'
+  ) => (await runWithContext(input, conversationId, callSource)).result;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -123,12 +131,21 @@ describe('remember tool', () => {
   });
 
   it('adapts conversation metadata to a create request', async () => {
-    const result = await run(
+    const { result, context } = await runWithContext(
       { ...params, sessionId: 'ignored', expires_at: null },
       'conversation-1'
     );
 
-    expect(assertContextEngineWriteAccessMock).toHaveBeenCalled();
+    expect(assertContextEngineWriteAccessMock).toHaveBeenCalledWith({
+      request: context.request,
+      spaceId: 'space-1',
+      getCoreStart: expect.any(Function),
+      getSecurityStart: expect.any(Function),
+    });
+    expect(getMemoryWriteService).toHaveBeenCalledWith({
+      esClient: context.esClient.asCurrentUser,
+      request: context.request,
+    });
     expect(createMemory).toHaveBeenCalledWith({
       ...params,
       aiIndexId: 'support',

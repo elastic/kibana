@@ -191,13 +191,15 @@ describe('memory routes', () => {
       'PATCH',
       AI_INDEX_MEMORY_BY_ID_PATH,
       { aiIndexId: 'support', memoryId: 'memory-1' },
-      { title: 'Updated title' }
+      { title: 'Updated title', tags: [], expires_at: null }
     );
 
     expect(reviseMemory).toHaveBeenCalledWith({
       aiIndexId: 'support',
       id: 'memory-1',
       title: 'Updated title',
+      tags: [],
+      expiresAt: null,
       writer: { uri: MEMORY_API_PROVENANCE_SOURCE, metadata: {} },
     });
   });
