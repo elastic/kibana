@@ -19,6 +19,7 @@ import {
 } from './action_policy_ebt_event';
 
 const apiUserOrigin: RuleChangedEventOrigin = { actor: 'user', channel: 'api' };
+const SPACE_ID = 'space-1';
 
 const createActionPolicyResponse = (
   overrides: Partial<ActionPolicyResponse> = {}
@@ -62,8 +63,12 @@ describe('action policy change EBT events', () => {
   it('declares every payload field in the registered schema', () => {
     const [{ schema }] = actionPolicyChangeTelemetryEvents;
     const data = buildActionPolicyChangedEventData(
-      createActionPolicyResponse({ throttle: { strategy: 'every_time' } }),
-      apiUserOrigin
+      createActionPolicyResponse({
+        grouping: { mode: 'per_alert' },
+        throttle: { strategy: 'every_time' },
+      }),
+      apiUserOrigin,
+      SPACE_ID
     );
 
     expect(Object.keys(schema).sort()).toEqual(Object.keys(data).sort());
@@ -72,13 +77,15 @@ describe('action policy change EBT events', () => {
 
 describe('buildActionPolicyChangedEventData', () => {
   it('projects the policy fields and nests the origin', () => {
-    expect(buildActionPolicyChangedEventData(createActionPolicyResponse(), apiUserOrigin)).toEqual({
+    expect(
+      buildActionPolicyChangedEventData(createActionPolicyResponse(), apiUserOrigin, SPACE_ID)
+    ).toEqual({
       action_policy_id: 'policy-1',
+      space_id: SPACE_ID,
       created_at: '2025-01-01T00:00:00.000Z',
       enabled: true,
       destination_count: 1,
       matcher_type: 'none',
-      grouping_mode: 'per_alert',
       snoozed: false,
       origin: { actor: 'user', channel: 'api' },
     });
@@ -92,7 +99,8 @@ describe('buildActionPolicyChangedEventData', () => {
         throttle: { strategy: 'time_interval', interval: '1h' },
         snoozed_until: '2030-01-01T00:00:00.000Z',
       }),
-      { actor: 'internal', channel: 'ui', app: 'discover' }
+      { actor: 'internal', channel: 'ui', app: 'discover' },
+      SPACE_ID
     );
 
     expect(actionPolicyChangedTelemetryDataSchema.safeParse(data).success).toBe(true);
@@ -102,6 +110,8 @@ describe('buildActionPolicyChangedEventData', () => {
     ['no matcher', undefined, 'none'],
     ['tags only', { tags: ['prod'] }, 'tags'],
     ['expression only', { expression: 'severity: critical' }, 'expression'],
+    ['empty tags and a blank expression', { tags: [], expression: '   ' }, 'none'],
+    ['tags and a blank expression', { tags: ['prod'], expression: '   ' }, 'tags'],
     [
       'tags and expression',
       { tags: ['prod'], expression: 'severity: critical' },
@@ -110,16 +120,20 @@ describe('buildActionPolicyChangedEventData', () => {
   ])('derives matcher_type for %s', (_description, matcher, expected) => {
     const policy = createActionPolicyResponse({ matcher });
 
-    expect(buildActionPolicyChangedEventData(policy, apiUserOrigin).matcher_type).toBe(expected);
+    expect(buildActionPolicyChangedEventData(policy, apiUserOrigin, SPACE_ID).matcher_type).toBe(
+      expected
+    );
   });
 
-  it('reports grouping.mode and defaults to per_alert when no grouping is set', () => {
+  it('reports grouping_mode only when grouping is set', () => {
     const grouped = createActionPolicyResponse({ grouping: { mode: 'all' } });
 
-    expect(buildActionPolicyChangedEventData(grouped, apiUserOrigin).grouping_mode).toBe('all');
+    expect(buildActionPolicyChangedEventData(grouped, apiUserOrigin, SPACE_ID).grouping_mode).toBe(
+      'all'
+    );
     expect(
-      buildActionPolicyChangedEventData(createActionPolicyResponse(), apiUserOrigin).grouping_mode
-    ).toBe('per_alert');
+      buildActionPolicyChangedEventData(createActionPolicyResponse(), apiUserOrigin, SPACE_ID)
+    ).not.toHaveProperty('grouping_mode');
   });
 
   it('reports throttle_strategy only when a throttle is set', () => {
@@ -127,18 +141,18 @@ describe('buildActionPolicyChangedEventData', () => {
       throttle: { strategy: 'per_status_interval', interval: '5m' },
     });
 
-    expect(buildActionPolicyChangedEventData(throttled, apiUserOrigin).throttle_strategy).toBe(
-      'per_status_interval'
-    );
     expect(
-      buildActionPolicyChangedEventData(createActionPolicyResponse(), apiUserOrigin)
+      buildActionPolicyChangedEventData(throttled, apiUserOrigin, SPACE_ID).throttle_strategy
+    ).toBe('per_status_interval');
+    expect(
+      buildActionPolicyChangedEventData(createActionPolicyResponse(), apiUserOrigin, SPACE_ID)
     ).not.toHaveProperty('throttle_strategy');
   });
 
   it('reports snoozed when snoozed_until is present', () => {
     const snoozed = createActionPolicyResponse({ snoozed_until: '2030-01-01T00:00:00.000Z' });
 
-    expect(buildActionPolicyChangedEventData(snoozed, apiUserOrigin).snoozed).toBe(true);
+    expect(buildActionPolicyChangedEventData(snoozed, apiUserOrigin, SPACE_ID).snoozed).toBe(true);
   });
 
   it('counts the destinations', () => {
@@ -150,18 +164,23 @@ describe('buildActionPolicyChangedEventData', () => {
       ],
     });
 
-    expect(buildActionPolicyChangedEventData(policy, apiUserOrigin).destination_count).toBe(3);
+    expect(
+      buildActionPolicyChangedEventData(policy, apiUserOrigin, SPACE_ID).destination_count
+    ).toBe(3);
   });
 
   it('omits origin.app when it is empty and keeps it when set', () => {
     const policy = createActionPolicyResponse();
 
     expect(
-      buildActionPolicyChangedEventData(policy, { ...apiUserOrigin, app: '' }).origin
+      buildActionPolicyChangedEventData(policy, { ...apiUserOrigin, app: '' }, SPACE_ID).origin
     ).not.toHaveProperty('app');
     expect(
-      buildActionPolicyChangedEventData(policy, { actor: 'user', channel: 'ui', app: 'discover' })
-        .origin
+      buildActionPolicyChangedEventData(
+        policy,
+        { actor: 'user', channel: 'ui', app: 'discover' },
+        SPACE_ID
+      ).origin
     ).toEqual({ actor: 'user', channel: 'ui', app: 'discover' });
   });
 
@@ -170,7 +189,9 @@ describe('buildActionPolicyChangedEventData', () => {
       matcher: { tags: ['secret-tag'], expression: 'secret: expression' },
       grouping: { mode: 'per_field', fields: ['secret.field'] },
     });
-    const serialized = JSON.stringify(buildActionPolicyChangedEventData(policy, apiUserOrigin));
+    const serialized = JSON.stringify(
+      buildActionPolicyChangedEventData(policy, apiUserOrigin, SPACE_ID)
+    );
 
     for (const value of [
       'Sensitive policy name',

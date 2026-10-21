@@ -65,6 +65,7 @@ apiTest.describe(
       });
       expect(event.properties).toMatchObject({
         action_policy_id: response.body.id,
+        space_id: 'default',
         enabled: true,
         destination_count: body.destinations.length,
         snoozed: false,

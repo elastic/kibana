@@ -63,6 +63,11 @@ export const actionPolicyChangedTelemetryDataSchema = lazySchema(() =>
       .min(1)
       .max(ID_MAX_LENGTH)
       .describe('The id of the action policy that was changed.'),
+    space_id: z
+      .string()
+      .min(1)
+      .max(ID_MAX_LENGTH)
+      .describe('The space the action policy belongs to.'),
     created_at: isoDateTime().describe('ISO timestamp of when the action policy was created.'),
     enabled: z
       .boolean()
@@ -77,9 +82,11 @@ export const actionPolicyChangedTelemetryDataSchema = lazySchema(() =>
     matcher_type: actionPolicyEbtMatcherTypeTelemetrySchema.describe(
       'How the action policy selects alerts: no matcher, routing tags, a KQL expression, or tags and expression.'
     ),
-    grouping_mode: groupingModeSchema.describe(
-      'How matched alerts are batched into notifications. `per_alert` when no grouping is set.'
-    ),
+    grouping_mode: groupingModeSchema
+      .optional()
+      .describe(
+        'How matched alerts are batched into notifications, when the policy sets grouping.'
+      ),
     throttle_strategy: throttleStrategySchema
       .optional()
       .describe('The throttle strategy, when the action policy has a throttle.'),

@@ -62,6 +62,7 @@ import {
 } from '../telemetry/action_policy_ebt_event';
 import { resolveRuleEventOrigin } from '../event_origin/rule_event_origin';
 import { buildSoSearch } from '../build_so_search';
+import { savedObjectNamespacesToSpaceId } from '../space_id_to_namespace';
 import { applyPatch } from '../apply_patch';
 import { buildActionPolicySoFilter } from './build_action_policy_filter';
 import { groupRoutingTags } from './group_routing_tags';
@@ -189,9 +190,13 @@ export class ActionPolicyClient {
 
     const origin = { actor: this.actor, ...resolveRuleEventOrigin(this.request) };
     const eventType = ACTION_POLICY_EBT_EVENT_TYPE_BY_OPERATION[operation];
+    const spaceId = savedObjectNamespacesToSpaceId(this.namespace ? [this.namespace] : undefined);
 
     for (const policy of policies) {
-      this.ebtService.reportEvent(eventType, buildActionPolicyChangedEventData(policy, origin));
+      this.ebtService.reportEvent(
+        eventType,
+        buildActionPolicyChangedEventData(policy, origin, spaceId)
+      );
     }
   }
 

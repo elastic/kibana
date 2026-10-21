@@ -3556,6 +3556,7 @@ describe('ActionPolicyClient', () => {
 
     const reportedPayload = (id: string, overrides: Record<string, unknown> = {}) => ({
       action_policy_id: id,
+      space_id: 'default',
       created_at: '2024-12-01T00:00:00.000Z',
       enabled: true,
       destination_count: 2,
@@ -3599,11 +3600,11 @@ describe('ActionPolicyClient', () => {
       expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
       expect(ebtService.reportEvent).toHaveBeenCalledWith('alerting_v2_action_policy_created', {
         action_policy_id: 'policy-created',
+        space_id: 'default',
         created_at: '2025-01-01T00:00:00.000Z',
         enabled: true,
         destination_count: 1,
         matcher_type: 'none',
-        grouping_mode: 'per_alert',
         snoozed: false,
         origin: apiOrigin,
       });
@@ -3644,11 +3645,11 @@ describe('ActionPolicyClient', () => {
       expect(ebtService.reportEvent).toHaveBeenCalledTimes(1);
       expect(ebtService.reportEvent).toHaveBeenCalledWith('alerting_v2_action_policy_updated', {
         action_policy_id: 'policy-updated',
+        space_id: 'default',
         created_at: '2024-12-01T00:00:00.000Z',
         enabled: true,
         destination_count: 2,
         matcher_type: 'tags_and_expression',
-        grouping_mode: 'per_alert',
         snoozed: false,
         origin: apiOrigin,
       });
@@ -4039,6 +4040,39 @@ describe('ActionPolicyClient', () => {
         expect(ebtService.reportEvent).toHaveBeenCalledWith(
           'alerting_v2_action_policy_created',
           expect.objectContaining({ origin: { actor: 'internal', channel: 'api' } })
+        );
+      });
+    });
+
+    describe('space', () => {
+      const createInNamespace = (namespace: string | undefined) =>
+        new ActionPolicyClient(
+          actionPolicySavedObjectService,
+          userService,
+          apiKeyService,
+          mockEsoClient as any,
+          namespace,
+          licenseService,
+          loggerService,
+          httpServerMock.createKibanaRequest(),
+          'user',
+          ebtService
+        );
+
+      const createData = {
+        name: 'my-policy',
+        destinations: [{ type: 'workflow' as const, id: 'my-workflow' }],
+      };
+
+      it.each([
+        ['the default space', undefined, 'default'],
+        ['a custom space', 'space-a', 'space-a'],
+      ])('reports the space id for %s', async (_description, namespace, expectedSpaceId) => {
+        await createInNamespace(namespace).createActionPolicy({ data: createData });
+
+        expect(ebtService.reportEvent).toHaveBeenCalledWith(
+          'alerting_v2_action_policy_created',
+          expect.objectContaining({ space_id: expectedSpaceId })
         );
       });
     });

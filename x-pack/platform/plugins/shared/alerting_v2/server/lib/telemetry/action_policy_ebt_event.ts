@@ -7,6 +7,7 @@
 
 import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import type { EventTypeOpts } from '@kbn/core/server';
+import { PolicyMatcher } from '../dispatcher/state';
 import type { RuleChangedEventOrigin } from '../event_origin/origin_schemas';
 import {
   ACTION_POLICY_CREATED_EBT_EVENT_TYPE,
@@ -48,6 +49,13 @@ const actionPolicyChangedEventSchema: EventTypeOpts<ActionPolicyChangedEbtData>[
       optional: false,
     },
   },
+  space_id: {
+    type: 'keyword',
+    _meta: {
+      description: 'The space the action policy belongs to.',
+      optional: false,
+    },
+  },
   created_at: {
     type: 'date',
     _meta: {
@@ -82,8 +90,8 @@ const actionPolicyChangedEventSchema: EventTypeOpts<ActionPolicyChangedEbtData>[
     type: 'keyword',
     _meta: {
       description:
-        'How matched alerts are batched into notifications: `per_alert`, `all` or `per_field`. `per_alert` when no grouping is set.',
-      optional: false,
+        'How matched alerts are batched into notifications: `per_alert`, `all` or `per_field`, when the policy sets grouping.',
+      optional: true,
     },
   },
   throttle_strategy: {
@@ -111,8 +119,9 @@ export const actionPolicyChangeTelemetryEvents: Array<EventTypeOpts<ActionPolicy
   }));
 
 const getMatcherType = ({ matcher }: ActionPolicyResponse): ActionPolicyEbtMatcherType => {
-  const hasTags = Boolean(matcher?.tags?.length);
-  const hasExpression = Boolean(matcher?.expression);
+  const policyMatcher = PolicyMatcher.of(matcher);
+  const hasTags = policyMatcher.hasTags();
+  const hasExpression = policyMatcher.expressionKql() !== null;
 
   if (hasTags && hasExpression) {
     return 'tags_and_expression';
@@ -127,17 +136,19 @@ const getMatcherType = ({ matcher }: ActionPolicyResponse): ActionPolicyEbtMatch
 };
 
 const buildActionPolicyFields = (
-  policy: ActionPolicyResponse
+  policy: ActionPolicyResponse,
+  spaceId: string
 ): Omit<ActionPolicyChangedEbtData, 'origin'> => {
   const { id, created_at: createdAt, enabled, destinations, grouping, throttle } = policy;
 
   return {
     action_policy_id: id,
+    space_id: spaceId,
     created_at: createdAt,
     enabled,
     destination_count: destinations.length,
     matcher_type: getMatcherType(policy),
-    grouping_mode: grouping?.mode ?? 'per_alert',
+    ...(grouping ? { grouping_mode: grouping.mode } : {}),
     ...(throttle ? { throttle_strategy: throttle.strategy } : {}),
     snoozed: Boolean(policy.snoozed_until),
   };
@@ -149,8 +160,9 @@ const buildActionPolicyFields = (
  */
 export const buildActionPolicyChangedEventData = (
   policy: ActionPolicyResponse,
-  origin: RuleChangedEventOrigin
+  origin: RuleChangedEventOrigin,
+  spaceId: string
 ): ActionPolicyChangedEbtData => ({
-  ...buildActionPolicyFields(policy),
+  ...buildActionPolicyFields(policy, spaceId),
   origin: toEventOrigin(origin),
 });

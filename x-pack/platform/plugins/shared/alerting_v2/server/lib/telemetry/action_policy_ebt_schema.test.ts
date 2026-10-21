@@ -13,6 +13,7 @@ import {
 
 const validPayload = {
   action_policy_id: 'policy-1',
+  space_id: 'default',
   created_at: '2025-01-01T00:00:00.000Z',
   enabled: true,
   destination_count: 2,
@@ -40,8 +41,8 @@ describe('actionPolicyChangedTelemetryDataSchema', () => {
     expect(actionPolicyChangedTelemetryDataSchema.parse(validPayload)).toEqual(validPayload);
   });
 
-  it('accepts a payload without throttle_strategy and origin.app', () => {
-    const { throttle_strategy: _throttle, ...rest } = validPayload;
+  it('accepts a payload without grouping_mode, throttle_strategy and origin.app', () => {
+    const { grouping_mode: _grouping, throttle_strategy: _throttle, ...rest } = validPayload;
 
     expect(
       actionPolicyChangedTelemetryDataSchema.safeParse({
@@ -57,6 +58,7 @@ describe('actionPolicyChangedTelemetryDataSchema', () => {
     ['a negative destination_count', { destination_count: -1 }],
     ['a non-integer destination_count', { destination_count: 1.5 }],
     ['an empty action_policy_id', { action_policy_id: '' }],
+    ['an empty space_id', { space_id: '' }],
     ['an unknown channel', { origin: { actor: 'user', channel: 'cli' } }],
   ])('rejects %s', (_description, overrides) => {
     expect(
