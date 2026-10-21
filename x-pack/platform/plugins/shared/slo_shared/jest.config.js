@@ -8,7 +8,7 @@
 const path = require('path');
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test-jest',
   rootDir: path.resolve(__dirname, '../../../../..'),
   roots: ['<rootDir>/x-pack/platform/plugins/shared/slo_shared'],
 };

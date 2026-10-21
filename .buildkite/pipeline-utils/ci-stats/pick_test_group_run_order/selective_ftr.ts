@@ -26,6 +26,7 @@ export const FTR_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
 
   // Jest
   '@kbn/test-eui-helpers',
+  '@kbn/test-jest',
   '@kbn/jest-serializers',
 
   // Cypress

@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test-jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/search/plugins/serverless_search'],
   coverageDirectory:

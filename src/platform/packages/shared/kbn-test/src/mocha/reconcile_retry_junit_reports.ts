@@ -14,7 +14,7 @@ import xml2js from 'xml2js';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import { getJunitReportPath } from '../report_path';
+import { getJunitReportPath } from '@kbn/test-reporting';
 
 const readAsync = promisify(Fs.readFile);
 const writeAsync = promisify(Fs.writeFile);

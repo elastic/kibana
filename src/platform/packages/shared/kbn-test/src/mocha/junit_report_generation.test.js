@@ -15,7 +15,7 @@ import { parseString } from 'xml2js';
 import del from 'del';
 import Mocha from 'mocha';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
-import { getUniqueJunitReportPath } from '../report_path';
+import { getUniqueJunitReportPath } from '@kbn/test-reporting';
 
 import { setupJUnitReportGeneration } from './junit_report_generation';
 

@@ -22,6 +22,11 @@ jest.mock('./jest_configs.ts', () => ({ SHARD_ANNOTATION_SEP: '||shard=' }));
 import type { SelectiveTestingContext } from './selective_testing.ts';
 import { getAffectedPackages } from '../../affected-packages/index.ts';
 import {
+  CRITICAL_FILES_JEST_INTEGRATION_TESTS as actualIntegrationCriticalFiles,
+  CRITICAL_FILES_JEST_UNIT_TESTS as actualUnitCriticalFiles,
+} from '../../affected-packages/const.ts';
+import { createScopeMatcher } from '../../affected-packages/utils.ts';
+import {
   filterJestIntegrationConfigsByAffected,
   filterJestUnitConfigsByAffected,
   resolveSelectiveTestingContext,
@@ -33,6 +38,21 @@ const context = (
 ): SelectiveTestingContext => ({
   affectedPackages: new Set(affected),
   changedFiles: changed,
+});
+
+describe('Jest framework paths', () => {
+  it('reruns Jest for Jest framework and shared reporting changes, but not FTR changes', () => {
+    for (const criticalFiles of [actualUnitCriticalFiles, actualIntegrationCriticalFiles]) {
+      const isCritical = createScopeMatcher(criticalFiles);
+      expect(isCritical('src/platform/packages/shared/kbn-test-jest/src/jest/run.ts')).toBe(true);
+      expect(isCritical('src/platform/packages/shared/kbn-test-reporting/src/xml.ts')).toBe(true);
+      expect(
+        isCritical(
+          'src/platform/packages/shared/kbn-test/src/functional_tests/run_tests/run_tests.ts'
+        )
+      ).toBe(false);
+    }
+  });
 });
 
 describe('filterJestIntegrationConfigsByAffected', () => {

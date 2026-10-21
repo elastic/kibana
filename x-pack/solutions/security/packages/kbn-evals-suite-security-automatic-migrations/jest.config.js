@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test-jest',
   rootDir: '../../../../..',
   roots: [
     '<rootDir>/x-pack/solutions/security/packages/kbn-evals-suite-security-automatic-migrations/src',

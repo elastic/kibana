@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test-jest',
   roots: ['<rootDir>/x-pack/solutions/security/packages/kbn-cloud-security-posture/graph'],
   rootDir: '../../../../../..',
   setupFiles: ['jest-canvas-mock'],

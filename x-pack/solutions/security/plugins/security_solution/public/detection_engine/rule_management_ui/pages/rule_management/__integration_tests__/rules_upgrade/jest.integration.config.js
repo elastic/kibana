@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_integration',
+  preset: '@kbn/test-jest/jest_integration',
   rootDir: '../../../../../../../../../../../..',
   modulePathIgnorePatterns: ['upgrade_rule_after_preview'],
   roots: [

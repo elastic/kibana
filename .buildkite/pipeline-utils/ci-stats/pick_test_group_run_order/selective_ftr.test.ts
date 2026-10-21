@@ -122,6 +122,19 @@ describe('shouldSkipFtrTests', () => {
     ).toBe(true);
   });
 
+  it('skips FTR for Jest framework changes but keeps shared reporting changes', () => {
+    expect(
+      shouldSkipFtrTests(new Set(['@kbn/test-jest']), [
+        'src/platform/packages/shared/kbn-test-jest/src/jest/run.ts',
+      ])
+    ).toBe(true);
+    expect(
+      shouldSkipFtrTests(new Set(['@kbn/test-reporting']), [
+        'src/platform/packages/shared/kbn-test-reporting/src/xml.ts',
+      ])
+    ).toBe(false);
+  });
+
   it('returns true for dependency ownership and Renovate changes', () => {
     expect(
       shouldSkipFtrTests(new Set(['@kbn/dependency-ownership']), [

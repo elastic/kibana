@@ -99,5 +99,7 @@ export default defineConfig<OxlintConfig>({
   ignorePatterns: [
     'x-pack/solutions/security/test/security_solution_cypress/cypress/support/index.d.ts',
     'src/platform/packages/shared/kbn-flot-charts/lib/**',
+    // Negative runner fixtures deliberately contain invalid imports and are never lint targets.
+    'src/platform/packages/shared/kbn-test-jest/src/jest/negative/__fixtures__/**',
   ],
 });

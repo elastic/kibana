@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test-jest',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/src/platform/packages/shared/controls/control-group-renderer'],
   setupFiles: ['<rootDir>/src/platform/plugins/shared/controls/jest_setup.ts'],

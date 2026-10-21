@@ -23,6 +23,8 @@ export const SCOUT_EXCLUDED_MODULES: ReadonlySet<string> = new Set([
   // Jest test helpers
   '@kbn/test-eui-helpers',
   '@kbn/test-jest-helpers',
+  '@kbn/test-jest',
+  '@kbn/test-reporting',
 
   // FTR services & helpers
   '@kbn/ftr-common-functional-services',

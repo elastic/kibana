@@ -20,6 +20,7 @@
     "@kbn/core",
     "@kbn/screenshotting-plugin",
     "@kbn/test",
+    "@kbn/test-jest",
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",

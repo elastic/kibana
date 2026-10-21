@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/test-jest',
   rootDir: '../../../../../',
   roots: ['<rootDir>/src/core/packages/custom-branding/browser-internal'],
 };

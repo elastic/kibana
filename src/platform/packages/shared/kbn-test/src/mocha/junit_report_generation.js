@@ -15,11 +15,9 @@ import { inspect } from 'util';
 
 import xmlBuilder from 'xmlbuilder';
 import { ToolingLog } from '@kbn/tooling-log';
-import { getUniqueJunitReportPath } from '../report_path';
+import { escapeCdata, getUniqueJunitReportPath, prettifyCommandLine } from '@kbn/test-reporting';
 
 import { getSnapshotOfRunnableLogs } from './log_cache';
-import { escapeCdata } from '../..';
-import { prettifyCommandLine } from '../prettify_command_line';
 import { isMochaTimeoutError } from './mocha_timeout';
 
 const dateNow = Date.now.bind(Date);
