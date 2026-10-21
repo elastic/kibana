@@ -200,6 +200,12 @@ describe('reinforcePath and penalizePath', () => {
     ).toBe(true);
   });
 
+  it('rejects a bad weight even on an empty path', () => {
+    expect(() => reinforcePath({ tree: TREE, path: [], weight: 0, now: T1 })).toThrow(
+      /positive number/
+    );
+  });
+
   it.each([0, -1, Number.NaN, Number.POSITIVE_INFINITY])('rejects weight %p', (weight) => {
     expect(() => reinforcePath({ tree: TREE, path: MAIN_PATH, weight, now: T1 })).toThrow(
       /positive number/
@@ -337,17 +343,128 @@ describe('carryCounts', () => {
     expect(edgeCount(counts, 'D1', 'E2', 'pool exhausted')).toMatchObject({ visit_count: 0 });
   });
 
-  it('clamps a summed reinforcement at 0', () => {
-    const counts = carryCounts({
-      previousTree: TREE,
-      previousCounts: {
-        nodes: [{ node_id: 'S1', visit_count: 0, reinforced_count: -2 }],
-        edges: [],
-      },
-      nextTree: TREE,
+  describe('folding edges that no longer match exactly', () => {
+    const PARALLEL = parseMermaidDecisionTree(
+      `flowchart TD
+        S1([Symptom]) --> D1{{Pool exhausted?}}
+        D1 -->|yes| E1[Check deploys]
+        D1 -->|no| E1
+        E1 --> X1((Root cause))`,
+      TREE.tree_id
+    );
+    const visitedBoth = recordVisit({
+      tree: PARALLEL,
+      counts: recordVisit({
+        tree: PARALLEL,
+        path: [{ source_node_id: 'D1', target_node_id: 'E1', condition: 'yes' }],
+        now: T1,
+      }),
+      path: [{ source_node_id: 'D1', target_node_id: 'E1', condition: 'no' }],
+      now: T2,
     });
 
-    expect(nodeCount(counts, 'S1')).toMatchObject({ reinforced_count: 0 });
+    it('sums parallel edges the agent collapsed into one new edge', () => {
+      const nextTree = parseMermaidDecisionTree(
+        `flowchart TD
+          S1([Symptom]) --> D1{{Pool exhausted?}}
+          D1 --> E1[Check deploys]
+          E1 --> X1((Root cause))`,
+        TREE.tree_id
+      );
+
+      const counts = carryCounts({ previousTree: PARALLEL, previousCounts: visitedBoth, nextTree });
+
+      expect(edgeCount(counts, 'D1', 'E1')).toMatchObject({
+        visit_count: 2,
+        last_visited_at: T2,
+      });
+    });
+
+    it('drops a deleted parallel edge rather than adding it to the edge that stayed', () => {
+      const nextTree = parseMermaidDecisionTree(
+        `flowchart TD
+          S1([Symptom]) --> D1{{Pool exhausted?}}
+          D1 -->|yes| E1[Check deploys]
+          E1 --> X1((Root cause))`,
+        TREE.tree_id
+      );
+
+      const counts = carryCounts({ previousTree: PARALLEL, previousCounts: visitedBoth, nextTree });
+
+      expect(edgeCount(counts, 'D1', 'E1', 'yes')).toMatchObject({ visit_count: 1 });
+    });
+
+    it.each([
+      ['keeps one of the labels', 'a'],
+      ['relabels the merged edge', 'a or b'],
+    ])('sums differently-labelled edges a node merge collapsed when the agent %s', (_, label) => {
+      const previousTree = parseMermaidDecisionTree(
+        `flowchart TD
+          S1([Symptom]) -->|a| E1[Query logs]
+          S1 -->|b| E2[Search logs]
+          E1 --> X1((Root cause))
+          E2 --> X1`,
+        TREE.tree_id
+      );
+      const previousCounts = recordVisit({
+        tree: previousTree,
+        counts: recordVisit({
+          tree: previousTree,
+          path: [{ source_node_id: 'S1', target_node_id: 'E1' }],
+          now: T1,
+        }),
+        path: [{ source_node_id: 'S1', target_node_id: 'E2' }],
+        now: T2,
+      });
+      const nextTree = parseMermaidDecisionTree(
+        `flowchart TD
+          S1([Symptom]) -->|${label}| E1[Query logs]
+          E1 --> X1((Root cause))`,
+        TREE.tree_id
+      );
+
+      const counts = carryCounts({
+        previousTree,
+        previousCounts,
+        nextTree,
+        merges: [{ from: ['E2'], into: 'E1' }],
+      });
+
+      expect(edgeCount(counts, 'S1', 'E1', label)).toMatchObject({ visit_count: 2 });
+    });
+  });
+
+  it('clamps the reinforcement summed by a merge at 0', () => {
+    const previousTree = parseMermaidDecisionTree(
+      `flowchart TD
+        S1([Symptom]) --> E1[Query logs]
+        S1 --> E2[Search logs]
+        E1 --> X1((Root cause))
+        E2 --> X1`,
+      TREE.tree_id
+    );
+    const nextTree = parseMermaidDecisionTree(
+      `flowchart TD
+        S1([Symptom]) --> E1[Query logs]
+        E1 --> X1((Root cause))`,
+      TREE.tree_id
+    );
+
+    // Stored counts written before clamping existed can be negative; merging must not keep that.
+    const counts = carryCounts({
+      previousTree,
+      previousCounts: {
+        nodes: [
+          { node_id: 'E1', visit_count: 1, reinforced_count: 1 },
+          { node_id: 'E2', visit_count: 1, reinforced_count: -3 },
+        ],
+        edges: [],
+      },
+      nextTree,
+      merges: [{ from: ['E2'], into: 'E1' }],
+    });
+
+    expect(nodeCount(counts, 'E1')).toMatchObject({ visit_count: 2, reinforced_count: 0 });
   });
 
   describe('rejects merges that would miscount', () => {
