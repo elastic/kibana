@@ -34,7 +34,8 @@ interface WaitForRunsParams {
   spaceId?: string;
 }
 
-interface WaitForTaskDrainedParams {
+/** Shared shape for lookups keyed by the rule's executor task (`taskType:spaceId:ruleId`). */
+interface RuleTaskParams {
   ruleId: string;
   spaceId?: string;
 }
@@ -87,6 +88,9 @@ interface WaitForReportedRunParams extends FindReportedRunsParams {
  *   - `waitForTaskDrained` — polls `.kibana_task_manager` until the executor
  *     task is no longer in `claiming`/`running` status (or until the document
  *     is gone, e.g. after rule delete).
+ *   - `waitForTaskScheduled` / `waitForTaskRemoved` — poll `.kibana_task_manager`
+ *     until the executor task document exists / no longer exists, so tests can
+ *     assert the real scheduling side effect, not just the stored `enabled` flag.
  *   - `findReportedRuns` / `waitForReportedRun` — read what those runs
  *     reported about themselves.
  *
@@ -95,7 +99,9 @@ interface WaitForReportedRunParams extends FindReportedRunsParams {
  */
 export interface RuleExecutionsApiService {
   waitForRuns: (params: WaitForRunsParams) => Promise<void>;
-  waitForTaskDrained: (params: WaitForTaskDrainedParams) => Promise<void>;
+  waitForTaskDrained: (params: RuleTaskParams) => Promise<void>;
+  waitForTaskScheduled: (params: RuleTaskParams) => Promise<void>;
+  waitForTaskRemoved: (params: RuleTaskParams) => Promise<void>;
   /** Every run's `kibana.task.data`, oldest first. */
   findReportedRuns: (params: FindReportedRunsParams) => Promise<ReportedRun[]>;
   /**
@@ -122,11 +128,10 @@ export const getRuleExecutionsApiService = ({
   esClient: EsClient;
 }): RuleExecutionsApiService => {
   /**
-   * Returns `true` when the executor task is not currently being executed:
-   * either the task document is absent (after delete), or its `task.status`
-   * is not in `claiming`/`running`.
+   * The executor task's `task.status`, or `undefined` when the task document
+   * does not exist (e.g. not yet scheduled, or removed on disable/delete).
    */
-  const isExecutorTaskDrained = async (taskId: string): Promise<boolean> => {
+  const getExecutorTaskStatus = async (taskId: string): Promise<string | undefined> => {
     const result = await esClient.search<{ task: { status: string } }>({
       index: TASK_MANAGER_INDEX,
       query: { term: { _id: `task:${taskId}` } },
@@ -134,12 +139,21 @@ export const getRuleExecutionsApiService = ({
       _source: ['task.status'],
     });
 
-    const hit = result.hits.hits[0];
-    if (!hit) return true;
+    return result.hits.hits[0]?._source?.task?.status;
+  };
 
-    const status = hit._source?.task?.status;
+  /**
+   * `true` when the executor task is not currently being executed: either
+   * the task document is absent (after delete), or its `task.status` is not
+   * in `claiming`/`running`.
+   */
+  const isExecutorTaskDrained = async (taskId: string): Promise<boolean> => {
+    const status = await getExecutorTaskStatus(taskId);
     return !status || !RUNNING_TASK_STATUSES.includes(status);
   };
+
+  const executorTaskExists = async (taskId: string): Promise<boolean> =>
+    (await getExecutorTaskStatus(taskId)) !== undefined;
 
   const findReportedRuns: RuleExecutionsApiService['findReportedRuns'] = ({
     ruleId,
@@ -196,6 +210,30 @@ export const getRuleExecutionsApiService = ({
             intervals: [POLL_INTERVAL_MS],
           })
           .toBe(true);
+      }),
+
+    waitForTaskScheduled: ({ ruleId, spaceId = DEFAULT_SPACE_ID }) =>
+      measurePerformanceAsync(log, 'ruleExecutions.waitForTaskScheduled', async () => {
+        const taskId = buildExecutorTaskId(ruleId, spaceId);
+
+        await expect
+          .poll(() => executorTaskExists(taskId), {
+            timeout: POLL_TIMEOUT_MS,
+            intervals: [POLL_INTERVAL_MS],
+          })
+          .toBe(true);
+      }),
+
+    waitForTaskRemoved: ({ ruleId, spaceId = DEFAULT_SPACE_ID }) =>
+      measurePerformanceAsync(log, 'ruleExecutions.waitForTaskRemoved', async () => {
+        const taskId = buildExecutorTaskId(ruleId, spaceId);
+
+        await expect
+          .poll(() => executorTaskExists(taskId), {
+            timeout: POLL_TIMEOUT_MS,
+            intervals: [POLL_INTERVAL_MS],
+          })
+          .toBe(false);
       }),
   };
 };

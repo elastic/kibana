@@ -132,6 +132,7 @@ export interface DocLinks {
     readonly connectorsConfluence: string;
     readonly connectorsContentExtraction: string;
     readonly connectorsDropbox: string;
+    readonly connectorsExchangeServer: string;
     readonly connectorsGithub: string;
     readonly connectorsGitlab: string;
     readonly connectorsGoogleCloudStorage: string;
@@ -503,7 +504,13 @@ export interface DocLinks {
     guide: string;
     actionTypes: string;
     actionPolicies: string;
+    manageActionPolicies: string;
     compareAlertingSystems: string;
+    viewManageRules: string;
+    viewAndManageAlerts: string;
+    investigateAlertEpisodes: string;
+    reviewRuleExecutionHistory: string;
+    reviewActionPolicyExecutionHistory: string;
     apmRulesErrorCount: string;
     apmRulesTransactionDuration: string;
     apmRulesTransactionError: string;
@@ -816,9 +823,11 @@ export interface DocLinks {
   };
   readonly subscriptions: string;
   readonly cases: {
+    readonly overview: string;
     readonly casesPermissions: string;
     readonly configureCaseSettings: string;
     readonly manageCaseTemplates: string;
+    readonly createCases: string;
   };
 }
 

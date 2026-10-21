@@ -54,16 +54,15 @@ describe('discoverFeatureFlags', () => {
       of(
         flagName === CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY
           ? false
-          : flagName === IS_ESQL_DEFAULT_FEATURE_FLAG_KEY
-          ? false
-          : flagName === KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY
+          : flagName === IS_ESQL_DEFAULT_FEATURE_FLAG_KEY ||
+            flagName === KBN_DATA_GRID_ENABLED_FEATURE_FLAG_KEY
           ? true
           : fallback
       )
     );
 
     expect(services.discoverFeatureFlags.getCascadeLayoutEnabled()).toBe(false);
-    expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(false);
+    expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(true);
     expect(services.discoverFeatureFlags.getKbnDataGridEnabled()).toBe(true);
   });
 
@@ -75,6 +74,6 @@ describe('discoverFeatureFlags', () => {
         })
     );
 
-    expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(false);
+    expect(services.discoverFeatureFlags.getIsEsqlDefault()).toBe(true);
   });
 });

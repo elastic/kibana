@@ -19,6 +19,22 @@ const getBodyMessage = (body: unknown): string | undefined => {
   return typeof body.message === 'string' ? body.message : undefined;
 };
 
+// The workflow engine reports a failed Kibana API step as `HTTP <status>: <response body>`.
+const WORKFLOW_HTTP_FAILURE_REGEX = /^HTTP \d{3}: (.+)$/s;
+
+/** Returns the API's own message from a workflow failure, or the failure as reported. */
+export const getWorkflowFailureMessage = (failure: string): string => {
+  const [, body] = failure.match(WORKFLOW_HTTP_FAILURE_REGEX) ?? [];
+  if (body === undefined) {
+    return failure;
+  }
+  try {
+    return getBodyMessage(JSON.parse(body)) ?? failure;
+  } catch {
+    return failure;
+  }
+};
+
 export const getFormattedError = (error: unknown): Error => {
   if (isRecord(error) && 'body' in error) {
     const message = getBodyMessage(error.body);
