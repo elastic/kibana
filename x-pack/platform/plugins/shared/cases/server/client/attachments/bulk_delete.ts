@@ -286,7 +286,7 @@ export const deleteByAttachmentIds = async (
       caseId,
       owner: caseOwner,
       attachmentType: type,
-      attachmentIds: deleted.map(({ id }) => id),
+      ids: deleted.map(({ id }) => id),
       removedAttributes,
     });
   };

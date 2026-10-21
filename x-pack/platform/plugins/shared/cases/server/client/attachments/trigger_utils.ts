@@ -40,7 +40,7 @@ interface AttachmentsDeletedEventArgs {
   owner: string;
   attachmentType: string;
   /** The deleted attachments. */
-  attachmentIds: string[];
+  ids: string[];
   /** The removed fields, read for the alert/event IDs; can include ids removed from kept attachments. */
   removedAttributes: AttachmentAttributesV2[];
 }
@@ -50,14 +50,14 @@ interface AttachmentsDeletedEventArgs {
  */
 export function emitAttachmentsDeletedEvent(
   clientArgs: CasesClientArgs,
-  { caseId, owner, attachmentType, attachmentIds, removedAttributes }: AttachmentsDeletedEventArgs
+  { caseId, owner, attachmentType, ids, removedAttributes }: AttachmentsDeletedEventArgs
 ): void {
   const alerts = toIdsAndIndices(getAlertInfoFromComments(removedAttributes));
   const events = toIdsAndIndices(getEventInfoFromComments(removedAttributes));
 
   clientArgs.casesEventBus?.emitAttachmentsDeleted(clientArgs.request, {
     caseId,
-    attachmentIds,
+    ids,
     attachmentType,
     owner: owner as Owner,
     ...(alerts.ids.length > 0 ? { alertIds: alerts.ids, alertIndices: alerts.indices } : {}),

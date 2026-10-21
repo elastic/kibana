@@ -132,6 +132,15 @@ describe('bulk_delete', () => {
         })
       );
       expect(creator.bulkCreateAttachmentDeletion).not.toHaveBeenCalled();
+      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
+        clientArgs.request,
+        {
+          caseId: 'mock-id-1',
+          ids: ['mock-comment-1', 'mock-comment-2'],
+          attachmentType: 'user',
+          owner: 'securitySolution',
+        }
+      );
     });
 
     it('counts every referenced id and passes each deleted attachment for the audit log', async () => {
@@ -143,16 +152,6 @@ describe('bulk_delete', () => {
       await bulkDeleteAttachments(
         { caseId: 'mock-id-1', savedObjectIds: ['attachment-1', 'mock-comment-1'] },
         clientArgs
-      );
-
-      expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
-        clientArgs.request,
-        {
-          caseId: 'mock-id-1',
-          ids: ['mock-comment-1', 'mock-comment-2'],
-          attachmentType: 'user',
-          owner: 'securitySolution',
-        }
       );
 
       expect(
@@ -344,7 +343,7 @@ describe('bulk_delete', () => {
             caseId,
             owner: mockCases[0].attributes.owner,
             attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE,
-            attachmentIds: ['attachment-1'],
+            ids: ['attachment-1'],
             alertIds: ['alert-1', 'alert-2'],
             alertIndices: ['index-1', 'index-2'],
           }
@@ -873,23 +872,21 @@ describe('bulk_delete', () => {
     });
 
     it('only emits the event for the file attachments confirmed deleted', async () => {
-      clientArgs.services.attachmentService.getter.getFileAttachments.mockResolvedValue([
+      clientArgs.services.attachmentService.getter.getFileAttachmentsForDeletion.mockResolvedValue([
         fileAttachment,
         { ...fileAttachment, id: 'file-attachment-2' },
       ]);
       clientArgs.services.attachmentService.bulkDelete.mockResolvedValueOnce(['file-attachment-2']);
 
-      await bulkDeleteFileAttachments(
-        { caseId: 'mock-id-1', fileIds: ['file-1', 'file-2'] },
-        clientArgs,
-        casesClient
+      await expect(deleteFileAttachments()).rejects.toThrow(
+        'Failed to delete attachment file-attachment-1 on case mock-id-1.'
       );
 
       expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledTimes(1);
       expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
         clientArgs.request,
         {
-          caseId: 'mock-id-1',
+          caseId,
           ids: ['file-attachment-2'],
           attachmentType: 'externalReference',
           owner: 'securitySolution',
