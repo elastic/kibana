@@ -189,7 +189,7 @@ export interface GetCaseIdsByAttachmentIdsArgs {
   /**
    * Authorization + owner filter scoped to the unified `cases-attachments` saved object type.
    */
-  filter?: KueryNode;
+  unifiedFilter?: KueryNode;
   /**
    * The same filter, scoped to the legacy `cases-comments` saved object type.
    */

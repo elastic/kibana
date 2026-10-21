@@ -64,7 +64,7 @@ describe('get', () => {
 
     const getAttachmentsFilter = () =>
       clientArgs.services.attachmentService.getter.getCaseIdsByAttachmentIds.mock.calls[0][0]
-        .filter;
+        .unifiedFilter;
 
     it('reads the attachments of the owners the user can read, scoped to the given owner', async () => {
       await getCasesByAttachmentIDs(request, clientArgs);

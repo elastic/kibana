@@ -572,7 +572,7 @@ export class AttachmentGetter {
   public async getCaseIdsByAttachmentIds({
     type,
     attachmentIds: requestedIds,
-    filter,
+    unifiedFilter,
     legacyFilter,
   }: GetCaseIdsByAttachmentIdsArgs): Promise<CasesWithOwnerOfAttachment[]> {
     const attachmentIds = [...new Set(requestedIds)];
@@ -596,7 +596,7 @@ export class AttachmentGetter {
               operator: 'or',
               type: CASE_ATTACHMENT_SAVED_OBJECT,
             }),
-            filter,
+            unifiedFilter,
           ]),
         }),
         ...legacyMatches.map((match) => {

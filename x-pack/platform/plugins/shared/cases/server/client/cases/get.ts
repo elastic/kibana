@@ -286,7 +286,7 @@ export const getCasesByAttachmentIDs = async (
     const casesOfAttachments = await attachmentService.getter.getCaseIdsByAttachmentIds({
       type,
       attachmentIds,
-      filter: getAttachmentsFilter(CASE_ATTACHMENT_SAVED_OBJECT),
+      unifiedFilter: getAttachmentsFilter(CASE_ATTACHMENT_SAVED_OBJECT),
       legacyFilter: getAttachmentsFilter(CASE_COMMENT_SAVED_OBJECT),
     });
 
