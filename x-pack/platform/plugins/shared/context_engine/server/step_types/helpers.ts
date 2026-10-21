@@ -437,6 +437,12 @@ export const findKiRevision = async ({
 }): Promise<KiRevision | undefined> => {
   const isDataStream = dest.type === 'data_stream';
   const useBackingIndexFilter = !isDataStream && backingIndex !== undefined;
+  let searchSize = 2;
+  if (isDataStream) {
+    searchSize = REVISION_TIE_WINDOW;
+  } else if (useBackingIndexFilter) {
+    searchSize = 1;
+  }
   // A dest with no physical backing index yet must resolve to empty hits, not an error.
   const response = await esClient.search<StoredKi>(
     {
@@ -453,7 +459,7 @@ export const findKiRevision = async ({
       ...(isDataStream && {
         sort: [{ '@timestamp': { order: 'desc' as const, unmapped_type: 'date' as const } }],
       }),
-      size: isDataStream ? REVISION_TIE_WINDOW : useBackingIndexFilter ? 1 : 2,
+      size: searchSize,
       seq_no_primary_term: true,
       _source: isDataStream || includeSource ? true : ['id', 'governance'],
     },

@@ -18,7 +18,6 @@ import {
   writeKiRevision,
   isKiDeleted,
   type KiWriter,
-  type StoredKi,
 } from '@kbn/context-engine-plugin/server/step_types/helpers';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -27,7 +26,7 @@ import dedent from 'dedent';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
 import { getWritableMemoryAiIndex } from '../get_writable_memory_ai_index';
-import { createMemoryWriter } from '../memory_document';
+import { createMemoryWriter, isMemoryDocument } from '../memory_document';
 
 const forgetSchema = z.object({
   aiIndexId: aiIndexIdFieldSchema.describe(
@@ -39,12 +38,6 @@ const forgetSchema = z.object({
     .max(MAX_KI_ID_LENGTH)
     .describe('The ID of the existing memory to mark as deleted'),
 });
-
-/** Narrows a stored KI to a memory document by its `type` discriminant. */
-const isMemoryDocument = (
-  source: StoredKi
-): source is StoredKi & { type: 'memory.session' | 'memory.session_fact' } =>
-  source.type === 'memory.session' || source.type === 'memory.session_fact';
 
 export const createForgetTool = ({
   getAiIndexService,
@@ -92,14 +85,12 @@ export const createForgetTool = ({
       });
 
       const currentUserClient = esClient.asCurrentUser;
-      const abortSignal = new AbortController().signal;
 
       const revision = await getKiRevision({
         esClient: currentUserClient,
         aiIndexId: params.aiIndexId,
         dest: aiIndex.dest,
         kiId: params.id,
-        abortSignal,
         includeSource: true,
       });
 
@@ -142,7 +133,6 @@ export const createForgetTool = ({
         revision,
         changes,
         refresh: true,
-        abortSignal,
       });
 
       return {

@@ -369,31 +369,6 @@ export const updateKiQuerySchema = schema.object({
   ),
 });
 
-export const kiReferenceBodySchema = schema.object({
-  uri: schema.string({
-    minLength: 1,
-    maxLength: MAX_KI_REFERENCE_URI_LENGTH,
-    meta: { description: 'The referenced URI, for example index://logs-*.' },
-  }),
-  relation: schema.maybe(
-    // 'oneOf' needs a tuple type, but 'map()' returns a plain array.
-    schema.oneOf(
-      KI_REFERENCE_RELATIONS.map((relation) => schema.literal(relation)) as [
-        Type<KiReferenceRelation>
-      ],
-      {
-        meta: { description: 'How the URI relates to this Knowledge Indicator.' },
-      }
-    )
-  ),
-  description: schema.maybe(
-    schema.string({
-      maxLength: MAX_KI_REFERENCE_DESCRIPTION_LENGTH,
-      meta: { description: 'Why this reference exists.' },
-    })
-  ),
-});
-
 export const updateKiBodySchema = schema.object({
   ki: schema.object({
     content: schema.string({
