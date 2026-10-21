@@ -15,7 +15,7 @@ import { EventInvestigation, type EventInvestigationProps } from './event_invest
 const mockOpenConversationDetails = jest.fn();
 let mockAgentBuilder: { openConversationDetails: jest.Mock } | undefined;
 
-jest.mock('../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { agentBuilder: mockAgentBuilder } }),
 }));
 

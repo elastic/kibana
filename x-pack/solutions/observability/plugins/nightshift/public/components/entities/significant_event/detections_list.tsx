@@ -16,9 +16,7 @@ import {
   EuiPanel,
   EuiSkeletonRectangle,
   EuiSkeletonText,
-  EuiSpacer,
   EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
@@ -30,18 +28,18 @@ import type {
   EventLifecycleResponse,
   SignificantEvent,
 } from '@kbn/significant-events-schema';
-import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
-import { getImpactedServices } from '../common/impacted_services';
-import { useFormatTimestamp } from '../common/format_timestamp';
+import { useFetchEventLifecycle } from '../../../hooks/use_fetch_event_lifecycle';
+import { getImpactedServices } from '../../../common/impacted_services';
+import { useFormatTimestamp } from '../../../common/format_timestamp';
 import {
   filterOccurrencesForDetection,
   getChangePointLabel,
   type OccurrencePoint,
-} from '../components/entities/detection/change_point';
-import { ChangePointSparkline } from '../components/entities/detection/change_point_visualization';
+} from '../detection/change_point';
+import { ChangePointSparkline } from '../detection/change_point_visualization';
 
-import { nightshiftBackgroundTransition } from '../common/transition';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
+import { nightshiftBackgroundTransition } from '../../../common/transition';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 
 const SPARKLINE_SKELETON_WIDTH = 64;
 const SPARKLINE_SKELETON_HEIGHT = 32;
@@ -450,15 +448,6 @@ export function DetectionsList({
 
   return (
     <>
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.nightshift.flyout.detectionsTitle', {
-            defaultMessage: 'Detections',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-
       {isError && (
         <EuiCallOut
           announceOnMount
