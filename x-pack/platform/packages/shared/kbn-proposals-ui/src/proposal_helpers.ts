@@ -5,11 +5,15 @@
  * 2.0.
  */
 
+import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import type { ApprovalProposal, ApprovalDecision } from './types';
 import type { ApprovalPhase } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import { formatDismissReason } from './dismiss_reason';
+
+/** The format of each full date and time in the proposal UI. The time uses 24 hours: "20 Oct 2026, 14:36". */
+export const DATE_TIME_FORMAT = 'D MMM YYYY, HH:mm';
 
 /** Stored lowercase (`configure`, `respond`, ...); the caption reads it in sentence case. */
 const toSentenceCase = (value: string): string =>
@@ -30,10 +34,7 @@ const deadlineCaptionPart = (proposal: ApprovalProposal): string | undefined => 
   if (!proposal.expiresAt) {
     return undefined;
   }
-  const deadline = new Date(proposal.expiresAt).toLocaleString(undefined, {
-    dateStyle: 'medium',
-    timeStyle: 'short',
-  });
+  const deadline = moment(proposal.expiresAt).format(DATE_TIME_FORMAT);
   if (isProposalExpired(proposal)) {
     return i18n.translate('xpack.proposals.approvalModal.caption.expired', {
       defaultMessage: 'Expired on {deadline}',

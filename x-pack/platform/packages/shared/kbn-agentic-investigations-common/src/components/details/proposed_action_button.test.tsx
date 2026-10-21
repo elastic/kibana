@@ -212,6 +212,14 @@ describe('ProposedActionButton', () => {
       expect(screen.queryByText('Irreversible')).not.toBeInTheDocument();
     });
 
+    it('shows the full date and time in a tooltip on the time of the decision', async () => {
+      renderButton({ proposal: decidedProposal });
+
+      fireEvent.mouseOver(screen.getByText(/^\d{1,2}:\d{2}/));
+
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(/^1 Jan 2024, \d{2}:\d{2}$/);
+    });
+
     it('shows a Declined badge for a dismissed proposal', () => {
       renderButton({ proposal: { ...decidedProposal, decision: 'dismissed' } });
 
