@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/repo-packages'
   - '@kbn/stdio-dev-helpers'
   - '@kbn/utils'
+  - '@kbn/std'
 tags:
   - shared-server
   - package

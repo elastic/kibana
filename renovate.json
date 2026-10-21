@@ -1989,10 +1989,7 @@
     },
     {
       "groupName": "minify",
-      "matchDepNames": [
-        "gulp-brotli",
-        "terser-webpack-plugin"
-      ],
+      "matchDepNames": ["terser-webpack-plugin"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
