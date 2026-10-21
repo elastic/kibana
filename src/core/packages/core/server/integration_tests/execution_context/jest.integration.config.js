@@ -9,10 +9,10 @@
 
 module.exports = {
   // TODO replace the line below with
-  // preset: '@kbn/test/jest_integration_node
+  // preset: '@kbn/jest/jest_integration_node
   // to do so, we must fix all integration tests first
   // see https://github.com/elastic/kibana/pull/130255/
-  preset: '@kbn/test/jest_integration',
+  preset: '@kbn/jest/jest_integration',
   rootDir: '../../../../../../..',
   roots: ['<rootDir>/src/core/packages/core/server/integration_tests/execution_context'],
   // must override to match all test given there is no `integration_tests` subfolder
