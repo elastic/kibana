@@ -53,7 +53,9 @@ const fixtureViewModel: BriefViewModel = {
         ],
       },
       assessment:
-        'A privileged, high-impact identity newly at High risk, with credential and remote access activity together, is the shape of account misuse and should be confirmed before anything else.',
+        'Credential and remote access activity on a privileged identity newly at High risk is the shape of account misuse.',
+      whyFirst:
+        'Privilege and a fresh threshold crossing make it the clearest place to confirm first.',
       nextStep:
         'Review the alerts behind the new High risk score and confirm recent access activity.',
       riskHistory: {
@@ -79,7 +81,8 @@ const fixtureViewModel: BriefViewModel = {
       assetCriticality: 'Extreme impact',
       firstSeen: '2 days ago',
       assessment:
-        'A high-impact host that appeared this week and is already alerting points to a provisioning or tooling problem more than an intrusion, but confirm that first.',
+        'A host that appeared this week and is already alerting looks more like a provisioning problem.',
+      whyFirst: 'A new asset of this criticality is worth confirming on its own.',
       nextStep: "Check what triggered the alerts and verify the host's provisioning is expected.",
     },
     {
@@ -91,7 +94,9 @@ const fixtureViewModel: BriefViewModel = {
       assetCriticality: 'High impact',
       firstSeen: '3 days ago',
       assessment:
-        'A newly appeared high-impact host with alerts of the same kind as the first priority could be the next step of the same activity.',
+        'A new host with alerts of the same kind as the first priority is worth a second look.',
+      whyFirst:
+        'Its recent appearance and the overlap in alert type put it ahead of the other hosts.',
       nextStep: "Review the alerts and confirm the host's role and ownership.",
     },
   ],
@@ -107,7 +112,8 @@ const withText = (viewModel: BriefViewModel, wordCount: number): BriefViewModel 
     recommendation: words(wordCount),
     priorities: viewModel.priorities.map((priority) => ({
       ...priority,
-      assessment: words(wordCount * 2),
+      assessment: words(wordCount),
+      whyFirst: words(wordCount),
       nextStep: words(wordCount),
     })),
   };
@@ -125,7 +131,7 @@ describe('renderBriefHtml', () => {
 
   it('lists the alerts as one row per rule, with a total only when rules are left out', () => {
     const { html } = renderBriefHtml(fixtureViewModel);
-    expect(html).toContain('12 open alerts in the last 7 days, 5 more rules');
+    expect(html).toContain('12 open alerts this period, 5 more rules');
 
     const { html: accountedFor } = renderBriefHtml({
       ...fixtureViewModel,
@@ -137,7 +143,7 @@ describe('renderBriefHtml', () => {
       ],
     });
     expect(accountedFor).toContain(
-      '<li><span>&lt;b&gt;Rule&lt;/b&gt;</span><span class="rule-count">1</span></li>'
+      '<li><span class="rule-count">1</span><span>&lt;b&gt;Rule&lt;/b&gt;</span></li>'
     );
     expect(accountedFor).not.toContain('<li class="rules-total">');
   });

@@ -22,6 +22,7 @@ const facts: EntityFacts[] = ['host:a', 'host:ab', 'user:b', 'user:c', 'user:d']
 const priority = (entityId: string, assessment = 'Assessed.'): BriefPriority => ({
   entityId,
   assessment,
+  whyFirst: 'Matters.',
   nextStep: 'Next.',
 });
 

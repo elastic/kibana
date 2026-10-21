@@ -89,6 +89,7 @@ export const BriefViewModel = lazySchema(() =>
           .optional(),
         firstSeen: z.string().optional(),
         assessment: z.string(),
+        whyFirst: z.string(),
         nextStep: z.string(),
         riskHistory: RiskHistory.optional(),
       })
@@ -153,7 +154,7 @@ export const buildViewModel = ({
         : [];
     }),
     priorities: (verified?.priorities ?? []).flatMap(
-      ({ entityId, assessment, nextStep }, index) => {
+      ({ entityId, assessment, whyFirst, nextStep }, index) => {
         const entityFacts = facts.find((entity) => entity.entityId === entityId);
         if (!entityFacts) {
           return [];
@@ -181,6 +182,7 @@ export const buildViewModel = ({
             // As the prompt does: first seen only for an entity flagged as new.
             firstSeen: flaggedFor.includes('newEntity') ? firstSeen : undefined,
             assessment: sentence(assessment),
+            whyFirst: sentence(whyFirst),
             nextStep: sentence(nextStep),
             riskHistory: riskHistory?.entityId === entityId ? riskHistory.history : undefined,
           },

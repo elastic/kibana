@@ -26,7 +26,13 @@ import { BRIEF_PERIOD_LABELS, describeDelta, formatCount } from './describe_scop
 // Drafting the brief
 
 export const MAX_PRIORITIES = 3;
-const WORD_LIMITS = { summary: 40, assessment: 30, nextStep: 20, recommendation: 30 } as const;
+const WORD_LIMITS = {
+  summary: 40,
+  assessment: 20,
+  whyFirst: 15,
+  nextStep: 20,
+  recommendation: 30,
+} as const;
 
 export const DRAFT_SYSTEM_PROMPT = `You write a short Entity Analytics brief for a security analyst or lead, from data about the entities the page flags. Answer with the complete brief in the required structure.
 
@@ -43,9 +49,9 @@ export const DRAFT_SYSTEM_PROMPT = `You write a short Entity Analytics brief for
 - summary: one or two sentences on the pattern of the period, never the counts the page shows. Never comment on which or how many entities are listed: the brief states its coverage itself. Follow the rule on findings below.
 - priorities: up to ${MAX_PRIORITIES} entities to look at first, most important first. Entities flagged several ways, with high criticality, privilege or high risk usually come first. Use fewer when the data doesn't support ${MAX_PRIORITIES}; never pad. Always include the field.
 - A priority's text sits under the entity's name: never name, mention or refer back to the entity in it ("its alerts", not "this user's alerts").
-- assessment: two sentences, at most ${WORD_LIMITS.assessment} words together. The first says what the evidence looks like taken together, the second why that puts the entity ahead of the others. Never repeat any number or name the reader already sees, such as the risk score, the alert count or a rule name: say what they point to.
-- Findings: the summary, the assessment and the recommendation name what to confirm, never what happened. Words such as "lateral movement", "compromise", "attack", "pivot", "breakout", "coordinated" and "exfiltration" state a finding: never use them in any of the three. Say "looks like", "is the shape of" or "worth confirming" instead.
-  Good: "A service account that never logged in interactively now does, from a host it had not touched before. The change in behavior, not the volume, is worth checking first."
+- assessment: one sentence, at most ${WORD_LIMITS.assessment} words, on what the evidence looks like taken together. whyFirst: one sentence, at most ${WORD_LIMITS.whyFirst} words, on why that puts the entity ahead of the others. Never repeat any number or name the reader already sees, such as the risk score, the alert count or a rule name: say what they point to.
+- Findings: the summary, the assessment, whyFirst and the recommendation name what to confirm, never what happened. Words such as "lateral movement", "compromise", "attack", "pivot", "breakout", "coordinated" and "exfiltration" state a finding: never use them in any of them. Say "looks like", "is the shape of" or "worth confirming" instead.
+  Good: assessment "A service account that never logged in interactively now does, from a host it had not touched before." whyFirst "The change in behavior, not the volume, is worth checking first."
   Bad: "Has three alerts, two for Potential Credential Access via LSASS Memory Dump, and risk score 76 (High)."
 - recommendation: the one step to take first across the whole view, not only for the first priority. It must make sense on its own. Follow the rule on findings below.
 - Mention an entity only as {{ entity.id <entityId> }}, copied exactly; the reader sees its name. Never write a name or EUID yourself, or refer to an entity any other way, such as "this account", "this identity" or "this host".
@@ -120,7 +126,12 @@ export const BriefDraft = lazySchema(() =>
           assessment: z
             .string()
             .describe(
-              `Two sentences, at most ${WORD_LIMITS.assessment} words together: what the evidence looks like taken together, then why it puts the entity ahead of the others. Repeat no number or name the reader already sees. Don't start with the entity name.`
+              `One sentence, at most ${WORD_LIMITS.assessment} words, on what the evidence looks like taken together. Repeat no number or name the reader already sees. Don't start with the entity name.`
+            ),
+          whyFirst: z
+            .string()
+            .describe(
+              `One sentence, at most ${WORD_LIMITS.whyFirst} words, on why that puts the entity ahead of the others.`
             ),
           nextStep: z
             .string()
