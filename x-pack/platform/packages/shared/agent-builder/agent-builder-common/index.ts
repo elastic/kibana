@@ -169,6 +169,7 @@ export type { TimeRange } from './attachments';
 export {
   agentBuilderDefaultAgentId,
   agentBuilderDefaultAiIndexId,
+  kiRetrievalSkillId,
   AgentType,
   chatAgentTypeId,
   AgentAccessControlMode,
@@ -439,6 +440,7 @@ export {
   type ConversationEventInput,
   type ConversationEvent,
   type EventActor,
+  getEventActorDisplayName,
   type BaseTimelineEventInput,
   type BaseTimelineEvent,
   type UserMessageEventData,
