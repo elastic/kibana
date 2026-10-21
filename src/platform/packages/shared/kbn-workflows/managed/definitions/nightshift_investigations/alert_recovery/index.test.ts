@@ -35,21 +35,29 @@ describe('Nightshift alert recovery workflow', () => {
     expect(findStep.with).toMatchObject({
       method: 'POST',
       path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/_alert_recovered',
-      body: { alert_uuid: '{{ event.alert.uuid }}', execution_id: '{{ execution.id }}' },
+      body: {
+        alert_uuid: '{{ event.alert.uuid }}',
+        recovered_at: '{{ event.timestamp }}',
+        execution_id: '{{ execution.id }}',
+      },
     });
     expect(openBranch.condition).toBe(
       '${{ steps.find_investigation.output.investigation_id != null and steps.find_investigation.output.duplicate != true }}'
     );
+    // A failed follow-up fails the execution, so no step runs after it to give the recovery back.
     expect(openBranch.steps).toEqual([
-      expect.objectContaining({
+      {
+        name: 'investigate',
         type: 'workflow.execute',
-        with: expect.objectContaining({ 'workflow-id': NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID }),
-        'on-failure': { continue: true },
-      }),
-      expect.objectContaining({
-        if: '${{ steps.investigate.error != null }}',
-        with: expect.objectContaining({ body: expect.objectContaining({ release_event: true }) }),
-      }),
+        with: {
+          'workflow-id': NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+          inputs: {
+            investigation_id: '{{ steps.find_investigation.output.investigation_id }}',
+            message: '${{ steps.find_investigation.output.message }}',
+            context: { source: 'alert', follow_up: 'alert_recovered' },
+          },
+        },
+      },
     ]);
   });
 });
