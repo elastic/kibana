@@ -2103,7 +2103,7 @@
     },
     {
       "groupName": "rrweb",
-      "matchDepNames": ["rrweb", "@rrweb/types"],
+      "matchDepNames": ["rrweb", "rrweb-snapshot", "@rrweb/types"],
       "reviewers": ["team:obs-signals-rum-team"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:obs-signals-rum"],
