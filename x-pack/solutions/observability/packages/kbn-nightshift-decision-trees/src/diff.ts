@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { decisionEdgeKey } from './counts';
+import { decisionEdgeKey } from './edge_key';
 import type { DecisionEdgeView, DecisionNodeView, DecisionTreeView } from './types';
 
 /** Fields of a node that can change between versions, used to label a modification. */
