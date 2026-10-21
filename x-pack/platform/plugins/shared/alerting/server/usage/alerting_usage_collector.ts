@@ -8,7 +8,6 @@
 import type { MakeSchemaFrom, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import { RuleExecutionStatusErrorReasons } from '../../common';
 import type { AlertingUsage } from './types';
 
 const byTypeSchema: MakeSchemaFrom<AlertingUsage>['count_by_type'] = {
@@ -231,8 +230,10 @@ const byReasonSchema: MakeSchemaFrom<AlertingUsage>['count_rules_executions_fail
 
 // DYNAMIC_KEY is a schema placeholder, not an event.reason value. Size must cover every
 // defined reason or the least common buckets are omitted from the breakdown.
-export const NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES = Object.values(
-  RuleExecutionStatusErrorReasons
+// Count the schema keys here. Reading the reason enum at module init races a cycle through
+// the alerting plugin barrel and can see the enum before it is initialized.
+export const NUM_ALERTING_EXECUTION_FAILURE_REASON_TYPES = Object.keys(byReasonSchema).filter(
+  (key) => key !== 'DYNAMIC_KEY'
 ).length;
 
 const byPercentileSchema: MakeSchemaFrom<AlertingUsage>['percentile_num_generated_actions_per_day'] =

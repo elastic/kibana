@@ -43,6 +43,8 @@ export const rawRuleExecutionStatusSchema = schema.object({
     schema.literal('unknown'),
     schema.literal('warning'),
   ]),
+  // Indexed on the rule saved object. Declared so the model-version schema matches the mapping.
+  numberOfTriggeredActions: schema.maybe(schema.number()),
   lastExecutionDate: schema.string(),
   lastDuration: schema.maybe(schema.number()),
   error: schema.nullable(
