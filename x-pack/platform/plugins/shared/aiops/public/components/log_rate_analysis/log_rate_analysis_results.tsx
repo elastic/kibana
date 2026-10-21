@@ -23,6 +23,7 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { ProgressControls } from '@kbn/aiops-components';
+import { AbortReason } from '@kbn/kibana-utils-plugin/common';
 import { cancelStream, startStream } from '@kbn/ml-response-stream/client';
 import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import {
@@ -95,6 +96,11 @@ interface LogRateAnalysisResultsProps {
   barHighlightColorOverride?: string;
   /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
   requestCancellationManager?: RequestCancellationManager;
+  /**
+   * Changes when the dashboard Refresh button runs. Stays put across the panel's first render,
+   * unlike the reload observable's initial subscription.
+   */
+  lastReloadRequestTime?: number;
   parentApi?: unknown;
 }
 
@@ -104,6 +110,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   barColorOverride,
   barHighlightColorOverride,
   requestCancellationManager,
+  lastReloadRequestTime,
   parentApi,
 }) => {
   const { analytics, http, embeddingOrigin, cps } = useAiopsAppContext();
@@ -130,6 +137,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   // to be able to track it across rerenders.
   const analysisStartTime = useRef<number | undefined>(window.performance.now());
   const abortCtrl = useRef(new AbortController());
+  const restartAnalysisRef = useRef<() => void>(() => {});
   const previousSearchQuery = useRef(searchQuery);
   const [overrides, setOverrides] = useState<AiopsLogRateAnalysisSchema['overrides'] | undefined>(
     undefined
@@ -170,22 +178,41 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
 
   // Propagates cancellations from the dashboard panel. Aborting the stream request alone
   // isn't enough, `cancelStream` also marks the stream as no longer running.
+  // `startLoad` aborts with `REPLACED` and installs a new signal; keep listening to that
+  // signal so a later refresh can still cancel the stream. A user cancel leaves the signal aborted.
+  // The analysis is started again from `lastReloadRequestTime`, which updates after `startLoad`.
   useEffect(() => {
-    const signal = requestCancellationManager?.signal;
-    if (!signal) return;
+    const manager = requestCancellationManager;
+    if (!manager) return;
+
+    let activeSignal = manager.signal;
 
     const onAbort = () => {
       abortCtrl.current.abort();
+      const replaced = activeSignal.reason === AbortReason.REPLACED;
       dispatch(cancelStream());
+      if (!replaced) {
+        return;
+      }
+
+      const nextSignal = manager.signal;
+      if (nextSignal !== activeSignal && !nextSignal.aborted) {
+        activeSignal = nextSignal;
+        activeSignal.addEventListener('abort', onAbort, { once: true });
+      }
     };
 
-    if (signal.aborted) {
-      onAbort();
+    if (activeSignal.aborted) {
+      if (activeSignal.reason !== AbortReason.REPLACED) {
+        onAbort();
+      }
       return;
     }
 
-    signal.addEventListener('abort', onAbort, { once: true });
-    return () => signal.removeEventListener('abort', onAbort);
+    activeSignal.addEventListener('abort', onAbort, { once: true });
+    return () => {
+      activeSignal.removeEventListener('abort', onAbort);
+    };
   }, [requestCancellationManager, dispatch]);
 
   useEffect(() => {
@@ -277,6 +304,25 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     // because it would be run with stale arguments.
     setShouldStart(true);
   }
+
+  restartAnalysisRef.current = () => startHandler(false);
+
+  // Dashboard refresh updates this after `startLoad` has installed the new signal.
+  // Restarting here (rather than inside the abort listener) also covers a refresh that
+  // follows a cancel, where the aborted signal is replaced without a new abort event.
+  const lastReloadOnMount = useRef(lastReloadRequestTime);
+  useEffect(() => {
+    if (!requestCancellationManager || lastReloadRequestTime === undefined) {
+      return;
+    }
+    if (lastReloadRequestTime === lastReloadOnMount.current) {
+      return;
+    }
+    if (requestCancellationManager.signal.aborted) {
+      return;
+    }
+    restartAnalysisRef.current();
+  }, [lastReloadRequestTime, requestCancellationManager]);
 
   const startParams = useMemo(() => {
     if (!chartWindowParameters || !earliest || !latest) {

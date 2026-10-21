@@ -67,6 +67,8 @@ export interface LogRateAnalysisContentProps {
   onWindowParametersChange?: (wp?: WindowParameters, replace?: boolean) => void;
   /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
   requestCancellationManager?: RequestCancellationManager;
+  /** Dashboard Refresh timestamp. Undefined outside the embeddable. */
+  lastReloadRequestTime?: number;
 
   parentApi?: unknown;
 }
@@ -78,6 +80,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   onAnalysisCompleted,
   onWindowParametersChange,
   requestCancellationManager,
+  lastReloadRequestTime,
   parentApi,
 }) => {
   const { embeddingOrigin } = useAiopsAppContext();
@@ -242,6 +245,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
           requestCancellationManager={requestCancellationManager}
+          lastReloadRequestTime={lastReloadRequestTime}
           parentApi={parentApi}
         />
       )}

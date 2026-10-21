@@ -189,6 +189,7 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
                       onLoading={onLoading}
                       onRenderComplete={onRenderComplete}
                       requestCancellationManager={requestCancellationManager}
+                      lastReloadRequestTime={lastReloadRequestTime}
                       parentApi={parentApi}
                     />
                   </LogRateAnalysisReduxProvider>

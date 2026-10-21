@@ -109,9 +109,10 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
 
     onLoadingChange?.(true);
 
+    let signal = abortCtrl.current.signal;
     try {
       abortCtrl.current = new AbortController();
-      const signal = requestCancellationManager
+      signal = requestCancellationManager
         ? AbortSignal.any([abortCtrl.current.signal, requestCancellationManager.signal])
         : abortCtrl.current.signal;
 
@@ -227,13 +228,15 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
       });
     } catch (error) {
       // An `AbortError` gets triggered when a user cancels a request by navigating away, we need to ignore these errors.
-      if (error.name !== 'AbortError') {
-        displayError(toasts, searchParams!.index, extractErrorProperties(error));
-        setDocumentStats((previous) => ({
-          ...previous,
-          errorMessage: extractErrorMessage(error),
-        }));
+      // Aborting with `AbortReason.REPLACED` does not surface as `AbortError`; the composed signal is aborted instead.
+      if (signal.aborted || error.name === 'AbortError') {
+        return;
       }
+      displayError(toasts, searchParams!.index, extractErrorProperties(error));
+      setDocumentStats((previous) => ({
+        ...previous,
+        errorMessage: extractErrorMessage(error),
+      }));
     } finally {
       if (requestId === latestRequestId.current) {
         onLoadingChange?.(false);

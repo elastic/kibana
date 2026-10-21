@@ -119,6 +119,46 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
    */
   autoFocusLoadPending = false;
 
+  /** Bumped synchronously at the start of each context load so an aborted load can tell a successor has started. */
+  loadGeneration = 0;
+
+  /**
+   * True while a refresh is waiting to schedule its focus load. The previous focus series is still
+   * in state, and the pipeline would otherwise skip the load the panel loading flag is waiting on.
+   */
+  pendingRefreshFocus = false;
+
+  /**
+   * Last chart that finished loading. A cancel restores this instead of leaving the context
+   * series from the in-flight load next to the previous focus series.
+   */
+  chartSnapshot;
+
+  /** Fields a context or focus load replaces. User toggles (show/hide series) are left as they are. */
+  static chartSnapshotFields = [
+    'chartDetails',
+    'contextAggregationInterval',
+    'contextChartData',
+    'contextForecastData',
+    'dataNotChartable',
+    'focusAggregationInterval',
+    'focusAnnotationData',
+    'focusChartData',
+    'focusForecastData',
+    'fullRefresh',
+    'hasResults',
+    'modelPlotEnabled',
+    'showAnnotationsCheckbox',
+    'showForecastCheckbox',
+    'showModelBoundsCheckbox',
+    'swimlaneData',
+    'tableData',
+    'zoomFrom',
+    'zoomTo',
+    'zoomFromFocusLoaded',
+    'zoomToFocusLoaded',
+  ];
+
   getBoundsRoundedToInterval;
   mlTimeSeriesExplorer;
   mlForecastService;
@@ -224,22 +264,31 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     );
   }
 
-  contextChartSelected = (selection) => {
+  /**
+   * @param selection brushed range to load into the focus chart
+   * @param forceFocus true when this selection comes from a refresh. By the time the context
+   *   request returns, `previousRefresh` has caught up with `lastRefresh`, so the duplicate-brush
+   *   check would otherwise skip the focus load that `onRenderComplete` is waiting on.
+   * @returns whether a focus load was scheduled
+   */
+  contextChartSelected = (selection, forceFocus = false) => {
     const zoomState = {
       from: selection.from.toISOString(),
       to: selection.to.toISOString(),
     };
 
     if (
+      !forceFocus &&
       isEqual(this.props.zoom, zoomState) &&
       this.state.focusChartData !== undefined &&
       this.props.previousRefresh === this.props.lastRefresh
     ) {
-      return;
+      return false;
     }
 
     this.contextChart$.next(selection);
     this.props.appStateHandler(APP_STATE_ACTION.SET_ZOOM, zoomState);
+    return true;
   };
 
   loadAnomaliesTableData = (earliestMs, latestMs) => {
@@ -271,6 +320,47 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     this.props.appStateHandler(APP_STATE_ACTION.SET_FORECAST_ID, forecastId);
   };
 
+  captureChartSnapshot = () => {
+    const state = {};
+    for (const field of TimeSeriesExplorerEmbeddableChart.chartSnapshotFields) {
+      state[field] = this.state[field];
+    }
+    return { state, zoom: this.props.zoom };
+  };
+
+  /** Remember the chart before the first in-flight load replaces any of it. Later commits overwrite this. */
+  ensureChartSnapshot = () => {
+    if (this.chartSnapshot === undefined) {
+      this.chartSnapshot = this.captureChartSnapshot();
+    }
+  };
+
+  commitChartSnapshot = () => {
+    this.chartSnapshot = this.captureChartSnapshot();
+  };
+
+  revertToChartSnapshot = () => {
+    if (this.unmounted) {
+      return;
+    }
+    this.pendingRefreshFocus = false;
+    const snapshot = this.chartSnapshot;
+    const finish = () => {
+      this.props.onRenderComplete?.();
+    };
+    if (snapshot === undefined) {
+      this.setState({ loading: false, fullRefresh: false }, finish);
+      return;
+    }
+    this.setState({ ...snapshot.state, loading: false, chartDataError: undefined }, finish);
+    if (!isEqual(this.props.zoom, snapshot.zoom)) {
+      this.props.appStateHandler(
+        snapshot.zoom === undefined ? APP_STATE_ACTION.UNSET_ZOOM : APP_STATE_ACTION.SET_ZOOM,
+        snapshot.zoom
+      );
+    }
+  };
+
   displayErrorToastMessages = (error, errorMsg) => {
     if (this.props.toastNotificationService) {
       this.props.toastNotificationService.displayErrorToast(error, errorMsg, 2000);
@@ -300,24 +390,38 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
 
     const functionToPlotByIfMetric = aggregationTypeTransform.toES(functionDescription);
 
-    // Hosts that can cancel requests (the embeddable) own the cancellation lifetime, so a child
-    // controller is aborted whenever the host cancels (or replaces) its current load.
+    // The embeddable owns cancellation. This load stops when that signal or the local controller aborts.
     const { requestCancellationManager } = this.props;
+    // Captured before the async context request. A later render updates `previousRefresh`, so the
+    // completion path can no longer tell a refresh apart from a duplicate brush.
+    const forceFocus = this.props.previousRefresh !== this.props.lastRefresh;
+    this.pendingRefreshFocus = forceFocus;
+    this.loadGeneration = (this.loadGeneration ?? 0) + 1;
+    const generation = this.loadGeneration;
     this.contextLoadAbortController?.abort(AbortReason.REPLACED);
-    this.contextLoadAbortController =
-      requestCancellationManager?.createChildController() ?? new AbortController();
-    const contextLoadSignal = this.contextLoadAbortController.signal;
+    this.contextLoadAbortController = new AbortController();
+    const contextLoadSignal = requestCancellationManager
+      ? AbortSignal.any([this.contextLoadAbortController.signal, requestCancellationManager.signal])
+      : this.contextLoadAbortController.signal;
     if (contextLoadSignal.aborted) {
       // Cancelled before the load started: don't send requests until the next load.
-      this.setState({ loading: false });
+      if (generation === this.loadGeneration && contextLoadSignal.reason !== AbortReason.REPLACED) {
+        this.revertToChartSnapshot();
+      }
       return;
     }
+    this.ensureChartSnapshot();
     contextLoadSignal.addEventListener(
       'abort',
       () => {
         // A replaced load is followed by a new one that manages the loading state.
-        if (!this.unmounted && contextLoadSignal.reason !== AbortReason.REPLACED) {
-          this.setState({ loading: false });
+        // A user cancel puts the previous finished chart back; context may already be applied.
+        if (
+          !this.unmounted &&
+          generation === this.loadGeneration &&
+          contextLoadSignal.reason !== AbortReason.REPLACED
+        ) {
+          this.revertToChartSnapshot();
         }
       },
       { once: true }
@@ -393,6 +497,21 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
             getBoundsRoundedToInterval: this.getBoundsRoundedToInterval,
           },
         }).then((result) => {
+          if (result === null) {
+            // Aborted or failed without a successor. A newer load increments `loadGeneration`
+            // synchronously, so this must not clear that load's in-progress state.
+            // Errors already report themselves. A cancel restores the previous chart; the abort
+            // listener does that too, and calling it again is the same snapshot.
+            const cancelled =
+              contextLoadSignal.aborted && contextLoadSignal.reason !== AbortReason.REPLACED;
+            if (!this.unmounted && generation === this.loadGeneration && cancelled) {
+              this.revertToChartSnapshot();
+            } else if (generation === this.loadGeneration) {
+              this.pendingRefreshFocus = false;
+            }
+            return;
+          }
+          let focusScheduled = false;
           consumeSmvContextLoadResult({
             result,
             isUnmounted: () => this.unmounted,
@@ -401,12 +520,27 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
             syncPreviousSelectedForecastIdFromProps: () => {
               this.previousSelectedForecastId = this.props.selectedForecastId;
             },
-            applyZoomSelection: (range) => this.contextChartSelected(range),
-            applyStatePatch: (patch) => this.setState({ ...fullRefreshResetPatch, ...patch }),
+            applyZoomSelection: (range) => {
+              focusScheduled = this.contextChartSelected(range, forceFocus);
+              if (!focusScheduled) {
+                this.pendingRefreshFocus = false;
+              }
+            },
+            applyStatePatch: (patch) => {
+              // Context can land before focus. Don't treat that half-updated chart as the
+              // snapshot a cancel restores.
+              const commitWhenApplied = !focusScheduled;
+              this.setState({ ...fullRefreshResetPatch, ...patch }, () => {
+                if (commitWhenApplied && generation === this.loadGeneration) {
+                  this.commitChartSnapshot();
+                }
+              });
+            },
             // If focus will load next, wait for applyFocusPipelinePatch before completing.
-            // Otherwise complete now (empty / dataNotChartable / no zoom) so reporting cannot hang.
+            // Otherwise complete now (empty / dataNotChartable / no zoom / skipped focus)
+            // so the dashboard refresh button cannot stay on Cancel.
             afterStatePatch: (_statePatch, { hasPendingFocus }) => {
-              if (!hasPendingFocus) {
+              if (!hasPendingFocus || !focusScheduled) {
                 this.props.onRenderComplete?.();
               }
             },
@@ -463,11 +597,15 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
         readChartZoomState: () => ({
           contextChartData: this.state.contextChartData,
           contextForecastData: this.state.contextForecastData,
-          focusChartData: this.state.focusChartData,
+          // A refresh keeps the previous focus series until the new one arrives. Treat it as
+          // missing so the pipeline starts a real focus load and always reaches onRenderComplete.
+          focusChartData: this.pendingRefreshFocus ? undefined : this.state.focusChartData,
           zoomFromFocusLoaded: this.state.zoomFromFocusLoaded,
           zoomToFocusLoaded: this.state.zoomToFocusLoaded,
         }),
         onFocusPipelineStarting: () => {
+          this.focusSnapshotGeneration = this.loadGeneration;
+          this.pendingRefreshFocus = false;
           this.props.onLoading?.(true);
           this.setState({
             loading: true,
@@ -495,23 +633,32 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
         readModelPlotEnabled: () => this.state.modelPlotEnabled,
         readSelectedForecastId: () => this.props.selectedForecastId,
         applyFocusPipelinePatch: (patch) => {
+          const focusGeneration = this.focusSnapshotGeneration;
           this.setState(patch, () => {
+            if (focusGeneration === this.loadGeneration) {
+              this.commitChartSnapshot();
+            }
             this.props.onRenderComplete?.();
           });
         },
         onFocusPipelineEmpty: (selection) => {
           const focusLoadSignal = this.focusLoadSignal;
           if (focusLoadSignal?.aborted) {
-            // The focus load was cancelled or replaced rather than empty: keep the current chart.
-            if (focusLoadSignal.reason !== AbortReason.REPLACED) {
-              this.setState({ loading: false }, () => {
-                this.props.onRenderComplete?.();
-              });
+            // Replaced loads belong to the successor. A cancel puts the previous chart back,
+            // including context data this load already applied.
+            if (
+              focusLoadSignal.reason !== AbortReason.REPLACED &&
+              this.focusSnapshotGeneration === this.loadGeneration
+            ) {
+              this.revertToChartSnapshot();
             }
             return;
           }
           // Empty focus is terminal for reporting, not an error.
           this.setState(buildSmvEmptyFocusStatePatch(selection), () => {
+            if (this.focusSnapshotGeneration === this.loadGeneration) {
+              this.commitChartSnapshot();
+            }
             this.props.onRenderComplete?.();
           });
         },

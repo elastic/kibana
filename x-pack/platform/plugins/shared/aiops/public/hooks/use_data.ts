@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { merge } from 'rxjs';
 import type { Moment } from 'moment';
 
@@ -28,6 +28,7 @@ import type { DocumentStatsSearchStrategyParams } from '../get_document_stats';
 import { useAiopsAppContext } from './use_aiops_app_context';
 
 import { useDocumentCountStats } from './use_document_count_stats';
+import { useReload } from './use_reload';
 
 const DEFAULT_BAR_TARGET = 75;
 
@@ -59,6 +60,20 @@ export const useData = (
   });
 
   const [lastRefresh, setLastRefresh] = useState(0);
+  const { refreshTimestamp } = useReload();
+  const reloadTimestampOnMount = useRef(refreshTimestamp);
+
+  // Dashboard refresh emits on the timefilter before `fetch$` runs `startLoad`, so a request
+  // started from that tick is aborted. ReloadContext updates only after the new signal exists.
+  useEffect(() => {
+    if (!requestCancellationManager) {
+      return;
+    }
+    if (refreshTimestamp === reloadTimestampOnMount.current) {
+      return;
+    }
+    setLastRefresh(Date.now());
+  }, [refreshTimestamp, requestCancellationManager]);
 
   const _timeBuckets = useTimeBuckets(uiSettings);
   const timefilter = useTimefilter({
