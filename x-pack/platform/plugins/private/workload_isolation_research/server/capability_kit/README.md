@@ -356,6 +356,21 @@ atlas, retaining co-located/eliminated/unobserved candidates, not count crossing
 alone as the denominator.
 Transport bytes are application serialization estimates, not kernel framing.
 
+## Trace context copy (research-only)
+
+Cherry-picked from 7.B onto worker Core: `28f593273dad`, `af60067618ef`, `71e8b06379ed`.
+Sol: READY FOR CHERRY-PICK narrowly. The host copies `traceId`, `spanId`, and `traceFlags`
+from the active OTel span, or from the APM `currentTraceparent` when Task Manager's fresh
+AsyncResource has dropped that span. The worker restores them as a non-recording remote
+parent for that run. This is a research transfer, not a production tracing integration.
+`6bf2235f` was not picked. Island observation fields (`observedTraceId`, `traceAtStart`,
+`parentSpanSent` on the alerting and agent hosts) were left off.
+
+Residual P2:
+- `traceState` and baggage are dropped. The copied parent is only those three fields.
+- `parentSpanWasSent` reads `lastSpanSent`, a process-global flag for the latest
+  `runWithParentSpan` call. Concurrent runs overwrite it. It is not a per-run record.
+
 ## Validation / limits
 
 `node .../server/capability_kit/kit_probe.cts` runs real thread/process native tests.
