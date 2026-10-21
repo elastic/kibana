@@ -1,5 +1,5 @@
 {
-  "sha1": "3b03d7749db7bfa5863dfeaa6490b665051744c9",
+  "sha1": "35385a9acb7e1e41a2f21f1b6bec2b185ebebf8d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -52,8 +52,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 206,
-        "column": 23
+        "line": 213,
+        "column": 33
       }
     },
     {
@@ -65,8 +65,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 245,
-        "column": 46
+        "line": 253,
+        "column": 9
       }
     },
     {
@@ -78,8 +78,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 291,
-        "column": 18
+        "line": 300,
+        "column": 13
       }
     },
     {
@@ -91,8 +91,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 352,
-        "column": 25
+        "line": 362,
+        "column": 17
       }
     },
     {
@@ -104,8 +104,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 371,
-        "column": 77
+        "line": 380,
+        "column": 15
       }
     },
     {
@@ -117,8 +117,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 430,
-        "column": 15
+        "line": 438,
+        "column": 9
       }
     },
     {
@@ -130,8 +130,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 485,
-        "column": 13
+        "line": 491,
+        "column": 52
       }
     },
     {
@@ -143,8 +143,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 546,
-        "column": 16
+        "line": 552,
+        "column": 41
       }
     },
     {
@@ -156,7 +156,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 584,
+        "line": 592,
         "column": 14
       }
     },
@@ -169,7 +169,20 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 634,
+        "line": 645,
+        "column": 9
+      }
+    },
+    {
+      "id": "50cd3300664bf57-613f3fc5b3e06b3",
+      "title": "Bulk episode actions API precondition: reports INVALID_ALERT_STATE_TRANSITION for an already acknowledged item",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 696,
         "column": 15
       }
     },
@@ -182,8 +195,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 686,
-        "column": 67
+        "line": 758,
+        "column": 68
       }
     },
     {
@@ -195,8 +208,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 696,
-        "column": 52
+        "line": 768,
+        "column": 12
+      }
+    },
+    {
+      "id": "50cd3300664bf57-a5f2b3ae7533c3d",
+      "title": "Bulk episode actions API schema: rejects items repeating an alert_id with 400 and writes nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
+        "line": 776,
+        "column": 23
       }
     },
     {
@@ -208,8 +234,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 705,
-        "column": 5
+        "line": 805,
+        "column": 11
       }
     },
     {
@@ -221,8 +247,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 715,
-        "column": 92
+        "line": 814,
+        "column": 12
       }
     },
     {
@@ -234,8 +260,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 727,
-        "column": 84
+        "line": 825,
+        "column": 12
       }
     },
     {
@@ -247,8 +273,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 736,
-        "column": 12
+        "line": 836,
+        "column": 54
       }
     },
     {
@@ -260,8 +286,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 752,
-        "column": 4
+        "line": 851,
+        "column": 12
       }
     },
     {
@@ -273,8 +299,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 766,
-        "column": 30
+        "line": 869,
+        "column": 14
       }
     },
     {
@@ -286,8 +312,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 782,
-        "column": 37
+        "line": 887,
+        "column": 24
       }
     },
     {
@@ -299,8 +325,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 798,
-        "column": 51
+        "line": 898,
+        "column": 43
       }
     },
     {
@@ -312,8 +338,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 809,
-        "column": 13
+        "line": 908,
+        "column": 4
       }
     },
     {
@@ -325,8 +351,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 819,
-        "column": 3
+        "line": 1076,
+        "column": 27
       }
     },
     {
@@ -338,7 +364,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 971,
+        "line": 1091,
         "column": 27
       }
     },
@@ -351,7 +377,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_episode_actions.spec.ts",
-        "line": 988,
+        "line": 1108,
         "column": 27
       }
     },
@@ -364,7 +390,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 32,
+        "line": 48,
         "column": 23
       }
     },
@@ -377,34 +403,47 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 95,
-        "column": 25
+        "line": 110,
+        "column": 23
       }
     },
     {
-      "id": "684750a15c38442-45588f70113de12",
-      "title": "Bulk series actions API partial success: reports ALERT_GROUP_NOT_FOUND when some group_hashes are unknown",
+      "id": "684750a15c38442-eeb0f30d99dedb6",
+      "title": "Bulk series actions API precondition: reports INVALID_ALERT_STATE_TRANSITION for a series that is not snoozed",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 132,
-        "column": 7
+        "line": 156,
+        "column": 5
       }
     },
     {
-      "id": "684750a15c38442-35368d65a54d69c",
-      "title": "Bulk series actions API partial success: reports a per-item error for every item when every group_hash is unknown",
+      "id": "684750a15c38442-1af5bf3603bd6b5",
+      "title": "Bulk series actions API partial success: reports ALERT_GROUP_NOT_FOUND when some series_ids are unknown",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 181,
-        "column": 25
+        "line": 209,
+        "column": 15
+      }
+    },
+    {
+      "id": "684750a15c38442-cf7381ba4b34be3",
+      "title": "Bulk series actions API partial success: reports a per-item error for every item when every series_id is unknown",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 258,
+        "column": 76
       }
     },
     {
@@ -416,8 +455,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 210,
-        "column": 28
+        "line": 289,
+        "column": 22
       }
     },
     {
@@ -429,8 +468,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 220,
-        "column": 25
+        "line": 299,
+        "column": 40
       }
     },
     {
@@ -442,8 +481,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 228,
-        "column": 59
+        "line": 308,
+        "column": 12
       }
     },
     {
@@ -455,21 +494,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 242,
-        "column": 5
+        "line": 317,
+        "column": 7
       }
     },
     {
-      "id": "684750a15c38442-c78b194d2f6d894",
-      "title": "Bulk series actions API schema: rejects an item missing group_hash with 400",
+      "id": "684750a15c38442-77a4800e0116bf2",
+      "title": "Bulk series actions API schema: rejects an item missing series_id with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 253,
-        "column": 22
+        "line": 330,
+        "column": 12
       }
     },
     {
@@ -481,8 +520,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 263,
-        "column": 5
+        "line": 338,
+        "column": 76
       }
     },
     {
@@ -494,8 +533,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 275,
-        "column": 5
+        "line": 350,
+        "column": 79
       }
     },
     {
@@ -507,34 +546,86 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 289,
-        "column": 7
+        "line": 364,
+        "column": 84
       }
     },
     {
-      "id": "684750a15c38442-cf439521e29f2d7",
-      "title": "Bulk series actions API schema: rejects an item with empty group_hash with 400",
+      "id": "684750a15c38442-c545cfe91b5026b",
+      "title": "Bulk series actions API schema: rejects an item with empty series_id with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 302,
+        "line": 379,
+        "column": 12
+      }
+    },
+    {
+      "id": "684750a15c38442-7187702f52ca696",
+      "title": "Bulk series actions API schema: rejects an item whose series_id has invalid characters or is too long with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 391,
+        "column": 16
+      }
+    },
+    {
+      "id": "684750a15c38442-1fb13078a6b0e8f",
+      "title": "Bulk series actions API schema: rejects an item whose series_id is malformed with INVALID_SERIES_ID",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 413,
+        "column": 5
+      }
+    },
+    {
+      "id": "684750a15c38442-1900540c5c7f4e5",
+      "title": "Bulk series actions API schema: fails the whole request when one series_id is malformed and writes nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 421,
+        "column": 25
+      }
+    },
+    {
+      "id": "684750a15c38442-f1d1f01a24a6103",
+      "title": "Bulk series actions API schema: rejects a repeated series_id with 400",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
+        "line": 452,
         "column": 22
       }
     },
     {
-      "id": "684750a15c38442-555513ef84a30fc",
-      "title": "Bulk series actions API schema: rejects an item whose group_hash is not a SHA-256 digest with 400",
+      "id": "684750a15c38442-0ef3b4bca87d588",
+      "title": "Bulk series actions API partial success: reports ALERT_GROUP_NOT_FOUND and writes nothing for a series_id minted for another space",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 314,
-        "column": 27
+        "line": 463,
+        "column": 43
       }
     },
     {
@@ -546,8 +637,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 331,
-        "column": 39
+        "line": 509,
+        "column": 83
       }
     },
     {
@@ -559,8 +650,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 347,
-        "column": 23
+        "line": 523,
+        "column": 18
       }
     },
     {
@@ -572,8 +663,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/bulk_series_actions.spec.ts",
-        "line": 361,
-        "column": 18
+        "line": 633,
+        "column": 27
       }
     },
     {
@@ -585,7 +676,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 35,
+        "line": 36,
         "column": 31
       }
     },
@@ -598,8 +689,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 65,
+        "line": 66,
         "column": 12
+      }
+    },
+    {
+      "id": "fc2b57b36f3106f-65a56e7f652ac16",
+      "title": "Create ack episode action API ack: a repeated ack returns 409 and writes no second action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 114,
+        "column": 9
+      }
+    },
+    {
+      "id": "fc2b57b36f3106f-903e64bccccc5ee",
+      "title": "Create ack episode action API ack: acking again after an unack returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
+        "line": 153,
+        "column": 9
       }
     },
     {
@@ -611,8 +728,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 113,
-        "column": 9
+        "line": 191,
+        "column": 27
       }
     },
     {
@@ -624,8 +741,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 124,
-        "column": 5
+        "line": 201,
+        "column": 16
       }
     },
     {
@@ -637,8 +754,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 133,
-        "column": 11
+        "line": 208,
+        "column": 98
       }
     },
     {
@@ -650,8 +767,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 137,
-        "column": 7
+        "line": 214,
+        "column": 12
       }
     },
     {
@@ -663,8 +780,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 147,
-        "column": 12
+        "line": 224,
+        "column": 5
       }
     },
     {
@@ -676,8 +793,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_ack_episode_action.spec.ts",
-        "line": 157,
-        "column": 12
+        "line": 233,
+        "column": 61
       }
     },
     {
@@ -902,6 +1019,45 @@
       }
     },
     {
+      "id": "f62e03a22ba2d1d-02e7c0c2a549b77",
+      "title": "Create assign episode action API assign: repeating the current assignee returns 409 and writes no second action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 106,
+        "column": 22
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-5725e4faabbebaa",
+      "title": "Create assign episode action API assign: clearing the assignee of an unassigned alert returns 409",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 147,
+        "column": 29
+      }
+    },
+    {
+      "id": "f62e03a22ba2d1d-a7974c3858a157a",
+      "title": "Create assign episode action API assign: reinstating a cleared assignee returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
+        "line": 177,
+        "column": 15
+      }
+    },
+    {
       "id": "f62e03a22ba2d1d-a0c3238e64cc708",
       "title": "Create assign episode action API assign: audit actions work on old (superseded) episodes",
       "expectedStatus": "passed",
@@ -910,8 +1066,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 100,
-        "column": 22
+        "line": 220,
+        "column": 4
       }
     },
     {
@@ -923,8 +1079,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 151,
-        "column": 21
+        "line": 271,
+        "column": 74
       }
     },
     {
@@ -936,8 +1092,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 159,
-        "column": 22
+        "line": 278,
+        "column": 5
       }
     },
     {
@@ -949,8 +1105,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 171,
-        "column": 16
+        "line": 287,
+        "column": 12
       }
     },
     {
@@ -962,8 +1118,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 180,
-        "column": 14
+        "line": 296,
+        "column": 61
       }
     },
     {
@@ -975,8 +1131,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 188,
-        "column": 4
+        "line": 306,
+        "column": 13
       }
     },
     {
@@ -988,8 +1144,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 195,
-        "column": 12
+        "line": 315,
+        "column": 24
       }
     },
     {
@@ -1001,8 +1157,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 205,
-        "column": 9
+        "line": 324,
+        "column": 98
       }
     },
     {
@@ -1014,8 +1170,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 214,
-        "column": 29
+        "line": 331,
+        "column": 5
       }
     },
     {
@@ -1027,8 +1183,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 223,
-        "column": 29
+        "line": 342,
+        "column": 11
       }
     },
     {
@@ -1040,8 +1196,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_assign_episode_action.spec.ts",
-        "line": 232,
-        "column": 41
+        "line": 349,
+        "column": 81
       }
     },
     {
@@ -1235,8 +1391,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 31,
-        "column": 23
+        "line": 46,
+        "column": 31
       }
     },
     {
@@ -1248,8 +1404,60 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 67,
-        "column": 22
+        "line": 80,
+        "column": 7
+      }
+    },
+    {
+      "id": "4142b94b18e5336-65b3b8e563a3146",
+      "title": "Create snooze series action API precondition: repeating the expiry in effect returns 409 and writes no second action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 112,
+        "column": 14
+      }
+    },
+    {
+      "id": "4142b94b18e5336-89a48b726e81366",
+      "title": "Create snooze series action API precondition: repeating an indefinite snooze returns 409",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 155,
+        "column": 89
+      }
+    },
+    {
+      "id": "4142b94b18e5336-bbcf557b19bfe67",
+      "title": "Create snooze series action API precondition: an indefinite snooze after a timed one is judged on its own, not the earlier expiry",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 184,
+        "column": 8
+      }
+    },
+    {
+      "id": "4142b94b18e5336-bf1298078024803",
+      "title": "Create snooze series action API precondition: changing the expiry in effect returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 246,
+        "column": 20
       }
     },
     {
@@ -1261,8 +1469,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 100,
-        "column": 22
+        "line": 284,
+        "column": 29
       }
     },
     {
@@ -1274,8 +1482,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 110,
-        "column": 22
+        "line": 294,
+        "column": 16
       }
     },
     {
@@ -1287,73 +1495,99 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 121,
+        "line": 305,
         "column": 7
       }
     },
     {
-      "id": "4142b94b18e5336-35a998a3f2ee596",
-      "title": "Create snooze series action API schema: rejects a group_hash with a plain label with 400",
+      "id": "4142b94b18e5336-d1d66d86d6ab50f",
+      "title": "Create snooze series action API schema: rejects a series_id with a space and punctuation with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 151,
-        "column": 31
+        "line": 335,
+        "column": 16
       }
     },
     {
-      "id": "4142b94b18e5336-39ebef826167408",
-      "title": "Create snooze series action API schema: rejects a group_hash with too few characters with 400",
+      "id": "4142b94b18e5336-1b5d3afac4d6d14",
+      "title": "Create snooze series action API schema: rejects a series_id with a dot with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 151,
-        "column": 31
+        "line": 335,
+        "column": 16
       }
     },
     {
-      "id": "4142b94b18e5336-b9004da73520419",
-      "title": "Create snooze series action API schema: rejects a group_hash with too many characters with 400",
+      "id": "4142b94b18e5336-0148add628c2635",
+      "title": "Create snooze series action API schema: rejects a series_id with a padding character with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 151,
-        "column": 31
+        "line": 335,
+        "column": 16
       }
     },
     {
-      "id": "4142b94b18e5336-0a243f8e3e71f66",
-      "title": "Create snooze series action API schema: rejects a group_hash with a non-hex character with 400",
+      "id": "4142b94b18e5336-2c0692117c7f6c8",
+      "title": "Create snooze series action API schema: rejects a series_id with more than 2048 characters with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 151,
-        "column": 31
+        "line": 335,
+        "column": 16
       }
     },
     {
-      "id": "4142b94b18e5336-2ec4154f43e28c6",
-      "title": "Create snooze series action API returns 404 when group_hash matches no events",
+      "id": "4142b94b18e5336-d842c293499d53f",
+      "title": "Create snooze series action API schema: rejects a series_id that is a base64url value that is not a series payload with INVALID_SERIES_ID",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 159,
-        "column": 85
+        "line": 345,
+        "column": 24
+      }
+    },
+    {
+      "id": "4142b94b18e5336-be62ca423bcf129",
+      "title": "Create snooze series action API returns 404 when series_id matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 354,
+        "column": 68
+      }
+    },
+    {
+      "id": "4142b94b18e5336-b88d07dd532d869",
+      "title": "Create snooze series action API returns 404 and writes nothing when series_id was minted for another space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
+        "line": 368,
+        "column": 5
       }
     },
     {
@@ -1365,7 +1599,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 171,
+        "line": 406,
         "column": 5
       }
     },
@@ -1378,8 +1612,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_snooze_series_action.spec.ts",
-        "line": 182,
-        "column": 8
+        "line": 414,
+        "column": 9
       }
     },
     {
@@ -1396,8 +1630,8 @@
       }
     },
     {
-      "id": "08995d5c2fad38e-b0b60061f48a124",
-      "title": "Create tag episode action API tag: accepts an empty tags array and returns 204",
+      "id": "08995d5c2fad38e-ba33912223e4b1e",
+      "title": "Create tag episode action API tag: an empty tags array clears the tags and returns 204",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -1409,6 +1643,32 @@
       }
     },
     {
+      "id": "08995d5c2fad38e-c08dcfa6d44e9f2",
+      "title": "Create tag episode action API tag: repeating the current set returns 409 regardless of order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 112,
+        "column": 28
+      }
+    },
+    {
+      "id": "08995d5c2fad38e-765ef81123b5945",
+      "title": "Create tag episode action API tag: re-applying a cleared set returns 204",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
+        "line": 157,
+        "column": 95
+      }
+    },
+    {
       "id": "08995d5c2fad38e-4a431a18ad1c2a2",
       "title": "Create tag episode action API tag: audit actions work on old (superseded) episodes",
       "expectedStatus": "passed",
@@ -1417,8 +1677,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 105,
-        "column": 27
+        "line": 205,
+        "column": 29
       }
     },
     {
@@ -1430,8 +1690,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 161,
-        "column": 11
+        "line": 251,
+        "column": 71
       }
     },
     {
@@ -1443,8 +1703,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 167,
-        "column": 12
+        "line": 258,
+        "column": 22
       }
     },
     {
@@ -1456,8 +1716,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 174,
-        "column": 7
+        "line": 267,
+        "column": 22
       }
     },
     {
@@ -1469,8 +1729,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 184,
-        "column": 12
+        "line": 277,
+        "column": 16
       }
     },
     {
@@ -1482,8 +1742,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 193,
-        "column": 12
+        "line": 286,
+        "column": 16
       }
     },
     {
@@ -1495,8 +1755,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 203,
-        "column": 12
+        "line": 295,
+        "column": 16
       }
     },
     {
@@ -1508,8 +1768,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 212,
-        "column": 12
+        "line": 305,
+        "column": 13
       }
     },
     {
@@ -1521,8 +1781,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 221,
-        "column": 12
+        "line": 314,
+        "column": 25
       }
     },
     {
@@ -1534,8 +1794,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 231,
-        "column": 81
+        "line": 328,
+        "column": 23
       }
     },
     {
@@ -1547,8 +1807,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_tag_episode_action.spec.ts",
-        "line": 243,
-        "column": 9
+        "line": 337,
+        "column": 3
       }
     },
     {
@@ -1560,7 +1820,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 29,
+        "line": 30,
         "column": 23
       }
     },
@@ -1573,8 +1833,21 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 60,
+        "line": 67,
         "column": 12
+      }
+    },
+    {
+      "id": "e225861e8bcf6b0-8f970e740c842e2",
+      "title": "Create unack episode action API unack: unacking an alert that is not acknowledged returns 409",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
+        "line": 122,
+        "column": 14
       }
     },
     {
@@ -1586,8 +1859,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 109,
-        "column": 14
+        "line": 157,
+        "column": 15
       }
     },
     {
@@ -1599,8 +1872,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 120,
-        "column": 16
+        "line": 168,
+        "column": 13
       }
     },
     {
@@ -1612,8 +1885,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 127,
-        "column": 98
+        "line": 175,
+        "column": 22
       }
     },
     {
@@ -1625,8 +1898,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 133,
-        "column": 12
+        "line": 181,
+        "column": 5
       }
     },
     {
@@ -1638,8 +1911,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 143,
-        "column": 5
+        "line": 192,
+        "column": 11
       }
     },
     {
@@ -1651,8 +1924,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unack_episode_action.spec.ts",
-        "line": 152,
-        "column": 61
+        "line": 199,
+        "column": 81
       }
     },
     {
@@ -1664,8 +1937,34 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 31,
-        "column": 23
+        "line": 46,
+        "column": 31
+      }
+    },
+    {
+      "id": "db1f5b15b3c8591-41998895819eb41",
+      "title": "Create unsnooze series action API precondition: unsnoozing a series that was never snoozed returns 409 and writes nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 87,
+        "column": 7
+      }
+    },
+    {
+      "id": "db1f5b15b3c8591-b22ab9202f66101",
+      "title": "Create unsnooze series action API precondition: a repeated unsnooze returns 409 and writes no second action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 124,
+        "column": 21
       }
     },
     {
@@ -1677,34 +1976,60 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 68,
+        "line": 175,
         "column": 14
       }
     },
     {
-      "id": "db1f5b15b3c8591-ef8b42d34c258f6",
-      "title": "Create unsnooze series action API schema: rejects a group_hash that is not a SHA-256 digest with 400",
+      "id": "db1f5b15b3c8591-bee75242d4f8220",
+      "title": "Create unsnooze series action API schema: rejects a series_id with invalid characters with 400",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 78,
+        "line": 186,
         "column": 98
       }
     },
     {
-      "id": "db1f5b15b3c8591-0f2a436229ebfc0",
-      "title": "Create unsnooze series action API returns 404 when group_hash matches no events",
+      "id": "db1f5b15b3c8591-1f176d6d016e42a",
+      "title": "Create unsnooze series action API schema: rejects a series_id that is not a series payload with INVALID_SERIES_ID",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 85,
+        "line": 193,
         "column": 12
+      }
+    },
+    {
+      "id": "db1f5b15b3c8591-058d806ce0de9c5",
+      "title": "Create unsnooze series action API returns 404 when series_id matches no events",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 200,
+        "column": 7
+      }
+    },
+    {
+      "id": "db1f5b15b3c8591-b6aafe5556b47c4",
+      "title": "Create unsnooze series action API returns 404 and writes nothing when series_id was minted for another space",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
+        "line": 222,
+        "column": 15
       }
     },
     {
@@ -1716,8 +2041,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 101,
-        "column": 11
+        "line": 251,
+        "column": 23
       }
     },
     {
@@ -1729,8 +2054,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/create_unsnooze_series_action.spec.ts",
-        "line": 110,
-        "column": 63
+        "line": 266,
+        "column": 23
       }
     },
     {
@@ -1950,7 +2275,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 37,
+        "line": 44,
         "column": 11
       }
     },
@@ -1963,7 +2288,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 65,
+        "line": 72,
         "column": 16
       }
     },
@@ -1976,7 +2301,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 102,
+        "line": 109,
         "column": 78
       }
     },
@@ -1989,7 +2314,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 123,
+        "line": 130,
         "column": 14
       }
     },
@@ -2002,7 +2327,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 130,
+        "line": 137,
         "column": 7
       }
     },
@@ -2015,7 +2340,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 136,
+        "line": 143,
         "column": 82
       }
     },
@@ -2028,7 +2353,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 144,
+        "line": 151,
         "column": 69
       }
     },
@@ -2041,7 +2366,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 148,
+        "line": 155,
         "column": 12
       }
     },
@@ -2054,7 +2379,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 153,
+        "line": 160,
         "column": 22
       }
     },
@@ -2067,7 +2392,59 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
-        "line": 162,
+        "line": 169,
+        "column": 16
+      }
+    },
+    {
+      "id": "f825e947215b0f4-e3d1101b0cbcc1a",
+      "title": "List rule executions API search: returns only the executions of rules whose name matches the search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 178,
+        "column": 96
+      }
+    },
+    {
+      "id": "f825e947215b0f4-e3773d06cd2590e",
+      "title": "List rule executions API search: applies the other filters on top of the search",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 211,
+        "column": 49
+      }
+    },
+    {
+      "id": "f825e947215b0f4-5e5dd13542b313c",
+      "title": "List rule executions API search: returns an empty page, not an error, when nothing matches",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 243,
+        "column": 88
+      }
+    },
+    {
+      "id": "f825e947215b0f4-0b9294a6ff34ea0",
+      "title": "List rule executions API validation: rejects a search longer than the maximum",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/list_rule_executions.spec.ts",
+        "line": 256,
         "column": 16
       }
     },
@@ -2147,6 +2524,188 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
         "line": 151,
         "column": 13
+      }
+    },
+    {
+      "id": "52213b689c01eb2-a49c0f295f16fe2",
+      "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for a rule-backed series (source \"internal\")",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/series_id_eval.spec.ts",
+        "line": 134,
+        "column": 22
+      }
+    },
+    {
+      "id": "52213b689c01eb2-bb66798a60d8713",
+      "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for an external source",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/series_id_eval.spec.ts",
+        "line": 134,
+        "column": 22
+      }
+    },
+    {
+      "id": "52213b689c01eb2-bd0a7bc4955d6b9",
+      "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for an external source containing the separator",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/series_id_eval.spec.ts",
+        "line": 134,
+        "column": 22
+      }
+    },
+    {
+      "id": "52213b689c01eb2-c6292c401cee2d6",
+      "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for an external source ending in a colon",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/series_id_eval.spec.ts",
+        "line": 134,
+        "column": 22
+      }
+    },
+    {
+      "id": "52213b689c01eb2-9398dcbebadb89b",
+      "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for an external source with non-ASCII characters",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/series_id_eval.spec.ts",
+        "line": 134,
+        "column": 22
+      }
+    },
+    {
+      "id": "52213b689c01eb2-5eaaa46bab09fb2",
+      "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for an external source of the maximum length",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/series_id_eval.spec.ts",
+        "line": 134,
+        "column": 22
+      }
+    },
+    {
+      "id": "52213b689c01eb2-cc18917be06b468",
+      "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for an empty source with a rule id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/series_id_eval.spec.ts",
+        "line": 134,
+        "column": 22
+      }
+    },
+    {
+      "id": "52213b689c01eb2-3307b62be4efbee",
+      "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for an empty source without a rule id, which has no series id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/series_id_eval.spec.ts",
+        "line": 134,
+        "column": 22
+      }
+    },
+    {
+      "id": "52213b689c01eb2-0bcdbb93a4e3d2e",
+      "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for the \"internal\" source without a rule id, which has no series id",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/series_id_eval.spec.ts",
+        "line": 134,
+        "column": 22
+      }
+    },
+    {
+      "id": "d9af471a323f6cf-c2ddd3ace4e9393",
+      "title": "Series identity when two rules share a group_hash snooze: stamps the action with the rule of the requested series, not the latest event of the shared group_hash",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/series_identity_collision.spec.ts",
+        "line": 99,
+        "column": 51
+      }
+    },
+    {
+      "id": "d9af471a323f6cf-b5abe47653089e8",
+      "title": "Series identity when two rules share a group_hash snooze: a snooze on one rule does not make the identical snooze on the other rule a no-op",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/series_identity_collision.spec.ts",
+        "line": 144,
+        "column": 16
+      }
+    },
+    {
+      "id": "d9af471a323f6cf-bef94d5e937a41b",
+      "title": "Series identity when two rules share a group_hash bulk snooze: stamps each action with the rule of its own series",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/series_identity_collision.spec.ts",
+        "line": 168,
+        "column": 20
+      }
+    },
+    {
+      "id": "d9af471a323f6cf-8a16e8270be5354",
+      "title": "Series identity when two rules share a group_hash deactivate: closes the latest episode of its own series even when another rule shares the group_hash",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/series_identity_collision.spec.ts",
+        "line": 194,
+        "column": 79
+      }
+    },
+    {
+      "id": "d9af471a323f6cf-29e29b79264c291",
+      "title": "Series identity when two rules share a group_hash read side: a snooze on one rule shows only on that rule in the episode and its action history",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/alerts/api/tests/series_identity_collision.spec.ts",
+        "line": 221,
+        "column": 25
       }
     },
     {

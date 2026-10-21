@@ -280,7 +280,7 @@ export interface RelayActionClient {
     threadTs?: string;
     /** Edits this previously posted message instead of posting a new one. */
     messageTs?: string;
-  }): Promise<{ ref: string; tenantKey: string; channel: string }>;
+  }): Promise<{ ref: string; channel: string; externalConversationId?: string }>;
   /** One page of the channels this deployment has connected; follow `nextCursor` for the rest. */
   listBindings(
     tenantKey: string,
@@ -312,6 +312,11 @@ export interface ActionContext {
   connectorUsageCollector?: unknown;
   log: Logger;
   secrets?: Record<string, unknown>;
+  /**
+   * Signs claims with the connector's private key and sets `iss` to the connector issuer.
+   * Defined only when the spec declares `signingKey`.
+   */
+  signJwt?: (claims: Record<string, unknown>) => Promise<string>;
   /**
    * Reaches the third party through the Elastic-hosted Relay, for specs whose auth type routes that
    * way. Undefined when the auth type does not use Relay transport or the deployment has no Relay
@@ -364,6 +369,15 @@ export interface ConnectorTest {
 }
 
 // ============================================================================
+// SIGNING KEY
+// ============================================================================
+
+export interface ConnectorSigningKey {
+  /** Value of the JWT `typ` header, for example `secevent+jwt`. */
+  jwtType: string;
+}
+
+// ============================================================================
 // MAIN CONNECTOR DEFINITION
 // ============================================================================
 
@@ -374,6 +388,8 @@ export interface AuthTypeDef {
   /** When true, excluded from the UI picker but kept in the validation schema for backwards compatibility with existing connectors. */
   isLegacy?: boolean;
   isExperimental?: boolean;
+  /** When true, this auth type may be used with sandbox credential injection. */
+  supportsSandbox?: boolean;
   defaults: Record<string, unknown>;
   overrides?: {
     /** Display name shown in the auth type picker. Defaults to the auth type's built-in label when omitted. */
@@ -409,6 +425,10 @@ export interface ConnectorSpec {
   // Omit when the connector has no inbound surface. A connector may declare both
   // `actions` and `events`. Only allowlisted specs may set this (see contract tests).
   events?: ConnectorSpecEvents;
+
+  // Optional Kibana-managed signing key. When present, creating a connector generates
+  // a key pair, Kibana publishes the public key, and actions get `signJwt`.
+  signingKey?: ConnectorSigningKey;
 
   transformations?: Transformations;
 

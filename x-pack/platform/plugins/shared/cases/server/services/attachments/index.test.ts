@@ -771,6 +771,30 @@ describe('AttachmentService', () => {
       });
     });
 
+    it('throws a 404 when the attachment is in neither saved object type', async () => {
+      unsecuredSavedObjectsClient.bulkGet.mockImplementation((objects) => {
+        const requests = objects as Array<{ id: string; type: string }>;
+        return Promise.resolve({
+          saved_objects: requests.map(({ id, type }) => ({
+            ...createErrorSO(type),
+            id,
+          })) as unknown as SavedObjectsBulkResponse['saved_objects'],
+        });
+      });
+
+      await expect(
+        service.update({
+          savedObjectId: 'missing',
+          updatedAttributes: persistableStateAttachment,
+          options: { references: [] },
+        })
+      ).rejects.toMatchObject({
+        message: 'Attachment missing not found',
+        output: expect.objectContaining({ statusCode: 404 }),
+      });
+      expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
+    });
+
     it('should inject the references to the attributes correctly (persistable state)', async () => {
       unsecuredSavedObjectsClient.update.mockResolvedValue(soClientRes);
 
@@ -2048,6 +2072,27 @@ describe('AttachmentService', () => {
           data: { content: '' },
         });
       });
+
+      it('skips a row that fails to decode and logs a warning', async () => {
+        const userAttachment = createUserAttachment();
+        const junkAttachment = {
+          ...userAttachment,
+          id: 'junk-1',
+          attributes: { ...userAttachment.attributes, type: 'junk' },
+        };
+
+        unsecuredSavedObjectsClient.find.mockResolvedValue(
+          createSOFindResponse([
+            { ...junkAttachment, score: 0 },
+            { ...userAttachment, score: 0 },
+          ])
+        );
+
+        const res = await service.find({});
+
+        expect(res.saved_objects.map(({ id }) => id)).toEqual([userAttachment.id]);
+        expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('junk-1'));
+      });
     });
   });
 
@@ -2165,6 +2210,18 @@ describe('AttachmentService', () => {
       expect(filterAsString).toMatch(/"value":\s*"osquery"/);
       expect(filterAsString).toMatch(/"value":\s*"security.indicator"/);
       expect(filterAsString).not.toMatch(/"value":\s*"file"/);
+    });
+  });
+
+  describe('countAlertsWithinCase', () => {
+    it('logs and rethrows when the aggregation fails', async () => {
+      unsecuredSavedObjectsClient.find.mockRejectedValue(new Error('aggregation failed'));
+
+      await expect(service.countAlertsWithinCase('test-id')).rejects.toThrow('aggregation failed');
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Error while counting alerts for case test-id: Error: aggregation failed'
+      );
     });
   });
 

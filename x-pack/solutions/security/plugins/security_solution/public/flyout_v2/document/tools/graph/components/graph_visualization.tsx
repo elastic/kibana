@@ -35,6 +35,7 @@ import { PREFIX } from '../../../../../flyout/shared/test_ids';
 import { useInvestigateInTimeline } from '../../../../../common/hooks/timeline/use_investigate_in_timeline';
 import { normalizeTimeRange } from '../../../../../common/utils/normalize_time_range';
 import { useKibana, useToasts } from '../../../../../common/lib/kibana';
+import { useGraphTelemetry } from '../../../../shared/hooks/use_graph_telemetry';
 import { extractTimelineCapabilities } from '../../../../../common/utils/timeline_capabilities';
 
 const GraphInvestigationLazy = React.lazy(() =>
@@ -145,6 +146,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
   }, [cps?.cpsManager]);
 
   const toasts = useToasts();
+  const { onTelemetryEvent } = useGraphTelemetry();
 
   const { dataView, status } = useDataView(PageScope.default);
   const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
@@ -180,10 +182,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
           }));
         onShowGrouped({ docMode, entityItems, documentIds: [], dataViewId: undefined });
       } else if (docMode === 'grouped-events' && documentsData.length > 0) {
-        const documentIds = documentsData
-          .slice(0, MAX_DOCUMENTS_TO_LOAD)
-          .map((doc) => doc.event?.id)
-          .filter((id): id is string => id !== undefined);
+        const documentIds = documentsData.slice(0, MAX_DOCUMENTS_TO_LOAD).map((doc) => doc.id);
         onShowGrouped({
           docMode,
           documentIds,
@@ -281,6 +280,7 @@ export const GraphVisualization: React.FC<GraphVisualizationProps> = memo((props
             onInvestigateInTimeline={openTimelineCallback}
             onOpenEventPreview={onOpenEventPreview}
             onOpenNetworkPreview={onShowNetwork}
+            onTelemetryEvent={onTelemetryEvent}
           />
         </React.Suspense>
       )}

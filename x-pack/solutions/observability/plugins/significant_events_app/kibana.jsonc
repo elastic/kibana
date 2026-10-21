@@ -12,15 +12,13 @@
     "requiredPlugins": [
       "charts",
       "data",
-      "inference",
-      "licensing",
+      "nightshiftSources",
       "share",
       "significantEvents",
-      "streams",
       "unifiedSearch",
     ],
-    "optionalPlugins": ["agentBuilder", "cloud", "cps", "nightshiftInvestigations", "spaces"],
-    "requiredBundles": ["kibanaReact", "stackConnectors"],
+    "optionalPlugins": ["agentBuilder", "cloud", "cps", "spaces"],
+    "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": ["common"],
   },
 }
