@@ -19,7 +19,6 @@ import type {
 import type { SavedObjectReference } from '@kbn/core/server';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { getValueColumn } from '../../columns/esql_column';
-import { fromFormatAPIToLensState } from '../../columns/format';
 import { toLensStateFilterLanguage } from '../../columns/filter';
 import type {
   DataLayerType,
@@ -63,17 +62,6 @@ export function getValueColumns(
     return [
       ...layer.thresholds.map((threshold, index) => {
         const columnId = getAccessorNameForXY(layer, i, REFERENCE_LINE_ACCESSOR_PREFIX, index);
-        if ('operation' in threshold) {
-          const format = fromFormatAPIToLensState(threshold.format);
-          return {
-            columnId,
-            fieldName: String(threshold.value),
-            operationType: 'static_value' as const,
-            params: { value: String(threshold.value), ...(format ? { format } : {}) },
-            meta: { type: 'number' as const },
-            ...(threshold.label ? { label: threshold.label, customLabel: true } : {}),
-          };
-        }
         return getValueColumn(columnId, threshold, 'number');
       }),
     ];

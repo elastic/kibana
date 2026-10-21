@@ -48,7 +48,6 @@ import {
 } from '../../coloring';
 import { DEFAULT_LINE_CATEGORICAL_COLOR_MAPPING, DEFAULT_REFERENCE_LINE_AXIS } from './defaults';
 import { getValueApiColumn } from '../../columns/esql_column';
-import { fromFormatLensStateToAPI } from '../../columns/format';
 import { toApiFilterLanguage } from '../../columns/filter';
 import {
   isAPIColumnOfBucketType,
@@ -328,15 +327,9 @@ function convertReferenceLineLayerToAPI(
       }
       const column = layer.columns.find(({ columnId }) => columnId === accessor);
       if (column?.operationType === 'static_value') {
-        return {
-          operation: 'static_value',
-          value: Number(column.params?.value),
-          ...(column.customLabel ? { label: column.label } : {}),
-          ...(column.params?.format
-            ? { format: fromFormatLensStateToAPI(column.params.format) }
-            : {}),
-          ...decorationConfig,
-        };
+        throw new Error(
+          'ES|QL reference line layers only support query column thresholds. Move static values to a separate static reference line layer.'
+        );
       }
       const op = getValueApiColumn(accessor, layer);
       if (!op) {

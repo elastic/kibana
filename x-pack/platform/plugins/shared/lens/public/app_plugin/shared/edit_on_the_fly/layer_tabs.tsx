@@ -90,11 +90,11 @@ export function LayerTabs({
         activeVisualization.getLayerType(layerId, visualization.state) ===
           LENS_LAYER_TYPES.REFERENCELINE && isEsqlChart(framePublicAPI.datasourceLayers)
           ? framePublicAPI.datasourceLayers[layerId]?.isTextBasedLanguage()
-            ? i18n.translate('xpack.lens.layerTabs.esqlReferencesLabel', {
-                defaultMessage: 'ES|QL references',
+            ? i18n.translate('xpack.lens.layerTabs.esqlReferenceLinesLabel', {
+                defaultMessage: 'ES|QL reference lines',
               })
-            : i18n.translate('xpack.lens.layerTabs.staticReferencesLabel', {
-                defaultMessage: 'Static references',
+            : i18n.translate('xpack.lens.layerTabs.staticReferenceLinesLabel', {
+                defaultMessage: 'Static reference lines',
               })
           : undefined,
       config: activeVisualization.getConfiguration({

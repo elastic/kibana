@@ -50,7 +50,9 @@ spaceTest.describe('Lens ES|QL reference lines', { tag: '@local-stateful-classic
       const dataQuery = await lens.workspace.getEsqlQuery();
       await lens.layers.createLayer('referenceLine', undefined, { referenceLineSource: 'esql' });
       await lens.layers.ensureLayerTabIsActive(1);
-      await expect(page.getByRole('tab', { name: 'ES|QL references', exact: true })).toBeVisible();
+      await expect(
+        page.getByRole('tab', { name: 'ES|QL reference lines', exact: true })
+      ).toBeVisible();
       await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
       await lens.workspace.submitEsqlQuery(SHARED_QUERY);
 
@@ -82,7 +84,7 @@ spaceTest.describe('Lens ES|QL reference lines', { tag: '@local-stateful-classic
         });
         await lens.layers.ensureLayerTabIsActive(2);
         await expect(
-          page.getByRole('tab', { name: 'Static references', exact: true })
+          page.getByRole('tab', { name: 'Static reference lines', exact: true })
         ).toBeVisible();
         await expect(page.testSubj.locator('InlineEditingESQLEditor')).toHaveCount(0);
         await lens.dimensions.openDimensionEditor(`${LEFT} > lns-dimensionTrigger`, 2);
@@ -117,12 +119,16 @@ spaceTest.describe('Lens ES|QL reference lines', { tag: '@local-stateful-classic
       await lens.layers.duplicateLayer(0);
       await lens.layers.createLayer('referenceLine', undefined, { referenceLineSource: 'static' });
       await lens.layers.ensureLayerTabIsActive(2);
-      await expect(page.getByRole('tab', { name: 'Static references', exact: true })).toBeVisible();
+      await expect(
+        page.getByRole('tab', { name: 'Static reference lines', exact: true })
+      ).toBeVisible();
       await expect(page.testSubj.locator('InlineEditingESQLEditor')).toHaveCount(0);
 
       await lens.layers.createLayer('referenceLine', undefined, { referenceLineSource: 'esql' });
       await lens.layers.ensureLayerTabIsActive(3);
-      await expect(page.getByRole('tab', { name: 'ES|QL references', exact: true })).toBeVisible();
+      await expect(
+        page.getByRole('tab', { name: 'ES|QL reference lines', exact: true })
+      ).toBeVisible();
       await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
       await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveCount(0);
       await lens.layers.activateLayerTab(0);
