@@ -29,7 +29,7 @@ import {
   useShareTypeContext,
 } from '@kbn/share-plugin/public';
 
-import { API_BASE, type DashboardLayout } from '../common';
+import { API_BASE, type DashboardLayout, VIEW_BASE } from '../common';
 
 interface PinnedPanel {
   id?: string;
@@ -114,7 +114,7 @@ const IsomerExportFlyout = ({
   };
 
   const openMobileView = () => {
-    if (!path) {
+    if (!objectId) {
       return;
     }
     const query = new URLSearchParams({
@@ -122,7 +122,11 @@ const IsomerExportFlyout = ({
       ...(timeRange ?? {}),
       ...(controls?.length ? { controls: JSON.stringify(controls) } : {}),
     });
-    window.open(core.http.basePath.prepend(`${path}/view?${query}`), '_blank', 'noopener');
+    window.open(
+      core.http.basePath.prepend(`${VIEW_BASE}/${encodeURIComponent(objectId)}/view?${query}`),
+      '_blank',
+      'noopener'
+    );
   };
 
   return (

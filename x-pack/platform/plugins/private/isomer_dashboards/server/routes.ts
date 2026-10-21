@@ -17,7 +17,7 @@ import {
 import { dashboardChartSize } from '@kbn/isomer-primitives-dashboard';
 import { cardContentWidth, kibanaCardFrame } from '@kbn/isomer-theme';
 
-import { API_BASE, type DashboardLayout, PAGE_WIDTH } from '../common';
+import { API_BASE, type DashboardLayout, PAGE_WIDTH, VIEW_BASE } from '../common';
 import type { IsomerDashboardsStartDeps } from './types';
 import { toDashboardComposition } from './to_composition';
 
@@ -222,9 +222,10 @@ export const registerRoutes = (
     }
   );
 
-  router.get(
+  // A page a browser opens in a tab: it can't send `x-elastic-internal-origin`, so it isn't an internal route.
+  http.resources.register(
     {
-      path: `${API_BASE}/{id}/view`,
+      path: `${VIEW_BASE}/{id}/view`,
       security: {
         authz: {
           enabled: false,
@@ -232,7 +233,6 @@ export const registerRoutes = (
             'Reads the dashboard and runs its queries only through the requesting user’s scoped clients.',
         },
       },
-      options: { access: 'internal' },
       validate: { params, query: viewQuery },
     },
     async (context, request, response) => {
@@ -247,11 +247,10 @@ export const registerRoutes = (
           ...(controls ? { controls: parseControls(controls) } : {}),
         });
         const html = await drawing.drawHtml(composition as never, options);
-        return response.ok({
+        return response.renderHtml({
           body: `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><title>${escapeHtml(
             converted.title
           )}</title></head><body style="margin:0;padding:16px;background:#fff">${html}</body></html>`,
-          headers: { 'content-type': 'text/html; charset=utf-8' },
         });
       } catch (error) {
         return notFound(error)
