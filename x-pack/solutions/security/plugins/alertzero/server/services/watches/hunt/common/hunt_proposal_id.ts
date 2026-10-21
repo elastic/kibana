@@ -32,7 +32,8 @@ const HUNT_PROPOSAL_UUID_NAMESPACE = '9b2e4d17-5c3a-5f08-8a61-3e7d1c4b9a25';
  *
  * The space and the producer are in the hash because the proposals index is shared across
  * spaces and the service does not scope the id: a bare `subjectKey` from two spaces would be one
- * id. This is where that rule is enforced, and the only place.
+ * id. This is where that rule is enforced for Proposals; {@link buildHuntInvestigationConversationId}
+ * enforces it for the Investigation conversation id, for the same reason.
  */
 export const buildHuntProposalId = ({
   spaceId,
