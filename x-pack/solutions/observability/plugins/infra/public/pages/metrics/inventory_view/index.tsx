@@ -90,6 +90,7 @@ export const SnapshotPage = (): React.ReactElement => {
                       <EuiFlexItem grow={false}>
                         <EuiSwitch
                           compressed
+                          data-test-subj="newInfrastructureExperienceToggle"
                           label="New infrastructure experience"
                           checked={isNewExperience ?? false}
                           onChange={(e) => setIsNewExperience(e.target.checked)}

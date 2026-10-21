@@ -20,6 +20,13 @@ const mockFetcherState: { hasData: boolean; status: MockFetchStatus } = {
   status: 'success',
 };
 
+let mockIsNewExperience = false;
+let mockEntityInventoryApp: { getAppComponent: () => React.ComponentType } | undefined;
+
+jest.mock('../../../hooks/use_new_infrastructure_experience', () => ({
+  useNewInfrastructureExperience: () => [mockIsNewExperience, jest.fn()],
+}));
+
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
   useTrackPageview: jest.fn(),
 }));
@@ -48,6 +55,7 @@ jest.mock('../../../hooks/use_fetcher', () => ({
 jest.mock('../../../hooks/use_kibana', () => ({
   useKibanaContextForPlugin: () => ({
     services: {
+      entityInventoryApp: mockEntityInventoryApp,
       share: {
         url: {
           locators: {
@@ -127,10 +135,14 @@ const renderSnapshotPage = () =>
   );
 
 describe('SnapshotPage', () => {
+  const MockEntityInventory = () => <div data-test-subj="entityInventoryApp" />;
+
   beforeEach(() => {
     mockFetcherState.hasData = true;
     mockFetcherState.status = 'success';
     lastInfraPageTemplateProps = {};
+    mockIsNewExperience = false;
+    mockEntityInventoryApp = undefined;
   });
 
   it('renders AppHeader with the inventory title and no back control when metrics exist', async () => {
@@ -185,5 +197,43 @@ describe('SnapshotPage', () => {
     expect(screen.queryByTestId('kbnNoDataPage')).not.toBeInTheDocument();
     expect(screen.getByTestId('inventorySnapshotContainer')).toBeInTheDocument();
     expect(lastInfraPageTemplateProps.hasDataOverride).toBe(true);
+  });
+
+  describe('new infrastructure experience toggle', () => {
+    it('does not render the toggle when entityInventoryApp is absent', () => {
+      mockEntityInventoryApp = undefined;
+
+      renderSnapshotPage();
+
+      expect(screen.queryByTestId('newInfrastructureExperienceToggle')).not.toBeInTheDocument();
+    });
+
+    it('renders the toggle when entityInventoryApp is present', () => {
+      mockEntityInventoryApp = { getAppComponent: () => MockEntityInventory };
+
+      renderSnapshotPage();
+
+      expect(screen.getByTestId('newInfrastructureExperienceToggle')).toBeInTheDocument();
+    });
+
+    it('renders the entity inventory and hides the old inventory when the new experience is active', () => {
+      mockIsNewExperience = true;
+      mockEntityInventoryApp = { getAppComponent: () => MockEntityInventory };
+
+      renderSnapshotPage();
+
+      expect(screen.getByTestId('entityInventoryApp')).toBeInTheDocument();
+      expect(screen.queryByTestId('inventorySnapshotContainer')).not.toBeInTheDocument();
+    });
+
+    it('falls back to the old inventory when preference is true but the plugin is absent', () => {
+      mockIsNewExperience = true;
+      mockEntityInventoryApp = undefined;
+
+      renderSnapshotPage();
+
+      expect(screen.queryByTestId('entityInventoryApp')).not.toBeInTheDocument();
+      expect(screen.getByTestId('inventorySnapshotContainer')).toBeInTheDocument();
+    });
   });
 });
