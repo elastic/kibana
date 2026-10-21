@@ -5,4 +5,10 @@
  * 2.0.
  */
 
-export { SurfacesServiceImpl, type SurfacesService } from './surfaces_service';
+export {
+  SurfacesServiceImpl,
+  type RenderPayloadOptions,
+  type SurfacesService,
+} from './surfaces_service';
+export { createImageAssetSource } from './image_asset_source';
+export type { SlackAssetFile, SlackAssetSource } from './slack_assets';
