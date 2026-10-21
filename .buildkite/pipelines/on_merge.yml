@@ -34,7 +34,7 @@ steps:
           no_cone: true
           paths:
             - '/.buildkite/'
-            - '/.node-version'
+            - '/.nvmrc'
             - '/package.json'
             - '/tsconfig.base.json'
             - '/versions.json'
@@ -264,6 +264,7 @@ steps:
     depends_on:
       - build
     build:
+      message: '${BUILDKITE_MESSAGE}'
       branch: '${BUILDKITE_BRANCH}'
       commit: '${BUILDKITE_COMMIT}'
       env:
@@ -338,7 +339,7 @@ steps:
       - sparse-checkout#v1.6.0:
           paths:
             - .buildkite
-            - .node-version
+            - .nvmrc
             - package.json
             - tsconfig.base.json
             - versions.json
