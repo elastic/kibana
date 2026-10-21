@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
-import { seriesIdSchema, tagsSchema } from './common';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { futureIsoDateTime, seriesIdSchema, tagsSchema } from './common';
 import { ID_MAX_LENGTH, MAX_BULK_ITEMS } from './constants';
 
 export const ALERT_EPISODE_STATUS = {
@@ -36,9 +36,11 @@ const snoozeActionSchema = lazySchema(() =>
   z
     .object({
       action_type: z.literal(ALERT_EPISODE_ACTION_TYPE.SNOOZE).describe('Snoozes an alert.'),
-      snoozed_until: isoDateTime()
+      snoozed_until: futureIsoDateTime()
         .optional()
-        .describe('ISO datetime until which the alert should be snoozed.'),
+        .describe(
+          'ISO datetime until which the alert should be snoozed. Must be in the future; a past or current instant is rejected with 400. Omit for an indefinite snooze.'
+        ),
     })
     .strict()
     .meta({ id: 'alerting_snooze_alert_action' })

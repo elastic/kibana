@@ -38,7 +38,7 @@ export const actionPolicyResponseSchema = lazySchema(() =>
         .string()
         .optional()
         .describe(
-          'The ISO datetime until which the policy is snoozed. Omitted when the policy is not snoozed.'
+          'The stored snooze expiry: the ISO datetime until which the policy is snoozed. Was in the future when set; it may now lie in the past once the snooze has elapsed. Absent once `_unsnooze` runs or when the policy was never snoozed.'
         ),
       created_by: actorSchema.nullable().describe('The actor who created the action policy.'),
       created_at: isoDateTime().describe('The ISO datetime when the action policy was created.'),

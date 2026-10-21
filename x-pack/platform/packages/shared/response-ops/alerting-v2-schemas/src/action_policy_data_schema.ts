@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { z, isoDateTime, lazySchema } from '@kbn/zod/v4';
-import { durationSchema, queryIntSchema } from './common';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { durationSchema, futureIsoDateTime, queryIntSchema } from './common';
 import { bulkByIdsSchema } from './bulk_operation_schema';
 import {
   ACTION_POLICY_MAX_DESTINATIONS,
@@ -255,8 +255,8 @@ export type ActionPolicyDestination = z.infer<typeof actionPolicyDestinationSche
 export const snoozeActionPolicyBodySchema = lazySchema(() =>
   z
     .object({
-      snoozed_until: isoDateTime().describe(
-        'The ISO datetime until which the action policy should be snoozed.'
+      snoozed_until: futureIsoDateTime().describe(
+        'The ISO datetime until which the action policy should be snoozed. Must be in the future; a past or current instant is rejected with 400.'
       ),
     })
     .strict()
@@ -273,8 +273,8 @@ export type SnoozeActionPolicyBody = z.infer<typeof snoozeActionPolicyBodySchema
 export const bulkSnoozeActionPoliciesBodySchema = lazySchema(() =>
   bulkByIdsSchema
     .extend({
-      snoozed_until: isoDateTime().describe(
-        'The ISO datetime until which the targeted action policies should be snoozed.'
+      snoozed_until: futureIsoDateTime().describe(
+        'The ISO datetime until which the targeted action policies should be snoozed. Must be in the future; a past or current instant is rejected with 400.'
       ),
     })
     .strict()
