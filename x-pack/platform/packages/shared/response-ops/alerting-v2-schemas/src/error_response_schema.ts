@@ -48,7 +48,7 @@ export const errorResponseSchema = lazySchema(() =>
         .record(z.string(), z.unknown())
         .optional()
         .describe(
-          'Optional structured context whose keys depend on `code`. Identifier keys such as `rule_id`, `action_policy_id` and `group_hash` are stable, permanent public identifiers. On a 400 request-validation error, `details.source` (`params`, `query`, or `body`) names the failing part and is the only guaranteed key; the sibling `details.errors` is a validation-library tree whose internal shape may change — do not branch on it.'
+          'Optional structured context whose keys depend on `code`. Identifier keys such as `rule_id`, `action_policy_id` and `group_hash` are stable, permanent public identifiers. On a 400 request-validation error, `details.source` (`params`, `query`, or `body`) names the failing part and is the only guaranteed key. The sibling `details.errors` may change. Do not branch on it.'
         ),
     })
     .meta({ id: 'alerting_error_response' })

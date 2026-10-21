@@ -10,8 +10,6 @@ import { buildOasOperation, invalidResponseExample } from '../oas_utils';
 import type { AlertingOasOperationObject } from '../oas_types';
 import { BULK_OPERATION_REQUEST, RULE_RESPONSE } from './rule_oas_shared_examples';
 
-// One of the two requested ids matched no rule: the request still succeeds and
-// the missing id is reported per item, as on every other bulk route.
 export const BULK_GET_RULES_RESPONSE: BulkGetRulesResponse = {
   items: [RULE_RESPONSE],
   errors: [

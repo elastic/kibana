@@ -16,7 +16,7 @@ import {
   isStateTransitionAllowed,
   putRuleDataSchema,
   updateRuleDataSchema,
-  type BulkCreateRuleError,
+  type BulkCreateError,
   type BulkGetRulesResponse,
   type PutRuleData,
   type RuleKind,
@@ -741,7 +741,7 @@ export class RulesClient {
     const nowIso = new Date().toISOString();
     const ruleVersion = this.getNextVersion();
 
-    const errors: BulkCreateRuleError[] = [];
+    const errors: BulkCreateError[] = [];
     const prepared: PreparedRule[] = [];
     // Persist-time errors come back keyed by the stored id, which for an item
     // without a client-supplied id is one the caller never saw; map them back

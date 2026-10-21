@@ -1048,7 +1048,7 @@ export const findRulesRequestSchema = lazySchema(() =>
         .max(MAX_KQL_LENGTH)
         .optional()
         .describe(
-          'A KQL filter to apply to the rules. Supported fields: id, kind, enabled, metadata.name, metadata.description, metadata.tags, metadata.routing_tags. Cannot be empty; omit it to list every rule.'
+          'A KQL filter to apply to the rules. Supported fields: id, kind, enabled, metadata.name, metadata.description, metadata.tags, metadata.routing_tags. Cannot be empty. Omit it to list every rule.'
         ),
       sort_field: findRulesSortFieldSchema.optional().describe('The field to sort rules by.'),
       sort_order: z.enum(['asc', 'desc']).optional().describe('The direction to sort rules.'),
@@ -1219,7 +1219,7 @@ export type BulkCreateRulesParams = z.input<typeof bulkCreateRulesRequestSchema>
  * the request because an item need not carry an `id`; `id` is echoed only when
  * the client supplied one, never generated for a rule that was not created.
  */
-export const bulkCreateRuleErrorSchema = lazySchema(() =>
+export const bulkCreateErrorSchema = lazySchema(() =>
   bulkErrorSchema
     .omit({ id: true })
     .extend({
@@ -1233,10 +1233,10 @@ export const bulkCreateRuleErrorSchema = lazySchema(() =>
         .optional()
         .describe('The client-supplied `id` of the failed item. Omitted when the item had none.'),
     })
-    .meta({ id: 'alerting_bulk_create_rule_error' })
+    .meta({ id: 'alerting_bulk_create_error' })
 );
 
-export type BulkCreateRuleError = z.infer<typeof bulkCreateRuleErrorSchema>;
+export type BulkCreateError = z.infer<typeof bulkCreateErrorSchema>;
 
 /**
  * Response schema for `POST /api/alerting/v2/rules/_bulk_create`.
@@ -1250,7 +1250,7 @@ export const bulkCreateRulesResponseSchema = lazySchema(() =>
         .array(ruleResponseSchema)
         .describe('Rules that were created. Rules listed in `errors` are not included.'),
       errors: z
-        .array(bulkCreateRuleErrorSchema)
+        .array(bulkCreateErrorSchema)
         .describe(
           'Errors for rules that could not be created. Each entry carries the `index` of the item in the request, its `id` when one was supplied, and the error. Empty when every requested rule was created.'
         ),

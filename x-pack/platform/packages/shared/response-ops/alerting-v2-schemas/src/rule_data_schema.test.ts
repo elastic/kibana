@@ -2097,6 +2097,7 @@ describe('bulkGetRulesResponseSchema', () => {
         },
       ],
     });
+
     expect(result.errors).toEqual([expect.objectContaining({ id: 'rule-missing' })]);
   });
 

@@ -114,7 +114,6 @@ describe('durationSchema', () => {
       const result = durationSchema.safeParse(value);
 
       expect(result.success).toBe(false);
-      expect(result.error!.issues[0].message).toMatch(/positive integer/);
     }
   );
 

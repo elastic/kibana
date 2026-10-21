@@ -57,11 +57,6 @@ export const actionPolicyDestinationSchema = lazySchema(() =>
     .meta({ id: 'alerting_action_policy_destination' })
 );
 
-/**
- * The destinations list shared by create, PUT and PATCH: 1..ACTION_POLICY_MAX_DESTINATIONS
- * entries, no two of which name the same `type` + `id`, so a workflow is never triggered twice
- * for one alert.
- */
 const actionPolicyDestinationsSchema = lazySchema(() =>
   z
     .array(actionPolicyDestinationSchema)
@@ -82,7 +77,7 @@ const actionPolicyDestinationsSchema = lazySchema(() =>
       });
     })
     .describe(
-      'The list of destinations. At least one is required; each one can appear at most once.'
+      'The list of destinations. At least one is required. Each one can appear at most once.'
     )
 );
 
@@ -256,7 +251,7 @@ export const snoozeActionPolicyBodySchema = lazySchema(() =>
   z
     .object({
       snoozed_until: futureIsoDateTime().describe(
-        'The ISO datetime until which the action policy should be snoozed. Must be in the future; a past or current instant is rejected with 400.'
+        'The ISO datetime until which the action policy should be snoozed. Must be in the future. A past or current instant is rejected with 400.'
       ),
     })
     .strict()
@@ -274,7 +269,7 @@ export const bulkSnoozeActionPoliciesBodySchema = lazySchema(() =>
   bulkByIdsSchema
     .extend({
       snoozed_until: futureIsoDateTime().describe(
-        'The ISO datetime until which the targeted action policies should be snoozed. Must be in the future; a past or current instant is rejected with 400.'
+        'The ISO datetime until which the targeted action policies should be snoozed. Must be in the future. A past or current instant is rejected with 400.'
       ),
     })
     .strict()
@@ -393,7 +388,7 @@ export const findActionPoliciesRequestSchema = lazySchema(() =>
         .max(MAX_KQL_LENGTH)
         .optional()
         .describe(
-          'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled. Cannot be empty; omit it to list every action policy.'
+          'A KQL filter to apply to the action policies. Supported fields: id, name, description, enabled. Cannot be empty. Omit it to list every action policy.'
         ),
       search: z
         .string()

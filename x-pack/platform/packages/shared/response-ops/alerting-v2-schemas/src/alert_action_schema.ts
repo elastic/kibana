@@ -39,7 +39,7 @@ const snoozeActionSchema = lazySchema(() =>
       snoozed_until: futureIsoDateTime()
         .optional()
         .describe(
-          'ISO datetime until which the alert should be snoozed. Must be in the future; a past or current instant is rejected with 400. Omit for an indefinite snooze.'
+          'ISO datetime until which the alert should be snoozed. Must be in the future. A past or current instant is rejected with 400. Omit for an indefinite snooze.'
         ),
     })
     .strict()
@@ -111,7 +111,7 @@ const tagEpisodeActionSchema = lazySchema(() =>
         .min(1)
         .nullable()
         .describe(
-          "Replaces the alert's tags. Send `null` to clear them; an empty array is rejected."
+          "Replaces the alert's tags. Send `null` to clear them. An empty array is rejected."
         ),
     })
     .strict()

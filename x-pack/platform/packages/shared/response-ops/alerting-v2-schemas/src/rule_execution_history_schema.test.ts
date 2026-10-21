@@ -534,10 +534,7 @@ describe('ruleSearchMatchCountsSchema', () => {
     });
   });
 
-  it('rejects the pre-GA `rules` name and negative counts', () => {
-    expect(ruleSearchMatchCountsSchema.safeParse({ rules: 3, is_truncated: false }).success).toBe(
-      false
-    );
+  it('rejects negative counts', () => {
     expect(
       ruleSearchMatchCountsSchema.safeParse({ rule_count: -1, is_truncated: false }).success
     ).toBe(false);

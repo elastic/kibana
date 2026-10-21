@@ -36,7 +36,7 @@ export class BulkGetRulesRoute extends BaseAlertingRoute {
     availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Get rules in bulk',
     description:
-      'Returns the requested rules. Ids that match no rule are reported per item in `errors` as `RULE_NOT_FOUND`; the request itself succeeds as long as it is valid.',
+      'Returns the requested rules. Ids that match no rule are reported per item in `errors` as `RULE_NOT_FOUND`. The request itself succeeds as long as it is valid.',
     oasOperationObject: bulkGetRulesOasExamples,
   } as const;
   static schemas = {
