@@ -32,6 +32,7 @@ import {
 } from '../../../lib/significant_events/events/cleanup_stale_events';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
 import { resolveInvestigationStatuses } from '../../../lib/significant_events/events/resolve_investigation_status';
+import type { DetectionClient } from '../../../lib/significant_events/detections';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import type { EventsFilterOptions } from '../../../lib/significant_events/events/types';
 import {
@@ -58,6 +59,24 @@ const parseChangePointType = (value: string | undefined): ChangePointType | unde
   }
   return CHANGE_POINT_TYPES.includes(value as ChangePointType)
     ? (value as ChangePointType)
+    : undefined;
+};
+
+/** A stored detection as the lifecycle lists it; what the detection lacks comes from `fallback`. */
+const toLifecycleDetection = (
+  hit: Detection,
+  fallback: { rule_name?: string; source_id?: string } = {}
+): LifecycleDetection | undefined => {
+  const changePointType = parseChangePointType(hit.change_point_type);
+  return changePointType
+    ? {
+        detection_id: hit.detection_id,
+        rule_name: hit.rule_name ?? fallback.rule_name ?? hit.rule_uuid,
+        rule_uuid: hit.rule_uuid,
+        source_id: hit.source_id ?? fallback.source_id,
+        change_point_type: changePointType,
+        '@timestamp': hit['@timestamp'],
+      }
     : undefined;
 };
 
@@ -137,6 +156,31 @@ const toEventsFilterOptions = ({
   investigationStates: toArray(investigationState),
   search: search || undefined,
 });
+
+/**
+ * The detections the classifier closed without the agent on the strength of this event. They are in
+ * no signal, so they are found by the event their skip marker names; each marker says why.
+ */
+const findSkippedDetections = async ({
+  detectionClient,
+  eventId,
+  known,
+}: {
+  detectionClient: Pick<DetectionClient, 'findSkippedForEvent'>;
+  eventId: string;
+  known: ReadonlySet<string>;
+}): Promise<{ detections: LifecycleDetection[]; truncated: boolean }> => {
+  const { hits, truncated } = await detectionClient.findSkippedForEvent(eventId);
+  const detections = hits
+    .flatMap((hit) => {
+      const detection = toLifecycleDetection(hit);
+      return detection && hit.skip && !known.has(hit.detection_id)
+        ? [{ ...detection, skip: hit.skip }]
+        : [];
+    })
+    .sort((a, b) => a['@timestamp'].localeCompare(b['@timestamp']));
+  return { detections, truncated };
+};
 
 const eventsSearchRoute = createServerRoute({
   endpoint: 'GET /internal/significant_events/events',
@@ -266,32 +310,23 @@ const eventsLifecycleRoute = createServerRoute({
       allDetectionHits.filter(hasChangePointType).map((h) => [h.detection_id, h])
     );
 
-    const detections: LifecycleDetection[] = embedded.flatMap(
-      ({ detection_id, rule_name, source_id, change_point_type }) => {
-        const hit = hitsByDetectionId.get(detection_id);
-        if (!hit) {
-          return [];
-        }
+    const detections = embedded.flatMap(({ detection_id, rule_name, source_id }) => {
+      const hit = hitsByDetectionId.get(detection_id);
+      const detection = hit && toLifecycleDetection(hit, { rule_name, source_id });
+      return detection ? [detection] : [];
+    });
 
-        const hitChangePointType = parseChangePointType(hit.change_point_type);
-        if (!hitChangePointType) {
-          return [];
-        }
+    const skipped = await findSkippedDetections({
+      detectionClient,
+      eventId: params.path.id,
+      known: new Set(detections.map(({ detection_id: id }) => id)),
+    });
 
-        return [
-          {
-            detection_id,
-            rule_name: hit.rule_name ?? rule_name,
-            rule_uuid: hit.rule_uuid,
-            source_id: hit.source_id ?? source_id,
-            change_point_type: hitChangePointType,
-            '@timestamp': hit['@timestamp'],
-          },
-        ];
-      }
-    );
-
-    return { detections, events };
+    return {
+      detections: [...detections, ...skipped.detections],
+      events,
+      ...(skipped.truncated ? { skipped_truncated: true } : {}),
+    };
   },
 });
 
