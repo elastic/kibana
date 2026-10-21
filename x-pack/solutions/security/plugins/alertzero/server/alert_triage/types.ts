@@ -14,6 +14,11 @@ export interface TriageAlert {
   timestamp: number;
   status: string;
   tags: readonly string[];
+  /**
+   * Set on a claimed alert the Worker settings now exclude (raised severity floor, excluded rule
+   * tag, building block). Its claim is still released, but it is not planned again.
+   */
+  excludedBySettings?: boolean;
 }
 
 export interface RuleAllocation {
