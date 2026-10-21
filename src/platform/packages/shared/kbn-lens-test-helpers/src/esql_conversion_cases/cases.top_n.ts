@@ -191,7 +191,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       dataset: logs,
       description: 'single terms with other bucket ordered alphabetically',
       columns: {
-        col1: terms('host.keyword', { otherBucket: true }),
+        col1: terms('host.keyword', { size: 3, otherBucket: true }),
         col2: metric('average', 'bytes'),
       },
       columnOrder: ['col1', 'col2'],
@@ -201,12 +201,15 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
           field: 'host.keyword',
           score: 'COUNT(*)',
           sort: 'host.keyword ASC',
-          size: 5,
+          size: 3,
         })} | STATS AVG(bytes) BY host.keyword | ${otherNamedFlag(
           'host.keyword'
-        )} | SORT named_host_keyword DESC, host.keyword ASC | LIMIT 6 | DROP named_host_keyword`,
+        )} | SORT named_host_keyword DESC, host.keyword ASC | LIMIT 4 | DROP named_host_keyword`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+        // The dataset has 4 hosts, so size 3 yields an Other row; "Other" sorts before the
+        // lowercase hosts in plain ASC order, so this fails without the named flag.
+        expectedLastRow: { 'host.keyword': 'Other' },
       },
     },
     {
@@ -214,7 +217,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       dataset: logs,
       description: 'single terms with other bucket ordered alphabetically DESC keeps Other last',
       columns: {
-        col1: terms('host.keyword', { otherBucket: true, orderDirection: 'desc' }),
+        col1: terms('host.keyword', { size: 3, otherBucket: true, orderDirection: 'desc' }),
         col2: metric('average', 'bytes'),
       },
       columnOrder: ['col1', 'col2'],
@@ -224,12 +227,13 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
           field: 'host.keyword',
           score: 'COUNT(*)',
           sort: 'host.keyword DESC',
-          size: 5,
+          size: 3,
         })} | STATS AVG(bytes) BY host.keyword | ${otherNamedFlag(
           'host.keyword'
-        )} | SORT named_host_keyword DESC, host.keyword DESC | LIMIT 6 | DROP named_host_keyword`,
+        )} | SORT named_host_keyword DESC, host.keyword DESC | LIMIT 4 | DROP named_host_keyword`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+        expectedLastRow: { 'host.keyword': 'Other' },
       },
     },
     {
@@ -258,6 +262,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         )} | SORT named_host_keyword DESC, \`AVG(bytes)\` DESC, host.keyword ASC | LIMIT 4 | DROP named_host_keyword`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+        expectedLastRow: { 'host.keyword': 'Other' },
       },
     },
     {
@@ -286,6 +291,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         )} | SORT named_host_keyword DESC, \`AVG(bytes)\` ASC, host.keyword ASC | LIMIT 4 | DROP named_host_keyword`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+        expectedLastRow: { 'host.keyword': 'Other' },
       },
     },
     {
@@ -319,6 +325,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
         )} | SORT named_clientip DESC, \`AVG(bytes)\` DESC, clientip ASC | LIMIT 10 | DROP named_clientip`,
         columnNames: ['AVG(bytes)', 'clientip'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], clientip: ['col1'] },
+        expectedLastRow: { clientip: 'Other' },
       },
     },
     {
