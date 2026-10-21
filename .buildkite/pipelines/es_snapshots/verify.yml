@@ -69,8 +69,8 @@ steps:
     depends_on:
       - build
     env:
-      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'configs'
-      SCOUT_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/scout/configs.sh'
+      SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
+      SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
       SCOUT_TEST_CHANNELS: ci-on-commit
     retry:
       automatic:
@@ -89,7 +89,6 @@ steps:
       - ftr-configs
       - jest-integration
       - scout_test_lanes
-      - scout-agent-builder-smoke-tests
 
   - wait: ~
     continue_on_failure: true
