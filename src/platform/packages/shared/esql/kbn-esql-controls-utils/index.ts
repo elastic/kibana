@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getEsqlControls, getAllEsqlControls } from './get_esql_controls';
-export { getVariableNamePrefix } from './get_variable_name_prefix';
+export { getEsqlControls, getAllEsqlControls } from './src/get_esql_controls';
+export { getVariableNamePrefix } from './src/get_variable_name_prefix';
