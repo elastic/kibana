@@ -217,6 +217,12 @@ export interface IEsqlSearchOptions extends IBaseSearchOptions {
    * receive the `_meta` field on columns in the response.
    */
   columnMetadata?: boolean;
+
+  /**
+   * When true, Elasticsearch includes a `profile` object on the response.
+   * Use this for an explicit debug view. It is extra work on the cluster.
+   */
+  profile?: boolean;
 }
 
 /**
