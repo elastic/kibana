@@ -354,9 +354,9 @@ Rules:
 
 <esql_rules>
 Run ES|QL from the sandbox with `nightshift_sandbox_bash` — never Agent Builder ES|QL tools.
-Read `/workspace/elastic.md` first: it names the `connector_id` you must pass on **every**
-Elasticsearch command and the `CONNECTOR_*` variables that command receives. A command without
-`connector_id` gets no credentials and cannot reach the cluster. Keep responses small — large result
+Read `/workspace/elastic.md` first: it names the `connector_id` or `secret_keys` you must pass on
+**every** Elasticsearch command and the variables that command receives. A command without them
+gets no credentials and cannot reach the cluster. Keep responses small — large result
 sets overflow context:
 
 - Prefer STATS aggregations (COUNT(*), AVG(), MAX(), etc.) over raw rows; they're more informative
@@ -368,7 +368,7 @@ sets overflow context:
 - **Mandatory time scope.** Every data query must filter `@timestamp` to an absolute ISO 8601
   window. A `STATS` with no `@timestamp` filter scans the entire index and will timeout. Use
   literal timestamps, not `now-1h`. Schema
-  probes (`| LIMIT 0`, or a single-row `| LIMIT 1`) are exempt.
+  probes (`| KEEP <prefix>* | LIMIT 0`, or a single-row `| LIMIT 1`) are exempt.
 - **Filter on structured fields before matching text.** Free-text matching on message fields
   (`LIKE`, `RLIKE`, especially with a leading `*` or `%`) is the slowest kind of query on large
   log indices. First narrow with structured fields — service, host, pod or container, log level,
@@ -384,14 +384,16 @@ sets overflow context:
   query you expect to be expensive on its own, not batched with other calls, so it does not delay
   results you could already act on.
 - Kickoff `Related sources` list each source as `- <slug> (id <id>): FROM <view_name>`. Probe a
-  source with `FROM <view_name> | LIMIT 0` before querying it, and keep the literal `$.` prefix of
-  the view name. If a view is not accessible, note it and continue with other signals. The
+  source's columns with `FROM <view_name> | KEEP <prefix>* | LIMIT 0` and `?format=txt` before
+  querying it (a bare `LIMIT 0` on a wide view returns every column), and keep the literal `$.`
+  prefix of the view name. If a view is not accessible, note it and continue with other signals. The
   `source_id` values in the kickoff context are source ids: match them to the `id` on these lines to
   find the view that holds an entity's data. When the kickoff says the requested sources could not be
   resolved, no source scope applies: say so in your conclusion and use the baseline fallback indices.
 - Baseline fallback indices are `logs-*`, `metrics-*`, and `traces-*`. Discover shape from Cortex
-  pages first, or run `FROM <target> | LIMIT 0` (columns only).
-- POST ES|QL to `$CONNECTOR_CONFIG_URL/_query` as shown in `/workspace/elastic.md`. Pipe large JSON
+  pages first, or run `FROM <target> | KEEP <prefix>* | LIMIT 0` with `?format=txt`, or
+  `_field_caps?fields=<prefix>*`.
+- POST ES|QL to `<url>/_query` as shown in `/workspace/elastic.md`. Pipe large JSON
   through `jq` and write bulky output to a file under `/workspace` instead of pasting it back.
 
 </esql_rules>
@@ -400,7 +402,7 @@ sets overflow context:
 Connector credentials are never stored in the sandbox. `/workspace/connectors.md` lists the
 connectors you may use and their ids. To call one, pass its id as the `connector_id` parameter of
 `nightshift_sandbox_bash`; for that single command only, the environment contains `CONNECTOR_ID`,
-`CONNECTOR_TYPE`, a `CONNECTOR_CONFIG_<KEY>` per setting, and a `CONNECTOR_SECRET_<KEY>` per
+`CONNECTOR_TYPE`, a `CONNECTOR_CONFIG_<KEY>` per setting, and a `CONNECTOR_HEADER_<NAME>` per
 credential. Discover the exact names with `env | grep ^CONNECTOR_ | cut -d= -f1`.
 
 If a connector you expected is not listed, it is not reachable from the sandbox — do not guess
@@ -412,7 +414,8 @@ incident, or verifying a webhook endpoint is reachable. Never print, log, or wri
 to files; they are redacted from command output.
 
 Elasticsearch is reached the same way. Read `/workspace/elastic.md` with
-`nightshift_sandbox_view_file` for the connector id to pass and the variables it exposes, then run
+`nightshift_sandbox_view_file` for the connector id or secret keys to pass and the variables they
+expose, then run
 your queries through `nightshift_sandbox_bash`. This is the only supported query path — do not look
 for Agent Builder ES|QL or observability tools.
 

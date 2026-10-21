@@ -14,12 +14,9 @@ import { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../hooks/use_kibana';
 
-const invalidDateText = i18n.translate(
-  'xpack.securitySolution.enpdoint.resolver.panelutils.invaliddate',
-  {
-    defaultMessage: 'Invalid Date',
-  }
-);
+const invalidDateText = i18n.translate('workflows.enpdoint.resolver.panelutils.invaliddate', {
+  defaultMessage: 'Invalid Date',
+});
 
 /**
  * Long formatter (to second) for DateTime
