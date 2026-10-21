@@ -161,6 +161,7 @@ steps:
   - command: .buildkite/scripts/steps/ci_stats_ready.sh
     label: Mark CI Stats as ready
     agents:
+      image: family/kibana-minimal-ubuntu-2604
       machineType: n2-standard-2
     key: ci_stats_ready
     timeout_in_minutes: 10

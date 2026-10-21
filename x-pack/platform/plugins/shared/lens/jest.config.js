@@ -12,7 +12,7 @@
 // Jest loads each project independently, so per-tree setup files stay scoped.
 //
 // `roots` is intentionally set even though `projects` makes it a no-op at
-// runtime: the regex-based parser in `src/.../kbn-test/src/jest/configs/
+// runtime: the regex-based parser in `src/.../kbn-jest/src/configs/
 // get_jest_configs.ts` does not understand `projects` and would otherwise
 // default `roots` to `<rootDir>` (= repo root), causing this config to look
 // like it owns every test file in the repo and triggering a SearchSource
@@ -26,7 +26,7 @@
 // the right tree-scoped config directly.
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/lens'],
   projects: [
