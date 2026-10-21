@@ -12,6 +12,8 @@ import {
   RUM_OTEL_LOGS_CUSTOM_TEMPLATE,
   RUM_OTEL_SESSION_ID_KEYWORD,
   RUM_OTEL_TRACES_CUSTOM_TEMPLATE,
+  RUM_REPLAY_COMPONENT_TEMPLATE_NAME,
+  RUM_REPLAY_INDEX_TEMPLATE_NAME,
   RUM_SESSIONS_INDEX,
   RUM_SESSIONS_INDEX_SORT_FIELD,
   RUM_SESSIONS_INDEX_SORT_ORDER,
@@ -20,15 +22,19 @@ import {
 import {
   composedAttributesFromSimulate,
   ensureOtelSessionSort,
+  ensureReplayIndexTemplate,
   ensureSessionsDestSorted,
   hasOtelSessionIdMapping,
+  hasReplayComponentMappings,
   isReplayOtelStream,
   matchesIndexSort,
   mergeOtelCustomMappings,
+  mergeReplayComponentMappings,
   mergeSortSettings,
   otelSourceStreams,
   parseIndexSort,
   resetSessionsTransformAfterDestRecreate,
+  rumReplayComponentMappings,
   withSessionIdAttributes,
   writeIndexName,
 } from './rum_index_sort';
@@ -423,9 +429,13 @@ describe('ensureOtelSessionSort', () => {
         },
         mappings: {
           properties: {
+            attributes: { subobjects: false },
             resource: {
               properties: {
-                attributes: { properties: { 'session.id': { type: 'keyword' } } },
+                attributes: {
+                  subobjects: false,
+                  properties: { 'session.id': { type: 'keyword' } },
+                },
               },
             },
           },
@@ -470,7 +480,7 @@ describe('ensureOtelSessionSort', () => {
     });
   });
 
-  it('puts settings-only @custom when no OTel streams exist yet', async () => {
+  it('clones Fleet attributes and maps session.id on greenfield clusters when no OTel streams exist yet', async () => {
     const client = mockClient({
       writeSort: { field: [], order: [] },
       streams: [],
@@ -480,17 +490,21 @@ describe('ensureOtelSessionSort', () => {
     );
 
     await ensureOtelSessionSort({ client, logger });
-    expect(client.indices.simulateIndexTemplate).not.toHaveBeenCalled();
-    expect(client.cluster.putComponentTemplate).toHaveBeenCalled();
+    expect(client.indices.simulateIndexTemplate).toHaveBeenCalled();
+    const tracesPut = (client.cluster.putComponentTemplate as jest.Mock).mock.calls.find(
+      ([body]: Array<{ name: string }>) => body.name === RUM_OTEL_TRACES_CUSTOM_TEMPLATE
+    )?.[0];
     expect(
-      (client.cluster.putComponentTemplate as jest.Mock).mock.calls.every(
-        ([body]: Array<{ template?: { mappings?: unknown } }>) => body.template?.mappings == null
-      )
-    ).toBe(true);
+      tracesPut?.template?.mappings?.properties?.resource?.properties?.attributes?.properties
+    ).toEqual({
+      'k8s.cluster.name': { type: 'keyword' },
+      'service.name': { type: 'keyword' },
+      'session.id': { ...RUM_OTEL_SESSION_ID_KEYWORD },
+    });
     expect(client.indices.rollover).not.toHaveBeenCalled();
   });
 
-  it('skips greenfield @custom when sort settings are already present', async () => {
+  it('repairs a settings-only @custom that is missing the session.id mapping', async () => {
     const client = mockClient({
       existingCustom: {
         settings: {
@@ -507,8 +521,34 @@ describe('ensureOtelSessionSort', () => {
     });
 
     await ensureOtelSessionSort({ client, logger });
-    expect(client.cluster.putComponentTemplate).not.toHaveBeenCalled();
-    expect(client.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+    expect(client.indices.simulateIndexTemplate).toHaveBeenCalled();
+    const tracesPut = (client.cluster.putComponentTemplate as jest.Mock).mock.calls.find(
+      ([body]: Array<{ name: string }>) => body.name === RUM_OTEL_TRACES_CUSTOM_TEMPLATE
+    )?.[0];
+    expect(
+      tracesPut?.template?.mappings?.properties?.resource?.properties?.attributes?.properties?.[
+        'session.id'
+      ]
+    ).toEqual({ ...RUM_OTEL_SESSION_ID_KEYWORD });
+  });
+
+  it('skips putting @custom sort when simulate fails and session.id is not mapped', async () => {
+    const client = mockClient({
+      writeSort: { field: [], order: [] },
+      streams: [],
+    });
+    (client.indices.simulateIndexTemplate as jest.Mock).mockRejectedValue(
+      new Error('no built-in otel template')
+    );
+
+    await ensureOtelSessionSort({ client, logger });
+    expect(
+      (client.cluster.putComponentTemplate as jest.Mock).mock.calls.some(
+        ([body]: Array<{ name: string }>) =>
+          body.name === RUM_OTEL_TRACES_CUSTOM_TEMPLATE ||
+          body.name === RUM_OTEL_LOGS_CUSTOM_TEMPLATE
+      )
+    ).toBe(false);
   });
 
   it('does not throw when putting @custom fails', async () => {
@@ -553,5 +593,54 @@ describe('ensureOtelSessionSort', () => {
         ([body]: Array<{ name: string }>) => body.name === RUM_OTEL_LOGS_CUSTOM_TEMPLATE
       )
     ).toBe(true);
+  });
+});
+
+describe('ensureReplayIndexTemplate', () => {
+  it('puts rum-replay-mappings and rum-replay when missing and preserves additive fields', async () => {
+    expect(hasReplayComponentMappings({})).toBe(false);
+    expect(hasReplayComponentMappings(rumReplayComponentMappings)).toBe(true);
+    const merged = mergeReplayComponentMappings({
+      properties: {
+        attributes: {
+          properties: {
+            'user.key': { type: 'keyword' },
+          },
+        },
+      },
+    });
+    expect(hasReplayComponentMappings(merged)).toBe(true);
+    expect(
+      (merged.properties as { attributes: { properties: Record<string, unknown> } }).attributes
+        .properties['user.key']
+    ).toEqual({ type: 'keyword' });
+
+    const notFound = Object.assign(new Error('not found'), { statusCode: 404 });
+    const putComponentTemplate = jest.fn().mockResolvedValue({});
+    const putIndexTemplate = jest.fn().mockResolvedValue({});
+    const client = {
+      cluster: {
+        getComponentTemplate: jest.fn().mockRejectedValue(notFound),
+        putComponentTemplate,
+      },
+      indices: {
+        getIndexTemplate: jest.fn().mockRejectedValue(notFound),
+        putIndexTemplate,
+      },
+    } as unknown as ElasticsearchClient;
+
+    await ensureReplayIndexTemplate({ client, logger });
+
+    expect(putComponentTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: RUM_REPLAY_COMPONENT_TEMPLATE_NAME,
+      })
+    );
+    expect(putIndexTemplate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: RUM_REPLAY_INDEX_TEMPLATE_NAME,
+        composed_of: [RUM_REPLAY_COMPONENT_TEMPLATE_NAME],
+      })
+    );
   });
 });

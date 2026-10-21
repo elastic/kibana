@@ -44,6 +44,10 @@ export const RUM_OTEL_TRACES_CUSTOM_TEMPLATE = 'traces-otel@custom';
 export const RUM_OTEL_LOGS_CUSTOM_TEMPLATE = 'logs-otel@custom';
 export const RUM_OTEL_DATA_STREAM_PATTERN = 'traces-*.otel-*,logs-*.otel-*';
 export const RUM_REPLAY_DATA_STREAM_PREFIX = 'logs-rum.replay-';
+export const RUM_REPLAY_COMPONENT_TEMPLATE_NAME = 'rum-replay-mappings';
+export const RUM_REPLAY_INDEX_TEMPLATE_NAME = 'rum-replay';
+export const RUM_REPLAY_INDEX_PATTERN = 'logs-rum.replay-*';
+export const RUM_REPLAY_TEMPLATE_PRIORITY = 500;
 export const RUM_OTEL_CUSTOM_PURPOSE = 'otel-session-id-index-sort';
 export const RUM_OTEL_SESSION_ID_KEYWORD = {
   type: 'keyword',

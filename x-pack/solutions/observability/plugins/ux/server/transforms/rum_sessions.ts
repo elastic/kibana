@@ -361,6 +361,11 @@ export const applyRumAnalyticsSettings = async ({
     syncDelay: delay,
     sourceLookbackDays: lookbackDays,
   });
+  try {
+    await ensureOtelSessionSort({ client, logger });
+  } catch (error) {
+    logger?.error(`Failed to apply OTel session sort: ${extractEsErrorMessage(error)}`);
+  }
   if (!status.installed) {
     return status;
   }

@@ -13,7 +13,11 @@ import {
   RUM_OTEL_INDEX_SORT_FIELD,
   RUM_OTEL_INDEX_SORT_ORDER,
   RUM_OTEL_SESSION_ID_KEYWORD,
+  RUM_REPLAY_COMPONENT_TEMPLATE_NAME,
   RUM_REPLAY_DATA_STREAM_PREFIX,
+  RUM_REPLAY_INDEX_PATTERN,
+  RUM_REPLAY_INDEX_TEMPLATE_NAME,
+  RUM_REPLAY_TEMPLATE_PRIORITY,
   RUM_SESSIONS_INDEX,
   RUM_SESSIONS_INDEX_SORT_FIELD,
   RUM_SESSIONS_INDEX_SORT_ORDER,
@@ -292,18 +296,120 @@ const listOtelDataStreams = async (client: ElasticsearchClient): Promise<OtelDat
   }
 };
 
+export const rumReplayComponentMappings = {
+  properties: {
+    '@timestamp': { type: 'date' },
+    body: {
+      properties: {
+        text: { type: 'text', index: false },
+      },
+    },
+    attributes: {
+      type: 'object',
+      subobjects: false,
+      properties: {
+        'rr-web.event': { type: 'long' },
+        'rr-web.offset': { type: 'long' },
+        'rr-web.chunk': { type: 'short' },
+        'rr-web.total-chunks': { type: 'short' },
+        'rrweb.type': { type: 'byte' },
+        'rrweb.packed': { type: 'byte' },
+        'rum.sessionId': { type: 'keyword' },
+        'session.id': { type: 'keyword' },
+        'page.url': { type: 'keyword', ignore_above: 2048 },
+        'page.url.path': { type: 'keyword', ignore_above: 1024 },
+      },
+    },
+    resource: {
+      properties: {
+        attributes: {
+          type: 'object',
+          subobjects: false,
+          properties: {
+            'service.name': { type: 'keyword' },
+            'rum.sessionId': { type: 'keyword' },
+            'session.id': { type: 'keyword' },
+          },
+        },
+      },
+    },
+  },
+} as const;
+
+export const hasReplayComponentMappings = (mappings: unknown): boolean => {
+  const props = (
+    mappings as {
+      properties?: {
+        attributes?: { subobjects?: boolean; properties?: SettingsMap };
+        resource?: {
+          properties?: {
+            attributes?: { subobjects?: boolean; properties?: SettingsMap };
+          };
+        };
+      };
+    }
+  )?.properties;
+  const attrs = props?.attributes;
+  const resourceAttrs = props?.resource?.properties?.attributes;
+  return (
+    attrs?.subobjects === false &&
+    resourceAttrs?.subobjects === false &&
+    resourceAttrs.properties?.['session.id'] != null
+  );
+};
+
+export const mergeReplayComponentMappings = (existing?: SettingsMap): SettingsMap => {
+  const existingProps = (existing?.properties as SettingsMap | undefined) ?? {};
+  const existingAttrs = (existingProps.attributes as SettingsMap | undefined) ?? {};
+  const existingAttrProps = (existingAttrs.properties as SettingsMap | undefined) ?? {};
+  const existingResource = (existingProps.resource as SettingsMap | undefined) ?? {};
+  const existingResourceProps = (existingResource.properties as SettingsMap | undefined) ?? {};
+  const existingResourceAttrs = (existingResourceProps.attributes as SettingsMap | undefined) ?? {};
+  const existingResourceAttrProps =
+    (existingResourceAttrs.properties as SettingsMap | undefined) ?? {};
+  return {
+    ...existing,
+    properties: {
+      ...rumReplayComponentMappings.properties,
+      ...existingProps,
+      attributes: {
+        ...rumReplayComponentMappings.properties.attributes,
+        ...existingAttrs,
+        subobjects: false,
+        properties: {
+          ...rumReplayComponentMappings.properties.attributes.properties,
+          ...existingAttrProps,
+        },
+      },
+      resource: {
+        ...existingResource,
+        properties: {
+          ...existingResourceProps,
+          attributes: {
+            ...rumReplayComponentMappings.properties.resource.properties.attributes,
+            ...existingResourceAttrs,
+            subobjects: false,
+            properties: {
+              ...rumReplayComponentMappings.properties.resource.properties.attributes.properties,
+              ...existingResourceAttrProps,
+            },
+          },
+        },
+      },
+    },
+  };
+};
+
 const putOtelCustomTemplate = async ({
   client,
   logger,
   name,
   simulateIndex,
-  includeMappings,
 }: {
   client: ElasticsearchClient;
   logger?: Logger;
   name: string;
   simulateIndex: string;
-  includeMappings: boolean;
 }): Promise<void> => {
   const existing = await getExistingCustom(client, name);
   const sortReady = matchesIndexSort(
@@ -311,7 +417,29 @@ const putOtelCustomTemplate = async ({
     RUM_OTEL_INDEX_SORT_FIELD,
     RUM_OTEL_INDEX_SORT_ORDER
   );
-  if (sortReady && (!includeMappings || hasOtelSessionIdMapping(existing?.mappings))) {
+  if (sortReady && hasOtelSessionIdMapping(existing?.mappings)) {
+    return;
+  }
+  let mappings = existing?.mappings;
+  try {
+    const simulated = await client.indices.simulateIndexTemplate({ name: simulateIndex });
+    const attributes = composedAttributesFromSimulate(simulated);
+    if (attributes) {
+      mappings = mergeOtelCustomMappings({ existing: existing?.mappings, attributes });
+    }
+  } catch (error) {
+    logger?.info(
+      `simulate ${simulateIndex} failed; skipping ${name} session.id sort: ${sortErrorMessage(
+        error
+      )}`
+    );
+  }
+  // Never write index.sort.field without resource.attributes.session.id mapped;
+  // ES rejects backing index creation with unknown index sort field.
+  if (!hasOtelSessionIdMapping(mappings)) {
+    logger?.info(
+      `simulate ${simulateIndex} missing resource.attributes; skipping ${name} session.id sort`
+    );
     return;
   }
   const settings = mergeSortSettings(
@@ -324,31 +452,89 @@ const putOtelCustomTemplate = async ({
     managed_by: RUM_SESSIONS_MANAGED_BY,
     purpose: RUM_OTEL_CUSTOM_PURPOSE,
   };
-  let mappings = existing?.mappings;
-  if (includeMappings) {
-    try {
-      const simulated = await client.indices.simulateIndexTemplate({ name: simulateIndex });
-      const attributes = composedAttributesFromSimulate(simulated);
-      if (attributes) {
-        mappings = mergeOtelCustomMappings({ existing: existing?.mappings, attributes });
-      }
-    } catch (error) {
-      logger?.info(
-        `simulate ${simulateIndex} failed; ${name} settings-only: ${sortErrorMessage(error)}`
-      );
-    }
-  }
   await client.cluster.putComponentTemplate({
     name,
     template: {
       settings,
-      ...(mappings ? { mappings } : {}),
+      mappings,
     },
     _meta: meta,
   });
-  logger?.info(
-    includeMappings ? `Put ${name} session.id index sort` : `Put ${name} session.id sort settings`
+  logger?.info(`Put ${name} session.id index sort`);
+};
+
+export const ensureReplayIndexTemplate = async ({
+  client,
+  logger,
+}: {
+  client: ElasticsearchClient;
+  logger?: Logger;
+}): Promise<void> => {
+  const existingComponent = await getExistingCustom(client, RUM_REPLAY_COMPONENT_TEMPLATE_NAME);
+  if (!hasReplayComponentMappings(existingComponent?.mappings)) {
+    await client.cluster.putComponentTemplate({
+      name: RUM_REPLAY_COMPONENT_TEMPLATE_NAME,
+      template: {
+        ...(existingComponent?.settings ? { settings: existingComponent.settings } : {}),
+        mappings: mergeReplayComponentMappings(existingComponent?.mappings),
+      },
+      _meta: {
+        ...existingComponent?.meta,
+        managed_by: RUM_SESSIONS_MANAGED_BY,
+        purpose: RUM_OTEL_CUSTOM_PURPOSE,
+      },
+    });
+    logger?.info(`Put ${RUM_REPLAY_COMPONENT_TEMPLATE_NAME} component template`);
+  }
+
+  if (!client.indices.getIndexTemplate || !client.indices.putIndexTemplate) {
+    return;
+  }
+  let existingIndexTemplate:
+    | {
+        composed_of?: string[];
+        template?: { settings?: SettingsMap };
+      }
+    | undefined;
+  try {
+    const current = await client.indices.getIndexTemplate({ name: RUM_REPLAY_INDEX_TEMPLATE_NAME });
+    existingIndexTemplate = current.index_templates[0]?.index_template as
+      | { composed_of?: string[]; template?: { settings?: SettingsMap } }
+      | undefined;
+  } catch (error) {
+    if (!isEsNotFound(error)) {
+      throw error;
+    }
+  }
+  const hasComponent =
+    existingIndexTemplate?.composed_of?.includes(RUM_REPLAY_COMPONENT_TEMPLATE_NAME) ?? false;
+  const sortReady = matchesIndexSort(
+    existingIndexTemplate?.template?.settings,
+    RUM_OTEL_INDEX_SORT_FIELD,
+    RUM_OTEL_INDEX_SORT_ORDER
   );
+  if (hasComponent && sortReady) {
+    return;
+  }
+  await client.indices.putIndexTemplate({
+    name: RUM_REPLAY_INDEX_TEMPLATE_NAME,
+    index_patterns: [RUM_REPLAY_INDEX_PATTERN],
+    data_stream: {},
+    composed_of: [RUM_REPLAY_COMPONENT_TEMPLATE_NAME],
+    priority: RUM_REPLAY_TEMPLATE_PRIORITY,
+    template: {
+      settings: mergeSortSettings(
+        existingIndexTemplate?.template?.settings,
+        RUM_OTEL_INDEX_SORT_FIELD,
+        RUM_OTEL_INDEX_SORT_ORDER
+      ),
+    },
+    _meta: {
+      managed_by: RUM_SESSIONS_MANAGED_BY,
+      purpose: RUM_OTEL_CUSTOM_PURPOSE,
+    },
+  });
+  logger?.info(`Put ${RUM_REPLAY_INDEX_TEMPLATE_NAME} index template`);
 };
 
 const rolloverUnsortedOtelWrites = async ({
@@ -388,13 +574,17 @@ export const ensureOtelSessionSort = async ({
   client: ElasticsearchClient;
   logger?: Logger;
 }): Promise<void> => {
+  try {
+    await ensureReplayIndexTemplate({ client, logger });
+  } catch (error) {
+    logger?.error(`Failed to put ${RUM_REPLAY_INDEX_TEMPLATE_NAME}: ${sortErrorMessage(error)}`);
+  }
   let sourceStreams: OtelDataStream[] = [];
   try {
     sourceStreams = otelSourceStreams(await listOtelDataStreams(client));
   } catch (error) {
     logger?.error(`Failed to list OTel data streams: ${sortErrorMessage(error)}`);
   }
-  const includeMappings = sourceStreams.length > 0;
   for (const component of RUM_OTEL_CUSTOM_COMPONENTS) {
     try {
       await putOtelCustomTemplate({
@@ -402,7 +592,6 @@ export const ensureOtelSessionSort = async ({
         logger,
         name: component.name,
         simulateIndex: component.simulateIndex,
-        includeMappings,
       });
     } catch (error) {
       logger?.error(`Failed to put ${component.name}: ${sortErrorMessage(error)}`);
