@@ -6400,9 +6400,6 @@ importers:
       tape:
         specifier: 5.9.0
         version: 5.9.0
-      tar-fs:
-        specifier: 3.1.2
-        version: 3.1.2
       terser:
         specifier: 5.40.0
         version: 5.40.0
@@ -23874,9 +23871,6 @@ packages:
   tape@5.9.0:
     resolution: {integrity: sha512-czbGgxSVwRlbB3Ly/aqQrNwrDAzKHDW/kVXegp4hSFmR2c8qqm3hCgZbUy1+3QAQFGhPDG7J56UsV1uNilBFCA==}
     hasBin: true
-
-  tar-fs@3.1.2:
-    resolution: {integrity: sha512-QGxxTxxyleAdyM3kpFs14ymbYmNFrfY+pHj7Z8FgtbZ7w2//VAgLMac7sT6nRpIHjppXO2AwwEOg0bPFVRcmXw==}
 
   tar-stream@3.2.1:
     resolution: {integrity: sha512-nqsEO8zLZJvrOMdEwkA0QdCLFbetHMn95Zqu4fKwX+hkaTWJPZZOrxx/PwtxoK0MMGQmBQNRW3CPs8IFYQz4cQ==}
@@ -43333,18 +43327,6 @@ snapshots:
       object.assign: 4.1.7
       resolve: 2.0.0-next.7
       string.prototype.trim: 1.2.11
-
-  tar-fs@3.1.2:
-    dependencies:
-      pump: 3.0.4
-      tar-stream: 3.2.1
-    optionalDependencies:
-      bare-fs: 4.8.1
-      bare-path: 3.1.2
-    transitivePeerDependencies:
-      - bare-abort-controller
-      - bare-buffer
-      - react-native-b4a
 
   tar-stream@3.2.1:
     dependencies:
