@@ -42,6 +42,15 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     await testSubjects.click('rulesTab');
   };
 
+  const assertRuleEnabledState = async (ruleId: string, enabled: boolean) => {
+    await retry.try(async () => {
+      const { body: rule } = await supertest
+        .get(`/internal/alerting/rule/${encodeURIComponent(ruleId)}`)
+        .expect(200);
+      expect(rule.enabled).to.eql(enabled);
+    });
+  };
+
   const toggleRuleStatusFilter = (selector: string) => {
     return retry.try(async () => {
       const filter = await testSubjects.find(selector);
@@ -211,11 +220,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'disabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, false);
     });
 
     it('should untrack disable rule if untrack switch is true', async () => {
@@ -325,11 +330,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await header.waitUntilLoadingHasFinished();
 
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'disabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, false);
 
       await testSubjects.click('collapsedItemActions');
 
@@ -341,11 +342,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await header.waitUntilLoadingHasFinished();
 
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'enabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, true);
     });
 
     it('should delete single alert', async () => {
@@ -394,11 +391,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         expect(toastTitle).to.eql('Disabled 1 rule');
       });
 
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'disabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, false);
     });
 
     it('should enable all selection', async () => {
@@ -412,11 +405,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('bulkAction');
       await testSubjects.click('bulkEnable');
 
-      await pageObjects.triggersActionsUI.ensureRuleActionStatusApplied(
-        createdAlert.name,
-        'statusDropdown',
-        'enabled'
-      );
+      await assertRuleEnabledState(createdAlert.id, true);
     });
 
     it('should render percentile column and cells correctly', async () => {
