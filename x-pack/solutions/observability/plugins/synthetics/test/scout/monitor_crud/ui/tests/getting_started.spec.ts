@@ -36,7 +36,11 @@ test.describe.skip('GettingStarted', { tag: tags.stateful.classic }, () => {
     });
 
     await test.step('shows validation error on submit', async () => {
-      await page.testSubj.click('syntheticsMonitorConfigSubmitButton');
+      await page
+        .getByRole('navigation')
+        .getByRole('link', { name: 'Synthetics', exact: true })
+        .click();
+      await page.click('text=Create monitor');
       await expect(page.getByText('URL is required')).toBeVisible();
     });
 
