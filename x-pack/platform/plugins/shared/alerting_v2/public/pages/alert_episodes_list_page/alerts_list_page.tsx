@@ -157,10 +157,11 @@ const CUSTOM_GRID_COLUMNS_CONFIGURATION: CustomGridColumnsConfiguration = Object
   ])
 );
 
-// The table fills the space left below the KPIs and the histogram. On short viewports that space
-// only fits one or two rows, so we keep a floor that shows a usable number of rows and let the page
-// scroll instead.
-const MIN_TABLE_HEIGHT = 400;
+/*
+ * The table has a fixed height, independent of the KPIs and the histogram above it, so the grid
+ * always measures a definite height and virtualizes rows.
+ */
+const TABLE_HEIGHT = 400;
 
 /**
  * Two reasons this is a whole pixel value rather than the `1.6em` default:
@@ -687,6 +688,7 @@ const AlertsListPageContent = () => {
           flex: 1;
           min-width: 0;
           ${logicalCSS('min-height')}: 0;
+          overflow-y: auto;
         `}
       >
         <EuiFlexItem grow={false}>
@@ -717,10 +719,11 @@ const AlertsListPageContent = () => {
           />
         </EuiFlexItem>
         <EuiFlexItem
-          grow
+          grow={false}
           css={css`
             min-width: 0;
-            ${logicalCSS('min-height', `${MIN_TABLE_HEIGHT}px`)}
+            flex-shrink: 0;
+            ${logicalCSS('height', `${TABLE_HEIGHT}px`)}
           `}
         >
           <EuiFlexGroup
@@ -728,6 +731,7 @@ const AlertsListPageContent = () => {
             gutterSize="xs"
             responsive={false}
             css={css`
+              flex-grow: 1;
               ${logicalCSS('min-height')}: 0;
             `}
           >
