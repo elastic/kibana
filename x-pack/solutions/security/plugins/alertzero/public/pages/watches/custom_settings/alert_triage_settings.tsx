@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { css } from '@emotion/react';
+import { EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
   AlertTriageWorkerExtras,
@@ -22,6 +24,29 @@ const readAlertTriageExtras = (settings: WorkerSettings): AlertTriageWorkerExtra
   return parsed.success ? parsed.data : ALERT_TRIAGE_DEFAULT_EXTRAS;
 };
 
+const DETAIL_MAX_WIDTH_PX = 480;
+
+/** Longer explanation shown under a control, where the wide column has room for it. */
+const SettingDetail: React.FC<{ id: string; children: React.ReactNode }> = ({ id, children }) => (
+  <EuiText
+    size="xs"
+    color="subdued"
+    css={css`
+      max-width: ${DETAIL_MAX_WIDTH_PX}px;
+      margin-top: 8px;
+    `}
+  >
+    <p
+      id={id}
+      css={css`
+        margin: 0;
+      `}
+    >
+      {children}
+    </p>
+  </EuiText>
+);
+
 /**
  * Watch-owned controls for the Alert Triage Worker's extras. Every change hands the complete
  * `extras` object back to the page draft.
@@ -32,20 +57,26 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
   onExtrasChange,
 }) => {
   const extras = readAlertTriageExtras(settings);
+  const confidenceDetailId = useGeneratedHtmlId({ prefix: 'alertZeroConfidenceDetail' });
 
   return (
-    <SettingRow
-      label={i18n.MINIMUM_CONFIDENCE_SCORE_LABEL}
-      labelHelp={i18n.MINIMUM_CONFIDENCE_SCORE_HELP_TEXT}
-      data-test-subj="alertZeroMinimumConfidenceScoreRow"
-    >
-      <MinimumConfidenceScoreField
-        current={extras.autoCloseConfidenceScoreMinThreshold}
-        isDisabled={isDisabled}
-        onChange={(autoCloseConfidenceScoreMinThreshold) =>
-          onExtrasChange({ ...extras, autoCloseConfidenceScoreMinThreshold })
-        }
-      />
-    </SettingRow>
+    <>
+      <SettingRow
+        label={i18n.MINIMUM_CONFIDENCE_SCORE_LABEL}
+        labelHelp={i18n.MINIMUM_CONFIDENCE_SCORE_HELP_TEXT}
+        data-test-subj="alertZeroMinimumConfidenceScoreRow"
+      >
+        <MinimumConfidenceScoreField
+          current={extras.autoCloseConfidenceScoreMinThreshold}
+          isDisabled={isDisabled}
+          onChange={(autoCloseConfidenceScoreMinThreshold) =>
+            onExtrasChange({ ...extras, autoCloseConfidenceScoreMinThreshold })
+          }
+        />
+        <SettingDetail id={confidenceDetailId}>
+          {i18n.MINIMUM_CONFIDENCE_SCORE_DETAIL_TEXT}
+        </SettingDetail>
+      </SettingRow>
+    </>
   );
 };

@@ -29,7 +29,6 @@ import type {
   WorkflowDetailDto,
   WorkflowExecutionCollapseField,
   WorkflowExecutionDto,
-  WorkflowExecutionHistoryModel,
   WorkflowExecutionListDto,
   WorkflowExecutionSortField,
   WorkflowExecutionSortOrder,
@@ -99,6 +98,7 @@ import type {
   ProcessedWaitForInputFacets,
   ProcessedWaitForInputFilters,
   WaitForInputListResult,
+  WorkflowExecutionStatusItem,
 } from '../services/workflow_execution_query_service';
 import { WorkflowExecutionQueryService } from '../services/workflow_execution_query_service';
 import { WorkflowSearchService } from '../services/workflow_search_service';
@@ -231,6 +231,7 @@ export class WorkflowsService {
       await this.changeHistoryService.initialize({
         elasticsearchClient: coreStart.elasticsearch.client.asInternalUser,
         authService: coreStart.security.authc,
+        userProfileService: coreStart.userProfile,
       });
       return;
     }
@@ -262,6 +263,8 @@ export class WorkflowsService {
       getActionsClient: this.getActionsClient,
       getActionsClientWithRequest: this.getActionsClientWithRequest,
       getCoreStart: () => this.coreStart,
+      licensing: pluginsStart.licensing,
+      logger: this.logger,
     });
 
     const { workflowExecutionsDataClient, stepExecutionsDataClient } =
@@ -358,7 +361,6 @@ export class WorkflowsService {
     return getHistoryForWorkflow(
       {
         changeHistoryService: this.changeHistoryService,
-        userProfileService: this.coreStart.userProfile,
         getWorkflowSource: (workflowId, sid) =>
           this.crudService.getWorkflowDocumentSource(workflowId, sid, {
             includeGlobal: true,
@@ -554,6 +556,14 @@ export class WorkflowsService {
     return this.executionQueryService.getWorkflowExecution(executionId, spaceId, options);
   }
 
+  public async getWorkflowExecutionStatuses(
+    executionIds: string[],
+    spaceId: string
+  ): Promise<WorkflowExecutionStatusItem[]> {
+    await this.ensureInitialized();
+    return this.executionQueryService.getWorkflowExecutionStatuses(executionIds, spaceId);
+  }
+
   public async getChildWorkflowExecutions(
     parentExecutionId: string,
     spaceId: string
@@ -664,14 +674,6 @@ export class WorkflowsService {
     return this.executionQueryService.getWaitingStepExecutionId(executionId, spaceId);
   }
 
-  public async getWorkflowExecutionHistory(
-    executionId: string,
-    spaceId: string
-  ): Promise<WorkflowExecutionHistoryModel[]> {
-    await this.ensureInitialized();
-    return this.executionQueryService.getWorkflowExecutionHistory(executionId, spaceId);
-  }
-
   public async getStepExecutions(params: GetStepExecutionParams, spaceId: string) {
     await this.ensureInitialized();
     return this.executionQueryService.getStepExecutions(params, spaceId);
@@ -720,7 +722,7 @@ export class WorkflowsService {
     yaml: string,
     spaceId: string,
     request: KibanaRequest,
-    options: { includeVariableRules: boolean }
+    options: { includeVariableRules: boolean; includeEsqlRules: boolean }
   ): Promise<ValidateWorkflowResponseDto> {
     await this.ensureInitialized();
     return this.validationService.validateWorkflow(yaml, spaceId, request, options);

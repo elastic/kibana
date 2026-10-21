@@ -16,6 +16,8 @@ import {
   checkIntegrationFipsLooseCompatibility,
   getNonFipsIntegrations,
   isRootPrivilegeRequired,
+  hasDataStreamsOrPolicyTemplates,
+  shouldAddIntegrationFromCatalog,
 } from './package_helpers';
 
 describe('isRootPrivilegesRequired', () => {
@@ -343,5 +345,99 @@ describe('getNonFipsIntegrations', () => {
       { name: 'oracle', title: 'Oracle' },
       { name: 'mongodb', title: 'MongoDb' },
     ]);
+  });
+});
+
+describe('hasDataStreamsOrPolicyTemplates', () => {
+  it('should return true if the package has data streams', () => {
+    expect(hasDataStreamsOrPolicyTemplates({ data_streams: [{ name: 'logs' }] } as any)).toBe(true);
+  });
+
+  it('should return true if the package has policy templates and no data streams', () => {
+    expect(hasDataStreamsOrPolicyTemplates({ policy_templates: [{ name: 'apm' }] } as any)).toBe(
+      true
+    );
+  });
+
+  it('should return false if the package has neither', () => {
+    expect(hasDataStreamsOrPolicyTemplates({} as any)).toBe(false);
+    expect(hasDataStreamsOrPolicyTemplates({ data_streams: [], policy_templates: [] } as any)).toBe(
+      false
+    );
+  });
+});
+
+describe('shouldAddIntegrationFromCatalog', () => {
+  it('should return true for input packages', () => {
+    expect(shouldAddIntegrationFromCatalog({ name: 'nginx_otel_input', type: 'input' })).toBe(true);
+  });
+
+  it('should return true for integration packages with data streams', () => {
+    expect(
+      shouldAddIntegrationFromCatalog({
+        name: 'okta',
+        type: 'integration',
+        data_streams: [{ name: 'system' }],
+      } as any)
+    ).toBe(true);
+  });
+
+  it('should return true for integration packages with policy templates and no data streams', () => {
+    expect(
+      shouldAddIntegrationFromCatalog({
+        name: 'apm',
+        type: 'integration',
+        policy_templates: [{ name: 'apmserver' }],
+      } as any)
+    ).toBe(true);
+  });
+
+  it('should return false for integration packages without data streams or policy templates', () => {
+    expect(shouldAddIntegrationFromCatalog({ name: 'corelight', type: 'integration' })).toBe(false);
+  });
+
+  it('should return false for content packages', () => {
+    expect(
+      shouldAddIntegrationFromCatalog({
+        name: 'sample_content',
+        type: 'content',
+        data_streams: [{ name: 'logs' }],
+      } as any)
+    ).toBe(false);
+  });
+
+  it.each([
+    'supabase',
+    'awsfirehose',
+    'cribl',
+    'contrast_security',
+    'elastic_agent',
+    'elastic_govcloud',
+    'keeper',
+  ])('should return false for %s even if it has data streams', (name) => {
+    expect(
+      shouldAddIntegrationFromCatalog({
+        name,
+        type: 'integration',
+        data_streams: [{ name: 'logs' }],
+      } as any)
+    ).toBe(false);
+  });
+
+  it('should return true for uploaded packages that only carry saved object attributes', () => {
+    expect(shouldAddIntegrationFromCatalog({ name: 'my_uploaded_package' })).toBe(true);
+  });
+
+  it('should classify uploaded packages with full package info like registry packages', () => {
+    expect(
+      shouldAddIntegrationFromCatalog({
+        name: 'my_uploaded_package',
+        type: 'integration',
+        data_streams: [{ name: 'logs' }],
+      } as any)
+    ).toBe(true);
+    expect(
+      shouldAddIntegrationFromCatalog({ name: 'my_uploaded_assets', type: 'integration' })
+    ).toBe(false);
   });
 });

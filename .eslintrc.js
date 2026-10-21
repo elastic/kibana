@@ -275,18 +275,6 @@ module.exports = {
         'react-hooks/exhaustive-deps': 'off',
       },
     },
-    {
-      files: ['x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
-    {
-      files: ['x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'jsx-a11y/click-events-have-key-events': 'off',
-      },
-    },
     /**
      * FormatJS linter for i18n code.
      * https://formatjs.io/docs/tooling/linter
@@ -305,59 +293,6 @@ module.exports = {
       rules: {
         'formatjs/enforce-default-message': ['error', 'anything'],
         'formatjs/enforce-description': 'off',
-      },
-    },
-
-    /**
-     * New Platform client-side
-     */
-    {
-      files: ['{src,x-pack}/plugins/*/public/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'import/no-commonjs': 'error',
-      },
-    },
-    /**
-     * Allow default exports
-     */
-    {
-      files: [
-        '**/*.stories.tsx',
-        '**/*.test.js',
-        'src/platform/test/*/config.ts',
-        'src/platform/test/*/config_open.ts',
-        'src/platform/test/*/*.config.ts',
-        'src/platform/test/*/{tests,test_suites,apis,apps}/**/*',
-        'src/platform/test/server_integration/**/*.ts',
-        'x-pack/solutions/observability/plugins/apm/**/*.js',
-        'x-pack/platform/test/*/{tests,test_suites,apis,apps}/**/*',
-        'x-pack/platform/test/*api_integration*/**/*',
-        'x-pack/platform/test/*/*config.*ts',
-        'x-pack/solutions/*/test/**/{tests,test_suites,apis,apps,fixtures,index.ts}/**/*',
-        'x-pack/solutions/*/test/**/*config*.ts',
-        'x-pack/solutions/*/test/**/tests/**/*',
-        'x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*',
-        'x-pack/solutions/*/test/alerting_api_integration/**/*',
-        'x-pack/solutions/*/test/serverless/*/configs/**/*',
-        'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
-        'x-pack/platform/test/ui_capabilities/*/tests/**/*',
-        'x-pack/platform/test/upgrade_assistant_integration/**/*',
-        '**/cypress.config.{js,ts}',
-        'x-pack/platform/test/serverless/shared/config*.ts',
-        'x-pack/platform/test/serverless/*/test_suites/**/*',
-        'x-pack/platform/test/serverless/functional/config*.ts',
-        'x-pack/platform/test/serverless/*/configs/**/*',
-        'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
-        'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
-        '**/playwright.config.ts',
-        '**/playwright.v2.config.ts',
-        '**/*.playwright.config.ts',
-        '**/parallel.playwright.config.ts',
-      ],
-      rules: {
-        'import/no-default-export': 'off',
-        'import/no-named-as-default-member': 'off',
-        'import/no-named-as-default': 'off',
       },
     },
 
@@ -386,7 +321,6 @@ module.exports = {
     {
       files: ['scripts/**/*.js', 'src/setup_node_env/**/*.js'],
       rules: {
-        'import/no-commonjs': 'off',
         'prefer-object-spread': 'off',
         'no-var': 'off',
         'prefer-const': 'off',
@@ -455,7 +389,6 @@ module.exports = {
       ],
       excludedFiles: ['**/integration_tests/**/*'],
       rules: {
-        'import/no-commonjs': 'off',
         'prefer-object-spread': 'off',
         'no-restricted-syntax': [
           'error',
@@ -645,32 +578,7 @@ module.exports = {
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
-        'react/function-component-definition': [
-          'warn',
-          {
-            namedComponents: 'function-declaration',
-            unnamedComponents: 'arrow-function',
-          },
-        ],
         'react-hooks/rules-of-hooks': 'error', // Checks rules of Hooks
-      },
-    },
-    {
-      files: [
-        'x-pack/solutions/observability/plugins/apm/**/*.stories.*',
-        'x-pack/solutions/observability/plugins/observability/**/*.stories.*',
-        'x-pack/solutions/observability/plugins/exploratory_view/**/*.stories.*',
-        'x-pack/solutions/observability/plugins/slo/**/*.stories.*',
-        'x-pack/solutions/observability/packages/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'react/function-component-definition': [
-          'off',
-          {
-            namedComponents: 'function-declaration',
-            unnamedComponents: 'arrow-function',
-          },
-        ],
       },
     },
     {
@@ -688,43 +596,6 @@ module.exports = {
               '^(useUrl|useAbortableAsync|useMemoWithAbortSignal|useFetcher|useProgressiveFetcher|useBreadcrumb|useAsync|useTimeRangeAsync|useAutoAbortedHttpClient|use.*Fetch)$',
           },
         ],
-      },
-    },
-    {
-      files: [
-        'x-pack/platform/plugins/shared/aiops/**/*.tsx',
-        'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
-        'src/platform/plugins/shared/ai_assistant_management/**/*.tsx',
-        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
-      ],
-      rules: {
-        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
-      },
-    },
-    {
-      files: [
-        'x-pack/solutions/search/**/*.tsx',
-        'x-pack/platform/plugins/shared/content_connectors/**/*.{ts,tsx}',
-        'x-pack/platform/plugins/shared/search_inference_endpoints/**/*.{ts,tsx}',
-      ],
-      rules: {
-        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
-      },
-    },
-    {
-      files: [
-        'x-pack/solutions/observability/plugins/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/solutions/observability/packages/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/plugins/shared/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/solutions/observability/plugins/significant_events_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'x-pack/platform/plugins/shared/streams_app/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/platform/packages/shared/kbn-unified-chart-section-viewer/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-      ],
-      rules: {
-        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
-        '@kbn/i18n/i18n_translate_should_start_with_the_right_id': 'warn',
-        '@kbn/i18n/formatted_message_should_start_with_the_right_id': 'warn',
       },
     },
     {
@@ -779,9 +650,7 @@ module.exports = {
         'x-pack/platform/plugins/shared/automatic_import/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        'import/no-duplicates': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -843,9 +712,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        'import/no-duplicates': ['error'],
         'no-restricted-imports': [
           'error',
           {
@@ -854,16 +721,6 @@ module.exports = {
             paths: RESTRICTED_IMPORTS,
           },
         ],
-      },
-    },
-    // Allow node.js imports for security solution test packages
-    {
-      files: [
-        'x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}',
-        'x-pack/solutions/security/packages/kbn-security-evals-matrix/**/*.{js,mjs,ts,tsx}',
-      ],
-      rules: {
-        'import/no-nodejs-modules': 'off',
       },
     },
     {
@@ -1009,34 +866,17 @@ module.exports = {
         'prefer-spread': 'error',
         'prefer-template': 'error',
         'react/boolean-prop-naming': 'error',
-        'react/button-has-type': 'error',
         'react/display-name': 'error',
-        'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
-        'react/no-children-prop': 'error',
-        'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
-        'react/no-did-mount-set-state': 'error',
-        'react/no-direct-mutation-state': 'error',
-        'react/no-find-dom-node': 'error',
-        'react/no-redundant-should-component-update': 'error',
-        'react/no-render-return-value': 'error',
         'react/no-typos': 'error',
-        'react/no-string-refs': 'error',
-        'react/no-this-in-sfc': 'error',
-        'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-default-props': 'error',
-        'react/void-dom-elements-no-children': 'error',
-        'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
-        'react/jsx-no-target-blank': 'error',
-        'react/jsx-fragments': 'error',
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        'import/no-duplicates': ['error'],
       },
       overrides: [
         {
@@ -1081,7 +921,6 @@ module.exports = {
         'x-pack/solutions/security/plugins/lists/common/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -1114,32 +953,15 @@ module.exports = {
       },
       rules: {
         'react/boolean-prop-naming': 'error',
-        'react/button-has-type': 'error',
         'react/display-name': 'error',
-        'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
-        'react/no-children-prop': 'error',
-        'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
-        'react/no-did-mount-set-state': 'error',
-        'react/no-did-update-set-state': 'error',
-        'react/no-direct-mutation-state': 'error',
-        'react/no-find-dom-node': 'error',
-        'react/no-redundant-should-component-update': 'error',
-        'react/no-render-return-value': 'error',
         'react/no-typos': 'error',
-        'react/no-string-refs': 'error',
-        'react/no-this-in-sfc': 'error',
-        'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-comp': 'error',
         'react/sort-default-props': 'error',
-        'react/void-dom-elements-no-children': 'error',
-        'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
-        'react/jsx-no-target-blank': 'error',
-        'react/jsx-fragments': 'error',
       },
     },
     {
@@ -1222,17 +1044,6 @@ module.exports = {
         'playwright/require-top-level-describe': 'error',
         // Scout has a its own runtime validator for test tags
         'playwright/valid-test-tags': 'off',
-        // Check all function arguments to catch unused destructured params
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          {
-            vars: 'all',
-            args: 'all',
-            ignoreRestSiblings: true, // Ignore unused vars when destructuring with rest operator
-            varsIgnorePattern: '^_', // Allow _ prefix for intentionally unused variables
-            argsIgnorePattern: '^_', // Allow _ prefix for intentionally unused args
-          },
-        ],
       },
     },
     {
@@ -1337,7 +1148,6 @@ module.exports = {
         '@typescript-eslint/no-useless-constructor': 'error',
         '@typescript-eslint/explicit-function-return-type': 'error',
         '@typescript-eslint/no-non-null-assertion': 'error',
-        '@typescript-eslint/no-unused-vars': 'error',
         'no-template-curly-in-string': 'error',
         'sort-keys': 'error',
         'prefer-destructuring': 'error',
@@ -1422,9 +1232,7 @@ module.exports = {
     {
       files: ['src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}'],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        'import/no-duplicates': 'error',
         'no-restricted-imports': [
           'error',
           {
@@ -1436,7 +1244,6 @@ module.exports = {
         '@typescript-eslint/no-explicit-any': 'error',
         '@typescript-eslint/no-non-null-assertion': 'error',
         '@typescript-eslint/no-this-alias': 'error',
-        '@typescript-eslint/no-unused-vars': 'error',
       },
     },
     {
@@ -1447,18 +1254,6 @@ module.exports = {
       ],
       rules: {
         'no-restricted-imports': ['error', { paths: RESTRICTED_IMPORTS }],
-      },
-    },
-    {
-      files: ['src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}'],
-      rules: {
-        'import/no-nodejs-modules': 'off',
-      },
-    },
-    {
-      files: ['src/platform/packages/shared/kbn-connector-specs/src/specs/**/icon/*.{ts,tsx}'],
-      rules: {
-        'import/no-default-export': 'off',
       },
     },
     /**
@@ -1534,8 +1329,6 @@ module.exports = {
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
         'react-hooks/exhaustive-deps': 'error',
-        // Custom content renders LLM-generated HTML; it must stay inside the sandboxed iframe.
-        'react/no-danger': 'error',
       },
     },
     {
@@ -1572,66 +1365,6 @@ module.exports = {
         'src/platform/plugins/shared/discover/**/*.{ts,tsx}',
         'src/platform/plugins/shared/saved_search/**/*.{ts,tsx}',
       ],
-    },
-
-    /**
-     * Search overrides
-     */
-
-    {
-      files: ['x-pack/solutions/search/**/*.{ts,tsx}'],
-      excludedFiles: ['x-pack/solutions/search/**/*.test.tsx'],
-      rules: {
-        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
-        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
-      },
-    },
-
-    /**
-     * Visualization team overrides
-     */
-
-    {
-      files: [
-        // src/platform/plugins
-        'src/platform/plugins/shared/visualizations',
-        'src/platform/plugins/shared/visualization_listing',
-        'src/platform/plugins/shared/data',
-        'src/platform/plugins/shared/expressions',
-        'src/platform/plugins/shared/charts',
-        'src/platform/plugins/shared/vis_types/timeseries',
-        'src/platform/plugins/shared/chart_expressions',
-        'src/platform/plugins/private/vis_types',
-        'src/platform/plugins/private/event_annotation',
-        'src/platform/plugins/private/event_annotation_listing',
-        'src/platform/plugins/private/vis_default_editor',
-
-        // src/platform/packages
-        'src/platform/packages/shared/kbn-visualization-listing-components',
-        'src/platform/packages/shared/kbn-visualizations-common',
-        'src/platform/packages/shared/kbn-visualization-utils',
-        'src/platform/packages/shared/kbn-visualization-ui-components',
-        'src/platform/packages/shared/kbn-palettes',
-        'src/platform/packages/shared/kbn-event-annotation-components',
-        'src/platform/packages/shared/kbn-dom-drag-drop',
-        'src/platform/packages/shared/kbn-coloring',
-        'src/platform/packages/shared/kbn-chart-icons',
-        'src/platform/packages/shared/chart-test-jest-helpers',
-        'src/platform/packages/private/kbn-test-eui-helpers',
-
-        // x-pack/platform/plugins
-        'x-pack/platform/plugins/shared/lens',
-        'x-pack/platform/plugins/private/graph',
-
-        // x-pack/platform/packages
-        'x-pack/platform/packages/private/kbn-random-sampling',
-      ].map(
-        (path) => `${path}/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)`
-      ),
-      rules: {
-        '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
-        '@kbn/i18n/strings_should_be_translated_with_formatted_message': 'warn',
-      },
     },
 
     /**
@@ -1675,16 +1408,9 @@ module.exports = {
             'newlines-between': 'always-and-inside-groups',
           },
         ],
-        'import/newline-after-import': 'error',
         'react-hooks/exhaustive-deps': 'off',
-        'react/jsx-boolean-value': ['error', 'never'],
         'sort-keys': 1, // warning
         '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
-        '@typescript-eslint/no-unused-vars': [
-          'error',
-          { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
-        ],
-        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
       },
     },
     {
@@ -1695,20 +1421,6 @@ module.exports = {
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
-      },
-    },
-
-    /**
-     * Serverless Search overrides
-     */
-    {
-      // All files
-      files: [
-        'x-pack/solutions/search/plugins/serverless_search/**/*.{ts,tsx}',
-        'x-pack/solutions/search/packages/kbn-search-*',
-      ],
-      rules: {
-        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
       },
     },
 
@@ -1727,32 +1439,9 @@ module.exports = {
             groups: ['builtin', 'external', 'internal', 'parent', 'sibling', 'index'],
           },
         ],
-        'import/extensions': ['error', 'never', { json: 'always', less: 'always', svg: 'always' }],
 
         // react
-        'react/no-did-mount-set-state': 'error',
-        'react/no-did-update-set-state': 'error',
         'react/sort-comp': 'error',
-        'react/jsx-boolean-value': 'error',
-        'react/forbid-elements': [
-          'error',
-          {
-            forbid: [
-              {
-                element: 'EuiConfirmModal',
-                message: 'Use <ConfirmModal> instead',
-              },
-              {
-                element: 'EuiPopover',
-                message: 'Use <Popover> instead',
-              },
-              {
-                element: 'EuiIconTip',
-                message: 'Use <TooltipIcon> instead',
-              },
-            ],
-          },
-        ],
       },
     },
     {
@@ -1808,26 +1497,6 @@ module.exports = {
         ],
       },
     },
-    {
-      files: [
-        'src/platform/packages/shared/kbn-flot-charts/index.js',
-        'src/platform/packages/shared/kbn-flot-charts/index.d.ts',
-      ],
-      rules: {
-        'import/no-default-export': 'off',
-      },
-    },
-    /**
-     * TSVB overrides
-     */
-    {
-      files: ['src/platform/plugins/shared/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
-      // Playwright resolves its configuration from a default export.
-      excludedFiles: ['src/platform/plugins/shared/vis_types/timeseries/**/*playwright.config.ts'],
-      rules: {
-        'import/no-default-export': 'error',
-      },
-    },
 
     /**
      * Osquery overrides
@@ -1859,15 +1528,29 @@ module.exports = {
         'no-unused-vars': 'off',
         'react/prop-types': 'off',
         // The `recommended` presets above re-enable these rules; they run in oxlint instead.
+        'constructor-super': 'off',
         'no-cond-assign': 'off',
+        'no-const-assign': 'off',
         'no-debugger': 'off',
         'no-empty': 'off',
         'no-unused-labels': 'off',
+        'no-with': 'off',
         'use-isnan': 'off',
         'react/jsx-no-undef': 'off',
         'react/no-is-mounted': 'off',
         'react/no-unescaped-entities': 'off',
         'react/no-unknown-property': 'off',
+        'react/jsx-key': 'off',
+        'react/jsx-no-comment-textnodes': 'off',
+        'react/jsx-no-target-blank': 'off',
+        'react/no-children-prop': 'off',
+        'react/no-danger-with-children': 'off',
+        'react/no-direct-mutation-state': 'off',
+        'react/no-find-dom-node': 'off',
+        'react/no-render-return-value': 'off',
+        'react/no-string-refs': 'off',
+        'react/require-render-return': 'off',
+        'react/react-in-jsx-scope': 'off',
         '@typescript-eslint/no-extra-non-null-assertion': 'off',
         '@typescript-eslint/no-misused-new': 'off',
         '@typescript-eslint/no-namespace': 'off',
@@ -1947,7 +1630,6 @@ module.exports = {
             'newlines-between': 'always',
           },
         ],
-        'import/no-duplicates': ['error'],
         'sort-imports': [
           // This rule sorts imports of multiple members (destructured imports)
           'error',
@@ -2095,34 +1777,17 @@ module.exports = {
         'prefer-spread': 'error',
         'prefer-template': 'error',
         'react/boolean-prop-naming': 'error',
-        'react/button-has-type': 'error',
         'react/display-name': 'error',
-        'react/forbid-dom-props': 'error',
         'react/no-access-state-in-setstate': 'error',
-        'react/no-children-prop': 'error',
-        'react/no-danger-with-children': 'error',
         'react/no-deprecated': 'error',
-        'react/no-did-mount-set-state': 'error',
-        'react/no-direct-mutation-state': 'error',
-        'react/no-find-dom-node': 'error',
-        'react/no-redundant-should-component-update': 'error',
-        'react/no-render-return-value': 'error',
         'react/no-typos': 'error',
-        'react/no-string-refs': 'error',
-        'react/no-this-in-sfc': 'error',
-        'react/no-unsafe': 'error',
         'react/no-unused-prop-types': 'error',
         'react/no-unused-state': 'error',
         'react/sort-default-props': 'error',
-        'react/void-dom-elements-no-children': 'error',
-        'react/jsx-no-comment-textnodes': 'error',
         'react/jsx-no-literals': 'error',
-        'react/jsx-no-target-blank': 'error',
-        'react/jsx-fragments': 'error',
         'require-atomic-updates': 'error',
         'symbol-description': 'error',
         'vars-on-top': 'error',
-        'import/no-duplicates': ['error'],
         '@typescript-eslint/no-non-null-assertion': 'error',
         '@typescript-eslint/no-this-alias': 'error',
         '@typescript-eslint/no-explicit-any': 'error',
@@ -2169,7 +1834,6 @@ module.exports = {
             },
           },
         ],
-        'import/no-duplicates': ['error'],
         'sort-imports': [
           // This rule sorts imports of multiple members (destructured imports)
           'error',
@@ -2193,9 +1857,7 @@ module.exports = {
         'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
-        'import/no-nodejs-modules': 'error',
         'no-duplicate-imports': 'off',
-        'import/no-duplicates': ['error'],
       },
     },
     /**
@@ -2220,7 +1882,6 @@ module.exports = {
     {
       files: ['src/platform/packages/shared/kbn-workflows/scripts/**/*.{js,ts}'],
       rules: {
-        'import/no-nodejs-modules': 'off',
         'no-console': 'off',
         'no-process-exit': 'off',
       },
@@ -2246,8 +1907,17 @@ module.exports = {
       },
       rules: {
         'no-console': 'off',
-        '@kbn/imports/no_unresolvable_imports': 'off',
-        '@kbn/imports/uniform_imports': ['error', { preserveFileExtensions: true }],
+      },
+    },
+
+    {
+      // The OpenAPI generator writes these API client bundles with duplicate and unused imports and
+      // relies on these two fixes to clean them up. Both run here, in one ESLint fix pass, so the
+      // generator output stays the same on every machine. Oxlint turns both off for these files.
+      files: ['x-pack/solutions/security/packages/test-api-clients/{supertest,scout}/*.gen.ts'],
+      rules: {
+        '@kbn/imports/no_unused_imports': 'error',
+        'import/no-duplicates': 'error',
       },
     },
 
@@ -2266,34 +1936,10 @@ module.exports = {
       },
     },
     {
-      files: [
-        // TODO @kibana/operations
-        'scripts/create_observability_rules.js', // is importing "@kbn/observability-alerting-test-data" (observability/private)
-        'scripts/capture_sigevents_env_snapshot.js',
-        'scripts/capture_sigevents_otel_demo_snapshots.js',
-        'scripts/probe_sigevents_eval_snapshot.js',
-        'scripts/replay_sigevents_eval_snapshot.js',
-        'scripts/restore_sigevents_env_snapshot.js',
-        'scripts/seed_sigevents_env.js',
-        'src/cli_setup/**', // is importing "@kbn/interactive-setup-plugin" (platform/private)
-        'src/dev/build/tasks/install_chromium.ts', // is importing "@kbn/screenshotting-plugin" (platform/private)*',
-
-        // For now, we keep the exception to let tests depend on anything.
-        // Ideally, we need to classify the solution specific ones to reduce CI times
-        'x-pack/platform/test/plugin_functional/plugins/resolver_test/**',
-      ],
-      rules: {
-        '@kbn/imports/no_group_crossing_manifests': 'warn',
-        '@kbn/imports/no_group_crossing_imports': 'warn',
-      },
-    },
-    {
       files: ['packages/kbn-dependency-usage/**/*.{ts,tsx}'],
       rules: {
         // disabling it since package is a CLI tool
         'no-console': 'off',
-        // disabling it since package is marked as module and it requires extension for files written
-        '@kbn/imports/uniform_imports': 'off',
       },
     },
     {
@@ -2509,78 +2155,8 @@ module.exports = {
         ],
       },
     },
-    {
-      files: [
-        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
-        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
-        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.{ts,tsx}',
-      ],
-      excludedFiles: [
-        'x-pack/solutions/observability/plugins/**/*.test.*',
-        'x-pack/solutions/observability/plugins/**/*.stories.*',
-        'x-pack/solutions/observability/plugins/**/*.mock.*',
-        'x-pack/solutions/observability/plugins/**/*.storybook_decorator.*',
-        'x-pack/solutions/observability/packages/**/*.test.*',
-        'x-pack/solutions/observability/packages/**/*.stories.*',
-        'x-pack/solutions/observability/packages/**/*.mock.*',
-        'x-pack/solutions/observability/packages/**/*.storybook_decorator.*',
-        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.test.*',
-        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.stories.*',
-        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.mock.*',
-        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.storybook_decorator.*',
-      ],
-      rules: {
-        '@kbn/telemetry/ebt_props_should_be_present': 'warn',
-      },
-    },
   ],
 };
-
-/**
- * Redux Toolkit v1 enforcement.
- * These paths still use RTK v1 aliased packages (redux-toolkit-v1, react-redux-v7, etc.).
- * When a plugin/package migrates to RTK v2, remove its entry here.
- * See dev_docs/contributing/redux_toolkit_v1_v2_migration.mdx
- */
-module.exports.overrides.push({
-  files: [
-    'src/platform/packages/private/kbn-ambient-common-types/**/*.{js,mjs,ts,tsx}',
-    'src/platform/packages/shared/kbn-coloring/**/*.{js,mjs,ts,tsx}',
-    'src/platform/packages/shared/kbn-test-jest-helpers/**/*.{js,mjs,ts,tsx}',
-    'src/platform/packages/shared/kbn-lens-embeddable-utils/**/*.{js,mjs,ts,tsx}',
-    'src/platform/packages/shared/shared-ux/**/*.{js,mjs,ts,tsx}',
-    'src/platform/plugins/shared/data_view_management/**/*.{js,mjs,ts,tsx}',
-    'src/platform/plugins/shared/expressions/**/*.{js,mjs,ts,tsx,d.ts}',
-    'src/platform/plugins/shared/unified_doc_viewer/**/*.{js,mjs,ts,tsx}',
-    'src/platform/plugins/shared/workflows_management/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/private/monitoring/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/private/remote_clusters/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/private/rollup/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/shared/agent_builder/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/shared/content_connectors/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/shared/index_management/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/shared/lens/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/shared/license_management/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/shared/maps/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/shared/osquery/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/shared/searchprofiler/**/*.{js,mjs,ts,tsx}',
-    'x-pack/platform/plugins/shared/streams_app/**/*.{js,mjs,ts,tsx}',
-    'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
-    'x-pack/solutions/observability/plugins/synthetics/**/*.{js,mjs,ts,tsx}',
-    'x-pack/solutions/observability/plugins/uptime/**/*.{js,mjs,ts,tsx}',
-    'x-pack/solutions/search/plugins/enterprise_search/**/*.{js,mjs,ts,tsx}',
-    'x-pack/solutions/security/packages/data-table/**/*.{js,mjs,ts,tsx}',
-    'x-pack/solutions/security/packages/expandable-flyout/**/*.{js,mjs,ts,tsx}',
-    'x-pack/solutions/security/plugins/security_solution/**/*.{js,mjs,ts,tsx}',
-    'x-pack/solutions/security/plugins/timelines/**/*.{js,mjs,ts,tsx}',
-  ],
-  rules: {
-    '@kbn/imports/no_redux_toolkit_v2_imports': 'error',
-  },
-});
 
 /**
  * Prettier disables all conflicting rules, listing as last override so it takes precedence

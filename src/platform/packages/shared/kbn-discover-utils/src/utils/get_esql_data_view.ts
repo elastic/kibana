@@ -57,7 +57,7 @@ export async function getEsqlDataView(
       query: query.esql,
       options: {
         // make sure that data view service cache is not used when creating the ES|QL data view,
-        // otherwise a single mutated data view instance would be used across tabs (inside currentDataView$) which would be incorrect
+        // otherwise a single mutated data view instance would be used across tabs (inside the tab runtime state) which would be incorrect
         // https://github.com/elastic/kibana/issues/234719
         createNewInstanceEvenIfCachedOneAvailable: !currentDataView || onlyTimeFieldChanged,
       },

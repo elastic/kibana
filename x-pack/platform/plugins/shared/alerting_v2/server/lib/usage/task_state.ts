@@ -140,6 +140,14 @@ const stateSchemaV4 = stateSchemaV3.extends({
   ),
 });
 
+// The agent-builder-assisted rule tag is no longer written, so neither counter
+// has a source. `action_policies_count_agent_builder_assisted` was stored but
+// never collected.
+const stateSchemaV5 = stateSchemaV4.extends({
+  count_agent_builder_assisted: undefined,
+  action_policies_count_agent_builder_assisted: undefined,
+});
+
 export const stateSchemaByVersion = {
   1: {
     up: (state: Record<string, unknown>) => ({
@@ -210,9 +218,14 @@ export const stateSchemaByVersion = {
     }),
     schema: stateSchemaV4,
   },
+  5: {
+    up: (state: Record<string, unknown>) =>
+      omit(state, ['count_agent_builder_assisted', 'action_policies_count_agent_builder_assisted']),
+    schema: stateSchemaV5,
+  },
 };
 
-const latestTaskStateSchema = stateSchemaByVersion[4].schema;
+const latestTaskStateSchema = stateSchemaByVersion[5].schema;
 export type LatestTaskStateSchema = TypeOf<typeof latestTaskStateSchema>;
 
 export const emptyState: LatestTaskStateSchema = {
