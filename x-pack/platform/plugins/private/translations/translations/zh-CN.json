@@ -2907,8 +2907,6 @@
     "discover.context.olderDocumentsWarningZero": "找不到比定位标记旧的文档。",
     "discover.context.pageTitle": "#{anchorId} 周围的文档",
     "discover.context.reloadPageDescription.reloadOrVisitTextMessage": "请重新加载或前往文档列表以选择有效的定位点文档。",
-    "discover.context.unableToLoadAnchorDocumentDescription": "无法加载该定位点文档",
-    "discover.context.unableToLoadDocumentDescription": "无法加载文档",
     "discover.contextAwareness.changePointDocViewer.noChartBody": "变更点图表只有在查询运行后才可用。",
     "discover.contextAwareness.changePointDocViewer.noChartTitle": "图表不可用",
     "discover.contextAwareness.changePointPvalueCell.impactHigh": "高",
