@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsqlDataResult } from '../utils/fetch_esql_data';
+import type { EsqlDataResult } from '@kbn/custom-content-renderer';
 
 interface FlyoutReducerState {
   draftEsqlQuery: string;

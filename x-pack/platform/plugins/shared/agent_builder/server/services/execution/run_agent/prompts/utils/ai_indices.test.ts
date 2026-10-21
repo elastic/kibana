@@ -5,31 +5,36 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAiIndexId } from '@kbn/agent-builder-common';
-import { smlIndexName } from '@kbn/agent-builder-sml-plugin/server';
+import type { AiIndexCatalogEntry } from '../../types';
 import { getAiIndicesInstructions } from './ai_indices';
 
+const defaultCatalog: AiIndexCatalogEntry[] = [
+  {
+    id: 'elastic',
+    esqlTarget: 'sml-main',
+    description: 'Summaries of Kibana resources such as dashboards and connectors.',
+  },
+];
+
+const render = (overrides: Partial<Parameters<typeof getAiIndicesInstructions>[0]> = {}) =>
+  getAiIndicesInstructions({
+    enabled: true,
+    catalog: defaultCatalog,
+    spaceId: 'default',
+    ...overrides,
+  });
+
 describe('getAiIndicesInstructions', () => {
-  it('renders nothing when AI index instructions are disabled', () => {
-    expect(
-      getAiIndicesInstructions({
-        enabled: false,
-        aiIndices: [agentBuilderDefaultAiIndexId],
-        spaceId: 'default',
-      })
-    ).toBe('');
+  it('renders nothing when AI Index instructions are disabled', () => {
+    expect(render({ enabled: false })).toBe('');
   });
 
-  it('renders nothing for an agent with no AI indices', () => {
-    expect(getAiIndicesInstructions({ enabled: true, aiIndices: [], spaceId: 'default' })).toBe('');
+  it('renders nothing for an agent with an empty catalog', () => {
+    expect(render({ catalog: [] })).toBe('');
   });
 
-  it('explains what an AI index is and how it is named', () => {
-    const instructions = getAiIndicesInstructions({
-      enabled: true,
-      aiIndices: [agentBuilderDefaultAiIndexId],
-      spaceId: 'default',
-    });
+  it('explains what an AI Index is and how it is named', () => {
+    const instructions = render();
 
     expect(instructions).toContain('## AI INDICES');
     expect(instructions).toContain('`ai-index-idx-*`');
@@ -37,162 +42,104 @@ describe('getAiIndicesInstructions', () => {
   });
 
   it('describes KIs as context that may answer directly or lead to another source', () => {
-    const instructions = getAiIndicesInstructions({
-      enabled: true,
-      aiIndices: [agentBuilderDefaultAiIndexId],
-      spaceId: 'default',
-    });
+    const instructions = render();
 
     expect(instructions).toContain('may answer a question directly');
     expect(instructions).toContain('help locate and use another source');
   });
 
   it('continues with other relevant sources when KIs do not cover the question', () => {
-    const instructions = getAiIndicesInstructions({
-      enabled: true,
-      aiIndices: [agentBuilderDefaultAiIndexId],
-      spaceId: 'default',
-    });
+    const instructions = render();
 
-    expect(instructions).toContain('Search relevant AI indices before broader retrieval');
+    expect(instructions).toContain('Search relevant AI Indices before broader retrieval');
     expect(instructions).toContain('continue with other relevant data or tools');
   });
 
-  it('names the backing index of the default AI index and what it holds', () => {
-    const instructions = getAiIndicesInstructions({
-      enabled: true,
-      aiIndices: [agentBuilderDefaultAiIndexId],
-      spaceId: 'default',
-    });
+  it('renders each catalog entry with its registry ID, ES|QL target, and description', () => {
+    const instructions = render();
 
-    expect(instructions).toContain(`\`${smlIndexName}\``);
-    expect(instructions).toContain('dashboards');
-    expect(instructions).toContain('connectors');
+    expect(instructions).toContain('Available to this agent:');
+    expect(instructions).toContain(
+      '- Registry ID: `elastic`; ES|QL target: sml-main — Summaries of Kibana resources such as dashboards and connectors.'
+    );
   });
 
-  it('tells the agent that entries have to be attached before they can be acted on', () => {
-    const instructions = getAiIndicesInstructions({
-      enabled: true,
-      aiIndices: [agentBuilderDefaultAiIndexId],
-      spaceId: 'default',
+  it('renders every catalog entry, including custom AI Indices', () => {
+    const instructions = render({
+      catalog: [
+        ...defaultCatalog,
+        { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets.' },
+      ],
     });
 
-    expect(instructions).toContain('attached to the conversation');
+    expect(instructions).toContain('- Registry ID: `elastic`; ES|QL target: sml-main');
+    expect(instructions).toContain(
+      '- Registry ID: `my-custom`; ES|QL target: ai-index-idx-custom — Support tickets.'
+    );
   });
 
-  it('names no SML tool, so the section survives their replacement by ES|QL', () => {
-    const instructions = getAiIndicesInstructions({
-      enabled: true,
-      aiIndices: [agentBuilderDefaultAiIndexId],
-      spaceId: 'default',
-    });
+  it('omits entries with no ES|QL target from the available list, keeping the resolved ones', () => {
+    const instructions = render({ catalog: [...defaultCatalog, { id: 'unresolved-custom' }] });
 
-    expect(instructions).toContain('Use `execute_esql` for direct AI-index queries');
-    expect(instructions).toContain('follow specialized tool instructions when they apply');
+    expect(instructions).toContain('Available to this agent:');
+    expect(instructions).toContain('- Registry ID: `elastic`; ES|QL target: sml-main');
+    expect(instructions).not.toContain('unresolved-custom');
+  });
+
+  it('renders the section without an available list when no entry resolved to a target', () => {
+    const instructions = render({ catalog: [{ id: 'unresolved-custom' }] });
+
+    expect(instructions).toContain('## AI INDICES');
+    expect(instructions).toContain('`ki-retrieval`');
+    expect(instructions).not.toContain('Available to this agent:');
+    expect(instructions).not.toContain('unresolved-custom');
+  });
+
+  it('renders both identifiers for an entry without a description', () => {
+    const instructions = render({ catalog: [{ id: 'bare-id', esqlTarget: 'bare-target' }] });
+
+    expect(instructions).toContain('- Registry ID: `bare-id`; ES|QL target: bare-target');
+    expect(instructions).not.toContain('bare-target —');
+  });
+
+  it('points at the ki-retrieval skill by name, leaving the path to the SKILLS section', () => {
+    const instructions = render();
+
+    expect(instructions).toContain('Load the `ki-retrieval` skill before');
+    expect(instructions).toContain('carries the AI Index tools');
+    expect(instructions).not.toContain('/skills/');
+  });
+
+  it('leaves the list/describe/query guidance to the skill', () => {
+    const instructions = render();
+
+    expect(instructions).not.toContain('list_ai_indices');
+    expect(instructions).not.toContain('describe_ai_index');
+    expect(instructions).not.toContain('query_ai_indices');
     expect(instructions).not.toContain('sml_');
   });
 
+  it("routes everything other than AI Indices to the agent's other data tools", () => {
+    const instructions = render();
+
+    expect(instructions).toContain('Query everything else');
+    expect(instructions).toContain('including a source a KI points you to');
+    expect(instructions).toContain('`generate_esql`');
+    expect(instructions).toContain('`execute_esql`');
+  });
+
   it('names the space the conversation runs in', () => {
-    const instructions = getAiIndicesInstructions({
-      enabled: true,
-      aiIndices: [agentBuilderDefaultAiIndexId],
-      spaceId: 'marketing',
-    });
+    const instructions = render({ spaceId: 'marketing' });
 
-    expect(instructions).toContain('`marketing`');
+    expect(instructions).toContain('This conversation runs in the space `marketing`');
   });
 
-  it('renders a query template with a filter that also matches indices that are not space-aware', () => {
-    const instructions = getAiIndicesInstructions({
-      enabled: true,
-      aiIndices: [agentBuilderDefaultAiIndexId],
-      spaceId: 'marketing',
-    });
-    const match = instructions.match(/```json\n(.+)\n```/);
-    if (!match) {
-      throw new Error('Expected the instructions to contain a JSON query template block');
-    }
-    const params = JSON.parse(match[1]);
+  it('carries no space filter for the agent to copy', () => {
+    const instructions = render({ spaceId: 'marketing' });
 
-    expect(params).toEqual({
-      query: 'FROM ai-index-* | LIMIT 100',
-      filter: {
-        bool: {
-          should: [
-            // A document with no privilege entries — including every document of an index that
-            // does not map the field — is visible from any space.
-            {
-              bool: {
-                must_not: {
-                  nested: {
-                    path: 'permissions.kibana.privileges',
-                    query: { match_all: {} },
-                    ignore_unmapped: true,
-                  },
-                },
-              },
-            },
-            {
-              nested: {
-                path: 'permissions.kibana.privileges',
-                ignore_unmapped: true,
-                query: {
-                  bool: {
-                    should: [
-                      { term: { 'permissions.kibana.privileges.space': 'marketing' } },
-                      { term: { 'permissions.kibana.privileges.space': '*' } },
-                    ],
-                    minimum_should_match: 1,
-                  },
-                },
-              },
-            },
-          ],
-          minimum_should_match: 1,
-        },
-      },
-    });
-  });
-
-  it('tells the agent to adapt the query but copy the filter verbatim', () => {
-    const instructions = getAiIndicesInstructions({
-      enabled: true,
-      aiIndices: [agentBuilderDefaultAiIndexId],
-      spaceId: 'marketing',
-    });
-
-    expect(instructions).toContain('Adapt the query to the task');
-    expect(instructions).toContain('copy the filter verbatim');
-  });
-
-  it('does not leak the Context Engine ids of the declared indices', () => {
-    const instructions = getAiIndicesInstructions({
-      enabled: true,
-      aiIndices: [agentBuilderDefaultAiIndexId, 'some-private-id'],
-      spaceId: 'default',
-    });
-
-    expect(instructions).not.toContain('some-private-id');
-  });
-
-  it('does not infer destinations for declared indices it cannot name', () => {
-    const instructions = getAiIndicesInstructions({
-      enabled: true,
-      aiIndices: [agentBuilderDefaultAiIndexId, 'some-private-id'],
-      spaceId: 'default',
-    });
-
-    expect(instructions).not.toContain('`list_indices`');
-  });
-
-  it('omits the catalog heading when no declared index can be named', () => {
-    const instructions = getAiIndicesInstructions({
-      enabled: true,
-      aiIndices: ['some-private-id'],
-      spaceId: 'default',
-    });
-
-    expect(instructions).not.toContain('Available to this agent');
-    expect(instructions).not.toContain('`list_indices`');
+    expect(instructions).not.toContain('permissions.kibana.privileges');
+    expect(instructions).not.toContain('"filter"');
+    expect(instructions).not.toContain('ignore_unmapped');
+    expect(instructions).not.toContain('verbatim');
   });
 });

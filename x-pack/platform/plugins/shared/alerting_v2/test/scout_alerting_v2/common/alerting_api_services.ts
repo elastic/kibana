@@ -14,25 +14,33 @@ import type {
 } from '@kbn/scout';
 import {
   getActionPoliciesApiService,
+  getActionPolicySavedObjectService,
   getAlertActionsApiService,
+  getAlertActionsCleanupService,
   getAlertActionsEventsService,
   getDispatcherApiService,
+  getEbtService,
   getMaintenanceWindowsApiService,
   getRuleChangesHistoryApiService,
   getRuleExecutionsApiService,
   getRulesApiService,
+  getRuleSavedObjectService,
   getRuleTemplatesApiService,
   getTaskManagerService,
   getTelemetryService,
   getWorkflowsApiService,
   type ActionPoliciesApiService,
+  type ActionPolicySavedObjectService,
   type AlertActionsApiService,
+  type AlertActionsCleanupService,
   type AlertActionsEventsService,
   type DispatcherApiService,
+  type EbtService,
   type MaintenanceWindowsApiService,
   type RuleChangesHistoryApiService,
   type RuleExecutionsApiService,
   type RulesApiService,
+  type RuleSavedObjectService,
   type RuleEventsApiService,
   type RuleTemplatesApiService,
   type TaskManagerService,
@@ -45,16 +53,20 @@ import { getSourceIndexApiService } from './services/source_index_api_service';
 
 export interface AlertingApiServices {
   rules: RulesApiService;
+  ruleSavedObject: RuleSavedObjectService;
   ruleTemplates: RuleTemplatesApiService;
   ruleChangesHistory: RuleChangesHistoryApiService;
   ruleEvents: RuleEventsApiService;
   alertActionsEvents: AlertActionsEventsService;
   alertActions: AlertActionsApiService;
+  alertActionsCleanup: AlertActionsCleanupService;
   actionPolicies: ActionPoliciesApiService;
+  actionPolicySavedObject: ActionPolicySavedObjectService;
   maintenanceWindows: MaintenanceWindowsApiService;
   sourceIndex: SourceIndexApiService;
   ruleExecutions: RuleExecutionsApiService;
   dispatcher: DispatcherApiService;
+  ebt: EbtService;
   taskManager: TaskManagerService;
   telemetry: TelemetryService;
   workflows: WorkflowsApiService;
@@ -83,16 +95,20 @@ export const buildAlertingApiServices = ({
   const taskManager = getTaskManagerService({ kbnClient, log });
   return {
     rules: getRulesApiService({ kbnClient, log }),
+    ruleSavedObject: getRuleSavedObjectService({ esClient, log, config }),
     ruleTemplates: getRuleTemplatesApiService({ kbnClient, log }),
     ruleChangesHistory: getRuleChangesHistoryApiService({ esClient, log, config }),
     ruleEvents: getRuleEventsApiService({ esClient, log }),
     alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
     alertActions: getAlertActionsApiService({ kbnClient, log }),
+    alertActionsCleanup: getAlertActionsCleanupService({ esClient, log, taskManager }),
     actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
+    actionPolicySavedObject: getActionPolicySavedObjectService({ esClient, log, config }),
     maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
     sourceIndex: getSourceIndexApiService({ esClient, log }),
     ruleExecutions: getRuleExecutionsApiService({ esClient, log }),
     dispatcher: getDispatcherApiService({ esClient, log }),
+    ebt: getEbtService({ kbnClient, log }),
     taskManager,
     telemetry: getTelemetryService({ esClient, log, taskManager }),
     workflows: getWorkflowsApiService({ kbnClient, log }),

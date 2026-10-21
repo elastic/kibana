@@ -21,8 +21,10 @@ import {
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { VisIconType } from '@kbn/chart-icons';
 import type { TextBasedLayerColumn } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import { DatasourceUnsupportedError } from '../../errors';
 import type { DeepWriteable, LensAttributes } from '../../types';
 import {
   DEFAULT_PRIMARY_POSITION,
@@ -110,12 +112,13 @@ export const iconCompat = getReversibleMappings<MetricIconName, string>([
   ['heart', 'heart'],
   ['map_marker', 'mapMarker'],
   ['pin', 'pin'],
+  ['popout', 'popout'],
   ['sort_down', 'sortDown'],
   ['sort_up', 'sortUp'],
   ['star_empty', 'starEmpty'],
   ['tag', 'tag'],
   ['temperature', 'temperature'],
-]);
+] satisfies Array<[MetricIconName, VisIconType]>);
 
 function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
@@ -157,12 +160,33 @@ function isPrimaryMetric(metric: MetricConfig['metrics'][number]): metric is Pri
   return metric.type === 'primary';
 }
 
+function getSecondaryNameVisibility(
+  label: NonNullable<MetricStyling['secondary']>['label']
+): MetricVisualizationState['secondaryNameVisibility'] {
+  const isVisible = label?.visible ?? DEFAULT_SECONDARY_LABEL_VISIBLE;
+  if (!isVisible) {
+    return 'hidden';
+  }
+  return label?.placement ?? DEFAULT_SECONDARY_LABEL_PLACEMENT;
+}
+
+function isSecondaryLabelHidden(visualization: MetricVisualizationState): boolean {
+  return visualization.secondaryNameVisibility === 'hidden' || visualization.secondaryLabel === '';
+}
+
 function convertStylingToStateFormat(
   styling: MetricStyling | undefined,
   hasSecondary: boolean
 ): Partial<MetricVisualizationState> {
   if (!styling) {
-    return { density: DEFAULT_DENSITY };
+    return {
+      density: DEFAULT_DENSITY,
+      ...(hasSecondary
+        ? {
+            secondaryNameVisibility: getSecondaryNameVisibility(undefined),
+          }
+        : {}),
+    };
   }
   const primaryStyling = styling.primary;
   const secondaryStyling = styling.secondary;
@@ -182,8 +206,7 @@ function convertStylingToStateFormat(
     iconAlign: styling.icon?.alignment,
     ...(hasSecondary
       ? stripUndefined({
-          secondaryLabel: secondaryStyling?.label?.visible === false ? '' : undefined,
-          secondaryLabelPosition: secondaryStyling?.label?.placement,
+          secondaryNameVisibility: getSecondaryNameVisibility(secondaryStyling?.label),
           secondaryAlign: secondaryStyling?.value?.alignment,
         })
       : {}),
@@ -219,7 +242,7 @@ function convertStylingToAPIFormat(
     }),
     secondary: hasSecondary
       ? {
-          ...(visualization.secondaryLabel === '' || visualization.secondaryPrefix === ''
+          ...(isSecondaryLabelHidden(visualization)
             ? {
                 label: {
                   visible: false,
@@ -227,9 +250,9 @@ function convertStylingToAPIFormat(
               }
             : {
                 label: {
-                  visible: DEFAULT_SECONDARY_LABEL_VISIBLE,
+                  visible: true,
                   placement:
-                    visualization.secondaryLabelPosition ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
+                    visualization.secondaryNameVisibility ?? DEFAULT_SECONDARY_LABEL_PLACEMENT,
                 },
               }),
           value: {
@@ -521,13 +544,13 @@ function enrichConfigurationWithVisualizationProperties(
   }
 
   if (secondaryMetric) {
-    if (visualization.secondaryTrend?.type === 'dynamic') {
-      secondaryMetric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
+    // Leftover vis Label is what the chart paints; emit it as the API name so GET+PUT cannot change appearance.
+    if (visualization.secondaryLabel) {
+      secondaryMetric.label = visualization.secondaryLabel;
     }
 
-    const secondaryLabelOverride = visualization.secondaryLabel ?? visualization.secondaryPrefix;
-    if (secondaryLabelOverride && secondaryLabelOverride.length > 0) {
-      secondaryMetric.label = secondaryLabelOverride;
+    if (visualization.secondaryTrend?.type === 'dynamic') {
+      secondaryMetric.compare = fromCompareLensStateToAPI(visualization.secondaryTrend);
     }
 
     if (visualization.secondaryTrend?.type === 'static' && visualization.secondaryTrend?.color) {
@@ -575,7 +598,7 @@ function reverseBuildVisualizationState(
   );
 
   if (!dataSource || dataSource.type == null) {
-    throw new Error('Unsupported DataSource type');
+    throw new DatasourceUnsupportedError();
   }
 
   return {

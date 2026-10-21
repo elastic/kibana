@@ -10,6 +10,7 @@ import type { APMEventClient } from '../../../lib/helpers/create_es_client/creat
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import type { Environment } from '../../../../common/environment_rt';
+import { isIndexNotFoundError } from '../../../lib/helpers/is_index_not_found_error';
 
 export async function getServiceNamesFromTermsEnum({
   apmEventClient,
@@ -27,27 +28,33 @@ export async function getServiceNamesFromTermsEnum({
   if (environment !== ENVIRONMENT_ALL.value) {
     return [];
   }
-  const response = await apmEventClient.termsEnum('get_services_from_terms_enum', {
-    apm: {
-      events: [
-        ProcessorEvent.transaction,
-        ProcessorEvent.span,
-        ProcessorEvent.metric,
-        ProcessorEvent.error,
-      ],
-    },
-    size: maxNumberOfServices,
-    field: SERVICE_NAME,
-    index_filter: {
-      range: {
-        ['@timestamp']: {
-          gte: start,
-          lte: end,
-          format: 'epoch_millis',
+  try {
+    const response = await apmEventClient.termsEnum('get_services_from_terms_enum', {
+      apm: {
+        events: [
+          ProcessorEvent.transaction,
+          ProcessorEvent.span,
+          ProcessorEvent.metric,
+          ProcessorEvent.error,
+        ],
+      },
+      size: maxNumberOfServices,
+      field: SERVICE_NAME,
+      index_filter: {
+        range: {
+          ['@timestamp']: {
+            gte: start,
+            lte: end,
+            format: 'epoch_millis',
+          },
         },
       },
-    },
-  });
-
-  return response.terms;
+    });
+    return response.terms;
+  } catch (error) {
+    if (isIndexNotFoundError(error)) {
+      return [];
+    }
+    throw error;
+  }
 }

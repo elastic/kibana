@@ -57,7 +57,7 @@ spaceTest.describe(
         await spaceTest.step('return with no changes and no modal', async () => {
           await openInLens();
           await lens.workspace.goBackToPreviousApp();
-          await expect(visualize.getEditInLensButton()).toBeVisible();
+          await visualize.expectEditInLensButtonVisible();
         });
 
         await spaceTest.step('warn and discard after unsaved Lens changes', async () => {
@@ -66,7 +66,7 @@ spaceTest.describe(
           await lens.workspace.goBackToPreviousApp();
           await expect(lens.workspace.discardChangesModal).toBeVisible();
           await lens.workspace.confirmDiscardChangesModal();
-          await expect(visualize.getEditInLensButton()).toBeVisible();
+          await visualize.expectEditInLensButtonVisible();
         });
 
         await spaceTest.step('return with no modal after saving in Lens', async () => {
@@ -77,7 +77,7 @@ spaceTest.describe(
           });
           await lens.workspace.goBackToPreviousApp();
           await expect(lens.workspace.discardChangesModal).toBeHidden();
-          await expect(visualize.getEditInLensButton()).toBeVisible();
+          await visualize.expectEditInLensButtonVisible();
         });
       }
     );

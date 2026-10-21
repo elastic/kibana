@@ -36,7 +36,7 @@ export const SHOWING_SELECTED_CASES = (totalRules: number) =>
     defaultMessage: 'Selected {totalRules} {totalRules, plural, =1 {case} other {cases}}',
   });
 
-export const SHOWING_CASES = (totalRules: number, pageSize: number) =>
+export const SHOWING_CASES_PAGE = (totalRules: number, pageSize: number) =>
   i18n.translate('xpack.cases.caseTable.showingCasesTitle', {
     values: { totalRules, pageSize },
     defaultMessage:
@@ -367,3 +367,117 @@ export const TABLE_CAPTION = i18n.translate('xpack.cases.caseTable.tableCaption'
 export const EDIT_FILTERS_TOOLTIP = i18n.translate('xpack.cases.allCases.editFiltersTooltip', {
   defaultMessage: 'Add or remove filters',
 });
+
+export const VIEW_TOGGLE_LEGEND = i18n.translate('xpack.cases.viewToggle.legend', {
+  defaultMessage: 'View toggle',
+});
+
+export const VIEW_TOGGLE_LIST_LABEL = i18n.translate('xpack.cases.viewToggle.listView', {
+  defaultMessage: 'List view',
+});
+
+export const VIEW_TOGGLE_TABLE_LABEL = i18n.translate('xpack.cases.viewToggle.tableView', {
+  defaultMessage: 'Table view',
+});
+
+export const COLUMNS_BUTTON_LABEL = i18n.translate('xpack.cases.tableFilters.columnsButton', {
+  defaultMessage: 'Columns',
+});
+
+export const FIELDS_BUTTON_LABEL = i18n.translate('xpack.cases.tableFilters.fieldsButton', {
+  defaultMessage: 'Fields',
+});
+
+export const UNKNOWN = i18n.translate('xpack.cases.listView.unknown', {
+  defaultMessage: 'Unknown',
+});
+
+export const LIST_REPORTED_BY = i18n.translate('xpack.cases.listView.reportedBy', {
+  defaultMessage: 'Reported by',
+});
+
+export const LIST_LAST_UPDATE = i18n.translate('xpack.cases.listView.lastUpdate', {
+  defaultMessage: 'Last update',
+});
+
+export const LIST_FIELD_CREATED = i18n.translate('xpack.cases.listView.fieldCreated', {
+  defaultMessage: 'Created',
+});
+
+export const LIST_FIELD_CLOSED = i18n.translate('xpack.cases.listView.fieldClosed', {
+  defaultMessage: 'Closed',
+});
+
+export const SORT_ORDER_ARIA_LABEL = i18n.translate('xpack.cases.tableFilters.sortOrderAriaLabel', {
+  defaultMessage: 'Sort order',
+});
+
+export const SORT_NEWEST_FIRST = i18n.translate('xpack.cases.tableFilters.newestFirst', {
+  defaultMessage: 'Newest first',
+});
+
+export const SORT_OLDEST_FIRST = i18n.translate('xpack.cases.tableFilters.oldestFirst', {
+  defaultMessage: 'Oldest first',
+});
+
+export const COLUMNS_POPOVER_ARIA_LABEL = i18n.translate('xpack.cases.columnsPopover.ariaLabel', {
+  defaultMessage: 'Column visibility options',
+});
+
+export const BULK_ACTIONS_POPOVER_ARIA_LABEL = i18n.translate(
+  'xpack.cases.bulkActionsPopover.ariaLabel',
+  {
+    defaultMessage: 'Bulk actions popover',
+  }
+);
+
+export const SELECT_CASE_ARIA_LABEL = (title: string) =>
+  i18n.translate('xpack.cases.listView.selectCaseAriaLabel', {
+    values: { title },
+    defaultMessage: 'Select case {title}',
+  });
+
+export const SELECT_ALL_CASES = i18n.translate('xpack.cases.listView.selectAll', {
+  defaultMessage: 'Select all',
+});
+
+export const CLEAR_SELECTION = i18n.translate('xpack.cases.listView.clearSelection', {
+  defaultMessage: 'Clear selection',
+});
+
+export const LIST_CASE_META_LINK_ARIA = (title: string) =>
+  i18n.translate('xpack.cases.listView.caseMetaLinkAriaLabel', {
+    values: { title },
+    defaultMessage: 'View case details for {title}',
+  });
+
+export const SEARCH_HIDDEN_FIELDS_INFO_TITLE = i18n.translate(
+  'xpack.cases.tableFilters.searchHiddenFieldsInfoTitle',
+  {
+    defaultMessage: 'Search may include hidden fields',
+  }
+);
+
+export const SEARCH_HIDDEN_FIELDS_INFO_TEXT = i18n.translate(
+  'xpack.cases.tableFilters.searchHiddenFieldsInfoText',
+  {
+    defaultMessage:
+      'Results can match values from template and custom fields that are not shown as columns.',
+  }
+);
+
+export const ACTION_LICENSE_REQUIRED = i18n.translate(
+  'xpack.cases.allCasesView.actionLicenseRequired',
+  {
+    defaultMessage:
+      'Opening cases in external systems requires a Platinum license or higher, a cloud deployment, or a free trial.',
+  }
+);
+
+export const ACTION_LICENSE_DISABLED_BY_CONFIG = i18n.translate(
+  'xpack.cases.allCasesView.actionLicenseDisabledByConfig',
+  {
+    defaultMessage:
+      'External connectors are disabled in the Kibana configuration. Update xpack.actions.enabledActionTypes to enable them.',
+  }
+);

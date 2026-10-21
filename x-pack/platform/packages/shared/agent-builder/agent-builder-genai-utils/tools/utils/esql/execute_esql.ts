@@ -13,6 +13,7 @@ import type {
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { isMaximumResponseSizeExceededError } from '@kbn/es-errors';
 import { MAX_ES_RESPONSE_SIZE_BYTES } from '../../constants';
+import { applyFrozenTierExclusion } from '../data_tiers';
 import { applyLimit } from './apply_limit';
 
 export interface EsqlResponse {
@@ -33,30 +34,37 @@ export interface EsqlResponse {
  * `filter` is a Query DSL container that only ever narrows the result set. It is not a `WHERE`
  * clause and cannot reference `?named` params, because Elasticsearch parses it separately from the
  * query text.
+ *
+ * `dropNullColumns` maps to Elasticsearch `drop_null_columns` (default `true`).
  */
 export const executeEsql = async ({
   query,
   params,
   limit,
   filter,
+  dropNullColumns = true,
+  includeFrozen = false,
   esClient,
 }: {
   query: string;
   params?: Array<Record<string, FieldValue>>;
   limit?: number;
   filter?: QueryDslQueryContainer;
+  dropNullColumns?: boolean;
+  includeFrozen?: boolean;
   esClient: ElasticsearchClient;
 }): Promise<EsqlResponse> => {
   const effectiveQuery = limit !== undefined ? applyLimit(query, limit) : query;
+  const effectiveFilter = applyFrozenTierExclusion(filter, includeFrozen);
 
   try {
     const response = await esClient.esql.query(
       {
         query: effectiveQuery,
-        drop_null_columns: true,
+        drop_null_columns: dropNullColumns,
         allow_partial_results: true,
         ...(params && params.length > 0 ? { params: params as unknown as FieldValue[] } : {}),
-        ...(filter ? { filter } : {}),
+        ...(effectiveFilter ? { filter: effectiveFilter } : {}),
       },
       { maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES }
     );

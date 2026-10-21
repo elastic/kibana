@@ -143,6 +143,39 @@ describe('createCaseFromTemplateStepDefinition', () => {
     });
   });
 
+  it('omits extractObservables from the create payload when the legacy template settings are partial', async () => {
+    const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const get = jest.fn().mockResolvedValue([
+      {
+        owner: 'securitySolution',
+        templates: [
+          {
+            key: 'triage_template',
+            name: 'Triage template',
+            caseFields: {
+              title: 'Template title',
+              description: 'Template description',
+              settings: { syncAlerts: false }, // extractObservables intentionally absent
+            },
+          },
+        ],
+      },
+    ]);
+    const getCasesClient = jest.fn().mockResolvedValue({
+      configure: { get },
+      cases: { create },
+    } as unknown as CasesClient);
+
+    const definition = createCaseFromTemplateStepDefinition(getCasesClient, false);
+    await definition.handler(
+      createContext({ case_template_id: 'triage_template', owner: 'securitySolution' })
+    );
+
+    // extractObservables must be absent so the server-side create path applies the space
+    // configuration default instead of a value hard-coded from owner info.
+    expect(create.mock.calls[0][0].settings).not.toHaveProperty('extractObservables');
+  });
+
   it('finds template across multiple configurations', async () => {
     const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const get = jest.fn().mockResolvedValue([
@@ -342,7 +375,7 @@ describe('createCaseFromTemplateStepDefinition', () => {
       expect('severity' in createPayload).toBe(false);
       expect('assignees' in createPayload).toBe(false);
       expect('category' in createPayload).toBe(false);
-      expect(createPayload.settings).toEqual({ syncAlerts: true, extractObservables: true });
+      expect(createPayload.settings).toEqual({ syncAlerts: true });
       // Tags are seeded empty (= "caller sent none") so expansion applies the template's tags.
       expect(createPayload.tags).toEqual([]);
 
@@ -381,6 +414,40 @@ describe('createCaseFromTemplateStepDefinition', () => {
       expect(createPayload.title).toBe('Caller title');
       expect(createPayload.description).toBe('Triage default description');
       expect(createPayload.template).toEqual({ id: 'triage_template', version: 4 });
+    });
+
+    it('passes overwrites.extended_fields through to cases.create', async () => {
+      const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
+      const getTemplate = jest.fn().mockResolvedValue(
+        buildTemplateSO({
+          name: 'Triage default title',
+          description: 'Triage default description',
+          fields: [],
+        })
+      );
+      const getCasesClient = jest.fn().mockResolvedValue({
+        templates: { getTemplate },
+        configure: { get: jest.fn() },
+        cases: { create },
+      } as unknown as CasesClient);
+
+      const definition = createCaseFromTemplateStepDefinition(getCasesClient, true);
+      await definition.handler(
+        createContext({
+          owner: 'securitySolution',
+          case_template_id: 'triage_template',
+          overwrites: {
+            extended_fields: { priority_as_keyword: 'high' },
+          },
+        })
+      );
+
+      expect(create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          extended_fields: { priority_as_keyword: 'high' },
+          template: { id: 'triage_template', version: 4 },
+        })
+      );
     });
 
     it('fails with owner context when the resolved template belongs to a different owner', async () => {
@@ -574,15 +641,15 @@ describe('createCaseFromTemplateStepDefinition', () => {
       );
 
       const createPayload = create.mock.calls[0][0];
-      expect(createPayload.settings).toEqual({ syncAlerts: false, extractObservables: true });
+      expect(createPayload.settings).toEqual({ syncAlerts: false });
     });
 
     it.each([
-      ['securitySolution', { syncAlerts: true, extractObservables: true }],
-      ['observability', { syncAlerts: false, extractObservables: false }],
-      ['cases', { syncAlerts: false, extractObservables: false }],
+      ['securitySolution', { syncAlerts: true }],
+      ['observability', { syncAlerts: false }],
+      ['cases', { syncAlerts: false }],
     ])(
-      'defaults settings from OWNER_INFO when the template does not specify them (owner=%s)',
+      'sets syncAlerts from OWNER_INFO and omits extractObservables (delegated to server) when the template does not specify them (owner=%s)',
       async (owner, settings) => {
         const create = jest.fn().mockResolvedValue(createCaseResponseFixture);
         const getTemplate = jest.fn().mockResolvedValue(

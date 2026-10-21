@@ -27,16 +27,19 @@ const getSubsectionStyles = ({ euiTheme }: UseEuiTheme) => ({
 });
 
 export const FlyoutSubsection = ({
+  id,
   title,
   hasBorder = false,
   children,
-  'data-test-subj': dataTestSubj,
+  ...subsectionProps
 }: FlyoutSubsectionProps) => {
   const styles = useEuiMemoizedStyles(getSubsectionStyles);
 
+  // No `aria-labelledby` counterpart to `FlyoutSection`: the `h5` already places the subsection in
+  // the document outline, and a named region per subsection would only add landmark noise.
   if (hasBorder) {
     return (
-      <div css={styles.subsection} data-bordered data-test-subj={dataTestSubj}>
+      <div {...subsectionProps} id={id} css={styles.subsection} data-bordered>
         <EuiPanel hasShadow={false} hasBorder paddingSize="m">
           <EuiTitle size="xxs">
             <h5>{title}</h5>
@@ -49,7 +52,8 @@ export const FlyoutSubsection = ({
   }
 
   return (
-    <div css={styles.subsection} data-test-subj={dataTestSubj}>
+    // Cleared so a forwarded `data-bordered` cannot suppress the next subsection's divider.
+    <div {...subsectionProps} id={id} css={styles.subsection} data-bordered={undefined}>
       <EuiTitle size="xxs">
         <h5>{title}</h5>
       </EuiTitle>

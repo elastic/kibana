@@ -8,7 +8,7 @@
 import type { ErrorToastOptions } from '@kbn/core-notifications-browser';
 
 import type { UseLogicalAndField } from '../../../../../common/constants';
-import type { MonitorListSortField } from '../../../../../common/runtime_types/monitor_management/sort_field';
+import type { MonitorListSortField } from '../../../../../common/runtime_types/schemas/sort_field';
 import type {
   EncryptedSyntheticsMonitor,
   FetchMonitorManagementListQueryArgs,

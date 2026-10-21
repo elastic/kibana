@@ -6,6 +6,7 @@
  */
 
 import type { MaybePromise } from '@kbn/utility-types';
+import type { AvailabilityContext, AvailabilityResult } from '../availability';
 import type { SkillBoundedTool } from './tools';
 import type { ReferencedContent } from './type_definition';
 
@@ -82,4 +83,15 @@ export interface InternalSkillDefinition {
    * `enable_elastic_capabilities` set.
    */
   excludeFromElasticCapabilities?: boolean;
+  /**
+   * When true, the skill is left out of `list()` but stays resolvable by id
+   * (`get`, `bulkGet`, `has`).
+   */
+  hidden?: boolean;
+  /**
+   * When present, evaluates whether the skill is available for the current
+   * request context. Skills that return `{ status: 'unavailable' }` are
+   * filtered from registry queries (`has`, `get`, `list`, `bulkGet`).
+   */
+  isAvailable?: (context: AvailabilityContext) => MaybePromise<AvailabilityResult>;
 }

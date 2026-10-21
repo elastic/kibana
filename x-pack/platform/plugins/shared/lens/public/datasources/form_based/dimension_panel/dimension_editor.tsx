@@ -109,6 +109,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     toggleFullscreen,
     isFullscreen,
     supportStaticValue,
+    staticValueOnly,
     enableFormatSelector = true,
     layerType,
     paramEditorCustomProps,
@@ -284,14 +285,19 @@ export function DimensionEditor(props: DimensionEditorProps) {
     ...incompleteParams
   } = incompleteInfo || {};
 
+  // restricts the editor to the static value option (i.e. for ES|QL charts without data views)
+  const isStaticValueOnly = Boolean(staticValueOnly && supportStaticValue);
+
   const isQuickFunctionSelected = Boolean(
     supportStaticValue
       ? selectedOperationDefinition && isQuickFunction(selectedOperationDefinition.type)
       : !selectedOperationDefinition || isQuickFunction(selectedOperationDefinition.type)
   );
-  const showQuickFunctions = temporaryQuickFunction || isQuickFunctionSelected;
+  const showQuickFunctions =
+    !isStaticValueOnly && (temporaryQuickFunction || isQuickFunctionSelected);
 
   const showStaticValueFunction =
+    isStaticValueOnly ||
     temporaryStaticValue ||
     (temporaryState === 'none' &&
       supportStaticValue &&
@@ -538,15 +544,27 @@ export function DimensionEditor(props: DimensionEditorProps) {
         );
       }
 
+      const dimensionTestSubj = `lns-indexPatternDimension-${operationType}${
+        compatibleWithCurrentField ? '' : ' incompatible'
+      }`;
+
       return {
         id: operationType as string,
-        label,
+        // Click target is the label (`-label`). The item button is width 100% and the
+        // function-help extraAction overlays its right edge, so a center-click on the
+        // button opens help instead of selecting the function.
+        label: (
+          <span
+            data-test-subj={`${dimensionTestSubj}-label`}
+            css={{ display: 'inline-block', maxWidth: '100%' }}
+          >
+            {label}
+          </span>
+        ),
         isActive,
         isDisabled: !!disabledStatus,
         css: operationsButtonStyles(euiThemeContext),
-        'data-test-subj': `lns-indexPatternDimension-${operationType}${
-          compatibleWithCurrentField ? '' : ' incompatible'
-        }`,
+        'data-test-subj': dimensionTestSubj,
         [`aria-pressed`]: isActive,
         extraAction: operationDefinitionMap[operationType].helpComponent
           ? {
@@ -958,7 +976,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
   const hasFormula =
     !isFullscreen && operationSupportMatrix.operationWithoutField.has(formulaOperationName);
 
-  const hasButtonGroups = !isFullscreen && (hasFormula || supportStaticValue);
+  const hasButtonGroups = !isFullscreen && !isStaticValueOnly && (hasFormula || supportStaticValue);
 
   const initialMethod = useMemo(() => {
     let methodId = '';

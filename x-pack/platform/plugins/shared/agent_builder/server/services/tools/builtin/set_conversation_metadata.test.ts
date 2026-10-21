@@ -47,7 +47,7 @@ describe('createSetConversationMetadataTool', () => {
     return (tool.handler as Function)({ metadata });
   };
 
-  it('calls updateConversationMetadata with serialized metadata', async () => {
+  it('calls updateConversationMetadata with the raw metadata', async () => {
     const metadata = { severity: 'high', affected_user: 'alice' };
     await callHandler(metadata);
     expect(updateConversationMetadata).toHaveBeenCalledWith({
@@ -71,31 +71,24 @@ describe('createSetConversationMetadataTool', () => {
     expect(updateConversationMetadata).not.toHaveBeenCalled();
   });
 
-  it('throws when a SELECT value is not in options', async () => {
-    await expect(callHandler({ severity: 'critical' })).rejects.toMatchObject({
-      message: expect.stringContaining('allowed options'),
-    });
-    expect(updateConversationMetadata).not.toHaveBeenCalled();
+  it('passes through values without field-level validation (delegated to patchMetadata)', async () => {
+    // The tool no longer validates field values — patchMetadata handles that.
+    // Unknown keys are still rejected here; valid-key values are forwarded as-is.
+    await callHandler({ severity: 'critical' });
+    expect(updateConversationMetadata).toHaveBeenCalledWith({ severity: 'critical' });
   });
 
-  it('throws when a TOGGLE field receives a string value', async () => {
-    await expect(callHandler({ is_confirmed: 'true' })).rejects.toMatchObject({
-      message: expect.stringContaining('TOGGLE'),
-    });
-    expect(updateConversationMetadata).not.toHaveBeenCalled();
-  });
-
-  it('serializes a TOGGLE boolean to a string in the stored value', async () => {
+  it('passes raw boolean values for TOGGLE fields', async () => {
     await callHandler({ is_confirmed: true });
-    expect(updateConversationMetadata).toHaveBeenCalledWith({ is_confirmed: 'true' });
+    expect(updateConversationMetadata).toHaveBeenCalledWith({ is_confirmed: true });
   });
 
-  it('serializes a NUMBER to a string in the stored value', async () => {
+  it('passes raw number values for NUMBER fields', async () => {
     await callHandler({ score: 7 });
-    expect(updateConversationMetadata).toHaveBeenCalledWith({ score: '7' });
+    expect(updateConversationMetadata).toHaveBeenCalledWith({ score: 7 });
   });
 
-  it('serializes a TEXT_ARRAY as a string array', async () => {
+  it('passes TEXT_ARRAY as a string array', async () => {
     await callHandler({ tags: ['alpha', 'beta'] });
     expect(updateConversationMetadata).toHaveBeenCalledWith({ tags: ['alpha', 'beta'] });
   });
@@ -106,7 +99,7 @@ describe('createSetConversationMetadataTool', () => {
     expect(updateConversationMetadata).toHaveBeenCalledWith({
       severity: 'medium',
       affected_user: 'bob',
-      is_confirmed: 'false',
+      is_confirmed: false,
     });
     expect(result.results[0].data.updated_keys).toEqual(
       expect.arrayContaining(['severity', 'affected_user', 'is_confirmed'])

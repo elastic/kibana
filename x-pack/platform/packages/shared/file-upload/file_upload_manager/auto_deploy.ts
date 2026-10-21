@@ -44,7 +44,7 @@ export class AutoDeploy {
 
   private async infer(signal?: AbortSignal) {
     return this.http.fetch<InferenceInferenceResponse>(
-      `/internal/data_visualizer/inference/${this.inferenceId}`,
+      `/internal/data_visualizer/inference/${encodeURIComponent(this.inferenceId)}`,
       {
         method: 'POST',
         version: '1',

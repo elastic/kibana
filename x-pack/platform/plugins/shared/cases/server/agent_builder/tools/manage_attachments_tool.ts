@@ -133,6 +133,7 @@ export const manageAttachmentsTool = (
     },
     schema,
     tags: ['cases'],
+    excludeFromMcp: true,
     handler: async (args, toolContext) => {
       const { mode, case_id, attachments, ...rest } = args;
 
@@ -164,7 +165,7 @@ export const manageAttachmentsTool = (
       };
 
       const result = await runStep();
-      const attachmentIds = await emitFromStepResult(toolContext.attachments, result);
+      const attachmentIds = await emitFromStepResult(toolContext, result);
       return injectAttachmentIds(result, attachmentIds);
     },
   };

@@ -28,7 +28,8 @@ describe('isVisibleSearchSource', () => {
       ['.alerts-observability.apm.alerts-default'],
       ['.alerts-stack.alerts-default'],
       ['.alerts-streams.alerts-default'],
-      // `.ml-anomalies-*`.
+      // `.ml-anomalies` materialized view and `.ml-anomalies-*` result indices.
+      ['.ml-anomalies'],
       ['.ml-anomalies-shared'],
       ['.ml-anomalies-my_custom_job'],
       // `.slo-observability.*`.
@@ -120,6 +121,7 @@ describe('isVisibleSearchSource', () => {
   it('exports at least one pattern for every documented category', () => {
     const patterns = DOT_INDEX_ALLOW_LIST_PATTERNS.join(',');
     expect(patterns).toContain('.alerts-*');
+    expect(patterns).toContain('.ml-anomalies');
     expect(patterns).toContain('.ml-anomalies-*');
     expect(patterns).toContain('.slo-observability.*');
     expect(patterns).toContain('.entities.*');

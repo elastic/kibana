@@ -12,6 +12,8 @@ import {
   ALERTING_V2_RULES_READ_ROLE,
   apiTest,
   buildCreateRuleData,
+  buildRuleTemplateData,
+  MAX_PER_PAGE,
   NO_ACCESS_ROLE,
   testData,
 } from '../fixtures';
@@ -312,6 +314,48 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
   });
 
   apiTest(
+    'filter: should filter rules by the template they were created from',
+    async ({ apiClient, apiServices }) => {
+      try {
+        for (const id of ['a-template', 'b-template']) {
+          await apiServices.alertingV2.ruleTemplates.create({
+            id,
+            attributes: buildRuleTemplateData({ metadata: { name: id } }),
+          });
+        }
+        const installs = [
+          { templateId: 'a-template', name: 'rule-from-a-1' },
+          { templateId: 'a-template', name: 'rule-from-a-2' },
+          { templateId: 'b-template', name: 'rule-from-b' },
+        ];
+        for (const { templateId, name } of installs) {
+          await apiServices.alertingV2.ruleTemplates.install(
+            templateId,
+            buildCreateRuleData({ metadata: { name } })
+          );
+        }
+        await apiServices.alertingV2.rules.create(
+          buildCreateRuleData({ metadata: { name: 'standalone-rule' } })
+        );
+
+        const response = await apiClient.get(
+          findRulesUrl({ filter: 'metadata.template.id: "a-template"', per_page: 100 }),
+          { headers: adminHeaders }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body.total).toBe(2);
+        expect(getRuleNames(response.body.items).sort()).toStrictEqual([
+          'rule-from-a-1',
+          'rule-from-a-2',
+        ]);
+      } finally {
+        await apiServices.alertingV2.ruleTemplates.cleanUp();
+      }
+    }
+  );
+
+  apiTest(
     'filter: should support compound expressions with AND/OR/NOT',
     async ({ apiClient, apiServices }) => {
       await apiServices.alertingV2.rules.create(
@@ -357,8 +401,17 @@ apiTest.describe('Find rules API', { tag: '@local-stateful-classic' }, () => {
     }
   );
 
+  apiTest('filter: rejects malformed KQL with a 400', async ({ apiClient }) => {
+    const response = await apiClient.get(findRulesUrl({ filter: 'enabled:', per_page: 100 }), {
+      headers: adminHeaders,
+    });
+
+    expect(response).toHaveStatusCode(400);
+    expect(response.body.code).toBe('INVALID_FILTER_SYNTAX');
+  });
+
   apiTest('validation: should reject perPage above the maximum', async ({ apiClient }) => {
-    const response = await apiClient.get(findRulesUrl({ per_page: 1001 }), {
+    const response = await apiClient.get(findRulesUrl({ per_page: MAX_PER_PAGE + 1 }), {
       headers: adminHeaders,
     });
 
