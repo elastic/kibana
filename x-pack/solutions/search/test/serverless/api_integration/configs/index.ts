@@ -14,6 +14,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('../test_suites/cases/find_cases'));
     loadTestFile(require.resolve('../test_suites/cases/post_case'));
     loadTestFile(require.resolve('../test_suites/serverless_search'));
+    loadTestFile(require.resolve('../test_suites/ml'));
     loadTestFile(require.resolve('../test_suites/platform_security'));
   });
 }
