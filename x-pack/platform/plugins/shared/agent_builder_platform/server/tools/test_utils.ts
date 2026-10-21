@@ -9,7 +9,10 @@ import type { ZodObject } from '@kbn/zod/v4';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { AGENT_BUILDER_INCLUDE_FROZEN_BY_DEFAULT_SETTING_ID } from '@kbn/management-settings-ids';
-import type { BuiltinToolDefinition, ToolSchemaContext } from '@kbn/agent-builder-server';
+import type {
+  DynamicSchemaBuiltinToolDefinition,
+  ToolSchemaContext,
+} from '@kbn/agent-builder-server';
 
 export const createSchemaContext = (includeFrozenByDefault: boolean): ToolSchemaContext => {
   const uiSettings = uiSettingsServiceMock.createClient();
@@ -24,11 +27,6 @@ export const createSchemaContext = (includeFrozenByDefault: boolean): ToolSchema
 };
 
 export const resolveToolSchema = async <TSchema extends ZodObject<any>>(
-  tool: BuiltinToolDefinition<TSchema>,
+  tool: DynamicSchemaBuiltinToolDefinition<TSchema>,
   includeFrozenByDefault: boolean
-): Promise<TSchema> => {
-  if (!tool.getSchema) {
-    throw new Error(`Tool ${tool.id} has no request-scoped schema`);
-  }
-  return tool.getSchema(createSchemaContext(includeFrozenByDefault));
-};
+): Promise<TSchema> => tool.getSchema(createSchemaContext(includeFrozenByDefault));

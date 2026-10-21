@@ -15,7 +15,7 @@ import {
   interpolateEsqlQuery,
 } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { resolveTimeRange } from './screen_context_utils';
 import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
@@ -72,7 +72,7 @@ const createExecuteEsqlToolSchema = (includeFrozenByDefault: boolean) =>
 
 type ExecuteEsqlToolSchema = ReturnType<typeof createExecuteEsqlToolSchema>;
 
-export const executeEsqlTool = (): BuiltinToolDefinition<ExecuteEsqlToolSchema> => {
+export const executeEsqlTool = (): DynamicSchemaBuiltinToolDefinition<ExecuteEsqlToolSchema> => {
   return {
     id: platformCoreTools.executeEsql,
     type: ToolType.builtin,
@@ -120,7 +120,6 @@ If results look incomplete for a time range that reaches far into the past and f
       idempotentHint: true,
       openWorldHint: false,
     },
-    schema: createExecuteEsqlToolSchema(false),
     getSchema: async (schemaContext) =>
       createExecuteEsqlToolSchema(await getIncludeFrozenByDefault(schemaContext)),
     handler: async (

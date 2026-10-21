@@ -7,6 +7,7 @@
 
 export type {
   BuiltinToolDefinition,
+  DynamicSchemaBuiltinToolDefinition,
   StaticToolRegistration,
   StaticEsqlTool,
   StaticWorkflowTool,

@@ -72,7 +72,7 @@ export type ToolAvailabilityHandler = AvailabilityHandler;
 export type ToolAvailabilityConfig = AvailabilityConfig;
 
 /**
- * Request-scoped context passed to {@link BuiltinToolDefinition.getSchema}.
+ * Request-scoped context passed to {@link DynamicSchemaBuiltinToolDefinition.getSchema}.
  */
 export type ToolSchemaContext = AvailabilityContext;
 
@@ -168,12 +168,6 @@ export interface BuiltinToolDefinition<
    */
   schema: RunInput;
   /**
-   * Optional request-scoped variant of {@link schema}, used in its place when exposing the tool
-   * to agents and MCP clients and when validating its input, e.g. for parameter defaults that
-   * depend on the current space's settings.
-   */
-  getSchema?: (context: ToolSchemaContext) => MaybePromise<RunInput>;
-  /**
    * Handler to call to execute the tool.
    */
   handler: ToolHandlerFn<z.infer<RunInput>, TResult>;
@@ -190,6 +184,21 @@ export interface BuiltinToolDefinition<
 }
 
 /**
+ * Built-in tool whose input schema is resolved for each request, e.g. for parameter defaults
+ * that depend on the current space's settings.
+ */
+export type DynamicSchemaBuiltinToolDefinition<
+  RunInput extends ZodObject<any> = ZodObject<any>,
+  TResult extends ToolResult = ToolResult
+> = Omit<BuiltinToolDefinition<RunInput, TResult>, 'schema'> & {
+  /**
+   * Resolves the tool's input schema, used when exposing the tool to agents and MCP clients
+   * and when validating its input.
+   */
+  getSchema: (context: ToolSchemaContext) => MaybePromise<RunInput>;
+};
+
+/**
  * Tool definition for internal agent-runner tools (bash, sleep, etc.) that use
  * BuiltinToolDefinition but are never exposed via the MCP server.
  * Omits annotations since these tools bypass MCP registration.
@@ -197,7 +206,7 @@ export interface BuiltinToolDefinition<
 export type InternalBuiltinToolDefinition<
   RunInput extends ZodObject<any> = ZodObject<any>,
   TResult extends ToolResult = ToolResult
-> = Omit<BuiltinToolDefinition<RunInput, TResult>, 'annotations' | 'getSchema'>;
+> = Omit<BuiltinToolDefinition<RunInput, TResult>, 'annotations'>;
 
 type StaticToolRegistrationMixin<T extends ToolDefinition> = Omit<T, 'readonly' | 'experimental'> &
   BuiltInToolSpecificConfig;
@@ -211,6 +220,7 @@ export type StaticToolRegistration<
   TResult extends ToolResult = ToolResult
 > =
   | BuiltinToolDefinition<RunInput, TResult>
+  | DynamicSchemaBuiltinToolDefinition<RunInput, TResult>
   | StaticEsqlTool
   | StaticIndexSearchTool
   | StaticWorkflowTool;

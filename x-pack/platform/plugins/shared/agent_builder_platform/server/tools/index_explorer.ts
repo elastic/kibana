@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { indexExplorer } from '@kbn/agent-builder-genai-utils';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
 
@@ -30,7 +30,7 @@ const createIndexExplorerSchema = (includeFrozenByDefault: boolean) =>
 
 type IndexExplorerSchema = ReturnType<typeof createIndexExplorerSchema>;
 
-export const indexExplorerTool = (): BuiltinToolDefinition<IndexExplorerSchema> => {
+export const indexExplorerTool = (): DynamicSchemaBuiltinToolDefinition<IndexExplorerSchema> => {
   return {
     id: platformCoreTools.indexExplorer,
     type: ToolType.builtin,
@@ -52,7 +52,6 @@ Tool result: [{ type: "index", name: '.alerts' }]
       idempotentHint: true,
       openWorldHint: false,
     },
-    schema: createIndexExplorerSchema(false),
     getSchema: async (schemaContext) =>
       createIndexExplorerSchema(await getIncludeFrozenByDefault(schemaContext)),
     handler: async (

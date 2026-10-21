@@ -11,7 +11,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { TopSnippetsConfig } from '@kbn/agent-builder-genai-utils/tools';
 import { runSearchTool } from '@kbn/agent-builder-genai-utils/tools';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { resolveTimeRange } from './screen_context_utils';
 import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
 
@@ -46,7 +46,7 @@ export const searchTool = ({
 }: {
   coreSetup: CoreSetup;
   topSnippetsDefaults: TopSnippetsConfig;
-}): BuiltinToolDefinition<SearchSchema> => {
+}): DynamicSchemaBuiltinToolDefinition<SearchSchema> => {
   // Cache the start services promise so it is resolved at most once.
   let startServicesPromise: ReturnType<CoreSetup['getStartServices']> | undefined;
   const getStartServices = () => {
@@ -85,7 +85,6 @@ Note:
       idempotentHint: true,
       openWorldHint: false,
     },
-    schema: createSearchSchema(false),
     getSchema: async (schemaContext) =>
       createSearchSchema(await getIncludeFrozenByDefault(schemaContext)),
     handler: async (

@@ -10,7 +10,7 @@ import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { MappingField } from '@kbn/agent-builder-genai-utils';
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import { getIndexFields } from '@kbn/agent-builder-genai-utils';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
 
 const createGetIndexMappingsSchema = (includeFrozenByDefault: boolean) =>
@@ -91,7 +91,9 @@ const countMappingNodes = (properties: Record<string, MappingNodeProps> | undefi
   return count;
 };
 
-export const getIndexMappingsTool = (): BuiltinToolDefinition<GetIndexMappingsSchema> => {
+type GetIndexMappingsTool = DynamicSchemaBuiltinToolDefinition<GetIndexMappingsSchema>;
+
+export const getIndexMappingsTool = (): GetIndexMappingsTool => {
   return {
     id: platformCoreTools.getIndexMapping,
     type: ToolType.builtin,
@@ -104,7 +106,6 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<GetIndexMappingsSc
       idempotentHint: true,
       openWorldHint: false,
     },
-    schema: createGetIndexMappingsSchema(false),
     getSchema: async (schemaContext) =>
       createGetIndexMappingsSchema(await getIncludeFrozenByDefault(schemaContext)),
     handler: async ({ indices, raw, include_frozen: includeFrozen }, { esClient }) => {

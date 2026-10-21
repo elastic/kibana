@@ -240,18 +240,19 @@ describe('executeEsqlTool', () => {
       expect((query?.data as { esql: string }).esql).not.toContain('range');
     });
 
-    it('accepts a verbose filter that stays under the size limit', () => {
+    it('accepts a verbose filter that stays under the size limit', async () => {
       const filter = {
         bool: {
           should: Array.from({ length: 500 }, (_, i) => ({ term: { host: `server-${i}` } })),
           minimum_should_match: 1,
         },
       };
+      const schema = await resolveToolSchema(executeEsqlTool(), false);
 
-      expect(executeEsqlTool().schema.safeParse({ query: 'FROM logs', filter }).success).toBe(true);
+      expect(schema.safeParse({ query: 'FROM logs', filter }).success).toBe(true);
     });
 
-    it('rejects a filter that exceeds the size limit once serialized', () => {
+    it('rejects a filter that exceeds the size limit once serialized', async () => {
       const filter = {
         bool: {
           should: Array.from({ length: 5000 }, (_, i) => ({ term: { host: `server-${i}` } })),
@@ -260,7 +261,8 @@ describe('executeEsqlTool', () => {
       };
       expect(JSON.stringify(filter).length).toBeGreaterThan(100_000);
 
-      const result = executeEsqlTool().schema.safeParse({ query: 'FROM logs', filter });
+      const schema = await resolveToolSchema(executeEsqlTool(), false);
+      const result = schema.safeParse({ query: 'FROM logs', filter });
 
       expect(result.success).toBe(false);
       expect(result.error?.issues[0].message).toContain('at most 100000 characters');

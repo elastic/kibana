@@ -54,6 +54,7 @@ export type {
   ToolHandlerContext,
   ToolHandlerResult,
   BuiltinToolDefinition,
+  DynamicSchemaBuiltinToolDefinition,
   InternalBuiltinToolDefinition,
   StaticToolRegistration,
   StaticEsqlTool,

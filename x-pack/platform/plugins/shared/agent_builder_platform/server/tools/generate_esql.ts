@@ -12,7 +12,7 @@ import {
   GenerateEsqlNoDataError,
   setDefaultEsqlCacheKey,
 } from '@kbn/agent-builder-genai-utils';
-import { toHashedId, type BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { toHashedId, type DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { ToolHandlerResult } from '@kbn/agent-builder-server/tools';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { resolveTimeRange } from './screen_context_utils';
@@ -79,7 +79,7 @@ export const generateEsqlTool = ({
 }: {
   /** Raw organization id used to derive a stable EIS session id for prompt-cache stickiness. */
   organizationId?: string;
-} = {}): BuiltinToolDefinition<NlToEsqlToolSchema> => {
+} = {}): DynamicSchemaBuiltinToolDefinition<NlToEsqlToolSchema> => {
   if (organizationId) {
     setDefaultEsqlCacheKey(toHashedId(organizationId));
   }
@@ -100,7 +100,6 @@ Set the time range with \`time_range\` rather than describing it in \`query\`, u
       idempotentHint: true,
       openWorldHint: false,
     },
-    schema: createNlToEsqlToolSchema(false),
     getSchema: async (schemaContext) =>
       createNlToEsqlToolSchema(await getIncludeFrozenByDefault(schemaContext)),
     handler: async (
