@@ -42,6 +42,28 @@ export const stackedHeight = ({ h }: GridBox): number =>
     Math.max(STACK_HEIGHT.min, h * DASHBOARD_GRID.row - DASHBOARD_GRID.gutter)
   );
 
+/**
+ * The box a panel's body draws in: its cell on a page `width` pixels wide (or in one column), less the panel's
+ * padding, border and title. Lowering and drawing both size a panel's content by it.
+ */
+export const panelBodySize = (
+  { grid, titled, frameless = false }: { grid: GridBox; titled: boolean; frameless?: boolean },
+  { width, layout = 'grid' }: { width: number; layout?: 'grid' | 'stack' }
+): { width: number; height: number } => {
+  const box = layout === 'stack' ? { width, height: stackedHeight(grid) } : panelBox(grid, width);
+  if (frameless) {
+    return { width: Math.max(80, box.width), height: Math.max(60, box.height) };
+  }
+  const border = 2;
+  return {
+    width: Math.max(80, box.width - 2 * PANEL_CHROME.padding - border),
+    height: Math.max(
+      60,
+      box.height - 2 * PANEL_CHROME.padding - (titled ? PANEL_CHROME.header : 0) - border
+    ),
+  };
+};
+
 /** The grid's height in pixels. */
 export const gridHeight = (grids: readonly GridBox[]): number =>
   Math.max(0, ...grids.map(({ y, h }) => (y + h) * DASHBOARD_GRID.row - DASHBOARD_GRID.gutter));
