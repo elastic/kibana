@@ -13,7 +13,7 @@ import type { BulkSnoozeSeriesActionItem } from '@kbn/alerting-v2-schemas';
 import type { EpisodeActionExtension } from '../types/episode_data_source';
 import type { EpisodeAction, EpisodeActionContext } from './types';
 import { bulkSnoozeSeriesActions } from './bulk_create_alert_actions';
-import { uniqueByGroup } from './helpers';
+import { uniqueBySeries } from './helpers';
 import { isEpisodeSnoozed } from '../utils/is_episode_snoozed';
 import { executeCompositeAction } from './execute_composite_action';
 import * as i18n from './translations';
@@ -37,7 +37,7 @@ export const createSnoozeAction = (
   isCompatible: ({ episodes }: EpisodeActionContext) =>
     episodes.some((ep) =>
       ep.source_id == null
-        ? !isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until)
+        ? ep.series_id != null && !isEpisodeSnoozed(ep.last_snooze_action, ep.snoozed_until)
         : extension?.isCompatible(ep) ?? false
     ),
   execute: async ({ episodes, onSuccess }: EpisodeActionContext) => {
@@ -49,9 +49,9 @@ export const createSnoozeAction = (
       nativeExecute: (eps, http) =>
         bulkSnoozeSeriesActions(
           http,
-          uniqueByGroup(eps).map(
+          uniqueBySeries(eps).map(
             (ep): BulkSnoozeSeriesActionItem => ({
-              group_hash: ep.group_hash,
+              series_id: ep.series_id,
               ...(snoozedUntil === null ? {} : { snoozed_until: snoozedUntil }),
             })
           )

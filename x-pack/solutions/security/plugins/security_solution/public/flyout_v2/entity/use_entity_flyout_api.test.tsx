@@ -591,6 +591,25 @@ describe('useEntityFlyoutApi', () => {
     expect(mockBuildOnClose).toHaveBeenCalledWith(null);
   });
 
+  it('openEntityResolution persists the resolved mode of the originating flyout', () => {
+    const { result } = renderHook(() => useEntityFlyoutApi());
+    result.current.openEntityResolution({
+      entityId: 'entity-1',
+      entityType: EntityType.host,
+      entityName: 'host-1',
+      scopeId: 'scope-1',
+      mode: 'resolved',
+    });
+
+    expect(mockWriteOnOpen).toHaveBeenCalledWith(
+      expect.objectContaining({
+        kind: FLYOUT_DESCRIPTOR_KIND.entityResolution,
+        entityId: 'entity-1',
+        mode: 'resolved',
+      })
+    );
+  });
+
   it('openEntityEntraInsights writes an entityEntraInsights descriptor and clears the param on close', () => {
     const { result } = renderHook(() => useEntityFlyoutApi());
     result.current.openEntityEntraInsights({ managedUser, value: 'user@example.com' });
