@@ -214,7 +214,7 @@ export const ResponseActionDetails = memo<ResponseActionDetailsProps>(
 
     return (
       <EuiText size={textSize} data-test-subj={getTestId()}>
-        <StyledEuiFlexGroup>
+        <StyledEuiFlexGroup data-test-subj={getTestId('details-tray')}>
           <EuiFlexItem grow={false}>
             <StyledDescriptionList listItems={dataList} />
           </EuiFlexItem>
