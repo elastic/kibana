@@ -131,6 +131,26 @@ describe('VegaBaseView external URL check', () => {
   });
 });
 
+describe('VegaBaseView errors', () => {
+  test('displays a parse error carried by the descriptor', async () => {
+    const parentEl = document.createElement('div');
+    const onError = jest.fn();
+    const view = createMockView(
+      {},
+      {
+        parentEl,
+        onError,
+        descriptor: { warnings: [], error: 'Signal-driven data URLs are not supported.' },
+      }
+    );
+
+    await view.init();
+
+    expect(parentEl.textContent).toContain('Signal-driven data URLs are not supported.');
+    expect(onError).toHaveBeenCalledWith('Signal-driven data URLs are not supported.');
+  });
+});
+
 describe('VegaBaseView filter actions', () => {
   test('forwards the function name and arguments to the parent', async () => {
     const onFilterAction = jest.fn().mockResolvedValue(undefined);
