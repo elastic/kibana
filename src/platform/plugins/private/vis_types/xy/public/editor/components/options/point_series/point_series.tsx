@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { Position } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
@@ -21,7 +21,7 @@ import {
 } from '@kbn/vis-default-editor-plugin/public';
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 
-import { LegendSize } from '@kbn/chart-expressions-common';
+import type { LegendSize } from '@kbn/chart-expressions-common';
 import type { VisParams } from '../../../../types';
 import { GridPanel } from './grid_panel';
 import { ThresholdPanel } from './threshold_panel';
@@ -44,8 +44,6 @@ export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) 
   );
 
   const legendSize = stateParams.legendSize;
-
-  const [hadAutoLegendSize] = useState(() => legendSize === LegendSize.AUTO);
 
   const handleLegendSizeChange = useCallback(
     (size?: LegendSize) => setValue('legendSize', size),
@@ -79,7 +77,6 @@ export function PointSeriesOptions(props: ValidationVisOptionsProps<VisParams>) 
             stateParams.legendPosition === Position.Left ||
             stateParams.legendPosition === Position.Right
           }
-          showAutoOption={hadAutoLegendSize}
         />
 
         {vis.data?.aggs?.aggs.some(

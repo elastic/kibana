@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { graphlib } from '@dagrejs/dagre';
 import { omit } from 'lodash';
 import { GraphBuildError } from './graph_build_error';
 import { isHitlWaitStepType } from '../../common/hitl';
@@ -78,7 +77,7 @@ import type {
   WorkflowGraphType,
   WorkflowOutputGraphNode,
 } from '../types';
-import { isLoopEnterNode } from '../types';
+import { isElasticsearch, isKibana, isLoopEnterNode } from '../types';
 import type { EnterParallelNode, ExitParallelNode } from '../types/nodes/parallel_nodes';
 import type { GraphNodeUnion } from '../types/nodes/union';
 import { createTypedGraph } from '../workflow_graph/create_typed_graph';
@@ -193,13 +192,17 @@ function visitTypedAbstractStep(
 
   if ((currentStep as TimeoutProp).timeout) {
     const step = currentStep as BaseStep & TimeoutProp;
-    return handleTimeout(
-      getStepId(step, context),
-      'step_level_timeout',
-      step.timeout as string,
-      visitAbstractStep(omit(step, ['timeout']) as BaseStep, context),
-      context
-    );
+    const stepId = getStepId(step, context);
+    const innerGraph = visitAbstractStep(omit(step, ['timeout']) as BaseStep, context);
+    // Elasticsearch and Kibana steps size their request timeout from the step timeout.
+    const leafNode = innerGraph.node(stepId);
+    if (leafNode && (isElasticsearch(leafNode) || isKibana(leafNode))) {
+      innerGraph.setNode(stepId, {
+        ...leafNode,
+        configuration: { ...leafNode.configuration, timeout: step.timeout },
+      });
+    }
+    return handleTimeout(stepId, 'step_level_timeout', step.timeout as string, innerGraph, context);
   }
 
   if (currentStep.type === 'foreach') {
@@ -1345,9 +1348,4 @@ function resolveWorklfowSettings(
     'on-failure': workflowSettings['on-failure'] ?? defaultSettings['on-failure'],
     timezone: workflowSettings.timezone ?? defaultSettings.timezone,
   };
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function convertToSerializableGraph(graph: graphlib.Graph): any {
-  return graphlib.json.write(graph); // GraphLib does not provide type information, so we use `any`
 }

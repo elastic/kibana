@@ -24,11 +24,11 @@ export class DataFederationPlugin
   implements Plugin<void, DataFederationPluginStart, SetupDependencies, StartDependencies>
 {
   private readonly enabled: boolean;
-  private readonly enableFederatedIdentityAuth: boolean;
   private readonly enableGoogleCloudStorageDataSourceType: boolean;
   private readonly enableAzureDataSourceType: boolean;
 
   private readonly workloadIdentityIssuerUrl: string | undefined;
+  private readonly awsCloudFormationTemplateUrl: string;
 
   private registeredApp?: ManagementApp;
   private licenseSubscription?: Subscription;
@@ -37,22 +37,22 @@ export class DataFederationPlugin
   constructor(initializerContext: PluginInitializerContext) {
     const {
       enabled,
-      enableFederatedIdentityAuth,
       enableGoogleCloudStorageDataSourceType,
       enableAzureDataSourceType,
       workloadIdentityIssuerUrl,
+      awsCloudFormationTemplateUrl,
     } = initializerContext.config.get<{
       enabled: boolean;
-      enableFederatedIdentityAuth: boolean;
       enableGoogleCloudStorageDataSourceType: boolean;
       enableAzureDataSourceType: boolean;
       workloadIdentityIssuerUrl?: string;
+      awsCloudFormationTemplateUrl: string;
     }>();
     this.enabled = enabled;
-    this.enableFederatedIdentityAuth = enableFederatedIdentityAuth;
     this.enableGoogleCloudStorageDataSourceType = enableGoogleCloudStorageDataSourceType;
     this.enableAzureDataSourceType = enableAzureDataSourceType;
     this.workloadIdentityIssuerUrl = workloadIdentityIssuerUrl;
+    this.awsCloudFormationTemplateUrl = awsCloudFormationTemplateUrl;
   }
 
   public setup(core: CoreSetup<StartDependencies>, { management, cloud }: SetupDependencies): void {
@@ -65,19 +65,20 @@ export class DataFederationPlugin
       false
     );
 
-    const enableFederatedIdentityAuth = this.enableFederatedIdentityAuth;
     const enableGoogleCloudStorageDataSourceType = this.enableGoogleCloudStorageDataSourceType;
     const enableAzureDataSourceType = this.enableAzureDataSourceType;
-    const cloudInfo = buildFederatedIdentityClusterInfo(cloud, this.workloadIdentityIssuerUrl);
-    const isCloudEnabled = Boolean(cloud?.isCloudEnabled);
+    const cloudInfo = buildFederatedIdentityClusterInfo(cloud, {
+      workloadIdentityIssuerUrl: this.workloadIdentityIssuerUrl,
+      awsCloudFormationTemplateUrl: this.awsCloudFormationTemplateUrl,
+    });
     this.registeredApp = management.sections.section.data.registerApp({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,
-      order: 2,
+      order: 1,
       visibleIn: ['globalSearch', 'projectSideNav'],
       async mount(params: ManagementAppMountParams) {
         const { mountManagementSection } = await import('./mount_management_section');
-        const [nextCoreStart, { share }] = await core.getStartServices();
+        const [nextCoreStart, { share, usageCollection }] = await core.getStartServices();
 
         const { docTitle } = nextCoreStart.chrome;
         docTitle.change(PLUGIN_NAME);
@@ -87,10 +88,9 @@ export class DataFederationPlugin
 
         const unmountAppCallback = mountManagementSection(nextCoreStart, params, {
           cloudInfo,
-          isCloudEnabled,
           share,
+          usageCollection,
           featureFlags: {
-            enableFederatedIdentityAuth,
             enableGoogleCloudStorageDataSourceType,
             enableAzureDataSourceType,
           },

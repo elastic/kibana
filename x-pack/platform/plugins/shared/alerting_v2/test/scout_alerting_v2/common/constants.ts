@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
+
+export const DEPLOYMENTS_WITH_ALERTING_V2 = [
+  ...tags.stateful.all,
+  ...tags.serverless.observability.complete,
+];
+
 export const COMMON_HEADERS = {
   'kbn-xsrf': 'some-xsrf-token',
   'x-elastic-internal-origin': 'kibana',

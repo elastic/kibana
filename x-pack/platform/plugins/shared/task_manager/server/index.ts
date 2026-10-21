@@ -55,6 +55,7 @@ export type { DecoratedError } from './task_running';
 
 export type {
   RunNowResult,
+  RunSoonOptions,
   BulkUpdateTaskResult,
   BulkUpdateSchedulesOptions,
 } from './task_scheduling';
