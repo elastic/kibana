@@ -7,8 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { servers as defaultConfig } from '../../default/serverless/observability_complete.serverless.config';
 import type { ScoutServerConfig } from '../../../../../types';
+
+// Buffers server-side EBT events behind `/internal/analytics_ftr_helpers/events` so the
+// rules UI tests can assert on rule-lifecycle EBT (`alerting_v2_rule_created` and the
+// other `alerting_v2_rule_*` event types). A config set is
+// server args, so those assertions are local-only: Cloud attaches to an existing deployment.
+const analyticsFtrHelpersPluginPath = `--plugin-path=${resolve(
+  REPO_ROOT,
+  'src/platform/test/analytics/plugins/analytics_ftr_helpers'
+)}`;
 
 export const servers: ScoutServerConfig = {
   ...defaultConfig,
@@ -22,6 +33,7 @@ export const servers: ScoutServerConfig = {
       '--xpack.alerting_v2.rules.minimumScheduleInterval=5s',
       '--xpack.alerting_v2.rules.maxScheduledPerMinute=32000',
       '--uiSettings.globalOverrides.alerting:v2:enabled=true',
+      analyticsFtrHelpersPluginPath,
       // Action policies hold UIAM API keys here. Without this, Task Manager clones the dispatcher
       // request key through the native ES endpoint, which rejects raw `essu_` credentials, so no
       // workflow execution can be scheduled.

@@ -66,7 +66,7 @@ export const FilterInBtn = ({
   const context = useContext(UnifiedDataTableContext);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterForAria', {
     defaultMessage: 'Filter for this {value}',
-    values: { value: columnId },
+    values: { value: field.displayName },
   });
 
   if (isCellValueIgnored(context, rowIndex, field)) {
@@ -102,7 +102,7 @@ export const FilterOutBtn = ({
   const context = useContext(UnifiedDataTableContext);
   const buttonTitle = i18n.translate('unifiedDataTable.grid.filterOutAria', {
     defaultMessage: 'Filter out this {value}',
-    values: { value: columnId },
+    values: { value: field.displayName },
   });
 
   if (isCellValueIgnored(context, rowIndex, field)) {
@@ -185,11 +185,12 @@ export function buildCopyValueButton(
   { Component, rowIndex, columnId }: EuiDataGridColumnCellActionProps,
   toastNotifications: ToastsStart,
   valueToStringConverter: ValueToStringConverter,
-  documentsDisplayMode: DocumentsDisplayMode
+  documentsDisplayMode: DocumentsDisplayMode,
+  columnDisplayName?: string
 ) {
   const buttonTitle = i18n.translate('unifiedDataTable.grid.copyClipboardButtonTitle', {
     defaultMessage: 'Copy value of {column}',
-    values: { column: columnId },
+    values: { column: columnDisplayName ?? columnId },
   });
 
   return (
@@ -258,7 +259,8 @@ export function buildCellActions(
         { Component, rowIndex, columnId } as EuiDataGridColumnCellActionProps,
         toastNotifications,
         valueToStringConverter,
-        documentsDisplayMode
+        documentsDisplayMode,
+        field.displayName
       ),
     ...(showReverseCategorize
       ? [
