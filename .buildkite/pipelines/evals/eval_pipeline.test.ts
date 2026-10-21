@@ -8,10 +8,13 @@
  */
 
 import { parse as yamlParse } from 'yaml';
+import type { EvalsSuiteMetadataEntry } from './eval_pipeline.ts';
 import {
   getEvalPipeline,
   getEvalTriggerStep,
   getForwardablePrLabels,
+  getSuiteRunState,
+  hasRunnableModelSelection,
   shouldRunEvals,
 } from './eval_pipeline.ts';
 
@@ -276,6 +279,97 @@ describe('eval_pipeline', () => {
 
       expect(yaml).not.toContain('EVAL_SCOUT_ARCH');
       expect(yaml).not.toContain('EVAL_SCOUT_DOMAIN');
+    });
+  });
+});
+
+describe('per-suite run state', () => {
+  const noDefaults: EvalsSuiteMetadataEntry = {
+    id: 'agent-builder',
+    ciLabels: ['evals:agent-builder'],
+  };
+  const emptyDefaults: EvalsSuiteMetadataEntry = { ...noDefaults, defaultModelGroups: [] };
+  const nullDefaults: EvalsSuiteMetadataEntry = { ...noDefaults, defaultModelGroups: null };
+  const withDefaults: EvalsSuiteMetadataEntry = {
+    ...noDefaults,
+    defaultModelGroups: ['eis/anthropic-claude-4.5-haiku'],
+  };
+  const withoutCiLabels: EvalsSuiteMetadataEntry = { id: 'ml' };
+
+  describe('hasRunnableModelSelection', () => {
+    it.each([
+      ['no labels, no defaults', [], noDefaults, false],
+      ['a models:<group> label', ['models:eis/openai-gpt-5.4'], noDefaults, true],
+      ['the weekly alias', ['models:weekly-eis-models'], noDefaults, true],
+      ['only a judge label', ['models:judge:eis/anthropic-claude-4.6-opus'], noDefaults, false],
+      ['an empty models: label', ['models:'], noDefaults, false],
+      ['empty defaults', [], emptyDefaults, false],
+      ['null defaults', [], nullDefaults, false],
+      ['non-empty defaults', [], withDefaults, true],
+      ['a model label and no suite label', ['models:x'], noDefaults, true],
+    ])('is decided by %s', (_name, labels, suite, expected) => {
+      expect(hasRunnableModelSelection(labels, suite)).toBe(expected);
+    });
+  });
+
+  describe('getSuiteRunState', () => {
+    it.each([
+      ['nothing selected', [], noDefaults, 'not-selected'],
+      ['models only', ['models:x'], noDefaults, 'not-selected'],
+      ['its label and no models', ['evals:agent-builder'], noDefaults, 'selected-needs-models'],
+      [
+        'its label and a models label',
+        ['evals:agent-builder', 'models:x'],
+        noDefaults,
+        'selected-will-run',
+      ],
+      [
+        'its label and only a judge label',
+        ['evals:agent-builder', 'models:judge:eis/x'],
+        noDefaults,
+        'selected-needs-models',
+      ],
+      [
+        'its label and non-empty defaults',
+        ['evals:agent-builder'],
+        withDefaults,
+        'selected-will-run',
+      ],
+      [
+        'its label and empty defaults',
+        ['evals:agent-builder'],
+        emptyDefaults,
+        'selected-needs-models',
+      ],
+      ['evals:all and no models', ['evals:all'], noDefaults, 'selected-needs-models'],
+      ['evals:all and a models label', ['evals:all', 'models:x'], noDefaults, 'selected-will-run'],
+      ['evals:all and non-empty defaults', ['evals:all'], withDefaults, 'selected-will-run'],
+      [
+        'its skip label',
+        ['evals:agent-builder', 'models:x', 'evals:skip-agent-builder'],
+        noDefaults,
+        'skipped',
+      ],
+      [
+        'evals:all and its skip label',
+        ['evals:all', 'evals:skip-agent-builder'],
+        noDefaults,
+        'skipped',
+      ],
+      [
+        'the fallback evals:<id> label',
+        ['evals:ml', 'models:x'],
+        withoutCiLabels,
+        'selected-will-run',
+      ],
+      [
+        'another suite skip label',
+        ['evals:agent-builder', 'evals:skip-ml'],
+        noDefaults,
+        'selected-needs-models',
+      ],
+    ])('is decided by %s', (_name, labels, suite, expected) => {
+      expect(getSuiteRunState(labels, suite)).toBe(expected);
     });
   });
 });

@@ -27,10 +27,18 @@ export interface EvalsSuiteSpecModelGroup {
   models?: string[];
 }
 
+// Repo-relative minimatch globs for the production code a suite evaluates (prompts, tools, skills).
+// A changed file matches when it hits an `include` and no `exclude`. Read by the PR suggester only.
+export interface EvalsSuiteCoverage {
+  include: string[];
+  exclude?: string[];
+}
+
 export interface EvalsSuiteMetadataEntry {
   id: string;
   name?: string;
   ciLabels?: string[];
+  coverage?: EvalsSuiteCoverage;
   configPath?: string;
   serverConfigSet?: string;
   scoutArch?: string;
@@ -52,7 +60,7 @@ function pathExistsInGitTree(repoRelativePath: string): boolean {
   return output.length > 0;
 }
 
-function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
+export function readEvalsSuiteMetadata(): EvalsSuiteMetadataEntry[] {
   try {
     const filePath = Path.resolve(process.cwd(), EVALS_SUITES_METADATA_RELATIVE_PATH);
     const raw = Fs.readFileSync(filePath, 'utf-8');
@@ -78,7 +86,7 @@ function normalizeBuildkiteKey(value: string): string {
     .replace(/^-|-$/g, '');
 }
 
-function parseGithubPrLabels(raw: string): string[] {
+export function parseGithubPrLabels(raw: string): string[] {
   try {
     const parsed = JSON.parse(raw) as unknown;
     if (Array.isArray(parsed)) {
@@ -102,10 +110,12 @@ function parseGithubPrLabels(raw: string): string[] {
  * `trigger_pipeline.ts`'s `key=value` space-delimited transport, which a spaced (e.g. `good first
  * issue`) or `=`-bearing label would truncate — dropping the `evals:*`/`models:*` labels.
  */
+export function getForwardablePrLabelList(githubPrLabels: string): string[] {
+  return parseGithubPrLabels(githubPrLabels).filter((label) => !/[\s=]/.test(label));
+}
+
 export function getForwardablePrLabels(githubPrLabels: string): string {
-  return parseGithubPrLabels(githubPrLabels)
-    .filter((label) => !/[\s=]/.test(label))
-    .join(',');
+  return getForwardablePrLabelList(githubPrLabels).join(',');
 }
 
 /**
@@ -265,6 +275,73 @@ function buildEvalsYaml({
   ].join('\n');
 }
 
+const MODELS_LABEL_PREFIX = 'models:';
+const MODELS_JUDGE_LABEL_PREFIX = 'models:judge:';
+const EVALS_ALL_LABEL = 'evals:all';
+
+/** Global model selection from `models:*` labels (judge labels excluded), aliases expanded. */
+const parseModelSelectors = (labels: string[]) => {
+  const rawModelSelectors = labels
+    .filter(
+      (label) =>
+        label.startsWith(MODELS_LABEL_PREFIX) && !label.startsWith(MODELS_JUDGE_LABEL_PREFIX)
+    )
+    .map((label) => label.slice(MODELS_LABEL_PREFIX.length))
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+  const useWeeklyEisModels = rawModelSelectors.includes(WEEKLY_EIS_MODELS_ALIAS);
+
+  const explicitModelGroups = rawModelSelectors
+    .filter((value) => value !== WEEKLY_EIS_MODELS_ALIAS)
+    .flatMap((value) => MODEL_GROUP_ALIASES[value] ?? [value]);
+
+  return {
+    explicitModelGroups,
+    useWeeklyEisModels,
+    hasGlobalModelSelection: explicitModelGroups.length > 0 || useWeeklyEisModels,
+  };
+};
+
+/**
+ * Whether the labels give the suite a model to run with: a global `models:*` selection (judge-only
+ * labels do not count) or pinned `defaultModelGroups`. Independent of whether the suite is selected.
+ */
+export const hasRunnableModelSelection = (
+  labels: string[],
+  suite: EvalsSuiteMetadataEntry
+): boolean =>
+  parseModelSelectors(labels).hasGlobalModelSelection ||
+  (suite.defaultModelGroups?.length ?? 0) > 0;
+
+export type SuiteRunState =
+  | 'not-selected'
+  | 'skipped'
+  | 'selected-will-run'
+  | 'selected-needs-models';
+
+/** What the PR labels do to one suite. The single source of truth for `resolveEvalSelection`. */
+export const getSuiteRunState = (
+  labels: string[],
+  suite: EvalsSuiteMetadataEntry
+): SuiteRunState => {
+  const isSkipped = labels.some(
+    (label) =>
+      label.startsWith(EVALS_SKIP_LABEL_PREFIX) &&
+      label.slice(EVALS_SKIP_LABEL_PREFIX.length).trim() === suite.id
+  );
+  if (isSkipped) {
+    return 'skipped';
+  }
+  const suiteLabels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
+  const isSelected =
+    labels.includes(EVALS_ALL_LABEL) || suiteLabels.some((label) => labels.includes(label));
+  if (!isSelected) {
+    return 'not-selected';
+  }
+  return hasRunnableModelSelection(labels, suite) ? 'selected-will-run' : 'selected-needs-models';
+};
+
 interface EvalSelection {
   runnableSuites: EvalsSuiteMetadataEntry[];
   resolveModelGroups: (suite: EvalsSuiteMetadataEntry) => string[];
@@ -279,19 +356,12 @@ interface EvalSelection {
 function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   const parsedLabels = parseGithubPrLabels(githubPrLabels);
 
-  const skippedSuiteIds = new Set(
-    parsedLabels
-      .filter((label) => label.startsWith(EVALS_SKIP_LABEL_PREFIX))
-      .map((label) => label.slice(EVALS_SKIP_LABEL_PREFIX.length).trim())
-      .filter(Boolean)
-  );
-
   // Most PRs carry no eval labels; bail before reading suite metadata so we don't spawn a
   // `git ls-tree` per suite on every kibana-pull-request pipeline generation.
   const hasSelectionLabel = parsedLabels.some(
     (label) =>
       (label.startsWith('evals:') && !label.startsWith(EVALS_SKIP_LABEL_PREFIX)) ||
-      label.startsWith('models:')
+      label.startsWith(MODELS_LABEL_PREFIX)
   );
   if (!hasSelectionLabel) {
     return null;
@@ -299,15 +369,12 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
 
   // Run eval suite(s) when their GH label(s) are present (see `evals.suites.json`).
   const evalSuites = readEvalsSuiteMetadata();
-  const runAllEvals = parsedLabels.includes('evals:all');
-  const selectedEvalSuites = (
-    runAllEvals
-      ? evalSuites
-      : evalSuites.filter((suite) => {
-          const labels = suite.ciLabels?.length ? suite.ciLabels : [`evals:${suite.id}`];
-          return labels.some((label) => parsedLabels.includes(label));
-        })
-  ).filter((suite) => !skippedSuiteIds.has(suite.id));
+  const runStates = new Map(
+    evalSuites.map((suite) => [suite, getSuiteRunState(parsedLabels, suite)])
+  );
+  const selectedEvalSuites = evalSuites.filter((suite) =>
+    ['selected-will-run', 'selected-needs-models'].includes(runStates.get(suite) ?? 'not-selected')
+  );
   // Model filtering (models:* labels): none => skip (explicit selection required);
   // `models:<group>` => run those groups; aliases (e.g. `models:weekly-eis-models`) expand.
   const rawEvaluationConnectorId = parsedLabels
@@ -319,19 +386,7 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
     : undefined;
 
   // Extract model groups + expand aliases. `weekly-eis-models` resolves per-suite (see above).
-  const rawModelSelectors = parsedLabels
-    .filter((label) => label.startsWith('models:') && !label.startsWith('models:judge:'))
-    .map((label) => label.slice('models:'.length))
-    .map((value) => value.trim())
-    .filter(Boolean);
-
-  const useWeeklyEisModels = rawModelSelectors.includes(WEEKLY_EIS_MODELS_ALIAS);
-
-  const explicitModelGroups = rawModelSelectors
-    .filter((value) => value !== WEEKLY_EIS_MODELS_ALIAS)
-    .flatMap((value) => MODEL_GROUP_ALIASES[value] ?? [value]);
-
-  const hasGlobalModelSelection = explicitModelGroups.length > 0 || useWeeklyEisModels;
+  const { explicitModelGroups, useWeeklyEisModels } = parseModelSelectors(parsedLabels);
 
   const resolveModelGroups = (suite: EvalsSuiteMetadataEntry): string[] => {
     const weeklyModels = useWeeklyEisModels
@@ -347,20 +402,14 @@ function resolveEvalSelection(githubPrLabels: string): EvalSelection | null {
   const hasEisJudge =
     !!rawEvaluationConnectorId?.startsWith('eis/') || !!evaluationConnectorId?.startsWith('eis-');
 
-  if (selectedEvalSuites.length === 0) {
-    return null;
-  }
-
   // Without models:* labels, skip (running all models is expensive) — except suites with
   // `defaultModelGroups`, which use their pinned defaults.
-  const suitesWithDefaults = selectedEvalSuites.filter(
-    (suite) => suite.defaultModelGroups && suite.defaultModelGroups.length > 0
+  const runnableSuites = selectedEvalSuites.filter(
+    (suite) => runStates.get(suite) === 'selected-will-run'
   );
-  if (!hasGlobalModelSelection && suitesWithDefaults.length === 0) {
+  if (runnableSuites.length === 0) {
     return null;
   }
-
-  const runnableSuites = hasGlobalModelSelection ? selectedEvalSuites : suitesWithDefaults;
 
   return {
     runnableSuites,

@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { execFileSync } from 'child_process';
 import Fs from 'fs';
+import { minimatch } from 'minimatch';
 import Path from 'path';
 import { parse as parseYaml } from 'yaml';
 import type { EvalsSuiteMetadataEntry } from './eval_pipeline.ts';
+import { getEvalSuggestions } from './evals_suggestions.ts';
 
 // Reads the real config, unlike `eval_pipeline.test.ts` which mocks `fs` with a fixture. These
 // mistakes are only reachable by hand-editing the file, so a PR-time check is the cheapest guard.
@@ -164,5 +167,126 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
       });
 
     expect(problems).toEqual([]);
+  });
+});
+
+describe('evals.suites.json coverage', () => {
+  const trackedFiles = execFileSync('git', ['ls-files'], {
+    cwd: Path.join(__dirname, '../../..'),
+    encoding: 'utf-8',
+    maxBuffer: 256 * 1024 * 1024,
+  })
+    .split('\n')
+    .filter(Boolean);
+
+  const suitesWithCoverage = suites.filter((suite) => suite.coverage);
+
+  // Suites whose prompts/tools/skills have been mapped by hand. Unmapped suites never match a PR,
+  // so "no mapping" must not be read as "no coverage". `smoke-tests` is left out on purpose:
+  // `.github/paths-labeller.yml` already maps the eval infrastructure paths to its label.
+  const SEEDED_SUITE_IDS = ['agent-builder', 'ml', 'alerting-v2', 'esql-generation'];
+
+  it('declares coverage for every seeded suite', () => {
+    const missing = SEEDED_SUITE_IDS.filter(
+      (id) => !suites.find((suite) => suite.id === id)?.coverage?.include?.length
+    );
+
+    expect(missing).toEqual([]);
+  });
+
+  it('only lists include globs that match at least one tracked file', () => {
+    const problems = suitesWithCoverage.flatMap(({ id, coverage }) =>
+      (coverage?.include ?? [])
+        .filter((glob) => !trackedFiles.some((file) => minimatch(file, glob)))
+        .map((glob) => `${id}: include glob "${glob}" matches no tracked file`)
+    );
+
+    expect(problems).toEqual([]);
+  });
+
+  it('gives every suite with coverage at least one CI label to act on', () => {
+    // The suggestion tells the dev to add this label; without one there is nothing to add.
+    const problems = suitesWithCoverage
+      .filter((suite) => !suite.ciLabels?.length)
+      .map(({ id }) => `${id}: has coverage but no ciLabels`);
+
+    expect(problems).toEqual([]);
+  });
+
+  it('has an include glob for each suite with coverage that shares its config directory', () => {
+    // A change in a shared directory must not recommend every sharing suite, so such a suite is
+    // only matched through the files it names itself.
+    const suitesByDir = suites.reduce<Record<string, string[]>>((acc, { id, configPath }) => {
+      if (!configPath) return acc;
+      const dir = Path.dirname(configPath);
+      return { ...acc, [dir]: [...(acc[dir] ?? []), id] };
+    }, {});
+
+    const problems = suitesWithCoverage
+      .filter(({ configPath }) => configPath && suitesByDir[Path.dirname(configPath)].length > 1)
+      .filter(({ coverage }) => !coverage?.include.length)
+      .map(({ id }) => `${id}: shares its config directory but lists no coverage.include`);
+
+    expect(problems).toEqual([]);
+  });
+
+  describe('shared Agent Builder eval helpers', () => {
+    const SRC = 'x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder/src';
+    const suggestedFor = (file: string) =>
+      getEvalSuggestions({ changes: [{ filename: file }], suites, labels: [] })
+        .suggestions.map(({ suiteId }) => suiteId)
+        .sort();
+
+    // The suites share one package, so these files are only mapped through explicit coverage.
+    it.each([
+      ['chat_client.ts', ['agent-builder', 'esql-generation']],
+      ['evaluate.ts', ['agent-builder', 'esql-generation']],
+      ['evaluate_dataset.ts', ['agent-builder']],
+      ['ir_extractor.ts', ['agent-builder']],
+    ])('recommends the suites that import %s', (file, expected) => {
+      expect(suggestedFor(`${SRC}/${file}`)).toEqual(expected);
+    });
+  });
+
+  describe('what the seeded coverage does and does not pick up', () => {
+    const PLUGIN = 'x-pack/platform/plugins/shared/agent_builder/server';
+    const GENAI =
+      'x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils/tools/generate_esql';
+    const suggestedFor = (file: string) =>
+      getEvalSuggestions({ changes: [{ filename: file }], suites, labels: [] })
+        .suggestions.map(({ suiteId }) => suiteId)
+        .sort();
+
+    it.each([
+      [
+        'the default agent system prompt',
+        `${PLUGIN}/services/execution/run_agent/prompts/research_agent.ts`,
+        ['agent-builder'],
+      ],
+      ['an agent definition', `${PLUGIN}/services/agents/default_ai_indices.ts`, ['agent-builder']],
+      ['the generate_esql prompts', `${GENAI}/prompts.ts`, ['esql-generation']],
+      [
+        'a runtime generate_esql documentation file',
+        `${GENAI}/documentation/syntax.md`,
+        ['esql-generation'],
+      ],
+      [
+        'the generate_esql tool wrapper',
+        'x-pack/platform/plugins/shared/agent_builder_platform/server/tools/generate_esql.ts',
+        ['esql-generation'],
+      ],
+    ])('recommends a change to %s', (_name, file, expected) => {
+      expect(suggestedFor(file)).toEqual(expected);
+    });
+
+    // Model-visible code only: plumbing around the agent must stay quiet.
+    it.each([
+      ['an HTTP route', `${PLUGIN}/routes/internal/tools.ts`],
+      ['conversation storage', `${PLUGIN}/services/conversation/client/merge_rounds.ts`],
+      ['the model provider plumbing', `${PLUGIN}/services/execution/runner/model_provider.ts`],
+      ['markdown outside the generate_esql documentation folder', `${GENAI}/README.md`],
+    ])('stays quiet for %s', (_name, file) => {
+      expect(suggestedFor(file)).toEqual([]);
+    });
   });
 });
