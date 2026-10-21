@@ -135,7 +135,9 @@ export const navigateToRule = (ruleName: string) => {
 // Enables or disables the rule from the rule details header badge menu, then closes the menu.
 const toggleRuleOnDetailsPage = (expectedLabel: 'Enabled' | 'Disabled') => {
   cy.getBySel('ruleDetailsEnabledBadge').click();
-  cy.getBySel('ruleDetailsEnabledToggle').click();
+  cy.getBySel(
+    expectedLabel === 'Enabled' ? 'ruleDetailsEnableRule' : 'ruleDetailsDisableRule'
+  ).click();
   cy.getBySel('ruleDetailsEnabledBadge').should('contain.text', expectedLabel);
   cy.focused().type('{esc}');
 };

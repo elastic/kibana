@@ -20,7 +20,7 @@ import { deleteAlertsAndRules, postDataView } from '../../../../../../tasks/api_
 import { login } from '../../../../../../tasks/login';
 import {
   clickDisableRuleSwitch,
-  expectRuleEnabled,
+  expectRuleEnabledOnDetailsPage,
   visitRuleDetailsPage,
   openEditException,
   goToExceptionsTab,
@@ -72,7 +72,7 @@ describe('Close matching Alerts ', { tags: ['@ess', '@serverless'] }, () => {
     waitForAlertsToPopulate();
     // Disables enabled rule
     clickDisableRuleSwitch();
-    expectRuleEnabled(false);
+    expectRuleEnabledOnDetailsPage(false);
   });
   after(() => {
     cy.task('esArchiverUnload', { archiveName: 'exceptions' });

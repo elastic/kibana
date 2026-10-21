@@ -20,9 +20,9 @@ import { interceptBulkFillRulesGaps, interceptGetRuleGaps } from '../../../../ta
 import { visit } from '../../../../tasks/navigation';
 import { ruleDetailsUrl } from '../../../../urls/rule_details';
 import {
-  expectRuleEnabled,
+  disableRuleOnDetailsPage,
+  expectRuleEnabledOnDetailsPage,
   goToExecutionLogTab,
-  toggleRuleEnabled,
 } from '../../../../tasks/rule_details';
 
 describe('bulk fill rule gaps', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
@@ -78,8 +78,8 @@ describe('bulk fill rule gaps', { tags: ['@ess', '@serverless', '@skipInServerle
     cy.wait('@getRuleManualRuns');
 
     // Disable the rule
-    toggleRuleEnabled();
-    expectRuleEnabled(false);
+    disableRuleOnDetailsPage();
+    expectRuleEnabledOnDetailsPage(false);
 
     // Attempt to schedule the backfill
     cy.get(RULE_FILL_ALL_GAPS_BUTTON).click();

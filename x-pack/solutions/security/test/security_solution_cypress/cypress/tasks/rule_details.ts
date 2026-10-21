@@ -48,8 +48,9 @@ import {
   RULE_GAPS_DATE_PICKER_APPLY_REFRESH,
   RULE_GAPS_STATUS_FILTER,
   RULE_GAPS_TABLE,
+  RULE_DISABLE_ACTION,
+  RULE_ENABLE_ACTION,
   RULE_ENABLED_BADGE,
-  RULE_ENABLED_TOGGLE,
   RULE_NAME_HEADER,
 } from '../screens/rule_details';
 import type { RuleDetailsTabs } from '../urls/rule_details';
@@ -78,7 +79,7 @@ export function visitRuleDetailsPage(ruleId: string, options?: VisitRuleDetailsP
 export const clickEnableRuleSwitch = () => {
   // Rules get enabled via _bulk_action endpoint
   cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
-  toggleRuleEnabled();
+  enableRuleOnDetailsPage();
   cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
     cy.wrap(response?.body.attributes.results.updated[0].enabled).should('eql', true);
@@ -88,24 +89,31 @@ export const clickEnableRuleSwitch = () => {
 export const clickDisableRuleSwitch = () => {
   // Rules get enabled via _bulk_action endpoint
   cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
-  toggleRuleEnabled();
+  disableRuleOnDetailsPage();
   cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
     cy.wrap(response?.body.attributes.results.updated[0].enabled).should('eql', false);
   });
 };
 
-/**
- * Enables a disabled rule or disables an enabled rule from the rule details header badge menu.
- */
-export const toggleRuleEnabled = () => {
+const clickRuleStateAction = (action: string) => {
   cy.get(RULE_ENABLED_BADGE).should('be.visible');
   cy.get(RULE_ENABLED_BADGE).click();
-  cy.get(RULE_ENABLED_TOGGLE).click();
+  cy.get(action).click();
   cy.focused().type('{esc}');
 };
 
-export const expectRuleEnabled = (enabled: boolean) => {
+/**
+ * Enables a disabled rule from the rule details header "Disabled" badge menu.
+ */
+export const enableRuleOnDetailsPage = () => clickRuleStateAction(RULE_ENABLE_ACTION);
+
+/**
+ * Disables an enabled rule from the rule details header "Enabled" badge menu.
+ */
+export const disableRuleOnDetailsPage = () => clickRuleStateAction(RULE_DISABLE_ACTION);
+
+export const expectRuleEnabledOnDetailsPage = (enabled: boolean) => {
   cy.get(RULE_ENABLED_BADGE).should('contain.text', enabled ? 'Enabled' : 'Disabled');
 };
 

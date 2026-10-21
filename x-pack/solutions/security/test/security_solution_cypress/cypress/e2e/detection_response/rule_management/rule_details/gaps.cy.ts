@@ -17,7 +17,7 @@ import {
   getGapsTableRows,
   refreshGapsTable,
   waitForPageToBeLoaded,
-  toggleRuleEnabled,
+  disableRuleOnDetailsPage,
 } from '../../../../tasks/rule_details';
 import { getNewRule } from '../../../../objects/rule';
 import {
@@ -114,7 +114,7 @@ describe('Rule gaps', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
     cy.get(TOASTER).contains('Manual run requested');
 
     // Test filling gaps with disabled rule
-    toggleRuleEnabled();
+    disableRuleOnDetailsPage();
     // Wait for the rule-disabled state to propagate to the button before hovering,
     // otherwise `EuiToolTip` won't render when content is still empty.
     cy.get(RULE_GAPS_FILL_BUTTON).first().should('be.disabled');

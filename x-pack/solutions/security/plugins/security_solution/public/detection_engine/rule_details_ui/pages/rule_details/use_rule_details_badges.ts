@@ -149,7 +149,7 @@ export const useRuleDetailsBadges = ({
               hasActionsPrivileges,
               canEnableDisableRules
             ),
-            'data-test-subj': 'ruleDetailsEnabledToggle',
+            'data-test-subj': isEnabled ? 'ruleDetailsDisableRule' : 'ruleDetailsEnableRule',
           },
         ],
       },

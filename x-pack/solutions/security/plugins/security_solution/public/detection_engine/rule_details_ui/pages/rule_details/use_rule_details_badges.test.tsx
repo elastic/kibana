@@ -115,7 +115,7 @@ describe('useRuleDetailsBadges', () => {
 
     await userEvent.click(screen.getByText('Enabled'));
     await waitForEuiPopoverOpen();
-    await userEvent.click(await screen.findByTestId('ruleDetailsEnabledToggle'));
+    await userEvent.click(await screen.findByTestId('ruleDetailsDisableRule'));
 
     expect(executeBulkAction).toHaveBeenCalledWith({
       type: BulkActionTypeEnum.disable,
@@ -133,7 +133,7 @@ describe('useRuleDetailsBadges', () => {
 
     await userEvent.click(screen.getByText('Disabled'));
     await waitForEuiPopoverOpen();
-    await userEvent.click(await screen.findByTestId('ruleDetailsEnabledToggle'));
+    await userEvent.click(await screen.findByTestId('ruleDetailsEnableRule'));
 
     expect(startMlJobsIfNeeded).toHaveBeenCalled();
     expect(executeBulkAction).toHaveBeenCalledWith({
@@ -150,7 +150,7 @@ describe('useRuleDetailsBadges', () => {
     await userEvent.click(screen.getByText('Enabled'));
     await waitForEuiPopoverOpen();
 
-    expect(await screen.findByTestId('ruleDetailsEnabledToggle')).toBeDisabled();
+    expect(await screen.findByTestId('ruleDetailsDisableRule')).toBeDisabled();
   });
 
   it('shows only the "Deleted rule" badge for a deleted rule', () => {

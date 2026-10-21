@@ -17,7 +17,7 @@ import { deleteAlertsAndRules, deleteConnectors } from '../../../../tasks/api_ca
 import { login } from '../../../../tasks/login';
 import { activateSpace, getSpaceUrl } from '../../../../tasks/space';
 import { visit } from '../../../../tasks/navigation';
-import { toggleRuleEnabled } from '../../../../tasks/rule_details';
+import { enableRuleOnDetailsPage } from '../../../../tasks/rule_details';
 import { ruleDetailsUrl } from '../../../../urls/rule_details';
 
 describe('Non-default space rule detail page', { tags: ['@ess'] }, function () {
@@ -76,7 +76,7 @@ describe('Non-default space rule detail page', { tags: ['@ess'] }, function () {
       'POST',
       getSpaceUrl(SPACE_ID, '/api/detection_engine/rules/_bulk_action?dry_run=false')
     ).as('bulk_action');
-    toggleRuleEnabled();
+    enableRuleOnDetailsPage();
     cy.wait('@bulk_action').then(({ response }) => {
       cy.wrap(response?.statusCode).should('eql', 200);
       cy.wrap(response?.body.attributes.results.updated[0].max_signals).should(

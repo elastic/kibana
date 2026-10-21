@@ -85,7 +85,9 @@ export const EDIT_EXCEPTION_BTN = '[data-test-subj="exceptionItemCardHeader-acti
 
 export const RULE_ENABLED_BADGE = '[data-test-subj="ruleDetailsEnabledBadge"]';
 
-export const RULE_ENABLED_TOGGLE = '[data-test-subj="ruleDetailsEnabledToggle"]';
+export const RULE_ENABLE_ACTION = '[data-test-subj="ruleDetailsEnableRule"]';
+
+export const RULE_DISABLE_ACTION = '[data-test-subj="ruleDetailsDisableRule"]';
 
 export const RULE_TYPE_DETAILS = 'Rule type';
 
