@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { MappingField } from '@kbn/agent-builder-genai-utils';
@@ -13,7 +14,7 @@ import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
 
-const createGetIndexMappingsSchema = (includeFrozenByDefault: boolean) =>
+const createGetIndexMappingsSchema = memoize((includeFrozenByDefault: boolean) =>
   z.object({
     indices: z
       .array(z.string())
@@ -28,7 +29,8 @@ const createGetIndexMappingsSchema = (includeFrozenByDefault: boolean) =>
         '(Optional) Whether to return the raw mapping tree instead of the summarized fields.'
       ),
     include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
-  });
+  })
+);
 
 type GetIndexMappingsSchema = ReturnType<typeof createGetIndexMappingsSchema>;
 

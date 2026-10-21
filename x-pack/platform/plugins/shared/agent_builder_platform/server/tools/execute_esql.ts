@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
 import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
@@ -35,7 +36,7 @@ const getTimeRangeNotAppliedWarning = (query: string): string => {
   return `The provided time_range was not applied: the query does not reference the ?_tstart / ?_tend named parameters, so it ran without that time filter. To apply a time range, reference the parameters in the query, e.g. ${example}`;
 };
 
-const createExecuteEsqlToolSchema = (includeFrozenByDefault: boolean) =>
+const createExecuteEsqlToolSchema = memoize((includeFrozenByDefault: boolean) =>
   z.object({
     query: z.string().describe('The ES|QL query to execute'),
     params: z
@@ -68,7 +69,8 @@ const createExecuteEsqlToolSchema = (includeFrozenByDefault: boolean) =>
         '(Optional) An Elasticsearch Query DSL object combined with the query using AND, e.g. {"term": {"status": "open"}}. It can only narrow the results, never widen them. This is not a WHERE clause: it is pushed down to the data source, so it removes documents before any ES|QL command sees them, and it is parsed separately from the query text, so it cannot reference ?named parameters.'
       ),
     include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
-  });
+  })
+);
 
 type ExecuteEsqlToolSchema = ReturnType<typeof createExecuteEsqlToolSchema>;
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import { indexExplorer } from '@kbn/agent-builder-genai-utils';
@@ -12,7 +13,7 @@ import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-serv
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
 
-const createIndexExplorerSchema = (includeFrozenByDefault: boolean) =>
+const createIndexExplorerSchema = memoize((includeFrozenByDefault: boolean) =>
   z.object({
     query: z
       .string()
@@ -26,7 +27,8 @@ const createIndexExplorerSchema = (includeFrozenByDefault: boolean) =>
       .optional()
       .describe('(optional) Index pattern to filter indices by. Defaults to *.'),
     include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
-  });
+  })
+);
 
 type IndexExplorerSchema = ReturnType<typeof createIndexExplorerSchema>;
 

@@ -187,6 +187,12 @@ describe('executeEsqlTool', () => {
       expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ includeFrozen: false });
     });
 
+    it('reuses the same schema instance for a given default', async () => {
+      expect(await getSchema(true)).toBe(await getSchema(true));
+      expect(await getSchema(false)).toBe(await getSchema(false));
+      expect(await getSchema(true)).not.toBe(await getSchema(false));
+    });
+
     it('describes how to opt in to the frozen tier', () => {
       expect(executeEsqlTool().description).toContain('include_frozen');
     });

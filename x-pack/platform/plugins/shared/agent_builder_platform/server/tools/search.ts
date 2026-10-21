@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
@@ -15,7 +16,7 @@ import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-serv
 import { resolveTimeRange } from './screen_context_utils';
 import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
 
-const createSearchSchema = (includeFrozenByDefault: boolean) =>
+const createSearchSchema = memoize((includeFrozenByDefault: boolean) =>
   z.object({
     query: z.string().describe('A natural language query expressing the search request'),
     index: z
@@ -36,7 +37,8 @@ const createSearchSchema = (includeFrozenByDefault: boolean) =>
         '(optional) Time range to scope the search. Falls back to screen context or last 24 hours.'
       ),
     include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
-  });
+  })
+);
 
 type SearchSchema = ReturnType<typeof createSearchSchema>;
 

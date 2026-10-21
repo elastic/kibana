@@ -193,7 +193,8 @@ export type DynamicSchemaBuiltinToolDefinition<
 > = Omit<BuiltinToolDefinition<RunInput, TResult>, 'schema'> & {
   /**
    * Resolves the tool's input schema, used when exposing the tool to agents and MCP clients
-   * and when validating its input.
+   * and when validating its input. Called on every tool call and listing, so implementations
+   * should return cached schema instances rather than building new ones.
    */
   getSchema: (context: ToolSchemaContext) => MaybePromise<RunInput>;
 };

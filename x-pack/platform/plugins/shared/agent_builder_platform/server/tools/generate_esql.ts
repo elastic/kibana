@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { memoize } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import {
@@ -29,7 +30,7 @@ const callGenerateEsql = async (params: Parameters<typeof generateEsql>[0]) => {
   }
 };
 
-const createNlToEsqlToolSchema = (includeFrozenByDefault: boolean) =>
+const createNlToEsqlToolSchema = memoize((includeFrozenByDefault: boolean) =>
   z.object({
     query: z.string().describe('A natural language query to generate an ES|QL query from.'),
     index: z
@@ -70,7 +71,8 @@ const createNlToEsqlToolSchema = (includeFrozenByDefault: boolean) =>
         '(optional) Time range to use for named parameters ?_tstart and ?_tend when validating the generated query. If not provided, falls back to the time range from the screen context.'
       ),
     include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
-  });
+  })
+);
 
 type NlToEsqlToolSchema = ReturnType<typeof createNlToEsqlToolSchema>;
 
