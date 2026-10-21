@@ -239,7 +239,9 @@ export const createInvestigatorServiceAccountService = ({
             await workflowsManagement.management.updateWorkflow(
               attributes.workflowId,
               {
-                yaml: generateWorkflowYaml(id, attributes, {
+                yaml: generateWorkflowYaml({
+                  automationId: id,
+                  automation: attributes,
                   serviceAccountId: AUTOMATIONS_SERVICE_ACCOUNT_ID,
                 }),
               },
