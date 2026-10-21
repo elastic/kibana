@@ -543,7 +543,7 @@ describe('getForFeature', () => {
       expect(result.endpoints).toEqual([{ ...createConnector('prec1'), parameters: lowEffort }]);
     });
 
-    it('applies declared parameters to SO override endpoints with a matching id', async () => {
+    it('returns SO override endpoints without the declared parameters', async () => {
       registry.register(
         createValidFeature({
           featureId: 'f1',
@@ -558,30 +558,14 @@ describe('getForFeature', () => {
         logger
       );
       expect(result).toEqual({
-        endpoints: [{ ...createConnector('rec1'), parameters: lowEffort }],
+        endpoints: [createConnector('rec1')],
         warnings: [],
         soEntryFound: true,
       });
+      expect(result.endpoints[0]).not.toHaveProperty('parameters');
     });
 
-    it('does not apply declared parameters to SO override endpoints with a different id', async () => {
-      registry.register(
-        createValidFeature({
-          featureId: 'f1',
-          recommendedEndpoints: [{ id: 'rec1', parameters: lowEffort }],
-        })
-      );
-      const result = await getForFeature(
-        registry,
-        createSoClient([{ feature_id: 'f1', endpoints: [{ id: 'so_ep' }] }]),
-        createGetConnectorById(['so_ep']),
-        'f1',
-        logger
-      );
-      expect(result.endpoints).toEqual([createConnector('so_ep')]);
-    });
-
-    it('applies parent declared parameters to a parent SO override resolved for a child', async () => {
+    it('returns a parent SO override resolved for a child without the declared parameters', async () => {
       registry.register(
         createValidFeature({
           featureId: 'parent',
@@ -596,97 +580,8 @@ describe('getForFeature', () => {
         'child',
         logger
       );
-      expect(result.endpoints).toEqual([{ ...createConnector('rec1'), parameters: lowEffort }]);
-    });
-
-    it('drops parent parameters for a parent SO override when the child has its own recommended list', async () => {
-      registry.register(
-        createValidFeature({
-          featureId: 'parent',
-          recommendedEndpoints: [{ id: 'rec1', parameters: lowEffort }],
-        })
-      );
-      registry.register(
-        createValidFeature({
-          featureId: 'child',
-          parentFeatureId: 'parent',
-          recommendedEndpoints: ['child_rec'],
-        })
-      );
-      const result = await getForFeature(
-        registry,
-        createSoClient([{ feature_id: 'parent', endpoints: [{ id: 'rec1' }] }]),
-        createGetConnectorById(['rec1']),
-        'child',
-        logger
-      );
       expect(result.endpoints).toEqual([createConnector('rec1')]);
-    });
-
-    it('drops parent parameters for a child SO override when the child has its own recommended list', async () => {
-      registry.register(
-        createValidFeature({
-          featureId: 'parent',
-          recommendedEndpoints: [{ id: 'rec1', parameters: lowEffort }],
-        })
-      );
-      registry.register(
-        createValidFeature({
-          featureId: 'child',
-          parentFeatureId: 'parent',
-          recommendedEndpoints: ['child_rec'],
-        })
-      );
-      const result = await getForFeature(
-        registry,
-        createSoClient([{ feature_id: 'child', endpoints: [{ id: 'rec1' }] }]),
-        createGetConnectorById(['rec1']),
-        'child',
-        logger
-      );
-      expect(result.endpoints).toEqual([createConnector('rec1')]);
-    });
-
-    it('applies only the parameters from the winning recommended list to SO override endpoints', async () => {
-      const highEffort = { reasoning: { effort: 'high' as const } };
-      const lowTemperature = { temperature: 0.2 };
-      registry.register(
-        createValidFeature({
-          featureId: 'grandparent',
-          recommendedEndpoints: [
-            { id: 'gpt', parameters: lowEffort },
-            { id: 'claude', parameters: lowTemperature },
-          ],
-        })
-      );
-      registry.register(
-        createValidFeature({ featureId: 'parent', parentFeatureId: 'grandparent' })
-      );
-      registry.register(
-        createValidFeature({
-          featureId: 'child',
-          parentFeatureId: 'parent',
-          recommendedEndpoints: [{ id: 'gpt', parameters: highEffort }, 'haiku'],
-        })
-      );
-      const result = await getForFeature(
-        registry,
-        createSoClient([
-          {
-            feature_id: 'grandparent',
-            endpoints: [{ id: 'gpt' }, { id: 'claude' }, { id: 'gemini' }],
-          },
-        ]),
-        createGetConnectorById(['gpt', 'claude', 'gemini']),
-        'child',
-        logger
-      );
-      expect(result.endpoints).toEqual([
-        { ...createConnector('gpt'), parameters: highEffort },
-        createConnector('claude'),
-        createConnector('gemini'),
-      ]);
-      expect(result.endpoints[1]).not.toHaveProperty('parameters');
+      expect(result.endpoints[0]).not.toHaveProperty('parameters');
     });
 
     it('drops parent parameters when the child recommends the same endpoint as a plain id', async () => {

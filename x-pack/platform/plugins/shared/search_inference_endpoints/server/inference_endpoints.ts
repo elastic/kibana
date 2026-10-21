@@ -15,7 +15,6 @@ import type { InferenceFeatureRegistry } from './inference_feature_registry';
 import type {
   GetForFeatureOptions,
   RecommendedEndpoint,
-  RegisteredInferenceFeature,
   ResolvedInferenceEndpoints,
 } from './types';
 
@@ -92,8 +91,6 @@ interface ResolvedFeatureEndpoints {
   soEntryFound: boolean;
 }
 
-type SoFeatureSetting = InferenceSettingsAttributes['features'][number];
-
 /**
  * Pure resolution logic that walks the fallback chain for a feature using
  * pre-fetched data. Exported so the settings route can reuse it without
@@ -105,18 +102,17 @@ type SoFeatureSetting = InferenceSettingsAttributes['features'][number];
  * 3. First non-empty recommendedEndpoints found in the chain
  * 4. Kibana default chat-completion endpoint
  *
- * Endpoints carry the parameters declared in the first non-empty recommendedEndpoints list in
- * the chain. Parameters from other features in the chain are never applied.
+ * Only recommendedEndpoints carry parameters; SO override endpoints are returned without them.
  */
 export const resolveFeatureEndpoints = (
   registry: InferenceFeatureRegistry,
-  soFeaturesMap: Map<string, SoFeatureSetting>,
+  soFeaturesMap: Map<string, InferenceSettingsAttributes['features'][number]>,
   featureId: string,
   logger: Logger,
   opts?: GetForFeatureOptions
 ): ResolvedFeatureEndpoints => {
-  const requested = registry.get(featureId);
-  if (!requested) {
+  let current = registry.get(featureId);
+  if (!current) {
     logger.warn(
       i18n.translate('xpack.searchInferenceEndpoints.endpoints.featureNotFound', {
         defaultMessage: 'Feature with id "{featureId}" is not registered.',
@@ -125,62 +121,87 @@ export const resolveFeatureEndpoints = (
     );
     return { endpoints: [], warnings: [], soEntryFound: false };
   }
+  let recEntry = current.recommendedEndpoints?.length
+    ? { featureId: current.featureId, recommendedEndpoints: current.recommendedEndpoints }
+    : undefined;
 
-  // Collect the feature and its parents. A parent that is already in the chain marks a cycle.
-  const chain: RegisteredInferenceFeature[] = [];
-  let cyclicFeatureId: string | undefined;
-  let current: RegisteredInferenceFeature | undefined = requested;
-  while (current) {
-    chain.push(current);
-    const { parentFeatureId } = current;
-    if (!parentFeatureId) {
-      break;
-    }
-    if (chain.some((feature) => feature.featureId === parentFeatureId)) {
-      cyclicFeatureId = parentFeatureId;
-      break;
-    }
-    current = registry.get(parentFeatureId);
-  }
+  // Walk the fallback chain for the feature:
+  // 1. Check for an admin-configured SO override for the current feature
+  // 2. Follow the parentFeatureId link and repeat
+  // 3. Fall back to the feature's recommendedEndpoints
+  // The visited set prevents infinite loops from circular parent references.
+  const visited = new Set<string>();
+  let currentId = featureId;
 
-  const recommendedEndpoints = chain.find(
-    (feature) => feature.recommendedEndpoints.length > 0
-  )?.recommendedEndpoints;
-  const declaredEndpoints = new Map(
-    recommendedEndpoints?.map((endpoint) => [endpoint.id, endpoint])
-  );
-
-  for (const feature of chain) {
-    const soEntry = soFeaturesMap.get(feature.featureId);
-    if (soEntry) {
-      return {
-        endpoints: soEntry.endpoints.map(({ id }) => declaredEndpoints.get(id) ?? { id }),
-        warnings: [],
-        soEntryFound: true,
-      };
-    }
-  }
-
-  if (cyclicFeatureId) {
+  const initialSoEntry = soFeaturesMap.get(currentId);
+  if (initialSoEntry && initialSoEntry.endpoints.length > 0) {
     return {
-      endpoints: [],
-      warnings: [
-        i18n.translate('xpack.searchInferenceEndpoints.endpoints.cyclicDependency', {
-          defaultMessage:
-            'Cyclic dependency detected in feature fallback chain: "{featureId}" references back to "{currentId}".',
-          values: { featureId, currentId: cyclicFeatureId },
-        }),
-      ],
-      soEntryFound: false,
+      endpoints: initialSoEntry.endpoints.map(({ id }) => ({ id })),
+      warnings: [],
+      soEntryFound: true,
     };
+  }
+  if (initialSoEntry && initialSoEntry.endpoints.length === 0) {
+    return { endpoints: [], warnings: [], soEntryFound: true };
+  }
+
+  visited.add(currentId);
+  if (current.parentFeatureId) {
+    currentId = current?.parentFeatureId;
+
+    while (true) {
+      if (visited.has(currentId)) {
+        return {
+          endpoints: [],
+          warnings: [
+            i18n.translate('xpack.searchInferenceEndpoints.endpoints.cyclicDependency', {
+              defaultMessage:
+                'Cyclic dependency detected in feature fallback chain: "{featureId}" references back to "{currentId}".',
+              values: { featureId, currentId },
+            }),
+          ],
+          soEntryFound: false,
+        };
+      }
+
+      visited.add(currentId);
+      current = registry.get(currentId);
+      if (!current) {
+        break;
+      }
+      if (!recEntry && current.recommendedEndpoints.length) {
+        recEntry = {
+          featureId: current.featureId,
+          recommendedEndpoints: current.recommendedEndpoints,
+        };
+      }
+
+      const soEntry = soFeaturesMap.get(currentId);
+      if (soEntry && soEntry.endpoints.length > 0) {
+        return {
+          endpoints: soEntry.endpoints.map(({ id }) => ({ id })),
+          warnings: [],
+          soEntryFound: true,
+        };
+      }
+      if (soEntry && soEntry.endpoints.length === 0) {
+        return { endpoints: [], warnings: [], soEntryFound: true };
+      }
+
+      if (current.parentFeatureId) {
+        currentId = current.parentFeatureId;
+      } else {
+        break;
+      }
+    }
   }
 
   return {
-    endpoints: recommendedEndpoints
-      ? recommendedEndpoints
-      : opts?.onlyReturnConfigured
-      ? []
-      : [{ id: defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION }],
+    endpoints:
+      recEntry?.recommendedEndpoints ??
+      (opts?.onlyReturnConfigured
+        ? []
+        : [{ id: defaultInferenceEndpoints.KIBANA_DEFAULT_CHAT_COMPLETION }]),
     warnings: [],
     soEntryFound: false,
   };
