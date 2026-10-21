@@ -41,7 +41,7 @@ describe('CloudFormationCloudCredentialsGuide', () => {
     renderGuide({ completion: 'callback', hasExternalId: true });
 
     const steps = stepTexts();
-    expect(steps.at(-2)).toBe('Wait for the stack status to reach CREATE_COMPLETE');
+    expect(steps.at(-2)).toBe('Waiting for the AWS CloudFormation stack to finish');
     expect(steps.at(-1)).toBe(
       'Return to this page. The stack reports back to Kibana, and the federated identity is created and selected here for you.'
     );

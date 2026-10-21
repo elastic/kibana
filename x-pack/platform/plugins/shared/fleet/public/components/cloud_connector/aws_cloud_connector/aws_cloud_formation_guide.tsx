@@ -179,10 +179,7 @@ export const CloudFormationCloudCredentialsGuide: React.FC<
             {reportsBack ? (
               <FormattedMessage
                 id="xpack.fleet.cloudConnector.aws.guide.steps.stackStatusReportedBack"
-                defaultMessage="Wait for the stack status to reach {createComplete}"
-                values={{
-                  createComplete: <strong>{'CREATE_COMPLETE'}</strong>,
-                }}
+                defaultMessage="Waiting for the AWS CloudFormation stack to finish"
               />
             ) : (
               <FormattedMessage
