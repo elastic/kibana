@@ -466,7 +466,7 @@ export class ScopedDiscoverEBTManager {
             fetchType,
             multi_match_types: mergedAnalysis.rawTypes,
             ...(querySourceCommand ? { query_source_command: querySourceCommand } : {}),
-            ...(approximation !== undefined ? { approximation } : {}),
+            ...(approximation !== undefined ? { approximation_applied: approximation } : {}),
           },
           eventName,
           duration,

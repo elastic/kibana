@@ -232,7 +232,7 @@ describe('startTrackingDashboardLoadTelemetry', () => {
     );
   });
 
-  it('reports acceleration_strategy 0 when no panels use approximation', async () => {
+  it('reports approximation_applied false when no panels use approximation', async () => {
     const children = {
       panel1: {
         phase$: new BehaviorSubject<PhaseEvent>({ status: 'loading', id: '', timeToEvent: 0 }),
@@ -246,13 +246,12 @@ describe('startTrackingDashboardLoadTelemetry', () => {
 
     expect(mockMetricEvent).toHaveBeenCalledWith(
       expect.objectContaining({
-        key5: 'acceleration_strategy',
-        value5: 0,
+        meta: { approximation_applied: false },
       })
     );
   });
 
-  it('reports acceleration_strategy 1 when any panel has approximation applied', async () => {
+  it('reports approximation_applied true when any panel has approximation applied', async () => {
     const children = {
       panel1: {
         phase$: new BehaviorSubject<PhaseEvent>({ status: 'loading', id: '', timeToEvent: 0 }),
@@ -271,8 +270,7 @@ describe('startTrackingDashboardLoadTelemetry', () => {
 
     expect(mockMetricEvent).toHaveBeenCalledWith(
       expect.objectContaining({
-        key5: 'acceleration_strategy',
-        value5: 1,
+        meta: { approximation_applied: true },
       })
     );
   });
