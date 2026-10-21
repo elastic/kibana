@@ -74,11 +74,13 @@ apiTest.describe(
 
     const packLiveQuery = () => ({ agent_all: true, kuery: '', pack_id: packSavedObjectId });
 
-    // 200: the query was dispatched. 400: authorization passed, then no agent matched
-    // (`No agents found for selection`). 403 is a privilege denial. 500 is what the route
-    // returns when authorization itself throws, so it must not count as allowed.
-    const expectAuthorized = (statusCode: number) => {
-      expect([200, 400]).toContain(statusCode);
+    // 200: the query was dispatched. Without enrolled agents, dispatch fails after authorization
+    // with a 400 (`No agents found for selection`) or, where the Fleet agent lookup itself
+    // fails (serverless CI), a 500. 403 is a privilege denial, and the route's dedicated
+    // authorization-error 500 must not count as allowed either.
+    const expectAuthorized = (response: { statusCode: number; body: { message?: string } }) => {
+      expect([200, 400, 500]).toContain(response.statusCode);
+      expect(response.body.message ?? '').not.toContain('authorizing the live query request');
     };
 
     apiTest('returns 403 when running a pack without Packs read', async ({ apiClient }) => {
@@ -90,7 +92,7 @@ apiTest.describe(
     apiTest('authorizes a pack run when the caller can read packs', async ({ apiClient }) => {
       const response = await runLiveQuery(apiClient, 'runSavedWithPacksRead', packLiveQuery());
 
-      expectAuthorized(response.statusCode);
+      expectAuthorized(response);
     });
 
     apiTest(
@@ -115,7 +117,7 @@ apiTest.describe(
           testData.getSavedQueryLiveQuery(savedQueryId)
         );
 
-        expectAuthorized(response.statusCode);
+        expectAuthorized(response);
       }
     );
 
@@ -137,7 +139,7 @@ apiTest.describe(
           testData.getMinimalLiveQuery()
         );
 
-        expectAuthorized(response.statusCode);
+        expectAuthorized(response);
       }
     );
 
@@ -146,7 +148,7 @@ apiTest.describe(
       async ({ apiClient }) => {
         const response = await runLiveQuery(apiClient, 't1Analyst', packLiveQuery());
 
-        expectAuthorized(response.statusCode);
+        expectAuthorized(response);
       }
     );
   }
