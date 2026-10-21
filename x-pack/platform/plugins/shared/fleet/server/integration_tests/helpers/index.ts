@@ -14,19 +14,34 @@ type Root = ReturnType<typeof createRoot>;
 
 export * from './docker_registry_helper';
 
-export const waitForFleetSetup = async (root: Root) => {
+const FLEET_SETUP_TIMEOUT_MS = 7 * 60 * 1000;
+
+export const waitForFleetSetup = async (root: Root, timeoutMs = FLEET_SETUP_TIMEOUT_MS) => {
+  let lastFleetStatus: unknown;
+
+  // Fleet also publishes `meta.error` on retryable setup attempts, so only a terminal status settles this.
   const isFleetSetupRunning = async () => {
     const statusApi = getSupertestWithAdminUser(root, 'get', '/api/status');
     const resp = await statusApi.send();
     const fleetStatus = resp.body?.status?.plugins?.fleet;
-    if (fleetStatus?.meta?.error) {
+    lastFleetStatus = fleetStatus;
+
+    if (fleetStatus?.summary === 'Fleet setup failed') {
       throw new FleetError(`Setup failed: ${JSON.stringify(fleetStatus)}`);
     }
 
-    return !fleetStatus || fleetStatus?.summary === 'Fleet is setting up';
+    return fleetStatus?.summary !== 'Fleet is available';
   };
 
+  const deadline = Date.now() + timeoutMs;
   while (await isFleetSetupRunning()) {
+    if (Date.now() >= deadline) {
+      throw new FleetError(
+        `Fleet setup did not complete within ${timeoutMs}ms, last status: ${JSON.stringify(
+          lastFleetStatus
+        )}`
+      );
+    }
     await new Promise((resolve) => setTimeout(resolve, 2000));
   }
 };
