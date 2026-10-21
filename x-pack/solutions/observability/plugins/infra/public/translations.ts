@@ -50,9 +50,9 @@ export const errorTitle = i18n.translate('xpack.infra.metricDetailPage.documentT
   defaultMessage: 'Uh oh',
 });
 
-export const newInfrastructureExperienceToggleLabel = i18n.translate(
-  'xpack.infra.metrics.newInfrastructureExperienceToggleLabel',
-  { defaultMessage: 'New infrastructure experience' }
+export const entityInventoryToggleLabel = i18n.translate(
+  'xpack.infra.metrics.entityInventoryToggleLabel',
+  { defaultMessage: 'Infrastructure entities inventory experience' }
 );
 
 export const entityInventoryTitle = i18n.translate('xpack.infra.metrics.entityInventoryTitle', {

@@ -20,7 +20,7 @@ import { useInfraEntitiesInventoryExperience } from '../../../hooks/use_infra_en
 import {
   entityInventoryTitle,
   inventoryTitle,
-  newInfrastructureExperienceToggleLabel,
+  entityInventoryToggleLabel,
 } from '../../../translations';
 import { SnapshotContainer } from './components/snapshot_container';
 import { WaffleTimeProvider } from './hooks/use_waffle_time';
@@ -96,7 +96,7 @@ export const SnapshotPage = (): React.ReactElement => {
                         <EuiSwitch
                           compressed
                           data-test-subj="entityInventoryExperienceToggle"
-                          label={newInfrastructureExperienceToggleLabel}
+                          label={entityInventoryToggleLabel}
                           checked={isEntityInventoryEnabled ?? false}
                           onChange={(e) => setEntityInventoryEnabled(e.target.checked)}
                         />
