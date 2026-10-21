@@ -169,6 +169,11 @@ describe('useBulkRunAlertWorkflowPanel', () => {
       expect(result.current.runWorkflowItems[0].disableOnQuery).toBe(false);
       expect(result.current.runWorkflowItems[0].icon).toBe('workflow');
       expect(result.current.runWorkflowItems[0].groupId).toBe('workflow');
+      // The menu disables the action past the cap, so a select-all never exceeds what a run accepts.
+      expect(result.current.runWorkflowItems[0].selectionLimit).toEqual({
+        max: MAX_RUN_WORKFLOW_DOCS,
+        reason: i18n.RUN_WORKFLOW_SELECTION_TOO_LARGE(MAX_RUN_WORKFLOW_DOCS),
+      });
 
       expect(result.current.runWorkflowPanels).toHaveLength(1);
       expect(result.current.runWorkflowPanels[0].id).toBe(RUN_WORKFLOW_BULK_PANEL_ID);
@@ -303,14 +308,13 @@ describe('useBulkRunAlertWorkflowPanel', () => {
         expect(screen.getByTestId('alert-id-alert-2')).toHaveTextContent('alert-2:index-2');
       });
       expect(screen.getByTestId('alert-id-alert-1')).toHaveTextContent('alert-1:index-1');
-      expect(screen.queryByTestId('bulk-run-workflow-selection-trimmed')).not.toBeInTheDocument();
     });
 
     it('requests at most the supported maximum, newest first, when resolving the selection', () => {
       renderPanel({ alertItems: [alertItem('alert-1', 'index-1')], isAllSelected: true });
 
-      // Newest first is what makes a trimmed selection keep the most recent alerts, as the
-      // trimmed-selection callout promises; the timeline search defaults to oldest first.
+      // Newest first keeps the most recent alerts if the selection grew past the cap after the
+      // action was offered; the timeline search defaults to oldest first.
       expect(useTimelineEventsHandlerMock).toHaveBeenCalledWith(
         expect.objectContaining({
           limit: MAX_RUN_WORKFLOW_DOCS,
@@ -364,21 +368,6 @@ describe('useBulkRunAlertWorkflowPanel', () => {
       );
     });
 
-    it('warns that the selection was trimmed when more alerts match than the maximum', async () => {
-      mockAlertIdSearch({
-        events: [alertItem('alert-1', 'index-1')],
-        totalCount: MAX_RUN_WORKFLOW_DOCS + 1,
-      });
-
-      renderPanel({ alertItems: [alertItem('alert-1', 'index-1')], isAllSelected: true });
-
-      await waitFor(() => {
-        expect(screen.getByTestId('bulk-run-workflow-selection-trimmed')).toBeInTheDocument();
-      });
-      // The run still proceeds — on the alerts that were resolved.
-      expect(screen.getByTestId('alert-id-alert-1')).toBeInTheDocument();
-    });
-
     it('surfaces an error instead of a partial run when resolving the selection fails', async () => {
       // The timeline search reports failures through its error callback, never by throwing.
       useTimelineEventsHandlerMock.mockReturnValue([
@@ -420,7 +409,6 @@ describe('useResolvedRunWorkflowSelection', () => {
       expect(result.current).toEqual({
         status: 'ready',
         selections: [{ _id: 'alert-1', _index: 'index-1' }],
-        wasTrimmed: false,
       });
     });
 
@@ -456,7 +444,6 @@ describe('useResolvedRunWorkflowSelection', () => {
       expect(result.current).toEqual({
         status: 'ready',
         selections: [{ _id: 'alert-2', _index: 'index-2' }],
-        wasTrimmed: false,
       });
     });
   });

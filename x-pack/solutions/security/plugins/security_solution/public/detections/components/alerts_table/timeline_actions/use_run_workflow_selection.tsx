@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiCallOut, EuiLoadingSpinner } from '@elastic/eui';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import React, { useEffect, useState } from 'react';
@@ -27,8 +27,8 @@ export interface HitSelection {
 const ID_ONLY_FIELDS = ['_id'];
 
 /**
- * Newest first, so a selection trimmed to the cap keeps the most recent hits. The timeline
- * search otherwise defaults to oldest first.
+ * Newest first, so a selection that grew past the cap after the action was offered keeps the most
+ * recent hits. The timeline search otherwise defaults to oldest first.
  */
 export const NEWEST_FIRST_SORT: TimelineRequestSortField[] = [
   { field: '@timestamp', direction: Direction.desc, type: 'date', esTypes: ['date'] },
@@ -61,8 +61,8 @@ export interface RunWorkflowSelectionScope {
 /**
  * Builds a search that resolves the ids of every hit matching the table's query, newest first.
  *
- * Capped rather than paged: the run payload carries the ids themselves, so the cap is what keeps
- * the request inside the payload limit.
+ * Capped rather than paged: the bulk menus disable the run on a selection larger than the cap, so
+ * no more ids than that are ever needed.
  */
 export const useRunWorkflowSelectionSearch = ({
   dataViewId,
@@ -91,7 +91,7 @@ export const useRunWorkflowSelectionSearch = ({
 };
 
 type ResolvedSelection =
-  | { status: 'ready'; selections: HitSelection[]; wasTrimmed: boolean }
+  | { status: 'ready'; selections: HitSelection[] }
   | { status: 'loading' }
   | { status: 'error' };
 
@@ -126,11 +126,7 @@ export const useResolvedRunWorkflowSelection = ({
         if (isStale) {
           return;
         }
-        setResolved({
-          status: 'ready',
-          selections: toHitSelections(response.events),
-          wasTrimmed: response.totalCount > response.events.length,
-        });
+        setResolved({ status: 'ready', selections: toHitSelections(response.events) });
       },
       () => {
         if (!isStale) {
@@ -144,13 +140,13 @@ export const useResolvedRunWorkflowSelection = ({
   }, [isAllSelected, searchSelectionIds]);
 
   if (!isAllSelected) {
-    return { status: 'ready', selections: pageSelections, wasTrimmed: false };
+    return { status: 'ready', selections: pageSelections };
   }
 
   return resolved;
 };
 
-/** Renders the loading, error, and trimmed-selection states shared by the bulk run panels. */
+/** Renders the loading and error states shared by the bulk run panels. */
 export const RunWorkflowSelectionStatus = ({
   selection,
   children,
@@ -174,21 +170,5 @@ export const RunWorkflowSelectionStatus = ({
     return <EuiLoadingSpinner size="m" data-test-subj="bulk-run-workflow-selection-loading" />;
   }
 
-  return (
-    <>
-      {selection.wasTrimmed && (
-        <>
-          <EuiCallOut
-            announceOnMount
-            color="warning"
-            size="s"
-            title={i18n.RUN_WORKFLOW_SELECTION_TRIMMED(MAX_RUN_WORKFLOW_DOCS)}
-            data-test-subj="bulk-run-workflow-selection-trimmed"
-          />
-          <EuiSpacer size="s" />
-        </>
-      )}
-      {children}
-    </>
-  );
+  return <>{children}</>;
 };

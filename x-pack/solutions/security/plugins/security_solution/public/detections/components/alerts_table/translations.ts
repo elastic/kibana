@@ -374,11 +374,11 @@ export const REMOVE_FROM_CASE = i18n.translate(
   }
 );
 
-export const RUN_WORKFLOW_SELECTION_TRIMMED = (maxAlerts: number) =>
-  i18n.translate('xpack.securitySolution.detectionEngine.alerts.workflow.selectionTrimmed', {
-    values: { maxAlerts },
+export const RUN_WORKFLOW_SELECTION_TOO_LARGE = (maxItems: number) =>
+  i18n.translate('xpack.securitySolution.detectionEngine.alerts.workflow.selectionTooLarge', {
+    values: { maxItems },
     defaultMessage:
-      'Your selection is larger than the {maxAlerts} alerts a workflow run supports. The workflow will run on the {maxAlerts} most recent alerts. If the run is rejected as too large, narrow your selection and try again.',
+      'A workflow can run on up to {maxItems} items at a time. Narrow your selection to run a workflow.',
   });
 
 export const RUN_WORKFLOW_SELECTION_FAILED = i18n.translate(

@@ -14,6 +14,7 @@ import type {
 } from '@kbn/response-ops-alerts-table/types';
 import type { TableId } from '@kbn/securitysolution-data-table';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import { useWorkflowsCapabilities, useWorkflowsUIEnabledSetting } from '@kbn/workflows-ui';
 import { useCaseAttachmentWorkflowRouting } from '@kbn/cases-plugin/public';
 import React, { useCallback, useMemo } from 'react';
@@ -160,6 +161,10 @@ export const useBulkRunAlertWorkflowPanel = ({
               name: i18n.CONTEXT_MENU_RUN_WORKFLOW,
               panel: RUN_WORKFLOW_BULK_PANEL_ID,
               disableOnQuery: false,
+              selectionLimit: {
+                max: MAX_RUN_WORKFLOW_DOCS,
+                reason: i18n.RUN_WORKFLOW_SELECTION_TOO_LARGE(MAX_RUN_WORKFLOW_DOCS),
+              },
               icon: 'workflow' as const,
               groupId: 'workflow' as const,
             },

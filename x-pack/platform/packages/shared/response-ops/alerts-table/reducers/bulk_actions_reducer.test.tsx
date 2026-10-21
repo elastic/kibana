@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useReducer } from 'react';
-import { render, screen, within, waitFor, act } from '@testing-library/react';
+import { render, screen, within, waitFor, act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -939,6 +939,71 @@ describe('AlertsDataGrid bulk actions', () => {
             ]);
             expect(mockOnClick.mock.calls[0][1]).toEqual(true);
             expect(mockOnClick.mock.calls[0][2]).toBeDefined();
+          });
+
+          describe('and the action caps how many alerts it accepts', () => {
+            const renderWithLimitedAction = (alertsCount: number) => {
+              const mockOnClick = jest.fn();
+              render(
+                <TestComponent
+                  {...dataGridPropsWithBulkActions}
+                  initialBulkActionsState={{
+                    ...createDefaultBulkActionsState(),
+                    isAllSelected: true,
+                    rowSelection: new Map([
+                      [0, { isLoading: false }],
+                      [1, { isLoading: false }],
+                    ]),
+                  }}
+                  renderContext={{ alertsCount }}
+                  additionalBulkActions={[
+                    {
+                      id: 0,
+                      items: [
+                        {
+                          label: 'Limited Bulk Action',
+                          key: 'limitedBulkAction',
+                          'data-test-subj': 'limited-bulk-action',
+                          disableOnQuery: false,
+                          selectionLimit: { max: 10, reason: 'Select up to 10 alerts' },
+                          onClick: mockOnClick,
+                        },
+                      ],
+                    },
+                  ]}
+                />
+              );
+              return { mockOnClick };
+            };
+
+            it('disables the action and explains why when every matching alert exceeds the cap', async () => {
+              const { mockOnClick } = renderWithLimitedAction(11);
+
+              await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+              await waitForEuiPopoverOpen();
+
+              const action = screen.getByTestId('limited-bulk-action');
+              expect(action).toBeDisabled();
+              await userEvent.click(action);
+              expect(mockOnClick).not.toHaveBeenCalled();
+
+              fireEvent.mouseOver(action);
+              expect(await screen.findByRole('tooltip')).toHaveTextContent(
+                'Select up to 10 alerts'
+              );
+            });
+
+            it('keeps the action enabled when every matching alert fits the cap', async () => {
+              const { mockOnClick } = renderWithLimitedAction(10);
+
+              await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+              await waitForEuiPopoverOpen();
+
+              const action = screen.getByTestId('limited-bulk-action');
+              expect(action).not.toBeDisabled();
+              await userEvent.click(action);
+              expect(mockOnClick).toHaveBeenCalled();
+            });
           });
 
           it('should first set all to loading, then clears the selection', async () => {
