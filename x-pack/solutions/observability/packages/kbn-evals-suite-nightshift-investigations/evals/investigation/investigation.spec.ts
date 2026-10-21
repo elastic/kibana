@@ -9,6 +9,7 @@ import { expect } from '@playwright/test';
 import pMap from 'p-map';
 import { tags } from '@kbn/evals';
 import type { ConversationRound } from '@kbn/agent-builder-common';
+import { ensureNightshiftServiceAccountRoles } from '@kbn/nightshift-investigations-plugin/common';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
@@ -31,6 +32,8 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
   evaluate(
     'grades investigations with the RCA judges and persists complete agent traces',
     async ({
+      config,
+      esClient,
       executorClient,
       connector,
       fetch,
@@ -57,7 +60,9 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
           5 * 60_000
       );
       // Investigations only run as the Nightshift agent service account, so the space has to be
-      // set up first. The eval user holds manage_security; setup is idempotent.
+      // set up first. The eval user holds manage_security; setup is idempotent. On stateful,
+      // Elasticsearch has no predefined roles for the account, so the eval creates them first.
+      await ensureNightshiftServiceAccountRoles(esClient, { isServerless: config.serverless });
       await expect
         .poll(
           async () =>

@@ -13,6 +13,7 @@ import type { CustomIntegration } from '@kbn/custom-integrations-plugin/common';
 import type { IntegrationPreferenceType } from '../../../components/integration_preference';
 import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import {
+  useAuthz,
   useGetPackagesQuery,
   useGetCategoriesQuery,
   useGetAppendCustomIntegrationsQuery,
@@ -229,6 +230,9 @@ export const useAvailablePackages = ({
     );
 
   const { enableIntegrationCollectionTiles } = ExperimentalFeaturesService.get();
+  // `authz` is not provided when the hook is used outside of Fleet (e.g. Observability onboarding),
+  // where the privileges are enforced by the destination page.
+  const canAddIntegration = useAuthz()?.integrations?.all ?? true;
 
   // All cards before any filter (no agentless filter, no category filter).
   // Used by useBrowseIntegrationHook which applies both filters from the live URL.
@@ -245,6 +249,7 @@ export const useAvailablePackages = ({
         getAbsolutePath,
         addBasePath,
         packageVerificationKeyId,
+        canAddIntegration,
       });
       itemsToMap = ungroupedItems;
       extraCards = collectionCards;
@@ -261,6 +266,7 @@ export const useAvailablePackages = ({
           item,
           addBasePath,
           packageVerificationKeyId,
+          canAddIntegration,
         })
       ),
     ].sort((a, b) => a.title.localeCompare(b.title));
@@ -269,6 +275,7 @@ export const useAvailablePackages = ({
   }, [
     addBasePath,
     appendCustomIntegrations,
+    canAddIntegration,
     applyOnboardingOverride,
     enableCollectionGrouping,
     enableIntegrationCollectionTiles,

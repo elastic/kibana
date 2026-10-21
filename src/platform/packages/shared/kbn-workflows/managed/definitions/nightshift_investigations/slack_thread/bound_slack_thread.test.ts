@@ -32,6 +32,11 @@ describe('Nightshift bound Slack thread workflow', () => {
     );
   });
 
+  it('leaves the global copy unbound', () => {
+    expect(NIGHTSHIFT_SLACK_THREAD_WORKFLOW.yaml).not.toContain('run_as');
+    expect(parse(NIGHTSHIFT_SLACK_THREAD_WORKFLOW.yaml).settings.run_as).toBeUndefined();
+  });
+
   it('refuses to render without an account', () => {
     expect(() =>
       NIGHTSHIFT_BOUND_SLACK_THREAD_WORKFLOW.yamlTemplate({ serviceAccountId: '' })

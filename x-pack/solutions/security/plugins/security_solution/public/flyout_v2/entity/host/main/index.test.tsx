@@ -290,6 +290,25 @@ describe('<Host />', () => {
       );
     });
 
+    it('counts every group member in the badge even when the loaded aliases are capped', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord, [aliasRecord]);
+      mockedUseEntityFromStore.mockReturnValue({
+        ...mockedUseEntityFromStore(),
+        aliasCount: 250,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <Host {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(getByTestId('host-panel-header-observed-badge')).toHaveTextContent(
+        'Resolved from 251 records'
+      );
+    });
+
     describe('header risk level', () => {
       const recordWithResolutionRisk: HostEntity = {
         ...targetRecord,
@@ -391,9 +410,7 @@ describe('<Host />', () => {
 
         expect(getByTestId('risk-summary-table')).toBeInTheDocument();
         expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
-        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent(
-          'Entity risk contributions'
-        );
+        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Risk contributions');
       });
     });
     describe('detail tools', () => {
@@ -407,10 +424,10 @@ describe('<Host />', () => {
         );
       };
 
-      it('passes the panel mode to the anomaly insights tool', () => {
+      it('passes the panel mode and scope to the anomaly insights tool', () => {
         fireEvent.click(renderResolved().getByTestId('openAnomalyInsights'));
         expect(mockFlyoutApi.openEntityAnomalyInsights).toHaveBeenCalledWith(
-          expect.objectContaining({ value: 'test', mode: 'resolved' })
+          expect.objectContaining({ value: 'test', mode: 'resolved', scopeId: 'test-scope-id' })
         );
       });
 

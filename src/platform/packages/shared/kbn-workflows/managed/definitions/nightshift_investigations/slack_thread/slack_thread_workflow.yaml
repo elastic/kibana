@@ -7,6 +7,8 @@ description: >
   later run leaves it showing the previous findings until its own are ready.
 enabled: true
 settings:
+  # The per-space copy runs as the bound service account; the global copy drops this line.
+  run_as: __SERVICE_ACCOUNT_ID__
   # Longer than the investigation's own timeout, since this run waits for it.
   timeout: '65m'
   # One run per thread at a time, in arrival order, so replies build on each other and a

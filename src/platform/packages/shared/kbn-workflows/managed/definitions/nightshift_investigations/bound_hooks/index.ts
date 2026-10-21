@@ -13,7 +13,7 @@ import { NIGHTSHIFT_AGENT_OPTIMIZE_WORKFLOW_ID } from '../agent_optimize';
 import AGENT_OPTIMIZE_WORKFLOW_YAML from '../agent_optimize/agent_optimize_workflow.yaml';
 import { NIGHTSHIFT_DECISION_TREE_HYDRATE_WORKFLOW_ID } from '../decision_tree_hydrate';
 import DECISION_TREE_HYDRATE_WORKFLOW_YAML from '../decision_tree_hydrate/decision_tree_hydrate_workflow.yaml';
-import { renderRunAs } from '../render_bound_yaml';
+import { renderRunAs, SERVICE_ACCOUNT_ID_TOKEN } from '../render_bound_yaml';
 import { NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID } from '../sandbox_materialize_workspace';
 import SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_YAML from '../sandbox_materialize_workspace/sandbox_materialize_workspace_workflow.yaml';
 
@@ -64,6 +64,7 @@ description: >
   inputs to the shared hook workflow, which runs with this workflow's identity.
 enabled: true
 settings:
+  run_as: ${SERVICE_ACCOUNT_ID_TOKEN}
   # Longer than any hook runs, since this run waits for it.
   timeout: '30m'
 tags:

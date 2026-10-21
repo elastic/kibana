@@ -17,6 +17,7 @@ project:
   owner: '@elastic/nightshift'
   sourceRoot: x-pack/solutions/observability/plugins/nightshift_investigations
 dependsOn:
+  - '@kbn/dev-cli-runner'
   - '@kbn/share-plugin'
   - '@kbn/deeplinks-observability'
   - '@kbn/nightshift-decision-trees'
@@ -51,6 +52,7 @@ dependsOn:
   - '@kbn/rule-data-utils'
   - '@kbn/rule-registry-plugin'
   - '@kbn/actions-plugin'
+  - '@kbn/alerting-plugin'
   - '@kbn/sandbox-plugin'
   - '@kbn/context-engine-plugin'
   - '@kbn/inference-common'
@@ -80,6 +82,7 @@ fileGroups:
     - server/**/*
     - public/**/*
     - integration_tests/**/*
+    - scripts/**/*
     - test/scout*/**/*
     - '!target/**/*'
   jest-config:

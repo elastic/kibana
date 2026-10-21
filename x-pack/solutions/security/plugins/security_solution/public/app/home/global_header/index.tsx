@@ -20,6 +20,7 @@ import { SECURITY_FEATURE_ID } from '../../../../common';
 import { MlPopover } from '../../../common/components/ml_popover/ml_popover';
 import { useKibana } from '../../../common/lib/kibana';
 import {
+  isCloudSecurityPosturePath,
   isDashboardViewPath,
   isDetectionsPath,
   isRuleChangesHistoryPath,
@@ -68,6 +69,8 @@ export const GlobalHeader = React.memo(() => {
   const rulesManagementPath = isRulesManagementPath(pathname);
   const rulesAddPath = isRulesAddPath(pathname);
   const sharedExceptionListsPath = isSharedExceptionListsPath(pathname);
+  // Cloud Security Posture pages own "Add integrations" in their own app header.
+  const cloudSecurityPosturePath = isCloudSecurityPosturePath(pathname);
 
   const { href, onClick } = useAddIntegrationsUrl();
 
@@ -76,9 +79,16 @@ export const GlobalHeader = React.memo(() => {
       return;
     }
 
-    // The Rules, Add Elastic rules and Shared Exception Lists page app headers render their own actions
-    // (ML job settings, Add integrations), so clear the global header action menu there to avoid duplicating them.
-    if (changesHistoryPath || rulesManagementPath || rulesAddPath || sharedExceptionListsPath) {
+    // The Rules, Add Elastic rules, Shared Exception Lists and Cloud Security Posture page app headers
+    // render their own actions (ML job settings, Add integrations), so clear the global header action
+    // menu there to avoid duplicating them.
+    if (
+      changesHistoryPath ||
+      rulesManagementPath ||
+      rulesAddPath ||
+      sharedExceptionListsPath ||
+      cloudSecurityPosturePath
+    ) {
       setHeaderActionMenu(undefined);
       return;
     }
@@ -109,6 +119,7 @@ export const GlobalHeader = React.memo(() => {
     rulesManagementPath,
     rulesAddPath,
     sharedExceptionListsPath,
+    cloudSecurityPosturePath,
   ]);
 
   return (
