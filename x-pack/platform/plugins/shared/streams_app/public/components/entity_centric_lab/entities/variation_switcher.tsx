@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.08';
+export const PROTOTYPE_VERSION = '1.09';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-10-21',
+    summary:
+      'Cloud account KQL/column, K8s node host runtime tabs, and APM services labeling.',
+    details:
+      'Filter and column for ECS cloud.account.id / cloud.account.name on cloud resources; fix Cloud inventory scoping to provider-backed entities. Kubernetes nodes get APM services and Processes tabs (kubelet/CRI demo processes) while keeping the K8s-first Overview; rename the host runtime tab to “APM services” to avoid clashing with Kubernetes Services. Bump to v1.09.',
+  },
   {
     date: '2026-10-21',
     summary:

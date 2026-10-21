@@ -16,6 +16,7 @@
  */
 
 import { CLOUD_PROVIDERS, type CloudProviderId } from './cloud_providers';
+import { mergeCloudAccountAttributes } from './cloud_account';
 import { withKubernetesHierarchy } from './kubernetes_hierarchy';
 
 export type EntityHealth = 'healthy' | 'atRisk' | 'unhealthy';
@@ -877,7 +878,11 @@ const buildCloudEntities = (multiplier = 1): Entity[] => {
             ...seenSampleAt(index),
             anomalyDetection: ANOMALY_SAMPLES[index % ANOMALY_SAMPLES.length],
             tags,
-            attributes: withAvailabilityZone(tags.region, name),
+            attributes: mergeCloudAccountAttributes(
+              provider.id,
+              name,
+              withAvailabilityZone(tags.region, name)
+            ),
             alerts: buildAlerts(name, health),
           });
           index += 1;

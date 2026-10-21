@@ -47,7 +47,7 @@ import {
   buildFakeEntityOverview,
   buildFakeEntityTabsData,
   isEntityTypeEnabled,
-  entityTypeShowsHostRuntimeTabs,
+  entityShowsHostRuntimeFlyoutTabs,
   resolveEntityTypeIdForName,
   useFlyoutTemplateOverride,
   useEntityDisplayName,
@@ -469,12 +469,12 @@ const EntityDetailPageInner = () => {
             },
           ]
         : []),
-      ...(kind === 'host' || entityTypeShowsHostRuntimeTabs(entityTypeId)
+      ...(entityShowsHostRuntimeFlyoutTabs(kind, entityTypeId)
         ? [
             {
               id: 'services' as TabId,
               label: i18n.translate('xpack.streams.entityCentricLab.detailPage.tabs.services', {
-                defaultMessage: 'Services',
+                defaultMessage: 'APM services',
               }),
             },
             {

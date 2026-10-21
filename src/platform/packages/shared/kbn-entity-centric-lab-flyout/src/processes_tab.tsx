@@ -30,6 +30,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { inferEntityKind } from './kind_templates';
 import { useEntityFlyoutServices } from './services_context';
 
 type ProcessState = 'running' | 'sleeping' | 'stopped' | 'idle' | 'dead' | 'zombie' | 'unknown';
@@ -79,6 +80,42 @@ const STATE_ORDER: readonly ProcessState[] = [
   'unknown',
 ];
 
+/** OS processes typical on a Kubernetes worker (kubelet, CRI, …). */
+const NODE_PROCESS_POOL: ReadonlyArray<Omit<FakeProcess, 'startTime' | 'id'>> = [
+  {
+    command: '/usr/bin/kubelet --config=/var/lib/kubelet/config.yaml --kubeconfig=/etc/kubernetes/kubelet.conf',
+    pid: 2104,
+    user: 'root',
+    state: 'running',
+    cpu: 4.2,
+    memory: 3.6,
+  },
+  {
+    command: '/usr/bin/kube-proxy --config=/var/lib/kube-proxy/config.conf',
+    pid: 1988,
+    user: 'root',
+    state: 'running',
+    cpu: 0.6,
+    memory: 1.1,
+  },
+  {
+    command: '/usr/bin/containerd',
+    pid: 1123,
+    user: 'root',
+    state: 'running',
+    cpu: 2.8,
+    memory: 3.2,
+  },
+  {
+    command: 'containerd-shim -namespace k8s.io -workdir /run/containerd/io.containerd.runtime.v2.task/k8s.io',
+    pid: 8842,
+    user: 'root',
+    state: 'sleeping',
+    cpu: 0.2,
+    memory: 0.4,
+  },
+];
+
 const PROCESS_POOL: ReadonlyArray<Omit<FakeProcess, 'startTime' | 'id'>> = [
   { command: '/usr/bin/metricbeat -c /etc/metricbeat.yml -d autodiscover -e', pid: 1842, user: 'root', state: 'running', cpu: 2.4, memory: 1.8 },
   { command: '/usr/sbin/sshd -D', pid: 982, user: 'root', state: 'sleeping', cpu: 0.0, memory: 0.3 },
@@ -100,11 +137,13 @@ const PROCESS_POOL: ReadonlyArray<Omit<FakeProcess, 'startTime' | 'id'>> = [
 const generateProcesses = (hostName: string): readonly FakeProcess[] => {
   const seed = hostName.split('').reduce((sum, ch) => sum + ch.charCodeAt(0), 0);
   const now = Date.now();
+  const isNode = inferEntityKind(hostName) === 'node';
+  const pool = isNode ? [...NODE_PROCESS_POOL, ...PROCESS_POOL] : PROCESS_POOL;
 
   const count = 8 + (seed % 5);
   const result: FakeProcess[] = [];
   for (let idx = 0; idx < count; idx++) {
-    const base = PROCESS_POOL[(seed + idx) % PROCESS_POOL.length];
+    const base = pool[(seed + idx) % pool.length];
     const runtimeMs = ((seed * (idx + 1) * 7919) % 86400000) + 60000;
     const pid = base.pid + ((seed * idx) % 100);
     result.push({

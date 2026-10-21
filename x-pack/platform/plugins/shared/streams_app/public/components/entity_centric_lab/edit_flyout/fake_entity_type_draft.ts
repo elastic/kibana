@@ -251,8 +251,8 @@ const defaultFlyoutTabs = (entityTypeId?: string): FlyoutTabConfig[] => [
   },
   {
     id: 'services',
-    label: 'Services',
-    description: 'Services running on this host',
+    label: 'APM services',
+    description: 'APM services detected on this host or Kubernetes node',
     enabled: entityTypeShowsHostRuntimeTabs(entityTypeId),
   },
   {

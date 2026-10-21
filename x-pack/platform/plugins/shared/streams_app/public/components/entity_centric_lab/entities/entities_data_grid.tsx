@@ -71,6 +71,13 @@ import {
   type BucketKey,
 } from './bucket_metrics';
 import {
+  bucketKeyShowsCloudAccountByDefault,
+  cloudAccountCellTitle,
+  cloudAccountColumnDescription,
+  CLOUD_ACCOUNT_COLUMN_ID,
+  getCloudAccountDisplayLabel,
+} from './cloud_account';
+import {
   ColumnHeaderWithInfo,
   alertsGridColumnDescription,
   firstSeenColumnDescription,
@@ -229,6 +236,13 @@ const BASE_HIDDEN_COLUMNS: readonly CatalogColumn[] = [
     }),
   },
   {
+    id: CLOUD_ACCOUNT_COLUMN_ID,
+    label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.cloudAccount', {
+      defaultMessage: 'Cloud account',
+    }),
+    description: cloudAccountColumnDescription(),
+  },
+  {
     id: 'id',
     label: i18n.translate('xpack.streams.entityCentricLab.entities.grid.columns.id', {
       defaultMessage: 'Resource ID',
@@ -375,9 +389,23 @@ const defaultVisibleIdsFor = (bucketKey: string, isHomogeneous: boolean): string
   }
   const extra = getK8sContextColumnIds(bucketKey).defaultVisible;
   const metricIds = DEFAULT_METRICS_BY_BUCKET[bucketKey] ?? [];
+  const cloudAccountIds = bucketKeyShowsCloudAccountByDefault(bucketKey)
+    ? [CLOUD_ACCOUNT_COLUMN_ID]
+    : [];
   if (extra.length > 0) {
     const [name, health, ...rest] = base;
-    return withUptimeLast([name, health, ...extra, ...rest, ...metricIds]);
+    return withUptimeLast([
+      name,
+      health,
+      ...extra,
+      ...cloudAccountIds,
+      ...rest,
+      ...metricIds,
+    ]);
+  }
+  if (cloudAccountIds.length > 0) {
+    const [name, health, ...rest] = base;
+    return withUptimeLast([name, health, ...cloudAccountIds, ...rest, ...metricIds]);
   }
   return withUptimeLast([...base, ...metricIds]);
 };
@@ -709,6 +737,8 @@ const sortValueFor = (entity: Entity, columnId: string, bucketKey: BucketKey): s
       return categoryLabel(entity.category);
     case 'provider':
       return entity.provider ? PROVIDER_LABEL[entity.provider] ?? entity.provider : '';
+    case CLOUD_ACCOUNT_COLUMN_ID:
+      return getCloudAccountDisplayLabel(entity).toLowerCase();
     case 'id':
       return entity.id;
     default:
@@ -999,6 +1029,12 @@ export const EntityDataGridSection = ({
           return categoryLabel(entity.category);
         case 'provider':
           return entity.provider ? PROVIDER_LABEL[entity.provider] ?? entity.provider : '—';
+        case CLOUD_ACCOUNT_COLUMN_ID: {
+          const label = getCloudAccountDisplayLabel(entity);
+          if (!label) return '—';
+          const title = cloudAccountCellTitle(entity);
+          return title ? <span title={title}>{label}</span> : label;
+        }
         case 'id':
           return entity.id;
         default:

@@ -123,6 +123,7 @@ export {
 
 export {
   KIND_TO_ENTITY_TYPE_ID,
+  entityShowsHostRuntimeFlyoutTabs,
   entityTypeShowsHostRuntimeTabs,
   resolveEntityTypeIdForName,
 } from './src/entity_type_id_mapping';

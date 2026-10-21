@@ -70,7 +70,7 @@ import {
 import type { EntityKind } from './kind_templates';
 import { entityTypeToKind, inferEntityKind, normalizeEntityHealth } from './kind_templates';
 import {
-  entityTypeShowsHostRuntimeTabs,
+  entityShowsHostRuntimeFlyoutTabs,
   resolveEntityTypeIdForName,
 } from './entity_type_id_mapping';
 import { useFlyoutTemplateOverride } from './flyout_template_overrides';
@@ -940,12 +940,12 @@ export const EntityFlyout = ({
             },
           ]
         : []),
-      ...(kind === 'host' || entityTypeShowsHostRuntimeTabs(entityTypeId)
+      ...(entityShowsHostRuntimeFlyoutTabs(kind, entityTypeId)
         ? [
             {
               id: 'services' as TabId,
               label: i18n.translate('entityCentricLabFlyout.flyout.tabs.services', {
-                defaultMessage: 'Services',
+                defaultMessage: 'APM services',
               }),
             },
             {

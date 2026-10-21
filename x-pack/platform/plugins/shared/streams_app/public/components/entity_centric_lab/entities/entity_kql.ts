@@ -28,6 +28,12 @@
  */
 
 import type { Filter } from '@kbn/es-query';
+import {
+  CLOUD_ACCOUNT_ECS_ID_FIELD,
+  CLOUD_ACCOUNT_ECS_NAME_FIELD,
+  CLOUD_ACCOUNT_ID_ATTR,
+  CLOUD_ACCOUNT_NAME_ATTR,
+} from './cloud_account';
 import type { Entity } from './fake_entities';
 
 type EntityPredicate = (entity: Entity) => boolean;
@@ -37,6 +43,8 @@ const MATCH_ALL: EntityPredicate = () => true;
 /** Canonical field name → the values to test for an entity. */
 const FIELD_ALIASES: Record<string, string> = {
   'cloud.provider': 'provider',
+  [CLOUD_ACCOUNT_ECS_ID_FIELD]: CLOUD_ACCOUNT_ID_ATTR,
+  [CLOUD_ACCOUNT_ECS_NAME_FIELD]: CLOUD_ACCOUNT_NAME_ATTR,
   'service.environment': 'environment',
   'orchestrator.namespace': 'category',
 };
@@ -60,12 +68,20 @@ const KNOWN_FIELDS = new Set([
   'cloudprovider',
   'servicename',
   'alerts',
+  CLOUD_ACCOUNT_ID_ATTR,
+  CLOUD_ACCOUNT_NAME_ATTR,
+  CLOUD_ACCOUNT_ECS_ID_FIELD,
+  CLOUD_ACCOUNT_ECS_NAME_FIELD,
 ]);
 
 const ATTR_FIELD_KEYS: Record<string, string> = {
   os: 'os',
   cloudprovider: 'cloudProvider',
   servicename: 'serviceName',
+  [CLOUD_ACCOUNT_ID_ATTR.toLowerCase()]: CLOUD_ACCOUNT_ID_ATTR,
+  [CLOUD_ACCOUNT_NAME_ATTR.toLowerCase()]: CLOUD_ACCOUNT_NAME_ATTR,
+  [CLOUD_ACCOUNT_ECS_ID_FIELD.toLowerCase()]: CLOUD_ACCOUNT_ID_ATTR,
+  [CLOUD_ACCOUNT_ECS_NAME_FIELD.toLowerCase()]: CLOUD_ACCOUNT_NAME_ATTR,
 };
 
 const K8S_SELF_SUBTYPE: Record<string, string> = {
@@ -113,9 +129,11 @@ const fieldValues = (entity: Entity, rawField: string): string[] => {
     }
     case 'os':
     case 'cloudprovider':
-    case 'servicename': {
-      const attrKey = ATTR_FIELD_KEYS[field];
-      const value = attrKey ? entity.attributes?.[attrKey] : undefined;
+    case 'servicename':
+    case CLOUD_ACCOUNT_ID_ATTR.toLowerCase():
+    case CLOUD_ACCOUNT_NAME_ATTR.toLowerCase(): {
+      const attrKey = ATTR_FIELD_KEYS[field] ?? field;
+      const value = entity.attributes?.[attrKey];
       return value ? [value] : [];
     }
     default:
@@ -155,6 +173,8 @@ const freeTextHaystack = (entity: Entity): string =>
     entity.attributes?.namespace ?? '',
     entity.attributes?.deployment ?? '',
     entity.attributes?.node ?? '',
+    entity.attributes?.[CLOUD_ACCOUNT_ID_ATTR] ?? '',
+    entity.attributes?.[CLOUD_ACCOUNT_NAME_ATTR] ?? '',
   ]
     .join(' ')
     .toLowerCase();

@@ -30,6 +30,9 @@ const CROSS_CATEGORY_SEARCH_FIELDS = ['category'] as const;
 /** Set on cloud entities only — offered when the view is Cloud-scoped. */
 const CLOUD_SEARCH_FIELDS = ['cloud.provider', 'provider'] as const;
 
+/** ECS billing boundary — offered on every inventory page for KQL / "+ Add filter". */
+const CLOUD_ACCOUNT_SEARCH_FIELDS = ['cloud.account.id', 'cloud.account.name'] as const;
+
 /**
  * K8s hierarchy + resource kind — only meaningful when the view is K8s-scoped.
  * `subtype` covers Clusters / Nodes / Namespaces / Pods / … labels.
@@ -55,6 +58,8 @@ export const ENTITY_SEARCH_FIELD_LABELS: Readonly<Record<string, string>> = {
   alerts: 'Alerts',
   provider: 'Cloud provider',
   'cloud.provider': 'Cloud provider',
+  'cloud.account.id': 'Cloud account ID',
+  'cloud.account.name': 'Cloud account',
   cluster: 'Cluster',
   namespace: 'Namespace',
   node: 'Node',
@@ -81,6 +86,7 @@ export const getEntitySearchFieldNames = (
   if (!categoryScope) {
     fields.push(...CROSS_CATEGORY_SEARCH_FIELDS);
   }
+  fields.push(...CLOUD_ACCOUNT_SEARCH_FIELDS);
   if (isCloudInventoryScope(categoryScope)) {
     fields.push(...CLOUD_SEARCH_FIELDS);
   }

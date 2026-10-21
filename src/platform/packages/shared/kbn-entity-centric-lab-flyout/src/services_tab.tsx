@@ -284,7 +284,7 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
       {
         field: 'name',
         name: i18n.translate('entityCentricLabFlyout.flyout.services.nameColumn', {
-          defaultMessage: 'Service',
+          defaultMessage: 'APM service',
         }),
         render: (name: string) => (
           <a
@@ -367,7 +367,7 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
           <EuiTitle size="xxs">
             <h4>
               {i18n.translate('entityCentricLabFlyout.flyout.services.title', {
-                defaultMessage: 'Services running on {hostName}',
+                defaultMessage: 'APM services on {hostName}',
                 values: { hostName: entityName },
               })}
             </h4>
@@ -376,7 +376,8 @@ export const ServicesTab = ({ entityName }: ServicesTabProps) => {
         <EuiFlexItem grow={false}>
           <EuiBadge color="hollow">
             {i18n.translate('entityCentricLabFlyout.flyout.services.count', {
-              defaultMessage: '{count} {count, plural, one {service} other {services}}',
+              defaultMessage:
+                '{count} {count, plural, one {APM service} other {APM services}}',
               values: { count: services.length },
             })}
           </EuiBadge>

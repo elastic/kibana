@@ -1214,7 +1214,9 @@ const AllEntitiesViewInner = ({
   // entities page.
   const scopedEntities = useMemo(() => {
     let list = categoryScope
-      ? dataset.entities.filter((entity) => entity.category === categoryScope)
+      ? (categoryScope as string) === 'cloud'
+        ? dataset.entities.filter((entity) => entity.provider != null)
+        : dataset.entities.filter((entity) => entity.category === categoryScope)
       : dataset.entities;
     if (cloudProviderScope) {
       list = list.filter((entity) => entity.provider === cloudProviderScope);
