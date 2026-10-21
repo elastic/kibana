@@ -100,7 +100,21 @@ describe('pull_request pipeline generation', () => {
     process.env = ORIGINAL_ENV;
   });
 
-  it('emits valid empty pipeline when changes are skippable', async () => {
+  it('emits only the evals suggestions step when changes are skippable', async () => {
+    mockAreChangesSkippable.mockResolvedValueOnce(true);
+    const emitted = waitForEmission();
+
+    await importPipelineModule();
+    const output = await emitted;
+
+    // Kept so a PR that stops matching any suite still clears its earlier suggestion comment.
+    const parsed = yamlLoad(output) as { steps: Array<{ key?: string }> };
+    expect(parsed.steps.map(({ key }) => key)).toEqual(['evals-suggestions']);
+    expect(mockRunPreBuild).not.toHaveBeenCalled();
+  });
+
+  it('emits a valid empty pipeline when changes are skippable and suggestions are opted out', async () => {
+    process.env.GITHUB_PR_LABELS = 'ci:skip-evals-suggestions';
     mockAreChangesSkippable.mockResolvedValueOnce(true);
     const emitted = waitForEmission();
 

@@ -775,6 +775,40 @@ exports[`pull_request fragments pull_request/deploy_project 1`] = `
 }
 `;
 
+exports[`pull_request fragments pull_request/evals_suggestions 1`] = `
+{
+  "steps": [
+    {
+      "agents": {
+        "machineType": "n2-standard-2",
+        "preemptible": true,
+        "spotZones": "us-central1-f,us-central1-c,us-central1-a",
+      },
+      "command": ".buildkite/scripts/steps/evals/suggest_evals.sh",
+      "env": {
+        "EVALS_SUGGESTIONS_MODE": "dry-run",
+      },
+      "key": "evals-suggestions",
+      "label": "Suggest Evals",
+      "retry": {
+        "automatic": [
+          {
+            "exit_status": -1,
+            "limit": 3,
+          },
+          {
+            "exit_status": "*",
+            "limit": 1,
+          },
+        ],
+      },
+      "soft_fail": true,
+      "timeout_in_minutes": 10,
+    },
+  ],
+}
+`;
+
 exports[`pull_request fragments pull_request/fips 1`] = `
 {
   "steps": [

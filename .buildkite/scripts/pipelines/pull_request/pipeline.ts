@@ -35,7 +35,7 @@ import {
   doAllChangesMatch,
   isAutomatedVersionBumpPR,
 } from '#pipeline-utils';
-import { cpsTests, renderSteps } from '#pipeline-utils/step-library';
+import { cpsTests, evalsSuggestions, renderSteps } from '#pipeline-utils/step-library';
 
 const prConfigs =
   loadBuildkiteJson<typeof import('../../../pull_requests.json')>('pull_requests.json');
@@ -109,7 +109,15 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     const skippable = await areChangesSkippable(SKIPPABLE_PR_MATCHERS, REQUIRED_PATHS);
 
     if (skippable) {
-      emitPipeline([emptyStep]);
+      // A PR that stops matching any suite must still clear the comment an earlier push left.
+      emitPipeline(
+        GITHUB_PR_LABELS.includes('ci:skip-evals-suggestions')
+          ? [emptyStep]
+          : [
+              getAgentImageConfig({ returnYaml: true }),
+              renderSteps(evalsSuggestions(), { header: true }),
+            ]
+      );
       return;
     }
 
@@ -731,6 +739,11 @@ const isStorybookBuildAffected = async (): Promise<boolean> => {
     const evalsTrigger = getEvalTriggerStep(GITHUB_PR_LABELS);
     if (evalsTrigger) {
       pipeline.push(evalsTrigger);
+    }
+
+    // Advisory; see the step for the dry-run default.
+    if (!GITHUB_PR_LABELS.includes('ci:skip-evals-suggestions')) {
+      pipeline.push(renderSteps(evalsSuggestions(), cancelOnGate));
     }
 
     if (GITHUB_PR_LABELS.includes('ci:sync-model-labels')) {

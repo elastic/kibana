@@ -211,6 +211,7 @@ const SCENARIOS: Scenario[] = [
   { name: 'scout cspm label', labels: ['ci:cloud-security-posture-scout'] },
   { name: 'scout edr label', labels: ['ci:scout-edr-real-fleet'] },
   { name: 'sync model labels', labels: ['ci:sync-model-labels'] },
+  { name: 'evals suggestions opt-out', labels: ['ci:skip-evals-suggestions'] },
   { name: 'workflow oom label', labels: ['ci:workflow-oom-test'] },
   { name: 'cps test', labels: ['ci:cps-test'] },
   { name: 'benchmarks', labels: ['ci:bench-jest', 'ci:bench-ftr', 'ci:bench-page-load'] },
@@ -281,6 +282,24 @@ describe('pull_request pipeline scenarios', () => {
       expect(await emittedIds()).toMatchSnapshot();
     }
   );
+
+  it('still runs the evals suggestions step on skippable changes, to clear a stale comment', async () => {
+    mockAreChangesSkippable.mockResolvedValue(true);
+    expect(await emittedIds()).toEqual(['evals-suggestions']);
+
+    jest.resetModules();
+    process.env.GITHUB_PR_LABELS = 'ci:skip-evals-suggestions';
+    expect(await emittedIds()).toEqual([]);
+  });
+
+  it('adds the evals suggestions step to a normal PR but not when opted out', async () => {
+    process.env.GITHUB_PR_LABELS = '';
+    expect(await emittedIds()).toContain('evals-suggestions');
+
+    jest.resetModules();
+    process.env.GITHUB_PR_LABELS = 'ci:skip-evals-suggestions';
+    expect(await emittedIds()).not.toContain('evals-suggestions');
+  });
 
   // These return before pre-build runs, so the table above cannot express them.
   it('skippable changes', async () => {

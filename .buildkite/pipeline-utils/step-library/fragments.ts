@@ -13,6 +13,7 @@ import { parse } from 'yaml';
 import { renderSteps } from './render.ts';
 import { normalizeSemantics } from './semantic_normalization.ts';
 import { cpsTests } from './steps/cps_testing.ts';
+import { evalsSuggestions } from './steps/evals_suggestions.ts';
 import type { Step } from './types.ts';
 import { getKibanaDir } from '#pipeline-utils/get_kibana_dir';
 
@@ -46,6 +47,7 @@ export const FRAGMENTS: readonly Fragment[] = [
   { ...yamlFragment('pull_request/cps_testing'), steps: cpsTests },
   yamlFragment('pull_request/deploy_cloud'),
   yamlFragment('pull_request/deploy_project'),
+  { ...yamlFragment('pull_request/evals_suggestions'), steps: evalsSuggestions },
   yamlFragment('pull_request/fips'),
   yamlFragment('pull_request/fleet_cypress'),
   yamlFragment('pull_request/ftr_bench'),
