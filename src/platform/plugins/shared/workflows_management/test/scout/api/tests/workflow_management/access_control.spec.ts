@@ -743,7 +743,7 @@ steps:
               `s/${spaceId}/api/workflows/executions/${executionId}/steps`,
               { headers: callerHeaders }
             );
-            expect(steps).toHaveStatusCode(allowed ? 200 : 403);
+            expect(steps).toHaveStatusCode(allowed ? 200 : 404);
             expect(steps.body.results).toStrictEqual(
               allowed
                 ? [expect.objectContaining({ stepId: 'message', status: 'completed' })]
@@ -1037,7 +1037,7 @@ steps:
           .toBeGreaterThan(0);
         expect(
           await apiClient.get(`${workflowPath}/executions/steps`, { headers: readerHeaders })
-        ).toHaveStatusCode(403);
+        ).toHaveStatusCode(404);
         const warning = await apiClient.delete(`${workflowPath}?force=true`, {
           headers: ownerHeaders,
         });
@@ -1060,7 +1060,7 @@ steps:
 
   for (const { mode, shared, readerStatus } of [
     { mode: 'public', shared: false, readerStatus: 200 },
-    { mode: 'private', shared: false, readerStatus: 403 },
+    { mode: 'private', shared: false, readerStatus: 404 },
     { mode: 'private', shared: true, readerStatus: 200 },
   ] as const) {
     apiTest(
