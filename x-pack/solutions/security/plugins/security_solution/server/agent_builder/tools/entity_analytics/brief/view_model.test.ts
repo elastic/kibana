@@ -128,7 +128,6 @@ describe('buildViewModel', () => {
       {
         rank: 1,
         name: 'jdoe',
-        flaggedFor: ['New entity'],
         privilegedUser: true,
         firstSeen: '2 days ago',
         observed: 'New and privileged.',
@@ -137,7 +136,6 @@ describe('buildViewModel', () => {
       {
         rank: 2,
         name: 'web_01',
-        flaggedFor: ['Entities with alerts', 'Risk movers'],
         risk: { score: 82, level: 'High', of: 'resolution group' },
         assetCriticality: 'High impact',
         alerts: { count: 3, rules: [{ name: 'Credential Dump', count: 2 }] },

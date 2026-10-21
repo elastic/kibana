@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { compact, uniq } from 'lodash';
+import { compact } from 'lodash';
 import { z, lazySchema } from '@kbn/zod/v4';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import {
@@ -71,8 +71,6 @@ export const BriefViewModel = lazySchema(() =>
         entityId: z.string(),
         name: z.string(),
         type: z.enum(['host', 'user', 'service', 'generic']),
-        /** The titles of the tiles that flag the entity. */
-        flaggedFor: z.array(z.string()),
         risk: z
           .object({
             score: z.number(),
@@ -173,7 +171,6 @@ export const buildViewModel = ({
             entityId,
             name,
             type,
-            flaggedFor: uniq(flaggedFor.map((tileId) => tiles[tileId]?.title ?? tileId)),
             risk: risk && { score: risk.score, level: risk.level, of: risk.of },
             assetCriticality,
             privilegedUser,

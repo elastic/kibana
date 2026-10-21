@@ -41,7 +41,6 @@ const fixtureViewModel: BriefViewModel = {
       entityId: 'user:a.rodriguez@acme.example@okta',
       name: 'a.rodriguez',
       type: 'user',
-      flaggedFor: ['Entities with alerts', 'Newly high/critical', 'Watchlisted'],
       risk: { score: 76, level: 'High', of: 'resolution group' },
       assetCriticality: 'High impact',
       privilegedUser: true,
@@ -77,7 +76,6 @@ const fixtureViewModel: BriefViewModel = {
       entityId: 'host:2528d2a4-bab4-5027-95ea-2b43632c165d',
       name: 'docker-host-prod-01',
       type: 'host',
-      flaggedFor: ['Entities with alerts', 'New entity'],
       risk: { score: 66, level: 'Moderate', of: 'entity' },
       assetCriticality: 'Extreme impact',
       firstSeen: '2 days ago',
@@ -92,7 +90,6 @@ const fixtureViewModel: BriefViewModel = {
       entityId: 'host:3e751925-2b1c-5e66-969b-d8c23136e00d',
       name: 'jump-box-01',
       type: 'host',
-      flaggedFor: ['Entities with alerts', 'New entity'],
       risk: { score: 58, level: 'Moderate', of: 'entity' },
       assetCriticality: 'High impact',
       firstSeen: '3 days ago',
@@ -189,12 +186,33 @@ describe('renderBriefHtml', () => {
     expect(height).toBeLessThan(500);
   });
 
-  it('keeps the chart and the chips however tall the brief is, and opens the card at its maximum', () => {
+  it('keeps the chart however tall the brief is, and opens the card at its maximum', () => {
     const { html, height } = renderBriefHtml(withText(fixtureViewModel, 30));
 
-    expect(html).toContain('<figure class="chart">');
-    expect(html).toContain('<span class="chip">Entities with alerts</span>');
+    expect(html).toContain('<svg');
     expect(height).toBe(CUSTOM_CONTENT_MAX_HEIGHT);
+  });
+
+  it('draws the chart from three points, and states the change in words from two', () => {
+    const [{ riskHistory }] = fixtureViewModel.priorities;
+    const withPoints = (count: number) =>
+      renderBriefHtml({
+        ...fixtureViewModel,
+        priorities: [
+          {
+            ...fixtureViewModel.priorities[0],
+            riskHistory: riskHistory && {
+              ...riskHistory,
+              points: riskHistory.points.slice(-count),
+            },
+          },
+        ],
+      }).html;
+
+    expect(withPoints(3)).toContain('<svg');
+    expect(withPoints(2)).not.toContain('<svg');
+    expect(withPoints(2)).toContain('76 High');
+    expect(withPoints(1)).not.toContain('<figure');
   });
 
   it('passes through the sanitiser unchanged, so the card shows everything', () => {

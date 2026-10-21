@@ -157,9 +157,6 @@ const renderPriority = (priority: Priority): string => {
   const privilegedPill = privilegedUser
     ? '<span class="pill pill-outline">Privileged user</span>'
     : '';
-  const chips = priority.flaggedFor
-    .map((title) => `<span class="chip">${escapeHtml(title)}</span>`)
-    .join('');
   return `<li class="priority">
       <div class="priority-head">
         <span class="rank" aria-hidden="true">${rank}</span>
@@ -171,8 +168,11 @@ const renderPriority = (priority: Priority): string => {
         </div>
         <div class="pills">${riskPill}${criticalityPill}${privilegedPill}</div>
       </div>
-      ${priority.alerts ? renderAlerts(priority.alerts) : ''}
-      <div class="evidence"><span class="label">Flagged by</span>${chips}</div>
+      ${
+        priority.alerts
+          ? `<p class="alerts">${escapeHtml(describeAlerts(priority.alerts))}</p>`
+          : ''
+      }
       <p class="priority-text">${escapeHtml(priority.observed)} ${escapeHtml(
     priority.whyItMatters
   )}</p>
@@ -181,31 +181,51 @@ const renderPriority = (priority: Priority): string => {
     </li>`;
 };
 
-/** The alerts and the rules behind most of them, as one line of plain text. */
-const renderAlerts = ({ count, rules }: NonNullable<Priority['alerts']>): string => {
+/** The alerts and the rules behind most of them, as plain text. */
+const describeAlerts = ({ count, rules }: NonNullable<Priority['alerts']>): string => {
   const alerts = formatCountOf(count, 'alert', 'alerts');
   const names = rules.map((rule) => `${rule.name} (${rule.count})`).join(', ');
-  return `<p class="alerts">${escapeHtml(names ? `${alerts}: ${names}` : alerts)}</p>`;
+  return names ? `${alerts}: ${names}` : alerts;
 };
 
-/** Bands are labelled only when the labels don't overlap in the chart. */
 const BANDS = [
   { label: 'Critical 90', score: 90 },
   { label: 'High 70', score: 70 },
   { label: 'Moderate 40', score: 40 },
 ];
-const MIN_BAND_LABEL_GAP = 11;
+
+/** The fewest points that make a line worth drawing. */
+const MIN_CHART_POINTS = 3;
 
 /**
- * The risk history over the period. The first and last scores are written as text too, so the chart is
- * never the only place the change is stated.
+ * The risk history over the period. The first and last scores are written as text, and the chart is
+ * drawn from enough points, so the chart is never the only place the change is stated.
  */
-const renderRiskHistory = (name: string, { points, of }: BriefRiskHistory): string => {
+const renderRiskHistory = (name: string, riskHistory: BriefRiskHistory): string => {
+  const { points, of } = riskHistory;
   if (points.length < 2) {
     return '';
   }
+  const first = points[0];
+  const last = points[points.length - 1];
+  return `<figure class="chart">
+        <figcaption>
+          <span>Risk score over the period for <strong>${escapeHtml(name)}</strong>${
+    of === 'resolution group' ? ' (resolution group)' : ''
+  }</span>
+          <span class="chart-change">${Math.round(first.score)} ${escapeHtml(first.level)}
+            <span aria-hidden="true">&rarr;</span>
+            <span class="screen-reader">to</span> ${Math.round(last.score)} ${escapeHtml(
+    last.level
+  )}</span>
+        </figcaption>
+        ${points.length >= MIN_CHART_POINTS ? renderChart(points) : ''}
+      </figure>`;
+};
+
+const renderChart = (points: BriefRiskHistory['points']): string => {
   const width = 640;
-  const height = 80;
+  const height = 104;
   const left = 30;
   const right = width - 70;
   const top = 14;
@@ -226,29 +246,15 @@ const renderRiskHistory = (name: string, { points, of }: BriefRiskHistory): stri
       ({ t }, index) => [0, points.length - 1].includes(index) || new Date(t).getUTCHours() === 23
     )
     .filter(({ t }, index, all) => index === 0 || x(t) - x(all[index - 1].t) > 60);
-  const bands = BANDS.map(({ label, score }, index) => {
-    const below = BANDS[index + 1];
-    const hasLabel = !below || y(below.score) - y(score) >= MIN_BAND_LABEL_GAP;
-    return `<line class="band" x1="${left}" x2="${right}" y1="${y(score).toFixed(1)}" y2="${y(
-      score
-    ).toFixed(1)}" />${
-      hasLabel
-        ? `<text class="band-label" x="${right + 6}" y="${(y(score) + 3).toFixed(
-            1
-          )}">${label}</text>`
-        : ''
-    }`;
-  });
-  return `<figure class="chart">
-        <figcaption>
-          <span>Risk score over the period for <strong>${escapeHtml(name)}</strong>${
-    of === 'resolution group' ? ' (resolution group)' : ''
-  }</span>
-          <span class="chart-change">${firstScore} ${escapeHtml(first.level)}
-            <span aria-hidden="true">&rarr;</span>
-            <span class="screen-reader">to</span> ${lastScore} ${escapeHtml(last.level)}</span>
-        </figcaption>
-        <svg viewBox="0 0 ${width} ${height}" width="100%" role="img"
+  const bands = BANDS.map(
+    ({ label, score }) =>
+      `<line class="band" x1="${left}" x2="${right}" y1="${y(score).toFixed(1)}" y2="${y(
+        score
+      ).toFixed(1)}" /><text class="band-label" x="${right + 6}" y="${(y(score) + 3).toFixed(
+        1
+      )}">${label}</text>`
+  );
+  return `<svg viewBox="0 0 ${width} ${height}" width="100%" role="img"
           aria-label="Risk score ${describeTrend(
             firstScore,
             lastScore
@@ -278,8 +284,7 @@ const renderRiskHistory = (name: string, { points, of }: BriefRiskHistory): stri
                 }" text-anchor="middle">${formatMonthDay(t)}</text>`
             )
             .join('')}
-        </svg>
-      </figure>`;
+        </svg>`;
 };
 
 const describeTrend = (first: number, last: number): string => {
@@ -289,94 +294,63 @@ const describeTrend = (first: number, last: number): string => {
   return last < first ? 'fell from' : 'stayed at';
 };
 
-// Height. The card needs a height up front, so it is estimated from the sections. The constants are
-// measured in Chromium at the card's 832 px width, with the system font the sandbox falls back to
-// because it allows no web fonts. The margin covers a wider font.
+// Height. The card needs its height up front, so it is estimated from rounded sizes, measured in Chromium
+// at the card's 832 px width with the system font the sandbox falls back to. The margin covers a wider font.
 
 const HEIGHT_MARGIN = 60;
-const CHARACTERS_PER_LINE = { title: 80, note: 120, lead: 104, text: 100 };
-const LINE_HEIGHTS = { title: 23.4, note: 18, lead: 22.5, text: 21 };
+const CHARACTERS_PER_LINE = 100;
 const HEIGHTS = {
-  /** The padding around the brief. */
-  page: 32,
-  /** The eyebrow, one line of title, the captured line and the rule under them, and the gap below. */
-  header: 82.4,
-  /** A note's padding and border, and the gap below it. */
-  note: 18,
-  /** The gap below the notes. */
-  notes: 12,
-  /** A section's heading, and the gap below the section. */
-  section: 41,
-  /** A callout's padding on top of a section. */
-  callout: 20,
-  /** A priority's padding, title row, one line each of evidence, text and next step, and the gap below. */
-  priority: 154.5,
-  /** The row the evidence chips need when they don't fit one line, with its gap. */
-  chipRow: 28,
-  /** The line that names the alerts and their rules, with its gap. */
-  alerts: 27,
-  chart: 131,
+  /** The padding around the brief, its header, and the gap below. */
+  header: 120,
+  /** A line of text. */
+  line: 22,
+  /** A section's heading and the gap below the section. */
+  section: 44,
+  /** A note's padding and gap, on top of its lines. */
+  note: 20,
+  /** One row of counts. */
+  counts: 72,
+  /** A priority's padding and title row, on top of its lines. */
+  priority: 80,
+  /** The gap above the alerts line. */
+  alerts: 8,
+  /** The risk history with its chart, or with the caption alone. */
+  chart: 160,
+  caption: 50,
 };
-/** The counts' height by how many there are, as labels and changes wrap in narrower counts. */
-const COUNTS_HEIGHTS: Record<number, number> = { 4: 55.6, 5: 71.2, 6: 89.2 };
-/** The width the chips of a priority share in a row, and what a chip takes: per character, and around it. */
-const CHIP_ROW_WIDTH = 590;
-const CHIP_CHARACTER_WIDTH = 6.2;
-const CHIP_PADDING = 24;
 
-const countLines = (text: string, charactersPerLine: number): number =>
-  Math.max(1, Math.ceil(text.length / charactersPerLine));
+const countLines = (text: string): number => Math.ceil(text.length / CHARACTERS_PER_LINE);
 
 const estimateHeight = (viewModel: BriefViewModel): number => {
   const { summary, recommendation, priorities } = viewModel;
-  const counts = getShownCounts(viewModel);
-  const notes = getNotes(viewModel);
-  const proseHeight = (text: string | undefined): number =>
-    text ? HEIGHTS.section + countLines(text, CHARACTERS_PER_LINE.lead) * LINE_HEIGHTS.lead : 0;
-  const titleLines = countLines(getTitleParts(viewModel).join('  ·  '), CHARACTERS_PER_LINE.title);
+  const prose = (text = ''): number =>
+    text ? HEIGHTS.section + countLines(text) * HEIGHTS.line : 0;
   return (
-    HEIGHTS.page +
     HEIGHTS.header +
-    (titleLines - 1) * LINE_HEIGHTS.title +
-    (notes.length > 0 ? HEIGHTS.notes : 0) +
-    sumBy(
-      notes,
-      (note) => HEIGHTS.note + countLines(note, CHARACTERS_PER_LINE.note) * LINE_HEIGHTS.note
-    ) +
-    proseHeight(summary) +
-    (counts.length > 0 ? HEIGHTS.section + COUNTS_HEIGHTS[Math.max(4, counts.length)] : 0) +
-    proseHeight(recommendation) +
-    (recommendation ? HEIGHTS.callout : 0) +
+    sumBy(getNotes(viewModel), (note) => HEIGHTS.note + countLines(note) * HEIGHTS.line) +
+    prose(summary) +
+    (getShownCounts(viewModel).length > 0 ? HEIGHTS.section + HEIGHTS.counts : 0) +
+    prose(recommendation) +
     HEIGHTS.section +
     (priorities.length === 0
-      ? countLines(NO_PRIORITIES_LINE, CHARACTERS_PER_LINE.lead) * LINE_HEIGHTS.lead
-      : sumBy(priorities, estimatePriorityHeight))
+      ? HEIGHTS.line
+      : sumBy(priorities, ({ observed, whyItMatters, nextStep, alerts, riskHistory }) => {
+          const lines = countLines(`${observed} ${whyItMatters}`) + countLines(nextStep);
+          return (
+            HEIGHTS.priority +
+            lines * HEIGHTS.line +
+            (alerts ? HEIGHTS.alerts + countLines(describeAlerts(alerts)) * HEIGHTS.line : 0) +
+            (riskHistory ? estimateRiskHistoryHeight(riskHistory) : 0)
+          );
+        }))
   );
 };
 
-const estimatePriorityHeight = ({
-  flaggedFor,
-  observed,
-  whyItMatters,
-  nextStep,
-  riskHistory,
-  alerts,
-}: Priority): number => {
-  const chipsWidth = sumBy(
-    flaggedFor,
-    (title) => title.length * CHIP_CHARACTER_WIDTH + CHIP_PADDING
-  );
-  const chipRows = Math.max(1, Math.ceil(chipsWidth / CHIP_ROW_WIDTH));
-  const textLines =
-    countLines(`${observed} ${whyItMatters}`, CHARACTERS_PER_LINE.text) +
-    countLines(nextStep, CHARACTERS_PER_LINE.text);
-  return (
-    HEIGHTS.priority +
-    (chipRows - 1) * HEIGHTS.chipRow +
-    (textLines - 2) * LINE_HEIGHTS.text +
-    (alerts ? HEIGHTS.alerts : 0) +
-    (riskHistory ? HEIGHTS.chart : 0)
-  );
+const estimateRiskHistoryHeight = ({ points }: BriefRiskHistory): number => {
+  if (points.length < 2) {
+    return 0;
+  }
+  return points.length >= MIN_CHART_POINTS ? HEIGHTS.chart : HEIGHTS.caption;
 };
 
 // Text and dates
@@ -449,9 +423,7 @@ const CSS = `
 .brief .name{font-weight:700;font-size:15px;overflow-wrap:anywhere;}
 .brief .pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}
 .brief .alerts{margin:6px 0 0 32px;}
-.brief .evidence{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 6px 32px;}
 .brief .label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.72;margin-right:2px;}
-.brief .chip{display:inline-block;padding:0 8px;line-height:20px;border-radius:var(--cc-radius-s);border:1px solid var(--cc-color-border);font-size:12px;}
 .brief .priority-text{margin-left:32px;}
 .brief .next{margin:6px 0 0 32px;}
 .brief .next .label{margin-right:6px;}
@@ -466,5 +438,5 @@ const CSS = `
 .brief .chart .line{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;}
 .brief .chart .dot{fill:currentColor;}
 .brief .callout{border-left:3px solid var(--cc-color-primary);padding:10px 14px;background:var(--cc-color-surface);border-radius:var(--cc-radius);}
-@media (max-width:420px){.brief .header{flex-direction:column;} .brief .pills{justify-content:flex-start;} .brief .evidence,.brief .priority-text,.brief .next,.brief .chart{margin-left:0;}}
+@media (max-width:420px){.brief .header{flex-direction:column;} .brief .pills{justify-content:flex-start;} .brief .alerts,.brief .priority-text,.brief .next,.brief .chart{margin-left:0;}}
 `;

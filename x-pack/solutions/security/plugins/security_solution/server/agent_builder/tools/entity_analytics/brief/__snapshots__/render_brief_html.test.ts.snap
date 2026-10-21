@@ -43,9 +43,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
 .brief .name{font-weight:700;font-size:15px;overflow-wrap:anywhere;}
 .brief .pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}
 .brief .alerts{margin:6px 0 0 32px;}
-.brief .evidence{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 6px 32px;}
 .brief .label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.72;margin-right:2px;}
-.brief .chip{display:inline-block;padding:0 8px;line-height:20px;border-radius:var(--cc-radius-s);border:1px solid var(--cc-color-border);font-size:12px;}
 .brief .priority-text{margin-left:32px;}
 .brief .next{margin:6px 0 0 32px;}
 .brief .next .label{margin-right:6px;}
@@ -60,7 +58,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
 .brief .chart .line{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;}
 .brief .chart .dot{fill:currentColor;}
 .brief .callout{border-left:3px solid var(--cc-color-primary);padding:10px 14px;background:var(--cc-color-surface);border-radius:var(--cc-radius);}
-@media (max-width:420px){.brief .header{flex-direction:column;} .brief .pills{justify-content:flex-start;} .brief .evidence,.brief .priority-text,.brief .next,.brief .chart{margin-left:0;}}
+@media (max-width:420px){.brief .header{flex-direction:column;} .brief .pills{justify-content:flex-start;} .brief .alerts,.brief .priority-text,.brief .next,.brief .chart{margin-left:0;}}
 </style>
 <div class=\\"brief\\">
   <header class=\\"header\\">
@@ -120,7 +118,6 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         <div class=\\"pills\\"><span class=\\"pill level-high\\">Risk 76 High <span class=\\"pill-detail\\">group</span></span><span class=\\"pill pill-outline\\">High impact</span><span class=\\"pill pill-outline\\">Privileged user</span></div>
       </div>
       <p class=\\"alerts\\">3 alerts: Potential Credential Access via LSASS Memory Dump (2), Unusual Logon (1)</p>
-      <div class=\\"evidence\\"><span class=\\"label\\">Flagged by</span><span class=\\"chip\\">Entities with alerts</span><span class=\\"chip\\">Newly high/critical</span><span class=\\"chip\\">Watchlisted</span></div>
       <p class=\\"priority-text\\">Has alerts, is newly high/critical, and sits on the watchlist, with risk score 76 (High). Combines a privileged, high-impact identity with three separate flags, unlike any other entity here.</p>
       <p class=\\"next\\"><span class=\\"label\\">Next</span>Review the alerts behind the new High risk score and confirm recent access activity.</p>
       <figure class=\\"chart\\">
@@ -130,15 +127,15 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
             <span aria-hidden=\\"true\\">&rarr;</span>
             <span class=\\"screen-reader\\">to</span> 76 High</span>
         </figcaption>
-        <svg viewBox=\\"0 0 640 80\\" width=\\"100%\\" role=\\"img\\"
+        <svg viewBox=\\"0 0 640 104\\" width=\\"100%\\" role=\\"img\\"
           aria-label=\\"Risk score rose from 34 on 15 Oct to 76 on 20 Oct\\">
-          <line class=\\"band\\" x1=\\"30\\" x2=\\"570\\" y1=\\"18.4\\" y2=\\"18.4\\" /><line class=\\"band\\" x1=\\"30\\" x2=\\"570\\" y1=\\"27.2\\" y2=\\"27.2\\" /><text class=\\"band-label\\" x=\\"576\\" y=\\"30.2\\">High 70</text><line class=\\"band\\" x1=\\"30\\" x2=\\"570\\" y1=\\"40.4\\" y2=\\"40.4\\" /><text class=\\"band-label\\" x=\\"576\\" y=\\"43.4\\">Moderate 40</text>
-          <polygon class=\\"area\\" points=\\"30,58 30.0,43.0 150.2,30.4 270.4,26.7 390.6,25.6 510.8,24.6 570.0,24.6 570.0,58\\" />
-          <polyline class=\\"line\\" points=\\"30.0,43.0 150.2,30.4 270.4,26.7 390.6,25.6 510.8,24.6 570.0,24.6\\" />
-          <circle class=\\"dot\\" cx=\\"30.0\\" cy=\\"43.0\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"150.2\\" cy=\\"30.4\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"270.4\\" cy=\\"26.7\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"390.6\\" cy=\\"25.6\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"510.8\\" cy=\\"24.6\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"570.0\\" cy=\\"24.6\\" r=\\"3\\" />
-          <text class=\\"point-label\\" x=\\"30.0\\" y=\\"36.0\\" text-anchor=\\"middle\\">34</text>
-          <text class=\\"point-label strong\\" x=\\"563.0\\" y=\\"18.6\\" text-anchor=\\"end\\">76</text>
-          <text class=\\"tick\\" x=\\"30.0\\" y=\\"74\\" text-anchor=\\"middle\\">15 Oct</text><text class=\\"tick\\" x=\\"150.2\\" y=\\"74\\" text-anchor=\\"middle\\">16 Oct</text><text class=\\"tick\\" x=\\"270.4\\" y=\\"74\\" text-anchor=\\"middle\\">17 Oct</text><text class=\\"tick\\" x=\\"390.6\\" y=\\"74\\" text-anchor=\\"middle\\">18 Oct</text><text class=\\"tick\\" x=\\"510.8\\" y=\\"74\\" text-anchor=\\"middle\\">19 Oct</text>
+          <line class=\\"band\\" x1=\\"30\\" x2=\\"570\\" y1=\\"20.8\\" y2=\\"20.8\\" /><text class=\\"band-label\\" x=\\"576\\" y=\\"23.8\\">Critical 90</text><line class=\\"band\\" x1=\\"30\\" x2=\\"570\\" y1=\\"34.4\\" y2=\\"34.4\\" /><text class=\\"band-label\\" x=\\"576\\" y=\\"37.4\\">High 70</text><line class=\\"band\\" x1=\\"30\\" x2=\\"570\\" y1=\\"54.8\\" y2=\\"54.8\\" /><text class=\\"band-label\\" x=\\"576\\" y=\\"57.8\\">Moderate 40</text>
+          <polygon class=\\"area\\" points=\\"30,82 30.0,58.9 150.2,39.4 270.4,33.7 390.6,31.9 510.8,30.4 570.0,30.4 570.0,82\\" />
+          <polyline class=\\"line\\" points=\\"30.0,58.9 150.2,39.4 270.4,33.7 390.6,31.9 510.8,30.4 570.0,30.4\\" />
+          <circle class=\\"dot\\" cx=\\"30.0\\" cy=\\"58.9\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"150.2\\" cy=\\"39.4\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"270.4\\" cy=\\"33.7\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"390.6\\" cy=\\"31.9\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"510.8\\" cy=\\"30.4\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"570.0\\" cy=\\"30.4\\" r=\\"3\\" />
+          <text class=\\"point-label\\" x=\\"30.0\\" y=\\"51.9\\" text-anchor=\\"middle\\">34</text>
+          <text class=\\"point-label strong\\" x=\\"563.0\\" y=\\"24.4\\" text-anchor=\\"end\\">76</text>
+          <text class=\\"tick\\" x=\\"30.0\\" y=\\"98\\" text-anchor=\\"middle\\">15 Oct</text><text class=\\"tick\\" x=\\"150.2\\" y=\\"98\\" text-anchor=\\"middle\\">16 Oct</text><text class=\\"tick\\" x=\\"270.4\\" y=\\"98\\" text-anchor=\\"middle\\">17 Oct</text><text class=\\"tick\\" x=\\"390.6\\" y=\\"98\\" text-anchor=\\"middle\\">18 Oct</text><text class=\\"tick\\" x=\\"510.8\\" y=\\"98\\" text-anchor=\\"middle\\">19 Oct</text>
         </svg>
       </figure>
     </li><li class=\\"priority\\">
@@ -151,7 +148,6 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         <div class=\\"pills\\"><span class=\\"pill level-moderate\\">Risk 66 Moderate</span><span class=\\"pill pill-outline\\">Extreme impact</span></div>
       </div>
       
-      <div class=\\"evidence\\"><span class=\\"label\\">Flagged by</span><span class=\\"chip\\">Entities with alerts</span><span class=\\"chip\\">New entity</span></div>
       <p class=\\"priority-text\\">Flagged for alerts and as a new entity, first seen 2 days ago, asset criticality is Extreme impact, risk score 66 (Moderate). Extreme impact criticality on a host seen for the first time this week raises the stakes of its alerts.</p>
       <p class=\\"next\\"><span class=\\"label\\">Next</span>Check what triggered the alerts and verify the host&#39;s provisioning is expected.</p>
       
@@ -165,7 +161,6 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         <div class=\\"pills\\"><span class=\\"pill level-moderate\\">Risk 58 Moderate</span><span class=\\"pill pill-outline\\">High impact</span></div>
       </div>
       
-      <div class=\\"evidence\\"><span class=\\"label\\">Flagged by</span><span class=\\"chip\\">Entities with alerts</span><span class=\\"chip\\">New entity</span></div>
       <p class=\\"priority-text\\">Flagged for alerts and as a new entity, first seen 3 days ago, asset criticality is High impact, risk score 58 (Moderate). A newly appeared high-impact host with alerts warrants a look even without other flags.</p>
       <p class=\\"next\\"><span class=\\"label\\">Next</span>Review the alerts and confirm the host&#39;s role and ownership.</p>
       
