@@ -1280,8 +1280,8 @@ export const InstallRuleAssetsRequestSchema = {
 
 export const InstallWorkflowAssetsRequestSchema = {
   params: schema.object({
-    pkgName: schema.string({ meta: { description: 'Package name' } }),
-    pkgVersion: schema.string({ meta: { description: 'Package version' } }),
+    pkgName: schema.string({ maxLength: 255, meta: { description: 'Package name' } }),
+    pkgVersion: schema.string({ maxLength: 255, meta: { description: 'Package version' } }),
   }),
   body: schema.nullable(
     schema.object(
