@@ -254,6 +254,42 @@ describe('AlertsDataGrid bulk actions', () => {
       expect(screen.getByTestId('alerts-table-add-to-case')).toHaveTextContent('Add to case');
     });
 
+    it('should render case removal actions right after the case actions', async () => {
+      render(
+        <TestComponent
+          {...dataGridProps}
+          additionalBulkActions={[
+            {
+              id: 0,
+              items: [
+                {
+                  label: 'Remove from case',
+                  key: 'removeFromCase',
+                  groupId: 'caseRemoval',
+                  'data-test-subj': 'remove-from-case',
+                  disableOnQuery: true,
+                },
+              ],
+            },
+          ]}
+        />
+      );
+
+      await userEvent.click(screen.getByTestId('bulk-actions-header'));
+      await userEvent.click(screen.getByTestId('selectedShowBulkActionsButton'));
+      await waitForEuiPopoverOpen();
+
+      const menu = screen.getByTestId('alertsTableBulkActionMenu');
+      expect(
+        within(menu)
+          .getAllByRole('menuitem')
+          .map((item) => item.getAttribute('data-test-subj'))
+      ).toEqual(['bulk-mute', 'bulk-unmute', 'alerts-table-add-to-case', 'remove-from-case']);
+      expect(within(menu).getAllByTestId('alertsTableBulkActionMenuGroupSeparator')).toHaveLength(
+        1
+      );
+    });
+
     it('should show only mute/unmute actions when user does not have case write access', async () => {
       mockCaseService.helpers.canUseCases.mockReturnValue({ create: false, read: true });
 
