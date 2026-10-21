@@ -23,6 +23,7 @@ import {
   sendUpdatePackagePolicy,
   sendUpgradePackagePolicyDryRun,
 } from '../../../../../../hooks';
+import { IAC_TEMPLATE_WRITE_FAILED_TOAST } from '../../../../../../components/cloud_connector/constants';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { allowedExperimentalValues } from '../../../../../../../common/experimental_features';
 import { ExperimentalFeaturesService } from '../../../../../../services';
@@ -716,7 +717,8 @@ describe('usePackagePolicy - agentless', () => {
       expect.objectContaining({
         name: 'agentless-1',
         package: expect.objectContaining({ name: 'nginx' }),
-      })
+      }),
+      expect.objectContaining({ onIacPersistError: expect.any(Function) })
     );
     expect(saveResult).toEqual({ data: { item: { id: 'agentless-1' } }, error: null });
     // Never falls back to the package-policy update API for agentless policies.
@@ -750,7 +752,8 @@ describe('usePackagePolicy - agentless', () => {
 
     expect(sendUpdateAgentlessPolicy).toHaveBeenCalledWith(
       'agentless-detect',
-      expect.objectContaining({ package: expect.objectContaining({ name: 'nginx' }) })
+      expect.objectContaining({ package: expect.objectContaining({ name: 'nginx' }) }),
+      expect.objectContaining({ onIacPersistError: expect.any(Function) })
     );
     expect(saveResult).toEqual({ data: { item: { id: 'agentless-detect' } }, error: null });
   });
@@ -787,7 +790,11 @@ describe('usePackagePolicy - agentless', () => {
       await result.current.savePackagePolicy();
     });
 
-    expect(sendUpdatePackagePolicy).toHaveBeenCalledWith('package-policy-1', expect.anything());
+    expect(sendUpdatePackagePolicy).toHaveBeenCalledWith(
+      'package-policy-1',
+      expect.anything(),
+      expect.objectContaining({ onIacPersistError: expect.any(Function) })
+    );
     expect(sendUpdateAgentlessPolicy).not.toHaveBeenCalled();
   });
 
@@ -1007,7 +1014,11 @@ describe('usePackagePolicy - agentless policies UI kill switch off', () => {
       await result.current.savePackagePolicy();
     });
 
-    expect(sendUpdatePackagePolicy).toHaveBeenCalledWith('package-policy-1', expect.anything());
+    expect(sendUpdatePackagePolicy).toHaveBeenCalledWith(
+      'package-policy-1',
+      expect.anything(),
+      expect.objectContaining({ onIacPersistError: expect.any(Function) })
+    );
     expect(sendUpdateAgentlessPolicy).not.toHaveBeenCalled();
   });
 
@@ -1022,7 +1033,37 @@ describe('usePackagePolicy - agentless policies UI kill switch off', () => {
       await result.current.savePackagePolicy();
     });
 
-    expect(sendUpdatePackagePolicy).toHaveBeenCalledWith('agentless-detect', expect.anything());
+    expect(sendUpdatePackagePolicy).toHaveBeenCalledWith(
+      'agentless-detect',
+      expect.anything(),
+      expect.objectContaining({ onIacPersistError: expect.any(Function) })
+    );
     expect(sendUpdateAgentlessPolicy).not.toHaveBeenCalled();
+  });
+
+  it('warns when the policy saved but its cloud connector could not record the template details', async () => {
+    // The request helper reports a failed template-details write through the options it is handed;
+    // the save itself still succeeds, so the hook must surface it as a warning, not an error.
+    jest.mocked(sendUpdatePackagePolicy).mockImplementation(async (_id, _body, options) => {
+      options?.onIacPersistError?.(new Error('connector update failed'));
+      return { data: { item: { id: 'nginx-1' } }, error: null } as any;
+    });
+
+    const renderer = createFleetTestRendererMock();
+    const { result } = renderer.renderHook(() =>
+      usePackagePolicyWithRelatedData('package-policy-1', {})
+    );
+    await waitFor(() => expect(result.current.packagePolicy?.name).toBe('nginx-1'));
+
+    let saveResult: any;
+    await act(async () => {
+      saveResult = await result.current.savePackagePolicy();
+    });
+
+    expect(saveResult.error).toBeNull();
+    expect(renderer.startServices.notifications.toasts.addWarning).toHaveBeenCalledWith(
+      IAC_TEMPLATE_WRITE_FAILED_TOAST
+    );
+    expect(renderer.startServices.notifications.toasts.addError).not.toHaveBeenCalled();
   });
 });

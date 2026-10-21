@@ -26,10 +26,7 @@ import {
   EuiFlyout,
   EuiToolTip,
 } from '@elastic/eui';
-import type {
-  EuiFilePickerClass,
-  EuiFilePickerProps,
-} from '@elastic/eui/src/components/form/file_picker/file_picker';
+import type { EuiFilePickerRef } from '@elastic/eui';
 import type {
   BulkErrorSchema,
   ImportExceptionsResponseSchema,
@@ -62,7 +59,7 @@ export const ImportExceptionListFlyout = React.memo(
     addError: (error: unknown, options: ErrorToastOptions) => Toast;
     setDisplayImportListFlyout: Dispatch<SetStateAction<boolean>>;
   }) => {
-    const filePickerRef = useRef<EuiFilePickerClass | null>(null);
+    const filePickerRef = useRef<EuiFilePickerRef>(null);
 
     const filePickerId = useGeneratedHtmlId({ prefix: 'filePicker' });
     const [files, setFiles] = useState<FileList | null>(null);
@@ -75,10 +72,7 @@ export const ImportExceptionListFlyout = React.memo(
     );
 
     const resetForm = useCallback(() => {
-      if (filePickerRef.current?.fileInput) {
-        filePickerRef.current.fileInput.value = '';
-        filePickerRef.current.handleChange();
-      }
+      filePickerRef.current?.removeFiles();
       setFiles(null);
       setAlreadyExistingItem(false);
       setEndpointListImporting(false);
@@ -226,7 +220,7 @@ export const ImportExceptionListFlyout = React.memo(
           <EuiFilePicker
             id={filePickerId}
             multiple
-            ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
+            ref={filePickerRef}
             initialPromptText={i18n.IMPORT_PROMPT}
             onChange={handleFileChange}
             display={'large'}

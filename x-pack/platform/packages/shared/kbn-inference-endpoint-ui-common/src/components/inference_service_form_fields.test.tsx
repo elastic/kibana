@@ -19,6 +19,7 @@ import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { mockProviders } from '../utils/mock_providers';
 import type { InferenceProvider } from '../types/types';
 import { INTERNAL_OVERRIDE_FIELDS, ServiceProviderKeys } from '../constants';
+import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_provider';
 
 // Create a stable cloned copy for each test suite to prevent mutations from affecting other tests
 // Note: Variable must be prefixed with 'mock' to be allowed in jest.mock()
@@ -136,10 +137,11 @@ describe('Inference Services', () => {
   it('populates default model_id when selecting openai provider', async () => {
     renderForm();
 
+    const openAiName = SERVICE_PROVIDERS[ServiceProviderKeys.openai].name;
     await user.click(screen.getByTestId('provider-select'));
-    await user.click(screen.getByText('OpenAI'));
+    await user.click(screen.getByText(openAiName));
 
-    expect(await screen.findByTestId('provider-select')).toHaveValue('OpenAI');
+    expect(await screen.findByTestId('provider-select')).toHaveValue(openAiName);
     // Default value comes from INTERNAL_OVERRIDE_FIELDS.openai.defaultValues.model_id
     const expectedDefaultModel = INTERNAL_OVERRIDE_FIELDS.openai?.defaultValues?.model_id as string;
     await waitFor(() =>

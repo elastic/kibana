@@ -69,6 +69,10 @@ describe('routing', () => {
       expect(extractArtifactListPageUrlSearchParams({ show: 'create' }).show).toBe('create');
     });
 
+    it('extracts "view" as a valid show value', () => {
+      expect(extractArtifactListPageUrlSearchParams({ show: 'view' }).show).toBe('view');
+    });
+
     it('extracts only last "show" when multiple values provided', () => {
       expect(extractArtifactListPageUrlSearchParams({ show: ['invalid', 'create'] }).show).toBe(
         'create'

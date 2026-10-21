@@ -11,7 +11,6 @@ import { SecurityPageObject } from './security_page';
 import { SpaceSelectorPageObject } from './space_selector_page';
 import { CopySavedObjectsToSpacePageProvider } from './copy_saved_objects_to_space_page';
 import { MonitoringPageObject } from './monitoring_page';
-import { AccountSettingsPageObject } from './account_settings_page';
 import { CanvasPageProvider } from './canvas_page';
 import { LensPageProvider } from './lens_page';
 import { GisPageObject } from './gis_page';
@@ -44,7 +43,6 @@ export const pageObjects = {
   spaceSelector: SpaceSelectorPageObject,
   copySavedObjectsToSpace: CopySavedObjectsToSpacePageProvider,
   monitoring: MonitoringPageObject,
-  accountSetting: AccountSettingsPageObject,
   canvas: CanvasPageProvider,
   graph: GraphPageObject,
   lens: LensPageProvider,

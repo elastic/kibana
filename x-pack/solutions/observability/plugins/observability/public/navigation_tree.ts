@@ -12,11 +12,12 @@ import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-
 import { combineLatest, map, of } from 'rxjs';
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import { AI_CHAT_EXPERIENCE_TYPE } from '@kbn/management-settings-ids';
-import { getAlertingV2ManagementNavPanel } from '@kbn/alerting-v2-utils';
 import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
-import { STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG } from '@kbn/significant-events-plugin/common';
+import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
+import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type { Location } from 'history';
 import { NightshiftNavigationIcon } from '@kbn/observability-shared-plugin/public';
+import { getAlertsNavPanel, shouldIncludeStackManagementRules } from './nav/get_alerts_nav_panel';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const title = i18n.translate(
@@ -25,7 +26,6 @@ const title = i18n.translate(
     defaultMessage: 'Observability',
   }
 );
-const icon = 'logoObservability';
 
 /**
  * CONTEXT: After restructuring Dashboards to integrate the Visualize library,
@@ -72,9 +72,10 @@ function createNavTree({
         : []),
       {
         link: 'observability-overview',
-        title,
-        icon,
-        renderAs: 'home',
+        title: i18n.translate('xpack.observability.obltNav.overview', {
+          defaultMessage: 'Overview',
+        }),
+        icon: 'home',
       },
       {
         title: i18n.translate('xpack.observability.obltNav.discover', {
@@ -90,11 +91,12 @@ function createNavTree({
           pathNameSerialized.startsWith(prepend('/app/dashboards')) ||
           isEditingFromDashboard(location, pathNameSerialized, prepend),
       },
-      ...getWorkflowsNavPanel(coreStart),
       {
-        link: 'observability-overview:alerts',
-        icon: 'warning',
+        link: EVALS_APP_ID,
+        icon: 'flask',
       },
+      ...getWorkflowsNavPanel(coreStart),
+      ...getAlertsNavPanel(coreStart),
       {
         link: 'observability-overview:cases',
         children: [
@@ -167,6 +169,12 @@ function createNavTree({
                 link: 'ux',
                 title: i18n.translate('xpack.observability.obltNav.apm.ux', {
                   defaultMessage: 'User experience',
+                }),
+              },
+              {
+                link: 'digital_experience',
+                title: i18n.translate('xpack.observability.obltNav.apm.digitalExperience', {
+                  defaultMessage: 'Digital Experience',
                 }),
               },
             ],
@@ -256,7 +264,7 @@ function createNavTree({
           {
             id: 'profiling',
             title: i18n.translate('xpack.observability.obltNav.infrastructure.universalProfiling', {
-              defaultMessage: 'Universal Profiling',
+              defaultMessage: 'Profiling',
             }),
             children: [
               {
@@ -289,6 +297,10 @@ function createNavTree({
               icon: 'productAgent',
             },
           ]),
+      {
+        icon: 'tableSparkles',
+        link: 'context_engine' as const,
+      },
       {
         id: 'machine_learning-landing',
         title: i18n.translate('xpack.observability.obltNav.machineLearning', {
@@ -513,6 +525,9 @@ function createNavTree({
                 link: 'management:index_management',
               },
               {
+                link: 'management:data_federation',
+              },
+              {
                 link: 'management:index_lifecycle_management',
               },
               {
@@ -525,7 +540,7 @@ function createNavTree({
                 link: 'management:rollup_jobs',
               },
               {
-                link: 'management:data_federation',
+                link: 'management:esql_views',
               },
               {
                 link: 'management:data_quality',
@@ -569,16 +584,19 @@ function createNavTree({
                   ]),
             ],
           },
-          ...getAlertingV2ManagementNavPanel(coreStart),
           {
             id: 'alerts_and_insights',
             title: i18n.translate('xpack.observability.obltNav.alertsAndInsights', {
               defaultMessage: 'Alerts and Insights',
             }),
             children: [
-              {
-                link: 'management:triggersActions',
-              },
+              ...(shouldIncludeStackManagementRules(coreStart)
+                ? [
+                    {
+                      link: 'management:triggersActions' as const,
+                    },
+                  ]
+                : []),
               {
                 link: 'management:triggersActionsConnectors',
               },
@@ -637,7 +655,7 @@ function createNavTree({
             }),
             children: [
               { link: 'management:genAiSettings' },
-              { link: 'management:evals' },
+              { link: 'management:aiAnonymizationSettings' },
               { link: 'management:aiAssistantManagementSelection' },
             ],
           },
@@ -658,6 +676,9 @@ function createNavTree({
               },
               {
                 link: 'management:role_mappings',
+              },
+              {
+                link: 'management:service_accounts',
               },
             ],
           },
@@ -716,11 +737,6 @@ export const createDefinition = (
   coreStart: CoreStart,
   pluginsStart: ObservabilityPublicPluginsStart
 ): AddSolutionNavigationArg => {
-  const significantEventsAvailable = coreStart.featureFlags.getBooleanValue(
-    STREAMS_SIGNIFICANT_EVENTS_AVAILABLE_FLAG,
-    false
-  );
-
   return {
     id: 'oblt',
     title,
@@ -729,8 +745,9 @@ export const createDefinition = (
       pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const }),
       coreStart.settings.client.get$<AIChatExperience>(AI_CHAT_EXPERIENCE_TYPE),
       pluginsStart.ingestHub?.navigationAvailable$ || of(false),
+      coreStart.featureFlags.getBooleanValue$(NIGHTSHIFT_ENABLED_FLAG, false),
     ]).pipe(
-      map(([{ status }, chatExperience, ingestHubAvailable]) =>
+      map(([{ status }, chatExperience, ingestHubAvailable, significantEventsAvailable]) =>
         createNavTree({
           coreStart,
           significantEventsAvailable,

@@ -42,6 +42,7 @@ export class AlertsCount extends SingleCaseBaseHandler {
       const alertsCount = await attachmentService.countAlertsAttachedToCase({
         caseId: theCase.id,
         filter: authorizationFilter,
+        owner: theCase.owner,
       });
 
       return {

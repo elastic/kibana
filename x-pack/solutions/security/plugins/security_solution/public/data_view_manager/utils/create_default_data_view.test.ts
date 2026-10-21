@@ -9,7 +9,7 @@ import {
   createDefaultDataView,
   type CreateDefaultDataViewDependencies,
 } from './create_default_data_view';
-import { initDataView } from '../../sourcerer/store/model';
+import { initDataView } from './init_data_view';
 import * as helpersAccess from '../../helpers_access';
 import * as initializationApi from '../../common/components/initialization/api';
 import {

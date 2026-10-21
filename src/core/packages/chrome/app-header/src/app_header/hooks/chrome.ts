@@ -35,7 +35,3 @@ export function useLegacyActionMenu(): MountPoint | undefined {
   const { legacyActionMenu$ } = useChromeService().componentDeps;
   return useObservable(legacyActionMenu$, undefined);
 }
-
-export function useHasLegacyActionMenu(): boolean {
-  return !!useLegacyActionMenu();
-}

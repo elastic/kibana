@@ -198,7 +198,7 @@ describe('action_type_form', () => {
     );
 
     await waitFor(() => {
-      expect(setActionParamsProperty).toBeCalledWith('dedupKey', 'test', 1);
+      expect(setActionParamsProperty).toHaveBeenCalledWith('dedupKey', 'test', 1);
     });
   });
 
@@ -347,7 +347,7 @@ describe('action_type_form', () => {
 
     // Give the component time to settle; setActionParamsProperty should not be called
     await waitFor(() => {
-      expect(setActionParamsProperty).toBeCalledTimes(0);
+      expect(setActionParamsProperty).toHaveBeenCalledTimes(0);
     });
   });
 

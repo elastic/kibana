@@ -14,12 +14,9 @@ import {
   createAlertEvent,
   createRuleResponse,
 } from '../test_utils';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { createDirectorService } from '../../director/director.mock';
 
 describe('DirectorStep', () => {
-  const { loggerService } = createLoggerService();
-
   const createEmptyEsqlResponse = () => ({
     columns: [
       { name: 'group_hash', type: 'keyword' },
@@ -27,13 +24,14 @@ describe('DirectorStep', () => {
       { name: 'last_episode_status', type: 'keyword' },
       { name: 'last_episode_status_count', type: 'long' },
       { name: 'last_episode_timestamp', type: 'date' },
+      { name: 'last_episode_phase_started_at', type: 'date' },
     ],
     values: [],
   });
 
   it('runs the director for alertable rules', async () => {
     const { directorService, mockEsClient } = createDirectorService();
-    const step = new DirectorStep(loggerService, directorService);
+    const step = new DirectorStep(directorService);
 
     mockEsClient.esql.query.mockResolvedValue(createEmptyEsqlResponse());
 
@@ -53,7 +51,7 @@ describe('DirectorStep', () => {
 
   it('threads freshly-opened episode ids on state for alertable rules (no direct counter)', async () => {
     const { directorService, mockEsClient } = createDirectorService();
-    const step = new DirectorStep(loggerService, directorService);
+    const step = new DirectorStep(directorService);
 
     // No previous episode state, so both events open a new episode.
     mockEsClient.esql.query.mockResolvedValue(createEmptyEsqlResponse());
@@ -77,7 +75,7 @@ describe('DirectorStep', () => {
 
   it('skips episode tracking for signal rules', async () => {
     const { directorService, mockEsClient } = createDirectorService();
-    const step = new DirectorStep(loggerService, directorService);
+    const step = new DirectorStep(directorService);
 
     const alertEventsBatch = [createAlertEvent({ group_hash: 'hash-1' })];
 
@@ -97,7 +95,7 @@ describe('DirectorStep', () => {
 
   it('handles empty alert events', async () => {
     const { directorService, mockEsClient } = createDirectorService();
-    const step = new DirectorStep(loggerService, directorService);
+    const step = new DirectorStep(directorService);
 
     const state = createRulePipelineState({
       rule: createRuleResponse({ kind: 'alert' }),
@@ -115,7 +113,7 @@ describe('DirectorStep', () => {
 
   it('propagates errors from elasticsearch', async () => {
     const { directorService, mockEsClient } = createDirectorService();
-    const step = new DirectorStep(loggerService, directorService);
+    const step = new DirectorStep(directorService);
 
     const alertEventsBatch = [createAlertEvent()];
     mockEsClient.esql.query.mockRejectedValue(new Error('ES query failed'));
@@ -132,7 +130,7 @@ describe('DirectorStep', () => {
 
   it('passes executionContext signal to ES client for state lookups', async () => {
     const { directorService, mockEsClient } = createDirectorService();
-    const step = new DirectorStep(loggerService, directorService);
+    const step = new DirectorStep(directorService);
 
     mockEsClient.esql.query.mockResolvedValue(createEmptyEsqlResponse());
 
@@ -154,11 +152,27 @@ describe('DirectorStep', () => {
 
   it('halts with state_not_ready when rule is missing from state', async () => {
     const { directorService } = createDirectorService();
-    const step = new DirectorStep(loggerService, directorService);
+    const step = new DirectorStep(directorService);
     const state = createRulePipelineState();
 
     const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
 
     expect(result).toEqual({ type: 'halt', reason: 'state_not_ready', state });
+  });
+  it('threads the prior state the director loaded onto state.previousAlertStateByGroupHash', async () => {
+    const { directorService, mockEsClient } = createDirectorService();
+    const step = new DirectorStep(directorService);
+
+    mockEsClient.esql.query.mockResolvedValue(createEmptyEsqlResponse());
+
+    const state = createRulePipelineState({
+      rule: createRuleResponse({ kind: 'alert' }),
+      alertEventsBatch: [createAlertEvent({ group_hash: 'hash-1' })],
+    });
+
+    const [result] = await collectStreamResults(step.executeStream(createPipelineStream([state])));
+
+    expect(result.type).toBe('continue');
+    expect(result.state.previousAlertStateByGroupHash).toEqual(new Map());
   });
 });

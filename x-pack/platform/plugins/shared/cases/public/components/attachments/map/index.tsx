@@ -17,7 +17,10 @@ import {
   type UnifiedReferenceAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 import * as i18n from './translations';
-import { SavedObjectAddedEvent } from '../common/saved_object/saved_object_added_event';
+import {
+  SavedObjectAddedEvent,
+  getSavedObjectDeletedEvent,
+} from '../common/saved_object/saved_object_added_event';
 import { createSavedObjectAttachmentsTab } from '../common/saved_object/saved_object_attachments_tab';
 
 type MapViewProps = UnifiedReferenceAttachmentViewProps<
@@ -36,7 +39,7 @@ const MapAttachmentsTab = createSavedObjectAttachmentsTab({
   soType: MAP_SO_TYPE,
 });
 
-const getMapAttachmentViewObject = ({ attachmentId, metadata, data }: MapViewProps) => {
+const getMapCreationActivity = ({ attachmentId, metadata, data }: MapViewProps) => {
   // Always show "added map <title>" as the timeline event. Inline embed is
   // appended as `children` only when a snapshot was captured at attach time.
   const event = (
@@ -51,7 +54,6 @@ const getMapAttachmentViewObject = ({ attachmentId, metadata, data }: MapViewPro
 
   return {
     event,
-    timelineAvatar: 'gisApp' as const,
     hideDefaultActions: false,
     ...(data ? { children: MapEmbedAttachmentLazy } : {}),
   };
@@ -60,11 +62,20 @@ const getMapAttachmentViewObject = ({ attachmentId, metadata, data }: MapViewPro
 export const getMapAttachmentType = () =>
   defineAttachment({
     id: MAP_ATTACHMENT_TYPE,
-    icon: 'gisApp',
-    displayName: i18n.MAPS,
-    getAttachmentViewObject: getMapAttachmentViewObject,
-    getAttachmentRemovalObject: () => ({ event: i18n.REMOVED_MAP }),
-    getAttachmentTabViewObject: () => ({ children: MapAttachmentsTab }),
+    getIcon: () => 'gisApp',
+    getLabel: () => i18n.MAPS,
+    getCreationActivity: getMapCreationActivity,
+    getRemovalActivity: ({ attachmentId, metadata }: MapViewProps) => ({
+      event: getSavedObjectDeletedEvent({
+        soType: MAP_SO_TYPE,
+        attachmentId,
+        title: metadata?.title,
+        label: i18n.REMOVED_MAP,
+        'data-test-subj': 'cases-map-deleted-event-link',
+      }),
+    }),
+    getAttachmentList: () => ({ children: MapAttachmentsTab }),
+    getCountLabel: ({ count }) => i18n.MAPS_COUNT(count),
     schema: MapAttachmentPayloadSchema,
     // Exclude pesistable data from the workflow schema
     workflowSchema: MapAttachmentPayloadSchema.omit({ data: true }),

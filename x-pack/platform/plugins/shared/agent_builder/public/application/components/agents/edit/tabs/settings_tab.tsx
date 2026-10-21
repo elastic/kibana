@@ -46,10 +46,13 @@ import { useAgentBuilderServices } from '../../../../hooks/use_agent_builder_ser
 import { useKibana } from '../../../../hooks/use_kibana';
 import { WorkflowPicker } from '../../../tools/form/components/workflow/workflow_picker';
 import { useUiPrivileges } from '../../../../hooks/use_ui_privileges';
-import { isPreExecutionWorkflowEnabled } from '../../../../utils/is_pre_execution_workflow_enabled';
+import { isWorkflowsUiEnabled } from '../../../../utils/is_workflows_ui_enabled';
 import { ACCESS_CONTROL_MODE_LABELS } from '../../../../utils/access_control_mode_i18n';
 import type { AgentFormData } from '../agent_form';
 import { truncateAvatarSymbol } from '../agent_form_validation';
+import { AiIndicesSection } from './ai_indices_section';
+import { AutoApprovedApisSection } from './auto_approved_apis_section';
+import { SubagentsSection } from './subagents_section';
 
 interface AgentSettingsTabProps {
   control: Control<AgentFormData>;
@@ -57,6 +60,7 @@ interface AgentSettingsTabProps {
   isCreateMode: boolean;
   isFormDisabled: boolean;
   canChangeAccessControl: boolean;
+  canChangeApprovals: boolean;
   owner?: UserIdAndName;
   agentId?: string;
 }
@@ -67,6 +71,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   isCreateMode,
   isFormDisabled,
   canChangeAccessControl,
+  canChangeApprovals,
   owner,
   agentId,
 }) => {
@@ -90,7 +95,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
   );
 
   const showAgentWorkflowsSection = useMemo(() => {
-    return isPreExecutionWorkflowEnabled(uiSettings);
+    return isWorkflowsUiEnabled(uiSettings);
   }, [uiSettings]);
 
   /* Enable shrinking; default min-width:auto blocks it and causes overflow */
@@ -343,6 +348,8 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
 
+      <AiIndicesSection control={control} agentId={agentId} isFormDisabled={isFormDisabled} />
+
       <EuiHorizontalRule />
 
       <EuiFlexGroup
@@ -546,7 +553,7 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
                   <AccessForm
                     agent={accessFormAgent}
                     entries={field.value ?? []}
-                    ownerName={owner?.username}
+                    owner={owner}
                     isDisabled={isFormDisabled || !canChangeAccessControl}
                     onChange={field.onChange}
                   />
@@ -824,8 +831,87 @@ export const AgentSettingsTab: React.FC<AgentSettingsTabProps> = ({
               </EuiFormRow>
             </EuiFlexItem>
           </EuiFlexGroup>
+
+          <EuiHorizontalRule />
+
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="xl"
+            alignItems="flexStart"
+            aria-labelledby="post-execution-workflow-section-title"
+          >
+            <EuiFlexItem grow={1}>
+              <EuiFlexGroup direction="column" gutterSize="s" alignItems="flexStart">
+                <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+                  <EuiIcon type="flag" aria-hidden={true} />
+                  <EuiTitle size="xs">
+                    <h2 id="post-execution-workflow-section-title">
+                      {i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.postExecutionWorkflowTitle',
+                        {
+                          defaultMessage: 'Post-execution workflow',
+                        }
+                      )}
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexGroup>
+                <EuiText size="s" color="subdued">
+                  {i18n.translate(
+                    'xpack.agentBuilder.agents.form.settings.postExecutionWorkflowDescription',
+                    {
+                      defaultMessage:
+                        'Runs once after the agent finishes responding. Cannot change the response.',
+                    }
+                  )}
+                </EuiText>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+            <EuiFlexItem grow={2} css={formFlexColumnStyles}>
+              <EuiFormRow
+                fullWidth
+                label={i18n.translate(
+                  'xpack.agentBuilder.agents.form.settings.postExecutionWorkflowLabel',
+                  {
+                    defaultMessage: 'Workflows',
+                  }
+                )}
+                labelAppend={
+                  <EuiText size="xs" color="subdued">
+                    {labels.common.optional}
+                  </EuiText>
+                }
+                helpText={
+                  !isAdmin
+                    ? i18n.translate(
+                        'xpack.agentBuilder.agents.form.settings.postExecutionWorkflowAdminOnlyReason',
+                        {
+                          defaultMessage:
+                            'Only administrators can configure post-execution workflows.',
+                        }
+                      )
+                    : undefined
+                }
+                isInvalid={!!formState.errors.configuration?.post_execution_workflow_ids}
+                error={formState.errors.configuration?.post_execution_workflow_ids?.message}
+              >
+                <WorkflowPicker
+                  name="configuration.post_execution_workflow_ids"
+                  singleSelection={false}
+                  isDisabled={isFormDisabled || !isAdmin}
+                />
+              </EuiFormRow>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </>
       )}
+
+      <AutoApprovedApisSection
+        isFormDisabled={isFormDisabled}
+        canEdit={canChangeApprovals}
+        agentId={agentId}
+      />
+
+      <SubagentsSection agentId={agentId} />
     </>
   );
 };

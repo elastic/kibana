@@ -7,16 +7,19 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { APP_HEADER_TEST_SUBJECTS, AppHeader as MockAppHeaderComponent } from '@kbn/app-header';
+import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
+import type { ApmMainTemplateHeaderProps } from '../../routing/templates/apm_main_template';
 import { TraceOverview } from '.';
 import { useApmIndexSettingsContext } from '../../../context/apm_index_settings/use_apm_index_settings_context';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
-// `TraceOverview` renders `OpenInDiscover`, which transitively depends on the
-// APM index settings context and the Discover locator from `useApmPluginContext`
-// to compute its href. Both contexts are mocked here so we can exercise the
-// composed tree without spinning up the full APM providers.
+// `TraceOverview` uses `useDiscoverHref`, which depends on the APM index settings
+// context and the Discover locator from `useApmPluginContext` to compute its href.
+// Both contexts are mocked here so we can exercise the composed tree without
+// spinning up the full APM providers.
 jest.mock('../../../context/apm_index_settings/use_apm_index_settings_context');
 jest.mock('../../../context/apm_plugin/use_apm_plugin_context');
 jest.mock('../../../hooks/use_apm_params');
@@ -28,16 +31,22 @@ jest.mock('../../../context/apm_index_settings/apm_index_settings_context', () =
   ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 
+// Render ApmMainTemplate as a thin wrapper that passes `header` straight into a real AppHeader
+// (so we exercise menu-building without the template's own dependencies).
+// MockAppHeaderComponent is aliased to start with "Mock" so Jest's factory out-of-scope check permits it.
 jest.mock('../../routing/templates/apm_main_template', () => ({
   ApmMainTemplate: ({
-    pageHeader,
+    header,
+    searchBar,
     children,
   }: {
-    pageHeader?: { rightSideItems?: React.ReactNode[] };
+    header?: ApmMainTemplateHeaderProps;
+    searchBar?: React.ReactNode;
     children: React.ReactNode;
   }) => (
     <div data-test-subj="apmMainTemplateMock">
-      <div data-test-subj="apmMainTemplatePageHeader">{pageHeader?.rightSideItems}</div>
+      {header ? <MockAppHeaderComponent {...header} /> : null}
+      {searchBar}
       {children}
     </div>
   ),
@@ -59,6 +68,18 @@ const mockUseApmParams = useApmParams as jest.MockedFunction<typeof useApmParams
 
 const mockGetRedirectUrl = jest.fn<string | undefined, [unknown]>();
 const mockLocatorGet = jest.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl });
+
+async function renderTraceOverview() {
+  const view = render(
+    <MockAppHeaderProvider>
+      <TraceOverview>
+        <div data-test-subj="content" />
+      </TraceOverview>
+    </MockAppHeaderProvider>
+  );
+  await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title);
+  return view;
+}
 
 describe('TraceOverview', () => {
   beforeEach(() => {
@@ -90,25 +111,26 @@ describe('TraceOverview', () => {
     jest.clearAllMocks();
   });
 
-  it('renders the Explore traces page-header button with a Discover href', () => {
-    render(
-      <TraceOverview>
-        <div />
-      </TraceOverview>
-    );
+  it('renders AppHeader with title "Traces"', async () => {
+    await renderTraceOverview();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Traces');
+  });
+
+  it('renders the Explore traces primary action with a Discover href', async () => {
+    await renderTraceOverview();
 
     const button = screen.getByTestId('apmTracesExploreInDiscoverButton');
     expect(button).toBeInTheDocument();
     expect(button).toHaveAttribute('href', 'http://test-discover-url');
     expect(button).toHaveTextContent('Explore traces');
+    expect(button).toHaveAttribute('data-ebt-action', 'exploreTraces');
+    expect(button).toHaveAttribute('data-ebt-element', 'appMenu');
+    expect(button).toHaveAttribute('data-ebt-detail', 'tracesPageHeader');
   });
 
-  it('passes the current time range and a traces-scoped ES|QL query to Discover', () => {
-    render(
-      <TraceOverview>
-        <div />
-      </TraceOverview>
-    );
+  it('passes the current time range and a traces-scoped ES|QL query to Discover', async () => {
+    await renderTraceOverview();
 
     expect(mockGetRedirectUrl).toHaveBeenCalled();
     const [args] = mockGetRedirectUrl.mock.calls.at(-1) as [

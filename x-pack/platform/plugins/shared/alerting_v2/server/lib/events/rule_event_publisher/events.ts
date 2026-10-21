@@ -6,6 +6,7 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleEventOrigin } from '../../event_origin/origin_schemas';
 
 /**
  * Data carried by every rule-lifecycle domain event.
@@ -14,8 +15,8 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
  * ({@link RuleResponse}, exactly what the public API returns) plus the
  * envelope fields that are not part of the rule itself (`spaceId`,
  * `correlationId`). Consumers project from this: the workflow subscriber
- * exposes only `{ ruleId, spaceId }`, while the change-history subscriber
- * uses the full `rule` as its snapshot.
+ * exposes `{ ruleId, spaceId, tags }`, while the change-history subscriber
+ * uses the full `rule` as its snapshot and `rule.version` as the sequence.
  */
 export interface RuleEventPayload {
   /** Rule id. Always present, even when the full `rule` could not be resolved. */
@@ -33,6 +34,8 @@ export interface RuleEventPayload {
    * for bulk emits.
    */
   readonly correlationId?: string;
+  /** Channel and app derived from the rules client's request. */
+  readonly origin: RuleEventOrigin;
 }
 
 /**

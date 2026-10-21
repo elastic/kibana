@@ -101,10 +101,25 @@ const applicationConnectionsManagementFeature: ElasticsearchFeatureConfig = {
   ],
 };
 
+const serviceAccountsManagementFeature: ElasticsearchFeatureConfig = {
+  id: 'service_accounts',
+  management: {
+    security: ['service_accounts'],
+  },
+  catalogue: ['security'],
+  privileges: [
+    {
+      requiredClusterPrivileges: ['manage_security'],
+      ui: ['save'],
+    },
+  ],
+};
+
 export const securityFeatures = [
   userManagementFeature,
   rolesManagementFeature,
   apiKeysManagementFeature,
   roleMappingsManagementFeature,
   applicationConnectionsManagementFeature,
+  serviceAccountsManagementFeature,
 ];

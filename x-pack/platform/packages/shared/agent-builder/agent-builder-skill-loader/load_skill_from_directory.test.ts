@@ -62,6 +62,7 @@ describe('loadSkillFromDirectory', () => {
       basePath: BASE_PATH,
       description: 'A minimal skill.',
       experimental: undefined,
+      uiSettingRequired: undefined,
       content: 'Body content.',
       referencedContent: undefined,
     });
@@ -97,6 +98,25 @@ describe('loadSkillFromDirectory', () => {
     }
   );
 
+  it('passes through the uiSettingRequired frontmatter field', () => {
+    const dir = skillDir('ui-setting-required');
+    writeFile(
+      dir,
+      'SKILL.md',
+      skillMarkdown([
+        'name: my-skill',
+        'description: desc.',
+        'experimental: true',
+        'uiSettingRequired: myFeature:enabled',
+      ])
+    );
+
+    const skill = loadSkillFromDirectory(dir, BASE_PATH, { logger });
+
+    expect(skill.uiSettingRequired).toBe('myFeature:enabled');
+    expect(skill.experimental).toBe(true);
+  });
+
   it('derives relativePath from each reference position in the tree', () => {
     const dir = skillDir('nested-mixed');
     writeFile(dir, 'SKILL.md', skillMarkdown(['name: my-skill', 'description: desc.']));
@@ -127,18 +147,37 @@ describe('loadSkillFromDirectory', () => {
     ]);
   });
 
+  it('accepts uppercase file names and directory segments', () => {
+    const dir = skillDir('mixed-case');
+    writeFile(dir, 'SKILL.md', skillMarkdown(['name: my-skill', 'description: desc.']));
+    writeFile(dir, 'README.md', 'Readme content.');
+    writeFile(dir, 'References/Guide.md', 'Guide content.');
+
+    const skill = loadSkillFromDirectory(dir, BASE_PATH, { logger });
+
+    expect(skill.referencedContent).toEqual([
+      { name: 'README', relativePath: '.', content: 'Readme content.' },
+      { name: 'Guide', relativePath: './References', content: 'Guide content.' },
+    ]);
+  });
+
+  it('treats a nested SKILL.md as an ordinary reference', () => {
+    const dir = skillDir('nested-skill-file');
+    writeFile(dir, 'SKILL.md', skillMarkdown(['name: my-skill', 'description: desc.']));
+    writeFile(dir, 'bundled/SKILL.md', 'Bundled content.');
+
+    const skill = loadSkillFromDirectory(dir, BASE_PATH, { logger });
+
+    expect(skill.referencedContent).toEqual([
+      { name: 'SKILL', relativePath: './bundled', content: 'Bundled content.' },
+    ]);
+  });
+
   const rejectedReferenceCases: Array<{
     label: string;
     filePath: string;
     invalidSegment: string;
   }> = [
-    { label: 'a file name that is not lowercase', filePath: 'README.md', invalidSegment: 'README' },
-    {
-      label: 'a directory segment that is not lowercase',
-      filePath: 'References/guide.md',
-      invalidSegment: 'References',
-    },
-    { label: 'a nested SKILL.md', filePath: 'bundled/SKILL.md', invalidSegment: 'SKILL' },
     {
       label: 'a space in the file name',
       filePath: 'bad name.md',
@@ -341,6 +380,20 @@ describe('loadSkillFromDirectory', () => {
       fileName: 'SKILL.md',
       content: skillMarkdown(['name: my-skill', 'description: desc.', 'experimental: maybe']),
       expectedError: /invalid frontmatter/,
+      expectedCode: 'invalid_frontmatter',
+    },
+    {
+      label: 'uiSettingRequired is not a string',
+      fileName: 'SKILL.md',
+      content: skillMarkdown(['name: my-skill', 'description: desc.', 'uiSettingRequired: true']),
+      expectedError: /"uiSettingRequired" must be a string/,
+      expectedCode: 'invalid_frontmatter',
+    },
+    {
+      label: 'uiSettingRequired is empty',
+      fileName: 'SKILL.md',
+      content: skillMarkdown(['name: my-skill', 'description: desc.', "uiSettingRequired: ''"]),
+      expectedError: /"uiSettingRequired" must be non-empty/,
       expectedCode: 'invalid_frontmatter',
     },
     {

@@ -20,19 +20,25 @@ import { ruleUpdatedTrigger } from './rule_updated';
 import { ruleDeletedTrigger } from './rule_deleted';
 import { ruleEnabledTrigger } from './rule_enabled';
 import { ruleDisabledTrigger } from './rule_disabled';
+import { toLifecycleWorkflowPayload } from './to_lifecycle_payload';
 
-const ruleRef = { ruleId: 'rule-1', spaceId: 'default' } as const;
+const tags = ['critical', 'security'] as const;
+const ruleRef = { ruleId: 'rule-1', spaceId: 'default', tags: [...tags] };
 
 /**
  * Internal event payload carries the full domain rule plus envelope fields. The
- * bindings must project this down to just the rule ref so the rule state never
- * leaks into the workflow trigger payload.
+ * bindings must project this down to the rule ref plus tags so the rest of the
+ * rule state never leaks into the workflow trigger payload.
  */
 const enrichedPayload: RuleEvent['payload'] = {
   ruleId: ruleRef.ruleId,
   spaceId: ruleRef.spaceId,
-  rule: createRuleResponse({ id: ruleRef.ruleId, metadata: { name: 'secret rule' } }),
+  rule: createRuleResponse({
+    id: ruleRef.ruleId,
+    metadata: { name: 'secret rule', tags: [...tags] },
+  }),
   correlationId: 'bulk-1',
+  origin: { channel: 'api' },
 };
 
 interface Case {
@@ -76,7 +82,7 @@ describe('rule lifecycle workflow trigger bindings', () => {
       expect(trigger.definition.id).toBe(trigger.triggerId);
     });
 
-    it('projects only the rule ref, dropping change-history fields (no snapshot/author/sequence leak)', () => {
+    it('projects the rule ref plus tags, dropping change-history fields (no snapshot/author/sequence leak)', () => {
       expect(trigger.toPayload(event)).toEqual({ rule: ruleRef });
     });
 
@@ -88,5 +94,47 @@ describe('rule lifecycle workflow trigger bindings', () => {
     it('rejects a payload missing the required `rule` field', () => {
       expect(() => trigger.definition.eventSchema.parse({})).toThrow();
     });
+  });
+});
+
+describe('toLifecycleWorkflowPayload', () => {
+  it('defaults tags to an empty array when the domain rule is missing (bulk-delete fallback)', () => {
+    const event: RuleEvent = {
+      type: RULE_DELETED_EVENT_TYPE,
+      payload: { ruleId: 'rule-1', spaceId: 'default', origin: { channel: 'api' } },
+    };
+
+    expect(toLifecycleWorkflowPayload(event)).toEqual({
+      rule: { ruleId: 'rule-1', spaceId: 'default', tags: [] },
+    });
+  });
+
+  it('defaults tags to an empty array when metadata.tags is absent', () => {
+    const event: RuleEvent = {
+      type: RULE_CREATED_EVENT_TYPE,
+      payload: {
+        ruleId: 'rule-1',
+        spaceId: 'default',
+        rule: createRuleResponse({ id: 'rule-1' }),
+        origin: { channel: 'api' },
+      },
+    };
+
+    expect(toLifecycleWorkflowPayload(event).rule.tags).toEqual([]);
+  });
+
+  it('copies tags into a fresh array (does not alias the domain rule)', () => {
+    const rule = createRuleResponse({
+      id: 'rule-1',
+      metadata: { name: 'tagged', tags: ['critical'] },
+    });
+    const event: RuleEvent = {
+      type: RULE_UPDATED_EVENT_TYPE,
+      payload: { ruleId: 'rule-1', spaceId: 'default', rule, origin: { channel: 'api' } },
+    };
+
+    const result = toLifecycleWorkflowPayload(event);
+    expect(result.rule.tags).toEqual(['critical']);
+    expect(result.rule.tags).not.toBe(rule.metadata.tags);
   });
 });

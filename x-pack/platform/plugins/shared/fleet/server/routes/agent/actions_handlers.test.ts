@@ -43,7 +43,7 @@ describe('test actions handlers schema', () => {
       NewAgentActionSchema.validate({
         data: 'data',
       });
-    }).toThrowError();
+    }).toThrow();
   });
 });
 

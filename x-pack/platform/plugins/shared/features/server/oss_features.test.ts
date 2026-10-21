@@ -30,6 +30,47 @@ describe('buildOSSFeatures', () => {
     ).toMatchSnapshot();
   });
 
+  describe('aiIndex privileges', () => {
+    it('grants ai_index read on dashboard to both dashboard feature variants', () => {
+      const ossFeatures = buildOSSFeatures({
+        savedObjectTypes: ['foo', 'bar'],
+        includeReporting: false,
+      });
+
+      for (const id of ['dashboard', 'dashboard_v2']) {
+        const feature = ossFeatures.find((f) => f.id === id)!;
+        expect(feature.privileges!.all.aiIndex).toEqual({ read: ['dashboard'] });
+        expect(feature.privileges!.read.aiIndex).toEqual({ read: ['dashboard'] });
+      }
+    });
+
+    it('grants ai_index read on visualization to both visualize feature variants', () => {
+      const ossFeatures = buildOSSFeatures({
+        savedObjectTypes: ['foo', 'bar'],
+        includeReporting: false,
+      });
+
+      for (const id of ['visualize', 'visualize_v2']) {
+        const feature = ossFeatures.find((f) => f.id === id)!;
+        expect(feature.privileges!.all.aiIndex).toEqual({ read: ['visualization'] });
+        expect(feature.privileges!.read.aiIndex).toEqual({ read: ['visualization'] });
+      }
+    });
+
+    it('does not grant ai_index read to features that did not opt in', () => {
+      const ossFeatures = buildOSSFeatures({
+        savedObjectTypes: ['foo', 'bar'],
+        includeReporting: false,
+      });
+
+      for (const id of ['discover', 'discover_v2', 'dev_tools', 'savedObjectsManagement']) {
+        const feature = ossFeatures.find((f) => f.id === id)!;
+        expect(feature.privileges!.all.aiIndex).toBeUndefined();
+        expect(feature.privileges!.read.aiIndex).toBeUndefined();
+      }
+    });
+  });
+
   const features = buildOSSFeatures({
     savedObjectTypes: ['foo', 'bar'],
     includeReporting: false,

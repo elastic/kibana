@@ -36,7 +36,7 @@ export const setupAppPage = async (
       screen.queryByTestId('missingKibanaPrivilegesMessage') ??
       screen.queryByTestId('isUpgradingMessage') ??
       screen.queryByTestId('isUpgradeCompleteMessage') ??
-      screen.queryByTestId('overviewPageHeader');
+      screen.queryByTestId('overview');
 
     expect(settledElement).not.toBeNull();
   });

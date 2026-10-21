@@ -6,7 +6,7 @@
  */
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
-import { AttachmentType } from '@kbn/cases-plugin/common';
+import { COMMENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import type { ClientMessage } from '@kbn/elastic-assistant';
 import React, { useCallback } from 'react';
 import { useDispatch } from 'react-redux-v7';
@@ -74,9 +74,8 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
     selectCaseModal.open({
       getAttachments: () => [
         {
-          comment: getSelfContainedContent(content),
-          type: AttachmentType.user,
-          owner: i18n.ELASTIC_AI_ASSISTANT,
+          type: COMMENT_ATTACHMENT_TYPE,
+          data: { content: getSelfContainedContent(content) },
         },
       ],
     });

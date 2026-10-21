@@ -8,8 +8,9 @@
  */
 
 import Path from 'path';
-import { rspack, type Compiler, type Chunk } from '@rspack/core';
+import type { Compiler, Chunk } from '@rspack/core';
 import type { CiStatsMetric } from '@kbn/ci-stats-reporter';
+import { rspack } from '../rspack_runtime';
 import { METRICS_FILENAME } from '../paths';
 
 /**
@@ -63,7 +64,7 @@ export interface PluginMetricsInfo {
  *    Core maps to `chunkName: 'plugin-core'` (loaded via dynamic import(),
  *    same as plugins). Plugins map to `chunkName: 'plugin-{id}'`. The
  *    user-facing `id` (e.g. "core", "discover") differs from the internal
- *    `chunkName` to match legacy metrics format and limits.yml keys.
+ *    `chunkName` to match the metrics format and limits.yml keys.
  *
  * 3. ASYNC CHUNK TRAVERSAL (exclusive-ownership attribution)
  *
@@ -103,34 +104,26 @@ export interface PluginMetricsInfo {
  *
  * 5. MISCELLANEOUS ASSETS
  *
- *    `chunk.auxiliaryFiles` maps to legacy's "miscellaneous assets" concept
- *    (non-JS assets like images/fonts via `asset/resource`). With `style-loader`
- *    (CSS injected, not extracted), this is typically 0. We measure only the
- *    named chunk's auxiliaryFiles (not async children's) -- a negligible
- *    difference from legacy since auxiliary files from lazy modules are rare.
+ *    `chunk.auxiliaryFiles` are the "miscellaneous assets" (non-JS assets
+ *    like images/fonts via `asset/resource`). With `style-loader` (CSS
+ *    injected, not extracted), this is typically 0. We measure only the
+ *    named chunk's auxiliaryFiles (not async children's) -- auxiliary files
+ *    from lazy modules are rare.
  *
  * 6. HOOK STAGE
  *
  *    `PROCESS_ASSETS_STAGE_ANALYSE` (stage 4000) runs AFTER `XPackBannerPlugin`
- *    (stage `PROCESS_ASSETS_STAGE_ADDITIONS` = 100), so sizes include license
- *    banners. This matches legacy's stage choice.
+ *    (stage `PROCESS_ASSETS_STAGE_SUMMARIZE` = 1000, post-minify), so sizes
+ *    include license banners.
  *
- * 7. COMPARISON WITH LEGACY
+ * 7. MODULE COUNT
  *
- *    Legacy used two plugins: `PopulateBundleCachePlugin` (counted modules at
- *    stage 500, stored in BundleCache) and `BundleMetricsPlugin` (read cache
- *    at stage 4000, emitted metrics.json). This plugin replaces both, using
- *    `compilation.chunkGraph.getChunkModules(chunk).length` directly.
+ *    Module counts come from `compilation.chunkGraph.getChunkModules(chunk).length`
+ *    directly. The group name `@kbn/rspack-optimizer bundle module count` is the
+ *    CI stats key used for trend comparison against the on-merge baseline;
+ *    module count has no limit, so it never causes validation failures.
  *
- * 8. MODULE COUNT GROUP NAME
- *
- *    Uses `@kbn/optimizer bundle module count` (same as legacy) to enable CI
- *    stats trend comparison against the on-merge baseline. Values will differ
- *    (rspack counts all module types; legacy was more selective), but since
- *    module count has no limit, no validation failures occur. This avoids a
- *    dead metric group with no baseline and eliminates a legacy removal step.
- *
- * 9. AGGREGATE SHARED CHUNK AND TOTAL OUTPUT METRICS
+ * 8. AGGREGATE SHARED CHUNK AND TOTAL OUTPUT METRICS
  *
  *    `shared chunks total size` and `shared chunk count` track all named
  *    chunks that are NOT plugin entries and NOT splitChunks shared chunks.
@@ -152,7 +145,7 @@ export interface PluginMetricsInfo {
  *    limits). They do NOT include UI shared deps (`@kbn/ui-shared-deps-npm`,
  *    `@kbn/ui-shared-deps-src`) which are built by separate tooling.
  *
- * 10. RSPACK API DIFFERENCES FROM WEBPACK 5
+ * 9. RSPACK API DIFFERENCES FROM WEBPACK 5
  *
  *    - `getAllAsyncChunks()` returns `Chunk[]` (not `Set<Chunk>`), requiring
  *      `new Set()` wrapping to deduplicate.
@@ -208,7 +201,7 @@ export function buildMetrics(
 
   for (const entry of entries) {
     metrics.push({
-      group: '@kbn/optimizer bundle module count',
+      group: '@kbn/rspack-optimizer bundle module count',
       id: entry.id,
       value: entry.moduleCount,
     });
@@ -267,10 +260,8 @@ export function buildMetrics(
 
 /**
  * Rspack plugin that collects per-plugin bundle metrics from the single
- * unified compilation and emits `metrics.json` as a compilation asset.
- *
- * Replaces legacy's `PopulateBundleCachePlugin` + `BundleMetricsPlugin`
- * with a single plugin that uses `ChunkGraph` APIs directly.
+ * unified compilation and emits `metrics.json` as a compilation asset,
+ * using `ChunkGraph` APIs directly.
  */
 export class BundleMetricsPlugin {
   private readonly chunkNameToInfo: Map<string, PluginMetricsInfo>;

@@ -29,7 +29,7 @@ import { launchPadLinks, onboardingLinks } from '../../onboarding/links';
 import { findingsLinks } from '../../cloud_security_posture/links';
 import type { StartPlugins } from '../../types';
 import { dashboardsLinks } from '../../dashboards/links';
-import { entityAnalyticsLinks, entityAnalyticsV2Links } from '../../entity_analytics/links';
+import { entityAnalyticsLinks } from '../../entity_analytics/links';
 
 export const appLinks: AppLinkItems = Object.freeze([
   dashboardsLinks,
@@ -78,19 +78,27 @@ export const getFilteredLinks = async (
     dashboardsLinks,
     enableAlertsAndAttacksAlignment ? alertDetectionsLinks : alertsLink,
     alertSummaryLink,
-    // Attack Discovery remains a permanent top-level page and stays visible in the side
-    // navigation, global navigation, and global search regardless of the alerts-and-attacks
-    // alignment setting.
-    attackDiscoveryLinks,
+    // When the new Attacks page is enabled, we hide the legacy Attack Discovery link from the
+    // side navigation, the global navigation, and global search. However, we keep it in the
+    // appLinks array so that SecurityRoutePageWrapper still considers the route
+    // authorized/available, allowing the redirect logic in attack_discovery/routes.tsx to run.
+    ...(enableAlertsAndAttacksAlignment
+      ? [
+          {
+            ...attackDiscoveryLinks,
+            sideNavDisabled: true,
+            globalNavPosition: undefined,
+            globalSearchDisabled: true,
+          },
+        ]
+      : [attackDiscoveryLinks]),
     findingsLinks,
     casesLinks,
     filteredConfigurationsLinks,
     timelinesLinks,
     indicatorsLinks,
     exploreLinks,
-    experimentalFeatures.entityAnalyticsNewHomePageEnabled
-      ? entityAnalyticsV2Links
-      : entityAnalyticsLinks,
+    entityAnalyticsLinks,
     assetInventoryLinks,
     rulesLinks,
     siemMigrationsLinks,

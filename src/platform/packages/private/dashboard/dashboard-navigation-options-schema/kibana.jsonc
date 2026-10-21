@@ -1,7 +1,7 @@
 {
   "type": "shared-server",
   "id": "@kbn/dashboard-navigation-options-schema",
-  "owner": "@elastic/kibana-presentation",
+  "owner": "@elastic/kibana-dashboards",
   "group": "platform",
   "visibility": "private"
 }

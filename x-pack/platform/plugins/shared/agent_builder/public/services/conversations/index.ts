@@ -6,3 +6,4 @@
  */
 
 export { ConversationsService } from './conversations_service';
+export { createPublicConversationsContract } from './create_public_conversations_contract';

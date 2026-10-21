@@ -96,6 +96,10 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
      */
     refusal?: string;
     /**
+     * Optional reasoning (thinking) text chunk.
+     */
+    reasoning?: string;
+    /**
      * The tool call chunks
      */
     tool_calls: ChatCompletionChunkToolCall[];
@@ -119,7 +123,7 @@ export type ChatCompletionChunkEvent = InferenceTaskEventBase<
  */
 export interface ChatCompletionTokenCount {
   /**
-   * Input token count
+   * Total input token count, including tokens served from or written to the prompt cache.
    */
   prompt: number;
   /**
@@ -127,7 +131,7 @@ export interface ChatCompletionTokenCount {
    */
   completion: number;
   /**
-   * Thinking token count, if available
+   * Thinking token count, if available. Not included in `completion`.
    */
   thinking?: number;
   /**
@@ -135,7 +139,7 @@ export interface ChatCompletionTokenCount {
    */
   total: number;
   /**
-   * Cached prompt tokens
+   * Input tokens served from the prompt cache. Subset of `prompt`, not additive.
    */
   cached?: number;
 }

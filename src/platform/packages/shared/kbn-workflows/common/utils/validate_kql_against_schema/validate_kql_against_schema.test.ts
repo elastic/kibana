@@ -196,4 +196,60 @@ describe('validateKqlAgainstSchema', () => {
       if (!result.valid) expect(result.error).toContain('other.*');
     });
   });
+
+  describe('open-ended schema properties (unknown / any / record)', () => {
+    const inboundLikeSchema = z.object({
+      body: z.unknown(),
+      connectorId: z.string(),
+    });
+
+    it('allows nested paths under z.unknown() (inbound webhook body)', () => {
+      expect(
+        validateKqlAgainstSchema('event.body.team_id: "T0AA78U71FZ"', inboundLikeSchema, {
+          fieldPrefix: EVENT_FIELD_PREFIX,
+        })
+      ).toEqual({ valid: true });
+
+      expect(
+        validateKqlAgainstSchema(
+          'event.body.event.type: "message" and event.connectorId: "testyng"',
+          inboundLikeSchema,
+          { fieldPrefix: EVENT_FIELD_PREFIX }
+        )
+      ).toEqual({ valid: true });
+    });
+
+    it('allows nested paths under optional z.unknown()', () => {
+      const schema = z.object({
+        body: z.unknown().optional(),
+      });
+      expect(
+        validateKqlAgainstSchema('event.body.team_id: "T0AA78U71FZ"', schema, {
+          fieldPrefix: EVENT_FIELD_PREFIX,
+        })
+      ).toEqual({ valid: true });
+    });
+
+    it('allows nested paths under z.any() and z.record()', () => {
+      const schema = z.object({
+        payload: z.any(),
+        headers: z.record(z.string(), z.string()),
+      });
+      expect(
+        validateKqlAgainstSchema(
+          'event.payload.foo.bar: "x" and event.headers.authorization: "y"',
+          schema,
+          { fieldPrefix: EVENT_FIELD_PREFIX }
+        )
+      ).toEqual({ valid: true });
+    });
+
+    it('still rejects fields that are not under an open-ended property', () => {
+      const result = validateKqlAgainstSchema('event.notInSchema: "x"', inboundLikeSchema, {
+        fieldPrefix: EVENT_FIELD_PREFIX,
+      });
+      expect(result.valid).toBe(false);
+      if (!result.valid) expect(result.error).toContain('event.notInSchema');
+    });
+  });
 });

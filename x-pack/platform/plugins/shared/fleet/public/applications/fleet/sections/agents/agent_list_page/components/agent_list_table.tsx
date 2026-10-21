@@ -34,7 +34,7 @@ import type { AgentMetrics } from '../../../../../../../common/types';
 import { formatAgentCPU, formatAgentMemory } from '../../services/agent_metrics';
 
 import {
-  hasVersionSuffix,
+  hasAgentVersionSuffix,
   removeVersionSuffixFromPolicyId,
 } from '../../../../../../../common/services/version_specific_policies_utils';
 
@@ -96,11 +96,11 @@ const PolicyCell = React.memo<{
 );
 
 const CpuCell = React.memo<{ agent: Agent; agentPolicy: AgentPolicy | undefined }>(
-  ({ agent, agentPolicy }) => <>{formatAgentCPU(agent.metrics, agentPolicy)}</>
+  ({ agent, agentPolicy }) => <>{formatAgentCPU(agent.metrics, agentPolicy, agent)}</>
 );
 
 const MemoryCell = React.memo<{ agent: Agent; agentPolicy: AgentPolicy | undefined }>(
-  ({ agent, agentPolicy }) => <>{formatAgentMemory(agent.metrics, agentPolicy)}</>
+  ({ agent, agentPolicy }) => <>{formatAgentMemory(agent.metrics, agentPolicy, agent)}</>
 );
 
 const LastCheckinCell = React.memo<{ lastCheckin: string | undefined }>(({ lastCheckin }) =>
@@ -300,7 +300,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         <PolicyCell
           agent={agent}
           agentPolicy={agentPoliciesIndexedById[removeVersionSuffixFromPolicyId(policyId)]}
-          isVersionSpecific={hasVersionSuffix(policyId)}
+          isVersionSpecific={hasAgentVersionSuffix(policyId)}
         />
       ),
     },
