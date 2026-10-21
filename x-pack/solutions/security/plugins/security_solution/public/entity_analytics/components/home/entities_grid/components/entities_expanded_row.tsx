@@ -52,7 +52,8 @@ const getTruncatedGroupLabel = (shown: number, total: number) =>
 export const getGroupRecordsOptions = (
   entityId: string,
   timeRange: TimeRange,
-  keepFields: readonly string[]
+  keepFields: readonly string[],
+  columns: readonly EuiDataGridColumn[]
 ): UseEntityGridDataOptions => ({
   keyScope: 'children',
   rowsMode: 'individual',
@@ -64,6 +65,7 @@ export const getGroupRecordsOptions = (
   pageSize: MAX_GROUP_RECORDS,
   timeRange,
   keepFields,
+  columnIds: columns.map(({ id }) => id),
 });
 
 interface ExpandedEntityRowProps {
@@ -241,7 +243,7 @@ export const ExpandedEntityGroup: React.FC<ExpandedEntityGroupProps> = ({
     rows: records,
     isEnriching,
     total,
-  } = useEntityGridData(getGroupRecordsOptions(entityId, timeRange, keepFields));
+  } = useEntityGridData(getGroupRecordsOptions(entityId, timeRange, keepFields, columns));
   // Child rows show the parent grid's columns, Records included: each is one record.
   const rows = useMemo(
     () => records.map((record) => ({ ...record, [GROUP_SIZE_FIELD]: 1 })),

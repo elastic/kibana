@@ -1108,7 +1108,7 @@ importers:
         version: link:src/platform/packages/shared/controls/controls-schemas
       '@kbn/core':
         specifier: workspace:*
-        version: link:src/core
+        version: link:src/core/packages/core
       '@kbn/core-analytics-browser':
         specifier: workspace:*
         version: link:src/core/packages/analytics/browser
@@ -1955,6 +1955,9 @@ importers:
       '@kbn/developer-examples-plugin':
         specifier: workspace:*
         version: link:examples/developer_examples
+      '@kbn/digital-experience-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/digital_experience
       '@kbn/discover-contextual-components':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-discover-contextual-components
@@ -5646,6 +5649,9 @@ importers:
       '@kbn/inspect-component-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/inspect_component
+      '@kbn/jest':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-jest
       '@kbn/jest-benchmarks':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-jest-benchmarks
@@ -7084,8 +7090,6 @@ importers:
 
   src/cli: {}
 
-  src/core: {}
-
   src/core/packages/analytics/browser: {}
 
   src/core/packages/analytics/browser-internal: {}
@@ -7181,6 +7185,8 @@ importers:
   src/core/packages/chrome/sidebar/sidebar-mocks: {}
 
   src/core/packages/config/server-internal: {}
+
+  src/core/packages/core: {}
 
   src/core/packages/custom-branding/browser: {}
 
@@ -8141,6 +8147,8 @@ importers:
   src/platform/packages/shared/kbn-interpreter: {}
 
   src/platform/packages/shared/kbn-io-ts-utils: {}
+
+  src/platform/packages/shared/kbn-jest: {}
 
   src/platform/packages/shared/kbn-jest-benchmarks: {}
 
@@ -9629,6 +9637,8 @@ importers:
   x-pack/solutions/observability/plugins/apm_data_access: {}
 
   x-pack/solutions/observability/plugins/client_apps: {}
+
+  x-pack/solutions/observability/plugins/digital_experience: {}
 
   x-pack/solutions/observability/plugins/entity_inventory: {}
 
@@ -13432,6 +13442,7 @@ packages:
   '@opentelemetry/propagator-jaeger@2.11.0':
     resolution: {integrity: sha512-RUOqgoIqXOPQTOhpBrs07Y8sBlxVoLY5Fka6ueZ0prW+k6fWQsba/nHDY4gm+gmfuwtRqbX5Y9YKhDvktjbIqQ==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Package no longer supported. See https://github.com/open-telemetry/opentelemetry-js/pull/7077
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
@@ -13502,12 +13513,14 @@ packages:
   '@opentelemetry/sdk-trace-base@2.11.0':
     resolution: {integrity: sha512-H19x/TX/LZdqiYOjM7fqtSxwlplC5pgelavqbQdHbhdq0q/AI/TGkM2dfGuuynTXmJPeF2HoZVoPDu+TGoW78A==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
 
   '@opentelemetry/sdk-trace-node@2.11.0':
     resolution: {integrity: sha512-CuvCMJmZxswhNLlM2LfuLOW3h3fZujA4hsG4B+Sz4dX2zvaXO8Ng74cnDHWD64gLszTlhiG3c0iNUjj4g+0/sA==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
