@@ -7,13 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
 /* RESEARCH ONLY. Live worker-Core platform probe. Prints counts, ids, and generations.
  * Never prints config values. */
 
