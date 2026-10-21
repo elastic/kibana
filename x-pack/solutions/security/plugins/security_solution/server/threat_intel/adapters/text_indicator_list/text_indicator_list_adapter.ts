@@ -208,7 +208,7 @@ export const textIndicatorListAdapter: FetchAdapter = {
           ...(provenanceUrl ? { url: provenanceUrl } : {}),
           adapter_id: `text_indicator_list:${source._id}`,
         },
-        content: baseContent,
+        content: { ...baseContent, published_at: ingestedAt },
         severity: {
           level: DEFAULT_SEVERITY_LEVEL,
           score: DEFAULT_SEVERITY_SCORE,

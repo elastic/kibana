@@ -118,6 +118,15 @@ describe('textIndicatorListAdapter', () => {
     expect(report.lineage.ingested_at).toBe('2024-01-15T12:00:00.000Z');
   });
 
+  it('stamps content.published_at with the ingest time', async () => {
+    parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
+    const fetchMock = jest.fn().mockResolvedValue(okResponse());
+
+    const [report] = await textIndicatorListAdapter.run(makeSource(), makeContext(fetchMock));
+
+    expect(report.content.published_at).toBe('2024-01-15T12:00:00.000Z');
+  });
+
   it('derives the trail label from the URL filename stem', async () => {
     parseIndicatorListMock.mockReturnValue(BLOCKS_FIXTURE);
     const fetchMock = jest.fn().mockResolvedValue(okResponse());

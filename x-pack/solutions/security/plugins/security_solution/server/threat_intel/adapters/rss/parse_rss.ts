@@ -359,7 +359,7 @@ const parseAtom = (feed: XmlNode): ParsedFeed => {
     const content = ((entry.content as XmlChildNode[] | undefined) ?? [])[0];
     const summary = ((entry.summary as XmlChildNode[] | undefined) ?? [])[0];
     const body = resolveTextConstruct(content) ?? resolveTextConstruct(summary);
-    const publishedAt = toIsoDate(text(entry.updated)) ?? toIsoDate(text(entry.published));
+    const publishedAt = toIsoDate(text(entry.published)) ?? toIsoDate(text(entry.updated));
     return {
       id: id || linkHref,
       title,

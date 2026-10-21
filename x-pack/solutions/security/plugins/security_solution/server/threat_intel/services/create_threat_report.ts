@@ -125,7 +125,7 @@ export const createThreatReport = async (
           ...(normalizedSourceUrl ? { url: normalizedSourceUrl } : {}),
           adapter_id: 'manual:analyst-paste',
         },
-        content: buildReportContent({ title, bodyText, language }),
+        content: { ...buildReportContent({ title, bodyText, language }), published_at: now },
         severity: {
           level: severity,
           score: severityScore(severity),
