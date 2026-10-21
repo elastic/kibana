@@ -227,8 +227,7 @@ const readBotName = (source: Record<string, unknown>): string | undefined =>
   readName(nestedRecord(source, 'bot_profile')?.name) ?? readName(source.username);
 
 /**
- * The Relay's thread key, sent next to the Slack body it forwards
- * (https://github.com/elastic/relay-service/blob/9aaeb4b3832fb6d3d2b14ef5e26623e29527deb3/src/worker/ingest-worker.ts#L795-L809).
+ * The Relay's thread key, sent next to the Slack body it forwards.
  */
 const relayConversationKey = (envelope: Record<string, unknown>): string | undefined => {
   const relay = nestedRecord(envelope, 'relay');

@@ -27,7 +27,7 @@ const makeAlert = (id: string): AlertSnapshot => ({
 });
 
 describe('toSlackThreadKey', () => {
-  // Must equal the Relay's key: https://github.com/elastic/relay-service/blob/9aaeb4b3832fb6d3d2b14ef5e26623e29527deb3/src/surfaces/slack/agent-builder.ts#L51-L59
+  // Must equal the key the Relay sends as `relay.origin.external_conversation_id`.
   it("builds the Relay's thread key", () => {
     expect(
       toSlackThreadKey({ workspace: 'T1', channel: 'C1', threadTs: '1700000000.000100' })

@@ -104,7 +104,7 @@ export const toSlackThreadKey = ({
 
 /**
  * The thread's subject id: the Relay's key when given, otherwise the same key built from the
- * thread's ids (https://github.com/elastic/relay-service/blob/9aaeb4b3832fb6d3d2b14ef5e26623e29527deb3/src/surfaces/slack/agent-builder.ts#L51-L59).
+ * thread's ids.
  */
 export const toSlackThreadSubjectId = ({
   workspace,
