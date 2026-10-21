@@ -73,7 +73,6 @@ export const javascriptRules: DummyRuleMap = {
   // 'no-unsanitized/property': 'error',
   // 'no-unused-expressions': 'error',
   'no-unused-labels': 'error',
-  // 'no-unused-vars': ['error'],
   // 'no-use-before-define': ['error', 'nofunc'],
   // 'no-var': 'error',
   'no-with': 'error',
