@@ -35,7 +35,7 @@ import { missStats, strict, toData } from './isolate/bridge';
 
 const wire = <T>(value: T): T => decode(encode(value as CodecInput)) as T;
 
-test('fake request codec keeps raw authorization, branded space and external UIAM mark', () => {
+void test('fake request codec keeps raw authorization, branded space and external UIAM mark', () => {
   const request = kibanaRequestFactory({
     headers: { authorization: 'ApiKey c2VjcmV0', 'x-custom': ['a', 'b'] },
     spaceId: brandSpaceId('space-a'),
@@ -49,14 +49,14 @@ test('fake request codec keeps raw authorization, branded space and external UIA
   assert.equal(isExternalUiamCredential(rebuilt), true);
 });
 
-test('fake request codec rejects non-fake requests and bad descriptors', () => {
+void test('fake request codec rejects non-fake requests and bad descriptors', () => {
   const fake = kibanaRequestFactory({ headers: {} });
   const real = Object.create(fake, { isFakeRequest: { value: false } });
   assert.throws(() => encodeFakeRequest(real), /only fake requests/);
   assert.throws(() => decodeFakeRequest({ kind: 'nope' } as never), /bad descriptor/);
 });
 
-test('TM decorated errors survive the boundary (module-private symbols rebuilt)', () => {
+void test('TM decorated errors survive the boundary (module-private symbols rebuilt)', () => {
   const retryAt = new Date('2026-10-20T12:00:00.000Z');
   const retryable = decodeTaskError(
     wire(
@@ -83,7 +83,7 @@ test('TM decorated errors survive the boundary (module-private symbols rebuilt)'
   assert.equal(isRetryableError(plain), null);
 });
 
-test('run result codec revives Dates and decorated taskRunError', () => {
+void test('run result codec revives Dates and decorated taskRunError', () => {
   const runAt = new Date('2026-10-20T13:00:00.000Z');
   const result = decodeRunResult(
     wire(
@@ -100,7 +100,7 @@ test('run result codec revives Dates and decorated taskRunError', () => {
   assert.equal(getErrorSource(result.taskRunError as Error), TaskErrorSource.USER);
 });
 
-test('strict facade names missing members and toData keeps dates, drops functions', () => {
+void test('strict facade names missing members and toData keeps dates, drops functions', () => {
   const facade = strict<{ a: number; b: number }>('fixture', { a: 1 });
   assert.equal(facade.a, 1);
   assert.throws(() => facade.b, /T7A_UNSUPPORTED fixture\.b/);
@@ -112,7 +112,7 @@ test('strict facade names missing members and toData keeps dates, drops function
   });
 });
 
-test('TM research runner override takes precedence only while installed', () => {
+void test('TM research runner override takes precedence only while installed', () => {
   const original = () => ({ run: async () => ({ state: { from: 'original' } }) });
   const context = { taskInstance: {} } as never;
   assert.equal(

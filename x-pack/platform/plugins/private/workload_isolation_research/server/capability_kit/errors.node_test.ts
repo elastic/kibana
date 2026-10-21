@@ -20,7 +20,7 @@ import { encode, decode } from './codecs';
 import { ExecutionHost } from './host';
 import { ModuleRegistry } from './registry';
 
-test('real AgentBuilder alias, Boom fields, SO helper symbols and cause survive', () => {
+void test('real AgentBuilder alias, Boom fields, SO helper symbols and cause survive', () => {
   const agent = createAgentBuilderError(AgentBuilderErrorCode.requestAborted, 'fixture-agent', {
     statusCode: 499,
     stage: 'stream',
@@ -64,7 +64,7 @@ test('real AgentBuilder alias, Boom fields, SO helper symbols and cause survive'
 });
 
 for (const transport of ['thread', 'process'] as const) {
-  test(
+  void test(
     transport + ': typed errors preserve identity in BOTH boundary directions',
     { timeout: 30000 },
     async () => {

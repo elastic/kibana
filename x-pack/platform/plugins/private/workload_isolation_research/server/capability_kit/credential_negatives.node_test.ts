@@ -35,7 +35,7 @@ const whoami = (calls: Bundle[]): Binding => ({
 });
 
 for (const transport of ['thread', 'process'] as const) {
-  test(
+  void test(
     transport + ': forged/absent grants and foreign principal/space scopes fail closed',
     { timeout: 30000 },
     async () => {
@@ -108,7 +108,7 @@ for (const transport of ['thread', 'process'] as const) {
   );
 
   for (const coResidency of ['any', 'same-principal'] as const) {
-    test(
+    void test(
       transport +
         ': co-resident runs share a trust domain (' +
         coResidency +

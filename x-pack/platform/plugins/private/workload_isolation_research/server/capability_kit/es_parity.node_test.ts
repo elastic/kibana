@@ -39,7 +39,7 @@ const logger: Logger = {
 };
 
 for (const transport of ['thread', 'process'] as const) {
-  test(
+  void test(
     transport + ': actual Core transport task headers/CPS/opaqueId/output parity and 401',
     { timeout: 30000 },
     async () => {
@@ -152,7 +152,7 @@ for (const transport of ['thread', 'process'] as const) {
     }
   );
 
-  test(
+  void test(
     transport + ': scoped SO bridge rejects space override and mismatched principal',
     { timeout: 30000 },
     async () => {

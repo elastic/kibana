@@ -14,7 +14,7 @@ import type { Bundle, WorkerContext } from './protocol';
 import type { CodecInput } from './codecs';
 
 const bundle: Bundle = { runId: 'fixture', principal: 'alice', space: 'space-a', grants: {} };
-test('batch binding fails closed on sequence, post-terminal and oversize', async () => {
+void test('batch binding fails closed on sequence, post-terminal and oversize', async () => {
   const binding = bindBatchStream(async () => {}, { maxEvents: 1, maxBytes: 200 });
   await assert.rejects(
     binding.handler('batch', { streamId: 'one', sequence: 1, terminal: false, events: [] }, bundle),
@@ -40,7 +40,7 @@ test('batch binding fails closed on sequence, post-terminal and oversize', async
   binding.onRunEnd?.(bundle);
 });
 
-test('writer rejects unbounded fire-and-forget queue and wrong ACK', async () => {
+void test('writer rejects unbounded fire-and-forget queue and wrong ACK', async () => {
   let release: (value: CodecInput) => void = () => {};
   const wait = new Promise<CodecInput>((resolve) => {
     release = resolve;
@@ -70,7 +70,7 @@ test('writer rejects unbounded fire-and-forget queue and wrong ACK', async () =>
 });
 
 for (const transport of ['thread', 'process'] as const) {
-  test(
+  void test(
     transport + ': consumer-settled ACK orders batches before task outcome',
     { timeout: 30000 },
     async () => {

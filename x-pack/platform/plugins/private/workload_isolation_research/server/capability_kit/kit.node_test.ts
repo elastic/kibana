@@ -15,7 +15,7 @@ import { ExecutionHost } from './host';
 import { startEndpoint } from './transport';
 import type { Crossing } from './protocol';
 
-test('configuration codecs preserve serverless value methods and fail closed', () => {
+void test('configuration codecs preserve serverless value methods and fail closed', () => {
   const restored = decode(
     encode({
       limit: new ByteSizeValue(2048),
@@ -44,7 +44,7 @@ test('configuration codecs preserve serverless value methods and fail closed', (
   );
 });
 
-test(
+void test(
   'queued deadline retires a never-ready bootstrap so the class recovers',
   { timeout: 15000 },
   async () => {
@@ -92,7 +92,7 @@ test(
 );
 
 for (const transport of ['thread', 'process'] as const) {
-  test(
+  void test(
     transport + ': real slot, revision, bridge, hard-stop and recovery',
     { timeout: 30000 },
     async () => {
@@ -154,7 +154,7 @@ for (const transport of ['thread', 'process'] as const) {
       }
     }
   );
-  test(
+  void test(
     transport + ': cooperative abort signals before terminal persistence/outcome',
     { timeout: 30000 },
     async () => {
@@ -196,7 +196,7 @@ for (const transport of ['thread', 'process'] as const) {
       }
     }
   );
-  test(
+  void test(
     transport + ': cancellation fences late host replies without killing another class',
     { timeout: 30000 },
     async () => {

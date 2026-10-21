@@ -44,7 +44,7 @@ const registry = (): ModuleRegistry => {
 };
 const base = { principal: 'alice', space: 'space-a', deadlineMs: 10000 };
 
-test('P1-1 main SO bridge: option ALLOWLIST rejects initialNamespaces and unknown keys', async () => {
+void test('P1-1 main SO bridge: option ALLOWLIST rejects initialNamespaces and unknown keys', async () => {
   const calls: string[] = [];
   const client = {
     create: async () => (calls.push('create'), { id: 'x' }),
@@ -104,7 +104,7 @@ const localContext = (capability: LocalSoCapability): WorkerContext =>
           ).createResearchEsoKernel as object),
   } as unknown as WorkerContext);
 
-test('P1-1/P1-2 local SO: initialNamespaces denied; ESO mergeAttributes:false and upsert of encrypted/AAD denied', async () => {
+void test('P1-1/P1-2 local SO: initialNamespaces denied; ESO mergeAttributes:false and upsert of encrypted/AAD denied', async () => {
   const client = new Client({ node: 'http://127.0.0.1:1', maxRetries: 0 });
   try {
     const so = await createLocalSavedObjects(
@@ -152,7 +152,7 @@ test('P1-1/P1-2 local SO: initialNamespaces denied; ESO mergeAttributes:false an
   }
 });
 
-test('P2 ES diagnostic keeps x-elastic-* / x-found-* response headers by prefix', () => {
+void test('P2 ES diagnostic keeps x-elastic-* / x-found-* response headers by prefix', () => {
   const error = new errors.ResponseError({
     body: { status: 429 },
     statusCode: 429,
@@ -173,7 +173,7 @@ test('P2 ES diagnostic keeps x-elastic-* / x-found-* response headers by prefix'
   assert.equal(back.headers?.['x-secret'], undefined);
 });
 
-test('P2 bindService requires an explicit lever', () => {
+void test('P2 bindService requires an explicit lever', () => {
   assert.throws(() => bindService({}, { operations: [] } as never), /lever/);
   assert.equal(
     bindService({}, { operations: [], lever: 'owner_refactor' }).lever,
@@ -182,84 +182,90 @@ test('P2 bindService requires an explicit lever', () => {
 });
 
 for (const transport of ['thread', 'process'] as const) {
-  test(transport + ': P1-3 ordered binding starts no host work after the run ended', async () => {
-    const host = new ExecutionHost(registry(), { transport });
-    const started: number[] = [];
-    const ordered: Binding = {
-      lever: 'capability_bundle',
-      ordered: true,
-      handler: async (_operation, args) => {
-        started.push((args as { index: number }).index);
-        await new Promise((r) => setTimeout(r, 300));
-        return null;
-      },
-    };
-    try {
-      const outcome = await host.run({
-        ...base,
-        workloadClass: 'o',
-        moduleId: 'orderedThenReturn',
-        input: null,
-        capabilities: { ordered },
-      });
-      assert.equal(outcome.status, 'failure');
-      await new Promise((r) => setTimeout(r, 1200));
-      assert.deepEqual(started, [0]);
-    } finally {
-      await host.stop();
-    }
-  });
-
-  test(transport + ': P1-4 default co-residency keeps different principals apart', async () => {
-    const host = new ExecutionHost(registry(), {
-      transport,
-      slotsPerClass: 2,
-      concurrencyPerClass: { neg: 4 },
-    });
-    const victimCalls: Bundle[] = [];
-    const fixture: Binding = {
-      lever: 'capability_bundle',
-      handler: async (operation, args, bundle) => {
-        if (operation === 'hold') {
-          await new Promise((r) => setTimeout(r, (args as { ms: number }).ms));
+  void test(
+    transport + ': P1-3 ordered binding starts no host work after the run ended',
+    async () => {
+      const host = new ExecutionHost(registry(), { transport });
+      const started: number[] = [];
+      const ordered: Binding = {
+        lever: 'capability_bundle',
+        ordered: true,
+        handler: async (_operation, args) => {
+          started.push((args as { index: number }).index);
+          await new Promise((r) => setTimeout(r, 300));
           return null;
-        }
-        victimCalls.push(bundle);
-        return null;
-      },
-    };
-    try {
-      const attacker = host.run({
-        workloadClass: 'neg',
-        moduleId: 'sniffCoResident',
-        input: { waitMs: 1500 },
-        principal: 'mallory',
-        space: 'space-m',
-        deadlineMs: 10000,
-        capabilities: {},
-      });
-      await new Promise((r) => setTimeout(r, 600));
-      const victim = host.run({
-        workloadClass: 'neg',
-        moduleId: 'hold',
-        input: { ms: 1500 },
-        principal: 'bob',
-        space: 'space-b',
-        deadlineMs: 10000,
-        data: { elasticsearch: { marker: 'stand-in' } },
-        capabilities: { fixture },
-      });
-      const [attack] = await Promise.all([attacker, victim]);
-      assert.equal(attack.status, 'success');
-      if (attack.status === 'success')
-        assert.deepEqual(attack.value, { sawOtherRun: false, sawCredentialsData: false });
-      assert.equal(victimCalls.length, 0);
-    } finally {
-      await host.stop();
+        },
+      };
+      try {
+        const outcome = await host.run({
+          ...base,
+          workloadClass: 'o',
+          moduleId: 'orderedThenReturn',
+          input: null,
+          capabilities: { ordered },
+        });
+        assert.equal(outcome.status, 'failure');
+        await new Promise((r) => setTimeout(r, 1200));
+        assert.deepEqual(started, [0]);
+      } finally {
+        await host.stop();
+      }
     }
-  });
+  );
 
-  test(transport + ': P2 hard-stop and queued outcomes say graceful:false', async () => {
+  void test(
+    transport + ': P1-4 default co-residency keeps different principals apart',
+    async () => {
+      const host = new ExecutionHost(registry(), {
+        transport,
+        slotsPerClass: 2,
+        concurrencyPerClass: { neg: 4 },
+      });
+      const victimCalls: Bundle[] = [];
+      const fixture: Binding = {
+        lever: 'capability_bundle',
+        handler: async (operation, args, bundle) => {
+          if (operation === 'hold') {
+            await new Promise((r) => setTimeout(r, (args as { ms: number }).ms));
+            return null;
+          }
+          victimCalls.push(bundle);
+          return null;
+        },
+      };
+      try {
+        const attacker = host.run({
+          workloadClass: 'neg',
+          moduleId: 'sniffCoResident',
+          input: { waitMs: 1500 },
+          principal: 'mallory',
+          space: 'space-m',
+          deadlineMs: 10000,
+          capabilities: {},
+        });
+        await new Promise((r) => setTimeout(r, 600));
+        const victim = host.run({
+          workloadClass: 'neg',
+          moduleId: 'hold',
+          input: { ms: 1500 },
+          principal: 'bob',
+          space: 'space-b',
+          deadlineMs: 10000,
+          data: { elasticsearch: { marker: 'stand-in' } },
+          capabilities: { fixture },
+        });
+        const [attack] = await Promise.all([attacker, victim]);
+        assert.equal(attack.status, 'success');
+        if (attack.status === 'success')
+          assert.deepEqual(attack.value, { sawOtherRun: false, sawCredentialsData: false });
+        assert.equal(victimCalls.length, 0);
+      } finally {
+        await host.stop();
+      }
+    }
+  );
+
+  void test(transport + ': P2 hard-stop and queued outcomes say graceful:false', async () => {
     const host = new ExecutionHost(registry(), { transport, abortGraceMs: 0 });
     try {
       const running = host.run({
@@ -289,7 +295,7 @@ for (const transport of ['thread', 'process'] as const) {
   });
 }
 
-test('P2 callSync wait longer than stallMs (main handler busy) is not a stall', async () => {
+void test('P2 callSync wait longer than stallMs (main handler busy) is not a stall', async () => {
   const host = new ExecutionHost(registry(), { transport: 'thread', abortGraceMs: 100 });
   const fixture = bindSyncOperations({
     slow: () => {

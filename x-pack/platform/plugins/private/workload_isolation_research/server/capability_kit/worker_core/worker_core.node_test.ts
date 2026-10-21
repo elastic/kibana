@@ -85,7 +85,7 @@ const baseRoute = {
   defaultSpace: true,
 };
 
-test('elasticsearch write classification treats search as read and bulk as write', () => {
+void test('elasticsearch write classification treats search as read and bulk as write', () => {
   assert.equal(isEsWrite('GET', '/.kibana/_doc/1'), false);
   assert.equal(isEsWrite('POST', '/logs-*/_search'), false);
   assert.equal(isEsWrite('POST', '/_bulk'), true);
@@ -106,7 +106,7 @@ test('elasticsearch write classification treats search as read and bulk as write
   assert.equal(fence.summary().writes, 1);
 });
 
-test('requestOptions.querystring overrides params the way transport merges them', () => {
+void test('requestOptions.querystring overrides params the way transport merges them', () => {
   const fence = createBootEsWriteFence({ mode: 'deny', allow: [] });
   const handler = fence.wrap(() => () => undefined)({ logger: {} as never });
   assert.throws(
@@ -133,7 +133,7 @@ test('requestOptions.querystring overrides params the way transport merges them'
   assert.equal(fence.summary().reads, 0);
 });
 
-test('boot fence anchors endpoint shapes and waits for installers', async () => {
+void test('boot fence anchors endpoint shapes and waits for installers', async () => {
   assert.equal(isEsWrite('POST', '/orders/_update/_simulate'), true);
   assert.equal(isEsWrite('POST', '/_index_template/_simulate_index/orders'), false);
   const fence = createBootEsWriteFence({
@@ -237,7 +237,7 @@ test('boot fence anchors endpoint shapes and waits for installers', async () => 
   assert.equal(fence.summary().writes, 9);
 });
 
-test('flag overrides are classified and unknown flags stay absent', () => {
+void test('flag overrides are classified and unknown flags stay absent', () => {
   const classified = classifyFlagOverrides({
     overrides: {
       'workerCore.liveProbe': true,
@@ -254,7 +254,7 @@ test('flag overrides are classified and unknown flags stay absent', () => {
   assert.equal(classifyFlagOverrides(undefined).booleans['workerCore.liveProbe'], undefined);
 });
 
-test('replicas refresh on generation change and do not invent flag or price defaults', () => {
+void test('replicas refresh on generation change and do not invent flag or price defaults', () => {
   const replica = createPlatformReplica(emptyPlatformReplicas());
   assert.equal(lookupBooleanFlag({ booleans: {}, strings: {}, numbers: {} }, 'x'), undefined);
   assert.equal(replica.booleanFlag('alertingFeature'), undefined);
@@ -278,7 +278,7 @@ test('replicas refresh on generation change and do not invent flag or price defa
   assert.deepEqual(replica.activeProduct(), { name: 'basic' });
 });
 
-test('replica subscriptions and content hashes observe warm owner changes', async () => {
+void test('replica subscriptions and content hashes observe warm owner changes', async () => {
   const replica = createPlatformReplica(emptyPlatformReplicas());
   const flags: Array<boolean | undefined> = [];
   let completed = false;
@@ -366,7 +366,7 @@ test('replica subscriptions and content hashes observe warm owner changes', asyn
   assert.equal(published, 'license:2|featureFlags:2');
 });
 
-test('logger and events forward to the sink and redact secret-looking meta', () => {
+void test('logger and events forward to the sink and redact secret-looking meta', () => {
   const logs: string[] = [];
   const logger = createForwardingLogger('alerting', (record) => logs.push(record.message));
   logger.warn('booting', { encryptionKey: 'super-secret', count: 2 });
@@ -383,7 +383,7 @@ test('logger and events forward to the sink and redact secret-looking meta', () 
   assert.throws(() => forwarder.send('unknown-sink', {}), /not forwarded or excluded/);
 });
 
-test('analytics reportEvent forwards a registered string event type and its data', () => {
+void test('analytics reportEvent forwards a registered string event type and its data', () => {
   const counters: Array<{ event_type: unknown; code: string }> = [];
   const client = createAnalytics({
     isDev: false,
@@ -428,7 +428,7 @@ test('analytics reportEvent forwards a registered string event type and its data
   );
 });
 
-test('set replaces the execution context and labels match Core', () => {
+void test('set replaces the execution context and labels match Core', () => {
   const service = createExecutionContextService();
   service.set({
     name: 'parent',
@@ -448,7 +448,7 @@ test('set replaces the execution context and labels match Core', () => {
   assert.equal(service.get()?.toJSON().child, undefined);
 });
 
-test('internal repository extensions fail closed', () => {
+void test('internal repository extensions fail closed', () => {
   assertNoInternalRepositoryExtensions(undefined);
   assertNoInternalRepositoryExtensions({});
   assert.throws(
@@ -457,7 +457,7 @@ test('internal repository extensions fail closed', () => {
   );
 });
 
-test('execution context matches Core opaque ids for concurrent tasks', async () => {
+void test('execution context matches Core opaque ids for concurrent tasks', async () => {
   const service = createExecutionContextService();
   const taskA = {
     type: 'task manager',
@@ -495,7 +495,7 @@ test('execution context matches Core opaque ids for concurrent tasks', async () 
   assert.equal(service.get(), undefined);
 });
 
-test('execution context is visible to nested calls and absent outside the run', () => {
+void test('execution context is visible to nested calls and absent outside the run', () => {
   const service = createExecutionContextService();
   assert.equal(service.get(), undefined);
   const seen = service.withContext({ name: 'run task', id: 'abc' }, () => service.get());
@@ -506,7 +506,7 @@ test('execution context is visible to nested calls and absent outside the run', 
   );
 });
 
-test('saved object routing is an exact client-options allowlist and bridges unknown combos', () => {
+void test('saved object routing is an exact client-options allowlist and bridges unknown combos', () => {
   const demonstrated = {
     excludedExtensions: ['security'],
     includedHiddenTypes: ['action', 'action_task_params'],
@@ -598,7 +598,7 @@ test('saved object routing is an exact client-options allowlist and bridges unkn
   );
 });
 
-test('task manager policy is boot versus run, not a task-type prefix', () => {
+void test('task manager policy is boot versus run, not a task-type prefix', () => {
   assert.equal(decideTaskManagerCall('schedule', 'boot'), 'fence');
   assert.equal(decideTaskManagerCall('bulkSchedule', 'boot'), 'fence');
   assert.equal(decideTaskManagerCall('schedule', 'run'), 'bridge');
@@ -610,7 +610,7 @@ test('task manager policy is boot versus run, not a task-type prefix', () => {
   assert.equal(decideTaskManagerCall('get', 'run'), 'bridge');
 });
 
-test('P2 contracts: task methods, config failure, log levels, and model versions', () => {
+void test('P2 contracts: task methods, config failure, log levels, and model versions', () => {
   for (const method of RUN_BRIDGED_TM_METHODS) {
     assert.equal(decideTaskManagerCall(method, 'run'), 'bridge');
     assert.equal(decideTaskManagerCall(method, 'boot'), 'fence');
@@ -647,7 +647,7 @@ test('P2 contracts: task methods, config failure, log levels, and model versions
   assert.notEqual(first, migrated);
 });
 
-test('readiness token mismatch fails closed and a matching fingerprint passes', () => {
+void test('readiness token mismatch fails closed and a matching fingerprint passes', () => {
   const type = {
     name: 'alert',
     mappings: { properties: { b: { type: 'long' }, a: { type: 'keyword' } } },
@@ -666,7 +666,7 @@ test('readiness token mismatch fails closed and a matching fingerprint passes', 
   assert.throws(() => verifyRegistryReadiness(undefined, [type]), /readiness token missing/);
 });
 
-test('readiness hash runs once per type and token, then again when the token changes', () => {
+void test('readiness hash runs once per type and token, then again when the token changes', () => {
   let reads = 0;
   const mappings = { properties: { a: { type: 'keyword' } } };
   const type = {
@@ -696,7 +696,7 @@ test('readiness hash runs once per type and token, then again when the token cha
   );
 });
 
-test('config capture keeps values in memory and exposes only key paths', () => {
+void test('config capture keeps values in memory and exposes only key paths', () => {
   const plain = toPlainConfig({
     enabled: true,
     encryptionKey: 'do-not-log',
@@ -708,7 +708,7 @@ test('config capture keeps values in memory and exposes only key paths', () => {
   assert.equal(JSON.stringify(paths).includes('do-not-log'), false);
 });
 
-test('execution class parity fails closed and collateral losses refund at most three attempts', () => {
+void test('execution class parity fails closed and collateral losses refund at most three attempts', () => {
   resetResearchExecutionClasses();
   const mismatches = diffDefinitionParity(
     [{ type: 'alerting:.es-query', timeout: '5m', maxAttempts: 1, stateSchemaVersions: [1] }],
@@ -787,7 +787,7 @@ const runCleanup = async (graceMs: number, cleanupMs: number) => {
   }
 };
 
-test(
+void test(
   'cleanup that finishes within the class cancel grace is not hard-stopped',
   { timeout: 20000 },
   async () => {
@@ -830,7 +830,7 @@ test(
   }
 );
 
-test('aborting a replica wait settles it and drops the waiter', async () => {
+void test('aborting a replica wait settles it and drops the waiter', async () => {
   const queue = createReplicaWaitQueue();
   const controller = new AbortController();
   let settled = false;
@@ -862,7 +862,7 @@ const READ_ENDPOINT_NAMES = [
   '_analyze',
 ] as const;
 
-test('read classification is anchored and document ids cannot impersonate endpoints', () => {
+void test('read classification is anchored and document ids cannot impersonate endpoints', () => {
   assert.equal(isEsWrite('POST', '/orders/_update/_search'), true);
   assert.equal(isEsWrite('POST', '/orders/_update/_query'), true);
   assert.equal(isEsWrite('POST', '/orders/_doc/_mget'), true);
@@ -1058,7 +1058,7 @@ const adversarialQueryCandidates = (): Array<{
   return candidates;
 };
 
-test('an already-aborted host signal still cancels the runner', () => {
+void test('an already-aborted host signal still cancels the runner', () => {
   const signal = AbortSignal.abort(new Error('boot finished after cancel'));
   const abortController = new AbortController();
   let cancels = 0;
@@ -1069,7 +1069,7 @@ test('an already-aborted host signal still cancels the runner', () => {
   assert.equal(abortController.signal.aborted, true);
 });
 
-test('a cancel rejection during boot does not escape the binder', async () => {
+void test('a cancel rejection during boot does not escape the binder', async () => {
   const signal = AbortSignal.abort(new Error('boot finished after cancel'));
   const abortController = new AbortController();
   let rejected = false;
@@ -1089,7 +1089,7 @@ test('a cancel rejection during boot does not escape the binder', async () => {
   }
 });
 
-test('an already-aborted signal does not start the run', async () => {
+void test('an already-aborted signal does not start the run', async () => {
   const signal = AbortSignal.abort(new Error('boot finished after cancel'));
   const abortController = new AbortController();
   const order: string[] = [];
@@ -1112,7 +1112,7 @@ test('an already-aborted signal does not start the run', async () => {
   }
 });
 
-test('a cancel rejection after run has started fails the run', async () => {
+void test('a cancel rejection after run has started fails the run', async () => {
   const signal = new AbortController();
   const abortController = new AbortController();
   const { pending, unbind } = beginRunThenCancel(signal.signal, abortController, {
@@ -1131,7 +1131,7 @@ test('a cancel rejection after run has started fails the run', async () => {
   }
 });
 
-test('cooperative stop reads a thrown result and a failed packet', () => {
+void test('cooperative stop reads a thrown result and a failed packet', () => {
   assert.equal(
     cooperativeStopFor(false, { thrown: { message: 'cancel failed' } }),
     'cooperative-failed'
@@ -1141,7 +1141,7 @@ test('cooperative stop reads a thrown result and a failed packet', () => {
   assert.equal(cooperativeStopFor(false, { cancelledBeforeStart: true }), 'cooperative');
 });
 
-test('replica watch joins on every early failure path', async () => {
+void test('replica watch joins on every early failure path', async () => {
   const paths = [
     'success',
     'runner-rejection',
@@ -1177,7 +1177,7 @@ test('replica watch joins on every early failure path', async () => {
   }
 });
 
-test(
+void test(
   'a failed terminal during cancel is not recorded as cooperative completion',
   { timeout: 20000 },
   async () => {
@@ -1216,41 +1216,45 @@ test(
   }
 );
 
-test('a detached log call does not fail the task as outstanding', { timeout: 20000 }, async () => {
-  const specifier = require.resolve('../example_tasks');
-  const registry = new ModuleRegistry(new Set([specifier]));
-  registry.register('fireAndForget', specifier, 'fireAndForget');
-  const host = new ExecutionHost(registry, { transport: 'thread', abortGraceMs: 200 });
-  let wrote = false;
-  try {
-    const outcome = await host.run({
-      workloadClass: 'alerting',
-      principal: 'alice',
-      space: 'default',
-      moduleId: 'fireAndForget',
-      input: {},
-      deadlineMs: 5000,
-      capabilities: {
-        fixture: {
-          lever: 'capability_bundle',
-          handler: async () => {
-            await new Promise((resolve) => setTimeout(resolve, 40));
-            wrote = true;
-            return { ok: true };
+void test(
+  'a detached log call does not fail the task as outstanding',
+  { timeout: 20000 },
+  async () => {
+    const specifier = require.resolve('../example_tasks');
+    const registry = new ModuleRegistry(new Set([specifier]));
+    registry.register('fireAndForget', specifier, 'fireAndForget');
+    const host = new ExecutionHost(registry, { transport: 'thread', abortGraceMs: 200 });
+    let wrote = false;
+    try {
+      const outcome = await host.run({
+        workloadClass: 'alerting',
+        principal: 'alice',
+        space: 'default',
+        moduleId: 'fireAndForget',
+        input: {},
+        deadlineMs: 5000,
+        capabilities: {
+          fixture: {
+            lever: 'capability_bundle',
+            handler: async () => {
+              await new Promise((resolve) => setTimeout(resolve, 40));
+              wrote = true;
+              return { ok: true };
+            },
           },
         },
-      },
-    });
-    assert.equal(outcome.status, 'success');
-    if (outcome.status === 'success') assert.deepEqual(outcome.value, { ok: true });
-    await new Promise((resolve) => setTimeout(resolve, 80));
-    assert.equal(wrote, true);
-  } finally {
-    await host.stop();
+      });
+      assert.equal(outcome.status, 'success');
+      if (outcome.status === 'success') assert.deepEqual(outcome.value, { ok: true });
+      await new Promise((resolve) => setTimeout(resolve, 80));
+      assert.equal(wrote, true);
+    } finally {
+      await host.stop();
+    }
   }
-});
+);
 
-test(
+void test(
   'a task that aborts its own capability call does not leave it outstanding',
   { timeout: 20000 },
   async () => {
@@ -1291,7 +1295,7 @@ test(
   }
 );
 
-test('bulk item namespaces bridge even when an options bag is present', () => {
+void test('bulk item namespaces bridge even when an options bag is present', () => {
   const options = savedObjectCallOptions('bulkCreate', [
     [{ type: 'action_task_params', id: '1', initialNamespaces: ['foreign'] }],
     { overwrite: false },
@@ -1331,7 +1335,7 @@ const scriptedEndpoint = (script: (runId: string, send: (packet: Packet) => void
   });
 };
 
-test('rule budget starts when execution starts, after bootstrap', async () => {
+void test('rule budget starts when execution starts, after bootstrap', async () => {
   const registry = new ModuleRegistry(new Set());
   const host = new ExecutionHost(
     registry,
@@ -1367,7 +1371,7 @@ test('rule budget starts when execution starts, after bootstrap', async () => {
   await host.stop();
 });
 
-test('a boot that never starts execution dies at the bootstrap deadline', async () => {
+void test('a boot that never starts execution dies at the bootstrap deadline', async () => {
   const registry = new ModuleRegistry(new Set());
   const host = new ExecutionHost(
     registry,
@@ -1403,7 +1407,7 @@ test('a boot that never starts execution dies at the bootstrap deadline', async 
   await host.stop();
 });
 
-test('a late execution_start after the bootstrap deadline is rejected', async () => {
+void test('a late execution_start after the bootstrap deadline is rejected', async () => {
   const registry = new ModuleRegistry(new Set());
   const host = new ExecutionHost(
     registry,
@@ -1447,7 +1451,7 @@ test('a late execution_start after the bootstrap deadline is rejected', async ()
   await host.stop();
 });
 
-test('a duplicate execution_start does not extend the rule budget', async () => {
+void test('a duplicate execution_start does not extend the rule budget', async () => {
   const registry = new ModuleRegistry(new Set());
   const host = new ExecutionHost(
     registry,
@@ -1485,7 +1489,7 @@ test('a duplicate execution_start does not extend the rule budget', async () => 
   await host.stop();
 });
 
-test('execution_start during cancel does not resurrect the run', async () => {
+void test('execution_start during cancel does not resurrect the run', async () => {
   const registry = new ModuleRegistry(new Set());
   const controller = new AbortController();
   const host = new ExecutionHost(
@@ -1525,7 +1529,7 @@ test('execution_start during cancel does not resurrect the run', async () => {
   await host.stop();
 });
 
-test('a research lease keeps the claim through boot and starts the rule budget once', () => {
+void test('a research lease keeps the claim through boot and starts the rule budget once', () => {
   armResearchLease({
     taskId: 'lease-1',
     claimedAt: 1_000,
@@ -1541,7 +1545,7 @@ test('a research lease keeps the claim through boot and starts the rule budget o
   assert.equal(researchExpiration('lease-1'), undefined);
 });
 
-test('claim arms a protected lease before a later stub and refunds persisted attempts', () => {
+void test('claim arms a protected lease before a later stub and refunds persisted attempts', () => {
   resetResearchExecutionClasses();
   setResearchTaskDefinitionSource({
     get: (type) =>
@@ -1591,7 +1595,7 @@ test('claim arms a protected lease before a later stub and refunds persisted att
   setResearchTaskDefinitionSource(undefined);
 });
 
-test('an owner invalidation bumps the flag generation when the override map is unchanged', () => {
+void test('an owner invalidation bumps the flag generation when the override map is unchanged', () => {
   const flags = { booleans: { 'workerCore.liveProbe': false }, strings: {}, numbers: {} };
   const first = advanceGeneration('', 1, { flags, invalidation: 0 });
   const same = advanceGeneration(first.hash, first.generation, { flags, invalidation: 0 });

@@ -33,7 +33,7 @@ const fixture = () => {
     infinite: Infinity,
   };
 };
-test('collections preserve semantics, visible view bytes only, and reject weak/cyclic collections', () => {
+void test('collections preserve semantics, visible view bytes only, and reject weak/cyclic collections', () => {
   const value = fixture();
   const cloned = decode(encode(value));
   assert.deepEqual(cloned, value);
@@ -43,7 +43,7 @@ test('collections preserve semantics, visible view bytes only, and reject weak/c
   assert.throws(() => encode(cyclic), /Cyclic/);
 });
 for (const transport of ['thread', 'process'] as const) {
-  test(
+  void test(
     transport + ': Map/Set and built-in values roundtrip through real protocol',
     { timeout: 30000 },
     async () => {

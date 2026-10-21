@@ -28,7 +28,7 @@ class PrivateFixture {
   }
 }
 for (const transport of ['thread', 'process'] as const) {
-  test(
+  void test(
     transport + ': async handles preserve private receiver, owner roundtrip, callback and lifetime',
     { timeout: 30000 },
     async () => {

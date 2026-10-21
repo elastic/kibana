@@ -12,7 +12,7 @@ import { ExecutionHost } from './host';
 import type { RunOptions } from './host';
 
 for (const transport of ['thread', 'process'] as const) {
-  test(
+  void test(
     transport + ': two async runs share a slot but not identity or signal',
     { timeout: 30000 },
     async () => {
@@ -90,7 +90,7 @@ for (const transport of ['thread', 'process'] as const) {
     }
   );
 
-  test(
+  void test(
     transport + ': hard kill reports ALL co-resident collateral and recovers',
     { timeout: 30000 },
     async () => {

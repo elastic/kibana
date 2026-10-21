@@ -31,7 +31,7 @@ const under = <T>(traceId: string, fn: () => Promise<T>): Promise<T> =>
   context.with(trace.setSpanContext(ROOT_CONTEXT, span(traceId)), fn);
 
 for (const transport of ['thread', 'process'] as const) {
-  test(
+  void test(
     transport + ': a worker task keeps the main trace id across continuations and co-resident runs',
     { timeout: 30000 },
     async () => {

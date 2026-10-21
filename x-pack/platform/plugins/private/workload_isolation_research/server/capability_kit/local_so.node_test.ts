@@ -64,7 +64,7 @@ const contextFor = (capability: LocalSoCapability): WorkerContext => ({
   releaseCallback: () => {},
 });
 
-test('real local SO/ESO composes; readiness, identity, registry, scope and unsafe partial updates fail closed', async () => {
+void test('real local SO/ESO composes; readiness, identity, registry, scope and unsafe partial updates fail closed', async () => {
   const client = new Client({ node: 'http://127.0.0.1:1', maxRetries: 0 });
   const capability: LocalSoCapability = {
     principal: 'internal-task',

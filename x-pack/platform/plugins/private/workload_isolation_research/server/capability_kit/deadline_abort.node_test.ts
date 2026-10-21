@@ -41,7 +41,7 @@ const base = {
 };
 const YEAR_MS = 365 * 24 * 60 * 60 * 1000;
 
-test('codec: ES client errors keep class, status, retry semantics and drop credentials', () => {
+void test('codec: ES client errors keep class, status, retry semantics and drop credentials', () => {
   const original = new errors.ResponseError({
     body: { error: { type: 'circuit_breaking_exception' }, status: 429 },
     statusCode: 429,
@@ -94,31 +94,35 @@ test('codec: ES client errors keep class, status, retry semantics and drop crede
   );
 });
 
-test('long deadlines are re-armed instead of overflowing to 1ms', { timeout: 20000 }, async () => {
-  const host = new ExecutionHost(registry(), { transport: 'thread' });
-  try {
-    const outcome = await host.run({
-      ...base,
-      moduleId: 'delayed',
-      input: { ms: 300 },
-      deadlineMs: YEAR_MS,
-    });
-    assert.equal(outcome.status, 'success');
-    await assert.rejects(
-      host.run({ ...base, moduleId: 'echo', deadlineMs: Number.MAX_SAFE_INTEGER + 2 }),
-      /Invalid deadline/
-    );
-    await assert.rejects(
-      host.run({ ...base, moduleId: 'echo', deadlineMs: 1000, stallMs: 10 }),
-      /stallMs/
-    );
-  } finally {
-    await host.stop();
+void test(
+  'long deadlines are re-armed instead of overflowing to 1ms',
+  { timeout: 20000 },
+  async () => {
+    const host = new ExecutionHost(registry(), { transport: 'thread' });
+    try {
+      const outcome = await host.run({
+        ...base,
+        moduleId: 'delayed',
+        input: { ms: 300 },
+        deadlineMs: YEAR_MS,
+      });
+      assert.equal(outcome.status, 'success');
+      await assert.rejects(
+        host.run({ ...base, moduleId: 'echo', deadlineMs: Number.MAX_SAFE_INTEGER + 2 }),
+        /Invalid deadline/
+      );
+      await assert.rejects(
+        host.run({ ...base, moduleId: 'echo', deadlineMs: 1000, stallMs: 10 }),
+        /stallMs/
+      );
+    } finally {
+      await host.stop();
+    }
   }
-});
+);
 
 for (const transport of ['thread', 'process'] as const) {
-  test(
+  void test(
     transport + ': original abort reason and cancellation category reach the worker',
     { timeout: 30000 },
     async () => {
@@ -215,7 +219,7 @@ for (const transport of ['thread', 'process'] as const) {
     }
   );
 
-  test(
+  void test(
     transport + ': stall watchdog aborts a blocked isolate then hard-stops; others recover',
     { timeout: 30000 },
     async () => {
@@ -259,7 +263,7 @@ for (const transport of ['thread', 'process'] as const) {
     }
   );
 
-  test(
+  void test(
     transport + ': unencodable callback result fails that call, not the slot',
     { timeout: 30000 },
     async () => {
@@ -298,7 +302,7 @@ for (const transport of ['thread', 'process'] as const) {
     }
   );
 
-  test(
+  void test(
     transport + ': ordered bindings serialize concurrent calls; default bindings may not',
     { timeout: 30000 },
     async () => {
@@ -346,7 +350,7 @@ for (const transport of ['thread', 'process'] as const) {
     }
   );
 
-  test(
+  void test(
     transport + ': ES ResponseError crosses both ways with instanceof and retry guards',
     { timeout: 30000 },
     async () => {
@@ -405,7 +409,7 @@ for (const transport of ['thread', 'process'] as const) {
   );
 }
 
-test(
+void test(
   'stall watchdog does not blame a healthy worker for a MAIN-thread block',
   { timeout: 30000 },
   async () => {

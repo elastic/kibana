@@ -35,7 +35,7 @@ class RunScopedService {
 }
 
 for (const transport of ['thread', 'process'] as const) {
-  test(
+  void test(
     transport + ': generic bindService keeps receivers, allowlists, orders and stops main work',
     { timeout: 30000 },
     async () => {

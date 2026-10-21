@@ -14,7 +14,7 @@ import { bindSyncOperations } from './sync_operations';
 import type { Crossing } from './protocol';
 
 for (const transport of ['thread', 'process'] as const) {
-  test(
+  void test(
     transport + ': bounded worker sync support is explicit; main never waits',
     { timeout: 30000 },
     async () => {
