@@ -43,28 +43,22 @@ spaceTest.describe('Lens ES|QL reference lines', { tag: '@local-stateful-classic
   });
 
   spaceTest(
-    'shares a query between numeric lines and a static line',
+    'combines query and static references in separate layers',
     async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
       await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
       const dataQuery = await lens.workspace.getEsqlQuery();
-
-      await lens.layers.createLayer('referenceLine');
+      await lens.layers.createLayer('referenceLine', undefined, { referenceLineSource: 'esql' });
       await lens.layers.ensureLayerTabIsActive(1);
+      await expect(page.getByRole('tab', { name: 'ES|QL references', exact: true })).toBeVisible();
       await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
-      await expect(page.getByRole('button', { name: 'Visualization parameters' })).toBeVisible();
       await lens.workspace.submitEsqlQuery(SHARED_QUERY);
 
-      await spaceTest.step('requires selection when several numeric outputs exist', async () => {
-        await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
-        await lens.dimensions.switchToEsql();
-        const dimensionEditor = page.testSubj.locator('lnsDimensionContainer');
-        await expect(dimensionEditor).toBeVisible();
-        await expect(dimensionEditor.getByTestId('InlineEditingESQLEditor')).toHaveCount(0);
-        await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
-        await expect
-          .poll(() => lens.dimensions.getSelectedTextBasedDimensionFields())
-          .toStrictEqual([]);
+      await spaceTest.step('select query outputs without a method switch', async () => {
+        await lens.dimensions.openDimensionEditor(`${LEFT} > lns-empty-dimension`, 1);
+        await expect(lens.dimensions.esqlTab).toHaveCount(0);
+        await expect(lens.dimensions.staticValueTab).toHaveCount(0);
+        await expect(page.testSubj.locator('lns-indexPattern-static_value-input')).toHaveCount(0);
         await lens.dimensions.openTextBasedDimensionFieldOptions();
         await expect(page.getByRole('option', { name: /lower/ })).toBeVisible();
         await expect(page.getByRole('option', { name: /upper/ })).toBeVisible();
@@ -72,39 +66,42 @@ spaceTest.describe('Lens ES|QL reference lines', { tag: '@local-stateful-classic
         await lens.dimensions.selectTextBasedDimensionField('lower');
         await lens.style.setAnnotationTextVisibility('name');
         await lens.closeDimensionEditor();
-        await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText('lower');
-        await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
         await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveText('lower');
+        await lens.dimensions.openDimensionEditor(`${LEFT} > lns-empty-dimension`, 1);
+        await lens.dimensions.selectTextBasedDimensionField('upper');
+        await lens.closeDimensionEditor();
+        await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText([
+          'lower',
+          'upper',
+        ]);
       });
 
-      await spaceTest.step(
-        'adds another query output and an independent static constant',
-        async () => {
-          await lens.dimensions.openDimensionEditor(`${LEFT} > lns-empty-dimension`, 1);
-          await lens.dimensions.switchToEsql();
-          await lens.dimensions.selectTextBasedDimensionField('upper');
-          await lens.closeDimensionEditor();
-          await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText([
-            'lower',
-            'upper',
-          ]);
+      await spaceTest.step('configure static references without a query editor', async () => {
+        await lens.layers.createLayer('referenceLine', undefined, {
+          referenceLineSource: 'static',
+        });
+        await lens.layers.ensureLayerTabIsActive(2);
+        await expect(
+          page.getByRole('tab', { name: 'Static references', exact: true })
+        ).toBeVisible();
+        await expect(page.testSubj.locator('InlineEditingESQLEditor')).toHaveCount(0);
+        await lens.dimensions.openDimensionEditor(`${LEFT} > lns-dimensionTrigger`, 2);
+        await expect(lens.dimensions.esqlTab).toHaveCount(0);
+        await expect(lens.dimensions.staticValueTab).toHaveCount(0);
+        await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '123');
+        await lens.closeDimensionEditor();
+        await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText(
+          'Static value: 123'
+        );
+        await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+      });
 
-          await lens.dimensions.openDimensionEditor(`${LEFT} > lns-empty-dimension`, 1);
-          await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '123');
-          await expect(page.testSubj.locator('lns-indexPattern-static_value-input')).toHaveValue(
-            '123'
-          );
-          await lens.closeDimensionEditor();
-          await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText([
-            'lower',
-            'upper',
-            'Static value: 123',
-          ]);
-          expect(await lens.workspace.getEsqlQuery()).toBe(SHARED_QUERY);
-          await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
-        }
-      );
-
+      await lens.layers.activateLayerTab(1);
+      expect(await lens.workspace.getEsqlQuery()).toBe(SHARED_QUERY);
+      await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText([
+        'lower',
+        'upper',
+      ]);
       await lens.layers.activateLayerTab(0);
       expect(await lens.workspace.getEsqlQuery()).toBe(dataQuery);
       await cancelLensInlineEditorAndWaitClosed({ lens });
@@ -112,109 +109,59 @@ spaceTest.describe('Lens ES|QL reference lines', { tag: '@local-stateful-classic
   );
 
   spaceTest(
-    'keeps the configured line until the replacement method is configured',
+    'offers both reference sources on multi-data-layer ES|QL charts',
     async ({ page, pageObjects }) => {
-      const { dashboard, lens } = pageObjects;
+      const { lens } = pageObjects;
       await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
-      await lens.layers.createLayer('referenceLine');
-      await lens.layers.ensureLayerTabIsActive(1);
-      await lens.workspace.submitEsqlQuery(SHARED_QUERY);
+      const dataQuery = await lens.workspace.getEsqlQuery();
+      await lens.layers.duplicateLayer(0);
+      await lens.layers.createLayer('referenceLine', undefined, { referenceLineSource: 'static' });
+      await lens.layers.ensureLayerTabIsActive(2);
+      await expect(page.getByRole('tab', { name: 'Static references', exact: true })).toBeVisible();
+      await expect(page.testSubj.locator('InlineEditingESQLEditor')).toHaveCount(0);
 
-      await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
-      await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '123');
-      await lens.style.setAnnotationTextVisibility('name');
-      await lens.closeDimensionEditor();
-      await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText(
-        'Static value: 123'
-      );
-      await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveText('Static value: 123');
-
-      await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
-      await lens.dimensions.switchToEsql();
-      await expect
-        .poll(() => lens.dimensions.getSelectedTextBasedDimensionFields())
-        .toStrictEqual([]);
-      await lens.closeDimensionEditor();
-      await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
-      await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText(
-        'Static value: 123'
-      );
-      await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveText('Static value: 123');
-
-      await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
-      await lens.dimensions.switchToStaticValue();
-      await expect(page.testSubj.locator('lns-indexPattern-static_value-input')).toHaveValue('123');
-      await lens.closeDimensionEditor();
-      await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveText('Static value: 123');
-
-      await lens.workspace.submitEsqlQuery(SINGLE_COLUMN_QUERY);
-      await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
-      await lens.dimensions.switchToEsql();
-      await expect
-        .poll(() => lens.dimensions.getSelectedTextBasedDimensionFields())
-        .toStrictEqual(['threshold']);
-      await lens.closeDimensionEditor();
-      await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText('threshold');
-      await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveText('threshold');
-
-      await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
-      await lens.dimensions.switchToStaticValue();
-      await expect(page.testSubj.locator('lns-indexPattern-static_value-input')).toHaveValue('42');
-      await lens.closeDimensionEditor();
-      await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText('threshold');
-      await expect(page.testSubj.locator('xyVisAnnotationText')).toHaveText('threshold');
-
-      await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
-      await lens.dimensions.switchToStaticValue();
-      await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '43');
-      await lens.closeDimensionEditor();
-      await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText(
-        'Static value: 43'
-      );
-      await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
+      await lens.layers.createLayer('referenceLine', undefined, { referenceLineSource: 'esql' });
+      await lens.layers.ensureLayerTabIsActive(3);
+      await expect(page.getByRole('tab', { name: 'ES|QL references', exact: true })).toBeVisible();
+      await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
+      await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveCount(0);
+      await lens.layers.activateLayerTab(0);
+      expect(await lens.workspace.getEsqlQuery()).toBe(dataQuery);
+      await lens.layers.activateLayerTab(1);
+      expect(await lens.workspace.getEsqlQuery()).toBe(dataQuery);
       await cancelLensInlineEditorAndWaitClosed({ lens });
     }
   );
 
   spaceTest(
     'preserves the column and style when moving and duplicating a line',
-    async ({ page, pageObjects }) => {
+    async ({ pageObjects }) => {
       const { dashboard, lens } = pageObjects;
       await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
       await lens.dimensions.setTextBasedDimensionField('lnsXY_yDimensionPanel', 'COUNT(*)');
       await lens.dimensions.openDimensionEditor(`lnsXY_yDimensionPanel > ${TRIGGER}`, 0, 1);
       await lens.dimensions.changeAxisSide('right', { inline: true });
       await lens.closeDimensionEditor();
-
-      await lens.layers.createLayer('referenceLine');
+      await lens.layers.createLayer('referenceLine', undefined, { referenceLineSource: 'esql' });
       await lens.layers.ensureLayerTabIsActive(1);
       await lens.workspace.submitEsqlQuery(SINGLE_COLUMN_QUERY);
-      await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
-      await lens.dimensions.switchToEsql();
-      await expect
-        .poll(() => lens.dimensions.getSelectedTextBasedDimensionFields())
-        .toStrictEqual(['threshold']);
+      await lens.dimensions.openDimensionEditor(`${LEFT} > lns-empty-dimension`, 1);
+      await lens.dimensions.selectTextBasedDimensionField('threshold');
       await lens.style.setReferenceLineFillBelow();
       await lens.closeDimensionEditor();
-      await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText('threshold');
       await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
-      await expect(page.testSubj.locator(`${RIGHT} > lns-empty-dimension`)).toBeVisible();
-
       await lens.dragDrop.dragDimensionToDimension({
         from: `${LEFT} > ${TRIGGER}`,
         to: `${RIGHT} > lns-empty-dimension`,
       });
       await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveCount(0);
       await expect(lens.dimensions.getDimensionTriggersLocator(RIGHT)).toHaveText('threshold');
-      await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
       await lens.dimensions.openDimensionEditor(`${RIGHT} > ${TRIGGER}`, 1);
       await expect
         .poll(() => lens.dimensions.getSelectedTextBasedDimensionFields())
         .toStrictEqual(['threshold']);
       await expect(lens.style.referenceLineFillBelowButton).toHaveAttribute('aria-pressed', 'true');
       await lens.closeDimensionEditor();
-      await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
-
       await lens.dragDrop.dragDimensionToDimension({
         from: `${RIGHT} > ${TRIGGER}`,
         to: `${RIGHT} > lns-empty-dimension`,
@@ -238,14 +185,11 @@ spaceTest.describe('Lens ES|QL reference lines', { tag: '@local-stateful-classic
       const query =
         'FROM logstash-* | SORT bytes DESC | EVAL threshold = bytes | KEEP threshold | LIMIT 2';
       await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
-      await lens.layers.createLayer('referenceLine');
+      await lens.layers.createLayer('referenceLine', undefined, { referenceLineSource: 'esql' });
       await lens.layers.ensureLayerTabIsActive(1);
       await lens.workspace.submitEsqlQuery(query);
-      await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
-      await lens.dimensions.switchToEsql();
-      await expect
-        .poll(() => lens.dimensions.getSelectedTextBasedDimensionFields())
-        .toStrictEqual(['threshold']);
+      await lens.dimensions.openDimensionEditor(`${LEFT} > lns-empty-dimension`, 1);
+      await lens.dimensions.selectTextBasedDimensionField('threshold');
       await lens.style.setAnnotationTextVisibility('name');
       await lens.closeDimensionEditor();
       await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
@@ -266,20 +210,15 @@ spaceTest.describe('Lens ES|QL reference lines', { tag: '@local-stateful-classic
       query: 'FROM logstash-* | STATS threshold = AVG(bytes) | EVAL threshold = TO_DOUBLE(null)',
       field: 'threshold',
     },
-    {
-      title: 'nonnumeric results',
-      query: SHARED_QUERY,
-      field: 'message',
-    },
+    { title: 'nonnumeric results', query: SHARED_QUERY, field: 'message' },
   ]) {
     spaceTest(`does not render a misleading line for ${title}`, async ({ page, pageObjects }) => {
       const { dashboard, lens } = pageObjects;
       await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
-      await lens.layers.createLayer('referenceLine');
+      await lens.layers.createLayer('referenceLine', undefined, { referenceLineSource: 'esql' });
       await lens.layers.ensureLayerTabIsActive(1);
       await lens.workspace.submitEsqlQuery(query);
-      await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
-      await lens.dimensions.switchToEsql();
+      await lens.dimensions.openDimensionEditor(`${LEFT} > lns-empty-dimension`, 1);
       await lens.dimensions.selectTextBasedDimensionField(field);
       await lens.style.setAnnotationTextVisibility('name');
       await lens.closeDimensionEditor();

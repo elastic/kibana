@@ -40,11 +40,7 @@ import {
 } from '../utils';
 import type { FormatSelectorProps } from '../../form_based/dimension_panel/format_selector';
 import { FormatSelector } from '../../form_based/dimension_panel/format_selector';
-import {
-  DimensionEditorButtonGroups,
-  esqlColumnName,
-  staticValueOperationName,
-} from '../../form_based/dimension_panel/dimensions_editor_helpers';
+import { staticValueOperationName } from '../../form_based/dimension_panel/dimensions_editor_helpers';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import { fetchFieldsFromESQLExpression } from './fetch_fields_from_esql_expression';
 
@@ -55,10 +51,6 @@ export type TextBasedDimensionEditorProps =
 
 export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   const [allColumns, setAllColumns] = useState<FieldOptionCompatible[]>([]);
-  const [columnsQuery, setColumnsQuery] = useState<string>();
-  const [temporaryMethod, setTemporaryMethod] = useState<
-    typeof staticValueOperationName | typeof esqlColumnName
-  >();
   const query = props.state.layers[props.layerId]?.query;
   const { euiTheme } = useEuiTheme();
   const {
@@ -128,7 +120,6 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
           };
         });
         setAllColumns(columns);
-        setColumnsQuery(queryEsql);
       } catch (err) {
         // Only swallow the abort we caused via cleanup; let real fetch /
         // ES|QL errors propagate as an unhandled promise rejection, matching
@@ -194,59 +185,7 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
     [columnId, layerId, state.layers, updateLayer]
   );
 
-  const isStatic = Boolean(
-    supportStaticValue &&
-      (temporaryMethod === staticValueOperationName ||
-        (temporaryMethod !== esqlColumnName &&
-          (!selectedField || isStaticValueColumn(selectedField))))
-  );
-
-  useEffect(() => {
-    if (
-      !supportStaticValue ||
-      temporaryMethod === staticValueOperationName ||
-      columnsQuery !== queryEsql ||
-      temporaryMethod !== esqlColumnName
-    )
-      return;
-    const numericColumns = allColumns.filter(
-      (column) => column.compatible && column.meta?.type === 'number'
-    );
-    if (numericColumns.length !== 1) return;
-    const [field] = numericColumns;
-    setState((previousState) => {
-      const layer = previousState.layers[layerId];
-      const previousColumn = layer.columns.find((column) => column.columnId === columnId);
-      const column = {
-        ...(previousColumn ? removeStaticValue(previousColumn) : {}),
-        columnId,
-        fieldName: field.name,
-        label: previousColumn?.customLabel ? previousColumn.label : field.name,
-        meta: field.meta,
-        variable: field.variable,
-      };
-      return mergeLayer({
-        state: previousState,
-        layerId,
-        newLayer: {
-          ...layer,
-          columns: previousColumn
-            ? layer.columns.map((existing) => (existing.columnId === columnId ? column : existing))
-            : [...layer.columns, column],
-        },
-      });
-    });
-    setTemporaryMethod(undefined);
-  }, [
-    allColumns,
-    columnId,
-    columnsQuery,
-    layerId,
-    queryEsql,
-    temporaryMethod,
-    setState,
-    supportStaticValue,
-  ]);
+  const isStatic = Boolean(selectedField && isStaticValueColumn(selectedField));
   const setStaticValue = useCallback(
     (value: string | undefined) => {
       // Same validation as the form-based static value editor.
@@ -257,7 +196,6 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
         selectedField.params?.value === value
       )
         return;
-      setTemporaryMethod(undefined);
       setState((previousState) => {
         const layer = previousState.layers[layerId];
         const previousColumn = layer.columns.find((column) => column.columnId === columnId);
@@ -315,44 +253,6 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
   return (
     <>
       <div className="lnsIndexPatternDimensionEditor--padded">
-        {supportStaticValue && (
-          <DimensionEditorButtonGroups
-            selectedMethod={isStatic ? staticValueOperationName : esqlColumnName}
-            onMethodChange={() => {}}
-            options={[
-              {
-                id: staticValueOperationName,
-                enabled: true,
-                state: isStatic,
-                label: i18n.translate('xpack.lens.indexPattern.staticValueLabel', {
-                  defaultMessage: 'Static value',
-                }),
-                onClick: () => {
-                  setTemporaryMethod(
-                    selectedField && !isStaticValueColumn(selectedField)
-                      ? staticValueOperationName
-                      : undefined
-                  );
-                },
-              },
-              {
-                id: esqlColumnName,
-                enabled: true,
-                state: !isStatic,
-                label: i18n.translate('xpack.lens.textBasedLanguages.esqlColumnLabel', {
-                  defaultMessage: 'ES|QL',
-                }),
-                onClick: () => {
-                  setTemporaryMethod(
-                    !selectedField || isStaticValueColumn(selectedField)
-                      ? esqlColumnName
-                      : undefined
-                  );
-                },
-              },
-            ]}
-          />
-        )}
         {isStatic ? (
           <EuiFormRow
             label={
@@ -398,7 +298,6 @@ export function TextBasedDimensionEditor(props: TextBasedDimensionEditorProps) {
                   selectedField && isStaticValueColumn(selectedField) ? undefined : selectedField
                 }
                 onChoose={(choice) => {
-                  setTemporaryMethod(undefined);
                   const column = allColumns?.find((f) => f.name === choice.field);
                   const newColumn = {
                     columnId: props.columnId,

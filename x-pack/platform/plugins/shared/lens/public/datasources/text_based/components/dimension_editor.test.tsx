@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { DEFAULT_STATIC_VALUE } from '@kbn/lens-common';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ESQLVariableType } from '@kbn/esql-types';
 import type { TextBasedDimensionEditorProps } from './dimension_editor';
@@ -121,17 +120,16 @@ describe('TextBasedDimensionEditor', () => {
     return <TextBasedDimensionEditor {...props} state={state} setState={setState} />;
   };
 
-  it('starts reference dimensions in static mode and switches to ES|QL selection', async () => {
+  it('starts reference dimensions with query field selection and no method switch', async () => {
     render(<StatefulEditor {...defaultProps} enableFormatSelector={false} supportStaticValue />);
     await waitToLoad();
-    expect(screen.getByTestId('lns-indexPattern-static_value-input')).toBeInTheDocument();
-    expect(screen.queryByTestId('text-based-dimension-field')).not.toBeInTheDocument();
-    fireEvent.click(screen.getByTestId('lens-dimensionTabs-esql'));
     expect(screen.getByTestId('text-based-dimension-field')).toBeInTheDocument();
     expect(screen.queryByTestId('lns-indexPattern-static_value-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-dimensionTabs-esql')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-dimensionTabs-static_value')).not.toBeInTheDocument();
   });
 
-  it('keeps the static column active until a query output is selected', async () => {
+  it('keeps an existing static column editable without a method switch', async () => {
     const setState = jest.fn();
     fetchFieldsFromESQLExpression.mockResolvedValue({
       columns: [
@@ -153,21 +151,13 @@ describe('TextBasedDimensionEditor', () => {
       />
     );
     await waitToLoad();
-    fireEvent.click(screen.getByTestId('lens-dimensionTabs-esql'));
-    expect(capturedSelectedField).toBeUndefined();
-    expect(setState).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByTestId('lens-dimensionTabs-static_value'));
     expect(screen.getByTestId('lns-indexPattern-static_value-input')).toHaveValue(42);
+    expect(screen.queryByTestId('text-based-dimension-field')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-dimensionTabs-esql')).not.toBeInTheDocument();
     expect(setState).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByTestId('lens-dimensionTabs-esql'));
-    act(() => capturedOnChoose?.({ field: 'a', type: 'field', dataType: 'number' }));
-    const [selectedColumn] = setState.mock.calls[0][0].layers.layer1.columns;
-    expect(selectedColumn).toMatchObject({ columnId: 'dim1', fieldName: 'a' });
-    expect(selectedColumn.operationType).toBeUndefined();
-    expect(selectedColumn.params?.value).toBeUndefined();
   });
 
-  it('auto-selects the only numeric field and defaults static controls without a result', async () => {
+  it('preserves an existing static value when query fields finish loading', async () => {
     render(
       <StatefulEditor
         {...defaultProps}
@@ -181,15 +171,11 @@ describe('TextBasedDimensionEditor', () => {
       />
     );
     await waitToLoad();
-    fireEvent.click(screen.getByTestId('lens-dimensionTabs-esql'));
-    await waitFor(() => expect(capturedSelectedField?.fieldName).toBe('Field Two'));
-    fireEvent.click(screen.getByTestId('lens-dimensionTabs-static_value'));
-    expect(screen.getByTestId('lns-indexPattern-static_value-input')).toHaveValue(
-      DEFAULT_STATIC_VALUE
-    );
+    expect(screen.getByTestId('lns-indexPattern-static_value-input')).toHaveValue(42);
+    expect(screen.queryByTestId('lens-dimensionTabs-esql')).not.toBeInTheDocument();
   });
 
-  it('keeps the query active until the temporary static value is edited', async () => {
+  it('keeps query dimensions field-based even when static values are supported', async () => {
     const setState = jest.fn();
     render(
       <TextBasedDimensionEditor
@@ -202,22 +188,10 @@ describe('TextBasedDimensionEditor', () => {
       />
     );
     await waitToLoad();
-    fireEvent.click(screen.getByTestId('lens-dimensionTabs-static_value'));
-    expect(screen.getByTestId('lns-indexPattern-static_value-input')).toHaveValue(42);
+    expect(capturedSelectedField?.fieldName).toBe('bytes');
+    expect(screen.queryByTestId('lns-indexPattern-static_value-input')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('lens-dimensionTabs-static_value')).not.toBeInTheDocument();
     expect(setState).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByTestId('lens-dimensionTabs-esql'));
-    expect(setState).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByTestId('lens-dimensionTabs-static_value'));
-    fireEvent.change(screen.getByTestId('lns-indexPattern-static_value-input'), {
-      target: { value: '43' },
-    });
-    await waitFor(() => expect(setState).toHaveBeenCalled());
-    const nextState = setState.mock.calls[0][0](stateWithColumn());
-    expect(nextState.layers.layer1.columns[0]).toMatchObject({
-      columnId: 'dim1',
-      operationType: 'static_value',
-      params: { value: '43' },
-    });
   });
 
   it('renders correctly and fetches columns on mount', async () => {

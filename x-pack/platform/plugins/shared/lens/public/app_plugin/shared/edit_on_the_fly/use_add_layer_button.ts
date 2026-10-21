@@ -40,10 +40,9 @@ export const getDatasourceIdForNewLayer = (
   isEsql: boolean
 ): LensDatasourceId | undefined => {
   if (layerType === LENS_LAYER_TYPES.REFERENCELINE) {
-    return isEsql ? LENS_DATASOURCE_ID.TEXT_BASED : LENS_DATASOURCE_ID.FORM_BASED;
+    return LENS_DATASOURCE_ID.FORM_BASED;
   }
-  // Existing static reference layers can still be form-based. New data layers
-  // must remain text-based even when one of those helper layers is selected.
+  // New data layers must remain text-based even when a static reference layer is selected.
   if (isEsql && layerType === LENS_LAYER_TYPES.DATA) {
     return LENS_DATASOURCE_ID.TEXT_BASED;
   }
@@ -82,18 +81,20 @@ export const useAddLayerButton = (
   );
 
   const addLayer: AddLayerFunction = useCallback(
-    (layerType, extraArg, ignoreInitialValues, seriesType) => {
+    (layerType, extraArg, ignoreInitialValues, seriesType, requestedDatasourceId) => {
       const layerId = generateId();
       const selectedLayerDatasourceId = (
         visualization.selectedLayerId
           ? framePublicAPI.datasourceLayers[visualization.selectedLayerId]?.datasourceId
           : undefined
       ) as LensDatasourceId | undefined;
-      const datasourceId = getDatasourceIdForNewLayer(
-        layerType,
-        selectedLayerDatasourceId,
-        isEsqlChart(framePublicAPI.datasourceLayers)
-      );
+      const datasourceId =
+        requestedDatasourceId ??
+        getDatasourceIdForNewLayer(
+          layerType,
+          selectedLayerDatasourceId,
+          isEsqlChart(framePublicAPI.datasourceLayers)
+        );
 
       dispatchLens(
         addLayerAction({
@@ -158,6 +159,7 @@ export const useAddLayerButton = (
         isInlineEditing: Boolean(setIsInlineFlyoutVisible),
         // annotation library groups are data-view-based and not supported on ES|QL charts
         hideAnnotationLibrary: isEsqlChart(framePublicAPI.datasourceLayers),
+        isEsqlChart: isEsqlChart(framePublicAPI.datasourceLayers),
       }) ?? null
     );
   }, [

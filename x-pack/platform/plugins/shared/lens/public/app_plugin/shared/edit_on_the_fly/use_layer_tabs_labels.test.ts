@@ -50,6 +50,18 @@ describe('useGetLayerTabsLabel', () => {
     expect(result.current('layer1')).toBe('Reference line');
   });
 
+  it('numbers source-specific labels independently', () => {
+    const layerConfigs = [
+      { ...createLayerConfig('static1', 'referenceLine'), tabLabel: 'Static references' },
+      { ...createLayerConfig('query1', 'referenceLine'), tabLabel: 'ES|QL references' },
+      { ...createLayerConfig('static2', 'referenceLine'), tabLabel: 'Static references' },
+    ];
+    const { result } = renderHook(() => useGetLayerTabsLabel(layerConfigs));
+    expect(result.current('static1')).toBe('Static references 1');
+    expect(result.current('static2')).toBe('Static references 2');
+    expect(result.current('query1')).toBe('ES|QL references');
+  });
+
   it('returns numbered labels for multiple reference line layers', () => {
     const layerConfigs = [
       createLayerConfig('layer1', 'referenceLine'),

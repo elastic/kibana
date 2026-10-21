@@ -60,10 +60,12 @@ spaceTest.describe(
 
         await lens.layers.activateLayerTab(0);
         expect(await lens.workspace.getEsqlQuery()).toBe(COUNT_QUERY);
-        await lens.layers.createLayer('referenceLine');
+        await lens.layers.createLayer('referenceLine', undefined, {
+          referenceLineSource: 'static',
+        });
         expect(await lens.layers.getLayerCount()).toBe(3);
         await lens.layers.ensureLayerTabIsActive(2);
-        await expect(page.testSubj.locator('InlineEditingESQLEditor')).toBeVisible();
+        await expect(page.testSubj.locator('InlineEditingESQLEditor')).toHaveCount(0);
         expect(await lens.dimensions.getDimensionTriggerText(REFERENCE_LINE_DIMENSION)).toMatch(
           /^Static value: /
         );
@@ -106,7 +108,9 @@ spaceTest.describe(
         const { dashboard, lens } = pageObjects;
 
         await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
-        await lens.layers.createLayer('referenceLine');
+        await lens.layers.createLayer('referenceLine', undefined, {
+          referenceLineSource: 'static',
+        });
         await applyLensInlineEditorAndWaitClosed({ lens });
         await dashboard.saveChangesToExistingDashboard();
 
@@ -120,7 +124,7 @@ spaceTest.describe(
         await expect(lens.applyFlyoutButton).toBeDisabled();
 
         await lens.dimensions.openDimensionEditor(
-          `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger-textBased`,
+          `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger`,
           1
         );
         await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '250');
@@ -165,19 +169,19 @@ spaceTest.describe(
         await lens.closeDimensionEditor();
 
         await lens.layers.activateLayerTab(0);
-        await lens.layers.createLayer('referenceLine');
+        await lens.layers.createLayer('referenceLine', undefined, {
+          referenceLineSource: 'static',
+        });
         await lens.layers.ensureLayerTabIsActive(2);
         // No data view switcher on the reference line layer.
         await expect(page.testSubj.locator('lns_layerIndexPatternLabel')).toHaveCount(0);
 
-        // ES|QL reference lines offer static values and query outputs, not
-        // data-view-dependent Quick function / Formula operations.
         await lens.dimensions.openDimensionEditor(
-          `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger-textBased`,
+          `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger`,
           2
         );
-        await expect(lens.dimensions.staticValueTab).toBeVisible();
-        await expect(lens.dimensions.esqlTab).toBeVisible();
+        await expect(lens.dimensions.staticValueTab).toHaveCount(0);
+        await expect(lens.dimensions.esqlTab).toHaveCount(0);
         await expect(lens.dimensions.quickFunctionsTab).toHaveCount(0);
         await expect(lens.dimensions.formulaTab).toHaveCount(0);
         await expect(page.testSubj.locator('indexPattern-dimension-field')).toHaveCount(0);
@@ -234,11 +238,13 @@ spaceTest.describe(
 
         // Reference line: set a custom static value and a below-fill style.
         await lens.layers.activateLayerTab(0);
-        await lens.layers.createLayer('referenceLine');
+        await lens.layers.createLayer('referenceLine', undefined, {
+          referenceLineSource: 'static',
+        });
         await lens.layers.ensureLayerTabIsActive(2);
 
         await lens.dimensions.openDimensionEditor(
-          `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger-textBased`,
+          `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger`,
           2
         );
         await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '1000');
@@ -254,7 +260,7 @@ spaceTest.describe(
 
         // Duplicating a reference line carries its value and style.
         await lens.dragDrop.dragDimensionToDimension({
-          from: `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger-textBased`,
+          from: `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger`,
           to: `${REFERENCE_LINE_DIMENSION} > lns-empty-dimension`,
         });
         const duplicatedReferenceLineTriggers =
@@ -264,7 +270,7 @@ spaceTest.describe(
           'Static value: 1000 [1]',
         ]);
         await lens.dimensions.openDimensionEditor(
-          `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger-textBased`,
+          `${REFERENCE_LINE_DIMENSION} > lns-dimensionTrigger`,
           2,
           1
         );
@@ -275,8 +281,6 @@ spaceTest.describe(
         await lens.closeDimensionEditor();
         await expectEsqlChartToRender(dashboard, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
 
-        // Static and query-based dimensions share the text-based reference layer;
-        // adding another static dimension must not break the chart.
         await lens.dimensions.openDimensionEditor(
           `${REFERENCE_LINE_DIMENSION} > lns-empty-dimension`,
           2

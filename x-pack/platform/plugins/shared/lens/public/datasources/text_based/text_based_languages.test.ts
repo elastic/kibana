@@ -619,7 +619,7 @@ describe('Textbased Data Source', () => {
   });
 
   describe('#initializeDimension', () => {
-    it('initializes a reference dimension with its default static threshold', () => {
+    it('does not initialize query reference dimensions with static thresholds', () => {
       const state: TextBasedPrivateState = {
         indexPatternRefs: [],
         layers: { reference: { columns: [], query: { esql: 'FROM logs' } } },
@@ -637,15 +637,8 @@ describe('Textbased Data Source', () => {
           staticValue: 42,
         }
       );
-      expect(nextState.layers.reference.columns).toEqual([
-        {
-          columnId: 'threshold',
-          fieldName: '42',
-          meta: { type: 'number' },
-          operationType: 'static_value',
-          params: { value: '42' },
-        },
-      ]);
+      expect(nextState).toBe(state);
+      expect(nextState.layers.reference.columns).toEqual([]);
       expect(nextState.layers.reference.query).toEqual(state.layers.reference.query);
     });
 

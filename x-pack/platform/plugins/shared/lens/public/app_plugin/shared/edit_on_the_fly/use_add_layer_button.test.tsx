@@ -101,14 +101,14 @@ describe('useAddLayerButton', () => {
     ).toBe(LENS_DATASOURCE_ID.TEXT_BASED);
   });
 
-  it('uses the text-based datasource for a new ES|QL reference line', () => {
+  it('defaults reference lines to the form-based datasource on ES|QL charts', () => {
     expect(
       getDatasourceIdForNewLayer(
         LENS_LAYER_TYPES.REFERENCELINE,
         LENS_DATASOURCE_ID.TEXT_BASED,
         true
       )
-    ).toBe(LENS_DATASOURCE_ID.TEXT_BASED);
+    ).toBe(LENS_DATASOURCE_ID.FORM_BASED);
   });
 
   it('keeps form-based reference lines on non-ES|QL charts', () => {

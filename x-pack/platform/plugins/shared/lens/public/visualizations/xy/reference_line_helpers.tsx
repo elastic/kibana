@@ -451,7 +451,7 @@ export const getReferenceConfiguration = ({
     frame.activeData
   );
   const isHorizontal = isHorizontalChart(state.layers);
-  // Legacy form-based reference layers on ES|QL charts remain static-only.
+  // Static reference layers reuse the form-based datasource without exposing DSL operations.
   const staticValueOnly =
     isEsqlChart(frame.datasourceLayers) &&
     !frame.datasourceLayers[layer.layerId]?.isTextBasedLanguage();

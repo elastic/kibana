@@ -52,24 +52,18 @@ spaceTest.describe(
         await openInlineEditorAndWaitVisible(pageObjects, panelId);
         const dataQuery = await lens.workspace.getEsqlQuery();
 
-        await spaceTest.step('configure two axes and a mixed reference layer', async () => {
+        await spaceTest.step('configure two axes and a query reference layer', async () => {
           await lens.dimensions.setTextBasedDimensionField('lnsXY_yDimensionPanel', 'COUNT(*)');
           await lens.dimensions.openDimensionEditor(`lnsXY_yDimensionPanel > ${TRIGGER}`, 0, 1);
           await lens.dimensions.changeAxisSide('right', { inline: true });
           await lens.closeDimensionEditor();
-          await lens.layers.createLayer('referenceLine');
+          await lens.layers.createLayer('referenceLine', undefined, {
+            referenceLineSource: 'esql',
+          });
           await lens.layers.ensureLayerTabIsActive(1);
           await lens.workspace.submitEsqlQuery(SHARED_QUERY);
 
-          await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
-          await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '123');
-          await lens.closeDimensionEditor();
-          await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText(
-            'Static value: 123'
-          );
-
           await lens.dimensions.openDimensionEditor(`${RIGHT} > lns-empty-dimension`, 1);
-          await lens.dimensions.switchToEsql();
           await lens.dimensions.selectTextBasedDimensionField('lower');
           await lens.style.setReferenceLineFillBelow();
           await lens.style.setAnnotationTextVisibility('name');
@@ -79,7 +73,6 @@ spaceTest.describe(
           await expectEsqlChartToRender(dashboard, panelId);
 
           await lens.dimensions.openDimensionEditor(`${RIGHT} > lns-empty-dimension`, 1);
-          await lens.dimensions.switchToEsql();
           await lens.dimensions.selectTextBasedDimensionField('upper');
           await lens.closeDimensionEditor();
           await expect(lens.dimensions.getDimensionTriggersLocator(RIGHT)).toHaveText([
@@ -90,17 +83,33 @@ spaceTest.describe(
 
         await spaceTest.step('add a second reference layer with its own query', async () => {
           await lens.layers.activateLayerTab(0);
-          await lens.layers.createLayer('referenceLine');
+          await lens.layers.createLayer('referenceLine', undefined, {
+            referenceLineSource: 'esql',
+          });
           await lens.layers.ensureLayerTabIsActive(2);
           await lens.workspace.submitEsqlQuery(SECOND_QUERY);
-          await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 2);
-          await lens.dimensions.switchToEsql();
+          await lens.dimensions.openDimensionEditor(`${LEFT} > lns-empty-dimension`, 2);
+          await lens.dimensions.selectTextBasedDimensionField('independent');
           await expect
             .poll(() => lens.dimensions.getSelectedTextBasedDimensionFields())
             .toStrictEqual(['independent']);
           await lens.closeDimensionEditor();
           await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText('independent');
           await expectEsqlChartToRender(dashboard, panelId);
+        });
+
+        await spaceTest.step('add a separate static reference layer', async () => {
+          await lens.layers.createLayer('referenceLine', undefined, {
+            referenceLineSource: 'static',
+          });
+          await lens.layers.ensureLayerTabIsActive(3);
+          await expect(page.testSubj.locator('InlineEditingESQLEditor')).toHaveCount(0);
+          await lens.dimensions.openDimensionEditor(`${LEFT} > lns-dimensionTrigger`, 3);
+          await lens.workspace.setInputValue('lns-indexPattern-static_value-input', '123');
+          await lens.closeDimensionEditor();
+          await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText(
+            'Static value: 123'
+          );
         });
 
         await spaceTest.step('apply, save and reload the dashboard', async () => {
@@ -114,7 +123,7 @@ spaceTest.describe(
           await expect(panel.getByTestId('xyVisAnnotationIcon')).toBeVisible();
           await dashboard.ensureEditMode();
           await openInlineEditorAndWaitVisible(pageObjects, panelId);
-          expect(await lens.layers.getLayerCount()).toBe(3);
+          expect(await lens.layers.getLayerCount()).toBe(4);
           await expect(lens.applyFlyoutButton).toBeDisabled();
         });
 
@@ -123,15 +132,14 @@ spaceTest.describe(
           expect(await lens.workspace.getEsqlQuery()).toBe(dataQuery);
           await lens.layers.activateLayerTab(1);
           expect(await lens.workspace.getEsqlQuery()).toBe(SHARED_QUERY);
-          await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveText(
-            'Static value: 123'
-          );
+          await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveCount(0);
           await expect(lens.dimensions.getDimensionTriggersLocator(RIGHT)).toHaveText([
             'lower',
             'upper',
           ]);
           await lens.dimensions.openDimensionEditor(`${RIGHT} > ${TRIGGER}`, 1);
-          await expect(lens.dimensions.esqlTab).toHaveAttribute('aria-pressed', 'true');
+          await expect(lens.dimensions.esqlTab).toHaveCount(0);
+          await expect(lens.dimensions.staticValueTab).toHaveCount(0);
           await expect
             .poll(() => lens.dimensions.getSelectedTextBasedDimensionFields())
             .toStrictEqual(['lower']);
@@ -144,8 +152,10 @@ spaceTest.describe(
             .toStrictEqual(['Bell']);
           await lens.closeDimensionEditor();
 
-          await lens.dimensions.openDimensionEditor(`${LEFT} > ${TRIGGER}`, 1);
-          await expect(lens.dimensions.staticValueTab).toHaveAttribute('aria-pressed', 'true');
+          await lens.layers.activateLayerTab(3);
+          await expect(page.testSubj.locator('InlineEditingESQLEditor')).toHaveCount(0);
+          await lens.dimensions.openDimensionEditor(`${LEFT} > lns-dimensionTrigger`, 3);
+          await expect(lens.dimensions.staticValueTab).toHaveCount(0);
           await expect(page.testSubj.locator('lns-indexPattern-static_value-input')).toHaveValue(
             '123'
           );

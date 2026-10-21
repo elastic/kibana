@@ -65,7 +65,6 @@ import {
   addColumnsToCache,
   retrieveLayerColumnsFromCache,
 } from './fieldlist_cache';
-import { staticValueOperationName } from '../form_based/dimension_panel/dimensions_editor_helpers';
 import { TEXT_BASED_LANGUAGE_ERROR } from '../../user_messages_ids';
 
 function getLayerReferenceName(layerId: string) {
@@ -612,35 +611,9 @@ export function getTextBasedDatasource({
     // created. For metric trendline layers, this auto-initializes the time field
     // column and applies the appropriate ES|QL time bucket so the trendline has
     // time-series data without manual user configuration.
-    initializeDimension(
-      state,
-      layerId,
-      indexPatterns,
-      { columnId, groupId, autoTimeField, staticValue }
-    ) {
+    initializeDimension(state, layerId, indexPatterns, { columnId, groupId, autoTimeField }) {
       const layer = state.layers[layerId];
       if (!layer) return state;
-      if (typeof staticValue === 'number') {
-        return {
-          ...state,
-          layers: {
-            ...state.layers,
-            [layerId]: {
-              ...layer,
-              columns: [
-                ...layer.columns,
-                {
-                  columnId,
-                  fieldName: String(staticValue),
-                  operationType: staticValueOperationName,
-                  params: { value: String(staticValue) },
-                  meta: { type: 'number' as const },
-                },
-              ],
-            },
-          },
-        };
-      }
       if (autoTimeField && layer.timeField) {
         const tf = layer.timeField;
         let trendlineTimeField = buildTrendlineBucketExpression(tf);

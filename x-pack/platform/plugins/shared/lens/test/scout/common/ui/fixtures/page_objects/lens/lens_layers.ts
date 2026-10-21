@@ -217,11 +217,15 @@ export class LensLayers {
        * Defaults to the DSL submenu flow, keeping existing call sites unchanged.
        */
       annotationsAddDirectly?: boolean;
+      referenceLineSource?: 'static' | 'esql';
     } = {}
   ) {
     const tabsBefore = await this.getLayerCount();
     await this.page.testSubj.click('lnsLayerAddButton');
     await this.page.testSubj.click(`lnsLayerAddButton-${layerType}`);
+    if (layerType === 'referenceLine' && options.referenceLineSource) {
+      await this.page.testSubj.click(`lnsReferenceLineLayer_${options.referenceLineSource}`);
+    }
     if (layerType === 'annotations' && !options.annotationsAddDirectly) {
       if (annotationFromLibraryTitle) {
         await this.page.testSubj.click('lnsAnnotationLayer_addFromLibrary');
