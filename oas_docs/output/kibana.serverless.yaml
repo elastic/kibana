@@ -48091,7 +48091,7 @@ paths:
                   type: string
                 integrationName:
                   description: Integration name as entered in the Service Settings step, before any per-package suffix is applied.
-                  maxLength: 255
+                  maxLength: 160
                   type: string
                 mechanisms:
                   description: Delivery mechanisms active in this deployment.
@@ -48897,7 +48897,7 @@ paths:
                   type: array
                 integrationName:
                   description: Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.
-                  maxLength: 255
+                  maxLength: 160
                   type: string
                 mechanisms:
                   description: Delivery mechanisms active in this deployment. Replaces the stored mechanisms array.
