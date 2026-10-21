@@ -29,6 +29,12 @@ export const getSummaryColumn = (
       {...props}
       density={density}
       onFilter={toolkit.actions.addFilter}
+      onOpenOverview={
+        toolkit.actions.setExpandedDoc
+          ? (row) =>
+              toolkit.actions.setExpandedDoc?.(row, { initialTabId: 'doc_view_logs_overview' })
+          : undefined
+      }
       rowHeight={rowHeight}
       shouldShowFieldHandler={shouldShowFieldHandler}
     />
