@@ -15,7 +15,11 @@ import { StatusError } from '../streams/errors/status_error';
 import { toEsqlRequest } from '../streams/helpers/esql';
 import { UNIT_STATS_DEFAULT_WINDOW_MS, UNIT_STATS_REQUEST_TIMEOUT_MS } from './constants';
 import { toSearchError } from './errors/search_errors';
-import { STATS_ERROR_CODE, type UnitStatsError } from './errors/unit_stats_error';
+import {
+  mostActionableFailure,
+  STATS_ERROR_CODE,
+  type UnitStatsError,
+} from './errors/unit_stats_error';
 import { toRows, type EsqlRow } from './mappers/esql_rows';
 import {
   joinDestinationRows,
@@ -51,7 +55,7 @@ interface StatsQuery {
 /** The results of one kind, and the error when its queries failed. */
 interface KindOutcome<TResult> {
   results: Record<string, TResult>;
-  error?: StreamsUnit.StatsError;
+  error?: UnitStatsError;
 }
 
 const dedupe = (refs: StreamsUnit.StatsComponentRef[]): StreamsUnit.StatsComponentRef[] => {
@@ -136,16 +140,17 @@ export class UnitStatsClient {
     Object.assign(destinations, destinationOutcome?.results);
     Object.assign(processors, processorOutcome?.results);
 
-    // Every kind that ran failed with the same code: the response says so too.
-    const outcomes = [destinationOutcome, processorOutcome].flatMap((outcome) =>
-      outcome ? [outcome] : []
+    // Every kind that ran failed: there is nothing to return, so the request fails with the most
+    // actionable error, and `createServerRoute` maps it to its HTTP status.
+    const failures = [destinationOutcome, processorOutcome].flatMap((outcome) =>
+      outcome?.error ? [outcome.error] : []
     );
-    const firstError = outcomes[0]?.error;
-    const allFailedTheSame =
-      firstError !== undefined && outcomes.every(({ error }) => error?.code === firstError.code);
+    const ranKinds = [destinationOutcome, processorOutcome].filter(Boolean).length;
+    if (failures.length > 0 && failures.length === ranKinds) {
+      throw mostActionableFailure(failures);
+    }
 
     return {
-      ...(allFailedTheSame ? { error: firstError } : {}),
       components: { destinations, processors },
       meta: { window, ...(configHash ? { config_hash: configHash } : {}) },
     };
@@ -175,15 +180,12 @@ export class UnitStatsClient {
       const what = 'stream probe';
       const failure = toSearchError(error, what);
       this.logFailure(failure, { unitId: query.unitId, what });
-      const statsError = failure.toStatsError();
 
       return [
         destinationIds.length > 0
-          ? this.destinationFailure({ ids: destinationIds, bucketMs, failure: statsError })
+          ? this.destinationFailure({ ids: destinationIds, bucketMs, failure })
           : undefined,
-        processorIds.length > 0
-          ? this.processorFailure({ ids: processorIds, failure: statsError })
-          : undefined,
+        processorIds.length > 0 ? this.processorFailure({ ids: processorIds, failure }) : undefined,
       ];
     }
 
@@ -287,7 +289,7 @@ export class UnitStatsClient {
       const failure = toSearchError(error, what);
       this.logFailure(failure, { unitId: query.unitId, what });
 
-      return this.destinationFailure({ ids, bucketMs, failure: failure.toStatsError() });
+      return this.destinationFailure({ ids, bucketMs, failure });
     }
   }
 
@@ -299,11 +301,11 @@ export class UnitStatsClient {
   }: {
     ids: string[];
     bucketMs: number;
-    failure: StreamsUnit.StatsError;
+    failure: UnitStatsError;
   }): KindOutcome<StreamsUnit.StatsDestinationResult> {
     return {
       results: Object.fromEntries(
-        ids.map((id) => [id, { ...noDestinationStats(bucketMs), error: failure }])
+        ids.map((id) => [id, { ...noDestinationStats(bucketMs), error: failure.toStatsError() }])
       ),
       error: failure,
     };
@@ -332,7 +334,7 @@ export class UnitStatsClient {
       const failure = toSearchError(error, what);
       this.logFailure(failure, { unitId: query.unitId, what });
 
-      return this.processorFailure({ ids, failure: failure.toStatsError() });
+      return this.processorFailure({ ids, failure });
     }
   }
 
@@ -342,10 +344,12 @@ export class UnitStatsClient {
     failure,
   }: {
     ids: string[];
-    failure: StreamsUnit.StatsError;
+    failure: UnitStatsError;
   }): KindOutcome<StreamsUnit.StatsProcessorResult> {
     return {
-      results: Object.fromEntries(ids.map((id) => [id, { ...noProcessorStats(), error: failure }])),
+      results: Object.fromEntries(
+        ids.map((id) => [id, { ...noProcessorStats(), error: failure.toStatsError() }])
+      ),
       error: failure,
     };
   }

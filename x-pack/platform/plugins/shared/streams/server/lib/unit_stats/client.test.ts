@@ -229,7 +229,6 @@ describe('UnitStatsClient.getStats', () => {
       expect(esql).not.toHaveBeenCalled();
       expect(response.components.destinations.nope.error?.code).toBe('not_found');
       expect(response.components.processors.nope.error?.code).toBe('not_found');
-      expect(response.error).toBeUndefined();
     });
   });
 
@@ -335,21 +334,14 @@ describe('UnitStatsClient.getStats', () => {
       ).toBeNull();
       expect(response.components.destinations['es-prod'].error).toBeUndefined();
       expect(response.components.destinations.dbg.error).toBeUndefined();
-      expect(response.error).toBeUndefined();
       expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
     });
 
-    it('runs no stats query and puts the probe error on every queryable component when the probe fails', async () => {
+    it('runs no stats query and fails the request with the probe error when the probe fails', async () => {
       const esql = makeEsql({ probe: failWith(responseError(429)) });
 
-      const response = await run(esql);
-
+      await expect(run(esql)).rejects.toMatchObject({ code: 'unavailable', statusCode: 503 });
       expect(statsQueries(esql)).toHaveLength(0);
-      expect(response.components.destinations['es-prod'].error?.code).toBe('unavailable');
-      expect(response.components.destinations['es-dev'].error?.code).toBe('unavailable');
-      expect(response.components.processors['uppercase-message'].error?.code).toBe('unavailable');
-      expect(response.components.destinations.dbg.error?.code).toBe('unavailable');
-      expect(response.error?.code).toBe('unavailable');
     });
 
     it('returns no data and no error when the queries return no rows', async () => {
@@ -370,7 +362,6 @@ describe('UnitStatsClient.getStats', () => {
         response.components.processors['uppercase-message'].events.incoming.rate.value
       ).toBeNull();
       expect(response.components.destinations['es-prod'].error).toBeUndefined();
-      expect(response.error).toBeUndefined();
       expect(response.meta.config_hash).toBe('nope');
     });
   });
@@ -386,7 +377,6 @@ describe('UnitStatsClient.getStats', () => {
       expect(response.components.processors['uppercase-message'].events.incoming.rate.value).toBe(
         4.6
       );
-      expect(response.error).toBeUndefined();
     });
 
     it('puts the same error on every processor when a processor query fails', async () => {
@@ -395,7 +385,6 @@ describe('UnitStatsClient.getStats', () => {
       expect(response.components.processors['uppercase-message'].error?.code).toBe('error');
       expect(response.components.destinations['es-prod'].error).toBeUndefined();
       expect(response.components.destinations['es-prod'].events.incoming.rate.value).toBe(4.6);
-      expect(response.error).toBeUndefined();
     });
 
     it('logs a query that fails or times out at warn, and an expected cluster state at debug', async () => {
@@ -424,39 +413,53 @@ describe('UnitStatsClient.getStats', () => {
       expect(response.components.destinations['es-prod'].events.incoming.total.value).toBeNull();
     });
 
-    it('also sets the response error when every kind failed with the same code', async () => {
-      const response = await run(
-        makeEsql({
-          destinationSums: failWith(responseError(429)),
-          processorRate: failWith(responseError(429)),
-        })
-      );
-
-      expect(response.error?.code).toBe('unavailable');
-      expect(response.components.destinations['es-prod'].error?.code).toBe('unavailable');
-      expect(response.components.processors['uppercase-message'].error?.code).toBe('unavailable');
+    it('fails the request when every kind that ran failed with the same code', async () => {
+      await expect(
+        run(
+          makeEsql({
+            destinationSums: failWith(responseError(429)),
+            processorRate: failWith(responseError(429)),
+          })
+        )
+      ).rejects.toMatchObject({ code: 'unavailable', statusCode: 503 });
     });
 
-    it('sets only the component errors when the kinds failed with different codes', async () => {
-      const response = await run(
-        makeEsql({
-          destinationRate: failWith(responseError(429)),
-          processorRate: failWith(new errors.TimeoutError('timeout', {} as never)),
-        })
-      );
-
-      expect(response.error).toBeUndefined();
-      expect(response.components.destinations['es-prod'].error?.code).toBe('unavailable');
-      expect(response.components.processors['uppercase-message'].error?.code).toBe('timeout');
+    it('fails the request with the most actionable error when every kind failed with a different code', async () => {
+      await expect(
+        run(
+          makeEsql({
+            destinationRate: failWith(responseError(429)),
+            processorRate: failWith(responseError(403)),
+          })
+        )
+      ).rejects.toMatchObject({ code: 'forbidden', statusCode: 403 });
+      await expect(
+        run(
+          makeEsql({
+            destinationRate: failWith(responseError(429)),
+            processorRate: failWith(new errors.TimeoutError('timeout', {} as never)),
+          })
+        )
+      ).rejects.toMatchObject({ code: 'timeout', statusCode: 503 });
     });
 
-    it('sets the response error when the only kind that ran failed', async () => {
-      const response = await run(makeEsql({ destinationRate: failWith(responseError(403)) }), {
-        components: [{ kind: 'destination', id: 'es-prod' }],
-      });
+    it('fails the request when the only kind that ran failed', async () => {
+      await expect(
+        run(makeEsql({ destinationRate: failWith(responseError(403)) }), {
+          components: [{ kind: 'destination', id: 'es-prod' }],
+        })
+      ).rejects.toMatchObject({ code: 'forbidden', statusCode: 403 });
+    });
 
-      expect(response.error?.code).toBe('forbidden');
-      expect(response.components.destinations['es-prod'].error?.code).toBe('forbidden');
+    it('fails the request with a 500 when every kind failed with an unexpected error', async () => {
+      await expect(
+        run(
+          makeEsql({
+            destinationRate: failWith(responseError(500)),
+            processorSums: failWith(responseError(500)),
+          })
+        )
+      ).rejects.toMatchObject({ code: 'error', statusCode: 500 });
     });
   });
 });

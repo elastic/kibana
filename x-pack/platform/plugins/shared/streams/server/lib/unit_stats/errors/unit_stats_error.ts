@@ -25,10 +25,10 @@ interface ErrorOptions {
 }
 
 /**
- * The stats errors. Unlike the other streams errors, these end up as a field in a 200
- * response and not as an HTTP status: the client catches them at the boundary they are
- * scoped to and calls `toStatsError`. Extending `StatusError` means one that escapes is
- * still mapped to the right status by `createServerRoute`.
+ * The stats errors. A failure of one kind ends up as a field in a 200 response: the client
+ * catches it at the boundary it is scoped to and calls `toStatsError`. When every kind that
+ * ran failed, the client throws one of them, and `createServerRoute` maps its `statusCode`
+ * because the class extends `StatusError`.
  *
  * One class with named constructors, because callers only read `code`. The messages are
  * written here and never hold a raw Elasticsearch body.
@@ -92,3 +92,21 @@ export class UnitStatsError extends StatusError {
     return { code: this.code, reason: this.message };
   }
 }
+
+/** From the failure a retry cannot fix to the one it can. */
+const FAILURE_PRIORITY: StatsErrorCode[] = [
+  STATS_ERROR_CODE.forbidden,
+  STATS_ERROR_CODE.error,
+  STATS_ERROR_CODE.timeout,
+  STATS_ERROR_CODE.unavailable,
+  STATS_ERROR_CODE.notFound,
+];
+
+/**
+ * The failure to report when every kind failed. The most actionable one wins, so a client that
+ * retries on a 503 does not keep retrying a request that also has a 403.
+ */
+export const mostActionableFailure = (failures: UnitStatsError[]): UnitStatsError =>
+  failures.reduce((best, failure) =>
+    FAILURE_PRIORITY.indexOf(failure.code) < FAILURE_PRIORITY.indexOf(best.code) ? failure : best
+  );
