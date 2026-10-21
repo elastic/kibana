@@ -1239,7 +1239,7 @@ describe('DiscoverEBTManager', () => {
       analyzeSpy.mockRestore();
     });
 
-    it('should track approximation_applied as true when the response has approximate results', () => {
+    it('should track approximation as true when the response has approximate results', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
@@ -1272,12 +1272,12 @@ describe('DiscoverEBTManager', () => {
           fetchType: 'fetchTextBased',
           multi_match_types: [],
           query_source_command: 'FROM',
-          approximation_applied: true,
+          approximation: true,
         },
       });
     });
 
-    it('should track approximation_applied as false when the response does not have approximate results', () => {
+    it('should track approximation as false when the response does not have approximate results', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
@@ -1310,12 +1310,12 @@ describe('DiscoverEBTManager', () => {
           fetchType: 'fetchTextBased',
           multi_match_types: [],
           query_source_command: 'FROM',
-          approximation_applied: false,
+          approximation: false,
         },
       });
     });
 
-    it('should omit approximation_applied from the performance event when not provided', () => {
+    it('should omit approximation from the performance event when not provided', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
