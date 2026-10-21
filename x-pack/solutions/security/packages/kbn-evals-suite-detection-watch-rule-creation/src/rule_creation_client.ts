@@ -14,20 +14,10 @@ import {
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
+import { API_VERSIONS, buildRespondToActionUrl, buildWorkflowSourceId } from '@kbn/inbox-common';
 import {
-  PROPOSALS_API_VERSION,
-  PROPOSALS_INTERNAL_URL,
-  PROPOSAL_APPROVE_URL,
-  PROPOSAL_DISMISS_URL,
-  type ListProposalsResponse,
-  type ProposalWithMetadata,
-} from '@kbn/proposals-common';
-import {
-  AGENT_BUILDER_API_VERSION,
   DRAFT_STEP_ID,
-  INVESTIGATION_TEMPLATE_ID,
-  OUTPUT_STEP_ID,
-  PROPOSE_STEP_ID,
+  REVIEW_STEP_ID,
   RULE_CREATION_WORKFLOW_ID,
   SCORING_INVESTIGATION_ID,
   WORKFLOWS_API_VERSION,
@@ -36,17 +26,11 @@ import { draftRuleSchema, type DraftRule } from './types';
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
-const isTerminal = ({ status }: WorkflowExecutionDto) => TerminalExecutionStatuses.includes(status);
-
-// propose_creation runs the proposal gate as a child workflow, so a run awaiting an analyst
-// parks in WAITING_FOR_CHILD (non-terminal). preview_creation is a child workflow too, so the
-// status alone does not mean the run reached the gate.
-const isAtProposalGate = ({ status, stepExecutions }: WorkflowExecutionDto) =>
-  status === ExecutionStatus.WAITING_FOR_CHILD &&
-  (stepExecutions ?? []).some((s) => s.stepId === PROPOSE_STEP_ID);
-
-const shouldStopPolling = (execution: WorkflowExecutionDto) =>
-  isTerminal(execution) || isAtProposalGate(execution);
+// WAITING_FOR_INPUT is in NonTerminalExecutionStatuses in @kbn/workflows, so we
+// must add it explicitly — otherwise the poll loop spins for maxWaitMs waiting
+// for a workflow that is intentionally paused waiting for human approval.
+const shouldStopPolling = (status: ExecutionStatus) =>
+  TerminalExecutionStatuses.includes(status) || status === ExecutionStatus.WAITING_FOR_INPUT;
 
 // The ai.agent step's persisted output is
 // `{ message, structured_output: { rule, attachment_id, attachment_version }, metadata }` —
@@ -89,29 +73,6 @@ export const extractDraftFromSteps = (
   return { rule, skipped: false, skipReason: undefined };
 };
 
-const workflowOutputSchema = lazySchema(() =>
-  z
-    .object({
-      created: z.boolean(),
-      reviewed: z.boolean(),
-      decision: z.string(),
-      rule_name: z.string(),
-      skip_reason: z.string(),
-    })
-    .partial()
-);
-
-export type RuleCreationWorkflowOutput = z.infer<typeof workflowOutputSchema>;
-
-/** Reads the outputs the workflow's emit_result step reported, or undefined if it never ran. */
-export const extractWorkflowOutput = (
-  steps: WorkflowStepExecutionDto[]
-): RuleCreationWorkflowOutput | undefined => {
-  const resultRecord = steps.find((s) => s.stepId === OUTPUT_STEP_ID && s.output != null);
-  const parsed = workflowOutputSchema.safeParse(resultRecord?.output);
-  return parsed.success ? parsed.data : undefined;
-};
-
 export interface RuleCreationResult {
   rule: DraftRule | undefined;
   /** True when the v3 quality gate refused to draft (distinct from a failed draft). */
@@ -136,7 +97,7 @@ export class RuleCreationClient {
     pollIntervalMs,
   }: {
     workflowExecutionId: string;
-    isDone: (execution: WorkflowExecutionDto) => boolean;
+    isDone: (status: ExecutionStatus) => boolean;
     maxWaitMs: number;
     pollIntervalMs: number;
   }): Promise<WorkflowExecutionDto> {
@@ -154,7 +115,7 @@ export class RuleCreationClient {
         }
       );
 
-      if (isDone(execution)) break;
+      if (isDone(execution.status)) break;
       await sleep(pollIntervalMs);
     }
 
@@ -200,9 +161,9 @@ export class RuleCreationClient {
       pollIntervalMs,
     });
 
-    if (!shouldStopPolling(execution)) {
+    if (!shouldStopPolling(execution.status)) {
       this.log.warning(
-        `Workflow ${workflowExecutionId} neither finished nor reached the proposal gate within ${maxWaitMs}ms (last status: ${execution.status})`
+        `Workflow ${workflowExecutionId} did not reach a terminal state within ${maxWaitMs}ms (last status: ${execution.status})`
       );
     }
 
@@ -224,7 +185,7 @@ export class RuleCreationClient {
       rule,
       skipped,
       skipReason,
-      pendingApproval: isAtProposalGate(execution),
+      pendingApproval: execution.status === ExecutionStatus.WAITING_FOR_INPUT,
       traceId: execution.traceId,
       workflowExecutionId,
       stepExecutions: execution.stepExecutions ?? [],
@@ -233,114 +194,57 @@ export class RuleCreationClient {
   }
 
   /**
-   * Opens an investigation for the workflow to record its proposal on, the same way the coverage
-   * review does. Returns the investigation's conversation id.
-   */
-  async createInvestigation({ title }: { title: string }): Promise<string> {
-    const { id } = await this.fetch<{ id: string }>('/api/agent_builder/conversations', {
-      method: 'POST',
-      headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
-      body: JSON.stringify({
-        title,
-        template_id: INVESTIGATION_TEMPLATE_ID,
-        access_control: { access_mode: 'public' },
-      }),
-    });
-    this.log.info(`Created investigation ${id}`);
-    return id;
-  }
-
-  async deleteInvestigation(investigationId: string): Promise<void> {
-    await this.fetch(`/api/agent_builder/conversations/${encodeURIComponent(investigationId)}`, {
-      method: 'DELETE',
-      headers: { 'elastic-api-version': AGENT_BUILDER_API_VERSION },
-    });
-  }
-
-  /**
-   * Approves or dismisses the pending proposal on the investigation, then polls the rule-creation
-   * execution until it finishes. Call this after run() returns pendingApproval:true.
+   * Responds to the review_creation approval gate for a paused workflow execution, then polls
+   * until the execution reaches a terminal state. Call this after run() returns pendingApproval:true.
    */
   async respond({
     workflowExecutionId,
-    investigationId,
+    stepExecutions,
     approved,
     maxWaitMs = 5 * 60_000,
     pollIntervalMs = 5_000,
   }: {
     workflowExecutionId: string;
-    investigationId: string;
+    stepExecutions: WorkflowStepExecutionDto[];
     approved: boolean;
     maxWaitMs?: number;
     pollIntervalMs?: number;
   }): Promise<WorkflowExecutionDto> {
-    const proposal = await this.waitForPendingProposal({
-      investigationId,
-      maxWaitMs,
-      pollIntervalMs,
-    });
-
-    const { workflowExecutionId: gateExecutionId } = proposal;
-    if (!gateExecutionId) {
-      throw new Error(`Proposal ${proposal.id} carries no gate workflowExecutionId`);
-    }
-
-    // The decision routes refuse (409) until the gate execution has parked for input.
-    const gate = await this.pollExecution({
-      workflowExecutionId: gateExecutionId,
-      isDone: (execution) =>
-        execution.status === ExecutionStatus.WAITING_FOR_INPUT || isTerminal(execution),
-      maxWaitMs,
-      pollIntervalMs,
-    });
-    if (gate.status !== ExecutionStatus.WAITING_FOR_INPUT) {
+    const reviewStep = stepExecutions.find((s) => s.stepId === REVIEW_STEP_ID && s.output == null);
+    if (!reviewStep) {
       throw new Error(
-        `Proposal gate ${gateExecutionId} for proposal ${proposal.id} is not waiting for a decision (status: ${gate.status})`
+        `${REVIEW_STEP_ID} step not found in waiting state for execution ${workflowExecutionId}`
       );
     }
 
-    this.log.info(`Sending ${approved ? 'approve' : 'dismiss'} for proposal ${proposal.id}`);
-    const url = (approved ? PROPOSAL_APPROVE_URL : PROPOSAL_DISMISS_URL).replace(
-      '{id}',
-      encodeURIComponent(proposal.id)
+    const sourceId = buildWorkflowSourceId(
+      RULE_CREATION_WORKFLOW_ID,
+      workflowExecutionId,
+      reviewStep.id
     );
-    await this.fetch(url, {
-      method: 'POST',
-      headers: { 'elastic-api-version': PROPOSALS_API_VERSION, 'kbn-xsrf': 'true' },
-      body: JSON.stringify(approved ? {} : { dismissReason: 'no_reason' }),
-    });
+    await this.respondToApprovalGate({ sourceId, approved });
 
-    // The decision is applied after the route returns, so wait for the run itself to finish.
     return this.pollExecution({
       workflowExecutionId,
-      isDone: isTerminal,
+      isDone: (status) => TerminalExecutionStatuses.includes(status),
       maxWaitMs,
       pollIntervalMs,
     });
   }
 
-  private async waitForPendingProposal({
-    investigationId,
-    maxWaitMs,
-    pollIntervalMs,
+  private async respondToApprovalGate({
+    sourceId,
+    approved,
   }: {
-    investigationId: string;
-    maxWaitMs: number;
-    pollIntervalMs: number;
-  }): Promise<ProposalWithMetadata> {
-    const deadline = Date.now() + maxWaitMs;
-    while (Date.now() < deadline) {
-      const { proposals } = await this.fetch<ListProposalsResponse>(PROPOSALS_INTERNAL_URL, {
-        method: 'GET',
-        headers: { 'elastic-api-version': PROPOSALS_API_VERSION },
-        query: { conversationId: investigationId, status: 'pending', size: 1 },
-      });
-      if (proposals[0]) return proposals[0];
-      await sleep(pollIntervalMs);
-    }
-    throw new Error(
-      `No pending proposal appeared on investigation ${investigationId} within ${maxWaitMs}ms`
-    );
+    sourceId: string;
+    approved: boolean;
+  }): Promise<void> {
+    this.log.info(`Sending approval=${approved} for inbox source ${sourceId}`);
+    await this.fetch(buildRespondToActionUrl('workflows', sourceId), {
+      method: 'POST',
+      headers: { 'elastic-api-version': API_VERSIONS.internal.v1, 'kbn-xsrf': 'true' },
+      body: JSON.stringify({ input: { approved } }),
+    });
   }
 
   async cancelPending(): Promise<void> {

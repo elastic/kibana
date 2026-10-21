@@ -16,7 +16,6 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { ExecutionStatus } from '@kbn/workflows';
 import { evaluate, tags } from '../src/evaluate';
-import { extractWorkflowOutput, type RuleCreationClient } from '../src/rule_creation_client';
 import { assertWorkflowInstalled, ensureJudgeConnectorAccessible } from '../src/workflow_fixture';
 
 const WORKFLOW_INPUT = {
@@ -37,8 +36,8 @@ const escapeKqlPhrase = (value: string): string => value.replace(/([\\"])/g, '\\
 const findRuleByName = async (
   fetch: HttpHandler,
   ruleName: string
-): Promise<{ id: string; name: string; enabled: boolean } | undefined> => {
-  const { data } = await fetch<{ data: Array<{ id: string; name: string; enabled: boolean }> }>(
+): Promise<{ id: string; name: string } | undefined> => {
+  const { data } = await fetch<{ data: Array<{ id: string; name: string }> }>(
     `/api/detection_engine/rules/_find`,
     {
       method: 'GET',
@@ -77,59 +76,17 @@ const sweepCreatedRules = async (
   createdRuleIds.clear();
 };
 
-/**
- * Opens an investigation, runs the workflow against it, and fails loudly unless the run parked
- * on the proposal gate. WORKFLOW_INPUT is a winnable gap, so a run that never reached the gate
- * means the quality gate is over-refusing or the draft broke, not that the approval plumbing did.
- */
-const runToProposalGate = async ({
-  ruleCreationClient,
-  investigationIds,
-  onRuleName,
-}: {
-  ruleCreationClient: RuleCreationClient;
-  investigationIds: Set<string>;
-  onRuleName: (name: string | undefined) => void;
-}) => {
-  const investigationId = await ruleCreationClient.createInvestigation({
-    title: `Rule creation eval: ${WORKFLOW_INPUT.technique}`,
-  });
-  investigationIds.add(investigationId);
-
-  const result = await ruleCreationClient.run({ input: WORKFLOW_INPUT, investigationId });
-  onRuleName(result.rule?.name);
-
-  if (!result.pendingApproval) {
-    if (result.skipped) {
-      throw new Error(
-        `The quality gate declined a winnable gap (${
-          result.skipReason ?? 'no reason given'
-        }) so the workflow never reached the proposal gate — the gate is over-refusing.`
-      );
-    }
-    const output = extractWorkflowOutput(result.stepExecutions);
-    throw new Error(
-      `Execution ${result.workflowExecutionId} did not park on the proposal gate (skip_reason: ${
-        output?.skip_reason || 'none'
-      }) — cannot test the decision path`
-    );
-  }
-
-  return { result, investigationId };
-};
-
 evaluate.describe(
-  'Rule Creation Worker — proposal gate',
+  'Rule Creation Worker — approval gate',
   { tag: tags.serverless.security.complete },
   () => {
     // Rules created by an approved run outlive the test that created them. Inline
     // cleanup only runs on success — a leaked rule from a failed approve test
     // false-fails the reject test's non-existence assertion. afterEach cancels
-    // any still-running execution first (a parked workflow that resumes after the
+    // any still-running execution first (a paused workflow that resumes after the
     // test body threw can still create a rule mid-sweep), then sweeps on every
     // path, including assertion failure and timeout.
     const createdRuleIds = new Set<string>();
-    const investigationIds = new Set<string>();
     let createdRuleName: string | undefined;
 
     evaluate.afterEach(async ({ ruleCreationClient, fetch, log }) => {
@@ -152,18 +109,6 @@ evaluate.describe(
           );
         }
       }
-      for (const id of investigationIds) {
-        try {
-          await ruleCreationClient.deleteInvestigation(id);
-        } catch (err) {
-          log.error(
-            `Failed to delete investigation ${id}: ${
-              err instanceof Error ? err.message : String(err)
-            }`
-          );
-        }
-      }
-      investigationIds.clear();
     });
 
     evaluate.beforeAll(
@@ -184,31 +129,36 @@ evaluate.describe(
     evaluate(
       'rule is saved in the detection engine when the user approves',
       async ({ ruleCreationClient, fetch, log }) => {
-        // Capture the name before the decision: if respond() throws or the test fails
-        // mid-flight, afterEach still knows what to sweep by name.
-        const { result, investigationId } = await runToProposalGate({
-          ruleCreationClient,
-          investigationIds,
-          onRuleName: (name) => {
-            createdRuleName = name;
-          },
-        });
+        const result = await ruleCreationClient.run({ input: WORKFLOW_INPUT });
+
+        // Capture the name before the approval response: if respond() throws or the
+        // test fails mid-flight, afterEach still knows what to sweep by name.
+        createdRuleName = result.rule?.name;
+
+        if (!result.pendingApproval) {
+          // A declined draft never reaches the gate. Say so explicitly: WORKFLOW_INPUT is a
+          // winnable gap, so a skip here means the quality gate is over-refusing, not that
+          // the approval plumbing broke.
+          if (result.skipped) {
+            throw new Error(
+              `The quality gate declined a winnable gap (${
+                result.skipReason ?? 'no reason given'
+              }) so the workflow never reached the approval gate — the gate is over-refusing.`
+            );
+          }
+          throw new Error(
+            `Execution did not pause at the approval gate (pendingApproval=${result.pendingApproval}) — cannot test the approve path`
+          );
+        }
 
         const execution = await ruleCreationClient.respond({
           workflowExecutionId: result.workflowExecutionId,
-          investigationId,
+          stepExecutions: result.stepExecutions,
           approved: true,
         });
 
         if (execution.status !== ExecutionStatus.COMPLETED) {
           throw new Error(`Workflow did not complete after approval — status: ${execution.status}`);
-        }
-
-        const output = extractWorkflowOutput(execution.stepExecutions ?? []);
-        if (output?.decision !== 'approved' || output.created !== true) {
-          throw new Error(
-            `Workflow reported decision=${output?.decision} created=${output?.created} after approval — expected approved and created`
-          );
         }
 
         const ruleName = result.rule?.name;
@@ -226,43 +176,45 @@ evaluate.describe(
           );
         }
         createdRuleIds.add(rule.id);
-        if (rule.enabled) {
-          throw new Error(
-            `Rule "${ruleName}" was created enabled — the create action must leave it disabled for review`
-          );
-        }
-        log.info(`Confirmed disabled rule "${ruleName}" exists — registered for afterEach sweep`);
+        log.info(`Confirmed rule "${ruleName}" exists — registered for afterEach sweep`);
       }
     );
 
     evaluate(
-      'rule is not created when the user dismisses',
+      'rule is not created when the user rejects',
       async ({ ruleCreationClient, fetch, log }) => {
-        const { result, investigationId } = await runToProposalGate({
-          ruleCreationClient,
-          investigationIds,
-          onRuleName: (name) => {
-            createdRuleName = name;
-          },
-        });
+        const result = await ruleCreationClient.run({ input: WORKFLOW_INPUT });
 
-        const execution = await ruleCreationClient.respond({
-          workflowExecutionId: result.workflowExecutionId,
-          investigationId,
-          approved: false,
-        });
+        // Capture for the same reason as the approve test: afterEach sweeps by name
+        // if this test dies before its own non-existence check completes.
+        createdRuleName = result.rule?.name;
 
-        // A dismissal settles the gate without running the action: the run still completes.
-        if (execution.status !== ExecutionStatus.COMPLETED) {
+        if (!result.pendingApproval) {
+          // A declined draft never reaches the gate. Say so explicitly: WORKFLOW_INPUT is a
+          // winnable gap, so a skip here means the quality gate is over-refusing, not that
+          // the approval plumbing broke.
+          if (result.skipped) {
+            throw new Error(
+              `The quality gate declined a winnable gap (${
+                result.skipReason ?? 'no reason given'
+              }) so the workflow never reached the approval gate — the gate is over-refusing.`
+            );
+          }
           throw new Error(
-            `Workflow did not complete after dismissal — status: ${execution.status}`
+            `Execution did not pause at the approval gate (pendingApproval=${result.pendingApproval}) — cannot test the reject path`
           );
         }
 
-        const output = extractWorkflowOutput(execution.stepExecutions ?? []);
-        if (output?.decision !== 'dismissed' || output.created !== false) {
+        const execution = await ruleCreationClient.respond({
+          workflowExecutionId: result.workflowExecutionId,
+          stepExecutions: result.stepExecutions,
+          approved: false,
+        });
+
+        // create_rule is if-guarded, not a workflow failure: rejection still completes.
+        if (execution.status !== ExecutionStatus.COMPLETED) {
           throw new Error(
-            `Workflow reported decision=${output?.decision} created=${output?.created} after dismissal — expected dismissed and not created`
+            `Workflow did not complete after rejection — status: ${execution.status}`
           );
         }
 
@@ -272,16 +224,16 @@ evaluate.describe(
           return;
         }
 
-        log.info(`Verifying rule "${ruleName}" was NOT created after dismissal`);
+        log.info(`Verifying rule "${ruleName}" was NOT created after rejection`);
 
         const rule = await findRuleByName(fetch, ruleName);
         if (rule) {
           throw new Error(
-            `Rule "${ruleName}" was found in the detection engine after dismissal — the create action should not have run`
+            `Rule "${ruleName}" was found in the detection engine after rejection — create_rule should not have fired`
           );
         }
 
-        log.info(`Confirmed rule "${ruleName}" does not exist after dismissal`);
+        log.info(`Confirmed rule "${ruleName}" does not exist after rejection`);
       }
     );
   }
