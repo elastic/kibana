@@ -22,8 +22,6 @@ import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { useEvalsTraceFetcher } from '../../hooks/use_evals_api';
 import { useModelConnectors } from '../../hooks/use_model_connectors';
 import { useActiveSpaceId } from '../../hooks/use_active_space_id';
-import { buildOnlineEvalWorkflowYaml } from '../../../common/online_evals/workflow_yaml';
-
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
 }));
@@ -309,91 +307,6 @@ describe('OnlineEvalDetailPage', () => {
     expect(await screen.findByTestId('onlineEvalDetailEverySelect')).toBeDisabled();
     expect(await screen.findByTestId('onlineEvalDetailWindowInput')).toBeDisabled();
     expect(await screen.findByTestId('onlineEvalDetailExtraWhereInput')).toBeDisabled();
-  });
-
-  describe('legacy workflows', () => {
-    const mockLegacyWorkflow = () =>
-      mockedUseOnlineEvalWorkflow.mockReturnValue({
-        data: {
-          id: 'workflow-1',
-          name: '[online-eval] quality monitor',
-          enabled: true,
-          yaml: buildOnlineEvalWorkflowYaml(parsedConfig).replaceAll(
-            '/s/{{ workflow.spaceId }}',
-            ''
-          ),
-          parsedConfig,
-        },
-        isLoading: false,
-        error: null,
-      } as unknown as ReturnType<typeof useOnlineEvalWorkflow>);
-
-    it('does not show the update callout for current workflows', async () => {
-      renderPage();
-
-      await screen.findByTestId('onlineEvalDetailEverySelect');
-      expect(screen.queryByTestId('onlineEvalDetailLegacyWorkflowCallout')).not.toBeInTheDocument();
-    });
-
-    it('does not show the update callout in the default space', async () => {
-      mockLegacyWorkflow();
-      mockedUseActiveSpaceId.mockReturnValue({ spaceId: 'default', isLoading: false });
-
-      renderPage();
-
-      await screen.findByTestId('onlineEvalDetailEverySelect');
-      expect(screen.queryByTestId('onlineEvalDetailLegacyWorkflowCallout')).not.toBeInTheDocument();
-    });
-
-    it('rebuilds the workflow from its parsed config when updating', async () => {
-      mockLegacyWorkflow();
-
-      renderPage();
-
-      expect(
-        await screen.findByTestId('onlineEvalDetailLegacyWorkflowCallout')
-      ).toBeInTheDocument();
-      fireEvent.click(screen.getByTestId('onlineEvalDetailLegacyWorkflowUpdateButton'));
-
-      await waitFor(() => {
-        expect(updateMutateAsync).toHaveBeenCalledWith({
-          workflowId: 'workflow-1',
-          config: parsedConfig,
-        });
-      });
-    });
-
-    it('hides the update button when the user cannot manage', async () => {
-      mockLegacyWorkflow();
-      mockedUseEvalsPermissions.mockReturnValue({ canRead: true, canManage: false });
-
-      renderPage();
-
-      expect(
-        await screen.findByTestId('onlineEvalDetailLegacyWorkflowCallout')
-      ).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('onlineEvalDetailLegacyWorkflowUpdateButton')
-      ).not.toBeInTheDocument();
-    });
-
-    it('hides the update button while there are unsaved edits', async () => {
-      mockLegacyWorkflow();
-
-      renderPage();
-
-      expect(
-        await screen.findByTestId('onlineEvalDetailLegacyWorkflowUpdateButton')
-      ).toBeInTheDocument();
-      fireEvent.change(screen.getByTestId('onlineEvalDetailWindowInput'), {
-        target: { value: '90' },
-      });
-
-      expect(await screen.findByTestId('onlineEvalDetailBottomBar')).toBeInTheDocument();
-      expect(
-        screen.queryByTestId('onlineEvalDetailLegacyWorkflowUpdateButton')
-      ).not.toBeInTheDocument();
-    });
   });
 
   it('keeps the configured connector selected when it is no longer selectable', async () => {
