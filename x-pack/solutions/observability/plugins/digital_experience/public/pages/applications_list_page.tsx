@@ -76,7 +76,7 @@ const dataUnavailablePrompt = (
       <p>
         {i18n.translate('xpack.digitalExperience.applications.unavailable.body', {
           defaultMessage:
-            'Digital Experience cannot read application data in this deployment yet. Applications will appear here once it can.',
+            'Digital experience cannot read application data in this deployment yet. Applications will appear here once it can.',
         })}
       </p>
     }

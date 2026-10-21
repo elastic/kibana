@@ -42,7 +42,7 @@ export const packageReportInputSchema = z.object({
   ),
   reportId: boundedId.describe('Threat report id this Investigation is bound to.'),
   investigationConversationId: boundedId.describe(
-    'Investigation conversation id; must equal uuidv5(hunt:report:{reportId}).'
+    'Investigation conversation id; must equal uuidv5(hunt:report:{spaceId}|{reportId}).'
   ),
   runId: boundedId.describe('Current-run id; packaging reads only attachments scoped to this run.'),
   /**
