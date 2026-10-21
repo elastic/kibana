@@ -1221,9 +1221,9 @@ export interface SuggestionRequest<T = unknown> {
    */
   query?: AggregateQuery;
   /**
-   * Consumer-provided defaults, used only when there is no current `state`.
+   * Caller-provided defaults (from `defaultVisualizationOverrides`), used only when there is no current `state`.
    */
-  defaultState?: Partial<T>;
+  defaultOverrides?: Partial<T>;
 }
 
 /**

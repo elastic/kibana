@@ -81,7 +81,7 @@ export function getSuggestions({
   allowMixed,
   datasourceId,
   query,
-  defaultState,
+  defaultOverrides,
 }: SuggestionRequest<XYVisualizationState>): Array<VisualizationSuggestion<XYVisualizationState>> {
   // Text-based datasource always sets isMultiRow: false regardless of actual data shape,
   // so skip that check for textBased to avoid incorrectly rejecting valid suggestions
@@ -113,7 +113,7 @@ export function getSuggestions({
     allowMixed,
     datasourceId,
     query,
-    defaultState
+    defaultOverrides
   );
 
   if (Array.isArray(suggestions)) {
@@ -132,7 +132,7 @@ function getSuggestionForColumns(
   allowMixed?: boolean,
   datasourceId?: string,
   query?: SuggestionRequest['query'],
-  defaultState?: SuggestionRequest<XYVisualizationState>['defaultState']
+  defaultOverrides?: SuggestionRequest<XYVisualizationState>['defaultOverrides']
 ):
   | VisualizationSuggestion<XYVisualizationState>
   | Array<VisualizationSuggestion<XYVisualizationState>>
@@ -149,7 +149,7 @@ function getSuggestionForColumns(
     allowMixed,
     datasourceId,
     query,
-    defaultState,
+    defaultOverrides,
   };
 
   const isEsql = datasourceId === LENS_DATASOURCE_ID.TEXT_BASED;
@@ -255,7 +255,7 @@ function getSuggestionsForLayer({
   allowMixed,
   datasourceId,
   query,
-  defaultState,
+  defaultOverrides,
 }: {
   layerId: string;
   changeType: TableChangeType;
@@ -270,7 +270,7 @@ function getSuggestionsForLayer({
   allowMixed?: boolean;
   datasourceId?: string;
   query?: SuggestionRequest['query'];
-  defaultState?: SuggestionRequest<XYVisualizationState>['defaultState'];
+  defaultOverrides?: SuggestionRequest<XYVisualizationState>['defaultOverrides'];
 }):
   | VisualizationSuggestion<XYVisualizationState>
   | Array<VisualizationSuggestion<XYVisualizationState>> {
@@ -295,7 +295,7 @@ function getSuggestionsForLayer({
     // only use palette if there is a breakdown by dimension
     mainPalette: splitBy ? mainPalette : undefined,
     allowMixed,
-    defaultState,
+    defaultOverrides,
   };
 
   if (
@@ -578,7 +578,7 @@ function buildSuggestion({
   hide,
   mainPalette,
   allowMixed,
-  defaultState,
+  defaultOverrides,
 }: {
   currentState: XYVisualizationState | undefined;
   seriesType: SeriesType;
@@ -592,7 +592,7 @@ function buildSuggestion({
   hide?: boolean;
   mainPalette?: SuggestionRequest['mainPalette'];
   allowMixed?: boolean;
-  defaultState?: SuggestionRequest<XYVisualizationState>['defaultState'];
+  defaultOverrides?: SuggestionRequest<XYVisualizationState>['defaultOverrides'];
 }) {
   let splitBy = splitByColumns && splitByColumns.length > 0 ? splitByColumns : undefined;
 
@@ -656,7 +656,7 @@ function buildSuggestion({
 
   const state: XYVisualizationState = {
     legend: currentState?.legend ??
-      defaultState?.legend ?? {
+      defaultOverrides?.legend ?? {
         isVisible: true,
         position: Position.Bottom,
         layout: LegendLayout.List,

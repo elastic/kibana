@@ -253,7 +253,7 @@ function getVisualizationSuggestions(
   allowMixed?: boolean,
   datasourceId?: string,
   query?: AggregateQuery,
-  defaultState?: DefaultVisualizationOverrides[keyof DefaultVisualizationOverrides]
+  defaultOverrides?: DefaultVisualizationOverrides[keyof DefaultVisualizationOverrides]
 ) {
   try {
     const isSubtypeSupported =
@@ -270,7 +270,7 @@ function getVisualizationSuggestions(
         allowMixed,
         datasourceId,
         query,
-        defaultState,
+        defaultOverrides,
       })
       .map(({ state, ...visualizationSuggestion }) => ({
         ...visualizationSuggestion,

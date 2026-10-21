@@ -669,7 +669,7 @@ describe('xy_suggestions', () => {
       },
       keptLayerIds: [],
       datasourceId: 'textBased',
-      defaultState: { legend: { isVisible: true, position: 'right' } },
+      defaultOverrides: { legend: { isVisible: true, position: 'right' } },
     });
 
     expect(suggestion.state.legend).toEqual({ isVisible: true, position: 'right' });
@@ -701,7 +701,7 @@ describe('xy_suggestions', () => {
       state: currentState,
       keptLayerIds: ['first'],
       datasourceId: 'textBased',
-      defaultState: { legend: { isVisible: true, position: 'right' } },
+      defaultOverrides: { legend: { isVisible: true, position: 'right' } },
     });
 
     expect(suggestion.state.legend).toEqual({ isVisible: false, position: 'left' });

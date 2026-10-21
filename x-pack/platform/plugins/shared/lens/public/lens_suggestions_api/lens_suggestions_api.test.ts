@@ -106,10 +106,10 @@ describe('suggestionsApi', () => {
     });
 
     expect(xyVis.getSuggestions).toHaveBeenCalledWith(
-      expect.objectContaining({ defaultState: { legend } })
+      expect.objectContaining({ defaultOverrides: { legend } })
     );
     expect(otherVis.getSuggestions).toHaveBeenCalledWith(
-      expect.objectContaining({ defaultState: undefined })
+      expect.objectContaining({ defaultOverrides: undefined })
     );
   });
 
