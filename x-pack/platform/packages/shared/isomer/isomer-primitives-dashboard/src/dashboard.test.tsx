@@ -8,7 +8,10 @@
 import { createKibanaIsomerRuntime } from '@kbn/isomer';
 import { componentsPack } from '@kbn/isomer-components';
 
+import type { PrimitiveNode } from '@elastic/isomer-sdk';
+
 import { type DashboardNode, dashboardChartSize, dashboardPack } from './dashboard';
+import { PANEL_CHROME, panelBodySize } from './geometry';
 
 const runtime = createKibanaIsomerRuntime({ packs: [componentsPack, dashboardPack] });
 
@@ -102,5 +105,22 @@ describe('dashboard', () => {
     });
     const { html } = runtime.surfaces.html.render(view(frameless));
     expect(html).not.toContain('isomerDashboard-panel ');
+  });
+});
+
+describe('panelBodySize', () => {
+  it('is the box every node in a panel draws in, the size charts are drawn at', () => {
+    const grid = { x: 24, y: 0, w: 24, h: 10 };
+    const node = { id: 'a', type: 'markdown' } as PrimitiveNode;
+    const owner = {
+      type: 'dashboard',
+      title: 'D',
+      panels: [{ id: 'a', grid, title: 'A', body: node }],
+    } as unknown as PrimitiveNode;
+    const body = panelBodySize({ grid, titled: true }, { width: 1200 });
+    expect(dashboardChartSize(1200)(node, [owner])).toEqual(body);
+    expect(panelBodySize({ grid, titled: false }, { width: 1200 }).height).toBe(
+      body.height + PANEL_CHROME.header
+    );
   });
 });
