@@ -195,6 +195,7 @@ export const isAllowedBuiltinAgent = (agentName: string): agentName is AgentBuil
 export const AGENT_BUILDER_AGENT_TYPES = [
   chatAgentTypeId,
   `${internalNamespaces.platformNightshift}.investigation-type`,
+  `${internalNamespaces.platformNightshift}.assistant-type`,
   `${internalNamespaces.platformSignificantEvents}.decision-tree-reinforcement-type`,
   `${internalNamespaces.platformSignificantEvents}.discovery-type`,
   `${internalNamespaces.security}.alertzero-type`,
