@@ -51,9 +51,6 @@ export const STATS_COLUMN = {
   avgDurationPerItem: 'avg_duration_per_item',
 } as const;
 
-/** Destination types that emit user-facing metrics (ADR 348, decision 4). */
-export const DESTINATION_TYPES_WITH_STATS = ['elasticsearch'];
-
 /** Same target as the classic Streams histograms (`STREAMS_HISTOGRAM_NUM_DATA_POINTS`). */
 export const SERIES_TARGET_POINTS = 25;
 

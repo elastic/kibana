@@ -11,7 +11,6 @@ import { StatusError } from '../../streams/errors/status_error';
 /** The response schema leaves `code` an open string, so the codes live here. */
 export const STATS_ERROR_CODE = {
   notFound: 'not_found',
-  unsupported: 'unsupported',
   forbidden: 'forbidden',
   unavailable: 'unavailable',
   timeout: 'timeout',
@@ -54,15 +53,6 @@ export class UnitStatsError extends StatusError {
       `No ${kind} with this id in the unit.`,
       404,
       STATS_ERROR_CODE.notFound
-    );
-  }
-
-  /** From the unit config alone. */
-  static unsupported() {
-    return new UnitStatsError(
-      'Destination type does not emit stats.',
-      400,
-      STATS_ERROR_CODE.unsupported
     );
   }
 

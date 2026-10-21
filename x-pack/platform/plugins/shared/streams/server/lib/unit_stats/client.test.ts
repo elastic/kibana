@@ -188,20 +188,18 @@ describe('UnitStatsClient.getStats', () => {
       queries.forEach((query) => expect(query).toContain('IN ("es-prod")'));
     });
 
-    it('answers not_found and unsupported from the config without querying', async () => {
+    it('answers not_found from the config without querying', async () => {
       const esql = makeEsql();
 
       const response = await run(esql, {
         components: [
           { kind: 'destination', id: 'nope' },
-          { kind: 'destination', id: 'dbg' },
           { kind: 'processor', id: 'nope' },
         ],
       });
 
       expect(esql).not.toHaveBeenCalled();
       expect(response.components.destinations.nope.error?.code).toBe('not_found');
-      expect(response.components.destinations.dbg.error?.code).toBe('unsupported');
       expect(response.components.processors.nope.error?.code).toBe('not_found');
       expect(response.error).toBeUndefined();
     });
@@ -297,7 +295,7 @@ describe('UnitStatsClient.getStats', () => {
         response.components.processors['uppercase-message'].events.incoming.rate.value
       ).toBeNull();
       expect(response.components.destinations['es-prod'].error).toBeUndefined();
-      expect(response.components.destinations.dbg.error?.code).toBe('unsupported');
+      expect(response.components.destinations.dbg.error).toBeUndefined();
       expect(response.error).toBeUndefined();
       expect(streamsUnitStatsResponseSchema.parse(response)).toEqual(response);
     });
@@ -311,7 +309,7 @@ describe('UnitStatsClient.getStats', () => {
       expect(response.components.destinations['es-prod'].error?.code).toBe('unavailable');
       expect(response.components.destinations['es-dev'].error?.code).toBe('unavailable');
       expect(response.components.processors['uppercase-message'].error?.code).toBe('unavailable');
-      expect(response.components.destinations.dbg.error?.code).toBe('unsupported');
+      expect(response.components.destinations.dbg.error?.code).toBe('unavailable');
       expect(response.error?.code).toBe('unavailable');
     });
 
@@ -344,8 +342,7 @@ describe('UnitStatsClient.getStats', () => {
 
       expect(response.components.destinations['es-prod'].error?.code).toBe('unavailable');
       expect(response.components.destinations['es-dev'].error?.code).toBe('unavailable');
-      // A destination that is not queried keeps its own error.
-      expect(response.components.destinations.dbg.error?.code).toBe('unsupported');
+      expect(response.components.destinations.dbg.error?.code).toBe('unavailable');
       expect(response.components.processors['uppercase-message'].error).toBeUndefined();
       expect(response.components.processors['uppercase-message'].events.incoming.rate.value).toBe(
         4.6

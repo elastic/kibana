@@ -44,8 +44,7 @@ const filterDestinations = (
  * Rate, failures rate and latency per destination, from the time series. `RATE` is not an
  * exact sum (it needs two samples per series and takes the first as its baseline), so the
  * series comes from `buildDestinationSumsQuery`. `failed_rate` counts every outcome except
- * `success`: 0 when there is a rate and no failures, null when there is no rate. Latency is
- * time per bulk request.
+ * `success`: 0 when there is a rate and no failures, null when there is no rate.
  */
 export const buildDestinationRateQuery = (params: DestinationStatsQueryParams): ComposerQuery => {
   const items = normalizeColumn(DESTINATION_ITEMS_FIELD);
