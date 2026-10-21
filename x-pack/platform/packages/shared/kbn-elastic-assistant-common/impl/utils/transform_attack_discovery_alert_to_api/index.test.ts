@@ -115,4 +115,31 @@ describe('transformAttackDiscoveryAlertToApi', () => {
 
     expect(transformAttackDiscoveryAlertToApi(minimal)).toEqual(expected);
   });
+
+  describe('alert_workflow_reason', () => {
+    const base: AttackDiscoveryAlert = {
+      alertIds: [],
+      connectorId: '',
+      connectorName: '',
+      detailsMarkdown: '',
+      generationUuid: '',
+      id: '',
+      summaryMarkdown: '',
+      timestamp: '',
+      title: '',
+    };
+
+    it('maps alertWorkflowReason to alert_workflow_reason', () => {
+      const result = transformAttackDiscoveryAlertToApi({
+        ...base,
+        alertWorkflowReason: 'false_positive',
+      });
+
+      expect(result.alert_workflow_reason).toEqual('false_positive');
+    });
+
+    it('returns undefined when alertWorkflowReason is not set', () => {
+      expect(transformAttackDiscoveryAlertToApi(base).alert_workflow_reason).toBeUndefined();
+    });
+  });
 });

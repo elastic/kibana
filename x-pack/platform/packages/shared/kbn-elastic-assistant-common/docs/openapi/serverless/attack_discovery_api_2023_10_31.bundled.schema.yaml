@@ -2733,6 +2733,10 @@ components:
           description: The optional username of the user who updated the attack discovery
             alert
           type: string
+        alert_workflow_reason:
+          description: The optional kibana.alert.workflow_reason of this attack discovery,
+            which records why the workflow status was last changed
+          type: string
         alert_workflow_status:
           description: The optional kibana.alert.workflow_status of this attack discovery
           type: string

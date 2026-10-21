@@ -50,6 +50,23 @@ describe('rollDataStreamIfRequired', () => {
     expect(mockEsClient.indices.rollover).not.toHaveBeenCalled();
   });
 
+  describe('when the data stream is not yet created', () => {
+    it('does nothing when getMapping throws a 404', async () => {
+      const notFoundError = new Error('index_not_found_exception') as Error & {
+        meta?: { statusCode?: number };
+      };
+      notFoundError.meta = { statusCode: 404 };
+      mockEsClient.indices.getMapping.mockRejectedValueOnce(notFoundError);
+
+      await rollDataStreamIfRequired(rollParams());
+
+      expect(mockLogger.debug).toHaveBeenCalledWith(
+        `${msgPrefix} does not exist so ${skipMessage}`
+      );
+      expect(mockEsClient.indices.rollover).not.toHaveBeenCalled();
+    });
+  });
+
   it('rolls over if backing indices have no managed_index_mappings_version', async () => {
     const mappings: IndicesGetMappingResponse = {
       indexName: {

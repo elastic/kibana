@@ -81,6 +81,7 @@ export const getLiveQueryResultsRoute = (
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
 
         try {
+          const cpsActive = await osqueryContext.isCpsActive(request);
           const page = request.query.page ?? 0;
           const pageSize = request.query.pageSize ?? 100;
 
@@ -137,7 +138,7 @@ export const getLiveQueryResultsRoute = (
           const search = await getScopedSearch(
             context,
             request,
-            osqueryContext.cpsEnabled,
+            cpsActive,
             osqueryContext.getStartServices
           );
           const { actionDetails } = await lastValueFrom(

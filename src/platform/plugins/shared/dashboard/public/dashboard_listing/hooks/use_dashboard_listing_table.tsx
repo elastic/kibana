@@ -265,6 +265,8 @@ export const useDashboardListingTable = ({
       await asyncMap(dashboardsToDelete, async ({ id }) => {
         await dashboardClient.delete(id);
         getDashboardBackupService().clearState(id);
+        getDashboardRecentlyAccessedService().remove(id);
+        coreServices.chrome.recentlyAccessed.remove(id);
       });
 
       const deleteDuration = window.performance.now() - deleteStartTime;

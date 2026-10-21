@@ -22,6 +22,12 @@ import type {
   EntityFromStoreResult,
   EntityStoreRecord,
 } from '../../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
+import {
+  getEntityGroupLifecycle,
+  getEntityGroupRecords,
+  isEntityGroupView,
+  mergeEntityGroupDetails,
+} from '../../../../../flyout/entity_details/shared/entity_store_group_utils';
 import type { ObservedEntityData } from '../../../shared/components/observed_entity/types';
 import { isActiveTimeline } from '../../../../../helpers';
 import { useSecurityDefaultPatterns } from '../../../../../data_view_manager/hooks/use_security_default_patterns';
@@ -60,12 +66,16 @@ export const useObservedHost = (
   const useEntityStoreObservedData =
     Boolean(entityFromStore) && (entityStoreInitialLoading || hasEntityStoreRecord);
 
+  // Resolution-group aliases (empty outside the group view): the observed query covers them too.
+  const aliasRecords = entityFromStore?.aliasRecords;
+
   const [isLoading, { hostDetails, inspect: inspectObservedHost, refetch: refetchHostDetails }] =
     useHostDetails({
       endDate: to,
       hostName,
       entityId: hasEntityStoreRecord ? entityFromStore?.entityRecord?.entity?.id : undefined,
       entityRecord: hasEntityStoreRecord ? entityFromStore?.entityRecord : undefined,
+      aliasRecords: hasEntityStoreRecord ? aliasRecords : undefined,
       entityStoreInitialLoading,
       indexNames: indexPatterns,
       id: HOST_PANEL_RISK_SCORE_QUERY_ID,
@@ -102,20 +112,28 @@ export const useObservedHost = (
 
   return useMemo((): ObservedHostResult => {
     if (useEntityStoreObservedData && entityFromStore) {
+      // merge with entity store record; deduplicate arrays because both sources
+      // derive from the same events and would otherwise duplicate scalar fields
+      // like host.ip and host.mac.
+      const targetDetails = deepmerge(hostDetails, entityFromStore.entityRecord ?? {}, {
+        arrayMerge: (target, source) => [...new Set([...target, ...source])],
+      });
+      const isGroupView = isEntityGroupView(aliasRecords);
+      // Group view: the activity window spans every member of the group.
+      const groupLifecycle = isGroupView
+        ? getEntityGroupLifecycle(getEntityGroupRecords(entityFromStore.entityRecord, aliasRecords))
+        : null;
       return {
-        // merge with entity store record; deduplicate arrays because both sources
-        // derive from the same events and would otherwise duplicate scalar fields
-        // like host.ip and host.mac.
-        details: deepmerge(hostDetails, entityFromStore.entityRecord ?? {}, {
-          arrayMerge: (target, source) => [...new Set([...target, ...source])],
-        }),
+        // Group view: alias attributes are unioned in; scalars that disagree become arrays.
+        details: isGroupView ? mergeEntityGroupDetails(targetDetails, aliasRecords) : targetDetails,
         isLoading: isLoading || entityFromStore.isLoading,
         firstSeen: {
-          date: entityFromStore.firstSeen ?? undefined,
+          date:
+            (groupLifecycle ? groupLifecycle.firstSeen : entityFromStore.firstSeen) ?? undefined,
           isLoading: entityFromStore.isLoading,
         },
         lastSeen: {
-          date: entityFromStore.lastSeen ?? undefined,
+          date: (groupLifecycle ? groupLifecycle.lastSeen : entityFromStore.lastSeen) ?? undefined,
           isLoading: entityFromStore.isLoading,
         },
         entityRecord: entityFromStore.entityRecord ?? null,
@@ -138,6 +156,7 @@ export const useObservedHost = (
   }, [
     useEntityStoreObservedData,
     entityFromStore,
+    aliasRecords,
     hostDetails,
     isLoading,
     loadingLastSeen,

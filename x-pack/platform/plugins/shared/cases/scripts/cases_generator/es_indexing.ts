@@ -179,7 +179,7 @@ export async function bulkIndexAlerts(
 // Generates `count` process-event documents and bulk-indexes them into
 // `eventIndex`. Returns eventId/index pairs for the docs that were created
 // successfully, used later to build event attachments. Called by run.ts when
-// --events > 0 and at least one non-observability case is being generated.
+// --events > 0 and at least one securitySolution case is being generated.
 export async function bulkIndexEvents(
   esClient: Client,
   eventIndex: string,
@@ -289,7 +289,7 @@ async function resolveAlertsForOwner(
 // stream, returning the full EventInfo pool. Uses the same reuse/top-up
 // policy as indexAlertsForOwners so a fresh run on top of an existing dataset
 // doesn't re-emit duplicate events. Called by run.ts when --events > 0 and
-// at least one non-observability case is being generated.
+// at least one securitySolution case is being generated.
 export async function indexOrReuseEvents(
   esClient: Client,
   eventIndex: string,

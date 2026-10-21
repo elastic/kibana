@@ -6,12 +6,16 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { serializedTitlesSchema } from '@kbn/presentation-publishing-schemas';
+import {
+  serializedTimeRangeSchema,
+  serializedTitlesSchema,
+} from '@kbn/presentation-publishing-schemas';
 import { customContentStateSchema } from '@kbn/custom-content-common';
 
 export const customContentEmbeddableSchema = z.object({
   ...customContentStateSchema.shape,
   ...serializedTitlesSchema.shape,
+  ...serializedTimeRangeSchema.shape,
 });
 
 export type CustomContentEmbeddableState = z.output<typeof customContentEmbeddableSchema>;

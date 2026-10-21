@@ -8,6 +8,7 @@
  */
 
 import type { ICPSManager, CPSAppAccessResolver } from '@kbn/cps-utils';
+import type { CloudStart } from '@kbn/cloud-plugin/public';
 
 export interface CPSPluginSetup {
   cpsEnabled?: boolean;
@@ -30,6 +31,10 @@ export interface CPSPluginStart {
    * use this to gate CPS-related UI sections.
    */
   isTierEligible: boolean;
+}
+
+export interface CPSPluginStartDependencies {
+  cloud?: CloudStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface

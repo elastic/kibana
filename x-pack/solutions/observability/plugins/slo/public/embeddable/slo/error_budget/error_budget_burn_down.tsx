@@ -25,6 +25,7 @@ export function SloErrorBudget({
   sloInstanceId,
   onRenderComplete,
   reloadSubject,
+  isInteractive = true,
 }: EmbeddableSloProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
@@ -110,7 +111,7 @@ export function SloErrorBudget({
   const hasGroupBy = slo.instanceId !== ALL_VALUE;
 
   return (
-    <div data-shared-item="" ref={containerRef} style={{ width: '100%', padding: 10 }}>
+    <div ref={containerRef} style={{ width: '100%', padding: 10 }}>
       <EuiFlexGroup direction="column" gutterSize="xs">
         <EuiFlexItem>
           <EuiLink
@@ -119,6 +120,7 @@ export function SloErrorBudget({
             onClick={() => {
               setSelectedSlo(slo);
             }}
+            disabled={!isInteractive}
           >
             <h4>{slo.name}</h4>
           </EuiLink>

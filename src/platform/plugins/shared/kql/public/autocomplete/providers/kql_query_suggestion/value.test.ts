@@ -89,6 +89,28 @@ describe('Kuery value suggestions', () => {
     expect(suggestions[0].end).toEqual(end);
   });
 
+  test('uses the value suggestion provider configured for the field', async () => {
+    await getSuggestions(
+      {
+        ...querySuggestionsArgs,
+        suggestionsAbstraction: {
+          type: 'alerting/v2',
+          fields: {},
+          valueSuggestionTypeByField: { 'machine.os': 'alerts' },
+        },
+      },
+      mockKueryNode({
+        fieldName: 'machine.os',
+        prefix: '',
+        suffix: '',
+      })
+    );
+
+    expect(autocompleteServiceMock.getValueSuggestions).toHaveBeenCalledWith(
+      expect.objectContaining({ querySuggestionKey: 'alerts' })
+    );
+  });
+
   test('should handle nested paths', async () => {
     const suggestions = await getSuggestions(
       querySuggestionsArgs,
@@ -148,7 +170,7 @@ describe('Kuery value suggestions', () => {
       );
 
       expect(autocompleteServiceMock.getValueSuggestions).toHaveBeenCalledTimes(1);
-      expect(autocompleteServiceMock.getValueSuggestions).toBeCalledWith(
+      expect(autocompleteServiceMock.getValueSuggestions).toHaveBeenCalledWith(
         expect.objectContaining({
           field: expect.any(Object),
           query: prefix + suffix,

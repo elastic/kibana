@@ -9,13 +9,13 @@
 
 import type { LineCounter } from 'yaml';
 import { isBuiltInStepProperty, isBuiltInStepType, type SelectionContext } from '@kbn/workflows';
+import type { StepPropertyItem } from '@kbn/workflows-yaml';
 import type { WorkflowLookup } from '../../../entities/workflows/store';
 import {
   buildStepSelectionValues,
   getValueFromValueNode,
 } from '../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 import type { GetStepPropertyHandler } from '../../../widgets/workflow_yaml_editor/lib/autocomplete/suggestions/step_property/get_step_property_suggestions';
-import type { StepPropertyItem } from '../model/types';
 
 export function collectAllStepPropertyItems(
   workflowLookup: WorkflowLookup,

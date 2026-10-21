@@ -11,13 +11,17 @@ import Fs from 'fs';
 import Os from 'os';
 import Path from 'path';
 
-jest.mock('../../../sharded_jest_configs.json', () => ({
-  'pkg/a/jest.config.js': 3,
-  'pkg/b/jest.integration.config.js': 2,
-  'pkg/c/jest.config.js': 1,
+jest.mock('../../load_buildkite_json.ts', () => ({
+  loadBuildkiteJson: jest.fn((filename: string) =>
+    filename === 'sharded_jest_configs.json'
+      ? {
+          'pkg/a/jest.config.js': 3,
+          'pkg/b/jest.integration.config.js': 2,
+          'pkg/c/jest.config.js': 1,
+        }
+      : []
+  ),
 }));
-
-jest.mock('../../../disabled_jest_configs.json', () => [], { virtual: false });
 
 let mockKibanaDir = process.cwd();
 
@@ -27,10 +31,11 @@ jest.mock('#pipeline-utils', () => ({
 
 import {
   SHARD_ANNOTATION_SEP,
+  discoverJestIntegrationConfigs,
   discoverJestUnitConfigs,
   expandShardedJestConfigs,
   globsForSolutions,
-} from './jest_configs';
+} from './jest_configs.ts';
 
 describe('expandShardedJestConfigs', () => {
   it('passes configs not in the shard map through unchanged', () => {
@@ -124,5 +129,23 @@ describe('discoverJestUnitConfigs', () => {
     process.chdir(otherCwd);
 
     expect(discoverJestUnitConfigs(undefined)).toEqual(['pkg/has_tests/jest.config.js']);
+  });
+
+  it('discovers CommonJS configs', () => {
+    Fs.mkdirSync(Path.join(repoRoot, 'pkg/unit'), { recursive: true });
+    Fs.writeFileSync(Path.join(repoRoot, 'pkg/unit/jest.config.cjs'), 'module.exports = {};');
+    Fs.writeFileSync(Path.join(repoRoot, 'pkg/unit/foo.test.ts'), '');
+    Fs.mkdirSync(Path.join(repoRoot, 'pkg/integration'), { recursive: true });
+    Fs.writeFileSync(
+      Path.join(repoRoot, 'pkg/integration/jest.integration.config.cjs'),
+      'module.exports = {};'
+    );
+    Fs.mkdirSync(Path.join(repoRoot, 'pkg/integration/integration_tests'));
+    Fs.writeFileSync(Path.join(repoRoot, 'pkg/integration/integration_tests/foo.test.ts'), '');
+
+    expect(discoverJestUnitConfigs(undefined)).toEqual(['pkg/unit/jest.config.cjs']);
+    expect(discoverJestIntegrationConfigs(undefined)).toEqual([
+      'pkg/integration/jest.integration.config.cjs',
+    ]);
   });
 });

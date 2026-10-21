@@ -67,6 +67,7 @@ describe('clone', () => {
           apiKeyOwner: 'user-a',
           apiKeyCreatedByUser: false,
           uiamApiKey: sourceUiamApiKey,
+          uiamApiKeyExternal: true,
         },
         references: [],
       };
@@ -84,6 +85,42 @@ describe('clone', () => {
       expect(createdAttributes.apiKeyOwner).toBeNull();
       expect(createdAttributes.apiKeyCreatedByUser).toBeNull();
       expect(createdAttributes.uiamApiKey).not.toBe(sourceUiamApiKey);
+      expect(createdAttributes).not.toHaveProperty('uiamApiKeyExternal');
+    });
+
+    it('stamps createdByProfileUid and updatedByProfileUid from the current user', async () => {
+      rulesClientParams.getProfileUid.mockResolvedValueOnce('u_profile_1');
+
+      const disabledRule = {
+        id: 'test-rule',
+        type: RULE_SAVED_OBJECT_TYPE,
+        attributes: {
+          name: 'My rule',
+          alertTypeId: '123',
+          schedule: { interval: '10s' },
+          params: { bar: true },
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          actions: [],
+          enabled: false,
+          executionStatus: {},
+        },
+        references: [],
+      };
+
+      encryptedSavedObjects.getDecryptedAsInternalUser.mockResolvedValue(disabledRule);
+      unsecuredSavedObjectsClient.create.mockResolvedValue(disabledRule);
+
+      await rulesClient.clone({
+        id: disabledRule.id,
+        newId: 'cloned-rule',
+      });
+
+      const createdAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1] as RuleDomain;
+      expect(createdAttributes.createdBy).toBe('elastic');
+      expect(createdAttributes.updatedBy).toBe('elastic');
+      expect(createdAttributes.createdByProfileUid).toBe('u_profile_1');
+      expect(createdAttributes.updatedByProfileUid).toBe('u_profile_1');
     });
 
     it('does not copy api key fields from the source rule when cloning an enabled rule', async () => {

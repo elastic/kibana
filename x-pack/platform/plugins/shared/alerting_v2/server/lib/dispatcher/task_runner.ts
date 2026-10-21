@@ -39,12 +39,19 @@ export class DispatcherTaskRunner {
     const state: DispatcherTaskState = taskInstance.state;
 
     return {
-      previousStartedAt: state.previousStartedAt ? new Date(state.previousStartedAt) : undefined,
+      eventWatermark: state.eventWatermark ? new Date(state.eventWatermark) : undefined,
+      stuckTicks: state.stuckTicks ?? 0,
       signal,
+      taskId: taskInstance.id,
     };
   }
 
   private buildRunResult(result: DispatcherExecutionResult): RunResult {
-    return { state: { previousStartedAt: result.startedAt.toISOString() } };
+    return {
+      state: {
+        eventWatermark: result.nextWatermark.toISOString(),
+        stuckTicks: result.nextStuckTicks,
+      },
+    };
   }
 }

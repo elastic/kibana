@@ -1,0 +1,606 @@
+{
+  "sha1": "59036009ee85aab73053ac5486133dbc98dc2f34",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "6429ae5067b2a21-fe5d0084e4dbd1a",
+      "title": "Install Entity Store once for logs extraction API suite",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "c8588d2004a116a-879855ef4ecd93b",
+      "title": "Entity Store dual-process union equivalence flag off: single-process extraction builds the baseline",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
+        "line": 372,
+        "column": 15
+      }
+    },
+    {
+      "id": "c8588d2004a116a-72f3e03302fc3b9",
+      "title": "Entity Store dual-process union equivalence flag on: priority then non-priority matches single-process output",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
+        "line": 385,
+        "column": 18
+      }
+    },
+    {
+      "id": "c8588d2004a116a-ce4317c5ca9ad92",
+      "title": "Entity Store dual-process union equivalence flag on: non-priority then priority gives the same entities and levels as single-process",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
+        "line": 401,
+        "column": 23
+      }
+    },
+    {
+      "id": "c8588d2004a116a-ec4c198ff60b40c",
+      "title": "Entity Store dual-process union equivalence flag on: public stop and start act on both processes",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
+        "line": 424,
+        "column": 25
+      }
+    },
+    {
+      "id": "c8588d2004a116a-177173137fbbdf1",
+      "title": "Entity Store dual-process union equivalence dual-process: run order decides newest and oldest values",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
+        "line": 447,
+        "column": 6
+      }
+    },
+    {
+      "id": "c8588d2004a116a-2099f470353f8e7",
+      "title": "Entity Store dual-process union equivalence flag on: a forced sampling rate samples non-priority only",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
+        "line": 483,
+        "column": 19
+      }
+    },
+    {
+      "id": "c8588d2004a116a-fa691e94a328f4b",
+      "title": "Entity Store dual-process union equivalence flag on: a lowered maxLogsPerWindow engages sampling dynamically, without an override",
+      "expectedStatus": "skipped",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/dual_process_union_equivalence.spec.ts",
+        "line": 514,
+        "column": 15
+      }
+    },
+    {
+      "id": "6d37da1b366c84e-3c3ccd873a00934",
+      "title": "Entity Store Logs Extraction with pagination (entity pages + maxLogsPerPage) Should extract host with entity pagination (docsLimit 5, wide log slices)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/entity_extraction_paginated.spec.ts",
+        "line": 69,
+        "column": 26
+      }
+    },
+    {
+      "id": "6d37da1b366c84e-8cfe8b8e2e35b47",
+      "title": "Entity Store Logs Extraction with pagination (entity pages + maxLogsPerPage) Should run more ESQL pages when maxLogsPerPage narrows log slices",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/entity_extraction_paginated.spec.ts",
+        "line": 102,
+        "column": 26
+      }
+    },
+    {
+      "id": "7bd199a668a89cc-ba96a82c602e6fb",
+      "title": "Entity Store logs extraction broken mapping should extract hosts successfully when source index has conflicting field mappings",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_broken_mapping.spec.ts",
+        "line": 411,
+        "column": 9
+      }
+    },
+    {
+      "id": "7bd199a668a89cc-bbd3312f425bf1f",
+      "title": "Entity Store logs extraction broken mapping should collect new field values on subsequent extractions when entity already exists and field has multi-field sub-fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_broken_mapping.spec.ts",
+        "line": 449,
+        "column": 23
+      }
+    },
+    {
+      "id": "7bd199a668a89cc-2c4ad9aaffd3713",
+      "title": "Entity Store logs extraction broken mapping should extract users successfully when source index has conflicting field mappings (IDP + local id / filters)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_broken_mapping.spec.ts",
+        "line": 546,
+        "column": 62
+      }
+    },
+    {
+      "id": "7bd199a668a89cc-64fa84ccac38380",
+      "title": "Entity Store logs extraction broken mapping should extract hosts successfully when timestamp is date_nanos (lifecycle COALESCE datetime/date_nanos type fix)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_broken_mapping.spec.ts",
+        "line": 586,
+        "column": 67
+      }
+    },
+    {
+      "id": "7bd199a668a89cc-3a88530356b96b0",
+      "title": "Entity Store logs extraction broken mapping should extract service successfully when service.name is mapped as long (triggers castField ambiguity fix)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_broken_mapping.spec.ts",
+        "line": 713,
+        "column": 15
+      }
+    },
+    {
+      "id": "bc857055aa1a377-4ea0e651fbacc8c",
+      "title": "Entity Store volume cap defer — logsCapApplied true, lastSearchTimestamp before window end",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_volume_cap.spec.ts",
+        "line": 74,
+        "column": 5
+      }
+    },
+    {
+      "id": "bc857055aa1a377-327842296215ab8",
+      "title": "Entity Store volume cap drop — logsCapApplied true, lastSearchTimestamp equals window end",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_volume_cap.spec.ts",
+        "line": 158,
+        "column": 4
+      }
+    },
+    {
+      "id": "bc857055aa1a377-cce7b64a428c2d9",
+      "title": "Entity Store volume cap maxLogsPerWindow 0 disables the cap and extracts all docs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction_volume_cap.spec.ts",
+        "line": 205,
+        "column": 51
+      }
+    },
+    {
+      "id": "8350afe5b00979d-edf468ca499c251",
+      "title": "Entity Store Main logs extraction Should extract properly extract host",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 84,
+        "column": 38
+      }
+    },
+    {
+      "id": "8350afe5b00979d-70644c9ff872ec2",
+      "title": "Entity Store Main logs extraction Should extract properly extract user",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 107,
+        "column": 12
+      }
+    },
+    {
+      "id": "8350afe5b00979d-66e9c7a3970c192",
+      "title": "Entity Store Main logs extraction Should extract properly extract service",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 143,
+        "column": 14
+      }
+    },
+    {
+      "id": "8350afe5b00979d-b83bb04860e3ad4",
+      "title": "Entity Store Main logs extraction Should extract properly extract generic",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 170,
+        "column": 15
+      }
+    },
+    {
+      "id": "8350afe5b00979d-e22bf5980fd8c5d",
+      "title": "Entity Store Main logs extraction Should properly handle field retention strategies",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 197,
+        "column": 11
+      }
+    },
+    {
+      "id": "8350afe5b00979d-89487fe761ee169",
+      "title": "Entity Store Main logs extraction Should apply user postAggFilter: IDP asset/iam paths and entity.id-after-LOOKUP; omit when no keep branch",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 438,
+        "column": 20
+      }
+    },
+    {
+      "id": "8350afe5b00979d-9b7dcd27c283b33",
+      "title": "Entity Store Main logs extraction Should resolve CloudTrail actors to the inventory IAM role entity via user.entity.id (aws)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 587,
+        "column": 22
+      }
+    },
+    {
+      "id": "8350afe5b00979d-ec90f47880eb3c8",
+      "title": "Entity Store Main logs extraction Should only enrich (update) existing entities when entity already exists for both IDP and non-IDP, no new entity creation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 639,
+        "column": 26
+      }
+    },
+    {
+      "id": "8350afe5b00979d-116d47fd013695a",
+      "title": "Entity Store Main logs extraction Should set entity.namespace to local and entity.name to user.name and host.name for non-IDP documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 713,
+        "column": 10
+      }
+    },
+    {
+      "id": "8350afe5b00979d-61814df6a17f9f1",
+      "title": "Entity Store Main logs extraction Should set entity.name to user.name when non-IDP local document has no host.name",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 740,
+        "column": 43
+      }
+    },
+    {
+      "id": "8350afe5b00979d-7babc9b74e11de2",
+      "title": "Entity Store Main logs extraction Should process extraction successfully when ingesting IDP, non-IDP, and invalid user documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 773,
+        "column": 23
+      }
+    },
+    {
+      "id": "8350afe5b00979d-123a9aec395f53e",
+      "title": "Entity Store Main logs extraction Should not extract user entities for excluded user names (LOCAL_NAMESPACE_EXCLUDED_USER_NAMES in user_entity_constants)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 854,
+        "column": 14
+      }
+    },
+    {
+      "id": "8350afe5b00979d-7825e51fe5a9e08",
+      "title": "Entity Store Main logs extraction Should process extraction successfully for all entity types with mixed valid and invalid documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 924,
+        "column": 25
+      }
+    },
+    {
+      "id": "8350afe5b00979d-0e0cd115ecf20b9",
+      "title": "Entity Store Main logs extraction Should omit documents at logs extraction when they do not match documentsFilter or postAggFilter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 1034,
+        "column": 17
+      }
+    },
+    {
+      "id": "8350afe5b00979d-3226f9613eaf130",
+      "title": "Entity Store Main logs extraction Should store _source as nested objects after ingest pipeline",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 1234,
+        "column": 24
+      }
+    },
+    {
+      "id": "8350afe5b00979d-a44a04d1960442a",
+      "title": "Entity Store Main logs extraction Should extract all entities when all documents share the same timestamp as fromDateISO (timestamp collision at slice boundary)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 1125,
+        "column": 66
+      }
+    },
+    {
+      "id": "8350afe5b00979d-7007b59e6e39b69",
+      "title": "Entity Store Main logs extraction Should merge entity.relationships.* identifier from host.entity on source documents",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 1184,
+        "column": 7
+      }
+    },
+    {
+      "id": "8350afe5b00979d-86dffcd432840e0",
+      "title": "Entity Store Main logs extraction Should route cloud asset users to the correct namespace based on cloud.provider",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 1266,
+        "column": 9
+      }
+    },
+    {
+      "id": "8350afe5b00979d-588fb43f1b015c5",
+      "title": "Entity Store Main logs extraction Should succeed when a data stream matched by the data view has a closed backing index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/logs_extraction.spec.ts",
+        "line": 1417,
+        "column": 22
+      }
+    },
+    {
+      "id": "6985e874ee1895b-82a237443bee9f2",
+      "title": "Uninstall Entity Store for logs extraction API suite",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/logs_extraction/api/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}
