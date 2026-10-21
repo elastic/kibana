@@ -12,7 +12,6 @@ import type { ChatCallbackResponse, ConversationOriginType } from '@kbn/agent-bu
 export interface CallbackConversationResolverContext {
   origin: { type: ConversationOriginType; external_conversation_id: string };
   spaceId: string;
-  /** The callback request, for resolvers that read as the caller. */
   request: KibanaRequest;
 }
 
@@ -28,16 +27,4 @@ export interface CallbackTransportDefinition {
   handles(callbackUrl: string): boolean;
   /** Resolves once delivered; throws a `CallbackDeliveryError` to say whether to retry. */
   send(callbackUrl: string, payload: ChatCallbackResponse, signal: AbortSignal): Promise<void>;
-}
-
-/** AgentBuilder callbacks setup contract. */
-export interface CallbacksSetup {
-  /**
-   * Registers a resolver for the conversation an execution's origin continues, when the execution
-   * names no conversation. Resolvers are asked in registration order and the first answer wins.
-   * When all return `undefined`, the default lookup by origin runs.
-   */
-  registerConversationResolver(resolver: CallbackConversationResolver): void;
-  /** Registers a callback transport. The first registered transport that handles a URL delivers to it. */
-  registerTransport(transport: CallbackTransportDefinition): void;
 }
