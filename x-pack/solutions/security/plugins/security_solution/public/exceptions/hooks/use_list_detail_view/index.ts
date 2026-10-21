@@ -163,9 +163,9 @@ export const useListDetailsView = (exceptionListId: string) => {
   const [showManageRulesFlyout, setShowManageRulesFlyout] = useState(false);
 
   const onEditListDetails = useCallback(
-    async (listDetails: ListDetails) => {
+    async (listDetails: ListDetails): Promise<boolean> => {
       try {
-        if (!list) return;
+        if (!list) return false;
         const updated = await updateList({
           http,
           list: {
@@ -178,8 +178,10 @@ export const useListDetailsView = (exceptionListId: string) => {
           },
         });
         setList(updated);
+        return true;
       } catch (error) {
         handleErrorStatus(error);
+        return false;
       }
     },
     [exceptionListId, handleErrorStatus, http, list]

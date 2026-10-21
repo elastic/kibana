@@ -26,7 +26,7 @@ interface ListDetailsAppHeaderProps {
   linkedRules: Rule[];
   isReadOnly: boolean;
   canUserEditList: boolean;
-  onEditListDetails: (listDetails: ListDetails) => void;
+  onEditListDetails: (listDetails: ListDetails) => Promise<boolean>;
   onExportList: () => void;
   onDuplicateList: () => void;
   onDeleteList: () => void;
@@ -57,9 +57,9 @@ export const ListDetailsAppHeader = React.memo<ListDetailsAppHeaderProps>(
     const openEditModal = useCallback(() => setIsEditModalVisible(true), []);
     const closeEditModal = useCallback(() => setIsEditModalVisible(false), []);
     const saveListDetails = useCallback(
-      (listDetails: ListDetails) => {
-        onEditListDetails(listDetails);
-        closeEditModal();
+      async (listDetails: ListDetails) => {
+        const isSaved = await onEditListDetails(listDetails);
+        if (isSaved) closeEditModal();
       },
       [closeEditModal, onEditListDetails]
     );
@@ -146,7 +146,6 @@ export const ListDetailsAppHeader = React.memo<ListDetailsAppHeaderProps>(
           label: i18n.DELETE_LIST,
           iconType: 'trash',
           overflow: true,
-          isDestructive: true,
           disableButton: !canUserEditList,
           run: onDeleteList,
           testId: `${TEST_SUBJ_PREFIX}DeleteAction`,

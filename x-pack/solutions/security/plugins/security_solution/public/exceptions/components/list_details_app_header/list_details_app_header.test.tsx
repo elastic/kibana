@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router-dom';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
@@ -45,7 +45,7 @@ const defaultProps = {
   linkedRules,
   isReadOnly: false,
   canUserEditList: true,
-  onEditListDetails: jest.fn(),
+  onEditListDetails: jest.fn().mockResolvedValue(true),
   onExportList: jest.fn(),
   onDuplicateList: jest.fn(),
   onDeleteList: jest.fn(),
@@ -175,6 +175,28 @@ describe('ListDetailsAppHeader', () => {
       name: 'Renamed',
       description: 'My description',
     });
+  });
+
+  it('closes the edit modal after a successful save', async () => {
+    renderHeader();
+
+    await openAppMenuOverflow();
+    await user.click(await screen.findByTestId('exceptionListManagementEditDetailsAction'));
+    await user.click(await screen.findByTestId('editModalSaveBtn'));
+
+    await waitFor(() => expect(screen.queryByTestId('editModalSaveBtn')).not.toBeInTheDocument());
+  });
+
+  it('keeps the edit modal open when saving fails', async () => {
+    (defaultProps.onEditListDetails as jest.Mock).mockResolvedValueOnce(false);
+    renderHeader();
+
+    await openAppMenuOverflow();
+    await user.click(await screen.findByTestId('exceptionListManagementEditDetailsAction'));
+    await user.click(await screen.findByTestId('editModalSaveBtn'));
+
+    await waitFor(() => expect(defaultProps.onEditListDetails).toHaveBeenCalled());
+    expect(screen.getByTestId('editModalSaveBtn')).toBeInTheDocument();
   });
 
   it('hides the edit action when read only', async () => {

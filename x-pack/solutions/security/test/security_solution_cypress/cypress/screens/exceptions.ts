@@ -202,7 +202,7 @@ export const EXCEPTIONS_LIST_MANAGEMENT_EDIT_MODAL_DESCRIPTION_INPUT =
 
 export const EXCEPTIONS_LIST_EDIT_DETAILS_SAVE_BTN = '[data-test-subj="editModalSaveBtn"]';
 
-export const EXCEPTIONS_LIST_DETAILS_HEADER = '[data-test-subj="appHeader"]';
+export const EXCEPTIONS_LIST_DETAILS_HEADER = '[data-test-subj="appHeaderTitle"]';
 
 export const EXCEPTION_LIST_DETAILS_CARD_ITEM_NAME = '[data-test-subj="exceptionItemCardHeader"]';
 
