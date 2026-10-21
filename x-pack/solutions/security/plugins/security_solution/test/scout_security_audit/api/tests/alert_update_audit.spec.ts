@@ -176,8 +176,6 @@ apiTest.describe(
     );
 
     apiTest('signals/tags writes alert_update', async ({ apiClient }) => {
-      apiTest.skip(true, 'Enabled once the tag and assignee audit PR for #273906 merges');
-
       const testStart = Date.now();
       const alertId = `scout-audit-tags-${testStart}`;
 
@@ -203,8 +201,6 @@ apiTest.describe(
     });
 
     apiTest('signals/assignees writes alert_update', async ({ apiClient }) => {
-      apiTest.skip(true, 'Enabled once the tag and assignee audit PR for #273906 merges');
-
       const testStart = Date.now();
       const alertId = `scout-audit-assignees-${testStart}`;
 
