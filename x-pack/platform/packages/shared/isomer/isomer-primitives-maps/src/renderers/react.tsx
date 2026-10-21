@@ -113,8 +113,8 @@ export const createMapReactRenderer =
                           d={path}
                           fill={region.fill ?? toneFill(region.tone ?? 'primary')}
                           fillOpacity={layer.opacity ?? 0.75}
-                          stroke={PAINT.regionLine}
-                          strokeWidth={0.6}
+                          stroke={layer.lineColor ?? PAINT.regionLine}
+                          strokeWidth={layer.lineWidth ?? 0.6}
                         />
                       ) : null;
                     })
@@ -143,8 +143,8 @@ export const createMapReactRenderer =
                     key={`arc-${layerIndex}-${index}`}
                     d={arc.path}
                     fill="none"
-                    stroke={arc.color ?? toneFill(arc.tone)}
-                    strokeWidth={Math.max(1.5, Math.min(arc.weight, 4))}
+                    stroke={arc.color ?? layer.lineColor ?? toneFill(arc.tone)}
+                    strokeWidth={layer.lineWidth ?? Math.max(1.5, Math.min(arc.weight, 4))}
                     strokeOpacity={layer.opacity ?? 1}
                   />
                 ));
@@ -158,8 +158,8 @@ export const createMapReactRenderer =
                       r={marker.radius}
                       fill={marker.fill ?? toneFill(marker.tone)}
                       fillOpacity={layer.opacity ?? 1}
-                      stroke={PAINT.markerLine}
-                      strokeWidth={1}
+                      stroke={layer.lineColor ?? PAINT.markerLine}
+                      strokeWidth={layer.lineWidth ?? 1}
                     />
                   )),
                   ...layer.markers.map((marker) =>
@@ -167,10 +167,10 @@ export const createMapReactRenderer =
                       <text
                         key={`marker-${layerIndex}-${marker.id}-label`}
                         x={layer.labels === 'inside' ? marker.x : marker.x + marker.radius + 3}
-                        y={marker.y + 4}
-                        fontSize={11}
+                        y={marker.y + (layer.labelSize ?? 11) * 0.35}
+                        fontSize={layer.labelSize ?? 11}
                         textAnchor={layer.labels === 'inside' ? 'middle' : 'start'}
-                        fill={PAINT.text}
+                        fill={layer.labelColor ?? PAINT.text}
                       >
                         {marker.label}
                       </text>

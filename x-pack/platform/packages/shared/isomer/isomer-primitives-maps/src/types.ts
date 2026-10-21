@@ -129,6 +129,13 @@ interface MapLayerBase {
   color?: string;
   /** The layer's opacity, 0 to 1, as a Maps layer's `alpha`; defaults to each kind's own. */
   opacity?: number;
+  /** A static `#rrggbb` outline, as a Maps layer's static line color; an arc's stroke. */
+  lineColor?: string;
+  /** The outline's width in pixels, as a Maps layer's static line width; an arc's width. */
+  lineWidth?: number;
+  /** A static `#rrggbb` label color and size in pixels, as a Maps layer's label style. */
+  labelColor?: string;
+  labelSize?: number;
 }
 
 export interface MapRegionsLayer extends MapLayerBase {

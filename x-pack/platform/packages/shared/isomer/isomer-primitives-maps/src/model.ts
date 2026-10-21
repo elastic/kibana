@@ -78,12 +78,22 @@ export interface MapRegionModel extends MapRegion {
 }
 
 /** A data layer as drawn, bottom to top. */
-export type MapLayerModel = { opacity: number | undefined } & (
-  | { kind: 'regions'; regionSet?: string; regionKey?: string; regions: MapRegionModel[] }
-  | { kind: 'markers'; labels: 'beside' | 'inside'; markers: MapMarkerModel[] }
-  | { kind: 'cells'; shape: MapNode['cellShape']; cells: MapCellModel[] }
-  | { kind: 'arcs'; arcs: MapArcModel[] }
-);
+/** A layer's outline and label paint, as its Maps style sets them. */
+export interface MapLayerPaint {
+  opacity: number | undefined;
+  lineColor: string | undefined;
+  lineWidth: number | undefined;
+  labelColor: string | undefined;
+  labelSize: number | undefined;
+}
+
+export type MapLayerModel = MapLayerPaint &
+  (
+    | { kind: 'regions'; regionSet?: string; regionKey?: string; regions: MapRegionModel[] }
+    | { kind: 'markers'; labels: 'beside' | 'inside'; markers: MapMarkerModel[] }
+    | { kind: 'cells'; shape: MapNode['cellShape']; cells: MapCellModel[] }
+    | { kind: 'arcs'; arcs: MapArcModel[] }
+  );
 
 /** A data layer before projection: a `layers` entry, or the node's single-layer fields. */
 type NodeLayer =
@@ -222,6 +232,14 @@ const arcPath = (from: ProjectedPoint, to: ProjectedPoint): string => {
 const extent = (values: readonly number[]) =>
   values.length === 0 ? { min: 0, max: 0 } : { min: Math.min(...values), max: Math.max(...values) };
 
+const paintOf = (layer: NodeLayer): MapLayerPaint => ({
+  opacity: 'opacity' in layer ? layer.opacity : undefined,
+  lineColor: 'lineColor' in layer ? layer.lineColor : undefined,
+  lineWidth: 'lineWidth' in layer ? layer.lineWidth : undefined,
+  labelColor: 'labelColor' in layer ? layer.labelColor : undefined,
+  labelSize: 'labelSize' in layer ? layer.labelSize : undefined,
+});
+
 const markerModels = (
   layer: Extract<NodeLayer, { kind: 'markers' }>,
   project: Projector
@@ -276,7 +294,7 @@ export const createMapModel = (node: MapNode): MapModel => {
       case 'markers':
         layerModels.push({
           kind: 'markers',
-          opacity: layer.opacity,
+          ...paintOf(layer),
           labels: layer.markerLabels ?? 'beside',
           markers: markerModels(layer, project),
         });
@@ -305,13 +323,13 @@ export const createMapModel = (node: MapNode): MapModel => {
               : layer.color,
           });
         }
-        layerModels.push({ kind: 'cells', opacity: layer.opacity, shape: layer.cellShape, cells });
+        layerModels.push({ kind: 'cells', ...paintOf(layer), shape: layer.cellShape, cells });
         break;
       }
       case 'arcs':
         layerModels.push({
           kind: 'arcs',
-          opacity: layer.opacity,
+          ...paintOf(layer),
           arcs: layer.arcs.map((arc: MapArc) => ({
             path: arcPath(project(arc.from[1], arc.from[0]), project(arc.to[1], arc.to[0])),
             tone: arc.tone ?? 'neutral',
@@ -325,7 +343,7 @@ export const createMapModel = (node: MapNode): MapModel => {
         const regionValues = extent(layer.regions.map(({ value }) => value));
         layerModels.push({
           kind: 'regions',
-          opacity: layer.opacity,
+          ...paintOf(layer),
           regionSet: layer.regionSet,
           regionKey: layer.regionKey,
           regions: layer.regions.map((region) => ({

@@ -118,3 +118,27 @@ describe('createMapModel layers', () => {
     expect(model.regions).toHaveLength(3);
   });
 });
+
+describe('createMapModel layer paint', () => {
+  it('carries each layer’s outline and label paint, as its Maps style sets them', () => {
+    const model = createMapModel({
+      type: 'map',
+      layers: [
+        {
+          kind: 'markers',
+          lineColor: '#ffffff',
+          lineWidth: 2,
+          labelColor: '#000000',
+          labelSize: 14,
+          markers: [{ id: 'a', lat: 0, lon: 0, label: 'A' }],
+        },
+      ],
+    });
+    expect(model.layers[0]).toMatchObject({
+      lineColor: '#ffffff',
+      lineWidth: 2,
+      labelColor: '#000000',
+      labelSize: 14,
+    });
+  });
+});
