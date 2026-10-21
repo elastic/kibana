@@ -181,13 +181,13 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
       .filter(({ id }) => id && defaultProfileAdHocDataViewIds.includes(id));
 
     const profileDataViewsExist = profileDataViews.length > 0;
-    const locationStateHasDataViewSpec = Boolean(dataViewSpec);
+    const hasLocationDataView = Boolean(dataViewSpec);
     const canAccessWithoutPersistedDataView =
       isEsqlMode ||
       tabHasInitialAdHocDataViewSpec ||
       peristedTabHasAdHocDataView ||
       profileDataViewsExist ||
-      locationStateHasDataViewSpec;
+      hasLocationDataView;
 
     if (!initializationState.hasDataView && !canAccessWithoutPersistedDataView) {
       return { showNoDataPage: true };
@@ -228,7 +228,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
         persistedTab,
         services,
         defaultProfileEsqlQuery,
-        hasLocationDataView: locationStateHasDataViewSpec,
+        hasLocationDataView,
       });
       if (isNonEmptyEsqlQuery(configuredEsqlQuery)) {
         return {
@@ -259,7 +259,7 @@ export const initializeSingleTab = createInternalStateAsyncThunk(
           services,
           dataView,
           defaultProfileEsqlQuery,
-          hasLocationDataView: locationStateHasDataViewSpec,
+          hasLocationDataView,
         });
 
       if (isNonEmptyEsqlQuery(query)) {
