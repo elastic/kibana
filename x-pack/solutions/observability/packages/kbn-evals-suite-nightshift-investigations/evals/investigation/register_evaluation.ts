@@ -25,14 +25,16 @@ import {
 import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
 import { assertSuccessfulSandboxCommand } from './trace_evidence';
 import type { InvestigationExample, InvestigationTaskOutput } from './types';
+import { assertOrcaSource, hasOrcaTelemetryQuery } from './orca_dataset';
 import {
-  captureInvestigationArtifacts,
-  captureInvestigationTrace,
-  writeInvestigationArtifact,
-} from '../../test/investigation_artifacts';
-import { assertOrcaSource, assertOrcaTelemetryQuery } from './orca_dataset';
+  EXECUTION_SUCCESS_EVALUATOR,
+  assertExecutionSuccessRate,
+  executionSuccessEvaluator,
+  getExecutionFailure,
+} from './execution_success';
 
-const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.complete];
+// CI runs the suite on a serverless observability Scout cluster.
+const suiteTags = [...tags.serverless.observability.complete];
 
 /** Registers a dataset with the native investigation task, RCA judges and execution checks. */
 export const registerInvestigationEvaluation = ({
@@ -51,7 +53,7 @@ export const registerInvestigationEvaluation = ({
   metadata?: Record<string, string | number>;
 }): void => {
   evaluate.describe(`Nightshift investigations: ${name}`, { tag: suiteTags }, () => {
-    // Expensive investigations must not repeat when an execution assertion fails.
+    // Scout retries a failed test once on CI; expensive investigations must not run twice.
     evaluate.describe.configure({ retries: 0 });
     evaluate(
       'grades investigations with the RCA judges and persists complete agent traces',
@@ -72,13 +74,13 @@ export const registerInvestigationEvaluation = ({
           await assertOrcaSource();
         }
         const dataset = await loadDataset(evalsClient);
-        const artifactErrors: string[] = [];
         // The judges score with the evaluation connector, not the model under test.
         const judges = createInvestigationJudges({
           inferenceClient: inferenceClient.bindTo({ connectorId: evaluationConnector.id }),
           evaluationConnector,
           log,
         });
+        const evaluators = [...judges, executionSuccessEvaluator];
         // The evals_nightshift_investigations config set sizes Task Manager for 16 investigations.
         const concurrency = Math.min(orca ? 8 : 16, requestedConcurrency);
         evaluate.setTimeout(
@@ -123,49 +125,17 @@ export const registerInvestigationEvaluation = ({
             trustUpstreamDataset,
             concurrency,
             metadata: { ...experimentMetadata, concurrency },
-            task: async (example) => {
-              const output = await runInvestigation(fetch, example, connector);
-              if (orca) {
-                try {
-                  await captureInvestigationArtifacts({
-                    output,
-                    fetch,
-                    modelId: connector.id,
-                  });
-                } catch {
-                  artifactErrors.push(example.metadata.case_id);
-                }
-              }
-              return output;
-            },
+            task: (example) => runInvestigation(fetch, example, connector),
           },
-          judges
+          evaluators
         );
 
-        if (orca) writeInvestigationArtifact(connector.id, 'experiment', experiment);
         const runs = Object.values(experiment.runs);
-        if (orca) {
-          await pMap(
-            runs,
-            async (run) => {
-              const output = run.output as InvestigationTaskOutput;
-              try {
-                await expect(async () =>
-                  captureInvestigationTrace(output, traceEsClient, connector.id)
-                ).toPass({ timeout: 60_000 });
-              } catch {
-                artifactErrors.push(output.case_id);
-              }
-            },
-            { concurrency }
-          );
-          writeInvestigationArtifact(connector.id, 'artifact-errors', { case_ids: artifactErrors });
-        }
         expect(runs).toHaveLength(dataset.examples.length * repetitions);
         expect(new Set(runs.map(({ metadata }) => metadata?.case_id))).toEqual(
           new Set(dataset.examples.map(({ metadata }) => metadata.case_id))
         );
-        const scoresPerRun = judges.length;
+        const scoresPerRun = evaluators.length;
         await expect
           .poll(async () => (await evalsClient.getExperimentScores(experiment.id)).length, {
             timeout: 60_000,
@@ -176,42 +146,46 @@ export const registerInvestigationEvaluation = ({
           experiment.datasetId
         );
         const scores = examples.flatMap((example) => example.scores);
-        if (orca) {
-          writeInvestigationArtifact(connector.id, 'scores', scores);
-          expect(artifactErrors, 'Failed to export evidence for these ORCA cases').toEqual([]);
-        }
         expect(scores).toHaveLength(runs.length * scoresPerRun);
+
+        // A failed investigation is scored, not fatal: the eval fails only when too many runs fail.
+        const failures = runs.flatMap((run) => {
+          const output = run.output as InvestigationTaskOutput;
+          const reason = getExecutionFailure(output);
+          return reason ? [{ caseId: output.case_id, reason }] : [];
+        });
+        for (const { caseId, reason } of failures) {
+          log.warning(`Investigation ${caseId} did not complete: ${reason}`);
+        }
+        assertExecutionSuccessRate(failures, runs.length);
+        const casesWithOrcaTelemetry: string[] = [];
 
         await pMap(
           runs,
           async (run) => {
             const output = run.output as InvestigationTaskOutput;
-            // These execution-acceptance checks alone establish that the run itself succeeded,
-            // independently of the quality scores the judges assign.
-            expect(output.execution_error).toBeUndefined();
-            expect(output.workflow_status).toBe('complete');
-            expect(output.investigation_id).toEqual(expect.any(String));
-            expect(output.conversation_id).toEqual(expect.any(String));
-            expect(
-              output.structured_report?.conclusion || output.structured_report?.summary
-            ).toBeTruthy();
-            const conversation = await fetch<{ rounds: ConversationRound[] }>(
-              `/api/agent_builder/conversations/${encodeURIComponent(
-                output.conversation_id ?? ''
-              )}`,
-              { headers: { 'elastic-api-version': '2023-10-31' } }
-            );
-            expect(conversation.rounds.length).toBeGreaterThan(0);
-            expect(conversation.rounds).toHaveLength(output.conversation_round_count ?? 0);
-            if (orca) assertOrcaTelemetryQuery(conversation.rounds);
-            if (
-              !orca &&
-              !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
-              !process.env.NIGHTSHIFT_DATASET_NAME
-            ) {
-              assertSuccessfulSandboxCommand(conversation.rounds);
+            // Completed runs must have persisted their conversation and agent trace.
+            if (!getExecutionFailure(output)) {
+              const conversation = await fetch<{ rounds: ConversationRound[] }>(
+                `/api/agent_builder/conversations/${encodeURIComponent(
+                  output.conversation_id ?? ''
+                )}`,
+                { headers: { 'elastic-api-version': '2023-10-31' } }
+              );
+              expect(conversation.rounds.length).toBeGreaterThan(0);
+              expect(conversation.rounds).toHaveLength(output.conversation_round_count ?? 0);
+              if (orca && hasOrcaTelemetryQuery(conversation.rounds)) {
+                casesWithOrcaTelemetry.push(output.case_id);
+              }
+              if (
+                !orca &&
+                !process.env.NIGHTSHIFT_EXAMPLES_FILE &&
+                !process.env.NIGHTSHIFT_DATASET_NAME
+              ) {
+                assertSuccessfulSandboxCommand(conversation.rounds);
+              }
+              expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);
             }
-            expect(output.traceId).toMatch(/^[a-f0-9]{32}$/);
             // The harness trace-correlation checks (run/score trace-id equality and the
             // assertAgentTrace .toPass block) were removed due to pre-existing flakiness: an
             // assertAgentTrace 60s timeout and Playwright cross-retry trace-id contamination.
@@ -243,7 +217,7 @@ export const registerInvestigationEvaluation = ({
             expect(persistedOutput).not.toBeNull();
             expect(persistedOutput?.case_id).toBe(output.case_id);
             expect(persistedOutput?.query).toBe(output.query);
-            // All RCA judges scored this run, each in its own evaluation trace.
+            // Every evaluator scored this run, each in its own evaluation trace.
             expect(new Set(exampleScores.map((each) => each.evaluator.name))).toEqual(
               new Set([
                 GOAL_PASS_EVALUATOR,
@@ -251,10 +225,13 @@ export const registerInvestigationEvaluation = ({
                 ANTI_LEAKAGE_EVALUATOR,
                 TRUTHFULNESS_EVALUATOR,
                 DECISION_TREE_HELPFULNESS_EVALUATOR,
+                EXECUTION_SUCCESS_EVALUATOR,
               ])
             );
             for (const exampleScore of exampleScores) {
-              expect(exampleScore.evaluator.kind).toBe('llm');
+              expect(exampleScore.evaluator.kind).toBe(
+                exampleScore.evaluator.name === EXECUTION_SUCCESS_EVALUATOR ? 'code' : 'llm'
+              );
               expect(exampleScore.evaluator.direction).toBe('maximize');
               expect(exampleScore.evaluator.trace_id).not.toBe(output.traceId);
               const { score: judgeScore } = exampleScore.evaluator;
@@ -282,12 +259,29 @@ export const registerInvestigationEvaluation = ({
           },
           { concurrency }
         );
+        if (orca) {
+          // No ORCA rows anywhere means the connector or source is misconfigured, not that the agent
+          // investigated poorly.
+          expect(
+            casesWithOrcaTelemetry.length,
+            'No ORCA investigation returned telemetry through the sandbox ORCA connector'
+          ).toBeGreaterThan(0);
+          log.info(
+            `${casesWithOrcaTelemetry.length} of ${runs.length} ORCA investigations returned ORCA telemetry`
+          );
+        }
 
         const evaluatorTraces = experiment.evaluationRuns
           .map(({ traceId }) => traceId)
           .filter((traceId): traceId is string => Boolean(traceId));
         expect(experiment.evaluationRuns).toHaveLength(runs.length * scoresPerRun);
-        expect(experiment.evaluationRuns.every(({ kind }) => kind === 'LLM')).toBe(true);
+        expect(
+          experiment.evaluationRuns.every((evaluationRun) =>
+            evaluationRun.name === EXECUTION_SUCCESS_EVALUATOR
+              ? evaluationRun.kind === 'CODE'
+              : evaluationRun.kind === 'LLM'
+          )
+        ).toBe(true);
         expect(evaluatorTraces).toHaveLength(runs.length * scoresPerRun);
         // We do NOT require every evaluator trace to be present in traces-*: a judge that resolves via
         // its fast rule-based path never calls the evaluation model (rca_anti_leakage on clean cases,

@@ -201,7 +201,7 @@
       "stepTimeoutInMinutes": 240,
       "shards": [
         {
-          "id": "current",
+          "id": "customer0",
           "specFiles": [
             "evals/smoke/smoke.spec.ts",
             "evals/investigation/investigation.spec.ts"

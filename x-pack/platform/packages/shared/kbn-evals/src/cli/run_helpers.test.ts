@@ -32,7 +32,6 @@ describe('loadScoutHookConfig', () => {
   const generalConfig = {
     evaluationsKbn: { url: 'https://kbn.example' },
     sandbox: { apiKey: 'from-general' },
-    nightshiftOrcaEs: { url: 'https://orca.example', apiKey: 'orca-key' },
   };
   const suiteSecret = { sandbox: { apiKey: 'from-suite-secret' } };
 
@@ -51,7 +50,10 @@ describe('loadScoutHookConfig', () => {
   });
 
   it('reuses the suite config CI supplied to the initial hook when the CLI runs it again', () => {
-    const ciConfig = { ...suiteSecret, nightshiftOrcaEs: generalConfig.nightshiftOrcaEs };
+    const ciConfig = {
+      ...suiteSecret,
+      nightshiftOrcaEs: { url: 'https://orca.example', apiKey: 'orca-key' },
+    };
     process.env.KBN_EVALS_SCOUT_HOOK_CONFIG_B64 = Buffer.from(JSON.stringify(ciConfig)).toString(
       'base64'
     );
@@ -85,13 +87,12 @@ describe('loadScoutHookConfig', () => {
     );
   });
 
-  it('merges general fields with the suite secret taking precedence', () => {
-    expect(loadScoutHookConfig('/repo', 'dev-vault', { vaultSecret: 'nightshift' })).toEqual({
-      ...generalConfig,
-      ...suiteSecret,
-    });
+  it("gives the hook the suite's own secret with the dev-vault profile", () => {
+    expect(loadScoutHookConfig('/repo', 'dev-vault', { vaultSecret: 'nightshift' })).toBe(
+      suiteSecret
+    );
     expect(mockedReadSuiteSecret).toHaveBeenCalledWith('nightshift');
-    expect(mockedLoadVaultConfig).toHaveBeenCalledWith('/repo', 'dev-vault');
+    expect(mockedLoadVaultConfig).not.toHaveBeenCalled();
   });
 
   it('gives the hook an empty config when the suite secret cannot be read', () => {

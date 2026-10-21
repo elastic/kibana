@@ -117,9 +117,9 @@ const hasRows = (stdout: string): boolean => {
   }
 };
 
-/** Requires real ORCA connector results, including detection of HTTP errors masked by pipelines. */
-export const assertOrcaTelemetryQuery = (rounds: Array<Pick<ConversationRound, 'steps'>>): void => {
-  const queried = rounds
+/** Whether any sandbox command returned real ORCA rows, catching HTTP errors masked by pipelines. */
+export const hasOrcaTelemetryQuery = (rounds: Array<Pick<ConversationRound, 'steps'>>): boolean =>
+  rounds
     .flatMap(({ steps }) => steps.filter(isToolCallStep))
     .some(
       ({ tool_id: toolId, params, results }) =>
@@ -138,11 +138,6 @@ export const assertOrcaTelemetryQuery = (rounds: Array<Pick<ConversationRound, '
             hasRows(data.stdout)
         )
     );
-  assert(
-    queried,
-    'ORCA investigation must return nonempty telemetry through the sandbox ORCA connector'
-  );
-};
 
 /** Checks the immutable historical data with the configured read key before starting paid tasks. */
 export const assertOrcaSource = async (

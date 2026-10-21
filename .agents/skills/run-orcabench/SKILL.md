@@ -6,8 +6,8 @@ description: Run the 42-case Nightshift ORCA benchmark manually against a select
 # Run ORCA manually
 
 Run the ORCA selection of `nightshift-investigations` using the native evals CLI. This is a
-local execution workflow; PR CI continues to use `evals:nightshift-investigations` with both
-current coverage and ORCA. Adding or editing this skill does not authorize a benchmark run.
+local execution workflow; PR CI runs ORCA as the `orcabench` shard of
+`evals:nightshift-investigations`, next to the `customer0` shard. Adding or editing this skill does not authorize a benchmark run.
 
 Example requests: `$run-orcabench with <model> judged by <judge>` or
 `$run-orcabench check configuration only with profile <name>`.
@@ -16,7 +16,7 @@ Example requests: `$run-orcabench with <model> judged by <judge>` or
 
 Read the suite's [ORCA instructions](../../../x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/README.md#orca-benchmark)
 and [release guard](../../../x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/evals/investigation/orca_dataset.ts).
-Use their current dataset identity, digest, source configuration and artifact locations.
+Use their current dataset identity, digest and source configuration.
 
 Resolve these from the request and session context:
 
@@ -43,9 +43,8 @@ valid when requested; it increases runtime. A filtered or partial run is not a f
    and EDOT locally; the sandbox executes remotely. Reserve the local ports and ensure the
    sandbox session pool can support 42 cases plus overlapping runs. Investigation concurrency
    alone does not resize that pool.
-3. Use existing credential access. `dev-vault` merges the suite's `nightshift` config over shared
-   `golden` config. Read `nightshiftOrcaEs: { url, apiKey }` from the suite config, with the shared
-   entry retained as a compatibility fallback. Keep source
+3. Use existing credential access. `dev-vault` reads the suite's own `nightshift` config, which
+   must hold `nightshiftOrcaEs: { url, apiKey }`; there is no fallback to shared config. Keep source
    privileges read-only and credentials in Vault or ignored owner-only profile files. Report
    missing fields by name; keep their values out of chat, argv and logs. Credential provisioning,
    Vault writes and source restoration are separate tasks.
@@ -74,9 +73,7 @@ For a configuration-only request, report this boundary and stop here.
 ## Execute once
 
 Announce the checkout/commit, model, judge, profile, 42-case coverage and result destination.
-Use `umask 077` for logs and evidence. Preserve any previous
-`target/nightshift-investigations/<model>/` artifacts in an ignored run directory before
-starting, since another invocation with the same model can overwrite those files.
+Use `umask 077` for logs.
 
 Run the checked command without `--dry-run`. Keep `NIGHTSHIFT_DATASETS=orcabench` and
 `--repetitions 1`; use `start` to establish the ORCA server configuration. Observe the process
@@ -84,8 +81,9 @@ through completion, saving its exit status and logs. Allow for six batches of in
 that can each take 30 minutes, plus startup and judging. Keep progress updates during long runs.
 
 The native test validates the pinned Golden payload and all three historical signal counts,
-then runs the existing investigation task and five judges. It requires positive telemetry from
-the ORCA sandbox connector. A hook flag or a successful query against local Scout Elasticsearch
+then runs the existing investigation task, five judges and `execution_success`. It fails when
+fewer than 90% of investigations complete, or when none returned telemetry from the ORCA
+sandbox connector. A hook flag or a successful query against local Scout Elasticsearch
 alone is insufficient evidence that investigations used ORCA.
 
 On failure, preserve the evidence and diagnose the first failing boundary. Do not relaunch the
@@ -95,15 +93,17 @@ credential, source or release drift rather than changing pins or selecting anoth
 
 ## Verify and report
 
-Inspect the experiment and artifacts under `target/nightshift-investigations/<model>/`:
+Inspect the experiment in the evals UI; the log prints its ID and each case's investigation,
+conversation and trace IDs:
 
-- Account for all 42 unique case IDs, one attempt each, and all 210 scores across the five judges.
-  Report any missing cases or scores as incomplete coverage, even if the process exited zero.
-- Separate workflow/parser/execution failures from advisory quality scores. Inspect the
-  per-case outputs, conversations, trace snapshots and `artifact-errors.json`; retain available
-  evidence when an execution assertion fails.
+- Account for all 42 unique case IDs, one attempt each, and all 252 scores across the five judges
+  and `execution_success`. Report any missing cases or scores as incomplete coverage, even if the
+  process exited zero.
+- Separate execution failures (`execution_success` of 0, with the reason as its explanation)
+  from advisory quality scores. Read a failed case's conversation in the Scout Kibana before
+  stopping it, and its agent trace in the tracing cluster.
 - Record the commit, model, judge, profile name, concurrency, elapsed time, exit status, dataset
-  release/digest, experiment ID/link and artifact paths. Report execution success counts and
+  release/digest and experiment ID/link. Report execution success counts and
   quality results separately. Preserve the dataset's attribution when sharing results.
 - State whether the run was full, partial or configuration-only. A configuration check or
   discovery listing is not an end-to-end result.

@@ -9,7 +9,7 @@ import { ConversationRoundStepType, ToolResultType } from '@kbn/agent-builder-co
 import type { ToolCallStep } from '@kbn/agent-builder-common';
 import {
   assertOrcaSource,
-  assertOrcaTelemetryQuery,
+  hasOrcaTelemetryQuery,
   getOrcaDatasetHash,
   loadOrcaDataset,
   validateOrcaDataset,
@@ -86,11 +86,11 @@ describe('ORCA telemetry evidence', () => {
     "[14268, 'checkout']",
     "{'@timestamp': '2026-04-19T16:30:00Z'}",
   ])('accepts returned telemetry in JSON and sandbox Python formats: %s', (stdout) => {
-    expect(() =>
-      assertOrcaTelemetryQuery([
+    expect(
+      hasOrcaTelemetryQuery([
         { steps: [{ ...call, results: [{ ...call.results[0], data: { stdout, exit_code: 0 } }] }] },
       ])
-    ).not.toThrow();
+    ).toBe(true);
   });
   it.each([
     { ...call, tool_id: 'execute_api' },
@@ -117,7 +117,7 @@ describe('ORCA telemetry evidence', () => {
       results: [{ ...call.results[0], data: { stdout: '{"values":[[14268]]}', exit_code: 1 } }],
     },
   ])('rejects wrong targets, empty data and masked failures: %j', (step) => {
-    expect(() => assertOrcaTelemetryQuery([{ steps: [step] }])).toThrow('nonempty telemetry');
+    expect(hasOrcaTelemetryQuery([{ steps: [step] }])).toBe(false);
   });
 });
 

@@ -2,16 +2,15 @@
 
 Evaluation suite for [Nightshift investigations](../../plugins/nightshift_investigations).
 
-The existing smoke and trace-only investigations run by default when sandbox credentials are
-available. PR CI also runs the 42-case ORCA benchmark in a separate shard under the same
-`evals:nightshift-investigations` label. Each shard starts its own Scout server so its telemetry
-connector cannot point at another dataset's cluster. Local ORCA runs must be selected explicitly
-with `NIGHTSHIFT_DATASETS=orcabench` on a fresh Scout server.
+The smoke and trace-only evals run by default, locally and in CI, when sandbox credentials are
+available. Set `NIGHTSHIFT_DATASETS` to run just one. The smoke eval checks seed data loading and
+score ingestion. The trace-only eval runs the real manual investigation workflow on file-based or
+stored questions and persists its report, conversation and full agent trace. The
+[ORCA benchmark](#orca-benchmark) runs the same investigation and judges on its own Scout server.
 
-The smoke eval checks seed data loading and score ingestion. Investigation evals run the real
-manual workflow and five RCA judges, persisting reports, conversations and agent traces.
-Execution checks and quality scores are independent: a completed investigation can have a low
-quality score, and a failed investigation retains its available evidence.
+Investigation evals grade each run with five RCA judges and an `execution_success` score. A run
+that ends without a conclusion scores 0 there but doesn't fail the eval on its own; the eval fails
+when fewer than 90% of runs complete.
 
 ## Running the suite
 
@@ -506,83 +505,36 @@ NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-in
 
 ## ORCA benchmark
 
-ORCA uses the existing suite and label; it does not register another suite or replace the current
-investigation dataset. CI fans each selected model out into `current` (the existing smoke and
-investigation specs) and `orcabench` (the 42 ORCA incidents) jobs. The existing `models:*` and
-`models:judge:*` label selection rules are unchanged.
+`orcabench` runs the 42 incidents of the Golden dataset `nightshift/orca-ech-full-20261019`
+against the ORCA telemetry cluster. CI runs it as its own shard under the
+`evals:nightshift-investigations` label, next to the `customer0` shard that runs the smoke and
+trace-only evals, so each Scout server's telemetry connector points at one cluster.
 
-The ORCA job reads [the Golden release](https://kbn-evals-serverless-ed035a.kb.us-central1.gcp.elastic.cloud/app/management/ai/evals/datasets/c1770850-0523-5470-9e57-f44016fcff92)
-`nightshift/orca-ech-full-20261019`. Dataset ID, 42-case coverage and a SHA-256 digest of stored
-example IDs, questions, reference answers and metadata are pinned in
-[`orca_dataset.ts`](evals/investigation/orca_dataset.ts). Object-key and example order are ignored.
-A change to the content fails before investigations start: publish a new release on Golden,
-review it and update the pin. Questions and labels remain on Golden. The executor receives the
-validated snapshot without resolving the name a second time; release and hash are recorded in
-experiment metadata. Native dataset upsert/score persistence remains in use.
+The Nightshift Vault config must hold a `nightshiftOrcaEs` block (see
+[`vault/config.example.json`](vault/config.example.json)) whose key can only `read` and
+`view_index_metadata` on `logs-orcabench.otel-*`, `traces-orcabench.otel-*` and
+`metrics-orcabench.otel-*`. An optional `readableIndices` in that block replaces the index hint
+the agent's manifest gets.
 
-### Credentials and source preflight
+- The dataset's ID, case count and content digest are pinned in
+  [`orca_dataset.ts`](evals/investigation/orca_dataset.ts). A changed release fails before any
+  investigation starts, as does a source whose document counts differ from the snapshot.
+- Each incident runs once, at most eight at a time, and Playwright doesn't retry the test.
+- The eval fails when fewer than 90% of investigations complete, or when none returned ORCA
+  telemetry. Judge scores are advisory.
+- Both shards draw on one sandbox pool. When it runs out, investigations end without a
+  conclusion and the eval fails, so leave room for overlapping builds.
 
-Add this field to the **Nightshift suite** config, preserving its other entries:
-
-```json
-{
-  "nightshiftOrcaEs": {
-    "url": "https://nightshift-orca.es.us-west2.gcp.elastic-cloud.com:443",
-    "apiKey": "REPLACE_ME_WITH_ENCODED_READ_KEY"
-  }
-}
-```
-
-Use only `read` and `view_index_metadata` on `logs-orcabench.otel-*`,
-`traces-orcabench.otel-*` and `metrics-orcabench.otel-*`, with no cluster privileges.
-The source is the already restored immutable `data-0418/2026-10-01` snapshot, with original
-April 2026 timestamps; a CI run never restores, rewrites or deletes its telemetry.
-
-- CI: `kv/ci-shared/kbn-evals/nightshift`, field `config` (base64 JSON), alongside `sandbox`.
-  Buildkite forwards this exact config to both Scout-hook invocations using
-  `KBN_EVALS_SCOUT_HOOK_CONFIG_B64`; the native CLI does not reread Vault. An existing
-  `nightshiftOrcaEs` entry in shared `golden` config remains a compatibility fallback.
-- `--profile dev-vault`: `secret/kibana-issues/dev/kbn-evals/nightshift`. The CLI merges this
-  suite config over shared `golden` config, retaining compatibility with an ORCA entry there.
-  Missing suite credentials do not fall back to shared credentials.
-- File profiles: put `nightshiftOrcaEs` and the usual sandbox/export settings in the profile JSON.
-
-The hook replaces only the ORCA job's telemetry destination, preserving sandbox authentication.
-The `current` job ignores `nightshiftOrcaEs`. Missing or incomplete ORCA credentials fail the ORCA
-job; they never select another source or fall back to smoke tests. Before paid investigations,
-a read-only preflight checks known historical counts on all three signals. Each investigation
-must also return positive telemetry through the sandbox connector; local `execute_api` calls
-alone and HTTP errors masked by shell pipelines do not satisfy that check.
-
-### Local run
-
-Use the [`run-orcabench` agent skill](../../../../../.agents/skills/run-orcabench/SKILL.md)
-for a manual run with explicit model/judge selection, configuration checks and result verification.
-
-Use a separate Scout stack for ORCA. Stop a stack configured for another source before starting
-this command; a reused server does not reload connector credentials.
+Locally, start a fresh Scout server for ORCA; a reused server keeps its connector credentials:
 
 ```bash
 NIGHTSHIFT_DATASETS=orcabench node scripts/evals start \
   --suite nightshift-investigations --profile dev-vault
 ```
 
-ORCA uses one repetition, at most eight concurrent investigations, and no automatic Playwright
-retries. `EVAL_REPETITIONS` must be unset or `1` for this job. The CI step budget is 240 minutes,
-covering cold serverless setup, six possible batches of 30-minute investigations and judging.
-The sandbox's session pool must support the cases and overlapping model/build jobs; setting
-Task Manager capacity or investigation concurrency alone does not resize that pool.
-
-ORCA outputs and conversations are captured per case before aggregate assertions. Agent trace
-snapshots, experiment records and all 210 scores are captured after judging under
-`target/nightshift-investigations/<model>/` and uploaded even on test failure. Known inherited
-credential values are masked in these files. Trace export retries allow for ingestion latency;
-these snapshots do not reinstate the previously removed full trace-correlation assertions.
-Execution errors still fail the test; judge quality scores are reported without a new threshold.
-
-The derived ORCA telemetry is CC BY 4.0. Preserve the dataset's attribution when sharing results.
-No new full benchmark should be launched until production credentials and sandbox capacity are
-ready; unit tests and Playwright discovery do not require live investigation calls.
+The [`run-orcabench` skill](../../../../../.agents/skills/run-orcabench/SKILL.md) covers model
+selection and result checks. The ORCA telemetry is CC BY 4.0; keep the dataset's attribution when
+sharing results.
 
 ## CI
 
@@ -591,7 +543,8 @@ as `nightshift-investigations`.
 
 - **Where it runs:** a serverless observability Scout cluster; `run_suite.sh` reads `scoutArch` /
   `scoutDomain` from the suite entry.
-- **What runs:** the existing smoke/trace-only coverage plus a separate 42-case ORCA shard. The suite's ci-prod secret,
+- **What runs:** a `customer0` shard with the smoke and trace-only evals, and an `orcabench`
+  shard with the ORCA benchmark. The suite's ci-prod secret,
   `kv/ci-shared/kbn-evals/nightshift`, must hold the `sandbox` block;
   `.buildkite/scripts/steps/evals/run_suite.sh` reads it and runs the suite's `scoutHook` on it
   before starting Scout (failing the step if it cannot be read), and Buildkite agents must be able
@@ -602,7 +555,6 @@ as `nightshift-investigations`.
 - **Weekly:** a step in [`llm_evals.yml`](../../../../../.buildkite/pipelines/evals/llm_evals.yml)
   runs it against the weekly core models (`weekly_eis_core_models`).
 - **Failures** are posted to `#nightshift-alerts`, resolved from `slackChannel` in the suite entry.
-- **Artifacts** for ORCA are uploaded from `target/nightshift-investigations/`, including on failure.
 - **Scores** reach the golden cluster automatically, through `EVAL_KBN_URL` in CI.
 
 ## Validation

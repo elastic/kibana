@@ -168,10 +168,10 @@ describe('evals.suites.json weeklyEisModelGroups', () => {
 });
 
 describe('Nightshift CI coverage', () => {
-  it('keeps the existing label and current specs alongside an isolated ORCA spec', () => {
+  it('keeps the existing label and Customer-0 specs alongside an isolated ORCA spec', () => {
     const suite = suites.find(({ id }) => id === 'nightshift-investigations');
     expect(suite?.ciLabels).toEqual(['evals:nightshift-investigations']);
-    expect(suite?.shards?.map(({ id }) => id)).toEqual(['current', 'orcabench']);
+    expect(suite?.shards?.map(({ id }) => id)).toEqual(['customer0', 'orcabench']);
     const files = suite?.shards?.flatMap(({ specFiles }) => specFiles) ?? [];
     expect(files).toEqual([
       'evals/smoke/smoke.spec.ts',

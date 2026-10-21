@@ -318,30 +318,13 @@ describe('ORCA CI shard', () => {
   const orca = { url: 'https://orca.example:443', apiKey: 'orca-key' };
   const existing = {
     sandbox: SANDBOX,
-    nightshift: { telemetry: { url: 'https://current.example', apiKey: 'current-key' } },
+    nightshift: { telemetry: { url: 'https://customer0.example', apiKey: 'customer0-key' } },
   };
-  it('prefers the suite-specific ORCA credentials over the shared config', () => {
-    const { status, output } = runHook(
+  it('replaces only the telemetry target and preserves sandbox authentication', () => {
+    const { status, output, stderr } = runHook(
       { ...existing, nightshiftOrcaEs: orca },
-      {
-        EVAL_SHARD_ID: 'orcabench',
-        KBN_EVALS_CONFIG_B64: Buffer.from(
-          JSON.stringify({ nightshiftOrcaEs: { url: 'https://shared.example', apiKey: 'shared' } })
-        ).toString('base64'),
-      }
+      { EVAL_SHARD_ID: 'orcabench' }
     );
-    expect(status).toBe(0);
-    expect(output.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL).toBe(orca.url);
-    expect(output.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY).toBe(orca.apiKey);
-    expect(output.env.SANDBOX_API_KEY).toBe(SANDBOX.apiKey);
-  });
-  it('takes only the ORCA shard telemetry from shared CI config and preserves sandbox authentication', () => {
-    const { status, output, stderr } = runHook(existing, {
-      EVAL_SHARD_ID: 'orcabench',
-      KBN_EVALS_CONFIG_B64: Buffer.from(JSON.stringify({ nightshiftOrcaEs: orca })).toString(
-        'base64'
-      ),
-    });
     expect(status).toBe(0);
     expect(stderr).not.toContain(orca.apiKey);
     expect(output.env).toMatchObject({
@@ -352,15 +335,40 @@ describe('ORCA CI shard', () => {
       NIGHTSHIFT_ORCA_TELEMETRY: '1',
     });
   });
-  it('keeps current telemetry unchanged in the original shard', () => {
+  it('takes the manifest hint from config, falling back to one that names no incident window', () => {
+    const configured = runHook(
+      { ...existing, nightshiftOrcaEs: { ...orca, readableIndices: 'Read orca indices.' } },
+      { EVAL_SHARD_ID: 'orcabench' }
+    );
+    expect(configured.output.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES).toBe('Read orca indices.');
+    const fallback = runHook(
+      { ...existing, nightshiftOrcaEs: { ...orca, readableIndices: null } },
+      { EVAL_SHARD_ID: 'orcabench' }
+    );
+    expect(fallback.output.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES).toContain(
+      'logs-orcabench.otel-*'
+    );
+    expect(fallback.output.env.NIGHTSHIFT_SANDBOX_READABLE_INDICES).not.toMatch(/2026|April/);
+  });
+  it('ignores a shared evals config, so the suite secret is the only source of the ORCA key', () => {
+    const { status, stderr } = runHook(existing, {
+      EVAL_SHARD_ID: 'orcabench',
+      KBN_EVALS_CONFIG_B64: Buffer.from(JSON.stringify({ nightshiftOrcaEs: orca })).toString(
+        'base64'
+      ),
+    });
+    expect(status).toBe(1);
+    expect(stderr).toContain('ORCA requires nightshiftOrcaEs');
+  });
+  it('keeps Customer-0 telemetry unchanged in the customer0 shard', () => {
     const { output } = runHook(
       { ...existing, nightshiftOrcaEs: orca },
-      { EVAL_SHARD_ID: 'current' }
+      { EVAL_SHARD_ID: 'customer0' }
     );
     expect(output.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL).toBe(existing.nightshift.telemetry.url);
     expect(output.env).not.toHaveProperty('NIGHTSHIFT_ORCA_TELEMETRY');
   });
-  it('supports file and merged dev-vault profiles without a shared CI environment', () => {
+  it('selects ORCA from NIGHTSHIFT_DATASETS for local runs outside CI', () => {
     const { output, status } = runHook(
       { ...existing, nightshiftOrcaEs: orca },
       { NIGHTSHIFT_DATASETS: 'orcabench' }
@@ -373,8 +381,9 @@ describe('ORCA CI shard', () => {
     { url: orca.url },
     { apiKey: orca.apiKey },
     { ...orca, url: 'https://user:password@orca.example' },
+    { ...orca, readableIndices: '' },
   ])(
-    'fails without a complete ORCA credential instead of using current telemetry: %j',
+    'fails without a complete ORCA credential instead of using Customer-0 telemetry: %j',
     (nightshiftOrcaEs) => {
       const { status, stderr } = runHook(
         { ...existing, nightshiftOrcaEs },
@@ -382,7 +391,7 @@ describe('ORCA CI shard', () => {
       );
       expect(status).toBe(1);
       expect(stderr).toContain('ORCA requires nightshiftOrcaEs');
-      expect(stderr).not.toContain('current-key');
+      expect(stderr).not.toContain('customer0-key');
     }
   );
 });
