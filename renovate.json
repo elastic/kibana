@@ -998,7 +998,6 @@
         "eslint-plugin-react-hooks",
         "eslint-plugin-react-perf",
         "eslint-plugin-testing-library",
-        "eslint-traverse",
         "@types/eslint"
       ],
       "matchUpdateTypes": ["minor", "patch"],
@@ -1985,7 +1984,7 @@
     },
     {
       "groupName": "minify",
-      "matchDepNames": ["gulp-brotli", "terser-webpack-plugin"],
+      "matchDepNames": ["terser-webpack-plugin"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -2288,6 +2287,7 @@
       "groupName": "esql-js",
       "matchDepNames": [
         "@elastic/esql",
+        "@elastic/esql-definitions",
         "@elastic/esql-grammar",
         "@elastic/esql-promql-grammar",
         "@elastic/esql-types",

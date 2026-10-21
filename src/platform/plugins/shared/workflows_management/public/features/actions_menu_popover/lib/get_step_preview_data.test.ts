@@ -9,6 +9,7 @@
 
 import { getStepPreviewData } from './get_step_preview_data';
 import { getFieldsFromZodSchema } from './get_step_preview_fields';
+import { stepSchemas } from '../../../../common/step_schemas';
 
 describe('getStepPreviewData', () => {
   it('returns schemas for built-in steps', () => {
@@ -16,5 +17,20 @@ describe('getStepPreviewData', () => {
 
     expect(getFieldsFromZodSchema(previewData.inputSchema)).not.toHaveLength(0);
     expect(previewData.outputSchema).toBeDefined();
+  });
+
+  it('wraps raw connector snippets in a yaml fence so they render as markdown', () => {
+    const snippet = '- name: run_query\n  type: test.connector';
+    jest
+      .spyOn(stepSchemas, 'getAllConnectorsMapCache')
+      .mockReturnValue(
+        new Map([['test.connector', { examples: { snippet } }]]) as unknown as ReturnType<
+          typeof stepSchemas.getAllConnectorsMapCache
+        >
+      );
+
+    expect(getStepPreviewData('test.connector').examples).toEqual([
+      `\`\`\`yaml\n${snippet}\n\`\`\``,
+    ]);
   });
 });

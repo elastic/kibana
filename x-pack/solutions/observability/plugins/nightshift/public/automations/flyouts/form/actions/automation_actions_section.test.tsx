@@ -6,10 +6,23 @@
  */
 
 import React, { useState } from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationActionsSection } from './automation_actions_section';
 import type { SlackActionFormValues } from '../automation_form_values';
+
+jest.mock('../../../../settings/components/apps_section/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../../settings/components/apps_section/use_relay_app_bindings'),
+  useAllRelayAppBindings: () => ({
+    bindings: [
+      { channel: 'C1', displayName: 'alerts', status: 'bound_to_self' },
+      { channel: 'C2', displayName: 'oncall', status: 'bound_to_self' },
+    ],
+    isLoading: false,
+    isError: false,
+    isComplete: true,
+  }),
+}));
 
 const onSlackActionChange = jest.fn();
 
@@ -47,6 +60,13 @@ describe('AutomationActionsSection', () => {
     expect(screen.getByText('Post in Slack')).toBeInTheDocument();
     expect(screen.queryByTestId('automationAddAction')).not.toBeInTheDocument();
 
+    const channelInput = within(screen.getByTestId('automationSlackChannelDestination')).getByRole(
+      'combobox'
+    );
+    fireEvent.change(channelInput, { target: { value: 'oncall' } });
+    fireEvent.click(await screen.findByRole('option', { name: '#oncall' }));
+    expect(onSlackActionChange).toHaveBeenLastCalledWith({ target: 'channel', destination: 'C2' });
+
     fireEvent.change(screen.getByLabelText('Where to respond'), { target: { value: 'self' } });
     expect(onSlackActionChange).toHaveBeenLastCalledWith({ target: 'self', destination: '' });
     expect(screen.getByTestId('automationSlackDestination')).toHaveAttribute(
@@ -62,6 +82,20 @@ describe('AutomationActionsSection', () => {
     fireEvent.click(screen.getByTestId('automationRemoveSlackAction'));
     expect(onSlackActionChange).toHaveBeenLastCalledWith(undefined);
     expect(screen.getByTestId('automationAddAction')).toBeInTheDocument();
+  });
+
+  it('shows the channel name when read only', () => {
+    render(
+      <I18nProvider>
+        <AutomationActionsSection
+          readOnly
+          slackAction={{ target: 'channel', destination: 'C1' }}
+          onSlackActionChange={onSlackActionChange}
+        />
+      </I18nProvider>
+    );
+
+    expect(screen.getByText('#alerts')).toBeInTheDocument();
   });
 
   it('shows a locked reply-in-thread action without edit or remove controls', () => {
