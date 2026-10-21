@@ -203,6 +203,19 @@ describe('GraphVisualization', () => {
       const { initialState } = jest.mocked(GraphInvestigation).mock.calls[0][0];
       expect(initialState.timeRange).toEqual({ from: 'now-30d', to: 'now' });
     });
+
+    it('seeds the timeRange from the scope when opened from the new Entity Analytics home', async () => {
+      render(
+        <GraphVisualization {...ENTITY_PROPS} scopeId="entity-analytics-new-entities-table-7d" />
+      );
+
+      await waitFor(() => {
+        expect(GraphInvestigation).toHaveBeenCalledTimes(1);
+      });
+
+      const { initialState } = jest.mocked(GraphInvestigation).mock.calls[0][0];
+      expect(initialState.timeRange).toEqual({ from: 'now-7d', to: 'now' });
+    });
   });
 
   describe('showInvestigateInTimeline', () => {

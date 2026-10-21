@@ -18,7 +18,7 @@ import { useQueryAlerts } from '../../../detections/containers/detection_engine/
 import {
   ENTITY_ANALYTICS_TABLE_ID,
   ENTITY_ANALYTICS_ALERTS_FROM,
-  ENTITY_ANALYTICS_ALERTS_TO,
+  ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO,
 } from '../../../entity_analytics/components/home/constants';
 
 jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
@@ -167,7 +167,7 @@ describe('AlertsDetailsTable', () => {
       expect(useNonClosedAlerts).toHaveBeenCalledWith(
         expect.objectContaining({
           from: ENTITY_ANALYTICS_ALERTS_FROM,
-          to: ENTITY_ANALYTICS_ALERTS_TO,
+          to: ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO,
         })
       );
     });

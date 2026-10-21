@@ -34,6 +34,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { ENTITY_ANOMALY_DEFAULT_LOOKBACK_DAYS } from '../../../../common/entity_analytics/anomalies/constants';
 
 import { useAnomalyOverview } from '../../api/hooks/use_anomaly_overview';
+import { getScopeFlyoutTimeRange } from '../../common/scope_time_ranges';
 import {
   ENTITY_ANOMALIES_TAB_MANAGE_ML_JOBS,
   ENTITY_ANOMALIES_TAB_ATTACK_CHAIN_TITLE,
@@ -88,11 +89,18 @@ const DEFAULT_DATE_PICKER_SETTINGS: DateRangePickerSettings = {
   timePrecision: 's',
 };
 
+/** Picker label for a window: the matching preset's label, else the raw bounds. */
+const getDatePickerValue = (timeRange: { from: string; to: string }): string =>
+  TIME_RANGE_PRESETS.find(({ start, end }) => start === timeRange.from && end === timeRange.to)
+    ?.label ?? `${timeRange.from} → ${timeRange.to}`;
+
 interface AnomaliesTabProps {
   entityId: string;
   entityName: string;
   entityType: EntityType;
   mode?: EntityViewMode;
+  /** Scope the tab was opened from; a scope that pins a time range sets the initial window. */
+  scopeId?: string;
 }
 
 export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
@@ -100,10 +108,15 @@ export const AnomaliesTab: React.FC<AnomaliesTabProps> = ({
   entityName,
   entityType,
   mode,
+  scopeId,
 }) => {
-  const [datePickerValue, setDatePickerValue] = useState<string>(DEFAULT_DATE_PICKER_VALUE);
-  const [start, setStart] = useState<string>(DEFAULT_TIME_RANGE.from);
-  const [end, setEnd] = useState<string>(DEFAULT_TIME_RANGE.to);
+  // Open on the opener's time range when its scope pins one; the user can still change it.
+  const flyoutTimeRange = getScopeFlyoutTimeRange(scopeId);
+  const [datePickerValue, setDatePickerValue] = useState<string>(() =>
+    flyoutTimeRange ? getDatePickerValue(flyoutTimeRange) : DEFAULT_DATE_PICKER_VALUE
+  );
+  const [start, setStart] = useState<string>(flyoutTimeRange?.from ?? DEFAULT_TIME_RANGE.from);
+  const [end, setEnd] = useState<string>(flyoutTimeRange?.to ?? DEFAULT_TIME_RANGE.to);
   const [datePickerSettings, setDatePickerSettings] = useState<DateRangePickerSettings>(
     DEFAULT_DATE_PICKER_SETTINGS
   );

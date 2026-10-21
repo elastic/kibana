@@ -279,6 +279,56 @@ describe('useFlyoutV2RestoreFromUrl', () => {
       expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(resolvedHost);
     });
 
+    it('restores the originating scope of entityAnomalyInsights', () => {
+      const { history } = renderRestore('/');
+      act(() => {
+        history.push(
+          buildUrl([
+            {
+              kind: 'entityAnomalyInsights',
+              entityType: 'host',
+              value: 'my-host',
+              entityId: 'host:my-host',
+              scopeId: 'entity-analytics-new-entities-table-7d',
+            },
+          ])
+        );
+        jest.runAllTimers();
+      });
+      expect(mockFlyoutApi.openEntityAnomalyInsights).toHaveBeenCalledWith(
+        expect.objectContaining({
+          value: 'my-host',
+          scopeId: 'entity-analytics-new-entities-table-7d',
+        })
+      );
+    });
+
+    it('opens the child entity flyout from a restored entityAnomalyInsights with its scope', () => {
+      const { history } = renderRestore('/');
+      act(() => {
+        history.push(
+          buildUrl([
+            {
+              kind: 'entityAnomalyInsights',
+              entityType: 'host',
+              value: 'my-host',
+              entityId: 'host:my-host',
+              scopeId: 'entity-analytics-new-entities-table-7d',
+            },
+          ])
+        );
+        jest.runAllTimers();
+      });
+      act(() => {
+        mockFlyoutApi.openEntityAnomalyInsights.mock.calls[0][0].onOpenEntity?.();
+      });
+      expect(mockFlyoutApi.openHostFlyoutAsChild).toHaveBeenCalledWith(
+        expect.objectContaining({
+          scopeId: 'entity-analytics-new-entities-table-7d',
+        })
+      );
+    });
+
     it('restores the originating scope of entityAlertsInsights', () => {
       const { history } = renderRestore('/');
       act(() => {

@@ -726,13 +726,14 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   );
   const openEntityAnomalyInsights = useCallback(
     ({ title, origin, ...props }: OpenEntityAnomalyInsightsParams) => {
-      const { entityType, value, entityId, mode } = props;
+      const { entityType, value, entityId, mode, scopeId } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityAnomalyInsights,
         entityType: entityType as string,
         value,
         entityId,
         mode: toEntityDescriptorMode(mode),
+        scopeId,
       });
       const onClose = buildOnClose(null);
       open(
