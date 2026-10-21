@@ -404,7 +404,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
         await find.waitForDeletedByCssSelector('[data-test-subj="rulePageFooterCancelButton"]');
 
+        // re-open the editor with fresh lookups: elements found before the cancel navigation are stale
+        await testSubjects.clickWhenNotDisabled('app-menu-overflow-button');
+        await testSubjects.clickWhenNotDisabled('openEditRuleFlyoutButton');
         await retry.try(async () => {
+          const nameAfterCancel = await testSubjects.getAttribute('ruleDetailsNameInput', 'value');
+          expect(nameAfterCancel).to.eql(ruleName);
+
           const { name } = await getRule(rule.id);
           expect(name).to.eql(ruleName);
         });

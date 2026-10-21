@@ -51,6 +51,19 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
     });
   };
 
+  // The row menu reuses one item to enable or disable a rule, so wait until it offers the intended
+  // action before clicking: a row that has not caught up with a status change would route the click
+  // to the other action.
+  const clickRuleRowStatusAction = async (expectedLabel: 'Enable' | 'Disable') => {
+    await find.waitForDeletedByCssSelector('.euiBasicTable-loading');
+    await testSubjects.click('collapsedItemActions');
+    await retry.waitForWithTimeout(`row action "${expectedLabel}" to show up`, 30000, async () => {
+      const label = await testSubjects.getVisibleText('disableButton');
+      return label.trim() === expectedLabel;
+    });
+    await testSubjects.click('disableButton');
+  };
+
   const toggleRuleStatusFilter = (selector: string) => {
     return retry.try(async () => {
       const filter = await testSubjects.find(selector);
@@ -212,9 +225,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      await testSubjects.click('collapsedItemActions');
-
-      await testSubjects.click('disableButton');
+      await clickRuleRowStatusAction('Disable');
 
       await testSubjects.click('confirmModalConfirmButton');
 
@@ -249,9 +260,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdRule.name);
 
-      await testSubjects.click('collapsedItemActions');
-
-      await testSubjects.click('disableButton');
+      await clickRuleRowStatusAction('Disable');
 
       await testSubjects.existOrFail('untrackAlertsModal');
 
@@ -296,9 +305,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdRule.name);
 
-      await testSubjects.click('collapsedItemActions');
-
-      await testSubjects.click('disableButton');
+      await clickRuleRowStatusAction('Disable');
 
       await testSubjects.click('confirmModalConfirmButton');
 
@@ -318,28 +325,13 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await refreshAlertsList();
       await pageObjects.triggersActionsUI.searchAlerts(createdAlert.name);
 
-      await testSubjects.click('collapsedItemActions');
-
-      await retry.waitForWithTimeout('disable button to show up', 30000, async () => {
-        return await testSubjects.isDisplayed('disableButton');
-      });
-
-      await testSubjects.click('disableButton');
-
+      await clickRuleRowStatusAction('Disable');
       await testSubjects.click('confirmModalConfirmButton');
-
       await header.waitUntilLoadingHasFinished();
 
       await assertRuleEnabledState(createdAlert.id, false);
 
-      await testSubjects.click('collapsedItemActions');
-
-      await retry.waitForWithTimeout('disable button to show up', 30000, async () => {
-        return await testSubjects.isDisplayed('disableButton');
-      });
-
-      await testSubjects.click('disableButton');
-
+      await clickRuleRowStatusAction('Enable');
       await header.waitUntilLoadingHasFinished();
 
       await assertRuleEnabledState(createdAlert.id, true);
