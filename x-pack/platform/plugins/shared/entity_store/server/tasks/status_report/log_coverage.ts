@@ -210,7 +210,12 @@ export const collectLogCoverage = async ({
 
     const { totalDocs, isPartial: countIsPartial } = countResult.result;
     if (totalDocs === 0) {
-      return finish('complete', { totalDocs, sampleRate: 1, sampledDocs: 0, sources: [] });
+      return finish(countIsPartial ? 'partial' : 'complete', {
+        totalDocs,
+        sampleRate: 1,
+        sampledDocs: 0,
+        sources: [],
+      });
     }
 
     const sampleRate = computeSampleRate(targetDocs, totalDocs);
