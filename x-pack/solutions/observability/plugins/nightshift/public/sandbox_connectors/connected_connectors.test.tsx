@@ -96,9 +96,9 @@ describe('ConnectedConnectors', () => {
     const accordion = await screen.findByTestId('nightshiftConnectedConnectors');
     expect(accordion).toHaveTextContent('Connected');
     expect(accordion).toHaveTextContent('2');
-    expect(screen.getByTestId('nightshiftConnectedConnectorCard-github')).toHaveTextContent(
-      'GitHub'
-    );
+    const card = screen.getByTestId('nightshiftConnectedConnectorCard-github');
+    expect(card).toHaveTextContent('Connector github');
+    expect(card).toHaveTextContent('GitHub');
   });
 
   it('renders nothing when there is no connector', async () => {
@@ -133,35 +133,30 @@ describe('ConnectedConnectors', () => {
     );
   });
 
-  it('deletes a connector after confirmation and refreshes the list', async () => {
-    const { http, fetch } = setup({ connectors: [connector('github')] });
-
-    fireEvent.click(await screen.findByTestId('nightshiftConnectorMenu-github'));
-    fireEvent.click(await screen.findByTestId('nightshiftConnectorDelete-github'));
-    fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
-
-    await waitFor(() => expect(http.delete).toHaveBeenCalledWith('/api/actions/connector/github'));
-    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
-  });
-
-  it('locks edit and delete for preconfigured connectors', async () => {
+  it('locks edit for preconfigured connectors', async () => {
     setup({ connectors: [connector('telemetry', true)] });
 
     expect(await screen.findByTestId('nightshiftEditConnector-telemetry')).toBeDisabled();
-    fireEvent.click(screen.getByTestId('nightshiftConnectorMenu-telemetry'));
-    expect(await screen.findByTestId('nightshiftConnectorDelete-telemetry')).toBeDisabled();
   });
 
-  it('collapses when the collapse signal changes', async () => {
+  it('has no delete or management action on the card', async () => {
+    setup({ connectors: [connector('github')] });
+
+    await screen.findByTestId('nightshiftConnectedConnectorCard-github');
+    expect(screen.queryByTestId('nightshiftConnectorMenu-github')).not.toBeInTheDocument();
+  });
+
+  it('starts folded, opens from its header, and folds again on the collapse signal', async () => {
     const { rerender } = setup({ connectors: [connector('github')] });
 
     const card = await screen.findByTestId('nightshiftConnectedConnectorCard-github');
-    expect(card).toBeVisible();
+    expect(card).not.toBeVisible();
+
+    fireEvent.click(screen.getByRole('button', { name: /Connected/ }));
+    await waitFor(() => expect(card).toBeVisible());
 
     await act(async () => rerender(1));
 
-    await waitFor(() =>
-      expect(screen.getByTestId('nightshiftConnectedConnectorCard-github')).not.toBeVisible()
-    );
+    await waitFor(() => expect(card).not.toBeVisible());
   });
 });

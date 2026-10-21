@@ -6,16 +6,16 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { EuiFlexGrid, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ConnectorTypeCard,
-  getConnectorTypeCardItem,
-} from '@kbn/alerts-ui-shared/src/connector_type_card';
+import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { useKibana } from '../hooks/use_kibana';
 import { useFetchSandboxConnectorTypes } from './use_fetch_sandbox_connector_types';
 import { useRefreshSandboxConnectors } from './use_fetch_sandbox_connectors';
 import { SandboxConnectorsError } from './sandbox_connectors_error';
+import { SourceCard } from './source_card';
+import { getSourceCardItem } from './source_card_item';
+import { sourceGridStyles } from './source_grid_styles';
 
 const noPermissionReason = i18n.translate('xpack.nightshift.connectSources.noPermission', {
   defaultMessage: 'You need permission to create connectors.',
@@ -23,6 +23,10 @@ const noPermissionReason = i18n.translate('xpack.nightshift.connectSources.noPer
 
 const typesLoadErrorTitle = i18n.translate('xpack.nightshift.connectSources.loadError', {
   defaultMessage: 'Could not load the connector types.',
+});
+
+const connectLabel = i18n.translate('xpack.nightshift.connectSources.connectButton', {
+  defaultMessage: 'Connect',
 });
 
 export function ConnectSourcesGrid({
@@ -62,29 +66,43 @@ export function ConnectSourcesGrid({
 
   return (
     <>
-      <EuiFlexGrid
-        columns={2}
-        gutterSize="m"
+      <div
+        css={sourceGridStyles}
         role="list"
         aria-label={i18n.translate('xpack.nightshift.connectSources.gridLabel', {
           defaultMessage: 'Connector types the investigation agent can use',
         })}
         data-test-subj="nightshiftConnectSourcesGrid"
       >
-        {types.map((actionType) => (
-          <EuiFlexItem key={actionType.id}>
-            <ConnectorTypeCard
-              item={getConnectorTypeCardItem({
-                actionType,
-                actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
-              })}
-              disabledReason={canConnect ? undefined : noPermissionReason}
-              size="s"
-              onClick={() => setConnectingTypeId(actionType.id)}
+        {types.map((actionType) => {
+          const item = getSourceCardItem({
+            actionType,
+            actionTypeRegistry: triggersActionsUi.actionTypeRegistry,
+          });
+          const enabledCheck = checkActionTypeEnabled(actionType);
+          const disabledReason = !canConnect
+            ? noPermissionReason
+            : enabledCheck.isEnabled
+            ? undefined
+            : enabledCheck.message;
+          return (
+            <SourceCard
+              key={actionType.id}
+              icon={item.iconClass}
+              title={item.name}
+              description={item.description}
+              data-test-subj={`${actionType.id}-card`}
+              action={{
+                label: connectLabel,
+                icon: 'plugs',
+                disabledReason,
+                onClick: () => setConnectingTypeId(actionType.id),
+                'data-test-subj': `${actionType.id}-connect`,
+              }}
             />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGrid>
+          );
+        })}
+      </div>
       {flyout}
     </>
   );

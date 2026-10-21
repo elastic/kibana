@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   CreateConnectorButton,
@@ -22,18 +22,9 @@ export function ConnectorsSection(): React.ReactElement {
       title={i18n.translate('xpack.nightshift.settings.connectors.sectionTitle', {
         defaultMessage: 'Connectors',
       })}
-      titleAdornment={<ManageConnectorsLink />}
+      headerAction={<ManageConnectorsLink />}
       data-test-subj="nightshiftConnectorsSection"
     >
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.nightshift.settings.connectors.description', {
-            defaultMessage:
-              'Connectors the investigation agent can use from its sandbox. Every connector the sandbox supports is available to the agent automatically.',
-          })}
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
       <SandboxConnectorsTable />
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" responsive={false}>

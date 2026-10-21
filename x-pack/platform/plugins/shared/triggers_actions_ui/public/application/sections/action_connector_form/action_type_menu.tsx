@@ -6,8 +6,11 @@
  */
 
 import React, { useEffect, useState, useMemo } from 'react';
+import type { IconType } from '@elastic/eui';
 import {
   EuiFlexItem,
+  EuiCard,
+  EuiIcon,
   EuiFlexGrid,
   EuiSpacer,
   EuiIconTip,
@@ -15,17 +18,20 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isEmpty } from 'lodash';
+import { checkActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import {
-  ConnectorTypeCard,
-  getConnectorTypeCardItem,
-  type ConnectorTypeCardItem,
-} from '@kbn/alerts-ui-shared/src/connector_type_card';
-import { DEPRECATED_LLM_CONNECTOR_INFO } from '@kbn/response-ops-rule-form/src/translations';
+  DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+  DEPRECATED_LABEL,
+  DEPRECATED_LLM_CONNECTOR_INFO,
+} from '@kbn/response-ops-rule-form/src/translations';
 import { isLLMConnectorTypeId } from '@kbn/response-ops-rule-form/src/constants';
 import { shouldHideWorkflowsOnlyConnector } from '@kbn/alerts-ui-shared/src/common/utils/action_type_model_utils';
+import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import type { ActionType, ActionTypeIndex, ActionTypeRegistryContract } from '../../../types';
 import { loadActionTypes } from '../../lib/action_connector_api';
 import { actionTypeCompare } from '../../lib/action_type_compare';
@@ -42,7 +48,14 @@ interface Props {
   selectedFeatureIds?: string[];
 }
 
-type RegisteredActionType = ConnectorTypeCardItem;
+interface RegisteredActionType {
+  iconClass: IconType;
+  selectMessage: string;
+  actionType: ActionType;
+  name: string;
+  isExperimental: boolean | undefined;
+  isDeprecated: boolean;
+}
 
 const filterActionTypes = (
   actionTypes: RegisteredActionType[],
@@ -78,7 +91,14 @@ const filterActionTypes = (
   });
 };
 
-export { getConnectorIcon } from '@kbn/alerts-ui-shared/src/connector_type_card';
+export function getConnectorIcon(id: string): IconType {
+  const lazyIcon = ConnectorIconsMap.get(id);
+  if (lazyIcon) {
+    return lazyIcon;
+  }
+
+  return 'plugs';
+}
 
 export const ActionTypeMenu = ({
   onActionTypeChange,
@@ -159,7 +179,28 @@ export const ActionTypeMenu = ({
 
       return actionType.enabledInConfig === true && !shouldHideInUi;
     })
-    .map(([, actionType]) => getConnectorTypeCardItem({ actionType, actionTypeRegistry }));
+    .map(([id, actionType]) => {
+      if (actionType.source === ACTION_TYPE_SOURCES.spec) {
+        return {
+          iconClass: getConnectorIcon(actionType.id),
+          selectMessage: actionType.description ?? '',
+          actionType,
+          name: actionType.name,
+          isExperimental: actionType.isExperimental ?? false,
+          isDeprecated: actionType.isDeprecated,
+        };
+      }
+
+      const actionTypeModel = actionTypeRegistry.has(id) ? actionTypeRegistry.get(id) : undefined;
+      return {
+        iconClass: actionTypeModel ? actionTypeModel.iconClass : '',
+        selectMessage: actionTypeModel ? actionTypeModel.selectMessage : '',
+        actionType,
+        name: actionType.name,
+        isExperimental: actionTypeModel?.isExperimental,
+        isDeprecated: actionType.isDeprecated,
+      };
+    });
 
   const filteredConnectors = useMemo(
     () => filterActionTypes(registeredActionTypes, searchValue, selectedFeatureIds),
@@ -169,8 +210,9 @@ export const ActionTypeMenu = ({
   const cardNodes = filteredConnectors
     .sort((a, b) => actionTypeCompare(a.actionType, b.actionType))
     .map((item, index) => {
-      // LLM connectors carry a deprecation hint next to their description.
-      const description = isLLMConnectorTypeId(item.actionType.id) ? (
+      const checkEnabledResult = checkActionTypeEnabled(item.actionType);
+      const isLLMConnector = isLLMConnectorTypeId(item.actionType.id);
+      const description = isLLMConnector ? (
         <EuiFlexGroup
           gutterSize="xs"
           alignItems="center"
@@ -189,14 +231,43 @@ export const ActionTypeMenu = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      ) : undefined;
+      ) : (
+        item.selectMessage
+      );
+      const card = (
+        <EuiCard
+          betaBadgeProps={
+            item.isDeprecated
+              ? {
+                  label: DEPRECATED_LABEL,
+                  tooltipContent: DEPRECATED_CONNECTOR_TOOLTIP_CONTENT,
+                  color: 'warning',
+                }
+              : item.isExperimental
+              ? { label: TECH_PREVIEW_LABEL, tooltipContent: TECH_PREVIEW_DESCRIPTION }
+              : undefined
+          }
+          role="listitem"
+          titleSize="xs"
+          data-test-subj={`${item.actionType.id}-card`}
+          icon={<EuiIcon size="xl" type={item.iconClass} aria-hidden={true} />}
+          title={item.name}
+          description={description}
+          isDisabled={!checkEnabledResult.isEnabled}
+          onClick={() => {
+            onActionTypeChange(item.actionType);
+          }}
+        />
+      );
+
       return (
         <EuiFlexItem key={index}>
-          <ConnectorTypeCard
-            item={item}
-            description={description}
-            onClick={() => onActionTypeChange(item.actionType)}
-          />
+          {checkEnabledResult.isEnabled && card}
+          {checkEnabledResult.isEnabled === false && (
+            <EuiToolTip position="top" content={checkEnabledResult.message}>
+              {card}
+            </EuiToolTip>
+          )}
         </EuiFlexItem>
       );
     });

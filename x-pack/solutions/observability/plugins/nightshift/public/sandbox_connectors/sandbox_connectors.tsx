@@ -10,12 +10,14 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -25,7 +27,13 @@ import {
   useFetchSandboxConnectors,
   useRefreshSandboxConnectors,
 } from './use_fetch_sandbox_connectors';
+import { useDeleteConnector } from './use_delete_connector';
+import { useEditConnector } from './use_edit_connector';
 import { SandboxConnectorsError } from './sandbox_connectors_error';
+
+const preconfiguredTooltip = i18n.translate('xpack.nightshift.sandboxConnectors.preconfigured', {
+  defaultMessage: 'This connector is configured in kibana.yml and cannot be changed here.',
+});
 
 const CONNECTORS_MANAGEMENT_PATH = '/insightsAndAlerting/triggersActionsConnectors';
 
@@ -36,10 +44,12 @@ export function ManageConnectorsLink(): React.ReactElement | null {
   return (
     <EuiLink
       href={application.getUrlForApp('management', { path: CONNECTORS_MANAGEMENT_PATH })}
+      external
+      target="_blank"
       data-test-subj="nightshiftManageConnectorsLink"
     >
       {i18n.translate('xpack.nightshift.sandboxConnectors.manageLink', {
-        defaultMessage: 'Manage connectors',
+        defaultMessage: 'Open in Stack Management',
       })}
     </EuiLink>
   );
@@ -87,62 +97,97 @@ export function CreateConnectorButton({
   );
 }
 
-const useConnectorTypeColumn = (): EuiBasicTableColumn<SandboxConnector> => {
-  const registry = useKibana().services.triggersActionsUi?.actionTypeRegistry;
-  return useMemo(
-    () => ({
-      field: 'connector_type_id',
-      name: i18n.translate('xpack.nightshift.sandboxConnectors.typeColumn', {
-        defaultMessage: 'Type',
-      }),
-      width: '30%',
-      render: (typeId: string) => {
-        const model = registry?.has(typeId) ? registry.get(typeId) : undefined;
-        return (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            {model?.iconClass && (
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={model.iconClass} size="m" aria-hidden={true} />
-              </EuiFlexItem>
-            )}
-            <EuiFlexItem grow={false}>{model?.actionTypeTitle ?? typeId}</EuiFlexItem>
-          </EuiFlexGroup>
-        );
-      },
-    }),
-    [registry]
-  );
-};
-
+/** The connectors the agent can use, one row each: name opening the connector, its type, Delete. */
 export function SandboxConnectorsTable(): React.ReactElement | null {
+  const { application, triggersActionsUi } = useKibana().services;
+  const registry = triggersActionsUi?.actionTypeRegistry;
   const { data, error, isLoading, refetch } = useFetchSandboxConnectors();
-  const typeColumn = useConnectorTypeColumn();
-  const columns = useMemo(
-    (): Array<EuiBasicTableColumn<SandboxConnector>> => [
+  const { canEdit, openEdit, editFlyout } = useEditConnector();
+  const { requestDelete, confirmModal } = useDeleteConnector();
+  const canDelete = application.capabilities.actions?.delete === true;
+
+  const columns = useMemo((): Array<EuiBasicTableColumn<SandboxConnector>> => {
+    const modelOf = (typeId: string) => (registry?.has(typeId) ? registry.get(typeId) : undefined);
+    return [
       {
         field: 'name',
         name: i18n.translate('xpack.nightshift.sandboxConnectors.nameColumn', {
           defaultMessage: 'Name',
         }),
-        render: (name: string, connector) => (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>{name}</EuiFlexItem>
-            {connector.is_preconfigured && (
+        width: '50%',
+        render: (name: string, connector) => {
+          const model = modelOf(connector.connector_type_id);
+          return (
+            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
               <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">
-                  {i18n.translate('xpack.nightshift.sandboxConnectors.preconfiguredBadge', {
-                    defaultMessage: 'Preconfigured',
-                  })}
-                </EuiBadge>
+                <EuiIcon type={model?.iconClass ?? 'plugs'} size="m" aria-hidden={true} />
               </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        ),
+              <EuiFlexItem grow={false}>
+                {canEdit ? (
+                  <EuiLink
+                    onClick={() => openEdit(connector)}
+                    data-test-subj={`nightshiftConnectorName-${connector.id}`}
+                  >
+                    {name}
+                  </EuiLink>
+                ) : (
+                  name
+                )}
+              </EuiFlexItem>
+              {connector.is_preconfigured && (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">
+                    {i18n.translate('xpack.nightshift.sandboxConnectors.preconfiguredBadge', {
+                      defaultMessage: 'Preconfigured',
+                    })}
+                  </EuiBadge>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          );
+        },
       },
-      typeColumn,
-    ],
-    [typeColumn]
-  );
+      {
+        field: 'connector_type_id',
+        name: i18n.translate('xpack.nightshift.sandboxConnectors.typeColumn', {
+          defaultMessage: 'Type',
+        }),
+        render: (typeId: string) => modelOf(typeId)?.actionTypeTitle ?? typeId,
+      },
+      {
+        name: i18n.translate('xpack.nightshift.sandboxConnectors.actionsColumn', {
+          defaultMessage: 'Actions',
+        }),
+        width: '96px',
+        align: 'right',
+        render: (connector: SandboxConnector) => {
+          const deleteLabel = i18n.translate('xpack.nightshift.sandboxConnectors.deleteAction', {
+            defaultMessage: 'Delete {name}',
+            values: { name: connector.name },
+          });
+          const disabledReason = connector.is_preconfigured
+            ? preconfiguredTooltip
+            : canDelete
+            ? undefined
+            : i18n.translate('xpack.nightshift.sandboxConnectors.deleteNoPermission', {
+                defaultMessage: 'You need permission to delete connectors.',
+              });
+          return (
+            <EuiToolTip content={disabledReason ?? deleteLabel} disableScreenReaderOutput>
+              <EuiButtonIcon
+                iconType="trash"
+                color="danger"
+                aria-label={deleteLabel}
+                isDisabled={disabledReason !== undefined}
+                onClick={() => requestDelete(connector)}
+                data-test-subj={`nightshiftConnectorDelete-${connector.id}`}
+              />
+            </EuiToolTip>
+          );
+        },
+      },
+    ];
+  }, [canDelete, canEdit, openEdit, registry, requestDelete]);
 
   if (isLoading) return <EuiLoadingSpinner size="m" />;
   if (error) return <SandboxConnectorsError onRetry={() => refetch()} />;
@@ -160,14 +205,19 @@ export function SandboxConnectorsTable(): React.ReactElement | null {
     );
   }
   return (
-    <EuiBasicTable
-      items={data.connectors}
-      columns={columns}
-      rowHeader="name"
-      tableCaption={i18n.translate('xpack.nightshift.sandboxConnectors.tableCaption', {
-        defaultMessage: 'Sandbox connectors',
-      })}
-      data-test-subj="nightshiftSandboxConnectorsTable"
-    />
+    <>
+      <EuiBasicTable
+        items={data.connectors}
+        columns={columns}
+        rowHeader="name"
+        tableLayout="fixed"
+        tableCaption={i18n.translate('xpack.nightshift.sandboxConnectors.tableCaption', {
+          defaultMessage: 'Sandbox connectors',
+        })}
+        data-test-subj="nightshiftSandboxConnectorsTable"
+      />
+      {editFlyout}
+      {confirmModal}
+    </>
   );
 }

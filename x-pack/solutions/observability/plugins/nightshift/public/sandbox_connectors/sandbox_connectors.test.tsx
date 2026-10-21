@@ -6,10 +6,11 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SandboxConnector } from '@kbn/nightshift-investigations-plugin/common';
+import { fetchConnector } from '@kbn/alerts-ui-shared/src/common/apis/fetch_connector';
 import { useKibana } from '../hooks/use_kibana';
 import {
   CreateConnectorButton,
@@ -18,6 +19,10 @@ import {
 } from './sandbox_connectors';
 
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_connector', () => ({
+  fetchConnector: jest.fn(),
+}));
+const mockFetchConnector = fetchConnector as jest.Mock;
 
 const mockUseKibana = useKibana as jest.Mock;
 
@@ -38,21 +43,26 @@ const forbiddenError = (): Error =>
 const setup = ({
   connectors,
   fetchError,
-  capabilities = { show: true, save: true },
+  capabilities = { show: true, save: true, delete: true },
   withTriggersActionsUi = true,
   ui = <SandboxConnectorsTable />,
 }: {
   connectors: SandboxConnector[];
   fetchError?: Error;
-  capabilities?: { show?: boolean; save?: boolean };
+  capabilities?: { show?: boolean; save?: boolean; delete?: boolean };
   withTriggersActionsUi?: boolean;
   ui?: React.ReactElement;
 }) => {
   const fetch = jest.fn().mockResolvedValue({ connectors });
   if (fetchError) fetch.mockRejectedValueOnce(fetchError);
   const getAddConnectorFlyout = jest.fn(() => <div data-test-subj="addConnectorFlyoutStub" />);
+  const getEditConnectorFlyout = jest.fn(() => <div data-test-subj="editConnectorFlyoutStub" />);
+  const http = { delete: jest.fn().mockResolvedValue({}) };
+  mockFetchConnector.mockResolvedValue({ id: 'github', actionTypeId: '.http', name: 'x' });
   mockUseKibana.mockReturnValue({
     services: {
+      http,
+      notifications: { toasts: { addError: jest.fn() } },
       application: {
         capabilities: { actions: capabilities },
         getUrlForApp: (app: string, { path }: { path: string }) => `/app/${app}${path}`,
@@ -61,6 +71,7 @@ const setup = ({
       triggersActionsUi: withTriggersActionsUi
         ? {
             getAddConnectorFlyout,
+            getEditConnectorFlyout,
             actionTypeRegistry: {
               has: (id: string) => id === '.http',
               get: () => ({ iconClass: 'globe', actionTypeTitle: 'HTTP' }),
@@ -75,7 +86,7 @@ const setup = ({
       <QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>
     </I18nProvider>
   );
-  return { fetch, getAddConnectorFlyout };
+  return { fetch, http, getAddConnectorFlyout, getEditConnectorFlyout };
 };
 
 describe('SandboxConnectorsTable', () => {
@@ -91,6 +102,35 @@ describe('SandboxConnectorsTable', () => {
       'GET /internal/nightshift/sandbox_connectors',
       expect.anything()
     );
+  });
+
+  it('opens the edit flyout from the connector name', async () => {
+    const { getEditConnectorFlyout } = setup({ connectors: [connector('github')] });
+
+    fireEvent.click(await screen.findByTestId('nightshiftConnectorName-github'));
+
+    expect(await screen.findByTestId('editConnectorFlyoutStub')).toBeInTheDocument();
+    expect(mockFetchConnector).toHaveBeenCalledWith('github', expect.anything());
+    expect(getEditConnectorFlyout).toHaveBeenCalledWith(
+      expect.objectContaining({ connector: expect.objectContaining({ id: 'github' }) })
+    );
+  });
+
+  it('deletes a connector after confirmation and refreshes the list', async () => {
+    const { http, fetch } = setup({ connectors: [connector('github')] });
+
+    fireEvent.click(await screen.findByTestId('nightshiftConnectorDelete-github'));
+    fireEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
+
+    await waitFor(() => expect(http.delete).toHaveBeenCalledWith('/api/actions/connector/github'));
+    await waitFor(() => expect(fetch).toHaveBeenCalledTimes(2));
+  });
+
+  it('locks delete for preconfigured connectors', async () => {
+    setup({ connectors: [connector('telemetry', true), connector('github')] });
+
+    expect(await screen.findByTestId('nightshiftConnectorDelete-telemetry')).toBeDisabled();
+    expect(screen.getByTestId('nightshiftConnectorDelete-github')).toBeEnabled();
   });
 
   it('explains what a connector does for the agent when there is none', async () => {

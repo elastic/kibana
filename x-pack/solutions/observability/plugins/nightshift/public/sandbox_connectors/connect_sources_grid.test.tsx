@@ -87,7 +87,6 @@ describe('ConnectSourcesGrid', () => {
     expect(mockFetchConnectorTypes).toHaveBeenCalledWith(
       expect.objectContaining({ sandboxCapableOnly: true })
     );
-    // Same card as the connector flyout's "Select a connector" step: `${id}-card`.
     expect(screen.getByTestId('.github-card')).toHaveTextContent('Type .github');
     expect(screen.getByTestId('.github-card')).toHaveTextContent('Repos');
     expect(screen.getByTestId('.http-card')).toHaveTextContent('Type .http');

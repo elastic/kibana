@@ -16,12 +16,9 @@ import { useFetchCustomContext } from '../custom_context/use_fetch_custom_contex
 import { ConnectSourcesGrid } from '../sandbox_connectors/connect_sources_grid';
 import { ConnectedConnectors } from '../sandbox_connectors/connected_connectors';
 
-/** Step 1: connect tools through connectors, connect Slack, and optionally describe the system. */
 export function OnboardingConnectStep(): React.ReactElement {
   const { application } = useKibana().services;
-  // Same privilege as the Apps section of the Nightshift settings.
   const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
-  // Bumped after a new connect so the Connected accordion folds, like the prototype.
   const [connectedCollapseSignal, setConnectedCollapseSignal] = useState(0);
 
   return (
@@ -42,24 +39,18 @@ export function OnboardingConnectStep(): React.ReactElement {
         </p>
       </EuiText>
 
-      <EuiSpacer size="m" />
-      <SectionTitle
-        title={i18n.translate('xpack.nightshift.onboarding.connectors.title', {
-          defaultMessage: 'Connect other sources',
-        })}
-      />
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.nightshift.onboarding.connectors.description', {
-            defaultMessage:
-              'Nightshift works from a sandbox. Any connector it can use from there is available to the investigation agent as soon as it exists.',
+      <EuiSpacer size="l" />
+      <EuiTitle size="s">
+        <h3>
+          {i18n.translate('xpack.nightshift.onboarding.connectors.title', {
+            defaultMessage: 'Connect other sources',
           })}
-        </p>
-      </EuiText>
+        </h3>
+      </EuiTitle>
       <EuiSpacer size="m" />
       <div data-test-subj="nightshiftOnboardingConnectors">
         <ConnectSourcesGrid onConnected={() => setConnectedCollapseSignal((n) => n + 1)} />
-        <EuiSpacer size="l" />
+        <EuiSpacer size="m" />
         <ConnectedConnectors collapseSignal={connectedCollapseSignal} />
       </div>
 
