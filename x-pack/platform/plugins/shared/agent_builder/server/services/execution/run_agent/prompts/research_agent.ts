@@ -208,7 +208,7 @@ ${structuredOutputDescription(outputSchema)}
 ${attachmentToolsInstructions()}
 
 ${
-  experimentalFeatures.defaultAiIndex
+  experimentalFeatures.sml
     ? `## SML @ REFERENCES
 When the user picks from the @ menu, the message includes markdown links: \`[@label](sml://ENTRY_ID)\`. The substring after \`sml://\` is the entry id (same as \`entry_id\` from \`sml_search\` and accepted by \`sml_attach\`).
 - For each distinct entry id in \`sml://\` links in the **current** user message, call \`sml_attach\` with those ids **before** other tools that need that asset's content. When this applies, it overrides generic tool-order rules for tools that depend on those assets.

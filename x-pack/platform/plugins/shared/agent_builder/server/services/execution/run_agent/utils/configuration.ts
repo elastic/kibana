@@ -16,13 +16,13 @@ export const resolveConfiguration = async (
   configuration: AgentConfiguration,
   {
     aiIndicesEnabled,
-    defaultAiIndexEnabled,
+    smlEnabled,
     request,
     resolver,
     logger,
   }: {
     aiIndicesEnabled: boolean;
-    defaultAiIndexEnabled: boolean;
+    smlEnabled: boolean;
     request: KibanaRequest;
     resolver?: AiIndexResolver;
     logger?: Logger;
@@ -31,7 +31,7 @@ export const resolveConfiguration = async (
   const aiIndices = configuration.ai_indices ?? [];
   const base: ResolvedConfiguration = {
     instructions: configuration.instructions ?? '',
-    aiIndices: defaultAiIndexEnabled
+    aiIndices: smlEnabled
       ? aiIndices
       : aiIndices.filter((id) => id !== agentBuilderDefaultAiIndexId),
   };

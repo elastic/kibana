@@ -267,7 +267,7 @@ describe('getResearchAgentPrompt', () => {
       makeParams({
         experimentalFeatures: {
           aiIndices: true,
-          defaultAiIndex: false,
+          sml: false,
           bash: false,
           skills: false,
         },
@@ -284,7 +284,7 @@ describe('getResearchAgentPrompt', () => {
       makeParams({
         experimentalFeatures: {
           aiIndices: true,
-          defaultAiIndex: true,
+          sml: true,
           bash: false,
           skills: false,
         },
@@ -310,7 +310,7 @@ describe('getResearchAgentPrompt', () => {
         },
         experimentalFeatures: {
           aiIndices: true,
-          defaultAiIndex: true,
+          sml: true,
           bash: false,
           skills: false,
         },

@@ -19,7 +19,7 @@ describe('resolveConfiguration', () => {
   it('keeps the default AI index when it is enabled', async () => {
     const resolved = await resolveConfiguration(configuration, {
       aiIndicesEnabled: true,
-      defaultAiIndexEnabled: true,
+      smlEnabled: true,
       request,
     });
 
@@ -33,7 +33,7 @@ describe('resolveConfiguration', () => {
   it('drops the default AI index when it is disabled, keeping custom ones', async () => {
     const resolved = await resolveConfiguration(configuration, {
       aiIndicesEnabled: true,
-      defaultAiIndexEnabled: false,
+      smlEnabled: false,
       request,
     });
 
@@ -44,7 +44,7 @@ describe('resolveConfiguration', () => {
   it('omits the catalog when AI indices are disabled', async () => {
     const resolved = await resolveConfiguration(configuration, {
       aiIndicesEnabled: false,
-      defaultAiIndexEnabled: true,
+      smlEnabled: true,
       request,
     });
 

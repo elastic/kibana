@@ -54,7 +54,7 @@ const createContext = (overrides: Record<string, unknown> = {}) => {
     experimentalFeatures: {
       skills: false,
       aiIndices: false,
-      defaultAiIndex: false,
+      sml: false,
       relevantSkills: false,
       todos: false,
       bash: false,

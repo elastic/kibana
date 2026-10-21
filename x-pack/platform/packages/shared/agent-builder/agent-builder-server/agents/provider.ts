@@ -169,8 +169,8 @@ export interface ExperimentalFeatures {
   skills: boolean;
   /** Whether AI index instructions are enabled by the Context Engine setting */
   aiIndices: boolean;
-  /** Whether the default `elastic` AI index (the SML index) is available, which follows the Agent Builder experimental setting */
-  defaultAiIndex: boolean;
+  /** Whether SML is available, which follows the Agent Builder experimental setting */
+  sml: boolean;
   /** Whether context-aware skill filtering is enabled */
   relevantSkills: boolean;
   /** Whether the todo list tool and task-management prompt are enabled */
