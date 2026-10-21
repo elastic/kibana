@@ -195,7 +195,11 @@ export const MAX_TITLE_LENGTH = 160 as const;
 export const MAX_OWNER_LENGTH = 30 as const;
 export const MAX_ISO_DATE_LENGTH = 30 as const;
 export const MAX_ATTACHMENT_ID_LENGTH = 512 as const; // ES `_id` upper bound
+export const MAX_IDS_PER_ATTACHMENT = 1000 as const; // `attachmentId` array size on 1 attachment, not a per-case limit
+export const MAX_SOURCE_ATTACHMENT_IDS = 100 as const; // `metadata.sourceAttachmentIds` on 1 alert attachment
 export const MAX_ATTACHMENT_TYPE_LENGTH = 50 as const;
+export const MAX_ATTACHMENT_JSON_LENGTH = 524288 as const; // serialized characters per `data` / `metadata` object
+export const MAX_SAVED_OBJECT_VERSION_LENGTH = 128 as const;
 export const MAX_USERNAME_LENGTH = 1024 as const;
 export const MAX_RULE_NAME_LENGTH = 100 as const;
 export const MAX_SUFFIX_LENGTH = 60 as const;
@@ -443,6 +447,7 @@ export const LOCAL_STORAGE_KEYS = {
   templateEditorTourSeen: 'cases.templates.editor.tour.seen.v1',
   templatesListInfoPanelDismissed: 'cases.templates.list.infoPanel.dismissed.v1',
   showLegacyCustomFields: 'cases.showLegacyCustomFields',
+  similarCasesTableColumns: 'cases.similar.tableColumns',
 };
 
 /**

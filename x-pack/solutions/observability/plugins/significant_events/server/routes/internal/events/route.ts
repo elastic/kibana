@@ -8,11 +8,12 @@
 import {
   significantEventInvestigationSchema,
   significantEventStatusSchema,
+  significantEventManualStatusSchema,
   SIGNIFICANT_EVENT_STATUS_OPTIONS,
   CHANGE_POINT_TYPES,
   severitySchema,
   MAX_ID_LENGTH,
-  MAX_ASSESSMENT_NOTE_LENGTH,
+  MAX_TEXT_LENGTH,
   type ChangePointType,
   type Detection,
   type InvestigationRunStatus,
@@ -25,18 +26,19 @@ import { notFound, serverUnavailable } from '@hapi/boom';
 import { z, isoDateTime } from '@kbn/zod/v4';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { attachInvestigationToEvent } from '../../../lib/significant_events/events/attach_investigation';
-import { updateSignificantEventStatus } from '../../../lib/significant_events/events/update_event_status';
 import {
   cleanupStaleEvents,
   type CleanupStaleEventsResult,
 } from '../../../lib/significant_events/events/cleanup_stale_events';
 import { triggerInvestigationWorkflow } from '../../../lib/significant_events/events/trigger_investigation_workflow';
 import { resolveInvestigationStatuses } from '../../../lib/significant_events/events/resolve_investigation_status';
+import type { DetectionClient } from '../../../lib/significant_events/detections';
 import type { PaginatedResponse } from '../../../lib/significant_events/query_utils';
 import { createServerRoute } from '../../create_server_route';
 import { assertNotPaused } from '../../utils/assert_not_paused';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { MAX_SOURCE_IDS_PER_REQUEST, sourceIdsQuerySchema } from '../../utils/resolve_source_ids';
+import { StatusChange } from '../../../lib/significant_events/events/lifecycle/lifecycle_controller';
 
 const toArray = <T extends string>(val: T | T[] | undefined): T[] | undefined =>
   val === undefined ? undefined : Array.isArray(val) ? val : [val];
@@ -49,6 +51,24 @@ const parseChangePointType = (value: string | undefined): ChangePointType | unde
   }
   return CHANGE_POINT_TYPES.includes(value as ChangePointType)
     ? (value as ChangePointType)
+    : undefined;
+};
+
+/** A stored detection as the lifecycle lists it; what the detection lacks comes from `fallback`. */
+const toLifecycleDetection = (
+  hit: Detection,
+  fallback: { rule_name?: string; source_id?: string } = {}
+): LifecycleDetection | undefined => {
+  const changePointType = parseChangePointType(hit.change_point_type);
+  return changePointType
+    ? {
+        detection_id: hit.detection_id,
+        rule_name: hit.rule_name ?? fallback.rule_name ?? hit.rule_uuid,
+        rule_uuid: hit.rule_uuid,
+        source_id: hit.source_id ?? fallback.source_id,
+        change_point_type: changePointType,
+        '@timestamp': hit['@timestamp'],
+      }
     : undefined;
 };
 
@@ -75,6 +95,31 @@ const collectEmbeddedDetections = (events: SignificantEvent[]) => {
   }
 
   return result;
+};
+
+/**
+ * The detections the classifier closed without the agent on the strength of this event. They are in
+ * no signal, so they are found by the event their skip marker names; each marker says why.
+ */
+const findSkippedDetections = async ({
+  detectionClient,
+  eventId,
+  known,
+}: {
+  detectionClient: Pick<DetectionClient, 'findSkippedForEvent'>;
+  eventId: string;
+  known: ReadonlySet<string>;
+}): Promise<{ detections: LifecycleDetection[]; truncated: boolean }> => {
+  const { hits, truncated } = await detectionClient.findSkippedForEvent(eventId);
+  const detections = hits
+    .flatMap((hit) => {
+      const detection = toLifecycleDetection(hit);
+      return detection && hit.skip && !known.has(hit.detection_id)
+        ? [{ ...detection, skip: hit.skip }]
+        : [];
+    })
+    .sort((a, b) => a['@timestamp'].localeCompare(b['@timestamp']));
+  return { detections, truncated };
 };
 
 const eventsSearchRoute = createServerRoute({
@@ -195,32 +240,23 @@ const eventsLifecycleRoute = createServerRoute({
       allDetectionHits.filter(hasChangePointType).map((h) => [h.detection_id, h])
     );
 
-    const detections: LifecycleDetection[] = embedded.flatMap(
-      ({ detection_id, rule_name, source_id, change_point_type }) => {
-        const hit = hitsByDetectionId.get(detection_id);
-        if (!hit) {
-          return [];
-        }
+    const detections = embedded.flatMap(({ detection_id, rule_name, source_id }) => {
+      const hit = hitsByDetectionId.get(detection_id);
+      const detection = hit && toLifecycleDetection(hit, { rule_name, source_id });
+      return detection ? [detection] : [];
+    });
 
-        const hitChangePointType = parseChangePointType(hit.change_point_type);
-        if (!hitChangePointType) {
-          return [];
-        }
+    const skipped = await findSkippedDetections({
+      detectionClient,
+      eventId: params.path.id,
+      known: new Set(detections.map(({ detection_id: id }) => id)),
+    });
 
-        return [
-          {
-            detection_id,
-            rule_name: hit.rule_name ?? rule_name,
-            rule_uuid: hit.rule_uuid,
-            source_id: hit.source_id ?? source_id,
-            change_point_type: hitChangePointType,
-            '@timestamp': hit['@timestamp'],
-          },
-        ];
-      }
-    );
-
-    return { detections, events };
+    return {
+      detections: [...detections, ...skipped.detections],
+      events,
+      ...(skipped.truncated ? { skipped_truncated: true } : {}),
+    };
   },
 });
 
@@ -371,23 +407,19 @@ const eventsUpdateRoute = createServerRoute({
       id: z.string().max(255),
     }),
     body: z.object({
-      status: significantEventStatusSchema,
-      assessment_note: z.string().max(MAX_ASSESSMENT_NOTE_LENGTH).optional(),
+      status: significantEventManualStatusSchema,
+      assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
-    const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } =
-      await getScopedClients({ request });
+    const { getEventSearchClient, licensing } = await getScopedClients({ request });
 
     await assertSignificantEventsAccess({ server, licensing });
 
-    return updateSignificantEventStatus({
-      eventSearchClient: await getEventSearchClient(),
+    return (await getEventSearchClient()).updateEventStatus({
       eventId: params.path.id,
-      status: params.body.status,
+      change: StatusChange.byOperator(params.body.status),
       assessmentNote: params.body.assessment_note,
-      alertEventsClient: await getAlertEventsClient(),
-      emitTrigger,
     });
   },
 });
@@ -419,7 +451,7 @@ const cleanupStaleEventsRoute = createServerRoute({
     logger,
   }): Promise<CleanupStaleEventsResult> => {
     const scopedClients = await getScopedClients({ request });
-    const { getEventSearchClient, getAlertEventsClient, emitTrigger, licensing } = scopedClients;
+    const { getEventSearchClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
 
@@ -429,8 +461,6 @@ const cleanupStaleEventsRoute = createServerRoute({
       eventSearchClient: await getEventSearchClient(),
       rulesClient,
       candidateRuleIds: params?.body?.candidateRuleIds,
-      alertEventsClient: await getAlertEventsClient(),
-      emitTrigger,
     });
   },
 });
