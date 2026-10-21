@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const DIGITAL_EXPERIENCE_LABEL = i18n.translate('xpack.digitalExperience.label', {
-  defaultMessage: 'Digital Experience',
+  defaultMessage: 'Digital experience',
 });
 
 export const APPLICATIONS_LABEL = i18n.translate('xpack.digitalExperience.applications.label', {

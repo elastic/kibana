@@ -45,7 +45,7 @@ describe('DigitalExperienceLayout', () => {
     render();
 
     expect(useRouteBreadcrumb).toHaveBeenCalledWith([
-      { text: 'Digital Experience', href: HREF },
+      { text: 'Digital experience', href: HREF },
       { text: 'Applications', href: HREF },
     ]);
   });

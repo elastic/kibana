@@ -174,7 +174,7 @@ export const createNavigationTree = ({
               {
                 link: 'digital_experience',
                 title: i18n.translate('xpack.serverlessObservability.nav.digitalExperience', {
-                  defaultMessage: 'Digital Experience',
+                  defaultMessage: 'Digital experience',
                 }),
               },
             ],
