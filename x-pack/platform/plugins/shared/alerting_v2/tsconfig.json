@@ -12,7 +12,7 @@
     "server/**/*.json",
     "public/**/*",
     "test/scout/**/*",
-    "test/scout_alerting_v2/**/*"
+    "test/scout_alerting_v2_custom_config/**/*"
   ],
   "kbn_references": [
     "@kbn/agent-builder-elastic-ai-index-ki-types",
