@@ -13,6 +13,7 @@ import type { PanelOutcome } from './bind_charts';
 import type { PlannedDashboard } from './dashboard';
 import type { ExecuteSearch } from './esql_response';
 import {
+  type DashboardBool,
   inlineVegaData,
   kibanaSearchBody,
   type VegaSpec,
@@ -62,7 +63,9 @@ const captionOf = (title: string, indices: readonly string[], from?: string, to?
 /** Binds every planned Vega panel, running its sources through `search`. */
 export const bindVegaPanels = (
   planned: PlannedDashboard,
-  search: ExecuteSearch
+  search: ExecuteSearch,
+  /** The dashboard's query, filters and controls, for `%context%` and `%dashboard_context-*%`. */
+  context: DashboardBool = {}
 ): Promise<BoundPanel[]> =>
   Promise.all(
     planned.vegaPanels.map(async ({ panelId, specPath, sources }): Promise<BoundPanel> => {
@@ -87,7 +90,7 @@ export const bindVegaPanels = (
             path,
             values: await search(
               url.index,
-              kibanaSearchBody(url, { timeRange: planned.timeRange, runtimeMappings })
+              kibanaSearchBody(url, { timeRange: planned.timeRange, runtimeMappings, context })
             ),
           }))
         );

@@ -17,6 +17,8 @@ project:
   owner: '@elastic/appex-sharedux'
   sourceRoot: x-pack/platform/packages/shared/isomer/isomer-lowering
 dependsOn:
+  - '@kbn/es-query'
+  - '@kbn/esql-utils'
   - '@kbn/isomer-charts-elastic'
   - '@kbn/isomer-primitives-charts'
 tags:
@@ -29,7 +31,7 @@ tags:
 fileGroups:
   src:
     - '**/*.ts'
-    - '**/*.json'
+    - src/**/*.json
     - '!target/**/*'
   jest-config:
     - jest.config.js

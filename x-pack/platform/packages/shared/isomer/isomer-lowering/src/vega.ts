@@ -112,6 +112,14 @@ export const predicateToDsl = ({
 export const selectionsToDsl = (selections: readonly ChartSelection[]): Record<string, unknown>[] =>
   selections.flatMap(({ predicates }) => predicates.flatMap(predicateToDsl));
 
+/** The dashboard's query, filters and controls as one bool, as `@kbn/es-query` `buildEsQuery` returns it. */
+export interface DashboardBool {
+  must?: unknown[];
+  filter?: unknown[];
+  should?: unknown[];
+  must_not?: unknown[];
+}
+
 const CONTEXT_CLAUSES = {
   '%dashboard_context-must_clause%': 'must',
   '%dashboard_context-filter_clause%': 'filter',
@@ -128,9 +136,18 @@ const substituteDashboardContext = (
   {
     timeRange,
     filters,
-  }: { timeRange?: TimeRange | undefined; filters: readonly Record<string, unknown>[] }
+    context,
+  }: {
+    timeRange?: TimeRange | undefined;
+    filters: readonly Record<string, unknown>[];
+    context: DashboardBool;
+  }
 ): Record<string, unknown> => {
-  const clauses = { must: [], filter: [...filters], must_not: [] } as Record<string, unknown[]>;
+  const clauses = {
+    must: [...(context.must ?? [])],
+    filter: [...filters, ...(context.filter ?? [])],
+    must_not: [...(context.must_not ?? [])],
+  } as Record<string, unknown[]>;
   const visit = (node: unknown): unknown => {
     if (Array.isArray(node)) {
       return node.flatMap((item) =>
@@ -162,10 +179,13 @@ export const kibanaSearchBody = (
   {
     timeRange,
     filters = [],
+    context = {},
     runtimeMappings,
   }: {
     timeRange?: TimeRange | undefined;
     filters?: readonly Record<string, unknown>[];
+    /** The dashboard's context, for `%context%` and the `%dashboard_context-*%` placeholders. */
+    context?: DashboardBool;
     runtimeMappings?: Record<string, unknown> | undefined;
   }
 ): Record<string, unknown> => {
@@ -173,7 +193,11 @@ export const kibanaSearchBody = (
   if (unknown.length > 0) {
     throw new VegaSourceError(`unsupported Kibana data keys: ${unknown.join(', ')}`);
   }
-  const body = substituteDashboardContext(structuredClone(url.body ?? {}), { timeRange, filters });
+  const body = substituteDashboardContext(structuredClone(url.body ?? {}), {
+    timeRange,
+    filters,
+    context,
+  });
   const placeholder = PLACEHOLDER.exec(JSON.stringify(body));
   if (placeholder) {
     throw new VegaSourceError(`unsupported Kibana placeholder ${placeholder[0]} in the query body`);
@@ -200,7 +224,14 @@ export const kibanaSearchBody = (
             },
           ]
         : [];
-    body.query = { bool: { must: [], filter: [...range, ...filters], should: [], must_not: [] } };
+    body.query = {
+      bool: {
+        must: [...(context.must ?? [])],
+        filter: [...range, ...filters, ...(context.filter ?? [])],
+        should: [...(context.should ?? [])],
+        must_not: [...(context.must_not ?? [])],
+      },
+    };
   }
   if (runtimeMappings && Object.keys(runtimeMappings).length > 0) {
     body.runtime_mappings = {

@@ -9,7 +9,18 @@
 // bind every panel to an Isomer node or an outcome that says why not. The caller supplies the queries' transport,
 // so the lowering itself runs nothing.
 
+import type { EsQueryConfig } from '@kbn/es-query';
+import { getNamedParams } from '@kbn/esql-utils';
+
 import { bindChartsDashboard, type PanelOutcome } from './bind_charts';
+import {
+  buildDashboardContext,
+  type PinnedControl,
+  readPinnedControls,
+  readSavedContext,
+  type ResolveField,
+  withCurrentControls,
+} from './dashboard_context';
 import { type GridData, planDashboard, type TimeRange } from './dashboard';
 import type { ExecuteEsql, ExecuteSearch } from './esql_response';
 import { parseSavedObjectNdjson } from './kibana/from-saved-object/ndjson';
@@ -39,6 +50,8 @@ export interface ConvertedDashboard {
   timeRange?: TimeRange;
   /** Every panel, in the dashboard's order. */
   panels: ConvertedPanel[];
+  /** What of the dashboard's context couldn't be applied, such as a control whose field didn't resolve. */
+  diagnostics: string[];
 }
 
 export interface ConvertDashboardOptions {
@@ -49,8 +62,15 @@ export interface ConvertDashboardOptions {
   timeRange?: TimeRange;
   /** Pins relative times; defaults to now. */
   now?: number;
+  /** Runs an ES|QL query with the dashboard's DSL `filter` and named `params`, as Kibana sends them. */
   executeEsql: ExecuteEsql;
   search: ExecuteSearch;
+  /** The controls on screen, in the dashboard API's as-code shape; they replace the saved ones by id. */
+  controls?: readonly PinnedControl[];
+  /** Resolves a control's data view and field; without it, field controls apply nothing and say so. */
+  resolveField?: ResolveField;
+  /** `@kbn/es-query` settings from Kibana's advanced settings, such as `ignoreFilterIfFieldNotInIndex`. */
+  esQueryConfig?: Partial<EsQueryConfig>;
 }
 
 interface PanelJson {
@@ -73,6 +93,9 @@ export const convertDashboard = async ({
   now = Date.now(),
   executeEsql,
   search,
+  controls,
+  resolveField,
+  esQueryConfig,
 }: ConvertDashboardOptions): Promise<ConvertedDashboard> => {
   const objects = parseSavedObjectNdjson(ndjson) as unknown as Array<Record<string, any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
   const saved = objects.find(({ type, id }) => type === 'dashboard' && id === dashboardId);
@@ -80,11 +103,43 @@ export const convertDashboard = async ({
     throw new Error(`dashboard ${dashboardId} is not in the export`);
   }
   const panelJson = JSON.parse(saved.attributes.panelsJSON ?? '[]') as PanelJson[];
-  const planned = planDashboard(ndjson, dashboardId, { now, ...(timeRange ? { timeRange } : {}) });
+  // The dashboard's query, filters and controls go with each request as DSL, as Kibana sends them.
+  const plan = (range?: TimeRange) =>
+    planDashboard(ndjson, dashboardId, {
+      now,
+      dashboardContext: 'dsl',
+      ...(range ? { timeRange: range } : {}),
+    });
+  let planned = plan(timeRange);
+  const context = await buildDashboardContext({
+    saved: readSavedContext(saved.attributes, saved.references),
+    controls: withCurrentControls(readPinnedControls(saved.attributes, saved.references), controls),
+    ...(planned.timeRange ? { timeRange: planned.timeRange } : {}),
+    ...(resolveField ? { resolveField } : {}),
+    ...(esQueryConfig ? { config: esQueryConfig } : {}),
+  });
+  // A time slider narrows every panel's window, as Kibana's timeslice does.
+  if (context.timeslice) {
+    planned = plan(context.timeslice);
+  }
+  const filter = { bool: context.bool } as unknown as Record<string, unknown>;
+  const executeFor = (panel: (typeof planned.panels)[number]): ExecuteEsql => {
+    const window = panel.timeRange ?? planned.timeRange;
+    const ignoresGlobal = (panel.query.query as { ignoreGlobalFilters?: boolean })
+      .ignoreGlobalFilters;
+    return (esql, options) =>
+      executeEsql(esql, {
+        ...options,
+        ...(ignoresGlobal ? {} : { filter }),
+        params: getNamedParams(esql, window, context.variables as never) as Array<
+          Record<string, unknown>
+        >,
+      });
+  };
   const [charts, vega, maps] = await Promise.all([
-    bindChartsDashboard(planned, executeEsql),
-    bindVegaPanels(planned, search),
-    bindMapPanels(objects, dashboardId, planned.timeRange, search),
+    bindChartsDashboard(planned, executeEsql, executeFor),
+    bindVegaPanels(planned, search, context.bool),
+    bindMapPanels(objects, dashboardId, planned.timeRange, search, context.bool),
   ]);
 
   const nodes = new Map(
@@ -117,6 +172,7 @@ export const convertDashboard = async ({
     title: planned.title,
     ...(saved.attributes.description ? { description: saved.attributes.description } : {}),
     ...(planned.timeRange ? { timeRange: planned.timeRange } : {}),
+    diagnostics: context.diagnostics,
     panels: panelJson.map((panel, index): ConvertedPanel => {
       const { panelIndex: panelId, gridData, embeddableConfig } = panel;
       const authoredTitle = embeddableConfig?.title ?? panel.title;
