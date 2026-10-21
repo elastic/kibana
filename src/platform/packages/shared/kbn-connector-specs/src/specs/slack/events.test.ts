@@ -188,7 +188,7 @@ describe('Slack inbound events', () => {
     ],
     [
       'no oversized key',
-      { origin: { type: 'slack', external_conversation_id: 'x'.repeat(513) } },
+      { origin: { type: 'slack', external_conversation_id: 'x'.repeat(129) } },
       undefined,
     ],
   ])('emits a message with %s', async (_, relay, externalConversationId) => {

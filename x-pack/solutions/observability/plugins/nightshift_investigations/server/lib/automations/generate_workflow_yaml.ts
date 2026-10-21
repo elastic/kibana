@@ -28,9 +28,8 @@ const SLACK_MESSAGE_EXCLUSIONS = [
   '(not event.subtype:* or event.subtype:bot_message or event.subtype:file_share)',
 ];
 
-// The message's thread, keyed by the Relay's thread key so a later mention in it finds the
-// investigation. Only top-level messages trigger, so each message is its own thread. Until the
-// managed Slack thread workflow is retired, a plain reply in the thread also reruns it.
+// The message's thread, keyed by the Relay's thread key so a later reply or mention in it continues
+// the investigation. Only top-level messages trigger, so each message is its own thread.
 const SLACK_THREAD = {
   workspace: '{{ event.workspace }}',
   channel: '{{ event.channel }}',

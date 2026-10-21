@@ -121,6 +121,30 @@ const inputSchema = lazySchema(() =>
   })
 );
 
+const toSubjectId = ({
+  subject_type: subjectType,
+  subject_id: subjectId,
+  slack_thread: slackThread,
+  message,
+}: z.infer<typeof inputSchema>): string => {
+  if (subjectType === 'slack_thread') {
+    if (!slackThread) throw new Error('Slack thread investigations require slack_thread.');
+    if (subjectId) {
+      throw new Error('Slack thread investigations take their subject ID from slack_thread.');
+    }
+    if (!message?.trim()) throw new Error('Slack thread investigations require a message.');
+    return toSlackThreadSubjectId(slackThread);
+  }
+  if (subjectType === 'manual') {
+    if (!message?.trim()) throw new Error('Manual investigations require a message.');
+    return subjectId ?? DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID;
+  }
+  if (!subjectId) {
+    throw new Error('Alert and significant event investigations require a subject ID.');
+  }
+  return subjectId;
+};
+
 export const triggerInvestigationStepDefinition = (
   getInvestigationsClient: GetInvestigationsClient,
   getAutomationsSoClient: GetAutomationsSoClient
@@ -155,23 +179,7 @@ export const triggerInvestigationStepDefinition = (
       const { workflow } = context.contextManager.getContext();
       const spaceId = workflow.spaceId;
       const input = inputSchema.parse(context.input);
-      if (input.subject_type === 'manual') {
-        if (!input.message?.trim()) throw new Error('Manual investigations require a message.');
-      } else if (input.subject_type === 'slack_thread') {
-        if (!input.slack_thread)
-          throw new Error('Slack thread investigations require slack_thread.');
-        if (input.subject_id) {
-          throw new Error('Slack thread investigations take their subject ID from slack_thread.');
-        }
-        if (!input.message?.trim())
-          throw new Error('Slack thread investigations require a message.');
-      } else if (!input.subject_id) {
-        throw new Error('Alert and significant event investigations require a subject ID.');
-      }
-      const subjectId =
-        input.subject_type === 'slack_thread' && input.slack_thread
-          ? toSlackThreadSubjectId(input.slack_thread)
-          : input.subject_id ?? DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID;
+      const subjectId = toSubjectId(input);
       if (input.automation_id) {
         const soClient = getAutomationsSoClient(request, spaceId);
         const automation = await soClient.get<NightshiftAutomationAttributes>(

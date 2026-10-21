@@ -73,6 +73,26 @@ const truncateSummary = (summary: string | undefined): string | undefined =>
 const isPlaceholderManualSubject = ({ type, id }: Pick<InvestigationSubject, 'type' | 'id'>) =>
   type === 'manual' && id === DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID;
 
+const withSlackThread = ({
+  primary,
+  slackThread,
+  triggerType,
+}: {
+  primary: WorkflowSubjectInput;
+  slackThread?: SlackThreadReference;
+  triggerType: InvestigationTriggerType;
+}): { primary: WorkflowSubjectInput; thread: WorkflowSubjectInput[] } => {
+  if (!slackThread) {
+    return { primary, thread: [] };
+  }
+  const id = toSlackThreadSubjectId(slackThread);
+  const slack = { channel: slackThread.channel, thread_ts: slackThread.thread_ts };
+  if (primary.type === 'slack_thread' && primary.id === id) {
+    return { primary: { ...primary, slack }, thread: [] };
+  }
+  return { primary, thread: [{ type: 'slack_thread', id, triggerType, slack }] };
+};
+
 /**
  * The subjects one start records: the named subject and, for an alert investigation, one subject
  * per alert snapshot, each carrying its snapshot. A manual investigation without a subject id is
@@ -93,24 +113,17 @@ export const toStartSubjects = ({
   investigationId: string;
   slackThread?: SlackThreadReference;
 }): WorkflowSubjectInput[] => {
-  const primaryId = isPlaceholderManualSubject(subject) ? investigationId : subject.id;
   const summary = truncateSummary(subject.summary);
-  const threadId = slackThread ? toSlackThreadSubjectId(slackThread) : undefined;
-  const slack = slackThread
-    ? { channel: slackThread.channel, thread_ts: slackThread.thread_ts }
-    : undefined;
-  const isThreadSubject = subject.type === 'slack_thread' && primaryId === threadId;
-  const primary: WorkflowSubjectInput = {
-    type: subject.type,
-    id: primaryId,
+  const { primary, thread } = withSlackThread({
+    primary: {
+      type: subject.type,
+      id: isPlaceholderManualSubject(subject) ? investigationId : subject.id,
+      triggerType,
+      ...(summary ? { summary } : {}),
+    },
+    slackThread,
     triggerType,
-    ...(summary ? { summary } : {}),
-    ...(isThreadSubject ? { slack } : {}),
-  };
-  const thread: WorkflowSubjectInput[] =
-    threadId && !isThreadSubject
-      ? [{ type: 'slack_thread', id: threadId, triggerType, slack }]
-      : [];
+  });
 
   if (subject.type !== 'alert') {
     return [primary, ...thread];

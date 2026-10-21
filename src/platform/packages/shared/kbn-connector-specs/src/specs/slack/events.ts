@@ -37,7 +37,6 @@ import {
 
 const SLACK_EVENT_ID_MAX = 128;
 const SLACK_EVENT_NAME_MAX = 256;
-const SLACK_CONVERSATION_KEY_MAX = 512;
 const SLACK_EVENT_TEXT_MAX = 40_000;
 const SLACK_EVENT_EMAIL_MAX = 320;
 const SLACK_URL_VERIFICATION_CHALLENGE_MAX = 1024;
@@ -70,14 +69,9 @@ const SlackMessageEventSchema = lazySchema(() =>
       .describe(
         'Display name of the bot or app that sent the message, when Slack includes it. The sender can set it, so use appId to identify the app.'
       ),
-    externalConversationId: z
-      .string()
-      .min(1)
-      .max(SLACK_CONVERSATION_KEY_MAX)
-      .optional()
-      .describe(
-        "The Relay's opaque key for the message's thread, when the Relay forwarded the event. A mention of the app in that thread carries the same key."
-      ),
+    externalConversationId: optionalSlackId(
+      "The Relay's opaque key for the message's thread, when the Relay forwarded the event. A mention of the app in that thread carries the same key."
+    ),
   })
 );
 
@@ -226,16 +220,13 @@ const readAppId = (source: Record<string, unknown>): string | undefined =>
 const readBotName = (source: Record<string, unknown>): string | undefined =>
   readName(nestedRecord(source, 'bot_profile')?.name) ?? readName(source.username);
 
-/**
- * The Relay's thread key, sent next to the Slack body it forwards.
- */
 const relayConversationKey = (envelope: Record<string, unknown>): string | undefined => {
   const relay = nestedRecord(envelope, 'relay');
   const origin = relay ? nestedRecord(relay, 'origin') : undefined;
   if (origin?.type !== 'slack') {
     return undefined;
   }
-  return readBoundedString(origin.external_conversation_id, SLACK_CONVERSATION_KEY_MAX);
+  return readId(origin.external_conversation_id);
 };
 
 const parseMessage = (
