@@ -7,9 +7,9 @@
 
 import type { DashboardAttachmentData } from '@kbn/agent-builder-dashboards-common';
 import type { Logger } from '@kbn/logging';
-import type { ResolvePanelContent } from './operations/panels';
-import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from './operations/types';
-import type { OperationFailure } from './utils';
+import type { ResolvePanelContent } from './panels';
+import type { ResolveAttachmentPanel, ResolveControlFieldCapabilities } from './types';
+import type { DashboardFailure } from './utils';
 import type { PanelAuthoringNote } from './resolve_panel';
 import { discardInvalidChanges, type DashboardValidator } from './validate_dashboard';
 import {
@@ -53,7 +53,7 @@ export const executeDashboardOperations = async ({
   validator,
 }: ExecuteDashboardOperationsParams): Promise<{
   dashboardData: DashboardAttachmentData;
-  failures: OperationFailure[];
+  failures: DashboardFailure[];
   panelAuthoringNotes: PanelAuthoringNote[];
 }> => {
   const originalDashboardData = structuredClone(
@@ -64,7 +64,7 @@ export const executeDashboardOperations = async ({
     }
   );
   let nextDashboardData = structuredClone(originalDashboardData);
-  const failures: OperationFailure[] = [];
+  const failures: DashboardFailure[] = [];
   const panelAuthoringNotes: PanelAuthoringNote[] = [];
 
   const context = await prepareOperationExecution({
@@ -104,3 +104,23 @@ export const executeDashboardOperations = async ({
     ),
   };
 };
+
+const hasNonEmptyValue = (value: string | undefined): value is string =>
+  value !== undefined && value.trim().length > 0;
+
+const hasRequiredCreateTitleOperation = (operations: DashboardOperation[]): boolean =>
+  operations.some(
+    (operation) => operation.operation === 'set_metadata' && hasNonEmptyValue(operation.title)
+  );
+
+const hasBlankTitleUpdate = (operations: DashboardOperation[]): boolean =>
+  operations.some((operation) => {
+    if (operation.operation !== 'set_metadata') {
+      return false;
+    }
+
+    return operation.title !== undefined && !hasNonEmptyValue(operation.title);
+  });
+
+export const hasValidCreateMetadataOperations = (operations: DashboardOperation[]): boolean =>
+  hasRequiredCreateTitleOperation(operations) && !hasBlankTitleUpdate(operations);

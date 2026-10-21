@@ -24,20 +24,20 @@ export interface ExecutionsGroupBucket {
 export const getExecutionsGroupByLabel = (value: ExecutionsGroupBy): string => {
   switch (value) {
     case 'workflow':
-      return i18n.translate('workflowsManagement.executionsPage.table.groupBy.workflow', {
+      return i18n.translate('workflows.executionsPage.table.groupBy.workflow', {
         defaultMessage: 'Workflow',
       });
     case 'status':
-      return i18n.translate('workflowsManagement.executionsPage.table.groupBy.status', {
+      return i18n.translate('workflows.executionsPage.table.groupBy.status', {
         defaultMessage: 'Status',
       });
     case 'trigger':
-      return i18n.translate('workflowsManagement.executionsPage.table.groupBy.trigger', {
+      return i18n.translate('workflows.executionsPage.table.groupBy.trigger', {
         defaultMessage: 'Trigger',
       });
     case 'none':
     default:
-      return i18n.translate('workflowsManagement.executionsPage.table.groupBy.none', {
+      return i18n.translate('workflows.executionsPage.table.groupBy.none', {
         defaultMessage: 'None',
       });
   }
