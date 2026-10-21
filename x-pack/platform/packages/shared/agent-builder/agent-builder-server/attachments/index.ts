@@ -20,6 +20,7 @@ export type {
   SurfaceNode,
   AttachmentSurfaceCompositionContext,
   MarkdownNode,
+  ImageNode,
 } from './type_definition';
 export type {
   AttachmentBoundedTool,

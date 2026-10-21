@@ -15,7 +15,7 @@ const toSurfaceText = async (content: string) => {
     { request: httpServerMock.createKibanaRequest(), spaceId: 'default' }
   );
 
-  return composition?.body.map((node) => (node.type === 'markdown' ? node.text : undefined));
+  return composition?.body.map((node) => (node.type === 'markdown' ? node.text : node.type));
 };
 
 describe('text attachment type', () => {

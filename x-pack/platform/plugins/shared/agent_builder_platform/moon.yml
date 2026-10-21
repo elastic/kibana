@@ -55,6 +55,7 @@ dependsOn:
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/agent-builder-plugin'
   - '@kbn/files-plugin'
+  - '@kbn/isomer-plugin'
   - '@kbn/cloud-plugin'
 tags:
   - plugin
