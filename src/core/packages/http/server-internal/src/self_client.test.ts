@@ -25,6 +25,7 @@ import {
   SELF_CALL_RECURSION_ERROR,
   type SelfClientUiamAttestationGetter,
 } from './self_client';
+import { SelfHttpDispatcherProvider } from './self_client_dispatcher';
 import { SELF_CALL_AUTH_CHALLENGE_HEADER } from './self_client_observer';
 
 const originalFetch = global.fetch;
@@ -171,6 +172,37 @@ describe('InternalHttpSelfScopedClient', () => {
     await self.asScoped(createRequest()).fetch('/api/status', { target: 'local' });
     const request = (global.fetch as jest.Mock).mock.calls[0][0] as Request;
     expect(request.url).toBe('http://localhost:5601/base/s/my-space/api/status');
+  });
+
+  it('passes a headers timeout to the dispatcher', async () => {
+    const { self } = createClient();
+    await self.asScoped(createRequest()).fetch('/api/status', { headersTimeout: 60_000 });
+
+    const fetchInit = (global.fetch as jest.Mock).mock.calls[0][1];
+    expect(fetchInit.dispatcher).toBeDefined();
+    await self.close();
+  });
+
+  it('rejects a non-integer headers timeout', async () => {
+    const { self } = createClient();
+
+    await expect(
+      self.asScoped(createRequest()).fetch('/api/status', { headersTimeout: 1.5 })
+    ).rejects.toThrow(
+      'Invalid self HTTP options, headersTimeout must be a positive integer or zero.'
+    );
+    await self.close();
+  });
+
+  it('rejects a negative headers timeout', async () => {
+    const { self } = createClient();
+
+    await expect(
+      self.asScoped(createRequest()).fetch('/api/status', { headersTimeout: -1 })
+    ).rejects.toThrow(
+      'Invalid self HTTP options, headersTimeout must be a positive integer or zero.'
+    );
+    await self.close();
   });
 
   it('brackets an IPv6 listener address on the local target', async () => {
@@ -943,6 +975,22 @@ describe('InternalHttpSelfScopedClient', () => {
         expect.objectContaining({ path: '/api/status', responseHeaders: expect.any(Headers) }),
         expect.anything()
       );
+    });
+
+    it('re-resolves the dispatcher for the credential-refresh retry', async () => {
+      mockFetchResponses(unauthorizedResponse(), okResponse());
+      const getSpy = jest.spyOn(SelfHttpDispatcherProvider.prototype, 'get');
+      const { self } = createClient({
+        unauthorizedErrorHandler: retryHandler({ authorization: 'Bearer essu_refreshed' }),
+      });
+
+      await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_expired' }))
+        .fetch('/api/status');
+
+      // One resolution per attempt, so a TLS config reload between attempts is honored.
+      expect(getSpy).toHaveBeenCalledTimes(2);
+      getSpy.mockRestore();
     });
 
     it('re-derives the attestation for the refreshed credential', async () => {

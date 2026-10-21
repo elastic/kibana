@@ -358,7 +358,7 @@ exports[`pull_request fragments pull_request/base 1`] = `
             "no_cone": true,
             "paths": [
               "/.buildkite/",
-              "/.node-version",
+              "/.nvmrc",
               "/package.json",
               "/tsconfig.base.json",
               "/versions.json",
@@ -982,7 +982,7 @@ exports[`pull_request fragments pull_request/post_build 1`] = `
             "cleanup_sparse_state": true,
             "paths": [
               ".buildkite",
-              ".node-version",
+              ".nvmrc",
               "package.json",
               "tsconfig.base.json",
               "versions.json",
