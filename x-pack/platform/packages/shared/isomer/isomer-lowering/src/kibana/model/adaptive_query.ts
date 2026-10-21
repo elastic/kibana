@@ -41,6 +41,14 @@ export interface AdaptiveQuery {
    * Kibana and still applies.
    */
   ignoreGlobalFilters?: boolean;
+  /**
+   * A Discover session's own query and filters. The host applies them as DSL with the dashboard's context, as the
+   * saved search embeddable does, rather than the converter translating them to ES|QL.
+   */
+  searchSource?: {
+    query?: { query: string | Record<string, unknown>; language: string };
+    filters?: Array<Record<string, unknown>>;
+  };
 }
 
 export interface ExpectedColumn {

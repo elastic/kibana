@@ -11,6 +11,8 @@ import { join } from 'node:path';
 import { convertDashboard } from './convert';
 import { readPinnedControls } from './dashboard_context';
 import { parseSavedObjectNdjson } from './kibana/from-saved-object/ndjson';
+import { selectedAttributes } from './kibana/from-saved-object/dashboard/panels/saved_search';
+import { corpusObjects } from './corpus.test_helpers';
 import type { EsqlResponse } from './esql_response';
 
 const ndjson = readFileSync(join(__dirname, '../fixtures/web_logs_sample.ndjson'), 'utf8');
@@ -107,5 +109,47 @@ describe('convertDashboard with controls', () => {
     expect(searches.some((body) => JSON.stringify(body).includes(JSON.stringify(phrase)))).toBe(
       true
     );
+  });
+});
+
+describe('Discover sessions', () => {
+  const flights = readFileSync(join(__dirname, '../fixtures/flights_sample.ndjson'), 'utf8');
+  const FLIGHTS = '7adfa750-4c81-11e8-b3d7-01146121b73d';
+
+  it('runs the selected tab as Discover does: its data view, sort and sample size', async () => {
+    const queries: string[] = [];
+    const converted = await convertDashboard({
+      ndjson: flights,
+      dashboardId: FLIGHTS,
+      now: Date.parse('2026-10-20T00:00:00Z'),
+      executeEsql: async (esql) => {
+        queries.push(esql);
+        return {
+          columns: [
+            { name: 'timestamp', type: 'date' },
+            { name: 'Carrier', type: 'keyword' },
+            { name: 'OriginCityName', type: 'keyword' },
+          ],
+          values: [['2026-10-19T10:00:00.000Z', 'JetBeats', 'Chicago']],
+        };
+      },
+      search: async () => ({ hits: { hits: [] }, aggregations: {} }),
+    });
+    expect(queries).toContain(
+      'FROM kibana_sample_data_flights | SORT `timestamp` DESC | LIMIT 100'
+    );
+    const log = converted.panels.find(({ title }) => title === '[Flights] Flight Log');
+    expect(log).toMatchObject({ outcome: { status: 'converted', nodeType: 'table' } });
+    expect(converted.panels.map(({ title }) => title)).toContain('[Flights] Flight Log');
+  });
+
+  it('finds a search source for every saved search and Discover session in the corpus', () => {
+    const searches = corpusObjects(['search'], 'searchSourceJSON');
+    expect(searches.length).toBeGreaterThan(50);
+    const missing = searches.filter(
+      ({ attributes }) =>
+        !selectedAttributes(attributes as never, {}).kibanaSavedObjectMeta?.searchSourceJSON
+    );
+    expect(missing.map(({ file, id }) => `${file} ${id}`)).toEqual([]);
   });
 });

@@ -9,7 +9,7 @@
 // bind every panel to an Isomer node or an outcome that says why not. The caller supplies the queries' transport,
 // so the lowering itself runs nothing.
 
-import type { EsQueryConfig } from '@kbn/es-query';
+import { buildEsQuery, type EsQueryConfig, type Filter, type Query } from '@kbn/es-query';
 import { getNamedParams } from '@kbn/esql-utils';
 
 import { bindChartsDashboard, type PanelOutcome } from './bind_charts';
@@ -122,15 +122,36 @@ export const convertDashboard = async ({
   if (context.timeslice) {
     planned = plan(context.timeslice);
   }
-  const filter = { bool: context.bool } as unknown as Record<string, unknown>;
+  const dashboardFilter = { bool: context.bool } as unknown as Record<string, unknown>;
   const executeFor = (panel: (typeof planned.panels)[number]): ExecuteEsql => {
     const window = panel.timeRange ?? planned.timeRange;
-    const ignoresGlobal = (panel.query.query as { ignoreGlobalFilters?: boolean })
-      .ignoreGlobalFilters;
+    const { ignoreGlobalFilters, searchSource } = panel.query.query as {
+      ignoreGlobalFilters?: boolean;
+      searchSource?: { query?: Query; filters?: Filter[] };
+    };
+    // A Discover session's own query and filters apply with the dashboard's, as its embeddable runs them.
+    const own = searchSource
+      ? buildEsQuery(
+          undefined,
+          searchSource.query ? [searchSource.query] : [],
+          searchSource.filters ?? [],
+          esQueryConfig
+        )
+      : undefined;
+    const clauses = [
+      ...(ignoreGlobalFilters ? [] : [dashboardFilter]),
+      ...(own ? [own as unknown as Record<string, unknown>] : []),
+    ];
+    const filter =
+      clauses.length === 0
+        ? undefined
+        : clauses.length === 1
+        ? clauses[0]
+        : { bool: { filter: clauses } };
     return (esql, options) =>
       executeEsql(esql, {
         ...options,
-        ...(ignoresGlobal ? {} : { filter }),
+        ...(filter ? { filter } : {}),
         params: getNamedParams(esql, window, context.variables as never) as Array<
           Record<string, unknown>
         >,
@@ -180,10 +201,15 @@ export const convertDashboard = async ({
         embeddableConfig?.hidePanelTitles || !title ? {} : { title };
       const grid = { x: gridData.x, y: gridData.y, w: gridData.w, h: gridData.h };
       const fromBinding = bound.get(panelId);
-      if (fromBinding) {
-        return { ...fromBinding, ...shown(authoredTitle ?? fromBinding.title), grid };
-      }
       const item = gridItems[index]?.node;
+      if (fromBinding) {
+        // A saved search binds with an empty label; its title is the planned item's.
+        return {
+          ...fromBinding,
+          ...shown(authoredTitle ?? (fromBinding.title || item?.title)),
+          grid,
+        };
+      }
       if (item?.type === 'text' && item.format === 'markdown') {
         return {
           panelId,
