@@ -142,6 +142,7 @@ export {
   isAgentVersionLessThanFleetServer,
 } from './check_fleet_server_versions';
 
+export { getIncompatibleIntegrations } from './agent_version_compatibility';
 export {
   removeSOAttributes,
   getSortConfig,

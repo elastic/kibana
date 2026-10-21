@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import satisfies from 'semver/functions/satisfies';
-import validRange from 'semver/ranges/valid';
 import type { Agent, AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
-import { removeVersionSuffixFromPolicyId } from '@kbn/fleet-plugin/common';
+import {
+  getIncompatibleIntegrations,
+  removeVersionSuffixFromPolicyId,
+} from '@kbn/fleet-plugin/common';
 import type { ComponentAlertLevel, PackagePolicyUnitSummary } from '@kbn/fleet-plugin/public';
 import type { DeploymentMethod } from '../../aws_service_matrix';
 import type { ServiceChipState } from '../../onboarding_flow_context';
@@ -102,25 +103,6 @@ interface AssessAgentParams {
   units: PackagePolicyUnitSummary;
 }
 
-const getIncompatibleIntegrations = (
-  agentVersion: string | undefined,
-  conditions: AssessAgentParams['agentPolicy']['package_agent_version_conditions'],
-  packageName: string
-): string[] => {
-  if (!agentVersion) return [];
-  return (
-    (conditions ?? [])
-      .filter(({ name }) => name === packageName)
-      // `satisfies` returns false for a range it cannot parse, which would fail the agent for a
-      // condition nobody can act on, so only judge ranges that are valid.
-      .filter(
-        ({ version_condition: versionCondition }) =>
-          !!validRange(versionCondition) && !satisfies(agentVersion, versionCondition)
-      )
-      .map(({ title, name }) => title || name)
-  );
-};
-
 /**
  * Spots agents that report Healthy but cannot do the job: a version too old for the deployed
  * package (the same check Fleet uses for its "Incompatible integrations" warning), or an agent
@@ -135,11 +117,11 @@ export const assessAgent = ({
 }: AssessAgentParams): AgentAssessment => {
   const hasLiveUnits = units.total > units.stopped;
   const agentVersion = agent.local_metadata?.elastic?.agent?.version;
-  const integrations = getIncompatibleIntegrations(
+  const integrations = getIncompatibleIntegrations({
     agentVersion,
-    agentPolicy.package_agent_version_conditions,
-    packageName
-  );
+    conditions: agentPolicy.package_agent_version_conditions,
+    packageName,
+  }).map(({ title, name }) => title || name);
   if (agentVersion && integrations.length > 0) {
     return {
       alertLevel,
