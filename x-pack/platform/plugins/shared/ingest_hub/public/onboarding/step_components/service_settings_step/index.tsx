@@ -31,7 +31,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
-import { DEFAULT_NAMESPACE } from '../authenticate_and_deploy_step/deploy_group_helpers';
+import {
+  DEFAULT_NAMESPACE,
+  getSourcePolicyName,
+} from '../authenticate_and_deploy_step/deploy_group_helpers';
+import { supportsIntegrationSettings } from './integration_settings';
 import { getCategoryTitle } from '../../service_categories';
 import {
   AWS_REGION_OPTIONS,
@@ -64,6 +68,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     setDescription,
     descriptionError,
     hasPolicyServices,
+    bareNamePackage,
     instances,
     filteredInstances,
     incompleteInstances,
@@ -673,7 +678,19 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         <DuplicateServiceModal
           service={duplicateSourceService}
           sourceConfig={getServiceVars(duplicateSourceInstance.instanceId)}
-          suggestedName={buildDuplicateName(duplicateSourceService.name, allInstanceNames)}
+          suggestedName={buildDuplicateName(
+            // The service name is the duplicate's policy name, so it starts from the name of the
+            // policy the service is deployed into.
+            integrationName.trim() && supportsIntegrationSettings(duplicateSourceService)
+              ? getSourcePolicyName(
+                  integrationName,
+                  duplicateSourceService.packageName,
+                  getServiceVars(duplicateSourceInstance.instanceId).namespace,
+                  bareNamePackage
+                )
+              : duplicateSourceService.name,
+            allInstanceNames
+          )}
           existingNames={allInstanceNames}
           globalRegion={globalRegion}
           onAdd={handleDuplicateAdd}

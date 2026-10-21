@@ -7,7 +7,13 @@
 
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import type { ServiceInstance, ServiceVars } from '../service_settings_step/use_service_settings';
-import { DEFAULT_NAMESPACE, deriveGroupPolicyName, groupByPackage } from './deploy_group_helpers';
+import {
+  DEFAULT_NAMESPACE,
+  deriveGroupPolicyName,
+  getBareNamePackage,
+  getSourcePolicyName,
+  groupByPackage,
+} from './deploy_group_helpers';
 import { planPolicyUpdates } from './plan_policy_updates';
 
 const original = (id: string, packageName = 'aws') => ({
@@ -104,10 +110,14 @@ describe('groupByPackage — namespaces', () => {
 });
 
 describe('deriveGroupPolicyName', () => {
-  const duplicate = (id: string, name: string, packageName = 'aws') => ({
-    instance: { instanceId: id, serviceId: 'elb', name, isDuplicate: true } as ServiceInstance,
-    service: { id: 'elb', packageName } as AwsServiceMatrixEntry,
-  });
+  // Duplicate instance ids are `<serviceId>__dup-<n>`.
+  const duplicate = (id: string, name: string, packageName = 'aws') => {
+    const serviceId = id.split('__dup-')[0];
+    return {
+      instance: { instanceId: id, serviceId, name, isDuplicate: true } as ServiceInstance,
+      service: { id: serviceId, packageName } as AwsServiceMatrixEntry,
+    };
+  };
 
   const groupsFor = (
     originals: ReturnType<typeof original>[],
@@ -146,9 +156,11 @@ describe('deriveGroupPolicyName', () => {
     ]);
   });
 
-  it('names a duplicate after the service name typed in the duplicate modal', () => {
-    const groups = groupsFor([original('elb')], {}, [duplicate('elb__dup-1', 'ALB prod/eu')]);
-    expect(deriveGroupPolicyName(groups[1], 'my-aws')).toBe('ALB prod_eu');
+  it('keeps the service name chosen in the duplicate modal as the policy name', () => {
+    const groups = groupsFor([original('elb')], {}, [
+      duplicate('elb__dup-1', ' my-aws [Duplicate] '),
+    ]);
+    expect(deriveGroupPolicyName(groups[1], 'other-name')).toBe('my-aws [Duplicate]');
   });
 
   it('keeps names unique when sanitizing makes namespaces equal', () => {
@@ -161,7 +173,91 @@ describe('deriveGroupPolicyName', () => {
   });
 
   it('truncates to the Fleet name limit', () => {
-    const [group] = groupsFor([original('bedrock', 'aws_bedrock')]);
-    expect(deriveGroupPolicyName(group, 'x'.repeat(250))!.length).toBe(255);
+    const groups = groupsFor([original('elb'), original('bedrock', 'aws_bedrock')]);
+    expect(deriveGroupPolicyName(groups[1], 'x'.repeat(250))!.length).toBe(255);
+  });
+
+  describe('when the deploy has a single package', () => {
+    it('gives a lone non-aws package the name exactly as entered', () => {
+      const [group] = groupsFor([original('bedrock', 'aws_bedrock')]);
+      expect(deriveGroupPolicyName(group, 'aws-1-aws_bedrock')).toBe('aws-1-aws_bedrock');
+    });
+
+    it('adds only the namespace for another namespace of that package', () => {
+      const groups = groupsFor([original('a', 'aws_bedrock'), original('b', 'aws_bedrock')], {
+        b: withNamespace('prod'),
+      });
+      expect(groups.map((g) => deriveGroupPolicyName(g, 'aws-1-aws_bedrock'))).toEqual([
+        'aws-1-aws_bedrock',
+        'aws-1-aws_bedrock-prod',
+      ]);
+    });
+
+    it('names a duplicate by its modal service name as before', () => {
+      const groups = groupsFor([original('elb', 'aws_bedrock')], {}, [
+        duplicate('elb__dup-1', 'aws-1-aws_bedrock [Duplicate]', 'aws_bedrock'),
+      ]);
+      expect(deriveGroupPolicyName(groups[1], 'aws-1-aws_bedrock')).toBe(
+        'aws-1-aws_bedrock [Duplicate]'
+      );
+    });
+  });
+
+  it('suffixes every package when several non-aws packages are selected', () => {
+    const groups = groupsFor([
+      original('bedrock', 'aws_bedrock'),
+      original('hub', 'aws_securityhub'),
+    ]);
+    expect(groups.map((g) => deriveGroupPolicyName(g, 'my-aws'))).toEqual([
+      'my-aws-aws_bedrock',
+      'my-aws-aws_securityhub',
+    ]);
+  });
+});
+
+describe('getBareNamePackage', () => {
+  it('is the only package when there is just one', () => {
+    expect(getBareNamePackage(['aws_bedrock', 'aws_bedrock'])).toBe('aws_bedrock');
+    expect(getBareNamePackage(['aws'])).toBe('aws');
+  });
+
+  it('is the main package otherwise', () => {
+    expect(getBareNamePackage(['aws_bedrock', 'aws'])).toBe('aws');
+    expect(getBareNamePackage(['aws_bedrock', 'aws_securityhub'])).toBe('aws');
+    expect(getBareNamePackage([])).toBe('aws');
+  });
+});
+
+describe('getSourcePolicyName', () => {
+  it('is the name as entered for the main package in the default namespace', () => {
+    expect(getSourcePolicyName(' my-aws ', 'aws')).toBe('my-aws');
+    expect(getSourcePolicyName('my-aws', 'aws', 'default')).toBe('my-aws');
+  });
+
+  it('adds the package of other packages and the namespace', () => {
+    expect(getSourcePolicyName('my-aws', 'aws', 'prod')).toBe('my-aws-prod');
+    expect(getSourcePolicyName('my-aws', 'aws_bedrock')).toBe('my-aws-aws_bedrock');
+    expect(getSourcePolicyName('my-aws', 'aws_bedrock', 'prod')).toBe('my-aws-aws_bedrock-prod');
+  });
+
+  it('leaves out the package of the bare-name package', () => {
+    expect(getSourcePolicyName('aws-1-aws_bedrock', 'aws_bedrock', undefined, 'aws_bedrock')).toBe(
+      'aws-1-aws_bedrock'
+    );
+    expect(getSourcePolicyName('aws-1-aws_bedrock', 'aws_bedrock', 'prod', 'aws_bedrock')).toBe(
+      'aws-1-aws_bedrock-prod'
+    );
+  });
+
+  it('matches the name the deploy gives the original instance', () => {
+    const [, prodGroup] = groupByPackage(
+      [original('elb'), original('s3')],
+      [],
+      { s3: withNamespace('prod') },
+      DEFAULT_NAMESPACE
+    );
+    expect(deriveGroupPolicyName(prodGroup, 'my-aws')).toBe(
+      getSourcePolicyName('my-aws', 'aws', 'prod')
+    );
   });
 });

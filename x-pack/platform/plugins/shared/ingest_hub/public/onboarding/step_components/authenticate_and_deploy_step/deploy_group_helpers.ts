@@ -54,13 +54,41 @@ export const AWS_MAIN_PACKAGE_NAME = 'aws';
 const MAX_POLICY_NAME_LENGTH = 255;
 
 /**
+ * The package whose policy keeps the integration name as entered: the only package when a deploy
+ * has just one, otherwise the main `aws` package. With only Bedrock selected the field then is
+ * the exact name of the Bedrock policy.
+ */
+export function getBareNamePackage(packageNames: Iterable<string>): string {
+  const unique = new Set(packageNames);
+  return unique.size === 1 ? [...unique][0] : AWS_MAIN_PACKAGE_NAME;
+}
+
+/**
+ * Policy name for a stem (`<package>` or `<package>__<namespace>`): the bare-name package keeps
+ * the name as entered and the others get `-<package>`, so one deploy's policies never collide.
+ */
+function policyNameFromStem(
+  base: string,
+  stem: string,
+  packageName: string,
+  bareNamePackage: string
+): string {
+  const suffix =
+    packageName === bareNamePackage
+      ? stem.slice(packageName.length).replace(/^__/, '')
+      : stem.replace('__', '-');
+  return suffix ? `${base}-${suffix}` : base;
+}
+
+/**
  * Package policy name for a deploy group, derived from the integration name the user entered.
  *
- * - Bundled originals of the main `aws` package keep the name as entered; a non-default
- *   namespace adds `-<namespace>`.
+ * - Bundled originals of the bare-name package (`aws`, or the only package of the deploy) keep the
+ *   name as entered; a non-default namespace adds `-<namespace>`.
  * - Bundled originals of any other package get `-<package>` (and `-<namespace>`), so the policies
  *   of one deploy never collide.
- * - A duplicate instance is named after the service name the user typed in the duplicate modal.
+ * - A duplicate keeps the service name the user chose in the duplicate modal, which is prefilled
+ *   with `<name of the policy it was copied from> [Duplicate]` (see `getSourcePolicyName`).
  *
  * Returns undefined without an integration name, so callers keep their previous naming.
  */
@@ -71,19 +99,38 @@ export function deriveGroupPolicyName(
   const base = integrationName?.trim();
   if (!base) return undefined;
 
+  const { packageName } = group.members[0].service;
   if (group.isDuplicateGroup) {
-    const { instance } = group.members[0];
-    return instance.name.replace(/[^a-zA-Z0-9_\-. ]/g, '_').slice(0, MAX_POLICY_NAME_LENGTH);
+    const name = group.members[0].instance.name.trim();
+    return name ? name.slice(0, MAX_POLICY_NAME_LENGTH) : undefined;
   }
 
-  // The stem is `<package>` or `<package>__<namespace>`, made unique within one deploy.
-  const stem = buildGroupPolicyNameStem(group);
-  const isMainPackage = group.members[0].service.packageName === AWS_MAIN_PACKAGE_NAME;
-  const suffix = isMainPackage
-    ? stem.slice(AWS_MAIN_PACKAGE_NAME.length).replace(/^__/, '')
-    : stem.replace('__', '-');
-  const name = suffix ? `${base}-${suffix}` : base;
-  return name.slice(0, MAX_POLICY_NAME_LENGTH);
+  return policyNameFromStem(
+    base,
+    buildGroupPolicyNameStem(group),
+    packageName,
+    group.bareNamePackage ?? AWS_MAIN_PACKAGE_NAME
+  ).slice(0, MAX_POLICY_NAME_LENGTH);
+}
+
+/**
+ * The policy name an original instance of a service gets, from the integration name and the
+ * instance's namespace. The duplicate modal uses it to suggest a duplicate's name.
+ */
+export function getSourcePolicyName(
+  integrationName: string,
+  packageName: string,
+  namespace?: string,
+  bareNamePackage: string = AWS_MAIN_PACKAGE_NAME
+): string {
+  const groupId =
+    namespace && namespace !== DEFAULT_NAMESPACE ? `${packageName}__${namespace}` : packageName;
+  return policyNameFromStem(
+    integrationName.trim(),
+    sanitizeGroupId(groupId),
+    packageName,
+    bareNamePackage
+  ).slice(0, MAX_POLICY_NAME_LENGTH);
 }
 
 function instanceNamespace(
@@ -136,6 +183,9 @@ export function groupByPackage(
   }
 
   const groups: DeployGroup[] = [];
+  const bareNamePackage = getBareNamePackage(
+    [...originals, ...duplicates].map(({ service }) => service.packageName)
+  );
   // Sanitizing is lossy (`prod.eu` and `prod_eu` both become `prod_eu`) and groups deploy in the
   // same millisecond, so a counter keeps the name stems of one deploy distinct.
   const usedStems = new Set<string>();
@@ -151,8 +201,10 @@ export function groupByPackage(
       isDuplicateGroup: false,
       namespace,
       policyNameStem,
+      bareNamePackage,
     });
   }
+
   for (const member of duplicates) {
     groups.push({
       groupId: member.instance.instanceId,
@@ -160,6 +212,7 @@ export function groupByPackage(
       members: [member],
       isDuplicateGroup: true,
       namespace: resolveNamespace(member.instance),
+      bareNamePackage,
     });
   }
 

@@ -46,6 +46,11 @@ export interface DeployGroup {
   namespace: string;
   /** Sanitized policy name prefix for bundled originals, unique within one deploy. */
   policyNameStem?: string;
+  /**
+   * The package whose policy keeps the integration name as entered. The main `aws` package, or
+   * the only package of the deploy when there is just one (the name already tells which).
+   */
+  bareNamePackage?: string;
 }
 
 export interface GroupDeployOutcome {

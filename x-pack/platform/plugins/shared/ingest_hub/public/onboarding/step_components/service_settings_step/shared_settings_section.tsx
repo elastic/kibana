@@ -56,11 +56,10 @@ export function SharedSettingsSection({
 
   const withLockTooltip = (field: React.ReactElement) =>
     isLocked ? (
-      // span needed: a disabled input has pointer-events:none, so the span receives the hover.
-      <EuiToolTip content={LOCKED_TOOLTIP}>
-        <span tabIndex={0} style={{ display: 'block' }}>
-          {field}
-        </span>
+      // block display keeps the full-width field full width; the anchor takes the hover because a
+      // disabled input has pointer-events:none.
+      <EuiToolTip content={LOCKED_TOOLTIP} display="block" anchorProps={{ tabIndex: 0 }}>
+        {field}
       </EuiToolTip>
     ) : (
       field
@@ -87,10 +86,6 @@ export function SharedSettingsSection({
         fullWidth
         label={i18n.translate('xpack.ingestHub.sharedSettings.name.label', {
           defaultMessage: 'Integration name',
-        })}
-        helpText={i18n.translate('xpack.ingestHub.sharedSettings.name.helpText', {
-          defaultMessage: 'Integrations from other packages get a suffix, for example {example}.',
-          values: { example: `${integrationName.trim() || 'aws-1'}-aws_bedrock` },
         })}
         isInvalid={nameTouched && !!integrationNameError}
         error={integrationNameError}

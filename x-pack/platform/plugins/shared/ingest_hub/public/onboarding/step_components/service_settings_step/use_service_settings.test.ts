@@ -612,6 +612,53 @@ describe('useServiceSettings — integration name and description', () => {
     );
   });
 
+  it('prefills a lone non-aws package with its package in the name', async () => {
+    mockServices([
+      makeEntry('svc_b', {
+        packageName: 'aws_bedrock',
+        deploymentMethods: policyService.deploymentMethods,
+      }),
+    ]);
+    mockSendGetPackagePolicies.mockResolvedValue({ data: { items: [{ name: 'aws-1' }] } });
+
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-2-aws_bedrock'));
+    expect(result.current.bareNamePackage).toBe('aws_bedrock');
+  });
+
+  it('follows the selection while the name is untouched', async () => {
+    const bedrock = makeEntry('svc_b', {
+      packageName: 'aws_bedrock',
+      deploymentMethods: policyService.deploymentMethods,
+    });
+    mockServices([bedrock]);
+    const { result, rerender } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1-aws_bedrock'));
+
+    mockServices([bedrock, policyService]);
+    rerender();
+
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+    expect(result.current.bareNamePackage).toBe('aws');
+  });
+
+  it('keeps a name the user edited when the selection changes', async () => {
+    const bedrock = makeEntry('svc_b', {
+      packageName: 'aws_bedrock',
+      deploymentMethods: policyService.deploymentMethods,
+    });
+    mockServices([bedrock]);
+    const { result, rerender } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1-aws_bedrock'));
+    act(() => result.current.setIntegrationName('my-bedrock'));
+
+    mockServices([bedrock, policyService]);
+    rerender();
+
+    expect(result.current.integrationName).toBe('my-bedrock');
+  });
+
   it('falls back to the first name when the policies cannot be listed', async () => {
     mockServices([policyService]);
     mockSendGetPackagePolicies.mockRejectedValue(new Error('network error'));

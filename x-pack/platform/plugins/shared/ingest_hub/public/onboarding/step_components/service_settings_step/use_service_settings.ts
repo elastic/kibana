@@ -26,7 +26,10 @@ import {
   toTyped,
 } from './field_config';
 import type { SignalFilter } from '../services_step/use_services_step';
-import { AWS_MAIN_PACKAGE_NAME } from '../authenticate_and_deploy_step/deploy_group_helpers';
+import {
+  AWS_MAIN_PACKAGE_NAME,
+  getBareNamePackage,
+} from '../authenticate_and_deploy_step/deploy_group_helpers';
 import {
   getDescriptionError,
   getIntegrationNameError,
@@ -75,6 +78,10 @@ export interface ServiceSettingsPersistedState {
    * the default is prefilled or the user types one.
    */
   integrationName?: string;
+  /** The Fleet-style default (`aws-<n>`) the name was prefilled from. Absent once the name came from a saved onboarding. */
+  defaultNameBase?: string;
+  /** The last name the prefill generated. While the name still equals it, it follows the selection. */
+  autoName?: string;
   description?: string;
   /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
@@ -285,10 +292,30 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [instances, awsServicesMap]
   );
 
+  // The package whose policy keeps the integration name as entered (the only package selected, or
+  // the main one), so the default name already carries the package when that is not `aws`.
+  const bareNamePackage = useMemo(
+    () =>
+      getBareNamePackage(
+        instances.flatMap((inst) => {
+          const service = awsServicesMap?.get(inst.serviceId);
+          return service && supportsIntegrationSettings(service) ? [service.packageName] : [];
+        })
+      ),
+    [instances, awsServicesMap]
+  );
+  const toAutoName = useCallback(
+    (base: string) =>
+      bareNamePackage === AWS_MAIN_PACKAGE_NAME ? base : `${base}-${bareNamePackage}`,
+    [bareNamePackage]
+  );
+
   // Prefill the Fleet-style default (`aws-<n>`) once, when no name exists yet. The fetch can
   // outlive other edits, so the write is based on the latest persisted state.
   const persistedRef = useRef(persisted);
   persistedRef.current = persisted;
+  const toAutoNameRef = useRef(toAutoName);
+  toAutoNameRef.current = toAutoName;
   const isPrefilling = useRef(false);
   useEffect(() => {
     if (!hasPolicyServices || persisted?.integrationName !== undefined || isPrefilling.current) {
@@ -297,14 +324,14 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     isPrefilling.current = true;
     let cancelled = false;
     (async () => {
-      let defaultName = `${AWS_MAIN_PACKAGE_NAME}-1`;
+      let base = `${AWS_MAIN_PACKAGE_NAME}-1`;
       try {
         const { data } = await sendGetPackagePolicies({
           perPage: SO_SEARCH_LIMIT,
           page: 1,
           kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${AWS_MAIN_PACKAGE_NAME}`,
         });
-        defaultName = getMaxPackageName(AWS_MAIN_PACKAGE_NAME, data?.items);
+        base = getMaxPackageName(AWS_MAIN_PACKAGE_NAME, data?.items);
       } catch {
         // Best-effort: fall back to the first number, the user can still edit the name.
       }
@@ -313,9 +340,12 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         isPrefilling.current = false;
         return;
       }
+      const name = toAutoNameRef.current(base);
       setPersisted({
         ...(latest ?? { globalRegion: '', serviceVars: {} }),
-        integrationName: defaultName,
+        integrationName: name,
+        defaultNameBase: base,
+        autoName: name,
       });
       isPrefilling.current = false;
     })();
@@ -324,6 +354,20 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       isPrefilling.current = false;
     };
   }, [hasPolicyServices, persisted?.integrationName, setPersisted]);
+
+  // A name nobody edited follows the selection: Bedrock alone gives `aws-1-aws_bedrock`, adding an
+  // `aws` service back gives `aws-1`.
+  useEffect(() => {
+    const { defaultNameBase, autoName } = persisted ?? {};
+    if (!defaultNameBase || !autoName || persisted?.integrationName !== autoName) return;
+    const next = toAutoName(defaultNameBase);
+    if (next === autoName) return;
+    setPersisted({
+      ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+      integrationName: next,
+      autoName: next,
+    });
+  }, [persisted, toAutoName, setPersisted]);
 
   // Lazy prune: drop serviceVars entries for instances no longer present (deselected in Step 1).
   // Runs on mount and whenever the instance list changes. Writing only when stale keys exist
@@ -512,6 +556,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     setDescription,
     descriptionError,
     hasPolicyServices,
+    bareNamePackage,
     instances,
     filteredInstances,
     incompleteInstances,
