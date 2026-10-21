@@ -50,6 +50,10 @@ export const AttachmentEvent: React.FC<AttachmentEventProps> = ({
     min-inline-size: ${euiTheme.size.l};
   `;
 
+  const contentColumnStyles = css`
+    min-inline-size: 0;
+  `;
+
   // Both are guaranteed by the resolve step and the conversation route; the checks only narrow the types.
   if (!conversationId || !inlineAttachment) {
     return null;
@@ -63,7 +67,7 @@ export const AttachmentEvent: React.FC<AttachmentEventProps> = ({
       data-test-subj="agentBuilderTimelineAttachmentEvent"
     >
       <EuiFlexItem grow={false} css={avatarColumnStyles} />
-      <EuiFlexItem grow={true}>
+      <EuiFlexItem grow={true} css={contentColumnStyles}>
         <InlineAttachmentWithActions
           attachment={inlineAttachment}
           conversationId={conversationId}
