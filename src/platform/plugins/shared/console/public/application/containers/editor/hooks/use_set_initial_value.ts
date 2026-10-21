@@ -57,6 +57,16 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
   const editorDispatch = useEditorActionContext();
 
   useEffect(() => {
+    // Only set the value in the editor if an initial value hasn't been set yet
+    if (!isInitialValueSet.current) {
+      // Only set to default input value if the localstorage value is undefined
+      setValue(localStorageValue ?? defaultEditorContent ?? DEFAULT_INPUT_VALUE);
+      isInitialValueSet.current = true;
+    }
+  }, [localStorageValue, setValue, defaultEditorContent]);
+
+  // Declared after the initial-value effect, and apart from it so an autosave can't cancel a load.
+  useEffect(() => {
     const ALLOWED_PATHS = ['/guide/', '/docs/'];
 
     const loadBufferFromRemote = async (url: string) => {
@@ -131,18 +141,11 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     }, 200);
 
     window.addEventListener('hashchange', loadFromUrl);
-
-    // Only set the value in the editor if an initial value hasn't been set yet
-    if (!isInitialValueSet.current) {
-      // Only set to default input value if the localstorage value is undefined
-      setValue(localStorageValue ?? defaultEditorContent ?? DEFAULT_INPUT_VALUE);
-      loadFromUrl();
-      isInitialValueSet.current = true;
-    }
+    loadFromUrl();
 
     return () => {
       window.removeEventListener('hashchange', loadFromUrl);
       loadFromUrl.cancel();
     };
-  }, [localStorageValue, setValue, toasts, editorDispatch, defaultEditorContent]);
+  }, [toasts, editorDispatch]);
 };

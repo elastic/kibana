@@ -326,6 +326,56 @@ describe('useSetInitialValue', () => {
     expect(removeLoadFromParameter).not.toHaveBeenCalled();
   });
 
+  it('should keep a pending deep link load when the editor content is autosaved', async () => {
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: {
+        hash: '#/console/shell',
+      },
+    });
+    (decompressFromEncodedURIComponent as jest.Mock).mockReturnValue(null);
+
+    const { rerender } = renderHook(
+      ({ localStorageValue }: { localStorageValue: string }) =>
+        useSetInitialValue({
+          localStorageValue,
+          setValue: setValueMock,
+          toasts: toastsMock,
+        }),
+      { initialProps: { localStorageValue: 'initial value' } }
+    );
+
+    // Let the one-shot load on mount settle before the deep link arrives.
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    });
+
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: {
+        hash: '#/console/shell?load_from=data:text/plain,invalid-data',
+      },
+    });
+
+    // Trigger hashchange event
+    await act(async () => {
+      const event = new Event('hashchange');
+      window.dispatchEvent(event);
+    });
+
+    // The autosave of the previous edit lands inside the 200ms debounce window.
+    rerender({ localStorageValue: 'autosaved value' });
+
+    await act(async () => {
+      // Wait for debounced function to execute
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    });
+
+    expect(addWarningMock).toHaveBeenCalledWith(
+      'Unable to load data from the load_from query parameter in the URL'
+    );
+  });
+
   it('should leave the URL alone when there is no load_from param', async () => {
     Object.defineProperty(window, 'location', {
       writable: true,
