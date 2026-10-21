@@ -7,11 +7,7 @@
 
 import { z as z4 } from '@kbn/zod/v4';
 import type { RegisteredSpec } from './get_registered_spec';
-import {
-  createActionType,
-  createExperimentalEarsSpec,
-  createSpec,
-} from '../specs_client.test_utils';
+import { createActionType, createExperimentalEarsSpec, createSpec } from '../test_utils';
 import {
   getAuthTypeIds,
   isEarsExperimentalSpec,
