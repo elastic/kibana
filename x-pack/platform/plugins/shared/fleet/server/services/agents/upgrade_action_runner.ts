@@ -124,7 +124,9 @@ export async function upgradeBatch(
       }
       // force skips the hosted validation, but never the agentless one
       if (isAgentlessAgent(restrictions, agent)) {
-        throw new AgentlessAgentRestrictionError(`Cannot upgrade managed integration agent ${agent.id}`);
+        throw new AgentlessAgentRestrictionError(
+          `Cannot upgrade managed integration agent ${agent.id}`
+        );
       }
       return agent;
     })
