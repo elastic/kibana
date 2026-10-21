@@ -1,5 +1,5 @@
 {
-  "sha1": "96ad7b7f126179ca83bc1e3ee44823ed85df74df",
+  "sha1": "265970b83d8d01bc6e604a9919550eb51ba39bb0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -142,6 +142,72 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/install_rule_template.spec.ts",
         "line": 70,
         "column": 56
+      }
+    },
+    {
+      "id": "b470088e3702fe3-1d2597bde6b013c",
+      "title": "Rule library - install a rule template the rule count links to the rules created from the template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/install_rule_template.spec.ts",
+        "line": 135,
+        "column": 13
+      }
+    },
+    {
+      "id": "c06941229ef6106-0ef4b960ce20b01",
+      "title": "Rule attachment canvas in Agent Builder renders every canvas section for a proposed rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_attachment_canvas.spec.ts",
+        "line": 184,
+        "column": 10
+      }
+    },
+    {
+      "id": "c06941229ef6106-b0dfc3e0b40706b",
+      "title": "Rule attachment canvas in Agent Builder Create rule persists the rule and switches to persisted actions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_attachment_canvas.spec.ts",
+        "line": 191,
+        "column": 7
+      }
+    },
+    {
+      "id": "c06941229ef6106-de6b2a2f1de3f9c",
+      "title": "Rule attachment canvas in Agent Builder View in Rules navigates to the persisted rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_attachment_canvas.spec.ts",
+        "line": 215,
+        "column": 20
+      }
+    },
+    {
+      "id": "c06941229ef6106-ea6c6a959b8bc0e",
+      "title": "Rule attachment canvas in Agent Builder closes and reopens the canvas without losing its content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_attachment_canvas.spec.ts",
+        "line": 229,
+        "column": 20
       }
     },
     {
