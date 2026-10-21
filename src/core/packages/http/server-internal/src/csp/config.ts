@@ -111,6 +111,18 @@ const configSchema = schema.object(
           defaultValue: [],
           validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
         }),
+        img_src: schema.arrayOf(schema.string(), {
+          defaultValue: [],
+          validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
+        }),
+        font_src: schema.arrayOf(schema.string(), {
+          defaultValue: [],
+          validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
+        }),
+        media_src: schema.arrayOf(schema.string(), {
+          defaultValue: [],
+          validate: getDirectiveValidator({ allowNone: false, allowNonce: false }),
+        }),
       })
     ),
     strict: schema.boolean({ defaultValue: true }),

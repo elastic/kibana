@@ -298,6 +298,33 @@ groups:
           - "ech: ga"
           - "self: ga"
 
+      - setting: csp.report_only.img_src
+        description: |
+          Add sources for the [Content Security Policy `img-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/img-src) in reporting mode.
+        datatype: array of strings
+        applies_to:
+          - "stack: ga 9.6"
+          - "ech: ga"
+          - "self: ga"
+
+      - setting: csp.report_only.font_src
+        description: |
+          Add sources for the [Content Security Policy `font-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/font-src) in reporting mode.
+        datatype: array of strings
+        applies_to:
+          - "stack: ga 9.6"
+          - "ech: ga"
+          - "self: ga"
+
+      - setting: csp.report_only.media_src
+        description: |
+          Add sources for the [Content Security Policy `media-src` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Content-Security-Policy/media-src) in reporting mode.
+        datatype: array of strings
+        applies_to:
+          - "stack: ga 9.6"
+          - "ech: ga"
+          - "self: ga"
+
       - setting: csp.report_uri
         description: |
           Add sources for the [Content Security Policy `report-uri` directive](https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri).

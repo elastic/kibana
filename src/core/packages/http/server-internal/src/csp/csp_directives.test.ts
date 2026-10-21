@@ -207,6 +207,64 @@ describe('CspDirectives', () => {
       });
     });
 
+    describe.each([
+      { key: 'img_src', directive: 'img-src', defaultValue: 'tiles.maps.elastic.co' },
+      { key: 'font_src', directive: 'font-src', defaultValue: "'self'" },
+    ] as const)('report_only.$key', ({ key, directive, defaultValue }) => {
+      it(`adds values only to the report-only ${directive} directive, not the enforced one`, () => {
+        const config = cspConfig.schema.validate({
+          report_only: { [key]: ['https://report-only.test'] },
+        });
+        const { enforceHeader, reportOnlyHeader } =
+          CspDirectives.fromConfig(config).getCspHeadersByDisposition();
+
+        expect(enforceHeader).not.toContain(directive);
+        expect(enforceHeader).not.toContain('https://report-only.test');
+        expect(reportOnlyHeader).toContain('https://report-only.test');
+      });
+
+      it(`appends to the existing report-only ${directive} defaults`, () => {
+        const config = cspConfig.schema.validate({
+          report_only: { [key]: ['https://report-only.test'] },
+        });
+        const { reportOnlyHeader } = CspDirectives.fromConfig(config).getCspHeadersByDisposition();
+
+        expect(reportOnlyHeader).toContain(defaultValue);
+        expect(reportOnlyHeader).toContain('https://report-only.test');
+      });
+
+      it("keeps default-src 'none' in the report-only header", () => {
+        const config = cspConfig.schema.validate({
+          report_only: { [key]: ['https://report-only.test'] },
+        });
+        const { reportOnlyHeader } = CspDirectives.fromConfig(config).getCspHeadersByDisposition();
+
+        expect(reportOnlyHeader).toContain("default-src 'report-sample' 'none'");
+      });
+    });
+
+    describe('report_only.media_src', () => {
+      it('adds values only to the report-only media-src directive, not the enforced one', () => {
+        const config = cspConfig.schema.validate({
+          report_only: { media_src: ["'self'", 'https://report-only.test'] },
+        });
+        const { enforceHeader, reportOnlyHeader } =
+          CspDirectives.fromConfig(config).getCspHeadersByDisposition();
+
+        expect(enforceHeader).not.toContain('media-src');
+        expect(reportOnlyHeader).toContain("media-src 'self' https://report-only.test");
+      });
+
+      it("keeps default-src 'none' in the report-only header", () => {
+        const config = cspConfig.schema.validate({
+          report_only: { media_src: ['https://report-only.test'] },
+        });
+        const { reportOnlyHeader } = CspDirectives.fromConfig(config).getCspHeadersByDisposition();
+
+        expect(reportOnlyHeader).toContain("default-src 'report-sample' 'none'");
+      });
+    });
+
     it('merges additional CSP configs as expected', () => {
       const config = cspConfig.schema.validate({
         connect_src: ['*.foo.bar'], // should de-dupe these
