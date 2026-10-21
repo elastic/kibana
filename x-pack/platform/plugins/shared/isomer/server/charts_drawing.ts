@@ -18,6 +18,7 @@ import {
   type PrepareChartsOptions,
 } from '@kbn/isomer-primitives-charts';
 import { cardContentWidth } from '@kbn/isomer-theme';
+import { dashboardPack } from '@kbn/isomer-primitives-dashboard';
 import { defineMapsPack, type MapGeometry } from '@kbn/isomer-primitives-maps';
 import { vegaPack } from '@kbn/isomer-primitives-vega';
 import { fromRoot } from '@kbn/repo-info';
@@ -124,6 +125,7 @@ export const createChartsDrawing = async ({
       vegaPack,
       defineChartsPack(engine, { drawHeight: DEFAULT_CHART_SIZE.height }),
       defineMapsPack(geometry ? { geometry } : {}),
+      dashboardPack,
       ...packs,
     ],
   });
