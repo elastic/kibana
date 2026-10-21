@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { baseFields } from '@kbn/streams-plugin/server/lib/streams/component_templates/logs_layer';
 import { ecsBaseFields } from '@kbn/streams-plugin/server/lib/streams/component_templates/logs_ecs_layer';
-import { Streams } from '@kbn/streams-schema';
+import { LOGS_ECS_STREAM_NAME, LOGS_OTEL_STREAM_NAME, Streams } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
@@ -17,12 +17,22 @@ import { getStream, indexAndAssertTargetStream } from './helpers/requests';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
+  const retry = getService('retry');
 
   let apiClient: StreamsSupertestRepositoryClient;
 
   describe('Streams Preconfigured Definitions', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
+      // Preconfigured definitions are installed asynchronously once Kibana is already serving requests.
+      await retry.waitForWithTimeout(
+        'preconfigured root streams to be installed',
+        60_000,
+        async () => {
+          const { body } = await apiClient.fetch('GET /api/streams/_status').expect(200);
+          return body[LOGS_ECS_STREAM_NAME] === true && body[LOGS_OTEL_STREAM_NAME] === true;
+        }
+      );
     });
 
     it(`materializes backing data streams for wired root streams`, async () => {
