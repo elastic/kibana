@@ -22,15 +22,31 @@ export function assertConnectorSucceeded(result: {
 const HITL_WORD_JOINER = '\u2060';
 const HITL_FULLWIDTH_VERTICAL_LINE = '\uff5c';
 
-/** Keeps `http://` and `https://` from becoming an autolink. The text still reads as the URL. */
+/** Keeps `http://`, `https://`, and `//` from becoming an autolink. The text still reads as the URL. */
 function breakHitlSchemeUrls(value: string): string {
-  return value.replace(/https?:\/\//gi, (scheme) => `${scheme.slice(0, -2)}${HITL_WORD_JOINER}//`);
+  const withSchemeBroken = value.replace(
+    /https?:\/\//gi,
+    (scheme) => `${scheme.slice(0, -2)}${HITL_WORD_JOINER}//`
+  );
+  return withSchemeBroken.replace(/\/\//g, (match, offset, full) =>
+    full[offset - 1] === HITL_WORD_JOINER ? match : `/${HITL_WORD_JOINER}/`
+  );
+}
+
+/** Adds a backslash only when the matched character is not already escaped. */
+function escapeUnescaped(value: string, pattern: RegExp): string {
+  return value.replace(pattern, (match, slashes: string) => {
+    if (slashes.length % 2 === 1) {
+      return match;
+    }
+    return `${slashes}\\${match.slice(slashes.length)}`;
+  });
 }
 
 /** Escapes generated email text so it cannot add a markdown link or code fence. */
 export function escapeHitlEmailMarkdown(value: string): string {
   return breakHitlSchemeUrls(
-    value.replace(/<(?=https?:\/\/|mailto:)/gi, '\\<').replace(/[\[\]`~]/g, (char) => `\\${char}`)
+    escapeUnescaped(escapeUnescaped(value, /(\\*)<(?=https?:\/\/|mailto:)/gi), /(\\*)[\[\]`~]/g)
   );
 }
 

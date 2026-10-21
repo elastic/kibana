@@ -125,6 +125,33 @@ describe('build_hitl_email_notification', () => {
       ).toEqual(['https://kibana.example/approve', 'https://kibana.example/reject']);
     });
 
+    it('does not let a backslash or a protocol-relative URL add a link', () => {
+      const markdown = new MarkdownIt({ linkify: true });
+      const hrefs = (message: string) => {
+        const source = buildDefaultHitlApprovalEmailMessage({
+          message,
+          approveLabel: 'Approve',
+          rejectLabel: 'Decline',
+          approveUrl: 'https://kibana.example/approve',
+          rejectUrl: 'https://kibana.example/reject',
+        });
+        return [...markdown.render(source).matchAll(/href="([^"]*)"/g)].map((match) => match[1]);
+      };
+
+      expect(hrefs('\\[Approve\\](//evil.example)')).toEqual([
+        'https://kibana.example/approve',
+        'https://kibana.example/reject',
+      ]);
+      expect(hrefs('\\\\[Approve](//evil.example)')).toEqual([
+        'https://kibana.example/approve',
+        'https://kibana.example/reject',
+      ]);
+      expect(hrefs('[Approve](//evil.example)')).toEqual([
+        'https://kibana.example/approve',
+        'https://kibana.example/reject',
+      ]);
+    });
+
     it('keeps both resume links when step text opens a code fence', () => {
       const markdown = new MarkdownIt({ linkify: true });
       const hrefs = (source: string) =>

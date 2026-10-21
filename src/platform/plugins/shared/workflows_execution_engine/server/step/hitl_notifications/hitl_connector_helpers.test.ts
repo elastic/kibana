@@ -123,6 +123,13 @@ describe('generated notification text', () => {
     );
     expect(escapeHitlEmailMarkdown('see www.elastic.co')).toBe('see www.elastic.co');
     expect(escapeHitlEmailMarkdown('```\n~~~')).toBe('\\`\\`\\`\n\\~\\~\\~');
+    expect(escapeHitlEmailMarkdown('\\[Approve\\](//evil.example)')).toBe(
+      '\\[Approve\\](/\u2060/evil.example)'
+    );
+    expect(escapeHitlEmailMarkdown('\\\\[Approve](//evil.example)')).toBe(
+      '\\\\\\[Approve\\](/\u2060/evil.example)'
+    );
+    expect(escapeHitlEmailMarkdown('//evil.example')).toBe('/\u2060/evil.example');
   });
 
   it('escapes Slack mrkdwn link syntax and keeps a scheme URL from autolinking', () => {
@@ -132,6 +139,7 @@ describe('generated notification text', () => {
     expect(escapeSlackMrkdwnText('Hey <@U123> <#C123> <!here> <mailto:a@b.co|Approve>')).toBe(
       'Hey <@U123> <#C123> <!here> &lt;mailto:a@b.co|Approve&gt;'
     );
+    expect(escapeSlackMrkdwnText('see //evil.example')).toBe('see /\u2060/evil.example');
   });
 
   it('shortens an escaped Slack section to the API limit without splitting an entity', () => {
