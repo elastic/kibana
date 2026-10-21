@@ -16,8 +16,8 @@ export function useNewInfrastructureExperience() {
 
   const setValue = useCallback(
     async (enabled: boolean) => {
-      await services.uiSettings.set(NEW_INFRASTRUCTURE_EXPERIENCE_KEY, enabled);
-      window.location.reload();
+      const saved = await services.uiSettings.set(NEW_INFRASTRUCTURE_EXPERIENCE_KEY, enabled);
+      if (saved) window.location.reload();
     },
     [services]
   );

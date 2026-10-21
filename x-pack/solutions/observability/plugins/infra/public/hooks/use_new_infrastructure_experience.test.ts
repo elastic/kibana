@@ -49,8 +49,9 @@ describe('useNewInfrastructureExperience', () => {
     expect(result.current[0]).toBe(true);
   });
 
-  it('calls uiSettings.set and reloads when the setter is invoked', async () => {
+  it('calls uiSettings.set and reloads when save succeeds', async () => {
     mockGet.mockReturnValue(false);
+    mockSet.mockResolvedValue(true);
 
     const { result } = renderHook(() => useNewInfrastructureExperience());
 
@@ -60,5 +61,19 @@ describe('useNewInfrastructureExperience', () => {
 
     expect(mockSet).toHaveBeenCalledWith(NEW_INFRASTRUCTURE_EXPERIENCE_KEY, true);
     expect(mockReload).toHaveBeenCalled();
+  });
+
+  it('does not reload when save fails', async () => {
+    mockGet.mockReturnValue(false);
+    mockSet.mockResolvedValue(false);
+
+    const { result } = renderHook(() => useNewInfrastructureExperience());
+
+    await act(async () => {
+      await result.current[1](true);
+    });
+
+    expect(mockSet).toHaveBeenCalledWith(NEW_INFRASTRUCTURE_EXPERIENCE_KEY, true);
+    expect(mockReload).not.toHaveBeenCalled();
   });
 });
