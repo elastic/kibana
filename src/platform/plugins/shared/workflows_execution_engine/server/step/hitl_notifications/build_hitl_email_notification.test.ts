@@ -106,6 +106,25 @@ describe('build_hitl_email_notification', () => {
       );
     });
 
+    it('leaves a path and a plain angle bracket unchanged while blocking scheme autolinks', () => {
+      const markdown = new MarkdownIt({ linkify: true });
+      const source = buildDefaultHitlApprovalEmailMessage({
+        message: 'C:\\temp and a < b <https://evil.example> <mailto:a@b.co>',
+        approveLabel: 'Approve\\',
+        rejectLabel: 'Decline',
+        approveUrl: 'https://kibana.example/approve',
+        rejectUrl: 'https://kibana.example/reject',
+      });
+
+      expect(source).toContain(
+        'C:\\temp and a < b \\<https:\u2060//evil.example> \\<mailto:a@b.co>'
+      );
+      expect(source).toContain('[Approve\\\\](https://kibana.example/approve)');
+      expect(
+        [...markdown.render(source).matchAll(/href="([^"]*)"/g)].map((match) => match[1])
+      ).toEqual(['https://kibana.example/approve', 'https://kibana.example/reject']);
+    });
+
     it('keeps both resume links when step text opens a code fence', () => {
       const markdown = new MarkdownIt({ linkify: true });
       const hrefs = (source: string) =>

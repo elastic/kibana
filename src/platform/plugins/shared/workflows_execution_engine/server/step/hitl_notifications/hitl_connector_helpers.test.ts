@@ -9,6 +9,7 @@
 
 import {
   assertConnectorSucceeded,
+  escapeHitlEmailLinkLabel,
   escapeHitlEmailMarkdown,
   escapeServiceNowCommentText,
   escapeSlackMrkdwnLabel,
@@ -110,6 +111,13 @@ describe('generated notification text', () => {
       'See \\[click\\](https:\u2060//evil.example)'
     );
     expect(escapeHitlEmailMarkdown('ship (prod)')).toBe('ship (prod)');
+    expect(escapeHitlEmailMarkdown('C:\\temp')).toBe('C:\\temp');
+    expect(escapeHitlEmailMarkdown('a < b')).toBe('a < b');
+    expect(escapeHitlEmailMarkdown('<https://evil.example>')).toBe(
+      '\\<https:\u2060//evil.example>'
+    );
+    expect(escapeHitlEmailMarkdown('<mailto:a@b.co>')).toBe('\\<mailto:a@b.co>');
+    expect(escapeHitlEmailLinkLabel('Approve\\')).toBe('Approve\\\\');
     expect(escapeHitlEmailMarkdown('is https://elastic.co a valid indicator')).toBe(
       'is https:\u2060//elastic.co a valid indicator'
     );

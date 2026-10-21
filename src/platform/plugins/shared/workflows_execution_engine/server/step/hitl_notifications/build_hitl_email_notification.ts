@@ -10,7 +10,11 @@
 import type { HitlEmailChannelSchema } from '@kbn/workflows';
 import { DEFAULT_HITL_INPUT_OPEN_FORM_LABEL } from '@kbn/workflows';
 import type { z } from '@kbn/zod/v4';
-import { escapeHitlEmailMarkdown, flattenHitlLinkLabel } from './hitl_connector_helpers';
+import {
+  escapeHitlEmailLinkLabel,
+  escapeHitlEmailMarkdown,
+  flattenHitlLinkLabel,
+} from './hitl_connector_helpers';
 import { buildWorkflowExecutionAppPath } from '../../utils/get_kibana_url';
 
 export type HitlEmailChannelConfig = z.infer<typeof HitlEmailChannelSchema>;
@@ -66,9 +70,9 @@ export function buildDefaultHitlApprovalEmailMessage({
   rejectUrl: string;
 }): string {
   const prompt = message.length > 0 ? `${escapeHitlEmailMarkdown(message)}\n\n` : '';
-  return `${prompt}[${escapeHitlEmailMarkdown(
+  return `${prompt}[${escapeHitlEmailLinkLabel(
     flattenHitlLinkLabel(approveLabel)
-  )}](${approveUrl})  [${escapeHitlEmailMarkdown(
+  )}](${approveUrl})  [${escapeHitlEmailLinkLabel(
     flattenHitlLinkLabel(rejectLabel)
   )}](${rejectUrl})`;
 }

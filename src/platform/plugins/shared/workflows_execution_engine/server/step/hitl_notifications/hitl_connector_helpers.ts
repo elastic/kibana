@@ -30,8 +30,13 @@ function breakHitlSchemeUrls(value: string): string {
 /** Escapes generated email text so it cannot add a markdown link or code fence. */
 export function escapeHitlEmailMarkdown(value: string): string {
   return breakHitlSchemeUrls(
-    value.replace(/\\/g, '\\\\').replace(/[\[\]<>`~]/g, (char) => `\\${char}`)
+    value.replace(/<(?=https?:\/\/|mailto:)/gi, '\\<').replace(/[\[\]`~]/g, (char) => `\\${char}`)
   );
+}
+
+/** Escapes an email link label, including a trailing backslash. */
+export function escapeHitlEmailLinkLabel(value: string): string {
+  return escapeHitlEmailMarkdown(value.replace(/\\/g, '\\\\'));
 }
 
 /** Escapes `&`, `<`, and `>` so Slack cannot treat them as mrkdwn control characters. */
