@@ -672,18 +672,21 @@ describe('useRunDocumentWorkflowPanel', () => {
       expect(getByTestId('run-workflow-execute-button')).toBeInTheDocument();
     });
 
-    it('surfaces an error instead of a partial run when resolving the selection fails', () => {
+    it('surfaces an error instead of a partial run when resolving the selection fails', async () => {
+      // The timeline search reports failures through its error callback, never by throwing.
       useTimelineEventsHandlerMock.mockReturnValue([
         undefined as never,
         undefined as never,
-        (() => {
-          throw new Error('search failed');
+        ((_onResponse: unknown, onError: (error: unknown) => void) => {
+          onError(new Error('search failed'));
         }) as never,
       ]);
 
       const { getByTestId, queryByTestId } = renderSelectAllPanel();
 
-      expect(getByTestId('bulk-run-workflow-selection-error')).toBeInTheDocument();
+      await waitFor(() => {
+        expect(getByTestId('bulk-run-workflow-selection-error')).toBeInTheDocument();
+      });
       expect(queryByTestId('run-workflow-execute-button')).not.toBeInTheDocument();
     });
   });
