@@ -41,7 +41,6 @@ react-element-to-jsx-string
 @babel/plugin-transform-class-static-block
 @swc/core
 lightningcss
-tar-fs
 browserslist
 react-day-picker
 mysql2
