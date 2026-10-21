@@ -22,13 +22,16 @@ import type {
   AttachmentSurfaceCompositionContext,
   SurfaceComposition,
   SurfaceNode,
-  MarkdownNode,
 } from '@kbn/agent-builder-server/attachments';
 import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
 
 const { tagName, attributes } = renderAttachmentElement;
+
+// The components pack's limits for a `header`'s text and a `context` item.
+const HEADER_TEXT_MAX = 200;
+const CONTEXT_TEXT_MAX = 500;
 
 /**
  * A `<render_attachment>` tag of the response message, with its attributes as written. Its
@@ -69,15 +72,26 @@ const toMessageNodes = (message: string): MessageNode[] =>
     return attachmentId ? [{ type: 'attachment', attachmentId, version }] : [];
   });
 
+/** `value` on one line, cut to `max` characters with an ellipsis. */
+const toLine = (value: string, max: number): string => {
+  const line = value.replace(/\s+/g, ' ').trim();
+  return line.length > max ? `${line.slice(0, max - 1).trimEnd()}…` : line;
+};
+
 /**
  * Keeps the `title` and `subtitle` of an attachment's composition, which would otherwise be lost
- * when its body is spliced into the message: they become a `markdown` node, with the title in bold
- * and the subtitle in italics, placed before the body. Returns nothing when the mapping sets
- * neither, so it's `toSurfaceComposition` that decides whether an attachment has a heading.
+ * when its body is spliced into the message: the title becomes a `header` and the subtitle a
+ * `context` line, placed before the body. Returns nothing when the mapping sets neither, so it's
+ * `toSurfaceComposition` that decides whether an attachment has a heading.
  */
-const toHeadingNode = ({ title, subtitle }: SurfaceComposition): MarkdownNode[] => {
-  const heading = [title && `**${title}**`, subtitle && `_${subtitle}_`].filter(Boolean).join('\n');
-  return heading ? [{ type: 'markdown', text: heading }] : [];
+const toHeadingNodes = ({ title, subtitle }: SurfaceComposition): SurfaceNode[] => {
+  const titleLine = title ? toLine(title, HEADER_TEXT_MAX) : '';
+  const subtitleLine = subtitle ? toLine(subtitle, CONTEXT_TEXT_MAX) : '';
+
+  return [
+    ...(titleLine ? [{ type: 'header' as const, text: titleLine, level: 2 as const }] : []),
+    ...(subtitleLine ? [{ type: 'context' as const, items: [{ text: subtitleLine }] }] : []),
+  ];
 };
 
 /**
@@ -152,7 +166,7 @@ const resolveAttachmentNode = async (
       return [];
     }
 
-    return [...toHeadingNode(composition), ...composition.body];
+    return [...toHeadingNodes(composition), ...composition.body];
   } catch (error) {
     logger.warn(
       `Leaving out attachment "${attachment.id}": its toSurfaceComposition failed: ${error.message}`

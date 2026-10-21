@@ -101,7 +101,7 @@ describe('buildComposition', () => {
     ]);
   });
 
-  it('shows the title and subtitle of the attachment composition as a heading', async () => {
+  it('shows the title and subtitle of the attachment composition as a header and context', async () => {
     const toSurfaceComposition: ToSurfaceComposition = () => ({
       type: 'view',
       title: 'Note',
@@ -109,10 +109,35 @@ describe('buildComposition', () => {
       body: [{ type: 'markdown', text: 'Content' }],
     });
 
-    expect(await build('<render_attachment id="a1" />', { toSurfaceComposition })).toEqual([
-      '**Note**\n_v1_',
-      'Content',
-    ]);
+    expect((await compose('<render_attachment id="a1" />', { toSurfaceComposition })).body).toEqual(
+      [
+        { type: 'header', text: 'Note', level: 2 },
+        { type: 'context', items: [{ text: 'v1' }] },
+        { type: 'markdown', text: 'Content' },
+      ]
+    );
+  });
+
+  it('fits a long title and subtitle on one line within the header and context limits', async () => {
+    const toSurfaceComposition: ToSurfaceComposition = () => ({
+      type: 'view',
+      title: `Long\n${'t'.repeat(400)}`,
+      subtitle: 's'.repeat(800),
+      body: [{ type: 'markdown', text: 'Content' }],
+    });
+
+    const [header, subtitle] = (
+      await compose('<render_attachment id="a1" />', { toSurfaceComposition })
+    ).body;
+
+    expect(header).toEqual({ type: 'header', text: expect.stringMatching(/^Long t+…$/), level: 2 });
+    expect(header.type === 'header' && header.text.length).toBe(200);
+    expect(subtitle.type === 'context' && subtitle.items[0].text.length).toBe(500);
+    expect(runtime.validate({ type: 'view', body: [header, subtitle] }).valid).toBe(true);
+  });
+
+  it('leaves out the heading when the composition has neither title nor subtitle', async () => {
+    expect(await build('<render_attachment id="a1" />')).toEqual(['[a1 v2]']);
   });
 
   it('uses the latest version of tags without a version', async () => {
