@@ -33,13 +33,14 @@ jobs:
             ];
 
             // Fetch the list of changed files in the PR
-            const files = await github.rest.pulls.listFiles({
+            const files = await github.paginate(github.rest.pulls.listFiles, {
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: context.payload.pull_request.number,
+              per_page: 100,
             });
 
-            const changedFiles = files.data.map(file => file.filename);
+            const changedFiles = files.map(file => file.filename);
             core.info(`Changed files: ${changedFiles.join(', ')}`);
 
             const matches = whitelist.some((rule) => {
@@ -48,9 +49,9 @@ jobs:
               if (rule.baseMatch && !rule.baseMatch.test(baseRef)) return false;
               if (rule.baseNotMatch && rule.baseNotMatch.test(baseRef)) return false;
 
-              // If paths is specified, verify at least one changed file matches
+              // If paths is specified, every changed file must match one of them
               if (rule.paths) {
-                const hasMatchingFile = changedFiles.some(file =>
+                const allFilesMatch = changedFiles.length > 0 && changedFiles.every(file =>
                   rule.paths.some(path => {
                     // Support glob patterns
                     if (path.includes('*')) {
@@ -60,8 +61,8 @@ jobs:
                     return file === path;
                   })
                 );
-                if (!hasMatchingFile) {
-                  core.info(`File check failed for rule ${rule.user}/${rule.branchPrefix}: no changed files match paths`);
+                if (!allFilesMatch) {
+                  core.info(`File check failed for rule ${rule.user}/${rule.branchPrefix}: not all changed files match paths`);
                   return false;
                 }
               }
