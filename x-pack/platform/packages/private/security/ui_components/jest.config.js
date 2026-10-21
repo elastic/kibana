@@ -12,7 +12,7 @@ module.exports = {
   collectCoverageFrom: [
     '<rootDir>/x-pack/platform/packages/private/security/ui_components/**/*.{ts,tsx}',
   ],
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/private/security/ui_components'],
 };

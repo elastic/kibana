@@ -36,7 +36,7 @@ export function registerSearchRoute({ router, log }: RouteDependencies) {
           }),
         }),
         params: schema.object({
-          index_name: schema.string(),
+          index_name: schema.string({ maxLength: 1024 }),
         }),
         query: schema.object({
           page: schema.number({ defaultValue: 0, min: 0 }),

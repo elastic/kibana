@@ -77,7 +77,7 @@ const initialState: DiscoverInternalState = {
   userId: undefined,
   spaceId: undefined,
   persistedDiscoverSession: undefined,
-  draftSessionTitle: undefined,
+  saveSessionModal: { isOpen: false, initialTitle: undefined, initialCopyOnSave: false },
   hasUnsavedChanges: false,
   defaultProfileAdHocDataViewIds: [],
   defaultProfileEsqlQuery: undefined,
@@ -197,8 +197,19 @@ const internalStateSliceDef = createSlice({
       state.persistedDiscoverSession = action.payload;
     },
 
-    setDraftSessionTitle: (state, action: PayloadAction<string | undefined>) => {
-      state.draftSessionTitle = action.payload;
+    openSaveSessionModal: (
+      state,
+      action: PayloadAction<{ initialTitle?: string; initialCopyOnSave?: boolean }>
+    ) => {
+      state.saveSessionModal = {
+        isOpen: true,
+        initialTitle: action.payload.initialTitle,
+        initialCopyOnSave: action.payload.initialCopyOnSave ?? false,
+      };
+    },
+
+    closeSaveSessionModal: (state) => {
+      state.saveSessionModal = { isOpen: false, initialTitle: undefined, initialCopyOnSave: false };
     },
 
     setUnsavedChanges: (state, action: PayloadAction<HasUnsavedChangesResult>) => {
@@ -665,11 +676,17 @@ const createMiddleware = (options: InternalStateDependencies) => {
     InternalStateDependencies
   >;
 
+  const shouldPersistTabsLocally = isAnyOf(
+    internalStateSlice.actions.setTabs,
+    internalStateSlice.actions.setPersistedDiscoverSession
+  );
+
   startListening({
-    matcher: isAnyOf(
-      internalStateSlice.actions.setTabs,
-      internalStateSlice.actions.setDraftSessionTitle
-    ),
+    // Unsaved changes are recomputed on every tab change, so persist only when the unsaved tabs differ
+    predicate: (action, currentState, previousState) =>
+      shouldPersistTabsLocally(action) ||
+      (internalStateSlice.actions.setUnsavedChanges.match(action) &&
+        !isEqual(currentState.tabs.unsavedIds, previousState.tabs.unsavedIds)),
     effect: throttle<
       ListenerEffect<
         UnknownAction,
@@ -688,10 +705,13 @@ const createMiddleware = (options: InternalStateDependencies) => {
             services,
           });
         void tabsStorageManager.persistLocally(
-          { allTabs: selectAllTabs(state), recentlyClosedTabs: selectRecentlyClosedTabs(state) },
+          {
+            allTabs: selectAllTabs(state),
+            recentlyClosedTabs: selectRecentlyClosedTabs(state),
+            unsavedTabIds: state.tabs.unsavedIds,
+          },
           getTabInternalState,
-          state.persistedDiscoverSession?.id,
-          state.draftSessionTitle
+          state.persistedDiscoverSession
         );
       },
       MIDDLEWARE_THROTTLE_MS,
@@ -704,19 +724,24 @@ const createMiddleware = (options: InternalStateDependencies) => {
     effect: throttle<InternalStateListenerEffect<typeof syncLocallyPersistedTabState>>(
       (action, listenerApi) => {
         const { runtimeStateManager, tabsStorageManager, services } = listenerApi.extra;
-        withTab(listenerApi.getState(), action.payload, (tab) => {
-          tabsStorageManager.updateTabStateLocally(action.payload.tabId, {
-            internalState: selectTabRuntimeInternalState({
-              runtimeStateManager,
-              tabState: tab,
-              services,
-            }),
-            attributes: tab.attributes,
-            appState: tab.appState,
-            globalState: tab.globalState,
-            profileState: tab.profileState,
-            visorMode: tab.uiState.visor?.visorMode,
-          });
+        const state = listenerApi.getState();
+        withTab(state, action.payload, (tab) => {
+          tabsStorageManager.updateTabStateLocally(
+            action.payload.tabId,
+            {
+              internalState: selectTabRuntimeInternalState({
+                runtimeStateManager,
+                tabState: tab,
+                services,
+              }),
+              attributes: tab.attributes,
+              appState: tab.appState,
+              globalState: tab.globalState,
+              profileState: tab.profileState,
+              visorMode: tab.uiState.visor?.visorMode,
+            },
+            state.persistedDiscoverSession
+          );
         });
       },
       MIDDLEWARE_THROTTLE_MS,

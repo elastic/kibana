@@ -32,6 +32,19 @@ export const buildCoreCases = (): EsqlConversionCase[] => {
     {
       group: 'core',
       dataset: ecommerce,
+      description: 'standard deviation of a numeric field',
+      columns: { col1: metric('standard_deviation', 'taxful_total_price') },
+      columnOrder: ['col1'],
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | ${ecommerceWhere} | STATS STD_DEV(taxful_total_price)`,
+        columnNames: ['STD_DEV(taxful_total_price)'],
+        expectedSourceIds: { 'STD_DEV(taxful_total_price)': ['col1'] },
+      },
+    },
+    {
+      group: 'core',
+      dataset: ecommerce,
       description: 'average of a numeric field',
       columns: { col1: metric('average', 'taxful_total_price') },
       columnOrder: ['col1'],

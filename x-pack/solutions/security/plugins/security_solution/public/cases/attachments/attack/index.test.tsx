@@ -13,7 +13,10 @@ import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
-import { MAX_ALERTS_PER_CASE } from '@kbn/cases-plugin/common/constants';
+import {
+  MAX_ALERTS_PER_CASE,
+  MAX_BULK_CREATE_ATTACHMENTS,
+} from '@kbn/cases-plugin/common/constants';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import type { AttackAttachmentPayload } from '../../../../common/cases/attachments/attack';
 import {
@@ -27,8 +30,9 @@ import {
 } from '../../../../common/cases/attachments/attack';
 import {
   buildAttackAttachments,
-  generateAttackAttachmentsWithoutOwner,
+  buildAttacksAttachments,
   getAttackAttachment,
+  MAX_ATTACKS_PER_ATTACH,
   type AttackToAttach,
 } from '.';
 import { TestProviders } from '../../../common/mock/test_providers';
@@ -90,12 +94,21 @@ describe('Attack attachment', () => {
       id: SECURITY_ATTACK_ATTACHMENT_TYPE,
       getIcon: expect.any(Function),
       getLabel: expect.any(Function),
+      getCountLabel: expect.any(Function),
+      getRelatedRemoval: expect.any(Function),
       schema: AttackAttachmentPayloadSchema,
       getCreationActivity: expect.any(Function),
       getRemovalActivity: expect.any(Function),
+      getAttachmentList: expect.any(Function),
       workflow: { getActivityLabel: expect.any(Function) },
       getDocumentAction: expect.any(Function),
     });
+  });
+
+  it('exposes an attachments list view so attacks get their own section in the Attachments tab', () => {
+    const attackType = getAttackAttachment();
+
+    expect(attackType.getAttachmentList?.()?.children).toBeDefined();
   });
 
   it('renders the activity event text correctly', () => {
@@ -146,6 +159,30 @@ describe('Attack attachment', () => {
     const attackType = getAttackAttachment();
 
     expect(attackType.getCreationActivity(baseProps).hideDefaultActions).toBeUndefined();
+  });
+
+  it('labels a count of attacks', () => {
+    const attackType = getAttackAttachment();
+
+    expect(attackType.getCountLabel?.({ count: 1 })).toBe('1 attack');
+    expect(attackType.getCountLabel?.({ count: 3 })).toBe('3 attacks');
+  });
+
+  it('offers to keep the alerts the removed attacks brought to the case', () => {
+    const attackType = getAttackAttachment();
+
+    expect(attackType.getRelatedRemoval?.({ count: 1 })).toEqual({
+      description:
+        'Also remove the alerts this attack added to the case? Alerts that also belong to another attack in this case stay.',
+      removeOnlyLabel: 'Remove attack only',
+      removeWithRelatedLabel: 'Remove attack and alerts',
+    });
+    expect(attackType.getRelatedRemoval?.({ count: 2 })).toEqual({
+      description:
+        'Also remove the alerts these attacks added to the case? Alerts that also belong to another attack in this case stay.',
+      removeOnlyLabel: 'Remove attacks only',
+      removeWithRelatedLabel: 'Remove attacks and alerts',
+    });
   });
 
   it('returns no actions when the metadata is missing', () => {
@@ -279,7 +316,7 @@ describe('buildAttackAttachments', () => {
     expect(attachments[1]).toEqual({
       type: SECURITY_ALERT_ATTACHMENT_TYPE,
       attachmentId: ['alert-1', 'alert-2'],
-      metadata: { index: ALERTS_INDEX },
+      metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-id-1'] },
     });
   });
 
@@ -668,16 +705,176 @@ describe('buildAttackAttachments', () => {
   });
 });
 
-describe('generateAttackAttachmentsWithoutOwner', () => {
-  it('returns just the attachments array', () => {
-    const attack = attackToAttach({ alertIds: ['alert-1'] });
+describe('buildAttacksAttachments', () => {
+  it('pairs each attack with its own alert attachment, in selection order', () => {
+    const { attachments, attackCount, attachedAttackCount, attacksTruncated } =
+      buildAttacksAttachments([
+        attackToAttach({ id: 'attack-id-1', alertIds: ['alert-1', 'alert-2'] }),
+        attackToAttach({ id: 'attack-id-2', alertIds: ['alert-3'] }),
+      ]);
 
-    expect(generateAttackAttachmentsWithoutOwner(attack)).toEqual(
-      buildAttackAttachments(attack).attachments
-    );
+    // Paired rather than merged: an alert attachment can only be deleted whole, so each has to
+    // belong to exactly one attack for that attack's removal to take its alerts with it.
+    expect(attachments).toEqual([
+      expect.objectContaining({
+        type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        attachmentId: 'attack-id-1',
+      }),
+      {
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId: ['alert-1', 'alert-2'],
+        metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-id-1'] },
+      },
+      expect.objectContaining({
+        type: SECURITY_ATTACK_ATTACHMENT_TYPE,
+        attachmentId: 'attack-id-2',
+      }),
+      {
+        type: SECURITY_ALERT_ATTACHMENT_TYPE,
+        attachmentId: ['alert-3'],
+        metadata: { index: ALERTS_INDEX, sourceAttachmentIds: ['attack-id-2'] },
+      },
+    ]);
+    expect(attackCount).toBe(2);
+    expect(attachedAttackCount).toBe(2);
+    expect(attacksTruncated).toBe(false);
   });
 
-  it('returns an empty array when the attack has no id', () => {
-    expect(generateAttackAttachmentsWithoutOwner(attackToAttach({ id: '' }))).toEqual([]);
+  it('gives each attack its own copy of an alert the two of them share', () => {
+    const { attachments, alertCount, attachedAlertCount } = buildAttacksAttachments([
+      attackToAttach({ id: 'attack-id-1', alertIds: ['alert-1', 'alert-2'] }),
+      attackToAttach({ id: 'attack-id-2', alertIds: ['alert-2', 'alert-3'] }),
+    ]);
+
+    // Deduping across the attacks would leave one of them with an attachment that does not cover
+    // its evidence, so the shared alert is attached — and counted — once per attack.
+    expect(attachments[1].attachmentId).toEqual(['alert-1', 'alert-2']);
+    expect(attachments[3].attachmentId).toEqual(['alert-2', 'alert-3']);
+    expect(alertCount).toBe(4);
+    expect(attachedAlertCount).toBe(4);
+  });
+
+  it('still dedupes within one attack, after de-anonymising', () => {
+    const { attachments, alertCount } = buildAttacksAttachments([
+      attackToAttach({
+        id: 'attack-id-1',
+        alertIds: ['anon-1', 'anon-2'],
+        replacements: { 'anon-1': 'alert-1', 'anon-2': 'alert-1' },
+      }),
+    ]);
+
+    expect(attachments[1].attachmentId).toEqual(['alert-1']);
+    expect(alertCount).toBe(1);
+  });
+
+  it('spends the case room in selection order, so an earlier attack keeps its alerts', () => {
+    const { attachments, alertCount, attachedAlertCount, truncated } = buildAttacksAttachments(
+      [
+        attackToAttach({ id: 'attack-id-1', alertIds: ['alert-1', 'alert-2'] }),
+        attackToAttach({ id: 'attack-id-2', alertIds: ['alert-3', 'alert-4'] }),
+      ],
+      { maxAlerts: 3 }
+    );
+
+    expect(attachments[1].attachmentId).toEqual(['alert-1', 'alert-2']);
+    expect(attachments[3].attachmentId).toEqual(['alert-3']);
+    expect(alertCount).toBe(4);
+    expect(attachedAlertCount).toBe(3);
+    expect(truncated).toBe(true);
+  });
+
+  it('attaches a later attack alone once the room runs out', () => {
+    const { attachments, truncated } = buildAttacksAttachments(
+      [
+        attackToAttach({ id: 'attack-id-1', alertIds: ['alert-1', 'alert-2'] }),
+        attackToAttach({ id: 'attack-id-2', alertIds: ['alert-3'] }),
+      ],
+      { maxAlerts: 2 }
+    );
+
+    expect(attachments).toEqual([
+      expect.objectContaining({ attachmentId: 'attack-id-1' }),
+      expect.objectContaining({ attachmentId: ['alert-1', 'alert-2'] }),
+      expect.objectContaining({ attachmentId: 'attack-id-2' }),
+    ]);
+    expect(truncated).toBe(true);
+  });
+
+  it('still attaches every attack when the case has no room for any alerts', () => {
+    const { attachments, attachedAttackCount, attacksTruncated } = buildAttacksAttachments(
+      [
+        attackToAttach({ id: 'attack-id-1', alertIds: ['alert-1'] }),
+        attackToAttach({ id: 'attack-id-2', alertIds: ['alert-2'] }),
+      ],
+      { maxAlerts: 0 }
+    );
+
+    expect(attachments).toEqual([
+      expect.objectContaining({ attachmentId: 'attack-id-1' }),
+      expect.objectContaining({ attachmentId: 'attack-id-2' }),
+    ]);
+    expect(attachedAttackCount).toBe(2);
+    expect(attacksTruncated).toBe(false);
+  });
+
+  it('caps the attacks at MAX_ATTACKS_PER_ATTACH and reports the truncation', () => {
+    const attacks = Array.from({ length: MAX_ATTACKS_PER_ATTACH + 5 }, (_, i) =>
+      attackToAttach({ id: `attack-id-${i}`, alertIds: [`alert-${i}`] })
+    );
+
+    const { attachments, attackCount, attachedAttackCount, attacksTruncated, alertCount } =
+      buildAttacksAttachments(attacks);
+
+    // Two attachments per attack, which is what the cap is there to keep within one bulk create.
+    expect(attachments).toHaveLength(MAX_ATTACKS_PER_ATTACH * 2);
+    expect(attachments.length).toBeLessThanOrEqual(MAX_BULK_CREATE_ATTACHMENTS);
+    expect(attackCount).toBe(MAX_ATTACKS_PER_ATTACH + 5);
+    expect(attachedAttackCount).toBe(MAX_ATTACKS_PER_ATTACH);
+    expect(attacksTruncated).toBe(true);
+    // The alerts of the attacks that were left off are left off with them.
+    expect(alertCount).toBe(MAX_ATTACKS_PER_ATTACH);
+  });
+
+  it('does not report truncation when the attack count is exactly at the cap', () => {
+    const attacks = Array.from({ length: MAX_ATTACKS_PER_ATTACH }, (_, i) =>
+      attackToAttach({ id: `attack-id-${i}`, alertIds: [`alert-${i}`] })
+    );
+
+    const { attachedAttackCount, attacksTruncated } = buildAttacksAttachments(attacks);
+
+    expect(attachedAttackCount).toBe(MAX_ATTACKS_PER_ATTACH);
+    expect(attacksTruncated).toBe(false);
+  });
+
+  it('skips attacks with no id without costing the rest the attach', () => {
+    const { attachments, attackCount, attachedAttackCount, attacksTruncated } =
+      buildAttacksAttachments([
+        attackToAttach({ id: '', alertIds: ['alert-1'] }),
+        attackToAttach({ id: 'attack-id-2', alertIds: ['alert-2'] }),
+      ]);
+
+    expect(attachments).toEqual([
+      expect.objectContaining({ attachmentId: 'attack-id-2' }),
+      expect.objectContaining({ attachmentId: ['alert-2'] }),
+    ]);
+    // Attacks without an id were never attachable, so they are not reported as truncated.
+    expect(attackCount).toBe(1);
+    expect(attachedAttackCount).toBe(1);
+    expect(attacksTruncated).toBe(false);
+  });
+
+  it('returns nothing when none of the attacks can be attached', () => {
+    const { attachments, attackCount, alertCount, truncated, attacksTruncated } =
+      buildAttacksAttachments([attackToAttach({ id: '' }), undefined]);
+
+    expect(attachments).toEqual([]);
+    expect(attackCount).toBe(0);
+    expect(alertCount).toBe(0);
+    expect(truncated).toBe(false);
+    expect(attacksTruncated).toBe(false);
+  });
+
+  it('returns nothing for an empty selection', () => {
+    expect(buildAttacksAttachments([]).attachments).toEqual([]);
   });
 });

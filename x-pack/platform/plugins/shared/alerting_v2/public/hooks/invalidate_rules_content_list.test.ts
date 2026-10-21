@@ -6,12 +6,13 @@
  */
 
 import { contentListKeys, contentListQueryClient } from '@kbn/content-list-provider';
-import { RULES_CONTENT_LIST_ID } from '../constants';
+import { RULES_CONTENT_LIST_ID, RULE_TEMPLATES_CONTENT_LIST_ID } from '../constants';
 import { ruleKeys } from './query_key_factory';
 import {
   invalidateRulesContentList,
   invalidateRulesListView,
   invalidateRulesTagsFacet,
+  invalidateRuleTemplatesListView,
 } from './invalidate_rules_content_list';
 
 jest.mock('@kbn/content-list-provider', () => ({
@@ -43,13 +44,26 @@ describe('invalidateRulesContentList helpers', () => {
     expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ruleKeys.allTags() });
   });
 
-  it('invalidateRulesContentList invalidates both the list and the tags facet', async () => {
+  it('invalidateRulesContentList invalidates the list, the tags facet and the rule library', async () => {
     await invalidateRulesContentList();
 
-    expect(mockInvalidateQueries).toHaveBeenCalledTimes(2);
+    expect(mockInvalidateQueries).toHaveBeenCalledTimes(3);
     expect(mockInvalidateQueries).toHaveBeenCalledWith({
       queryKey: ['contentList', RULES_CONTENT_LIST_ID],
     });
     expect(mockInvalidateQueries).toHaveBeenCalledWith({ queryKey: ruleKeys.allTags() });
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['contentList', RULE_TEMPLATES_CONTENT_LIST_ID],
+    });
+  });
+
+  it('invalidateRuleTemplatesListView invalidates the Content List scope for the rule library', async () => {
+    await invalidateRuleTemplatesListView();
+
+    expect(contentListKeys.all).toHaveBeenCalledWith(RULE_TEMPLATES_CONTENT_LIST_ID);
+    expect(mockInvalidateQueries).toHaveBeenCalledTimes(1);
+    expect(mockInvalidateQueries).toHaveBeenCalledWith({
+      queryKey: ['contentList', RULE_TEMPLATES_CONTENT_LIST_ID],
+    });
   });
 });

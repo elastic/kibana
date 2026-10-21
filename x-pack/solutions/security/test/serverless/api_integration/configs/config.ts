@@ -39,6 +39,19 @@ export default createTestConfig({
       { product_line: 'endpoint', product_tier: 'complete' },
       { product_line: 'cloud', product_tier: 'complete' },
     ])}`,
+    // config/serverless.security.yml list (CLI arrays replace it, not merge) plus
+    // `disable:customYaraSignaturesEnabled` to match MKI (kibana-controller override).
+    // Remove the YARA and registry credential hardening entries once those flags are enabled on
+    // serverless (planned for 9.6 GA).
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+      'riskScoreAssistantToolDisabled',
+      'disable:enableRiskScorePrivmonModifier',
+      'disable:kubernetesEnabled',
+      'trialCompanionEnabled',
+      'disable:linuxRansomwareProtection',
+      'disable:registryCredentialHardening',
+      'disable:customYaraSignaturesEnabled',
+    ])}`,
   ],
   enableFleetDockerRegistry: false,
 });
