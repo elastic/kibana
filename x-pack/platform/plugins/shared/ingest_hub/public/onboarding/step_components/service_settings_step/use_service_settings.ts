@@ -30,6 +30,7 @@ import {
 import type { SignalFilter } from '../services_step/use_services_step';
 import {
   AWS_MAIN_PACKAGE_NAME,
+  AWS_OTEL_PACKAGE_NAME,
   getBareNamePackage,
   isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
@@ -305,9 +306,10 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   // the main one), so the default name already carries the package when that is not `aws`.
   const bareNamePackage = useMemo(() => getBareNamePackage(policyPackages), [policyPackages]);
   // Policies of the selected packages count too: a Bedrock-only deploy creates `aws-1-aws_bedrock`
-  // under `aws_bedrock`, which an `aws`-only query never sees.
+  // under `aws_bedrock`, which an `aws`-only query never sees. Both main packages always count,
+  // because ECS and OTel onboardings share the plain `aws-<n>` names.
   const defaultNamePackages = useMemo(
-    () => [...new Set([AWS_MAIN_PACKAGE_NAME, ...policyPackages])].sort(),
+    () => [...new Set([AWS_MAIN_PACKAGE_NAME, AWS_OTEL_PACKAGE_NAME, ...policyPackages])].sort(),
     [policyPackages]
   );
   const defaultNamePackagesRef = useRef(defaultNamePackages);

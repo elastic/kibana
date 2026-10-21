@@ -724,6 +724,19 @@ describe('useServiceSettings — integration name and description', () => {
     expect(result.current.bareNamePackage).toBe('aws');
   });
 
+  it('counts OTel policies too when an ECS onboarding picks the next free name', async () => {
+    mockServices([policyService]);
+    // The OTel package names its policies `aws-<n>` as well, so they share the pool.
+    mockSendGetPackagePolicies.mockResolvedValue({ data: { items: [{ name: 'aws-1' }] } });
+
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-2'));
+    expect(mockSendGetPackagePolicies.mock.calls[0][0].kuery).toContain(
+      'package.name:aws_cloudwatch_input_otel'
+    );
+  });
+
   it('needs no package suffix for the OTel package, the only one an OTel deploy uses', async () => {
     mockServices([
       makeEntry('svc_o', {
