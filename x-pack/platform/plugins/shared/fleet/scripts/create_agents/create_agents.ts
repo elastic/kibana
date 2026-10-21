@@ -811,8 +811,12 @@ export async function run() {
               logger.info(
                 `Bumping agent policy revision so that agents will have outdated policies`
               );
-              // awaited: agentless policies can't be updated through the API once marked as agentless
-              await bumpAgentPolicyRevision(agentPolicyId, agentPolicy.item);
+              if (agentlessArg) {
+                // the update API rejects agentless policies, which a later batch can reuse
+                await revisePolicySoRevisionIdx(agentPolicyId, latestRevision + 1);
+              } else {
+                bumpAgentPolicyRevision(agentPolicyId, agentPolicy.item);
+              }
             }
             if (agentlessArg) {
               await markAgentPolicyAsAgentless(agentPolicyId);
