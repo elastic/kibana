@@ -66,6 +66,8 @@ export const toTokenValues = (theme: EuiThemeComputed) => {
       background: {
         plain: colors.backgroundBasePlain,
         subdued: colors.backgroundBaseSubdued,
+        /** The page behind panels, as a dashboard's viewport paints it. */
+        recessed: colors.backgroundBaseRecessed,
         base: byFamily((family) => colors[`backgroundBase${family}`]),
         light: byFamily((family) => colors[`backgroundLight${family}`]),
         filled: byFamily((family) => colors[`backgroundFilled${family}`]),
