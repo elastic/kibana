@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 import { isSchema, safeParseResult } from '@kbn/zod-helpers';
 import {
   budgetingMethodSchemaZod,
@@ -23,6 +23,8 @@ import {
 import type { SLOTemplate, StoredSLOTemplate } from '../domain/models';
 import { SLOTemplateNotFound } from '../errors';
 import { SO_SLO_TEMPLATE_TYPE } from '../saved_objects';
+
+const storedGroupBySchema = lazySchema(() => z.array(z.string()));
 
 interface SearchParams {
   pagination: Pagination;
@@ -144,7 +146,7 @@ export class DefaultSLOTemplateRepository implements SLOTemplateRepository {
         template.settings = settings;
       }
 
-      if (stored.groupBy && isSchema(z.array(z.string()), stored.groupBy)) {
+      if (stored.groupBy && isSchema(storedGroupBySchema, stored.groupBy)) {
         template.groupBy = stored.groupBy;
       }
 
