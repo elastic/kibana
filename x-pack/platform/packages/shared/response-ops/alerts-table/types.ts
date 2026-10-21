@@ -153,7 +153,6 @@ export interface CasesService {
   helpers: {
     groupAlertsByRule: (items: any[], owner: string) => any[];
     canUseCases: (owners: CasesOwner[]) => any;
-    getRuleIdFromEvent: (event: { data: any[]; ecs: Ecs }) => { id: string; name: string };
   };
 }
 
@@ -547,6 +546,8 @@ export type RenderContext<AC extends AdditionalContext> = {
   showAlertStatusWithFlapping?: boolean;
 
   bulkActionsStore: [BulkActionsState, Dispatch<BulkActionsReducerAction>];
+
+  allowLinks?: boolean;
 } & SetRequired<
   Pick<
     AlertsTableProps<AC>,
@@ -645,6 +646,10 @@ export interface PublicAlertsDataGridProps
    * Options to customize the actions menu for each cell
    */
   cellActionsOptions?: CellActionsOptions;
+  /**
+   * When `false`, the page size selector is hidden. Defaults to `true`.
+   */
+  isInteractive?: boolean;
 }
 
 export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalContext>
@@ -721,6 +726,7 @@ export type BulkActionGroupId =
   | 'status'
   | 'assignees'
   | 'cases'
+  | 'caseRemoval'
   | 'tags'
   | 'timeline'
   | 'custom'

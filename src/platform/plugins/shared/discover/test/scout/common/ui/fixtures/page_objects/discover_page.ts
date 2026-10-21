@@ -24,8 +24,12 @@ export class DiscoverPage extends DiscoverApp {
     return this.page.testSubj.locator('discoverUninitialized');
   }
 
-  getUninitializedKeyboardShortcuts(): Locator {
-    return this.page.testSubj.locator('discoverUninitializedKeyboardShortcuts');
+  getRecommendedQueries(): Locator {
+    return this.page.testSubj.locator('discoverRecommendedQueries');
+  }
+
+  getRecommendedQueryRunButton(label: string): Locator {
+    return this.getRecommendedQueries().getByRole('button', { name: `Run query: ${label}` });
   }
 
   async selectClassicMode() {

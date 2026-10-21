@@ -7,18 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Rule } from 'eslint';
-import type { Node } from 'estree';
+import type { CreateOnceRule } from '@oxlint/plugins';
 import { parseKbnImportReq } from '@kbn/repo-packages';
 
 import { isTypeOnlyImport } from '../helpers/ast';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
-import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
 import { getImportResolver } from '../get_import_resolver';
 
 /**
- * ESLint rule that validates cross-plugin imports target declared `extraPublicDirs`.
+ * Rule that validates cross-plugin imports target declared `extraPublicDirs`.
  *
  * This is the lint-time complement to the build-time validation in the
  * optimizer's `createCrossPluginExternals` (callback-style externals) and
@@ -59,7 +57,7 @@ import { getImportResolver } from '../get_import_resolver';
  * @see packages/kbn-rspack-optimizer/src/config/create_external_plugin_config.ts (build-time equivalent)
  * @see packages/kbn-rspack-optimizer/src/plugins/cross_plugin_target_validation_plugin.ts (dist-build validation)
  */
-export const NoUndeclaredPluginTargetRule: Rule.RuleModule = {
+export const NoUndeclaredPluginTargetRule: CreateOnceRule = {
   meta: {
     docs: {
       url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx',
@@ -70,67 +68,70 @@ export const NoUndeclaredPluginTargetRule: Rule.RuleModule = {
         'plugin and must point to one of the public directories: [{{targets}}]',
     },
   },
-  create(context) {
-    const resolver = getImportResolver(context);
-    const classifier = getRepoSourceClassifier(resolver);
-    const sourcePath = getSourcePath(context);
+  createOnce(context) {
+    return visitAllImportStatements(() => {
+      const resolver = getImportResolver(context);
+      const classifier = getRepoSourceClassifier(resolver);
+      const sourcePath = context.physicalFilename;
 
-    const self = classifier.classify(sourcePath);
-    const ownPkgId = resolver.getPackageIdForPath(sourcePath);
-
-    return visitAllImportStatements((req, { node, importer }) => {
-      if (!req) return;
+      const self = classifier.classify(sourcePath);
 
       // Guard 1: only validate browser and common code — these are the types that
       // go through the browser bundler and are affected by __kbnBundles__ resolution.
       // Server code, non-package code (CLI tools, build scripts), test fixtures, and
       // tooling all resolve imports via Node.js module resolution and are never
       // subject to target validation.
-      if (self.type !== 'browser package' && self.type !== 'common package') return;
+      if (self.type !== 'browser package' && self.type !== 'common package') return false;
 
-      // Guard 2: skip type-only imports (erased before bundling)
-      if (isTypeOnlyImport(importer)) return;
+      const ownPkgId = resolver.getPackageIdForPath(sourcePath);
 
-      // Guard 6: skip .json and ?raw imports (never cross-plugin externals)
-      if (req.endsWith('.json') || req.endsWith('?raw')) return;
+      return (req, { node, importer }) => {
+        if (!req) return;
 
-      // Guard 3: skip non-@kbn imports
-      const parsed = parseKbnImportReq(req);
-      if (!parsed) return;
+        // Guard 2: skip type-only imports (erased before bundling)
+        if (isTypeOnlyImport(importer)) return;
 
-      // Guard 4: skip same-plugin imports
-      if (parsed.pkgId === ownPkgId) return;
+        // Guard 6: skip .json and ?raw imports (never cross-plugin externals)
+        if (req.endsWith('.json') || req.endsWith('?raw')) return;
 
-      // Guard 5: only validate browser plugin packages
-      const manifest = resolver.getPkgManifest(parsed.pkgId);
-      if (!manifest || manifest.type !== 'plugin') return;
-      if (manifest.plugin.browser === false) return;
+        // Guard 3: skip non-@kbn imports
+        const parsed = parseKbnImportReq(req);
+        if (!parsed) return;
 
-      const targets = ['public', ...(manifest.plugin.extraPublicDirs ?? [])];
+        // Guard 4: skip same-plugin imports
+        if (parsed.pkgId === ownPkgId) return;
 
-      // When the importing file lives in common/ code, implicitly allow the
-      // remote plugin's common/ directory — common-to-common imports resolve
-      // via normal module resolution and are not routed through __kbnBundles__.
-      // Only public/ (browser package) code requires the target plugin to
-      // declare "common" in extraPublicDirs.
-      if (self.type === 'common package' && !targets.includes('common')) {
-        targets.push('common');
-      }
+        // Guard 5: only validate browser plugin packages
+        const manifest = resolver.getPkgManifest(parsed.pkgId);
+        if (!manifest || manifest.type !== 'plugin') return;
+        if (manifest.plugin.browser === false) return;
 
-      const targetMatches = targets.some(
-        (t) => parsed.target === t || parsed.target.startsWith(t + '/')
-      );
-      if (!targetMatches) {
-        context.report({
-          node: node as Node,
-          messageId: 'INVALID_TARGET',
-          data: {
-            request: req,
-            pluginId: manifest.plugin.id,
-            targets: targets.join(', '),
-          },
-        });
-      }
+        const targets = ['public', ...(manifest.plugin.extraPublicDirs ?? [])];
+
+        // When the importing file lives in common/ code, implicitly allow the
+        // remote plugin's common/ directory — common-to-common imports resolve
+        // via normal module resolution and are not routed through __kbnBundles__.
+        // Only public/ (browser package) code requires the target plugin to
+        // declare "common" in extraPublicDirs.
+        if (self.type === 'common package' && !targets.includes('common')) {
+          targets.push('common');
+        }
+
+        const targetMatches = targets.some(
+          (t) => parsed.target === t || parsed.target.startsWith(t + '/')
+        );
+        if (!targetMatches) {
+          context.report({
+            node,
+            messageId: 'INVALID_TARGET',
+            data: {
+              request: req,
+              pluginId: manifest.plugin.id,
+              targets: targets.join(', '),
+            },
+          });
+        }
+      };
     });
   },
 };

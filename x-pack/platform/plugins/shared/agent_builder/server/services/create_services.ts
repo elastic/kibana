@@ -110,6 +110,7 @@ export class ServiceManager {
       plugins: this.services.plugins.setup({ skillsSetup }),
       metering: this.services.metering,
       conversationTemplates: this.services.conversationTemplates.setup(),
+      callbacks: this.services.callbackDelivery.setup(),
     };
 
     return this.internalSetup;
@@ -209,6 +210,11 @@ export class ServiceManager {
       trackingService,
     });
 
+    const auditLogService = new AuditLogService({
+      security,
+      logger: logger.get('audit'),
+    });
+
     const conversations = new ConversationServiceImpl({
       logger: logger.get('conversations'),
       security,
@@ -217,6 +223,8 @@ export class ServiceManager {
       agents,
       eventBus: conversationEventBus,
       conversationEvents,
+      auditLogService,
+      analyticsService,
     });
 
     const runnerFactory = new RunnerFactoryImpl({
@@ -254,11 +262,6 @@ export class ServiceManager {
       elasticsearch,
       spaces,
       conversations,
-    });
-
-    const auditLogService = new AuditLogService({
-      security,
-      logger: logger.get('audit'),
     });
 
     const surfaces = new SurfacesServiceImpl({
@@ -302,6 +305,7 @@ export class ServiceManager {
       analyticsService,
       meteringService: this.services.metering,
       searchInferenceEndpoints,
+      callbackDeliveryService: this.services.callbackDelivery,
     });
 
     const consumption = this.services.consumption.start({ elasticsearch, spaces });
@@ -329,6 +333,7 @@ export class ServiceManager {
       plugins,
       consumption,
       searchInferenceEndpoints,
+      inference,
       callbackDeliveryService: this.services.callbackDelivery,
       spaceSettings,
       conversationTemplates: conversationTemplatesStart,

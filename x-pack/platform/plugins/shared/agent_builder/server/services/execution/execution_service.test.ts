@@ -25,6 +25,7 @@ import {
   ChatTriggerMode,
   ConversationOriginType,
   ConversationRoundStatus,
+  EventActorType,
   ExecutionStatus,
   TimelineEventType,
   createRequestAbortedError,
@@ -94,7 +95,9 @@ const mockTaskManagerSchedule = jest.fn();
 const mockTaskManagerEnsureScheduled = jest.fn();
 const mockTaskManagerRunSoon = jest.fn();
 
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { createAgentExecutionService } from './execution_service';
+import { CallbackDeliveryService } from './callback';
 import { ABORT_WAIT_FOR_TERMINAL_TIMEOUT_MS } from './constants';
 
 describe('AgentExecutionService', () => {
@@ -154,6 +157,10 @@ describe('AgentExecutionService', () => {
 
   const agentRegistry = createMockedAgentRegistry();
   const agentService = createAgentsServiceStartMock();
+  const callbackDeliveryService = new CallbackDeliveryService({
+    actions: actionsMock.createSetup(),
+  });
+  const resolveConversation = jest.spyOn(callbackDeliveryService, 'resolveConversation');
 
   const service = createAgentExecutionService({
     logger,
@@ -169,10 +176,12 @@ describe('AgentExecutionService', () => {
     savedObjects,
     meteringService,
     searchInferenceEndpoints,
+    callbackDeliveryService,
   });
 
   beforeEach(() => {
     jest.clearAllMocks();
+    resolveConversation.mockResolvedValue(undefined);
     getForFeature.mockResolvedValue({ endpoints: [], warnings: [], soEntryFound: false });
     agentService.getRegistry.mockResolvedValue(agentRegistry);
     agentRegistry.get.mockResolvedValue(createMockedInternalAgent({ id: 'agent-1' }));
@@ -287,6 +296,31 @@ describe('AgentExecutionService', () => {
     });
   });
 
+  describe('owner attribution', () => {
+    it('pins a service account owner with its principal type on the execution', async () => {
+      conversationClient.getUser.mockReturnValueOnce({
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account',
+        isAdmin: true,
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: { agentId: 'agent-1', nextInput: { message: 'hello' } },
+        useTaskManager: true,
+      });
+
+      expect(mockExecutionClient.create.mock.calls[0][0].owner).toEqual({
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account',
+      });
+    });
+  });
+
   describe('executeAgent with a caller-provided executionId', () => {
     it('throws when an execution with the same id already exists, regardless of its status', async () => {
       mockExecutionClient.create.mockRejectedValueOnce(conflictError());
@@ -356,6 +390,29 @@ describe('AgentExecutionService', () => {
             executionId: result.executionId,
             agentId: 'agent-1',
           }),
+        })
+      );
+    });
+
+    it("stores the workflow execution id with the execution's params, for round telemetry", async () => {
+      const request = httpServerMock.createKibanaRequest();
+      mockHandleAgentExecution.mockResolvedValue(of());
+      mockCollectAndWriteEvents.mockResolvedValue(undefined);
+
+      await service.executeAgent({
+        mode: AgentExecutionMode.conversation,
+        request,
+        params: {
+          agentId: 'agent-1',
+          nextInput: { message: 'hello' },
+          workflowExecutionId: 'workflow-run-1',
+        },
+        useTaskManager: false,
+      });
+
+      expect(mockExecutionClient.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agentParams: expect.objectContaining({ workflowExecutionId: 'workflow-run-1' }),
         })
       );
     });
@@ -792,14 +849,22 @@ describe('AgentExecutionService', () => {
       } as never);
 
       await service.abortExecution('exec-1', {
-        reason: { source: 'api', actor: { id: 'u1', username: 'alice' } },
+        reason: {
+          source: 'api',
+          actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+        },
         waitForTerminal: false,
       });
 
       expect(mockExecutionClient.updateStatus).toHaveBeenCalledWith(
         'exec-1',
         ExecutionStatus.aborted,
-        { abortReason: { source: 'api', actor: { id: 'u1', username: 'alice' } } }
+        {
+          abortReason: {
+            source: 'api',
+            actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+          },
+        }
       );
     });
 
@@ -825,7 +890,10 @@ describe('AgentExecutionService', () => {
         status: ExecutionStatus.running,
       } as never);
 
-      abortController.abort({ source: 'api', actor: { id: 'u1', username: 'alice' } });
+      abortController.abort({
+        source: 'api',
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      });
       await new Promise((resolve) => setTimeout(resolve, 10));
 
       // the client mock's create() answers with a fixed id, so match the aborted id loosely
@@ -836,7 +904,7 @@ describe('AgentExecutionService', () => {
           abortReason: {
             source: 'caller',
             parent_execution_id: 'parent-1',
-            actor: { id: 'u1', username: 'alice' },
+            actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
           },
         }
       );
@@ -1306,6 +1374,65 @@ describe('AgentExecutionService', () => {
       conversationClient.create.mockResolvedValue(conversation);
     });
 
+    describe('with an origin and no conversation id', () => {
+      const origin = {
+        type: ConversationOriginType.Slack,
+        external_conversation_id: 'thread-1',
+      };
+      const boundConversation = createEmptyConversation({
+        id: 'investigation-1',
+        agent_id: 'investigation-agent',
+        schema_version: CONVERSATION_SCHEMA_VERSION,
+      });
+
+      it('continues the conversation the origin resolves to, on the requested agent', async () => {
+        resolveConversation.mockResolvedValueOnce('investigation-1');
+        conversationClient.get.mockResolvedValueOnce(boundConversation);
+
+        await converse({ conversationId: undefined, origin });
+
+        expect(resolveConversation).toHaveBeenCalledWith(
+          {
+            origin: { type: ConversationOriginType.Slack, external_conversation_id: 'thread-1' },
+            spaceId: 'default',
+            request: expect.anything(),
+          },
+          conversationClient
+        );
+        expect(conversationClient.get).toHaveBeenCalledWith('investigation-1');
+        const [{ agentId, agentParams }] = mockExecutionClient.create.mock.calls[0];
+        expect(agentId).toBe('agent-1');
+        expect(agentParams).toMatchObject({
+          agentId: 'agent-1',
+          conversationId: 'investigation-1',
+          conversationOperation: 'UPDATE',
+        });
+      });
+
+      it('starts a conversation with the origin when nothing resolves it', async () => {
+        await converse({ conversationId: undefined, origin });
+
+        const [{ agentId, agentParams }] = mockExecutionClient.create.mock.calls[0];
+        expect(agentId).toBe('agent-1');
+        expect(agentParams).toMatchObject({ agentId: 'agent-1', conversationOperation: 'CREATE' });
+      });
+
+      it('does not resolve the origin when the request names its conversation', async () => {
+        await converse({ conversationId: 'conversation-1', origin });
+
+        expect(resolveConversation).not.toHaveBeenCalled();
+      });
+
+      it('propagates a resolver error', async () => {
+        resolveConversation.mockRejectedValueOnce(new Error('lookup failed'));
+
+        await expect(converse({ conversationId: undefined, origin })).rejects.toThrow(
+          'lookup failed'
+        );
+        expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      });
+    });
+
     it('writes the opening user message on the round it reserved', async () => {
       await converse();
 
@@ -1404,6 +1531,45 @@ describe('AgentExecutionService', () => {
         { source: 'execution' }
       );
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
+    });
+
+    it('attributes a conversation created for a sub-agent to the parent execution', async () => {
+      conversationClient.exists.mockResolvedValue(false);
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.running,
+        eventCount: 0,
+        agentId: 'parent-agent',
+        owner: { id: 'profile-1', username: 'alice' },
+      });
+
+      await converse({
+        conversationId: undefined,
+        autoCreateConversationWithId: true,
+        parentExecutionId: 'parent-1',
+      });
+
+      // The record id only names the parent for `peek`: it is not a conversation `execution_id`.
+      expect(mockExecutionClient.peek).toHaveBeenCalledWith('parent-1');
+      expect(conversationClient.create).toHaveBeenCalledWith(expect.anything(), {
+        source: 'execution',
+        activity: { actor: { type: EventActorType.agent, id: 'parent-agent' } },
+      });
+    });
+
+    it('creates with no attribution when the parent execution is no longer recorded', async () => {
+      conversationClient.exists.mockResolvedValue(false);
+      mockExecutionClient.peek.mockResolvedValueOnce(undefined);
+
+      await converse({
+        conversationId: undefined,
+        autoCreateConversationWithId: true,
+        parentExecutionId: 'parent-1',
+      });
+
+      expect(conversationClient.create).toHaveBeenCalledTimes(1);
+      expect(conversationClient.create).toHaveBeenCalledWith(expect.anything(), {
+        source: 'execution',
+      });
     });
 
     it('leaves a conversation paused on a prompt to the resume path', async () => {
