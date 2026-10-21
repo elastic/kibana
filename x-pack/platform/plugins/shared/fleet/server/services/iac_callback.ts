@@ -14,8 +14,8 @@ import {
   IAC_CALLBACK_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 import type {
-  IacCallback,
-  IacCallbackIdentity,
+  CloudConnectorCallback,
+  CloudConnectorCallbackIdentity,
   IacCallbackReceivedValues,
 } from '../../common/types/models/iac_callback';
 import type { CloudConnectorIacState } from '../../common/types/models/cloud_connector';
@@ -36,10 +36,10 @@ export interface CreateIacCallbackOptions {
   createdBy?: string;
   spaceId?: string;
   /** Name, account type and template details for the cloud connector created when the stack reports back. */
-  identity?: IacCallbackIdentity;
+  identity?: CloudConnectorCallbackIdentity;
 }
 
-const IDENTITY_FIELDS: Array<keyof IacCallbackIdentity> = [
+const IDENTITY_FIELDS: Array<keyof CloudConnectorCallbackIdentity> = [
   'connector_name',
   'account_type',
   'iac_key',
@@ -67,11 +67,11 @@ export interface IacCallbackReceiveInput {
 
 export type IacCallbackReceiveResult =
   /** Stored now, or an exact replay of what is already stored. */
-  | { outcome: 'received'; item: IacCallback }
+  | { outcome: 'received'; item: CloudConnectorCallback }
   /** No such record, or the caller's key is not the one bound to it. Indistinguishable on purpose. */
   | { outcome: 'not_found' }
   /** A different payload arrived after the record was already received. */
-  | { outcome: 'conflict'; item: IacCallback }
+  | { outcome: 'conflict'; item: CloudConnectorCallback }
   /** Past its expiry, or cancelled by the browser. */
   | { outcome: 'gone' }
   /** Fields are individually well-formed but disagree with each other. */
@@ -81,7 +81,7 @@ const RECEIVED_FIELDS: Array<keyof IacCallbackReceivedValues> = ['role_arn', 'st
 
 const accountIdOfArn = (arn: string): string | undefined => arn.split(':')[4];
 
-const toItem = (id: string, attributes: IacCallbackSOAttributes): IacCallback => {
+const toItem = (id: string, attributes: IacCallbackSOAttributes): CloudConnectorCallback => {
   // The API key id never leaves this service.
   const { api_key_id: _apiKeyId, ...rest } = attributes;
   return { id, ...rest };
@@ -112,7 +112,7 @@ class IacCallbackService {
     soClient: SavedObjectsClientContract,
     request: KibanaRequest,
     { provider, createdBy, spaceId, identity = {} }: CreateIacCallbackOptions
-  ): Promise<{ item: IacCallback; apiKey: string }> {
+  ): Promise<{ item: CloudConnectorCallback; apiKey: string }> {
     const id = uuidv4();
     const now = new Date();
 
@@ -184,7 +184,7 @@ class IacCallbackService {
   public async get(
     soClient: SavedObjectsClientContract,
     id: string
-  ): Promise<IacCallback | undefined> {
+  ): Promise<CloudConnectorCallback | undefined> {
     const so = await this.getSavedObject(soClient, id);
     return so ? toItem(so.id, so.attributes) : undefined;
   }
@@ -265,7 +265,7 @@ class IacCallbackService {
     id: string,
     attributes: IacCallbackSOAttributes,
     connector: CreatedCloudConnector
-  ): Promise<IacCallback> {
+  ): Promise<CloudConnectorCallback> {
     const update: Partial<IacCallbackSOAttributes> = {
       status: 'received',
       received_at: new Date().toISOString(),
@@ -320,7 +320,7 @@ class IacCallbackService {
   public async cancel(
     soClient: SavedObjectsClientContract,
     id: string
-  ): Promise<IacCallback | undefined> {
+  ): Promise<CloudConnectorCallback | undefined> {
     const so = await this.getSavedObject(soClient, id);
     if (!so) {
       return undefined;

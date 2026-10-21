@@ -14,8 +14,8 @@ import {
   useGetIacCallbackAvailabilityQuery,
 } from '../../../hooks/use_request/iac_callback';
 import type {
-  IacCallback,
-  IacCallbackIdentity,
+  CloudConnectorCallback,
+  CloudConnectorCallbackIdentity,
 } from '../../../../common/types/models/iac_callback';
 import type { AccountType } from '../../../../common/types/models/cloud_connector';
 import { IAC_PROVISIONER_API_ROUTES } from '../../../../common/constants';
@@ -78,13 +78,13 @@ export interface UseIacCallbackResult {
   cancel: () => Promise<IacCallbackCancelOutcome>;
 }
 
-const toCreated = (item: IacCallback): IacCallbackCreated | undefined =>
+const toCreated = (item: CloudConnectorCallback): IacCallbackCreated | undefined =>
   item.cloud_connector_id
     ? { id: item.cloud_connector_id, name: item.connector_name ?? item.cloud_connector_id }
     : undefined;
 
-const toIdentityBody = (identity: IacCallbackStartInput): IacCallbackIdentity => {
-  const body: IacCallbackIdentity = {};
+const toIdentityBody = (identity: IacCallbackStartInput): CloudConnectorCallbackIdentity => {
+  const body: CloudConnectorCallbackIdentity = {};
   const name = identity.connectorName?.trim();
   if (name) {
     body.connector_name = name;

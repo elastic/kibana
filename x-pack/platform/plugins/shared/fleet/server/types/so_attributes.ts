@@ -59,7 +59,7 @@ import type {
   DeploymentMethod,
   CloudOnboardingDeploymentStatus,
 } from '../../common/types/models/cloud_onboarding_deployment';
-import type { IacCallbackStatus } from '../../common/types/models/iac_callback';
+import type { CloudConnectorCallback } from '../../common/types/models/iac_callback';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
 
@@ -430,25 +430,8 @@ export interface CloudOnboardingDeploymentSOAttributes {
   apiKeyId?: string;
 }
 
-export interface IacCallbackSOAttributes {
-  provider: 'aws';
-  status: IacCallbackStatus;
+/** Stored shape of a callback record: the item without its id, plus the key binding. */
+export interface IacCallbackSOAttributes extends Omit<CloudConnectorCallback, 'id'> {
   /** Id of the record's API key. The key itself is never stored. */
   api_key_id: string;
-  created_at: string;
-  created_by?: string;
-  /** Space the launch happened in. The type is space-agnostic because the stack calls Kibana without a space. */
-  space_id?: string;
-  expires_at: string;
-  received_at?: string;
-  role_arn?: string;
-  stack_arn?: string;
-  /** Name for the cloud connector created when the stack reports back. */
-  connector_name?: string;
-  account_type?: 'single-account' | 'organization-account';
-  iac_key?: string | null;
-  iac_blueprint_id?: string | null;
-  iac_blueprint_version?: string | null;
-  /** Cloud connector created from this callback. Set together with status `received`. */
-  cloud_connector_id?: string;
 }

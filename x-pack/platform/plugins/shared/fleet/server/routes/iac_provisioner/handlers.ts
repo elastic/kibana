@@ -37,7 +37,7 @@ import type {
   GetIacCallbackRequestSchema,
   ReceiveIacCallbackRequestSchema,
 } from '../../types/rest_spec/iac_callback';
-import type { IacCallback } from '../../../common/types/models/iac_callback';
+import type { CloudConnectorCallback } from '../../../common/types/models/iac_callback';
 import type { IacProvisionerRenderFlow } from '../../../common/telemetry/iac_provisioner_events';
 
 export const renderIacTemplateHandler: FleetRequestHandler<
@@ -197,7 +197,7 @@ const CALLBACK_NOT_FOUND = { body: { message: 'Callback not found' } };
 const getCallbackInSpace = async (
   id: string,
   spaceId: string
-): Promise<IacCallback | undefined> => {
+): Promise<CloudConnectorCallback | undefined> => {
   const item = await iacCallbackService.get(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
     id

@@ -21,7 +21,7 @@ import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import { isAwsIdentityFederationEnabled } from '../../services/utils/aws_identity_federation';
 import { getIacCallbackAvailability } from '../../services/utils/iac_callback_availability';
 import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
-import type { IacCallback } from '../../../common/types/models/iac_callback';
+import type { CloudConnectorCallback } from '../../../common/types/models/iac_callback';
 import {
   reportIacProvisionerRenderCompleted,
   reportIacProvisionerRenderRequested,
@@ -470,7 +470,7 @@ const PAYLOAD = {
   stack_arn: 'arn:aws:cloudformation:us-east-1:123456789012:stack/elastic/uuid-1',
 };
 
-const ITEM: IacCallback = {
+const ITEM: CloudConnectorCallback = {
   id: 'cb-1',
   provider: 'aws',
   status: 'pending',

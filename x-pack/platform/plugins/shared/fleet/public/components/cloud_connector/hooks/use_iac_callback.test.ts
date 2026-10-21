@@ -13,7 +13,7 @@ import {
   sendGetIacCallback,
   useGetIacCallbackAvailabilityQuery,
 } from '../../../hooks/use_request/iac_callback';
-import type { IacCallback } from '../../../../common/types/models/iac_callback';
+import type { CloudConnectorCallback } from '../../../../common/types/models/iac_callback';
 import type { GetIacCallbackAvailabilityResponse } from '../../../../common/types/rest_spec/iac_callback';
 
 import {
@@ -32,7 +32,10 @@ const mockedDelete = jest.mocked(sendDeleteIacCallback);
 const NOW = new Date('2026-10-13T10:00:00.000Z');
 const EXPIRES_AT = '2026-10-13T12:00:00.000Z';
 
-const pendingItem = (id = 'cb-1', overrides: Partial<IacCallback> = {}): IacCallback => ({
+const pendingItem = (
+  id = 'cb-1',
+  overrides: Partial<CloudConnectorCallback> = {}
+): CloudConnectorCallback => ({
   id,
   provider: 'aws',
   status: 'pending',

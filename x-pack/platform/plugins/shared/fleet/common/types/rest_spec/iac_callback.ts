@@ -6,8 +6,8 @@
  */
 
 import type {
-  IacCallback,
-  IacCallbackIdentity,
+  CloudConnectorCallback,
+  CloudConnectorCallbackIdentity,
   IacCallbackReceivedValues,
   IacCallbackStatus,
 } from '../models/iac_callback';
@@ -23,13 +23,13 @@ export interface GetIacCallbackAvailabilityResponse {
 }
 
 export interface CreateIacCallbackRequest {
-  body: IacCallbackIdentity & {
+  body: CloudConnectorCallbackIdentity & {
     provider: 'aws';
   };
 }
 
 export interface CreateIacCallbackResponse {
-  item: IacCallback;
+  item: CloudConnectorCallback;
   /** Base64 `id:api_key`, returned exactly once. Passed to the stack as a parameter; never persisted. */
   api_key: string;
 }
@@ -39,7 +39,7 @@ export interface GetIacCallbackRequest {
 }
 
 export interface GetIacCallbackResponse {
-  item: IacCallback;
+  item: CloudConnectorCallback;
 }
 
 export interface DeleteIacCallbackRequest {
@@ -48,7 +48,7 @@ export interface DeleteIacCallbackRequest {
 
 /** The record as left by the cancel: `cancelled`, or untouched when the stack had already reported. */
 export interface DeleteIacCallbackResponse {
-  item: IacCallback;
+  item: CloudConnectorCallback;
 }
 
 export interface ReceiveIacCallbackRequest {
