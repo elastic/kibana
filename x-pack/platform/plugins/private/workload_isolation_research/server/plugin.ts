@@ -26,6 +26,7 @@ import { registerTierBRoutes, registerTierBTasks } from './tier_b';
 import { registerMockLlmRoute } from './tier_b/canned_llm';
 import { API_BASE } from './routes';
 import { registerT7aRoutes } from './t7a/routes';
+import { runsOnBackgroundTasks, startResearchRuntime } from './t7a/runtime';
 import type { PlatformStatusSource, T7aController, T7aDeps } from './t7a/main_host';
 
 interface SetupDeps {
@@ -48,6 +49,7 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
   private readonly recorder: Recorder;
   private ticks?: TickScheduler;
   private t7a?: Promise<T7aController | undefined>;
+  private runtime?: { stop: () => void };
   private analyticsSetup?: { registerEventType: (definition: unknown) => void };
   private readonly statusSource: PlatformStatusSource = {
     elasticsearch: 'unknown',
@@ -111,10 +113,18 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
     }
     const router = core.http.createRouter();
     registerTierBRoutes(router, API_BASE, getRecorder, getStart);
-    registerT7aRoutes(router, API_BASE, async () => {
-      await core.getStartServices();
-      return this.t7a;
-    });
+    registerT7aRoutes(
+      router,
+      API_BASE,
+      async () => {
+        await core.getStartServices();
+        return this.t7a;
+      },
+      async () => {
+        const [coreStart] = await core.getStartServices();
+        return coreStart.elasticsearch.client.asInternalUser;
+      }
+    );
     registerMockLlmRoute(router, API_BASE, this.config.mockLlm, async () => {
       const [coreStart] = await core.getStartServices();
       return coreStart.elasticsearch.client.asInternalUser;
@@ -160,12 +170,20 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
             this.analyticsSetup
           )
       );
+      if (runsOnBackgroundTasks(process.env.NODE_ROLES)) {
+        this.runtime = startResearchRuntime({
+          es: core.elasticsearch.client.asInternalUser,
+          getController: () => this.t7a ?? Promise.resolve(undefined),
+          logger: this.logger.get('t7p-runtime'),
+        });
+      }
     }
     this.recorder.start();
     this.recorder.startPush(async () => core.elasticsearch.client.asInternalUser);
   }
 
   public async stop(): Promise<void> {
+    this.runtime?.stop();
     this.ticks?.stop();
     await this.recorder.stop();
   }

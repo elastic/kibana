@@ -130,6 +130,7 @@ export class ExecutionHost {
     private readonly registry: ModuleRegistry,
     private readonly options: {
       readonly transport?: 'thread' | 'process';
+      readonly processOldSpaceMb?: number;
       readonly slotsPerClass?: number;
       readonly concurrencyPerClass?: Readonly<Record<string, number>>;
       readonly maxQueuePerClass?: number;
@@ -276,7 +277,10 @@ export class ExecutionHost {
     if (!idle && slots.length < (this.options.slotsPerClass ?? 1)) {
       let endpoint: Endpoint;
       try {
-        endpoint = this.endpointFactory(this.options.transport ?? 'thread');
+        endpoint = this.endpointFactory(
+          this.options.transport ?? 'thread',
+          this.options.processOldSpaceMb
+        );
       } catch (error) {
         const execution = queue.shift();
         if (execution)

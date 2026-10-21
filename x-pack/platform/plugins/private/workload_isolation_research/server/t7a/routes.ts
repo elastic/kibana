@@ -8,14 +8,24 @@
 /* RESEARCH ONLY (Track 7.A). Control routes for the alerting class pool (superuser, internal). */
 
 import { schema } from '@kbn/config-schema';
-import type { IRouter } from '@kbn/core/server';
+import type { ElasticsearchClient, IRouter } from '@kbn/core/server';
 import { ReservedPrivilegesSet } from '@kbn/core/server';
 import type { T7aController } from './main_host';
+import {
+  CHILD_CAP_MAX,
+  CHILD_CAP_MIN,
+  buildRuntimeDoc,
+  bumpSampleRequest,
+  readCgroupSamples,
+  readRuntimeDoc,
+  writeRuntimeDoc,
+} from './runtime';
 
 export const registerT7aRoutes = (
   router: IRouter,
   base: string,
-  getController: () => Promise<T7aController | undefined>
+  getController: () => Promise<T7aController | undefined>,
+  getEs: () => Promise<ElasticsearchClient>
 ): void => {
   const security = { authz: { requiredPrivileges: [ReservedPrivilegesSet.superuser] } };
   const options = { access: 'internal' } as const;
@@ -103,5 +113,116 @@ export const registerT7aRoutes = (
   router.post(
     { path: `${base}/t7a/host/_stop`, security, options, validate: false },
     withController((c) => c.stopHost()) as never
+  );
+
+  const runtimeError = (error: unknown) => ({
+    statusCode: 500 as const,
+    body: {
+      message: error instanceof Error ? error.name : 'research runtime failed',
+    },
+  });
+
+  router.post(
+    {
+      path: `${base}/t7a/runtime`,
+      security,
+      options,
+      validate: {
+        body: schema.object({
+          mode: schema.oneOf([schema.literal('main'), schema.literal('offmain-process')]),
+          childCapMb: schema.maybe(schema.number({ min: CHILD_CAP_MIN, max: CHILD_CAP_MAX })),
+          localSo: schema.maybe(schema.boolean()),
+        }),
+      },
+    },
+    (async (
+      _ctx: unknown,
+      request: {
+        body: { mode: 'main' | 'offmain-process'; childCapMb?: number; localSo?: boolean };
+      },
+      response: {
+        ok: (o: { body: unknown }) => unknown;
+        customError: (o: { statusCode: number; body: { message: string } }) => unknown;
+      }
+    ) => {
+      try {
+        const es = await getEs();
+        const doc = buildRuntimeDoc(await readRuntimeDoc(es), request.body);
+        await writeRuntimeDoc(es, doc);
+        return response.ok({ body: doc });
+      } catch (error) {
+        return response.customError(runtimeError(error));
+      }
+    }) as never
+  );
+
+  router.get({ path: `${base}/t7a/runtime`, security, options, validate: false }, (async (
+    _ctx: unknown,
+    _request: unknown,
+    response: {
+      ok: (o: { body: unknown }) => unknown;
+      customError: (o: { statusCode: number; body: { message: string } }) => unknown;
+    }
+  ) => {
+    try {
+      const doc = await readRuntimeDoc(await getEs());
+      return response.ok({
+        body: doc ?? {
+          generation: 0,
+          mode: 'main',
+          childCapMb: 384,
+          localSo: true,
+          sampleRequest: 0,
+        },
+      });
+    } catch (error) {
+      return response.customError(runtimeError(error));
+    }
+  }) as never);
+
+  router.post({ path: `${base}/t7a/runtime/_sample`, security, options, validate: false }, (async (
+    _ctx: unknown,
+    _request: unknown,
+    response: {
+      ok: (o: { body: unknown }) => unknown;
+      customError: (o: { statusCode: number; body: { message: string } }) => unknown;
+    }
+  ) => {
+    try {
+      const es = await getEs();
+      const doc = bumpSampleRequest(await readRuntimeDoc(es));
+      await writeRuntimeDoc(es, doc);
+      return response.ok({ body: doc });
+    } catch (error) {
+      return response.customError(runtimeError(error));
+    }
+  }) as never);
+
+  router.get(
+    {
+      path: `${base}/t7a/cgroup`,
+      security,
+      options,
+      validate: {
+        query: schema.object({
+          size: schema.maybe(schema.number({ min: 1, max: 100 })),
+        }),
+      },
+    },
+    (async (
+      _ctx: unknown,
+      request: { query: { size?: number } },
+      response: {
+        ok: (o: { body: unknown }) => unknown;
+        customError: (o: { statusCode: number; body: { message: string } }) => unknown;
+      }
+    ) => {
+      try {
+        const samples = await readCgroupSamples(await getEs(), request.query.size ?? 20);
+        return response.ok({ body: { samples } });
+      } catch (error) {
+        return response.customError(runtimeError(error));
+      }
+    }) as never
   );
 };

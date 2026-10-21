@@ -98,6 +98,8 @@ export interface T7aConfig {
   readonly deadlineMs: number;
   /** D: isolate-local SO repository + co-located ESO (else async SO/ESO bridges to main). */
   readonly localSo: boolean;
+  /** Process-child V8 old space, in MiB. Beats T7P_PROCESS_OLD_SPACE_MB when the child forks. */
+  readonly processOldSpaceMb?: number;
 }
 
 interface EdgeAgg {
@@ -211,7 +213,8 @@ export class T7aController {
       previous.slots !== this.config.slots ||
       previous.concurrency !== this.config.concurrency ||
       previous.abortGraceMs !== this.config.abortGraceMs ||
-      previous.localSo !== this.config.localSo;
+      previous.localSo !== this.config.localSo ||
+      previous.processOldSpaceMb !== this.config.processOldSpaceMb;
     if (hostChanged || this.config.mode === 'main') await this.stopHost();
     return this.config;
   }
@@ -281,6 +284,7 @@ export class T7aController {
     if (!this.host) {
       this.host = new ExecutionHost(this.registry, {
         transport: this.config.transport,
+        processOldSpaceMb: this.config.processOldSpaceMb,
         slotsPerClass: this.config.slots,
         concurrencyPerClass: { [WORKLOAD_CLASS]: this.config.concurrency },
         maxQueuePerClass: 1000,

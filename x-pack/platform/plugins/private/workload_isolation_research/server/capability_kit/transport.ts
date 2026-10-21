@@ -18,11 +18,20 @@ export interface Endpoint {
 
 /**
  * A forked child is a new process, so its argv `--max-old-space-size` is its own
- * V8 flag. Unset, the child keeps the parent's execArgv.
+ * V8 flag. An explicit cap beats the image env. Unset, the child keeps the parent's execArgv.
  */
-const processForkOptions = (): { execArgv?: string[]; env?: NodeJS.ProcessEnv } => {
-  const raw = process.env.T7P_PROCESS_OLD_SPACE_MB;
-  if (!raw || !/^[1-9]\d{0,4}$/.test(raw)) return {};
+export const resolveChildOldSpaceMb = (
+  cap: number | undefined,
+  envValue: string | undefined
+): string | undefined => {
+  if (cap != null && Number.isInteger(cap) && cap >= 128 && cap <= 2048) return String(cap);
+  if (envValue && /^[1-9]\d{0,4}$/.test(envValue)) return envValue;
+  return undefined;
+};
+
+const processForkOptions = (cap?: number): { execArgv?: string[]; env?: NodeJS.ProcessEnv } => {
+  const raw = resolveChildOldSpaceMb(cap, process.env.T7P_PROCESS_OLD_SPACE_MB);
+  if (!raw) return {};
   const env: NodeJS.ProcessEnv = { ...process.env };
   if (typeof env.NODE_OPTIONS === 'string') {
     env.NODE_OPTIONS = env.NODE_OPTIONS.replace(/--max-old-space-size(?:=|\s+)\d+/g, '').trim();
@@ -37,7 +46,10 @@ const processForkOptions = (): { execArgv?: string[]; env?: NodeJS.ProcessEnv } 
 };
 
 /** Adapts thread ports and advanced-serialization child IPC to the same protocol. */
-export const startEndpoint = (transport: 'thread' | 'process'): Endpoint => {
+export const startEndpoint = (
+  transport: 'thread' | 'process',
+  processOldSpaceMb?: number
+): Endpoint => {
   const entry = require.resolve('./worker_bootstrap');
   if (transport === 'thread') {
     const worker = new Worker(entry);
@@ -58,7 +70,7 @@ export const startEndpoint = (transport: 'thread' | 'process'): Endpoint => {
   const child = fork(entry, [], {
     serialization: 'advanced',
     stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
-    ...processForkOptions(),
+    ...processForkOptions(processOldSpaceMb),
   });
   child.on('error', () => undefined);
   return {
