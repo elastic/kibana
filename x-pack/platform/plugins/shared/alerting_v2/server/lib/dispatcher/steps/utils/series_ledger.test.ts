@@ -47,7 +47,7 @@ describe('SeriesLedger', () => {
   });
 
   it.each([
-    ['suppressed', { suppressed: [{ ...alertA, reason: 'ack' }] }],
+    ['suppressed', { suppressed: [{ ...alertA, reason: 'ack', action_subtype: 'ack' as const }] }],
     ['throttled', { throttled: [createActionGroup({ alerts: [alertA] })] }],
     ['already notified', { alreadyNotified: [createActionGroup({ alerts: [alertA] })] }],
     ['unmatched', { unmatched: [alertA] }],
@@ -63,7 +63,7 @@ describe('SeriesLedger', () => {
       last_event_timestamp: '2026-01-22T07:12:00.000Z',
     });
     const ledger = buildLedger({
-      suppressed: [{ ...alertA, reason: 'snoozed' }],
+      suppressed: [{ ...alertA, reason: 'snoozed', action_subtype: 'snooze' }],
       throttled: [createActionGroup({ id: 'g-t', policyId: 'p-t', alerts: [alertB] })],
       alreadyNotified: [createActionGroup({ id: 'g-n', policyId: 'p-n', alerts: [alertC] })],
       unmatched: [alertD],
@@ -73,6 +73,7 @@ describe('SeriesLedger', () => {
       {
         actor: { type: 'internal' },
         action_type: 'suppress',
+        action_subtype: 'snooze',
         group_hash: 'hash-a',
         rule_id: 'rule-1',
         source: 'internal',
@@ -83,6 +84,7 @@ describe('SeriesLedger', () => {
       expect.objectContaining({
         group_hash: 'hash-b',
         action_type: 'suppress',
+        action_subtype: 'throttled',
         reason: 'suppressed by throttled policy p-t',
       }),
       expect.objectContaining({
@@ -243,8 +245,16 @@ describe('SeriesLedger', () => {
     it('takes the space_id of each record from its alert', () => {
       const ledger = buildLedger({
         suppressed: [
-          { ...createAlert({ space_id: 'space-a', group_hash: 'hash-1' }), reason: 'suppressed' },
-          { ...createAlert({ space_id: 'space-b', group_hash: 'hash-2' }), reason: 'suppressed' },
+          {
+            ...createAlert({ space_id: 'space-a', group_hash: 'hash-1' }),
+            reason: 'suppressed',
+            action_subtype: 'unknown',
+          },
+          {
+            ...createAlert({ space_id: 'space-b', group_hash: 'hash-2' }),
+            reason: 'suppressed',
+            action_subtype: 'unknown',
+          },
         ],
       });
 
@@ -252,6 +262,44 @@ describe('SeriesLedger', () => {
         'space-a',
         'space-b',
       ]);
+    });
+
+    it('records the maintenance window id on a suppress record', () => {
+      const ledger = buildLedger({
+        suppressed: [
+          {
+            ...alertA,
+            reason: 'maintenance_window:mw-1',
+            action_subtype: 'maintenance_window',
+            maintenance_window_id: 'mw-1',
+          },
+        ],
+      });
+
+      expect(ledger.takeReady()).toEqual([
+        expect.objectContaining({
+          action_type: 'suppress',
+          action_subtype: 'maintenance_window',
+          reason: 'maintenance_window:mw-1',
+          maintenance_window_id: 'mw-1',
+        }),
+      ]);
+    });
+
+    it('omits maintenance_window_id and action_subtype where they do not apply', () => {
+      const group = createActionGroup({ id: 'g1', alerts: [alertB] });
+      const ledger = buildLedger({
+        suppressed: [{ ...alertA, reason: 'ack', action_subtype: 'ack' }],
+        toDispatch: [group],
+        unmatched: [createAlert({ alert_id: 'alert-c', group_hash: 'hash-c' })],
+      });
+
+      const [suppress, unmatched] = ledger.takeReady();
+      const [fire] = ledger.conclude([group]);
+
+      expect(suppress).not.toHaveProperty('maintenance_window_id');
+      expect(unmatched).not.toHaveProperty('action_subtype');
+      expect(fire).not.toHaveProperty('action_subtype');
     });
   });
 });

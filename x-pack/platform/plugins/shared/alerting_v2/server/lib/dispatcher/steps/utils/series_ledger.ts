@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { AlertActionDocument } from '../../../../resources/datastreams/alert_actions';
+import {
+  alertActionSubtype,
+  type AlertActionDocument,
+} from '../../../../resources/datastreams/alert_actions';
 import type { AlertTriage, DispatchPlan } from '../../state';
 import type { ActionGroup, ActionGroupId, Alert } from '../../types';
 import { toAction } from './action_documents';
@@ -55,7 +58,8 @@ export class SeriesLedger {
     const record = (
       alert: Alert,
       actionType: 'suppress' | 'fire' | 'unmatched',
-      reason: string
+      reason: string,
+      details: Pick<Parameters<typeof toAction>[0], 'actionSubtype' | 'maintenanceWindowId'> = {}
     ): SeriesRecords => {
       const key = suppressionSeriesKey(alert);
       let records = recordsBySeries.get(key);
@@ -63,16 +67,23 @@ export class SeriesLedger {
         records = { docs: [], unconcludedPairs: 0, released: false };
         recordsBySeries.set(key, records);
       }
-      records.docs.push(toAction({ alert, actionType, reason, spaceId: alert.space_id }));
+      records.docs.push(
+        toAction({ alert, actionType, reason, spaceId: alert.space_id, ...details })
+      );
       return records;
     };
 
     for (const alert of triage.suppressed) {
-      record(alert, 'suppress', alert.reason);
+      record(alert, 'suppress', alert.reason, {
+        actionSubtype: alert.action_subtype,
+        maintenanceWindowId: alert.maintenance_window_id,
+      });
     }
     for (const { policyId, alerts } of plan.throttled) {
       for (const alert of alerts) {
-        record(alert, 'suppress', `suppressed by throttled policy ${policyId}`);
+        record(alert, 'suppress', `suppressed by throttled policy ${policyId}`, {
+          actionSubtype: alertActionSubtype.throttled,
+        });
       }
     }
     // Only toDispatch alerts hold their series back: every other record describes a decision

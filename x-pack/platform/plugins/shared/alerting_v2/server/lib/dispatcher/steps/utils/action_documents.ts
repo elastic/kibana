@@ -8,19 +8,24 @@
 import {
   alertActionActorType,
   type AlertActionDocument,
+  type AlertActionSubtype,
 } from '../../../../resources/datastreams/alert_actions';
 import type { ActionGroup, ActionPolicy, Alert } from '../../types';
 
 export function toAction({
   alert,
   actionType,
+  actionSubtype,
   reason,
   spaceId,
+  maintenanceWindowId,
 }: {
   alert: Alert;
   actionType: 'suppress' | 'fire' | 'notified' | 'unmatched';
+  actionSubtype?: AlertActionSubtype;
   reason?: string;
   spaceId: string;
+  maintenanceWindowId?: string;
 }): AlertActionDocument {
   return {
     group_hash: alert.group_hash,
@@ -31,6 +36,8 @@ export function toAction({
     source: alert.source,
     reason,
     space_id: spaceId,
+    ...(actionSubtype !== undefined && { action_subtype: actionSubtype }),
+    ...(maintenanceWindowId !== undefined && { maintenance_window_id: maintenanceWindowId }),
   };
 }
 

@@ -1109,7 +1109,9 @@ describe('DispatchStep', () => {
 
         await createStep().execute(
           createDispatcherPipelineState({
-            suppressed: [{ ...suppressedAlert, reason: 'manually suppressed' }],
+            suppressed: [
+              { ...suppressedAlert, reason: 'manually suppressed', action_subtype: 'unknown' },
+            ],
             throttled: [
               createActionGroup({
                 id: 'throttled-group',
@@ -1131,11 +1133,13 @@ describe('DispatchStep', () => {
         expect(docsOfCommit(0)).toEqual([
           expect.objectContaining({
             action_type: 'suppress',
+            action_subtype: 'unknown',
             group_hash: 'hash-suppressed',
             reason: 'manually suppressed',
           }),
           expect.objectContaining({
             action_type: 'suppress',
+            action_subtype: 'throttled',
             group_hash: 'hash-throttled',
             reason: 'suppressed by throttled policy throttle-policy',
           }),
@@ -1244,7 +1248,7 @@ describe('DispatchStep', () => {
           createDispatcherPipelineState({
             dispatch: [groupFor(0)],
             throttled: [createActionGroup({ id: 'g-t', policyId: 'p1', alerts: [alertFor(901)] })],
-            suppressed: [{ ...alertFor(900), reason: 'ack' }],
+            suppressed: [{ ...alertFor(900), reason: 'ack', action_subtype: 'ack' }],
             dispatchable: [alertFor(0), alertFor(901), unmatched],
             policies,
           }),
@@ -1361,7 +1365,7 @@ describe('DispatchStep', () => {
         const result = await createStep().execute(
           createDispatcherPipelineState({
             dispatch: [groupFor(0)],
-            suppressed: [{ ...alertFor(900), reason: 'ack' }],
+            suppressed: [{ ...alertFor(900), reason: 'ack', action_subtype: 'ack' }],
             dispatchable: [alertFor(0), alertFor(901)],
             policies,
             input: createDispatcherPipelineInput({ signal: controller.signal }),
@@ -1409,7 +1413,7 @@ describe('DispatchStep', () => {
         const result = await createStep().execute(
           createDispatcherPipelineState({
             dispatch: [groupFor(0)],
-            suppressed: [{ ...alertFor(900), reason: 'ack' }],
+            suppressed: [{ ...alertFor(900), reason: 'ack', action_subtype: 'ack' }],
             dispatchable: [alertFor(0)],
             policies,
           }),
@@ -1491,7 +1495,7 @@ describe('DispatchStep', () => {
               createActionGroup({ id: 'g-no-key', policyId: 'p2', alerts: [alertFor(1)] }),
               groupFor(0),
             ],
-            suppressed: [{ ...alertFor(900), reason: 'ack' }],
+            suppressed: [{ ...alertFor(900), reason: 'ack', action_subtype: 'ack' }],
             dispatchable: [alertFor(0), alertFor(1)],
             policies: new Map([
               ['p1', policy],
