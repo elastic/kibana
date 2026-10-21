@@ -9,7 +9,7 @@ import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 export const NIGHTSHIFT_DEFAULT_MODELS = {
   discovery: defaultInferenceEndpoints.OPENAI_GPT_5_4,
-  investigation: defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
+  investigation: defaultInferenceEndpoints.ANTHROPIC_CLAUDE_5_5_SONNET,
   kiExtraction: defaultInferenceEndpoints.OPENAI_GPT_5_4,
   kiQueryGeneration: defaultInferenceEndpoints.ANTHROPIC_CLAUDE_4_6_SONNET,
 } as const;

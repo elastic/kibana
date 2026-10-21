@@ -7,12 +7,7 @@
 
 import type { RunContextStackEntry } from '@kbn/agent-builder-server';
 import type { SignalEntry, SignificantEvent } from '@kbn/significant-events-schema';
-import {
-  MAX_ASSESSMENT_NOTE_LENGTH,
-  MAX_SIGNAL_DESCRIPTION_LENGTH,
-  MAX_SUMMARY_LENGTH,
-  MAX_SYMPTOM_HYPOTHESIS_LENGTH,
-} from '@kbn/significant-events-schema';
+import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
@@ -674,7 +669,7 @@ describe('eventsWriteItemSchema', () => {
       {
         type: 'detection',
         source_id: 'logs.test',
-        description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH),
+        description: 'x'.repeat(MAX_TEXT_LENGTH),
         verdict: 'confirms',
         evidence: { esql_query: 'FROM logs.test', result: 'found' },
         metadata: {
@@ -720,15 +715,13 @@ describe('eventsWriteItemSchema', () => {
     [
       'signal description',
       {
-        signals: [
-          { ...validItem.signals[0], description: 'x'.repeat(MAX_SIGNAL_DESCRIPTION_LENGTH + 1) },
-        ],
+        signals: [{ ...validItem.signals[0], description: 'x'.repeat(MAX_TEXT_LENGTH + 1) }],
       },
     ],
-    ['symptom_hypothesis', { symptom_hypothesis: 'x'.repeat(MAX_SYMPTOM_HYPOTHESIS_LENGTH + 1) }],
-    ['summary', { summary: 'x'.repeat(MAX_SUMMARY_LENGTH + 1) }],
-    ['assessment_note', { assessment_note: 'x'.repeat(MAX_ASSESSMENT_NOTE_LENGTH + 1) }],
-  ])('rejects %s exceeding the length limit', (_, overrides) => {
+    ['symptom_hypothesis', { symptom_hypothesis: 'x'.repeat(MAX_TEXT_LENGTH + 1) }],
+    ['summary', { summary: 'x'.repeat(MAX_TEXT_LENGTH + 1) }],
+    ['assessment_note', { assessment_note: 'x'.repeat(MAX_TEXT_LENGTH + 1) }],
+  ])('rejects %s exceeding the maximum text length', (_, overrides) => {
     expect(eventsWriteItemSchema.safeParse({ ...validItem, ...overrides }).success).toBe(false);
   });
 });

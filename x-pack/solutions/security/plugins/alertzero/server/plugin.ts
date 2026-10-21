@@ -16,6 +16,7 @@ import {
   type PluginInitializerContext,
 } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentService } from '@kbn/fleet-plugin/server';
 import {
@@ -51,6 +52,7 @@ import { registerAlertZeroInferenceFeatures } from './inference_features';
 import { registerUiSettings } from './ui_settings';
 import { registerRoutes } from './routes/register_routes';
 import { registerOwner } from './managed_workflows/register_owner';
+import { registerInvestigationsAiIndex } from './context_engine/register_investigations_ai_index';
 import { initializeManagedWorkflows } from './managed_workflows/initialize_managed_workflows';
 import { installRegisteredWorkerForRequest } from './managed_workflows/worker_registry';
 import { WatchesService } from './services/watches/watches_service';
@@ -66,11 +68,20 @@ import { createAssertAlertZeroAccess } from './agent_builder_tools/assert_alertz
 import { agentType, ensureAgent, ensureAgentSafe, registerAgentType } from './agent';
 import { createActionDiscoverySkill } from './agent_builder/skills/action_discovery';
 import { registerAttachments } from './agent_builder/attachments/register_attachments';
-import { registerStepDefinitions } from './step_types';
 import { makeIsContextEngineEnabled } from './step_types/is_context_engine_enabled';
 import { makeScopedResolveHostEnrollment } from './services/fleet/resolve_host_enrollment';
 import { enumerateSpaceIds } from './lib/enumerate_space_ids';
 import { ThreatIntelSupplyService } from './services/threat_intel_supply';
+import {
+  createAlertZeroTelemetryReporter,
+  readTelemetryOptIn,
+  registerAlertZeroTelemetryEvents,
+} from './telemetry';
+import {
+  REPORT_STEP_OPT_IN_TIMEOUT_MS,
+  registerAlertZeroStepDefinitions,
+  registerStepDefinitions,
+} from './step_types';
 
 export class AlertZeroPlugin
   implements
@@ -92,6 +103,8 @@ export class AlertZeroPlugin
   private spaces?: AlertZeroStartDependencies['spaces'];
   private taskManager?: AlertZeroStartDependencies['taskManager'];
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
+  /** Resolved during `start`; the report step awaits it for its owner-bound managed check. */
+  private managedWorkflows?: Promise<PluginScopedManagedWorkflowsApi | undefined>;
 
   /** Created during `start`; routes resolve them lazily after managed-workflow initialization. */
   private watchesService?: WatchesService;
@@ -105,6 +118,9 @@ export class AlertZeroPlugin
   private agentBuilderExecution?: NonNullable<
     AlertZeroStartDependencies['agentBuilder']
   >['execution'];
+  private agentBuilderAttachments?: NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['attachments'];
   private searchInferenceEndpoints?: AlertZeroStartDependencies['searchInferenceEndpoints'];
   private huntServices?: HuntServices;
   private fleetAgentService?: AgentService;
@@ -143,6 +159,7 @@ export class AlertZeroPlugin
       agentBuilder,
       proposals,
       agenticInvestigations,
+      contextEngine,
       features,
       searchInferenceEndpoints,
       workflowsExtensions,
@@ -159,11 +176,34 @@ export class AlertZeroPlugin
     // Registered inside the config guard so the deployment kill switch removes the setting
     // entirely; `withAlertZeroEnabled` then never reads an unregistered key.
     registerUiSettings(coreSetup.uiSettings);
+    // Inside the guard too: with the kill switch off, no AlertZero event type exists to report.
+    registerAlertZeroTelemetryEvents(coreSetup.analytics);
 
     this.workflowsManagementApi = workflowsManagement.management;
 
     // Missing runtime dependencies must not make installed workflows eligible for orphan cleanup.
     registerOwner({ workflowsExtensions });
+    if (contextEngine) {
+      registerInvestigationsAiIndex({ contextEngine });
+    }
+    // Outside the optional-plugin guard below: the browser offers this step whenever AlertZero is
+    // enabled, and an unregistered step type fails the run before `on-failure: continue` applies.
+    // The handler reports only for a managed Worker, which needs those plugins.
+    registerAlertZeroStepDefinitions({
+      analytics: coreSetup.analytics,
+      areServiceAccountsEnabled: () => this.serviceAccountsEnabled,
+      getManagedWorkflowState: async () => this.managedWorkflows,
+      getWorkflowsManagement: () => this.workflowsManagementApi,
+      isTelemetryOptedIn: async () => {
+        const [, { telemetry }] = await coreSetup.getStartServices();
+        return readTelemetryOptIn({
+          isOptedIn$: telemetry?.isOptedIn$,
+          timeoutMs: REPORT_STEP_OPT_IN_TIMEOUT_MS,
+        });
+      },
+      logger: this.logger.get('telemetry'),
+      workflowsExtensions,
+    });
     if (agentBuilder && proposals && agenticInvestigations) {
       const assertAlertZeroAccess = createAssertAlertZeroAccess(async () => {
         const [core, { security }] = await coreSetup.getStartServices();
@@ -269,9 +309,14 @@ export class AlertZeroPlugin
       getConversationProposalsService: () => this.requireConversationProposalsService(),
       getActionsService: () => this.requireActionsService(),
       getAgentBuilderConversations: () => this.requireAgentBuilderConversations(),
+      getAgentBuilderAttachments: () => this.requireAgentBuilderAttachments(),
       getHuntServices: () => this.requireHuntServices(),
       getScanFailuresService: () => this.requireScanFailuresService(),
       getThreatIntelSupplyService: () => this.threatIntelSupplyService,
+      reportTelemetryEvent: createAlertZeroTelemetryReporter({
+        analytics: coreSetup.analytics,
+        logger: this.logger.get('telemetry'),
+      }),
     });
 
     return { isEnabled: true, setServerlessTierAvailable: this.setServerlessTierAvailable };
@@ -285,6 +330,7 @@ export class AlertZeroPlugin
     this.proposals = plugins.proposals;
     this.agentBuilderConversations = plugins.agentBuilder?.conversations;
     this.agentBuilderExecution = plugins.agentBuilder?.execution;
+    this.agentBuilderAttachments = plugins.agentBuilder?.attachments;
     this.searchInferenceEndpoints = plugins.searchInferenceEndpoints;
 
     if (!this.config.enabled) {
@@ -317,6 +363,7 @@ export class AlertZeroPlugin
       );
       return undefined;
     });
+    this.managedWorkflows = managedWorkflows;
 
     this.conversationProposalsService = new ConversationProposalsService(
       proposals.getProposalsService(),
@@ -423,6 +470,12 @@ export class AlertZeroPlugin
     AlertZeroStartDependencies['agentBuilder']
   >['execution'] {
     return this.requireStarted(this.agentBuilderExecution, 'agentBuilder.execution');
+  }
+
+  private requireAgentBuilderAttachments(): NonNullable<
+    AlertZeroStartDependencies['agentBuilder']
+  >['attachments'] {
+    return this.requireStarted(this.agentBuilderAttachments, 'agentBuilder.attachments');
   }
 
   private async resolveSummaryConnectorId(request: KibanaRequest): Promise<string | undefined> {
