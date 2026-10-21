@@ -17,6 +17,8 @@ export interface FakeReplayerSession extends ReplayerSession {
   readonly appended: ReplayEvent[];
   readonly speed: () => number;
   readonly destroyed: () => boolean;
+  /** Moves the playhead as the passing of time would while playing. */
+  advanceTo: (offsetMs: number) => void;
   /** Triggers the end-of-playback callback as rrweb would. */
   finish: () => void;
 }
@@ -63,6 +65,9 @@ export const createFakeSessionFactory = (): {
       appended,
       speed: () => currentSpeed,
       destroyed: () => isDestroyed,
+      advanceTo: (offset) => {
+        offsetMs = offset;
+      },
       finish: () => callbacks.onFinish(),
       append: (events) => {
         if (isDestroyed) {

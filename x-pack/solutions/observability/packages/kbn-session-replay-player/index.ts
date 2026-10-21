@@ -7,7 +7,22 @@
 
 import { lazy } from 'react';
 
-export type { SessionReplayPlayerProps } from './src/types';
+export { deriveReplayMarkers } from './src/model/derive_markers';
+export type {
+  ReplayCursor,
+  ReplayEvent,
+  ReplayEventsLoader,
+  ReplayEventsPage,
+  ReplayEventsRequest,
+  ReplayMarker,
+  ReplayMarkerKind,
+  ReplayRecording,
+  ReplayRecordingMeta,
+  ReplayTimeUpdateReason,
+  ReplayUnavailableReason,
+  SessionReplayPlayerHandle,
+  SessionReplayPlayerProps,
+} from './src/types';
 
 /**
  * Lazily loaded so that importing the package does not pull the player, rrweb or EUI into a

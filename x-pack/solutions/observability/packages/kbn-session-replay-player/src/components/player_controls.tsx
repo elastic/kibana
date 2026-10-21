@@ -108,7 +108,7 @@ export const PlayerControls = ({
       <EuiFlexItem grow={false}>
         <EuiToolTip content={RESTART_LABEL} disableScreenReaderOutput>
           <EuiButtonIcon
-            iconType="returnKey"
+            iconType="return"
             color="text"
             size="s"
             aria-label={RESTART_LABEL}
