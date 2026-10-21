@@ -80,6 +80,7 @@ export const ChangePointDetectionPage: FC = () => {
               'dataViewFieldEditor',
               'embeddable',
               'executionContext',
+              'featureFlags',
               'fieldFormats',
               'http',
               'i18n',

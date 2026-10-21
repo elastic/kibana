@@ -139,7 +139,16 @@ const SingleMetricViewerWrapper: FC<SingleMetricViewerPropsWithDeps> = ({
   const { mlApi, mlTimeSeriesExplorerService, toastNotificationService } = mlServices;
   const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile');
   const datePickerDeps: DatePickerDependencies = {
-    ...pick(coreStart, ['http', 'notifications', 'theme', 'uiSettings', 'userProfile', 'i18n']),
+    ...pick(coreStart, [
+      'application',
+      'featureFlags',
+      'http',
+      'notifications',
+      'theme',
+      'uiSettings',
+      'userProfile',
+      'i18n',
+    ]),
     data: pluginStart.data,
     uiSettingsKeys: UI_SETTINGS,
     showFrozenDataTierChoice: false,

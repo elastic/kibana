@@ -445,7 +445,9 @@ export const Wizard: FC<WizardProps> = React.memo(
 
     const datePickerDeps: DatePickerDependencies = {
       ...pick(appDependencies, [
+        'application',
         'data',
+        'featureFlags',
         'http',
         'notifications',
         'theme',

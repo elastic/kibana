@@ -10,6 +10,8 @@ import React, { createContext, useContext, type FC, type PropsWithChildren } fro
 import type { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type {
+  ApplicationStart,
+  FeatureFlagsStart,
   I18nStart,
   IUiSettingsClient,
   ThemeServiceStart,
@@ -31,6 +33,14 @@ export interface DatePickerDependencies {
    * http service
    */
   http: HttpStart;
+  /**
+   * application service, used to check access to advanced settings
+   */
+  application: ApplicationStart;
+  /**
+   * feature flags service, used to toggle the new date range picker
+   */
+  featureFlags: FeatureFlagsStart;
   /**
    * notifications service
    */

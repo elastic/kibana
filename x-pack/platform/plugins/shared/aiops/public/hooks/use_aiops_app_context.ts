@@ -19,6 +19,7 @@ import type {
   AnalyticsServiceStart,
   CoreStart,
   ExecutionContextStart,
+  FeatureFlagsStart,
   HttpStart,
   IUiSettingsClient,
   ThemeServiceStart,
@@ -67,6 +68,10 @@ export interface AiopsAppContextValue {
    * used for date formatting in change point detection.
    */
   fieldFormats: FieldFormatsStart;
+  /**
+   * Used to toggle the new date range picker.
+   */
+  featureFlags: FeatureFlagsStart;
   /**
    * Used for data fetching.
    */

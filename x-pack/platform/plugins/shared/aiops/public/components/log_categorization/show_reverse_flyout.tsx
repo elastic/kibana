@@ -56,7 +56,9 @@ export async function showReverseCategorizeFieldFlyout(
       const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile');
       const datePickerDeps: DatePickerDependencies = {
         ...pick(appContextValue, [
+          'application',
           'data',
+          'featureFlags',
           'http',
           'notifications',
           'theme',

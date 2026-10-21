@@ -63,6 +63,7 @@ export const LogRateAnalysisPage: FC = () => {
               'dataViewEditor',
               'dataViewFieldEditor',
               'executionContext',
+              'featureFlags',
               'fieldFormats',
               'http',
               'i18n',

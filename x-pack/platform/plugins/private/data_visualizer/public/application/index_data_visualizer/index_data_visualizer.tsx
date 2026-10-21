@@ -351,7 +351,9 @@ export const IndexDataVisualizer: FC<Props> = ({
   const startServices = pick(coreStart, 'analytics', 'i18n', 'theme', 'userProfile');
   const datePickerDeps: DatePickerDependencies = {
     ...pick(services, [
+      'application',
       'data',
+      'featureFlags',
       'http',
       'notifications',
       'theme',

@@ -10,6 +10,7 @@ import type {
   ApplicationStart,
   ChromeStart,
   DocLinksStart,
+  FeatureFlagsStart,
   HttpSetup,
   I18nStart,
   IUiSettingsClient,
@@ -50,6 +51,7 @@ export interface AppDependencies {
   dataViewEditor?: DataViewEditorStart;
   dataViews: DataViewsPublicPluginStart;
   docLinks: DocLinksStart;
+  featureFlags: FeatureFlagsStart;
   fieldFormats: FieldFormatsStart;
   http: HttpSetup;
   i18n: I18nStart;

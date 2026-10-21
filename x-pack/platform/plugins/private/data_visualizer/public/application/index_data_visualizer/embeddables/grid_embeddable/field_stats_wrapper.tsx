@@ -167,7 +167,9 @@ const FieldStatisticsWrapper = (props: FieldStatisticTableEmbeddableProps) => {
   const datePickerDeps: DatePickerDependencies = useMemo(
     () => ({
       ...pick(servicesWithOverrides, [
+        'application',
         'data',
+        'featureFlags',
         'http',
         'notifications',
         'theme',

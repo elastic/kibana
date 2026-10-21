@@ -106,7 +106,9 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
 
   const datePickerDeps = {
     ...pick(deps, [
+      'application',
       'data',
+      'featureFlags',
       'http',
       'notifications',
       'theme',

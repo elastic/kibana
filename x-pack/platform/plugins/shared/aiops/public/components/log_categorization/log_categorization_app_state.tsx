@@ -68,7 +68,9 @@ export const LogCategorizationAppState: FC<LogCategorizationAppStateProps> = ({
 
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appContextValue, [
+      'application',
       'data',
+      'featureFlags',
       'http',
       'notifications',
       'theme',

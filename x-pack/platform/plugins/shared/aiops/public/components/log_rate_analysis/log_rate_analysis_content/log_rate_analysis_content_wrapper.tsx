@@ -81,7 +81,9 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
 
   const datePickerDeps = {
     ...pick(appContextValue, [
+      'application',
       'data',
+      'featureFlags',
       'http',
       'notifications',
       'theme',

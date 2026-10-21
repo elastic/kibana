@@ -35,7 +35,9 @@ export const LogCategorizationDiscoverWrapper: FC<LogCategorizationEmbeddableWra
 
   const datePickerDeps = {
     ...pick(appContextValue, [
+      'application',
       'data',
+      'featureFlags',
       'http',
       'notifications',
       'theme',

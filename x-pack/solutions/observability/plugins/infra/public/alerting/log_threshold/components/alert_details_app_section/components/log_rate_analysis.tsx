@@ -224,6 +224,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
                 'application',
                 'data',
                 'executionContext',
+                'featureFlags',
                 'charts',
                 'fieldFormats',
                 'http',
