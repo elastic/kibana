@@ -27,7 +27,6 @@ export class RuleFormPage {
   public readonly flyout: Locator;
   public readonly flyoutValidationCallout: Locator;
   public readonly form: Locator;
-  public readonly esqlModeButton: Locator;
 
   private readonly esqlEditor: EsqlEditor;
 
@@ -50,7 +49,6 @@ export class RuleFormPage {
     this.nameFieldError = this.flyout.getByText(/Name is required/);
     this.flyoutValidationCallout = this.page.testSubj.locator('ruleV2FlyoutValidationErrors');
     this.form = this.page.locator(`#${RULE_FORM_ID}`);
-    this.esqlModeButton = this.page.testSubj.locator('select-text-based-language-btn');
   }
 
   async gotoCreate() {
@@ -65,10 +63,6 @@ export class RuleFormPage {
     await this.page.gotoApp(
       `${this.mountConfig.appRoute}${this.mountConfig.subPaths.rulesDetail(ruleId)}`
     );
-  }
-
-  async gotoDiscover() {
-    await this.page.gotoApp('discover');
   }
 
   /**
@@ -143,10 +137,6 @@ export class RuleFormPage {
   private async clickNextWhenEnabled() {
     await this.waitForProceedButtonEnabled();
     await this.clickVisibleProceedButton();
-  }
-
-  async switchToEsqlMode() {
-    await this.esqlModeButton.click();
   }
 
   /**
