@@ -6,7 +6,7 @@
  */
 
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { InferenceConnector, InferenceModelParameters } from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
@@ -62,7 +62,7 @@ export const resolveModelsForFeature = async ({
   getForFeature: (featureId: string) => Promise<ResolvedInferenceEndpoints>;
   getConnectorList: () => Promise<InferenceConnector[]>;
   getConnectorById: (id: string) => Promise<InferenceConnector>;
-  getDeclaredParameters: (endpointId: string) => InferenceModelParameters | undefined;
+  getDeclaredParameters: (endpointId: string) => ApiInferenceConnector['parameters'];
   uiSettingsClient: IUiSettingsClient;
   featureId: string;
   ignoreGlobalDefault?: boolean;

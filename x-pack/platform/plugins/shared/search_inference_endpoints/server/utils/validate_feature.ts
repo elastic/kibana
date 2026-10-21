@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import {
-  chatCompletionReasoningEfforts,
-  type InferenceModelParameters,
-} from '@kbn/inference-common';
-import type { InferenceFeatureConfig, RecommendedEndpointInput } from '../types';
+import { chatCompletionReasoningEfforts } from '@kbn/inference-common';
+import type {
+  InferenceFeatureConfig,
+  RecommendedEndpoint,
+  RecommendedEndpointInput,
+} from '../types';
 
 export const FEATURE_ID_PATTERN = /^[a-z][a-z0-9_]*$/;
 
 const MAX_TEMPERATURE = 2;
 
-const validateModelParameters = ({ reasoning, temperature }: InferenceModelParameters): void => {
+const validateModelParameters = ({
+  reasoning,
+  temperature,
+}: NonNullable<RecommendedEndpoint['parameters']>): void => {
   if (
     reasoning?.effort !== undefined &&
     !chatCompletionReasoningEfforts.includes(reasoning.effort)

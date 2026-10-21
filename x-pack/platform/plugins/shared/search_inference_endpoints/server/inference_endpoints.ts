@@ -8,11 +8,7 @@
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import {
-  type InferenceConnector,
-  type InferenceModelParameters,
-  defaultInferenceEndpoints,
-} from '@kbn/inference-common';
+import { type InferenceConnector, defaultInferenceEndpoints } from '@kbn/inference-common';
 import { INFERENCE_SETTINGS_SO_TYPE, INFERENCE_SETTINGS_ID } from '../common/constants';
 import type { InferenceSettingsAttributes } from '../common/types';
 import type { InferenceFeatureRegistry } from './inference_feature_registry';
@@ -137,7 +133,7 @@ export const getDeclaredParameters = (
   registry: InferenceFeatureRegistry,
   featureId: string,
   endpointId: string
-): InferenceModelParameters | undefined => {
+): RecommendedEndpoint['parameters'] => {
   const { parameters } = findDeclaredEndpoint(registry, featureId, endpointId);
   return parameters && structuredClone(parameters);
 };

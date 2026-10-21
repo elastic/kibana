@@ -21,7 +21,6 @@ export {
   type ChatCompletionReasoning,
   type ChatCompletionReasoningEffort,
 } from './reasoning';
-export type { InferenceModelParameters } from './model_parameters';
 export type { BoundChatCompleteAPI, UnboundChatCompleteOptions } from './bound_api';
 export {
   ChatCompletionEventType,

@@ -36,7 +36,6 @@ export {
   chatCompletionReasoningEfforts,
   type ChatCompletionReasoning,
   type ChatCompletionReasoningEffort,
-  type InferenceModelParameters,
   type ChatCompletionTokenCountEvent,
   type ChatCompletionEvent,
   type ChatCompletionChunkEvent,
