@@ -29,6 +29,7 @@ import {
   RULES_CHANGES_HISTORY_PATH,
   RULES_PATH,
   THREAT_INTELLIGENCE_PATH,
+  ONBOARDING_PATH,
 } from '../common/constants';
 import type {
   FactoryQueryTypes,
@@ -181,6 +182,13 @@ export const isDetectionsPath = (pathname: string): boolean => {
 export const isDashboardViewPath = (pathname: string): boolean =>
   matchPath(pathname, {
     path: `${DASHBOARDS_PATH}/:detailName`,
+    exact: false,
+    strict: false,
+  }) != null;
+
+export const isOnboardingPath = (pathname: string): boolean =>
+  matchPath(pathname, {
+    path: ONBOARDING_PATH,
     exact: false,
     strict: false,
   }) != null;
