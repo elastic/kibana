@@ -149,7 +149,7 @@ export default function (providerContext: FtrProviderContext) {
             policy_id: 'policy2',
           })
           .expect(400);
-        expect(body.message).to.eql('No agents to reassign, already assigned or hosted agents');
+        expect(body.message).to.eql('No agents to reassign, already assigned or managed agents');
 
         const [agent2data, agent3data] = await Promise.all([
           supertest.get(`/api/fleet/agents/agent2`),
