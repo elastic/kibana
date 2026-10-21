@@ -29,7 +29,7 @@ import { SIGNAL_TYPE_LABELS } from './signal_type_badge';
 import { useServicesStep } from './use_services_step';
 import { getCategoryTitle } from '../../service_categories';
 import { ServiceSearchFilter } from '../service_search_filter';
-import { DataFormatSelect } from './data_format_select';
+import { DataSchemaSection } from './data_schema_section';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 
 interface ServicesStepProps {
@@ -81,25 +81,20 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
 
   return (
     <div data-test-subj="onboardingStep-services">
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle size="m">
-            <h2>
-              <FormattedMessage
-                id="xpack.ingestHub.servicesStep.title"
-                defaultMessage="Which AWS services do you want to monitor?"
-              />
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <DataFormatSelect
-            dataFormat={dataFormat}
-            onChange={setDataFormat}
-            disabled={isFormatDisabled}
+      <DataSchemaSection
+        dataFormat={dataFormat}
+        onChange={setDataFormat}
+        disabled={isFormatDisabled}
+      />
+      <EuiSpacer size="xl" />
+      <EuiTitle size="m">
+        <h2>
+          <FormattedMessage
+            id="xpack.ingestHub.servicesStep.title"
+            defaultMessage="Which AWS services do you want to monitor?"
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </h2>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText color="subdued">
         <p>
