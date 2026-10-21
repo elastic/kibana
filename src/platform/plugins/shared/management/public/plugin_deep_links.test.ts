@@ -9,7 +9,7 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { ManagementPlugin } from './plugin';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import type { AppUpdater, AppDeepLink, AppDeepLinkLocations } from '@kbn/core/public';
 
 const mockShare = {
@@ -88,31 +88,102 @@ describe('ManagementPlugin appUpdater deep link visibleIn', () => {
     expect(app?.visibleIn).toEqual(['projectSideNav']);
   });
 
-  it('rebuilds deep links when an app emits a new visibleIn after start', () => {
-    const plugin = createPlugin();
-    const setup = plugin.setup(coreMock.createSetup(), { share: mockShare });
-    const visibleIn$ = new BehaviorSubject<AppDeepLinkLocations[]>(['projectSideNav']);
+  describe('visibleIn$', () => {
+    let plugin: ManagementPlugin;
+    let setup: ReturnType<ManagementPlugin['setup']>;
 
-    setup.sections.section.kibana.registerApp({
-      id: 'test-runtime-visible-in',
-      title: 'Runtime visibleIn',
-      mount: jest.fn(),
-      visibleIn$,
-    });
-
-    const getApp = () =>
+    const getApp = (id: string) =>
       getDeepLinksFromUpdater(plugin)
         .find((s) => s.id === 'kibana')
-        ?.deepLinks?.find((a) => a.id === 'test-runtime-visible-in');
+        ?.deepLinks?.find((a) => a.id === id);
 
-    expect(getApp()?.visibleIn).toEqual(['globalSearch', 'projectSideNav']);
+    const start = () => plugin.start(coreMock.createStart(), { share: mockShare });
 
-    plugin.start(coreMock.createStart(), { share: mockShare });
-    expect(getApp()?.visibleIn).toEqual(['projectSideNav']);
+    beforeEach(() => {
+      plugin = createPlugin();
+      setup = plugin.setup(coreMock.createSetup(), { share: mockShare });
+    });
 
-    visibleIn$.next(['globalSearch', 'projectSideNav']);
-    expect(getApp()?.visibleIn).toEqual(['globalSearch', 'projectSideNav']);
+    afterEach(() => {
+      plugin.stop();
+    });
 
-    plugin.stop();
+    it('rebuilds deep links when an app emits a new visibleIn after start', () => {
+      const visibleIn$ = new BehaviorSubject<AppDeepLinkLocations[]>(['projectSideNav']);
+      setup.sections.section.kibana.registerApp({
+        id: 'test-runtime',
+        title: 'Runtime visibleIn',
+        mount: jest.fn(),
+        visibleIn$,
+      });
+
+      expect(getApp('test-runtime')?.visibleIn).toEqual(['globalSearch', 'projectSideNav']);
+
+      start();
+      expect(getApp('test-runtime')?.visibleIn).toEqual(['projectSideNav']);
+
+      visibleIn$.next(['globalSearch', 'projectSideNav']);
+      expect(getApp('test-runtime')?.visibleIn).toEqual(['globalSearch', 'projectSideNav']);
+    });
+
+    it('falls back to the registered visibleIn when the source errors, without stopping other apps', () => {
+      const failing$ = new Subject<AppDeepLinkLocations[]>();
+      const healthy$ = new BehaviorSubject<AppDeepLinkLocations[]>(['projectSideNav']);
+      setup.sections.section.kibana.registerApp({
+        id: 'test-failing',
+        title: 'Failing',
+        mount: jest.fn(),
+        visibleIn: ['globalSearch'],
+        visibleIn$: failing$,
+      });
+      setup.sections.section.kibana.registerApp({
+        id: 'test-healthy',
+        title: 'Healthy',
+        mount: jest.fn(),
+        visibleIn$: healthy$,
+      });
+
+      start();
+      failing$.next(['projectSideNav']);
+      expect(getApp('test-failing')?.visibleIn).toEqual(['projectSideNav']);
+
+      failing$.error(new Error('boom'));
+      expect(getApp('test-failing')?.visibleIn).toEqual(['globalSearch']);
+
+      healthy$.next(['globalSearch', 'projectSideNav']);
+      expect(getApp('test-healthy')?.visibleIn).toEqual(['globalSearch', 'projectSideNav']);
+    });
+
+    it('keeps an app hidden by hideFromGlobalSearch once visibleIn$ emits', () => {
+      setup.sections.section.kibana.registerApp({
+        id: 'test-hidden-runtime',
+        title: 'Hidden runtime',
+        mount: jest.fn(),
+        hideFromGlobalSearch: true,
+        visibleIn$: new BehaviorSubject<AppDeepLinkLocations[]>(['projectSideNav']),
+      });
+
+      expect(getApp('test-hidden-runtime')).toBeUndefined();
+
+      start();
+      expect(getApp('test-hidden-runtime')?.visibleIn).toEqual(['projectSideNav']);
+    });
+
+    it('ignores visibleIn$ on apps registered after start', () => {
+      setup.sections.section.kibana.registerApp({
+        id: 'test-setup-time',
+        title: 'Setup time',
+        mount: jest.fn(),
+      });
+      start();
+      setup.sections.section.kibana.registerApp({
+        id: 'test-late',
+        title: 'Late',
+        mount: jest.fn(),
+        visibleIn$: new BehaviorSubject<AppDeepLinkLocations[]>(['projectSideNav']),
+      });
+
+      expect(getApp('test-late')?.visibleIn).toEqual(['globalSearch', 'projectSideNav']);
+    });
   });
 });

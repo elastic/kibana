@@ -17,7 +17,7 @@ export class ManagementItem {
   public readonly order: number;
   public readonly hideFromSidebar?: boolean;
   public readonly hideFromGlobalSearch?: boolean;
-  public visibleIn?: AppDeepLinkLocations[];
+  public readonly visibleIn?: AppDeepLinkLocations[];
   public readonly euiIconType?: string;
   public readonly icon?: string;
   public readonly capabilitiesId?: string;
@@ -57,9 +57,5 @@ export class ManagementItem {
 
   enable() {
     this.enabled = true;
-  }
-
-  setVisibleIn(visibleIn: AppDeepLinkLocations[]) {
-    this.visibleIn = visibleIn;
   }
 }

@@ -25,7 +25,9 @@ export interface RegisterManagementAppArgs extends CreateManagementItemArgs {
    */
   mainPaddingSize?: ManagementAppPaddingSize;
   /**
-   * Replaces `visibleIn` at runtime. Each emission rebuilds the management deep links.
+   * Overrides `visibleIn` at runtime; each emission rebuilds the management deep links.
+   * `visibleIn` applies until the first emission and again if the observable errors.
+   * Only honored for apps registered during setup.
    */
   visibleIn$?: Observable<AppDeepLinkLocations[]>;
 }
