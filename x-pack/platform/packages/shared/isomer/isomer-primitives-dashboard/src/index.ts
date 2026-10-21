@@ -14,3 +14,4 @@ export {
   dashboardPack,
 } from './dashboard';
 export { type GridBox, DASHBOARD_GRID, panelBodySize, panelBox, readingOrder } from './geometry';
+export { DASHBOARD_FRAME, DASHBOARD_PAGE_PADDING, dashboardFrame } from './frame';
