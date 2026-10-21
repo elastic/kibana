@@ -10,15 +10,73 @@ import { z as z4 } from '@kbn/zod/v4';
 import type { EsqlAttachmentData } from '@kbn/agent-builder-common/attachments';
 import { AttachmentType, esqlAttachmentDataSchema } from '@kbn/agent-builder-common/attachments';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentTypeDefinition,
+  SurfaceComposition,
+  SurfaceNode,
+} from '@kbn/agent-builder-server/attachments';
+import { i18n } from '@kbn/i18n';
+import type { Logger } from '@kbn/logging';
+import type { SerializableRecord } from '@kbn/utility-types';
+import { SURFACE_LIMITS, clampText, hasText } from './surface_helpers';
+
+/** The params of Discover's locator that an ES|QL attachment opens it with. */
+export interface DiscoverEsqlLocatorParams extends SerializableRecord {
+  query: { esql: string };
+}
+
+/** The part of Discover's locator the `esql` surface composition uses. */
+export interface DiscoverEsqlLocator {
+  getLocation: (params: DiscoverEsqlLocatorParams) => Promise<{ app: string; path: string }>;
+}
+
+export interface EsqlAttachmentTypeDeps {
+  /** Discover's locator, registered on the server, or nothing when Discover is off. */
+  getDiscoverLocator?: () => DiscoverEsqlLocator | undefined;
+  logger?: Logger;
+}
 
 /**
- * Creates the definition for the `text` attachment type.
+ * Creates the definition for the `esql` attachment type.
  */
-export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
+export const createEsqlAttachmentType = ({
+  getDiscoverLocator,
+  logger,
+}: EsqlAttachmentTypeDeps = {}): AttachmentTypeDefinition<
   AttachmentType.esql,
   EsqlAttachmentData
 > => {
+  /** The query in Discover, as an app path, or nothing when it can't be resolved. */
+  const toDiscoverLink = async (query: string): Promise<SurfaceNode[]> => {
+    const locator = getDiscoverLocator?.();
+    if (!locator) {
+      return [];
+    }
+
+    try {
+      const { app, path } = await locator.getLocation({ query: { esql: query } });
+
+      return path.length <= SURFACE_LIMITS.linkPath
+        ? [
+            {
+              type: 'link',
+              label: i18n.translate(
+                'xpack.agentBuilderPlatform.attachments.esql.surface.openInDiscover',
+                {
+                  defaultMessage: 'Open in Discover',
+                }
+              ),
+              app,
+              path,
+            },
+          ]
+        : [];
+    } catch (error) {
+      logger?.debug(`Leaving out the Discover link of an ES|QL attachment: ${error.message}`);
+      return [];
+    }
+  };
+
   return {
     id: AttachmentType.esql,
     validate: async (input) => {
@@ -51,6 +109,24 @@ export const createEsqlAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
+    toSurfaceComposition: async ({
+      data: { query, description },
+    }): Promise<SurfaceComposition> => ({
+      type: 'view',
+      body: [
+        ...(hasText(description) ? [{ type: 'markdown' as const, text: description }] : []),
+        ...(hasText(query)
+          ? [
+              {
+                type: 'code' as const,
+                language: 'esql',
+                text: clampText(query, SURFACE_LIMITS.codeText),
+              },
+            ]
+          : []),
+        ...(hasText(query) ? await toDiscoverLink(query) : []),
+      ],
+    }),
     getAgentDescription: () => {
       return `Represents an ES|QL query, which can be executed using the ${platformCoreTools.executeEsql} tool
 
