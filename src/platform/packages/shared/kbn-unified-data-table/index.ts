@@ -42,7 +42,11 @@ export {
   renderCustomToolbar,
 } from './src/components/custom_toolbar/render_custom_toolbar';
 
-export { useFindSimilarValues } from './src/hooks/use_find_similar_values';
+export {
+  executeFindSimilarValues,
+  isFindSimilarValuesActionRegistered,
+  useFindSimilarValues,
+} from './src/hooks/use_find_similar_values';
 export { getDataGridDensity, getDataGridDensityPadding } from './src/hooks/use_data_grid_density';
 export { getRowHeight } from './src/hooks/use_row_height';
 

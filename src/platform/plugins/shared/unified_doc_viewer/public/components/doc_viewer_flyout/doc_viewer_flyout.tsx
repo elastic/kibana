@@ -35,7 +35,11 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import useObservable from 'react-use/lib/useObservable';
 import type { ChromeStart } from '@kbn/core/public';
-import type { DocViewFilterFn, DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
+import type {
+  DocViewFilterFn,
+  DocViewFindSimilarValuesFn,
+  DocViewRenderProps,
+} from '@kbn/unified-doc-viewer/types';
 import { FlyoutHistoryKeyContext } from './flyout_history_key_context';
 import { OriginDocTypeContext } from './origin_doc_type_context';
 import { UnifiedDocViewer } from '../lazy_doc_viewer';
@@ -84,6 +88,7 @@ export interface UnifiedDocViewerFlyoutProps
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
   onFilter?: DocViewFilterFn;
+  onFindSimilarValues?: DocViewFindSimilarValuesFn;
 }
 
 function getIndexByDocId(hits: DataTableRecord[], id: string) {
@@ -131,6 +136,7 @@ export function UnifiedDocViewerFlyout({
   onAddColumn,
   onRemoveColumn,
   onFilter,
+  onFindSimilarValues,
   onInitialDocViewerStateChange,
   onUpdateSelectedTabId,
   initialShareableState,
@@ -221,6 +227,7 @@ export function UnifiedDocViewerFlyout({
         dataSource,
         textBasedHits: isEsqlQuery ? hits : undefined,
         filter: onFilter,
+        onFindSimilarValues,
         onAddColumn,
         onRemoveColumn,
         docViewsRegistry,
@@ -237,6 +244,7 @@ export function UnifiedDocViewerFlyout({
       isEsqlQuery,
       hits,
       onFilter,
+      onFindSimilarValues,
       onAddColumn,
       onRemoveColumn,
       docViewsRegistry,

@@ -32,6 +32,7 @@ import {
 import {
   DEFAULT_EXPANDED_DOC_OWNER,
   internalStateActions,
+  selectTabCombinedFilters,
   useAppStateSelector,
   useCurrentTabAction,
   useCurrentDataSource,
@@ -42,6 +43,7 @@ import {
   useInternalStateSelector,
 } from '../../state_management/redux';
 import { useDataState } from '../../hooks/use_data_state';
+import { useOnOpenInNewTab } from '../../hooks/use_on_open_in_new_tab';
 import { ExpandedDocNotice, useExpandedDocSync } from './use_expanded_doc_sync';
 import { useCopyExpandedDocLink } from './use_copy_expanded_doc_link';
 import { getExpandedDocLinkability } from '../../utils/expanded_doc';
@@ -68,6 +70,9 @@ export const DiscoverDocumentFlyout = memo(
   }: DiscoverDocumentFlyoutProps) => {
     const dispatch = useInternalStateDispatch();
     const query = useAppStateSelector((state) => state.query);
+    const filters = useCurrentTabSelector(selectTabCombinedFilters);
+    const queryContext = useMemo(() => ({ query, filters }), [query, filters]);
+    const onOpenInNewTab = useOnOpenInNewTab();
     const persistedDiscoverSession = useInternalStateSelector(
       (state) => state.persistedDiscoverSession
     );
@@ -186,6 +191,8 @@ export const DiscoverDocumentFlyout = memo(
         dataSource={flyoutDataSource}
         savedSearchId={persistedDiscoverSession?.id}
         query={query}
+        queryContext={queryContext}
+        onOpenInNewTab={onOpenInNewTab}
         initialTabId={initialDocViewerTabId}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumn}
