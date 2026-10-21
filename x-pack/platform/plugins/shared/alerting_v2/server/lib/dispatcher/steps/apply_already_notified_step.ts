@@ -7,13 +7,11 @@
 
 import { inject, injectable } from 'inversify';
 import { partition } from 'lodash';
-import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { LoggerServiceContract } from '../../services/logger_service/logger_service';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../../services/query_service/tokens';
 import {
   alreadyNotifiedPairKey,
-  ESQL_QUERY_ROW_LIMIT,
   getAlreadyNotifiedQueries,
   getMinLastEventTimestamp,
 } from '../queries';
@@ -41,7 +39,7 @@ export class ApplyAlreadyNotifiedStep implements DispatcherStep {
 
   public async execute(
     state: Readonly<DispatcherPipelineState>,
-    logger: LoggerServiceContract
+    _: LoggerServiceContract
   ): Promise<DispatcherStepOutput> {
     const { groups = [] } = state;
     if (groups.length === 0) {
@@ -60,16 +58,6 @@ export class ApplyAlreadyNotifiedStep implements DispatcherStep {
         })
       )
     );
-
-    const truncatedChunks = responses.filter((rows) => rows.length >= ESQL_QUERY_ROW_LIMIT).length;
-    if (truncatedChunks > 0) {
-      logger.warn({
-        code: ALERTING_LOG_CODES.DISPATCH_ALREADY_NOTIFIED_ROW_LIMIT_REACHED,
-        message: () =>
-          `${truncatedChunks} of ${responses.length} already-notified queries returned ` +
-          `${ESQL_QUERY_ROW_LIMIT} rows; alerts past the limit are treated as not notified`,
-      });
-    }
 
     const notifiedThrough = new Map<string, number>();
     for (const row of responses.flat()) {

@@ -1481,6 +1481,45 @@ describe('DispatchStep', () => {
         );
         expect(mockWfm.bulkScheduleWorkflow).toHaveBeenCalledTimes(2);
       });
+
+      it('rethrows a non-commit error raised after earlier commits and emits history', async () => {
+        mockWfm.getWorkflowsByIdsForRequests.mockRejectedValueOnce(new Error('workflows down'));
+
+        const execution = createStep().execute(
+          createDispatcherPipelineState({
+            dispatch: [
+              createActionGroup({ id: 'g-no-key', policyId: 'p2', alerts: [alertFor(1)] }),
+              groupFor(0),
+            ],
+            suppressed: [{ ...alertFor(900), reason: 'ack' }],
+            dispatchable: [alertFor(0), alertFor(1)],
+            policies: new Map([
+              ['p1', policy],
+              ['p2', createActionPolicy({ id: 'p2' })],
+            ]),
+          }),
+          loggerService
+        );
+
+        await expect(execution).rejects.toThrow('workflows down');
+        expect(mockStorageService.bulkIndexDocs).toHaveBeenCalledTimes(2);
+        expect(actionTypes(docsOfCommit(0))).toEqual(['suppress']);
+        expect(docsOfCommit(1)).toEqual([
+          expect.objectContaining({ action_type: 'notified', action_group_id: 'g-no-key' }),
+          expect.objectContaining({ action_type: 'fire', group_hash: 'hash-1' }),
+        ]);
+        expect(mockWfm.bulkScheduleWorkflow).not.toHaveBeenCalled();
+        expect(mockLogger.error).not.toHaveBeenCalledWith(
+          expect.anything(),
+          expect.objectContaining({
+            labels: expect.objectContaining({ code: ALERTING_LOG_CODES.DISPATCH_COMMIT_FAILED }),
+          })
+        );
+        expect(mockEventLogger.logEvent).toHaveBeenCalledTimes(1);
+        expect(
+          mockEventLogger.logEvent.mock.calls[0][0]?.kibana?.alerting_v2?.dispatcher
+        ).toMatchObject({ action_group_ids: ['g-no-key'] });
+      });
     });
 
     describe('history', () => {

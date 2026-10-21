@@ -377,12 +377,6 @@ export const ALERTING_LOG_CODES = {
    */
   DISPATCH_COMMIT_DEGRADED: 'DISPATCH_COMMIT_DEGRADED',
   /**
-   * An already-notified query chunk returned the ES|QL row limit, so rows past
-   * it were dropped. The affected alerts are treated as not notified and may be
-   * dispatched again.
-   */
-  DISPATCH_ALREADY_NOTIFIED_ROW_LIMIT_REACHED: 'DISPATCH_ALREADY_NOTIFIED_ROW_LIMIT_REACHED',
-  /**
    * The cluster license does not allow action policies. Alert actions are still
    * recorded, but no workflow is scheduled until the license is upgraded.
    */

@@ -6,10 +6,7 @@
  */
 
 import { ApplyAlreadyNotifiedStep } from './apply_already_notified_step';
-import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createQueryService } from '../../services/query_service/query_service.mock';
-import { createLoggerService } from '../../services/logger_service/logger_service.mock';
-import { ESQL_QUERY_ROW_LIMIT } from '../queries';
 import { createAlreadyNotifiedResponse } from '../fixtures/dispatcher';
 import {
   createActionGroup,
@@ -139,28 +136,5 @@ describe('ApplyAlreadyNotifiedStep', () => {
       }),
       expect.anything()
     );
-  });
-
-  it('warns when a lookup chunk returns the row limit', async () => {
-    const group = createActionGroup({ id: 'g1', alerts: [alertA] });
-    const { loggerService, mockLogger } = createLoggerService();
-    const { step } = setup(
-      Array.from({ length: ESQL_QUERY_ROW_LIMIT }, (_, i) =>
-        notified('g1', `other-${i}`, '2026-01-22T07:10:00.000Z')
-      )
-    );
-
-    const result = await step.execute(
-      createDispatcherPipelineState({ groups: [group] }),
-      loggerService
-    );
-
-    expect(mockLogger.warn).toHaveBeenCalledWith(expect.any(Function), {
-      labels: { code: ALERTING_LOG_CODES.DISPATCH_ALREADY_NOTIFIED_ROW_LIMIT_REACHED },
-    });
-    expect(result).toEqual({
-      type: 'continue',
-      data: { groups: [group], alreadyNotified: [] },
-    });
   });
 });

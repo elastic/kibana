@@ -102,9 +102,8 @@ export const ESQL_IN_CLAUSE_LITERAL_BUDGET_BYTES = 600_000;
 export const SUPPRESSIONS_IN_CLAUSE_LITERAL_BUDGET_BYTES = 300_000;
 
 // Pair budget for the already-notified query. Each chunk emits the pair keys plus two pre-filter
-// IN lists (group ids and alert ids) that together are no longer than the keys, so this budget is
-// smaller than the default to keep all three lists plus the static body under the 1 MB ES|QL
-// statement cap.
+// IN lists (group ids and alert ids) of at most about the keys' size, so this budget is smaller
+// than the default to keep all three lists plus the static body under the 1 MB ES|QL statement cap.
 export const ALREADY_NOTIFIED_IN_CLAUSE_LITERAL_BUDGET_BYTES = 300_000;
 
 // `"<value>", ` = 2 quotes + comma + space (4 bytes) + 2 escape-margin bytes per literal.
@@ -358,7 +357,8 @@ export const getAlertDataQueries = (
 
 // Returns one request per chunk (see ALREADY_NOTIFIED_IN_CLAUSE_LITERAL_BUDGET_BYTES). The group
 // and alert IN lists alone also match unrequested combinations of the two, which could push
-// requested pairs past the row limit; the pair-key filter keeps at most one row per requested pair.
+// requested pairs past the row limit; the pair-key filter keeps at most one row per requested pair,
+// and a chunk holds at most ESQL_QUERY_ROW_LIMIT pairs, so no row is ever truncated.
 // The IN lists must stay in front of it: they are served by the index, the computed key is not.
 //
 // Matches only `notified` records carrying an alert_id. Records written before notified became

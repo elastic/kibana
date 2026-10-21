@@ -86,14 +86,16 @@ This stream is the dispatcher's durable memory and also stores user/system actio
 | `alert_id` | `keyword` | Optional episode scope. Null for series-level actions such as `snooze`. Named `episode_id` before v8. |
 | `alert_status` | `keyword` | Optional episode status captured with the action. Named `episode_status` before v8. |
 | `rule_id` | `keyword` | Rule identifier. |
-| `tags` | `keyword` | Optional tags. |
-| `notification_group_id` | `keyword` | Group identity for throttling / notify tracking. |
+| `tags` | `keyword` | Tag set of a `tag` action. |
+| `assignee_uid` | `keyword` | User profile uid set by an `assign` action; null when unassigned. |
+| `action_group_id` | `keyword` | Action group of a `notified` record. With `alert_id`, the key read by throttling and the already-notified lookup. |
 | `source` | `keyword` | Origin marker. |
 | `reason` | `text` | Human-readable explanation. |
 
 Writers:
 
 - `lib/dispatcher/steps/dispatch_step.ts` (with `lib/dispatcher/steps/utils/series_ledger.ts`)
+- `lib/dispatcher/dispatcher.ts` (`unmatched` records written by the stuck-watermark escape hatch)
 - alert action routes under `server/routes/alert_actions/`
 
 Readers:
@@ -119,18 +121,19 @@ These actions are created through the alert action routes and clients. They chan
 | `unsnooze` | User/API | Clears an active snooze. |
 | `deactivate` | User/API | Disables the alert or episode from active notification handling. |
 | `activate` | User/API | Reverses a previous deactivation. |
-| `tag` | User/API | Attaches tags/metadata to the alert action history. |
+| `assign` | User/API | Sets the episode's assignee (`assignee_uid`, null to unassign). The latest `assign` wins. Not read by the dispatcher. |
+| `tag` | User/API | Replaces the episode's tags with the given set (`tags`). The latest `tag` wins. Not read by the dispatcher. |
 
 ### Dispatcher outcome actions
 
-These actions are written by `DispatchStep` to record what the dispatcher decided during a run, after each dispatch chunk. `fire`, `suppress` and `unmatched` are written for a series only once every action group holding one of its alerts has concluded, because one of these records hides every event of the series up to its `last_series_event_timestamp`.
+These actions are written by `DispatchStep` to record what the dispatcher decided during a run, after each dispatch chunk (and `unmatched`, by the escape hatch in `dispatcher.ts`). `fire`, `suppress` and `unmatched` are written for a series only once every action group holding one of its alerts has concluded, because one of these records hides every event of the series up to its `last_series_event_timestamp`.
 
 | Action type | Written by | Meaning |
 | --- | --- | --- |
-| `fire` | Dispatcher | This episode was eligible for dispatch in the current run. |
+| `fire` | Dispatcher | The series was dispatched in this run, or its content was already notified by an earlier run. Series-level: no `alert_id`. |
 | `notified` | Dispatcher | The action group concluded for this alert: its workflows were scheduled, or their scheduling failed (reported as a `dispatch_failed` event, not retried). Written once per (`action_group_id`, `alert_id`) right after the dispatch chunk, with `last_series_event_timestamp` set to the alert's event time. Used for throttling and to skip content an aborted tick already handled. Records written before this carry no `alert_id`. |
-| `suppress` | Dispatcher | The episode was intentionally not fired in this run, for example because suppression logic or throttling held it back. |
-| `unmatched` | Dispatcher | The episode stayed dispatchable but matched no enabled notification policy. |
+| `suppress` | Dispatcher | The series was intentionally not fired in this run, for example because a user action (ack, snooze, deactivate), a maintenance window or throttling held it back. Series-level: no `alert_id`. |
+| `unmatched` | Dispatcher | The series stayed dispatchable but matched no enabled action policy. Also written by the stuck-watermark escape hatch for every alert of a window it skips. Series-level: no `alert_id`. |
 
 ### Why both `fire` and `notified` exist
 
