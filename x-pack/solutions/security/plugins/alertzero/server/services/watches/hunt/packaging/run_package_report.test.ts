@@ -21,7 +21,7 @@ import type { RunPackageReportDeps } from './run_package_report';
 import type { CoverageSubject } from './types';
 
 const reportId = 'rpt-package-1';
-const conversationId = buildHuntInvestigationConversationId(reportId);
+const conversationId = buildHuntInvestigationConversationId({ spaceId: 'default', reportId });
 const runId = 'run-abc';
 
 const isolateHost: ActionCatalogEntry = {

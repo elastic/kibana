@@ -6,6 +6,7 @@
  */
 
 import { toKqlExpression } from '@kbn/es-query';
+import { z } from '@kbn/zod/v4';
 import type { File } from '@kbn/files-plugin/common';
 import { FileNotFoundError } from '@kbn/files-plugin/server/file_service/errors';
 import { bulkDeleteAttachments, bulkDeleteFileAttachments } from './bulk_delete';
@@ -518,6 +519,167 @@ describe('bulk_delete', () => {
         await expect(deleteAlerts([])).rejects.toThrow(
           'Failed to bulk delete attachments for case: mock-id-1: Error: The length of the field attachmentIds is too short. Array must be of length >= 1'
         );
+      });
+    });
+
+    describe('related attachments', () => {
+      const caseId = 'mock-id-1';
+      const PARENT_TYPE = 'test.parent';
+      const relatedArgs = createCasesClientMockArgs();
+      const getRelated = jest.fn();
+      relatedArgs.unifiedAttachmentTypeRegistry.register({
+        id: PARENT_TYPE,
+        schema: z.object({}),
+        getRelatedAttachments: getRelated,
+      });
+      const { attachmentService, caseService } = relatedArgs.services;
+
+      const parent: AttachmentForDeletion = {
+        ...alertAttachment('parent-1', 'parent-doc-1', 'parent-index'),
+        attributes: {
+          ...mockCaseComments[0].attributes,
+          type: PARENT_TYPE,
+          attachmentId: 'parent-doc-1',
+          metadata: { index: 'parent-index' },
+        } as unknown as AttachmentAttributesV2,
+      };
+      const child = alertAttachment('child-1', ['alert-1', 'alert-2'], 'index-1');
+
+      beforeEach(() => {
+        jest.resetAllMocks();
+        caseService.getCase.mockResolvedValue(mockCases[0]);
+        caseService.getAllCaseComments.mockResolvedValue({
+          saved_objects: [],
+          total: 0,
+          per_page: 100,
+          page: 1,
+        });
+        attachmentService.getter.getCaseAttatchmentStats.mockResolvedValue(new Map());
+        attachmentService.bulkDelete.mockImplementation(
+          async ({ savedObjectIds }) => savedObjectIds
+        );
+        attachmentService.bulkUpdate.mockImplementation(async ({ comments }) => ({
+          saved_objects: comments.map(({ savedObjectId, updatedAttributes }) => ({
+            id: savedObjectId,
+            type: CASE_ATTACHMENT_SAVED_OBJECT,
+            attributes: updatedAttributes,
+            references: [],
+          })),
+        }));
+        getRelated.mockResolvedValue([
+          { type: SECURITY_ALERT_ATTACHMENT_TYPE, attachmentIds: ['alert-1'] },
+        ]);
+      });
+
+      it('removes the related ids before deleting the requested attachments', async () => {
+        attachmentService.getter.bulkGetForDeletion.mockResolvedValue([parent]);
+        attachmentService.getter.getCaseAttachmentsForDeletion.mockResolvedValue([child]);
+
+        await bulkDeleteAttachments({ caseId, savedObjectIds: ['parent-1'] }, relatedArgs);
+
+        expect(getRelated).toHaveBeenCalledWith(
+          expect.objectContaining({
+            caseId,
+            attachments: [expect.objectContaining({ id: 'parent-1' })],
+          })
+        );
+        expect(attachmentService.bulkUpdate).toHaveBeenCalledWith(
+          expect.objectContaining({
+            comments: [
+              expect.objectContaining({
+                savedObjectId: 'child-1',
+                updatedAttributes: expect.objectContaining({ attachmentId: ['alert-2'] }),
+              }),
+            ],
+          })
+        );
+        expect(attachmentService.bulkDelete).toHaveBeenCalledWith({
+          savedObjectIds: ['parent-1'],
+          refresh: true,
+        });
+        expect(attachmentService.bulkUpdate.mock.invocationCallOrder[0]).toBeLessThan(
+          attachmentService.bulkDelete.mock.invocationCallOrder[0]
+        );
+      });
+
+      it('records 1 user action for the related type and 1 for the requested type', async () => {
+        attachmentService.getter.bulkGetForDeletion.mockResolvedValue([parent]);
+        attachmentService.getter.getCaseAttachmentsForDeletion.mockResolvedValue([child]);
+
+        await bulkDeleteAttachments({ caseId, savedObjectIds: ['parent-1'] }, relatedArgs);
+
+        const { creator } = relatedArgs.services.userActionService;
+        expect(creator.bulkCreateAttachmentBulkDeletion).toHaveBeenCalledTimes(2);
+        expect(creator.bulkCreateAttachmentBulkDeletion).toHaveBeenCalledWith(
+          expect.objectContaining({
+            deletions: [
+              expect.objectContaining({ attachmentType: SECURITY_ALERT_ATTACHMENT_TYPE }),
+            ],
+          })
+        );
+        expect(creator.bulkCreateAttachmentBulkDeletion).toHaveBeenCalledWith(
+          expect.objectContaining({
+            deletions: [expect.objectContaining({ attachmentType: PARENT_TYPE, count: 1 })],
+          })
+        );
+      });
+
+      it('runs the hook when deleting by the ids the requested type references', async () => {
+        attachmentService.getter.getCaseAttachmentsForDeletion
+          .mockResolvedValueOnce([parent])
+          .mockResolvedValueOnce([child]);
+
+        await bulkDeleteAttachments(
+          { caseId, type: PARENT_TYPE, attachmentIds: ['parent-doc-1'] },
+          relatedArgs
+        );
+
+        expect(getRelated).toHaveBeenCalledTimes(1);
+        expect(attachmentService.bulkUpdate).toHaveBeenCalled();
+        expect(attachmentService.bulkDelete).toHaveBeenCalledWith({
+          savedObjectIds: ['parent-1'],
+          refresh: true,
+        });
+      });
+
+      it.each([
+        ['saved object ids', { savedObjectIds: ['parent-1'] }],
+        ['attachment ids', { type: PARENT_TYPE, attachmentIds: ['parent-doc-1'] }],
+      ])('skips the hook by %s when related attachments are excluded', async (_, request) => {
+        attachmentService.getter.bulkGetForDeletion.mockResolvedValue([parent]);
+        attachmentService.getter.getCaseAttachmentsForDeletion.mockResolvedValue([parent]);
+
+        await bulkDeleteAttachments({ caseId, includeRelated: false, ...request }, relatedArgs);
+
+        expect(getRelated).not.toHaveBeenCalled();
+        expect(attachmentService.bulkUpdate).not.toHaveBeenCalled();
+        expect(attachmentService.bulkDelete).toHaveBeenCalledWith({
+          savedObjectIds: ['parent-1'],
+          refresh: true,
+        });
+      });
+
+      it('does not run the hook when the user may not delete the requested attachments', async () => {
+        attachmentService.getter.bulkGetForDeletion.mockResolvedValue([parent]);
+        relatedArgs.authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized'));
+
+        await expect(
+          bulkDeleteAttachments({ caseId, savedObjectIds: ['parent-1'] }, relatedArgs)
+        ).rejects.toThrow();
+
+        expect(getRelated).not.toHaveBeenCalled();
+        expect(attachmentService.bulkDelete).not.toHaveBeenCalled();
+      });
+
+      it('deletes nothing when removing the related ids fails', async () => {
+        attachmentService.getter.bulkGetForDeletion.mockResolvedValue([parent]);
+        attachmentService.getter.getCaseAttachmentsForDeletion.mockResolvedValue([]);
+
+        await expect(
+          bulkDeleteAttachments({ caseId, savedObjectIds: ['parent-1'] }, relatedArgs)
+        ).rejects.toThrow('alert-1');
+
+        expect(attachmentService.bulkDelete).not.toHaveBeenCalled();
       });
     });
 
