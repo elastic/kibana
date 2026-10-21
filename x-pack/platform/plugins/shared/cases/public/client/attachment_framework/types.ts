@@ -157,6 +157,15 @@ export interface CountLabelProps {
   count: number;
 }
 
+export interface RelatedRemovalChoice {
+  /** Which related attachments can leave the case with the removed ones. */
+  description: string;
+  /** Label of the button that removes only the selected attachments. */
+  removeOnlyLabel: string;
+  /** Label of the button that also removes the related attachments. */
+  removeWithRelatedLabel: string;
+}
+
 export interface AttachmentType<Props> {
   id: string;
   getIcon: (props: Props) => EuiCommentProps['timelineAvatar'];
@@ -165,6 +174,11 @@ export interface AttachmentType<Props> {
   getRemovalActivity?: (props: Props) => AttachmentRemovalActivity<Props>;
   /** Counted noun for `count` attachments of this type, e.g. "2 files". Lowercase except brand names. */
   getCountLabel?: (props: CountLabelProps) => string;
+  /**
+   * Lets the removal prompt offer to keep the attachments the server would remove with `count`
+   * attachments of this type, e.g. the alerts an attack brought to the case.
+   */
+  getRelatedRemoval?: (props: CountLabelProps) => RelatedRemovalChoice;
   getAttachmentList?: (
     props?: CommonAttachmentListViewProps
   ) => AttachmentList<CommonAttachmentListViewProps>;

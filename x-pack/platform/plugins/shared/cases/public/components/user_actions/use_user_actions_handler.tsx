@@ -107,8 +107,13 @@ export const useUserActionsHandler = (): UseUserActionsHandler => {
   );
 
   const handleDeleteComment = useCallback(
-    (id: string, successToasterTitle: string) => {
-      deleteComment({ caseId, commentId: id, successToasterTitle });
+    (id: string, successToasterTitle: string, options?: { includeRelated: boolean }) => {
+      deleteComment({
+        caseId,
+        commentId: id,
+        successToasterTitle,
+        includeRelated: options?.includeRelated,
+      });
     },
     [caseId, deleteComment]
   );

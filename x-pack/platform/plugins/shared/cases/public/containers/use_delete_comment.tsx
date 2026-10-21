@@ -17,6 +17,7 @@ interface MutationArgs {
   caseId: string;
   commentId: string;
   successToasterTitle: string;
+  includeRelated?: boolean;
 }
 
 export const useDeleteComment = () => {
@@ -24,7 +25,8 @@ export const useDeleteComment = () => {
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   return useMutation(
-    ({ caseId, commentId }: MutationArgs) => deleteComment({ caseId, commentId }),
+    ({ caseId, commentId, includeRelated }: MutationArgs) =>
+      deleteComment({ caseId, commentId, includeRelated }),
     {
       mutationKey: casesMutationsKeys.deleteComment,
       onSuccess: (_, { successToasterTitle }) => {

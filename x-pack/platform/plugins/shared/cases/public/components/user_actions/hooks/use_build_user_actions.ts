@@ -38,7 +38,11 @@ interface UseBuildUserActionsArgs {
   loadingCommentIds: string[];
   euiTheme: EuiThemeComputed<{}>;
   handleOutlineComment: (id: string) => void;
-  handleDeleteComment: (id: string, successToasterTitle: string) => void;
+  handleDeleteComment: (
+    id: string,
+    successToasterTitle: string,
+    options?: { includeRelated: boolean }
+  ) => void;
 }
 
 export const useBuildUserActions = ({

@@ -58,7 +58,11 @@ export interface UserActionBuilderArgs {
   selectedOutlineCommentId: string;
   loadingCommentIds: string[];
   handleOutlineComment: (id: string) => void;
-  handleDeleteComment: (id: string, successToasterTitle: string) => void;
+  handleDeleteComment: (
+    id: string,
+    successToasterTitle: string,
+    options?: { includeRelated: boolean }
+  ) => void;
   euiTheme: EuiThemeComputed<{}>;
 }
 

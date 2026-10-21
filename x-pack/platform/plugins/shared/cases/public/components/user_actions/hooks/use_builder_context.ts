@@ -23,7 +23,11 @@ interface UseBuilderContextArgs {
   selectedOutlineCommentId: string;
   loadingCommentIds: string[];
   handleOutlineComment: (id: string) => void;
-  handleDeleteComment: (id: string, successToasterTitle: string) => void;
+  handleDeleteComment: (
+    id: string,
+    successToasterTitle: string,
+    options?: { includeRelated: boolean }
+  ) => void;
 }
 
 export const useBuilderContext = ({

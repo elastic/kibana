@@ -5,22 +5,28 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
-import type { AttachmentAction } from '../../../client/attachment_framework/types';
+import type {
+  AttachmentAction,
+  RelatedRemovalChoice,
+} from '../../../client/attachment_framework/types';
 
 import { AttachmentActionType } from '../../../client/attachment_framework/types';
 import { useCasesContext } from '../../cases_context/use_cases_context';
 import * as i18n from './translations';
 import { UserActionPropertyActions } from './property_actions';
 import { DeleteAttachmentConfirmationModal } from '../delete_attachment_confirmation_modal';
+import { RemoveWithRelatedConfirmationModal } from '../remove_with_related_confirmation_modal';
 import { useDeletePropertyAction } from './use_delete_property_action';
 
 interface Props {
   isLoading: boolean;
   registeredAttachmentActions: AttachmentAction[];
-  onDelete: () => void;
+  onDelete: (options?: { includeRelated: boolean }) => void;
   hideDefaultActions: boolean;
+  /** Offers to keep the attachments the deletion would also remove. */
+  relatedRemoval?: RelatedRemovalChoice;
 }
 
 const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
@@ -28,12 +34,20 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
   registeredAttachmentActions,
   onDelete,
   hideDefaultActions,
+  relatedRemoval,
 }) => {
   const { permissions } = useCasesContext();
   const { showDeletionModal, onModalOpen, onConfirm, onCancel } = useDeletePropertyAction({
     onDelete,
   });
   const buttonRef = React.useRef<HTMLAnchorElement>(null);
+  const onConfirmRelated = useCallback(
+    (options: { includeRelated: boolean }) => {
+      onCancel();
+      onDelete(options);
+    },
+    [onCancel, onDelete]
+  );
 
   const propertyActions = useMemo(() => {
     const showTrashIcon = permissions.delete && !hideDefaultActions;
@@ -62,7 +76,16 @@ const RegisteredAttachmentsPropertyActionsComponent: React.FC<Props> = ({
         propertyActions={propertyActions}
         buttonRef={buttonRef}
       />
-      {showDeletionModal ? (
+      {showDeletionModal && relatedRemoval != null ? (
+        <RemoveWithRelatedConfirmationModal
+          title={i18n.DELETE_ATTACHMENT}
+          relatedRemoval={relatedRemoval}
+          onCancel={onCancel}
+          onConfirm={onConfirmRelated}
+          focusButtonRef={buttonRef}
+        />
+      ) : null}
+      {showDeletionModal && relatedRemoval == null ? (
         <DeleteAttachmentConfirmationModal
           title={i18n.DELETE_ATTACHMENT}
           confirmButtonText={i18n.DELETE}
