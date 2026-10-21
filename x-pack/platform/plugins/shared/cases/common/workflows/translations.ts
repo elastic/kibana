@@ -578,10 +578,18 @@ export const CASE_STATUS_UPDATED_TRIGGER_EVENT_SCHEMA_PREVIOUS_STATUS_DESCRIPTIO
   }
 );
 
+export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsAdded.eventSchema.ids',
+  {
+    defaultMessage:
+      'The IDs of the added attachments themselves (all of the same type), not of the alerts or events they reference.',
+  }
+);
+
 export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowTriggers.attachmentsAdded.eventSchema.attachmentIds',
   {
-    defaultMessage: 'The IDs of the attachments that were added (all of the same type).',
+    defaultMessage: 'Deprecated. Use ids instead, which has the same values.',
   }
 );
 
@@ -592,10 +600,18 @@ export const ATTACHMENTS_ADDED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_TYPE_DESCRIPTION 
   }
 );
 
+export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_IDS_DESCRIPTION = i18n.translate(
+  'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.ids',
+  {
+    defaultMessage:
+      'The IDs of the deleted attachments themselves (all of the same type), not of the alerts or events they reference. Use alertIds or eventIds for those.',
+  }
+);
+
 export const ATTACHMENTS_DELETED_TRIGGER_EVENT_SCHEMA_ATTACHMENT_IDS_DESCRIPTION = i18n.translate(
   'xpack.cases.workflowTriggers.attachmentsDeleted.eventSchema.attachmentIds',
   {
-    defaultMessage: 'The IDs of the attachments that were deleted (all of the same type).',
+    defaultMessage: 'Deprecated. Use ids instead, which has the same values.',
   }
 );
 
