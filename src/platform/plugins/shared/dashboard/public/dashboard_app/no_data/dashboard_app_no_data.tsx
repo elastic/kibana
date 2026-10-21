@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import {
@@ -56,12 +56,9 @@ export const DashboardAppNoDataPage = ({
     )
   );
 
-  const lensHelpersPromise = useMemo(
-    () => lensService?.stateHelperApi() ?? Promise.resolve(null),
-    []
-  );
-
-  const lensHelpersAsync = useAsync(() => lensHelpersPromise, [lensHelpersPromise]);
+  const lensHelpersAsync = useAsync(() => {
+    return lensService?.stateHelperApi() ?? Promise.resolve(null);
+  }, [lensService]);
 
   useEffect(() => {
     return () => {
@@ -71,8 +68,7 @@ export const DashboardAppNoDataPage = ({
 
   const onTryESQL = useCallback(async () => {
     abortController?.abort(AbortReason.REPLACED);
-    const lensHelpers = await lensHelpersPromise;
-    if (lensHelpers) {
+    if (lensHelpersAsync.value) {
       const abc = new AbortController();
       const indexName = (await getIndexForESQLQuery({ http: coreServices.http })) ?? '*';
       const dataView = await getESQLAdHocDataview({
@@ -100,7 +96,7 @@ export const DashboardAppNoDataPage = ({
 
         setAbortController(abc);
 
-        const chartSuggestions = lensHelpers.suggestions(context, dataView);
+        const chartSuggestions = lensHelpersAsync.value.suggestions(context, dataView);
         if (chartSuggestions?.length) {
           const [suggestion] = chartSuggestions;
 
@@ -136,7 +132,7 @@ export const DashboardAppNoDataPage = ({
         }
       }
     }
-  }, [abortController, lensHelpersPromise]);
+  }, [abortController, lensHelpersAsync.value]);
 
   const AnalyticsNoDataPage = withSuspense(
     React.lazy(() =>
@@ -154,7 +150,12 @@ export const DashboardAppNoDataPage = ({
         }
         hidden
       />
-      <AnalyticsNoDataPage onDataViewCreated={onDataViewCreated} onTryESQL={onTryESQL} />
+      <AnalyticsNoDataPage
+        onDataViewCreated={onDataViewCreated}
+        onTryESQL={onTryESQL}
+        // the handler needs the Lens state helpers, so keep the button disabled until they resolve
+        isTryESQLDisabled={!lensHelpersAsync.value}
+      />
     </AnalyticsNoDataPageKibanaProvider>
   );
 };
