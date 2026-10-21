@@ -29,11 +29,6 @@ export const DRAFT_STEP_ID = 'draft_creation';
 export const REVIEW_STEP_ID = 'review_creation';
 export const PROPOSE_STEP_ID = 'propose_creation';
 
-/**
- * Investigation id for scoring-only runs. No conversation has this id, so the workflow's
- * attach_draft step fails (on-failure: continue), propose_creation is skipped, and the run
- * completes on its own instead of parking on an analyst proposal. The draft is still scored.
- */
 export const SCORING_INVESTIGATION_ID = '00000000-0000-4000-8000-000000000000';
 
 /**

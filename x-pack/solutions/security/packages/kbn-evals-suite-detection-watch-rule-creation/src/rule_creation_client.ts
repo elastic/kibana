@@ -44,7 +44,6 @@ const stepOutputSchema = lazySchema(() =>
       structured_output: z
         .object({
           rule: draftRuleSchema,
-          // Why the agent built no rule; empty when it drafted one.
           reason: z.string(),
         })
         .partial(),
@@ -54,11 +53,6 @@ const stepOutputSchema = lazySchema(() =>
 
 // Each step produces two entries in stepExecutions: an "enter" record (output: null)
 // and a "result" record (output: data). Find the result record for draft_creation.
-//
-// The quality gate refuses unwinnable gaps instead of drafting. The managed yaml has the agent
-// signal a refusal with an empty name and query plus a `reason`, not a flag. A refusal is a
-// CORRECT outcome, not a missing rule — evaluators must be able to tell the two apart (a crashed
-// draft also yields no rule).
 export const extractDraftFromSteps = (
   steps: WorkflowStepExecutionDto[]
 ): { rule: DraftRule | undefined; skipped: boolean; skipReason: string | undefined } => {
