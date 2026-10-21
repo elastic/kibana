@@ -21,8 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const obsAssistantConversationsGlobalSearchEntry = 'Observability AI Assistant / Conversations';
 
-  // Failing: See https://github.com/elastic/kibana/issues/287866
-  describe.skip('ai assistant privileges', () => {
+  describe('ai assistant privileges', () => {
     describe('all privileges', () => {
       before(async () => {
         await createAndLoginUserWithCustomRole(getPageObjects, getService, {
