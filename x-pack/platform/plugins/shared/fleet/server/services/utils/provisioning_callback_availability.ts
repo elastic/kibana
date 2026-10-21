@@ -8,7 +8,7 @@
 import { appContextService } from '../app_context';
 
 /** Whether a launched CloudFormation stack could report back to this Kibana, and why not. */
-export interface IacCallbackAvailability {
+export interface ProvisioningCallbackAvailability {
   available: boolean;
   /** The URL the stack is given: `server.publicBaseUrl` without a trailing slash. */
   kibanaUrl?: string;
@@ -21,7 +21,7 @@ export interface IacCallbackAvailability {
  * set and be https, since CloudFormation only accepts an https callback URL. Whether AWS can reach
  * that URL is not checked. Kibana's own view of the network says nothing about what AWS sees.
  */
-export const getIacCallbackAvailability = (): IacCallbackAvailability => {
+export const getProvisioningCallbackAvailability = (): ProvisioningCallbackAvailability => {
   const configured = appContextService.getHttpSetup().basePath.publicBaseUrl;
   if (!configured) {
     return {

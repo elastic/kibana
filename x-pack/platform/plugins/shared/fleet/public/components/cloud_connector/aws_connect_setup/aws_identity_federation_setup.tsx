@@ -34,7 +34,7 @@ import { AWS_CLOUD_PROVIDER } from '../../../../common/types/models/cloud_connec
 import type { CloudConnectorIacState } from '../../../../common/types/models/cloud_connector';
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
-import { useIacCallback } from '../hooks/use_iac_callback';
+import { useProvisioningCallback } from '../hooks/use_provisioning_callback';
 import { CloudConnectorTabs, type CloudConnectorTab } from '../cloud_connector_tabs';
 import { CloudConnectorSelector } from '../form/cloud_connector_selector';
 import { CloudConnectorNameField } from '../form/cloud_connector_name_field';
@@ -140,7 +140,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
     created: callbackCreated,
     start: startCallback,
     cancel: cancelCallback,
-  } = useIacCallback({ enabled: isAwsIdentityFederationEnabled });
+  } = useProvisioningCallback({ enabled: isAwsIdentityFederationEnabled });
   // The name the pending record holds: what the stack's report will call the identity.
   const [launchedName, setLaunchedName] = useState('');
 

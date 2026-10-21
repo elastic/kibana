@@ -11,15 +11,18 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import {
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-  IAC_CALLBACK_SAVED_OBJECT_TYPE,
+  PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 import type {
   CloudConnectorCallback,
   CloudConnectorCallbackIdentity,
-  IacCallbackReceivedValues,
-} from '../../common/types/models/iac_callback';
+  CloudConnectorCallbackReceivedValues,
+} from '../../common/types/models/provisioning_callback';
 import type { CloudConnectorIacState } from '../../common/types/models/cloud_connector';
-import type { CloudConnectorSOAttributes, IacCallbackSOAttributes } from '../types/so_attributes';
+import type {
+  CloudConnectorSOAttributes,
+  ProvisioningCallbackSOAttributes,
+} from '../types/so_attributes';
 import { CloudConnectorCreateError, FleetError } from '../errors';
 
 import { appContextService } from './app_context';
@@ -28,10 +31,10 @@ import { invalidateAPIKeys } from './api_keys/security';
 import { cloudConnectorService } from './cloud_connector';
 
 /** How long the stack has to call back. Also the lifetime of the key bound to the record. */
-export const IAC_CALLBACK_EXPIRATION = '2h';
-export const IAC_CALLBACK_TTL_MS = 2 * 60 * 60 * 1000;
+export const PROVISIONING_CALLBACK_EXPIRATION = '2h';
+export const PROVISIONING_CALLBACK_TTL_MS = 2 * 60 * 60 * 1000;
 
-export interface CreateIacCallbackOptions {
+export interface CreateProvisioningCallbackOptions {
   provider: 'aws';
   createdBy?: string;
   spaceId?: string;
@@ -59,13 +62,13 @@ const roleNameFromArn = (roleArn: string): string => {
 const isDuplicateName = (error: unknown): boolean =>
   error instanceof CloudConnectorCreateError && error.message.includes('already exists');
 
-export interface IacCallbackReceiveInput {
+export interface ProvisioningCallbackReceiveInput {
   /** Id of the API key the caller authenticated with; undefined for any other authentication. */
   apiKeyId: string | undefined;
-  payload: IacCallbackReceivedValues;
+  payload: CloudConnectorCallbackReceivedValues;
 }
 
-export type IacCallbackReceiveResult =
+export type ProvisioningCallbackReceiveResult =
   /** Stored now, or an exact replay of what is already stored. */
   | { outcome: 'received'; item: CloudConnectorCallback }
   /** No such record, or the caller's key is not the one bound to it. Indistinguishable on purpose. */
@@ -77,19 +80,25 @@ export type IacCallbackReceiveResult =
   /** Fields are individually well-formed but disagree with each other. */
   | { outcome: 'invalid'; message: string };
 
-const RECEIVED_FIELDS: Array<keyof IacCallbackReceivedValues> = ['role_arn', 'stack_arn'];
+const RECEIVED_FIELDS: Array<keyof CloudConnectorCallbackReceivedValues> = [
+  'role_arn',
+  'stack_arn',
+];
 
 const accountIdOfArn = (arn: string): string | undefined => arn.split(':')[4];
 
-const toItem = (id: string, attributes: IacCallbackSOAttributes): CloudConnectorCallback => {
+const toItem = (
+  id: string,
+  attributes: ProvisioningCallbackSOAttributes
+): CloudConnectorCallback => {
   // The API key id never leaves this service.
   const { api_key_id: _apiKeyId, ...rest } = attributes;
   return { id, ...rest };
 };
 
 const isSamePayload = (
-  stored: IacCallbackSOAttributes,
-  payload: IacCallbackReceivedValues
+  stored: ProvisioningCallbackSOAttributes,
+  payload: CloudConnectorCallbackReceivedValues
 ): boolean => RECEIVED_FIELDS.every((field) => stored[field] === payload[field]);
 
 interface CreatedCloudConnector {
@@ -97,7 +106,7 @@ interface CreatedCloudConnector {
   name: string;
 }
 
-class IacCallbackService {
+class ProvisioningCallbackService {
   private get logger() {
     return appContextService.getLogger().get('iacCallback');
   }
@@ -111,7 +120,7 @@ class IacCallbackService {
   public async create(
     soClient: SavedObjectsClientContract,
     request: KibanaRequest,
-    { provider, createdBy, spaceId, identity = {} }: CreateIacCallbackOptions
+    { provider, createdBy, spaceId, identity = {} }: CreateProvisioningCallbackOptions
   ): Promise<{ item: CloudConnectorCallback; apiKey: string }> {
     const id = uuidv4();
     const now = new Date();
@@ -123,7 +132,7 @@ class IacCallbackService {
     const key = await security.authc.apiKeys
       .grantAsInternalUser(request, {
         name: `fleet-iac-callback-${id}`,
-        expiration: IAC_CALLBACK_EXPIRATION,
+        expiration: PROVISIONING_CALLBACK_EXPIRATION,
         metadata: { managed_by: 'fleet', managed: true, type: 'iac_callback', callback_id: id },
         role_descriptors: {
           // Named descriptor with no privileges. An empty `role_descriptors: {}` would inherit
@@ -144,7 +153,7 @@ class IacCallbackService {
       throw new FleetError('Impossible to create an api key: API keys are not available');
     }
 
-    const attributes: IacCallbackSOAttributes = {
+    const attributes: ProvisioningCallbackSOAttributes = {
       provider,
       status: 'pending',
       api_key_id: key.id,
@@ -152,7 +161,7 @@ class IacCallbackService {
       ...(createdBy ? { created_by: createdBy } : {}),
       ...(spaceId ? { space_id: spaceId } : {}),
       // The grant answer carries no expiration; the key was asked for the same lifetime.
-      expires_at: new Date(now.getTime() + IAC_CALLBACK_TTL_MS).toISOString(),
+      expires_at: new Date(now.getTime() + PROVISIONING_CALLBACK_TTL_MS).toISOString(),
     };
     for (const field of IDENTITY_FIELDS) {
       if (identity[field] !== undefined) {
@@ -164,8 +173,8 @@ class IacCallbackService {
       message: `User creating IaC callback [id=${id}] [api_key_id=${key.id}]`,
     });
 
-    const so = await soClient.create<IacCallbackSOAttributes>(
-      IAC_CALLBACK_SAVED_OBJECT_TYPE,
+    const so = await soClient.create<ProvisioningCallbackSOAttributes>(
+      PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
       attributes,
       { id }
     );
@@ -201,8 +210,8 @@ class IacCallbackService {
   public async receive(
     soClient: SavedObjectsClientContract,
     id: string,
-    { apiKeyId, payload }: IacCallbackReceiveInput
-  ): Promise<IacCallbackReceiveResult> {
+    { apiKeyId, payload }: ProvisioningCallbackReceiveInput
+  ): Promise<ProvisioningCallbackReceiveResult> {
     const so = await this.getSavedObject(soClient, id);
     if (!so || !apiKeyId || so.attributes.api_key_id !== apiKeyId) {
       return { outcome: 'not_found' };
@@ -263,16 +272,20 @@ class IacCallbackService {
   private async finish(
     soClient: SavedObjectsClientContract,
     id: string,
-    attributes: IacCallbackSOAttributes,
+    attributes: ProvisioningCallbackSOAttributes,
     connector: CreatedCloudConnector
   ): Promise<CloudConnectorCallback> {
-    const update: Partial<IacCallbackSOAttributes> = {
+    const update: Partial<ProvisioningCallbackSOAttributes> = {
       status: 'received',
       received_at: new Date().toISOString(),
       connector_name: connector.name,
       cloud_connector_id: connector.id,
     };
-    await soClient.update<IacCallbackSOAttributes>(IAC_CALLBACK_SAVED_OBJECT_TYPE, id, update);
+    await soClient.update<ProvisioningCallbackSOAttributes>(
+      PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+      id,
+      update
+    );
 
     // The key is single use.
     await invalidateAPIKeys([attributes.api_key_id]);
@@ -295,8 +308,8 @@ class IacCallbackService {
     version: string | undefined
   ): Promise<void> {
     try {
-      await soClient.update<IacCallbackSOAttributes>(
-        IAC_CALLBACK_SAVED_OBJECT_TYPE,
+      await soClient.update<ProvisioningCallbackSOAttributes>(
+        PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
         id,
         { status: 'pending' },
         { version }
@@ -337,10 +350,10 @@ class IacCallbackService {
       return toItem(so.id, attributes);
     }
 
-    const update: Partial<IacCallbackSOAttributes> = { status: 'cancelled' };
+    const update: Partial<ProvisioningCallbackSOAttributes> = { status: 'cancelled' };
     try {
-      await soClient.update<IacCallbackSOAttributes>(
-        IAC_CALLBACK_SAVED_OBJECT_TYPE,
+      await soClient.update<ProvisioningCallbackSOAttributes>(
+        PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
         so.id,
         update,
         { version }
@@ -370,17 +383,19 @@ class IacCallbackService {
    */
   private async claim(
     soClient: SavedObjectsClientContract,
-    so: SavedObject<IacCallbackSOAttributes>,
-    payload: IacCallbackReceivedValues
-  ): Promise<{ attributes: IacCallbackSOAttributes; version: string | undefined } | undefined> {
-    const update: Partial<IacCallbackSOAttributes> = {
+    so: SavedObject<ProvisioningCallbackSOAttributes>,
+    payload: CloudConnectorCallbackReceivedValues
+  ): Promise<
+    { attributes: ProvisioningCallbackSOAttributes; version: string | undefined } | undefined
+  > {
+    const update: Partial<ProvisioningCallbackSOAttributes> = {
       status: 'receiving',
       role_arn: payload.role_arn,
       stack_arn: payload.stack_arn,
     };
     try {
-      const updated = await soClient.update<IacCallbackSOAttributes>(
-        IAC_CALLBACK_SAVED_OBJECT_TYPE,
+      const updated = await soClient.update<ProvisioningCallbackSOAttributes>(
+        PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
         so.id,
         update,
         { version: so.version }
@@ -402,8 +417,8 @@ class IacCallbackService {
    */
   private async ensureCloudConnector(
     callbackId: string,
-    attributes: IacCallbackSOAttributes,
-    payload: IacCallbackReceivedValues
+    attributes: ProvisioningCallbackSOAttributes,
+    payload: CloudConnectorCallbackReceivedValues
   ): Promise<CreatedCloudConnector> {
     const spaceClient = appContextService.getInternalUserSOClientForSpaceId(attributes.space_id);
     const existing = await this.findCloudConnector(spaceClient, callbackId);
@@ -448,8 +463,8 @@ class IacCallbackService {
   private async createCloudConnector(
     spaceClient: SavedObjectsClientContract,
     callbackId: string,
-    attributes: IacCallbackSOAttributes,
-    payload: IacCallbackReceivedValues
+    attributes: ProvisioningCallbackSOAttributes,
+    payload: CloudConnectorCallbackReceivedValues
   ): Promise<CreatedCloudConnector> {
     const preferred =
       attributes.connector_name?.trim().slice(0, CONNECTOR_NAME_MAX_LENGTH) ||
@@ -492,7 +507,10 @@ class IacCallbackService {
 
   private async getSavedObject(soClient: SavedObjectsClientContract, id: string) {
     try {
-      return await soClient.get<IacCallbackSOAttributes>(IAC_CALLBACK_SAVED_OBJECT_TYPE, id);
+      return await soClient.get<ProvisioningCallbackSOAttributes>(
+        PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
+        id
+      );
     } catch (error) {
       if (SavedObjectsErrorHelpers.isNotFoundError(error)) {
         return undefined;
@@ -502,4 +520,4 @@ class IacCallbackService {
   }
 }
 
-export const iacCallbackService = new IacCallbackService();
+export const provisioningCallbackService = new ProvisioningCallbackService();

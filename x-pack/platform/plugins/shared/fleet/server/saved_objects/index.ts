@@ -15,7 +15,7 @@ import {
   PACKAGE_POLICY_SAVED_OBJECT_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
-  IAC_CALLBACK_SAVED_OBJECT_TYPE,
+  PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
 
 import {
@@ -62,7 +62,7 @@ import {
   CloudConnectorSchemaV5,
   CloudOnboardingDeploymentSchemaV1,
   CloudOnboardingDeploymentSchemaV2,
-  IacCallbackSchemaV1,
+  ProvisioningCallbackSchemaV1,
 } from '../types';
 
 import { downloadSourceSchemaV2 } from '../../common/types/models/download_source_schema';
@@ -2187,8 +2187,8 @@ export const getSavedObjectTypes = (
         },
       },
     },
-    [IAC_CALLBACK_SAVED_OBJECT_TYPE]: {
-      name: IAC_CALLBACK_SAVED_OBJECT_TYPE,
+    [PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE]: {
+      name: PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE,
       indexPattern: INGEST_SAVED_OBJECT_INDEX,
       hidden: false,
       // The stack's Lambda calls the receive route without a space prefix, so the record must be
@@ -2209,8 +2209,8 @@ export const getSavedObjectTypes = (
         1: {
           changes: [],
           schemas: {
-            forwardCompatibility: IacCallbackSchemaV1.extends({}, { unknowns: 'ignore' }),
-            create: IacCallbackSchemaV1,
+            forwardCompatibility: ProvisioningCallbackSchemaV1.extends({}, { unknowns: 'ignore' }),
+            create: ProvisioningCallbackSchemaV1,
           },
         },
       },

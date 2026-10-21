@@ -8,24 +8,24 @@
 import { useQuery } from '@kbn/react-query';
 
 import type {
-  CreateIacCallbackRequest,
-  CreateIacCallbackResponse,
-  DeleteIacCallbackResponse,
-  GetIacCallbackAvailabilityResponse,
-  GetIacCallbackResponse,
-} from '../../../common/types/rest_spec/iac_callback';
+  CreateProvisioningCallbackRequest,
+  CreateProvisioningCallbackResponse,
+  DeleteProvisioningCallbackResponse,
+  GetProvisioningCallbackAvailabilityResponse,
+  GetProvisioningCallbackResponse,
+} from '../../../common/types/rest_spec/provisioning_callback';
 import { API_VERSIONS, IAC_PROVISIONER_API_ROUTES } from '../../../common/constants';
 
 import { sendRequest, sendRequestForRq } from './use_request';
 
-export const IAC_CALLBACK_AVAILABILITY_QUERY_KEY = ['iac-callback-availability'];
+export const PROVISIONING_CALLBACK_AVAILABILITY_QUERY_KEY = ['iac-callback-availability'];
 
 /** Whether a launched stack could report back to this Kibana: its public URL must be set and https. */
-export function useGetIacCallbackAvailabilityQuery({ enabled }: { enabled: boolean }) {
+export function useGetProvisioningCallbackAvailabilityQuery({ enabled }: { enabled: boolean }) {
   return useQuery(
-    IAC_CALLBACK_AVAILABILITY_QUERY_KEY,
+    PROVISIONING_CALLBACK_AVAILABILITY_QUERY_KEY,
     () =>
-      sendRequestForRq<GetIacCallbackAvailabilityResponse>({
+      sendRequestForRq<GetProvisioningCallbackAvailabilityResponse>({
         method: 'get',
         path: IAC_PROVISIONER_API_ROUTES.CALLBACK_AVAILABILITY_PATTERN,
         version: API_VERSIONS.internal.v1,
@@ -37,8 +37,8 @@ export function useGetIacCallbackAvailabilityQuery({ enabled }: { enabled: boole
 const callbackPath = (id: string) =>
   IAC_PROVISIONER_API_ROUTES.CALLBACK_INFO_PATTERN.replace('{callbackId}', encodeURIComponent(id));
 
-export function sendCreateIacCallback(body: CreateIacCallbackRequest['body']) {
-  return sendRequest<CreateIacCallbackResponse>({
+export function sendCreateProvisioningCallback(body: CreateProvisioningCallbackRequest['body']) {
+  return sendRequest<CreateProvisioningCallbackResponse>({
     method: 'post',
     path: IAC_PROVISIONER_API_ROUTES.CALLBACK_CREATE_PATTERN,
     version: API_VERSIONS.internal.v1,
@@ -46,16 +46,16 @@ export function sendCreateIacCallback(body: CreateIacCallbackRequest['body']) {
   });
 }
 
-export function sendGetIacCallback(id: string) {
-  return sendRequest<GetIacCallbackResponse>({
+export function sendGetProvisioningCallback(id: string) {
+  return sendRequest<GetProvisioningCallbackResponse>({
     method: 'get',
     path: callbackPath(id),
     version: API_VERSIONS.internal.v1,
   });
 }
 
-export function sendDeleteIacCallback(id: string) {
-  return sendRequest<DeleteIacCallbackResponse>({
+export function sendDeleteProvisioningCallback(id: string) {
+  return sendRequest<DeleteProvisioningCallbackResponse>({
     method: 'delete',
     path: callbackPath(id),
     version: API_VERSIONS.internal.v1,

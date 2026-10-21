@@ -8,54 +8,54 @@
 import type {
   CloudConnectorCallback,
   CloudConnectorCallbackIdentity,
-  IacCallbackReceivedValues,
-  IacCallbackStatus,
-} from '../models/iac_callback';
+  CloudConnectorCallbackReceivedValues,
+  ProvisioningCallbackStatus,
+} from '../models/provisioning_callback';
 
 /**
  * Whether a launched stack could report back to this Kibana. `kibana_url` is `server.publicBaseUrl`
  * as the stack is given it; `reason` says why the callback cannot be used.
  */
-export interface GetIacCallbackAvailabilityResponse {
+export interface GetProvisioningCallbackAvailabilityResponse {
   available: boolean;
   kibana_url?: string;
   reason?: string;
 }
 
-export interface CreateIacCallbackRequest {
+export interface CreateProvisioningCallbackRequest {
   body: CloudConnectorCallbackIdentity & {
     provider: 'aws';
   };
 }
 
-export interface CreateIacCallbackResponse {
+export interface CreateProvisioningCallbackResponse {
   item: CloudConnectorCallback;
   /** Base64 `id:api_key`, returned exactly once. Passed to the stack as a parameter; never persisted. */
   api_key: string;
 }
 
-export interface GetIacCallbackRequest {
+export interface GetProvisioningCallbackRequest {
   params: { callbackId: string };
 }
 
-export interface GetIacCallbackResponse {
+export interface GetProvisioningCallbackResponse {
   item: CloudConnectorCallback;
 }
 
-export interface DeleteIacCallbackRequest {
+export interface DeleteProvisioningCallbackRequest {
   params: { callbackId: string };
 }
 
 /** The record as left by the cancel: `cancelled`, or untouched when the stack had already reported. */
-export interface DeleteIacCallbackResponse {
+export interface DeleteProvisioningCallbackResponse {
   item: CloudConnectorCallback;
 }
 
-export interface ReceiveIacCallbackRequest {
+export interface ReceiveProvisioningCallbackRequest {
   params: { callbackId: string };
-  body: IacCallbackReceivedValues;
+  body: CloudConnectorCallbackReceivedValues;
 }
 
-export interface ReceiveIacCallbackResponse {
-  status: IacCallbackStatus;
+export interface ReceiveProvisioningCallbackResponse {
+  status: ProvisioningCallbackStatus;
 }

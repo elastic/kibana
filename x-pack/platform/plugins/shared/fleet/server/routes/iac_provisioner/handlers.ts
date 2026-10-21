@@ -10,7 +10,7 @@ import type { KibanaResponseFactory } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
 import { iacProvisionerService } from '../../services';
-import { iacCallbackService } from '../../services/iac_callback';
+import { provisioningCallbackService } from '../../services/provisioning_callback';
 import {
   buildIacProvisionerIntegrations,
   isBuildError,
@@ -18,7 +18,7 @@ import {
 import { appContextService } from '../../services/app_context';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import { isAwsIdentityFederationEnabled } from '../../services/utils/aws_identity_federation';
-import { getIacCallbackAvailability } from '../../services/utils/iac_callback_availability';
+import { getProvisioningCallbackAvailability } from '../../services/utils/provisioning_callback_availability';
 import {
   reportIacProvisionerRenderCompleted,
   reportIacProvisionerRenderRequested,
@@ -32,12 +32,12 @@ import { getErrorMessage } from '../../errors/utils';
 import type { FleetRequestHandler } from '../../types';
 import type { RenderIacTemplateRequestSchema } from '../../types/rest_spec/iac_provisioner';
 import type {
-  CreateIacCallbackRequestSchema,
-  DeleteIacCallbackRequestSchema,
-  GetIacCallbackRequestSchema,
-  ReceiveIacCallbackRequestSchema,
-} from '../../types/rest_spec/iac_callback';
-import type { CloudConnectorCallback } from '../../../common/types/models/iac_callback';
+  CreateProvisioningCallbackRequestSchema,
+  DeleteProvisioningCallbackRequestSchema,
+  GetProvisioningCallbackRequestSchema,
+  ReceiveProvisioningCallbackRequestSchema,
+} from '../../types/rest_spec/provisioning_callback';
+import type { CloudConnectorCallback } from '../../../common/types/models/provisioning_callback';
 import type { IacProvisionerRenderFlow } from '../../../common/telemetry/iac_provisioner_events';
 
 export const renderIacTemplateHandler: FleetRequestHandler<
@@ -198,7 +198,7 @@ const getCallbackInSpace = async (
   id: string,
   spaceId: string
 ): Promise<CloudConnectorCallback | undefined> => {
-  const item = await iacCallbackService.get(
+  const item = await provisioningCallbackService.get(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
     id
   );
@@ -213,7 +213,7 @@ const AWS_IDENTITY_FEDERATION_DISABLED = {
  * Tells the browser whether a launched stack could report back to this Kibana, so it can refuse
  * the launch with the reason instead of waiting for a report that cannot arrive.
  */
-export const getIacCallbackAvailabilityHandler: FleetRequestHandler = async (
+export const getProvisioningCallbackAvailabilityHandler: FleetRequestHandler = async (
   context,
   request,
   response
@@ -221,7 +221,7 @@ export const getIacCallbackAvailabilityHandler: FleetRequestHandler = async (
   if (!(await isAwsIdentityFederationEnabled())) {
     return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
   }
-  const { available, kibanaUrl, reason } = getIacCallbackAvailability();
+  const { available, kibanaUrl, reason } = getProvisioningCallbackAvailability();
   return response.ok({
     body: {
       available,
@@ -231,10 +231,10 @@ export const getIacCallbackAvailabilityHandler: FleetRequestHandler = async (
   });
 };
 
-export const createIacCallbackHandler: FleetRequestHandler<
+export const createProvisioningCallbackHandler: FleetRequestHandler<
   undefined,
   undefined,
-  TypeOf<typeof CreateIacCallbackRequestSchema.body>
+  TypeOf<typeof CreateProvisioningCallbackRequestSchema.body>
 > = async (context, request, response) => {
   if (!(await isAwsIdentityFederationEnabled())) {
     return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
@@ -242,7 +242,7 @@ export const createIacCallbackHandler: FleetRequestHandler<
   // A public URL the stack cannot be given (not https) is refused, so no key is minted for a
   // report that cannot arrive. Without a configured public URL there is nothing to check; the
   // caller supplies the URL to the stack and is responsible for it.
-  const availability = getIacCallbackAvailability();
+  const availability = getProvisioningCallbackAvailability();
   if (!availability.available && availability.kibanaUrl) {
     return response.customError({
       statusCode: 412,
@@ -256,7 +256,7 @@ export const createIacCallbackHandler: FleetRequestHandler<
   // The key is granted for the caller through the security plugin, so they need no
   // `manage_api_key` privilege (unavailable on Serverless). The type is space-agnostic, hence the
   // internal saved objects client.
-  const { item, apiKey } = await iacCallbackService.create(
+  const { item, apiKey } = await provisioningCallbackService.create(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
     request,
     { provider, createdBy: user?.username, spaceId, identity }
@@ -265,8 +265,8 @@ export const createIacCallbackHandler: FleetRequestHandler<
   return response.ok({ body: { item, api_key: apiKey } });
 };
 
-export const getIacCallbackHandler: FleetRequestHandler<
-  TypeOf<typeof GetIacCallbackRequestSchema.params>
+export const getProvisioningCallbackHandler: FleetRequestHandler<
+  TypeOf<typeof GetProvisioningCallbackRequestSchema.params>
 > = async (context, request, response) => {
   const { spaceId } = await context.fleet;
   const item = await getCallbackInSpace(request.params.callbackId, spaceId);
@@ -280,15 +280,15 @@ export const getIacCallbackHandler: FleetRequestHandler<
  * Retires a record the browser no longer waits on, for example because the identity is being
  * created by hand. Answers with the record as the stack left it when it had already reported.
  */
-export const deleteIacCallbackHandler: FleetRequestHandler<
-  TypeOf<typeof DeleteIacCallbackRequestSchema.params>
+export const deleteProvisioningCallbackHandler: FleetRequestHandler<
+  TypeOf<typeof DeleteProvisioningCallbackRequestSchema.params>
 > = async (context, request, response) => {
   const { spaceId } = await context.fleet;
   const existing = await getCallbackInSpace(request.params.callbackId, spaceId);
   if (!existing) {
     return response.notFound(CALLBACK_NOT_FOUND);
   }
-  const item = await iacCallbackService.cancel(
+  const item = await provisioningCallbackService.cancel(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
     existing.id
   );
@@ -302,16 +302,18 @@ export const deleteIacCallbackHandler: FleetRequestHandler<
  * Called by the stack's Lambda. Kibana has already authenticated the API key; the service then
  * checks that it is this record's key.
  */
-export const receiveIacCallbackHandler: FleetRequestHandler<
-  TypeOf<typeof ReceiveIacCallbackRequestSchema.params>,
+export const receiveProvisioningCallbackHandler: FleetRequestHandler<
+  TypeOf<typeof ReceiveProvisioningCallbackRequestSchema.params>,
   undefined,
-  TypeOf<typeof ReceiveIacCallbackRequestSchema.body>
+  TypeOf<typeof ReceiveProvisioningCallbackRequestSchema.body>
 > = async (context, request, response) => {
-  const logger = appContextService.getLogger().get('IacProvisioner receiveIacCallbackHandler');
+  const logger = appContextService
+    .getLogger()
+    .get('IacProvisioner receiveProvisioningCallbackHandler');
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request);
   const apiKeyId = user?.authentication_type === 'api_key' ? user.api_key?.id : undefined;
 
-  const result = await iacCallbackService.receive(
+  const result = await provisioningCallbackService.receive(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
     request.params.callbackId,
     { apiKeyId, payload: request.body }

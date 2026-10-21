@@ -7,7 +7,7 @@
 
 import { appContextService } from '../app_context';
 
-import { getIacCallbackAvailability } from './iac_callback_availability';
+import { getProvisioningCallbackAvailability } from './provisioning_callback_availability';
 
 jest.mock('../app_context');
 
@@ -16,11 +16,11 @@ const setPublicBaseUrl = (publicBaseUrl: string | undefined) =>
     basePath: { publicBaseUrl },
   } as any);
 
-describe('getIacCallbackAvailability', () => {
+describe('getProvisioningCallbackAvailability', () => {
   it('is unavailable without a public URL', () => {
     setPublicBaseUrl(undefined);
 
-    expect(getIacCallbackAvailability()).toEqual({
+    expect(getProvisioningCallbackAvailability()).toEqual({
       available: false,
       reason: 'Kibana has no public URL: server.publicBaseUrl is not set.',
     });
@@ -29,7 +29,7 @@ describe('getIacCallbackAvailability', () => {
   it('is unavailable when the public URL is not https', () => {
     setPublicBaseUrl('http://kibana.example.com/');
 
-    expect(getIacCallbackAvailability()).toEqual({
+    expect(getProvisioningCallbackAvailability()).toEqual({
       available: false,
       kibanaUrl: 'http://kibana.example.com',
       reason:
@@ -40,7 +40,7 @@ describe('getIacCallbackAvailability', () => {
   it('is available with the https public URL, without its trailing slash', () => {
     setPublicBaseUrl('https://kibana.example.com/');
 
-    expect(getIacCallbackAvailability()).toEqual({
+    expect(getProvisioningCallbackAvailability()).toEqual({
       available: true,
       kibanaUrl: 'https://kibana.example.com',
     });

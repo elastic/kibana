@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-const IacCallbackStatusSchema = schema.oneOf([
+const ProvisioningCallbackStatusSchema = schema.oneOf([
   schema.literal('pending'),
   schema.literal('receiving'),
   schema.literal('received'),
@@ -20,13 +20,13 @@ const AccountTypeSchema = schema.oneOf([
 ]);
 
 /**
- * Stored shape of a `fleet-iac-callback`. Only the API key id is kept so the key can be
+ * Stored shape of a `fleet-provisioning-callback`. Only the API key id is kept so the key can be
  * invalidated and matched against the caller; the key itself is never stored. The identity
  * fields are set at launch and copied to the cloud connector the report creates.
  */
-export const IacCallbackSchemaV1 = schema.object({
+export const ProvisioningCallbackSchemaV1 = schema.object({
   provider: schema.literal('aws'),
-  status: IacCallbackStatusSchema,
+  status: ProvisioningCallbackStatusSchema,
   api_key_id: schema.string({ minLength: 1, maxLength: 256 }),
   created_at: schema.string({ maxLength: 64 }),
   created_by: schema.maybe(schema.string({ maxLength: 1024 })),

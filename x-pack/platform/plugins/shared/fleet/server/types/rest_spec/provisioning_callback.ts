@@ -19,7 +19,7 @@ const CallbackIdParamsSchema = schema.object({
   }),
 });
 
-const IacCallbackStatusSchema = schema.oneOf(
+const ProvisioningCallbackStatusSchema = schema.oneOf(
   [
     schema.literal('pending'),
     schema.literal('receiving'),
@@ -34,10 +34,10 @@ const IacCallbackStatusSchema = schema.oneOf(
   }
 );
 
-export const IacCallbackItemSchema = schema.object({
+export const CloudConnectorCallbackItemSchema = schema.object({
   id: schema.string(),
   provider: schema.literal('aws'),
-  status: IacCallbackStatusSchema,
+  status: ProvisioningCallbackStatusSchema,
   created_at: schema.string(),
   created_by: schema.maybe(schema.string()),
   space_id: schema.maybe(schema.string()),
@@ -55,13 +55,13 @@ export const IacCallbackItemSchema = schema.object({
   cloud_connector_id: schema.maybe(schema.string()),
 });
 
-export const GetIacCallbackAvailabilityResponseSchema = schema.object({
+export const GetProvisioningCallbackAvailabilityResponseSchema = schema.object({
   available: schema.boolean(),
   kibana_url: schema.maybe(schema.string()),
   reason: schema.maybe(schema.string()),
 });
 
-export const CreateIacCallbackRequestSchema = {
+export const CreateProvisioningCallbackRequestSchema = {
   body: schema.object({
     provider: schema.literal('aws'),
     connector_name: schema.maybe(
@@ -93,8 +93,8 @@ export const CreateIacCallbackRequestSchema = {
   }),
 };
 
-export const CreateIacCallbackResponseSchema = schema.object({
-  item: IacCallbackItemSchema,
+export const CreateProvisioningCallbackResponseSchema = schema.object({
+  item: CloudConnectorCallbackItemSchema,
   api_key: schema.string({
     meta: {
       description:
@@ -103,23 +103,23 @@ export const CreateIacCallbackResponseSchema = schema.object({
   }),
 });
 
-export const GetIacCallbackRequestSchema = {
+export const GetProvisioningCallbackRequestSchema = {
   params: CallbackIdParamsSchema,
 };
 
-export const GetIacCallbackResponseSchema = schema.object({
-  item: IacCallbackItemSchema,
+export const GetProvisioningCallbackResponseSchema = schema.object({
+  item: CloudConnectorCallbackItemSchema,
 });
 
-export const DeleteIacCallbackRequestSchema = {
+export const DeleteProvisioningCallbackRequestSchema = {
   params: CallbackIdParamsSchema,
 };
 
-export const DeleteIacCallbackResponseSchema = schema.object({
-  item: IacCallbackItemSchema,
+export const DeleteProvisioningCallbackResponseSchema = schema.object({
+  item: CloudConnectorCallbackItemSchema,
 });
 
-export const ReceiveIacCallbackRequestSchema = {
+export const ReceiveProvisioningCallbackRequestSchema = {
   params: CallbackIdParamsSchema,
   body: schema.object({
     role_arn: schema.string({
@@ -139,6 +139,6 @@ export const ReceiveIacCallbackRequestSchema = {
   }),
 };
 
-export const ReceiveIacCallbackResponseSchema = schema.object({
-  status: IacCallbackStatusSchema,
+export const ReceiveProvisioningCallbackResponseSchema = schema.object({
+  status: ProvisioningCallbackStatusSchema,
 });

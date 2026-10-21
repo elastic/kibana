@@ -8,41 +8,46 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
-  sendCreateIacCallback,
-  sendDeleteIacCallback,
-  sendGetIacCallback,
-  useGetIacCallbackAvailabilityQuery,
-} from '../../../hooks/use_request/iac_callback';
+  sendCreateProvisioningCallback,
+  sendDeleteProvisioningCallback,
+  sendGetProvisioningCallback,
+  useGetProvisioningCallbackAvailabilityQuery,
+} from '../../../hooks/use_request/provisioning_callback';
 import type {
   CloudConnectorCallback,
   CloudConnectorCallbackIdentity,
-} from '../../../../common/types/models/iac_callback';
+} from '../../../../common/types/models/provisioning_callback';
 import type { AccountType } from '../../../../common/types/models/cloud_connector';
 import { IAC_PROVISIONER_API_ROUTES } from '../../../../common/constants';
 
-export const IAC_CALLBACK_POLL_INTERVAL_MS = 3_000;
+export const PROVISIONING_CALLBACK_POLL_INTERVAL_MS = 3_000;
 /** Stop polling after this even if the record has not expired yet. */
-export const IAC_CALLBACK_POLL_TIMEOUT_MS = 15 * 60 * 1000;
+export const PROVISIONING_CALLBACK_POLL_TIMEOUT_MS = 15 * 60 * 1000;
 /** Extra time to wait when the deadline finds the stack's report still being applied. */
-export const IAC_CALLBACK_RECEIVING_GRACE_MS = 60 * 1000;
+export const PROVISIONING_CALLBACK_RECEIVING_GRACE_MS = 60 * 1000;
 
-export type IacCallbackClientStatus = 'idle' | 'pending' | 'received' | 'expired' | 'error';
+export type ProvisioningCallbackClientStatus =
+  | 'idle'
+  | 'pending'
+  | 'received'
+  | 'expired'
+  | 'error';
 
 /**
  * What `cancel` found. `cancelled`: nothing will arrive, the caller may create by hand.
  * `created`: the stack reported first; its identity is (or will be) in `created`. `failed`: the
  * record could not be retired and is still live; the caller must not create by hand yet.
  */
-export type IacCallbackCancelOutcome = 'cancelled' | 'created' | 'failed';
+export type ProvisioningCallbackCancelOutcome = 'cancelled' | 'created' | 'failed';
 
 /** The cloud connector created when the stack reported back. */
-export interface IacCallbackCreated {
+export interface CloudConnectorCallbackCreated {
   id: string;
   name: string;
 }
 
 /** Identity details stored on the record at launch and used to create the cloud connector. */
-export interface IacCallbackStartInput {
+export interface CloudConnectorCallbackStartInput {
   connectorName?: string;
   accountType?: AccountType;
   iacKey?: string | null;
@@ -50,7 +55,7 @@ export interface IacCallbackStartInput {
   iacBlueprintVersion?: string | null;
 }
 
-export interface UseIacCallbackResult {
+export interface UseProvisioningCallbackResult {
   /**
    * False when the callback can't be used: disabled, still being checked, or Kibana's public URL
    * is not one a launched stack could report back to.
@@ -60,30 +65,34 @@ export interface UseIacCallbackResult {
   isChecking: boolean;
   /** The server's explanation when the callback is not available. */
   unavailableReason?: string;
-  status: IacCallbackClientStatus;
+  status: ProvisioningCallbackClientStatus;
   /** Set when the stack's report has created the cloud connector. */
-  created?: IacCallbackCreated;
+  created?: CloudConnectorCallbackCreated;
   /**
    * Creates a callback record and returns the stack parameters for the quick-create link.
    * Rejects when the record could not be created: the stack's report is the only way the identity
    * gets created, so the caller must not open the console. Returns undefined when the callback is
    * not available.
    */
-  start: (identity: IacCallbackStartInput) => Promise<Record<string, string> | undefined>;
+  start: (
+    identity: CloudConnectorCallbackStartInput
+  ) => Promise<Record<string, string> | undefined>;
   /**
    * Stops waiting on the current record and retires it on the server, so a late report cannot
-   * create an identity the form no longer watches. See `IacCallbackCancelOutcome` for what the
+   * create an identity the form no longer watches. See `ProvisioningCallbackCancelOutcome` for what the
    * caller may do next.
    */
-  cancel: () => Promise<IacCallbackCancelOutcome>;
+  cancel: () => Promise<ProvisioningCallbackCancelOutcome>;
 }
 
-const toCreated = (item: CloudConnectorCallback): IacCallbackCreated | undefined =>
+const toCreated = (item: CloudConnectorCallback): CloudConnectorCallbackCreated | undefined =>
   item.cloud_connector_id
     ? { id: item.cloud_connector_id, name: item.connector_name ?? item.cloud_connector_id }
     : undefined;
 
-const toIdentityBody = (identity: IacCallbackStartInput): CloudConnectorCallbackIdentity => {
+const toIdentityBody = (
+  identity: CloudConnectorCallbackStartInput
+): CloudConnectorCallbackIdentity => {
   const body: CloudConnectorCallbackIdentity = {};
   const name = identity.connectorName?.trim();
   if (name) {
@@ -104,17 +113,21 @@ const toIdentityBody = (identity: IacCallbackStartInput): CloudConnectorCallback
   return body;
 };
 
-export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbackResult => {
+export const useProvisioningCallback = ({
+  enabled,
+}: {
+  enabled: boolean;
+}): UseProvisioningCallbackResult => {
   // The server decides whether the stack could call back: `server.publicBaseUrl` must be set and
   // be https. It is also the URL the stack is given.
   const {
     data: availability,
     isLoading: isChecking,
     refetch: recheckAvailability,
-  } = useGetIacCallbackAvailabilityQuery({ enabled });
+  } = useGetProvisioningCallbackAvailabilityQuery({ enabled });
   const kibanaUrl = availability?.available ? availability.kibana_url : undefined;
-  const [status, setStatus] = useState<IacCallbackClientStatus>('idle');
-  const [created, setCreated] = useState<IacCallbackCreated | undefined>(undefined);
+  const [status, setStatus] = useState<ProvisioningCallbackClientStatus>('idle');
+  const [created, setCreated] = useState<CloudConnectorCallbackCreated | undefined>(undefined);
   // The record currently being waited on; a poll result for any other id is stale and ignored.
   const activeIdRef = useRef<string | undefined>(undefined);
   // The record whose report was last seen, so a cancel racing with that poll knows the outcome.
@@ -140,8 +153,8 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
    * for a cancelled record, since it means expired at the deadline and idle on a manual cancel.
    */
   const retire = useCallback(
-    async (id: string): Promise<IacCallbackCancelOutcome> => {
-      const { data, error } = await sendDeleteIacCallback(id);
+    async (id: string): Promise<ProvisioningCallbackCancelOutcome> => {
+      const { data, error } = await sendDeleteProvisioningCallback(id);
       if (activeIdRef.current !== id) {
         // A poll saw the report land while the request was in flight; otherwise a new Launch or
         // an unmount took the record away, and there is nothing left to wait on.
@@ -174,7 +187,7 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
     (id: string, expiresAt: string) => {
       let deadline = Math.min(
         new Date(expiresAt).getTime(),
-        Date.now() + IAC_CALLBACK_POLL_TIMEOUT_MS
+        Date.now() + PROVISIONING_CALLBACK_POLL_TIMEOUT_MS
       );
       let hasGrace = true;
       let isRetiring = false;
@@ -202,7 +215,7 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
             // Still being applied. Give it a little longer, once.
             if (hasGrace) {
               hasGrace = false;
-              deadline = Date.now() + IAC_CALLBACK_RECEIVING_GRACE_MS;
+              deadline = Date.now() + PROVISIONING_CALLBACK_RECEIVING_GRACE_MS;
             } else {
               stopPolling();
               setStatus('expired');
@@ -214,7 +227,7 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
           }
           return;
         }
-        const { data, error } = await sendGetIacCallback(id);
+        const { data, error } = await sendGetProvisioningCallback(id);
         if (activeIdRef.current !== id) {
           return;
         }
@@ -234,12 +247,12 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
           setCreated(toCreated(data.item));
           setStatus('received');
         }
-      }, IAC_CALLBACK_POLL_INTERVAL_MS);
+      }, PROVISIONING_CALLBACK_POLL_INTERVAL_MS);
     },
     [retire, stopPolling]
   );
 
-  const cancel = useCallback(async (): Promise<IacCallbackCancelOutcome> => {
+  const cancel = useCallback(async (): Promise<ProvisioningCallbackCancelOutcome> => {
     const id = activeIdRef.current;
     if (!id) {
       return 'cancelled';
@@ -255,13 +268,16 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
       // The report is being applied and nothing is polling any more (the deadline had passed
       // and its cancel failed). Watch for the identity a little longer.
       setStatus('pending');
-      startPolling(id, new Date(Date.now() + IAC_CALLBACK_RECEIVING_GRACE_MS).toISOString());
+      startPolling(
+        id,
+        new Date(Date.now() + PROVISIONING_CALLBACK_RECEIVING_GRACE_MS).toISOString()
+      );
     }
     return outcome;
   }, [retire, startPolling]);
 
   const start = useCallback(
-    async (identity: IacCallbackStartInput) => {
+    async (identity: CloudConnectorCallbackStartInput) => {
       if (!enabled || !kibanaUrl) {
         return undefined;
       }
@@ -273,10 +289,10 @@ export const useIacCallback = ({ enabled }: { enabled: boolean }): UseIacCallbac
       activeIdRef.current = undefined;
       setStatus('idle');
       if (previousId) {
-        sendDeleteIacCallback(previousId).catch(() => {});
+        sendDeleteProvisioningCallback(previousId).catch(() => {});
       }
 
-      const { data, error } = await sendCreateIacCallback({
+      const { data, error } = await sendCreateProvisioningCallback({
         provider: 'aws',
         ...toIdentityBody(identity),
       });

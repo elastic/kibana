@@ -13,4 +13,4 @@ export const CLOUD_CONNECTOR_SAVED_OBJECT_TYPE = 'fleet-cloud-connector';
 
 export const CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE = 'fleet-cloud-onboarding-deployment';
 
-export const IAC_CALLBACK_SAVED_OBJECT_TYPE = 'fleet-iac-callback';
+export const PROVISIONING_CALLBACK_SAVED_OBJECT_TYPE = 'fleet-provisioning-callback';

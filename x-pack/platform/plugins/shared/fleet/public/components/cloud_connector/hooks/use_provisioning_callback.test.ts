@@ -8,26 +8,26 @@
 import { act, renderHook } from '@testing-library/react';
 
 import {
-  sendCreateIacCallback,
-  sendDeleteIacCallback,
-  sendGetIacCallback,
-  useGetIacCallbackAvailabilityQuery,
-} from '../../../hooks/use_request/iac_callback';
-import type { CloudConnectorCallback } from '../../../../common/types/models/iac_callback';
-import type { GetIacCallbackAvailabilityResponse } from '../../../../common/types/rest_spec/iac_callback';
+  sendCreateProvisioningCallback,
+  sendDeleteProvisioningCallback,
+  sendGetProvisioningCallback,
+  useGetProvisioningCallbackAvailabilityQuery,
+} from '../../../hooks/use_request/provisioning_callback';
+import type { CloudConnectorCallback } from '../../../../common/types/models/provisioning_callback';
+import type { GetProvisioningCallbackAvailabilityResponse } from '../../../../common/types/rest_spec/provisioning_callback';
 
 import {
-  IAC_CALLBACK_POLL_INTERVAL_MS,
-  IAC_CALLBACK_RECEIVING_GRACE_MS,
-  useIacCallback,
-} from './use_iac_callback';
+  PROVISIONING_CALLBACK_POLL_INTERVAL_MS,
+  PROVISIONING_CALLBACK_RECEIVING_GRACE_MS,
+  useProvisioningCallback,
+} from './use_provisioning_callback';
 
-jest.mock('../../../hooks/use_request/iac_callback');
+jest.mock('../../../hooks/use_request/provisioning_callback');
 
-const mockedAvailabilityQuery = jest.mocked(useGetIacCallbackAvailabilityQuery);
-const mockedCreate = jest.mocked(sendCreateIacCallback);
-const mockedGet = jest.mocked(sendGetIacCallback);
-const mockedDelete = jest.mocked(sendDeleteIacCallback);
+const mockedAvailabilityQuery = jest.mocked(useGetProvisioningCallbackAvailabilityQuery);
+const mockedCreate = jest.mocked(sendCreateProvisioningCallback);
+const mockedGet = jest.mocked(sendGetProvisioningCallback);
+const mockedDelete = jest.mocked(sendDeleteProvisioningCallback);
 
 const NOW = new Date('2026-10-13T10:00:00.000Z');
 const EXPIRES_AT = '2026-10-13T12:00:00.000Z';
@@ -51,7 +51,7 @@ const RECEIVED_VALUES = {
 
 const mockedRecheck = jest.fn();
 /** What the server says about the callback; `undefined` while it is still checking. */
-const setAvailability = (data: GetIacCallbackAvailabilityResponse | undefined) =>
+const setAvailability = (data: GetProvisioningCallbackAvailabilityResponse | undefined) =>
   mockedAvailabilityQuery.mockReturnValue({
     data,
     isLoading: data === undefined,
@@ -62,11 +62,11 @@ const NOT_HTTPS_REASON =
 
 const poll = async () => {
   await act(async () => {
-    jest.advanceTimersByTime(IAC_CALLBACK_POLL_INTERVAL_MS);
+    jest.advanceTimersByTime(PROVISIONING_CALLBACK_POLL_INTERVAL_MS);
   });
 };
 
-describe('useIacCallback', () => {
+describe('useProvisioningCallback', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers().setSystemTime(NOW);
@@ -87,7 +87,7 @@ describe('useIacCallback', () => {
   });
 
   it('is available when enabled and the server can be called back at its public URL', () => {
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
 
     expect(result.current.available).toBe(true);
     expect(result.current.isChecking).toBe(false);
@@ -95,7 +95,7 @@ describe('useIacCallback', () => {
   });
 
   it('is not available when disabled, and does not ask the server', () => {
-    const { result } = renderHook(() => useIacCallback({ enabled: false }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: false }));
 
     expect(result.current.available).toBe(false);
     expect(result.current.isChecking).toBe(false);
@@ -104,7 +104,7 @@ describe('useIacCallback', () => {
 
   it('is checking, not available, until the server has answered', () => {
     setAvailability(undefined);
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
 
     expect(result.current.available).toBe(false);
     expect(result.current.isChecking).toBe(true);
@@ -117,14 +117,14 @@ describe('useIacCallback', () => {
       kibana_url: 'https://kb.example.com',
       reason: NOT_HTTPS_REASON,
     });
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
 
     expect(result.current.available).toBe(false);
     expect(result.current.unavailableReason).toBe(NOT_HTTPS_REASON);
   });
 
   it('start() creates a record with the identity details and returns the stack params', async () => {
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
 
     let params: Record<string, string> | undefined;
     await act(async () => {
@@ -153,7 +153,7 @@ describe('useIacCallback', () => {
   });
 
   it('leaves out a blank name and unset details', async () => {
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
     await act(async () => {
       await result.current.start({ connectorName: '   ' });
     });
@@ -162,7 +162,7 @@ describe('useIacCallback', () => {
   });
 
   it('polls while pending and exposes the created connector once received', async () => {
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
     await act(async () => {
       await result.current.start({});
     });
@@ -194,7 +194,7 @@ describe('useIacCallback', () => {
   });
 
   it('stops polling as error when the record is gone', async () => {
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
     await act(async () => {
       await result.current.start({});
     });
@@ -207,7 +207,7 @@ describe('useIacCallback', () => {
   });
 
   it('keeps polling through a transient error', async () => {
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
     await act(async () => {
       await result.current.start({});
     });
@@ -221,7 +221,7 @@ describe('useIacCallback', () => {
 
   describe('at the deadline', () => {
     const startAndPassDeadline = async () => {
-      const { result } = renderHook(() => useIacCallback({ enabled: true }));
+      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
       await act(async () => {
         await result.current.start({});
       });
@@ -275,7 +275,7 @@ describe('useIacCallback', () => {
       await poll();
       expect(mockedGet).toHaveBeenCalledTimes(1);
 
-      jest.setSystemTime(Date.now() + IAC_CALLBACK_RECEIVING_GRACE_MS + 1);
+      jest.setSystemTime(Date.now() + PROVISIONING_CALLBACK_RECEIVING_GRACE_MS + 1);
       await poll();
       expect(mockedDelete).toHaveBeenCalledTimes(2);
       expect(result.current.status).toBe('expired');
@@ -369,7 +369,7 @@ describe('useIacCallback', () => {
         error: null,
       } as any);
     mockedGet.mockResolvedValue({ data: { item: pendingItem('cb-2') }, error: null } as any);
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
 
     await act(async () => {
       await result.current.start({});
@@ -394,7 +394,7 @@ describe('useIacCallback', () => {
       available: false,
       reason: 'Kibana has no public URL: server.publicBaseUrl is not set.',
     });
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
 
     let params: Record<string, string> | undefined;
     await act(async () => {
@@ -411,7 +411,7 @@ describe('useIacCallback', () => {
       data: null,
       error: { statusCode: 412, message: NOT_HTTPS_REASON },
     } as any);
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
 
     await act(async () => {
       await expect(result.current.start({})).rejects.toThrow(NOT_HTTPS_REASON);
@@ -422,7 +422,7 @@ describe('useIacCallback', () => {
   });
 
   it('returns undefined when disabled', async () => {
-    const { result } = renderHook(() => useIacCallback({ enabled: false }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: false }));
     let params: Record<string, string> | undefined;
     await act(async () => {
       params = await result.current.start({});
@@ -433,7 +433,7 @@ describe('useIacCallback', () => {
 
   it('rejects and stays idle when the record cannot be created, so no console opens', async () => {
     mockedCreate.mockResolvedValue({ data: null, error: { message: 'boom' } } as any);
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
     await act(async () => {
       await expect(result.current.start({})).rejects.toThrow('boom');
     });
@@ -442,7 +442,7 @@ describe('useIacCallback', () => {
   });
 
   it('a new start() leaves a previous received status behind even when no record is created', async () => {
-    const { result } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
     await act(async () => {
       await result.current.start({});
     });
@@ -469,7 +469,7 @@ describe('useIacCallback', () => {
 
   describe('cancel()', () => {
     const startAndCancel = async () => {
-      const { result } = renderHook(() => useIacCallback({ enabled: true }));
+      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
       await act(async () => {
         await result.current.start({});
       });
@@ -539,7 +539,7 @@ describe('useIacCallback', () => {
         },
         error: null,
       } as any);
-      const { result } = renderHook(() => useIacCallback({ enabled: true }));
+      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
       await act(async () => {
         await result.current.start({});
       });
@@ -579,7 +579,7 @@ describe('useIacCallback', () => {
     });
 
     it('does nothing without a record to wait on', async () => {
-      const { result } = renderHook(() => useIacCallback({ enabled: true }));
+      const { result } = renderHook(() => useProvisioningCallback({ enabled: true }));
 
       let outcome: string | undefined;
       await act(async () => {
@@ -594,7 +594,7 @@ describe('useIacCallback', () => {
   it('does not poll for a record whose creation finished after unmount', async () => {
     let resolveCreate: (value: unknown) => void = () => {};
     mockedCreate.mockReturnValue(new Promise((resolve) => (resolveCreate = resolve)) as any);
-    const { result, unmount } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result, unmount } = renderHook(() => useProvisioningCallback({ enabled: true }));
 
     let params: Record<string, string> | undefined;
     const started = act(async () => {
@@ -613,7 +613,7 @@ describe('useIacCallback', () => {
   });
 
   it('stops polling on unmount', async () => {
-    const { result, unmount } = renderHook(() => useIacCallback({ enabled: true }));
+    const { result, unmount } = renderHook(() => useProvisioningCallback({ enabled: true }));
     await act(async () => {
       await result.current.start({});
     });

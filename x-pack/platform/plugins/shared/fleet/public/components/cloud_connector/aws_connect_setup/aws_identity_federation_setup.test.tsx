@@ -19,8 +19,8 @@ import type { CloudConnectorIacState } from '../../../../common/types/models/clo
 
 import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
-import { useIacCallback } from '../hooks/use_iac_callback';
-import type { IacCallbackCancelOutcome } from '../hooks/use_iac_callback';
+import { useProvisioningCallback } from '../hooks/use_provisioning_callback';
+import type { ProvisioningCallbackCancelOutcome } from '../hooks/use_provisioning_callback';
 import { IacKeyCheck } from '../components/iac_key_check';
 
 import { AwsIdentityFederationSetup } from './aws_identity_federation_setup';
@@ -28,7 +28,7 @@ import { AwsIdentityFederationSetup } from './aws_identity_federation_setup';
 jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../hooks/use_get_cloud_connectors');
 jest.mock('../hooks/use_cloud_connector_template');
-jest.mock('../hooks/use_iac_callback');
+jest.mock('../hooks/use_provisioning_callback');
 jest.mock('../../../hooks', () => ({
   useDisabledIdentityFederationProviders: jest.fn(),
   useIacProvisioner: jest.fn(),
@@ -43,7 +43,9 @@ const mockUseGetCloudConnectors = useGetCloudConnectors as jest.MockedFunction<
 const mockUseCloudConnectorTemplate = useCloudConnectorTemplate as jest.MockedFunction<
   typeof useCloudConnectorTemplate
 >;
-const mockUseIacCallback = useIacCallback as jest.MockedFunction<typeof useIacCallback>;
+const mockUseProvisioningCallback = useProvisioningCallback as jest.MockedFunction<
+  typeof useProvisioningCallback
+>;
 const mockIacKeyCheck = IacKeyCheck as jest.MockedFunction<typeof IacKeyCheck>;
 const {
   useIacProvisioner: mockUseIacProvisioner,
@@ -143,7 +145,7 @@ describe('AwsIdentityFederationSetup', () => {
   const onReadyChange = jest.fn();
   const mockLaunchOnClick = jest.fn();
   const mockCallbackStart = jest.fn();
-  const mockCallbackCancel = jest.fn<Promise<IacCallbackCancelOutcome>, []>();
+  const mockCallbackCancel = jest.fn<Promise<ProvisioningCallbackCancelOutcome>, []>();
   const mockAddSuccess = jest.fn();
 
   const mockGetConnectors = (overrides: Partial<ReturnType<typeof useGetCloudConnectors>> = {}) => {
@@ -201,7 +203,7 @@ describe('AwsIdentityFederationSetup', () => {
     mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
     mockUseDisabledIdentityFederationProviders.mockReturnValue([]);
     mockCallbackCancel.mockResolvedValue('cancelled');
-    mockUseIacCallback.mockReturnValue({
+    mockUseProvisioningCallback.mockReturnValue({
       available: false,
       isChecking: false,
       status: 'idle',
@@ -267,7 +269,7 @@ describe('AwsIdentityFederationSetup', () => {
     });
 
     it('offers no ARN fields or Create with the provisioner off: the static stack reports back too', () => {
-      mockUseIacCallback.mockReturnValue({
+      mockUseProvisioningCallback.mockReturnValue({
         available: true,
         isChecking: false,
         status: 'idle',
@@ -298,7 +300,7 @@ describe('AwsIdentityFederationSetup', () => {
       mockGetConnectors({ data: [] });
       mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
       mockUseCloudConnectorTemplate.mockReturnValue(provisionerHookResult(mockLaunchOnClick));
-      mockUseIacCallback.mockReturnValue({
+      mockUseProvisioningCallback.mockReturnValue({
         available: true,
         isChecking: false,
         status: 'expired',
@@ -342,8 +344,8 @@ describe('AwsIdentityFederationSetup', () => {
 
   describe('CloudFormation callback (New Identity tab)', () => {
     const callbackState = (
-      overrides: Partial<ReturnType<typeof useIacCallback>>
-    ): ReturnType<typeof useIacCallback> => ({
+      overrides: Partial<ReturnType<typeof useProvisioningCallback>>
+    ): ReturnType<typeof useProvisioningCallback> => ({
       available: true,
       isChecking: false,
       status: 'idle',
@@ -357,7 +359,7 @@ describe('AwsIdentityFederationSetup', () => {
       mockGetConnectors({ data: [] });
       mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: true });
       mockUseCloudConnectorTemplate.mockReturnValue(provisionerHookResult(mockLaunchOnClick));
-      mockUseIacCallback.mockReturnValue(callbackState({}));
+      mockUseProvisioningCallback.mockReturnValue(callbackState({}));
     });
 
     it('starts the callback at Launch with the typed name and the rendered template details', async () => {
@@ -368,7 +370,7 @@ describe('AwsIdentityFederationSetup', () => {
         'my-identity'
       );
 
-      expect(mockUseIacCallback).toHaveBeenCalledWith({ enabled: true });
+      expect(mockUseProvisioningCallback).toHaveBeenCalledWith({ enabled: true });
       const { getLaunchStackParams } = mockUseCloudConnectorTemplate.mock.lastCall![0];
       await act(async () => {
         await getLaunchStackParams?.(RENDERED_IAC_CONFIRM);
@@ -392,7 +394,7 @@ describe('AwsIdentityFederationSetup', () => {
         'my-identity'
       );
 
-      expect(mockUseIacCallback).toHaveBeenCalledWith({ enabled: true });
+      expect(mockUseProvisioningCallback).toHaveBeenCalledWith({ enabled: true });
       const { getLaunchStackParams } = mockUseCloudConnectorTemplate.mock.lastCall![0];
       await act(async () => {
         await getLaunchStackParams?.(undefined);
@@ -405,14 +407,14 @@ describe('AwsIdentityFederationSetup', () => {
     });
 
     it('does not pass getLaunchStackParams to the template hook when the callback is not available', () => {
-      mockUseIacCallback.mockReturnValue(callbackState({ available: false }));
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ available: false }));
       renderSetup({ cloud, integrations });
 
       expect(mockUseCloudConnectorTemplate.mock.lastCall![0].getLaunchStackParams).toBeUndefined();
     });
 
     it('explains and blocks Launch when the callback is not available: nothing else creates the identity', async () => {
-      mockUseIacCallback.mockReturnValue(callbackState({ available: false }));
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ available: false }));
       const user = userEvent.setup();
       renderSetup({ cloud, integrations });
 
@@ -427,7 +429,7 @@ describe('AwsIdentityFederationSetup', () => {
     it('shows the server reason when the callback is not available because of the public URL', async () => {
       const reason =
         'The public Kibana URL http://kb.example.com is not https. CloudFormation only accepts an https callback URL.';
-      mockUseIacCallback.mockReturnValue(
+      mockUseProvisioningCallback.mockReturnValue(
         callbackState({ available: false, unavailableReason: reason })
       );
       const user = userEvent.setup();
@@ -441,7 +443,9 @@ describe('AwsIdentityFederationSetup', () => {
     });
 
     it('shows no callout and keeps Launch disabled while the server is still checking', async () => {
-      mockUseIacCallback.mockReturnValue(callbackState({ available: false, isChecking: true }));
+      mockUseProvisioningCallback.mockReturnValue(
+        callbackState({ available: false, isChecking: true })
+      );
       const user = userEvent.setup();
       renderSetup({ cloud, integrations });
 
@@ -464,11 +468,11 @@ describe('AwsIdentityFederationSetup', () => {
       mockUseDisabledIdentityFederationProviders.mockReturnValue(['aws']);
       renderSetup({ cloud, integrations });
 
-      expect(mockUseIacCallback).toHaveBeenCalledWith({ enabled: false });
+      expect(mockUseProvisioningCallback).toHaveBeenCalledWith({ enabled: false });
     });
 
     it('shows a spinner with a waiting hint while the stack has not called back yet', () => {
-      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
       renderSetup({ cloud, integrations });
 
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toBeInTheDocument();
@@ -478,7 +482,7 @@ describe('AwsIdentityFederationSetup', () => {
     it.each(['idle', 'received', 'expired', 'error'] as const)(
       'shows no spinner when the callback is %s',
       (status) => {
-        mockUseIacCallback.mockReturnValue(callbackState({ status }));
+        mockUseProvisioningCallback.mockReturnValue(callbackState({ status }));
         renderSetup({ cloud, integrations });
 
         expect(
@@ -498,7 +502,7 @@ describe('AwsIdentityFederationSetup', () => {
       await act(async () => {
         await getLaunchStackParams?.(RENDERED_IAC_CONFIRM);
       });
-      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
       rerender(setupElement({ cloud, integrations }));
 
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackPending')).toHaveTextContent(
@@ -531,7 +535,7 @@ describe('AwsIdentityFederationSetup', () => {
           clearIacConfirm,
         })
       );
-      mockUseIacCallback.mockReturnValue(
+      mockUseProvisioningCallback.mockReturnValue(
         callbackState({
           status: 'received',
           created: { id: 'cc-1', name: 'my-identity' },
@@ -559,7 +563,7 @@ describe('AwsIdentityFederationSetup', () => {
       const { rerender } = renderSetup({ cloud, integrations });
       await typeIdentityName(user);
 
-      mockUseIacCallback.mockReturnValue(
+      mockUseProvisioningCallback.mockReturnValue(
         callbackState({ status: 'received', created: { id: 'cc-1', name: 'my-identity' } })
       );
       rerender(setupElement({ cloud, integrations }));
@@ -569,7 +573,7 @@ describe('AwsIdentityFederationSetup', () => {
     });
 
     it('keeps the name editable and Launch available while waiting, so the user can launch again', () => {
-      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
       mockUseCloudConnectorTemplate.mockReturnValue(
         provisionerHookResult(mockLaunchOnClick, {
           iacConfirm: RENDERED_IAC_CONFIRM,
@@ -587,7 +591,7 @@ describe('AwsIdentityFederationSetup', () => {
 
     it('shows the spinner while waiting on a static launch with the provisioner off', () => {
       mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
-      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
       mockUseCloudConnectorTemplate.mockReturnValue({
         ...staticTemplateHookResult,
         hasLaunched: true,
@@ -600,7 +604,7 @@ describe('AwsIdentityFederationSetup', () => {
     it.each(['expired', 'error'] as const)(
       'asks for another launch, without a spinner, when the callback is %s',
       async (status) => {
-        mockUseIacCallback.mockReturnValue(callbackState({ status }));
+        mockUseProvisioningCallback.mockReturnValue(callbackState({ status }));
         const user = userEvent.setup();
         renderSetup({ cloud, integrations });
 
@@ -617,7 +621,7 @@ describe('AwsIdentityFederationSetup', () => {
     );
 
     it('keeps waiting after a static-template fallback', () => {
-      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
       mockUseCloudConnectorTemplate.mockReturnValue(
         provisionerHookResult(mockLaunchOnClick, {
           iacConfirm: { iac_key: null, iac_blueprint_id: null, iac_blueprint_version: null },
@@ -630,7 +634,7 @@ describe('AwsIdentityFederationSetup', () => {
     });
 
     it('retires the record when the launch failed', () => {
-      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
       mockUseCloudConnectorTemplate.mockReturnValue(
         provisionerHookResult(mockLaunchOnClick, { templateGenerationError: 'boom' })
       );
@@ -640,7 +644,7 @@ describe('AwsIdentityFederationSetup', () => {
     });
 
     it('keeps waiting on a rendered launch', () => {
-      mockUseIacCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
       mockUseCloudConnectorTemplate.mockReturnValue(
         provisionerHookResult(mockLaunchOnClick, {
           iacConfirm: RENDERED_IAC_CONFIRM,

@@ -15,24 +15,24 @@ import {
 } from '../../errors';
 import { appContextService } from '../../services/app_context';
 import { iacProvisionerService } from '../../services';
-import { iacCallbackService } from '../../services/iac_callback';
+import { provisioningCallbackService } from '../../services/provisioning_callback';
 import { getPackageInfo } from '../../services/epm/packages';
 import { isIacProvisionerEnabled } from '../../services/utils/iac_provisioner';
 import { isAwsIdentityFederationEnabled } from '../../services/utils/aws_identity_federation';
-import { getIacCallbackAvailability } from '../../services/utils/iac_callback_availability';
+import { getProvisioningCallbackAvailability } from '../../services/utils/provisioning_callback_availability';
 import { IAC_FEDERATED_IDENTITY_WORKFLOW } from '../../../common/types/rest_spec/iac_provisioner';
-import type { CloudConnectorCallback } from '../../../common/types/models/iac_callback';
+import type { CloudConnectorCallback } from '../../../common/types/models/provisioning_callback';
 import {
   reportIacProvisionerRenderCompleted,
   reportIacProvisionerRenderRequested,
 } from '../../services/telemetry/iac_provisioner_telemetry';
 
 import {
-  createIacCallbackHandler,
-  getIacCallbackAvailabilityHandler,
-  deleteIacCallbackHandler,
-  getIacCallbackHandler,
-  receiveIacCallbackHandler,
+  createProvisioningCallbackHandler,
+  getProvisioningCallbackAvailabilityHandler,
+  deleteProvisioningCallbackHandler,
+  getProvisioningCallbackHandler,
+  receiveProvisioningCallbackHandler,
   renderIacTemplateHandler,
 } from './handlers';
 
@@ -43,10 +43,10 @@ jest.mock('../../services', () => ({
 jest.mock('../../services/epm/packages');
 jest.mock('../../services/utils/iac_provisioner');
 jest.mock('../../services/utils/aws_identity_federation');
-jest.mock('../../services/utils/iac_callback_availability');
+jest.mock('../../services/utils/provisioning_callback_availability');
 jest.mock('../../services/telemetry/iac_provisioner_telemetry');
-jest.mock('../../services/iac_callback', () => ({
-  iacCallbackService: {
+jest.mock('../../services/provisioning_callback', () => ({
+  provisioningCallbackService: {
     create: jest.fn(),
     get: jest.fn(),
     cancel: jest.fn(),
@@ -58,7 +58,7 @@ const mockedRenderTemplate = jest.mocked(iacProvisionerService.renderTemplate);
 const mockedGetPackageInfo = jest.mocked(getPackageInfo);
 const mockedIsEnabled = jest.mocked(isIacProvisionerEnabled);
 const mockedIsAwsIdentityFederationEnabled = jest.mocked(isAwsIdentityFederationEnabled);
-const mockedGetAvailability = jest.mocked(getIacCallbackAvailability);
+const mockedGetAvailability = jest.mocked(getProvisioningCallbackAvailability);
 
 const buildContext = () =>
   ({
@@ -462,7 +462,7 @@ describe('renderIacTemplateHandler', () => {
   });
 });
 
-const mockedService = jest.mocked(iacCallbackService);
+const mockedService = jest.mocked(provisioningCallbackService);
 const mockedAppContext = jest.mocked(appContextService);
 
 const PAYLOAD = {
@@ -482,7 +482,7 @@ const ITEM: CloudConnectorCallback = {
 
 const apiKeyUser = (id: string) =>
   ({
-    username: 'fleet-iac-callback',
+    username: 'fleet-provisioning-callback',
     authentication_type: 'api_key',
     api_key: { id, name: 'k' },
   } as unknown as AuthenticatedUser);
@@ -511,11 +511,11 @@ describe('IaC callback handlers', () => {
     });
   });
 
-  describe('getIacCallbackAvailabilityHandler', () => {
+  describe('getProvisioningCallbackAvailabilityHandler', () => {
     it('returns 404 when AWS identity federation is not enabled', async () => {
       mockedIsAwsIdentityFederationEnabled.mockResolvedValue(false);
 
-      await getIacCallbackAvailabilityHandler(
+      await getProvisioningCallbackAvailabilityHandler(
         buildCallbackContext(),
         httpServerMock.createKibanaRequest(),
         response
@@ -528,7 +528,7 @@ describe('IaC callback handlers', () => {
     });
 
     it('returns the URL the stack is given when the callback is available', async () => {
-      await getIacCallbackAvailabilityHandler(
+      await getProvisioningCallbackAvailabilityHandler(
         buildCallbackContext(),
         httpServerMock.createKibanaRequest(),
         response
@@ -547,7 +547,7 @@ describe('IaC callback handlers', () => {
           'The public Kibana URL http://kb.example.com is not https. CloudFormation only accepts an https callback URL.',
       });
 
-      await getIacCallbackAvailabilityHandler(
+      await getProvisioningCallbackAvailabilityHandler(
         buildCallbackContext(),
         httpServerMock.createKibanaRequest(),
         response
@@ -564,7 +564,7 @@ describe('IaC callback handlers', () => {
     });
   });
 
-  describe('createIacCallbackHandler', () => {
+  describe('createProvisioningCallbackHandler', () => {
     it('returns 412 and mints nothing when the public URL is not https', async () => {
       mockedGetAvailability.mockReturnValue({
         available: false,
@@ -574,7 +574,7 @@ describe('IaC callback handlers', () => {
       });
       const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
 
-      await createIacCallbackHandler(buildCallbackContext(), request, response);
+      await createProvisioningCallbackHandler(buildCallbackContext(), request, response);
 
       expect(response.customError).toHaveBeenCalledWith({
         statusCode: 412,
@@ -595,7 +595,7 @@ describe('IaC callback handlers', () => {
       mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
       const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
 
-      await createIacCallbackHandler(buildCallbackContext(), request, response);
+      await createProvisioningCallbackHandler(buildCallbackContext(), request, response);
 
       expect(mockedService.create).toHaveBeenCalled();
       expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, api_key: 'encoded-key' } });
@@ -605,7 +605,7 @@ describe('IaC callback handlers', () => {
       mockedIsAwsIdentityFederationEnabled.mockResolvedValue(false);
       const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
 
-      await createIacCallbackHandler(buildCallbackContext(), request, response);
+      await createProvisioningCallbackHandler(buildCallbackContext(), request, response);
 
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: 'AWS identity federation is not enabled' },
@@ -619,7 +619,7 @@ describe('IaC callback handlers', () => {
       mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
       const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
 
-      await createIacCallbackHandler(buildCallbackContext(), request, response);
+      await createProvisioningCallbackHandler(buildCallbackContext(), request, response);
 
       expect(mockedService.create).toHaveBeenCalled();
       expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, api_key: 'encoded-key' } });
@@ -630,7 +630,7 @@ describe('IaC callback handlers', () => {
       mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
       const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
 
-      await createIacCallbackHandler(buildCallbackContext('marketing'), request, response);
+      await createProvisioningCallbackHandler(buildCallbackContext('marketing'), request, response);
 
       // The request is handed down so the key can be granted on the caller's behalf.
       expect(mockedService.create).toHaveBeenCalledWith(soClient, request, {
@@ -656,7 +656,7 @@ describe('IaC callback handlers', () => {
         },
       });
 
-      await createIacCallbackHandler(buildCallbackContext(), request, response);
+      await createProvisioningCallbackHandler(buildCallbackContext(), request, response);
 
       expect(mockedService.create).toHaveBeenCalledWith(
         soClient,
@@ -675,12 +675,12 @@ describe('IaC callback handlers', () => {
     });
   });
 
-  describe('getIacCallbackHandler', () => {
+  describe('getProvisioningCallbackHandler', () => {
     it('returns the item without any key material', async () => {
       mockedService.get.mockResolvedValue(ITEM);
       const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
 
-      await getIacCallbackHandler(buildCallbackContext(), request, response);
+      await getProvisioningCallbackHandler(buildCallbackContext(), request, response);
 
       expect(mockedService.get).toHaveBeenCalledWith(soClient, 'cb-1');
       expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM } });
@@ -690,7 +690,7 @@ describe('IaC callback handlers', () => {
       mockedService.get.mockResolvedValue({ ...ITEM, space_id: 'marketing' });
       const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
 
-      await getIacCallbackHandler(buildCallbackContext('default'), request, response);
+      await getProvisioningCallbackHandler(buildCallbackContext('default'), request, response);
 
       expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
     });
@@ -699,19 +699,19 @@ describe('IaC callback handlers', () => {
       mockedService.get.mockResolvedValue(undefined);
       const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'nope' } });
 
-      await getIacCallbackHandler(buildCallbackContext(), request, response);
+      await getProvisioningCallbackHandler(buildCallbackContext(), request, response);
 
       expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
     });
   });
 
-  describe('deleteIacCallbackHandler', () => {
+  describe('deleteProvisioningCallbackHandler', () => {
     it('cancels the record and returns it', async () => {
       mockedService.get.mockResolvedValue(ITEM);
       mockedService.cancel.mockResolvedValue({ ...ITEM, status: 'cancelled' });
       const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
 
-      await deleteIacCallbackHandler(buildCallbackContext(), request, response);
+      await deleteProvisioningCallbackHandler(buildCallbackContext(), request, response);
 
       expect(mockedService.cancel).toHaveBeenCalledWith(soClient, 'cb-1');
       expect(response.ok).toHaveBeenCalledWith({
@@ -730,7 +730,7 @@ describe('IaC callback handlers', () => {
       mockedService.cancel.mockResolvedValue(received);
       const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
 
-      await deleteIacCallbackHandler(buildCallbackContext(), request, response);
+      await deleteProvisioningCallbackHandler(buildCallbackContext(), request, response);
 
       expect(response.ok).toHaveBeenCalledWith({ body: { item: received } });
     });
@@ -739,7 +739,7 @@ describe('IaC callback handlers', () => {
       mockedService.get.mockResolvedValue({ ...ITEM, space_id: 'marketing' });
       const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'cb-1' } });
 
-      await deleteIacCallbackHandler(buildCallbackContext('default'), request, response);
+      await deleteProvisioningCallbackHandler(buildCallbackContext('default'), request, response);
 
       expect(mockedService.cancel).not.toHaveBeenCalled();
       expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
@@ -749,20 +749,20 @@ describe('IaC callback handlers', () => {
       mockedService.get.mockResolvedValue(undefined);
       const request = httpServerMock.createKibanaRequest({ params: { callbackId: 'nope' } });
 
-      await deleteIacCallbackHandler(buildCallbackContext(), request, response);
+      await deleteProvisioningCallbackHandler(buildCallbackContext(), request, response);
 
       expect(response.notFound).toHaveBeenCalledWith({ body: { message: 'Callback not found' } });
     });
   });
 
-  describe('receiveIacCallbackHandler', () => {
+  describe('receiveProvisioningCallbackHandler', () => {
     const receive = (user: AuthenticatedUser | null) => {
       getCurrentUser.mockReturnValue(user);
       const request = httpServerMock.createKibanaRequest({
         params: { callbackId: 'cb-1' },
         body: PAYLOAD,
       });
-      return receiveIacCallbackHandler(buildCallbackContext(), request, response);
+      return receiveProvisioningCallbackHandler(buildCallbackContext(), request, response);
     };
 
     it('passes the caller key id to the service and answers 200 on receive', async () => {

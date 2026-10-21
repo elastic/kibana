@@ -17,23 +17,23 @@ import {
   RenderIacTemplateResponseSchema,
 } from '../../types/rest_spec/iac_provisioner';
 import {
-  CreateIacCallbackRequestSchema,
-  CreateIacCallbackResponseSchema,
-  DeleteIacCallbackRequestSchema,
-  DeleteIacCallbackResponseSchema,
-  GetIacCallbackAvailabilityResponseSchema,
-  GetIacCallbackRequestSchema,
-  GetIacCallbackResponseSchema,
-  ReceiveIacCallbackRequestSchema,
-  ReceiveIacCallbackResponseSchema,
-} from '../../types/rest_spec/iac_callback';
+  CreateProvisioningCallbackRequestSchema,
+  CreateProvisioningCallbackResponseSchema,
+  DeleteProvisioningCallbackRequestSchema,
+  DeleteProvisioningCallbackResponseSchema,
+  GetProvisioningCallbackAvailabilityResponseSchema,
+  GetProvisioningCallbackRequestSchema,
+  GetProvisioningCallbackResponseSchema,
+  ReceiveProvisioningCallbackRequestSchema,
+  ReceiveProvisioningCallbackResponseSchema,
+} from '../../types/rest_spec/provisioning_callback';
 
 import {
-  createIacCallbackHandler,
-  deleteIacCallbackHandler,
-  getIacCallbackAvailabilityHandler,
-  getIacCallbackHandler,
-  receiveIacCallbackHandler,
+  createProvisioningCallbackHandler,
+  deleteProvisioningCallbackHandler,
+  getProvisioningCallbackAvailabilityHandler,
+  getProvisioningCallbackHandler,
+  receiveProvisioningCallbackHandler,
   renderIacTemplateHandler,
 } from './handlers';
 
@@ -53,7 +53,7 @@ const IAC_PROVISIONER_ROUTE_SECURITY = {
   },
 };
 
-const IAC_CALLBACK_WRITE_SECURITY = {
+const PROVISIONING_CALLBACK_WRITE_SECURITY = {
   authz: {
     // Creates an API key, so it needs the same privileges as creating an identity.
     requiredPrivileges: [
@@ -114,13 +114,13 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           response: {
             200: {
               description: 'OK: A successful request.',
-              body: () => GetIacCallbackAvailabilityResponseSchema,
+              body: () => GetProvisioningCallbackAvailabilityResponseSchema,
             },
             404: { description: 'AWS identity federation is not enabled.', body: notFoundResponse },
           },
         },
       },
-      getIacCallbackAvailabilityHandler
+      getProvisioningCallbackAvailabilityHandler
     );
 
   router.versioned
@@ -130,17 +130,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       description:
         'Create a one-time record and a short-lived, zero-privilege API key that a launched CloudFormation stack uses to report its role back to Kibana. The identity name, account type, and template details are stored on the record for the cloud connector the report creates.',
       access: 'internal',
-      security: IAC_CALLBACK_WRITE_SECURITY,
+      security: PROVISIONING_CALLBACK_WRITE_SECURITY,
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
-          request: CreateIacCallbackRequestSchema,
+          request: CreateProvisioningCallbackRequestSchema,
           response: {
             200: {
               description: 'OK: A successful request.',
-              body: () => CreateIacCallbackResponseSchema,
+              body: () => CreateProvisioningCallbackResponseSchema,
             },
             400: { description: 'A bad request.', body: genericErrorResponse },
             404: { description: 'AWS identity federation is not enabled.', body: notFoundResponse },
@@ -151,7 +151,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           },
         },
       },
-      createIacCallbackHandler
+      createProvisioningCallbackHandler
     );
 
   router.versioned
@@ -166,17 +166,17 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       {
         version: API_VERSIONS.internal.v1,
         validate: {
-          request: GetIacCallbackRequestSchema,
+          request: GetProvisioningCallbackRequestSchema,
           response: {
             200: {
               description: 'OK: A successful request.',
-              body: () => GetIacCallbackResponseSchema,
+              body: () => GetProvisioningCallbackResponseSchema,
             },
             404: { description: 'Not found.', body: notFoundResponse },
           },
         },
       },
-      getIacCallbackHandler
+      getProvisioningCallbackHandler
     );
 
   router.versioned
@@ -186,23 +186,23 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       description:
         'Retire a callback record the form no longer waits on and invalidate its API key. A record the stack has already reported to is returned unchanged.',
       access: 'internal',
-      security: IAC_CALLBACK_WRITE_SECURITY,
+      security: PROVISIONING_CALLBACK_WRITE_SECURITY,
     })
     .addVersion(
       {
         version: API_VERSIONS.internal.v1,
         validate: {
-          request: DeleteIacCallbackRequestSchema,
+          request: DeleteProvisioningCallbackRequestSchema,
           response: {
             200: {
               description: 'OK: A successful request.',
-              body: () => DeleteIacCallbackResponseSchema,
+              body: () => DeleteProvisioningCallbackResponseSchema,
             },
             404: { description: 'Not found.', body: notFoundResponse },
           },
         },
       },
-      deleteIacCallbackHandler
+      deleteProvisioningCallbackHandler
     );
 
   // Public: the stack's Lambda calls this with the record's API key. Kibana rejects an invalid
@@ -236,11 +236,11 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           oasOperationObject: () => path.join(__dirname, 'examples/post_iac_callback.yaml'),
         },
         validate: {
-          request: ReceiveIacCallbackRequestSchema,
+          request: ReceiveProvisioningCallbackRequestSchema,
           response: {
             200: {
               description: 'OK: the values were stored, or were already stored.',
-              body: () => ReceiveIacCallbackResponseSchema,
+              body: () => ReceiveProvisioningCallbackResponseSchema,
             },
             400: { description: 'A bad request.', body: genericErrorResponse },
             404: { description: 'Not found.', body: notFoundResponse },
@@ -255,6 +255,6 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           },
         },
       },
-      receiveIacCallbackHandler
+      receiveProvisioningCallbackHandler
     );
 };

@@ -11,7 +11,7 @@ import type { AccountType, CloudConnectorIacState } from './cloud_connector';
  * `receiving` is the window between a report being accepted and what it creates existing;
  * `cancelled` is a record the browser retired, for example because the identity was created by hand.
  */
-export type IacCallbackStatus = 'pending' | 'receiving' | 'received' | 'cancelled';
+export type ProvisioningCallbackStatus = 'pending' | 'receiving' | 'received' | 'cancelled';
 
 /**
  * A one-time record that lets something launched from Kibana report back to it, whatever the
@@ -22,7 +22,7 @@ export type IacCallbackStatus = 'pending' | 'receiving' | 'received' | 'cancelle
 export interface ProvisioningCallback {
   id: string;
   provider: 'aws';
-  status: IacCallbackStatus;
+  status: ProvisioningCallbackStatus;
   created_at: string;
   created_by?: string;
   /** Space the launch happened in. The record is space-agnostic because the stack calls Kibana without a space. */
@@ -32,7 +32,7 @@ export interface ProvisioningCallback {
 }
 
 /** What the stack's Lambda reports once the IAM role exists. */
-export interface IacCallbackReceivedValues {
+export interface CloudConnectorCallbackReceivedValues {
   role_arn: string;
   stack_arn: string;
 }
@@ -55,7 +55,7 @@ export interface CloudConnectorCallbackIdentity
 export interface CloudConnectorCallback
   extends ProvisioningCallback,
     CloudConnectorCallbackIdentity,
-    Partial<IacCallbackReceivedValues> {
+    Partial<CloudConnectorCallbackReceivedValues> {
   /** Set when the stack's report has created the cloud connector. */
   cloud_connector_id?: string;
 }
