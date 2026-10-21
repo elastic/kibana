@@ -116,7 +116,7 @@ export function useAgentDetection({
     [policiesData?.items]
   );
 
-  const { agents, dataUpdatedAt } = useAgentsForPolicyIds(allPolicyIds, {
+  const { agents, dataUpdatedAt, isTruncated } = useAgentsForPolicyIds(allPolicyIds, {
     refetchInterval: shouldPoll ? POLL_INTERVAL_MS : false,
   });
   // Remembers when an agent was first seen not running the integration, across polls.
@@ -170,7 +170,13 @@ export function useAgentDetection({
       });
       assessments = graced.assessments;
       Object.assign(notRunningSince, graced.since);
-      const summary = summarizeInstanceAgents(applicable, assessments);
+      const fullSummary = summarizeInstanceAgents(applicable, assessments);
+      // With the agent list capped, an agent that was left out may be unhealthy, so a healthy
+      // verdict cannot be given. An unhealthy one stands: the agents seen are real.
+      const summary: InstanceAgentSummary =
+        isTruncated && fullSummary.health === 'healthy'
+          ? { ...fullSummary, health: 'pending', unhealthyElsewhere: undefined }
+          : fullSummary;
       summaries[instanceId] = summary;
 
       // The flyout shows the policy of the agent the badge represents. With no agent yet, fall back
@@ -217,6 +223,7 @@ export function useAgentDetection({
     };
   }, [
     dataUpdatedAt,
+    isTruncated,
     agentPolicyIdsByInstance,
     agents,
     agentPolicies,

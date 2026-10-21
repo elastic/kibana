@@ -63,6 +63,20 @@ const agent = (id: string, status: string, policyId: string, extra = {}) => ({
   ...extra,
 });
 
+const versioned = (version: string, extra: Record<string, unknown> = {}) =>
+  agent('a1', 'online', 'policy-s3', {
+    policy_revision: 3,
+    local_metadata: { elastic: { agent: { version } } },
+    components: [{ id: 'system-metrics' }],
+    ...extra,
+  });
+const policyNeeding94 = agentPolicy('policy-s3', [packagePolicy('policy-s3')], {
+  revision: 3,
+  supports_agentless: true,
+  min_agent_version: '9.4.0',
+  package_agent_version_conditions: [{ name: 'aws', title: 'AWS', version_condition: '>=9.4.0' }],
+});
+
 interface SetupOptions {
   deploymentMethod?: 'managed_integration' | 'agent_based' | 'ecf';
   policyIdsByInstance?: Record<string, string>;
@@ -75,6 +89,8 @@ interface SetupOptions {
   incomingData?: Record<string, string[]>;
   /** When the agents were last fetched, in ms. Drives the not-running grace period. */
   dataUpdatedAt?: number;
+  /** Whether the agent list was capped, so some agents are missing from it. */
+  isTruncated?: boolean;
 }
 
 const T0 = 1_000_000;
@@ -90,6 +106,7 @@ function setup({
   shouldPoll = true,
   incomingData,
   dataUpdatedAt = T0,
+  isTruncated = false,
 }: SetupOptions = {}) {
   mockUseOnboardingFlow.mockReturnValue({
     detectAndReviewStep: { policyIdsByInstance },
@@ -98,12 +115,12 @@ function setup({
     agentBasedDeployment,
   });
   mockUseBulkPolicies.mockReturnValue({ data: { items: agentPolicies } });
-  mockUsePolicyAgents.mockReturnValue({ agents, dataUpdatedAt, isTruncated: false });
+  mockUsePolicyAgents.mockReturnValue({ agents, dataUpdatedAt, isTruncated });
   mockUseQuery.mockReturnValue({ data: incomingData });
   const hook = renderHook(() => useAgentDetection({ instances, shouldPoll }));
   /** Simulates the next poll finishing `ms` after the first one, with the same agents. */
   const pollAfter = (ms: number) => {
-    mockUsePolicyAgents.mockReturnValue({ agents, dataUpdatedAt: T0 + ms, isTruncated: false });
+    mockUsePolicyAgents.mockReturnValue({ agents, dataUpdatedAt: T0 + ms, isTruncated });
     hook.rerender();
   };
   return { ...hook, pollAfter };
@@ -258,22 +275,6 @@ describe('useAgentDetection', () => {
   });
 
   describe('agents that cannot run the deployed integration', () => {
-    const versioned = (version: string, extra: Record<string, unknown> = {}) =>
-      agent('a1', 'online', 'policy-s3', {
-        policy_revision: 3,
-        local_metadata: { elastic: { agent: { version } } },
-        components: [{ id: 'system-metrics' }],
-        ...extra,
-      });
-    const policyNeeding94 = agentPolicy('policy-s3', [packagePolicy('policy-s3')], {
-      revision: 3,
-      supports_agentless: true,
-      min_agent_version: '9.4.0',
-      package_agent_version_conditions: [
-        { name: 'aws', title: 'AWS', version_condition: '>=9.4.0' },
-      ],
-    });
-
     it('is unhealthy when the agent is too old for the deployed package, despite reporting Healthy', () => {
       const { result } = setup({ agentPolicies: [policyNeeding94], agents: [versioned('8.18.0')] });
 
@@ -529,6 +530,46 @@ describe('useAgentDetection', () => {
 
       // A document attributable to the agent would still be real data, so detection keeps going.
       expect(mockUseQuery.mock.calls[0][0].enabled).toBe(true);
+    });
+  });
+
+  describe('when the agent list is truncated', () => {
+    it('does not call an instance healthy, since an omitted agent may not be', () => {
+      const { result } = setup({ isTruncated: true });
+
+      expect(result.current.summaryByInstanceId.s3.health).toBe('pending');
+    });
+
+    it('does not claim the integration runs fine while the agent is unhealthy elsewhere', () => {
+      const elsewhere = {
+        agentPolicies: [policyNeeding94],
+        agents: [versioned('9.6.0', { status: 'error' })],
+      };
+
+      expect(setup(elsewhere).result.current.summaryByInstanceId.s3.unhealthyElsewhere).toBe(true);
+      expect(
+        setup({ ...elsewhere, isTruncated: true }).result.current.summaryByInstanceId.s3
+          .unhealthyElsewhere
+      ).toBeUndefined();
+    });
+
+    it('still reports an unhealthy agent that was seen', () => {
+      mockGetComponentAlertLevel.mockReturnValue('error');
+      const { result } = setup({ isTruncated: true, agents: [agent('a1', 'error', 'policy-s3')] });
+
+      expect(result.current.summaryByInstanceId.s3.health).toBe('unhealthy');
+    });
+
+    it('keeps the live agents, so their data still counts', () => {
+      const { result } = setup({ isTruncated: true });
+
+      expect(result.current.summaryByInstanceId.s3.liveAgentIds).toEqual(['a1']);
+    });
+
+    it('reports healthy when the list is complete', () => {
+      const { result } = setup({ isTruncated: false });
+
+      expect(result.current.summaryByInstanceId.s3.health).toBe('healthy');
     });
   });
 
