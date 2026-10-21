@@ -744,7 +744,6 @@ describe('RuleEventsClient', () => {
         ['event-2', 'recovering', 'refutes'],
       ]);
     });
-
   });
 
   describe('findLatestByCurrentStateBatch', () => {
