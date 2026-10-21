@@ -630,14 +630,12 @@ describe('FlyoutTemplate body sections in tabbed mode', () => {
     const section = screen.getByRole('region', { name: 'Shared section' });
     expect(section).toHaveTextContent('shared content');
     expect(screen.getByTestId('overviewPanel')).not.toContainElement(section);
-    expect(
-      screen.getByText('Flyout-wide callout').compareDocumentPosition(section) &
-        Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
-    expect(
-      section.compareDocumentPosition(screen.getByTestId('overviewPanel')) &
-        Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
+    expect(screen.getByText('Flyout-wide callout').compareDocumentPosition(section)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(section.compareDocumentPosition(screen.getByTestId('overviewPanel'))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
   });
 
   it('does not remount or re-render a section under Body on tab switch', async () => {
@@ -674,12 +672,11 @@ describe('FlyoutTemplate body sections in tabbed mode', () => {
     const accordionContent = screen.getByText('accordion content');
     const sectionContent = screen.getByText('section content');
     expect(screen.getByTestId('overviewPanel')).not.toContainElement(accordionContent);
-    expect(
-      accordionContent.compareDocumentPosition(sectionContent) & Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
-    expect(
-      sectionContent.compareDocumentPosition(screen.getByTestId('overviewPanel')) &
-        Node.DOCUMENT_POSITION_FOLLOWING
-    ).toBeTruthy();
+    expect(accordionContent.compareDocumentPosition(sectionContent)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
+    expect(sectionContent.compareDocumentPosition(screen.getByTestId('overviewPanel'))).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING
+    );
   });
 });
