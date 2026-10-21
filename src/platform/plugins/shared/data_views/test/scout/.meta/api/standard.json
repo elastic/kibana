@@ -1,5 +1,5 @@
 {
-  "sha1": "dfc2f3f740332a594f47d95b52a6ef26dbdbce50",
+  "sha1": "0717ad2078c0628b70952de74b168cf60eb5c5b7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1000,7 +1000,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 72,
+        "line": 74,
         "column": 14
       }
     },
@@ -1020,7 +1020,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 95,
+        "line": 97,
         "column": 78
       }
     },
@@ -1040,7 +1040,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 124,
+        "line": 126,
         "column": 23
       }
     },
@@ -1060,7 +1060,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 149,
+        "line": 151,
         "column": 13
       }
     },
@@ -1080,7 +1080,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 168,
+        "line": 170,
         "column": 42
       }
     },
@@ -1100,7 +1100,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 192,
+        "line": 194,
         "column": 83
       }
     },
@@ -1120,8 +1120,88 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 207,
+        "line": 209,
         "column": 23
+      }
+    },
+    {
+      "id": "02d517cf72595be-0f85ad7f21668b3",
+      "title": "POST api/data_views/data_view/{id}/fields - main (data view api) can set field customDescription attribute on non-existing field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
+        "line": 236,
+        "column": 53
+      }
+    },
+    {
+      "id": "02d517cf72595be-a4dd7023cfaa7a3",
+      "title": "POST api/data_views/data_view/{id}/fields - main (data view api) can update customDescription attribute",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
+        "line": 252,
+        "column": 23
+      }
+    },
+    {
+      "id": "02d517cf72595be-db2e8a2317829d2",
+      "title": "POST api/data_views/data_view/{id}/fields - main (data view api) can set field customDescription attribute on an existing field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
+        "line": 283,
+        "column": 23
+      }
+    },
+    {
+      "id": "02d517cf72595be-e07e7b2e7a890c6",
+      "title": "POST api/data_views/data_view/{id}/fields - main (data view api) can delete customDescription attribute",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
+        "line": 294,
+        "column": 25
       }
     },
     {
@@ -1140,8 +1220,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 234,
-        "column": 53
+        "line": 325,
+        "column": 80
       }
     },
     {
@@ -1160,8 +1240,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 260,
-        "column": 25
+        "line": 352,
+        "column": 7
       }
     },
     {
@@ -1180,8 +1260,28 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
-        "line": 296,
-        "column": 14
+        "line": 388,
+        "column": 25
+      }
+    },
+    {
+      "id": "02d517cf72595be-9c7a7694c0e6170",
+      "title": "POST api/data_views/data_view/{id}/fields - main (data view api) can set field format attribute on an existing field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/data_views/fields_api_update_main.spec.ts",
+        "line": 413,
+        "column": 24
       }
     },
     {
@@ -1843,6 +1943,20 @@
       }
     },
     {
+      "id": "8a3c6163974ad25-586f9a7b5d7a61e",
+      "title": "scripted field deprecations scripted field deprecation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/deprecations/scripted_fields.spec.ts",
+        "line": 33,
+        "column": 5
+      }
+    },
+    {
       "id": "2469d3fab87de35-67dd8e75ed32631",
       "title": "GET /internal/data_views/_existing_indices - params requires a query param",
       "expectedStatus": "passed",
@@ -2353,6 +2467,34 @@
       }
     },
     {
+      "id": "ab88407118069a9-0a9b243fff09c2b",
+      "title": "GET /internal/data_views/_fields_for_wildcard - response (closed index) returns 200 when index is closed and allow_no_index is true",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response_closed_index.spec.ts",
+        "line": 28,
+        "column": 23
+      }
+    },
+    {
+      "id": "ab88407118069a9-d943e8e60c67acf",
+      "title": "GET /internal/data_views/_fields_for_wildcard - response (closed index) returns 404 when index is closed and allow_no_index is false",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response_closed_index.spec.ts",
+        "line": 48,
+        "column": 18
+      }
+    },
+    {
       "id": "0ee43e9dd0c5ceb-cea819e1a95dc13",
       "title": "GET /internal/data_views/_fields_for_wildcard - response returns a flattened version of the fields in es",
       "expectedStatus": "passed",
@@ -2529,6 +2671,520 @@
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_for_wildcard_route/response.spec.ts",
         "line": 333,
+        "column": 24
+      }
+    },
+    {
+      "id": "8c90da7e63afdd4-de6437205e8d56b",
+      "title": "GET /internal/data_views/fields - cache headers (configurable max age) no-cache when data_views:cache_max_age set to zero",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/cache_max_age.spec.ts",
+        "line": 28,
+        "column": 7
+      }
+    },
+    {
+      "id": "07bebaac90ce6e1-44d05b30847a40e",
+      "title": "GET /internal/data_views/fields - cache headers are present",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/cache.spec.ts",
+        "line": 24,
+        "column": 44
+      }
+    },
+    {
+      "id": "07bebaac90ce6e1-6a96b3e25cc68c8",
+      "title": "GET /internal/data_views/fields - cache headers returns 304 on matching etag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/cache.spec.ts",
+        "line": 39,
+        "column": 14
+      }
+    },
+    {
+      "id": "07bebaac90ce6e1-80ef28922efbdd9",
+      "title": "GET /internal/data_views/fields - cache headers handles empty field lists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/cache.spec.ts",
+        "line": 59,
+        "column": 13
+      }
+    },
+    {
+      "id": "983d0d19e3315ab-eadef41072b8af8",
+      "title": "GET /internal/data_views/fields - conflicts flags fields with mismatched types as conflicting",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/conflicts.spec.ts",
+        "line": 21,
+        "column": 42
+      }
+    },
+    {
+      "id": "58bbbbaee50732a-ae4d772807609fe",
+      "title": "GET /internal/data_views/fields - params requires a pattern query param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/params.spec.ts",
+        "line": 21,
+        "column": 42
+      }
+    },
+    {
+      "id": "58bbbbaee50732a-05806353248ad0b",
+      "title": "GET /internal/data_views/fields - params accepts include_unmapped param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/params.spec.ts",
+        "line": 29,
+        "column": 16
+      }
+    },
+    {
+      "id": "58bbbbaee50732a-e42547dbe9a2a94",
+      "title": "GET /internal/data_views/fields - params rejects unexpected query params",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/params.spec.ts",
+        "line": 42,
+        "column": 19
+      }
+    },
+    {
+      "id": "58bbbbaee50732a-f4ed99aff6d7f08",
+      "title": "GET /internal/data_views/fields - params fields - accepts a JSON formatted fields query param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/params.spec.ts",
+        "line": 56,
+        "column": 24
+      }
+    },
+    {
+      "id": "58bbbbaee50732a-dd5c96c46221856",
+      "title": "GET /internal/data_views/fields - params fields - accepts a string array fields query param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/params.spec.ts",
+        "line": 72,
+        "column": 24
+      }
+    },
+    {
+      "id": "58bbbbaee50732a-811294e26c36903",
+      "title": "GET /internal/data_views/fields - params fields - accepts a single array fields query param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/params.spec.ts",
+        "line": 87,
+        "column": 90
+      }
+    },
+    {
+      "id": "58bbbbaee50732a-3cda177229a0de0",
+      "title": "GET /internal/data_views/fields - params fields - rejects a comma-separated list of fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/params.spec.ts",
+        "line": 102,
+        "column": 5
+      }
+    },
+    {
+      "id": "58bbbbaee50732a-550ca98a3b302cc",
+      "title": "GET /internal/data_views/fields - params meta_fields - accepts a JSON formatted meta_fields query param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/params.spec.ts",
+        "line": 115,
+        "column": 7
+      }
+    },
+    {
+      "id": "58bbbbaee50732a-d0a0585fdd1952e",
+      "title": "GET /internal/data_views/fields - params meta_fields - accepts a string array meta_fields query param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/params.spec.ts",
+        "line": 131,
+        "column": 7
+      }
+    },
+    {
+      "id": "58bbbbaee50732a-688b593c592b0f3",
+      "title": "GET /internal/data_views/fields - params meta_fields - accepts a single meta_fields query param",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/params.spec.ts",
+        "line": 148,
+        "column": 23
+      }
+    },
+    {
+      "id": "58bbbbaee50732a-379b776b58c2ea3",
+      "title": "GET /internal/data_views/fields - params meta_fields - rejects a comma-separated list of meta_fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/params.spec.ts",
+        "line": 163,
+        "column": 12
+      }
+    },
+    {
+      "id": "cc316c9f674d480-7a1188fe4c62471",
+      "title": "GET /internal/data_views/fields - response returns a flattened version of the fields in es",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/response.spec.ts",
+        "line": 97,
+        "column": 21
+      }
+    },
+    {
+      "id": "cc316c9f674d480-b37d7a1e6839f14",
+      "title": "GET /internal/data_views/fields - response returns a single field as requested",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/response.spec.ts",
+        "line": 115,
+        "column": 12
+      }
+    },
+    {
+      "id": "cc316c9f674d480-d44e9b534512cab",
+      "title": "GET /internal/data_views/fields - response returns a single field as requested with json encoding",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/response.spec.ts",
+        "line": 137,
+        "column": 8
+      }
+    },
+    {
+      "id": "cc316c9f674d480-1ab01872ee0294a",
+      "title": "GET /internal/data_views/fields - response always returns a field for all passed meta fields",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/response.spec.ts",
+        "line": 161,
+        "column": 7
+      }
+    },
+    {
+      "id": "cc316c9f674d480-216c971894903f0",
+      "title": "GET /internal/data_views/fields - response can request fields by type",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/response.spec.ts",
+        "line": 290,
+        "column": 7
+      }
+    },
+    {
+      "id": "cc316c9f674d480-20b02b964ce7a9e",
+      "title": "GET /internal/data_views/fields - response can request fields by multiple types",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/response.spec.ts",
+        "line": 313,
+        "column": 22
+      }
+    },
+    {
+      "id": "cc316c9f674d480-90f64828b80d48a",
+      "title": "GET /internal/data_views/fields - response returns fields when one pattern exists and the other does not",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/response.spec.ts",
+        "line": 338,
+        "column": 25
+      }
+    },
+    {
+      "id": "cc316c9f674d480-6904837e21baf3e",
+      "title": "GET /internal/data_views/fields - response returns 404 when neither exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/response.spec.ts",
+        "line": 353,
+        "column": 10
+      }
+    },
+    {
+      "id": "cc316c9f674d480-d2669395cfaf2ca",
+      "title": "GET /internal/data_views/fields - response returns 404 when no patterns exist",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/response.spec.ts",
+        "line": 350,
+        "column": 24
+      }
+    },
+    {
+      "id": "cc316c9f674d480-de2be53a54c5719",
+      "title": "GET /internal/data_views/fields - response returns empty set when no fields even if meta fields are supplied",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/fields_route/response.spec.ts",
+        "line": 360,
         "column": 24
       }
     },
@@ -3468,7 +4124,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 75,
+        "line": 77,
         "column": 14
       }
     },
@@ -3488,7 +4144,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 100,
+        "line": 102,
         "column": 80
       }
     },
@@ -3508,7 +4164,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 130,
+        "line": 132,
         "column": 23
       }
     },
@@ -3528,7 +4184,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 155,
+        "line": 157,
         "column": 13
       }
     },
@@ -3548,7 +4204,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 174,
+        "line": 176,
         "column": 42
       }
     },
@@ -3568,7 +4224,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 201,
+        "line": 203,
         "column": 90
       }
     },
@@ -3588,8 +4244,88 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 216,
+        "line": 218,
         "column": 23
+      }
+    },
+    {
+      "id": "a2c33fd1e0245ee-c17296ed1993940",
+      "title": "POST api/index_patterns/index_pattern/{id}/fields - main (legacy index pattern api) can set field customDescription attribute on non-existing field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
+        "line": 245,
+        "column": 60
+      }
+    },
+    {
+      "id": "a2c33fd1e0245ee-a6c1d241d614b6f",
+      "title": "POST api/index_patterns/index_pattern/{id}/fields - main (legacy index pattern api) can update customDescription attribute",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
+        "line": 261,
+        "column": 23
+      }
+    },
+    {
+      "id": "a2c33fd1e0245ee-7ebbb1c0dd37ed6",
+      "title": "POST api/index_patterns/index_pattern/{id}/fields - main (legacy index pattern api) can set field customDescription attribute on an existing field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
+        "line": 297,
+        "column": 23
+      }
+    },
+    {
+      "id": "a2c33fd1e0245ee-1dff84eb84f3a89",
+      "title": "POST api/index_patterns/index_pattern/{id}/fields - main (legacy index pattern api) can delete customDescription attribute",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
+        "line": 310,
+        "column": 25
       }
     },
     {
@@ -3608,8 +4344,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 243,
-        "column": 60
+        "line": 344,
+        "column": 80
       }
     },
     {
@@ -3628,8 +4364,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 269,
-        "column": 25
+        "line": 375,
+        "column": 7
       }
     },
     {
@@ -3648,8 +4384,28 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
-        "line": 308,
-        "column": 14
+        "line": 414,
+        "column": 25
+      }
+    },
+    {
+      "id": "a2c33fd1e0245ee-9479cf3b67fd03b",
+      "title": "POST api/index_patterns/index_pattern/{id}/fields - main (legacy index pattern api) can set field format attribute on an existing field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/fields_api_update_main.spec.ts",
+        "line": 439,
+        "column": 24
       }
     },
     {
@@ -4110,6 +4866,424 @@
         "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/index_patterns/runtime_fields_update_main.spec.ts",
         "line": 31,
         "column": 13
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-193b28431c25d99",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) create: returns an error when field object is not provided",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 47,
+        "column": 7
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-8292f449acb260c",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) create: returns an error when creating a non-scripted field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 56,
+        "column": 31
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-dd6920ca5edeb41",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) get: returns 404 error on non-existing index_pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 74,
+        "column": 7
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-dbede9d919d73f6",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) get: returns 404 error on non-existing scripted field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 81,
+        "column": 28
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-e81a5142767796f",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) get: returns error when ID is too long",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 85,
+        "column": 16
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-90005afd90c81be",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) get: returns error when attempting to fetch a field which is not a scripted field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 94,
+        "column": 28
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-f6a9b5e047144fb",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) delete: returns 404 error on non-existing index_pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 103,
+        "column": 28
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-544bcafe0b6c381",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) delete: returns 404 error on non-existing scripted field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 109,
+        "column": 80
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-c868564c3a2ded6",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) delete: returns error when attempting to delete a field which is not a scripted field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 117,
+        "column": 7
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-362585e1200f22e",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) delete: returns error when ID is too long",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 128,
+        "column": 16
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-7dfcc4c31ea1cd9",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) put: returns 404 error on non-existing index_pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 136,
+        "column": 45
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-101f2529339851a",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) put: returns error when updating a field which is not a scripted field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 153,
+        "column": 16
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-c0cf8ae4665ac19",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) put: returns error when ID is too long",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 185,
+        "column": 14
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-c71298c3d907872",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) update: returns 404 error on non-existing index_pattern",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 197,
+        "column": 79
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-07ba130b442563f",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) update: returns error when field name is specified",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 208,
+        "column": 26
+      }
+    },
+    {
+      "id": "7db3c25de8b39f9-53820e1d22303a0",
+      "title": "scripted_fields_crud - errors (legacy index pattern api) update: returns error when ID is too long",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_errors.spec.ts",
+        "line": 223,
+        "column": 17
+      }
+    },
+    {
+      "id": "66a5e71427f6be5-abffc6093971391",
+      "title": "scripted_fields_crud - main (legacy index pattern api) can create a new scripted field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_main.spec.ts",
+        "line": 53,
+        "column": 31
+      }
+    },
+    {
+      "id": "66a5e71427f6be5-ded9136af2b85ea",
+      "title": "scripted_fields_crud - main (legacy index pattern api) newly created scripted field is materialized in the index_pattern object",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_main.spec.ts",
+        "line": 70,
+        "column": 31
+      }
+    },
+    {
+      "id": "66a5e71427f6be5-5d251a923a703f9",
+      "title": "scripted_fields_crud - main (legacy index pattern api) can fetch a scripted field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_main.spec.ts",
+        "line": 92,
+        "column": 85
+      }
+    },
+    {
+      "id": "66a5e71427f6be5-0cc5a8b053730d0",
+      "title": "scripted_fields_crud - main (legacy index pattern api) can remove a scripted field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_main.spec.ts",
+        "line": 117,
+        "column": 37
+      }
+    },
+    {
+      "id": "66a5e71427f6be5-7b8bcf1ef01af0a",
+      "title": "scripted_fields_crud - main (legacy index pattern api) can overwrite an existing field with PUT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_main.spec.ts",
+        "line": 138,
+        "column": 79
+      }
+    },
+    {
+      "id": "66a5e71427f6be5-ac2a2a8ebb4ae78",
+      "title": "scripted_fields_crud - main (legacy index pattern api) can add a new scripted field with PUT",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_main.spec.ts",
+        "line": 174,
+        "column": 31
+      }
+    },
+    {
+      "id": "66a5e71427f6be5-117123fb5c714d8",
+      "title": "scripted_fields_crud - main (legacy index pattern api) can update an existing field",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_views/test/scout/api/tests/scripted_fields_crud/scripted_fields_crud_main.spec.ts",
+        "line": 198,
+        "column": 78
       }
     },
     {

@@ -76,6 +76,8 @@ outputs:
       items:
         type: object
         additionalProperties: true
+    tier2_invoked:
+      type: boolean
 steps:
   # Start + poll: POST returns `{ run_id, state: running, result_attachment_id }`
   # immediately; the pipeline updates that hidden attachment. Downstream reads
@@ -179,13 +181,23 @@ steps:
         # idempotency key it is documented to be. Folding `run_id` into the id would
         # also stop the conflict, but by abandoning that idempotency.
         #
+        # `fallback` alone does not rescue the step. The engine composes
+        # Continue(Fallback(step)) and `ExitTryBlockNodeImpl` re-throws the stored add
+        # error after the fallback path completes, so without `continue: true` the
+        # conflict still fails this iteration, `attach_sse`, and the run even though
+        # the update landed (see workflows_execution_engine .../fallback_step/README.md,
+        # "With Continue"). With it, the add is recorded `failed` with the conflict and
+        # everything enclosing it is `completed`. That one red step is expected; do not
+        # "fix" it by removing the add or by swallowing the conflict without the update.
+        #
         # A failure for any other reason (validation, a conversation that vanished)
-        # also lands here, and the update fails in turn, which `continue`
-        # swallows. That is not silent, though: the coordinator
+        # also lands here: the update runs, fails in turn, and the outer `continue`
+        # lets the run proceed either way. That is not silent, though: the coordinator
         # only prepares an attachment for a confirmed hit, so packaging finds no
         # current-run state and returns `run_incomplete`, which the Worker reports
         # as a partial sweep. A genuinely broken attachment is visible there.
         on-failure:
+          continue: true
           fallback:
             - name: update_sse_attachment
               type: ai.attachment.update
@@ -364,6 +376,9 @@ steps:
       # executed behavior from being dropped behind an unexecuted one, and keeps the array inside
       # the packaging step's input limit.
       result_behaviors: "${{ steps.read_hunt_result.output.data.result.tier2.behaviors | compact | where: 'execution.executed', true | slice: 0, 20 }}"
+      # A Tier 2 that threw still called the model: the coordinator returns `tier1_only` with
+      # `tier2_skipped_reason: tier2_failed`.
+      result_tier2_invoked: "${{ steps.read_hunt_result.output.data.result.status == 'tier1_and_tier2' or steps.read_hunt_result.output.data.result.tier2_skipped_reason == 'tier2_failed' }}"
 
   # Permanent delete after outputs are set; continue on failure.
   - name: delete_hunt_result
@@ -388,3 +403,4 @@ steps:
       sse_count: "${{ variables.result_sse_count }}"
       report_intent_targets: "${{ variables.result_report_intent_targets }}"
       behaviors: "${{ variables.result_behaviors }}"
+      tier2_invoked: "${{ variables.result_tier2_invoked }}"
