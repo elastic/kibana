@@ -158,9 +158,21 @@ describe('workspace editing', () => {
 
   it('clears topology, selections, blocklists and history when clearing the workspace', () => {
     const { store, workspace } = setup();
-    store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: true }));
+    store.dispatch(toggleNodeSelection({ nodeId: 'field..third', replace: true }));
     workspace.blocklistSelection();
+    store.dispatch(toggleNodeSelection({ nodeId: 'field..second', replace: true }));
+    workspace.groupSelections(workspace.nodesMap['field..first']);
     workspace.undo();
+    store.dispatch(clearNodeSelection());
+    store.dispatch(toggleNodeSelection({ nodeId: 'field..first', replace: true }));
+    store.dispatch(toggleEdgeSelection(store.getState().workspace.edgeIds[0]));
+
+    expect(workspace.nodes).toHaveLength(2);
+    expect(workspace.edges).toHaveLength(1);
+    expect(workspace.blocklistedNodes).toHaveLength(1);
+    expect(workspace.selectedNodes).toHaveLength(1);
+    expect(workspace.getEdgeSelection()).toHaveLength(1);
+    expect(workspace.undoLog).toHaveLength(1);
     expect(workspace.redoLog).toHaveLength(1);
 
     workspace.clearGraph();
