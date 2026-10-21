@@ -22,6 +22,7 @@ dependsOn:
   - '@kbn/agent-builder-elastic-ai-index-ki-types'
   - '@kbn/agent-builder-plugin'
   - '@kbn/alerts-ui-shared'
+  - '@kbn/connector-specs'
   - '@kbn/app-header'
   - '@kbn/calculate-auto'
   - '@kbn/charts-plugin'
