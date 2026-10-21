@@ -41,7 +41,7 @@ it('loads the alert and builds the investigation context server-side', async () 
       getInvestigationsClient,
       getAlertsClient,
       getEpisodeLookup,
-      params: { body: { subject: { type: 'alert', id: 'alert-1' } } },
+      params: { body: { subject: { type: 'alert', ids: ['alert-1'] } } },
     } as never)
   ).resolves.toEqual({ investigation_id: 'investigation-1' });
   // Agent Builder titles the investigation, so no title is derived from the rule name.
@@ -53,24 +53,47 @@ it('loads the alert and builds the investigation context server-side', async () 
   });
 });
 
+it('loads every alert id and stores the first as the subject', async () => {
+  const get = jest.fn().mockResolvedValue(alert);
+  const alertsClient = {
+    getAuthorizedAlertsIndices: jest.fn().mockResolvedValue(['.alerts-observability.test']),
+    get,
+  };
+  await handler({
+    request: {},
+    getInvestigationsClient,
+    getAlertsClient: jest.fn().mockResolvedValue(alertsClient),
+    getEpisodeLookup,
+    params: { body: { subject: { type: 'alert', ids: ['alert-1', 'alert-2', 'alert-1'] } } },
+  } as never);
+  expect(get).toHaveBeenCalledTimes(2);
+  expect(start).toHaveBeenCalledWith(
+    expect.objectContaining({ subject: { type: 'alert', id: 'alert-1', summary: undefined } })
+  );
+});
+
+it('requires at least one alert id', () => {
+  expect(schema.safeParse({ subject: { type: 'alert', ids: [] } }).success).toBe(false);
+});
+
 it('passes a caller-provided title on', async () => {
   await handler({
     request: {},
     getInvestigationsClient,
     getAlertsClient,
     getEpisodeLookup,
-    params: { body: { subject: { type: 'alert', id: 'alert-1' }, title: 'Custom title' } },
+    params: { body: { subject: { type: 'alert', ids: ['alert-1'] }, title: 'Custom title' } },
   } as never);
   expect(start).toHaveBeenCalledWith(expect.objectContaining({ title: 'Custom title' }));
 });
 
 it('no longer accepts a concurrency key', () => {
   expect(
-    schema.safeParse({ subject: { type: 'alert', id: 'alert-1' }, concurrency_key: 'key-1' })
+    schema.safeParse({ subject: { type: 'alert', ids: ['alert-1'] }, concurrency_key: 'key-1' })
       .success
   ).toBe(true);
   expect(
-    schema.parse({ subject: { type: 'alert', id: 'alert-1' }, concurrency_key: 'key-1' })
+    schema.parse({ subject: { type: 'alert', ids: ['alert-1'] }, concurrency_key: 'key-1' })
   ).not.toHaveProperty('concurrency_key');
 });
 
@@ -82,7 +105,7 @@ it('forwards connector_id for an alert investigation', async () => {
     getEpisodeLookup,
     params: {
       body: {
-        subject: { type: 'alert', id: 'alert-1' },
+        subject: { type: 'alert', ids: ['alert-1'] },
         connector_id: 'custom-model',
       },
     },
@@ -156,7 +179,7 @@ it('returns service unavailable when alert lookup is not wired', async () => {
       request: {},
       getInvestigationsClient,
       getAlertsClient: () => undefined,
-      params: { body: { subject: { type: 'alert', id: 'alert-1' } } },
+      params: { body: { subject: { type: 'alert', ids: ['alert-1'] } } },
     } as never)
   ).rejects.toMatchObject({ output: { statusCode: 503 } });
 });
@@ -166,7 +189,7 @@ it.each(['alert', 'manual'])(
   async (type) => {
     const destination = { type: 'slack', connector_id: 'slack', params: { channel: '#alerts' } };
     const input = {
-      subject: { type, id: 'alert-1' },
+      subject: type === 'alert' ? { type, ids: ['alert-1'] } : { type, id: 'alert-1' },
       message: 'Investigate',
       notificationDestinations: [destination],
     };

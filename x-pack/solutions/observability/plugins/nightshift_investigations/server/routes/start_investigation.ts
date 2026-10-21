@@ -18,11 +18,6 @@ import { fetchInvestigationAlertSnapshot } from '../lib/alert_snapshot';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
-const subjectIdAndSummary = {
-  id: z.string().min(1).max(MAX_KEYWORD_LENGTH),
-  summary: z.string().max(MAX_TEXT_LENGTH).optional(),
-};
-
 const startInvestigationMessage = {
   message: z.string().min(1).max(MAX_TEXT_LENGTH).optional(),
 };
@@ -46,12 +41,12 @@ const startInvestigationBodySchema = z.union([
   z.object({
     subject: z.object({
       type: z.literal('alert'),
-      ...subjectIdAndSummary,
+      ids: z
+        .array(z.string().min(1).max(MAX_KEYWORD_LENGTH))
+        .min(1)
+        .max(MAX_ALERTS_PER_INVESTIGATION),
+      summary: z.string().max(MAX_TEXT_LENGTH).optional(),
     }),
-    alert_ids: z
-      .array(z.string().min(1).max(MAX_KEYWORD_LENGTH))
-      .max(MAX_ALERTS_PER_INVESTIGATION)
-      .optional(),
     title: titleSchema.optional(),
     ...startInvestigationMessage,
     ...startInvestigationModel,
@@ -89,7 +84,8 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
     summary: 'Start an investigation',
     description:
       'Starts an investigation for a given subject, or continues the open investigation that ' +
-      'already holds it, and returns the investigation (Agent Builder conversation) id. A new ' +
+      'already holds it. An alert subject takes one or more alert ids, classic or universal; the ' +
+      'first is the stored subject, used for naming and the summary, and returns the investigation (Agent Builder conversation) id. A new ' +
       'investigation is created when the start is accepted; its run records the subjects.',
   },
   security: {
@@ -122,14 +118,14 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
           throw serverUnavailable('Alert lookup is unavailable');
         }
         const lookup = getEpisodeLookup(request);
-        const alertIds = [...new Set([body.subject.id, ...(body.alert_ids ?? [])])];
+        const [primaryId] = body.subject.ids;
         const alerts = await Promise.all(
-          alertIds.map((alertId) =>
+          [...new Set(body.subject.ids)].map((alertId) =>
             fetchInvestigationAlertSnapshot({ alertsClient, alertId, ...lookup })
           )
         );
         return await client.start({
-          subject: body.subject,
+          subject: { type: 'alert', id: primaryId, summary: body.subject.summary },
           title: body.title,
           context: { alerts },
           trigger_type: 'manual',
