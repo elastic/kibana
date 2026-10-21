@@ -21,6 +21,30 @@ dependsOn:
   - '@kbn/config-schema'
   - '@kbn/task-manager-plugin'
   - '@kbn/data-views-plugin'
+  - '@kbn/core-elasticsearch-client-server-internal'
+  - '@kbn/core-saved-objects-api-server'
+  - '@kbn/logging'
+  - '@kbn/core-spaces-common'
+  - '@kbn/core-saved-objects-server'
+  - '@kbn/sse-utils'
+  - '@kbn/agent-builder-common'
+  - '@kbn/core-http-server'
+  - '@kbn/core-http-server-utils'
+  - '@kbn/core-http-router-server-internal'
+  - '@kbn/core-security-server'
+  - '@kbn/core-saved-objects-utils-server'
+  - '@kbn/core-saved-objects-base-server-internal'
+  - '@kbn/core-saved-objects-migration-server-internal'
+  - '@kbn/core-saved-objects-api-server-internal'
+  - '@kbn/core-status-common'
+  - '@kbn/security-authorization-core'
+  - '@kbn/share-plugin'
+  - '@kbn/licensing-plugin'
+  - '@kbn/encrypted-saved-objects-plugin'
+  - '@kbn/core-elasticsearch-server-utils'
+  - '@kbn/core-elasticsearch-server'
+  - '@kbn/setup-node-env'
+  - '@kbn/core-execution-context-server-internal'
 tags:
   - plugin
   - prod
@@ -33,6 +57,7 @@ fileGroups:
     - common/**/*
     - harness/**/*.ts
     - '!target/**/*'
+    - '!server/capability_kit/worker_core/reconstruct_config.node_test.ts'
   jest-config:
     - jest.config.js
 tasks: {}
