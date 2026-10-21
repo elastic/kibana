@@ -6,14 +6,12 @@
  */
 
 import React, { Suspense, useState } from 'react';
-import { css } from '@emotion/react';
-import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  LazyAgentHealth,
   LazyAgentlessEnrollmentFlyout,
   LazyAgentlessStatusDetailsFlyout,
+  LazyAgentStatusBadge,
 } from '@kbn/fleet-plugin/public';
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../../aws_service_matrix';
 import type { AgentIssue } from '../agent_detection';
@@ -29,13 +27,16 @@ interface ServiceAgentStatusProps {
 
 type FlyoutKind = 'details' | 'enrollment';
 
-const buttonResetCss = css({
-  background: 'none',
-  border: 0,
-  padding: 0,
-  cursor: 'pointer',
-  font: 'inherit',
-});
+const getBadgeTestSubj = ({
+  hasAgent,
+  isClickable,
+}: {
+  hasAgent: boolean;
+  isClickable: boolean;
+}): string | undefined => {
+  if (isClickable) return 'serviceTile-agentStatusButton';
+  return hasAgent ? undefined : 'serviceTile-agentPendingBadge';
+};
 
 const getFlyoutKind = ({
   hasAgent,
@@ -127,31 +128,20 @@ export function ServiceAgentStatus({
       </>
     ) : undefined;
 
-  const badge = badgeAgent ? (
+  const badge = (
     <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-      <LazyAgentHealth agent={badgeAgent} tooltipExtraContent={tooltipExtraContent} />
-    </Suspense>
-  ) : (
-    <EuiBadge color="default" data-test-subj="serviceTile-agentPendingBadge">
-      <FormattedMessage
-        id="xpack.ingestHub.detectAndReviewStep.agentStatus.pending"
-        defaultMessage="Pending"
+      <LazyAgentStatusBadge
+        agent={badgeAgent}
+        tooltipExtraContent={tooltipExtraContent}
+        onClick={flyoutKind ? () => setOpenFlyout(flyoutKind) : undefined}
+        data-test-subj={getBadgeTestSubj({ hasAgent: !!agent, isClickable: !!flyoutKind })}
       />
-    </EuiBadge>
+    </Suspense>
   );
 
   return (
     <div data-test-subj="serviceTile-agentStatus">
-      {flyoutKind ? (
-        <button
-          type="button"
-          css={buttonResetCss}
-          onClick={() => setOpenFlyout(flyoutKind)}
-          data-test-subj="serviceTile-agentStatusButton"
-        >
-          {badge}
-        </button>
-      ) : elsewhereMessage ? (
+      {!flyoutKind && elsewhereMessage ? (
         <span tabIndex={0} data-test-subj="serviceTile-agentUnhealthyElsewhere">
           {badge}
         </span>

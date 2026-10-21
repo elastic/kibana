@@ -316,17 +316,12 @@ export { sendCreatePackagePolicyForRq as sendCreatePackagePolicy } from './hooks
 export { useAgentsForPolicyIds } from './hooks/use_agents_for_policy_ids';
 export { sendGetAgentIncomingData } from './hooks/use_request/agents';
 
-// Agent status badge — the same badge the Agent list and Managed integrations table render.
-export const LazyAgentHealth = lazy(() =>
-  import('./applications/fleet/sections/agents/components/agent_health').then((m) => ({
-    default: m.AgentHealth,
-  }))
+// Agent status badge — the same badge the Managed integrations table renders: the agent's health,
+// or Pending while there is no agent yet.
+export const LazyAgentStatusBadge = lazy(() =>
+  import('./components/agent_status_badge').then((m) => ({ default: m.AgentStatusBadge }))
 );
-// Narrow public surface — the full props extend EuiBadgeProps.
-export interface AgentHealthProps {
-  agent: import('../common/types').Agent;
-  tooltipExtraContent?: import('react').ReactNode;
-}
+export type { AgentStatusBadgeProps } from './components/agent_status_badge';
 
 // Agentless flyouts — step 4 opens these from a service status chip.
 export const LazyAgentlessStatusDetailsFlyout = lazy(() =>

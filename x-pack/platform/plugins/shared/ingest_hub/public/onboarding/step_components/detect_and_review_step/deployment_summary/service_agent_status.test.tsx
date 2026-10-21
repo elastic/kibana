@@ -11,18 +11,31 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
   // Fleet's badge shows its tooltip on hover; the mock renders the extra content right away.
-  LazyAgentHealth: ({
+  LazyAgentStatusBadge: ({
     agent,
     tooltipExtraContent,
+    onClick,
+    'data-test-subj': dataTestSubj,
   }: {
-    agent: { status: string };
+    agent?: { status: string };
     tooltipExtraContent?: React.ReactNode;
-  }) => (
-    <span>
-      <span data-test-subj="agentHealth">{agent.status}</span>
-      {tooltipExtraContent && <span data-test-subj="agentTooltip">{tooltipExtraContent}</span>}
-    </span>
-  ),
+    onClick?: () => void;
+    'data-test-subj'?: string;
+  }) => {
+    const label = agent ? <span data-test-subj="agentHealth">{agent.status}</span> : 'Pending';
+    return (
+      <span>
+        {onClick ? (
+          <button type="button" onClick={onClick} data-test-subj={dataTestSubj}>
+            {label}
+          </button>
+        ) : (
+          <span data-test-subj={dataTestSubj}>{label}</span>
+        )}
+        {tooltipExtraContent && <span data-test-subj="agentTooltip">{tooltipExtraContent}</span>}
+      </span>
+    );
+  },
   LazyAgentlessStatusDetailsFlyout: (props: {
     onClose: () => void;
     policyName: string;
@@ -299,15 +312,18 @@ describe('ServiceAgentStatus', () => {
     const noAgent = (overrides: Partial<ServiceAgentInfo> = {}) =>
       info({ health: 'pending', agent: undefined, agentIds: [], ...overrides });
 
-    it('shows a Pending badge', () => {
+    it('shows a Pending badge, as a button where there is an enrollment status to open', () => {
       renderStatus(noAgent());
 
-      expect(screen.getByTestId('serviceTile-agentPendingBadge')).toHaveTextContent('Pending');
-      // Fleet's own Pending badge is the filled default colour, not the outlined (hollow) style.
-      const { className } = screen.getByTestId('serviceTile-agentPendingBadge');
-      expect(className).toMatch(/euiBadge-default/);
-      expect(className).not.toMatch(/euiBadge-hollow/);
+      expect(screen.getByTestId('serviceTile-agentStatusButton')).toHaveTextContent('Pending');
       expect(screen.queryByTestId('agentHealth')).not.toBeInTheDocument();
+    });
+
+    it('shows a plain Pending badge where there is nothing to open', () => {
+      renderStatus(noAgent(), 'agent_based');
+
+      expect(screen.getByTestId('serviceTile-agentPendingBadge')).toHaveTextContent('Pending');
+      expect(screen.queryByTestId('serviceTile-agentStatusButton')).not.toBeInTheDocument();
     });
 
     it('opens the enrollment status for a managed integration', async () => {

@@ -7,7 +7,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { HorizontalAlignment } from '@elastic/eui';
 import {
-  EuiBadge,
   EuiBasicTable,
   EuiButton,
   EuiEmptyPrompt,
@@ -48,10 +47,10 @@ import {
   Loading,
   PackagePolicyActionsMenu,
   AgentlessEnrollmentFlyout,
+  AgentStatusBadge,
 } from '../../../../../../components';
 
 import { Persona } from '../persona';
-import { AgentHealth } from '../../../../../../../fleet/sections/agents/components';
 
 import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
 import { ThroughputCell } from './throughput_cell';
@@ -358,31 +357,16 @@ export const AgentlessPackagePoliciesTable = ({
                     const agent =
                       (agentPolicy?.id && agentsByPolicyId[agentPolicy.id]) || undefined;
 
-                    // Status badge click handler
-                    const statusBadgeProps = {
-                      onClick: () => {
-                        setFlyoutOpenForPolicyId(packagePolicy.id);
-                        setFlyoutPackagePolicy(packagePolicy);
-                        setFlyoutAgentPolicy(agentPolicy);
-                      },
-                      'data-test-subj': 'agentlessStatusBadge',
-                      onClickAriaLabel: i18n.translate(
-                        'xpack.fleet.epm.packageDetails.integrationList.agentlessStatusAriaLabel',
-                        {
-                          defaultMessage: 'Open status details',
-                        }
-                      ),
-                    };
-
-                    return agent ? (
-                      <AgentHealth agent={agent} {...statusBadgeProps} />
-                    ) : (
-                      <EuiBadge color="default" {...statusBadgeProps}>
-                        <FormattedMessage
-                          id="xpack.fleet.packageDetails.integrationList.pendingAgentlessStatus"
-                          defaultMessage="Pending"
-                        />
-                      </EuiBadge>
+                    return (
+                      <AgentStatusBadge
+                        agent={agent}
+                        onClick={() => {
+                          setFlyoutOpenForPolicyId(packagePolicy.id);
+                          setFlyoutPackagePolicy(packagePolicy);
+                          setFlyoutAgentPolicy(agentPolicy);
+                        }}
+                        data-test-subj="agentlessStatusBadge"
+                      />
                     );
                   },
                 },
