@@ -66,6 +66,8 @@ spaceTest.describe('Lens ES|QL metric EVAL maximum', { tag: tags.stateful.classi
         await dashboard.openDashboardWithIdInEditMode(dashboardId);
         await dashboard.waitForPanelsToLoad(1);
         await openInlineEditorAndWaitVisible(pageObjects, panelId);
+        // Changing the query before this lands restarts the editor's initial fetch, and the stale run can win.
+        await expect(page.getByTestId('ESQLQueryResults')).toBeVisible();
 
         // Normalize the fixture's nonzero average to a deterministic value below the maximum.
         await esqlEditor.setQueryAndRun(
