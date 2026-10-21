@@ -243,7 +243,8 @@ export const convertSmithy = (
       const code = errorStatus(getShape(model, target));
       errors.set(code, [...(errors.get(code) ?? []), target]);
     }
-    // Errors that share a status are alternatives; smithy-openapi keeps only the last one.
+    // Errors that share a status are alternatives, as an `anyOf`: bodies with only a `message`
+    // match several of them. smithy-openapi keeps only the last one.
     const errorResponses = [...errors].map(([code, targets]) => {
       const schemas: JsonSchema[] = [];
       let headers: Node = {};
@@ -266,7 +267,7 @@ export const convertSmithy = (
             ? {
                 content: {
                   'application/json': {
-                    schema: schemas.length === 1 ? schemas[0] : { oneOf: schemas },
+                    schema: schemas.length === 1 ? schemas[0] : { anyOf: schemas },
                   },
                 },
               }

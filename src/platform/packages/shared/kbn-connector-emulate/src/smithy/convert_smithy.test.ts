@@ -383,7 +383,7 @@ describe('convertSmithy', () => {
         content: {
           'application/json': {
             schema: {
-              oneOf: [
+              anyOf: [
                 { $ref: '#/components/schemas/NotFoundExceptionResponseContent' },
                 { $ref: '#/components/schemas/GoneExceptionResponseContent' },
               ],
@@ -464,6 +464,26 @@ describe('convertSmithy', () => {
       'GetBucket',
       'GetBucket',
     ]);
+  });
+
+  it('accepts an error body that fits several errors of its status', async () => {
+    const { fetch, calls, rejectedResponses } = createEmulatorFetch({
+      specs: [document],
+      fixtures: [
+        {
+          operation: { method: 'get', path: '/buckets/{name}' },
+          response: { status: 404, body: { message: 'No such bucket' } },
+        },
+      ],
+    });
+
+    const response = await fetch('https://storage.eu-west-1.amazonaws.com/buckets/logs', {
+      headers: { authorization: 'AWS4-HMAC-SHA256 Credential=AKIDEXAMPLE' },
+    });
+
+    expect(response.status).toBe(404);
+    expect(rejectedResponses).toEqual([]);
+    expect(calls[0].responseViolations).toEqual([]);
   });
 
   it('rejects services of other protocols and ambiguous models', () => {

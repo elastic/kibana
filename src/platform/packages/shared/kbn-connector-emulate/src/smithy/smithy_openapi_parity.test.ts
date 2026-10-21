@@ -27,7 +27,7 @@ const KNOWN_DIFFERENCES = {
   // with their format are what the model means, and reject fractions.
   integerType: 'integers are `integer` with `int32`/`int64`, not `number`',
   // smithy-openapi keeps only the last error declared at a status; AWS can return any of them.
-  errorsPerStatus: 'errors that share a status are a `oneOf`, not the last one only',
+  errorsPerStatus: 'errors that share a status are an `anyOf`, not the last one only',
   // restJson1 sends blob payloads as raw bytes; smithy-openapi defaults to `byte` (base64).
   blobPayload: 'blob payloads are `binary`, not `byte`',
   // smithy-openapi also marks `@sensitive` maps and structures with `format: password`, which
@@ -123,8 +123,8 @@ const contentOf = (document: OpenApiDocument, holder: unknown, lastVariant = fal
         const schema = isRecord(content) ? content.schema : undefined;
         // KNOWN_DIFFERENCES.errorsPerStatus
         const compared =
-          lastVariant && isRecord(schema) && Array.isArray(schema.oneOf)
-            ? schema.oneOf[schema.oneOf.length - 1]
+          lastVariant && isRecord(schema) && Array.isArray(schema.anyOf)
+            ? schema.anyOf[schema.anyOf.length - 1]
             : schema;
         return [mediaType, flatten(document, compared)];
       }
