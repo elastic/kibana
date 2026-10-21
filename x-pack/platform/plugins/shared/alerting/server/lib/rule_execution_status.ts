@@ -7,7 +7,8 @@
 
 import type { Logger } from '@kbn/core/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
-import { reasonForReportedError, type RuleResultService } from '../monitoring/rule_result_service';
+import { reasonForReportedError } from './reason_for_reported_error';
+import type { RuleResultService } from '../monitoring/rule_result_service';
 import type { RuleExecutionStatus, RawRuleExecutionStatus, RawRule, Rule } from '../types';
 import { RuleExecutionStatusValues, RuleExecutionStatusWarningReasons } from '../types';
 import { getReasonFromError } from './error_with_reason';

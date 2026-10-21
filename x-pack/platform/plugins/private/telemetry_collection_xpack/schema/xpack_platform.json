@@ -2133,10 +2133,16 @@
               "type": "long"
             },
             "execute": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Rule executions that failed while running the executor per day."
+              }
             },
             "configuration": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Rule executions that failed because of the rule configuration per day."
+              }
             },
             "unknown": {
               "type": "long"
@@ -2145,13 +2151,22 @@
               "type": "long"
             },
             "timeout": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Rule executions that failed because the rule timed out per day."
+              }
             },
             "disabled": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Rule executions that failed because the rule is disabled per day."
+              }
             },
             "validate": {
-              "type": "long"
+              "type": "long",
+              "_meta": {
+                "description": "Rule executions that failed rule validation per day."
+              }
             }
           }
         },

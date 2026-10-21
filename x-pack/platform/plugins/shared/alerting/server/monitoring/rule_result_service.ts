@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { RuleExecutionStatusErrorReasons, type PublicLastRunSetters } from '../types';
+import { reasonForReportedError } from '../lib/reason_for_reported_error';
+import type { RuleExecutionStatusErrorReasons } from '../types';
+import { type PublicLastRunSetters } from '../types';
 
 export interface RuleResultServiceResults {
   errors: LastRunError[];
@@ -18,16 +20,6 @@ interface LastRunError {
   userError: boolean;
   reason?: RuleExecutionStatusErrorReasons;
 }
-
-/** Reason stored for an error a rule executor reports through addLastRunError. */
-export const reasonForReportedError = (
-  userError: boolean,
-  reason?: RuleExecutionStatusErrorReasons
-): RuleExecutionStatusErrorReasons =>
-  reason ??
-  (userError
-    ? RuleExecutionStatusErrorReasons.Configuration
-    : RuleExecutionStatusErrorReasons.Execute);
 
 export class RuleResultService {
   private errors: LastRunError[] = [];

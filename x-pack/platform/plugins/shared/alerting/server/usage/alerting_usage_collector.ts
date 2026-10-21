@@ -203,13 +203,30 @@ const byReasonSchema: MakeSchemaFrom<AlertingUsage>['count_rules_executions_fail
     DYNAMIC_KEY: { type: 'long' },
     read: { type: 'long' },
     decrypt: { type: 'long' },
-    execute: { type: 'long' },
-    configuration: { type: 'long' },
+    execute: {
+      type: 'long',
+      _meta: { description: 'Rule executions that failed while running the executor per day.' },
+    },
+    configuration: {
+      type: 'long',
+      _meta: {
+        description: 'Rule executions that failed because of the rule configuration per day.',
+      },
+    },
     unknown: { type: 'long' },
     license: { type: 'long' },
-    timeout: { type: 'long' },
-    disabled: { type: 'long' },
-    validate: { type: 'long' },
+    timeout: {
+      type: 'long',
+      _meta: { description: 'Rule executions that failed because the rule timed out per day.' },
+    },
+    disabled: {
+      type: 'long',
+      _meta: { description: 'Rule executions that failed because the rule is disabled per day.' },
+    },
+    validate: {
+      type: 'long',
+      _meta: { description: 'Rule executions that failed rule validation per day.' },
+    },
   };
 
 // DYNAMIC_KEY is a schema placeholder, not an event.reason value. Size must cover every
