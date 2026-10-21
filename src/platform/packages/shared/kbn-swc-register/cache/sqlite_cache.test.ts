@@ -10,21 +10,16 @@
 import Fs from 'fs';
 import Path from 'path';
 import { Writable } from 'stream';
+import { DatabaseSync } from 'node:sqlite';
 
 import del from 'del';
-import LmdbStore = require('lmdb');
-import type { RootDatabaseOptions } from 'lmdb';
 
-import { LmdbCache } from './lmdb_cache';
-import { utf8StringKeyEncoder } from './lmdb_key_encoder';
+import { SqliteCache } from './sqlite_cache';
 
 const DIR = Path.resolve(__dirname, '../__tmp__/cache');
-const DB_DIR = Path.resolve(DIR, 'v2');
+const DB_FILE = Path.resolve(DIR, 'v3.sqlite');
 const DAY = 1000 * 60 * 60 * 24;
 const GLOBAL_ATIME = new Date().setHours(0, 0, 0, 0);
-
-const getCodeKey = (key: string) => `code:${key}`;
-const getMapKey = (key: string) => `map:${key}`;
 
 const makeTestFile = (name: string, source: string) => {
   const path = Path.resolve(DIR, name);
@@ -42,16 +37,27 @@ const getExpectedMetadataKey = (path: string) => {
   return `prefix:stat:${keyParts.join(':')}:${Path.resolve(path)}`;
 };
 
-const openDb = () => {
-  const databaseOptions: RootDatabaseOptions & {
-    keyEncoder: typeof utf8StringKeyEncoder;
-  } = {
-    name: 'db',
-    encoding: 'json',
-    keyEncoder: utf8StringKeyEncoder,
-  };
+const readRow = (key: string) => {
+  const db = new DatabaseSync(DB_FILE);
+  try {
+    return db.prepare('SELECT atime, code, map FROM cache WHERE key = ?').get(key);
+  } finally {
+    db.close();
+  }
+};
 
-  return LmdbStore.open<unknown, string>(DB_DIR, databaseOptions);
+const writeRows = (rows: Array<[key: string, atime: number, code: string, map: string | null]>) => {
+  const db = new DatabaseSync(DB_FILE);
+  try {
+    const put = db.prepare(
+      'INSERT OR REPLACE INTO cache (key, atime, code, map) VALUES (?, ?, ?, ?)'
+    );
+    for (const row of rows) {
+      put.run(...row);
+    }
+  } finally {
+    db.close();
+  }
 };
 
 const makeTestLog = () => {
@@ -70,10 +76,10 @@ const makeTestLog = () => {
   return log;
 };
 
-const caches: LmdbCache[] = [];
+const caches: SqliteCache[] = [];
 
-const makeCache = (...options: ConstructorParameters<typeof LmdbCache>) => {
-  const cache = new LmdbCache(...options);
+const makeCache = (...options: ConstructorParameters<typeof SqliteCache>) => {
+  const cache = new SqliteCache(...options);
   caches.push(cache);
   return cache;
 };
@@ -107,12 +113,11 @@ it('returns undefined until values are set', async () => {
   expect(cache.getCode(key)).toBe('var x = 1');
   expect(cache.getSourceMap(key)).toEqual({ foo: 'bar' });
   expect(log.output).toMatchInlineSnapshot(`
-    "MISS   [db]   code:prefix:1bfb4256d4a036a897e0582a67bb23417da30bf3975c7e59da5d5a211a6ce74b
-    MISS   [db]   map:prefix:1bfb4256d4a036a897e0582a67bb23417da30bf3975c7e59da5d5a211a6ce74b
-    PUT   [db]   code:prefix:1bfb4256d4a036a897e0582a67bb23417da30bf3975c7e59da5d5a211a6ce74b
-    PUT   [db]   map:prefix:1bfb4256d4a036a897e0582a67bb23417da30bf3975c7e59da5d5a211a6ce74b
-    HIT   [db]   code:prefix:1bfb4256d4a036a897e0582a67bb23417da30bf3975c7e59da5d5a211a6ce74b
-    HIT   [db]   map:prefix:1bfb4256d4a036a897e0582a67bb23417da30bf3975c7e59da5d5a211a6ce74b
+    "MISS code   prefix:1bfb4256d4a036a897e0582a67bb23417da30bf3975c7e59da5d5a211a6ce74b
+    MISS map   prefix:1bfb4256d4a036a897e0582a67bb23417da30bf3975c7e59da5d5a211a6ce74b
+    PUT   prefix:1bfb4256d4a036a897e0582a67bb23417da30bf3975c7e59da5d5a211a6ce74b
+    HIT code   prefix:1bfb4256d4a036a897e0582a67bb23417da30bf3975c7e59da5d5a211a6ce74b
+    HIT map   prefix:1bfb4256d4a036a897e0582a67bb23417da30bf3975c7e59da5d5a211a6ce74b
     "
   `);
 });
@@ -144,7 +149,7 @@ it('changes metadata cache keys when file metadata changes', () => {
   expect(cache.getKey(path, updatedSource)).not.toBe(initialKey);
 });
 
-it('stores code and source maps separately', async () => {
+it('stores code, atime and source map in one row', async () => {
   const cache = makeCache({
     dir: DIR,
     prefix: 'prefix',
@@ -156,10 +161,7 @@ it('stores code and source maps separately', async () => {
     map: { foo: 'bar' },
   });
 
-  const db = openDb();
-  expect(db.get(getCodeKey(key))).toEqual([GLOBAL_ATIME, 'var x = 1']);
-  expect(db.get(getMapKey(key))).toEqual({ foo: 'bar' });
-  await db.close();
+  expect(readRow(key)).toEqual({ atime: GLOBAL_ATIME, code: 'var x = 1', map: '{"foo":"bar"}' });
 });
 
 it('supports UTF-8 cache keys', async () => {
@@ -174,9 +176,7 @@ it('supports UTF-8 cache keys', async () => {
   });
   await cache.close();
 
-  const db = openDb();
-  expect(Array.from(db.getKeys())).toContain(`code:${key}`);
-  await db.close();
+  expect(readRow(key)).toMatchObject({ code: 'var utf8 = true' });
 });
 
 it('does not write source maps for transforms without source maps', async () => {
@@ -192,13 +192,10 @@ it('does not write source maps for transforms without source maps', async () => 
 
   expect(cache.getCode(key)).toBe('module.exports = "foo: bar";');
   expect(cache.getSourceMap(key)).toBe(undefined);
-
-  const db = openDb();
-  expect(db.get(getMapKey(key))).toBe(undefined);
-  await db.close();
+  expect(readRow(key)).toMatchObject({ map: null });
 });
 
-it('drains pending async writes on explicit close', async () => {
+it('drains pending writes on explicit close', async () => {
   const cache = makeCache({
     dir: DIR,
     prefix: 'prefix',
@@ -212,10 +209,33 @@ it('drains pending async writes on explicit close', async () => {
 
   await cache.close();
 
-  const db = openDb();
-  expect(db.get(getCodeKey(key))).toEqual([GLOBAL_ATIME, 'var pending = true']);
-  expect(db.get(getMapKey(key))).toEqual({ pending: true });
-  await db.close();
+  expect(readRow(key)).toEqual({
+    atime: GLOBAL_ATIME,
+    code: 'var pending = true',
+    map: '{"pending":true}',
+  });
+});
+
+it('drains pending writes when the process exits', () => {
+  const cache = makeCache({
+    dir: DIR,
+    prefix: 'prefix',
+  });
+  const key = cache.getKey('/foo/exit.js', 'source');
+
+  void cache.update(key, { code: 'var exited = true' });
+  process.emit('exit', 0);
+
+  expect(readRow(key)).toMatchObject({ code: 'var exited = true' });
+});
+
+it('shares entries between instances using the same directory', async () => {
+  const writer = makeCache({ dir: DIR, prefix: 'prefix' });
+  const reader = makeCache({ dir: DIR, prefix: 'prefix' });
+
+  await writer.update('shared', { code: 'var shared = true' });
+
+  expect(reader.getCode('shared')).toBe('var shared = true');
 });
 
 it('only refreshes atime for entries older than the refresh interval', async () => {
@@ -228,45 +248,37 @@ it('only refreshes atime for entries older than the refresh interval', async () 
   const freshKey = cache.getKey('/foo/fresh.js', 'source');
   const staleKey = cache.getKey('/foo/stale.js', 'source');
 
-  const db = openDb();
-  db.putSync(getCodeKey(freshKey), [GLOBAL_ATIME - 6 * DAY, 'fresh']);
-  db.putSync(getCodeKey(staleKey), [GLOBAL_ATIME - 8 * DAY, 'stale']);
-  await db.close();
+  writeRows([
+    [freshKey, GLOBAL_ATIME - 6 * DAY, 'fresh', null],
+    [staleKey, GLOBAL_ATIME - 8 * DAY, 'stale', null],
+  ]);
 
   log.output = '';
   expect(cache.getCode(freshKey)).toBe('fresh');
   expect(cache.getCode(staleKey)).toBe('stale');
 
-  // Drain the fire-and-forget atime-refresh put so its PUT log line is deterministic.
   await cache.close();
 
-  expect(log.output).toBe(
-    `HIT   [db]   ${getCodeKey(freshKey)}\n` +
-      `HIT   [db]   ${getCodeKey(staleKey)}\n` +
-      `PUT   [db]   ${getCodeKey(staleKey)}\n`
-  );
+  expect(log.output).toBe(`HIT code   ${freshKey}\nHIT code   ${staleKey}\nPUT   ${staleKey}\n`);
+  expect(readRow(freshKey)).toMatchObject({ atime: GLOBAL_ATIME - 6 * DAY });
+  expect(readRow(staleKey)).toMatchObject({ atime: GLOBAL_ATIME });
 });
 
-it('prunes stale code entries and their source maps', async () => {
-  const db = openDb();
-  db.putSync('code:old', [GLOBAL_ATIME - 31 * DAY, 'old']);
-  db.putSync('map:old', { old: true });
-  db.putSync('code:fresh', [GLOBAL_ATIME - 1 * DAY, 'fresh']);
-  db.putSync('map:fresh', { fresh: true });
-  db.putSync('legacy', [GLOBAL_ATIME - 31 * DAY, 'legacy', { legacy: true }]);
-  await db.close();
+it('prunes stale entries when the last prune is older than a week', async () => {
+  await makeCache({ dir: DIR, prefix: 'prefix' }).close();
+  writeRows([
+    ['old', GLOBAL_ATIME - 31 * DAY, 'old', '{"old":true}'],
+    ['fresh', GLOBAL_ATIME - 1 * DAY, 'fresh', '{"fresh":true}'],
+  ]);
 
-  const cache = makeCache({
-    dir: DIR,
-    prefix: 'prefix',
-  });
-  await cache.close();
+  await makeCache({ dir: DIR, prefix: 'prefix' }).close();
+  expect(readRow('old')).toMatchObject({ code: 'old' });
 
-  const updatedDb = openDb();
-  expect(updatedDb.get('code:old')).toBe(undefined);
-  expect(updatedDb.get('map:old')).toBe(undefined);
-  expect(updatedDb.get('legacy')).toBe(undefined);
-  expect(updatedDb.get('code:fresh')).toEqual([GLOBAL_ATIME - 1 * DAY, 'fresh']);
-  expect(updatedDb.get('map:fresh')).toEqual({ fresh: true });
-  await updatedDb.close();
+  const db = new DatabaseSync(DB_FILE);
+  db.prepare("UPDATE meta SET value = ? WHERE key = 'lastPrune'").run(GLOBAL_ATIME - 8 * DAY);
+  db.close();
+
+  await makeCache({ dir: DIR, prefix: 'prefix' }).close();
+  expect(readRow('old')).toBe(undefined);
+  expect(readRow('fresh')).toMatchObject({ code: 'fresh' });
 });

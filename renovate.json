@@ -1584,15 +1584,6 @@
       "enabled": true
     },
     {
-      "groupName": "lmdb",
-      "matchDepNames": ["lmdb"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "pirates",
       "matchDepNames": ["pirates"],
       "reviewers": ["team:kibana-operations"],
