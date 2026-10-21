@@ -12,6 +12,7 @@ import type { ConversationRound } from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
+import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
 import {
   ANTI_LEAKAGE_EVALUATOR,
   CAUSE_COMPLETENESS_EVALUATOR,
@@ -82,6 +83,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
           { timeout: 60_000 }
         )
         .toBe(true);
+      await replaceCustomContext(fetch, getDatasetCustomContext(dataset.name));
       const [experiment] = await executorClient.runExperiment(
         {
           name: 'Nightshift graded investigation traces',
@@ -119,7 +121,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, (
           // These execution-acceptance checks alone establish that the run itself succeeded,
           // independently of the quality scores the judges assign.
           expect(output.execution_error).toBeUndefined();
-          expect(output.workflow_status).toBe('completed');
+          expect(output.workflow_status).toBe('complete');
           expect(output.investigation_id).toEqual(expect.any(String));
           expect(output.conversation_id).toEqual(expect.any(String));
           expect(

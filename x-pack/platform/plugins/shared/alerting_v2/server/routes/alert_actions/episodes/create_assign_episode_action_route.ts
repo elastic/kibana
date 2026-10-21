@@ -16,10 +16,11 @@ import { createEpisodeActionRouteForType } from './create_episode_action_route_f
 export const CreateAssignEpisodeActionRoute = createEpisodeActionRouteForType({
   actionType: ALERT_EPISODE_ACTION_TYPE.ASSIGN,
   pathSuffix: '_assign',
-  summary: 'Assign an alert episode to a user',
+  summary: 'Assign an alert to a user',
   bodySchema: createAssignEpisodeActionBodySchema,
   oasOperationObject: createAssignEpisodeActionOasExamples,
   access: 'public' as const,
+  availability: { stability: 'stable' as const, since: '9.6.0' },
   additionalResponses: {
     409: {
       body: () => errorResponseSchema,

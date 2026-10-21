@@ -7,10 +7,11 @@
 
 import { Parser } from '@elastic/esql';
 import { RUNBOOK_ARTIFACT_TYPE, RUNBOOK_CONTENT_LIMIT } from '@kbn/alerting-v2-constants';
-import { z } from '@kbn/zod/v4';
+import { z, inlineRootJsonSchemaRef } from '@kbn/zod/v4';
 import {
   createRuleDataBaseSchema,
   createRuleDataSchema,
+  putRuleDataSchema,
   isLifecycleConfigAllowedForKind,
   isAbsenceDistinguishableFromBreach,
   isRecoveryConditionUsableWithBreach,
@@ -28,6 +29,7 @@ import {
   bulkCreateRulesRequestSchema,
   bulkCreateRulesResponseSchema,
   ruleTagsParamsSchema,
+  ruleResponseSchema,
   findRulesRequestSchema,
 } from './rule_data_schema';
 import { tagsResponseSchema } from './common';
@@ -367,6 +369,17 @@ describe('createRuleDataSchema', () => {
       const result = createRuleDataSchema.safeParse({
         ...validCreateData,
         metadata: { name: 'test rule', routing_tags: ['a'.repeat(129)] },
+      });
+
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('metadata.template', () => {
+    it('is not accepted in a request body', () => {
+      const result = createRuleDataSchema.safeParse({
+        ...validCreateData,
+        metadata: { name: 'test rule', template: { id: 'template-1' } },
       });
 
       expect(result.success).toBe(false);
@@ -1316,6 +1329,33 @@ describe('createRuleDataSchema', () => {
   });
 });
 
+describe('putRuleDataSchema', () => {
+  it('leaves enabled undefined when omitted', () => {
+    const result = putRuleDataSchema.parse(validCreateData);
+    expect(result.enabled).toBeUndefined();
+  });
+
+  it('accepts an explicit enabled: true', () => {
+    const result = putRuleDataSchema.parse({ ...validCreateData, enabled: true });
+    expect(result.enabled).toBe(true);
+  });
+
+  it('accepts an explicit enabled: false', () => {
+    const result = putRuleDataSchema.parse({ ...validCreateData, enabled: false });
+    expect(result.enabled).toBe(false);
+  });
+
+  it('rejects a non-boolean enabled', () => {
+    const result = putRuleDataSchema.safeParse({ ...validCreateData, enabled: 'true' });
+    expect(result.success).toBe(false);
+  });
+
+  it('does not add enabled to createRuleDataSchema', () => {
+    const result = createRuleDataSchema.safeParse({ ...validCreateData, enabled: true });
+    expect(result.success).toBe(false);
+  });
+});
+
 describe('updateRuleDataSchema', () => {
   it('accepts an empty payload', () => {
     const result = updateRuleDataSchema.parse({});
@@ -1365,6 +1405,11 @@ describe('updateRuleDataSchema', () => {
 
   it('rejects metadata.routing_tags as an empty array (use null to clear)', () => {
     const result = updateRuleDataSchema.safeParse({ metadata: { routing_tags: [] } });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects metadata.template', () => {
+    const result = updateRuleDataSchema.safeParse({ metadata: { template: { id: 'template-1' } } });
     expect(result.success).toBe(false);
   });
 
@@ -1689,6 +1734,21 @@ describe('updateRuleDataSchema', () => {
   });
 });
 
+describe('ruleResponseSchema metadata', () => {
+  it('returns metadata.template when present', () => {
+    const result = ruleResponseSchema.shape.metadata.parse({
+      name: 'test rule',
+      template: { id: 'template-1' },
+    });
+
+    expect(result.template).toEqual({ id: 'template-1' });
+  });
+
+  it('accepts metadata without a template', () => {
+    expect(ruleResponseSchema.shape.metadata.safeParse({ name: 'test rule' }).success).toBe(true);
+  });
+});
+
 describe('getBreachEsqlQuery', () => {
   it('returns base verbatim when the breach block is omitted', () => {
     expect(getBreachEsqlQuery({ base: 'FROM metrics-*' })).toBe('FROM metrics-*');
@@ -1795,10 +1855,9 @@ describe('getRootEsqlQuery', () => {
 
 describe('updateRuleDataSchema OpenAPI descriptions', () => {
   it('documents PATCH omission for time_field and the recovery/no_data contracts', () => {
-    const json = z.toJSONSchema(updateRuleDataSchema, {
-      target: 'draft-7',
-      unrepresentable: 'any',
-    }) as {
+    const json = inlineRootJsonSchemaRef(
+      z.toJSONSchema(updateRuleDataSchema, { target: 'draft-7', unrepresentable: 'any' })
+    ) as {
       properties?: Record<string, { description?: string }>;
       definitions?: Record<string, { description?: string }>;
     };

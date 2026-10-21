@@ -44,7 +44,7 @@ import type { XYVisualizationState as XYConfiguration } from '@kbn/lens-common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
-import { DataViewSource, getRegisteredEsqlDataView, type DataSource } from '@kbn/data-source';
+import { getRegisteredEsqlDataView, type DataSource } from '@kbn/data-source';
 import type {
   UnifiedHistogramSuggestionContext,
   UnifiedHistogramVisContext,
@@ -70,7 +70,7 @@ const ESQL_HISTOGRAM_RESULT_LIMIT = 10000;
 
 /** Lens suggestions still take a DataView. Classic unwraps it; ES|QL uses the registered shim. */
 function resolveLensDataView(dataSource: DataSource): DataView | undefined {
-  return dataSource instanceof DataViewSource
+  return dataSource.kind === 'index-pattern'
     ? dataSource.getDataView()
     : getRegisteredEsqlDataView(dataSource);
 }
@@ -238,7 +238,7 @@ export class LensVisService {
       type: UnifiedHistogramSuggestionType;
     }> = [];
 
-    if (queryParams.isPlainRecord) {
+    if (queryParams.dataSource.kind === 'esql') {
       if (isOfAggregateQueryType(queryParams.query)) {
         if (getCategorizeField(queryParams.query.esql).length) {
           // query uses categorize, override the chart to be a simple doc count histogram
@@ -311,7 +311,7 @@ export class LensVisService {
       }
     }
 
-    if (externalVisContext && queryParams.isPlainRecord) {
+    if (externalVisContext && queryParams.dataSource.kind === 'esql') {
       // externalVisContext can be based on an unfamiliar suggestion (not a part of allSuggestions), but it was saved before, so we try to restore it too
       const derivedSuggestion = deriveLensSuggestionFromLensAttributes({
         externalVisContext,
@@ -678,10 +678,10 @@ export class LensVisService {
     queryParams: QueryParams;
     preferredVisAttributes?: UnifiedHistogramVisContext['attributes'];
   }): Suggestion[] => {
-    const { columns, query, isPlainRecord, dataSource } = queryParams;
+    const { columns, query, dataSource } = queryParams;
     const dataView = resolveLensDataView(dataSource);
 
-    if (!isPlainRecord || !isOfAggregateQueryType(query) || !dataView) {
+    if (dataSource.kind !== 'esql' || !isOfAggregateQueryType(query) || !dataView) {
       return [];
     }
 
@@ -703,7 +703,7 @@ export class LensVisService {
     const context = {
       dataViewSpec: dataView?.toSpec(),
       fieldName: '',
-      textBasedColumns: columns,
+      textBasedColumns: columns as DatatableColumn[] | undefined,
       query,
     };
 
@@ -894,7 +894,7 @@ function areSuggestionAndVisContextAndQueryParamsStillCompatible({
   }
 
   if (
-    queryParams.isPlainRecord &&
+    queryParams.dataSource.kind === 'esql' &&
     suggestionType === UnifiedHistogramSuggestionType.lensSuggestion &&
     !deriveLensSuggestionFromLensAttributes({ externalVisContext, queryParams })
   ) {

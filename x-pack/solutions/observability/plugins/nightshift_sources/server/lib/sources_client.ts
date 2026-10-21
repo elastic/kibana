@@ -6,24 +6,27 @@
  */
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { escapeKuery } from '@kbn/es-query';
 import { hasSameEsql } from '@kbn/streams-schema';
 import {
   createSourceRequestSchema,
   getNightshiftSourceViewName,
+  getSourceReadTargets,
   getSourceSlugCandidate,
   hasMultipleSourceIndices,
   updateSourceRequestSchema,
   type CreateSourceRequest,
+  type ISourceReadTargets,
   type ListSourcesResponse,
   type NightshiftSource,
   type SourceHealth,
+  type SourceType,
   type SourceWithHealth,
   type UpdateSourceRequest,
 } from '@kbn/nightshift-shared';
 import { z } from '@kbn/zod/v4';
-import { badRequest, notFound } from '@hapi/boom';
+import { badRequest, boomify, forbidden, notFound } from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 import {
   NIGHTSHIFT_SOURCE_SO_TYPE,
@@ -32,6 +35,7 @@ import {
 import { assertSourceQueryExecutes, hasNoIndicesBehind } from './assert_source_query_executes';
 import { isEsqlUnknownIndexError, isEsqlVerificationError } from './es_errors';
 import type { EsqlViewsClient } from './esql_views_client';
+import type { SourceChange } from './source_change_emitter';
 import { validateSourceQuery } from './validate_source_query';
 
 // Every write sends the full attribute set, so a field the caller dropped (an optional
@@ -51,6 +55,8 @@ interface SourcesClientDependencies {
   username: string;
   /** Request space; encoded in the view name so grants can be `$.nightshift.sources.<spaceId>.*`. */
   spaceId: string;
+  /** Called after every committed write, never after a rolled-back one. */
+  onChange: (change: SourceChange) => Promise<void>;
 }
 
 const toSource = (id: string, attributes: NightshiftSourceAttributes): NightshiftSource => ({
@@ -83,17 +89,34 @@ const nextEsqlUpdatedAt = (previous: string, now: string): string => {
 export class SourcesClient {
   constructor(private readonly deps: SourcesClientDependencies) {}
 
+  /**
+   * The checks create and update run on a new query, without writing. Returns the type to store,
+   * and whether any index exists yet behind the query.
+   */
+  async validateQuery({
+    esql,
+  }: {
+    esql: string;
+  }): Promise<{ type: SourceType; indexExists: boolean }> {
+    const type = validateSourceQuery({ esql });
+    const { indexExists } = await assertSourceQueryExecutes({
+      esClient: this.deps.dataEsClient,
+      esql,
+    });
+    return { type, indexExists };
+  }
+
   async create(input: CreateSourceRequest): Promise<NightshiftSource> {
     const { soClient, viewsClient, username } = this.deps;
     const parsed = parseSourceWrite(createSourceRequestSchema, input);
-    validateSourceQuery(parsed.esql);
-    await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: parsed.esql });
+    const { type } = await this.validateQuery({ esql: parsed.esql });
 
     const slug = await this.allocateSlug(parsed.title);
     const id = uuidv4();
     const now = new Date().toISOString();
     const attributes: NightshiftSourceAttributes = {
       ...parsed,
+      type,
       slug,
       view_name: getNightshiftSourceViewName(this.deps.spaceId, slug),
       enabled: true,
@@ -122,7 +145,9 @@ export class SourcesClient {
       throw error;
     }
 
-    return toSource(id, attributes);
+    const source = toSource(id, attributes);
+    await this.deps.onChange({ type: 'created', source });
+    return source;
   }
 
   async update(id: string, input: UpdateSourceRequest): Promise<NightshiftSource> {
@@ -131,9 +156,10 @@ export class SourcesClient {
     const so = await this.getSavedObject(id);
     const { attributes: previous } = so;
     const esqlChanged = !hasSameEsql(parsed.esql, previous.esql);
-    validateSourceQuery(parsed.esql);
+    // A metadata-only save keeps the stored type. The query did not change.
+    let type = previous.type;
     if (esqlChanged) {
-      await assertSourceQueryExecutes({ esClient: this.deps.dataEsClient, esql: parsed.esql });
+      ({ type } = await this.validateQuery({ esql: parsed.esql }));
     }
 
     const now = new Date().toISOString();
@@ -145,6 +171,7 @@ export class SourcesClient {
       description: parsed.description,
       tags: parsed.tags,
       esql: parsed.esql,
+      type,
       updated_at: now,
       esql_updated_at: esqlChanged
         ? nextEsqlUpdatedAt(previous.esql_updated_at, now)
@@ -175,7 +202,9 @@ export class SourcesClient {
       throw error;
     }
 
-    return toSource(id, attributes);
+    const source = toSource(id, attributes);
+    await this.deps.onChange({ type: 'updated', source, previous: toSource(id, previous) });
+    return source;
   }
 
   async get(id: string): Promise<SourceWithHealth> {
@@ -184,21 +213,70 @@ export class SourcesClient {
     return { source, health: await this.getHealth(source) };
   }
 
-  /** Saved-object catalog. View health is `get()`; list does not fetch views. */
+  /**
+   * Rejects with 403 when the current user cannot read the source's data. Stored knowledge
+   * is read through the internal user, so this is the only place a caller's own index
+   * privileges are checked before that data is returned.
+   *
+   * It asks Elasticsearch for `read` on the local index patterns of the stored query. An ES|QL
+   * probe is not a test: it passes for a user who can read the view but not the data behind a
+   * wildcard, and a missing view looks the same as a denied one. The check fails closed, so a
+   * query that cannot be parsed and a failed privilege request deny.
+   *
+   * Remote cluster targets (`cluster:index`) are not checked: `has_privileges` only covers local
+   * indices and no probe can tell a denied remote index from an absent one. They are trusted,
+   * because only a user who could run the query against the remote cluster can create the source.
+   * A source that reads a remote cluster therefore lets any Nightshift reader of the space read
+   * its stored knowledge.
+   */
+  async assertReadable(id: string): Promise<void> {
+    const { attributes } = await this.getSavedObject(id);
+    let targets: ISourceReadTargets;
+    try {
+      targets = getSourceReadTargets(attributes.esql);
+    } catch {
+      throw forbidden(`Cannot read source ${id}: its query cannot be checked`);
+    }
+    if (targets.indexPatterns.length === 0) {
+      if (targets.hasRemote) {
+        return;
+      }
+      throw forbidden(`Cannot read source ${id}: its data cannot be checked for this user`);
+    }
+
+    const response = await this.deps.dataEsClient.security.hasPrivileges({
+      index: [{ names: targets.indexPatterns, privileges: ['read'] }],
+    });
+    if (!response.has_all_requested) {
+      throw forbidden(`Cannot read source ${id}`);
+    }
+  }
+
+  /**
+   * Saved-object catalog. View health is `get()`; list does not fetch views.
+   * `ids` looks those sources up directly. Search, enabled, and paging then apply to the ones that exist.
+   */
   async list({
     page,
     perPage,
     search,
     enabled,
+    ids,
   }: {
     page: number;
     perPage: number;
     search?: string;
     enabled?: boolean;
+    ids?: string[];
   }): Promise<ListSourcesResponse> {
+    const term = search?.trim() || undefined;
+    if (ids) {
+      return this.listByIds({ ids, page, perPage, search: term, enabled });
+    }
+
     const filters: string[] = [];
-    if (search) {
-      filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.title: ${escapeKuery(search)}*`);
+    if (term) {
+      filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.title: ${escapeKuery(term)}*`);
     }
     if (enabled !== undefined) {
       filters.push(`${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.enabled: ${enabled}`);
@@ -223,16 +301,75 @@ export class SourcesClient {
     };
   }
 
+  /**
+   * Ids that match no source are left out, so a deleted source never fails the whole lookup.
+   * Any other bulkGet failure is thrown: a 403 or 5xx is not "this source does not exist".
+   */
+  private async listByIds({
+    ids,
+    page,
+    perPage,
+    search,
+    enabled,
+  }: {
+    ids: string[];
+    page: number;
+    perPage: number;
+    search?: string;
+    enabled?: boolean;
+  }): Promise<ListSourcesResponse> {
+    const uniqueIds = [...new Set(ids)];
+    const { saved_objects: savedObjects } =
+      await this.deps.soClient.bulkGet<NightshiftSourceAttributes>(
+        uniqueIds.map((id) => ({ type: NIGHTSHIFT_SOURCE_SO_TYPE, id }))
+      );
+    const sources = savedObjects
+      .flatMap((savedObject) => {
+        if (!isSavedObjectErrorResult(savedObject)) {
+          return [toSource(savedObject.id, savedObject.attributes)];
+        }
+        if (savedObject.error.statusCode === 404) {
+          return [];
+        }
+        throw boomify(new Error(savedObject.error.message), {
+          statusCode: savedObject.error.statusCode,
+        });
+      })
+      .filter((source) => {
+        if (enabled !== undefined && source.enabled !== enabled) {
+          return false;
+        }
+        if (search !== undefined && !source.title.startsWith(search)) {
+          return false;
+        }
+        return true;
+      })
+      .sort((a, b) => a.title.localeCompare(b.title));
+
+    const start = (page - 1) * perPage;
+    return {
+      sources: sources.slice(start, start + perPage),
+      total: sources.length,
+      page,
+      per_page: perPage,
+    };
+  }
+
   async delete(id: string): Promise<void> {
     const { soClient, viewsClient } = this.deps;
-    const { attributes } = await this.getSavedObject(id);
+    const { attributes, version } = await this.getSavedObject(id);
+    // The view delete runs as kibana_system, so it cannot be what rejects a caller who may only read.
+    // The saved objects client has no authorization check, so an unchanged write stands in for one:
+    // it fails with 403 for a reader before anything is deleted.
+    await soClient.update(NIGHTSHIFT_SOURCE_SO_TYPE, id, attributes, { ...FULL_UPDATE, version });
     // View first so a failed ES delete leaves the catalog row and DELETE stays retryable.
     // `deleteView` already ignores 404; anything else must not acknowledge the source as gone.
     await viewsClient.deleteView(attributes.view_name);
     await soClient.delete(NIGHTSHIFT_SOURCE_SO_TYPE, id);
+    await this.deps.onChange({ type: 'deleted', source: toSource(id, attributes) });
   }
 
-  /** Flips the flag only; engines reconcile their rules and onboarding from it. */
+  /** Flips the flag, then waits for the `onSourceChange` listeners, which align rules and onboarding. */
   async setEnabled(id: string, enabled: boolean): Promise<NightshiftSource> {
     const so = await this.getSavedObject(id);
     if (so.attributes.enabled === enabled) {
@@ -247,7 +384,9 @@ export class SourcesClient {
       ...FULL_UPDATE,
       version: so.version,
     });
-    return toSource(id, attributes);
+    const source = toSource(id, attributes);
+    await this.deps.onChange({ type: 'updated', source, previous: toSource(id, so.attributes) });
+    return source;
   }
 
   /**
