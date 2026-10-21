@@ -26,6 +26,11 @@ export const TS_PROJECTS = TsProject.loadAll({
     // are present or up-to-date, and users likely won't know how to manage either, so the
     // type check is explicitly disabled in this project for now
     '.buildkite/tsconfig.json',
+    // Research measurement CLIs and the config-reconstruction node test import
+    // other plugins' schemas. They are registered so every .ts file belongs to
+    // one project, and typecheck is skipped so that import does not pull those
+    // plugins into this project's rootDir.
+    'research/t7a/tsconfig.json',
     // Each @kbn/ui-* package's `packaging/example/` is a demo app whose
     // tsconfig doesn't fit the repo-wide project graph — its imports reach
     // into the package source (outside the example's rootDir), and its

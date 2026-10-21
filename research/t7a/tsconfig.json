@@ -1,0 +1,16 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "noEmit": true,
+    "types": ["node"]
+  },
+  "include": [
+    "abab_summary.ts",
+    "lever_map.ts",
+    "mem_summary.ts",
+    "parity.ts",
+    "../../x-pack/platform/plugins/private/workload_isolation_research/server/capability_kit/worker_core/reconstruct_config.node_test.ts"
+  ],
+  "exclude": ["target/**/*"]
+}
