@@ -180,4 +180,67 @@ describe('reportFailuresToFile', () => {
       'Run aborted after this failure:'
     );
   });
+
+  describe('same-error failures', () => {
+    const readHtmlOf = (name: string) => {
+      const dir = Path.join(tmpDir, 'target', 'test_failures');
+      return Fs.readdirSync(dir)
+        .filter((file) => file.endsWith('.html'))
+        .map((file) => Fs.readFileSync(Path.join(dir, file), 'utf8').replaceAll('<wbr />', ''))
+        .find((html) => html.includes(`<h1>${name}</h1>`));
+    };
+
+    const failures = () => {
+      const first = makeFailure('first', { location: 'x-pack/first.ts' });
+      return [
+        first,
+        makeFailure('second', {
+          location: 'x-pack/second.ts',
+          sameErrorAs: first,
+          githubIssue: 'https://gh/issues/42',
+        }),
+        makeFailure('third', { location: 'x-pack/third.ts', sameErrorAs: first }),
+      ];
+    };
+
+    it('keeps artifacts for every failure', async () => {
+      await report(failures());
+
+      expect(readArtifacts().filter((file) => file.endsWith('.html'))).toHaveLength(3);
+    });
+
+    it('lists the other failures with their files and issues on the report of the first one', async () => {
+      await report(failures());
+
+      const html = readHtmlOf('first');
+      expect(html).toContain('Same error in 2 other tests');
+      expect(html).toContain('<code>second</code> in <code>x-pack/second.ts</code> <a');
+      expect(html).toContain('>#42</a>');
+      expect(html).toContain('<li><code>third</code> in <code>x-pack/third.ts</code></li>');
+    });
+
+    it('points the other failures at the first one and its file', async () => {
+      await report(failures());
+
+      const html = readHtmlOf('third');
+      expect(html).toContain('<code>first</code> in <code>x-pack/first.ts</code>');
+      expect(html).not.toContain('Same error in');
+    });
+
+    it('records the first failure as a reference in the json artifact', async () => {
+      await report(failures());
+
+      const dir = Path.join(tmpDir, 'target', 'test_failures');
+      const artifacts = Fs.readdirSync(dir)
+        .filter((file) => file.endsWith('.json'))
+        .map((file) => JSON.parse(Fs.readFileSync(Path.join(dir, file), 'utf8')));
+      const third = artifacts.find(({ name }) => name === 'third');
+
+      expect(third.sameErrorAs).toEqual({
+        classname: third.classname,
+        name: 'first',
+        location: 'x-pack/first.ts',
+      });
+    });
+  });
 });

@@ -8,6 +8,8 @@
  */
 
 import { addMessagesToReport } from './add_messages_to_report';
+import { extractErrorMessage } from './failure_text';
+import type { TestFailure } from './get_failures';
 import { getFailures } from './get_failures';
 import type { ProcessReportsParams } from './process_reports_types';
 import { createFailureIssue, updateFailureIssue } from './report_failure';
@@ -28,6 +30,63 @@ import { getRootMetadata, readTestReport } from './test_report';
 // Failures the FTR marked as cascading are excluded from all of this: they are the hooks that a
 // Mocha timeout forced to fail on its way out, so they all describe the same event. Only the
 // failure that caused the abort reaches GitHub, the rest are listed on its report.
+//
+// FTR failures sharing an error message with enough others in the same report are one event too
+// (e.g. an API they all call returning 500), so the group opens at most one new issue: for its
+// first failure, and only when none of its tests is tracked yet. Tracked issues are still updated.
+const SAME_ERROR_MIN_FAILURES = 3;
+
+const describeFailure = ({ name, location }: TestFailure) =>
+  location && location !== 'unknown' ? `"${name}" (${location})` : `"${name}"`;
+
+/**
+ * Point every failure in a same-error group at the group's first failure. Returns, per first
+ * failure, the issue of a tracked test in its group, which then stands in for a new issue.
+ */
+const markSameErrorFailures = (
+  failures: TestFailure[],
+  getTrackedIssueUrl: (failure: TestFailure) => string | undefined
+) => {
+  const failuresByError = new Map<string, TestFailure[]>();
+  const seenKeys = new Set<string>();
+
+  for (const failure of failures) {
+    if (failure.testType !== 'ftr' || failure.likelyIrrelevant || failure.cascading) {
+      continue;
+    }
+
+    const key = `${failure.classname}\n${failure.name}`;
+    const errorMessage = extractErrorMessage(failure.failure);
+    if (!errorMessage || seenKeys.has(key)) {
+      continue;
+    }
+    seenKeys.add(key);
+
+    const group = failuresByError.get(errorMessage);
+    if (group) {
+      group.push(failure);
+    } else {
+      failuresByError.set(errorMessage, [failure]);
+    }
+  }
+
+  const trackedIssueUrlByFirstFailure = new Map<TestFailure, string>();
+  for (const [first, ...rest] of failuresByError.values()) {
+    if (rest.length + 1 < SAME_ERROR_MIN_FAILURES) {
+      continue;
+    }
+
+    let trackedIssueUrl: string | undefined;
+    for (const failure of rest) {
+      failure.sameErrorAs = first;
+      trackedIssueUrl ??= getTrackedIssueUrl(failure);
+    }
+    if (trackedIssueUrl) {
+      trackedIssueUrlByFirstFailure.set(first, trackedIssueUrl);
+    }
+  }
+  return trackedIssueUrlByFirstFailure;
+};
 
 export async function processJUnitReports(
   reportPaths: string[],
@@ -58,10 +117,16 @@ export async function processJUnitReports(
       await reportFailuresToEs(log, failures);
     }
 
+    const trackedSameErrorIssueUrls = markSameErrorFailures(
+      failures,
+      (failure) => existingIssues.getForFailure(failure)?.github.htmlUrl
+    );
+
     const seenNewIssueKeys = new Set<string>();
     let newIssueCreated = false;
     let skippedNewFailures = 0;
     let cascadingFailures = 0;
+    let sameErrorFailures = 0;
 
     for (const failure of failures) {
       const pushMessage = (msg: string) => {
@@ -119,6 +184,27 @@ export async function processJUnitReports(
         continue;
       }
 
+      if (failure.sameErrorAs) {
+        sameErrorFailures += 1;
+        pushMessage(
+          `Skipped opening a new issue: failed with the same error as ` +
+            `${describeFailure(failure.sameErrorAs)}, an earlier failure in this run`
+        );
+        failure.failureCount = 0;
+        continue;
+      }
+
+      const trackedSameErrorIssueUrl = trackedSameErrorIssueUrls.get(failure);
+      if (trackedSameErrorIssueUrl) {
+        sameErrorFailures += 1;
+        pushMessage(
+          'Skipped opening a new issue: later tests in this run failed with the same error and ' +
+            `one is already tracked: ${trackedSameErrorIssueUrl}`
+        );
+        failure.failureCount = 0;
+        continue;
+      }
+
       if (newIssueCreated) {
         skippedNewFailures += 1;
         pushMessage(
@@ -152,6 +238,13 @@ export async function processJUnitReports(
         `Ignored ${cascadingFailures} failure(s) in ${reportPath} that cascaded from an earlier ` +
           `Mocha timeout aborting the config run. They are listed on the report of the failure ` +
           `that caused the abort.`
+      );
+    }
+
+    if (sameErrorFailures > 0) {
+      log.info(
+        `Skipped opening new issues for ${sameErrorFailures} failure(s) in ${reportPath} that ` +
+          `share their error with other failures in the run. Tracked issues were updated normally.`
       );
     }
 
