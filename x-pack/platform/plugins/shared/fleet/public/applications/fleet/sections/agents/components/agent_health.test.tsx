@@ -140,17 +140,24 @@ describe('AgentHealth tooltip', () => {
     await waitFor(() => expect(utils.getByText('Never checked in')).toBeInTheDocument());
   });
 
-  it('shows no check-in tooltip when hideTooltip is set', async () => {
+  it('shows the extra tooltip content after the check-in details', async () => {
     const renderer = createFleetTestRendererMock();
-    const utils = renderer.render(<AgentHealth agent={agent} hideTooltip />);
+    const utils = renderer.render(
+      <AgentHealth agent={agent} tooltipExtraContent={<p>See agent info</p>} />
+    );
 
     fireEvent.mouseOver(utils.getByText('Healthy'));
 
-    // Give a tooltip the chance to appear before asserting that it does not.
-    await act(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 50));
-    });
-    expect(utils.queryByText('Never checked in')).not.toBeInTheDocument();
-    expect(utils.getByText('Healthy')).toBeInTheDocument();
+    await waitFor(() => expect(utils.getByText('Never checked in')).toBeInTheDocument());
+    expect(utils.getByText('See agent info')).toBeInTheDocument();
+  });
+
+  it('does not pass the extra tooltip content on to the badge', () => {
+    const renderer = createFleetTestRendererMock();
+    const utils = renderer.render(
+      <AgentHealth agent={agent} tooltipExtraContent={<p>See agent info</p>} />
+    );
+
+    expect(utils.queryByText('See agent info')).not.toBeInTheDocument();
   });
 });

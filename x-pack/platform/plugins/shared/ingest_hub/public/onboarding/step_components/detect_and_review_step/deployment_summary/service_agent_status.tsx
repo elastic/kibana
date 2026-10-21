@@ -7,7 +7,7 @@
 
 import React, { Suspense, useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiBadge, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -110,9 +110,25 @@ export function ServiceAgentStatus({
   // it is for this deployment, so the badge does not contradict the tile.
   const badgeAgent = agent && issue ? { ...agent, status: 'degraded' as const } : agent;
 
+  // Said in the badge's own check-in tooltip, so the last check-in stays visible for every status.
+  const tooltipExtraContent =
+    issue || flyoutKind || elsewhereMessage ? (
+      <>
+        {issue && <p>{getIssueMessage(issue)}</p>}
+        {elsewhereMessage && <p>{elsewhereMessage}</p>}
+        {flyoutKind && (
+          <p>
+            {i18n.translate('xpack.ingestHub.detectAndReviewStep.agentStatus.seeAgentInfo', {
+              defaultMessage: 'See agent info',
+            })}
+          </p>
+        )}
+      </>
+    ) : undefined;
+
   const badge = badgeAgent ? (
     <Suspense fallback={<EuiLoadingSpinner size="s" />}>
-      <LazyAgentHealth agent={badgeAgent} hideTooltip={!!flyoutKind || !!elsewhereMessage} />
+      <LazyAgentHealth agent={badgeAgent} tooltipExtraContent={tooltipExtraContent} />
     </Suspense>
   ) : (
     <EuiBadge color="default" data-test-subj="serviceTile-agentPendingBadge">
@@ -126,34 +142,18 @@ export function ServiceAgentStatus({
   return (
     <div data-test-subj="serviceTile-agentStatus">
       {flyoutKind ? (
-        <EuiToolTip
-          position="top"
-          content={
-            <>
-              {issue && <p>{getIssueMessage(issue)}</p>}
-              <p>
-                {i18n.translate('xpack.ingestHub.detectAndReviewStep.agentStatus.seeAgentInfo', {
-                  defaultMessage: 'See agent info',
-                })}
-              </p>
-            </>
-          }
+        <button
+          type="button"
+          css={buttonResetCss}
+          onClick={() => setOpenFlyout(flyoutKind)}
+          data-test-subj="serviceTile-agentStatusButton"
         >
-          <button
-            type="button"
-            css={buttonResetCss}
-            onClick={() => setOpenFlyout(flyoutKind)}
-            data-test-subj="serviceTile-agentStatusButton"
-          >
-            {badge}
-          </button>
-        </EuiToolTip>
+          {badge}
+        </button>
       ) : elsewhereMessage ? (
-        <EuiToolTip position="top" content={<p>{elsewhereMessage}</p>}>
-          <span tabIndex={0} data-test-subj="serviceTile-agentUnhealthyElsewhere">
-            {badge}
-          </span>
-        </EuiToolTip>
+        <span tabIndex={0} data-test-subj="serviceTile-agentUnhealthyElsewhere">
+          {badge}
+        </span>
       ) : (
         badge
       )}

@@ -30,8 +30,8 @@ import { AgentUpgradeAgentModal } from './agent_upgrade_modal';
 type Props = EuiBadgeProps & {
   agent: Agent;
   fromDetails?: boolean;
-  /** Skip the check-in tooltip, for hosts that attach their own tooltip to the badge. */
-  hideTooltip?: boolean;
+  /** Shown in the check-in tooltip, after the check-in details. */
+  tooltipExtraContent?: React.ReactNode;
 };
 
 function getStatusComponent({
@@ -136,7 +136,7 @@ const WrappedWarningCallout = styled(KbnWarningCallout)`
 export const AgentHealth: React.FunctionComponent<Props> = ({
   agent,
   fromDetails,
-  hideTooltip,
+  tooltipExtraContent,
   ...restOfProps
 }) => {
   const { last_checkin: lastCheckIn, last_checkin_message: lastCheckInMessage } = agent;
@@ -209,36 +209,33 @@ export const AgentHealth: React.FunctionComponent<Props> = ({
 
   return (
     <>
-      {hideTooltip ? (
-        badge
-      ) : (
-        <EuiToolTip
-          position="top"
-          content={
-            <>
-              <p>{lastCheckinText}</p>
-              <p>{lastCheckInMessageText}</p>
-              {isStuckInUpdating(agent) ? (
-                isAgentInFailedUpgradeState(agent.upgrade_details) ? (
+      <EuiToolTip
+        position="top"
+        content={
+          <>
+            <p>{lastCheckinText}</p>
+            <p>{lastCheckInMessageText}</p>
+            {isStuckInUpdating(agent) ? (
+              isAgentInFailedUpgradeState(agent.upgrade_details) ? (
+                <FormattedMessage
+                  id="xpack.fleet.agentHealth.failedUpgradeTooltipText"
+                  defaultMessage="Agent upgrade failed. Consider restarting the upgrade."
+                />
+              ) : (
+                <p>
                   <FormattedMessage
-                    id="xpack.fleet.agentHealth.failedUpgradeTooltipText"
-                    defaultMessage="Agent upgrade failed. Consider restarting the upgrade."
+                    id="xpack.fleet.agentHealth.restartUpgradeTooltipText"
+                    defaultMessage="Agent may be stuck updating. Consider restarting the upgrade."
                   />
-                ) : (
-                  <p>
-                    <FormattedMessage
-                      id="xpack.fleet.agentHealth.restartUpgradeTooltipText"
-                      defaultMessage="Agent may be stuck updating. Consider restarting the upgrade."
-                    />
-                  </p>
-                )
-              ) : null}
-            </>
-          }
-        >
-          {badge}
-        </EuiToolTip>
-      )}
+                </p>
+              )
+            ) : null}
+            {tooltipExtraContent}
+          </>
+        }
+      >
+        {badge}
+      </EuiToolTip>
       {fromDetails && isStuckInUpdating(agent) ? (
         <>
           <EuiSpacer size="m" />

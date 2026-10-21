@@ -325,7 +325,7 @@ export const LazyAgentHealth = lazy(() =>
 // Narrow public surface — the full props extend EuiBadgeProps.
 export interface AgentHealthProps {
   agent: import('../common/types').Agent;
-  hideTooltip?: boolean;
+  tooltipExtraContent?: import('react').ReactNode;
 }
 
 // Agentless flyouts — step 4 opens these from a service status chip.

@@ -6,19 +6,21 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('@kbn/fleet-plugin/public', () => ({
+  // Fleet's badge shows its tooltip on hover; the mock renders the extra content right away.
   LazyAgentHealth: ({
     agent,
-    hideTooltip,
+    tooltipExtraContent,
   }: {
     agent: { status: string };
-    hideTooltip?: boolean;
+    tooltipExtraContent?: React.ReactNode;
   }) => (
-    <span data-test-subj="agentHealth" data-hide-tooltip={String(!!hideTooltip)}>
-      {agent.status}
+    <span>
+      <span data-test-subj="agentHealth">{agent.status}</span>
+      {tooltipExtraContent && <span data-test-subj="agentTooltip">{tooltipExtraContent}</span>}
     </span>
   ),
   LazyAgentlessStatusDetailsFlyout: (props: {
@@ -92,10 +94,10 @@ describe('ServiceAgentStatus', () => {
       expect(screen.queryByTestId('serviceTile-agentStatusButton')).not.toBeInTheDocument();
     });
 
-    it('keeps the badge own check-in tooltip when nothing else is attached', () => {
+    it('adds nothing to the badge own check-in tooltip', () => {
       renderStatus(info());
 
-      expect(screen.getByTestId('agentHealth')).toHaveAttribute('data-hide-tooltip', 'false');
+      expect(screen.queryByTestId('agentTooltip')).not.toBeInTheDocument();
     });
 
     it('is not clickable while the agent is still enrolling', () => {
@@ -110,15 +112,11 @@ describe('ServiceAgentStatus', () => {
     const unhealthy = () =>
       info({ health: 'unhealthy', agent: { id: 'a1', status: 'error' } as never });
 
-    it('makes the badge a button and swaps in the "See agent info" tooltip', async () => {
+    it('makes the badge a button and adds "See agent info" to the check-in tooltip', () => {
       renderStatus(unhealthy());
 
-      const button = screen.getByTestId('serviceTile-agentStatusButton');
-      expect(button.tagName).toBe('BUTTON');
-      expect(screen.getByTestId('agentHealth')).toHaveAttribute('data-hide-tooltip', 'true');
-
-      fireEvent.mouseOver(button);
-      await waitFor(() => expect(screen.getByText('See agent info')).toBeInTheDocument());
+      expect(screen.getByTestId('serviceTile-agentStatusButton').tagName).toBe('BUTTON');
+      expect(screen.getByTestId('agentTooltip')).toHaveTextContent('See agent info');
     });
 
     it('opens the component health flyout with the agent and its package policy', async () => {
@@ -147,11 +145,11 @@ describe('ServiceAgentStatus', () => {
       expect(await screen.findByTestId('detailsFlyout')).toBeInTheDocument();
     });
 
-    it('is not clickable until the package policy is known, and keeps its own tooltip', () => {
+    it('is not clickable until the package policy is known, and promises no flyout', () => {
       renderStatus({ ...unhealthy(), packagePolicy: undefined });
 
       expect(screen.queryByTestId('serviceTile-agentStatusButton')).not.toBeInTheDocument();
-      expect(screen.getByTestId('agentHealth')).toHaveAttribute('data-hide-tooltip', 'false');
+      expect(screen.queryByTestId('agentTooltip')).not.toBeInTheDocument();
     });
   });
 
@@ -183,47 +181,37 @@ describe('ServiceAgentStatus', () => {
       expect(await screen.findByTestId('detailsFlyout')).toHaveTextContent('Amazon S3|a1|pp-1');
     });
 
-    it('explains what to upgrade to in the tooltip', async () => {
+    it('explains what to upgrade to in the tooltip', () => {
       renderStatus(withIssue(INCOMPATIBLE));
 
-      fireEvent.mouseOver(screen.getByTestId('serviceTile-agentStatusButton'));
-
       expect(
-        await screen.findByText(
+        screen.getByText(
           'Upgrade the agent to 9.4.0 or later to run AWS, AWS CloudWatch. This agent is on 8.18.0.'
         )
       ).toBeInTheDocument();
       expect(screen.getByText('See agent info')).toBeInTheDocument();
     });
 
-    it('still explains the upgrade when Fleet does not record a minimum version', async () => {
+    it('still explains the upgrade when Fleet does not record a minimum version', () => {
       renderStatus(withIssue({ ...INCOMPATIBLE, minVersion: undefined, integrations: ['AWS'] }));
 
-      fireEvent.mouseOver(screen.getByTestId('serviceTile-agentStatusButton'));
-
       expect(
-        await screen.findByText("This agent is on 8.18.0, which can't run AWS. Upgrade the agent.")
+        screen.getByText("This agent is on 8.18.0, which can't run AWS. Upgrade the agent.")
       ).toBeInTheDocument();
     });
 
-    it('says so when the agent is not running the integration', async () => {
+    it('says so when the agent is not running the integration', () => {
       renderStatus(withIssue({ type: 'not_running' }));
 
-      fireEvent.mouseOver(screen.getByTestId('serviceTile-agentStatusButton'));
-
-      expect(
-        await screen.findByText("The agent isn't running this integration.")
-      ).toBeInTheDocument();
+      expect(screen.getByText("The agent isn't running this integration.")).toBeInTheDocument();
       expect(screen.getByTestId('agentHealth')).toHaveTextContent('degraded');
     });
 
-    it('leaves a plain unhealthy agent with just the "See agent info" tooltip and its real status', async () => {
+    it('leaves a plain unhealthy agent with just the "See agent info" line and its real status', () => {
       renderStatus(info({ health: 'unhealthy', agent: { id: 'a1', status: 'error' } as never }));
 
       expect(screen.getByTestId('agentHealth')).toHaveTextContent('error');
-      fireEvent.mouseOver(screen.getByTestId('serviceTile-agentStatusButton'));
-      await waitFor(() => expect(screen.getByText('See agent info')).toBeInTheDocument());
-      expect(screen.queryByText(/Upgrade the agent/)).not.toBeInTheDocument();
+      expect(screen.getByTestId('agentTooltip')).toHaveTextContent(/^See agent info$/);
     });
   });
 
@@ -242,22 +230,12 @@ describe('ServiceAgentStatus', () => {
       expect(screen.getByTestId('agentHealth')).toHaveTextContent('error');
     });
 
-    it('explains in the tooltip that this integration is running', async () => {
+    it('explains in the check-in tooltip that this integration is running', () => {
       renderStatus(elsewhere());
 
-      fireEvent.mouseOver(screen.getByTestId('serviceTile-agentUnhealthyElsewhere'));
-
-      expect(
-        await screen.findByText(
-          'The agent reports problems with other integrations. This one is running.'
-        )
-      ).toBeInTheDocument();
-    });
-
-    it('replaces the badge own tooltip so two do not stack', () => {
-      renderStatus(elsewhere());
-
-      expect(screen.getByTestId('agentHealth')).toHaveAttribute('data-hide-tooltip', 'true');
+      expect(screen.getByTestId('agentTooltip')).toHaveTextContent(
+        'The agent reports problems with other integrations. This one is running.'
+      );
     });
 
     it('can be reached with the keyboard, so the explanation is not mouse only', () => {
@@ -279,7 +257,7 @@ describe('ServiceAgentStatus', () => {
       renderStatus(info());
 
       expect(screen.queryByTestId('serviceTile-agentUnhealthyElsewhere')).not.toBeInTheDocument();
-      expect(screen.getByTestId('agentHealth')).toHaveAttribute('data-hide-tooltip', 'false');
+      expect(screen.queryByTestId('agentTooltip')).not.toBeInTheDocument();
     });
 
     it('does not apply once the integration itself is unhealthy, which has its own tooltip', async () => {
