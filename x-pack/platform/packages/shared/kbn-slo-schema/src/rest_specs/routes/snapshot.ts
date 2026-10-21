@@ -8,6 +8,7 @@ import { z } from '@kbn/zod';
 
 import { sloIdSchema } from '../../schema/zod/slo';
 import { allOrAnyString, dateType, statusSchema } from '../../schema/zod/common';
+import { MAX_DATE_STRING_LENGTH } from '../../schema/zod/limits';
 
 const bulkSnapshotRequestItemSchema = z.object({
   id: sloIdSchema,
@@ -51,12 +52,20 @@ const snapshotResponseSchema = z.object({
   results: z.array(snapshotResultSchema),
 });
 
+// Query params cannot use the `dateType` codec: the OAS query converter rejects
+// codecs whose output is a class instance. The handler converts it to a Date.
+const dateStringQuerySchema = z
+  .string()
+  .max(MAX_DATE_STRING_LENGTH)
+  .refine((value) => !isNaN(new Date(value).getTime()), { message: 'Invalid date' })
+  .describe('A date string, for example 2023-01-12T10:03:19.000Z');
+
 const getSnapshotParamsSchema = z.object({
   path: z.object({
     id: sloIdSchema,
   }),
   query: z.object({
-    at: dateType,
+    at: dateStringQuerySchema,
     instanceId: allOrAnyString.optional(),
   }),
 });
