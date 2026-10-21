@@ -18,7 +18,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { SchedulingConfiguraton } from '@kbn/search-connectors';
 import { ConnectorStatus } from '@kbn/search-connectors';
-import { ConnectorSchedulingComponent } from '@kbn/search-connectors/components/scheduling/connector_scheduling';
+import { ConnectorSchedulingComponent } from '@kbn/search-connectors-ui';
 
 import { Status } from '../../../../../../common/types/api';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';

@@ -20,8 +20,6 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/core'
   - '@kbn/core-elasticsearch-server'
-  - '@kbn/config-schema'
-  - '@kbn/test-jest-helpers'
   - '@kbn/std'
   - '@kbn/doc-links'
 tags:
@@ -36,7 +34,6 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-    - '!components/**/*'
   jest-config:
     - jest.config.js
 tasks: {}
