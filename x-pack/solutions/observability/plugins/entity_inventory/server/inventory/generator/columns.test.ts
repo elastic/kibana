@@ -62,6 +62,20 @@ describe('buildColumns', () => {
     expect(columnsOf(definition).map(({ name, kind }) => [name, kind])).toEqual(expected);
   });
 
+  it('lists an entity.id identity field once, as the id column', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...k8sNodeFixture,
+      identityField: { singleField: 'entity.id' },
+    };
+    expect(columnsOf(definition).map(({ name, kind }) => [name, kind])).toEqual([
+      ['entity.id', 'id'],
+      ['cluster', 'attribute'],
+      ['os', 'attribute'],
+      ['os.type', 'attribute'],
+      ['last_seen', 'last_seen'],
+    ]);
+  });
+
   it('merges an attribute declared by two sources into one column recording both fields', () => {
     const attributes = columnsOf(k8sDeploymentFixture).filter(({ kind }) => kind === 'attribute');
     expect(attributes).toEqual([

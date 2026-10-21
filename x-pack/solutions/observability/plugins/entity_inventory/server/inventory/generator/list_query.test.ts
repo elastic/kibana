@@ -7,7 +7,11 @@
 
 import { Parser } from '@elastic/esql';
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
-import { INVENTORY_DEFINITION_FIXTURES, k8sDeploymentFixture } from '../__fixtures__/definitions';
+import {
+  INVENTORY_DEFINITION_FIXTURES,
+  k8sDeploymentFixture,
+  k8sNodeFixture,
+} from '../__fixtures__/definitions';
 import { buildColumns, planColumnNames } from './columns';
 import { InventoryDefinitionError } from './errors';
 import { quoteIdentifier } from './esql_syntax';
@@ -108,6 +112,21 @@ describe('buildListQuery', () => {
 
     expect(esql).toContain('kubernetes_namespace_present_or_null =');
     expect(keepLine).not.toContain('_present');
+  });
+
+  it('keeps entity.id once when it is the identity field', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...k8sNodeFixture,
+      identityField: { singleField: 'entity.id' },
+    };
+    const [{ esql }] = generateListQueries(definition, plansOf(definition, 'FROM'), window, LIMIT);
+    const lines = esql.split('\n');
+    const keepLine = lines.find((line) => line.startsWith('| KEEP '));
+
+    expect(lines.find((line) => line.trimStart().startsWith('BY '))?.trim()).toBe('BY `entity.id`');
+    expect(keepLine).toBe('| KEEP `entity.id`, `cluster`, `os`, `os.type`, `last_seen`');
+    expect(keepLine?.match(/`entity\.id`/g)).toHaveLength(1);
+    expect(Parser.parse(esql).errors).toEqual([]);
   });
 
   it('quotes reserved words and numeric path segments so the query parses', () => {

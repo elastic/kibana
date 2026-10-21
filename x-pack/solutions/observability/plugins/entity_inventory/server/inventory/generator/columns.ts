@@ -29,8 +29,8 @@ export interface OutputColumn {
 const RESERVED_COLUMNS: ReadonlySet<string> = new Set([ENTITY_ID_COLUMN, LAST_SEEN_COLUMN]);
 
 /**
- * Builds the ordered output columns: `entity.id`, the identity fields, the attributes in plan order
- * (one column per name), then `last_seen`.
+ * Builds the ordered output columns: `entity.id`, the identity fields other than `entity.id`, the
+ * attributes in plan order (one column per name), then `last_seen`.
  */
 export const buildColumns = (
   definition: EntityDefinitionWithoutId,
@@ -61,7 +61,10 @@ export const buildColumns = (
 
   return [
     { name: ENTITY_ID_COLUMN, kind: 'id' },
-    ...groupingFields.map((name): OutputColumn => ({ name, kind: 'identity' })),
+    // An identity field named `entity.id` is already the id column; list it once.
+    ...groupingFields
+      .filter((name) => name !== ENTITY_ID_COLUMN)
+      .map((name): OutputColumn => ({ name, kind: 'identity' })),
     ...[...attributeColumns].map(
       ([name, fieldByPlan]): OutputColumn => ({ name, kind: 'attribute', fieldByPlan })
     ),
