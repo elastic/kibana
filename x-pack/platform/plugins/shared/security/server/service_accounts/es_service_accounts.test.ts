@@ -502,6 +502,24 @@ describe('EsServiceAccounts', () => {
       });
     });
 
+    it('leaves the account in place when a concurrent create already minted its token', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockResolvedValueOnce({}) // pre-flight GET: no such account
+        .mockResolvedValueOnce({ created: true }) // PUT
+        .mockRejectedValueOnce(
+          Object.assign(new Error('version_conflict_engine_exception'), { statusCode: 409 })
+        );
+
+      await expect(serviceAccounts.create(request, createParams)).rejects.toMatchObject({
+        output: { statusCode: 409 },
+      });
+
+      // Only the pre-flight, the PUT and the token attempt: nothing the winner made is deleted.
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(3);
+      expect(credentialStore.set).not.toHaveBeenCalled();
+      expect(credentialStore.delete).not.toHaveBeenCalled();
+    });
+
     // The forced account delete exists for exactly this case: Elasticsearch refuses an unforced
     // delete while a token remains, so a token Kibana could not delete must not also stop the
     // account from going away.

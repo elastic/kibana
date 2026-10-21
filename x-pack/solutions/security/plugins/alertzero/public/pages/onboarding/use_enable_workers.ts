@@ -56,17 +56,22 @@ export const useEnableWorkers = (
 
     setIsSaving(true);
     onSavingChange?.(true);
-    // Workers being turned on without a service account get their prebuilt one first. A Worker
-    // whose account cannot be set up stays off; pressing the button again retries it.
+    // Workers being turned on get their prebuilt service account first, including those whose
+    // bound account has since disappeared. A Worker whose account cannot be set up stays off;
+    // pressing the button again retries it.
     const workerById = new Map(cached.workers.map((worker) => [worker.id, worker]));
-    const needsAccount = idsToUpdate.filter(
-      (id) => workerEnabled[id] === true && !workerById.get(id)?.settings?.serviceAccountId
+    const needsAccount = idsToUpdate.filter((id) => workerEnabled[id] === true);
+    const boundAccountIds = new Map(
+      needsAccount.flatMap((id) => {
+        const accountId = workerById.get(id)?.settings?.serviceAccountId;
+        return accountId ? [[id, accountId] as [string, string]] : [];
+      })
     );
     const accounts = await ensureWorkerServiceAccounts(
       services.http!,
       services.serviceAccounts,
       needsAccount,
-      { isServerless: services.isServerless ?? false }
+      { isServerless: services.isServerless ?? false, boundAccountIds }
     );
     const accountFailures = needsAccount.flatMap((id) => {
       const account = accounts.get(id);
@@ -86,9 +91,9 @@ export const useEnableWorkers = (
       idsToPatch.map((id) => {
         const turningOn = workerEnabled[id] === true;
         const account = accounts.get(id);
-        // An existing binding is kept; only a newly set up account is written.
+        // An existing binding is kept; only a new or replaced account is written.
         const body =
-          turningOn && account?.ok
+          turningOn && account?.ok && account.serviceAccountId !== boundAccountIds.get(id)
             ? {
                 enabled: true,
                 settings: { serviceAccountId: account.serviceAccountId },

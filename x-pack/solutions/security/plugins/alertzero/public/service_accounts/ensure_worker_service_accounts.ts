@@ -32,6 +32,11 @@ interface ListServiceAccountsResponse {
 
 export interface EnsureWorkerServiceAccountsOptions {
   isServerless: boolean;
+  /**
+   * The account each worker is already bound to, by worker ID. A binding whose account still
+   * exists is kept; one whose account is gone is replaced, so a repeat run repairs it.
+   */
+  boundAccountIds?: ReadonlyMap<string, string>;
 }
 
 interface RoleResponse {
@@ -43,6 +48,12 @@ export type WorkerServiceAccountResult =
   | { ok: false; error: string };
 
 const LIST_PAGE_SIZE = 100;
+// A concurrent create lists an account before its credential is stored, so it reads as unusable
+// for a moment. Waiting briefly lets the other create finish instead of reporting a false failure.
+const CONFLICT_LOOKUP_ATTEMPTS = 5;
+const CONFLICT_LOOKUP_DELAY_MS = 500;
+
+const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
 const hasStatus = (error: unknown, status: number) =>
   isHttpFetchError(error) && error.response?.status === status;
@@ -112,10 +123,14 @@ const ensureOne = async (
   serviceAccounts: CoreServiceAccounts,
   findRole: FindRole,
   accounts: ServiceAccountEntry[],
-  workerId: string
+  workerId: string,
+  boundAccountId: string | undefined
 ): Promise<WorkerServiceAccountResult> => {
   const accountName = WORKER_SERVICE_ACCOUNT_NAMES[workerId];
   if (!accountName) return { ok: false, error: i18n.NO_PREBUILT_ROLE };
+
+  const bound = boundAccountId && accounts.find(({ id }) => id === boundAccountId);
+  if (bound) return { ok: true, serviceAccountId: bound.id };
 
   const existing = findByName(accounts, accountName);
   if (existing) return toResult(existing);
@@ -132,26 +147,41 @@ const ensureOne = async (
     if (!isConflict(error)) return { ok: false, error: toMessage(error) };
     // Created concurrently, for example from another tab. A failed lookup is reported like any
     // other failure, so callers always get a result for this worker.
-    return listAccounts(http).then(
-      (current): WorkerServiceAccountResult => {
-        const concurrent = findByName(current, accountName);
-        return concurrent ? toResult(concurrent) : { ok: false, error: toMessage(error) };
-      },
-      (listError): WorkerServiceAccountResult => ({ ok: false, error: toMessage(listError) })
-    );
+    return awaitConcurrentAccount(http, accountName, error);
   }
+};
+
+const awaitConcurrentAccount = async (
+  http: HttpStart,
+  accountName: string,
+  conflict: unknown
+): Promise<WorkerServiceAccountResult> => {
+  let result: WorkerServiceAccountResult = { ok: false, error: toMessage(conflict) };
+  for (let attempt = 0; attempt < CONFLICT_LOOKUP_ATTEMPTS; attempt++) {
+    if (attempt > 0) await sleep(CONFLICT_LOOKUP_DELAY_MS);
+    try {
+      const concurrent = findByName(await listAccounts(http), accountName);
+      if (!concurrent) return result;
+      result = toResult(concurrent);
+      if (result.ok) return result;
+    } catch (listError) {
+      return { ok: false, error: toMessage(listError) };
+    }
+  }
+  return result;
 };
 
 /**
  * Finds or creates each worker's service account with the current user's privileges, giving it the
  * worker's built-in role. A worker whose built-in role is missing fails on its own. Existing
- * accounts are reused, never changed.
+ * accounts are reused, never changed, and a binding to an account that no longer exists is
+ * replaced.
  */
 export const ensureWorkerServiceAccounts = async (
   http: HttpStart,
   serviceAccounts: CoreServiceAccounts | undefined,
   workerIds: readonly string[],
-  { isServerless }: EnsureWorkerServiceAccountsOptions
+  { isServerless, boundAccountIds }: EnsureWorkerServiceAccountsOptions
 ): Promise<Map<string, WorkerServiceAccountResult>> => {
   const failAll = (error: string) =>
     new Map(
@@ -173,7 +203,14 @@ export const ensureWorkerServiceAccounts = async (
     workerIds.map(
       async (workerId): Promise<[string, WorkerServiceAccountResult]> => [
         workerId,
-        await ensureOne(http, serviceAccounts, findRole, accounts, workerId),
+        await ensureOne(
+          http,
+          serviceAccounts,
+          findRole,
+          accounts,
+          workerId,
+          boundAccountIds?.get(workerId)
+        ),
       ]
     )
   );
