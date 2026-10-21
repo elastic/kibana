@@ -336,7 +336,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
   options: {
     access: 'internal',
     summary: 'Attach investigation to event',
-    description: 'Record a completed investigation against a significant event.',
+    description: 'Record a completed or failed investigation against a significant event.',
   },
   security: {
     authz: {

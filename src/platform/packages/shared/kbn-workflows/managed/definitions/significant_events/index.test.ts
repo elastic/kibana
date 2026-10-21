@@ -259,6 +259,7 @@ describe('significant events persistence workflow contracts', () => {
       workflow_execution_id: '{{ event.investigation_id }}',
       started_at: '{{ event.started_at }}',
       completed_at: '{{ event.completed_at }}',
+      outcome: '{{ event.status }}',
     });
   });
 });

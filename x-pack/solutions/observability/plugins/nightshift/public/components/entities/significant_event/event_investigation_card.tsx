@@ -15,7 +15,10 @@ import type { SignificantEvent } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { getInvestigationState } from '../../../data/significant_events/investigation_state';
 import { useKibana } from '../../../hooks/use_kibana';
-import { SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS } from './significant_event_status';
+import {
+  getLatestInvestigation,
+  SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS,
+} from './significant_event_status';
 
 interface EventInvestigationCardProps {
   event: Pick<SignificantEvent, 'investigations'>;
@@ -37,6 +40,13 @@ export const EventInvestigationCard = ({
           defaultMessage: 'Investigation',
         });
   const canOpen = agentBuilder != null && conversationId != null;
+  const investigationState = getInvestigationState(event);
+  const statusLabel =
+    investigationState === 'completed' && getLatestInvestigation(event)?.outcome === 'failed'
+      ? i18n.translate('xpack.nightshift.flyout.investigationCardFailedLabel', {
+          defaultMessage: 'Failed',
+        })
+      : SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS[investigationState];
 
   return (
     <EuiPanel
@@ -67,7 +77,7 @@ export const EventInvestigationCard = ({
             {i18n.translate('xpack.nightshift.flyout.investigationCardStatusLabel', {
               defaultMessage: 'Investigation · {status}',
               values: {
-                status: SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS[getInvestigationState(event)],
+                status: statusLabel,
               },
             })}
           </EuiText>

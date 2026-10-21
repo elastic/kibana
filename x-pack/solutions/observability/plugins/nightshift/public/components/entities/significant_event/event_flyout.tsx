@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import {
@@ -16,7 +16,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useInvestigation } from '@kbn/investigation-output';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
-import { useQueryClient } from '@kbn/react-query';
 import type { SignificantEventResponse } from '@kbn/significant-events-schema';
 import { DetectionFlyout } from '../detection/detection_flyout';
 import { DetectionsList } from './detections_list';
@@ -24,10 +23,6 @@ import { EventInvestigationCard } from './event_investigation_card';
 import { EventTimeline } from './event_timeline';
 import { TruncatableSummary } from '../../../common/truncatable_summary';
 import { SIGNIFICANT_EVENT_SEVERITY } from '../../ui/severity_badge';
-import {
-  isInvestigationInvestigated,
-  isInvestigationTerminalFailure,
-} from '../../../common/investigation_progress_status';
 import { useFlyoutShareUrlCustomAction } from '../../../common/flyout_share_url_button';
 import { buildNightshiftEventFlyoutShareUrl } from '../../../common/url_params';
 import {
@@ -37,7 +32,6 @@ import {
 import { useFormatTimestamp } from '../../../common/format_timestamp';
 import { useFetchDetectionOccurrences } from '../../../hooks/use_fetch_detection_occurrences';
 import { useFetchEventLifecycle } from '../../../hooks/use_fetch_event_lifecycle';
-import { markEventInvestigationCompleteInCache } from '../../../hooks/use_fetch_significant_events';
 import { useFetchInvestigationStatuses } from '../../../hooks/use_fetch_investigation_statuses';
 import { findDetectionSignal } from '../detection/resolve_detection_signal';
 import {
@@ -49,7 +43,6 @@ import {
 import { useKibana } from '../../../hooks/use_kibana';
 import { useBlocksNewActivity } from '../../../data/maintenance/use_significant_events_maintenance';
 import { useTriggerEventInvestigation } from '../../../data/significant_events/use_trigger_event_investigation';
-import { hasInvestigationsToPoll } from '../../../data/significant_events/investigation_state';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
   NIGHTSHIFT_EBT_DETAILS,
@@ -140,13 +133,11 @@ export interface EventFlyoutProps {
 export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactElement {
   const formatTimestamp = useFormatTimestamp();
   const { euiTheme } = useEuiTheme();
-  const queryClient = useQueryClient();
   const { agentBuilder, application, http } = useKibana().services;
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
   const [selectedTabId, setSelectedTabId] = useState(OVERVIEW_TAB_ID);
-  const observedRunningRound = useRef<string>();
   const [isMarkInactiveModalOpen, setIsMarkInactiveModalOpen] = useState(false);
   const lifecycleQuery = useFetchEventLifecycle(event.event_id);
   const { triggerInvestigation, triggeringEventId } = useTriggerEventInvestigation({
@@ -183,31 +174,6 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     setSelectedDetectionId(undefined);
     setSelectedTabId(OVERVIEW_TAB_ID);
   }, [event.event_id]);
-
-  useEffect(() => {
-    if (latestInvestigation == null || latestInvestigation.completed_at != null) {
-      return;
-    }
-
-    const roundKey = `${event.event_id}:${latestInvestigation.workflow_execution_id}:${latestInvestigation.started_at}`;
-    if (investigationStatus === 'running') {
-      observedRunningRound.current = roundKey;
-    }
-    // A follow-up can initially expose the previous round's terminal status.
-    if (
-      hasInvestigationsToPoll([{ investigations: [latestInvestigation] }]) &&
-      observedRunningRound.current !== roundKey
-    ) {
-      return;
-    }
-
-    if (
-      isInvestigationInvestigated(investigationStatus) ||
-      isInvestigationTerminalFailure(investigationStatus)
-    ) {
-      markEventInvestigationCompleteInCache(queryClient, event.event_id);
-    }
-  }, [event.event_id, investigationStatus, latestInvestigation, queryClient]);
 
   useEffect(() => {
     if (

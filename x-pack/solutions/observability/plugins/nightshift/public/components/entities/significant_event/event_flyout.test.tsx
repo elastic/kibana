@@ -345,7 +345,7 @@ describe('EventFlyout', () => {
     expect(screen.getByTestId('nightshiftEventFlyoutStartNewChatItem')).toBeInTheDocument();
   });
 
-  it('does not complete a follow-up from the previous round status', () => {
+  it('waits for the event outcome before completing each investigation round', () => {
     const key = [...SIGNIFICANT_EVENTS_LIST_QUERY_KEY, 'follow-up'];
     const firstRound: SignificantEventResponse = {
       ...mockEvent,
@@ -369,10 +369,7 @@ describe('EventFlyout', () => {
       investigation: investigationDetails,
     });
     rerender(<EventFlyout event={firstRound} onClose={onClose} />);
-    expect(
-      queryClient.getQueryData<{ hits: SignificantEventResponse[] }>(key)?.hits[0]
-        .investigations?.[0].completed_at
-    ).toBeDefined();
+    expect(queryClient.getQueryData(key)).toEqual({ hits: [firstRound] });
 
     const followUp: SignificantEventResponse = {
       ...firstRound,
@@ -395,10 +392,89 @@ describe('EventFlyout', () => {
       investigation: investigationDetails,
     });
     rerender(<EventFlyout event={followUp} onClose={onClose} />);
-    expect(
-      queryClient.getQueryData<{ hits: SignificantEventResponse[] }>(key)?.hits[0]
-        .investigations?.[0].completed_at
-    ).toBeDefined();
+    expect(queryClient.getQueryData(key)).toEqual({ hits: [followUp] });
+
+    const finishedFollowUp: SignificantEventResponse = {
+      ...followUp,
+      investigations: followUp.investigations?.map((investigation) => ({
+        ...investigation,
+        completed_at: new Date().toISOString(),
+        outcome: 'failed',
+      })),
+    };
+    act(() => queryClient.setQueryData(key, { hits: [finishedFollowUp] }));
+    rerender(<EventFlyout event={finishedFollowUp} onClose={onClose} />);
+    expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
+      'Investigation · Failed'
+    );
+  });
+
+  it.each([
+    { phase: 'the initial read', minutesAgo: 1, wasRunning: false },
+    { phase: 'a running investigation', minutesAgo: 1, wasRunning: true },
+    { phase: 'the polling cutoff', minutesAgo: 66, wasRunning: false },
+  ])(
+    'does not complete an investigation after a read error during $phase',
+    ({ minutesAgo, wasRunning }) => {
+      const key = [...SIGNIFICANT_EVENTS_LIST_QUERY_KEY, 'read-error'];
+      const event: SignificantEventResponse = {
+        ...mockEvent,
+        investigations: [
+          {
+            workflow_execution_id: 'conv-1',
+            started_at: new Date(Date.now() - minutesAgo * 60_000).toISOString(),
+          },
+        ],
+      };
+      const readError: UseInvestigationResult = {
+        status: 'unavailable',
+        error: 'Internal Server Error',
+      };
+      queryClient.setQueryData(key, { hits: [event] });
+      mockUseInvestigation.mockReturnValue(wasRunning ? { status: 'running' } : readError);
+      const onClose = jest.fn();
+      const { rerender } = renderFlyout({ event, onClose });
+
+      mockUseInvestigation.mockReturnValue(readError);
+      rerender(<EventFlyout event={event} onClose={onClose} />);
+
+      expect(queryClient.getQueryData(key)).toEqual({ hits: [event] });
+      expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
+        'Investigation · In progress'
+      );
+    }
+  );
+
+  it('shows a failed outcome and clears it when a follow-up starts', () => {
+    const key = [...SIGNIFICANT_EVENTS_LIST_QUERY_KEY, 'failed-follow-up'];
+    const failedEvent: SignificantEventResponse = {
+      ...mockEvent,
+      investigations: [
+        {
+          workflow_execution_id: 'conv-1',
+          started_at: new Date(Date.now() - 60_000).toISOString(),
+          completed_at: new Date().toISOString(),
+          outcome: 'failed',
+        },
+      ],
+    };
+    const onClose = jest.fn();
+    const { rerender } = renderFlyout({ event: failedEvent, onClose });
+    expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
+      'Investigation · Failed'
+    );
+
+    const followUp: SignificantEventResponse = {
+      ...failedEvent,
+      investigations: [{ workflow_execution_id: 'conv-1', started_at: new Date().toISOString() }],
+    };
+    act(() => queryClient.setQueryData(key, { hits: [followUp] }));
+    rerender(<EventFlyout event={followUp} onClose={onClose} />);
+
+    expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
+      'Investigation · In progress'
+    );
+    expect(queryClient.getQueryData(key)).toEqual({ hits: [followUp] });
   });
 
   it('renders the summary section with the summary text', () => {
