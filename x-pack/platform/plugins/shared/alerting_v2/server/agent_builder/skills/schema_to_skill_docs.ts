@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { ACTION_POLICY_MANAGEMENT_SKILL_ID, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
+import { ACTION_POLICY_AUTHORING_SKILL_ID, RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import {
   createRuleDataBaseSchema,
   createActionPolicyDataSchema,
@@ -572,7 +572,7 @@ export const getDescribedVariants = (
   return values;
 };
 
-export const getEpisodeStatusValues = (): string[] =>
+export const getAlertStatusValues = (): string[] =>
   getDescribedEnumValues(alertEpisodeStatusSchema, 'alertEpisodeStatusSchema').map(
     ({ value }) => value
   );
@@ -608,7 +608,7 @@ export const formatEnumValuesList = (values: readonly string[]): string =>
   values.map((v) => `\`${v}\``).join(', ');
 
 /** Formats a set of strategy values as an inline backtick list. */
-const formatStrategySet = (strategies: Set<string>): string =>
+const formatStrategySet = (strategies: ReadonlySet<string>): string =>
   formatEnumValuesList([...strategies]);
 
 /**
@@ -672,14 +672,14 @@ const getRuleKindProductLabel = (kind: string): string => {
 /** Generates the Rule Kind section with heading, per-kind subsections, and immutability note. */
 export const generateRuleKindDoc = (): string => {
   const kinds = getDescribedEnumValues(ruleKindSchema, 'ruleKindSchema');
-  const episodeStatuses = formatEnumValuesList(getEpisodeStatusValues());
+  const alertStatuses = formatEnumValuesList(getAlertStatusValues());
   const transitionFields = formatEnumValuesList(getStateTransitionFields());
 
   const kindSections = kinds.flatMap(({ value, description }, i) => {
     const heading = `### ${getRuleKindProductLabel(value)} (\`kind: ${value}\`)`;
     const lines = [heading, description];
     if (value === 'alert') {
-      lines.push(`Alert statuses: ${episodeStatuses}.`);
+      lines.push(`Alert statuses: ${alertStatuses}.`);
       lines.push(`State transition fields: ${transitionFields}.`);
     }
     return i > 0 ? ['', ...lines] : lines;
@@ -713,7 +713,7 @@ export const generateNotificationsOverviewDoc = (): string => {
     '',
     'Notifications are not configured on the rule itself. Alerts are matched and dispatched by **action policies** — space-scoped saved objects that send matched alerts to workflow destinations.',
     '',
-    `When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.`,
+    `When the user needs notifications (email, Slack, PagerDuty, etc.), load the \`${ACTION_POLICY_AUTHORING_SKILL_ID}\` skill. That skill owns action policy CRUD, workflow destination wiring, and the default notification setup flow.`,
     '',
     '## Notifications Require Alert Kind',
     '',
@@ -722,9 +722,9 @@ export const generateNotificationsOverviewDoc = (): string => {
     'When a user asks for notifications on a rule that is currently `kind: signal` (or when composing a new rule where the user wants notifications):',
     '',
     `1. **Explain the difference**: ${signalLabel} (\`kind: signal\`) rules are observation-only and do not trigger notifications. ${alertLabel} (\`kind: alert\`) track alert lifecycle and can dispatch to action policies.`,
-    `2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.`,
+    `2. If the rule is a **draft (in-memory)**: use \`set_kind\` to change it to \`alert\`, then load the \`${ACTION_POLICY_AUTHORING_SKILL_ID}\` skill for notification setup.`,
     `3. If the rule is **persisted**: \`kind\` is immutable after creation. Inform the user that the existing ${signalLabel} (\`kind: signal\`) rule cannot be converted. Offer to create a new ${alertLabel} (\`kind: alert\`) rule with the same query and schedule, then set up notifications on the new rule.`,
-    `4. After ensuring the rule is \`kind: alert\`, load the \`${ACTION_POLICY_MANAGEMENT_SKILL_ID}\` skill for notification setup.`,
+    `4. After ensuring the rule is \`kind: alert\`, load the \`${ACTION_POLICY_AUTHORING_SKILL_ID}\` skill for notification setup.`,
   ].join('\n');
 };
 
@@ -855,11 +855,11 @@ export const generateRecoveryStrategyDoc = (): string => {
  * / `alertEventSeveritySchema`.
  */
 export const generateMatcherContextDoc = (): string => {
-  const episodeStatuses = formatEnumValuesList(getEpisodeStatusValues());
+  const alertStatuses = formatEnumValuesList(getAlertStatusValues());
   const severities = formatEnumValuesList(getSeverityValues());
 
   const formatMatcherFieldType = (path: string, type: string): string => {
-    if (path === 'alert_status') return episodeStatuses;
+    if (path === 'alert_status') return alertStatuses;
     if (path === 'severity') return severities;
     if (path === 'data') return '`data.*` object';
     return type;
@@ -992,7 +992,7 @@ export const generateDispatchFlowDoc = (): string =>
     '2. **Dispatcher** (runs on its own Task Manager schedule) reads alerts from `.rule-events`.',
     '3. Dispatcher loads **enabled action policies** for the relevant space.',
     "4. **Matcher evaluation**: each policy's KQL matcher is tested against each alert's context.",
-    "5. **Grouping**: matched alerts are grouped according to the policy's `groupingMode` / `groupBy`.",
+    "5. **Grouping**: matched alerts are grouped according to the policy's `grouping` mode.",
     "6. **Throttling**: groups are filtered based on the policy's throttle strategy and notification history.",
     "7. **Dispatch**: eligible groups are sent to the policy's **workflow destinations** via `scheduleWorkflow`.",
     '8. **Workflow execution**: workflow steps run, using connectors to deliver notifications (email, Slack, etc.).',
@@ -1008,7 +1008,7 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     'Use this path when the user wants notifications for **one specific rule**.',
     '',
     'Action policies only process alerts. If the rule is `kind: signal`, do not',
-    'proceed: ask the user (or the rule-management skill) to convert or recreate the',
+    'proceed: ask the user (or the rule-authoring skill) to convert or recreate the',
     'rule as `kind: alert` first.',
     '',
     '## Scoping a policy to one rule',
@@ -1034,8 +1034,8 @@ export const generateSingleRuleActionPolicyDoc = (): string =>
     '> Do not put the routing tag in `tags`; rule tags do not link policies.',
     '',
     '> **Save reminder**: `manage_rule` only updates the in-memory rule attachment.',
-    '> The routing tag only takes effect once the user saves the rule',
-    '> (Rule → Workflow → Action Policy save order).',
+    '> The routing tag only exists once the user saves the rule; until then, this policy',
+    '> will not match any alerts (unless another saved rule already carries the tag).',
     '',
     '### 2. Create the action policy',
     '',
@@ -1169,6 +1169,32 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     '- Discover columns with `| LIMIT 0` if they are unclear.',
     '- Guard empty `data` on recovering/inactive: `| default` or `{% if alert.data %}`.',
     '',
+    '## Full JSON Schema (`alertingV2NotificationGroup`)',
+    '',
+    "This is the schema resolved by `$ref: '#/kibana/definitions/alertingV2NotificationGroup'`.",
+    'Including this `$ref` on the manual trigger is **required**. It enables the',
+    'validation service to statically check every `inputs.payload.*` Liquid reference against',
+    'the dispatch payload schema. Without it, invalid field paths are only caught at runtime.',
+    '',
+    '```json',
+    JSON.stringify(jsonSchema, null, 2),
+    '```',
+    '',
+    '## Liquid Usage',
+    '',
+    '- Top-level fields: `{{ inputs.payload.<field> }}`',
+    '- Alert iteration: `{% for alert in inputs.payload.alerts %}{{ alert.<field> }}{% endfor %}`',
+    '- Rule metadata: `{{ inputs.payload.rules[alert.rule_id].name }}`',
+    '',
+    '### `data` (dynamic query columns)',
+    '',
+    "`data` is the rule's ES|QL result row (each query row is written as `data: rowDoc`",
+    'on the alert event). Columns depend on the rule query, so they are not in the schema.',
+    '',
+    '- Nested dotted names: `alert.data.host.name`, not `alert.data["host.name"]`.',
+    '- Discover columns with `| LIMIT 0` if they are unclear.',
+    '- Guard empty `data` on recovering/inactive: `| default` or `{% if alert.data %}`.',
+    '',
     '## Example',
     '',
     'For `FROM logs-* | STATS error_count = COUNT(*) BY host.name | WHERE error_count >= 5`:',
@@ -1179,6 +1205,10 @@ export const generateActionPolicyWorkflowPayloadDoc = (): string => {
     'enabled: true',
     'triggers:',
     '  - type: manual',
+    '    inputs:',
+    '      properties:',
+    '        payload:',
+    "          $ref: '#/kibana/definitions/alertingV2NotificationGroup'",
     'steps:',
     '  - name: send_email',
     '    type: email',

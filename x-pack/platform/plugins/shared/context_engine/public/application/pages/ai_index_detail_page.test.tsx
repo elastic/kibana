@@ -15,6 +15,7 @@ import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types'
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -25,11 +26,20 @@ import React from 'react';
 import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { CONTEXT_ENGINE_APP_ID } from '../../../common/features';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
-import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
+import {
+  CONTEXT_ENGINE_PATHS,
+  getAiIndexDetailPath,
+  getAiIndexKnowledgeIndicatorsPath,
+} from '../paths';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AiIndexDetailPage } from './ai_index_detail_page';
 import { useFeedbackLoopEnabled } from '../hooks/use_feedback_loop_enabled';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
+
+const AI_INDEX_DETAIL_ROUTE_PATHS = [
+  CONTEXT_ENGINE_PATHS.detail,
+  CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators,
+] as const;
 
 jest.mock('@kbn/esql/public', () => ({
   ESQLLangEditor: ({
@@ -66,13 +76,13 @@ jest.mock('@kbn/workflows-ui', () => ({
   }),
 }));
 
-const mockUseKiList = jest.fn();
+const mockUseListKi = jest.fn();
 
-jest.mock('../hooks/use_ki_list', () => ({
-  useKiList: (...args: unknown[]) => mockUseKiList(...args),
+jest.mock('../hooks/use_list_ki', () => ({
+  useListKi: (...args: unknown[]) => mockUseListKi(...args),
 }));
 
-const defaultKiListMock = {
+const defaultListKiMock = {
   kis: [],
   total: 25,
   summary: {
@@ -193,7 +203,7 @@ const renderWithProviders = (
                   },
                 ]}
               >
-                <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
+                <Route path={AI_INDEX_DETAIL_ROUTE_PATHS} exact component={AiIndexDetailPage} />
               </MemoryRouter>
             </QueryClientProvider>
           </KibanaContextProvider>
@@ -222,13 +232,13 @@ describe('AiIndexDetailPage', () => {
     mockMgetWorkflows.mockResolvedValue([]);
     mockCreateWorkflow.mockResolvedValue({ id: 'wf-created' });
     mockUseFeedbackLoopEnabled.mockReturnValue(true);
-    mockUseKiList.mockImplementation(() => defaultKiListMock);
+    mockUseListKi.mockImplementation(() => defaultListKiMock);
     mockUseMemoryEnabled.mockReturnValue(true);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
-    mockUseKiList.mockImplementation(() => defaultKiListMock);
+    mockUseListKi.mockImplementation(() => defaultListKiMock);
   });
 
   it('shows a dismissible success callout when navigated from AI index creation', async () => {
@@ -357,7 +367,7 @@ describe('AiIndexDetailPage', () => {
             >
               <QueryClientProvider client={queryClient}>
                 <Router history={history}>
-                  <Route path={CONTEXT_ENGINE_PATHS.detail} component={AiIndexDetailPage} />
+                  <Route path={AI_INDEX_DETAIL_ROUTE_PATHS} exact component={AiIndexDetailPage} />
                 </Router>
               </QueryClientProvider>
             </KibanaContextProvider>
@@ -903,22 +913,68 @@ describe('AiIndexDetailPage', () => {
     services.application.capabilities = {
       ...services.application.capabilities,
       discover_v2: { show: true },
+      index_management: {
+        ...services.application.capabilities.index_management,
+        monitor: true,
+      },
     };
+    const history = createMemoryHistory({
+      initialEntries: [{ pathname: getAiIndexDetailPath(aiIndex.id) }],
+    });
+    services.application.navigateToApp.mockImplementation(async (_appId, options) => {
+      history.push(options?.path ?? '');
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
 
-    renderWithProviders(services);
+    render(
+      <ChromeServiceProvider value={{ chrome: services.chrome }}>
+        <I18nProvider>
+          <EuiProvider>
+            <KibanaContextProvider
+              services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
+            >
+              <QueryClientProvider client={queryClient}>
+                <Router history={history}>
+                  <Route path={AI_INDEX_DETAIL_ROUTE_PATHS} exact component={AiIndexDetailPage} />
+                </Router>
+              </QueryClientProvider>
+            </KibanaContextProvider>
+          </EuiProvider>
+        </I18nProvider>
+      </ChromeServiceProvider>
+    );
 
     await waitForAiIndexDetailLoaded();
 
-    expect(screen.queryByTestId('contextKiListPanel')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiPanel')).not.toBeInTheDocument();
+    expect(history.location.pathname).toBe(getAiIndexDetailPath(aiIndex.id));
 
     fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-knowledge_indicators'));
 
-    expect(screen.getByTestId('contextKiListPanel')).toBeInTheDocument();
+    expect(services.application.navigateToApp).toHaveBeenCalledWith(
+      CONTEXT_ENGINE_APP_ID,
+      expect.objectContaining({
+        path: getAiIndexKnowledgeIndicatorsPath(aiIndex.id),
+      })
+    );
+    expect(screen.getByTestId('contextListKiPanel')).toBeInTheDocument();
+    expect(history.location.pathname).toBe(getAiIndexKnowledgeIndicatorsPath(aiIndex.id));
+    await openAppMenuOverflow();
+    await waitFor(() => {
+      expect(screen.getByTestId('contextListKiPanelDestLink')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('contextListKiDiscoverLink')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiPanelSummary')).not.toBeInTheDocument();
+
+    expect(screen.getByTestId('contextListKiDiscoverLink')).toHaveAttribute(
+      'href',
+      '/app/discover'
+    );
   });
 
   it('hides the Knowledge Indicators tab when there are no KIs', async () => {
-    mockUseKiList.mockImplementation(() => ({
-      ...defaultKiListMock,
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
       total: 0,
       summary: { total: 0, countsByType: [] },
     }));
@@ -937,9 +993,88 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
   });
 
+  it('shows the Knowledge Indicators tab on a deep link before the AI index has loaded', async () => {
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
+      isLoading: true,
+    }));
+    const services = createServices();
+    let resolveAiIndexGet: (value: GetAiIndexResponse) => void = () => {};
+    services.http.get.mockImplementation(
+      () =>
+        new Promise<GetAiIndexResponse>((resolve) => {
+          resolveAiIndexGet = resolve;
+        })
+    );
+    const history = createMemoryHistory({
+      initialEntries: [{ pathname: getAiIndexKnowledgeIndicatorsPath(aiIndex.id) }],
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    render(
+      <ChromeServiceProvider value={{ chrome: services.chrome }}>
+        <I18nProvider>
+          <EuiProvider>
+            <KibanaContextProvider
+              services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
+            >
+              <QueryClientProvider client={queryClient}>
+                <Router history={history}>
+                  <Route path={AI_INDEX_DETAIL_ROUTE_PATHS} exact component={AiIndexDetailPage} />
+                </Router>
+              </QueryClientProvider>
+            </KibanaContextProvider>
+          </EuiProvider>
+        </I18nProvider>
+      </ChromeServiceProvider>
+    );
+
+    expect(screen.getByTestId('contextAiIndexDetailTab-knowledge_indicators')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiPanel')).not.toBeInTheDocument();
+
+    resolveAiIndexGet(aiIndex);
+
+    expect(await screen.findByTestId('contextListKiPanel')).toBeInTheDocument();
+  });
+
+  it('opens the Knowledge Indicators tab from the URL while the KI summary is loading', async () => {
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
+      isLoading: true,
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+    const history = createMemoryHistory({
+      initialEntries: [{ pathname: getAiIndexKnowledgeIndicatorsPath(aiIndex.id) }],
+    });
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+
+    render(
+      <ChromeServiceProvider value={{ chrome: services.chrome }}>
+        <I18nProvider>
+          <EuiProvider>
+            <KibanaContextProvider
+              services={{ ...services, triggersActionsUi: triggersActionsUiMock.createStart() }}
+            >
+              <QueryClientProvider client={queryClient}>
+                <Router history={history}>
+                  <Route path={AI_INDEX_DETAIL_ROUTE_PATHS} exact component={AiIndexDetailPage} />
+                </Router>
+              </QueryClientProvider>
+            </KibanaContextProvider>
+          </EuiProvider>
+        </I18nProvider>
+      </ChromeServiceProvider>
+    );
+
+    expect(await screen.findByTestId('contextListKiPanel')).toBeInTheDocument();
+    expect(history.location.pathname).toBe(getAiIndexKnowledgeIndicatorsPath(aiIndex.id));
+    expect(screen.getByTestId('contextAiIndexDetailTab-knowledge_indicators')).toBeInTheDocument();
+  });
+
   it('hides the Knowledge Indicators tab while the KI summary is loading', async () => {
-    mockUseKiList.mockImplementation(() => ({
-      ...defaultKiListMock,
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
       isLoading: true,
     }));
     const services = createServices();
@@ -958,8 +1093,8 @@ describe('AiIndexDetailPage', () => {
   });
 
   it('hides the Knowledge Indicators tab when the KI summary request fails', async () => {
-    mockUseKiList.mockImplementation(() => ({
-      ...defaultKiListMock,
+    mockUseListKi.mockImplementation(() => ({
+      ...defaultListKiMock,
       total: 0,
       summary: { total: 0, countsByType: [] },
       error: new Error('Request timed out'),

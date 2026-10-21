@@ -21,8 +21,10 @@ import {
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { KbnPaletteId } from '@kbn/palettes';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { VisIconType } from '@kbn/chart-icons';
 import type { TextBasedLayerColumn } from '@kbn/lens-common';
 import { LENS_ITEM_LATEST_VERSION } from '@kbn/lens-common/content_management/constants';
+import { DatasourceUnsupportedError } from '../../errors';
 import type { DeepWriteable, LensAttributes } from '../../types';
 import {
   DEFAULT_PRIMARY_POSITION,
@@ -110,12 +112,13 @@ export const iconCompat = getReversibleMappings<MetricIconName, string>([
   ['heart', 'heart'],
   ['map_marker', 'mapMarker'],
   ['pin', 'pin'],
+  ['popout', 'popout'],
   ['sort_down', 'sortDown'],
   ['sort_up', 'sortUp'],
   ['star_empty', 'starEmpty'],
   ['tag', 'tag'],
   ['temperature', 'temperature'],
-]);
+] satisfies Array<[MetricIconName, VisIconType]>);
 
 function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
@@ -595,7 +598,7 @@ function reverseBuildVisualizationState(
   );
 
   if (!dataSource || dataSource.type == null) {
-    throw new Error('Unsupported DataSource type');
+    throw new DatasourceUnsupportedError();
   }
 
   return {

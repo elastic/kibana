@@ -11,19 +11,25 @@ import {
   ATTACK_DISCOVERY_ADHOC_ALERTS_COMMON_INDEX_PREFIX,
   ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX,
 } from '@kbn/elastic-assistant-common';
+import { GroupedAttachmentRow } from '@kbn/agentic-investigations-common';
 import type { FlyoutGroupedAttachmentRendererProps } from '@kbn/agentic-investigations-common';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SecurityCanvasEmbeddedBundle } from '../../components/security_redux_embedded_provider';
+import { APP_UI_ID, SecurityPageName } from '../../../../common/constants';
 import { FLYOUT_DESCRIPTOR_KIND } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
-import { ATTACK_SUBTITLE, FlyoutRow, useSpaceId } from '../grouped_attachments';
+import { ATTACK_SUBTITLE, FlyoutRow, attacksTitle, useSpaceId } from '../grouped_attachments';
 import { getAttackDiscoveryLabel } from './attack_discovery_attachment';
 import type { AttackDiscoveryAttachment } from './attack_discovery_attachment';
+import { buildAttacksPagePath } from './build_attacks_page_path';
 
 export interface AttacksGroupRendererDeps {
+  application: ApplicationStart;
   getSpaceId: () => Promise<string>;
   resolveSecurityCanvasContext: () => Promise<SecurityCanvasEmbeddedBundle>;
 }
 
 export const createAttacksGroupRenderer = ({
+  application,
   getSpaceId,
   resolveSecurityCanvasContext,
 }: AttacksGroupRendererDeps): ComponentType<FlyoutGroupedAttachmentRendererProps> => {
@@ -41,6 +47,30 @@ export const createAttacksGroupRenderer = ({
       if (attackId && !attacks.has(attackId)) {
         attacks.set(attackId, attack);
       }
+    }
+
+    if (attacks.size === 0) {
+      return null;
+    }
+
+    if (attacks.size > 1) {
+      const createdAt = [...attacks.values()]
+        .map(({ data }) => data?.timestamp)
+        .filter((timestamp): timestamp is string => Boolean(timestamp))
+        .sort()[0];
+      const href = application.getUrlForApp(APP_UI_ID, {
+        deepLinkId: SecurityPageName.attacks,
+        path: buildAttacksPagePath([...attacks.keys()], createdAt ?? new Date().toISOString()),
+      });
+
+      return (
+        <GroupedAttachmentRow
+          iconType="bolt"
+          iconColor="danger"
+          title={attacksTitle(attacks.size)}
+          action={{ kind: 'page', href }}
+        />
+      );
     }
 
     const indexName = [

@@ -37,6 +37,8 @@ jest.mock('@kbn/entity-store/common/euid_helpers', () => ({
       getEuidFilterBasedOnDocument: jest.fn().mockReturnValue({ term: { 'entity.id': entityId } }),
     },
   },
+  getBuiltInEntityDefinition: jest.requireActual('@kbn/entity-store/common/euid_helpers')
+    .getBuiltInEntityDefinition,
 }));
 jest.mock('../get_risk_inputs_index');
 jest.mock('../../risk_engine/utils/saved_object_configuration');

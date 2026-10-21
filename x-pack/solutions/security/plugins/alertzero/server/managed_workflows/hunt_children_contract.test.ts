@@ -7,6 +7,7 @@
 
 import { parse } from 'yaml';
 import { IMPACT_INTERNAL_URL } from '@kbn/agentic-investigations-plugin/common';
+import { PROPOSAL_BY_ID_URL } from '@kbn/proposals-common';
 import {
   getManagedWorkflowDefinition,
   ALERTZERO_HUNT_WORKFLOW_ID,
@@ -30,15 +31,33 @@ interface NestedStep {
   name: string;
   type: string;
   if?: string;
+  condition?: string;
   with?: Record<string, unknown>;
   steps?: NestedStep[];
-  'on-failure'?: { continue?: boolean; fallback?: NestedStep[] };
+  'max-iterations'?: { limit?: number; 'on-limit'?: string };
+  timeout?: string;
+  'on-failure'?: {
+    continue?: boolean;
+    retry?: { 'max-attempts'?: number; delay?: string };
+    fallback?: NestedStep[];
+  };
 }
+
+const outputNames = (workflow: { outputs?: ParsedWorkflow['outputs'] }): string[] => {
+  const { outputs } = workflow;
+  if (!outputs) return [];
+  return Array.isArray(outputs)
+    ? outputs.map(({ name }) => name)
+    : Object.keys(outputs.properties ?? {});
+};
 
 interface ParsedWorkflow {
   tags?: string[];
   settings?: { timeout?: string };
-  outputs?: Array<{ name: string; type: string }>;
+  /** Legacy list form, or the JSON-schema form `hunt.yaml` uses to declare array outputs. */
+  outputs?:
+    | Array<{ name: string; type: string }>
+    | { properties?: Record<string, { type?: string }> };
   steps: NestedStep[];
 }
 
@@ -98,9 +117,95 @@ describe('system-security-hunt-execute', () => {
     workflow = parseChild(ALERTZERO_HUNT_WORKFLOW_ID);
   });
 
-  it('sends the coordinator a snake_case run_id and no technology', () => {
+  it('sends the coordinator a snake_case run_id, the Investigation to write to, and no technology', () => {
     const body = stepNamed(workflow, 'run_hunt_coordinator').with?.body as Record<string, unknown>;
-    expect(Object.keys(body).sort()).toEqual(['report_id', 'run_id', 'tier2_when', 'trigger']);
+    expect(Object.keys(body).sort()).toEqual([
+      'conversation_id',
+      'report_id',
+      'run_id',
+      'tier2_when',
+      'trigger',
+    ]);
+    expect(body.conversation_id).toBe('{{ inputs.investigationConversationId }}');
+  });
+
+  describe('polls the hidden result attachment the start call named', () => {
+    const TERMINAL_CHECK =
+      "${{ steps.read_hunt_result.output.data.state != 'completed' and steps.read_hunt_result.output.data.state != 'failed' }}";
+
+    it('loops for at most 60 reads, backstopped by a 12 minute timeout, and never fails the child when it gives up', () => {
+      const poll = stepNamed(workflow, 'poll_hunt_coordinator');
+
+      expect(poll.type).toBe('while');
+      expect(poll.if).toBe('${{ steps.run_hunt_coordinator.output.result_attachment_id != nil }}');
+      expect(poll.condition).toBe(TERMINAL_CHECK);
+      expect(poll['max-iterations']).toEqual({ limit: 60, 'on-limit': 'continue' });
+      expect(poll.timeout).toBe('12m');
+      expect(poll['on-failure']).toEqual({ continue: true });
+    });
+
+    it('reads by the id the route returned, never one it rebuilt, and keeps polling through a broken read', () => {
+      const read = stepNamed(workflow, 'read_hunt_result');
+
+      expect(read.type).toBe('ai.attachment.read');
+      expect(read.with).toEqual({
+        conversation_id: '{{ inputs.investigationConversationId }}',
+        attachment_id: '{{ steps.run_hunt_coordinator.output.result_attachment_id }}',
+      });
+      expect(read['on-failure']).toEqual({
+        retry: { 'max-attempts': 3, delay: '5s' },
+        continue: true,
+      });
+      expect(JSON.stringify(workflow)).not.toContain('ai.attachment.list');
+    });
+
+    it('waits 10s between reads only while the run is not terminal, on the same check the loop uses', () => {
+      const wait = stepNamed(workflow, 'wait_if_running');
+
+      expect(wait.type).toBe('if');
+      expect(wait.condition).toBe(stepNamed(workflow, 'poll_hunt_coordinator').condition);
+      expect(wait.steps?.map((step) => [step.type, step.with])).toEqual([
+        ['wait', { duration: '10s' }],
+      ]);
+    });
+
+    it('deletes the attachment permanently once the outputs are computed, and continues if that fails', () => {
+      const names = workflow.steps.map((step) => step.name);
+      const remove = stepNamed(workflow, 'delete_hunt_result');
+
+      expect(remove.type).toBe('ai.attachment.delete');
+      expect(remove.if).toBe(stepNamed(workflow, 'poll_hunt_coordinator').if);
+      expect(remove.with).toEqual({
+        conversation_id: '{{ inputs.investigationConversationId }}',
+        attachment_id: '{{ steps.run_hunt_coordinator.output.result_attachment_id }}',
+        permanent: true,
+      });
+      expect(remove['on-failure']).toEqual({ continue: true });
+      expect(names.indexOf('delete_hunt_result')).toBeGreaterThan(
+        names.indexOf('resolve_result_status')
+      );
+      expect(names.indexOf('delete_hunt_result')).toBeLessThan(names.indexOf('emit_result'));
+    });
+
+    // Worker packaging requires every child to complete; no workflow.fail exits.
+    it('has no step that fails the workflow, and every fallback completes the child or continues', () => {
+      const all = flattenSteps(workflow.steps);
+      const withFallback = all.filter((step) => step['on-failure']?.fallback);
+
+      expect(all.filter((step) => step.type === 'workflow.fail')).toEqual([]);
+      expect(withFallback.map((step) => step.name)).toEqual([
+        'run_hunt_coordinator',
+        'add_sse_attachment',
+      ]);
+      for (const step of withFallback) {
+        for (const fallback of step['on-failure']?.fallback ?? []) {
+          const completesChild =
+            fallback.type === 'workflow.output' &&
+            (fallback as unknown as { status?: string }).status === 'completed';
+          expect(completesChild || fallback['on-failure']?.continue === true).toBe(true);
+        }
+      }
+    });
   });
 
   it('never sends the camelCase runId the coordinator no longer accepts', () => {
@@ -129,13 +234,25 @@ describe('system-security-hunt-execute', () => {
     expect(update.with?.conversation_id).toBe(add.with?.conversation_id);
   });
 
+  // `fallback` alone does not rescue the step: the engine's `ExitTryBlockNodeImpl` re-throws
+  // the stored add error after the fallback path completes, so without `continue` the rerun
+  // still fails at `attach_sse` even though the update landed (fallback_step/README.md,
+  // "With Continue"). The add stays `failed` in the execution detail; the run completes.
+  it('lets a successful update fallback finish the add step instead of re-throwing the conflict', () => {
+    const add = stepNamed(workflow, 'add_sse_attachment');
+
+    expect(add['on-failure']?.continue).toBe(true);
+  });
+
   // The hunt-once evidence write (last_hunted_at, last_hunt_status and siblings) is a dedicated
   // step calling its own route -- see write_hunt_evidence.test.ts for the `deriveLastHuntStatus` /
   // script-shape coverage this test used to provide at the YAML level when it was still an
   // `elasticsearch.update` step.
   it('only stamps the hunt-once gate once the coordinator confirms success', () => {
     const step = stepNamed(workflow, 'write_evidence');
-    expect(step.if).toBe('${{ steps.run_hunt_coordinator.output.completed_successfully == true }}');
+    expect(step.if).toBe(
+      '${{ steps.read_hunt_result.output.data.result.completed_successfully == true }}'
+    );
     expect(step.with?.path).toBe(`/s/{{ workflow.spaceId }}${WRITE_HUNT_EVIDENCE_URL}`);
   });
 
@@ -150,9 +267,7 @@ describe('system-security-hunt-execute', () => {
   it('exposes the headline, hit, and sse_count the Worker conclusion quotes', () => {
     const emitted = stepNamed(workflow, 'emit_result').with as Record<string, unknown>;
     expect(Object.keys(emitted)).toEqual(expect.arrayContaining(['headline', 'hit', 'sse_count']));
-    expect((workflow.outputs ?? []).map((output) => output.name)).toEqual(
-      expect.arrayContaining(['headline', 'hit', 'sse_count'])
-    );
+    expect(outputNames(workflow)).toEqual(expect.arrayContaining(['headline', 'hit', 'sse_count']));
   });
 });
 
@@ -174,9 +289,7 @@ describe(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID, () => {
     const workflow = parseChild(ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID);
     const emitted = stepNamed(workflow, 'emit_result').with as Record<string, unknown>;
     expect(emitted.summary).toEqual(expect.stringContaining('package_summary'));
-    expect((workflow.outputs ?? []).map((output) => output.name)).toEqual(
-      expect.arrayContaining(['summary'])
-    );
+    expect(outputNames(workflow)).toEqual(expect.arrayContaining(['summary']));
   });
 });
 
@@ -313,6 +426,10 @@ describe('Hunt Watch public exports (kbn-alertzero-common)', () => {
       // main's own public package, not alertzero's -- Hunt Watch calls it but does not
       // own it, so it is not one of this package's exports.
       '/internal/proposals',
+      // The gate reads the Proposal under its id to tell a lost race from any other failed create.
+      // Imported rather than typed, with the route's own `{id}` swapped for the gate's template,
+      // so a moved route fails here instead of 404ing on the first lost race.
+      PROPOSAL_BY_ID_URL.replace('{id}', '{{ inputs.proposalId }}'),
       // Owned by agentic investigations; imported rather than typed so a moved route fails here.
       IMPACT_INTERNAL_URL,
     ]);

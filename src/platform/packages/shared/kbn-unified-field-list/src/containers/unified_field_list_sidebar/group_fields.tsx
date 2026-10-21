@@ -46,6 +46,39 @@ export interface SelectedFieldsResult {
   selectedFieldsMap: Record<string, boolean>;
 }
 
+export interface ReorderSelectedFieldsResult {
+  targetIndex: number;
+  reorderedFieldNames: string[];
+}
+
+/**
+ * Resolves a drop of `sourceFieldName` onto `targetFieldName`: the source takes over the slot of the target.
+ * `targetIndex` refers to the current order and is meant for "remove, then insert at index" move actions
+ * like `onMoveColumn` of the unified data table. Returns `undefined` if nothing can be moved.
+ */
+export function reorderSelectedFields({
+  selectedFieldNames,
+  sourceFieldName,
+  targetFieldName,
+}: {
+  selectedFieldNames: string[];
+  sourceFieldName: string;
+  targetFieldName: string;
+}): ReorderSelectedFieldsResult | undefined {
+  const sourceIndex = selectedFieldNames.indexOf(sourceFieldName);
+  const targetIndex = selectedFieldNames.indexOf(targetFieldName);
+
+  if (sourceIndex === -1 || targetIndex === -1 || sourceIndex === targetIndex) {
+    return undefined;
+  }
+
+  const reorderedFieldNames = [...selectedFieldNames];
+  reorderedFieldNames.splice(sourceIndex, 1);
+  reorderedFieldNames.splice(targetIndex, 0, sourceFieldName);
+
+  return { targetIndex, reorderedFieldNames };
+}
+
 export function getSelectedFields({
   dataView,
   workspaceSelectedFieldNames,
