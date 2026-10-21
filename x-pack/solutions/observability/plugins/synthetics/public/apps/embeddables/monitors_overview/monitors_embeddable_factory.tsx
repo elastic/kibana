@@ -16,6 +16,7 @@ import type {
   PublishesTitle,
   SerializedTitles,
   HasEditCapabilities,
+  ViewMode,
   CanCancelRequests,
 } from '@kbn/presentation-publishing';
 import {
@@ -23,6 +24,7 @@ import {
   useBatchedPublishingSubjects,
   fetch$,
   titleComparators,
+  getViewModeSubject,
 } from '@kbn/presentation-publishing';
 import { initializeStateApi } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject, map, merge, skip } from 'rxjs';
@@ -159,10 +161,16 @@ export const getMonitorsEmbeddableFactory = (
           reload$.next(next.isReload);
         });
 
+      const viewMode$ = getViewModeSubject(api) ?? new BehaviorSubject<ViewMode>('view');
+
       return {
         api,
         Component: () => {
-          const [filters, view] = useBatchedPublishingSubjects(filters$, view$);
+          const [filters, view, viewMode] = useBatchedPublishingSubjects(
+            filters$,
+            view$,
+            viewMode$
+          );
 
           useEffect(() => {
             return () => {
@@ -181,6 +189,7 @@ export const getMonitorsEmbeddableFactory = (
                 reload$={reload$}
                 filters={filters || DEFAULT_FILTERS}
                 view={view}
+                isInteractive={viewMode !== 'non-interactive'}
                 requestCancellationManager={requestCancellationManager}
               />
             </div>

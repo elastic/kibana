@@ -41,6 +41,7 @@ export {
   ALERTING_V2_ACTION_POLICIES_ALL_ROLE,
   ALERTING_V2_ACTION_POLICIES_READ_ROLE,
   ALERTING_V2_ACTION_POLICIES_ALL_AND_RULES_READ_ROLE,
+  ALERTING_V2_ACTION_POLICY_DISPATCH_ROLE,
   ALERTING_V2_EXECUTION_HISTORY_ALL_ROLE,
   ALERTING_V2_EXECUTION_HISTORY_READ_ROLE,
 } from '../../roles';
@@ -48,6 +49,7 @@ export {
   buildAlertEvent,
   buildExternalAlertEvent,
   buildGroupHash,
+  buildSeriesId,
   buildCreateRuleData,
   buildCreateActionPolicyData,
   buildRuleTemplateData,

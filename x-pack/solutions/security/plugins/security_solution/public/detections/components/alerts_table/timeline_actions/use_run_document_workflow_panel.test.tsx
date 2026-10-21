@@ -189,10 +189,12 @@ describe('useRunDocumentWorkflowPanel', () => {
         result.current.runDocumentWorkflowPanel
       );
       await waitFor(() => {
-        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
-          attachmentType: 'security.event',
-          target: { attachmentId: 'event-123' },
-        });
+        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attachmentType: 'security.event',
+            target: { attachmentId: 'event-123' },
+          })
+        );
       });
     });
 
@@ -213,10 +215,12 @@ describe('useRunDocumentWorkflowPanel', () => {
         result.current.runDocumentWorkflowPanel
       );
       await waitFor(() => {
-        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith({
-          attachmentType: 'security.event',
-          target: { attachmentIds: ['doc-1', 'doc-2'] },
-        });
+        expect(mockUseCaseAttachmentWorkflowRun).toHaveBeenCalledWith(
+          expect.objectContaining({
+            attachmentType: 'security.event',
+            target: { attachmentIds: ['doc-1', 'doc-2'] },
+          })
+        );
       });
     });
 
@@ -254,6 +258,74 @@ describe('useRunDocumentWorkflowPanel', () => {
       const panelProps = mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
       expect(panelProps?.runWorkflow).toBeUndefined();
       expect(panelProps?.showSuccessToast).toBe(true);
+    });
+  });
+
+  describe('run telemetry', () => {
+    beforeEach(() => {
+      // Outside a case the hook reports the fallback telemetry.
+      mockUseCaseAttachmentWorkflowRun.mockImplementation(({ fallbackTelemetry }) => ({
+        ...OUTSIDE_CASE_RUN_PROPS,
+        telemetry: fallbackTelemetry,
+      }));
+    });
+
+    const renderPanel = (props: Partial<UseRunDocumentWorkflowPanelProps> = {}) => {
+      const { result } = renderHook(
+        () => useRunDocumentWorkflowPanel({ ...defaultProps, ...props }),
+        { wrapper: TestProviders }
+      );
+      renderContextMenu(
+        result.current.runWorkflowMenuItem,
+        result.current.runDocumentWorkflowPanel
+      );
+    };
+    const lastPanelProps = () => mockRunWorkflowPanelProps[mockRunWorkflowPanelProps.length - 1];
+    const twoDocuments = [
+      { _id: 'doc-1', _index: 'documents-index' },
+      { _id: 'doc-2', _index: 'documents-index' },
+    ];
+
+    it('reports a document run by default', async () => {
+      renderPanel({ originEventId: 'event-123' });
+
+      await waitFor(() =>
+        expect(lastPanelProps()?.telemetry).toEqual({
+          origin: 'document',
+          itemCount: defaultProps.documents.length,
+          owner: 'securitySolution',
+        })
+      );
+    });
+
+    it('reports a bulk action as a bulk document run over the selected documents', async () => {
+      renderPanel({ documents: twoDocuments, isBulk: true });
+
+      await waitFor(() =>
+        expect(lastPanelProps()?.telemetry).toEqual({
+          origin: 'document_bulk',
+          itemCount: 2,
+          owner: 'securitySolution',
+        })
+      );
+    });
+
+    it('reports the telemetry returned by Cases when the run is routed through Cases', async () => {
+      const caseTelemetry = {
+        origin: 'cases.attachments',
+        attachmentType: 'security.event',
+        itemCount: 2,
+        owner: 'securitySolution',
+      };
+      mockUseCaseAttachmentWorkflowRouting.mockReturnValue('available');
+      mockUseCaseAttachmentWorkflowRun.mockReturnValue({
+        ...CASES_ROUTED_RUN_PROPS,
+        telemetry: caseTelemetry,
+      });
+
+      renderPanel({ documents: twoDocuments, isBulk: true });
+
+      await waitFor(() => expect(lastPanelProps()?.telemetry).toEqual(caseTelemetry));
     });
   });
 

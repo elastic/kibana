@@ -1,0 +1,19 @@
+type: object
+description: The payload for a bulk attachments user action, recorded when a user removes one or more attachments of the same type from a case in a single action.
+required:
+  - bulkAttachments
+properties:
+  bulkAttachments:
+    type: object
+    required:
+      - attachmentType
+      - count
+    properties:
+      attachmentType:
+        type: string
+        description: The attachment type, such as `security.alert` or `file`.
+        example: security.alert
+      count:
+        type: integer
+        description: The number of attachments of this type.
+        example: 3

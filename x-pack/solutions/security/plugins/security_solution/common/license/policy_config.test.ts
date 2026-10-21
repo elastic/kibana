@@ -36,6 +36,9 @@ describe('policy_config and licenses', () => {
     policy.windows.memory_protection.custom_yara_signatures = false;
     policy.mac.memory_protection.custom_yara_signatures = false;
     policy.linux.memory_protection.custom_yara_signatures = false;
+    if (policy.windows.attack_surface_reduction.registry_credential_hardening) {
+      policy.windows.attack_surface_reduction.registry_credential_hardening.enabled = false;
+    }
   };
 
   const omitCustomYaraSignatures = (policy: PolicyConfig) => {
@@ -43,6 +46,10 @@ describe('policy_config and licenses', () => {
       const memoryProtection: { custom_yara_signatures?: boolean } = policy[os].memory_protection;
       delete memoryProtection.custom_yara_signatures;
     }
+  };
+
+  const omitRegistryCredentialHardening = (policy: PolicyConfig) => {
+    delete policy.windows.attack_surface_reduction.registry_credential_hardening;
   };
 
   describe('isEndpointPolicyValidForLicense', () => {
@@ -1272,6 +1279,75 @@ describe('policy_config and licenses', () => {
           expect(isEndpointPolicyValidForLicense(policy, license)).toBe(true);
         }
       );
+    });
+  });
+
+  describe('registry credential hardening license gating', () => {
+    it('allows a policy with registry_credential_hardening absent below Enterprise', () => {
+      const platinumPolicy = policyFactory();
+      disableEnterpriseFeatures(platinumPolicy);
+      omitRegistryCredentialHardening(platinumPolicy);
+      expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(true);
+
+      const unpaidPolicy = policyFactoryWithoutPaidFeatures();
+      omitRegistryCredentialHardening(unpaidPolicy);
+      expect(isEndpointPolicyValidForLicense(unpaidPolicy, Gold)).toBe(true);
+      expect(isEndpointPolicyValidForLicense(unpaidPolicy, Basic)).toBe(true);
+    });
+
+    it('is invalid below Enterprise when registry_credential_hardening is enabled', () => {
+      const platinumPolicy = policyFactory();
+      disableEnterpriseFeatures(platinumPolicy);
+      platinumPolicy.windows.attack_surface_reduction.registry_credential_hardening = {
+        enabled: true,
+      };
+      expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(false);
+
+      const unpaidPolicy = policyFactoryWithoutPaidFeatures();
+      unpaidPolicy.windows.attack_surface_reduction.registry_credential_hardening = {
+        enabled: true,
+      };
+      expect(isEndpointPolicyValidForLicense(unpaidPolicy, Gold)).toBe(false);
+      expect(isEndpointPolicyValidForLicense(unpaidPolicy, Basic)).toBe(false);
+    });
+
+    it('allows registry_credential_hardening disabled below Enterprise', () => {
+      const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
+      expect(isEndpointPolicyValidForLicense(policy, Platinum)).toBe(true);
+    });
+
+    it('turns registry_credential_hardening off below Enterprise and keeps it for Enterprise', () => {
+      const enterprisePolicy = unsetPolicyFeaturesAccordingToLicenseLevel(
+        policyFactory(),
+        Enterprise
+      );
+      expect(
+        enterprisePolicy.windows.attack_surface_reduction.registry_credential_hardening?.enabled
+      ).toBe(true);
+      expect(isEndpointPolicyValidForLicense(enterprisePolicy, Enterprise)).toBe(true);
+
+      for (const license of [Platinum, Gold, Basic]) {
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(policyFactory(), license);
+        expect(
+          stripped.windows.attack_surface_reduction.registry_credential_hardening?.enabled
+        ).toBe(false);
+        expect(isEndpointPolicyValidForLicense(stripped, license)).toBe(true);
+      }
+    });
+
+    it('leaves an absent registry_credential_hardening absent on every downgrade', () => {
+      for (const license of [Platinum, Gold, Basic]) {
+        const policy = policyFactory();
+        omitRegistryCredentialHardening(policy);
+
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(policy, license);
+
+        expect(stripped.windows.attack_surface_reduction).not.toHaveProperty(
+          'registry_credential_hardening'
+        );
+        expect(isEndpointPolicyValidForLicense(stripped, license)).toBe(true);
+      }
     });
   });
 });
