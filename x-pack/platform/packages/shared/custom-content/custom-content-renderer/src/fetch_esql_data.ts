@@ -24,7 +24,7 @@ import {
   getESQLResults,
   getESQLTimeField,
   getEsqlInspectorStats,
-  getNamedParams,
+  getEsqlSearchParams,
 } from '@kbn/esql-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -52,6 +52,19 @@ const INSPECTOR_REQUEST_DESCRIPTION = i18n.translate(
     defaultMessage: 'This request queries Elasticsearch to fetch the data for the custom panel.',
   }
 );
+
+const getInspectorErrorJson = (error: unknown): object => {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'attributes' in error &&
+    typeof error.attributes === 'object' &&
+    error.attributes !== null
+  ) {
+    return error.attributes;
+  }
+  return { message: error instanceof Error ? error.message : String(error) };
+};
 
 export async function fetchEsqlData(
   search: ISearchGeneric,
@@ -114,11 +127,8 @@ export async function fetchEsqlData(
 
   const filter = hasConstraints ? { bool: { ...esBoolQuery.bool, filter: allFilters } } : undefined;
 
-  const namedParams = getNamedParams(esqlQuery, timeRange, esqlVariables);
   const requestBody = {
-    query: esqlQuery,
-    ...(filter ? { filter } : {}),
-    ...(namedParams.length ? { params: namedParams } : {}),
+    ...getEsqlSearchParams({ esqlQuery, filter, timeRange, variables: esqlVariables }),
     ...(isApproximate !== undefined ? { approximation: isApproximate } : {}),
     ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
   };
@@ -139,18 +149,21 @@ export async function fetchEsqlData(
     // The server strips its body, so the request shown in Inspector is rebuilt from what was sent.
     const requestParams = params as unknown as ConnectionRequestParams;
 
-    logRequest()
-      ?.stats(getEsqlInspectorStats(response))
-      .json(requestBody)
-      .ok({ json: { rawResponse: response }, requestParams });
+    // A newer fetch has already reset the adapter, so this response must not leave a stale entry.
+    if (!signal.aborted) {
+      logRequest()
+        ?.stats(getEsqlInspectorStats(response))
+        .json(requestBody)
+        .ok({ json: { rawResponse: response }, requestParams });
+    }
 
     return response;
-  } catch (error) {
+  } catch (error: unknown) {
     // A superseded fetch is aborted on purpose; it is not a failed request worth showing.
     if (!signal.aborted) {
       logRequest()
         ?.json(requestBody)
-        .error({ json: error?.attributes ?? { message: error?.message ?? String(error) } });
+        .error({ json: getInspectorErrorJson(error) });
     }
     throw error;
   }

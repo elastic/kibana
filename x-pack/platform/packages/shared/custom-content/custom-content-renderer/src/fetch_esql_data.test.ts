@@ -366,6 +366,26 @@ describe('fetchEsqlData', () => {
       expect(requestAdapter.getRequests()).toHaveLength(1);
     });
 
+    it('shows the request body built from the same parameters getESQLResults sends', async () => {
+      const requestAdapter = new RequestAdapter();
+      const variables = [{ key: 'host', value: 'a', type: ESQLVariableType.VALUES }];
+      const query = 'FROM logs | WHERE host == ?host';
+
+      await fetchEsqlData(mockSearch, mockHttp, query, undefined, mockSignal, {
+        requestAdapter,
+        esqlVariables: variables,
+        isApproximate: true,
+        projectRouting: 'my-project' as import('@kbn/es-query').ProjectRouting,
+      });
+
+      expect(requestAdapter.getRequests()[0].json).toEqual({
+        query,
+        params: [{ host: 'a' }],
+        approximation: true,
+        project_routing: 'my-project',
+      });
+    });
+
     it('records a failed request with the error attributes and rethrows', async () => {
       const requestAdapter = new RequestAdapter();
       const error = Object.assign(new Error('boom'), { attributes: { type: 'parsing_exception' } });
@@ -394,6 +414,34 @@ describe('fetchEsqlData', () => {
       });
     });
 
+    it('records the message of a thrown value that is not an Error', async () => {
+      const requestAdapter = new RequestAdapter();
+      mockGetESQLResults.mockRejectedValue('plain string failure');
+
+      await expect(
+        fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, { requestAdapter })
+      ).rejects.toBe('plain string failure');
+
+      expect(requestAdapter.getRequests()[0].response?.json).toEqual({
+        message: 'plain string failure',
+      });
+    });
+
+    it('ignores error attributes that are not an object', async () => {
+      const requestAdapter = new RequestAdapter();
+      mockGetESQLResults.mockRejectedValue(
+        Object.assign(new Error('bad attributes'), { attributes: null })
+      );
+
+      await expect(
+        fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, { requestAdapter })
+      ).rejects.toThrow('bad attributes');
+
+      expect(requestAdapter.getRequests()[0].response?.json).toEqual({
+        message: 'bad attributes',
+      });
+    });
+
     it('does not record a request that was aborted by a newer fetch', async () => {
       const requestAdapter = new RequestAdapter();
       const controller = new AbortController();
@@ -406,6 +454,30 @@ describe('fetchEsqlData', () => {
         })
       ).rejects.toThrow();
 
+      expect(requestAdapter.getRequests()).toHaveLength(0);
+    });
+
+    it('does not record a response that arrives after the fetch was superseded', async () => {
+      const requestAdapter = new RequestAdapter();
+      const controller = new AbortController();
+      mockGetESQLResults.mockImplementation(async () => {
+        controller.abort();
+        return {
+          response: mockResponse,
+          params: { query: esqlQuery },
+        } as Awaited<ReturnType<typeof getESQLResults>>;
+      });
+
+      const result = await fetchEsqlData(
+        mockSearch,
+        mockHttp,
+        esqlQuery,
+        undefined,
+        controller.signal,
+        { requestAdapter }
+      );
+
+      expect(result).toBe(mockResponse);
       expect(requestAdapter.getRequests()).toHaveLength(0);
     });
 
