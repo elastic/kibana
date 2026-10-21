@@ -67,6 +67,9 @@ export const writeNotifications = async (
 export const clearNotifications = async (esClient: Client): Promise<number> => {
   const { deleted } = await esClient.deleteByQuery({
     index: NOTIFICATION_DATA_STREAM_NAME,
+    // Nothing has created the stream until a producer writes to it, and `--clean` still has to
+    // reset the read horizon on a cluster that has never been seeded.
+    ignore_unavailable: true,
     refresh: true,
     conflicts: 'proceed',
     query: { match_all: {} },
