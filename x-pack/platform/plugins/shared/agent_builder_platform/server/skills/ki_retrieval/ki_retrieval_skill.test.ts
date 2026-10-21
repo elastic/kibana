@@ -21,9 +21,13 @@ describe('kiRetrievalSkill', () => {
     expect(isAllowedBuiltinSkill(kiRetrievalSkill.id)).toBe(true);
   });
 
-  it('is hidden in spaces where the Context Engine is off', () => {
+  it('is unavailable in spaces where the Context Engine is off', () => {
     expect(kiRetrievalSkill.experimental).toBeFalsy();
     expect(kiRetrievalSkill.availability).toBe(contextEngineSkillAvailability);
+  });
+
+  it('is hidden from skill listings, since Agent Builder grants it at runtime', () => {
+    expect(kiRetrievalSkill.hidden).toBe(true);
   });
 
   it('ships non-empty markdown content', () => {

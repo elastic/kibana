@@ -866,13 +866,14 @@ export const useEntityFlyoutApi = (): EntityFlyoutApi => {
   );
   const openEntityResolution = useCallback(
     ({ title, origin, ...props }: OpenEntityResolutionParams) => {
-      const { entityId, entityType, entityName, scopeId } = props;
+      const { entityId, entityType, entityName, scopeId, mode } = props;
       writeOnOpen({
         kind: FLYOUT_DESCRIPTOR_KIND.entityResolution,
         entityId,
         entityType: entityType as string,
         entityName,
         scopeId,
+        mode: toEntityDescriptorMode(mode),
       });
       const onClose = buildOnClose(null);
       open(
