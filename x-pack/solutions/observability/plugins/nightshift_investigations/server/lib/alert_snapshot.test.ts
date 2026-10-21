@@ -6,6 +6,7 @@
  */
 
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import { errors } from '@elastic/elasticsearch';
 import { fetchInvestigationAlertSnapshots, parseAlertSnapshot } from './alert_snapshot';
 
 const alert = {
@@ -72,17 +73,18 @@ describe('fetchInvestigationAlertSnapshots', () => {
   });
 
   const makeLookup = ({
-    hasEvents = true,
+    queryError,
     columns = [] as string[],
     rows = [] as unknown[][],
-  } = {}) => ({
+  }: { queryError?: Error; columns?: string[]; rows?: unknown[][] } = {}) => ({
     esClient: {
-      indices: { exists: jest.fn().mockResolvedValue(hasEvents) },
       esql: {
-        query: jest.fn().mockResolvedValue({
-          columns: columns.map((name) => ({ name })),
-          values: rows,
-        }),
+        query: queryError
+          ? jest.fn().mockRejectedValue(queryError)
+          : jest.fn().mockResolvedValue({
+              columns: columns.map((name) => ({ name })),
+              values: rows,
+            }),
       },
     },
     soClient: {
@@ -149,13 +151,41 @@ describe('fetchInvestigationAlertSnapshots', () => {
 
   it('lists every id it cannot find in one not found error', async () => {
     const alertsClient = makeAlertsClient({ indices: [] });
-    const lookup = makeLookup({ hasEvents: false });
+    const lookup = makeLookup();
 
     await expect(run(alertsClient, lookup, ['a', 'b'])).rejects.toMatchObject({
       message: 'Alert with id a, b not found',
       output: { statusCode: 404 },
     });
-    expect(lookup.esClient.esql.query).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['the user cannot read the events', 403, 'security_exception'],
+    [
+      'the events index does not exist',
+      400,
+      'verification_exception: Unknown index [.rule-events]',
+    ],
+  ])('treats an id as not found when %s', async (_, statusCode, reason) => {
+    const queryError = new errors.ResponseError({
+      statusCode,
+      body: { error: { reason } },
+      headers: {},
+      meta: {} as never,
+      warnings: [],
+    });
+
+    await expect(
+      run(makeAlertsClient({ alerts: [] }), makeLookup({ queryError }), ['a'])
+    ).rejects.toMatchObject({ output: { statusCode: 404 } });
+  });
+
+  it('keeps unexpected events lookup failures as errors', async () => {
+    const queryError = new Error('Elasticsearch unavailable');
+
+    await expect(
+      run(makeAlertsClient({ alerts: [] }), makeLookup({ queryError }), ['a'])
+    ).rejects.toBe(queryError);
   });
 
   it('keeps an alert that lacks required fields, with placeholders', async () => {

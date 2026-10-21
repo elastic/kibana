@@ -7,6 +7,7 @@
 
 import Boom from '@hapi/boom';
 import { esql } from '@elastic/esql';
+import { isResponseError } from '@kbn/es-errors';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
@@ -153,14 +154,16 @@ const fetchRuleNames = async (
   );
 };
 
+const isEventsUnavailable = (error: unknown): boolean =>
+  isResponseError(error) &&
+  (error.statusCode === 403 ||
+    error.statusCode === 404 ||
+    (error.statusCode === 400 && /unknown index/i.test(error.message)));
+
 const fetchV2Snapshots = async (
   { esClient, soClient, spaceId, basePath }: EpisodeLookup,
   episodeIds: string[]
 ): Promise<Map<string, V2AlertSnapshot>> => {
-  if (!(await esClient.indices.exists({ index: ALERT_EVENTS_DATA_STREAM }))) {
-    return new Map();
-  }
-
   const episodeIdValues = episodeIds.map((episodeId) => esql.str(episodeId));
   const { query } = esql`
     FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
@@ -178,7 +181,15 @@ const fetchV2Snapshots = async (
         group_hash = LAST(group_hash, @timestamp)
       BY episode_id`.toRequest();
 
-  const { columns, values } = await esClient.esql.query({ query, drop_null_columns: true });
+  const response = await esClient.esql.query({ query, drop_null_columns: true }).catch((error) => {
+    if (isEventsUnavailable(error)) return undefined;
+    throw error;
+  });
+  if (!response) {
+    return new Map();
+  }
+
+  const { columns, values } = response;
   const rows = values.map((row) =>
     Object.fromEntries(
       columns.flatMap(({ name }, index) => (row[index] === null ? [] : [[name, row[index]]]))
