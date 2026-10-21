@@ -41,6 +41,26 @@ import {
   DetectAndReviewStep,
 } from '../step_components';
 
+const stepLayoutCss = css`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+`;
+
+// Every step renders one root element with a `onboardingStep-*` test subject. Stretch it to the
+// height of the page so its last child, the footer, can be pushed to the bottom.
+const stepFillCss = css`
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  > [data-test-subj^='onboardingStep-'] {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+`;
+
 const DOWNSTREAM_OF_SERVICES_STEP_IDS = ONBOARDING_STEPS.slice(1).map((s) => s.id);
 
 export interface StepComponentProps {
@@ -158,7 +178,14 @@ export function OnboardingShell() {
 
   return (
     <EuiPageTemplate data-test-subj="onboardingShell">
-      <EuiPageTemplate.Section paddingSize="m" restrictWidth>
+      {/* The content is a column that fills the page, so the step's footer can sit at the bottom
+          even when the step is short (see StepFooter). */}
+      <EuiPageTemplate.Section
+        grow
+        paddingSize="m"
+        restrictWidth
+        contentProps={{ css: stepLayoutCss }}
+      >
         <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
           <EuiFlexGroup direction="row" alignItems="flexEnd" gutterSize="m">
             <EuiIcon type={meta.icon} size="xl" aria-hidden={true} />
@@ -212,7 +239,11 @@ export function OnboardingShell() {
             <EuiLoadingSpinner size="xl" />
           </EuiFlexGroup>
         ) : (
-          CurrentStepComponent && <CurrentStepComponent onContinue={onContinue} onBack={onBack} />
+          CurrentStepComponent && (
+            <div css={stepFillCss}>
+              <CurrentStepComponent onContinue={onContinue} onBack={onBack} />
+            </div>
+          )
         )}
       </EuiPageTemplate.Section>
       {isCancelModalOpen && (
