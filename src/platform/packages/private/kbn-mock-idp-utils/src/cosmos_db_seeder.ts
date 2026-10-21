@@ -40,6 +40,8 @@ export interface TestUserData {
   organizationId: string;
   projectType: string;
   applicationRoles: string[];
+  /** Built-in UIAM organization roles, see `buildMockIdpUiamRoleAssignments`. */
+  organizationRoleIds?: string[];
 }
 
 /**
@@ -108,6 +110,7 @@ function createUserDocument(userData: TestUserData): PersistableUser {
     organizationId: userData.organizationId,
     projectType: userData.projectType,
     applicationRoles: userData.applicationRoles,
+    organizationRoleIds: userData.organizationRoleIds,
   });
   return {
     id: userData.userId,
