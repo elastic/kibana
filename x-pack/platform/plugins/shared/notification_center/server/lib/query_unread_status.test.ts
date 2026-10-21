@@ -58,6 +58,7 @@ describe('queryUnreadStatus', () => {
 
     expect(search).toHaveBeenCalledWith({
       index: NOTIFICATION_DATA_STREAM_NAME,
+      ignore_unavailable: true,
       query: {
         bool: { filter: [{ range: { '@timestamp': { gt: '2026-07-15T00:00:00.000Z' } } }] },
       },
