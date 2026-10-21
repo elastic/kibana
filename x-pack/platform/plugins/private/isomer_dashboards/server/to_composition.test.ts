@@ -63,7 +63,8 @@ describe('toDashboardComposition', () => {
     expect(panels[0]).toMatchObject({ title: 'Requests', body: { type: 'xyChart' } });
     expect(panels[0].body).not.toHaveProperty('title');
     expect(panels[1]).not.toHaveProperty('title');
-    expect(panels[1].body).toMatchObject({ title: 'Visitors' });
+    expect(panels[1]).toMatchObject({ frame: 'none', body: { title: 'Visitors' } });
+    expect(panels[0]).not.toHaveProperty('frame');
   });
 
   it('gives panels without a node, or with an invalid one, a linked placeholder', () => {
