@@ -9,6 +9,14 @@ settings:
   run_as: __SERVICE_ACCOUNT_ID__
   # Longer than the investigation's own timeout, since this run waits for it.
   timeout: '65m'
+  # A follow-up waits here until the investigation's previous round has finished, since a wait in
+  # the shared workflow's queue would count against the timeout above and could cancel the
+  # follow-up before it starts. The timeout only starts once a run leaves this queue. The key
+  # differs from the shared workflow's, which this run would otherwise block.
+  concurrency:
+    key: 'bound-investigation:{{ inputs.investigation_id | default: execution.id }}'
+    strategy: queue
+    max: 1
 tags:
   - observability
   - investigation

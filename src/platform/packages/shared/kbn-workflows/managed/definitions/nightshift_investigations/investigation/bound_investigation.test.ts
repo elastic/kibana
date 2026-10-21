@@ -76,6 +76,19 @@ describe('Nightshift bound investigation workflow', () => {
     );
   });
 
+  it('queues the rounds of an investigation on a key of its own', () => {
+    const wrapper = parse(render('kibana/nightshift_agent'));
+    const investigation = parse(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml);
+
+    expect(wrapper.settings.concurrency).toEqual({
+      key: 'bound-investigation:{{ inputs.investigation_id | default: execution.id }}',
+      strategy: 'queue',
+      max: 1,
+    });
+    // Sharing the shared workflow's key would make each run wait for itself.
+    expect(wrapper.settings.concurrency.key).not.toBe(investigation.settings.concurrency.key);
+  });
+
   it('quotes the account id so YAML special characters stay literal', () => {
     expect(parse(render('kibana/a: b')).settings.run_as).toBe('kibana/a: b');
   });
