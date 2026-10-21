@@ -316,6 +316,7 @@ export interface EntityResolutionDescriptor {
   entityType: string;
   entityName: string;
   scopeId: string;
+  mode?: EntityDescriptorMode;
 }
 
 /**

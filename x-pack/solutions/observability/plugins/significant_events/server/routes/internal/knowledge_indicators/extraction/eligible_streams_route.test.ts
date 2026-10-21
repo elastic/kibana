@@ -25,11 +25,10 @@ const makeSource = (id: string, enabled: boolean) => ({
   esql_updated_at: '2020-01-01T00:00:00.000Z',
 });
 
-const makeHandlerParams = (logger: { info: jest.Mock }): HandlerParams =>
+const makeHandlerParams = (): HandlerParams =>
   ({
     params: undefined,
     request: {},
-    logger,
     server: {},
     maintenanceService: {},
     workflowClients: {
@@ -48,29 +47,14 @@ describe('eligibleStreamsRoute', () => {
     jest.clearAllMocks();
   });
 
-  it('logs the ids of disabled sources it skips', async () => {
+  it('returns a disabled source only in the disabled bucket', async () => {
     (reconcileSourceCatalog as jest.Mock).mockResolvedValue({
       sources: [makeSource('on', true), makeSource('off-a', false), makeSource('off-b', false)],
     });
-    const logger = { info: jest.fn() };
 
-    const response = await eligibleRoute.handler(makeHandlerParams(logger));
+    const response = await eligibleRoute.handler(makeHandlerParams());
 
-    expect(logger.info).toHaveBeenCalledTimes(1);
-    expect(logger.info).toHaveBeenCalledWith(
-      'Continuous onboarding skipped 2 disabled source(s): off-a, off-b'
-    );
+    expect(response.disabled.map(({ sourceId }) => sourceId)).toEqual(['off-a', 'off-b']);
     expect(response.candidates.map(({ sourceId }) => sourceId)).toEqual(['on']);
-  });
-
-  it('does not log when every source is enabled', async () => {
-    (reconcileSourceCatalog as jest.Mock).mockResolvedValue({
-      sources: [makeSource('on', true)],
-    });
-    const logger = { info: jest.fn() };
-
-    await eligibleRoute.handler(makeHandlerParams(logger));
-
-    expect(logger.info).not.toHaveBeenCalled();
   });
 });
