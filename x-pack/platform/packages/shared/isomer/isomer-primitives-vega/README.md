@@ -65,6 +65,8 @@ Specs are author-written code, so the pack treats them as untrusted at every lay
 - **Cursors** stay keywords: any other `cursor` is stripped, and `config.events.globalCursor` is forced off so a chart never styles the page.
 - **Expressions** run through `vega-interpreter` (`parse(…, { ast: true })`), never `new Function`, so charts render under `--disallow-code-generation-from-strings`.
 - **Events** cannot select elements outside the chart: `config.events.selector` is forced to `false`.
+- **Results** are the host's too: a node's `results` replace data sources' `url`s by path, so the spec stays as authored, its queries included, as Dashboards as Code keeps a Vega panel's. `pruneVegaResults` keeps only what the static drawing reads: it runs the drawing once with each result behind read-recording proxies (tooltips stripped, since a static drawing never shows them), and keeps the pruned results only if they draw the same SVG under every theme given. An array keeps its length. A node with results never re-renders in the browser. Each result's `scope` says what it serves; only `static` exists so far, leaving room for hover data later.
+- **A basemap** is the host's, not the spec's: a node's `basemap` holds at most 16 tiles positioned in the chart's pixel frame, each an inline PNG, JPEG or WebP `data:` URI. They draw beneath everything Vega drew, as Kibana map mode draws a Vega layer over its tiles, and a node with one never re-renders in the browser.
 
 ## Theming
 

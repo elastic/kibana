@@ -148,6 +148,18 @@ describe('renderVegaSvg', () => {
     expect(draw(node, vegaDarkTheme)).toContain(expected);
   });
 
+  it('fits a Vega spec to the node, unless the spec turns autosize off as Kibana allows', () => {
+    const grammar = vegaGrammarExample as VegaChartInput;
+    expect(toVegaSpec(grammar, vegaLightTheme).autosize).toEqual({
+      type: 'fit',
+      contains: 'padding',
+    });
+    expect(
+      toVegaSpec({ ...grammar, spec: { ...grammar.spec, autosize: 'none' } }, vegaLightTheme)
+        .autosize
+    ).toBe('none');
+  });
+
   it('draws with the theme, under the spec’s own config', () => {
     const light = draw(vegaExample);
     expect(light).toContain(vegaLightTheme.palette[0]);

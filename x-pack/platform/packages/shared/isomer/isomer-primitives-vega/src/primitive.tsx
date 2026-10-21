@@ -24,6 +24,7 @@ import {
   type VegaChartInput,
   VegaRenderError,
 } from './render';
+import { isResultUrl, resultIssues, withResults } from './results';
 import { isSpecObject, specIssues, stripSpec } from './spec';
 import { cellText, describeDataset, primaryDataset } from './summary';
 import { vegaBorealisAdaptiveTheme, vegaBorealisLightTheme } from './borealis_theme';
@@ -33,6 +34,9 @@ export const VEGA_INTERACTIVE = 'vegaInteractive';
 
 /** Past this many characters of JSON a spec is carrying a dataset, not a chart. */
 export const MAX_SPEC_CHARS = 1_000_000;
+/** A host's query results, after pruning to what the drawing reads; more is a dataset, not a chart's. */
+export const MAX_RESULTS_CHARS = 1_000_000;
+export const MAX_RESULTS = 16;
 export const MAX_CHART_SIDE = 4096;
 export const MIN_CHART_SIDE = 16;
 /** Rows the Markdown table shows before it summarizes the rest. */
@@ -47,6 +51,50 @@ const side = (what: string) =>
     .max(MAX_CHART_SIDE)
     .describe(`The chart's ${what} in CSS pixels, including axes and legends.`);
 
+/** Raster tiles under a chart; at most a 4 by 4 grid, as Kibana's map mode loads for one panel. */
+export const MAX_BASEMAP_TILES = 16;
+const MAX_TILE_SRC = 120_000;
+/** Only an inline raster, so a tile can never fetch. */
+const TILE_SRC = /^data:image\/(png|jpeg|webp);base64,[A-Za-z0-9+/]+=*$/;
+
+const basemapSchema = z
+  .object({
+    tiles: z
+      .array(
+        z.object({
+          src: z.string().max(MAX_TILE_SRC).regex(TILE_SRC),
+          x: z.number().finite(),
+          y: z.number().finite(),
+          width: z.number().positive().max(MAX_CHART_SIDE),
+          height: z.number().positive().max(MAX_CHART_SIDE),
+        })
+      )
+      .max(MAX_BASEMAP_TILES),
+    attribution: z.string().max(400).optional(),
+  })
+  .describe(
+    'Host-stamped map tiles drawn beneath the chart in its pixel frame, as Kibana map mode draws a Vega layer over its basemap. Models must not set this.'
+  );
+
+const round = (value: number) => Math.round(value * 100) / 100;
+
+/** `svg` with `basemap`'s tiles as its first children, under everything Vega drew. */
+const withBasemap = (svg: string, basemap: VegaNode['basemap']): string => {
+  if (!basemap?.tiles.length) {
+    return svg;
+  }
+  const tiles = basemap.tiles
+    .filter(({ src }) => TILE_SRC.test(src))
+    .map(
+      ({ src, x, y, width, height }) =>
+        `<image href="${src}" x="${round(x)}" y="${round(y)}" width="${round(
+          width
+        )}" height="${round(height)}" preserveAspectRatio="none"/>`
+    )
+    .join('');
+  return svg.replace(/^(<svg[^>]*>)/, `$1<g data-isomer-vega-basemap="">${tiles}</g>`);
+};
+
 /** Where `spec` compiles and parses, the message why not; checked at validation so an author sees it. */
 const parseProblem = (node: VegaChartInput): string | undefined => {
   try {
@@ -60,9 +108,6 @@ const parseProblem = (node: VegaChartInput): string | undefined => {
 const specSchema = z
   .record(z.string(), z.unknown())
   .superRefine((spec, ctx) => {
-    for (const { path, message } of specIssues(spec)) {
-      ctx.addIssue({ code: 'custom', path, message });
-    }
     if (JSON.stringify(spec).length > MAX_SPEC_CHARS) {
       ctx.addIssue({
         code: 'custom',
@@ -71,7 +116,31 @@ const specSchema = z
     }
   })
   .describe(
-    'The Vega or Vega-Lite spec. Data is inline under `values`; nothing loads by URL, and marks cannot link.'
+    'The Vega or Vega-Lite spec. Data is inline under `values`, or a host result replaces a source’s `url`; nothing loads by URL, and marks cannot link.'
+  );
+
+const resultsSchema = z
+  .array(
+    z.object({
+      path: z
+        .array(z.union([z.string().max(100), z.number().int().min(0)]))
+        .min(1)
+        .max(16),
+      values: z.unknown(),
+      scope: z.literal('static'),
+    })
+  )
+  .max(MAX_RESULTS)
+  .superRefine((results, ctx) => {
+    if (JSON.stringify(results).length > MAX_RESULTS_CHARS) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `is longer than ${MAX_RESULTS_CHARS} characters of JSON`,
+      });
+    }
+  })
+  .describe(
+    'Host-stamped query results, each replacing the `url` of the data entry at its `path`, holding only what a static drawing reads. Models must not set this.'
   );
 
 export const vegaSchema = z
@@ -84,9 +153,22 @@ export const vegaSchema = z
     caption: requiredString().describe(
       'One sentence saying what the chart shows. It is the alt text, and the whole chart on text surfaces.'
     ),
+    basemap: basemapSchema.optional(),
+    results: resultsSchema.optional(),
   })
   .check(
     z.superRefine((node, ctx) => {
+      if (isSpecObject(node.spec)) {
+        for (const { path, message } of specIssues(node.spec)) {
+          // A source's `url` is allowed where a host result replaces it.
+          if (!isResultUrl(path, node.results)) {
+            ctx.addIssue({ code: 'custom', path: ['spec', ...path], message });
+          }
+        }
+        for (const { path, message } of resultIssues(node.spec, node.results ?? [])) {
+          ctx.addIssue({ code: 'custom', path: [...path], message });
+        }
+      }
       const problem = parseProblem(node);
       if (problem !== undefined) {
         ctx.addIssue({ code: 'custom', path: ['spec'], message: problem });
@@ -114,12 +196,12 @@ export interface VegaPrimitiveOptions {
 }
 
 const text = (node: VegaNode): string => {
-  const data = primaryDataset(node.mode, node.spec);
+  const data = primaryDataset(node.mode, withResults(node.spec, node.results));
   return data === undefined ? node.caption : `${node.caption} (Chart of ${describeDataset(data)}.)`;
 };
 
 const markdown = (node: VegaNode) => {
-  const data = primaryDataset(node.mode, node.spec);
+  const data = primaryDataset(node.mode, withResults(node.spec, node.results));
   if (data === undefined) {
     return md.paragraph(md.strong(node.caption));
   }
@@ -175,6 +257,7 @@ export const createVegaPrimitive = ({
         try {
           vegaSpec = toVegaSpec(node, chartTheme);
           ({ svg } = renderVegaSvg(vegaSpec, node));
+          svg = withBasemap(svg, node.basemap);
         } catch (error) {
           const reason =
             error instanceof VegaRenderError || error instanceof Error
@@ -186,8 +269,11 @@ export const createVegaPrimitive = ({
             </div>
           );
         }
+        // A browser re-render would draw the chart without its basemap, or hover over results pruned to the drawing.
         const interactive =
           frameTheme === undefined &&
+          !node.basemap &&
+          !node.results?.length &&
           (context as PrimitiveRenderContext | undefined)?.enhancements?.has(VEGA_INTERACTIVE);
         return (
           <div data-isomer-vega="" {...anchor}>
