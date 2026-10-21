@@ -13,7 +13,7 @@ import type { Interpolation, Theme } from '@emotion/react';
 
 export interface DataGridCellRenderProps<TRow> {
   row: TRow;
-  /** Index of the row in the `rows` passed to the grid. */
+  /** Index of the row in the `rows` passed to the grid, whatever the pinned or virtualized position. */
   rowIndex: number;
   columnId: string;
   /** True when the cell is rendered in the expansion popover instead of in the grid. */

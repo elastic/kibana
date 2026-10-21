@@ -8,6 +8,9 @@ arrow, Home and End keys), ARIA grid semantics, EUI theming, auto row heights an
 
 Today it is used by the Doc Viewer fields table, behind the `discover.kbnDataGridEnabled` feature flag.
 
+> **Experimental.** The API may still change until a second consumer (e.g. `@kbn/unified-data-table`)
+> uses it.
+
 ## Usage
 
 ```tsx
@@ -52,7 +55,7 @@ visible cells re-render when it changes.
 | Option | Description |
 |---|---|
 | `id`, `header` | Column id, and header content. |
-| `renderCell({ row, rowIndex, columnId, isDetails })` | Renders the cell. `isDetails` is `true` inside the expansion popover. |
+| `renderCell({ row, rowIndex, columnId, isDetails })` | Renders the cell. `rowIndex` is the index of the row in the `rows` you passed (not its pinned or scrolled position). `isDetails` is `true` inside the expansion popover. |
 | `initialWidth`, `minWidth`, `maxWidth` | `initialWidth` is a number of pixels, or a function of the grid width, used until the user resizes the column. Columns without one share the remaining space. |
 | `isResizable` | Allow resizing from the header edge. Needs an `initialWidth`. |
 | `cellActions` | `EuiDataGridColumnCellAction[]`, shown in the hover/focus bubble and in the popover footer. |
