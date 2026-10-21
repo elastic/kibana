@@ -23,11 +23,28 @@ const SPAN_ID = /^(?!0{16}$)[0-9a-f]{16}$/;
  * Reads the active span on the caller. Call it synchronously inside that span;
  * a later turn of the event loop is a different context.
  */
-export const captureParentSpan = (): ParentSpanContext | undefined => {
+const fromOtel = (): ParentSpanContext | undefined => {
   const current = trace.getActiveSpan()?.spanContext();
   if (!current || !TRACE_ID.test(current.traceId) || !SPAN_ID.test(current.spanId)) return undefined;
   return { traceId: current.traceId, spanId: current.spanId, traceFlags: current.traceFlags };
 };
+
+/**
+ * Task Manager's `withSpan` (`@kbn/apm-utils`) runs the runner in a fresh AsyncResource,
+ * which drops the OTel span. The APM transaction started just above that call is still current.
+ */
+const fromApm = (): ParentSpanContext | undefined => {
+  const apm = require('elastic-apm-node') as { currentTraceparent?: string | null };
+  const parts = apm.currentTraceparent?.split('-');
+  if (!parts || parts.length !== 4) return undefined;
+  const traceId = parts[1];
+  const spanId = parts[2];
+  const flags = Number.parseInt(parts[3], 16);
+  if (!TRACE_ID.test(traceId) || !SPAN_ID.test(spanId) || !Number.isFinite(flags)) return undefined;
+  return { traceId, spanId, traceFlags: flags };
+};
+
+export const captureParentSpan = (): ParentSpanContext | undefined => fromOtel() ?? fromApm();
 
 let managerReady = false;
 let lastSpanSent = false;
