@@ -64,7 +64,7 @@ apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, (
     expect(response).toHaveStatusCode(400);
     expect(response.body.code).toBe('BAD_REQUEST');
 
-    const stored = await apiServices.alertingV2.rules.get(created.id);
+    const stored = await apiServices.alertingV2.ruleSavedObject.getAttributes(created.id);
     expect(stored.metadata.template).toBeUndefined();
   });
 
@@ -79,14 +79,14 @@ apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, (
   });
 
   apiTest(
-    'get and find: return metadata.template when present',
+    'get and find: do not return metadata.template even when it is stored',
     async ({ apiClient, apiServices }) => {
       const created = await createRule(apiServices, 'from-template');
       await apiServices.alertingV2.ruleSavedObject.setMetadataTemplate(created.id, TEMPLATE);
 
       const getResponse = await apiClient.get(getRuleUrl(created.id), { headers: writerHeaders });
       expect(getResponse).toHaveStatusCode(200);
-      expect(getResponse.body.metadata.template).toStrictEqual(TEMPLATE);
+      expect(getResponse.body.metadata).not.toHaveProperty('template');
 
       const findResponse = await apiClient.get(
         `${testData.RULE_API_PATH}?filter=${encodeURIComponent(`id: "${created.id}"`)}`,
@@ -94,27 +94,34 @@ apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, (
       );
       expect(findResponse).toHaveStatusCode(200);
       const found = findResponse.body.items.find((item: { id: string }) => item.id === created.id);
-      expect(found?.metadata.template).toStrictEqual(TEMPLATE);
+      expect(found?.metadata).not.toHaveProperty('template');
+
+      // The link stays in storage; only the public response omits it.
+      const stored = await apiServices.alertingV2.ruleSavedObject.getAttributes(created.id);
+      expect(stored.metadata.template).toStrictEqual(TEMPLATE);
     }
   );
 
-  apiTest('update: keeps metadata.template', async ({ apiClient, apiServices }) => {
-    const created = await createRule(apiServices, 'update-keeps-template');
-    await apiServices.alertingV2.ruleSavedObject.setMetadataTemplate(created.id, TEMPLATE);
+  apiTest(
+    'update: keeps metadata.template in storage without returning it',
+    async ({ apiClient, apiServices }) => {
+      const created = await createRule(apiServices, 'update-keeps-template');
+      await apiServices.alertingV2.ruleSavedObject.setMetadataTemplate(created.id, TEMPLATE);
 
-    const response = await apiClient.patch(getRuleUrl(created.id), {
-      headers: writerHeaders,
-      body: { metadata: { name: 'update-keeps-template-renamed' } },
-    });
-    expect(response).toHaveStatusCode(200);
-    expect(response.body.metadata.template).toStrictEqual(TEMPLATE);
+      const response = await apiClient.patch(getRuleUrl(created.id), {
+        headers: writerHeaders,
+        body: { metadata: { name: 'update-keeps-template-renamed' } },
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.metadata).not.toHaveProperty('template');
 
-    const stored = await apiServices.alertingV2.rules.get(created.id);
-    expect(stored.metadata.template).toStrictEqual(TEMPLATE);
-  });
+      const stored = await apiServices.alertingV2.ruleSavedObject.getAttributes(created.id);
+      expect(stored.metadata.template).toStrictEqual(TEMPLATE);
+    }
+  );
 
   apiTest(
-    'upsert: keeps metadata.template on an existing rule',
+    'upsert: keeps metadata.template in storage on an existing rule without returning it',
     async ({ apiClient, apiServices }) => {
       const created = await createRule(apiServices, 'upsert-keeps-template');
       await apiServices.alertingV2.ruleSavedObject.setMetadataTemplate(created.id, TEMPLATE);
@@ -124,9 +131,9 @@ apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, (
         body: buildCreateRuleData({ metadata: { name: 'upsert-keeps-template-replaced' } }),
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.metadata.template).toStrictEqual(TEMPLATE);
+      expect(response.body.metadata).not.toHaveProperty('template');
 
-      const stored = await apiServices.alertingV2.rules.get(created.id);
+      const stored = await apiServices.alertingV2.ruleSavedObject.getAttributes(created.id);
       expect(stored.metadata.template).toStrictEqual(TEMPLATE);
     }
   );

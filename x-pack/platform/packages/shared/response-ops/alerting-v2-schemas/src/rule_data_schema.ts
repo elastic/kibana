@@ -1001,16 +1001,11 @@ export type UpdateRuleData = z.infer<typeof updateRuleDataSchema>;
 export const ruleResponseSchema = lazySchema(() =>
   createRuleDataBaseSchema
     .extend({
-      // `template` is server-managed: it is returned but not accepted on write.
-      metadata: metadataSchema
-        .extend({
-          template: z
-            .object({ id: z.string().describe('Id of the rule template.') })
-            .strict()
-            .optional()
-            .describe('The rule template this rule was created from.'),
-        })
-        .describe('Rule metadata.'),
+      // The rule-template link (`metadata.template` in storage) is deliberately not
+      // returned: its public shape is undecided, and a response-only key inside the
+      // strict `metadata` block would break a GET -> PUT round-trip. Lifecycle
+      // events and telemetry still read it from the saved object.
+      metadata: metadataSchema.describe('Rule metadata.'),
       id: z.string().describe('Unique rule identifier.'),
       version: z
         .number()

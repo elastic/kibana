@@ -1735,13 +1735,13 @@ describe('updateRuleDataSchema', () => {
 });
 
 describe('ruleResponseSchema metadata', () => {
-  it('returns metadata.template when present', () => {
-    const result = ruleResponseSchema.shape.metadata.parse({
+  it('does not carry metadata.template: the strict response block omits it', () => {
+    const result = ruleResponseSchema.shape.metadata.safeParse({
       name: 'test rule',
       template: { id: 'template-1' },
     });
 
-    expect(result.template).toEqual({ id: 'template-1' });
+    expect(result.success).toBe(false);
   });
 
   it('accepts metadata without a template', () => {

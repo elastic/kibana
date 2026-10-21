@@ -230,7 +230,7 @@ describe('RulesClient', () => {
       );
     });
 
-    it('stores the server-provided template and returns it', async () => {
+    it('stores the server-provided template without returning it', async () => {
       const client = createClient();
 
       const res = await client.createRule({
@@ -245,7 +245,7 @@ describe('RulesClient', () => {
           }),
         }),
       ]);
-      expect(res.metadata.template).toEqual({ id: 'template-1' });
+      expect(res.metadata).not.toHaveProperty('template');
     });
 
     it('rejects metadata.template in the request body', async () => {
