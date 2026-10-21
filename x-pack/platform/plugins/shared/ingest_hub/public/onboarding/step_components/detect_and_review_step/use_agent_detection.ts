@@ -7,7 +7,11 @@
 
 import { useMemo, useRef } from 'react';
 import { useQuery } from '@kbn/react-query';
-import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  extractAgentIdsWithData,
+  type AgentPolicy,
+  type PackagePolicy,
+} from '@kbn/fleet-plugin/common';
 import {
   getComponentAlertLevel,
   getPackagePolicyUnitSummary,
@@ -233,11 +237,7 @@ export function useAgentDetection({
             pkgName,
             pkgVersion,
           });
-          const withData = (data?.items ?? []).flatMap((item) =>
-            Object.entries(item)
-              .filter(([, { data: hasData }]) => hasData)
-              .map(([agentId]) => agentId)
-          );
+          const withData = extractAgentIdsWithData(data?.items ?? []);
           return [key, withData] as const;
         })
       );
