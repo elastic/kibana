@@ -173,6 +173,25 @@ steps:
           unknown.body.message.replace(unknownId, '<id>')
         );
       }
+      const bulkDelete = await apiClient.delete(`s/${spaceId}/api/workflows`, {
+        headers: readerHeaders,
+        body: { ids: [workflowId, unknownId] },
+      });
+      expect(bulkDelete).toHaveStatusCode(200);
+      expect(bulkDelete.body).toStrictEqual({ total: 2, deleted: 0, failures: [] });
+      expect(await apiClient.get(workflowPath, { headers: ownerHeaders })).toHaveStatusCode(200);
+      const bulkCreate = (query: string) =>
+        apiClient.post(`s/${spaceId}/api/workflows${query}`, {
+          headers: readerHeaders,
+          body: { workflows: [{ id: workflowId, yaml }] },
+        });
+      const overwritten = await bulkCreate('?overwrite=true');
+      const duplicated = await bulkCreate('');
+      expect(overwritten).toHaveStatusCode(200);
+      expect(duplicated).toHaveStatusCode(200);
+      expect(overwritten.body.created).toStrictEqual([]);
+      expect(overwritten.body.failed).toHaveLength(1);
+      expect(overwritten.body.failed[0].error).toBe(duplicated.body.failed[0].error);
       const hiddenList = await apiClient.get(`s/${spaceId}/api/workflows`, {
         headers: readerHeaders,
       });
