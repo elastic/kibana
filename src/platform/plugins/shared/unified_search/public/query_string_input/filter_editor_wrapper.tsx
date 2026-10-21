@@ -13,9 +13,9 @@ import { buildEmptyFilter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SuggestionsAbstraction } from '@kbn/kql/public';
 import { useEuiTheme } from '@elastic/eui';
+import type { FilterableSource } from '@kbn/data-source';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { getFilterItemEditorContainerStyle } from '../filter_bar/filter_item/filter_item';
 import { FilterEditor } from '../filter_bar/filter_editor';
@@ -27,7 +27,7 @@ interface QueryDslFilter {
 }
 
 interface FilterEditorWrapperProps {
-  indexPatterns?: Array<DataView | string>;
+  indexPatterns?: Array<FilterableSource | string>;
   filters: Filter[];
   timeRangeForSuggestionsOverride?: boolean;
   filtersForSuggestions?: Filter[];
@@ -61,7 +61,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
   );
   const { uiSettings, data, usageCollection, appName, docLinks } = kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
-  const [dataViews, setDataviews] = useState<DataView[]>([]);
+  const [dataViews, setDataviews] = useState<FilterableSource[]>([]);
   const [newFilter, setNewFilter] = useState<Filter | undefined>(undefined);
   const isPinned = uiSettings!.get(UI_SETTINGS.FILTERS_PINNED_BY_DEFAULT);
 
@@ -80,7 +80,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
       ) as string[];
       const objectPatterns = indexPatterns?.filter(
         (indexPattern) => typeof indexPattern !== 'string'
-      ) as DataView[];
+      ) as FilterableSource[];
 
       fetchIndexAbortController.current?.abort();
       fetchIndexAbortController.current = new AbortController();
@@ -89,7 +89,7 @@ export const FilterEditorWrapper = React.memo(function FilterEditorWrapper({
       const objectPatternsFromStrings = (await fetchIndexPatterns(
         data.dataViews,
         stringPatterns.map((value) => ({ type: 'title', value }))
-      )) as DataView[];
+      )) as FilterableSource[];
 
       if (!currentFetchIndexAbortController.signal.aborted) {
         setDataviews([...objectPatterns, ...objectPatternsFromStrings]);
