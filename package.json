@@ -1263,6 +1263,7 @@
     "@kbn/significant-events-app-plugin": "workspace:*",
     "@kbn/significant-events-plugin": "workspace:*",
     "@kbn/significant-events-schema": "workspace:*",
+    "@kbn/slo-constants": "workspace:*",
     "@kbn/slo-plugin": "workspace:*",
     "@kbn/slo-schema": "workspace:*",
     "@kbn/slo-shared-plugin": "workspace:*",

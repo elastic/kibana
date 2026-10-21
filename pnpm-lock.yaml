@@ -3716,6 +3716,9 @@ importers:
       '@kbn/significant-events-schema':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/kbn-significant-events-schema
+      '@kbn/slo-constants':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-slo-constants
       '@kbn/slo-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/slo
@@ -9138,6 +9141,8 @@ importers:
   x-pack/platform/packages/shared/kbn-shared-components: {}
 
   x-pack/platform/packages/shared/kbn-significant-events-schema: {}
+
+  x-pack/platform/packages/shared/kbn-slo-constants: {}
 
   x-pack/platform/packages/shared/kbn-slo-schema: {}
 
