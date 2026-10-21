@@ -200,6 +200,7 @@ export const validateExtendedFields = (
     onClose = false,
     requiredOnly = false,
     hintFields,
+    touchedKeys,
   }: {
     partial?: boolean;
     onClose?: boolean;
@@ -218,6 +219,12 @@ export const validateExtendedFields = (
      * (`priority_as_keyword`) in the error rather than a list of template-only keys.
      */
     hintFields?: InlineField[];
+    /**
+     * When set, `extendedFields` is the full map (used for `show_when` / `required_when`
+     * evaluation) but only these keys are checked for unknown-key, size, and per-field value
+     * validity. Untouched fields are skipped entirely, as they were validated when written.
+     */
+    touchedKeys?: ReadonlySet<string>;
   } = {}
 ): string[] => {
   let errors: string[] = [];
@@ -241,7 +248,13 @@ export const validateExtendedFields = (
       ? [...displayOnlyFields, ...hintFields.filter(isDisplayOnlyField)]
       : displayOnlyFields;
 
-    const unknownKeys = Object.keys(extendedFields).filter((key) => !validKeys.has(key));
+    const checkedFields =
+      touchedKeys === undefined
+        ? extendedFields
+        : Object.fromEntries(
+            Object.entries(extendedFields).filter(([key]) => touchedKeys.has(key))
+          );
+    const unknownKeys = Object.keys(checkedFields).filter((key) => !validKeys.has(key));
     const MAX_UNKNOWN_KEY_ERRORS = 10;
     for (const key of unknownKeys.slice(0, MAX_UNKNOWN_KEY_ERRORS)) {
       errors.push(buildUnknownKeyError(key, suggestionInlineFields, suggestionDisplayOnlyFields));
@@ -249,7 +262,7 @@ export const validateExtendedFields = (
     if (unknownKeys.length > MAX_UNKNOWN_KEY_ERRORS) {
       errors.push(`${unknownKeys.length - MAX_UNKNOWN_KEY_ERRORS} more unknown key(s) not shown`);
     }
-    errors = errors.concat(validateExtendedFieldValueSizes(extendedFields));
+    errors = errors.concat(validateExtendedFieldValueSizes(checkedFields));
   }
 
   // 3. Build helper maps
@@ -263,7 +276,11 @@ export const validateExtendedFields = (
   }
 
   // 4. Per-field validation
-  for (const field of inlineFields) {
+  const fieldsToValidate =
+    touchedKeys === undefined
+      ? inlineFields
+      : inlineFields.filter((f) => touchedKeys.has(getFieldSnakeKey(f.name, f.type)));
+  for (const field of fieldsToValidate) {
     const isHidden =
       field.display?.show_when != null &&
       !evaluateCondition(field.display.show_when, fieldValues, fieldTypeMap, fieldControlMap);
