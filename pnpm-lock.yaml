@@ -1108,7 +1108,7 @@ importers:
         version: link:src/platform/packages/shared/controls/controls-schemas
       '@kbn/core':
         specifier: workspace:*
-        version: link:src/core
+        version: link:src/core/packages/core
       '@kbn/core-analytics-browser':
         specifier: workspace:*
         version: link:src/core/packages/analytics/browser
@@ -1955,6 +1955,9 @@ importers:
       '@kbn/developer-examples-plugin':
         specifier: workspace:*
         version: link:examples/developer_examples
+      '@kbn/digital-experience-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/digital_experience
       '@kbn/discover-contextual-components':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-discover-contextual-components
@@ -2066,6 +2069,9 @@ importers:
       '@kbn/entity-access-control-ui':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-entity-access-control-ui
+      '@kbn/entity-inventory-app-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/entity_inventory_app
       '@kbn/entity-inventory-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/entity_inventory
@@ -4170,11 +4176,11 @@ importers:
         specifier: 4.10.4
         version: 4.10.4
       '@launchdarkly/node-server-sdk':
-        specifier: 9.13.7
-        version: 9.13.7(supports-color@10.2.2)
+        specifier: 9.13.8
+        version: 9.13.8(supports-color@10.2.2)
       '@launchdarkly/openfeature-node-server':
-        specifier: 2.0.6
-        version: 2.0.6(@launchdarkly/node-server-sdk@9.13.7(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+        specifier: 2.0.7
+        version: 2.0.7(@launchdarkly/node-server-sdk@9.13.8(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@loaders.gl/core':
         specifier: 3.4.7
         version: 3.4.7
@@ -5646,6 +5652,9 @@ importers:
       '@kbn/inspect-component-plugin':
         specifier: workspace:*
         version: link:src/platform/plugins/private/inspect_component
+      '@kbn/jest':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-jest
       '@kbn/jest-benchmarks':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-jest-benchmarks
@@ -7084,8 +7093,6 @@ importers:
 
   src/cli: {}
 
-  src/core: {}
-
   src/core/packages/analytics/browser: {}
 
   src/core/packages/analytics/browser-internal: {}
@@ -7181,6 +7188,8 @@ importers:
   src/core/packages/chrome/sidebar/sidebar-mocks: {}
 
   src/core/packages/config/server-internal: {}
+
+  src/core/packages/core: {}
 
   src/core/packages/custom-branding/browser: {}
 
@@ -8141,6 +8150,8 @@ importers:
   src/platform/packages/shared/kbn-interpreter: {}
 
   src/platform/packages/shared/kbn-io-ts-utils: {}
+
+  src/platform/packages/shared/kbn-jest: {}
 
   src/platform/packages/shared/kbn-jest-benchmarks: {}
 
@@ -9630,7 +9641,11 @@ importers:
 
   x-pack/solutions/observability/plugins/client_apps: {}
 
+  x-pack/solutions/observability/plugins/digital_experience: {}
+
   x-pack/solutions/observability/plugins/entity_inventory: {}
+
+  x-pack/solutions/observability/plugins/entity_inventory_app: {}
 
   x-pack/solutions/observability/plugins/exploratory_view: {}
 
@@ -12545,25 +12560,22 @@ packages:
   '@launchdarkly/js-client-sdk@4.10.4':
     resolution: {integrity: sha512-n1gvH/Or8/M2bR2HNqyLKrZ7x7lJOQx7WOaWnSibqf9hmtauE169HgtbtdMoUA9s22Z5MvSmNF6eBCJbetHlKA==}
 
-  '@launchdarkly/js-sdk-common@2.26.1':
-    resolution: {integrity: sha512-FY4gKzlU5bL44+EgUtP9E9uMBpa7aYgAJ+y0zKRTlf5HPd84XW4zy9vPPeLkCYIfgIn/KoxO3g+9o08qcLvcrw==}
-
   '@launchdarkly/js-sdk-common@2.27.0':
     resolution: {integrity: sha512-Av+eVK5QXQ41leDGi1JS+rzOGvz4ViRgVw8P8vg9h6Q+IwP4UkW/swA7ZU6+05k4cUs9LuGUg8oW+mR7weCVFg==}
 
-  '@launchdarkly/js-server-sdk-common@2.21.5':
-    resolution: {integrity: sha512-4hKdGulMc6ZRiyVjxCEjXdA3/Syg2cJdtRdfhLaMQuWHe6Cc2obmM8afW7AIsFwpeWjvmHagoBewl9uV1N6CSw==}
+  '@launchdarkly/js-server-sdk-common@2.21.6':
+    resolution: {integrity: sha512-WyfcBG1oun5cgvZSTUzpFZFtgBd0uk9WVolt0sQTcYfBA0nS6A1bhdgGtM8FjdCq+6ZRKQeiwvjkQdVoHLrvBw==}
 
-  '@launchdarkly/node-server-sdk@9.13.7':
-    resolution: {integrity: sha512-GBzQbkpJVORjRd8AHbrTO3eTrQkOj+nEUQydvjU50TcqlD6/z43X9zqKYc9pBR2uD4nmmRlbART4K7gWBRQtkQ==}
+  '@launchdarkly/node-server-sdk@9.13.8':
+    resolution: {integrity: sha512-E4grvdy7TKYvG3RqjrpCNoH2O1XWmTU0YDIm4UMBCXfM2Hf7w10aPGWM/tqtyViBiODmc36Pf3ILntZJYpaWlA==}
 
-  '@launchdarkly/openfeature-js-server-common@2.0.2':
-    resolution: {integrity: sha512-DPEhBA4vBkBc8yBEnwuEDF+KzZKfOvsdJaKmrtumxOVKPZxqieBxXEvXQH5e9AgglqyoSW9k4ggSwwkotSfD7g==}
+  '@launchdarkly/openfeature-js-server-common@2.0.3':
+    resolution: {integrity: sha512-EIGgztosblBCkDDPiYJ1ke8BnHQz+9D+qHHyr58TRv+4JLpU/3O9zwMQMooUXw2nHWdYphcxI62Rb3AoS2IjFQ==}
     peerDependencies:
       '@openfeature/server-sdk': ^1.16.0
 
-  '@launchdarkly/openfeature-node-server@2.0.6':
-    resolution: {integrity: sha512-npkcV+ZCboKzTWY9HXZyIohJoqjPhfRCcHkU3aUhH3sPb3rv6c6ZVnYPk7EzgwTx2ipgkLVomCk7fY7ObnfrDA==}
+  '@launchdarkly/openfeature-node-server@2.0.7':
+    resolution: {integrity: sha512-wwDm4yiGdl35aLzKZXDkcmKQfr90ZUadsu1zB1LoeQCfhbUvjaWmmi5deUmPpYI5LxP/rmvbo7dB5DM9cIBBUA==}
     engines: {node: '>=20'}
     peerDependencies:
       '@launchdarkly/node-server-sdk': ^9.0.0
@@ -13435,6 +13447,7 @@ packages:
   '@opentelemetry/propagator-jaeger@2.11.0':
     resolution: {integrity: sha512-RUOqgoIqXOPQTOhpBrs07Y8sBlxVoLY5Fka6ueZ0prW+k6fWQsba/nHDY4gm+gmfuwtRqbX5Y9YKhDvktjbIqQ==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Package no longer supported. See https://github.com/open-telemetry/opentelemetry-js/pull/7077
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
@@ -13505,12 +13518,14 @@ packages:
   '@opentelemetry/sdk-trace-base@2.11.0':
     resolution: {integrity: sha512-H19x/TX/LZdqiYOjM7fqtSxwlplC5pgelavqbQdHbhdq0q/AI/TGkM2dfGuuynTXmJPeF2HoZVoPDu+TGoW78A==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.3.0 <1.10.0'
 
   '@opentelemetry/sdk-trace-node@2.11.0':
     resolution: {integrity: sha512-CuvCMJmZxswhNLlM2LfuLOW3h3fZujA4hsG4B+Sz4dX2zvaXO8Ng74cnDHWD64gLszTlhiG3c0iNUjj4g+0/sA==}
     engines: {node: ^18.19.0 || >=20.6.0}
+    deprecated: Use @opentelemetry/sdk-trace package
     peerDependencies:
       '@opentelemetry/api': '>=1.0.0 <1.10.0'
 
@@ -29705,32 +29720,30 @@ snapshots:
     dependencies:
       '@launchdarkly/js-client-sdk-common': 1.32.2
 
-  '@launchdarkly/js-sdk-common@2.26.1': {}
-
   '@launchdarkly/js-sdk-common@2.27.0': {}
 
-  '@launchdarkly/js-server-sdk-common@2.21.5':
+  '@launchdarkly/js-server-sdk-common@2.21.6':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.26.1
+      '@launchdarkly/js-sdk-common': 2.27.0
       semver: 7.5.4
 
-  '@launchdarkly/node-server-sdk@9.13.7(supports-color@10.2.2)':
+  '@launchdarkly/node-server-sdk@9.13.8(supports-color@10.2.2)':
     dependencies:
-      '@launchdarkly/js-server-sdk-common': 2.21.5
+      '@launchdarkly/js-server-sdk-common': 2.21.6
       https-proxy-agent: 7.0.6(supports-color@10.2.2)
       launchdarkly-eventsource: 2.2.0
     transitivePeerDependencies:
       - supports-color
 
-  '@launchdarkly/openfeature-js-server-common@2.0.2(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-js-server-common@2.0.3(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/js-sdk-common': 2.26.1
+      '@launchdarkly/js-sdk-common': 2.27.0
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
-  '@launchdarkly/openfeature-node-server@2.0.6(@launchdarkly/node-server-sdk@9.13.7(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
+  '@launchdarkly/openfeature-node-server@2.0.7(@launchdarkly/node-server-sdk@9.13.8(supports-color@10.2.2))(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))':
     dependencies:
-      '@launchdarkly/node-server-sdk': 9.13.7(supports-color@10.2.2)
-      '@launchdarkly/openfeature-js-server-common': 2.0.2(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
+      '@launchdarkly/node-server-sdk': 9.13.8(supports-color@10.2.2)
+      '@launchdarkly/openfeature-js-server-common': 2.0.3(@openfeature/server-sdk@1.23.0(@openfeature/core@1.12.0))
       '@openfeature/server-sdk': 1.23.0(@openfeature/core@1.12.0)
 
   '@leichtgewicht/ip-codec@2.0.5':
