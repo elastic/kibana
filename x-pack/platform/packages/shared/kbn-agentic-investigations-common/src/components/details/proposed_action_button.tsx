@@ -50,6 +50,9 @@ export interface ProposedActionButtonProps {
   isSubmitting?: 'applying' | 'declining';
   /** Who's approving/declining, for the modal's "Applying"/"Declining" caption. */
   currentActorName?: string;
+  /** Marks a to-do proposal that was marked as applied as not applied, from the modal. */
+  onReopen?: () => Promise<void>;
+  isReopening?: boolean;
   'data-test-subj'?: string;
 }
 
@@ -141,6 +144,8 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
     onDismiss,
     isSubmitting,
     currentActorName,
+    onReopen,
+    isReopening,
     'data-test-subj': dataTestSubj,
   }) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -235,6 +240,8 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
             onDismiss={onDismiss}
             isSubmitting={isSubmitting}
             currentActorName={currentActorName}
+            onReopen={onReopen}
+            isReopening={isReopening}
             data-test-subj={dataTestSubj ? `${dataTestSubj}-modal` : undefined}
           />
         )}
