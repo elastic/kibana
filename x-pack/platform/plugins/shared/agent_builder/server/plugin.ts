@@ -390,6 +390,7 @@ export class AgentBuilderPlugin
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
       isomer,
+      files: startDeps.files,
       getSurfaceBaseUrl: (spaceId) => {
         const kibanaUrl = this.getKibanaBaseUrl?.();
         return kibanaUrl ? addSpaceIdToPath(kibanaUrl, spaceId) : undefined;
