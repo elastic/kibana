@@ -17,9 +17,7 @@ describe('Utils.formatErrorToStr', () => {
   });
 
   it('keeps a string error as is', () => {
-    expect(Utils.formatErrorToStr('Signal-driven data URLs are not supported.')).toBe(
-      'Signal-driven data URLs are not supported.'
-    );
+    expect(Utils.formatErrorToStr('Invalid Vega specification')).toBe('Invalid Vega specification');
   });
 
   it('does not stringify other values', () => {

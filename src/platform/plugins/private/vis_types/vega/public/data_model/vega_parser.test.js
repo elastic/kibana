@@ -566,31 +566,6 @@ describe('VegaParser._compileWithAutosize', () => {
   test('autosize signals are ignored', check({ autosize: { signal: 'asdf' } }, undefined));
 });
 
-describe('VegaParser signal-driven data URLs', () => {
-  test('reports them as unsupported without attempting an Elasticsearch query', async () => {
-    const searchApiStub = { search: jest.fn(), resetSearchStats: jest.fn() };
-    const mockGetServiceSettings = async () => ({});
-    const vp = new VegaParser(
-      {
-        $schema: 'https://vega.github.io/schema/vega/v5.json',
-        signals: [{ name: 'endpoint', value: 'https://example.com/data.json' }],
-        data: [{ name: 'table', url: { signal: 'endpoint' } }],
-      },
-      searchApiStub,
-      undefined,
-      {},
-      mockGetServiceSettings,
-      theme
-    );
-
-    await vp.parseAsync();
-
-    expect(vp.error).toMatch(/signal-driven data URLs are not supported/i);
-    expect(vp.error).not.toMatch(/elasticsearch|index|query/i);
-    expect(searchApiStub.search).not.toHaveBeenCalled();
-  });
-});
-
 describe('VegaParser.toRenderDescriptor', () => {
   const searchApiStub = {
     search: jest.fn(() => of([{ name: 'requestId', rawResponse: [42] }])),

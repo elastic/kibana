@@ -140,14 +140,14 @@ describe('VegaBaseView errors', () => {
       {
         parentEl,
         onError,
-        descriptor: { warnings: [], error: 'Signal-driven data URLs are not supported.' },
+        descriptor: { warnings: [], error: 'Invalid Vega specification' },
       }
     );
 
     await view.init();
 
-    expect(parentEl.textContent).toContain('Signal-driven data URLs are not supported.');
-    expect(onError).toHaveBeenCalledWith('Signal-driven data URLs are not supported.');
+    expect(parentEl.textContent).toContain('Invalid Vega specification');
+    expect(onError).toHaveBeenCalledWith('Invalid Vega specification');
   });
 });
 
