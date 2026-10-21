@@ -12,7 +12,7 @@ export const EXECUTION_SUCCESS_EVALUATOR = 'execution_success';
 
 /**
  * The share of runs that must complete with a recorded conclusion for the eval to pass. One agent
- * running out of its cycle budget shouldn't fail a 42-case benchmark, but an outage that leaves
+ * running out of its cycle budget shouldn't fail a 50-case benchmark, but an outage that leaves
  * many investigations without a conclusion (an exhausted sandbox pool, say) should.
  */
 export const MIN_EXECUTION_SUCCESS_RATE = 0.9;

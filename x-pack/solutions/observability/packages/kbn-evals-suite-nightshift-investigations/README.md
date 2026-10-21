@@ -505,8 +505,12 @@ NIGHTSHIFT_DATASETS=synthetic-smoke node scripts/evals run --suite nightshift-in
 
 ## ORCA benchmark
 
-`orcabench` runs the 42 incidents of the Golden dataset `nightshift/orca-ech-full-20261019`
-against the ORCA telemetry cluster. CI runs it as its own shard under the
+`orcabench` runs ORCA's 50 sampled tasks from the Golden dataset `nightshift/orca-sampled50-v2`
+against the ORCA telemetry cluster: 40 incident tasks over 28 incidents and 10 no-incident
+controls. Each question uses ORCA's own wording: a stated current time, a vague or offset report
+time and the user-facing symptom, without the incident onset or an analysis window. The cluster
+holds all six days, so an agent can still read telemetry after the stated current time; each
+example records it as `metadata.current_time`. CI runs it as its own shard under the
 `evals:nightshift-investigations` label, next to the `customer0` shard that runs the smoke and
 trace-only evals, so each Scout server's telemetry connector points at one cluster.
 
@@ -519,7 +523,7 @@ the agent's manifest gets.
 - The dataset's ID, case count and content digest are pinned in
   [`orca_dataset.ts`](evals/investigation/orca_dataset.ts). A changed release fails before any
   investigation starts, as does a source whose document counts differ from the snapshot.
-- Each incident runs once, at most eight at a time, and Playwright doesn't retry the test.
+- Each task runs once, at most eight at a time, and Playwright doesn't retry the test.
 - The eval fails when fewer than 90% of investigations complete, or when none returned ORCA
   telemetry. Judge scores are advisory.
 - Both shards draw on one sandbox pool. When it runs out, investigations end without a
