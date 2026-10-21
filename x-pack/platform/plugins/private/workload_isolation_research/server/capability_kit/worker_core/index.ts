@@ -68,6 +68,8 @@ export {
   toPlainConfig,
   verifyRegistryReadiness,
 } from './policies';
+export { reconstructPluginConfig, restoreSchemaInput } from './reconstruct_config';
+export type { PluginConfigSchema } from './reconstruct_config';
 export type { ReadinessToken, SoRouteInput, SoTypeFingerprintInput } from './policies';
 export { captureParentSpan, runWithParentSpan } from './parent_span';
 export type { ParentSpanContext } from './parent_span';
