@@ -1,9 +1,35 @@
 {
-  "sha1": "80d438af882b288d2540dfdaf7f8e16f31e576a5",
+  "sha1": "f2caefc1e6588d6a2f54fc1ee85af8a0117f39f7",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "28735694e3be44d-38a863d2228c7ae",
+      "title": "Alert actions cleanup task is scheduled to run daily",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/alert_actions_cleanup.spec.ts",
+        "line": 39,
+        "column": 49
+      }
+    },
+    {
+      "id": "28735694e3be44d-e72c64b0c42bb49",
+      "title": "Alert actions cleanup task deletes expired dispatcher docs and keeps every other action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/alert_actions_cleanup.spec.ts",
+        "line": 43,
+        "column": 29
+      }
+    },
     {
       "id": "af81b6bb218cc8d-c5e946cce3fe120",
       "title": "Alerting v2 data stream ingest timestamp pipeline .rule-events: installs the managed ingest pipeline",
@@ -644,8 +670,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/engine/api/tests/telemetry.spec.ts",
-        "line": 168,
-        "column": 12
+        "line": 165,
+        "column": 7
       }
     }
   ]
