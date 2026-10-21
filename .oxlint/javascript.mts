@@ -87,10 +87,6 @@ export const javascriptRules: DummyRuleMap = {
   // '@eslint-community/eslint-comments/no-unused-disable': 'error',
   // '@eslint-community/eslint-comments/no-unused-enable': 'error',
   'guard-for-in': 'error',
-  // 'import/named': 'error',
-  // 'import/namespace': 'error',
-  // 'import/no-duplicates': 'error',
-  // 'import/no-named-as-default-member': 'error',
   // 'import/order': [
   //   'error',
   //   {
@@ -158,17 +154,11 @@ export const javascriptOverrides: OxlintOverride[] = [
       'no-redeclare': 'error',
       'no-restricted-globals': ['error', ...RESTRICTED_GLOBALS],
       'no-sequences': 'error',
-      // ESLint 8 ignored unused catch parameters by default; oxlint reports them.
-      'no-unused-vars': ['error', { caughtErrors: 'none' }],
       'no-use-before-define': ['error', 'nofunc'],
       'no-var': 'error',
       'one-var': ['error', 'never'],
       'prefer-const': 'error',
       'valid-typeof': 'error',
-      'import/default': 'error',
-      'import/export': 'error',
-      'import/no-named-as-default': 'error',
-      'import/no-dynamic-require': 'error',
       'prefer-object-spread': 'error',
     },
   },

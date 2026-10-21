@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getAiIndexDest } from '@kbn/context-engine-plugin/common/ai_index_dest';
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
 import type { CommonStepDefinition } from '@kbn/workflows-extensions/common';
@@ -14,6 +15,10 @@ export const PACKAGE_REPORT_STEP_ID = 'hunt.packageReport' as const;
 
 /** AI index Detection Watch's coverage sweep polls. Must stay in lockstep with coverage_worker.yaml. */
 export const HUNT_COVERAGE_AI_INDEX_ID = 'security-investigations' as const;
+
+// Context Engine owns how an AI index id maps to a backing store, so ask it rather than
+// rebuilding the prefix here and drifting when it changes.
+export const HUNT_COVERAGE_AI_INDEX_DEST = getAiIndexDest('index', HUNT_COVERAGE_AI_INDEX_ID);
 
 /**
  * Upper bound on per-proposal bullets embedded in the run conclusion. The conclusion lands in a
@@ -37,7 +42,7 @@ export const packageReportInputSchema = z.object({
   ),
   reportId: boundedId.describe('Threat report id this Investigation is bound to.'),
   investigationConversationId: boundedId.describe(
-    'Investigation conversation id; must equal uuidv5(hunt:report:{reportId}).'
+    'Investigation conversation id; must equal uuidv5(hunt:report:{spaceId}|{reportId}).'
   ),
   runId: boundedId.describe('Current-run id; packaging reads only attachments scoped to this run.'),
   /**
@@ -189,17 +194,12 @@ export const packageReportMintPayloadSchema = z.object({
   impact: z.string().optional(),
   actionWorkflowId: z.string().optional(),
   actionInput: z.record(z.string(), z.unknown()).optional(),
-  /** Host name when the mint is host-scoped; absent on identity mints and the analyst recommendation. */
+  /** Host name when the mint is host-scoped; absent on the analyst recommendation. */
   hostName: z.string().optional(),
-  /** What the proposal acts on; absent on the analyst recommendation. `hostName` stays for host and process mints. */
+  /** What the proposal acts on; absent on the analyst recommendation. `hostName` is set whenever it is present. */
   subject: z
     .object({
-      kind: z.enum(['host', 'process', 'user', 'service']),
-      // Matches the SSE entity value cap (`entityRefSchema.value` in
-      // significant_security_event_schema.ts): a user/service subject's value is read
-      // straight from an SSE entity, which allows up to 2048 (ARN-shaped service names
-      // run long). A tighter cap here would throw on mint and fail the whole package
-      // result, including the host/process proposals bundled in the same array.
+      kind: z.enum(['host', 'process']),
       value: z.string().max(2048),
     })
     .optional(),

@@ -164,6 +164,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }
@@ -975,6 +976,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }
@@ -1190,6 +1192,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }
@@ -2584,6 +2587,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }
@@ -2798,6 +2802,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }

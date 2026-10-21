@@ -16,53 +16,6 @@ import { RESTRICTED_GLOBALS } from './javascript.mts';
  * ESLint overrides. `plugin:`/`eslint:recommended` presets are expanded to the rules they enable.
  */
 export const teamOverrides: OxlintOverride[] = [
-  {
-    files: ['x-pack/platform/plugins/private/canvas/**/*.{js,mjs,ts,tsx}'],
-    rules: { 'jsx-a11y/click-events-have-key-events': 'off' },
-  },
-  {
-    files: ['x-pack/platform/plugins/private/cross_cluster_replication/**/*.{js,mjs,ts,tsx}'],
-    rules: { 'jsx-a11y/click-events-have-key-events': 'off' },
-  },
-  /**
-   * Allow default exports
-   */
-  {
-    files: [
-      '**/*.stories.tsx',
-      '**/*.test.js',
-      'src/platform/test/*/config.ts',
-      'src/platform/test/*/config_open.ts',
-      'src/platform/test/*/*.config.ts',
-      'src/platform/test/*/{tests,test_suites,apis,apps}/**/*',
-      'src/platform/test/server_integration/**/*.ts',
-      'x-pack/solutions/observability/plugins/apm/**/*.js',
-      'x-pack/platform/test/*/{tests,test_suites,apis,apps}/**/*',
-      'x-pack/platform/test/*api_integration*/**/*',
-      'x-pack/platform/test/*/*config.*ts',
-      'x-pack/solutions/*/test/**/{tests,test_suites,apis,apps,fixtures,index.ts}/**/*',
-      'x-pack/solutions/*/test/**/*config*.ts',
-      'x-pack/solutions/*/test/**/tests/**/*',
-      'x-pack/solutions/*/test/api_integration_deployment_agnostic/*configs/**/*',
-      'x-pack/solutions/*/test/alerting_api_integration/**/*',
-      'x-pack/solutions/*/test/serverless/*/configs/**/*',
-      'x-pack/platform/test/saved_object_api_integration/*/apis/**/*',
-      'x-pack/platform/test/ui_capabilities/*/tests/**/*',
-      'x-pack/platform/test/upgrade_assistant_integration/**/*',
-      '**/cypress.config.{js,ts}',
-      'x-pack/platform/test/serverless/shared/config*.ts',
-      'x-pack/platform/test/serverless/*/test_suites/**/*',
-      'x-pack/platform/test/serverless/functional/config*.ts',
-      'x-pack/platform/test/serverless/*/configs/**/*',
-      'x-pack/solutions/security/test/security_solution_api_integration/*/test_suites/**/*',
-      'x-pack/solutions/security/test/security_solution_api_integration/**/config*.ts',
-      '**/playwright.config.ts',
-      '**/playwright.v2.config.ts',
-      '**/*.playwright.config.ts',
-      '**/parallel.playwright.config.ts',
-    ],
-    rules: { 'import/no-default-export': 'off', 'import/no-named-as-default': 'off' },
-  },
   /**
    * Files that run BEFORE node version check
    */
@@ -163,21 +116,7 @@ export const teamOverrides: OxlintOverride[] = [
     ],
     rules: {
       'no-console': ['warn', { allow: ['error'] }],
-      'react/function-component-definition': [
-        'warn',
-        { namedComponents: 'function-declaration', unnamedComponents: 'arrow-function' },
-      ],
     },
-  },
-  {
-    files: [
-      'x-pack/solutions/observability/plugins/apm/**/*.stories.*',
-      'x-pack/solutions/observability/plugins/observability/**/*.stories.*',
-      'x-pack/solutions/observability/plugins/exploratory_view/**/*.stories.*',
-      'x-pack/solutions/observability/plugins/slo/**/*.stories.*',
-      'x-pack/solutions/observability/packages/**/*.{js,mjs,ts,tsx}',
-    ],
-    rules: { 'react/function-component-definition': 'off' },
   },
   {
     files: ['x-pack/solutions/observability/plugins/apm/server/**/route.ts'],
@@ -189,16 +128,6 @@ export const teamOverrides: OxlintOverride[] = [
     },
   },
   /**
-   * Automatic Import overrides
-   */
-  {
-    files: [
-      'x-pack/platform/plugins/shared/automatic_import/public/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/automatic_import/common/**/*.{js,mjs,ts,tsx}',
-    ],
-    rules: { 'import/no-nodejs-modules': 'error' },
-  },
-  /**
    * Security Solution overrides. These rules below are maintained and owned by
    * the people within the security-detection-engine team. Please see ping them
    * or check with them if you are encountering issues, have suggestions, or would
@@ -206,37 +135,6 @@ export const teamOverrides: OxlintOverride[] = [
    * evolve and change over time just like coding styles, so please do not hesitate to
    * reach out.
    */
-  {
-    files: [
-      'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/common/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/elastic_assistant/common/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/packages/shared/kbn-elastic-assistant/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/packages/shared/kbn-elastic-assistant-common/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/packages/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/security_solution/public/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/security_solution_ess/public/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/security_solution_serverless/public/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/security_solution/common/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/security_solution_ess/common/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/security_solution_serverless/common/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/timelines/public/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/timelines/common/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/cases/public/**/*.{js,mjs,ts,tsx}',
-      'x-pack/platform/plugins/shared/cases/common/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/shared/kbn-cell-actions/**/*.{js,mjs,ts,tsx}',
-    ],
-    rules: { 'import/no-nodejs-modules': 'error' },
-  },
-  /**
-   * Allow node.js imports for security solution test packages
-   */
-  {
-    files: [
-      'x-pack/solutions/security/packages/test-api-clients/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/packages/kbn-security-evals-matrix/**/*.{js,mjs,ts,tsx}',
-    ],
-    rules: { 'import/no-nodejs-modules': 'off' },
-  },
   {
     files: [
       'x-pack/solutions/security/plugins/ecs_data_quality_dashboard/**/*.{ts,tsx}',
@@ -351,64 +249,8 @@ export const teamOverrides: OxlintOverride[] = [
       'prefer-rest-params': 'error',
       'prefer-spread': 'error',
       'prefer-template': 'error',
-      'react/button-has-type': 'error',
-      'react/forbid-dom-props': 'error',
-      'react/no-children-prop': 'error',
-      'react/no-danger-with-children': 'error',
-      'react/no-did-mount-set-state': 'error',
-      'react/no-direct-mutation-state': 'error',
-      'react/no-find-dom-node': 'error',
-      'react/no-redundant-should-component-update': 'error',
-      'react/no-render-return-value': 'error',
-      'react/no-string-refs': 'error',
-      'react/no-this-in-sfc': 'error',
-      'react/no-unsafe': 'error',
-      'react/void-dom-elements-no-children': 'error',
-      'react/jsx-no-comment-textnodes': 'error',
-      'react/jsx-no-target-blank': 'error',
-      'react/jsx-fragments': 'error',
       'symbol-description': 'error',
       'vars-on-top': 'error',
-    },
-  },
-  /**
-   * Lists overrides. These rules below are maintained and owned by
-   * the people within the security-detection-engine team. Please see ping them
-   * or check with them if you are encountering issues, have suggestions, or would
-   * like to add, change, or remove any particular rule. Linters, Typescript, and rules
-   * evolve and change over time just like coding styles, so please do not hesitate to
-   * reach out.
-   */
-  {
-    files: [
-      'x-pack/solutions/security/plugins/lists/public/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/plugins/lists/common/**/*.{js,mjs,ts,tsx}',
-    ],
-    rules: { 'import/no-nodejs-modules': 'error' },
-  },
-  {
-    files: [
-      'x-pack/solutions/security/plugins/lists/public/*.{ts,tsx}',
-      'x-pack/solutions/security/plugins/lists/common/*.{ts,tsx}',
-    ],
-    rules: {
-      'react/button-has-type': 'error',
-      'react/forbid-dom-props': 'error',
-      'react/no-children-prop': 'error',
-      'react/no-danger-with-children': 'error',
-      'react/no-did-mount-set-state': 'error',
-      'react/no-did-update-set-state': 'error',
-      'react/no-direct-mutation-state': 'error',
-      'react/no-find-dom-node': 'error',
-      'react/no-redundant-should-component-update': 'error',
-      'react/no-render-return-value': 'error',
-      'react/no-string-refs': 'error',
-      'react/no-this-in-sfc': 'error',
-      'react/no-unsafe': 'error',
-      'react/void-dom-elements-no-children': 'error',
-      'react/jsx-no-comment-textnodes': 'error',
-      'react/jsx-no-target-blank': 'error',
-      'react/jsx-fragments': 'error',
     },
   },
   // Scout tests
@@ -438,19 +280,16 @@ export const teamOverrides: OxlintOverride[] = [
     excludeFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
     rules: {
       'no-empty-pattern': 'off',
-      // Check all function arguments to catch unused destructured params
-      'no-unused-vars': [
-        'error',
-        {
-          vars: 'all',
-          args: 'all',
-          ignoreRestSiblings: true,
-          varsIgnorePattern: '^_',
-          argsIgnorePattern: '^_',
-        },
-      ],
     },
   },
+  /**
+   * Lists overrides. These rules below are maintained and owned by
+   * the people within the security-detection-engine team. Please see ping them
+   * or check with them if you are encountering issues, have suggestions, or would
+   * like to add, change, or remove any particular rule. Linters, Typescript, and rules
+   * evolve and change over time just like coding styles, so please do not hesitate to
+   * reach out.
+   */
   {
     // ESLint matched `public/**/!(*.test).{js,mjs,ts,tsx}`; oxlint globs have no extglobs.
     files: ['x-pack/solutions/security/plugins/lists/public/**/*.{js,mjs,ts,tsx}'],
@@ -520,7 +359,6 @@ export const teamOverrides: OxlintOverride[] = [
       'no-useless-constructor': 'error',
       '@typescript-eslint/explicit-function-return-type': 'error',
       '@typescript-eslint/no-non-null-assertion': 'error',
-      'no-unused-vars': 'error',
       'no-template-curly-in-string': 'error',
       'prefer-destructuring': 'error',
     },
@@ -552,20 +390,10 @@ export const teamOverrides: OxlintOverride[] = [
   {
     files: ['src/platform/packages/shared/kbn-connector-specs/**/*.{js,mjs,ts,tsx}'],
     rules: {
-      'import/no-nodejs-modules': 'error',
       '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-non-null-assertion': 'error',
       '@typescript-eslint/no-this-alias': 'error',
-      'no-unused-vars': 'error',
     },
-  },
-  {
-    files: ['src/platform/packages/shared/kbn-connector-specs/**/*.test.{ts,tsx}'],
-    rules: { 'import/no-nodejs-modules': 'off' },
-  },
-  {
-    files: ['src/platform/packages/shared/kbn-connector-specs/src/specs/**/icon/*.{ts,tsx}'],
-    rules: { 'import/no-default-export': 'off' },
   },
   /**
    * Lens overrides
@@ -618,8 +446,6 @@ export const teamOverrides: OxlintOverride[] = [
     ],
     rules: {
       '@typescript-eslint/no-explicit-any': 'error',
-      // Custom content renders LLM-generated HTML; it must stay inside the sandboxed iframe.
-      'react/no-danger': 'error',
     },
   },
   {
@@ -650,17 +476,6 @@ export const teamOverrides: OxlintOverride[] = [
    */
   {
     files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
-    rules: {
-      'import/newline-after-import': 'error',
-      'react/jsx-boolean-value': ['error', 'never'],
-      'no-unused-vars': [
-        'error',
-        { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
-      ],
-    },
-  },
-  {
-    files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
     excludeFiles: [
       'x-pack/solutions/search/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}',
     ],
@@ -673,20 +488,6 @@ export const teamOverrides: OxlintOverride[] = [
     files: ['x-pack/platform/plugins/private/canvas/**/*.js'],
     rules: {
       radix: 'error',
-      'import/extensions': ['error', 'never', { json: 'always', less: 'always', svg: 'always' }],
-      'react/no-did-mount-set-state': 'error',
-      'react/no-did-update-set-state': 'error',
-      'react/jsx-boolean-value': 'error',
-      'react/forbid-elements': [
-        'error',
-        {
-          forbid: [
-            { element: 'EuiConfirmModal', message: 'Use <ConfirmModal> instead' },
-            { element: 'EuiPopover', message: 'Use <Popover> instead' },
-            { element: 'EuiIconTip', message: 'Use <TooltipIcon> instead' },
-          ],
-        },
-      ],
     },
   },
   {
@@ -708,21 +509,6 @@ export const teamOverrides: OxlintOverride[] = [
         },
       ],
     },
-  },
-  {
-    files: [
-      'src/platform/packages/shared/kbn-flot-charts/index.js',
-      'src/platform/packages/shared/kbn-flot-charts/index.d.ts',
-    ],
-    rules: { 'import/no-default-export': 'off' },
-  },
-  /**
-   * TSVB overrides
-   */
-  {
-    files: ['src/platform/plugins/shared/vis_types/timeseries/**/*.{js,mjs,ts,tsx}'],
-    excludeFiles: ['src/platform/plugins/shared/vis_types/timeseries/**/*playwright.config.ts'],
-    rules: { 'import/no-default-export': 'error' },
   },
   /**
    * Osquery overrides
@@ -769,23 +555,11 @@ export const teamOverrides: OxlintOverride[] = [
       'no-unreachable': 'error',
       'no-unsafe-finally': 'error',
       'no-unsafe-negation': 'error',
-      'no-unused-vars': ['error', { caughtErrors: 'none' }],
       'no-useless-backreference': 'error',
       'no-useless-catch': 'error',
       'no-useless-escape': 'error',
       'require-yield': 'error',
       'valid-typeof': 'error',
-      'react/jsx-key': 'error',
-      'react/jsx-no-comment-textnodes': 'error',
-      'react/jsx-no-target-blank': 'error',
-      'react/no-children-prop': 'error',
-      'react/no-danger-with-children': 'error',
-      'react/no-direct-mutation-state': 'error',
-      'react/no-find-dom-node': 'error',
-      'react/no-render-return-value': 'error',
-      'react/no-string-refs': 'error',
-      'react/no-unsafe': 'off',
-      'react/require-render-return': 'error',
     },
   },
   {
@@ -821,7 +595,6 @@ export const teamOverrides: OxlintOverride[] = [
       '@typescript-eslint/no-this-alias': 'error',
       '@typescript-eslint/no-unnecessary-type-constraint': 'error',
       '@typescript-eslint/no-unsafe-declaration-merging': 'error',
-      'no-unused-vars': 'off',
       '@typescript-eslint/no-wrapper-object-types': 'error',
       '@typescript-eslint/prefer-as-const': 'error',
       '@typescript-eslint/prefer-namespace-keyword': 'error',
@@ -967,22 +740,6 @@ export const teamOverrides: OxlintOverride[] = [
       'prefer-rest-params': 'error',
       'prefer-spread': 'error',
       'prefer-template': 'error',
-      'react/button-has-type': 'error',
-      'react/forbid-dom-props': 'error',
-      'react/no-children-prop': 'error',
-      'react/no-danger-with-children': 'error',
-      'react/no-did-mount-set-state': 'error',
-      'react/no-direct-mutation-state': 'error',
-      'react/no-find-dom-node': 'error',
-      'react/no-redundant-should-component-update': 'error',
-      'react/no-render-return-value': 'error',
-      'react/no-string-refs': 'error',
-      'react/no-this-in-sfc': 'error',
-      'react/no-unsafe': 'error',
-      'react/void-dom-elements-no-children': 'error',
-      'react/jsx-no-comment-textnodes': 'error',
-      'react/jsx-no-target-blank': 'error',
-      'react/jsx-fragments': 'error',
       'symbol-description': 'error',
       'vars-on-top': 'error',
       '@typescript-eslint/no-non-null-assertion': 'error',
@@ -999,20 +756,6 @@ export const teamOverrides: OxlintOverride[] = [
         },
       ],
     },
-  },
-  /**
-   * Workflows Team: public and common rules
-   */
-  {
-    files: [
-      'src/platform/plugins/shared/workflows_management/public/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/workflows_management/common/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/workflows_extensions/public/**/*.{js,mjs,ts,tsx}',
-      'src/platform/plugins/shared/workflows_extensions/common/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/shared/kbn-workflows/**/*.{js,mjs,ts,tsx}',
-      'src/platform/packages/shared/kbn-workflows-ui/**/*.{js,mjs,ts,tsx}',
-    ],
-    rules: { 'import/no-nodejs-modules': 'error' },
   },
   /**
    * Workflows Team: test files
@@ -1036,7 +779,6 @@ export const teamOverrides: OxlintOverride[] = [
   {
     files: ['src/platform/packages/shared/kbn-workflows/scripts/**/*.{js,ts}'],
     rules: {
-      'import/no-nodejs-modules': 'off',
       'no-console': 'off',
       'unicorn/no-process-exit': 'off',
     },
@@ -1104,29 +846,5 @@ export const nestedConfigOverrides: OxlintOverride[] = [
       'x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/**/*.spec.ts',
     ],
     rules: { '@typescript-eslint/triple-slash-reference': 'off' },
-  },
-  {
-    files: [
-      'src/platform/packages/shared/kbn-synthtrace-client/src/**/*',
-      'src/platform/packages/shared/kbn-synthtrace/src/**/*',
-      'x-pack/platform/plugins/shared/streams/test/scenarios/**/*',
-      'x-pack/solutions/observability/plugins/apm/test/scenarios/**/*',
-      'x-pack/solutions/observability/plugins/infra/test/scenarios/**/*',
-      'x-pack/solutions/observability/plugins/synthetics/test/scenarios/**/*',
-    ],
-    rules: { 'import/no-default-export': 'off' },
-  },
-  {
-    // Node.js-only packages: Playwright eval suites and the MITRE ATT&CK server package.
-    files: [
-      'x-pack/solutions/security/packages/kbn-evals-suite-alert-analysis-workflow/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/packages/kbn-evals-suite-alerts-rag/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery-fp-tp/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/packages/kbn-evals-suite-attack-discovery/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/packages/kbn-evals-suite-lead-generation/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/packages/kbn-evals-suite-security-alert-triage/**/*.{js,mjs,ts,tsx}',
-      'x-pack/solutions/security/packages/security-mitre-attack-server/**/*.{js,mjs,ts,tsx}',
-    ],
-    rules: { 'import/no-nodejs-modules': 'off' },
   },
 ];

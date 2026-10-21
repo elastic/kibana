@@ -175,7 +175,6 @@ export const typescriptOverrides: OxlintOverride[] = [
       'prefer-const': 'error',
       'prefer-rest-params': 'error',
       radix: 'error',
-      'import/no-default-export': 'error',
     },
   },
 ];
