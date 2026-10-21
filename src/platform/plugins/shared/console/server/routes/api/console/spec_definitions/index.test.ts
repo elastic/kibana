@@ -96,6 +96,17 @@ describe('WHEN serving Console spec definitions', () => {
     });
   });
 
+  it('SHOULD include the generated Kibana API endpoint definitions', async () => {
+    const [[, handler]] = mockRouter.get.mock.calls;
+    const response = await handler({}, httpServerMock.createKibanaRequest(), kibanaResponseFactory);
+    const payload = JSON.parse(String(response.payload));
+
+    expect(payload.kibana.endpoints['get-actions-connector-types']).toEqual({
+      methods: ['GET'],
+      patterns: ['api/actions/connector_types'],
+    });
+  });
+
   it('SHOULD return not modified when the cached response ETag matches', async () => {
     const [[, handler]] = mockRouter.get.mock.calls;
     const firstResponse = await handler(

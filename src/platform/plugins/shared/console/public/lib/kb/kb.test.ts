@@ -167,6 +167,58 @@ describe('Knowledge base', () => {
     });
   });
 
+  describe('Kibana API endpoints', () => {
+    const suggestionsFor = (tokenPath: string[], isKibanaRequest: boolean) => {
+      const context: AutoCompleteContext = {};
+      populateContext(
+        tokenPath,
+        context,
+        null,
+        true,
+        kb.getTopLevelUrlCompleteComponents('GET', isKibanaRequest)
+      );
+      return (context.autoCompleteSet ?? []).map((term) => term.name);
+    };
+
+    beforeEach(() => {
+      kb._test.setKibanaApi({
+        'get-spaces-space-id': { methods: ['GET'], patterns: ['api/spaces/space/{id}'] },
+        'get-features': { methods: ['GET'], patterns: ['api/features'] },
+      });
+    });
+
+    afterEach(() => {
+      kb._test.setKibanaApi({});
+    });
+
+    it('suggests Kibana API paths when resolving a Kibana request', () => {
+      expect(suggestionsFor([], true)).toEqual(['api/spaces/space', 'api/features']);
+      expect(suggestionsFor(['api', 'spaces', 'space'], true)).toEqual([]);
+    });
+
+    it('does not leak Kibana API paths into Elasticsearch requests', () => {
+      expect(suggestionsFor([], false)).toEqual([]);
+    });
+
+    it('does not suggest the Elasticsearch url params for Kibana endpoints', () => {
+      const context: AutoCompleteContext = { method: 'GET' };
+      populateContext(
+        ['api', 'features', '__url_path_end__'],
+        context,
+        null,
+        true,
+        kb.getTopLevelUrlCompleteComponents('GET', true)
+      );
+      expect(context.endpoint?.id).toBe('get-features');
+      expect(context.endpoint?.paramsAutocomplete.getTopLevelComponents('GET')).toEqual([]);
+    });
+
+    it('ignores non-record values', () => {
+      kb._test.setKibanaApi('not a record');
+      expect(suggestionsFor([], true)).toEqual(['api/spaces/space', 'api/features']);
+    });
+  });
+
   describe('WHEN body rules use a generated shared global', () => {
     it('SHOULD resolve the shared rules through the existing scope-link consumer', () => {
       const api = kb._test.loadApisFromJson({

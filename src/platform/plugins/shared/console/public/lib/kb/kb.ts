@@ -26,6 +26,9 @@ import { isRecord } from '../../../common/utils/record_utils';
 import type { KibanaApiDocLinksMap } from '../../../common/types/api_responses';
 
 let ACTIVE_API = new Api();
+// Kibana APIs don't accept the Elasticsearch url params (pretty, format, filter_path)
+const createKibanaApi = () => new Api(undefined, undefined, {});
+let KIBANA_API = createKibanaApi();
 let apiLoaded = false;
 let KIBANA_API_DOC_LINKS: KibanaApiDocLinksMap = {};
 
@@ -87,8 +90,8 @@ export function getEndpointBodyCompleteComponents(endpoint: string) {
   return components;
 }
 
-export function getTopLevelUrlCompleteComponents(method: string) {
-  return ACTIVE_API.getTopLevelUrlCompleteComponents(method);
+export function getTopLevelUrlCompleteComponents(method: string, isKibanaRequest = false) {
+  return (isKibanaRequest ? KIBANA_API : ACTIVE_API).getTopLevelUrlCompleteComponents(method);
 }
 
 export function getGlobalAutocompleteComponents(term: string, throwOnMissing?: boolean) {
@@ -149,6 +152,18 @@ function setActiveApi(api: Api | undefined) {
   ACTIVE_API = api;
 }
 
+function setKibanaApi(endpoints: unknown) {
+  if (!isRecord(endpoints)) {
+    return;
+  }
+  const api = createKibanaApi();
+  for (const [endpointName, endpointJson] of Object.entries(endpoints)) {
+    api.addEndpointDescription(endpointName, endpointJson);
+  }
+  api.name = 'kibana';
+  KIBANA_API = api;
+}
+
 function setKibanaApiDocLinks(docLinks: unknown) {
   if (isRecord(docLinks)) {
     KIBANA_API_DOC_LINKS = docLinks as KibanaApiDocLinksMap;
@@ -169,6 +184,7 @@ export async function loadActiveApi(http: HttpSetup) {
     if (isRecord(data)) {
       setActiveApi(loadApisFromJson({ es: data.es }));
       setKibanaApiDocLinks(isRecord(data.kibana) ? data.kibana.docLinks : undefined);
+      setKibanaApi(isRecord(data.kibana) ? data.kibana.endpoints : undefined);
     }
   } catch (err) {
     const responseText =
@@ -184,4 +200,5 @@ export const _test = {
   loadApisFromJson,
   setActiveApi,
   setKibanaApiDocLinks,
+  setKibanaApi,
 };

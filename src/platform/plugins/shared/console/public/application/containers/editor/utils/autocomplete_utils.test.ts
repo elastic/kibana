@@ -28,9 +28,9 @@ jest.mock('../../../../lib/kb', () => {
   const actual = jest.requireActual('../../../../lib/kb');
   return {
     ...actual,
-    getTopLevelUrlCompleteComponents: (method: string) => {
-      mockGetTopLevelUrlCompleteComponents(method);
-      return actual.getTopLevelUrlCompleteComponents(method);
+    getTopLevelUrlCompleteComponents: (method: string, isKibanaRequest?: boolean) => {
+      mockGetTopLevelUrlCompleteComponents(method, isKibanaRequest);
+      return actual.getTopLevelUrlCompleteComponents(method, isKibanaRequest);
     },
   };
 });
@@ -314,6 +314,34 @@ describe('autocomplete_utils', () => {
       expect(items.every((item) => item.detail === 'index')).toBe(true);
     });
 
+    describe('WHEN the url starts with the kbn: prefix', () => {
+      const getItems = (line: string) =>
+        getUrlPathCompletionItems(
+          { getValueInRange: () => line } as unknown as monaco.editor.ITextModel,
+          { lineNumber: 1, column: line.length + 1 } as unknown as monaco.Position
+        );
+
+      beforeEach(() => mockGetTopLevelUrlCompleteComponents.mockClear());
+
+      it.each(['GET kbn:/', 'GET kbn:', 'GET kbn:/api/sp', 'GET kbn:api'])(
+        'resolves "%s" against the Kibana API definitions',
+        (line) => {
+          getItems(line);
+          expect(mockGetTopLevelUrlCompleteComponents).toHaveBeenCalledWith('GET', true);
+        }
+      );
+
+      it('strips the prefix from the url tokens passed to the engine', () => {
+        getItems('GET kbn:/api/spaces/');
+        expect(mockPopulateContext.mock.calls.at(-1)?.[0][0]).toEqual(['api', 'spaces']);
+      });
+
+      it('does not use the Kibana API definitions for Elasticsearch requests', () => {
+        getItems('GET _cat/');
+        expect(mockGetTopLevelUrlCompleteComponents).toHaveBeenCalledWith('GET', false);
+      });
+    });
+
     it('suggest only endpoints matching prefix, excluding dot-prefixed ones, if no comma and no dot', () => {
       const mockModel = {
         getValueInRange: () => 'GET _search',
@@ -345,7 +373,7 @@ describe('autocomplete_utils', () => {
       } as unknown as monaco.editor.ITextModel;
       const mockPosition = { lineNumber: 1, column: 6 } as unknown as monaco.Position;
       getUrlPathCompletionItems(mockModel, mockPosition);
-      expect(mockGetTopLevelUrlCompleteComponents).toHaveBeenLastCalledWith('POST');
+      expect(mockGetTopLevelUrlCompleteComponents).toHaveBeenLastCalledWith('POST', false);
     });
 
     it('suggests all endpoints and indices, including dot-prefixed ones, if last char is a dot', () => {
