@@ -278,7 +278,6 @@ export const streamsUnitStatsMetaSchema = z.object({
 });
 
 export const streamsUnitStatsResponseSchema = z.object({
-  error: streamsUnitStatsErrorSchema.optional(),
   components: z.object({
     /** Component references by their IDs. */
     destinations: z.record(z.string(), streamsUnitStatsDestinationResultSchema),

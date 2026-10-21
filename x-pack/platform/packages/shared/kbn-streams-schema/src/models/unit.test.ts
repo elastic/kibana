@@ -223,15 +223,14 @@ describe('streams unit stats response schema', () => {
     ).toBe(true);
   });
 
-  it('parses a component-level error and a response-level error with an unknown code', () => {
+  it('parses a component-level error with an unknown code', () => {
     expect(
       streamsUnitStatsResponseSchema.safeParse({
-        error: { code: 'some_future_code', reason: 'The stats stream is unreadable.' },
         components: {
           destinations: {
             'es-prod': {
               ...noDataDestination,
-              error: { code: 'not_found', reason: 'Not in unit.' },
+              error: { code: 'some_future_code', reason: 'Not in unit.' },
             },
           },
           processors: {},
