@@ -70,6 +70,8 @@ module.exports = {
 
     'no-new-func': 'error',
     'no-implied-eval': 'error',
+    'no-eval': 'error',
+    'no-script-url': 'error',
     'no-prototype-builtins': 'error',
 
     /**
