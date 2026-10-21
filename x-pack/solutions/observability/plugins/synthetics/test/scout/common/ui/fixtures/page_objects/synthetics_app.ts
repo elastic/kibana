@@ -91,7 +91,7 @@ export class SyntheticsAppPage {
     await this.ensureIsOnMonitorConfigPage();
     await this.page.testSubj.click('syntheticsMonitorConfigSubmitButton');
     const msg = isUpdate ? 'Monitor updated successfully.' : 'Monitor added successfully.';
-    await expect(this.page.getByText(msg)).toBeVisible();
+    await expect(this.page.testSubj.locator('globalToastList').getByText(msg)).toBeVisible();
     await this.page.testSubj.locator('toastCloseButton').click();
   }
 
