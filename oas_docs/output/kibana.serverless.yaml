@@ -180913,15 +180913,21 @@ components:
       title: Multi Field Key
       type: object
     Kibana_HTTP_APIs_visMultiValueCell:
+      anyOf:
+        - items:
+            type: string
+          maxItems: 100
+          type: array
+        - items:
+            type: number
+          maxItems: 100
+          type: array
+        - items:
+            type: boolean
+          maxItems: 100
+          type: array
       description: Values of a multi-value cell.
-      items:
-        anyOf:
-          - type: string
-          - type: number
-          - type: boolean
-      maxItems: 100
       title: Multi Value Cell
-      type: array
     Kibana_HTTP_APIs_visNoColor:
       additionalProperties: false
       description: Explicitly disables coloring
