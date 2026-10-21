@@ -532,9 +532,7 @@ NIGHTSHIFT_DATASETS=orcabench node scripts/evals start \
   --suite nightshift-investigations --profile dev-vault
 ```
 
-The [`run-orcabench` skill](../../../../../.agents/skills/run-orcabench/SKILL.md) covers model
-selection and result checks. The ORCA telemetry is CC BY 4.0; keep the dataset's attribution when
-sharing results.
+The ORCA telemetry is CC BY 4.0; keep the dataset's attribution when sharing results.
 
 ## CI
 
