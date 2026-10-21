@@ -183,9 +183,7 @@ export const ReverseCategorizeBtn = ({
       onClick={() => {
         // Use the indexed/flattened value so category regex matching is not broken by
         // field formatting or clipboard escaping from valueToStringConverter.
-        findSimilarValues(
-          typeof rawValue === 'string' ? rawValue : rawValue == null ? '' : String(rawValue)
-        );
+        findSimilarValues(rawValue == null ? '' : String(rawValue));
         dataGridRef?.current?.closeCellPopover();
       }}
       iconType="search"
