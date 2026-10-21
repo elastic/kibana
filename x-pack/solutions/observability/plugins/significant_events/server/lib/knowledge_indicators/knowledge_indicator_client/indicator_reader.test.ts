@@ -31,13 +31,14 @@ const SOURCE = 'logs-app';
 
 function makeReader(): {
   reader: IndicatorReader;
+  revisionReader: RevisionReader;
   runEsql: jest.Mock;
 } {
   const runEsql = executeAndDecodeSource as jest.Mock;
   const logger = loggerMock.create();
   const revisionReader = new RevisionReader({} as ElasticsearchClient, logger, SPACE);
   const reader = new IndicatorReader(revisionReader);
-  return { reader, runEsql };
+  return { reader, revisionReader, runEsql };
 }
 
 function createQueryDoc(
@@ -106,7 +107,62 @@ describe('IndicatorReader.countKnowledgeIndicators', () => {
   });
 });
 
+describe('IndicatorReader overview counts', () => {
+  it('counts active features for the requested sources', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(12);
+
+    await expect(reader.countFeatures([SOURCE, 'logs-other'])).resolves.toBe(12);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`\`source.id\` IN ("${SOURCE}", "logs-other")`);
+    expect(query).toContain('"feature"');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain('excluded IS NULL OR excluded == FALSE');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+  });
+
+  it('counts active unbacked queries for the requested sources', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(4);
+
+    await expect(reader.countUnbackedQueries([SOURCE])).resolves.toBe(4);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`\`source.id\` IN ("${SOURCE}")`);
+    expect(query).toContain('"query"');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+    expect(query).toContain('`query.rule_backed` == FALSE');
+  });
+
+  it('counts rule-backed queries for the requested sources', async () => {
+    const { reader } = makeReader();
+    (executeCountQuery as jest.Mock).mockResolvedValueOnce(8);
+
+    await expect(reader.countRuleBackedQueries([SOURCE])).resolves.toBe(8);
+
+    const query = (executeCountQuery as jest.Mock).mock.calls[0][0].query.print('basic');
+    expect(query).toContain(`\`source.id\` IN ("${SOURCE}")`);
+    expect(query).toContain('"query"');
+    expect(query).toContain('deleted IS NULL OR deleted == FALSE');
+    expect(query).toContain(IS_NOT_EXPIRED_FRAGMENT);
+    expect(query).toContain('`query.rule_backed` == TRUE');
+  });
+});
+
 describe('IndicatorReader space scoping', () => {
+  it('retains the Elasticsearch IDs of the selected latest revisions', async () => {
+    const { revisionReader, runEsql } = makeReader();
+    const doc = createQueryDoc();
+    runEsql.mockResolvedValueOnce({ hits: [doc], esIds: ['latest-es-id'] });
+
+    await expect(revisionReader.fetchLatestRevisionEntries()).resolves.toEqual([
+      { esId: 'latest-es-id', doc },
+    ]);
+    expect(capturedQueryString(runEsql)).toContain('KEEP _id, _source');
+  });
+
   it('filters every read by the client space with no IS NULL fallback', async () => {
     const { reader, runEsql } = makeReader();
     runEsql.mockResolvedValueOnce({ hits: [] });

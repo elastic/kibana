@@ -128,9 +128,10 @@ export const runManualOrchestration = async ({
   start?: string;
   /**
    * How generation was triggered (`manual` | `schedule` | `workflow` |
-   * `agent_builder`). The always-on gate runs for every trigger EXCEPT
-   * `agent_builder` (the conversational skill has already ground-truthed its own
-   * data before delegating to the pipeline — see `shouldRunGate`).
+   * `agent_builder`). The gate runs for every trigger EXCEPT `agent_builder`
+   * (the conversational skill has already ground-truthed its own data before
+   * delegating to the pipeline), unless `workflowConfig.ground_truth_gate_enabled`
+   * is `false` — see `shouldRunGate`.
    */
   trigger?: string;
   workflowConfig: WorkflowConfig;
@@ -152,7 +153,9 @@ export const runManualOrchestration = async ({
         workflowConfig.alert_retrieval_workflows_enabled
       }, custom_workflow_ids=${JSON.stringify(
         workflowConfig.alert_retrieval_workflow_ids
-      )}, trigger=${trigger ?? 'unknown'}, pipelineTimeoutMs=${pipelineTimeoutMs}`
+      )}, ground_truth_gate_enabled=${workflowConfig.ground_truth_gate_enabled ?? true}, trigger=${
+        trigger ?? 'unknown'
+      }, pipelineTimeoutMs=${pipelineTimeoutMs}`
   );
 
   const orchestrationStart = Date.now();
@@ -259,13 +262,14 @@ export const runManualOrchestration = async ({
     // gate whose own additional retrieval was the SOLE source of alerts.
     const candidateCountBeforeGate = candidateResult.alerts.length;
 
-    // Always-on ground-truthing gate (generation phase, before the untouched
-    // generate workflow). Runs for every trigger EXCEPT `agent_builder` (the
-    // conversational skill already ground-truthed its own data). The gate is the
+    // Ground-truthing gate (generation phase, before the untouched generate
+    // workflow). Runs for every trigger EXCEPT `agent_builder` (the
+    // conversational skill already ground-truthed its own data), unless the
+    // caller disabled it because it owns the false-positive decision. The gate is the
     // final arbiter of the candidate set: it keeps a subset by `_id` (original
     // bytes pass through), may add net-new alerts (Skill toggle), and threads a
     // `conversation_id` for the report phase. Fail-closed: a gate failure throws.
-    if (shouldRunGate(trigger)) {
+    if (shouldRunGate(trigger, workflowConfig.ground_truth_gate_enabled)) {
       timings.gateStart = Date.now();
       candidateResult = await runGatePhase({
         alertsIndexPattern,
