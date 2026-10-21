@@ -15,10 +15,6 @@ import type {
   EntityInventoryAppStartDependencies,
 } from './types';
 
-const AppComponent = React.lazy(() =>
-  import('./application').then((m) => ({ default: m.EntityInventoryApp }))
-);
-
 export class EntityInventoryAppPlugin
   implements
     Plugin<
@@ -40,7 +36,7 @@ export class EntityInventoryAppPlugin
       visibleIn: [],
       mount: async ({ element }) => {
         const { renderApp } = await import('./application');
-        return renderApp(element);
+        return renderApp(element, core.getStartServices);
       },
     });
 
@@ -48,9 +44,16 @@ export class EntityInventoryAppPlugin
   }
 
   start(
-    _core: CoreStart,
-    _plugins: EntityInventoryAppStartDependencies
+    core: CoreStart,
+    plugins: EntityInventoryAppStartDependencies
   ): EntityInventoryAppPublicStart {
+    // Created once so the host app does not remount it on every render.
+    const AppComponent = React.lazy(() =>
+      import('./application').then(({ createBoundEntityInventoryApp }) => ({
+        default: createBoundEntityInventoryApp({ core, plugins }),
+      }))
+    );
+
     return { getAppComponent: () => AppComponent };
   }
 }
