@@ -85,8 +85,9 @@ export interface SeveritySlotRenderProps {
 
 /**
  * A render prop that the consuming plugin provides to render an interactive severity picker in
- * the header blocks, beside status and assignees. When supplied, the header leaves the severity
- * to it rather than showing a read-only badge under the title.
+ * the header blocks, beside status and assignees. Called only while the investigation has a
+ * severity; the header then leaves the severity to it rather than showing a read-only badge under
+ * the title.
  */
 export type RenderSeverity = (props: SeveritySlotRenderProps) => React.ReactNode;
 

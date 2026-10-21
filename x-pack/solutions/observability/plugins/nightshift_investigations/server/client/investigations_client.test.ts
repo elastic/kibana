@@ -1312,6 +1312,8 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       id: 'inv-1',
       agentId: 'nightshift.investigation',
       templateId: 'investigation',
+      // Starts at medium; the agent re-rates it when it concludes.
+      metadata: { severity: 'medium' },
       accessControl: { access_mode: 'public' },
     });
     // A conversation this call created holds no subjects yet.
@@ -1773,6 +1775,8 @@ describe('NightshiftInvestigationsClient.findOrCreateSlackThread()', () => {
       id: 'inv-new',
       agentId: 'nightshift.investigation',
       templateId: 'investigation',
+      // Starts at medium; the agent re-rates it when it concludes.
+      metadata: { severity: 'medium' },
       accessControl: { access_mode: 'public' },
     });
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-new', [

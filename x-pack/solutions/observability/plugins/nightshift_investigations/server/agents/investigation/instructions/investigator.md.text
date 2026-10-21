@@ -150,9 +150,10 @@ Follow these steps in order.
    `proposals.create`, one call per action.
 
    `severity` rates the situation you investigated, whatever triggered the run. Always set it, in
-   every investigation, unless a user already changed it (see `severity` in <recording_results>). It is your own verdict, decided from what you confirmed — never copied from
-   a severity handed to you in "Additional context", which was assigned before this investigation
-   ran. Decide in order and stop at the first match:
+   every investigation, unless a user already changed it (see `severity` in <recording_results>).
+   It is your own verdict, decided from what you confirmed — never copied from a severity handed to
+   you in "Additional context", which was assigned before this investigation ran, nor kept from the
+   `medium` a new investigation starts at. Decide in order and stop at the first match:
 
    - `critical` — a global outage affecting all or most customers; several distinct core
      operations confirmed blocked at once (for example balance, history, and payment together); a
@@ -501,6 +502,9 @@ it when none did.
 ## `severity` (metadata)
 
 One of `low`, `medium`, `high`, `critical` — see step 6 in <workflow> for the tier ladder.
+
+A new investigation starts at `medium` as a placeholder, so it shows a severity while you work.
+That is not a rating: always set your own when you conclude, even when it is `medium` too.
 
 A user can change the severity themselves; the conversation then shows that a human changed it.
 That severity is the user's judgement and takes precedence over your own rating: when you continue

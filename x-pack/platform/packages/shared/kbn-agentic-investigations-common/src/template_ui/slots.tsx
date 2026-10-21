@@ -123,13 +123,16 @@ export const HeaderSlot = ({
         refetchConversation,
       })
     : undefined;
-  const severityNode = renderSeverity
-    ? renderSeverity({
-        conversationId: conversation.id,
-        severity: investigation.severity,
-        refetchConversation,
-      })
-    : undefined;
+  // Shown once the investigation has a severity: one that never got one (AlertZero's, today) has
+  // nothing to show or change.
+  const severityNode =
+    renderSeverity && investigation.severity
+      ? renderSeverity({
+          conversationId: conversation.id,
+          severity: investigation.severity,
+          refetchConversation,
+        })
+      : undefined;
   return (
     <ConversationDetailsFlyoutHeader
       investigation={investigation}
