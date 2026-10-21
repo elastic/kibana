@@ -70,6 +70,7 @@ export const GlobalHeader = React.memo(() => {
   const rulesAddPath = isRulesAddPath(pathname);
   const sharedExceptionListsPath = isSharedExceptionListsPath(pathname);
   const onboardingPath = isOnboardingPath(pathname);
+
   const { href, onClick } = useAddIntegrationsUrl();
 
   useEffect(() => {
@@ -117,6 +118,7 @@ export const GlobalHeader = React.memo(() => {
     rulesManagementPath,
     rulesAddPath,
     sharedExceptionListsPath,
+    onboardingPath,
   ]);
 
   return (
