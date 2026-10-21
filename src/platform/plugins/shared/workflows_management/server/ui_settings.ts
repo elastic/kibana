@@ -28,7 +28,7 @@ export const registerUISettings = (
   let licenseText = '';
 
   if (!plugins.serverless) {
-    licenseText = i18n.translate('workflowsManagement.uiSettings.ui.licenseText', {
+    licenseText = i18n.translate('workflows.uiSettings.ui.licenseText', {
       defaultMessage: 'Requires {license} license.',
       values: { license: '<b>enterprise</b>' },
     });
@@ -36,18 +36,18 @@ export const registerUISettings = (
 
   uiSettings.register({
     [WORKFLOWS_UI_SETTING_ID]: {
-      description: i18n.translate('workflowsManagement.uiSettings.ui.description', {
+      description: i18n.translate('workflows.uiSettings.ui.description', {
         defaultMessage:
           'Enables Elastic Workflows and related experiences. {licenseText} {learnMoreLink}',
         values: {
           learnMoreLink: `<a href="${WORKFLOWS_DOCUMENTATION_URL}" target="_blank" rel="noreferrer noopener">${i18n.translate(
-            'workflowsManagement.uiSettings.ui.learnMore',
+            'workflows.uiSettings.ui.learnMore',
             { defaultMessage: 'Learn more' }
           )}</a>.`,
           licenseText,
         },
       }),
-      name: i18n.translate('workflowsManagement.uiSettings.ui.name', {
+      name: i18n.translate('workflows.uiSettings.ui.name', {
         defaultMessage: 'Elastic Workflows',
       }),
       schema: schema.boolean(),
@@ -57,16 +57,13 @@ export const registerUISettings = (
       category: ['workflows'],
     },
     [WORKFLOWS_UI_SHOW_MANAGED_WORKFLOWS_SETTING_ID]: {
-      description: i18n.translate(
-        'workflowsManagement.uiSettings.showManagedWorkflows.description',
-        {
-          defaultMessage:
-            'Allows users with the required workflow privileges to display managed workflows and their executions in workflow experiences. ' +
-            'Managed workflows are maintained by Elastic and power certain functionality. ' +
-            'Editing, disabling, or deleting them may cause unexpected behavior or break product functionality.',
-        }
-      ),
-      name: i18n.translate('workflowsManagement.uiSettings.showManagedWorkflows.name', {
+      description: i18n.translate('workflows.uiSettings.showManagedWorkflows.description', {
+        defaultMessage:
+          'Allows users with the required workflow privileges to display managed workflows and their executions in workflow experiences. ' +
+          'Managed workflows are maintained by Elastic and power certain functionality. ' +
+          'Editing, disabling, or deleting them may cause unexpected behavior or break product functionality.',
+      }),
+      name: i18n.translate('workflows.uiSettings.showManagedWorkflows.name', {
         defaultMessage: 'Show managed workflows',
       }),
       schema: schema.boolean(),
@@ -75,13 +72,10 @@ export const registerUISettings = (
       category: ['workflows'],
     },
     [WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID]: {
-      description: i18n.translate(
-        'workflowsManagement.uiSettings.experimentalFeatures.description',
-        {
-          defaultMessage: 'Enables experimental features for Elastic Workflows.',
-        }
-      ),
-      name: i18n.translate('workflowsManagement.uiSettings.experimentalFeatures.name', {
+      description: i18n.translate('workflows.uiSettings.experimentalFeatures.description', {
+        defaultMessage: 'Enables experimental features for Elastic Workflows.',
+      }),
+      name: i18n.translate('workflows.uiSettings.experimentalFeatures.name', {
         defaultMessage: 'Elastic Workflows: Experimental Features',
       }),
       schema: schema.boolean(),
@@ -92,14 +86,11 @@ export const registerUISettings = (
       category: ['workflows'],
     },
     [WORKFLOWS_ERROR_PANEL_AI_DIAGNOSE_SETTING_ID]: {
-      description: i18n.translate(
-        'workflowsManagement.uiSettings.errorPanelAiDiagnose.description',
-        {
-          defaultMessage:
-            'Enables the "Diagnose with AI" action on failed-step error panels in the execution flyout.',
-        }
-      ),
-      name: i18n.translate('workflowsManagement.uiSettings.errorPanelAiDiagnose.name', {
+      description: i18n.translate('workflows.uiSettings.errorPanelAiDiagnose.description', {
+        defaultMessage:
+          'Enables the "Diagnose with AI" action on failed-step error panels in the execution flyout.',
+      }),
+      name: i18n.translate('workflows.uiSettings.errorPanelAiDiagnose.name', {
         defaultMessage: 'Workflows: AI Agent failure diagnosis',
       }),
       schema: schema.boolean(),
@@ -113,11 +104,11 @@ export const registerUISettings = (
 
   uiSettings.registerGlobal({
     [WORKFLOWS_LIBRARY_ENABLED_SETTING_ID]: {
-      name: i18n.translate('workflowsManagement.uiSettings.libraryEnabled.name', {
-        defaultMessage: 'Workflow Template Library',
+      name: i18n.translate('workflows.uiSettings.libraryEnabled.name', {
+        defaultMessage: 'Workflow Template library',
       }),
-      description: i18n.translate('workflowsManagement.uiSettings.libraryEnabled.description', {
-        defaultMessage: 'Enables the Workflow Template Library.',
+      description: i18n.translate('workflows.uiSettings.libraryEnabled.description', {
+        defaultMessage: 'Enables the Workflow Template library.',
       }),
       schema: schema.boolean(),
       value: true,
@@ -126,16 +117,13 @@ export const registerUISettings = (
       requiresPageReload: true,
     },
     [WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID]: {
-      name: i18n.translate('workflowsManagement.uiSettings.globalExecutionsViewEnabled.name', {
+      name: i18n.translate('workflows.uiSettings.globalExecutionsViewEnabled.name', {
         defaultMessage: 'Workflow Executions view',
       }),
-      description: i18n.translate(
-        'workflowsManagement.uiSettings.globalExecutionsViewEnabled.description',
-        {
-          defaultMessage:
-            'Enables the global Workflow Executions view and the execution flyout on the workflow detail page.',
-        }
-      ),
+      description: i18n.translate('workflows.uiSettings.globalExecutionsViewEnabled.description', {
+        defaultMessage:
+          'Enables the global Workflow Executions view and the execution flyout on the workflow detail page.',
+      }),
       schema: schema.boolean(),
       value: true,
       readonly: true,

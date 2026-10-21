@@ -506,7 +506,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.populate_file_data',
       {
         defaultMessage:
-          'Enable collection of entropy and header bytes on file events. Default: false.',
+          'Enable collection of entropy and header bytes on file events. For Defend 9.6 and later, default: true.',
       }
     ),
   },
@@ -1050,6 +1050,17 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       {
         defaultMessage:
           'Control the maximum file size in bytes that should be evaluated for malware. Default: 78643200.',
+      }
+    ),
+  },
+  {
+    key: 'linux.advanced.malware.elf_model',
+    first_supported_version: '9.6',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.malware.elf_model',
+      {
+        defaultMessage:
+          'Enable the machine learning model for ELF files. When disabled (false), blocklist, exceptionlist, and YARA scanning of ELF files continue. Default: true.',
       }
     ),
   },

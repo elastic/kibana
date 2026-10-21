@@ -91,6 +91,12 @@ describe('Investigation id binding', () => {
     );
   });
 
+  it('returns the hash material the alertzero plugin derives the id from', () => {
+    expect(
+      readRepoFile(alertzeroRoot, 'server/services/watches/hunt/common/hunt_investigation_id.ts')
+    ).toContain('`${HUNT_INVESTIGATION_ID_NAMESPACE}${spaceId}|${reportId}`');
+  });
+
   it('returns the frozen uuid namespace the alertzero plugin hashes with', () => {
     expect(
       readRepoFile(alertzeroRoot, 'server/services/watches/hunt/common/hunt_investigation_id.ts')
