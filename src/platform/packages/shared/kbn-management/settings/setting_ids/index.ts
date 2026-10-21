@@ -273,6 +273,8 @@ export const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING =
   'securitySolution:enableAssetInventory' as const;
 export const SECURITY_SOLUTION_ENABLE_SIEM_READINESS_SETTING =
   'securitySolution:enableSiemReadiness' as const;
+export const SECURITY_SOLUTION_ENABLE_ESQL_RULE_COMPUTED_FIELD_EXCEPTIONS_SETTING =
+  'securitySolution:enableEsqlRuleComputedFieldExceptions' as const;
 export const SECURITY_SOLUTION_ENABLE_CLOUD_CONNECTOR_SETTING =
   'securitySolution:enableCloudConnector' as const;
 export const SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES =

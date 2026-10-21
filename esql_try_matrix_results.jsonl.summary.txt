@@ -1,0 +1,7 @@
+Summary of the results in esql_try_matrix_results.jsonl
+  layer 1, setting off: {"MATCH":512}
+  layer 1, setting on: {"MATCH":512}
+  layer 2, setting off: {"MATCH":2520}
+  layer 2, setting on: {"MATCH":2520}
+  layer 3, setting off: {"MATCH":800}
+  layer 3, setting on: {"MATCH":800}

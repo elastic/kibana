@@ -182,6 +182,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'securitySolution:enableEsqlRuleComputedFieldExceptions': {
+    type: 'boolean',
+    _meta: {
+      description: 'Allows users to enable/disable exceptions on computed fields in ES|QL rules.',
+    },
+  },
+
   'securitySolution:enableAlertsAndAttacksAlignment': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },

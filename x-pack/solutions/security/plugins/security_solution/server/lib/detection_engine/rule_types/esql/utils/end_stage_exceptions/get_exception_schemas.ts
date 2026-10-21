@@ -1,0 +1,89 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import type { estypes } from '@elastic/elasticsearch';
+import { castArray } from 'lodash';
+import type { ElasticsearchClient } from '@kbn/core/server';
+
+import type { OutputColumns, SourceFieldTypes } from './types';
+
+/** `_field_caps` takes the field names in the URL, which is limited to 4kb, so they are requested in batches. */
+const MAX_FIELDS_PARAM_LENGTH = 2000;
+
+/** Splits the field names, in order, into groups whose names joined by commas fit in `MAX_FIELDS_PARAM_LENGTH` characters. Each `_field_caps` request then fits in the URL. A name longer than the limit goes alone in its own group. */
+const splitFieldsByParamLength = (fields: readonly string[]): string[][] => {
+  const batches: string[][] = [];
+  let current: string[] = [];
+  let length = 0;
+  for (const field of fields) {
+    if (current.length > 0 && length + field.length + 1 > MAX_FIELDS_PARAM_LENGTH) {
+      batches.push(current);
+      current = [];
+      length = 0;
+    }
+    current.push(field);
+    length += field.length + 1;
+  }
+  if (current.length > 0) {
+    batches.push(current);
+  }
+  return batches;
+};
+
+/**
+ * The types the given fields have in the source indices, and whether any index was read: with an `indexFilter`, none is
+ * when no index has documents in the time range. Fields that are not mapped are left out.
+ */
+export const fetchSourceFieldTypes = async ({
+  esClient,
+  indices,
+  fields,
+  indexFilter,
+}: {
+  esClient: ElasticsearchClient;
+  indices: string[];
+  fields: readonly string[];
+  /** Limits the indices that `_field_caps` reads, as the filter of the real request does. */
+  indexFilter?: estypes.QueryDslQueryContainer;
+}): Promise<{ sourceFieldTypes: SourceFieldTypes; hasIndices: boolean }> => {
+  const responses = await Promise.all(
+    splitFieldsByParamLength(fields).map((batch) =>
+      esClient.fieldCaps({
+        index: indices,
+        fields: batch,
+        ignore_unavailable: true,
+        allow_no_indices: true,
+        ...(indexFilter ? { index_filter: indexFilter } : {}),
+      })
+    )
+  );
+  const types = new Map<string, string[]>();
+  for (const response of responses) {
+    for (const [field, capabilities] of Object.entries(response.fields)) {
+      types.set(field, Object.keys(capabilities));
+    }
+  }
+  const hasIndices = responses.some(({ indices: found }) => castArray(found).length > 0);
+  return { sourceFieldTypes: types, hasIndices };
+};
+
+/** The columns, and their types, that the rule query outputs, read with a request that returns no rows and carries the filter of the real request. */
+export const fetchOutputColumns = async ({
+  esClient,
+  query,
+  filter,
+}: {
+  esClient: ElasticsearchClient;
+  query: string;
+  filter?: estypes.QueryDslQueryContainer;
+}): Promise<OutputColumns> => {
+  const response = await esClient.esql.query({
+    query: `${query}\n| LIMIT 0`,
+    ...(filter ? { filter } : {}),
+  });
+  return new Map(response.columns.map(({ name, type }) => [name, type]));
+};

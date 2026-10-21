@@ -103,6 +103,17 @@ export interface SecuritySharedParams<TParams extends RuleParams = RuleParams> {
   aggregatableTimestampField: string;
   unprocessedExceptions: ExceptionListItemSchema[];
   exceptionFilter: Filter | undefined;
+  /**
+   * Every exception item of the rule, expired ones included, before they are turned into `exceptionFilter`.
+   * Used by the ES|QL executor when the advanced setting `securitySolution:enableEsqlRuleComputedFieldExceptions`
+   * is enabled.
+   */
+  allExceptionItems?: ExceptionListItemSchema[];
+  /**
+   * When the execution started. The ES|QL executor decides with it which exception items have expired, as the
+   * common wrapper does when it builds `exceptionFilter`, whatever the end of the time range of the tuple is.
+   */
+  startedAt?: Date;
   alertTimestampOverride: Date | undefined;
   refreshOnIndexingAlerts: RefreshTypes;
   publicBaseUrl: string | undefined;
