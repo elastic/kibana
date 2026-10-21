@@ -240,6 +240,7 @@ export {
   type ConversationEventInput,
   type ConversationEvent,
   type EventActor,
+  getEventActorDisplayName,
   type BaseTimelineEventInput,
   type BaseTimelineEvent,
   type UserMessageEventData,
@@ -313,3 +314,8 @@ export {
   assertValidConversationEventType,
   type ConversationAddEventInput,
 } from './timeline_events';
+export type {
+  ChatCallbackEventResponse,
+  ChatCallbackFailureResponse,
+  ChatCallbackResponse,
+} from './callback';
