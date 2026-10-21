@@ -6,6 +6,7 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
+import type { IndexManagementPluginStart } from '@kbn/index-management-shared-types';
 import type { ManagementAppMountParams, ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -15,6 +16,7 @@ export interface BoostSetupDependencies {
 
 export interface BoostStartDependencies {
   share: SharePluginStart;
+  indexManagement?: IndexManagementPluginStart;
 }
 
 export type BoostServices = CoreStart &

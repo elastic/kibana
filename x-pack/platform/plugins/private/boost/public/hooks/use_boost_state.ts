@@ -37,6 +37,12 @@ export const useBoostState = () => {
   });
 };
 
+/** Refetches the state, such as after something outside boost changes the data sources. */
+export const useRefetchBoostState = () => {
+  const queryClient = useQueryClient();
+  return () => queryClient.invalidateQueries({ queryKey: BOOST_STATE_QUERY_KEY });
+};
+
 /** Mutations respond with the full updated state, which replaces the cached state. */
 const useBoostMutation = <TVariables>(
   request: (http: HttpStart, variables: TVariables) => Promise<BoostState>,

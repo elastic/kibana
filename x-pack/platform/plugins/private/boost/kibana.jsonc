@@ -19,6 +19,9 @@
       "features",
       "share"
     ],
+    "optionalPlugins": [
+      "indexManagement"
+    ],
     "requiredBundles": [
       "kibanaReact"
     ]

@@ -70,11 +70,30 @@ const mockIndexManagementLocator = {
   navigate: jest.fn(),
 };
 
+// Index Management's data stream details flyout, which closes asking to reload after a change.
+const MockDataStreamFlyout = ({
+  datastreamName,
+  onClose,
+}: {
+  datastreamName: string;
+  onClose: (shouldReload?: boolean) => void;
+}) => {
+  const { createElement } = jest.requireActual('react');
+  return createElement(
+    'div',
+    { 'data-test-subj': 'mockDataStreamFlyout' },
+    datastreamName,
+    createElement('button', { onClick: () => onClose(true) }, 'Delete and close')
+  );
+};
+const mockRefetchBoostState = jest.fn();
+
 jest.mock('../../hooks/use_boost_services', () => ({
   useBoostServices: () => ({
     application: { capabilities: mockCapabilities },
     share: { url: { locators: { get: () => mockIndexManagementLocator } } },
-    appParams: { setBreadcrumbs: jest.fn() },
+    indexManagement: { getDatastreamFlyoutComponent: () => MockDataStreamFlyout },
+    appParams: { setBreadcrumbs: jest.fn(), history: {} },
     chrome: { docTitle: { change: jest.fn() } },
     notifications: { toasts: { addSuccess: jest.fn() } },
   }),
@@ -137,6 +156,7 @@ const mockState: BoostState = {
 
 jest.mock('../../hooks/use_boost_state', () => ({
   useBoostState: () => ({ data: mockState }),
+  useRefetchBoostState: () => mockRefetchBoostState,
   useCreateRule: () => ({ mutate: jest.fn(), isLoading: false }),
   useUpdateRule: () => ({ mutate: jest.fn(), isLoading: false }),
   useUpdateDefaultRule: () => ({ mutate: jest.fn(), isLoading: false }),
@@ -245,6 +265,8 @@ describe('RuleDetailsPage', () => {
     const fallRow = within(matched).getByText('catalog-fall').closest('tr');
     expect(fallRow).toHaveTextContent('catalog-first');
     expect(fallRow).toHaveTextContent('4,000');
+    // The table always pages, however few it matches.
+    expect(matched).toHaveTextContent('Rows per page: 10');
   });
 
   it('links matches to their details in Index Management, striking through outranked ones', async () => {
@@ -266,15 +288,26 @@ describe('RuleDetailsPage', () => {
     });
   });
 
-  it('links a data stream to its details in Index Management, and counts its documents', async () => {
+  it("opens a data stream's details from Index Management in place, and counts its documents", async () => {
+    mockIndexManagementLocator.navigate.mockClear();
     renderAt(`/rules/${DEFAULT_DATA_STREAMS_RULE_NAME}`);
     const matched = screen.getByTestId('boostRuleMatched');
+    expect(within(matched).getByText('logs-app').closest('tr')).toHaveTextContent('3,000');
 
-    expect(await within(matched).findByRole('link', { name: 'logs-app' })).toHaveAttribute(
+    // The link still leads to Index Management, such as to open it in a new tab.
+    const link = await within(matched).findByRole('link', { name: 'logs-app' });
+    expect(link).toHaveAttribute(
       'href',
       '/app/management/data/index_management/data_streams/logs-app'
     );
-    expect(within(matched).getByText('logs-app').closest('tr')).toHaveTextContent('3,000');
+    await userEvent.click(link);
+    expect(screen.getByTestId('mockDataStreamFlyout')).toHaveTextContent('logs-app');
+    expect(mockIndexManagementLocator.navigate).not.toHaveBeenCalled();
+
+    // A change in the flyout, such as deleting the data stream, reloads what the page shows.
+    await userEvent.click(screen.getByRole('button', { name: 'Delete and close' }));
+    expect(screen.queryByTestId('mockDataStreamFlyout')).not.toBeInTheDocument();
+    expect(mockRefetchBoostState).toHaveBeenCalled();
   });
 
   it('filters matches by name, and by whether the rule applies to them', async () => {
@@ -290,6 +323,10 @@ describe('RuleDetailsPage', () => {
 
     await userEvent.type(matched.getByRole('searchbox', { name: 'Search indices' }), 'spring');
     expect(getNames()).toEqual(['catalog-spring']);
+    // The filters count what they'd show with the search.
+    expect(matched.getByTestId('boostMatchedFilter-applied')).toHaveTextContent('1');
+    expect(matched.getByTestId('boostMatchedFilter-outranked')).toHaveTextContent('0');
+    expect(matched.getByTestId('boostMatchedFilter-outranked')).toBeDisabled();
 
     await userEvent.clear(matched.getByRole('searchbox', { name: 'Search indices' }));
     await userEvent.click(matched.getByTestId('boostMatchedFilter-outranked'));

@@ -6,13 +6,14 @@
  */
 
 import type { MouseEvent, ReactNode } from 'react';
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types';
 import { useLocatorUrl } from '@kbn/share-plugin/public';
 import type { DataSourceType } from '../../common/types';
 import { useBoostServices } from '../hooks/use_boost_services';
+import { useRefetchBoostState } from '../hooks/use_boost_state';
 
 interface IndexManagementLinkProps {
   type: DataSourceType;
@@ -27,8 +28,9 @@ const isModifiedClick = (event: MouseEvent) =>
   event.button !== 0 || event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
 
 /**
- * An index or data stream, linking to its details in Index Management: an index's details page, or
- * a data stream's details flyout. Without Index Management, it's plain text.
+ * An index or data stream, linking to its details in Index Management. An index's details are a
+ * page there, and a data stream's a flyout, which opens in place. Without Index Management, it's
+ * plain text.
  */
 export const IndexManagementLink = ({
   type,
@@ -36,8 +38,18 @@ export const IndexManagementLink = ({
   children = name,
   className,
 }: IndexManagementLinkProps) => {
-  const { share } = useBoostServices();
+  const { appParams, indexManagement, share } = useBoostServices();
+  const refetchBoostState = useRefetchBoostState();
+  const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
   const locator = share.url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID);
+  // Created once, since each call returns a new component, which would remount the flyout.
+  const DataStreamFlyout = useMemo(
+    () =>
+      type === 'data_stream'
+        ? indexManagement?.getDatastreamFlyoutComponent({ history: appParams.history })
+        : undefined,
+    [type, indexManagement, appParams.history]
+  );
   const params: IndexManagementLocatorParams =
     type === 'data_stream'
       ? { page: 'data_streams_details', dataStreamName: name }
@@ -48,20 +60,38 @@ export const IndexManagementLink = ({
     return <span className={className}>{children}</span>;
   }
   return (
-    <EuiLink
-      // The URL resolves asynchronously, but a click navigates either way, within Kibana.
-      href={href || undefined}
-      onClick={(event: MouseEvent) => {
-        if (href && isModifiedClick(event)) {
-          return;
-        }
-        event.preventDefault();
-        locator.navigate(params);
-      }}
-      className={className}
-      data-test-subj="boostIndexManagementLink"
-    >
-      {children}
-    </EuiLink>
+    <>
+      <EuiLink
+        // The URL resolves asynchronously, but a click opens the details either way, within Kibana.
+        href={href || undefined}
+        onClick={(event: MouseEvent) => {
+          if (href && isModifiedClick(event)) {
+            return;
+          }
+          event.preventDefault();
+          if (DataStreamFlyout) {
+            setIsFlyoutOpen(true);
+          } else {
+            locator.navigate(params);
+          }
+        }}
+        className={className}
+        data-test-subj="boostIndexManagementLink"
+      >
+        {children}
+      </EuiLink>
+      {DataStreamFlyout && isFlyoutOpen && (
+        <DataStreamFlyout
+          datastreamName={name}
+          // The flyout can change or delete the data stream, after which it asks to reload.
+          onClose={(shouldReload?: boolean) => {
+            setIsFlyoutOpen(false);
+            if (shouldReload) {
+              refetchBoostState();
+            }
+          }}
+        />
+      )}
+    </>
   );
 };

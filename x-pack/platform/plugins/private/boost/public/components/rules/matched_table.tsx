@@ -47,7 +47,8 @@ interface MatchedTableProps {
 /**
  * The indices or data streams a rule matches, each linking to its details in Index Management, with
  * the rule that applies to it. Those a higher-ranked rule applies to instead are struck through. A
- * search box filters them by name, and a filter group by whether the rule applies to them.
+ * search box filters them by name, and a filter group by whether the rule applies to them, with how
+ * many of the search results each would show.
  */
 export const MatchedTable = ({ type, matched, supersededBy }: MatchedTableProps) => {
   const [query, setQuery] = useState('');
@@ -56,15 +57,15 @@ export const MatchedTable = ({ type, matched, supersededBy }: MatchedTableProps)
 
   const getStatus = ({ name }: BoostDataSource): MatchStatus =>
     supersededBy.has(name) ? 'outranked' : 'applied';
-  const counts: Record<MatchStatus, number> = { applied: 0, outranked: 0 };
-  matched.forEach((dataSource) => counts[getStatus(dataSource)]++);
-
   const normalizedQuery = query.trim().toLowerCase();
-  const items = matched.filter(
-    (dataSource) =>
-      (status === undefined || getStatus(dataSource) === status) &&
-      dataSource.name.toLowerCase().includes(normalizedQuery)
-  );
+  const searched = matched.filter(({ name }) => name.toLowerCase().includes(normalizedQuery));
+  // Each filter counts what it would show with the current search.
+  const counts: Record<MatchStatus, number> = { applied: 0, outranked: 0 };
+  searched.forEach((dataSource) => counts[getStatus(dataSource)]++);
+  const items =
+    status === undefined
+      ? searched
+      : searched.filter((dataSource) => getStatus(dataSource) === status);
 
   const searchLabel = isDataStreams
     ? i18n.translate('xpack.boost.matchedTable.searchDataStreams', {
@@ -135,25 +136,12 @@ export const MatchedTable = ({ type, matched, supersededBy }: MatchedTableProps)
       }
       data-test-subj="boostRuleMatched"
     >
-      {counts.outranked > 0 && (
-        <>
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('xpack.boost.matchedTable.supersededDescription', {
-                defaultMessage:
-                  'A higher-ranked rule applies to {count} of them instead. To outrank it, increase this rule’s priority.',
-                values: { count: counts.outranked },
-              })}
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-        </>
-      )}
       {matched.length > 0 && (
         <>
           <EuiFlexGroup gutterSize="s" responsive={false} wrap>
             <EuiFlexItem css={{ minInlineSize: '12em' }}>
               <EuiFieldSearch
+                compressed
                 value={query}
                 onChange={(event) => setQuery(event.target.value)}
                 placeholder={searchLabel}
@@ -164,7 +152,7 @@ export const MatchedTable = ({ type, matched, supersededBy }: MatchedTableProps)
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFilterGroup>
+              <EuiFilterGroup compressed>
                 {STATUSES.map((item, index) => (
                   <EuiFilterButton
                     key={item}
@@ -194,7 +182,7 @@ export const MatchedTable = ({ type, matched, supersededBy }: MatchedTableProps)
         items={items}
         columns={columns}
         sorting={{ sort: { field: 'name', direction: 'asc' } }}
-        pagination={matched.length > 10 ? { pageSizeOptions: [10, 25, 50] } : undefined}
+        pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
         noItemsMessage={
           matched.length === 0
             ? i18n.translate('xpack.boost.matchedTable.noMatches', {
