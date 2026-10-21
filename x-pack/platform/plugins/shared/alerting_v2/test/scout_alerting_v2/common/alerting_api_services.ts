@@ -19,6 +19,7 @@ import {
   getAlertActionsCleanupService,
   getAlertActionsEventsService,
   getDispatcherApiService,
+  getEbtService,
   getMaintenanceWindowsApiService,
   getRuleChangesHistoryApiService,
   getRuleExecutionsApiService,
@@ -34,6 +35,7 @@ import {
   type AlertActionsCleanupService,
   type AlertActionsEventsService,
   type DispatcherApiService,
+  type EbtService,
   type MaintenanceWindowsApiService,
   type RuleChangesHistoryApiService,
   type RuleExecutionsApiService,
@@ -64,6 +66,7 @@ export interface AlertingApiServices {
   sourceIndex: SourceIndexApiService;
   ruleExecutions: RuleExecutionsApiService;
   dispatcher: DispatcherApiService;
+  ebt: EbtService;
   taskManager: TaskManagerService;
   telemetry: TelemetryService;
   workflows: WorkflowsApiService;
@@ -105,6 +108,7 @@ export const buildAlertingApiServices = ({
     sourceIndex: getSourceIndexApiService({ esClient, log }),
     ruleExecutions: getRuleExecutionsApiService({ esClient, log }),
     dispatcher: getDispatcherApiService({ esClient, log }),
+    ebt: getEbtService({ kbnClient, log }),
     taskManager,
     telemetry: getTelemetryService({ esClient, log, taskManager }),
     workflows: getWorkflowsApiService({ kbnClient, log }),
