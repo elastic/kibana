@@ -480,6 +480,40 @@ describe('server/investigation_round', () => {
           { skipRoots: ['memories'] }
         )
       ).toBe(true);
+      expect(
+        isSeededWorkspaceAccess(
+          SANDBOX_BASH_TOOL_ID,
+          {
+            working_directory: '/workspace/memories',
+            command: "printf 'redis\\n' | grep -R -f - .",
+          },
+          { skipRoots: ['memories'] }
+        )
+      ).toBe(true);
+      expect(
+        isSeededWorkspaceAccess(
+          SANDBOX_BASH_TOOL_ID,
+          {
+            working_directory: '/workspace/memories',
+            command: 'grep -i error /tmp/query-results.json',
+          },
+          { skipRoots: ['memories'] }
+        )
+      ).toBe(false);
+
+      // Quoted query values in curl/esql vs escaped filenames in python -c
+      expect(
+        isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
+          command:
+            'curl -s localhost:9200/_search -d \'{"query":{"term":{"service.name":"cortex"}}}\'',
+        })
+      ).toBe(false);
+      expect(
+        isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
+          working_directory: '/workspace/memories',
+          command: 'python3 -c "print(open(\\"redis-pool-exhaustion.md\\").read())"',
+        })
+      ).toBe(true);
 
       // Executable Python heredoc reading a seeded file vs write-only heredoc
       expect(
@@ -509,7 +543,7 @@ describe('server/investigation_round', () => {
           tool_id: SANDBOX_BASH_TOOL_ID,
           params: {
             command:
-              "python3 - <<'PY'\nprint(open('/workspace/memories/heredoc-read.md').read())\nopen('/workspace/memories/heredoc-written.md', 'w').write('x')\nPY",
+              "python3 - <<'PY'\nprint(open('/workspace/memories/heredoc-read.md').read())\npath = '/workspace/memories/heredoc-written.md'\nwith open(path, 'w') as f:\n    f.write('x')\nPY",
           },
           results: [{ type: 'other', data: { stdout: '...', exit_code: 0 } }],
         },
@@ -528,7 +562,7 @@ describe('server/investigation_round', () => {
           params: {
             working_directory: '/workspace/memories',
             command:
-              "printf 'new content' > fresh-note.md && echo 'x' | tee tee-note.md && cp redis-pool-exhaustion.md copied-note.md && sed -i 's/a/b/' sed-note.md",
+              "printf 'new content' > fresh-note.md && echo 'x' | tee tee-note.md && cp redis-pool-exhaustion.md copied-note.md && sed -E -i 's/a/b/' sed-note.md",
           },
           results: [{ type: 'other', data: { stdout: '', exit_code: 0 } }],
         },
