@@ -26,7 +26,11 @@ import type { IngestHubStartDependencies } from '../../types';
 
 import { OnboardingShell } from './onboarding_shell';
 import { OnboardingFlowProvider } from '../onboarding_flow_context';
-import { clearOnboardingSession, getOnboardingSessionKey } from './onboarding_session_storage';
+import {
+  clearOnboardingSession,
+  discardMarkedSessions,
+  getOnboardingSessionKey,
+} from './onboarding_session_storage';
 import { ECF_LAUNCH_STEP_SESSION_KEY } from '../step_components/ecf_deployment_section';
 import { ONBOARDING_STEPS } from './steps';
 import { DEFAULT_RETURN_APP, saveReturnUrl } from './return_url';
@@ -285,5 +289,9 @@ export async function renderOnboardingApp(
       </EuiThemeProvider>
     )
   );
-  return () => root.unmount();
+  return () => {
+    root.unmount();
+    // Nothing can rewrite the session now, so a cancelled flow is dropped for good.
+    discardMarkedSessions();
+  };
 }

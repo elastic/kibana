@@ -74,6 +74,7 @@ jest.mock('../step_components', () => ({
 
 import { OnboardingFlowProvider, useOnboardingFlow } from '../onboarding_flow_context';
 import { OnboardingShell } from './onboarding_shell';
+import { discardMarkedSessions } from './onboarding_session_storage';
 import {
   AWS_ONBOARDING_TITLE,
   AWS_ONBOARDING_DESCRIPTION,
@@ -301,7 +302,7 @@ describe('OnboardingShell — cancelling the flow from the first step', () => {
     expect(screen.getByTestId('servicesStep-continue')).toBeInTheDocument();
   });
 
-  it('returns to the page the flow was opened from and drops the session', () => {
+  it('returns to the page the flow was opened from and drops the session once the app unmounts', () => {
     sessionStorage.setItem('onboarding.aws.returnUrl', '/app/integrations/browse?q=aws');
     sessionStorage.setItem('onboarding.aws.stepState', '{"services":"complete"}');
     renderAt('/aws#services');
@@ -310,6 +311,11 @@ describe('OnboardingShell — cancelling the flow from the first step', () => {
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(navigateToUrl).toHaveBeenCalledWith('/app/integrations/browse?q=aws');
+    // Still there: clearing now would be undone by the mounted persistence hooks.
+    expect(sessionStorage.getItem('onboarding.aws.stepState')).not.toBeNull();
+
+    // What the app does after it has unmounted.
+    discardMarkedSessions();
     expect(sessionStorage.getItem('onboarding.aws.stepState')).toBeNull();
     expect(sessionStorage.getItem('onboarding.aws.returnUrl')).toBeNull();
   });

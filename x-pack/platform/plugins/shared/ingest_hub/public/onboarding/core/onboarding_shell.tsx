@@ -31,7 +31,7 @@ import { getOnboardingProvider } from './provider_registry';
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
 import { useInvalidateDownstreamSteps } from './use_invalidate_downstream_steps';
-import { clearOnboardingSession } from './onboarding_session_storage';
+import { discardSessionOnUnmount } from './onboarding_session_storage';
 import { DEFAULT_RETURN_APP, getReturnUrl } from './return_url';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import {
@@ -138,9 +138,9 @@ export function OnboardingShell() {
   }, [currentStepIndex, history]);
 
   const handleCancelFlow = useCallback(() => {
-    // Read the return URL first, clearing the session removes it.
     const returnUrl = getReturnUrl(integrationId);
-    clearOnboardingSession(integrationId);
+    // Not cleared here: the step state hooks would write it back before the app unmounts.
+    discardSessionOnUnmount(integrationId);
     setIsCancelModalOpen(false);
     if (returnUrl) {
       services.application?.navigateToUrl(returnUrl);
