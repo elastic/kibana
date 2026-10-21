@@ -374,6 +374,51 @@ describe('buildContextOverride', () => {
       expect(result.schema).toBeDefined();
     });
 
+    it('should use default falsy values for inputs', () => {
+      const workflowWithFalsyInputs = {
+        version: '1' as const,
+        name: 'test-workflow',
+        enabled: true,
+        triggers: [
+          {
+            type: 'manual' as const,
+            enabled: true,
+          },
+        ],
+        steps: [
+          {
+            name: 'log_input',
+            type: 'console.log',
+            with: {
+              emptyString: '{{ inputs.emptyString }}',
+              zero: '{{ inputs.zero }}',
+              falseFlag: '{{ inputs.falseFlag }}',
+            },
+          },
+        ],
+      };
+
+      const workflowGraph = WorkflowGraph.fromWorkflowDefinition(workflowWithFalsyInputs);
+      const staticDataWithInputs = {
+        ...mockStaticData,
+        inputsDefinition: [
+          { name: 'emptyString', type: 'string' as const, default: '' },
+          { name: 'zero', type: 'number' as const, default: 0 },
+          { name: 'falseFlag', type: 'boolean' as const, default: false },
+        ],
+      };
+      const result = buildContextOverride(workflowGraph, staticDataWithInputs);
+
+      expect(result.stepContext).toEqual({
+        inputs: {
+          emptyString: '',
+          zero: 0,
+          falseFlag: false,
+        },
+      });
+      expect(result.schema).toBeDefined();
+    });
+
     it('should fall back to placeholder for inputs without defaults', () => {
       const workflowWithInputs = {
         version: '1' as const,

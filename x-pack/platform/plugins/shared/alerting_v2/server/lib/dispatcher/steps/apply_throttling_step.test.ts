@@ -17,7 +17,7 @@ import {
   createStepLogger,
 } from '../fixtures/test_utils';
 import { PolicyCatalog } from '../state';
-import type { ActionGroupId, LastNotifiedInfo } from '../types';
+import type { ActionGroupId, ActionPolicy, LastNotifiedInfo } from '../types';
 
 const logger = createStepLogger();
 
@@ -29,45 +29,70 @@ const info = (lastNotified: string, alertStatus?: string): LastNotifiedInfo => (
 });
 
 describe('applyThrottling', () => {
-  describe('per_alert + on_status_change', () => {
-    const basePolicy = createActionPolicy({
-      id: 'p1',
+  it.each<Pick<ActionPolicy, 'grouping' | 'throttle'>>([
+    { grouping: { mode: 'per_alert' }, throttle: { strategy: 'on_status_change' } },
+    {
       grouping: { mode: 'per_alert' },
-      throttle: { strategy: 'on_status_change' },
-    });
-
-    it('dispatches when no previous action exists', () => {
+      throttle: { strategy: 'per_status_interval', interval: '1h' },
+    },
+    { grouping: { mode: 'per_alert' }, throttle: { strategy: 'every_time' } },
+    {
+      grouping: { mode: 'per_field', fields: ['host.name'] },
+      throttle: { strategy: 'time_interval', interval: '5m' },
+    },
+    {
+      grouping: { mode: 'per_field', fields: ['host.name'] },
+      throttle: { strategy: 'every_time' },
+    },
+    { grouping: { mode: 'all' }, throttle: { strategy: 'time_interval', interval: '5m' } },
+    { grouping: { mode: 'all' }, throttle: { strategy: 'every_time' } },
+  ])(
+    'dispatches when no previous action exists ($grouping.mode + $throttle.strategy)',
+    ({ grouping, throttle }) => {
+      const policy = createActionPolicy({ id: 'p1', grouping, throttle });
       const group = createActionGroup({ id: 'g1', policyId: 'p1' });
 
       const { dispatch, throttled } = applyThrottling(
         [group],
-        PolicyCatalog.of(new Map([['p1', basePolicy]])),
+        PolicyCatalog.of(new Map([['p1', policy]])),
         new Map(),
         NOW
       );
 
       expect(dispatch).toHaveLength(1);
       expect(throttled).toHaveLength(0);
+    }
+  );
+
+  it.each<NonNullable<ActionPolicy['throttle']>>([
+    { strategy: 'on_status_change' },
+    { strategy: 'per_status_interval', interval: '1h' },
+  ])('dispatches per_alert groups when status changed ($strategy)', (throttle) => {
+    const policy = createActionPolicy({ id: 'p1', grouping: { mode: 'per_alert' }, throttle });
+    const group = createActionGroup({
+      id: 'g1',
+      policyId: 'p1',
+      alerts: [createAlert({ alert_status: 'recovering' })],
     });
 
-    it('dispatches when status changed', () => {
-      const group = createActionGroup({
-        id: 'g1',
-        policyId: 'p1',
-        alerts: [createAlert({ alert_status: 'recovering' })],
-      });
+    const { dispatch, throttled } = applyThrottling(
+      [group],
+      PolicyCatalog.of(new Map([['p1', policy]])),
+      new Map<ActionGroupId, LastNotifiedInfo>([
+        ['g1', info('2026-01-22T09:59:00.000Z', 'active')],
+      ]),
+      NOW
+    );
 
-      const { dispatch, throttled } = applyThrottling(
-        [group],
-        PolicyCatalog.of(new Map([['p1', basePolicy]])),
-        new Map<ActionGroupId, LastNotifiedInfo>([
-          ['g1', info('2026-01-22T09:59:00.000Z', 'active')],
-        ]),
-        NOW
-      );
+    expect(dispatch).toHaveLength(1);
+    expect(throttled).toHaveLength(0);
+  });
 
-      expect(dispatch).toHaveLength(1);
-      expect(throttled).toHaveLength(0);
+  describe('per_alert + on_status_change', () => {
+    const basePolicy = createActionPolicy({
+      id: 'p1',
+      grouping: { mode: 'per_alert' },
+      throttle: { strategy: 'on_status_change' },
     });
 
     it('throttles when status unchanged', () => {
@@ -96,40 +121,6 @@ describe('applyThrottling', () => {
       id: 'p1',
       grouping: { mode: 'per_alert' },
       throttle: { strategy: 'per_status_interval', interval: '1h' },
-    });
-
-    it('dispatches when no previous action exists', () => {
-      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
-
-      const { dispatch, throttled } = applyThrottling(
-        [group],
-        PolicyCatalog.of(new Map([['p1', basePolicy]])),
-        new Map(),
-        NOW
-      );
-
-      expect(dispatch).toHaveLength(1);
-      expect(throttled).toHaveLength(0);
-    });
-
-    it('dispatches when status changed', () => {
-      const group = createActionGroup({
-        id: 'g1',
-        policyId: 'p1',
-        alerts: [createAlert({ alert_status: 'recovering' })],
-      });
-
-      const { dispatch, throttled } = applyThrottling(
-        [group],
-        PolicyCatalog.of(new Map([['p1', basePolicy]])),
-        new Map<ActionGroupId, LastNotifiedInfo>([
-          ['g1', info('2026-01-22T09:59:00.000Z', 'active')],
-        ]),
-        NOW
-      );
-
-      expect(dispatch).toHaveLength(1);
-      expect(throttled).toHaveLength(0);
     });
 
     it('dispatches when status unchanged and interval expired', () => {
@@ -173,67 +164,39 @@ describe('applyThrottling', () => {
     });
   });
 
-  describe('per_alert + every_time', () => {
-    const basePolicy = createActionPolicy({
-      id: 'p1',
-      grouping: { mode: 'per_alert' },
-      throttle: { strategy: 'every_time' },
+  it.each<ActionPolicy['grouping']>([
+    { mode: 'per_alert' },
+    { mode: 'per_field', fields: ['host.name'] },
+    { mode: 'all' },
+  ])('dispatches every_time even with recent action and unchanged status ($mode)', (grouping) => {
+    const policy = createActionPolicy({ id: 'p1', grouping, throttle: { strategy: 'every_time' } });
+    const group = createActionGroup({
+      id: 'g1',
+      policyId: 'p1',
+      alerts: [createAlert({ alert_status: 'active' })],
     });
 
-    it('dispatches when no previous action exists', () => {
-      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
+    const { dispatch, throttled } = applyThrottling(
+      [group],
+      PolicyCatalog.of(new Map([['p1', policy]])),
+      new Map<ActionGroupId, LastNotifiedInfo>([
+        ['g1', info('2026-01-22T09:59:59.000Z', 'active')],
+      ]),
+      NOW
+    );
 
-      const { dispatch, throttled } = applyThrottling(
-        [group],
-        PolicyCatalog.of(new Map([['p1', basePolicy]])),
-        new Map(),
-        NOW
-      );
-
-      expect(dispatch).toHaveLength(1);
-      expect(throttled).toHaveLength(0);
-    });
-
-    it('dispatches even with recent action', () => {
-      const group = createActionGroup({
-        id: 'g1',
-        policyId: 'p1',
-        alerts: [createAlert({ alert_status: 'active' })],
-      });
-
-      const { dispatch, throttled } = applyThrottling(
-        [group],
-        PolicyCatalog.of(new Map([['p1', basePolicy]])),
-        new Map<ActionGroupId, LastNotifiedInfo>([
-          ['g1', info('2026-01-22T09:59:59.000Z', 'active')],
-        ]),
-        NOW
-      );
-
-      expect(dispatch).toHaveLength(1);
-      expect(throttled).toHaveLength(0);
-    });
+    expect(dispatch).toHaveLength(1);
+    expect(throttled).toHaveLength(0);
   });
 
-  describe('per_field + time_interval', () => {
+  describe.each<ActionPolicy['grouping']>([
+    { mode: 'per_field', fields: ['host.name'] },
+    { mode: 'all' },
+  ])('$mode + time_interval', (grouping) => {
     const basePolicy = createActionPolicy({
       id: 'p1',
-      grouping: { mode: 'per_field', fields: ['host.name'] },
+      grouping,
       throttle: { strategy: 'time_interval', interval: '5m' },
-    });
-
-    it('dispatches when no previous action exists', () => {
-      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
-
-      const { dispatch, throttled } = applyThrottling(
-        [group],
-        PolicyCatalog.of(new Map([['p1', basePolicy]])),
-        new Map(),
-        NOW
-      );
-
-      expect(dispatch).toHaveLength(1);
-      expect(throttled).toHaveLength(0);
     });
 
     it('dispatches when interval expired', () => {
@@ -267,7 +230,7 @@ describe('applyThrottling', () => {
     it('dispatches when no interval configured', () => {
       const policy = createActionPolicy({
         id: 'p1',
-        grouping: { mode: 'per_field', fields: ['host.name'] },
+        grouping,
         throttle: { strategy: 'time_interval' },
       });
       const group = createActionGroup({ id: 'g1', policyId: 'p1' });
@@ -275,147 +238,6 @@ describe('applyThrottling', () => {
       const { dispatch, throttled } = applyThrottling(
         [group],
         PolicyCatalog.of(new Map([['p1', policy]])),
-        new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
-        NOW
-      );
-
-      expect(dispatch).toHaveLength(1);
-      expect(throttled).toHaveLength(0);
-    });
-  });
-
-  describe('per_field + every_time', () => {
-    const basePolicy = createActionPolicy({
-      id: 'p1',
-      grouping: { mode: 'per_field', fields: ['host.name'] },
-      throttle: { strategy: 'every_time' },
-    });
-
-    it('dispatches when no previous action exists', () => {
-      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
-
-      const { dispatch, throttled } = applyThrottling(
-        [group],
-        PolicyCatalog.of(new Map([['p1', basePolicy]])),
-        new Map(),
-        NOW
-      );
-
-      expect(dispatch).toHaveLength(1);
-      expect(throttled).toHaveLength(0);
-    });
-
-    it('dispatches even with recent action', () => {
-      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
-
-      const { dispatch, throttled } = applyThrottling(
-        [group],
-        PolicyCatalog.of(new Map([['p1', basePolicy]])),
-        new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
-        NOW
-      );
-
-      expect(dispatch).toHaveLength(1);
-      expect(throttled).toHaveLength(0);
-    });
-  });
-
-  describe('all + time_interval', () => {
-    const basePolicy = createActionPolicy({
-      id: 'p1',
-      grouping: { mode: 'all' },
-      throttle: { strategy: 'time_interval', interval: '5m' },
-    });
-
-    it('dispatches when no previous action exists', () => {
-      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
-
-      const { dispatch, throttled } = applyThrottling(
-        [group],
-        PolicyCatalog.of(new Map([['p1', basePolicy]])),
-        new Map(),
-        NOW
-      );
-
-      expect(dispatch).toHaveLength(1);
-      expect(throttled).toHaveLength(0);
-    });
-
-    it('dispatches when interval expired', () => {
-      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
-
-      const { dispatch, throttled } = applyThrottling(
-        [group],
-        PolicyCatalog.of(new Map([['p1', basePolicy]])),
-        new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:50:00.000Z')]]),
-        NOW
-      );
-
-      expect(dispatch).toHaveLength(1);
-      expect(throttled).toHaveLength(0);
-    });
-
-    it('throttles when within interval', () => {
-      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
-
-      const { dispatch, throttled } = applyThrottling(
-        [group],
-        PolicyCatalog.of(new Map([['p1', basePolicy]])),
-        new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:58:00.000Z')]]),
-        NOW
-      );
-
-      expect(dispatch).toHaveLength(0);
-      expect(throttled).toHaveLength(1);
-    });
-
-    it('dispatches when no interval configured', () => {
-      const policy = createActionPolicy({
-        id: 'p1',
-        grouping: { mode: 'all' },
-        throttle: { strategy: 'time_interval' },
-      });
-      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
-
-      const { dispatch, throttled } = applyThrottling(
-        [group],
-        PolicyCatalog.of(new Map([['p1', policy]])),
-        new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
-        NOW
-      );
-
-      expect(dispatch).toHaveLength(1);
-      expect(throttled).toHaveLength(0);
-    });
-  });
-
-  describe('all + every_time', () => {
-    const basePolicy = createActionPolicy({
-      id: 'p1',
-      grouping: { mode: 'all' },
-      throttle: { strategy: 'every_time' },
-    });
-
-    it('dispatches when no previous action exists', () => {
-      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
-
-      const { dispatch, throttled } = applyThrottling(
-        [group],
-        PolicyCatalog.of(new Map([['p1', basePolicy]])),
-        new Map(),
-        NOW
-      );
-
-      expect(dispatch).toHaveLength(1);
-      expect(throttled).toHaveLength(0);
-    });
-
-    it('dispatches even with recent action', () => {
-      const group = createActionGroup({ id: 'g1', policyId: 'p1' });
-
-      const { dispatch, throttled } = applyThrottling(
-        [group],
-        PolicyCatalog.of(new Map([['p1', basePolicy]])),
         new Map<ActionGroupId, LastNotifiedInfo>([['g1', info('2026-01-22T09:59:59.000Z')]]),
         NOW
       );
@@ -456,13 +278,6 @@ describe('applyThrottling', () => {
       expect(dispatch[0].id).toBe('g2');
       expect(throttled).toHaveLength(1);
       expect(throttled[0].id).toBe('g1');
-    });
-
-    it('returns empty arrays when no groups', () => {
-      const { dispatch, throttled } = applyThrottling([], PolicyCatalog.empty(), new Map(), NOW);
-
-      expect(dispatch).toHaveLength(0);
-      expect(throttled).toHaveLength(0);
     });
   });
 
@@ -508,21 +323,28 @@ describe('ApplyThrottlingStep', () => {
       createActionGroup({ id: `${longSegment}-g${i}`, policyId: 'p1' })
     );
     const policies = new Map([
-      ['p1', createActionPolicy({ id: 'p1', throttle: { strategy: 'every_time' } })],
+      [
+        'p1',
+        createActionPolicy({
+          id: 'p1',
+          grouping: { mode: 'all' },
+          throttle: { strategy: 'time_interval', interval: '1h' },
+        }),
+      ],
     ]);
 
     const firstId = groups[0].id;
     const lastId = groups[groups.length - 1].id;
 
-    // A chunk that contains firstId returns its row, the chunk that contains
-    // lastId returns its row, every other chunk returns an empty result.
+    // The first and last chunks each return a recent row for their group, so
+    // only those two groups are throttled if both responses are concatenated.
     mockEsClient.esql.query.mockImplementation((args: { query: string }) => {
       const rows: Array<{ action_group_id: string; last_notified: string }> = [];
       if (args.query.includes(firstId)) {
-        rows.push({ action_group_id: firstId, last_notified: '2026-01-22T08:00:00.000Z' });
+        rows.push({ action_group_id: firstId, last_notified: '2026-01-22T07:30:00.000Z' });
       }
       if (args.query.includes(lastId)) {
-        rows.push({ action_group_id: lastId, last_notified: '2026-01-22T08:00:00.000Z' });
+        rows.push({ action_group_id: lastId, last_notified: '2026-01-22T07:30:00.000Z' });
       }
       return Promise.resolve(createLastNotifiedTimestampsResponse(rows));
     });
@@ -537,9 +359,8 @@ describe('ApplyThrottlingStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
-    // every_time strategy → all groups dispatch regardless of last_notified.
-    expect(result.data?.plan?.toDispatch).toHaveLength(200);
-    expect(result.data?.plan?.throttled).toHaveLength(0);
+    expect(result.data?.plan?.toDispatch).toHaveLength(198);
+    expect(result.data?.plan?.throttled.map(({ id }) => id)).toEqual([firstId, lastId]);
   });
 
   it('compares the alert_status of the last notified record for on_status_change', async () => {

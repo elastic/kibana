@@ -12,7 +12,6 @@ import { services as svlSharedServices } from '../../shared/services';
 import { SamlToolsProvider } from './saml_tools';
 import { SvlCasesServiceProvider } from './svl_cases';
 
-import { SvlDatastreamsHelpers } from './index_management/svl_datastreams.helpers';
 import { SynthtraceClientProvider } from './synthtrace';
 
 export const services = {
@@ -24,7 +23,6 @@ export const services = {
   samlTools: SamlToolsProvider,
   svlCases: SvlCasesServiceProvider,
   synthtrace: SynthtraceClientProvider,
-  svlDatastreamsHelpers: SvlDatastreamsHelpers,
 };
 
 export type InheritedFtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

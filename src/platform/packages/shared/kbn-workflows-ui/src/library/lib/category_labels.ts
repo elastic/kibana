@@ -27,46 +27,46 @@ import { humanizeCategoryId } from './humanize_category_id';
  */
 const CATEGORY_NAMES: Record<string, () => string> = {
   enrichment: () =>
-    i18n.translate('workflows.library.category.enrichment', { defaultMessage: 'Enrichment' }),
+    i18n.translate('workflowsUi.library.category.enrichment', { defaultMessage: 'Enrichment' }),
   detection: () =>
-    i18n.translate('workflows.library.category.detection', { defaultMessage: 'Detection' }),
+    i18n.translate('workflowsUi.library.category.detection', { defaultMessage: 'Detection' }),
   response: () =>
-    i18n.translate('workflows.library.category.response', { defaultMessage: 'Response' }),
+    i18n.translate('workflowsUi.library.category.response', { defaultMessage: 'Response' }),
   hunting: () =>
-    i18n.translate('workflows.library.category.hunting', { defaultMessage: 'Hunting' }),
+    i18n.translate('workflowsUi.library.category.hunting', { defaultMessage: 'Hunting' }),
   'threat-intel': () =>
-    i18n.translate('workflows.library.category.threatIntel', {
+    i18n.translate('workflowsUi.library.category.threatIntel', {
       defaultMessage: 'Threat intelligence',
     }),
   notification: () =>
-    i18n.translate('workflows.library.category.notification', { defaultMessage: 'Notification' }),
+    i18n.translate('workflowsUi.library.category.notification', { defaultMessage: 'Notification' }),
   'case-management': () =>
-    i18n.translate('workflows.library.category.caseManagement', {
+    i18n.translate('workflowsUi.library.category.caseManagement', {
       defaultMessage: 'Case management',
     }),
   monitoring: () =>
-    i18n.translate('workflows.library.category.monitoring', { defaultMessage: 'Monitoring' }),
+    i18n.translate('workflowsUi.library.category.monitoring', { defaultMessage: 'Monitoring' }),
   'root-cause-analysis': () =>
-    i18n.translate('workflows.library.category.rootCauseAnalysis', {
+    i18n.translate('workflowsUi.library.category.rootCauseAnalysis', {
       defaultMessage: 'Root cause analysis',
     }),
   'data-ingestion': () =>
-    i18n.translate('workflows.library.category.dataIngestion', {
+    i18n.translate('workflowsUi.library.category.dataIngestion', {
       defaultMessage: 'Data ingestion',
     }),
   'data-transformation': () =>
-    i18n.translate('workflows.library.category.dataTransformation', {
+    i18n.translate('workflowsUi.library.category.dataTransformation', {
       defaultMessage: 'Data transformation',
     }),
   reporting: () =>
-    i18n.translate('workflows.library.category.reporting', { defaultMessage: 'Reporting' }),
-  search: () => i18n.translate('workflows.library.category.search', { defaultMessage: 'Search' }),
+    i18n.translate('workflowsUi.library.category.reporting', { defaultMessage: 'Reporting' }),
+  search: () => i18n.translate('workflowsUi.library.category.search', { defaultMessage: 'Search' }),
   'ai-agent': () =>
-    i18n.translate('workflows.library.category.aiAgent', { defaultMessage: 'Agent Builder' }),
+    i18n.translate('workflowsUi.library.category.aiAgent', { defaultMessage: 'Agent Builder' }),
   integration: () =>
-    i18n.translate('workflows.library.category.integration', { defaultMessage: 'Integration' }),
+    i18n.translate('workflowsUi.library.category.integration', { defaultMessage: 'Integration' }),
   utility: () =>
-    i18n.translate('workflows.library.category.utility', { defaultMessage: 'Utility' }),
+    i18n.translate('workflowsUi.library.category.utility', { defaultMessage: 'Utility' }),
 };
 
 /**
