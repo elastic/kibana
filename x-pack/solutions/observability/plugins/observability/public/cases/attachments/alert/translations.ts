@@ -54,3 +54,14 @@ export const SHOW_ALERT_TOOLTIP = i18n.translate(
   'xpack.observability.cases.alertAttachment.showAlertTooltip',
   { defaultMessage: 'Show alert details' }
 );
+
+export const ALERTS_COUNT = (count: number) =>
+  i18n.translate('xpack.observability.cases.alertAttachment.alertsCount', {
+    defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
+    values: { count },
+  });
+
+export const REMOVE_FROM_CASE = i18n.translate(
+  'xpack.observability.cases.alertAttachment.removeFromCase',
+  { defaultMessage: 'Remove from case' }
+);

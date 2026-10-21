@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
+  preset: '@kbn/jest/jest_node',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/packages/shared/kbn-scout'],
   setupFiles: ['<rootDir>/src/platform/packages/shared/kbn-scout/setup_tests.ts'],
