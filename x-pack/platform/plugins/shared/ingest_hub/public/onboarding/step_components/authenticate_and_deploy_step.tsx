@@ -6,14 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiHorizontalRule,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
@@ -46,6 +39,7 @@ import {
   SERVICE_SETTINGS_SESSION_KEY,
   type ServiceSettingsPersistedState,
 } from './service_settings_step/use_service_settings';
+import { StepFooter } from './step_footer';
 
 const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
@@ -918,34 +912,20 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         <EcfDeploymentSection {...ecfSectionProps} />
       )}
 
-      <EuiSpacer size="l" />
-
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          {onBack && (
-            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
-              <FormattedMessage
-                id="xpack.ingestHub.authenticateAndDeployStep.backButton"
-                defaultMessage="Back"
-              />
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={handleNext}
-            isDisabled={isNextDisabled}
-            isLoading={hasUnloadedSelectedManifests || isSavingSO || isAgentDeploying}
-            data-test-subj="authenticateAndDeployStep-nextButton"
-          >
-            <FormattedMessage
-              id="xpack.ingestHub.authenticateAndDeployStep.nextButton"
-              defaultMessage="Next"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <StepFooter onBack={onBack}>
+        <EuiButton
+          fill
+          onClick={handleNext}
+          isDisabled={isNextDisabled}
+          isLoading={hasUnloadedSelectedManifests || isSavingSO || isAgentDeploying}
+          data-test-subj="authenticateAndDeployStep-nextButton"
+        >
+          <FormattedMessage
+            id="xpack.ingestHub.authenticateAndDeployStep.nextButton"
+            defaultMessage="Next"
+          />
+        </EuiButton>
+      </StepFooter>
     </div>
   );
 }

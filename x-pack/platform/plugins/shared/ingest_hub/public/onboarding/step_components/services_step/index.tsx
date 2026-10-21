@@ -29,6 +29,7 @@ import { useServicesStep } from './use_services_step';
 import { ServiceSearchFilter } from '../service_search_filter';
 import { DataSchemaSection } from './data_schema_section';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { StepFooter } from '../step_footer';
 
 interface ServicesStepProps {
   onContinue: () => void;
@@ -235,30 +236,16 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
         )}
       </EuiPanel>
 
-      <EuiSpacer size="l" />
-
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          {onBack && (
-            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
-              <FormattedMessage
-                id="xpack.ingestHub.servicesStep.backButton"
-                defaultMessage="Back"
-              />
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={handleNext}
-            isDisabled={!isReady}
-            data-test-subj="servicesStep-continueButton"
-          >
-            <FormattedMessage id="xpack.ingestHub.servicesStep.nextButton" defaultMessage="Next" />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <StepFooter onBack={onBack}>
+        <EuiButton
+          fill
+          onClick={handleNext}
+          isDisabled={!isReady}
+          data-test-subj="servicesStep-continueButton"
+        >
+          <FormattedMessage id="xpack.ingestHub.servicesStep.nextButton" defaultMessage="Next" />
+        </EuiButton>
+      </StepFooter>
     </div>
   );
 }

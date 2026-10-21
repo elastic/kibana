@@ -45,6 +45,7 @@ import { SignalTypeBadge } from '../services_step/signal_type_badge';
 import { ServiceSearchFilter } from '../service_search_filter';
 import { buildDuplicateName } from './duplicate_name';
 import type { SignalFilter } from '../services_step/use_services_step';
+import { StepFooter } from '../step_footer';
 
 interface ServiceSettingsStepProps {
   onContinue: () => void;
@@ -572,39 +573,25 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         data-test-subj="serviceSettingsStep-table"
       />
 
-      <EuiSpacer size="m" />
-
-      <EuiFlexGroup justifyContent="spaceBetween">
-        <EuiFlexItem grow={false}>
-          {onBack && (
-            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
+      <StepFooter onBack={onBack}>
+        <EuiToolTip content={continueTooltipContent}>
+          {/* span needed: disabled <button> swallows pointer events, span intercepts them for the tooltip */}
+          <span tabIndex={0} style={{ display: 'inline-block' }}>
+            <EuiButton
+              fill
+              onClick={handleNext}
+              disabled={!isReady || hasUnloadedSelectedManifests || hasErroredSelectedManifests}
+              isLoading={hasUnloadedSelectedManifests}
+              data-test-subj="serviceSettingsStep-continueButton"
+            >
               <FormattedMessage
-                id="xpack.ingestHub.serviceSettingsStep.backButton"
-                defaultMessage="Back"
+                id="xpack.ingestHub.serviceSettingsStep.nextButton"
+                defaultMessage="Next"
               />
-            </EuiButtonEmpty>
-          )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={continueTooltipContent}>
-            {/* span needed: disabled <button> swallows pointer events, span intercepts them for the tooltip */}
-            <span tabIndex={0} style={{ display: 'inline-block' }}>
-              <EuiButton
-                fill
-                onClick={handleNext}
-                disabled={!isReady || hasUnloadedSelectedManifests || hasErroredSelectedManifests}
-                isLoading={hasUnloadedSelectedManifests}
-                data-test-subj="serviceSettingsStep-continueButton"
-              >
-                <FormattedMessage
-                  id="xpack.ingestHub.serviceSettingsStep.nextButton"
-                  defaultMessage="Next"
-                />
-              </EuiButton>
-            </span>
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+            </EuiButton>
+          </span>
+        </EuiToolTip>
+      </StepFooter>
 
       {activeFlyoutService && activeFlyoutInstance && (
         <ServiceSettingsFlyout
