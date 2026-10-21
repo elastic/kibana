@@ -21,6 +21,14 @@ export const API_HEADERS = {
 export const AI_INDEX_COLLECTION_PATH = 'api/context_engine/ai_index';
 export const AI_INDEX_QUERY_PATH = `${AI_INDEX_COLLECTION_PATH}/_query`;
 
+/** The internal (not public) API that lists Knowledge Indicators for one AI Index. */
+export const AI_INDEX_INTERNAL_PATH = 'internal/context_engine/ai_index';
+
+export const INTERNAL_API_HEADERS = {
+  ...COMMON_HEADERS,
+  'elastic-api-version': '1',
+};
+
 /** Kibana grant for the Context Engine `read` privilege in every space. */
 export const CONTEXT_ENGINE_READ: KibanaRole['kibana'][number] = {
   base: [],

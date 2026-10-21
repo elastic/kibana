@@ -29,6 +29,7 @@ import {
   MAX_AI_INDICES,
   MAX_AI_INDEX_TRACES,
   MAX_AI_INDEX_TRACE_INDEX_EXPRESSIONS,
+  MAX_KI_SEARCH_QUERY_LENGTH,
   AI_INDEX_BY_ID_PATH,
   AI_INDEX_DESCRIBE_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
@@ -1143,6 +1144,46 @@ describe('ai indices routes', () => {
       expect(esEsqlQuery.mock.calls[1][0]).toEqual({
         query: expect.stringContaining('| WHERE type == ?type'),
         params: [{ type: 'fact' }],
+      });
+    });
+
+    it('passes search query to Elasticsearch', async () => {
+      aiIndexService.get.mockResolvedValue(aiIndexItem);
+      esEsqlQuery
+        .mockResolvedValueOnce(probe)
+        .mockResolvedValueOnce(rows([]))
+        .mockResolvedValueOnce(totals(0))
+        .mockResolvedValueOnce(buckets([]));
+
+      await callRoute('GET', AI_INDEX_KI_LIST_PATH, {
+        params: { aiIndexId: 'customer_support' },
+        query: { size: 25, query: 'refund policy' },
+      });
+
+      expect(esEsqlQuery.mock.calls[1][0]).toEqual({
+        query: expect.stringContaining(
+          'MATCH(title, ?searchQuery, {"fuzziness":"AUTO", "boost": 2})'
+        ),
+        params: [{ searchQuery: 'refund policy' }],
+      });
+    });
+
+    describe('query validation', () => {
+      const validateQuery = (queryParams: unknown) => {
+        const { validate } = getRoute('GET', AI_INDEX_KI_LIST_PATH);
+        if (validate === false || !validate.request?.query) {
+          throw new Error('expected a query schema');
+        }
+        return validate.request.query.validate(queryParams);
+      };
+
+      it('accepts a bounded search query', () => {
+        expect(() =>
+          validateQuery({ query: 'a'.repeat(MAX_KI_SEARCH_QUERY_LENGTH) })
+        ).not.toThrow();
+        expect(() =>
+          validateQuery({ query: 'a'.repeat(MAX_KI_SEARCH_QUERY_LENGTH + 1) })
+        ).toThrow();
       });
     });
 
