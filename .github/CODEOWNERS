@@ -1087,6 +1087,7 @@ x-pack/platform/packages/shared/isomer/isomer-charts-elastic-node @elastic/appex
 x-pack/platform/packages/shared/isomer/isomer-components @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-lowering @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-primitives-charts @elastic/appex-sharedux
+x-pack/platform/packages/shared/isomer/isomer-primitives-dashboard @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-primitives-maps @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-primitives-vega @elastic/appex-sharedux
 x-pack/platform/packages/shared/isomer/isomer-theme @elastic/appex-sharedux

@@ -2543,6 +2543,9 @@ importers:
       '@kbn/isomer-primitives-charts':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer-primitives-charts
+      '@kbn/isomer-primitives-dashboard':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/isomer/isomer-primitives-dashboard
       '@kbn/isomer-primitives-maps':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer-primitives-maps
@@ -9074,6 +9077,8 @@ importers:
   x-pack/platform/packages/shared/isomer/isomer-lowering: {}
 
   x-pack/platform/packages/shared/isomer/isomer-primitives-charts: {}
+
+  x-pack/platform/packages/shared/isomer/isomer-primitives-dashboard: {}
 
   x-pack/platform/packages/shared/isomer/isomer-primitives-maps: {}
 
