@@ -314,3 +314,8 @@ export {
   assertValidConversationEventType,
   type ConversationAddEventInput,
 } from './timeline_events';
+export type {
+  ChatCallbackEventResponse,
+  ChatCallbackFailureResponse,
+  ChatCallbackResponse,
+} from './callback';

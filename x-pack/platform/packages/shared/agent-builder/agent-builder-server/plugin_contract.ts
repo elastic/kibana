@@ -9,6 +9,7 @@ import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from './conversations';
+import type { CallbackConversationResolver, CallbackTransportDefinition } from './callbacks';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition, AttachmentPublicClient } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
@@ -269,6 +270,18 @@ export interface ConversationsStart {
   getScopedClient(opts: { request: KibanaRequest }): Promise<ConversationPublicClient>;
 }
 
+/** AgentBuilder callbacks setup contract. */
+export interface CallbacksSetup {
+  /**
+   * Registers a resolver for the conversation an execution's origin continues, when the execution
+   * names no conversation. Resolvers are asked in registration order and the first answer wins.
+   * When all return `undefined`, the default lookup by origin runs.
+   */
+  registerConversationResolver(resolver: CallbackConversationResolver): void;
+  /** Registers a callback transport. The first registered transport that handles a URL delivers to it. */
+  registerTransport(transport: CallbackTransportDefinition): void;
+}
+
 /**
  * Configuration for the TOP_SNIPPETS search utility.
  */
@@ -307,6 +320,11 @@ export interface AgentBuilderPluginSetup {
    * Conversations setup contract, which can be used to opt in to conversation workflow triggers.
    */
   conversations: ConversationsSetup;
+  /**
+   * Callbacks setup contract, which can be used to resolve the conversation an execution's origin
+   * continues and to register callback transports.
+   */
+  callbacks: CallbacksSetup;
   /**
    * Renderers setup contract, which can be used to register renderer types.
    */
