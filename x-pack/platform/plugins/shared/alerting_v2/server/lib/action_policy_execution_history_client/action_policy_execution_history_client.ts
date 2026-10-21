@@ -42,6 +42,15 @@ import { toEventActions } from './outcome';
 // explicit `from`.
 const DEFAULT_TIME_WINDOW_HOURS = 24;
 
+// Default lower bound when the caller does not pass `from`: 24 hours before
+// `to`, or before now when `to` is omitted — the same rolling window the rule
+// execution history applies. Anchoring on `to` keeps a caller-supplied upper
+// bound from producing an empty or inverted window.
+const defaultFrom = (to?: string): string =>
+  new Date(
+    (to ? Date.parse(to) : Date.now()) - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000
+  ).toISOString();
+
 // Pagination defaults applied when the caller omits them
 const DEFAULT_PAGE = 1;
 
@@ -112,13 +121,7 @@ export class ActionPolicyExecutionHistoryClient {
     to,
     sortOrder,
   }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
-    // Default lower bound: 24 hours before `to`, or before now when `to` is
-    // omitted, so a caller-supplied upper bound never yields an inverted window.
-    const effectiveFrom =
-      from ??
-      new Date(
-        (to ? Date.parse(to) : Date.now()) - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000
-      ).toISOString();
+    const effectiveFrom = from ?? defaultFrom(to);
     const spaceId = this.spaces.spacesService.getSpaceId(request);
     const searchIsActive = search !== undefined && search.trim() !== '';
 
