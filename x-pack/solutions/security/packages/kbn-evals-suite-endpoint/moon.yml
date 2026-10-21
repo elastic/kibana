@@ -24,6 +24,9 @@ dependsOn:
   - '@kbn/test'
   - '@kbn/security-solution-plugin'
   - '@kbn/fleet-plugin'
+  - '@kbn/repo-info'
+  - '@kbn/es-query'
+  - '@kbn/osquery-plugin'
 tags:
   - functional-tests
   - package

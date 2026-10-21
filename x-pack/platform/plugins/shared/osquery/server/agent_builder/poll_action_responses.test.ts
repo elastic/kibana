@@ -1,0 +1,626 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { pollActionResponses } from './poll_action_responses';
+
+const responsesSearchResult = (distinctAgents: number) => ({
+  hits: { total: { value: distinctAgents }, hits: [] },
+  aggregations: { distinct_agents: { value: distinctAgents } },
+});
+
+/** Same shape but raw doc count deliberately disagrees with distinct agents. */
+const duplicateResponsesSearchResult = (distinctAgents: number) => ({
+  hits: { total: { value: distinctAgents + 2 }, hits: [] },
+  aggregations: { distinct_agents: { value: distinctAgents } },
+});
+
+describe('pollActionResponses', () => {
+  it('keeps SQL aliases separate from trusted agent provenance', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce(responsesSearchResult(1))
+      .mockResolvedValueOnce({
+        hits: {
+          total: { value: 1 },
+          hits: [
+            {
+              _source: {
+                agent: { id: 'real-agent', name: 'real-host' },
+                osquery: { agent_id: 'sql-id', agent_name: 'sql-name', _agent: 'sql-alias' },
+              },
+            },
+          ],
+        },
+      });
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 1,
+    });
+    expect(result.rows[0]).toEqual({
+      _agent: { id: 'real-agent', name: 'real-host' },
+      osquery: { agent_id: 'sql-id', agent_name: 'sql-name', _agent: 'sql-alias' },
+    });
+  });
+
+  it('waits for result refresh after all agents report nonzero row counts', async () => {
+    jest.useFakeTimers();
+    try {
+      const response = {
+        ...duplicateResponsesSearchResult(2),
+        aggregations: {
+          distinct_agents: { value: 2 },
+          expected_rows: { value: 2 },
+          error_agents: { distinct: { value: 1 } },
+        },
+      };
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce(response)
+        .mockResolvedValueOnce({ hits: { total: { value: 0 }, hits: [] } })
+        .mockResolvedValueOnce(response)
+        .mockResolvedValueOnce({
+          hits: { total: { value: 2 }, hits: [{ _source: { osquery: { pid: 1 } } }] },
+        });
+      const polling = pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 1000,
+        intervalMs: 100,
+        maxRows: 1,
+        spaceId: 'default',
+        expectedAgentCount: 2,
+      });
+      await jest.advanceTimersByTimeAsync(200);
+      const result = await polling;
+      expect(search).toHaveBeenCalledTimes(4);
+      expect(result.status).toBe('completed');
+      expect(result.rows).toHaveLength(1);
+      expect(result.truncated).toBe(true);
+      expect(result.responded).toBe(2);
+      expect(result.errorAgents).toBe(1);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('returns partial rather than completed when result refresh exceeds the budget', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ...responsesSearchResult(1),
+        aggregations: {
+          distinct_agents: { value: 1 },
+          expected_rows: { value: 2 },
+        },
+      })
+      .mockResolvedValueOnce({ hits: { total: { value: 0 }, hits: [] } })
+      .mockImplementation((request) =>
+        Promise.resolve(
+          request.size === 0
+            ? {
+                ...responsesSearchResult(1),
+                aggregations: { distinct_agents: { value: 1 }, expected_rows: { value: 2 } },
+              }
+            : { hits: { total: { value: 0 }, hits: [] } }
+        )
+      );
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 1,
+    });
+    expect(result.status).toBe('partial');
+    expect(result.rows).toEqual([]);
+  });
+
+  it('completes immediately for a reported zero-row query', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce({
+        ...responsesSearchResult(1),
+        aggregations: {
+          distinct_agents: { value: 1 },
+          expected_rows: { value: 0 },
+        },
+      })
+      .mockResolvedValueOnce({ hits: { total: { value: 0 }, hits: [] } });
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 1,
+    });
+    expect(result.status).toBe('completed');
+    expect(search).toHaveBeenCalledTimes(2);
+  });
+  it('polls action responses for completion metadata and result index for SQL rows', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce(responsesSearchResult(1))
+      .mockResolvedValueOnce({
+        hits: { hits: [{ _source: { osquery: { pid: 1, name: 'launchd' } } }] },
+      });
+
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 2,
+      maxRows: 10,
+    });
+
+    expect(search).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        index: [
+          'logs-osquery_manager.action.responses*',
+          '.logs-osquery_manager.action.responses*',
+        ],
+        size: 0,
+        aggs: {
+          distinct_agents: { cardinality: { field: 'agent_id' } },
+          rows_by_agent: {
+            terms: { field: 'agent_id', size: 2 },
+            aggs: { row_count: { max: { field: 'action_response.osquery.count' } } },
+          },
+          expected_rows: { sum_bucket: { buckets_path: 'rows_by_agent>row_count' } },
+          error_agents: {
+            filter: { exists: { field: 'error' } },
+            aggs: { distinct: { cardinality: { field: 'agent_id' } } },
+          },
+        },
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([{ term: { action_id: 'query-action-1' } }]),
+          }),
+        }),
+      })
+    );
+    expect(search).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        index: 'logs-osquery_manager.result*',
+        size: 10,
+        query: expect.objectContaining({
+          bool: expect.objectContaining({
+            filter: expect.arrayContaining([{ term: { action_id: 'query-action-1' } }]),
+          }),
+        }),
+      })
+    );
+    expect(result).toEqual({
+      responded: 1,
+      expected: 2,
+      rows: [{ pid: 1, name: 'launchd' }],
+      status: 'partial',
+    });
+  });
+
+  it('only reports completed after every expected agent responds', async () => {
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce(responsesSearchResult(2))
+      .mockResolvedValueOnce({ hits: { hits: [] } });
+
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 2,
+    });
+
+    expect(result.status).toBe('completed');
+  });
+
+  it('reports status error when every search attempt fails', async () => {
+    const search = jest.fn().mockRejectedValue(new Error('es search failed'));
+
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 2,
+    });
+
+    expect(result.status).toBe('error');
+    expect(result.error).toMatch(/es search failed/);
+    expect(result.rows).toEqual([]);
+  });
+
+  it('still reports a terminal status when a later iteration succeeds after failures', async () => {
+    const search = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('transient'))
+      .mockResolvedValueOnce(responsesSearchResult(1))
+      .mockResolvedValueOnce({ hits: { hits: [{ _source: { pid: 1 } }] } });
+
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 50,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 2,
+    });
+
+    expect(result.status).not.toBe('error');
+    expect(result.status).toBe('partial');
+    expect(result.rows).toEqual([{ pid: 1 }]);
+  });
+
+  it('does not complete early when one agent produced multiple response docs', async () => {
+    // Raw doc count reads 3 >= 3 here; cardinality correctly reads 2 of 3.
+    const search = jest
+      .fn()
+      .mockResolvedValueOnce({
+        hits: { total: { value: 3 }, hits: [] },
+        aggregations: { distinct_agents: { value: 2 } },
+      })
+      .mockResolvedValueOnce({ hits: { hits: [] } })
+      .mockResolvedValueOnce(duplicateResponsesSearchResult(3))
+      .mockResolvedValueOnce({ hits: { hits: [] } });
+
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 50,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 3,
+    });
+
+    // 5 raw docs / 3 distinct agents: a hits.total implementation reports 5
+    // and this expectation fails — only the cardinality agg reports 3.
+    expect(result.responded).toBe(3);
+    expect(result.status).toBe('completed');
+  });
+
+  it('reports execution failure when every responding agent reported an execution error', async () => {
+    // Each poll iteration issues two searches (responses, then results).
+    const search = jest.fn().mockImplementation(async () => {
+      const call = search.mock.calls.length;
+
+      return call % 2 === 1
+        ? {
+            hits: { total: { value: 2 }, hits: [] },
+            aggregations: {
+              distinct_agents: { value: 2 },
+              error_agents: { doc_count: 2, distinct: { value: 2 } },
+            },
+          }
+        : { hits: { hits: [] } };
+    });
+
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 2,
+    });
+
+    expect(result.status).toBe('execution_failed');
+    expect(result.errorAgents).toBe(2);
+    expect(result.error).toMatch(/execution error/);
+  });
+
+  it('does not report a hard error while other dispatched agents are still pending', async () => {
+    // One agent errored, a second was dispatched but never reported by budget
+    // expiry. That is a retryable partial, not "the query failed".
+    const search = jest.fn().mockImplementation(async () => {
+      const call = search.mock.calls.length;
+
+      return call % 2 === 1
+        ? {
+            hits: { total: { value: 1 }, hits: [] },
+            aggregations: {
+              distinct_agents: { value: 1 },
+              error_agents: { doc_count: 1, distinct: { value: 1 } },
+            },
+          }
+        : { hits: { hits: [] } };
+    });
+
+    const result = await pollActionResponses({ search } as any, 'query-action-1', {
+      budgetMs: 10,
+      intervalMs: 1,
+      spaceId: 'default',
+      expectedAgentCount: 2,
+    });
+
+    expect(result.status).toBe('partial');
+    expect(result.errorAgents).toBe(1);
+  });
+
+  // github-actions review #4975398844: result documents keep the query columns
+  // under `osquery` and the host identity at the document root, so a query
+  // dispatched to several agents used to emit rows with nothing to tell them
+  // apart — forensic output from one host could be attributed to another.
+  describe('row provenance', () => {
+    it('serializes each SQL column once, not at the top level and again under osquery', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce(responsesSearchResult(1))
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  agent: { id: 'agent-a', name: 'host-a' },
+                  osquery: { cmdline: 'UNIQUE-COLUMN-VALUE', pid: 1 },
+                },
+              },
+            ],
+          },
+        });
+
+      const result = await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 1,
+      });
+
+      expect(Object.keys(result.rows[0]).sort()).toEqual(['_agent', 'osquery']);
+      expect(JSON.stringify(result.rows[0]).split('UNIQUE-COLUMN-VALUE')).toHaveLength(2);
+    });
+
+    const twoAgentResults = {
+      hits: {
+        hits: [
+          {
+            _source: {
+              agent: { id: 'agent-a', name: 'host-a' },
+              osquery: { pid: 1, name: 'launchd' },
+            },
+          },
+          {
+            _source: {
+              agent: { id: 'agent-b', name: 'host-b' },
+              osquery: { pid: 2, name: 'svchost' },
+            },
+          },
+        ],
+      },
+    };
+
+    it('keeps per-row agent identity for a multi-agent dispatch', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce(responsesSearchResult(2))
+        .mockResolvedValueOnce(twoAgentResults);
+
+      const result = await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 2,
+      });
+
+      expect(result.rows).toEqual([
+        {
+          _agent: { id: 'agent-a', name: 'host-a' },
+          osquery: { pid: 1, name: 'launchd' },
+        },
+        {
+          _agent: { id: 'agent-b', name: 'host-b' },
+          osquery: { pid: 2, name: 'svchost' },
+        },
+      ]);
+    });
+
+    it('reads provenance from the document root when the ECS agent object is absent', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce(responsesSearchResult(1))
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              { _source: { agent_id: 'a1', host: { hostname: 'host-a' }, osquery: { pid: 1 } } },
+            ],
+          },
+        });
+
+      const result = await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 1,
+      });
+
+      expect(result.rows).toEqual([
+        {
+          _agent: { id: 'a1', name: 'host-a' },
+          osquery: { pid: 1 },
+        },
+      ]);
+    });
+
+    it('falls back to elastic_agent.id and never overwrites a selected column', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce(responsesSearchResult(1))
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  elastic_agent: { id: 'agent-from-elastic-agent' },
+                  // The query selected its own `agent_id` column: provenance
+                  // must not clobber query output.
+                  osquery: { pid: 1, agent_id: 'value-selected-by-the-query' },
+                },
+              },
+              {
+                _source: {
+                  elastic_agent: { id: 'agent-from-elastic-agent' },
+                  osquery: { pid: 2 },
+                },
+              },
+            ],
+          },
+        });
+
+      const result = await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 1,
+      });
+
+      expect(result.rows).toEqual([
+        {
+          _agent: { id: 'agent-from-elastic-agent', name: undefined },
+          osquery: { pid: 1, agent_id: 'value-selected-by-the-query' },
+        },
+        {
+          _agent: { id: 'agent-from-elastic-agent', name: undefined },
+          osquery: { pid: 2 },
+        },
+      ]);
+    });
+
+    it('adds provenance for rows nested under `osquery.result`', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce(responsesSearchResult(1))
+        .mockResolvedValueOnce({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  agent: { id: 'agent-a', name: 'host-a' },
+                  'osquery.result': { pid: 1 },
+                },
+              },
+            ],
+          },
+        });
+
+      const result = await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 1,
+      });
+
+      expect(result.rows).toEqual([
+        {
+          _agent: { id: 'agent-a', name: 'host-a' },
+          osquery: { pid: 1 },
+        },
+      ]);
+    });
+
+    it('leaves rows untouched when the document carries no identity at all', async () => {
+      const search = jest
+        .fn()
+        .mockResolvedValueOnce(responsesSearchResult(1))
+        .mockResolvedValueOnce({ hits: { hits: [{ _source: { osquery: { pid: 1 } } }] } });
+
+      const result = await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 1,
+      });
+
+      expect(result.rows).toEqual([{ pid: 1 }]);
+    });
+  });
+
+  describe('index coverage and space scoping', () => {
+    const bothSearches = () =>
+      jest
+        .fn()
+        .mockResolvedValueOnce(responsesSearchResult(1))
+        .mockResolvedValueOnce({ hits: { total: { value: 0 }, hits: [] } });
+
+    it('reads legacy and new action-response locations so pre-1.12 integrations still complete', async () => {
+      const search = bothSearches();
+
+      await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 1,
+      });
+
+      // Older integration packages report completion into the legacy
+      // transform-fed index; omitting it strands those queries on `pending`.
+      expect(search.mock.calls[0][0].index).toEqual([
+        'logs-osquery_manager.action.responses*',
+        '.logs-osquery_manager.action.responses*',
+      ]);
+    });
+
+    it('matches agent-carried provenance in a named space on both reads', async () => {
+      const search = bothSearches();
+
+      await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'my-space',
+        expectedAgentCount: 1,
+      });
+
+      // Fleet never forwards the action's top-level `space_id` to osquerybeat,
+      // so a named-space poll that only matches that field returns nothing and
+      // reports a successful query as permanently pending.
+      const expectedFilter = {
+        bool: {
+          should: [
+            { term: { space_id: 'my-space' } },
+            {
+              bool: {
+                filter: { term: { 'action_data.space_id': 'my-space' } },
+                must_not: { exists: { field: 'space_id' } },
+              },
+            },
+          ],
+        },
+      };
+
+      for (const call of search.mock.calls) {
+        expect(call[0].query.bool.filter).toContainEqual(expectedFilter);
+      }
+    });
+
+    it('still excludes named-space documents from a default-space poll', async () => {
+      const search = bothSearches();
+
+      await pollActionResponses({ search } as any, 'query-action-1', {
+        budgetMs: 10,
+        intervalMs: 1,
+        spaceId: 'default',
+        expectedAgentCount: 1,
+      });
+
+      // The field-less allowance must not swallow documents stamped for
+      // another space via `action_data.space_id`.
+      for (const call of search.mock.calls) {
+        expect(call[0].query.bool.filter).toContainEqual({
+          bool: {
+            should: [
+              { term: { space_id: 'default' } },
+              {
+                bool: {
+                  must_not: [
+                    { exists: { field: 'space_id' } },
+                    { exists: { field: 'action_data.space_id' } },
+                  ],
+                },
+              },
+              {
+                bool: {
+                  filter: { term: { 'action_data.space_id': 'default' } },
+                  must_not: { exists: { field: 'space_id' } },
+                },
+              },
+            ],
+          },
+        });
+      }
+    });
+  });
+});

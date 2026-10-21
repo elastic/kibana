@@ -7,6 +7,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import { platformCoreTools, ToolResultType, ToolType } from '@kbn/agent-builder-common';
+import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definition';
 import type { InvestigationIocCategory } from '../../attachments/investigation_iocs';
 import { MAX_IOCS_PER_CATEGORY } from '../../attachments/investigation_iocs';
@@ -28,6 +29,17 @@ type ExtractedIocCategory = Extract<
 
 export const ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID = 'endpoint-forensic-analysis';
 
+/** Osquery registry tools bound when this skill loads (must match osquery plugin registrations). */
+export const ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS = [
+  `${internalNamespaces.osquery}.check_integration`,
+  `${internalNamespaces.osquery}.list_saved_queries`,
+  `${internalNamespaces.osquery}.get_table_schema`,
+  `${internalNamespaces.osquery}.run_live_query`,
+  `${internalNamespaces.osquery}.get_live_query_results`,
+  `${internalNamespaces.osquery}.list_packs`,
+  `${internalNamespaces.osquery}.resolve_agent_ids`,
+] as const;
+
 export const ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID = securityTool(
   'endpoint_forensic.discover_telemetry'
 );
@@ -43,12 +55,17 @@ const ENDPOINT_TELEMETRY_INDEX_PATTERNS = [
   'logs-endpoint.events.registry-*',
 ] as const;
 
+const escapeEsqlString = (value: string) => value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
 const discoverTelemetrySchema = lazySchema(() =>
   z.object({
     hosts: z
-      .array(z.string())
+      .array(z.string().max(255))
+      .max(50)
       .optional()
-      .describe('Named host.name values extracted from the analyst question'),
+      .describe(
+        'Named host.name values extracted from the analyst question (max 50 hosts, 255 chars each)'
+      ),
     time_window_hours: z
       .number()
       .int()
@@ -63,8 +80,10 @@ const discoverTelemetrySchema = lazySchema(() =>
 const extractIocsSchema = lazySchema(() =>
   z.object({
     hosts: z
-      .array(z.string())
-      .describe('Named host.name values to extract IoCs from (at least one required)'),
+      .array(z.string().max(255))
+      .min(1)
+      .max(50)
+      .describe('Named host.name values to extract IoCs from (at least one required, max 50)'),
     time_window_hours: z
       .number()
       .int()
@@ -114,14 +133,44 @@ Do **not** load for:
 
 This skill MUST NOT invoke response actions. On response-action requests, explain that this skill is read-only and direct the analyst to Endpoint response actions in Security; then stop.
 
+## Capability Detection (Phase 0 — ALWAYS FIRST)
+
+Before selecting a query path, determine what data sources are available:
+
+**Availability gate (read this before any \`osquery.*\` step).** The \`osquery.*\` tools are registered only when the Osquery Agent Builder tools are enabled on this deployment. If \`osquery.check_integration\` is not in your tool list, the entire Osquery path is unavailable: do not attempt any \`osquery.*\` call, answer from ES|QL / Defend telemetry, and say that live host interrogation is not available on this deployment. Do **not** report that outcome as "Osquery is not installed" — with no tool you cannot probe the integration, so the unprobed claim would be wrong. Every rule below that names an \`osquery.*\` tool applies only when those tools are present.
+
+1. Call \`osquery.check_integration\` to see if the Osquery integration is installed and agents are enrolled.
+2. **If \`enrollment_status\` is \`unknown\`**: the capability check itself failed (Fleet or package-policy error) — this is NOT the same as "no agents", and it is NOT "not installed": a failed check can also return \`installed: false\`. Say the check was inconclusive, answer from ES|QL / Defend telemetry, and suggest retrying the capability check. Evaluate this rule BEFORE any installed/not-installed rule.
+3. **If Osquery IS installed and agents are enrolled**: for **live-state** questions (current processes, open sockets, loaded DLLs, registry keys as of now), route to the Osquery path (step 2b below). For **historical** questions (what happened in the past), use ES|QL on Defend telemetry.
+4. **If Osquery IS installed but NO agents are enrolled** (\`installed: true\`, \`agents_enrolled: false\`): live interrogation is impossible even though the integration exists. Route all questions to the ES|QL / Defend telemetry path and tell the analyst live host interrogation needs an agent enrolled in an Osquery-capable agent policy. Do **not** call \`osquery.run_live_query\` — it has no agent to run on.
+5. **If Osquery is NOT installed**: route all questions to the ES|QL / Defend telemetry path. Inform the analyst that live host interrogation requires the Osquery integration.
+
+Use Osquery when the question asks for **current state** ("what processes are currently running", "which sockets are open right now").
+Use ES|QL when the question asks for **historical events** ("what happened at 3am", "timeline of the attack", "patient zero").
+
+Both paths can be combined in a single investigation when both integrations are available.
+
 ## Process
 
 ### 1. Discover telemetry scope
-Call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` first with host names and time window from the question.
+**On the ES|QL / Defend telemetry path only**, call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` first with host names and time window from the question. It resolves Defend telemetry indices and has no bearing on the Osquery live-state path — do not call it before \`osquery.run_live_query\`.
 
-### 2. Query with ES|QL
+### 2a. Query with ES|QL (historical / Defend telemetry)
 Use \`platform.core.generate_esql\` then \`platform.core.execute_esql\` against the recommended Defend indices.
 Always scope \`@timestamp\`. Cite index and query in answers.
+
+### 2b. Query with Osquery (live state — only when the \`osquery.*\` tools are available and \`check_integration\` reports a capable stack)
+For live-state questions, use these Osquery tools in sequence (skip \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` — it is ES|QL-only):
+- If the analyst references a pack by name, call \`osquery.list_packs\` FIRST — before authoring or dispatching any query — and use the pack's prebuilt queries rather than composing a custom one.
+- \`osquery.list_saved_queries\` to find prebuilt queries matching the investigative need
+- \`osquery.get_table_schema\` to verify column names before authoring a custom query
+- \`osquery.resolve_agent_ids\` to turn host names into Elastic Agent IDs — \`run_live_query\` takes \`agent_ids\`, not host names. Do NOT query the \`.fleet-agents\` index via ES|QL/search; it requires ES-level privileges most roles lack and fails with a security_exception.
+- \`osquery.run_live_query\` to dispatch a read-only SELECT query to enrolled agents (waits ~30s inline for rows)
+- \`osquery.get_live_query_results\` when \`run_live_query\` returns \`status: dispatched\` or \`status: partial\` — pass the \`action_id\` and wait up to 60s for agent rows
+
+Do not treat rows from a partial response as complete: follow up for pending agents and explicitly report any agents that remain unresolved. This path ends once the live-state results are returned and displayed — do NOT continue into steps 3–7 (patient zero, timeline, IoCs, lateral movement, persistence): those are historical ES|QL reconstruction and were not requested by a live-state question. Only combine paths when the analyst explicitly asks for both live and historical analysis.
+
+After rows return, **display them in chat** as a markdown table (columns from the first row, cap at 20 rows with a note if truncated).
 
 ### 3. Patient zero
 Query process and network indices ordered by @timestamp ASC.
@@ -188,10 +237,16 @@ Where the indicators go depends on how you were asked to answer:
   Echo each \`value\` verbatim. Source event is the indicator's \`comment\`, enriched from the reconstruction.
   First seen is the earliest timestamp you have for that indicator; use "—" when you do not have one.
   Surface every category listed above; if a category has no hits, show one row with Value "—".
+  If the tool result contains an \`error\` field, do NOT report "no indicators found" — say the extraction failed,
+  report the error, and answer from the telemetry you already have.
 - Answering with a structured output schema that has an indicators field: that field is the categories
   themselves, each a list of \`{ value, comment }\`. \`comment\` carries the same detail you would have written
   for an analyst — do not shorten it to a label because it is going into a structured field. Omit a category
   entirely when the reconstruction found nothing in it. Do not also render the indicators in a free-text field.
+
+Do not automatically put observed network destinations in \`ips\`. The tool returns them separately in
+\`observed_network_destinations\`; host/time scope alone does not establish compromise. Add only destinations
+corroborated by the reconstructed attack to the \`ips\` category.
 
 ### 6. Lateral movement
 
@@ -199,16 +254,24 @@ Trace outbound internal connections from source host; correlate with process cre
 
 ### 7. Persistence
 Enumerate registry run keys, scheduled tasks, services, and startup items from telemetry indices.
+When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`startup_items\` tables.
 
 ## Tool Selection Guardrails
 
-- **Always** call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` before ES|QL.
+- **Always** call \`osquery.check_integration\` before using any other \`osquery.*\` tool — and only after confirming the \`osquery.*\` tools are in your tool list (see Phase 0). When they are not registered on this deployment, use the ES|QL / Defend telemetry path instead: never call a tool that is not in your tool list.
+- **Always** call \`${ENDPOINT_FORENSIC_DISCOVER_TELEMETRY_TOOL_ID}\` before ES|QL — and only on the ES|QL path.
+- **Always** call \`osquery.resolve_agent_ids\` before \`osquery.run_live_query\`: the dispatch tool takes \`agent_ids\`, never host names.
 - **Always** call \`${ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID}\` after reconstructing an attack on a host, to produce the structured indicators for downstream hunts.
 - **Always** use \`platform.core.generate_esql\` and \`platform.core.execute_esql\` for historical forensic answers.
-- Do **not** use \`platform.core.search\` or \`relevance_search\` for reconstruction — they cannot replace scoped ES|QL on Defend telemetry.
+- Do **not** use \`platform.core.search\`, \`relevance_search\`, or repeated \`platform.core.list_indices\` for reconstruction — they cannot replace scoped ES|QL on Defend telemetry.
 - Use \`platform.core.get_index_mapping\` only when field names are uncertain before generating ES|QL.
+- Use \`osquery.run_live_query\` only for **read-only SELECT queries** on enrolled agents. Never attempt shell execution or mutating Osquery tables.
+- When \`osquery.run_live_query\` returns \`status: dispatched\` or \`status: partial\`, **must** call \`osquery.get_live_query_results\` with the \`action_id\` before telling the analyst live dispatch is unavailable.
+- When \`osquery.check_integration\` reports \`agents_enrolled: false\`, do **not** call \`osquery.run_live_query\`; answer from Defend telemetry and state the limitation.
+- When a prebuilt saved query matches, prefer it over authoring a custom query.
 `,
   getRegistryTools: () => [
+    ...ENDPOINT_FORENSIC_OSQUERY_TOOL_IDS,
     platformCoreTools.listIndices,
     platformCoreTools.getIndexMapping,
     platformCoreTools.generateEsql,
@@ -261,21 +324,22 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
       type: ToolType.builtin,
       description:
         'Extract structured indicators of compromise (IoCs) from Defend telemetry for named host(s). ' +
-        'Returns indicators grouped by category — shas, ips, file_paths, malicious_commands, affected_hosts — ' +
-        `each a deduplicated list of { value, comment }, capped at ${MAX_IOCS_PER_CATEGORY} per category. ` +
+        'Returns indicators grouped by category — shas, file_paths, malicious_commands, affected_hosts — ' +
+        `each a deduplicated list of { value, comment }, capped at ${MAX_IOCS_PER_CATEGORY} per category, ` +
+        'plus observed network destinations that require attack correlation before adding them to ips. ' +
         'Call this after forensic reconstruction to produce the indicators for cross-environment hunts and ' +
         'response actions. It only returns what telemetry fields can be typed mechanically — add ransom notes, ' +
         'encryption markers, and compromised identities from your own analysis.',
       schema: extractIocsSchema,
       handler: async (args, context) => {
         const { hosts, time_window_hours: timeWindowHours } = extractIocsSchema.parse(args);
-        const hostFilter = hosts.map((h) => `"${h}"`).join(', ');
+        const hostFilter = hosts.map((h) => `"${escapeEsqlString(h)}"`).join(', ');
         // Sorting ascending before the limit keeps the truncated set anchored on the start of the
         // attack, so the comment each indicator keeps describes its earliest occurrence.
         const esqlQuery = [
           `FROM logs-endpoint.events.process-*, logs-endpoint.events.network-*, logs-endpoint.events.file-*, logs-endpoint.events.registry-*`,
           `| WHERE host.name IN (${hostFilter}) AND @timestamp >= NOW() - ${timeWindowHours} HOURS`,
-          `| KEEP process.hash.sha256, process.executable, process.name, process.command_line, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, registry.value, file.path, user.name, event.action, host.name, @timestamp`,
+          `| KEEP process.hash.sha256, file.hash.sha256, process.executable, process.name, process.command_line, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, registry.value, file.path, user.name, event.action, host.name, @timestamp`,
           `| SORT @timestamp ASC`,
           `| LIMIT 500`,
         ].join(' ');
@@ -283,6 +347,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
         // One map per category, keyed by value so a repeated indicator keeps the first comment it
         // was given — which, because the query sorts ascending, is its earliest occurrence.
         const byCategory = new Map<ExtractedIocCategory, Map<string, InvestigationIoc>>();
+        const observedNetworkDestinations: string[] = [];
 
         const addIndicator = (category: ExtractedIocCategory, value: unknown, comment?: string) => {
           if (typeof value !== 'string' || value === '') {
@@ -308,6 +373,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
           const colIndex = (name: string) => columns.findIndex((c) => c.name === name);
 
           const hashIdx = colIndex('process.hash.sha256');
+          const fileHashIdx = colIndex('file.hash.sha256');
           const exeIdx = colIndex('process.executable');
           const processNameIdx = colIndex('process.name');
           const cmdIdx = colIndex('process.command_line');
@@ -332,6 +398,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
 
             const host = asText(hostIdx);
             const exe = asText(exeIdx);
+            const filePath = asText(filePathIdx);
             const processName = asText(processNameIdx) ?? exe;
             const parentName = asText(parentNameIdx);
             const user = asText(userIdx);
@@ -352,15 +419,34 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
               exe ? `SHA256 of ${exe}${seenOn}` : `Observed${seenOn}`.trim()
             );
             addIndicator(
-              'ips',
-              at(ipIdx),
-              `Outbound destination contacted${seenOn}${actor ? ` ${actor}` : ''}`
+              'shas',
+              at(fileHashIdx),
+              filePath
+                ? `SHA256 of ${filePath}${seenOn}`
+                : `Observed in file telemetry${seenOn}`.trim()
             );
-            addIndicator(
-              'ips',
-              at(domainIdx),
-              `Domain resolved and contacted${seenOn}${actor ? ` ${actor}` : ''}`
-            );
+
+            const addObservedNetworkDestination = (value: unknown) => {
+              if (
+                typeof value !== 'string' ||
+                value === '' ||
+                observedNetworkDestinations.includes(value) ||
+                observedNetworkDestinations.length >= MAX_IOCS_PER_CATEGORY
+              ) {
+                return;
+              }
+              observedNetworkDestinations.push(value);
+            };
+            const destinationIp = asText(ipIdx);
+            if (
+              destinationIp &&
+              !/^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.|127\.|0\.|169\.254\.|::1|fe80:|224\.|239\.)/i.test(
+                destinationIp
+              )
+            ) {
+              addObservedNetworkDestination(destinationIp);
+            }
+            addObservedNetworkDestination(at(domainIdx));
             addIndicator(
               'file_paths',
               exe,
@@ -368,7 +454,7 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
             );
             addIndicator(
               'file_paths',
-              at(filePathIdx),
+              filePath,
               `${action ? `File ${action}` : 'File touched'}${seenOn}${actor ? ` ${actor}` : ''}`
             );
             addIndicator(
@@ -415,14 +501,16 @@ Enumerate registry run keys, scheduled tasks, services, and startup items from t
                 ...iocs,
                 scoped_hosts: hosts,
                 time_window_hours: timeWindowHours,
+                observed_network_destinations: observedNetworkDestinations,
                 ...(queryError ? { error: queryError } : {}),
                 guidance: queryError
                   ? 'The extraction query failed, so no categories were returned for that reason and not ' +
                     'because the hosts were clean. Fall back to the indicators you identified during reconstruction.'
                   : 'These categories are deduplicated — echo the values verbatim rather than rewriting or ' +
-                    'merging them, and enrich each comment with what your reconstruction established. They are ' +
-                    'a floor, not the full set: this query can only type telemetry fields mechanically, so add ' +
-                    'the ransom_note, encryption_marker, and compromised_identities categories yourself.',
+                    'merging them, and enrich each comment with what your reconstruction established. Observed ' +
+                    'network destinations require attack correlation before adding them to ips. The categories ' +
+                    'are a floor, not the full set: add ransom notes, encryption markers, and compromised identities ' +
+                    'from the reconstruction.',
               },
             },
           ],

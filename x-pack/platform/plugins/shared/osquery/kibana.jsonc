@@ -29,6 +29,7 @@
       "unifiedSearch"
     ],
     "optionalPlugins": [
+      "agentBuilder",
       "cps",
       "fleet",
       "home",

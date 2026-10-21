@@ -258,7 +258,11 @@ const KILL_CHAIN: ForensicEvent[] = [
 export async function seedForensicTimeline(
   { esClient }: { esClient: Client },
   log: ToolingLog,
-  baseTime: Date = new Date(Date.now() - 3 * 60 * 60 * 1000)
+  baseTime: Date = new Date(Date.now() - 3 * 60 * 60 * 1000),
+  ownership?: {
+    runId: string;
+    persist: (resources: { agentIds: string[]; indices: string[] }) => Promise<void>;
+  }
 ): Promise<void> {
   const operations = KILL_CHAIN.flatMap((event) => {
     const agentId = AGENT_IDS[event.host];
@@ -282,6 +286,21 @@ export async function seedForensicTimeline(
       },
     ];
   });
+
+  if (ownership) {
+    const agentIds = new Set<string>();
+    const indices = new Set<string>();
+    for (let i = 0; i < operations.length; i += 2) {
+      const action = operations[i] as { create: { _index: string } };
+      const document = operations[i + 1] as { agent: { id: string } };
+      document.agent.id = `${ownership.runId}-${document.agent.id}`;
+      const elastic = operations[i + 1] as { elastic: { agent: { id: string } } };
+      elastic.elastic.agent.id = document.agent.id;
+      agentIds.add(document.agent.id);
+      indices.add(action.create._index);
+    }
+    await ownership.persist({ agentIds: [...agentIds], indices: [...indices] });
+  }
 
   const response = await esClient.bulk({ operations, refresh: true });
 

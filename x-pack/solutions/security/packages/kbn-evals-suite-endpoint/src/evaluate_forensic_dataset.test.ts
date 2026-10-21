@@ -7,9 +7,77 @@
 
 import type { Evaluator, TaskOutput } from '@kbn/evals';
 import {
+  createForensicTrajectoryEvaluator,
   wrapSkillInvocationForDistractors,
   type ForensicDatasetExample,
 } from './evaluate_forensic_dataset';
+
+const toolCallOutput = (toolIds: string[]): TaskOutput =>
+  ({
+    messages: [],
+    errors: [],
+    steps: toolIds.map((toolId, index) => ({
+      type: 'tool_call',
+      tool_id: toolId,
+      tool_call_id: `call-${index}`,
+      params: {},
+      results: [],
+    })),
+  } as unknown as TaskOutput);
+
+describe('createForensicTrajectoryEvaluator', () => {
+  const GOLDEN = [
+    'osquery.check_integration',
+    'osquery.list_saved_queries',
+    'osquery.resolve_agent_ids',
+    'osquery.run_live_query',
+  ];
+
+  it('does not award full coverage when a golden tool was never called', async () => {
+    const evaluator = createForensicTrajectoryEvaluator();
+    const result = await evaluator.evaluate({
+      input: { question: 'live processes?' },
+      // resolve_agent_ids missing — the exact gap review finding 16 describes.
+      output: toolCallOutput([
+        'osquery.check_integration',
+        'osquery.list_saved_queries',
+        'osquery.run_live_query',
+      ]),
+      expected: { criteria: [], tool_sequence: GOLDEN },
+      metadata: { row_type: 'happy' },
+    });
+
+    expect(typeof result.score).toBe('number');
+    expect(result.score as number).toBeLessThan(1);
+    expect(result.metadata?.missing_golden_tools).toEqual(['osquery.resolve_agent_ids']);
+  });
+
+  it('still allows a full score when every golden tool ran', async () => {
+    const evaluator = createForensicTrajectoryEvaluator();
+    const result = await evaluator.evaluate({
+      input: { question: 'live processes?' },
+      output: toolCallOutput(GOLDEN),
+      expected: { criteria: [], tool_sequence: GOLDEN },
+      metadata: { row_type: 'happy' },
+    });
+
+    expect(result.score).toBe(1);
+    expect(result.metadata?.missing_golden_tools).toBeUndefined();
+  });
+
+  it('skips evaluation when no tool_sequence is annotated', async () => {
+    const evaluator = createForensicTrajectoryEvaluator();
+    const result = await evaluator.evaluate({
+      input: { question: 'patient zero?' },
+      output: toolCallOutput(['platform.core.execute_esql']),
+      expected: { criteria: [] },
+      metadata: { row_type: 'happy' },
+    });
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('N/A');
+  });
+});
 
 describe('wrapSkillInvocationForDistractors', () => {
   const inner: Evaluator<ForensicDatasetExample, TaskOutput> = {
