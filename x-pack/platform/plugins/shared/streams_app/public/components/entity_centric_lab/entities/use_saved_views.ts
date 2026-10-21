@@ -261,7 +261,8 @@ const parseK8sFilters = (
   return { resourceType, cluster, namespace, deployment, node };
 };
 
-const parseState = (value: unknown): SavedViewState | undefined => {
+/** Parse a raw JSON value into {@link SavedViewState} (share URLs, imports). */
+export const parseSavedViewState = (value: unknown): SavedViewState | undefined => {
   if (!value || typeof value !== 'object') return undefined;
   const source = value as Record<string, unknown>;
   const rawCategory = source.category;
@@ -307,7 +308,7 @@ const parseState = (value: unknown): SavedViewState | undefined => {
 const parseView = (value: unknown): SavedView | undefined => {
   if (!value || typeof value !== 'object') return undefined;
   const source = value as Record<string, unknown>;
-  const state = parseState(source.state);
+  const state = parseSavedViewState(source.state);
   if (!state) return undefined;
   if (typeof source.id !== 'string' || typeof source.name !== 'string') return undefined;
   return {

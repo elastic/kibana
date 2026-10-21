@@ -527,6 +527,7 @@ export const EntityFlyout = ({
     persistDashboardPreviewId(null);
     onClose();
   }, [onClose]);
+
   const [dateStart, setDateStart] = useState(timeRange?.from ?? 'now-15m');
   const [dateEnd, setDateEnd] = useState(timeRange?.to ?? 'now');
   // Keep the picker aligned when the host updates shareable URL time params.

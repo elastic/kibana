@@ -26,6 +26,7 @@ import {
   EuiIconTip,
   EuiLink,
   EuiPanel,
+  EuiHorizontalRule,
   EuiPopover,
   EuiSelectable,
   EuiSpacer,
@@ -125,6 +126,8 @@ interface StoredCustomDashboard {
   readonly enabled: boolean;
   /** When `enabled` is false, the dashboard is only shown for this specific entity. */
   readonly scopedToEntity?: string;
+  /** When true, scope the dashboard to this resource (filter pill) using its name. */
+  readonly portResourceName?: boolean;
 }
 
 const storageKey = (kind: string): string => `elasticOn_customDashboards_${kind}`;
@@ -134,7 +137,11 @@ const loadCustomDashboards = (kind: string): StoredCustomDashboard[] => {
     const raw = localStorage.getItem(storageKey(kind));
     if (!raw) return [];
     const parsed = JSON.parse(raw) as Array<Omit<StoredCustomDashboard, 'enabled'> & { enabled?: boolean }>;
-    return parsed.map((d) => ({ ...d, enabled: d.enabled ?? true }));
+    return parsed.map((d) => ({
+      ...d,
+      enabled: d.enabled ?? true,
+      portResourceName: d.portResourceName ?? false,
+    }));
   } catch {
     return [];
   }
@@ -289,6 +296,28 @@ export const buildDashboardHref = (dashboard: DashboardDescriptor, entityName: s
   return `${basePath}/app/dashboards#/view/${id}?${globalState}${appState}`;
 };
 
+const resolveScopeFieldForEntity = (entityName: string, entityType?: string): string => {
+  const managed = getOotbDashboards(entityName, entityType);
+  const scopeField = managed[0]?.scopeField;
+  return scopeField && scopeField.length > 0 ? scopeField : 'host.name';
+};
+
+const buildCustomDashboardHref = (
+  item: StoredCustomDashboard,
+  entityName: string,
+  entityType?: string
+): string => {
+  const id = item.id;
+  const basePath = getBasePath();
+  const globalState = `_g=(refreshInterval:(pause:!t,value:60000),time:(from:now-24h,to:now))`;
+  if (!item.portResourceName) {
+    return `${basePath}/app/dashboards#/view/${id}?${globalState}`;
+  }
+  const scopeField = resolveScopeFieldForEntity(entityName, entityType);
+  const appState = `&_a=(filters:!((query:(match_phrase:(${scopeField}:'${entityName}')))))`;
+  return `${basePath}/app/dashboards#/view/${id}?${globalState}${appState}`;
+};
+
 // ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
@@ -329,16 +358,16 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
           'entityCentricLabFlyout.dashboardsList.custom.createDashboardInitialMessageWithType',
           {
             defaultMessage:
-              'Create a dashboard for "{resourceName}" ({resourceType}). Scope it to this resource and include the panels that matter most for this resource type.',
-            values: { resourceName: displayName, resourceType: entityType },
+              'Create a dashboard for "{resourceName}" ({resourceType}). Design it for this resource type—not just this instance—so it works for any similar resource opened from Infrastructure. Include panels that support drill-down so linking with "Port resource name to dashboard" scopes the view to the current resource.',
+            values: { resourceName: entityName, resourceType: entityType },
           }
         )
       : i18n.translate(
           'entityCentricLabFlyout.dashboardsList.custom.createDashboardInitialMessage',
           {
             defaultMessage:
-              'Create a dashboard for "{resourceName}". Scope it to this resource and include the panels that matter most for this resource type.',
-            values: { resourceName: displayName },
+              'Create a dashboard for "{resourceName}". Design it for this resource type—not just this instance—so it works for any similar resource opened from Infrastructure. Include panels that support drill-down so linking with "Port resource name to dashboard" scopes the view to the current resource.',
+            values: { resourceName: entityName },
           }
         );
     agentBuilder.openChat({
@@ -347,7 +376,7 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
       initialMessage,
       autoSendInitialMessage: false,
     });
-  }, [agentBuilder, displayName, entityType]);
+  }, [agentBuilder, entityName, entityType]);
 
   // --- Managed dashboards ---
   const managedDashboards = useMemo(
@@ -474,7 +503,10 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
         }),
         width: '40%',
         render: (title: string, item: StoredCustomDashboard) => {
-          const href = `${getBasePath()}/app/dashboards#/view/${item.id}`;
+          const href = buildCustomDashboardHref(item, entityName, entityType);
+          const scopeField = item.portResourceName
+            ? resolveScopeFieldForEntity(entityName, entityType)
+            : '';
           return (
             <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
               <EuiFlexItem grow={false}>
@@ -489,7 +521,7 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
                           title,
                           savedObjectTitle: title,
                           savedObjectId: item.id,
-                          scopeField: '',
+                          scopeField,
                         },
                       })
                     }
@@ -509,6 +541,11 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
                   </EuiLink>
                 )}
               </EuiFlexItem>
+              {item.portResourceName ? (
+                <EuiFlexItem grow={false}>
+                  <EuiBadge color="hollow">{displayName}</EuiBadge>
+                </EuiFlexItem>
+              ) : null}
               {!item.enabled && item.scopedToEntity ? (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="hollow">{item.scopedToEntity} only</EuiBadge>
@@ -541,7 +578,7 @@ export const DashboardsListTab: React.FC<DashboardsListTabProps> = ({
         ),
       },
     ],
-    [handleRemoveCustom, onPreviewDashboard, showThumbnails]
+    [displayName, entityName, entityType, handleRemoveCustom, onPreviewDashboard, showThumbnails]
   );
 
   return (
@@ -754,6 +791,7 @@ const AddDashboardPicker: React.FC<{
 }> = ({ existingIds, onAdd, entityName, entityType }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showForSimilar, setShowForSimilar] = useState(true);
+  const [portResourceName, setPortResourceName] = useState(false);
 
   const [options, setOptions] = useState<EuiSelectableOption[]>(() =>
     AVAILABLE_CUSTOM_DASHBOARDS.filter((d) => !existingIds.has(d.id)).map((d) => ({
@@ -773,6 +811,7 @@ const AddDashboardPicker: React.FC<{
       }))
     );
     setShowForSimilar(true);
+    setPortResourceName(false);
     setIsOpen(true);
   }, [existingIds]);
 
@@ -786,6 +825,7 @@ const AddDashboardPicker: React.FC<{
           title: source.title,
           description: source.description,
           enabled: showForSimilar,
+          portResourceName,
           ...(!showForSimilar ? { scopedToEntity: entityName } : {}),
         };
       });
@@ -793,7 +833,7 @@ const AddDashboardPicker: React.FC<{
       onAdd(selected);
     }
     setIsOpen(false);
-  }, [options, onAdd, showForSimilar, entityName]);
+  }, [options, onAdd, portResourceName, showForSimilar, entityName]);
 
   const selectedCount = options.filter((o) => o.checked === 'on').length;
 
@@ -861,6 +901,37 @@ const AddDashboardPicker: React.FC<{
                     resourceType: entityType ?? 'resource',
                     resourceName: entityName,
                   },
+                }
+              )}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiHorizontalRule margin="s" />
+        <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiCheckbox
+              id="port-resource-name-to-dashboard"
+              label={i18n.translate(
+                'entityCentricLabFlyout.dashboardsList.custom.portResourceName',
+                { defaultMessage: 'Port resource name to dashboard' }
+              )}
+              checked={portResourceName}
+              onChange={(e) => setPortResourceName(e.target.checked)}
+              compressed
+              data-test-subj="entityCentricLabDashboardsPortResourceName"
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              type="info"
+              color="subdued"
+              position="top"
+              content={i18n.translate(
+                'entityCentricLabFlyout.dashboardsList.custom.portResourceNameHelp',
+                {
+                  defaultMessage:
+                    'When on, opening this dashboard applies a filter for "{resourceName}" so the dashboard opens scoped to this resource.',
+                  values: { resourceName: entityName },
                 }
               )}
             />

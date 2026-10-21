@@ -227,6 +227,11 @@ import {
 } from './list_density';
 import { ListDisplayOptionsPopover } from './list_display_options_popover';
 import {
+  encodeInventorySharePayload,
+  INVENTORY_SHARE_QUERY_KEY,
+  readInventorySharePayloadFromSearch,
+} from './inventory_share_url';
+import {
   applyViewToStorage,
   areStatesEqual,
   consumePendingSearch,
@@ -707,16 +712,24 @@ const AddDataOverlay = ({ onClose }: { readonly onClose: () => void }) => {
   );
 };
 
+const NEW_INFRA_EXPERIENCE_UI_SETTING = 'observability:newInfraExperience';
+const TRANSITION_COMPLETED_SESSION_KEY = 'elasticOn_transitionCompleted';
+const HAS_REVERTED_TO_CLASSIC_SESSION_KEY = 'elasticOn_hasRevertedToClassic';
+const PENDING_TRANSITION_MODAL_SESSION_KEY = 'elasticOn_pendingTransitionModal';
+
 const ADVANCED_SETTINGS_NEW_INFRA_PATH =
   '/app/management/kibana/settings?query=newInfraExperience';
 
 const MoreActionsMenu = ({
   onPlayTour,
-  onRevertToSettings,
+  newExperienceEnabled,
+  onToggleNewExperience,
 }: {
   onPlayTour: () => void;
-  /** When set, shows the revert action (admins only — not banner-user). */
-  onRevertToSettings?: () => void;
+  /** Current state of the new-experience toggle (undefined = hide toggle). */
+  newExperienceEnabled?: boolean;
+  /** Callback when the user flips the toggle. */
+  onToggleNewExperience?: (enabled: boolean) => void;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const button = (
@@ -758,22 +771,48 @@ const MoreActionsMenu = ({
               { defaultMessage: 'Play feature tour' }
             )}
           </EuiContextMenuItem>,
-          ...(onRevertToSettings
+          ...(newExperienceEnabled !== undefined && onToggleNewExperience
             ? [
                 <EuiContextMenuItem
-                  key="revert"
-                  icon="undo"
+                  key="new-experience-toggle"
+                  icon="visGauge"
                   onClick={() => {
+                    onToggleNewExperience(!newExperienceEnabled);
                     setIsOpen(false);
-                    onRevertToSettings();
                   }}
-                  data-test-subj="entityCentricLabMoreActionsRevert"
+                  css={css`
+                    cursor: pointer;
+                  `}
+                  data-test-subj="entityCentricLabMoreActionsNewExperience"
                 >
-                  {i18n.translate(
-                    'xpack.streams.entityCentricLab.entities.moreActions.revert',
-                    { defaultMessage: 'Revert back to old UX in Settings' }
-                  )}
+                  <EuiFlexGroup
+                    alignItems="center"
+                    justifyContent="spaceBetween"
+                    gutterSize="s"
+                    responsive={false}
+                  >
+                    <EuiFlexItem grow={false}>
+                      {i18n.translate(
+                        'xpack.streams.entityCentricLab.entities.moreActions.newExperience',
+                        { defaultMessage: 'New experience' }
+                      )}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiSwitch
+                        label=""
+                        showLabel={false}
+                        checked={newExperienceEnabled}
+                        onChange={(e) => {
+                          onToggleNewExperience(e.target.checked);
+                          setIsOpen(false);
+                        }}
+                        compressed
+                        data-test-subj="entityCentricLabNewExperienceSwitch"
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 </EuiContextMenuItem>,
+                <EuiHorizontalRule key="new-experience-hr" margin="none" />,
               ]
             : []),
           <EuiContextMenuItem
@@ -1016,32 +1055,83 @@ const AllEntitiesViewInner = ({
   }, []);
 
   const [transitionCompleted, setTransitionCompleted] = useState(
-    () => sessionStorage.getItem('elasticOn_transitionCompleted') === 'true'
+    () => sessionStorage.getItem(TRANSITION_COMPLETED_SESSION_KEY) === 'true'
   );
-  const handleTransitionSwitch = useCallback(() => {
-    sessionStorage.setItem('elasticOn_transitionCompleted', 'true');
+  // Track whether the user explicitly reverted via the toggle (skip modal)
+  const [revertedViaToggle, setRevertedViaToggle] = useState(false);
+
+  const applyNewInfraEnabledFromAdvancedSettings = useCallback(() => {
+    sessionStorage.setItem(TRANSITION_COMPLETED_SESSION_KEY, 'true');
+    sessionStorage.removeItem(PENDING_TRANSITION_MODAL_SESSION_KEY);
+    sessionStorage.removeItem(HAS_REVERTED_TO_CLASSIC_SESSION_KEY);
     setTransitionCompleted(true);
+    setRevertedViaToggle(false);
   }, []);
 
+  const handleTransitionSwitch = useCallback(() => {
+    sessionStorage.setItem(TRANSITION_COMPLETED_SESSION_KEY, 'true');
+    sessionStorage.removeItem(PENDING_TRANSITION_MODAL_SESSION_KEY);
+    sessionStorage.removeItem(HAS_REVERTED_TO_CLASSIC_SESSION_KEY);
+    setTransitionCompleted(true);
+    setRevertedViaToggle(false);
+    uiSettings.set(NEW_INFRA_EXPERIENCE_UI_SETTING, true);
+  }, [uiSettings]);
+
   const handleRevertToClassic = useCallback(() => {
-    variationCtx.set('scenario', 'transition');
+    sessionStorage.removeItem(TRANSITION_COMPLETED_SESSION_KEY);
+    sessionStorage.setItem(HAS_REVERTED_TO_CLASSIC_SESSION_KEY, 'true');
+    sessionStorage.removeItem(PENDING_TRANSITION_MODAL_SESSION_KEY);
+    setTransitionCompleted(false);
+    // Reverting to the classic screenshot should not dim it behind the modal
+    // scrim (toggle-off, Advanced Settings, etc.).
+    setRevertedViaToggle(true);
+    if (variationCtx.get('scenario') !== 'transition') {
+      variationCtx.set('scenario', 'transition');
+    }
   }, [variationCtx]);
 
-  // Subscribe to the Stack Management toggle so flipping it off
-  // triggers the revert to classic immediately (no page reload needed).
   const newInfraEnabled = useObservable(
-    uiSettings.get$<boolean>('observability:newInfraExperience', true),
-    uiSettings.get<boolean>('observability:newInfraExperience', true)
+    uiSettings.get$<boolean>(NEW_INFRA_EXPERIENCE_UI_SETTING, true),
+    uiSettings.get<boolean>(NEW_INFRA_EXPERIENCE_UI_SETTING, true)
   );
-  const prevNewInfraRef = useRef(newInfraEnabled);
+  const prevNewInfraRef = useRef<boolean | undefined>(undefined);
+
   useEffect(() => {
-    if (prevNewInfraRef.current && !newInfraEnabled) {
-      handleRevertToClassic();
+    const prev = prevNewInfraRef.current;
+    const pendingTransitionModal =
+      sessionStorage.getItem(PENDING_TRANSITION_MODAL_SESSION_KEY) === 'true';
+
+    if (prev === undefined) {
+      prevNewInfraRef.current = newInfraEnabled;
+      if (!newInfraEnabled) {
+        handleRevertToClassic();
+      } else if (
+        sessionStorage.getItem(HAS_REVERTED_TO_CLASSIC_SESSION_KEY) === 'true' &&
+        !pendingTransitionModal
+      ) {
+        applyNewInfraEnabledFromAdvancedSettings();
+      }
+      return;
+    }
+
+    if (prev === newInfraEnabled) {
+      return;
     }
     prevNewInfraRef.current = newInfraEnabled;
-  }, [newInfraEnabled, handleRevertToClassic]);
 
-  const isTransitionScenario = scenarioVariation === 'transition' && !transitionCompleted;
+    if (!newInfraEnabled) {
+      handleRevertToClassic();
+      return;
+    }
+    if (!pendingTransitionModal) {
+      applyNewInfraEnabledFromAdvancedSettings();
+    }
+  }, [
+    newInfraEnabled,
+    applyNewInfraEnabledFromAdvancedSettings,
+    handleRevertToClassic,
+  ]);
+
   const isBannerScenario =
     (scenarioVariation === 'transition' && transitionCompleted) ||
     scenarioVariation === 'banner-admin' ||
@@ -1064,9 +1154,46 @@ const AllEntitiesViewInner = ({
   // Admins (default / transition / banner-admin) can revert; banner-user cannot.
   const canRevertToClassicUx = scenarioVariation !== 'banner-user';
 
+  const pendingTransitionModal =
+    sessionStorage.getItem(PENDING_TRANSITION_MODAL_SESSION_KEY) === 'true';
+  const hasRevertedToClassic =
+    sessionStorage.getItem(HAS_REVERTED_TO_CLASSIC_SESSION_KEY) === 'true';
+  const showOldForTransitionModal =
+    newInfraEnabled &&
+    !transitionCompleted &&
+    (pendingTransitionModal ||
+      (scenarioVariation === 'transition' && !hasRevertedToClassic));
+
+  const showOldExperiencePage =
+    canRevertToClassicUx && (!newInfraEnabled || showOldForTransitionModal);
+  const showOldPageTransitionModal =
+    newInfraEnabled && showOldForTransitionModal && !revertedViaToggle;
+
   const openRevertSettings = useCallback(() => {
     application.navigateToUrl(basePath.prepend(ADVANCED_SETTINGS_NEW_INFRA_PATH));
   }, [application, basePath]);
+
+  const handleToggleNewExperience = useCallback(
+    (enabled: boolean) => {
+      if (enabled) {
+        setRevertedViaToggle(false);
+        sessionStorage.removeItem(TRANSITION_COMPLETED_SESSION_KEY);
+        sessionStorage.setItem(PENDING_TRANSITION_MODAL_SESSION_KEY, 'true');
+        sessionStorage.removeItem(HAS_REVERTED_TO_CLASSIC_SESSION_KEY);
+        setTransitionCompleted(false);
+        variationCtx.set('scenario', 'transition');
+      } else {
+        setRevertedViaToggle(true);
+        sessionStorage.removeItem(TRANSITION_COMPLETED_SESSION_KEY);
+        sessionStorage.setItem(HAS_REVERTED_TO_CLASSIC_SESSION_KEY, 'true');
+        sessionStorage.removeItem(PENDING_TRANSITION_MODAL_SESSION_KEY);
+        setTransitionCompleted(false);
+        variationCtx.set('scenario', 'transition');
+      }
+      uiSettings.set(NEW_INFRA_EXPERIENCE_UI_SETTING, enabled);
+    },
+    [uiSettings, variationCtx]
+  );
 
   const prevScenarioRef = useRef(scenarioVariation);
   useEffect(() => {
@@ -1494,6 +1621,10 @@ const AllEntitiesViewInner = ({
   // walking the left nav from Kubernetes → Hosts → Databases doesn't
   // silently drop the user back to Overview each time.
   const [categoryTab, setCategoryTab] = useCategoryTab();
+  const loadViewId = useMemo(
+    () => (isLatest ? new URLSearchParams(location.search).get('loadView') : null),
+    [isLatest, location.search]
+  );
   // Phase 1 landing: list view, every category, grouped by Category → Type.
   // The storage write above covers the first mount; this also catches a
   // phase switch to Phase 1 after the persisted hooks have already hydrated.
@@ -1502,6 +1633,9 @@ const AllEntitiesViewInner = ({
       if (!isPhase1) phase1InventoryDefaultsApplied = false;
       return;
     }
+    // Explicit saved view in the URL — apply that snapshot (incl. list vs hex)
+    // instead of forcing the Phase 1 demo defaults.
+    if (loadViewId) return;
     if (phase1InventoryDefaultsApplied && !phase1InventoryDefaultsNeedStateSync) return;
     applyPhase1InventoryDefaultsToStorage();
     phase1InventoryDefaultsApplied = true;
@@ -1512,7 +1646,15 @@ const AllEntitiesViewInner = ({
       setGroupBy([...PHASE1_DEFAULT_GROUP_BY]);
     }
     setCategoryFilter(CATEGORY_FILTER_ALL);
-  }, [isElasticOn, isPhase1, setViewMode, setGroupBy, setCategoryFilter, location.search]);
+  }, [
+    isElasticOn,
+    isPhase1,
+    loadViewId,
+    setViewMode,
+    setGroupBy,
+    setCategoryFilter,
+    location.search,
+  ]);
 
   // Left-nav alert badges link here with `?groupBy=alerts` (comma-separated for more).
   useEffect(() => {
@@ -1542,59 +1684,81 @@ const AllEntitiesViewInner = ({
   // highlighted in the nav and survives a refresh — the id is the single source
   // of truth for "which view is loaded".
   const { views: savedViewsList } = savedViewsApi;
-  const loadViewId = useMemo(
-    () => (isLatest ? new URLSearchParams(location.search).get('loadView') : null),
-    [isLatest, location.search]
+
+  const applyViewStateSnapshot = useCallback(
+    (state: SavedViewState) => {
+      setCategoryTab(state.tab);
+      setActiveTagFilters(state.filters);
+      setViewMode(state.viewMode);
+      setSearch(state.search);
+      setActiveExtraFilters(state.extraFilters ?? EMPTY_EXTRA_FILTERS);
+      setLabFilters(state.queryFilters ?? []);
+      setGroupBy([...(state.groupBy ?? DEFAULT_GROUP_BY)]);
+      setPageSizes(state.pageSizes ?? {});
+      setK8sResourceType(
+        (state.k8sFilters?.resourceType as KubernetesResourceType | undefined) ??
+          KUBERNETES_RESOURCE_TYPE_ALL
+      );
+      setK8sClusterFilter(state.k8sFilters?.cluster ?? KUBERNETES_FILTER_ALL);
+      setK8sNamespaceFilter(state.k8sFilters?.namespace ?? KUBERNETES_FILTER_ALL);
+      setK8sDeploymentFilter(state.k8sFilters?.deployment ?? KUBERNETES_FILTER_ALL);
+      setK8sNodeFilter(state.k8sFilters?.node ?? KUBERNETES_FILTER_ALL);
+      setCategoryFilter(state.categoryFilter ?? CATEGORY_FILTER_ALL);
+      setCloudProviderFilter(state.cloudProviderFilter ?? CLOUD_PROVIDER_FILTER_ALL);
+      setCategoryTypeFilter(state.categoryTypeFilter ?? CATEGORY_RESOURCE_TYPE_ALL);
+      if (state.storeTime && state.timeRange) {
+        updateTimeRange({ from: state.timeRange.from, to: state.timeRange.to });
+      }
+    },
+    [
+      setActiveTagFilters,
+      setCategoryTab,
+      setViewMode,
+      setGroupBy,
+      setPageSizes,
+      updateTimeRange,
+    ]
   );
+
+  // Shareable URL: `?inventory=<base64>` carries the full on-page snapshot so
+  // another user/browser sees the same layout without localStorage saved views.
+  const appliedInventoryPayloadRef = useRef<string | null>(null);
+  const skipInventoryUrlSyncRef = useRef(false);
+  useEffect(() => {
+    if (!isLatest) return;
+    const params = new URLSearchParams(location.search);
+    const raw = params.get(INVENTORY_SHARE_QUERY_KEY);
+    if (!raw) return;
+    if (appliedInventoryPayloadRef.current === raw) return;
+    const state = readInventorySharePayloadFromSearch(location.search);
+    if (!state) return;
+    appliedInventoryPayloadRef.current = raw;
+    skipInventoryUrlSyncRef.current = true;
+    applyViewStateSnapshot(state);
+    skipInventoryUrlSyncRef.current = false;
+  }, [isLatest, location.search, applyViewStateSnapshot]);
+
   // Apply each `loadView` id exactly once. The setters below (category tab / tag
   // filters / view mode) already persist to localStorage, so we deliberately do
   // NOT call back into the saved-views store here: doing so re-fired this effect
   // via the store subscription and caused an infinite update loop. The ref guard
-  // also prevents re-applying — and clobbering the user's in-progress edits —
+  // also prevents re-aplying — and clobbering the user's in-progress edits —
   // when the store emits for unrelated reasons (e.g. saving a new view).
   const appliedLoadViewIdRef = useRef<string | null>(null);
   useEffect(() => {
     if (!isLatest || !loadViewId) return;
-    // Phase 1 always opens on All categories + the list view. A `loadView`
-    // param (including one left over from a default-view redirect) must
-    // not replace that landing.
-    if (isPhase1) return;
+    if (new URLSearchParams(location.search).has(INVENTORY_SHARE_QUERY_KEY)) return;
     if (appliedLoadViewIdRef.current === loadViewId) return;
     const view = savedViewsList.find((candidate) => candidate.id === loadViewId);
     if (!view) return;
     appliedLoadViewIdRef.current = loadViewId;
-    setCategoryTab(view.state.tab);
-    setActiveTagFilters(view.state.filters);
-    setViewMode(view.state.viewMode);
-    setSearch(view.state.search);
-    setActiveExtraFilters(view.state.extraFilters ?? EMPTY_EXTRA_FILTERS);
-    setLabFilters(view.state.queryFilters ?? []);
-    setGroupBy([...(view.state.groupBy ?? DEFAULT_GROUP_BY)]);
-    setK8sResourceType(
-      (view.state.k8sFilters?.resourceType as KubernetesResourceType | undefined) ??
-        KUBERNETES_RESOURCE_TYPE_ALL
-    );
-    setK8sClusterFilter(view.state.k8sFilters?.cluster ?? KUBERNETES_FILTER_ALL);
-    setK8sNamespaceFilter(view.state.k8sFilters?.namespace ?? KUBERNETES_FILTER_ALL);
-    setK8sDeploymentFilter(view.state.k8sFilters?.deployment ?? KUBERNETES_FILTER_ALL);
-    setK8sNodeFilter(view.state.k8sFilters?.node ?? KUBERNETES_FILTER_ALL);
-    setCategoryFilter(view.state.categoryFilter ?? CATEGORY_FILTER_ALL);
-    setCloudProviderFilter(view.state.cloudProviderFilter ?? CLOUD_PROVIDER_FILTER_ALL);
-    setCategoryTypeFilter(view.state.categoryTypeFilter ?? CATEGORY_RESOURCE_TYPE_ALL);
-    // "Store time with view": reset the shared time filter to the captured range.
-    if (view.state.storeTime && view.state.timeRange) {
-      updateTimeRange({ from: view.state.timeRange.from, to: view.state.timeRange.to });
-    }
+    applyViewStateSnapshot(view.state);
   }, [
     isLatest,
     loadViewId,
+    location.search,
     savedViewsList,
-    setActiveTagFilters,
-    setCategoryTab,
-    setViewMode,
-    setGroupBy,
-    updateTimeRange,
-    isPhase1,
+    applyViewStateSnapshot,
   ]);
 
   // Latest: if the loaded view is deleted (e.g. from the nav's "Manage saved
@@ -2399,6 +2563,39 @@ const AllEntitiesViewInner = ({
     ? !areStatesEqual(loadedView.state, currentViewState)
     : false;
 
+  // Snapshot encoded in `?inventory=` so copying the address bar shares the
+  // exact layout (list vs hex, filters, group-by, …) plus the live time range.
+  const inventorySharePayload = useMemo(() => {
+    if (!isLatest) return null;
+    return encodeInventorySharePayload({
+      ...currentViewState,
+      storeTime: true,
+      timeRange: { from: rangeFrom, to: rangeTo },
+    });
+  }, [isLatest, currentViewState, rangeFrom, rangeTo]);
+
+  useEffect(() => {
+    if (!isLatest || !inventorySharePayload) return undefined;
+    const timer = window.setTimeout(() => {
+      if (skipInventoryUrlSyncRef.current) return;
+      if (appliedInventoryPayloadRef.current === inventorySharePayload) return;
+      const params = new URLSearchParams(location.search);
+      params.set(INVENTORY_SHARE_QUERY_KEY, inventorySharePayload);
+      appliedInventoryPayloadRef.current = inventorySharePayload;
+      history.replace({
+        pathname: location.pathname,
+        search: params.toString() ? `?${params.toString()}` : '',
+      });
+    }, 300);
+    return () => window.clearTimeout(timer);
+  }, [
+    isLatest,
+    inventorySharePayload,
+    history,
+    location.pathname,
+    location.search,
+  ]);
+
   // Fold the "Store time with view" choice into the state written on Save /
   // Update: capture the live time range when on, strip it when off.
   const withStoredTime = useCallback(
@@ -2432,10 +2629,13 @@ const AllEntitiesViewInner = ({
   // new view's category is the current category, so only the query changes.
   const handleSaveAsNewView = useCallback(
     (name: string, state: SavedViewState, makeDefault: boolean, storeTime: boolean) => {
-      const view = savedViewsApi.saveView(name, withStoredTime(state, storeTime));
+      const persisted = withStoredTime(state, storeTime);
+      const view = savedViewsApi.saveView(name, persisted);
       if (makeDefault) savedViewsApi.setDefaultView(view.id);
       const params = new URLSearchParams(location.search);
       params.set('loadView', view.id);
+      params.set(INVENTORY_SHARE_QUERY_KEY, encodeInventorySharePayload(persisted));
+      appliedInventoryPayloadRef.current = params.get(INVENTORY_SHARE_QUERY_KEY);
       history.push({ pathname: location.pathname, search: `?${params.toString()}` });
     },
     [savedViewsApi, history, location.pathname, location.search, withStoredTime]
@@ -2471,47 +2671,48 @@ const AllEntitiesViewInner = ({
         // UI updates without waiting for a remount. Also clear the
         // pending-search slot we just wrote — no navigation means no
         // destination mount to consume it.
-        setCategoryTab(view.state.tab);
-        setActiveTagFilters(view.state.filters);
-        setViewMode(view.state.viewMode);
-        setSearch(view.state.search);
-        setActiveExtraFilters(view.state.extraFilters ?? EMPTY_EXTRA_FILTERS);
-        setLabFilters(view.state.queryFilters ?? []);
-        setGroupBy([...(view.state.groupBy ?? DEFAULT_GROUP_BY)]);
-        setPageSizes(view.state.pageSizes ?? {});
-        setK8sResourceType(
-          (view.state.k8sFilters?.resourceType as KubernetesResourceType | undefined) ??
-            KUBERNETES_RESOURCE_TYPE_ALL
-        );
-        setK8sClusterFilter(view.state.k8sFilters?.cluster ?? KUBERNETES_FILTER_ALL);
-        setK8sNamespaceFilter(view.state.k8sFilters?.namespace ?? KUBERNETES_FILTER_ALL);
-        setK8sDeploymentFilter(view.state.k8sFilters?.deployment ?? KUBERNETES_FILTER_ALL);
-        setK8sNodeFilter(view.state.k8sFilters?.node ?? KUBERNETES_FILTER_ALL);
-        setCategoryFilter(view.state.categoryFilter ?? CATEGORY_FILTER_ALL);
-        setCloudProviderFilter(view.state.cloudProviderFilter ?? CLOUD_PROVIDER_FILTER_ALL);
-        setCategoryTypeFilter(view.state.categoryTypeFilter ?? CATEGORY_RESOURCE_TYPE_ALL);
-        if (view.state.storeTime && view.state.timeRange) {
-          updateTimeRange({ from: view.state.timeRange.from, to: view.state.timeRange.to });
-        }
+        applyViewStateSnapshot(view.state);
         consumePendingSearch();
+        if (isLatest) {
+          const params = new URLSearchParams(location.search);
+          params.set('loadView', view.id);
+          params.set(
+            INVENTORY_SHARE_QUERY_KEY,
+            encodeInventorySharePayload({
+              ...view.state,
+              storeTime: view.state.storeTime,
+              timeRange: view.state.timeRange,
+            })
+          );
+          appliedInventoryPayloadRef.current = params.get(INVENTORY_SHARE_QUERY_KEY);
+          history.replace({
+            pathname: location.pathname,
+            search: `?${params.toString()}`,
+          });
+        }
         return;
       }
+      const loadViewQuery: Record<string, string> = {};
+      if (isLatest) {
+        loadViewQuery.loadView = view.id;
+        loadViewQuery[INVENTORY_SHARE_QUERY_KEY] = encodeInventorySharePayload(view.state);
+      }
       if (targetCategory === null) {
-        router.push('/entities', { path: {}, query: {} });
+        router.push('/entities', { path: {}, query: loadViewQuery });
       } else if (targetCategory === 'cloud' && targetProvider && targetService) {
         router.push('/entities/cloud/{provider}/{service}', {
           path: { provider: targetProvider, service: targetService },
-          query: {},
+          query: loadViewQuery,
         });
       } else if (targetCategory === 'cloud' && targetProvider) {
         router.push('/entities/cloud/{provider}', {
           path: { provider: targetProvider },
-          query: {},
+          query: loadViewQuery,
         });
       } else {
         router.push('/entities/{category}', {
           path: { category: targetCategory },
-          query: {},
+          query: loadViewQuery,
         });
       }
     },
@@ -2519,13 +2720,12 @@ const AllEntitiesViewInner = ({
       categoryScope,
       cloudProviderScope,
       cloudServiceScope,
+      isLatest,
+      history,
+      location.pathname,
+      location.search,
       router,
-      setActiveTagFilters,
-      setCategoryTab,
-      setViewMode,
-      setGroupBy,
-      setPageSizes,
-      updateTimeRange,
+      applyViewStateSnapshot,
     ]
   );
 
@@ -2537,10 +2737,15 @@ const AllEntitiesViewInner = ({
     : VIEW_MODE_OPTIONS;
   const effectiveViewMode: ViewMode = isElasticOn && viewMode === 'geomap' ? 'grid' : viewMode;
 
-  if (isTransitionScenario) {
+  if (showOldExperiencePage) {
     return (
       <>
-        <OldExperiencePage onSwitch={handleTransitionSwitch} />
+        <OldExperiencePage
+          onSwitch={handleTransitionSwitch}
+          onToggleNewExperience={canRevertToClassicUx ? handleToggleNewExperience : undefined}
+          showTransitionModal={showOldPageTransitionModal}
+          newExperienceEnabled={newInfraEnabled}
+        />
         {isElasticOn ? <VariationSwitcher /> : null}
       </>
     );
@@ -2717,8 +2922,13 @@ const AllEntitiesViewInner = ({
                       >
                         <MoreActionsMenu
                           onPlayTour={startScenarioTour}
-                          onRevertToSettings={
-                            canRevertToClassicUx ? openRevertSettings : undefined
+                          newExperienceEnabled={
+                            canRevertToClassicUx ? newInfraEnabled : undefined
+                          }
+                          onToggleNewExperience={
+                            canRevertToClassicUx
+                              ? handleToggleNewExperience
+                              : undefined
                           }
                         />
                       </EuiTourStep>,

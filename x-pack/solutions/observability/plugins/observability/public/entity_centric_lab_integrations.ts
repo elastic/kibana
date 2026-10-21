@@ -294,6 +294,48 @@ const SAVED_VIEWS_DEFAULT_KEY = 'entityCentricLab.savedViews.defaultId.v1';
 const SAVED_VIEWS_CHANGE_EVENT = 'entity-centric-lab:saved-views-changed';
 const GLOBAL_SAVED_VIEWS_KEY = '__kbnEntityCentricLab_savedViews__' as const;
 
+/** Must stay in sync with streams_app `inventory_share_url.ts`. */
+export const INVENTORY_SHARE_QUERY_KEY = 'inventory';
+
+const base64UrlEncodeJson = (json: string): string => {
+  const bytes = new TextEncoder().encode(json);
+  let binary = '';
+  for (const byte of bytes) {
+    binary += String.fromCharCode(byte);
+  }
+  return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+
+const readSavedViewStateById = (viewId: string): unknown | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(SAVED_VIEWS_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed: unknown = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return null;
+    for (const entry of parsed) {
+      if (typeof entry !== 'object' || entry === null) continue;
+      const candidate = entry as { id?: unknown; state?: unknown };
+      if (candidate.id === viewId) return candidate.state ?? null;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+};
+
+/** Encodes a saved view's state for cross-user URL sharing (`?inventory=`). */
+export const buildSavedViewInventoryQuerySuffix = (viewId: string): string => {
+  const state = readSavedViewStateById(viewId);
+  if (!state) return '';
+  try {
+    const encoded = base64UrlEncodeJson(JSON.stringify({ v: 1, s: state }));
+    return `&${INVENTORY_SHARE_QUERY_KEY}=${encodeURIComponent(encoded)}`;
+  } catch {
+    return '';
+  }
+};
+
 interface SavedViewsSharedState {
   readonly subject: BehaviorSubject<NavSavedView[]>;
   hydrated: boolean;

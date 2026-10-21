@@ -22,6 +22,7 @@ import {
   getSavedViews$,
   getSavedViewsExpanded$,
   getEntityNavCounts$,
+  buildSavedViewInventoryQuerySuffix,
   maybeAutoExpandSavedViewsForActiveView,
   SAVED_VIEWS_COLLAPSED_LIMIT,
   type EntityNavCounts,
@@ -530,7 +531,7 @@ function createNavTree({
             }
             const path = `/app/streams/entities${categorySegment}?loadView=${encodeURIComponent(
               view.id
-            )}`;
+            )}${buildSavedViewInventoryQuerySuffix(view.id)}`;
             return {
               id: `entityCentricLab-savedView-${view.id}`,
               href: toAbsoluteHref(path),

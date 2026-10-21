@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.07';
+export const PROTOTYPE_VERSION = '1.08';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-10-21',
+    summary:
+      'New/ classic UX toggle, shareable inventory URLs, and dashboard linking polish.',
+    details:
+      'Kebab “New experience” syncs with Advanced Settings (New infrastructure experience); classic screenshot overlay with transition modal; hi-res old Hosts asset; inventory state in ?inventory= URLs and nav saved-view links; saved-view viewMode restore; custom dashboards “Port resource name to dashboard” option and updated Create dashboard agent prompt. Bump to v1.08.',
+  },
   {
     date: '2026-10-20',
     summary:

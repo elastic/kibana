@@ -5,26 +5,40 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
   EuiPanel,
+  EuiPopover,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
-import oldHostsPageUrl from './assets/old_hosts_page.jpg';
+import oldHostsPageUrl from './assets/old_hosts_page.png';
 import newExperiencePreviewUrl from './assets/new_experience_preview.png';
+
+/** Native pixel size of `old_hosts_page` (must match the bundled asset). */
+const OLD_HOSTS_PAGE_WIDTH_PX = 3456;
+const OLD_HOSTS_PAGE_HEIGHT_PX = 1828;
+/** ⋮ button position in screenshot coordinates (top-left origin, 3456×1828 asset). */
+const OLD_PAGE_KEBAB_TOP_PX =
+  Math.round(66 * (OLD_HOSTS_PAGE_HEIGHT_PX / 541)) - 90;
+const OLD_PAGE_KEBAB_RIGHT_PX =
+  Math.round(130 * (OLD_HOSTS_PAGE_WIDTH_PX / 1024)) - 158;
 
 const TOUR_FLAG_KEY = 'elasticOn_showTour';
 
@@ -197,11 +211,158 @@ const TransitionModal = ({ onSwitch, onDismiss }: TransitionModalProps) => {
 
 interface OldExperiencePageProps {
   onSwitch: () => void;
+  /** When provided, renders the ⋮ kebab toggle on the old-page overlay. */
+  onToggleNewExperience?: (enabled: boolean) => void;
+  /** Whether to show the transition modal on mount (default: true). */
+  showTransitionModal?: boolean;
+  /** Mirrors Advanced Settings → New infrastructure experience. */
+  newExperienceEnabled?: boolean;
 }
 
-export const OldExperiencePage = ({ onSwitch }: OldExperiencePageProps) => {
+/**
+ * Small kebab menu overlaid on the old-experience screenshot so users
+ * can flip back to the new experience without visiting Settings.
+ */
+const OldPageKebab = ({
+  onToggle,
+  newExperienceEnabled,
+}: {
+  onToggle: (enabled: boolean) => void;
+  newExperienceEnabled: boolean;
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  return (
+    <div
+      css={css`
+        position: absolute;
+        top: ${(OLD_PAGE_KEBAB_TOP_PX / OLD_HOSTS_PAGE_HEIGHT_PX) * 100}%;
+        right: ${(OLD_PAGE_KEBAB_RIGHT_PX / OLD_HOSTS_PAGE_WIDTH_PX) * 100}%;
+        z-index: 100001;
+      `}
+    >
+      <EuiPopover
+        button={
+          <EuiButtonIcon
+            iconType="boxesVertical"
+            aria-label={i18n.translate(
+              'xpack.streams.entityCentricLab.oldPage.moreActions',
+              { defaultMessage: 'More actions' }
+            )}
+            color="text"
+            display="base"
+            size="s"
+            onClick={() => setIsOpen(!isOpen)}
+            data-test-subj="oldPageMoreActions"
+          />
+        }
+        isOpen={isOpen}
+        closePopover={() => setIsOpen(false)}
+        anchorPosition="downRight"
+        panelPaddingSize="none"
+        repositionOnScroll
+      >
+        <EuiContextMenuPanel
+          size="s"
+          items={[
+            <EuiContextMenuItem
+              key="new-experience-toggle"
+              icon="visGauge"
+              onClick={() => {
+                setIsOpen(false);
+                onToggle(!newExperienceEnabled);
+              }}
+              css={css`
+                cursor: pointer;
+              `}
+              data-test-subj="oldPageNewExperienceItem"
+            >
+              <EuiFlexGroup
+                alignItems="center"
+                justifyContent="spaceBetween"
+                gutterSize="s"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
+                  {i18n.translate(
+                    'xpack.streams.entityCentricLab.oldPage.newExperience',
+                    { defaultMessage: 'New experience' }
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    label=""
+                    showLabel={false}
+                    checked={newExperienceEnabled}
+                    onChange={(e) => {
+                      setIsOpen(false);
+                      onToggle(e.target.checked);
+                    }}
+                    compressed
+                    data-test-subj="oldPageNewExperienceSwitch"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiContextMenuItem>,
+            <EuiHorizontalRule key="old-page-more-actions-hr" margin="none" />,
+            <EuiContextMenuItem
+              key="documentation"
+              icon="documentation"
+              onClick={() => {
+                setIsOpen(false);
+                window.open('https://ela.st/entity-centric-docs', '_blank');
+              }}
+              data-test-subj="oldPageDocumentation"
+            >
+              {i18n.translate(
+                'xpack.streams.entityCentricLab.entities.moreActions.documentation',
+                { defaultMessage: 'View documentation' }
+              )}
+            </EuiContextMenuItem>,
+            <EuiContextMenuItem
+              key="feedback"
+              icon="editorComment"
+              onClick={() => {
+                setIsOpen(false);
+                window.open('https://ela.st/entity-centric-feedback', '_blank');
+              }}
+              data-test-subj="oldPageFeedback"
+            >
+              {i18n.translate(
+                'xpack.streams.entityCentricLab.entities.moreActions.feedback',
+                { defaultMessage: 'Feedback' }
+              )}
+            </EuiContextMenuItem>,
+          ]}
+        />
+      </EuiPopover>
+    </div>
+  );
+};
+
+export const OldExperiencePage = ({
+  onSwitch,
+  onToggleNewExperience,
+  showTransitionModal = true,
+  newExperienceEnabled = false,
+}: OldExperiencePageProps) => {
   const { euiTheme } = useEuiTheme();
-  const [showModal, setShowModal] = useState(true);
+  const [showModal, setShowModal] = useState(showTransitionModal);
+
+  // Parent turned off the transition flow — never leave the scrim up.
+  useEffect(() => {
+    if (!showTransitionModal) {
+      setShowModal(false);
+    }
+  }, [showTransitionModal]);
+
+  // Parent turned the transition flow back on — show modal + scrim again.
+  useEffect(() => {
+    if (showTransitionModal) {
+      setShowModal(true);
+    }
+  }, [showTransitionModal]);
+
+  const modalActive = showTransitionModal && showModal;
 
   const handleSwitch = () => {
     onSwitch();
@@ -217,31 +378,53 @@ export const OldExperiencePage = ({ onSwitch }: OldExperiencePageProps) => {
         background: ${euiTheme.colors.backgroundBasePlain};
       `}
     >
-      <img
-        src={oldHostsPageUrl}
-        alt="Old Infrastructure Inventory"
+      <div
         css={css`
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          object-position: top left;
-          pointer-events: none;
+          position: relative;
+          /* Largest “contain” box that fits the viewport (same as object-fit: contain). */
+          width: min(
+            100vw,
+            calc(100vh * ${OLD_HOSTS_PAGE_WIDTH_PX} / ${OLD_HOSTS_PAGE_HEIGHT_PX})
+          );
+          height: min(
+            100vh,
+            calc(100vw * ${OLD_HOSTS_PAGE_HEIGHT_PX} / ${OLD_HOSTS_PAGE_WIDTH_PX})
+          );
         `}
-      />
-      {showModal ? (
-        <div
+      >
+        <img
+          src={oldHostsPageUrl}
+          alt="Old Infrastructure Inventory"
+          width={OLD_HOSTS_PAGE_WIDTH_PX}
+          height={OLD_HOSTS_PAGE_HEIGHT_PX}
           css={css`
-            position: absolute;
-            inset: 0;
-            background: ${euiTheme.colors.backgroundBaseInteractiveOverlay};
+            display: block;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
           `}
         />
-      ) : null}
-      {showModal ? (
-        <TransitionModal
-          onSwitch={handleSwitch}
-          onDismiss={() => setShowModal(false)}
-        />
+        {!modalActive && onToggleNewExperience ? (
+          <OldPageKebab
+            onToggle={onToggleNewExperience}
+            newExperienceEnabled={newExperienceEnabled}
+          />
+        ) : null}
+      </div>
+      {modalActive ? (
+        <>
+          <div
+            css={css`
+              position: absolute;
+              inset: 0;
+              background: ${euiTheme.colors.backgroundBaseInteractiveOverlay};
+            `}
+          />
+          <TransitionModal
+            onSwitch={handleSwitch}
+            onDismiss={() => setShowModal(false)}
+          />
+        </>
       ) : null}
     </div>,
     document.body
