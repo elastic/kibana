@@ -6,49 +6,70 @@
  */
 
 /*
- * React component for rendering EuiEmptyPrompt when no jobs were found.
+ * React component for rendering an empty prompt when no jobs were found.
  */
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { EuiEmptyPrompt, EuiButton } from '@elastic/eui';
+import { EuiButton, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { useMlManagementLink } from '../../../contexts/kibana/use_create_url';
+import adImage from '../../../jobs/jobs_list/components/anomaly_detection_empty_state/machine_learning_cog.svg';
+import { useMlKibana } from '../../../contexts/kibana';
+import { useCreateAndNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
 import { usePermissionCheck } from '../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../ml_nodes_check';
-import { MANAGEMENT_SECTION_IDS } from '../../../management';
+import { MLEmptyPromptCard } from '../../../components/overview/ml_empty_prompt_card';
 
 export const TimeseriesexplorerNoJobsFound = () => {
-  const jobLink = useMlManagementLink(
-    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB,
-    MANAGEMENT_SECTION_IDS.ANOMALY_DETECTION
+  const canCreateJob = usePermissionCheck('canCreateJob');
+  const disableCreateAnomalyDetectionJob = !canCreateJob || !mlNodesAvailable();
+
+  const {
+    services: { docLinks },
+  } = useMlKibana();
+
+  const redirectToCreateJobSelectIndexPage = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX,
+    'anomaly_detection'
   );
 
-  const canCreateJob = usePermissionCheck('canCreateJob');
-  const disableCreateAnomalyDetectionJob: boolean = !canCreateJob || !mlNodesAvailable();
-
   return (
-    <EuiEmptyPrompt
-      data-test-subj="mlNoSingleMetricJobsFound"
-      iconType="warning"
-      title={
-        <h2>
+    <MLEmptyPromptCard
+      iconSrc={adImage}
+      iconAlt={i18n.translate('xpack.ml.timeSeriesExplorer.pageTitle', {
+        defaultMessage: 'Single Metric Viewer',
+      })}
+      title={i18n.translate('xpack.ml.timeSeriesExplorer.pageTitle', {
+        defaultMessage: 'Single Metric Viewer',
+      })}
+      body={
+        <EuiText size="s">
           <FormattedMessage
-            id="xpack.ml.timeSeriesExplorer.noSingleMetricJobsFoundLabel"
-            defaultMessage="No single metric jobs found"
+            id="xpack.ml.timeSeriesExplorer.noJobsFound.emptyPromptText"
+            defaultMessage="Analyze time series data and identify anomalous patterns in your data set with Elastic machine learning."
           />
-        </h2>
+        </EuiText>
       }
       actions={
-        // @ts-ignore disabled type expects undefined
-        <EuiButton color="primary" fill href={jobLink} disabled={disableCreateAnomalyDetectionJob}>
+        <EuiButton
+          color="primary"
+          fill
+          iconType="plusCircle"
+          onClick={redirectToCreateJobSelectIndexPage}
+          isDisabled={disableCreateAnomalyDetectionJob}
+          data-test-subj="mlCreateNewSingleMetricJobButton"
+        >
           <FormattedMessage
             id="xpack.ml.timeSeriesExplorer.createNewSingleMetricJobLinkText"
             defaultMessage="Create new single metric job"
           />
         </EuiButton>
       }
+      docsLink={docLinks.links.ml.anomalyDetection}
+      docsLinkDataTestSubj="mlSingleMetricViewerReadDocumentationButton"
+      centered
+      data-test-subj="mlNoSingleMetricJobsFound"
     />
   );
 };

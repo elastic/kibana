@@ -447,6 +447,7 @@ describe('create()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -456,6 +457,7 @@ describe('create()', () => {
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
+        "createdByProfileUid": null,
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
@@ -506,6 +508,7 @@ describe('create()', () => {
         "throttle": null,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "updatedByProfileUid": null,
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -713,6 +716,7 @@ describe('create()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -722,6 +726,7 @@ describe('create()', () => {
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
+        "createdByProfileUid": null,
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
@@ -772,6 +777,7 @@ describe('create()', () => {
         "throttle": null,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "updatedByProfileUid": null,
       }
     `);
   });
@@ -1198,6 +1204,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -1206,6 +1213,7 @@ describe('create()', () => {
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
+        createdByProfileUid: null,
         enabled: true,
         legacyId: null,
         executionStatus: {
@@ -1228,6 +1236,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: 'mock-saved-object-id',
@@ -1458,6 +1467,7 @@ describe('create()', () => {
         apiKey: null,
         apiKeyCreatedByUser: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -1465,6 +1475,7 @@ describe('create()', () => {
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
+        createdByProfileUid: null,
         enabled: true,
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -1513,6 +1524,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: 'mock-saved-object-id',
@@ -1722,6 +1734,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
@@ -1730,6 +1743,7 @@ describe('create()', () => {
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
+        createdByProfileUid: null,
         enabled: true,
         legacyId: null,
         executionStatus: {
@@ -1752,6 +1766,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: 'mock-saved-object-id',
@@ -1928,6 +1943,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
@@ -1937,6 +1953,7 @@ describe('create()', () => {
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
+        createdByProfileUid: null,
         enabled: true,
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -1958,6 +1975,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: 'mock-saved-object-id',
@@ -2127,14 +2145,17 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -2284,14 +2305,17 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -2441,6 +2465,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
@@ -2449,8 +2474,10 @@ describe('create()', () => {
           },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -2621,6 +2648,7 @@ describe('create()', () => {
           },
         ],
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKey: null,
         apiKeyCreatedByUser: null,
         artifacts: {
@@ -2631,7 +2659,9 @@ describe('create()', () => {
         },
         legacyId: null,
         createdBy: 'elastic',
+        createdByProfileUid: null,
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedAt: '2019-02-12T21:01:22.479Z',
         muteAll: false,
@@ -3101,6 +3131,7 @@ describe('create()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyCreatedByUser: false,
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: {
@@ -3108,8 +3139,10 @@ describe('create()', () => {
           },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -3220,10 +3253,13 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: false,
         meta: {
@@ -4176,6 +4212,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: true,
         artifacts: {
           dashboards: [],
@@ -4184,8 +4221,10 @@ describe('create()', () => {
           },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -4259,6 +4298,7 @@ describe('create()', () => {
       expect.objectContaining({
         apiKey: Buffer.from('cloned-id:cloned-secret').toString('base64'),
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: false,
       }),
       expect.any(Object)
@@ -4489,6 +4529,7 @@ describe('create()', () => {
           alertTypeId: '123',
           apiKey: null,
           apiKeyOwner: null,
+          apiKeyOwnerProfileUid: null,
           apiKeyCreatedByUser: null,
           artifacts: {
             dashboards: [],
@@ -4499,6 +4540,7 @@ describe('create()', () => {
           consumer: 'bar',
           createdAt: '2019-02-12T21:01:22.479Z',
           createdBy: 'elastic',
+          createdByProfileUid: null,
           enabled: true,
           legacyId: null,
           executionStatus: {
@@ -4521,6 +4563,7 @@ describe('create()', () => {
           throttle: null,
           updatedAt: '2019-02-12T21:01:22.479Z',
           updatedBy: 'elastic',
+          updatedByProfileUid: null,
         },
         {
           id: 'mock-saved-object-id',
@@ -5334,5 +5377,53 @@ This is the type of text _investigation guides_ will contain.`;
 
       await expect(rulesClient.create({ data: getMockData() })).resolves.toBeDefined();
     });
+  });
+
+  test('persists createdByProfileUid and updatedByProfileUid when the actor has a profile uid', async () => {
+    rulesClientParams.getProfileUid.mockResolvedValueOnce('u_profile_1');
+    const data = getMockData({ enabled: false });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        enabled: false,
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        params: { bar: true },
+        running: false,
+        executionStatus: getRuleExecutionStatusPending(now),
+        createdAt: now,
+        updatedAt: now,
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        createdByProfileUid: 'u_profile_1',
+        updatedByProfileUid: 'u_profile_1',
+        notifyWhen: null,
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            uuid: 'test-uuid',
+            params: { foo: true },
+          },
+        ],
+      },
+      references: [{ name: 'action_0', type: 'action', id: '1' }],
+    });
+
+    await rulesClient.create({ data });
+
+    expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      expect.objectContaining({
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        createdByProfileUid: 'u_profile_1',
+        updatedByProfileUid: 'u_profile_1',
+      }),
+      expect.any(Object)
+    );
   });
 });

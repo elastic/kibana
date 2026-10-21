@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../../connector_spec';
 import {
   SearchMessagesInputSchema,
@@ -31,11 +31,13 @@ import type {
 
 const GRAPH_BASE = 'https://graph.microsoft.com/v1.0';
 
-const GraphCollectionOutputSchema = z.object({
-  value: z.array(z.any()).describe('Array of items returned from the API'),
-  '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
-  '@odata.count': z.number().optional().describe('Total count of items (if requested)'),
-});
+const GraphCollectionOutputSchema = lazySchema(() =>
+  z.object({
+    value: z.array(z.any()).describe('Array of items returned from the API'),
+    '@odata.nextLink': z.string().optional().describe('URL to fetch next page of results'),
+    '@odata.count': z.number().optional().describe('Total count of items (if requested)'),
+  })
+);
 
 export const Outlook: ConnectorSpec = {
   metadata: {
@@ -194,14 +196,16 @@ export const Outlook: ConnectorSpec = {
       description:
         'Download an attachment from an Outlook email message. Returns the attachment content as a base64-encoded string (contentBytes). WARNING: Attachment content can be large; only call this when you have a plan to process the binary data (for example, via an Elasticsearch ingest pipeline attachment processor). Use listAttachments first to get the attachment ID and verify the content type and size before downloading.',
       input: GetAttachmentInputSchema,
-      output: z.object({
-        id: z.string().describe('Attachment ID'),
-        name: z.string().describe('File name of the attachment'),
-        contentType: z.string().describe('MIME type of the attachment'),
-        size: z.number().describe('Size of the attachment in bytes'),
-        contentBytes: z.string().describe('Base64-encoded content of the attachment'),
-        isInline: z.boolean().optional().describe('Whether the attachment is inline'),
-      }),
+      output: lazySchema(() =>
+        z.object({
+          id: z.string().describe('Attachment ID'),
+          name: z.string().describe('File name of the attachment'),
+          contentType: z.string().describe('MIME type of the attachment'),
+          size: z.number().describe('Size of the attachment in bytes'),
+          contentBytes: z.string().describe('Base64-encoded content of the attachment'),
+          isInline: z.boolean().optional().describe('Whether the attachment is inline'),
+        })
+      ),
       handler: async (ctx, input: GetAttachmentInput) => {
         const url = `${GRAPH_BASE}/me/messages/${input.messageId}/attachments/${input.attachmentId}`;
 

@@ -21,11 +21,16 @@ import { EntityStoreGlobalStateClient } from '../domain/saved_objects';
 import { HistorySnapshotClient } from '../domain/history_snapshot';
 import { wrapTaskRun } from '../telemetry/traces';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
 const config = TasksConfig[EntityStoreTaskType.enum.historySnapshot];
 
 interface RunHistorySnapshotTaskParams {
-  taskInstance: { state: Record<string, unknown>; id: string };
+  taskInstance: {
+    state: Record<string, unknown>;
+    id: string;
+    schedule?: { interval?: string };
+  };
   signal: AbortSignal;
   core: EntityStoreCoreSetup;
   logger: Logger;
@@ -39,6 +44,7 @@ async function runHistorySnapshotTask({
 }: RunHistorySnapshotTaskParams): Promise<{
   state: Record<string, unknown>;
   shouldDeleteTask?: boolean;
+  schedule?: { interval: string };
 }> {
   const namespace = taskInstance.state?.namespace as string | undefined;
   if (!namespace) {
@@ -75,7 +81,21 @@ async function runHistorySnapshotTask({
     abortSignal: signal,
   });
 
-  return { state: taskInstance.state };
+  // A run that was already in progress skips Task Manager's schedule update. Adopt the stored
+  // interval when this run finishes so a concurrent config change is not lost.
+  let schedule: { schedule: { interval: string } } | undefined;
+  try {
+    const frequency = (await globalStateClient.find())?.historySnapshot.frequency;
+    const currentInterval = taskInstance.schedule?.interval;
+    if (frequency && frequency !== currentInterval) {
+      schedule = { schedule: { interval: frequency } };
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    logger.warn(`Error reading history snapshot frequency for reschedule, received ${message}`);
+  }
+
+  return { state: taskInstance.state, ...schedule };
 }
 
 export function registerHistorySnapshotTask({
@@ -104,22 +124,31 @@ export function registerHistorySnapshotTask({
         },
       },
       createTaskRunner: ({ taskInstance, signal }) => ({
-        run: () =>
-          wrapTaskRun({
-            spanName: 'entityStore.task.history_snapshot.run',
-            namespace: taskInstance.state.namespace,
-            attributes: {
-              'entity_store.task.id': taskInstance.id,
-              'entity_store.task.type': taskType,
-            },
-            run: () =>
-              runHistorySnapshotTask({
-                taskInstance,
-                signal,
-                core,
-                logger,
-              }),
-          }),
+        run: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.executionContext.withContext(
+            buildEaExecutionContext(
+              EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_HISTORY_SNAPSHOT_TASK,
+              taskInstance.id
+            ),
+            () =>
+              wrapTaskRun({
+                spanName: 'entityStore.task.history_snapshot.run',
+                namespace: taskInstance.state.namespace,
+                attributes: {
+                  'entity_store.task.id': taskInstance.id,
+                  'entity_store.task.type': taskType,
+                },
+                run: () =>
+                  runHistorySnapshotTask({
+                    taskInstance,
+                    signal,
+                    core,
+                    logger,
+                  }),
+              })
+          );
+        },
       }),
     },
   });

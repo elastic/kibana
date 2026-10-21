@@ -61,6 +61,11 @@ const baseWorkflowExecutionSchema: RootSchema<{
   compositionDepth?: number;
   parentWorkflowId?: string;
   parentWorkflowInvocation?: 'sync' | 'async';
+  executionChain?: Array<{
+    executionId: string;
+    invocation: 'sync' | 'async';
+    workflowId: string;
+  }>;
   eventChainDepth?: number;
   inputTokensUsed?: number;
   outputTokensUsed?: number;
@@ -180,6 +185,34 @@ const baseWorkflowExecutionSchema: RootSchema<{
       optional: true,
     },
   },
+  executionChain: {
+    type: 'array',
+    items: {
+      properties: {
+        executionId: {
+          type: 'keyword',
+          _meta: { description: 'The execution ID of this ancestor run.', optional: false },
+        },
+        invocation: {
+          type: 'keyword',
+          _meta: {
+            description:
+              'How this ancestor started the next run down: workflow.execute (sync) or workflow.executeAsync (async).',
+            optional: false,
+          },
+        },
+        workflowId: {
+          type: 'keyword',
+          _meta: { description: 'The workflow ID of this ancestor run.', optional: false },
+        },
+      },
+    },
+    _meta: {
+      description:
+        'Every ancestor of a sub-workflow execution, root first and direct parent last. The last hop matches parentWorkflowId and parentWorkflowInvocation. Omitted for a top-level execution, and for a sub-workflow execution whose chain started before the chain was recorded. Its length is the composition depth.',
+      optional: true,
+    },
+  },
   eventChainDepth: {
     type: 'integer',
     _meta: {
@@ -241,6 +274,7 @@ const {
   compositionDepth: _compositionDepth,
   parentWorkflowId: _parentWorkflowId,
   parentWorkflowInvocation: _parentWorkflowInvocation,
+  executionChain: _executionChain,
   ...eventDrivenExecutionSuppressedBaseSchema
 } = baseWorkflowExecutionSchema;
 

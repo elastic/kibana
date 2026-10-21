@@ -12,7 +12,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { uniq, sortBy, isEqual } from 'lodash';
 
-import { RuleDiffTab } from '../rule_diff_tab';
+import { RuleDiffTab, getRuleDiffSources } from '../rule_diff_tab';
 import { savedRuleMock } from '../../../logic/mock';
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schemas.gen';
 import { COLORS } from './constants';
@@ -238,6 +238,47 @@ describe('Rule upgrade workflow: viewing rule changes in JSON diff view', () => 
         expect(screen.queryAllByText(property, { exact: false })).toHaveLength(0);
       }
     );
+  });
+
+  describe('"required_fields"', () => {
+    it('ignores order', () => {
+      const oldRule: RuleResponse = {
+        ...savedRuleMock,
+        required_fields: [
+          { name: 'host.name', type: 'keyword', ecs: true },
+          { name: 'custom.field', type: 'keyword', ecs: false },
+        ],
+      };
+      const newRule: RuleResponse = {
+        ...savedRuleMock,
+        required_fields: [
+          { name: 'custom.field', type: 'keyword', ecs: false },
+          { name: 'host.name', type: 'keyword', ecs: true },
+        ],
+      };
+
+      const [oldSource, newSource] = getRuleDiffSources(oldRule, newRule);
+
+      expect(oldSource).toEqual(newSource);
+    });
+
+    it('ignores duplicates', () => {
+      const oldRule: RuleResponse = {
+        ...savedRuleMock,
+        required_fields: [{ name: 'host.name', type: 'keyword', ecs: true }],
+      };
+      const newRule: RuleResponse = {
+        ...savedRuleMock,
+        required_fields: [
+          { name: 'host.name', type: 'keyword', ecs: true },
+          { name: 'host.name', type: 'keyword', ecs: true },
+        ],
+      };
+
+      const [oldSource, newSource] = getRuleDiffSources(oldRule, newRule);
+
+      expect(oldSource).toEqual(newSource);
+    });
   });
 
   it('Unchanged sections of a rule should be hidden by default', async () => {

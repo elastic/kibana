@@ -23,12 +23,6 @@ export const MORE_ACTIONS_BUTTON_ARIA_LABEL = i18n.translate(
     defaultMessage: 'More actions',
   }
 );
-export const ADD_TO_CASE_ARIA_LABEL = i18n.translate(
-  'xpack.securitySolution.alertSummary.table.attachToCaseAriaLabel',
-  {
-    defaultMessage: 'Attach alert to case',
-  }
-);
 
 export interface MoreActionsRowControlColumnProps {
   alert: Alert;
@@ -77,7 +71,6 @@ export const MoreActionsRowControlColumn = memo(({ alert }: MoreActionsRowContro
     ecsData: ecsAlert,
     nonEcsData,
     onMenuItemClick: closePopover,
-    ariaLabel: ADD_TO_CASE_ARIA_LABEL,
   });
 
   const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({

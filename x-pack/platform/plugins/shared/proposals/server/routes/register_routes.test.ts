@@ -12,7 +12,6 @@ import { PROPOSALS_API_PRIVILEGE_MANAGE, PROPOSALS_API_PRIVILEGE_READ } from '..
 import type { ProposalsService } from '../services/proposals_service';
 import {
   ProposalConflictError,
-  ProposalExpiredError,
   ProposalForbiddenError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
@@ -172,20 +171,6 @@ describe('proposals routes', () => {
     expect(response.conflict).toHaveBeenCalled();
   });
 
-  it('should map an expired proposal to 410', async () => {
-    const releaseGate = jest.fn().mockRejectedValue(new ProposalExpiredError('proposal-1'));
-    const { posts, byPath } = registerAndCollect({ releaseGate });
-    const response = httpServerMock.createResponseFactory();
-
-    await byPath(posts, '/approve').handler(
-      {},
-      httpServerMock.createKibanaRequest({ params: { id: 'proposal-1' }, body: {} }),
-      response
-    );
-
-    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 410 }));
-  });
-
   it('should map a missing privilege to 403', async () => {
     const releaseGate = jest.fn().mockRejectedValue(new ProposalForbiddenError('no privilege'));
     const { posts, byPath } = registerAndCollect({ releaseGate });
@@ -213,18 +198,16 @@ describe('proposals routes', () => {
     const { posts, byPath } = registerAndCollect({ revise });
     const response = httpServerMock.createResponseFactory();
 
-    await byPath(posts, '/revisions').handler(
-      {},
-      httpServerMock.createKibanaRequest({
-        params: { proposalId: 'proposal-1' },
-        body: { comment: 'Tightened the match', confidence: 'high' },
-      }),
-      response
-    );
+    const request = httpServerMock.createKibanaRequest({
+      params: { proposalId: 'proposal-1' },
+      body: { comment: 'Tightened the match', confidence: 'high' },
+    });
+    await byPath(posts, '/revisions').handler({}, request, response);
 
     expect(revise).toHaveBeenCalledWith(
       { id: 'proposal-1', comment: 'Tightened the match', confidence: 'high' },
-      'default'
+      'default',
+      request
     );
     expect(response.ok).toHaveBeenCalledWith({
       body: { proposalId: 'proposal-2', revision: 2, status: 'pending' },
@@ -243,20 +226,6 @@ describe('proposals routes', () => {
     );
 
     expect(response.conflict).toHaveBeenCalled();
-  });
-
-  it('should map revising an expired proposal to 410', async () => {
-    const revise = jest.fn().mockRejectedValue(new ProposalExpiredError('proposal-1'));
-    const { posts, byPath } = registerAndCollect({ revise });
-    const response = httpServerMock.createResponseFactory();
-
-    await byPath(posts, '/revisions').handler(
-      {},
-      httpServerMock.createKibanaRequest({ params: { proposalId: 'proposal-1' }, body: {} }),
-      response
-    );
-
-    expect(response.customError).toHaveBeenCalledWith(expect.objectContaining({ statusCode: 410 }));
   });
 
   it('should map an action input the action can never accept to 400', async () => {

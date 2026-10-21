@@ -64,7 +64,6 @@ import {
   ES_CLIENT_AUTHENTICATION_HEADER,
   HTTPAuthorizationHeader,
   isUiamCredential,
-  isExternalUiamCredential,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import { UserProfileService } from '@kbn/core-user-profile-server-internal';
@@ -561,7 +560,6 @@ export class Server {
     });
 
     const deprecationsStart = this.deprecations.start();
-    const userActivityStart = this.userActivity.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await withActiveSpan(
       'saved_objects.migration',
@@ -591,6 +589,10 @@ export class Server {
         }
       }
     );
+
+    const userActivityStart = this.userActivity.start({
+      typeRegistry: savedObjectsStart.getTypeRegistry(),
+    });
 
     if (this.nodeRoles?.migrator === true) {
       this.log.info('Detected migrator node role; shutting down Kibana...');
@@ -622,7 +624,7 @@ export class Server {
         if (!credential || !isUiamCredential(credential)) {
           return undefined;
         }
-        if (isExternalUiamCredential(request) || uiam.isExternalApiKey(request)) {
+        if (uiam.isExternalApiKey(request)) {
           return undefined;
         }
 

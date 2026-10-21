@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLCallbacks } from '@kbn/esql-types';
+import {
+  collectIgnoredKibanaFetcherOccurrences,
+  IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+  shouldWarnIgnoredKibanaFetcher,
+  validateStepNameUniqueness,
+} from '@kbn/workflows';
 import type { ValidateWorkflowResponseDto, WorkflowYaml } from '@kbn/workflows';
-import { validateStepNameUniqueness } from '@kbn/workflows';
 import { isGraphBuildError, WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowDiagnostic } from '@kbn/workflows/types/v1';
 import type { WorkflowContextRegistry } from '@kbn/workflows-yaml';
@@ -21,11 +27,16 @@ import {
 import type { z } from '@kbn/zod/v4';
 import { collectVariableDiagnostics } from './collect_variable_diagnostics';
 import { connectorParamsSchemaResolver } from './connector_params_schema_resolver';
+import { collectEsqlDiagnostics } from './esql_validation/collect_esql_diagnostics';
 import type { TriggerDefinitionForValidateTriggers } from './validate_triggers';
 import { validateTriggers } from './validate_triggers';
 
 export interface ValidateWorkflowYamlOptions {
   triggerDefinitions?: TriggerDefinitionForValidateTriggers[];
+  /**
+   * When true, `kibana.*` YAML `fetcher` is warned as ignored because it uses Core self-client.
+   */
+  warnIgnoredKibanaFetcher?: boolean;
   /**
    * Registry of registered step, connector and trigger metadata. Passing one
    * runs the `variable-validation` rule group, which resolves every `{{ … }}`
@@ -41,13 +52,23 @@ export interface ValidateWorkflowYamlOptions {
    * these rules, where the diagnostics are reported rather than enforced.
    */
   variableValidationRegistry?: WorkflowContextRegistry;
+  /**
+   * Callbacks for the ES|QL validator. Passing them runs the `esql` rule group
+   * over every `elasticsearch.esql.query` step: grammar, plus indices and
+   * fields when `getSources` / `getColumnsFor` are set.
+   *
+   * Omitted by default for the same reason as `variableValidationRegistry`:
+   * ES|QL errors would block create/update, and the cluster checked here can
+   * differ from the one the workflow runs against. Only reporting callers set it.
+   */
+  esqlCallbacks?: ESQLCallbacks;
 }
 
-export function validateWorkflowYaml(
+export async function validateWorkflowYaml(
   yaml: string,
   zodSchema: z.ZodType,
   options?: ValidateWorkflowYamlOptions
-): ValidateWorkflowResponseDto {
+): Promise<ValidateWorkflowResponseDto> {
   const diagnostics: WorkflowDiagnostic[] = [];
   const notChecked: string[] = [];
   let parsedWorkflow: WorkflowYaml | undefined;
@@ -142,6 +163,19 @@ export function validateWorkflowYaml(
       diagnostics.push({ severity: 'error', message, source: 'graph', ruleId: 'graphBuildError' });
     }
 
+    const warnKibanaFetcher = options?.warnIgnoredKibanaFetcher ?? false;
+    for (const occurrence of collectIgnoredKibanaFetcherOccurrences(parsedWorkflow.steps)) {
+      if (shouldWarnIgnoredKibanaFetcher(occurrence.stepType, warnKibanaFetcher)) {
+        diagnostics.push({
+          severity: 'warning',
+          message: IGNORED_KIBANA_FETCHER_SETTING_MESSAGE,
+          source: 'deprecation',
+          path: occurrence.path,
+          ruleId: 'ignoredFetcherSetting',
+        });
+      }
+    }
+
     // Variable validation resolves references against the step graph, so it only
     // runs once the graph builds. Same guard the editor applies.
     if (options?.variableValidationRegistry && workflowGraph) {
@@ -166,6 +200,12 @@ export function validateWorkflowYaml(
       source: 'liquid',
       ruleId: 'liquidSyntaxError',
     });
+  }
+
+  if (options?.esqlCallbacks) {
+    const esqlValidation = await collectEsqlDiagnostics(yaml, options.esqlCallbacks);
+    diagnostics.push(...esqlValidation.diagnostics);
+    notChecked.push(...esqlValidation.notChecked);
   }
 
   return {

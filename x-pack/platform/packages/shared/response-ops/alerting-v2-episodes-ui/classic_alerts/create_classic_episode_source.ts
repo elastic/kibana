@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getRuleDetailsRoute, triggersActionsRoute } from '@kbn/rule-data-utils';
+import {
+  getRuleDetailsRoute,
+  STACK_MANAGEMENT_RULES_HOST,
+  type LocatorHost,
+} from '@kbn/rule-data-utils';
 import type { EpisodeDataSource, SeverityExtension } from '../types/episode_data_source';
 import { classicActionExtensions } from './action_extensions';
 import {
@@ -17,7 +21,9 @@ import { fetchClassicAlertsAsEpisodes } from './apis/fetch_classic_episodes';
 import { fetchClassicAlertsHistogram } from './apis/fetch_classic_histogram';
 import { fetchClassicAlertsKpis } from './apis/fetch_classic_kpis';
 import { fetchClassicAlertsTags } from './apis/fetch_classic_tags';
+import { ELASTIC_SOURCE_ICON, CLASSIC_SOURCE_LABEL } from '../source_labels';
 import { resolveClassicRules } from './apis/resolve_classic_rules';
+import { fetchClassicSearchFields } from './apis/fetch_classic_search_fields';
 import { CLASSIC_ALERTS_HISTOGRAM_LIMIT, CLASSIC_EPISODE_SOURCE_ID } from './constants';
 import { classicAlertQueryKeys } from './query_keys';
 
@@ -47,12 +53,16 @@ export const CLASSIC_SEVERITY_EXTENSIONS: SeverityExtension[] = [
 
 export interface CreateClassicEpisodeSourceOptions {
   ruleTypeIds: string[];
+  host?: LocatorHost;
 }
 
 export const createClassicEpisodeSource = ({
   ruleTypeIds,
+  host = STACK_MANAGEMENT_RULES_HOST,
 }: CreateClassicEpisodeSourceOptions): EpisodeDataSource => ({
   id: CLASSIC_EPISODE_SOURCE_ID,
+  label: CLASSIC_SOURCE_LABEL,
+  icon: ELASTIC_SOURCE_ICON,
   queryKeyPrefix: classicAlertQueryKeys.all(),
 
   severityExtensions: CLASSIC_SEVERITY_EXTENSIONS,
@@ -103,8 +113,11 @@ export const createClassicEpisodeSource = ({
 
   resolveRules: ({ services, ids }) => resolveClassicRules({ ids, services }),
 
+  fetchSearchFields: ({ services, abortSignal }) =>
+    fetchClassicSearchFields({ ruleTypeIds, services, abortSignal }),
+
   actionExtensions: classicActionExtensions,
 
-  // TODO: Update to observability rule details route once obs navigation changes land.
-  getRuleDetailsHref: (ruleId) => `${triggersActionsRoute}${getRuleDetailsRoute(ruleId)}`,
+  getRuleDetailsHref: (ruleId) =>
+    `${host.appBasePath ?? `/app/${host.app}`}${host.pathPrefix}${getRuleDetailsRoute(ruleId)}`,
 });

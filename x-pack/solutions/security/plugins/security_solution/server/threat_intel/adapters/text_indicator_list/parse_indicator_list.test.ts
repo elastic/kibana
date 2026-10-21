@@ -161,6 +161,27 @@ describe('parseIndicatorList', () => {
     });
   });
 
+  describe('adjudication context field', () => {
+    // context is prompt-only, built by extractIocs for article-report semantic
+    // adjudication. This parser never adjudicates, and extracted.iocs is
+    // dynamic: strict, so a leaked context would fail every such report write.
+    it('strips context from url/domain IOCs before returning them', () => {
+      const urlIoc = makeIoc('url', 'https://evil.example/payload', {
+        context: 'The attacker downloaded https://evil.example/payload.',
+      });
+      const domainIoc = makeIoc('domain', 'evil.com', { context: 'Docs mention evil.com.' });
+      extractIocsMock.mockReturnValue(makeResult(urlIoc, domainIoc));
+
+      const blocks = parseIndicatorList(
+        '# Reference: https://example.com/report\nhttps://evil.example/payload'
+      );
+
+      for (const ioc of blocks[0].iocs) {
+        expect(ioc).not.toHaveProperty('context');
+      }
+    });
+  });
+
   describe('port preservation', () => {
     it('preserves port field from extractIocs for ip:port lines', () => {
       const ipPortIoc = makeIoc('ip', '66.84.11.168', { port: 8080 });

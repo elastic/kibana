@@ -24,7 +24,9 @@ export const generateSearchApplicationApiKey = async ({
   keyName: string;
   searchApplicationName: string;
 }) => {
-  const route = `/internal/enterprise_search/search_applications/${searchApplicationName}/api_key`;
+  const route = `/internal/enterprise_search/search_applications/${encodeURIComponent(
+    searchApplicationName
+  )}/api_key`;
 
   return await HttpLogic.values.http.post<APIKeyResponse>(route, {
     body: JSON.stringify({

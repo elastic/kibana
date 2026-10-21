@@ -45,7 +45,7 @@ const BASE_COMPOSE_VALUES: FormValues = {
   metadata: { name: 'Test rule', enabled: true },
   timeField: '@timestamp',
   schedule: { every: '1m', lookback: '5m' },
-  query: { format: 'composed', base: '', breach: { segment: '' } },
+  query: { base: '', breach: { segment: '' } },
   stateTransitionAlertDelayMode: 'immediate',
   stateTransitionRecoveryDelayMode: 'immediate',
   artifacts: [],
@@ -241,6 +241,11 @@ describe('step validation', () => {
       expect(outcomeStep.validate).toBeUndefined();
     });
 
+    it('outcome triggers both lifecycle fields, so the no-data rule blocks "Next"', () => {
+      const outcomeStep = getSteps(true).steps.find((s) => s.id === 'outcome')!;
+      expect(outcomeStep.fields).toEqual(['recovery', 'noData']);
+    });
+
     it('builderCondition does not inherit queryCommitted meetsPrecondition from the ES|QL registry', () => {
       const builderStep = getSteps(true, 'threshold').steps.find(
         (s) => s.id === 'builderCondition'
@@ -277,21 +282,25 @@ describe('step validation', () => {
   describe('notifications step validation', () => {
     const notificationsStep = getSteps(true).steps.find((s) => s.id === 'notifications')!;
 
-    it('has no declared fields and no custom validate', () => {
-      expect(notificationsStep.fields).toBeUndefined();
+    it('validates the routing tags field and has no custom validate', () => {
+      expect(notificationsStep.fields).toEqual(['metadata.routingTags']);
       expect(notificationsStep.validate).toBeUndefined();
     });
 
-    it('returns true without calling trigger when no fields are declared', async () => {
+    it('triggers validation of the routing tags field', async () => {
       const state = createState();
       const methods = {
-        trigger: jest.fn().mockResolvedValue(true),
+        trigger: jest.fn().mockResolvedValue(false),
       } as unknown as UseFormReturn<FormValues>;
 
       const result = await validateStep(notificationsStep, methods, state);
 
-      expect(methods.trigger).not.toHaveBeenCalled();
-      expect(result).toBe(true);
+      expect(methods.trigger).toHaveBeenCalledWith(['metadata.routingTags']);
+      expect(result).toBe(false);
+    });
+
+    it('is not a step for signal rules', () => {
+      expect(getSteps(false).steps.map(({ id }) => id)).not.toContain('notifications');
     });
   });
 
@@ -383,7 +392,7 @@ describe('shell shared fields', () => {
   it('renders Outcome kind cards without alert-only fields for signal kind', () => {
     renderShell(
       { step: 1 },
-      { kind: 'signal', query: { format: 'standalone', breach: { query: 'FROM logs-*' } } }
+      { kind: 'signal', query: { base: 'FROM logs-*', breach: { segment: '' } } }
     );
 
     expect(screen.getByTestId('composeDiscoverKindSelect')).toBeInTheDocument();

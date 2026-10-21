@@ -8,7 +8,58 @@
 import { mkdtempSync, rmSync, writeFileSync } from 'fs';
 import { tmpdir } from 'os';
 import { join } from 'path';
-import { readInvestigationDataset } from './datasets';
+import { loadInvestigationDataset, readInvestigationDataset } from './datasets';
+
+describe('stored investigation dataset', () => {
+  const dataset = {
+    id: 'stored-dataset',
+    name: 'Operator questions',
+    description: 'Curated through the UI',
+    tags: ['operator'],
+    examples: [
+      {
+        id: 'stored-example',
+        input: { question: 'Investigate the signal.' },
+        output: { reference_answer: 'Optional label' },
+        metadata: { case_id: 'signal', category: 'latency' },
+      },
+    ],
+  };
+
+  it('loads the selected name and preserves example IDs, labels and operator metadata', async () => {
+    const client = { getDatasetByName: jest.fn().mockResolvedValue(dataset) };
+    await expect(loadInvestigationDataset(client, { datasetName: dataset.name })).resolves.toEqual({
+      ...dataset,
+      id: undefined,
+    });
+    expect(client.getDatasetByName).toHaveBeenCalledWith(dataset.name);
+  });
+
+  it('fails before running when the dataset is missing or has duplicate case IDs', async () => {
+    const client = { getDatasetByName: jest.fn().mockResolvedValue(null) };
+    await expect(loadInvestigationDataset(client, { datasetName: dataset.name })).rejects.toThrow(
+      'Investigation dataset not found'
+    );
+    client.getDatasetByName.mockResolvedValue({
+      ...dataset,
+      examples: [...dataset.examples, ...dataset.examples],
+    });
+    await expect(loadInvestigationDataset(client, { datasetName: dataset.name })).rejects.toThrow(
+      'Duplicate case_id'
+    );
+  });
+
+  it('rejects ambiguous file and stored dataset selections before fetching', async () => {
+    const client = { getDatasetByName: jest.fn() };
+    await expect(
+      loadInvestigationDataset(client, {
+        datasetName: dataset.name,
+        examplesFile: '/tmp/examples.json',
+      })
+    ).rejects.toThrow('Choose either NIGHTSHIFT_DATASET_NAME or NIGHTSHIFT_EXAMPLES_FILE');
+    expect(client.getDatasetByName).not.toHaveBeenCalled();
+  });
+});
 
 describe('investigation file dataset', () => {
   const directory = mkdtempSync(join(tmpdir(), 'nightshift-dataset-'));

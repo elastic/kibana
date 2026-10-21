@@ -4,9 +4,9 @@
 
 ## Summary <!-- omit from toc -->
 
-This is a test plan for the backend infrastructure of the Managed MITRE Data Source feature: Saved Object population, feature flag gating, the internal entities API, the server-side data client, multi-version coexistence, and error handling.
+This is a test plan for the backend infrastructure of the Managed MITRE Data Source feature: Saved Object population, feature flag gating, the internal entities API, the server-side data client, multi-framework (ATT&CK Enterprise and ATLAS) and multi-version coexistence, and error handling.
 
-Out of scope for this plan: `GET /internal/mitre/search` route scenarios, Fleet out-of-band delivery, ATLAS framework, AI tooling, semantic search, and removal of the legacy blob.
+Out of scope for this plan: `GET /internal/mitre/search` route scenarios, Fleet out-of-band delivery, AI tooling, semantic search, and removal of the legacy blob. ATLAS UI surfaces (coverage overview, threat picker) are covered by their own test plans.
 
 ## Table of contents <!-- omit from toc -->
 
@@ -26,8 +26,10 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Bundled artifact](#bundled-artifact)
     - [**Scenario: The build script generates a valid artifact from the STIX bundle**](#scenario-the-build-script-generates-a-valid-artifact-from-the-stix-bundle)
     - [**Scenario: The build script correctly maps entities across multiple MITRE versions**](#scenario-the-build-script-correctly-maps-entities-across-multiple-mitre-versions)
+    - [**Scenario: The artifact carries both the Enterprise and the ATLAS frameworks**](#scenario-the-artifact-carries-both-the-enterprise-and-the-atlas-frameworks)
   - [SO population lifecycle](#so-population-lifecycle)
     - [**Scenario: SO IDs are deterministic and match the expected format**](#scenario-so-ids-are-deterministic-and-match-the-expected-format)
+    - [**Scenario: Population writes every framework and logs the entity count per framework**](#scenario-population-writes-every-framework-and-logs-the-entity-count-per-framework)
     - [**Scenario: Successful population marks the service as initialized**](#scenario-successful-population-marks-the-service-as-initialized)
     - [**Scenario: A failure during population is caught, logged, and marks the service as uninitialized**](#scenario-a-failure-during-population-is-caught-logged-and-marks-the-service-as-uninitialized)
   - [Feature flag behavior](#feature-flag-behavior)
@@ -36,13 +38,16 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
   - [Entities API: filtering and response shape](#entities-api-filtering-and-response-shape)
     - [**Scenario: The `types` parameter controls which entity buckets are populated**](#scenario-the-types-parameter-controls-which-entity-buckets-are-populated)
     - [**Scenario: `framework` defaults to "enterprise" when omitted**](#scenario-framework-defaults-to-enterprise-when-omitted)
+    - [**Scenario: `framework=atlas` returns only ATLAS entities**](#scenario-frameworkatlas-returns-only-atlas-entities)
     - [**Scenario: `framework_version` omitted resolves to the latest version**](#scenario-framework_version-omitted-resolves-to-the-latest-version)
+    - [**Scenario: `framework_version` omitted resolves independently per framework**](#scenario-framework_version-omitted-resolves-independently-per-framework)
     - [**Scenario: `framework_version` specified explicitly returns entities from that version**](#scenario-framework_version-specified-explicitly-returns-entities-from-that-version)
     - [**Scenario: `status` defaults to "active", excluding revoked and deprecated entities**](#scenario-status-defaults-to-active-excluding-revoked-and-deprecated-entities)
     - [**Scenario: `status=all` includes revoked and deprecated entities**](#scenario-statusall-includes-revoked-and-deprecated-entities)
     - [**Scenario: Revoked entities include `superseded_by_id` when a successor exists**](#scenario-revoked-entities-include-superseded_by_id-when-a-successor-exists)
     - [**Scenario: A multi-tactic technique appears once in the techniques bucket with all its tactic IDs**](#scenario-a-multi-tactic-technique-appears-once-in-the-techniques-bucket-with-all-its-tactic-ids)
     - [**Scenario: A technique present in both versions is returned with version-specific data**](#scenario-a-technique-present-in-both-versions-is-returned-with-version-specific-data)
+    - [**Scenario: Buckets are returned in a guaranteed order**](#scenario-buckets-are-returned-in-a-guaranteed-order)
   - [Entities API: input validation](#entities-api-input-validation)
     - [**Scenario: Invalid query parameters return 400**](#scenario-invalid-query-parameters-return-400)
   - [Server-side data client](#server-side-data-client)
@@ -85,10 +90,12 @@ https://marketplace.visualstudio.com/items?itemName=yzhang.markdown-all-in-one
 
 - Population must be idempotent: running on every restart must not duplicate entities (`bulkCreate` uses `overwrite: true`).
 - Population must not block or crash Kibana startup on failure, any errors must be caught and logged.
-- SO IDs must be deterministic (`{framework}:{framework_version}:{mitre_id}`) to allow multiple versions to coexist without ID collisions.
+- SO IDs must be deterministic (`{framework}:{framework_version}:{mitre_id}`) to allow multiple frameworks and versions to coexist without ID collisions.
+- Every entity, Saved Object and API response belongs to exactly one framework (`enterprise` or `atlas`). The latest version is resolved per framework; a newer version of one framework must never affect the version served for another.
 - Reads must return empty results gracefully (no error) when population has not yet completed.
 - Routes must not be registered when the feature flag is off.
 - All API query parameters must be bounded: `framework_version` max 32 characters, `types` array max 3 elements.
+- Bucket order is part of the API contract: tactics ascending by position, techniques and subtechniques ascending by name. UI consumers must not re-sort.
 
 ### Product requirements
 
@@ -121,6 +128,19 @@ And entities from different versions should be present as distinct entries in th
 And an entity ID present in both versions should appear twice with version-specific metadata
 ```
 
+#### **Scenario: The artifact carries both the Enterprise and the ATLAS frameworks**
+
+**Automation**: 1 unit test, 1 integration test.
+
+```Gherkin
+When the bundled artifact is loaded
+Then it should contain entities with framework "enterprise"
+And it should contain entities with framework "atlas"
+And every ATLAS entity ID should carry the "AML." prefix (e.g. AML.TA0000, AML.T0044, AML.T0024.002)
+And every ATLAS entity reference should point at https://atlas.mitre.org/
+And the artifact may carry several framework_version values per framework, and the entities API should resolve the latest version for each framework independently
+```
+
 ### SO population lifecycle
 
 #### **Scenario: SO IDs are deterministic and match the expected format**
@@ -132,6 +152,20 @@ Given the plugin start() lifecycle has completed
 When mitre-attack-entity Saved Objects are queried directly in the .kibana_security_solution index
 Then each document's _id should follow the format {framework}:{framework_version}:{mitre_id}
 And the total document count should match the number of entities in the bundled artifact
+```
+
+#### **Scenario: Population writes every framework and logs the entity count per framework**
+
+**Automation**: 1 unit test, 1 integration test.
+
+```Gherkin
+Given the bundled artifact carries both the enterprise and the atlas frameworks
+When MitreAttackService.populate() completes
+Then mitre-attack-entity Saved Objects should exist for every framework in the artifact
+And the population log line should list the entity count per framework and version (e.g. "enterprise@19.2: N, atlas@2026.8: M")
+And for each framework, the entities API called with that framework should return
+  the artifact framework_version for that framework
+  and active entity counts per bucket matching the artifact
 ```
 
 #### **Scenario: Successful population marks the service as initialized**
@@ -208,8 +242,29 @@ And <empty_buckets> should be empty
 **Automation**: 1 integration test.
 
 ```Gherkin
+Given the index contains both enterprise and atlas entities
 When the entities API is called without a framework parameter
 Then the response framework field should equal "enterprise"
+And every entity in every bucket should have framework equal to "enterprise"
+And no ATLAS entity should be present in any bucket
+```
+
+#### **Scenario: `framework=atlas` returns only ATLAS entities**
+
+**Automation**: 2 integration tests.
+
+```Gherkin
+Given the index contains both enterprise and atlas entities
+When the entities API is called with framework=atlas
+Then the response status should be 200
+And the response framework field should equal "atlas"
+And every entity in every bucket should have framework equal to "atlas"
+And no enterprise entity should be present in any bucket
+
+Given the index contains only enterprise entities
+When the entities API is called with framework=atlas
+Then the response status should be 200
+And the tactics, techniques, and subtechniques buckets should all be empty
 ```
 
 #### **Scenario: `framework_version` omitted resolves to the latest version**
@@ -220,6 +275,20 @@ Then the response framework field should equal "enterprise"
 When the entities API is called without a framework_version parameter
 Then the response framework_version field should be a non-empty string matching the latest version in the index
 And the returned entities should belong to that latest version
+```
+
+#### **Scenario: `framework_version` omitted resolves independently per framework**
+
+**Automation**: 1 integration test.
+
+```Gherkin
+Given the index contains enterprise entities at versions 99.0 and 98.0
+And atlas entities at version 97.0
+When the entities API is called with framework=enterprise and no framework_version
+Then the response framework_version field should equal "99.0"
+When the entities API is called with framework=atlas and no framework_version
+Then the response framework_version field should equal "97.0"
+And the higher enterprise version should not influence the atlas resolution
 ```
 
 #### **Scenario: `framework_version` specified explicitly returns entities from that version**
@@ -288,6 +357,18 @@ Then each response should contain that technique with the metadata for the respe
 And the two entities should share the same id but differ in their version-specific fields
 ```
 
+#### **Scenario: Buckets are returned in a guaranteed order**
+
+**Automation**: 1 integration test per bucket type, 1 unit test.
+
+```Gherkin
+Given the index contains tactics whose alphabetical order differs from their position order
+And techniques and subtechniques with names out of alphabetical order
+When the entities API is called
+Then the tactics bucket should be ordered ascending by position
+And the techniques and subtechniques buckets should be ordered ascending by name
+```
+
 ### Entities API: input validation
 
 #### **Scenario: Invalid query parameters return 400**
@@ -304,7 +385,7 @@ And the response body should describe a validation error for the <parameter> par
 
 | `<parameter>`       | `<reason>`                                                    |
 | ------------------- | ------------------------------------------------------------- |
-| `framework`         | value is not "enterprise"                                     |
+| `framework`         | value is not "enterprise" or "atlas"                          |
 | `types`             | contains a value not in tactic / technique / subtechnique     |
 | `types`             | array contains more than 3 elements                           |
 | `types`             | empty string                                                  |
