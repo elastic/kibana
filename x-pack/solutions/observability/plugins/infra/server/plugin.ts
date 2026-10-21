@@ -141,20 +141,22 @@ export class InfraServerPlugin
     const inventoryViews = this.inventoryViews.setup();
     const metricsExplorerViews = this.metricsExplorerViews?.setup();
 
-    core.uiSettings.register({
-      [NEW_INFRASTRUCTURE_EXPERIENCE_KEY]: {
-        name: i18n.translate('xpack.infra.uiSettings.newInfrastructureExperienceName', {
-          defaultMessage: 'New infrastructure experience',
-        }),
-        value: false,
-        description: i18n.translate(
-          'xpack.infra.uiSettings.newInfrastructureExperienceDescription',
-          { defaultMessage: 'Enables the new entity-based infrastructure inventory experience.' }
-        ),
-        schema: schema.boolean(),
-        category: ['observability'],
-      },
-    });
+    if (plugins.entityInventoryApp) {
+      core.uiSettings.register({
+        [NEW_INFRASTRUCTURE_EXPERIENCE_KEY]: {
+          name: i18n.translate('xpack.infra.uiSettings.newInfrastructureExperienceName', {
+            defaultMessage: 'New infrastructure experience',
+          }),
+          value: false,
+          description: i18n.translate(
+            'xpack.infra.uiSettings.newInfrastructureExperienceDescription',
+            { defaultMessage: 'Enables the new entity-based infrastructure inventory experience.' }
+          ),
+          schema: schema.boolean(),
+          category: ['observability'],
+        },
+      });
+    }
 
     // Register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
