@@ -661,7 +661,9 @@ describe('FlyoutTemplate body sections in tabbed mode', () => {
           <FlyoutTemplate.Body.Accordion title="Shared accordion" initialIsOpen>
             accordion content
           </FlyoutTemplate.Body.Accordion>
-          <FlyoutTemplate.Body.Section title="Shared section">section content</FlyoutTemplate.Body.Section>
+          <FlyoutTemplate.Body.Section title="Shared section">
+            section content
+          </FlyoutTemplate.Body.Section>
           <FlyoutTemplate.Body.TabPanel tabId="overview" data-test-subj="overviewPanel">
             overview content
           </FlyoutTemplate.Body.TabPanel>
