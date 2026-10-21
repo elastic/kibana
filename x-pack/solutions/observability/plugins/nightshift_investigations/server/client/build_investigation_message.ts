@@ -234,16 +234,10 @@ export interface AlertRecoveredMessageInput {
   snapshot?: Partial<AlertSnapshot> & Record<string, unknown>;
 }
 
-function formatDuration(startIso: string, endIso = new Date().toISOString()): string | undefined {
-  const durationMs = Date.parse(endIso) - Date.parse(startIso);
-  if (!Number.isFinite(durationMs) || durationMs < 0) return undefined;
-  const total = Math.round(durationMs / 1000);
-  const [h, m, s] = [Math.floor(total / 3600), Math.floor((total % 3600) / 60), total % 60];
-  return [h > 0 ? `${h}h` : '', m > 0 ? `${m}m` : '', s > 0 || (!h && !m) ? `${s}s` : '']
-    .filter(Boolean)
-    .join(' ');
-}
-
+/**
+ * The follow-up can wait behind a running round, so the brief states when the rule found the
+ * alert recovered rather than leave the agent to assume it just happened.
+ */
 export function buildAlertRecoveredFollowUpMessage({
   alertUuid,
   alertId,
@@ -258,16 +252,14 @@ export function buildAlertRecoveredFollowUpMessage({
   const start =
     (alertStart || undefined) ??
     (isString(snapshot?.start) ? snapshot.start || undefined : undefined);
-  const duration = start ? formatDuration(start, recoveredAt) : undefined;
-  const startClause = start
-    ? `, first active at ${sanitize(start)}${duration ? ` (duration ${duration})` : ''}`
-    : '';
+  const recoveredClause = recoveredAt ? ` at ${sanitize(recoveredAt)}` : '';
+  const startClause = start ? `, first active at ${sanitize(start)}` : '';
   const lines = [
     `Alert "${sanitize(ruleName)}" (UUID ${sanitize(alertUuid)}, instance "${sanitize(
       alertId
     )}", rule ${sanitize(ruleId)}, type ${sanitize(
       ruleTypeId
-    )}) transitioned to recovered${startClause}.`,
+    )}) transitioned to recovered${recoveredClause}${startClause}.`,
   ];
   if (isString(snapshot?.reason) && snapshot.reason)
     lines.push(`Reason: ${sanitize(snapshot.reason)}`);

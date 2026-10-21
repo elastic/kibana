@@ -21,6 +21,9 @@ triggers:
       condition: 'event.alert.status: "recovered"'
 
 steps:
+  # Delivery is at least once, so the alert's subject records the execution handling the recovery,
+  # and the lookup skips a recovery another execution completed. One that failed or was cancelled
+  # abandoned it, so a redelivery takes it over. A retry within this execution is not a duplicate.
   - name: find_investigation
     type: kibana.request
     with:
@@ -32,6 +35,8 @@ steps:
         alert_uuid: '{{ event.alert.uuid }}'
         alert_id: '${{ event.alert.id }}'
         alert_start: '${{ event.alert.start }}'
+        # Stamped when the rule run that found the alert recovered emitted the event.
+        recovered_at: '{{ event.timestamp }}'
         rule_id: '{{ event.rule.id }}'
         rule_name: '${{ event.rule.name }}'
         rule_type_id: '{{ event.rule.ruleTypeId }}'
@@ -42,6 +47,9 @@ steps:
     type: if
     condition: '${{ steps.find_investigation.output.investigation_id != null and steps.find_investigation.output.duplicate != true }}'
     steps:
+      # The follow-up waits its turn in the investigation's queue. Marked as a recovery follow-up,
+      # it continues the investigation only if it is still open then, and never reopens or
+      # recreates it. A failed follow-up fails this execution, so a redelivery takes it over.
       - name: investigate
         type: workflow.execute
         with:
@@ -49,30 +57,6 @@ steps:
           inputs:
             investigation_id: '{{ steps.find_investigation.output.investigation_id }}'
             message: '${{ steps.find_investigation.output.message }}'
-        on-failure:
-          continue: true
-
-      - name: release_event
-        type: kibana.request
-        if: '${{ steps.investigate.error != null }}'
-        with:
-          method: POST
-          path: '/s/{{ workflow.spaceId }}/internal/nightshift/investigations/_alert_recovered'
-          headers:
-            x-elastic-internal-origin: 'kibana'
-          body:
-            alert_uuid: '{{ event.alert.uuid }}'
-            alert_id: '${{ event.alert.id }}'
-            alert_start: '${{ event.alert.start }}'
-            rule_id: '{{ event.rule.id }}'
-            rule_name: '${{ event.rule.name }}'
-            rule_type_id: '{{ event.rule.ruleTypeId }}'
-            rule_tags: '${{ event.rule.tags }}'
-            execution_id: '{{ execution.id }}'
-            release_event: true
-        on-failure:
-          retry:
-            max-attempts: 3
-            delay: 5s
-            strategy: exponential
-          continue: true
+            context:
+              source: alert
+              follow_up: alert_recovered

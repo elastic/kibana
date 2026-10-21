@@ -1546,6 +1546,50 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     }
   );
 
+  describe('for an alert recovery follow-up', () => {
+    const recoveryInputs = {
+      investigation_id: 'inv-1',
+      message: 'Alert recovered',
+      context: { source: 'alert', follow_up: 'alert_recovered' },
+    };
+
+    it('continues an investigation that is still open, recording no subject', async () => {
+      withExecution({ inputs: recoveryInputs });
+      withConversations(makeConversation({ id: 'inv-1', workflowExecutionIds: ['exec-0'] }));
+
+      await expect(makeClient().ensureOrCreate('inv-1', 'exec-1')).resolves.toBe('inv-1');
+
+      expect(conversations.create).not.toHaveBeenCalled();
+      expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+      expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
+        workflow_execution_ids: ['exec-0', 'exec-1'],
+      });
+    });
+
+    it.each([
+      ['ensureOrCreate', 'closed'],
+      ['ensureOrCreate', 'deleted'],
+      ['ensureForFailure', 'closed'],
+      ['ensureForFailure', 'deleted'],
+    ] as const)(
+      '%s neither reopens nor recreates an investigation %s while the follow-up waited',
+      async (method, state) => {
+        withExecution({ inputs: recoveryInputs });
+        if (state === 'closed') {
+          withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
+        }
+
+        await expect(makeClient()[method]('inv-1', 'exec-1')).rejects.toThrow(
+          InvestigationNotFoundError
+        );
+
+        expect(conversations.create).not.toHaveBeenCalled();
+        expect(conversations.patchMetadata).not.toHaveBeenCalled();
+        expect(installInvestigationAgentMock).not.toHaveBeenCalled();
+      }
+    );
+  });
+
   it('reopens an investigation another identity owns', async () => {
     withExecution();
     withConversations(makeConversation({ id: 'inv-1', status: 'closed', owner: false }));
@@ -2274,24 +2318,68 @@ describe('NightshiftInvestigationsClient.findAlertRecovered() & route', () => {
     ]);
   });
 
-  it('deduplicates other executions and clears recovery_execution_id on release_event or active re-fire', async () => {
+  const withRecordedRecovery = () => {
     agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
     withConversations(makeConversation({ id: 'inv-1', status: 'open' }));
     subjectsClient.listByConversationIds.mockResolvedValue([
       { ...makeStoredSubject(), snapshot: { id: 'alert-1', recovery_execution_id: 'exec-rec-1' } },
     ]);
+  };
 
-    await expect(
-      makeClient().findAlertRecovered({ ...RECOVERY, executionId: 'exec-rec-2' })
-    ).resolves.toMatchObject({ investigation_id: 'inv-1', duplicate: true });
-    await expect(
-      makeClient().findAlertRecovered({ ...RECOVERY, releaseEvent: true })
-    ).resolves.not.toHaveProperty('duplicate');
+  it('lets the execution that recorded the recovery ask again without a duplicate', async () => {
+    withRecordedRecovery();
+
+    await expect(makeClient().findAlertRecovered(RECOVERY)).resolves.toEqual({
+      investigation_id: 'inv-1',
+      message: expect.any(String),
+    });
+    expect(mockManagement.getWorkflowExecution).not.toHaveBeenCalled();
+    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+  });
+
+  it.each([ExecutionStatus.COMPLETED, ExecutionStatus.RUNNING, ExecutionStatus.WAITING_FOR_CHILD])(
+    'skips a recovery another execution recorded that is %s',
+    async (status) => {
+      withRecordedRecovery();
+      mockManagement.getWorkflowExecution.mockResolvedValue({ id: 'exec-rec-1', status });
+
+      await expect(
+        makeClient().findAlertRecovered({ ...RECOVERY, executionId: 'exec-rec-2' })
+      ).resolves.toMatchObject({ investigation_id: 'inv-1', duplicate: true });
+      expect(mockManagement.getWorkflowExecution).toHaveBeenCalledWith('exec-rec-1', SPACE_ID, {
+        includeOutput: false,
+        request: mockRequest,
+      });
+      expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+    }
+  );
+
+  it.each<[string, Record<string, unknown> | null]>([
+    ['failed', { id: 'exec-rec-1', status: ExecutionStatus.FAILED }],
+    ['was cancelled', { id: 'exec-rec-1', status: ExecutionStatus.CANCELLED }],
+    ['timed out', { id: 'exec-rec-1', status: ExecutionStatus.TIMED_OUT }],
+    ['no longer exists', null],
+  ])('takes over a recovery whose recording execution %s', async (_label, execution) => {
+    withRecordedRecovery();
+    mockManagement.getWorkflowExecution.mockResolvedValue(execution);
+
+    const result = await makeClient().findAlertRecovered({
+      ...RECOVERY,
+      executionId: 'exec-rec-2',
+    });
+
+    expect(result).toEqual({ investigation_id: 'inv-1', message: expect.any(String) });
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', [
-      { type: 'alert', id: 'alert-1', snapshot: { id: 'alert-1' } },
+      {
+        type: 'alert',
+        id: 'alert-1',
+        snapshot: { id: 'alert-1', recovery_execution_id: 'exec-rec-2' },
+      },
     ]);
+  });
 
-    subjectsClient.upsertSubjects.mockClear();
+  it('clears recovery_execution_id when the alert fires again', async () => {
+    withRecordedRecovery();
     mockManagement.getWorkflow.mockResolvedValue({
       id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       enabled: true,
@@ -2329,11 +2417,11 @@ describe('NightshiftInvestigationsClient.findAlertRecovered() & route', () => {
       alert_uuid: 'alert-1',
       alert_id: 'service.name:checkout',
       alert_start: null,
+      recovered_at: '2026-08-24T12:15:30.000Z',
       rule_id: 'rule-1',
       rule_name: 'Latency is too high',
       rule_type_id: 'apm.transaction_duration',
       execution_id: 'exec-rec-1',
-      release_event: true,
     };
     expect(params?.safeParse({ body }).success).toBe(true);
     expect(params?.safeParse({ body: { ...body, alert_uuid: '' } }).success).toBe(false);
@@ -2345,8 +2433,16 @@ describe('NightshiftInvestigationsClient.findAlertRecovered() & route', () => {
         params: { body },
       } as never)
     ).resolves.toEqual({});
-    expect(findAlertRecovered).toHaveBeenCalledWith(
-      expect.objectContaining({ alertUuid: 'alert-1', releaseEvent: true })
-    );
+    expect(findAlertRecovered).toHaveBeenCalledWith({
+      alertUuid: 'alert-1',
+      alertId: 'service.name:checkout',
+      alertStart: null,
+      recoveredAt: '2026-08-24T12:15:30.000Z',
+      ruleId: 'rule-1',
+      ruleName: 'Latency is too high',
+      ruleTypeId: 'apm.transaction_duration',
+      ruleTags: undefined,
+      executionId: 'exec-rec-1',
+    });
   });
 });

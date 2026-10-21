@@ -27,12 +27,13 @@ export const findAlertRecoveredInvestigationRoute = createNightshiftInvestigatio
       alert_uuid: z.string().min(1).max(MAX_ALERT_FIELD_LENGTH),
       alert_id: z.string().min(1).max(MAX_ALERT_FIELD_LENGTH),
       alert_start: z.string().max(100).nullable().optional(),
+      /** When the rule found the alert recovered: the trigger event's timestamp. */
+      recovered_at: z.string().max(100).optional(),
       rule_id: z.string().min(1).max(MAX_ALERT_FIELD_LENGTH),
       rule_name: z.string().min(1).max(MAX_ALERT_FIELD_LENGTH),
       rule_type_id: z.string().min(1).max(MAX_ALERT_FIELD_LENGTH),
       rule_tags: z.array(z.string().max(MAX_ALERT_FIELD_LENGTH)).max(50).optional(),
       execution_id: z.string().min(1).max(MAX_EXECUTION_ID_LENGTH),
-      release_event: z.boolean().optional(),
     }),
   }),
   handler: async ({ request, params: { body }, getInvestigationsClient }) => {
@@ -42,12 +43,12 @@ export const findAlertRecoveredInvestigationRoute = createNightshiftInvestigatio
           alertUuid: body.alert_uuid,
           alertId: body.alert_id,
           alertStart: body.alert_start,
+          recoveredAt: body.recovered_at,
           ruleId: body.rule_id,
           ruleName: body.rule_name,
           ruleTypeId: body.rule_type_id,
           ruleTags: body.rule_tags,
           executionId: body.execution_id,
-          ...(body.release_event && { releaseEvent: body.release_event }),
         })) ?? {}
       );
     } catch (error) {

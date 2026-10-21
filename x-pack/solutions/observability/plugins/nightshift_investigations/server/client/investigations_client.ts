@@ -68,6 +68,7 @@ import {
 } from './errors';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
 import {
+  findInvestigationConversation,
   findInvestigationConversations,
   getOrCreateInvestigationConversation,
   type InvestigationConversation,
@@ -89,6 +90,14 @@ function isPlainObject(v: unknown): v is Record<string, unknown> {
 function asString(v: unknown): string | undefined {
   return typeof v === 'string' ? v || undefined : undefined;
 }
+
+/** `inputs.context.follow_up` of the investigation runs the alert recovery workflow starts. */
+const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
+
+const isAlertRecoveredFollowUp = (inputs: Record<string, unknown> | undefined): boolean => {
+  const context = inputs?.context;
+  return isPlainObject(context) && context.follow_up === ALERT_RECOVERED_FOLLOW_UP;
+};
 
 /** Keeps a derived summary to one readable line, since it is rendered as a list headline. */
 const MAX_DERIVED_SUBJECT_SUMMARY_LENGTH = 200;
@@ -770,6 +779,14 @@ export class NightshiftInvestigationsClient {
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
+    // A recovery follow-up waits in the investigation's queue after its lookup found it open, so
+    // it only continues an investigation that is still open when it gets its turn.
+    if (isAlertRecoveredFollowUp(inputs)) {
+      const found = await findInvestigationConversation(conversations, investigationId);
+      if (found?.status !== 'open') {
+        throw new InvestigationNotFoundError(investigationId);
+      }
+    }
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
@@ -1063,13 +1080,18 @@ export class NightshiftInvestigationsClient {
     ]);
   }
 
+  /**
+   * The open investigation holding a recovered alert, and the follow-up brief for it. Delivery is
+   * at least once, so the alert subject records the execution handling the recovery. Another
+   * execution's recovery is a duplicate only when that execution completed: the workflow runs one
+   * execution per alert at a time, so one that failed, was cancelled, or no longer exists
+   * abandoned the recovery, and this execution takes it over.
+   */
   async findAlertRecovered({
     executionId,
-    releaseEvent,
     ...alertInput
   }: Omit<AlertRecoveredMessageInput, 'snapshot'> & {
     executionId: string;
-    releaseEvent?: boolean;
   }): Promise<{ investigation_id: string; message: string; duplicate?: true } | undefined> {
     const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
     const { alertUuid } = alertInput;
@@ -1095,28 +1117,35 @@ export class NightshiftInvestigationsClient {
     const recordedExecutionId = asString(snapshot?.recovery_execution_id);
     const message = buildAlertRecoveredFollowUpMessage({ ...alertInput, snapshot });
 
-    if (releaseEvent) {
-      if (recordedExecutionId === executionId) {
-        const { recovery_execution_id: _cleared, ...restSnapshot } = snapshot ?? {};
-        await subjectsClient.upsertSubjects(existing.id, [
-          { type: 'alert', id: alertUuid, snapshot: restSnapshot },
-        ]);
-      }
+    if (recordedExecutionId === executionId) {
       return { investigation_id: existing.id, message };
     }
-    if (recordedExecutionId && recordedExecutionId !== executionId) {
+    if (recordedExecutionId && (await this.holdsRecovery(recordedExecutionId))) {
       return { investigation_id: existing.id, message, duplicate: true };
     }
-    if (!recordedExecutionId) {
-      await subjectsClient.upsertSubjects(existing.id, [
-        {
-          type: 'alert',
-          id: alertUuid,
-          snapshot: { ...snapshot, recovery_execution_id: executionId },
-        },
-      ]);
-    }
+    await subjectsClient.upsertSubjects(existing.id, [
+      {
+        type: 'alert',
+        id: alertUuid,
+        snapshot: { ...snapshot, recovery_execution_id: executionId },
+      },
+    ]);
     return { investigation_id: existing.id, message };
+  }
+
+  /** Whether the execution still holds the recovery it recorded: it completed or still runs. */
+  private async holdsRecovery(executionId: string): Promise<boolean> {
+    const { workflowsManagement } = this.requireWriteDeps();
+    const execution = await workflowsManagement.management.getWorkflowExecution(
+      executionId,
+      this.getSpaceId(),
+      { includeOutput: false, request: this.request }
+    );
+    return (
+      execution != null &&
+      (execution.status === ExecutionStatus.COMPLETED ||
+        !TerminalExecutionStatuses.includes(execution.status))
+    );
   }
 
   /**
