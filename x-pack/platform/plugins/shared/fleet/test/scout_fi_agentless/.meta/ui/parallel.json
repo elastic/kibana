@@ -16,6 +16,20 @@
       }
     },
     {
+      "id": "d857cde6ebf8844-927a1dd0f954376",
+      "title": "Agentless as the default deployment mode AWS Billing: saves an agentless policy when the deployment mode was not changed (regression guard for #297105)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/fleet/test/scout_fi_agentless/ui/parallel_tests/agentless_default/default_deployment_mode.spec.ts",
+        "line": 57,
+        "column": 14
+      }
+    },
+    {
       "id": "d3cc7f7862ac702-c8fe4e6b395d318",
       "title": "AWS Federated Identity — create, save, and edit round-trip GuardDuty agentless: an FI policy saves with role_arn only (regression guard for #284522 — no external_id anywhere in the payload)",
       "expectedStatus": "passed",
