@@ -282,28 +282,31 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [selectedServiceIds, persisted?.instances, awsServicesMap]
   );
 
-  // ECF creates no package policies, so name and description only matter for the other services.
-  const hasPolicyServices = useMemo(
+  // Packages of the services that deploy as a package policy. ECF-only services create none under
+  // managed integration, so name and description only matter for the others.
+  const policyPackages = useMemo(
     () =>
-      instances.some((inst) => {
+      instances.flatMap((inst) => {
         const service = awsServicesMap?.get(inst.serviceId);
-        return service ? supportsIntegrationSettings(service) : false;
+        return service && supportsIntegrationSettings(service, deploymentMethod)
+          ? [service.packageName]
+          : [];
       }),
-    [instances, awsServicesMap]
+    [instances, awsServicesMap, deploymentMethod]
   );
+  const hasPolicyServices = policyPackages.length > 0;
 
   // The package whose policy keeps the integration name as entered (the only package selected, or
   // the main one), so the default name already carries the package when that is not `aws`.
-  const bareNamePackage = useMemo(
-    () =>
-      getBareNamePackage(
-        instances.flatMap((inst) => {
-          const service = awsServicesMap?.get(inst.serviceId);
-          return service && supportsIntegrationSettings(service) ? [service.packageName] : [];
-        })
-      ),
-    [instances, awsServicesMap]
+  const bareNamePackage = useMemo(() => getBareNamePackage(policyPackages), [policyPackages]);
+  // Policies of the selected packages count too: a Bedrock-only deploy creates `aws-1-aws_bedrock`
+  // under `aws_bedrock`, which an `aws`-only query never sees.
+  const defaultNamePackages = useMemo(
+    () => [...new Set([AWS_MAIN_PACKAGE_NAME, ...policyPackages])].sort(),
+    [policyPackages]
   );
+  const defaultNamePackagesRef = useRef(defaultNamePackages);
+  defaultNamePackagesRef.current = defaultNamePackages;
   const toAutoName = useCallback(
     (base: string) =>
       bareNamePackage === AWS_MAIN_PACKAGE_NAME ? base : `${base}-${bareNamePackage}`,
@@ -329,7 +332,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
         const { data } = await sendGetPackagePolicies({
           perPage: SO_SEARCH_LIMIT,
           page: 1,
-          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${AWS_MAIN_PACKAGE_NAME}`,
+          kuery: defaultNamePackagesRef.current
+            .map((pkg) => `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${pkg}`)
+            .join(' or '),
         });
         base = getMaxPackageName(AWS_MAIN_PACKAGE_NAME, data?.items);
       } catch {

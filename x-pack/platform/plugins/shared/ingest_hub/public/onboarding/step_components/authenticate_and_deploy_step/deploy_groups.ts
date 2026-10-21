@@ -47,6 +47,12 @@ export interface DeployGroup {
   /** Sanitized policy name prefix for bundled originals, unique within one deploy. */
   policyNameStem?: string;
   /**
+   * What follows the integration name in the group's policy name (`aws_bedrock`, `prod`, … or
+   * empty for the bare-name policy), unique within one deploy even where different packages and
+   * namespaces would spell the same suffix.
+   */
+  policyNameSuffix?: string;
+  /**
    * The package whose policy keeps the integration name as entered. The main `aws` package, or
    * the only package of the deploy when there is just one (the name already tells which).
    */

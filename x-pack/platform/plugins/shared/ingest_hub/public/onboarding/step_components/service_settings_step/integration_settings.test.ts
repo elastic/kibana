@@ -50,6 +50,11 @@ describe('supportsIntegrationSettings', () => {
     expect(supportsIntegrationSettings(service(['ecf']))).toBe(false);
   });
 
+  it('is true for ECF-only services in agent-based mode, which deploys them as policies', () => {
+    expect(supportsIntegrationSettings(service(['ecf']), 'agent_based')).toBe(true);
+    expect(supportsIntegrationSettings(service(['ecf']), 'managed_integration')).toBe(false);
+  });
+
   it('is true when a service can be deployed as a policy', () => {
     expect(supportsIntegrationSettings(service(['ecf', 'managed_integration']))).toBe(true);
     expect(supportsIntegrationSettings(service(['agent_based']))).toBe(true);

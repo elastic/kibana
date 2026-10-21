@@ -20,6 +20,7 @@ import {
   buildAgentPolicyName,
 } from './agent_based_deploy';
 import type { AgentCredentialVars } from './package_inputs';
+import { toSOSettings } from './so_settings';
 import { toSOServiceVars } from './package_inputs';
 import type { DeployGroup } from './deploy_groups';
 import { DEFAULT_NAMESPACE } from './deploy_group_helpers';
@@ -179,6 +180,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         if (existingDeploymentId) {
           const remainingPolicyIdsByInstance = detectAndReviewStep.policyIdsByInstance ?? {};
           await updateDeployment(existingDeploymentId, {
+            ...toSOSettings(serviceSettings),
             services: selectedServiceIds,
             serviceVars: toSOServiceVars(
               serviceSettings?.serviceVars ?? {},
@@ -444,6 +446,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               );
               // Keep isDirty if SO write fails so settings change isn't silently lost.
               const soOk = await updateDeployment(onboardingDeploymentId, {
+                ...toSOSettings(serviceSettings),
                 services: selectedServiceIds,
                 serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
                   string,
@@ -500,6 +503,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               )
             );
             await updateDeployment(onboardingDeploymentId, {
+              ...toSOSettings(serviceSettings),
               services: selectedServiceIds,
               serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
                 string,
@@ -531,8 +535,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 Record<string, unknown>
               >,
               globalRegion,
-              ...(integrationName ? { integrationName } : {}),
-              ...(description ? { description } : {}),
+              ...toSOSettings(serviceSettings),
               dataFormat,
               authMethod: toSOAuthMethod(agentCredentialMethod),
               // Persist agentPolicyIds on create so a mid-deploy tab-close leaves a record that
@@ -685,6 +688,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           cleanupFullySucceeded =
             Object.keys(remainingPending).length === 0 && allLiveStaleSucceededInDeploy;
           soOk = await updateDeployment(onboardingDeploymentId, {
+            ...toSOSettings(serviceSettings),
             ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
             packagePolicyIds: [...new Set(Object.values({ ...priorIds, ...policyIdsByInstance }))],
             // Always update mechanisms so that a record originally created for managed_integration
@@ -811,6 +815,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // credential method, not a stale snapshot from a prior successful deploy.
         if (onboardingDeploymentId) {
           await updateDeployment(onboardingDeploymentId, {
+            ...toSOSettings(serviceSettings),
             ...(resolvedAgentPolicyIds.length ? { agentPolicyIds: resolvedAgentPolicyIds } : {}),
             services: selectedServiceIds,
             serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<

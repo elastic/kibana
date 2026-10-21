@@ -64,19 +64,23 @@ export function getBareNamePackage(packageNames: Iterable<string>): string {
 }
 
 /**
- * Policy name for a stem (`<package>` or `<package>__<namespace>`): the bare-name package keeps
- * the name as entered and the others get `-<package>`, so one deploy's policies never collide.
+ * What follows the integration name for a stem (`<package>` or `<package>__<namespace>`): nothing
+ * for the bare-name package in the default namespace, its namespace for that package otherwise,
+ * and `<package>[-<namespace>]` for the other packages.
  */
+function suffixFromStem(stem: string, packageName: string, bareNamePackage: string): string {
+  return packageName === bareNamePackage
+    ? stem.slice(packageName.length).replace(/^__/, '')
+    : stem.replace('__', '-');
+}
+
 function policyNameFromStem(
   base: string,
   stem: string,
   packageName: string,
   bareNamePackage: string
 ): string {
-  const suffix =
-    packageName === bareNamePackage
-      ? stem.slice(packageName.length).replace(/^__/, '')
-      : stem.replace('__', '-');
+  const suffix = suffixFromStem(stem, packageName, bareNamePackage);
   return suffix ? `${base}-${suffix}` : base;
 }
 
@@ -105,12 +109,14 @@ export function deriveGroupPolicyName(
     return name ? name.slice(0, MAX_POLICY_NAME_LENGTH) : undefined;
   }
 
-  return policyNameFromStem(
-    base,
-    buildGroupPolicyNameStem(group),
-    packageName,
-    group.bareNamePackage ?? AWS_MAIN_PACKAGE_NAME
-  ).slice(0, MAX_POLICY_NAME_LENGTH);
+  const suffix =
+    group.policyNameSuffix ??
+    suffixFromStem(
+      buildGroupPolicyNameStem(group),
+      packageName,
+      group.bareNamePackage ?? AWS_MAIN_PACKAGE_NAME
+    );
+  return (suffix ? `${base}-${suffix}` : base).slice(0, MAX_POLICY_NAME_LENGTH);
 }
 
 /**
@@ -189,11 +195,22 @@ export function groupByPackage(
   // Sanitizing is lossy (`prod.eu` and `prod_eu` both become `prod_eu`) and groups deploy in the
   // same millisecond, so a counter keeps the name stems of one deploy distinct.
   const usedStems = new Set<string>();
+  const usedSuffixes = new Set<string>();
   for (const [groupId, { namespace, members }] of bundled) {
     const baseStem = sanitizeGroupId(groupId);
     let policyNameStem = baseStem;
     for (let n = 2; usedStems.has(policyNameStem); n++) policyNameStem = `${baseStem}_${n}`;
     usedStems.add(policyNameStem);
+    // Different packages and namespaces can still spell the same suffix (an `aws` group in
+    // namespace `aws_bedrock` next to an `aws_bedrock` group), so the final names are made unique
+    // too, not just the stems.
+    const packageName = members[0].service.packageName;
+    const baseSuffix = suffixFromStem(policyNameStem, packageName, bareNamePackage);
+    let policyNameSuffix = baseSuffix;
+    for (let n = 2; policyNameSuffix && usedSuffixes.has(policyNameSuffix); n++) {
+      policyNameSuffix = `${baseSuffix}_${n}`;
+    }
+    usedSuffixes.add(policyNameSuffix);
     groups.push({
       groupId,
       instanceIds: members.map(({ instance }) => instance.instanceId),
@@ -201,6 +218,7 @@ export function groupByPackage(
       isDuplicateGroup: false,
       namespace,
       policyNameStem,
+      policyNameSuffix,
       bareNamePackage,
     });
   }

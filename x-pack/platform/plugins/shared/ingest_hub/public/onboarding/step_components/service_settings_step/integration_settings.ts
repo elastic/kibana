@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
+import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
 
 /**
  * Fleet allows 255 characters in a package policy name. The integration name leaves room for the
@@ -18,8 +18,16 @@ export const MAX_INTEGRATION_NAME_LENGTH = 200;
 /** Fleet's package policy description limit. */
 export const MAX_DESCRIPTION_LENGTH = 2048;
 
-/** Integration name and description only apply to services deployed as a package policy. */
-export const supportsIntegrationSettings = (service: AwsServiceMatrixEntry): boolean =>
+/**
+ * Integration name and description apply to every service that deploys as a package policy.
+ * Managed integration skips ECF-only services, but agent-based deploys them too (it ignores the
+ * advertised methods), so there only the method decides.
+ */
+export const supportsIntegrationSettings = (
+  service: AwsServiceMatrixEntry,
+  deploymentMethod?: DeploymentMethod
+): boolean =>
+  deploymentMethod === 'agent_based' ||
   !service.deploymentMethods.every((dm) => dm.method === 'ecf');
 
 export const getIntegrationNameError = (name: string): string | undefined => {

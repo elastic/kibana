@@ -332,6 +332,21 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
       })
     ),
     deploymentName: schema.maybe(schema.string({ maxLength: 255 })),
+    integrationName: schema.maybe(
+      schema.string({
+        maxLength: 255,
+        meta: {
+          description:
+            'Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.',
+        },
+      })
+    ),
+    description: schema.maybe(
+      schema.string({
+        maxLength: 2048,
+        meta: { description: 'Integration description from the Service Settings step.' },
+      })
+    ),
     serviceVars: schema.maybe(RequestServiceVarsSchema),
     services: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1, maxLength: 256 }), {

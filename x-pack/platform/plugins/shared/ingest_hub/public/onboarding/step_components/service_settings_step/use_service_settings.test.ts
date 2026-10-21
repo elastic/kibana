@@ -590,8 +590,9 @@ describe('useServiceSettings — integration name and description', () => {
     deploymentMethods: [{ method: 'ecf', preferred: true }] as any,
   });
 
-  const mockServices = (services: AwsServiceMatrixEntry[]) => {
+  const mockServices = (services: AwsServiceMatrixEntry[], deploymentMethod?: string) => {
     mockUseOnboardingFlow.mockReturnValue({
+      deploymentMethod,
       servicesStep: { selectedServiceIds: services.map((s) => s.id) },
       removeDeployInstance: jest.fn(),
       awsServicesMap: new Map(services.map((s) => [s.id, s])),
@@ -665,6 +666,34 @@ describe('useServiceSettings — integration name and description', () => {
 
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
 
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+  });
+
+  it('also looks at the policies of the selected packages for the next free name', async () => {
+    mockServices([
+      makeEntry('svc_b', {
+        packageName: 'aws_bedrock',
+        deploymentMethods: policyService.deploymentMethods,
+      }),
+    ]);
+    mockSendGetPackagePolicies.mockResolvedValue({
+      data: { items: [{ name: 'aws-1-aws_bedrock' }] },
+    });
+
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-2-aws_bedrock'));
+    const { kuery } = mockSendGetPackagePolicies.mock.calls[0][0];
+    expect(kuery).toContain('package.name:aws_bedrock');
+    expect(kuery).toContain('package.name:aws');
+  });
+
+  it('treats ECF-only services as policy services in agent-based mode', async () => {
+    mockServices([ecfOnlyService], 'agent_based');
+
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    expect(result.current.hasPolicyServices).toBe(true);
     await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
   });
 

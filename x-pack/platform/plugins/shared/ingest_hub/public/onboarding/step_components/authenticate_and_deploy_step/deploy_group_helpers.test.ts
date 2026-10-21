@@ -203,6 +203,18 @@ describe('deriveGroupPolicyName', () => {
     });
   });
 
+  it('keeps names unique when a namespace spells the same suffix as another package', () => {
+    // `aws` in namespace `aws_bedrock` and `aws_bedrock` in the default namespace both spell
+    // `-aws_bedrock`.
+    const groups = groupsFor(
+      [original('elb'), original('s3'), original('bedrock', 'aws_bedrock')],
+      { s3: withNamespace('aws_bedrock') }
+    );
+    const names = groups.map((g) => deriveGroupPolicyName(g, 'my-aws'));
+    expect(new Set(names).size).toBe(groups.length);
+    expect(names).toEqual(['my-aws', 'my-aws-aws_bedrock', 'my-aws-aws_bedrock_2']);
+  });
+
   it('suffixes every package when several non-aws packages are selected', () => {
     const groups = groupsFor([
       original('bedrock', 'aws_bedrock'),

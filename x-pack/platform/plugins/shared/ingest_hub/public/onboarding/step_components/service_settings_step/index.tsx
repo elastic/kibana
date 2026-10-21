@@ -681,7 +681,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           suggestedName={buildDuplicateName(
             // The service name is the duplicate's policy name, so it starts from the name of the
             // policy the service is deployed into.
-            integrationName.trim() && supportsIntegrationSettings(duplicateSourceService)
+            integrationName.trim() &&
+              supportsIntegrationSettings(duplicateSourceService, deploymentMethod)
               ? getSourcePolicyName(
                   integrationName,
                   duplicateSourceService.packageName,
