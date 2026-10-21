@@ -179,6 +179,7 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
     getCaseAttatchmentStats: jest.fn(),
     getAttachmentIdsForCases: jest.fn(),
     getFileAttachmentsForDeletion: jest.fn(),
+    getCaseAttachmentsForDeletion: jest.fn(),
     getAllAlertIds: jest.fn(),
     getAttachedAttackIds: jest.fn().mockResolvedValue(new Set()),
     getAllEventIds: jest.fn(),
