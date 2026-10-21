@@ -10,7 +10,7 @@ import type {
   HasEditCapabilities,
   PublishesBlockingError,
   PublishesDataLoading,
-  PublishesOnlyDataViews,
+  PublishesDataViews,
   PublishesTimeRange,
 } from '@kbn/presentation-publishing';
 import type { BehaviorSubject } from 'rxjs';
@@ -28,7 +28,7 @@ export interface FieldStatsControlsApi {
 export type FieldStatisticsTableEmbeddableApi =
   DefaultEmbeddableApi<FieldStatsTableEmbeddableState> &
     HasEditCapabilities &
-    PublishesOnlyDataViews &
+    PublishesDataViews &
     PublishesTimeRange &
     PublishesDataLoading &
     PublishesBlockingError &

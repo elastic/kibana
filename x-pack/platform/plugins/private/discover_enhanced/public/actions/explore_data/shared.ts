@@ -5,15 +5,16 @@
  * 2.0.
  */
 
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { apiPublishesDataViews } from '@kbn/presentation-publishing';
 
 export const getDataViews = (embeddable: EmbeddableApiContext['embeddable']): string[] => {
   if (!apiPublishesDataViews(embeddable)) return [];
 
-  const dataViews = embeddable.dataViews$.getValue() ?? [];
+  const dataViews: DataView[] = embeddable.dataViews$.getValue() ?? [];
   return dataViews.reduce(
-    (prev: string[], current) => (current.id ? [...prev, current.id] : prev),
+    (prev: string[], current: DataView) => (current.id ? [...prev, current.id] : prev),
     []
   );
 };

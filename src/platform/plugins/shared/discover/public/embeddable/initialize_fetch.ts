@@ -24,7 +24,7 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type {
   FetchContext,
   HasParentApi,
-  PublishesOnlyDataViews,
+  PublishesDataViews,
   PublishesTitle,
   PublishesSavedObjectId,
   PublishesDataLoading,
@@ -50,7 +50,7 @@ import { isFieldStatsMode } from './utils/is_field_stats_mode';
 type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
   PublishesDataLoading &
-  PublishesOnlyDataViews &
+  PublishesDataViews &
   PublishesTitle &
   PublishesWritableTimeRange & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;

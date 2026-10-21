@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import type {
   FetchContext,
   HasEditCapabilities,
-  PublishesOnlyDataViews,
+  PublishesDataViews,
   PublishesSavedObjectId,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
@@ -27,7 +27,7 @@ import type { DiscoverSessionByValueInput } from '../plugin_imports/embeddable_e
 
 type SavedSearchPartialApi = PublishesSavedSearch &
   PublishesSavedObjectId &
-  PublishesOnlyDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
+  PublishesDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
 
 export async function getAppTarget(
   partialApi: SavedSearchPartialApi,
@@ -69,7 +69,7 @@ export function initializeEditApi({
   partialApi: PublishesSavedSearch &
     PublishesSavedObjectId &
     PublishesSelectedTabId &
-    PublishesOnlyDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
+    PublishesDataViews & { fetchContext$: PublishingSubject<FetchContext | undefined> };
   isEditable: () => boolean;
   getTitle: () => string | undefined;
   discoverServices: DiscoverServices;

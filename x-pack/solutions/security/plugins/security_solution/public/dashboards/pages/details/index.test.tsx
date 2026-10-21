@@ -130,9 +130,9 @@ describe('DashboardView', () => {
 
   test('passes published data views to the search bar', async () => {
     const libraryDataView = { id: 'library-data-view' };
-    const dataViews$ = new BehaviorSubject([libraryDataView]);
+    const filterableSources$ = new BehaviorSubject([libraryDataView]);
     const dashboardContainer = {
-      dataViews$,
+      filterableSources$,
       title$: new BehaviorSubject('Dashboard'),
       children$: new BehaviorSubject({ libraryPanel: {} }),
       getDashboardPanelFromId: () => ({

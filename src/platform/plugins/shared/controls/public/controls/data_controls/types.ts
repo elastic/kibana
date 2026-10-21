@@ -16,7 +16,7 @@ import type {
   HasEditCapabilities,
   PublishesBlockingError,
   PublishesDataLoading,
-  PublishesOnlyDataViews,
+  PublishesDataViews,
   PublishingSubject,
 } from '@kbn/presentation-publishing';
 import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
@@ -34,7 +34,7 @@ export interface PublishesField {
 export type DataControlApi = StateManager<Omit<DataControlState, 'title'>>['api'] &
   Partial<HasCustomPrepend> &
   HasEditCapabilities &
-  PublishesOnlyDataViews &
+  PublishesDataViews &
   PublishesBlockingError &
   PublishesField &
   PublishesDataLoading &

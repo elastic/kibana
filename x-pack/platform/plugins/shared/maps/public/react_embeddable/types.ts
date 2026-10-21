@@ -14,7 +14,7 @@ import type {
   HasSupportedTriggers,
   HasType,
   PublishesDataLoading,
-  PublishesOnlyDataViews,
+  PublishesDataViews,
   PublishesEsql,
   PublishesProjectRoutingOverrides,
   PublishesUnifiedSearch,
@@ -38,7 +38,7 @@ export type MapApi = DefaultEmbeddableApi<MapEmbeddableState> &
   HasInspectorAdapters &
   HasSupportedTriggers &
   PublishesDataLoading &
-  PublishesOnlyDataViews &
+  PublishesDataViews &
   PublishesEsql &
   PublishesProjectRoutingOverrides &
   PublishesWritableTitle &

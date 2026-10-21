@@ -21,7 +21,9 @@ export const getDataViewIdFromESQLQuery = async (query: string, options: Options
     : undefined;
 
   const indexPattern = getIndexPatternFromESQLQuery(query);
-  const existingDataView = preferredDataViews?.find(({ title }) => title === indexPattern);
+  const existingDataView = preferredDataViews?.find(
+    (dataView) => dataView.getIndexPattern() === indexPattern
+  );
   if (existingDataView?.id) {
     return existingDataView.id;
   }

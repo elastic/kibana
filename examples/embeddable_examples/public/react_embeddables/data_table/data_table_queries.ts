@@ -63,17 +63,9 @@ export const initializeDataTableQueries = async (
         dataView$.next(defaultDataView);
         return;
       }
-      const dataViewSubscription = dataViewProvider.dataViews$
-        .pipe(
-          switchMap(async (dataViews) => {
-            const id = dataViews?.[0]?.id;
-            const dataView = id
-              ? await services.data.dataViews.get(id, false).catch(() => undefined)
-              : undefined;
-            return dataView ?? defaultDataView;
-          })
-        )
-        .subscribe((dataView) => dataView$.next(dataView));
+      const dataViewSubscription = dataViewProvider.dataViews$.subscribe((dataViews) => {
+        dataView$.next(dataViews?.[0] ?? defaultDataView);
+      });
       return () => dataViewSubscription.unsubscribe();
     }
   );

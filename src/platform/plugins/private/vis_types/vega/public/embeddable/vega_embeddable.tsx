@@ -56,7 +56,7 @@ import {
   type ProjectRoutingOverrides,
   type PublishesBlockingError,
   type PublishesDataLoading,
-  type PublishesOnlyDataViews,
+  type PublishesDataViews,
   type PublishesWritableDescription,
   type PublishesWritableTitle,
   type PublishesEsql,
@@ -124,7 +124,7 @@ export type VegaEmbeddableApi = DefaultEmbeddableApi<VegaByValueState> &
   PublishesEsql &
   PublishesWritableUnifiedSearch &
   PublishesProjectRoutingOverrides &
-  PublishesOnlyDataViews &
+  PublishesDataViews &
   PublishesRendered & {
     /** Returns the editor panel content for an already-open flyout. */
     getEditPanel?: (options: {
