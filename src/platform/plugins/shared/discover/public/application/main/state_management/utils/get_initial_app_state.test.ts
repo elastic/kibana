@@ -1068,16 +1068,16 @@ describe('when the navigation passes a data view spec', () => {
       esql: 'FROM my-custom-index',
     });
     expect(
-      getConfiguredDefaultEsqlQuery({ ...baseArgs, services, hasLocationDataView: true })
+      getConfiguredDefaultEsqlQuery({ ...baseArgs, services, locationStateHasDataViewSpec: true })
     ).toBeUndefined();
   });
 
   it('should derive the ES|QL query from the data view instead of the configured query', () => {
     const services = createServices(true);
 
-    expect(getDefaultQuery({ ...baseArgs, services, dataView, hasLocationDataView: true })).toEqual(
-      { esql: 'FROM the-data-view-title' }
-    );
+    expect(
+      getDefaultQuery({ ...baseArgs, services, dataView, locationStateHasDataViewSpec: true })
+    ).toEqual({ esql: 'FROM the-data-view-title' });
   });
 
   it('should keep the classic query when ES|QL is not the default', () => {
@@ -1085,8 +1085,8 @@ describe('when the navigation passes a data view spec', () => {
     const defaultQuery = { query: '', language: 'kuery' };
     services.data.query.queryString.getDefaultQuery = jest.fn().mockReturnValue(defaultQuery);
 
-    expect(getDefaultQuery({ ...baseArgs, services, dataView, hasLocationDataView: true })).toEqual(
-      defaultQuery
-    );
+    expect(
+      getDefaultQuery({ ...baseArgs, services, dataView, locationStateHasDataViewSpec: true })
+    ).toEqual(defaultQuery);
   });
 });
