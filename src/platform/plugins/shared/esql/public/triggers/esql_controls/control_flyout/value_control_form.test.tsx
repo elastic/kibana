@@ -44,7 +44,6 @@ jest.mock('@kbn/esql-utils', () => {
     getLimitFromESQLQuery: jest.fn().mockReturnValue(1000),
     getValuesFromQueryField: jest.fn().mockReturnValue('field'),
     getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
-    getVariableNamePrefix: actual.getVariableNamePrefix,
     ESQLValuesPreview: actual.ESQLValuesPreview,
     appendStatsByToQuery: actual.appendStatsByToQuery,
   };
