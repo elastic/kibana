@@ -283,6 +283,25 @@ apiTest.describe(
       expect(response).toHaveStatusCode(404);
     });
 
+    apiTest(
+      'returns 200 when remote cluster does not exist and allow_no_index is true',
+      async ({ apiClient }) => {
+        const response = await apiClient.get(
+          `${FIELDS_FOR_WILDCARD_PATH}?pattern=non_existing_cluster:logs-*&allow_no_index=true`,
+          {
+            headers: {
+              ...INTERNAL_COMMON_HEADERS,
+              ...adminApiCredentials.apiKeyHeader,
+            },
+            responseType: 'json',
+          }
+        );
+
+        expect(response).toHaveStatusCode(200);
+        expect(response.body).toStrictEqual({ fields: [], indices: [] });
+      }
+    );
+
     apiTest('returns nested field metadata', async ({ apiClient }) => {
       const response = await apiClient.get(`${FIELDS_FOR_WILDCARD_PATH}?pattern=basic_index`, {
         headers: {

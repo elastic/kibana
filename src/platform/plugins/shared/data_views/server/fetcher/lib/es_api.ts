@@ -108,6 +108,15 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     ) {
       return { body: { indices: [], fields: {} } };
     }
+    // ES ignores allow_no_indices for a non-existing remote cluster
+    if (
+      fieldCapsOptions.allow_no_indices &&
+      error.body?.error?.root_cause?.some(
+        (cause: { type?: string }) => cause.type === 'no_such_remote_cluster_exception'
+      )
+    ) {
+      return { body: { indices: [], fields: {} } };
+    }
     throw convertEsError(indices, error);
   }
 }

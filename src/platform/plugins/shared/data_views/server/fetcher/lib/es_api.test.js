@@ -8,6 +8,7 @@
  */
 
 import sinon from 'sinon';
+import { errors as esErrors } from '@elastic/elasticsearch';
 
 import { convertEsError } from './errors';
 import * as convertEsErrorNS from './errors';
@@ -190,6 +191,42 @@ describe('server/index_patterns/service/lib/es_api', () => {
         expect(convertEsError.args[0][0]).toBe(indices);
         expect(convertEsError.args[0][1]).toBe(esError);
       }
+    });
+
+    it('returns an empty response for a non-existing remote cluster when allow_no_indices is true', async () => {
+      const esError = new esErrors.ResponseError({
+        statusCode: 403,
+        body: {
+          error: {
+            root_cause: [
+              {
+                type: 'no_such_remote_cluster_exception',
+                reason: 'no such remote cluster: [non_existing_cluster]',
+              },
+            ],
+            type: 'security_exception',
+            reason: 'action [indices:data/read/field_caps] is unauthorized for user [admin]',
+          },
+          status: 403,
+        },
+      });
+      const fieldCaps = sinon.spy(async () => {
+        throw esError;
+      });
+      const callCluster = {
+        indices: {
+          getAlias: sinon.stub(),
+        },
+        fieldCaps,
+      };
+
+      const resp = await callFieldCapsApi({
+        callCluster,
+        indices: ['non_existing_cluster:logs-*'],
+        fieldCapsOptions: { allow_no_indices: true },
+      });
+
+      expect(resp).toEqual({ body: { indices: [], fields: {} } });
     });
 
     it('passes projectRouting to es api when provided', async () => {
