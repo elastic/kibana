@@ -232,6 +232,37 @@ describe('useSetInitialValue', () => {
     });
   });
 
+  it('should apply a data URI present on mount even when a dependency changes right away', async () => {
+    Object.defineProperty(window, 'location', {
+      writable: true,
+      value: {
+        hash: '?load_from=data:text/plain,compressed-data',
+      },
+    });
+    (decompressFromEncodedURIComponent as jest.Mock).mockReturnValue('decompressed data');
+
+    await act(async () => {
+      const { rerender } = renderHook(
+        ({ localStorageValue }: { localStorageValue: string }) =>
+          useSetInitialValue({
+            localStorageValue,
+            setValue: setValueMock,
+            toasts: toastsMock,
+          }),
+        { initialProps: { localStorageValue: 'initial value' } }
+      );
+
+      // Console autosaves the editor content, which hands the hook a new localStorageValue
+      // and so re-runs its effect, cleanup included.
+      rerender({ localStorageValue: 'autosaved value' });
+    });
+
+    expect(editorDispatchMock).toHaveBeenCalledWith({
+      type: 'setRequestToRestore',
+      payload: { request: 'decompressed data' },
+    });
+  });
+
   it('should show a warning if decompressing a data URI fails', async () => {
     Object.defineProperty(window, 'location', {
       writable: true,
