@@ -9,12 +9,12 @@ import React from 'react';
 import { renderHook } from '@testing-library/react';
 import * as reactRedux from 'react-redux-v7';
 import { useBins, useMonitorStatusData } from './use_monitor_status_data';
-import { WrappedHelper } from '../../../utils/testing';
+import { HookWrapper } from '../../../utils/testing/hook_helpers';
 import * as selectedMonitorHook from '../hooks/use_selected_monitor';
 import * as selectedLocationHook from '../hooks/use_selected_location';
 
 const Wrapper = ({ children }: React.PropsWithChildren) =>
-  React.createElement(WrappedHelper, null, children);
+  React.createElement(HookWrapper, null, children);
 
 describe('useMonitorStatusData', () => {
   let dispatchMock: jest.Mock;
