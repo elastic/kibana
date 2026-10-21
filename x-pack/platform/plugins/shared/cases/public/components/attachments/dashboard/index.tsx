@@ -73,6 +73,7 @@ export const getDashboardAttachmentType = () =>
       }),
     }),
     getAttachmentList: () => ({ children: DashboardAttachmentsTab }),
+    getCountLabel: ({ count }) => i18n.DASHBOARDS_COUNT(count),
     schema: DashboardAttachmentPayloadSchema,
     // Exclude pesistable data from the workflow schema
     workflowSchema: DashboardAttachmentPayloadSchema.omit({ data: true }),
