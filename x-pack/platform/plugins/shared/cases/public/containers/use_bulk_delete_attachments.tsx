@@ -33,6 +33,9 @@ export const useBulkDeleteAttachments = (caseId: string) => {
       },
       onSuccess: (_, { countLabel }) => {
         showSuccessToast(i18n.ATTACHMENTS_REMOVED(countLabel));
+      },
+      // A failed request can still remove part of the ids, so the case view refreshes either way.
+      onSettled: () => {
         refreshCaseViewPage();
       },
     }
