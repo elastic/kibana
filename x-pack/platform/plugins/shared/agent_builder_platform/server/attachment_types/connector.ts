@@ -11,13 +11,15 @@ import {
   AttachmentType,
   connectorAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { AttachmentTypeDefinition, SurfaceNode } from '@kbn/agent-builder-server/attachments';
+import { i18n } from '@kbn/i18n';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import {
   filterActionsBySelection,
   formatConnectorActionLine,
   getConnectorSpec,
 } from '@kbn/connector-specs';
+import { SURFACE_LIMITS, clampText, hasText, toLine } from './surface_helpers';
 
 /**
  * Creates the definition for the `connector` attachment type.
@@ -105,6 +107,53 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
         },
 
         getBoundedTools: () => [],
+      };
+    },
+
+    toSurfaceComposition: ({
+      data: {
+        connector_name: connectorName,
+        connector_type: connectorType,
+        selected_actions: selectedActions,
+      },
+    }) => {
+      const spec = getConnectorSpec(connectorType);
+      const actionNames = spec
+        ? filterActionsBySelection(spec.actions, selectedActions).map(([actionName]) => actionName)
+        : [];
+      const typeName = spec?.metadata.displayName ?? connectorType;
+      const description = spec?.metadata.description;
+
+      const fields: SurfaceNode = {
+        type: 'fields',
+        items: [
+          {
+            label: i18n.translate('xpack.agentBuilderPlatform.attachments.connector.surface.type', {
+              defaultMessage: 'Type',
+            }),
+            value: toLine(typeName, SURFACE_LIMITS.fieldValue),
+          },
+          ...(actionNames.length > 0
+            ? [
+                {
+                  label: i18n.translate(
+                    'xpack.agentBuilderPlatform.attachments.connector.surface.actions',
+                    { defaultMessage: 'Actions' }
+                  ),
+                  value: clampText(actionNames.join(', '), SURFACE_LIMITS.fieldValue),
+                },
+              ]
+            : []),
+        ],
+      };
+
+      return {
+        type: 'view',
+        title: connectorName,
+        body: [
+          ...(hasText(description) ? [{ type: 'markdown' as const, text: description }] : []),
+          ...(hasText(typeName) ? [fields] : []),
+        ],
       };
     },
 
