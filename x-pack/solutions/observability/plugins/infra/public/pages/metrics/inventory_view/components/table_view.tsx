@@ -77,7 +77,11 @@ export const TableView = (props: Props) => {
         // different groups and be on the screen at the same time.
         const uniqueID = [...item.node.path.map((p) => p.value), item.node.name].join(':');
         const button = (
-          <EuiToolTip content={tooltipText}>
+          <EuiToolTip
+            content={tooltipText}
+            // Only announce the tooltip when it adds the node id to the name
+            disableScreenReaderOutput={item.node.id === value}
+          >
             <EuiButtonEmpty
               aria-label={i18n.translate(
                 'xpack.infra.tableView.columnName.openNodeDetailsButton.ariaLabel',

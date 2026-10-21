@@ -45,14 +45,16 @@ export const EntryTitle = ({ onClick, title }: EntryTitleProps) => {
           name,
         },
       })}
+      // The link's aria-label already conveys the host name and cloud provider
+      disableScreenReaderOutput
     >
       <EuiLink
         data-test-subj="hostsViewTableEntryTitleLink"
         aria-label={i18n.translate(
           'xpack.infra.hostsViewPage.table.openHostDetailsLink.ariaLabel',
           {
-            defaultMessage: 'Open host details {hostName}',
-            values: { hostName: name },
+            defaultMessage: 'Open host details {hostName}, cloud provider {providerName}',
+            values: { hostName: name, providerName },
           }
         )}
         {...link}
