@@ -29,6 +29,7 @@ import {
   type RawRoundResult,
 } from './round_loader';
 import {
+  extractScriptReadPaths,
   extractSegmentVerb,
   FILE_TOOL_IDS,
   PATH_TOKEN_RE,
@@ -58,8 +59,7 @@ const BASH_DECISION_TREE_FILE_RE =
   /(?:^|\/)decision_tree_([a-z0-9][a-z0-9-]*)\.md(?=$|[^a-z0-9-])/g;
 const BASH_QUOTED_STRING_RE = /'[^']*'|"(?:[^"\\]|\\.)*"/g;
 const BASH_UNQUOTED_STDOUT_REDIRECT_RE = /(?:^|[^\d&>])(?:1|&)?>>?\|?\s*(?!&)(?!\/dev\/stdout\b)/;
-const BASH_WRITE_CALL_RE =
-  /\b(?:sed|perl)\s+-[a-zA-Z]*i\b|\b(?:write_text|writeFileSync)\s*\(|\bopen\s*\([^()\n]{1,200},\s*['"][wa+]/;
+const SCRIPT_INTERPRETER_VERBS = new Set<string>(['python', 'python3', 'node', 'perl', 'ruby']);
 
 // Commands whose arguments are never read and printed as file contents to stdout.
 const NON_FILE_READING_VERBS = new Set<string>([
@@ -177,6 +177,21 @@ const recordResolvedFilePath = (
   recordDecisionTreeFileMatches(rawPath, acc);
 };
 
+const isInPlaceEditSegment = (verb: string, unquotedSegment: string): boolean => {
+  if (verb !== 'sed' && verb !== 'perl') {
+    return false;
+  }
+  for (const token of unquotedSegment.split(/\s+/)) {
+    if (token === '--in-place' || token.startsWith('--in-place=')) {
+      return true;
+    }
+    if (/^-[a-zA-Z]*i[a-zA-Z]*$/.test(token)) {
+      return true;
+    }
+  }
+  return false;
+};
+
 const recordBashCommandReads = (
   command: string,
   acc: MutableReads,
@@ -185,13 +200,26 @@ const recordBashCommandReads = (
   // Decision tree attribution includes both reads and edits anywhere in the command.
   recordDecisionTreeFileMatches(command, acc);
 
-  for (const { segment, cwd } of splitBashSegmentsWithCwd(command, workingDirectory)) {
+  for (const { segment, cwd, scriptBody } of splitBashSegmentsWithCwd(command, workingDirectory)) {
+    if (scriptBody) {
+      for (const readPath of extractScriptReadPaths(scriptBody)) {
+        recordResolvedFilePath(readPath, acc, { baseDir: cwd });
+      }
+    }
+
     const unquoted = segment.replace(BASH_QUOTED_STRING_RE, '');
-    if (BASH_UNQUOTED_STDOUT_REDIRECT_RE.test(unquoted) || BASH_WRITE_CALL_RE.test(segment)) {
+    if (BASH_UNQUOTED_STDOUT_REDIRECT_RE.test(unquoted)) {
       continue;
     }
     const verb = extractSegmentVerb(segment);
-    if (!verb || NON_FILE_READING_VERBS.has(verb)) {
+    if (!verb || NON_FILE_READING_VERBS.has(verb) || isInPlaceEditSegment(verb, unquoted)) {
+      continue;
+    }
+
+    if (SCRIPT_INTERPRETER_VERBS.has(verb)) {
+      for (const readPath of extractScriptReadPaths(segment)) {
+        recordResolvedFilePath(readPath, acc, { baseDir: cwd });
+      }
       continue;
     }
 
