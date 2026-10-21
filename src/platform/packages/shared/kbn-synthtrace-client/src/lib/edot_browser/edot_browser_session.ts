@@ -129,6 +129,36 @@ const DEFAULT_CLICK_TARGETS: readonly EdotBrowserClickTarget[] = [
   { tagName: 'DIV', cssSelector: '#main > div.card:nth-child(3)' },
 ];
 
+/*
+ * How a session is built
+ *
+ * A session is generated in two phases, planning and simulation.
+ *
+ * Planning (`planDocuments`) decides the session's structure and timing, without emitting anything:
+ * - The session is a sequence of page views (`PageView`), back to back. Each page view shows one
+ *   page of the site from `start` to `end`. The user interacts with it from `from` on, which is
+ *   when the page is usable: right away for an SPA route change, or once a full page load is done.
+ *   After that, the user stays on the page for a sampled dwell time.
+ * - Page views are grouped into documents (`DocumentPlan`), the way a browser sees them. A
+ *   document starts with a full page load, followed by any number of SPA route changes on the
+ *   same document, and is hidden right before the next full page load or at the session end.
+ * - Each document carries its `PageLoadPlan`: all timings of the page load, sampled up front.
+ *   That makes the length of every page view, and so of the session, known before simulating.
+ * - Plans start at time 0. `session()` then moves them to the requested `start`, or so that the
+ *   session ends at `end`.
+ *
+ * Simulation (`simulateDocument`) turns each planned document into events, from load to hide:
+ * - `loadDocument` emits the page load (navigation, resource and navigation timing, TTFB, FCP
+ *   and LCP) from the load plan, and derives the `DocumentState` the later steps share.
+ * - `interactWithPage` emits what the user does on each page view: requests fired by the page,
+ *   clicks, the requests they fire, and uncaught exceptions. `routeChange` emits the soft
+ *   navigation of each SPA route change.
+ * - `hideDocument` emits CLS and INP, which web-vitals reports once the document is hidden.
+ *
+ * Planning and simulation draw from the same `random` source, planning first. A seed therefore
+ * reproduces a session exactly, but any change to the order of draws changes seeded output.
+ */
+
 interface SessionContext {
   client: EdotBrowserClient;
   site: EdotBrowserSite;
