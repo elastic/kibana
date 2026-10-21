@@ -116,9 +116,9 @@ spaceTest.describe('Lens ES|QL reference lines', { tag: '@local-stateful-classic
       const { lens } = pageObjects;
       await openInlineEditorAndWaitVisible(pageObjects, testData.ESQL_MULTI_LAYER_PANEL_IDS.DATA);
       const dataQuery = await lens.workspace.getEsqlQuery();
-      await lens.layers.duplicateLayer(0);
       await lens.layers.createLayer('referenceLine', undefined, { referenceLineSource: 'static' });
-      await lens.layers.ensureLayerTabIsActive(2);
+      await lens.layers.duplicateLayer(0);
+      await lens.layers.ensureLayerTabIsActive(1);
       await expect(
         page.getByRole('tab', { name: 'Static reference lines', exact: true })
       ).toBeVisible();
@@ -133,7 +133,7 @@ spaceTest.describe('Lens ES|QL reference lines', { tag: '@local-stateful-classic
       await expect(lens.dimensions.getDimensionTriggersLocator(LEFT)).toHaveCount(0);
       await lens.layers.activateLayerTab(0);
       expect(await lens.workspace.getEsqlQuery()).toBe(dataQuery);
-      await lens.layers.activateLayerTab(1);
+      await lens.layers.activateLayerTab(2);
       expect(await lens.workspace.getEsqlQuery()).toBe(dataQuery);
       await cancelLensInlineEditorAndWaitClosed({ lens });
     }
