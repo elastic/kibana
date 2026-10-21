@@ -14,9 +14,12 @@ import type {
 } from '@kbn/scout';
 import {
   getActionPoliciesApiService,
+  getActionPolicySavedObjectService,
   getAlertActionsApiService,
+  getAlertActionsCleanupService,
   getAlertActionsEventsService,
   getDispatcherApiService,
+  getEbtService,
   getMaintenanceWindowsApiService,
   getRuleChangesHistoryApiService,
   getRuleExecutionsApiService,
@@ -27,9 +30,12 @@ import {
   getTelemetryService,
   getWorkflowsApiService,
   type ActionPoliciesApiService,
+  type ActionPolicySavedObjectService,
   type AlertActionsApiService,
+  type AlertActionsCleanupService,
   type AlertActionsEventsService,
   type DispatcherApiService,
+  type EbtService,
   type MaintenanceWindowsApiService,
   type RuleChangesHistoryApiService,
   type RuleExecutionsApiService,
@@ -53,11 +59,14 @@ export interface AlertingApiServices {
   ruleEvents: RuleEventsApiService;
   alertActionsEvents: AlertActionsEventsService;
   alertActions: AlertActionsApiService;
+  alertActionsCleanup: AlertActionsCleanupService;
   actionPolicies: ActionPoliciesApiService;
+  actionPolicySavedObject: ActionPolicySavedObjectService;
   maintenanceWindows: MaintenanceWindowsApiService;
   sourceIndex: SourceIndexApiService;
   ruleExecutions: RuleExecutionsApiService;
   dispatcher: DispatcherApiService;
+  ebt: EbtService;
   taskManager: TaskManagerService;
   telemetry: TelemetryService;
   workflows: WorkflowsApiService;
@@ -92,11 +101,14 @@ export const buildAlertingApiServices = ({
     ruleEvents: getRuleEventsApiService({ esClient, log }),
     alertActionsEvents: getAlertActionsEventsService({ esClient, log }),
     alertActions: getAlertActionsApiService({ kbnClient, log }),
+    alertActionsCleanup: getAlertActionsCleanupService({ esClient, log, taskManager }),
     actionPolicies: getActionPoliciesApiService({ kbnClient, log }),
+    actionPolicySavedObject: getActionPolicySavedObjectService({ esClient, log, config }),
     maintenanceWindows: getMaintenanceWindowsApiService({ kbnClient, log }),
     sourceIndex: getSourceIndexApiService({ esClient, log }),
     ruleExecutions: getRuleExecutionsApiService({ esClient, log }),
     dispatcher: getDispatcherApiService({ esClient, log }),
+    ebt: getEbtService({ kbnClient, log }),
     taskManager,
     telemetry: getTelemetryService({ esClient, log, taskManager }),
     workflows: getWorkflowsApiService({ kbnClient, log }),

@@ -26,7 +26,7 @@ export const SEMCONV_PODS_DATA_FROM = '2019-07-10T20:20:00.000Z';
 export const SEMCONV_PODS_DATA_TO = '2019-07-10T20:30:00.000Z';
 
 export const SEMCONV_PODS: SemconvPodFixture[] = [
-  { uid: 'semconv-pod-0', name: 'semconv-pod-0', nodeName: 'semconv-host-1' },
+  { uid: 'semconv-pod-0-uid', name: 'semconv-pod-0', nodeName: 'semconv-host-1' },
   {
     uid: 'semconv-pod-1-uid',
     name: 'semconv-pod-1',

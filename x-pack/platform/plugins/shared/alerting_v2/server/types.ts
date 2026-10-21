@@ -30,13 +30,27 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-plugin/server';
 import type { AgentBuilderSmlPluginSetup } from '@kbn/agent-builder-sml-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
-import type { RulesClient } from './lib/rules_client';
+import type { RulesClient, CreateRulesClientOptions } from './lib/rules_client';
 import type { ActionPolicyClient } from './lib/action_policy_client';
 import type { ArtifactTypeDefinition } from './lib/artifact_types';
 import type { AlertEventsClient } from './lib/alert_events_client';
 
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
+
+/** Rules client for system work with no user request; it only disables rules. */
+export interface InternalRulesClientApi {
+  /**
+   * Disables rules by id in whichever space each one lives in. Unlike a user disable,
+   * `updatedBy` is `null`, the change history has no author, and `alerting.ruleDisabled`
+   * workflow triggers do not fire. Accepts at most `MAX_BULK_ITEMS` ids. Ids not valid per
+   * `entityIdSchema` are reported as errors without being looked up, as the HTTP API cannot
+   * address them either. A space that fails to disable reports its rules' ids as errors
+   * without stopping the other spaces.
+   */
+  bulkDisableRules: RulesClientApi['bulkDisableRules'];
+}
 
 export type ActionPolicyClientApi = PublicMethodsOf<ActionPolicyClient>;
 
@@ -52,11 +66,22 @@ export interface AlertingServerSetup {
 }
 
 export interface AlertingServerStart {
-  getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi>;
+  getRulesClientWithRequest(
+    request: KibanaRequest,
+    options?: CreateRulesClientOptions
+  ): Promise<RulesClientApi>;
   getRulesClientWithRequestInSpace(
     request: KibanaRequest,
-    spaceId: SpaceId
+    spaceId: SpaceId,
+    options?: CreateRulesClientOptions
   ): Promise<RulesClientApi>;
+
+  /**
+   * Returns a rules client that acts as the internal Kibana user across every space,
+   * for system-initiated work with no user request. It bypasses user authorization,
+   * so callers own the decision of which rules to change.
+   */
+  getUnsafeInternalRulesClient(): Promise<InternalRulesClientApi>;
 
   getActionPolicyClientWithRequest(request: KibanaRequest): Promise<ActionPolicyClientApi>;
   getActionPolicyClientWithRequestInSpace(
@@ -85,6 +110,7 @@ export interface AlertingServerSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   agentBuilder?: AgentBuilderPluginSetup;
   agentBuilderSml?: AgentBuilderSmlPluginSetup;
+  cloud?: CloudSetup;
 }
 
 export interface AlertingServerStartDependencies {

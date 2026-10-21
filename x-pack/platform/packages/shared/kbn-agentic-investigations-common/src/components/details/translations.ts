@@ -20,6 +20,10 @@ export const LINKED_INVESTIGATIONS_LABELS = Object.freeze({
   statusClosed: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.statusClosed', {
     defaultMessage: 'Closed',
   }),
+  actionRequired: i18n.translate(
+    'xpack.alertzero.detailsFlyout.linkedInvestigations.actionRequired',
+    { defaultMessage: 'Action required' }
+  ),
   empty: i18n.translate('xpack.alertzero.detailsFlyout.linkedInvestigations.empty', {
     defaultMessage: 'No linked investigations',
   }),
@@ -50,6 +54,12 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
         defaultMessage: 'Parent investigation',
       }
     ),
+    proposedActions: i18n.translate('xpack.alertzero.detailsFlyout.sections.proposedActions', {
+      defaultMessage: 'Proposed actions',
+    }),
+    impact: i18n.translate('xpack.alertzero.detailsFlyout.sections.impact', {
+      defaultMessage: 'Impact',
+    }),
   },
   overview: {
     showMore: i18n.translate('xpack.alertzero.detailsFlyout.overview.showMore', {
@@ -75,5 +85,25 @@ export const DETAILS_FLYOUT_LABELS = Object.freeze({
     dismiss: i18n.translate('xpack.alertzero.detailsFlyout.actions.dismiss', {
       defaultMessage: 'Dismiss',
     }),
+  },
+  proposedAction: {
+    needsReviewBadge: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.needsReview', {
+      defaultMessage: 'Needs review',
+    }),
+    reversible: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.reversible', {
+      defaultMessage: 'Reversible',
+    }),
+    irreversible: i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.irreversible', {
+      defaultMessage: 'Irreversible',
+    }),
+    /**
+     * Distinct per row: a screen reader announces this button-by-button, so a fixed string would
+     * leave every proposed action indistinguishable from the others in the list.
+     */
+    ariaLabel: ({ title, status }: { title: string; status: string }) =>
+      i18n.translate('xpack.alertzero.detailsFlyout.proposedAction.ariaLabel', {
+        defaultMessage: 'Review proposed action: {title}, {status}',
+        values: { title, status },
+      }),
   },
 });

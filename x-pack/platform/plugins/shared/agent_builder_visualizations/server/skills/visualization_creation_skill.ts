@@ -8,6 +8,7 @@
 import { platformCoreTools } from '@kbn/agent-builder-common';
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
+  dataDiscoveryAgentGuidance,
   getChartTypeSelectionPromptContent,
   seriesStatisticsAgentGuidance,
 } from '@kbn/agent-builder-visualizations-server';
@@ -20,7 +21,7 @@ export const visualizationCreationSkill = defineSkillType({
   name: 'visualization-creation',
   basePath: 'skills/platform/visualization',
   description:
-    'Create standalone or reusable visualizations from grounded index and field context.',
+    'Create or update standalone charts and visualizations shown in the conversation, not on a dashboard. If the request involves a dashboard, use the dashboards skill instead.',
   content: `## When to Use This Skill
 
 Use this skill when:
@@ -30,10 +31,15 @@ Use this skill when:
 - A user asks to update an existing visualization by attachment ID.
 
 Do **not** use this skill when:
-- The user only needs raw documents or table/query output without a visualization.
+- The user wants raw documents, events, search hits, or a Discover-style document table:
+  - If the discover-session skill is listed in the available or relevant skills, use that skill and \`${
+    platformCoreTools.createDiscoverSession
+  }\` instead. Do **not** use chartType \`"data_table"\` as a substitute for that Discover table.
+  - If discover-session is not available, do not use this skill for those requests.
+- The user only needs other table/query output without a visualization.
 - The user first needs broad data discovery and exploration across unknown sources.
 - The request is about persisted saved objects instead of in-memory attachment workflows.
-- The primary goal is to compose or update a dashboard. Use the dashboard-management skill for dashboard panel creation and layout.
+- The primary goal is to compose or update a dashboard. Use the dashboards skill for dashboard panel creation and layout.
 
 ## Available Tools
 
@@ -45,7 +51,9 @@ Do **not** use this skill when:
   }**: Optional. Only for genuinely complex aggregations/joins you want to control and validate precisely; pass the result to ${
     platformCoreTools.createVisualization
   } via \`target.esql\`. Not a required step before every visualization.
-- **${platformCoreTools.executeEsql}**: Validate ES|QL and inspect sample result shape.
+- **${
+    platformCoreTools.executeEsql
+  }**: Inspect the results of a query, such as its sample result shape. Running a query you wrote yourself doesn't make it eligible for \`target.esql\`.
 
 ## Visualization Creation Workflow
 
@@ -54,9 +62,8 @@ Do **not** use this skill when:
      platformCoreTools.createVisualization
    } call, know the target index and confirm every field you reference exists in its mapping.
    - If the index and fields are already grounded in context, continue directly.
-   - If not, discover them first: list indices and inspect the index mapping (optionally probe with ${
-     platformCoreTools.executeEsql
-   }). Always use real field names from the index mapping — never invent index or field names, and never assume a domain schema (APM, metrics, etc.) is present; verify against the actual cluster.
+   - ${dataDiscoveryAgentGuidance}
+   - Always use real field names from the index mapping — never invent index or field names, and never assume a domain schema (APM, metrics, etc.) is present; verify against the actual cluster.
    - ${
      platformCoreTools.createVisualization
    } auto-discovers an index only when you omit \`index\`, and that discovery FAILS when the referenced fields do not exist in any index. Guessing fields and relying on auto-discovery is the most common cause of failures — ground first.
@@ -78,11 +85,13 @@ Do **not** use this skill when:
      - \`query\` (required, specific and field-accurate)
      - \`index\` (strongly recommended — pass the grounded index; omitting it forces auto-discovery, which fails for ungrounded/invented fields)
      - \`target\` (required) — one of:
-       - \`{ "type": "lens", "chartType": <required>, "esql"?: <validated ES|QL> }\` for a standard chart
-       - \`{ "type": "vega", "chartType"?: <styling hint>, "esql"?: <validated ES|QL> }\` for a custom Vega-Lite visualization
-       - \`{ "type": "custom_content", "esql"?: <validated ES|QL>, "has_data"?: false }\` for an HTML layout — omit \`esql\` to have a query generated; pass \`has_data: false\` only when the panel genuinely has no data
+       - \`{ "type": "lens", "chartType": <required>, "esql"?: <ES|QL from generate_esql or the user> }\` for a standard chart
+       - \`{ "type": "vega", "chartType"?: <styling hint>, "esql"?: <ES|QL from generate_esql or the user> }\` for a custom Vega-Lite visualization
+       - \`{ "type": "custom_content", "esql"?: <ES|QL from generate_esql or the user>, "has_data"?: false }\` for an HTML layout — omit \`esql\` to have a query generated; pass \`has_data: false\` only when the panel genuinely has no data
        - \`{ "type": "attachment", "attachment_id": <id>, "chartType"?, "esql"?, "has_data"? }\` to update an existing visualization
-       \`esql\` is optional everywhere it appears: pass it when you already have a validated ES|QL, otherwise it is generated for you.
+       \`esql\` is optional everywhere it appears: pass it only when the query came from ${
+         platformCoreTools.generateEsql
+       } or the user pasted it, otherwise it is generated for you.
      - \`time_range\` (optional; **only** when the user explicitly named a time window, e.g. "last 7 days", "May 20–24". Do not invent a range. Omit it otherwise — create applies a data-aware default, and edits keep the existing range.)
    - For multi-panel requests, resolve the index (and validate the fields) ONCE up front, then call ${
      platformCoreTools.createVisualization
@@ -145,10 +154,16 @@ ${
 Pass \`target.type: "custom_content"\` and describe the panel in \`query\` — layout, copy, and any values or fields to show. Do not write HTML, and never pass a template: the markup is generated server-side.
 
 You decide whether the panel has data:
-- Omit \`target.esql\` and a query is generated from \`query\` (the common case), or pass a validated ES|QL yourself.
+- Omit \`target.esql\` and a query is generated from \`query\` (the common case), or pass a query from ${
+    platformCoreTools.generateEsql
+  } or the user.
 - Pass \`target.has_data: false\` **only** when the panel genuinely shows no live values — a banner, a legend, an explanatory note, a title card. Never use \`has_data: false\` to get past a failed query generation; fix the index or fields and retry instead. Do not pass \`esql: null\` to mean "no data" — that is treated as omitting the query so one is generated.
 
-To change an existing panel, call this tool again with \`target: { "type": "attachment", "attachment_id": ... }\` and describe the update — do not read the attachment to edit the HTML. Omitting \`esql\` and \`has_data\` on an update keeps the panel's current data state (its query, or none); pass a validated \`esql\` to add or replace data, \`has_data: true\` to ensure it has data (the stored query is kept; one is generated only when the panel has none), and \`has_data: false\` to remove it. If the generated query is rejected, correct \`query\` (or pass a validated \`esql\`) and retry; do not fall back to writing markup yourself.
+To change an existing panel, call this tool again with \`target: { "type": "attachment", "attachment_id": ... }\` and describe the update — do not read the attachment to edit the HTML. Omitting \`esql\` and \`has_data\` on an update keeps the panel's current data state (its query, or none); pass an \`esql\` from ${
+    platformCoreTools.generateEsql
+  } or the user to add or replace data, \`has_data: true\` to ensure it has data (the stored query is kept; one is generated only when the panel has none), and \`has_data: false\` to remove it. If the generated query is rejected, correct \`query\` (or pass an \`esql\` from ${
+    platformCoreTools.generateEsql
+  }) and retry; do not fall back to writing markup yourself.
 
 **Scope — "Vega" here means Vega-Lite, not full Vega.** The Vega renderer only supports the Vega-Lite grammar. It cannot do full Vega features such as custom signals / imperative interactivity, arbitrary data transforms or expressions, or bespoke rendering. If a request fits neither a Lens chart type nor the Vega-Lite grammar, do **not** force a broken or misleading chart. Be honest with the user: explain that the requested chart is not supported in Vega-Lite and that full Vega is not available yet, then offer alternatives — the closest Vega-Lite approximation, a standard Lens chart, or splitting the request into multiple charts — and ask how they would like to proceed.
 

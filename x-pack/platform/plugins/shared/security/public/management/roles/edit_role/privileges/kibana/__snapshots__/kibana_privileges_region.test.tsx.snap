@@ -26,7 +26,7 @@ exports[`<KibanaPrivileges> renders without crashing 1`] = `
       class="euiFlexItem emotion-euiFlexItem-growZero"
     >
       <button
-        class="euiLink emotion-euiLink-primary"
+        class="euiLink emotion-euiLink-text"
         data-test-subj="showHidePrivilege"
         type="button"
       >

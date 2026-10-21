@@ -5,21 +5,17 @@
  * 2.0.
  */
 
-import type { DataSchemaFormat, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import { DEFAULT_SCHEMA } from '../../../../../common/constants';
 
 /**
- * Resolves the Schema Inventory waffle requests should send for the current node type.
+ * Resolves the Schema Inventory waffle / timeline / tooltip requests should send.
+ *
+ * Follows `preferredSchema`, falling through to `DEFAULT_SCHEMA` when unset.
+ * The Schema control itself stays gated per node type in the toolbar.
  */
 export const getInventoryRequestSchema = (
-  nodeType: InventoryItemType,
   preferredSchema: DataSchemaFormat | null | undefined
 ): DataSchemaFormat => {
-  // Leftover Hosts preferredSchema must not query kubeletstats until the pod toolbar owns Schema (#291416).
-  // Do not fall through to DEFAULT_SCHEMA here: that constant is `semconv`.
-  if (nodeType === 'pod') {
-    return 'ecs';
-  }
-
   return preferredSchema ?? DEFAULT_SCHEMA;
 };

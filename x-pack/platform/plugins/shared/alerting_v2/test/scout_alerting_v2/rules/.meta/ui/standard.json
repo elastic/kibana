@@ -1,20 +1,21 @@
 {
-  "sha1": "a7ba547ccf54242b53804483507243296a2c8e94",
+  "sha1": "53949c244dcea82b39ce453b41ff73006cd6d2b8",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
     {
-      "id": "9d9e2576f83ca69-f39fa53ccc71915",
-      "title": "ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327) recovery tab appears in the YAML-mode sandbox when YAML sets recovery_strategy: query",
+      "id": "9d9e2576f83ca69-16f66a115f40c62",
+      "title": "ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327) recovery tab appears in the YAML-mode sandbox when YAML sets recovery.strategy: condition",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
-        "line": 111,
-        "column": 11
+        "line": 117,
+        "column": 26
       }
     },
     {
@@ -22,12 +23,13 @@
       "title": "ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327) a YAML recovery edit reaches the form dropdown (#278327 regression test)",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
-        "line": 151,
-        "column": 10
+        "line": 156,
+        "column": 9
       }
     },
     {
@@ -35,12 +37,13 @@
       "title": "ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327) removing recovery from YAML drops the recovery tab and falls back to the base tab",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
-        "line": 200,
-        "column": 22
+        "line": 207,
+        "column": 25
       }
     },
     {
@@ -48,12 +51,13 @@
       "title": "ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327) selecting Custom recovery in the form and editing the query reaches the YAML",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
-        "line": 252,
-        "column": 15
+        "line": 258,
+        "column": 18
       }
     },
     {
@@ -61,12 +65,13 @@
       "title": "ComposeDiscoverFlyout — recovery strategy YAML <-> GUI round trip (#278327) a YAML recovery edit persists on save",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/compose_discover_recovery_yaml_sync.spec.ts",
-        "line": 283,
-        "column": 26
+        "line": 290,
+        "column": 9
       }
     },
     {
@@ -74,12 +79,41 @@
       "title": "Discover query sync — Rule flyout flyout query updates when the Discover query changes",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/discover_query_sync.spec.ts",
-        "line": 42,
-        "column": 26
+        "line": 41,
+        "column": 74
+      }
+    },
+    {
+      "id": "e3c907aa2ae798f-596e67cf4a28a72",
+      "title": "Rule changed EBT telemetry reports a rule created from Discover with the discover app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/ebt_telemetry.spec.ts",
+        "line": 71,
+        "column": 15
+      }
+    },
+    {
+      "id": "e3c907aa2ae798f-49e30c8475ba2b6",
+      "title": "Rule changed EBT telemetry reports a rule created from the rules list with the observabilityAlerting app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/ebt_telemetry.spec.ts",
+        "line": 99,
+        "column": 23
       }
     },
     {
@@ -88,12 +122,12 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/esql_rule_flyout_validation.spec.ts",
-        "line": 25,
-        "column": 41
+        "line": 29,
+        "column": 25
       }
     },
     {
@@ -102,12 +136,54 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/esql_rule_flyout_validation.spec.ts",
-        "line": 38,
-        "column": 24
+        "line": 46,
+        "column": 13
+      }
+    },
+    {
+      "id": "b470088e3702fe3-96ce193baa9f2e9",
+      "title": "Rule library - install a rule template lists every installed v2 template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/install_rule_template.spec.ts",
+        "line": 64,
+        "column": 56
+      }
+    },
+    {
+      "id": "b470088e3702fe3-226855ce3d4b15e",
+      "title": "Rule library - install a rule template creating from a template opens the flyout and creates a rule",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/install_rule_template.spec.ts",
+        "line": 70,
+        "column": 56
+      }
+    },
+    {
+      "id": "b470088e3702fe3-1d2597bde6b013c",
+      "title": "Rule library - install a rule template the rule count links to the rules created from the template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/install_rule_template.spec.ts",
+        "line": 135,
+        "column": 13
       }
     },
     {
@@ -115,12 +191,13 @@
       "title": "Rule Builder — threshold create and edit flows create flow: configure threshold builder and submit",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 54,
-        "column": 38
+        "line": 60,
+        "column": 46
       }
     },
     {
@@ -128,12 +205,13 @@
       "title": "Rule Builder — threshold create and edit flows edit flow: open builder-created rule and modify",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 115,
-        "column": 13
+        "line": 140,
+        "column": 77
       }
     },
     {
@@ -141,24 +219,26 @@
       "title": "Rule Builder — threshold create and edit flows permissions: viewer role cannot access create flow",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 169,
-        "column": 26
+        "line": 185,
+        "column": 9
       }
     },
     {
-      "id": "9c1881f2135d817-686926d85ee73c5",
-      "title": "Rule Builder — threshold create and edit flows builder-to-esql: rule without builder_type opens in ES|QL mode",
+      "id": "9c1881f2135d817-4c4c58a6af68be9",
+      "title": "Rule Builder — threshold create and edit flows builder-to-esql: rule without builder metadata opens in ES|QL mode",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 182,
+        "line": 203,
         "column": 12
       }
     },
@@ -167,12 +247,13 @@
       "title": "Rule Builder — threshold create and edit flows builder-to-esql: unparseable query shows confirmation modal",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 228,
-        "column": 51
+        "line": 248,
+        "column": 26
       }
     },
     {
@@ -180,12 +261,13 @@
       "title": "Rule Builder — threshold create and edit flows builder-to-esql: switch toggle shows confirmation modal",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_builder_threshold.spec.ts",
-        "line": 264,
-        "column": 21
+        "line": 285,
+        "column": 88
       }
     },
     {
@@ -193,12 +275,13 @@
       "title": "Rule name validation — Discover flyout opens rule form flyout and displays default placeholder name",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 44,
-        "column": 41
+        "line": 42,
+        "column": 76
       }
     },
     {
@@ -206,12 +289,13 @@
       "title": "Rule name validation — Discover flyout shows validation error when saving flyout with empty default name",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 48,
-        "column": 8
+        "line": 49,
+        "column": 7
       }
     },
     {
@@ -219,12 +303,27 @@
       "title": "Rule name validation — Discover flyout error callout scrolls into view in flyout on failed submission",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_name_validation_flyout.spec.ts",
-        "line": 58,
-        "column": 5
+        "line": 61,
+        "column": 25
+      }
+    },
+    {
+      "id": "516c7c0e6a63cda-5cfaaa8b9382bbe",
+      "title": "Rule routing tags — edit via ES|QL form replacing routing tags on the Actions step persists them and leaves tags alone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_routing_tags_edit.spec.ts",
+        "line": 53,
+        "column": 22
       }
     },
     {
@@ -232,12 +331,13 @@
       "title": "Rule tags — edit via ES|QL form removing all tags persists (does not restore the old tags)",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rule_tags_edit.spec.ts",
-        "line": 51,
-        "column": 34
+        "line": 59,
+        "column": 22
       }
     },
     {
@@ -245,12 +345,13 @@
       "title": "Rules list bulk actions respect active filters bulk disable applies only to rules matching the list filter, not the full space",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rules_list_bulk_respects_filters.spec.ts",
         "line": 43,
-        "column": 28
+        "column": 18
       }
     },
     {
@@ -258,12 +359,13 @@
       "title": "Rules list - read/write privileges editor can create rules and toggle enabled",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rules_list_privileges.spec.ts",
-        "line": 31,
-        "column": 6
+        "line": 37,
+        "column": 46
       }
     },
     {
@@ -271,12 +373,13 @@
       "title": "Rules list - read/write privileges read-only user cannot create rules or toggle enabled",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rules_list_privileges.spec.ts",
-        "line": 37,
-        "column": 5
+        "line": 43,
+        "column": 25
       }
     },
     {
@@ -285,13 +388,11 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rules_list_tabs_privileges.spec.ts",
-        "line": 20,
+        "line": 19,
         "column": 10
       }
     },
@@ -301,13 +402,11 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-search",
-        "@cloud-serverless-search"
+        "@local-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/rules_list_tabs_privileges.spec.ts",
-        "line": 27,
+        "line": 26,
         "column": 13
       }
     }

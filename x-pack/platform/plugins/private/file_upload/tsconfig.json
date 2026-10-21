@@ -20,6 +20,7 @@
     "@kbn/file-upload-common",
     "@kbn/test-jest-helpers",
     "@kbn/ui-callout",
+    "@kbn/code-editor-mock",
   ],
   "exclude": [
     "target/**/*",

@@ -14,7 +14,7 @@
  *   version: 1
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 export const ListOnlineScoresRequestQuery = lazySchema(() =>
   z.object({
@@ -31,7 +31,7 @@ export const ListOnlineScoresResponse = lazySchema(() =>
     total: z.number().int(),
     data: z.array(
       z.object({
-        '@timestamp': z.string().datetime(),
+        '@timestamp': isoDateTime(),
         monitor: z.object({
           id: z.string().max(1024),
           name: z.string().max(256),

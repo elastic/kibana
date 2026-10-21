@@ -26,6 +26,7 @@ import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+  GEN_AI_SETTINGS_INFERENCE_STREAMING,
 } from '@kbn/management-settings-ids';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
@@ -34,6 +35,7 @@ const READ_ONLY_SETTINGS: string[] = [
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+  GEN_AI_SETTINGS_INFERENCE_STREAMING,
   AGENT_BUILDER_NAV_ENABLED_SETTING_ID,
   AI_CHAT_EXPERIENCE_TYPE,
   AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS,
@@ -84,7 +86,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         }
         it('renders ' + settingId + ' edit field', async () => {
           const fieldTestSubj = 'management-settings-editField-' + settingId;
-          expect(await testSubjects.exists(fieldTestSubj)).to.be(true);
+          await testSubjects.existOrFail(fieldTestSubj, { timeout: 5000 });
         });
       }
     });

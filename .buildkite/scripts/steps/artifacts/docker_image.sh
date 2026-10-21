@@ -2,6 +2,9 @@
 
 set -euo pipefail
 
+# node scripts/build rebuilds the shared webpack bundles without the remote cache
+export KBN_BOOTSTRAP_NO_PREBUILT=true
+
 .buildkite/scripts/bootstrap.sh
 
 source .buildkite/scripts/steps/artifacts/env.sh
@@ -30,20 +33,23 @@ check_cdn_assets_ready() {
 echo "--- Clean up cached images"
 clean_cached_images
 
-KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
-export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+# node scripts/build always names the image kibana-ci/kibana-serverless, PR pipelines push it to kibana-serverless-pr
+BUILD_OUTPUT_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless:$KIBANA_IMAGE_TAG"
+KIBANA_PUSH_REPOSITORY="$(kibana_ci_image_repository kibana-serverless)"
+export KIBANA_IMAGE="$KIBANA_PUSH_REPOSITORY:$KIBANA_IMAGE_TAG"
 
 retag_image_with_architecture() {
-  local image="$1"
-  local artifact="$2"
+  local build_output_image="$1"
+  local target_image="$2"
+  local artifact="$3"
 
-  docker rmi "$image" || true
+  docker rmi "$build_output_image" || true
   docker load < "target/${artifact}-amd64.tar.gz"
-  docker tag "$image" "$image-amd64"
+  docker tag "$build_output_image" "$target_image-amd64"
 
-  docker rmi "$image" || true
+  docker rmi "$build_output_image" || true
   docker load < "target/${artifact}-arm64.tar.gz"
-  docker tag "$image" "$image-arm64"
+  docker tag "$build_output_image" "$target_image-arm64"
 }
 
 create_and_push_manifest() {
@@ -96,7 +102,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
     --docker-tag="$KIBANA_IMAGE_TAG"
 
   echo "--- Tag images"
-  retag_image_with_architecture "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$BUILD_OUTPUT_IMAGE" "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
 
   echo "--- Push images"
   docker_with_retry push "$KIBANA_IMAGE-arm64"
@@ -107,7 +113,7 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
 
   # Update latest tags when building off main
   if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
-    docker buildx imagetools create -t "$KIBANA_BASE_IMAGE:latest" "$KIBANA_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_PUSH_REPOSITORY:latest" "$KIBANA_IMAGE"
   fi
 
   echo "--- Build dependencies report"
@@ -170,6 +176,21 @@ EOF
 if [[ "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
   buildkite-agent meta-data set pr_comment:build_serverless:head "* Kibana Serverless Image: \`$KIBANA_IMAGE\`"
   buildkite-agent meta-data set pr_comment:early_comment_job_id "$BUILDKITE_JOB_ID"
+fi
+
+# Publish the workflow step-schema artifact to the rolling serverless CDN path
+# on every main-branch image promotion. This runs before the image-tag-update
+# trigger so that a Vault or GCS failure does not block the trigger upload.
+if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+  echo "--- Publish workflow step schema to CDN"
+  if [[ "${DRY_RUN:-false}" == "true" ]]; then
+    echo "DRY_RUN enabled — skipping workflow step schema CDN publish"
+  elif ! (cd "$(git rev-parse --show-toplevel)" && .buildkite/scripts/steps/workflow_step_schema/publish_schema.sh serverless); then
+    echo "^^^ Workflow step schema CDN publish failed; continuing so the image-tag-update trigger is not blocked."
+    buildkite-agent annotate \
+      "**Workflow step schema CDN publish (serverless) failed.** The schema at https://workflows.elastic.co/schema/v1/serverless may be stale. Check the job log for details." \
+      --style warning --context workflow-schema-cdn
+  fi
 fi
 
 # This part is related with updating the configuration of kibana-controller,

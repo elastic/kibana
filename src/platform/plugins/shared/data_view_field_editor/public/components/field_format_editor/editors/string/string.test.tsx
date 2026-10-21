@@ -11,7 +11,7 @@ import React from 'react';
 import { createFieldFormatMock } from '../test_utils';
 import { formatId } from './constants';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { StringFormatEditor } from './string';
 
 const fieldType = 'string';
@@ -26,6 +26,26 @@ const format = createFieldFormatMock({
       {
         kind: 'upper',
         text: 'Upper Case',
+      },
+      {
+        kind: 'lower',
+        text: 'Lower Case',
+      },
+      {
+        kind: 'title',
+        text: 'Title Case',
+      },
+      {
+        kind: 'short',
+        text: 'Short Dots',
+      },
+      {
+        kind: 'base64',
+        text: 'Base64 Decode',
+      },
+      {
+        kind: 'urlparam',
+        text: 'URL Param Decode',
       },
     ],
   },
@@ -62,4 +82,17 @@ describe('StringFormatEditor', () => {
     expect(screen.getByText('A Quick Brown Fox.')).toBeVisible();
     expect(screen.getByText('A QUICK BROWN FOX.')).toBeVisible();
   });
+
+  it.each(['upper', 'lower', 'title', 'short', 'base64', 'urlparam'])(
+    'should fire change with the %s transform when it is selected',
+    (transform) => {
+      renderStringFormatEditor();
+
+      fireEvent.change(screen.getByTestId('stringEditorTransform'), {
+        target: { value: transform },
+      });
+
+      expect(onChange).toHaveBeenLastCalledWith({ transform });
+    }
+  );
 });

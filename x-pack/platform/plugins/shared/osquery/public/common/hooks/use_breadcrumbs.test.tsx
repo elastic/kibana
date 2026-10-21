@@ -37,6 +37,20 @@ describe('useBreadcrumbs', () => {
     jest.clearAllMocks();
   });
 
+  describe('pack_add', () => {
+    it('should end with "Create" to match the Create pack page title', () => {
+      renderHook(() => useBreadcrumbs('pack_add'));
+
+      expect(lastBreadcrumbText()).toBe('Create');
+    });
+
+    it('should set the doc title to "Create - Packs - Osquery"', () => {
+      renderHook(() => useBreadcrumbs('pack_add'));
+
+      expect(mockDocTitleChange).toHaveBeenLastCalledWith(['Create', 'Packs', 'Osquery']);
+    });
+  });
+
   describe('pack_edit', () => {
     it('should end with "Edit" when the user can write packs', () => {
       renderHook(() => useBreadcrumbs('pack_edit', { packName: 'my-pack', isReadOnly: false }));

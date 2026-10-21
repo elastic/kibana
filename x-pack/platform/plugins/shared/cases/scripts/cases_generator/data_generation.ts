@@ -227,7 +227,7 @@ export function generateObservabilityAlert(alertNum: number, ctx: DocGeneratorCo
 
 // Builds a single ECS-style process event document ready for ES bulk
 // indexing into the endpoint events data stream. Called by bulkIndexEvents to
-// produce the pool of events that get attached to non-observability cases.
+// produce the pool of events that get attached to securitySolution cases.
 export function generateProcessEvent(ctx: DocGeneratorContext) {
   const now = new Date();
   const eventId = uuidv4();

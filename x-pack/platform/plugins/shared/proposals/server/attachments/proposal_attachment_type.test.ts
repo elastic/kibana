@@ -22,14 +22,14 @@ const proposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWithMe
   id: 'proposal-1',
   spaceId: SPACE_ID,
   conversationId: 'conv-1',
+  title: 'Tune the noisy rule',
   comment: 'Tune the noisy rule',
   status: 'pending',
   impact: 'high',
   confidence: 'high',
   category: 'configure',
-  origin: 'worker',
+  origin: 'alertzero',
   createdAt: '2026-09-01T00:00:00.000Z',
-  expired: false,
   ...overrides,
 });
 
@@ -80,13 +80,12 @@ describe('proposalAttachmentType', () => {
   });
 
   describe('validate', () => {
-    it('should accept a bare proposal id', () => {
+    // The label is rendered synchronously, so an attachment without one has
+    // nothing to show — and `create()` always resolves a title to write here.
+    it('should reject a bare proposal id, with no title to label the card', () => {
       const { type } = createType();
 
-      expect(type.validate({ proposalId: 'proposal-1' })).toEqual({
-        valid: true,
-        data: { proposalId: 'proposal-1' },
-      });
+      expect(type.validate({ proposalId: 'proposal-1' })).toMatchObject({ valid: false });
     });
 
     // The only thing the synchronous card label has to go on, so it is the one
@@ -110,29 +109,90 @@ describe('proposalAttachmentType', () => {
   });
 
   describe('format', () => {
+    it.each<Partial<ProposalWithMetadata>>([
+      { status: 'pending' },
+      { status: 'superseded', supersededBy: 'proposal-2' },
+      { status: 'failed', decision: 'approved', supersededBy: 'proposal-2' },
+    ])('exposes its own proposal ID to the agent: %j', async (overrides) => {
+      const { type, get } = createType();
+      get.mockResolvedValue(proposal(overrides));
+
+      expect(await represent(type)).toEqual({
+        type: 'text',
+        value: expect.stringContaining('Proposal ID: proposal-1'),
+      });
+    });
+
+    it('exposes complete revision content and history without storage bookkeeping', async () => {
+      const { type, get } = createType();
+      const comment =
+        '**Create a rule**\n\nKeep this rationale and disabled-rule warning.\n\n| Index | `logs*` |';
+      const actionInput = {
+        name: 'Repeated failed logons',
+        index: ['logs*'],
+        query: 'event.category:authentication',
+        severity: 'medium',
+        risk_score: 47,
+        settings: { enabled: false },
+      };
+      get.mockResolvedValue(
+        proposal({
+          rootProposalId: 'root-1',
+          revision: 2,
+          supersedes: 'root-1',
+          supersededBy: 'proposal-3',
+          status: 'superseded',
+          comment,
+          actionInput,
+          actionWorkflowId: 'create-rule',
+          workflowExecutionId: 'internal-execution',
+          executionError: 'Previous execution failed',
+          decidedBy: { username: 'analyst', fullName: null, email: null },
+        })
+      );
+
+      const representation = await represent(type);
+      if (representation.type !== 'text') {
+        throw new Error('expected text representation');
+      }
+      const data = JSON.parse(representation.value.slice(representation.value.indexOf('{')));
+      expect(data).toMatchObject({
+        id: 'proposal-1',
+        rootProposalId: 'root-1',
+        revision: 2,
+        supersedes: 'root-1',
+        supersededBy: 'proposal-3',
+        status: 'superseded',
+        expired: false,
+        comment,
+        actionInput,
+        actionWorkflowId: 'create-rule',
+        executionError: 'Previous execution failed',
+        decidedBy: { username: 'analyst' },
+      });
+      expect(data).not.toHaveProperty('spaceId');
+      expect(data).not.toHaveProperty('conversationId');
+      expect(data).not.toHaveProperty('workflowExecutionId');
+    });
+
     it('should describe the proposal as it is now, not as it was attached', async () => {
       const { type, get } = createType();
       get.mockResolvedValue(proposal({ status: 'no_action', decision: 'dismissed' }));
 
       const representation = await represent(type);
 
-      expect(get).toHaveBeenCalledWith('proposal-1', SPACE_ID);
+      expect(get).toHaveBeenCalledWith('proposal-1', SPACE_ID, REQUEST);
       expect(representation).toEqual({
         type: 'text',
         value: expect.stringContaining('Status: no_action'),
       });
     });
 
-    // Reachable on every read now that `expired` is evaluated live: saying a
-    // decision was pending underneath the expiry banner contradicted it, and
-    // dropped the "do not decide this yourself" instruction exactly where it
-    // matters most.
-    it.each([
-      ['the deadline has passed', proposal({ status: 'pending', expired: true })],
-      ['the gate settled it as expired', proposal({ status: 'expired', expired: false })],
-    ])('should not report a pending decision when %s', async (_, expiredProposal) => {
+    // Saying a decision was pending underneath the expiry banner contradicted it, and dropped the
+    // "do not decide this yourself" instruction exactly where it matters most.
+    it('should not report a pending decision once the gate settles the proposal as expired', async () => {
       const { type, get } = createType();
-      get.mockResolvedValue(expiredProposal);
+      get.mockResolvedValue(proposal({ status: 'expired' }));
 
       const { value } = (await represent(type)) as { value: string };
 
@@ -144,12 +204,49 @@ describe('proposalAttachmentType', () => {
       expect(value).not.toContain('deadline has passed');
     });
 
+    it.each<Partial<ProposalWithMetadata>>([
+      { status: 'superseded', supersededBy: 'proposal-2' },
+      { status: 'failed', decision: 'approved', supersededBy: 'proposal-2' },
+      { status: 'pending', supersededBy: 'proposal-2' },
+      { status: 'expired', supersededBy: 'proposal-2' },
+      { status: 'superseded' },
+    ])('describes replaced proposals as historical: %j', async (overrides) => {
+      const { type, get } = createType();
+      get.mockResolvedValue(proposal(overrides));
+
+      const representation = await represent(type);
+      expect(representation).toEqual({
+        type: 'text',
+        value: expect.stringContaining(
+          'REPLACED: this proposal is historical and cannot be acted on.'
+        ),
+      });
+      expect(representation).toEqual({
+        type: 'text',
+        value: expect.not.stringContaining('Awaiting a human decision'),
+      });
+      if (overrides.supersededBy) {
+        expect(representation).toEqual({
+          type: 'text',
+          value: expect.stringContaining('Replacement proposal ID: proposal-2.'),
+        });
+      }
+      expect(get).toHaveBeenCalledTimes(1);
+      expect(get).toHaveBeenCalledWith('proposal-1', SPACE_ID, REQUEST);
+    });
+
     it('should read the id from the payload when the attachment has no origin', async () => {
       const { type, get } = createType();
 
-      await represent(type, attachment({ origin: undefined, data: { proposalId: 'proposal-9' } }));
+      await represent(
+        type,
+        attachment({
+          origin: undefined,
+          data: { proposalId: 'proposal-9', title: 'Tune the noisy rule' },
+        })
+      );
 
-      expect(get).toHaveBeenCalledWith('proposal-9', SPACE_ID);
+      expect(get).toHaveBeenCalledWith('proposal-9', SPACE_ID, REQUEST);
     });
 
     // The service reads as the internal user, and the public attachment API

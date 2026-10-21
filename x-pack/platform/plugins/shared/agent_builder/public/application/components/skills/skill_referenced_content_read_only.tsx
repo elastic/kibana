@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiIcon,
   EuiMarkdownFormat,
+  EuiPanel,
   EuiSpacer,
   EuiText,
   useGeneratedHtmlId,
@@ -32,32 +33,33 @@ const ReadOnlyFileRow: React.FC<ReadOnlyFileRowProps> = ({ item, index }) => {
   const displayName = getReferencedFileDisplayName(item.name);
 
   return (
-    <EuiAccordion
-      id={accordionId}
-      buttonContent={
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiIcon type="document" color="subdued" aria-hidden={true} />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">{displayName}</EuiText>
-            <EuiText size="xs" color="subdued">
-              {labels.skills.referencedFileSection.compactTokenCount(tokenCount)}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      }
-      buttonProps={{
-        'aria-label':
-          labels.skills.referencedFileSection.readOnlyFileAccordionAriaLabel(displayName),
-      }}
-      paddingSize="m"
-      borders="all"
-      arrowDisplay="right"
-      data-test-subj={`agentBuilderSkillReferencedContentReadOnlyAccordion-${index}`}
-    >
-      <EuiMarkdownFormat textSize="s">{item.content}</EuiMarkdownFormat>
-    </EuiAccordion>
+    <EuiPanel hasBorder hasShadow={false} borderRadius="m" paddingSize="s">
+      <EuiAccordion
+        id={accordionId}
+        buttonContent={
+          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="document" color="subdued" aria-hidden={true} />
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText size="s">{displayName}</EuiText>
+              <EuiText size="xs" color="subdued">
+                {labels.skills.referencedFileSection.compactTokenCount(tokenCount)}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+        buttonProps={{
+          'aria-label':
+            labels.skills.referencedFileSection.readOnlyFileAccordionAriaLabel(displayName),
+        }}
+        paddingSize="none"
+        arrowDisplay="right"
+        data-test-subj={`agentBuilderSkillReferencedContentReadOnlyAccordion-${index}`}
+      >
+        <EuiMarkdownFormat textSize="s">{item.content}</EuiMarkdownFormat>
+      </EuiAccordion>
+    </EuiPanel>
   );
 };
 

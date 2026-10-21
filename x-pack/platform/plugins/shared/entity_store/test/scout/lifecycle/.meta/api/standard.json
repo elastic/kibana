@@ -1,5 +1,5 @@
 {
-  "sha1": "5c758cbfcae2fa44db7146e340de3acca1ce4678",
+  "sha1": "02adeb942631ef2e812532bd3417ff07b91f3f5c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -421,8 +421,8 @@
       }
     },
     {
-      "id": "d1ac35cbfabb8dd-79b9321af5a6eda",
-      "title": "Entity Store install / update API tests Should fail with feature flag disabled",
+      "id": "d1ac35cbfabb8dd-a600fdc9000f15c",
+      "title": "Entity Store install / update API tests logExtraction is not mandatory on install",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -437,22 +437,6 @@
       }
     },
     {
-      "id": "d1ac35cbfabb8dd-a600fdc9000f15c",
-      "title": "Entity Store install / update API tests logExtraction is not mandatory on install",
-      "expectedStatus": "passed",
-      "tags": [
-        "@local-stateful-classic",
-        "@cloud-stateful-classic",
-        "@local-serverless-security_complete",
-        "@cloud-serverless-security_complete"
-      ],
-      "location": {
-        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 81,
-        "column": 14
-      }
-    },
-    {
       "id": "d1ac35cbfabb8dd-a0ba708820e1b70",
       "title": "Entity Store install / update API tests Update on uninstalled store should return 404",
       "expectedStatus": "passed",
@@ -464,13 +448,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 92,
-        "column": 14
+        "line": 83,
+        "column": 4
       }
     },
     {
-      "id": "d1ac35cbfabb8dd-1e886910e4426bc",
-      "title": "Entity Store install / update API tests logExtraction is mandatory on update",
+      "id": "d1ac35cbfabb8dd-5b6b2505dad5ad0",
+      "title": "Entity Store install / update API tests update requires logExtraction or historySnapshot",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -480,8 +464,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 109,
-        "column": 7
+        "line": 100,
+        "column": 69
       }
     },
     {
@@ -496,8 +480,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 123,
-        "column": 7
+        "line": 115,
+        "column": 11
+      }
+    },
+    {
+      "id": "d1ac35cbfabb8dd-9cf44f270656754",
+      "title": "Entity Store install / update API tests Update should change history snapshot interval and retention",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
+        "line": 145,
+        "column": 21
+      }
+    },
+    {
+      "id": "d1ac35cbfabb8dd-b78646e6d164755",
+      "title": "Entity Store install / update API tests update rejects a history snapshot interval shorter than 1 hour",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
+        "line": 249,
+        "column": 15
       }
     },
     {
@@ -512,8 +528,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 153,
-        "column": 7
+        "line": 257,
+        "column": 13
       }
     },
     {
@@ -528,8 +544,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 160,
-        "column": 12
+        "line": 267,
+        "column": 13
       }
     },
     {
@@ -544,8 +560,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 172,
-        "column": 16
+        "line": 280,
+        "column": 22
       }
     },
     {
@@ -560,13 +576,13 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/install_update.spec.ts",
-        "line": 181,
-        "column": 21
+        "line": 287,
+        "column": 4
       }
     },
     {
-      "id": "46bb8a3a58b1410-b5ad2fd90b66e1d",
-      "title": "Entity Store per entity-type log extraction config reports identical config for every engine when nothing is overridden",
+      "id": "46bb8a3a58b1410-f5452522a797eca",
+      "title": "Entity Store per entity-type log extraction config reports identical non-cadence config for every engine, and the built-in cadence per type, when nothing is overridden",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -576,8 +592,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
-        "line": 54,
-        "column": 60
+        "line": 102,
+        "column": 7
       }
     },
     {
@@ -592,8 +608,72 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
-        "line": 69,
-        "column": 32
+        "line": 121,
+        "column": 16
+      }
+    },
+    {
+      "id": "46bb8a3a58b1410-5a6592634e3dc68",
+      "title": "Entity Store per entity-type log extraction config sets a per-type override without the dual-process flag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
+        "line": 135,
+        "column": 67
+      }
+    },
+    {
+      "id": "46bb8a3a58b1410-6d9fc5993a41e7f",
+      "title": "Entity Store per entity-type log extraction config rejects nonPriorityOverride without the dual-process flag",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
+        "line": 151,
+        "column": 68
+      }
+    },
+    {
+      "id": "46bb8a3a58b1410-d4064322640759e",
+      "title": "Entity Store per entity-type log extraction config a per-type index pattern list replaces the store-wide one and survives store-wide updates",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
+        "line": 163,
+        "column": 96
+      }
+    },
+    {
+      "id": "46bb8a3a58b1410-eeedf0c28bc96d3",
+      "title": "Entity Store per entity-type log extraction config a store-wide exclusion removes the same pattern added by a per-type override",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/log_extraction_by_type.spec.ts",
+        "line": 213,
+        "column": 23
       }
     },
     {
@@ -626,6 +706,262 @@
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/metadata_data_stream.spec.ts",
         "line": 54,
         "column": 17
+      }
+    },
+    {
+      "id": "7464d46f8495c10-f9063a3c6e27b2c",
+      "title": "Entity Store per-process configuration and control stores a non-priority override and reports it on status",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 100,
+        "column": 7
+      }
+    },
+    {
+      "id": "7464d46f8495c10-4ce7f39facedb26",
+      "title": "Entity Store per-process configuration and control reports the config each process resolves",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 107,
+        "column": 25
+      }
+    },
+    {
+      "id": "7464d46f8495c10-fa25591aad9c759",
+      "title": "Entity Store per-process configuration and control a later global update does not clear the per-type override",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 135,
+        "column": 84
+      }
+    },
+    {
+      "id": "7464d46f8495c10-13d8fb09cb518f0",
+      "title": "Entity Store per-process configuration and control null clears one field and leaves the rest alone",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 162,
+        "column": 18
+      }
+    },
+    {
+      "id": "7464d46f8495c10-3086f67c8d4e92a",
+      "title": "Entity Store per-process configuration and control rejects a sampling rate outside [0.1, 1]",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 177,
+        "column": 32
+      }
+    },
+    {
+      "id": "7464d46f8495c10-8fb2952be30c57c",
+      "title": "Entity Store per-process configuration and control stopping the non-priority process leaves the priority task scheduled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 181,
+        "column": 89
+      }
+    },
+    {
+      "id": "7464d46f8495c10-25f115a3c77751c",
+      "title": "Entity Store per-process configuration and control starting the non-priority process reschedules only its task",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 197,
+        "column": 13
+      }
+    },
+    {
+      "id": "7464d46f8495c10-644d2ec7e4b64e5",
+      "title": "Entity Store per-process configuration and control rejects a non-priority request for a type without that process",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 218,
+        "column": 16
+      }
+    },
+    {
+      "id": "7464d46f8495c10-25d3d74aed332e5",
+      "title": "Entity Store per-process configuration and control acts on the gated types when no entity types are given",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 230,
+        "column": 33
+      }
+    },
+    {
+      "id": "7464d46f8495c10-1564505db0833b5",
+      "title": "Entity Store per-process configuration and control runs a forced extraction as the requested process",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 240,
+        "column": 16
+      }
+    },
+    {
+      "id": "7464d46f8495c10-b9b534b02eb8f97",
+      "title": "Entity Store per-process configuration and control runs both processes in one forced extraction",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 254,
+        "column": 16
+      }
+    },
+    {
+      "id": "7464d46f8495c10-9c725821c35df78",
+      "title": "Entity Store per-process configuration and control rejects running all processes for a type with one",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 266,
+        "column": 17
+      }
+    },
+    {
+      "id": "7464d46f8495c10-d3769cc1dbcbd66",
+      "title": "Entity Store per-process configuration and control rejects a forced extraction process the type does not run",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 275,
+        "column": 13
+      }
+    },
+    {
+      "id": "7464d46f8495c10-beb169116b559c5",
+      "title": "Entity Store per-process configuration and control does not serve start with the dual-process flag off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 301,
+        "column": 24
+      }
+    },
+    {
+      "id": "7464d46f8495c10-ba8b32690c74535",
+      "title": "Entity Store per-process configuration and control does not serve stop with the dual-process flag off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 323,
+        "column": 24
+      }
+    },
+    {
+      "id": "7464d46f8495c10-89feea28f7669bd",
+      "title": "Entity Store per-process configuration and control still serves the per-type config route with the flag off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
+        "line": 361,
+        "column": 24
       }
     },
     {
