@@ -9,12 +9,8 @@
 
 import type { EvalsSuiteMetadataEntry } from '../../../pipelines/evals/eval_pipeline.ts';
 import { NO_SUGGESTIONS_BODY } from '../../../pipelines/evals/evals_suggestions_comment.ts';
-import {
-  getSuggestionLabels,
-  parseCommentAuthors,
-  resolveSuggestionsMode,
-  runSuggestEvals,
-} from './suggest_evals.ts';
+import { EVALS_SUGGESTIONS_LABEL } from '../../../pipeline-utils/step-library/steps/evals_suggestions.ts';
+import { getSuggestionLabels, resolveSuggestionsMode, runSuggestEvals } from './suggest_evals.ts';
 
 jest.mock('#pipeline-utils', () => ({
   upsertComment: jest.fn(),
@@ -31,6 +27,9 @@ const SUITES: EvalsSuiteMetadataEntry[] = [
     coverage: { include: ['plugin/ab/server/**'] },
   },
 ];
+
+// Opting in with this label is what allows a comment on a PR.
+const OPT_IN = EVALS_SUGGESTIONS_LABEL;
 
 const MATCHING = [{ filename: 'plugin/ab/server/prompt.ts' }];
 const UNRELATED = [{ filename: 'src/other/file.ts' }];
@@ -53,10 +52,8 @@ describe('suggest_evals', () => {
     runSuggestEvals({
       changes,
       suites: SUITES,
-      labels: [],
+      labels: [OPT_IN],
       mode,
-      prAuthor: 'me',
-      commentAuthors: ['me'],
       upsert,
       annotate,
     });
@@ -87,64 +84,43 @@ describe('suggest_evals', () => {
     });
   });
 
-  describe('the comment author allowlist', () => {
-    const runAs = (prAuthor: string | undefined, commentAuthors: string[]) =>
+  describe('the opt-in label', () => {
+    const runWith = (labels: string[], changes = MATCHING) =>
       runSuggestEvals({
-        changes: MATCHING,
+        changes,
         suites: SUITES,
-        labels: [],
+        labels,
         mode: 'comment',
-        prAuthor,
-        commentAuthors,
         upsert,
         annotate,
       });
 
-    it('comments on a PR by an allowlisted author, ignoring case', async () => {
-      await runAs('Enrique-Dev', ['enrique-dev']);
+    it('is the documented label name', () => {
+      expect(EVALS_SUGGESTIONS_LABEL).toBe('ci:evals-suggestions');
+    });
+
+    it('allows a comment when it is present among other labels', async () => {
+      await runWith(['Team:Foo', OPT_IN, 'release_note:skip']);
 
       expect(upsert).toHaveBeenCalledTimes(1);
       expect(annotate).not.toHaveBeenCalled();
     });
 
     it.each([
-      ['an author who is not allowlisted', 'someone-else', ['enrique-dev']],
-      ['an empty allowlist', 'enrique-dev', []],
-      ['an unknown author', undefined, ['enrique-dev']],
-    ])(
-      'never comments for %s, and only annotates the build instead',
-      async (_name, author, allowed) => {
-        await runAs(author, allowed);
-
-        expect(upsert).not.toHaveBeenCalled();
-        expect(annotate).toHaveBeenCalledTimes(1);
-      }
-    );
-
-    it('does not even clear a comment on a PR that is not allowlisted', async () => {
-      await runSuggestEvals({
-        changes: [{ filename: 'src/other/file.ts' }],
-        suites: SUITES,
-        labels: [],
-        mode: 'comment',
-        prAuthor: 'someone-else',
-        commentAuthors: ['enrique-dev'],
-        upsert,
-        annotate,
-      });
+      ['no labels', []],
+      ['only unrelated labels', ['Team:Foo', 'evals:agent-builder']],
+      ['a similar but different label', ['ci:evals-suggestions-later']],
+    ])('never comments with %s, and only annotates the build instead', async (_name, labels) => {
+      await runWith(labels);
 
       expect(upsert).not.toHaveBeenCalled();
+      expect(annotate).toHaveBeenCalledTimes(1);
     });
-  });
 
-  describe('parseCommentAuthors', () => {
-    it.each([
-      [undefined, []],
-      ['', []],
-      ['a', ['a']],
-      [' Alice , bob,, ', ['alice', 'bob']],
-    ])('parses %j', (value, expected) => {
-      expect(parseCommentAuthors(value)).toEqual(expected);
+    it('does not even clear a comment when the label is missing', async () => {
+      await runWith([], UNRELATED);
+
+      expect(upsert).not.toHaveBeenCalled();
     });
   });
 
@@ -173,11 +149,9 @@ describe('suggest_evals', () => {
     await runSuggestEvals({
       changes: [{ filename: 'plugin/platform/server/skills/group/one/reference.md' }],
       suites: skillSuites,
-      labels: [],
+      labels: [OPT_IN],
       skillDirs: ['plugin/platform/server/skills/group/one'],
       mode: 'comment',
-      prAuthor: 'me',
-      commentAuthors: ['me'],
       upsert,
       annotate,
     });
@@ -191,11 +165,9 @@ describe('suggest_evals', () => {
     await runSuggestEvals({
       changes: [{ filename: 'plugin/o/skills/a/a.skill.md.text' }],
       suites: SUITES,
-      labels: [],
+      labels: [OPT_IN],
       baseBranch: '9.4',
       mode: 'comment',
-      prAuthor: 'me',
-      commentAuthors: ['me'],
       upsert,
       annotate,
     });
@@ -245,10 +217,8 @@ describe('suggest_evals', () => {
       await runSuggestEvals({
         changes: MATCHING,
         suites: SUITES,
-        labels: getSuggestionLabels('evals:agent-builder,models:gpt 5'),
+        labels: getSuggestionLabels(`${OPT_IN},evals:agent-builder,models:gpt 5`),
         mode: 'comment',
-        prAuthor: 'me',
-        commentAuthors: ['me'],
         upsert,
         annotate,
       });

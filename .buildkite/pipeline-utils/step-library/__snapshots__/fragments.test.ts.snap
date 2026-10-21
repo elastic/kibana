@@ -786,7 +786,7 @@ exports[`pull_request fragments pull_request/evals_suggestions 1`] = `
       },
       "command": ".buildkite/scripts/steps/evals/suggest_evals.sh",
       "env": {
-        "EVALS_SUGGESTIONS_MODE": "dry-run",
+        "EVALS_SUGGESTIONS_MODE": "comment",
       },
       "key": "evals-suggestions",
       "label": "Suggest Evals",

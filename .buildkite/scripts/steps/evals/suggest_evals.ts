@@ -21,6 +21,7 @@ import {
   renderEvalSuggestionsComment,
 } from '../../../pipelines/evals/evals_suggestions_comment.ts';
 import { listSkillDirs } from '../../../pipelines/evals/skill_dirs.ts';
+import { EVALS_SUGGESTIONS_LABEL } from '../../../pipeline-utils/step-library/steps/evals_suggestions.ts';
 import { BuildkiteClient, getPrChangesCached, upsertComment } from '#pipeline-utils';
 
 /**
@@ -29,13 +30,6 @@ import { BuildkiteClient, getPrChangesCached, upsertComment } from '#pipeline-ut
  */
 export const getSuggestionLabels = (githubPrLabels: string): string[] =>
   getForwardablePrLabelList(githubPrLabels);
-
-/** Logins allowed to receive the comment, from a comma-separated env value. Lowercased. */
-export const parseCommentAuthors = (value: string | undefined): string[] =>
-  (value ?? '')
-    .split(',')
-    .map((login) => login.trim().toLowerCase())
-    .filter(Boolean);
 
 export type SuggestionsMode = 'dry-run' | 'comment';
 
@@ -51,9 +45,6 @@ interface RunSuggestEvalsArgs {
   /** The PR target branch, so the prompt can show the diff against it. */
   baseBranch?: string;
   mode: SuggestionsMode;
-  /** Login of the PR author. Comments are only ever posted on PRs by an allowlisted author. */
-  prAuthor?: string;
-  commentAuthors?: readonly string[];
   upsert: typeof upsertComment;
   annotate: (markdown: string) => void;
 }
@@ -66,8 +57,6 @@ export const runSuggestEvals = async ({
   skillDirs,
   baseBranch,
   mode: requestedMode,
-  prAuthor,
-  commentAuthors = [],
   upsert,
   annotate,
 }: RunSuggestEvalsArgs): Promise<void> => {
@@ -79,16 +68,12 @@ export const runSuggestEvals = async ({
       }
     );
 
-    // Commenting on other people's PRs is unwelcome while the tool is still being evaluated, so a
-    // comment is only ever posted for an allowlisted author. Everyone else gets the dry run.
-    const isAllowlisted = prAuthor !== undefined && commentAuthors.includes(prAuthor.toLowerCase());
-    const mode: SuggestionsMode =
-      requestedMode === 'comment' && isAllowlisted ? 'comment' : 'dry-run';
+    // A comment is only ever posted on a PR that opted in with the label, whatever the mode says.
+    const isOptedIn = labels.includes(EVALS_SUGGESTIONS_LABEL);
+    const mode: SuggestionsMode = requestedMode === 'comment' && isOptedIn ? 'comment' : 'dry-run';
     if (requestedMode === 'comment' && mode === 'dry-run') {
       console.log(
-        `Not commenting: the PR author ${
-          prAuthor ?? '(unknown)'
-        } is not in EVALS_SUGGESTIONS_COMMENT_AUTHORS; doing a dry run instead.`
+        `Not commenting: the PR does not have the ${EVALS_SUGGESTIONS_LABEL} label; doing a dry run instead.`
       );
     }
 
@@ -132,8 +117,6 @@ export const main = async (): Promise<void> => {
       skillDirs: listSkillDirs(),
       mode: resolveSuggestionsMode(process.env.EVALS_SUGGESTIONS_MODE),
       baseBranch: process.env.GITHUB_PR_TARGET_BRANCH,
-      prAuthor: process.env.GITHUB_PR_USER,
-      commentAuthors: parseCommentAuthors(process.env.EVALS_SUGGESTIONS_COMMENT_AUTHORS),
       upsert: upsertComment,
       annotate: (markdown) =>
         new BuildkiteClient().setAnnotation(EVALS_SUGGESTIONS_CONTEXT, 'info', markdown),
