@@ -39,6 +39,14 @@ describe('plain default messages', () => {
     expect(translate('plain', { defaultMessage: 'English default' })).toBe('English default');
   });
 
+  test.each([undefined, null])('handles an absent message map (%s)', (messages) => {
+    const translation = { locale: 'en', messages: {} };
+    Reflect.set(translation, 'messages', messages);
+    activateTranslation(translation);
+
+    expect(translate('plain', { defaultMessage: 'English default' })).toBe('English default');
+  });
+
   test.each([
     ['quoted brace', "A '{' brace", 'A { brace'],
     ['escaped apostrophe', "It''s ready", "It's ready"],

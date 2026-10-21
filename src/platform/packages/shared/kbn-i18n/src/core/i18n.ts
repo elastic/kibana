@@ -160,7 +160,7 @@ export function translate(
     if (
       typeof defaultMessage === 'string' &&
       intl.locale === intl.defaultLocale &&
-      !Object.prototype.hasOwnProperty.call(intl.messages, id) &&
+      (!intl.messages || !Object.prototype.hasOwnProperty.call(intl.messages, id)) &&
       !/[{}<>']/.test(defaultMessage)
     ) {
       return defaultMessage;
