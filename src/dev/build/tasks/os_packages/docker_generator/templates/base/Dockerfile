@@ -146,6 +146,9 @@ RUN /bin/echo -e '\nxpack.security.fipsMode.enabled: true' >> config/kibana.yml
 # Add the launcher/wrapper script. It knows how to interpret environment
 # variables and translate them to Kibana CLI options.
 COPY bin/kibana-docker /usr/local/bin/
+{{#serverless}}
+COPY bin/research-t7p-entry.sh /usr/local/bin/research-t7p-entry.sh
+{{/serverless}}
 
 # Ensure gid 0 write permissions for OpenShift.
 RUN chmod g+ws /usr/share/kibana && \

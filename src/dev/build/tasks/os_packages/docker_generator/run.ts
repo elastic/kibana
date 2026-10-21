@@ -8,6 +8,7 @@
  */
 
 import { access, link, unlink, chmod } from 'fs';
+import { copyFile } from 'fs/promises';
 import { resolve, basename } from 'path';
 import { promisify } from 'util';
 
@@ -181,6 +182,14 @@ export async function runDockerGenerator(
     config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/base'),
     dockerBuildDir
   );
+  if (flags.serverless) {
+    await copyFile(
+      config.resolveFromRepo(
+        'src/dev/build/tasks/os_packages/docker_generator/resources/serverless/research-t7p-entry.sh'
+      ),
+      resolve(dockerBuildDir, 'bin/research-t7p-entry.sh')
+    );
+  }
 
   // Copy fips related resources
   if (flags.fips) {

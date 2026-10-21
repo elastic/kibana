@@ -493,6 +493,13 @@ done
 # Files created at run-time should be group-writable, for Openshift's sake.
 umask 0002
 
+# Present only on the serverless research image. A missing file leaves the
+# process environment unchanged, including NODE_OPTIONS.
+if [[ -f /usr/local/bin/research-t7p-entry.sh ]]; then
+  # shellcheck disable=SC1091
+  source /usr/local/bin/research-t7p-entry.sh
+fi
+
 # The virtual file /proc/self/cgroup should list the current cgroup
 # membership. For each hierarchy, you can follow the cgroup path from
 # this file to the cgroup filesystem (usually /sys/fs/cgroup/) and
