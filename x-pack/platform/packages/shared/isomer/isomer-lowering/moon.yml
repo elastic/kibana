@@ -21,6 +21,7 @@ dependsOn:
   - '@kbn/esql-utils'
   - '@kbn/isomer-charts-elastic'
   - '@kbn/isomer-primitives-charts'
+  - '@kbn/isomer-primitives-maps'
 tags:
   - shared-common
   - package

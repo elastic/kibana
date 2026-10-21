@@ -47,7 +47,18 @@ export {
   convertDashboard,
 } from './convert';
 export { type BoundPanel, bindVegaPanels } from './vega_panels';
-export { bindMapPanels } from './map_panels';
+export {
+  basemapId,
+  bindMapPanels,
+  dataViewResolver,
+  type LoweredMap,
+  lowerMap,
+  type LowerMapOptions,
+  type MapLoweringOptions,
+  type MapDataView,
+  type MapPanelState,
+  type MapServices,
+} from './map_panels';
 export { engineHintFromLens } from './engine_hints';
 export {
   type DashboardContext,
