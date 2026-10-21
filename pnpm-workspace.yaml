@@ -720,6 +720,7 @@ packages:
   - 'src/platform/packages/shared/deeplinks/vectordb'
   - 'src/platform/packages/shared/deeplinks/workflows'
   - 'src/platform/packages/shared/esql/kbn-esql-browser'
+  - 'src/platform/packages/shared/esql/kbn-esql-controls-utils'
   - 'src/platform/packages/shared/esql/kbn-esql-language'
   - 'src/platform/packages/shared/esql/kbn-esql-server-utils'
   - 'src/platform/packages/shared/esql/kbn-esql-types'

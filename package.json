@@ -730,6 +730,7 @@
     "@kbn/esql": "workspace:*",
     "@kbn/esql-browser": "workspace:*",
     "@kbn/esql-composer": "workspace:*",
+    "@kbn/esql-controls-utils": "workspace:*",
     "@kbn/esql-datagrid": "workspace:*",
     "@kbn/esql-editor": "workspace:*",
     "@kbn/esql-language": "workspace:*",
