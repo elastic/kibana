@@ -37,10 +37,10 @@ const resolveCustomContentState = async (
     generateEsql({ nlQuery: nlQuery ?? '', index, existingQueries });
 
   if (!existingPanel) {
-    // A static panel has no query: only an explicit esql or hasData: true gives it one.
+    // The agent always states hasData: a static panel (false) has no query unless one is supplied.
     const { query } = await resolveCustomContentQuery({
       suppliedQuery: esql,
-      hasData: hasData === true,
+      hasData,
       existingQuery: undefined,
       isNewPanel: true,
       generate,
@@ -53,7 +53,7 @@ const resolveCustomContentState = async (
   const { query: mergedEsqlQuery, isChanging: isQueryChanging } = await resolveCustomContentQuery({
     suppliedQuery: esql,
     hasData,
-    regenerate: request.regenerateEsql,
+    regenerate: request.regenerateESQL,
     existingQuery: readEsqlQuery(existing),
     isNewPanel: false,
     generate,

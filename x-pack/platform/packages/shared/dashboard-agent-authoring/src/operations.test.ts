@@ -2600,6 +2600,7 @@ describe('executeDashboardOperations', () => {
               source: 'request',
               renderer: 'custom_content',
               query: 'Show error rate KPI',
+              hasData: true,
               esql: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
             },
           ],
@@ -2615,6 +2616,7 @@ describe('executeDashboardOperations', () => {
       identifier: 'Show error rate KPI',
       nlQuery: 'Show error rate KPI',
       esql: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
+      hasData: true,
     });
     expect(result.failures).toEqual([]);
     const panels = getPanelsOnly(result.dashboardData.panels);

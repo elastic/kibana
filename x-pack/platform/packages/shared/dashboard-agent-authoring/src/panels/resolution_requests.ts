@@ -51,7 +51,7 @@ export const toEditResolutionRequest = (
   };
 
   if (panelInput.renderer === 'custom_content') {
-    const { query, esql, hasData, regenerateEsql, index } = panelInput;
+    const { query, esql, hasData, regenerateESQL, index } = panelInput;
     return {
       request: {
         ...base,
@@ -59,7 +59,7 @@ export const toEditResolutionRequest = (
         nlQuery: query,
         esql,
         hasData,
-        regenerateEsql,
+        regenerateESQL,
         index,
       },
     };

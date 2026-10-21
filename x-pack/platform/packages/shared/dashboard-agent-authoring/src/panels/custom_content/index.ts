@@ -30,8 +30,8 @@ export interface CustomContentPanelAddRequest extends PanelResolutionRequestBase
   nlQuery: string;
   /** ES|QL query feeding the template. Wins over `hasData`. */
   esql?: string;
-  /** True: generate the query from `nlQuery`. Omitted or false: static content with no query. */
-  hasData?: boolean;
+  /** True: generate the query from `nlQuery`. False: static content with no query. Always stated. */
+  hasData: boolean;
   /** Index, alias or data stream to generate the query from. */
   index?: string;
   existingPanel?: undefined;
@@ -48,7 +48,7 @@ export interface CustomContentPanelEditRequest extends PanelResolutionRequestBas
   /** True: ensure the panel has data, generating a query only when it has none. False: remove it. */
   hasData?: boolean;
   /** Regenerate the query from `nlQuery`, keeping the parts the request does not change. */
-  regenerateEsql?: boolean;
+  regenerateESQL?: boolean;
   /** Index, alias or data stream to generate the query from. */
   index?: string;
 }
@@ -82,9 +82,8 @@ const customContentPanelRequestSchema = z.object({
     ),
   hasData: z
     .boolean()
-    .optional()
     .describe(
-      'Set true when the panel shows live Elasticsearch values: the server generates the ES|QL query from "query" (and "index"). Omit for static content such as a banner, a legend or a note — a static panel has no query.'
+      'Required. True when the panel shows live Elasticsearch values: the server generates the ES|QL query from "query" (and "index"). False for static content such as a banner, a legend or a note, which has no query. Always state which one it is.'
     ),
   index: z
     .string()
@@ -117,9 +116,9 @@ const customContentEditPanelRequestSchema = z
       .nullable()
       .optional()
       .describe(
-        'An ES|QL query the user supplied verbatim; it replaces the current one. Omit to keep the current query; pass null to remove it. Do not write a query yourself; to change the data, set regenerateEsql to true and describe the change in "query".'
+        'An ES|QL query the user supplied verbatim; it replaces the current one. Omit to keep the current query; pass null to remove it. Do not write a query yourself; to change the data, set regenerateESQL to true and describe the change in "query".'
       ),
-    regenerateEsql: z
+    regenerateESQL: z
       .boolean()
       .optional()
       .describe(
@@ -139,16 +138,16 @@ const customContentEditPanelRequestSchema = z
         'Exact index, alias, or data stream to generate the query from, when regenerating or adding data.'
       ),
   })
-  .refine(({ regenerateEsql, hasData }) => !(regenerateEsql && hasData === false), {
-    message: 'regenerateEsql cannot be combined with hasData: false, which removes the query.',
+  .refine(({ regenerateESQL, hasData }) => !(regenerateESQL && hasData === false), {
+    message: 'regenerateESQL cannot be combined with hasData: false, which removes the query.',
   })
   .refine(
-    ({ query, esql, regenerateEsql, hasData }) =>
+    ({ query, esql, regenerateESQL, hasData }) =>
       query !== undefined ||
-      ((esql !== undefined || hasData === false) && !regenerateEsql && hasData !== true),
+      ((esql !== undefined || hasData === false) && !regenerateESQL && hasData !== true),
     {
       message:
-        'query is required unless the edit only replaces or removes the ES|QL query (esql, or hasData: false); regenerateEsql and hasData: true need it.',
+        'query is required unless the edit only replaces or removes the ES|QL query (esql, or hasData: false); regenerateESQL and hasData: true need it.',
     }
   );
 

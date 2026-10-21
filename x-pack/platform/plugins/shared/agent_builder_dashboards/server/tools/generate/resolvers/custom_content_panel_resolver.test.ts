@@ -29,6 +29,7 @@ const addRequest = (
   operationType: 'add_panels',
   identifier: 'Show KPI',
   nlQuery: 'Show KPI',
+  hasData: false,
   ...overrides,
 });
 
@@ -210,11 +211,11 @@ describe('createCustomContentPanelResolver', () => {
       expect(generateEsql).not.toHaveBeenCalled();
     });
 
-    it('regenerates the query from the existing one when regenerateEsql is set', async () => {
+    it('regenerates the query from the existing one when regenerateESQL is set', async () => {
       const result = await resolve(
         editRequest(customContentPanel({ esql_query: ['FROM logs-*'], template: '<div/>' }), {
           nlQuery: 'Also show the error rate',
-          regenerateEsql: true,
+          regenerateESQL: true,
           index: 'logs-*',
         })
       );
@@ -237,11 +238,11 @@ describe('createCustomContentPanelResolver', () => {
       });
     });
 
-    it('lets an explicit query win over regenerateEsql', async () => {
+    it('lets an explicit query win over regenerateESQL', async () => {
       await resolve(
         editRequest(customContentPanel({ esql_query: ['FROM logs-*'] }), {
           nlQuery: 'Change the data',
-          regenerateEsql: true,
+          regenerateESQL: true,
           esql: 'FROM metrics-*',
         })
       );

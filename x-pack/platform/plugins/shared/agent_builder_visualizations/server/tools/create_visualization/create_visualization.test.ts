@@ -63,8 +63,9 @@ const lensTarget = (chartType: SupportedChartType = SupportedChartType.XY) => ({
   chartType,
 });
 const vegaTarget = { type: 'vega' as const };
-const customContentTarget = (rest: { esql?: string | null; has_data?: boolean | null } = {}) => ({
+const customContentTarget = (rest: { esql?: string | null; has_data?: boolean } = {}) => ({
   type: 'custom_content' as const,
+  has_data: true,
   ...rest,
 });
 const attachmentTarget = (
@@ -126,6 +127,26 @@ describe('createVisualizationTool schema', () => {
   it('allows a new custom content visualization without chartType', () => {
     expect(
       schema.safeParse({ query: 'a status board per host', target: customContentTarget() }).success
+    ).toBe(true);
+  });
+
+  it('requires a new custom content visualization to state has_data, with no default', () => {
+    const { has_data: hasData, ...withoutHasData } = customContentTarget();
+
+    expect(
+      schema.safeParse({ query: 'a status board per host', target: withoutHasData }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        query: 'a banner',
+        target: { ...withoutHasData, has_data: null },
+      }).success
+    ).toBe(false);
+    expect(
+      schema.safeParse({
+        query: 'a banner',
+        target: customContentTarget({ has_data: false }),
+      }).success
     ).toBe(true);
   });
 

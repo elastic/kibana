@@ -78,10 +78,8 @@ const optionalEsqlField = z
 
 const customContentHasDataField = z
   .boolean()
-  .nullable()
-  .optional()
   .describe(
-    '(optional) Whether the panel shows live Elasticsearch values. Omit or true: generate a query from "query" when esql is omitted. Pass false only when the panel has no data at all — a banner, a legend, an explanatory note. A supplied esql always means data: it wins over false. Never pass false to get past a failed query generation; fix the index or fields and retry instead.'
+    '(required) Whether the new panel shows live Elasticsearch values. True: a query is generated from "query" when esql is omitted. False: the panel has no data at all — a banner, a legend, an explanatory note — and no query. There is no default, so always state which. A supplied esql always means data: it wins over false. Never pass false to get past a failed query generation; fix the index or fields and retry instead.'
   );
 
 const attachmentHasDataField = z
@@ -269,7 +267,7 @@ You say what to build via "target", discriminated by "target.type":
       ', '
     )}).
 - "vega" for a custom Vega-Lite specification when no Lens chart type can express the request, e.g. small multiples / faceting, layered or combination charts (bars plus an overlaid line), scatter / bubble plots with an encoded size dimension, or custom tooltips/encodings. "chartType" is optional for Vega and acts only as a styling hint.
-- "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. The HTML is generated server-side from your natural-language "query"; never author markup yourself. Omit "esql" to generate a query; pass "has_data": false only when the panel genuinely has no data (a banner, a legend, a note).
+- "custom_content" for an HTML/CSS layout neither chart grammar can express — a KPI scorecard with status badges, a health or status board, a panel mixing narrative text with live values. The HTML is generated server-side from your natural-language "query"; never author markup yourself. Always set "has_data": true (a query is generated unless you pass "esql") or false when the panel genuinely has no data (a banner, a legend, a note).
 - "attachment" with "attachment_id" to update an existing visualization; edits keep its renderer. "chartType" is optional on updates. Omit "esql" and "has_data" to keep the current data state; pass "has_data": false to drop a stored query, or "has_data": true to ensure the panel has one (a stored query is kept, one is generated only when the panel has none). For a custom content edit that changes what the panel shows, pass "regenerate_esql": true: the stored query is regenerated from "query", keeping the parts the request does not change; layout, copy and style edits keep the stored query.
 
 Only pass "time_range" when the user explicitly named a time window (e.g. "last 7 days", "May 20–24"). Do not set it otherwise: create applies a data-aware default, and edits keep the existing range.

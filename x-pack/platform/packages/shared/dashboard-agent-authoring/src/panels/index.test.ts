@@ -64,13 +64,22 @@ describe('custom_content panel schemas', () => {
     renderer: 'custom_content' as const,
     grid,
     query: 'Show a KPI card for total errors',
+    hasData: false,
   };
 
   it.each([
     ['add_panels', addPanelsItemSchema],
     ['add_section', addSectionPanelItemSchema],
-  ])('accepts a custom_content request with only a query through %s', (_, schema) => {
+  ])('accepts a custom_content request with a query and hasData through %s', (_, schema) => {
     expect(schema.safeParse(customContentRequest).success).toBe(true);
+  });
+
+  it.each([
+    ['add_panels', addPanelsItemSchema],
+    ['add_section', addSectionPanelItemSchema],
+  ])('rejects a custom_content request that does not state hasData through %s', (_, schema) => {
+    const { hasData, ...withoutHasData } = customContentRequest;
+    expect(schema.safeParse(withoutHasData).success).toBe(false);
   });
 
   it.each([

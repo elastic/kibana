@@ -73,15 +73,15 @@ Reach for custom content only when nothing above fits:
 - Plain explanatory text with no data → use markdown.
 - The content needs an HTML/CSS layout no single Lens chart type can express, or mixes narrative text with live data, or the user explicitly asks for a custom/HTML panel → use custom content.
 
-**ES|QL for custom content:** a custom content panel with live data does not need a query from you. Set \`hasData: true\` (and \`index\` when you know it) and the server generates the query from \`query\`, then samples its schema before generating the template. A panel without \`hasData: true\` is static and has no query — use that for banners, legends and notes, and never invent a query for them. Do not write the query yourself; pass \`esql\` only when the user supplied one verbatim. If the server cannot generate a query, the panel fails with an error naming the reason — fix the \`index\` or the description and retry rather than proceeding.
+**ES|QL for custom content:** a custom content panel with live data does not need a query from you. Always set \`hasData\` when you add one, since there is no default: \`hasData: true\` (and \`index\` when you know it) and the server generates the query from \`query\`, then samples its schema before generating the template. \`hasData: false\` makes a static panel with no query — use that for banners, legends and notes, and never invent a query for them. Do not write the query yourself; pass \`esql\` only when the user supplied one verbatim. If the server cannot generate a query, the panel fails with an error naming the reason — fix the \`index\` or the description and retry rather than proceeding.
 
 **Creating a custom content panel:**
 - Set \`query\` to a concise description of what to display. The HTML template is generated server-side from it.
-- Set \`hasData: true\` and \`index\` when the panel needs live data. Omit \`hasData\` for static content.
+- Always set \`hasData\`: \`true\` (with \`index\` when known) when the panel needs live data, \`false\` for static content.
 
 **Editing a custom content panel:**
 - Use \`edit_panels\` (\`source: "request"\`, \`renderer: "custom_content"\`) and set \`panelId\` to the target panel.
-- Set \`query\` to the requested change. Layout, copy and style edits keep the current query. When the edit changes what the panel shows, also set \`regenerateEsql: true\`: the server regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. Pass \`esql\` only when the user supplied one verbatim. The server refines the existing template.
+- Set \`query\` to the requested change. Layout, copy and style edits keep the current query. When the edit changes what the panel shows, also set \`regenerateESQL: true\`: the server regenerates the query from \`query\`, keeping what the request does not change. \`hasData: true\` gives a static panel a query; \`hasData: false\` (or \`esql: null\`) removes it. Pass \`esql\` only when the user supplied one verbatim. The server refines the existing template.
 
 ## Chart Type Guidance
 

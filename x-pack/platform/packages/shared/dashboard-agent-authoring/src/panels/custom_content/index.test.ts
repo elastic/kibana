@@ -24,8 +24,12 @@ describe('custom content panel kind schemas', () => {
     });
 
   describe('add', () => {
-    it('accepts a static panel with only a description', () => {
-      expect(add({}).success).toBe(true);
+    it('accepts a static panel that states it has no data', () => {
+      expect(add({ hasData: false }).success).toBe(true);
+    });
+
+    it('rejects a panel that does not state whether it has data', () => {
+      expect(add({}).success).toBe(false);
     });
 
     it('accepts hasData and index to request a generated query', () => {
@@ -33,7 +37,7 @@ describe('custom content panel kind schemas', () => {
     });
 
     it('rejects an index longer than the limit', () => {
-      expect(add({ index: 'x'.repeat(257) }).success).toBe(false);
+      expect(add({ hasData: true, index: 'x'.repeat(257) }).success).toBe(false);
     });
   });
 
@@ -48,18 +52,18 @@ describe('custom content panel kind schemas', () => {
       expect(edit({ hasData: false }).success).toBe(true);
     });
 
-    it('accepts regenerateEsql with a description', () => {
-      expect(edit({ query: 'also show errors', regenerateEsql: true }).success).toBe(true);
+    it('accepts regenerateESQL with a description', () => {
+      expect(edit({ query: 'also show errors', regenerateESQL: true }).success).toBe(true);
     });
 
     it('requires a description to regenerate the query or to add data', () => {
-      expect(edit({ regenerateEsql: true }).success).toBe(false);
+      expect(edit({ regenerateESQL: true }).success).toBe(false);
       expect(edit({ hasData: true }).success).toBe(false);
-      expect(edit({ esql: 'FROM logs-*', regenerateEsql: true }).success).toBe(false);
+      expect(edit({ esql: 'FROM logs-*', regenerateESQL: true }).success).toBe(false);
     });
 
-    it('rejects regenerateEsql together with hasData: false', () => {
-      expect(edit({ query: 'show hosts', regenerateEsql: true, hasData: false }).success).toBe(
+    it('rejects regenerateESQL together with hasData: false', () => {
+      expect(edit({ query: 'show hosts', regenerateESQL: true, hasData: false }).success).toBe(
         false
       );
     });
