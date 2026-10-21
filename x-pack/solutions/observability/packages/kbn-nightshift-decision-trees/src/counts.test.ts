@@ -107,6 +107,24 @@ describe('resolveEdgeRefs', () => {
     expect(edge.condition).toBe('yes');
   });
 
+  it('prefers an exact condition match over a case-insensitive one', () => {
+    const tree = parseMermaidDecisionTree(
+      `flowchart TD
+        D1{{Retry?}} -->|yes| X1((Done))
+        D1 -->|YES| X1`,
+      TREE.tree_id
+    );
+
+    const [edge] = resolveEdgeRefs(tree, [
+      { source_node_id: 'D1', target_node_id: 'X1', condition: 'YES' },
+    ]);
+
+    expect(edge.condition).toBe('YES');
+    expect(() =>
+      resolveEdgeRefs(tree, [{ source_node_id: 'D1', target_node_id: 'X1', condition: 'Yes' }])
+    ).toThrow(/ambiguous/);
+  });
+
   it('deduplicates repeated refs', () => {
     expect(resolveEdgeRefs(TREE, [MAIN_PATH[0], MAIN_PATH[0]])).toHaveLength(1);
   });
@@ -395,7 +413,8 @@ describe('carryCounts', () => {
     });
 
     it.each([
-      ['keeps one of the labels', 'a'],
+      ['keeps the surviving edge label', 'a'],
+      ['keeps the merged-away edge label', 'b'],
       ['relabels the merged edge', 'a or b'],
     ])('sums differently-labelled edges a node merge collapsed when the agent %s', (_, label) => {
       const previousTree = parseMermaidDecisionTree(
