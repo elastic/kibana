@@ -16,22 +16,17 @@ export interface AlertSourceCount {
 
 export type AlertSourceCounts = Record<string, AlertSourceCount>;
 
-/**
- * Counts alerts per source, split by whether their entity exists in the store.
- *
- * An entity's alerts are counted once for every source they came from, so an entity with alerts
- * from two sources adds its whole `alert_count` to both. Counts are exact for single-source entities.
- */
+/** Counts alerts per source, split by whether their entity exists in the store. */
 export const tallyAlertSources = (
-  scores: ReadonlyArray<Pick<ParsedRiskScore, 'entity_id' | 'alert_count' | 'alert_sources'>>,
+  scores: ReadonlyArray<Pick<ParsedRiskScore, 'entity_id' | 'alert_sources'>>,
   entities: ReadonlyMap<string, unknown>
 ): AlertSourceCounts => {
   const counts: AlertSourceCounts = Object.create(null);
-  for (const { entity_id: entityId, alert_count: alertCount, alert_sources: sources } of scores) {
+  for (const { entity_id: entityId, alert_sources: sources } of scores) {
     const key = entities.has(entityId) ? 'scored' : 'unmatched';
-    for (const source of sources ?? []) {
+    for (const { source, alerts } of sources ?? []) {
       const entry = counts[source] ?? { scored: 0, unmatched: 0 };
-      entry[key] += alertCount;
+      entry[key] += alerts;
       counts[source] = entry;
     }
   }

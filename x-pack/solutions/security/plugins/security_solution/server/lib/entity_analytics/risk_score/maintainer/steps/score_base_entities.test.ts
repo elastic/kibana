@@ -46,7 +46,7 @@ const baseParams = {
 
 // Build a fake ES|QL row in the column order parseEsqlBaseScoreRow expects:
 // [alert_count, scores, risk_inputs, alert_sources, entity_id]
-const esqlRow = (entityId: string, alertCount = 1, sources: string | string[] = 'okta') => [
+const esqlRow = (entityId: string, alertCount = 1, sources: string | string[] = '1:okta') => [
   alertCount,
   0.5,
   '{"risk_score":"50","time":"2026-01-01T00:00:00.000Z","id":"a"}',
@@ -282,10 +282,9 @@ describe('score_base_entities', () => {
       mockCompositeAggPage(esClient, ['user:a@okta', 'user:b@okta', 'user:phantom@okta']);
       (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
         values: [
-          esqlRow('user:a@okta', 3, 'okta'),
-          // Alerts from two sources count fully toward each one.
-          esqlRow('user:b@okta', 2, ['okta', 'azure']),
-          esqlRow('user:phantom@okta', 5, 'azure'),
+          esqlRow('user:a@okta', 3, '3:okta'),
+          esqlRow('user:b@okta', 3, ['2:okta', '1:azure']),
+          esqlRow('user:phantom@okta', 5, '5:azure'),
         ],
       });
       (crudClient.listEntities as jest.Mock).mockResolvedValue({
@@ -305,7 +304,7 @@ describe('score_base_entities', () => {
 
       expect(summary.alertSources).toEqual({
         okta: { scored: 5, unmatched: 0 },
-        azure: { scored: 2, unmatched: 5 },
+        azure: { scored: 1, unmatched: 5 },
       });
     });
 

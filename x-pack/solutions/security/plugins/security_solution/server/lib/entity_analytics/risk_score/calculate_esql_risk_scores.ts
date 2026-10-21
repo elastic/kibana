@@ -563,7 +563,8 @@ export interface EuidCompositeAggregation {
  * 1. Filters documents where the entity has an identifiable EUID
  * 2. Uses the entity store EUID evaluation logic to compute entity_id
  * 3. Filters to the EUID page bounds: WHERE entity_id > lower AND entity_id <= upper
- * 4. STATs alert_count, scores (MV_PSERIES_WEIGHTED_SUM), risk_inputs, alert_sources BY entity_id
+ * 4. STATs alert_count, scores (MV_PSERIES_WEIGHTED_SUM), risk_inputs, alert_sources BY entity_id.
+ *    Each `alert_sources` value is `<alert count>:<source>`, so the counts are exact per source.
  *
  * Column order: [alert_count, scores, risk_inputs, alert_sources, entity_id]
  * This order must match buildBaseScoreRiskScoreBucket().
@@ -632,6 +633,8 @@ export const getBaseScoreESQL = (
     ${euidEvalClause}
     ${storedEuidCoalesceClause}
     | WHERE ${rangeClause}
+    | INLINE STATS source_alert_count = COUNT(*) BY entity_id, alert_source
+    | EVAL alert_source_count = CONCAT(TO_STRING(source_alert_count), ":", alert_source)
     | RENAME kibana.alert.risk_score as risk_score,
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
@@ -647,7 +650,7 @@ export const getBaseScoreESQL = (
           sampleSize ?? 10000
         }, "desc"), ${RIEMANN_ZETA_S_VALUE}),
         risk_inputs = ${RISK_INPUTS_TOP},
-        alert_sources = VALUES(alert_source)
+        alert_sources = VALUES(alert_source_count)
         BY entity_id
     | SORT scores DESC
     | LIMIT ${pageSize}

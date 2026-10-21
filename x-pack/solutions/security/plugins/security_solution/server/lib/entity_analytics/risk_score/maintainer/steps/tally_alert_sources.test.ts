@@ -14,33 +14,49 @@ describe('tallyAlertSources', () => {
     expect(
       tallyAlertSources(
         [
-          { entity_id: 'user:a', alert_count: 3, alert_sources: ['okta'] },
-          { entity_id: 'user:ghost', alert_count: 2, alert_sources: ['okta'] },
+          { entity_id: 'user:a', alert_sources: [{ source: 'okta', alerts: 3 }] },
+          { entity_id: 'user:ghost', alert_sources: [{ source: 'okta', alerts: 2 }] },
         ],
         entities
       )
     ).toEqual({ okta: { scored: 3, unmatched: 2 } });
   });
 
-  it('adds an entity with several sources to each of them', () => {
+  it('gives each source only its own alerts when an entity has several sources', () => {
     expect(
       tallyAlertSources(
-        [{ entity_id: 'user:a', alert_count: 4, alert_sources: ['okta', 'azure'] }],
+        [
+          {
+            entity_id: 'user:a',
+            alert_sources: [
+              { source: 'okta', alerts: 9 },
+              { source: 'azure', alerts: 1 },
+            ],
+          },
+        ],
         entities
       )
     ).toEqual({
-      okta: { scored: 4, unmatched: 0 },
-      azure: { scored: 4, unmatched: 0 },
+      okta: { scored: 9, unmatched: 0 },
+      azure: { scored: 1, unmatched: 0 },
     });
   });
 
   it('ignores scores without sources', () => {
-    expect(tallyAlertSources([{ entity_id: 'user:a', alert_count: 4 }], entities)).toEqual({});
+    expect(tallyAlertSources([{ entity_id: 'user:a' }], entities)).toEqual({});
   });
 
   it('does not treat names like __proto__ or constructor specially', () => {
     const counts = tallyAlertSources(
-      [{ entity_id: 'user:a', alert_count: 1, alert_sources: ['__proto__', 'constructor'] }],
+      [
+        {
+          entity_id: 'user:a',
+          alert_sources: [
+            { source: '__proto__', alerts: 1 },
+            { source: 'constructor', alerts: 1 },
+          ],
+        },
+      ],
       entities
     );
 

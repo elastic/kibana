@@ -53,7 +53,7 @@ describe('calculateScoresWithESQLV2', () => {
             time: '2026-04-21T00:00:00.000Z',
             rule_name: 'Known alert',
           }),
-          'okta',
+          '1:okta',
           'host:known',
         ],
         [
@@ -67,7 +67,7 @@ describe('calculateScoresWithESQLV2', () => {
             time: '2026-04-21T00:00:00.000Z',
             rule_name: 'Missing alert',
           }),
-          'okta',
+          '1:okta',
           'host:missing',
         ],
       ],

@@ -283,7 +283,7 @@ describe('Calculate risk scores with ESQL', () => {
       });
 
       it.each([EntityType.host, EntityType.user])(
-        'collects the distinct alert sources of each %s entity, before the entity id column',
+        'counts the alerts of each %s entity per source, before the entity id column',
         (entityType) => {
           const query = getBaseScoreESQL(
             entityType,
@@ -294,7 +294,14 @@ describe('Calculate risk scores with ESQL', () => {
           );
 
           expect(query).toContain('EVAL alert_source = COALESCE(entity.source, "unknown")');
-          expect(query).toMatch(/alert_sources = VALUES\(alert_source\)\s+BY entity_id/);
+          expect(query).toContain(
+            'INLINE STATS source_alert_count = COUNT(*) BY entity_id, alert_source'
+          );
+          expect(query).toContain(
+            'EVAL alert_source_count = CONCAT(TO_STRING(source_alert_count), ":", alert_source)'
+          );
+          expect(query).toMatch(/alert_sources = VALUES\(alert_source_count\)\s+BY entity_id/);
+          expect(query.indexOf('WHERE entity_id >')).toBeLessThan(query.indexOf('INLINE STATS'));
           expect(query.indexOf('entity.source =')).toBeLessThan(query.indexOf('alert_source ='));
         }
       );
