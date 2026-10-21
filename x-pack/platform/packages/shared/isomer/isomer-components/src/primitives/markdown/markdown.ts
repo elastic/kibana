@@ -17,6 +17,13 @@ import { markdownSnapshotHeight } from './markdown_snapshot_height';
 export interface MarkdownNode extends PrimitiveNode {
   type: 'markdown';
   text: string;
+  /**
+   * Which of Kibana's Markdown renderers it reads as: EUI's (`EuiMarkdownFormat`, the default) or the legacy Markdown
+   * visualization's (`kibana_react`'s `Markdown`), whose sizes scale with `fontSize`.
+   */
+  appearance?: 'eui' | 'kibanaLegacy';
+  /** The legacy visualization's font size in pixels. */
+  fontSize?: number;
 }
 
 const example: MarkdownNode = {
@@ -52,6 +59,18 @@ export const markdown = definePrimitive<MarkdownNode>({
   schema: z.object({
     type: z.literal('markdown'),
     text: requiredString().describe('GitHub-flavored Markdown.'),
+    appearance: z
+      .enum(['eui', 'kibanaLegacy'])
+      .optional()
+      .describe(
+        'A host setting: which of Kibana’s Markdown renderers the text reads as. Defaults to eui.'
+      ),
+    fontSize: z
+      .number()
+      .min(6)
+      .max(96)
+      .optional()
+      .describe('A host setting: the legacy Markdown visualization’s font size in pixels.'),
   }),
   catalog: {
     type: 'markdown',
