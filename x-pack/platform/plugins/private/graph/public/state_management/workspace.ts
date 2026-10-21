@@ -348,17 +348,17 @@ const getSelectedNodeIds = (state: WorkspaceState, defaultToAll = true): string[
     ? new Set(state.selectedNodeIds)
     : new Set(defaultToAll ? state.nodeIds : []);
 
-  for (const nodeId of state.nodeIds) {
-    let parentId = state.nodesById[nodeId].parentId;
+  for (const id of state.nodeIds) {
+    let parentId = state.nodesById[id].parentId;
     while (parentId) {
       if (selectedNodeIds.has(parentId)) {
-        selectedNodeIds.add(nodeId);
+        selectedNodeIds.add(id);
         break;
       }
       parentId = state.nodesById[parentId]?.parentId;
     }
   }
-  return state.nodeIds.filter((nodeId) => selectedNodeIds.has(nodeId));
+  return state.nodeIds.filter((id) => selectedNodeIds.has(id));
 };
 
 const removeNodes = (state: WorkspaceState, nodeIds: string[]): WorkspaceState => {
