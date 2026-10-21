@@ -29,11 +29,8 @@ import type { AttacksActionTelemetrySource } from '../../../../common/lib/teleme
 import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { AttacksActionMenu } from './attacks_action_menu';
-import {
-  ATTACK_DISCOVERY_ACTION_IDS,
-  REMOVE_FROM_CASE_ACTION_ID,
-} from '../../../../common/constants/action_ids';
-import { REMOVE_FROM_CASE } from '../../alerts_table/translations';
+import { ATTACK_DISCOVERY_ACTION_IDS } from '../../../../common/constants/action_ids';
+import { getRemoveFromCaseItems } from '../../../../cases/attachments/attack/remove_from_case_items';
 import { toAttacksToAttach } from '../../../../cases/attachments/attack/utils';
 
 interface AttacksGroupTakeActionItemsProps {
@@ -231,20 +228,7 @@ export function AttacksGroupTakeActionItems({
   );
 
   const removeFromCaseItems = useMemo(
-    () =>
-      onRemoveFromCase != null
-        ? [
-            {
-              key: REMOVE_FROM_CASE_ACTION_ID,
-              'data-test-subj': REMOVE_FROM_CASE_ACTION_ID,
-              name: REMOVE_FROM_CASE,
-              onClick: () => {
-                closePopover?.();
-                onRemoveFromCase();
-              },
-            },
-          ]
-        : [],
+    () => getRemoveFromCaseItems({ onRemove: onRemoveFromCase, closePopover }),
     [closePopover, onRemoveFromCase]
   );
 

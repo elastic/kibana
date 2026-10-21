@@ -58,9 +58,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(response.statusCode).to.be(400);
       expect(response.error).to.be('Bad Request');
-      // The type stays registered with the flag off so that attacks attached while it was on
-      // keep rendering and keep taking their alerts with them when removed. Only the attach
-      // path is gated, so this is a payload rejection rather than an unregistered type.
       expect(response.message).to.contain(
         `Invalid attachment payload for type '${SECURITY_ATTACK_ATTACHMENT_TYPE}'`
       );

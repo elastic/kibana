@@ -27,8 +27,8 @@
  *  - Removing an attack from its grid row's "Remove from case" item takes the attack and the
  *    alerts no other attached attack still claims off the case.
  *
- * The `security.attack` type is registered only when `attackAttachmentsEnabled` is on; the
- * attacks-alignment Scout config boots with it (see
+ * Attaching a `security.attack` requires `attackAttachmentsEnabled`; the attacks-alignment
+ * Scout config boots with it (see
  * `kbn-scout/src/servers/configs/config_sets/security_attacks_alignment/shared.ts`).
  *
  * To run locally:
@@ -80,7 +80,7 @@ const MANUAL_ONLY_ALERT_ID = 'seed-alert-3';
 /** The attack document field the alert set is read from, live, at removal time. */
 const ALERT_IDS_FIELD = 'kibana.alert.attack_discovery.alert_ids';
 
-/** One seeded attack, as the attack discovery find API returns it. */
+/** One seeded attack, from the attack discovery find API. */
 interface FoundAttack {
   id: string;
   index: string;
@@ -114,7 +114,11 @@ const findSeededAttacks = async (kbnClient: KbnClient, spaceId: string): Promise
     query: { per_page: 10, search: SEEDED_TITLE, shared: true },
   });
 
-  return (response.data as { data: FoundAttack[] }).data;
+  const { data } = response.data as {
+    data: Array<Omit<FoundAttack, 'alertIds'> & { alert_ids: string[] }>;
+  };
+
+  return data.map(({ alert_ids: alertIds, ...attack }) => ({ ...attack, alertIds }));
 };
 
 /** Re-points one attack's constituent alerts, so two attached attacks can overlap on one alert. */
@@ -167,8 +171,8 @@ spaceTest.describe(
   'Attack case attachments',
   {
     // Local only: the suite needs `attackAttachmentsEnabled`, which defaults off and is turned
-    // on by this config set's Scout server args. Cloud targets boot without it, so the
-    // `security.attack` attachment type is never registered there.
+    // on by this config set's Scout server args. Cloud targets boot without it, so attaching an
+    // attack is refused there.
     tag: [
       ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
       ...getPlaywrightTagsFor('serverless', 'security_complete', 'local'),

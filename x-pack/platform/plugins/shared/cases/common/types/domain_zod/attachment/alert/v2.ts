@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_ALERTS_PER_CASE, MAX_ATTACHMENT_ID_LENGTH } from '../../../../constants';
+import { MAX_ATTACHMENT_ID_LENGTH, MAX_SOURCE_ATTACHMENT_IDS } from '../../../../constants';
 import { STACK_ALERT_ATTACHMENT_TYPE } from '../../../../constants/attachments';
 
 /**
@@ -28,20 +28,10 @@ export const AlertAttachmentMetadataSchema = z
           .strict(),
       ])
       .optional(),
-    /**
-     * The `attachmentId`s of the attachments that put these alerts on the case, for types whose
-     * `getRelatedAttachments` hook takes its alerts with it. Absent on an attachment the analyst
-     * created directly, which is the point: without it there is no way to tell an alert a
-     * cascading type contributed from one the analyst attached themselves, and removing the
-     * former would delete the latter.
-     *
-     * Written by the attaching client and narrowed server side by `filterDuplicatedAttachments`,
-     * which drops ids already on the case but keeps the rest of the metadata. What survives that
-     * filter is exactly the set of alerts this attachment introduced.
-     */
+    /** The `attachmentId`s of the attachments that put these alerts on the case. */
     sourceAttachmentIds: z
       .array(z.string().max(MAX_ATTACHMENT_ID_LENGTH))
-      .max(MAX_ALERTS_PER_CASE)
+      .max(MAX_SOURCE_ATTACHMENT_IDS)
       .optional(),
   })
   .strict();

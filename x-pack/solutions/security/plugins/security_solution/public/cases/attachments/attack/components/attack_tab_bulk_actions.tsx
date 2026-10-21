@@ -14,8 +14,7 @@ import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 import { getAttackDiscoveryMarkdown, getOriginalAlertIds } from '@kbn/elastic-assistant-common';
 import { DEFAULT_NUMBER_FORMAT } from '../../../../../common/constants';
-import { REMOVE_FROM_CASE_ACTION_ID } from '../../../../common/constants/action_ids';
-import { REMOVE_FROM_CASE } from '../../../../detections/components/alerts_table/translations';
+import { getRemoveFromCaseItems } from '../remove_from_case_items';
 import {
   withActionIcons,
   withGroupSeparators,
@@ -263,19 +262,11 @@ export const AttackTabBulkActions = ({
 
   const removeFromCaseItems = useMemo(
     () =>
-      onRemove != null
-        ? [
-            {
-              key: REMOVE_FROM_CASE_ACTION_ID,
-              'data-test-subj': REMOVE_FROM_CASE_ACTION_ID,
-              name: REMOVE_FROM_CASE,
-              onClick: () => {
-                closePopover();
-                onRemove(resolvedAttacks.map(({ id }) => id));
-              },
-            },
-          ]
-        : [],
+      getRemoveFromCaseItems({
+        onRemove:
+          onRemove != null ? () => onRemove(resolvedAttacks.map(({ id }) => id)) : undefined,
+        closePopover,
+      }),
     [closePopover, onRemove, resolvedAttacks]
   );
 

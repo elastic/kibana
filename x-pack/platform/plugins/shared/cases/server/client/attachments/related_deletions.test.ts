@@ -8,7 +8,7 @@
 import { z } from '@kbn/zod/v4';
 import { mockCaseComments } from '../../mocks';
 import { createCasesClientMockArgs } from '../mocks';
-import { getRelatedAttachments } from './related_deletions';
+import { collectRelatedAttachmentIds } from './related_deletions';
 
 const PARENT_TYPE = 'test.parent';
 const OTHER_PARENT_TYPE = 'test.other-parent';
@@ -20,7 +20,7 @@ const asType = (comment: (typeof mockCaseComments)[number], id: string, type: st
     attributes: { ...comment.attributes, type },
   } as unknown as (typeof mockCaseComments)[number]);
 
-describe('getRelatedAttachments', () => {
+describe('collectRelatedAttachmentIds', () => {
   const parent = asType(mockCaseComments[0], 'parent-1', PARENT_TYPE);
   const otherParent = asType(mockCaseComments[3], 'other-parent-1', OTHER_PARENT_TYPE);
   const child = mockCaseComments[1];
@@ -56,7 +56,7 @@ describe('getRelatedAttachments', () => {
   it('does not read the case attachments when no deleted type has a hook', async () => {
     const clientArgs = setup();
 
-    const related = await getRelatedAttachments({
+    const related = await collectRelatedAttachmentIds({
       caseId: 'mock-id-1',
       attachments: [parent],
       clientArgs,
@@ -70,7 +70,7 @@ describe('getRelatedAttachments', () => {
     const hook = jest.fn().mockResolvedValue([]);
     const clientArgs = setup({ hook });
 
-    await getRelatedAttachments({
+    await collectRelatedAttachmentIds({
       caseId: 'mock-id-1',
       attachments: [parent, unrelated],
       clientArgs,
@@ -84,11 +84,28 @@ describe('getRelatedAttachments', () => {
     });
   });
 
+  it('calls a hook shared by 2 types once per type', async () => {
+    const hook = jest.fn().mockResolvedValue([]);
+    const clientArgs = setup({ hook, otherHook: hook });
+
+    await collectRelatedAttachmentIds({
+      caseId: 'mock-id-1',
+      attachments: [parent, otherParent],
+      clientArgs,
+    });
+
+    expect(hook).toHaveBeenCalledTimes(2);
+    expect(hook.mock.calls.map(([{ attachments }]) => attachments)).toEqual([
+      [{ id: parent.id, attributes: parent.attributes }],
+      [{ id: otherParent.id, attributes: otherParent.attributes }],
+    ]);
+  });
+
   it('skips a deleted attachment whose attributes did not decode', async () => {
     const hook = jest.fn().mockResolvedValue([]);
     const clientArgs = setup({ hook });
 
-    await getRelatedAttachments({
+    await collectRelatedAttachmentIds({
       caseId: 'mock-id-1',
       attachments: [{ id: 'undecodable-1' }, parent],
       clientArgs,
@@ -110,7 +127,7 @@ describe('getRelatedAttachments', () => {
     ]);
     const clientArgs = setup({ hook, otherHook });
 
-    const related = await getRelatedAttachments({
+    const related = await collectRelatedAttachmentIds({
       caseId: 'mock-id-1',
       attachments: [parent, otherParent],
       clientArgs,
@@ -127,7 +144,7 @@ describe('getRelatedAttachments', () => {
     const clientArgs = setup({ hook });
 
     await expect(
-      getRelatedAttachments({ caseId: 'mock-id-1', attachments: [parent], clientArgs })
+      collectRelatedAttachmentIds({ caseId: 'mock-id-1', attachments: [parent], clientArgs })
     ).rejects.toThrow('hook failed');
   });
 });

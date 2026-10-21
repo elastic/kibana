@@ -41,10 +41,9 @@ import { getActionsColumnWidth } from '../../../../common/components/header_acti
 import { TruncatableText } from '../../../../common/components/truncatable_text';
 import { RuleStatus } from '../../../../timelines/components/timeline/body/renderers/rule_status';
 import { AttacksGroupTakeActionItems } from '../../../../detections/components/attacks/table/attacks_group_take_action_items';
-import { REMOVE_FROM_CASE } from '../../../../detections/components/alerts_table/translations';
-import { REMOVE_FROM_CASE_ACTION_ID } from '../../../../common/constants/action_ids';
 import { ACTION_ICONS_BY_ID } from '../../../../common/utils/action_icons';
 import { withActionIcons } from '../../../../common/utils/action_menu_items';
+import { getRemoveFromCaseItems } from '../remove_from_case_items';
 import { AttackTitleLink } from './attack_title_link';
 import { ShowAttackButton } from './show_attack_button';
 import { InvestigateAttackInTimelineButton } from './investigate_attack_in_timeline_button';
@@ -192,17 +191,7 @@ const AttackMoreActionsButton = ({
             {
               id: 0,
               items: withActionIcons(
-                [
-                  {
-                    key: REMOVE_FROM_CASE_ACTION_ID,
-                    'data-test-subj': REMOVE_FROM_CASE_ACTION_ID,
-                    name: REMOVE_FROM_CASE,
-                    onClick: () => {
-                      closePopover();
-                      onRemoveFromCase();
-                    },
-                  },
-                ],
+                getRemoveFromCaseItems({ onRemove: onRemoveFromCase, closePopover }),
                 ACTION_ICONS_BY_ID
               ),
             },

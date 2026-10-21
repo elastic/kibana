@@ -20,22 +20,15 @@ import {
   toReadableAttackIndexPattern,
   transformInternalReplacements,
 } from '@kbn/elastic-assistant-common';
+import { isResponseError } from '@kbn/es-errors';
 import { z } from '@kbn/zod/v4';
 import { AttackAttachmentPayloadSchema } from '../../../common/cases/attachments/attack';
 import { validateAttackWorkflowTargets } from './workflow_validation';
-import {
-  getCaseAlertAttachments,
-  resolveRemovableAlertIds,
-} from '../../../common/cases/attachments/attack/resolve_removable_alerts';
+import { getCaseAlertAttachments, resolveRemovableAlertIds } from './resolve_removable_alerts';
 
 interface AttackAttachmentTypeDeps {
   getStartServices: CoreSetup['getStartServices'];
   logger: Logger;
-  /**
-   * Whether `attackAttachmentsEnabled` is on. The type is registered either way so that attacks
-   * attached while the flag was on keep rendering, and keep taking their alerts with them when
-   * removed. Only the attach path is gated.
-   */
   isAttachEnabled: boolean;
 }
 
@@ -71,21 +64,16 @@ const toAttackReferences = (targets: readonly AttachmentDeleteTarget[]): AttackR
       ? [
           {
             attackId: parsed.data.attachmentId,
-            // The attachment snapshots the concrete backing index the attack was found in, and
-            // most users hold read on the alias pattern rather than on that index. Reading it
-            // verbatim as the requesting user is refused, which would quietly strand the
-            // attack's alerts on the case; see `toReadableAttackIndexPattern`.
+            // Users usually hold read on the alias pattern, not on the stored backing index.
             index: toReadableAttackIndexPattern(parsed.data.metadata.index),
           },
         ]
       : [];
   });
 
-const isUnauthorizedRead = (error: unknown): boolean => {
-  const candidate = error as { statusCode?: number; body?: { error?: { type?: string } } };
-
-  return candidate?.statusCode === 403 || candidate?.body?.error?.type === 'security_exception';
-};
+const isUnauthorizedRead = (error: unknown): boolean =>
+  isResponseError(error) &&
+  (error.statusCode === 403 || error.body?.error?.type === 'security_exception');
 
 /**
  * Reads each attack's current, de-anonymised alert ids as the requesting user. Attacks the user
@@ -186,12 +174,6 @@ export const getAttackRelatedAttachments =
 /**
  * Server-side attack attachment type registration.
  * Uses a zod schema (shared with the client) to validate the full payload.
- *
- * Registered whether or not `attackAttachmentsEnabled` is on. The renderer is registered
- * unconditionally on the client so that attacks attached while the flag was on still display,
- * and `getRelatedAttachments` has to stay reachable for the same reason: otherwise removing one
- * of those attacks would quietly keep its alerts. With the flag off the schema refuses new
- * payloads, so the gate sits on the attach path alone.
  */
 export const getAttackAttachmentType = (
   deps: AttackAttachmentTypeDeps

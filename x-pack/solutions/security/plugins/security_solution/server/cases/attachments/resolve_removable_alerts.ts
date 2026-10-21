@@ -8,7 +8,7 @@
 import { isUnifiedAlertAttachment, toStringArray } from '@kbn/cases-plugin/common';
 import { SECURITY_ALERT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common/constants';
 
-/** A case attachment, as the case view or the Cases server holds it, with its saved object id. */
+/** A case attachment with its saved object id. */
 export type CaseAttachmentWithId = Parameters<typeof isUnifiedAlertAttachment>[0] & { id: string };
 
 /** A `security.alert` attachment on the case, reduced to what the resolution needs. */

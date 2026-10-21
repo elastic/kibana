@@ -43,7 +43,7 @@ import {
 } from './delete_utils';
 import { buildAttachmentTypeFilter } from './type_filter';
 import { emitAttachmentsDeletedEvent } from './trigger_utils';
-import { getRelatedAttachments } from './related_deletions';
+import { collectRelatedAttachmentIds } from './related_deletions';
 
 /**
  * Deletes attachments from a case, by saved object id or by the ids an attachment type references,
@@ -90,7 +90,7 @@ export const deleteRelatedAttachments = async (
   { caseId, attachments }: { caseId: string; attachments: DecodedAttachment[] },
   clientArgs: CasesClientArgs
 ): Promise<void> => {
-  const related = await getRelatedAttachments({ caseId, attachments, clientArgs });
+  const related = await collectRelatedAttachmentIds({ caseId, attachments, clientArgs });
 
   for (const { type, attachmentIds } of related) {
     await deleteByAttachmentIds({ caseId, type, attachmentIds, includeRelated: false }, clientArgs);

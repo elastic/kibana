@@ -353,10 +353,7 @@ export const buildAttacksAttachments = (
       attachments.push({
         type: SECURITY_ALERT_ATTACHMENT_TYPE,
         attachmentId: attachedAlertIds,
-        // Records which attack put these alerts on the case. Cases drops the ids already
-        // attached before persisting this, so what survives is the set this attack actually
-        // introduced rather than the set it claims — which is the only way to tell an alert the
-        // attack brought from one the analyst attached themselves.
+        // Records the attack that brought these alerts, so removing it can take them along.
         metadata: { index: attack.alertsIndex, sourceAttachmentIds: [attack.id] },
       });
     }

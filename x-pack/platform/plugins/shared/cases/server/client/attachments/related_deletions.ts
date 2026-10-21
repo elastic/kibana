@@ -17,7 +17,7 @@ import type { CasesClientArgs } from '../types';
  * Returns the ids, by attachment type, that the `getRelatedAttachments` hooks of the deleted
  * attachment types take along with them.
  */
-export const getRelatedAttachments = async ({
+export const collectRelatedAttachmentIds = async ({
   caseId,
   attachments,
   clientArgs,
@@ -34,7 +34,10 @@ export const getRelatedAttachments = async ({
 
   // An attachment whose stored fields do not decode is still deleted, but it cannot be handed to
   // a hook, so it takes nothing along with it.
-  const targetsByHook = new Map<GetRelatedAttachments, AttachmentDeleteTarget[]>();
+  const targetsByType = new Map<
+    string,
+    { hook: GetRelatedAttachments; targets: AttachmentDeleteTarget[] }
+  >();
   for (const { id, attributes } of attachments) {
     const hook =
       attributes != null && unifiedAttachmentTypeRegistry.has(attributes.type)
@@ -42,11 +45,12 @@ export const getRelatedAttachments = async ({
         : undefined;
 
     if (attributes != null && hook != null) {
-      targetsByHook.set(hook, [...(targetsByHook.get(hook) ?? []), { id, attributes }]);
+      const { targets } = targetsByType.get(attributes.type) ?? { targets: [] };
+      targetsByType.set(attributes.type, { hook, targets: [...targets, { id, attributes }] });
     }
   }
 
-  if (targetsByHook.size === 0) {
+  if (targetsByType.size === 0) {
     return [];
   }
 
@@ -57,7 +61,7 @@ export const getRelatedAttachments = async ({
     .map(({ id, attributes }) => ({ id, attributes }));
 
   const idsByType = new Map<string, Set<string>>();
-  for (const [hook, targets] of targetsByHook) {
+  for (const { hook, targets } of targetsByType.values()) {
     const related = await hook({ caseId, request, attachments: targets, remainingAttachments });
 
     for (const { type, attachmentIds } of related) {

@@ -148,9 +148,6 @@ describe('registerCaseAttachments', () => {
 
     registerCaseAttachments(framework, experimentalFeatures, deps);
 
-    // The renderer is registered unconditionally on the client, so the type has to stay
-    // registered here or removing an attack attached while the flag was on would quietly keep
-    // its alerts.
     const registered = framework.registerAttachment.mock.calls
       .map(([attachmentType]) => attachmentType)
       .find(({ id }) => id === SECURITY_ATTACK_ATTACHMENT_TYPE);
@@ -159,7 +156,6 @@ describe('registerCaseAttachments', () => {
     expect(registered!.getRelatedAttachments).toEqual(expect.any(Function));
     expect(registered!.schema).not.toBe(AttackAttachmentPayloadSchema);
 
-    // Only the attach path is gated: every payload is refused while the flag is off.
     const result = registered!.schema.safeParse({
       type: SECURITY_ATTACK_ATTACHMENT_TYPE,
       owner: 'securitySolution',

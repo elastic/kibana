@@ -83,13 +83,7 @@ const toAlertMetadata = (
  * Transformer for alert attachments (legacy schema <-> unified schema).
  * Legacy: { type: 'alert', alertId, index, rule } (AttachmentType.alert)
  * Unified: { type: owner-scoped alert, attachmentId: string|string[], metadata: { index, rule } }
- *
- * The legacy shape has no room for `metadata.sourceAttachmentIds`, so the provenance is dropped
- * when an alert attachment is written to `cases-comments`. That is safe rather than lossy: the
- * field is only ever written by a cascading attachment type, every one of which is unified-only
- * and so cannot be attached at all unless `xpack.cases.attachments.enabled` puts the whole case
- * on the unified saved object. An alert attachment that reaches the legacy write path therefore
- * never had provenance to lose.
+ * The legacy shape drops `metadata.sourceAttachmentIds`.
  */
 export const alertAttachmentTransformer: AttachmentTypeTransformer<
   AttachmentPersistedAttributes,

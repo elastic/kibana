@@ -516,12 +516,29 @@ export default ({ getService }: FtrProviderContext): void => {
           savedObjectIds: [attackAttachmentId(ATTACK_B_ID)],
         });
 
-        // The first removal hands A's attachment over to B, which still claims the shared alert.
-        // Without that, the shared alert would name a departed attack and nothing could take it.
-        // A's own alert was kept by the analyst and is not B's to take.
+        // No remaining attack claims the shared alert, so B's removal takes it. A's own alert is
+        // not B's to take.
         const remaining = await readAttachments(caseId);
         expect(attackIdsOf(remaining)).to.eql([]);
         expect(alertIdsOf(remaining)).to.eql([ATTACK_A_ONLY_ALERT_ID]);
+      });
+
+      it("keeps every alert when another attack's document no longer exists", async () => {
+        const { caseId, attackAttachmentId } = await seedCaseWithTwoAttacks();
+        await es.delete({ index: ATTACK_INDEX, id: ATTACK_B_ID, refresh: true });
+
+        await bulkDeleteAttachments({
+          supertest,
+          caseId,
+          savedObjectIds: [attackAttachmentId(ATTACK_A_ID)],
+        });
+
+        // B's alerts cannot be read, so nothing proves the shared alert is A's alone.
+        const remaining = await readAttachments(caseId);
+        expect(attackIdsOf(remaining)).to.eql([ATTACK_B_ID]);
+        expect(alertIdsOf(remaining)).to.eql(
+          [SHARED_ALERT_ID, ATTACK_A_ONLY_ALERT_ID, ATTACK_B_ONLY_ALERT_ID].sort()
+        );
       });
 
       it('deletes nothing when one of the ids is not an attachment of the case', async () => {

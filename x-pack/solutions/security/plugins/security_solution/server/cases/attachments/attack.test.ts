@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { coreMock, elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentDeleteTarget } from '@kbn/cases-plugin/server';
@@ -230,10 +231,13 @@ describe('getAttackRelatedAttachments', () => {
 
   it('keeps every alert when the attacks cannot be read', async () => {
     esClient.search.mockRejectedValue(
-      Object.assign(new Error('security_exception'), {
+      new errors.ResponseError({
         statusCode: 403,
         body: { error: { type: 'security_exception' } },
-      })
+        headers: {},
+        meta: {},
+        warnings: null,
+      } as unknown as ConstructorParameters<typeof errors.ResponseError>[0])
     );
 
     const result = await getRelated({
