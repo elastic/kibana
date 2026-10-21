@@ -251,7 +251,7 @@ export function OnboardingShell() {
           aria-labelledby={cancelModalTitleId}
           titleProps={{ id: cancelModalTitleId }}
           title={i18n.translate('xpack.ingestHub.onboardingShell.cancelModal.title', {
-            defaultMessage: 'Cancel setup?',
+            defaultMessage: 'Cancel onboarding?',
           })}
           onCancel={() => setIsCancelModalOpen(false)}
           onConfirm={handleCancelFlow}
@@ -260,8 +260,8 @@ export function OnboardingShell() {
             { defaultMessage: 'Keep editing' }
           )}
           confirmButtonText={i18n.translate(
-            'xpack.ingestHub.onboardingShell.cancelModal.cancelSetupButton',
-            { defaultMessage: 'Cancel setup' }
+            'xpack.ingestHub.onboardingShell.cancelModal.cancelOnboardingButton',
+            { defaultMessage: 'Cancel onboarding' }
           )}
           buttonColor="danger"
           data-test-subj="onboardingCancelModal"
