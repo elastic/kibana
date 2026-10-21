@@ -197,10 +197,10 @@ describe('useBulkActionItems', () => {
         queryId: 'test-table-run-workflow-selection',
       };
 
-      renderUseBulkActionItems({ isAllSelected: true, selectionScope });
+      renderUseBulkActionItems({ isAllSelected: true, selectionScope, totalItems: 1234 });
 
       expect(mockUseRunDocumentWorkflowPanel).toHaveBeenCalledWith(
-        expect.objectContaining({ isAllSelected: true, selectionScope })
+        expect.objectContaining({ isAllSelected: true, selectionScope, totalItems: 1234 })
       );
     });
 

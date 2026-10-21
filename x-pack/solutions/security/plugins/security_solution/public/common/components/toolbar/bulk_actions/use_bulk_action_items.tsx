@@ -67,6 +67,8 @@ export interface BulkActionsProps {
    * action. Omit it and a run stays scoped to the loaded rows, as it always has.
    */
   selectionScope?: RunWorkflowSelectionScope;
+  /** Number of items a select-all covers, so the run-workflow action can refuse too many. */
+  totalItems?: number;
 }
 
 type CustomActionGroups = Pick<BulkActionGroups, 'casesItems' | 'timelineItems' | 'customItems'>;
@@ -130,6 +132,7 @@ export const useBulkActionItems = ({
   showRunWorkflowActions = true,
   isAllSelected,
   selectionScope,
+  totalItems,
 }: BulkActionsProps) => {
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
@@ -262,6 +265,7 @@ export const useBulkActionItems = ({
     isBulk: true,
     isAllSelected,
     selectionScope,
+    totalItems,
   });
 
   const statusItems = useMemo<BulkActionMenuItem[]>(() => {

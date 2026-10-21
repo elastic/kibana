@@ -657,19 +657,54 @@ describe('useRunDocumentWorkflowPanel', () => {
       );
     });
 
-    it('warns that the selection was trimmed when more documents match than the maximum', async () => {
-      mockDocumentIdSearch({
-        events: [timelineItem('doc-1', 'logs-a')],
-        totalCount: MAX_RUN_WORKFLOW_DOCS + 1,
+    describe('selection limit', () => {
+      const renderMenuItem = (props: Partial<UseRunDocumentWorkflowPanelProps>) =>
+        renderHook(
+          () =>
+            useRunDocumentWorkflowPanel({
+              closePopover: jest.fn(),
+              documentIds: pageDocumentIds,
+              isAllSelected: true,
+              selectionScope,
+              ...props,
+            }),
+          { wrapper: TestProviders }
+        ).result.current.runWorkflowMenuItem[0];
+
+      it('disables the action and explains why when a select-all covers more than the maximum', () => {
+        const menuItem = renderMenuItem({ totalItems: MAX_RUN_WORKFLOW_DOCS + 1 });
+
+        expect(menuItem.disabled).toBe(true);
+        expect(menuItem.toolTipContent).toBe(
+          i18n.RUN_WORKFLOW_SELECTION_TOO_LARGE(MAX_RUN_WORKFLOW_DOCS)
+        );
       });
 
-      const { getByTestId } = renderSelectAllPanel();
+      it('keeps the action enabled when a select-all covers exactly the maximum', () => {
+        const menuItem = renderMenuItem({ totalItems: MAX_RUN_WORKFLOW_DOCS });
 
-      await waitFor(() => {
-        expect(getByTestId('bulk-run-workflow-selection-trimmed')).toBeInTheDocument();
+        expect(menuItem.disabled).toBeUndefined();
+        expect(menuItem.toolTipContent).toBeUndefined();
       });
-      // The run still proceeds — on the documents that were resolved.
-      expect(getByTestId('run-workflow-execute-button')).toBeInTheDocument();
+
+      // Without a scope the run stays on the loaded rows, so the table total is irrelevant.
+      it('ignores the table total when the select-all cannot be resolved beyond the loaded rows', () => {
+        const menuItem = renderMenuItem({
+          selectionScope: undefined,
+          totalItems: MAX_RUN_WORKFLOW_DOCS + 1,
+        });
+
+        expect(menuItem.disabled).toBeUndefined();
+      });
+
+      it('ignores the table total when only the loaded rows are selected', () => {
+        const menuItem = renderMenuItem({
+          isAllSelected: false,
+          totalItems: MAX_RUN_WORKFLOW_DOCS + 1,
+        });
+
+        expect(menuItem.disabled).toBeUndefined();
+      });
     });
 
     it('surfaces an error instead of a partial run when resolving the selection fails', async () => {

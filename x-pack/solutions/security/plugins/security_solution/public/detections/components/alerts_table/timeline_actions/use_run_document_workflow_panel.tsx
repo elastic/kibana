@@ -11,6 +11,7 @@ import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
+import { MAX_RUN_WORKFLOW_DOCS } from '@kbn/workflows';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import {
   RunWorkflowPanel,
@@ -138,6 +139,11 @@ export interface UseRunDocumentWorkflowPanelProps {
    * describe their selection as a query omit it, and the run stays scoped to the loaded rows.
    */
   selectionScope?: RunWorkflowSelectionScope;
+  /**
+   * Number of hits a select-all covers. Past `MAX_RUN_WORKFLOW_DOCS` the menu item is disabled
+   * with a tooltip explaining why. Only read when a select-all is resolved from `selectionScope`.
+   */
+  totalItems?: number;
 }
 
 /**
@@ -191,6 +197,7 @@ export const useRunDocumentWorkflowPanel = ({
   isBulk,
   isAllSelected = false,
   selectionScope,
+  totalItems,
 }: UseRunDocumentWorkflowPanelProps): UseRunDocumentWorkflowPanelResult => {
   const { canExecuteWorkflow } = useWorkflowsCapabilities();
   const workflowUIEnabled = useWorkflowsUIEnabledSetting();
@@ -228,6 +235,10 @@ export const useRunDocumentWorkflowPanel = ({
     [selectAllScope, documentIds, closePopover, originEventId, isBulk]
   );
 
+  const selectionSize =
+    selectAllScope !== undefined && totalItems !== undefined ? totalItems : documentIds.length;
+  const exceedsLimit = selectionSize > MAX_RUN_WORKFLOW_DOCS;
+
   const runWorkflowMenuItem: DocumentTableContextMenuItem[] = useMemo(
     () => [
       {
@@ -237,9 +248,13 @@ export const useRunDocumentWorkflowPanel = ({
         key: RUN_DOCUMENT_WORKFLOW_ACTION_ID,
         name: i18n.CONTEXT_MENU_RUN_WORKFLOW,
         panel: RUN_DOCUMENT_WORKFLOW_PANEL_ID,
+        ...(exceedsLimit && {
+          disabled: true,
+          toolTipContent: i18n.RUN_WORKFLOW_SELECTION_TOO_LARGE(MAX_RUN_WORKFLOW_DOCS),
+        }),
       },
     ],
-    []
+    [exceedsLimit]
   );
 
   const runDocumentWorkflowPanel: EuiContextMenuPanelDescriptor[] = useMemo(
