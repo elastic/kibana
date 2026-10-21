@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import { asyncForEach } from '@kbn/std';
 import type { SavedObject, SavedObjectReference } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
@@ -24,15 +25,17 @@ type FindAndTransformLegacyActions = (
   skipActionsValidation: boolean
 ) => FindAndTransformLegacyActionsReturn;
 
-type FindAndTransformLegacyActionsReturn = Promise<
-  Record<
+type FindAndTransformLegacyActionsReturn = Promise<{
+  transformedActionsByRuleId: Record<
     string,
     {
       transformedActions: RawRuleAction[];
       transformedReferences: SavedObjectReference[];
     }
-  >
->;
+  >;
+  sidecarIdsToDeleteNow: string[];
+  ruleIdsToDeleteNotificationRulesOf: string[];
+}>;
 
 // ruleThrottle can have special values 'no_actions' or 'rule', or a duration like e.g. '1h'
 // 'rule' means actions fire each time the rule runs, whereas a duration means the actions are
@@ -40,57 +43,95 @@ type FindAndTransformLegacyActionsReturn = Promise<
 const hasNoThrottledActions = ({ ruleThrottle }: LegacyIRuleActionsAttributes): boolean =>
   ruleThrottle === 'no_actions' || ruleThrottle === 'rule';
 
-interface LegacyActionsLookup {
-  siemNotificationRuleIds: string[];
-  legacyRuleActionsSOs: Array<SavedObject<LegacyIRuleActionsAttributes>>;
-}
+const getConnectorId = (
+  references: SavedObjectReference[],
+  actionRef: string
+): string | undefined =>
+  references.find(({ name, type }) => name === actionRef && type === 'action')?.id;
 
-const findLegacyActions = async (
-  context: RulesClientContext,
-  ruleIds: string[]
-): Promise<LegacyActionsLookup> => {
-  const hasReference = ruleIds.map((id) => ({ type: RULE_SAVED_OBJECT_TYPE, id }));
-  const [siemNotifications, legacyRuleActionsSOs] = await Promise.all([
-    findRules(context, {
-      options: {
-        filter: 'alert.attributes.alertTypeId:(siem.notifications)',
-        hasReference,
-      },
-    }),
-    context.unsecuredSavedObjectsClient.find<LegacyIRuleActionsAttributes>({
-      type: legacyRuleActionsSavedObjectType,
-      hasReference,
-    }),
-  ]);
-
-  return {
-    siemNotificationRuleIds: siemNotifications?.data.map((rule) => rule.id) ?? [],
-    legacyRuleActionsSOs: legacyRuleActionsSOs?.saved_objects ?? [],
-  };
+/**
+ * True when the rule already holds every action of a (throttled) sidecar, matched by connector, group and params.
+ * That happens when a previous migration saved the rule but could not delete the sidecar.
+ */
+const ruleHasAllSidecarActions = (
+  rule: SavedObject<RawRule>,
+  sidecar: SavedObject<LegacyIRuleActionsAttributes>
+): boolean => {
+  const sidecarActions = sidecar.attributes.actions;
+  if (sidecarActions.length === 0) {
+    return false;
+  }
+  const unmatchedRuleActions = [...rule.attributes.actions];
+  return sidecarActions.every((sidecarAction) => {
+    const connectorId = getConnectorId(sidecar.references, sidecarAction.actionRef);
+    const index = unmatchedRuleActions.findIndex(
+      (ruleAction) =>
+        connectorId !== undefined &&
+        ruleAction.group === sidecarAction.group &&
+        isEqual(ruleAction.params, sidecarAction.params) &&
+        getConnectorId(rule.references, ruleAction.actionRef) === connectorId
+    );
+    if (index === -1) {
+      return false;
+    }
+    unmatchedRuleActions.splice(index, 1);
+    return true;
+  });
 };
 
-const deleteLegacyActionObjects = async (
+type LegacySidecar = SavedObject<LegacyIRuleActionsAttributes>;
+
+const toRuleReferences = (ruleIds: string[]) =>
+  ruleIds.map((id) => ({ type: RULE_SAVED_OBJECT_TYPE, id }));
+
+// The legacy `siem.notifications` rules that point at the given rules
+const findNotificationRuleIds = async (
   context: RulesClientContext,
-  { siemNotificationRuleIds, legacyRuleActionsSOs }: LegacyActionsLookup
+  ruleIds: string[]
+): Promise<string[]> => {
+  const notificationRules = await findRules(context, {
+    options: {
+      filter: 'alert.attributes.alertTypeId:(siem.notifications)',
+      hasReference: toRuleReferences(ruleIds),
+    },
+  });
+  return notificationRules?.data.map((rule) => rule.id) ?? [];
+};
+
+// The legacy sidecar saved objects that point at the given rules
+const findSidecars = async (
+  context: RulesClientContext,
+  ruleIds: string[]
+): Promise<LegacySidecar[]> => {
+  const sidecars = await context.unsecuredSavedObjectsClient.find<LegacyIRuleActionsAttributes>({
+    type: legacyRuleActionsSavedObjectType,
+    hasReference: toRuleReferences(ruleIds),
+  });
+  return sidecars?.saved_objects ?? [];
+};
+
+const deleteSidecarsById = async (context: RulesClientContext, sidecarIds: string[]) => {
+  if (sidecarIds.length > 0) {
+    await context.unsecuredSavedObjectsClient.bulkDelete(
+      sidecarIds.map((id) => ({ type: legacyRuleActionsSavedObjectType, id }))
+    );
+  }
+};
+
+const deleteNotificationRulesById = async (
+  context: RulesClientContext,
+  notificationRuleIds: string[]
 ) => {
-  await Promise.all([
-    // If the legacy notification rule type ("siem.notification") exist,
-    // migration and cleanup are needed
-    siemNotificationRuleIds.length > 0 &&
-      bulkDeleteRules(context, { ids: siemNotificationRuleIds }),
-    // Delete the legacy sidecar SO if it exists
-    legacyRuleActionsSOs.length > 0 &&
-      context.unsecuredSavedObjectsClient.bulkDelete(
-        legacyRuleActionsSOs.map(({ id }) => ({ type: legacyRuleActionsSavedObjectType, id }))
-      ),
-  ]);
+  if (notificationRuleIds.length > 0) {
+    await bulkDeleteRules(context, { ids: notificationRuleIds });
+  }
 };
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- * Deletes the legacy sidecar SOs and `siem.notification` rules that reference the given rules.
+ * Deletes the sidecars of the given rules and the sidecars' `siem.notifications` rules, found by their reference to those rules.
  * Call it only after the rules carrying the migrated actions have been saved. Failures are logged and
- * swallowed: a leftover sidecar is harmless because a rule that already has actions takes precedence over it.
+ * swallowed: a leftover sidecar is detected and discarded the next time the rule is migrated.
  */
 export const deleteLegacyActionsForRules = async (
   context: RulesClientContext,
@@ -100,7 +141,17 @@ export const deleteLegacyActionsForRules = async (
     return;
   }
   try {
-    await deleteLegacyActionObjects(context, await findLegacyActions(context, ruleIds));
+    const [notificationRuleIds, sidecars] = await Promise.all([
+      findNotificationRuleIds(context, ruleIds),
+      findSidecars(context, ruleIds),
+    ]);
+    await Promise.all([
+      deleteNotificationRulesById(context, notificationRuleIds),
+      deleteSidecarsById(
+        context,
+        sidecars.map(({ id }) => id)
+      ),
+    ]);
   } catch (e) {
     context.logger.warn(`Failed to delete legacy actions for SIEM rules: ${e.message}`);
   }
@@ -108,12 +159,49 @@ export const deleteLegacyActionsForRules = async (
 
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
- * Retrieves legacy actions for SIEM rules and transforms them. Nothing is deleted for rules that still
- * need their actions persisted: the caller must call `deleteLegacyActionsForRules` after saving them.
- * A rule that already has actions is the source of truth, so its legacy objects are discarded right away.
+ * Deletes sidecars by id when nothing is waiting to be saved from them. Failures are logged and swallowed.
+ */
+export const deleteMigratedSidecars = async (
+  context: RulesClientContext,
+  sidecarIds: string[]
+): Promise<void> => {
+  try {
+    await deleteSidecarsById(context, sidecarIds);
+  } catch (e) {
+    context.logger.warn(`Failed to delete legacy sidecars for SIEM rules: ${e.message}`);
+  }
+};
+
+/**
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ * Deletes the `siem.notifications` rules that point at the given rules, when nothing is waiting to be saved
+ * for those rules. Failures are logged and swallowed.
+ */
+export const deleteNotificationRulesOfRules = async (
+  context: RulesClientContext,
+  ruleIds: string[]
+): Promise<void> => {
+  if (ruleIds.length === 0) {
+    return;
+  }
+  try {
+    await deleteNotificationRulesById(context, await findNotificationRuleIds(context, ruleIds));
+  } catch (e) {
+    context.logger.warn(`Failed to delete legacy notification rules for SIEM rules: ${e.message}`);
+  }
+};
+
+/**
+ * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
+ * Retrieves legacy actions for SIEM rules and transforms them. It does not delete anything.
+ * A throttled sidecar whose actions are all on the rule already was migrated by a previous run, so it is
+ * not merged again.
  * @param context RulesClient context
  * @param rules rules to migrate
- * @returns transformed actions by rule id, only for rules that need to be saved with the migrated actions
+ * @returns `transformedActionsByRuleId`: the actions to save, by rule id. Their legacy objects must be deleted
+ * only after the rule is saved (`deleteLegacyActionsForRules`).
+ * `sidecarIdsToDeleteNow`: sidecars whose actions are on their rule already, so nothing is waiting on them.
+ * `ruleIdsToDeleteNotificationRulesOf`: rules with nothing to save, whose `siem.notifications` rules can go now.
  */
 export const findAndTransformLegacyActions: FindAndTransformLegacyActions = async (
   context,
@@ -122,43 +210,35 @@ export const findAndTransformLegacyActions: FindAndTransformLegacyActions = asyn
 ) => {
   try {
     if (rules.length === 0) {
-      return {};
+      return {
+        transformedActionsByRuleId: {},
+        sidecarIdsToDeleteNow: [],
+        ruleIdsToDeleteNotificationRulesOf: [],
+      };
     }
 
-    const { siemNotificationRuleIds, legacyRuleActionsSOs } = await findLegacyActions(
-      context,
-      rules.map(({ id }) => id)
-    );
+    /**
+     * On update / patch I'm going to take the actions as they are, better off taking rules client.find (siem.notification) result
+     * and putting that into the actions array of the rule, then set the rules onThrottle property, notifyWhen and throttle from null -> actual value (1hr etc..)
+     * Then use the rules client to delete the siem.notification
+     * Then with the legacy Rule Actions saved object type, just delete it.
+     */
+    const ruleIds = rules.map(({ id }) => id);
+    const [notificationRuleIds, legacyRuleActionsSOs] = await Promise.all([
+      findNotificationRuleIds(context, ruleIds),
+      findSidecars(context, ruleIds),
+    ]);
 
-    // Assumption: if no legacy sidecar SO or notification rule types exist
-    // that reference the rule in question, assume rule actions are not legacy
-    if (siemNotificationRuleIds.length === 0 && legacyRuleActionsSOs.length === 0) {
-      return {};
-    }
-
-    const ruleIdsWithActions = new Set(
-      rules.filter((rule) => rule.attributes.actions?.length > 0).map(({ id }) => id)
-    );
     const getRuleId = (savedObject: SavedObject): string | undefined =>
       savedObject.references.find(({ type }) => type === RULE_SAVED_OBJECT_TYPE)?.id;
-
-    // A rule that already has actions wins over a sidecar that carries actions of its own, so that sidecar is not migrated.
-    // A "no_actions" or "rule" sidecar carries no actions, only the notify setting that has to be folded into the rule's own actions.
-    const migratingSOs = legacyRuleActionsSOs.filter((savedObject) => {
-      const ruleId = getRuleId(savedObject);
-      return (
-        ruleId === undefined ||
-        !ruleIdsWithActions.has(ruleId) ||
-        hasNoThrottledActions(savedObject.attributes)
-      );
-    });
+    const alreadyMigratedSidecarIds: string[] = [];
 
     const transformedActionsByRuleId: Record<
       string,
       { transformedActions: RawRuleAction[]; transformedReferences: SavedObjectReference[] }
     > = {};
 
-    await asyncForEach(migratingSOs, async (savedObject) => {
+    await asyncForEach(legacyRuleActionsSOs, async (savedObject) => {
       const ruleId = getRuleId(savedObject);
       if (ruleId === undefined) {
         throw new Error('Failed to find rule reference on legacy action Saved Object');
@@ -171,6 +251,12 @@ export const findAndTransformLegacyActions: FindAndTransformLegacyActions = asyn
         transformedActionsByRuleId[ruleId] = { transformedActions: [], transformedReferences: [] };
         return;
       }
+      const rule = rules.find((r) => r.id === ruleId);
+      if (rule != null && ruleHasAllSidecarActions(rule, savedObject)) {
+        alreadyMigratedSidecarIds.push(savedObject.id);
+        return;
+      }
+
       const transformedActions = transformFromLegacyActions(
         savedObject.attributes,
         savedObject.references
@@ -178,7 +264,6 @@ export const findAndTransformLegacyActions: FindAndTransformLegacyActions = asyn
       const transformedReferences = savedObject.references.filter(({ type }) => type === 'action');
 
       if (!skipActionsValidation) {
-        const rule = rules.find((r) => r.id === ruleId);
         if (rule == null) {
           throw new Error(`Failed to find rule id: ${ruleId} for validating migrated actions`);
         }
@@ -192,18 +277,17 @@ export const findAndTransformLegacyActions: FindAndTransformLegacyActions = asyn
       transformedActionsByRuleId[ruleId] = { transformedActions, transformedReferences };
     });
 
-    // Rules that will not be saved with migrated actions have nothing to lose, so their legacy
-    // objects can go now. The others are deleted by the caller once the rule is saved.
-    const ruleIdsToCleanUpNow = rules
-      .map(({ id }) => id)
-      .filter((id) => transformedActionsByRuleId[id] === undefined);
-    const hasLegacyObjectsToDiscard =
-      siemNotificationRuleIds.length > 0 || migratingSOs.length < legacyRuleActionsSOs.length;
-    if (hasLegacyObjectsToDiscard) {
-      await deleteLegacyActionsForRules(context, ruleIdsToCleanUpNow);
-    }
+    // Rules with nothing to save have nothing to lose, so their notification rules can be deleted now
+    const ruleIdsToDeleteNotificationRulesOf =
+      notificationRuleIds.length > 0
+        ? ruleIds.filter((id) => transformedActionsByRuleId[id] === undefined)
+        : [];
 
-    return transformedActionsByRuleId;
+    return {
+      transformedActionsByRuleId,
+      sidecarIdsToDeleteNow: alreadyMigratedSidecarIds,
+      ruleIdsToDeleteNotificationRulesOf,
+    };
   } catch (e) {
     context.logger.debug(`Migration has failed for SIEM rules: ${e.message}`);
     throw e;

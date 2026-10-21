@@ -42,13 +42,27 @@ const existingAction: RawRuleAction = {
   uuid: 'existing-uuid',
 };
 
-const buildRule = (actions: RawRuleAction[] = [], consumer = 'siem'): SavedObject<RawRule> =>
+const buildRule = (
+  actions: RawRuleAction[] = [],
+  consumer = 'siem',
+  connectorId = 'email-1'
+): SavedObject<RawRule> =>
   ({
     id: RULE_ID,
     type: RULE_SAVED_OBJECT_TYPE,
-    references: actions.length > 0 ? [{ name: 'action_0', type: 'action', id: 'email-1' }] : [],
+    references: actions.length > 0 ? [{ name: 'action_0', type: 'action', id: connectorId }] : [],
     attributes: { consumer, actions, throttle: '1h', notifyWhen: 'onThrottleInterval' },
   } as unknown as SavedObject<RawRule>);
+
+// the action buildSidecar() holds, as saved on a rule by a previous migration
+const migratedSidecarAction: RawRuleAction = {
+  group: 'default',
+  params: { message: 'legacy' },
+  actionRef: 'action_0',
+  actionTypeId: '.slack',
+  uuid: 'migrated-uuid',
+  frequency: { summary: true, notifyWhen: 'onThrottleInterval', throttle: '1h' },
+};
 
 const buildSidecar = (ruleThrottle: string): SavedObject<LegacyIRuleActionsAttributes> => ({
   id: SIDECAR_ID,
@@ -142,10 +156,10 @@ describe('bulkMigrateLegacyActions', () => {
     expect(savedObjectsClient.bulkDelete).not.toHaveBeenCalled();
   });
 
-  it('keeps the actions of a rule that another process already migrated, and discards the leftover sidecar', async () => {
-    // Process B migrated and saved first: the retry of process A reads a rule that now has actions
+  it('discards a throttled sidecar whose actions are all on the rule already, without merging them again', async () => {
+    // A previous migration saved the rule but could not delete the sidecar
     mockLegacyObjects({ sidecars: [buildSidecar('1h')] });
-    const rule = buildRule([existingAction]);
+    const rule = buildRule([migratedSidecarAction], 'siem', 'slack-1');
 
     const migratedIds = await bulkMigrateLegacyActions({
       context,
@@ -154,15 +168,65 @@ describe('bulkMigrateLegacyActions', () => {
     });
 
     expect(migratedIds).toEqual([]);
-    expect(rule.attributes.actions).toEqual([existingAction]);
-    expect(rule.references).toEqual([{ name: 'action_0', type: 'action', id: 'email-1' }]);
-    expect(rule.attributes.throttle).toBe('1h');
-    expect(rule.attributes.notifyWhen).toBe('onThrottleInterval');
-    // the rule's own actions are persisted, so deleting the sidecar right away cannot lose data
+    expect(rule.attributes.actions).toEqual([migratedSidecarAction]);
+    expect(rule.references).toEqual([{ name: 'action_0', type: 'action', id: 'slack-1' }]);
+    // the rule already holds the actions, so deleting the sidecar right away cannot lose data
     expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith([
       { type: legacyRuleActionsSavedObjectType, id: SIDECAR_ID },
     ]);
   });
+
+  it('does not validate a sidecar whose actions are on the rule already', async () => {
+    mockLegacyObjects({ sidecars: [buildSidecar('1h')] });
+
+    // the context has no rule type registry, so validating would throw
+    await expect(
+      bulkMigrateLegacyActions({
+        context,
+        rules: [buildRule([migratedSidecarAction], 'siem', 'slack-1')],
+      })
+    ).resolves.toEqual([]);
+  });
+
+  it.each([
+    ['another connector', 'email-1', migratedSidecarAction],
+    ['other params', 'slack-1', { ...migratedSidecarAction, params: { message: 'edited' } }],
+    ['another group', 'slack-1', { ...migratedSidecarAction, group: 'other' }],
+  ])(
+    'merges a throttled sidecar with a rule whose action differs by %s, like before',
+    async (_difference, connectorId, ruleAction) => {
+      mockLegacyObjects({ sidecars: [buildSidecar('1h')] });
+      const rule = buildRule([ruleAction], 'siem', connectorId);
+      rule.attributes.notifyWhen = null;
+      rule.attributes.throttle = undefined;
+
+      const migratedIds = await bulkMigrateLegacyActions({
+        context,
+        rules: [rule],
+        skipActionsValidation: true,
+      });
+
+      expect(migratedIds).toEqual([RULE_ID]);
+      expect(rule.attributes.actions).toEqual([
+        {
+          ...ruleAction,
+          frequency: { summary: true, notifyWhen: 'onActiveAlert', throttle: null },
+        },
+        expect.objectContaining({
+          actionRef: 'action_1',
+          actionTypeId: '.slack',
+          frequency: { summary: true, notifyWhen: 'onThrottleInterval', throttle: '1h' },
+        }),
+      ]);
+      expect(rule.references).toEqual([
+        { name: 'action_0', type: 'action', id: connectorId },
+        { name: 'action_1', type: 'action', id: 'slack-1' },
+      ]);
+      expect(rule.attributes.notifyWhen).toBeNull();
+      // deleted after the rule is saved
+      expect(savedObjectsClient.bulkDelete).not.toHaveBeenCalled();
+    }
+  );
 
   it.each(['rule', 'no_actions'])(
     'folds the notify setting into the actions of a rule that has its own actions with a "%s" sidecar',
@@ -191,19 +255,6 @@ describe('bulkMigrateLegacyActions', () => {
       expect(savedObjectsClient.bulkDelete).not.toHaveBeenCalled();
     }
   );
-
-  it('does not validate or transform the sidecar of a rule that already has actions', async () => {
-    // a sidecar with no connector references would make the transformation throw
-    const brokenSidecar = {
-      ...buildSidecar('1h'),
-      references: [{ name: 'alert_0', type: RULE_SAVED_OBJECT_TYPE, id: RULE_ID }],
-    };
-    mockLegacyObjects({ sidecars: [brokenSidecar] });
-
-    await expect(
-      bulkMigrateLegacyActions({ context, rules: [buildRule([existingAction])] })
-    ).resolves.toEqual([]);
-  });
 
   it('defers the cleanup of a "no_actions" sidecar until the rule is saved', async () => {
     mockLegacyObjects({ sidecars: [buildSidecar('no_actions')] });
@@ -284,7 +335,7 @@ describe('deleteLegacyActionsForRules', () => {
     expect(savedObjectsClient.find).not.toHaveBeenCalled();
   });
 
-  it('logs and swallows failures: a leftover sidecar is harmless because the rule actions win', async () => {
+  it('logs and swallows failures: a leftover sidecar is detected and discarded on the next run', async () => {
     mockLegacyObjects({ sidecars: [buildSidecar('1h')] });
     savedObjectsClient.bulkDelete.mockRejectedValue(new Error('es down'));
 

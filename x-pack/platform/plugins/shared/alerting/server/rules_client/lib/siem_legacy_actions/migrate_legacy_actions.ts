@@ -10,8 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import type { SavedObject } from '@kbn/core/server';
 import type { RulesClientContext } from '../..';
-import type { RawRule, RawRuleAction } from '../../../types';
-import { findAndTransformLegacyActions } from './find_and_transform_legacy_actions';
+import type { RawRuleAction, RawRule } from '../../../types';
+import {
+  deleteMigratedSidecars,
+  deleteNotificationRulesOfRules,
+  findAndTransformLegacyActions,
+} from './find_and_transform_legacy_actions';
 
 interface BulkMigrateLegacyActionsParams {
   context: RulesClientContext;
@@ -22,10 +26,9 @@ interface BulkMigrateLegacyActionsParams {
 /**
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
  * migrates SIEM legacy actions and merges rule actions and references.
- * Migrated legacy objects are NOT deleted here: once the returned rules are saved, the caller must call
+ * The migrated legacy objects are NOT deleted here: once the returned rules are saved, the caller must call
  * `deleteLegacyActionsForRules` with the ids of the rules that saved successfully. Deleting earlier loses the
  * actions when the save fails, for example on a version conflict.
- * A rule that already has actions keeps them: its legacy objects are discarded without being merged.
  * @param context RulesClient context
  * @param rules Rules to check for legacy actions
  * @param skipActionsValidation Skip validating actions after transformation
@@ -41,11 +44,17 @@ export const bulkMigrateLegacyActions = async ({
     const siemRulesMap: Map<string, SavedObject<RawRule>> = new Map();
     siemRules.forEach((rule) => siemRulesMap.set(rule.id, rule));
 
-    const transformed = await findAndTransformLegacyActions(
-      context,
-      siemRules,
-      skipActionsValidation
-    );
+    const {
+      transformedActionsByRuleId: transformed,
+      sidecarIdsToDeleteNow,
+      ruleIdsToDeleteNotificationRulesOf,
+    } = await findAndTransformLegacyActions(context, siemRules, skipActionsValidation);
+
+    // nothing is waiting to be saved from these, so they can be deleted now
+    await Promise.all([
+      deleteMigratedSidecars(context, sidecarIdsToDeleteNow),
+      deleteNotificationRulesOfRules(context, ruleIdsToDeleteNotificationRulesOf),
+    ]);
 
     Object.keys(transformed).forEach((ruleId) => {
       const rule = siemRulesMap.get(ruleId);
@@ -56,18 +65,35 @@ export const bulkMigrateLegacyActions = async ({
         return;
       }
       const { transformedActions, transformedReferences } = transformed[ruleId];
-      // A rule with its own actions only gets here with a "no_actions" or "rule" sidecar, which has no actions to merge.
-      // The notify setting of the rule is put into the frequency of its own actions instead.
-      const existingActionsWithFrequencies: RawRuleAction[] = rule.attributes.actions.map(
-        (action) => ({
-          ...action,
-          frequency: {
-            summary: true,
-            notifyWhen: rule.attributes.notifyWhen ?? 'onActiveAlert',
-            throttle: rule.attributes.throttle ?? null,
-          },
-        })
-      );
+      // fix references for a case when non-legacy actions present in a rule before the migration
+      const actions = rule.attributes.actions;
+      if (actions.length) {
+        transformedActions.forEach((transformedAction, i) => {
+          const oldReferenceName = transformedAction.actionRef;
+          const transformedReference = transformedReferences.find(
+            ({ name }) => name === oldReferenceName
+          );
+          const newReferenceName = `action_${actions.length + i}`;
+          transformedAction.actionRef = newReferenceName;
+
+          if (transformedReference) {
+            transformedReference.name = newReferenceName;
+          }
+        });
+      }
+
+      // put frequencies into existing actions
+      // the situation when both action in rule and legacy exist should be rare one
+      // but if it happens, we put frequency in existing actions per-action level
+      const existingActionsWithFrequencies: RawRuleAction[] = actions.map((action) => ({
+        ...action,
+        frequency: {
+          summary: true,
+          notifyWhen: rule.attributes.notifyWhen ?? 'onActiveAlert',
+          throttle: rule.attributes.throttle ?? null,
+        },
+      }));
+
       rule.attributes.actions = [...existingActionsWithFrequencies, ...transformedActions];
       rule.references = [...rule.references, ...transformedReferences];
       // Only clear rule-level throttle when there are actual migrated actions from
