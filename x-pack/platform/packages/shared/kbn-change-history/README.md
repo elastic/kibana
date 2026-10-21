@@ -86,9 +86,20 @@ Each persisted document gets a unique `event.id` assigned by the package (UUID v
 
 UUID v7 values are monotonically increasing within the same millisecond. That matters when two change history events are written back-to-back with the same timestamp (for example `rule_install` and `rule_enable` when a user chooses "Install and enable"): `getHistory()` sorts by `sequence`, then `@timestamp`, then `event.id`, so ordering stays deterministic.
 
-### Backwards/forwards compatibility in `object.snapshot`
+### Reading snapshots back (forward compatibility)
 
-`object.snapshot` is stored unmapped in the `.kibana_change_history` data stream, separate from the original tracked object. Because of this, it is recommended that callers store an application-layer type rather than a raw on-disk format. If/when there are underlying changes in tracked object storage format, using an application-layer type will likely save on having to introduce a compensating storage-layer transform to keep old snapshots readable. See [#273561](https://github.com/elastic/kibana/pull/273561) for more context and a concrete example.
+This package stores `object.snapshot` unmapped, exactly as you logged it, and never changes it afterwards. It has no restore API, no snapshot migrations, and no read-time transforms. How to read an old snapshot, and whether it still applies to the current object, depends on your domain, so your feature owns that logic.
+
+If your feature reads snapshots back, for example to show a diff or to restore an object to an earlier version, your code must understand every snapshot shape your feature has ever written. Snapshots from older Kibana versions stay in the data stream until an admin applies retention (see [Retention](#retention)). `service.version` records the Kibana version that wrote each document.
+
+To keep old snapshots readable:
+
+- Store an application-layer type, not the raw storage format of the tracked object. If that storage format changes later, an application-layer snapshot usually stays readable without a compensating transform. See [#273561](https://github.com/elastic/kibana/pull/273561) for an example.
+- Change the snapshot shape only by adding optional fields. A rename, a removal, or a new required field breaks older snapshots unless your read path handles both the old and the new shape.
+- Treat every field of a historical snapshot as optional, including fields that your current code always writes.
+- Validate a snapshot when you read it back. The package does not check snapshot shape when you log it, so your read path is the only place that can detect a snapshot it can't use.
+- If the shape must change in a breaking way, write a schema version into the snapshot, `metadata`, or `tags`. Your read path can then branch on that version instead of guessing from the shape.
+- Decide up front what happens to a snapshot that your current code can't apply, for example one that predates a required setting. Fill in defaults, reject the restore with a clear error, or show the snapshot as read-only.
 
 ## API
 
