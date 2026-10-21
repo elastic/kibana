@@ -34,6 +34,9 @@ const probeResponse = (columns: string[]) => ({
   values: [],
 });
 
+const zeroStats = { total: 0, max: 0, min: 0, avg: 0 };
+const zeroKiStats = { active: zeroStats, expired: zeroStats, deleted: zeroStats };
+
 const countsResponse = (counts: Record<string, number>) => ({
   columns: [
     { name: 'count', type: 'long' },
@@ -97,6 +100,7 @@ describe('context_engine usage collector', () => {
     ]);
     esqlResponses.set('ai-index-idx-a', { counts: { active: 3, deleted: 1 } });
     esqlResponses.set('ai-index-ds-b', { counts: { active: 2, expired: 4 } });
+    esqlResponses.set('ai-index-idx-c', { counts: { active: 4, expired: 2, deleted: 2 } });
 
     const usage = await fetch();
 
@@ -106,8 +110,12 @@ describe('context_engine usage collector', () => {
     expect(usage).toEqual({
       ai_indices: { user: 3, managed: 0 },
       kis: {
-        user: { active: 5, expired: 4, deleted: 1 },
-        managed: { active: 0, expired: 0, deleted: 0 },
+        user: {
+          active: { total: 9, max: 4, min: 2, avg: 3 },
+          expired: { total: 6, max: 4, min: 0, avg: 2 },
+          deleted: { total: 3, max: 2, min: 0, avg: 1 },
+        },
+        managed: zeroKiStats,
       },
     });
   });
@@ -125,8 +133,12 @@ describe('context_engine usage collector', () => {
     expect(usage).toEqual({
       ai_indices: { user: 0, managed: 2 },
       kis: {
-        user: { active: 0, expired: 0, deleted: 0 },
-        managed: { active: 7, expired: 0, deleted: 0 },
+        user: zeroKiStats,
+        managed: {
+          active: { total: 7, max: 7, min: 7, avg: 7 },
+          expired: zeroStats,
+          deleted: zeroStats,
+        },
       },
     });
     expect(esClient.esql.query).not.toHaveBeenCalledWith(
@@ -156,8 +168,12 @@ describe('context_engine usage collector', () => {
     expect(usage).toEqual({
       ai_indices: { user: 2, managed: 0 },
       kis: {
-        user: { active: 1, expired: 0, deleted: 0 },
-        managed: { active: 0, expired: 0, deleted: 0 },
+        user: {
+          active: { total: 1, max: 1, min: 1, avg: 1 },
+          expired: zeroStats,
+          deleted: zeroStats,
+        },
+        managed: zeroKiStats,
       },
     });
   });

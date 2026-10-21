@@ -30,14 +30,27 @@ interface KiLifecycleCounts {
   deleted: number;
 }
 
+interface KiBucketStats {
+  total: number;
+  max: number;
+  min: number;
+  avg: number;
+}
+
+interface KiStats {
+  active: KiBucketStats;
+  expired: KiBucketStats;
+  deleted: KiBucketStats;
+}
+
 export interface ContextEngineUsage {
   ai_indices: {
     user: number;
     managed: number;
   };
   kis: {
-    user: KiLifecycleCounts;
-    managed: KiLifecycleCounts;
+    user: KiStats;
+    managed: KiStats;
   };
 }
 
@@ -86,11 +99,19 @@ const countKisByLifecycle = async (
   return counts;
 };
 
-const addCounts = (target: KiLifecycleCounts, source: KiLifecycleCounts): void => {
-  for (const bucket of KI_LIFECYCLE_BUCKETS) {
-    target[bucket] += source[bucket];
-  }
+const bucketStats = (values: number[]): KiBucketStats => {
+  const total = values.reduce((sum, value) => sum + value, 0);
+  return values.length === 0
+    ? { total, max: 0, min: 0, avg: 0 }
+    : { total, max: Math.max(...values), min: Math.min(...values), avg: total / values.length };
 };
+
+/** Total and spread of each lifecycle count across the counted dests. */
+const kiStats = (counts: KiLifecycleCounts[]): KiStats => ({
+  active: bucketStats(counts.map(({ active }) => active)),
+  expired: bucketStats(counts.map(({ expired }) => expired)),
+  deleted: bucketStats(counts.map(({ deleted }) => deleted)),
+});
 
 const fetchContextEngineUsage = async ({
   esClient,
@@ -109,10 +130,7 @@ const fetchContextEngineUsage = async ({
     _source: ['id', 'managed', 'dest'],
   });
 
-  const usage: ContextEngineUsage = {
-    ai_indices: { user: 0, managed: 0 },
-    kis: { user: emptyKiCounts(), managed: emptyKiCounts() },
-  };
+  const aiIndices = { user: 0, managed: 0 };
   // Every dest counts once.
   const destOwners = new Map<string, { dest: AiIndexDest; owner: 'user' | 'managed' }>();
   for (const hit of response.hits.hits) {
@@ -121,7 +139,7 @@ const fetchContextEngineUsage = async ({
       continue;
     }
     const owner = source.managed === true ? 'managed' : 'user';
-    usage.ai_indices[owner] += 1;
+    aiIndices[owner] += 1;
     const id = source.id ?? hit._id;
     const dest = owner === 'managed' && id !== undefined ? getManagedDest(id) : source.dest;
     if (dest !== undefined && !isIndexPattern(dest.value) && !destOwners.has(dest.value)) {
@@ -142,12 +160,19 @@ const fetchContextEngineUsage = async ({
       })
     )
   );
+  const perDestCounts: Record<'user' | 'managed', KiLifecycleCounts[]> = { user: [], managed: [] };
   for (const result of results) {
     if (result !== undefined) {
-      addCounts(usage.kis[result.owner], result.counts);
+      perDestCounts[result.owner].push(result.counts);
     }
   }
-  return usage;
+  return {
+    ai_indices: aiIndices,
+    kis: {
+      user: kiStats(perDestCounts.user),
+      managed: kiStats(perDestCounts.managed),
+    },
+  };
 };
 
 export const registerContextEngineUsageCollector = ({
@@ -185,37 +210,148 @@ export const registerContextEngineUsageCollector = ({
       kis: {
         user: {
           active: {
-            type: 'long',
-            _meta: { description: 'Number of active, unexpired KIs in user-created AI indices' },
+            total: {
+              type: 'long',
+              _meta: { description: 'Number of active, unexpired KIs in user-created AI indices' },
+            },
+            max: {
+              type: 'long',
+              _meta: { description: 'Most active, unexpired KIs in one user-created AI index' },
+            },
+            min: {
+              type: 'long',
+              _meta: { description: 'Fewest active, unexpired KIs in one user-created AI index' },
+            },
+            avg: {
+              type: 'float',
+              _meta: { description: 'Average active, unexpired KIs per user-created AI index' },
+            },
           },
           expired: {
-            type: 'long',
-            _meta: {
-              description: 'Number of active KIs past their expires_at in user-created AI indices',
+            total: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Number of active KIs past their expires_at in user-created AI indices',
+              },
+            },
+            max: {
+              type: 'long',
+              _meta: {
+                description: 'Most active KIs past their expires_at in one user-created AI index',
+              },
+            },
+            min: {
+              type: 'long',
+              _meta: {
+                description: 'Fewest active KIs past their expires_at in one user-created AI index',
+              },
+            },
+            avg: {
+              type: 'float',
+              _meta: {
+                description: 'Average active KIs past their expires_at per user-created AI index',
+              },
             },
           },
           deleted: {
-            type: 'long',
-            _meta: {
-              description: 'Number of KIs with lifecycle status deleted in user-created AI indices',
+            total: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Number of KIs with lifecycle status deleted in user-created AI indices',
+              },
+            },
+            max: {
+              type: 'long',
+              _meta: {
+                description: 'Most KIs with lifecycle status deleted in one user-created AI index',
+              },
+            },
+            min: {
+              type: 'long',
+              _meta: {
+                description:
+                  'Fewest KIs with lifecycle status deleted in one user-created AI index',
+              },
+            },
+            avg: {
+              type: 'float',
+              _meta: {
+                description: 'Average KIs with lifecycle status deleted per user-created AI index',
+              },
             },
           },
         },
         managed: {
           active: {
-            type: 'long',
-            _meta: { description: 'Number of active, unexpired KIs in managed AI indices' },
+            total: {
+              type: 'long',
+              _meta: { description: 'Number of active, unexpired KIs in managed AI indices' },
+            },
+            max: {
+              type: 'long',
+              _meta: { description: 'Most active, unexpired KIs in one managed AI index' },
+            },
+            min: {
+              type: 'long',
+              _meta: { description: 'Fewest active, unexpired KIs in one managed AI index' },
+            },
+            avg: {
+              type: 'float',
+              _meta: { description: 'Average active, unexpired KIs per managed AI index' },
+            },
           },
           expired: {
-            type: 'long',
-            _meta: {
-              description: 'Number of active KIs past their expires_at in managed AI indices',
+            total: {
+              type: 'long',
+              _meta: {
+                description: 'Number of active KIs past their expires_at in managed AI indices',
+              },
+            },
+            max: {
+              type: 'long',
+              _meta: {
+                description: 'Most active KIs past their expires_at in one managed AI index',
+              },
+            },
+            min: {
+              type: 'long',
+              _meta: {
+                description: 'Fewest active KIs past their expires_at in one managed AI index',
+              },
+            },
+            avg: {
+              type: 'float',
+              _meta: {
+                description: 'Average active KIs past their expires_at per managed AI index',
+              },
             },
           },
           deleted: {
-            type: 'long',
-            _meta: {
-              description: 'Number of KIs with lifecycle status deleted in managed AI indices',
+            total: {
+              type: 'long',
+              _meta: {
+                description: 'Number of KIs with lifecycle status deleted in managed AI indices',
+              },
+            },
+            max: {
+              type: 'long',
+              _meta: {
+                description: 'Most KIs with lifecycle status deleted in one managed AI index',
+              },
+            },
+            min: {
+              type: 'long',
+              _meta: {
+                description: 'Fewest KIs with lifecycle status deleted in one managed AI index',
+              },
+            },
+            avg: {
+              type: 'float',
+              _meta: {
+                description: 'Average KIs with lifecycle status deleted per managed AI index',
+              },
             },
           },
         },
