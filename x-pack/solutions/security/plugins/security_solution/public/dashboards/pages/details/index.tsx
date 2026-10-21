@@ -62,15 +62,15 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
 
   const { dashboardContainer, dashboardInternalApi, handleDashboardLoaded } =
     useDashboardRenderer(savedObjectId);
-  const [dashboardDataViews, setDashboardDataViews] = useState<FilterableSource[] | undefined>();
+  const [dashboardSources, setDashboardSources] = useState<FilterableSource[] | undefined>();
   useEffect(() => {
     if (!dashboardContainer) {
-      setDashboardDataViews(undefined);
+      setDashboardSources(undefined);
       return;
     }
 
-    const subscription = dashboardContainer.filterableSources$.subscribe((publishedDataViews) => {
-      setDashboardDataViews(publishedDataViews?.length ? publishedDataViews : undefined);
+    const subscription = dashboardContainer.filterableSources$.subscribe((publishedSources) => {
+      setDashboardSources(publishedSources?.length ? publishedSources : undefined);
     });
 
     return () => {
@@ -96,7 +96,7 @@ const DashboardViewComponent: React.FC<DashboardViewProps> = ({
       <FiltersGlobal color="plain" hasBorder={false} panelCss={filtersGlobalStyles}>
         <SiemSearchBar
           dataView={dataView}
-          additionalDataViews={dashboardDataViews}
+          additionalSources={dashboardSources}
           id={InputsModelId.global}
         />
       </FiltersGlobal>

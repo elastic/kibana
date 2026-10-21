@@ -141,7 +141,6 @@ const DashboardAppHeader = ({
   );
 };
 
-// An ES|QL data view, which never reports to be time based, even with a time field.
 const isEsqlDataView = (dataView: FilterableSource) =>
   'type' in dataView && dataView.type === 'esql';
 

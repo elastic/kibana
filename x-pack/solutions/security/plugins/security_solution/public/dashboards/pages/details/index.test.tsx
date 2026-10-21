@@ -156,7 +156,7 @@ describe('DashboardView', () => {
     await waitFor(() => {
       expect(SiemSearchBar).toHaveBeenLastCalledWith(
         expect.objectContaining({
-          additionalDataViews: [libraryDataView],
+          additionalSources: [libraryDataView],
         }),
         expect.anything()
       );
@@ -172,7 +172,7 @@ describe('DashboardView', () => {
 
     await waitFor(() => {
       expect(SiemSearchBar).toHaveBeenLastCalledWith(
-        expect.objectContaining({ additionalDataViews: undefined }),
+        expect.objectContaining({ additionalSources: undefined }),
         expect.anything()
       );
     });

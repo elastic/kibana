@@ -31,6 +31,7 @@ import type {
   PresentationContainer,
   PublishesDataLoading,
   PublishesDataViews,
+  PublishesFilterableSources,
   PublishesDescription,
   PublishesEditablePauseFetch,
   PublishesHideBorder,
@@ -180,6 +181,7 @@ export type DashboardApi = CanExpandPanels &
   PresentationContainer &
   PublishesDataLoading &
   PublishesDataViews &
+  PublishesFilterableSources &
   PublishesDescription &
   PublishesHideBorder &
   Pick<PublishesTitle, 'title$' | 'hideTitle$'> &

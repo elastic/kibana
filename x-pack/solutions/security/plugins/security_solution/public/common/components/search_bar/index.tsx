@@ -45,10 +45,10 @@ interface SiemSearchBarProps {
   dataTestSubj?: string;
   dataView: DataView;
   /**
-   * Data views from the current page, such as dashboard panels, used to resolve
+   * Sources from the current page, such as dashboard panels, used to resolve
    * filters that target a data view other than `dataView`.
    */
-  additionalDataViews?: FilterableSource[];
+  additionalSources?: FilterableSource[];
   hideFilterBar?: boolean;
   hideQueryInput?: boolean;
   id: InputsModelId.global | InputsModelId.timeline;
@@ -72,7 +72,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
   ({
     dataTestSubj,
     dataView,
-    additionalDataViews,
+    additionalSources,
     displayStyle,
     end,
     filterQuery,
@@ -307,18 +307,18 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    const dataViews: FilterableSource[] | null = useMemo(() => {
+    const sources: FilterableSource[] | null = useMemo(() => {
       if (dataView == null) {
         return null;
       }
       const extras = new Map<string, FilterableSource>();
-      for (const view of additionalDataViews ?? []) {
+      for (const view of additionalSources ?? []) {
         if (view.id && view.id !== dataView.id && !extras.has(view.id)) {
           extras.set(view.id, view);
         }
       }
       return [dataView, ...extras.values()];
-    }, [additionalDataViews, dataView]);
+    }, [additionalSources, dataView]);
 
     const onTimeRangeChange = useCallback(
       ({ dateRange }: { dateRange: TimeRange }) => {
@@ -336,12 +336,12 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
       },
       [filterManager, id, setTablesActivePageToZero, updateSearch]
     );
-    return dataViews ? (
+    return sources ? (
       <div data-test-subj={`${id}DatePicker`}>
         <SearchBar
           appName="siem"
           isLoading={isLoading}
-          indexPatterns={dataViews}
+          indexPatterns={sources}
           query={filterQuery}
           onClearSavedQuery={onClearSavedQuery}
           onQuerySubmit={onQuerySubmit}
@@ -377,7 +377,7 @@ export const SearchBarComponent = memo<SiemSearchBarProps & PropsFromRedux>(
     prevProps.displayStyle === nextProps.displayStyle &&
     deepEqual(prevProps.queries, nextProps.queries) &&
     deepEqual(prevProps.dataView, nextProps.dataView) &&
-    deepEqual(prevProps.additionalDataViews, nextProps.additionalDataViews)
+    deepEqual(prevProps.additionalSources, nextProps.additionalSources)
 );
 
 const makeMapStateToProps = () => {

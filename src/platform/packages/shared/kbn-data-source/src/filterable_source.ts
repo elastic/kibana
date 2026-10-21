@@ -35,6 +35,4 @@ export interface FilterableSource extends DataViewBase {
   readonly timeFieldName?: string;
   getName?(): string;
   isTimeBased(): boolean;
-  /** A `DataView` is persisted when it is a saved object. The filterable source of an ES|QL dataset never is. */
-  isPersisted?(): boolean;
 }

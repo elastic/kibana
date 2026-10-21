@@ -108,15 +108,6 @@ describe('toFilterableSource', () => {
       });
     });
 
-    it('is not persisted, like the source it comes from', async () => {
-      const source = await statsOnDataset('persisted-*');
-
-      const filterable = await source.toFilterableSource();
-
-      expect(source.isPersisted()).toBe(false);
-      expect(filterable.isPersisted?.()).toBe(false);
-    });
-
     it('has the name of the source, and no getName, which is an optional capability', async () => {
       const source = await statsOnDataset('named-*');
 
@@ -248,7 +239,6 @@ describe('toFilterableSource', () => {
       const filterable = await new DataViewSource(dataView).toFilterableSource();
 
       expect(filterable).toBe(dataView);
-      expect(filterable.isPersisted?.()).toBe(dataView.isPersisted());
     });
   });
 });
