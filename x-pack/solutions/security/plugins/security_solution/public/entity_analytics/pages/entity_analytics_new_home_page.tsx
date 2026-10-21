@@ -103,6 +103,7 @@ import {
   useRiskMoversCount,
   useRiskMoversDelta,
   useRiskTilesSeries,
+  useSearchedTileEntityIds,
   useTilesLoadTelemetry,
   useTilesTimeoutNotice,
   TILE_TIMEOUT_MESSAGE,
@@ -842,35 +843,37 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
     [activeTile, setActiveTile]
   );
 
-  const selectedEntityIds = useMemo(() => {
-    if (!activeTile) {
-      return EMPTY_ENTITY_IDS;
-    }
-    switch (activeTile) {
-      case 'entitiesWithAlerts':
-        return severeAlertsEntityIds;
-      case 'entitiesWithAnomalies':
-        return anomaliesEntityIds;
-      case 'riskMovers':
-        return riskMoversEntityIds;
-      case 'newlyHighCritical':
-        return newlyHCEntityIds;
-      case 'watchlisted':
-        return watchlistedEntityIds;
-      case 'newEntity':
-        return newEntityEntityIds;
-      default:
-        return EMPTY_ENTITY_IDS;
-    }
-  }, [
-    activeTile,
-    severeAlertsEntityIds,
-    anomaliesEntityIds,
-    riskMoversEntityIds,
-    newlyHCEntityIds,
-    watchlistedEntityIds,
-    newEntityEntityIds,
-  ]);
+  const tileEntityIds = useMemo(
+    () => ({
+      entitiesWithAlerts: severeAlertsEntityIds,
+      entitiesWithAnomalies: anomaliesEntityIds,
+      riskMovers: riskMoversEntityIds,
+      newlyHighCritical: newlyHCEntityIds,
+      watchlisted: watchlistedEntityIds,
+      newEntity: newEntityEntityIds,
+    }),
+    [
+      severeAlertsEntityIds,
+      anomaliesEntityIds,
+      riskMoversEntityIds,
+      newlyHCEntityIds,
+      watchlistedEntityIds,
+      newEntityEntityIds,
+    ]
+  );
+  const { tileEntityIds: searchedTileEntityIds, isSearchPending } = useSearchedTileEntityIds({
+    spaceId: resolvedSpaceId,
+    searchExpression,
+    isReady:
+      !alertBasedPending &&
+      !anomaliesPending &&
+      !newEntityPending &&
+      !riskMoversPending &&
+      !newlyHCPending,
+    tileEntityIds,
+  });
+
+  const selectedEntityIds = activeTile ? searchedTileEntityIds[activeTile] : EMPTY_ENTITY_IDS;
 
   const cappedTileEntityIds = useMemo(
     () => (activeTile ? getCappedTileEntityIds(selectedEntityIds) : null),
@@ -1239,6 +1242,22 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
       timeRange,
     ]
   );
+  // Deltas and sparklines only have counts, which the search can't narrow, so they are hidden.
+  const shownSignalCards = useMemo(
+    (): SignalCardData[] =>
+      searchExpression
+        ? signalCards.map((card) => ({
+            ...card,
+            value: searchedTileEntityIds[card.id].length,
+            isLoading: card.isLoading || isSearchPending,
+            delta: undefined,
+            isDeltaLoading: false,
+            isDeltaUnavailable: false,
+            trend: undefined,
+          }))
+        : signalCards,
+    [signalCards, searchExpression, searchedTileEntityIds, isSearchPending]
+  );
 
   const onGroupChange = useCallback(
     (key: string) => {
@@ -1375,7 +1394,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             <EuiSpacer size="s" />
             <SignalCards
               activeTile={activeTile}
-              cards={signalCards}
+              cards={shownSignalCards}
               onFilterForCard={handleFilterForCard}
             />
           </div>
