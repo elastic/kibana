@@ -33,6 +33,8 @@ export type ResourceKind = keyof typeof resourceTypeLabels;
 export type DataManagementResource = ContentListItem<{
   kind: ResourceKind;
   type: (typeof resourceTypeLabels)[ResourceKind];
+  /** Index open/close status from Index Management. Absent for other resource kinds. */
+  indexStatus?: string;
 }>;
 
 export const RESOURCE_TYPES = (Object.keys(resourceTypeLabels) as ResourceKind[]).map((kind) => ({
@@ -48,9 +50,14 @@ export const resolveResourceKind = (value: string): ResourceKind | undefined => 
   )?.kind;
 };
 
-export const toResource = (name: string, kind: ResourceKind): DataManagementResource => ({
+export const toResource = (
+  name: string,
+  kind: ResourceKind,
+  indexStatus?: string
+): DataManagementResource => ({
   id: `${kind}:${name}`,
   title: name,
   kind,
   type: resourceTypeLabels[kind],
+  ...(indexStatus ? { indexStatus } : {}),
 });

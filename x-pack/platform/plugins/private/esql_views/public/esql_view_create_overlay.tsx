@@ -7,6 +7,8 @@
 
 import React, { Suspense, useEffect, useMemo, useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import type { EsqlView } from '@kbn/esql-types';
+import { i18n } from '@kbn/i18n';
 import { createEsqlViewsManagementClient } from '@kbn/esql-utils';
 import type { EsqlViewsTelemetryClient } from './telemetry';
 import type { StartDependencies } from './plugin';
@@ -24,10 +26,12 @@ const LazyEsqlEditor = React.lazy(async () => {
 /** ES|QL view create flyout hosted on the data management overview. */
 export const EsqlViewCreateOverlay = ({
   onClose,
+  esqlViewName,
   getStartServices,
   getTelemetryClient,
 }: {
   onClose: () => void;
+  esqlViewName?: string;
   getStartServices: () => Promise<readonly [CoreStart, StartDependencies, ...unknown[]]>;
   getTelemetryClient: () => Promise<EsqlViewsTelemetryClient | undefined>;
 }) => {
@@ -35,21 +39,43 @@ export const EsqlViewCreateOverlay = ({
     | {
         start: readonly [CoreStart, StartDependencies, ...unknown[]];
         telemetryClient?: EsqlViewsTelemetryClient;
+        view?: EsqlView;
       }
     | undefined
   >();
 
   useEffect(() => {
     let cancelled = false;
-    Promise.all([getStartServices(), getTelemetryClient()]).then(([start, telemetryClient]) => {
-      if (!cancelled) {
-        setReady({ start, telemetryClient });
+    Promise.all([getStartServices(), getTelemetryClient()]).then(
+      async ([start, telemetryClient]) => {
+        if (cancelled) {
+          return;
+        }
+        const [coreStart] = start;
+        let view: EsqlView | undefined;
+        if (esqlViewName) {
+          try {
+            view = await createEsqlViewsManagementClient(coreStart.http).getView(esqlViewName);
+          } catch (error) {
+            coreStart.notifications.toasts.addDanger(readViewError(error, esqlViewName));
+            onClose();
+            return;
+          }
+          if (!view) {
+            coreStart.notifications.toasts.addDanger(readViewError(undefined, esqlViewName));
+            onClose();
+            return;
+          }
+        }
+        if (!cancelled) {
+          setReady({ start, telemetryClient, view });
+        }
       }
-    });
+    );
     return () => {
       cancelled = true;
     };
-  }, [getStartServices, getTelemetryClient]);
+  }, [esqlViewName, getStartServices, getTelemetryClient, onClose]);
 
   const formProps = useMemo(() => {
     if (!ready) {
@@ -77,6 +103,7 @@ export const EsqlViewCreateOverlay = ({
         EsqlEditor={LazyEsqlEditor}
         client={formProps.client}
         onClose={onClose}
+        view={ready?.view}
         onSave={async () => {
           onClose();
         }}
@@ -85,4 +112,19 @@ export const EsqlViewCreateOverlay = ({
       />
     </Suspense>
   );
+};
+
+const readViewError = (error: unknown, name: string): string => {
+  if (
+    typeof error === 'object' &&
+    error !== null &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
+    return error.message;
+  }
+  return i18n.translate('xpack.esqlViews.createOverlay.viewNotFound', {
+    defaultMessage: 'ES|QL view {name} could not be opened for editing.',
+    values: { name },
+  });
 };

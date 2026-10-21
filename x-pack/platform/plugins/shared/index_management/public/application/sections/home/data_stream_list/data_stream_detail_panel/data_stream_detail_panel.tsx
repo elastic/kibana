@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
@@ -52,6 +52,8 @@ import {
 interface Props {
   dataStreamName: string;
   onClose: (shouldReload?: boolean) => void;
+  /** Opens the data lifecycle editor once the data stream has loaded. */
+  startEditing?: boolean;
 }
 
 export const ConditionalWrap = ({
@@ -67,6 +69,7 @@ export const ConditionalWrap = ({
 export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
   dataStreamName,
   onClose,
+  startEditing = false,
 }) => {
   const [isActionsPopOverOpen, setActionsPopOverOpen] = useState<boolean>(false);
   const [isDeleting, setIsDeleting] = useState<boolean>(false);
@@ -90,6 +93,15 @@ export const DataStreamDetailPanel: React.FunctionComponent<Props> = ({
     inspectedIlmPolicy,
     closeInspectFlyout,
   } = useEditDataLifecycle({ dataStream, resolvedLifecycle, onClose });
+
+  const openedLifecycleEditor = useRef(false);
+  useEffect(() => {
+    if (!startEditing || !dataStream || openedLifecycleEditor.current) {
+      return;
+    }
+    openedLifecycleEditor.current = true;
+    openEditFlyout();
+  }, [dataStream, openEditFlyout, startEditing]);
 
   const { url, config, core } = useAppContext();
   const locator = url.locators.get<IndexManagementLocatorParams>(INDEX_MANAGEMENT_LOCATOR_ID);

@@ -42,6 +42,8 @@ export type DataManagementCreateOverlayId = 'index' | 'dataStream' | 'esqlView';
 
 export interface DataManagementCreateOverlayProps {
   onClose: () => void;
+  /** Set when the ES|QL view overlay should edit this view instead of creating one. */
+  esqlViewName?: string;
 }
 
 export type DataManagementCreateOverlayRenderer = (

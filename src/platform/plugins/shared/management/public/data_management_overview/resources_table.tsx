@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart, HttpStart } from '@kbn/core/public';
+import type { ApplicationStart, CoreStart, HttpStart } from '@kbn/core/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
   ContentList,
   ContentListFooter,
@@ -22,6 +23,7 @@ import {
 } from '@kbn/content-list';
 import { getResourcePreviewHref } from './get_resource_preview_href';
 import { loadDataManagementResources } from './load_resources';
+import { ResourceRowActions } from './resource_row_actions';
 import { resolveResourceKind, type DataManagementResource } from './sample_resources';
 import {
   LoadedResourcesContext,
@@ -38,6 +40,10 @@ const nameColumnTitle = i18n.translate('management.dataManagementOverview.column
 
 const typeColumnTitle = i18n.translate('management.dataManagementOverview.column.type', {
   defaultMessage: 'Type',
+});
+
+const actionsColumnTitle = i18n.translate('management.dataManagementOverview.column.actions', {
+  defaultMessage: 'Actions',
 });
 
 const tableTitle = i18n.translate('management.dataManagementOverview.tableTitle', {
@@ -106,14 +112,22 @@ const isResource = (item: ContentListItem): item is DataManagementResource =>
 export const ResourcesTable = ({
   getUrlForApp,
   http,
+  share,
+  toasts,
+  onEditEsqlView,
 }: {
   getUrlForApp: ApplicationStart['getUrlForApp'];
   http: HttpStart;
+  share: SharePluginStart;
+  toasts: CoreStart['notifications']['toasts'];
+  onEditEsqlView: (name: string) => void;
 }) => {
   const resourcesPromise = useMemo(() => loadDataManagementResources(http), [http]);
+  const resourcesRequest = useRef(resourcesPromise);
   const [resources, setResources] = useState<readonly DataManagementResource[]>([]);
 
   useEffect(() => {
+    resourcesRequest.current = resourcesPromise;
     let cancelled = false;
     resourcesPromise.then((loaded) => {
       if (!cancelled) {
@@ -128,8 +142,13 @@ export const ResourcesTable = ({
   const dataSource = useMemo<DataSourceConfig>(
     () => ({
       debounceMs: 0,
+      onRefresh: async () => {
+        const next = loadDataManagementResources(http);
+        resourcesRequest.current = next;
+        setResources(await next);
+      },
       findItems: async ({ searchQuery, filters, sort, page }) => {
-        const loaded = await resourcesPromise;
+        const loaded = await resourcesRequest.current;
         const { include, exclude } = readTypeFilter(filters);
         const direction = sort?.direction === 'desc' ? -1 : 1;
         const field = sort?.field === 'type' ? 'type' : 'title';
@@ -152,7 +171,7 @@ export const ResourcesTable = ({
         };
       },
     }),
-    [resourcesPromise]
+    [http]
   );
   const itemConfig = useMemo(
     () => ({
@@ -186,6 +205,24 @@ export const ResourcesTable = ({
               render={(item) => (isResource(item) ? item.type : undefined)}
               sortable
               width="16em"
+            />
+            <Column
+              data-test-subj="dataManagementOverviewActionsColumn"
+              id="actions"
+              name={actionsColumnTitle}
+              render={(item) =>
+                isResource(item) ? (
+                  <ResourceRowActions
+                    getUrlForApp={getUrlForApp}
+                    http={http}
+                    onEditEsqlView={onEditEsqlView}
+                    resource={item}
+                    share={share}
+                    toasts={toasts}
+                  />
+                ) : null
+              }
+              width="7em"
             />
           </ContentListTable>
           <ContentListFooter />

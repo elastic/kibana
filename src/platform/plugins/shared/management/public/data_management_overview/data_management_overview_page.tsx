@@ -13,6 +13,7 @@ import { EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { getDataManagementCreateOverlay } from '../data_management_create_overlays';
 import type { DataManagementCreateOverlayId, ManagementAppMountParams } from '../types';
 import { getCreateResourceMenu } from './create_resource_menu';
@@ -30,19 +31,35 @@ const pageDescription = i18n.translate('management.dataManagementOverview.pageDe
 export const DataManagementOverviewPage = ({
   getUrlForApp,
   http,
+  share,
+  toasts,
 }: {
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   http: CoreStart['http'];
+  share: SharePluginStart;
+  toasts: CoreStart['notifications']['toasts'];
 }) => {
   const [openCreate, setOpenCreate] = useState<DataManagementCreateOverlayId | undefined>();
-  const closeCreate = useCallback(() => setOpenCreate(undefined), []);
+  const [esqlViewName, setEsqlViewName] = useState<string | undefined>();
+  const closeCreate = useCallback(() => {
+    setOpenCreate(undefined);
+    setEsqlViewName(undefined);
+  }, []);
+  const openCreateOverlay = useCallback((id: DataManagementCreateOverlayId) => {
+    setEsqlViewName(undefined);
+    setOpenCreate(id);
+  }, []);
+  const editEsqlView = useCallback((name: string) => {
+    setEsqlViewName(name);
+    setOpenCreate('esqlView');
+  }, []);
   const menu = useMemo(
     () =>
       getCreateResourceMenu({
         getUrlForApp,
-        onOpenCreate: setOpenCreate,
+        onOpenCreate: openCreateOverlay,
       }),
-    [getUrlForApp]
+    [getUrlForApp, openCreateOverlay]
   );
   const createOverlay = openCreate ? getDataManagementCreateOverlay(openCreate) : undefined;
 
@@ -50,15 +67,22 @@ export const DataManagementOverviewPage = ({
     <div data-test-subj="dataManagementOverviewPage">
       <AppHeader description={pageDescription} menu={menu} spacing="bleed" title={pageTitle} />
       <EuiSpacer size="l" />
-      <ResourcesTable getUrlForApp={getUrlForApp} http={http} />
-      {createOverlay?.({ onClose: closeCreate })}
+      <ResourcesTable
+        getUrlForApp={getUrlForApp}
+        http={http}
+        onEditEsqlView={editEsqlView}
+        share={share}
+        toasts={toasts}
+      />
+      {createOverlay?.({ onClose: closeCreate, esqlViewName })}
     </div>
   );
 };
 
 export const renderDataManagementOverview = (
   coreStart: CoreStart,
-  { element, setBreadcrumbs }: ManagementAppMountParams
+  { element, setBreadcrumbs }: ManagementAppMountParams,
+  share: SharePluginStart
 ) => {
   coreStart.chrome.docTitle.change(pageTitle);
   setBreadcrumbs([{ text: pageTitle }]);
@@ -69,6 +93,8 @@ export const renderDataManagementOverview = (
       <DataManagementOverviewPage
         getUrlForApp={coreStart.application.getUrlForApp}
         http={coreStart.http}
+        share={share}
+        toasts={coreStart.notifications.toasts}
       />
     )
   );

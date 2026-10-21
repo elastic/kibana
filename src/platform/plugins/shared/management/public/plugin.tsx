@@ -214,12 +214,12 @@ export class ManagementPlugin
       hideFromGlobalSearch: true,
       visibleIn: ['projectSideNav'],
       async mount(params) {
-        const [{ renderDataManagementOverview }, [coreStart]] = await Promise.all([
+        const [{ renderDataManagementOverview }, [coreStart, startPlugins]] = await Promise.all([
           import('./data_management_overview/data_management_overview_page'),
           core.getStartServices(),
         ]);
 
-        return renderDataManagementOverview(coreStart, params);
+        return renderDataManagementOverview(coreStart, params, startPlugins.share);
       },
     });
 

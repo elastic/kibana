@@ -38,8 +38,9 @@ export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies, St
         .catch(() => undefined));
 
     const getStartServices = () => core.getStartServices();
-    management.registerDataManagementCreateOverlay('esqlView', ({ onClose }) =>
+    management.registerDataManagementCreateOverlay('esqlView', ({ onClose, esqlViewName }) =>
       React.createElement(EsqlViewCreateOverlay, {
+        esqlViewName,
         getStartServices,
         getTelemetryClient,
         onClose,

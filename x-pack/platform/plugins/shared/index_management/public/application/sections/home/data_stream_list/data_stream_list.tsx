@@ -350,6 +350,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
       {decodedDataStreamName && (
         <DataStreamDetailPanel
           dataStreamName={decodedDataStreamName}
+          startEditing={new URLSearchParams(search).get('editLifecycle') === '1'}
           onClose={(shouldReload?: boolean) => {
             if (cameFromDataManagementOverview(search)) {
               void application.navigateToUrl(

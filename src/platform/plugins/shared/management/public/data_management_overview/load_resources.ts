@@ -20,6 +20,14 @@ const readName = (value: unknown): string | undefined => {
   return typeof name === 'string' && name.length > 0 ? name : undefined;
 };
 
+const readIndexStatus = (value: unknown): string | undefined => {
+  if (typeof value !== 'object' || value === null || !('status' in value)) {
+    return undefined;
+  }
+  const { status } = value;
+  return typeof status === 'string' && status.length > 0 ? status : undefined;
+};
+
 const isHidden = (value: unknown): boolean =>
   typeof value === 'object' && value !== null && 'hidden' in value && value.hidden === true;
 
@@ -43,7 +51,7 @@ const loadIndices = async (http: HttpStart): Promise<DataManagementResource[]> =
     if (!name || isHidden(index) || isBackingIndex) {
       return [];
     }
-    return [toResource(name, 'index')];
+    return [toResource(name, 'index', readIndexStatus(index))];
   });
 };
 

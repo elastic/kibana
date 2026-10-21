@@ -33,6 +33,7 @@
     "@kbn/core-chrome-browser",
     "@kbn/autoops-promotion-callout",
     "@kbn/app-header",
+    "@kbn/ui-callout",
     "@kbn/cps",
     "@kbn/cps-utils",
     "@kbn/core-application-browser-mocks",
