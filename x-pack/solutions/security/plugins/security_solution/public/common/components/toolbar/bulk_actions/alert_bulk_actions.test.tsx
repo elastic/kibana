@@ -13,6 +13,7 @@ import { AlertBulkActionsComponent } from './alert_bulk_actions';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { clearSelected } from '@kbn/securitysolution-data-table/store/data_table/actions';
 import { render, screen, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
@@ -92,6 +93,15 @@ describe('AlertBulkActionsComponent', () => {
 
     expect(useBulkActionItemsMock).toHaveBeenLastCalledWith(
       expect.objectContaining({ isAllSelected: true })
+    );
+  });
+
+  // The run-workflow action refuses a select-all larger than it can run on, so it needs the count.
+  it('passes the total item count through to the bulk actions', () => {
+    renderAlertBulkActions({ totalItems: 1234 });
+
+    expect(useBulkActionItemsMock).toHaveBeenLastCalledWith(
+      expect.objectContaining({ totalItems: 1234 })
     );
   });
 
