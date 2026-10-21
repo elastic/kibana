@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-var-requires */
 import { join } from 'path';
 import { build } from '@storybook/core-server';
 import type { CLIOptions, BuilderOptions, LoadOptions } from '@storybook/types';
