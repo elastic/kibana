@@ -11,6 +11,7 @@ import type { Loader, LoaderOptions, View, ViewOptions } from 'vega';
 import { loader, logger, Warn, expressionFunction } from 'vega';
 import { expressionInterpreter } from 'vega-interpreter';
 import { i18n } from '@kbn/i18n';
+import { VEGA_FUNCTION_NAMES } from '@kbn/vega-sandbox';
 import type { IExternalUrl } from '@kbn/core/public';
 import { Utils } from '../data_model/utils';
 import type { VegaRenderDescriptor } from '../data_model/types';
@@ -20,7 +21,6 @@ import type { IServiceSettings } from './vega_map_view/service_settings/service_
 import { TooltipHandler } from './vega_tooltip';
 
 import { getEnableExternalUrls } from '../services';
-import { VEGA_FILTER_FUNCTIONS } from '../constants';
 
 export interface VegaViewParams {
   parentEl: HTMLDivElement;
@@ -44,7 +44,7 @@ type VegaLoader = Loader & { options: LoaderOptions };
 
 // Vega's extension functions are global. When called, we forward the call to the instance's
 // parent as a filter action; the parent validates it, so the view never builds filters itself.
-for (const funcName of VEGA_FILTER_FUNCTIONS) {
+for (const funcName of VEGA_FUNCTION_NAMES) {
   if (!expressionFunction(funcName)) {
     expressionFunction(
       funcName,
@@ -244,7 +244,7 @@ export abstract class VegaBaseView {
 
     return {
       expr: expressionInterpreter,
-      renderer: this._descriptor.renderer as ViewOptions['renderer'],
+      renderer: this._descriptor.renderer,
       loader: vegaLoader,
       logger: vegaLogger,
     };

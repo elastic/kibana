@@ -22,7 +22,7 @@ export interface VegaEvent {
 
 export type VegaEventHandler = (event: VegaEvent) => void;
 
-/** An unvalidated call to one of the `VEGA_FILTER_FUNCTIONS`, forwarded by the view to its parent. */
+/** An unvalidated call to one of the `VEGA_FUNCTION_NAMES`, forwarded by the view to its parent. */
 export interface VegaFilterAction {
   fn: string;
   args: readonly unknown[];

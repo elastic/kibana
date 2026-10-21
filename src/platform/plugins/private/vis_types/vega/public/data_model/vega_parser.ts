@@ -43,6 +43,7 @@ import type {
   ControlsDirection,
   KibanaConfig,
   VegaRenderDescriptor,
+  Renderer,
 } from './types';
 
 const locToDirMap: Record<string, ControlsLocation> = {
@@ -67,9 +68,10 @@ export class VegaParser {
   useHover?: boolean;
   _config?: VegaConfig;
   useMap?: boolean;
-  renderer?: string;
+  renderer?: Renderer;
   tooltips?: false | ResolvedTooltipConfig;
   mapConfig?: VegaConfig;
+  colorSchemes?: Record<string, string[]>;
   vlspec?: VegaSpec;
   useResize?: boolean;
   containerDir?: ControlsLocation | ControlsDirection;
@@ -125,6 +127,7 @@ export class VegaParser {
       renderer: this.renderer,
       tooltips: this.tooltips,
       mapConfig: this.mapConfig,
+      colorSchemes: this.colorSchemes,
       containerDir: this.containerDir,
       controlsDir: this.controlsDir,
       hideWarnings: this.hideWarnings,
@@ -761,6 +764,8 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     // Add the default palette
     const paletteColors = getVegaThemeColors(this.theme, 'visColors');
     scheme('elastic', paletteColors);
+    // Vega registers schemes per realm, so a view in another frame must register them itself.
+    this.colorSchemes = { elastic: paletteColors };
 
     // Default category coloring to the Elastic color scheme
     this._setDefaultValue({ scheme: 'elastic' }, 'config', 'range', 'category');

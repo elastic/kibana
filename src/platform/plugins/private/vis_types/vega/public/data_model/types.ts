@@ -58,7 +58,7 @@ interface Mark {
   stroke?: string;
 }
 
-type Renderer = 'svg' | 'canvas';
+export type Renderer = 'svg' | 'canvas';
 
 interface VegaSpecConfig extends KibanaConfig {
   kibana?: KibanaConfig;
@@ -254,9 +254,11 @@ export interface VegaRenderDescriptor {
   readonly useMap?: boolean;
   readonly useResize?: boolean;
   readonly useHover?: boolean;
-  readonly renderer?: string;
+  readonly renderer?: Renderer;
   readonly tooltips?: false | ResolvedTooltipConfig;
   readonly mapConfig?: VegaConfig;
+  /** Named Vega color schemes the spec relies on, such as Kibana's `elastic` palette. */
+  readonly colorSchemes?: Readonly<Record<string, string[]>>;
   readonly containerDir?: ControlsLocation | ControlsDirection;
   readonly controlsDir?: ControlsLocation;
   readonly hideWarnings: boolean;
