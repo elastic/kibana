@@ -5,29 +5,24 @@
  * 2.0.
  */
 
-// PROTOTYPE: step bodies for the integration group onboarding wizard. Generic: signals, streams
-// and fields all come from the selected schema's child package (see model.ts).
+// PROTOTYPE: step bodies for the integration onboarding wizard (integration groups). Generic:
+// signals, streams and fields all come from the selected schema's child package (see model.ts).
+// Order follows the design's install order: what to collect -> how -> settings per signal ->
+// review -> detect and review (detect_step.tsx).
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
-import moment from 'moment';
 import {
-  EuiBadge,
-  EuiButton,
-  EuiButtonEmpty,
   EuiCallOut,
   EuiCheckbox,
   EuiCode,
   EuiFieldText,
-  EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
   EuiPanel,
-  EuiProgress,
   EuiRadio,
   EuiSelect,
   EuiSpacer,
@@ -36,28 +31,26 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 
-import type { AgentPolicy, DataStream, NewPackagePolicy } from '../../../../../../../types';
-import {
-  ElasticsearchAssetType,
-  KibanaSavedObjectType,
-} from '../../../../../../../../common/types';
+import type { AgentPolicy, NewPackagePolicy } from '../../../../../../../types';
 import type { PackagePolicyValidationResults } from '../../../../../../../../common/services';
-import {
-  sendGetBulkAssets,
-  sendGetDataStreams,
-  sendGetPackageInfoByKey,
-  useStartServices,
-} from '../../../../../../../hooks';
-import { useDiscoverLocator } from '../../../../../../../hooks/use_locator';
+import { SetupTechnology } from '../../../../../../../../common/types';
 
-import type { CarryOverReport, SchemaModel, SchemaState, WizardInput, WizardStream } from './model';
+import type {
+  CarryOverReport,
+  InstallSummary,
+  SchemaModel,
+  SchemaState,
+  WizardInput,
+  WizardStream,
+} from './model';
 import {
-  getDatasetVarValue,
   getEnabledSignals,
+  getEnabledStreams,
   getSchemaInfo,
   getSignalInfo,
   getStreamShortTitle,
   getTargetDataset,
+  getDatasetVarValue,
   getVarGroupSelections,
   isStreamEnabled,
   toInputVar,
@@ -70,7 +63,7 @@ import { VarFieldGrid, VarGroupSelectors, countVarErrors, splitVars } from './va
 
 const sectionGap = css({ display: 'flex', flexDirection: 'column', gap: 24 });
 
-/* ---------- Step 1: schema & signals ---------- */
+/* ---------- What to collect: schema + signals ---------- */
 
 export type AgentPolicyMode = 'new' | 'existing';
 
@@ -82,8 +75,8 @@ export interface SchemaChoice {
   signals?: string[];
 }
 
-export const SchemaSignalsStep: React.FC<{
-  groupTitle: string;
+export const CollectStep: React.FC<{
+  title: string;
   schemas: SchemaChoice[];
   schema: string;
   defaultSchema?: string;
@@ -92,36 +85,25 @@ export const SchemaSignalsStep: React.FC<{
   model?: SchemaModel;
   state: SchemaState;
   onStreamsChange: (enabled: Record<string, boolean>) => void;
-  policyMode: AgentPolicyMode;
-  onPolicyModeChange: (mode: AgentPolicyMode) => void;
-  newPolicyName: string;
-  onNewPolicyNameChange: (name: string) => void;
-  existingPolicies: AgentPolicy[];
-  existingPolicyId?: string;
-  onExistingPolicyChange: (id: string) => void;
-  packagePolicy: NewPackagePolicy;
-  validationResults?: PackagePolicyValidationResults;
-  onPolicyFieldChange: (field: 'name' | 'namespace', value: string) => void;
 }> = (props) => {
   const { euiTheme } = useEuiTheme();
-  const { model, state, onStreamsChange, groupTitle } = props;
+  const { model, state, onStreamsChange, title } = props;
   // Default (recommended) schema first
   const schemas = [...props.schemas].sort(
     (a, b) => Number(b.schema === props.defaultSchema) - Number(a.schema === props.defaultSchema)
   );
   const switchNote =
     props.lastSwitch && props.lastSwitch.to === props.schema ? props.lastSwitch : undefined;
-  const nameErrors = props.validationResults?.name;
-  const namespaceErrors = props.validationResults?.namespace;
+  const noSignals = !!model && getEnabledStreams(model, state).length === 0;
 
   return (
     <div css={sectionGap}>
-      {/* PROTOTYPE: single-schema groups skip the choice entirely (design I1). */}
+      {/* Single-schema integrations skip the choice entirely (design I1). */}
       {schemas.length > 1 && (
-        <div>
+        <div data-test-subj="groupWizardSchemaChoice">
           <SectionHeading
             title="Data schema"
-            info={`How ${groupTitle} data is shaped in Elasticsearch. You can't change this after the integration is added - switching later means adding a new integration.`}
+            info={`How ${title} data is shaped in Elasticsearch. You can't change this after the integration is added - switching later means adding a new integration.`}
           />
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s" responsive={false}>
@@ -173,7 +155,7 @@ export const SchemaSignalsStep: React.FC<{
                       {switchNote.report.lostSignals
                         .map((sig) => getSignalInfo(sig).title.toLowerCase())
                         .join(' or ')}{' '}
-                      for {groupTitle}.
+                      for {title}.
                     </p>
                   )}
                   {switchNote.report.dropped.length > 0 && (
@@ -189,7 +171,10 @@ export const SchemaSignalsStep: React.FC<{
       )}
 
       <div>
-        <SectionHeading title="Signals" />
+        <SectionHeading
+          title="Signals"
+          description="Pick what to collect. You can also skip collection and only install the assets."
+        />
         <EuiSpacer size="s" />
         {!model ? (
           <EuiLoadingSpinner />
@@ -224,9 +209,7 @@ export const SchemaSignalsStep: React.FC<{
                           <EuiCheckbox
                             key={s.id}
                             id={`groupWizardStream-${s.id}`}
-                            label={
-                              <EuiText size="xs">{getStreamShortTitle(s, groupTitle)}</EuiText>
-                            }
+                            label={<EuiText size="xs">{getStreamShortTitle(s, title)}</EuiText>}
                             checked={isStreamEnabled(s, state)}
                             onChange={(e) => onStreamsChange({ [s.id]: e.target.checked })}
                           />
@@ -239,132 +222,348 @@ export const SchemaSignalsStep: React.FC<{
             })}
           </EuiFlexGroup>
         )}
+        {noSignals && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiText size="xs" color="subdued" data-test-subj="groupWizardNoSignalsHint">
+              Nothing selected: {title} will be added without collecting data, and only its assets
+              (dashboards and other saved objects) are installed.
+            </EuiText>
+          </>
+        )}
       </div>
+    </div>
+  );
+};
 
-      <div>
-        <SectionHeading
-          title="Agent policy"
-          description={`Elastic Agent collects ${groupTitle} data from your hosts. Agent policies manage a group of integrations across a set of agents.`}
-        />
-        <EuiSpacer size="s" />
-        <EuiPanel color="subdued" hasBorder paddingSize="m">
-          <EuiFlexGroup gutterSize="l" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiRadio
-                id="groupWizardPolicyNew"
-                name="groupWizardPolicyMode"
-                label="Create a new policy"
-                checked={props.policyMode === 'new'}
-                onChange={() => props.onPolicyModeChange('new')}
-              />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiRadio
-                id="groupWizardPolicyExisting"
-                name="groupWizardPolicyMode"
-                label="Use an existing policy"
-                checked={props.policyMode === 'existing'}
-                disabled={props.existingPolicies.length === 0}
-                onChange={() => props.onPolicyModeChange('existing')}
-              />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          {props.policyMode === 'new' ? (
-            <EuiFormRow
-              fullWidth
-              css={css({ maxWidth: 480 })}
-              label="New agent policy name"
-              helpText="Created with this integration. You can add agents after setup."
-              isInvalid={!props.newPolicyName.trim()}
-              error="A name is required"
-            >
-              <EuiFieldText
-                compressed
-                fullWidth
-                value={props.newPolicyName}
-                isInvalid={!props.newPolicyName.trim()}
-                onChange={(e) => props.onNewPolicyNameChange(e.target.value)}
-                data-test-subj="groupWizardNewPolicyName"
-              />
-            </EuiFormRow>
-          ) : (
-            <EuiFormRow label="Agent policy" fullWidth css={css({ maxWidth: 480 })}>
-              <EuiSelect
-                compressed
-                fullWidth
-                hasNoInitialSelection={!props.existingPolicyId}
-                value={props.existingPolicyId ?? ''}
-                options={props.existingPolicies.map((p) => ({ value: p.id, text: p.name }))}
-                onChange={(e) => props.onExistingPolicyChange(e.target.value)}
-                data-test-subj="groupWizardExistingPolicy"
-              />
-            </EuiFormRow>
-          )}
-        </EuiPanel>
-      </div>
+/* ---------- How: deployment method (hidden with a single method) ---------- */
 
-      {/* PROTOTYPE: integration name + namespace live above the schema, so they survive a switch. */}
-      <div>
-        <SectionHeading title="Integration settings" />
-        <EuiSpacer size="s" />
-        <EuiFlexGroup gutterSize="m" css={css({ maxWidth: 720 })}>
-          <EuiFlexItem>
-            <EuiFormRow
-              label="Integration name"
+const METHOD_INFO: Record<SetupTechnology, { title: string; description: string }> = {
+  [SetupTechnology.AGENT_BASED]: {
+    title: 'Elastic Agent',
+    description: 'Install Elastic Agent on your hosts. Agent policies manage what it collects.',
+  },
+  [SetupTechnology.AGENTLESS]: {
+    title: 'Agentless',
+    description: 'Elastic collects the data for you. Nothing to install.',
+  },
+};
+
+export const HowStep: React.FC<{
+  methods: SetupTechnology[];
+  method: SetupTechnology;
+  onMethodChange: (method: SetupTechnology) => void;
+  agentPolicySection: React.ReactNode;
+}> = ({ methods, method, onMethodChange, agentPolicySection }) => (
+  <div css={sectionGap}>
+    <div>
+      <SectionHeading title="Deployment" description="How the data gets collected." />
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="s" responsive={false}>
+        {methods.map((m) => (
+          <EuiFlexItem key={m}>
+            <ChoiceCard
+              control="radio"
+              name="groupWizardMethod"
+              title={METHOD_INFO[m].title}
+              description={METHOD_INFO[m].description}
+              checked={method === m}
+              onChange={() => onMethodChange(m)}
+              data-test-subj={`groupWizardMethod-${m}`}
+            />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    </div>
+    {method === SetupTechnology.AGENT_BASED && agentPolicySection}
+  </div>
+);
+
+/* ---------- Agent policy + integration settings (in "how", or in review when "how" is hidden) ---------- */
+
+export const AgentPolicySection: React.FC<{
+  title: string;
+  policyMode: AgentPolicyMode;
+  onPolicyModeChange: (mode: AgentPolicyMode) => void;
+  newPolicyName: string;
+  onNewPolicyNameChange: (name: string) => void;
+  existingPolicies: AgentPolicy[];
+  existingPolicyId?: string;
+  onExistingPolicyChange: (id: string) => void;
+}> = (props) => (
+  <div data-test-subj="groupWizardAgentPolicy">
+    <SectionHeading
+      title="Agent policy"
+      description={`Elastic Agent collects ${props.title} data from your hosts. Agent policies decide which integrations run on a set of agents.`}
+    />
+    <EuiSpacer size="s" />
+    <EuiPanel color="subdued" hasBorder paddingSize="m">
+      <EuiFlexGroup gutterSize="l" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiRadio
+            id="groupWizardPolicyNew"
+            name="groupWizardPolicyMode"
+            label="Create a new policy"
+            checked={props.policyMode === 'new'}
+            onChange={() => props.onPolicyModeChange('new')}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiRadio
+            id="groupWizardPolicyExisting"
+            name="groupWizardPolicyMode"
+            label="Use an existing policy"
+            checked={props.policyMode === 'existing'}
+            disabled={props.existingPolicies.length === 0}
+            onChange={() => props.onPolicyModeChange('existing')}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+      {props.policyMode === 'new' ? (
+        <EuiFormRow
+          fullWidth
+          css={css({ maxWidth: 480 })}
+          label="New agent policy name"
+          helpText="Created with this integration. You can add agents after setup."
+          isInvalid={!props.newPolicyName.trim()}
+          error="A name is required"
+        >
+          <EuiFieldText
+            compressed
+            fullWidth
+            value={props.newPolicyName}
+            isInvalid={!props.newPolicyName.trim()}
+            onChange={(e) => props.onNewPolicyNameChange(e.target.value)}
+            data-test-subj="groupWizardNewPolicyName"
+          />
+        </EuiFormRow>
+      ) : (
+        <EuiFormRow label="Agent policy" fullWidth css={css({ maxWidth: 480 })}>
+          <EuiSelect
+            compressed
+            fullWidth
+            hasNoInitialSelection={!props.existingPolicyId}
+            value={props.existingPolicyId ?? ''}
+            options={props.existingPolicies.map((p) => ({ value: p.id, text: p.name }))}
+            onChange={(e) => props.onExistingPolicyChange(e.target.value)}
+            data-test-subj="groupWizardExistingPolicy"
+          />
+        </EuiFormRow>
+      )}
+    </EuiPanel>
+  </div>
+);
+
+/** Integration name + namespace. They live above the schema state, so they survive a switch. */
+export const IntegrationSettingsSection: React.FC<{
+  packagePolicy: NewPackagePolicy;
+  validationResults?: PackagePolicyValidationResults;
+  onPolicyFieldChange: (field: 'name' | 'namespace', value: string) => void;
+}> = ({ packagePolicy, validationResults, onPolicyFieldChange }) => {
+  const nameErrors = validationResults?.name;
+  const namespaceErrors = validationResults?.namespace;
+  return (
+    <div>
+      <SectionHeading title="Integration settings" />
+      <EuiSpacer size="s" />
+      <EuiFlexGroup gutterSize="m" css={css({ maxWidth: 720 })}>
+        <EuiFlexItem>
+          <EuiFormRow
+            label="Integration name"
+            fullWidth
+            isInvalid={!!nameErrors?.length}
+            error={nameErrors}
+          >
+            <EuiFieldText
+              compressed
               fullWidth
+              value={packagePolicy.name}
               isInvalid={!!nameErrors?.length}
-              error={nameErrors}
-            >
-              <EuiFieldText
-                compressed
-                fullWidth
-                value={props.packagePolicy.name}
-                isInvalid={!!nameErrors?.length}
-                onChange={(e) => props.onPolicyFieldChange('name', e.target.value)}
-                data-test-subj="groupWizardPolicyName"
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFormRow
-              label="Namespace"
+              onChange={(e) => onPolicyFieldChange('name', e.target.value)}
+              data-test-subj="groupWizardPolicyName"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiFormRow
+            label="Namespace"
+            fullWidth
+            isInvalid={!!namespaceErrors?.length}
+            error={namespaceErrors}
+            labelAppend={
+              <EuiText size="xs" color="subdued">
+                Optional
+              </EuiText>
+            }
+          >
+            <EuiFieldText
+              compressed
               fullWidth
+              placeholder="Agent policy namespace"
+              value={packagePolicy.namespace ?? ''}
               isInvalid={!!namespaceErrors?.length}
-              error={namespaceErrors}
-              labelAppend={
-                <EuiText size="xs" color="subdued">
-                  Optional
-                </EuiText>
-              }
-            >
-              <EuiFieldText
-                compressed
-                fullWidth
-                placeholder="Agent policy namespace"
-                value={props.packagePolicy.namespace ?? ''}
-                isInvalid={!!namespaceErrors?.length}
-                onChange={(e) => props.onPolicyFieldChange('namespace', e.target.value)}
-                data-test-subj="groupWizardNamespace"
-              />
-            </EuiFormRow>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+              onChange={(e) => onPolicyFieldChange('namespace', e.target.value)}
+              data-test-subj="groupWizardNamespace"
+            />
+          </EuiFormRow>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </div>
+  );
+};
+
+/* ---------- Review ---------- */
+
+export const ReviewStep: React.FC<{
+  title: string;
+  schema: string;
+  model: SchemaModel;
+  state: SchemaState;
+  packagePolicy: NewPackagePolicy;
+  installSummary?: InstallSummary;
+  method: SetupTechnology;
+  showMethod: boolean;
+  /** Agent policy choice, when the "how" step is hidden. */
+  agentPolicySection?: React.ReactNode;
+  agentPolicyLabel?: string;
+  integrationSettings: React.ReactNode;
+  onEdit: (step: string) => void;
+}> = (props) => {
+  const { euiTheme } = useEuiTheme();
+  const { model, state, title } = props;
+  const streams = getEnabledStreams(model, state);
+  const signals = getEnabledSignals(model, state);
+  const summary = props.installSummary;
+  const contentNames = summary?.contentPackages.map((c) => `${c.package} ${c.version}`) ?? [];
+
+  const row = (label: string, value: React.ReactNode, editStep?: string) => (
+    <div
+      css={css({
+        display: 'flex',
+        gap: euiTheme.size.m,
+        padding: `${euiTheme.size.s} 0`,
+        borderTop: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+      })}
+    >
+      <EuiText size="s" color="subdued" css={css({ width: 160, flexShrink: 0 })}>
+        {label}
+      </EuiText>
+      <EuiText size="s" css={css({ flex: 1 })}>
+        {value}
+      </EuiText>
+      {editStep && (
+        <EuiLink
+          onClick={() => props.onEdit(editStep)}
+          data-test-subj={`groupWizardEdit-${editStep}`}
+        >
+          Edit
+        </EuiLink>
+      )}
+    </div>
+  );
+
+  return (
+    <div css={sectionGap} data-test-subj="groupWizardReview">
+      <div>
+        <EuiTitle size="xs">
+          <h2>Review</h2>
+        </EuiTitle>
+        <EuiText size="xs" color="subdued" css={css({ marginTop: 4 })}>
+          Check what gets collected and installed, then add {title}.
+        </EuiText>
       </div>
+
+      {streams.length === 0 && (
+        <EuiCallOut
+          announceOnMount
+          iconType="info"
+          title="No data will be collected"
+          data-test-subj="groupWizardAssetsOnly"
+        >
+          <p>
+            No signals are selected. {title} is added with every input turned off, so its assets get
+            installed but nothing is collected. You can turn inputs on later from the
+            integration&apos;s policy.
+          </p>
+        </EuiCallOut>
+      )}
+
+      <EuiPanel hasBorder paddingSize="m">
+        {row('Data schema', getSchemaInfo(props.schema).title, 'collect')}
+        {row(
+          'Collect',
+          streams.length
+            ? signals
+                .map(
+                  (sig) =>
+                    `${getSignalInfo(sig).title}: ${streams
+                      .filter((s) => s.signal === sig)
+                      .map((s) => getStreamShortTitle(s, title))
+                      .join(', ')}`
+                )
+                .join(' · ')
+            : 'Nothing (assets only)',
+          'collect'
+        )}
+        {streams.length > 0 &&
+          row(
+            'Data streams',
+            streams
+              .map(
+                (s) =>
+                  `${s.signal}-${getTargetDataset(
+                    s,
+                    getDatasetVarValue(props.packagePolicy, model, s)
+                  )}-*`
+              )
+              .join(', ')
+          )}
+        {props.showMethod &&
+          row(
+            'Deployment',
+            props.method === SetupTechnology.AGENTLESS ? 'Agentless' : 'Elastic Agent',
+            'how'
+          )}
+        {props.agentPolicyLabel && row('Agent policy', props.agentPolicyLabel, 'how')}
+        {summary &&
+          row(
+            'Installs',
+            <>
+              {summary.packageTitle} {summary.packageVersion}
+              {summary.dashboards + summary.otherKibanaAssets + summary.elasticsearchAssets > 0 &&
+                ` with ${summary.dashboards} dashboards and ${
+                  summary.otherKibanaAssets + summary.elasticsearchAssets
+                } other assets`}
+              {contentNames.length > 0 && `, plus assets from ${contentNames.join(', ')}`}
+              {summary.dashboards === 0 && contentNames.length === 0 && (
+                <>
+                  {' '}
+                  <EuiText size="xs" color="subdued" component="span">
+                    (no dashboards)
+                  </EuiText>
+                </>
+              )}
+            </>
+          )}
+      </EuiPanel>
+
+      {props.agentPolicySection}
+      {props.integrationSettings}
     </div>
   );
 };
 
 /* ---------- Signal steps (one per selected signal) ---------- */
 
-/** One-line reminder of the step 1 choices, with a link back to change them. */
+/** One-line reminder of the "what to collect" choices, with a link back to change them. */
 export const StepRecap: React.FC<{
   schema: string;
-  policyLabel: string;
+  detail?: string;
   onEdit: () => void;
-}> = ({ schema, policyLabel, onEdit }) => (
+}> = ({ schema, detail, onEdit }) => (
   <EuiText size="xs" color="subdued" data-test-subj="groupWizardRecap">
-    {getSchemaInfo(schema).title} · {policyLabel} ·{' '}
+    {getSchemaInfo(schema).title} {detail ? `· ${detail} ` : ''}·{' '}
     <EuiLink onClick={onEdit} data-test-subj="groupWizardRecapEdit">
       Change
     </EuiLink>
@@ -558,289 +757,5 @@ const SignalStreamCard: React.FC<{
         </EuiText>
       )}
     </StreamCard>
-  );
-};
-
-/* ---------- Summary ---------- */
-
-const RECENT_MS = 10 * 60 * 1000;
-
-const useDataStreamPoll = () => {
-  const [dataStreams, setDataStreams] = useState<DataStream[]>([]);
-  useEffect(() => {
-    let cancelled = false;
-    const poll = async () => {
-      try {
-        const res = await sendGetDataStreams();
-        if (!cancelled && res) setDataStreams(res.data_streams);
-      } catch {
-        // PROTOTYPE: ignore polling errors
-      }
-    };
-    poll();
-    const interval = setInterval(poll, 5000);
-    return () => {
-      cancelled = true;
-      clearInterval(interval);
-    };
-  }, []);
-  return dataStreams;
-};
-
-interface InstalledContent {
-  dashboards: Array<{ id: string; title: string; href?: string }>;
-  pipelines: number;
-  templates: number;
-}
-
-/** Installed assets of the child package plus its content dependencies (e.g. nginx_otel). */
-const useInstalledContent = (pkgName: string) => {
-  const { http } = useStartServices();
-  const [content, setContent] = useState<InstalledContent>();
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const { data: child } = await sendGetPackageInfoByKey(pkgName, undefined, {
-        prerelease: true,
-      });
-      const deps = child?.item.requires?.content?.map((d) => d.package) ?? [];
-      const depInfos = await Promise.all(
-        deps.map((dep) => sendGetPackageInfoByKey(dep, undefined, { prerelease: true }))
-      );
-      const infos = [child?.item, ...depInfos.map((r) => r.data?.item)];
-      const kibana = infos.flatMap((i) => i?.installationInfo?.installed_kibana ?? []);
-      const es = infos.flatMap((i) => i?.installationInfo?.installed_es ?? []);
-      const dashboardRefs = kibana.filter((a) => a.type === KibanaSavedObjectType.dashboard);
-      const { data: assets } = dashboardRefs.length
-        ? await sendGetBulkAssets({
-            assetIds: dashboardRefs.map(({ id, type }) => ({ id, type })),
-          })
-        : { data: undefined };
-      if (cancelled) return;
-      const basePath = http.basePath.get();
-      setContent({
-        dashboards: (
-          assets?.items ??
-          dashboardRefs.map((a) => ({ ...a, attributes: {} as { title?: string } }))
-        )
-          .map((a) => ({
-            id: a.id,
-            title: a.attributes.title ?? a.id,
-            href:
-              'appLink' in a && a.appLink
-                ? a.appLink.startsWith(basePath)
-                  ? a.appLink
-                  : http.basePath.prepend(a.appLink)
-                : undefined,
-          }))
-          .sort((a, b) => a.title.localeCompare(b.title)),
-        pipelines: es.filter((a) => a.type === ElasticsearchAssetType.ingestPipeline).length,
-        templates: es.filter((a) => a.type === ElasticsearchAssetType.indexTemplate).length,
-      });
-    })().catch(() => {
-      // PROTOTYPE: content list is best effort
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, [pkgName, http.basePath]);
-  return content;
-};
-
-export const SummaryStep: React.FC<{
-  schema: string;
-  groupTitle: string;
-  pkgName: string;
-  /** Enabled streams with their target dataset (computed before save). */
-  streams: Array<{ stream: WizardStream; dataset: string }>;
-  agentPolicyName?: string;
-  packagePolicyName?: string;
-  onAddAgent: () => void;
-  assetsHref: string;
-}> = ({
-  schema,
-  groupTitle,
-  pkgName,
-  streams,
-  agentPolicyName,
-  packagePolicyName,
-  onAddAgent,
-  assetsHref,
-}) => {
-  const { euiTheme } = useEuiTheme();
-  const discoverLocator = useDiscoverLocator();
-  const dataStreams = useDataStreamPoll();
-  const content = useInstalledContent(pkgName);
-  const rows = streams.map(({ stream, dataset }) => {
-    const match = dataStreams
-      .filter((ds) => ds.dataset === dataset && ds.type === stream.signal)
-      .sort((a, b) => b.last_activity_ms - a.last_activity_ms)[0];
-    const live = !!match && Date.now() - match.last_activity_ms < RECENT_MS;
-    return { stream, dataset, pattern: `${stream.signal}-${dataset}-*`, match, live };
-  });
-  const liveRows = rows.filter((r) => r.live);
-  const allLive = liveRows.length === rows.length;
-  const [exploreHref, setExploreHref] = useState<string>();
-  const patterns = liveRows.map((r) => r.pattern).join(', ');
-  useEffect(() => {
-    if (!discoverLocator || !patterns) return setExploreHref(undefined);
-    discoverLocator
-      .getUrl({ query: { esql: `FROM ${patterns}` }, timeRange: { from: 'now-15m', to: 'now' } })
-      .then(setExploreHref)
-      .catch(() => setExploreHref(undefined));
-  }, [discoverLocator, patterns]);
-
-  return (
-    <div css={css({ display: 'flex', flexDirection: 'column', gap: 32 })}>
-      <EuiPanel hasBorder paddingSize="l" data-test-subj="groupWizardStatusCard">
-        <EuiFlexGroup alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            {allLive ? (
-              <EuiIcon type="checkCircleFill" color="success" size="l" aria-hidden={true} />
-            ) : (
-              <EuiLoadingSpinner size="l" />
-            )}
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h3>
-                {allLive
-                  ? `${groupTitle} is sending data · ${rows.length} streams`
-                  : 'Waiting for data'}
-              </h3>
-            </EuiTitle>
-            <EuiText size="s" color="subdued">
-              {allLive
-                ? 'All selected data streams are receiving documents.'
-                : `${liveRows.length} of ${rows.length} streams receiving · data shows up once an agent on this policy can reach ${groupTitle}`}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">Agent-based</EuiBadge>
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow">{getSchemaInfo(schema).title}</EuiBadge>
-              </EuiFlexItem>
-              {exploreHref && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    iconType="discoverApp"
-                    href={exploreHref}
-                    css={css({ marginLeft: euiTheme.size.s })}
-                    data-test-subj="groupWizardExploreDiscover"
-                  >
-                    Explore in Discover
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {!allLive && (
-          <>
-            <EuiSpacer size="m" />
-            <EuiProgress size="xs" color="primary" />
-          </>
-        )}
-        <EuiSpacer size="m" />
-        {rows.map((r) => (
-          <div
-            key={r.stream.id}
-            css={css({
-              display: 'flex',
-              alignItems: 'center',
-              gap: euiTheme.size.m,
-              padding: `${euiTheme.size.s} 0`,
-              borderTop: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-            })}
-          >
-            {r.live ? (
-              <EuiIcon type="checkCircle" color="success" aria-hidden={true} />
-            ) : (
-              <EuiLoadingSpinner size="m" />
-            )}
-            <EuiText size="s" css={css({ flex: 1 })}>
-              {r.stream.title} <EuiCode>{r.pattern}</EuiCode>
-            </EuiText>
-            <EuiText size="xs" color="subdued">
-              {r.live && r.match
-                ? `last event ${moment(r.match.last_activity_ms).fromNow()}`
-                : 'waiting'}
-            </EuiText>
-          </div>
-        ))}
-      </EuiPanel>
-
-      {!allLive && (
-        <EuiCallOut
-          announceOnMount={false}
-          iconType="info"
-          title="Add Elastic Agent to start collecting"
-          data-test-subj="groupWizardAddAgentCallout"
-          text={
-            <p>
-              {packagePolicyName ? <strong>{packagePolicyName}</strong> : 'The integration'} was
-              added to the <strong>{agentPolicyName ?? 'selected'}</strong> agent policy. Install
-              Elastic Agent on your {groupTitle} hosts with this policy, or check that existing
-              agents can reach the configured paths and endpoints.
-            </p>
-          }
-          actionProps={{
-            primary: {
-              children: 'Add Elastic Agent',
-              onClick: onAddAgent,
-              'data-test-subj': 'groupWizardAddAgent',
-            },
-          }}
-        />
-      )}
-
-      <div data-test-subj="groupWizardInstalledContent">
-        <EuiFlexGroup alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <SectionHeading
-              title="Installed content"
-              description={
-                content
-                  ? `${content.dashboards.length} dashboards · ${content.pipelines} ingest pipelines · ${content.templates} index templates`
-                  : 'Loading installed assets...'
-              }
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="s"
-              iconType="chevronSingleRight"
-              iconSide="right"
-              href={assetsHref}
-            >
-              View all assets
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="s" />
-        {content && content.dashboards.length > 0 && (
-          <EuiFlexGrid columns={2} gutterSize="s">
-            {content.dashboards.map((d) => (
-              <EuiFlexItem key={d.id}>
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <EuiIcon type="dashboardApp" color="subdued" aria-hidden={true} />
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      {d.href ? <EuiLink href={d.href}>{d.title}</EuiLink> : d.title}
-                    </EuiText>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            ))}
-          </EuiFlexGrid>
-        )}
-      </div>
-    </div>
   );
 };

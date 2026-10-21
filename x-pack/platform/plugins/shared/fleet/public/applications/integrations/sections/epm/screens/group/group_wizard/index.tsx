@@ -6,14 +6,16 @@
  */
 
 // PROTOTYPE: generic onboarding wizard for any integration group (package with `schemas`), after
-// the design team's Ingest Workbench prototype. Step 1 picks schema, signals and agent policy; one
-// step per selected signal configures its streams; saving installs the schema's child package and
-// moves to a summary. Signals, streams and fields come from each child's package info (model.ts).
+// the design team's Ingest Workbench prototype. Steps follow the design's install order (hub
+// Design direction 3.4): what to collect (schema + signals) -> how (deployment method, hidden with
+// a single method) -> settings per selected signal -> review (save) -> detect and review -> exit.
+// Signals, streams and fields come from each child's package info (model.ts).
 //
 // State lives in GroupOnboardingWizard so it survives a schema switch: per-schema state (enabled
-// streams, edited var values keyed by var path) plus policy name/namespace and agent policy. The
-// body is keyed by schema: it runs the stock create-package-policy hook (useOnSubmit) for that
-// schema's child package, and the wizard state is applied on top of the stock package policy.
+// streams, edited var values keyed by var path) plus deployment method, agent policy and
+// integration name/namespace. The body is keyed by schema: it runs the stock
+// create-package-policy hook (useOnSubmit) for that schema's child package, and the wizard state
+// is applied on top of the stock package policy.
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
@@ -53,7 +55,9 @@ import { PackageIcon } from '../../../../../../../components';
 import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../constants';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
 import { validationHasErrors } from '../../../../../../../../common/services';
+import { SetupTechnology } from '../../../../../../../../common/types';
 import { useOnSubmit } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks';
+import { useAgentless } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology';
 import { PackageDocumentationModal } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/components';
 import { SelectedPolicyTab } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/components';
 import { useAllNonManagedAgentPolicies } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/components/steps/components/use_policies';
@@ -68,27 +72,44 @@ import type {
   WizardStep,
 } from './model';
 import {
-  SCHEMA_STEP,
-  SUMMARY_STEP,
+  COLLECT_STEP,
+  DETECT_STEP,
+  HOW_STEP,
+  REVIEW_STEP,
   applySchemaState,
   buildSchemaModel,
   carryOverSchemaState,
   emptySchemaState,
   getDatasetVarValue,
+  getDeploymentMethods,
+  getEnabledSignals,
   getEnabledStreams,
+  getInstallSummary,
+  getSignalInfo,
   getSteps,
   getTargetDataset,
+  isSignalStep,
+  resolveDefaultSchema,
 } from './model';
 import { StepRail } from './primitives';
 import type { AgentPolicyMode, SchemaChoice } from './steps';
-import { SchemaSignalsStep, SignalStep, StepRecap, SummaryStep, getStepVars } from './steps';
+import {
+  AgentPolicySection,
+  CollectStep,
+  HowStep,
+  IntegrationSettingsSection,
+  ReviewStep,
+  SignalStep,
+  StepRecap,
+  getStepVars,
+} from './steps';
+import { DetectStep } from './detect_step';
 import type { VarFieldContext } from './var_fields';
 import { countVarErrors } from './var_fields';
 
 interface WizardProps {
   group: PackageListItem;
   options: GroupSchemaOption[];
-  defaultSchema?: string;
 }
 
 const EMPTY_STATE = emptySchemaState();
@@ -133,17 +154,52 @@ const useSchemaPackages = (options: GroupSchemaOption[]): Record<string, SchemaP
   );
 };
 
-export const GroupOnboardingWizard: React.FC<WizardProps> = ({ group, options, defaultSchema }) => {
+/**
+ * Solution the user is in: serverless project type, else the active space's solution view
+ * (`oblt`, `security`, `es`, `classic`). `isResolved` turns true once the space has loaded.
+ */
+export const useActiveSolution = () => {
+  const { cloud, spaces } = useStartServices();
+  const projectType = cloud?.serverless?.projectType;
+  const [space, setSpace] = useState<{ solution?: string; resolved: boolean }>({
+    resolved: !!projectType || !spaces,
+  });
+  useEffect(() => {
+    if (projectType || !spaces) return;
+    let cancelled = false;
+    Promise.resolve(spaces.getActiveSpace())
+      .then((s) => !cancelled && setSpace({ solution: s?.solution, resolved: true }))
+      .catch(() => !cancelled && setSpace({ resolved: true }));
+    return () => {
+      cancelled = true;
+    };
+  }, [projectType, spaces]);
+  return { solution: projectType ?? space.solution, isResolved: space.resolved };
+};
+
+export const GroupOnboardingWizard: React.FC<WizardProps> = ({ group, options }) => {
   const spaceSettings = useSpaceSettingsContext();
   const existingPolicies = useAllNonManagedAgentPolicies();
+  const { isAgentlessEnabled } = useAgentless();
   const packages = useSchemaPackages(options);
 
-  const [schema, setSchema] = useState<string>(
+  // Default schema by solution (Nima): Observability -> otel, Security -> ecs, when the group has
+  // it; else the manifest's `default: true`; else the first schema.
+  const { solution, isResolved: isSolutionResolved } = useActiveSolution();
+  const defaultSchema = useMemo(
     () =>
-      options.find((o) => o.schema === defaultSchema && o.child)?.schema ??
-      options.find((o) => o.child)?.schema ??
-      options[0].schema
+      resolveDefaultSchema(
+        Object.fromEntries(options.map((o) => [o.schema, group.schemas?.[o.schema]])),
+        solution
+      ),
+    [group.schemas, options, solution]
   );
+  const [schema, setSchema] = useState<string>(defaultSchema ?? options[0].schema);
+  const userPickedSchema = useRef(false);
+  useEffect(() => {
+    if (isSolutionResolved && !userPickedSchema.current && defaultSchema) setSchema(defaultSchema);
+  }, [defaultSchema, isSolutionResolved]);
+
   const [schemaStates, setSchemaStates] = useState<Record<string, SchemaState>>({});
   const [policyOverrides, setPolicyOverrides] = useState<PolicyOverrides>({});
   const [lastSwitch, setLastSwitch] = useState<{
@@ -151,7 +207,7 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({ group, options, d
     to: string;
     report: CarryOverReport;
   }>();
-  const [visited, setVisited] = useState<WizardStep[]>([SCHEMA_STEP]);
+  const [visited, setVisited] = useState<WizardStep[]>([COLLECT_STEP]);
   const [saved, setSaved] = useState<SavedPolicyResult>();
 
   const [policyMode, setPolicyMode] = useState<AgentPolicyMode>('new');
@@ -172,7 +228,14 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({ group, options, d
 
   const model = packages[schema]?.model;
   const state = schemaStates[schema] ?? EMPTY_STATE;
-  const steps = useMemo(() => getSteps(model, state), [model, state]);
+
+  // "How" only shows when the child offers more than one deployment method.
+  const methods = getDeploymentMethods(model, isAgentlessEnabled);
+  const showHow = methods.length > 1;
+  const [pickedMethod, setPickedMethod] = useState<SetupTechnology>();
+  const method = pickedMethod && methods.includes(pickedMethod) ? pickedMethod : methods[0];
+
+  const steps = useMemo(() => getSteps(model, state, { showHow }), [model, state, showHow]);
 
   const updateState = useCallback(
     (fn: (s: SchemaState) => SchemaState) =>
@@ -182,6 +245,7 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({ group, options, d
 
   const onSchemaChange = (next: string) => {
     if (next === schema) return;
+    userPickedSchema.current = true;
     const fromModel = packages[schema]?.model;
     const toModel = packages[next]?.model;
     if (fromModel && toModel) {
@@ -200,14 +264,14 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({ group, options, d
   const location = useLocation();
   const requestedStep = new URLSearchParams(location.search).get('step');
   const step: WizardStep = saved
-    ? SUMMARY_STEP
+    ? DETECT_STEP
     : requestedStep &&
-      requestedStep !== SUMMARY_STEP &&
+      requestedStep !== DETECT_STEP &&
       steps.includes(requestedStep) &&
       visited.includes(requestedStep)
     ? requestedStep
-    : // Unknown, unvisited, or removed by unchecking a signal: last config step visited.
-      [...steps].reverse().find((s) => s !== SUMMARY_STEP && visited.includes(s)) ?? SCHEMA_STEP;
+    : // Unknown, unvisited, or removed by unchecking a signal: last step visited.
+      [...steps].reverse().find((s) => s !== DETECT_STEP && visited.includes(s)) ?? COLLECT_STEP;
 
   const goTo = useCallback(
     (next: WizardStep, { replace = false }: { replace?: boolean } = {}) => {
@@ -259,6 +323,10 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({ group, options, d
       }
       policyOverrides={policyOverrides}
       onPolicyFieldChange={(field, value) => setPolicyOverrides((p) => ({ ...p, [field]: value }))}
+      methods={methods}
+      method={method}
+      onMethodChange={setPickedMethod}
+      showHow={showHow}
       steps={steps}
       step={step}
       visited={visited}
@@ -266,7 +334,7 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({ group, options, d
       saved={saved}
       onSaved={(result) => {
         setSaved(result);
-        goTo(SUMMARY_STEP, { replace: true });
+        goTo(DETECT_STEP, { replace: true });
       }}
       policyMode={policyMode}
       onPolicyModeChange={setPolicyMode}
@@ -296,6 +364,10 @@ interface BodyProps {
   onVarGroupChange: (scopeKey: string, groupName: string, optionName: string) => void;
   policyOverrides: PolicyOverrides;
   onPolicyFieldChange: (field: 'name' | 'namespace', value: string) => void;
+  methods: SetupTechnology[];
+  method: SetupTechnology;
+  onMethodChange: (method: SetupTechnology) => void;
+  showHow: boolean;
   steps: WizardStep[];
   step: WizardStep;
   visited: WizardStep[];
@@ -334,6 +406,8 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
     savedPackagePolicy,
     navigateAddAgent,
     isInitialized,
+    selectedSetupTechnology,
+    handleSetupTechnologyChange,
   } = useOnSubmit({
     agentCount: 0,
     packageInfo,
@@ -347,7 +421,14 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
     setSelectedPolicyTab: () => {},
   });
 
-  // Keep the hook's agent policy selection in sync with step 1.
+  // Keep the hook's deployment method in sync with the "how" step.
+  useEffect(() => {
+    if (props.showHow && selectedSetupTechnology !== props.method) {
+      handleSetupTechnologyChange(props.method);
+    }
+  }, [props.showHow, props.method, selectedSetupTechnology, handleSetupTechnologyChange]);
+
+  // Keep the hook's agent policy selection in sync with the wizard.
   useEffect(() => {
     if (props.policyMode === 'new') {
       if (agentPolicies.length) updateAgentPolicies([]);
@@ -386,19 +467,25 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
   const index = steps.indexOf(step);
   const nextStep = steps[index + 1];
   const prevStep = steps[index - 1];
-  const anyStream = model ? getEnabledStreams(model, state).length > 0 : false;
+  const enabledStreams = model ? getEnabledStreams(model, state) : [];
+  const assetsOnly = !!model && enabledStreams.length === 0;
+  const isAgentless = props.method === SetupTechnology.AGENTLESS;
   const policyValid =
-    props.policyMode === 'new' ? !!props.newAgentPolicy.name.trim() : !!props.existingPolicyId;
+    isAgentless ||
+    (props.policyMode === 'new' ? !!props.newAgentPolicy.name.trim() : !!props.existingPolicyId);
   const isSaving = formState === 'LOADING' && !saved;
   const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
-  const canSave = !!packageInfo && isInitialized && policyValid && !isSaving;
+  const canSave = !!packageInfo && isInitialized && !isSaving;
+  // Agent policy goes on "how" when that step shows, else on review.
+  const agentPolicyStep = props.showHow ? HOW_STEP : REVIEW_STEP;
 
   const stepHasErrors = (s: WizardStep) => {
     if (!model || !ctx) return false;
-    if (s === SCHEMA_STEP) {
+    if (s === agentPolicyStep && !policyValid) return true;
+    if (s === REVIEW_STEP) {
       return !!validationResults?.name?.length || !!validationResults?.namespace?.length;
     }
-    if (s === SUMMARY_STEP) return false;
+    if (!isSignalStep(s)) return false;
     return countVarErrors(getStepVars(model, state, s).all, ctx) > 0;
   };
   const onNext = () => {
@@ -409,9 +496,9 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
     props.goTo(nextStep);
   };
   const onSave = () => {
-    if (hasErrors) {
+    const firstWithErrors = steps.find(stepHasErrors);
+    if (hasErrors || firstWithErrors) {
       setShowErrors(true);
-      const firstWithErrors = steps.find(stepHasErrors);
       if (firstWithErrors && firstWithErrors !== step) props.goTo(firstWithErrors);
       return;
     }
@@ -428,9 +515,38 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
   )?.name;
   const agentPolicyName =
     props.policyMode === 'new' ? props.newAgentPolicy.name : existingPolicyName;
+  const savedAgentPolicyId =
+    saved?.type === 'packagePolicy' ? saved.policy.policy_ids?.[0] : undefined;
 
   const groupIcon = (
     <PackageIcon packageName={group.name} version={group.version} icons={group.icons} size="m" />
+  );
+
+  const agentPolicySection = (
+    <AgentPolicySection
+      title={group.title}
+      policyMode={props.policyMode}
+      onPolicyModeChange={props.onPolicyModeChange}
+      newPolicyName={props.newAgentPolicy.name}
+      onNewPolicyNameChange={(name) => props.setNewAgentPolicy((p) => ({ ...p, name }))}
+      existingPolicies={props.existingPolicies}
+      existingPolicyId={props.existingPolicyId}
+      onExistingPolicyChange={props.onExistingPolicyChange}
+    />
+  );
+
+  const recap = (
+    <StepRecap
+      schema={schema}
+      detail={
+        model
+          ? getEnabledSignals(model, state)
+              .map((s) => getSignalInfo(s).title)
+              .join(', ')
+          : undefined
+      }
+      onEdit={() => props.goTo(COLLECT_STEP)}
+    />
   );
 
   const stepBody = (() => {
@@ -444,10 +560,10 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
         />
       );
     }
-    if (step === SCHEMA_STEP) {
+    if (step === COLLECT_STEP) {
       return (
-        <SchemaSignalsStep
-          groupTitle={group.title}
+        <CollectStep
+          title={group.title}
           schemas={props.schemaChoices}
           schema={schema}
           defaultSchema={props.defaultSchema}
@@ -456,28 +572,28 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
           model={model}
           state={state}
           onStreamsChange={props.onStreamsChange}
-          policyMode={props.policyMode}
-          onPolicyModeChange={props.onPolicyModeChange}
-          newPolicyName={props.newAgentPolicy.name}
-          onNewPolicyNameChange={(name) => props.setNewAgentPolicy((p) => ({ ...p, name }))}
-          existingPolicies={props.existingPolicies}
-          existingPolicyId={props.existingPolicyId}
-          onExistingPolicyChange={props.onExistingPolicyChange}
-          packagePolicy={packagePolicy}
-          validationResults={validationResults}
-          onPolicyFieldChange={props.onPolicyFieldChange}
         />
       );
     }
-    if (step === SUMMARY_STEP) {
+    if (step === HOW_STEP) {
       return (
-        <SummaryStep
+        <HowStep
+          methods={props.methods}
+          method={props.method}
+          onMethodChange={props.onMethodChange}
+          agentPolicySection={agentPolicySection}
+        />
+      );
+    }
+    if (step === DETECT_STEP) {
+      return (
+        <DetectStep
+          title={group.title}
           schema={schema}
-          groupTitle={group.title}
           pkgName={props.pkgName ?? ''}
-          streams={
+          rows={
             model
-              ? getEnabledStreams(model, state).map((stream) => ({
+              ? enabledStreams.map((stream) => ({
                   stream,
                   dataset: getTargetDataset(
                     stream,
@@ -486,7 +602,9 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
                 }))
               : []
           }
-          packagePolicyName={saved?.policy.name}
+          packagePolicy={saved?.type === 'packagePolicy' ? saved.policy : undefined}
+          isAgentless={saved?.type === 'agentless'}
+          agentPolicyId={savedAgentPolicyId}
           agentPolicyName={agentPolicyName}
           onAddAgent={() => saved && navigateAddAgent(saved)}
           assetsHref={getHref('integration_details_assets', { pkgkey: childPkgkey })}
@@ -494,6 +612,36 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
       );
     }
     if (!model || !ctx) return null;
+    if (step === REVIEW_STEP) {
+      return (
+        <ReviewStep
+          title={group.title}
+          schema={schema}
+          model={model}
+          state={state}
+          packagePolicy={packagePolicy}
+          installSummary={packageInfo ? getInstallSummary(packageInfo) : undefined}
+          method={props.method}
+          showMethod={props.showHow}
+          agentPolicySection={!props.showHow ? agentPolicySection : undefined}
+          agentPolicyLabel={
+            props.showHow && !isAgentless
+              ? props.policyMode === 'new'
+                ? `New: ${props.newAgentPolicy.name}`
+                : existingPolicyName
+              : undefined
+          }
+          integrationSettings={
+            <IntegrationSettingsSection
+              packagePolicy={packagePolicy}
+              validationResults={validationResults}
+              onPolicyFieldChange={props.onPolicyFieldChange}
+            />
+          }
+          onEdit={props.goTo}
+        />
+      );
+    }
     return (
       <SignalStep
         signal={step}
@@ -502,23 +650,13 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
         state={state}
         ctx={ctx}
         icon={groupIcon}
-        recap={
-          <StepRecap
-            schema={schema}
-            policyLabel={
-              props.policyMode === 'new'
-                ? `New policy: ${props.newAgentPolicy.name}`
-                : `Policy: ${existingPolicyName ?? '-'}`
-            }
-            onEdit={() => props.goTo(SCHEMA_STEP)}
-          />
-        }
+        recap={recap}
       />
     );
   })();
 
   const footer = (() => {
-    if (step === SUMMARY_STEP) {
+    if (step === DETECT_STEP) {
       return (
         <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
           <EuiFlexItem grow={false}>
@@ -540,7 +678,7 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
         </EuiFlexGroup>
       );
     }
-    const isLastConfigStep = nextStep === SUMMARY_STEP;
+    const isReview = step === REVIEW_STEP;
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem grow={false}>
@@ -552,7 +690,7 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-            {showErrors && (isLastConfigStep ? hasErrors : stepHasErrors(step)) && (
+            {showErrors && (isReview ? hasErrors || stepHasErrors(step) : stepHasErrors(step)) && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="danger">
                   Fix the highlighted settings to continue.
@@ -560,17 +698,17 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
               </EuiFlexItem>
             )}
             <EuiFlexItem grow={false}>
-              {isLastConfigStep ? (
+              {isReview ? (
                 <EuiButton
                   fill
                   size="s"
                   iconType="check"
                   isLoading={isSaving}
-                  isDisabled={!canSave || !anyStream}
+                  isDisabled={!canSave}
                   onClick={onSave}
                   data-test-subj="groupWizardSave"
                 >
-                  Add {group.title}
+                  {assetsOnly ? 'Install assets only' : `Add ${group.title}`}
                 </EuiButton>
               ) : (
                 <EuiButton
@@ -578,11 +716,11 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
                   size="s"
                   iconType="sortRight"
                   iconSide="right"
-                  isDisabled={!anyStream || (step === SCHEMA_STEP && !policyValid)}
+                  isDisabled={!model}
                   onClick={onNext}
                   data-test-subj="groupWizardNext"
                 >
-                  {step === SCHEMA_STEP ? "Let's go" : 'Next'}
+                  {step === COLLECT_STEP ? "Let's go" : 'Next'}
                 </EuiButton>
               )}
             </EuiFlexItem>
@@ -670,7 +808,7 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
             steps={steps}
             current={step}
             completed={(s) => !!saved || steps.indexOf(s) < index}
-            canSelect={(s) => !saved && s !== SUMMARY_STEP && props.visited.includes(s)}
+            canSelect={(s) => !saved && s !== DETECT_STEP && props.visited.includes(s)}
             onSelect={props.goTo}
           />
           <div

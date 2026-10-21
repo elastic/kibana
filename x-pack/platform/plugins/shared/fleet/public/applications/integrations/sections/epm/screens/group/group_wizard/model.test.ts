@@ -14,14 +14,27 @@ import { validateAgentConditionExpression } from '@kbn/elastic-agent-condition-l
 import {
   packageToPackagePolicy,
   validatePackagePolicy,
+  validationHasErrors,
 } from '../../../../../../../../common/services';
 import type { NewPackagePolicy, PackageInfo } from '../../../../../../../types';
 import { isAdvancedVar } from '../../../../../../fleet/sections/agent_policy/create_package_policy_page/services';
 
 import { nginxOtelPackageInfo, nginxPackageInfo } from './__fixtures__/nginx';
 import { apacheInputOtelPackageInfo, apachePackageInfo } from './__fixtures__/apache';
+import {
+  getGroupDefaultSchema,
+  getGroupSchemaChildren,
+} from '../../../../../../../../common/services';
+import { SetupTechnology } from '../../../../../../../../common/types';
+
+import { nginxGroupItem, singleSchemaGroupItem } from './__fixtures__/groups';
 import type { SchemaModel, SchemaState, WizardStream } from './model';
 import {
+  getAgentInputErrors,
+  getDeploymentMethods,
+  getDetectStatus,
+  getInstallSummary,
+  resolveDefaultSchema,
   applySchemaState,
   buildSchemaModel,
   carryOverSchemaState,
@@ -134,16 +147,205 @@ describe('group wizard model', () => {
     });
   });
 
-  describe('steps', () => {
+  describe('steps (install order)', () => {
     const model = buildSchemaModel(nginxPackageInfo);
-    it('has one step per selected signal', () => {
-      expect(getSteps(model, emptySchemaState())).toEqual(['schema', 'logs', 'metrics', 'summary']);
+    it('collect -> settings per selected signal -> review -> detect', () => {
+      expect(getSteps(model, emptySchemaState())).toEqual([
+        'collect',
+        'logs',
+        'metrics',
+        'review',
+        'detect',
+      ]);
       const metrics = streamBy(model, 'nginx.stubstatus');
       expect(getSteps(model, { ...emptySchemaState(), enabled: { [metrics.id]: false } })).toEqual([
-        'schema',
+        'collect',
         'logs',
-        'summary',
+        'review',
+        'detect',
       ]);
+    });
+
+    it('zero signals skips the settings steps', () => {
+      const none = Object.fromEntries(model.streams.map((s) => [s.id, false]));
+      expect(getSteps(model, { ...emptySchemaState(), enabled: none })).toEqual([
+        'collect',
+        'review',
+        'detect',
+      ]);
+    });
+
+    it('zero signals: the stock package policy has every input off and still validates', () => {
+      const otel = buildSchemaModel(nginxOtelPackageInfo);
+      const none = Object.fromEntries(otel.streams.map((s) => [s.id, false]));
+      const policy = policyFor(nginxOtelPackageInfo, otel, {
+        ...emptySchemaState(),
+        enabled: none,
+      });
+      expect(policy.inputs.map((i) => i.enabled)).toEqual([false, false]);
+      expect(validationHasErrors(validatePackagePolicy(policy, nginxOtelPackageInfo, deps))).toBe(
+        false
+      );
+    });
+
+    it('"how" only shows when there is more than one deployment method', () => {
+      expect(getDeploymentMethods(model, true)).toEqual([SetupTechnology.AGENT_BASED]);
+      const agentless = { ...model, supportsAgentless: true };
+      expect(getDeploymentMethods(agentless, false)).toEqual([SetupTechnology.AGENT_BASED]);
+      expect(getDeploymentMethods(agentless, true)).toEqual([
+        SetupTechnology.AGENTLESS,
+        SetupTechnology.AGENT_BASED,
+      ]);
+      expect(getDeploymentMethods({ ...agentless, agentlessOnly: true }, true)).toEqual([
+        SetupTechnology.AGENTLESS,
+      ]);
+      expect(getSteps(model, emptySchemaState(), { showHow: true }).slice(0, 2)).toEqual([
+        'collect',
+        'how',
+      ]);
+    });
+  });
+
+  describe('default schema', () => {
+    const { schemas } = nginxGroupItem as unknown as {
+      schemas: Record<string, { default?: boolean }>;
+    };
+    it('by solution when the group has that schema, else manifest default', () => {
+      expect(resolveDefaultSchema(schemas, 'oblt')).toBe('otel');
+      expect(resolveDefaultSchema(schemas, 'observability')).toBe('otel');
+      expect(resolveDefaultSchema(schemas, 'security')).toBe('ecs');
+      expect(resolveDefaultSchema(schemas, 'es')).toBe('otel');
+      expect(resolveDefaultSchema(schemas, 'classic')).toBe('otel');
+      expect(resolveDefaultSchema(schemas, undefined)).toBe('otel');
+    });
+
+    it('single-schema group without `default`', () => {
+      expect(getGroupSchemaChildren(singleSchemaGroupItem)).toEqual([
+        { schema: 'otel', package: 'nginx_otel_integration', version: '^0.1.0' },
+      ]);
+      expect(getGroupDefaultSchema(singleSchemaGroupItem)).toBe('otel');
+      // Security prefers ECS, but this group has no ECS schema.
+      expect(resolveDefaultSchema({ otel: {} }, 'security')).toBe('otel');
+      expect(resolveDefaultSchema({ ecs: {}, otel: {} }, undefined)).toBe('ecs');
+    });
+  });
+
+  describe('review', () => {
+    it('lists the child and the content packages it installs', () => {
+      expect(getInstallSummary(nginxOtelPackageInfo)).toEqual({
+        packageTitle: 'Nginx (OpenTelemetry)',
+        packageVersion: '0.1.0',
+        dashboards: 0,
+        otherKibanaAssets: 0,
+        elasticsearchAssets: 0,
+        contentPackages: [{ package: 'nginx_otel', version: '0.7.0' }],
+      });
+      // Input packages can't require content packs: nothing to show for Apache OTel.
+      expect(getInstallSummary(apacheInputOtelPackageInfo).contentPackages).toEqual([]);
+    });
+  });
+
+  describe('detect and review', () => {
+    const model = buildSchemaModel(nginxOtelPackageInfo);
+    const access = streamBy(model, 'nginx.access');
+    const dataset = 'nginx.access.otel';
+    const now = 1_000_000_000;
+    const agents = { total: 1, online: 1, inputErrors: {} };
+
+    it('waiting, with the reason', () => {
+      const base = { stream: access, dataset, dataStreams: [], now };
+      expect(getDetectStatus(base)).toEqual({ kind: 'waiting', reason: 'checking' });
+      expect(getDetectStatus({ ...base, agents: { ...agents, total: 0, online: 0 } })).toEqual({
+        kind: 'waiting',
+        reason: 'no_agents',
+      });
+      expect(getDetectStatus({ ...base, agents: { ...agents, online: 0 } })).toEqual({
+        kind: 'waiting',
+        reason: 'agents_offline',
+      });
+      expect(getDetectStatus({ ...base, agents })).toEqual({
+        kind: 'waiting',
+        reason: 'no_data_yet',
+      });
+      // Stale data stream (older than 10 min) still counts as waiting
+      expect(
+        getDetectStatus({
+          ...base,
+          agents,
+          dataStreams: [{ dataset, type: 'logs', last_activity_ms: now - 11 * 60 * 1000 }],
+        })
+      ).toEqual({ kind: 'waiting', reason: 'no_data_yet' });
+    });
+
+    it('receiving with count and last seen; errors win and stay on the row', () => {
+      const dataStreams = [{ dataset, type: 'logs', last_activity_ms: now - 1000 }];
+      expect(
+        getDetectStatus({
+          stream: access,
+          dataset,
+          dataStreams,
+          counts: { [dataset]: 42 },
+          agents,
+          now,
+        })
+      ).toEqual({ kind: 'receiving', count: 42, lastSeenMs: now - 1000 });
+      expect(
+        getDetectStatus({
+          stream: access,
+          dataset,
+          dataStreams,
+          agents: { ...agents, inputErrors: { [access.inputKey]: 'host-1: permission denied' } },
+          now,
+        })
+      ).toEqual({ kind: 'error', message: 'host-1: permission denied' });
+    });
+
+    it('maps unhealthy agent input units to wizard inputs', () => {
+      const policy = {
+        id: 'pp-1',
+        inputs: [
+          {
+            id: 'in-logs',
+            type: 'otelcol',
+            name: 'filelog_otel',
+            policy_template: 'nginx',
+            enabled: true,
+            streams: [],
+          },
+          {
+            id: 'in-metrics',
+            type: 'otelcol',
+            name: 'nginx_otel_input',
+            policy_template: 'nginx',
+            enabled: true,
+            streams: [],
+          },
+        ],
+      } as any;
+      const agent = {
+        id: 'agent-1',
+        local_metadata: { host: { hostname: 'web-1' } },
+        components: [
+          {
+            id: 'otelcol-default',
+            type: 'otelcol',
+            status: 'DEGRADED',
+            message: '',
+            units: [
+              {
+                id: 'otelcol-default-in-logs',
+                type: 'input',
+                status: 'FAILED',
+                message: 'open /var/log/nginx/access.log: permission denied',
+              },
+              { id: 'otelcol-default-in-metrics', type: 'input', status: 'HEALTHY', message: 'ok' },
+            ],
+          },
+        ],
+      } as any;
+      expect(getAgentInputErrors([agent], policy)).toEqual({
+        'nginx-filelog_otel': 'web-1: open /var/log/nginx/access.log: permission denied',
+      });
     });
   });
 
@@ -255,7 +457,7 @@ describe('group wizard model', () => {
         'Server Status Path',
         'Period',
       ]);
-      expect(getSteps(otel, state)).toEqual(['schema', 'logs', 'summary']);
+      expect(getSteps(otel, state)).toEqual(['collect', 'logs', 'review', 'detect']);
     });
 
     it('keeps values when name and type match, and keeps target edits on switch back', () => {
@@ -355,7 +557,7 @@ describe('group wizard model', () => {
         values: { [streamVarPath(status.id, 'period')]: '1m' },
       };
       const toOtel = carryOverSchemaState({ model: ecs, state: fromEcs }, { model: otel });
-      expect(getSteps(otel, toOtel.state)).toEqual(['schema', 'metrics', 'summary']);
+      expect(getSteps(otel, toOtel.state)).toEqual(['collect', 'metrics', 'review', 'detect']);
       expect(toOtel.report.dropped.map((d) => d.title)).toEqual(['Period']);
 
       const back = carryOverSchemaState(

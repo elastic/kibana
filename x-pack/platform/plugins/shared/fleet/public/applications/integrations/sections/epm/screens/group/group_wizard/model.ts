@@ -32,10 +32,19 @@ import {
   isInputOnlyPolicyTemplate,
 } from '../../../../../../../../common/services';
 import type { PackagePolicyValidationResults } from '../../../../../../../../common/services';
+import {
+  isAgentlessIntegration,
+  isOnlyAgentlessIntegration,
+} from '../../../../../../../../common/services/agentless_policy_helper';
+import { SetupTechnology } from '../../../../../../../../common/types';
+import { getInputUnitsByPackage } from '../../../../../../fleet/sections/agents/agent_details_page/components/agent_details/input_status_utils';
 import type {
+  Agent,
+  DataStream,
   NewPackagePolicy,
   NewPackagePolicyInput,
   PackageInfo,
+  PackagePolicy,
   PackagePolicyConfigRecord,
   RegistryVarGroup,
   RegistryVarsEntry,
@@ -43,10 +52,18 @@ import type {
 
 /* ---------- Model ---------- */
 
-export const SCHEMA_STEP = 'schema';
-export const SUMMARY_STEP = 'summary';
-/** 'schema', one step per selected signal (data stream type, e.g. 'logs'), 'summary'. */
+// Install order from the design direction (hub, 3.4): what to collect -> how (deployment, hidden
+// with a single method) -> settings per signal -> review -> detect -> exit.
+export const COLLECT_STEP = 'collect';
+export const HOW_STEP = 'how';
+export const REVIEW_STEP = 'review';
+export const DETECT_STEP = 'detect';
+/** PROTOTYPE: provisional, design hasn't settled "Review and install" vs "Detect and review". */
+export const DETECT_STEP_LABEL = 'Detect and review';
+/** collect, how?, one step per selected signal (data stream type, e.g. 'logs'), review, detect. */
 export type WizardStep = string;
+const FIXED_STEPS = [COLLECT_STEP, HOW_STEP, REVIEW_STEP, DETECT_STEP];
+export const isSignalStep = (step: WizardStep) => !FIXED_STEPS.includes(step);
 
 export type VarScope = 'package' | 'input' | 'stream';
 
@@ -85,7 +102,11 @@ export interface WizardStream {
 export interface SchemaModel {
   packageName: string;
   packageTitle: string;
+  packageVersion: string;
   packageType: string;
+  /** Deployment methods the child declares (agentless needs the deployment to support it too). */
+  supportsAgentless: boolean;
+  agentlessOnly: boolean;
   packageVars: RegistryVarsEntry[];
   packageVarGroups?: RegistryVarGroup[];
   inputs: WizardInput[];
@@ -160,7 +181,10 @@ export const buildSchemaModel = (packageInfo: PackageInfo): SchemaModel => {
   return {
     packageName: packageInfo.name,
     packageTitle: packageInfo.title,
+    packageVersion: packageInfo.version,
     packageType: packageInfo.type ?? 'integration',
+    supportsAgentless: isAgentlessIntegration(packageInfo),
+    agentlessOnly: isOnlyAgentlessIntegration(packageInfo),
     packageVars: packageInfo.vars ?? [],
     packageVarGroups: packageInfo.var_groups,
     inputs: inputs.filter((input) => streams.some((s) => s.inputKey === input.key)),
@@ -231,17 +255,94 @@ export const emptySchemaState = (): SchemaState => ({
 export const isStreamEnabled = (stream: WizardStream, state: SchemaState) =>
   state.enabled[stream.id] ?? stream.enabledByDefault;
 
-export const getEnabledStreams = (model: SchemaModel, state: SchemaState) =>
-  model.streams.filter((s) => isStreamEnabled(s, state));
+/** Enabled streams, grouped by signal in display order. */
+export const getEnabledStreams = (model: SchemaModel, state: SchemaState) => {
+  const enabled = model.streams.filter((s) => isStreamEnabled(s, state));
+  return sortSignals(enabled.map((s) => s.signal)).flatMap((signal) =>
+    enabled.filter((s) => s.signal === signal)
+  );
+};
 
 export const getEnabledSignals = (model: SchemaModel, state: SchemaState) =>
   sortSignals(getEnabledStreams(model, state).map((s) => s.signal));
 
-export const getSteps = (model: SchemaModel | undefined, state: SchemaState): WizardStep[] => [
-  SCHEMA_STEP,
+export const getDeploymentMethods = (
+  model: SchemaModel | undefined,
+  isAgentlessAvailable: boolean
+): SetupTechnology[] => {
+  if (!model) return [SetupTechnology.AGENT_BASED];
+  return [
+    ...(isAgentlessAvailable && model.supportsAgentless ? [SetupTechnology.AGENTLESS] : []),
+    ...(!model.agentlessOnly || !isAgentlessAvailable ? [SetupTechnology.AGENT_BASED] : []),
+  ];
+};
+
+/**
+ * Zero selected signals is allowed (Nima's spec): the settings steps drop out and review offers
+ * an "install assets only" path. The "how" step only shows when there's a real choice.
+ */
+export const getSteps = (
+  model: SchemaModel | undefined,
+  state: SchemaState,
+  { showHow = false }: { showHow?: boolean } = {}
+): WizardStep[] => [
+  COLLECT_STEP,
+  ...(showHow ? [HOW_STEP] : []),
   ...(model ? getEnabledSignals(model, state) : []),
-  SUMMARY_STEP,
+  REVIEW_STEP,
+  DETECT_STEP,
 ];
+
+/* ---------- Default schema ---------- */
+
+// Nima's install flow spec: Observability defaults to OTel, Security to ECS.
+const SOLUTION_SCHEMA: Record<string, string> = {
+  observability: 'otel',
+  oblt: 'otel',
+  security: 'ecs',
+};
+
+/**
+ * Default schema: by solution (serverless project type or the space's solution view) when the
+ * group has that schema, else the manifest's `default: true`, else the first schema.
+ */
+export const resolveDefaultSchema = (
+  schemas: Record<string, { default?: boolean } | undefined>,
+  solution?: string
+): string | undefined => {
+  const names = Object.keys(schemas);
+  const preferred = solution ? SOLUTION_SCHEMA[solution] : undefined;
+  if (preferred && names.includes(preferred)) return preferred;
+  return names.find((name) => schemas[name]?.default) ?? names[0];
+};
+
+/* ---------- Review: what gets installed ---------- */
+
+export interface InstallSummary {
+  packageTitle: string;
+  packageVersion: string;
+  dashboards: number;
+  otherKibanaAssets: number;
+  elasticsearchAssets: number;
+  /** Content packages installed alongside (`requires.content`), e.g. nginx_otel. */
+  contentPackages: Array<{ package: string; version: string }>;
+}
+
+export const getInstallSummary = (packageInfo: PackageInfo): InstallSummary => {
+  const kibana = Object.entries(packageInfo.assets?.kibana ?? {});
+  const es = Object.values(packageInfo.assets?.elasticsearch ?? {});
+  const count = (parts: unknown) => (Array.isArray(parts) ? parts.length : 0);
+  return {
+    packageTitle: packageInfo.title,
+    packageVersion: packageInfo.version,
+    dashboards: count(packageInfo.assets?.kibana?.dashboard),
+    otherKibanaAssets: kibana
+      .filter(([type]) => type !== 'dashboard')
+      .reduce((n, [, parts]) => n + count(parts), 0),
+    elasticsearchAssets: es.reduce((n, parts) => n + count(parts), 0),
+    contentPackages: packageInfo.requires?.content ?? [],
+  };
+};
 
 /** Var group selections with defaults filled in: first option of each group, like the stock form. */
 export const getVarGroupSelections = (
@@ -621,12 +722,14 @@ export const SCHEMA_INFO: Record<string, { title: string; description: string }>
 export const getSchemaInfo = (schema: string) =>
   SCHEMA_INFO[schema] ?? { title: schema.toUpperCase(), description: '' };
 
-export const getStepLabel = (step: WizardStep) =>
-  step === SCHEMA_STEP
-    ? 'Schema & signals'
-    : step === SUMMARY_STEP
-    ? 'Summary'
-    : getSignalInfo(step).title;
+const STEP_LABELS: Record<string, string> = {
+  [COLLECT_STEP]: 'What to collect',
+  [HOW_STEP]: 'Deployment',
+  [REVIEW_STEP]: 'Review',
+  [DETECT_STEP]: DETECT_STEP_LABEL,
+};
+
+export const getStepLabel = (step: WizardStep) => STEP_LABELS[step] ?? getSignalInfo(step).title;
 
 /**
  * PROTOTYPE: short stream label for the signal checkboxes. Drops a leading technology name
@@ -640,4 +743,81 @@ export const getStreamShortTitle = (stream: WizardStream, groupTitle: string) =>
     return rest.charAt(0).toUpperCase() + rest.slice(1);
   }
   return title;
+};
+
+/* ---------- Detect and review ---------- */
+
+export const RECENT_DATA_MS = 10 * 60 * 1000;
+
+export interface DetectAgents {
+  total: number;
+  online: number;
+  /** Wizard input key -> first unhealthy unit message for that input, across agents. */
+  inputErrors: Record<string, string>;
+}
+
+export type DetectStatus =
+  | { kind: 'receiving'; count?: number; lastSeenMs: number }
+  | { kind: 'error'; message: string }
+  | {
+      kind: 'waiting';
+      reason: 'checking' | 'no_agents' | 'agents_offline' | 'no_data_yet' | 'agentless';
+    };
+
+/** Unhealthy input units of the saved package policy, keyed like wizard inputs. */
+export const getAgentInputErrors = (
+  agents: Array<Pick<Agent, 'id' | 'components' | 'local_metadata'>>,
+  packagePolicy: Pick<PackagePolicy, 'id' | 'inputs'>
+): Record<string, string> => {
+  const errors: Record<string, string> = {};
+  agents.forEach((agent) => {
+    packagePolicy.inputs
+      .filter((input) => input.enabled)
+      .forEach((input) => {
+        const key = policyInputKey(input);
+        if (errors[key]) return;
+        // Same matching as the agent details page (input id, else package policy id, + input type).
+        const unit = getInputUnitsByPackage(agent.components ?? [], input.id ?? packagePolicy.id)
+          .filter((u) => u.id.includes(input.type))
+          .find((u) => u.status === 'FAILED' || u.status === 'DEGRADED');
+        if (unit) {
+          const host = agent.local_metadata?.host?.hostname ?? agent.id;
+          errors[key] = `${host}: ${unit.message || unit.status.toLowerCase()}`;
+        }
+      });
+  });
+  return errors;
+};
+
+/** Per data stream status: never blocks, errors show on the row. */
+export const getDetectStatus = ({
+  stream,
+  dataset,
+  dataStreams,
+  counts,
+  agents,
+  isAgentless = false,
+  now = Date.now(),
+}: {
+  stream: WizardStream;
+  dataset: string;
+  dataStreams: Array<Pick<DataStream, 'dataset' | 'type' | 'last_activity_ms'>>;
+  counts?: Record<string, number>;
+  agents?: DetectAgents;
+  isAgentless?: boolean;
+  now?: number;
+}): DetectStatus => {
+  const error = agents?.inputErrors[stream.inputKey];
+  if (error) return { kind: 'error', message: error };
+  const match = dataStreams
+    .filter((ds) => ds.dataset === dataset && ds.type === stream.signal)
+    .sort((a, b) => b.last_activity_ms - a.last_activity_ms)[0];
+  if (match && now - match.last_activity_ms < RECENT_DATA_MS) {
+    return { kind: 'receiving', count: counts?.[dataset], lastSeenMs: match.last_activity_ms };
+  }
+  if (isAgentless) return { kind: 'waiting', reason: 'agentless' };
+  if (!agents) return { kind: 'waiting', reason: 'checking' };
+  if (agents.total === 0) return { kind: 'waiting', reason: 'no_agents' };
+  if (agents.online === 0) return { kind: 'waiting', reason: 'agents_offline' };
+  return { kind: 'waiting', reason: 'no_data_yet' };
 };

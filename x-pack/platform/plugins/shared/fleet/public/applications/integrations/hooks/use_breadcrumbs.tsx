@@ -51,6 +51,8 @@ const breadcrumbGetters: {
     },
   ],
   integration_details_overview: ({ pkgTitle }) => [BASE_BREADCRUMB, { text: pkgTitle }],
+  // PROTOTYPE: integration group onboarding shows the group's title, never a child package name.
+  integration_group: ({ pkgTitle }) => [BASE_BREADCRUMB, { text: pkgTitle }],
   integration_policy_edit: ({ pkgTitle, pkgkey, policyName }) => [
     BASE_BREADCRUMB,
     {
