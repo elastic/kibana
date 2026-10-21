@@ -523,6 +523,8 @@ export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   ATTACKS_PAGE_CALLOUT: 'securitySolution.attacksPage.tourCalloutDismissed.v9.5',
   ATTACKS_PAGE_WORKFLOWS_PROMOTION_CALLOUT:
     'securitySolution.attacksPage.workflowsPromotionCalloutDismissed.v9.5',
+  SIEM_MIGRATIONS_RULES_ADD_TO_CHAT_TOUR:
+    'securitySolution.siemMigrations.rules.addToChatTour.v9.6',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =

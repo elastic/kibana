@@ -27,6 +27,7 @@ import { isMigrationPrebuiltRule } from '../../../../../common/siem_migrations/r
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { type RuleMigrationRule } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { AddMigrationRuleToChatButton } from '../rule_details_flyout/add_to_chat_button';
+import { AddToChatTour, useAddToChatTourState } from '../add_to_chat_tour';
 import { useMigrationRulesTableColumns } from '../../hooks/use_migration_rules_table_columns';
 import { useMigrationRuleDetailsFlyout } from '../../hooks/use_migration_rule_preview_flyout';
 import { useInstallMigrationRule } from '../../logic/use_install_migration_rule';
@@ -95,6 +96,11 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     const isSiemMigrationAgentBuilderEnabled = useIsExperimentalFeatureEnabled(
       'siemRuleMigrationsAgentBuilderEnabled'
     );
+    const addToChatTour = useAddToChatTourState();
+    const {
+      tourState: { isTourActive: isAddToChatTourActive },
+      onAddToChat: onAddToChatTour,
+    } = addToChatTour;
 
     const [pageIndex, setPageIndex] = useState(0);
     const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
@@ -303,7 +309,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           <EuiFlexGroup>
             {isSiemMigrationAgentBuilderEnabled && !migrationRule.elastic_rule?.id && (
               <EuiFlexItem grow={false}>
-                <AddMigrationRuleToChatButton rule={migrationRule} />
+                <AddMigrationRuleToChatButton rule={migrationRule} onAddToChat={onAddToChatTour} />
               </EuiFlexItem>
             )}
             <EuiFlexItem>
@@ -336,7 +342,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           </EuiFlexGroup>
         );
       },
-      [installSingleRule, isSiemMigrationAgentBuilderEnabled, isRulesLoading]
+      [installSingleRule, isSiemMigrationAgentBuilderEnabled, isRulesLoading, onAddToChatTour]
     );
 
     const getMigrationRuleData = useCallback(
@@ -461,6 +467,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                       installTranslatedRule={installTranslatedRules}
                       installSelectedRule={installSelectedRule}
                       reprocessFailedRules={showReprocessMigrationModal}
+                      onAddToChat={onAddToChatTour}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -514,6 +521,16 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           />
         )}
         {rulePreviewFlyout}
+        {isSiemMigrationAgentBuilderEnabled && isAddToChatTourActive && (
+          <AddToChatTour
+            tour={addToChatTour}
+            migrationRules={migrationRules}
+            isTableLoaded={!isStatsLoading && !isRulesLoading}
+            openedMigrationRuleId={openedMigrationRuleId}
+            isOtherFlyoutOpen={isMissingIndexPatternFlyoutOpen}
+            openMigrationRuleDetails={openRulePreview}
+          />
+        )}
       </>
     );
   }
