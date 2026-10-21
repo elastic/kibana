@@ -231,7 +231,7 @@ describe('test transform install with legacy schema', () => {
           content: 'data',
           _meta: meta,
         },
-        { ignore: [409] },
+        {},
       ],
       [
         {
@@ -240,7 +240,7 @@ describe('test transform install with legacy schema', () => {
           content: 'data',
           _meta: meta,
         },
-        { ignore: [409] },
+        {},
       ],
     ]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
@@ -429,7 +429,7 @@ describe('test transform install with legacy schema', () => {
           content: 'data',
           _meta: meta,
         },
-        { ignore: [409] },
+        {},
       ],
     ]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
@@ -650,7 +650,7 @@ describe('test transform install with legacy schema', () => {
           content: 'data',
           _meta: meta,
         },
-        { ignore: [409] },
+        {},
       ],
     ]);
     expect(esClient.transform.startTransform.mock.calls).toEqual([
