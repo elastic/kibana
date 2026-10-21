@@ -26,6 +26,7 @@ import {
   isRulesAddPath,
   isRulesManagementPath,
   isSharedExceptionListsPath,
+  isOnboardingPath,
 } from '../../../helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { timelineDefaults } from '../../../timelines/store/defaults';
@@ -68,7 +69,7 @@ export const GlobalHeader = React.memo(() => {
   const rulesManagementPath = isRulesManagementPath(pathname);
   const rulesAddPath = isRulesAddPath(pathname);
   const sharedExceptionListsPath = isSharedExceptionListsPath(pathname);
-
+  const onboardingPath = isOnboardingPath(pathname);
   const { href, onClick } = useAddIntegrationsUrl();
 
   useEffect(() => {
@@ -78,7 +79,14 @@ export const GlobalHeader = React.memo(() => {
 
     // The Rules, Add Elastic rules and Shared Exception Lists page app headers render their own actions
     // (ML job settings, Add integrations), so clear the global header action menu there to avoid duplicating them.
-    if (changesHistoryPath || rulesManagementPath || rulesAddPath || sharedExceptionListsPath) {
+    // Onboarding is a page without the global header action menu
+    if (
+      changesHistoryPath ||
+      rulesManagementPath ||
+      rulesAddPath ||
+      sharedExceptionListsPath ||
+      onboardingPath
+    ) {
       setHeaderActionMenu(undefined);
       return;
     }
