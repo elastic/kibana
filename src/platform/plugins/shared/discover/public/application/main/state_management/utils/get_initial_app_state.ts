@@ -176,8 +176,9 @@ export function getDefaultQuery(
     return initialUrlState?.query || services.data.query.queryString.getDefaultQuery();
 
   if (dataView instanceof DataView && opensInEsqlByDefault(args)) {
-    const configuredEsqlQuery = args.hasLocationDataView ? undefined : getConfiguredEsqlQuery(args);
-    return { esql: configuredEsqlQuery || getInitialESQLQuery(dataView) };
+    // A data view passed by the navigation takes precedence over the configured query
+    if (args.hasLocationDataView) return { esql: getInitialESQLQuery(dataView) };
+    return { esql: getConfiguredEsqlQuery(args) || getInitialESQLQuery(dataView) };
   }
 
   // Lastly, fall back to classic if we can't use anything else
