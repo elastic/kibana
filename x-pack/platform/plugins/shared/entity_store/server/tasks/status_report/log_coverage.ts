@@ -27,6 +27,7 @@ import { runPart } from './collection';
 export const LOG_COVERAGE_WINDOW_HOURS = 12;
 export const DEFAULT_LOG_COVERAGE_TARGET_DOCS = 50_000;
 export const MIN_LOG_COVERAGE_TARGET_DOCS = 1_000;
+const INDEX_PATTERNS_TIMEOUT_MS = 10_000;
 const COUNT_TIMEOUT_MS = 10_000;
 const SAMPLE_TIMEOUT_MS = 30_000;
 const MIN_SAMPLE_RATE = 0.0001;
@@ -157,6 +158,13 @@ interface CollectLogCoverageParams {
   deadline: number;
 }
 
+const untilAborted = <T>(promise: Promise<T>, signal: AbortSignal): Promise<T> =>
+  new Promise<T>((resolve, reject) => {
+    const onAbort = () => reject(signal.reason);
+    signal.addEventListener('abort', onAbort, { once: true });
+    promise.then(resolve, reject).finally(() => signal.removeEventListener('abort', onAbort));
+  });
+
 /**
  * Samples the last 12h of logs and counts, per source, which identity fields the logs carry and
  * whether they could create a user entity. It never throws: every outcome becomes an event, so a
@@ -186,9 +194,24 @@ export const collectLogCoverage = async ({
   });
 
   try {
-    const patterns = await getIndexPatterns();
-    if (patterns.length === 0) return finish('skipped');
-    const indexPatterns = withInternalEsqlViewExclusions(patterns);
+    // `getIndexPatterns` takes no signal, so stop waiting for it once the part is aborted.
+    const patternsResult = await runPart({
+      part: 'logIndexPatterns',
+      timeoutMs: INDEX_PATTERNS_TIMEOUT_MS,
+      deadline,
+      taskSignal: signal,
+      fn: (partSignal) =>
+        untilAborted(
+          getIndexPatterns().catch((e) => {
+            logger.warn(`Failed to resolve log coverage index patterns: ${e}`);
+            throw e;
+          }),
+          partSignal
+        ),
+    });
+    if (!patternsResult.result) return finish(patternsResult.outcome);
+    if (patternsResult.result.length === 0) return finish('skipped');
+    const indexPatterns = withInternalEsqlViewExclusions(patternsResult.result);
 
     const countResult = await runPart({
       part: 'logCount',
