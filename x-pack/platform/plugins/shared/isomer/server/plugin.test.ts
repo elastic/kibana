@@ -90,4 +90,8 @@ describe('IsomerPlugin', () => {
       vegaExample.caption
     );
   });
+
+  it('rejects getDrawing while server drawing is off', async () => {
+    await expect(startPlugin().getDrawing()).rejects.toThrow('Server drawing is off');
+  });
 });

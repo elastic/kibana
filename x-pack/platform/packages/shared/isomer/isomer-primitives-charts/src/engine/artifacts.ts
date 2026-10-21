@@ -64,9 +64,16 @@ export interface PrepareChartsOptions {
   /** Finds charts inside any pack's containers: `createChildNodeWalker(runtime.primitives)`. */
   walk: ChildNodeWalker;
   mode: ColorMode;
-  /** The width every chart is drawn at; no surface tells a chart its own. */
+  /** The width every chart is drawn at, unless `sizeFor` gives its own. */
   width: number;
   height?: number;
+  /** A chart's own size, from the containers it sits in (outermost first), e.g. a dashboard panel. */
+  sizeFor?: (
+    node: ChartNode,
+    ancestors: readonly PrimitiveNode[]
+  ) => { width: number; height: number } | undefined;
+  /** Engine-specific presentation for a chart, e.g. from its Lens source. */
+  hintFor?: (node: ChartNode) => Readonly<Record<string, unknown>> | undefined;
 }
 
 export interface PreparedCharts {
@@ -83,17 +90,19 @@ const isChart = (engine: ChartEngine, node: unknown): node is ChartNode =>
 export const prepareCharts = async (
   engine: ChartEngine,
   composition: Composition,
-  { walk, mode, width, height = DEFAULT_HEIGHT }: PrepareChartsOptions
+  { walk, mode, width, height = DEFAULT_HEIGHT, sizeFor, hintFor }: PrepareChartsOptions
 ): Promise<PreparedCharts> => {
   const { draw } = engine;
   const store = storeOf(engine);
   const held: string[] = [];
   if (draw) {
     const theme = resolveChartTheme(mode);
-    const queue: unknown[] = [...composition.body];
+    const queue: Array<{ node: unknown; ancestors: readonly PrimitiveNode[] }> =
+      composition.body.map((node) => ({ node, ancestors: [] }));
     for (let index = 0; index < queue.length; index += 1) {
-      const node = queue[index];
-      queue.push(...walk(node).map(({ node: child }) => child));
+      const { node, ancestors } = queue[index];
+      const inside = [...ancestors, node as PrimitiveNode];
+      queue.push(...walk(node).map(({ node: child }) => ({ node: child, ancestors: inside })));
       if (!isChart(engine, node)) {
         continue;
       }
@@ -103,9 +112,11 @@ export const prepareCharts = async (
         existing.holds += 1;
       } else {
         // Held before the draw resolves, so a concurrent call shares it rather than drawing again.
+        const size = sizeFor?.(node, ancestors) ?? { width, height };
+        const hint = hintFor?.(node);
         const entry: Held = {
           drawing: Promise.resolve()
-            .then(() => draw(node, { mode, theme, width, height }))
+            .then(() => draw(node, { mode, theme, ...size, ...(hint ? { hint } : {}) }))
             .then(
               (artifact) => (entry.artifact = artifact),
               // A drawing that fails leaves the chart to its fallback table.

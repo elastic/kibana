@@ -10,7 +10,14 @@ import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/c
 import { schema } from '@kbn/config-schema';
 import type { KibanaIsomerRuntime } from '@kbn/isomer';
 import type { IsomerPluginConfig } from './config';
-import { createChartsDrawing, DEFAULT_CHART_SIZE } from './charts_drawing';
+import { existsSync, readFileSync } from 'node:fs';
+import { fromRoot } from '@kbn/repo-info';
+import {
+  type ChartsDrawing,
+  createChartsDrawing,
+  DEFAULT_CHART_SIZE,
+  type IsomerDrawing,
+} from './charts_drawing';
 import { createRuntime } from './create_runtime';
 
 export type IsomerPluginSetup = Record<string, never>;
@@ -21,12 +28,23 @@ export interface IsomerPluginStart {
    * packs. The first call loads the packs and builds it; later calls share it.
    */
   getRuntime: () => Promise<KibanaIsomerRuntime>;
+  /**
+   * Resolves server drawing: PNG and PDF from the `snapshot` surface, and `html` with charts drawn.
+   * The first call starts the drawing thread. Rejects unless `xpack.isomer.charts.serverDraw` is on.
+   */
+  getDrawing: () => Promise<IsomerDrawing>;
 }
+
+// Demo: the maps pack's only local boundary file, until EMS geometry (F12).
+const WORLD_COUNTRIES = fromRoot(
+  'x-pack/platform/plugins/shared/maps/test/scout/ui/fixtures/files/world_countries_v7.geo.json'
+);
 
 export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart> {
   private readonly logger: Logger;
   private readonly serverDraw: boolean;
   private runtime?: Promise<KibanaIsomerRuntime>;
+  private drawing?: Promise<ChartsDrawing>;
 
   constructor(private readonly initializerContext: PluginInitializerContext<IsomerPluginConfig>) {
     this.logger = initializerContext.logger.get();
@@ -41,10 +59,14 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
   }
 
   start(): IsomerPluginStart {
-    return { getRuntime: this.getRuntime };
+    return { getRuntime: this.getRuntime, getDrawing: this.getDrawing };
   }
 
-  stop() {}
+  async stop() {
+    const drawing = this.drawing;
+    this.drawing = undefined;
+    await drawing?.then(({ close }) => close()).catch(() => undefined);
+  }
 
   /** Dev only: draws with per-request hints and chart size, for comparison with Lens. */
   private registerDevRenderRoute(core: CoreSetup) {
@@ -76,6 +98,27 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
       }
     );
   }
+
+  private readonly getDrawing = (): Promise<IsomerDrawing> => {
+    if (!this.serverDraw) {
+      return Promise.reject(new Error('Server drawing is off: set xpack.isomer.charts.serverDraw'));
+    }
+    this.drawing ??= createChartsDrawing(
+      existsSync(WORLD_COUNTRIES)
+        ? { geometry: { world_countries: JSON.parse(readFileSync(WORLD_COUNTRIES, 'utf8')) } }
+        : {}
+    ).then(
+      (drawing) => {
+        this.logger.debug('Started server drawing.');
+        return drawing;
+      },
+      (error) => {
+        this.drawing = undefined;
+        throw error;
+      }
+    );
+    return this.drawing;
+  };
 
   private readonly getRuntime = (): Promise<KibanaIsomerRuntime> => {
     this.runtime ??= createRuntime().then(
