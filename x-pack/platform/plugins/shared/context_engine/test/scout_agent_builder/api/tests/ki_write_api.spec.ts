@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { KibanaRole, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import { apiTest, testData, registerAiIndex, withQuery, createKiDest, storedKi } from '../fixtures';
@@ -14,6 +14,7 @@ import { apiTest, testData, registerAiIndex, withQuery, createKiDest, storedKi }
 const {
   AI_INDEX_COLLECTION_PATH,
   API_HEADERS,
+  CONTEXT_ENGINE_ALL,
   INTERNAL_API_HEADERS,
   kiByIdPath,
   kiListPath,
@@ -28,17 +29,32 @@ const DS_DEST = `ai-index-ds-scout-ki-write-${RUN_ID}`;
 const KI_ID = 'scout-ki-write-target';
 const DS_KI_ID = 'scout-ki-write-ds-target';
 
+/** Documented caller: Context Engine write access plus ES write privileges on the backing indices. */
+const KI_WRITE_ROLE: KibanaRole = {
+  elasticsearch: {
+    cluster: [],
+    indices: [
+      { names: [DEST_INDEX, DS_DEST], privileges: ['read', 'write', 'view_index_metadata'] },
+    ],
+  },
+  kibana: [CONTEXT_ENGINE_ALL],
+};
+
 apiTest.describe('context engine KI write API', { tag: tags.stateful.classic }, () => {
   let adminApiCredentials: RoleApiCredentials;
   let viewerApiCredentials: RoleApiCredentials;
+  let writerApiCredentials: RoleApiCredentials;
   let adminInternalHeaders: Record<string, string>;
   let viewerInternalHeaders: Record<string, string>;
+  let writerInternalHeaders: Record<string, string>;
 
   apiTest.beforeAll(async ({ requestAuth, esClient, apiClient }) => {
     adminApiCredentials = await requestAuth.getApiKey('admin');
     viewerApiCredentials = await requestAuth.getApiKey('viewer');
+    writerApiCredentials = await requestAuth.getApiKeyForCustomRole(KI_WRITE_ROLE);
     adminInternalHeaders = { ...INTERNAL_API_HEADERS, ...adminApiCredentials.apiKeyHeader };
     viewerInternalHeaders = { ...INTERNAL_API_HEADERS, ...viewerApiCredentials.apiKeyHeader };
+    writerInternalHeaders = { ...INTERNAL_API_HEADERS, ...writerApiCredentials.apiKeyHeader };
 
     await createKiDest(esClient, { type: 'index', value: DEST_INDEX });
     await createKiDest(esClient, { type: 'data_stream', value: DS_DEST });
@@ -83,7 +99,7 @@ apiTest.describe('context engine KI write API', { tag: tags.stateful.classic }, 
 
     await apiTest.step('updates the KI content', async () => {
       const patchResponse = await apiClient.patch(kiPath, {
-        headers: adminInternalHeaders,
+        headers: writerInternalHeaders,
         responseType: 'json',
         body: { ki: { content: 'Updated by scout' } },
       });
@@ -100,7 +116,7 @@ apiTest.describe('context engine KI write API', { tag: tags.stateful.classic }, 
 
     await apiTest.step('soft-deletes the KI', async () => {
       const deleteResponse = await apiClient.delete(kiPath, {
-        headers: adminInternalHeaders,
+        headers: writerInternalHeaders,
         responseType: 'json',
       });
       expect(deleteResponse).toHaveStatusCode(200);
@@ -134,7 +150,7 @@ apiTest.describe('context engine KI write API', { tag: tags.stateful.classic }, 
 
     await apiTest.step('rejects an update to the soft-deleted KI with 409', async () => {
       const patchDeleted = await apiClient.patch(kiPath, {
-        headers: adminInternalHeaders,
+        headers: writerInternalHeaders,
         responseType: 'json',
         body: { ki: { content: 'Should not apply' } },
       });
@@ -143,7 +159,7 @@ apiTest.describe('context engine KI write API', { tag: tags.stateful.classic }, 
 
     await apiTest.step('restores the soft-deleted KI', async () => {
       const restoreResponse = await apiClient.post(kiRestorePath(AI_INDEX_ID, KI_ID), {
-        headers: adminInternalHeaders,
+        headers: writerInternalHeaders,
         responseType: 'json',
       });
       expect(restoreResponse).toHaveStatusCode(200);
@@ -160,13 +176,13 @@ apiTest.describe('context engine KI write API', { tag: tags.stateful.classic }, 
 
     await apiTest.step('is idempotent on a repeated delete', async () => {
       const deleteAgain = await apiClient.delete(kiPath, {
-        headers: adminInternalHeaders,
+        headers: writerInternalHeaders,
         responseType: 'json',
       });
       expect(deleteAgain).toHaveStatusCode(200);
 
       const deleteIdempotent = await apiClient.delete(kiPath, {
-        headers: adminInternalHeaders,
+        headers: writerInternalHeaders,
         responseType: 'json',
       });
       expect(deleteIdempotent).toHaveStatusCode(200);
@@ -178,7 +194,7 @@ apiTest.describe('context engine KI write API', { tag: tags.stateful.classic }, 
     const kiPath = kiByIdPath(DS_AI_INDEX_ID, DS_KI_ID);
 
     const patchResponse = await apiClient.patch(kiPath, {
-      headers: adminInternalHeaders,
+      headers: writerInternalHeaders,
       responseType: 'json',
       body: { ki: { content: 'Data stream updated' } },
     });

@@ -47,7 +47,7 @@ export const updateKi = async (
     backingIndex,
   });
   if (isKiDeleted(revision.source)) {
-    throw kiDeletedError(aiIndexId, kiId);
+    throw kiDeletedError(aiIndexId, kiId, 'restore the deleted KI before updating it');
   }
 
   const now = new Date().toISOString();

@@ -180,6 +180,7 @@ export const createRememberTool = ({
         agentId: agent?.agentId,
       });
       let existingBackingIndex: string | undefined;
+      let existingDocumentId: string | undefined;
       let existingSeqNo: number | undefined;
       let existingPrimaryTerm: number | undefined;
       let existingDocument: StoredMemoryDocument | undefined;
@@ -210,6 +211,7 @@ export const createRememberTool = ({
         }
 
         existingBackingIndex = revision.index;
+        existingDocumentId = revision.documentId;
         existingSeqNo = revision.seqNo;
         existingPrimaryTerm = revision.primaryTerm;
         existingDocument = revision.source;
@@ -265,7 +267,9 @@ export const createRememberTool = ({
           aiIndex.dest.type === 'index' && existingBackingIndex
             ? existingBackingIndex
             : aiIndex.dest.value,
-        ...(aiIndex.dest.type === 'index' && { id: logicalId }),
+        ...(aiIndex.dest.type === 'index' && {
+          id: existingBackingIndex && existingDocumentId ? existingDocumentId : logicalId,
+        }),
         document,
         ...(aiIndex.dest.type === 'data_stream' || !existingDocument
           ? { op_type: 'create' as const }

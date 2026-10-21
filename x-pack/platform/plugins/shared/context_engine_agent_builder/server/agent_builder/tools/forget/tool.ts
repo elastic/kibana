@@ -85,12 +85,14 @@ export const createForgetTool = ({
       });
 
       const currentUserClient = esClient.asCurrentUser;
+      const abortSignal = new AbortController().signal;
 
       const revision = await getKiRevision({
         esClient: currentUserClient,
         aiIndexId: params.aiIndexId,
         dest: aiIndex.dest,
         kiId: params.id,
+        abortSignal,
         includeSource: true,
       });
 
@@ -133,6 +135,7 @@ export const createForgetTool = ({
         revision,
         changes,
         refresh: true,
+        abortSignal,
       });
 
       return {
