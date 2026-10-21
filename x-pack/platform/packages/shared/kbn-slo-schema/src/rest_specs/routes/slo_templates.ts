@@ -4,29 +4,33 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 
 import type { sloTemplateSchema } from '../../schema/zod/slo_template';
 
-const getSLOTemplateParamsSchema = z.object({
-  path: z.object({
-    templateId: z.string(),
-  }),
-});
+const getSLOTemplateParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      templateId: z.string(),
+    }),
+  })
+);
 
-const findSLOTemplatesParamsSchema = z.object({
-  query: z
-    .object({
-      search: z.string().optional(),
-      tags: z
-        .string()
-        .transform((value) => value.split(','))
-        .optional(),
-      page: z.coerce.number().optional(),
-      perPage: z.coerce.number().optional(),
-    })
-    .optional(),
-});
+const findSLOTemplatesParamsSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .object({
+        search: z.string().optional(),
+        tags: z
+          .string()
+          .transform((value) => value.split(','))
+          .optional(),
+        page: z.coerce.number().optional(),
+        perPage: z.coerce.number().optional(),
+      })
+      .optional(),
+  })
+);
 
 type SLOTemplateResponse = z.input<typeof sloTemplateSchema>;
 type GetSLOTemplateResponse = SLOTemplateResponse;

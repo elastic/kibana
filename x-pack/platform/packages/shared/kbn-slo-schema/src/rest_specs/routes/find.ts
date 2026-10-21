@@ -5,75 +5,85 @@
  * 2.0.
  */
 import { BooleanFromString } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 import { sloWithDataResponseSchemaZod } from '../slo';
 
-const sortDirectionSchema = z.union([z.literal('asc'), z.literal('desc')]);
-const sortBySchema = z.union([
-  z.literal('error_budget_consumed'),
-  z.literal('error_budget_remaining'),
-  z.literal('sli_value'),
-  z.literal('status'),
-  z.literal('burn_rate_5m'),
-  z.literal('burn_rate_1h'),
-  z.literal('burn_rate_1d'),
-]);
-
-const searchAfterArraySchema = z.array(z.union([z.string(), z.number()]));
-
-// Codec: wire form is a JSON-encoded string; decoded form is the parsed array.
-const searchAfterSchema = z.codec(
-  z
-    .string()
-    .describe('A JSON-encoded array of strings or numbers used for cursor-based pagination'),
-  searchAfterArraySchema,
-  {
-    decode: (value, payload) => {
-      const fail = () => {
-        payload.issues.push({
-          code: 'custom',
-          message: 'Invalid searchAfter value, must be a JSON array of strings or numbers',
-          input: value,
-        });
-        return z.NEVER;
-      };
-      try {
-        const result = searchAfterArraySchema.safeParse(JSON.parse(value));
-        return result.success ? result.data : fail();
-      } catch {
-        return fail();
-      }
-    },
-    encode: (value) => JSON.stringify(value),
-  }
+const sortDirectionSchema = lazySchema(() => z.union([z.literal('asc'), z.literal('desc')]));
+const sortBySchema = lazySchema(() =>
+  z.union([
+    z.literal('error_budget_consumed'),
+    z.literal('error_budget_remaining'),
+    z.literal('sli_value'),
+    z.literal('status'),
+    z.literal('burn_rate_5m'),
+    z.literal('burn_rate_1h'),
+    z.literal('burn_rate_1d'),
+  ])
 );
 
-const findSLOQuerySchema = z.object({
-  filters: z.string().optional(),
-  kqlQuery: z.string().optional(),
-  // Used for page-based pagination; kept as strings to preserve backward compatibility
-  page: z.string().optional(),
-  perPage: z.string().optional(),
-  sortBy: sortBySchema.optional(),
-  sortDirection: sortDirectionSchema.optional(),
-  hideStale: BooleanFromString.optional(),
-  // Used for cursor-based pagination; searchAfter is a JSON-encoded array
-  searchAfter: searchAfterSchema.optional(),
-  size: z.string().optional(),
-});
+const searchAfterArraySchema = lazySchema(() => z.array(z.union([z.string(), z.number()])));
 
-const findSLOParamsSchema = z.object({
-  query: findSLOQuerySchema.optional(),
-});
+// Codec: wire form is a JSON-encoded string; decoded form is the parsed array.
+const searchAfterSchema = lazySchema(() =>
+  z.codec(
+    z
+      .string()
+      .describe('A JSON-encoded array of strings or numbers used for cursor-based pagination'),
+    searchAfterArraySchema,
+    {
+      decode: (value, payload) => {
+        const fail = () => {
+          payload.issues.push({
+            code: 'custom',
+            message: 'Invalid searchAfter value, must be a JSON array of strings or numbers',
+            input: value,
+          });
+          return z.NEVER;
+        };
+        try {
+          const result = searchAfterArraySchema.safeParse(JSON.parse(value));
+          return result.success ? result.data : fail();
+        } catch {
+          return fail();
+        }
+      },
+      encode: (value) => JSON.stringify(value),
+    }
+  )
+);
 
-const findSLOResponseSchema = z.object({
-  page: z.number(),
-  perPage: z.number(),
-  total: z.number(),
-  results: z.array(sloWithDataResponseSchemaZod),
-  searchAfter: searchAfterArraySchema.optional(),
-  size: z.number().optional(),
-});
+const findSLOQuerySchema = lazySchema(() =>
+  z.object({
+    filters: z.string().optional(),
+    kqlQuery: z.string().optional(),
+    // Used for page-based pagination; kept as strings to preserve backward compatibility
+    page: z.string().optional(),
+    perPage: z.string().optional(),
+    sortBy: sortBySchema.optional(),
+    sortDirection: sortDirectionSchema.optional(),
+    hideStale: BooleanFromString.optional(),
+    // Used for cursor-based pagination; searchAfter is a JSON-encoded array
+    searchAfter: searchAfterSchema.optional(),
+    size: z.string().optional(),
+  })
+);
+
+const findSLOParamsSchema = lazySchema(() =>
+  z.object({
+    query: findSLOQuerySchema.optional(),
+  })
+);
+
+const findSLOResponseSchema = lazySchema(() =>
+  z.object({
+    page: z.number(),
+    perPage: z.number(),
+    total: z.number(),
+    results: z.array(sloWithDataResponseSchemaZod),
+    searchAfter: searchAfterArraySchema.optional(),
+    size: z.number().optional(),
+  })
+);
 
 type FindSLOParams = z.output<typeof findSLOQuerySchema>;
 type FindSLOResponse = z.input<typeof findSLOResponseSchema>;

@@ -4,21 +4,25 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 
 import { sloIdSchema } from '../../schema/zod/slo';
 
-const bulkDeleteParamsSchema = z.object({
-  body: z.object({
-    list: z.array(sloIdSchema),
-  }),
-});
+const bulkDeleteParamsSchema = lazySchema(() =>
+  z.object({
+    body: z.object({
+      list: z.array(sloIdSchema),
+    }),
+  })
+);
 
-const bulkDeleteStatusParamsSchema = z.object({
-  path: z.object({
-    taskId: z.string(),
-  }),
-});
+const bulkDeleteStatusParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      taskId: z.string(),
+    }),
+  })
+);
 
 type BulkDeleteInput = z.input<typeof bulkDeleteParamsSchema.shape.body>;
 type BulkDeleteParams = z.output<typeof bulkDeleteParamsSchema.shape.body>;

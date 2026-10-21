@@ -4,22 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 import { allOrAnyString } from '../../schema/zod/common';
 import { sloIdSchema } from '../../schema/zod/slo';
 import { sloWithDataResponseSchemaZod } from '../slo';
 
-const getSLOQuerySchema = z.object({
-  instanceId: allOrAnyString.optional(),
-  remoteName: z.string().optional(),
-});
+const getSLOQuerySchema = lazySchema(() =>
+  z.object({
+    instanceId: allOrAnyString.optional(),
+    remoteName: z.string().optional(),
+  })
+);
 
-const getSLOParamsSchema = z.object({
-  path: z.object({
-    id: sloIdSchema,
-  }),
-  query: getSLOQuerySchema.optional(),
-});
+const getSLOParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({
+      id: sloIdSchema,
+    }),
+    query: getSLOQuerySchema.optional(),
+  })
+);
 
 const getSLOResponseSchema = sloWithDataResponseSchemaZod;
 

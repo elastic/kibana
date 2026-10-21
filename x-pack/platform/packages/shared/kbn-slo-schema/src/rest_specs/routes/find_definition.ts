@@ -5,34 +5,40 @@
  * 2.0.
  */
 import { BooleanFromString } from '@kbn/zod-helpers';
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 
 import { sloHealthSchema } from '../../schema/zod/health';
 import { sloDefinitionSchema } from '../../schema/zod/slo';
 
-const findSloDefinitionsParamsSchema = z.object({
-  query: z
-    .object({
-      search: z.string().optional(),
-      includeOutdatedOnly: BooleanFromString.optional(),
-      includeHealth: BooleanFromString.optional(),
-      tags: z.string().optional(),
-      page: z.string().optional(),
-      perPage: z.string().optional(),
-    })
-    .optional(),
-});
+const findSloDefinitionsParamsSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .object({
+        search: z.string().optional(),
+        includeOutdatedOnly: BooleanFromString.optional(),
+        includeHealth: BooleanFromString.optional(),
+        tags: z.string().optional(),
+        page: z.string().optional(),
+        perPage: z.string().optional(),
+      })
+      .optional(),
+  })
+);
 
-const sloDefinitionResponseSchema = sloDefinitionSchema.extend({
-  health: sloHealthSchema.optional(),
-});
+const sloDefinitionResponseSchema = lazySchema(() =>
+  sloDefinitionSchema.extend({
+    health: sloHealthSchema.optional(),
+  })
+);
 
-const findSloDefinitionsResponseSchema = z.object({
-  page: z.number(),
-  perPage: z.number(),
-  total: z.number(),
-  results: z.array(sloDefinitionResponseSchema),
-});
+const findSloDefinitionsResponseSchema = lazySchema(() =>
+  z.object({
+    page: z.number(),
+    perPage: z.number(),
+    total: z.number(),
+    results: z.array(sloDefinitionResponseSchema),
+  })
+);
 
 type FindSLODefinitionsParams = NonNullable<
   z.output<typeof findSloDefinitionsParamsSchema.shape.query>

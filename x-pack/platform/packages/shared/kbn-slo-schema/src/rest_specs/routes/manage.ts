@@ -4,12 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 import { sloIdSchema } from '../../schema/zod/slo';
 
-const manageSLOParamsSchema = z.object({
-  path: z.object({ id: sloIdSchema }),
-});
+const manageSLOParamsSchema = lazySchema(() =>
+  z.object({
+    path: z.object({ id: sloIdSchema }),
+  })
+);
 
 type ManageSLOParams = z.output<typeof manageSLOParamsSchema.shape.path>;
 

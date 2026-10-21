@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { lazySchema } from '@kbn/zod';
 import type { z } from '@kbn/zod';
 import {
   allOrAnyString as allOrAnyStringZod,
@@ -16,13 +17,15 @@ import {
 } from '../schema/zod';
 import type { SLODefinitionResponse } from './routes/find_definition';
 
-const sloWithDataResponseSchemaZod = sloDefinitionSchemaZod.extend({
-  summary: summarySchemaZod,
-  groupings: groupingsSchemaZod,
-  instanceId: allOrAnyStringZod,
-  meta: metaSchemaZod.optional(),
-  remote: remoteSchemaZod.optional(),
-});
+const sloWithDataResponseSchemaZod = lazySchema(() =>
+  sloDefinitionSchemaZod.extend({
+    summary: summarySchemaZod,
+    groupings: groupingsSchemaZod,
+    instanceId: allOrAnyStringZod,
+    meta: metaSchemaZod.optional(),
+    remote: remoteSchemaZod.optional(),
+  })
+);
 
 type SLOWithSummaryResponse = z.input<typeof sloWithDataResponseSchemaZod>;
 
