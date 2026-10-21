@@ -73,10 +73,25 @@ export const FTR_CRITICAL_PATHS: readonly string[] = [
   'config/node.options',
 ];
 
+/**
+ * Platform configs that FTR domain selection runs on every PR with a selected domain. They
+ * assert runtime registries (task types, privileges, features) or load solution archives by
+ * path, so no `kbn_references` edge ties them to the solution plugins they depend on.
+ */
+export const FTR_ALWAYS_RUN_CONFIGS: ReadonlySet<string> = new Set([
+  'x-pack/platform/test/plugin_api_integration/config.ts',
+  'x-pack/platform/test/api_integration/apis/security/config_security_trial.ts',
+  'x-pack/platform/test/api_integration/apis/features/config.ts',
+  'x-pack/platform/test/rule_registry/security_and_spaces/config_basic.ts',
+  'x-pack/platform/test/alerting_api_integration/security_and_spaces/group3/config.ts',
+]);
+
 /** Skip FTR when every changed file matches, regardless of owning module. */
 export const FTR_IRRELEVANT_PATHS: readonly string[] = [
   'docs/**',
-  '**/docs/**',
+  // Nested docs folders hold OpenAPI bundles next to markdown and images; kbn-es-archiver keeps
+  // source under src/lib/docs, so only data formats are ignored here.
+  '**/docs/**/*.{yaml,yml,json}',
   'oas_docs/**',
   '**/*.md',
   '**/*.mdx',

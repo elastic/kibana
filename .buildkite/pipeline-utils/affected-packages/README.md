@@ -136,9 +136,33 @@ On pull request builds, Jest unit and integration test groups are narrowed to co
 
 Merge-queue builds select Jest unit tests affected by changes since the group's pinned base (`BUILDKITE_MERGE_QUEUE_BASE_COMMIT`), not the live target-branch comparison (`MERGE_QUEUE_MERGE_BASE`). If that base is missing or invalid, or CI cannot determine the comparison range, test selection fails.
 
+The pick step lists the changed files once, with git resolving the comparison base and `moon query changed-files --base <base> --head <head>` listing the files (deleted files included), and shares that list between Jest selection, FTR selection and the Scout-only-diff check. The step skips bootstrap, so `pick_test_group_run_order.sh` installs the `@moonrepo/cli` version pinned in `package.json` on PR and merge-queue builds and passes it as `MOON_BIN`; a failed install fails the step. The PR pick step's sparse checkout includes `/.moon/` and `**/moon.yml`.
+
 ### Always-run integration configs
 
 Some integration suites boot a full Kibana and snapshot a *global registry* (rule-type params, connector types, task types, …) populated at runtime by downstream publishers that sit **upstream** of the suite's own package. `includeDownstream` expansion never reaches them, so a publisher-only change can silently skip the snapshot. Configs listed in `ALWAYS_RUN_JEST_INTEGRATION_CONFIGS` (`const.ts`) are re-added after affected-filtering so they run on every PR regardless of the graph. Keep the list tiny — it is a deliberate escape hatch.
+
+## PR FTR domain selection
+
+`selective_ftr_domains.ts` (in `pick_test_group_run_order`) narrows FTR on pull request builds to the manifest domains (`ftr_{domain}_{arch}_configs.yml`) a diff can affect. It is controlled by `FTR_DOMAIN_SELECTION` on the PR pick step: `off`, `dry-run` (annotate what would be skipped, run everything), or `enabled`. On-merge and merge-queue builds always keep every domain, and `ci:prevent-selective-testing` turns it off.
+
+- Changed files matching `FTR_IRRELEVANT_PATHS`, and modules in `FTR_EXCLUDED_MODULES`, are ignored.
+- Every module in the downstream `kbn_references` closure of the remaining changed modules contributes its kibana.jsonc `group`: a solution group selects that solution's domain; `platform` selects `platform` and every `base` config.
+- A manifest entry whose config file belongs to a closure module runs too, whichever manifest lists it.
+- When `platform` is selected, platform-owned configs filed in solution manifests also run (for example `x-pack/platform/test/serverless/functional/configs/<solution>/*`). They exercise platform UIs inside each serverless project, and no test suite imports the plugins they cover.
+- `FTR_ALWAYS_RUN_CONFIGS` run whenever any domain is selected. They assert runtime registries (task types, privileges, features) or load solution archives by path, so no `kbn_references` edge ties them to the solution plugins they depend on. Keep the list short.
+- `base` serverless configs declare `project` (the solution of their `serverlessProject`) and also run when that solution is selected. Serverless projects only load `platform` plus their own group's plugins, so other solutions cannot affect them. An entry without `project` always runs.
+- Every domain runs when an `FTR_CRITICAL_PATHS` file, a file outside any module, or a module without a `group` changes, or when detection fails. `LIMIT_SOLUTIONS` takes precedence when set.
+
+### Moon graph (shadow mode)
+
+The git (tsconfig `kbn_references`) graph decides the selection. Alongside it, `createMoonFtrModuleGraph` resolves the same rules with moon's project graph: each changed module's `kibana.jsonc` is piped to `moon query projects --affected --downstream deep`, so moon never diffs on its own. When the two select different configs, the build gets a `selective-testing-ftr-domains-moon-shadow` warning annotation listing them; a failure of this query is logged and has no effect.
+
+### Moon FTR task (shadow mode)
+
+`.buildkite/moon.yml` (project `kibana-buildkite`) has one noop `ftr` task. It depends on `#package:source-upstream` and `#plugin:source-upstream`, which covers every generated project, and takes the `ftrCritical` file group (a copy of `FTR_CRITICAL_PATHS`) as inputs. `resolveFtrDomainsWithMoonTask` runs `moon query tasks --affected --downstream deep --project kibana-buildkite --id ftr` and reads moon's affected reasons for the task (`options.affected.tasks["kibana-buildkite:ftr"]`): changed `files` (critical inputs) run every domain, and each `<project>:source-upstream` in `upstream` (the project or something it imports changed) adds its kibana.jsonc group, with `platform` and ungrouped projects adding `platform` and `base`. Code still drops excluded modules and irrelevant files inside modules, and runs every domain for a relevant file outside any module or a changed module without a group. When its domains differ from the git graph's, the build gets a `selective-testing-ftr-domains-moon-task` warning annotation; failures are logged and have no effect. It compares domains only: configs owned by affected modules, platform configs in solution manifests and always-run configs are not part of this answer.
+
+Both moon shadows run after the pick step uploads its steps, because the task query takes about 15 seconds.
 
 ## Scout selective testing: git -> Moon (shadow mode)
 
