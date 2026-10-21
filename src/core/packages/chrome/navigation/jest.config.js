@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../../',
   roots: ['<rootDir>/src/core/packages/chrome/navigation'],
   setupFilesAfterEnv: ['<rootDir>/src/core/packages/chrome/navigation/src/__tests__/test_setup.ts'],

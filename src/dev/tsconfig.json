@@ -18,7 +18,7 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/screenshotting-plugin",
-    "@kbn/test",
+    "@kbn/jest",
     "@kbn/dev-cli-runner",
     "@kbn/dev-cli-errors",
     "@kbn/repo-info",
@@ -53,5 +53,6 @@
     "@kbn/sort-package-json",
     "@kbn/babel-register",
     "@kbn/dev-validation-runner",
+    "@kbn/test",
   ]
 }

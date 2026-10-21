@@ -6,7 +6,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/entity_store'],
   // setupFilesAfterEnv is a list of scripts that are executed after JSDOM is initialized.
