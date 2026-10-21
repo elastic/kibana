@@ -209,6 +209,7 @@ export interface GetCaseIdsByAttachmentIdsAggs {
       references: {
         cases: {
           caseIds: {
+            sum_other_doc_count: number;
             buckets: Array<{
               key: string;
               attachment: { owner: { buckets: Array<{ key: string }> } };

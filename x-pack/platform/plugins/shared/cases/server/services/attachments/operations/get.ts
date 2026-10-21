@@ -707,9 +707,8 @@ export class AttachmentGetter {
                     caseIds: {
                       terms: {
                         field: `${soType}.references.id`,
-                        // A ceiling, not an allocation: ES makes one bucket per (attachment id, case)
-                        // pair that exists, and past `search.max_buckets` it fails rather than
-                        // returning fewer cases.
+                        // Caps the cases of each attachment id; ES leaves the rest out silently, so
+                        // more than this is an error rather than a partial list.
                         size: MAX_DOCS_PER_PAGE,
                       },
                       aggregations: {
@@ -735,12 +734,18 @@ export class AttachmentGetter {
       ]),
     });
 
-    return (response.aggregations?.attachmentIds.buckets ?? []).map(({ key, references }) => ({
-      attachmentId: key,
-      cases: references.cases.caseIds.buckets.flatMap(({ key: id, attachment }) =>
-        attachment.owner.buckets.map(({ key: owner }) => ({ id, owner }))
-      ),
-    }));
+    return (response.aggregations?.attachmentIds.buckets ?? []).map(({ key, references }) => {
+      const { buckets, sum_other_doc_count: casesLeftOut } = references.cases.caseIds;
+      if (casesLeftOut > 0) {
+        throw new Error(`Attachment id ${key} is in more than ${MAX_DOCS_PER_PAGE} cases`);
+      }
+      return {
+        attachmentId: key,
+        cases: buckets.flatMap(({ key: id, attachment }) =>
+          attachment.owner.buckets.map(({ key: owner }) => ({ id, owner }))
+        ),
+      };
+    });
   }
 
   /**

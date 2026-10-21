@@ -1573,6 +1573,29 @@ describe('AttachmentService getter', () => {
       expect(JSON.stringify(findArgs.filter)).toContain('host:b');
     });
 
+    it('throws when an attachment id is in more cases than one read returns', async () => {
+      unsecuredSavedObjectsClient.find.mockResolvedValue({
+        ...createSOFindResponse([]),
+        aggregations: {
+          attachmentIds: {
+            buckets: [
+              {
+                key: 'host:a',
+                references: { cases: { caseIds: { sum_other_doc_count: 1, buckets: [] } } },
+              },
+            ],
+          },
+        },
+      });
+
+      await expect(
+        createAttachmentGetter().getCaseIdsByAttachmentIds({
+          type: 'security.entity',
+          attachmentIds: ['host:a'],
+        })
+      ).rejects.toThrow('Attachment id host:a is in more than 10000 cases');
+    });
+
     it('reads each requested id once', async () => {
       unsecuredSavedObjectsClient.find.mockResolvedValue(createSOFindResponse([]));
 
