@@ -547,11 +547,12 @@ export async function deleteKibanaAssetsAndReferencesForSpace({
       'Impossible to delete kibana assets from the space where the package was installed, you must uninstall the package.'
     );
   }
-  // Best-effort (non-strict); only removeInstallation fails when workflows cannot be removed.
+  // Strict so the refs are not cleared below while workflows still exist in the space.
   await deleteWorkflowAssets({
     refs: installedPkg.attributes.additional_spaces_installed_kibana?.[spaceId] ?? [],
     spaceId,
     logger,
+    strict: true,
   });
   await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
   await saveKibanaAssetsRefs(savedObjectsClient, pkgName, null, spaceId, true);
