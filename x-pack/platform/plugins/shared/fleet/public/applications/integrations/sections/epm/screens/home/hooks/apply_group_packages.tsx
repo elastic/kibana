@@ -98,6 +98,7 @@ export const applyGroupPackages = ({
     return {
       ...card,
       url: getHref('integration_group', { groupName: group.name }),
+      isIntegrationGroupCard: true,
       release: undefined,
       installStatus: installedLabel ? installationStatuses.Installed : undefined,
       searchableContent: [

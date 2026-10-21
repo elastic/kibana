@@ -17,6 +17,7 @@ import type { GroupSchemaOption } from '../../../../../../../hooks/use_group_pac
 import { of } from 'rxjs';
 
 import {
+  sendCreatePackagePolicyForRq,
   sendGetAgents,
   sendGetDataStreams,
   sendGetPackageInfoByKeyForRq,
@@ -47,6 +48,15 @@ jest.mock('../../../../../../../hooks', () => ({
   sendGetPackageInfoByKey: jest.fn().mockResolvedValue({ data: undefined }),
   sendGetDataStreams: jest.fn(),
   sendGetAgents: jest.fn(),
+  sendBulkInstallPackages: jest.fn().mockResolvedValue({ data: { items: [] } }),
+  sendCreateAgentPolicy: jest.fn().mockResolvedValue({
+    data: { item: { id: 'agent-policy-2', name: 'Agent policy 1', namespace: 'default' } },
+  }),
+  sendCreatePackagePolicyForRq: jest.fn(),
+}));
+
+jest.mock('../../../../../../fleet/services/ensure_kibana_assets_installed', () => ({
+  ensurePackageKibanaAssetsInstalled: jest.fn().mockResolvedValue(undefined),
 }));
 
 const PACKAGES: Record<string, PackageInfo> = {
@@ -82,21 +92,31 @@ describe('GroupOnboardingWizard', () => {
     (sendGetPackageInfoByKeyForRq as jest.Mock).mockImplementation((name: string) =>
       Promise.resolve({ item: PACKAGES[name] })
     );
+    (sendGetDataStreams as jest.Mock).mockResolvedValue({ data_streams: [] });
+    (sendGetAgents as jest.Mock).mockResolvedValue({ data: { items: [], total: 0 } });
+    (sendCreatePackagePolicyForRq as jest.Mock).mockImplementation((policy) =>
+      Promise.resolve({ item: { ...policy, id: 'package-policy-1' } })
+    );
   });
 
+  let renderer: ReturnType<typeof createIntegrationsTestRendererMock>;
   const renderWizard = (
     group: PackageListItem,
     options: GroupSchemaOption[],
-    projectType?: string
+    projectType?: string,
+    host: Partial<React.ComponentProps<typeof GroupOnboardingWizard>> = {}
   ) => {
-    const renderer = createIntegrationsTestRendererMock();
+    renderer = createIntegrationsTestRendererMock();
+    renderer.startServices.data.search.search = jest.fn().mockReturnValue(of({})) as any;
     if (projectType) {
       renderer.startServices.cloud = {
         ...renderer.startServices.cloud,
         serverless: { ...renderer.startServices.cloud?.serverless, projectType },
       } as any;
     }
-    return renderer.render(<GroupOnboardingWizard group={group} options={options} />);
+    return renderer.render(
+      <GroupOnboardingWizard group={group} options={options} onExit={jest.fn()} {...host} />
+    );
   };
   const click = (el: HTMLElement) =>
     act(() => {
@@ -265,7 +285,7 @@ describe('GroupOnboardingWizard', () => {
       ],
     });
     (sendGetAgents as jest.Mock).mockResolvedValue({ data: { items: [], total: 0 } });
-    const renderer = createIntegrationsTestRendererMock();
+    renderer = createIntegrationsTestRendererMock();
     renderer.startServices.data.search.search = jest.fn().mockReturnValue(
       of({
         rawResponse: {
@@ -304,5 +324,61 @@ describe('GroupOnboardingWizard', () => {
     );
     click(result.getByTestId('groupWizardAddAgent'));
     expect(onAddAgent).toHaveBeenCalled();
+  });
+
+  it('page host: step lives in the URL', async () => {
+    const result = renderWizard(nginxGroupItem, [
+      option('otel', nginxOtelPackageInfo),
+      option('ecs', nginxPackageInfo),
+    ]);
+    await waitFor(() => expect(result.getByTestId('groupWizardSignal-logs')).toBeInTheDocument());
+    expect(result.getByTestId('groupWizardBack')).toBeInTheDocument();
+    click(result.getByTestId('groupWizardNext'));
+    await waitFor(() => expect(renderer.mountHistory.location.search).toBe('?step=logs'));
+  });
+
+  it('embedded host: local step state, no page header, save -> detect -> host exit', async () => {
+    const onExit = jest.fn();
+    const onSaved = jest.fn();
+    const result = renderWizard(
+      nginxGroupItem,
+      [option('otel', nginxOtelPackageInfo), option('ecs', nginxPackageInfo)],
+      undefined,
+      { stepState: 'local', layout: 'embedded', exitLabel: 'Back to Streams', onExit, onSaved }
+    );
+    await waitFor(() => expect(result.getByTestId('groupWizardSignal-logs')).toBeInTheDocument());
+    expect(result.queryByTestId('groupWizardBack')).not.toBeInTheDocument();
+    expect(result.getByText('View documentation')).toBeInTheDocument();
+
+    // Zero signals -> review -> "Install assets only"
+    click(result.getByTestId('groupWizardSignal-logs').querySelector('input')!);
+    click(result.getByTestId('groupWizardSignal-metrics').querySelector('input')!);
+    click(result.getByTestId('groupWizardNext'));
+    await waitFor(() => expect(result.getByTestId('groupWizardReview')).toBeInTheDocument());
+    expect(renderer.mountHistory.location.search).toBe('');
+    await waitFor(() => expect(result.getByTestId('groupWizardSave')).not.toBeDisabled());
+    click(result.getByTestId('groupWizardSave'));
+
+    // Nima's spec: the package policy is still created, with every input off
+    await waitFor(() => expect(sendCreatePackagePolicyForRq).toHaveBeenCalled());
+    const created = (sendCreatePackagePolicyForRq as jest.Mock).mock.calls[0][0];
+    expect(created.package.name).toBe('nginx_otel_integration');
+    expect(created.policy_ids).toEqual(['agent-policy-2']);
+    expect(created.inputs.map((i: { enabled: boolean }) => i.enabled)).toEqual([false, false]);
+
+    await waitFor(() =>
+      expect(result.getByTestId('groupWizardDetectAssetsOnly')).toBeInTheDocument()
+    );
+    expect(onSaved).toHaveBeenCalledWith(expect.objectContaining({ type: 'packagePolicy' }));
+    expect(result.getByTestId('groupWizardDone')).toHaveTextContent('Back to Streams');
+    click(result.getByTestId('groupWizardDone'));
+    expect(onExit).toHaveBeenCalledWith(
+      expect.objectContaining({
+        reason: 'done',
+        schema: 'otel',
+        packageName: 'nginx_otel_integration',
+        saved: expect.objectContaining({ type: 'packagePolicy' }),
+      })
+    );
   });
 });

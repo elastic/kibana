@@ -14,6 +14,7 @@ import { CardIcon } from '../../../../../../components/package_icon';
 import type { CollectionVariant } from '../home/card_utils';
 import { COLLECTION_QUERYPARAM } from '../home/card_utils';
 import { CollectionFlyout } from '../home/components/collection_flyout';
+import { useGroupWizardFlyout } from '../group/group_wizard_flyout';
 
 import { useBreadcrumbs, useStartServices } from '../../../../hooks';
 import { NoEprCallout } from '../../components/no_epr_callout';
@@ -115,14 +116,19 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
     availableSubCategories,
   } = useBrowseIntegrationHook({ prereleaseIntegrationsEnabled });
 
+  // PROTOTYPE: integration group tiles open the onboarding wizard in a flyout.
+  const { withGroupFlyout, flyout: groupWizardFlyout } = useGroupWizardFlyout();
+
   // Override onCardClick for collection tiles so they open the flyout instead of navigating away.
   const filteredCards = useMemo(
     () =>
-      rawFilteredCards.map((card) => {
-        if (!card.isCollectionCard) return card;
-        return { ...card, onCardClick: () => openCollection(card.name) };
-      }),
-    [rawFilteredCards, openCollection]
+      withGroupFlyout(
+        rawFilteredCards.map((card) => {
+          if (!card.isCollectionCard) return card;
+          return { ...card, onCardClick: () => openCollection(card.name) };
+        })
+      ),
+    [rawFilteredCards, openCollection, withGroupFlyout]
   );
 
   // Resolve the open collection card from rawFilteredCards so the flyout variants
@@ -239,6 +245,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
 
   return (
     <>
+      {groupWizardFlyout}
       {openCollectionCard && (
         <CollectionFlyout
           title={openCollectionCard.title}

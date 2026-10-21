@@ -52,7 +52,6 @@ import { useSpaceSettingsContext } from '../../../../../../../hooks/use_space_se
 import { incrementPolicyName } from '../../../../../../../services';
 import type { GroupSchemaOption } from '../../../../../../../hooks/use_group_package';
 import { PackageIcon } from '../../../../../../../components';
-import { INTEGRATIONS_PLUGIN_ID } from '../../../../../../../constants';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
 import { validationHasErrors } from '../../../../../../../../common/services';
 import { SetupTechnology } from '../../../../../../../../common/types';
@@ -107,10 +106,63 @@ import { DetectStep } from './detect_step';
 import type { VarFieldContext } from './var_fields';
 import { countVarErrors } from './var_fields';
 
-interface WizardProps {
+/** What the wizard hands back to its host when the user leaves. */
+export interface GroupWizardExitResult {
+  /** 'done': left from the last step. 'cancel': left before adding the integration. */
+  reason: 'done' | 'cancel';
+  /** Set once the integration was added. */
+  saved?: SavedPolicyResult;
+  schema: string;
+  packageName?: string;
+  packageVersion?: string;
+}
+
+/**
+ * PROTOTYPE: host contract. The route renders it as a full page with URL step state; an embedding
+ * host (browse flyout today, Streams "+ Source" or observability onboarding later) renders it
+ * `embedded` with local step state and owns the exit.
+ */
+export interface GroupWizardHostProps {
+  /** 'url': step in `?step=` (browser back works). 'local': component state, no URL changes. */
+  stepState?: 'url' | 'local';
+  /** 'page': full-bleed page with its own header. 'embedded': fills the host container. */
+  layout?: 'page' | 'embedded';
+  /** Label of the exit button on the last step, declared by the host. */
+  exitLabel?: string;
+  /** Called on exit. The wizard never navigates on its own when exiting. */
+  onExit: (result: GroupWizardExitResult) => void;
+  /** Called right after the integration is added (before the user exits). */
+  onSaved?: (result: SavedPolicyResult) => void;
+}
+
+interface WizardProps extends GroupWizardHostProps {
   group: PackageListItem;
   options: GroupSchemaOption[];
 }
+
+/** Current step + navigation, either in the URL (`?step=`) or in local state. */
+const useStepState = (mode: 'url' | 'local') => {
+  const history = useHistory();
+  const location = useLocation();
+  const [localStep, setLocalStep] = useState<string | null>(null);
+  const requestedStep =
+    mode === 'url' ? new URLSearchParams(location.search).get('step') : localStep;
+  const navigate = useCallback(
+    (next: WizardStep, replace: boolean) => {
+      if (mode === 'local') {
+        setLocalStep(next);
+        return;
+      }
+      const params = new URLSearchParams(location.search);
+      params.set('step', next);
+      const to = { ...location, search: `?${params.toString()}` };
+      if (replace) history.replace(to);
+      else history.push(to);
+    },
+    [mode, history, location]
+  );
+  return { requestedStep, navigate };
+};
 
 const EMPTY_STATE = emptySchemaState();
 
@@ -177,7 +229,15 @@ export const useActiveSolution = () => {
   return { solution: projectType ?? space.solution, isResolved: space.resolved };
 };
 
-export const GroupOnboardingWizard: React.FC<WizardProps> = ({ group, options }) => {
+export const GroupOnboardingWizard: React.FC<WizardProps> = ({
+  group,
+  options,
+  stepState = 'url',
+  layout = 'page',
+  exitLabel = 'Done',
+  onExit,
+  onSaved,
+}) => {
   const spaceSettings = useSpaceSettingsContext();
   const existingPolicies = useAllNonManagedAgentPolicies();
   const { isAgentlessEnabled } = useAgentless();
@@ -259,10 +319,9 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({ group, options })
     setSchema(next);
   };
 
-  // The current step lives in `?step=` so browser back/forward moves between steps.
-  const history = useHistory();
-  const location = useLocation();
-  const requestedStep = new URLSearchParams(location.search).get('step');
+  // Page: the current step lives in `?step=` so browser back/forward moves between steps.
+  // Embedded: local state, the host's URL is left alone.
+  const { requestedStep, navigate } = useStepState(stepState);
   const step: WizardStep = saved
     ? DETECT_STEP
     : requestedStep &&
@@ -276,13 +335,9 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({ group, options })
   const goTo = useCallback(
     (next: WizardStep, { replace = false }: { replace?: boolean } = {}) => {
       setVisited((v) => (v.includes(next) ? v : [...v, next]));
-      const params = new URLSearchParams(location.search);
-      params.set('step', next);
-      const to = { ...location, search: `?${params.toString()}` };
-      if (replace) history.replace(to);
-      else history.push(to);
+      navigate(next, replace);
     },
-    [history, location]
+    [navigate]
   );
 
   const option = options.find((o) => o.schema === schema);
@@ -335,7 +390,19 @@ export const GroupOnboardingWizard: React.FC<WizardProps> = ({ group, options })
       onSaved={(result) => {
         setSaved(result);
         goTo(DETECT_STEP, { replace: true });
+        onSaved?.(result);
       }}
+      layout={layout}
+      exitLabel={exitLabel}
+      onExit={(reason) =>
+        onExit({
+          reason,
+          saved,
+          schema,
+          packageName: packages[schema]?.packageInfo?.name,
+          packageVersion: packages[schema]?.packageInfo?.version,
+        })
+      }
       policyMode={policyMode}
       onPolicyModeChange={setPolicyMode}
       newAgentPolicy={newAgentPolicy}
@@ -381,13 +448,15 @@ interface BodyProps {
   existingPolicies: AgentPolicy[];
   existingPolicyId?: string;
   onExistingPolicyChange: (id: string) => void;
+  layout: 'page' | 'embedded';
+  exitLabel: string;
+  onExit: (reason: GroupWizardExitResult['reason']) => void;
 }
 
 const GroupWizardBody: React.FC<BodyProps> = (props) => {
   const { schema, model, state, steps, step, saved, packageInfo, group } = props;
   const { euiTheme } = useEuiTheme();
-  const { application } = useStartServices();
-  const { getHref, getPath } = useLink();
+  const { getHref } = useLink();
   const hasFleetAddAgentsPrivileges = useAuthz().fleet.addAgents;
   const [isDocModalOpen, setIsDocModalOpen] = useState(false);
   const [showErrors, setShowErrors] = useState(false);
@@ -506,9 +575,9 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
   };
 
   const childPkgkey = packageInfo ? `${packageInfo.name}-${packageInfo.version}` : '';
-  const browseHref = getHref('integrations_all', {});
   const canStepBack = !!prevStep && !saved;
   const backLabel = canStepBack ? 'Previous step' : 'Back to integrations';
+  const isEmbedded = props.layout === 'embedded';
 
   const existingPolicyName = props.existingPolicies.find(
     (p) => p.id === props.existingPolicyId
@@ -665,14 +734,10 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
               size="s"
               iconType="sortRight"
               iconSide="right"
-              onClick={() =>
-                application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
-                  path: getPath('integration_details_policies', { pkgkey: childPkgkey }),
-                })
-              }
+              onClick={() => props.onExit('done')}
               data-test-subj="groupWizardDone"
             >
-              Take me to my integration
+              {props.exitLabel}
             </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
@@ -737,70 +802,95 @@ const GroupWizardBody: React.FC<BodyProps> = (props) => {
       data-test-subj="groupOnboardingWizard"
       css={css({
         background: euiTheme.colors.backgroundBasePlain,
-        minHeight: 'calc(100vh - var(--euiFixedHeadersOffset, 0px))',
+        minHeight: isEmbedded ? undefined : 'calc(100vh - var(--euiFixedHeadersOffset, 0px))',
       })}
     >
       <div
-        css={css({
-          maxWidth: 1440,
-          margin: '0 auto',
-          padding: `${euiTheme.size.l} ${euiTheme.size.xl} ${euiTheme.size.xl}`,
-        })}
+        css={css(
+          isEmbedded
+            ? {}
+            : {
+                maxWidth: 1440,
+                margin: '0 auto',
+                padding: `${euiTheme.size.l} ${euiTheme.size.xl} ${euiTheme.size.xl}`,
+              }
+        )}
       >
-        {/* Header */}
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiToolTip content={backLabel} disableScreenReaderOutput>
-              <EuiButtonIcon
-                iconType="sortLeft"
+        {/* Header: page only, an embedding host renders its own (title, close). */}
+        {!isEmbedded && (
+          <>
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={backLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="sortLeft"
+                    size="xs"
+                    aria-label={backLabel}
+                    onClick={() =>
+                      canStepBack ? props.goTo(prevStep) : props.onExit(saved ? 'done' : 'cancel')
+                    }
+                    data-test-subj="groupWizardBack"
+                  />
+                </EuiToolTip>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <div
+                  css={css({
+                    width: 32,
+                    height: 32,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+                    borderRadius: euiTheme.border.radius.frame,
+                  })}
+                >
+                  {groupIcon}
+                </div>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="m">
+                  <h1>{group.title}</h1>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiBadge color="hollow">Integration</EuiBadge>
+              </EuiFlexItem>
+              <EuiFlexItem />
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  size="s"
+                  color="text"
+                  iconType="external"
+                  iconSide="right"
+                  isDisabled={!packageInfo}
+                  onClick={() => setIsDocModalOpen(true)}
+                >
+                  View documentation
+                </EuiButton>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiText size="s" color="subdued" css={css({ marginTop: euiTheme.size.s })}>
+              {group.description}
+            </EuiText>
+            <EuiHorizontalRule margin="m" />
+          </>
+        )}
+
+        {isEmbedded && (
+          <EuiFlexGroup justifyContent="flexEnd" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
                 size="xs"
-                aria-label={backLabel}
-                {...(canStepBack ? { onClick: () => props.goTo(prevStep) } : { href: browseHref })}
-                data-test-subj="groupWizardBack"
-              />
-            </EuiToolTip>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <div
-              css={css({
-                width: 32,
-                height: 32,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-                borderRadius: euiTheme.border.radius.frame,
-              })}
-            >
-              {groupIcon}
-            </div>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h1>{group.title}</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">Integration</EuiBadge>
-          </EuiFlexItem>
-          <EuiFlexItem />
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              size="s"
-              color="text"
-              iconType="external"
-              iconSide="right"
-              isDisabled={!packageInfo}
-              onClick={() => setIsDocModalOpen(true)}
-            >
-              View documentation
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiText size="s" color="subdued" css={css({ marginTop: euiTheme.size.s })}>
-          {group.description}
-        </EuiText>
-        <EuiHorizontalRule margin="m" />
+                iconType="documentation"
+                isDisabled={!packageInfo}
+                onClick={() => setIsDocModalOpen(true)}
+              >
+                View documentation
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
 
         {/* Rail + content */}
         <div css={css({ display: 'flex', gap: euiTheme.size.l, alignItems: 'flex-start' })}>

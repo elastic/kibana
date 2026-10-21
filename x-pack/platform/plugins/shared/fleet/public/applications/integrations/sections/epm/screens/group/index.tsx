@@ -7,6 +7,8 @@
 
 // PROTOTYPE: integration group page. Every group (package with `schemas`) gets the generic
 // onboarding wizard, driven by its child integrations' package metadata. No per-group code.
+// The route is a thin host: full page, step in the URL, exits to the integration (done) or to
+// browse (cancel). The browse tile opens the same wizard in a flyout (group_wizard_flyout.tsx).
 // The create-package-policy page keeps its `?group=<name>` schema toggle for direct links.
 // User-facing copy says "integration", never "group".
 
@@ -14,21 +16,42 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiCallOut, EuiSkeletonText } from '@elastic/eui';
 
-import { useBreadcrumbs } from '../../../../hooks';
+import { INTEGRATIONS_PLUGIN_ID } from '../../../../constants';
+import { useBreadcrumbs, useLink, useStartServices } from '../../../../hooks';
 import { useGroupPackage } from '../../../../../../hooks/use_group_package';
 import type { GroupSchemaOption } from '../../../../../../hooks/use_group_package';
 import type { PackageListItem } from '../../../../../../types';
 
+import type { GroupWizardExitResult } from './group_wizard';
 import { GroupOnboardingWizard } from './group_wizard';
 
 export { GroupSchemaToggle } from './schema_toggle';
+export { GroupWizardFlyout, useGroupWizardFlyout } from './group_wizard_flyout';
 
 const GroupWizardRoute: React.FC<{ group: PackageListItem; options: GroupSchemaOption[] }> = ({
   group,
   options,
 }) => {
   useBreadcrumbs('integration_group', { pkgTitle: group.title });
-  return <GroupOnboardingWizard group={group} options={options} />;
+  const { application } = useStartServices();
+  const { getPath } = useLink();
+  const onExit = ({ reason, packageName, packageVersion }: GroupWizardExitResult) =>
+    application.navigateToApp(INTEGRATIONS_PLUGIN_ID, {
+      path:
+        reason === 'done' && packageName
+          ? getPath('integration_details_policies', { pkgkey: `${packageName}-${packageVersion}` })
+          : getPath('integrations_all', {}),
+    });
+  return (
+    <GroupOnboardingWizard
+      group={group}
+      options={options}
+      stepState="url"
+      layout="page"
+      exitLabel="Take me to my integration"
+      onExit={onExit}
+    />
+  );
 };
 
 export const GroupPackagePage: React.FC = () => {
