@@ -69,6 +69,11 @@ const getSelector = (failure: TestFailure): FailureSelector => ({
   testId: getScoutTestId(failure),
 });
 
+const getLegacySelector = ({ classname, name }: TestFailure): FailureSelector => ({
+  classname,
+  name,
+});
+
 const getFramework = (failure: TestFailure): string | undefined =>
   isScoutFailure(failure) ? 'playwright' : failure.testType;
 
@@ -121,6 +126,8 @@ export class ExistingFailedTestIssues {
   private readonly results = new Map<TestFailure, ExistingFailedTestIssue | undefined>();
   /** by issue number, newest first */
   private suiteIssues: FlakySuiteIssue[] = [];
+  /** false once ci-stats turned out to predate suite issues and reject their request fields */
+  private askForSuiteIssues = true;
 
   constructor(private readonly log: ToolingLog) {}
 
@@ -245,12 +252,13 @@ export class ExistingFailedTestIssues {
     while (true) {
       attempt += 1;
 
+      const selectors = failures.map(this.askForSuiteIssues ? getSelector : getLegacySelector);
       let response: Response;
       try {
         response = await fetch(`${BASE_URL}/v1/find_failed_test_issues`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ failures: failures.map(getSelector) }),
+          body: JSON.stringify({ failures: selectors }),
         });
       } catch (error: unknown) {
         // Network-level error (fetch throws TypeError for DNS/connection failures).
@@ -264,13 +272,27 @@ export class ExistingFailedTestIssues {
       }
 
       if (!response.ok) {
+        const text = await response.text();
+        // ci-stats versions that predate suite issues reject the fields they don't know, so ask
+        // them for per-test issues only, as before
+        if (
+          response.status === 400 &&
+          this.askForSuiteIssues &&
+          text.includes('unexpected fields')
+        ) {
+          this.log.warning(
+            `ci-stats does not know suite issues yet, asking for per-test issues only`
+          );
+          this.askForSuiteIssues = false;
+          continue;
+        }
         // Server error: retry on 5xx, throw immediately on 4xx.
         if (attempt < maxAttempts && response.status >= 500) {
           this.log.warning(`Failure talking to ci-stats, waiting ${attempt} before retrying`);
           await setTimeout(attempt * 1000);
           continue;
         }
-        throw new Error(`${response.status}:${await response.text()}`);
+        throw new Error(`${response.status}:${text}`);
       }
 
       return (await response.json()) as FindFailedTestIssuesResponse;

@@ -491,4 +491,64 @@ describe('flaky suite issues', () => {
 
     expect(existing.getSuiteIssueForFailure(ftrFailure)).toBeUndefined();
   });
+
+  it('asks a ci-stats that rejects the suite issue fields for per-test issues only, from then on', async () => {
+    const perTestIssue: FailedTestIssue = {
+      classname: ftrFailure.classname,
+      name: ftrFailure.name,
+      github: {
+        nodeId: 'node-1',
+        number: 1,
+        htmlUrl: 'https://github.com/elastic/kibana/issues/1',
+        body: 'body',
+      },
+    };
+    fetchMock
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            type: 'BadRequestError',
+            status: 400,
+            message: '[body.failures[0]] unexpected fields: filePath, testId',
+          }),
+          { status: 400 }
+        )
+      )
+      .mockImplementation(async () => jsonResponse({ existingIssues: [perTestIssue] }));
+
+    const existing = new ExistingFailedTestIssues(log);
+    await existing.loadForFailures([ftrFailure]);
+    await existing.loadForFailures([jestFailure]);
+
+    const sent = fetchMock.mock.calls.map(([, init]) => JSON.parse(init?.body as string).failures);
+    expect(sent).toEqual([
+      [
+        {
+          classname: ftrFailure.classname,
+          name: ftrFailure.name,
+          filePath: FTR_FILE,
+          testId: computeTestID(FTR_FILE, ftrFailure.name),
+        },
+      ],
+      [{ classname: ftrFailure.classname, name: ftrFailure.name }],
+      [{ classname: jestFailure.classname, name: jestFailure.name }],
+    ]);
+    expect(existing.getForFailure(ftrFailure)?.github.number).toBe(1);
+    expect(existing.getSuiteIssueForFailure(ftrFailure)).toBeUndefined();
+    expect(writer.messages).toContainEqual(
+      expect.stringContaining('ci-stats does not know suite issues yet')
+    );
+  });
+
+  it('still fails on a 400 that is not about the suite issue fields', async () => {
+    fetchMock.mockImplementation(
+      async () => new Response('too many failures, max is 10k', { status: 400 })
+    );
+    const existing = new ExistingFailedTestIssues(log);
+
+    await expect(existing.loadForFailures([ftrFailure])).rejects.toThrow(
+      '400:too many failures, max is 10k'
+    );
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
 });
