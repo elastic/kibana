@@ -25,47 +25,45 @@ const impactCaptionPart = (proposal: ApprovalProposal): string | undefined => {
       });
 };
 
-/** `undefined` proposals carry no deadline at all — as opposed to one already past. */
+/** Returns `undefined` when there is no deadline. A past deadline still returns text. */
 const deadlineCaptionPart = (proposal: ApprovalProposal): string | undefined => {
   if (!proposal.expiresAt) {
     return undefined;
-  }
-  if (isProposalExpired(proposal)) {
-    return APPROVAL_MODAL_TRANSLATIONS.expiredCaption;
   }
   const deadline = new Date(proposal.expiresAt).toLocaleString(undefined, {
     dateStyle: 'medium',
     timeStyle: 'short',
   });
+  if (isProposalExpired(proposal)) {
+    return i18n.translate('xpack.proposals.approvalModal.caption.expired', {
+      defaultMessage: 'Expired on {deadline}',
+      values: { deadline },
+    });
+  }
   return i18n.translate('xpack.proposals.approvalModal.caption.expires', {
-    defaultMessage: 'Expires {deadline}',
+    defaultMessage: 'Expires on {deadline}',
     values: { deadline },
   });
 };
 
 /**
- * The category/reversibility line shown under a proposal's title — in the modal header and the
- * flyout's `ProposedActionButton` row alike, so the two describe the same proposal identically.
- * `undefined` when the proposal carries neither, so a caller can skip the line rather than render
- * an empty one.
+ * Returns the line under a proposal title: its category and whether it is reversible.
+ * Returns `undefined` when the proposal has neither.
  *
- * `includeRiskDetails` adds impact and the decision deadline — the same risk context the modal
- * used to show as its own list section before this became one caption line. Opt-in rather than
- * always on: a whole list of flyout rows repeating both on every line would be noisier than
- * useful, where the one proposal a modal (or the chat card) is actually asking about has the room
- * for it and the analyst needs it to actually decide.
+ * Set `includeRiskDetails` to add the impact and the decision deadline. Use it for one proposal,
+ * such as in the modal. Do not use it for a list of rows, because the repeated text is noisy.
  */
 export const getProposalCaption = (
   proposal: ApprovalProposal,
   { includeRiskDetails = false }: { includeRiskDetails?: boolean } = {}
 ): string | undefined => {
   const category = proposal.action?.category ?? proposal.category;
-  const reversible = proposal.action?.reversible;
+  const isReversible = proposal.action?.reversible;
   const parts = [
     category === undefined ? undefined : toSentenceCase(category),
-    reversible === undefined
+    isReversible === undefined
       ? undefined
-      : reversible
+      : isReversible
       ? APPROVAL_MODAL_TRANSLATIONS.reversible
       : APPROVAL_MODAL_TRANSLATIONS.irreversible,
     ...(includeRiskDetails ? [impactCaptionPart(proposal), deadlineCaptionPart(proposal)] : []),

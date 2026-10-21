@@ -129,21 +129,21 @@ describe('getProposalCaption', () => {
       getProposalCaption(proposal({ category: 'configure', impact: 'high', expiresAt }), {
         includeRiskDetails: true,
       })
-    ).toBe(`Configure • High impact • Expires ${formattedDeadline}`);
+    ).toBe(`Configure • High impact • Expires on ${formattedDeadline}`);
   });
 
-  it('shows Expired rather than a formatted deadline once the decision window has passed', () => {
+  it('shows the expiry date and time once the decision window has passed', () => {
+    const expiresAt = '2024-01-05T17:00:00.000Z';
+    const formattedDeadline = new Date(expiresAt).toLocaleString(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
+    });
     expect(
       getProposalCaption(
-        proposal({
-          category: 'configure',
-          impact: 'high',
-          status: 'expired',
-          expiresAt: '2024-01-05T17:00:00.000Z',
-        }),
+        proposal({ category: 'configure', impact: 'high', status: 'expired', expiresAt }),
         { includeRiskDetails: true }
       )
-    ).toBe('Configure • High impact • Expired');
+    ).toBe(`Configure • High impact • Expired on ${formattedDeadline}`);
   });
 
   it('omits the deadline segment entirely when the proposal carries no expiresAt', () => {

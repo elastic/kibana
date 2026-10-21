@@ -231,15 +231,20 @@ describe('ApprovalContent', () => {
       timeStyle: 'short',
     });
     expect(
-      screen.getByText(`Configure • Reversible • Critical impact • Expires ${formattedDeadline}`)
+      screen.getByText(`Configure • Reversible • Critical impact • Expires on ${formattedDeadline}`)
     ).toBeInTheDocument();
   });
 
-  it('shows Expired in the caption instead of the deadline once it has passed', () => {
-    renderContent({
-      proposal: { ...baseProposal, status: 'expired', expiresAt: '2024-01-05T17:00:00.000Z' },
+  it('shows the expiry date and time in the caption after the deadline', () => {
+    const expiresAt = '2024-01-05T17:00:00.000Z';
+    renderContent({ proposal: { ...baseProposal, status: 'expired', expiresAt } });
+    const formattedDeadline = new Date(expiresAt).toLocaleString(undefined, {
+      dateStyle: 'medium',
+      timeStyle: 'short',
     });
-    expect(screen.getByText('Critical impact • Expired')).toBeInTheDocument();
+    expect(
+      screen.getByText(`Critical impact • Expired on ${formattedDeadline}`)
+    ).toBeInTheDocument();
   });
 
   it('renders the comment', () => {
