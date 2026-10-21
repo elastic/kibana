@@ -9,6 +9,7 @@ echo '--- Log out of gcloud'
 ./.buildkite/scripts/common/activate_service_account.sh --logout-gcloud || true
 
 print_disk_usage "post-command"
+stop_disk_usage_sampler
 
 IS_TEST_EXECUTION_STEP="$(buildkite-agent meta-data get "${BUILDKITE_JOB_ID}_is_test_execution_step" --default '')"
 
