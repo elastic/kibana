@@ -8,7 +8,12 @@
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { CoreSetup, IRouter, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 import type { DrawOptions } from '@kbn/isomer-plugin/server';
-import { convertDashboard, engineHintFromLens, type EsqlResponse } from '@kbn/isomer-lowering';
+import {
+  convertDashboard,
+  engineHintFromLens,
+  type EsqlResponse,
+  type PinnedControl,
+} from '@kbn/isomer-lowering';
 import { dashboardChartSize } from '@kbn/isomer-primitives-dashboard';
 import { CARD_CONTENT_WIDTH, kibanaCardFrame } from '@kbn/isomer-theme';
 
@@ -22,16 +27,32 @@ const layoutSchema = (defaultValue: DashboardLayout) =>
   schema.oneOf([schema.literal('grid'), schema.literal('stack')], { defaultValue });
 const widthSchema = schema.maybe(schema.number({ min: PAGE_WIDTH.min, max: PAGE_WIDTH.max }));
 
+// The controls on screen, in the dashboard API's as-code shape; the lowering reads only what Kibana's controls do.
+const MAX_CONTROLS = 100;
+const controlSchema = schema.object(
+  {
+    id: schema.string({ minLength: 1, maxLength: 200 }),
+    type: schema.string({ minLength: 1, maxLength: 100 }),
+    // Bounded by the route's body limit; the lowering reads only the keys Kibana's controls define.
+    config: schema.recordOf(schema.string({ maxLength: 100 }), schema.any()),
+  },
+  { unknowns: 'ignore' }
+);
+const controlsSchema = schema.maybe(schema.arrayOf(controlSchema, { maxSize: MAX_CONTROLS }));
+
 const pdfBody = schema.object({
   timeRange: schema.maybe(schema.object({ from: time, to: time })),
   layout: layoutSchema('grid'),
   width: widthSchema,
+  controls: controlsSchema,
 });
 const viewQuery = schema.object({
   from: schema.maybe(time),
   to: schema.maybe(time),
   layout: layoutSchema('stack'),
   width: widthSchema,
+  // The on-screen controls as JSON, since a new tab can only send them in the URL.
+  controls: schema.maybe(schema.string({ maxLength: 100_000 })),
 });
 
 interface RenderRequest {
@@ -39,7 +60,12 @@ interface RenderRequest {
   timeRange?: { from: string; to: string };
   layout: DashboardLayout;
   width?: number;
+  controls?: PinnedControl[];
 }
+
+/** The view's `controls` URL parameter, held to the same schema as the PDF route's body. */
+const parseControls = (json: string): PinnedControl[] =>
+  controlsSchema.validate(JSON.parse(json)) as PinnedControl[];
 
 const escapeHtml = (text: string) =>
   text.replace(
@@ -67,9 +93,9 @@ export const registerRoutes = (
   const prepare = async (
     context: RequestHandlerContext,
     request: KibanaRequest,
-    { id, timeRange, layout, width }: RenderRequest
+    { id, timeRange, layout, width, controls }: RenderRequest
   ) => {
-    const [, { isomer }] = await getStartServices();
+    const [, { isomer, dataViews }] = await getStartServices();
     const drawing = await isomer.getDrawing();
     const core = await context.core;
     const exporter = core.savedObjects.getExporter(core.savedObjects.client);
@@ -84,12 +110,38 @@ export const registerRoutes = (
       lines.push(JSON.stringify(object));
     }
     const es = core.elasticsearch.client.asCurrentUser;
+    // Controls resolve their data view and field as Kibana's do, through the user's data views service.
+    const views = await dataViews.dataViewsServiceFactory(core.savedObjects.client, es, request);
+    const { uiSettings } = core;
+    const [ignoreFilterIfFieldNotInIndex, allowLeadingWildcards, queryStringOptions, dateFormatTZ] =
+      await Promise.all([
+        uiSettings.client.get<boolean>('courier:ignoreFilterIfFieldNotInIndex'),
+        uiSettings.client.get<boolean>('query:allowLeadingWildcards'),
+        uiSettings.client.get<Record<string, unknown>>('query:queryString:options'),
+        uiSettings.client.get<string>('dateFormat:tz'),
+      ]);
     const converted = await convertDashboard({
       ndjson: lines.join('\n'),
       dashboardId: id,
       ...(timeRange ? { timeRange } : {}),
-      executeEsql: async (query) => {
-        const { columns, values } = await es.esql.query({ query });
+      ...(controls ? { controls } : {}),
+      resolveField: async (dataViewId, fieldName) => {
+        const dataView = await views.get(dataViewId).catch(() => undefined);
+        const field = dataView?.getFieldByName(fieldName);
+        return dataView && field ? { dataView, field } : undefined;
+      },
+      esQueryConfig: {
+        ignoreFilterIfFieldNotInIndex,
+        allowLeadingWildcards,
+        queryStringOptions: queryStringOptions as never,
+        ...(dateFormatTZ && dateFormatTZ !== 'Browser' ? { dateFormatTZ } : {}),
+      },
+      executeEsql: async (query, options) => {
+        const { columns, values } = await es.esql.query({
+          query,
+          ...(options?.filter ? { filter: options.filter } : {}),
+          ...(options?.params?.length ? { params: options.params } : {}),
+        } as never);
         return { columns, values } as unknown as EsqlResponse;
       },
       search: (index, body) => es.search({ index, ...body }),
@@ -136,13 +188,14 @@ export const registerRoutes = (
     },
     async (context, request, response) => {
       const { id } = request.params;
-      const { timeRange, layout, width } = request.body as TypeOf<typeof pdfBody>;
+      const { timeRange, layout, width, controls } = request.body as TypeOf<typeof pdfBody>;
       try {
         const { drawing, converted, composition, options } = await prepare(context, request, {
           id,
           ...(timeRange ? { timeRange } : {}),
           layout,
           ...(width ? { width } : {}),
+          ...(controls ? { controls: controls as PinnedControl[] } : {}),
         });
         const pdf = await drawing.drawPdf(composition as never, {
           ...options,
@@ -181,13 +234,14 @@ export const registerRoutes = (
     },
     async (context, request, response) => {
       const { id } = request.params;
-      const { from, to, layout, width } = request.query as TypeOf<typeof viewQuery>;
+      const { from, to, layout, width, controls } = request.query as TypeOf<typeof viewQuery>;
       try {
         const { drawing, converted, composition, options } = await prepare(context, request, {
           id,
           ...(from && to ? { timeRange: { from, to } } : {}),
           layout,
           ...(width ? { width } : {}),
+          ...(controls ? { controls: parseControls(controls) } : {}),
         });
         const html = await drawing.drawHtml(composition as never, options);
         return response.ok({

@@ -10,7 +10,6 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonGroup,
-  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -22,6 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { i18n } from '@kbn/i18n';
 import {
   downloadFileAs,
@@ -31,10 +31,27 @@ import {
 
 import { API_BASE, type DashboardLayout } from '../common';
 
+interface PinnedPanel {
+  id?: string;
+  uid?: string;
+  type: string;
+  config?: Record<string, unknown>;
+}
+
 interface SharingData {
   title?: string;
-  locatorParams?: { params?: { time_range?: { from: string; to: string } } };
+  locatorParams?: {
+    params?: { time_range?: { from: string; to: string }; pinned_panels?: PinnedPanel[] };
+  };
 }
+
+/** The controls on screen, which the dashboard's locator carries once they differ from the saved ones. */
+const currentControls = (pinned: PinnedPanel[] | undefined) =>
+  pinned
+    ?.filter(({ type }) => type.endsWith('_control'))
+    .flatMap(({ id, uid, type, config }) =>
+      id ?? uid ? [{ id: (id ?? uid)!, type, config: config ?? {} }] : []
+    );
 
 const LAYOUTS = [
   {
@@ -56,9 +73,13 @@ const IsomerExportFlyout = ({
   core: CoreStart;
   closeFlyout: () => void;
 }) => {
-  const { objectId, sharingData } = useShareTypeContext('integration', 'exportDerivatives');
+  const { objectId, sharingData, isDirty } = useShareTypeContext(
+    'integration',
+    'exportDerivatives'
+  );
   const { title = 'dashboard', locatorParams } = sharingData as unknown as SharingData;
   const timeRange = locatorParams?.params?.time_range;
+  const controls = currentControls(locatorParams?.params?.pinned_panels);
   const [layout, setLayout] = useState<DashboardLayout>('grid');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string>();
@@ -72,7 +93,11 @@ const IsomerExportFlyout = ({
     setError(undefined);
     try {
       const { response } = await core.http.post(`${path}/pdf`, {
-        body: JSON.stringify({ layout, ...(timeRange ? { timeRange } : {}) }),
+        body: JSON.stringify({
+          layout,
+          ...(timeRange ? { timeRange } : {}),
+          ...(controls?.length ? { controls } : {}),
+        }),
         asResponse: true,
         rawResponse: true,
       });
@@ -92,7 +117,11 @@ const IsomerExportFlyout = ({
     if (!path) {
       return;
     }
-    const query = new URLSearchParams({ layout: 'stack', ...(timeRange ?? {}) });
+    const query = new URLSearchParams({
+      layout: 'stack',
+      ...(timeRange ?? {}),
+      ...(controls?.length ? { controls: JSON.stringify(controls) } : {}),
+    });
     window.open(core.http.basePath.prepend(`${path}/view?${query}`), '_blank', 'noopener');
   };
 
@@ -112,11 +141,23 @@ const IsomerExportFlyout = ({
           <p>
             {i18n.translate('xpack.isomerDashboards.flyout.description', {
               defaultMessage:
-                'Draws the saved dashboard on the server with Isomer, over the time range on screen. Panels Isomer can’t draw yet show a placeholder.',
+                'Draws the saved dashboard on the server with Isomer, with the time range and controls on screen. Panels Isomer can’t draw yet show a placeholder.',
             })}
           </p>
         </EuiText>
         <EuiSpacer size="m" />
+        {isDirty && (
+          <>
+            <KbnWarningCallout
+              size="s"
+              title={i18n.translate('xpack.isomerDashboards.flyout.unsavedChanges', {
+                defaultMessage:
+                  'Unsaved changes won’t be printed. The export uses the saved dashboard, with the time range and controls on screen.',
+              })}
+            />
+            <EuiSpacer size="m" />
+          </>
+        )}
         {objectId ? (
           <EuiFormRow
             label={i18n.translate('xpack.isomerDashboards.flyout.layout', {
@@ -134,10 +175,8 @@ const IsomerExportFlyout = ({
             />
           </EuiFormRow>
         ) : (
-          <EuiCallOut
-            announceOnMount
+          <KbnWarningCallout
             size="s"
-            color="warning"
             title={i18n.translate('xpack.isomerDashboards.flyout.unsaved', {
               defaultMessage: 'Save the dashboard to export it.',
             })}
@@ -146,7 +185,7 @@ const IsomerExportFlyout = ({
         {error && (
           <>
             <EuiSpacer size="m" />
-            <EuiCallOut announceOnMount size="s" color="danger" title={error} />
+            <KbnDangerCallout size="s" title={error} />
           </>
         )}
       </EuiFlyoutBody>

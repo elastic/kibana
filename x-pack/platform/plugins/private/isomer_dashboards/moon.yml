@@ -19,6 +19,8 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/config-schema'
+  - '@kbn/data-views-plugin'
+  - '@kbn/ui-callout'
   - '@kbn/i18n'
   - '@kbn/isomer-plugin'
   - '@kbn/isomer-lowering'

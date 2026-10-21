@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 
 export interface IsomerDashboardsStartDeps {
   isomer: IsomerPluginStart;
+  dataViews: DataViewsServerPluginStart;
 }

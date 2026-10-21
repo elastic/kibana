@@ -15,6 +15,7 @@ const converted: ConvertedDashboard = {
   id: 'dash',
   title: 'Traffic',
   timeRange: { from: '2026-10-13T00:00:00.000Z', to: '2026-10-20T00:00:00.000Z' },
+  diagnostics: [],
   panels: [
     {
       panelId: 'xy',
