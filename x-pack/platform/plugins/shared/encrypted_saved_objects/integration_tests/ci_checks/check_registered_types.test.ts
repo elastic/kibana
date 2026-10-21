@@ -189,6 +189,7 @@ describe('checking changes on all registered encrypted SO types', () => {
         "service-account-workload-binding|1",
         "synthetics-monitor|2",
         "synthetics-monitor|1",
+        "synthetics-monitor-multi-space|1",
         "synthetics-secret-connection|1",
         "task|9",
         "task|8",
