@@ -25,8 +25,7 @@ export const ANALYSIS_WINDOW_DAYS_LABEL = i18n.translate(
 export const ANALYSIS_WINDOW_DAYS_HELP = i18n.translate(
   'xpack.alertzero.watches.settings.analysisWindowDays.help',
   {
-    defaultMessage:
-      'How many days of alerts Rule Tuning analyses. Applies to this Worker only.',
+    defaultMessage: 'How many days of alerts Rule Tuning analyses. Applies to this Worker only.',
   }
 );
 
