@@ -92,7 +92,7 @@ export const createAutomationRoute = createNightshiftInvestigationsServerRoute({
 
     let workflowId: string;
     try {
-      const yaml = generateWorkflowYaml(created.id, attributes);
+      const yaml = generateWorkflowYaml({ automationId: created.id, automation: attributes });
       const workflow = await workflowsManagement.management.createWorkflow(
         { yaml },
         spaceId,

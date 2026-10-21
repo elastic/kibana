@@ -57,10 +57,16 @@ const OVERLAP_POLICY_TO_STRATEGY: Record<OverlapPolicy, string> = {
 };
 
 /** Generates a workflow document from an automation, serializing user input safely. */
-export function generateWorkflowYaml(
-  automationId: string,
-  automation: NightshiftAutomationAttributes
-): string {
+export function generateWorkflowYaml({
+  automationId,
+  automation,
+  serviceAccountId,
+}: {
+  automationId: string;
+  automation: NightshiftAutomationAttributes;
+  /** The account the automation runs as (`settings.run_as`); unbound when omitted. */
+  serviceAccountId?: string;
+}): string {
   const alertRows = automation.trigger.rows.filter((row): row is AlertRow => row.kind === 'alert');
   const slackRows = automation.trigger.rows.filter(isSlackRow);
   const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
@@ -90,6 +96,7 @@ export function generateWorkflowYaml(
     enabled: automation.isEnabled,
     tags: ['nightshift', 'automation'],
     settings: {
+      ...(serviceAccountId ? { run_as: serviceAccountId } : {}),
       // The automation starts first and waits for the investigation, so its deadline
       // needs extra time for setup and returning the investigation result.
       ...(automation.runtime.timeoutSeconds !== undefined
