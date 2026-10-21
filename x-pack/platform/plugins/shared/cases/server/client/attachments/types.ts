@@ -25,11 +25,6 @@ export interface AddArgs {
    * toUnifiedAttachmentRequest.
    */
   comment: UnifiedAttachmentPayload;
-  /**
-   * Optional pre-generated saved object id. The internal POST /attachments route
-   * supplies this so it can locate the created attachment in the returned case.
-   */
-  id?: string;
 }
 
 export interface BulkCreateArgs {
@@ -181,6 +176,17 @@ export interface UpdateArgs {
    * toUnifiedAttachmentPatchRequest.
    */
   updateRequest: UnifiedAttachmentPayload & { id: string; version: string };
+}
+
+/**
+ * Parameters for reading a case with all its attachments right after an attachment write.
+ */
+export interface GetCaseWithAttachmentsArgs {
+  caseId: string;
+  /**
+   * The write that just ran. Decides which privilege the read is checked against.
+   */
+  writeOperation: 'create' | 'update';
 }
 
 export interface HapiReadableStream extends Readable {

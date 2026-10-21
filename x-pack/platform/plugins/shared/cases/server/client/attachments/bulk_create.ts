@@ -8,9 +8,11 @@
 import { SavedObjectsUtils } from '@kbn/core/server';
 
 import { BulkCreateUnifiedAttachmentsRequestRt } from '../../../common/types/api/attachment/v2';
-import type { Case } from '../../../common/types/domain';
+import type { UnifiedAttachment } from '../../../common/types/domain';
 import type { UnifiedAttachmentPayload } from '../../../common/types/domain/attachment/v2';
 import { decodeWithExcessOrThrow } from '../../common/runtime_types';
+import { flattenAttachmentSavedObject } from '../../common/utils';
+import { toUnifiedAttachment } from '../../services/attachments/operations/utils';
 
 import { CaseCommentModel } from '../../common/models';
 import { createCaseError } from '../../common/error';
@@ -27,7 +29,7 @@ import { extractAndAddObservables } from './extract_observables';
 export const bulkCreate = async (
   args: BulkCreateArgs,
   clientArgs: CasesClientArgs
-): Promise<Case> => {
+): Promise<UnifiedAttachment[]> => {
   const { attachments, caseId } = args;
 
   const {
@@ -77,11 +79,14 @@ export const bulkCreate = async (
     });
 
     const model = await CaseCommentModel.create(caseId, clientArgs);
-    const updatedModel = await model.bulkCreate({
+    const createdAttachments = await model.bulkCreate({
       attachments: attachmentsWithIds,
     });
 
-    const updatedCase = await updatedModel.encodeWithComments();
+    const {
+      attributes: { owner, settings },
+    } = model.savedObject;
+    const caseInfo = { id: caseId, owner };
 
     const idsByType = new Map<string, string[]>();
     for (const attachment of attachmentsWithIds) {
@@ -90,13 +95,15 @@ export const bulkCreate = async (
       idsByType.set(attachment.type, ids);
     }
     for (const [type, ids] of idsByType) {
-      emitAttachmentsAddedEvent(clientArgs, updatedCase, ids, type);
+      emitAttachmentsAddedEvent(clientArgs, caseInfo, ids, type);
     }
 
     // This call never throws — failures are logged and do not abort the attachment creation.
-    await extractAndAddObservables(caseId, decodedAttachments, updatedCase, clientArgs);
+    await extractAndAddObservables(caseId, decodedAttachments, { settings }, clientArgs);
 
-    return updatedCase;
+    return createdAttachments.map((attachment) =>
+      toUnifiedAttachment(flattenAttachmentSavedObject(attachment))
+    );
   } catch (error) {
     throw createCaseError({
       message: `Failed while bulk creating attachment to case id: ${caseId} error: ${error}`,

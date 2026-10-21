@@ -187,7 +187,8 @@ describe('manageAttachmentsTool', () => {
       updated_at: null,
     };
     casesClient.cases.get.mockResolvedValue(theCase as never);
-    casesClient.attachments.bulkCreate.mockResolvedValue(theCase as never);
+    casesClient.attachments.bulkCreate.mockResolvedValue([]);
+    casesClient.attachments.getCaseWithAttachments.mockResolvedValue(theCase as never);
 
     const attachments = buildMockAttachments();
     const tool = buildTool(buildRegistry([{ id: 'comment', schema: commentSchema }]), true);

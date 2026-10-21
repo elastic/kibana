@@ -16,10 +16,11 @@ const createContext = (input: unknown) =>
 describe('addEventsStepDefinition', () => {
   it('adds events to a case', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = jest.fn().mockResolvedValue([]);
+    const getCaseWithAttachments = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
-      attachments: { bulkCreate },
+      attachments: { bulkCreate, getCaseWithAttachments },
     } as unknown as CasesClient);
     const definition = addEventsStepDefinition(getCasesClient);
 
@@ -46,10 +47,11 @@ describe('addEventsStepDefinition', () => {
 
   it('creates a single event attachment for multiple events with the same index', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = jest.fn().mockResolvedValue([]);
+    const getCaseWithAttachments = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
-      attachments: { bulkCreate },
+      attachments: { bulkCreate, getCaseWithAttachments },
     } as unknown as CasesClient);
     const definition = addEventsStepDefinition(getCasesClient);
 
@@ -78,10 +80,11 @@ describe('addEventsStepDefinition', () => {
 
   it('creates one event attachment per distinct index', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkCreate = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const bulkCreate = jest.fn().mockResolvedValue([]);
+    const getCaseWithAttachments = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
-      attachments: { bulkCreate },
+      attachments: { bulkCreate, getCaseWithAttachments },
     } as unknown as CasesClient);
     const definition = addEventsStepDefinition(getCasesClient);
 

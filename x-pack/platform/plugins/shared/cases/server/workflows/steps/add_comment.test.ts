@@ -30,10 +30,11 @@ describe('addCommentStepDefinition', () => {
 
   it('adds comment to case', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const add = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const add = jest.fn().mockResolvedValue({ id: 'attachment-1' });
+    const getCaseWithAttachments = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get },
-      attachments: { add },
+      attachments: { add, getCaseWithAttachments },
     } as unknown as CasesClient);
     const definition = addCommentStepDefinition(getCasesClient);
 
@@ -48,7 +49,10 @@ describe('addCommentStepDefinition', () => {
         owner: createCaseResponseFixture.owner,
       },
     });
-    // The case returned by `add` is used directly; no second reload.
+    expect(getCaseWithAttachments).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      writeOperation: 'create',
+    });
     expect(get).toHaveBeenCalledTimes(1);
     expect(result).toEqual({
       output: {
@@ -90,11 +94,12 @@ describe('addCommentStepDefinition', () => {
 
   it('pushes case when push-case is enabled', async () => {
     const get = jest.fn().mockResolvedValue(createCaseResponseFixture);
-    const add = jest.fn().mockResolvedValue(createCaseResponseFixture);
+    const add = jest.fn().mockResolvedValue({ id: 'attachment-1' });
+    const getCaseWithAttachments = jest.fn().mockResolvedValue(createCaseResponseFixture);
     const push = jest.fn().mockResolvedValue(undefined);
     const getCasesClient = jest.fn().mockResolvedValue({
       cases: { get, push },
-      attachments: { add },
+      attachments: { add, getCaseWithAttachments },
     } as unknown as CasesClient);
     const definition = addCommentStepDefinition(getCasesClient);
 
