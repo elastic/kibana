@@ -400,12 +400,32 @@ describe('createSandboxWorkspaceManager', () => {
           content: Buffer.from('No telemetry connector is available.\n'),
         },
       ]);
+    });
+
+    it('preserves a custom agent multi-connector allow-list without inferring one telemetry source', async () => {
+      const named = createSandboxWorkspaceManager({
+        getDeps: () => ({ actions }),
+        telemetryTargets: [
+          { connectorId: 'c0', readableIndices: 'c0:logs-*' },
+          { connectorId: 'orca', readableIndices: 'orca:logs-*' },
+        ],
+        getTelemetryTarget: async () => undefined,
+        logger,
+      });
+      const callContext = { ...createCallContext(['c0', 'orca']), agentId: 'custom-agent' };
+
+      await expect(named.prepareCallContext(callContext)).resolves.toBeUndefined();
       await expect(
-        named.ensureWorkspaceReady({
-          session: c0Session,
-          callContext: createCallContext(['c0', 'orca']),
+        named.ensureWorkspaceReady({ session: createSessionMock(false), callContext })
+      ).resolves.toBeUndefined();
+
+      expect(callContext.allowedConnectorIds).toEqual(['c0', 'orca']);
+      expect(mockWriteConnectorManifest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          callContext: expect.objectContaining({ allowedConnectorIds: ['c0', 'orca'] }),
         })
-      ).rejects.toThrow('only one telemetry connector');
+      );
+      expect(mockWriteElasticManifest).not.toHaveBeenCalled();
     });
 
     it('scopes concurrent investigations that share the single agent to their conversation target', async () => {

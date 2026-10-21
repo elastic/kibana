@@ -9,7 +9,7 @@ import type { ConversationTemplate } from '@kbn/agent-builder-common';
 
 export const investigationTemplate: ConversationTemplate = {
   id: 'investigation',
-  version: 2,
+  version: 3,
   name: 'Investigation',
   description: 'Use for investigations',
   fields: {
@@ -60,6 +60,16 @@ export const investigationTemplate: ConversationTemplate = {
       input_type: 'TEXT_ARRAY',
       required: false,
       description: 'Workflow executions that have worked on this investigation.',
+    },
+    telemetry_target: {
+      input_type: 'TEXT',
+      required: false,
+      description: 'Telemetry target retained by this investigation.',
+      max_length: 64,
+      regex: {
+        pattern: '^[a-z][a-z0-9_-]*$',
+        message: 'Expected a lowercase telemetry target name.',
+      },
     },
   },
 };

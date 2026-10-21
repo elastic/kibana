@@ -72,13 +72,12 @@ export const createSandboxWorkspaceManager = ({
       const allowedTargets = configuredTargets.filter(
         ({ connectorId }) => connectorId && callContext.allowedConnectorIds.includes(connectorId)
       );
-      if (
-        boundTarget === undefined &&
-        new Set(allowedTargets.map(({ connectorId }) => connectorId)).size > 1
-      ) {
-        throw new Error('An investigation must select only one telemetry connector');
-      }
-      return boundTarget ?? allowedTargets[0];
+      // Custom agents can use several connectors; only infer guidance for an unambiguous source.
+      const inferredTarget =
+        new Set(allowedTargets.map(({ connectorId }) => connectorId)).size === 1
+          ? allowedTargets[0]
+          : undefined;
+      return boundTarget ?? inferredTarget;
     })();
     callTargets.set(callContext, pending);
     return pending;
