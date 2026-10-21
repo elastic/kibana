@@ -10,8 +10,11 @@
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
+import { createAnalytics } from '@elastic/ebt/client';
+import { ExecutionContextContainer } from '@kbn/core-execution-context-server-internal/src/execution_context_container';
 import {
   armResearchLease,
+  createTaskRunnerWithResearchOverride,
   clearResearchLease,
   consumeCollateralReschedule,
   deriveCancelGraceMs,
@@ -174,13 +177,7 @@ test('boot fence anchors endpoint shapes and waits for installers', async () => 
     /boot ES write denied/
   );
   assert.throws(
-    () =>
-      handler(
-        { scoped: false },
-        { method: 'GET', path: '/orders/_refresh' },
-        {},
-        {} as never
-      ),
+    () => handler({ scoped: false }, { method: 'GET', path: '/orders/_refresh' }, {}, {} as never),
     /boot ES write denied/
   );
   handler(
@@ -387,7 +384,6 @@ test('logger and events forward to the sink and redact secret-looking meta', () 
 });
 
 test('analytics reportEvent forwards a registered string event type and its data', () => {
-  const { createAnalytics } = require('@elastic/ebt/client');
   const counters: Array<{ event_type: unknown; code: string }> = [];
   const client = createAnalytics({
     isDev: false,
@@ -462,9 +458,6 @@ test('internal repository extensions fail closed', () => {
 });
 
 test('execution context matches Core opaque ids for concurrent tasks', async () => {
-  const {
-    ExecutionContextContainer,
-  } = require('@kbn/core-execution-context-server-internal/src/execution_context_container');
   const service = createExecutionContextService();
   const taskA = {
     type: 'task manager',
@@ -698,8 +691,7 @@ test('readiness hash runs once per type and token, then again when the token cha
   );
   const other = { name: 'alert', mappings: { properties: { a: { type: 'text' } } } };
   assert.throws(
-    () =>
-      verifyRegistryReadiness({ generation: 5, fingerprints: { alert: fingerprint } }, [other]),
+    () => verifyRegistryReadiness({ generation: 5, fingerprints: { alert: fingerprint } }, [other]),
     /readiness mismatch for saved object type alert/
   );
 });
@@ -749,9 +741,6 @@ test('execution class parity fails closed and collateral losses refund at most t
       },
     }),
   });
-  const {
-    createTaskRunnerWithResearchOverride,
-  } = require('@kbn/task-manager-plugin/server/lib/research_runner_override');
   const runner = createTaskRunnerWithResearchOverride(
     'alerting:.es-query',
     () => ({ run: async () => ({ state: { from: 'main' } }) }),
@@ -923,7 +912,10 @@ test('read classification is anchored and document ids cannot impersonate endpoi
     (candidate) => !isEsWrite(candidate.method, candidate.path, candidate.query)
   );
   assert.deepEqual(grammarAdmitted, []);
-  assert.equal(isEsWrite('GET', '/.kibana-event-log-*/_settings', { expand_wildcards: 'all' }), false);
+  assert.equal(
+    isEsWrite('GET', '/.kibana-event-log-*/_settings', { expand_wildcards: 'all' }),
+    false
+  );
 });
 
 /** Recreates the 242-path set: document ids, bulk shapes, underscore ids, encoding, slashes, queries. */
@@ -1322,9 +1314,7 @@ test('bulk item namespaces bridge even when an options bag is present', () => {
   );
 });
 
-const scriptedEndpoint = (
-  script: (runId: string, send: (packet: Packet) => void) => void
-) => {
+const scriptedEndpoint = (script: (runId: string, send: (packet: Packet) => void) => void) => {
   let handler: (packet: Packet) => void = () => {};
   return () => ({
     send(packet: Packet) {

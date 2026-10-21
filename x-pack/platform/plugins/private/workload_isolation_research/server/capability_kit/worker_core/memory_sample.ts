@@ -29,9 +29,8 @@ export const sampleProcessMemory = (): ProcessMemorySample => {
   const usage = process.memoryUsage();
   const heap = getHeapStatistics();
   const code = getHeapSpaceStatistics().find((space) => space.space_name === 'code_space');
-  const variables = (
-    process.config as { variables?: { v8_enable_pointer_compression?: number } }
-  ).variables;
+  const variables = (process.config as { variables?: { v8_enable_pointer_compression?: number } })
+    .variables;
   return {
     rss: usage.rss,
     heapUsed: usage.heapUsed,

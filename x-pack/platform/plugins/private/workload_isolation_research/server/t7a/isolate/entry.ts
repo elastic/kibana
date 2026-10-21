@@ -10,10 +10,10 @@
  * the island's captured task definitions — the same `createTaskRunner` main would have used. */
 
 import { setFlagsFromString } from 'v8';
-import { sampleProcessMemory } from '../../capability_kit/worker_core/memory_sample';
 import { runInNewContext } from 'vm';
 import type { ResearchEsCapability } from '@kbn/core-elasticsearch-client-server-internal';
 import { diffDefinitionParity } from '@kbn/task-manager-plugin/server/lib/research_runner_override';
+import { sampleProcessMemory } from '../../capability_kit/worker_core/memory_sample';
 import { decode } from '../../capability_kit/codecs';
 import type { CodecInput } from '../../capability_kit/codecs';
 import type { TaskEntry, WorkerContext } from '../../capability_kit/protocol';
@@ -114,7 +114,8 @@ const measureDispatchPhases = async (context: WorkerContext): Promise<CodecInput
   if (snapshot.replicas) current.applyReplicas({ replicas: snapshot.replicas } as IslandSnapshot);
   const replicaRefreshMs = performance.now() - replicaStart;
   const readinessStart = performance.now();
-  if (snapshot.readiness) current.applyReplicas({ readiness: snapshot.readiness } as IslandSnapshot);
+  if (snapshot.readiness)
+    current.applyReplicas({ readiness: snapshot.readiness } as IslandSnapshot);
   const readinessMs = performance.now() - readinessStart;
   const bootBodyMs = performance.now() - workerStart;
   const parityStart = performance.now();
@@ -130,7 +131,7 @@ const measureDispatchPhases = async (context: WorkerContext): Promise<CodecInput
   const definitions = current.taskCapture.definitions;
   workloadType = definitions.has('alerting:.es-query')
     ? 'alerting:.es-query'
-    : ([...definitions.keys()].find((type) => type.startsWith('alerting:')) ?? null);
+    : [...definitions.keys()].find((type) => type.startsWith('alerting:')) ?? null;
   const definition = workloadType ? definitions.get(workloadType) : undefined;
   if (definition) {
     try {

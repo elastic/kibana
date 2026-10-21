@@ -36,6 +36,7 @@
     "@kbn/core-elasticsearch-server-utils"
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
+    "server/capability_kit/worker_core/reconstruct_config.node_test.ts"
   ]
 }

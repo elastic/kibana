@@ -15,10 +15,11 @@
 
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
-import { ByteSizeValue, schema } from '@kbn/config-schema';
-import { configSchema as agentConfigSchema } from '../../../../../../../../x-pack/platform/plugins/shared/agent_builder/server/config';
-import { config as executionConfig } from '../../../../../../../../src/platform/plugins/shared/workflows_execution_engine/server/config';
-import { config as extensionsConfig } from '../../../../../../../../src/platform/plugins/shared/workflows_extensions/server/config';
+import type { ByteSizeValue } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
+import { configSchema as agentConfigSchema } from '@kbn/agent-builder-plugin/server/config';
+import { config as executionConfig } from '@kbn/workflows-execution-engine/server/config';
+import { config as extensionsConfig } from '@kbn/workflows-extensions/server/config';
 import { toPlainConfig } from './policies';
 import { reconstructPluginConfig, restoreSchemaInput } from './reconstruct_config';
 

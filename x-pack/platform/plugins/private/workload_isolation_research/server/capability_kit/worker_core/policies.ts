@@ -374,7 +374,10 @@ export const toPlainConfig = (value: unknown, depth = 0): unknown => {
 export const captureEffectivePluginConfig = (
   at: ((path: string) => unknown) | undefined,
   paths: Readonly<Record<string, string>>
-): { readonly effectiveConfig: Record<string, Record<string, unknown>>; readonly keyPaths: string[] } => {
+): {
+  readonly effectiveConfig: Record<string, Record<string, unknown>>;
+  readonly keyPaths: string[];
+} => {
   if (typeof at !== 'function') throw new Error('worker-core config capture unavailable');
   const effectiveConfig: Record<string, Record<string, unknown>> = {};
   const errors: string[] = [];

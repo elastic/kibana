@@ -179,11 +179,12 @@ export class T7aController {
     if (typeof observe === 'function') {
       observe('feature_flags').subscribe(() => this.refreshFlags());
     }
-    (globalThis as Record<symbol, () => void>)[Symbol.for('kbn.research.featureFlags.invalidation')] =
-      () => {
-        this.flagInvalidation += 1;
-        this.refreshFlags();
-      };
+    (globalThis as Record<symbol, () => void>)[
+      Symbol.for('kbn.research.featureFlags.invalidation')
+    ] = () => {
+      this.flagInvalidation += 1;
+      this.refreshFlags();
+    };
     registerExecutionClass({
       id: WORKLOAD_CLASS,
       taskTypes: (taskType) => OFFMAIN_TASK_TYPES.has(taskType),
@@ -702,7 +703,11 @@ export class T7aController {
     input: Obj,
     space: string,
     signal: AbortSignal | undefined,
-    budget?: { readonly deadlineMs: number; readonly bootstrapDeadlineMs: number; readonly taskId?: string }
+    budget?: {
+      readonly deadlineMs: number;
+      readonly bootstrapDeadlineMs: number;
+      readonly taskId?: string;
+    }
   ) {
     const fake = kibanaRequestFactory({ headers: {} });
     return {
@@ -722,9 +727,7 @@ export class T7aController {
         ) as unknown as Obj),
       } as unknown as CodecInput,
       deadlineMs: budget?.deadlineMs ?? this.config.deadlineMs,
-      ...(budget
-        ? { bootstrapDeadlineMs: budget.bootstrapDeadlineMs, taskId: budget.taskId }
-        : {}),
+      ...(budget ? { bootstrapDeadlineMs: budget.bootstrapDeadlineMs, taskId: budget.taskId } : {}),
       abortGraceMs: resolveCancelGraceMs(taskType, this.config.abortGraceMs),
       signal,
     };
