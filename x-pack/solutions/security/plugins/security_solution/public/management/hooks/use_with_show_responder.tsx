@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { useIsMounted } from '@kbn/securitysolution-hook-utils';
+import React, { useCallback, useRef } from 'react';
 import type { ConsoleApi, ConsoleProps } from '../components/console/types';
 import { type SupportedHostOsType } from '../../../common/endpoint/constants';
 import { useLicense } from '../../common/hooks/use_license';
@@ -54,22 +53,14 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const endpointPrivileges = useUserPrivileges().endpointPrivileges;
   const isEnterpriseLicense = useLicense().isEnterprise();
   const consoleApi = useRef<ConsoleApi>();
-  const [consoleInputCommand, setConsoleInputCommand] = useState<string | undefined>();
-  const isMounted = useIsMounted();
+  const pendingInputCommand = useRef<string | undefined>();
 
-  useEffect(() => {
-    if (consoleInputCommand) {
-      setConsoleInputCommand(undefined);
-
-      // Delay is needed so that the Console has an opportunity to complete its full rendering
-      // and set the `ref` with the console's API
-      setTimeout(() => {
-        if (consoleApi.current && isMounted()) {
-          consoleApi.current.setInput(consoleInputCommand);
-        }
-      }, 1);
+  const applyPendingInputCommand = useCallback((api: ConsoleApi) => {
+    if (pendingInputCommand.current) {
+      api.setInput(pendingInputCommand.current);
+      pendingInputCommand.current = undefined;
     }
-  }, [consoleInputCommand, isMounted]);
+  }, []);
 
   return useCallback(
     (props: ResponderInfoProps) => {
@@ -88,8 +79,17 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
 
       const endpointRunningConsole = consoleManager.getOne(agentId);
 
+      pendingInputCommand.current = inputCommand;
+
       if (endpointRunningConsole) {
+        // An already visible console is not re-mounted by `show()`, so `onApiAvailable` won't fire
+        const isAlreadyVisible = endpointRunningConsole.isVisible();
+
         endpointRunningConsole.show();
+
+        if (isAlreadyVisible && consoleApi.current) {
+          applyPendingInputCommand(consoleApi.current);
+        }
       } else {
         const consoleProps: ConsoleProps = {
           commands: getEndpointConsoleCommands({
@@ -102,6 +102,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           'data-test-subj': `${agentType}ResponseActionsConsole`,
           storagePrefix: 'xpack.securitySolution.Responder',
           apiRef: consoleApi,
+          onApiAvailable: applyPendingInputCommand,
           TitleComponent: () => {
             return (
               <AgentInfo
@@ -143,11 +144,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           })
           .show();
       }
-
-      if (inputCommand) {
-        setConsoleInputCommand(inputCommand);
-      }
     },
-    [endpointPrivileges, isEnterpriseLicense, consoleManager]
+    [endpointPrivileges, isEnterpriseLicense, consoleManager, applyPendingInputCommand]
   );
 };
