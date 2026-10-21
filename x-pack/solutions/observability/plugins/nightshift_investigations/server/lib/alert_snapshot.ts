@@ -86,33 +86,6 @@ export const parseAlertSnapshot = (alert: Record<string, unknown>): AlertSnapsho
   return result.success ? result.data : undefined;
 };
 
-export const fetchAlertSnapshot = async (
-  alertsClient: AlertsClient,
-  alertId: string,
-  basePath: string
-): Promise<AlertSnapshot> => {
-  const indices = (await alertsClient.getAuthorizedAlertsIndices(INVESTIGABLE_RULE_TYPE_IDS)) ?? [];
-  if (!indices.length) {
-    throw Boom.notFound(`Alert with id ${alertId} not found`);
-  }
-
-  const alert = await alertsClient.get({ id: alertId, index: indices.join(',') }).catch((error) => {
-    if (Boom.isBoom(error) && error.output.statusCode === 404) {
-      throw Boom.notFound(`Alert with id ${alertId} not found`);
-    }
-    throw error;
-  });
-
-  const snapshot = parseAlertSnapshot(alert);
-  if (!snapshot) {
-    throw Boom.badRequest('Alert does not contain the fields required for an investigation');
-  }
-  return {
-    ...snapshot,
-    url: `${basePath}${OBSERVABILITY_ALERT_DETAILS_PATH}/${encodeURIComponent(alertId)}`,
-  };
-};
-
 export interface EpisodeLookup {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
@@ -120,16 +93,78 @@ export interface EpisodeLookup {
   basePath: string;
 }
 
-export const fetchV2AlertSnapshot = async ({
-  esClient,
-  soClient,
-  spaceId,
-  basePath,
-  episodeId,
-}: EpisodeLookup & { episodeId: string }): Promise<V2AlertSnapshot> => {
+const UNKNOWN = 'unknown';
+
+const buildClassicSnapshot = (alert: Record<string, unknown>, basePath: string): AlertSnapshot => {
+  const snapshot =
+    parseAlertSnapshot(alert) ??
+    alertSnapshotSchema.parse({
+      id: alert[ALERT_UUID],
+      rule_id: alert[ALERT_RULE_UUID] ?? UNKNOWN,
+      rule_name: alert[ALERT_RULE_NAME] ?? UNKNOWN,
+      rule_type_id: alert[ALERT_RULE_TYPE_ID] ?? UNKNOWN,
+      rule_category: alert[ALERT_RULE_CATEGORY] ?? UNKNOWN,
+      status: alert[ALERT_STATUS] ?? UNKNOWN,
+      start: alert[ALERT_START] ?? alert[TIMESTAMP],
+    });
+  return {
+    ...snapshot,
+    url: `${basePath}${OBSERVABILITY_ALERT_DETAILS_PATH}/${encodeURIComponent(snapshot.id)}`,
+  };
+};
+
+const fetchClassicSnapshots = async (
+  alertsClient: AlertsClient,
+  alertIds: string[],
+  basePath: string
+): Promise<Map<string, AlertSnapshot>> => {
+  const indices = (await alertsClient.getAuthorizedAlertsIndices(INVESTIGABLE_RULE_TYPE_IDS)) ?? [];
+  if (!indices.length) {
+    return new Map();
+  }
+
+  const {
+    hits: { hits },
+  } = await alertsClient.find({
+    index: indices.join(','),
+    query: { terms: { [ALERT_UUID]: alertIds } },
+    size: alertIds.length,
+  });
+  return new Map(
+    hits.flatMap(({ _source: alert }) =>
+      alert ? [[String(alert[ALERT_UUID]), buildClassicSnapshot({ ...alert }, basePath)]] : []
+    )
+  );
+};
+
+const fetchRuleNames = async (
+  soClient: SavedObjectsClientContract,
+  ruleIds: string[]
+): Promise<Map<string, string>> => {
+  const { saved_objects: rules } = await soClient.bulkGet<{ metadata?: { name?: string } }>(
+    ruleIds.map((id) => ({ type: ALERTING_V2_RULE_SO_TYPE, id }))
+  );
+  return new Map(
+    rules.flatMap((rule) =>
+      'attributes' in rule && rule.attributes.metadata?.name
+        ? [[rule.id, rule.attributes.metadata.name]]
+        : []
+    )
+  );
+};
+
+const fetchV2Snapshots = async (
+  { esClient, soClient, spaceId, basePath }: EpisodeLookup,
+  episodeIds: string[]
+): Promise<Map<string, V2AlertSnapshot>> => {
+  if (!(await esClient.indices.exists({ index: ALERT_EVENTS_DATA_STREAM }))) {
+    return new Map();
+  }
+
+  const episodeIdValues = episodeIds.map((episodeId) => esql.str(episodeId));
   const { query } = esql`
     FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
-    | WHERE type == "alert" AND space_id == ${spaceId} AND episode.id == ${episodeId}
+    | WHERE type == "alert" AND space_id == ${spaceId} AND episode.id IN (${episodeIdValues})
     | EVAL data_json = JSON_EXTRACT(_source, "$.data"), episode_id = episode.id
     | DROP _source
     | STATS
@@ -144,50 +179,56 @@ export const fetchV2AlertSnapshot = async ({
       BY episode_id`.toRequest();
 
   const { columns, values } = await esClient.esql.query({ query, drop_null_columns: true });
-  const [row] = values;
-  if (!row) {
-    throw Boom.notFound(`Alert with id ${episodeId} not found`);
-  }
-
-  const {
-    data_json: dataJson,
-    episode_id: id,
-    ...fields
-  } = Object.fromEntries(columns.map(({ name }, index) => [name, row[index]]));
-  const result = v2AlertSnapshotSchema.safeParse({
-    alert_version: 'v2',
-    id,
-    ...fields,
-    data: typeof dataJson === 'string' ? JSON.parse(dataJson) : undefined,
-    url: `${basePath}${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_ALERTS_PATH}/${encodeURIComponent(
-      episodeId
-    )}`,
-  });
-  if (!result.success) {
-    throw Boom.badRequest('Alert does not contain the fields required for an investigation');
-  }
-  const {
-    saved_objects: [rule],
-  } = await soClient.bulkGet<{ metadata?: { name?: string } }>([
-    { type: ALERTING_V2_RULE_SO_TYPE, id: result.data.rule_id },
+  const rows = values.map((row) =>
+    Object.fromEntries(
+      columns.flatMap(({ name }, index) => (row[index] === null ? [] : [[name, row[index]]]))
+    )
+  );
+  const ruleNames = await fetchRuleNames(soClient, [
+    ...new Set(rows.flatMap(({ rule_id: ruleId }) => (typeof ruleId === 'string' ? [ruleId] : []))),
   ]);
-  return {
-    ...result.data,
-    rule_name: 'attributes' in rule ? rule.attributes.metadata?.name : undefined,
-  };
+
+  return new Map(
+    rows.map(({ data_json: dataJson, episode_id: id, ...fields }) => {
+      const snapshot = v2AlertSnapshotSchema.parse({
+        alert_version: 'v2',
+        id,
+        ...fields,
+        rule_id: fields.rule_id ?? UNKNOWN,
+        group_hash: fields.group_hash ?? UNKNOWN,
+        status: fields.status ?? UNKNOWN,
+        rule_name: ruleNames.get(String(fields.rule_id)),
+        data: v2AlertSnapshotSchema.shape.data
+          .catch(undefined)
+          .parse(typeof dataJson === 'string' ? JSON.parse(dataJson) : undefined),
+        url: `${basePath}${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_ALERTS_PATH}/${encodeURIComponent(
+          String(id)
+        )}`,
+      });
+      return [snapshot.id, snapshot];
+    })
+  );
 };
 
-export const fetchInvestigationAlertSnapshot = ({
+export const fetchInvestigationAlertSnapshots = async ({
   alertsClient,
-  alertId,
+  alertIds,
   ...lookup
 }: EpisodeLookup & {
   alertsClient: AlertsClient;
-  alertId: string;
-}): Promise<InvestigationAlertSnapshot> =>
-  fetchAlertSnapshot(alertsClient, alertId, lookup.basePath).catch((error) => {
-    if (Boom.isBoom(error) && error.output.statusCode === 404) {
-      return fetchV2AlertSnapshot({ ...lookup, episodeId: alertId });
-    }
-    throw error;
-  });
+  alertIds: string[];
+}): Promise<InvestigationAlertSnapshot[]> => {
+  const ids = [...new Set(alertIds)];
+  const classic = await fetchClassicSnapshots(alertsClient, ids, lookup.basePath);
+  const unresolved = ids.filter((id) => !classic.has(id));
+  const universal = unresolved.length
+    ? await fetchV2Snapshots(lookup, unresolved)
+    : new Map<string, V2AlertSnapshot>();
+
+  const missing = unresolved.filter((id) => !universal.has(id));
+  if (missing.length) {
+    throw Boom.notFound(`Alert with id ${missing.join(', ')} not found`);
+  }
+  const resolved = new Map<string, InvestigationAlertSnapshot>([...classic, ...universal]);
+  return ids.flatMap((id) => resolved.get(id) ?? []);
+};

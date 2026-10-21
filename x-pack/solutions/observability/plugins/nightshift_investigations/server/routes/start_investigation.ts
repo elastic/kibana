@@ -14,7 +14,7 @@ import {
   MAX_ALERTS_PER_INVESTIGATION,
 } from '../../common';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID, MAX_KEYWORD_LENGTH } from '../../common';
-import { fetchInvestigationAlertSnapshot } from '../lib/alert_snapshot';
+import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
@@ -119,11 +119,11 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
         }
         const lookup = getEpisodeLookup(request);
         const [primaryId] = body.subject.ids;
-        const alerts = await Promise.all(
-          [...new Set(body.subject.ids)].map((alertId) =>
-            fetchInvestigationAlertSnapshot({ alertsClient, alertId, ...lookup })
-          )
-        );
+        const alerts = await fetchInvestigationAlertSnapshots({
+          alertsClient,
+          alertIds: body.subject.ids,
+          ...lookup,
+        });
         return await client.start({
           subject: { type: 'alert', id: primaryId, summary: body.subject.summary },
           title: body.title,

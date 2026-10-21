@@ -27,7 +27,7 @@ const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' 
 const getInvestigationsClient = jest.fn().mockReturnValue({ start });
 const getAlertsClient = jest.fn().mockResolvedValue({
   getAuthorizedAlertsIndices: jest.fn().mockResolvedValue(['.alerts-observability.test']),
-  get: jest.fn().mockResolvedValue(alert),
+  find: jest.fn().mockResolvedValue({ hits: { hits: [{ _source: alert }] } }),
 });
 
 const getEpisodeLookup = jest.fn().mockReturnValue({ basePath: '' });
@@ -54,10 +54,12 @@ it('loads the alert and builds the investigation context server-side', async () 
 });
 
 it('loads every alert id and stores the first as the subject', async () => {
-  const get = jest.fn().mockResolvedValue(alert);
+  const find = jest.fn().mockResolvedValue({
+    hits: { hits: [{ _source: alert }, { _source: { ...alert, 'kibana.alert.uuid': 'alert-2' } }] },
+  });
   const alertsClient = {
     getAuthorizedAlertsIndices: jest.fn().mockResolvedValue(['.alerts-observability.test']),
-    get,
+    find,
   };
   await handler({
     request: {},
@@ -66,9 +68,17 @@ it('loads every alert id and stores the first as the subject', async () => {
     getEpisodeLookup,
     params: { body: { subject: { type: 'alert', ids: ['alert-1', 'alert-2', 'alert-1'] } } },
   } as never);
-  expect(get).toHaveBeenCalledTimes(2);
+  expect(find).toHaveBeenCalledTimes(1);
   expect(start).toHaveBeenCalledWith(
-    expect.objectContaining({ subject: { type: 'alert', id: 'alert-1', summary: undefined } })
+    expect.objectContaining({
+      subject: { type: 'alert', id: 'alert-1', summary: undefined },
+      context: {
+        alerts: [
+          expect.objectContaining({ id: 'alert-1' }),
+          expect.objectContaining({ id: 'alert-2' }),
+        ],
+      },
+    })
   );
 });
 
