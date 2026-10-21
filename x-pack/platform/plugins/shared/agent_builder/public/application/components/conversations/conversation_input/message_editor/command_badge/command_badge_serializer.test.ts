@@ -125,7 +125,7 @@ describe('serializeEditorContent', () => {
     });
     div.appendChild(badge);
 
-    expect(serializeEditorContent(div)).toBe('[@visualization/Pacific Sales](sml://entry-1)');
+    expect(serializeEditorContent(div)).toBe('[#visualization/Pacific Sales](sml://entry-1)');
   });
 
   it('serializes an image placeholder element', () => {
@@ -252,7 +252,7 @@ describe('deserializeInputSegments', () => {
   });
 
   it('parses an SML badge', () => {
-    const segments = deserializeInputSegments('[@visualization/Pacific Sales](sml://entry-1)');
+    const segments = deserializeInputSegments('[#visualization/Pacific Sales](sml://entry-1)');
 
     expect(segments).toEqual([
       {
@@ -333,7 +333,7 @@ describe('round-trip serialization', () => {
   });
 
   it('round-trips SML badge', () => {
-    const original = 'Ref [@visualization/Pacific Sales](sml://entry-1) here';
+    const original = 'Ref [#visualization/Pacific Sales](sml://entry-1) here';
     const segments = deserializeInputSegments(original);
 
     const div = document.createElement('div');
