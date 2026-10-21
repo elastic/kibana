@@ -3215,6 +3215,7 @@ x-pack/solutions/security/plugins/security_solution/common/workflows/alert_analy
 
 # AlertZero Hunt Watch services
 /src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/hunt @elastic/security-investigations
+/x-pack/solutions/security/packages/kbn-alertzero-common/impl/hunt @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/hunt @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.schema.yaml @elastic/security-investigations
 /x-pack/solutions/security/packages/kbn-alertzero-common/impl/schemas/components/hunt.gen.ts @elastic/security-investigations
