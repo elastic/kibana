@@ -7,19 +7,28 @@
 
 import React from 'react';
 import type { Conversation } from '@kbn/agent-builder-common';
-import type { AttachmentServiceStartContract } from '@kbn/agent-builder-browser';
 import {
   ConversationDetailsFlyoutHeader,
   ConversationDetailsFlyoutFooter,
   EscalationFlyoutHeader,
+  EscalationOverviewTab,
   type ConversationDetailsFlyoutFooterProps,
   OverviewTab,
 } from '../components/details';
+import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
 import {
   conversationToInvestigation,
   conversationToEscalationHeader,
 } from './conversation_to_investigation';
-import type { RenderAssignees, RenderStatus, RenderLinkedInvestigations } from './types';
+import type {
+  RenderAssignees,
+  RenderStatus,
+  RenderLinkedInvestigations,
+  RenderOverview,
+  RenderLiveState,
+  RenderTitle,
+  RenderSyncIndicator,
+} from './types';
 
 /**
  * The investigation flyout's slot contents, kept in one module so `register` can pull them in a
@@ -34,40 +43,63 @@ interface InvestigationSlotProps {
 }
 
 export interface OverviewSlotProps extends InvestigationSlotProps {
-  /**
-   * Captured at registration: the flyout can mount outside a `KibanaContextProvider`, so the
-   * attachment registry cannot be reached from ambient context.
-   */
-  attachmentsService: AttachmentServiceStartContract;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   /**
    * Renders the "Proposed actions" section's content. Called with the conversation's own id so a
    * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
    */
   renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
+  /** Replaces the tab body; see `RenderOverview`. */
+  renderOverview?: RenderOverview;
+  /** Renders a count shown beside the "Proposed actions" heading. */
+  renderProposedActionsCount?: (props: { conversationId: string }) => React.ReactNode;
 }
 
 export const OverviewSlot = ({
   conversation,
-  attachmentsService,
+  groupedAttachments,
   renderProposedActions,
-}: OverviewSlotProps) => (
-  <OverviewTab
-    investigation={conversationToInvestigation(conversation)}
-    attachments={conversation.attachments}
-    attachmentsService={attachmentsService}
-    proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
-  />
-);
+  renderOverview,
+  renderProposedActionsCount,
+}: OverviewSlotProps) => {
+  const proposedActionsContent = renderProposedActions?.({ conversationId: conversation.id });
+  const proposedActionsCount = renderProposedActionsCount?.({ conversationId: conversation.id });
+  if (renderOverview) {
+    return (
+      <>
+        {renderOverview({
+          conversation,
+          groupedAttachments,
+          proposedActionsContent,
+          proposedActionsCount,
+        })}
+      </>
+    );
+  }
+  return (
+    <OverviewTab
+      investigation={conversationToInvestigation(conversation)}
+      attachments={conversation.attachments}
+      groupedAttachments={groupedAttachments}
+      proposedActionsContent={proposedActionsContent}
+      proposedActionsCount={proposedActionsCount}
+    />
+  );
+};
 
 export interface HeaderSlotProps extends InvestigationSlotProps {
   renderAssignees?: RenderAssignees;
   renderStatus?: RenderStatus;
+  renderLiveState?: RenderLiveState;
+  renderTitle?: RenderTitle;
 }
 
 export const HeaderSlot = ({
   conversation,
   renderAssignees,
   renderStatus,
+  renderLiveState,
+  renderTitle,
   refetchConversation,
 }: HeaderSlotProps) => {
   const investigation = conversationToInvestigation(conversation);
@@ -93,6 +125,11 @@ export const HeaderSlot = ({
       investigation={investigation}
       assigneesNode={assigneesNode}
       statusNode={statusNode}
+      liveStateNode={renderLiveState?.({
+        conversationId: conversation.id,
+        severity: investigation.severity,
+      })}
+      titleNode={renderTitle?.({ conversationId: conversation.id, title: conversation.title })}
     />
   );
 };
@@ -132,12 +169,14 @@ export interface EscalationHeaderSlotProps {
   refetchConversation?: () => Promise<void>;
   renderAssignees?: RenderAssignees;
   renderStatus?: RenderStatus;
+  renderSyncIndicator?: RenderSyncIndicator;
 }
 
 export const EscalationHeaderSlot = ({
   conversation,
   renderAssignees,
   renderStatus,
+  renderSyncIndicator,
   refetchConversation,
 }: EscalationHeaderSlotProps) => {
   const { status, assigneeUids } = conversationToEscalationHeader(conversation);
@@ -169,6 +208,7 @@ export const EscalationHeaderSlot = ({
       assigneeUids={assigneeUids}
       assigneesNode={assigneesNode}
       statusNode={statusNode}
+      syncNode={renderSyncIndicator?.({ escalationId: conversation.id })}
     />
   );
 };
@@ -179,31 +219,35 @@ export const EscalationHeaderSlot = ({
 
 export interface EscalationOverviewSlotProps {
   conversation: Conversation;
+  groupedAttachments: FlyoutGroupedAttachmentsRegistry;
   renderLinkedInvestigations?: RenderLinkedInvestigations;
   onOpenInvestigation: (args: { conversationId: string; agentId: string }) => void;
 }
 
 /**
- * The body tab for the escalation details flyout. Renders the linked investigations list via
- * `renderLinkedInvestigations` (supplied by the consuming plugin so it can use HTTP hooks).
- * Returns `null` when no render prop is provided.
+ * The body tab for the escalation details flyout: the summary and grouped attachments, then the
+ * linked investigations list via `renderLinkedInvestigations` (supplied by the consuming plugin so
+ * it can use HTTP hooks), then the Impact copied over from the linked investigations. The list is
+ * omitted when no render prop is provided.
  */
 export const EscalationOverviewSlot = ({
   conversation,
+  groupedAttachments,
   renderLinkedInvestigations,
   onOpenInvestigation,
 }: EscalationOverviewSlotProps) => {
-  if (!renderLinkedInvestigations) return null;
-
-  const { linkedInvestigationIds } = conversationToEscalationHeader(conversation);
+  const { linkedInvestigationIds, summary } = conversationToEscalationHeader(conversation);
 
   return (
-    <>
-      {renderLinkedInvestigations({
+    <EscalationOverviewTab
+      summary={summary}
+      attachments={conversation.attachments}
+      groupedAttachments={groupedAttachments}
+      linkedInvestigationsContent={renderLinkedInvestigations?.({
         escalationId: conversation.id,
         linkedInvestigationIds,
         onOpenInvestigation,
       })}
-    </>
+    />
   );
 };

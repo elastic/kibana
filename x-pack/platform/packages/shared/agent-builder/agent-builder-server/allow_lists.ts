@@ -111,6 +111,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS = [
   `${internalNamespaces.security}.siem_migration.stop_rule_migration`,
   `${internalNamespaces.security}.siem_migration.update_rule_migration`,
   `${internalNamespaces.security}.siem_migration.delete_rule_migration`,
+  `${internalNamespaces.security}.siem_migration.update_translated_rule`,
   `${internalNamespaces.security}.siem_migration.install_migration_rules`,
   `${internalNamespaces.security}.alert-triage`,
 
@@ -225,14 +226,15 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'cases-analytics',
 
   // Platform – Alerting
-  'rule-management',
-  'action-policy-management',
+  'rule-authoring',
+  'action-policy-authoring',
 
   // Platform – Dashboard
   'dashboards',
 
   // Platform – Discover
   'discover-data-analysis',
+  'discover-session',
 
   // Platform – Streams
   'streams-management',
@@ -291,9 +293,11 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'automatic-migration-rules-stop-migration',
   'automatic-migration-rules-update-migration',
   'automatic-migration-rules-delete-migration',
+  'automatic-migration-rules-update-translated-rule',
   'attack-discovery-alert-retrieval-builder',
   'attack-discovery-generator',
   'attack-discovery-workflow-troubleshooting',
+  'endpoint-response-actions',
 
   // O11Y
   'observability.investigation',
@@ -368,6 +372,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
 
   // Platform – Discover
   'esql.query_results',
+  'discover.session',
 
   // Platform – Workflows
   'workflow.yaml',
@@ -399,6 +404,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'security.siem_readiness',
   // gated behind experimentalFeatures.rulePreviewAttachmentEnabled
   'security.rule.preview',
+  // gated behind !siemMigrationsDisabled && siemRuleMigrationsAgentBuilderEnabled
+  'security.siem_migration.rule_migration_items',
 
   // Security Solution – Attack Discovery (discoveries plugin)
   // gated behind the workflows feature flag
@@ -410,6 +417,8 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   // gated behind xpack.alertzero.enabled
   'security.threat',
   'security.significant_security_event',
+  // hidden; server-registered only
+  'security.hunt_coordinator_result',
 
   // Observability
   'observability.ai_insight',
@@ -441,6 +450,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'investigation_impact',
   'investigation_subject',
   'investigation_hypotheses',
+
+  // Observability – Nightshift
+  'nightshift.notification_routing',
 ] as const;
 
 export type AgentBuilderBuiltinAttachment = (typeof AGENT_BUILDER_BUILTIN_ATTACHMENTS)[number];
@@ -449,4 +461,16 @@ export const isAllowedBuiltinAttachment = (
   attachmentTypeId: string
 ): attachmentTypeId is AgentBuilderBuiltinAttachment => {
   return (AGENT_BUILDER_BUILTIN_ATTACHMENTS as readonly string[]).includes(attachmentTypeId);
+};
+
+/**
+ * This is a manually maintained list of all cycle hooks registered in Agent Builder.
+ * The intention is to force a code review from the Agent Builder team when any team adds a new cycle hook.
+ */
+export const AGENT_BUILDER_CYCLE_HOOKS = [] as const;
+
+export type AgentBuilderCycleHook = (typeof AGENT_BUILDER_CYCLE_HOOKS)[number];
+
+export const isAllowedCycleHook = (hookId: string): hookId is AgentBuilderCycleHook => {
+  return (AGENT_BUILDER_CYCLE_HOOKS as readonly string[]).includes(hookId);
 };

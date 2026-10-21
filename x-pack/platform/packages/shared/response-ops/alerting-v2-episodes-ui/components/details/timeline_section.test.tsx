@@ -65,7 +65,12 @@ const renderSection = () => {
   return render(
     <I18nProvider>
       <QueryClientProvider client={client}>
-        <AlertEpisodeTimelineSection episodeId="ep-1" groupHash="hash-1" services={mockServices} />
+        <AlertEpisodeTimelineSection
+          episodeId="ep-1"
+          seriesId="series-1"
+          groupHash="hash-1"
+          services={mockServices}
+        />
       </QueryClientProvider>
     </I18nProvider>
   );
@@ -136,11 +141,11 @@ describe('AlertEpisodeTimelineSection', () => {
     expect(comments[0]).toHaveAttribute('data-timestamp', '2024-01-01T00:01:30.000Z');
   });
 
-  it('shows "started the episode as" text for the initial state entry', () => {
+  it('shows "started the alert as" text for the initial state entry', () => {
     mockEvents([makeRow(ALERT_EPISODE_STATUS.PENDING, '2024-01-01T00:00:00.000Z')]);
     mockActions([]);
     renderSection();
-    expect(screen.getByText(/started the episode as/i)).toBeInTheDocument();
+    expect(screen.getByText(/started the alert as/i)).toBeInTheDocument();
   });
 
   it('shows "changed the status to" text for subsequent transitions', () => {
@@ -159,7 +164,7 @@ describe('AlertEpisodeTimelineSection', () => {
     mockEvents([]);
     mockActions([mockAction]);
     renderSection();
-    expect(screen.getByText('acknowledged the episode')).toBeInTheDocument();
+    expect(screen.getByText('acknowledged the alert')).toBeInTheDocument();
   });
 
   it('falls back to "system" username for an internal actor', () => {

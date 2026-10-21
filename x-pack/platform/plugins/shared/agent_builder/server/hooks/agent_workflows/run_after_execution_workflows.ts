@@ -14,7 +14,11 @@ import {
   type ToolCallStep,
   type ToolResult,
 } from '@kbn/agent-builder-common';
-import { WORKFLOWS_UI_SETTING_ID, ExecutionStatus } from '@kbn/workflows';
+import {
+  AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
+  WORKFLOWS_UI_SETTING_ID,
+  ExecutionStatus,
+} from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
@@ -71,6 +75,11 @@ export const runAfterExecutionWorkflows = async ({
 }: RunAfterExecutionWorkflowsParams): Promise<void> => {
   const workflowIds = context.agentConfiguration.post_execution_workflow_ids ?? [];
   if (!workflowIds.length) {
+    return;
+  }
+
+  // The conversation and round ids would name a conversation that never gets this round.
+  if (context.conversationAccess === 'readOnly') {
     return;
   }
 
@@ -140,6 +149,7 @@ export const runAfterExecutionWorkflows = async ({
       spaceId,
       workflowApi,
       waitForCompletion: true,
+      triggeredBy: AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
     });
 
     if (!result.success) {

@@ -19,13 +19,9 @@ const PAGE_URL = 'security/entity_analytics_management';
  */
 export class EntityAnalyticsManagementPage {
   public readonly entityAnalyticsSwitch: Locator;
-  public readonly entityAnalyticsHealth: Locator;
-  public readonly statusLoading: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.entityAnalyticsSwitch = this.page.testSubj.locator('entity-analytics-switch');
-    this.entityAnalyticsHealth = this.page.testSubj.locator('entity-analytics-health');
-    this.statusLoading = this.page.testSubj.locator('entity-analytics-status-loading');
   }
 
   async navigate(): Promise<void> {
@@ -40,12 +36,15 @@ export class EntityAnalyticsManagementPage {
   }
 
   async waitForStatusLoaded(): Promise<void> {
-    await this.statusLoading.waitFor({ state: 'detached', timeout: 30000 });
-    await this.entityAnalyticsHealth.waitFor({ state: 'visible', timeout: 30000 });
+    // `entity-analytics-switch` is rendered only after the status query settles.
+    // While loading, the control is mounted under a different test id, disabled,
+    // and labeled "Disabled", so visibility of this locator is the terminal signal.
+    await this.entityAnalyticsSwitch.waitFor({ state: 'visible', timeout: 30000 });
   }
 
   async clearEntityData(): Promise<void> {
     const modal = this.page.testSubj.locator('clear-entity-data-modal');
+    await this.page.testSubj.locator('app-menu-overflow-button').click();
     await this.page.testSubj.locator('clear-entity-data-button').click();
     await modal.waitFor({ state: 'visible' });
     await this.page.testSubj.locator('confirmModalConfirmButton').click();

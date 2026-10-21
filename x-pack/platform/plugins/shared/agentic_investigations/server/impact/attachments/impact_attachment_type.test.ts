@@ -56,6 +56,7 @@ const attachmentType = () =>
         storage: createInMemoryStorage<ImpactDocument>() as unknown as ImpactStorageClient,
       }).getDocumentService(),
     assertCanRead: jest.fn().mockResolvedValue(undefined),
+    assertCanReadConversation: jest.fn().mockResolvedValue(undefined),
     logger: loggerMock.create(),
   });
 

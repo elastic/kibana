@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { Logger, RequestHandler } from '@kbn/core/server';
 import { isAgentBuilderError } from '@kbn/agent-builder-common';
 import { isInferenceError } from '@kbn/inference-common';
@@ -81,6 +82,16 @@ export const getHandlerWrapper =
               },
             },
             statusCode: e.meta?.statusCode ?? 500,
+          });
+        }
+        // A 4xx Boom is a refusal the caller can act on, for example a service account that
+        // can't be granted the API key a scheduled task needs.
+        if (Boom.isBoom(e) && e.output.statusCode < 500) {
+          logger.warn(`Request refused: ${e.message}`);
+          return res.customError({
+            body: { message: e.message },
+            statusCode: e.output.statusCode,
+            headers: e.output.headers as { [key: string]: string },
           });
         }
         logger.error(`Unexpected error in handler: ${e.stack ?? e.message}`);

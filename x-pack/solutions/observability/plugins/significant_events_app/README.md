@@ -4,10 +4,13 @@ Owner: `@elastic/nightshift`
 
 Browser-only plugin serving the Significant Events UI at `/app/significant_events`.
 
-The application covers the Significant Events management surface: streams onboarding
-overview, knowledge indicators, rules (queries), detections and events. Settings is a
-standalone page at `/settings`. The application consumes the `significant_events` plugin
-(server APIs via the typed `significantEventsRepositoryClient`).
+The application covers the Significant Events management surface: rules (queries),
+detections and events. Sources, knowledge indicators, Cortex, Memory and Decision Trees
+are served by Nightshift (`/app/nightshift/sources`, `/app/nightshift/knowledge`). Settings
+is served by Nightshift at `/app/nightshift/settings`. The application consumes the
+`significant_events` plugin
+(server APIs via the typed `significantEventsRepositoryClient`) and the `nightshiftSources`
+plugin (the sources API via `getClient()`).
 
 Availability is decided server-side by `GET /internal/significant_events/availability`
 (rollout feature flag, project type, pricing tier, Enterprise license and required

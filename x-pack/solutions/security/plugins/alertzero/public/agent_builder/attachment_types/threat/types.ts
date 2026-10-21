@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { lazySchema } from '@kbn/zod/v4';
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { threatAttachmentDataSchema } from '../../../../common/threat_attachment_schema';
 import type { ThreatAttachmentData } from '../../../../common/threat_attachment_schema';
@@ -14,7 +15,9 @@ export type ThreatAttachment = Attachment<string, ThreatAttachmentData>;
 /** The one field the live fetch and the Discover exit need; the rest are display fallbacks. */
 export type ThreatAttachmentReference = Pick<ThreatAttachmentData, 'report_id'>;
 
-const threatAttachmentReferenceSchema = threatAttachmentDataSchema.pick({ report_id: true });
+const threatAttachmentReferenceSchema = lazySchema(() =>
+  threatAttachmentDataSchema.pick({ report_id: true })
+);
 
 /**
  * Structural check for the fields the renderer actually reads: requires a non-empty

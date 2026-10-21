@@ -36,8 +36,10 @@ export type {
 
 import type { VisualizationType } from '@kbn/lens-common';
 import { SeriesTypes } from '@kbn/lens-common';
+import { AreaFillOptions, type AreaFillOption } from '@kbn/expression-xy-plugin/common';
 
 export const defaultSeriesType = SeriesTypes.BAR_STACKED;
+export const defaultAreaFill: AreaFillOption = AreaFillOptions.GRADIENT;
 
 const barShared = {
   sortPriority: 1,
