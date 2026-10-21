@@ -336,6 +336,20 @@ export interface WorkflowsSolutionTelemetry {
   configurationsWithWorkflowTags: number;
 }
 
+/**
+ * Cumulative user action count for one `source.type` and user action `type` pair. Only pairs
+ * with at least 1 user action appear; user actions without a source are reported as `unknown`.
+ */
+export interface UserActionsBySourceRow {
+  source: string;
+  type: string;
+  total: number;
+}
+
+export interface UserActionsSourceTelemetry {
+  bySource: UserActionsBySourceRow[];
+}
+
 export interface CasesTelemetry {
   cases: {
     all: Count &
@@ -359,7 +373,12 @@ export interface CasesTelemetry {
     obs: SolutionTelemetry;
     main: SolutionTelemetry;
   };
-  userActions: { all: Count & { maxOnACase: number } };
+  userActions: {
+    all: Count & { maxOnACase: number } & UserActionsSourceTelemetry;
+    sec: UserActionsSourceTelemetry;
+    obs: UserActionsSourceTelemetry;
+    main: UserActionsSourceTelemetry;
+  };
   comments: { all: Count & { maxOnACase: number } };
   alerts: {
     all: Count & { maxOnACase: number };
@@ -415,3 +434,4 @@ export type CustomFieldsSolutionTelemetrySchema = MakeSchemaFrom<CustomFieldsSol
 export type TemplatesSolutionTelemetrySchema = MakeSchemaFrom<TemplatesSolutionTelemetry>;
 export type FieldLibrarySolutionTelemetrySchema = MakeSchemaFrom<FieldLibrarySolutionTelemetry>;
 export type WorkflowsSolutionTelemetrySchema = MakeSchemaFrom<WorkflowsSolutionTelemetry>;
+export type UserActionsSourceTelemetrySchema = MakeSchemaFrom<UserActionsSourceTelemetry>;
