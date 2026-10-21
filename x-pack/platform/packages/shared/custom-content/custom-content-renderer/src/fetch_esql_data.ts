@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { ConnectionRequestParams } from '@elastic/transport';
 import dateMath from '@kbn/datemath';
+import { i18n } from '@kbn/i18n';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type {
   AggregateQuery,
@@ -20,6 +22,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { getESQLResults, getESQLTimeField } from '@kbn/esql-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 export type EsqlDataResult = ESQLSearchResponse;
 
@@ -30,7 +33,20 @@ export interface FetchEsqlOptions {
   filters?: Filter[];
   esQueryConfig?: EsQueryConfig;
   esqlVariables?: ESQLControlVariable[];
+  /** Records the request so the panel's Inspect action can show it. */
+  requestAdapter?: RequestAdapter;
 }
+
+const INSPECTOR_REQUEST_TITLE = i18n.translate('xpack.customContent.inspector.requestTitle', {
+  defaultMessage: 'Data',
+});
+
+const INSPECTOR_REQUEST_DESCRIPTION = i18n.translate(
+  'xpack.customContent.inspector.requestDescription',
+  {
+    defaultMessage: 'This request queries Elasticsearch to fetch the data for the custom panel.',
+  }
+);
 
 export async function fetchEsqlData(
   search: ISearchGeneric,
@@ -40,8 +56,25 @@ export async function fetchEsqlData(
   signal: AbortSignal,
   options?: FetchEsqlOptions
 ): Promise<EsqlDataResult> {
-  const { isApproximate, projectRouting, query, filters, esQueryConfig, esqlVariables } =
-    options ?? {};
+  const {
+    isApproximate,
+    projectRouting,
+    query,
+    filters,
+    esQueryConfig,
+    esqlVariables,
+    requestAdapter,
+  } = options ?? {};
+
+  // One request per fetch, so the Requests view shows the latest query instead of a growing list.
+  requestAdapter?.reset();
+  const startTime = Date.now();
+  const logRequest = () =>
+    requestAdapter?.start(
+      INSPECTOR_REQUEST_TITLE,
+      { description: INSPECTOR_REQUEST_DESCRIPTION },
+      startTime
+    );
 
   let timeRangeFilter: { range: Record<string, unknown> } | undefined;
   if (timeRange) {
@@ -76,16 +109,59 @@ export async function fetchEsqlData(
 
   const filter = hasConstraints ? { bool: { ...esBoolQuery.bool, filter: allFilters } } : undefined;
 
-  const { response } = await getESQLResults({
-    esqlQuery,
-    search,
-    signal,
-    filter,
-    timeRange,
-    ...(isApproximate !== undefined ? { approximation: isApproximate } : {}),
-    ...(projectRouting !== undefined ? { projectRouting } : {}),
-    ...(esqlVariables?.length ? { variables: esqlVariables } : {}),
-  });
+  try {
+    const { response, params } = await getESQLResults({
+      esqlQuery,
+      search,
+      signal,
+      filter,
+      timeRange,
+      ...(isApproximate !== undefined ? { approximation: isApproximate } : {}),
+      ...(projectRouting !== undefined ? { projectRouting } : {}),
+      ...(esqlVariables?.length ? { variables: esqlVariables } : {}),
+    });
 
-  return response;
+    // getESQLResults types this as the search params, but it is the connection request that was sent.
+    const requestParams = params as unknown as ConnectionRequestParams;
+
+    logRequest()
+      ?.stats({
+        hits: {
+          label: i18n.translate('xpack.customContent.inspector.hitsLabel', {
+            defaultMessage: 'Hits',
+          }),
+          value: `${response.values.length}`,
+          description: i18n.translate('xpack.customContent.inspector.hitsDescription', {
+            defaultMessage: 'The number of rows returned by the query.',
+          }),
+        },
+        ...(response.took !== undefined && {
+          queryTime: {
+            label: i18n.translate('xpack.customContent.inspector.queryTimeLabel', {
+              defaultMessage: 'Query time',
+            }),
+            value: i18n.translate('xpack.customContent.inspector.queryTimeValue', {
+              defaultMessage: '{queryTime}ms',
+              values: { queryTime: response.took },
+            }),
+            description: i18n.translate('xpack.customContent.inspector.queryTimeDescription', {
+              defaultMessage:
+                'The time it took to process the query. Does not include the time to send the request or parse it in the browser.',
+            }),
+          },
+        }),
+      })
+      .json(requestParams)
+      .ok({ json: { rawResponse: response }, requestParams });
+
+    return response;
+  } catch (error) {
+    // A superseded fetch is aborted on purpose; it is not a failed request worth showing.
+    if (!signal.aborted) {
+      logRequest()
+        ?.json({ query: esqlQuery, ...(filter ? { filter } : {}) })
+        .error({ json: error?.attributes ?? { message: error?.message ?? String(error) } });
+    }
+    throw error;
+  }
 }
