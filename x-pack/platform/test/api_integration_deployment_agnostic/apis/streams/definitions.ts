@@ -24,13 +24,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe('Streams Preconfigured Definitions', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
-      // Preconfigured definitions are installed asynchronously once Kibana is already serving requests.
+      // Preconfigured roots land before the bulk upsert that creates their child streams.
       await retry.waitForWithTimeout(
-        'preconfigured root streams to be installed',
+        'preconfigured definitions to be installed',
         60_000,
         async () => {
           const { body } = await apiClient.fetch('GET /api/streams/_status').expect(200);
-          return body[LOGS_ECS_STREAM_NAME] === true && body[LOGS_OTEL_STREAM_NAME] === true;
+          if (body[LOGS_ECS_STREAM_NAME] !== true || body[LOGS_OTEL_STREAM_NAME] !== true) {
+            return false;
+          }
+          await Promise.all(
+            [`${LOGS_ECS_STREAM_NAME}.child`, `${LOGS_OTEL_STREAM_NAME}.child`].map((name) =>
+              getStream(apiClient, name)
+            )
+          );
+          return true;
         }
       );
     });
