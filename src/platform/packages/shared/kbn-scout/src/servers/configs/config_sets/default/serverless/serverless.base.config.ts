@@ -172,6 +172,8 @@ export const defaultConfig: ScoutServerConfig = {
       '--xpack.cloud.projects_url=/projects/',
       `--xpack.cloud.serverless.project_id=${MOCK_IDP_UIAM_PROJECT_ID}`,
       '--xpack.cloud.users_and_roles_url=/account/members/',
+      // Clears `dataUsageDisabled` from config/serverless.yml, as the project controller does
+      '--xpack.dataUsage.enableExperimental=[]',
       // Ensure that SAML is used as the default authentication method whenever a user navigates to Kibana. In other
       // words, Kibana should attempt to authenticate the user using the provider with the lowest order if the Login
       // Selector is disabled (which is how Serverless Kibana is configured). By declaring `cloud-basic` with a higher
