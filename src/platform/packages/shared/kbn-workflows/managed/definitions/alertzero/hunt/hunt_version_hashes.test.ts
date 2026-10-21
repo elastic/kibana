@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS } from '../worker_settings_defaults';
 import { ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW } from './hunt_continuous_threat_hunt';
 import HUNT_CONTINUOUS_THREAT_HUNT_YAML from './hunt_continuous_threat_hunt.yaml';
+import { CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS } from '../worker_settings_defaults';
 
 function createContentFingerprint(content: string): string {
   let fingerprint = 0;
@@ -30,7 +30,10 @@ describe('Hunt Watch version hashes', () => {
   it('requires bumping Continuous Threat Hunt definition.version with its render-input fingerprint', () => {
     expect(
       `${ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW.version}:${createContentFingerprint(
-        renderInputs(HUNT_CONTINUOUS_THREAT_HUNT_YAML, CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS)
+        renderInputs(
+          HUNT_CONTINUOUS_THREAT_HUNT_YAML,
+          CONTINUOUS_THREAT_HUNT_WORKER_SETTINGS_DEFAULTS
+        )
       )}`
     ).toBe('5:d4ec990c');
   });

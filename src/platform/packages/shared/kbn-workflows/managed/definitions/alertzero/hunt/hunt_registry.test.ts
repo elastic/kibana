@@ -8,13 +8,11 @@
  */
 
 import { parse } from 'yaml';
-import { managedWorkflowDefinitions } from '../../..';
-import { ALERTZERO_HUNT_CHILD_WORKFLOW_IDS } from '..';
 import { ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID } from '.';
+import { ALERTZERO_HUNT_CHILD_WORKFLOW_IDS } from '..';
+import { managedWorkflowDefinitions } from '../../..';
 
-const renderWorkflowYaml = (
-  definition: (typeof managedWorkflowDefinitions)[number]
-): string =>
+const renderWorkflowYaml = (definition: (typeof managedWorkflowDefinitions)[number]): string =>
   'yaml' in definition
     ? definition.yaml
     : definition.yamlTemplate({

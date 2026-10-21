@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import HUNT_PACKAGE_REPORT_YAML from './hunt_package_report.yaml';
+import type { ManagedWorkflowDefinition } from '../../../types';
 import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
 } from '../constants';
-import HUNT_PACKAGE_REPORT_YAML from './hunt_package_report.yaml';
-import type { ManagedWorkflowDefinition } from '../../../types';
 
 export const ALERTZERO_HUNT_PACKAGE_REPORT_WORKFLOW_ID = 'system-security-hunt-package-report';
 

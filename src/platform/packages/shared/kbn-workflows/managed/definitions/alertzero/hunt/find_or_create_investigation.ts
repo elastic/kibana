@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import FIND_OR_CREATE_INVESTIGATION_YAML from './find_or_create_investigation.yaml';
+import type { ManagedWorkflowDefinition } from '../../../types';
 import {
   ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
 } from '../constants';
-import FIND_OR_CREATE_INVESTIGATION_YAML from './find_or_create_investigation.yaml';
-import type { ManagedWorkflowDefinition } from '../../../types';
 
 export const ALERTZERO_HUNT_FIND_OR_CREATE_INVESTIGATION_WORKFLOW_ID =
   'system-security-hunt-find-or-create-investigation';
