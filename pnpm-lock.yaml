@@ -5482,9 +5482,6 @@ importers:
       globby:
         specifier: 11.1.0
         version: 11.1.0
-      gulp-brotli:
-        specifier: 3.0.0
-        version: 3.0.0
       gulp-postcss:
         specifier: 10.0.0
         version: 10.0.0(jiti@2.5.1)(postcss@8.5.26)(tsx@4.21.0)
@@ -16982,10 +16979,6 @@ packages:
     resolution: {integrity: sha512-mS1lbMsxgQj6hge1XZ6p7GPhbrtFwUFYi3wRzXAC/FmYnyXMTvvI3td3rjmQ2u8ewXueaSvRPWaEcgVVOT9Jnw==}
     engines: {node: ^12.22.0 || ^14.16.0 || ^16.0.0 || >=17.0.0}
 
-  gulp-brotli@3.0.0:
-    resolution: {integrity: sha512-AkGR+FRn4Nrf9Ocx8/WXgNNX+owk4FN4xU4kRrso41DWWd9v1KXO8EyG1cGcwt4364Ax68b7ANcP9Em+/RM2OQ==}
-    engines: {node: '>=10.17.0'}
-
   gulp-postcss@10.0.0:
     resolution: {integrity: sha512-z1RF2RJEX/BvFsKN11PXai8lRmihZTiHnlJf7Zu8uHaA/Q7Om4IeN8z1NtMAW5OiLwUY02H0DIFl9tHl0CNSgA==}
     engines: {node: '>=18'}
@@ -22235,9 +22228,6 @@ packages:
 
   through2@2.0.5:
     resolution: {integrity: sha512-/mrRod8xqpA+IHSLyGCQ2s8SPHiCDEeQJSep1jqLYeEUClOFG2Qsh+4FU6G9VeqpZnGW/Su8LQGc4YKni5rYSQ==}
-
-  through2@3.0.1:
-    resolution: {integrity: sha512-M96dvTalPT3YbYLaKaCuwu+j06D/8Jfib0o/PxbVt6Amhv3dUAtW6rTV1jPgJSBG83I/e04Y6xkVdVhSRhi0ww==}
 
   through2@4.0.2:
     resolution: {integrity: sha512-iOqSav00cVxEEICeD7TjLB1sueEL+81Wpzp2bY17uZjZN0pWZPuo4suZ/61VujxmqSGFfgOcNuTZ85QJwNZQpw==}
@@ -34529,11 +34519,6 @@ snapshots:
 
   graphql@16.11.0: {}
 
-  gulp-brotli@3.0.0:
-    dependencies:
-      plugin-error: 1.0.1
-      through2: 3.0.1
-
   gulp-postcss@10.0.0(jiti@2.5.1)(postcss@8.5.26)(tsx@4.21.0):
     dependencies:
       fancy-log: 2.0.0
@@ -40662,10 +40647,6 @@ snapshots:
     dependencies:
       readable-stream: 2.3.8
       xtend: 4.0.2
-
-  through2@3.0.1:
-    dependencies:
-      readable-stream: 3.6.2
 
   through2@4.0.2:
     dependencies:
