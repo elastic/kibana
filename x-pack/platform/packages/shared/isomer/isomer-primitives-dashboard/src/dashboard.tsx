@@ -52,6 +52,8 @@ export interface DashboardPanel {
   body?: PrimitiveNode;
   /** Why the panel has no content, and where it is in Kibana. */
   placeholder?: { reason: string; href?: string };
+  /** `none` for a body that draws its own frame, such as a Lens metric: it fills the panel edge to edge. */
+  frame?: 'panel' | 'none';
 }
 
 export interface DashboardNode extends PrimitiveNode {
@@ -93,6 +95,12 @@ const panelSchemaFor = (bodyNodeSchema: z.ZodType) =>
         .strict()
         .optional()
         .describe('Why the panel has no content, and its link in Kibana.'),
+      frame: z
+        .enum(['panel', 'none'])
+        .optional()
+        .describe(
+          '`none` lets a body that draws its own frame fill the panel. Defaults to `panel`.'
+        ),
     })
     .strict();
 
@@ -175,6 +183,11 @@ const { handles } = isomerDistillery.createStyleModule(
     panelBody: css`
       flex: 1 1 auto;
       min-height: 0;
+      overflow: hidden;
+    `,
+    frameless: css`
+      flex: 1 1 auto;
+      min-width: 0;
       overflow: hidden;
     `,
     placeholder: css`
@@ -266,18 +279,25 @@ export const dashboard = definePrimitive<DashboardNode, typeof dashboardSchema>(
     react: (node, { context, scope }) => {
       const { title, description, period, panels } = node;
       const stacked = node.layout === 'stack';
-      const panelContent = ({ title: panelTitle, body, placeholder }: DashboardPanel) => (
-        <div className={classNames(context, handles.panel)}>
-          {panelTitle && <h3 className={classNames(context, handles.panelTitle)}>{panelTitle}</h3>}
-          <div className={classNames(context, handles.panelBody)}>
-            {body ? (
-              scope.renderReact(body, context)
-            ) : (
-              <Placeholder {...{ context, placeholder }} />
-            )}
+      const panelContent = ({ title: panelTitle, body, placeholder, frame }: DashboardPanel) =>
+        frame === 'none' && body ? (
+          <div className={classNames(context, handles.frameless)}>
+            {scope.renderReact(body, context)}
           </div>
-        </div>
-      );
+        ) : (
+          <div className={classNames(context, handles.panel)}>
+            {panelTitle && (
+              <h3 className={classNames(context, handles.panelTitle)}>{panelTitle}</h3>
+            )}
+            <div className={classNames(context, handles.panelBody)}>
+              {body ? (
+                scope.renderReact(body, context)
+              ) : (
+                <Placeholder {...{ context, placeholder }} />
+              )}
+            </div>
+          </div>
+        );
       return (
         <div
           {...nodeAnchor(context, node)}
@@ -390,11 +410,14 @@ export const dashboardChartSize =
     if (!owner || !panel) {
       return undefined;
     }
-    const chrome = 2 * PANEL_CHROME.padding + (panel.title ? PANEL_CHROME.header : 0) + 2;
     const box =
       owner.layout === 'stack'
         ? { width, height: stackedHeight(panel.grid) }
         : panelBox(panel.grid, width);
+    if (panel.frame === 'none') {
+      return { width: Math.max(80, box.width), height: Math.max(60, box.height) };
+    }
+    const chrome = 2 * PANEL_CHROME.padding + (panel.title ? PANEL_CHROME.header : 0) + 2;
     return {
       width: Math.max(80, box.width - 2 * PANEL_CHROME.padding - 2),
       height: Math.max(60, box.height - chrome),
