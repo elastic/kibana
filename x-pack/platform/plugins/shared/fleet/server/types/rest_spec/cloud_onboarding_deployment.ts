@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '../../../common/constants';
+
 // --- Shared primitives ---
 
 const EcfFamilySchema = schema.oneOf(
@@ -247,7 +249,7 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
     ),
     integrationName: schema.maybe(
       schema.string({
-        maxLength: 255,
+        maxLength: CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
         meta: {
           description:
             'Integration name as entered in the Service Settings step, before any per-package suffix is applied.',
@@ -334,7 +336,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     deploymentName: schema.maybe(schema.string({ maxLength: 255 })),
     integrationName: schema.maybe(
       schema.string({
-        maxLength: 255,
+        maxLength: CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
         meta: {
           description:
             'Integration name used by the last deploy, before any per-package suffix. Refreshed on each deploy because an unedited default name follows the service selection.',

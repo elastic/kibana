@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '@kbn/fleet-plugin/common';
 
 import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_matrix';
 
@@ -13,12 +14,12 @@ import type { AwsServiceMatrixEntry, DeploymentMethod } from '../../aws_service_
 export const MAX_POLICY_NAME_LENGTH = 255;
 
 /**
- * The longest integration name. A policy name is the integration name plus `-<suffix>`, and a
- * suffix is at most 88 characters (an 80-character package and namespace stem plus two
- * uniqueness counters). Capping the name here keeps every derived name within Fleet's limit, so
- * no name is ever cut, which would make two different suffixes collide.
+ * The longest integration name, enforced by the Fleet API too. A policy name is the integration
+ * name plus `-<suffix>` of at most 88 characters (an 80-character package and namespace stem and
+ * two uniqueness counters). Capping it keeps every derived name within Fleet's limit, so no name
+ * is cut, which would make two different suffixes collide.
  */
-export const MAX_INTEGRATION_NAME_LENGTH = 160;
+export const MAX_INTEGRATION_NAME_LENGTH = CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH;
 
 /** Fleet's package policy description limit. */
 export const MAX_DESCRIPTION_LENGTH = 2048;

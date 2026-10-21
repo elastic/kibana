@@ -7,6 +7,8 @@
 
 import { schema } from '@kbn/config-schema';
 
+import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '../../../common/constants';
+
 // ── Shared schema primitives reused across V1 and V2 ─────────────────────────
 
 const ProviderSchema = schema.oneOf([
@@ -97,7 +99,9 @@ export const CloudOnboardingDeploymentSchemaV2 = schema.object({
 // Common integration settings entered in the Service Settings step. Neither field is in
 // mappings.properties (dynamic: false), so no mapping change is needed.
 export const CloudOnboardingDeploymentSchemaV3 = CloudOnboardingDeploymentSchemaV2.extends({
-  integrationName: schema.maybe(schema.string({ maxLength: 255 })),
+  integrationName: schema.maybe(
+    schema.string({ maxLength: CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH })
+  ),
   description: schema.maybe(schema.string({ maxLength: 2048 })),
 });
 

@@ -245,7 +245,23 @@ export default function (providerContext: FtrProviderContext) {
         expect(fetched.item.description).to.equal('Production AWS');
       });
 
-      it('should reject an integration name over the Fleet limit', async () => {
+      it('should accept an integration name of exactly the limit (160)', async () => {
+        const { body } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            authMethod: 'static_keys',
+            mechanisms: ['managed_integration'],
+            services: ['cloudtrail'],
+            integrationName: 'a'.repeat(160),
+          })
+          .expect(200);
+
+        createdIds.push(body.item.id);
+      });
+
+      it('should reject an integration name over the limit shared with the UI (160)', async () => {
         await supertest
           .post(BASE_URL)
           .set('kbn-xsrf', 'xxxx')
@@ -254,7 +270,7 @@ export default function (providerContext: FtrProviderContext) {
             authMethod: 'static_keys',
             mechanisms: ['managed_integration'],
             services: ['cloudtrail'],
-            integrationName: 'a'.repeat(256),
+            integrationName: 'a'.repeat(161),
           })
           .expect(400);
       });
