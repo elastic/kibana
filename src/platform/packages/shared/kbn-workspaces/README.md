@@ -42,7 +42,7 @@ Each task invalidates the successive steps.
 
 - Uses git worktrees to avoid multiple full clones (saves disk & time).
 - Detached checkouts prevent accidental commits inside benchmark worktrees.
-- Bootstrap enforces the current runtime Node version by updating `package.json` engines and `.nvmrc` / `.node-version` inside the worktree to reduce friction with older refs. (Ideally we'd use a Node.js version manager)
+- Bootstrap enforces the current runtime Node version by updating `package.json` engines and `.nvmrc` (and `.node-version` on older refs) inside the worktree to reduce friction with older refs. (Ideally we'd use a Node.js version manager)
 
 ### When to use
 

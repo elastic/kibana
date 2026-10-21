@@ -18,6 +18,8 @@ export interface LabelNodeDetailsProps {
   countryCodes?: string[];
   onIpClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
   onCountryClick?: (e: React.MouseEvent<HTMLButtonElement>) => void;
+  /** Pushes the row down so it clears the origin highlight ring drawn around the label. */
+  hasOriginHighlight?: boolean;
 }
 
 export const LabelNodeDetails = ({
@@ -25,6 +27,7 @@ export const LabelNodeDetails = ({
   countryCodes,
   onIpClick,
   onCountryClick,
+  hasOriginHighlight = false,
 }: LabelNodeDetailsProps) => {
   const { euiTheme } = useEuiTheme();
   const shouldRenderIps = ips && ips.length > 0;
@@ -38,7 +41,7 @@ export const LabelNodeDetails = ({
       wrap={false}
       css={css`
         width: ${NODE_LABEL_WIDTH}px;
-        margin-top: ${euiTheme.size.xs};
+        margin-top: ${hasOriginHighlight ? euiTheme.size.m : euiTheme.size.xs};
       `}
     >
       {shouldRenderIps && (
