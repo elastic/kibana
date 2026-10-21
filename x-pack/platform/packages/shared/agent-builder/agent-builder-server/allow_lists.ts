@@ -244,6 +244,7 @@ export const AGENT_BUILDER_BUILTIN_SKILLS = [
   'significant-events-assessment',
   'streams-investigation-management',
   'knowledge-indicators-management',
+  'nightshift-sources-management',
   'ki-identification-management',
   'feature-identification',
   'ki-query-generation',

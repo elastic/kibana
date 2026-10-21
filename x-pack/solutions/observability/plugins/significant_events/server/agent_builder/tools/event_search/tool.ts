@@ -33,7 +33,7 @@ import {
 } from './handler';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   toSourceRef,
   type SourceCatalog,
 } from '../../utils/resolve_source_slugs';
@@ -269,7 +269,7 @@ export function createSearchEventsTool({
         await assertCanReadSignificantEvents({ request, server });
         const { slugs, ...searchParams } = toolParams;
         const catalog = await loadSourceCatalog(sourcesClient);
-        const filterSources = slugs ? resolveSourcesBySlug(catalog, slugs) : [];
+        const filterSources = slugs ? resolveSourcesBySlugOrId(catalog, slugs) : [];
 
         const data = await searchEventsToolHandler({
           eventSearchClient: await getEventSearchClient(),

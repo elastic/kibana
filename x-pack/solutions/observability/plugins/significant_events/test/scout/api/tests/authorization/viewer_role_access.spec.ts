@@ -11,12 +11,19 @@ import { tags } from '@kbn/scout-oblt';
 import { significantEventsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
 import {
+  ACCESS_SOURCE_ESQL,
   DETECTIONS_ENDPOINT,
   EVENTS_ENDPOINT,
   EVENT_SEARCH_TOOL_ID,
+  executeTool,
   KI_FEATURE_CREATE_TOOL_ID,
   MARK_SCANNED_ENDPOINT,
   POLL_OPTIONS,
+  SOURCE_CREATE_TOOL_ID,
+  SOURCE_DELETE_TOOL_ID,
+  SOURCE_GET_TOOL_ID,
+  SOURCE_LIST_TOOL_ID,
+  SOURCE_UPDATE_TOOL_ID,
   TOOL_API_HEADERS,
   TOOL_EXECUTE_ENDPOINT,
   buildDetection,
@@ -205,6 +212,53 @@ apiTest.describe(
             }),
           }),
         ]);
+      }
+    );
+
+    apiTest(
+      'can list and get sources but cannot create, update or delete them from Agent Builder',
+      async ({ apiClient }) => {
+        const listResponse = await executeTool(apiClient, toolHeaders, SOURCE_LIST_TOOL_ID, {
+          search: 'viewer-access',
+        });
+        expect(listResponse).toHaveStatusCode(200);
+        expect(listResponse.body.results[0].data.sources).toStrictEqual(
+          expect.arrayContaining([expect.objectContaining({ id: sourceId, slug: sourceSlug })])
+        );
+
+        const getResponse = await executeTool(apiClient, toolHeaders, SOURCE_GET_TOOL_ID, {
+          source: sourceSlug,
+        });
+        expect(getResponse).toHaveStatusCode(200);
+        expect(getResponse.body.results[0].data).toStrictEqual(
+          expect.objectContaining({ id: sourceId, slug: sourceSlug })
+        );
+
+        const deniedCalls = [
+          [SOURCE_CREATE_TOOL_ID, { title: `viewer-denied-${uuidv4()}`, esql: ACCESS_SOURCE_ESQL }],
+          [SOURCE_UPDATE_TOOL_ID, { source: sourceSlug, enabled: false }],
+          [SOURCE_DELETE_TOOL_ID, { source: sourceSlug }],
+        ] as const;
+        for (const [toolId, toolParams] of deniedCalls) {
+          const response = await executeTool(apiClient, toolHeaders, toolId, toolParams);
+          expect(response).toHaveStatusCode(200);
+          expect(response.body.results).toStrictEqual([
+            expect.objectContaining({
+              type: 'error',
+              data: expect.objectContaining({
+                message: expect.stringContaining('requires the Nightshift manage privilege'),
+              }),
+            }),
+          ]);
+        }
+
+        // The denied delete and disable left the source as it was.
+        const afterResponse = await executeTool(apiClient, toolHeaders, SOURCE_GET_TOOL_ID, {
+          source: sourceSlug,
+        });
+        expect(afterResponse.body.results[0].data).toStrictEqual(
+          expect.objectContaining({ id: sourceId, enabled: true })
+        );
       }
     );
   }

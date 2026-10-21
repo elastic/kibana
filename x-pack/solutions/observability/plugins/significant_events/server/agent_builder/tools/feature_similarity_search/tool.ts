@@ -24,7 +24,7 @@ import {
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
 
@@ -73,7 +73,7 @@ export const createFeatureSimilaritySearchTool = ({
         });
         await assertCanReadSignificantEvents({ request: context.request, server });
         const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-        const [source] = resolveSourcesBySlug(catalog, [slug]);
+        const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
         // Stored features are read as the internal user, so check the caller's own data access first.
         await scopedClients.sourcesClient.assertReadable(source.id);
         const kiClient = await scopedClients.getKnowledgeIndicatorClient();

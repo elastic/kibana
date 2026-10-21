@@ -11,11 +11,17 @@ import { tags } from '@kbn/scout-oblt';
 import { significantEventsApiTest as apiTest } from '../../fixtures';
 import { COMMON_API_HEADERS } from '../../fixtures/constants';
 import {
+  ACCESS_SOURCE_ESQL,
   DETECTIONS_ENDPOINT,
   EVENTS_ENDPOINT,
   KI_FEATURE_CREATE_TOOL_ID,
+  KNOWLEDGE_INDICATORS_DATA_STREAM,
   MARK_SCANNED_ENDPOINT,
   POLL_OPTIONS,
+  SOURCES_ENDPOINT,
+  SOURCE_CREATE_TOOL_ID,
+  SOURCE_DELETE_TOOL_ID,
+  SOURCE_UPDATE_TOOL_ID,
   TOOL_API_HEADERS,
   TOOL_EXECUTE_ENDPOINT,
   buildDetection,
@@ -26,6 +32,8 @@ import {
   deleteFeature,
   getFeaturesEndpoint,
   deleteSignificantEvent,
+  executeTool,
+  seedFeature,
   seedSignificantEvent,
 } from '../../fixtures/built_in_role_access';
 
@@ -157,6 +165,96 @@ for (const role of ['editor', 'admin'] as const) {
           }),
         ]);
       });
+
+      apiTest('creates, updates and deletes a source from Agent Builder', async ({ apiClient }) => {
+        const title = `${role}-tool-source-${uuidv4()}`;
+
+        const createResponse = await executeTool(apiClient, toolHeaders, SOURCE_CREATE_TOOL_ID, {
+          title,
+          esql: ACCESS_SOURCE_ESQL,
+        });
+        expect(createResponse).toHaveStatusCode(200);
+        const created = createResponse.body.results[0];
+        expect(created).toStrictEqual(
+          expect.objectContaining({
+            type: 'other',
+            data: expect.objectContaining({ title, enabled: true }),
+          })
+        );
+        const { id, slug } = created.data;
+
+        const updatedTitle = `${title}-renamed`;
+        const updateResponse = await executeTool(apiClient, toolHeaders, SOURCE_UPDATE_TOOL_ID, {
+          source: slug,
+          title: updatedTitle,
+          enabled: false,
+        });
+        expect(updateResponse).toHaveStatusCode(200);
+        expect(updateResponse.body.results[0].data).toStrictEqual(
+          expect.objectContaining({
+            id,
+            slug,
+            title: updatedTitle,
+            esql: ACCESS_SOURCE_ESQL,
+            enabled: false,
+          })
+        );
+
+        const deleteResponse = await executeTool(apiClient, toolHeaders, SOURCE_DELETE_TOOL_ID, {
+          source: slug,
+        });
+        expect(deleteResponse).toHaveStatusCode(200);
+        expect(deleteResponse.body.results[0].data).toStrictEqual(
+          expect.objectContaining({ deleted: true, id })
+        );
+
+        const getResponse = await apiClient.get(`${SOURCES_ENDPOINT}/${id}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(getResponse).toHaveStatusCode(404);
+      });
+
+      apiTest(
+        'cleans up the knowledge indicators of a source deleted from Agent Builder',
+        async ({ apiClient, esClient, kbnClient }) => {
+          const { id, slug } = await createAccessSource({
+            kbnClient,
+            title: `${role}-delete-cascade-${uuidv4()}`,
+          });
+          try {
+            await seedFeature({
+              kbnClient,
+              sourceId: id,
+              featureId: `${role}-cascade-${uuidv4()}`,
+            });
+
+            const response = await executeTool(apiClient, toolHeaders, SOURCE_DELETE_TOOL_ID, {
+              source: slug,
+            });
+            expect(response).toHaveStatusCode(200);
+            expect(response.body.results[0].data).toStrictEqual(
+              expect.objectContaining({ deleted: true, id })
+            );
+
+            await expect
+              .poll(async () => {
+                const { hits } = await esClient.search({
+                  index: KNOWLEDGE_INDICATORS_DATA_STREAM,
+                  size: 0,
+                  track_total_hits: true,
+                  query: {
+                    bool: { filter: [{ term: { 'source.id': id } }, { term: { deleted: true } }] },
+                  },
+                });
+                return typeof hits.total === 'number' ? hits.total : hits.total?.value;
+              }, POLL_OPTIONS)
+              .toBeGreaterThan(0);
+          } finally {
+            await deleteAccessSource({ kbnClient, sourceId: id });
+          }
+        }
+      );
     }
   );
 }

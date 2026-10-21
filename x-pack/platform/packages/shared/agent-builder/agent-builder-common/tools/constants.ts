@@ -79,6 +79,11 @@ export const platformSignificantEventsTools = {
   createEvent: `${internalNamespaces.platformSignificantEvents}.event_create`,
   updateEventStatus: `${internalNamespaces.platformSignificantEvents}.event_status_update`,
   eventsWrite: `${internalNamespaces.platformSignificantEvents}.events_write`,
+  listSources: `${internalNamespaces.platformSignificantEvents}.source_list`,
+  getSource: `${internalNamespaces.platformSignificantEvents}.source_get`,
+  createSource: `${internalNamespaces.platformSignificantEvents}.source_create`,
+  updateSource: `${internalNamespaces.platformSignificantEvents}.source_update`,
+  deleteSource: `${internalNamespaces.platformSignificantEvents}.source_delete`,
   attachInvestigation: `${internalNamespaces.platformStreams}.sig_events.event_investigation_attach`,
 } as const;
 

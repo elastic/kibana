@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { IUiSettingsClient } from '@kbn/core/server';
@@ -155,3 +156,16 @@ export const createSignificantEventsServer = ({
   const server: Pick<SignificantEventsServer, 'security'> = { security };
   return server as SignificantEventsServer;
 };
+
+/** The dependencies every source tool takes, with the given sources client behind the scoped clients. */
+export const createSourceToolDeps = ({
+  featurePrivilege,
+  sourcesClient,
+}: {
+  featurePrivilege: NightshiftFeaturePrivilege;
+  sourcesClient: object;
+}) => ({
+  getScopedClients: jest.fn().mockResolvedValue({ licensing: {}, sourcesClient }),
+  server: createSignificantEventsServer({ featurePrivilege }),
+  logger: loggingSystemMock.createLogger(),
+});
