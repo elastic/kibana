@@ -11,9 +11,8 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { REACHES_BACK_COLUMN } from '../queries/history_reaches_back';
-
-/** The previous period barely changes between renders, so it stays fresh longer than the count. */
-export const PREVIOUS_PERIOD_STALE_TIME_MS = 30 * 60_000;
+import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
+import { retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 
 interface PreviousPeriodQueryOptions<T> {
   queryKey: string;
@@ -44,14 +43,16 @@ const usePreviousPeriodQuery = <T>({
     [queryKey, query],
     async ({ signal }) => {
       if (!query) return undefined;
-      const result = await lastValueFrom(
-        services.search.search(
-          { params: { query } },
-          {
-            abortSignal: signal,
-            strategy: 'esql_async',
-            ...(localOnly ? { projectRouting: '_alias:_origin' } : {}),
-          }
+      const result = await runWithTileTimeout(signal, (tileSignal) =>
+        lastValueFrom(
+          services.search.search(
+            { params: { query } },
+            {
+              abortSignal: tileSignal,
+              strategy: 'esql_async',
+              ...(localOnly ? { projectRouting: '_alias:_origin' } : {}),
+            }
+          )
         )
       );
       return parse(result.rawResponse as unknown as ESQLSearchResponse);
@@ -59,9 +60,9 @@ const usePreviousPeriodQuery = <T>({
     {
       enabled: enabled && Boolean(query),
       keepPreviousData: true,
-      staleTime: PREVIOUS_PERIOD_STALE_TIME_MS,
+      ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: retryUnlessTimedOut,
     }
   );
 
@@ -83,6 +84,11 @@ export const parseReachesBack = (raw: ESQLSearchResponse): boolean => {
 interface PreviousPeriodOptions<T> {
   /** Identifies the tile in the query cache. */
   tileKey: string;
+  /**
+   * Identifies the history check in the query cache, when tiles read the same source with the same
+   * query and should share one request. Defaults to `tileKey`.
+   */
+  guardKey?: string;
   /** The history check of the tile's source, or null while its inputs load. */
   guardQuery: string | null;
   /** The tile's query for the previous period (count only), or null while its inputs load. */
@@ -102,6 +108,7 @@ interface PreviousPeriodOptions<T> {
  */
 export const usePreviousPeriod = <T>({
   tileKey,
+  guardKey = tileKey,
   guardQuery,
   previousQuery,
   enabled,
@@ -109,23 +116,28 @@ export const usePreviousPeriod = <T>({
   localOnly,
 }: PreviousPeriodOptions<T>): {
   previous: T | undefined;
+  /**
+   * True or false once the history check has settled without an error, otherwise undefined. It does
+   * not depend on the previous-period query, so a sparkline can follow it when only that query fails.
+   */
+  reachesBack: boolean | undefined;
   isHistoryMissing: boolean;
   isError: boolean;
 } => {
   const guard = usePreviousPeriodQuery({
-    queryKey: `${tileKey}HistoryReachesBack`,
+    queryKey: `${guardKey}HistoryReachesBack`,
     query: guardQuery,
     enabled,
     parse: parseReachesBack,
     localOnly,
   });
   const guardSettled = guard.data !== undefined && !guard.isPending;
-  const reachesBack = guardSettled && guard.data === true;
+  const hasHistory = guardSettled && guard.data === true;
 
   const previousPeriod = usePreviousPeriodQuery({
     queryKey: `${tileKey}PrevPeriod`,
     query: previousQuery,
-    enabled: enabled && reachesBack,
+    enabled: enabled && hasHistory,
     parse,
     localOnly,
   });
@@ -134,7 +146,8 @@ export const usePreviousPeriod = <T>({
   const isPreviousSettled = previousPeriod.data !== undefined && !previousPeriod.isPending;
 
   return {
-    previous: !isError && reachesBack && isPreviousSettled ? previousPeriod.data : undefined,
+    previous: !isError && hasHistory && isPreviousSettled ? previousPeriod.data : undefined,
+    reachesBack: !guard.isError && guardSettled ? guard.data : undefined,
     isHistoryMissing: !isError && guardSettled && guard.data === false,
     isError,
   };

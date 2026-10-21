@@ -63,7 +63,8 @@ const UNTITLED_INVESTIGATION = i18n.translate(
  *                      across would be inventing a meaning. The bucket carries the part
  *                      the queue actually needs: decided proposals land in `closed`.
  * - `severity`         lossy 4→3 collapse: `critical` → `'high'` so the danger icon fires.
- * - `updatedAt`        approximated as `decidedAt ?? createdAt`; proposals have no mtime.
+ * - `proposalCreatedAt` / `proposalDecidedAt` the proposal's own timestamps. The decision time
+ *                      dates the closed rows.
  * - `recordId`         repurposed as the proposal id; the page gates dismiss/assign modals
  *                      on `modalState.recordId`, so this must be non-null for the ⋮ menu
  *                      items to work.
@@ -87,8 +88,8 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     template_id: 'investigation',
     title: proposal.title,
     createdAt: proposal.createdAt,
-    // Proposals have no modification timestamp; decidedAt is the closest event.
-    updatedAt: proposal.decidedAt ?? proposal.createdAt,
+    proposalCreatedAt: proposal.createdAt,
+    proposalDecidedAt: proposal.decidedAt,
     // Proposals do not carry worker execution IDs.
     worker_execution_ids: [],
     // status is deliberately omitted — see the data-gap note above.
@@ -114,6 +115,7 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     assignees: proposal.conversationAssignees,
     events: [],
     entityIds: proposal.entityIds,
+    entityTypes: proposal.entityTypes,
     // First id feeds the flyout Overview "Compromised" row until that surface
     // reads `entityIds` directly. Pills and the queue filter use `entityIds`.
     affectedSurface: proposal.entityIds?.[0],

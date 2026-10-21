@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/core'
   - '@kbn/inference-common'
+  - '@kbn/management-settings-ids'
   - '@kbn/actions-plugin'
   - '@kbn/triggers-actions-ui-plugin'
   - '@kbn/config-schema'

@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type {
   HuntBehaviorArticleContext,
   HuntCompleteness,
@@ -136,7 +137,7 @@ export interface HuntCoordinatorCoreResult {
    * The model tiers that had no usable model on this run, in tier order; absent when every
    * tier resolved. Reported whether or not the run needed them: a missing Efficient model
    * quietly degrades dataset matching and recommendations without skipping anything, and a
-   * missing Balanced or Frontier model is what makes Tier 2 report `no_inference`.
+   * missing Frontier model is what makes Tier 2 report `no_inference`.
    */
   unavailable_model_tiers?: HuntModelTier[];
   message: string;
@@ -205,6 +206,7 @@ const MAX_MATCHED_INDICES = 50;
 export interface HuntCoordinatorClients {
   esClient: ElasticsearchClient;
   reportsEsClient: ElasticsearchClient;
+  mitreDataClient?: MitreAttackDataClient;
 }
 
 const clampHuntReportText = (value: string | undefined): string | undefined => {
@@ -453,7 +455,7 @@ const coordinatorGaps = ({
 };
 
 const huntCoordinatorCore = async (
-  { esClient, reportsEsClient }: HuntCoordinatorClients,
+  { esClient, reportsEsClient, mitreDataClient }: HuntCoordinatorClients,
   models: HuntModels,
   logger: Logger,
   params: HuntCoordinatorParams,
@@ -723,11 +725,10 @@ const huntCoordinatorCore = async (
   // The model is a fallback inside it and spends tokens, so a run that Tier 2 will not
   // reach gets the deterministic targets only; they still describe the run.
   // The one place a hunt workload is mapped to a tier (see `HuntModels` for the reasoning).
-  // Tier 2 needs both its tiers, so it is unreachable when either has no usable endpoint.
-  const tier2Models: HuntBehaviorModels | undefined =
-    models.frontier && models.balanced
-      ? { extraction: models.frontier, esql: models.balanced }
-      : undefined;
+  // Both Tier 2 jobs run on Frontier, so Tier 2 is unreachable without it.
+  const tier2Models: HuntBehaviorModels | undefined = models.frontier
+    ? { extraction: models.frontier, esql: models.frontier }
+    : undefined;
   const tier2Reachable = gatedSkipReason === null && tier2Models !== undefined && Boolean(text);
   const targets = await resolveTier2Targets({
     scope,
@@ -903,7 +904,8 @@ const huntCoordinatorCore = async (
         // gates, the hit bar) treats this as the set Tier 2 may read.
         allowed_indices: targets.tier2_targets,
       },
-      esClient
+      esClient,
+      mitreDataClient
     );
   } catch (err) {
     logger.warn(`hunt_coordinator: tier2 huntBehavior failed — ${(err as Error).message}`);

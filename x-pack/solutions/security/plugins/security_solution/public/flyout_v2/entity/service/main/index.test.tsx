@@ -10,6 +10,7 @@ import React from 'react';
 import { TestProviders } from '../../../../common/mock';
 import {
   mockServiceEntityRiskScores,
+  mockServiceEntityRiskScoresWithResolution,
   mockServiceRiskScoreState,
 } from '../../../../flyout/entity_details/mocks';
 import { mockObservedService } from '../../../../flyout/entity_details/service_right/mocks';
@@ -35,9 +36,10 @@ jest.mock('../../../../entity_analytics/api/hooks/use_risk_score', () => ({
   useRiskScore: () => mockedUseRiskScore(),
 }));
 
+const mockedEntityRiskScores = jest.fn().mockReturnValue(mockServiceEntityRiskScores);
 jest.mock('../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation', () => ({
   useEntityRiskScoreRecalculation: () => ({
-    entityRiskScores: mockServiceEntityRiskScores,
+    entityRiskScores: mockedEntityRiskScores(),
     recalculatingScore: false,
     calculateEntityRiskScore: jest.fn(),
   }),
@@ -113,6 +115,7 @@ describe('<Service />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedUseRiskScore.mockReturnValue(mockServiceRiskScoreState);
+    mockedEntityRiskScores.mockReturnValue(mockServiceEntityRiskScores);
     mockedUseObservedService.mockReturnValue(mockObservedService);
     mockedUseEntityFromStore.mockReturnValue(emptyEntityFromStore);
     mockedUseAssetCriticalityPrivileges.mockReturnValue({
@@ -309,6 +312,71 @@ describe('<Service />', () => {
         );
 
         expect(getByTestId('service-panel-header')).toHaveTextContent('Risk: Low');
+      });
+    });
+
+    describe('risk summary', () => {
+      it('shows only the resolution-group risk score in the group view', () => {
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+        mockedEntityRiskScores.mockReturnValue(mockServiceEntityRiskScoresWithResolution);
+        withStoreRecords(targetRecord, [aliasRecord]);
+
+        const { getByTestId, queryByTestId } = render(
+          <TestProviders>
+            <Service {...mockProps} mode="resolved" />
+          </TestProviders>
+        );
+
+        expect(getByTestId('resolution-risk-summary-table')).toBeInTheDocument();
+        expect(queryByTestId('risk-summary-table')).not.toBeInTheDocument();
+      });
+
+      it('shows the individual risk score when no aliases are returned even if a resolution score exists', () => {
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+        mockedEntityRiskScores.mockReturnValue(mockServiceEntityRiskScoresWithResolution);
+        withStoreRecords(targetRecord);
+
+        const { getByTestId, queryByTestId } = render(
+          <TestProviders>
+            <Service {...mockProps} mode="resolved" />
+          </TestProviders>
+        );
+
+        expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+        expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
+        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Risk contributions');
+      });
+
+      it('keeps showing the resolution group score next to the individual score when the feature flag is off', () => {
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(false);
+        mockedEntityRiskScores.mockReturnValue(mockServiceEntityRiskScoresWithResolution);
+        withStoreRecords(targetRecord);
+
+        const { getByTestId } = render(
+          <TestProviders>
+            <Service {...mockProps} />
+          </TestProviders>
+        );
+
+        expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+        expect(getByTestId('resolution-risk-summary-table')).toBeInTheDocument();
+        expect(getByTestId('resolutionRiskInputsTitleLink')).toHaveTextContent(
+          'Resolution group risk contributions'
+        );
+      });
+
+      it('shows only the individual risk score when no aliases are returned', () => {
+        mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+        withStoreRecords(targetRecord);
+
+        const { getByTestId, queryByTestId } = render(
+          <TestProviders>
+            <Service {...mockProps} mode="resolved" />
+          </TestProviders>
+        );
+
+        expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+        expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
       });
     });
   });

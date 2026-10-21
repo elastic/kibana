@@ -16,10 +16,9 @@ describe('securityFeatures', () => {
       (feature) => feature.id === 'service_accounts'
     )!;
 
-    it('grants the `save` UI capability to holders of `manage_security`', () => {
+    it('is only available to holders of `manage_security`, with the `save` UI capability', () => {
       expect(serviceAccountsFeature.privileges).toEqual([
         { requiredClusterPrivileges: ['manage_security'], ui: ['save'] },
-        { requiredClusterPrivileges: ['read_security'], ui: [] },
       ]);
     });
 

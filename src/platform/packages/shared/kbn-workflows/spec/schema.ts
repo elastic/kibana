@@ -401,6 +401,28 @@ export const HitlSlack2ChannelSchema = z.object({
     ),
 });
 
+export const HitlTeamsChannelSchema = z.object({
+  'connector-id': z
+    .string()
+    .min(1)
+    .max(CONNECTOR_ID_MAX_LENGTH)
+    .describe('Microsoft Teams connector saved object id or name'),
+  'team-id': z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'Team ID, or Liquid that renders to one. Obtain this from listJoinedTeams (the "id" field on each team object).'
+    ),
+  'channel-id': z
+    .string()
+    .min(1)
+    .max(200)
+    .describe(
+      'Channel ID, or Liquid that renders to one. Obtain this from listChannels (the "id" field on each channel object).'
+    ),
+});
+
 export const HitlServiceNowChannelSchema = z.object({
   'connector-id': z
     .string()
@@ -493,6 +515,7 @@ const hitlChannelDescriptions = {
   email: 'Notify via an Email connector. Requires connector-id and at least one `to` recipient.',
   slack2:
     'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
+  teams: 'Post a message to a Microsoft Teams channel. Set connector-id, team-id, and channel-id.',
   servicenow:
     'Add a customer-visible comment to an existing ServiceNow record. Set connector-id, table, and sys-id.',
   http: 'Send the response links in an HTTP request. Set a connector-id or a url. Uses the workflow HTTP connector, including its destination controls.',
@@ -512,6 +535,9 @@ export const WaitForInputChannelsSchema = z
     slack2: HitlSlack2ChannelSchema.extend(hitlChannelMessageField)
       .optional()
       .describe(hitlChannelDescriptions.slack2),
+    teams: HitlTeamsChannelSchema.extend(hitlChannelMessageField)
+      .optional()
+      .describe(hitlChannelDescriptions.teams),
     servicenow: HitlServiceNowChannelSchema.extend(hitlChannelMessageField)
       .optional()
       .describe(hitlChannelDescriptions.servicenow),
@@ -528,6 +554,7 @@ export const WaitForApprovalChannelsSchema = z
       .describe(hitlChannelDescriptions.slack_api),
     email: HitlEmailChannelSchema.loose().optional().describe(hitlChannelDescriptions.email),
     slack2: HitlSlack2ChannelSchema.loose().optional().describe(hitlChannelDescriptions.slack2),
+    teams: HitlTeamsChannelSchema.loose().optional().describe(hitlChannelDescriptions.teams),
     servicenow: HitlServiceNowChannelSchema.loose()
       .optional()
       .describe(hitlChannelDescriptions.servicenow),
@@ -673,6 +700,7 @@ export const ElasticsearchStepSchema = BaseStepSchema.extend({
     message: 'Elasticsearch step type must start with "elasticsearch."',
   }),
   with: ElasticsearchStepInputSchema,
+  timeout: DynamicTimeoutSchema.optional(),
 });
 export type ElasticsearchStep = z.infer<typeof ElasticsearchStepSchema>;
 
@@ -734,6 +762,7 @@ export const KibanaStepSchema = BaseStepSchema.extend({
     message: 'Kibana step type must start with "kibana."',
   }),
   with: KibanaStepInputSchema,
+  timeout: DynamicTimeoutSchema.optional(),
 });
 export type KibanaStep = z.infer<typeof KibanaStepSchema>;
 
@@ -1144,6 +1173,36 @@ export type WorkflowRunAsMode = z.infer<typeof WorkflowRunAsModeSchema>;
 // Base schema shared by both workflow.execute and workflow.executeAsync
 export const WorkflowExecuteStepInputSchema = z.object({
   'workflow-id': z.string().min(1).max(1024),
+  'allowed-workflow-ids': z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(1024)
+        .regex(/^(?![\s\S]*\{[{%])[\s\S]+$/, 'Allowed workflow IDs must be literal IDs')
+    )
+    .min(1)
+    .max(100)
+    .optional()
+    .describe(
+      'Literal child workflow IDs permitted to receive the parent service account. A templated workflow-id with inherit or override requires allowed-workflow-ids or allowed-workflow-tags; checked against the saved parent definition.'
+    )
+    .meta({ doNotSuggest: true }),
+  'allowed-workflow-tags': z
+    .array(
+      z
+        .string()
+        .min(1)
+        .max(1024)
+        .regex(/^(?![\s\S]*\{[{%])[\s\S]+$/, 'Allowed workflow tags must be literal tags')
+    )
+    .min(1)
+    .max(100)
+    .optional()
+    .describe(
+      'Literal tags permitting managed children to receive the parent service account. At least one must match the saved child definition. When IDs are also supplied, both restrictions must pass.'
+    )
+    .meta({ doNotSuggest: true }),
   inputs: z.record(z.string(), z.unknown()).optional(),
   'run-as-mode': WorkflowRunAsModeSchema.optional()
     .describe(
