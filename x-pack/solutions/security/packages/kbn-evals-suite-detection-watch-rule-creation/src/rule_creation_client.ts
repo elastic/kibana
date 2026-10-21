@@ -7,7 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { z } from '@kbn/zod';
+import { z, lazySchema } from '@kbn/zod';
 import {
   ExecutionStatus,
   TerminalExecutionStatuses,
@@ -38,17 +38,19 @@ const shouldStopPolling = (status: ExecutionStatus) =>
 // `steps.draft_creation.output.structured_output.rule.query`). Parsing structured_output
 // as the rule itself strips the wrapper and yields an empty object — every evaluator
 // then sees a rule with no fields (the false-zero failure this fixed).
-const stepOutputSchema = z
-  .object({
-    structured_output: z
-      .object({
-        rule: draftRuleSchema,
-        // Why the agent built no rule; empty when it drafted one.
-        reason: z.string(),
-      })
-      .partial(),
-  })
-  .partial();
+const stepOutputSchema = lazySchema(() =>
+  z
+    .object({
+      structured_output: z
+        .object({
+          rule: draftRuleSchema,
+          // Why the agent built no rule; empty when it drafted one.
+          reason: z.string(),
+        })
+        .partial(),
+    })
+    .partial()
+);
 
 // Each step produces two entries in stepExecutions: an "enter" record (output: null)
 // and a "result" record (output: data). Find the result record for draft_creation.
