@@ -11,13 +11,7 @@ import { isMetaEvent, isReplayEvent } from '../model/replay_event_guards';
 import type { ReplayEvent } from '../types';
 import type { RrwebModule } from './load_rrweb';
 import type { ReplayerSession, ReplayerSessionFactory, ViewportSize } from './types';
-
-/**
- * Canvases that were not replayed show this pattern, so an empty chart reads as "not replayed"
- * instead of broken. It sits behind whatever the replay draws.
- */
-const CANVAS_PLACEHOLDER_RULE =
-  'canvas { background-image: repeating-linear-gradient(45deg, rgba(128, 128, 128, 0.28) 0, rgba(128, 128, 128, 0.28) 6px, transparent 6px, transparent 12px); }';
+import { CANVAS_PLACEHOLDER_RULE } from './canvas_placeholder';
 
 const isCanvasMutationEvent = (event: ReplayEvent): event is canvasEventWithTime =>
   event.type === EventType.IncrementalSnapshot &&

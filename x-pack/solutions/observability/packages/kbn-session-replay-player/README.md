@@ -58,6 +58,28 @@ readable after the player unmounts, so a host can store it when the viewer leave
 `deriveReplayMarkers(events)` builds navigation and click markers from the events themselves, for
 hosts that have no other source.
 
+## Thumbnails
+
+`SessionReplayThumbnail` draws the first frame of a recording as a still picture, for lists. The
+host fetches only the start of the recording, takes what the thumbnail needs from it, and passes it
+in:
+
+```tsx
+import { SessionReplayThumbnail, extractThumbnailSnapshot } from '@kbn/session-replay-player';
+
+const snapshot = extractThumbnailSnapshot(firstPageOfEvents); // undefined if there is nothing to draw
+
+<Suspense fallback={null}>
+  <SessionReplayThumbnail snapshot={snapshot} width={160} height={100} />
+</Suspense>
+```
+
+The page is drawn once, when the thumbnail first scrolls into view, and never updates. Until then,
+when there is no snapshot, and when drawing fails, a hatched placeholder shows. The page is drawn
+in the same kind of sandboxed frame as the player and its snapshot goes through the same URL policy,
+so scripts do not run and remote content is not fetched. Canvases show the placeholder pattern.
+`allowedRemoteOrigins` works as it does for the player.
+
 ## The recording
 
 The host decides whether a recording exists, and why not. The player does not guess.
@@ -182,7 +204,9 @@ is requested and nothing runs.
 | `src/loading/` | The paging loop and the hook around it. |
 | `src/rrweb/` | The only code that imports rrweb, behind a small interface the tests replace. |
 | `src/components/` | Stage, controls, timeline and state prompts. |
+| `src/thumbnail/` | The thumbnail component and the snapshot it is drawn from. |
 | `src/session_replay_player.tsx` | Puts them together. |
 
-rrweb is imported from one module, `src/rrweb/load_rrweb.ts`, and an ESLint rule stops any other
-package in the repository from importing it.
+rrweb is imported from `src/rrweb/load_rrweb.ts`, and rrweb-snapshot (thumbnails) from
+`src/thumbnail/rebuild_thumbnail.ts`; an ESLint rule stops any other package in the repository from
+importing either.

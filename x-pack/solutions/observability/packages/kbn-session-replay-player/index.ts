@@ -8,6 +8,7 @@
 import { lazy } from 'react';
 
 export { deriveReplayMarkers } from './src/model/derive_markers';
+export { extractThumbnailSnapshot } from './src/thumbnail/extract_thumbnail_snapshot';
 export type {
   ReplayCursor,
   ReplayEvent,
@@ -18,10 +19,12 @@ export type {
   ReplayMarkerKind,
   ReplayRecording,
   ReplayRecordingMeta,
+  ReplayThumbnailSnapshot,
   ReplayTimeUpdateReason,
   ReplayUnavailableReason,
   SessionReplayPlayerHandle,
   SessionReplayPlayerProps,
+  SessionReplayThumbnailProps,
 } from './src/types';
 
 /**
@@ -31,5 +34,15 @@ export type {
 export const SessionReplayPlayer = lazy(() =>
   import('./src/session_replay_player').then((module) => ({
     default: module.SessionReplayPlayer,
+  }))
+);
+
+/**
+ * A still picture of the first frame of a recording, for lists. Lazily loaded like the player, and
+ * drawn only once it scrolls into view.
+ */
+export const SessionReplayThumbnail = lazy(() =>
+  import('./src/thumbnail/session_replay_thumbnail').then((module) => ({
+    default: module.SessionReplayThumbnail,
   }))
 );

@@ -85,6 +85,24 @@ export interface SessionReplayPlayerProps {
   readonly 'data-test-subj'?: string;
 }
 
+/** What a thumbnail is drawn from; produced by `extractThumbnailSnapshot`. */
+export interface ReplayThumbnailSnapshot {
+  readonly viewport: { readonly width: number; readonly height: number };
+  /** The first full snapshot of the recording. */
+  readonly fullSnapshot: ReplayEvent;
+}
+
+export interface SessionReplayThumbnailProps {
+  /** Absent while the host has not loaded it, or when the recording has none; a placeholder shows. */
+  readonly snapshot?: ReplayThumbnailSnapshot;
+  readonly width?: number;
+  readonly height?: number;
+  /** Origins from which the recorded page may load images; see `SessionReplayPlayerProps`. */
+  readonly allowedRemoteOrigins?: readonly string[];
+  readonly 'aria-label'?: string;
+  readonly 'data-test-subj'?: string;
+}
+
 export interface SessionReplayPlayerHandle {
   seek: (offsetMs: number) => void;
   play: () => void;

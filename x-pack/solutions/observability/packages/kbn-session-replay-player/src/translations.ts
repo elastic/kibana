@@ -172,3 +172,10 @@ export const LARGE_BODY = i18n.translate('xpack.sessionReplayPlayer.state.large.
 export const CONTINUE_LABEL = i18n.translate('xpack.sessionReplayPlayer.state.continue', {
   defaultMessage: 'Keep loading',
 });
+
+export const THUMBNAIL_ARIA_LABEL = i18n.translate(
+  'xpack.sessionReplayPlayer.thumbnail.ariaLabel',
+  {
+    defaultMessage: 'Preview of the recorded page',
+  }
+);

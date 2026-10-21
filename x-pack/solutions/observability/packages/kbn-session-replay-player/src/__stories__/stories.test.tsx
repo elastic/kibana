@@ -7,15 +7,17 @@
 
 import React from 'react';
 import '@testing-library/jest-dom';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import { composeStories } from '@storybook/react';
 import * as stories from './session_replay_player.stories';
+import * as thumbnailStories from './thumbnail.stories';
 import {
   installIframeSandboxProperty,
   silenceJsdomScrollErrors,
 } from '../test_helpers/jsdom_rrweb';
 
 const composed = composeStories(stories);
+const composedThumbnails = composeStories(thumbnailStories);
 
 /** What each story shows once it has settled, as a test id. */
 const SETTLED: Record<string, string> = {
@@ -57,4 +59,32 @@ describe('stories', () => {
       unmount();
     }
   );
+});
+
+describe('thumbnail stories', () => {
+  it('ThumbnailStates renders a placeholder and drawn thumbnails', async () => {
+    const { ThumbnailStates } = composedThumbnails;
+
+    const { unmount } = render(<ThumbnailStates />);
+
+    await waitFor(() =>
+      expect(
+        screen
+          .getAllByRole('img', { name: 'Preview of the recorded page' })
+          .filter((thumbnail) => thumbnail.getAttribute('data-state') === 'drawn')
+      ).toHaveLength(2)
+    );
+    unmount();
+  });
+
+  it('SessionListWithThumbnails renders every row', async () => {
+    const { SessionListWithThumbnails } = composedThumbnails;
+
+    const { unmount } = render(<SessionListWithThumbnails />);
+
+    expect(
+      await screen.findAllByRole('img', { name: 'Preview of the recorded page' })
+    ).toHaveLength(25);
+    unmount();
+  });
 });
