@@ -100,6 +100,8 @@ export interface T7aConfig {
   readonly localSo: boolean;
   /** Process-child V8 old space, in MiB. Beats T7P_PROCESS_OLD_SPACE_MB when the child forks. */
   readonly processOldSpaceMb?: number;
+  /** UNSUPPORTED-API RESEARCH SHIM. Thread old-space cap in MiB. */
+  readonly threadOldSpaceMb?: number;
 }
 
 interface EdgeAgg {
@@ -214,7 +216,8 @@ export class T7aController {
       previous.concurrency !== this.config.concurrency ||
       previous.abortGraceMs !== this.config.abortGraceMs ||
       previous.localSo !== this.config.localSo ||
-      previous.processOldSpaceMb !== this.config.processOldSpaceMb;
+      previous.processOldSpaceMb !== this.config.processOldSpaceMb ||
+      previous.threadOldSpaceMb !== this.config.threadOldSpaceMb;
     if (hostChanged || this.config.mode === 'main') await this.stopHost();
     return this.config;
   }
@@ -285,6 +288,7 @@ export class T7aController {
       this.host = new ExecutionHost(this.registry, {
         transport: this.config.transport,
         processOldSpaceMb: this.config.processOldSpaceMb,
+        threadOldSpaceMb: this.config.threadOldSpaceMb,
         slotsPerClass: this.config.slots,
         concurrencyPerClass: { [WORKLOAD_CLASS]: this.config.concurrency },
         maxQueuePerClass: 1000,

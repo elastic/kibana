@@ -14,6 +14,15 @@
 > retires a slot on identity change. Restart-on-identity-switch would close this at one cold
 > start per switch, and is not implemented.
 
+## Thread old-space cap (UNSUPPORTED-API RESEARCH SHIM)
+
+`v8.setFlagsFromString('--max-old-space-size=0')` runs immediately before `new Worker`
+when the runtime mode is `offmain-thread`, and the parent `--max-old-space-size` is
+restored on that worker's `online` event. `resourceLimits.maxOldGenerationSizeMb` is
+the cap. Node documents `setFlagsFromString` after startup as unsupported. Creation is
+serialised around the window so a later worker is not born while the flag is cleared.
+Without this mode, a thread worker keeps the parent heap limit.
+
 PRIVATE research code; no public Core API, plugin lifecycle hook, or automatic enablement.
 Base harness fd3138c. Only main owns TM claims/leases/results.
 Default one async run per slot; configure concurrencyPerClass: { action: 50 } on

@@ -129,7 +129,11 @@ export const registerT7aRoutes = (
       options,
       validate: {
         body: schema.object({
-          mode: schema.oneOf([schema.literal('main'), schema.literal('offmain-process')]),
+          mode: schema.oneOf([
+            schema.literal('main'),
+            schema.literal('offmain-process'),
+            schema.literal('offmain-thread'),
+          ]),
           childCapMb: schema.maybe(schema.number({ min: CHILD_CAP_MIN, max: CHILD_CAP_MAX })),
           localSo: schema.maybe(schema.boolean()),
         }),
@@ -138,7 +142,11 @@ export const registerT7aRoutes = (
     (async (
       _ctx: unknown,
       request: {
-        body: { mode: 'main' | 'offmain-process'; childCapMb?: number; localSo?: boolean };
+        body: {
+          mode: 'main' | 'offmain-process' | 'offmain-thread';
+          childCapMb?: number;
+          localSo?: boolean;
+        };
       },
       response: {
         ok: (o: { body: unknown }) => unknown;

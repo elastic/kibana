@@ -131,6 +131,8 @@ export class ExecutionHost {
     private readonly options: {
       readonly transport?: 'thread' | 'process';
       readonly processOldSpaceMb?: number;
+      /** UNSUPPORTED-API RESEARCH SHIM. Thread old-space cap in MiB. */
+      readonly threadOldSpaceMb?: number;
       readonly slotsPerClass?: number;
       readonly concurrencyPerClass?: Readonly<Record<string, number>>;
       readonly maxQueuePerClass?: number;
@@ -279,7 +281,8 @@ export class ExecutionHost {
       try {
         endpoint = this.endpointFactory(
           this.options.transport ?? 'thread',
-          this.options.processOldSpaceMb
+          this.options.processOldSpaceMb,
+          this.options.threadOldSpaceMb
         );
       } catch (error) {
         const execution = queue.shift();

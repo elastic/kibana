@@ -85,6 +85,34 @@ void test('applying the doc uses process transport and the doc cap, not the imag
   assert.equal(seen[1].processOldSpaceMb, undefined);
 });
 
+void test('offmain-thread sets the thread cap and clears the process cap', async () => {
+  const seen: Array<Partial<T7aConfig>> = [];
+  const controller = {
+    configure: async (next: Partial<T7aConfig>) => {
+      seen.push(next);
+      return next as T7aConfig;
+    },
+  };
+  await applyRuntime(controller, {
+    generation: 3,
+    mode: 'offmain-thread',
+    childCapMb: 384,
+    localSo: true,
+    sampleRequest: 0,
+  });
+  const parsed = parseRuntimeDoc({
+    mode: 'offmain-thread',
+    generation: 3,
+    childCapMb: 384,
+    sampleRequest: 0,
+  });
+  assert.equal(parsed?.mode, 'offmain-thread');
+  assert.equal(seen[0].transport, 'thread');
+  assert.equal(seen[0].mode, 'offmain');
+  assert.equal(seen[0].threadOldSpaceMb, 384);
+  assert.equal(seen[0].processOldSpaceMb, undefined);
+});
+
 void test('an explicit child cap beats the parent env and roles select the background process', () => {
   assert.equal(resolveChildOldSpaceMb(512, '384'), '512');
   assert.equal(resolveChildOldSpaceMb(undefined, '384'), '384');

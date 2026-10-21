@@ -19,16 +19,18 @@ export const RUNTIME_ID = 'island';
 export const CHILD_CAP_MIN = 128;
 export const CHILD_CAP_MAX = 2048;
 
+export type RuntimeMode = 'main' | 'offmain-process' | 'offmain-thread';
+
 export interface RuntimeDoc {
   readonly generation: number;
-  readonly mode: 'main' | 'offmain-process';
+  readonly mode: RuntimeMode;
   readonly childCapMb: number;
   readonly localSo: boolean;
   readonly sampleRequest: number;
 }
 
 export interface RuntimeInput {
-  readonly mode: 'main' | 'offmain-process';
+  readonly mode: RuntimeMode;
   readonly childCapMb?: number;
   readonly localSo?: boolean;
 }
@@ -46,7 +48,9 @@ const isCount = (value: unknown): value is number =>
 export const parseRuntimeDoc = (source: unknown): RuntimeDoc | null => {
   if (!source || typeof source !== 'object') return null;
   const doc = source as Record<string, unknown>;
-  if (doc.mode !== 'main' && doc.mode !== 'offmain-process') return null;
+  if (doc.mode !== 'main' && doc.mode !== 'offmain-process' && doc.mode !== 'offmain-thread') {
+    return null;
+  }
   if (!isCount(doc.generation) || !isCap(doc.childCapMb) || !isCount(doc.sampleRequest))
     return null;
   return {
@@ -80,13 +84,30 @@ export const bumpSampleRequest = (previous: RuntimeDoc | null): RuntimeDoc => ({
   sampleRequest: (previous?.sampleRequest ?? 0) + 1,
 });
 
-/** Applies a doc on the process that owns the island. Main stays on the thread. */
+/** Applies a doc on the process that owns the island. Main clears both caps. */
 export const applyRuntime = async (
   controller: { configure: (next: Partial<T7aConfig>) => Promise<T7aConfig> },
   doc: RuntimeDoc
 ): Promise<void> => {
   if (doc.mode === 'main') {
-    await controller.configure({ mode: 'main', transport: 'thread' });
+    await controller.configure({
+      mode: 'main',
+      transport: 'thread',
+      processOldSpaceMb: undefined,
+      threadOldSpaceMb: undefined,
+    });
+    return;
+  }
+  if (doc.mode === 'offmain-thread') {
+    await controller.configure({
+      mode: 'offmain',
+      transport: 'thread',
+      slots: 1,
+      concurrency: 1,
+      localSo: doc.localSo,
+      processOldSpaceMb: undefined,
+      threadOldSpaceMb: doc.childCapMb,
+    });
     return;
   }
   await controller.configure({
@@ -96,6 +117,7 @@ export const applyRuntime = async (
     concurrency: 1,
     localSo: doc.localSo,
     processOldSpaceMb: doc.childCapMb,
+    threadOldSpaceMb: undefined,
   });
 };
 
@@ -245,6 +267,7 @@ export const startResearchRuntime = (options: {
           mode: config?.mode ?? null,
           transport: config?.transport ?? null,
           process_old_space_mb: config?.processOldSpaceMb ?? null,
+          thread_old_space_mb: config?.threadOldSpaceMb ?? null,
           parent_old_space_mb: parentOldSpaceMb(process.env.NODE_OPTIONS),
           pointer_compression: memory.pointerCompression,
           jemalloc:

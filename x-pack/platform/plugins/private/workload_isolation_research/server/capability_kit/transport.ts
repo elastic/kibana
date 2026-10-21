@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Worker } from 'worker_threads';
 import { fork } from 'child_process';
+import { setFlagsFromString } from 'v8';
+import { Worker } from 'worker_threads';
 import type { Packet } from './protocol';
 
 export interface Endpoint {
@@ -45,13 +46,107 @@ const processForkOptions = (cap?: number): { execArgv?: string[]; env?: NodeJS.P
   };
 };
 
+const parentOldSpaceFlag = (): number | null => {
+  const source = `${process.env.NODE_OPTIONS ?? ''} ${process.execArgv.join(' ')}`;
+  const match = source.match(/--max-old-space-size(?:=|\s+)(\d+)/);
+  if (!match) return null;
+  const value = Number(match[1]);
+  return Number.isInteger(value) ? value : null;
+};
+
+const isThreadCap = (value: number | undefined): value is number =>
+  value != null && Number.isInteger(value) && value >= 128 && value <= 2048;
+
+let threadWindowOpen = false;
+const threadWindowQueue: Array<() => void> = [];
+
+const releaseThreadWindow = (): void => {
+  threadWindowOpen = false;
+  const next = threadWindowQueue.shift();
+  if (next) next();
+};
+
+/**
+ * UNSUPPORTED-API RESEARCH SHIM.
+ * Clears the parent old-space flag only for this Worker constructor, then restores it
+ * on online. Callers that overlap are queued so the flag is never cleared twice.
+ */
+export const startCappedThread = (filename: string, capMb: number): Worker => {
+  if (threadWindowOpen) {
+    throw new Error('thread old-space window is already open');
+  }
+  threadWindowOpen = true;
+  const saved = parentOldSpaceFlag();
+  let worker: Worker;
+  try {
+    setFlagsFromString('--max-old-space-size=0');
+    worker = new Worker(filename, {
+      resourceLimits: { maxOldGenerationSizeMb: capMb },
+    });
+  } catch (error) {
+    if (saved != null) setFlagsFromString(`--max-old-space-size=${saved}`);
+    releaseThreadWindow();
+    throw error;
+  }
+  let closed = false;
+  const close = () => {
+    if (closed) return;
+    closed = true;
+    if (saved != null) setFlagsFromString(`--max-old-space-size=${saved}`);
+    releaseThreadWindow();
+  };
+  worker.once('online', close);
+  worker.once('exit', close);
+  worker.once('error', close);
+  return worker;
+};
+
+const startCappedThreadEndpoint = (filename: string, capMb: number): Endpoint => {
+  let worker: Worker | undefined;
+  const messageHandlers: Array<(packet: Packet) => void> = [];
+  const exitHandlers: Array<() => void> = [];
+  const queuedPackets: Packet[] = [];
+  const bind = (created: Worker) => {
+    worker = created;
+    created.on('error', () => undefined);
+    for (const handler of messageHandlers) created.on('message', handler);
+    for (const handler of exitHandlers) created.once('exit', handler);
+    for (const packet of queuedPackets.splice(0)) created.postMessage(packet);
+  };
+  const open = () => bind(startCappedThread(filename, capMb));
+  if (threadWindowOpen) threadWindowQueue.push(open);
+  else open();
+  return {
+    send: (packet) => {
+      if (!worker) {
+        queuedPackets.push(packet);
+        return;
+      }
+      worker.postMessage(packet);
+    },
+    onMessage: (handler) => {
+      messageHandlers.push(handler);
+      worker?.on('message', handler);
+    },
+    onExit: (handler) => {
+      exitHandlers.push(handler);
+      worker?.once('exit', handler);
+    },
+    stop: async () => {
+      await worker?.terminate();
+    },
+  };
+};
+
 /** Adapts thread ports and advanced-serialization child IPC to the same protocol. */
 export const startEndpoint = (
   transport: 'thread' | 'process',
-  processOldSpaceMb?: number
+  processOldSpaceMb?: number,
+  threadOldSpaceMb?: number
 ): Endpoint => {
   const entry = require.resolve('./worker_bootstrap');
   if (transport === 'thread') {
+    if (isThreadCap(threadOldSpaceMb)) return startCappedThreadEndpoint(entry, threadOldSpaceMb);
     const worker = new Worker(entry);
     worker.on('error', () => undefined);
     return {
