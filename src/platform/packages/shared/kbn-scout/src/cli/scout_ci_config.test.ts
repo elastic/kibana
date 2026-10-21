@@ -25,7 +25,7 @@ describe('scout_ci_config helpers', () => {
         { kind: 'packages', name: 'kbn-streamlang-tests' },
       ],
       ['x-pack\\platform\\plugins\\shared\\maps', { kind: 'plugins', name: 'maps' }],
-      ['src/core/test/scout', { kind: 'packages', name: 'core' }],
+      ['src/core/packages/core/test/scout', { kind: 'packages', name: 'core' }],
       ['src/dev/build', { kind: 'packages', name: 'dev' }],
       ['src/dev/build/test/scout_fips', { kind: 'packages', name: 'dev' }],
     ])('derives module from path: %s', (path, expected) => {

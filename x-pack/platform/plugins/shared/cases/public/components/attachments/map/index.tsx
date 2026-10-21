@@ -75,6 +75,7 @@ export const getMapAttachmentType = () =>
       }),
     }),
     getAttachmentList: () => ({ children: MapAttachmentsTab }),
+    getCountLabel: ({ count }) => i18n.MAPS_COUNT(count),
     schema: MapAttachmentPayloadSchema,
     // Exclude pesistable data from the workflow schema
     workflowSchema: MapAttachmentPayloadSchema.omit({ data: true }),
