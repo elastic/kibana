@@ -158,7 +158,7 @@ export const User: FC<UserProps> = memo(function User({
     entityType: 'user',
     skip: !entityStoreV2Enabled || isInitializing,
   });
-  const { aliasRecords } = entityFromStoreResult;
+  const { aliasRecords, aliasCount } = entityFromStoreResult;
   const isGroupView = isEntityGroupView(aliasRecords);
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -351,6 +351,7 @@ export const User: FC<UserProps> = memo(function User({
             value: userName,
             entityId: entityStoreEntityId,
             mode,
+            scopeId,
             onOpenEntity: onOpenUser,
             title: userName,
             origin: FLYOUT_ORIGIN.ANOMALIES_SECTION,
@@ -399,6 +400,7 @@ export const User: FC<UserProps> = memo(function User({
             entityType: 'user',
             entityName: userName,
             scopeId,
+            mode,
             onShowEntity: onOpenUser,
             onShowRelatedEntity: onShowRelatedEntityFromResolution,
             title: userName,
@@ -462,6 +464,7 @@ export const User: FC<UserProps> = memo(function User({
           lastSeen={observedUser.lastSeen}
           entityId={panelDisplayEntityId}
           aliasRecords={aliasRecords}
+          aliasCount={aliasCount}
           mode={mode}
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedUser.entityRecord}
@@ -498,6 +501,7 @@ export const User: FC<UserProps> = memo(function User({
             entityRecord={entityStoreV2Enabled ? observedUser.entityRecord ?? undefined : undefined}
             aliasRecords={aliasRecords}
             noEntityInStore={noEntityInStore}
+            isEntityRecordLoading={entityStoreV2Enabled && entityFromStoreResult.isLoading}
             entityStoreV2Enabled={entityStoreV2Enabled}
             entityStoreEntityId={entityStoreEntityId}
             mode={mode}

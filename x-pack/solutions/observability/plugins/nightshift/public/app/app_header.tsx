@@ -33,6 +33,10 @@ export const SOURCES_PAGE_TITLE = i18n.translate('xpack.nightshift.sourcesPage.t
   defaultMessage: 'Sources',
 });
 
+export const DETECTION_PAGE_TITLE = i18n.translate('xpack.nightshift.detectionPage.title', {
+  defaultMessage: 'Detections',
+});
+
 const sourcesLabel = i18n.translate('xpack.nightshift.sourcesLinkLabel', {
   defaultMessage: 'Sources',
 });
@@ -51,6 +55,15 @@ const managementLabel = i18n.translate('xpack.nightshift.managementLinkLabel', {
 
 const sandboxSecretsLabel = i18n.translate('xpack.nightshift.sandboxSecretsLinkLabel', {
   defaultMessage: 'Sandbox secrets',
+});
+
+const investigateLabel = i18n.translate('xpack.nightshift.header.investigateButtonText', {
+  defaultMessage: 'Investigate',
+});
+
+const startInvestigationEbtProps = getEbtProps({
+  action: NIGHTSHIFT_EBT_ACTIONS.OPEN_START_INVESTIGATION,
+  element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
 });
 
 const settingsEbtProps = getEbtProps({
@@ -89,9 +102,9 @@ const applyEbtProps = (
 };
 
 export interface NightshiftAppHeaderProps {
-  page?: 'landing' | 'automations' | 'knowledge' | 'settings' | 'sources';
-  onManagementClick: () => void | Promise<void>;
-  managementHref: string;
+  page?: 'landing' | 'automations' | 'detection' | 'knowledge' | 'settings' | 'sources';
+  onManagementClick?: () => void | Promise<void>;
+  managementHref?: string;
   onSourcesClick?: () => void | Promise<void>;
   sourcesHref?: string;
   onKnowledgeClick?: () => void | Promise<void>;
@@ -102,6 +115,8 @@ export interface NightshiftAppHeaderProps {
   onSandboxSecretsClick?: () => void;
   onAutomationsClick?: () => void | Promise<void>;
   automationsHref?: string;
+  /** Renders "Investigate" (opens the start investigation panel) as the primary action when set. */
+  onStartInvestigationClick?: () => void;
   tabs?: AppHeaderTab[];
   back?: AppHeaderBack;
 }
@@ -119,15 +134,29 @@ export function NightshiftAppHeader({
   onSandboxSecretsClick,
   onAutomationsClick,
   automationsHref,
+  onStartInvestigationClick,
   tabs,
   back,
 }: NightshiftAppHeaderProps): React.ReactElement {
   const isAutomationsPage = page === 'automations';
+  const isDetectionPage = page === 'detection';
   const isKnowledgePage = page === 'knowledge';
   const isSourcesPage = page === 'sources';
   const isSettingsPage = page === 'settings';
   const menu = useMemo<AppMenuConfig>(
     () => ({
+      ...(onStartInvestigationClick && {
+        primaryActionItem: {
+          id: 'nightshiftStartInvestigation',
+          label: investigateLabel,
+          iconType: 'inspect',
+          testId: 'o11yNightshiftAppStartInvestigationButton',
+          run: (params?: AppMenuRunActionParams) => {
+            applyEbtProps(startInvestigationEbtProps, params);
+            onStartInvestigationClick();
+          },
+        },
+      }),
       items: [
         ...(onAutomationsClick && automationsHref && !isAutomationsPage
           ? [
@@ -138,6 +167,8 @@ export function NightshiftAppHeader({
                 href: automationsHref,
                 run: () => void onAutomationsClick(),
                 testId: 'nightshiftAutomationsPrimaryAction',
+                // The menu shows two buttons; Detections keeps them for Sources and Settings.
+                overflow: isDetectionPage,
               },
             ]
           : []),
@@ -153,18 +184,22 @@ export function NightshiftAppHeader({
               },
             ]
           : []),
-        {
-          id: 'nightshiftManagement',
-          label: managementLabel,
-          iconType: 'managementApp',
-          href: managementHref,
-          run: (params) => {
-            applyEbtProps(managementEbtProps, params);
-            void onManagementClick();
-          },
-          testId: 'nightshiftManagementLink',
-          overflow: true,
-        },
+        ...(onManagementClick && managementHref && !isDetectionPage
+          ? [
+              {
+                id: 'nightshiftManagement',
+                label: managementLabel,
+                iconType: 'managementApp' as const,
+                href: managementHref,
+                run: (params?: AppMenuRunActionParams) => {
+                  applyEbtProps(managementEbtProps, params);
+                  void onManagementClick();
+                },
+                testId: 'nightshiftManagementLink',
+                overflow: true,
+              },
+            ]
+          : []),
         ...(onSourcesClick && sourcesHref && !isSourcesPage
           ? [
               {
@@ -177,7 +212,7 @@ export function NightshiftAppHeader({
                   void onSourcesClick();
                 },
                 testId: 'nightshiftSourcesLink',
-                overflow: true,
+                overflow: !isDetectionPage,
               },
             ]
           : []),
@@ -209,7 +244,7 @@ export function NightshiftAppHeader({
                   void onSettingsClick();
                 },
                 testId: 'nightshiftSettingsLink',
-                overflow: !isAutomationsPage,
+                overflow: !isAutomationsPage && !isDetectionPage,
               },
             ]
           : []),
@@ -218,6 +253,7 @@ export function NightshiftAppHeader({
     [
       automationsHref,
       isAutomationsPage,
+      isDetectionPage,
       isKnowledgePage,
       isSourcesPage,
       isSettingsPage,
@@ -229,6 +265,7 @@ export function NightshiftAppHeader({
       onSandboxSecretsClick,
       onSourcesClick,
       onSettingsClick,
+      onStartInvestigationClick,
       settingsHref,
       sourcesHref,
     ]
@@ -239,6 +276,8 @@ export function NightshiftAppHeader({
       title={
         isAutomationsPage
           ? automationsLabel
+          : isDetectionPage
+          ? DETECTION_PAGE_TITLE
           : isKnowledgePage
           ? KNOWLEDGE_PAGE_TITLE
           : isSettingsPage
