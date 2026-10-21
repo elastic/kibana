@@ -10,7 +10,11 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ApiConfig, AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
-import { resolveAttackDiscoveryTemplateCompletion } from '@kbn/discoveries';
+import {
+  attackDiscoveryTemplateOmissionMessage,
+  capAttackDiscoveryTemplateCount,
+  resolveAttackDiscoveryTemplateCompletion,
+} from '@kbn/discoveries';
 import type { InferenceClient, InferenceConnectorType } from '@kbn/inference-common';
 import { ActionsClientLlm, InferenceClientLlm } from '@kbn/langchain/server';
 import type { BaseLLM } from '@langchain/core/language_models/llms';
@@ -137,7 +141,22 @@ export const invokeAttackDiscoveryGraph = async ({
   const completeWithTemplate = await resolveAttackDiscoveryTemplateCompletion({
     inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
     connectorId: apiConfig.connectorId,
+    logger,
+    timeout: connectorTimeout,
   });
+
+  // This route has no pre-supplied alerts. The graph retrieves `size` alerts and
+  // later reports that same count, so cap it before retrieval.
+  let sizeForGraph = size;
+  if (completeWithTemplate) {
+    const requestedSize = sizeForGraph;
+    sizeForGraph = capAttackDiscoveryTemplateCount(sizeForGraph) ?? sizeForGraph;
+    if (sizeForGraph < requestedSize) {
+      logger.warn(
+        attackDiscoveryTemplateOmissionMessage(requestedSize - sizeForGraph, requestedSize)
+      );
+    }
+  }
 
   const graph = getDefaultAttackDiscoveryGraph({
     alertsIndexPattern,
@@ -150,7 +169,7 @@ export const invokeAttackDiscoveryGraph = async ({
     onNewReplacements,
     prompts: attackDiscoveryPrompts,
     replacements: latestReplacements,
-    size,
+    size: sizeForGraph,
     start,
     ...(completeWithTemplate ? { completeWithTemplate } : {}),
   });

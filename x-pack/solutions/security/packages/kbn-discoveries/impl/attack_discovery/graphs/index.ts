@@ -36,6 +36,8 @@ export {
   ATTACK_DISCOVERY_TEMPLATE_ID,
   ATTACK_DISCOVERY_TEMPLATE_VERSION,
   attackDiscoveryRefineTemplateRequest,
+  attackDiscoveryTemplateOmissionMessage,
+  capAttackDiscoveryTemplateCount,
   createAttackDiscoveryTemplateCompletion,
   resolveAttackDiscoveryTemplateCompletion,
 } from './template_completion';
