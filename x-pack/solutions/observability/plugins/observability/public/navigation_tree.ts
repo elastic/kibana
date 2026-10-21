@@ -489,6 +489,18 @@ function createNavTree({
         icon: 'database',
         children: [
           {
+            children: [
+              {
+                link: 'management:data_management_overview',
+                title: i18n.translate('xpack.observability.obltNav.dataManagement.overview', {
+                  defaultMessage: 'Overview',
+                }),
+              },
+            ],
+            id: 'data_management_overview',
+            title: '',
+          },
+          {
             id: 'ingest_and_integrations',
             title: i18n.translate('xpack.observability.obltNav.ingestAndIntegrations', {
               defaultMessage: 'Ingest and integrations',

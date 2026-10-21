@@ -35,6 +35,7 @@
       "cps",
       "spaces",
       "indexLifecycleManagement",
+      "management",
       "evals"
     ],
     "requiredBundles": [

@@ -48,6 +48,7 @@ import { DataStreamFlyout } from './application/sections/home/data_stream_list/d
 import { IndexTemplateFlyout } from './application/sections/home/template_list/template_details/index_template_flyout_embeddable';
 import { indexDataEnricher, type IndexDataEnricher } from './services';
 import { indexStatsEnricher } from './index_stats_enricher';
+import { CreateIndexOverviewModal } from './application/sections/home/index_list/create_index/create_index_overview_modal';
 
 export class IndexMgmtUIPlugin
   implements
@@ -60,6 +61,8 @@ export class IndexMgmtUIPlugin
 {
   private extensionsService = new ExtensionsService();
   private apiService?: PublicApiService;
+  private coreStart?: CoreStart;
+  private startPlugins?: StartDependencies;
   private locator?: IndexManagementLocator;
   private kibanaVersion: SemVer;
   private config: {
@@ -179,6 +182,18 @@ export class IndexMgmtUIPlugin
 
     this.apiService = new PublicApiService(coreSetup.http);
 
+    management.registerDataManagementCreateOverlay('index', ({ onClose }) => {
+      if (!this.coreStart || !this.startPlugins) {
+        return null;
+      }
+      const { core, dependencies } = this.buildComponentDependencies(
+        this.coreStart,
+        this.startPlugins,
+        { history: createOverlayHistory() }
+      );
+      return React.createElement(CreateIndexOverviewModal, { onClose, core, dependencies });
+    });
+
     // disabled in serverless
     if (this.config.enableIndexStats) {
       this.indexDataEnricher.add(indexStatsEnricher);
@@ -277,6 +292,8 @@ export class IndexMgmtUIPlugin
   }
 
   public start(coreStart: CoreStart, plugins: StartDependencies): IndexManagementPluginStart {
+    this.coreStart = coreStart;
+    this.startPlugins = plugins;
     const { licensing } = plugins;
 
     this.capabilities$.next(coreStart.application.capabilities);
@@ -333,3 +350,23 @@ export class IndexMgmtUIPlugin
     this.licensingSubscription?.unsubscribe();
   }
 }
+
+// The create-index modal requires a history object and never reads it when opened from the overview.
+const createOverlayHistory = (): ScopedHistory => {
+  const history = {
+    action: 'POP' as const,
+    block: () => () => {},
+    createHref: () => '/',
+    createSubHistory: () => history,
+    go: () => {},
+    goBack: () => {},
+    goForward: () => {},
+    length: 1,
+    listen: () => () => {},
+    location: { hash: '', key: 'overview', pathname: '/', search: '', state: undefined },
+    push: () => {},
+    replace: () => {},
+  };
+
+  return history as ScopedHistory;
+};

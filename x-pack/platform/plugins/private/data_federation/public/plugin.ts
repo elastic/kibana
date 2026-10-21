@@ -71,6 +71,7 @@ export class DataFederationPlugin
       workloadIdentityIssuerUrl: this.workloadIdentityIssuerUrl,
       awsCloudFormationTemplateUrl: this.awsCloudFormationTemplateUrl,
     });
+
     this.registeredApp = management.sections.section.data.registerApp({
       id: PLUGIN_ID,
       title: PLUGIN_NAME,

@@ -279,6 +279,11 @@ export const i18nStrings = {
     title: i18n.translate('securitySolutionPackages.navLinks.dataManagement', {
       defaultMessage: 'Data management',
     }),
+    overview: {
+      title: i18n.translate('securitySolutionPackages.navLinks.ingestAndManageData.overview', {
+        defaultMessage: 'Overview',
+      }),
+    },
     ingestAndIntegrations: {
       title: i18n.translate(
         'securitySolutionPackages.navLinks.ingestAndManageData.ingestAndIntegrations',

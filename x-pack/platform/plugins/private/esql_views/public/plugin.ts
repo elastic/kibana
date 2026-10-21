@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import React from 'react';
 import type { CoreSetup, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementSetup } from '@kbn/management-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { MANAGEMENT_APP_ID, PLUGIN_NAME } from '../common';
+import { EsqlViewCreateOverlay } from './esql_view_create_overlay';
 import type { EsqlViewsTelemetryClient } from './telemetry';
 
 interface SetupDependencies {
@@ -34,6 +36,15 @@ export class EsqlViewsPlugin implements Plugin<void, void, SetupDependencies, St
           return telemetry.start();
         })
         .catch(() => undefined));
+
+    const getStartServices = () => core.getStartServices();
+    management.registerDataManagementCreateOverlay('esqlView', ({ onClose }) =>
+      React.createElement(EsqlViewCreateOverlay, {
+        getStartServices,
+        getTelemetryClient,
+        onClose,
+      })
+    );
 
     management.sections.section.data.registerApp({
       id: MANAGEMENT_APP_ID,

@@ -41,6 +41,7 @@ const createSetupContract = (): ManagementSetup => ({
     })),
   },
   registerAutoOpsStatusHook: jest.fn(),
+  registerDataManagementCreateOverlay: jest.fn(),
 });
 
 const createStartContract = (): ManagementStart => ({

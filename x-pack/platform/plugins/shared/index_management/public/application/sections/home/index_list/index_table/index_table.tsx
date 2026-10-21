@@ -879,7 +879,13 @@ export class IndexTable extends Component<IndexTableProps, IndexTableState> {
                   </>
                 )}
                 <EuiFlexItem grow={false}>
-                  <CreateIndexButton loadIndices={loadIndices} share={share} />
+                  <CreateIndexButton
+                    defaultOpen={new URLSearchParams(location.search).get('createIndex') === 'true'}
+                    history={history}
+                    loadIndices={loadIndices}
+                    location={location}
+                    share={share}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
 

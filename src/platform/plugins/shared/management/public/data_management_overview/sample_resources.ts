@@ -35,31 +35,22 @@ export type DataManagementResource = ContentListItem<{
   type: (typeof resourceTypeLabels)[ResourceKind];
 }>;
 
-const resource = (name: string, kind: ResourceKind): DataManagementResource => ({
-  id: name,
+export const RESOURCE_TYPES = (Object.keys(resourceTypeLabels) as ResourceKind[]).map((kind) => ({
+  kind,
+  label: resourceTypeLabels[kind],
+}));
+
+/** Maps a type label or kind id from the search bar back to a resource kind. */
+export const resolveResourceKind = (value: string): ResourceKind | undefined => {
+  const normalized = value.trim().toLowerCase();
+  return RESOURCE_TYPES.find(
+    (type) => type.kind.toLowerCase() === normalized || type.label.toLowerCase() === normalized
+  )?.kind;
+};
+
+export const toResource = (name: string, kind: ResourceKind): DataManagementResource => ({
+  id: `${kind}:${name}`,
   title: name,
   kind,
   type: resourceTypeLabels[kind],
 });
-
-/** Prototype stand-ins until the overview reads real cluster resources. */
-export const MOCK_RESOURCES: DataManagementResource[] = [
-  resource('logs-nginx.access-default', 'index'),
-  resource('metrics-system.cpu-default', 'index'),
-  resource('.kibana_analytics', 'index'),
-  resource('traces-apm.sampled-default', 'index'),
-  resource('logs-apache.access-default', 'dataStream'),
-  resource('metrics-kubernetes.pod-default', 'dataStream'),
-  resource('traces-apm-default', 'dataStream'),
-  resource('service-latency', 'esqlView'),
-  resource('error-rate-by-host', 'esqlView'),
-  resource('checkout-funnel', 'esqlView'),
-  resource('billing-events', 'dataset'),
-  resource('cloudtrail-us-east', 'dataset'),
-  resource('github-audit', 'dataset'),
-  resource('logs', 'stream'),
-  resource('logs.nginx', 'stream'),
-  resource('metrics', 'stream'),
-  resource('metrics.system', 'stream'),
-  resource('traces.apm', 'stream'),
-];

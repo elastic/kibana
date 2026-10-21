@@ -12,7 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';
 import { isEmpty } from 'lodash';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { useHistory, useLocation } from 'react-router-dom';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
@@ -132,9 +133,22 @@ export function StreamListView() {
     }
   }, [streamsListFetch.loading, streamsListFetch.value, onPageReady]);
 
+  const location = useLocation();
+  const history = useHistory();
+  const openClassicCreate = new URLSearchParams(location.search).get('create') === 'classic';
   const [isSettingsFlyoutOpen, setIsSettingsFlyoutOpen] = React.useState(false);
   const [isClassicStreamCreationFlyoutOpen, setIsClassicStreamCreationFlyoutOpen] =
-    React.useState(false);
+    React.useState(openClassicCreate);
+  const closeClassicStreamCreationFlyout = useCallback(() => {
+    setIsClassicStreamCreationFlyoutOpen(false);
+    const params = new URLSearchParams(location.search);
+    if (params.get('create') !== 'classic') {
+      return;
+    }
+    params.delete('create');
+    const search = params.toString();
+    history.replace({ ...location, search: search ? `?${search}` : '' });
+  }, [history, location]);
   const [isQueryStreamCreationFlyoutOpen, setIsQueryStreamCreationFlyoutOpen] =
     React.useState(false);
 
@@ -271,7 +285,7 @@ export function StreamListView() {
         />
       )}
       {isClassicStreamCreationFlyoutOpen && (
-        <ClassicStreamCreationFlyout onClose={() => setIsClassicStreamCreationFlyoutOpen(false)} />
+        <ClassicStreamCreationFlyout onClose={closeClassicStreamCreationFlyout} />
       )}
       {isQueryStreamCreationFlyoutOpen && (
         <CreateQueryStreamFlyoutContent

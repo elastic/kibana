@@ -40,6 +40,7 @@ import {
   getSectionsServiceStartPrivate,
 } from './management_sections_service';
 import type { ManagementSection } from './utils';
+import { registerDataManagementCreateOverlay } from './data_management_create_overlays';
 
 const defaultAutoOpsStatusResult: AutoOpsStatusResult = {
   isCloudConnectAutoopsEnabled: false,
@@ -208,9 +209,8 @@ export class ManagementPlugin
       title: kbnI18n.translate('management.dataManagementOverview.title', {
         defaultMessage: 'Overview',
       }),
-      order: 0,
-      // Prototype page: solution nav only. Stay out of the classic management sidebar and global search.
-      hideFromSidebar: true,
+      order: -1,
+      // Stay out of global search. Solution navs link it explicitly; classic nav shows it in the Data sidebar.
       hideFromGlobalSearch: true,
       visibleIn: ['projectSideNav'],
       async mount(params) {
@@ -227,6 +227,7 @@ export class ManagementPlugin
       sections,
       locator,
       registerAutoOpsStatusHook: this.registerAutoOpsStatusHook,
+      registerDataManagementCreateOverlay,
     };
   }
 

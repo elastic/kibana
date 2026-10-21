@@ -8,7 +8,7 @@
  */
 
 import type { ApplicationStart } from '@kbn/core/public';
-import type { DataManagementResource } from './mock_resources';
+import type { DataManagementResource } from './sample_resources';
 
 type GetUrlForApp = ApplicationStart['getUrlForApp'];
 

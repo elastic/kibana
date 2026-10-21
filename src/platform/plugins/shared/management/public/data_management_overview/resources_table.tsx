@@ -7,19 +7,28 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { ApplicationStart } from '@kbn/core/public';
+import type { ApplicationStart, HttpStart } from '@kbn/core/public';
 import {
   ContentList,
   ContentListFooter,
   ContentListProvider,
   ContentListTable,
+  ContentListToolbar,
   type ContentListItem,
   type DataSourceConfig,
+  type FindItemsParams,
 } from '@kbn/content-list';
 import { getResourcePreviewHref } from './get_resource_preview_href';
-import { MOCK_RESOURCES, type DataManagementResource } from './mock_resources';
+import { loadDataManagementResources } from './load_resources';
+import { resolveResourceKind, type DataManagementResource } from './sample_resources';
+import {
+  LoadedResourcesContext,
+  TYPE_FILTER_FIELD,
+  TypeFilter,
+  typeFieldDefinition,
+} from './type_filter';
 
 const { Column } = ContentListTable;
 
@@ -42,6 +51,9 @@ const labels = {
   entityPlural: i18n.translate('management.dataManagementOverview.entityPlural', {
     defaultMessage: 'resources',
   }),
+  searchPlaceholder: i18n.translate('management.dataManagementOverview.searchPlaceholder', {
+    defaultMessage: 'Search',
+  }),
 };
 
 const features = {
@@ -54,8 +66,34 @@ const features = {
   },
   pagination: { initialPageSize: 25 },
   selection: false as const,
-  search: false,
+  search: true,
+  fields: [typeFieldDefinition],
   urlSync: false,
+};
+
+const matchesSearch = (title: string, searchQuery: string): boolean => {
+  const terms = searchQuery.trim().toLowerCase().split(/\s+/).filter(Boolean);
+  if (terms.length === 0) {
+    return true;
+  }
+  const name = title.toLowerCase();
+  return terms.every((term) => name.includes(term));
+};
+
+const readTypeFilter = (
+  filters: FindItemsParams['filters']
+): { include: string[]; exclude: string[] } => {
+  const value = filters[TYPE_FILTER_FIELD];
+  if (value == null || typeof value !== 'object' || !('include' in value || 'exclude' in value)) {
+    return { include: [], exclude: [] };
+  }
+
+  const include = 'include' in value && Array.isArray(value.include) ? value.include : [];
+  const exclude = 'exclude' in value && Array.isArray(value.exclude) ? value.exclude : [];
+  return {
+    include: include.map((entry) => resolveResourceKind(entry) ?? entry),
+    exclude: exclude.map((entry) => resolveResourceKind(entry) ?? entry),
+  };
 };
 
 const isResource = (item: ContentListItem): item is DataManagementResource =>
@@ -67,18 +105,45 @@ const isResource = (item: ContentListItem): item is DataManagementResource =>
 
 export const ResourcesTable = ({
   getUrlForApp,
+  http,
 }: {
   getUrlForApp: ApplicationStart['getUrlForApp'];
+  http: HttpStart;
 }) => {
+  const resourcesPromise = useMemo(() => loadDataManagementResources(http), [http]);
+  const [resources, setResources] = useState<readonly DataManagementResource[]>([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    resourcesPromise.then((loaded) => {
+      if (!cancelled) {
+        setResources(loaded);
+      }
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [resourcesPromise]);
+
   const dataSource = useMemo<DataSourceConfig>(
     () => ({
       debounceMs: 0,
-      findItems: async ({ sort, page }) => {
+      findItems: async ({ searchQuery, filters, sort, page }) => {
+        const loaded = await resourcesPromise;
+        const { include, exclude } = readTypeFilter(filters);
         const direction = sort?.direction === 'desc' ? -1 : 1;
         const field = sort?.field === 'type' ? 'type' : 'title';
-        const sorted = [...MOCK_RESOURCES].sort(
-          (left, right) => left[field].localeCompare(right[field]) * direction
-        );
+        const sorted = loaded
+          .filter((resource) => {
+            if (!matchesSearch(resource.title, searchQuery)) {
+              return false;
+            }
+            if (include.length > 0 && !include.includes(resource.kind)) {
+              return false;
+            }
+            return !exclude.includes(resource.kind);
+          })
+          .sort((left, right) => left[field].localeCompare(right[field]) * direction);
         const start = page.index * page.size;
 
         return {
@@ -87,7 +152,7 @@ export const ResourcesTable = ({
         };
       },
     }),
-    []
+    [resourcesPromise]
   );
   const itemConfig = useMemo(
     () => ({
@@ -98,27 +163,34 @@ export const ResourcesTable = ({
   );
 
   return (
-    <ContentListProvider
-      id="data-management-overview"
-      dataSource={dataSource}
-      features={features}
-      item={itemConfig}
-      labels={labels}
-    >
-      <ContentList data-test-subj="dataManagementOverviewTable">
-        <ContentListTable title={tableTitle}>
-          <Column.Name columnTitle={nameColumnTitle} showDescription={false} />
-          <Column
-            data-test-subj="dataManagementOverviewTypeColumn"
-            id="type"
-            name={typeColumnTitle}
-            render={(item) => (isResource(item) ? item.type : undefined)}
-            sortable
-            width="16em"
-          />
-        </ContentListTable>
-        <ContentListFooter />
-      </ContentList>
-    </ContentListProvider>
+    <LoadedResourcesContext.Provider value={resources}>
+      <ContentListProvider
+        id="data-management-overview"
+        dataSource={dataSource}
+        features={features}
+        item={itemConfig}
+        labels={labels}
+      >
+        <ContentList data-test-subj="dataManagementOverviewTable">
+          <ContentListToolbar data-test-subj="dataManagementOverviewSearch">
+            <ContentListToolbar.Filters>
+              <TypeFilter />
+            </ContentListToolbar.Filters>
+          </ContentListToolbar>
+          <ContentListTable title={tableTitle}>
+            <Column.Name columnTitle={nameColumnTitle} showDescription={false} />
+            <Column
+              data-test-subj="dataManagementOverviewTypeColumn"
+              id="type"
+              name={typeColumnTitle}
+              render={(item) => (isResource(item) ? item.type : undefined)}
+              sortable
+              width="16em"
+            />
+          </ContentListTable>
+          <ContentListFooter />
+        </ContentList>
+      </ContentListProvider>
+    </LoadedResourcesContext.Provider>
   );
 };
