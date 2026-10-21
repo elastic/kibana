@@ -57,12 +57,12 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
     );
   });
 
-  // Toggling `alerting:v2:enabled` requires the Alerting V2 plugin, which only
-  // ships enabled on stateful; on serverless the plugin is disabled.
-  // Constantly fails on ECH: https://github.com/elastic/kibana/issues/283926
+  // Stateful only (local + ECH): two cases below provision Security/Search/Observability
+  // solution-view spaces, which a single-solution serverless project cannot host.
+  // alerting_v2 is enabled on serverless oblt, so the plugin is not the constraint.
   apiTest(
     'does not list the alerting V2 skills when alerting:v2:enabled is off',
-    { tag: '@local-stateful-classic' },
+    { tag: tags.stateful.all },
     async ({ apiClient, kbnClient, requestAuth }) => {
       await kbnClient.uiSettings.update({
         [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: true,
@@ -78,19 +78,33 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
       );
       expect(setResponse).toHaveStatusCode(200);
 
-      const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
-      expect(response).toHaveStatusCode(200);
-      expect(Array.isArray(response.body.results)).toBe(true);
-      expect(response.body.results.length).toBeGreaterThan(0);
-      for (const skillId of ALERTING_V2_SKILL_IDS) {
-        expect(getSkillIds(response.body.results)).not.toContain(skillId);
-      }
+      // Poll so the `alerting:v2:enabled` write can refresh on every node before the
+      // negative assertion; a stale node would still list the skills from its cached
+      // setting (the ECH multi-node uiSettings cache is only eventually consistent).
+      await expect
+        .poll(
+          async () => {
+            const response = await apiClient.get(SKILLS_API, { headers, responseType: 'json' });
+            // Returned, not thrown: throwing inside expect.poll aborts polling instead of retrying.
+            if (response.statusCode !== 200) {
+              return `status ${response.statusCode}: ${JSON.stringify(response.body)}`;
+            }
+            // Guard against a false pass before the skills list is populated.
+            if (response.body.results.length === 0) {
+              return 'no skills returned yet';
+            }
+            const skillIds = getSkillIds(response.body.results);
+            return ALERTING_V2_SKILL_IDS.every((skillId) => !skillIds.includes(skillId));
+          },
+          { timeout: SETTINGS_PROPAGATION_TIMEOUT, intervals: [1_000] }
+        )
+        .toBe(true);
     }
   );
 
   apiTest(
     'lists both Alerting V2 skills when alerting:v2:enabled is on and experimental features are off',
-    { tag: tags.stateful.classic },
+    { tag: tags.stateful.all },
     async ({ apiClient, kbnClient, requestAuth }) => {
       await kbnClient.uiSettings.update({
         [AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID]: false,
@@ -124,7 +138,7 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
 
   apiTest(
     'does not list Alerting V2 skills in Security or Search solution spaces',
-    { tag: tags.stateful.classic },
+    { tag: tags.stateful.all },
     async ({ apiClient, apiServices, kbnClient, requestAuth }) => {
       for (const { id } of RESTRICTED_SOLUTION_SPACES) {
         await apiServices.spaces.delete(id);
@@ -186,7 +200,7 @@ apiTest.describe('Agent Builder — alerting V2 skill gating', () => {
 
   apiTest(
     'lists Alerting V2 skills in an Observability solution space',
-    { tag: tags.stateful.classic },
+    { tag: tags.stateful.all },
     async ({ apiClient, apiServices, kbnClient, requestAuth }) => {
       const { id, solution } = OBSERVABILITY_SOLUTION_SPACE;
       await apiServices.spaces.delete(id);
