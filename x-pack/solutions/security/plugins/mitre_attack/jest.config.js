@@ -8,7 +8,7 @@
 module.exports = {
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/plugins/mitre_attack'],
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/solutions/security/plugins/mitre_attack',
   coverageReporters: ['text', 'html'],
