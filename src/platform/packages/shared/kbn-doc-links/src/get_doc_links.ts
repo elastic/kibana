@@ -1203,9 +1203,11 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
     },
     subscriptions: `${ELASTIC_WEBSITE_URL}subscriptions`,
     cases: {
+      overview: `${ELASTIC_DOCS}explore-analyze/cases`,
       casesPermissions: `${ELASTIC_DOCS}explore-analyze/cases/control-case-access`,
       configureCaseSettings: `${ELASTIC_DOCS}explore-analyze/cases/configure-case-settings`,
       manageCaseTemplates: `${ELASTIC_DOCS}explore-analyze/cases/manage-case-templates`,
+      createCases: `${ELASTIC_DOCS}explore-analyze/cases/create-cases`,
     },
   });
 };

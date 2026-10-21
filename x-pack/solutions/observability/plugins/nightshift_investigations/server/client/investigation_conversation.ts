@@ -105,10 +105,16 @@ export const INITIAL_INVESTIGATION_SEVERITY = 'medium' as const;
 export const getOrCreateInvestigationConversation = async ({
   conversations,
   id,
+  workflowExecutionId,
   beforeCreate,
 }: {
   conversations: ConversationPublicClient;
   id: string;
+  /**
+   * The run creating it. Recorded in the creating write, so the investigation never reads as not
+   * in progress between its creation and the run being recorded on it.
+   */
+  workflowExecutionId?: string;
   beforeCreate?: () => Promise<void>;
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
@@ -127,6 +133,9 @@ export const getOrCreateInvestigationConversation = async ({
         // agent re-rates it from its findings when it concludes.
         metadata: { severity: INITIAL_INVESTIGATION_SEVERITY },
         accessControl: { access_mode: ConversationAccessControlMode.Public },
+        ...(workflowExecutionId
+          ? { metadata: { workflow_execution_ids: [workflowExecutionId] } }
+          : {}),
       });
     // Agent creation can precede its visibility to the conversation API's agent lookup.
     const created = beforeCreate
