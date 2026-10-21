@@ -39,7 +39,6 @@ import {
 } from './workflows_management_api';
 import type { WorkflowsService } from './workflows_management_service';
 import { WorkflowAccessControlService } from '../services/workflow_access_control';
-import { WorkflowAccessDeniedError } from '../services/workflow_access_denied_error';
 
 jest.mock('./external_resume/external_resume_service', () => ({
   ...jest.requireActual('./external_resume/external_resume_service'),
@@ -214,7 +213,7 @@ describe('WorkflowsManagementApi', () => {
             'default'
           );
         } else {
-          await expect(steps).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          await expect(steps).rejects.toBeInstanceOf(WorkflowNotFoundError);
           expect(mockWorkflowsService.getExecutionStepExecutions).not.toHaveBeenCalled();
         }
 
@@ -227,7 +226,7 @@ describe('WorkflowsManagementApi', () => {
             'default'
           );
         } else {
-          await expect(history).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          await expect(history).rejects.toBeInstanceOf(WorkflowNotFoundError);
           expect(mockWorkflowsService.searchStepExecutions).not.toHaveBeenCalled();
         }
 
@@ -243,7 +242,7 @@ describe('WorkflowsManagementApi', () => {
             historyOptions
           );
         } else {
-          await expect(changes).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
+          await expect(changes).rejects.toBeInstanceOf(WorkflowNotFoundError);
           expect(mockWorkflowsService.getHistoryForWorkflow).not.toHaveBeenCalled();
         }
       }

@@ -126,7 +126,7 @@ steps:
           headers: readerHeaders,
           body: { name: '', size: 10 },
         })
-      ).toHaveStatusCode(403);
+      ).toHaveStatusCode(404);
       expect(
         await apiClient.post(suggestPath, {
           headers: ownerHeaders,
@@ -140,6 +140,39 @@ steps:
           body: { inputs: {} },
         })
       ).toHaveStatusCode(404);
+      const unknownId = 'does-not-exist';
+      const unknownPath = `s/${spaceId}/api/workflows/workflow/${unknownId}`;
+      const unknownAccessPath = `s/${spaceId}/internal/workflows/${unknownId}/access_control`;
+      const writes = [
+        {
+          hiddenPath: workflowPath,
+          unknownPath,
+          send: (path: string) => apiClient.put(path, { headers: readerHeaders, body: { yaml } }),
+        },
+        {
+          hiddenPath: workflowPath,
+          unknownPath,
+          send: (path: string) => apiClient.delete(path, { headers: readerHeaders }),
+        },
+        {
+          hiddenPath: accessPath,
+          unknownPath: unknownAccessPath,
+          send: (path: string) =>
+            apiClient.put(path, {
+              headers: readerHeaders,
+              body: { access_mode: 'public', entries: [] },
+            }),
+        },
+      ];
+      for (const { hiddenPath, unknownPath: missingPath, send } of writes) {
+        const hidden = await send(hiddenPath);
+        const unknown = await send(missingPath);
+        expect(hidden).toHaveStatusCode(404);
+        expect(unknown).toHaveStatusCode(404);
+        expect(hidden.body.message.replace(workflowId, '<id>')).toBe(
+          unknown.body.message.replace(unknownId, '<id>')
+        );
+      }
       const hiddenList = await apiClient.get(`s/${spaceId}/api/workflows`, {
         headers: readerHeaders,
       });
