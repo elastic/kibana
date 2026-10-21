@@ -22,7 +22,6 @@ export const apiPublishesBreakdownFieldName = (
   unknownApi: null | unknown
 ): unknownApi is PublishesBreakdownFieldName => {
   return Boolean(
-    unknownApi &&
-      (unknownApi as PublishesBreakdownFieldName)?.breakdownFieldName$ !== undefined
+    unknownApi && (unknownApi as PublishesBreakdownFieldName)?.breakdownFieldName$ !== undefined
   );
 };

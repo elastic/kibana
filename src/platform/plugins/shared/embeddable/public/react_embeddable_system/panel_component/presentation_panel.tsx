@@ -102,14 +102,10 @@ const PresentationPanelChrome = <
 
   const baseTitle = panelTitle ?? defaultPanelTitle;
   const smartTitleActive = Boolean(smartTitle) && Boolean(breakdownFieldName);
-  const displayTitle = smartTitleActive
-    ? `Count of records by ${breakdownFieldName}`
-    : baseTitle;
+  const displayTitle = smartTitleActive ? `Count of records by ${breakdownFieldName}` : baseTitle;
 
   const hideTitle =
-    Boolean(hidePanelTitle) ||
-    Boolean(parentHidePanelTitle) ||
-    !Boolean(displayTitle);
+    Boolean(hidePanelTitle) || Boolean(parentHidePanelTitle) || !Boolean(displayTitle);
 
   const dataAttributes = useMemo(() => {
     const dataTitle = panelTitle ?? defaultPanelTitle;

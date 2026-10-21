@@ -212,9 +212,21 @@ describe('CopyToDashboardModal', () => {
         expect(navigateToWithEmbeddablePackagesMock).toHaveBeenCalledWith('dashboards', {
           path: '#/view/dashboardTwo?_a=(viewMode:edit)',
           state: [
-            { type: 'testPanelType', serializedState: { title: 'Panel panelOne' }, size: { width: 2, height: 2 } },
-            { type: 'testPanelType', serializedState: { title: 'Panel panelTwo' }, size: { width: 2, height: 2 } },
-            { type: 'testPanelType', serializedState: { title: 'Panel panelThree' }, size: { width: 2, height: 2 } },
+            {
+              type: 'testPanelType',
+              serializedState: { title: 'Panel panelOne' },
+              size: { width: 2, height: 2 },
+            },
+            {
+              type: 'testPanelType',
+              serializedState: { title: 'Panel panelTwo' },
+              size: { width: 2, height: 2 },
+            },
+            {
+              type: 'testPanelType',
+              serializedState: { title: 'Panel panelThree' },
+              size: { width: 2, height: 2 },
+            },
           ],
         });
         expect(getDashboardPanelFromId).toHaveBeenCalledWith('panelOne');

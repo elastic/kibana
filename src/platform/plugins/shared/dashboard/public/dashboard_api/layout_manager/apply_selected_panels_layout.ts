@@ -19,10 +19,7 @@ const PRETTIFY_PANELS_PER_ROW = 3;
 /**
  * Sort panel IDs by layout position (top-left first: by y, then by x).
  */
-function sortPanelIdsByPosition(
-  panelIds: string[],
-  panels: DashboardLayout['panels']
-): string[] {
+function sortPanelIdsByPosition(panelIds: string[], panels: DashboardLayout['panels']): string[] {
   return [...panelIds].sort((a, b) => {
     const ga = panels[a]?.grid ?? { x: 0, y: 0 };
     const gb = panels[b]?.grid ?? { x: 0, y: 0 };

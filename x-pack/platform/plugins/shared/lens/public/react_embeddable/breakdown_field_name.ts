@@ -10,7 +10,11 @@ interface DatasourceLayerColumns {
 }
 
 interface DatasourceLayers {
-  [layerId: string]: { columns?: DatasourceLayerColumns; indexPatternId?: string; columnOrder?: string[] };
+  [layerId: string]: {
+    columns?: DatasourceLayerColumns;
+    indexPatternId?: string;
+    columnOrder?: string[];
+  };
 }
 
 interface VisLayer {
@@ -25,8 +29,7 @@ interface AttributesState {
 }
 
 /** Reference name used for formBased layer index pattern (see form_based loader) */
-const getLayerReferenceName = (layerId: string) =>
-  `indexpattern-datasource-layer-${layerId}`;
+const getLayerReferenceName = (layerId: string) => `indexpattern-datasource-layer-${layerId}`;
 
 export interface BreakdownLayerInfo {
   layerId: string;
@@ -107,9 +110,7 @@ export function getBreakdownLayerInfo(
       const layerState = dsLayers[layerId];
       let indexPatternId = layerState?.indexPatternId;
       if (!indexPatternId && layerId) {
-        indexPatternId = references.find(
-          (ref) => ref.name === getLayerReferenceName(layerId)
-        )?.id;
+        indexPatternId = references.find((ref) => ref.name === getLayerReferenceName(layerId))?.id;
       }
       if (layerId && firstSplit && indexPatternId) {
         return { layerId, columnId: firstSplit, indexPatternId };

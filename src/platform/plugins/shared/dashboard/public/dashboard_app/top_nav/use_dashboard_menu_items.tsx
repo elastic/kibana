@@ -414,8 +414,7 @@ export const useDashboardMenuItems = ({
         id: 'groupSelectedPanels',
         iconType: 'folderClosed',
         testId: 'dashboardGroupSelectedPanels',
-        disableButton:
-          disableTopNav || (selectedPanelIds ?? new Set()).size < 2,
+        disableButton: disableTopNav || (selectedPanelIds ?? new Set()).size < 2,
         run: () => {
           const ids = selectedPanelIds ?? new Set<string>();
           if (ids.size < 2) return;

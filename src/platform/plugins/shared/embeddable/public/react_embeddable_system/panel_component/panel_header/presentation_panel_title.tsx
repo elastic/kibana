@@ -239,19 +239,12 @@ export const PresentationPanelTitle = ({
       const linkContent = (
         <EuiLink
           color="primary"
-          onClick={
-            hasBreakdownFieldApi(api)
-              ? openBreakdownPopover
-              : () => onClickCustomize()
-          }
+          onClick={hasBreakdownFieldApi(api) ? openBreakdownPopover : () => onClickCustomize()}
           data-test-subj="embeddablePanelTitle-SmartTitleFieldLink"
-          aria-label={i18n.translate(
-            'presentationPanel.header.smartTitleFieldLinkAriaLabel',
-            {
-              defaultMessage: 'Data field: {field}. Click to change.',
-              values: { field: breakdownFieldName },
-            }
-          )}
+          aria-label={i18n.translate('presentationPanel.header.smartTitleFieldLinkAriaLabel', {
+            defaultMessage: 'Data field: {field}. Click to change.',
+            values: { field: breakdownFieldName },
+          })}
         >
           {breakdownFieldName}
         </EuiLink>

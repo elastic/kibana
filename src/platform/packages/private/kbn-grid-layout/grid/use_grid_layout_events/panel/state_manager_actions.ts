@@ -177,15 +177,10 @@ export const moveAction = (
 
   const selectedIds = gridLayoutStateManager.getSelectedPanelIds?.();
   const isMultiDrag =
-    !isResize &&
-    selectedIds &&
-    selectedIds.size > 1 &&
-    selectedIds.has(activePanel.id);
+    !isResize && selectedIds && selectedIds.size > 1 && selectedIds.has(activePanel.id);
 
   const idsToMove: string[] = isMultiDrag
-    ? [...selectedIds!].filter(
-        (id) => currentLayout[lastSectionId]?.panels[id] !== undefined
-      )
+    ? [...selectedIds!].filter((id) => currentLayout[lastSectionId]?.panels[id] !== undefined)
     : [activePanel.id];
 
   // resolve the new grid layout

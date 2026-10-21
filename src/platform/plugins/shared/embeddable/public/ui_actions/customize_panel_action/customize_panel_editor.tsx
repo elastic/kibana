@@ -116,7 +116,10 @@ export const CustomizePanelEditor = ({
     if (isPanelBorderless !== api.hideBorder$?.value) api.setHideBorder?.(isPanelBorderless);
     const setSmartTitleApi = (api as { setSmartTitle?: (v: boolean | undefined) => void })
       ?.setSmartTitle;
-    if (setSmartTitleApi && smartTitle !== (api as { smartTitle$?: { value?: boolean } })?.smartTitle$?.value) {
+    if (
+      setSmartTitleApi &&
+      smartTitle !== (api as { smartTitle$?: { value?: boolean } })?.smartTitle$?.value
+    ) {
       setSmartTitleApi(smartTitle);
     }
     if (panelDescription !== api.description$?.value) api.setDescription?.(panelDescription);

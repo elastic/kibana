@@ -68,7 +68,9 @@ export async function setBreakdownField<T extends { state?: unknown }>(
   if (!info) return attributes;
 
   const state = attributes?.state as Record<string, unknown> | undefined;
-  const dsStates = state?.datasourceStates as Record<string, { layers?: Record<string, FormBasedLayer> }> | undefined;
+  const dsStates = state?.datasourceStates as
+    | Record<string, { layers?: Record<string, FormBasedLayer> }>
+    | undefined;
   const formBased = dsStates?.formBased ?? dsStates?.indexpattern;
   const layers = formBased?.layers;
   const rawLayer = layers?.[info.layerId];

@@ -18,11 +18,6 @@ import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentat
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, merge, skip } from 'rxjs';
 
-import { getBreakdownFieldNameFromAttributes } from '../breakdown_field_name';
-import {
-  getBreakdownFieldOptions as getBreakdownFieldOptionsImpl,
-  setBreakdownField as setBreakdownFieldImpl,
-} from '../breakdown_field_selector';
 import type {
   LensComponentProps,
   LensPanelProps,
@@ -33,6 +28,11 @@ import type {
   LensInternalApi,
 } from '@kbn/lens-common';
 import type { LensApi, LensWireAPIConfig } from '@kbn/lens-common-2';
+import { getBreakdownFieldNameFromAttributes } from '../breakdown_field_name';
+import {
+  getBreakdownFieldOptions as getBreakdownFieldOptionsImpl,
+  setBreakdownField as setBreakdownFieldImpl,
+} from '../breakdown_field_selector';
 
 import { stripInheritedContext } from '../../../common/transforms/helpers';
 import { isTextBasedLanguage, transformToApiConfig } from '../helper';

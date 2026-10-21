@@ -126,7 +126,9 @@ describe('PanelClickHint', () => {
         <PanelClickHint position={{ x: 10, y: 20 }} onDismiss={onDismiss} />
       </EuiProvider>
     );
-    expect(screen.getByTestId('dashboardPanelClickHint')).toHaveTextContent('+ Click to select panel');
+    expect(screen.getByTestId('dashboardPanelClickHint')).toHaveTextContent(
+      '+ Click to select panel'
+    );
     act(() => jest.runAllTimers());
     expect(onDismiss).toHaveBeenCalledTimes(1);
   });

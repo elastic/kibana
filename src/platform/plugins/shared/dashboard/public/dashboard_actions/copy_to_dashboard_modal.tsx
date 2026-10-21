@@ -57,7 +57,7 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
       selectedIds.has(api.uuid) && selectedIds.size > 0 ? [...selectedIds] : [api.uuid];
 
     const getPanelAsync = api.parentApi.getDashboardPanelFromIdAsync;
-    let states: EmbeddablePackageState[] = [];
+    const states: EmbeddablePackageState[] = [];
 
     if (getPanelAsync) {
       setIsSubmitting(true);
