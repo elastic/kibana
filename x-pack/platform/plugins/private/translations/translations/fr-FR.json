@@ -2893,8 +2893,6 @@
     "discover.context.olderDocumentsWarningZero": "Aucun document plus ancien que le document ancré n'a été trouvé.",
     "discover.context.pageTitle": "Les documents relatifs à #{anchorId}",
     "discover.context.reloadPageDescription.reloadOrVisitTextMessage": "Veuillez recharger le document ou revenir à la liste pour sélectionner un document ancré valide.",
-    "discover.context.unableToLoadAnchorDocumentDescription": "Impossible de charger le document ancré",
-    "discover.context.unableToLoadDocumentDescription": "Impossible de charger les documents",
     "discover.contextAwareness.changePointDocViewer.noChartBody": "Le graphique des points de changement n'est pas disponible jusqu'à ce qu'une requête soit exécutée.",
     "discover.contextAwareness.changePointDocViewer.noChartTitle": "Graphique non disponible",
     "discover.contextAwareness.changePointPvalueCell.impactHigh": "élevé",
