@@ -21,6 +21,7 @@ import {
   getIacTemplateUrlFromVarGroupSelection,
   getAwsConsoleHostFromArn,
   isCloudFormationStackArn,
+  isIamRoleArn,
   parseAwsRegionFromArn,
 } from '../../../common/services/cloud_connectors';
 
@@ -939,20 +940,12 @@ export const INVALID_ROLE_ARN_MESSAGE = i18n.translate(
 );
 
 /**
- * An IAM role ARN: `arn:<partition>:iam::<account>:role/<path/><name>`. IAM is global, so the
- * region segment is empty; path and name use AWS's role name charset, and the name is capped at
- * AWS's 64 characters.
- */
-const IAM_ROLE_ARN_PATTERN =
-  /^arn:aws(?:-[a-z]+)*:iam::\d{12}:role\/(?:[\w+=,.@-]+\/)*[\w+=,.@-]{1,64}$/;
-
-/**
  * True for a non-empty value that is not an IAM role ARN; whitespace is ignored so a pasted value
- * is judged as it will be saved.
+ * is judged as it will be saved. Same rule as the connector API's `role_arn`.
  */
 export const isRoleArnInvalid = (roleArn: string | undefined): boolean => {
   const trimmed = roleArn?.trim() ?? '';
-  return trimmed !== '' && !IAM_ROLE_ARN_PATTERN.test(trimmed);
+  return trimmed !== '' && !isIamRoleArn(trimmed);
 };
 
 /** Read-only link to the deployed stack; needs no render. */

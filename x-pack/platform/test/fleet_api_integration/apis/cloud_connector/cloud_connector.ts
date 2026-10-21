@@ -142,6 +142,22 @@ export default function (providerContext: FtrProviderContext) {
           .expect(400);
       });
 
+      it('should return 400 when role_arn is not an IAM role ARN for AWS', async () => {
+        const { body } = await supertest
+          .post(`/api/fleet/cloud_connectors`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'test-connector-malformed-role-arn',
+            cloudProvider: 'aws',
+            vars: {
+              role_arn: { value: '123456', type: 'text' },
+            },
+          })
+          .expect(400);
+
+        expect(body.message).to.match(/role_arn must be an IAM role ARN/);
+      });
+
       it('should return 400 when tenant_id is missing for Azure', async () => {
         await supertest
           .post(`/api/fleet/cloud_connectors`)
@@ -1669,6 +1685,16 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(body).to.have.property('message');
         expect(body.message).to.match(/Package policy must contain role_arn variable/);
+      });
+
+      it('should validate that role_arn is an IAM role ARN when updating vars', async () => {
+        const { body } = await supertest
+          .put(`/api/fleet/cloud_connectors/${createdAwsConnectorId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ vars: { role_arn: { value: '123456', type: 'text' } } })
+          .expect(400);
+
+        expect(body.message).to.match(/role_arn must be an IAM role ARN/);
       });
 
       it('should validate that tenant_id is required when updating Azure vars', async () => {
