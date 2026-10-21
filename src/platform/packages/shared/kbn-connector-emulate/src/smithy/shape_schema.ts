@@ -96,7 +96,10 @@ export const jsonName = (name: string, member: MemberShape): string => {
 /** Whether a member is required, ignoring `@required` where `@clientOptional` relaxes it. */
 export const isRequired = (member: MemberShape): boolean =>
   hasTrait(member.traits, 'smithy.api#required') &&
-  !hasTrait(member.traits, 'smithy.api#clientOptional');
+  !hasTrait(member.traits, 'smithy.api#clientOptional') &&
+  // Senders may leave out members with a default, which receivers fill in.
+  (member.traits?.['smithy.api#default'] === undefined ||
+    member.traits['smithy.api#default'] === null);
 
 export interface ShapeConverter {
   /** The schema of a shape where it is sent, given the traits of the member that targets it. */

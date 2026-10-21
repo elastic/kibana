@@ -33,6 +33,9 @@ const KNOWN_DIFFERENCES = {
   // smithy-openapi also marks `@sensitive` maps and structures with `format: password`, which
   // means nothing for them.
   sensitive: '`format: password` only on strings',
+  // Senders may leave out members with a `@default`, which receivers fill in; AWS's protocol
+  // tests require servers to accept requests without them.
+  requiredWithDefault: '`@required` members with a `@default` are optional',
 } as const;
 
 type Paths = Record<string, Record<string, Record<string, unknown>>>;
@@ -107,7 +110,15 @@ const flatten = (
     ),
     ...Object.entries(isRecord(node.properties) ? node.properties : {}).flatMap(
       ([name, property]) =>
-        flatten(document, property, `${prefix}.${name}${required.has(name) ? '!' : ''}`, visited)
+        flatten(
+          document,
+          property,
+          // KNOWN_DIFFERENCES.requiredWithDefault
+          `${prefix}.${name}${
+            required.has(name) && resolve(document, property).default === undefined ? '!' : ''
+          }`,
+          visited
+        )
     ),
     ...(node.items === undefined ? [] : flatten(document, node.items, `${prefix}[]`, visited)),
     ...(isRecord(node.additionalProperties)
@@ -177,6 +188,7 @@ describe('convertSmithy compared with smithy-openapi', () => {
       'errorsPerStatus',
       'blobPayload',
       'sensitive',
+      'requiredWithDefault',
     ]);
   });
 
