@@ -85,7 +85,9 @@ const compileRoute = (operation: ContractOperation): Route => {
       .filter((parameter) => parameter.in === 'path' && parameter.multiSegment)
       .map(({ name }) => name)
   );
-  const source = compileTemplate(operation.path, (name) => {
+  // `x-ms-paths` keys end in the operation's fixed query parameters.
+  const [template] = operation.path.split('?');
+  const source = compileTemplate(template, (name) => {
     parameterNames.push(name);
     return multiSegment.has(name) ? '(.+?)' : '([^/]+)';
   });
@@ -94,9 +96,16 @@ const compileRoute = (operation: ContractOperation): Route => {
     servers: operation.servers.map(compileServer),
     path: new RegExp(`^${source}$`),
     parameterNames,
-    literalLength: operation.path.replace(new RegExp(TEMPLATE_PARAMETER, 'g'), '').length,
+    literalLength: template.replace(new RegExp(TEMPLATE_PARAMETER, 'g'), '').length,
   };
 };
+
+const hasFixedQuery = ({ operation: { fixedQuery = [] } }: Route, url: URL): boolean =>
+  fixedQuery.every(({ name, value }) =>
+    value === undefined ? url.searchParams.has(name) : url.searchParams.getAll(name).includes(value)
+  );
+
+const fixedQueryCount = ({ operation: { fixedQuery = [] } }: Route): number => fixedQuery.length;
 
 // Strips the longest matching server URL, e.g. `https://api.trello.com/1` from a Trello URL.
 const getOperationPath = ({ servers }: Route, url: URL): string | undefined => {
@@ -126,26 +135,38 @@ const decodePathSegment = (segment: string): string => {
  * Creates a router that finds the operation for a request. When several path templates match,
  * the one with the fewest parameters wins, so `/items/new` takes precedence over `/items/{id}`,
  * then the one with the most literal text, so `/items/{id}:archive` takes precedence over
- * `/items/{id}`.
+ * `/items/{id}`, then the one with the most fixed query parameters (`x-ms-paths`), so
+ * `/?restype=service&comp=properties` takes precedence over `/?comp=properties`.
  */
 export const createOperationMatcher = (operations: readonly ContractOperation[]) => {
   const routes = operations.map(compileRoute);
 
   return (method: string, url: URL): OperationMatch | OperationMismatch => {
-    const candidates = routes.flatMap((route) => {
+    const pathMatches = routes.flatMap((route) => {
       const path = getOperationPath(route, url);
       const match = path === undefined ? null : route.path.exec(path);
       return match ? [{ route, values: match.slice(1) }] : [];
     });
-    if (candidates.length === 0) {
+    if (pathMatches.length === 0) {
       return { status: 404, message: 'No operation matches the path' };
+    }
+    const candidates = pathMatches.filter(({ route }) => hasFixedQuery(route, url));
+    if (candidates.length === 0) {
+      const expected = [...new Set(pathMatches.map(({ route }) => route.operation.path))];
+      return {
+        status: 404,
+        message: `No operation matches the query; operations on the path expect ${expected.join(
+          ', or '
+        )}`,
+      };
     }
     const [best] = candidates
       .filter(({ route }) => route.operation.method === method.toLowerCase())
       .sort(
         (a, b) =>
           a.route.parameterNames.length - b.route.parameterNames.length ||
-          b.route.literalLength - a.route.literalLength
+          b.route.literalLength - a.route.literalLength ||
+          fixedQueryCount(b.route) - fixedQueryCount(a.route)
       );
     if (!best) {
       const allowed = [...new Set(candidates.map(({ route }) => route.operation.method))];
