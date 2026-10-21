@@ -133,6 +133,41 @@ describe('AgenticInvestigationsPublicPlugin conversation template UI registratio
     expect(open).toHaveBeenCalledWith({ id: 'user:cfo@corp', name: 'cfo@corp', type: 'user' });
   });
 
+  it('links subjects where a resolver registered after start says, first link winning', async () => {
+    const agentBuilder = agentBuilderMocks.createStart();
+    const { registerSubjectHrefResolver } = createPlugin().start(coreMock.createStart(), {
+      agentBuilder,
+    });
+    registerSubjectHrefResolver(({ type }) => (type === 'alert' ? '/app/first' : undefined));
+    registerSubjectHrefResolver(({ type, id }) => `/app/second/${type}/${id}`);
+    registerSubjectHrefResolver(() => '/app/third');
+
+    const subjectDefinition = agentBuilder.attachments.addAttachmentType.mock.calls.find(
+      ([type]) => type === 'investigation_subject'
+    )?.[1];
+    const view = subjectDefinition?.renderInlineContent?.({
+      attachment: {
+        id: 'att-1',
+        type: 'investigation_subject',
+        data: {
+          id: 'doc-1',
+          spaceId: 'default',
+          conversationId: 'conv-1',
+          subjectType: 'significant_event',
+          subjectId: 'se-1',
+          createdAt: '2026-09-01T00:00:00.000Z',
+        },
+      },
+    } as never);
+
+    render(React.createElement(EuiProvider, null, React.createElement(I18nProvider, null, view)));
+
+    expect(await screen.findByTestId('investigationSubject-significant_event')).toHaveAttribute(
+      'href',
+      '/app/second/significant_event/se-1'
+    );
+  });
+
   it('exposes a registration that the investigation overview reads from', () => {
     const plugin = createPlugin();
     const workflowsExtensions = {

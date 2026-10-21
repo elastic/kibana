@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
 import { SUBJECT_ATTACHMENT_TYPE } from '../../../common/subjects/constants';
 import type { InvestigationSubject } from '../../../common/subjects/subject';
-import type { InvestigationAttachmentRenderer } from '../../investigation_attachments';
+import type {
+  InvestigationAttachmentContentProps,
+  InvestigationAttachmentRenderer,
+} from '../../investigation_attachments';
+import { SubjectHrefResolverContext, type SubjectHrefResolver } from './subject_href';
 import { SUBJECT_LABEL, slackChannelLabel, subjectAttachmentLabel } from './translations';
 
 const labelDetail = ({
@@ -24,10 +29,15 @@ const labelDetail = ({
   return undefined;
 };
 
-/** Browser UI for the investigation_subject attachment; the content loads on first render. */
-export const subjectAttachmentRenderer: InvestigationAttachmentRenderer<InvestigationSubject> & {
+/**
+ * Browser UI for the investigation_subject attachment; the content loads on first render and
+ * links the subject where `resolveSubjectHref` says.
+ */
+export const createSubjectAttachmentRenderer = (
+  resolveSubjectHref: SubjectHrefResolver
+): InvestigationAttachmentRenderer<InvestigationSubject> & {
   type: typeof SUBJECT_ATTACHMENT_TYPE;
-} = {
+} => ({
   type: SUBJECT_ATTACHMENT_TYPE,
   // The data can be missing while a by-reference attachment is still resolving.
   getLabel: (subject) =>
@@ -35,5 +45,16 @@ export const subjectAttachmentRenderer: InvestigationAttachmentRenderer<Investig
       ? subjectAttachmentLabel(subject.subjectType, labelDetail(subject))
       : SUBJECT_LABEL,
   icon: 'bullseye',
-  loadContent: () => import('./subject_view').then(({ SubjectView }) => SubjectView),
-};
+  loadContent: async () => {
+    const { SubjectView } = await import('./subject_view');
+    const SubjectViewWithLinks: React.FC<
+      InvestigationAttachmentContentProps<InvestigationSubject>
+    > = (props) =>
+      React.createElement(
+        SubjectHrefResolverContext.Provider,
+        { value: resolveSubjectHref },
+        React.createElement(SubjectView, props)
+      );
+    return SubjectViewWithLinks;
+  },
+});

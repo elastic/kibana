@@ -16,6 +16,7 @@ import type {
 } from '../../../common/subjects/subject';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
 import { getSubjectTitle, type SubjectRowData } from './subject_title';
+import { useSubjectHref } from './subject_href';
 import {
   OPENS_IN_NEW_TAB,
   TRIGGER_LABEL,
@@ -37,30 +38,6 @@ const SUBJECT_ICON_TONES: Record<InvestigationSubjectType, SubjectIconTone> = {
   significant_event: 'danger',
   manual: 'neutral',
   slack_thread: 'logo',
-};
-
-/**
- * Alert URLs come from the rule type: a Kibana path or an absolute URL. Anything else (for
- * example a `javascript:` URL) is not rendered as a link.
- */
-const isSafeHref = (url: string): boolean =>
-  (url.startsWith('/') && !url.startsWith('//')) || /^https?:\/\//i.test(url);
-
-/** Slack permalinks are validated as HTTPS on write; checked again because the row is a raw link. */
-const isSafeSlackHref = (url: string): boolean => /^https:\/\//i.test(url);
-
-/**
- * Where a click on the row goes: the alert's `kibana.alert.url` (whatever the rule type writes
- * there, for example a Discover link) or the Slack thread.
- */
-export const getSubjectHref = ({ type, snapshot, slack }: SubjectRowData): string | undefined => {
-  if (type === 'alert') {
-    return snapshot?.url && isSafeHref(snapshot.url) ? snapshot.url : undefined;
-  }
-  if (type === 'slack_thread') {
-    return slack?.permalink && isSafeSlackHref(slack.permalink) ? slack.permalink : undefined;
-  }
-  return undefined;
 };
 
 const SubjectIcon = ({ iconType, tone }: { iconType: IconType; tone: SubjectIconTone }) => {
@@ -282,13 +259,13 @@ const getSubjectDescription = (
 
 /**
  * One compact row per subject: an icon for its type, what it is called, and "Trigger · <type>".
- * Alerts link to their `kibana.alert.url` and Slack threads to the thread; other subjects do not link.
+ * The row links where `useSubjectHref` resolves the subject to; without a link it is plain text.
  */
 export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean }> = ({
   subject,
   isNested = false,
 }) => {
-  const href = getSubjectHref(subject);
+  const href = useSubjectHref(subject);
   return (
     <CompactRow
       iconType={SUBJECT_ICONS[subject.type]}

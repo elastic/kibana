@@ -27,6 +27,7 @@ import type {
   AgenticInvestigationsPublicStartDependencies,
   ImpactEntityOpener,
 } from './types';
+import type { SubjectHrefResolver } from './subjects/attachments/subject_href';
 
 const LazyInvestigationCardComponent = React.lazy(async () => {
   const { InvestigationCard } = await import(
@@ -62,6 +63,16 @@ export class AgenticInvestigationsPublicPlugin
   private readonly escalationsEnabled: boolean;
   private readonly groupedAttachments = createFlyoutGroupedAttachmentsRegistry();
   private impactEntityOpener: ImpactEntityOpener | undefined;
+  private subjectHrefResolvers: SubjectHrefResolver[] = [];
+  private readonly resolveSubjectHref: SubjectHrefResolver = (subject) => {
+    for (const resolver of this.subjectHrefResolvers) {
+      const href = resolver(subject);
+      if (href !== undefined) {
+        return href;
+      }
+    }
+    return undefined;
+  };
 
   constructor(context: PluginInitializerContext<AgenticInvestigationsPublicConfig>) {
     this.escalationsEnabled = context.config.get().escalations.enabled;
@@ -91,7 +102,7 @@ export class AgenticInvestigationsPublicPlugin
           application: core.application,
         });
       }
-      registerSubjectAttachmentTypes(agentBuilder);
+      registerSubjectAttachmentTypes(agentBuilder, this.resolveSubjectHref);
       registerHypothesesAttachmentTypes(agentBuilder);
       registerTemplate({
         core,
@@ -101,6 +112,7 @@ export class AgenticInvestigationsPublicPlugin
         escalationsEnabled: this.escalationsEnabled,
         groupedAttachments: this.groupedAttachments,
         getImpactEntityOpener: () => this.impactEntityOpener,
+        resolveSubjectHref: this.resolveSubjectHref,
         templates: this.escalationsEnabled
           ? [investigationTemplate, escalationTemplate]
           : [investigationTemplate],
@@ -110,11 +122,15 @@ export class AgenticInvestigationsPublicPlugin
       registerImpactEntityOpener: (opener) => {
         this.impactEntityOpener = opener;
       },
+      registerSubjectHrefResolver: (resolver) => {
+        this.subjectHrefResolvers = [...this.subjectHrefResolvers, resolver];
+      },
       InvestigationCard: LazyInvestigationCard,
     };
   }
 
   stop() {
     this.impactEntityOpener = undefined;
+    this.subjectHrefResolvers = [];
   }
 }

@@ -25,7 +25,10 @@ import type { HypothesisStatus } from '../../../common/hypotheses/hypotheses';
 import type { InvestigationProposalSummary } from '../../../common/investigations/investigation';
 import type { InvestigationSubjectType } from '../../../common/subjects/subject';
 import { getSubjectTitle } from '../../subjects/attachments/subject_title';
-import { getSubjectHref } from '../../subjects/attachments/subject_view';
+import {
+  SubjectHrefResolverContext,
+  getSubjectHref,
+} from '../../subjects/attachments/subject_href';
 import { SUBJECT_TYPE_LABELS } from '../../subjects/attachments/translations';
 import { HYPOTHESIS_STATUS_LABELS, confidenceLabel } from '../attachments/translations';
 import type { HypothesisTreeNodeData, HypothesisTreeNodeKind } from './build_hypothesis_graph';
@@ -33,9 +36,8 @@ import { HYPOTHESIS_TREE_NODE_WIDTH } from './layout_hypothesis_graph';
 import { ProposalStatusBadge } from './proposal_status_badge';
 import {
   NODE_LABELS,
-  OPEN_SLACK_THREAD_LABEL,
+  OPEN_SUBJECT_LABELS,
   PROPOSAL_CONFIDENCE_LABELS,
-  VIEW_ALERT_LABEL,
   actionsCountLabel,
   hypothesesCountLabel,
   hypothesisStatusCountLabel,
@@ -470,6 +472,7 @@ const HypothesisTreeNodeComponent = ({
 }: NodeProps<HypothesisTreeFlowNode>): React.ReactElement => {
   const { isSelected, isDimmed } = data;
   const { onSelectNode } = useContext(HypothesisTreeActionsContext);
+  const resolveSubjectHref = useContext(SubjectHrefResolverContext);
   const shellProps = { isSelected, isDimmed };
   // The chip only summarizes the row below it, and the actions node's cards are buttons themselves.
   const selectableProps = { ...shellProps, onActivate: () => onSelectNode(id) };
@@ -477,7 +480,7 @@ const HypothesisTreeNodeComponent = ({
   switch (data.kind) {
     case 'trigger': {
       const [first, ...rest] = data.subjects;
-      const href = first ? getSubjectHref(first) : undefined;
+      const href = first ? getSubjectHref(first, resolveSubjectHref) : undefined;
       const isSlack = first?.type === 'slack_thread';
       return (
         <NodeShell kind="trigger" label={NODE_LABELS.trigger} {...selectableProps}>
@@ -499,7 +502,7 @@ const HypothesisTreeNodeComponent = ({
                   {rest.length > 0 && ` · ${moreSubjectsLabel(rest.length)}`}
                 </EuiText>
               )}
-              {href && (
+              {first && href && (
                 <EuiText size="xs">
                   <EuiLink
                     href={href}
@@ -509,7 +512,7 @@ const HypothesisTreeNodeComponent = ({
                     // Following the link should not also select the node.
                     onClick={(event: React.MouseEvent) => event.stopPropagation()}
                   >
-                    {isSlack ? OPEN_SLACK_THREAD_LABEL : VIEW_ALERT_LABEL}
+                    {OPEN_SUBJECT_LABELS[first.type]}
                   </EuiLink>
                 </EuiText>
               )}
