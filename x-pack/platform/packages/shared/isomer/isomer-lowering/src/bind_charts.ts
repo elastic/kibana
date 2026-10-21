@@ -33,8 +33,11 @@ type Predicate =
 export type ChartNode = { type: string } & Record<string, unknown>;
 
 export type PanelOutcome =
-  /** Bound to a pack node whose `id` is the panel id; what the spec leaves to the engine is in `hints`. */
-  | { status: 'converted'; nodeType: string }
+  /**
+   * Bound to a pack node whose `id` is the panel id; what the spec leaves to the engine is in `hints`, and where the
+   * drawing approximates Kibana's styling is in `notes`.
+   */
+  | { status: 'converted'; nodeType: string; notes?: string[] }
   /** The panel holds something no node can carry faithfully, so it gets no node rather than a wrong one. */
   | { status: 'refused'; nodeType: string; reasons: string[] }
   /** The Lens chart kind or layout maps to none of the six types. */

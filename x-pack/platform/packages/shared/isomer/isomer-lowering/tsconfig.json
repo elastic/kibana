@@ -10,6 +10,7 @@
     "@kbn/es-query",
     "@kbn/esql-utils",
     "@kbn/isomer-charts-elastic",
-    "@kbn/isomer-primitives-charts"
+    "@kbn/isomer-primitives-charts",
+    "@kbn/isomer-primitives-maps"
   ]
 }

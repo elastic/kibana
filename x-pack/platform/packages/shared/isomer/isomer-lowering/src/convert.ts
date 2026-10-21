@@ -24,7 +24,7 @@ import {
 import { type GridData, planDashboard, type TimeRange } from './dashboard';
 import type { ExecuteEsql, ExecuteSearch } from './esql_response';
 import { parseSavedObjectNdjson } from './kibana/from-saved-object/ndjson';
-import { bindMapPanels } from './map_panels';
+import { bindMapPanels, type MapServices } from './map_panels';
 import { bindVegaPanels } from './vega_panels';
 
 export interface ConvertedPanel {
@@ -71,6 +71,8 @@ export interface ConvertDashboardOptions {
   resolveField?: ResolveField;
   /** `@kbn/es-query` settings from Kibana's advanced settings, such as `ignoreFilterIfFieldNotInIndex`. */
   esQueryConfig?: Partial<EsQueryConfig>;
+  /** EMS boundaries and basemaps for Maps panels; without them, choropleths refuse and basemaps fall back. */
+  mapServices?: MapServices;
 }
 
 interface PanelJson {
@@ -96,6 +98,7 @@ export const convertDashboard = async ({
   controls,
   resolveField,
   esQueryConfig,
+  mapServices,
 }: ConvertDashboardOptions): Promise<ConvertedDashboard> => {
   const objects = parseSavedObjectNdjson(ndjson) as unknown as Array<Record<string, any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
   const saved = objects.find(({ type, id }) => type === 'dashboard' && id === dashboardId);
@@ -160,7 +163,12 @@ export const convertDashboard = async ({
   const [charts, vega, maps] = await Promise.all([
     bindChartsDashboard(planned, executeEsql, executeFor),
     bindVegaPanels(planned, search, context.bool),
-    bindMapPanels(objects, dashboardId, planned.timeRange, search, context.bool),
+    bindMapPanels(objects, dashboardId, planned.timeRange, context.bool, {
+      search,
+      executeEsql,
+      ...(mapServices ? { services: mapServices } : {}),
+      ...(esQueryConfig ? { esQueryConfig } : {}),
+    }),
   ]);
 
   const nodes = new Map(
