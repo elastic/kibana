@@ -196,5 +196,18 @@ describe('endpointForensicAnalysisSkill', () => {
     expect(content).toContain('Do not do date arithmetic yourself');
     expect(content).toContain('Containment based on history needs a concrete tie to this incident');
     expect(content).toContain('Always state the window that was searched');
+    expect(content).toContain('copy the `start` and `end` of the `searched_window`');
+  });
+
+  // Initial access often precedes the first alert by hours or days; an incident-anchored
+  // window must not turn patient zero into "history".
+  it('lets the agent trace initial access back past the incident window', () => {
+    const { content } = endpointForensicAnalysisSkill;
+    expect(content).toContain('or the initial access that led to it');
+    expect(content).toContain('Evidence reached that way is this incident too');
+    expect(content).toMatch(
+      /follow\s+its parent chain, dropper, or delivering connection backwards/
+    );
+    expect(content).toContain('patient zero for this incident, not history');
   });
 });

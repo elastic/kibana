@@ -116,8 +116,12 @@ When the request names an incident (an attack, its alerts, or a start and end ti
 that incident, not on now:
 - Pass the incident's \`start\` and \`end\` (ISO-8601) to both tools, with any \`margin_hours\` the request gives.
   Do not do date arithmetic yourself; the tools apply the margin and return the exact \`searched_window\`.
-- Evidence inside \`searched_window\` is **this incident**. Evidence outside it is **history**: report it
-  separately, say it is outside the window, and do not let it drive the assessment on its own.
+- Evidence inside \`searched_window\` is **this incident**. Widen a query only to follow a tie from inside the
+  window — the same process tree, file, hash, destination, or account, or the initial access that led to it —
+  and say that you widened. Evidence reached that way is this incident too, even when it is earlier than the
+  window; keep its real timestamp and name the tie.
+- Evidence outside the window with no tie is **history**: report it separately, say it is outside the window,
+  and do not let it drive the assessment on its own.
 - Containment based on history needs a concrete tie to this incident — the same process tree, file, hash,
   destination, or account seen inside the window. Name the tie. Without one, history is context, not grounds.
 - Always state the window that was searched in the answer or structured output.
@@ -137,6 +141,10 @@ Always scope \`@timestamp\` to the \`searched_window\` the discovery tool return
 ### 3. Patient zero
 Query process and network indices ordered by @timestamp ASC.
 Return earliest host, timestamp, indicator, and delivery-vector hypothesis.
+Initial access often precedes the first alert by hours or days (phishing, then a dormant implant, then execution).
+When the search is anchored on an incident window, start from the earliest in-window process or file and follow
+its parent chain, dropper, or delivering connection backwards past the window start. That is a tie, so what you
+find is patient zero for this incident, not history. Say how far before the window it was.
 
 ### 4. Attack timeline
 Merge process, file, network, and registry events for the host in the searched time window; sort by \`@timestamp\` ascending.
@@ -158,7 +166,8 @@ Where the timeline goes depends on how you were asked to answer:
   \`{ events }\`, where \`events\` is the ordered event array, earliest first, with each event as
   \`{ timestamp, host, description }\`. \`description\` carries the same detail you would have written
   for an analyst — do not shorten it to a label because it is going into a structured field.
-  If the schema has a searched-window field, copy the \`searched_window\` the tools returned into it.
+  If the schema has a searched-window field, copy the \`start\` and \`end\` of the \`searched_window\` the
+  tools returned into it.
   Do not also render the timeline in a free-text field.
 
 ### 5. IoC extraction

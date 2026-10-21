@@ -1074,9 +1074,12 @@ describe('Endpoint analysis run', () => {
     // on a 15m run that can only report nothing. The Hunt Watch worker makes the same
     // check (`check_index_scope`) before it selects a report.
     //
-    // Scoped to the incident window plus margin rather than a lookback from now: older
-    // telemetry on the same host is not this incident, and must not send the agent after it.
-    it('checks for Defend telemetry in the incident window before the agent, and fails the run rather than guess', () => {
+    // Anchored on the incident rather than on now, so an old incident is not judged by what
+    // the host shipped this week. But it is an existence check whose miss retires the
+    // indicator with no retry, so it looks from well before the incident through now, not
+    // the agent's ±2h: ingest lag, discoveries built from non-Defend alerts, and long-dwell
+    // incidents all have a host that ships telemetry with nothing in those four hours.
+    it('checks for Defend telemetry from well before the incident through now, and fails the run rather than guess', () => {
       const names = allSteps.map(({ name }) => name);
       const check = stepByName('check_endpoint_telemetry');
 
@@ -1100,8 +1103,7 @@ describe('Endpoint analysis run', () => {
               {
                 range: {
                   '@timestamp': {
-                    gte: '{{ steps.resolve_incident_window.output.start }}||-{{ consts.incident_margin_hours }}h',
-                    lte: '{{ steps.resolve_incident_window.output.end }}||+{{ consts.incident_margin_hours }}h',
+                    gte: '{{ steps.resolve_incident_window.output.start }}||-{{ consts.telemetry_gate_lookback_hours }}h',
                   },
                 },
               },
@@ -1109,31 +1111,39 @@ describe('Endpoint analysis run', () => {
           },
         },
       });
-      // Liquid has no date math, so the margin is ES date math on the resolved bounds.
+      // Liquid has no date math, so the lookback is ES date math on the resolved start.
+      // No `lte`: telemetry after the incident still says the host ships it.
       const range = (
         check?.with?.query as {
-          bool: { filter: Array<{ range?: { '@timestamp': { gte: string; lte: string } } }> };
+          bool: { filter: Array<{ range?: { '@timestamp': { gte: string; lte?: string } } }> };
         }
       ).bool.filter[1].range?.['@timestamp'];
+      expect(range).not.toHaveProperty('lte');
       const rendered = {
         steps: {
           resolve_incident_window: {
             output: { start: '2026-10-16T10:00:00.000Z', end: '2026-10-16T11:30:00.000Z' },
           },
         },
-        consts: { incident_margin_hours: 2 },
+        consts: { telemetry_gate_lookback_hours: 72 },
       };
       expect(liquid.parseAndRenderSync(String(range?.gte), rendered)).toBe(
-        '2026-10-16T10:00:00.000Z||-2h'
+        '2026-10-16T10:00:00.000Z||-72h'
       );
-      expect(liquid.parseAndRenderSync(String(range?.lte), rendered)).toBe(
-        '2026-10-16T11:30:00.000Z||+2h'
-      );
+      // The gate's lookback and the agent's margin are different questions ("does this
+      // host ship telemetry?" vs "what happened in the incident?"), so they are separate
+      // consts and the gate's is much wider.
+      expect(definition.consts?.telemetry_gate_lookback_hours).toBe(72);
       expect(definition.consts?.incident_margin_hours).toBe(2);
+      expect(definition.consts?.telemetry_gate_lookback_hours).toBeGreaterThan(
+        Number(definition.consts?.incident_margin_hours)
+      );
+      expect(JSON.stringify(check?.with)).not.toContain('incident_margin_hours');
       const noTelemetry = String(
         (stepByName('journal_no_telemetry')?.with?.inputs as { message?: string } | undefined)
           ?.message
       );
+      expect(noTelemetry).toContain('consts.telemetry_gate_lookback_hours');
       expect(noTelemetry).toContain('steps.resolve_incident_window.output.start');
       expect(noTelemetry).toContain('steps.resolve_incident_window.output.end');
       // A read error is a gap, not "no telemetry": the run fails and the indicator stays
@@ -1446,7 +1456,9 @@ describe('Endpoint analysis run', () => {
       expect(message).toContain("Call the skill's tools with `start`, `end`, and `margin_hours`");
       expect(message).toContain('Do not use `time_window_hours`');
       expect(message).toContain('Do not do date arithmetic yourself');
-      expect(message).toContain('Copy it into `timeline.window`');
+      // `searched_window` also carries `anchor`, which `timeline.window` does not declare,
+      // so the instruction names the two fields rather than the object.
+      expect(message).toContain('Copy its `start` and `end` into `timeline.window`');
 
       const schema = stepByName('forensic_analysis')?.with?.schema as {
         properties: {
@@ -1474,7 +1486,7 @@ describe('Endpoint analysis run', () => {
 
     it('keeps older activity apart from the incident and out of containment on its own', () => {
       expect(message).toContain('Evidence inside the window is this incident');
-      expect(message).toContain('Evidence outside the window is history');
+      expect(message).toContain('Evidence outside the window with no tie is history');
       expect(message).toContain('`## Earlier activity`');
       expect(message).toContain('History alone does not make this a real incident');
       expect(message).toContain(
@@ -1485,6 +1497,19 @@ describe('Endpoint analysis run', () => {
         properties: { rationale: { description: string } };
       };
       expect(schema.properties.rationale.description).toContain('`## Earlier activity`');
+    });
+
+    // Initial access routinely precedes the first alert by hours or days. A narrow
+    // window must not push patient zero into "earlier activity": reaching it through a
+    // tie from inside the window makes it part of this incident, and it goes in the
+    // timeline with its real timestamp.
+    it('lets the agent follow initial access back past the window and keep it in the timeline', () => {
+      const flat = message.replace(/\s+/g, ' ');
+      expect(flat).toContain('or the initial access that led to it');
+      expect(flat).toContain('Evidence you reached by following such a tie is');
+      expect(flat).toContain('put it in `timeline.events` with');
+      expect(flat).toContain('Patient zero is often before the window');
+      expect(flat).toContain('Tied findings belong in');
     });
   });
 

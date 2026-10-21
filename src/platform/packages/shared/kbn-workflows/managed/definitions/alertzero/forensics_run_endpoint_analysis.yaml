@@ -65,9 +65,14 @@ consts:
   # Fallback when the KI carries no `attributes.autonomy`.
   default_autonomy: manual
   # Hours added on each side of the incident window (earliest to latest cited
-  # alert) for the telemetry check and the agent's searches. Same ±2h the FP/TP
-  # analysis reads raw events over.
+  # alert) for the agent's searches. Kept narrow so older activity on the host
+  # does not read as this incident; the agent widens from inside the window by
+  # following a tie (process tree, file, hash, destination, account, initial access).
   incident_margin_hours: 2
+  # How far before the incident the telemetry check looks. It asks whether the
+  # host ships Defend telemetry at all, not what happened in the incident, so it
+  # is much wider than the agent's margin and open-ended toward now.
+  telemetry_gate_lookback_hours: 72
 
 steps:
   # A read error fails the run, leaving the indicator pending for the next
@@ -286,9 +291,8 @@ steps:
           # telemetry spends the indicator's single attempt on a 30m run that can
           # only report nothing.
           #
-          # Scoped to the padded incident window, not a lookback from now: telemetry
-          # from an older incident on the same host is not something this run can
-          # reconstruct, and the agent searches the same window.
+          # Telemetry existence check. Looks back over a longer time window
+          # because a miss here retires the indicator with no retry.
           #
           # Gated like the agent, so a retry of a finished analysis does not depend
           # on telemetry still being there. Fails the run on a read error, like the
@@ -309,8 +313,7 @@ steps:
                         host.name: "{{ steps.resolve_host.output.host_name }}"
                     - range:
                         "@timestamp":
-                          gte: "{{ steps.resolve_incident_window.output.start }}||-{{ consts.incident_margin_hours }}h"
-                          lte: "{{ steps.resolve_incident_window.output.end }}||+{{ consts.incident_margin_hours }}h"
+                          gte: "{{ steps.resolve_incident_window.output.start }}||-{{ consts.telemetry_gate_lookback_hours }}h"
 
           # `checked` tells "no telemetry" apart from "did not look": a skipped step
           # has no output, and that must not read as an empty index.
@@ -334,9 +337,9 @@ steps:
                 conversation_id: "{{ steps.resolve_request.output.investigation_id }}"
                 message: >-
                   No Elastic Defend telemetry was found for `{{ steps.resolve_host.output.host_name }}`
-                  in `logs-endpoint.events.*` between `{{ steps.resolve_incident_window.output.start }}`
-                  and `{{ steps.resolve_incident_window.output.end }}` (plus {{ consts.incident_margin_hours }}h
-                  on each side), so endpoint analysis was not run.
+                  in `logs-endpoint.events.*` from {{ consts.telemetry_gate_lookback_hours }}h before the
+                  incident window (`{{ steps.resolve_incident_window.output.start }}` to
+                  `{{ steps.resolve_incident_window.output.end }}`) until now, so endpoint analysis was not run.
 
           # Record the attempt before the agent. A later run reads it back from the
           # indicator and does not start another analysis. `attributes` merges, so
@@ -479,12 +482,17 @@ steps:
 
                 - Call the skill's tools with `start`, `end`, and `margin_hours` set to the incident window and
                   margin above. Do not use `time_window_hours`. Do not do date arithmetic yourself: the tools
-                  return the exact `searched_window`. Copy it into `timeline.window`.
-                - Scope every ES|QL query to that `searched_window`. Widen a query only to follow a process tree,
-                  file, hash, destination, or account you found inside the window, and say that you did.
-                - Evidence inside the window is this incident. Keep `timeline.events` to it.
-                - Evidence outside the window is history. Report it under `## Earlier activity` in `rationale`,
-                  with its dates, and say it is outside the window.
+                  return the exact `searched_window`. Copy its `start` and `end` into `timeline.window`.
+                - Scope every ES|QL query to that `searched_window`. Widen a query only to follow a tie from
+                  inside the window: the same process tree, file, hash, destination, or account,
+                  or the initial access that led to it (how the earliest in-window process or file got onto
+                  the host). Say that you widened, and how far.
+                - Evidence inside the window is this incident.
+                  Evidence you reached by following such a tie is this incident too, even when it is earlier
+                  than the window: put it in `timeline.events` with its real timestamp, and name the tie in
+                  its `description`. Patient zero is often before the window.
+                - Evidence outside the window with no tie is history. Report it under `## Earlier activity` in
+                  `rationale`, with its dates, and say it is outside the window. Keep it out of `timeline.events`.
                   History alone does not make this a real incident and does not justify containment.
                 - Containment based on history needs a concrete tie to this incident: the same process tree,
                   file, hash, destination, or account seen inside the window. Name the tie in that action's
@@ -496,8 +504,9 @@ steps:
                   Say why the evidence supports containment, or why it does not. Name the window you searched.
                 - Then these headings, each with a bullet list. Omit a heading that has nothing to report:
                   - `## Affected hosts`. One bullet per host. Name the host and its role.
-                  - `## Earlier activity`. One bullet per finding outside the incident window. Give its date,
-                    what it was, and whether anything ties it to this incident.
+                  - `## Earlier activity`. One bullet per finding outside the incident window that you could
+                    not tie to this incident. Give its date and what it was.
+                    Tied findings belong in `timeline.events`, not here.
                   - `## Data gaps`. One bullet per gap. Name the telemetry that is missing.
                 - Do not list the actions. `recommendedActions` carries each action, and each card's
                   `title` and `comment` name its target and the evidence.
