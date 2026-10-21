@@ -18,7 +18,7 @@ export const deleteAttachmentsStepDefinition = (
   createServerStepDefinition({
     ...deleteAttachmentsStepCommonDefinition,
     handler: async (context) => {
-      const { case_id, ids } = context.input;
+      const { case_id, ids, include_related: includeRelated } = context.input;
 
       try {
         const casesClient = await getCasesClientFromStepsContext(context, getCasesClient);
@@ -26,6 +26,7 @@ export const deleteAttachmentsStepDefinition = (
         await casesClient.attachments.bulkDelete({
           caseId: case_id,
           savedObjectIds: ids,
+          includeRelated,
         });
 
         return {

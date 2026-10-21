@@ -140,11 +140,15 @@ export const manageAttachmentsTool = (
     tags: ['cases'],
     excludeFromMcp: true,
     handler: async (args, toolContext) => {
-      const { mode, case_id, attachments, ids, ...rest } = args;
+      const { mode, case_id, attachments, ids, include_related, ...rest } = args;
 
       if (mode === 'delete_attachments') {
         // Deletion returns ids only, so there is no case to emit as an attachment.
-        const input = deleteAttachmentsStepCommonDefinition.inputSchema.parse({ case_id, ids });
+        const input = deleteAttachmentsStepCommonDefinition.inputSchema.parse({
+          case_id,
+          ids,
+          include_related,
+        });
         return invokeStepHandler(deleteAttachmentsStepDef, input, toolContext);
       }
 

@@ -129,6 +129,26 @@ describe('manageAttachmentsTool', () => {
     });
   });
 
+  it('passes include_related to the cases client', async () => {
+    const tool = buildTool(buildRegistry([]), true);
+
+    await tool.handler(
+      {
+        mode: 'delete_attachments',
+        case_id: 'case-1',
+        ids: ['a-1'],
+        include_related: false,
+      } as never,
+      buildToolContext()
+    );
+
+    expect(casesClient.attachments.bulkDelete).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      savedObjectIds: ['a-1'],
+      includeRelated: false,
+    });
+  });
+
   it('throws when a deletion fails', async () => {
     casesClient.attachments.bulkDelete.mockRejectedValue(new Error('Forbidden'));
     const tool = buildTool(buildRegistry([]), true);

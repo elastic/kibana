@@ -48,6 +48,18 @@ describe('deleteAttachmentsStepDefinition', () => {
     });
   });
 
+  it('passes include_related to attachments.bulkDelete', async () => {
+    const { definition, bulkDelete } = setup();
+
+    await definition.handler(createContext({ ...validInput, include_related: false }));
+
+    expect(bulkDelete).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      savedObjectIds: ['a-1', 'a-2'],
+      includeRelated: false,
+    });
+  });
+
   it('returns each deleted id once when the input repeats ids', async () => {
     const { definition } = setup();
 

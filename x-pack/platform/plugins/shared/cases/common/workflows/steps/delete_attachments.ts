@@ -23,6 +23,12 @@ const InputSchema = CasesStepCaseIdSchema.extend({
   ids: IdsSchema.describe(
     "The `id` of each attachment to delete, from `cases.getAllAttachments`. Use the attachment's own `id`, not its `attachmentId`, which points to an alert, event, or saved object."
   ),
+  include_related: z
+    .boolean()
+    .optional()
+    .describe(
+      'Also delete the attachments that the deleted ones brought to the case, such as the alerts of an attack. Default: true.'
+    ),
 });
 
 const OutputSchema = z.object({
