@@ -244,8 +244,16 @@ export const EntitiesGrid: React.FC<EntitiesGridProps> = ({
   const gridColumns = useMemo(() => [...columns, ...extraColumns], [columns, extraColumns]);
 
   const prefetchChildren = useCallback(
-    (entityId: string) =>
-      prefetch(getGroupRecordsOptions(entityId, timeRange, keepFields, gridColumns)),
+    (entityId: string) => {
+      const { mainEntity, aliases } = getGroupRecordsOptions(
+        entityId,
+        timeRange,
+        keepFields,
+        gridColumns
+      );
+      prefetch(mainEntity);
+      prefetch(aliases);
+    },
     [prefetch, timeRange, keepFields, gridColumns]
   );
 
