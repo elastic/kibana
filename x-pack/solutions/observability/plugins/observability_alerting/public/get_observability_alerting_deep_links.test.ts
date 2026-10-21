@@ -33,12 +33,12 @@ const visibleInById = (caps?: Capabilities): Record<string, AppDeepLinkLocations
   );
 
 describe('getObservabilityAlertingDeepLinks', () => {
-  it('marks every surface searchable when capabilities are omitted, except Rule Library', () => {
+  it('marks every surface searchable when capabilities are omitted', () => {
     expect(visibleInById()).toEqual({
       [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: SEARCHABLE,
       [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: SEARCHABLE,
       [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: SEARCHABLE,
-      [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
+      [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: SEARCHABLE,
       [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: SEARCHABLE,
       [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: SEARCHABLE,
     });
@@ -67,24 +67,24 @@ describe('getObservabilityAlertingDeepLinks', () => {
       });
     });
 
-    it('offers Rules V2 but not Rules V1 to a v2 rules-read user', () => {
+    it('offers Rules V2 and Rule Library but not Rules V1 to a v2 rules-read user', () => {
       expect(visibleInById(capabilities({ alerting_v2_rules: { read: true } }))).toEqual({
         [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: SEARCHABLE,
-        [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
+        [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: SEARCHABLE,
         [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
         [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
       });
     });
 
-    it('offers Rules V2 but hides Rule Library when the user has v2 rules write', () => {
+    it('offers Rules V2 and Rule Library when the user has v2 rules write', () => {
       expect(visibleInById(capabilities({ alerting_v2_rules: { all: true, read: true } }))).toEqual(
         {
           [OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID]: [],
           [OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]: [],
           [OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]: SEARCHABLE,
-          [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: [],
+          [OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]: SEARCHABLE,
           [OBSERVABILITY_ALERTING_ACTION_POLICIES_DEEP_LINK_ID]: [],
           [OBSERVABILITY_ALERTING_EXECUTION_HISTORY_DEEP_LINK_ID]: [],
         }
@@ -147,6 +147,7 @@ describe('getObservabilityAlertingDeepLinks', () => {
       );
       expect(result[OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]).toEqual(SEARCHABLE);
       expect(result[OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]).toEqual(SEARCHABLE);
+      expect(result[OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]).toEqual(SEARCHABLE);
     });
   });
 });

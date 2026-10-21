@@ -9,7 +9,6 @@
       "platform/packages/shared/ml/aiops_log_rate_analysis",
       "platform/plugins/shared/aiops"
     ],
-    "xpack.aiAnonymization": "platform/packages/shared/ai-infra/ai-anonymization-server",
     "xpack.aiAnonymizationSettings": "platform/plugins/private/ai_anonymization_settings",
     "xpack.aiAssistant": [
       "platform/packages/shared/kbn-ai-assistant",
@@ -59,6 +58,7 @@
     "xpack.dataQuality": "platform/plugins/shared/data_quality",
     "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
+    "xpack.digitalExperience": "solutions/observability/plugins/digital_experience",
     "xpack.discover": "platform/plugins/private/discover_enhanced",
     "xpack.createClassicStreamFlyout": "platform/packages/shared/kbn-classic-stream-flyout",
     "xpack.crossClusterReplication": "platform/plugins/private/cross_cluster_replication",
@@ -232,11 +232,12 @@
     "xpack.sampleDataIngest": "platform/plugins/shared/sample_data_ingest",
     "xpack.serverlessWorkplaceAI": "solutions/workplaceai/plugins/serverless_workplace_ai",
     "xpack.sloShared": "platform/plugins/shared/slo_shared",
-    "xpack.workplaceai": "solutions/workplaceai/plugins/workplace_ai_app"
+    "xpack.workplaceai": "solutions/workplaceai/plugins/workplace_ai_app",
+    "xpack.entityInventoryApp": ["solutions/observability/plugins/entity_inventory_app"]
+
   },
   "exclude": [
     "examples",
-    "platform/plugins/shared/agent_builder_workflows",
     "platform/packages/shared/file-upload",
     "platform/packages/shared/kbn-ingest-pipeline-json-editor",
     "platform/packages/shared/kbn-search-index-documents",
