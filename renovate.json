@@ -916,7 +916,7 @@
     },
     {
       "groupName": "typescript",
-      "matchDepNames": ["typescript", "tsrs", "oxlint-tsgolint"],
+      "matchDepNames": ["typescript", "typescript-7", "oxlint-tsgolint"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
