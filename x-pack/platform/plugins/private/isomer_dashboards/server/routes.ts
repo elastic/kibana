@@ -15,7 +15,7 @@ import {
   type PinnedControl,
 } from '@kbn/isomer-lowering';
 import { dashboardChartSize } from '@kbn/isomer-primitives-dashboard';
-import { CARD_CONTENT_WIDTH, kibanaCardFrame } from '@kbn/isomer-theme';
+import { cardContentWidth, kibanaCardFrame } from '@kbn/isomer-theme';
 
 import { API_BASE, type DashboardLayout, PAGE_WIDTH } from '../common';
 import type { IsomerDashboardsStartDeps } from './types';
@@ -97,6 +97,7 @@ export const registerRoutes = (
   ) => {
     const [, { isomer, dataViews }] = await getStartServices();
     const drawing = await isomer.getDrawing();
+    const ems = isomer.getEms();
     const core = await context.core;
     const exporter = core.savedObjects.getExporter(core.savedObjects.client);
     const stream = await exporter.exportByObjects({
@@ -145,6 +146,8 @@ export const registerRoutes = (
         return { columns, values } as unknown as EsqlResponse;
       },
       search: (index, body) => es.search({ index, ...body }),
+      // The drawing is light, so an auto-selected basemap is too.
+      ...(ems ? { mapServices: ems } : {}),
     });
     const href = `${request.url.origin}${http.basePath.get(
       request
@@ -161,7 +164,7 @@ export const registerRoutes = (
     const options: DrawOptions = {
       width: page,
       sizeFor: dashboardChartSize(
-        page - (kibanaCardFrame.defaultWidth - CARD_CONTENT_WIDTH)
+        page - (kibanaCardFrame.defaultWidth - cardContentWidth())
       ) as DrawOptions['sizeFor'],
       hintFor: (node) => {
         const hint = node.id === undefined ? undefined : hints[node.id];
