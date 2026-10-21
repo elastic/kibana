@@ -49,6 +49,7 @@ export const EmbeddableRenderer = <
         internalApi: PresentationPanelProps<Api>['componentInternalApi'];
         Panel: React.ComponentType<PresentationPanelProps<Api>>;
         phaseTracker: PhaseTracker;
+        panelColor: PresentationPanelProps['panelColor'];
       }
     | undefined
   >();
@@ -93,6 +94,7 @@ export const EmbeddableRenderer = <
         internalApi,
         Panel: PresentationPanel,
         phaseTracker,
+        panelColor: factory?.panelColor,
       });
     }
 
@@ -137,6 +139,7 @@ export const EmbeddableRenderer = <
       componentInternalApi={value.internalApi}
       hidePanelChrome={hidePanelChrome}
       {...panelProps}
+      panelColor={value.panelColor ?? panelProps?.panelColor}
     />
   );
 };

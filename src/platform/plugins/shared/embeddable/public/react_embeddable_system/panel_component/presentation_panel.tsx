@@ -38,6 +38,7 @@ const PresentationPanelChrome = <
   showShadow,
   showBorder,
   showBadges,
+  panelColor,
   getActions,
   actionPredicate,
   titleHighlight,
@@ -141,6 +142,7 @@ const PresentationPanelChrome = <
       <EuiPanel
         role="figure"
         paddingSize="none"
+        color={panelColor}
         className={classNames('embPanel', {
           'embPanel--editing': viewMode === 'edit',
         })}

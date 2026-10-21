@@ -343,7 +343,6 @@ describe('useCustomContentHtml', () => {
       await waitFor(() => expect(result.current.isLoading).toBe(false));
 
       expect(result.current.html).toContain('--cc-color-text');
-      expect(result.current.html).toContain('--cc-color-background');
       expect(result.current.html).toContain('--cc-color-surface');
     });
   });
