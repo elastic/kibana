@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { Entity } from '../../../../../common/api/entity_analytics';
+import type { EntityViewMode } from '../../../../../common/entity_analytics/entity_store/resolution_group';
 import { ObservedDataSection } from '../../shared/components/observed_data_section';
 import { useAnomalyOverview } from '../../../../entity_analytics/api/hooks/use_anomaly_overview';
 import { useAnomalyPrivileges } from '../../../../entity_analytics/api/hooks/use_anomaly_privileges';
@@ -68,10 +69,14 @@ export interface ContentProps {
   refetchEntityRecord?: () => void;
   /** When true (i.e. entity store v2 enabled but no entity found), hide entity highlights and risk score. */
   noEntityInStore?: boolean;
+  /** True while the entity store record is being resolved (v2); the AI summary waits for it. */
+  isEntityRecordLoading?: boolean;
   /** When `true`, hide the legacy asset criticality accordion. Required so every call site wires it explicitly. */
   entityStoreV2Enabled: boolean;
   /** Entity store entity ID for the host. */
   entityStoreEntityId?: string;
+  /** Entity view mode of the panel; `resolved` loads anomalies and the AI summary for the whole resolution group. */
+  mode?: EntityViewMode;
   /** See {@link RiskSummaryProps.prefetchedResolutionRisk}. */
   prefetchedResolutionRisk?: EntityRiskScore<EntityType.host>;
   /**
@@ -122,8 +127,10 @@ export const Content = ({
   aliasRecords,
   refetchEntityRecord,
   noEntityInStore = false,
+  isEntityRecordLoading = false,
   entityStoreV2Enabled,
   entityStoreEntityId,
+  mode,
   prefetchedResolutionRisk,
   enableGraphAndResolutionNavigation = true,
   hideHeaderIcons = false,
@@ -140,6 +147,7 @@ export const Content = ({
   const loadAnomalies = isAnomalyDetailsEnabled && hasAnomalyPrivileges && !!entityStoreEntityId;
   const anomalyOverview = useAnomalyOverview({
     entityId: entityStoreEntityId ?? '',
+    mode,
     entityType: EntityType.host,
     enabled: loadAnomalies,
   });
@@ -159,6 +167,7 @@ export const Content = ({
           openDetailsPanel={enableGraphAndResolutionNavigation ? openDetailsPanel : undefined}
           onShowEntity={onShowEntity}
           hideHeaderIcons={hideHeaderIcons}
+          mode={mode}
         />
         <EuiHorizontalRule />
       </>
@@ -172,6 +181,8 @@ export const Content = ({
           entityType={EntityType.host}
           entityRecord={entityRecord}
           refetchEntityRecord={refetchEntityRecord}
+          mode={mode}
+          isEntityRecordLoading={isEntityRecordLoading}
         />
       )}
       {!noEntityInStore &&

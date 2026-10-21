@@ -13,7 +13,7 @@ import {
   CHANGE_POINT_TYPES,
   severitySchema,
   MAX_ID_LENGTH,
-  MAX_ASSESSMENT_NOTE_LENGTH,
+  MAX_TEXT_LENGTH,
   type ChangePointType,
   type Detection,
   type InvestigationRunStatus,
@@ -373,7 +373,7 @@ const eventsUpdateRoute = createServerRoute({
     }),
     body: z.object({
       status: significantEventManualStatusSchema,
-      assessment_note: z.string().max(MAX_ASSESSMENT_NOTE_LENGTH).optional(),
+      assessment_note: z.string().max(MAX_TEXT_LENGTH).optional(),
     }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
