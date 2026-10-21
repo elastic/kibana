@@ -7,20 +7,26 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
-import { renderElasticManifest, writeElasticManifest } from './elastic_manifest';
+import {
+  findElasticSecretCredentials,
+  renderElasticManifest,
+  writeElasticManifest,
+} from './elastic_manifest';
+
+const connector = (connectorId: string) => ({ kind: 'connector' as const, connectorId });
 
 describe('renderElasticManifest', () => {
   it('tells the agent which connector id unlocks the credentials', () => {
-    const content = renderElasticManifest('elasticsearch-telemetry');
+    const content = renderElasticManifest(connector('elasticsearch-telemetry'));
 
     expect(content).toContain('`connector_id: "elasticsearch-telemetry"`');
     expect(content).toContain('`CONNECTOR_CONFIG_URL`');
-    expect(content).toContain('`CONNECTOR_SECRET_PASSWORD`');
+    expect(content).toContain('`CONNECTOR_HEADER_AUTHORIZATION`');
     expect(content).toContain('never hard-code their values');
   });
 
   it('documents the readable indices and a query example', () => {
-    const content = renderElasticManifest('elasticsearch-telemetry');
+    const content = renderElasticManifest(connector('elasticsearch-telemetry'));
 
     expect(content).toContain('`logs-*`, `metrics-*`, `traces-*`');
     expect(content).toContain('"$CONNECTOR_CONFIG_URL/_remote/info"');
@@ -28,7 +34,7 @@ describe('renderElasticManifest', () => {
   });
 
   it('uses operator-supplied remote index guidance and bounds telemetry queries', () => {
-    const content = renderElasticManifest('remote-telemetry', {
+    const content = renderElasticManifest(connector('remote-telemetry'), {
       readableIndices: 'Read `logging-region:logs-service-*`; no local telemetry is available.',
     });
 
@@ -39,6 +45,46 @@ describe('renderElasticManifest', () => {
     expect(content).toContain('Name each remote explicitly');
     expect(content).toContain('never use wildcard remote names');
   });
+
+  it('steers remote queries to a specific data stream instead of logs-*', () => {
+    const content = renderElasticManifest(connector('remote-telemetry'));
+
+    expect(content).toContain('/_resolve/index/<remote>:logs-*nginx*');
+    expect(content).toContain('FROM $1:logs-nginx.error-*');
+    expect(content).not.toContain('FROM $1:logs-* ');
+  });
+
+  it('tells the agent which secret keys unlock the credentials', () => {
+    const content = renderElasticManifest({
+      kind: 'secrets',
+      urlKey: 'ELASTICSEARCH_ENDPOINT',
+      apiKeyKey: 'ELASTICSEARCH_API_KEY',
+    });
+
+    expect(content).toContain('`secret_keys: ["ELASTICSEARCH_ENDPOINT", "ELASTICSEARCH_API_KEY"]`');
+    expect(content).toContain('"$ELASTICSEARCH_ENDPOINT/_query?format=txt"');
+    expect(content).toContain('Authorization: ApiKey $ELASTICSEARCH_API_KEY');
+    expect(content).toContain('# secret_keys must be set on every one of these commands');
+    expect(content).not.toContain('CONNECTOR_');
+  });
+});
+
+describe('findElasticSecretCredentials', () => {
+  it.each(['ELASTICSEARCH_URL', 'ELASTICSEARCH_ENDPOINT'])(
+    'pairs %s with the API key secret',
+    (urlKey) => {
+      expect(
+        findElasticSecretCredentials(['GITHUB_TOKEN', urlKey, 'ELASTICSEARCH_API_KEY'])
+      ).toEqual({ kind: 'secrets', urlKey, apiKeyKey: 'ELASTICSEARCH_API_KEY' });
+    }
+  );
+
+  it.each([[['ELASTICSEARCH_URL']], [['ELASTICSEARCH_API_KEY']], [[]]])(
+    'returns nothing for the incomplete pair %j',
+    (secretKeys) => {
+      expect(findElasticSecretCredentials(secretKeys)).toBeUndefined();
+    }
+  );
 });
 
 describe('writeElasticManifest', () => {
@@ -48,7 +94,7 @@ describe('writeElasticManifest', () => {
 
     await writeElasticManifest({
       session,
-      connectorId: 'elasticsearch-telemetry',
+      credentials: connector('elasticsearch-telemetry'),
       logger: loggingSystemMock.createLogger(),
     });
 
@@ -66,7 +112,7 @@ describe('writeElasticManifest', () => {
       await expect(
         writeElasticManifest({
           session,
-          connectorId: 'telemetry',
+          credentials: connector('telemetry'),
           logger: loggingSystemMock.createLogger(),
         })
       ).rejects.toThrow('Failed to write sandbox telemetry guidance');

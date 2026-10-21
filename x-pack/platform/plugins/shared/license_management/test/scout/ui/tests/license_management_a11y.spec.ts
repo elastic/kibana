@@ -35,7 +35,8 @@ test.describe('License Management — accessibility', { tag: '@local-stateful-cl
 
     await test.step('upload license error panel', async () => {
       await page.testSubj.click('uploadLicenseButton');
-      await page.locator('[role="alert"]').waitFor({ state: 'visible' });
+      // Scoped to the app: Kibana's screen reader announcer is a role="alert" region too
+      await page.locator('.kbnAppWrapper [role="alert"]').waitFor({ state: 'visible' });
       await expectNoA11yViolations();
     });
 

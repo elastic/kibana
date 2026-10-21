@@ -67,4 +67,5 @@ export const getDiscoverSessionAttachmentType = () =>
       }),
     }),
     getAttachmentList: () => ({ children: DiscoverSessionAttachmentsTab }),
+    getCountLabel: ({ count }) => i18n.DISCOVER_SESSIONS_COUNT(count),
   });

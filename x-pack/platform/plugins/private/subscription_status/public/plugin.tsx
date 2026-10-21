@@ -18,7 +18,6 @@ import {
   registerSubscriptionStatusEvents,
 } from './telemetry';
 
-// Off by default: billing admins get the no-access tooltip in real Serverless environments.
 const ENABLED_FLAG = 'subscriptionStatus.enabled';
 
 interface SubscriptionStatusSetupDeps {
