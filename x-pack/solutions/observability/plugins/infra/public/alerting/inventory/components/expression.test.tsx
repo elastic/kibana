@@ -326,6 +326,81 @@ describe('Expression', () => {
     });
   });
 
+  describe('Node type change', () => {
+    const changeNodeType = async (
+      wrapper: ReturnType<typeof renderShallow>['wrapper'],
+      nodeType: string
+    ) => {
+      await act(async () => {
+        wrapper.find('[data-test-subj="forExpressionSelect"]').simulate('change', nodeType);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+    };
+
+    it('clears the metric when the node type changes', async () => {
+      const { wrapper, params } = renderShallow({ nodeType: 'host' });
+
+      await changeNodeType(wrapper, 'pod');
+
+      expect(params.criteria[0].metric).toBeUndefined();
+    });
+
+    it('clears a custom metric too', async () => {
+      const { wrapper, params } = renderShallow({
+        nodeType: 'host',
+        criteria: [
+          {
+            metric: 'custom',
+            customMetric: exampleCustomMetric,
+            timeSize: 1,
+            timeUnit: 'm',
+            threshold: [10],
+            comparator: COMPARATORS.GREATER_THAN,
+          },
+        ],
+      });
+
+      await changeNodeType(wrapper, 'pod');
+
+      expect(params.criteria[0].metric).toBeUndefined();
+    });
+
+    it('adds a new condition without a metric for non-host node types', () => {
+      const { wrapper, params } = renderShallow({ nodeType: 'pod' });
+
+      wrapper.find('[data-test-subj="infraExpressionsAddConditionButton"]').simulate('click');
+
+      expect(params.criteria).toHaveLength(2);
+      expect(params.criteria[1].metric).toBeUndefined();
+    });
+
+    it('adds a new condition with the default metric for hosts', () => {
+      const { wrapper, params } = renderShallow({ nodeType: 'host' });
+
+      wrapper.find('[data-test-subj="infraExpressionsAddConditionButton"]').simulate('click');
+
+      expect(params.criteria).toHaveLength(2);
+      expect(params.criteria[1].metric).toBe(defaultExpression.metric);
+    });
+
+    it('does not render the preview chart without a metric', () => {
+      const { wrapper } = renderShallow({
+        nodeType: 'pod',
+        criteria: [
+          {
+            timeSize: 1,
+            timeUnit: 'm',
+            threshold: [10],
+            comparator: COMPARATORS.GREATER_THAN,
+            metric: undefined,
+          },
+        ],
+      });
+
+      expect(wrapper.exists('[data-test-subj="preview-chart"]')).toBe(false);
+    });
+  });
+
   describe('using custom metrics', () => {
     it('should prefill the alert using the context metadata', async () => {
       const currentOptions = {
@@ -353,16 +428,22 @@ describe('Expression', () => {
 });
 
 describe('ExpressionRow', () => {
-  async function setup(expression: InventoryMetricConditions) {
+  async function setup(
+    expression: Omit<InventoryMetricConditions, 'metric'> & {
+      metric?: InventoryMetricConditions['metric'];
+    },
+    setRuleParams: () => void = () => {},
+    nodeType: InventoryItemType = 'host'
+  ) {
     const wrapper = mountWithIntl(
       <ExpressionRow
-        nodeType="host"
+        nodeType={nodeType}
         canDelete={false}
         remove={() => {}}
         addExpression={() => {}}
         key={1}
         expressionId={1}
-        setRuleParams={() => {}}
+        setRuleParams={setRuleParams}
         errors={{
           aggField: [],
           timeSizeUnit: [],
