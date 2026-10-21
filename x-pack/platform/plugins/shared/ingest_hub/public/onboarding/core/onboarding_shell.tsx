@@ -41,23 +41,38 @@ import {
   DetectAndReviewStep,
 } from '../step_components';
 
+// The page content is a column, so the step can be stretched to the height of the page and its
+// footer pushed to the bottom. EuiFlexGroup grows by default, which would spread any free space
+// between the sections of the page, so only the step container is allowed to grow.
 const stepLayoutCss = css`
   display: flex;
   flex-direction: column;
   flex-grow: 1;
+
+  > * {
+    flex-grow: 0;
+  }
+
+  > [data-test-subj='onboardingStepContainer'] {
+    flex-grow: 1;
+  }
 `;
 
-// Every step renders one root element with a `onboardingStep-*` test subject. Stretch it to the
-// height of the page so its last child, the footer, can be pushed to the bottom.
+// Every step renders one root element with a `onboardingStep-*` test subject. It fills the
+// container, and its children keep their natural height so that the free space ends up between
+// the content and the footer (see StepFooter).
 const stepFillCss = css`
   display: flex;
   flex-direction: column;
-  flex-grow: 1;
 
   > [data-test-subj^='onboardingStep-'] {
     display: flex;
     flex-direction: column;
     flex-grow: 1;
+
+    > * {
+      flex-grow: 0;
+    }
   }
 `;
 
@@ -240,7 +255,7 @@ export function OnboardingShell() {
           </EuiFlexGroup>
         ) : (
           CurrentStepComponent && (
-            <div css={stepFillCss}>
+            <div css={stepFillCss} data-test-subj="onboardingStepContainer">
               <CurrentStepComponent onContinue={onContinue} onBack={onBack} />
             </div>
           )
