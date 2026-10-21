@@ -110,7 +110,10 @@ export async function processJUnitReports(
           failure
         );
         const url = suiteIssue.github.htmlUrl;
-        suiteIssue.github.body = newBody;
+        // in dry-run nothing was written, so the next failure of the suite counts from the same body
+        if (updateGithub) {
+          suiteIssue.github.body = newBody;
+        }
         failure.githubIssue = url;
         failure.failureCount = updateGithub ? newCount : newCount - 1;
         pushMessage(
@@ -135,7 +138,9 @@ export async function processJUnitReports(
           failure
         );
         const url = existingIssue.github.htmlUrl;
-        existingIssue.github.body = newBody;
+        if (updateGithub) {
+          existingIssue.github.body = newBody;
+        }
         failure.githubIssue = url;
         failure.failureCount = updateGithub ? newCount : newCount - 1;
         pushMessage(`Test has failed ${newCount - 1} times on tracked branches: ${url}`);

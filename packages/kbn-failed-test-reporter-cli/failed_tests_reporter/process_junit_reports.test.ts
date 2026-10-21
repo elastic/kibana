@@ -229,13 +229,23 @@ describe('processJUnitReports flaky suite issues', () => {
   });
 
   it('shows the count the suite issue had without bumping it when GitHub updates are off', async () => {
-    const failures = [makeFailure(0)];
+    const failures = [makeFailure(0), makeFailure(1)];
     getFailures.mockReturnValue(failures);
-    const { params } = createParams([], [[failures[0], createSuiteIssue(failures[0])]]);
+    const suiteIssue = createSuiteIssue(failures[0]);
+    const { params } = createParams(
+      [],
+      [
+        [failures[0], suiteIssue],
+        [failures[1], suiteIssue],
+      ]
+    );
 
     await processJUnitReports(['report.xml'], { ...params, updateGithub: false });
 
     expect(failures[0].failureCount).toBe(4);
+    // nothing was written, so the second failure of the suite counts from the same body
+    expect(suiteIssue.github.body).toBe('suite body');
+    expect(updateSuiteIssue.mock.calls[1][1].github.body).toBe('suite body');
   });
 });
 
