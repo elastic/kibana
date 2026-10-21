@@ -22,14 +22,9 @@ const buildLifecycle = (data: Partial<RuleAttachmentData>) =>
       }
     : {};
 
-const buildMetadata = (metadata: Partial<RuleAttachmentData>['metadata']) => {
-  if (metadata) {
-    // `template` is server-managed and rejected by the write API.
-    const { template: _template, ...rest } = metadata;
-    return { metadata: rest };
-  }
-  return { metadata: metadata! };
-};
+const buildMetadata = (metadata: Partial<RuleAttachmentData>['metadata']) => ({
+  metadata: metadata!,
+});
 
 /**
  * Maps partial rule attachment data to the API request payload,

@@ -142,8 +142,6 @@ test.describe(
       });
 
       await test.step('the rule was created through the create API, not the rule template API', async () => {
-        const { items } = await apiServices.alertingV2.rules.find({ search: RULE_NAME });
-        expect(items[0]?.metadata?.template).toBeUndefined();
         expect(createRequestUrls).toHaveLength(1);
         expect(installRequestUrls).toHaveLength(0);
       });

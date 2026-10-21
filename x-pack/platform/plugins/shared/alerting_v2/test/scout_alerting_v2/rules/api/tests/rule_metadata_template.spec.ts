@@ -86,7 +86,7 @@ apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, (
 
       const getResponse = await apiClient.get(getRuleUrl(created.id), { headers: writerHeaders });
       expect(getResponse).toHaveStatusCode(200);
-      expect(getResponse.body.metadata).not.toHaveProperty('template');
+      expect(getResponse.body.metadata.template).toBeUndefined();
 
       const findResponse = await apiClient.get(
         `${testData.RULE_API_PATH}?filter=${encodeURIComponent(`id: "${created.id}"`)}`,
@@ -94,7 +94,7 @@ apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, (
       );
       expect(findResponse).toHaveStatusCode(200);
       const found = findResponse.body.items.find((item: { id: string }) => item.id === created.id);
-      expect(found?.metadata).not.toHaveProperty('template');
+      expect(found?.metadata.template).toBeUndefined();
 
       // The link stays in storage; only the public response omits it.
       const stored = await apiServices.alertingV2.ruleSavedObject.getAttributes(created.id);
@@ -113,7 +113,7 @@ apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, (
         body: { metadata: { name: 'update-keeps-template-renamed' } },
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.metadata).not.toHaveProperty('template');
+      expect(response.body.metadata.template).toBeUndefined();
 
       const stored = await apiServices.alertingV2.ruleSavedObject.getAttributes(created.id);
       expect(stored.metadata.template).toStrictEqual(TEMPLATE);
@@ -131,7 +131,7 @@ apiTest.describe('Rule metadata.template', { tag: '@local-stateful-classic' }, (
         body: buildCreateRuleData({ metadata: { name: 'upsert-keeps-template-replaced' } }),
       });
       expect(response).toHaveStatusCode(200);
-      expect(response.body.metadata).not.toHaveProperty('template');
+      expect(response.body.metadata.template).toBeUndefined();
 
       const stored = await apiServices.alertingV2.ruleSavedObject.getAttributes(created.id);
       expect(stored.metadata.template).toStrictEqual(TEMPLATE);

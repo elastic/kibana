@@ -141,7 +141,9 @@ test.describe(
         ruleId = rule.id;
         expect(rule.enabled).toBe(true);
         expect(rule.metadata.name).toBe(EDITED_RULE_NAME);
-        expect(rule.metadata.template).toStrictEqual({ id: TEMPLATE_ID });
+        // The template link is recorded in storage; the public response omits it.
+        const stored = await apiServices.alertingV2.ruleSavedObject.getAttributes(rule.id);
+        expect(stored.metadata.template).toStrictEqual({ id: TEMPLATE_ID });
       });
 
       await test.step('the install went through the rule template API exactly once', async () => {

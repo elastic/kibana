@@ -29,7 +29,7 @@ describe('RuleEventPublisher', () => {
     context = { request: httpServerMock.createKibanaRequest(), origin: 'internal' };
   });
 
-  type TestRule = Omit<EventRule, 'origin'>;
+  type TestRule = Omit<EventRule, 'origin' | 'templateId'>;
 
   const cases = [
     {
@@ -65,13 +65,23 @@ describe('RuleEventPublisher', () => {
   ];
 
   const withOrigin = (rules: TestRule[]): EventRule[] =>
-    rules.map((rule) => ({ ...rule, origin: { channel: 'api' as const } }));
+    rules.map((rule) => ({ ...rule, templateId: undefined, origin: { channel: 'api' as const } }));
 
   describe.each(cases)('$name origin', ({ emit }) => {
     it('carries the origin on every event', () => {
       emit(publisher, context, [
-        { ruleId: 'rule-1', spaceId: 'space-1', origin: { channel: 'ui', app: 'discover' } },
-        { ruleId: 'rule-2', spaceId: 'space-1', origin: { channel: 'ui', app: 'discover' } },
+        {
+          ruleId: 'rule-1',
+          spaceId: 'space-1',
+          templateId: undefined,
+          origin: { channel: 'ui', app: 'discover' },
+        },
+        {
+          ruleId: 'rule-2',
+          spaceId: 'space-1',
+          templateId: undefined,
+          origin: { channel: 'ui', app: 'discover' },
+        },
       ]);
 
       expect(eventBus.publish).toHaveBeenCalledTimes(2);
@@ -85,7 +95,12 @@ describe('RuleEventPublisher', () => {
 
     it('omits app when origin has none', () => {
       emit(publisher, context, [
-        { ruleId: 'rule-1', spaceId: 'space-1', origin: { channel: 'system' } },
+        {
+          ruleId: 'rule-1',
+          spaceId: 'space-1',
+          templateId: undefined,
+          origin: { channel: 'system' },
+        },
       ]);
 
       const [[event]] = eventBus.publish.mock.calls;

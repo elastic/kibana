@@ -60,14 +60,15 @@ apiTest.describe('Install rule template API', { tag: DEPLOYMENTS_WITH_ALERTING_V
       expect(response.body.metadata).toMatchObject({
         name: 'nginx-error-rate-edited',
         tags: ['nginx'],
-        template: { id: 'nginx-error-rate' },
       });
       expect(response.body.schedule).toStrictEqual(body.schedule);
       expect(response.body.enabled).toBe(true);
 
       const persisted = await apiServices.alertingV2.rules.get(response.body.id);
       expect(persisted.metadata.name).toBe('nginx-error-rate-edited');
-      expect(persisted.metadata.template).toStrictEqual({ id: 'nginx-error-rate' });
+      // The template link is recorded in storage; the public response omits it.
+      const stored = await apiServices.alertingV2.ruleSavedObject.getAttributes(response.body.id);
+      expect(stored.metadata.template).toStrictEqual({ id: 'nginx-error-rate' });
     }
   );
 
@@ -83,7 +84,9 @@ apiTest.describe('Install rule template API', { tag: DEPLOYMENTS_WITH_ALERTING_V
       });
 
       expect(response).toHaveStatusCode(201);
-      expect(response.body.metadata.template).toStrictEqual({ id: 'as-is' });
+      // The template link is recorded in storage; the public response omits it.
+      const stored = await apiServices.alertingV2.ruleSavedObject.getAttributes(response.body.id);
+      expect(stored.metadata.template).toStrictEqual({ id: 'as-is' });
     }
   );
 
