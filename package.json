@@ -871,6 +871,7 @@
     "@kbn/isomer-lowering": "workspace:*",
     "@kbn/isomer-plugin": "workspace:*",
     "@kbn/isomer-primitives-charts": "workspace:*",
+    "@kbn/isomer-primitives-dashboard": "workspace:*",
     "@kbn/isomer-primitives-maps": "workspace:*",
     "@kbn/isomer-primitives-vega": "workspace:*",
     "@kbn/isomer-theme": "workspace:*",

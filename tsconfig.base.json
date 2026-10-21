@@ -1707,6 +1707,8 @@
       "@kbn/isomer-plugin/*": ["./x-pack/platform/plugins/shared/isomer/*"],
       "@kbn/isomer-primitives-charts": ["./x-pack/platform/packages/shared/isomer/isomer-primitives-charts"],
       "@kbn/isomer-primitives-charts/*": ["./x-pack/platform/packages/shared/isomer/isomer-primitives-charts/*"],
+      "@kbn/isomer-primitives-dashboard": ["./x-pack/platform/packages/shared/isomer/isomer-primitives-dashboard"],
+      "@kbn/isomer-primitives-dashboard/*": ["./x-pack/platform/packages/shared/isomer/isomer-primitives-dashboard/*"],
       "@kbn/isomer-primitives-maps": ["./x-pack/platform/packages/shared/isomer/isomer-primitives-maps"],
       "@kbn/isomer-primitives-maps/*": ["./x-pack/platform/packages/shared/isomer/isomer-primitives-maps/*"],
       "@kbn/isomer-primitives-vega": ["./x-pack/platform/packages/shared/isomer/isomer-primitives-vega"],
