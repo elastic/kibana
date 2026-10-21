@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ScopedModel } from '@kbn/agent-builder-server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type {
   HuntBehaviorArticleContext,
   HuntCompleteness,
@@ -22,7 +22,7 @@ import {
   huntCompletenessOf,
 } from './common/completeness';
 import { resolveHuntScope } from './common/resolve_index_scope';
-import { resolveTier2Targets } from './common/resolve_tier2_targets';
+import { needsModelDatasetMatch, resolveTier2Targets } from './common/resolve_tier2_targets';
 import type { Tier2TargetSource } from './common/resolve_tier2_targets';
 import { generateRecommendations } from './common/build_recommendations';
 import { buildHuntHeadline, buildHuntNarrative } from './common/build_hunt_narrative';
@@ -33,6 +33,12 @@ import type { ResolvedHuntScope } from './common/resolve_index_scope';
 import type { HuntScopeReportContext } from './common/match_hunt_datasets';
 import { SUMMARIZE_HIT_SOURCE_FIELDS, summarizeHit } from './common/summarize_hit';
 import { huntForThreat, emptyHuntForThreatResult } from './tier1/hunt_for_threat';
+import type { HuntBehaviorModels, HuntModels, HuntModelTier } from './types';
+import {
+  TIER2_MODEL_TIERS,
+  describeModelTiers,
+  unavailableModelTiers,
+} from './common/hunt_model_tiers';
 import type { HuntForThreatServiceResult } from './tier1/types';
 import { huntBehavior } from './tier2/hunt_behavior';
 import type { HuntBehaviorResult } from './tier2/types';
@@ -127,6 +133,13 @@ export interface HuntCoordinatorCoreResult {
   tier1: HuntCoordinatorTier1;
   tier2?: HuntCoordinatorTier2;
   tier2_skipped_reason?: HuntCoordinatorTier2SkipReason;
+  /**
+   * The model tiers that had no usable model on this run, in tier order; absent when every
+   * tier resolved. Reported whether or not the run needed them: a missing Efficient model
+   * quietly degrades dataset matching and recommendations without skipping anything, and a
+   * missing Frontier model is what makes Tier 2 report `no_inference`.
+   */
+  unavailable_model_tiers?: HuntModelTier[];
   message: string;
   next_step: string;
   /**
@@ -193,6 +206,7 @@ const MAX_MATCHED_INDICES = 50;
 export interface HuntCoordinatorClients {
   esClient: ElasticsearchClient;
   reportsEsClient: ElasticsearchClient;
+  mitreDataClient?: MitreAttackDataClient;
 }
 
 const clampHuntReportText = (value: string | undefined): string | undefined => {
@@ -441,8 +455,8 @@ const coordinatorGaps = ({
 };
 
 const huntCoordinatorCore = async (
-  { esClient, reportsEsClient }: HuntCoordinatorClients,
-  model: ScopedModel | undefined,
+  { esClient, reportsEsClient, mitreDataClient }: HuntCoordinatorClients,
+  models: HuntModels,
   logger: Logger,
   params: HuntCoordinatorParams,
   narrativeContext: HuntNarrativeContext
@@ -710,12 +724,18 @@ const huntCoordinatorCore = async (
   // Stage 2: what Tier 2 may read, chosen now that the report was read and Tier 1 ran.
   // The model is a fallback inside it and spends tokens, so a run that Tier 2 will not
   // reach gets the deterministic targets only; they still describe the run.
-  const tier2Reachable = gatedSkipReason === null && model !== undefined && Boolean(text);
+  // The one place a hunt workload is mapped to a tier (see `HuntModels` for the reasoning).
+  // Both Tier 2 jobs run on Frontier, so Tier 2 is unreachable without it.
+  const tier2Models: HuntBehaviorModels | undefined = models.frontier
+    ? { extraction: models.frontier, esql: models.frontier }
+    : undefined;
+  const tier2Reachable = gatedSkipReason === null && tier2Models !== undefined && Boolean(text);
   const targets = await resolveTier2Targets({
     scope,
     tier1: tier1Raw,
     report: scopeReport,
-    model: tier2Reachable ? model : undefined,
+    // Dataset matching: a selection task from a list, so the efficient tier.
+    model: tier2Reachable ? models.efficient : undefined,
     logger,
   });
 
@@ -785,12 +805,12 @@ const huntCoordinatorCore = async (
     });
   }
 
-  if (!model) {
+  if (!tier2Models) {
+    const missingTiers = describeModelTiers(unavailableModelTiers(models, TIER2_MODEL_TIERS));
     return tier1Only({
       reason: 'no_inference',
-      message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no GenAI connector).`,
-      nextStep:
-        'Tier 2 requires a GenAI connector. Configure one via Stack Management → Connectors.',
+      message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no model available for the ${missingTiers}).`,
+      nextStep: `Tier 2 needs a model for the ${missingTiers}. Create a GenAI connector if there is none, then pick it for the tier in Stack Management → Feature Settings.`,
     });
   }
 
@@ -827,7 +847,23 @@ const huntCoordinatorCore = async (
   // Nothing to point Tier 2 at is not a failure to run it: every signal came up empty,
   // and a later run over the same data finds the same. `always` does not override it,
   // because a query with no allowed index could only be refused at the source gate.
+  //
+  // That only holds when every signal was consulted. Choosing a dataset by model is the last
+  // one, and without a model for the Efficient tier it never ran, so "no targets" says nothing
+  // about this report and a run with the model restored may find some. That is a Tier 2 that
+  // was requested but could not run, which stays retryable, and not a report to retire.
   if (targets.tier2_targets.length === 0) {
+    if (
+      !models.efficient &&
+      needsModelDatasetMatch({ scope, tier1: tier1Raw, report: scopeReport })
+    ) {
+      const missingTier = describeModelTiers(['efficient']);
+      return tier1Only({
+        reason: 'no_inference',
+        message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no model available for the ${missingTier} to choose where to hunt).`,
+        nextStep: `Tier 2 could not choose where to hunt because the ${missingTier} has no model. Create a GenAI connector if there is none, then pick it for the tier in Stack Management → Feature Settings.`,
+      });
+    }
     return tier1Only({
       reason: 'no_tier2_targets',
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no_tier2_targets).`,
@@ -853,7 +889,7 @@ const huntCoordinatorCore = async (
   let tier2Raw: HuntBehaviorResult;
   try {
     tier2Raw = await huntBehavior(
-      model,
+      tier2Models,
       logger,
       {
         text,
@@ -868,7 +904,8 @@ const huntCoordinatorCore = async (
         // gates, the hit bar) treats this as the set Tier 2 may read.
         allowed_indices: targets.tier2_targets,
       },
-      esClient
+      esClient,
+      mitreDataClient
     );
   } catch (err) {
     logger.warn(`hunt_coordinator: tier2 huntBehavior failed — ${(err as Error).message}`);
@@ -968,7 +1005,8 @@ const huntCoordinatorCore = async (
     .join('\n');
 
   const recommendations = await generateRecommendations({
-    model,
+    // A few short grounded lines with a template floor, so the efficient tier.
+    model: models.efficient,
     logger,
     result: coreResult,
     context: recommendationContext,
@@ -984,12 +1022,15 @@ const huntCoordinatorCore = async (
  */
 export const huntCoordinator = async (
   clients: HuntCoordinatorClients,
-  model: ScopedModel | undefined,
+  models: HuntModels,
   logger: Logger,
   params: HuntCoordinatorParams
 ): Promise<HuntCoordinatorResult> => {
   const narrativeContext: HuntNarrativeContext = {};
-  const core = await huntCoordinatorCore(clients, model, logger, params, narrativeContext);
+  const coreResult = await huntCoordinatorCore(clients, models, logger, params, narrativeContext);
+  const unavailable = unavailableModelTiers(models);
+  const core: HuntCoordinatorCoreResult =
+    unavailable.length > 0 ? { ...coreResult, unavailable_model_tiers: unavailable } : coreResult;
   return {
     ...core,
     headline: buildHuntHeadline(core),

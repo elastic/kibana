@@ -66,7 +66,7 @@ jest.mock('../hooks/use_fetch_source_features', () => ({
   }),
 }));
 
-jest.mock('../detection/change_point_lens_chart', () => ({
+jest.mock('../components/entities/detection/change_point_lens_chart', () => ({
   ChangePointLensChart: () => <div data-test-subj="nightshiftDetectionLensChart" />,
 }));
 
