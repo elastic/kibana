@@ -11,12 +11,6 @@ import { parsePresetSchedule } from '../../../common/automation_schedule';
 import type { InvestigationNotificationDestination } from '../../../common';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow, OverlapPolicy } from './types';
 
-// alerting.v1.alertStatusChanged uses 'active'/'recovered'; our AlertStatus uses 'active'/'inactive'.
-const ALERT_STATUS_TO_KQL: Record<string, string> = {
-  active: 'active',
-  inactive: 'recovered',
-};
-
 // Defaults to the Elastic Slack app when no connector is selected; the channel remains user-selected.
 // Mirrors significant_events/server/lib/slack_app/service.ts, which depends on this plugin.
 export const ELASTIC_APPS_SLACK_CONNECTOR_ID = 'elastic-apps-slack';
@@ -63,10 +57,16 @@ const OVERLAP_POLICY_TO_STRATEGY: Record<OverlapPolicy, string> = {
 };
 
 /** Generates a workflow document from an automation, serializing user input safely. */
-export function generateWorkflowYaml(
-  automationId: string,
-  automation: NightshiftAutomationAttributes
-): string {
+export function generateWorkflowYaml({
+  automationId,
+  automation,
+  serviceAccountId,
+}: {
+  automationId: string;
+  automation: NightshiftAutomationAttributes;
+  /** The account the automation runs as (`settings.run_as`); unbound when omitted. */
+  serviceAccountId?: string;
+}): string {
   const alertRows = automation.trigger.rows.filter((row): row is AlertRow => row.kind === 'alert');
   const slackRows = automation.trigger.rows.filter(isSlackRow);
   const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
@@ -96,6 +96,7 @@ export function generateWorkflowYaml(
     enabled: automation.isEnabled,
     tags: ['nightshift', 'automation'],
     settings: {
+      ...(serviceAccountId ? { run_as: serviceAccountId } : {}),
       // The automation starts first and waits for the investigation, so its deadline
       // needs extra time for setup and returning the investigation result.
       ...(automation.runtime.timeoutSeconds !== undefined
@@ -146,8 +147,8 @@ function generateAlertWorkflow(
         with: {
           automation_id: automationId,
           subject_type: alertRows.length > 0 ? 'alert' : 'manual',
-          subject_id: alertRows.length > 0 ? '{{ trigger.alert.uuid }}' : automationId,
-          title: alertRows.length > 0 ? '{{ trigger.rule.name }}' : automation.name,
+          subject_id: alertRows.length > 0 ? '{{ event.alert.uuid }}' : automationId,
+          title: alertRows.length > 0 ? '{{ event.rule.name }}' : automation.name,
           summary: automation.name,
           trigger_type: 'automatic',
           ...(automation.execution.promptTemplate
@@ -156,8 +157,27 @@ function generateAlertWorkflow(
           ...(automation.runtime.timeoutSeconds !== undefined
             ? { timeout_seconds: automation.runtime.timeoutSeconds }
             : {}),
+          ...(alertRows.length > 0 ? { context: buildAlertContext() } : {}),
           ...(notificationDestinations ? { notificationDestinations } : {}),
         },
+      },
+    ],
+  };
+}
+
+function buildAlertContext() {
+  return {
+    alerts: [
+      {
+        id: '${{ event.alert.uuid }}',
+        rule_id: '${{ event.rule.id }}',
+        rule_name: '${{ event.rule.name }}',
+        rule_type_id: '${{ event.rule.ruleTypeId }}',
+        rule_category: '${{ event.rule.ruleTypeName }}',
+        status: '${{ event.alert.status }}',
+        start:
+          '{{ event.alert.start | default: execution.startedAt | date: "%Y-%m-%dT%H:%M:%S.%L%:z" }}',
+        rule_tags: '${{ event.rule.tags }}',
       },
     ],
   };
@@ -210,7 +230,7 @@ type TriggerKind = 'alert' | 'slack' | 'schedule';
  * One investigation per alert and per Slack message, so a new one does not cancel or drop the
  * previous one. Scheduled runs have no event payload and share one concurrency key per automation.
  */
-const ALERT_CONCURRENCY_SUFFIX = '{{ trigger.alert.uuid }}';
+const ALERT_CONCURRENCY_SUFFIX = '{{ event.alert.uuid }}';
 const SLACK_CONCURRENCY_SUFFIX = '{{ event.channel }}-{{ event.messageId }}';
 
 function buildConcurrencyKey(
@@ -429,27 +449,18 @@ function buildCondition(rows: Array<Extract<NightshiftTriggerRow, { kind: 'alert
   return rowConditions.map((c) => `(${c})`).join(' OR ');
 }
 
-function buildRowCondition(row: Extract<NightshiftTriggerRow, { kind: 'alert' }>): string {
-  const parts: string[] = [];
+const ACTIVE_ALERT_CONDITION = 'event.alert.status: "active"';
 
-  if (row.alertStatus && row.alertStatus !== 'any') {
-    const kqlStatus = ALERT_STATUS_TO_KQL[row.alertStatus];
-    if (kqlStatus) {
-      parts.push(`alert.status: "${kqlStatus}"`);
-    }
-  }
+function buildRowCondition(row: Extract<NightshiftTriggerRow, { kind: 'alert' }>): string {
+  const parts: string[] = [ACTIVE_ALERT_CONDITION];
 
   if (row.ruleNamePattern) {
-    const mode = row.ruleNameMatchMode ?? 'substring';
-    if (mode === 'substring') {
-      parts.push(`rule.name: "*${escapeKql(row.ruleNamePattern)}*"`);
-    }
-    // regex mode: KQL does not natively support regex — filter applied at investigation time.
+    parts.push(`event.rule.name: *${escapeKqlWildcardTerm(row.ruleNamePattern)}*`);
   }
 
   const ruleMatchers = [
-    ...(row.ruleNames ?? []).map((name) => `rule.name: "${escapeKql(name)}"`),
-    ...(row.tags ?? []).map((tag) => `rule.tags: "${escapeKql(tag)}"`),
+    ...(row.ruleNames ?? []).map((name) => `event.rule.name: "${escapeKql(name)}"`),
+    ...(row.tags ?? []).map((tag) => `event.rule.tags: "${escapeKql(tag)}"`),
   ];
   if (ruleMatchers.length > 0) {
     parts.push(ruleMatchers.length === 1 ? ruleMatchers[0] : `(${ruleMatchers.join(' OR ')})`);
