@@ -45,9 +45,8 @@ import { isSerializedError } from '../utils/errors';
  * cache before the upcoming context build for `node`. Combines:
  *
  * 1. Template-referenced steps (static analysis via `extractReferencedStepIds`).
- *    Falls back to all predecessors when analysis is ambiguous (`null`) or when
- *    the node references no steps explicitly (size === 0) — conservative to
- *    guard against analysis gaps.
+ *    Falls back to all predecessors only when analysis is ambiguous (`null`).
+ *    A node with no step references needs none, so nothing is fetched for it.
  * 2. All `data.set` executions — needed by `getVariables`, only when the node may
  *    reference `variables`.
  * 3. Active scope-stack frames — needed by `enrichStepContextAccordingToStepScope`.
@@ -61,7 +60,7 @@ export function resolveRehydrationTargets(
   const neededIds = new Set<string>();
   const referencedStepIds = extractReferencedStepIds(node);
 
-  if (referencedStepIds === null || referencedStepIds.size === 0) {
+  if (referencedStepIds === null) {
     for (const pred of predecessors) {
       const latestExec = state.getLatestStepExecution(pred.stepId, stackFrames);
       if (latestExec) neededIds.add(latestExec.id);
