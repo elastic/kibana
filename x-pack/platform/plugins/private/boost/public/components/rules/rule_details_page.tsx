@@ -103,7 +103,6 @@ export const RuleDetailsPage = () => {
       list="rules"
       name={name}
       isFound
-      hasBands
       badges={[
         ...(type ? [{ label: PROFILE_TYPE_LABELS[type], color: 'hollow' as const }] : []),
         // The same color as the badge in the rules list.
@@ -265,7 +264,7 @@ export const RuleDetailsPage = () => {
         <DetailsBand>
           <DetailsSection
             title={i18n.translate('xpack.boost.ruleDetails.ageTimelineTitle', {
-              defaultMessage: 'Age timeline',
+              defaultMessage: 'Boost phase timeline',
             })}
           >
             <AgeTimeline profile={profile} dataStreams={applied} appliesThrough="rule" />

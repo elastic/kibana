@@ -7,7 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiDescriptionList, EuiIconTip, useEuiTheme } from '@elastic/eui';
+import { EuiDescriptionList, EuiIconTip, EuiText, useEuiTheme } from '@elastic/eui';
 
 export interface DetailsListItem {
   title: string;
@@ -34,7 +34,9 @@ export const DetailsList = ({ items }: { items: readonly DetailsListItem[] }) =>
         ) : (
           title
         ),
-        description,
+        // The compressed list's descriptions are a size smaller than its titles, so they're set
+        // to the titles' size.
+        description: <EuiText size="s">{description}</EuiText>,
       }))}
     />
   );

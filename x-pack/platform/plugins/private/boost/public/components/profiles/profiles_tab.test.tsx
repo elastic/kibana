@@ -56,6 +56,8 @@ describe('ProfilesTab', () => {
     expect(
       screen.getByRole('link', { name: 'View 1 rule using boost profile "catalog-search"' })
     ).toHaveAttribute('href', '/rules?profile=catalog-search');
+    // The table always pages, however few profiles there are.
+    expect(screen.getByTestId('boostProfilesTable')).toHaveTextContent('Rows per page: 10');
     // Unused profiles have nothing to link to.
     expect(
       screen.queryByRole('link', { name: /using boost profile "elastic-on-demand"/ })

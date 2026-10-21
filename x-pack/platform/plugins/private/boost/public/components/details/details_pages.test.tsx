@@ -203,6 +203,7 @@ describe('ProfileDetailsPage', () => {
     expect(settings).toHaveTextContent('PinOff');
 
     expect(screen.getByTestId('boostProfileRules')).toHaveTextContent('catalogs');
+    expect(screen.getByTestId('boostProfileRules')).toHaveTextContent('Rows per page: 10');
     // A higher-ranked rule keeps catalog-fall, so the profile only applies to catalog-spring.
     const usedBy = screen.getByTestId('boostProfileUsedBy');
     expect(usedBy).toHaveTextContent('catalog-spring');
@@ -268,6 +269,7 @@ describe('RuleDetailsPage', () => {
     expect(usage).toHaveTextContent('Applies to1 index');
 
     const matched = screen.getByTestId('boostRuleMatched');
+    expect(within(matched).getByRole('heading', { name: 'Matching indices' })).toBeInTheDocument();
     // Only a match that a higher-ranked rule applies to instead names a rule; the others have a dash.
     const springRow = within(matched).getByText('catalog-spring').closest('tr') as HTMLElement;
     expect(within(springRow).queryByTestId('boostSupersedingRule')).not.toBeInTheDocument();
@@ -363,13 +365,13 @@ describe('RuleDetailsPage', () => {
     expect(matched.getByText('No indices match your search or filter.')).toBeInTheDocument();
   });
 
-  it("shows a data streams rule's data in each period of its profile", () => {
+  it("shows a data streams rule's data in each phase of its profile", () => {
     renderAt(`/rules/${DEFAULT_DATA_STREAMS_RULE_NAME}`);
 
+    expect(screen.getByRole('heading', { name: 'Boost phase timeline' })).toBeInTheDocument();
     expect(screen.getByTestId('boostAgeTimelinePeriods-recent')).toHaveTextContent('3 GB');
-    expect(screen.getByTestId('boostAgeTimeline')).toHaveTextContent(
-      'Data in each period across the 1 data stream this rule applies to, 3 GB in total.'
-    );
+    // The periods say how much data is in each, so there's no caption.
+    expect(screen.getByTestId('boostAgeTimeline')).not.toHaveTextContent('appears once');
   });
 
   it('only has a column of outranking rules when a higher-ranked rule outranks a match', () => {

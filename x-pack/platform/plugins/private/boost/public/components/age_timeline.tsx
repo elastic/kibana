@@ -10,9 +10,7 @@ import { EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoostDataSource, DataStreamsBoostProfile } from '../../common/types';
 import { estimateDataStreamPeriods } from '../../common/vcu_estimate';
-import { formatSize } from './cost_format';
 import { DataStreamTimeline } from './data_stream_timeline';
-import { formatDataSourceCount } from './format';
 
 interface AgeTimelineProps {
   profile: DataStreamsBoostProfile;
@@ -22,37 +20,23 @@ interface AgeTimelineProps {
   appliesThrough: 'rule' | 'profile';
 }
 
-/** A details page's timeline of a profile's periods, with how much data is in each, and a caption. */
+/**
+ * A details page's timeline of a profile's periods, with how much data is in each. Until the
+ * profile applies to a data stream, a caption says why the periods have no data.
+ */
 export const AgeTimeline = ({ profile, dataStreams, appliesThrough }: AgeTimelineProps) => {
   const estimates =
     dataStreams.length > 0 ? estimateDataStreamPeriods(profile, dataStreams) : undefined;
-  const totalSize = dataStreams.reduce((total, { size_in_bytes: bytes }) => total + bytes, 0);
-
-  const getCaption = () => {
-    const dataStreamCount = formatDataSourceCount('data_streams', dataStreams.length);
-    if (appliesThrough === 'rule') {
-      return estimates
-        ? i18n.translate('xpack.boost.ageTimeline.ruleCaption', {
-            defaultMessage:
-              'Data in each period across the {dataStreams} this rule applies to, {size} in total.',
-            values: { dataStreams: dataStreamCount, size: formatSize(totalSize) },
-          })
-        : i18n.translate('xpack.boost.ageTimeline.ruleEmptyCaption', {
-            defaultMessage:
-              'How much data is in each period appears once this rule applies to a data stream.',
-          });
-    }
-    return estimates
-      ? i18n.translate('xpack.boost.ageTimeline.caption', {
+  const emptyCaption =
+    appliesThrough === 'rule'
+      ? i18n.translate('xpack.boost.ageTimeline.ruleEmptyCaption', {
           defaultMessage:
-            'Data in each period across the {dataStreams} this profile applies to, {size} in total.',
-          values: { dataStreams: dataStreamCount, size: formatSize(totalSize) },
+            'How much data is in each phase appears once this rule applies to a data stream.',
         })
       : i18n.translate('xpack.boost.ageTimeline.emptyCaption', {
           defaultMessage:
-            'How much data is in each period appears once a boost rule applies this profile to a data stream.',
+            'How much data is in each phase appears once a boost rule applies this profile to a data stream.',
         });
-  };
 
   return (
     <div data-test-subj="boostAgeTimeline">
@@ -63,10 +47,14 @@ export const AgeTimeline = ({ profile, dataStreams, appliesThrough }: AgeTimelin
         background="plain"
         testSubj="boostAgeTimelinePeriods"
       />
-      <EuiSpacer size="m" />
-      <EuiText size="xs" color="subdued">
-        {getCaption()}
-      </EuiText>
+      {!estimates && (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="xs" color="subdued">
+            {emptyCaption}
+          </EuiText>
+        </>
+      )}
     </div>
   );
 };

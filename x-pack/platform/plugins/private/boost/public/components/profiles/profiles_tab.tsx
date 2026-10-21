@@ -277,11 +277,7 @@ export const ProfilesTab = ({ profiles, rules, dataSources, canEdit }: ProfilesT
         columns={columns}
         search={search}
         sorting={{ sort: { field: 'name', direction: 'asc' } }}
-        pagination={
-          filteredRows.length > PAGE_SIZE
-            ? { pageSize: PAGE_SIZE, pageSizeOptions: [PAGE_SIZE, 25, 50] }
-            : undefined
-        }
+        pagination={{ pageSize: PAGE_SIZE, pageSizeOptions: [PAGE_SIZE, 25, 50] }}
         data-test-subj="boostProfilesTable"
       />
 

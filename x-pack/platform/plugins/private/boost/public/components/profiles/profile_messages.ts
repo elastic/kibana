@@ -69,6 +69,6 @@ export const MAX_AGE_ERROR_MESSAGES: Readonly<Record<MaxAgeError, string>> = {
     values: { max: MAX_AGE_MAX_DAYS.toLocaleString(i18n.getLocale()) },
   }),
   below_previous_period: i18n.translate('xpack.boost.profileForm.maxAgeBelowRecent', {
-    defaultMessage: "Must be at least the recent period's age.",
+    defaultMessage: "Must be at least the recent phase's age.",
   }),
 };

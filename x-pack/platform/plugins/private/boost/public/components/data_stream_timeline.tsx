@@ -151,7 +151,7 @@ export const DataStreamTimeline = ({
         <div
           role="list"
           aria-label={i18n.translate('xpack.boost.dataStreamTimeline.label', {
-            defaultMessage: 'Boost periods by age of data',
+            defaultMessage: 'Boost phases by age of data',
           })}
           css={{
             display: 'grid',

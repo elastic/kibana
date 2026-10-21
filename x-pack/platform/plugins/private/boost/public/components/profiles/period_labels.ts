@@ -21,7 +21,7 @@ export const PERIOD_LABELS: Readonly<
   standard: {
     title: i18n.translate('xpack.boost.periods.standardTitle', { defaultMessage: 'Standard' }),
     description: i18n.translate('xpack.boost.periods.standardDescription', {
-      defaultMessage: 'Data past the recent period, up to the standard max age.',
+      defaultMessage: 'Data past the recent phase, up to the standard max age.',
     }),
   },
   background: {

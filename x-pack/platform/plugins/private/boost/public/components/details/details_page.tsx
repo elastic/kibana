@@ -13,7 +13,6 @@ import {
   EuiCallOut,
   EuiEmptyPrompt,
   EuiPageSection,
-  EuiPanel,
   EuiSpacer,
   EuiTitle,
   useEuiMaxBreakpoint,
@@ -54,8 +53,7 @@ interface DetailsPageProps {
   menu?: AppHeaderProps['menu'];
   /** Shown above the details, such as when advanced mode is off. */
   notice?: ReactNode;
-  /** Whether the details are bands between dividers, rather than panels. */
-  hasBands?: boolean;
+  /** The details, in bands between dividers. */
   children?: ReactNode;
 }
 
@@ -67,7 +65,6 @@ export const DetailsPage = ({
   badges,
   menu,
   notice,
-  hasBands = false,
   children,
 }: DetailsPageProps) => {
   const { appParams, chrome } = useBoostServices();
@@ -95,19 +92,11 @@ export const DetailsPage = ({
         spacing="bleed"
       />
       {/* Bands start with their own padding, so a band's dividers meet the header's border. */}
-      {!(isFound && hasBands) && <EuiSpacer size="l" />}
+      {!isFound && <EuiSpacer size="l" />}
       <EuiPageSection paddingSize="none" color="transparent" restrictWidth>
         {isFound ? (
           <>
-            {notice &&
-              (hasBands ? (
-                <DetailsBand>{notice}</DetailsBand>
-              ) : (
-                <>
-                  {notice}
-                  <EuiSpacer size="l" />
-                </>
-              ))}
+            {notice && <DetailsBand>{notice}</DetailsBand>}
             {children}
           </>
         ) : (
@@ -227,7 +216,7 @@ const DetailsTitle = ({
   </>
 );
 
-/** A titled section of a details page without a panel, such as a table, which has its own lines. */
+/** A titled section of a details page, such as in a band. */
 export const DetailsSection = ({
   title,
   titleAppend,
@@ -238,30 +227,6 @@ export const DetailsSection = ({
     <DetailsTitle title={title} titleAppend={titleAppend} />
     {children}
   </div>
-);
-
-interface DetailsPanelProps extends DetailsSectionProps {
-  /** Fills its row's height, so panels side by side line up. */
-  fillsHeight?: boolean;
-}
-
-/** A titled section of a details page, in a panel. */
-export const DetailsPanel = ({
-  title,
-  fillsHeight = false,
-  titleAppend,
-  children,
-  'data-test-subj': dataTestSubj,
-}: DetailsPanelProps) => (
-  <EuiPanel
-    hasBorder
-    hasShadow={false}
-    css={fillsHeight ? { blockSize: '100%' } : undefined}
-    data-test-subj={dataTestSubj}
-  >
-    <DetailsTitle title={title} titleAppend={titleAppend} />
-    {children}
-  </EuiPanel>
 );
 
 /** Says that advanced mode is off, so custom rules don't apply. Details show advanced mode. */

@@ -298,10 +298,10 @@ export const MatchedTable = ({ type, profile, matched, supersededBy }: MatchedTa
       title={
         isDataStreams
           ? i18n.translate('xpack.boost.matchedTable.dataStreamsTitle', {
-              defaultMessage: 'Matched data streams',
+              defaultMessage: 'Matching data streams',
             })
           : i18n.translate('xpack.boost.matchedTable.indicesTitle', {
-              defaultMessage: 'Matched indices',
+              defaultMessage: 'Matching indices',
             })
       }
       data-test-subj="boostRuleMatched"

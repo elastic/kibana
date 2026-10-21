@@ -86,6 +86,8 @@ describe('RulesTab', () => {
 
     expect(screen.getByText('catalogs')).toBeInTheDocument();
     expect(screen.getByText('archives')).toBeInTheDocument();
+    // The table always pages, however few rules there are.
+    expect(screen.getByTestId('boostRulesTable')).toHaveTextContent('Rows per page: 10');
   });
 
   it('starts filtered to the rules that use the profile in its location', () => {

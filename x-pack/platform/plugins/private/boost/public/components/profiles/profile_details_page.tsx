@@ -12,8 +12,6 @@ import {
   EuiBadge,
   EuiBasicTable,
   EuiButton,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiIconTip,
   EuiInMemoryTable,
   EuiLink,
@@ -40,7 +38,13 @@ import { useBoostServices } from '../../hooks/use_boost_services';
 import { useBoostState } from '../../hooks/use_boost_state';
 import { AgeTimeline } from '../age_timeline';
 import { COST_DISCLAIMER, formatSize, getCostText } from '../cost_format';
-import { DetailsPage, DetailsPanel, SimpleModeNotice } from '../details/details_page';
+import {
+  DetailsBand,
+  DetailsPage,
+  DetailsSection,
+  DetailsSplitBand,
+  SimpleModeNotice,
+} from '../details/details_page';
 import { DetailsList } from '../details/details_list';
 import { DetailsLink } from '../details_link';
 import { EmptyCell } from '../empty_cell';
@@ -100,7 +104,7 @@ const DataStreamsSettings = ({ profile }: { profile: DataStreamsBoostProfile }) 
     {
       field: 'id',
       name: i18n.translate('xpack.boost.profileDetails.periodColumn', {
-        defaultMessage: 'Period',
+        defaultMessage: 'Phase',
       }),
       render: (id: PeriodRow['id']) => (
         <span>
@@ -133,7 +137,7 @@ const DataStreamsSettings = ({ profile }: { profile: DataStreamsBoostProfile }) 
   return (
     <EuiBasicTable
       tableCaption={i18n.translate('xpack.boost.profileDetails.periodsCaption', {
-        defaultMessage: 'Boost for each period of data',
+        defaultMessage: 'Boost for each phase of data',
       })}
       compressed
       items={[
@@ -343,13 +347,12 @@ export const ProfileDetailsPage = () => {
         )
       }
     >
-      <EuiFlexGroup gutterSize="l" alignItems="stretch">
-        <EuiFlexItem>
-          <DetailsPanel
+      <DetailsSplitBand
+        start={
+          <DetailsSection
             title={i18n.translate('xpack.boost.profileDetails.settingsTitle', {
               defaultMessage: 'Settings',
             })}
-            fillsHeight
             data-test-subj="boostProfileSettings"
           >
             {profile.type === 'indices' ? (
@@ -357,14 +360,13 @@ export const ProfileDetailsPage = () => {
             ) : (
               <DataStreamsSettings profile={profile} />
             )}
-          </DetailsPanel>
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <DetailsPanel
+          </DetailsSection>
+        }
+        end={
+          <DetailsSection
             title={i18n.translate('xpack.boost.profileDetails.usageTitle', {
               defaultMessage: 'Usage',
             })}
-            fillsHeight
             data-test-subj="boostProfileUsage"
           >
             <DetailsList
@@ -409,97 +411,99 @@ export const ProfileDetailsPage = () => {
                 },
               ]}
             />
-          </DetailsPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+          </DetailsSection>
+        }
+      />
 
       {profile.type === 'data_streams' && (
-        <>
-          <EuiSpacer size="l" />
-          <DetailsPanel
+        <DetailsBand>
+          <DetailsSection
             title={i18n.translate('xpack.boost.profileDetails.ageTimelineTitle', {
-              defaultMessage: 'Age timeline',
+              defaultMessage: 'Boost phase timeline',
             })}
           >
             <AgeTimeline profile={profile} dataStreams={usedBy} appliesThrough="profile" />
-          </DetailsPanel>
-        </>
+          </DetailsSection>
+        </DetailsBand>
       )}
 
-      <EuiSpacer size="l" />
-      <DetailsPanel
-        title={i18n.translate('xpack.boost.profileDetails.rulesTitle', {
-          defaultMessage: 'Boost rules using this profile',
-        })}
-        titleAppend={
-          canEdit &&
-          isAdvanced && (
-            <EuiButton
-              size="s"
-              onClick={() => setFlyout('createRule')}
-              data-test-subj="boostProfileDetailsCreateRule"
-            >
-              {i18n.translate('xpack.boost.profileDetails.createRule', {
-                defaultMessage: 'Create boost rule',
-              })}
-            </EuiButton>
-          )
-        }
-        data-test-subj="boostProfileRules"
-      >
-        <EuiBasicTable
-          tableCaption={i18n.translate('xpack.boost.profileDetails.rulesCaption', {
+      <DetailsBand>
+        <DetailsSection
+          title={i18n.translate('xpack.boost.profileDetails.rulesTitle', {
             defaultMessage: 'Boost rules using this profile',
           })}
-          items={profileRules}
-          columns={rulesColumns}
-          noItemsMessage={i18n.translate('xpack.boost.profileDetails.noRules', {
-            defaultMessage: 'No boost rules use this profile yet.',
-          })}
-        />
-      </DetailsPanel>
-
-      <EuiSpacer size="l" />
-      <DetailsPanel
-        title={
-          profile.type === 'indices'
-            ? i18n.translate('xpack.boost.profileDetails.indicesTitle', {
-                defaultMessage: 'Indices using this profile',
-              })
-            : i18n.translate('xpack.boost.profileDetails.dataStreamsTitle', {
-                defaultMessage: 'Data streams using this profile',
-              })
-        }
-        data-test-subj="boostProfileUsedBy"
-      >
-        <EuiText size="s" color="subdued">
-          <p>
-            {i18n.translate('xpack.boost.profileDetails.usedByDescription', {
-              defaultMessage:
-                'Where a rule using this profile ranks highest among the rules that match.',
+          titleAppend={
+            canEdit &&
+            isAdvanced && (
+              <EuiButton
+                size="s"
+                onClick={() => setFlyout('createRule')}
+                data-test-subj="boostProfileDetailsCreateRule"
+              >
+                {i18n.translate('xpack.boost.profileDetails.createRule', {
+                  defaultMessage: 'Create boost rule',
+                })}
+              </EuiButton>
+            )
+          }
+          data-test-subj="boostProfileRules"
+        >
+          <EuiInMemoryTable
+            tableCaption={i18n.translate('xpack.boost.profileDetails.rulesCaption', {
+              defaultMessage: 'Boost rules using this profile',
             })}
-          </p>
-        </EuiText>
-        <EuiSpacer size="s" />
-        <EuiInMemoryTable
-          tableCaption={i18n.translate('xpack.boost.profileDetails.usedByCaption', {
-            defaultMessage: 'Indices or data streams using this profile',
-          })}
-          items={usedBy}
-          columns={usedByColumns}
-          sorting={{ sort: { field: 'name', direction: 'asc' } }}
-          pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
-          noItemsMessage={
+            items={profileRules}
+            columns={rulesColumns}
+            pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
+            noItemsMessage={i18n.translate('xpack.boost.profileDetails.noRules', {
+              defaultMessage: 'No boost rules use this profile yet.',
+            })}
+          />
+        </DetailsSection>
+      </DetailsBand>
+
+      <DetailsBand hasDivider={false}>
+        <DetailsSection
+          title={
             profile.type === 'indices'
-              ? i18n.translate('xpack.boost.profileDetails.noIndices', {
-                  defaultMessage: 'No indices use this profile.',
+              ? i18n.translate('xpack.boost.profileDetails.indicesTitle', {
+                  defaultMessage: 'Indices using this profile',
                 })
-              : i18n.translate('xpack.boost.profileDetails.noDataStreams', {
-                  defaultMessage: 'No data streams use this profile.',
+              : i18n.translate('xpack.boost.profileDetails.dataStreamsTitle', {
+                  defaultMessage: 'Data streams using this profile',
                 })
           }
-        />
-      </DetailsPanel>
+          data-test-subj="boostProfileUsedBy"
+        >
+          <EuiText size="s" color="subdued">
+            <p>
+              {i18n.translate('xpack.boost.profileDetails.usedByDescription', {
+                defaultMessage:
+                  'Where a rule using this profile ranks highest among the rules that match.',
+              })}
+            </p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiInMemoryTable
+            tableCaption={i18n.translate('xpack.boost.profileDetails.usedByCaption', {
+              defaultMessage: 'Indices or data streams using this profile',
+            })}
+            items={usedBy}
+            columns={usedByColumns}
+            sorting={{ sort: { field: 'name', direction: 'asc' } }}
+            pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
+            noItemsMessage={
+              profile.type === 'indices'
+                ? i18n.translate('xpack.boost.profileDetails.noIndices', {
+                    defaultMessage: 'No indices use this profile.',
+                  })
+                : i18n.translate('xpack.boost.profileDetails.noDataStreams', {
+                    defaultMessage: 'No data streams use this profile.',
+                  })
+            }
+          />
+        </DetailsSection>
+      </DetailsBand>
 
       {(flyout === 'edit' || flyout === 'duplicate') && (
         <ProfileFlyout
