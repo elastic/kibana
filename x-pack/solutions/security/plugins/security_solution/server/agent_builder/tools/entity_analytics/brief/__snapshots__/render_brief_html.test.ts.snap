@@ -1,0 +1,171 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`renderBriefHtml renders the fixture brief 1`] = `
+"<style>
+.brief{max-width:736px;margin:0;font-family:var(--cc-font-family);font-size:14px;line-height:1.5;color:var(--cc-color-text);font-variant-numeric:tabular-nums;}
+.brief *{box-sizing:border-box;}
+.brief h1,.brief h2,.brief p,.brief ol,.brief figure{margin:0;}
+.brief .muted{opacity:.72;}
+.brief .small{font-size:12px;}
+.brief .screen-reader{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
+.brief .header{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--cc-space-m);padding-bottom:var(--cc-space-s);margin-bottom:var(--cc-space-m);border-bottom:1px solid var(--cc-color-border);}
+.brief .eyebrow{font-size:12px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--cc-color-primary);margin-bottom:2px;}
+.brief h1{font-size:18px;font-weight:700;line-height:1.3;}
+.brief h1 .separator{opacity:.5;font-weight:400;padding:0 2px;}
+.brief h2{font-size:14px;font-weight:600;margin-bottom:var(--cc-space-s);}
+.brief .section{margin-bottom:var(--cc-space-m);}
+.brief .lead{font-size:15px;}
+.brief .notes{margin-bottom:var(--cc-space-m);}
+.brief .note{font-size:12px;padding:6px 10px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius-s);background:var(--cc-color-surface);margin-bottom:4px;}
+.brief .pill{display:inline-flex;align-items:center;gap:4px;padding:0 8px;line-height:20px;border-radius:var(--cc-radius-s);font-size:12px;font-weight:600;white-space:nowrap;border:1px solid transparent;}
+.brief .pill-primary{background:var(--cc-color-primary);color:var(--cc-color-surface);}
+.brief .pill-outline{border-color:var(--cc-color-border);background:var(--cc-color-surface);color:var(--cc-color-text);}
+.brief .pill-detail{font-weight:400;opacity:.85;}
+.brief .level-critical{background:var(--cc-color-danger);color:#fff;}
+.brief .level-high{background:#C86100;color:#fff;}
+.brief .level-moderate{background:var(--cc-color-warning);color:#1D2A3E;}
+.brief .level-low,.brief .level-unknown{border-color:var(--cc-color-border);background:var(--cc-color-surface);color:var(--cc-color-text);}
+.brief .counts{display:flex;flex-wrap:wrap;gap:var(--cc-space-s);}
+.brief .count{flex:1 1 104px;max-width:180px;padding:6px 10px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);background:var(--cc-color-surface);min-width:0;}
+.brief .count-label{font-size:12px;line-height:1.3;}
+.brief .count-row{display:flex;align-items:baseline;flex-wrap:wrap;column-gap:6px;margin-top:2px;}
+.brief .count-value{font-size:20px;font-weight:700;line-height:1.2;letter-spacing:-.02em;}
+.brief .count-zero{opacity:.5;}
+.brief .count-change{font-size:12px;font-weight:600;}
+.brief .count-change.muted{font-weight:400;}
+.brief .count-change.up{color:var(--cc-color-danger);}
+.brief .count-change.down{color:var(--cc-color-accent);}
+.brief .priorities{list-style:none;padding:0;display:flex;flex-direction:column;gap:var(--cc-space-s);}
+.brief .priority{border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);background:var(--cc-color-surface);padding:10px 14px;}
+.brief .priority-head{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;}
+.brief .rank{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--cc-color-primary);color:var(--cc-color-surface);font-weight:700;font-size:12px;flex:none;margin-top:1px;}
+.brief .priority-title{display:flex;flex-direction:column;min-width:0;flex:1 1 160px;}
+.brief .name{font-weight:700;font-size:15px;overflow-wrap:anywhere;}
+.brief .pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}
+.brief .evidence{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 6px 32px;}
+.brief .label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.72;margin-right:2px;}
+.brief .chip{display:inline-block;padding:0 8px;line-height:20px;border-radius:var(--cc-radius-s);border:1px solid var(--cc-color-border);font-size:12px;}
+.brief .priority-text{margin-left:32px;}
+.brief .next{margin:6px 0 0 32px;}
+.brief .next .label{margin-right:6px;}
+.brief .chart{margin:10px 0 0 32px;padding:8px 12px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);}
+.brief .chart figcaption{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;margin-bottom:4px;}
+.brief .chart-change{font-weight:600;}
+.brief .chart svg{display:block;color:var(--cc-color-primary);}
+.brief .chart .band{stroke:var(--cc-color-border);stroke-dasharray:3 3;}
+.brief .chart .band-label,.brief .chart .tick,.brief .chart .point-label{font-size:10px;fill:var(--cc-color-text);opacity:.72;}
+.brief .chart .point-label.strong{opacity:1;font-weight:700;}
+.brief .chart .area{fill:currentColor;opacity:.10;}
+.brief .chart .line{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;}
+.brief .chart .dot{fill:currentColor;}
+.brief .callout{border-left:3px solid var(--cc-color-primary);padding:10px 14px;background:var(--cc-color-surface);border-radius:var(--cc-radius);}
+@media (max-width:420px){.brief .header{flex-direction:column;} .brief .pills{justify-content:flex-start;} .brief .evidence,.brief .priority-text,.brief .next,.brief .chart{margin-left:0;}}
+</style>
+<div class=\\"brief\\">
+  <header class=\\"header\\">
+    <div>
+      <p class=\\"eyebrow\\">Entity Analytics AI brief</p>
+      <h1>Last 7 days</h1>
+      <p class=\\"muted small\\">Captured 20 Oct 2026, 10:53 UTC. Numbers are the page's own.</p>
+    </div>
+    <span class=\\"pill pill-primary\\">3 priorities</span>
+  </header>
+  
+  <section class=\\"section\\">
+    <h2>What needs attention</h2>
+    <p class=\\"lead\\">Five entities have alerts this period, including one privileged user newly rated high/critical and on the watchlist, and two hosts seen for the first time in the last few days.</p>
+  </section>
+  <section class=\\"section\\">
+    <h2>This period at a glance <span class=\\"muted small\\">vs previous 7 days</span></h2>
+    <div class=\\"counts\\"><div class=\\"count\\">
+      <div class=\\"count-label\\">Entities with alerts</div>
+      <div class=\\"count-row\\">
+        <span class=\\"count-value\\">5</span>
+        <span class=\\"count-change up\\">+5</span>
+      </div>
+    </div><div class=\\"count\\">
+      <div class=\\"count-label\\">Newly high/critical</div>
+      <div class=\\"count-row\\">
+        <span class=\\"count-value\\">1</span>
+        <span class=\\"count-change muted\\">No comparison</span>
+      </div>
+    </div><div class=\\"count\\">
+      <div class=\\"count-label\\">Watchlisted</div>
+      <div class=\\"count-row\\">
+        <span class=\\"count-value\\">1</span>
+        <span class=\\"count-change muted\\">No change</span>
+      </div>
+    </div><div class=\\"count\\">
+      <div class=\\"count-label\\">New entity</div>
+      <div class=\\"count-row\\">
+        <span class=\\"count-value\\">2</span>
+        <span class=\\"count-change up\\">+2</span>
+      </div>
+    </div></div>
+  </section>
+  <section class=\\"section callout\\">
+    <h2>Recommended next step</h2>
+    <p class=\\"lead\\">Start by reviewing the alerts and new High risk score tied to a.rodriguez, given its privileged, high-impact, multi-flagged status.</p>
+  </section>
+  <section class=\\"section\\">
+    <h2>Priorities</h2>
+    <ol class=\\"priorities\\"><li class=\\"priority\\">
+      <div class=\\"priority-head\\">
+        <span class=\\"rank\\" aria-hidden=\\"true\\">1</span>
+        <div class=\\"priority-title\\">
+          <span class=\\"name\\">a.rodriguez</span>
+          <span class=\\"muted small\\">user</span>
+        </div>
+        <div class=\\"pills\\"><span class=\\"pill level-high\\">Risk 76 High <span class=\\"pill-detail\\">group</span></span><span class=\\"pill pill-outline\\">High impact</span><span class=\\"pill pill-outline\\">Privileged user</span></div>
+      </div>
+      <div class=\\"evidence\\"><span class=\\"label\\">Flagged by</span><span class=\\"chip\\">Entities with alerts</span><span class=\\"chip\\">Newly high/critical</span><span class=\\"chip\\">Watchlisted</span></div>
+      <p class=\\"priority-text\\">Has alerts, is newly high/critical, and sits on the watchlist, with risk score 76 (High). Combines a privileged, high-impact identity with three separate flags, unlike any other entity here.</p>
+      <p class=\\"next\\"><span class=\\"label\\">Next</span>Review the alerts behind the new High risk score and confirm recent access activity.</p>
+      <figure class=\\"chart\\">
+        <figcaption>
+          <span>Risk score over the period for <strong>a.rodriguez</strong> (resolution group)</span>
+          <span class=\\"chart-change\\">34 Low
+            <span aria-hidden=\\"true\\">&rarr;</span>
+            <span class=\\"screen-reader\\">to</span> 76 High</span>
+        </figcaption>
+        <svg viewBox=\\"0 0 640 80\\" width=\\"100%\\" role=\\"img\\"
+          aria-label=\\"Risk score rose from 34 on 15 Oct to 76 on 20 Oct\\">
+          <line class=\\"band\\" x1=\\"30\\" x2=\\"570\\" y1=\\"18.4\\" y2=\\"18.4\\" /><line class=\\"band\\" x1=\\"30\\" x2=\\"570\\" y1=\\"27.2\\" y2=\\"27.2\\" /><text class=\\"band-label\\" x=\\"576\\" y=\\"30.2\\">High 70</text><line class=\\"band\\" x1=\\"30\\" x2=\\"570\\" y1=\\"40.4\\" y2=\\"40.4\\" /><text class=\\"band-label\\" x=\\"576\\" y=\\"43.4\\">Moderate 40</text>
+          <polygon class=\\"area\\" points=\\"30,58 30.0,43.0 150.2,30.4 270.4,26.7 390.6,25.6 510.8,24.6 570.0,24.6 570.0,58\\" />
+          <polyline class=\\"line\\" points=\\"30.0,43.0 150.2,30.4 270.4,26.7 390.6,25.6 510.8,24.6 570.0,24.6\\" />
+          <circle class=\\"dot\\" cx=\\"30.0\\" cy=\\"43.0\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"150.2\\" cy=\\"30.4\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"270.4\\" cy=\\"26.7\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"390.6\\" cy=\\"25.6\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"510.8\\" cy=\\"24.6\\" r=\\"3\\" /><circle class=\\"dot\\" cx=\\"570.0\\" cy=\\"24.6\\" r=\\"3\\" />
+          <text class=\\"point-label\\" x=\\"30.0\\" y=\\"36.0\\" text-anchor=\\"middle\\">34</text>
+          <text class=\\"point-label strong\\" x=\\"563.0\\" y=\\"18.6\\" text-anchor=\\"end\\">76</text>
+          <text class=\\"tick\\" x=\\"30.0\\" y=\\"74\\" text-anchor=\\"middle\\">15 Oct</text><text class=\\"tick\\" x=\\"150.2\\" y=\\"74\\" text-anchor=\\"middle\\">16 Oct</text><text class=\\"tick\\" x=\\"270.4\\" y=\\"74\\" text-anchor=\\"middle\\">17 Oct</text><text class=\\"tick\\" x=\\"390.6\\" y=\\"74\\" text-anchor=\\"middle\\">18 Oct</text><text class=\\"tick\\" x=\\"510.8\\" y=\\"74\\" text-anchor=\\"middle\\">19 Oct</text>
+        </svg>
+      </figure>
+    </li><li class=\\"priority\\">
+      <div class=\\"priority-head\\">
+        <span class=\\"rank\\" aria-hidden=\\"true\\">2</span>
+        <div class=\\"priority-title\\">
+          <span class=\\"name\\">docker-host-prod-01</span>
+          <span class=\\"muted small\\">host &middot; first seen 2 days ago</span>
+        </div>
+        <div class=\\"pills\\"><span class=\\"pill level-moderate\\">Risk 66 Moderate</span><span class=\\"pill pill-outline\\">Extreme impact</span></div>
+      </div>
+      <div class=\\"evidence\\"><span class=\\"label\\">Flagged by</span><span class=\\"chip\\">Entities with alerts</span><span class=\\"chip\\">New entity</span></div>
+      <p class=\\"priority-text\\">Flagged for alerts and as a new entity, first seen 2 days ago, asset criticality is Extreme impact, risk score 66 (Moderate). Extreme impact criticality on a host seen for the first time this week raises the stakes of its alerts.</p>
+      <p class=\\"next\\"><span class=\\"label\\">Next</span>Check what triggered the alerts and verify the host&#39;s provisioning is expected.</p>
+      
+    </li><li class=\\"priority\\">
+      <div class=\\"priority-head\\">
+        <span class=\\"rank\\" aria-hidden=\\"true\\">3</span>
+        <div class=\\"priority-title\\">
+          <span class=\\"name\\">jump-box-01</span>
+          <span class=\\"muted small\\">host &middot; first seen 3 days ago</span>
+        </div>
+        <div class=\\"pills\\"><span class=\\"pill level-moderate\\">Risk 58 Moderate</span><span class=\\"pill pill-outline\\">High impact</span></div>
+      </div>
+      <div class=\\"evidence\\"><span class=\\"label\\">Flagged by</span><span class=\\"chip\\">Entities with alerts</span><span class=\\"chip\\">New entity</span></div>
+      <p class=\\"priority-text\\">Flagged for alerts and as a new entity, first seen 3 days ago, asset criticality is High impact, risk score 58 (Moderate). A newly appeared high-impact host with alerts warrants a look even without other flags.</p>
+      <p class=\\"next\\"><span class=\\"label\\">Next</span>Review the alerts and confirm the host&#39;s role and ownership.</p>
+      
+    </li></ol>
+  </section>
+</div>"
+`;
