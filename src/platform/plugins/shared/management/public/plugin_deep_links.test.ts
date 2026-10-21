@@ -9,7 +9,8 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { ManagementPlugin } from './plugin';
-import type { AppUpdater, AppDeepLink } from '@kbn/core/public';
+import { BehaviorSubject } from 'rxjs';
+import type { AppUpdater, AppDeepLink, AppDeepLinkLocations } from '@kbn/core/public';
 
 const mockShare = {
   url: {
@@ -85,5 +86,33 @@ describe('ManagementPlugin appUpdater deep link visibleIn', () => {
 
     expect(app).toBeDefined();
     expect(app?.visibleIn).toEqual(['projectSideNav']);
+  });
+
+  it('rebuilds deep links when an app emits a new visibleIn after start', () => {
+    const plugin = createPlugin();
+    const setup = plugin.setup(coreMock.createSetup(), { share: mockShare });
+    const visibleIn$ = new BehaviorSubject<AppDeepLinkLocations[]>(['projectSideNav']);
+
+    setup.sections.section.kibana.registerApp({
+      id: 'test-runtime-visible-in',
+      title: 'Runtime visibleIn',
+      mount: jest.fn(),
+      visibleIn$,
+    });
+
+    const getApp = () =>
+      getDeepLinksFromUpdater(plugin)
+        .find((s) => s.id === 'kibana')
+        ?.deepLinks?.find((a) => a.id === 'test-runtime-visible-in');
+
+    expect(getApp()?.visibleIn).toEqual(['globalSearch', 'projectSideNav']);
+
+    plugin.start(coreMock.createStart(), { share: mockShare });
+    expect(getApp()?.visibleIn).toEqual(['projectSideNav']);
+
+    visibleIn$.next(['globalSearch', 'projectSideNav']);
+    expect(getApp()?.visibleIn).toEqual(['globalSearch', 'projectSideNav']);
+
+    plugin.stop();
   });
 });

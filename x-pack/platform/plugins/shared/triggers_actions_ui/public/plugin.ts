@@ -86,7 +86,7 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
 import { AlertRuleFromVisAction } from './common/alert_rule_from_vis_ui_action';
-import { getRulesAppUpdate } from './get_rules_app_update';
+import { getRulesAppUpdate, getRulesManagementVisibleIn } from './get_rules_app_update';
 
 import type {
   ActionTypeModel,
@@ -351,6 +351,9 @@ export class Plugin
         title: featureTitle,
         capabilitiesId: TRIGGERS_ACTIONS_RULES_CAPABILITY_ID,
         order: 1,
+        visibleIn$: from(core.getStartServices()).pipe(
+          map(([coreStart]) => getRulesManagementVisibleIn(coreStart))
+        ),
         async mount(params: ManagementAppMountParams) {
           const [coreStart, pluginsStart] = (await core.getStartServices()) as [
             CoreStart,

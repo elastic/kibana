@@ -26,6 +26,8 @@ import {
 } from './constants';
 
 const SEARCHABLE_VISIBLE_IN: AppDeepLinkLocations[] = ['globalSearch', 'projectSideNav'];
+const PROJECT_SIDE_NAV_ONLY_VISIBLE_IN: AppDeepLinkLocations[] = ['projectSideNav'];
+const RULES_V1_KEYWORDS = ['classic', 'v1'];
 
 /**
  * Same gate as the Observability classic nav (`updateGlobalNavigation`), plus Alerting v2 alerts
@@ -100,11 +102,11 @@ export const getObservabilityAlertingDeepLinks = (capabilities?: Capabilities): 
     {
       id: OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID,
       title: i18n.translate('xpack.observabilityAlerting.deepLinks.rulesV1Title', {
-        defaultMessage: 'Rules (V1)',
+        defaultMessage: 'Rules',
       }),
       path: OBSERVABILITY_ALERTING_RULES_V1_PATH,
       visibleIn: SEARCHABLE_VISIBLE_IN,
-      keywords: ['alerting', 'rules', 'classic', 'v1'],
+      keywords: ['alerting', 'rules', ...RULES_V1_KEYWORDS],
     },
     {
       id: OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID,
@@ -148,8 +150,28 @@ export const getObservabilityAlertingDeepLinks = (capabilities?: Capabilities): 
     return deepLinks;
   }
 
-  return deepLinks.map((link) => ({
-    ...link,
-    visibleIn: getAccessibleVisibleIn(link, capabilities),
-  }));
+  const { v1: canReadV1Rules, v2: canReadV2Rules } = hasObservabilityAlertingCapabilities(
+    capabilities,
+    'rules'
+  );
+  const hasCombinedRulesPage = canReadV1Rules && canReadV2Rules;
+
+  return deepLinks.map((link) => {
+    const visibleIn = getAccessibleVisibleIn(link, capabilities);
+
+    if (!hasCombinedRulesPage) {
+      return { ...link, visibleIn };
+    }
+
+    // Classic and Universal share one Rules page, so search offers only the Universal entry.
+    if (link.id === OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID) {
+      return { ...link, visibleIn: PROJECT_SIDE_NAV_ONLY_VISIBLE_IN };
+    }
+
+    if (link.id === OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID) {
+      return { ...link, visibleIn, keywords: [...(link.keywords ?? []), ...RULES_V1_KEYWORDS] };
+    }
+
+    return { ...link, visibleIn };
+  });
 };

@@ -8,7 +8,8 @@
  */
 
 import { i18n as kbnI18n } from '@kbn/i18n';
-import { BehaviorSubject } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject, map, merge } from 'rxjs';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
@@ -72,7 +73,7 @@ export class ManagementPlugin
 {
   private readonly managementSections = new ManagementSectionsService();
 
-  private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
+  private readonly createDeepLinksUpdater = (): AppUpdater => () => {
     const deepLinks: AppDeepLink[] = this.managementSections
       .getAllSections()
       .map((section: ManagementSection) => ({
@@ -91,7 +92,11 @@ export class ManagementPlugin
       }));
 
     return { deepLinks };
-  });
+  };
+
+  private readonly appUpdater = new BehaviorSubject<AppUpdater>(this.createDeepLinksUpdater());
+
+  private visibleInSubscription?: Subscription;
 
   private hasAnyEnabledApps = true;
 
@@ -222,6 +227,8 @@ export class ManagementPlugin
           visibleIn: [],
         };
       });
+    } else {
+      this.subscribeToVisibleInUpdates();
     }
 
     plugins.cps?.cpsManager?.registerAppAccess('management', (location: string) =>
@@ -234,5 +241,27 @@ export class ManagementPlugin
       setupCardsNavigation: ({ enabled, hideLinksTo, extendCardNavDefinitions }) =>
         this.cardsNavigationConfig$.next({ enabled, hideLinksTo, extendCardNavDefinitions }),
     };
+  }
+
+  public stop() {
+    this.visibleInSubscription?.unsubscribe();
+  }
+
+  private subscribeToVisibleInUpdates() {
+    const visibleInUpdates$ = this.managementSections
+      .getAllSections()
+      .flatMap((section) => section.apps)
+      .flatMap((app) =>
+        app.visibleIn$ ? [app.visibleIn$.pipe(map((visibleIn) => ({ app, visibleIn })))] : []
+      );
+
+    if (visibleInUpdates$.length === 0) {
+      return;
+    }
+
+    this.visibleInSubscription = merge(...visibleInUpdates$).subscribe(({ app, visibleIn }) => {
+      app.setVisibleIn(visibleIn);
+      this.appUpdater.next(this.createDeepLinksUpdater());
+    });
   }
 }

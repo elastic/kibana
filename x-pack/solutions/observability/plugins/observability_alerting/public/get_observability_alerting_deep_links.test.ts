@@ -141,13 +141,31 @@ describe('getObservabilityAlertingDeepLinks', () => {
   });
 
   describe('mixed v1 + v2 users', () => {
-    it('offers both Rules V1 and V2 when the user has v1 logs and v2 rules read', () => {
-      const result = visibleInById(
-        capabilities({ logs: { show: true }, alerting_v2_rules: { read: true } })
-      );
-      expect(result[OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]).toEqual(SEARCHABLE);
+    const mixedCapabilities = capabilities({
+      logs: { show: true },
+      alerting_v2_rules: { read: true },
+    });
+
+    it('offers a single Rules search entry when the user has v1 logs and v2 rules read', () => {
+      const result = visibleInById(mixedCapabilities);
+      expect(result[OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID]).toEqual(['projectSideNav']);
       expect(result[OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID]).toEqual(SEARCHABLE);
       expect(result[OBSERVABILITY_ALERTING_RULE_LIBRARY_DEEP_LINK_ID]).toEqual(SEARCHABLE);
     });
+
+    it('lets classic search terms reach the combined Rules page', () => {
+      const rulesV2 = getObservabilityAlertingDeepLinks(mixedCapabilities).find(
+        ({ id }) => id === OBSERVABILITY_ALERTING_RULES_V2_DEEP_LINK_ID
+      );
+      expect(rulesV2?.title).toBe('Rules');
+      expect(rulesV2?.keywords).toEqual(expect.arrayContaining(['classic', 'v1']));
+    });
+  });
+
+  it('titles the classic-only Rules entry Rules', () => {
+    const rulesV1 = getObservabilityAlertingDeepLinks(capabilities({ logs: { show: true } })).find(
+      ({ id }) => id === OBSERVABILITY_ALERTING_RULES_V1_DEEP_LINK_ID
+    );
+    expect(rulesV1?.title).toBe('Rules');
   });
 });
