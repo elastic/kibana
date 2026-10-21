@@ -65,10 +65,11 @@ export interface CommonAttachmentViewProps {
   permissions: CasesPermissions;
 }
 
-/** The confirmation counts attachments, so use it only when each attachment references 1 id. */
-export interface AttachmentRemovalRequest {
-  savedObjectIds: string[];
-}
+/**
+ * Saved object ids, or ids that this list's type references (grouped attachments keep the rest).
+ * The confirmation counts ids, so use `savedObjectIds` only when each attachment references 1 id.
+ */
+export type AttachmentRemovalRequest = { savedObjectIds: string[] } | { attachmentIds: string[] };
 
 export interface AttachmentRemovalOptions {
   /** Called once the attachments are removed, e.g. to clear a table selection. */
