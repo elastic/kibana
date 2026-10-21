@@ -12,6 +12,12 @@ import type {
   SeparatorExpandPopoverListItemProps,
 } from '../primitives/list_graph_popover';
 import type { NodeViewModel } from '../../types';
+import entityActionsIcon from '../../../assets/icons/entity_actions.svg';
+import entityActionsDarkIcon from '../../../assets/icons/entity_actions_dark.svg';
+import entityActionsDoneIcon from '../../../assets/icons/entity_actions_done.svg';
+import entityActionsDoneDarkIcon from '../../../assets/icons/entity_actions_done_dark.svg';
+import entityRelationshipsIcon from '../../../assets/icons/entity_relationships.svg';
+import entityRelationshipsDarkIcon from '../../../assets/icons/entity_relationships_dark.svg';
 import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../common/constants';
 import {
   emitFilterToggle,
@@ -528,6 +534,8 @@ export interface GetEntityExpandItemsOptions {
   toggleEntityRelationships?: (action: 'show' | 'hide') => void;
   /** Whether entity relationships should be disabled. Defaults to false. */
   showEntityRelationshipsDisabled?: boolean;
+  /** Whether to use the dark-mode variants of the custom icons. Defaults to false. */
+  isDarkMode?: boolean;
 }
 
 const DISABLED_TOOLTIP = i18n.translate(
@@ -555,6 +563,7 @@ export const getEntityExpandItems = (
     toggleEntityRelationships,
     showEntityRelationshipsDisabled = false,
     isGrouped = false,
+    isDarkMode = false,
   } = options;
 
   const items: Array<ItemExpandPopoverListItemProps | SeparatorExpandPopoverListItemProps> = [];
@@ -563,7 +572,7 @@ export const getEntityExpandItems = (
   if (shouldRender.showEntityRelationships) {
     items.push({
       type: 'item',
-      iconType: 'cluster',
+      iconType: isDarkMode ? entityRelationshipsDarkIcon : entityRelationshipsIcon,
       testSubject: GRAPH_NODE_POPOVER_SHOW_ENTITY_RELATIONSHIPS_ITEM_ID,
       label: isEntityRelationshipsExpanded
         ? i18n.translate(
@@ -605,7 +614,7 @@ export const getEntityExpandItems = (
     const actionsByEntityActive = entityFilterActions?.isEntityFilterActive('actor') ?? false;
     items.push({
       type: 'item',
-      iconType: 'sortRight',
+      iconType: isDarkMode ? entityActionsDarkIcon : entityActionsIcon,
       testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_BY_ITEM_ID,
       label: actionsByEntityActive
         ? i18n.translate(
@@ -627,7 +636,7 @@ export const getEntityExpandItems = (
     const actionsOnEntityActive = entityFilterActions?.isEntityFilterActive('target') ?? false;
     items.push({
       type: 'item',
-      iconType: 'sortLeft',
+      iconType: isDarkMode ? entityActionsDoneDarkIcon : entityActionsDoneIcon,
       testSubject: GRAPH_NODE_POPOVER_SHOW_ACTIONS_ON_ITEM_ID,
       label: actionsOnEntityActive
         ? i18n.translate(
