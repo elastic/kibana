@@ -35,14 +35,14 @@ it('preserves the legacy default and resolves named targets independently', () =
   expect(resolveTelemetryTarget(sandbox, 'none')).toEqual({});
 });
 
-it('uses a configured default while allowing a request to select none', () => {
+it('does not reapply a named default to an existing legacy conversation', () => {
   expect(
     resolveTelemetryTarget({
       ...sandbox,
       telemetry_targets: sandbox?.telemetry_targets ?? {},
       default_telemetry_target: 'orca',
     })
-  ).toMatchObject({ connectorId: 'orca' });
+  ).toMatchObject({ connectorId: 'legacy' });
   expect(
     resolveTelemetryTarget(
       {

@@ -25,8 +25,7 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
-import { getInvestigationTelemetryTarget } from '../common/telemetry_targets';
-import { getTelemetryTargets, resolveTelemetryTarget } from './telemetry_targets';
+import { getTelemetryTargets } from './telemetry_targets';
 import type { NightshiftInvestigationsConfig } from './config';
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
@@ -73,7 +72,10 @@ import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
-import { registerInvestigationAgentType } from './agents/investigation';
+import {
+  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+  registerInvestigationAgentType,
+} from './agents/investigation';
 import { registerDecisionTreeReinforcementAgentType } from './agents/decision_tree_reinforcement';
 import { registerAssistantAgentType } from './agents/assistant';
 import { createDecisionTreeTools } from './tools/decision_tree';
@@ -279,8 +281,11 @@ export class NightshiftInvestigationsPlugin
           telemetryConnectorId,
           telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
           telemetryTargets: getTelemetryTargets(config.sandbox),
-          getTelemetryTarget: (agentId) =>
-            resolveTelemetryTarget(config.sandbox, getInvestigationTelemetryTarget(agentId)),
+          getTelemetryTarget: async ({ agentId, conversationId, request }) => {
+            if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) return undefined;
+            if (!conversationId) throw new Error('Investigation telemetry requires a conversation');
+            return this.getInvestigationsClient(request).getTelemetryTarget(conversationId);
+          },
           logger: sandboxLogger,
         });
         const resolveConnectorCredentials = createConnectorCredentialResolver({
@@ -289,6 +294,7 @@ export class NightshiftInvestigationsPlugin
         });
         const outputRedactionLogger = sandboxLogger.get('output_redaction');
         const redaction = {
+          prepareCallContext: sandboxWorkspaceManager.prepareCallContext,
           getOutputRedactor: createSandboxOutputRedactorProvider({
             getDeps: () => ({ actions: this.actionsStart, sandboxSecretsClient }),
           }),
@@ -371,7 +377,6 @@ export class NightshiftInvestigationsPlugin
           ensureInvestigationAgentStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
             getAgentAvailability: () => this.getInvestigationAvailability(),
-            getTelemetryConfig: () => this.ctx.config.get().sandbox,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -469,11 +474,11 @@ export class NightshiftInvestigationsPlugin
         // reinforcement phase too. The handler no-ops on the flag.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
-            getTelemetryConnectorId: (agentId) =>
-              resolveTelemetryTarget(
-                this.ctx.config.get().sandbox,
-                getInvestigationTelemetryTarget(agentId)
-              ).connectorId,
+            getTelemetryConnectorId: async (request, conversationId) =>
+              conversationId
+                ? (await this.getInvestigationsClient(request).getTelemetryTarget(conversationId))
+                    .connectorId
+                : this.ctx.config.get().sandbox?.telemetry_connector_id,
             logger: this.logger.get('decision_trees'),
             isEnabled: () => this.decisionTreesEnabled,
           })

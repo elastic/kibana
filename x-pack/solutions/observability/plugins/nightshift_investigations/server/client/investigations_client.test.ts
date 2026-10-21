@@ -96,7 +96,7 @@ const makeConversation = ({
   status,
   owner = true,
   templateId = 'investigation',
-  agentId = 'nightshift.investigation',
+  telemetryTarget,
   workflowExecutionIds,
 }: {
   id: string;
@@ -104,14 +104,15 @@ const makeConversation = ({
   status?: 'open' | 'closed';
   owner?: boolean;
   templateId?: string;
-  agentId?: string;
+  telemetryTarget?: string;
   workflowExecutionIds?: string[];
 }) => ({
   id,
   title,
   template_id: templateId,
-  agent_id: agentId,
+  agent_id: 'nightshift.investigation',
   metadata: {
+    ...(telemetryTarget ? { telemetry_target: telemetryTarget } : {}),
     ...(status ? { status } : {}),
     ...(workflowExecutionIds ? { workflow_execution_ids: workflowExecutionIds } : {}),
   },
@@ -202,12 +203,13 @@ beforeEach(() => {
     }: {
       id: string;
       title?: string;
-      metadata?: { workflow_execution_ids?: string[] };
+      metadata?: { workflow_execution_ids?: string[]; telemetry_target?: string };
     }) =>
       makeConversation({
         id,
         title: title ?? DEFAULT_CONVERSATION_TITLE,
         workflowExecutionIds: metadata?.workflow_execution_ids,
+        telemetryTarget: metadata?.telemetry_target,
       })
   );
   conversations.patchMetadata.mockResolvedValue({ conversation: {}, changedFields: ['status'] });
@@ -292,7 +294,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
     );
   });
 
-  it('passes the telemetry default separately from the LLM and creates its selected agent conversation', async () => {
+  it('passes the telemetry default separately from the LLM and stores it alongside the creating run', async () => {
     mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
     mockManagement.runWorkflow.mockResolvedValue('exec-123');
     await makeClient({
@@ -303,12 +305,13 @@ describe('NightshiftInvestigationsClient.start()', () => {
     }).start({ subject: { type: 'manual', id: 'question' }, trigger_type: 'manual' });
     expect(mockManagement.runWorkflow.mock.calls[0][2]).toMatchObject({ telemetry_target: 'c0' });
     expect(installInvestigationAgentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ telemetryTarget: 'c0' })
+      expect.objectContaining({ spaceId: SPACE_ID, availability: mockAgentAvailability })
     );
     expect(conversations.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        agentId: 'nightshift.investigation.c0',
+        agentId: 'nightshift.investigation',
         templateId: 'investigation',
+        metadata: { telemetry_target: 'c0', workflow_execution_ids: ['exec-123'] },
       })
     );
     expect(getConnectorById).toHaveBeenCalledWith(
@@ -1143,7 +1146,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
 
   it('keeps a matched investigation target when the follow-up omits it', async () => {
     agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
-    withConversations(makeConversation({ id: 'inv-1', agentId: 'nightshift.investigation.c0' }));
+    withConversations(makeConversation({ id: 'inv-1', telemetryTarget: 'c0' }));
     await makeClient({ telemetryConfig }).start({
       subject: { type: 'manual', id: 'question' },
       trigger_type: 'manual',
@@ -1154,7 +1157,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
 
   it('rejects changing a matched investigation target before launching its follow-up', async () => {
     agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
-    withConversations(makeConversation({ id: 'inv-1', agentId: 'nightshift.investigation.c0' }));
+    withConversations(makeConversation({ id: 'inv-1', telemetryTarget: 'c0' }));
     await expect(
       makeClient({ telemetryConfig }).start({
         subject: { type: 'manual', id: 'question' },
@@ -1495,7 +1498,8 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       await makeClient({ telemetryConfig }).ensureOrCreate('inv-1', 'exec-1');
       expect(conversations.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          agentId: `nightshift.investigation.${target}`,
+          agentId: 'nightshift.investigation',
+          metadata: { telemetry_target: target, workflow_execution_ids: ['exec-1'] },
           templateId: 'investigation',
         })
       );
@@ -1505,20 +1509,61 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
 
   it('keeps the conversation target when a later run omits it', async () => {
     withExecution();
-    withConversations(makeConversation({ id: 'inv-1', agentId: 'nightshift.investigation.c0' }));
+    withConversations(makeConversation({ id: 'inv-1', telemetryTarget: 'c0' }));
     const client = makeClient({ telemetryConfig });
     await client.ensureOrCreate('inv-1', 'exec-1');
-    await expect(client.getConversationAgentId('inv-1')).resolves.toBe(
-      'nightshift.investigation.c0'
-    );
+    await expect(client.getTelemetryTarget('inv-1')).resolves.toMatchObject({
+      connectorId: 'c0',
+      allowSecretFallback: false,
+    });
     expect(conversations.create).not.toHaveBeenCalled();
   });
 
+  it('keeps direct chats on the investigator working without an investigation template', async () => {
+    withConversations(makeConversation({ id: 'chat-1', templateId: 'default' }));
+    await expect(
+      makeClient({
+        telemetryConfig: { ...telemetryConfig, telemetry_connector_id: 'legacy' },
+      }).getTelemetryTarget('chat-1')
+    ).resolves.toMatchObject({ connectorId: 'legacy' });
+  });
+
+  it('keeps legacy telemetry when a named default is added', async () => {
+    withExecution();
+    withConversations(makeConversation({ id: 'inv-1' }));
+    const client = makeClient({
+      telemetryConfig: { ...telemetryConfig, telemetry_connector_id: 'legacy' },
+    });
+    await client.ensureOrCreate('inv-1', 'exec-1');
+    await expect(client.getTelemetryTarget('inv-1')).resolves.toMatchObject({
+      connectorId: 'legacy',
+    });
+    expect(conversations.create).not.toHaveBeenCalled();
+    expect(conversations.patchMetadata).not.toHaveBeenCalledWith(
+      'inv-1',
+      expect.objectContaining({ telemetry_target: expect.anything() })
+    );
+  });
+
+  it.each(['a'.repeat(64), 'orca-', 'orca_'])(
+    'accepts target %s without turning its name into an agent id',
+    async (target) => {
+      withExecution({ inputs: { investigation_id: 'inv-1', telemetry_target: target } });
+      await makeClient({
+        telemetryConfig: { telemetry_targets: { [target]: { connector_id: 'telemetry' } } },
+      }).ensureOrCreate('inv-1', 'exec-1');
+      expect(conversations.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          agentId: 'nightshift.investigation',
+          metadata: { telemetry_target: target, workflow_execution_ids: ['exec-1'] },
+        })
+      );
+    }
+  );
+
   it('rejects another target before reopening or recording subjects and execution metadata', async () => {
     withExecution({ inputs: { investigation_id: 'inv-1', subjects, telemetry_target: 'orca' } });
-    withConversations(
-      makeConversation({ id: 'inv-1', status: 'closed', agentId: 'nightshift.investigation.c0' })
-    );
+    withConversations(makeConversation({ id: 'inv-1', status: 'closed', telemetryTarget: 'c0' }));
     await expect(makeClient({ telemetryConfig }).ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
       'cannot change its telemetry target'
     );
@@ -1526,17 +1571,20 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(conversations.patchMetadata).not.toHaveBeenCalled();
   });
 
-  it('installs and binds the selected agent when materializing an early failure', async () => {
+  it('stores the target while using the single investigator for an early failure', async () => {
     withExecution({
       inputs: { investigation_id: 'inv-1', telemetry_target: 'c0' },
       status: ExecutionStatus.FAILED,
     });
     await makeClient({ telemetryConfig }).ensureForFailure('inv-1', 'exec-1');
     expect(installInvestigationAgentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ telemetryTarget: 'c0' })
+      expect.objectContaining({ spaceId: SPACE_ID, availability: mockAgentAvailability })
     );
     expect(conversations.create).toHaveBeenCalledWith(
-      expect.objectContaining({ agentId: 'nightshift.investigation.c0' })
+      expect.objectContaining({
+        agentId: 'nightshift.investigation',
+        metadata: { telemetry_target: 'c0', workflow_execution_ids: ['exec-1'] },
+      })
     );
   });
 

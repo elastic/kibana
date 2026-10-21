@@ -133,7 +133,6 @@ steps:
     type: nightshift.ensureInvestigationAgent
     with:
       agent_id: nightshift.investigation
-      telemetry_target: '{{ inputs.telemetry_target }}'
 
   # Gets or creates the investigation conversation and records the run's subjects before lifecycle
   # emission, so a running investigation is always visible, and records this run's execution id so
@@ -204,7 +203,7 @@ steps:
 
   - name: investigate
     type: ai.agent
-    agent-id: '${{ steps.persist_investigation_started.output.agent_id }}'
+    agent-id: nightshift.investigation
     connector-id: '{{ steps.resolve_model.output.connector_id }}'
     plugin-id: 'nightshift_investigation'
     aggregate-by: 'nightshift'

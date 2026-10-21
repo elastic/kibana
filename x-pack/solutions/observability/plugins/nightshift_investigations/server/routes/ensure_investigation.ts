@@ -43,11 +43,7 @@ export const ensureInvestigationRoute = createNightshiftInvestigationsServerRout
     const client = getInvestigationsClient(request);
     try {
       const conversationId = await client.ensureOrCreate(params.path.id, params.body?.execution_id);
-      return {
-        acknowledged: true,
-        conversation_id: conversationId,
-        agent_id: await client.getConversationAgentId(conversationId),
-      };
+      return { acknowledged: true, conversation_id: conversationId };
     } catch (error) {
       rethrowInvestigationClientError(error);
     }

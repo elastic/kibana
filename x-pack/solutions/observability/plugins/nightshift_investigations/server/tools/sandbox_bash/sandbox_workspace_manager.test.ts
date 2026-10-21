@@ -382,14 +382,14 @@ describe('createSandboxWorkspaceManager', () => {
       expect(mockWriteElasticManifest).toHaveBeenCalledWith(
         expect.objectContaining({
           session: c0Session,
-          connectorId: 'c0',
+          credentials: { kind: 'connector', connectorId: 'c0' },
           readableIndices: 'remote:logs-*',
         })
       );
       expect(mockWriteElasticManifest).toHaveBeenCalledWith(
         expect.objectContaining({
           session: orcaSession,
-          connectorId: 'orca',
+          credentials: { kind: 'connector', connectorId: 'orca' },
           readableIndices: 'logs-orcabench.*',
         })
       );
@@ -408,13 +408,101 @@ describe('createSandboxWorkspaceManager', () => {
       ).rejects.toThrow('only one telemetry connector');
     });
 
+    it('scopes concurrent investigations that share the single agent to their conversation target', async () => {
+      const baseConnector = actions.inMemoryConnectors[0];
+      actions.inMemoryConnectors = ['c0', 'orca'].map((id) => ({ ...baseConnector, id }));
+      const getTelemetryTarget = jest.fn(async ({ conversationId }: SandboxCallContext) => ({
+        connectorId: conversationId === 'inv-c0' ? 'c0' : 'orca',
+        readableIndices: conversationId === 'inv-c0' ? 'c0:logs-*' : 'orca:logs-*',
+      }));
+      const named = createSandboxWorkspaceManager({
+        getDeps: () => ({ actions }),
+        telemetryTargets: [{ connectorId: 'c0' }, { connectorId: 'orca' }],
+        getTelemetryTarget,
+        logger,
+      });
+      const c0 = {
+        ...createCallContext(['c0', 'orca', 'other']),
+        conversationId: 'inv-c0',
+        agentId: 'nightshift.investigation',
+      };
+      const orca = {
+        ...createCallContext(['c0', 'orca', 'other']),
+        conversationId: 'inv-orca',
+        agentId: 'nightshift.investigation',
+      };
+      await Promise.all([named.prepareCallContext(c0), named.prepareCallContext(orca)]);
+      await Promise.all([
+        named.ensureWorkspaceReady({ session: createSessionMock(false), callContext: c0 }),
+        named.ensureWorkspaceReady({ session: createSessionMock(false), callContext: orca }),
+      ]);
+      expect(c0.allowedConnectorIds).toEqual(['c0', 'other']);
+      expect(orca.allowedConnectorIds).toEqual(['orca', 'other']);
+      expect(getTelemetryTarget).toHaveBeenCalledTimes(2);
+      expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          credentials: { kind: 'connector', connectorId: 'c0' },
+          readableIndices: 'c0:logs-*',
+        })
+      );
+      expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          credentials: { kind: 'connector', connectorId: 'orca' },
+          readableIndices: 'orca:logs-*',
+        })
+      );
+    });
+
+    it('keeps a custom agent on its own allowed connector when investigations have another default', async () => {
+      const baseConnector = actions.inMemoryConnectors[0];
+      actions.inMemoryConnectors = ['c0', 'orca'].map((id) => ({ ...baseConnector, id }));
+      const named = createSandboxWorkspaceManager({
+        getDeps: () => ({ actions }),
+        telemetryTargets: [
+          { connectorId: 'c0' },
+          { connectorId: 'orca', readableIndices: 'orca:logs-*' },
+        ],
+        getTelemetryTarget: async () => undefined,
+        logger,
+      });
+      const callContext = { ...createCallContext(['orca']), agentId: 'custom-agent' };
+      await named.ensureWorkspaceReady({ session: createSessionMock(false), callContext });
+      expect(callContext.allowedConnectorIds).toEqual(['orca']);
+      expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          credentials: { kind: 'connector', connectorId: 'orca' },
+          readableIndices: 'orca:logs-*',
+        })
+      );
+    });
+
+    it('removes telemetry access for none without falling back to Elasticsearch sandbox secrets', async () => {
+      const named = createSandboxWorkspaceManager({
+        getDeps: () => ({
+          actions,
+          sandboxSecretsClient: {
+            listKeysForSandbox: jest
+              .fn()
+              .mockResolvedValue(['ELASTICSEARCH_URL', 'ELASTICSEARCH_API_KEY']),
+          },
+        }),
+        telemetryTargets: [{ connectorId: 'c0' }, { connectorId: 'orca' }],
+        getTelemetryTarget: async () => ({ allowSecretFallback: false }),
+        logger,
+      });
+      const callContext = createCallContext(['c0', 'orca', 'other']);
+      await named.ensureWorkspaceReady({ session: createSessionMock(false), callContext });
+      expect(callContext.allowedConnectorIds).toEqual(['other']);
+      expect(mockWriteElasticManifest).not.toHaveBeenCalled();
+    });
+
     it('resolves target-specific hints when targets share a connector', async () => {
       const named = createSandboxWorkspaceManager({
         getDeps: () => ({ actions }),
         telemetryTargets: [{ connectorId: 'elasticsearch-telemetry' }],
-        getTelemetryTarget: (agentId) => ({
+        getTelemetryTarget: async ({ conversationId }) => ({
           connectorId: 'elasticsearch-telemetry',
-          readableIndices: agentId === 'nightshift.investigation.c0' ? 'c0:logs-*' : 'orca:logs-*',
+          readableIndices: conversationId === 'c0-conversation' ? 'c0:logs-*' : 'orca:logs-*',
         }),
         logger,
       });
@@ -423,14 +511,14 @@ describe('createSandboxWorkspaceManager', () => {
         session,
         callContext: {
           ...createCallContext(['elasticsearch-telemetry']),
-          agentId: 'nightshift.investigation.c0',
+          conversationId: 'c0-conversation',
         },
       });
       await named.ensureWorkspaceReady({
         session,
         callContext: {
           ...createCallContext(['elasticsearch-telemetry']),
-          agentId: 'nightshift.investigation.orca',
+          conversationId: 'orca-conversation',
         },
       });
       expect(mockWriteElasticManifest).toHaveBeenNthCalledWith(
