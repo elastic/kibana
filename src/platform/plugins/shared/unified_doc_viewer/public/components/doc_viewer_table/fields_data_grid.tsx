@@ -251,6 +251,19 @@ export const FieldsDataGrid = ({
       />
     );
 
+    const renderWarningFooter =
+      (
+        getWarning: (
+          params: Parameters<typeof getFilterExistsDisabledWarning>[0]
+        ) => string | undefined
+      ) =>
+      (row: FieldRow) =>
+        (
+          <ExpansionWarning
+            title={getWarning({ row, onFilter: filter, hideFilteringOnComputedColumns })}
+          />
+        );
+
     return [
       {
         id: GRID_COLUMN_FIELD_NAME,
@@ -263,15 +276,7 @@ export const FieldsDataGrid = ({
         cellActions: fieldCellActions,
         cellCss: styles.nameCell,
         renderCell: renderFieldCell,
-        renderCellExpansionFooter: (row) => (
-          <ExpansionWarning
-            title={getFilterExistsDisabledWarning({
-              row,
-              onFilter: filter,
-              hideFilteringOnComputedColumns,
-            })}
-          />
-        ),
+        renderCellExpansionFooter: renderWarningFooter(getFilterExistsDisabledWarning),
       },
       {
         id: GRID_COLUMN_FIELD_VALUE,
@@ -280,15 +285,7 @@ export const FieldsDataGrid = ({
         }),
         cellActions: fieldValueCellActions,
         renderCell: renderFieldCell,
-        renderCellExpansionFooter: (row) => (
-          <ExpansionWarning
-            title={getFilterInOutPairDisabledWarning({
-              row,
-              onFilter: filter,
-              hideFilteringOnComputedColumns,
-            })}
-          />
-        ),
+        renderCellExpansionFooter: renderWarningFooter(getFilterInOutPairDisabledWarning),
       },
     ];
   }, [
