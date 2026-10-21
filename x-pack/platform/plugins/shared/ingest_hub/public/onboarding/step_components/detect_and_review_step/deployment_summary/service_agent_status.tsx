@@ -39,16 +39,17 @@ const buttonResetCss = css({
 
 const getFlyoutKind = ({
   hasAgent,
-  isUnhealthy,
+  isSettled,
   hasPackagePolicy,
   canShowEnrollment,
 }: {
   hasAgent: boolean;
-  isUnhealthy: boolean;
+  /** The agent is healthy or unhealthy, as opposed to still enrolling or starting. */
+  isSettled: boolean;
   hasPackagePolicy: boolean;
   canShowEnrollment: boolean;
 }): FlyoutKind | undefined => {
-  if (hasAgent) return isUnhealthy && hasPackagePolicy ? 'details' : undefined;
+  if (hasAgent) return isSettled && hasPackagePolicy ? 'details' : undefined;
   return canShowEnrollment ? 'enrollment' : undefined;
 };
 
@@ -74,9 +75,9 @@ const getIssueMessage = (issue: AgentIssue): string => {
 };
 
 /**
- * Fleet agent badge for a service deployed through Fleet. An unhealthy agent opens its component
- * health, and a managed integration whose agent is not there yet opens the enrollment status —
- * the same flyouts the Managed integrations table uses.
+ * Fleet agent badge for a service deployed through Fleet. A healthy or unhealthy agent opens its
+ * component health, and a managed integration whose agent is not there yet opens the enrollment
+ * status — the same flyouts the Managed integrations table uses.
  */
 export function ServiceAgentStatus({
   name,
@@ -91,7 +92,7 @@ export function ServiceAgentStatus({
 
   const flyoutKind = getFlyoutKind({
     hasAgent: !!agent,
-    isUnhealthy: health === 'unhealthy',
+    isSettled: health === 'healthy' || health === 'unhealthy',
     hasPackagePolicy: !!packagePolicy,
     canShowEnrollment: deploymentMethod === 'managed_integration' && !!packageVersion,
   });
@@ -99,7 +100,7 @@ export function ServiceAgentStatus({
   // The badge is Fleet's view of the whole agent. When it is unhealthy only because of other
   // integrations, say so, so it does not read as a contradiction of this one running.
   const elsewhereMessage =
-    unhealthyElsewhere && !flyoutKind
+    unhealthyElsewhere && health === 'healthy'
       ? i18n.translate('xpack.ingestHub.detectAndReviewStep.agentStatus.unhealthyElsewhere', {
           defaultMessage:
             'The agent reports problems with other integrations. This one is running.',

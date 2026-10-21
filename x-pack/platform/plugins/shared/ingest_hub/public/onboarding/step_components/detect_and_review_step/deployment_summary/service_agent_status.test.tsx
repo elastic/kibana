@@ -87,16 +87,26 @@ const renderStatus = (
 
 describe('ServiceAgentStatus', () => {
   describe('healthy and in-progress agents', () => {
-    it('renders the Fleet agent badge without making it clickable', () => {
+    it('renders the Fleet agent badge as a button, so the per-input health can be reached', () => {
       renderStatus(info());
 
       expect(screen.getByTestId('agentHealth')).toHaveTextContent('online');
-      expect(screen.queryByTestId('serviceTile-agentStatusButton')).not.toBeInTheDocument();
+      expect(screen.getByTestId('serviceTile-agentStatusButton').tagName).toBe('BUTTON');
+      expect(screen.getByTestId('agentTooltip')).toHaveTextContent('See agent info');
     });
 
-    it('adds nothing to the badge own check-in tooltip', () => {
+    it('opens the component health flyout for a healthy agent', async () => {
       renderStatus(info());
 
+      fireEvent.click(screen.getByTestId('serviceTile-agentStatusButton'));
+
+      expect(await screen.findByTestId('detailsFlyout')).toHaveTextContent('Amazon S3|a1|pp-1');
+    });
+
+    it('is not clickable until the package policy is known', () => {
+      renderStatus({ ...info(), packagePolicy: undefined });
+
+      expect(screen.queryByTestId('serviceTile-agentStatusButton')).not.toBeInTheDocument();
       expect(screen.queryByTestId('agentTooltip')).not.toBeInTheDocument();
     });
 
@@ -105,6 +115,7 @@ describe('ServiceAgentStatus', () => {
 
       expect(screen.getByTestId('agentHealth')).toHaveTextContent('enrolling');
       expect(screen.queryByTestId('serviceTile-agentStatusButton')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('agentTooltip')).not.toBeInTheDocument();
     });
   });
 
@@ -238,26 +249,36 @@ describe('ServiceAgentStatus', () => {
       );
     });
 
-    it('can be reached with the keyboard, so the explanation is not mouse only', () => {
+    it('is a button, so the explanation is reachable with the keyboard', () => {
       renderStatus(elsewhere());
 
+      expect(screen.getByTestId('serviceTile-agentStatusButton').tagName).toBe('BUTTON');
+      expect(screen.queryByTestId('serviceTile-agentUnhealthyElsewhere')).not.toBeInTheDocument();
+    });
+
+    it('opens the flyout, where the failing integrations are listed', async () => {
+      renderStatus(elsewhere());
+
+      fireEvent.click(screen.getByTestId('serviceTile-agentStatusButton'));
+
+      expect(await screen.findByTestId('detailsFlyout')).toBeInTheDocument();
+    });
+
+    it('can still be reached with the keyboard before the package policy is known', () => {
+      renderStatus(elsewhere({ packagePolicy: undefined }));
+
+      expect(screen.queryByTestId('serviceTile-agentStatusButton')).not.toBeInTheDocument();
       expect(screen.getByTestId('serviceTile-agentUnhealthyElsewhere')).toHaveAttribute(
         'tabindex',
         '0'
       );
     });
 
-    it('is not clickable, since the deployed integration has nothing to show', () => {
-      renderStatus(elsewhere());
-
-      expect(screen.queryByTestId('serviceTile-agentStatusButton')).not.toBeInTheDocument();
-    });
-
-    it('adds nothing for an agent that is simply healthy', () => {
+    it('says nothing about other integrations for an agent that is simply healthy', () => {
       renderStatus(info());
 
       expect(screen.queryByTestId('serviceTile-agentUnhealthyElsewhere')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('agentTooltip')).not.toBeInTheDocument();
+      expect(screen.getByTestId('agentTooltip')).not.toHaveTextContent('other integrations');
     });
 
     it('does not apply once the integration itself is unhealthy, which has its own tooltip', async () => {
@@ -269,7 +290,7 @@ describe('ServiceAgentStatus', () => {
         })
       );
 
-      expect(screen.queryByTestId('serviceTile-agentUnhealthyElsewhere')).not.toBeInTheDocument();
+      expect(screen.getByTestId('agentTooltip')).not.toHaveTextContent('other integrations');
       expect(screen.getByTestId('serviceTile-agentStatusButton')).toBeInTheDocument();
     });
   });
