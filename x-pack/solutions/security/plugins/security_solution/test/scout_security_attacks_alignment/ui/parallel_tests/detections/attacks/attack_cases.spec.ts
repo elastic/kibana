@@ -28,9 +28,8 @@
  *    alerts no other attached attack still claims off the case, and that "Remove attack only"
  *    leaves the alerts on the case.
  *
- * Attaching a `security.attack` requires `attackAttachmentsEnabled`; the attacks-alignment
- * Scout config boots with it (see
- * `kbn-scout/src/servers/configs/config_sets/security_attacks_alignment/shared.ts`).
+ * Attaching a `security.attack` requires the `attackAttachments` experimental flag, which is on
+ * by default.
  *
  * To run locally:
  *
@@ -44,7 +43,7 @@ import {
   SECURITY_ALERT_ATTACHMENT_TYPE,
   SECURITY_ATTACK_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common';
-import { getPlaywrightTagsFor } from '@kbn/scout-security';
+import { tags } from '@kbn/scout-security';
 import { spaceTest } from '../../../fixtures';
 import {
   ATTACK_GRID_COLUMN_ID,
@@ -168,15 +167,7 @@ const getAttackAttachments = (attachments: readonly FoundCaseAttachment[]): Foun
 
 spaceTest.describe(
   'Attack case attachments',
-  {
-    // Local only: the suite needs `attackAttachmentsEnabled`, which defaults off and is turned
-    // on by this config set's Scout server args. Cloud targets boot without it, so attaching an
-    // attack is refused there.
-    tag: [
-      ...getPlaywrightTagsFor('stateful', 'classic', 'local'),
-      ...getPlaywrightTagsFor('serverless', 'security_complete', 'local'),
-    ],
-  },
+  { tag: [...tags.stateful.classic, ...tags.serverless.security.complete] },
   () => {
     /**
      * The seeded attack whose alert set a test re-pointed, and the set to put back. Held across
