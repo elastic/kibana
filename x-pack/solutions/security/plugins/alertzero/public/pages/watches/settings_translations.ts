@@ -506,6 +506,18 @@ export const EXCLUDED_RULE_TAGS_PLACEHOLDER = i18n.translate(
   { defaultMessage: 'Add a rule tag, for example in-development' }
 );
 
+export const excludedRuleTagTooLong = (max: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.alertTriage.excludedRuleTagTooLong', {
+    defaultMessage: 'A tag can be at most {max} characters.',
+    values: { max },
+  });
+
+export const excludedRuleTagsLimitReached = (max: number) =>
+  i18n.translate('xpack.alertzero.watches.settings.alertTriage.excludedRuleTagsLimitReached', {
+    defaultMessage: 'You can exclude at most {max} tags.',
+    values: { max },
+  });
+
 export const SEVERITY_LOW = i18n.translate('xpack.alertzero.watches.settings.severity.low', {
   defaultMessage: 'Low',
 });

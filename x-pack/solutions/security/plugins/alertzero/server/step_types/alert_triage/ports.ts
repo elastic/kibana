@@ -45,7 +45,6 @@ const ALERT_FIELDS = {
   ruleId: 'kibana.alert.rule.uuid',
   ruleName: 'kibana.alert.rule.name',
   riskScore: 'kibana.alert.risk_score',
-  severity: 'kibana.alert.severity',
   status: 'kibana.alert.workflow_status',
   tags: 'kibana.alert.workflow_tags',
   timestamp: '@timestamp',
@@ -207,6 +206,7 @@ export interface TriageFilters {
 }
 
 // Filter-only fields: kept out of `ALERT_FIELDS`, which also decides which fields are fetched.
+const SEVERITY_FIELD = 'kibana.alert.severity';
 const BUILDING_BLOCK_TYPE_FIELD = 'kibana.alert.building_block_type';
 const RULE_TAGS_FIELD = 'kibana.alert.rule.tags';
 
@@ -223,7 +223,7 @@ const severityFilter = (minSeverity: AlertSeverity) =>
     : [
         {
           terms: {
-            [ALERT_FIELDS.severity]: ALERT_SEVERITIES.slice(ALERT_SEVERITIES.indexOf(minSeverity)),
+            [SEVERITY_FIELD]: ALERT_SEVERITIES.slice(ALERT_SEVERITIES.indexOf(minSeverity)),
           },
         },
       ];

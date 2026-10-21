@@ -5,11 +5,20 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
-import { EuiComboBox, EuiSelect, EuiSwitch, EuiText, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFormErrorText,
+  EuiSelect,
+  EuiSwitch,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import {
   ALERT_TRIAGE_DEFAULT_EXTRAS,
+  EXCLUDED_RULE_TAG_MAX_LENGTH,
+  EXCLUDED_RULE_TAGS_MAX_COUNT,
   AlertTriageWorkerExtras,
   type WorkerSettings,
 } from '@kbn/alertzero-common';
@@ -18,10 +27,22 @@ import { SettingRow } from '../components/setting_row';
 import * as i18n from '../settings_translations';
 import type { WorkerCustomSettingsComponent } from './types';
 
-/** The server projects complete extras; fall back to the defaults rather than crash a render. */
+/**
+ * The server projects complete extras. A field that fails validation falls back to its own default
+ * rather than resetting every control, so one bad value never discards the user's other edits.
+ */
 const readAlertTriageExtras = (settings: WorkerSettings): AlertTriageWorkerExtras => {
   const parsed = AlertTriageWorkerExtras.safeParse(settings.extras);
-  return parsed.success ? parsed.data : ALERT_TRIAGE_DEFAULT_EXTRAS;
+  if (parsed.success) return parsed.data;
+  const stored: Record<string, unknown> =
+    typeof settings.extras === 'object' && settings.extras !== null ? settings.extras : {};
+  const isValidField = (key: keyof AlertTriageWorkerExtras): boolean =>
+    AlertTriageWorkerExtras.safeParse({ ...ALERT_TRIAGE_DEFAULT_EXTRAS, [key]: stored[key] })
+      .success;
+  const fields = Object.keys(ALERT_TRIAGE_DEFAULT_EXTRAS) as Array<keyof AlertTriageWorkerExtras>;
+  return Object.fromEntries(
+    fields.map((key) => [key, isValidField(key) ? stored[key] : ALERT_TRIAGE_DEFAULT_EXTRAS[key]])
+  ) as AlertTriageWorkerExtras;
 };
 
 const SEVERITY_OPTIONS: Array<{ value: AlertTriageWorkerExtras['minSeverity']; text: string }> = [
@@ -70,6 +91,7 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
   const severityDetailId = useGeneratedHtmlId({ prefix: 'alertZeroSeverityDetail' });
   const buildingBlocksDetailId = useGeneratedHtmlId({ prefix: 'alertZeroBuildingBlocksDetail' });
   const ruleTagsDetailId = useGeneratedHtmlId({ prefix: 'alertZeroRuleTagsDetail' });
+  const [tagError, setTagError] = useState<string>();
 
   return (
     <>
@@ -144,11 +166,26 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
           compressed
           noSuggestions
           placeholder={i18n.EXCLUDED_RULE_TAGS_PLACEHOLDER}
-          selectedOptions={extras.excludedRuleTags.map((label) => ({ label }))}
+          // EUI keys pills by lowercased label unless given a key, so `Dev` and `dev` would collide.
+          selectedOptions={extras.excludedRuleTags.map((label) => ({ label, key: label }))}
           isDisabled={isDisabled}
+          isCaseSensitive
+          isInvalid={tagError !== undefined}
+          // EUI clears the search box after a create attempt, which must not clear the error it just set.
+          onSearchChange={(search) => {
+            if (search !== '') setTagError(undefined);
+          }}
           onCreateOption={(tag) => {
             const trimmed = tag.trim();
             if (trimmed.length === 0 || extras.excludedRuleTags.includes(trimmed)) return;
+            if (trimmed.length > EXCLUDED_RULE_TAG_MAX_LENGTH) {
+              setTagError(i18n.excludedRuleTagTooLong(EXCLUDED_RULE_TAG_MAX_LENGTH));
+              return;
+            }
+            if (extras.excludedRuleTags.length >= EXCLUDED_RULE_TAGS_MAX_COUNT) {
+              setTagError(i18n.excludedRuleTagsLimitReached(EXCLUDED_RULE_TAGS_MAX_COUNT));
+              return;
+            }
             onExtrasChange({ ...extras, excludedRuleTags: [...extras.excludedRuleTags, trimmed] });
           }}
           onChange={(options) =>
@@ -158,6 +195,11 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
           aria-describedby={ruleTagsDetailId}
           data-test-subj="alertZeroExcludedRuleTagsInput"
         />
+        {tagError !== undefined && (
+          <EuiFormErrorText data-test-subj="alertZeroExcludedRuleTagsError">
+            {tagError}
+          </EuiFormErrorText>
+        )}
         <SettingDetail id={ruleTagsDetailId}>{i18n.EXCLUDED_RULE_TAGS_DETAIL_TEXT}</SettingDetail>
       </SettingRow>
     </>
