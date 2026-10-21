@@ -22,6 +22,8 @@ import { defineMapsPack, type MapGeometry } from '@kbn/isomer-primitives-maps';
 import { vegaPack } from '@kbn/isomer-primitives-vega';
 import { fromRoot } from '@kbn/repo-info';
 
+import { hoistStyles, withoutMasks } from './hoist_styles';
+
 const FONTS = fromRoot('src/core/packages/apps/server-internal/assets/fonts');
 
 /** The faces Elastic Charts' Borealis theme names, from Kibana's own assets. */
@@ -148,12 +150,14 @@ export const createChartsDrawing = async ({
     }
   };
   const snapshot = (composition: Composition, { frame, width, height, theme }: DrawOptions) =>
-    runtime.surfaces.snapshot.render(composition, {
-      ...(frame ? { frame } : {}),
-      ...(width ? { width } : {}),
-      ...(height ? { height } : {}),
-      ...(theme ? { theme } : {}),
-    });
+    hoistStyles(
+      runtime.surfaces.snapshot.render(composition, {
+        ...(frame ? { frame } : {}),
+        ...(width ? { width } : {}),
+        ...(height ? { height } : {}),
+        ...(theme ? { theme } : {}),
+      })
+    );
   return {
     runtime,
     drawHtml: (composition, options = {}) =>
@@ -164,7 +168,8 @@ export const createChartsDrawing = async ({
       ),
     drawPdf: (composition, { metadata, ...options } = {}) =>
       withCharts(composition, options, () => {
-        const { html, css, width, height } = snapshot(composition, options);
+        // The PDF writer drops content under a mask (request 15).
+        const { html, css, width, height } = withoutMasks(snapshot(composition, options));
         return takumi.pdf(
           { pages: [{ html }], css, width, height },
           { uncoveredText: 'placeholder', ...(metadata ? { metadata } : {}) }
