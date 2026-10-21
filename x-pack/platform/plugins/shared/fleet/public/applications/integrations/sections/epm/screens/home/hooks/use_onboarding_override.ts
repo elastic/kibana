@@ -82,6 +82,7 @@ export function useOnboardingOverride() {
         categories,
         searchableContent,
         searchMembers: members,
+        ...(members.length > 0 ? { collectionSize: members.length } : {}),
         onCardClick: navigateToOnboarding,
       };
 
