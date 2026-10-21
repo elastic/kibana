@@ -29,6 +29,7 @@ export const TestProvider: React.FC<Partial<CspAppDeps>> = ({
   core = coreMock.createStart(),
   deps = getMockDependencies(),
   params = coreMock.createAppMountParameters(),
+  // @ts-ignore
   children,
 } = {}) => {
   const queryClient = new QueryClient({

@@ -20,6 +20,7 @@ jest.mock('@kbn/agent-builder-plugin/public', () => ({ AGENTBUILDER_APP_ID: 'age
 
 const setup = (index: 0 | 1 | 2, data: object) => {
   const application = applicationServiceMock.createStartContract();
+  // @ts-ignore
   application.getUrlForApp.mockImplementation((appId, { path } = {}) => `/app/${appId}${path}`);
   const definition = createEscalationConversationEventUiDefinitions({ application })[index];
   const event = { id: 'e1', type: definition.type, data } as never;

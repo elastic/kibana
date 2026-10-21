@@ -93,6 +93,7 @@ describe('UserPicker', () => {
     useCasesContextMock.mockReturnValue({ owner: ['securitySolution'] });
     // Mirror the real hook, which clears the "user typing" state by invoking onDebounce; a static
     // return value never resets isUserTyping, pinning the async combobox on "Loading options".
+    // @ts-ignore
     useSuggestUserProfilesMock.mockImplementation(({ onDebounce } = {}) => {
       setTimeout(() => onDebounce?.(), 0);
       return {

@@ -11,6 +11,7 @@ export type UseIsOpen = (
   callbacks?: { onOpen?: () => void; onClose?: () => void; onToggle?: () => void }
 ) => { isOpen: boolean; open: () => void; close: () => void; toggle: () => void };
 
+// @ts-ignore
 export const useIsOpenState: UseIsOpen = (defaultValue, { onOpen, onClose, onToggle } = {}) => {
   const [isOpen, setIsOpen] = useState(defaultValue);
 

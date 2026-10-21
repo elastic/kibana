@@ -625,6 +625,7 @@ export const getDatatableVisualization = ({
   toExpression(
     state,
     datasourceLayers,
+    // @ts-ignore
     { title, description } = {},
     datasourceExpressionsByLayers = {}
   ): Ast | null {

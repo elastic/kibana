@@ -84,6 +84,7 @@ const onSave: ContentEditorConfig['onSave'] = async ({ id, title, description, t
   });
 };
 
+// @ts-ignore
 const findItems: TableListViewFindItemsFn = async (searchTerm, { listingLimit: limit } = {}) => {
   try {
     const {

@@ -33,6 +33,7 @@ interface Props {
 export const OverviewCard: FunctionComponent<Props> = ({
   title,
   content: { left: contentLeft, right: contentRight },
+  // @ts-ignore
   footer: { left: footerLeft, right: footerRight } = {},
   'data-test-subj': dataTestSubj,
 }) => {

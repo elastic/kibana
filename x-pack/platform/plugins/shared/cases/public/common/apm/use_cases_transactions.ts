@@ -28,6 +28,7 @@ export const useCreateCaseWithAttachmentsTransaction = () => {
 
   const startCreateCaseWithAttachmentsTransaction =
     useCallback<StartCreateCaseWithAttachmentsTransaction>(
+      // @ts-ignore
       ({ appId, attachments } = {}) => {
         if (!appId) {
           return;

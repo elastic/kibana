@@ -78,15 +78,25 @@ export const deserializeFollowerIndex = ({
   leader_index,
   status,
   parameters: {
+    // @ts-ignore
     max_read_request_operation_count,
+    // @ts-ignore
     max_outstanding_read_requests,
+    // @ts-ignore
     max_read_request_size,
+    // @ts-ignore
     max_write_request_operation_count,
+    // @ts-ignore
     max_write_request_size,
+    // @ts-ignore
     max_outstanding_write_requests,
+    // @ts-ignore
     max_write_buffer_count,
+    // @ts-ignore
     max_write_buffer_size,
+    // @ts-ignore
     max_retry_delay,
+    // @ts-ignore
     read_poll_timeout,
   } = {},
   shards,

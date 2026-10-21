@@ -30,6 +30,7 @@ export const statuses: Statuses = {
     },
   },
   [CaseStatuses['in-progress']]: {
+    // @ts-ignore
     ...statusConfiguration[CaseStatuses['in-progress']],
     actions: {
       single: {

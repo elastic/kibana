@@ -171,6 +171,7 @@ export const inferenceEndpoints: InferenceEndpointAutocompleteItem[] = [
 
 export function getCallbackMocks(): ESQLCallbacks {
   return {
+    // @ts-ignore
     getColumnsFor: jest.fn(async ({ query } = {}) => {
       if (/enrich/.test(query)) {
         return enrichFields;

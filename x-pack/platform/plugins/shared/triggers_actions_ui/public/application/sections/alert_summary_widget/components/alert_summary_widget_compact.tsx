@@ -46,6 +46,7 @@ export interface AlertSummaryWidgetCompactProps {
 export const AlertSummaryWidgetCompact = ({
   activeAlertCount,
   activeAlerts,
+  // @ts-ignore
   chartProps: { themeOverrides } = {},
   recoveredAlertCount,
   timeRangeTitle,

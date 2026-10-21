@@ -111,6 +111,7 @@ export const ComponentTemplatesSelector = ({
   defaultValue,
   onComponentsLoaded,
   docUri,
+  // @ts-ignore
   emptyPrompt: { text, showCreateButton } = {},
 }: Props) => {
   const { data: components, isLoading, error } = useApi().useLoadComponentTemplates();

@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  buildConcurrencyArgs,
-  resolveMemoryLimit,
-  resolveTypeCheckConcurrency,
-} from './resolve_concurrency';
+import { buildConcurrencyArgs, resolveTypeCheckConcurrency } from './resolve_concurrency';
 
 describe('resolveTypeCheckConcurrency', () => {
   it('defaults builders to floor(cores/checkers) so total workers equal core count', () => {
@@ -63,15 +59,5 @@ describe('buildConcurrencyArgs', () => {
     expect(buildConcurrencyArgs({ builders: 6, checkers: 2, stopOnErrors: true })).toContain(
       '--stopBuildOnErrors'
     );
-  });
-});
-
-describe('resolveMemoryLimit', () => {
-  it('defaults to 12288MiB', () => {
-    expect(resolveMemoryLimit({})).toBe('12288MiB');
-  });
-
-  it('honors the env override', () => {
-    expect(resolveMemoryLimit({ KBN_TYPE_CHECK_MEMORY_LIMIT_MB: '49152' })).toBe('49152MiB');
   });
 });

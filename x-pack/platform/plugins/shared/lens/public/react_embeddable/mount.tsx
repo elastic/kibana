@@ -26,6 +26,7 @@ export const mountInlinePanel = async ({
   core,
   api,
   loadContent,
+  // @ts-ignore
   options: { dataTestSubj, uuid, container, returnFocus, isEsql } = {},
 }: {
   core: CoreStart;

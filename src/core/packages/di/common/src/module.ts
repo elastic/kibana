@@ -101,6 +101,7 @@ export type KibanaBind = <T>(
  * An extended fluent binding syntax supporting Kibana-specific features.
  * @public
  */
+// @ts-expect-error
 export interface KibanaBindToFluentSyntax<T> extends BindToFluentSyntax<T> {
   /**
    * A dynamic value binding supporting Kibana resolution context.

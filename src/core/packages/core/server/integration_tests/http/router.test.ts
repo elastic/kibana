@@ -1651,6 +1651,7 @@ describe('Response factory', () => {
           path: '/',
           security: { authz: { enabled: false, reason: '' } },
           validate: {
+            // @ts-expect-error
             body: ({ bar, baz } = {}, { ok, badRequest }) => {
               if (typeof bar === 'string' && typeof baz === 'number') {
                 return ok({ bar, baz });

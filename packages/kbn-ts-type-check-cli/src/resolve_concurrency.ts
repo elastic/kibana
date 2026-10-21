@@ -10,7 +10,7 @@
 import Os from 'os';
 
 /**
- * `tsgo -b` is an orchestrator: `--builders` projects build concurrently and
+ * `tsrs -b` is an orchestrator: `--builders` projects build concurrently and
  * each runs up to `--checkers` type-checkers. The two multiply, so peak
  * parallelism is roughly `builders * checkers`.
  *
@@ -26,10 +26,8 @@ import Os from 'os';
 export const ENV_BUILDERS = 'KBN_TYPE_CHECK_BUILDERS';
 export const ENV_CHECKERS = 'KBN_TYPE_CHECK_CHECKERS';
 export const ENV_STOP_ON_ERRORS = 'KBN_TYPE_CHECK_STOP_ON_ERRORS';
-export const ENV_MEMORY_LIMIT = 'KBN_TYPE_CHECK_MEMORY_LIMIT_MB';
 
 const DEFAULT_CHECKERS = 3;
-const DEFAULT_MEMORY_LIMIT_MB = 12288;
 
 export interface TypeCheckConcurrency {
   builders: number;
@@ -37,7 +35,7 @@ export interface TypeCheckConcurrency {
   stopOnErrors: boolean;
 }
 
-/** Resolves tsgo build concurrency from env overrides, defaulting from core count. */
+/** Resolves tsrs build concurrency from env overrides, defaulting from core count. */
 export const resolveTypeCheckConcurrency = (
   env: NodeJS.ProcessEnv = process.env,
   cpuCount: number = Os.cpus().length
@@ -51,11 +49,7 @@ export const resolveTypeCheckConcurrency = (
   };
 };
 
-/** Resolves the Go memory limit for the native tsgo process, env-overridable. */
-export const resolveMemoryLimit = (env: NodeJS.ProcessEnv = process.env): string =>
-  `${readPositiveInt(env[ENV_MEMORY_LIMIT], DEFAULT_MEMORY_LIMIT_MB)}MiB`;
-
-/** Builds the `tsgo -b` concurrency CLI args from resolved values. */
+/** Builds the `tsrs -b` concurrency CLI args from resolved values. */
 export const buildConcurrencyArgs = (concurrency: TypeCheckConcurrency): string[] => {
   const args = [
     '--builders',

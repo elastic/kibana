@@ -495,6 +495,7 @@ export const useField = <T, FormType = FormData, I = T>(
   );
 
   const getErrorsMessages: FieldHook<T, I>['getErrorsMessages'] = useCallback(
+    // @ts-ignore
     ({ errorCode, validationType = VALIDATION_TYPES.FIELD } = {}) => {
       const errorMessages = errors.reduce((messages, error) => {
         const isSameErrorCode = errorCode && error.code === errorCode;

@@ -48,6 +48,7 @@ export class CorePluginBPlugin implements Plugin {
         },
         validate: {
           query: schema.object({ id: schema.string() }),
+          // @ts-ignore
           body: ({ bar, baz } = {}, { ok, badRequest }) => {
             if (typeof bar === 'string' && bar === baz) {
               return ok({ bar, baz });

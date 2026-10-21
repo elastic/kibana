@@ -59,6 +59,7 @@ describe('registerAlertAnalysisWorkflowRuleAttachmentRoutes', () => {
   // action" KQL filter (detected by the actionRef clause), name sorting, count-only requests
   // (perPage 0), and page slicing.
   const mockFindRules = (rules: RuleAlertType[]) => {
+    // @ts-ignore
     rulesClient.find.mockImplementation(async ({ options } = {}) => {
       const {
         filter,

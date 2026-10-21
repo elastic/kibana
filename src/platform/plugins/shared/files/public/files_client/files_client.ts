@@ -120,6 +120,7 @@ export function createFilesClient({
     getById: ({ kind, ...args }) => {
       return http.get(apiRoutes.getByIdRoute(scopedFileKind ?? kind, args.id));
     },
+    // @ts-ignore
     list: ({ kind, page, perPage, abortSignal, ...body } = { kind: '' }) => {
       return http.post(apiRoutes.getListRoute(scopedFileKind ?? kind), {
         headers: commonBodyHeaders,

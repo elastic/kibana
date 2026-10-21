@@ -397,6 +397,7 @@ export class SavedObjectsService
 
     return {
       getScopedClient: clientProvider.getClient.bind(clientProvider),
+      // @ts-expect-error
       getUnsafeInternalClient: ({ includedHiddenTypes, excludedExtensions = [] } = {}) => {
         const safeExcludedExtensions = Array.isArray(excludedExtensions) ? excludedExtensions : [];
         const extensions = this.getInternalExtensions(safeExcludedExtensions);

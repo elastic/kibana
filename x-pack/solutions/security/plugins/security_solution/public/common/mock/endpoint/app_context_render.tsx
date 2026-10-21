@@ -440,6 +440,7 @@ const createCoreStartMock = (
   const linkPaths = getLinksPaths(appLinks);
 
   // Mock certain APP Ids returned by `application.getUrlForApp()`
+  // @ts-ignore
   coreStart.application.getUrlForApp.mockImplementation((appId, { deepLinkId, path = '' } = {}) => {
     let appUrl: string = '';
 
@@ -463,6 +464,7 @@ const createCoreStartMock = (
     return `${appUrl}${path}`;
   });
 
+  // @ts-ignore
   coreStart.application.navigateToApp.mockImplementation((appId, { deepLinkId, path } = {}) => {
     if (appId === APP_UI_ID) {
       history.push(

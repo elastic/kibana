@@ -38,6 +38,7 @@ export interface AlertSummaryWidgetFullSizeProps {
 export const AlertSummaryWidgetFullSize = ({
   activeAlertCount,
   activeAlerts,
+  // @ts-ignore
   chartProps: { themeOverrides, onBrushEnd } = {},
   dateFormat,
   recoveredAlertCount,

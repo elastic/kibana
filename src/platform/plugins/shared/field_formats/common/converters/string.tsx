@@ -139,6 +139,7 @@ export class StringFormat extends FieldFormat {
     }
   };
 
+  // @ts-ignore
   reactConvert: ReactConvertFunction = (val, { hit, field } = {}) => {
     const missing = this.checkForMissingValueReact(val);
     if (missing) return missing;

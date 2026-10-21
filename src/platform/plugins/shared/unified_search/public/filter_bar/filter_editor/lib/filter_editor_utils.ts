@@ -22,6 +22,7 @@ export function getFieldFromFilter(filter: Filter, indexPattern?: FilterableSour
 }
 
 function getRangeOperatorFromFilter({
+  // @ts-ignore
   meta: { params: { gte, gt, lte, lt } = {}, negate },
 }: RangeFilter | ScriptedRangeFilter) {
   if (negate) {

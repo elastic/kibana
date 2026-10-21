@@ -28,6 +28,7 @@ export function KibanaEBTServerProvider({ getService }: FtrProviderContext): EBT
     setOptIn,
     getEvents: async (
       takeNumberOfEvents,
+      // @ts-ignore
       { eventTypes = [], withTimeoutMs, fromTimestamp, filters } = {}
     ) => {
       await setOptIn(true);

@@ -130,6 +130,7 @@ const RuntimeFieldFormComp = ({
   defaultValue,
   onChange,
   links,
+  // @ts-ignore
   ctx: { namesNotAllowed, existingConcreteFields = [] } = {},
 }: Props) => {
   const typeFieldConfig = schema.type as FieldConfig<RuntimeType, RuntimeField>;

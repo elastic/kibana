@@ -50,6 +50,7 @@ describe('FleetAuthzRouter', () => {
       roles = [],
       pluginEnabled = true,
       licenseEnabled = true,
+      // @ts-ignore
       checkPrivilegesDynamically,
     } = {},
     routeConfig = {

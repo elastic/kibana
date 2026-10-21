@@ -130,6 +130,7 @@ describe('StatusHandler', () => {
 
     it("should return 'timeout' with 504 when `fetch` timeouts", async () => {
       (fetch as jest.MockedFunction<typeof fetch>).mockImplementationOnce(
+        // @ts-ignore
         (url, { signal } = {}) => {
           return new Promise((resolve, reject) => {
             signal?.addEventListener('abort', () => {

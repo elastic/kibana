@@ -52,6 +52,7 @@ export const createPrebuiltRuleAssetsClient = (
       });
     },
 
+    // @ts-ignore
     fetchLatestVersions: ({ ruleIds, sort, filter } = {}): Promise<BasicRuleInfo[]> => {
       return withSecuritySpan('IPrebuiltRuleAssetsClient.fetchLatestVersions', async () => {
         return fetchLatestVersions(savedObjectsClient, { ruleIds, sort, filter });

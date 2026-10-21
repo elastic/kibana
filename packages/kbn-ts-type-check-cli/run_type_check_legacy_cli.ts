@@ -26,11 +26,7 @@ import { restoreTSBuildArtifacts } from './src/archive/restore_ts_build_artifact
 import { isCiEnvironment } from './src/archive/utils';
 import { normalizeProjectPath } from './src/normalize_project_path';
 import { resolveTypeCheckCompiler } from './src/resolve_compiler';
-import {
-  buildConcurrencyArgs,
-  resolveMemoryLimit,
-  resolveTypeCheckConcurrency,
-} from './src/resolve_concurrency';
+import { buildConcurrencyArgs, resolveTypeCheckConcurrency } from './src/resolve_concurrency';
 
 /** Runs the legacy direct-target `scripts/type_check` CLI flow. */
 export const runLegacyTypeCheckCli = () => {
@@ -87,7 +83,7 @@ export const runLegacyTypeCheckCli = () => {
 
         const concurrency = resolveTypeCheckConcurrency();
         log.info(
-          `tsgo build concurrency: --builders ${concurrency.builders} --checkers ${concurrency.checkers}`
+          `tsrs build concurrency: --builders ${concurrency.builders} --checkers ${concurrency.checkers}`
         );
         await procRunner.run(TSC_LABEL, {
           cmd: Path.relative(REPO_ROOT, resolveTypeCheckCompiler()),
@@ -99,9 +95,6 @@ export const runLegacyTypeCheckCli = () => {
             ...(flagsReader.boolean('verbose') ? ['--verbose'] : []),
             ...(flagsReader.boolean('extended-diagnostics') ? ['--extendedDiagnostics'] : []),
           ],
-          env: {
-            GOMEMLIMIT: resolveMemoryLimit(),
-          },
           cwd: REPO_ROOT,
           wait: true,
         });

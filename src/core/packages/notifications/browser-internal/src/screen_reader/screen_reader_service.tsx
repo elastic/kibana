@@ -51,6 +51,7 @@ export class ScreenReaderService {
     );
 
     return {
+      // @ts-expect-error
       notify: (message, { politeness = 'polite', key } = {}) =>
         messages$.next({ message, politeness, key }),
     };

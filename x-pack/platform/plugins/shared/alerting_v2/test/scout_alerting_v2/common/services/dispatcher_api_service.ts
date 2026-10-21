@@ -38,6 +38,7 @@ export const getDispatcherApiService = ({
   log: ScoutLogger;
   esClient: EsClient;
 }): DispatcherApiService => ({
+  // @ts-ignore
   waitForDispatcherTick: ({ ticks = 1, since } = {}) =>
     measurePerformanceAsync(log, `dispatcher.waitForDispatcherTick[${ticks}]`, async () => {
       const sinceMs = (since ?? new Date()).getTime();

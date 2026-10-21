@@ -60,6 +60,7 @@ describe('useFetchRuleTemplateTags', () => {
   });
 
   it('keeps different search results separate in the same cache', async () => {
+    // @ts-ignore
     listTags.mockImplementation(async ({ search } = {}) => ({
       tags: search === 'pro' ? ['production'] : ['staging'],
     }));

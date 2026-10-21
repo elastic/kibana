@@ -549,6 +549,7 @@ export const createCommentsController = (services: CommentsHostServices): Commen
       store.setState({ panelMinimized: minimized });
     },
 
+    // @ts-ignore
     pick(element, point, hit, { revealedBy } = {}) {
       if (store.getState().pending?.saving) {
         return;

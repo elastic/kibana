@@ -27,6 +27,7 @@ export interface UseChangeHistoryRestoreResult {
 
 export const useChangeHistoryRestore: (
   args?: UseChangeHistoryRestoreArgs
+  // @ts-ignore
 ) => UseChangeHistoryRestoreResult = ({ onRestored } = {}) => {
   const { adapter, objectId, supports, telemetry } = useChangeHistoryConfig();
   const invalidateChangeHistory = useInvalidateChangeHistory();

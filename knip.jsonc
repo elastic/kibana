@@ -58,9 +58,9 @@
     "svgo",
     "http-proxy",
     "@types/http-proxy",
-    // typescript-7 is invoked via resolveTypeCheckCompiler() in kbn-ts-type-check-cli;
+    // tsrs is invoked via resolveTypeCheckCompiler() in kbn-ts-type-check-cli;
     // knip can't trace dynamic require.resolve() calls.
-    "typescript-7",
+    "tsrs",
     // @rsdoctor/rspack-plugin is loaded lazily via nativeRequire() in the
     // @kbn/rspack-optimizer rspack_runtime shim; knip can't trace dynamic require.
     "@rsdoctor/rspack-plugin",

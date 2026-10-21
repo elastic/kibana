@@ -122,6 +122,7 @@ export const DiscoverMainContent = ({
   const viewModeFocusOnMountRef = useRef(false);
 
   const renderViewModeToggle = useCallback<RenderViewModeToggle>(
+    // @ts-expect-error
     ({ patternCount, hitsCounterVariant } = {}) => {
       return (
         <DocumentViewModeToggle

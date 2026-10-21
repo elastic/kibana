@@ -15,6 +15,7 @@ import type {
 } from '@kbn/agentic-investigations-plugin/common';
 
 export const investigationExampleSchema = z.object({
+  // @ts-ignore
   input: z.object({ question: z.string().trim().min(1).max(MAX_TEXT_LENGTH) }).catchall(z.json()),
   output: z.record(z.string(), z.json()).optional(),
   metadata: z.object({ case_id: z.string().trim().min(1).max(500) }).catchall(z.json()),

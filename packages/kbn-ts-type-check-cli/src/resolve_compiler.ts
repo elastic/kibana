@@ -9,16 +9,16 @@
 
 import Path from 'path';
 
-/** Package alias pointing at typescript@7.x (the tsgo-based compiler). */
-export const TSGO_PACKAGE = 'typescript-7';
+/** tsrs: Rust port of the TypeScript 7 compiler, CLI-compatible with `tsc`. */
+export const TYPE_CHECK_COMPILER_PACKAGE = 'tsrs';
 
 /**
- * Resolves the absolute path to the TS7 `tsc` compiler binary.
+ * Resolves the absolute path to the `tsrs` compiler binary.
  *
  * The bin is not exposed through the package `exports` map, so resolve it
  * relative to the (exported) package.json.
  */
 export const resolveTypeCheckCompiler = (): string => {
-  const pkgJsonPath = require.resolve(`${TSGO_PACKAGE}/package.json`);
-  return Path.join(Path.dirname(pkgJsonPath), 'bin', 'tsc');
+  const pkgJsonPath = require.resolve(`${TYPE_CHECK_COMPILER_PACKAGE}/package.json`);
+  return Path.join(Path.dirname(pkgJsonPath), 'bin', 'tsrs');
 };

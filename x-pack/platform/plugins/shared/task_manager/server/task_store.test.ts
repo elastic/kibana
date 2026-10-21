@@ -5490,6 +5490,7 @@ describe('TaskStore', () => {
       beforeEach(() => {
         (coreStart.security.serviceAccounts.isEnabled as jest.Mock).mockReturnValue(true);
         coreStart.savedObjects.getUnsafeInternalClient.mockImplementation(
+          // @ts-ignore
           ({ includedHiddenTypes } = {}) =>
             includedHiddenTypes?.includes('task')
               ? serviceAccountSoClient

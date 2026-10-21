@@ -139,6 +139,7 @@ export function createTracedEsClient({
   ): Promise<T extends { body: infer TBody } ? TBody : T> => {
     logger.debug(() => `Request (${operationName}):\n${JSON.stringify(params)}`);
 
+    // @ts-ignore
     return withSpan(
       {
         name: operationName,

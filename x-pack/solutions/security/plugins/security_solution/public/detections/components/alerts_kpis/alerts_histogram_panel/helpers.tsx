@@ -35,7 +35,9 @@ interface CreateResetGroupByFieldActionProps {
 
 type CreateResetGroupByFieldAction = (params?: CreateResetGroupByFieldActionProps) => Action;
 export const createResetGroupByFieldAction: CreateResetGroupByFieldAction = ({
+  // @ts-ignore
   callback,
+  // @ts-ignore
   order,
 } = {}) => ({
   id: 'resetGroupByField',

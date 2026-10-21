@@ -40,6 +40,7 @@ import { TODO_CONTENT_ID } from '../../../common/examples/todos';
 const useCreateTodoMutation = () => useCreateContentMutation<TodoCreateIn, TodoCreateOut>();
 const useDeleteTodoMutation = () => useDeleteContentMutation<TodoDeleteIn, TodoDeleteOut>();
 const useUpdateTodoMutation = () => useUpdateContentMutation<TodoUpdateIn, TodoUpdateOut>();
+// @ts-ignore
 const useSearchTodosQuery = ({ options: { filter } = {} }: { options: TodoSearchIn['options'] }) =>
   useSearchContentQuery<TodoSearchIn, TodoSearchOut>({
     contentTypeId: TODO_CONTENT_ID,

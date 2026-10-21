@@ -218,6 +218,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
         i18n.translate('xpack.customContent.embeddable.typeDisplayName', {
           defaultMessage: 'Custom panel',
         }),
+      // @ts-ignore
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
         getTelemetry().trackEditFlyoutOpened({
           isNewPanel,

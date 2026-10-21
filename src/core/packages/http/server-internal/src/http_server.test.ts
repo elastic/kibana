@@ -398,6 +398,7 @@ test('valid body with validate function', async () => {
     {
       path: '/',
       validate: {
+        // @ts-expect-error
         body: ({ bar, baz } = {}, { ok, badRequest }) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
             return ok({ bar, baz });
@@ -486,6 +487,7 @@ test('not inline validation - specifying validation handler', async () => {
   const router = new Router('/foo', logger, enhanceWithContext, routerOptions);
 
   const bodyValidation: RouteValidationFunction<{ bar: string; baz: number }> = (
+    // @ts-expect-error
     { bar, baz } = {},
     { ok, badRequest }
   ) => {
@@ -551,6 +553,7 @@ test('not inline handler - KibanaRequest', async () => {
     {
       path: '/',
       validate: {
+        // @ts-expect-error
         body: ({ bar, baz } = {}, { ok, badRequest }) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
             return ok({ bar, baz });
@@ -605,6 +608,7 @@ test('not inline handler - RequestHandler', async () => {
     {
       path: '/',
       validate: {
+        // @ts-expect-error
         body: ({ bar, baz } = {}, { ok, badRequest }) => {
           if (typeof bar === 'string' && typeof baz === 'number') {
             return ok({ bar, baz });

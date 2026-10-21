@@ -31,6 +31,7 @@ export const indexDocuments: IndexDocuments = async ({ es, documents, index, log
   const response = await es.bulk({ refresh: true, operations });
 
   // throw error if document wasn't indexed, so test will be terminated earlier and no false positives can happen
+  // @ts-ignore
   response.items.some(({ index: responseIndex } = {}) => {
     if (responseIndex?.error) {
       log.error(

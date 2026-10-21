@@ -23,6 +23,7 @@ interface TestProviderProps {
  * A provider that wraps the necessary context for testing components.
  * Includes the Kibana, navigation, and chrome context the shared page header reads.
  */
+// @ts-ignore
 export const TestProvider: React.FC<Partial<TestProviderProps>> = ({ children } = {}) => {
   const [queryClient] = useState(
     () =>

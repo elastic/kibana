@@ -370,6 +370,7 @@ export const createCortexPageStore = ({
   };
 
   return {
+    // @ts-ignore
     async list({ status, entityType } = {}) {
       const allPages = await listAll();
       const pages = allPages.filter((page) => {

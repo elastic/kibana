@@ -35,6 +35,7 @@ export const TestProvider: FC<PropsWithChildren<Partial<CloudDefendAppDeps>>> = 
     fleet: fleetMock.createStartMock(),
   },
   params = coreMock.createAppMountParameters(),
+  // @ts-ignore
   children,
 } = {}) => {
   const queryClient = useMemo(() => new QueryClient(), []);

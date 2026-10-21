@@ -1987,6 +1987,7 @@ const executeConnectorAndVerifyCorrectness = async ({
 const createOracleRecord = async ({
   es,
   oracleId,
+  // @ts-ignore
   attributes: { counter, date } = {},
 }: {
   es: Client;

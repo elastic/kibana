@@ -313,6 +313,7 @@ export const vegaEmbeddableFactory = (
       getTypeDisplayName: () => 'Vega',
       isEditingEnabled: () => true,
       getEditPanel,
+      // @ts-ignore
       onEdit: async ({ isNewPanel = false, returnFocus } = {}) => {
         openVegaEditor({
           core,

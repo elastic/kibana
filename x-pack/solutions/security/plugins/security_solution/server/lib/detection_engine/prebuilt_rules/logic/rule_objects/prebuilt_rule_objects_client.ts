@@ -93,6 +93,7 @@ export const createPrebuiltRuleObjectsClient = (
         return rules;
       });
     },
+    // @ts-ignore
     fetchInstalledRules: ({ page, perPage, sortField, sortOrder, filter } = {}) => {
       return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRules', async () => {
         const filterKQL = convertRulesFilterToKQL({
@@ -150,6 +151,7 @@ export const createPrebuiltRuleObjectsClient = (
         }
       );
     },
+    // @ts-ignore
     fetchInstalledRuleVersions: ({ kqlFilter, sortField, sortOrder } = {}) => {
       return withSecuritySpan('IPrebuiltRuleObjectsClient.fetchInstalledRuleVersions', async () => {
         const combinedKQL =

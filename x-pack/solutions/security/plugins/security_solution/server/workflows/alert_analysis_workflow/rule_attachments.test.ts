@@ -45,6 +45,7 @@ const createWorkflowSystemAction = (workflowId = WORKFLOW_ID) =>
 // filter with no `actionRef`, so it falls through to the full set like the real client does.
 const createRulesClient = (rules: RuleAlertType[]): jest.Mocked<RulesClient> =>
   ({
+    // @ts-ignore
     find: jest.fn().mockImplementation(async ({ options } = {}) => {
       const { filter = '', page = 1, perPage = 0, sortField, sortOrder } = options ?? {};
 

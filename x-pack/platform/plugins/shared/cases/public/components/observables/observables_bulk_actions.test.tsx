@@ -209,6 +209,7 @@ describe('ObservablesBulkActions', () => {
 
   it('calls onActionSuccess after a successful bulk delete', async () => {
     const onActionSuccess = jest.fn();
+    // @ts-ignore
     (useBulkDeleteObservables as jest.Mock).mockImplementation((_caseId, { onSuccess } = {}) => ({
       mutate: () => onSuccess?.(),
       isLoading: false,

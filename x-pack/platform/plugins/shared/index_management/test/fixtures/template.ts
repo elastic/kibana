@@ -18,6 +18,7 @@ export const getComposableTemplate = ({
   version = getRandomNumber(),
   priority = getRandomNumber(),
   indexPatterns = [],
+  // @ts-ignore
   template: { settings, aliases, mappings, lifecycle } = {},
   hasDatastream = false,
   isLegacy = false,
@@ -67,6 +68,7 @@ export const getTemplate = ({
   version = getRandomNumber(),
   order = getRandomNumber(),
   indexPatterns = [],
+  // @ts-ignore
   template: { settings, aliases, mappings } = {},
   indexMode = 'standard',
   dataStream,

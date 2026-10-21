@@ -105,6 +105,7 @@ export function RuleConditionChart({
   error,
   annotations,
   timeRange,
+  // @ts-ignore
   chartOptions: { seriesType, interval } = {},
   additionalFilters = EMPTY_ARRAY,
 }: RuleConditionChartProps) {

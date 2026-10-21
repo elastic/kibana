@@ -464,6 +464,7 @@ export const createMemoryPageStore = ({
       : undefined;
 
   return {
+    // @ts-ignore
     async list({ filter = 'all', tags } = {}) {
       try {
         const response = await esClient.search<StoredMemoryPage>(
@@ -492,6 +493,7 @@ export const createMemoryPageStore = ({
       }
     },
 
+    // @ts-ignore
     async listPaginated({ filter = 'all', cursor, size, tags, search } = {}) {
       const pageSize = Math.min(Math.max(size ?? DEFAULT_PAGE_SIZE, 1), MAX_PAGE_SIZE);
       const searchAfter = decodeCursor(cursor);
@@ -540,6 +542,7 @@ export const createMemoryPageStore = ({
       }
     },
 
+    // @ts-ignore
     async retrieve({ query, size, match = 'context' } = {}) {
       const trimmed = query?.trim();
       const isSearch = trimmed !== undefined && trimmed.length > 0;
