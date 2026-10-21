@@ -303,12 +303,14 @@ export const bulkDeleteAttachments = async ({
   supertest,
   caseId,
   savedObjectIds,
+  includeRelated,
   expectedHttpCode = 204,
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
   savedObjectIds: string[];
+  includeRelated?: boolean;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<{} | Error> => {
@@ -317,7 +319,7 @@ export const bulkDeleteAttachments = async ({
     .set('kbn-xsrf', 'true')
     .set('x-elastic-internal-origin', 'foo')
     .auth(auth.user.username, auth.user.password)
-    .send({ ids: savedObjectIds })
+    .send({ ids: savedObjectIds, include_related: includeRelated })
     .expect(expectedHttpCode);
 
   return body;
@@ -328,6 +330,7 @@ export const bulkDeleteAttachmentReferences = async ({
   caseId,
   type,
   attachmentIds,
+  includeRelated,
   expectedHttpCode = 204,
   auth = { user: superUser, space: null },
 }: {
@@ -335,6 +338,7 @@ export const bulkDeleteAttachmentReferences = async ({
   caseId: string;
   type: string;
   attachmentIds: string[];
+  includeRelated?: boolean;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<void> => {
@@ -343,7 +347,7 @@ export const bulkDeleteAttachmentReferences = async ({
     .set('kbn-xsrf', 'true')
     .set('x-elastic-internal-origin', 'foo')
     .auth(auth.user.username, auth.user.password)
-    .send({ type, attachmentIds })
+    .send({ type, attachmentIds, include_related: includeRelated })
     .expect(expectedHttpCode);
 };
 
