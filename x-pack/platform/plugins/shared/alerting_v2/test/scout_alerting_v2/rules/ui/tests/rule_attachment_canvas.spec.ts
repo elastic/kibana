@@ -80,6 +80,8 @@ test.describe(
       ruleName: string;
     }) => {
       ruleNames.push(ruleName);
+      // Each interceptor expires 30s after it is registered, so register after the app loads.
+      await pageObjects.agentChat.goto();
       mockTitleGeneration(llmProxy, ruleName);
       mockLoadSkill(llmProxy, RULE_AUTHORING_SKILL_ID);
       mockManageRule(llmProxy, [
@@ -93,7 +95,6 @@ test.describe(
       ]);
       mockFinalAnswerRenderingRuleAttachment(llmProxy, 'Here is the proposed rule.');
 
-      await pageObjects.agentChat.goto();
       await pageObjects.agentChat.sendMessage(`Create an alert rule named ${ruleName}`);
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
 
