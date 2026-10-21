@@ -7,7 +7,6 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SearchInferenceEndpointsPluginStart } from '../types';
-import { resolveExplicitFeatureConnectorId } from './resolve_explicit_feature_connector';
 
 /**
  * Drops blank entries from a `connector-id-by-feature` value. A string and a list
@@ -30,17 +29,15 @@ export const normalizeConnectorFeatureIds = (value: unknown): string[] => {
 };
 
 /**
- * Resolves the first usable connector from an ordered feature list.
+ * Resolves the first configured connector from an ordered feature list.
  *
- * A feature with `ownEntryOnly` contributes a connector only when an operator
- * saved one on that row. A miss continues to the next id and does not conflict
- * with an explicit connector id. An id that is not registered is skipped the
+ * Each id is asked only for what an operator configured (`onlyReturnConfigured`).
+ * A miss continues to the next id. An id that is not registered is skipped the
  * same way: AlertZero ships disabled, and a workflow installed by another
- * plugin must not treat that missing row as a full-resolve feature. Any other
- * feature is resolved in full (saved model, parent chain, recommended
- * endpoints, then the platform default) and conflicts with an explicit
- * connector id. Returns undefined when every id misses, so the caller can use
- * `connector-id` or its default.
+ * plugin must not treat that missing row as a configured feature. A list where
+ * every entry misses is not a conflict with an explicit connector id, so the
+ * caller can use `connector-id` or its default. A listed feature that does
+ * resolve a connector conflicts with an explicit connector id.
  */
 export const resolveConnectorIdFromFeatures = async ({
   featureIds,
@@ -58,28 +55,13 @@ export const resolveConnectorIdFromFeatures = async ({
   for (const featureId of featureIds) {
     const feature = searchInferenceEndpoints.features.get(featureId);
     // Unregistered ids are optional. `features.get` is undefined when the
-    // owning plugin is disabled, and treating that as a full resolve conflicts
-    // with a standalone `connector-id`.
+    // owning plugin is disabled, and treating that as a configured feature
+    // conflicts with a standalone `connector-id`.
     if (feature == null) {
       continue;
     }
-    if (feature.ownEntryOnly) {
-      const connectorId = await resolveExplicitFeatureConnectorId({
-        featureId,
-        request,
-        searchInferenceEndpoints,
-      });
-      if (connectorId) {
-        return connectorId;
-      }
-      continue;
-    }
 
-    if (hasExplicitConnector) {
-      throw new Error(conflictMessage);
-    }
-
-    if (feature && feature.taskType !== 'chat_completion') {
+    if (feature.taskType !== 'chat_completion') {
       throw new Error(
         `Feature "${featureId}" is not a chat completion feature (task type "${feature.taskType}"). connector-id-by-feature requires a feature with task type "chat_completion".`
       );
@@ -87,11 +69,17 @@ export const resolveConnectorIdFromFeatures = async ({
 
     const { endpoints } = await searchInferenceEndpoints.endpoints.getForFeature(
       featureId,
-      request
+      request,
+      { onlyReturnConfigured: true }
     );
     if (endpoints.length === 0) {
-      throw new Error(`No connector available for feature "${featureId}".`);
+      continue;
     }
+
+    if (hasExplicitConnector) {
+      throw new Error(conflictMessage);
+    }
+
     return endpoints[0].connectorId;
   }
 

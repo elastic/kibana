@@ -80,7 +80,7 @@ export const ConfigSchema = z
       .union([z.string().max(255), z.array(z.string().max(255)).max(8)])
       .optional()
       .describe(
-        'A Model Management feature id, or an ordered list of them. An id that is not registered is skipped. An own-entry-only feature is used only when an operator has saved a model on that row; otherwise the next id is tried. The first other feature is resolved in full and is mutually exclusive with connector-id. A single id keeps that full resolution. Example: "context_engine_prompt".'
+        'A Model Management feature id, or an ordered list of them. An id that is not registered is skipped. Each id contributes a connector only when one is configured for it; otherwise the next id is tried. A configured connector is mutually exclusive with connector-id. A list where every id misses is not a conflict. Example: "context_engine_prompt".'
       ),
   })
   .superRefine((cfg, ctx) => {

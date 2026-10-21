@@ -9,7 +9,6 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { coreMock, httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { InferenceConnectorType } from '@kbn/inference-common';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
 import {
   GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR,
@@ -266,49 +265,18 @@ describe('SearchInferenceEndpointsPlugin', () => {
         });
       });
 
-      it('returns nothing for a child feature when only the parent row has a saved model', async () => {
+      it('returns nothing for a registered feature with no saved row and no recommended endpoints', async () => {
         const request = httpServerMock.createKibanaRequest();
-        const internalClient = savedObjectsClientMock.create();
-        internalClient.get.mockResolvedValue({
-          id: 'default',
-          type: INFERENCE_SETTINGS_SO_TYPE,
-          references: [],
-          attributes: {
-            features: [{ feature_id: 'parent_feature', endpoints: [{ id: 'parent-connector' }] }],
-          },
-        });
-        coreStart.savedObjects.getUnsafeInternalClient.mockReturnValue(internalClient);
-
-        const inference = inferenceMock.createStartContract();
-        inference.getConnectorById.mockImplementation(async (id: string) => ({
-          connectorId: id,
-          name: id,
-          type: InferenceConnectorType.OpenAI,
-          config: {},
-          capabilities: {},
-          isPreconfigured: false,
-          isInferenceEndpoint: false,
-        }));
-        const contract = plugin.start(coreStart, { inference });
-        contract.features.register({
-          featureId: 'parent_feature',
-          featureName: 'Parent',
-          featureDescription: 'Parent',
-          taskType: 'chat_completion',
-          recommendedEndpoints: [],
-        });
-        contract.features.register({
+        startContract.features.register({
           featureId: 'child_feature',
           featureName: 'Child',
           featureDescription: 'Child',
           taskType: 'chat_completion',
-          parentFeatureId: 'parent_feature',
           recommendedEndpoints: [],
         });
 
-        const result = await contract.endpoints.getForFeature('child_feature', request, {
+        const result = await startContract.endpoints.getForFeature('child_feature', request, {
           onlyReturnConfigured: true,
-          ownEntryOnly: true,
         });
 
         expect(result).toEqual({ endpoints: [], warnings: [], soEntryFound: false });

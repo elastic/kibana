@@ -31,13 +31,6 @@ export interface InferenceFeatureConfig {
    * endpoints hidden.
    */
   allowTemplateRequiredModels?: boolean;
-  /**
-   * When true, `connector-id-by-feature` uses a model only when an operator saved
-   * one on this row. A parent feature, recommended endpoints, and the platform
-   * default do not count. An empty row is a miss, so the next feature id or
-   * `connector-id` still applies.
-   */
-  ownEntryOnly?: boolean;
   visibilityCondition?: {
     key: string;
     value: string | number | boolean | null;
@@ -85,12 +78,6 @@ export interface GetForFeatureOptions {
    * user's current execution model).
    */
   onlyReturnConfigured?: boolean;
-  /**
-   * When true, resolution stops at this feature's own saved-object entry.
-   * `soEntryFound` is true only for that entry, including one that clears the
-   * endpoint list. A parent feature's saved model stays on the parent.
-   */
-  ownEntryOnly?: boolean;
 }
 
 export interface InferenceEndpointsContract {

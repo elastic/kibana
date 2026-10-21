@@ -46,7 +46,8 @@ describe('resolveConnectorIdByFeature', () => {
     expect(result).toBe('feature-connector-1');
     expect(searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
       'significant_events_investigation',
-      request
+      request,
+      { onlyReturnConfigured: true }
     );
   });
 

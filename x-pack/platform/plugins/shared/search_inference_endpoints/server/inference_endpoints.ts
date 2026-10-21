@@ -137,12 +137,6 @@ export const resolveFeatureEndpointIds = (
     return { ids: [], warnings: [], soEntryFound: true };
   }
 
-  // An optional row must not adopt a parent row's saved model. Callers that
-  // ask for this feature's own entry stop here when the row itself is unset.
-  if (opts?.ownEntryOnly) {
-    return { ids: [], warnings: [], soEntryFound: false };
-  }
-
   visited.add(currentId);
   if (current.parentFeatureId) {
     currentId = current?.parentFeatureId;

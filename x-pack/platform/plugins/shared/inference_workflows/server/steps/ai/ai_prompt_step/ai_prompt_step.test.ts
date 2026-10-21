@@ -835,12 +835,8 @@ describe('aiPromptStepDefinition', () => {
         expect(mockInference.getChatModel).toHaveBeenCalled();
       });
 
-      it('uses a saved own-entry feature ahead of the tier in the list', async () => {
-        mockSearchInferenceEndpoints.features.get.mockImplementation((featureId: string) =>
-          featureId === 'alertzero_template_models'
-            ? { taskType: 'chat_completion', ownEntryOnly: true }
-            : { taskType: 'chat_completion' }
-        );
+      it('uses the first configured feature ahead of the next id in the list', async () => {
+        mockSearchInferenceEndpoints.features.get.mockReturnValue({ taskType: 'chat_completion' });
         mockSearchInferenceEndpoints.endpoints.getForFeature.mockImplementation(
           async (featureId: string) => {
             if (featureId === 'alertzero_template_models') {
@@ -868,10 +864,11 @@ describe('aiPromptStepDefinition', () => {
         expect(mockSearchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
           'alertzero_template_models',
           expect.anything(),
-          { onlyReturnConfigured: true, ownEntryOnly: true }
+          { onlyReturnConfigured: true }
         );
         expect(mockSearchInferenceEndpoints.endpoints.getForFeature).not.toHaveBeenCalledWith(
           'alertzero_efficient',
+          expect.anything(),
           expect.anything()
         );
       });
@@ -895,7 +892,8 @@ describe('aiPromptStepDefinition', () => {
 
         expect(mockSearchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
           'context_engine_prompt',
-          expect.any(Object)
+          expect.any(Object),
+          { onlyReturnConfigured: true }
         );
         expect(mockResolveConnectorId).not.toHaveBeenCalled();
         expect(mockInference.getChatModel).toHaveBeenCalledWith(
@@ -912,6 +910,9 @@ describe('aiPromptStepDefinition', () => {
           },
         };
         mockSearchInferenceEndpoints.features.get.mockReturnValue({ taskType: 'chat_completion' });
+        mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({
+          endpoints: [{ connectorId: 'feature-connector' }],
+        });
 
         await expect(handler(contextWithBoth)).rejects.toThrow(
           'Cannot specify both connector-id and connector-id-by-feature'
@@ -964,7 +965,7 @@ describe('aiPromptStepDefinition', () => {
         }
       );
 
-      it('throws when the feature resolves to no endpoints', async () => {
+      it('falls through to the default connector when the feature resolves no endpoints', async () => {
         const contextWithFeature = {
           ...mockContext,
           config: { 'connector-id-by-feature': 'context_engine_prompt' },
@@ -972,9 +973,13 @@ describe('aiPromptStepDefinition', () => {
 
         mockSearchInferenceEndpoints.features.get.mockReturnValue({ taskType: 'chat_completion' });
         mockSearchInferenceEndpoints.endpoints.getForFeature.mockResolvedValue({ endpoints: [] });
+        mockChatModel.invoke.mockResolvedValue({ content: 'ok', response_metadata: {} });
 
-        await expect(handler(contextWithFeature)).rejects.toThrow(
-          'No connector available for feature "context_engine_prompt"'
+        await handler(contextWithFeature);
+
+        expect(mockResolveConnectorId).toHaveBeenCalled();
+        expect(mockInference.getChatModel).toHaveBeenCalledWith(
+          expect.objectContaining({ connectorId: 'resolved-connector-id' })
         );
       });
 

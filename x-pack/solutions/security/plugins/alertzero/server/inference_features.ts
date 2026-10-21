@@ -159,15 +159,15 @@ export const registerAlertZeroInferenceFeatures = (
   // Not a cost rung. Attack Discovery, alert triage, and the FP/TP judge read a model saved
   // here and otherwise stay on their tier, so the row recommends nothing and ignores the
   // global default. It is the only AlertZero row that lists template-required endpoints.
+  // The parent row is never written by the settings form and also recommends nothing, so
+  // an unset row resolves to no connector under onlyReturnConfigured and callers that
+  // list this id first fall through to their tier.
   const templateModelsResult = register({
     parentFeatureId: ALERTZERO_INFERENCE_PARENT_FEATURE_ID,
     taskType: 'chat_completion',
     isTechPreview: true,
     ignoreGlobalDefault: true,
     allowTemplateRequiredModels: true,
-    // An empty row must not adopt the parent tier. Steps list this id first in
-    // connector-id-by-feature and fall through to their own tier.
-    ownEntryOnly: true,
     featureId: ALERTZERO_TEMPLATE_INFERENCE_FEATURE_ID,
     featureName: i18n.translate('xpack.alertzero.inferenceFeature.templateModelsName', {
       defaultMessage: 'Cyber domain models',

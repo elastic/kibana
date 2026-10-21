@@ -42,10 +42,9 @@ describe('normalizeConnectorFeatureIds', () => {
 describe('resolveConnectorIdFromFeatures', () => {
   const request = httpServerMock.createKibanaRequest();
 
+  const configuredOptions = { onlyReturnConfigured: true };
+
   const featureFor = (featureId: string): InferenceFeatureConfig | undefined => {
-    if (featureId === 'alertzero_template_models') {
-      return { taskType: 'chat_completion', ownEntryOnly: true } as InferenceFeatureConfig;
-    }
     if (featureId === 'knowledge_base_embeddings') {
       return { taskType: 'text_embedding' } as InferenceFeatureConfig;
     }
@@ -55,7 +54,7 @@ describe('resolveConnectorIdFromFeatures', () => {
     return { taskType: 'chat_completion' } as InferenceFeatureConfig;
   };
 
-  it('uses a saved own-entry feature and does not resolve the tier', async () => {
+  it('returns the first configured connector and does not resolve later ids', async () => {
     const getForFeature = jest.fn().mockImplementation(async (featureId: string) => {
       if (featureId === 'alertzero_template_models') {
         return {
@@ -76,19 +75,24 @@ describe('resolveConnectorIdFromFeatures', () => {
       featureIds: ['alertzero_template_models', 'alertzero_frontier'],
       request,
       searchInferenceEndpoints,
-      hasExplicitConnector: true,
+      hasExplicitConnector: false,
       conflictMessage: CONFLICT,
     });
 
     expect(connectorId).toBe('template-connector');
-    expect(getForFeature).toHaveBeenCalledWith('alertzero_template_models', request, {
-      onlyReturnConfigured: true,
-      ownEntryOnly: true,
-    });
-    expect(getForFeature).not.toHaveBeenCalledWith('alertzero_frontier', expect.anything());
+    expect(getForFeature).toHaveBeenCalledWith(
+      'alertzero_template_models',
+      request,
+      configuredOptions
+    );
+    expect(getForFeature).not.toHaveBeenCalledWith(
+      'alertzero_frontier',
+      expect.anything(),
+      expect.anything()
+    );
   });
 
-  it('continues to the next feature when the own-entry row is empty', async () => {
+  it('continues to the next feature when the first row has no configured connector', async () => {
     const getForFeature = jest.fn().mockImplementation(async (featureId: string) => {
       if (featureId === 'alertzero_template_models') {
         return { endpoints: [], warnings: [], soEntryFound: false };
@@ -109,28 +113,10 @@ describe('resolveConnectorIdFromFeatures', () => {
     });
 
     expect(connectorId).toBe('tier-connector');
-    expect(getForFeature).toHaveBeenCalledWith('alertzero_frontier', request);
+    expect(getForFeature).toHaveBeenCalledWith('alertzero_frontier', request, configuredOptions);
   });
 
-  it('returns undefined when every own-entry feature misses', async () => {
-    const getForFeature = jest.fn().mockResolvedValue({
-      endpoints: [],
-      warnings: [],
-      soEntryFound: false,
-    });
-
-    await expect(
-      resolveConnectorIdFromFeatures({
-        featureIds: ['alertzero_template_models'],
-        request,
-        searchInferenceEndpoints: createServices(featureFor, getForFeature),
-        hasExplicitConnector: true,
-        conflictMessage: CONFLICT,
-      })
-    ).resolves.toBeUndefined();
-  });
-
-  it('conflicts with an explicit connector when a full-resolve feature is reached', async () => {
+  it('returns undefined when every feature misses, even if an explicit connector is set', async () => {
     const getForFeature = jest.fn().mockResolvedValue({
       endpoints: [],
       warnings: [],
@@ -145,8 +131,32 @@ describe('resolveConnectorIdFromFeatures', () => {
         hasExplicitConnector: true,
         conflictMessage: CONFLICT,
       })
+    ).resolves.toBeUndefined();
+    expect(getForFeature).toHaveBeenCalledWith('alertzero_frontier', request, configuredOptions);
+  });
+
+  it('conflicts with an explicit connector only when a listed feature resolves one', async () => {
+    const getForFeature = jest.fn().mockImplementation(async (featureId: string) => {
+      if (featureId === 'alertzero_template_models') {
+        return { endpoints: [], warnings: [], soEntryFound: false };
+      }
+      return {
+        endpoints: [{ connectorId: 'tier-connector' } as InferenceConnector],
+        warnings: [],
+        soEntryFound: false,
+      };
+    });
+
+    await expect(
+      resolveConnectorIdFromFeatures({
+        featureIds: ['alertzero_template_models', 'alertzero_frontier'],
+        request,
+        searchInferenceEndpoints: createServices(featureFor, getForFeature),
+        hasExplicitConnector: true,
+        conflictMessage: CONFLICT,
+      })
     ).rejects.toThrow(CONFLICT);
-    expect(getForFeature).not.toHaveBeenCalledWith('alertzero_frontier', expect.anything());
+    expect(getForFeature).toHaveBeenCalledWith('alertzero_frontier', request, configuredOptions);
   });
 
   it('rejects a feature that is not chat completion before resolving it', async () => {
@@ -218,6 +228,6 @@ describe('resolveConnectorIdFromFeatures', () => {
 
     expect(connectorId).toBe('tier-connector');
     expect(getForFeature).toHaveBeenCalledTimes(1);
-    expect(getForFeature).toHaveBeenCalledWith('alertzero_frontier', request);
+    expect(getForFeature).toHaveBeenCalledWith('alertzero_frontier', request, configuredOptions);
   });
 });

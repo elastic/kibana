@@ -345,7 +345,7 @@ function collectStepsOfType(
 
 /**
  * A step is pinned when its connector field is a tier id, or a list that includes one.
- * The list form leads with an own-entry-only feature and keeps the tier as the fallback.
+ * The list form can lead with another feature and keeps the tier as the fallback.
  */
 function namesAlertZeroTier(value: unknown): boolean {
   if (typeof value === 'string') {
@@ -541,7 +541,7 @@ describe('managedWorkflowDefinitions', () => {
         parse(renderWorkflowYaml(definition))
       );
       const unpinnedStepNames = runSteps
-        .filter((step) => !ALERTZERO_TIER_IDS.has(getNamedTier(step, FEATURE_ID) as string))
+        .filter((step) => !namesAlertZeroTier(getNamedTier(step, FEATURE_ID)))
         .map((step) => (typeof step.name === 'string' ? step.name : '<unnamed>'));
 
       expect(unpinnedStepNames).toEqual([]);

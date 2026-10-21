@@ -8,7 +8,6 @@
 import type { PluginInitializerContext } from '@kbn/core/server';
 
 export { config } from './config';
-export { resolveExplicitFeatureConnectorId } from './lib/resolve_explicit_feature_connector';
 export {
   normalizeConnectorFeatureIds,
   resolveConnectorIdFromFeatures,

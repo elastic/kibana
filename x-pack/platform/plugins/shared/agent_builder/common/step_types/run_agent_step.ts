@@ -283,14 +283,14 @@ export const ConfigSchema = z
     /**
      * Model Management feature id, or a priority list of them.
      * A single id is mutually exclusive with `connector-id` and `inference-id`.
-     * In a list, an unregistered id and an own-entry-only feature are optional
-     * and the first other id keeps that exclusion.
+     * In a list, an unregistered id is skipped. A listed feature conflicts with
+     * an explicit connector only when it resolves one.
      */
     'connector-id-by-feature': z
       .union([z.string().max(255), z.array(z.string().max(255)).max(8)])
       .optional()
       .describe(
-        'A Model Management feature id, or an ordered list of them. An id that is not registered is skipped. An own-entry-only feature is used only when an operator has saved a model on that row; otherwise the next id is tried. The first other feature is resolved in full and is mutually exclusive with `connector-id` and `inference-id`. A single id keeps that full resolution.'
+        'A Model Management feature id, or an ordered list of them. An id that is not registered is skipped. Each id contributes a connector only when one is configured for it; otherwise the next id is tried. A configured connector is mutually exclusive with `connector-id` and `inference-id`. A list where every id misses is not a conflict.'
       ),
     /**
      * When true, create/persist a conversation and associate it with the executing user.
@@ -381,8 +381,8 @@ export const ConfigSchema = z
   .superRefine((cfg, ctx) => {
     const connector = normalizeOptionalConnectorOrInferenceParam(cfg['connector-id']);
     const inference = normalizeOptionalConnectorOrInferenceParam(cfg['inference-id']);
-    // A list can lead with an own-entry-only feature, which may sit beside connector-id.
-    // Whether a later id conflicts is decided at runtime, once the feature registry is known.
+    // A list may sit beside connector-id. Whether an id conflicts is decided at
+    // runtime, and only when that feature actually resolves a connector.
     const connectorByFeatureRaw = cfg['connector-id-by-feature'];
     const connectorByFeature =
       typeof connectorByFeatureRaw === 'string'

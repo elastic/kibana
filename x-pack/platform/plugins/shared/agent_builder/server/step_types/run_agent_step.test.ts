@@ -747,7 +747,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(parsed.success).toBe(true);
     });
 
-    it('uses a saved own-entry feature ahead of the tier in the list', async () => {
+    it('uses the first configured feature ahead of the next id in the list', async () => {
       const events$ = of({
         type: ChatEventType.roundComplete,
         data: { round: { id: 'r-1', response: { message: 'ok' } } },
@@ -772,13 +772,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
           execution,
           searchInferenceEndpoints: {
             features: {
-              get: jest
-                .fn()
-                .mockImplementation((featureId: string) =>
-                  featureId === 'alertzero_template_models'
-                    ? { taskType: 'chat_completion', ownEntryOnly: true }
-                    : { taskType: 'chat_completion' }
-                ),
+              get: jest.fn().mockReturnValue({ taskType: 'chat_completion' }),
             },
             endpoints: { getForFeature },
           },
@@ -802,12 +796,15 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       );
       expect(getForFeature).toHaveBeenCalledWith('alertzero_template_models', expect.anything(), {
         onlyReturnConfigured: true,
-        ownEntryOnly: true,
       });
-      expect(getForFeature).not.toHaveBeenCalledWith('alertzero_frontier', expect.anything());
+      expect(getForFeature).not.toHaveBeenCalledWith(
+        'alertzero_frontier',
+        expect.anything(),
+        expect.anything()
+      );
     });
 
-    it('falls through to connector-id when the own-entry feature has no saved model', async () => {
+    it('falls through to connector-id when the listed feature has no configured model', async () => {
       const events$ = of({
         type: ChatEventType.roundComplete,
         data: { round: { id: 'r-1', response: { message: 'ok' } } },
@@ -823,7 +820,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
           execution,
           searchInferenceEndpoints: {
             features: {
-              get: jest.fn().mockReturnValue({ taskType: 'chat_completion', ownEntryOnly: true }),
+              get: jest.fn().mockReturnValue({ taskType: 'chat_completion' }),
             },
             endpoints: { getForFeature },
           },
@@ -906,7 +903,8 @@ describe('ai.agent workflow step (Agent Builder)', () => {
 
       expect(featureServices.searchInferenceEndpoints.endpoints.getForFeature).toHaveBeenCalledWith(
         'significant_events_investigation',
-        expect.anything()
+        expect.anything(),
+        { onlyReturnConfigured: true }
       );
       expect(execution.executeAgent).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -921,7 +919,9 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         data: { round: { id: 'r-1', response: { message: 'ok' } } },
       });
       const execution = createExecutionMock(events$);
-      const featureServices = createFeatureServicesMock([], { taskType: 'chat_completion' });
+      const featureServices = createFeatureServicesMock([{ connectorId: 'feature-connector' }], {
+        taskType: 'chat_completion',
+      });
       const serviceManager = { internalStart: { execution, ...featureServices } } as any;
 
       const step = getRunAgentStepDefinition(serviceManager);
@@ -939,8 +939,12 @@ describe('ai.agent workflow step (Agent Builder)', () => {
       expect(res.error?.message).toBe(CONNECTOR_ID_BY_FEATURE_CONFLICT_MESSAGE_WORKFLOW);
     });
 
-    it('surfaces an error when no connector can be resolved for the feature', async () => {
-      const execution = createExecutionMock(of());
+    it('continues without a feature connector when the feature resolves no endpoints', async () => {
+      const events$ = of({
+        type: ChatEventType.roundComplete,
+        data: { round: { id: 'r-1', response: { message: 'ok' } } },
+      });
+      const execution = createExecutionMock(events$);
       const featureServices = createFeatureServicesMock([], { taskType: 'chat_completion' });
       const serviceManager = { internalStart: { execution, ...featureServices } } as any;
 
@@ -952,8 +956,12 @@ describe('ai.agent workflow step (Agent Builder)', () => {
         })
       );
 
-      expect(execution.executeAgent).not.toHaveBeenCalled();
-      expect(res.error?.message).toBe('No connector available for feature "unknown_feature".');
+      expect(res.error).toBeUndefined();
+      expect(execution.executeAgent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          params: expect.objectContaining({ connectorId: undefined }),
+        })
+      );
     });
 
     it('surfaces an error when the feature is not a chat completion feature', async () => {

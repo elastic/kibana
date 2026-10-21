@@ -65,7 +65,6 @@ export const getRunStepDefinition = ({
           connector_id: connectorId,
           end,
           esql_query: esqlQuery,
-          explicit_feature_id: explicitFeatureId,
           feature_id: featureId,
           filter,
           ground_truth_gate_enabled: groundTruthGateEnabled = true,
@@ -109,7 +108,6 @@ export const getRunStepDefinition = ({
         const effectiveConnectorId = connectorId
           ? connectorId
           : await resolveDefaultConnectorId({
-              explicitFeatureId,
               featureId,
               inference: pluginsStart.inference,
               logger,

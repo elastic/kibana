@@ -54,7 +54,7 @@ describe('ai_prompt_step common', () => {
       ).toBe(true);
     });
 
-    it('accepts a feature list next to connector-id, so an own-entry id can lead the list', () => {
+    it('accepts a feature list next to connector-id', () => {
       expect(
         ConfigSchema.safeParse({
           'connector-id': 'my-connector',

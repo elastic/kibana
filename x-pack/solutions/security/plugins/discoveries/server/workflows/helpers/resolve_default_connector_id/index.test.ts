@@ -80,7 +80,7 @@ describe('resolveDefaultConnectorId', () => {
 
     // The tier is deliberately above the cluster-wide default in the resolution
     // order, so a configured default must not win over an operator's tier choice.
-    it('uses a model saved on explicitFeatureId ahead of the tier', async () => {
+    it('uses the first feature in the list that resolves a connector', async () => {
       mockGetForFeature.mockImplementation(async (featureId: string) => {
         if (featureId === 'alertzero_template_models') {
           return {
@@ -92,8 +92,7 @@ describe('resolveDefaultConnectorId', () => {
       });
 
       const result = await resolveDefaultConnectorId({
-        explicitFeatureId: 'alertzero_template_models',
-        featureId: 'alertzero_frontier',
+        featureId: ['alertzero_template_models', 'alertzero_frontier'],
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,
@@ -104,7 +103,6 @@ describe('resolveDefaultConnectorId', () => {
       expect(result).toBe('template-connector');
       expect(mockGetForFeature).toHaveBeenCalledWith('alertzero_template_models', mockRequest, {
         onlyReturnConfigured: true,
-        ownEntryOnly: true,
       });
       expect(mockGetForFeature).not.toHaveBeenCalledWith(
         'alertzero_frontier',
@@ -113,7 +111,7 @@ describe('resolveDefaultConnectorId', () => {
       );
     });
 
-    it('keeps the tier when the explicit feature has no saved model', async () => {
+    it('keeps the later feature when an earlier one resolves no connector', async () => {
       mockGetForFeature.mockImplementation(async (featureId: string) => {
         if (featureId === 'alertzero_template_models') {
           return { endpoints: [], soEntryFound: false };
@@ -122,8 +120,7 @@ describe('resolveDefaultConnectorId', () => {
       });
 
       const result = await resolveDefaultConnectorId({
-        explicitFeatureId: 'alertzero_template_models',
-        featureId: 'alertzero_frontier',
+        featureId: ['alertzero_template_models', 'alertzero_frontier'],
         inference: mockInference,
         logger: mockLogger,
         request: mockRequest,

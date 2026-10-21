@@ -19,8 +19,8 @@ export interface ResolveConnectorIdByFeatureParams {
 }
 
 /**
- * Resolves one feature id to a connector. An own-entry-only feature with no saved
- * model throws, rather than falling through to another connector source.
+ * Resolves one feature id to a connector. A feature with no configured model
+ * throws, rather than falling through to another connector source.
  */
 export const resolveConnectorIdByFeature = async ({
   featureId,
