@@ -12,11 +12,15 @@ import type { InspectorViewDescription } from '@kbn/inspector-plugin/public';
 import type { ISearchStart } from '../../search';
 import { hasEsqlInspectorRequest } from './is_esql_inspector_request';
 import { getQueryProfileViewComponent } from './query_profile_view_wrapper';
+import { ESQL_QUERY_PROFILE_VIEW_ID } from './view_id';
+
+export { ESQL_QUERY_PROFILE_VIEW_ID } from './view_id';
 
 /** Inspector view that re-runs a logged ES|QL request with `profile: true`. */
 export const getEsqlQueryProfileViewDescription = (
   getStartServices: () => { search: ISearchStart }
 ): InspectorViewDescription => ({
+  id: ESQL_QUERY_PROFILE_VIEW_ID,
   title: i18n.translate('data.inspector.queryProfile.queryProfileTitle', {
     defaultMessage: 'Query profile',
   }),

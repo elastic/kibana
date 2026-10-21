@@ -151,6 +151,7 @@ describe('getEsqlQueryProfileViewDescription', () => {
     logRequest(sql, 'Documents', { query: 'SELECT * FROM logs', fetchSize: 10 });
     expect(view.shouldShow?.({ requests: sql })).toBe(false);
     expect(view.shouldShow?.({})).toBe(false);
+    expect(view.id).toBe('esqlQueryProfile');
   });
 });
 
@@ -205,8 +206,8 @@ describe('QueryProfileView', () => {
     expect(reader).toHaveTextContent('10 in, 4 out');
     expect(reader).toHaveTextContent('5 MB stored, 80 MB decoded');
     expect(reader).toHaveTextContent('80 MB/s');
-    expect(reader.querySelector('[data-euiicon-type="chevronSingleRight"]')).toBeInTheDocument();
-    expect(reader.querySelector('[data-euiicon-type="search"]')).toBeInTheDocument();
+    expect(reader?.querySelector('[data-euiicon-type="chevronSingleRight"]')).toBeInTheDocument();
+    expect(reader?.querySelector('[data-euiicon-type="search"]')).toBeInTheDocument();
 
     expect(esql).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -241,6 +242,30 @@ describe('QueryProfileView', () => {
       .getAllByTestId('esqlQueryProfileOperator')
       .find((row) => row.textContent?.includes('ValuesSourceReader'));
     expect(reader?.querySelector('[data-euiicon-type="chevronSingleDown"]')).toBeInTheDocument();
+  });
+
+  it('profiles the request id passed when the inspector opens', async () => {
+    const requests = new RequestAdapter();
+    logRequest(requests, 'Documents', {
+      query: 'FROM logs',
+      include_execution_metadata: true,
+    });
+    logRequest(requests, 'Chart', {
+      query: 'FROM logs | STATS count()',
+      include_execution_metadata: true,
+    });
+    const chartId = requests.getRequests()[1].id;
+
+    renderView(
+      <QueryProfileView
+        adapters={{ requests }}
+        search={search}
+        options={{ initialRequestId: chartId }}
+      />
+    );
+
+    expect(await screen.findByText('Eval')).toBeInTheDocument();
+    expect(screen.queryByText('ValuesSourceReader')).not.toBeInTheDocument();
   });
 
   it('profiles the request chosen in the picker', async () => {

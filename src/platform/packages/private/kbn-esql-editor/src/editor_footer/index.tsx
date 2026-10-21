@@ -51,6 +51,7 @@ interface EditorFooterProps {
   dataErrorsControl?: DataErrorsControl;
   starredQueriesService: EsqlStarredQueriesService | null;
   queryStats?: QueryStats;
+  onQueryDurationClick?: () => void;
   hideQueryHistory?: boolean;
   onESQLDocsFlyoutVisibilityChanged?: (isOpen: boolean) => void;
   enableCreateView?: boolean;
@@ -80,6 +81,7 @@ export const EditorFooter = memo(function EditorFooter({
   dataErrorsControl,
   starredQueriesService,
   queryStats,
+  onQueryDurationClick,
   hideQueryHistory,
   onESQLDocsFlyoutVisibilityChanged,
   enableCreateView,
@@ -114,7 +116,9 @@ export const EditorFooter = memo(function EditorFooter({
         >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="none" responsive={false} alignItems="center">
-              {queryStats && <ESQLQueryStats queryStats={queryStats} />}
+              {queryStats && (
+                <ESQLQueryStats queryStats={queryStats} onDurationClick={onQueryDurationClick} />
+              )}
               {errors && errors.length > 0 && (
                 <ErrorsWarningsFooterPopover
                   isPopoverOpen={isErrorPopoverOpen}

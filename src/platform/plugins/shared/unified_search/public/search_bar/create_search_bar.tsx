@@ -322,6 +322,7 @@ export function createSearchBar({
             onOpenQueryInNewTab={props.onOpenQueryInNewTab}
             useBackgroundSearchButton={props.useBackgroundSearchButton}
             esqlQueryStats={props.esqlQueryStats}
+            onQueryDurationClick={props.onQueryDurationClick}
             enableResourceBrowser={props.enableResourceBrowser}
             enableCreateView={props.enableCreateView}
             enableDateRangePicker={props.enableDateRangePicker}

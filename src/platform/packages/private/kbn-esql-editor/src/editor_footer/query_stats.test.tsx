@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { ESQLQueryStats } from './query_stats';
 import type { ESQLQueryStats as ESQLQueryStatsType } from '@kbn/esql-types';
 
@@ -24,6 +24,36 @@ describe('ESQLQueryStats', () => {
     const durationElement = screen.getByTestId('ESQLEditor-queryStats-queryDuration');
     expect(durationElement).toBeInTheDocument();
     expect(durationElement).toHaveTextContent('150ms');
+  });
+
+  it('keeps the duration as text until a click handler is provided', () => {
+    render(
+      <ESQLQueryStats
+        queryStats={{
+          durationInMs: '150ms',
+          totalDocumentsProcessed: undefined,
+        }}
+      />
+    );
+
+    expect(screen.queryByRole('button', { name: /open query profile/ })).not.toBeInTheDocument();
+    expect(screen.getByTestId('ESQLEditor-queryStats-queryDuration')).toHaveTextContent('150ms');
+  });
+
+  it('opens the query profile from the duration', () => {
+    const onDurationClick = jest.fn();
+    render(
+      <ESQLQueryStats
+        queryStats={{
+          durationInMs: '150ms',
+          totalDocumentsProcessed: undefined,
+        }}
+        onDurationClick={onDurationClick}
+      />
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: '150ms, open query profile' }));
+    expect(onDurationClick).toHaveBeenCalled();
   });
 
   it('should render total documents processed when provided', () => {

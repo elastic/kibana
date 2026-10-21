@@ -180,6 +180,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
    */
   esqlVariablesConfig?: QueryBarTopRowProps['esqlVariablesConfig'];
   esqlQueryStats?: ESQLQueryStats;
+  /** Called when the ES|QL editor duration is clicked. */
+  onQueryDurationClick?: QueryBarTopRowProps['onQueryDurationClick'];
 
   /** Optional configurations for the lookup join index editor */
   onOpenQueryInNewTab?: QueryBarTopRowProps['onOpenQueryInNewTab'];
@@ -872,6 +874,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           onVisorInitialStateChange={this.props.onVisorInitialStateChange}
           esqlVariablesConfig={this.props.esqlVariablesConfig}
           esqlQueryStats={this.props.esqlQueryStats}
+          onQueryDurationClick={this.props.onQueryDurationClick}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
           enableDateRangePicker={this.props.enableDateRangePicker}

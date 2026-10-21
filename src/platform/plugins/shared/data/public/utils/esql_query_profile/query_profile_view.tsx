@@ -31,13 +31,15 @@ import { QueryProfileBody } from './query_profile_body';
 export function QueryProfileView({
   adapters,
   search,
+  options,
 }: {
   adapters: Adapters;
   search: Pick<ISearchStart, 'esql'>;
   title?: string;
+  options?: unknown;
 }) {
   const requests = useEsqlRequests(adapters);
-  const [selectedId, setSelectedId] = useState<string | undefined>();
+  const [selectedId, setSelectedId] = useState<string | undefined>(readInitialRequestId(options));
   const selected = useMemo(
     () => requests.find((request) => request.id === selectedId) ?? requests[0],
     [requests, selectedId]
@@ -108,6 +110,14 @@ export function QueryProfileView({
       )}
     </div>
   );
+}
+
+function readInitialRequestId(options: unknown): string | undefined {
+  if (!options || typeof options !== 'object' || !('initialRequestId' in options)) {
+    return undefined;
+  }
+  const requestId = (options as { initialRequestId?: unknown }).initialRequestId;
+  return typeof requestId === 'string' && requestId.length > 0 ? requestId : undefined;
 }
 
 function completedRequestTime(request: Request | undefined): string | undefined {

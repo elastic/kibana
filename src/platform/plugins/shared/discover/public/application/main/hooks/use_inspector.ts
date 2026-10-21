@@ -57,7 +57,8 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
   const [inspectorSession, setInspectorSession] = useState<InspectorSession | undefined>(undefined);
 
   const onOpenInspector = useCallback(
-    (onClose?: () => void) => {
+    (arg?: (() => void) | OpenInspectorOptions) => {
+      const options = typeof arg === 'function' ? { onClose: arg } : arg;
       const tabRuntimeState = selectTabRuntimeState(runtimeStateManager, currentTabId);
       const dataStateContainer = tabRuntimeState?.dataStateContainer$.getValue();
 
@@ -85,14 +86,20 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
             },
           }),
         },
-        { title: persistedDiscoverSession?.title }
+        {
+          title: persistedDiscoverSession?.title,
+          initialViewId: options?.initialViewId,
+          options: options?.initialRequestId
+            ? { initialRequestId: options.initialRequestId }
+            : undefined,
+        }
       );
 
       setInspectorSession(session);
 
-      if (onClose) {
+      if (options?.onClose) {
         session?.onClose.then(() => {
-          onClose();
+          options.onClose?.();
         });
       }
     },
@@ -115,4 +122,10 @@ export function useInspector({ inspector }: { inspector: InspectorPublicPluginSt
     };
   }, [inspectorSession]);
   return onOpenInspector;
+}
+
+export interface OpenInspectorOptions {
+  initialViewId?: string;
+  initialRequestId?: string;
+  onClose?: () => void;
 }

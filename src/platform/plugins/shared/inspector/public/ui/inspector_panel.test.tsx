@@ -59,6 +59,7 @@ describe('InspectorPanel', () => {
         component: () => <h1>View 1</h1>,
       },
       {
+        id: 'foo',
         title: 'Foo View',
         order: 100,
         component: () => <h1>Foo view</h1>,
@@ -89,6 +90,33 @@ describe('InspectorPanel', () => {
     expect(screen.getByText('View: View 1')).toBeInTheDocument();
 
     // Rendered content of the selected view
+    expect(screen.getByRole('heading', { name: 'View 1' })).toBeInTheDocument();
+  });
+
+  it('opens the view whose id was requested', () => {
+    renderWithI18n(
+      <InspectorPanel
+        adapters={adapters}
+        views={views}
+        dependencies={dependencies}
+        initialViewId="foo"
+      />
+    );
+
+    expect(screen.getByText('View: Foo View')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Foo view' })).toBeInTheDocument();
+  });
+
+  it('stays on the first view when the requested id is missing', () => {
+    renderWithI18n(
+      <InspectorPanel
+        adapters={adapters}
+        views={views}
+        dependencies={dependencies}
+        initialViewId="missing"
+      />
+    );
+
     expect(screen.getByRole('heading', { name: 'View 1' })).toBeInTheDocument();
   });
 

@@ -22,6 +22,7 @@ export const getQueryProfileViewComponent =
       <QueryProfileView
         adapters={props.adapters}
         title={props.title}
+        options={props.options}
         search={getStartServices().search}
       />
     );
