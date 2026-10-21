@@ -163,6 +163,22 @@ describe('ALERTZERO_ATTACK_DISCOVERY_BATCHED_GENERATION_WORKFLOW', () => {
       );
     });
 
+    // A true-positive or inconclusive review retires its alerts with this tag, so
+    // correlating them again would only persist a near-duplicate attack.
+    it('excludes alerts the review tagged az:ad_correlated', () => {
+      expect(retrieve().with?.filter).toEqual({
+        bool: {
+          must_not: [{ terms: { 'kibana.alert.workflow_tags': ['az:ad_correlated'] } }],
+        },
+      });
+    });
+
+    // A `must_not` keeps untagged alerts, which an ES|QL comparison on the
+    // multi-valued, often-absent tag field would drop unless it had a null arm.
+    it('excludes the tag in the pushed-down filter rather than the ES|QL query', () => {
+      expect(query()).not.toContain('workflow_tags');
+    });
+
     it('selects METADATA _id, which is all the batches need', () => {
       expect(query()).toContain('METADATA _id');
     });

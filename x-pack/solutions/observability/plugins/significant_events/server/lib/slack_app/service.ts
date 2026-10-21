@@ -111,6 +111,21 @@ const toWorkspace = (connection: RelayAppConnectionAttributes): SlackAppWorkspac
   };
 };
 
+const toWorkspaceDetails = (
+  connection: RelayAppConnectionAttributes
+): Pick<SlackAppStatusResponse, 'workspace' | 'createdBy' | 'createdAt'> => {
+  const workspace = toWorkspace(connection);
+  if (!workspace) {
+    return {};
+  }
+  const { createdBy, createdAt } = connection;
+  return {
+    workspace,
+    ...(createdBy ? { createdBy } : {}),
+    ...(createdAt ? { createdAt } : {}),
+  };
+};
+
 /** Pagination options for a single page of connected channels. */
 export interface ListBindingsOptions {
   /** Opaque cursor from a previous page's `nextCursor`; omit for the first page. */
@@ -580,7 +595,7 @@ export class SlackAppService {
           return {
             available: true,
             status: RELAY_APP_CONNECTION_STATUS.pendingConfirmation,
-            workspace: toWorkspace(pending),
+            ...toWorkspaceDetails(pending),
           };
         }
       } catch (error) {
@@ -591,14 +606,13 @@ export class SlackAppService {
       }
     }
 
-    const workspace = toWorkspace(connection);
     return {
       available: true,
       status: isAwaitingConfirmation(connection)
         ? RELAY_APP_CONNECTION_STATUS.pendingConfirmation
         : connection.status,
       ...(connection.error ? { error: connection.error } : {}),
-      ...(workspace ? { workspace } : {}),
+      ...toWorkspaceDetails(connection),
     };
   }
 

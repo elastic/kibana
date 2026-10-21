@@ -50,6 +50,11 @@ export class RuleLibraryPage {
     return this.createButton(templateName);
   }
 
+  /** Link to the rules created from the template; absent when the template has no rules. */
+  ruleCountLink(templateName: string) {
+    return this.templateRow(templateName).getByTestId('ruleLibraryRuleCountLink');
+  }
+
   createdToast(ruleName: string) {
     return this.scoutPage.getByText(`Rule "${ruleName}" created successfully`);
   }

@@ -10,7 +10,16 @@ import {
   loadSourceForMutation,
   mapSourceHit,
 } from './list_sources';
-import { updateSourceBodySchema } from '../../../common/threat_intel';
+import { resolveCatalogSourceUrl, updateSourceBodySchema } from '../../../common/threat_intel';
+
+jest.mock('../../../common/threat_intel', () => {
+  const actual = jest.requireActual('../../../common/threat_intel');
+  return { ...actual, resolveCatalogSourceUrl: jest.fn(actual.resolveCatalogSourceUrl) };
+});
+
+const resolveCatalogSourceUrlMock = resolveCatalogSourceUrl as jest.MockedFunction<
+  typeof resolveCatalogSourceUrl
+>;
 
 describe('loadSourceReportStatsByAdapterId', () => {
   const logger = {
@@ -241,6 +250,22 @@ describe('mapSourceHit', () => {
     });
 
     expect(mapped.url).toBeUndefined();
+  });
+
+  // The shipped catalog carries no credentials, so these drive the resolver directly to
+  // prove the route strips userinfo before a Security Read caller sees the URL.
+  it.each([
+    ['username and password', 'https://feed-user:s3cret@example.com/feed.xml'],
+    ['username only', 'https://api-token@example.com/feed.xml'],
+  ])('strips %s from a credential-bearing catalog URL', (_label, catalogUrl) => {
+    resolveCatalogSourceUrlMock.mockReturnValueOnce(catalogUrl);
+
+    const mapped = mapSourceHit({
+      _id: 'vendor_api:credentialed',
+      _source: { name: 'Credentialed', adapter_type: 'rss' },
+    });
+
+    expect(mapped.url).toBe('https://example.com/feed.xml');
   });
 });
 
