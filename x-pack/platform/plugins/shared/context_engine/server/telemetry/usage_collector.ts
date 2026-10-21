@@ -187,6 +187,7 @@ export const registerContextEngineUsageCollector = ({
   logger: Logger;
 }): void => {
   if (!usageCollection) {
+    logger.debug('usageCollection plugin unavailable; collector not registered');
     return;
   }
 

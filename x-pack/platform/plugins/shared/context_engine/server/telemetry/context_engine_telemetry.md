@@ -2,7 +2,7 @@
 
 The Context Engine plugin reports event-based telemetry (EBT) for Knowledge Indicator (KI) writes and verification runs. `ContextEngineAnalyticsService` (`analytics_service.ts`) owns event type registration through `core.analytics.registerEventType` and all reporting.
 
-A `context_engine` usage collector (`usage_collector.ts`) reports a daily snapshot of AI index and KI counts.
+A `context_engine` usage collector (`usage_collector.ts`) reports a daily snapshot of AI Indices and KI counts.
 
 ## Privacy rules
 
