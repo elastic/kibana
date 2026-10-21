@@ -522,7 +522,7 @@ experiment metadata. Native dataset upsert/score persistence remains in use.
 
 ### Credentials and source preflight
 
-Add this field to the **shared** evals config, preserving its other entries:
+Add this field to the **Nightshift suite** config, preserving its other entries:
 
 ```json
 {
@@ -538,11 +538,13 @@ Use only `read` and `view_index_metadata` on `logs-orcabench.otel-*`,
 The source is the already restored immutable `data-0418/2026-10-01` snapshot, with original
 April 2026 timestamps; a CI run never restores, rewrites or deletes its telemetry.
 
-- CI shared config: `kv/ci-shared/kbn-evals/golden`, field `config` (base64 JSON).
-  Buildkite exposes it as `KBN_EVALS_CONFIG_B64`; the ORCA hook reads `nightshiftOrcaEs` from it.
-- `--profile dev-vault`: `secret/kibana-issues/dev/kbn-evals/golden`, alongside the existing
-  suite-specific `nightshift` secret. The CLI merges the suite's sandbox settings over the shared
-  config before calling the hook. Missing suite credentials do not fall back to shared credentials.
+- CI: `kv/ci-shared/kbn-evals/nightshift`, field `config` (base64 JSON), alongside `sandbox`.
+  Buildkite forwards this exact config to both Scout-hook invocations using
+  `KBN_EVALS_SCOUT_HOOK_CONFIG_B64`; the native CLI does not reread Vault. An existing
+  `nightshiftOrcaEs` entry in shared `golden` config remains a compatibility fallback.
+- `--profile dev-vault`: `secret/kibana-issues/dev/kbn-evals/nightshift`. The CLI merges this
+  suite config over shared `golden` config, retaining compatibility with an ORCA entry there.
+  Missing suite credentials do not fall back to shared credentials.
 - File profiles: put `nightshiftOrcaEs` and the usual sandbox/export settings in the profile JSON.
 
 The hook replaces only the ORCA job's telemetry destination, preserving sandbox authentication.

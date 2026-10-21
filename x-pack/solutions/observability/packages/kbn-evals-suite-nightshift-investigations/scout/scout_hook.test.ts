@@ -320,6 +320,21 @@ describe('ORCA CI shard', () => {
     sandbox: SANDBOX,
     nightshift: { telemetry: { url: 'https://current.example', apiKey: 'current-key' } },
   };
+  it('prefers the suite-specific ORCA credentials over the shared config', () => {
+    const { status, output } = runHook(
+      { ...existing, nightshiftOrcaEs: orca },
+      {
+        EVAL_SHARD_ID: 'orcabench',
+        KBN_EVALS_CONFIG_B64: Buffer.from(
+          JSON.stringify({ nightshiftOrcaEs: { url: 'https://shared.example', apiKey: 'shared' } })
+        ).toString('base64'),
+      }
+    );
+    expect(status).toBe(0);
+    expect(output.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL).toBe(orca.url);
+    expect(output.env.NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY).toBe(orca.apiKey);
+    expect(output.env.SANDBOX_API_KEY).toBe(SANDBOX.apiKey);
+  });
   it('takes only the ORCA shard telemetry from shared CI config and preserves sandbox authentication', () => {
     const { status, output, stderr } = runHook(existing, {
       EVAL_SHARD_ID: 'orcabench',

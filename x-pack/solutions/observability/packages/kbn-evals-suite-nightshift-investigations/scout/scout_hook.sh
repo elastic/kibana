@@ -89,8 +89,8 @@ ca="$(pem_path SANDBOX_CA_CERT_PATH '.sandbox.ssl.certificateAuthorities')"
 orca=false
 if [[ "${EVAL_SHARD_ID:-}" == orcabench || "${NIGHTSHIFT_DATASETS:-}" == orcabench ]]; then
   orca=true
-  # CI supplies the general config separately from this suite's sandbox secret. File and
-  # dev-vault profiles include nightshiftOrcaEs directly in stdin. Never put credentials in argv.
+  # Prefer the suite-owned config, with shared config as a compatibility fallback.
+  # CI forwards this same input when the native CLI invokes the hook again.
   orca_config="$(printf '%s' "$config" | jq -c '.nightshiftOrcaEs // null')"
   if [[ "$orca_config" == null && -n "${KBN_EVALS_CONFIG_B64:-}" ]]; then
     orca_config="$(printf '%s' "$KBN_EVALS_CONFIG_B64" | base64 -d | jq -c '.nightshiftOrcaEs // null')"
@@ -99,7 +99,7 @@ if [[ "${EVAL_SHARD_ID:-}" == orcabench || "${NIGHTSHIFT_DATASETS:-}" == orcaben
     type == "object" and (.url | type == "string" and startswith("https://") and (contains("@") | not))
     and (.apiKey | type == "string" and length > 0 and (contains("REPLACE_ME") | not))
   ' >/dev/null 2>&1; then
-    echo "nightshift-investigations scout hook: ORCA requires nightshiftOrcaEs.url and apiKey in the shared evals config" >&2
+    echo "nightshift-investigations scout hook: ORCA requires nightshiftOrcaEs.url and apiKey in the Nightshift evals config" >&2
     exit 1
   fi
   # Replace only this process's target; the existing Nightshift secret is never modified.

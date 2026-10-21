@@ -43,8 +43,9 @@ valid when requested; it increases runtime. A filtered or partial run is not a f
    and EDOT locally; the sandbox executes remotely. Reserve the local ports and ensure the
    sandbox session pool can support 42 cases plus overlapping runs. Investigation concurrency
    alone does not resize that pool.
-3. Use existing credential access. `dev-vault` merges the shared `golden` config's
-   `nightshiftOrcaEs: { url, apiKey }` with the suite's `nightshift` sandbox secret. Keep source
+3. Use existing credential access. `dev-vault` merges the suite's `nightshift` config over shared
+   `golden` config. Read `nightshiftOrcaEs: { url, apiKey }` from the suite config, with the shared
+   entry retained as a compatibility fallback. Keep source
    privileges read-only and credentials in Vault or ignored owner-only profile files. Report
    missing fields by name; keep their values out of chat, argv and logs. Credential provisioning,
    Vault writes and source restoration are separate tasks.
