@@ -18,6 +18,7 @@ import {
   RULE_CREATION_WORKFLOW_ID,
   WORKFLOWS_API_VERSION,
   DRAFT_STEP_ID,
+  OUTPUT_STEP_ID,
   PROPOSE_STEP_ID,
 } from './constants';
 
@@ -67,7 +68,7 @@ export const ensureJudgeConnectorAccessible = async ({
  * behaviour contract is present, not the exact wording (the wording itself is pinned by
  * workflow_contract.test.ts against the checked-in definition).
  */
-export const REQUIRED_STEP_IDS = [DRAFT_STEP_ID, PROPOSE_STEP_ID] as const;
+export const REQUIRED_STEP_IDS = [DRAFT_STEP_ID, PROPOSE_STEP_ID, OUTPUT_STEP_ID] as const;
 
 /**
  * Parses the installed workflow's step names out of its yaml without a yaml dependency:
@@ -139,7 +140,7 @@ export const assertWorkflowInstalled = async ({
     throw new Error(
       `Managed workflow "${RULE_CREATION_WORKFLOW_ID}" no longer declares step(s) ` +
         `${missing.join(', ')} (found: ${stepNames.join(', ')}). The eval client and evaluators ` +
-        `address steps by id — update DRAFT_STEP_ID / PROPOSE_STEP_ID in src/constants.ts when ` +
+        `address steps by id — update the step ids in src/constants.ts when ` +
         `the managed yaml renames them.`
     );
   }

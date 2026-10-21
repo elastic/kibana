@@ -6,8 +6,8 @@
  */
 
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
-import { DRAFT_STEP_ID } from './constants';
-import { extractDraftFromSteps } from './rule_creation_client';
+import { DRAFT_STEP_ID, OUTPUT_STEP_ID } from './constants';
+import { extractDraftFromSteps, extractWorkflowOutput } from './rule_creation_client';
 
 const draftSteps = (structuredOutput: Record<string, unknown>) =>
   [
@@ -74,5 +74,32 @@ describe('extractDraftFromSteps', () => {
         { stepId: DRAFT_STEP_ID, output: null },
       ] as unknown as WorkflowStepExecutionDto[])
     ).toEqual({ rule: undefined, skipped: false, skipReason: undefined });
+  });
+});
+
+describe('extractWorkflowOutput', () => {
+  it('reads the outputs emit_result reported', () => {
+    const output = {
+      created: true,
+      reviewed: true,
+      decision: 'approved',
+      rule_name: 'Sudo brute force',
+      skip_reason: '',
+    };
+
+    expect(
+      extractWorkflowOutput([
+        { stepId: OUTPUT_STEP_ID, output: null },
+        { stepId: OUTPUT_STEP_ID, output },
+      ] as unknown as WorkflowStepExecutionDto[])
+    ).toEqual(output);
+  });
+
+  it('returns undefined when emit_result never ran', () => {
+    expect(
+      extractWorkflowOutput([
+        { stepId: DRAFT_STEP_ID, output: {} },
+      ] as unknown as WorkflowStepExecutionDto[])
+    ).toBeUndefined();
   });
 });

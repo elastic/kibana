@@ -26,8 +26,14 @@ export const WORKFLOWS_API_VERSION = '2023-10-31';
 
 /** Step ids from the managed workflow yaml (@kbn/workflows managed/definitions/alertzero/rule_creation.yaml). */
 export const DRAFT_STEP_ID = 'draft_creation';
-export const REVIEW_STEP_ID = 'review_creation';
 export const PROPOSE_STEP_ID = 'propose_creation';
+export const OUTPUT_STEP_ID = 'emit_result';
+
+/** Public Agent Builder API version (`Elastic-Api-Version` header) for the conversations routes. */
+export const AGENT_BUILDER_API_VERSION = '2023-10-31';
+
+/** Conversation template the coverage review opens investigations from (coverage_review.yaml). */
+export const INVESTIGATION_TEMPLATE_ID = 'investigation';
 
 /**
  * Investigation id for scoring-only runs. No conversation has this id, so the workflow's
