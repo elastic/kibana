@@ -26,6 +26,7 @@ export {
 export {
   WatchAutonomyLevel,
   Worker,
+  WorkerBlockingReason,
   WorkerRunState,
   WorkerScheduleInterval,
   WorkerSettings,
@@ -66,16 +67,13 @@ export {
   HuntIncompleteReason,
   HuntIoc,
   HuntIocType,
-  HuntTechnology,
+  HuntScope,
+  HuntScopeResolution,
   IndexScopeStatus,
   IndexScopeWindow,
-  ResolvedIndexScope,
 } from './components/hunt.gen';
 export { HuntForThreatRequestBody, HuntForThreatResponse } from './hunt/hunt_for_threat_route.gen';
-export {
-  HuntIndexScopeRequestQuery,
-  HuntIndexScopeResponse,
-} from './hunt/hunt_index_scope_route.gen';
+export { HuntIndexScopeResponse } from './hunt/hunt_index_scope_route.gen';
 export {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
@@ -91,5 +89,15 @@ export {
 export {
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
+  HuntCoordinatorResult,
   HuntCoordinatorStatus,
 } from './hunt/hunt_coordinator_route.gen';
+export {
+  FindOrCreateInvestigationRequestBody,
+  FindOrCreateInvestigationResponse,
+} from './hunt/find_or_create_investigation_route.gen';
+export {
+  WriteHuntEvidenceRequestBody,
+  WriteHuntEvidenceResponse,
+} from './hunt/write_hunt_evidence_route.gen';
+export { huntResultSchema, isoDatetimeSchema, type HuntResult } from './hunt/hunt_result';

@@ -14,12 +14,12 @@
  * (DSL/ESQL/Painless, entity types), use common/euid_helpers.
  *
  * @example
- * import { euid, type EntityType } from '@kbn/entity-store/common/euid_helpers';
+ * import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
-export const PLUGIN_ID = 'entityStore';
+export { PLUGIN_ID } from './plugin_id';
 export const PLUGIN_NAME = 'Entity Store';
 
 export const FF_ENABLE_ENTITY_STORE_V2 = 'securitySolution:entityStoreEnableV2';
@@ -39,13 +39,9 @@ export {
 } from './privileges';
 
 export type EntityStoreStatus = z.infer<typeof EntityStoreStatus>;
-export const EntityStoreStatus = z.enum([
-  'not_installed',
-  'installing',
-  'running',
-  'stopped',
-  'error',
-]);
+export const EntityStoreStatus = lazySchema(() =>
+  z.enum(['not_installed', 'installing', 'running', 'stopped', 'error'])
+);
 
 export const API_VERSIONS = {
   public: {
@@ -83,6 +79,10 @@ export const ENTITY_STORE_ROUTES = {
   },
   internal: {
     CHECK_PRIVILEGES: `${INTERNAL_BASE_ROUTE}/check_privileges`,
+    // Literal segments win over `{entityType}` in the router, so START and STOP are unambiguous.
+    START: `${INTERNAL_BASE_ROUTE}/start`,
+    STOP: `${INTERNAL_BASE_ROUTE}/stop`,
+    ENGINE_CONFIG: `${INTERNAL_BASE_ROUTE}/{entityType}`,
     FORCE_LOG_EXTRACTION: `${INTERNAL_BASE_ROUTE}/{entityType}/force_log_extraction`,
     FORCE_HISTORY_SNAPSHOT: `${INTERNAL_BASE_ROUTE}/force_history_snapshot`,
     ENTITY_MAINTAINERS_START: `${INTERNAL_BASE_ROUTE}/entity_maintainers/start/{id}`,
@@ -90,6 +90,9 @@ export const ENTITY_STORE_ROUTES = {
     ENTITY_MAINTAINERS_RUN: `${INTERNAL_BASE_ROUTE}/entity_maintainers/run/{id}`,
     ENTITY_MAINTAINERS_GET: `${INTERNAL_BASE_ROUTE}/entity_maintainers`,
     ENTITY_MAINTAINERS_INIT: `${INTERNAL_BASE_ROUTE}/entity_maintainers/init`,
+    RESOLUTION_CUSTOM_RULES: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules`,
+    RESOLUTION_CUSTOM_RULE: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules/{id}`,
+    RESOLUTION_CUSTOM_RULES_PREVIEW: `${INTERNAL_BASE_ROUTE}/resolution/custom_rules/_preview`,
   },
 } as const satisfies Record<string, Record<string, string>>;
 
@@ -114,11 +117,28 @@ export const getErrorMessage = (error: unknown): string => {
 
 // Entity types (slim definitions; for EUID translation use common/euid_helpers)
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host', 'service', 'generic']);
+export const EntityType = lazySchema(() => z.enum(['user', 'host', 'service', 'generic']));
 
 export const ALL_ENTITY_TYPES = Object.values(EntityType.enum);
 
-export { ExtractionMode } from './domain/definitions/entity_schema';
+export {
+  ExtractionMode,
+  extractionBlockSchema,
+  dynamicBlockSchema,
+} from './domain/definitions/entity_schema';
+export type {
+  DynamicBlock,
+  EntityDefinitionOfAnyType,
+  EntityDefinitionWithoutId,
+  ExtractionBlock,
+  ExtractedEntityDefinition,
+} from './domain/definitions/entity_schema';
+
+// Consumed by the entity inventory plugin, which must not restate the store's definition rules.
+export { entitySchema } from './domain/definitions/entity_schema';
+export type { EntityDefinitionManagedBy } from './domain/definitions/entity_schema';
+export type { DynamicAttribute, DynamicSource } from './domain/definitions/dynamic';
+export { getIdentityFields, getPresenceFilter } from './domain/definitions/dynamic';
 
 export type {
   Entity,
@@ -201,7 +221,10 @@ export type {
   RelationshipMetadataDoc,
   RelationshipMetadataMaintainer,
 } from './domain/entity_metadata/relationship_metadata';
-export { AI_SUMMARY_EVENT_ACTION } from './domain/entity_metadata/ai_summary_metadata';
+export {
+  AI_SUMMARY_EVENT_ACTION,
+  AI_SUMMARY_RESOLVED_GROUP_VARIANT_ID,
+} from './domain/entity_metadata/ai_summary_metadata';
 export type {
   AiSummaryMetadataDoc,
   AiSummaryHighlightItem,

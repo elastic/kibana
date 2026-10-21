@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { Suspense, useMemo, useRef, useState } from 'react';
 import {
+  EuiBadge,
   EuiFlexGroup,
   EuiLink,
   EuiPanel,
   EuiSkeletonTitle,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
 import { css, Global } from '@emotion/react';
 import { parseEpisodeDataJson } from '@kbn/alerting-v2-utils';
@@ -21,6 +21,7 @@ import { FlyoutTemplate } from '@kbn/flyout-template';
 // and defaults it on, whereas we render subpanels ourselves.
 import { FlyoutAccordion } from '@kbn/flyout-sections';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import { ConnectorIconsMap } from '@kbn/connector-specs/icons';
 import { EDIT_EPISODE_ASSIGNEE_ACTION_ID } from '../../actions/edit_assignee';
 import { useInvalidateEpisodeQueries } from '../../hooks/use_invalidate_episode_queries';
 import { useEpisodeDetailsHeaderData } from '../../hooks/use_episode_details_header_data';
@@ -43,8 +44,10 @@ import { AlertEpisodeMetadataSection } from './metadata_section';
 import { DOC_VIEWER_FLEX_HEIGHT_SENTINEL } from './metadata_layout';
 import { EpisodeFooterActionMenu } from './footer_action_menu';
 import { EMPTY_VALUE } from '../../constants';
+import { getConnectorSource, useEpisodeSource } from '../../source_labels';
 import { formatDateTime } from '../../utils/format_date_time';
 import { formatMetadataListDuration } from './translations';
+import { useAlertDetailsFlyoutWidth } from './use_alert_details_flyout_width';
 import type { EpisodeAction } from '../../actions/types';
 import type { AlertEpisodeDetailsServices } from './types';
 import * as i18n from './translations';
@@ -52,17 +55,6 @@ import * as flappingI18n from '../flapping/translations';
 import { FlappingPopover } from '../flapping/flapping_badge';
 
 type TabId = 'overview' | 'timeline' | 'metadata';
-
-/**
- * Mirrors `FLYOUT_MIN_CELL_WIDTH` and `FLYOUT_MAX_GRID_COLUMNS` in
- * `@kbn/flyout-info-blocks`, to estimate an initial width that allows 4 info blocks
- * to be displayed in one line
- */
-const INFO_BLOCKS_MIN_CELL_WIDTH = 140;
-const INFO_BLOCKS_COLUMNS = 4;
-
-/** Matches the `paddingSize` passed to the flyout, which EUI resolves to a theme size. */
-const FLYOUT_PADDING_SIZE = 'm';
 
 /**
  * Groups the episode flyout and anything opened from it into one navigation history.
@@ -158,6 +150,7 @@ const SnoozedBadgeLabel = ({
 export interface AlertEpisodeDetailsFlyoutProps {
   episodeId: string;
   groupHash: string | undefined;
+  sourceId?: string;
   onClose: () => void;
   services: AlertEpisodeDetailsServices;
   actions?: EpisodeAction[];
@@ -168,13 +161,13 @@ export interface AlertEpisodeDetailsFlyoutProps {
 export const AlertEpisodeDetailsFlyout = ({
   episodeId,
   groupHash,
+  sourceId,
   onClose,
   services,
   actions,
   getRuleDetailsHref,
   getEpisodeDetailsHref,
 }: AlertEpisodeDetailsFlyoutProps) => {
-  const { euiTheme } = useEuiTheme();
   const [tab, setTab] = useState<TabId>('overview');
   const invalidateEpisodeQueries = useInvalidateEpisodeQueries();
 
@@ -188,16 +181,34 @@ export const AlertEpisodeDetailsFlyout = ({
     groupAction,
     isFlapping,
   } = useEpisodeDetailsHeaderData({ episodeId, groupHash, services });
+  const { label: systemLabel, icon: systemIcon } = useEpisodeSource(sourceId);
+  // Alerts ingested from an external connector show that connector (e.g. "zabbix");
+  // everything else shows the alerting system (Universal or Classic).
+  const connectorSource = getConnectorSource(episode?.source);
+  const sourceLabel = connectorSource ?? systemLabel;
+  const sourceIcon = connectorSource ? ConnectorIconsMap.get(`.${connectorSource}`) : systemIcon;
 
   const showRuleDependentTabs = isRuleLoaded(ruleState);
+  // Related episodes are matched by rule or external source. Until the episode loads the
+  // section renders its own loading or error state, so the panel stays.
+  const showRelated = !episode || Boolean(episode['rule.id']) || connectorSource !== undefined;
   const episodes = useMemo(() => (episode ? [episode] : []), [episode]);
   const compatibleActions = useMemo(
     () => (actions && episodes.length ? actions.filter((a) => a.isCompatible({ episodes })) : []),
     [actions, episodes]
   );
+  const menuActions = useMemo(
+    () =>
+      actions && episodes.length
+        ? actions.filter(
+            (action) =>
+              action.isCompatible({ episodes }) || Boolean(action.showWhenDisabled?.({ episodes }))
+          )
+        : [],
+    [actions, episodes]
+  );
 
-  // Narrowest width that keeps the header's four info blocks on one row
-  const initialWidth = INFO_BLOCKS_COLUMNS * INFO_BLOCKS_MIN_CELL_WIDTH + euiTheme.base * 2;
+  const initialWidth = useAlertDetailsFlyoutWidth();
 
   // Footer "Take action" popover anchor, captured from the PrimaryAction button's onClick.
   const menuAnchorRef = useRef<HTMLButtonElement | null>(null);
@@ -294,7 +305,6 @@ export const AlertEpisodeDetailsFlyout = ({
         // to reopen quickly on first loads. Setting a constant title keeps the registration stable.
         flyoutMenuProps={{ title: i18n.FLYOUT_ARIA_LABEL }}
         historyKey={FLYOUT_HISTORY_KEY}
-        paddingSize={FLYOUT_PADDING_SIZE}
         size={initialWidth}
         aria-label={i18n.FLYOUT_ARIA_LABEL}
         data-test-subj={FLYOUT_TEST_SUBJ}
@@ -347,6 +357,19 @@ export const AlertEpisodeDetailsFlyout = ({
               copiedTooltip={i18n.FLYOUT_ALERT_ID_COPIED}
               data-test-subj="alertingV2EpisodeFlyoutAlertId"
             />
+          </FlyoutTemplate.Header.InfoBlock>
+
+          {/* Source: which alerting system the alert came from. */}
+          <FlyoutTemplate.Header.InfoBlock title={i18n.FLYOUT_INFO_BLOCK_SOURCE}>
+            <Suspense fallback={null}>
+              <EuiBadge
+                color="hollow"
+                iconType={sourceIcon}
+                data-test-subj="alertingV2EpisodeFlyoutSourceBadge"
+              >
+                {sourceLabel}
+              </EuiBadge>
+            </Suspense>
           </FlyoutTemplate.Header.InfoBlock>
 
           {/* Severity. The dot carries the color, so the value text stays default. */}
@@ -449,36 +472,41 @@ export const AlertEpisodeDetailsFlyout = ({
                 </EuiFlexGroup>
               </FlyoutAccordion>
 
-              <FlyoutAccordion
-                title={i18n.FLYOUT_ACCORDION_INVESTIGATION}
-                initialIsOpen
-                hasBorder={false}
-                data-test-subj="alertingV2EpisodeFlyoutAccordionInvestigation"
-              >
-                <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
-                  {/* No rule means no runbook, so the panel goes too. */}
-                  {showRuleDependentTabs && (
-                    <EuiPanel hasBorder paddingSize="m">
-                      <AlertEpisodeRunbookSection
-                        episodeId={episodeId}
-                        services={services}
-                        compressed
-                        showTitle
-                        onShowFullGuide={() => setIsRunbookOpen(true)}
-                      />
-                    </EuiPanel>
-                  )}
-                  <EuiPanel hasBorder paddingSize="m">
-                    <AlertEpisodesRelatedSection
-                      episodeId={episodeId}
-                      services={services}
-                      getEpisodeDetailsHref={getEpisodeDetailsHref}
-                      showHeading
-                      compressed
-                    />
-                  </EuiPanel>
-                </EuiFlexGroup>
-              </FlyoutAccordion>
+              {(showRuleDependentTabs || showRelated) && (
+                <FlyoutAccordion
+                  title={i18n.FLYOUT_ACCORDION_INVESTIGATION}
+                  initialIsOpen
+                  hasBorder={false}
+                  data-test-subj="alertingV2EpisodeFlyoutAccordionInvestigation"
+                >
+                  <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+                    {/* No rule means no runbook, so the panel goes too. */}
+                    {showRuleDependentTabs && (
+                      <EuiPanel hasBorder paddingSize="m">
+                        <AlertEpisodeRunbookSection
+                          episodeId={episodeId}
+                          services={services}
+                          compressed
+                          showTitle
+                          onShowFullGuide={() => setIsRunbookOpen(true)}
+                        />
+                      </EuiPanel>
+                    )}
+                    {/* No rule or source means nothing to relate by, so the panel goes too. */}
+                    {showRelated && (
+                      <EuiPanel hasBorder paddingSize="m">
+                        <AlertEpisodesRelatedSection
+                          episodeId={episodeId}
+                          services={services}
+                          getEpisodeDetailsHref={getEpisodeDetailsHref}
+                          showHeading
+                          compressed
+                        />
+                      </EuiPanel>
+                    )}
+                  </EuiFlexGroup>
+                </FlyoutAccordion>
+              )}
 
               <FlyoutAccordion
                 title={i18n.FLYOUT_ACCORDION_RULE}
@@ -502,7 +530,8 @@ export const AlertEpisodeDetailsFlyout = ({
           <FlyoutTemplate.Body.TabPanel tabId="timeline">
             <AlertEpisodeTimelineSection
               episodeId={episodeId}
-              groupHash={groupHash}
+              seriesId={episode ? episode.series_id ?? null : undefined}
+              groupHash={episode?.group_hash}
               services={services}
             />
           </FlyoutTemplate.Body.TabPanel>
@@ -539,7 +568,8 @@ export const AlertEpisodeDetailsFlyout = ({
           />
           <FlyoutTemplate.Footer.PrimaryAction
             label={i18n.FLYOUT_TAKE_ACTION}
-            iconType="chevronSingleDown"
+            iconType={isMenuOpen ? 'chevronSingleUp' : 'chevronSingleDown'}
+            iconSide="right"
             data-test-subj="alertingV2EpisodeFlyoutTakeActionButton"
             onClick={(event) => {
               menuAnchorRef.current = event.currentTarget as HTMLButtonElement;
@@ -559,7 +589,6 @@ export const AlertEpisodeDetailsFlyout = ({
           resizable
           session="start"
           historyKey={FLYOUT_HISTORY_KEY}
-          paddingSize={FLYOUT_PADDING_SIZE}
           size={initialWidth}
           aria-label={i18n.RUNBOOK_FULL_GUIDE_ARIA_LABEL}
           data-test-subj="alertingV2EpisodeRunbookFlyout"
@@ -581,7 +610,7 @@ export const AlertEpisodeDetailsFlyout = ({
           anchor={menuAnchorRef.current}
           isOpen={isMenuOpen}
           onClose={() => setIsMenuOpen(false)}
-          actions={compatibleActions}
+          actions={menuActions}
           episodes={episodes}
           viewDetailsHref={getEpisodeDetailsHref(episodeId)}
           onSuccess={invalidateEpisodeQueries}

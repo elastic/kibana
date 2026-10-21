@@ -62,7 +62,7 @@ export function registerInternalConversationRoutes({
       const client = await conversationsService.getScopedClient({ request });
       const updatedConversation = await client.update(
         { id: conversationId, title },
-        { access: 'rename', retryOnConflict: true }
+        { access: 'rename', retryOnConflict: true, source: 'http_api' }
       );
 
       return response.ok<RenameConversationResponse>({
@@ -96,7 +96,9 @@ export function registerInternalConversationRoutes({
       const { template_id: templateId } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      const updatedConversation = await client.applyTemplate(conversationId, templateId);
+      const updatedConversation = await client.applyTemplate(conversationId, templateId, {
+        source: 'http_api',
+      });
 
       return response.ok<ApplyTemplateResponse>({
         body: { id: updatedConversation.id },
@@ -143,7 +145,8 @@ export function registerInternalConversationRoutes({
       const client = await conversationsService.getScopedClient({ request });
       const { conversation: updatedConversation } = await client.patchMetadata(
         conversationId,
-        metadata
+        metadata,
+        { source: 'http_api' }
       );
 
       return response.ok<PatchConversationMetadataResponse>({
@@ -191,11 +194,11 @@ export function registerInternalConversationRoutes({
   // submit round feedback
   router.post(
     {
-      path: `${internalApiPath}/conversations/{conversation_id}/rounds/{round_id}/_feedback`,
+      path: `${internalApiPath}/conversations/{conversation_id}/executions/{execution_id}/_feedback`,
       validate: {
         params: schema.object({
           conversation_id: schema.string({ maxLength: 256 }),
-          round_id: schema.string({ maxLength: 256 }),
+          execution_id: schema.string({ maxLength: 256 }),
         }),
         body: schema.object({
           vote: schema.nullable(schema.oneOf([schema.literal('up'), schema.literal('down')])),
@@ -222,11 +225,11 @@ export function registerInternalConversationRoutes({
     },
     wrapHandler(async (ctx, request, response) => {
       const { conversations: conversationsService } = getInternalServices();
-      const { conversation_id: conversationId, round_id: roundId } = request.params;
+      const { conversation_id: conversationId, execution_id: executionId } = request.params;
       const { vote, chips, comment } = request.body;
 
       const client = await conversationsService.getScopedClient({ request });
-      await client.updateRoundFeedback(conversationId, roundId, {
+      await client.updateRoundFeedback(conversationId, executionId, {
         vote,
         chips: chips as FeedbackChipId[] | undefined,
         comment,

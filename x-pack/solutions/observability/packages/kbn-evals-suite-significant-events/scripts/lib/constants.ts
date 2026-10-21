@@ -8,8 +8,8 @@ import type { IndicesUpdateAliasesAddAction } from '@elastic/elasticsearch/lib/a
 import type { Scenario } from './types';
 import {
   DETECTIONS_DATA_STREAM,
-  EVENTS_DATA_STREAM,
   KNOWLEDGE_INDICATORS_DATA_STREAM,
+  RULE_EVENTS_DATA_STREAM,
 } from '../../src/data_generators/snapshot_indices';
 
 export {
@@ -41,11 +41,21 @@ export const HEALTHY_BASELINE_SCENARIO: Scenario = { id: 'healthy-baseline' };
 
 // Streams that only exist when the user runs the full discovery workflow.
 // Capture skips them silently when absent; restore skips them when not in the snapshot.
-export const SIGEVENTS_OPTIONAL_STREAMS = [EVENTS_DATA_STREAM, DETECTIONS_DATA_STREAM] as const;
+export const SIGEVENTS_OPTIONAL_STREAMS = [
+  DETECTIONS_DATA_STREAM,
+  RULE_EVENTS_DATA_STREAM,
+] as const;
 
 export const SIGNIFICANT_EVENTS_DATA_STREAMS = [
   KNOWLEDGE_INDICATORS_DATA_STREAM,
   ...SIGEVENTS_OPTIONAL_STREAMS,
+] as const;
+
+// Only these streams can be safely deleted during restore. `.rule-events` is shared with other
+// Alerting v2 producers, so restore must preserve documents that are not Significant Events.
+export const SIGNIFICANT_EVENTS_CLEANABLE_DATA_STREAMS = [
+  KNOWLEDGE_INDICATORS_DATA_STREAM,
+  DETECTIONS_DATA_STREAM,
 ] as const;
 
 export const VALID_ALERT_INDICES = ['.internal.alerts-streams.alerts-default-*'] as const;

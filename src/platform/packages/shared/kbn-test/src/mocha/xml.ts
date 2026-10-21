@@ -9,11 +9,10 @@
 
 import stripAnsi from 'strip-ansi';
 
-// create a regular expression that selects any character that is explicitly allowed by https://www.w3.org/TR/xml/#NT-Char
-const validXmlCharsRE =
-  /(?:[\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD]|[\uD800-\uDBFF][\uDC00-\uDFFF])*/g;
+// selects any code point not allowed by https://www.w3.org/TR/xml/#NT-Char. Keep it a single
+// character class: a repeated alternation overflows the V8 stack on multi-MB inputs.
+const invalidXmlCharsRE = /[^\x09\x0A\x0D\x20-\uD7FF\uE000-\uFFFD\u{10000}-\u{10FFFF}]/gu;
 
 export function escapeCdata(input: string) {
-  const match = stripAnsi(input).match(validXmlCharsRE) || [];
-  return match.join('');
+  return stripAnsi(input).replace(invalidXmlCharsRE, '');
 }

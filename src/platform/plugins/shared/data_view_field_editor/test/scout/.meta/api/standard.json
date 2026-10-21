@@ -1,0 +1,148 @@
+{
+  "sha1": "fafe2dd5ddfbb0d6a0529dd1588f9953b575ffb9",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "f69e6ad63934f0d-1125b3eb0172918",
+      "title": "Field preview should return the script value > keyword_field: emit(\"test\")",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts",
+        "line": 54,
+        "column": 5
+      }
+    },
+    {
+      "id": "f69e6ad63934f0d-3060a6de667d243",
+      "title": "Field preview should return the script value > long_field: emit(doc[\"foo\"].value + 1)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts",
+        "line": 54,
+        "column": 5
+      }
+    },
+    {
+      "id": "f69e6ad63934f0d-93b8c622513ffdd",
+      "title": "Field preview should return the script value > keyword_field: emit(doc[\"bar\"].value + \" world\")",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts",
+        "line": 54,
+        "column": 5
+      }
+    },
+    {
+      "id": "f69e6ad63934f0d-311c58f9cff4aae",
+      "title": "Field preview should require a script",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts",
+        "line": 60,
+        "column": 84
+      }
+    },
+    {
+      "id": "f69e6ad63934f0d-cf41f92edde1fa3",
+      "title": "Field preview should require a context",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts",
+        "line": 70,
+        "column": 14
+      }
+    },
+    {
+      "id": "f69e6ad63934f0d-5b9ede6d6ea8794",
+      "title": "Field preview should require an index",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts",
+        "line": 79,
+        "column": 14
+      }
+    },
+    {
+      "id": "f69e6ad63934f0d-848a88d855eb529",
+      "title": "Field preview should detect a script casting error",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/data_view_field_editor/test/scout/api/tests/field_preview.spec.ts",
+        "line": 88,
+        "column": 14
+      }
+    }
+  ]
+}

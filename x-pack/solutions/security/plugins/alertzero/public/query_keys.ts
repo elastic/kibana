@@ -7,6 +7,9 @@
 
 import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 
+/** Absent without a filter, so an unfiltered key stays the prefix of every filtered one. */
+const entitySegment = (entity?: string | null) => (entity ? [entity] : []);
+
 export const queryKeys = {
   /**
    * AlertZero-specific views over the shared proposals data.
@@ -14,16 +17,32 @@ export const queryKeys = {
    * on approve/dismiss sweeps these up without AlertZero needing its own mutations.
    */
   proposals: {
+    chartsSummaryAll: () => [...platformQueryKeys.proposals.all, 'charts-summary'] as const,
     chartsSummary: (windowHours: number, bucketMinutes: number) =>
-      [...platformQueryKeys.proposals.all, 'charts-summary', windowHours, bucketMinutes] as const,
-    /** No offset in the key: one entry holds every page Show more has appended. */
-    byCategory: (category: string) =>
-      [...platformQueryKeys.proposals.all, 'by-category', category] as const,
-    closed: () => [...platformQueryKeys.proposals.all, 'closed'] as const,
+      [...queryKeys.proposals.chartsSummaryAll(), windowHours, bucketMinutes] as const,
+    /**
+     * No offset in the key: one entry holds every page Show more has appended. The Impact
+     * entity filter is a trailing segment, so the key without it is a prefix of every variant.
+     */
+    byCategory: (category: string, entity?: string | null) =>
+      [
+        ...platformQueryKeys.proposals.all,
+        'by-category',
+        category,
+        ...entitySegment(entity),
+      ] as const,
+    closed: (entity?: string | null) =>
+      [...platformQueryKeys.proposals.all, 'closed', ...entitySegment(entity)] as const,
     /** `size: 0` reads, so a collapsed accordion knows its size without its rows. */
-    byCategoryCount: (category: string) =>
-      [...platformQueryKeys.proposals.all, 'by-category-count', category] as const,
-    closedCount: () => [...platformQueryKeys.proposals.all, 'closed-count'] as const,
+    byCategoryCount: (category: string, entity?: string | null) =>
+      [
+        ...platformQueryKeys.proposals.all,
+        'by-category-count',
+        category,
+        ...entitySegment(entity),
+      ] as const,
+    closedCount: (entity?: string | null) =>
+      [...platformQueryKeys.proposals.all, 'closed-count', ...entitySegment(entity)] as const,
   },
   watches: {
     all: ['alertzero', 'watches'] as const,
@@ -34,6 +53,27 @@ export const queryKeys = {
   workers: {
     all: ['alertzero', 'workers'] as const,
     list: () => [...queryKeys.workers.all, 'list'] as const,
+  },
+  /** Hunt Watch threat-intel supply status for the current space. */
+  huntThreatIntelSupply: {
+    all: ['alertzero', 'hunt-threat-intel-supply'] as const,
+    status: () => [...queryKeys.huntThreatIntelSupply.all, 'status'] as const,
+  },
+  workerDependencies: {
+    alertAnalysisSetting: (spaceBasePath: string, cachedValue: boolean) =>
+      [
+        'alertzero',
+        'workerDependencies',
+        spaceBasePath,
+        'alertAnalysisSetting',
+        cachedValue,
+      ] as const,
+    alertAnalysisWorkflow: (spaceBasePath: string) =>
+      ['alertzero', 'workerDependencies', spaceBasePath, 'alertAnalysisWorkflow'] as const,
+    defendPolicies: (spaceBasePath: string) =>
+      ['alertzero', 'workerDependencies', spaceBasePath, 'defendPolicies'] as const,
+    threatReportWorkflows: (spaceBasePath: string) =>
+      ['alertzero', 'workerDependencies', spaceBasePath, 'threatReportWorkflows'] as const,
   },
   /** Global skill catalog. */
   skills: {

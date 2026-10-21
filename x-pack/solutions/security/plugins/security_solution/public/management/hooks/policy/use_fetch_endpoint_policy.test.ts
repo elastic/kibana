@@ -89,6 +89,7 @@ describe('When using the `useGetFileInfo()` hook', () => {
       'linux.popup.malware.message',
       'windows.popup.ransomware.message',
       'mac.popup.ransomware.message',
+      'linux.popup.ransomware.message',
     ].forEach((keyPath) => {
       set(policySettings, keyPath, DefaultPolicyNotificationMessage);
     });
