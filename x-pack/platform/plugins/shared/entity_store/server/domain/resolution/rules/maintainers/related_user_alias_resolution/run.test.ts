@@ -12,7 +12,6 @@ import type { MaintainerTelemetryClient } from '../../../../../tasks/entity_main
 import type { PerRuleState } from '../automated_resolution/types';
 import { collectSeeds, runRelatedUserAliasResolution } from './run';
 
-const NAMESPACE = 'default';
 const INITIAL_STATE: PerRuleState = { lastProcessedTimestamp: null, lastRun: null };
 
 const createSearchResponse = (sources: Array<Record<string, unknown>>) => ({
@@ -69,7 +68,7 @@ const createDeps = ({
   telemetry?: MaintainerTelemetryClient;
 }) => ({
   state: INITIAL_STATE,
-  namespace: NAMESPACE,
+  index: '.entities.v2.latest.default',
   esClient,
   logger: loggerMock.create(),
   resolutionClient,

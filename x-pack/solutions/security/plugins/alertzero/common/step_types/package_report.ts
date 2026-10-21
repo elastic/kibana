@@ -42,7 +42,7 @@ export const packageReportInputSchema = z.object({
   ),
   reportId: boundedId.describe('Threat report id this Investigation is bound to.'),
   investigationConversationId: boundedId.describe(
-    'Investigation conversation id; must equal uuidv5(hunt:report:{reportId}).'
+    'Investigation conversation id; must equal uuidv5(hunt:report:{spaceId}|{reportId}).'
   ),
   runId: boundedId.describe('Current-run id; packaging reads only attachments scoped to this run.'),
   /**
@@ -194,17 +194,12 @@ export const packageReportMintPayloadSchema = z.object({
   impact: z.string().optional(),
   actionWorkflowId: z.string().optional(),
   actionInput: z.record(z.string(), z.unknown()).optional(),
-  /** Host name when the mint is host-scoped; absent on identity mints and the analyst recommendation. */
+  /** Host name when the mint is host-scoped; absent on the analyst recommendation. */
   hostName: z.string().optional(),
-  /** What the proposal acts on; absent on the analyst recommendation. `hostName` stays for host and process mints. */
+  /** What the proposal acts on; absent on the analyst recommendation. `hostName` is set whenever it is present. */
   subject: z
     .object({
-      kind: z.enum(['host', 'process', 'user', 'service']),
-      // Matches the SSE entity value cap (`entityRefSchema.value` in
-      // significant_security_event_schema.ts): a user/service subject's value is read
-      // straight from an SSE entity, which allows up to 2048 (ARN-shaped service names
-      // run long). A tighter cap here would throw on mint and fail the whole package
-      // result, including the host/process proposals bundled in the same array.
+      kind: z.enum(['host', 'process']),
       value: z.string().max(2048),
     })
     .optional(),
