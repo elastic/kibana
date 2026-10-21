@@ -275,7 +275,7 @@ describe('StreamsUnitService', () => {
 
     await expect(
       service.upsertUnit({ unitId: 'default', unit, ui_metadata: {}, secrets, onPublished })
-    ).rejects.toThrow('metadata write failed');
+    ).resolves.toEqual({ ui_metadata_not_persisted: true });
     expect(order).toEqual(['publish', 'onPublished']);
   });
 

@@ -146,7 +146,7 @@ That deletes the configuration and UI metadata saved objects in the current spac
 | `application/json` | `{ unit, ui_metadata, secrets? }` envelope (Map / Dev Tools). |
 | `application/yaml` (also `text/yaml`, `application/x-yaml`) | The authored unit document itself (`sources` / `destinations` / `pipelines`). Do **not** wrap it in `{ unit: … }` and do **not** jsonify it first. YAML cannot set `ui_metadata` or `secrets`; stored map layout and secrets are kept (stale node metadata is still pruned). |
 
-A successful PUT returns `{ acknowledged: true }`. When config-distributor validate succeeds and includes compiled OpenTelemetry collector YAML, the response also has `compiled_config`. Without `xpack.streams.distributor.url`, validate is skipped and `compiled_config` is omitted.
+A successful PUT returns `{ acknowledged: true }`. When config-distributor validate succeeds and includes compiled OpenTelemetry collector YAML, the response also has `compiled_config`. Without `xpack.streams.distributor.url`, validate is skipped and `compiled_config` is omitted. If the unit published but the canvas layout write failed, the response includes `ui_metadata_not_persisted: true`.
 
 ### JSON envelope (Map)
 

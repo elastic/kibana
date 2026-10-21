@@ -101,6 +101,8 @@ export const useDestinationIndexStats = ({
   );
 
   const failedDocsUnavailable = Boolean(failedDocsResult.error);
+  const degradedDocsUnavailable = Boolean(degradedDocsResult.error);
+  const totalDocsUnavailable = Boolean(totalDocsResult.error);
   const getIndexQuality = useCallback(
     (indexName: string): QualityIndicators | undefined => {
       const failureStore = failureStoreByIndex.get(indexName);
@@ -110,7 +112,7 @@ export const useDestinationIndexStats = ({
       // A disabled failure store has no failed documents, so they are known to be zero.
       const failedDocsKnown =
         !failureStore.enabled || (failureStore.readable && !failedDocsUnavailable);
-      if (!failedDocsKnown) {
+      if (!failedDocsKnown || degradedDocsUnavailable || totalDocsUnavailable) {
         return undefined;
       }
       return calculateDataQuality({
@@ -119,7 +121,15 @@ export const useDestinationIndexStats = ({
         failedDocs: failureStore.enabled ? failedByIndex[indexName] ?? 0 : 0,
       });
     },
-    [degradedByIndex, docsByIndex, failedByIndex, failedDocsUnavailable, failureStoreByIndex]
+    [
+      degradedByIndex,
+      degradedDocsUnavailable,
+      docsByIndex,
+      failedByIndex,
+      failedDocsUnavailable,
+      failureStoreByIndex,
+      totalDocsUnavailable,
+    ]
   );
 
   const { ingestionByStream, ingestionLoaded, ingestionError } = useStreamsIngestionRates({

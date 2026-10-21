@@ -22,7 +22,7 @@ const CanvasCreateHistoryContext =
 
 const noopCreateHistory: CanvasCreateHistoryHandlers = {
   hold: () => {},
-  commit: () => {},
+  reset: () => {},
   discard: () => {},
 };
 

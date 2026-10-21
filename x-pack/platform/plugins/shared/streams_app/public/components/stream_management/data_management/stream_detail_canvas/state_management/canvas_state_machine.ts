@@ -168,7 +168,7 @@ export const canvasStateMachine = setup({
     notifyUnitFailure: getPlaceholderFor(createNotifyUnitFailureAction),
     notifyUnitSaved: getPlaceholderFor(createNotifyUnitSavedAction),
     holdCreateHistory: getPlaceholderFor(createHoldCreateHistoryAction),
-    commitCreateHistory: getPlaceholderFor(createCommitCreateHistoryAction),
+    resetHistory: getPlaceholderFor(createResetHistoryAction),
     discardCreateHistory: getPlaceholderFor(createDiscardCreateHistoryAction),
     notifySourcesUnitSaveStarted: sendTo(
       ({ context }) => context.sourcesRef,
@@ -544,9 +544,9 @@ export const canvasStateMachine = setup({
                     'syncSavedUnitToOriginator',
                     'syncSavedUnitToPeer',
                     'notifyUnitSaved',
-                    // Commit while the create intent is still set. storePersistedUnitDefinition
-                    // clears it.
-                    'commitCreateHistory',
+                    // Reset after a successful persist so undo cannot restore a destination / source
+                    // whose API key was already revoked on save.
+                    'resetHistory',
                     'storePersistedUnitDefinition',
                   ],
                 },
@@ -656,7 +656,7 @@ export function createCanvasMachineImplementations({
       notifyUnitFailure: createNotifyUnitFailureAction({ core }),
       notifyUnitSaved: createNotifyUnitSavedAction({ core }),
       holdCreateHistory: createHoldCreateHistoryAction(createHistoryRef),
-      commitCreateHistory: createCommitCreateHistoryAction(createHistoryRef),
+      resetHistory: createResetHistoryAction(createHistoryRef),
       discardCreateHistory: createDiscardCreateHistoryAction(createHistoryRef),
     },
   };
@@ -741,11 +741,9 @@ function createHoldCreateHistoryAction(createHistoryRef: CanvasCreateHistoryRef)
   };
 }
 
-function createCommitCreateHistoryAction(createHistoryRef: CanvasCreateHistoryRef) {
-  return ({ context }: ActionArgs<CanvasState, CanvasUrlEvent, CanvasUrlEvent>) => {
-    if (context.savingComponentIntent === 'create') {
-      createHistoryRef.current.commit();
-    }
+function createResetHistoryAction(createHistoryRef: CanvasCreateHistoryRef) {
+  return () => {
+    createHistoryRef.current.reset();
   };
 }
 

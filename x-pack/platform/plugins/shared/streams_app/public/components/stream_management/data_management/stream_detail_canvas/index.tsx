@@ -285,7 +285,7 @@ function StreamsCanvasInner() {
     },
     [changeUnitConnection, unitDefinition]
   );
-  const { record, hold, commit, discard, undo, redo, canUndo, canRedo } = useCanvasHistory({
+  const { record, hold, reset, discard, undo, redo, canUndo, canRedo } = useCanvasHistory({
     nodes,
     edges,
     extra: {
@@ -295,9 +295,9 @@ function StreamsCanvasInner() {
     setEdges,
     onRestore: restoreHistory,
   });
-  // The machine holds this canvas when a create save starts, then commits or
-  // discards that step from the persist success and failure transitions.
-  useBindCanvasCreateHistory({ hold, commit, discard });
+  // The machine holds this canvas when a create save starts, then resets the
+  // stack on persist success so undo cannot restore a destination / source whose key was revoked.
+  useBindCanvasCreateHistory({ hold, reset, discard });
   const graphNodeIdsRef = useRef('');
   const graphEdgeIdsRef = useRef('');
 

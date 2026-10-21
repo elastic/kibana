@@ -107,7 +107,12 @@ export const putStreamsUnitRoute = createServerRoute({
     getScopedClients,
     logger,
     unitConfigHooks,
-  }): Promise<{ acknowledged: true; compiled_config?: string; api_keys_may_remain?: true }> => {
+  }): Promise<{
+    acknowledged: true;
+    compiled_config?: string;
+    api_keys_may_remain?: true;
+    ui_metadata_not_persisted?: true;
+  }> => {
     const {
       soClient,
       uiSettingsClient,
@@ -139,26 +144,28 @@ export const putStreamsUnitRoute = createServerRoute({
     const { unit: previousUnit } = await streamsUnitService.getUnit(params.path.id);
 
     let apiKeysMayRemain = false;
-    const { compiled_config: compiledConfig } = await streamsUnitService.upsertUnit({
-      unitId: params.path.id,
-      unit: parsed.unit,
-      ui_metadata: uiMetadata,
-      secrets,
-      onPublished: async () => {
-        ({ apiKeysMayRemain } = await revokeRemovedComponentApiKeys({
-          client: scopedClusterClient.asCurrentUser,
-          logger,
-          isSecurityEnabled,
-          previousUnit,
-          nextUnit: parsed.unit,
-        }));
-      },
-    });
+    const { compiled_config: compiledConfig, ui_metadata_not_persisted: uiMetadataNotPersisted } =
+      await streamsUnitService.upsertUnit({
+        unitId: params.path.id,
+        unit: parsed.unit,
+        ui_metadata: uiMetadata,
+        secrets,
+        onPublished: async () => {
+          ({ apiKeysMayRemain } = await revokeRemovedComponentApiKeys({
+            client: scopedClusterClient.asCurrentUser,
+            logger,
+            isSecurityEnabled,
+            previousUnit,
+            nextUnit: parsed.unit,
+          }));
+        },
+      });
 
     return {
       acknowledged: true,
       ...(compiledConfig !== undefined ? { compiled_config: compiledConfig } : {}),
       ...(apiKeysMayRemain ? { api_keys_may_remain: true } : {}),
+      ...(uiMetadataNotPersisted ? { ui_metadata_not_persisted: true } : {}),
     };
   },
 });

@@ -17,7 +17,8 @@ import type { SourceEnvironmentLoader } from '../../../../streams_layout/sources
 /** Undo steps for a source or destination create, driven by the canvas save transitions. */
 export interface CanvasCreateHistoryHandlers {
   hold: () => void;
-  commit: () => void;
+  /** Clear the stack after a successful persist so undo cannot restore revoked keys. */
+  reset: () => void;
   discard: () => void;
 }
 

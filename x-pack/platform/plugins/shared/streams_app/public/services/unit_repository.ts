@@ -106,6 +106,18 @@ export const createUnitRepository = ({
       });
     }
 
+    if (response.ui_metadata_not_persisted) {
+      toasts?.addWarning({
+        title: i18n.translate('xpack.streams.unitRepository.uiMetadataNotPersistedTitle', {
+          defaultMessage: 'Map layout could not be saved',
+        }),
+        text: i18n.translate('xpack.streams.unitRepository.uiMetadataNotPersistedText', {
+          defaultMessage:
+            'The unit was published, but the canvas layout could not be stored. Node positions may reset the next time the map loads.',
+        }),
+      });
+    }
+
     return unit;
   },
 });

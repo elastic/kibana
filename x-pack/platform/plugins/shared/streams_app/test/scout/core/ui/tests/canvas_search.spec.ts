@@ -25,10 +25,9 @@ const SUPPORTED_TELEMETRY = ['logs', 'metrics', 'traces'];
 const MOCK_UNIT = {
   unit: {
     sources: [
-      { id: 'nop-input', name: 'Nop', type: 'nop', supported_telemetry: SUPPORTED_TELEMETRY },
+      { id: 'otlp-input', name: 'OTLP', type: 'otlp', supported_telemetry: SUPPORTED_TELEMETRY },
     ],
     destinations: [
-      { id: 'debug-out', name: 'Debug', type: 'debug', supported_telemetry: SUPPORTED_TELEMETRY },
       {
         id: DESTINATION_ID,
         name: DESTINATION_NAME,
@@ -42,8 +41,8 @@ const MOCK_UNIT = {
         id: 'main',
         supported_telemetry: SUPPORTED_TELEMETRY,
         config: [
-          { name: 'sources', value: ['nop-input'] },
-          { name: 'destinations', value: ['debug-out'] },
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'destinations', value: [DESTINATION_ID] },
         ],
       },
     ],

@@ -166,9 +166,9 @@ export class StreamsUnitService {
     unit: StreamsUnit.Configuration;
     ui_metadata?: StreamsUnit.UiMetadata;
     secrets?: StreamsUnit.Secrets;
-    /** Runs once the unit is published, before the UI metadata write that may still fail. */
+    /** Runs once the unit is published, before the UI metadata write. */
     onPublished?: () => Promise<void>;
-  }): Promise<UnitValidationResult> {
+  }): Promise<UnitValidationResult & { ui_metadata_not_persisted?: true }> {
     if (!this.canEncrypt) {
       throw new StatusError(
         'Cannot store Streams unit credentials: encrypted saved objects are not configured.',
@@ -250,10 +250,17 @@ export class StreamsUnitService {
         ? uiMetadata
         : (await this.getUiMetadataSavedObject(unitId))?.attributes.metadata ?? {};
 
-    await this.writeUiMetadata({
-      configurationSavedObjectId: unitId,
-      metadata: pruneStaleNodeMetadata(metadataToWrite, unit),
-    });
+    try {
+      await this.writeUiMetadata({
+        configurationSavedObjectId: unitId,
+        metadata: pruneStaleNodeMetadata(metadataToWrite, unit),
+      });
+    } catch (error) {
+      // The unit is already stored and published. Fail the metadata write
+      // in-band so the PUT can still acknowledge the live configuration.
+      this.logger.error(`Failed to persist Streams unit UI metadata [${unitId}]: ${error}`);
+      return { ...validation, ui_metadata_not_persisted: true };
+    }
 
     return validation;
   }

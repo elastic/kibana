@@ -10,24 +10,31 @@ import { OBSERVABILITY_STREAMS_ENABLE_CANVAS } from '@kbn/management-settings-id
 import { expect } from '@kbn/scout/ui';
 import { test } from '../fixtures';
 
-const SOURCE_NAME = 'Nop';
-const DESTINATION_NAME = 'Debug';
+const SOURCE_NAME = 'OTLP';
+const DESTINATION_NAME = 'Elasticsearch';
 const SUPPORTED_TELEMETRY = ['logs', 'metrics', 'traces'];
 
 /**
  * Unit writes go through the config distributor, which the test stack does not
- * run, so the map is served from a mocked unit instead.
+ * run, so the map is served from a mocked unit instead. The map only renders
+ * supported source and destination types, so this fixture uses OTLP and
+ * Elasticsearch rather than the temporary nop/debug defaults.
  */
 const MOCK_UNIT = {
   unit: {
     sources: [
-      { id: 'nop-input', name: SOURCE_NAME, type: 'nop', supported_telemetry: SUPPORTED_TELEMETRY },
+      {
+        id: 'otlp-input',
+        name: SOURCE_NAME,
+        type: 'otlp',
+        supported_telemetry: SUPPORTED_TELEMETRY,
+      },
     ],
     destinations: [
       {
-        id: 'debug-out',
+        id: 'es-out',
         name: DESTINATION_NAME,
-        type: 'debug',
+        type: 'elasticsearch',
         supported_telemetry: SUPPORTED_TELEMETRY,
       },
     ],
@@ -36,8 +43,8 @@ const MOCK_UNIT = {
         id: 'main',
         supported_telemetry: SUPPORTED_TELEMETRY,
         config: [
-          { name: 'sources', value: ['nop-input'] },
-          { name: 'destinations', value: ['debug-out'] },
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'destinations', value: ['es-out'] },
         ],
       },
     ],
