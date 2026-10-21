@@ -86,7 +86,7 @@ can be placed in the folder [`manual`](https://github.com/elastic/kibana/blob/ma
 
 ### Kibana API doc links
 
-The [`generated_kibana_api_doc_links.json`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/kibana_api_doc_links/generated_kibana_api_doc_links.json) file maps Kibana API path templates to their OpenAPI `operationId`, and powers the "Open API reference" link for `kbn:` requests in Console. It's generated from the Kibana OpenAPI bundle (`oas_docs/output/kibana.yaml`) by running:
+The [`generated_kibana_api_doc_links.json`](https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/console/server/lib/spec_definitions/kibana_api_doc_links/generated_kibana_api_doc_links.json) file maps Kibana API path templates to their OpenAPI `operationId`. It's generated from the Kibana OpenAPI bundle (`oas_docs/output/kibana.yaml`) by running:
 
 ```
 node scripts/generate_kibana_api_doc_links.js
@@ -354,5 +354,5 @@ The definitions (one file per OpenAPI operation) live in [`kibana_api_definition
 node scripts/generate_kibana_api_paths.js
 ```
 
-Re-run it whenever the bundle changes. They are served to the client as `kibana.endpoints` by the spec definitions route.
+Re-run it whenever the bundle changes. Each definition's `documentation` field powers the "Open API reference" link for `kbn:` requests. They are served to the client as `kibana.endpoints` by the spec definitions route.
 Related issue: [#130661](https://github.com/elastic/kibana/issues/130661)
