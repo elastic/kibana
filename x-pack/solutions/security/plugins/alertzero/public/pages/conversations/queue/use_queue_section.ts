@@ -44,8 +44,14 @@ export interface QueueSection {
    * not blank rows still worth reading.
    */
   hasLoadError: boolean;
+  /** The rows' fetch error behind `hasLoadError`, for its telemetry class; never shown. */
+  loadError: unknown;
+  /** The rows are being fetched again, which hides a load error until the retry settles. */
+  isRefetchingRows: boolean;
   /** The analyst's own Show more failed, as opposed to a poll they never asked for. */
   hasLoadMoreError: boolean;
+  /** The Show more fetch error behind `hasLoadMoreError`, for its telemetry class; never shown. */
+  loadMoreError: unknown;
   hasCountError: boolean;
   /** Refetches both of this section's queries, behind the failure's retry. */
   retry: () => void;
@@ -145,6 +151,7 @@ const useSection = (
   // poll sets just the same — and a poll the analyst did not ask for must not
   // report that their Show more failed.
   const [hasLoadMoreError, setHasLoadMoreError] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState<unknown>(undefined);
 
   useEffect(() => {
     if (!isOpen) {
@@ -157,7 +164,10 @@ const useSection = (
       setHasLoadMoreError(false);
       // `throwOnError` is the only way to hear about this fetch alone: v4 has no
       // `isFetchNextPageError`, and the query's own error outlives it.
-      fetchNextPage({ throwOnError: true }).catch(() => setHasLoadMoreError(true));
+      fetchNextPage({ throwOnError: true }).catch((error: unknown) => {
+        setLoadMoreError(error);
+        setHasLoadMoreError(true);
+      });
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
@@ -171,7 +181,10 @@ const useSection = (
     retry,
     loadingRows: pagesQuery.isInitialLoading ? Math.min(total ?? firstPageSize, firstPageSize) : 0,
     hasLoadError: Boolean(pagesQuery.error) && proposals.length === 0,
+    loadError: proposals.length === 0 ? pagesQuery.error : undefined,
+    isRefetchingRows: Boolean(pagesQuery.isFetching),
     hasLoadMoreError,
+    loadMoreError: hasLoadMoreError ? loadMoreError : undefined,
     hasCountError: Boolean(countQuery.error) && total === undefined,
     remaining: Math.max(Math.min(total ?? 0, MAX_QUEUE_REACH) - proposals.length, 0),
     // The authority, so the control is never offered when a click fetches nothing.

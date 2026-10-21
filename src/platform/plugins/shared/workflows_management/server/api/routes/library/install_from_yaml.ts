@@ -41,7 +41,7 @@ export function registerInstallFromYamlRoute({ router, api, spaces, audit }: Rou
       path: '/internal/workflows/library/templates/install',
       access: 'internal',
       security: WORKFLOW_CREATE_SECURITY,
-      summary: 'Install a Workflow Template Library template from raw YAML',
+      summary: 'Install a Workflow Template library template from raw YAML',
       description:
         'Parses a client-supplied template YAML, renders it with the submitted install-form values, and creates a workflow from the result.',
     })
