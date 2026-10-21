@@ -28,7 +28,7 @@ interface AttachmentEventProps {
  * An attachment the server asked to show inline, drawn as the same card the `<render_attachment>`
  * XML tag produces inside a HTML response. The empty first column keeps it aligned with turn content.
  */
-export const AttachmentEvent: React.FC<AttachmentEventProps> = ({
+const AttachmentEventComponent: React.FC<AttachmentEventProps> = ({
   item,
   conversationAttachments,
 }) => {
@@ -75,3 +75,6 @@ export const AttachmentEvent: React.FC<AttachmentEventProps> = ({
     </EuiFlexGroup>
   );
 };
+
+export const AttachmentEvent = React.memo(AttachmentEventComponent);
+AttachmentEvent.displayName = 'AttachmentEvent';
