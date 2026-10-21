@@ -159,7 +159,7 @@ test.describe(
       await investigateItem.click();
 
       expect((await requestPromise).postDataJSON()).toMatchObject({
-        subject: { type: 'alert', id: alertId },
+        subject: { type: 'alert', ids: [alertId] },
       });
       await expect(investigateItem).toHaveText('Investigating…');
       await expect(investigateItem).toHaveAttribute('aria-disabled', 'true');
@@ -192,7 +192,7 @@ test.describe(
       await investigateItem.click();
 
       expect((await requestPromise).postDataJSON()).toMatchObject({
-        subject: { type: 'alert', id: alertId },
+        subject: { type: 'alert', ids: [alertId] },
       });
     });
 
