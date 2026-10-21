@@ -34,7 +34,7 @@ describe('useDatasetDetailsTelemetry', () => {
 
     const { result } = renderHook(() => useDatasetDetailsTelemetry());
     const linkProps = result.current.wrapLinkPropsForTelemetry(
-      { onClick: navigationCallback } as RouterLinkProps,
+      { href: undefined, onClick: navigationCallback },
       NavigationTarget.Discover,
       NavigationSource.Table
     );
