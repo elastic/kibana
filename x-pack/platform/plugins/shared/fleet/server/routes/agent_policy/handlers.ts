@@ -56,6 +56,7 @@ import type {
   CreateAgentAndPackagePolicyRequestSchema,
   RunAgentPolicyRevisionsCleanupTaskRequestSchema,
   RunAgentPolicyRevisionsCleanupTaskResponseSchema,
+  GetAgentPoliciesPackagePoliciesSummaryRequestSchema,
 } from '../../types';
 
 import type {
@@ -71,6 +72,7 @@ import type {
   GetFullAgentConfigMapResponse,
   GetFullAgentManifestResponse,
   BulkGetAgentPoliciesResponse,
+  GetAgentPoliciesPackagePoliciesSummaryResponse,
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
   CreatePackagePolicyRequest,
@@ -1088,6 +1090,26 @@ export const GetListAgentPolicyOutputsHandler: FleetRequestHandler<
   return response.ok({
     body,
   });
+};
+
+export const getAgentPoliciesPackagePoliciesSummaryHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  TypeOf<typeof GetAgentPoliciesPackagePoliciesSummaryRequestSchema.body>
+> = async (context, request, response) => {
+  const coreContext = await context.core;
+  const ids = deduplicateIds(request.body.ids);
+
+  const summaries = await packagePolicyService.getSummaryForAgentPolicies(
+    coreContext.savedObjects.client,
+    ids
+  );
+
+  const body: GetAgentPoliciesPackagePoliciesSummaryResponse = {
+    items: Object.fromEntries(summaries),
+  };
+
+  return response.ok({ body });
 };
 
 export const RunAgentPolicyRevisionsCleanupTaskHandler: FleetRequestHandler<

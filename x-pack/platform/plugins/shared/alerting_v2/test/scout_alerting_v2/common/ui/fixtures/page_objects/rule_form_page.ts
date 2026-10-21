@@ -27,7 +27,6 @@ export class RuleFormPage {
   public readonly flyout: Locator;
   public readonly flyoutValidationCallout: Locator;
   public readonly form: Locator;
-  public readonly esqlModeButton: Locator;
 
   private readonly esqlEditor: EsqlEditor;
 
@@ -43,13 +42,13 @@ export class RuleFormPage {
     this.flyoutNextButton = this.page.testSubj.locator('composeDiscoverNext');
     this.flyoutSubmitButton = this.page.testSubj.locator('composeDiscoverSubmit');
     this.flyoutSaveButton = this.flyoutNextButton;
-    // The ComposeDiscoverFlyout title ID.
-    this.flyout = this.page.locator('[aria-labelledby="composeDiscoverFlyoutTitle"]');
+    // Stacked create sessions render EUI's flyout menu, which appends its own
+    // title id to aria-labelledby. The test subject stays exact.
+    this.flyout = this.page.testSubj.locator('composeDiscoverFlyout');
     // EuiFormRow puts `id` on the label; the error text is a sibling, not a descendant.
     this.nameFieldError = this.flyout.getByText(/Name is required/);
     this.flyoutValidationCallout = this.page.testSubj.locator('ruleV2FlyoutValidationErrors');
     this.form = this.page.locator(`#${RULE_FORM_ID}`);
-    this.esqlModeButton = this.page.testSubj.locator('select-text-based-language-btn');
   }
 
   async gotoCreate() {
@@ -64,10 +63,6 @@ export class RuleFormPage {
     await this.page.gotoApp(
       `${this.mountConfig.appRoute}${this.mountConfig.subPaths.rulesDetail(ruleId)}`
     );
-  }
-
-  async gotoDiscover() {
-    await this.page.gotoApp('discover');
   }
 
   /**
@@ -142,10 +137,6 @@ export class RuleFormPage {
   private async clickNextWhenEnabled() {
     await this.waitForProceedButtonEnabled();
     await this.clickVisibleProceedButton();
-  }
-
-  async switchToEsqlMode() {
-    await this.esqlModeButton.click();
   }
 
   /**

@@ -12,6 +12,7 @@ import {
   COMMENT_ATTACHMENT_TYPE,
 } from '@kbn/cases-plugin/common/constants';
 import {
+  getCaseBulkDeleteAttachmentsUrl,
   getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
@@ -296,6 +297,58 @@ export const updateComment = async ({
     .expect(expectedHttpCode);
 
   return res;
+};
+
+export const bulkDeleteAttachments = async ({
+  supertest,
+  caseId,
+  savedObjectIds,
+  includeRelated,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  savedObjectIds: string[];
+  includeRelated?: boolean;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<{} | Error> => {
+  const { body } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${getCaseBulkDeleteAttachmentsUrl(caseId)}`)
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .auth(auth.user.username, auth.user.password)
+    .send({ ids: savedObjectIds, include_related: includeRelated })
+    .expect(expectedHttpCode);
+
+  return body;
+};
+
+export const bulkDeleteAttachmentReferences = async ({
+  supertest,
+  caseId,
+  type,
+  attachmentIds,
+  includeRelated,
+  expectedHttpCode = 204,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  type: string;
+  attachmentIds: string[];
+  includeRelated?: boolean;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<void> => {
+  await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${getCaseBulkDeleteAttachmentsUrl(caseId)}`)
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .auth(auth.user.username, auth.user.password)
+    .send({ type, attachmentIds, include_related: includeRelated })
+    .expect(expectedHttpCode);
 };
 
 export const bulkDeleteFileAttachments = async ({

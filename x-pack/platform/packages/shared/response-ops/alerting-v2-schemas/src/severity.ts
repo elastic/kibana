@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import { SEVERITY_LEVELS } from './constants';
 
 /**
@@ -13,7 +13,7 @@ import { SEVERITY_LEVELS } from './constants';
  * package, and the rule builder. Built from the runtime-light {@link SEVERITY_LEVELS} tuple so
  * browser-shared consumers can import the ordered values without pulling Zod into their bundle.
  */
-export const alertEventSeveritySchema = z.enum(SEVERITY_LEVELS);
+export const alertEventSeveritySchema = lazySchema(() => z.enum(SEVERITY_LEVELS));
 
 export const alertEventSeverity = alertEventSeveritySchema.enum;
 

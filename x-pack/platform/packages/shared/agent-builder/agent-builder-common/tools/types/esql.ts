@@ -56,6 +56,10 @@ export interface EsqlToolParam {
 export type EsqlToolConfig = {
   query: string;
   params: Record<string, EsqlToolParam>;
+  /**
+   * Whether the query also reads frozen tier indices.
+   */
+  include_frozen?: boolean;
 };
 
 export type EsqlToolDefinition = ToolDefinition<ToolType.esql, EsqlToolConfig>;

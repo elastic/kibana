@@ -11,6 +11,7 @@ import type { MappingField } from '@kbn/agent-builder-genai-utils';
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import { includeFrozenSchema } from './include_frozen_schema';
 
 const getIndexMappingsSchema = z.object({
   indices: z
@@ -25,6 +26,7 @@ const getIndexMappingsSchema = z.object({
     .describe(
       '(Optional) Whether to return the raw mapping tree instead of the summarized fields.'
     ),
+  include_frozen: includeFrozenSchema,
 });
 
 const renderTypeSegment = (field: MappingField): string => {
@@ -55,15 +57,17 @@ const FIELD_LIMIT = 500;
 const truncationNote = (totalFields: number): string =>
   `Truncated: showing ${FIELD_LIMIT} of ${totalFields} fields. Use a more specific index pattern to retrieve full mappings.`;
 
-const NO_FIELDS_NOTE =
-  'No fields found. Frozen tier indices are excluded from mappings, so this can happen when every backing index of a data stream is on the frozen tier.';
+const NO_FIELDS_FROZEN_EXCLUDED_NOTE =
+  'No fields found. Frozen tier indices are excluded from mappings by default, so this can happen when every backing index of a data stream is on the frozen tier. Retry with include_frozen set to true to include them.';
 
-const fieldsNote = (totalFields: number): string | undefined => {
+const NO_FIELDS_NOTE = 'No fields found.';
+
+const fieldsNote = (totalFields: number, includeFrozen: boolean): string | undefined => {
   if (totalFields > FIELD_LIMIT) {
     return truncationNote(totalFields);
   }
   if (totalFields === 0) {
-    return NO_FIELDS_NOTE;
+    return includeFrozen ? NO_FIELDS_NOTE : NO_FIELDS_FROZEN_EXCLUDED_NOTE;
   }
   return undefined;
 };
@@ -98,13 +102,14 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
       openWorldHint: false,
     },
     schema: getIndexMappingsSchema,
-    handler: async ({ indices, raw }, { esClient }) => {
+    handler: async ({ indices, raw, include_frozen: includeFrozen = false }, { esClient }) => {
       // getIndexFields transparently handles the local-vs-CCS split:
       //  - local indices use _mapping API (full mapping tree in rawMapping)
       //  - CCS indices use batched _field_caps API (flat field list)
       const indexFields = await getIndexFields({
         indices,
         includeViews: true,
+        includeFrozen,
         esClient: esClient.asCurrentUser,
       });
 
@@ -113,7 +118,7 @@ export const getIndexMappingsTool = (): BuiltinToolDefinition<typeof getIndexMap
           const totalFields = v.fields.length;
           const truncated = totalFields > FIELD_LIMIT;
           const cappedFields = truncated ? v.fields.slice(0, FIELD_LIMIT) : v.fields;
-          const note = fieldsNote(totalFields);
+          const note = fieldsNote(totalFields, includeFrozen);
 
           if (raw) {
             if (v.rawMapping) {

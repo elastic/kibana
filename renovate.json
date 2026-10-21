@@ -41,7 +41,6 @@
     {
       "groupName": "webpack",
       "matchDepNames": [
-        "autoprefixer",
         "clean-webpack-plugin",
         "css-loader",
         "mini-css-extract-plugin",
@@ -50,7 +49,6 @@
         "val-loader",
         "webpack",
         "webpack-cli",
-        "webpack-dev-server",
         "webpack-merge"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -508,7 +506,6 @@
       "groupName": "@elastic/fleet dependencies",
       "matchDepNames": [
         "exponential-backoff",
-        "isbinaryfile",
         "openpgp",
         "remark-gfm",
         "rehype-raw",
@@ -999,7 +996,6 @@
         "eslint-plugin-react-hooks",
         "eslint-plugin-react-perf",
         "eslint-plugin-testing-library",
-        "eslint-traverse",
         "@types/eslint"
       ],
       "matchUpdateTypes": ["minor", "patch"],
@@ -1160,7 +1156,7 @@
     },
     {
       "groupName": "postcss",
-      "matchDepNames": ["postcss", "postcss-scss", "postcss-loader"],
+      "matchDepNames": ["postcss", "postcss-scss"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1325,7 +1321,7 @@
       "enabled": true
     },
     {
-      "groupName": "workplace_ai gen-ai dependencies",
+      "groupName": "agent-builder gen-ai dependencies",
       "matchDepNames": ["@a2a-js/sdk", "@modelcontextprotocol/sdk", "just-bash"],
       "reviewers": ["team:search-ml-ux"],
       "matchBaseBranches": ["main"],
@@ -1372,15 +1368,6 @@
     {
       "groupName": "borc",
       "matchDepNames": ["borc"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
-      "groupName": "cssnano",
-      "matchDepNames": ["cssnano", "cssnano-preset-default"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -1704,9 +1691,9 @@
     {
       "groupName": "zod",
       "matchDepNames": ["zod"],
-      "reviewers": ["team:security-detection-engineering", "team:security-threat-hunting"],
+      "reviewers": ["team:kibana-core"],
       "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Detection Engineering", "Team:Threat Hunting"],
+      "addLabels": ["Team:Core", "backport:skip"],
       "minimumReleaseAge": "14 days",
       "enabled": true
     },
@@ -1967,7 +1954,6 @@
         "@types/chromedriver",
         "@types/selenium-webdriver",
         "geckodriver",
-        "ms-chromium-edge-driver",
         "selenium-webdriver"
       ],
       "reviewers": ["team:kibana-operations"],
@@ -1996,7 +1982,7 @@
     },
     {
       "groupName": "minify",
-      "matchDepNames": ["gulp-brotli", "terser-webpack-plugin"],
+      "matchDepNames": ["terser-webpack-plugin"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],
@@ -2053,7 +2039,7 @@
       "groupName": "storybook",
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main", "8.19"],
-      "matchDepNames": ["@pmmmwh/react-refresh-webpack-plugin", "fix-esm", "react-refresh"],
+      "matchDepNames": ["@pmmmwh/react-refresh-webpack-plugin", "react-refresh"],
       "matchDepPatterns": ["storybook"],
       "labels": ["Team:Operations", "release_note:skip", "ci:build-storybooks", "backport:skip"],
       "allowedVersions": "<9.0.0",
@@ -2299,6 +2285,7 @@
       "groupName": "esql-js",
       "matchDepNames": [
         "@elastic/esql",
+        "@elastic/esql-definitions",
         "@elastic/esql-grammar",
         "@elastic/esql-promql-grammar",
         "@elastic/esql-types",
@@ -2482,15 +2469,6 @@
       "addLabels": ["team:obs-entities"],
       "enabled": true,
       "minimumReleaseAge": "14 days"
-    },
-    {
-      "groupName": "dotenv",
-      "matchDepNames": ["dotenv"],
-      "reviewers": ["team:kibana-operations"],
-      "matchBaseBranches": ["main"],
-      "addLabels": ["Team:Operations"],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
     },
     {
       "groupName": "oxlint",

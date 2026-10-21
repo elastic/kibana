@@ -18,7 +18,6 @@ import type {
 import { useSendExecuteEndpoint } from '../../../hooks/response_actions/use_send_execute_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';
 import { parsedExecuteTimeout } from '../lib/utils';
-import { ExecuteActionHostResponse } from '../../endpoint_execute_action';
 
 export const ExecuteActionResult = memo<
   ActionRequestComponentProps<
@@ -53,7 +52,7 @@ export const ExecuteActionResult = memo<
     command.args.args?.comment,
   ]);
 
-  const { result, actionDetails: completedActionDetails } = useConsoleActionSubmitter<
+  const { result } = useConsoleActionSubmitter<
     ExecuteActionRequestBody,
     ResponseActionExecuteOutputContent,
     ResponseActionsExecuteParameters
@@ -68,29 +67,7 @@ export const ExecuteActionResult = memo<
     dataTestSubj: 'execute',
   });
 
-  if (!completedActionDetails || !completedActionDetails.wasSuccessful) {
-    return result;
-  }
-
-  // Show results
-  return (
-    <ResultComponent
-      data-test-subj="executeSuccess"
-      showAs="success"
-      title={i18n.translate(
-        'xpack.securitySolution.endpointResponseActions.executeAction.successTitle',
-        { defaultMessage: 'Command execution was successful.' }
-      )}
-    >
-      <ExecuteActionHostResponse
-        action={completedActionDetails}
-        canAccessFileDownloadLink={true}
-        agentId={command.commandDefinition?.meta?.endpointId}
-        textSize="s"
-        data-test-subj="console"
-      />
-    </ResultComponent>
-  );
+  return result;
 });
 ExecuteActionResult.displayName = 'ExecuteActionResult';
 
