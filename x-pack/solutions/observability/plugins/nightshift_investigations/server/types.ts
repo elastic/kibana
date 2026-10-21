@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentBuilderPluginSetup, AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type {
@@ -50,6 +51,7 @@ export interface NightshiftInvestigationsServerStart {
 export interface NightshiftInvestigationsSetupDeps {
   share: SharePluginSetup;
   agentBuilder?: AgentBuilderPluginSetup;
+  alerting?: AlertingServerSetup;
   /**
    * Stores investigations as conversations. Without it investigations are unavailable.
    */

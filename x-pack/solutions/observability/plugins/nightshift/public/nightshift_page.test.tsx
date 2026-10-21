@@ -22,6 +22,10 @@ import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility'
 import type { NightshiftAppHeaderProps } from './app/app_header';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({ useBreadcrumbs: jest.fn() }));
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useCurrentEuiBreakpoint: () => 'xl',
+}));
 jest.mock('./app/app', () => ({
   NightshiftApp: ({ isStartInvestigationOpen }: { isStartInvestigationOpen?: boolean }) => (
     <div
@@ -58,6 +62,17 @@ jest.mock('./sources/page', () => {
       <>
         <NightshiftAppHeader {...headerProps} page="sources" />
         <div data-test-subj="sourcesPageStub" />
+      </>
+    ),
+  };
+});
+jest.mock('./pages/detection/page', () => {
+  const { NightshiftAppHeader } = jest.requireActual('./app/app_header');
+  return {
+    DetectionPage: ({ headerProps }: { headerProps: NightshiftAppHeaderProps }) => (
+      <>
+        <NightshiftAppHeader {...headerProps} page="detection" />
+        <div data-test-subj="detectionPageStub" />
       </>
     ),
   };
@@ -347,6 +362,24 @@ describe('NightshiftPage', () => {
         expect(screen.getByTestId('nightshiftKnowledgeLink')).toBeInTheDocument();
       }
     );
+  });
+
+  it('renders the lazy Detection page with its header actions', async () => {
+    renderPage('/detection');
+
+    expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Detection');
+    expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+
+    const sourcesLink = screen.getByTestId('nightshiftSourcesLink');
+    expect(sourcesLink).toBeVisible();
+    expect(sourcesLink).toHaveAttribute('href', '/app/nightshift/sources');
+
+    await act(async () => fireEvent.click(sourcesLink));
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/sources');
+
+    await openAppMenuOverflow();
+    expect(screen.queryByTestId('nightshiftManagementLink')).not.toBeInTheDocument();
   });
 
   describe('sandbox secrets', () => {

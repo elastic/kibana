@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiFlexGroup, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import { EuiFlexGroup, EuiLoadingSpinner, EuiPageTemplate, useEuiTheme } from '@elastic/eui';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
@@ -20,6 +21,7 @@ import { getNightshiftCapabilities, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightsh
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftApp } from './app/app';
 import {
+  DETECTION_PAGE_TITLE,
   KNOWLEDGE_PAGE_TITLE,
   NightshiftAppHeader,
   SETTINGS_PAGE_TITLE,
@@ -44,7 +46,12 @@ const SourcesPage = React.lazy(() =>
   import('./sources/page').then(({ SourcesPage: Page }) => ({ default: Page }))
 );
 
+const DetectionPage = React.lazy(() =>
+  import('./pages/detection/page').then(({ DetectionPage: Page }) => ({ default: Page }))
+);
+
 export function NightshiftPage(): React.ReactElement | null {
+  const { euiTheme } = useEuiTheme();
   const {
     application,
     featureFlags,
@@ -99,6 +106,7 @@ export function NightshiftPage(): React.ReactElement | null {
   );
   const isKnowledgePage = pathname === '/knowledge' || pathname.startsWith('/knowledge/');
   const isSourcesPage = pathname === '/sources' || pathname.startsWith('/sources/');
+  const isDetectionPage = pathname === '/detection' || pathname.startsWith('/detection/');
   const isSettingsPage = pathname === '/settings' || pathname.startsWith('/settings/');
   const canUseAutomationsPage = canUseAutomations && pathname.startsWith('/automations');
   const isAutomationDetailRoute = pathname.startsWith('/automations/');
@@ -178,6 +186,7 @@ export function NightshiftPage(): React.ReactElement | null {
       ...(isSettingsPage ? [{ text: SETTINGS_PAGE_TITLE }] : []),
       ...(isKnowledgePage ? [{ text: KNOWLEDGE_PAGE_TITLE }] : []),
       ...(isSourcesPage ? [{ text: SOURCES_PAGE_TITLE }] : []),
+      ...(isDetectionPage ? [{ text: DETECTION_PAGE_TITLE }] : []),
     ],
     { serverless }
   );
@@ -202,12 +211,32 @@ export function NightshiftPage(): React.ReactElement | null {
     return null;
   }
 
+  const isHomePage =
+    !isSettingsPage &&
+    !isKnowledgePage &&
+    !isSourcesPage &&
+    !isDetectionPage &&
+    !canUseAutomationsPage &&
+    !isOnboarding &&
+    !onboarding.isLoading;
+
   return (
     <ObservabilityPageTemplate
       data-test-subj="nightshiftPage"
       restrictWidth={false}
       pageSectionProps={{
         paddingSize: 'none',
+        ...(isHomePage
+          ? {
+              css: css`
+                background: linear-gradient(
+                  ${euiTheme.colors.backgroundBasePlain},
+                  ${euiTheme.colors.backgroundBaseSubdued},
+                  ${euiTheme.colors.backgroundBasePlain}
+                );
+              `,
+            }
+          : {}),
       }}
     >
       {isSettingsPage ? (
@@ -231,6 +260,34 @@ export function NightshiftPage(): React.ReactElement | null {
             />
           </Route>
         </Routes>
+      ) : isDetectionPage ? (
+        <React.Suspense
+          fallback={
+            <EuiPageTemplate.Section component="div" restrictWidth={false}>
+              <EuiLoadingSpinner size="xl" data-test-subj="nightshiftDetectionPageLazyLoading" />
+            </EuiPageTemplate.Section>
+          }
+        >
+          <Routes>
+            <Route path="/detection">
+              <DetectionPage
+                headerProps={{
+                  onSourcesClick: navigateToSources,
+                  sourcesHref,
+                  onKnowledgeClick: navigateToKnowledge,
+                  knowledgeHref,
+                  onSettingsClick: canManageAndConfigure ? navigateToSettings : undefined,
+                  settingsHref: canManageAndConfigure ? settingsHref : undefined,
+                  onSandboxSecretsClick: canManageSandboxSecrets
+                    ? openSandboxSecretsFlyout
+                    : undefined,
+                  onAutomationsClick: canUseAutomations ? navigateToAutomations : undefined,
+                  automationsHref: canUseAutomations ? automationsHref : undefined,
+                }}
+              />
+            </Route>
+          </Routes>
+        </React.Suspense>
       ) : isSourcesPage ? (
         <React.Suspense
           fallback={
@@ -318,6 +375,7 @@ export function NightshiftPage(): React.ReactElement | null {
           />
           <EuiPageTemplate.Section
             component="div"
+            color={isHomePage ? 'transparent' : undefined}
             restrictWidth={
               canUseAutomationsPage
                 ? false

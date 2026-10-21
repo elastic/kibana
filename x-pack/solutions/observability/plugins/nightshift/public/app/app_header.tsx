@@ -33,6 +33,10 @@ export const SOURCES_PAGE_TITLE = i18n.translate('xpack.nightshift.sourcesPage.t
   defaultMessage: 'Sources',
 });
 
+export const DETECTION_PAGE_TITLE = i18n.translate('xpack.nightshift.detectionPage.title', {
+  defaultMessage: 'Detection',
+});
+
 const sourcesLabel = i18n.translate('xpack.nightshift.sourcesLinkLabel', {
   defaultMessage: 'Sources',
 });
@@ -98,9 +102,9 @@ const applyEbtProps = (
 };
 
 export interface NightshiftAppHeaderProps {
-  page?: 'landing' | 'automations' | 'knowledge' | 'settings' | 'sources';
-  onManagementClick: () => void | Promise<void>;
-  managementHref: string;
+  page?: 'landing' | 'automations' | 'detection' | 'knowledge' | 'settings' | 'sources';
+  onManagementClick?: () => void | Promise<void>;
+  managementHref?: string;
   onSourcesClick?: () => void | Promise<void>;
   sourcesHref?: string;
   onKnowledgeClick?: () => void | Promise<void>;
@@ -135,6 +139,7 @@ export function NightshiftAppHeader({
   back,
 }: NightshiftAppHeaderProps): React.ReactElement {
   const isAutomationsPage = page === 'automations';
+  const isDetectionPage = page === 'detection';
   const isKnowledgePage = page === 'knowledge';
   const isSourcesPage = page === 'sources';
   const isSettingsPage = page === 'settings';
@@ -177,18 +182,22 @@ export function NightshiftAppHeader({
               },
             ]
           : []),
-        {
-          id: 'nightshiftManagement',
-          label: managementLabel,
-          iconType: 'managementApp',
-          href: managementHref,
-          run: (params) => {
-            applyEbtProps(managementEbtProps, params);
-            void onManagementClick();
-          },
-          testId: 'nightshiftManagementLink',
-          overflow: true,
-        },
+        ...(onManagementClick && managementHref && !isDetectionPage
+          ? [
+              {
+                id: 'nightshiftManagement',
+                label: managementLabel,
+                iconType: 'managementApp' as const,
+                href: managementHref,
+                run: (params?: AppMenuRunActionParams) => {
+                  applyEbtProps(managementEbtProps, params);
+                  void onManagementClick();
+                },
+                testId: 'nightshiftManagementLink',
+                overflow: true,
+              },
+            ]
+          : []),
         ...(onSourcesClick && sourcesHref && !isSourcesPage
           ? [
               {
@@ -201,7 +210,7 @@ export function NightshiftAppHeader({
                   void onSourcesClick();
                 },
                 testId: 'nightshiftSourcesLink',
-                overflow: true,
+                overflow: !isDetectionPage,
               },
             ]
           : []),
@@ -242,6 +251,7 @@ export function NightshiftAppHeader({
     [
       automationsHref,
       isAutomationsPage,
+      isDetectionPage,
       isKnowledgePage,
       isSourcesPage,
       isSettingsPage,
@@ -264,6 +274,8 @@ export function NightshiftAppHeader({
       title={
         isAutomationsPage
           ? automationsLabel
+          : isDetectionPage
+          ? DETECTION_PAGE_TITLE
           : isKnowledgePage
           ? KNOWLEDGE_PAGE_TITLE
           : isSettingsPage
@@ -275,7 +287,7 @@ export function NightshiftAppHeader({
       back={back}
       tabs={tabs}
       menu={menu}
-      spacing="standard"
+      spacing="compact"
     />
   );
 }

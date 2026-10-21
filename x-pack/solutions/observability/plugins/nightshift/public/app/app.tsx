@@ -290,6 +290,7 @@ export function NightshiftApp({
         onChange={handleSearchChange}
         isClearable
         fullWidth
+        compressed
       />
 
       <EuiSpacer size="m" />
