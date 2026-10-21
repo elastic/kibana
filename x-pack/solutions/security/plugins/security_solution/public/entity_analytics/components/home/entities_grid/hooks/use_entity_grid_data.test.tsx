@@ -56,6 +56,7 @@ const OPTIONS: UseEntityGridDataOptions = {
   timeRange: '7d',
   rowsMode: 'resolved',
   keepFields: [],
+  columnIds: [],
 };
 
 const entityRow = (n: number): Row => ({ 'entity.id': `e${n}`, 'entity.name': `name-e${n}` });

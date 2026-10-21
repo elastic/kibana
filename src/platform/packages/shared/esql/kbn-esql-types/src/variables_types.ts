@@ -15,7 +15,7 @@ type PublishingSubject<T extends unknown = unknown> = Omit<BehaviorSubject<T>, '
 
 /**
  * Prefix a variable name carries in an ES|QL query. Determined by the variable's
- * {@link ESQLVariableType} — derive it with `getVariableNamePrefix` from `@kbn/esql-utils`
+ * {@link ESQLVariableType} — derive it with `getVariableNamePrefix` from `@kbn/esql-controls-utils`
  * rather than hardcoding a prefix.
  */
 export enum VariableNamePrefix {
