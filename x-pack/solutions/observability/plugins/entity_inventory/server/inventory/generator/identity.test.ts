@@ -21,14 +21,11 @@ describe('resolveIdentityPlan', () => {
       k8sDeploymentFixture.type,
       k8sDeploymentFixture,
       ['kubernetes.namespace', 'kubernetes.deployment.name'],
-      false,
     ],
-    [k8sNodeFixture.type, k8sNodeFixture, ['kubernetes.node.name'], false],
-    [hostLikeFixture.type, hostLikeFixture, ['host.id', 'host.name'], true],
-  ] as const)('resolves the identity of %s', (_type, definition, groupingFields, isRanked) => {
-    const plan = resolveIdentityPlan(definition);
-    expect(plan.groupingFields).toEqual(groupingFields);
-    expect(plan.isRanked).toBe(isRanked);
+    [k8sNodeFixture.type, k8sNodeFixture, ['kubernetes.node.name']],
+    [hostLikeFixture.type, hostLikeFixture, ['host.id', 'host.name']],
+  ] as const)('resolves the grouping fields of %s', (_type, definition, groupingFields) => {
+    expect(resolveIdentityPlan(definition).groupingFields).toEqual(groupingFields);
   });
 
   it.each([

@@ -50,8 +50,8 @@ const expectParses = (esql: string): void => {
   expect(Parser.parse(esql).errors).toEqual([]);
 };
 
-const commandsOf = (esql: string): string[] =>
-  esql.split('\n').filter((line) => !line.startsWith('    '));
+// Continuation lines (WHERE predicates, EVAL assignments) are indented; commands are not.
+const commandsOf = (esql: string): string[] => esql.split('\n').filter((line) => !/^\s/.test(line));
 
 const expectGuarded = (esql: string): void => {
   expect(assertParses).toHaveBeenCalledTimes(1);
@@ -94,11 +94,16 @@ describe('buildCountQuery', () => {
     );
     expect(esql.split('metricset.name').length - 1).toBe(1);
     expect(esql).toContain('| STATS BY `kubernetes.namespace`, `kubernetes.deployment.name`\n');
-    expect(esql).toMatch(/\| STATS `count` = COUNT\(\*\)$/);
+    expect(esql).toContain(
+      `\n| EVAL ${
+        resolveIdentityPlan(k8sDeploymentFixture).idEvaluation
+      }\n| STATS BY \`entity.id\`\n`
+    );
+    expect(esql).toMatch(/\n\| STATS `count` = COUNT\(\*\)$/);
     expect(esql).not.toContain('COUNT_DISTINCT');
   });
 
-  it('counts a ranked identity by evaluating the id and counting distinct ids', () => {
+  it('counts a ranked identity by evaluating the id and counting the id groups', () => {
     const { esql } = countOf(hostLikeFixture);
     expect(esql).toMatchSnapshot();
     expectParses(esql);
@@ -109,11 +114,12 @@ describe('buildCountQuery', () => {
       'stats',
       'eval',
       'stats',
+      'stats',
     ]);
     expect(esql).toContain(`\n| EVAL ${resolveIdentityPlan(hostLikeFixture).idEvaluation}\n`);
     expect(esql).toContain('\n| STATS BY `host.id`, `host.name`\n| EVAL ');
-    expect(esql).toMatch(/\n\| STATS `count` = COUNT_DISTINCT\(`entity\.id`\)$/);
-    expect(esql).not.toContain('COUNT(*)');
+    expect(esql).toMatch(/\n\| STATS BY `entity\.id`\n\| STATS `count` = COUNT\(\*\)$/);
+    expect(esql).not.toContain('COUNT_DISTINCT');
   });
 
   it('lists a pattern shared by two plans once while keeping both branches', () => {

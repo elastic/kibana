@@ -27,17 +27,7 @@ export interface IdentityPlan {
   idEvaluation: string;
   /** Columns the id evaluation assigns besides `entity.id`, in assignment order. */
   helperColumns: string[];
-  /** True when the identity has more than one composition, so groups may share an id. */
-  isRanked: boolean;
 }
-
-type EntityIdentity = EntityDefinitionWithoutId['identityField'];
-
-// How many compositions the identity ranks; the store exports no count of its own.
-const countCompositions = (identityField: EntityIdentity): number =>
-  'singleField' in identityField
-    ? 1
-    : identityField.euidRanking.branches.reduce((count, { ranking }) => count + ranking.length, 0);
 
 // Reads the assignment targets from the generated text so the names never drift from the store.
 const assignedColumns = (idEvaluation: string): string[] => {
@@ -70,6 +60,5 @@ export const resolveIdentityPlan = (definition: EntityDefinitionWithoutId): Iden
     presenceFilter: `(${euid.esql.getEuidDocumentsContainsIdFilter(definition)})`,
     idEvaluation,
     helperColumns: assignedColumns(idEvaluation).filter((name) => name !== ENTITY_ID_COLUMN),
-    isRanked: countCompositions(identityField) > 1,
   };
 };

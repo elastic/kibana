@@ -62,7 +62,7 @@ export const buildCountQuery = ({
   if (plans.length === 0) {
     throw new Error('the count query needs at least one plan');
   }
-  const { groupingFields, presenceFilter, idEvaluation, isRanked } = identity;
+  const { groupingFields, presenceFilter, idEvaluation } = identity;
   const patterns = [...new Set(plans.map(({ indexPattern }) => indexPattern))];
   // Bare: Elasticsearch rejects a quoted name in `METADATA` ("Unresolved metadata pattern").
   const metadata = plans.length > 1 ? ' METADATA _index' : '';
@@ -72,12 +72,18 @@ export const buildCountQuery = ({
     sourcePredicate(plans),
   ].filter((predicate): predicate is string => predicate !== undefined);
   const countColumn = quoteIdentifier(COUNT_COLUMN);
-  const tail = isRanked
-    ? [
-        `| EVAL ${idEvaluation}`,
-        `| STATS ${countColumn} = COUNT_DISTINCT(${quoteIdentifier(ENTITY_ID_COLUMN)})`,
-      ]
-    : [`| STATS ${countColumn} = COUNT(*)`];
+  // A single field maps groups to ids one to one, so the groups can be counted directly. With
+  // several fields two groups can share an id (a ranking falls back to another field, a composition
+  // `CONCAT(a, "/", b)` joins `("a/b", "c")` and `("a", "b/c")`), so the ids are grouped again and
+  // counted exactly, matching the merged list; `COUNT_DISTINCT` would be approximate.
+  const tail =
+    groupingFields.length > 1
+      ? [
+          `| EVAL ${idEvaluation}`,
+          `| STATS BY ${quoteIdentifier(ENTITY_ID_COLUMN)}`,
+          `| STATS ${countColumn} = COUNT(*)`,
+        ]
+      : [`| STATS ${countColumn} = COUNT(*)`];
 
   const esql = [
     'SET unmapped_fields="nullify";',

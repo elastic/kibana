@@ -55,11 +55,11 @@ FROM <patterns> METADATA _index
 | WHERE <time> AND <identity present>
     AND ((<index matches plan a> AND (<a filter>)) OR (<index matches plan b>) ...)
 | STATS BY <identity fields>
-| STATS `count` = COUNT(*)                                  -- or, for a ranked identity:
-| EVAL <entity.id> | STATS `count` = COUNT_DISTINCT(`entity.id`)
+| STATS `count` = COUNT(*)                                  -- single identity field; otherwise:
+| EVAL <entity.id> | STATS BY `entity.id` | STATS `count` = COUNT(*)
 ```
 
-A single plan has no `METADATA _index` and no per-plan clause.
+A single plan has no `METADATA _index` and no per-plan clause. An identity with more than one field is counted by distinct id, exactly, because a ranked fallback or a composed id can give two raw groups the same id.
 
 **Safety.** The window travels as the named parameters `?from` and `?to`. Every reference the generator writes is backticked. An index pattern may contain only letters, digits, `_`, `.`, `-`, `*`, `?` and `:`, may not start with `-`, and must parse. An author's filter must be a single boolean expression with no pipe, semicolon, comment or parameter. Every generated query is parsed before it leaves the generator. Anything a definition gets wrong throws `InventoryDefinitionError`; anything the generator gets wrong throws a plain `Error`.
 
