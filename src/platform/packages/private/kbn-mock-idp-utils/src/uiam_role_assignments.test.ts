@@ -13,6 +13,8 @@ import { buildMockIdpUiamRoleAssignments } from './uiam_role_assignments';
 // unknown role ID instead of rejecting it, so a typo here would only show up as a 403 at runtime.
 const KNOWN_UIAM_ROLE_IDS = new Set([
   'ess-default-organization',
+  'organization-admin',
+  'billing-admin',
   'elasticsearch-application-only',
   'observability-application-only',
   'security-application-only',
@@ -32,6 +34,28 @@ describe('buildMockIdpUiamRoleAssignments', () => {
     expect(organization).toEqual([
       {
         role_id: 'ess-default-organization',
+        organization_id: organizationId,
+        application_roles: [],
+      },
+    ]);
+  });
+
+  it('grants the requested organization roles without application roles', () => {
+    const { organization } = buildMockIdpUiamRoleAssignments({
+      organizationId,
+      projectType: 'security',
+      applicationRoles: ['admin'],
+      organizationRoleIds: ['billing-admin'],
+    });
+
+    expect(organization).toEqual([
+      {
+        role_id: 'ess-default-organization',
+        organization_id: organizationId,
+        application_roles: [],
+      },
+      {
+        role_id: 'billing-admin',
         organization_id: organizationId,
         application_roles: [],
       },
@@ -61,6 +85,7 @@ describe('buildMockIdpUiamRoleAssignments', () => {
       organizationId,
       projectType: 'observability',
       applicationRoles: ['admin'],
+      organizationRoleIds: ['organization-admin', 'billing-admin'],
     });
 
     for (const { role_id: roleId } of [...organization, ...project]) {
