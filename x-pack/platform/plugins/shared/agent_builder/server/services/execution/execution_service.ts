@@ -819,14 +819,17 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const receivedAt = new Date();
     const { origin, conversationId } = validatedParams;
 
-    const resolvedConversationId =
-      origin && !conversationId
-        ? await this.resolveOriginConversationId({ origin, spaceId, request, conversationClient })
-        : undefined;
+    const resolvedConversationId = await this.resolveConversationId({
+      conversationId,
+      origin,
+      spaceId,
+      request,
+      conversationClient,
+    });
 
     const conversation = await getConversation({
       agentId: validatedParams.agentId ?? agentBuilderDefaultAgentId,
-      conversationId: resolvedConversationId ?? conversationId,
+      conversationId: resolvedConversationId,
       autoCreateConversationWithId: validatedParams.autoCreateConversationWithId,
       conversationClient,
       accessControl: validatedParams.accessControl,
@@ -838,21 +841,29 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     return { validatedParams, conversation, receivedAt };
   }
 
-  /** The conversation an origin continues: a registered resolver's answer, else the conversation that has the origin. */
-  private async resolveOriginConversationId({
+  /**
+   * The conversation an execution continues: the one it names, else the one its origin continues,
+   * as a registered resolver answers or by origin lookup. `undefined` starts a new conversation.
+   */
+  private async resolveConversationId({
+    conversationId,
     origin,
     spaceId,
     request,
     conversationClient,
   }: {
-    origin: ExecutionConversationOrigin;
+    conversationId?: string;
+    origin?: ExecutionConversationOrigin;
     spaceId: string;
     request: KibanaRequest;
     conversationClient: ConversationClient;
   }): Promise<string | undefined> {
-    const { type, external_conversation_id: externalConversationId } = origin;
+    if (conversationId || !origin) {
+      return conversationId;
+    }
+
     const resolved = await this.deps.callbackDeliveryService.resolveConversation({
-      origin: { type, external_conversation_id: externalConversationId },
+      origin,
       spaceId,
       request,
     });
@@ -862,7 +873,7 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     }
 
     const conversation = await conversationClient.getByOrigin({
-      external_conversation_id: externalConversationId,
+      external_conversation_id: origin.external_conversation_id,
     });
 
     return conversation?.id;

@@ -6,11 +6,12 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type { ChatCallbackResponse, ConversationOriginType } from '@kbn/agent-builder-common';
+import type { ChatCallbackResponse } from '@kbn/agent-builder-common';
+import type { ExecutionConversationOrigin } from '../execution';
 
 /** The external conversation an execution came from. */
 export interface CallbackConversationResolverContext {
-  origin: { type: ConversationOriginType; external_conversation_id: string };
+  origin: ExecutionConversationOrigin;
   spaceId: string;
   request: KibanaRequest;
 }
