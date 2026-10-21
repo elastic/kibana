@@ -46,6 +46,37 @@ const deadlineCaptionPart = (proposal: ApprovalProposal): string | undefined => 
   });
 };
 
+export interface ProposalCaptionPart {
+  text: string;
+  /** True for the "Irreversible" part, which the UI highlights. */
+  isIrreversible?: boolean;
+}
+
+/** Returns the parts of the caption line, in display order. See {@link getProposalCaption}. */
+export const getProposalCaptionParts = (
+  proposal: ApprovalProposal,
+  { includeRiskDetails = false }: { includeRiskDetails?: boolean } = {}
+): ProposalCaptionPart[] => {
+  const category = proposal.action?.category ?? proposal.category;
+  const isReversible = proposal.action?.reversible;
+  const parts: Array<ProposalCaptionPart | undefined> = [
+    category === undefined ? undefined : { text: toSentenceCase(category) },
+    isReversible === undefined
+      ? undefined
+      : isReversible
+      ? { text: APPROVAL_MODAL_TRANSLATIONS.reversible }
+      : { text: APPROVAL_MODAL_TRANSLATIONS.irreversible, isIrreversible: true },
+    ...(includeRiskDetails
+      ? [impactCaptionPart(proposal), deadlineCaptionPart(proposal)].map((text) =>
+          text === undefined ? undefined : { text }
+        )
+      : []),
+  ];
+  return parts.filter(
+    (part): part is ProposalCaptionPart => part !== undefined && part.text !== ''
+  );
+};
+
 /**
  * Returns the line under a proposal title: its category and whether it is reversible.
  * Returns `undefined` when the proposal has neither.
@@ -55,21 +86,10 @@ const deadlineCaptionPart = (proposal: ApprovalProposal): string | undefined => 
  */
 export const getProposalCaption = (
   proposal: ApprovalProposal,
-  { includeRiskDetails = false }: { includeRiskDetails?: boolean } = {}
+  options: { includeRiskDetails?: boolean } = {}
 ): string | undefined => {
-  const category = proposal.action?.category ?? proposal.category;
-  const isReversible = proposal.action?.reversible;
-  const parts = [
-    category === undefined ? undefined : toSentenceCase(category),
-    isReversible === undefined
-      ? undefined
-      : isReversible
-      ? APPROVAL_MODAL_TRANSLATIONS.reversible
-      : APPROVAL_MODAL_TRANSLATIONS.irreversible,
-    ...(includeRiskDetails ? [impactCaptionPart(proposal), deadlineCaptionPart(proposal)] : []),
-  ].filter((part): part is string => Boolean(part));
-
-  return parts.length > 0 ? parts.join(' • ') : undefined;
+  const parts = getProposalCaptionParts(proposal, options);
+  return parts.length > 0 ? parts.map(({ text }) => text).join(' • ') : undefined;
 };
 
 /**
