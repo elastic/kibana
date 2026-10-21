@@ -202,8 +202,29 @@ export class ManagementPlugin
         .subscribe((style) => this.isSidebarEnabled$.next(style === 'classic'));
     });
 
+    const sections = this.managementSections.setup();
+    sections.section.data.registerApp({
+      id: 'data_management_overview',
+      title: kbnI18n.translate('management.dataManagementOverview.title', {
+        defaultMessage: 'Overview',
+      }),
+      order: 0,
+      // Prototype page: solution nav only. Stay out of the classic management sidebar and global search.
+      hideFromSidebar: true,
+      hideFromGlobalSearch: true,
+      visibleIn: ['projectSideNav'],
+      async mount(params) {
+        const [{ renderDataManagementOverview }, [coreStart]] = await Promise.all([
+          import('./data_management_overview/data_management_overview_page'),
+          core.getStartServices(),
+        ]);
+
+        return renderDataManagementOverview(coreStart, params);
+      },
+    });
+
     return {
-      sections: this.managementSections.setup(),
+      sections,
       locator,
       registerAutoOpsStatusHook: this.registerAutoOpsStatusHook,
     };

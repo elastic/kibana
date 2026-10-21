@@ -172,6 +172,21 @@ export const getNavigationTreeDefinition = ({
               children: [
                 {
                   children: [
+                    {
+                      link: 'management:data_management_overview',
+                      title: i18n.translate(
+                        'xpack.enterpriseSearch.searchNav.dataManagement.overview',
+                        {
+                          defaultMessage: 'Overview',
+                        }
+                      ),
+                    },
+                  ],
+                  id: 'data_management_overview',
+                  title: '',
+                },
+                {
+                  children: [
                     { link: 'management:index_management' },
                     { link: 'management:data_federation' },
                     { link: 'management:esql_views' },
