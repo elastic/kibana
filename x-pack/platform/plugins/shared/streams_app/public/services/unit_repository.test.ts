@@ -97,6 +97,18 @@ describe('unit repository', () => {
     expect(addWarning).toHaveBeenCalledTimes(1);
   });
 
+  it('sends secrets in the PUT envelope when given', async () => {
+    const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
+    const repository = createUnitRepository({ streamsRepositoryClient: { fetch } as never });
+    const secrets = { 'es-prod-api-key': 'plaintext' };
+
+    await expect(repository.persist(storedUnit, secrets)).resolves.toEqual(storedUnit);
+    expect(fetch).toHaveBeenCalledWith('PUT /internal/streams/unit/{id}', {
+      params: { path: { id: STREAMS_DEFAULT_UNIT_ID }, body: { ...storedUnit, secrets } },
+      signal: null,
+    });
+  });
+
   it('wires a source, destination, and pipeline in the temporary default unit', () => {
     expect(createDefaultUnit()).toEqual({
       unit: {

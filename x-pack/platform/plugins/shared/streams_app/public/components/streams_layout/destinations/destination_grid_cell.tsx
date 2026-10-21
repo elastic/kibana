@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
-import { DESTINATION_SIGNAL_LABELS, LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
+import { DESTINATION_SIGNAL_LABELS, getDestinationTypeLabel } from './destination_type_config';
 import type { ResolvedIndicesStatus } from './state_machines/destinations_state_machine';
 import type { DestinationViewModel } from './types';
 
@@ -48,10 +48,13 @@ export const DestinationGridCell = ({
           gutterSize="none"
           responsive={false}
         >
-          <EuiBadge color="hollow">{LOCAL_ELASTICSEARCH_LABEL}</EuiBadge>
+          <EuiBadge color="hollow">{getDestinationTypeLabel(destination.type)}</EuiBadge>
         </EuiFlexGroup>
       );
     case 'indices':
+      if (destination.type !== 'elasticsearch') {
+        return '-';
+      }
       if (resolvedIndicesStatus === 'loading' && targetedIndexCount === 0) {
         return (
           <EuiFlexGroup
@@ -110,7 +113,7 @@ export const getDestinationSortableValue = (
 ): string | number => {
   switch (columnId) {
     case 'type':
-      return LOCAL_ELASTICSEARCH_LABEL;
+      return getDestinationTypeLabel(destination.type);
     case 'indices':
       return indexCount;
     case 'name':

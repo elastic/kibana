@@ -7,6 +7,7 @@
 
 import { assign, fromPromise, sendTo, setup } from 'xstate';
 import type { CoreStart } from '@kbn/core/public';
+import type { StreamsUnit } from '@kbn/streams-schema';
 import type { DestinationApiKeyGenerationDeps } from '../destination_api_keys';
 import type { DestinationType } from '../types';
 import {
@@ -44,6 +45,8 @@ export interface DestinationsTableStateContext {
   pendingUnitDefinition?: Unit;
   pendingDestinationIds?: string[];
   pendingIntent?: 'create' | 'delete';
+  pendingSecrets?: StreamsUnit.Secrets;
+  failedIntent?: 'create' | 'delete';
   destinationsRef: DestinationsActorRef;
   query: string;
   selectedTypes: DestinationType[];
@@ -51,7 +54,7 @@ export interface DestinationsTableStateContext {
   pagination: DestinationsTablePagination;
   visibleColumnIds: string[];
   loadUnitDefinition: () => Promise<Unit>;
-  persistUnitDefinition: (unitDefinition: Unit) => Promise<Unit>;
+  persistUnitDefinition: UnitRepository['persist'];
   error?: Error;
 }
 
@@ -61,6 +64,7 @@ export type DestinationsTableStateEvent =
       unitDefinition: Unit;
       destinationIds: string[];
       intent: 'create' | 'delete';
+      secrets?: StreamsUnit.Secrets;
     }
   | { type: 'unit.reload' }
   | { type: 'xstate.done.actor.loadUnitDefinition'; output: Unit }
@@ -92,9 +96,10 @@ export const destinationsTableStateMachine = setup({
           persist: UnitRepository['persist'];
           unitDefinition: Unit;
           destinationIds: string[];
+          secrets?: StreamsUnit.Secrets;
         };
       }) => ({
-        unitDefinition: await input.persist(input.unitDefinition),
+        unitDefinition: await input.persist(input.unitDefinition, input.secrets),
         destinationIds: input.destinationIds,
       })
     ),
@@ -106,6 +111,8 @@ export const destinationsTableStateMachine = setup({
       pendingDestinationIds: ({ event }) =>
         event.type === 'unit.changed' ? event.destinationIds : undefined,
       pendingIntent: ({ event }) => (event.type === 'unit.changed' ? event.intent : undefined),
+      pendingSecrets: ({ event }) => (event.type === 'unit.changed' ? event.secrets : undefined),
+      failedIntent: undefined,
       error: undefined,
     }),
     storeLoadedUnitDefinition: assign({
@@ -116,6 +123,8 @@ export const destinationsTableStateMachine = setup({
       pendingUnitDefinition: undefined,
       pendingDestinationIds: undefined,
       pendingIntent: undefined,
+      pendingSecrets: undefined,
+      failedIntent: undefined,
       error: undefined,
     }),
     storePersistedUnitDefinition: assign({
@@ -126,6 +135,8 @@ export const destinationsTableStateMachine = setup({
       pendingUnitDefinition: undefined,
       pendingDestinationIds: undefined,
       pendingIntent: undefined,
+      pendingSecrets: undefined,
+      failedIntent: undefined,
       error: undefined,
     }),
     storeFailure: assign({
@@ -133,6 +144,11 @@ export const destinationsTableStateMachine = setup({
         event.type === 'xstate.error.actor.loadUnitDefinition' ||
         event.type === 'xstate.error.actor.persistUnitDefinition'
           ? getFormattedError(event.error)
+          : undefined,
+      pendingSecrets: undefined,
+      failedIntent: ({ context, event }) =>
+        event.type === 'xstate.error.actor.persistUnitDefinition'
+          ? context.pendingIntent
           : undefined,
     }),
     syncLoadedUnitDefinition: sendTo(
@@ -312,6 +328,7 @@ export const destinationsTableStateMachine = setup({
           persist: context.persistUnitDefinition,
           unitDefinition: context.pendingUnitDefinition ?? context.unitDefinition,
           destinationIds: context.pendingDestinationIds ?? [],
+          secrets: context.pendingSecrets,
         }),
         onDone: {
           target: 'ready',
