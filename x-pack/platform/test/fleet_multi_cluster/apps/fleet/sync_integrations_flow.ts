@@ -207,10 +207,10 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       // Clean up the remote output (tolerate 404 if setup aborted before it was created)
-      await supertest
+      const deleteRemoteOutputResponse = await supertest
         .delete('/api/fleet/outputs/remote-elasticsearch1')
-        .set('kbn-xsrf', 'xxxx')
-        .ok((res) => [200, 404].includes(res.status));
+        .set('kbn-xsrf', 'xxxx');
+      expect([200, 404]).to.contain(deleteRemoteOutputResponse.status);
 
       // Clean up the local output on remote
       const response = await axios.delete('http://localhost:5621/api/fleet/outputs/es', {
