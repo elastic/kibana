@@ -8,14 +8,22 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ActionsService } from '../services/actions/actions_service';
 import type { HuntServices } from '../services/watches/hunt/types';
+import {
+  getTriageHeadroomStepDefinition,
+  getTriageLoadAlertsStepDefinition,
+  getTriagePlanSweepStepDefinition,
+} from './alert_triage/alert_triage_steps';
 import { getPackageReportStepDefinition } from './package_report';
 import {
   getSummarizeInvestigationStepDefinition,
   type SummarizeInvestigationStepDependencies,
 } from './summarize_investigation';
 import type { PackageReportStepDependencies } from './package_report/package_report_step';
+import type { ReportWorkerOutcomeStepDeps } from './report_worker_outcome/report_worker_outcome_step';
+import { getReportWorkerOutcomeStepDefinition } from './report_worker_outcome/report_worker_outcome_step';
 
 export const registerStepDefinitions = ({
   workflowsExtensions,
@@ -27,6 +35,7 @@ export const registerStepDefinitions = ({
   getResolveHostEnrollment,
   isContextEngineEnabled,
   getInternalEsClient,
+  getTaskManager,
   logger,
 }: {
   workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
@@ -38,6 +47,7 @@ export const registerStepDefinitions = ({
   getResolveHostEnrollment?: PackageReportStepDependencies['getResolveHostEnrollment'];
   isContextEngineEnabled: PackageReportStepDependencies['isContextEngineEnabled'];
   getInternalEsClient?: () => ElasticsearchClient;
+  getTaskManager: () => Pick<TaskManagerStartContract, 'aggregate'>;
   logger?: Logger;
 }) => {
   workflowsExtensions.registerStepDefinition(
@@ -58,6 +68,21 @@ export const registerStepDefinitions = ({
       resolveConnectorId,
     })
   );
+  workflowsExtensions.registerStepDefinition(getTriageHeadroomStepDefinition({ getTaskManager }));
+  workflowsExtensions.registerStepDefinition(getTriagePlanSweepStepDefinition());
+  workflowsExtensions.registerStepDefinition(getTriageLoadAlertsStepDefinition());
 };
 
 export { getPackageReportStepDefinition } from './package_report';
+
+export { OPT_IN_TIMEOUT_MS as REPORT_STEP_OPT_IN_TIMEOUT_MS } from './report_worker_outcome/report_worker_outcome_step';
+
+/** Registers the `alertzero.reportWorkerOutcome` step during plugin setup. */
+export const registerAlertZeroStepDefinitions = ({
+  workflowsExtensions,
+  ...deps
+}: ReportWorkerOutcomeStepDeps & {
+  workflowsExtensions: WorkflowsExtensionsServerPluginSetup;
+}): void => {
+  workflowsExtensions.registerStepDefinition(getReportWorkerOutcomeStepDefinition(deps));
+};

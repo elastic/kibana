@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitForElementToBeRemoved } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
@@ -76,7 +76,7 @@ describe('AlertEpisodesRelatedSection', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(screen.getByTestId('alertEpisodesRelatedStub')).toBeInTheDocument());
+    expect(await screen.findByTestId('alertEpisodesRelatedStub')).toBeInTheDocument();
 
     expect(AlertEpisodesRelated).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -111,7 +111,7 @@ describe('AlertEpisodesRelatedSection', () => {
       { wrapper }
     );
 
-    await waitFor(() => expect(screen.getByTestId('alertEpisodesRelatedStub')).toBeInTheDocument());
+    expect(await screen.findByTestId('alertEpisodesRelatedStub')).toBeInTheDocument();
 
     expect(AlertEpisodesRelated).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -119,6 +119,59 @@ describe('AlertEpisodesRelatedSection', () => {
       }),
       expect.anything()
     );
+  });
+
+  it('renders related episodes by source for an episode without a rule', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: [...mockEpisodeEventsResponse.columns, { name: 'source', type: 'keyword' }],
+      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, null, 'gh-1', 'zabbix']],
+    });
+
+    render(
+      <I18nProvider>
+        <AlertEpisodesRelatedSection
+          episodeId="ep-1"
+          services={mockServices}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    expect(await screen.findByTestId('alertEpisodesRelatedStub')).toBeInTheDocument();
+
+    expect(AlertEpisodesRelated).toHaveBeenCalledWith(
+      expect.objectContaining({
+        groupHash: 'gh-1',
+        source: 'zabbix',
+        ruleState: { status: RuleStateStatus.idle },
+      }),
+      expect.anything()
+    );
+    expect(mockHttp.get).not.toHaveBeenCalled();
+  });
+
+  it('renders nothing for an episode with neither a rule nor an external source', async () => {
+    runEsqlAsyncSearchMock.mockResolvedValue({
+      columns: mockEpisodeEventsResponse.columns,
+      values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, null, 'gh-1']],
+    });
+
+    const { container } = render(
+      <I18nProvider>
+        <AlertEpisodesRelatedSection
+          episodeId="ep-1"
+          services={mockServices}
+          getEpisodeDetailsHref={mockGetEpisodeDetailsHref}
+        />
+      </I18nProvider>,
+      { wrapper }
+    );
+
+    await waitForElementToBeRemoved(() =>
+      screen.queryByTestId('alertingV2EpisodesRelatedSectionLoading')
+    );
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('renders the loading state while events are loading', () => {
@@ -156,8 +209,6 @@ describe('AlertEpisodesRelatedSection', () => {
       { wrapper }
     );
 
-    await waitFor(() =>
-      expect(screen.getByTestId('alertingV2EpisodesRelatedSectionError')).toBeInTheDocument()
-    );
+    expect(await screen.findByTestId('alertingV2EpisodesRelatedSectionError')).toBeInTheDocument();
   });
 });

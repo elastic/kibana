@@ -136,13 +136,6 @@ export interface UpdateFailureStoreAction {
   };
 }
 
-export interface DeleteQueriesAction {
-  type: 'delete_queries';
-  request: {
-    definition: Streams.all.Definition;
-  };
-}
-
 export interface UnlinkAssetsAction {
   type: 'unlink_assets';
   request: {
@@ -152,13 +145,6 @@ export interface UnlinkAssetsAction {
 
 export interface UnlinkSystemsAction {
   type: 'unlink_systems';
-  request: {
-    name: string;
-  };
-}
-
-export interface UnlinkFeaturesAction {
-  type: 'unlink_features';
   request: {
     name: string;
   };
@@ -208,10 +194,8 @@ export type ElasticsearchAction =
   | UpsertDotStreamsDocumentAction
   | DeleteDotStreamsDocumentAction
   | UpdateDataStreamMappingsAction
-  | DeleteQueriesAction
   | UnlinkAssetsAction
   | UnlinkSystemsAction
-  | UnlinkFeaturesAction
   | UpdateFailureStoreAction
   | UpdateIngestSettingsAction
   | UpsertEsqlViewAction
@@ -234,10 +218,8 @@ export interface ActionsByType {
   upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
   update_data_stream_mappings: UpdateDataStreamMappingsAction[];
-  delete_queries: DeleteQueriesAction[];
   unlink_assets: UnlinkAssetsAction[];
   unlink_systems: UnlinkSystemsAction[];
-  unlink_features: UnlinkFeaturesAction[];
   update_failure_store: UpdateFailureStoreAction[];
   update_ingest_settings: UpdateIngestSettingsAction[];
   upsert_esql_view: UpsertEsqlViewAction[];

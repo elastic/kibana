@@ -24,6 +24,7 @@ import {
   ChatEventType,
   ConversationAccessControlMode,
   ConversationOriginType,
+  EventActorType,
   TimelineEventType,
   isRequestAbortedError,
   type ChatAgentEvent,
@@ -282,6 +283,82 @@ describe('handleAgentExecution', () => {
         outputSchema,
         executionMode: AgentExecutionMode.standalone,
       })
+    );
+  });
+
+  it('runs a standalone execution with the reasoning level returned by resolveServices', async () => {
+    resolveServicesMock.mockResolvedValue({
+      selectedConnectorId: 'connector-1',
+      modelProvider: createModelProviderMock(),
+      reasoningLevel: 'high',
+    } as never);
+    executeAgentMock.mockReturnValue(
+      of({
+        type: ChatEventType.messageComplete,
+        data: { message_id: 'm-1', message_content: '' },
+      } as ChatAgentEvent)
+    );
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.standalone,
+        agentId: 'test-agent',
+        agentParams: {
+          nextInput: { message: 'summarize' },
+          reasoningLevel: 'low',
+        },
+      } as never,
+      deps: createDeps({ conversationClient: createConversationClientMock() }),
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    await lastValueFrom(events$.pipe(toArray()));
+
+    expect(resolveServicesMock).toHaveBeenCalledWith(
+      expect.objectContaining({ agentId: 'test-agent', reasoningLevel: 'low' })
+    );
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ reasoningLevel: 'high' })
+    );
+  });
+
+  it('runs a conversation execution with the reasoning level returned by resolveServices', async () => {
+    const conversation = createEmptyConversation({
+      id: 'conversation-1',
+      title: 'Existing conversation',
+      agent_id: 'test-agent',
+    });
+    const conversationClient = createConversationClientMock();
+    conversationClient.get.mockResolvedValue(conversation);
+    conversationClient.update.mockResolvedValue(conversation);
+    resolveServicesMock.mockResolvedValue({
+      selectedConnectorId: 'connector-1',
+      modelProvider: createModelProviderMock(),
+      reasoningLevel: 'high',
+    } as never);
+    executeAgentMock.mockReturnValue(
+      of({
+        type: ChatEventType.roundComplete,
+        data: { round: createRound({}) },
+      } as RoundCompleteEvent)
+    );
+
+    const events$ = await runHandle({
+      agentParams: {
+        agentId: 'test-agent',
+        nextInput: { message: 'Hello' },
+        reasoningLevel: 'low',
+      },
+      conversationClient,
+    });
+    await lastValueFrom(events$.pipe(toArray()));
+
+    expect(resolveServicesMock).toHaveBeenCalledWith(
+      expect.objectContaining({ agentId: 'test-agent', reasoningLevel: 'low' })
+    );
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ reasoningLevel: 'high' })
     );
   });
 
@@ -786,6 +863,59 @@ describe('handleAgentExecution', () => {
       await lastValueFrom(events$.pipe(toArray()));
 
       expect(executeAgentMock).toHaveBeenCalledWith(expect.objectContaining({ author }));
+    });
+
+    it('acts as the execution owner, keeping a service account typed', async () => {
+      const owner = {
+        id: 'service_account:kibana/automation',
+        username: 'kibana/automation',
+        type: 'service_account' as const,
+      };
+      const conversation = createEmptyConversation({
+        id: 'conversation-1',
+        agent_id: 'test-agent',
+      });
+      const conversationClient = createConversationClientMock();
+      conversationClient.get.mockResolvedValue(conversation);
+      conversationClient.update.mockResolvedValue(conversation);
+      executeAgentMock.mockReturnValue(
+        of({
+          type: ChatEventType.roundComplete,
+          data: { round: createRound({}) },
+        } as RoundCompleteEvent)
+      );
+      resolveServicesMock.mockResolvedValue({
+        selectedConnectorId: 'connector-1',
+        modelProvider: createModelProviderMock(),
+      } as never);
+      const deps = createDeps({ conversationClient });
+
+      const events$ = await handleAgentExecution({
+        execution: {
+          executionId: 'execution-1',
+          executionMode: AgentExecutionMode.conversation,
+          owner,
+          agentParams: {
+            agentId: 'test-agent',
+            conversationId: 'conversation-1',
+            roundId: 'round-1',
+            conversationOperation: 'UPDATE',
+            receivedAt: '2024-01-01T00:00:00.000Z',
+            nextInput: { message: 'Hello' },
+          },
+        } as never,
+        deps,
+        request: { headers: {} } as never,
+        abortSignal: new AbortController().signal,
+      });
+      await lastValueFrom(events$.pipe(toArray()));
+
+      const { conversationService } = deps as unknown as {
+        conversationService: { getScopedClientAsUser: jest.Mock };
+      };
+      expect(conversationService.getScopedClientAsUser).toHaveBeenCalledWith(
+        expect.objectContaining({ user: { ...owner, isAdmin: false } })
+      );
     });
   });
 
@@ -1622,7 +1752,10 @@ describe('handleAgentExecution — interrupted executions', () => {
     const deps = createDeps({ conversationClient }) as { agentService: { getRegistry: jest.Mock } };
     const abortController = new AbortController();
     deps.agentService.getRegistry.mockImplementation(async () => {
-      abortController.abort({ source: 'api', actor: { id: 'u1', username: 'alice' } });
+      abortController.abort({
+        source: 'api',
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      });
       throw new Error('AbortError');
     });
 
@@ -1650,7 +1783,10 @@ describe('handleAgentExecution — interrupted executions', () => {
     expect(seen.map((event) => event.type)).toEqual([TimelineEventType.executionAborted]);
     const [write] = conversationClient.replaceRoundEvents.mock.calls[0];
     expect(write.events.at(-1)!.data).toMatchObject({
-      aborted_by: { source: 'api', actor: { id: 'u1', username: 'alice' } },
+      aborted_by: {
+        source: 'api',
+        actor: { type: EventActorType.user, id: 'u1', username: 'alice' },
+      },
     });
   });
 
@@ -1832,6 +1968,255 @@ describe('handleAgentExecution — interrupted executions', () => {
     expect(seen).toEqual([]);
     expect(conversationClient.appendEvents).not.toHaveBeenCalled();
     expect(conversationClient.replaceRoundEvents).not.toHaveBeenCalled();
+  });
+});
+
+describe('handleAgentExecution — round attribution', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    generateTitleMock.mockReturnValue(of('Generated title'));
+  });
+
+  const makeFailedRoundInterruptedEvent = (): RoundInterruptedEvent => ({
+    type: ChatEventType.roundInterrupted,
+    data: {
+      round_id: 'round-1',
+      started_at: '2024-01-01T00:00:00.000Z',
+      input: { message: 'Hello' },
+      steps: [],
+      summary: { time_to_last_token: 1 },
+      attachments: [],
+    },
+  });
+
+  const createClient = () => {
+    const conversation = createEmptyConversation({ agent_id: 'test-agent', id: 'conversation-1' });
+    const conversationClient = createConversationClientMock();
+    conversationClient.get.mockResolvedValue(conversation);
+    conversationClient.appendEvents.mockImplementation(async (request) => ({
+      ...conversation,
+      events: request.events,
+      schema_version: 1,
+    }));
+    conversationClient.replaceRoundEvents.mockImplementation(async (request) => ({
+      ...conversation,
+      events: request.events,
+      schema_version: 1,
+    }));
+    return conversationClient;
+  };
+
+  const run = async ({
+    agentParams = {},
+    parentExecutionId,
+    reportRoundComplete = jest.fn(),
+    reportRoundError = jest.fn(),
+  }: {
+    agentParams?: Record<string, unknown>;
+    parentExecutionId?: string;
+    reportRoundComplete?: jest.Mock;
+    reportRoundError?: jest.Mock;
+  }) => {
+    const conversationClient = createClient();
+    stubResolveServices(conversationClient);
+
+    const events$ = await handleAgentExecution({
+      abortSignal: new AbortController().signal,
+      deps: createDeps({
+        analyticsService: { reportRoundComplete, reportRoundError },
+        conversationClient,
+      }),
+      execution: {
+        agentParams: {
+          agentId: 'test-agent',
+          conversationId: 'conversation-1',
+          conversationOperation: 'UPDATE',
+          nextInput: { message: 'Hello' },
+          receivedAt: '2024-01-01T00:00:00.000Z',
+          roundId: 'round-1',
+          ...agentParams,
+        },
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.conversation,
+        owner: { id: 'owner-1', username: 'owner' },
+        ...(parentExecutionId ? { parentExecutionId } : {}),
+      } as never,
+      request: { headers: {} } as never,
+    });
+
+    // failure scenarios surface the error on the stream; the assertions are on telemetry
+    await lastValueFrom(events$.pipe(toArray())).catch(() => undefined);
+    await flushMicrotasks();
+  };
+
+  const workflowParams = { workflowExecutionId: 'workflow-run-1' };
+
+  it('reports the workflow execution id on round complete', async () => {
+    const reportRoundComplete = jest.fn();
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
+
+    await run({ agentParams: workflowParams, reportRoundComplete });
+
+    expect(reportRoundComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: 'workflow-run-1' })
+    );
+  });
+
+  it('reports no workflow execution id for a round no workflow step started', async () => {
+    const reportRoundComplete = jest.fn();
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
+
+    await run({ reportRoundComplete });
+
+    expect(reportRoundComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: undefined })
+    );
+  });
+
+  it('does not report the plugin-id the step sends to inference', async () => {
+    const reportRoundComplete = jest.fn();
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
+
+    await run({
+      agentParams: {
+        ...workflowParams,
+        telemetryMetadata: { pluginId: 'my_feature', interactionId: 'workflow-run-1' },
+      },
+      reportRoundComplete,
+    });
+
+    expect(JSON.stringify(reportRoundComplete.mock.calls)).not.toContain('my_feature');
+  });
+
+  it('reports the workflow execution id on round error', async () => {
+    const reportRoundError = jest.fn();
+    mockAgentStream(
+      [makeRoundStartedEvent(), makeFailedRoundInterruptedEvent()],
+      'asyncShared',
+      new Error('llm exploded')
+    );
+
+    await run({ agentParams: workflowParams, reportRoundError });
+
+    expect(reportRoundError).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: 'workflow-run-1' })
+    );
+  });
+
+  it('sends the workflow execution id to EIS as the interaction id of every LLM call', async () => {
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
+
+    await run({
+      agentParams: { ...workflowParams, telemetryMetadata: { pluginId: 'my_feature' } },
+    });
+
+    const expected = expect.objectContaining({
+      interactionId: 'workflow-run-1',
+      pluginId: 'my_feature',
+    });
+    expect(resolveServicesMock).toHaveBeenCalledWith(
+      expect.objectContaining({ telemetryMetadata: expected })
+    );
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ telemetryMetadata: expected })
+    );
+  });
+
+  it('sends the workflow execution id to EIS when the step set no plugin-id', async () => {
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
+
+    await run({ agentParams: workflowParams });
+
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        telemetryMetadata: expect.objectContaining({ interactionId: 'workflow-run-1' }),
+      })
+    );
+  });
+
+  it("reports a persistent sub-agent's round with the workflow run, but sends no interaction id to EIS", async () => {
+    const reportRoundComplete = jest.fn();
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
+
+    await run({
+      agentParams: workflowParams,
+      parentExecutionId: 'parent-execution-1',
+      reportRoundComplete,
+    });
+
+    expect(reportRoundComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: 'workflow-run-1' })
+    );
+    const [{ telemetryMetadata }] = executeAgentMock.mock.calls[0];
+    expect(telemetryMetadata?.interactionId).toBeUndefined();
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: 'workflow-run-1' })
+    );
+  });
+
+  it('sends no interaction id for a round no workflow step started', async () => {
+    mockAgentStream([makeRoundStartedEvent(), makeRoundCompleteEvent()]);
+
+    await run({});
+
+    const [{ telemetryMetadata }] = executeAgentMock.mock.calls[0];
+    expect(telemetryMetadata?.interactionId).toBeUndefined();
+  });
+});
+
+describe('handleAgentExecution — standalone workflow attribution', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  const runStandalone = async ({ parentExecutionId }: { parentExecutionId?: string }) => {
+    const conversationClient = createConversationClientMock();
+    stubResolveServices(conversationClient);
+    executeAgentMock.mockReturnValue(
+      of({
+        type: ChatEventType.messageComplete,
+        data: { message_id: 'm-1', message_content: '' },
+      } as ChatAgentEvent)
+    );
+
+    const events$ = await handleAgentExecution({
+      execution: {
+        executionId: 'execution-1',
+        executionMode: AgentExecutionMode.standalone,
+        agentId: 'test-agent',
+        agentParams: {
+          nextInput: { message: 'summarize' },
+          workflowExecutionId: 'workflow-run-1',
+        },
+        ...(parentExecutionId ? { parentExecutionId } : {}),
+      } as never,
+      deps: createDeps({ conversationClient }),
+      request: { headers: {} } as never,
+      abortSignal: new AbortController().signal,
+    });
+    await lastValueFrom(events$.pipe(toArray()));
+  };
+
+  it('sends the workflow execution id to EIS and passes it on to its own sub-agents', async () => {
+    await runStandalone({});
+
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        executionMode: AgentExecutionMode.standalone,
+        telemetryMetadata: expect.objectContaining({ interactionId: 'workflow-run-1' }),
+        workflowExecutionId: 'workflow-run-1',
+      })
+    );
+  });
+
+  it("does not send a standalone sub-agent's workflow run to EIS, but passes it on", async () => {
+    await runStandalone({ parentExecutionId: 'parent-execution-1' });
+
+    const [{ telemetryMetadata }] = executeAgentMock.mock.calls[0];
+    expect(telemetryMetadata?.interactionId).toBeUndefined();
+    expect(executeAgentMock).toHaveBeenCalledWith(
+      expect.objectContaining({ workflowExecutionId: 'workflow-run-1' })
+    );
   });
 });
 

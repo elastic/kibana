@@ -427,6 +427,41 @@ describe('TaskStore', () => {
       });
     });
 
+    test('passes refreshApiKey false to grantApiKeys', async () => {
+      const task = {
+        id: 'id',
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        traceparent: 'apmTraceparent',
+      };
+
+      const request = httpServerMock.createKibanaRequest();
+      const grantApiKeys = jest
+        .spyOn(EsApiKeyStrategy.prototype, 'grantApiKeys')
+        .mockResolvedValueOnce(new Map());
+
+      coreStart.savedObjects.getScopedClient.mockReturnValueOnce(scopedSavedObjectsClient);
+      scopedSavedObjectsClient.create.mockImplementation(
+        async (type: string, attributes: unknown) => ({
+          id: 'testid',
+          type,
+          attributes,
+          references: [],
+          version: '123',
+        })
+      );
+
+      await store.schedule(task as TaskInstance, { request, refreshApiKey: false });
+
+      const calls = [...grantApiKeys.mock.calls];
+      grantApiKeys.mockRestore();
+
+      expect(calls).toEqual([
+        [[task], request, coreStart.security, expect.objectContaining({ refreshApiKey: false })],
+      ]);
+    });
+
     test('errors when scheduling a task with API key if unable to encrypt SO', async () => {
       store = new TaskStore({
         logger: mockLogger(),
@@ -1691,11 +1726,24 @@ describe('TaskStore', () => {
         ],
       });
 
-      await store.bulkUpdate([task1, task2], { validate: true });
+      const result = await store.bulkUpdate([task1, task2], { validate: true });
 
       expect(logger.error).toHaveBeenCalledWith(
         '[TaskStore] An error occured. Task task:2 will not be updated. Error: [TaskValidator] Invalid interval "invalid". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.'
       );
+      expect(result).toEqual([
+        expect.objectContaining({ tag: 'ok', value: expect.objectContaining({ id: task1.id }) }),
+        asErr({
+          type: 'task',
+          id: task2.id,
+          error: {
+            error: 'Bad Request',
+            message:
+              '[TaskValidator] Invalid interval "invalid". Interval must be of the form "{number}{cadence}" where number is an integer. Example: 5m.',
+            statusCode: 400,
+          },
+        }),
+      ]);
 
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         [
@@ -2228,7 +2276,13 @@ describe('TaskStore', () => {
         },
       ]);
 
-      expect(result).toEqual([]);
+      expect(result).toEqual([
+        asErr({
+          type: 'task',
+          id: 'task:324242',
+          error: { error: 'Bad Request', message: 'validation failed', statusCode: 400 },
+        }),
+      ]);
     });
 
     test('bulk update task with no API key changes when api key, user scope are not available and request and regenerate api key flag are available', async () => {
@@ -2675,7 +2729,18 @@ describe('TaskStore', () => {
           );
           expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith([], { refresh: false });
           expect(savedObjectsClient.bulkUpdate).not.toHaveBeenCalled();
-          expect(result).toEqual([]);
+          expect(result).toEqual([
+            asErr({
+              type: 'task',
+              id: credentialTaskWithApiKey.id,
+              error: {
+                error: 'Bad Request',
+                message:
+                  'Task has both a credential and an API key, which this version of Kibana cannot update',
+                statusCode: 400,
+              },
+            }),
+          ]);
         }
       );
 
@@ -2692,6 +2757,116 @@ describe('TaskStore', () => {
 
         expect(getApiKeyAndUserScope).not.toHaveBeenCalled();
         expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
+      });
+
+      test('returns an error for each task of a failed write and keeps the results of the other write', async () => {
+        const failure = new Error('Failure');
+        const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+        const mockScopedClient = {
+          bulkUpdate: jest.fn().mockResolvedValue({ saved_objects: [toSavedObject(apiKeyTask)] }),
+        };
+        mockGetScopedClient.mockReturnValue(mockScopedClient);
+        savedObjectsClient.bulkUpdate.mockRejectedValue(failure);
+
+        const result = await store.bulkUpdate([apiKeyTask, credentialTask], {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest },
+        });
+
+        expect(result).toEqual([
+          expect.objectContaining({
+            tag: 'ok',
+            value: expect.objectContaining({ id: apiKeyTask.id }),
+          }),
+          asErr({
+            type: 'task',
+            id: credentialTask.id,
+            error: { error: 'Internal Server Error', message: 'Failure', statusCode: 500 },
+          }),
+        ]);
+        expect(await firstErrorPromise).toBe(failure);
+      });
+
+      test('invalidates only the regenerated API keys of a failed write', async () => {
+        const unavailable = SavedObjectsErrorHelpers.decorateEsUnavailableError(
+          new Error('Unavailable')
+        );
+        const mockScopedClient = { bulkUpdate: jest.fn().mockRejectedValue(unavailable) };
+        mockGetScopedClient.mockReturnValue(mockScopedClient);
+        savedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [toSavedObject(credentialTask)],
+        });
+        (getApiKeyAndUserScope as jest.Mock).mockResolvedValueOnce(
+          new Map([
+            [
+              apiKeyTask.id,
+              {
+                apiKey: Buffer.from('apiKeyIdUpdated:apiKey').toString('base64'),
+                userScope: { ...mockUserScope, apiKeyId: 'apiKeyIdUpdated' },
+              },
+            ],
+          ])
+        );
+
+        const result = await store.bulkUpdate([apiKeyTask, credentialTask], {
+          validate: false,
+          mergeAttributes: false,
+          options: { request: mockRequest, regenerateApiKey: true },
+        });
+
+        expect(result).toEqual([
+          asErr({ type: 'task', id: apiKeyTask.id, error: unavailable.output.payload }),
+          expect.objectContaining({
+            tag: 'ok',
+            value: expect.objectContaining({ id: credentialTask.id }),
+          }),
+        ]);
+        // The old key must be left alone: the failed task still runs on it.
+        expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+          {
+            attributes: { apiKeyId: 'apiKeyIdUpdated', createdAt: expect.any(String) },
+            type: 'api_key_to_invalidate',
+          },
+        ]);
+      });
+
+      test('throws the first write error when every write fails', async () => {
+        const scopedFailure = new Error('Scoped failure');
+        const mockScopedClient = { bulkUpdate: jest.fn().mockRejectedValue(scopedFailure) };
+        mockGetScopedClient.mockReturnValue(mockScopedClient);
+        savedObjectsClient.bulkUpdate.mockRejectedValue(new Error('Plain failure'));
+
+        await expect(
+          store.bulkUpdate([apiKeyTask, credentialTask], {
+            validate: false,
+            mergeAttributes: false,
+            options: { request: mockRequest },
+          })
+        ).rejects.toBe(scopedFailure);
+        expect(savedObjectsClient.bulkUpdate).toHaveBeenCalled();
+      });
+
+      test('throws when the only write with tasks fails', async () => {
+        const failure = new Error('Failure');
+        const mockScopedClient = { bulkUpdate: jest.fn().mockResolvedValue({ saved_objects: [] }) };
+        mockGetScopedClient.mockReturnValue(mockScopedClient);
+        savedObjectsClient.bulkUpdate.mockRejectedValue(failure);
+        mockGetValidatedTaskInstanceForUpdating.mockImplementation((task) => {
+          if (task.id === apiKeyTask.id) {
+            throw new Error('validation failed');
+          }
+          return task;
+        });
+
+        await expect(
+          store.bulkUpdate([apiKeyTask, credentialTask], {
+            validate: false,
+            mergeAttributes: false,
+            options: { request: mockRequest },
+          })
+        ).rejects.toBe(failure);
+        expect(mockScopedClient.bulkUpdate).toHaveBeenCalledWith([], { refresh: false });
       });
     });
   });
@@ -3410,6 +3585,15 @@ describe('TaskStore', () => {
       references: [],
       version: '123',
     };
+    const serviceAccountTask = {
+      ...mockTask,
+      id: 'serviceAccountTask1',
+      attributes: {
+        ..._.omit(mockTask.attributes, 'apiKey', 'userScope'),
+        credential: serviceAccountCredential,
+        encryptedCredential: 'encrypted-value',
+      },
+    };
 
     beforeEach(() => {
       (coreStart.savedObjects.getUnsafeInternalClient as jest.Mock).mockReturnValue(
@@ -3463,6 +3647,15 @@ describe('TaskStore', () => {
           type: 'api_key_to_invalidate',
         },
       ]);
+    });
+
+    test('does not mark anything for invalidation when the task runs as a service account', async () => {
+      savedObjectsClient.get.mockResolvedValueOnce(serviceAccountTask);
+      await store.remove(serviceAccountTask.id);
+      expect(savedObjectsClient.delete).toHaveBeenCalledWith('task', serviceAccountTask.id, {
+        refresh: false,
+      });
+      expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
     });
 
     test('pushes error from saved objects client to errors$', async () => {
@@ -3535,6 +3728,16 @@ describe('TaskStore', () => {
       version: '123',
     };
 
+    const serviceAccountTask = {
+      ...mockTask1,
+      id: 'serviceAccountTask1',
+      attributes: {
+        ..._.omit(mockTask1.attributes, 'apiKey', 'userScope'),
+        credential: serviceAccountCredential,
+        encryptedCredential: 'encrypted-value',
+      },
+    };
+
     const tasksIdsToDelete = [randomId(), randomId()];
 
     beforeEach(() => {
@@ -3597,6 +3800,38 @@ describe('TaskStore', () => {
         },
         {
           attributes: { apiKeyId: 'apiKeyId2', createdAt: expect.any(String) },
+          type: 'api_key_to_invalidate',
+        },
+      ]);
+    });
+
+    test('does not mark anything for invalidation when only service account tasks are removed', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [serviceAccountTask],
+      });
+      await store.bulkRemove([serviceAccountTask.id]);
+      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith(
+        [{ type: 'task', id: serviceAccountTask.id }],
+        { refresh: false }
+      );
+      expect(invalidationSoClientMock.bulkCreate).not.toHaveBeenCalled();
+    });
+
+    test('marks only the API key of the API key task when removed with a service account task', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValueOnce({
+        saved_objects: [mockTask1, serviceAccountTask],
+      });
+      await store.bulkRemove([mockTask1.id, serviceAccountTask.id]);
+      expect(savedObjectsClient.bulkDelete).toHaveBeenCalledWith(
+        [
+          { type: 'task', id: mockTask1.id },
+          { type: 'task', id: serviceAccountTask.id },
+        ],
+        { refresh: false }
+      );
+      expect(invalidationSoClientMock.bulkCreate).toHaveBeenCalledWith([
+        {
+          attributes: { apiKeyId: 'apiKeyId1', createdAt: expect.any(String) },
           type: 'api_key_to_invalidate',
         },
       ]);
@@ -3889,6 +4124,146 @@ describe('TaskStore', () => {
 
       await expect(store.getCredential('id')).rejects.toThrow('Failure');
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+  });
+
+  describe('getVerifiedCredential', () => {
+    const encryptionError = new Error('Unable to decrypt attribute "encryptedCredential"');
+    const isEncryptionError = (error: Error) => error === encryptionError;
+
+    const createStore = (canEncryptSavedObjects: boolean) =>
+      new TaskStore({
+        logger: mockLogger(),
+        index: 'tasky',
+        taskManagerId: '',
+        serializer,
+        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+        definitions: taskDefinitions,
+        savedObjectsRepository: savedObjectsClient,
+        adHocTaskCounter,
+        allowReadingInvalidState: false,
+        savedObjectsService: coreStart.savedObjects,
+        security: coreStart.security,
+        canEncryptSavedObjects,
+        getIsSecurityEnabled: () => true,
+        executionContext: mockExecutionContextStart,
+        apiKeyStrategy: new EsApiKeyStrategy(),
+      });
+
+    let store: TaskStore;
+
+    beforeEach(() => {
+      store = createStore(true);
+      store.registerEncryptedSavedObjectsClient(esoClient, isEncryptionError);
+    });
+
+    const mockDecryptedTask = (attributes: Record<string, unknown>) =>
+      esoClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+        id: 'id',
+        type: 'task',
+        attributes,
+        references: [],
+        version: '123',
+      });
+
+    test('returns the credential of the decrypted task', async () => {
+      mockDecryptedTask({ credential: serviceAccountCredential, encryptedCredential: 'canary' });
+
+      await expect(store.getVerifiedCredential('id')).resolves.toEqual(
+        asOk(serviceAccountCredential)
+      );
+
+      expect(esoClient.getDecryptedAsInternalUser).toHaveBeenCalledWith('task', 'id');
+    });
+
+    test('returns an error without pushing it to errors$ when decryption fails', async () => {
+      const errors = jest.fn();
+      const subscription = store.errors$.subscribe(errors);
+      esoClient.getDecryptedAsInternalUser.mockRejectedValueOnce(encryptionError);
+
+      await expect(store.getVerifiedCredential('id')).resolves.toEqual(
+        asErr(
+          new Error(
+            'Task credential failed its integrity check: Unable to decrypt attribute "encryptedCredential"'
+          )
+        )
+      );
+
+      subscription.unsubscribe();
+      expect(errors).not.toHaveBeenCalled();
+    });
+
+    test.each([
+      ['credential', { encryptedCredential: 'canary' }],
+      ['encryptedCredential', { credential: serviceAccountCredential }],
+    ])('returns an error when the task has no %s', async (_description, attributes) => {
+      mockDecryptedTask(attributes);
+
+      await expect(store.getVerifiedCredential('id')).resolves.toEqual(
+        asErr(new Error('Task credential failed its integrity check: the credential is incomplete'))
+      );
+    });
+
+    test('throws a not found error without pushing it to errors$', async () => {
+      const errors = jest.fn();
+      const subscription = store.errors$.subscribe(errors);
+      esoClient.getDecryptedAsInternalUser.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('task', 'id')
+      );
+
+      await expect(store.getVerifiedCredential('id')).rejects.toMatchObject({
+        output: { statusCode: 404 },
+      });
+
+      subscription.unsubscribe();
+      expect(errors).not.toHaveBeenCalled();
+    });
+
+    test('pushes any other error to errors$', async () => {
+      const firstErrorPromise = store.errors$.pipe(first()).toPromise();
+      esoClient.getDecryptedAsInternalUser.mockRejectedValueOnce(new Error('Failure'));
+
+      await expect(store.getVerifiedCredential('id')).rejects.toThrow('Failure');
+      expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
+    });
+
+    test.each([
+      [
+        'saved objects cannot be encrypted',
+        () => {
+          const unableToEncryptStore = createStore(false);
+          unableToEncryptStore.registerEncryptedSavedObjectsClient(esoClient, isEncryptionError);
+          return unableToEncryptStore;
+        },
+      ],
+      [
+        'the client was registered without the encryption error predicate',
+        () => {
+          const noPredicateStore = createStore(true);
+          noPredicateStore.registerEncryptedSavedObjectsClient(esoClient);
+          return noPredicateStore;
+        },
+      ],
+      ['the client was not registered', () => createStore(true)],
+    ])('throws without reading the task when %s', async (_description, getStore) => {
+      await expect(getStore().getVerifiedCredential('id')).rejects.toThrow(
+        'Unable to verify the task credential because the Encrypted Saved Objects plugin has not been registered or is missing encryption key.'
+      );
+
+      expect(esoClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+    });
+
+    test('keeps the encryption error predicate when the client is registered again without one', async () => {
+      store.registerEncryptedSavedObjectsClient(esoClient);
+      esoClient.getDecryptedAsInternalUser.mockRejectedValueOnce(encryptionError);
+
+      await expect(store.getVerifiedCredential('id')).resolves.toEqual(
+        asErr(
+          new Error(
+            'Task credential failed its integrity check: Unable to decrypt attribute "encryptedCredential"'
+          )
+        )
+      );
     });
   });
 

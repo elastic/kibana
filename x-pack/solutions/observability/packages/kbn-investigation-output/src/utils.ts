@@ -6,15 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { InvestigationState } from '@kbn/significant-events-schema';
+import type { Investigation } from '@kbn/agentic-investigations-plugin/common';
 import type { InvestigationStatus } from './types';
 
 type Header =
   | { spinner: true; title: string }
-  | { spinner: false; icon: string; color: 'success' | 'danger' | 'warning'; title: string };
+  | { spinner: false; icon: string; color: 'success' | 'warning'; title: string };
 
-const buildRunningHeadline = (state: InvestigationState | undefined): string => {
-  const hypotheses = state?.hypotheses ?? [];
+const buildRunningHeadline = (investigation: Investigation | undefined): string => {
+  const hypotheses = investigation?.hypotheses?.hypotheses ?? [];
   if (hypotheses.length === 0) {
     return i18n.translate('xpack.investigationOutput.gatheringEvidenceTitle', {
       defaultMessage: 'Gathering evidence',
@@ -32,24 +32,15 @@ const buildRunningHeadline = (state: InvestigationState | undefined): string => 
   });
 };
 
-export const buildHeader = (status: InvestigationStatus, state?: InvestigationState): Header => {
+export const buildHeader = (status: InvestigationStatus, investigation?: Investigation): Header => {
   switch (status) {
     case 'running':
-      return { spinner: true, title: buildRunningHeadline(state) };
+      return { spinner: true, title: buildRunningHeadline(investigation) };
     case 'loading':
       return {
         spinner: true,
         title: i18n.translate('xpack.investigationOutput.loadingResultTitle', {
-          defaultMessage: 'Loading investigation result…',
-        }),
-      };
-    case 'failed':
-      return {
-        spinner: false,
-        icon: 'errorFill',
-        color: 'danger',
-        title: i18n.translate('xpack.investigationOutput.failedStatusTitle', {
-          defaultMessage: 'Investigation failed',
+          defaultMessage: 'Loading investigation…',
         }),
       };
     case 'unavailable':
@@ -58,7 +49,7 @@ export const buildHeader = (status: InvestigationStatus, state?: InvestigationSt
         icon: 'warning',
         color: 'warning',
         title: i18n.translate('xpack.investigationOutput.unavailableStatusTitle', {
-          defaultMessage: 'Investigation result unavailable',
+          defaultMessage: 'Investigation unavailable',
         }),
       };
     case 'complete':
