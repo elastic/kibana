@@ -26,7 +26,7 @@ import { BRIEF_PERIOD_LABELS, describeDelta, formatCount } from './describe_scop
 // Drafting the brief
 
 export const MAX_PRIORITIES = 3;
-const WORD_LIMITS = { summary: 40, assessment: 35, nextStep: 20, recommendation: 30 } as const;
+const WORD_LIMITS = { summary: 40, assessment: 30, nextStep: 20, recommendation: 30 } as const;
 
 export const DRAFT_SYSTEM_PROMPT = `You write a short Entity Analytics brief for a security analyst or lead, from data about the entities the page flags. Answer with the complete brief in the required structure.
 

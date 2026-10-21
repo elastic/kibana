@@ -328,23 +328,23 @@ const CHARACTERS_PER_LINE = 100;
 const ASSESSMENT_CHARACTERS_PER_LINE = 66;
 const HEIGHTS = {
   /** The padding around the brief, its header, and the gap below. */
-  header: 120,
+  header: 114,
   /** A line of text. */
-  line: 22,
+  line: 21,
   /** A section's heading and the gap below the section. */
-  section: 44,
+  section: 38,
   /** A note's padding and gap, on top of its lines. */
   note: 20,
   /** One row of counts. */
-  counts: 72,
+  counts: 68,
   /** A priority's padding and title row, on top of its lines. */
-  priority: 80,
+  priority: 70,
   /** The gap above the alerts, and one row of them. */
   alerts: 10,
-  rule: 25,
+  rule: 22,
   /** The risk history with its chart, or with the caption alone. */
-  chart: 160,
-  caption: 50,
+  chart: 155,
+  caption: 46,
 };
 
 const countLines = (text: string, charactersPerLine = CHARACTERS_PER_LINE): number =>
@@ -420,14 +420,14 @@ const CSS = `
 .brief .muted{opacity:.72;}
 .brief .small{font-size:12px;}
 .brief .screen-reader{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
-.brief .header{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--cc-space-m);padding-bottom:var(--cc-space-s);margin-bottom:var(--cc-space-m);border-bottom:1px solid var(--cc-color-border);}
+.brief .header{display:flex;justify-content:space-between;align-items:flex-start;gap:var(--cc-space-m);padding-bottom:4px;margin-bottom:var(--cc-space-m);border-bottom:1px solid var(--cc-color-border);}
 .brief .eyebrow{font-size:12px;font-weight:600;letter-spacing:.02em;text-transform:uppercase;color:var(--cc-color-primary);margin-bottom:2px;}
 .brief h1{font-size:18px;font-weight:700;line-height:1.3;}
 .brief h1 .separator{opacity:.5;font-weight:400;padding:0 2px;}
 .brief h2{font-size:14px;font-weight:600;margin-bottom:var(--cc-space-s);}
-.brief .section{margin-bottom:var(--cc-space-m);}
+.brief .section{margin-bottom:var(--cc-space-s);}
 .brief .lead{font-size:15px;}
-.brief .notes{margin-bottom:var(--cc-space-m);}
+.brief .notes{margin-bottom:var(--cc-space-s);}
 .brief .note{font-size:12px;padding:6px 10px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius-s);background:var(--cc-color-surface);margin-bottom:4px;}
 .brief .pill{display:inline-flex;align-items:center;gap:4px;padding:0 8px;line-height:20px;border-radius:var(--cc-radius-s);font-size:12px;font-weight:600;white-space:nowrap;border:1px solid transparent;}
 .brief .pill-primary{background:var(--cc-color-primary);color:var(--cc-color-surface);}
@@ -438,7 +438,7 @@ const CSS = `
 .brief .level-moderate{background:var(--cc-color-warning);color:#1D2A3E;}
 .brief .level-low,.brief .level-unknown{border-color:var(--cc-color-border);background:var(--cc-color-surface);color:var(--cc-color-text);}
 .brief .counts{display:flex;flex-wrap:wrap;gap:var(--cc-space-s);}
-.brief .count{flex:1 1 104px;max-width:180px;padding:6px 10px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);background:var(--cc-color-surface);min-width:0;}
+.brief .count{flex:1 1 104px;max-width:180px;padding:4px 10px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);background:var(--cc-color-surface);min-width:0;}
 .brief .count-label{font-size:12px;line-height:1.3;}
 .brief .count-row{display:flex;align-items:baseline;flex-wrap:wrap;column-gap:6px;margin-top:2px;}
 .brief .count-value{font-size:20px;font-weight:700;line-height:1.2;letter-spacing:-.02em;}
@@ -448,23 +448,23 @@ const CSS = `
 .brief .count-change.up{color:var(--cc-color-danger);}
 .brief .count-change.down{color:var(--cc-color-accent);}
 .brief .priorities{list-style:none;padding:0;display:flex;flex-direction:column;gap:var(--cc-space-s);}
-.brief .priority{border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);background:var(--cc-color-surface);padding:10px 14px;}
+.brief .priority{border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);background:var(--cc-color-surface);padding:8px 14px;}
 .brief .priority-head{display:flex;align-items:flex-start;gap:10px;flex-wrap:wrap;}
 .brief .rank{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--cc-color-primary);color:var(--cc-color-surface);font-weight:700;font-size:12px;flex:none;margin-top:1px;}
 .brief .priority-title{display:flex;flex-direction:column;min-width:0;flex:1 1 160px;}
 .brief .name{font-weight:700;font-size:15px;overflow-wrap:anywhere;}
 .brief .pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}
 .brief .label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.72;padding-top:3px;}
-.brief .assessment{margin:8px 0 0 32px;font-size:15px;line-height:1.45;max-width:62ch;}
+.brief .assessment{margin:8px 0 0 32px;font-size:14px;line-height:1.45;max-width:62ch;}
 .brief .evidence,.brief .next{display:grid;grid-template-columns:auto 1fr;column-gap:14px;margin:10px 0 0 32px;}
 .brief .evidence{row-gap:2px;align-items:start;}
-.brief .rules{list-style:none;margin:0;padding:0;font-size:13px;max-width:560px;}
-.brief .rules li{display:flex;justify-content:space-between;gap:12px;padding:2px 0;border-bottom:1px dashed var(--cc-color-border);}
+.brief .rules{list-style:none;margin:0;padding:0;font-size:12.5px;max-width:560px;}
+.brief .rules li{display:flex;justify-content:space-between;gap:12px;padding:1px 0;border-bottom:1px dashed var(--cc-color-border);}
 .brief .rules li:last-child{border-bottom:0;}
 .brief .rule-count{font-variant-numeric:tabular-nums;font-weight:600;opacity:.85;flex:none;}
 .brief .rules-total{opacity:.72;}
 .brief .rules-total span{font-weight:400;}
-.brief .chart{margin:10px 0 0 32px;padding:8px 12px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);}
+.brief .chart{margin:6px 0 0 32px;padding:8px 12px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);}
 .brief .chart figcaption{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;margin-bottom:4px;}
 .brief .chart-change{font-weight:600;}
 .brief .chart svg{display:block;color:var(--cc-color-primary);}

@@ -50,7 +50,6 @@ const fixtureViewModel: BriefViewModel = {
         rules: [
           { name: 'Potential SharpRDP Behavior', count: 3 },
           { name: 'Privileged Container Creation with Host Directory Mount', count: 3 },
-          { name: 'Potential Credential Access via LSASS Memory Dump', count: 2 },
         ],
       },
       assessment:
@@ -126,7 +125,7 @@ describe('renderBriefHtml', () => {
 
   it('lists the alerts as one row per rule, with a total only when rules are left out', () => {
     const { html } = renderBriefHtml(fixtureViewModel);
-    expect(html).toContain('12 open alerts in the last 7 days, 4 more rules');
+    expect(html).toContain('12 open alerts in the last 7 days, 5 more rules');
 
     const { html: accountedFor } = renderBriefHtml({
       ...fixtureViewModel,

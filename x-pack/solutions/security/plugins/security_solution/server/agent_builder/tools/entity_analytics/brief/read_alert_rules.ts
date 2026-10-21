@@ -20,7 +20,7 @@ import { getPeriodStart } from './describe_scope';
 import { getBriefEntityType } from './read_entities';
 import type { BriefCandidate, EntityAlerts } from './types';
 
-const MAX_RULES_PER_ENTITY = 3;
+const MAX_RULES_PER_ENTITY = 2;
 /** The members of a group whose records match its alerts without an entity id. Stamped alerts match every member. */
 const MAX_MEMBERS_MATCHED_BY_RECORD = 20;
 /** Rule names are written by users, so a long one is cut. */
