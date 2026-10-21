@@ -77,7 +77,7 @@ export const readEntities = async ({
     esClient,
     spaceId,
     ranked.map(({ id }) => id),
-    GROUP_VALUE_FIELDS
+    MEMBER_FIELDS
   );
   return {
     candidates: ranked.map((candidate) => {
@@ -87,7 +87,7 @@ export const readEntities = async ({
           candidate,
           members.map(({ record }) => record)
         ),
-        memberIds: members.map(({ id }) => id),
+        members,
       };
     }),
     capturedCount: entityIds.length,
@@ -112,11 +112,8 @@ export const selectCandidateTiles = ({
   return tileIdsByEntityId;
 };
 
-const GROUP_VALUE_FIELDS = [
-  'asset.criticality',
-  'entity.attributes.watchlists',
-  'entity.lifecycle.first_seen',
-];
+/** Every field of a member's record: its group values, and the identity fields that tell which alerts are its own. */
+const MEMBER_FIELDS = ['*'];
 
 /** A group's values, as the page shows them: the highest criticality, every watchlist, the earliest first seen. */
 export const withGroupValues = (
@@ -206,7 +203,7 @@ export const getCandidateRisk = ({ id, record }: BriefCandidate): CandidateRisk 
 };
 
 /** The record's entity type, or the EUID prefix when the record has none. */
-const getBriefEntityType = (record: Entity, id: string): BriefEntityType => {
+export const getBriefEntityType = (record: Entity, id: string): BriefEntityType => {
   const isKnown = (type: unknown): type is BriefEntityType =>
     ENTITY_IDENTIFIER_TYPES.some((known) => known === type);
   try {

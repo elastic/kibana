@@ -9,6 +9,7 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { Entity, EntityRiskLevels } from '@kbn/entity-store/common';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachments';
+import type { GroupMember } from '../../../../lib/entity_analytics/entity_case_counts/fetch_group_member_ids';
 import type { RiskScoreDataClient } from '../../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
@@ -27,8 +28,8 @@ export interface BriefCandidate {
   /** The tiles that flag the entity, in the page's order. */
   tileIds: SignalCardId[];
   record: Entity;
-  /** The ids of the members resolved to a golden entity. Absent for an entity without members. */
-  memberIds?: string[];
+  /** The members resolved to a golden entity, with their records. Absent for an entity without members. */
+  members?: GroupMember[];
 }
 
 /** The open alerts of an entity, or of its resolution group, in the captured period. */
