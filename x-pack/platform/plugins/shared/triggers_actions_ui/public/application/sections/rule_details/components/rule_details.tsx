@@ -354,6 +354,13 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
 
   const badges: AppHeaderBadge[] = [
     {
+      label: i18n.translate('xpack.triggersActionsUI.sections.ruleDetails.classicRulesBadge', {
+        defaultMessage: 'Classic',
+      }),
+      color: 'hollow',
+      'data-test-subj': 'classicRulesBadge',
+    },
+    {
       label:
         rule.executionStatus.status.charAt(0).toUpperCase() + rule.executionStatus.status.slice(1),
       color: statusColor === 'subdued' ? 'default' : statusColor,

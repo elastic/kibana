@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-export { dashboardOperationSchema, executeDashboardOperations } from './src/operations';
+export {
+  dashboardOperationSchema,
+  executeDashboardOperations,
+  hasValidCreateMetadataOperations,
+} from './src/operations';
 
-export { getErrorMessage, hasValidCreateMetadataOperations } from './src/utils';
+export { arrangeDashboardLayout, buildLayoutPrompt, parseLayoutAnswer } from './src/layout';
+export type { ArrangeDashboardLayout, LayoutArrangement, LayoutRequest } from './src/layout';
+
+export { getErrorMessage } from './src/utils';
 
 export { createPanelFailureResult } from './src/resolve_panel';
 export type {
@@ -16,21 +23,19 @@ export type {
   PanelContentAttempt,
 } from './src/resolve_panel';
 
-export { EMBEDDABLE_TYPE_BY_RENDERER } from './src/operations/panels';
+export type { DashboardValidationIssue, DashboardValidator } from './src/validate_dashboard';
+
+export { getRendererEmbeddableType } from './src/panels';
 export type {
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,
   CustomContentPanelResolutionRequest,
   ResolvePanelContent,
   VisPanelResolutionRequest,
-} from './src/operations/panels';
-export {
-  MARKDOWN_EMBEDDABLE_TYPE,
-  markdownPanelConfigSchema,
-} from './src/operations/panels/markdown';
+} from './src/panels';
 
 export type {
   ControlFieldCapability,
   ResolveAttachmentPanel,
   ResolveControlFieldCapabilities,
-} from './src/operations/types';
+} from './src/types';

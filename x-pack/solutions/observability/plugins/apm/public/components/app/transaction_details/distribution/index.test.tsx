@@ -137,7 +137,7 @@ describe('transaction_details/distribution', () => {
         .spyOn(useFetcherModule, 'useFetcher')
         .mockImplementationOnce(() => ({
           data: {
-            traceItems: {},
+            traceItems: [],
             entryTransaction: {},
           },
           refetch: () => {},

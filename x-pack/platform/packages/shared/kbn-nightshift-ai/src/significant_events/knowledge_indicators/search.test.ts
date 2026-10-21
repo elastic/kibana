@@ -12,7 +12,7 @@ function makeFeature(overrides: Partial<Feature> = {}): Feature {
   return {
     id: 'feature-id',
     uuid: 'feature-uuid',
-    stream_name: 'logs.test',
+    source_id: 'logs.test',
     type: 'dataset_analysis',
     description: 'Feature description',
     properties: {},
@@ -36,14 +36,14 @@ describe('searchKnowledgeIndicators', () => {
   it('returns both features and queries by default', async () => {
     const res = await searchKnowledgeIndicators({
       params: {},
-      getStreamNames: async () => ['logs.test'],
+      getSourceIds: async () => ['logs.test'],
       getFeatures: async () => [makeFeature({ id: 'f1', confidence: 80 })],
       getQueries: async () => [
         {
           query: makeStreamQuery({ id: 'q1', severity_score: 50 }),
           rule_backed: true,
           rule_id: 'rule-1',
-          stream_name: 'logs.test',
+          source_id: 'logs.test',
         },
       ],
     });
@@ -62,14 +62,14 @@ describe('searchKnowledgeIndicators', () => {
           query: makeStreamQuery({ id: 'q1' }),
           rule_backed: false,
           rule_id: 'rule-1',
-          stream_name: 'logs.test',
+          source_id: 'logs.test',
         },
       ]
     );
 
     const res = await searchKnowledgeIndicators({
       params: { kind: ['query'] },
-      getStreamNames: async () => ['logs.test'],
+      getSourceIds: async () => ['logs.test'],
       getFeatures,
       getQueries,
     });
@@ -85,7 +85,7 @@ describe('searchKnowledgeIndicators', () => {
 
     const res = await searchKnowledgeIndicators({
       params: { kind: ['feature'] },
-      getStreamNames: async () => ['logs.test'],
+      getSourceIds: async () => ['logs.test'],
       getFeatures,
       getQueries,
     });
@@ -95,13 +95,13 @@ describe('searchKnowledgeIndicators', () => {
     expect(res.knowledge_indicators[0].kind).toBe('feature');
   });
 
-  it('filters requested stream_names against accessible streams', async () => {
+  it('filters requested source_ids against accessible sources', async () => {
     const getFeatures = jest.fn(async () => []);
     const getQueries = jest.fn(async () => []);
 
     await searchKnowledgeIndicators({
-      params: { stream_names: ['logs.allowed', 'logs.denied'] },
-      getStreamNames: async () => ['logs.allowed'],
+      params: { source_ids: ['logs.allowed', 'logs.denied'] },
+      getSourceIds: async () => ['logs.allowed'],
       getFeatures,
       getQueries,
     });
@@ -114,13 +114,13 @@ describe('searchKnowledgeIndicators', () => {
     );
   });
 
-  it('returns empty when requested stream_names are not accessible', async () => {
+  it('returns empty when requested source_ids are not accessible', async () => {
     const getFeatures = jest.fn(async () => []);
     const getQueries = jest.fn(async () => []);
 
     const res = await searchKnowledgeIndicators({
-      params: { stream_names: ['logs.missing'] },
-      getStreamNames: async () => ['logs.allowed'],
+      params: { source_ids: ['logs.missing'] },
+      getSourceIds: async () => ['logs.allowed'],
       getFeatures,
       getQueries,
     });
@@ -133,7 +133,7 @@ describe('searchKnowledgeIndicators', () => {
   it('applies per_page to the merged output', async () => {
     const res = await searchKnowledgeIndicators({
       params: { per_page: 2 },
-      getStreamNames: async () => ['logs.test'],
+      getSourceIds: async () => ['logs.test'],
       getFeatures: async () => [
         makeFeature({ id: 'f1', confidence: 10 }),
         makeFeature({ id: 'f2', confidence: 20 }),
@@ -144,13 +144,13 @@ describe('searchKnowledgeIndicators', () => {
             query: makeStreamQuery({ id: 'q1' }),
             rule_backed: true,
             rule_id: 'rule-1',
-            stream_name: 'logs.test',
+            source_id: 'logs.test',
           },
           {
             query: makeStreamQuery({ id: 'q2' }),
             rule_backed: true,
             rule_id: 'rule-2',
-            stream_name: 'logs.test',
+            source_id: 'logs.test',
           },
         ] as QueryLink[],
     });
@@ -195,7 +195,7 @@ describe('searchKnowledgeIndicators', () => {
         page: 2,
         per_page: 1,
       },
-      getStreamNames: async () => ['logs.test'],
+      getSourceIds: async () => ['logs.test'],
       getFeatures,
       getQueries: async () => [],
     });
@@ -228,13 +228,13 @@ describe('searchKnowledgeIndicators', () => {
           query: makeStreamQuery({ id: 'matching', type: 'match' }),
           rule_backed: true,
           rule_id: 'rule-1',
-          stream_name: 'logs.test',
+          source_id: 'logs.test',
         },
         {
           query: makeStreamQuery({ id: 'wrong-rule', type: 'match' }),
           rule_backed: true,
           rule_id: 'rule-2',
-          stream_name: 'logs.test',
+          source_id: 'logs.test',
         },
       ]
     );
@@ -246,7 +246,7 @@ describe('searchKnowledgeIndicators', () => {
         rule_ids: ['rule-1'],
         rule_backed: true,
       },
-      getStreamNames: async () => ['logs.test'],
+      getSourceIds: async () => ['logs.test'],
       getFeatures: async () => [],
       getQueries,
     });
@@ -269,7 +269,7 @@ describe('searchKnowledgeIndicators', () => {
         feature_types: ['dependency'],
         feature_ids: ['orders-api'],
       },
-      getStreamNames: async () => ['logs.test'],
+      getSourceIds: async () => ['logs.test'],
       getFeatures: async () => [
         makeFeature({
           id: 'orders-api-storage',
@@ -308,7 +308,7 @@ describe('searchKnowledgeIndicators', () => {
         feature_types: ['dependency', 'entity'],
         feature_ids: ['orders-api'],
       },
-      getStreamNames: async () => ['logs.test'],
+      getSourceIds: async () => ['logs.test'],
       getFeatures: async () => [
         makeFeature({
           id: 'orders-api-storage',
@@ -354,7 +354,7 @@ describe('searchKnowledgeIndicators', () => {
         feature_types: ['dependency', 'entity'],
         feature_ids: ['frontend-balancereader-http'],
       },
-      getStreamNames: async () => ['logs.test'],
+      getSourceIds: async () => ['logs.test'],
       getFeatures: async () => [
         makeFeature({
           id: 'frontend-balancereader-http',
@@ -390,7 +390,7 @@ describe('searchKnowledgeIndicators', () => {
         feature_types: ['infrastructure', 'entity'],
         feature_ids: ['k8s-node-1'],
       },
-      getStreamNames: async () => ['logs.test'],
+      getSourceIds: async () => ['logs.test'],
       getFeatures: async () => [
         makeFeature({ id: 'k8s-node-1', type: 'infrastructure', properties: {} }),
         makeFeature({ id: 'k8s-node-2', type: 'infrastructure', properties: {} }),
@@ -413,9 +413,9 @@ describe('searchKnowledgeIndicators', () => {
     const res = await searchKnowledgeIndicators({
       params: { kind: ['feature'] },
       onFeatureFetchError,
-      getStreamNames: async () => ['logs.bad', 'logs.good'],
-      getFeatures: async (streamName) => {
-        if (streamName === 'logs.bad') {
+      getSourceIds: async () => ['logs.bad', 'logs.good'],
+      getFeatures: async (sourceId) => {
+        if (sourceId === 'logs.bad') {
           throw new Error('boom');
         }
         return [makeFeature({ id: 'ok' })];

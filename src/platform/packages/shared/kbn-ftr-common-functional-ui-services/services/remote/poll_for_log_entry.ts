@@ -42,8 +42,7 @@ export function pollForLogEntry$(driver: WebDriver, type: string, ms: number) {
     ),
 
     // resubscribe when parent completes with delay by `ms` milliseconds
-    repeat(),
-    delay(ms),
+    repeat({ delay: ms }),
 
     catchError((error, resubscribe) => {
       if (

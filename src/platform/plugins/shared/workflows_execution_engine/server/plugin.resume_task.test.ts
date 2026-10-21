@@ -10,7 +10,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { TaskAlreadyRunningError, TaskStatus } from '@kbn/task-manager-plugin/server';
+import { TaskAlreadyRunningError, TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { ConcreteTaskInstance, TaskRegisterDefinition } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
@@ -86,6 +86,7 @@ describe('workflow:resume task runner event fields', () => {
     const initializerContext = coreMock.createPluginInitializerContext({
       logging: { console: false },
       eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
+      storage: { source: 'plain_index', dataRetention: '90d' },
     });
     const plugin = new WorkflowsExecutionEnginePlugin(initializerContext);
     const coreSetup = coreMock.createSetup();
@@ -176,21 +177,30 @@ describe('workflow:resume task runner event fields', () => {
       })
     );
     // A new caller may ensure this same task while the current dispatch finishes.
-    expect(await runner.run()).toEqual({ runAt: expect.any(Date), state: {} });
+    expect(await runner.run()).toEqual({
+      runAt: expect.any(Date),
+      state: {},
+      priority: TaskPriority.Standard,
+    });
     expect(mockResumeWorkflow).not.toHaveBeenCalled();
     taskManagerStart.runSoon.mockRejectedValueOnce(new TaskAlreadyRunningError('runner'));
-    expect(await runner.run()).toEqual({ runAt: expect.any(Date), state: {} });
-    expect(taskManagerStart.removeIfExists).not.toHaveBeenCalled();
-    mockGetWorkflowExecutionById.mockResolvedValue({ status: 'completed' });
-    taskManagerStart.get.mockResolvedValue({
-      ...taskManagerMock.createTask(),
-      id: getWorkflowImmediateResumeTaskId('retained'),
-      status: TaskStatus.Idle,
+    expect(await runner.run()).toEqual({
+      runAt: expect.any(Date),
+      state: {},
+      priority: TaskPriority.Standard,
     });
-    expect(await runner.run()).toBeUndefined();
-    expect(taskManagerStart.removeIfExists).toHaveBeenCalledWith(
-      getWorkflowImmediateResumeTaskId('retained')
+    expect(taskManagerStart.bulkRemove).not.toHaveBeenCalled();
+    mockGetWorkflowExecutionById.mockResolvedValue({ status: 'completed' });
+    const idleTasks = [
+      getWorkflowImmediateResumeTaskId('retained'),
+      getWorkflowGlobalTimeoutResumeTaskId('retained'),
+    ].map((id) => ({ ...taskManagerMock.createTask(), id, status: TaskStatus.Idle, attempts: 0 }));
+    taskManagerStart.fetch.mockResolvedValue({ docs: idleTasks, versionMap: new Map() });
+    taskManagerStart.bulkGet.mockResolvedValue(
+      idleTasks.map((value) => ({ tag: 'ok' as const, value }))
     );
+    expect(await runner.run()).toBeUndefined();
+    expect(taskManagerStart.bulkRemove).toHaveBeenCalledWith(idleTasks.map(({ id }) => id));
   });
 
   it('parks the immediate runner while the execution is still waiting', async () => {
@@ -253,11 +263,17 @@ describe('workflow:resume task runner event fields', () => {
   it('does not remove a claimed runner when the retained wake sees a terminal execution', async () => {
     setupPlugin();
     mockGetWorkflowExecutionById.mockResolvedValue({ status: 'failed' });
-    taskManagerStart.get.mockResolvedValue({
+    const claimedRunner = {
       ...taskManagerMock.createTask(),
       id: getWorkflowImmediateResumeTaskId('claimed'),
       status: TaskStatus.Running,
+    };
+    // The search still reports the runner idle; the fresh read sees the claim.
+    taskManagerStart.fetch.mockResolvedValue({
+      docs: [{ ...claimedRunner, status: TaskStatus.Idle }],
+      versionMap: new Map(),
     });
+    taskManagerStart.bulkGet.mockResolvedValue([{ tag: 'ok', value: claimedRunner }]);
     const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: {
@@ -270,7 +286,43 @@ describe('workflow:resume task runner event fields', () => {
     );
 
     expect(await runner.run()).toBeUndefined();
-    expect(taskManagerStart.removeIfExists).not.toHaveBeenCalled();
+    expect(taskManagerStart.bulkGet).toHaveBeenCalledWith([claimedRunner.id]);
+    expect(taskManagerStart.bulkRemove).not.toHaveBeenCalled();
+  });
+
+  it('retains interactive priority through a busy handoff and resets it after consumption', async () => {
+    setupPlugin();
+    mockGetWorkflowExecutionById.mockResolvedValue({
+      status: 'waiting_for_input',
+      context: { pendingInteractiveResume: true, resumeInput: { approved: true } },
+    });
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          id: getWorkflowWakeTaskId('interactive'),
+          params: { workflowRunId: 'interactive', spaceId: 'default' },
+          priority: TaskPriority.UserInteractive,
+        },
+        fakeRequest: {} as KibanaRequest,
+      })
+    );
+    taskManagerStart.runSoon.mockRejectedValueOnce(new TaskAlreadyRunningError('runner'));
+    expect(await runner.run()).toMatchObject({ priority: TaskPriority.UserInteractive });
+    expect(await runner.run()).toMatchObject({ priority: TaskPriority.UserInteractive });
+    expect(taskManagerStart.runSoon).toHaveBeenLastCalledWith(
+      getWorkflowImmediateResumeTaskId('interactive'),
+      { priority: TaskPriority.UserInteractive }
+    );
+
+    mockGetWorkflowExecutionById.mockResolvedValue({
+      status: 'waiting',
+      context: { pendingInteractiveResume: false, resumeInput: null, isUserInteractive: true },
+    });
+    expect(await runner.run()).toMatchObject({ priority: TaskPriority.Standard });
+    expect(taskManagerStart.runSoon).toHaveBeenLastCalledWith(
+      getWorkflowImmediateResumeTaskId('interactive')
+    );
   });
 
   it('dispatches a timeout task through the same immediate runner', async () => {

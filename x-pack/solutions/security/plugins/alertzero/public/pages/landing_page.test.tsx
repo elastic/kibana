@@ -46,33 +46,13 @@ jest.mock('../components/scan_failure_callout/scan_failure_callout', () => ({
   ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
 }));
 jest.mock('../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
+jest.mock('../service_accounts/ensure_worker_service_accounts', () => ({
+  ensureWorkerServiceAccounts: async (_http: unknown, _serviceAccounts: unknown, ids: string[]) =>
+    new Map(ids.map((id) => [id, { ok: true, serviceAccountId: 'account-a' }])),
+}));
 
 const mockUseWorkers = useWorkers as jest.Mock;
 
-const withServiceAccountPicker = <T extends { security?: object }>(core: T) => ({
-  ...core,
-  security: {
-    ...core.security,
-    uiApi: {
-      components: {
-        getServiceAccountPicker: ({
-          onSelect,
-        }: {
-          onSelect: (account: { id: string } | null) => void;
-        }) => (
-          <button type="button" onClick={() => onSelect({ id: 'account-a' })}>
-            Select service account
-          </button>
-        ),
-      },
-    },
-  },
-});
-
-const selectServiceAccount = () => {
-  fireEvent.click(screen.getByTestId('alertZeroServiceAccountSelect-onboarding'));
-  fireEvent.click(screen.getByRole('button', { name: 'Select service account' }));
-};
 const mockUseInvestigationsCount = useInvestigationsCount as jest.Mock;
 // useUpdateWorker mock above is kept for completeness; OnboardingPage no longer calls it.
 
@@ -92,7 +72,7 @@ type QueryOverrides = Partial<{
 }>;
 
 const workersResult = (workers: Array<{ enabled: boolean }>, overrides: QueryOverrides = {}) => ({
-  data: { workers: workers.map((w, i) => ({ id: `w-${i}`, ...w })) },
+  data: { workers: workers.map((w, i) => ({ id: `w-${i}`, blockingReasons: [], ...w })) },
   isLoading: false,
   isFetching: false,
   error: undefined,
@@ -109,6 +89,7 @@ const investigationsResult = (total: number, overrides: QueryOverrides = {}) => 
 
 const wrap = (ui: React.ReactElement) => {
   const core = coreMock.createStart();
+  (core.application.capabilities as Record<string, unknown>).alertzero = { write: true };
   const history = createMemoryHistory();
   const queryClient = new QueryClient({
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
@@ -148,7 +129,7 @@ describe('LandingPage', () => {
 
     renderPage();
 
-    expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
   });
 
@@ -157,7 +138,7 @@ describe('LandingPage', () => {
 
     renderPage();
 
-    expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
   });
 
   it('shows the queue when at least one worker is enabled', () => {
@@ -166,7 +147,7 @@ describe('LandingPage', () => {
     renderPage();
 
     expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
-    expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroOnboardingIntroPromo')).not.toBeInTheDocument();
   });
 
   it('shows the queue when investigations exist even with no workers enabled', () => {
@@ -175,7 +156,7 @@ describe('LandingPage', () => {
     renderPage();
 
     expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
-    expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroOnboardingIntroPromo')).not.toBeInTheDocument();
   });
 
   describe('onboarding condition', () => {
@@ -193,7 +174,7 @@ describe('LandingPage', () => {
 
         renderPage();
 
-        expect(screen.queryByText('AlertZero in 90 seconds') != null).toBe(onboarding);
+        expect(screen.queryByTestId('alertZeroOnboardingIntroPromo') != null).toBe(onboarding);
         expect(screen.queryByTestId('conversations-page') != null).toBe(!onboarding);
       }
     );
@@ -204,7 +185,7 @@ describe('LandingPage', () => {
 
     renderPage();
 
-    expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroOnboardingIntroPromo')).not.toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
     expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
   });
@@ -245,7 +226,7 @@ describe('LandingPage', () => {
 
     renderPage();
 
-    expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroOnboardingIntroPromo')).not.toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
     expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
   });
@@ -258,7 +239,7 @@ describe('LandingPage', () => {
 
     renderPage();
 
-    expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroOnboardingIntroPromo')).not.toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
     expect(document.querySelector('[class*="euiLoadingSpinner"]')).toBeInTheDocument();
   });
@@ -268,14 +249,14 @@ describe('LandingPage', () => {
     mockUseWorkers.mockReturnValue(workersResult([]));
     const { rerender } = render(wrap(<LandingPage />));
 
-    expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
 
     // Phase 2: another admin enables a worker — page should transition without a reload.
     mockUseWorkers.mockReturnValue(workersResult([{ enabled: true }]));
     rerender(wrap(<LandingPage />));
 
     expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
-    expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroOnboardingIntroPromo')).not.toBeInTheDocument();
   });
 
   it('does not transition to the queue when a background refetch returns partial state mid-save', async () => {
@@ -283,7 +264,13 @@ describe('LandingPage', () => {
     // the Enable button is active. (workersResult uses sequential w-N IDs; supply
     // the real catalog IDs so the worker intersection in OnboardingPage matches.)
     mockUseWorkers.mockReturnValue({
-      data: { workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false })) },
+      data: {
+        workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({
+          id,
+          enabled: false,
+          blockingReasons: [],
+        })),
+      },
       isLoading: false,
       isFetching: false,
       error: undefined,
@@ -304,21 +291,21 @@ describe('LandingPage', () => {
     );
     const coreStart = coreMock.createStart();
     (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: true };
-    const core = withServiceAccountPicker({
+    const core = {
       ...coreStart,
       http: {
         ...coreStart.http,
         get: jest.fn().mockResolvedValue(undefined),
         patch: httpPatch,
       },
-    });
+    };
     const history = createMemoryHistory();
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     });
     // Seed the workers cache so useEnableWorkers can filter IDs on the first click.
     queryClient.setQueryData(queryKeys.workers.list(), {
-      workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false })),
+      workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false, blockingReasons: [] })),
     });
 
     // Build the element as a factory so each call produces a distinct React element.
@@ -340,12 +327,11 @@ describe('LandingPage', () => {
 
     const { rerender } = render(makeUI());
 
-    expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
     expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
 
     // Start the save — this calls onSavingChange(true) in LandingPage.
-    selectServiceAccount();
     fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
     // Wait until all five PATCHes are in-flight (button becomes disabled).
@@ -358,7 +344,7 @@ describe('LandingPage', () => {
     // Construct a fresh element tree for rerender so React reconciles from the new root
     // and LandingPage reads the updated mock return value.
     mockUseWorkers.mockReturnValue({
-      data: { workers: [{ id: ALL_ONBOARDING_WORKER_IDS[0], enabled: true }] },
+      data: { workers: [{ id: ALL_ONBOARDING_WORKER_IDS[0], enabled: true, blockingReasons: [] }] },
       isLoading: false,
       isFetching: false,
       error: undefined,
@@ -390,7 +376,13 @@ describe('LandingPage', () => {
 
   it('releases the save lock on total failure so a subsequent worker enable can transition normally', async () => {
     mockUseWorkers.mockReturnValue({
-      data: { workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false })) },
+      data: {
+        workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({
+          id,
+          enabled: false,
+          blockingReasons: [],
+        })),
+      },
       isLoading: false,
       isFetching: false,
       error: undefined,
@@ -406,20 +398,20 @@ describe('LandingPage', () => {
     );
     const coreStart = coreMock.createStart();
     (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: true };
-    const core = withServiceAccountPicker({
+    const core = {
       ...coreStart,
       http: {
         ...coreStart.http,
         get: jest.fn().mockResolvedValue(undefined),
         patch: httpPatch,
       },
-    });
+    };
     const history = createMemoryHistory();
     const queryClient = new QueryClient({
       defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
     });
     queryClient.setQueryData(queryKeys.workers.list(), {
-      workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false })),
+      workers: ALL_ONBOARDING_WORKER_IDS.map((id) => ({ id, enabled: false, blockingReasons: [] })),
     });
 
     const makeUI = () => (
@@ -437,11 +429,10 @@ describe('LandingPage', () => {
     );
 
     const { rerender } = render(makeUI());
-    expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
     expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
 
-    selectServiceAccount();
     fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
     // Wait for all PATCHes to be in-flight.
@@ -459,7 +450,7 @@ describe('LandingPage', () => {
     // Simulate a background refetch returning an enabled worker: the queue should
     // now be reachable (savingInProgress is false).
     mockUseWorkers.mockReturnValue({
-      data: { workers: [{ id: ALL_ONBOARDING_WORKER_IDS[0], enabled: true }] },
+      data: { workers: [{ id: ALL_ONBOARDING_WORKER_IDS[0], enabled: true, blockingReasons: [] }] },
       isLoading: false,
       isFetching: false,
       error: undefined,
@@ -467,7 +458,7 @@ describe('LandingPage', () => {
     rerender(makeUI());
 
     expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
-    expect(screen.queryByText('AlertZero in 90 seconds')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroOnboardingIntroPromo')).not.toBeInTheDocument();
   });
 
   it('transitions from queue to onboarding when stale positive cache is corrected by a fresh empty response', () => {
@@ -481,7 +472,7 @@ describe('LandingPage', () => {
     mockUseWorkers.mockReturnValue(workersResult([{ enabled: false }]));
     rerender(wrap(<LandingPage />));
 
-    expect(screen.getByText('AlertZero in 90 seconds')).toBeInTheDocument();
+    expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
   });
 

@@ -1,7 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/293914
-type: deprecation
-products:
-- product: cloud-serverless
-- product: kibana
-title: Delete `search_notebooks` plugin

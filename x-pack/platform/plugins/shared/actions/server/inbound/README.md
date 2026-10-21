@@ -100,6 +100,31 @@ xpack.actions.inboundEvents.admission:
 
 At most 50 inbound requests are in flight at once, and 10 of those may be for one connector. A full cap returns **429** with `Retry-After: 1`. The body is not read. The slot is held until the response is sent or the client disconnects. `maxInFlight` times `maxBodyBytes` is the raw-body budget for this route (50mb at the defaults).
 
+## Bursts
+
+A burst that stays inside the in-flight cap and the connector window is accepted and scheduled on the same path as a single request. The defaults are 10 in flight for one connector, 50 in flight on this process, and 300 authenticated requests per minute per connector. Past either cap the sender gets **429** and retries after `Retry-After`.
+
+When the last-saver identity is missing, the sender still gets **202** `{ "ok": true }`. Nothing is scheduled. Kibana logs `identity_missing` and counts `result=schedule`.
+
+When one or more events in an accepted body fail to emit, the sender still gets **202**. Kibana logs `emit_partial` and counts `result=schedule`. Events earlier in that same body may already have been scheduled.
+
+## Operator visibility
+
+Every hub response writes one `Inbound events outcome=...` log line and increments `kibana.actions.inbound_events.request.count` once. The attribute is `result`. It has six values, so the series omits the connector id. The log and the counter omit the token and the raw body.
+
+| What the sender received | Log `outcome` | Metric `result` |
+| --- | --- | --- |
+| 202, events scheduled (or an empty emit) | `accepted` | `accepted` |
+| 200 handshake | `http_ack` | `accepted` |
+| 404 bad or unknown token | `auth_fail` | `auth` |
+| 413 body larger than `maxBodyBytes` (default 1mb) | `payload_too_large` | `size` |
+| 429 over the window or the in-flight cap | `rate_limited` | `throttle` |
+| 202, nothing scheduled | `identity_missing` | `schedule` |
+| 202, one or more events in the body failed to emit | `emit_partial` | `schedule` |
+| Other reject | `disabled`, `no_spec`, `load_miss`, `validate_fail`, `handle_fail` | `other` |
+
+`auth_fail` and an address or in-flight `rate_limited` line are debug. A connector `rate_limited` line and `payload_too_large` are info. `emit_partial` and `identity_missing` are warn. A 413 comes from the route body limit before the handler runs, so it does not spend the per-minute window. The pre-response hook records it.
+
 ## Who a matching workflow runs as
 
 The ingest token only authenticates the POST. After it is accepted, Actions decrypts the connector and emits with a fake request built from the last-saver Kibana API key on the `action` saved object. Matching workflows therefore run **as the last person who saved that inbound connector**, not as `kibana_system` and not as the workflow YAML author. Anyone who holds the ingest token can trigger work with that user's privileges.

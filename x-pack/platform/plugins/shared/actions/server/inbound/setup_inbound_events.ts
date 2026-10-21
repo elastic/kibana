@@ -6,6 +6,7 @@
  */
 
 import type { CoreSetup, HttpServiceSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import { brandSpaceId, DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
 
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { InMemoryConnector } from '../types';
@@ -14,7 +15,10 @@ import { dispatchConnectorEvents } from './dispatch_connector_events';
 import { createInboundEventsClient } from './factory';
 import { InboundEventAdmission } from './inbound_event_admission';
 import { InboundEventRateLimiter } from './inbound_event_rate_limiter';
-import { registerInboundEventAdmission } from './register_inbound_event_admission';
+import {
+  registerInboundEventAdmission,
+  registerInboundEventSizeOutcome,
+} from './register_inbound_event_admission';
 import type { ConnectorEventEmitter } from './types';
 
 export interface SetupInboundEventsParams {
@@ -35,7 +39,7 @@ export interface SetupInboundEventsParams {
 export interface InboundEventsSetup {
   maxBodyBytes: number;
   client: InboundEventsClient;
-  getSpaceId: (request: KibanaRequest) => string;
+  getSpaceId: (request: KibanaRequest) => SpaceId;
 }
 
 /** Registers inbound event admission and returns the hub route deps when the feature is enabled. */
@@ -52,8 +56,10 @@ export function setupInboundEvents({
     return undefined;
   }
 
-  const getSpaceId = (request: KibanaRequest): string =>
-    spaces?.spacesService.getSpaceId(request) ?? 'default';
+  const getSpaceId = (request: KibanaRequest): SpaceId =>
+    brandSpaceId(spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID);
+
+  registerInboundEventSizeOutcome({ http, logger, getSpaceId });
 
   const admissionConfig = actionsConfigUtils.getInboundEventsAdmission();
   if (admissionConfig.enabled) {

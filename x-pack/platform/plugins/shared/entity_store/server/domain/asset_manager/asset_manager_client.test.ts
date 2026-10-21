@@ -539,6 +539,54 @@ describe('AssetManagerClient', () => {
       expect(scheduledModes()).toEqual([EXTRACTION_MODE.single]);
     });
 
+    describe('getStatus config', () => {
+      beforeEach(() => {
+        mockEngineDescriptorClient.getAll.mockResolvedValue([
+          { type: 'host', status: 'started' },
+          {
+            type: 'user',
+            status: 'started',
+            nonPriorityLogExtractionConfig: { frequency: '5m' },
+          },
+        ]);
+        mockGlobalStateClient.findLogExtractionOverrides.mockResolvedValue({
+          maxLogsPerWindow: 500000,
+        });
+      });
+
+      it('resolves priority and non-priority config for dual-process types', async () => {
+        const result = await createDualProcessClient().getStatus();
+        if (!('logsExtractionConfigByType' in result)) throw new Error('expected installed');
+        const { logsExtractionConfigByType, nonPriorityLogsExtractionConfigByType } = result;
+
+        expect(logsExtractionConfigByType.user).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'defer',
+          maxLogsPerWindow: 500000,
+          frequency: '1m',
+        });
+        expect(nonPriorityLogsExtractionConfigByType.user).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'drop',
+          maxLogsPerWindow: 500000,
+          frequency: '5m',
+        });
+        expect(logsExtractionConfigByType.host).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'drop',
+          maxLogsPerWindow: 500000,
+        });
+        expect(nonPriorityLogsExtractionConfigByType.host).toBeUndefined();
+      });
+
+      it('resolves single config only with the flag off', async () => {
+        const result = await client.getStatus();
+        if (!('logsExtractionConfigByType' in result)) throw new Error('expected installed');
+
+        expect(result.logsExtractionConfigByType.user).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'drop',
+        });
+        expect(result.nonPriorityLogsExtractionConfigByType).toEqual({});
+      });
+    });
+
     it('start rolls the shared task back when the non-priority schedule fails', async () => {
       mockScheduleExtractEntityTask
         .mockResolvedValueOnce(undefined)
@@ -674,10 +722,9 @@ describe('AssetManagerClient', () => {
       });
 
       // `priority` and `single` resolve to the same task id, so a `priority` request on a type
-      // with no priority variant acts on its only task. That is the right outcome, but the
-      // frequency comes from DEFAULT_CONFIG_BY_MODE.priority while the single path takes the
-      // code default. They agree today; this fails loudly if they ever diverge and a `priority`
-      // call starts silently rescheduling ungated types at a different cadence.
+      // with no priority variant acts on its only task — and must schedule it at the same
+      // frequency. This fails loudly if a mode-level frequency is ever introduced and starts
+      // silently rescheduling ungated types at a different cadence.
       it('startProcess priority keeps an ungated type on its single-process frequency', async () => {
         const dualProcessClient = createDualProcessClient();
 

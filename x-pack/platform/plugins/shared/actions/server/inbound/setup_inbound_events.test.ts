@@ -6,6 +6,7 @@
  */
 
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 import { actionsConfigMock } from '../actions_config.mock';
 import { createInboundEventsClient } from './factory';
@@ -23,7 +24,7 @@ const createInboundEventsClientMock = createInboundEventsClient as jest.MockedFu
 const emitParams = (): ConnectorEventEmitParams => ({
   eventId: 'evt-1',
   payload: { hello: 'world' },
-  spaceId: 'default',
+  spaceId: DEFAULT_SPACE_ID,
   connectorId: 'c1',
   connectorTypeId: '.inboundWebhook',
   request: httpServerMock.createKibanaRequest(),
@@ -52,6 +53,7 @@ describe('setupInboundEvents', () => {
 
     expect(inboundEvents).toBeUndefined();
     expect(http.registerOnPreAuth).not.toHaveBeenCalled();
+    expect(http.registerOnPreResponse).not.toHaveBeenCalled();
     expect(createInboundEventsClientMock).not.toHaveBeenCalled();
   });
 
@@ -70,6 +72,7 @@ describe('setupInboundEvents', () => {
     });
 
     expect(http.registerOnPreAuth).not.toHaveBeenCalled();
+    expect(http.registerOnPreResponse).toHaveBeenCalledTimes(1);
     expect(inboundEvents?.maxBodyBytes).toBe(1024 * 1024);
     expect(inboundEvents?.getSpaceId(request)).toBe('default');
     expect(createInboundEventsClientMock).toHaveBeenCalledWith(
@@ -105,6 +108,7 @@ describe('setupInboundEvents', () => {
     });
 
     expect(http.registerOnPreAuth).toHaveBeenCalledTimes(1);
+    expect(http.registerOnPreResponse).toHaveBeenCalledTimes(1);
     expect(getSpaceId).not.toHaveBeenCalled();
     expect(inboundEvents?.getSpaceId(request)).toBe('space-a');
     expect(getSpaceId).toHaveBeenCalledWith(request);

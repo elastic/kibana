@@ -70,25 +70,9 @@ export class SignificantEventsAppPlugin
       ],
       deepLinks: [
         {
-          id: 'knowledge_indicators' satisfies SignificantEventsLinkId,
-          title: i18n.translate('xpack.significantEventsApp.kiDeepLinkTitle', {
-            defaultMessage: 'Significant Events / KIs',
-          }),
-          path: '/knowledge_indicators',
-          visibleIn: [],
-          keywords: [
-            'knowledge indicators',
-            'ki',
-            'kis',
-            'significant events',
-            'sig events',
-            'sig events kis',
-          ],
-        },
-        {
           id: 'events' satisfies SignificantEventsLinkId,
           title: i18n.translate('xpack.significantEventsApp.eventsDeepLinkTitle', {
-            defaultMessage: 'Significant Events / Events',
+            defaultMessage: 'Significant events / Events',
           }),
           path: '/significant_events',
           visibleIn: [],
@@ -97,7 +81,7 @@ export class SignificantEventsAppPlugin
         {
           id: 'rules' satisfies SignificantEventsLinkId,
           title: i18n.translate('xpack.significantEventsApp.rulesDeepLinkTitle', {
-            defaultMessage: 'Significant Events / Rules',
+            defaultMessage: 'Significant events / Rules',
           }),
           path: '/queries',
           visibleIn: [],

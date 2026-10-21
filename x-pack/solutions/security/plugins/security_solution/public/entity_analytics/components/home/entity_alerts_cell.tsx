@@ -22,7 +22,7 @@ import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { SecurityPageName, useNavigation } from '@kbn/security-solution-navigation';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/hooks/use_entity_from_store';
-import { ENTITY_ANALYTICS_ALERTS_FROM, ENTITY_ANALYTICS_ALERTS_TO } from './constants';
+import { ENTITY_ANALYTICS_ALERTS_FROM, ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO } from './constants';
 import type { EntityType } from '../../../../common/entity_analytics/types';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import { FILTER_OPEN, FILTER_ACKNOWLEDGED } from '../../../../common/types';
@@ -60,7 +60,7 @@ const ENTITY_ALERTS_CELL_CONTEXT = buildExecutionContext(
 // Local aliases — the source of truth lives in ./constants and is shared with the
 // entity flyout insights section to keep both time windows in sync.
 const ALERTS_CELL_FROM_STR = ENTITY_ANALYTICS_ALERTS_FROM;
-const ALERTS_CELL_TO_STR = ENTITY_ANALYTICS_ALERTS_TO;
+const ALERTS_CELL_TO_STR = ENTITY_ANALYTICS_DEFAULT_TIMERANGE_TO;
 
 const ENTITY_FILTER_TITLE = i18n.translate(
   'xpack.securitySolution.entityAnalytics.homePage.alertsColumn.entityFilterTitle',
@@ -93,20 +93,26 @@ export const EntityAlertsCell: React.FC<{
 
   const entityFilters = useMemo(() => {
     if (euidApi?.euid && entityRecord) {
-      const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(entityType, entityRecord);
+      const filter = euidApi.euid?.dsl.getEuidFilterBasedOnDocument(
+        euidApi.getBuiltInEntityDefinition(entityType),
+        entityRecord
+      );
       if (filter != null) {
         return [filter];
       }
     }
     return [{ term: { [filterField]: entityName } }];
-  }, [euidApi?.euid, filterField, entityName, entityType, entityRecord]);
+  }, [euidApi, filterField, entityName, entityType, entityRecord]);
 
   const euidKqlEntityFilter = useMemo(() => {
     if (euidApi?.euid && entityRecord) {
-      return euidApi.euid.kql.getEuidFilterBasedOnDocument(entityType, entityRecord);
+      return euidApi.euid.kql.getEuidFilterBasedOnDocument(
+        euidApi.getBuiltInEntityDefinition(entityType),
+        entityRecord
+      );
     }
     return undefined;
-  }, [euidApi?.euid, entityType, entityRecord]);
+  }, [euidApi, entityType, entityRecord]);
 
   const queryEnabled = Boolean(signalIndexName && entityName && entityType);
   const {

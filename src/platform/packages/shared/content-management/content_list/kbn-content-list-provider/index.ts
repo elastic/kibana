@@ -92,6 +92,8 @@ export type {
   FilterFacetConfig,
   SortField,
   SortOption,
+  SortState,
+  SortDirection,
   SortingConfig,
   UseContentListSortReturn,
   PaginationConfig,
