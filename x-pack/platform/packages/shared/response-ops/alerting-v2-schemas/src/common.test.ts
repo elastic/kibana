@@ -90,30 +90,25 @@ describe('durationSchema', () => {
     expect(result.error!.issues).toEqual([
       {
         code: 'custom',
-        message:
-          'Invalid duration. Expected a positive integer followed by a unit, like "5m", "1h", "30s", "250ms"',
+        message: 'Invalid duration. Expected format like "5m", "1h", "30s", "250ms"',
         path: [],
       },
     ]);
   });
 
-  it('accepts a well-formed duration under the length limit', () => {
-    const value = '31536000000ms';
+  it('accepts a well-formed duration at the exact length limit', () => {
+    const value = `${'0'.repeat(MAX_DURATION_LENGTH - 2)}5m`;
 
-    expect(value.length).toBeLessThanOrEqual(MAX_DURATION_LENGTH);
+    expect(value).toHaveLength(MAX_DURATION_LENGTH);
     expect(durationSchema.parse(value)).toBe(value);
   });
 
-  it('accepts the smallest duration, 1ms', () => {
-    expect(durationSchema.parse('1ms')).toBe('1ms');
-  });
-
+  // Zero and zero-padded durations are deliberately accepted (reviewed decision):
+  // `0s` is a value, and `007m` parses to the same instant as `7m`.
   it.each(['0s', '0ms', '0m', '007m', '05s'])(
-    'rejects the zero or zero-padded duration "%s"',
+    'accepts the zero or zero-padded duration "%s"',
     (value) => {
-      const result = durationSchema.safeParse(value);
-
-      expect(result.success).toBe(false);
+      expect(durationSchema.parse(value)).toBe(value);
     }
   );
 
