@@ -211,7 +211,7 @@ describe('reassignAgent', () => {
       expect(actionResults.operations?.[1]).toEqual(
         expect.objectContaining({
           agent_id: agentInAgentlessDoc._id,
-          error: expect.stringContaining('agentless agent policy'),
+          error: expect.stringContaining('managed integration agent policy'),
         })
       );
     });

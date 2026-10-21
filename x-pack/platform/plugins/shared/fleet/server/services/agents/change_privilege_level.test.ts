@@ -73,7 +73,7 @@ describe('changeAgentPrivilegeLevel', () => {
     } as any);
     (throwIfAgentlessAgent as jest.Mock).mockRejectedValueOnce(
       new AgentlessAgentRestrictionError(
-        `Cannot remove root privilege for agentless agent ${agentId}`
+        `Cannot remove root privilege for managed integration agent ${agentId}`
       )
     );
 

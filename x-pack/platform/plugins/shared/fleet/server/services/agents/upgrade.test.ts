@@ -134,7 +134,7 @@ describe('sendUpgradeAgentsActions (plural)', () => {
     expect(calledWithActionResults.operations?.[1]).toEqual(
       expect.objectContaining({
         agent_id: agentInAgentlessDoc._id,
-        error: expect.stringContaining('Cannot upgrade agentless agent'),
+        error: expect.stringContaining('Cannot upgrade managed integration agent'),
       })
     );
   });

@@ -140,7 +140,7 @@ describe('restartBatch', () => {
     );
     const errorsArg = (mockCreateErrorActionResults as jest.Mock).mock.calls[0][2];
     expect(Object.keys(errorsArg)).toEqual(['agentless-1']);
-    expect(errorsArg['agentless-1'].message).toMatch(/agentless agent/i);
+    expect(errorsArg['agentless-1'].message).toMatch(/managed integration agent/i);
   });
 
   it('creates empty action when all agents are hosted', async () => {

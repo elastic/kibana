@@ -150,7 +150,7 @@ describe('hosted agent helpers', () => {
     it('throws for an agentless policy', () => {
       expect(() =>
         throwIfAgentlessAgentPolicy({ supports_agentless: true }, 'Cannot restart agent')
-      ).toThrow(/Cannot restart agent.*agentless agents are managed by Elastic/);
+      ).toThrow(/Cannot restart agent.*managed integration agents are managed by Elastic/);
     });
 
     it('does not throw for other policies', () => {

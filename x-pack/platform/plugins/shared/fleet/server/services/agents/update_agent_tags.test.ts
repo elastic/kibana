@@ -229,7 +229,7 @@ describe('update_agent_tags', () => {
       expect(errorResults).toEqual([
         expect.objectContaining({
           agent_id: agentInAgentlessDoc._id,
-          error: expect.stringContaining('Cannot modify tags on an agentless agent'),
+          error: expect.stringContaining('Cannot modify tags on a managed integration agent'),
         }),
       ]);
     });
@@ -262,7 +262,7 @@ describe('update_agent_tags', () => {
       expect(errorResults).toEqual([
         expect.objectContaining({
           agent_id: agentInAgentlessDoc._id,
-          error: expect.stringContaining('Cannot modify tags on an agentless agent'),
+          error: expect.stringContaining('Cannot modify tags on a managed integration agent'),
         }),
       ]);
     });
