@@ -211,22 +211,36 @@ export interface ControlFailure extends DashboardFailure {
 
 const CONTROL_POSITION = /^controls\[(\d+)\]$/;
 
-/** The sent control a failure names by its id, or by its position in `controls` when it has none. */
-const getFailedControl = (step: Step, identifier: string): Record<string, unknown> | undefined => {
-  const sentControls = getSentControls(step);
+/**
+ * The control a failure names: by its position in the `controls` of the failing call when it has
+ * no id, otherwise by id, from the failing call or, for a control it did not send, the latest
+ * earlier call that sent it.
+ */
+const getFailedControl = (
+  callSteps: Step[],
+  call: number,
+  identifier: string
+): Record<string, unknown> | undefined => {
   const position = CONTROL_POSITION.exec(identifier)?.[1];
-  return position !== undefined
-    ? sentControls[Number(position)]
-    : sentControls.find(({ id }) => id === identifier);
+  if (position !== undefined) {
+    return getSentControls(callSteps[call])[Number(position)];
+  }
+  return callSteps
+    .slice(0, call + 1)
+    .reverse()
+    .flatMap(getSentControls)
+    .find(({ id }) => id === identifier);
 };
 
 /** Failures of the controls every `generate_dashboard` call sent. */
-export const getControlFailures = (steps: Step[]): ControlFailure[] =>
-  getGenerateDashboardSteps(steps).flatMap((step, call) =>
+export const getControlFailures = (steps: Step[]): ControlFailure[] => {
+  const callSteps = getGenerateDashboardSteps(steps);
+  return callSteps.flatMap((step, call) =>
     getStepFailures(step, call)
       .filter(({ kind }) => kind === CONTROL_FAILURE_KIND)
       .map((failure) => {
-        const field = getFailedControl(step, failure.identifier)?.field_name;
+        const field = getFailedControl(callSteps, call, failure.identifier)?.field_name;
         return typeof field === 'string' ? { ...failure, field } : failure;
       })
   );
+};
