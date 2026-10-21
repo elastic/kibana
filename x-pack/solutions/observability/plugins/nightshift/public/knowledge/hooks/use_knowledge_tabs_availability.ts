@@ -6,6 +6,7 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { useKibana } from '../../hooks/use_kibana';
 import { toFeatureAvailability, type FeatureAvailability } from '../feature_availability';
 import type { KnowledgeTabsAvailability } from '../knowledge_tabs';
@@ -76,10 +77,14 @@ interface UseKnowledgeTabsAvailabilityOptions {
 
 export const useKnowledgeTabsAvailability = ({
   enabled = true,
-}: UseKnowledgeTabsAvailabilityOptions = {}): KnowledgeTabsAvailability => ({
-  // KIs are always available; only the optional tabs below have gates.
-  knowledge_indicators: { isEnabled: true, isLoading: false },
-  cortex: useCortexEnabled(enabled),
-  memory: useMemoryEnabled(enabled),
-  decision_trees: useDecisionTreesEnabled(enabled),
-});
+}: UseKnowledgeTabsAvailabilityOptions = {}): KnowledgeTabsAvailability => {
+  const { isDeveloperMode } = useDeveloperMode();
+
+  return {
+    // KIs are always available; only the optional tabs below have gates.
+    knowledge_indicators: { isEnabled: true, isLoading: false },
+    cortex: useCortexEnabled(enabled),
+    memory: useMemoryEnabled(enabled),
+    decision_trees: useDecisionTreesEnabled(enabled && isDeveloperMode),
+  };
+};
