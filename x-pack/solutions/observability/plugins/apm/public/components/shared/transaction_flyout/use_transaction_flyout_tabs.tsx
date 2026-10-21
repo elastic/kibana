@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import React from 'react';
@@ -64,13 +63,10 @@ export function useTransactionFlyoutTabs({
         defaultMessage: 'Metadata',
       }),
       content: (
-        <>
-          <EuiSpacer size="m" />
-          <TransactionMetadata
-            transaction={transaction}
-            prefetchedMetadata={{ metadata, isLoading: isMetadataLoading }}
-          />
-        </>
+        <TransactionMetadata
+          transaction={transaction}
+          prefetchedMetadata={{ metadata, isLoading: isMetadataLoading }}
+        />
       ),
     }),
     ...(genAiTabContent ? [toFlyoutTab(genAiTabContent)] : []),

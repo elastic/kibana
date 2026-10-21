@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
@@ -73,13 +72,7 @@ export function useSpanFlyoutTabs({
         defaultMessage: 'Metadata',
       }),
       content: (
-        <>
-          <EuiSpacer size="m" />
-          <SpanMetadata
-            span={span}
-            prefetchedMetadata={{ metadata, isLoading: isMetadataLoading }}
-          />
-        </>
+        <SpanMetadata span={span} prefetchedMetadata={{ metadata, isLoading: isMetadataLoading }} />
       ),
     }),
     ...(!isEmpty(stackframes) || !isEmpty(plaintextStacktrace)
@@ -90,18 +83,10 @@ export function useSpanFlyoutTabs({
             name: i18n.translate('xpack.apm.transactionDetails.spanFlyout.stackTraceTabLabel', {
               defaultMessage: 'Stack Trace',
             }),
-            content: (
-              <>
-                <EuiSpacer size="l" />
-                {stackframes ? (
-                  <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
-                ) : (
-                  <PlaintextStacktrace
-                    stacktrace={plaintextStacktrace}
-                    codeLanguage={codeLanguage}
-                  />
-                )}
-              </>
+            content: stackframes ? (
+              <Stacktrace stackframes={stackframes} codeLanguage={codeLanguage} />
+            ) : (
+              <PlaintextStacktrace stacktrace={plaintextStacktrace} codeLanguage={codeLanguage} />
             ),
           }),
         ]
