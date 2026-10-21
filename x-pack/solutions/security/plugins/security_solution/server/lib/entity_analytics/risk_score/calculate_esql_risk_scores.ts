@@ -41,7 +41,7 @@ import {
   DEFAULT_ALERT_SAMPLE_SIZE,
   MAX_INPUTS_COUNT,
   RIEMANN_ZETA_S_VALUE,
-  RIEMANN_ZETA_VALUE,
+  getRiemannZetaValue,
 } from './constants';
 
 import { filterFromRange } from './helpers';
@@ -207,10 +207,11 @@ export const calculateScoresWithESQL = async (
           upper: afterKey?.[(EntityTypeToIdentifierField as Record<string, string>)[entityType]],
         };
 
+        const sampleSize = params.alertSampleSizePerShard || DEFAULT_ALERT_SAMPLE_SIZE;
         const query = getESQL(
           entityType as EntityType,
           bounds,
-          params.alertSampleSizePerShard || DEFAULT_ALERT_SAMPLE_SIZE,
+          sampleSize,
           params.pageSize,
           params.index
         );
@@ -221,7 +222,9 @@ export const calculateScoresWithESQL = async (
             query,
             filter: { bool: { filter: entityFilter } },
           })
-          .then((rs) => rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index)))
+          .then((rs) =>
+            rs.values.map(buildRiskScoreBucket(entityType as EntityType, params.index, sampleSize))
+          )
 
           .then(async (riskScoreBuckets) => {
             const results = await applyScoreModifiers({
@@ -416,9 +419,10 @@ export const getESQL = (
 };
 
 export const buildRiskScoreBucket =
-  (entityType: EntityType, index: string) =>
+  (entityType: EntityType, index: string, sampleSize: number) =>
   (row: FieldValue[]): RiskScoreBucket => {
     const [count, score, _inputs, entity] = row as [number, number, string | string[], string];
+    const zetaValue = getRiemannZetaValue(sampleSize);
 
     const inputs = [_inputs].flat().map((input, i) => {
       let parsedRiskInputData = JSON.parse('{}');
@@ -459,7 +463,7 @@ export const buildRiskScoreBucket =
         rule_name: ruleName,
         category,
         score: value,
-        contribution: currentScore / RIEMANN_ZETA_VALUE,
+        contribution: currentScore / zetaValue,
         index,
       };
     });
@@ -472,7 +476,7 @@ export const buildRiskScoreBucket =
         risk_details: {
           value: {
             score,
-            normalized_score: score / RIEMANN_ZETA_VALUE, // normalize value to be between 0-100
+            normalized_score: score / zetaValue, // normalize value to be between 0-100
             notes: [],
             category_1_score: score, // Don't normalize here - will be normalized in calculate_risk_scores.ts
             category_1_count: count,
