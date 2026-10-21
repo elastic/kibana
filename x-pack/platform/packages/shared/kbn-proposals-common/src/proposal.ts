@@ -329,12 +329,6 @@ export const proposalFiltersSchema = z.object({
   /** Drops proposals that were replaced, so a chain shows only its live head. */
   excludeSuperseded: z.stringbool().default(false),
   /**
-   * Drops superseded proposals that were never decided — earlier revisions, whose successor
-   * carries the same ask — while keeping a decided one, such as a failed attempt that a retry
-   * replaced, so the history still shows what ran and how it ended.
-   */
-  excludeUndecidedSuperseded: z.stringbool().default(false),
-  /**
    * Drops proposals whose deadline has passed, by date rather than by status.
    * Distinct from `status: 'expired'`: between the deadline passing and the
    * gate workflow settling the record there is task lag during which it still
@@ -441,3 +435,18 @@ export const isProposalSettling = (proposal: Pick<Proposal, 'decision' | 'status
  * so this is not a substitute for comparing `expiresAt` to `now`. */
 export const isExpired = (proposal: Pick<Proposal, 'status'>): boolean =>
   proposal.status === 'expired';
+
+/**
+ * A status that has settled. `pending` and `executing` are the only two a
+ * proposal can still be moved out of.
+ */
+export const isTerminal = (status: ProposalStatus): boolean =>
+  status === 'succeeded' ||
+  status === 'failed' ||
+  status === 'expired' ||
+  status === 'no_action' ||
+  // Undecided, unlike the other four, but equally unable to move: a
+  // superseded proposal is not the live revision anymore, and a caller that
+  // still holds its id (a stale workflow variable, a retried step) must not
+  // be able to resurrect it via update().
+  status === 'superseded';

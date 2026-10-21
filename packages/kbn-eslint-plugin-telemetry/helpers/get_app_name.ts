@@ -16,13 +16,21 @@ const APP_ALIASES: Record<string, string> = {
   observability: 'o11y',
 };
 
+let moduleDirs: string[] | undefined;
+
+// The package directories (longest first) are read once per process instead of for every report.
+const getModuleDirs = () => {
+  moduleDirs ??= Array.from(getPkgDirMap(REPO_ROOT).values())
+    .map((module) => module.directory.replace(REPO_ROOT, ''))
+    .sort((a, b) => b.length - a.length);
+  return moduleDirs;
+};
+
 export function getAppName(fileName: string, cwd: string) {
   const { dir } = parse(fileName);
   const relativePathToFile = dir.replace(cwd, '');
 
-  const allPaths = Array.from(getPkgDirMap(REPO_ROOT).values())
-    .map((module) => module.directory.replace(REPO_ROOT, ''))
-    .sort((a, b) => b.length - a.length);
+  const allPaths = getModuleDirs();
 
   const moduleDir = allPaths.find((path) => relativePathToFile.startsWith(path)) ?? '';
   const moduleBasename = camelCase(basename(moduleDir));

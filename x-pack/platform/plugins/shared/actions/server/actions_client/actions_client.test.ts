@@ -6,6 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { MockedLogger } from '@kbn/logging-mocks';
@@ -49,6 +50,7 @@ import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
 import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
 import type { OAuthParams } from '../routes/get_oauth_access_token';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+import { fromKueryExpression, nodeBuilder } from '@kbn/es-query';
 import type { GetGlobalExecutionKPIParams, GetGlobalExecutionLogParams } from '../../common';
 import type { estypes } from '@elastic/elasticsearch';
 import { ConnectorRateLimiter } from '../lib/connector_rate_limiter';
@@ -122,6 +124,9 @@ let logger: MockedLogger;
 
 beforeEach(() => {
   jest.resetAllMocks();
+  authorization.getFindAuthorizationFilter.mockResolvedValue({
+    filter: fromKueryExpression('*'),
+  });
   logger = loggerMock.create();
   mockedLicenseState = licenseStateMock.create();
   actionTypeRegistryParams = {
@@ -3369,7 +3374,7 @@ describe('bulkEnqueueExecution()', () => {
         {
           id: uuidv4(),
           params: {},
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '123abc',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -3378,7 +3383,7 @@ describe('bulkEnqueueExecution()', () => {
         {
           id: uuidv4(),
           params: {},
-          spaceId: 'default',
+          spaceId: DEFAULT_SPACE_ID,
           executionId: '456def',
           apiKey: null,
           source: asHttpRequestExecutionSource(request),
@@ -3401,7 +3406,7 @@ describe('bulkEnqueueExecution()', () => {
           {
             id: uuidv4(),
             params: {},
-            spaceId: 'default',
+            spaceId: DEFAULT_SPACE_ID,
             executionId: '123abc',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
@@ -3410,7 +3415,7 @@ describe('bulkEnqueueExecution()', () => {
           {
             id: uuidv4(),
             params: {},
-            spaceId: 'default',
+            spaceId: DEFAULT_SPACE_ID,
             executionId: '456def',
             apiKey: null,
             source: asHttpRequestExecutionSource(request),
@@ -3430,7 +3435,7 @@ describe('bulkEnqueueExecution()', () => {
       {
         id: uuidv4(),
         params: {},
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '123abc',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -3439,7 +3444,7 @@ describe('bulkEnqueueExecution()', () => {
       {
         id: uuidv4(),
         params: {},
-        spaceId: 'default',
+        spaceId: DEFAULT_SPACE_ID,
         executionId: '456def',
         apiKey: null,
         source: asHttpRequestExecutionSource(request),
@@ -3676,12 +3681,18 @@ describe('isSystemAction()', () => {
 });
 
 describe('getGlobalExecutionLogWithAuth()', () => {
+  const executionNamespaces = ['space-1', 'space-2'];
+  const executionAuthorizationFilter = nodeBuilder.or([
+    nodeBuilder.is('kibana.space_ids', 'space-1'),
+    nodeBuilder.is('kibana.space_ids', 'space-2'),
+  ]);
   const opts: GetGlobalExecutionLogParams = {
     dateStart: '2023-01-09T08:55:56-08:00',
     dateEnd: '2023-01-10T08:55:56-08:00',
     page: 1,
     perPage: 50,
     sort: [{ timestamp: { order: 'desc' } }],
+    namespaces: executionNamespaces,
   };
   const results = {
     aggregations: {
@@ -3700,22 +3711,35 @@ describe('getGlobalExecutionLogWithAuth()', () => {
       hits: [],
     } as estypes.SearchHitsMetadata<unknown>,
   };
+
+  beforeEach(() => {
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter: executionAuthorizationFilter,
+    });
+  });
+
   describe('authorization', () => {
     test('ensures user is authorised to access logs', async () => {
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
 
       await actionsClient.getGlobalExecutionLogWithAuth(opts);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+        namespaces: executionNamespaces,
+      });
     });
 
     test('throws when user is not authorised to access logs', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to access logs`));
+      authorization.getFindAuthorizationFilter.mockRejectedValue(
+        new Error(`Unauthorized to access logs`)
+      );
 
       await expect(actionsClient.getGlobalExecutionLogWithAuth(opts)).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to access logs]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+        namespaces: executionNamespaces,
+      });
     });
   });
 
@@ -3728,14 +3752,26 @@ describe('getGlobalExecutionLogWithAuth()', () => {
         "total": 5,
       }
     `);
-    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalled();
+    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+      'action',
+      executionAuthorizationFilter,
+      expect.any(Object),
+      executionNamespaces,
+      true
+    );
   });
 });
 
 describe('getGlobalExecutionKpiWithAuth()', () => {
+  const executionNamespaces = ['space-1', 'space-2'];
+  const executionAuthorizationFilter = nodeBuilder.or([
+    nodeBuilder.is('kibana.space_ids', 'space-1'),
+    nodeBuilder.is('kibana.space_ids', 'space-2'),
+  ]);
   const opts: GetGlobalExecutionKPIParams = {
     dateStart: '2023-01-09T08:55:56-08:00',
     dateEnd: '2023-01-10T08:55:56-08:00',
+    namespaces: executionNamespaces,
   };
   const results = {
     aggregations: {
@@ -3753,22 +3789,35 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
       hits: [],
     } as estypes.SearchHitsMetadata<unknown>,
   };
+
+  beforeEach(() => {
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter: executionAuthorizationFilter,
+    });
+  });
+
   describe('authorization', () => {
     test('ensures user is authorised to access kpi', async () => {
       eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue(results);
 
       await actionsClient.getGlobalExecutionKpiWithAuth(opts);
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+        namespaces: executionNamespaces,
+      });
     });
 
     test('throws when user is not authorised to access kpi', async () => {
-      authorization.ensureAuthorized.mockRejectedValue(new Error(`Unauthorized to access kpi`));
+      authorization.getFindAuthorizationFilter.mockRejectedValue(
+        new Error(`Unauthorized to access kpi`)
+      );
 
       await expect(actionsClient.getGlobalExecutionKpiWithAuth(opts)).rejects.toMatchInlineSnapshot(
         `[Error: Unauthorized to access kpi]`
       );
 
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({ operation: 'get' });
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
+        namespaces: executionNamespaces,
+      });
     });
   });
 
@@ -3783,6 +3832,12 @@ describe('getGlobalExecutionKpiWithAuth()', () => {
         "warning": 0,
       }
     `);
-    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalled();
+    expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+      'action',
+      executionAuthorizationFilter,
+      expect.any(Object),
+      executionNamespaces,
+      true
+    );
   });
 });

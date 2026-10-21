@@ -84,6 +84,11 @@ export interface InternalSkillDefinition {
    */
   excludeFromElasticCapabilities?: boolean;
   /**
+   * When true, the skill is left out of `list()` but stays resolvable by id
+   * (`get`, `bulkGet`, `has`).
+   */
+  hidden?: boolean;
+  /**
    * When present, evaluates whether the skill is available for the current
    * request context. Skills that return `{ status: 'unavailable' }` are
    * filtered from registry queries (`has`, `get`, `list`, `bulkGet`).
