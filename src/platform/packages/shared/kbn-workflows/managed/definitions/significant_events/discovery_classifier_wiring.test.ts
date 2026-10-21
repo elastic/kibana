@@ -250,15 +250,22 @@ describe('discovery workflow detection classifier wiring', () => {
     });
 
     it('stamps one rule per request, whether its detections come back as a scalar or a list', () => {
+      const prepare = requireStep('prepare_skipped_marker').with ?? {};
       const ids = (requireStep('write_skipped_marker').with?.body as Record<string, unknown>)
         .detection_ids;
 
-      expect(evaluate(ids, { foreach: { item: ['detection-A', 'rule-A'] } })).toEqual([
-        'detection-A',
-      ]);
+      expect(evaluate(prepare.detection_ids, { foreach: { item: ['detection-A', 'rule-A'] } })).toEqual(
+        ['detection-A']
+      );
       expect(
-        evaluate(ids, { foreach: { item: [['detection-A', 'detection-B'], 'rule-A'] } })
+        evaluate(prepare.detection_ids, {
+          foreach: { item: [['detection-A', 'detection-B'], 'rule-A'] },
+        })
       ).toEqual(['detection-A', 'detection-B']);
+      expect(evaluate(ids, { foreach: { item: ['detection-A', 'detection-B'] } })).toEqual([
+        'detection-A',
+        'detection-B',
+      ]);
     });
 
     it('stamps each rule only up to the detection the classifier judged', () => {
@@ -297,7 +304,15 @@ describe('discovery workflow detection classifier wiring', () => {
       });
 
       it('is absent when the classifier has no skip for the rule', () => {
-        expect(evaluate(skipExpression(), forItem(['detection-C', 'rule-C']))).toBeUndefined();
+        expect(
+          evaluate(skipExpression(), {
+            ...forItem(['detection-C']),
+            steps: {
+              ...forItem(['detection-C']).steps,
+              prepare_skipped_marker: { output: { rule_uuid: 'rule-C' } },
+            },
+          })
+        ).toBeUndefined();
       });
     });
 
