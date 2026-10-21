@@ -148,7 +148,8 @@ describe('fetchTriageAlerts', () => {
   const fetchWith = (
     rules: Array<{ hits: unknown[] }>,
     claimedHits: unknown[] = [],
-    filters: Partial<TriageFilters> = {}
+    filters: Partial<TriageFilters> = {},
+    excludedClaimHits: unknown[] = []
   ) => {
     const callKibanaApi = jest.fn().mockImplementation(async ({ body }) => ({
       status: 200,
@@ -159,7 +160,14 @@ describe('fetchTriageAlerts', () => {
               rules: { buckets: rules.map(({ hits }) => ({ top: { hits: { hits } } })) },
             },
           }
-        : { hits: { hits: claimedHits } },
+        : {
+            hits: {
+              // Only the excluded-claims search negates conditions, so `must_not` tells them apart.
+              hits: JSON.stringify(body.query).includes('must_not')
+                ? excludedClaimHits
+                : claimedHits,
+            },
+          },
     }));
     return {
       callKibanaApi,
@@ -227,6 +235,65 @@ describe('fetchTriageAlerts', () => {
     expect(claimed.size).toBe(ALERT_FETCH_LIMIT);
     expect(JSON.stringify(claimed.query)).toContain('az:triage_pending');
     expect(JSON.stringify(claimed.query)).not.toContain('range');
+  });
+
+  // A claim left by a failed or canceled batch is re-planned when its batch is gone. If the user has
+  // since raised the severity floor or excluded the rule's tag, that must not start a new batch.
+  it('flags a claimed alert the settings now exclude, and leaves the other claims alone', async () => {
+    const stale = hit('claimed-low', 'rule-1', 10);
+    const kept = hit('claimed-high', 'rule-2', 90);
+    const { run, callKibanaApi } = fetchWith(
+      [{ hits: [] }],
+      [stale, kept],
+      { minSeverity: 'high' },
+      [stale]
+    );
+
+    const alerts = await run();
+
+    expect(alerts.map(({ id, excludedBySettings }) => [id, excludedBySettings])).toEqual([
+      ['claimed-low', true],
+      ['claimed-high', undefined],
+    ]);
+    const excludedSearch = callKibanaApi.mock.calls
+      .map(([request]) => request.body)
+      .find(({ aggs, query }) => aggs === undefined && JSON.stringify(query).includes('must_not'));
+    expect(excludedSearch.query.bool.filter).toContainEqual({
+      term: { 'kibana.alert.workflow_tags': 'az:triage_pending' },
+    });
+    expect(excludedSearch.query.bool.must_not).toEqual([
+      {
+        bool: {
+          filter: [{ terms: { 'kibana.alert.severity': ['high', 'critical'] } }],
+          must_not: [],
+        },
+      },
+    ]);
+  });
+
+  it('flags claims of excluded rule tags and building blocks the same way', async () => {
+    const stale = hit('claimed-tagged', 'rule-1', 10);
+    const { run } = fetchWith(
+      [{ hits: [] }],
+      [stale],
+      { excludeBuildingBlocks: true, excludedRuleTags: ['in-development'] },
+      [stale]
+    );
+
+    const [claimed] = await run();
+
+    expect(claimed.excludedBySettings).toBe(true);
+  });
+
+  it('does not run the excluded-claims search when the settings exclude nothing', async () => {
+    const { run, callKibanaApi } = fetchWith([{ hits: [] }], [hit('claimed-1', 'rule-1', 10)]);
+
+    await run();
+
+    const claimSearches = callKibanaApi.mock.calls
+      .map(([request]) => request.body)
+      .filter(({ aggs }) => aggs === undefined);
+    expect(claimSearches).toHaveLength(1);
   });
 
   // Low severity is a signal, not something to triage: a minimum must keep those alerts from ever

@@ -228,12 +228,33 @@ const severityFilter = (minSeverity: AlertSeverity) =>
         },
       ];
 
+/** Claimed alerts the settings now exclude, so a stale claim is released but not planned again. */
+const searchExcludedClaims = async (
+  api: KibanaApi,
+  filters: TriageFilters
+): Promise<Set<string>> => {
+  const severity = severityFilter(filters.minSeverity);
+  const excluded = excludedByFilters(filters);
+  if (severity.length === 0 && excluded.length === 0) return new Set();
+  const alerts = await searchAlerts(api, {
+    bool: {
+      filter: [
+        { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
+        { term: { [ALERT_FIELDS.tags]: TRIAGE_PENDING_TAG } },
+      ],
+      // The negation of the unclaimed search's own conditions, so both read the settings the same way.
+      must_not: [{ bool: { filter: severity, must_not: excluded } }],
+    },
+  });
+  return new Set(alerts.map(({ id }) => id));
+};
+
 /**
  * Open alerts created since `windowStart` that still need triage, so the look-back is the search
  * window and older alerts are never read or tagged. They are read per rule, the most urgent
  * `BATCH_ALERT_CAP` of each, so one rule's backlog cannot hide the others. Claimed alerts come from
  * a separate query with no time bound, so a claim on a low-risk or aged-out alert is still seen and
- * can be reclaimed.
+ * can be reclaimed. Claims the settings now exclude are flagged so they are released, not re-planned.
  */
 export const fetchTriageAlerts = async (
   api: KibanaApi,
@@ -242,7 +263,7 @@ export const fetchTriageAlerts = async (
   filters: TriageFilters
 ): Promise<TriageAlert[]> => {
   const openStatus = { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } };
-  const [unclaimed, claimed] = await Promise.all([
+  const [unclaimed, claimed, excludedClaimIds] = await Promise.all([
     searchAlertsPerRule(api, {
       bool: {
         filter: [
@@ -256,8 +277,14 @@ export const fetchTriageAlerts = async (
     searchAlerts(api, {
       bool: { filter: [openStatus, { term: { [ALERT_FIELDS.tags]: TRIAGE_PENDING_TAG } }] },
     }),
+    searchExcludedClaims(api, filters),
   ]);
-  return [...unclaimed, ...claimed];
+  return [
+    ...unclaimed,
+    ...claimed.map((alert) =>
+      excludedClaimIds.has(alert.id) ? { ...alert, excludedBySettings: true } : alert
+    ),
+  ];
 };
 
 /** The tags route returns Elasticsearch's update-by-query response, which can be a 200 with gaps. */
