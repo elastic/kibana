@@ -13,6 +13,7 @@ import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
+import type { RequestStatistics } from '@kbn/inspector-plugin/common';
 import type { ISearchStart } from '../../search';
 import { getEsqlQueryProfileViewDescription } from '.';
 import { QueryProfileView } from './query_profile_view';
@@ -116,8 +117,17 @@ function renderView(ui: React.ReactElement) {
   );
 }
 
-function logRequest(adapter: RequestAdapter, name: string, json: object) {
-  adapter.start(name).json(json).ok({ json: {} });
+function logRequest(
+  adapter: RequestAdapter,
+  name: string,
+  json: object,
+  stats?: RequestStatistics
+) {
+  const request = adapter.start(name).json(json);
+  if (stats) {
+    request.stats(stats);
+  }
+  request.ok({ json: {} });
 }
 
 describe('getEsqlQueryProfileViewDescription', () => {
@@ -163,17 +173,26 @@ describe('QueryProfileView', () => {
 
   it('shows the duration split, a reader row, and the chevron', async () => {
     const requests = new RequestAdapter();
-    logRequest(requests, 'Documents', {
-      query: 'FROM logs',
-      include_execution_metadata: true,
-      time_zone: 'UTC',
-      filter: { match_all: {} },
-      approximation: true,
-    });
+    logRequest(
+      requests,
+      'Documents',
+      {
+        query: 'FROM logs',
+        include_execution_metadata: true,
+        time_zone: 'UTC',
+        filter: { match_all: {} },
+        approximation: true,
+      },
+      { queryTime: { label: 'Query time', value: '15ms' } }
+    );
 
     renderView(<QueryProfileView adapters={{ requests }} search={search} />);
 
+    expect(await screen.findByTestId('esqlQueryProfileCompletedRequest')).toHaveTextContent(
+      'Completed request: 15ms'
+    );
     expect(await screen.findByTestId('esqlQueryProfileDuration')).toHaveTextContent('2 s');
+    expect(screen.getByText('Profiled run')).toBeInTheDocument();
     expect(screen.getByText('Planning 500 ms')).toBeInTheDocument();
     expect(screen.getByText('Execution 1.5 s')).toBeInTheDocument();
 

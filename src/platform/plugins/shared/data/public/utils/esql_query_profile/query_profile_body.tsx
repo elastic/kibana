@@ -188,8 +188,8 @@ function DurationBar({
           <EuiText size="xs" color="subdued">
             <p>
               <FormattedMessage
-                id="data.inspector.queryProfile.totalTimeLabel"
-                defaultMessage="Total query time"
+                id="data.inspector.queryProfile.profiledRunLabel"
+                defaultMessage="Profiled run"
               />
             </p>
           </EuiText>

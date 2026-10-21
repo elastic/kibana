@@ -43,6 +43,7 @@ export function QueryProfileView({
     [requests, selectedId]
   );
   const { view, error, loading } = useQueryProfile(search, selected);
+  const completedTime = completedRequestTime(selected);
 
   return (
     <div data-test-subj="esqlQueryProfile">
@@ -62,6 +63,20 @@ export function QueryProfileView({
             selected={selected}
             onSelect={(request) => setSelectedId(request.id)}
           />
+        </>
+      ) : null}
+      {completedTime ? (
+        <>
+          <EuiSpacer size="m" />
+          <EuiText size="s" data-test-subj="esqlQueryProfileCompletedRequest">
+            <p>
+              <FormattedMessage
+                id="data.inspector.queryProfile.completedRequestDescription"
+                defaultMessage="Completed request: {time}"
+                values={{ time: completedTime }}
+              />
+            </p>
+          </EuiText>
         </>
       ) : null}
       <EuiSpacer size="m" />
@@ -93,6 +108,11 @@ export function QueryProfileView({
       )}
     </div>
   );
+}
+
+function completedRequestTime(request: Request | undefined): string | undefined {
+  const value = request?.stats?.queryTime?.value;
+  return typeof value === 'string' && value.length > 0 ? value : undefined;
 }
 
 function RequestPicker({
