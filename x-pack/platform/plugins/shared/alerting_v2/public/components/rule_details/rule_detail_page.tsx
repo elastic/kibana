@@ -14,7 +14,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
-import type { AppHeaderBadge, AppHeaderMetadataItems } from '@kbn/app-header';
+import type {
+  AppHeaderBadge,
+  AppHeaderMetadataItems,
+  AppHeaderMetadataTextItem,
+} from '@kbn/app-header';
+import type { RuleExecutionOutcome } from '@kbn/alerting-v2-schemas';
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
@@ -27,6 +32,8 @@ import { useRuleAutoAttach } from '@kbn/alerting-v2-browser-shared';
 import { UserCapabilities } from '../../services/user_capabilities';
 import { useBreadcrumbs } from '../../hooks/use_breadcrumbs';
 import { useRuleAuditMetadata } from '../../hooks/use_rule_audit_metadata';
+import { useFetchRuleExecutions } from '../../hooks/use_fetch_rule_executions';
+import { EMPTY_VALUE } from '../../utils/rule_display';
 import { useDeleteRule } from '../../hooks/use_delete_rule';
 import { useComposeDiscoverFlyout } from '../../hooks/use_compose_discover_flyout';
 import { useToggleRuleEnabled } from '../../hooks/use_toggle_rule_enabled';
@@ -42,6 +49,43 @@ import { RuleOverviewSection } from './overview';
 import { RuleSidebar } from './sidebar/rule_sidebar';
 import { useRule } from './rule_context';
 import type { RuleApiResponse } from '../../services/rules_api';
+
+const LAST_EXECUTION_OUTCOME_LABELS: Record<RuleExecutionOutcome, string> = {
+  success: i18n.translate('xpack.alertingV2.ruleDetails.header.lastExecution.success', {
+    defaultMessage: 'Succeeded',
+  }),
+  failure: i18n.translate('xpack.alertingV2.ruleDetails.header.lastExecution.failure', {
+    defaultMessage: 'Failed',
+  }),
+};
+
+const LAST_EXECUTION_UNAVAILABLE = i18n.translate(
+  'xpack.alertingV2.ruleDetails.header.lastExecution.unavailable',
+  {
+    defaultMessage: 'Unavailable',
+  }
+);
+
+const getLastExecutionValue = ({
+  isLoading,
+  isError,
+  outcome,
+}: {
+  isLoading: boolean;
+  isError: boolean;
+  outcome?: RuleExecutionOutcome;
+}): string | undefined => {
+  if (isLoading) {
+    return undefined;
+  }
+  if (isError) {
+    return LAST_EXECUTION_UNAVAILABLE;
+  }
+  if (!outcome) {
+    return EMPTY_VALUE;
+  }
+  return LAST_EXECUTION_OUTCOME_LABELS[outcome];
+};
 
 const getRuleDetailBadges = (rule: RuleApiResponse): AppHeaderBadge[] => {
   const badges: AppHeaderBadge[] = [
@@ -79,7 +123,9 @@ export const RuleDetailPage: React.FunctionComponent = () => {
   const { rulesLocators } = useAlertingLocators();
   const rulesListHref = rulesLocators.useUrl({});
 
-  const canWrite = useService(UserCapabilities).canWrite('rules');
+  const userCapabilities = useService(UserCapabilities);
+  const canWrite = userCapabilities.canWrite('rules');
+  const canReadExecutionHistory = userCapabilities.canRead('executionHistory');
   const chrome = useService(CoreStart('chrome'));
   const agentBuilder = useService(PluginStart('agentBuilder'), { optional: true }) as
     | AgentBuilderPluginStart
@@ -151,36 +197,73 @@ export const RuleDetailPage: React.FunctionComponent = () => {
 
   const { createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted } =
     useRuleAuditMetadata(rule);
+  const {
+    data: executionsData,
+    isLoading: isLoadingLastExecution,
+    isError: isErrorLastExecution,
+  } = useFetchRuleExecutions({
+    ruleIds: [rule.id],
+    perPage: 1,
+    sortField: 'startedAt',
+    sortOrder: 'desc',
+    enabled: canReadExecutionHistory,
+  });
+  const lastExecutionOutcome = executionsData?.items[0]?.outcome;
 
   const badges = React.useMemo(() => getRuleDetailBadges(rule), [rule]);
 
-  const headerMetadata = React.useMemo<AppHeaderMetadataItems>(
-    () => [
-      {
-        type: 'text',
-        label: i18n.translate('xpack.alertingV2.ruleDetails.header.createdBy', {
-          defaultMessage: 'Created by',
-        }),
-        value: i18n.translate('xpack.alertingV2.ruleDetails.header.createdByValue', {
-          defaultMessage: '{user} on {date}',
-          values: { user: createdByDisplay, date: createdAtFormatted },
-        }),
-        'data-test-subj': 'ruleDetailsCreatedByMetadata',
-      },
-      {
-        type: 'text',
-        label: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedBy', {
-          defaultMessage: 'Last updated by',
-        }),
-        value: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedByValue', {
-          defaultMessage: '{user} on {date}',
-          values: { user: updatedByDisplay, date: updatedAtFormatted },
-        }),
-        'data-test-subj': 'ruleDetailsUpdatedByMetadata',
-      },
-    ],
-    [createdByDisplay, createdAtFormatted, updatedByDisplay, updatedAtFormatted]
-  );
+  const headerMetadata = React.useMemo<AppHeaderMetadataItems>(() => {
+    const createdBy: AppHeaderMetadataTextItem = {
+      type: 'text',
+      label: i18n.translate('xpack.alertingV2.ruleDetails.header.createdBy', {
+        defaultMessage: 'Created by',
+      }),
+      value: i18n.translate('xpack.alertingV2.ruleDetails.header.createdByValue', {
+        defaultMessage: '{user} on {date}',
+        values: { user: createdByDisplay, date: createdAtFormatted },
+      }),
+      'data-test-subj': 'ruleDetailsCreatedByMetadata',
+    };
+    const updatedBy: AppHeaderMetadataTextItem = {
+      type: 'text',
+      label: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedBy', {
+        defaultMessage: 'Last updated by',
+      }),
+      value: i18n.translate('xpack.alertingV2.ruleDetails.header.updatedByValue', {
+        defaultMessage: '{user} on {date}',
+        values: { user: updatedByDisplay, date: updatedAtFormatted },
+      }),
+      'data-test-subj': 'ruleDetailsUpdatedByMetadata',
+    };
+
+    if (!canReadExecutionHistory) {
+      return [createdBy, updatedBy];
+    }
+
+    const lastExecution: AppHeaderMetadataTextItem = {
+      type: 'text',
+      label: i18n.translate('xpack.alertingV2.ruleDetails.header.lastExecution', {
+        defaultMessage: 'Last execution',
+      }),
+      value: getLastExecutionValue({
+        isLoading: isLoadingLastExecution,
+        isError: isErrorLastExecution,
+        outcome: lastExecutionOutcome,
+      }),
+      'data-test-subj': 'ruleDetailsLastExecutionMetadata',
+    };
+
+    return [lastExecution, createdBy, updatedBy];
+  }, [
+    canReadExecutionHistory,
+    createdAtFormatted,
+    createdByDisplay,
+    isErrorLastExecution,
+    isLoadingLastExecution,
+    lastExecutionOutcome,
+    updatedAtFormatted,
+    updatedByDisplay,
+  ]);
 
   const menu = React.useMemo(
     () =>
