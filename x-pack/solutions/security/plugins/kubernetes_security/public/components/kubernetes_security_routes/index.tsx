@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer, EuiText } from '@elastic/eui';
+import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
   KUBERNETES_PATH,
-  KUBERNETES_TITLE,
   LOCAL_STORAGE_HIDE_WIDGETS_KEY,
   ENTRY_LEADER_INTERACTIVE,
   ENTRY_LEADER_USER_ID,
@@ -33,10 +33,10 @@ import { PercentWidget } from '../percent_widget';
 import { CountWidget } from '../count_widget';
 import type { KubernetesSecurityDeps } from '../../types';
 import type { AggregateResult } from '../../../common/types';
-import { useLastUpdated } from '../../hooks';
+import { useLastUpdatedText } from '../../hooks';
 import { useStyles } from './styles';
 import { TreeViewContainer } from '../tree_view_container';
-import { ChartsToggle } from '../charts_toggle';
+import { getChartsToggleMenuItem } from '../charts_toggle';
 import {
   COUNT_WIDGET_CLUSTERS,
   COUNT_WIDGET_NAMESPACE,
@@ -51,6 +51,7 @@ const KubernetesSecurityRoutesComponent = ({
   filter,
   indexPattern,
   globalFilter,
+  renderHeader,
   renderSessionsView,
 }: KubernetesSecurityDeps) => {
   const [shouldHideCharts, setShouldHideCharts] = useLocalStorage(
@@ -58,7 +59,7 @@ const KubernetesSecurityRoutesComponent = ({
     false
   );
   const styles = useStyles();
-  const lastUpdated = useLastUpdated(globalFilter);
+  const lastUpdatedText = useLastUpdatedText(globalFilter);
   const onReduceInteractiveAggs = useCallback(
     (result: AggregateResult): Record<string, number> =>
       result.buckets.reduce((groupedByKeyValue, aggregate) => {
@@ -87,24 +88,26 @@ const KubernetesSecurityRoutesComponent = ({
     setShouldHideCharts(!shouldHideCharts);
   }, [setShouldHideCharts, shouldHideCharts]);
 
+  const headerMenu = useMemo<AppHeaderMenu>(
+    () => ({
+      items: [
+        getChartsToggleMenuItem({
+          shouldHideCharts: !!shouldHideCharts,
+          onToggle: handleToggleHideCharts,
+        }),
+      ],
+    }),
+    [handleToggleHideCharts, shouldHideCharts]
+  );
+
   return (
     <Routes>
       <Route strict exact path={KUBERNETES_PATH}>
+        {/* Do not wrap the header in an element: CSS sticky is confined to its parent's height. */}
+        {renderHeader({ description: lastUpdatedText, menu: headerMenu })}
+        <EuiSpacer size="m" />
         {filter}
-        <EuiFlexGroup gutterSize="none" css={styles.titleSection}>
-          <EuiFlexItem>
-            <EuiTitle size="l">
-              <h1 css={styles.titleText}>{KUBERNETES_TITLE}</h1>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false} css={styles.titleActions}>
-            <div css={styles.updatedAt}>{lastUpdated}</div>
-            <ChartsToggle
-              shouldHideCharts={shouldHideCharts}
-              handleToggleHideCharts={handleToggleHideCharts}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiSpacer size="m" />
         {!shouldHideCharts && (
           <>
             <EuiFlexGroup css={styles.widgetsGroup}>
