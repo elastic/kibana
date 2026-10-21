@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { getIdentityFields } from '@kbn/entity-store/common';
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { getDynamicBlock } from './dynamic';
 import { InventoryDefinitionError } from './errors';
-import { ENTITY_ID_COLUMN } from './identity';
+import { ENTITY_ID_COLUMN, resolveIdentityPlan } from './identity';
 import type { QueryPlan } from './types';
 
 /** The column holding the newest `@timestamp` of an entity. */
@@ -37,8 +36,9 @@ export const buildColumns = (
   plans: QueryPlan[]
 ): OutputColumn[] => {
   getDynamicBlock(definition);
-  const groupingFields = getIdentityFields(definition.identityField);
+  const { groupingFields, helperColumns } = resolveIdentityPlan(definition);
   const identityFields = new Set(groupingFields);
+  const helperColumnNames = new Set(helperColumns);
   const attributeColumns = new Map<string, Record<number, string>>();
 
   plans.forEach(({ index, attributes }) => {
@@ -46,6 +46,11 @@ export const buildColumns = (
       if (RESERVED_COLUMNS.has(name)) {
         throw new InventoryDefinitionError(
           `attribute name "${name}" is reserved by the inventory query generator for its own output column`
+        );
+      }
+      if (helperColumnNames.has(name)) {
+        throw new InventoryDefinitionError(
+          `attribute name "${name}" is a column the identity compiler generates for definition "${definition.type}"`
         );
       }
       if (identityFields.has(name)) {

@@ -31,6 +31,35 @@ describe('resolveIdentityPlan', () => {
     expect(plan.isRanked).toBe(isRanked);
   });
 
+  it.each([
+    [
+      hostLikeFixture.type,
+      hostLikeFixture,
+      [
+        'host_id_present',
+        'host_name_present',
+        'host_id_present_or_null',
+        'host_name_present_or_null',
+      ],
+    ],
+    [
+      k8sDeploymentFixture.type,
+      k8sDeploymentFixture,
+      [
+        'kubernetes_namespace_present',
+        'kubernetes_deployment_name_present',
+        'kubernetes_namespace_present_or_null',
+        'kubernetes_deployment_name_present_or_null',
+      ],
+    ],
+    [k8sNodeFixture.type, k8sNodeFixture, []],
+  ] as const)(
+    'reads the helper columns of %s from the id evaluation',
+    (_type, definition, names) => {
+      expect(resolveIdentityPlan(definition).helperColumns).toEqual(names);
+    }
+  );
+
   it.each(INVENTORY_DEFINITION_FIXTURES.map((definition) => [definition.type, definition]))(
     'the presence filter of %s mentions every grouping field and nothing else',
     (_type, definition) => {

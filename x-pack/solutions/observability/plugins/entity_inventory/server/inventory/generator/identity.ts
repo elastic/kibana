@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Parser, isAssignment, isColumn } from '@elastic/esql';
 import { getIdentityFields } from '@kbn/entity-store/common';
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
@@ -24,6 +25,8 @@ export interface IdentityPlan {
    * the store emits helper columns (`<field>_present`, `<field>_present_or_null`) before it.
    */
   idEvaluation: string;
+  /** Columns the id evaluation assigns besides `entity.id`, in assignment order. */
+  helperColumns: string[];
   /** True when the identity has more than one composition, so groups may share an id. */
   isRanked: boolean;
 }
@@ -36,6 +39,22 @@ const countCompositions = (identityField: EntityIdentity): number =>
     ? 1
     : identityField.euidRanking.branches.reduce((count, { ranking }) => count + ranking.length, 0);
 
+// Reads the assignment targets from the generated text so the names never drift from the store.
+const assignedColumns = (idEvaluation: string): string[] => {
+  const { root, errors } = Parser.parse(`FROM x | EVAL ${idEvaluation}`);
+  const [, evalCommand] = root.commands;
+  if (errors.length > 0 || root.commands.length !== 2 || evalCommand?.name !== 'eval') {
+    throw new Error(`the store's id evaluation is not a single EVAL: ${idEvaluation}`);
+  }
+  return evalCommand.args.map((arg) => {
+    const target = isAssignment(arg) ? arg.args[0] : undefined;
+    if (!isColumn(target)) {
+      throw new Error(`the store's id evaluation has a non-assignment expression: ${idEvaluation}`);
+    }
+    return target.name;
+  });
+};
+
 /**
  * Resolves the grouping fields, presence filter and id evaluation of a definition with `dynamic`,
  * whose identity the store has already validated as servable.
@@ -43,12 +62,14 @@ const countCompositions = (identityField: EntityIdentity): number =>
 export const resolveIdentityPlan = (definition: EntityDefinitionWithoutId): IdentityPlan => {
   getDynamicBlock(definition);
   const { identityField } = definition;
+  const idEvaluation = euid.esql.getEuidEvaluation(definition, ENTITY_ID_COLUMN);
   return {
     groupingFields: getIdentityFields(identityField),
     // The store leaves a composed filter unparenthesised (`a AND b OR c AND d`); wrap it so it can
     // be ANDed with other predicates.
     presenceFilter: `(${euid.esql.getEuidDocumentsContainsIdFilter(definition)})`,
-    idEvaluation: euid.esql.getEuidEvaluation(definition, ENTITY_ID_COLUMN),
+    idEvaluation,
+    helperColumns: assignedColumns(idEvaluation).filter((name) => name !== ENTITY_ID_COLUMN),
     isRanked: countCompositions(identityField) > 1,
   };
 };

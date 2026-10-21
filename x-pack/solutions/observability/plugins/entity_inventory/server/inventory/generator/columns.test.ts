@@ -117,6 +117,24 @@ describe('buildColumns', () => {
     );
   });
 
+  it('throws when an attribute is named like a helper column of the identity compiler', () => {
+    const definition: EntityDefinitionWithoutId = {
+      ...hostLikeFixture,
+      dynamic: {
+        sources: [
+          {
+            indexPattern: 'metrics-*',
+            attributes: [{ name: 'host_id_present', field: 'host.os.name' }],
+          },
+        ],
+      },
+    };
+    expect(() => columnsOf(definition)).toThrow(InventoryDefinitionError);
+    expect(() => columnsOf(definition)).toThrow(
+      'attribute name "host_id_present" is a column the identity compiler generates for definition "inventory_host"'
+    );
+  });
+
   it('throws when a dotted attribute name equals an identity field', () => {
     const definition: EntityDefinitionWithoutId = {
       ...k8sNodeFixture,
