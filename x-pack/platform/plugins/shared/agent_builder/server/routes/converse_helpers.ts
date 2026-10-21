@@ -39,7 +39,7 @@ export const filterEventsNativeApiEvents = (): MonoTypeOperatorFunction<ChatEven
 export interface ResolvedExecutionOptions {
   useTaskManager: boolean | undefined;
   origin: ExecutionConversationOrigin | undefined;
-  callback: { url: string } | undefined;
+  callback: { url: string; surface_assets?: boolean } | undefined;
   executionId: string | undefined;
   metadata: Record<string, string> | undefined;
 }
