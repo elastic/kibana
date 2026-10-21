@@ -514,12 +514,17 @@ describe('server/investigation_round', () => {
           command: 'python3 -c "print(open(\\"redis-pool-exhaustion.md\\").read())"',
         })
       ).toBe(true);
+      expect(
+        isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
+          command: 'grep -efoo /workspace/memories/redis-pool-exhaustion.md',
+        })
+      ).toBe(true);
 
-      // Executable Python heredoc reading a seeded file vs write-only heredoc
+      // Executable Python heredoc reading a seeded file (including open(Path(...))) vs write-only heredoc
       expect(
         isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
           command:
-            "python - <<'PY'\nprint(open('/workspace/memories/redis-pool-exhaustion.md').read())\nPY",
+            "python - <<'PY'\nprint(open(Path('/workspace/memories/redis-pool-exhaustion.md')).read())\nPY",
         })
       ).toBe(true);
       expect(
@@ -543,7 +548,16 @@ describe('server/investigation_round', () => {
           tool_id: SANDBOX_BASH_TOOL_ID,
           params: {
             command:
-              "python3 - <<'PY'\nprint(open('/workspace/memories/heredoc-read.md').read())\npath = '/workspace/memories/heredoc-written.md'\nwith open(path, 'w') as f:\n    f.write('x')\nPY",
+              "python3 - <<'PY'\nprint(open(Path('/workspace/memories/heredoc-read.md')).read())\npath = '/workspace/memories/heredoc-written.md'\nwith open(path, 'w') as f:\n    f.write('x')\nPY",
+          },
+          results: [{ type: 'other', data: { stdout: '...', exit_code: 0 } }],
+        },
+        {
+          type: 'tool_call',
+          tool_id: SANDBOX_BASH_TOOL_ID,
+          params: {
+            command:
+              'python3 -c "p=\'/workspace/memories/inline-script-read.md\'; print(open(p).read())"',
           },
           results: [{ type: 'other', data: { stdout: '...', exit_code: 0 } }],
         },
@@ -605,7 +619,11 @@ describe('server/investigation_round', () => {
       ]);
 
       const reads = extractWorkspaceReads(steps);
-      expect(reads.memoryIds).toEqual(['memory_redis-pool-exhaustion', 'memory_heredoc-read']);
+      expect(reads.memoryIds).toEqual([
+        'memory_redis-pool-exhaustion',
+        'memory_heredoc-read',
+        'memory_inline-script-read',
+      ]);
       expect(reads.cortexIds).toEqual(['cortex_service_checkout-service']);
       expect(reads.decisionTreeIds).toEqual(['symptom:edited-tree']);
       expect(reads.indexReads.memoryIndex).toBe(true);
