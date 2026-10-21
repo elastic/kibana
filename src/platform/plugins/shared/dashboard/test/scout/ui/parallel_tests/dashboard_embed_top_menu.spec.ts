@@ -12,6 +12,7 @@ import { expect } from '@kbn/scout/ui';
 import {
   DASHBOARD_DEFAULT_INDEX_TITLE,
   DASHBOARD_SAVED_SEARCH_ARCHIVE,
+  FEW_PANELS_DASHBOARD_PANEL_COUNT,
   FEW_PANELS_DASHBOARD_TITLE,
 } from '../constants';
 import { findImportedSavedObjectId } from '../../utils/migration_smoke_helpers';
@@ -46,6 +47,9 @@ spaceTest.describe('Dashboard embed top menu', { tag: tags.deploymentAgnostic },
         hash: `/view/${fewPanelsDashboardId}?embed=true&show-top-menu=false`,
       });
       await pageObjects.dashboard.waitForRenderComplete();
+      await expect
+        .poll(() => pageObjects.dashboard.getPanelCount())
+        .toBe(FEW_PANELS_DASHBOARD_PANEL_COUNT);
 
       await expect(page.testSubj.locator('dashboardEditMode')).toBeHidden();
     }
@@ -56,6 +60,9 @@ spaceTest.describe('Dashboard embed top menu', { tag: tags.deploymentAgnostic },
       hash: `/view/${fewPanelsDashboardId}?embed=true&show-top-menu=true`,
     });
     await pageObjects.dashboard.waitForRenderComplete();
+    await expect
+      .poll(() => pageObjects.dashboard.getPanelCount())
+      .toBe(FEW_PANELS_DASHBOARD_PANEL_COUNT);
 
     await expect(page.testSubj.locator('dashboardEditMode')).toBeVisible();
   });
