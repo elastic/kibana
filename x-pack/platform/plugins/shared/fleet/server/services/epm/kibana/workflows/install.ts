@@ -28,10 +28,10 @@ const MAX_CONCURRENT_WORKFLOW_OPERATIONS = 5;
 
 const WORKFLOW_FILE_EXTENSION = '.yml';
 
-const SPACE_HASH_LENGTH = 16;
+const ID_HASH_LENGTH = 16;
 
-const hashSpaceId = (spaceId: string) =>
-  createHash('sha256').update(spaceId).digest('hex').slice(0, SPACE_HASH_LENGTH);
+const hashIdSegment = (value: string) =>
+  createHash('sha256').update(value).digest('hex').slice(0, ID_HASH_LENGTH);
 
 const normalizeIdSegment = (value: string) => value.toLowerCase().replace(/_/g, '-');
 
@@ -57,16 +57,18 @@ export const isWorkflowAssetPath = (path: string) => {
 };
 
 /**
- * Builds `<definition id>-<space hash>-<file name>`. The file name already carries the
- * `{PACKAGE_NAME}-` prefix required by package-spec. The space is hashed because space ids
- * are uncapped and allow hyphens, so appending them as-is could collide with the file name part.
+ * Builds `<definition id>-<space hash>-<package hash>-<file name>`. The space and package name
+ * are hashed because space ids are uncapped and allow hyphens, and package names differing only
+ * by `-`/`_` normalize to the same file name prefix, so appending them as-is could collide.
  * Returns undefined when the file name cannot produce a valid workflow id.
  */
 export const getPackageWorkflowId = ({
   spaceId,
+  packageName,
   path,
 }: {
   spaceId: string;
+  packageName: string;
   path: string;
 }): string | undefined => {
   const fileName = path.split('/').pop() ?? '';
@@ -74,7 +76,8 @@ export const getPackageWorkflowId = ({
 
   const workflowId = [
     FLEET_PACKAGE_WORKFLOW_ID,
-    hashSpaceId(spaceId),
+    hashIdSegment(spaceId),
+    hashIdSegment(packageName),
     normalizeIdSegment(fileBase),
   ].join('-');
 
@@ -134,9 +137,16 @@ export const installWorkflows = async ({
       );
     }
 
-    const workflowId = getPackageWorkflowId({ spaceId, path });
+    const workflowId = getPackageWorkflowId({
+      spaceId,
+      packageName: packageInstallContext.packageInfo.name,
+      path,
+    });
     if (!workflowId) {
       throw new FleetError(`Workflow asset ${path} cannot be mapped to a valid workflow id`);
+    }
+    if (workflows.some((workflow) => workflow.workflowId === workflowId)) {
+      throw new FleetError(`Workflow asset ${path} maps to a workflow id used by another asset`);
     }
     if (!isYamlMapping(yaml)) {
       throw new FleetError(`Workflow asset ${path} is not a valid YAML mapping`);

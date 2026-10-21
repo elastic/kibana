@@ -51,6 +51,9 @@ const createClient = (status: ManagedWorkflowStatus = 'disabled') =>
 const hashSpace = (spaceId: string) =>
   createHash('sha256').update(spaceId).digest('hex').slice(0, 16);
 
+const hashPackage = (packageName: string) =>
+  createHash('sha256').update(packageName).digest('hex').slice(0, 16);
+
 const WORKFLOW_PATH = 'my_pkg-1.0.0/kibana/workflow/my_pkg-hello.yml';
 
 describe('workflow assets', () => {
@@ -65,26 +68,37 @@ describe('workflow assets', () => {
   });
 
   describe('getPackageWorkflowId', () => {
-    const idFor = (spaceId: string, fileName = 'my_pkg-hello') =>
+    const idFor = (spaceId: string, fileName = 'my_pkg-hello', packageName = 'my_pkg') =>
       getPackageWorkflowId({
         spaceId,
+        packageName,
         path: `my_pkg-1.0.0/kibana/workflow/${fileName}.yml`,
       });
 
     it('builds an id from a hashed space and the package-prefixed file name', () => {
       expect(idFor('My_Space')).toBe(
-        `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('My_Space')}-my-pkg-hello`
+        `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('My_Space')}-${hashPackage(
+          'my_pkg'
+        )}-my-pkg-hello`
       );
     });
 
     it('normalizes the file name', () => {
       expect(idFor('default', 'my_pkg-Hello_World')).toBe(
-        `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-my-pkg-hello-world`
+        `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-${hashPackage(
+          'my_pkg'
+        )}-my-pkg-hello-world`
       );
     });
 
     it('does not collide when a hyphenated space shifts into the file name part', () => {
       expect(idFor('a-b', 'c-hello')).not.toBe(idFor('a', 'b-c-hello'));
+    });
+
+    it('does not collide across packages whose file names normalize to the same value', () => {
+      expect(idFor('default', 'foo-bar-baz', 'foo')).not.toBe(
+        idFor('default', 'foo_bar-baz', 'foo_bar')
+      );
     });
 
     it('produces the same id length for any space id', () => {
@@ -112,7 +126,9 @@ describe('workflow assets', () => {
         logger,
       });
 
-      const workflowId = `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-my-pkg-hello`;
+      const workflowId = `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-${hashPackage(
+        'my_pkg'
+      )}-my-pkg-hello`;
       expect(client.install).toHaveBeenCalledWith(FLEET_PACKAGE_WORKFLOW_ID, {
         spaceId: 'default',
         workflowId,
@@ -121,6 +137,22 @@ describe('workflow assets', () => {
       expect(refs).toEqual([
         { id: workflowId, type: KibanaSavedObjectType.workflow, deferred: false },
       ]);
+    });
+
+    it('rejects files that map to the same workflow id', async () => {
+      const client = createClient();
+      await expect(
+        installWorkflows({
+          client,
+          packageInstallContext: createContext({
+            'my_pkg-1.0.0/kibana/workflow/my_pkg-a_b.yml': 'name: a',
+            'my_pkg-1.0.0/kibana/workflow/my_pkg-a-b.yml': 'name: b',
+          }),
+          spaceId: 'default',
+          logger,
+        })
+      ).rejects.toThrow('maps to a workflow id used by another asset');
+      expect(client.install).not.toHaveBeenCalled();
     });
 
     it('defers workflows that were not persisted', async () => {
@@ -237,23 +269,31 @@ describe('workflow assets', () => {
           logger,
           previousRefs: [
             {
-              id: `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-my-pkg-kept`,
+              id: `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-${hashPackage(
+                'my_pkg'
+              )}-my-pkg-kept`,
               type: KibanaSavedObjectType.workflow,
             },
           ],
         })
-      ).rejects.toThrow(`${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-my-pkg-broken: boom`);
+      ).rejects.toThrow(
+        `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-${hashPackage(
+          'my_pkg'
+        )}-my-pkg-broken: boom`
+      );
 
       expect(client.uninstall).toHaveBeenCalledTimes(1);
       expect(client.uninstall).toHaveBeenCalledWith(FLEET_PACKAGE_WORKFLOW_ID, {
         spaceId: 'default',
-        workflowId: `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-my-pkg-hello`,
+        workflowId: `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-${hashPackage(
+          'my_pkg'
+        )}-my-pkg-hello`,
       });
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining(
           `Failed to install workflow ${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace(
             'default'
-          )}-my-pkg-broken: boom`
+          )}-${hashPackage('my_pkg')}-my-pkg-broken: boom`
         )
       );
     });
@@ -264,8 +304,12 @@ describe('workflow assets', () => {
         throw new Error(`boom-${workflowId?.split('-').pop()}`);
       });
 
-      const helloId = `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-my-pkg-hello`;
-      const otherId = `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-my-pkg-other`;
+      const helloId = `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-${hashPackage(
+        'my_pkg'
+      )}-my-pkg-hello`;
+      const otherId = `${FLEET_PACKAGE_WORKFLOW_ID}-${hashSpace('default')}-${hashPackage(
+        'my_pkg'
+      )}-my-pkg-other`;
 
       const error = await installWorkflows({
         client,
