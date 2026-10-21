@@ -19,8 +19,12 @@ const STATUS_CHANGE_INPUT_SUBJ = 'statusChangeThresholdRangeInput';
 const DEFAULT_LOOK_BACK = 10;
 const DEFAULT_STATUS_CHANGE_THRESHOLD = 10;
 
-const openRulesSettingsFlyout = async (page: ScoutPage) => {
-  await page.testSubj.click(SETTINGS_LINK_SUBJ);
+const openRulesSettingsFlyout = async (
+  page: ScoutPage,
+  appMenu: { clickItem: (item: string) => Promise<void> }
+) => {
+  // Settings is forced into the More overflow menu.
+  await appMenu.clickItem(SETTINGS_LINK_SUBJ);
 
   const flyout = page.testSubj.locator(FLYOUT_SUBJ);
   await expect(flyout).toBeVisible();
@@ -43,15 +47,16 @@ test.describe('Rules settings flyout', { tag: tags.stateful.classic }, () => {
     await apiServices.alerting.settings.reset();
   });
 
-  test('opens, shows configured values, and persists changes', async ({ page }) => {
-    await test.step('the rules settings link is enabled', async () => {
+  test('opens, shows configured values, and persists changes', async ({ page, pageObjects }) => {
+    await test.step('the rules settings link is enabled under More', async () => {
+      await pageObjects.appMenu.revealItem(SETTINGS_LINK_SUBJ);
       const link = page.testSubj.locator(SETTINGS_LINK_SUBJ);
       await expect(link).toBeVisible();
       await expect(link).toBeEnabled();
     });
 
     await test.step('opens the flyout with the configured values', async () => {
-      const flyout = await openRulesSettingsFlyout(page);
+      const flyout = await openRulesSettingsFlyout(page, pageObjects.appMenu);
 
       await expect(flyout.getByTestId(FLAPPING_OFF_PROMPT_SUBJ)).toBeHidden();
       await expect(flyout.getByTestId(FLAPPING_TOGGLE_SUBJ)).toBeVisible();

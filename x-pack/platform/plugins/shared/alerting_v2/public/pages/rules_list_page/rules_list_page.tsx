@@ -82,10 +82,13 @@ export const RulesListPage = () => {
   const { navigateToApp, navigateToUrl } = useService(CoreStart('application'));
   const http = useService(CoreStart('http'));
   const hostTabs = useHostTabs();
-  const { rulesLocators } = useAlertingLocators();
+  const { rulesLocators, actionPolicyLocators } = useAlertingLocators();
   const navigateToSequenceBuilder = useCallback(() => {
     rulesLocators.navigateSync({ page: 'sequence_create' });
   }, [rulesLocators]);
+  const navigateToCreateActionPolicy = useCallback(() => {
+    actionPolicyLocators.navigateSync({ page: 'create' });
+  }, [actionPolicyLocators]);
 
   const classicRulesHref =
     hostTabs?.find((tab) => tab.id === 'v1Rules')?.href ??
@@ -139,6 +142,11 @@ export const RulesListPage = () => {
     closeOnboardingModal();
     navigateToSequenceBuilder();
   }, [closeOnboardingModal, navigateToSequenceBuilder]);
+
+  const onCreateActionPolicyFromOnboarding = useCallback(() => {
+    closeOnboardingModal();
+    navigateToCreateActionPolicy();
+  }, [closeOnboardingModal, navigateToCreateActionPolicy]);
 
   const onBrowseClassicFromOnboarding = useCallback(
     (search?: string) => {
@@ -233,7 +241,11 @@ export const RulesListPage = () => {
           fields: RULES_LIST_FEATURES_FIELDS,
         }}
       >
-        <RulesListHeader canWrite={canWrite} onCreateRule={openCreateOptionsFlyout} />
+        <RulesListHeader
+          canWrite={canWrite}
+          onCreateRule={openCreateOptionsFlyout}
+          onHelpMeOnboard={openOnboardingModal}
+        />
         <EsqlRulesIntroBanner />
         <ContentList emptyState={emptyState} data-test-subj="rulesList">
           <ContentListToolbar>
@@ -266,6 +278,7 @@ export const RulesListPage = () => {
           onCreateWithAgent={onCreateWithAgentFromOnboarding}
           onBuildSequence={onBuildSequenceFromOnboarding}
           onBrowseClassic={onBrowseClassicFromOnboarding}
+          onCreateActionPolicy={onCreateActionPolicyFromOnboarding}
           documentationHref={documentationHref}
         />
       ) : null}

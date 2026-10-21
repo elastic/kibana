@@ -6,6 +6,7 @@
  */
 
 import type { CoreStart, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type {
   AlertingV2PublicStart,
   AlertingV2HostApp,
@@ -42,6 +43,7 @@ interface ObservabilityAlertingAppProps {
   coreStart: CoreStart;
   alertingVTwo: AlertingV2PublicStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
   history: ScopedHistory;
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
@@ -132,6 +134,7 @@ export const ObservabilityAlertingApp = ({
   coreStart,
   alertingVTwo,
   triggersActionsUi,
+  agentBuilder,
   history,
   setBreadcrumbs,
 }: ObservabilityAlertingAppProps) => {
@@ -178,6 +181,7 @@ export const ObservabilityAlertingApp = ({
       coreStart={coreStart}
       alertingVTwo={alertingVTwo}
       triggersActionsUi={triggersActionsUi}
+      agentBuilder={agentBuilder}
       includeClassic={hasV1Rules}
       includeEsql={hasV2Rules}
     />

@@ -12,6 +12,17 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { FormValues } from '../form/types';
 import { AssembledQueriesControl } from './assembled_queries_control';
 
+jest.mock('@kbn/code-editor', () => ({
+  CodeEditor: ({ value, dataTestSubj }: { value: string; dataTestSubj?: string }) => (
+    <pre data-test-subj={dataTestSubj ?? 'mockCodeEditor'}>{value}</pre>
+  ),
+  ESQL_LANG_ID: 'esql',
+}));
+
+jest.mock('@kbn/esql-utils', () => ({
+  prettifyQuery: (query: string) => query,
+}));
+
 const defaultValues = {
   kind: 'alert' as const,
   metadata: { name: 'Test', enabled: true },
@@ -40,6 +51,14 @@ const Harness = ({
 };
 
 describe('AssembledQueriesControl', () => {
+  it('renders How this works? with an info icon', () => {
+    render(<Harness />);
+
+    const button = screen.getByTestId('assembledQueriesOpen');
+    expect(button).toHaveTextContent('How this works?');
+    expect(button.querySelector('[data-euiicon-type="info"]')).toBeInTheDocument();
+  });
+
   it('opens the modal with demo explainer when the query is incomplete', () => {
     render(<Harness />);
 

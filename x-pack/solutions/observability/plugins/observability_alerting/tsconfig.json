@@ -26,7 +26,8 @@
     "@kbn/observability-plugin",
     "@kbn/triggers-actions-ui-plugin/test/scout/common/ui",
     "@kbn/alerting-v2-episodes-ui",
-    "@kbn/ui-ai-components"
+    "@kbn/ui-ai-components",
+    "@kbn/agent-builder-browser"
   ],
   "exclude": ["target/**/*"]
 }

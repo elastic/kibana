@@ -36,14 +36,14 @@ export const AssembledQueriesControl = (): React.ReactElement => {
     <>
       <EuiButtonEmpty
         size="xs"
-        flush="left"
-        iconType="inspect"
+        flush="right"
+        iconType="info"
         onClick={() => setIsOpen(true)}
         data-test-subj="assembledQueriesOpen"
       >
         <FormattedMessage
           id="xpack.alertingV2.queryPipelineExplainer.assembledQueriesButton"
-          defaultMessage="Assembled queries"
+          defaultMessage="How this works?"
         />
       </EuiButtonEmpty>
 

@@ -48,6 +48,8 @@ export const getRulesPageMenu = ({
               iconType: 'gear',
               run: onOpenSettings,
               testId: 'rulesSettingsLink',
+              // Keep Create rule primary; tuck Settings under More.
+              overflow: true,
             },
           ]
         : []),

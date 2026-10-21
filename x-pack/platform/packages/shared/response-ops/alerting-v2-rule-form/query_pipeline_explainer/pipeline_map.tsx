@@ -25,7 +25,8 @@ import type { PipelineStep, PipelineStepId } from './build_pipeline_steps';
 const BASE_NODE_WIDTH = 280;
 const STEP_NODE_WIDTH = 180;
 const NODE_HEIGHT = 52;
-const COMPACT_MAP_HEIGHT = 280;
+/** Tall enough for Base → Alert → Recovery → No-data stacked vertically. */
+const COMPACT_MAP_HEIGHT = 420;
 
 const STEP_ICONS: Record<PipelineStepId, IconType> = {
   base: 'document',
@@ -166,17 +167,17 @@ const buildGraph = (
 ): { nodes: PipelineFlowNode[]; edges: Edge[] } => {
   const byId = new Map(steps.map((step) => [step.id, step]));
 
-  // Vertical main path: Base (wide) on top → Alert → Recovery.
-  // No-data branches to the right of Alert, from Base.
+  // Vertical path: Base → Alert → Recovery → No-data.
+  // No-data sits below Recovery but its edge still originates from Base
+  // (right handle → left handle), curving around the main column.
   const baseX = 40;
   const stepX = baseX + (BASE_NODE_WIDTH - STEP_NODE_WIDTH) / 2;
-  const noDataX = baseX + BASE_NODE_WIDTH + 48;
 
   const positions: Record<PipelineStepId, { x: number; y: number }> = {
     base: { x: baseX, y: 24 },
-    alert: { x: stepX, y: 140 },
-    recovery: { x: stepX, y: 240 },
-    noData: { x: noDataX, y: 140 },
+    alert: { x: stepX, y: 120 },
+    recovery: { x: stepX, y: 220 },
+    noData: { x: stepX, y: 320 },
   };
 
   const ordered: PipelineStepId[] = ['base', 'alert', 'recovery', 'noData'];
@@ -355,9 +356,9 @@ const PipelineMapCanvas = ({
 };
 
 /**
- * Pipeline map (React Flow): Base sits as a wide block above Alert → Recovery,
- * with No-data branching right from Base. Optional detail panel docks top-right
- * like the Workflows graph inspector.
+ * Pipeline map (React Flow): Base → Alert → Recovery → No-data stacked vertically,
+ * with the No-data edge still sourced from Base (curves around the main column).
+ * Optional detail panel docks top-right like the Workflows graph inspector.
  */
 export const PipelineMap = (props: {
   steps: PipelineStep[];

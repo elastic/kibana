@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { AlertingV2PublicStart } from '@kbn/alerting-v2-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBoolean } from '@kbn/react-hooks';
@@ -27,16 +28,20 @@ import {
 const CREATE_BUTTON_SELECTOR =
   '[data-test-subj="createRuleButton"], [data-test-subj="createFirstRuleButton"]';
 
+const ELASTIC_AI_AGENT_ID = 'elastic-ai-agent';
+
 export const MixedCreateRuleSession = ({
   coreStart,
   alertingVTwo,
   triggersActionsUi,
+  agentBuilder,
   includeClassic,
   includeEsql,
 }: {
   coreStart: CoreStart;
   alertingVTwo: AlertingV2PublicStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  agentBuilder?: AgentBuilderPluginStart;
   includeClassic: boolean;
   includeEsql: boolean;
 }) => {
@@ -112,14 +117,23 @@ export const MixedCreateRuleSession = ({
   const onChooseAgent = useCallback(
     (userInput?: string) => {
       closeCreateSession();
+      const initialMessage = buildRuleManagementAgentMessage(userInput);
+      if (agentBuilder?.openChat) {
+        agentBuilder.openChat({
+          newConversation: true,
+          agentId: ELASTIC_AI_AGENT_ID,
+          sessionTag: 'observability-alerting',
+          initialMessage,
+          autoSendInitialMessage: true,
+        });
+        return;
+      }
       coreStart.application.navigateToApp(AGENT_BUILDER_APP_ID, {
-        path: '/agents/elastic-ai-agent/conversations/new',
-        state: {
-          initialMessage: buildRuleManagementAgentMessage(userInput),
-        },
+        path: `/agents/${ELASTIC_AI_AGENT_ID}/conversations/new`,
+        state: { initialMessage },
       });
     },
-    [closeCreateSession, coreStart.application]
+    [agentBuilder, closeCreateSession, coreStart.application]
   );
 
   const onChooseSequence = useCallback(() => {
@@ -157,6 +171,7 @@ export const MixedCreateRuleSession = ({
           onChooseAgent={onChooseAgent}
           onChooseSequence={onChooseSequence}
           onBrowseClassic={browseClassic}
+          onSelectClassicRuleType={onSelectRuleType}
           showClassic={includeClassic}
           http={coreStart.http}
           toasts={coreStart.notifications.toasts}

@@ -36,6 +36,14 @@ jest.mock('@kbn/core-di-browser', () => {
   const { UserCapabilities: ActualUserCapabilities } = jest.requireActual(
     '../../services/user_capabilities'
   );
+  const { PluginStart: ActualPluginStart } = jest.requireActual('@kbn/core-di');
+  const mockShare = {
+    url: {
+      locators: {
+        get: jest.fn().mockReturnValue(undefined),
+      },
+    },
+  };
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -47,6 +55,10 @@ jest.mock('@kbn/core-di-browser', () => {
           canRead: () => true,
           can: () => mockCanWriteRules,
         };
+      }
+
+      if (token === ActualPluginStart('share')) {
+        return mockShare;
       }
 
       const services: Record<string, unknown> = {
@@ -381,9 +393,10 @@ describe('RulesListPage', () => {
     await waitFor(() => {
       expect(screen.getByTestId('esqlRulesEmptyState')).toBeInTheDocument();
     });
-    // Create lives on the empty prompt only — header Create is hidden to avoid a duplicate.
+    // Create / Get started live on the empty prompt only — header menu is hidden to avoid duplicates.
     expect(screen.getByTestId('createRuleButton')).toBeInTheDocument();
     expect(screen.queryByTestId('createRuleButton-secondary-button')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('rulesListHeaderGetStartedButton')).not.toBeInTheDocument();
   });
 
   it('keeps the header create controls when filters are active even with zero matching rules', async () => {
@@ -429,7 +442,18 @@ describe('RulesListPage', () => {
     fireEvent.click(screen.getByTestId('esqlRulesEmptyStateHelpMeOnboardButton'));
 
     expect(await screen.findByTestId('alertingOnboardingModal')).toBeInTheDocument();
-    expect(screen.getByText('Get started with Universal Alerting')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingOnboardingChecklist')).toBeInTheDocument();
+  });
+
+  it('opens the onboarding modal from the header Get started button when rules exist', async () => {
+    renderPage();
+    await waitForRules();
+
+    await screen.findByTestId('createRuleButton');
+    fireEvent.click(await screen.findByTestId('app-menu-overflow-button'));
+    fireEvent.click(await screen.findByTestId('rulesListHeaderGetStartedButton'));
+
+    expect(await screen.findByTestId('alertingOnboardingModal')).toBeInTheDocument();
     expect(screen.getByTestId('alertingOnboardingChecklist')).toBeInTheDocument();
   });
 

@@ -13,7 +13,7 @@ import { EpisodeDataSourceProvider } from '@kbn/alerting-v2-episodes-ui/context/
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
 import { RuleSummaryFlyoutContainer } from './components/rule/flyouts/rule_summary/rule_summary_flyout_container';
-import { CLASSIC_EPISODES_DATA_SOURCE } from './episode_sources';
+import { CLASSIC_ALERTS_DATA_SOURCE } from './alert_sources';
 import { untilPluginStartServicesReady } from './kibana_services';
 
 export interface ClassicRuleSummaryFlyoutProps {
@@ -57,7 +57,7 @@ const ClassicRuleSummaryFlyoutInner = ({
 
   return (
     <Context.Provider value={services.container}>
-      <EpisodeDataSourceProvider dataSource={CLASSIC_EPISODES_DATA_SOURCE} queryV2Source={false}>
+      <EpisodeDataSourceProvider dataSource={CLASSIC_ALERTS_DATA_SOURCE} queryV2Source={false}>
         <RuleSummaryFlyoutContainer
           ruleId={ruleId}
           sourceRuleInfo={{ category: ruleCategory }}
