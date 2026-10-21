@@ -55,8 +55,24 @@ export const ruleEventActorSchema = lazySchema(() =>
 export type RuleEventActor = z.infer<typeof ruleEventActorSchema>;
 
 /**
- * Channel, app, and optional actor derived from the request. Actor is optional
- * because the rules client may not yet know who made the change at resolve time.
+ * Who published an alerting event, and where it came from.
+ *
+ * `channel` is always derived from the request. `app` is set when a caller
+ * configures one, or when a UI request names one in the execution context.
+ */
+export const eventOriginSchema = lazySchema(() =>
+  z.object({
+    actor: ruleEventActorSchema,
+    channel: ruleEventChannelSchema,
+    app: ruleEventAppSchema.optional(),
+  })
+);
+
+export type EventOrigin = z.infer<typeof eventOriginSchema>;
+
+/**
+ * Channel and optional app derived from a rules-client request, before the
+ * injected actor is attached.
  */
 export const ruleEventOriginSchema = lazySchema(() =>
   z.object({

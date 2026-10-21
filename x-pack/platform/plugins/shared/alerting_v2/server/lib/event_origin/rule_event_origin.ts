@@ -7,7 +7,13 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { ruleEventAppSchema, type RuleEventChannel, type RuleEventOrigin } from './origin_schemas';
+import {
+  ruleEventAppSchema,
+  type EventOrigin,
+  type RuleEventActor,
+  type RuleEventChannel,
+  type RuleEventOrigin,
+} from './origin_schemas';
 
 /**
  * Headers Core's `core.http.fetch` attaches to every request the Kibana browser app makes.
@@ -69,4 +75,14 @@ export const resolveRuleEventOrigin = (
     (channel === 'ui' ? getAppFromExecutionContext(request) : undefined);
 
   return { channel, ...(app ? { app } : {}) };
+};
+
+/** Publisher-context origin: the injected actor plus the request-derived channel and app. */
+export const toEventOrigin = (
+  actor: RuleEventActor,
+  request: KibanaRequest,
+  options?: { app?: string }
+): EventOrigin => {
+  const { channel, app } = resolveRuleEventOrigin(request, options);
+  return { actor, channel, ...(app ? { app } : {}) };
 };

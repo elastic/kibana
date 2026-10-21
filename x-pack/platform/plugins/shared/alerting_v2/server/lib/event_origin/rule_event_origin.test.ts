@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
-import { resolveRuleEventOrigin } from './rule_event_origin';
+import { resolveRuleEventOrigin, toEventOrigin } from './rule_event_origin';
 
 const UI_HEADERS = {
   'kbn-version': '9.0.0',
@@ -23,6 +23,28 @@ const createRequest = (
 ): KibanaRequest => ({
   ...httpServerMock.createKibanaRequest({ headers }),
   isFakeRequest,
+});
+
+describe('toEventOrigin', () => {
+  it('attaches the actor to the channel derived from the request', () => {
+    expect(toEventOrigin('internal', createRequest({}, { isFakeRequest: true }))).toEqual({
+      actor: 'internal',
+      channel: 'system',
+    });
+  });
+
+  it('keeps a configured app ahead of the execution context', () => {
+    const request = createRequest({
+      ...UI_HEADERS,
+      'x-kbn-context': executionContextHeader({ name: 'discover' }),
+    });
+
+    expect(toEventOrigin('user', request, { app: 'nightshift' })).toEqual({
+      actor: 'user',
+      channel: 'ui',
+      app: 'nightshift',
+    });
+  });
 });
 
 describe('resolveRuleEventOrigin', () => {
