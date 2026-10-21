@@ -163,6 +163,7 @@ const { handles } = isomerDistillery.createStyleModule(
       flex-direction: column;
       flex: 1 1 auto;
       min-width: 0;
+      min-height: 0;
       overflow: hidden;
       padding: ${PANEL_CHROME.padding}px;
       background: ${color.background.plain};
@@ -170,6 +171,7 @@ const { handles } = isomerDistillery.createStyleModule(
       border-radius: ${border.radius.panel};
     `,
     panelTitle: css`
+      flex: none;
       margin: 0 0 ${size.xs};
       height: ${PANEL_CHROME.header - PANEL_CHROME.padding}px;
       overflow: hidden;
@@ -181,8 +183,9 @@ const { handles } = isomerDistillery.createStyleModule(
       line-height: ${font.lineHeight.s};
     `,
     panelBody: css`
-      flex: 1 1 auto;
+      flex: 1 1 0;
       min-height: 0;
+      min-width: 0;
       overflow: hidden;
     `,
     frameless: css`
