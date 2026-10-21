@@ -40,7 +40,7 @@ import {
 } from '@elastic/eui';
 import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
@@ -914,9 +914,6 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     // The step flyout can inherit the session only after the run flyout has registered it.
     const [isExecutionFlyoutActive, setIsExecutionFlyoutActive] = useState(false);
     const onExecutionFlyoutActive = useCallback(() => {
-      setIsExecutionFlyoutActive(true);
-    }, []);
-    useLayoutEffect(() => {
       setIsExecutionFlyoutActive(true);
     }, []);
     const onCloseStepDetail: React.ComponentProps<typeof EuiFlyout>['onClose'] = useCallback(
