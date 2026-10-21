@@ -16,7 +16,7 @@ import {
   type RumReportResponse,
 } from '../../../../common/rum_report';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
-import { mergeRumSearch } from '../../../utils/rum_search';
+import { mergeRumSearch, uxAppBasePath } from '../../../utils/rum_search';
 import { exportReportPdf } from './export_report_pdf';
 import { UxTourAnchor } from '../rum_tour/ux_tour_anchor';
 
@@ -68,7 +68,7 @@ export function ReportToolbar({
               compare: report.compareFrom ? 'previous' : 'none',
               includePii: includePii ? 'true' : '',
             });
-      const path = http.basePath.prepend(`/app/ux${location.pathname}`);
+      const path = http.basePath.prepend(`${uxAppBasePath()}${location.pathname}`);
       return `${window.location.origin}${path}${search ? `?${search}` : ''}`;
     },
     [

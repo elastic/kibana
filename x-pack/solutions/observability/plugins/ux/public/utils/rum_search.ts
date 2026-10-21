@@ -73,6 +73,11 @@ export const uxQueryString = (search: string, patch: RumFilterPatch = {}): strin
   return next ? `?${next}` : '';
 };
 
+export const uxAppBasePath = (): string =>
+  typeof window !== 'undefined' && window.location.pathname.includes('/app/digital_experience')
+    ? '/app/digital_experience'
+    : '/app/ux';
+
 export const uxAppHref = (
   prepend: (path: string) => string,
   {
@@ -87,9 +92,10 @@ export const uxAppHref = (
     patch?: RumFilterPatch;
   }
 ): string => {
+  const base = uxAppBasePath();
   const path = uxAppPath(serviceName, suffix);
   const qs = uxQueryString(search, { ...patch, serviceName: '' });
-  return prepend(`${path === '/' ? '/app/ux' : `/app/ux${path}`}${qs}`);
+  return prepend(`${path === '/' ? base : `${base}${path}`}${qs}`);
 };
 
 export const pushRumPath = (history: History, pathname: string, patch: RumFilterPatch = {}) => {

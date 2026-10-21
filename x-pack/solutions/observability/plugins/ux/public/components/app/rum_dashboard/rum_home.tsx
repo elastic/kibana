@@ -22,7 +22,7 @@ import {
 import type { NoDataConfig } from '@kbn/shared-ux-page-kibana-template';
 import { AppHeader } from '@kbn/app-header';
 import { useHistory, useLocation } from 'react-router-dom';
-import { UX_APP_TITLE } from '../../../application/ux_breadcrumbs';
+import { uxActiveAppTitle } from '../../../application/ux_breadcrumbs';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { pushRumPath, uxAppHref } from '../../../utils/rum_search';
 import { serviceNameFromPath, uxAppPath } from '../../../utils/ux_app_path';
@@ -182,7 +182,7 @@ export function RumHome({ tab, templateId }: { tab: UxHomeTab; templateId?: stri
           paddingSize: 'none',
         }}
       >
-        <AppHeader title={serviceName || UX_APP_TITLE} menu={appMenu} spacing="standard" />
+        <AppHeader title={serviceName || uxActiveAppTitle()} menu={appMenu} spacing="standard" />
 
         <EuiPageSection paddingSize="m" restrictWidth={false}>
           <DashboardToolbar tab={tab} />
@@ -218,7 +218,7 @@ function InventoryBackButton() {
   const href = uxAppHref(http.basePath.prepend, { search });
   const tooltip = i18n.translate('xpack.ux.home.backToInventoryTooltip', {
     defaultMessage: 'to {destination}',
-    values: { destination: UX_APP_TITLE },
+    values: { destination: uxActiveAppTitle(href) },
   });
 
   return (

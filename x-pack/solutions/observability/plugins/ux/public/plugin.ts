@@ -68,6 +68,8 @@ export interface UxPluginStart {
   }): Promise<string[]>;
   /** Hides User Experience from the navigation; the app stays reachable by URL. */
   hideLegacyNavigation(): void;
+  /** Mounts the Digital Experience app (OTel RUM + Sessions + Replay) into the given mount container. */
+  mountDigitalExperienceApp?(appMountParameters: AppMountParameters): Promise<() => void>;
 }
 
 export interface ApmPluginSetupDeps {
@@ -110,11 +112,13 @@ async function getDataStartPlugin(core: CoreSetup) {
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
   private readonly legacyNavigationHidden$ = new BehaviorSubject(false);
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
+  private setupDeps?: ApmPluginSetupDeps;
 
   constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup<ApmPluginStartDeps>, plugins: ApmPluginSetupDeps) {
     const pluginSetupDeps = plugins;
+    this.setupDeps = plugins;
     if (plugins.embeddable) {
       registerUxEmbeddables(core, plugins);
     }
@@ -295,6 +299,21 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
       hideLegacyNavigation: () => {
         this.legacyNavigationHidden$.next(true);
         this.appUpdater$.next(() => ({ visibleIn: [] }));
+      },
+      mountDigitalExperienceApp: async (appMountParameters: AppMountParameters) => {
+        const [{ renderApp }, activeSpace] = await Promise.all([
+          import('./application/ux_app'),
+          plugins.spaces?.getActiveSpace(),
+        ]);
+
+        return renderApp({
+          isDev: this.initContext.env.mode.dev,
+          core,
+          deps: this.setupDeps!,
+          appMountParameters,
+          corePlugins: plugins,
+          spaceId: activeSpace?.id || 'default',
+        });
       },
     };
   }

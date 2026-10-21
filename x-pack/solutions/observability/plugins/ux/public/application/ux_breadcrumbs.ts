@@ -14,6 +14,18 @@ export const UX_APP_TITLE = i18n.translate('xpack.ux.breadcrumbs.root', {
   defaultMessage: 'User Experience',
 });
 
+export const DIGITAL_EXPERIENCE_APP_TITLE = i18n.translate(
+  'xpack.ux.breadcrumbs.digitalExperienceRoot',
+  {
+    defaultMessage: 'Digital Experience',
+  }
+);
+
+export const uxActiveAppTitle = (href?: string): string => {
+  const path = href ?? (typeof window !== 'undefined' ? window.location.pathname : '');
+  return path.includes('/app/digital_experience') ? DIGITAL_EXPERIENCE_APP_TITLE : UX_APP_TITLE;
+};
+
 export const APPLICATIONS_LABEL = i18n.translate('xpack.ux.breadcrumbs.applicationsLabel', {
   defaultMessage: 'Applications',
 });
@@ -66,10 +78,11 @@ export function uxInventoryBreadcrumbs({
   tab?: 'applications' | 'errors';
   inventoryHref?: string;
 } = {}): ChromeBreadcrumb[] {
+  const rootTitle = uxActiveAppTitle(inventoryHref);
   if (tab === 'errors') {
-    return [{ text: UX_APP_TITLE, href: inventoryHref }, { text: UX_HOME_TAB_CRUMB.errors }];
+    return [{ text: rootTitle, href: inventoryHref }, { text: UX_HOME_TAB_CRUMB.errors }];
   }
-  return [{ text: UX_APP_TITLE }];
+  return [{ text: rootTitle }];
 }
 
 export function uxHomeBreadcrumbs({
@@ -86,7 +99,7 @@ export function uxHomeBreadcrumbs({
   overviewHref: string;
 }): ChromeBreadcrumb[] {
   const inventoryCrumb: ChromeBreadcrumb = {
-    text: UX_APP_TITLE,
+    text: uxActiveAppTitle(inventoryHref),
     href: inventoryHref,
   };
   const appCrumb: ChromeBreadcrumb = { text: serviceName };

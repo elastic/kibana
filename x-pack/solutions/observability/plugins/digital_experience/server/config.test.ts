@@ -8,11 +8,11 @@
 import { config } from './config';
 
 describe('digital_experience config', () => {
-  it('is disabled by default', () => {
-    expect(config.schema.validate({})).toEqual({ enabled: false });
+  it('is enabled by default', () => {
+    expect(config.schema.validate({})).toEqual({ enabled: true });
   });
 
-  it('can be enabled', () => {
-    expect(config.schema.validate({ enabled: true })).toEqual({ enabled: true });
+  it('can be disabled', () => {
+    expect(config.schema.validate({ enabled: false })).toEqual({ enabled: false });
   });
 });

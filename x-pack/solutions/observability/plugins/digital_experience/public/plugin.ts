@@ -59,11 +59,12 @@ export class DigitalExperiencePlugin
       updater$: this.appUpdater$,
       keywords: ['RUM', 'Real User Monitoring', 'digital experience', 'web performance'],
       async mount(appMountParameters: AppMountParameters) {
-        const [{ renderApp }, [coreStart, pluginsStart]] = await Promise.all([
-          import('./application/render_app'),
-          core.getStartServices(),
-        ]);
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        if (pluginsStart.ux?.mountDigitalExperienceApp) {
+          return pluginsStart.ux.mountDigitalExperienceApp(appMountParameters);
+        }
 
+        const { renderApp } = await import('./application/render_app');
         return renderApp({ core: coreStart, pluginsStart, appMountParameters });
       },
     });

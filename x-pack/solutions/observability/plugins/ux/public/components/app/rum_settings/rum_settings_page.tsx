@@ -9,7 +9,7 @@ import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { UX_APP_TITLE } from '../../../application/ux_breadcrumbs';
+import { uxActiveAppTitle } from '../../../application/ux_breadcrumbs';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
 import { uxAppHref } from '../../../utils/rum_search';
 import {
@@ -68,7 +68,7 @@ export function RumSettingsPage() {
 
   useBreadcrumbs([
     {
-      text: UX_APP_TITLE,
+      text: uxActiveAppTitle(),
       href: uxAppHref(http.basePath.prepend, { search }),
     },
     ...(serviceName

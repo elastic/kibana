@@ -12,7 +12,7 @@ import React from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 import {
   APPLICATIONS_LABEL,
-  UX_APP_TITLE,
+  uxActiveAppTitle,
   uxInventoryBreadcrumbs,
 } from '../../../application/ux_breadcrumbs';
 import { useKibanaServices } from '../../../hooks/use_kibana_services';
@@ -59,7 +59,7 @@ export function UxInventoryChrome({
             <EuiFlexGroup gutterSize="m" alignItems="center" justifyContent="spaceBetween" wrap>
               <EuiFlexItem grow={false}>
                 <EuiTitle>
-                  <h1 className="eui-textNoWrap">{UX_APP_TITLE}</h1>
+                  <h1 className="eui-textNoWrap">{uxActiveAppTitle()}</h1>
                 </EuiTitle>
               </EuiFlexItem>
               <EuiFlexItem grow={false} style={{ marginLeft: 'auto' }}>
