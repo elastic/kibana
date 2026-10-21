@@ -43,10 +43,7 @@ const stepOutputSchema = z
     structured_output: z
       .object({
         rule: draftRuleSchema,
-        // v3 quality gate: the agent refuses unwinnable gaps instead of drafting.
-        // A refusal is a CORRECT outcome, not a missing rule — evaluators must be
-        // able to tell the two apart (a crashed draft also yields no rule).
-        skipped: z.boolean(),
+        // Why the agent built no rule; empty when it drafted one.
         reason: z.string(),
       })
       .partial(),
@@ -55,19 +52,23 @@ const stepOutputSchema = z
 
 // Each step produces two entries in stepExecutions: an "enter" record (output: null)
 // and a "result" record (output: data). Find the result record for draft_creation.
-const extractDraftFromSteps = (
+//
+// The quality gate refuses unwinnable gaps instead of drafting. The managed yaml has the agent
+// signal a refusal with an empty name and query plus a `reason`, not a flag. A refusal is a
+// CORRECT outcome, not a missing rule — evaluators must be able to tell the two apart (a crashed
+// draft also yields no rule).
+export const extractDraftFromSteps = (
   steps: WorkflowStepExecutionDto[]
 ): { rule: DraftRule | undefined; skipped: boolean; skipReason: string | undefined } => {
   const draftSteps = steps.filter((s) => s.stepId === DRAFT_STEP_ID);
   const resultRecord = draftSteps.find((s) => s.output != null);
   const parsed = stepOutputSchema.safeParse(resultRecord?.output);
   if (!parsed.success) return { rule: undefined, skipped: false, skipReason: undefined };
-  const out = parsed.data.structured_output;
-  return {
-    rule: out?.rule,
-    skipped: out?.skipped === true,
-    skipReason: out?.reason,
-  };
+  const { rule, reason } = parsed.data.structured_output ?? {};
+  if (rule && rule.name === '' && rule.query === '') {
+    return { rule: undefined, skipped: true, skipReason: reason || undefined };
+  }
+  return { rule, skipped: false, skipReason: undefined };
 };
 
 export interface RuleCreationResult {
