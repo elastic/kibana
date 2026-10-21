@@ -16,7 +16,7 @@ import type {
 } from '../../../common/subjects/subject';
 import type { InvestigationAttachmentContentProps } from '../../investigation_attachments';
 import { getSubjectTitle, type SubjectRowData } from './subject_title';
-import { useSubjectHref } from './subject_href';
+import { useSubjectHref, useSubjectLinkClick } from './subject_href';
 import {
   OPENS_IN_NEW_TAB,
   TRIGGER_LABEL,
@@ -86,6 +86,8 @@ interface CompactRowProps {
   /** Makes the row a link; Slack threads open in a new tab. */
   href?: string;
   isExternal?: boolean;
+  /** Opens `href` inside Kibana instead of loading the page again. */
+  onLinkClick?: (event: React.MouseEvent) => void;
   /** Makes the row a button that shows or hides more rows. */
   onToggle?: () => void;
   isExpanded?: boolean;
@@ -105,6 +107,7 @@ const CompactRow = ({
   description,
   href,
   isExternal = false,
+  onLinkClick,
   onToggle,
   isExpanded,
   isNested = false,
@@ -195,6 +198,7 @@ const CompactRow = ({
     return (
       <a
         href={href}
+        onClick={onLinkClick}
         css={rowStyles}
         data-test-subj={dataTestSubj}
         {...(isExternal && { target: '_blank', rel: 'noopener noreferrer' })}
@@ -266,6 +270,8 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
   isNested = false,
 }) => {
   const href = useSubjectHref(subject);
+  const isExternal = href !== undefined && subject.type === 'slack_thread';
+  const onLinkClick = useSubjectLinkClick(isExternal ? undefined : href);
   return (
     <CompactRow
       iconType={SUBJECT_ICONS[subject.type]}
@@ -273,7 +279,8 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
       title={getSubjectTitle(subject)}
       description={getSubjectDescription(subject, isNested)}
       href={href}
-      isExternal={href !== undefined && subject.type === 'slack_thread'}
+      isExternal={isExternal}
+      onLinkClick={onLinkClick}
       isNested={isNested}
       data-test-subj={`investigationSubject-${subject.type}`}
     />

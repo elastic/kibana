@@ -45,7 +45,7 @@ const register = ({
     escalationsEnabled,
     groupedAttachments,
     getImpactEntityOpener: () => undefined,
-    resolveSubjectHref: () => undefined,
+    subjectLinks: {},
     templates: escalationsEnabled
       ? [investigationTemplate, escalationTemplate]
       : [investigationTemplate],

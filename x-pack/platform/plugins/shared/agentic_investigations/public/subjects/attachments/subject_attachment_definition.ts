@@ -12,7 +12,7 @@ import type {
   InvestigationAttachmentContentProps,
   InvestigationAttachmentRenderer,
 } from '../../investigation_attachments';
-import { SubjectHrefResolverContext, type SubjectHrefResolver } from './subject_href';
+import { SubjectLinksContext, type SubjectLinks } from './subject_href';
 import { SUBJECT_LABEL, slackChannelLabel, subjectAttachmentLabel } from './translations';
 
 const labelDetail = ({
@@ -31,10 +31,10 @@ const labelDetail = ({
 
 /**
  * Browser UI for the investigation_subject attachment; the content loads on first render and
- * links the subject where `resolveSubjectHref` says.
+ * links the subject the way `subjectLinks` says.
  */
 export const createSubjectAttachmentRenderer = (
-  resolveSubjectHref: SubjectHrefResolver
+  subjectLinks: SubjectLinks
 ): InvestigationAttachmentRenderer<InvestigationSubject> & {
   type: typeof SUBJECT_ATTACHMENT_TYPE;
 } => ({
@@ -51,8 +51,8 @@ export const createSubjectAttachmentRenderer = (
       InvestigationAttachmentContentProps<InvestigationSubject>
     > = (props) =>
       React.createElement(
-        SubjectHrefResolverContext.Provider,
-        { value: resolveSubjectHref },
+        SubjectLinksContext.Provider,
+        { value: subjectLinks },
         React.createElement(SubjectView, props)
       );
     return SubjectViewWithLinks;

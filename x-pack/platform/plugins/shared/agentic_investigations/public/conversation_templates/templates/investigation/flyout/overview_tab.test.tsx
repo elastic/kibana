@@ -13,7 +13,7 @@ import type { Conversation } from '@kbn/agent-builder-common';
 import { createFlyoutGroupedAttachmentsRegistry } from '@kbn/agentic-investigations-common';
 import type { Investigation } from '../../../../../common';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
-import type { SubjectHrefResolver } from '../../../../subjects/attachments/subject_href';
+import type { SubjectLinks } from '../../../../subjects/attachments/subject_href';
 import { InvestigationOverview } from './overview_tab';
 
 jest.mock('../../../../investigations/hooks/use_investigation');
@@ -58,14 +58,14 @@ const investigation: Investigation = {
   proposals: [],
 };
 
-const renderOverview = (resolveSubjectHref?: SubjectHrefResolver) =>
+const renderOverview = (subjectLinks?: SubjectLinks) =>
   render(
     <EuiProvider>
       <I18nProvider>
         <InvestigationOverview
           conversation={conversation}
           groupedAttachments={groupedAttachments}
-          resolveSubjectHref={resolveSubjectHref}
+          subjectLinks={subjectLinks}
         />
       </I18nProvider>
     </EuiProvider>
@@ -98,7 +98,7 @@ describe('InvestigationOverview', () => {
       },
     });
 
-    renderOverview(({ type, id }) => `/app/solution/${type}/${id}`);
+    renderOverview({ resolveSubjectHref: ({ type, id }) => `/app/solution/${type}/${id}` });
 
     expect(screen.getByTestId('investigationSubject-significant_event')).toHaveAttribute(
       'href',

@@ -18,11 +18,13 @@ import { HypothesisTreeCard } from '../../../../hypotheses/tree/hypothesis_tree_
 import { ImpactContent } from '../../../../impact/attachments/impact_view';
 import { SubjectList } from '../../../../subjects/attachments/subject_view';
 import {
-  SubjectHrefResolverContext,
-  type SubjectHrefResolver,
+  SubjectLinksContext,
+  type SubjectLinks,
 } from '../../../../subjects/attachments/subject_href';
 import { useInvestigation } from '../../../../investigations/hooks/use_investigation';
 import { getInvestigationDisplayTitle } from '../to_view_model';
+
+const NO_SUBJECT_LINKS: SubjectLinks = {};
 
 const readMetadataString = (value: unknown): string | undefined =>
   typeof value === 'string' && value.trim().length > 0 ? value : undefined;
@@ -82,7 +84,7 @@ export const InvestigationOverview: React.FC<
     /** Present when a solution registered an entity flyout. Entity-store ids open it. */
     onOpenEntity?: (entity: ImpactEntityTarget) => void;
     /** Links subjects (and the hypothesis tree's trigger) to the pages solutions registered. */
-    resolveSubjectHref?: SubjectHrefResolver;
+    subjectLinks?: SubjectLinks;
   }
 > = ({
   conversation,
@@ -90,7 +92,7 @@ export const InvestigationOverview: React.FC<
   proposedActionsContent,
   proposedActionsCount,
   onOpenEntity,
-  resolveSubjectHref,
+  subjectLinks = NO_SUBJECT_LINKS,
 }) => {
   const { data } = useInvestigation(conversation.id);
   const investigation = useMemo(() => {
@@ -106,7 +108,7 @@ export const InvestigationOverview: React.FC<
   );
 
   return (
-    <SubjectHrefResolverContext.Provider value={resolveSubjectHref}>
+    <SubjectLinksContext.Provider value={subjectLinks}>
       <OverviewTab
         investigation={investigation}
         attachments={conversation.attachments}
@@ -115,6 +117,6 @@ export const InvestigationOverview: React.FC<
         proposedActionsCount={proposedActionsCount}
         sections={sections}
       />
-    </SubjectHrefResolverContext.Provider>
+    </SubjectLinksContext.Provider>
   );
 };

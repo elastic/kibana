@@ -22,10 +22,7 @@ import {
   HypothesisTreeNode,
   type HypothesisTreeFlowNode,
 } from './hypothesis_tree_nodes';
-import {
-  SubjectHrefResolverContext,
-  type SubjectHrefResolver,
-} from '../../subjects/attachments/subject_href';
+import { SubjectLinksContext, type SubjectLinks } from '../../subjects/attachments/subject_href';
 
 jest.mock('@kbn/proposals-plugin/public');
 
@@ -34,19 +31,19 @@ const flags = { isSelected: false, isDimmed: false, selectedActionIndex: null };
 const renderNode = (
   data: HypothesisTreeFlowNode['data'],
   actions = { onSelectAction: jest.fn(), onSelectNode: jest.fn() },
-  resolveSubjectHref?: SubjectHrefResolver
+  subjectLinks: SubjectLinks = {}
 ) => {
   render(
     <EuiProvider>
       <I18nProvider>
         <ReactFlowProvider>
-          <SubjectHrefResolverContext.Provider value={resolveSubjectHref}>
+          <SubjectLinksContext.Provider value={subjectLinks}>
             <HypothesisTreeActionsContext.Provider value={actions}>
               <HypothesisTreeNode
                 {...({ id: 'node', data } as NodeProps<HypothesisTreeFlowNode>)}
               />
             </HypothesisTreeActionsContext.Provider>
-          </SubjectHrefResolverContext.Provider>
+          </SubjectLinksContext.Provider>
         </ReactFlowProvider>
       </I18nProvider>
     </EuiProvider>
@@ -146,7 +143,9 @@ describe('HypothesisTreeNode', () => {
     expect(link).toHaveAttribute('target', '_blank');
   });
 
-  it('links a significant event trigger where the solution resolves it', () => {
+  it('links a significant event trigger where the solution resolves it, opened in place', () => {
+    const actions = { onSelectAction: jest.fn(), onSelectNode: jest.fn() };
+    const navigateToUrl = jest.fn().mockResolvedValue(undefined);
     renderNode(
       {
         kind: 'trigger',
@@ -156,14 +155,18 @@ describe('HypothesisTreeNode', () => {
         ],
         ...flags,
       },
-      undefined,
-      ({ type, id }) => `/app/solution/${type}/${id}`
+      actions,
+      { resolveSubjectHref: ({ type, id }) => `/app/solution/${type}/${id}`, navigateToUrl }
     );
 
     const link = screen.getByTestId('investigationHypothesisTreeTriggerLink');
     expect(link).toHaveTextContent('View significant event');
     expect(link).toHaveAttribute('href', '/app/solution/significant_event/se-1');
     expect(link).not.toHaveAttribute('target');
+
+    fireEvent.click(link);
+    expect(navigateToUrl).toHaveBeenCalledWith('/app/solution/significant_event/se-1');
+    expect(actions.onSelectNode).not.toHaveBeenCalled();
   });
 
   it('does not link a subject without a link', () => {
