@@ -38,7 +38,6 @@ const mockGroupAction: AlertEpisodeGroupAction = {
   lastDeactivateAction: null,
   lastSnoozeAction: 'snooze',
   snoozedUntil: '2026-08-04T00:00:00.000Z',
-  tags: ['series-tag'],
   lastSnoozeActor: null,
   lastDeactivateActor: null,
 };

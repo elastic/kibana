@@ -252,7 +252,7 @@ export const AlertEpisodeDetailsFlyout = ({
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isResolved = episodeAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
-  const tags = groupAction?.tags ?? [];
+  const tags = episodeAction?.tags ?? [];
 
   // Header title: show skeleton while loading, fall back to generic label if rule not found.
   const ruleName = isRuleLoaded(ruleState) ? ruleState.rule.metadata.name : undefined;

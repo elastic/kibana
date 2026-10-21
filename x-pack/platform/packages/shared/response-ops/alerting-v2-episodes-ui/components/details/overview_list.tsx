@@ -64,7 +64,7 @@ export const AlertEpisodeOverviewList = ({
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isResolved = episodeAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
-  const tags = groupAction?.tags ?? [];
+  const tags = episodeAction?.tags ?? [];
   // Caller-controlled (data.alert_url from external ingest). Restrict to absolute
   // http(s) before putting into href — blocks javascript:/data: stored XSS.
   const rawAlertUrl =

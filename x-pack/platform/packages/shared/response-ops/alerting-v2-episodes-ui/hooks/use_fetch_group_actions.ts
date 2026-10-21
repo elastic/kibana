@@ -8,7 +8,6 @@
 import { useQuery } from '@kbn/react-query';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { normalizeTags } from '@kbn/alerting-v2-utils';
 import type { AlertEpisodeGroupAction } from '../types/action';
 import { fetchGroupActions } from '../apis/fetch_group_actions';
 import type { GroupActionRow } from '../queries/group_actions_query';
@@ -41,7 +40,6 @@ const toGroupActionsMap = (rows: GroupActionRow[]) => {
       lastDeactivateAction: row.last_deactivate_action ?? null,
       lastSnoozeAction: row.last_snooze_action ?? null,
       snoozedUntil: row.snoozed_until ?? null,
-      tags: normalizeTags(row.tags),
       lastSnoozeActor: row.last_snooze_actor ?? null,
       lastDeactivateActor: row.last_deactivate_actor ?? null,
     });

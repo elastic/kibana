@@ -23,7 +23,6 @@ export interface AlertEpisodeGroupAction {
   lastDeactivateAction: string | null;
   lastSnoozeAction: string | null;
   snoozedUntil: string | null;
-  tags: string[];
   lastSnoozeActor: string | null;
   lastDeactivateActor: string | null;
 }

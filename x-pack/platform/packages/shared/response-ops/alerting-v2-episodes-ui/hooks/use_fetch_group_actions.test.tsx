@@ -50,7 +50,6 @@ describe('useFetchGroupActions', () => {
         last_deactivate_action: 'deactivate',
         last_snooze_action: 'snooze',
         snoozed_until: '2035-01-02T12:00:00.000Z',
-        tags: ['t1', 't2'],
         last_snooze_actor: 'actor-snooze',
         last_deactivate_actor: 'actor-deactivate',
       },
@@ -74,66 +73,9 @@ describe('useFetchGroupActions', () => {
       lastDeactivateAction: 'deactivate',
       lastSnoozeAction: 'snooze',
       snoozedUntil: '2035-01-02T12:00:00.000Z',
-      tags: ['t1', 't2'],
       lastSnoozeActor: 'actor-snooze',
       lastDeactivateActor: 'actor-deactivate',
     });
-  });
-
-  it('normalizes string tags into a single-element array', async () => {
-    const rows: GroupActionRow[] = [
-      {
-        group_hash: 'gh-2',
-        rule_id: null,
-        last_deactivate_action: null,
-        last_snooze_action: null,
-        snoozed_until: null,
-        tags: 'solo',
-        last_snooze_actor: null,
-        last_deactivate_actor: null,
-      },
-    ];
-    fetchGroupActionsMock.mockResolvedValue(rows);
-
-    const { result } = renderHook(
-      () =>
-        useFetchGroupActions({
-          groupHashes: ['gh-2'],
-          services: { expressions: mockExpressions, spaces: mockSpaces },
-        }),
-      { wrapper }
-    );
-
-    await waitFor(() => expect(result.current.data!.has(':gh-2')).toBe(true));
-    expect(result.current.data!.get(':gh-2')?.tags).toEqual(['solo']);
-  });
-
-  it('converts tags to empty array when row tags are null', async () => {
-    const rows: GroupActionRow[] = [
-      {
-        group_hash: 'gh-3',
-        rule_id: null,
-        last_deactivate_action: null,
-        last_snooze_action: null,
-        snoozed_until: null,
-        tags: null,
-        last_snooze_actor: null,
-        last_deactivate_actor: null,
-      },
-    ];
-    fetchGroupActionsMock.mockResolvedValue(rows);
-
-    const { result } = renderHook(
-      () =>
-        useFetchGroupActions({
-          groupHashes: ['gh-3'],
-          services: { expressions: mockExpressions, spaces: mockSpaces },
-        }),
-      { wrapper }
-    );
-
-    await waitFor(() => expect(result.current.data!.has(':gh-3')).toBe(true));
-    expect(result.current.data!.get(':gh-3')?.tags).toEqual([]);
   });
 
   it('keeps actions from different rules that share a group hash', async () => {
@@ -144,7 +86,6 @@ describe('useFetchGroupActions', () => {
         last_deactivate_action: null,
         last_snooze_action: 'snooze',
         snoozed_until: null,
-        tags: [],
         last_snooze_actor: null,
         last_deactivate_actor: null,
       },
@@ -154,7 +95,6 @@ describe('useFetchGroupActions', () => {
         last_deactivate_action: 'deactivate',
         last_snooze_action: null,
         snoozed_until: null,
-        tags: [],
         last_snooze_actor: null,
         last_deactivate_actor: null,
       },
