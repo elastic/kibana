@@ -40,13 +40,9 @@ import type { ImprovementAction } from '../../../common/http_api/improvement_act
 import { IMPROVEMENT_ACTIONS } from '../../../common/http_api/improvement_actions';
 import {
   KI_LIFECYCLE_STATUSES,
-  KI_REFERENCE_RELATIONS,
   MAX_KI_CONTENT_LENGTH,
   MAX_KI_ID_LENGTH,
-  MAX_KI_REFERENCE_DESCRIPTION_LENGTH,
-  MAX_KI_REFERENCE_URI_LENGTH,
   type KiLifecycleStatus,
-  type KiReferenceRelation,
 } from '../../../common/step_types/ki';
 import {
   validateAbsoluteSignalWindow,

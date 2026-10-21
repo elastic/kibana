@@ -86,7 +86,7 @@ import { validateEsqlSources } from '../ai_indices/validate_esql_sources';
 import { validateTraces } from '../ai_indices/validate_traces';
 import { formatErrorMessage } from '../utils/format_es_error';
 import { resolveSpaceId } from '../utils/resolve_space_id';
-import { AiIndexAuditAction, aiIndexAuditEvent } from '../audit/audit_events';
+import { AiIndexAuditAction, aiIndexAuditEvent, kiAuditEvent } from '../audit/audit_events';
 import {
   aiIndexHttpItemResponseSchema,
   aiIndexIdParamsSchema,
@@ -846,16 +846,14 @@ export const registerAiIndexRoutes = ({
               return { output: result };
             },
           });
-          auditLogger.log(
-            aiIndexAuditEvent({ action: AiIndexAuditAction.KI_UPDATE, id: aiIndexId, kiId })
-          );
+          auditLogger.log(kiAuditEvent({ action: AiIndexAuditAction.KI_UPDATE, aiIndexId, kiId }));
           const body: UpdateKiResponse = output;
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(
-            aiIndexAuditEvent({
+            kiAuditEvent({
               action: AiIndexAuditAction.KI_UPDATE,
-              id: aiIndexId,
+              aiIndexId,
               kiId,
               error,
             })
@@ -920,16 +918,14 @@ export const registerAiIndexRoutes = ({
               return { output: result };
             },
           });
-          auditLogger.log(
-            aiIndexAuditEvent({ action: AiIndexAuditAction.KI_DELETE, id: aiIndexId, kiId })
-          );
+          auditLogger.log(kiAuditEvent({ action: AiIndexAuditAction.KI_DELETE, aiIndexId, kiId }));
           const body: DeleteKiResponse = output;
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(
-            aiIndexAuditEvent({
+            kiAuditEvent({
               action: AiIndexAuditAction.KI_DELETE,
-              id: aiIndexId,
+              aiIndexId,
               kiId,
               error,
             })
@@ -995,16 +991,14 @@ export const registerAiIndexRoutes = ({
               return { output: result };
             },
           });
-          auditLogger.log(
-            aiIndexAuditEvent({ action: AiIndexAuditAction.RESTORE, id: aiIndexId, kiId })
-          );
+          auditLogger.log(kiAuditEvent({ action: AiIndexAuditAction.RESTORE, aiIndexId, kiId }));
           const body: RestoreKiResponse = output;
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(
-            aiIndexAuditEvent({
+            kiAuditEvent({
               action: AiIndexAuditAction.RESTORE,
-              id: aiIndexId,
+              aiIndexId,
               kiId,
               error,
             })

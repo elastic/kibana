@@ -97,6 +97,7 @@ describe('updateKi', () => {
       },
       if_seq_no: 5,
       if_primary_term: 1,
+      refresh: 'wait_for',
     });
   });
 
@@ -173,6 +174,7 @@ describe('updateKi', () => {
         },
       },
       op_type: 'create',
+      refresh: 'wait_for',
     });
   });
 
@@ -262,6 +264,7 @@ describe('softDeleteKi', () => {
       },
       if_seq_no: 5,
       if_primary_term: 1,
+      refresh: 'wait_for',
     });
   });
 
@@ -322,6 +325,7 @@ describe('softDeleteKi', () => {
         },
       },
       op_type: 'create',
+      refresh: 'wait_for',
     });
   });
 
@@ -394,6 +398,7 @@ describe('restoreKi', () => {
       },
       if_seq_no: 5,
       if_primary_term: 1,
+      refresh: 'wait_for',
     });
   });
 
@@ -456,6 +461,7 @@ describe('restoreKi', () => {
         },
       },
       op_type: 'create',
+      refresh: 'wait_for',
     });
   });
 

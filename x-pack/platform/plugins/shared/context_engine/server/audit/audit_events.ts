@@ -59,10 +59,27 @@ const eventTypes: Record<AiIndexAuditAction, string> = {
   ai_index_describe: 'access',
 };
 
+type AiIndexOnlyAuditAction = Exclude<
+  AiIndexAuditAction,
+  AiIndexAuditAction.KI_UPDATE | AiIndexAuditAction.KI_DELETE | AiIndexAuditAction.RESTORE
+>;
+
+export type KiAuditAction =
+  | AiIndexAuditAction.KI_UPDATE
+  | AiIndexAuditAction.KI_DELETE
+  | AiIndexAuditAction.RESTORE;
+
 export interface AiIndexAuditEventParams {
-  action: AiIndexAuditAction;
+  action: AiIndexOnlyAuditAction;
   id?: string;
-  kiId?: string;
+  outcome?: EcsEvent['outcome'];
+  error?: Error;
+}
+
+export interface KiAuditEventParams {
+  action: KiAuditAction;
+  aiIndexId: string;
+  kiId: string;
   outcome?: EcsEvent['outcome'];
   error?: Error;
 }
@@ -77,6 +94,46 @@ export interface ImprovementAuditEventParams {
   recorded?: number;
   error?: Error;
 }
+
+interface AuditEventBodyParams {
+  action: AiIndexAuditAction;
+  doc: string;
+  savedObject?: { type: string; id: string };
+  outcome?: EcsEvent['outcome'];
+  error?: Error;
+}
+
+const auditEventBody = ({
+  action,
+  doc,
+  savedObject,
+  outcome,
+  error,
+}: AuditEventBodyParams): AuditEvent => {
+  const [present, progressive, past] = eventVerbs[action];
+  const message = error
+    ? `Failed attempt to ${present} ${doc}`
+    : outcome === 'unknown'
+    ? `User is ${progressive} ${doc}`
+    : `User has ${past} ${doc}`;
+
+  return {
+    message,
+    event: {
+      action,
+      category: ['database'],
+      type: [eventTypes[action]],
+      outcome: outcome ?? (error ? 'failure' : 'success'),
+    },
+    kibana: {
+      saved_object: savedObject,
+    },
+    error: error && {
+      code: error.name,
+      message: error.message,
+    },
+  };
+};
 
 /** Audits an analysis run recording what it proposed. */
 export const improvementAuditEvent = ({
@@ -105,43 +162,30 @@ export const improvementAuditEvent = ({
 export const aiIndexAuditEvent = ({
   action,
   id,
-  kiId,
   outcome,
   error,
 }: AiIndexAuditEventParams): AuditEvent => {
-  let doc: string;
-  if (kiId) {
-    doc = `Knowledge Indicator [id=${kiId}] of AI index [id=${id}]`;
-  } else if (id) {
-    doc = `AI index [id=${id}]`;
-  } else {
-    doc = 'an AI index';
-  }
-
-  const savedObject =
-    !kiId || !id ? { type: kiId ? 'ki' : 'ai_index', id: kiId ?? id ?? '' } : undefined;
-
-  const [present, progressive, past] = eventVerbs[action];
-  const message = error
-    ? `Failed attempt to ${present} ${doc}`
-    : outcome === 'unknown'
-    ? `User is ${progressive} ${doc}`
-    : `User has ${past} ${doc}`;
-
-  return {
-    message,
-    event: {
-      action,
-      category: ['database'],
-      type: [eventTypes[action]],
-      outcome: outcome ?? (error ? 'failure' : 'success'),
-    },
-    kibana: {
-      saved_object: savedObject,
-    },
-    error: error && {
-      code: error.name,
-      message: error.message,
-    },
-  };
+  const doc = id ? `AI index [id=${id}]` : 'an AI index';
+  return auditEventBody({
+    action,
+    doc,
+    savedObject: id ? { type: 'ai_index', id } : undefined,
+    outcome,
+    error,
+  });
 };
+
+export const kiAuditEvent = ({
+  action,
+  aiIndexId,
+  kiId,
+  outcome,
+  error,
+}: KiAuditEventParams): AuditEvent =>
+  auditEventBody({
+    action,
+    doc: `Knowledge Indicator [id=${kiId}] of AI index [id=${aiIndexId}]`,
+    savedObject: { type: 'ki', id: kiId },
+    outcome,
+    error,
+  });

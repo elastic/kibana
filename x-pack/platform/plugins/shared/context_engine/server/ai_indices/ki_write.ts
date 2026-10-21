@@ -64,6 +64,7 @@ export const updateKi = async (
     kiId,
     revision,
     changes,
+    refresh: true,
   });
 
   return { id: kiId, result };
@@ -111,6 +112,7 @@ export const softDeleteKi = async (
     kiId,
     revision,
     changes,
+    refresh: true,
   });
 
   return { id: kiId };
@@ -158,6 +160,7 @@ export const restoreKi = async (
     kiId,
     revision,
     changes,
+    refresh: true,
   });
 
   return { id: kiId };
