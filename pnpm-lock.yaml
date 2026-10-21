@@ -3664,8 +3664,8 @@ importers:
         specifier: 5.3.0
         version: 5.3.0
       markdown-it:
-        specifier: 14.2.0
-        version: 14.2.0
+        specifier: 14.3.3
+        version: 14.3.3
       memoize-one:
         specifier: 6.0.0
         version: 6.0.0
@@ -5057,8 +5057,8 @@ importers:
         specifier: 1.3.0
         version: 1.3.0
       '@types/markdown-it':
-        specifier: 12.2.3
-        version: 12.2.3
+        specifier: 14.2.0
+        version: 14.2.0
       '@types/micromatch':
         specifier: 4.0.2
         version: 4.0.2
@@ -12808,8 +12808,8 @@ packages:
   '@types/license-checker@25.0.6':
     resolution: {integrity: sha512-ju/75+YPkNE5vX1iPer+qtI1eI/LqJVYZgOsmSHI1iiEM1bQL5Gh1lEvyjR9T7ZXVE1FwJa2doWJEEmPNwbZkw==}
 
-  '@types/linkify-it@2.1.0':
-    resolution: {integrity: sha512-Q7DYAOi9O/+cLLhdaSvKdaumWyHbm7HAk/bFwwyTuU0arR5yyCeW5GOoqt4tJTpDRxhpx9Q8kQL6vMpuw9hDSw==}
+  '@types/linkify-it@5.0.0':
+    resolution: {integrity: sha512-sVDA58zAw4eWAffKOaQH5/5j3XeayukzDk+ewSsnv3p4yJEZHCCzMDiZM8e0OUrRvmpGZ85jf4yDHkHsgBNr9Q==}
 
   '@types/loader-utils@2.0.3':
     resolution: {integrity: sha512-sDXXzZnTLXgdso54/iOpAFSDgqhVXabCvwGAt77Agadh/Xk0QYgOk520r3tpOouI098gyqGIFywx8Op1voc3vQ==}
@@ -12829,8 +12829,8 @@ packages:
   '@types/mapbox__vector-tile@1.3.4':
     resolution: {integrity: sha512-bpd8dRn9pr6xKvuEBQup8pwQfD4VUyqO/2deGjfpe6AwC8YRlyEipvefyRJUSiCJTZuCb8Pl1ciVV5ekqJ96Bg==}
 
-  '@types/markdown-it@12.2.3':
-    resolution: {integrity: sha512-GKMHFfv3458yYy+v/N8gjufHO6MSZKCOXpZc5GXIWWy8uldwfmPn98vp81gZ5f9SVw8YYBctgfJ22a2d7AOMeQ==}
+  '@types/markdown-it@14.2.0':
+    resolution: {integrity: sha512-NoQ2yGlLWj4wpxMs+TYmRKk3thDrQ97agr7sFqfLsAlvoS8SNQuTrlObhFqG9iugdTtgOE9jpJ6FNM4ZGsa5xQ==}
 
   '@types/md5@2.3.5':
     resolution: {integrity: sha512-/i42wjYNgE6wf0j2bcTX6kuowmdL/6PE4IVitMpm2eYKBUuYCprdcWVK+xEF0gcV6ufMCRhtxmReGfc6hIK7Jw==}
@@ -12838,8 +12838,8 @@ packages:
   '@types/mdast@3.0.3':
     resolution: {integrity: sha512-SXPBMnFVQg1s00dlMCc/jCdvPqdE4mXaMMCeRlxLDmTAEoegHT53xKtkDnzDTOcmMHUfcjyf36/YYZ6SxRdnsw==}
 
-  '@types/mdurl@1.0.2':
-    resolution: {integrity: sha512-eC4U9MlIcu2q0KQmXszyn5Akca/0jrQmwDRgpAMJai7qBWq4amIQhZyNau4VYGtCeALvW1/NtjzJJ567aZxfKA==}
+  '@types/mdurl@2.0.0':
+    resolution: {integrity: sha512-RGdgjQUZba5p6QEFAVx2OGb8rQDL/cPRG7GiedRzMcJ1tYnUANBncjbSB1NRGwbvjcPeikRABz2nshyPk1bhWg==}
 
   '@types/mdx@2.0.13':
     resolution: {integrity: sha512-+OWZQfAYyio6YkJb3HLxDrvnx6SWWDbC0zVPfBRzUk0/nqoDyf6dNxQi3eArPe8rJ473nobTMQ/8Zk+LxJ+Yuw==}
@@ -15966,6 +15966,10 @@ packages:
     resolution: {integrity: sha512-oYp7156SP8LkeGD0GF85ad1X9Ai79WtRsZ2gxJqtBuzH+98YUV6jkHEKlZkMbcrjJjIVJNIDP/3WL9wQkoPbWA==}
     engines: {node: '>=0.12'}
 
+  entities@4.5.0:
+    resolution: {integrity: sha512-V0hjH4dGPh9Ao5p0MoRY6BVqtwCjhz6vI5LT8AJ55H+4g9/4vbHx1I54fS0XuclLhDHArPQCiMjDxjaL8fPxhw==}
+    engines: {node: '>=0.12'}
+
   entities@7.0.1:
     resolution: {integrity: sha512-TWrgLOFUQTH994YUyl1yT4uyavY5nNB5muff+RtWaqNVCAK408b5ZnnbNAUEWLTCpum9w6arT70i1XdQ4UeOPA==}
     engines: {node: '>=0.12'}
@@ -18827,8 +18831,8 @@ packages:
   markdown-escapes@1.0.1:
     resolution: {integrity: sha512-wo7K7q4uD6+BTjI+tuwfA3Eb9uUVmwsQCgyDzHf8ddirgZYMnT5k4tMfh1j0eEL9FD80CXmwg48qgK4KI/DBbg==}
 
-  markdown-it@14.2.0:
-    resolution: {integrity: sha512-1TGiQiJVRQ3NPmZH6sx5Cfnmg6GQm9jvC1ch4TK511NjSJvjzKLzn5pPfZRNZkRPZP0HqCioSndqH8v2nRaWVQ==}
+  markdown-it@14.3.3:
+    resolution: {integrity: sha512-L//tDAkjTjJCU6pBUSBTgs3Kg4InVaZuUZog/b6V12UKhcDQ7S78877ibbCanRExwPuYP1CZD7Gd2dxSy1GXRg==}
     hasBin: true
 
   markdown-table@2.0.0:
@@ -29679,7 +29683,7 @@ snapshots:
 
   '@types/license-checker@25.0.6': {}
 
-  '@types/linkify-it@2.1.0': {}
+  '@types/linkify-it@5.0.0': {}
 
   '@types/loader-utils@2.0.3':
     dependencies:
@@ -29704,10 +29708,10 @@ snapshots:
       '@types/mapbox__point-geometry': 0.1.4
       '@types/pbf': 3.0.2
 
-  '@types/markdown-it@12.2.3':
+  '@types/markdown-it@14.2.0':
     dependencies:
-      '@types/linkify-it': 2.1.0
-      '@types/mdurl': 1.0.2
+      '@types/linkify-it': 5.0.0
+      '@types/mdurl': 2.0.0
 
   '@types/md5@2.3.5': {}
 
@@ -29715,7 +29719,7 @@ snapshots:
     dependencies:
       '@types/unist': 2.0.3
 
-  '@types/mdurl@1.0.2': {}
+  '@types/mdurl@2.0.0': {}
 
   '@types/mdx@2.0.13': {}
 
@@ -33246,6 +33250,8 @@ snapshots:
   entities@2.2.0: {}
 
   entities@4.4.0: {}
+
+  entities@4.5.0: {}
 
   entities@7.0.1: {}
 
@@ -36809,10 +36815,10 @@ snapshots:
 
   markdown-escapes@1.0.1: {}
 
-  markdown-it@14.2.0:
+  markdown-it@14.3.3:
     dependencies:
       argparse: 2.0.1
-      entities: 4.4.0
+      entities: 4.5.0
       linkify-it: 5.0.2
       mdurl: 2.0.0
       punycode.js: 2.3.1
