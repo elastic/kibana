@@ -147,7 +147,7 @@ const nameContentCss = css`
 
 const groupRecordsCss = css`
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
 `;
 
 const groupRecordCss = css`
