@@ -671,12 +671,15 @@ export const getResolutionScoreESQLByIds = (
   // resolution_target_id, then filter on resolution_target_id BEFORE the
   // CONCAT/base64 builders run so per-row string-allocation work only
   // happens for alerts that survive the IN-clause.
+  // The alert timestamp is renamed before the join because lookup rows have their own
+  // @timestamp, which would otherwise replace the alert's (and null it on unmatched rows).
   const query = /* esql */ `
   SET unmapped_fields="nullify";
   FROM ${alertsIndex} METADATA _index
     | WHERE kibana.alert.risk_score IS NOT NULL AND (${containsIdFilter})
     ${fieldEvalsClause}
     ${euidEvalClause}
+    | RENAME @timestamp as time
     | LOOKUP JOIN ${lookupIndex} ON entity_id
     | EVAL resolution_target_id = COALESCE(resolution_target_id, entity_id),
            relationship_type = COALESCE(relationship_type, "self")
@@ -685,8 +688,7 @@ export const getResolutionScoreESQLByIds = (
              kibana.alert.rule.name as rule_name,
              kibana.alert.rule.uuid as rule_id,
              kibana.alert.uuid as alert_id,
-             event.kind as category,
-             @timestamp as time
+             event.kind as category
     | EVAL rule_name_b64 = TO_BASE64(rule_name),
            category_b64 = TO_BASE64(category)
     | EVAL input = CONCAT(""" {"risk_score": """", risk_score::keyword, """", "time": """", time::keyword, """", "index": """", _index, """", "rule_name_b64": """", rule_name_b64, """\", "category_b64": """", category_b64, """\", "id": \"""", alert_id, """\" } """)

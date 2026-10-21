@@ -127,6 +127,21 @@ describe('Calculate risk scores with ESQL', () => {
       expect(query).toContain('contributing_entities_raw = VALUES(entity_with_rel)');
     });
 
+    it('keeps the alert timestamp when joining lookup rows that have their own', () => {
+      const query = getResolutionScoreESQLByIds(
+        EntityType.user,
+        ['user:target-a'],
+        5000,
+        1000,
+        '.alerts-security.alerts-default',
+        '.entity_analytics.risk_score.lookup-default'
+      );
+
+      const renameIndex = query.indexOf('| RENAME @timestamp as time');
+      expect(renameIndex).toBeGreaterThan(-1);
+      expect(renameIndex).toBeLessThan(query.indexOf('| LOOKUP JOIN'));
+    });
+
     it('escapes quote and backslash characters in resolution target ID list', () => {
       const query = getResolutionScoreESQLByIds(
         EntityType.user,
