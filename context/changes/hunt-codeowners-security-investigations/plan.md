@@ -379,13 +379,13 @@ These files touch all AlertZero Workers (Triage, Attack Discovery, Forensics, De
 
 #### Automated
 
-- [x] 2.1 Move `hunt_children_contract.test.ts` into `server/managed_workflows/hunt/`
-- [x] 2.2 Move `use_hunt_threat_intel_supply.ts` into `public/hooks/hunt/` and update importers
-- [x] 2.3 Phase 2 jest + type_check gates pass
+- [x] 2.1 Move `hunt_children_contract.test.ts` into `server/managed_workflows/hunt/` — 28aa3bab5d6d
+- [x] 2.2 Move `use_hunt_threat_intel_supply.ts` into `public/hooks/hunt/` and update importers — 28aa3bab5d6d
+- [x] 2.3 Phase 2 jest + type_check gates pass — 28aa3bab5d6d
 
 ### Phase 3: Update `.github/CODEOWNERS` and verify every Hunt Watch path
 
 #### Automated
 
-- [ ] 3.1 Expand `# AlertZero Hunt Watch services` CODEOWNERS block
-- [ ] 3.2 Ownership resolution + CODEOWNERS generator + team validation + eslint pass
+- [x] 3.1 Expand `# AlertZero Hunt Watch services` CODEOWNERS block
+- [x] 3.2 Ownership resolution + CODEOWNERS generator + team validation + eslint pass

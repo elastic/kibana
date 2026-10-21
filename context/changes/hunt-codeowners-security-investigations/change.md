@@ -16,3 +16,5 @@ by PR 297827, which pinged only security-solution and workflows-eng.
 - Phases: kibana-15c.1 (kbn-workflows hunt/), kibana-15c.2 (alertzero plugin + common), kibana-15c.3 (CODEOWNERS + PR)
 - Related: kibana-5df (Hunt Watch epic), open hunt PRs 297827, 297496, 297846 need a rebase after this lands
 - Branch / worktree: `hunt-codeowners-security-investigations` at `~/dev/kibana.worktrees/hunt-codeowners-security-investigations`
+- Phase 1 commit: f242bb12d30f
+- Phase 2 commit: 28aa3bab5d6d
