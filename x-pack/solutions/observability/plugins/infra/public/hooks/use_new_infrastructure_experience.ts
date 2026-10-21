@@ -5,14 +5,22 @@
  * 2.0.
  */
 
-import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { useActiveKibanaSpace } from './use_kibana_space';
-
-const NEW_INFRASTRUCTURE_EXPERIENCE_STORAGE_KEY = 'newInfrastructureExperience';
+import { useCallback } from 'react';
+import { NEW_INFRASTRUCTURE_EXPERIENCE_KEY } from '../../common/ui_settings_keys';
+import { useKibanaContextForPlugin } from './use_kibana';
 
 export function useNewInfrastructureExperience() {
-  const { space } = useActiveKibanaSpace();
-  const spaceId = space?.id ?? DEFAULT_SPACE_ID;
-  return useLocalStorage(`${NEW_INFRASTRUCTURE_EXPERIENCE_STORAGE_KEY}:${spaceId}`, false);
+  const { services } = useKibanaContextForPlugin();
+
+  const value = services.uiSettings.get<boolean>(NEW_INFRASTRUCTURE_EXPERIENCE_KEY, false);
+
+  const setValue = useCallback(
+    async (enabled: boolean) => {
+      await services.uiSettings.set(NEW_INFRASTRUCTURE_EXPERIENCE_KEY, enabled);
+      window.location.reload();
+    },
+    [services]
+  );
+
+  return [value, setValue] as const;
 }

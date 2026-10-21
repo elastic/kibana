@@ -5,62 +5,60 @@
  * 2.0.
  */
 
-import { renderHook } from '@testing-library/react';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { act, renderHook } from '@testing-library/react';
+import { NEW_INFRASTRUCTURE_EXPERIENCE_KEY } from '../../common/ui_settings_keys';
 import { useNewInfrastructureExperience } from './use_new_infrastructure_experience';
 
-jest.mock('./use_kibana_space', () => ({
-  useActiveKibanaSpace: jest.fn(),
+jest.mock('./use_kibana', () => ({
+  useKibanaContextForPlugin: jest.fn(),
 }));
 
-const { useActiveKibanaSpace } = jest.requireMock('./use_kibana_space');
+const { useKibanaContextForPlugin } = jest.requireMock('./use_kibana');
 
-const mockSpace = (id: string) =>
-  useActiveKibanaSpace.mockReturnValue({
-    isLoading: false,
-    error: undefined,
-    space: { id, name: id, disabledFeatures: [] },
-  });
+const mockGet = jest.fn();
+const mockSet = jest.fn().mockResolvedValue(true);
 
-const mockSpaceError = () =>
-  useActiveKibanaSpace.mockReturnValue({
-    isLoading: false,
-    error: new Error('spaces unavailable'),
-    space: undefined,
-  });
+const mockReload = jest.fn();
+Object.defineProperty(window, 'location', {
+  value: { reload: mockReload },
+  writable: true,
+});
 
 describe('useNewInfrastructureExperience', () => {
   beforeEach(() => {
-    localStorage.clear();
-    mockSpace('default');
+    jest.clearAllMocks();
+    useKibanaContextForPlugin.mockReturnValue({
+      services: { uiSettings: { get: mockGet, set: mockSet } },
+    });
   });
 
-  it('returns false by default', () => {
+  it('returns false by default when the setting is not set', () => {
+    mockGet.mockReturnValue(false);
+
     const { result } = renderHook(() => useNewInfrastructureExperience());
+
     expect(result.current[0]).toBe(false);
+    expect(mockGet).toHaveBeenCalledWith(NEW_INFRASTRUCTURE_EXPERIENCE_KEY, false);
   });
 
-  it('scopes the preference to the active space', () => {
-    mockSpace('my-space');
-    localStorage.setItem('newInfrastructureExperience:my-space', 'true');
+  it('returns true when the setting is enabled', () => {
+    mockGet.mockReturnValue(true);
 
     const { result } = renderHook(() => useNewInfrastructureExperience());
+
     expect(result.current[0]).toBe(true);
   });
 
-  it('does not read the preference of a different space', () => {
-    mockSpace('space-a');
-    localStorage.setItem('newInfrastructureExperience:space-b', 'true');
+  it('calls uiSettings.set and reloads when the setter is invoked', async () => {
+    mockGet.mockReturnValue(false);
 
     const { result } = renderHook(() => useNewInfrastructureExperience());
-    expect(result.current[0]).toBe(false);
-  });
 
-  it('falls back to DEFAULT_SPACE_ID when the space cannot be resolved', () => {
-    mockSpaceError();
-    localStorage.setItem(`newInfrastructureExperience:${DEFAULT_SPACE_ID}`, 'true');
+    await act(async () => {
+      await result.current[1](true);
+    });
 
-    const { result } = renderHook(() => useNewInfrastructureExperience());
-    expect(result.current[0]).toBe(true);
+    expect(mockSet).toHaveBeenCalledWith(NEW_INFRASTRUCTURE_EXPERIENCE_KEY, true);
+    expect(mockReload).toHaveBeenCalled();
   });
 });

@@ -17,7 +17,10 @@ import {
   MetricsExplorerLocatorDefinition,
 } from '@kbn/observability-shared-plugin/common';
 import { mapValues } from 'lodash';
+import { schema } from '@kbn/config-schema';
+import { i18n } from '@kbn/i18n';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
+import { NEW_INFRASTRUCTURE_EXPERIENCE_KEY } from '../common/ui_settings_keys';
 import { getMetricsFeature } from './features';
 import { registerRoutes } from './infra_server';
 import type {
@@ -137,6 +140,21 @@ export class InfraServerPlugin
     // Setup infra services
     const inventoryViews = this.inventoryViews.setup();
     const metricsExplorerViews = this.metricsExplorerViews?.setup();
+
+    core.uiSettings.register({
+      [NEW_INFRASTRUCTURE_EXPERIENCE_KEY]: {
+        name: i18n.translate('xpack.infra.uiSettings.newInfrastructureExperienceName', {
+          defaultMessage: 'New infrastructure experience',
+        }),
+        value: false,
+        description: i18n.translate(
+          'xpack.infra.uiSettings.newInfrastructureExperienceDescription',
+          { defaultMessage: 'Enables the new entity-based infrastructure inventory experience.' }
+        ),
+        schema: schema.boolean(),
+        category: ['hiddenConfig'],
+      },
+    });
 
     // Register saved object types
     core.savedObjects.registerType(infraSourceConfigurationSavedObjectType);
