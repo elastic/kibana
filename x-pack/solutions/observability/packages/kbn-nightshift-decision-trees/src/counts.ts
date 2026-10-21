@@ -160,7 +160,7 @@ export const countsForTree = (
   return toTreeCounts(tree, nodeCounts, edgeCounts);
 };
 
-/** The only candidate, or the one whose condition matches; `undefined` when that cannot decide. */
+/** The only candidate, the exact condition match, or a unique case-insensitive match; else `undefined`. */
 const pickCandidate = (
   candidates: DecisionEdgeView[],
   condition: string | undefined
@@ -171,8 +171,15 @@ const pickCandidate = (
   if (condition === undefined) {
     return undefined;
   }
-  const wanted = conditionMatchKey(condition);
-  return candidates.find((candidate) => conditionMatchKey(candidate.condition) === wanted);
+  const { condition: cleaned } = parseEdgeCondition(condition);
+  const exact = candidates.find((candidate) => candidate.condition === cleaned);
+  if (exact) {
+    return exact;
+  }
+  const loose = candidates.filter(
+    (candidate) => conditionMatchKey(candidate.condition) === conditionMatchKey(cleaned)
+  );
+  return loose.length === 1 ? loose[0] : undefined;
 };
 
 /** Resolves edge refs against the tree, throwing a validation error for unknown or ambiguous refs. */
@@ -328,7 +335,8 @@ export const carryCounts = ({
     target_node_id: resolveNode(entry.target_node_id),
     remapped: mergeMap.has(entry.source_node_id) || mergeMap.has(entry.target_node_id),
   }));
-  const previousKeys = new Set(remappedEdges.map(decisionEdgeKey));
+  // Before remapping: an edge that only exists because a merge moved it onto this pair is new.
+  const previousKeys = new Set(previous.edges.map(decisionEdgeKey));
   const nextKeys = new Set(nextTree.edges.map(decisionEdgeKey));
   const nextEdgesByPair = groupByNodePair(nextTree.edges);
 
