@@ -12,6 +12,7 @@ import type { IsomerPluginStart } from './plugin';
 const createStartContract = (): jest.Mocked<IsomerPluginStart> => ({
   getRuntime: jest.fn(createRuntime),
   getDrawing: jest.fn(() => Promise.reject(new Error('Server drawing is off'))),
+  getEms: jest.fn(() => undefined),
 });
 
 export const isomerPluginMock = { createStartContract };

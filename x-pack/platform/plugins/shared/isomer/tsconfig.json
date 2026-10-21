@@ -18,6 +18,7 @@
     "@kbn/isomer-primitives-maps",
     "@kbn/isomer-primitives-vega",
     "@kbn/isomer-theme",
+    "@kbn/maps-ems-plugin",
     "@kbn/react-kibana-context-render",
     "@kbn/repo-info",
     "@kbn/setup-node-env"
