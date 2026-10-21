@@ -319,7 +319,9 @@ export const receiveProvisioningCallbackHandler: FleetRequestHandler<
     { apiKeyId, payload: request.body }
   );
   // Never log the key.
-  logger.info(`IaC callback report [id=${request.params.callbackId}] outcome=${result.outcome}`);
+  logger.info(
+    `Provisioning callback report [id=${request.params.callbackId}] outcome=${result.outcome}`
+  );
 
   switch (result.outcome) {
     case 'received':

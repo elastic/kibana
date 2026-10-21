@@ -49,7 +49,7 @@ export default function (providerContext: FtrProviderContext) {
       .set('Authorization', `ApiKey ${apiKey}`)
       .send(payload);
 
-  describe('IaC callbacks', () => {
+  describe('Provisioning callbacks', () => {
     skipIfNoDockerRegistry(providerContext);
 
     before(async () => {
@@ -152,7 +152,7 @@ export default function (providerContext: FtrProviderContext) {
 
     it('creates the identity with the name, account type and template details sent at create', async () => {
       const { item, api_key: apiKey } = await createCallback({
-        connector_name: 'iac-callback-named',
+        connector_name: 'provisioning-callback-named',
         account_type: 'single-account',
         iac_key: 'sha256:abc',
         iac_blueprint_id: 'federated-identity',
@@ -173,7 +173,7 @@ export default function (providerContext: FtrProviderContext) {
       const created = connectors.body.items.find(
         (connector: { id: string }) => connector.id === body.item.cloud_connector_id
       );
-      expect(created.name).to.be('iac-callback-named');
+      expect(created.name).to.be('provisioning-callback-named');
       expect(created.accountType).to.be('single-account');
       expect(created.iac_key).to.be('sha256:abc');
       expect(created.iac_blueprint_id).to.be('federated-identity');

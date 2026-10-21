@@ -301,7 +301,7 @@ export const useProvisioningCallback = ({
         recheckAvailability();
       }
       if (error || !data) {
-        throw new Error(error?.message ?? 'The IaC callback record could not be created');
+        throw new Error(error?.message ?? 'The provisioning callback record could not be created');
       }
       if (!mountedRef.current) {
         return undefined;

@@ -108,7 +108,7 @@ interface CreatedCloudConnector {
 
 class ProvisioningCallbackService {
   private get logger() {
-    return appContextService.getLogger().get('iacCallback');
+    return appContextService.getLogger().get('provisioningCallback');
   }
 
   /**
@@ -131,13 +131,18 @@ class ProvisioningCallbackService {
     }
     const key = await security.authc.apiKeys
       .grantAsInternalUser(request, {
-        name: `fleet-iac-callback-${id}`,
+        name: `fleet-provisioning-callback-${id}`,
         expiration: PROVISIONING_CALLBACK_EXPIRATION,
-        metadata: { managed_by: 'fleet', managed: true, type: 'iac_callback', callback_id: id },
+        metadata: {
+          managed_by: 'fleet',
+          managed: true,
+          type: 'provisioning_callback',
+          callback_id: id,
+        },
         role_descriptors: {
           // Named descriptor with no privileges. An empty `role_descriptors: {}` would inherit
           // the caller's privileges instead.
-          'fleet-apikey-iac-callback': {
+          'fleet-apikey-provisioning-callback': {
             cluster: [],
             index: [],
             applications: [
@@ -170,7 +175,7 @@ class ProvisioningCallbackService {
     }
 
     auditLoggingService.writeCustomAuditLog({
-      message: `User creating IaC callback [id=${id}] [api_key_id=${key.id}]`,
+      message: `User creating provisioning callback [id=${id}] [api_key_id=${key.id}]`,
     });
 
     const so = await soClient.create<ProvisioningCallbackSOAttributes>(
@@ -179,7 +184,7 @@ class ProvisioningCallbackService {
       { id }
     );
     this.logger.info(
-      `IaC callback created [id=${id}] [space_id=${spaceId ?? 'default'}] [expires_at=${
+      `Provisioning callback created [id=${id}] [space_id=${spaceId ?? 'default'}] [expires_at=${
         attributes.expires_at
       }]`
     );
@@ -264,7 +269,9 @@ class ProvisioningCallbackService {
     }
 
     const item = await this.finish(soClient, so.id, attributes, connector);
-    this.logger.info(`IaC callback received [id=${so.id}] [cloud_connector_id=${connector.id}]`);
+    this.logger.info(
+      `Provisioning callback received [id=${so.id}] [cloud_connector_id=${connector.id}]`
+    );
     return { outcome: 'received', item };
   }
 
@@ -291,7 +298,7 @@ class ProvisioningCallbackService {
     await invalidateAPIKeys([attributes.api_key_id]);
 
     auditLoggingService.writeCustomAuditLog({
-      message: `IaC callback received [id=${id}] [api_key_id=${attributes.api_key_id}] [cloud_connector_id=${connector.id}] [role_arn=${attributes.role_arn}]`,
+      message: `Provisioning callback received [id=${id}] [api_key_id=${attributes.api_key_id}] [cloud_connector_id=${connector.id}] [role_arn=${attributes.role_arn}]`,
     });
 
     return toItem(id, { ...attributes, ...update });
@@ -319,7 +326,7 @@ class ProvisioningCallbackService {
         return;
       }
       this.logger.warn(
-        `IaC callback [id=${id}] could not be released after a failed report: ${error.message}`
+        `Provisioning callback [id=${id}] could not be released after a failed report: ${error.message}`
       );
     }
   }
@@ -367,10 +374,10 @@ class ProvisioningCallbackService {
       return claimed ? toItem(claimed.id, claimed.attributes) : undefined;
     }
     await invalidateAPIKeys([attributes.api_key_id]);
-    this.logger.info(`IaC callback cancelled [id=${so.id}]`);
+    this.logger.info(`Provisioning callback cancelled [id=${so.id}]`);
 
     auditLoggingService.writeCustomAuditLog({
-      message: `User cancelling IaC callback [id=${so.id}] [api_key_id=${attributes.api_key_id}]`,
+      message: `User cancelling provisioning callback [id=${so.id}] [api_key_id=${attributes.api_key_id}]`,
     });
 
     return toItem(so.id, { ...attributes, ...update });

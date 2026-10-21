@@ -2,7 +2,7 @@ requestBody:
   content:
     application/json:
       examples:
-        receiveIacCallbackRequestExample:
+        receiveProvisioningCallbackRequestExample:
           summary: Report a created IAM role
           description: 'The report the launched CloudFormation stack sends once its IAM role exists'
           value:
@@ -14,7 +14,7 @@ responses:
     content:
       application/json:
         examples:
-          receiveIacCallbackExample:
+          receiveProvisioningCallbackExample:
             summary: Identity created
             description: 'The report was applied and the federated identity exists'
             value:

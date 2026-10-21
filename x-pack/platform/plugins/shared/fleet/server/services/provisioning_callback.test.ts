@@ -118,7 +118,7 @@ describe('provisioningCallbackService', () => {
     beforeEach(() => {
       grantAsInternalUser.mockResolvedValue({
         id: 'key-1',
-        name: 'fleet-iac-callback-cb-1',
+        name: 'fleet-provisioning-callback-cb-1',
         api_key: 'secret',
       });
       soClient.create.mockImplementation(async (type, attributes, options) => ({
@@ -139,11 +139,16 @@ describe('provisioningCallbackService', () => {
       // The security plugin grants the key on the caller's behalf, so the caller needs no
       // `manage_api_key` privilege and the key stays attributed to them.
       expect(grantAsInternalUser).toHaveBeenCalledWith(request, {
-        name: 'fleet-iac-callback-cb-1',
+        name: 'fleet-provisioning-callback-cb-1',
         expiration: PROVISIONING_CALLBACK_EXPIRATION,
-        metadata: { managed_by: 'fleet', managed: true, type: 'iac_callback', callback_id: 'cb-1' },
+        metadata: {
+          managed_by: 'fleet',
+          managed: true,
+          type: 'provisioning_callback',
+          callback_id: 'cb-1',
+        },
         role_descriptors: {
-          'fleet-apikey-iac-callback': {
+          'fleet-apikey-provisioning-callback': {
             cluster: [],
             index: [],
             applications: [
@@ -182,7 +187,7 @@ describe('provisioningCallbackService', () => {
       expect(item).not.toHaveProperty('api_key_id');
       // Operators can see the launch in the server log, without the key.
       expect(logger.info).toHaveBeenCalledWith(
-        `IaC callback created [id=cb-1] [space_id=default] [expires_at=${expiresAt}]`
+        `Provisioning callback created [id=cb-1] [space_id=default] [expires_at=${expiresAt}]`
       );
       expect(JSON.stringify(logger.info.mock.calls)).not.toContain('secret');
     });
@@ -403,10 +408,10 @@ describe('provisioningCallbackService', () => {
       );
       expect(mockedInvalidate).toHaveBeenCalledWith(['key-1']);
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: `IaC callback received [id=cb-1] [api_key_id=key-1] [cloud_connector_id=cc-1] [role_arn=${ROLE_ARN}]`,
+        message: `Provisioning callback received [id=cb-1] [api_key_id=key-1] [cloud_connector_id=cc-1] [role_arn=${ROLE_ARN}]`,
       });
       expect(logger.info).toHaveBeenCalledWith(
-        'IaC callback received [id=cb-1] [cloud_connector_id=cc-1]'
+        'Provisioning callback received [id=cb-1] [cloud_connector_id=cc-1]'
       );
       expect(result).toEqual({
         outcome: 'received',
@@ -703,7 +708,7 @@ describe('provisioningCallbackService', () => {
       );
       expect(mockedInvalidate).toHaveBeenCalledWith(['key-1']);
       expect(mockedAudit.writeCustomAuditLog).toHaveBeenCalledWith({
-        message: 'User cancelling IaC callback [id=cb-1] [api_key_id=key-1]',
+        message: 'User cancelling provisioning callback [id=cb-1] [api_key_id=key-1]',
       });
       expect(item).toMatchObject({ id: 'cb-1', status: 'cancelled' });
       expect(item).not.toHaveProperty('api_key_id');

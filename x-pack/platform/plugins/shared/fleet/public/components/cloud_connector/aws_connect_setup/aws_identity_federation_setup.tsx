@@ -295,9 +295,12 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
               <KbnWarningCallout
                 announceOnMount
                 size="s"
-                title={i18n.translate('xpack.fleet.cloudConnector.iacCallback.unavailableTitle', {
-                  defaultMessage: 'CloudFormation cannot report back to this Kibana',
-                })}
+                title={i18n.translate(
+                  'xpack.fleet.cloudConnector.provisioningCallback.unavailableTitle',
+                  {
+                    defaultMessage: 'CloudFormation cannot report back to this Kibana',
+                  }
+                )}
                 data-test-subj="awsIdentityFederationSetup-callbackUnavailable"
                 text={
                   <>
@@ -308,7 +311,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                     )}
                     <p>
                       <FormattedMessage
-                        id="xpack.fleet.cloudConnector.iacCallback.unavailableHint"
+                        id="xpack.fleet.cloudConnector.provisioningCallback.unavailableHint"
                         defaultMessage="The stack reports the created role ARN to Kibana over HTTPS. Set Kibana's public URL (server.publicBaseUrl) to an HTTPS URL that AWS can reach with a publicly trusted certificate. Fix it, then reload this page."
                       />
                     </p>
@@ -352,7 +355,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                 <EuiFlexItem>
                   <EuiText size="s" color="subdued">
                     <FormattedMessage
-                      id="xpack.fleet.cloudConnector.iacCallback.pendingHint"
+                      id="xpack.fleet.cloudConnector.provisioningCallback.pendingHint"
                       defaultMessage="Waiting for CloudFormation to create the federated identity {name}. Keep this page open; the identity is selected here as soon as the stack reports back."
                       values={{ name: <strong>{launchedName}</strong> }}
                     />
@@ -370,7 +373,7 @@ export const AwsIdentityFederationSetup: React.FC<AwsIdentityFederationSetupProp
                 data-test-subj="awsIdentityFederationSetup-callbackGivenUp"
               >
                 <FormattedMessage
-                  id="xpack.fleet.cloudConnector.iacCallback.givenUpHint"
+                  id="xpack.fleet.cloudConnector.provisioningCallback.givenUpHint"
                   defaultMessage="CloudFormation did not report back. Check the stack in the AWS console, then launch it again to create the identity."
                 />
               </EuiText>

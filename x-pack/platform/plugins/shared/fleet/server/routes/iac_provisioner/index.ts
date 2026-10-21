@@ -100,7 +100,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_AVAILABILITY_PATTERN,
-      summary: 'Check IaC callback availability',
+      summary: 'Check provisioning callback availability',
       description:
         'Whether a launched CloudFormation stack could report back to this Kibana: server.publicBaseUrl must be set and be an https URL. Returns the URL the stack is given, or the reason the callback cannot be used.',
       access: 'internal',
@@ -126,7 +126,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_CREATE_PATTERN,
-      summary: 'Create an IaC callback',
+      summary: 'Create a provisioning callback',
       description:
         'Create a one-time record and a short-lived, zero-privilege API key that a launched CloudFormation stack uses to report its role back to Kibana. The identity name, account type, and template details are stored on the record for the cloud connector the report creates.',
       access: 'internal',
@@ -157,7 +157,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_INFO_PATTERN,
-      summary: 'Get an IaC callback',
+      summary: 'Get a provisioning callback',
       description: 'Get the state of a callback record. Never returns the API key.',
       access: 'internal',
       security: IAC_PROVISIONER_ROUTE_SECURITY,
@@ -182,7 +182,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .delete({
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_DELETE_PATTERN,
-      summary: 'Cancel an IaC callback',
+      summary: 'Cancel a provisioning callback',
       description:
         'Retire a callback record the form no longer waits on and invalidate its API key. A record the stack has already reported to is returned unchanged.',
       access: 'internal',
@@ -210,8 +210,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .post({
       path: IAC_PROVISIONER_API_ROUTES.CALLBACK_RECEIVE_PATTERN,
-      summary: 'Receive an IaC callback',
-      operationId: 'receive-iac-callback',
+      summary: 'Receive a provisioning callback',
+      operationId: 'receive-provisioning-callback',
       description:
         'Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. Authenticate with the one-time API key issued when the callback was created, sent as `Authorization: ApiKey <encoded-key>`. The key has no other privileges. `role_arn` and `stack_arn` must be in the same AWS account. While the key is valid, a repeat report with the same values succeeds and different values return 409. The key is invalidated once the first report has been applied, so a later retry is rejected with 401 before these checks run.',
       access: 'public',
@@ -233,7 +233,8 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       {
         version: API_VERSIONS.public.v1,
         options: {
-          oasOperationObject: () => path.join(__dirname, 'examples/post_iac_callback.yaml'),
+          oasOperationObject: () =>
+            path.join(__dirname, 'examples/post_provisioning_callback.yaml'),
         },
         validate: {
           request: ReceiveProvisioningCallbackRequestSchema,

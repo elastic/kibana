@@ -55572,7 +55572,7 @@ paths:
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
         Called by the CloudFormation stack launched from Kibana to report the IAM role ARN and stack ARN it created. Authenticate with the one-time API key issued when the callback was created, sent as `Authorization: ApiKey <encoded-key>`. The key has no other privileges. `role_arn` and `stack_arn` must be in the same AWS account. While the key is valid, a repeat report with the same values succeeds and different values return 409. The key is invalidated once the first report has been applied, so a later retry is rejected with 401 before these checks run.
-      operationId: receive-iac-callback
+      operationId: receive-provisioning-callback
       parameters:
         - description: A required header to protect against CSRF attacks
           in: header
@@ -55593,7 +55593,7 @@ paths:
         content:
           application/json:
             examples:
-              receiveIacCallbackRequestExample:
+              receiveProvisioningCallbackRequestExample:
                 description: The report the launched CloudFormation stack sends once its IAM role exists
                 summary: Report a created IAM role
                 value:
@@ -55621,7 +55621,7 @@ paths:
           content:
             application/json:
               examples:
-                receiveIacCallbackExample:
+                receiveProvisioningCallbackExample:
                   description: The report was applied and the federated identity exists
                   summary: Identity created
                   value:
@@ -55751,7 +55751,7 @@ paths:
                   - message
                   - attributes
           description: Gone
-      summary: Receive an IaC callback
+      summary: Receive a provisioning callback
       tags:
         - Fleet IaC provisioner
       x-state: Experimental; added in 9.6.0

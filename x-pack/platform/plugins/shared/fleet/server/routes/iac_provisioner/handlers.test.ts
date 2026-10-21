@@ -492,7 +492,7 @@ const realmUser = () =>
 const buildCallbackContext = (spaceId = 'default') =>
   ({ fleet: Promise.resolve({ spaceId, internalSoClient: {} }) } as any);
 
-describe('IaC callback handlers', () => {
+describe('Provisioning callback handlers', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let getCurrentUser: jest.Mock;
   const soClient = { tag: 'internal-so-client' };

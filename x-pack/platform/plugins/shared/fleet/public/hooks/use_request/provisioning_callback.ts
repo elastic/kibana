@@ -18,7 +18,7 @@ import { API_VERSIONS, IAC_PROVISIONER_API_ROUTES } from '../../../common/consta
 
 import { sendRequest, sendRequestForRq } from './use_request';
 
-export const PROVISIONING_CALLBACK_AVAILABILITY_QUERY_KEY = ['iac-callback-availability'];
+export const PROVISIONING_CALLBACK_AVAILABILITY_QUERY_KEY = ['provisioning-callback-availability'];
 
 /** Whether a launched stack could report back to this Kibana: its public URL must be set and https. */
 export function useGetProvisioningCallbackAvailabilityQuery({ enabled }: { enabled: boolean }) {
