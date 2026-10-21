@@ -11,7 +11,6 @@
   filter is the abstracted canvas filter.
 */
 
-/*eslint import/namespace: ['error', { allowComputed: true }]*/
 import * as filters from './filters';
 
 export function getESFilter(filter) {

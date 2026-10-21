@@ -14,7 +14,6 @@ import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/
 import type { EntityFilters } from '../../entities_grid/common';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
-import { getEntityFilterESQL } from '../../use_entity_filters_param';
 import {
   severeAlertsSeriesColumn,
   watchlistedSeriesColumn,
@@ -29,6 +28,7 @@ import { useAlertBasedTilesSeries } from './use_alert_based_tiles_series';
 import { useEntitiesWithAnomaliesSeries } from './use_entities_with_anomalies_series';
 import { useNewEntitySeries } from './use_new_entity_series';
 import { useRiskTilesSeries } from './use_risk_tiles_series';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 
 jest.mock('@kbn/react-query', () => ({ useQuery: jest.fn() }));
 jest.mock('../../../../../common/lib/kibana', () => ({ useKibana: jest.fn() }));
@@ -38,6 +38,7 @@ jest.mock('../../../../../common/components/ml/hooks/use_installed_security_jobs
 jest.mock('../../../../../common/hooks/use_resolved_latest_entities_index_name', () => ({
   useResolvedLatestEntitiesIndexName: jest.fn(),
 }));
+jest.mock('./use_tile_query_inputs', () => ({ useTileQueryInputs: jest.fn() }));
 
 /*
  * The four series hooks are thin wrappers over `getSeriesGate`, `getTileTrend` and
@@ -52,7 +53,7 @@ const mockIndex = useResolvedLatestEntitiesIndexName as jest.Mock;
 const mockJobs = useInstalledSecurityJobsIds as jest.Mock;
 
 const RANGE = '24h';
-const DOT_COUNT = 24;
+const DOT_COUNT = 6;
 const DOTS = Array.from({ length: DOT_COUNT }, (_, i) => 10 + i);
 
 interface TileGate {
@@ -142,7 +143,7 @@ const HOOKS: readonly HookCase[] = [
     columns: [newEntitySeriesColumn],
     toQueryData: ([dots]) => dots,
     fromParsed: (parsed) => [parsed as number[]],
-    clausesOf: getEntityFilterESQL,
+    clausesOf: buildEntityFilterClauses,
     run: ({ isReady, skip, entityFilters, tiles: [tile] }) => {
       const { trend, isTrendLoading } = renderHook(() =>
         useNewEntitySeries({
@@ -226,6 +227,14 @@ describe('series hooks', () => {
       services: { data: { search: { search: mockSearch } } },
     });
     mockIndex.mockReturnValue({ data: { indexName: '.entities-v1' }, isLoading: false });
+    // The index as the index hook resolves it, and the plain filter clauses: the group overrides of the
+    // filters have their own tests (use_tile_query_inputs.test.ts).
+    (useTileQueryInputs as jest.Mock).mockImplementation(
+      (spaceId: string, entityFilters: EntityFilters) => ({
+        ...mockIndex(spaceId),
+        entityFilterClauses: buildEntityFilterClauses(entityFilters),
+      })
+    );
     mockJobs.mockReturnValue({ jobIds: ['job_a'], loading: false });
     mockUseQuery.mockReturnValue(queryResult());
   });
@@ -297,7 +306,7 @@ describe('series hooks', () => {
       expect(mockUseQuery).toHaveBeenCalledTimes(1);
       const [key, queryFn] = lastCall();
       expect(key[0]).toBe(hook.tileKey);
-      // Oldest first: the first dot is column 23 of the tile, the last is column 0.
+      // Oldest first: the first dot is column 5 of the tile, the last is column 0.
       hook.fromParsed(await queryFn({ signal: undefined })).forEach((dots, t) => {
         expect(dots[0]).toBe(1000 * t + DOT_COUNT - 1);
         expect(dots[DOT_COUNT - 1]).toBe(1000 * t);
