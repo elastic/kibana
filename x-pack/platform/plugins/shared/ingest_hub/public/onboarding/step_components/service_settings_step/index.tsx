@@ -32,7 +32,6 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { DEFAULT_NAMESPACE } from '../authenticate_and_deploy_step/deploy_group_helpers';
-import { getCategoryTitle } from '../../service_categories';
 import {
   AWS_REGION_OPTIONS,
   getRegionFieldName,
@@ -271,19 +270,6 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         },
         sortable: (inst: ServiceInstance) =>
           awsServicesMap?.get(inst.serviceId)?.signalTypes.join(',') ?? '',
-      },
-      {
-        name: i18n.translate('xpack.ingestHub.serviceSettingsStep.table.col.category', {
-          defaultMessage: 'Category',
-        }),
-        render: (inst: ServiceInstance) => {
-          const cat = awsServicesMap?.get(inst.serviceId)?.category;
-          return cat ? getCategoryTitle(cat) : '';
-        },
-        sortable: (inst: ServiceInstance) => {
-          const cat = awsServicesMap?.get(inst.serviceId)?.category;
-          return cat ? getCategoryTitle(cat) : '';
-        },
       },
       {
         name: i18n.translate('xpack.ingestHub.serviceSettingsStep.table.col.region', {

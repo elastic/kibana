@@ -7,7 +7,6 @@
 
 import React from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiFlexGrid,
@@ -27,7 +26,6 @@ import { useLocation } from 'react-router-dom';
 import { ServiceRow } from './service_row';
 import { SIGNAL_TYPE_LABELS } from './signal_type_badge';
 import { useServicesStep } from './use_services_step';
-import { getCategoryTitle } from '../../service_categories';
 import { ServiceSearchFilter } from '../service_search_filter';
 import { DataSchemaSection } from './data_schema_section';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -43,18 +41,14 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
     setSignalFilter,
     searchQuery,
     setSearchQuery,
-    categories,
-    activeCategory,
-    setSelectedCategory,
-    servicesInCategory,
-    duplicateNamesInCategory,
+    filteredServices,
+    duplicateNames,
     selectedSet,
-    categoryStats,
     isReady,
     handleToggle,
-    allInCategorySelected,
-    handleSelectAllInCategory,
-    handleDeselectAllInCategory,
+    allVisibleSelected,
+    handleSelectAllVisible,
+    handleDeselectAllVisible,
     handleNext,
     dataFormat,
     setDataFormat,
@@ -169,131 +163,77 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
-        <EuiFlexItem grow={false} style={{ maxWidth: 350 }}>
-          {categories.map((cat) => {
-            const isActive = cat === activeCategory;
-            const stats = categoryStats.get(cat);
-            const selected = stats?.selected ?? 0;
-            const total = stats?.total ?? 0;
-            const preview = stats?.preview ?? '';
-
-            return (
-              <EuiPanel
-                key={cat}
-                paddingSize="s"
-                hasBorder={false}
-                hasShadow={false}
-                color={isActive ? 'subdued' : 'transparent'}
-                onClick={() => setSelectedCategory(cat)}
-                style={{ cursor: 'pointer' }}
-                data-test-subj={`servicesStep-category-${cat}`}
-              >
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <strong>{getCategoryTitle(cat)}</strong>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued">
-                      {preview}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge
-                      color="default"
-                      aria-label={i18n.translate(
-                        'xpack.ingestHub.servicesStep.categoryBadgeAriaLabel',
-                        {
-                          defaultMessage: '{selected} of {total} services selected',
-                          values: { selected, total },
-                        }
-                      )}
-                    >
-                      {selected > 0 ? `${selected}/${total}` : total}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            );
-          })}
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiText size="s" color="subdued" data-test-subj="servicesStep-selectedCount">
+            <FormattedMessage
+              id="xpack.ingestHub.servicesStep.selectedCount"
+              defaultMessage="{count, plural, =0 {None selected} other {# selected}}"
+              values={{ count: selectedSet.size }}
+            />
+          </EuiText>
         </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiPanel paddingSize="none" hasBorder>
-            {activeCategory ? (
-              <>
-                <EuiPanel
-                  color="subdued"
-                  hasBorder={false}
-                  hasShadow={false}
-                  paddingSize="m"
-                  borderRadius="none"
-                >
-                  <EuiFlexGroup
-                    alignItems="center"
-                    justifyContent="spaceBetween"
-                    responsive={false}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xs">
-                        <h3>{getCategoryTitle(activeCategory)}</h3>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      {allInCategorySelected ? (
-                        <EuiButtonEmpty
-                          size="s"
-                          onClick={handleDeselectAllInCategory}
-                          data-test-subj="servicesStep-deselectAllButton"
-                        >
-                          <FormattedMessage
-                            id="xpack.ingestHub.servicesStep.deselectAll"
-                            defaultMessage="Deselect all"
-                          />
-                        </EuiButtonEmpty>
-                      ) : (
-                        <EuiButtonEmpty
-                          size="s"
-                          onClick={handleSelectAllInCategory}
-                          data-test-subj="servicesStep-selectAllButton"
-                        >
-                          <FormattedMessage
-                            id="xpack.ingestHub.servicesStep.selectAll"
-                            defaultMessage="Select all"
-                          />
-                        </EuiButtonEmpty>
-                      )}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-                <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
-                  <EuiFlexGrid columns={2} gutterSize="m">
-                    {servicesInCategory.map((service) => (
-                      <EuiFlexItem key={service.id}>
-                        <ServiceRow
-                          service={service}
-                          isSelected={selectedSet.has(service.id)}
-                          onToggle={handleToggle}
-                          disabledReason={
-                            isUnavailableForMethod(service) ? unavailableForMethodReason : undefined
-                          }
-                          displayName={
-                            duplicateNamesInCategory.has(service.name)
-                              ? `${service.name} ${service.signalTypes
-                                  .map((t) => SIGNAL_TYPE_LABELS[t])
-                                  .join(' & ')}`
-                              : undefined
-                          }
-                        />
-                      </EuiFlexItem>
-                    ))}
-                  </EuiFlexGrid>
-                </EuiPanel>
-              </>
-            ) : null}
-          </EuiPanel>
+        <EuiFlexItem grow={false}>
+          {allVisibleSelected ? (
+            <EuiButtonEmpty
+              size="s"
+              onClick={handleDeselectAllVisible}
+              data-test-subj="servicesStep-deselectAllButton"
+            >
+              <FormattedMessage
+                id="xpack.ingestHub.servicesStep.deselectAll"
+                defaultMessage="Deselect all"
+              />
+            </EuiButtonEmpty>
+          ) : (
+            <EuiButtonEmpty
+              size="s"
+              onClick={handleSelectAllVisible}
+              data-test-subj="servicesStep-selectAllButton"
+            >
+              <FormattedMessage
+                id="xpack.ingestHub.servicesStep.selectAll"
+                defaultMessage="Select all"
+              />
+            </EuiButtonEmpty>
+          )}
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
+      <EuiPanel paddingSize="m" hasBorder>
+        {filteredServices.length > 0 ? (
+          <EuiFlexGrid columns={2} gutterSize="m">
+            {filteredServices.map((service) => (
+              <EuiFlexItem key={service.id}>
+                <ServiceRow
+                  service={service}
+                  isSelected={selectedSet.has(service.id)}
+                  onToggle={handleToggle}
+                  disabledReason={
+                    isUnavailableForMethod(service) ? unavailableForMethodReason : undefined
+                  }
+                  displayName={
+                    duplicateNames.has(service.name)
+                      ? `${service.name} ${service.signalTypes
+                          .map((t) => SIGNAL_TYPE_LABELS[t])
+                          .join(' & ')}`
+                      : undefined
+                  }
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
+        ) : (
+          <EuiText size="s" color="subdued" textAlign="center" data-test-subj="servicesStep-empty">
+            <FormattedMessage
+              id="xpack.ingestHub.servicesStep.noServices"
+              defaultMessage="No services match your search."
+            />
+          </EuiText>
+        )}
+      </EuiPanel>
 
       <EuiSpacer size="l" />
 

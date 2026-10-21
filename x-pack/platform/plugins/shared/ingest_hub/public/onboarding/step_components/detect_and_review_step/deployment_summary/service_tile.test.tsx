@@ -17,7 +17,6 @@ const ENTRY = {
   name: 'AWS Config',
   packageName: 'aws',
   dataStreams: ['config'],
-  category: 'security_identity_compliance',
   signalTypes: ['logs'],
   deploymentMethods: [{ method: 'managed_integration', preferred: true }],
   defaultEnabled: true,

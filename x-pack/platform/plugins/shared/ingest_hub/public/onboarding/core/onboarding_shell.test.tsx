@@ -20,7 +20,6 @@ jest.mock('../use_aws_service_matrix', () => {
     {
       id: 'cloudtrail',
       name: 'AWS CloudTrail',
-      category: 'management_governance',
       signalTypes: ['logs'],
       dataStreams: [],
       deploymentMethods: [{ method: 'ecf', preferred: true }],
@@ -31,7 +30,6 @@ jest.mock('../use_aws_service_matrix', () => {
     {
       id: 'ec2',
       name: 'Amazon EC2',
-      category: 'compute',
       signalTypes: ['logs', 'metrics'],
       dataStreams: [],
       deploymentMethods: [{ method: 'managed_integration', preferred: true }],
