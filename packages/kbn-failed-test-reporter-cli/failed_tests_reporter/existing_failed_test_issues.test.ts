@@ -484,6 +484,37 @@ describe('flaky suite issues', () => {
     expect(numberOf(existing.getSuiteIssueForFailure(ftrFailure))).toBe(2);
   });
 
+  it('prefers an issue that lists the test id to a newer one that only covers its describe block', async () => {
+    const existing = await loadWith(
+      [
+        // both nested describes end in the innermost title the Scout failure knows
+        suiteIssue(1, { filePath: SCOUT_FILE, title: 'A Attachments', testIds: ['scout-1'] }),
+        suiteIssue(2, { filePath: SCOUT_FILE, title: 'B Attachments' }),
+      ],
+      [scoutFailure]
+    );
+
+    expect(numberOf(existing.getSuiteIssueForFailure(scoutFailure))).toBe(1);
+  });
+
+  it('still prefers an open issue about the describe block to a closed one that lists the id', async () => {
+    // the daily report supersedes a closed issue with a new one about the suite, which only lists
+    // the tests that were flaky when it was filed
+    const existing = await loadWith(
+      [
+        suiteIssue(
+          1,
+          { filePath: SCOUT_FILE, title: 'Attachments', testIds: ['scout-1'] },
+          'closed'
+        ),
+        suiteIssue(2, { filePath: SCOUT_FILE, title: 'Attachments' }),
+      ],
+      [scoutFailure]
+    );
+
+    expect(numberOf(existing.getSuiteIssueForFailure(scoutFailure))).toBe(2);
+  });
+
   it('still links a closed issue when it is the only one', async () => {
     const existing = await loadWith(
       [suiteIssue(1, { filePath: FTR_FILE }, 'closed')],

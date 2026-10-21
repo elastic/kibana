@@ -200,11 +200,18 @@ export class ExistingFailedTestIssues {
 
   /**
    * The flaky suite issue tracking the failure's test, if any: an open one before a closed one,
+   * then one that lists the test's id before one that only covers its file and describe block,
    * then the newest.
    */
   getSuiteIssueForFailure(failure: TestFailure): FlakySuiteIssue | undefined {
-    const about = this.suiteIssues.filter((issue) => isAboutFailure(issue, failure));
-    return about.find((issue) => issue.github.state === 'open') ?? about[0];
+    const testId = getScoutTestId(failure);
+    const listsTest = (issue: FlakySuiteIssue): number =>
+      testId !== undefined && issue.suite.testIds.includes(testId) ? 1 : 0;
+    const isOpen = (issue: FlakySuiteIssue): number => (issue.github.state === 'open' ? 1 : 0);
+    // suiteIssues are newest first and the sort is stable, so ties keep that order
+    return this.suiteIssues
+      .filter((issue) => isAboutFailure(issue, failure))
+      .sort((a, b) => isOpen(b) - isOpen(a) || listsTest(b) - listsTest(a))[0];
   }
 
   getForFailure(failure: TestFailure) {
