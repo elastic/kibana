@@ -13,6 +13,7 @@
 import { AsyncLocalStorage } from 'async_hooks';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { CodecInput } from '../../capability_kit/codecs';
+import { encodeFakeRequest } from '../request_codec';
 import type { WorkerContext } from '../../capability_kit/protocol';
 
 export const runContext = new AsyncLocalStorage<WorkerContext>();
@@ -104,6 +105,10 @@ export const toData = (value: unknown, depth = 0): CodecInput => {
   if (typeof value !== 'object') return value as CodecInput;
   if (value instanceof Date || Buffer.isBuffer(value)) return value;
   if (Array.isArray(value)) return value.map((item) => toData(item, depth + 1) ?? null);
+  // KibanaRequest.toJSON drops headers. Fake task requests must cross with them.
+  if ((value as { isFakeRequest?: boolean }).isFakeRequest === true) {
+    return encodeFakeRequest(value as Parameters<typeof encodeFakeRequest>[0]) as CodecInput;
+  }
   const proto = Object.getPrototypeOf(value);
   if (proto !== Object.prototype && proto !== null) {
     return JSON.parse(JSON.stringify(value)) as CodecInput;

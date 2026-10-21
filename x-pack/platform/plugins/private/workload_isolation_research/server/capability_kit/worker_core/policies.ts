@@ -203,12 +203,40 @@ export const currentTmPhase = (): 'boot' | 'run' => tmPhaseStore.getStore() ?? '
 export const runInTmPhase = <T>(phase: 'boot' | 'run', fn: () => T): T =>
   tmPhaseStore.run(phase, fn);
 
-/** Maintenance scheduling stays on main in both phases. */
-export const ALWAYS_FENCED_TM_METHODS = ['ensureScheduled'] as const;
+/**
+ * No method is fenced in both phases. Boot fences every call. Run bridges the list,
+ * including `ensureScheduled`, for every task type (no id or type prefix).
+ */
+export const ALWAYS_FENCED_TM_METHODS = [] as const;
+
+/** Task types whose run-phase `ensureScheduled` stays fenced. Default is empty (bridge). */
+const fenceEnsureScheduledTypes = new Set<string>();
+
+/**
+ * Per execution class, deny run-phase `ensureScheduled` for these task types.
+ * Boot phase is unchanged. Calling this again adds types; it does not replace the set.
+ */
+export const registerEnsureScheduledFence = (taskTypes: readonly string[]): void => {
+  for (const taskType of taskTypes) fenceEnsureScheduledTypes.add(taskType);
+};
+
+/** Clears the run-phase deny list. Tests use this so cases do not leak. */
+export const resetEnsureScheduledFence = (): void => {
+  fenceEnsureScheduledTypes.clear();
+};
+
+/** Reads `taskType` from an ensureScheduled/schedule task instance, when one was passed. */
+export const taskTypeOfTaskManagerArgs = (args: readonly unknown[]): string | undefined => {
+  const first = args[0];
+  if (!first || typeof first !== 'object' || Array.isArray(first)) return undefined;
+  const taskType = (first as { taskType?: unknown }).taskType;
+  return typeof taskType === 'string' ? taskType : undefined;
+};
 
 export const RUN_BRIDGED_TM_METHODS = [
   'schedule',
   'bulkSchedule',
+  'ensureScheduled',
   'aggregate',
   'fetch',
   'get',
@@ -225,14 +253,22 @@ const RUN_BRIDGED = new Set<string>(RUN_BRIDGED_TM_METHODS);
 
 /**
  * Boot phase fences every Task Manager call. Run phase bridges the run-time methods
- * for every task type (no `actions:*` prefix). `ensureScheduled` stays fenced.
+ * for every task type. A class deny list can keep `ensureScheduled` fenced.
  */
 export const decideTaskManagerCall = (
   method: string,
-  phase: 'boot' | 'run' = currentTmPhase()
+  phase: 'boot' | 'run' = currentTmPhase(),
+  taskType?: string
 ): 'fence' | 'bridge' => {
   if ((ALWAYS_FENCED_TM_METHODS as readonly string[]).includes(method)) return 'fence';
   if (phase === 'boot') return 'fence';
+  if (
+    method === 'ensureScheduled' &&
+    taskType !== undefined &&
+    fenceEnsureScheduledTypes.has(taskType)
+  ) {
+    return 'fence';
+  }
   return RUN_BRIDGED.has(method) ? 'bridge' : 'fence';
 };
 

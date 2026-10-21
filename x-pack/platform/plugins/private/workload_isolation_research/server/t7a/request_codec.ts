@@ -40,13 +40,72 @@ export const encodeFakeRequest = (request: KibanaRequest): FakeRequestDescriptor
   };
 };
 
+const isHeaderValue = (value: unknown): value is string | string[] =>
+  typeof value === 'string' ||
+  (Array.isArray(value) && value.every((item) => typeof item === 'string'));
+
 /** Rebuilds the fake request with Core's own factory (same as alerting/actions task runners). */
 export const decodeFakeRequest = (descriptor: FakeRequestDescriptor): KibanaRequest => {
-  if (descriptor?.kind !== 't7a-fake-request') throw new Error('t7a request codec: bad descriptor');
+  if (!descriptor || typeof descriptor !== 'object' || Array.isArray(descriptor)) {
+    throw new Error('t7a request codec: bad descriptor');
+  }
+  if (descriptor.kind !== 't7a-fake-request') throw new Error('t7a request codec: bad descriptor');
+  if (typeof descriptor.externalUiam !== 'boolean') {
+    throw new Error('t7a request codec: externalUiam must be boolean');
+  }
+  if (descriptor.spaceId !== undefined && typeof descriptor.spaceId !== 'string') {
+    throw new Error('t7a request codec: spaceId must be a string');
+  }
+  if (
+    !descriptor.headers ||
+    typeof descriptor.headers !== 'object' ||
+    Array.isArray(descriptor.headers)
+  ) {
+    throw new Error('t7a request codec: headers must be an object');
+  }
+  for (const value of Object.values(descriptor.headers)) {
+    if (!isHeaderValue(value)) throw new Error('t7a request codec: bad header');
+  }
   const request = kibanaRequestFactory({
     headers: descriptor.headers,
     ...(descriptor.spaceId ? { spaceId: brandSpaceId(descriptor.spaceId) } : {}),
   });
   if (descriptor.externalUiam) markExternalUiamCredential(request);
   return request;
+};
+
+/**
+ * Argument index of the options bag whose `request` field is a fake KibanaRequest.
+ * Task params and state are not on this list and are never revived.
+ */
+const TASK_MANAGER_REQUEST_ARGUMENT: Readonly<Record<string, number>> = {
+  schedule: 1,
+  bulkSchedule: 1,
+  ensureScheduled: 1,
+  bulkDisable: 2,
+  bulkEnable: 2,
+  bulkUpdateSchedules: 2,
+  bulkUpdateState: 2,
+};
+
+/**
+ * Revives a fake request only at the Task Manager options position for `method`.
+ * A `kind: t7a-fake-request` object inside params or state stays a plain object.
+ */
+export const reviveTaskManagerArgs = (method: string, args: unknown): unknown[] => {
+  if (!Array.isArray(args)) throw new Error('t7a request codec: task manager args must be a list');
+  const index = TASK_MANAGER_REQUEST_ARGUMENT[method];
+  if (index === undefined) return args.slice();
+  const options = args[index];
+  if (!options || typeof options !== 'object' || Array.isArray(options) || !('request' in options)) {
+    return args.slice();
+  }
+  const request = (options as { request?: unknown }).request;
+  if (request === undefined) return args.slice();
+  const next = args.slice();
+  next[index] = {
+    ...(options as Record<string, unknown>),
+    request: decodeFakeRequest(request as FakeRequestDescriptor),
+  };
+  return next;
 };

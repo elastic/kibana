@@ -75,6 +75,7 @@ import {
   executionContextOpaqueId,
   parseAnalyticsReport,
   decideTaskManagerCall,
+  taskTypeOfTaskManagerArgs,
   emptyPlatformReplicas,
   assertNoInternalRepositoryExtensions,
   routeSavedObject,
@@ -746,7 +747,8 @@ export const createDepFacades = (
     (method: string) =>
     async (...args: unknown[]) => {
       const first = args[0] as Obj | Obj[] | undefined;
-      if (decideTaskManagerCall(method) === 'bridge') {
+      const taskType = taskTypeOfTaskManagerArgs(args);
+      if (decideTaskManagerCall(method, undefined, taskType) === 'bridge') {
         return bridge('tm', method, toData(args) as never);
       }
       countFence(`taskManager.${method}`);

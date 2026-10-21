@@ -59,6 +59,8 @@ import {
   createPlatformReplica,
   captureEffectivePluginConfig,
   decideTaskManagerCall,
+  registerEnsureScheduledFence,
+  resetEnsureScheduledFence,
   forwardLogLevel,
   RUN_BRIDGED_TM_METHODS,
   emptyPlatformReplicas,
@@ -613,8 +615,15 @@ void test('task manager policy is boot versus run, not a task-type prefix', () =
   assert.equal(decideTaskManagerCall('bulkSchedule', 'boot'), 'fence');
   assert.equal(decideTaskManagerCall('schedule', 'run'), 'bridge');
   assert.equal(decideTaskManagerCall('bulkSchedule', 'run'), 'bridge');
-  assert.equal(decideTaskManagerCall('ensureScheduled', 'run'), 'fence');
+  assert.equal(decideTaskManagerCall('ensureScheduled', 'run'), 'bridge');
   assert.equal(decideTaskManagerCall('ensureScheduled', 'boot'), 'fence');
+  assert.equal(decideTaskManagerCall('ensureScheduled', 'run', 'workflow:resume'), 'bridge');
+  registerEnsureScheduledFence(['workflow:resume']);
+  assert.equal(decideTaskManagerCall('ensureScheduled', 'run', 'workflow:resume'), 'fence');
+  assert.equal(decideTaskManagerCall('ensureScheduled', 'run', 'other'), 'bridge');
+  assert.equal(decideTaskManagerCall('ensureScheduled', 'boot', 'other'), 'fence');
+  resetEnsureScheduledFence();
+  assert.equal(decideTaskManagerCall('ensureScheduled', 'run', 'workflow:resume'), 'bridge');
   const seen = runInTmPhase('boot', () => decideTaskManagerCall('get'));
   assert.equal(seen, 'fence');
   assert.equal(decideTaskManagerCall('get', 'run'), 'bridge');

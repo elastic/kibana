@@ -51,7 +51,7 @@ import {
 } from '../capability_kit/worker_core';
 import { ExecutionHost, ModuleRegistry } from '../capability_kit';
 import type { Binding, CodecInput, Crossing, Outcome } from '../capability_kit';
-import { decodeFakeRequest, encodeFakeRequest } from './request_codec';
+import { decodeFakeRequest, encodeFakeRequest, reviveTaskManagerArgs } from './request_codec';
 import type { FakeRequestDescriptor } from './request_codec';
 import { decodeRunResult, decodeTaskError } from './task_codec';
 import type { WireRunResult, WireTaskError } from './task_codec';
@@ -667,7 +667,7 @@ export class T7aController {
       tm: asBinding(async (op, args) => {
         if (!(RUN_BRIDGED_TM_METHODS as readonly string[]).includes(op))
           throw new Error('t7a tm: op not allowlisted');
-        const list = args as unknown as unknown[];
+        const list = reviveTaskManagerArgs(op, args);
         return (taskManager as unknown as Record<string, AnyFn>)[op].apply(taskManager, list);
       }),
       uiSettings: asBinding(async (op, args) => {
