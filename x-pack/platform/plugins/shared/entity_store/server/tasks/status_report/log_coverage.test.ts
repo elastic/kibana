@@ -180,6 +180,19 @@ describe('collectLogCoverage', () => {
     expect(esClient.esql.query).toHaveBeenCalledTimes(1);
   });
 
+  it('reports partial, not complete, when a partial count finds no documents', async () => {
+    const esClient = clientWith(() => ({
+      columns: columns(['totalDocs']),
+      values: [[0]],
+      is_partial: true,
+    }));
+
+    const { event, nextTargetDocs: next } = await collect(esClient, { targetDocs: 20_000 });
+
+    expect(event).toEqual(expect.objectContaining({ outcome: 'partial', totalDocs: 0 }));
+    expect(next).toBe(20_000);
+  });
+
   it('reports partial when Elasticsearch returns partial results', async () => {
     const esClient = clientWith((query) =>
       query.includes('totalDocs')
