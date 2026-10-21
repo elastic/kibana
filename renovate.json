@@ -1998,7 +1998,6 @@
     {
       "groupName": "minify",
       "matchDepNames": [
-        "gulp-brotli",
         "gulp-postcss",
         "gulp-terser",
         "terser",
