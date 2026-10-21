@@ -18,6 +18,7 @@ import { createCasesRoute } from '../create_cases_route';
 import { DEFAULT_CASES_ROUTE_SECURITY } from '../constants';
 import { pickCreatedOrExistingAttachment } from '../../../client/attachments/add';
 import { toUnifiedAttachment } from '../../../services/attachments/operations/utils';
+import { getAttachmentRequestType } from '../utils';
 
 export const postAttachmentRoute = createCasesRoute<
   { case_id: string },
@@ -40,7 +41,7 @@ export const postAttachmentRoute = createCasesRoute<
     tags: ['oas-tag:cases'],
     description: 'Creates a single unified attachment (e.g. a comment or an alert).',
   },
-  handler: async ({ context, request, response }) => {
+  handler: async ({ context, request, response, incrementAttachmentTypeCounters }) => {
     try {
       const caseContext = await context.cases;
       const client = await caseContext.getCasesClient();
@@ -55,6 +56,7 @@ export const postAttachmentRoute = createCasesRoute<
         comment: request.body,
         id,
       });
+      incrementAttachmentTypeCounters([getAttachmentRequestType(request.body)]);
 
       const created = pickCreatedOrExistingAttachment(updatedCase.comments, id, request.body);
       if (created == null) {
