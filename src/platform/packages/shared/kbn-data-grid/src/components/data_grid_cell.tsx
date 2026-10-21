@@ -10,6 +10,7 @@
 import type { FocusEvent, KeyboardEvent, MouseEvent, RefObject } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { SerializedStyles } from '@emotion/react';
+import type { EuiDataGridColumnCellAction } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -37,6 +38,7 @@ import type {
   DataGridInternalColumn,
   DataGridProps,
 } from '../types';
+import { enterCellContent, exitCellContent } from '../utils/cell_content_focus';
 import type { CellActionsBubbleAction } from './cell_actions_bubble/cell_actions_bubble';
 import { CellActionsBubble } from './cell_actions_bubble/cell_actions_bubble';
 
@@ -119,6 +121,8 @@ const CellActionIconButton: typeof EuiButtonIcon = ({
   );
 };
 
+const NO_CELL_ACTIONS: EuiDataGridColumnCellAction[] = [];
+
 const CellActionPopoverButton: typeof EuiButtonEmpty = (props) => (
   <EuiButtonEmpty {...props} size="s" />
 );
@@ -143,7 +147,12 @@ const CellContent = <TRow,>({
   anchorRef,
   expansion,
 }: CellContentProps<TRow>) => {
-  const { id: columnId, cellActions = [], renderCell, renderCellExpansionFooter } = column;
+  const {
+    id: columnId,
+    cellActions = NO_CELL_ACTIONS,
+    renderCell,
+    renderCellExpansionFooter,
+  } = column;
   const { anchorRect, open: openExpansion, close: closeExpansion } = expansion;
   const isExpanded = anchorRect !== undefined;
 
@@ -352,6 +361,31 @@ const DataGridCellComponent = <TRow,>({
     [openExpansion]
   );
 
+  // Control cells: Enter or F2 moves focus into the content, Escape returns it to the cell.
+  const onControlKeyDown = useCallback((event: KeyboardEvent<HTMLDivElement>) => {
+    const cell = event.currentTarget;
+    if (event.target === cell && (event.key === keys.ENTER || event.key === keys.F2)) {
+      const firstTabbable = enterCellContent(cell);
+      if (firstTabbable) {
+        event.preventDefault();
+        firstTabbable.focus();
+      } else {
+        exitCellContent(cell);
+      }
+      return;
+    }
+    if (event.target !== cell && event.key === keys.ESCAPE) {
+      event.preventDefault();
+      exitCellContent(cell);
+      cell.focus();
+    }
+  }, []);
+  const onControlBlur = useCallback((event: FocusEvent<HTMLDivElement>) => {
+    if (!event.currentTarget.contains(event.relatedTarget)) {
+      exitCellContent(event.currentTarget);
+    }
+  }, []);
+
   return (
     <div
       ref={cellRef}
@@ -364,8 +398,8 @@ const DataGridCellComponent = <TRow,>({
       onMouseEnter={isInteractive ? onMouseEnter : undefined}
       onMouseLeave={isInteractive ? onMouseLeave : undefined}
       onFocus={isInteractive ? onFocus : undefined}
-      onBlur={isInteractive ? onBlur : undefined}
-      onKeyDown={isInteractive ? onKeyDown : undefined}
+      onBlur={isInteractive ? onBlur : onControlBlur}
+      onKeyDown={isInteractive ? onKeyDown : onControlKeyDown}
       css={[styles.cell, isInteractive && styles.cellWithActions, layoutCss, cellCss, extraCss]}
     >
       {isInteractive ? (

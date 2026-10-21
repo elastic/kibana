@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { act, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import {
@@ -330,7 +330,18 @@ describe('DataGrid', () => {
         <DataGrid {...defaultProps} columnWidths={{ name: 300 }} onColumnResize={onColumnResize} />
       );
       await userEvent.dblClick(container.querySelector('[role="presentation"]')!);
-      expect(onColumnResize).toHaveBeenCalledWith({ columnId: 'name', width: 200 });
+      expect(onColumnResize).toHaveBeenCalledWith({ columnId: 'name', width: undefined });
+    });
+
+    it('does not make a column without an initial width resizable', () => {
+      const { container } = render(
+        <DataGrid
+          {...defaultProps}
+          columns={[{ ...columns[1], isResizable: true }]}
+          leadingControlColumns={undefined}
+        />
+      );
+      expect(container.querySelector('[role="presentation"]')).not.toBeInTheDocument();
     });
   });
 
@@ -383,6 +394,50 @@ describe('DataGrid', () => {
       getCell('valueA').focus();
       await userEvent.keyboard('{ArrowDown}{Escape}');
       expect(onParentKeyDown).not.toHaveBeenCalled();
+    });
+
+    it('keeps the content of cells out of the tab order until the cell is entered', async () => {
+      render(<DataGrid {...defaultProps} />);
+      const controlButton = screen.getByTestId('control-rowA');
+      const controlCell = controlButton.closest<HTMLElement>('[role="gridcell"]')!;
+      await waitFor(() => expect(controlButton).toHaveAttribute('tabindex', '-1'));
+      expect(screen.getByTestId('control-rowB')).toHaveAttribute('tabindex', '-1');
+
+      act(() => controlCell.focus());
+      await userEvent.keyboard('{Enter}');
+      expect(controlButton).toHaveFocus();
+      expect(controlButton).not.toHaveAttribute('tabindex');
+
+      await userEvent.keyboard('{Escape}');
+      expect(controlCell).toHaveFocus();
+      await waitFor(() => expect(controlButton).toHaveAttribute('tabindex', '-1'));
+    });
+
+    it('keeps the cell actions trigger of the focused cell tabbable', async () => {
+      render(<DataGrid {...defaultProps} />);
+      act(() => getCell('valueA').focus());
+      const trigger = await within(getCell('valueA')).findByTestId(CELL_ACTIONS_TRIGGER_TEST_SUBJ);
+      expect(trigger).not.toHaveAttribute('tabindex', '-1');
+    });
+
+    it('keeps arrow keys and Escape pressed inside a cell from reaching parents', async () => {
+      const onParentKeyDown = jest.fn();
+      render(
+        <div role="presentation" onKeyDown={onParentKeyDown}>
+          <DataGrid {...defaultProps} />
+        </div>
+      );
+      act(() => screen.getByTestId('control-rowA').focus());
+      await userEvent.keyboard('{ArrowLeft}{Escape}');
+      expect(onParentKeyDown).not.toHaveBeenCalled();
+    });
+
+    it('does not move focus into the cell actions toolbar when it opens on hover', async () => {
+      render(<DataGrid {...defaultProps} />);
+      await userEvent.hover(getCell('valueA'));
+      await openCellActionsBubble(getCell('valueA'));
+      await new Promise((resolve) => requestAnimationFrame(resolve));
+      expect(screen.getByTestId(CELL_EXPAND_BUTTON_TEST_SUBJ)).not.toHaveFocus();
     });
 
     it('opens the cell popover with Enter as a focus-trapped dialog', async () => {

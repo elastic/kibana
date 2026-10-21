@@ -117,12 +117,13 @@ export const useGridNavigation = ({
 
   const onKeyDown = useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
-      // Only while a cell or header itself is focused, not for content inside of it.
-      if (!(event.target instanceof Element) || !event.target.matches(GRID_CELL_SELECTOR)) {
-        return;
-      }
+      // Also for content inside a cell, e.g. a focused cell action or the expansion popover.
       if (GRID_KEYS.has(event.key)) {
         event.stopPropagation();
+      }
+      // Only navigate while a cell or header itself is focused, not content inside of it.
+      if (!(event.target instanceof Element) || !event.target.matches(GRID_CELL_SELECTOR)) {
+        return;
       }
       const position = getGridPosition(event.target);
       const nextPosition =

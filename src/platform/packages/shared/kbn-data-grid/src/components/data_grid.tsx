@@ -28,6 +28,7 @@ import { DEFAULT_ESTIMATED_ROW_HEIGHT, OVERSCAN } from '../constants';
 import { useColumnSizing } from '../hooks/use_column_sizing';
 import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { componentStyles, getColumnLayoutStyles } from '../styles';
+import { observeCellContentFocus } from '../utils/cell_content_focus';
 import type {
   DataGridCellKey,
   DataGridControlColumn,
@@ -92,6 +93,12 @@ export const DataGrid = <TRow,>({
   }, []);
   const { width: gridWidth } = useResizeObserver(scrollElement, 'width');
 
+  // Interactive cell content stays out of the tab order until its cell is entered.
+  useEffect(
+    () => (scrollElement ? observeCellContentFocus(scrollElement) : undefined),
+    [scrollElement]
+  );
+
   // Header and pinned rows share one sticky block, which the virtualized rows scroll below.
   const [stickyElement, setStickyElement] = useState<HTMLDivElement | null>(null);
   const { height: stickyHeight } = useResizeObserver(stickyElement, 'height');
@@ -106,11 +113,12 @@ export const DataGrid = <TRow,>({
 
   const tableColumns = useMemo<Array<ColumnDef<TRow>>>(
     () =>
-      columns.map(({ id, minWidth, maxWidth, isResizable = false }) => ({
+      columns.map(({ id, minWidth, maxWidth, isResizable = false, initialWidth }) => ({
         id,
         minSize: minWidth,
         maxSize: maxWidth,
-        enableResizing: isResizable,
+        // Columns without an initial width fill the remaining space, a dragged width has no effect.
+        enableResizing: isResizable && initialWidth !== undefined,
         header: () => null,
       })),
     [columns]

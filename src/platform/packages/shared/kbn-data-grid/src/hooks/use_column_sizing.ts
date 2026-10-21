@@ -23,6 +23,11 @@ const INITIAL_COLUMN_SIZING_INFO: ColumnSizingInfoState = {
   columnSizingStart: [],
 };
 
+const clampWidth = <TRow>(
+  { minWidth = 0, maxWidth = Infinity }: DataGridInternalColumn<TRow>,
+  width: number
+) => clamp(width, minWidth, maxWidth);
+
 const resolveInitialWidth = <TRow>(
   { initialWidth }: DataGridInternalColumn<TRow>,
   gridWidth: number
@@ -78,33 +83,36 @@ export const useColumnSizing = <TRow>({
       return;
     }
     resizingColumnIdRef.current = undefined;
-    onColumnResize?.({ columnId, width: columnSizingRef.current[columnId] });
+    // TanStack keeps the dragged size as is and only clamps it when reading it.
+    const column = columns.find(({ id }) => id === columnId);
+    const width = columnSizingRef.current[columnId];
+    onColumnResize?.({ columnId, width: column ? clampWidth(column, width) : width });
     if (columnWidths) {
       // Controlled: from now on the width comes from `columnWidths`.
       setDragSizing({});
     }
-  }, [isResizingColumn, onColumnResize, columnWidths]);
+  }, [isResizingColumn, onColumnResize, columnWidths, columns]);
 
   const resetColumnWidth = useCallback(
     (columnId: string) => {
       const column = columns.find(({ id }) => id === columnId);
-      const width = column && resolveInitialWidth(column, gridWidth);
-      if (width === undefined) {
+      if (!column || column.initialWidth === undefined) {
         return;
       }
-      // Drop the user's width, the column falls back to `columnWidths` or its initial width.
+      // Drop the user's width, the column falls back to its initial width. No width is reported,
+      // so a controlled parent drops it too and a function `initialWidth` keeps following the grid.
       setDragSizing(({ [columnId]: _dropped, ...rest }) => rest);
-      onColumnResize?.({ columnId, width });
+      onColumnResize?.({ columnId, width: undefined });
     },
-    [columns, gridWidth, onColumnResize]
+    [columns, onColumnResize]
   );
 
   // Fixed width columns follow CSS variables, so resizing doesn't re-render the rows.
   const widthVars = useMemo(() => {
     const vars: Record<string, string> = {};
-    columns.forEach(({ id, initialWidth, minWidth = 0, maxWidth = Infinity }, columnIndex) => {
-      if (initialWidth !== undefined) {
-        vars[getColumnWidthVar(columnIndex)] = `${clamp(columnSizing[id], minWidth, maxWidth)}px`;
+    columns.forEach((column, columnIndex) => {
+      if (column.initialWidth !== undefined) {
+        vars[getColumnWidthVar(columnIndex)] = `${clampWidth(column, columnSizing[column.id])}px`;
       }
     });
     // CSS custom properties are not part of React's CSSProperties type.

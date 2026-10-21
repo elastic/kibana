@@ -69,6 +69,8 @@ export const CellActionsBubble = React.memo(
     const bubbleRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<HTMLButtonElement>(null);
     const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    // Only a keyboard user expects focus to move into the toolbar, hovering must not take it.
+    const openedByKeyboardRef = useRef(false);
     const [isOpen, setIsOpen] = useState(false);
     const [useFixedLayer, setUseFixedLayer] = useState(false);
     const [fixedLayerStyle, setFixedLayerStyle] = useState<CSSProperties>();
@@ -152,14 +154,18 @@ export const CellActionsBubble = React.memo(
       return needsFixedLayer;
     }, [actionCount, actionInsetPx, anchorCellRef]);
 
-    const openBubble = useCallback(() => {
-      if (isOpen) {
-        return;
-      }
-      clearOpenTimer();
-      refreshFixedLayer();
-      playMorph(true);
-    }, [clearOpenTimer, isOpen, playMorph, refreshFixedLayer]);
+    const openBubble = useCallback(
+      (isKeyboard: boolean) => {
+        if (isOpen) {
+          return;
+        }
+        openedByKeyboardRef.current = isKeyboard;
+        clearOpenTimer();
+        refreshFixedLayer();
+        playMorph(true);
+      },
+      [clearOpenTimer, isOpen, playMorph, refreshFixedLayer]
+    );
 
     const closeBubble = useCallback(
       (returnFocusToTrigger = false) => {
@@ -183,7 +189,7 @@ export const CellActionsBubble = React.memo(
       clearOpenTimer();
       openTimerRef.current = setTimeout(() => {
         openTimerRef.current = null;
-        openBubble();
+        openBubble(false);
       }, CELL_ACTIONS_HOVER_OPEN_DELAY_MS);
     }, [clearOpenTimer, isOpen, openBubble]);
 
@@ -236,11 +242,14 @@ export const CellActionsBubble = React.memo(
       const focusFirstAction = () => {
         bubbleRef.current?.querySelector<HTMLElement>('button')?.focus();
       };
-      const focusFrame = requestAnimationFrame(focusFirstAction);
+      const focusFrame = openedByKeyboardRef.current
+        ? requestAnimationFrame(focusFirstAction)
+        : undefined;
 
+      // The pointer moved on to something else, which should keep the focus it gets.
       const onPointerDown = (event: PointerEvent) => {
         if (!bubbleRef.current?.contains(event.target as Node)) {
-          closeBubble(true);
+          closeBubble(false);
         }
       };
       const onKeyDown = (event: KeyboardEvent) => {
@@ -253,7 +262,9 @@ export const CellActionsBubble = React.memo(
       document.addEventListener('pointerdown', onPointerDown);
       document.addEventListener('keydown', onKeyDown, true);
       return () => {
-        cancelAnimationFrame(focusFrame);
+        if (focusFrame !== undefined) {
+          cancelAnimationFrame(focusFrame);
+        }
         document.removeEventListener('pointerdown', onPointerDown);
         document.removeEventListener('keydown', onKeyDown, true);
       };
@@ -270,7 +281,8 @@ export const CellActionsBubble = React.memo(
         if (isOpen) {
           closeBubble(true);
         } else {
-          openBubble();
+          // Keyboard activation of a button fires a click with `detail` 0.
+          openBubble(event.detail === 0);
         }
       },
       [clearOpenTimer, closeBubble, isOpen, onTriggerActivate, openBubble]
@@ -289,7 +301,7 @@ export const CellActionsBubble = React.memo(
           if (isOpen) {
             closeBubble(true);
           } else {
-            openBubble();
+            openBubble(true);
           }
         }
       },

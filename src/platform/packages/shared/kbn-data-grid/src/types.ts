@@ -111,8 +111,11 @@ export interface DataGridProps<TRow> {
    * applied if `columnWidths` is updated in `onColumnResize`. When omitted, the grid keeps the widths.
    */
   columnWidths?: Record<string, number>;
-  /** Called when the user finishes resizing a column, or resets it by double clicking. */
-  onColumnResize?: (params: { columnId: string; width: number }) => void;
+  /**
+   * Called when the user finishes resizing a column, or resets it by double clicking. `width` is
+   * `undefined` on reset: drop the column from `columnWidths` so it uses its `initialWidth` again.
+   */
+  onColumnResize?: (params: { columnId: string; width: number | undefined }) => void;
   initialScrollOffset?: number;
   onScrollOffsetChange?: (scrollOffset: number) => void;
   gridRef?: Ref<DataGridRef>;

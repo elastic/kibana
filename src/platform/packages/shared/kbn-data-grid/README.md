@@ -38,10 +38,10 @@ visible cells re-render when it changes.
 |---|---|
 | `rows`, `getRowId` | The data, and a stable string id per row. |
 | `columns` | `DataGridColumn[]`, see below. |
-| `leadingControlColumns`, `trailingControlColumns` | `DataGridControlColumn[]` rendered before and after the data columns: `{ id, header, width, renderCell({ row, rowIndex }), cellCss? }`. For columns with their own interactive content, e.g. a pin button. They have no cell actions or popover, and keyboard focus skips them at first. |
+| `leadingControlColumns`, `trailingControlColumns` | `DataGridControlColumn[]` rendered before and after the data columns: `{ id, header, width, renderCell({ row, rowIndex }), cellCss? }`. For columns with their own interactive content, e.g. a pin button. They have no cell actions or popover, and keyboard focus skips them at first. Their content is not in the tab order: Enter or F2 on the cell moves focus into it, Escape moves it back to the cell. |
 | `getCellProps({ row, rowIndex, columnId })` | Returns `{ css?, className?, 'data-test-subj'? }` for a cell, e.g. a background color. Keep it stable (`useCallback`). |
 | `getRowProps({ row, rowIndex })` | Same, for a row, e.g. to highlight it. Keep it stable. |
-| `columnWidths`, `onColumnResize({ columnId, width })` | Column widths by id. When `columnWidths` is set the grid is controlled: a resize only sticks if you update it in `onColumnResize`, which is called when the drag ends or a double click resets the column. Without it the grid keeps the widths itself. |
+| `columnWidths`, `onColumnResize({ columnId, width })` | Column widths by id. When `columnWidths` is set the grid is controlled: a resize only sticks if you update it in `onColumnResize`, which is called when the drag ends (with the width clamped to `minWidth`/`maxWidth`) or a double click resets the column (with `width: undefined`: remove the column from `columnWidths`). Without it the grid keeps the widths itself. |
 | `ariaLabel` | Accessible name of the grid. Required. |
 | `data-test-subj` | Defaults to `kbnDataGrid`. The pinned section uses `<subj>-pinnedRows`. |
 | `pinnedRowIds` | Rows kept in a sticky section below the header, in `rows` order. |
@@ -67,9 +67,10 @@ focus. Prefer it over styling the grid's internal DOM.
 
 ## Not supported yet
 
-Sorting, pagination, the column header menu, trailing control columns, a footer row, density and row
+Sorting, pagination, the column header menu, a footer row, density and row
 height settings, column visibility and reordering, a custom popover body, a non-interactive mode and a
-render-complete signal. The API is not a drop-in replacement for `EuiDataGrid`.
+render-complete signal, horizontal scrolling and column virtualization, PageUp/PageDown, keyboard
+column resizing, and an imperative API to focus a cell or open its popover. The API is not a drop-in replacement for `EuiDataGrid`.
 
 ## Using it in other components
 
