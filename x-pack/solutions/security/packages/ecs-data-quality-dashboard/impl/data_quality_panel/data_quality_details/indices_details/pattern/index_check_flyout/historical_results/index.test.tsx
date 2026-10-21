@@ -152,7 +152,7 @@ describe('HistoricalResults', () => {
 
     describe('when new date is selected', () => {
       it('should invoke fetchHistoricalResults with new start and end dates, from: 0 and remaining fetch query opts', async () => {
-        const user = userEvent.setup();
+        const user = userEvent.setup({ pointerEventsCheck: 0 });
         const indexName = 'test';
         const historicalResult = getHistoricalResultStub(indexName);
         const fetchHistoricalResults = jest.fn();
@@ -183,7 +183,7 @@ describe('HistoricalResults', () => {
 
         const monthToDateButton = screen.getByTestId('superDatePickerCommonlyUsed_Month_to date');
 
-        await user.click(monthToDateButton, { pointerEventsCheck: 0 });
+        await user.click(monthToDateButton);
 
         const fetchQueryOpts = {
           abortController: expect.any(AbortController),
