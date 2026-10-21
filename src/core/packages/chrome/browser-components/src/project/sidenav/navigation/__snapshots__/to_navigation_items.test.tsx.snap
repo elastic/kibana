@@ -598,7 +598,7 @@ Array [
             "href": "/jom/app/security/rules_coverage_overview",
             "id": "coverage-overview",
             "isExternal": false,
-            "label": "MITRE ATT&CK® Coverage",
+            "label": "MITRE coverage",
           },
         ],
         "label": "Discover",

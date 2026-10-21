@@ -23,6 +23,7 @@ import { controlGroupStateBuilder } from '@kbn/control-group-renderer/src/contro
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
+import { buildSpaceFilter } from './build_space_filter';
 import { AddControl, SaveControls } from './buttons';
 import { COMMON_OPTIONS_LIST_CONTROL_INPUTS, TEST_IDS, TIMEOUTS, URL_PARAM_KEY } from './constants';
 import { FilterGroupContextMenu } from './context_menu';
@@ -139,6 +140,14 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
       query,
     };
   }, [filters, query]);
+
+  const filtersForControls = useMemo(() => {
+    if (!spaceId) {
+      return validatedFilters;
+    }
+    // Applied after validation so a bad user query drops those filters without dropping the space constraint.
+    return [...(validatedFilters ?? []), buildSpaceFilter(spaceId)];
+  }, [spaceId, validatedFilters]);
 
   const handleStateUpdates = useCallback(
     (newState: ControlGroupRuntimeState) => {
@@ -442,7 +451,7 @@ export const FilterGroup = (props: PropsWithChildren<FilterGroupProps>) => {
                 getCreationOptions={getCreationOptions}
                 timeRange={timeRange}
                 query={validatedQuery}
-                filters={validatedFilters}
+                filters={filtersForControls}
                 viewMode={filterGroupMode}
               />
               {!controlGroup ? <FilterGroupLoading /> : null}

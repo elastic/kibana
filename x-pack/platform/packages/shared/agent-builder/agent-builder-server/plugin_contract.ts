@@ -166,11 +166,15 @@ export interface AgentsStart {
    * Optional `availability` is kept in memory and keyed by `agent.id` (never persisted). Use the
    * same {@link AgentAvailabilityConfig} shape as built-in agents. Prefer passing it on every
    * `ensure` call for that id.
+   *
+   * Optional `hidden` is kept in memory the same way and overrides the default UI visibility
+   * (system-created non-chat agents are hidden from the agent picker and management list).
    */
   ensure: (opts: {
     spaceId: string;
     agent: AgentCreateRequest;
     availability?: AgentAvailabilityConfig;
+    hidden?: boolean;
   }) => Promise<void>;
 }
 
