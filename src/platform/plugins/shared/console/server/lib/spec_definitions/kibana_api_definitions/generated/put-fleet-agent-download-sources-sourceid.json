@@ -1,0 +1,10 @@
+{
+  "put-fleet-agent-download-sources-sourceid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/agent_download_sources/{sourceId}"
+    ]
+  }
+}

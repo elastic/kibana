@@ -1,0 +1,10 @@
+{
+  "swapDataViewsDefault": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/data_views/swap_references"
+    ]
+  }
+}

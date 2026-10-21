@@ -1,0 +1,10 @@
+{
+  "getCaseFieldDefinitionsDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/field_definitions"
+    ]
+  }
+}

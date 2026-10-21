@@ -1,0 +1,10 @@
+{
+  "create-visualization": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/visualizations"
+    ]
+  }
+}

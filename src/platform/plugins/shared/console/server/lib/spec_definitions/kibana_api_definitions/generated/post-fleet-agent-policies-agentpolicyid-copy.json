@@ -1,0 +1,10 @@
+{
+  "post-fleet-agent-policies-agentpolicyid-copy": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agent_policies/{agentPolicyId}/copy"
+    ]
+  }
+}

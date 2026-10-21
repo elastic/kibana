@@ -1,0 +1,10 @@
+{
+  "CreatePrivMonUser": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/users"
+    ]
+  }
+}

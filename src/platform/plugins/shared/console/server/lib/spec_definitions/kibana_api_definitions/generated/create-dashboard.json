@@ -1,0 +1,10 @@
+{
+  "create-dashboard": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/dashboards"
+    ]
+  }
+}

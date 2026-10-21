@@ -1,0 +1,10 @@
+{
+  "put-streams-name": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/streams/{name}"
+    ]
+  }
+}

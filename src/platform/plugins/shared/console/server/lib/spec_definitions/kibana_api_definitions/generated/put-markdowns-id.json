@@ -1,0 +1,10 @@
+{
+  "put-markdowns-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/markdowns/{id}"
+    ]
+  }
+}

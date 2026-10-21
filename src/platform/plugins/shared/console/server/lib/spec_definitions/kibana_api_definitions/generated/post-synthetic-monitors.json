@@ -1,0 +1,10 @@
+{
+  "post-synthetic-monitors": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/synthetics/monitors"
+    ]
+  }
+}

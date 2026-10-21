@@ -1,0 +1,10 @@
+{
+  "post-workflows-workflow-id-run": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/workflows/workflow/{id}/run"
+    ]
+  }
+}

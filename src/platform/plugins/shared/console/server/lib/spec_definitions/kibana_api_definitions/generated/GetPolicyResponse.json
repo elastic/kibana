@@ -1,0 +1,10 @@
+{
+  "GetPolicyResponse": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint/policy_response"
+    ]
+  }
+}

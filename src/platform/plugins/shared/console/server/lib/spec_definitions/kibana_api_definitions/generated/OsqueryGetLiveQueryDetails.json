@@ -1,0 +1,10 @@
+{
+  "OsqueryGetLiveQueryDetails": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/osquery/live_queries/{id}"
+    ]
+  }
+}

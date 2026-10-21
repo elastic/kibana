@@ -1,0 +1,10 @@
+{
+  "get-markdowns": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/markdowns"
+    ]
+  }
+}

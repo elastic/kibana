@@ -1,0 +1,10 @@
+{
+  "get-fleet-agents-action-status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agents/action_status"
+    ]
+  }
+}

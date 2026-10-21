@@ -1,0 +1,10 @@
+{
+  "getAgentNameForService": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/apm/settings/agent-configuration/agent_name"
+    ]
+  }
+}

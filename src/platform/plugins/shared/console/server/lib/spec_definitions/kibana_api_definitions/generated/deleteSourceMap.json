@@ -1,0 +1,10 @@
+{
+  "deleteSourceMap": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/apm/sourcemaps/{id}"
+    ]
+  }
+}

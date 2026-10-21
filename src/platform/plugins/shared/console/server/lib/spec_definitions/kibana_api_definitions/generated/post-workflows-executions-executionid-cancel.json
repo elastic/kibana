@@ -1,0 +1,10 @@
+{
+  "post-workflows-executions-executionid-cancel": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/workflows/executions/{executionId}/cancel"
+    ]
+  }
+}

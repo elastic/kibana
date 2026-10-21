@@ -1,0 +1,10 @@
+{
+  "post-fleet-outputs": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/outputs"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "getAnnotation": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/apm/services/{serviceName}/annotation/search"
+    ]
+  }
+}

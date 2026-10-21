@@ -1,0 +1,10 @@
+{
+  "get-alerting-v2-execution-history-rules": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/alerting/v2/execution_history/rules"
+    ]
+  }
+}

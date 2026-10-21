@@ -1,0 +1,10 @@
+{
+  "CreateUpdateProtectionUpdatesNote": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/protection_updates_note/{package_policy_id}"
+    ]
+  }
+}

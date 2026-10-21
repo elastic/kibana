@@ -1,0 +1,10 @@
+{
+  "UpdateAttackDiscoverySchedules": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/attack_discovery/schedules/{id}"
+    ]
+  }
+}

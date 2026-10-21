@@ -1,0 +1,10 @@
+{
+  "get-url": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/short_url/{id}"
+    ]
+  }
+}

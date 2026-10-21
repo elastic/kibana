@@ -1,0 +1,10 @@
+{
+  "ImportExceptionList": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/exception_lists/_import"
+    ]
+  }
+}

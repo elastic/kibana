@@ -1,0 +1,10 @@
+{
+  "get-saved-objects-resolve-type-id": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/saved_objects/resolve/{type}/{id}"
+    ]
+  }
+}

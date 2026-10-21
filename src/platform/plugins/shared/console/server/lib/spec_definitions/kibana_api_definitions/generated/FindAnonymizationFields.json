@@ -1,0 +1,10 @@
+{
+  "FindAnonymizationFields": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/anonymization_fields/_find"
+    ]
+  }
+}

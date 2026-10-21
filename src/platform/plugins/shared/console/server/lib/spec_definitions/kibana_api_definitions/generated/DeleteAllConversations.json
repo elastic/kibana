@@ -1,0 +1,10 @@
+{
+  "DeleteAllConversations": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/current_user/conversations"
+    ]
+  }
+}

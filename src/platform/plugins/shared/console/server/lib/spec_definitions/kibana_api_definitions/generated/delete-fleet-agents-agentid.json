@@ -1,0 +1,10 @@
+{
+  "delete-fleet-agents-agentid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}"
+    ]
+  }
+}

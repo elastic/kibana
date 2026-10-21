@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents-agentid-request-diagnostics": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}/request_diagnostics"
+    ]
+  }
+}

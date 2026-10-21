@@ -1,0 +1,10 @@
+{
+  "deleteSloOp": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "s/{spaceId}/api/observability/slos/{sloId}"
+    ]
+  }
+}

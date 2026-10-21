@@ -1,0 +1,10 @@
+{
+  "post-links": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/links"
+    ]
+  }
+}

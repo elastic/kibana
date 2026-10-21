@@ -1,0 +1,10 @@
+{
+  "ReadAlertsIndex": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/detection_engine/index"
+    ]
+  }
+}

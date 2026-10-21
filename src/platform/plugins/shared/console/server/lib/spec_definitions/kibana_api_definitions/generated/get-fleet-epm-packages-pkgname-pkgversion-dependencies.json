@@ -1,0 +1,10 @@
+{
+  "get-fleet-epm-packages-pkgname-pkgversion-dependencies": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/{pkgVersion}/dependencies"
+    ]
+  }
+}

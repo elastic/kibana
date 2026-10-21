@@ -1,0 +1,10 @@
+{
+  "get-synthetic-monitors": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/synthetics/monitors"
+    ]
+  }
+}

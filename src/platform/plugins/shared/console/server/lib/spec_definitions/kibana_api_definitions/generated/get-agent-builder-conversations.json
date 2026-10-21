@@ -1,0 +1,10 @@
+{
+  "get-agent-builder-conversations": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/agent_builder/conversations"
+    ]
+  }
+}

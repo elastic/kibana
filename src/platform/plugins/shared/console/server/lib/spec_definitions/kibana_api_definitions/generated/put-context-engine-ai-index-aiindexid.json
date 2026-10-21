@@ -1,0 +1,10 @@
+{
+  "put-context-engine-ai-index-aiindexid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/context_engine/ai_index/{aiIndexId}"
+    ]
+  }
+}

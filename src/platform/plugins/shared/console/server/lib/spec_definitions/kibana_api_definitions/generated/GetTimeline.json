@@ -1,0 +1,10 @@
+{
+  "GetTimeline": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/timeline"
+    ]
+  }
+}

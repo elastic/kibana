@@ -1,0 +1,10 @@
+{
+  "post-alerting-rule-id-disable": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/rule/{id}/_disable"
+    ]
+  }
+}

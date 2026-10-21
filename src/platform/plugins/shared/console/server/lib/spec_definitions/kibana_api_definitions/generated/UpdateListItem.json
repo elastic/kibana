@@ -1,0 +1,10 @@
+{
+  "UpdateListItem": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/lists/items"
+    ]
+  }
+}

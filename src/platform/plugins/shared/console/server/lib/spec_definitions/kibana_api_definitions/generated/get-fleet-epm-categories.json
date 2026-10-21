@@ -1,0 +1,10 @@
+{
+  "get-fleet-epm-categories": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/categories"
+    ]
+  }
+}

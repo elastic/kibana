@@ -1,0 +1,10 @@
+{
+  "createUpdateAgentConfiguration": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/apm/settings/agent-configuration"
+    ]
+  }
+}

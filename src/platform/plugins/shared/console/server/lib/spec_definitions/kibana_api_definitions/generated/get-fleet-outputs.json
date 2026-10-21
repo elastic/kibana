@@ -1,0 +1,10 @@
+{
+  "get-fleet-outputs": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/outputs"
+    ]
+  }
+}

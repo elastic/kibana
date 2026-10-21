@@ -1,0 +1,10 @@
+{
+  "post-data-views-v2": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/data_views/v2"
+    ]
+  }
+}

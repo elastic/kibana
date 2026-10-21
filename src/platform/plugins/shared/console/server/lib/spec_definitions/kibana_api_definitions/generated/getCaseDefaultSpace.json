@@ -1,0 +1,10 @@
+{
+  "getCaseDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/{caseId}"
+    ]
+  }
+}

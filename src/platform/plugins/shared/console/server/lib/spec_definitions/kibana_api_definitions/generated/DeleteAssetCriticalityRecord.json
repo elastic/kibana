@@ -1,0 +1,10 @@
+{
+  "DeleteAssetCriticalityRecord": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/asset_criticality"
+    ]
+  }
+}

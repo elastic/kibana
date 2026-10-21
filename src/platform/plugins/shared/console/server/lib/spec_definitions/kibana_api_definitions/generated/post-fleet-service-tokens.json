@@ -1,0 +1,10 @@
+{
+  "post-fleet-service-tokens": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/service_tokens"
+    ]
+  }
+}

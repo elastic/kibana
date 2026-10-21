@@ -1,0 +1,10 @@
+{
+  "CleanDraftTimelines": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/timeline/_draft"
+    ]
+  }
+}

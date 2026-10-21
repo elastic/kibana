@@ -1,0 +1,10 @@
+{
+  "get-links-id": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/links/{id}"
+    ]
+  }
+}

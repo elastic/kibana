@@ -1,0 +1,10 @@
+{
+  "get-fleet-agent-policies-agentpolicyid-full": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agent_policies/{agentPolicyId}/full"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "put-parameter": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/synthetics/params/{id}"
+    ]
+  }
+}

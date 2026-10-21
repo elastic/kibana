@@ -1,0 +1,10 @@
+{
+  "getCaseReportersDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/reporters"
+    ]
+  }
+}

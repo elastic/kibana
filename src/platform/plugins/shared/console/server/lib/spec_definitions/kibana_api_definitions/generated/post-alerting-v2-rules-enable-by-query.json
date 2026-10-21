@@ -1,0 +1,10 @@
+{
+  "post-alerting-v2-rules-enable-by-query": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules/_enable_by_query"
+    ]
+  }
+}

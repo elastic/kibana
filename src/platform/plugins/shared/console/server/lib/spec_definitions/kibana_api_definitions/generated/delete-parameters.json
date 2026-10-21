@@ -1,0 +1,10 @@
+{
+  "delete-parameters": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/synthetics/params/_bulk_delete"
+    ]
+  }
+}

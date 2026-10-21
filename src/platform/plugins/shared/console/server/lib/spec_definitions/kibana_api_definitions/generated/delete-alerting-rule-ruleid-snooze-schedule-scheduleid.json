@@ -1,0 +1,10 @@
+{
+  "delete-alerting-rule-ruleid-snooze-schedule-scheduleid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}"
+    ]
+  }
+}

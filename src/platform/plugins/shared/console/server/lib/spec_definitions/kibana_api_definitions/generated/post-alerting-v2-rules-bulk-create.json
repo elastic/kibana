@@ -1,0 +1,10 @@
+{
+  "post-alerting-v2-rules-bulk-create": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules/_bulk_create"
+    ]
+  }
+}

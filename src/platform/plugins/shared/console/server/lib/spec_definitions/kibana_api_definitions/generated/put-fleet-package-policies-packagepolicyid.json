@@ -1,0 +1,10 @@
+{
+  "put-fleet-package-policies-packagepolicyid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/package_policies/{packagePolicyId}"
+    ]
+  }
+}

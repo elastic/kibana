@@ -1,0 +1,10 @@
+{
+  "post-security-entity-store-uninstall": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security/entity_store/uninstall"
+    ]
+  }
+}

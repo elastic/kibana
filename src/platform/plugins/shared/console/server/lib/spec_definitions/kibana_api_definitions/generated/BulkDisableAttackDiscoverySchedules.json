@@ -1,0 +1,10 @@
+{
+  "BulkDisableAttackDiscoverySchedules": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/attack_discovery/schedules/_bulk_disable"
+    ]
+  }
+}

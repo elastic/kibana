@@ -1,0 +1,10 @@
+{
+  "ResolveTimeline": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/timeline/resolve"
+    ]
+  }
+}

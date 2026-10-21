@@ -1,0 +1,10 @@
+{
+  "patch-alerting-v2-action-policies-id": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/alerting/v2/action_policies/{id}"
+    ]
+  }
+}

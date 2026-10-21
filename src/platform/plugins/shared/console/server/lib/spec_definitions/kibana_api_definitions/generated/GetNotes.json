@@ -1,0 +1,10 @@
+{
+  "GetNotes": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/note"
+    ]
+  }
+}

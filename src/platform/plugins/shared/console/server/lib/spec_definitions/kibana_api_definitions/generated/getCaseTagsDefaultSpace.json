@@ -1,0 +1,10 @@
+{
+  "getCaseTagsDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/tags"
+    ]
+  }
+}

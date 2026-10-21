@@ -1,0 +1,10 @@
+{
+  "post-url": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/short_url"
+    ]
+  }
+}

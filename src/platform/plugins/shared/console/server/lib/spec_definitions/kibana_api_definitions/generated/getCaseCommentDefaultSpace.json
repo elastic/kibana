@@ -1,0 +1,10 @@
+{
+  "getCaseCommentDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/comments/{commentId}"
+    ]
+  }
+}

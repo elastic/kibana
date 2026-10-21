@@ -1,0 +1,10 @@
+{
+  "observability-ai-assistant-chat-complete": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/observability_ai_assistant/chat/complete"
+    ]
+  }
+}

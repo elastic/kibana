@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents-agentid-migrate": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}/migrate"
+    ]
+  }
+}

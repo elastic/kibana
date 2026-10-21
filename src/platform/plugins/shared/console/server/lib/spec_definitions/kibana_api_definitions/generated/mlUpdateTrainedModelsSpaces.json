@@ -1,0 +1,10 @@
+{
+  "mlUpdateTrainedModelsSpaces": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/ml/saved_objects/update_trained_models_spaces"
+    ]
+  }
+}

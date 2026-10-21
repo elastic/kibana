@@ -1,0 +1,10 @@
+{
+  "OsqueryDeletePacks": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/osquery/packs/{id}"
+    ]
+  }
+}

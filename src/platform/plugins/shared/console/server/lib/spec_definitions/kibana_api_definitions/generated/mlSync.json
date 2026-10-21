@@ -1,0 +1,10 @@
+{
+  "mlSync": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/ml/saved_objects/sync"
+    ]
+  }
+}

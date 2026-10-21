@@ -1,0 +1,10 @@
+{
+  "post-fleet-managed-integrations-upgrade-dryrun": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/managed_integrations/_upgrade/dryrun"
+    ]
+  }
+}

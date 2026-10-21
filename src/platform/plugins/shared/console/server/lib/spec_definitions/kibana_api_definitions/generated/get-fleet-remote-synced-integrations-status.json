@@ -1,0 +1,10 @@
+{
+  "get-fleet-remote-synced-integrations-status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/remote_synced_integrations/status"
+    ]
+  }
+}

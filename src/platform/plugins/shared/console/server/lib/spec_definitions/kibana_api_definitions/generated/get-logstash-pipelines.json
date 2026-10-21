@@ -1,0 +1,10 @@
+{
+  "get-logstash-pipelines": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/logstash/pipelines"
+    ]
+  }
+}

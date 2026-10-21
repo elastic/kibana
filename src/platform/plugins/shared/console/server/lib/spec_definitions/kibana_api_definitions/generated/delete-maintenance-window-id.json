@@ -1,0 +1,10 @@
+{
+  "delete-maintenance-window-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/maintenance_window/{id}"
+    ]
+  }
+}

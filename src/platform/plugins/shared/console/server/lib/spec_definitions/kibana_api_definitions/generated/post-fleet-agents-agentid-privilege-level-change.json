@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents-agentid-privilege-level-change": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}/privilege_level_change"
+    ]
+  }
+}

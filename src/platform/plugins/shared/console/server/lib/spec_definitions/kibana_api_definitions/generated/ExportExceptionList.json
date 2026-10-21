@@ -1,0 +1,10 @@
+{
+  "ExportExceptionList": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/exception_lists/_export"
+    ]
+  }
+}

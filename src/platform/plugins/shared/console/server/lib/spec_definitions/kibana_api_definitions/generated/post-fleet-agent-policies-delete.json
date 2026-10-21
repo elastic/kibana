@@ -1,0 +1,10 @@
+{
+  "post-fleet-agent-policies-delete": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agent_policies/delete"
+    ]
+  }
+}

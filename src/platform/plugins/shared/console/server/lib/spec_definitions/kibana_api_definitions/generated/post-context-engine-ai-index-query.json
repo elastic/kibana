@@ -1,0 +1,10 @@
+{
+  "post-context-engine-ai-index-query": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/context_engine/ai_index/_query"
+    ]
+  }
+}

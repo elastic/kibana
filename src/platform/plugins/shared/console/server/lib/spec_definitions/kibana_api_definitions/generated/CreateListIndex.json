@@ -1,0 +1,10 @@
+{
+  "CreateListIndex": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/lists/index"
+    ]
+  }
+}

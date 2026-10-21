@@ -1,0 +1,10 @@
+{
+  "get-parameter": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/synthetics/params/{id}"
+    ]
+  }
+}

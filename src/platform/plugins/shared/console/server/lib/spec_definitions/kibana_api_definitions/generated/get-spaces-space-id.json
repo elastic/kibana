@@ -1,0 +1,10 @@
+{
+  "get-spaces-space-id": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/spaces/space/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "delete-workflows-workflow-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/workflows/workflow/{id}"
+    ]
+  }
+}

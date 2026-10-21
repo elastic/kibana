@@ -1,0 +1,10 @@
+{
+  "post-workflows-step-test": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/workflows/step/test"
+    ]
+  }
+}

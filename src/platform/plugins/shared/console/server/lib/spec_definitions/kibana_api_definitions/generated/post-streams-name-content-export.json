@@ -1,0 +1,10 @@
+{
+  "post-streams-name-content-export": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/streams/{name}/content/export"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "ExportListItems": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/lists/items/_export"
+    ]
+  }
+}

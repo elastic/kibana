@@ -1,0 +1,10 @@
+{
+  "ReadAlertsMigrationStatus": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/detection_engine/signals/migration_status"
+    ]
+  }
+}

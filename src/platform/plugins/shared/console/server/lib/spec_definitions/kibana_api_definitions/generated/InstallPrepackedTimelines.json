@@ -1,0 +1,10 @@
+{
+  "InstallPrepackedTimelines": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/timeline/_prepackaged"
+    ]
+  }
+}

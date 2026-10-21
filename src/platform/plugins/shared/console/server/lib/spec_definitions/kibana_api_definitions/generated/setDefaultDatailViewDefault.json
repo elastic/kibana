@@ -1,0 +1,10 @@
+{
+  "setDefaultDatailViewDefault": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/data_views/default"
+    ]
+  }
+}

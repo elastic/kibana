@@ -1,0 +1,10 @@
+{
+  "getEnvironmentsForService": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/apm/settings/agent-configuration/environments"
+    ]
+  }
+}

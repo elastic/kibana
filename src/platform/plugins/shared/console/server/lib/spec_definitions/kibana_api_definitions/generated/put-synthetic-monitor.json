@@ -1,0 +1,10 @@
+{
+  "put-synthetic-monitor": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/synthetics/monitors/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents-actions-actionid-cancel": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/actions/{actionId}/cancel"
+    ]
+  }
+}

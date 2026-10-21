@@ -1,0 +1,10 @@
+{
+  "pushCaseDefaultSpace": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/connector/{connectorId}/_push"
+    ]
+  }
+}

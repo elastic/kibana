@@ -1,0 +1,10 @@
+{
+  "post-saved-objects-bulk-resolve": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/saved_objects/_bulk_resolve"
+    ]
+  }
+}

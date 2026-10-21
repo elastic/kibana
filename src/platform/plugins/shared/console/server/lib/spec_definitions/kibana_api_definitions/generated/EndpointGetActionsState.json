@@ -1,0 +1,10 @@
+{
+  "EndpointGetActionsState": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint/action/state"
+    ]
+  }
+}

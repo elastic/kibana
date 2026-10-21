@@ -1,0 +1,10 @@
+{
+  "FindListItems": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/lists/items/_find"
+    ]
+  }
+}

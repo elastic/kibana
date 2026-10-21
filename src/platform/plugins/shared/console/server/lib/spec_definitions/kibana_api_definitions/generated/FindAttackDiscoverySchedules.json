@@ -1,0 +1,10 @@
+{
+  "FindAttackDiscoverySchedules": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/attack_discovery/schedules/_find"
+    ]
+  }
+}

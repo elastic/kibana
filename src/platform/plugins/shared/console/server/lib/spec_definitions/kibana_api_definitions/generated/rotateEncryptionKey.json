@@ -1,0 +1,10 @@
+{
+  "rotateEncryptionKey": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/encrypted_saved_objects/_rotate_key"
+    ]
+  }
+}

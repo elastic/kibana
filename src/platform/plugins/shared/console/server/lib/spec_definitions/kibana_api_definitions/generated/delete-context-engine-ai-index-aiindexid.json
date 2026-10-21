@@ -1,0 +1,10 @@
+{
+  "delete-context-engine-ai-index-aiindexid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/context_engine/ai_index/{aiIndexId}"
+    ]
+  }
+}

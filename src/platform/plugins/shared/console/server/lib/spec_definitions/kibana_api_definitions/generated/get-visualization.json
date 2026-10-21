@@ -1,0 +1,10 @@
+{
+  "get-visualization": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/visualizations/{id}"
+    ]
+  }
+}

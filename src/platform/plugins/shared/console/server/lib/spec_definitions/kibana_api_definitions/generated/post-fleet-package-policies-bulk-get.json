@@ -1,0 +1,10 @@
+{
+  "post-fleet-package-policies-bulk-get": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/package_policies/_bulk_get"
+    ]
+  }
+}

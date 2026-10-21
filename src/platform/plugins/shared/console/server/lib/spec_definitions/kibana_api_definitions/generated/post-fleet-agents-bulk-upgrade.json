@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents-bulk-upgrade": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/bulk_upgrade"
+    ]
+  }
+}

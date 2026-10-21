@@ -1,0 +1,10 @@
+{
+  "get-fleet-space-settings": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/space_settings"
+    ]
+  }
+}

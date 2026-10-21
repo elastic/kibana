@@ -1,0 +1,10 @@
+{
+  "getAlertingHealth": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/alerting/_health"
+    ]
+  }
+}

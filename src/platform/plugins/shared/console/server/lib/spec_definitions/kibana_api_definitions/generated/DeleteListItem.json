@@ -1,0 +1,10 @@
+{
+  "DeleteListItem": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/lists/items"
+    ]
+  }
+}

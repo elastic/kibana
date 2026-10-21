@@ -1,0 +1,10 @@
+{
+  "post-fleet-enrollment-api-keys": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/enrollment_api_keys"
+    ]
+  }
+}

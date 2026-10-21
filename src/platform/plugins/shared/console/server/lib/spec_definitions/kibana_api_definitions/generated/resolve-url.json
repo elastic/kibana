@@ -1,0 +1,10 @@
+{
+  "resolve-url": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/short_url/_slug/{slug}"
+    ]
+  }
+}

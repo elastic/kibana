@@ -1,0 +1,10 @@
+{
+  "get-workflows-workflow-id": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/workflow/{id}"
+    ]
+  }
+}

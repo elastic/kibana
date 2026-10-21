@@ -1,0 +1,10 @@
+{
+  "get-agent-builder-conversations-conversation-id-attachments": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/agent_builder/conversations/{conversation_id}/attachments"
+    ]
+  }
+}

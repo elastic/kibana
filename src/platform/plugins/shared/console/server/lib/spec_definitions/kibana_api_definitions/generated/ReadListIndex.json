@@ -1,0 +1,10 @@
+{
+  "ReadListIndex": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/lists/index"
+    ]
+  }
+}

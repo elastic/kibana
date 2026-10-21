@@ -1,0 +1,10 @@
+{
+  "DeleteAlertsIndex": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/detection_engine/index"
+    ]
+  }
+}

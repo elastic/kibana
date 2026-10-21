@@ -1,0 +1,10 @@
+{
+  "get-fleet-managed-integrations": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/managed_integrations"
+    ]
+  }
+}

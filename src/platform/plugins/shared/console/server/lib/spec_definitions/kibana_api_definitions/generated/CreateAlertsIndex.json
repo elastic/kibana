@@ -1,0 +1,10 @@
+{
+  "CreateAlertsIndex": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/detection_engine/index"
+    ]
+  }
+}

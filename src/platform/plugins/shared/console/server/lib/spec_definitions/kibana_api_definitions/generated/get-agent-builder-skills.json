@@ -1,0 +1,10 @@
+{
+  "get-agent-builder-skills": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/agent_builder/skills"
+    ]
+  }
+}

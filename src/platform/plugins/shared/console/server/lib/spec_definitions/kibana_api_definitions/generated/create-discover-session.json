@@ -1,0 +1,10 @@
+{
+  "create-discover-session": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/discover_sessions"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "findCaseActivityDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/user_actions/_find"
+    ]
+  }
+}

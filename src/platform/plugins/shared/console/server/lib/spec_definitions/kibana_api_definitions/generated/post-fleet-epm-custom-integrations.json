@@ -1,0 +1,10 @@
+{
+  "post-fleet-epm-custom-integrations": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/custom_integrations"
+    ]
+  }
+}

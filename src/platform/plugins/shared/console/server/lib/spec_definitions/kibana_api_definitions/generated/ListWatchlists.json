@@ -1,0 +1,10 @@
+{
+  "ListWatchlists": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/entity_analytics/watchlists/list"
+    ]
+  }
+}

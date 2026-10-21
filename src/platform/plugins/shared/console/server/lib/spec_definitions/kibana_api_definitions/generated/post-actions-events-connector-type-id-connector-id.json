@@ -1,0 +1,10 @@
+{
+  "post-actions-events-connector-type-id-connector-id": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/actions/events/{connector_type_id}/{connector_id}"
+    ]
+  }
+}

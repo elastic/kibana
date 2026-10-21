@@ -1,0 +1,10 @@
+{
+  "post-workflows-executions-executionid-resume": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/workflows/executions/{executionId}/resume"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "createAnnotation": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/apm/services/{serviceName}/annotation"
+    ]
+  }
+}

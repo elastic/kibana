@@ -1,0 +1,10 @@
+{
+  "get-fleet-kubernetes-download": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/kubernetes/download"
+    ]
+  }
+}

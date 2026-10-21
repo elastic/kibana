@@ -1,0 +1,10 @@
+{
+  "put-fleet-space-settings": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/space_settings"
+    ]
+  }
+}

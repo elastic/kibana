@@ -1,0 +1,10 @@
+{
+  "delete-actions-connector-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/actions/connector/{id}"
+    ]
+  }
+}

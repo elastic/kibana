@@ -1,0 +1,10 @@
+{
+  "put-fleet-outputs-outputid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/outputs/{outputId}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "post-fleet-epm-packages-bulk-namespace-customization": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/_bulk_namespace_customization"
+    ]
+  }
+}

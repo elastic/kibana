@@ -1,0 +1,10 @@
+{
+  "createCaseFieldDefinitionDefaultSpace": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/cases/field_definitions"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "EndpointUploadAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/action/upload"
+    ]
+  }
+}

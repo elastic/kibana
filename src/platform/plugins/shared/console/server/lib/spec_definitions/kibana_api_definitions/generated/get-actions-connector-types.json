@@ -1,0 +1,10 @@
+{
+  "get-actions-connector-types": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/actions/connector_types"
+    ]
+  }
+}

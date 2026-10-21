@@ -1,0 +1,10 @@
+{
+  "OsqueryCreateLiveQuery": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/osquery/live_queries"
+    ]
+  }
+}

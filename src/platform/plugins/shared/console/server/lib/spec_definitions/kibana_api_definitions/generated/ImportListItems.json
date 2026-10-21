@@ -1,0 +1,10 @@
+{
+  "ImportListItems": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/lists/items/_import"
+    ]
+  }
+}

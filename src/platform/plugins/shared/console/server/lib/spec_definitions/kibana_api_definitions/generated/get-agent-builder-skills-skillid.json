@@ -1,0 +1,10 @@
+{
+  "get-agent-builder-skills-skillid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/agent_builder/skills/{skillId}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "get-security-role": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security/role"
+    ]
+  }
+}

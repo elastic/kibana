@@ -1,0 +1,10 @@
+{
+  "post-agent-builder-mcp": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/mcp"
+    ]
+  }
+}

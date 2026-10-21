@@ -1,0 +1,10 @@
+{
+  "delete-markdowns-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/markdowns/{id}"
+    ]
+  }
+}

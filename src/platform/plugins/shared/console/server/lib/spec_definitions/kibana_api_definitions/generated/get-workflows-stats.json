@@ -1,0 +1,10 @@
+{
+  "get-workflows-stats": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/stats"
+    ]
+  }
+}

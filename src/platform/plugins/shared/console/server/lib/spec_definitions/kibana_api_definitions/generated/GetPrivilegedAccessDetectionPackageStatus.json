@@ -1,0 +1,10 @@
+{
+  "GetPrivilegedAccessDetectionPackageStatus": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/entity_analytics/privileged_user_monitoring/pad/status"
+    ]
+  }
+}

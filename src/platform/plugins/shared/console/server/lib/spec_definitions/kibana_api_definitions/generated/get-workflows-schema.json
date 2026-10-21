@@ -1,0 +1,10 @@
+{
+  "get-workflows-schema": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/schema"
+    ]
+  }
+}

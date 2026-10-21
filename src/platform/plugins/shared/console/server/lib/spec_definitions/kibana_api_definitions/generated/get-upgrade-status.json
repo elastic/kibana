@@ -1,0 +1,10 @@
+{
+  "get-upgrade-status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/upgrade_assistant/status"
+    ]
+  }
+}

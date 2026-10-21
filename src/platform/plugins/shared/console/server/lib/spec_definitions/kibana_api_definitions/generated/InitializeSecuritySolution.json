@@ -1,0 +1,10 @@
+{
+  "InitializeSecuritySolution": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security_solution/initialize"
+    ]
+  }
+}

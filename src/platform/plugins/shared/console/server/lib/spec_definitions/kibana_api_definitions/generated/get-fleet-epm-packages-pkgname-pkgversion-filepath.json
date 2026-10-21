@@ -1,0 +1,10 @@
+{
+  "get-fleet-epm-packages-pkgname-pkgversion-filepath": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "OsqueryGetPacksDetails": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/osquery/packs/{id}"
+    ]
+  }
+}

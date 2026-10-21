@@ -1,0 +1,10 @@
+{
+  "setCaseConfigurationDefaultSpace": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/cases/configure"
+    ]
+  }
+}

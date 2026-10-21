@@ -1,0 +1,10 @@
+{
+  "get-security-entity-store-resolution-group": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security/entity_store/resolution/group"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "delete-agent-builder-plugins-pluginid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/agent_builder/plugins/{pluginId}"
+    ]
+  }
+}

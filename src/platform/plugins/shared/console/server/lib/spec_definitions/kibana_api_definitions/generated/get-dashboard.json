@@ -1,0 +1,10 @@
+{
+  "get-dashboard": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/dashboards/{id}"
+    ]
+  }
+}

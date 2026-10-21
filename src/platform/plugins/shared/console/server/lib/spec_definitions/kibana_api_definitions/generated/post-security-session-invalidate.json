@@ -1,0 +1,10 @@
+{
+  "post-security-session-invalidate": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security/session/_invalidate"
+    ]
+  }
+}

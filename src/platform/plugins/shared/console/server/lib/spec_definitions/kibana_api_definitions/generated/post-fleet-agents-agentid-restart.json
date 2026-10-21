@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents-agentid-restart": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}/restart"
+    ]
+  }
+}

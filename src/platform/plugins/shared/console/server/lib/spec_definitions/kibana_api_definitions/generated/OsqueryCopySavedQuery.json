@@ -1,0 +1,10 @@
+{
+  "OsqueryCopySavedQuery": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/osquery/saved_queries/{id}/copy"
+    ]
+  }
+}

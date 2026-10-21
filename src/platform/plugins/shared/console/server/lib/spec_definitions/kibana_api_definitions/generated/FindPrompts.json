@@ -1,0 +1,10 @@
+{
+  "FindPrompts": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/prompts/_find"
+    ]
+  }
+}

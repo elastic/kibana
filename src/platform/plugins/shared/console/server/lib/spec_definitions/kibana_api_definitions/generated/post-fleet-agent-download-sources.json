@@ -1,0 +1,10 @@
+{
+  "post-fleet-agent-download-sources": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agent_download_sources"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "post-agent-builder-a2a-agentid": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/a2a/{agentId}"
+    ]
+  }
+}

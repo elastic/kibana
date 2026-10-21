@@ -1,0 +1,10 @@
+{
+  "delete-agent-builder-conversations-conversation-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/agent_builder/conversations/{conversation_id}"
+    ]
+  }
+}

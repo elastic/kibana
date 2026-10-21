@@ -1,0 +1,10 @@
+{
+  "getRuntimeFieldDefault": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/data_views/data_view/{viewId}/runtime_field/{fieldName}"
+    ]
+  }
+}

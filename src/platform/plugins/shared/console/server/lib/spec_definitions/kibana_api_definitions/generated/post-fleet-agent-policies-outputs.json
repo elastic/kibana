@@ -1,0 +1,10 @@
+{
+  "post-fleet-agent-policies-outputs": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agent_policies/outputs"
+    ]
+  }
+}

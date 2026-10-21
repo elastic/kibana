@@ -1,0 +1,10 @@
+{
+  "put-fleet-agentless-policies-policyid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/agentless_policies/{policyId}"
+    ]
+  }
+}

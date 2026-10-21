@@ -1,0 +1,10 @@
+{
+  "uploadSourceMap": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/apm/sourcemaps"
+    ]
+  }
+}

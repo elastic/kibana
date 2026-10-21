@@ -1,0 +1,10 @@
+{
+  "EndpointGetActionsStatus": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint/action_status"
+    ]
+  }
+}

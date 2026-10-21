@@ -1,0 +1,10 @@
+{
+  "post-alerting-v2-alerts-bulk-assign": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/alerts/_bulk_assign"
+    ]
+  }
+}

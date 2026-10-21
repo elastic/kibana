@@ -1,0 +1,10 @@
+{
+  "get-fleet-settings": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/settings"
+    ]
+  }
+}

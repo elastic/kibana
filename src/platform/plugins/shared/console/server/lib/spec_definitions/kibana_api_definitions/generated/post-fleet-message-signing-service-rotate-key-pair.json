@@ -1,0 +1,10 @@
+{
+  "post-fleet-message-signing-service-rotate-key-pair": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/message_signing_service/rotate_key_pair"
+    ]
+  }
+}

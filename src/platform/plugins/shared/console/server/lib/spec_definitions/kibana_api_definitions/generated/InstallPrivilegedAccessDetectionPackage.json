@@ -1,0 +1,10 @@
+{
+  "InstallPrivilegedAccessDetectionPackage": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/privileged_user_monitoring/pad/install"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "get-agent-builder-agents-id-access-control": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/agent_builder/agents/{id}/access_control"
+    ]
+  }
+}

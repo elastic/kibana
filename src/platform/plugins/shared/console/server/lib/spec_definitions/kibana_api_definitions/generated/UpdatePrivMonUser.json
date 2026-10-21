@@ -1,0 +1,10 @@
+{
+  "UpdatePrivMonUser": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/users/{id}"
+    ]
+  }
+}

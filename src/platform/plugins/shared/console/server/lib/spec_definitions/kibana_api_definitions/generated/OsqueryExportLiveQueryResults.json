@@ -1,0 +1,10 @@
+{
+  "OsqueryExportLiveQueryResults": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/osquery/live_queries/{id}/results/{actionId}/_export"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "OsqueryUpdateSavedQuery": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/osquery/saved_queries/{id}"
+    ]
+  }
+}

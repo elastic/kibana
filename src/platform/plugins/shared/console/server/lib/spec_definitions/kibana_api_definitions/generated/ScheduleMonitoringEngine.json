@@ -1,0 +1,10 @@
+{
+  "ScheduleMonitoringEngine": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/engine/schedule_now"
+    ]
+  }
+}

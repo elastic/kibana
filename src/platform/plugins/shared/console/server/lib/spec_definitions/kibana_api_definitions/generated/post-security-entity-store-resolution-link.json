@@ -1,0 +1,10 @@
+{
+  "post-security-entity-store-resolution-link": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security/entity_store/resolution/link"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "get-alerting-rules-backfill-id": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/alerting/rules/backfill/{id}"
+    ]
+  }
+}

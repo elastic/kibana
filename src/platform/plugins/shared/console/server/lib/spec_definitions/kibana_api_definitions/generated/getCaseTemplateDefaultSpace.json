@@ -1,0 +1,10 @@
+{
+  "getCaseTemplateDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/templates/{template_id}"
+    ]
+  }
+}

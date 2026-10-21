@@ -1,0 +1,10 @@
+{
+  "put-alerting-rule-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/alerting/rule/{id}"
+    ]
+  }
+}

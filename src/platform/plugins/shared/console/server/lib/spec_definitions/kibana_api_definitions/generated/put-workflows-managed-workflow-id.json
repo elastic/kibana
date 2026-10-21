@@ -1,0 +1,10 @@
+{
+  "put-workflows-managed-workflow-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/workflows/managed/workflow/{id}"
+    ]
+  }
+}

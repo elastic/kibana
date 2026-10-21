@@ -1,0 +1,10 @@
+{
+  "patch-maintenance-window-id": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/maintenance_window/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "put-agent-builder-agents-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/agent_builder/agents/{id}"
+    ]
+  }
+}

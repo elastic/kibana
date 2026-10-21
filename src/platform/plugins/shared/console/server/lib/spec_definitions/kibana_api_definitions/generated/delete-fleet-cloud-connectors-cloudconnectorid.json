@@ -1,0 +1,10 @@
+{
+  "delete-fleet-cloud-connectors-cloudconnectorid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/cloud_connectors/{cloudConnectorId}"
+    ]
+  }
+}

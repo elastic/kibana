@@ -1,0 +1,10 @@
+{
+  "mlUpdateJobsSpaces": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/ml/saved_objects/update_jobs_spaces"
+    ]
+  }
+}

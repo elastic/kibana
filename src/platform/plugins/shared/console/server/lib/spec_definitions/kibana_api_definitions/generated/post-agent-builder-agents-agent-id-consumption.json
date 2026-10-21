@@ -1,0 +1,10 @@
+{
+  "post-agent-builder-agents-agent-id-consumption": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/agents/{agent_id}/consumption"
+    ]
+  }
+}

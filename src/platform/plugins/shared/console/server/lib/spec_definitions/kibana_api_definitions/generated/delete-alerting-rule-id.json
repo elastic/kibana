@@ -1,0 +1,10 @@
+{
+  "delete-alerting-rule-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/alerting/rule/{id}"
+    ]
+  }
+}

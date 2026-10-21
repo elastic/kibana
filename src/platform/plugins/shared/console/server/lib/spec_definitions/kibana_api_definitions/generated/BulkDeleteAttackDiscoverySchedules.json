@@ -1,0 +1,10 @@
+{
+  "BulkDeleteAttackDiscoverySchedules": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/attack_discovery/schedules/_bulk_delete"
+    ]
+  }
+}

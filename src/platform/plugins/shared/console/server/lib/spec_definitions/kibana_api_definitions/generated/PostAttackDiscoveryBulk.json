@@ -1,0 +1,10 @@
+{
+  "PostAttackDiscoveryBulk": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/attack_discovery/_bulk"
+    ]
+  }
+}

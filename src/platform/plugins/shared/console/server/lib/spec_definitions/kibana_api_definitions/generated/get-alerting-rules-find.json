@@ -1,0 +1,10 @@
+{
+  "get-alerting-rules-find": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/alerting/rules/_find"
+    ]
+  }
+}

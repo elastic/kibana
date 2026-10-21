@@ -1,0 +1,10 @@
+{
+  "post-fleet-epm-packages-pkgname-pkgversion-transforms-authorize": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize"
+    ]
+  }
+}

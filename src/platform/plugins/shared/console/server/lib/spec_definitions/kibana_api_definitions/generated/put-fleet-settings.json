@@ -1,0 +1,10 @@
+{
+  "put-fleet-settings": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/settings"
+    ]
+  }
+}

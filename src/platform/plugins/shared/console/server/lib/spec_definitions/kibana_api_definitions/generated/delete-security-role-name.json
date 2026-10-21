@@ -1,0 +1,10 @@
+{
+  "delete-security-role-name": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/security/role/{name}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "DeleteMonitoringEngine": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/engine/delete"
+    ]
+  }
+}

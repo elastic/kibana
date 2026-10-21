@@ -1,0 +1,10 @@
+{
+  "post-streams-disable": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/streams/_disable"
+    ]
+  }
+}

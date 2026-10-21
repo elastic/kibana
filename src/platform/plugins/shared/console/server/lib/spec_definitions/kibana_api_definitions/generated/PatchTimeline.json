@@ -1,0 +1,10 @@
+{
+  "PatchTimeline": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/timeline"
+    ]
+  }
+}

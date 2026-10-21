@@ -1,0 +1,10 @@
+{
+  "get-agent-builder-agents": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/agent_builder/agents"
+    ]
+  }
+}

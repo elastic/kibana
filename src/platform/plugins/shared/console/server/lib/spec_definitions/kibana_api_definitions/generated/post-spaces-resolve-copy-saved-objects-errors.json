@@ -1,0 +1,10 @@
+{
+  "post-spaces-resolve-copy-saved-objects-errors": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/spaces/_resolve_copy_saved_objects_errors"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "post-fleet-epm-bulk-assets": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/bulk_assets"
+    ]
+  }
+}

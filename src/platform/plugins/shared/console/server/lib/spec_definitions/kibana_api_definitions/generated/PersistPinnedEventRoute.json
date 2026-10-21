@@ -1,0 +1,10 @@
+{
+  "PersistPinnedEventRoute": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/pinned_event"
+    ]
+  }
+}

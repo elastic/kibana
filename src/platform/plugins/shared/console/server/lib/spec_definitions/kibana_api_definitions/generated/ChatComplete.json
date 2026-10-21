@@ -1,0 +1,10 @@
+{
+  "ChatComplete": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/chat/complete"
+    ]
+  }
+}

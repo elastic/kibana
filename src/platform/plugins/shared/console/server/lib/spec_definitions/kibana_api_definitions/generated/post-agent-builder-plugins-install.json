@@ -1,0 +1,10 @@
+{
+  "post-agent-builder-plugins-install": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/plugins/install"
+    ]
+  }
+}

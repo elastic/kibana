@@ -1,0 +1,10 @@
+{
+  "post-workflows-mget": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/workflows/mget"
+    ]
+  }
+}

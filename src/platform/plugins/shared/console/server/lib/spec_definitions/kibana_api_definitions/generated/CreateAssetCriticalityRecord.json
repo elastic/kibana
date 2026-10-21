@@ -1,0 +1,10 @@
+{
+  "CreateAssetCriticalityRecord": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/asset_criticality"
+    ]
+  }
+}

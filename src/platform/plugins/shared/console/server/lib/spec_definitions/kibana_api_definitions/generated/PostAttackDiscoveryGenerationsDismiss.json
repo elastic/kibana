@@ -1,0 +1,10 @@
+{
+  "PostAttackDiscoveryGenerationsDismiss": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/attack_discovery/generations/{execution_uuid}/_dismiss"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "put-streams-streamname-attachments-attachmenttype-attachmentid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/streams/{streamName}/attachments/{attachmentType}/{attachmentId}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "post-fleet-epm-packages-pkgname-review-upgrade": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/review_upgrade"
+    ]
+  }
+}

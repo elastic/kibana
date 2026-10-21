@@ -1,0 +1,10 @@
+{
+  "post-fleet-health-check": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/health_check"
+    ]
+  }
+}

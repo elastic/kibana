@@ -1,0 +1,10 @@
+{
+  "delete-tags-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/tags/{id}"
+    ]
+  }
+}

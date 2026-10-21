@@ -1,0 +1,10 @@
+{
+  "get-fleet-agent-download-sources": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agent_download_sources"
+    ]
+  }
+}

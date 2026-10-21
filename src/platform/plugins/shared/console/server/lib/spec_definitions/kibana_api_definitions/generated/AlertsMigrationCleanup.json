@@ -1,0 +1,10 @@
+{
+  "AlertsMigrationCleanup": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/detection_engine/signals/migration"
+    ]
+  }
+}

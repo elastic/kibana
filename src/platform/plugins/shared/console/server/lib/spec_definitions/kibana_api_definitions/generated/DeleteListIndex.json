@@ -1,0 +1,10 @@
+{
+  "DeleteListIndex": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/lists/index"
+    ]
+  }
+}

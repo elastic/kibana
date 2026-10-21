@@ -1,0 +1,10 @@
+{
+  "task-manager-health": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/task_manager/_health"
+    ]
+  }
+}

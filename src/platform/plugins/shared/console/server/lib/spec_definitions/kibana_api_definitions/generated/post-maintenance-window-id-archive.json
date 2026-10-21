@@ -1,0 +1,10 @@
+{
+  "post-maintenance-window-id-archive": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/maintenance_window/{id}/_archive"
+    ]
+  }
+}

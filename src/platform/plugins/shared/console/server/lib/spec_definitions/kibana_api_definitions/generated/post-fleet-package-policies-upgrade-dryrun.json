@@ -1,0 +1,10 @@
+{
+  "post-fleet-package-policies-upgrade-dryrun": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/package_policies/upgrade/dryrun"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "post-alerting-rule-id-unmute-all": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/rule/{id}/_unmute_all"
+    ]
+  }
+}

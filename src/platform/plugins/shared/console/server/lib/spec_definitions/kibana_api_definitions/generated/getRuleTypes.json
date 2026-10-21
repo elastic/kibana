@@ -1,0 +1,10 @@
+{
+  "getRuleTypes": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/alerting/rule_types"
+    ]
+  }
+}

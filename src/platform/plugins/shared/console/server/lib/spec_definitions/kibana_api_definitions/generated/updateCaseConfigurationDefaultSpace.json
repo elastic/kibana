@@ -1,0 +1,10 @@
+{
+  "updateCaseConfigurationDefaultSpace": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/cases/configure/{configurationId}"
+    ]
+  }
+}

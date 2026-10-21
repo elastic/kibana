@@ -1,0 +1,10 @@
+{
+  "ReadKnowledgeBase": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/knowledge_base/{resource}"
+    ]
+  }
+}

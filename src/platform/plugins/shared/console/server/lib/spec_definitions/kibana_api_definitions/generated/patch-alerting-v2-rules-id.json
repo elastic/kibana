@@ -1,0 +1,10 @@
+{
+  "patch-alerting-v2-rules-id": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "updateCaseTemplateDefaultSpace": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/cases/templates/{template_id}"
+    ]
+  }
+}

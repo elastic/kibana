@@ -1,0 +1,10 @@
+{
+  "GetEndpointMetadata": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint/metadata/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "createCaseTemplateDefaultSpace": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/cases/templates"
+    ]
+  }
+}

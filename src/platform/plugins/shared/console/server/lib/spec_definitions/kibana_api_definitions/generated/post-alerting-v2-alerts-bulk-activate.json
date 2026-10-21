@@ -1,0 +1,10 @@
+{
+  "post-alerting-v2-alerts-bulk-activate": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/alerts/_bulk_activate"
+    ]
+  }
+}

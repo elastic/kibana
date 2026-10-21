@@ -1,0 +1,10 @@
+{
+  "put-fleet-fleet-server-hosts-itemid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/fleet_server_hosts/{itemId}"
+    ]
+  }
+}

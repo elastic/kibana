@@ -1,0 +1,10 @@
+{
+  "upsert-discover-session": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/discover_sessions/{id}"
+    ]
+  }
+}

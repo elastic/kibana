@@ -1,0 +1,10 @@
+{
+  "delete-logstash-pipeline": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/logstash/pipeline/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "put-private-location": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/synthetics/private_locations/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "post-spaces-update-objects-spaces": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/spaces/_update_objects_spaces"
+    ]
+  }
+}

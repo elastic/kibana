@@ -1,0 +1,10 @@
+{
+  "ScheduleRiskEngineNow": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/risk_score/engine/schedule_now"
+    ]
+  }
+}

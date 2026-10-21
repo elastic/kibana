@@ -1,0 +1,10 @@
+{
+  "get-workflows-workflow-executions": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/workflow/executions"
+    ]
+  }
+}

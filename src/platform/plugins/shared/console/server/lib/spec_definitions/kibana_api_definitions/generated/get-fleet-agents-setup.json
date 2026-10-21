@@ -1,0 +1,10 @@
+{
+  "get-fleet-agents-setup": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agents/setup"
+    ]
+  }
+}

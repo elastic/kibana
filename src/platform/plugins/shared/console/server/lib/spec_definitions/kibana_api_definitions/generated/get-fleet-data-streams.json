@@ -1,0 +1,10 @@
+{
+  "get-fleet-data-streams": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/data_streams"
+    ]
+  }
+}

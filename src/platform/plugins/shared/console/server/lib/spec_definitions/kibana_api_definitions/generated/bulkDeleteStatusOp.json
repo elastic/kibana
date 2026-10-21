@@ -1,0 +1,10 @@
+{
+  "bulkDeleteStatusOp": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "s/{spaceId}/api/observability/slos/_bulk_delete/{taskId}"
+    ]
+  }
+}

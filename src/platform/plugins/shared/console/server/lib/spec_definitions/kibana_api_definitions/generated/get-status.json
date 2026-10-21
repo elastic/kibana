@@ -1,0 +1,10 @@
+{
+  "get-status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/status"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "get-workflows-executions-executionid-step-stepexecutionid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/executions/{executionId}/step/{stepExecutionId}"
+    ]
+  }
+}

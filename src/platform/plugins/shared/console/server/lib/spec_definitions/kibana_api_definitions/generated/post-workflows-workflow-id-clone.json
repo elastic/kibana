@@ -1,0 +1,10 @@
+{
+  "post-workflows-workflow-id-clone": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/workflows/workflow/{id}/clone"
+    ]
+  }
+}

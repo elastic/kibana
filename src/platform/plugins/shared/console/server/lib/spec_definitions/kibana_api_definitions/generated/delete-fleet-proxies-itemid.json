@@ -1,0 +1,10 @@
+{
+  "delete-fleet-proxies-itemid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/proxies/{itemId}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "UpdateWatchlist": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/entity_analytics/watchlists/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "post-spaces-copy-saved-objects": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/spaces/_copy_saved_objects"
+    ]
+  }
+}

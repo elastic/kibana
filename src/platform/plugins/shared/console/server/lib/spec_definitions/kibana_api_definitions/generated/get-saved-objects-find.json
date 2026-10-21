@@ -1,0 +1,10 @@
+{
+  "get-saved-objects-find": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/saved_objects/_find"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "put-fleet-managed-integrations-policyid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/managed_integrations/{policyId}"
+    ]
+  }
+}

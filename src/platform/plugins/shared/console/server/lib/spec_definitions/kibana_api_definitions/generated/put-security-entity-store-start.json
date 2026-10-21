@@ -1,0 +1,10 @@
+{
+  "put-security-entity-store-start": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security/entity_store/start"
+    ]
+  }
+}

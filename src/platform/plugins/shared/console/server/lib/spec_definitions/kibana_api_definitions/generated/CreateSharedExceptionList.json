@@ -1,0 +1,10 @@
+{
+  "CreateSharedExceptionList": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/exceptions/shared"
+    ]
+  }
+}

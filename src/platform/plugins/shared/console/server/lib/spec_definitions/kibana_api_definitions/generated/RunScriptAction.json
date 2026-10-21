@@ -1,0 +1,10 @@
+{
+  "RunScriptAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/action/run_script"
+    ]
+  }
+}

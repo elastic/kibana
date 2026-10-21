@@ -1,0 +1,10 @@
+{
+  "AttackDiscoveryFind": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/attack_discovery/_find"
+    ]
+  }
+}

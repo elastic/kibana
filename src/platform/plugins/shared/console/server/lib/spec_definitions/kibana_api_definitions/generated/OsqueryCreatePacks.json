@@ -1,0 +1,10 @@
+{
+  "OsqueryCreatePacks": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/osquery/packs"
+    ]
+  }
+}

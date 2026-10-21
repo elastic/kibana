@@ -1,0 +1,10 @@
+{
+  "FindAssetCriticalityRecords": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/asset_criticality/list"
+    ]
+  }
+}

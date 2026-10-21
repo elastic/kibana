@@ -1,0 +1,10 @@
+{
+  "UpdateEndpointListItem": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/endpoint_list/items"
+    ]
+  }
+}

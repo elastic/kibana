@@ -1,0 +1,10 @@
+{
+  "get-streams-name-ingest": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/streams/{name}/_ingest"
+    ]
+  }
+}

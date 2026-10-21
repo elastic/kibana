@@ -1,0 +1,10 @@
+{
+  "createAgentKey": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/apm/agent_keys"
+    ]
+  }
+}

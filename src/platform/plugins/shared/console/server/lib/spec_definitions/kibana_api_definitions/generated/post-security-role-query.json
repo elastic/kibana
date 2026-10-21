@@ -1,0 +1,10 @@
+{
+  "post-security-role-query": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security/role/_query"
+    ]
+  }
+}

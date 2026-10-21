@@ -1,0 +1,10 @@
+{
+  "PerformKnowledgeBaseEntryBulkAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/knowledge_base/entries/_bulk_action"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "delete-fleet-outputs-outputid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/outputs/{outputId}"
+    ]
+  }
+}

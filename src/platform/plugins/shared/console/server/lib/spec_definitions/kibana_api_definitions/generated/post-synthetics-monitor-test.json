@@ -1,0 +1,10 @@
+{
+  "post-synthetics-monitor-test": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/synthetics/monitor/test/{monitorId}"
+    ]
+  }
+}

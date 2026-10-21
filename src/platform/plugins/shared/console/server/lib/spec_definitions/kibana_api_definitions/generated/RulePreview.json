@@ -1,0 +1,10 @@
+{
+  "RulePreview": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/detection_engine/rules/preview"
+    ]
+  }
+}

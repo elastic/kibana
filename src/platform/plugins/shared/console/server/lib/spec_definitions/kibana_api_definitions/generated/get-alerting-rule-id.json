@@ -1,0 +1,10 @@
+{
+  "get-alerting-rule-id": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/alerting/rule/{id}"
+    ]
+  }
+}

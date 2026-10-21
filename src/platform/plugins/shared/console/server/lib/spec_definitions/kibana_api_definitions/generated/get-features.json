@@ -1,0 +1,10 @@
+{
+  "get-features": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/features"
+    ]
+  }
+}

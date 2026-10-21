@@ -1,0 +1,10 @@
+{
+  "get-maintenance-window-id": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/maintenance_window/{id}"
+    ]
+  }
+}

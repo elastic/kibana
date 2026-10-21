@@ -1,0 +1,10 @@
+{
+  "InitMonitoringEngine": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/engine/init"
+    ]
+  }
+}

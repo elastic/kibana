@@ -1,0 +1,10 @@
+{
+  "put-spaces-space-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/spaces/space/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "DisableMonitoringEngine": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/engine/disable"
+    ]
+  }
+}

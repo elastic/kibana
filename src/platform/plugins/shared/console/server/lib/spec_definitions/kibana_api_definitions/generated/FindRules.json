@@ -1,0 +1,10 @@
+{
+  "FindRules": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/detection_engine/rules/_find"
+    ]
+  }
+}

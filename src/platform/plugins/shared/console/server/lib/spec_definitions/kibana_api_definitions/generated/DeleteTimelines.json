@@ -1,0 +1,10 @@
+{
+  "DeleteTimelines": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/timeline"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "OsqueryCreateSavedQuery": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/osquery/saved_queries"
+    ]
+  }
+}

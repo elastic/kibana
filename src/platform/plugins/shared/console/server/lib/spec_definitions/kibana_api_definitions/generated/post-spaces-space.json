@@ -1,0 +1,10 @@
+{
+  "post-spaces-space": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/spaces/space"
+    ]
+  }
+}

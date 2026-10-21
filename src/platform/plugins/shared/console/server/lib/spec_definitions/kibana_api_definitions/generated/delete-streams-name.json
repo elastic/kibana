@@ -1,0 +1,10 @@
+{
+  "delete-streams-name": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/streams/{name}"
+    ]
+  }
+}

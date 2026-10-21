@@ -1,0 +1,10 @@
+{
+  "PatchRule": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/detection_engine/rules"
+    ]
+  }
+}

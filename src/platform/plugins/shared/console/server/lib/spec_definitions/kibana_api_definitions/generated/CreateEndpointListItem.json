@@ -1,0 +1,10 @@
+{
+  "CreateEndpointListItem": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint_list/items"
+    ]
+  }
+}

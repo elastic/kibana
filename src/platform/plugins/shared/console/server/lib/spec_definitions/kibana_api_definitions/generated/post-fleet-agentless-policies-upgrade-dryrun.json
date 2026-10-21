@@ -1,0 +1,10 @@
+{
+  "post-fleet-agentless-policies-upgrade-dryrun": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agentless_policies/_upgrade/dryrun"
+    ]
+  }
+}

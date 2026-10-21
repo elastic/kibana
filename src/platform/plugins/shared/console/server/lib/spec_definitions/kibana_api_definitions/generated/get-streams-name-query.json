@@ -1,0 +1,10 @@
+{
+  "get-streams-name-query": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/streams/{name}/_query"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "updateSloOp": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "s/{spaceId}/api/observability/slos/{sloId}"
+    ]
+  }
+}

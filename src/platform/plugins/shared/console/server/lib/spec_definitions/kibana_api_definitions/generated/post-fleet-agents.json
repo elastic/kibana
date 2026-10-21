@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents"
+    ]
+  }
+}

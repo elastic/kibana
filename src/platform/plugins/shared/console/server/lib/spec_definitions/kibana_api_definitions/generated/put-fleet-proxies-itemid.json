@@ -1,0 +1,10 @@
+{
+  "put-fleet-proxies-itemid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/proxies/{itemId}"
+    ]
+  }
+}

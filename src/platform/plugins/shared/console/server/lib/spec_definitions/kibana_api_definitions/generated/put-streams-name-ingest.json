@@ -1,0 +1,10 @@
+{
+  "put-streams-name-ingest": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/streams/{name}/_ingest"
+    ]
+  }
+}

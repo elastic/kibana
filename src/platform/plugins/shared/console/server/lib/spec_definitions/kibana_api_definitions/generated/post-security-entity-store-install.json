@@ -1,0 +1,10 @@
+{
+  "post-security-entity-store-install": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security/entity_store/install"
+    ]
+  }
+}

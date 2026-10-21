@@ -1,0 +1,10 @@
+{
+  "post-private-location": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/synthetics/private_locations"
+    ]
+  }
+}

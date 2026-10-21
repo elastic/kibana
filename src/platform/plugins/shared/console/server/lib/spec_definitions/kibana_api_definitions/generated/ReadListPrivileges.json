@@ -1,0 +1,10 @@
+{
+  "ReadListPrivileges": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/lists/privileges"
+    ]
+  }
+}

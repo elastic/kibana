@@ -1,0 +1,10 @@
+{
+  "findCaseCommentsDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/comments/_find"
+    ]
+  }
+}

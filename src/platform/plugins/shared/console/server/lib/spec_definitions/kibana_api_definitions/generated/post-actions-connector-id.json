@@ -1,0 +1,10 @@
+{
+  "post-actions-connector-id": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/actions/connector/{id}"
+    ]
+  }
+}

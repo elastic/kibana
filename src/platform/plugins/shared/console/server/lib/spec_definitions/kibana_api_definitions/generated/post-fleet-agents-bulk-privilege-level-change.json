@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents-bulk-privilege-level-change": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/bulk_privilege_level_change"
+    ]
+  }
+}

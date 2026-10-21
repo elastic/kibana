@@ -1,0 +1,10 @@
+{
+  "upsert-dashboard": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/dashboards/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "addCaseCommentDefaultSpace": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/comments"
+    ]
+  }
+}

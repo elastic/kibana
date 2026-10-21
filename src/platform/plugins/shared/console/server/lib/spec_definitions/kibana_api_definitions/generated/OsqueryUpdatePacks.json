@@ -1,0 +1,10 @@
+{
+  "OsqueryUpdatePacks": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/osquery/packs/{id}"
+    ]
+  }
+}

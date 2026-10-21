@@ -1,0 +1,10 @@
+{
+  "GetRiskScoreHistory": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/risk_score/history"
+    ]
+  }
+}

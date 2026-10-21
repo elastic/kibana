@@ -1,0 +1,10 @@
+{
+  "delete-fleet-agentless-policies-policyid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/agentless_policies/{policyId}"
+    ]
+  }
+}

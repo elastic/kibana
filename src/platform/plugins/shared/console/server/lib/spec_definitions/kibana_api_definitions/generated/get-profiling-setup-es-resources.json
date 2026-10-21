@@ -1,0 +1,10 @@
+{
+  "get-profiling-setup-es-resources": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/profiling/setup/es_resources"
+    ]
+  }
+}

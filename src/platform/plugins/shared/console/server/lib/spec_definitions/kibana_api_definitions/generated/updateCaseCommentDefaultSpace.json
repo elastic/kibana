@@ -1,0 +1,10 @@
+{
+  "updateCaseCommentDefaultSpace": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/comments"
+    ]
+  }
+}

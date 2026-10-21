@@ -1,0 +1,10 @@
+{
+  "FindKnowledgeBaseEntries": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/knowledge_base/entries/_find"
+    ]
+  }
+}

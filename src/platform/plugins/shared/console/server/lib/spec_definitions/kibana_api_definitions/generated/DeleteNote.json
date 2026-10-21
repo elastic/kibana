@@ -1,0 +1,10 @@
+{
+  "DeleteNote": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/note"
+    ]
+  }
+}

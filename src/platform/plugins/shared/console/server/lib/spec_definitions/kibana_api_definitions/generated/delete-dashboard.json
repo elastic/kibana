@@ -1,0 +1,10 @@
+{
+  "delete-dashboard": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/dashboards/{id}"
+    ]
+  }
+}

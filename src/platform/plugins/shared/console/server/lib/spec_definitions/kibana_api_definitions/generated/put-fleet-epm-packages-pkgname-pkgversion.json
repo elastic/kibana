@@ -1,0 +1,10 @@
+{
+  "put-fleet-epm-packages-pkgname-pkgversion": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/{pkgVersion}"
+    ]
+  }
+}

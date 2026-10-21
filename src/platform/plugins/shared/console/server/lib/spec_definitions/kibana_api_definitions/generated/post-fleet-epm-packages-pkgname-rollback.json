@@ -1,0 +1,10 @@
+{
+  "post-fleet-epm-packages-pkgname-rollback": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/rollback"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "OsqueryDeleteSavedQuery": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/osquery/saved_queries/{id}"
+    ]
+  }
+}

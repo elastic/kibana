@@ -1,0 +1,10 @@
+{
+  "post-streams-name-fork": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/streams/{name}/_fork"
+    ]
+  }
+}

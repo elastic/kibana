@@ -1,0 +1,10 @@
+{
+  "get-fleet-cloud-onboarding-deployments-id": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/cloud_onboarding_deployments/{id}"
+    ]
+  }
+}

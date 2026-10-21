@@ -1,0 +1,10 @@
+{
+  "AssignWatchlistEntities": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/watchlists/{watchlist_id}/entities/assign"
+    ]
+  }
+}

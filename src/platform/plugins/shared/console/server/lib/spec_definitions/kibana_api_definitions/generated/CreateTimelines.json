@@ -1,0 +1,10 @@
+{
+  "CreateTimelines": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/timeline"
+    ]
+  }
+}

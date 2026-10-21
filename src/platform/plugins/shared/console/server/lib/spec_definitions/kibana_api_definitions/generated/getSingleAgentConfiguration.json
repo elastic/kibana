@@ -1,0 +1,10 @@
+{
+  "getSingleAgentConfiguration": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/apm/settings/agent-configuration/view"
+    ]
+  }
+}

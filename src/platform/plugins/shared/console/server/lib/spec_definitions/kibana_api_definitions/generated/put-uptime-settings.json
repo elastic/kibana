@@ -1,0 +1,10 @@
+{
+  "put-uptime-settings": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/uptime/settings"
+    ]
+  }
+}

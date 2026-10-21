@@ -1,0 +1,10 @@
+{
+  "post-security-entity-store-entities-entitytype": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security/entity_store/entities/{entityType}"
+    ]
+  }
+}

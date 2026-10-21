@@ -1,0 +1,10 @@
+{
+  "delete-agent-builder-conversations-conversation-id-attachments-attachment-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}"
+    ]
+  }
+}

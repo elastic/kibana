@@ -1,0 +1,10 @@
+{
+  "get-data-views-v2": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/data_views/v2"
+    ]
+  }
+}

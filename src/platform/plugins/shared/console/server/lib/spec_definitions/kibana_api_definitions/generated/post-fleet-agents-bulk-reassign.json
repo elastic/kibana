@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents-bulk-reassign": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/bulk_reassign"
+    ]
+  }
+}

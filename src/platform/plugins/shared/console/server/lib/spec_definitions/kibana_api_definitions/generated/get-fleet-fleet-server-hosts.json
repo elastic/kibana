@@ -1,0 +1,10 @@
+{
+  "get-fleet-fleet-server-hosts": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/fleet_server_hosts"
+    ]
+  }
+}

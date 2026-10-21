@@ -1,0 +1,10 @@
+{
+  "put-agent-builder-agents-id-access-control": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/agent_builder/agents/{id}/access_control"
+    ]
+  }
+}

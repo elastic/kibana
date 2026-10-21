@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents-bulk-remove-collectors": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/bulk_remove_collectors"
+    ]
+  }
+}

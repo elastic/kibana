@@ -1,0 +1,10 @@
+{
+  "get-fleet-agents-agentid-uploads": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}/uploads"
+    ]
+  }
+}

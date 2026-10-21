@@ -1,0 +1,10 @@
+{
+  "delete-fleet-agents-files-fileid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/agents/files/{fileId}"
+    ]
+  }
+}

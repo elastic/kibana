@@ -1,0 +1,10 @@
+{
+  "get-fleet-epm-verification-key-id": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/verification_key_id"
+    ]
+  }
+}

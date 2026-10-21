@@ -1,0 +1,10 @@
+{
+  "get-agent-builder-a2a-agentid.json": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/agent_builder/a2a/{agentId}.json"
+    ]
+  }
+}

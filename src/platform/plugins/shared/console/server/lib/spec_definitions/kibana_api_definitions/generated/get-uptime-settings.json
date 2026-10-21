@@ -1,0 +1,10 @@
+{
+  "get-uptime-settings": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/uptime/settings"
+    ]
+  }
+}

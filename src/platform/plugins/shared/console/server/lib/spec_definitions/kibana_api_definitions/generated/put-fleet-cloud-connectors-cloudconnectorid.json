@@ -1,0 +1,10 @@
+{
+  "put-fleet-cloud-connectors-cloudconnectorid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/cloud_connectors/{cloudConnectorId}"
+    ]
+  }
+}

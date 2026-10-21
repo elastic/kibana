@@ -1,0 +1,10 @@
+{
+  "get-workflows-executions-executionid-logs": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/executions/{executionId}/logs"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "PersistFavoriteRoute": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/timeline/_favorite"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "bulkDeleteOp": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "s/{spaceId}/api/observability/slos/_bulk_delete"
+    ]
+  }
+}

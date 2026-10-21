@@ -1,0 +1,10 @@
+{
+  "put-fleet-agents-agentid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}"
+    ]
+  }
+}

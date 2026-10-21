@@ -1,0 +1,10 @@
+{
+  "DeleteEndpointListItem": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/endpoint_list/items"
+    ]
+  }
+}

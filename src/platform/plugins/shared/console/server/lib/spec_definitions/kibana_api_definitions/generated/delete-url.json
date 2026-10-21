@@ -1,0 +1,10 @@
+{
+  "delete-url": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/short_url/{id}"
+    ]
+  }
+}

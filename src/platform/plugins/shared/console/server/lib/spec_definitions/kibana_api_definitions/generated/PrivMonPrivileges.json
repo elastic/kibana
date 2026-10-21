@@ -1,0 +1,10 @@
+{
+  "PrivMonPrivileges": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/privileges/privileges"
+    ]
+  }
+}

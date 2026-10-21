@@ -1,0 +1,10 @@
+{
+  "get-discover-session": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/discover_sessions/{id}"
+    ]
+  }
+}

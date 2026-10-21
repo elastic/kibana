@@ -1,0 +1,10 @@
+{
+  "delete-fleet-epm-packages-pkgname": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}"
+    ]
+  }
+}

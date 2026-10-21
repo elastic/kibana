@@ -1,0 +1,10 @@
+{
+  "saveApmServerSchema": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/apm/fleet/apm_server_schema"
+    ]
+  }
+}

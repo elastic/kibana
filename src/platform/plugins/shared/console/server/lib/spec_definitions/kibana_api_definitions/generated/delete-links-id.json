@@ -1,0 +1,10 @@
+{
+  "delete-links-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/links/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "delete-spaces-space-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/spaces/space/{id}"
+    ]
+  }
+}

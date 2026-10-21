@@ -1,0 +1,10 @@
+{
+  "EndpointExecuteAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/action/execute"
+    ]
+  }
+}

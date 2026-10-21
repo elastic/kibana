@@ -1,0 +1,10 @@
+{
+  "get-fleet-epm-templates-pkgname-pkgversion-inputs": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs"
+    ]
+  }
+}

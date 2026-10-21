@@ -1,0 +1,10 @@
+{
+  "EndpointFileInfo": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint/action/{action_id}/file/{file_id}"
+    ]
+  }
+}

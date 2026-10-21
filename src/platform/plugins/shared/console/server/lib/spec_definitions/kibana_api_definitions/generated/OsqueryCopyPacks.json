@@ -1,0 +1,10 @@
+{
+  "OsqueryCopyPacks": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/osquery/packs/{id}/copy"
+    ]
+  }
+}

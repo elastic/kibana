@@ -1,0 +1,10 @@
+{
+  "delete-visualization": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/visualizations/{id}"
+    ]
+  }
+}

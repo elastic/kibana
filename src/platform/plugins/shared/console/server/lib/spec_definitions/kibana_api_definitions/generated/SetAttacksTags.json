@@ -1,0 +1,10 @@
+{
+  "SetAttacksTags": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/detection_engine/attacks/tags"
+    ]
+  }
+}

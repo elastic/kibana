@@ -1,0 +1,10 @@
+{
+  "EndpointScriptLibraryListScripts": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint/scripts_library"
+    ]
+  }
+}

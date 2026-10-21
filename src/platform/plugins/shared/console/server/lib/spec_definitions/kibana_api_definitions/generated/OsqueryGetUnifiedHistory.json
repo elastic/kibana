@@ -1,0 +1,10 @@
+{
+  "OsqueryGetUnifiedHistory": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/osquery/history"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "GetAttackDiscoverySchedules": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/attack_discovery/schedules/{id}"
+    ]
+  }
+}

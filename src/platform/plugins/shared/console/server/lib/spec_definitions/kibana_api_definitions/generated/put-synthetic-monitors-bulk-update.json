@@ -1,0 +1,10 @@
+{
+  "put-synthetic-monitors-bulk-update": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/synthetics/monitors/_bulk_update"
+    ]
+  }
+}

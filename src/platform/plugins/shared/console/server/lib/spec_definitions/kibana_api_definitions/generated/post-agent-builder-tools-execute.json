@@ -1,0 +1,10 @@
+{
+  "post-agent-builder-tools-execute": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/tools/_execute"
+    ]
+  }
+}

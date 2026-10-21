@@ -1,0 +1,10 @@
+{
+  "delete-fleet-epm-packages-pkgname-pkgversion-kibana-assets": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "get-fleet-outputs-outputid-health": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/outputs/{outputId}/health"
+    ]
+  }
+}

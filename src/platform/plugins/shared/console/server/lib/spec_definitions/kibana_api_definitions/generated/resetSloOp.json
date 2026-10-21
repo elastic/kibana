@@ -1,0 +1,10 @@
+{
+  "resetSloOp": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "s/{spaceId}/api/observability/slos/{sloId}/_reset"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "delete-private-location": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/synthetics/private_locations/{id}"
+    ]
+  }
+}

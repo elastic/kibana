@@ -1,0 +1,10 @@
+{
+  "EndpointSuspendProcessAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/action/suspend_process"
+    ]
+  }
+}

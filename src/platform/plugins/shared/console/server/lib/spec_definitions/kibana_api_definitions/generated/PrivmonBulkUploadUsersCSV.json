@@ -1,0 +1,10 @@
+{
+  "PrivmonBulkUploadUsersCSV": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/users/_csv"
+    ]
+  }
+}

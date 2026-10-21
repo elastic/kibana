@@ -1,0 +1,10 @@
+{
+  "delete-alerting-rules-backfill-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/alerting/rules/backfill/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "PerformPromptsBulkAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/prompts/_bulk_action"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "SetAlertsStatus": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/detection_engine/signals/status"
+    ]
+  }
+}

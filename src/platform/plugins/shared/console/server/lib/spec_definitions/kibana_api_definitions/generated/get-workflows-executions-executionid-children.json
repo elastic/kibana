@@ -1,0 +1,10 @@
+{
+  "get-workflows-executions-executionid-children": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/executions/{executionId}/children"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "post-streams-resync": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/streams/_resync"
+    ]
+  }
+}

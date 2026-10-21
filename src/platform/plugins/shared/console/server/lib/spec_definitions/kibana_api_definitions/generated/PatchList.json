@@ -1,0 +1,10 @@
+{
+  "PatchList": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/lists"
+    ]
+  }
+}

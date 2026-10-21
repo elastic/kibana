@@ -1,0 +1,10 @@
+{
+  "post-alerting-v2-action-policies-bulk-disable": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/action_policies/_bulk_disable"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "search-discover-sessions": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/discover_sessions"
+    ]
+  }
+}

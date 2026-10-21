@@ -1,0 +1,10 @@
+{
+  "PersistNoteRoute": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/note"
+    ]
+  }
+}

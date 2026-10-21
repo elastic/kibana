@@ -1,0 +1,10 @@
+{
+  "put-fleet-epm-custom-integrations-pkgname": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/fleet/epm/custom_integrations/{pkgName}"
+    ]
+  }
+}

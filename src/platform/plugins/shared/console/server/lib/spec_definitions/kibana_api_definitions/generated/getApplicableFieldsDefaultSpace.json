@@ -1,0 +1,10 @@
+{
+  "getApplicableFieldsDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/fields"
+    ]
+  }
+}

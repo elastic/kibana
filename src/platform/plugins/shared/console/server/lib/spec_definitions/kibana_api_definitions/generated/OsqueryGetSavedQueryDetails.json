@@ -1,0 +1,10 @@
+{
+  "OsqueryGetSavedQueryDetails": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/osquery/saved_queries/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "ExportTimelines": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/timeline/_export"
+    ]
+  }
+}

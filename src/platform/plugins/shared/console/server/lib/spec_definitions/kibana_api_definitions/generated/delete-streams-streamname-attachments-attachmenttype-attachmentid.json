@@ -1,0 +1,10 @@
+{
+  "delete-streams-streamname-attachments-attachmenttype-attachmentid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/streams/{streamName}/attachments/{attachmentType}/{attachmentId}"
+    ]
+  }
+}

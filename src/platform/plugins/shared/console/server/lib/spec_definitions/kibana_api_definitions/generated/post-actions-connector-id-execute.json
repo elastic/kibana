@@ -1,0 +1,10 @@
+{
+  "post-actions-connector-id-execute": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/actions/connector/{id}/_execute"
+    ]
+  }
+}

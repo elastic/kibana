@@ -1,0 +1,10 @@
+{
+  "PrivMonHealth": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/privileges/health"
+    ]
+  }
+}

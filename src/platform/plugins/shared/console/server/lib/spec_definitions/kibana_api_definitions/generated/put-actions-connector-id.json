@@ -1,0 +1,10 @@
+{
+  "put-actions-connector-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/actions/connector/{id}"
+    ]
+  }
+}

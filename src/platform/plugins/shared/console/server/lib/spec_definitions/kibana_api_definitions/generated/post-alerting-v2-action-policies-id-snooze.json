@@ -1,0 +1,10 @@
+{
+  "post-alerting-v2-action-policies-id-snooze": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/action_policies/{id}/_snooze"
+    ]
+  }
+}

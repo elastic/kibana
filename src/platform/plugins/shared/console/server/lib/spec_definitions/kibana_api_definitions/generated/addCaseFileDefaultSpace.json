@@ -1,0 +1,10 @@
+{
+  "addCaseFileDefaultSpace": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/files"
+    ]
+  }
+}

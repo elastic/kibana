@@ -1,0 +1,10 @@
+{
+  "upsert-visualization": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/visualizations/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "put-logstash-pipeline": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/logstash/pipeline/{id}"
+    ]
+  }
+}

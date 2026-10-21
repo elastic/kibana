@@ -1,0 +1,10 @@
+{
+  "EndpointKillProcessAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/action/kill_process"
+    ]
+  }
+}

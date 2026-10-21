@@ -1,0 +1,10 @@
+{
+  "put-streams-name-query": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/streams/{name}/_query"
+    ]
+  }
+}

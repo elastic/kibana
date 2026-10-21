@@ -1,0 +1,10 @@
+{
+  "post-fleet-logstash-api-keys": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/logstash_api_keys"
+    ]
+  }
+}

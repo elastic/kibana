@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents-agentid-rollback": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}/rollback"
+    ]
+  }
+}

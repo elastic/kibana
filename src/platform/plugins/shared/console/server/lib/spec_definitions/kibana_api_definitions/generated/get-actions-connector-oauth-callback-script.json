@@ -1,0 +1,10 @@
+{
+  "get-actions-connector-oauth-callback-script": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/actions/connector/_oauth_callback_script"
+    ]
+  }
+}

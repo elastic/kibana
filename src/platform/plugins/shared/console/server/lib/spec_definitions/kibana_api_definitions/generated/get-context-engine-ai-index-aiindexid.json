@@ -1,0 +1,10 @@
+{
+  "get-context-engine-ai-index-aiindexid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/context_engine/ai_index/{aiIndexId}"
+    ]
+  }
+}

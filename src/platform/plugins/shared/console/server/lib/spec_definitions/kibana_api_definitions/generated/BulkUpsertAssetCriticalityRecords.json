@@ -1,0 +1,10 @@
+{
+  "BulkUpsertAssetCriticalityRecords": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/asset_criticality/bulk"
+    ]
+  }
+}

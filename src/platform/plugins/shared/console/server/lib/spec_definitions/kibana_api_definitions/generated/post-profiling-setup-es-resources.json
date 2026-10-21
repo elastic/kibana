@@ -1,0 +1,10 @@
+{
+  "post-profiling-setup-es-resources": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/profiling/setup/es_resources"
+    ]
+  }
+}

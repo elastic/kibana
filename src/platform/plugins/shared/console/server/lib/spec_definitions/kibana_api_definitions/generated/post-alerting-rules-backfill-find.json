@@ -1,0 +1,10 @@
+{
+  "post-alerting-rules-backfill-find": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/rules/backfill/_find"
+    ]
+  }
+}

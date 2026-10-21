@@ -1,0 +1,10 @@
+{
+  "post-fleet-epm-packages-bulk": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/_bulk"
+    ]
+  }
+}

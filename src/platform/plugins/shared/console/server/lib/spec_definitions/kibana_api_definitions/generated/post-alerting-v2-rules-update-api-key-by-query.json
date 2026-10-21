@@ -1,0 +1,10 @@
+{
+  "post-alerting-v2-rules-update-api-key-by-query": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules/_update_api_key_by_query"
+    ]
+  }
+}

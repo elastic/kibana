@@ -1,0 +1,10 @@
+{
+  "post-markdowns": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/markdowns"
+    ]
+  }
+}

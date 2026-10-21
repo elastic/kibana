@@ -1,0 +1,10 @@
+{
+  "put-security-entity-store-history-snapshot-enable": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security/entity_store/history_snapshot/enable"
+    ]
+  }
+}

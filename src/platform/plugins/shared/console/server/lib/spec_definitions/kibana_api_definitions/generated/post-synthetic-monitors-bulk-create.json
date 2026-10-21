@@ -1,0 +1,10 @@
+{
+  "post-synthetic-monitors-bulk-create": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/synthetics/monitors/_bulk_create"
+    ]
+  }
+}

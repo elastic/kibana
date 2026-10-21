@@ -1,0 +1,10 @@
+{
+  "post-streams-enable": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/streams/_enable"
+    ]
+  }
+}

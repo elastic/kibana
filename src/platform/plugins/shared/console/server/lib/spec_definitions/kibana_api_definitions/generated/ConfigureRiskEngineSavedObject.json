@@ -1,0 +1,10 @@
+{
+  "ConfigureRiskEngineSavedObject": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/risk_score/engine/saved_object/configure"
+    ]
+  }
+}

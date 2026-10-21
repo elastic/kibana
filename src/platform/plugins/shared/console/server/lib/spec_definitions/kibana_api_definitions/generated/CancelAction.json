@@ -1,0 +1,10 @@
+{
+  "CancelAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/action/cancel"
+    ]
+  }
+}

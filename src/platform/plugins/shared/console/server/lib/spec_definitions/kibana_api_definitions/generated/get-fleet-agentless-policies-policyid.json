@@ -1,0 +1,10 @@
+{
+  "get-fleet-agentless-policies-policyid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agentless_policies/{policyId}"
+    ]
+  }
+}

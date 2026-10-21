@@ -1,0 +1,10 @@
+{
+  "ListPrivMonUsers": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/users/list"
+    ]
+  }
+}

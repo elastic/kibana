@@ -1,0 +1,10 @@
+{
+  "put-agent-builder-conversations-conversation-id-access-control": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/agent_builder/conversations/{conversation_id}/access_control"
+    ]
+  }
+}

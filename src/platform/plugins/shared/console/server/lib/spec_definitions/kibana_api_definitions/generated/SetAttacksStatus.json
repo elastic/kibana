@@ -1,0 +1,10 @@
+{
+  "SetAttacksStatus": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/detection_engine/attacks/status"
+    ]
+  }
+}

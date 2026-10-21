@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents-bulk-restart": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/bulk_restart"
+    ]
+  }
+}

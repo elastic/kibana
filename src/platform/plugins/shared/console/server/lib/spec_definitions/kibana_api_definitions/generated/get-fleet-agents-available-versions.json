@@ -1,0 +1,10 @@
+{
+  "get-fleet-agents-available-versions": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agents/available_versions"
+    ]
+  }
+}

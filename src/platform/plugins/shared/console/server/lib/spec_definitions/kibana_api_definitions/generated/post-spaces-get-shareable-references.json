@@ -1,0 +1,10 @@
+{
+  "post-spaces-get-shareable-references": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/spaces/_get_shareable_references"
+    ]
+  }
+}

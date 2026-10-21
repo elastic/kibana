@@ -1,0 +1,10 @@
+{
+  "post-fleet-agentless-policies-upgrade": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agentless_policies/_upgrade"
+    ]
+  }
+}

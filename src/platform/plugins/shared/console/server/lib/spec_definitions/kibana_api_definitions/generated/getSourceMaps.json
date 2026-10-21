@@ -1,0 +1,10 @@
+{
+  "getSourceMaps": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/apm/sourcemaps"
+    ]
+  }
+}

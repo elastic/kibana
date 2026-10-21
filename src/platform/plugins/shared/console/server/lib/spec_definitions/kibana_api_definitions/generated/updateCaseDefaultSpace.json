@@ -1,0 +1,10 @@
+{
+  "updateCaseDefaultSpace": {
+    "methods": [
+      "PATCH"
+    ],
+    "patterns": [
+      "api/cases"
+    ]
+  }
+}

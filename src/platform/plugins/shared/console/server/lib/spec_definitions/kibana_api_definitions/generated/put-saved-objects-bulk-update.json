@@ -1,0 +1,10 @@
+{
+  "put-saved-objects-bulk-update": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/saved_objects/_bulk_update"
+    ]
+  }
+}

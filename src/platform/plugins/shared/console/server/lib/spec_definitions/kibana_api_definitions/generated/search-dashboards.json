@@ -1,0 +1,10 @@
+{
+  "search-dashboards": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/dashboards"
+    ]
+  }
+}

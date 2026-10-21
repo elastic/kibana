@@ -1,0 +1,10 @@
+{
+  "deleteCaseCommentsDefaultSpace": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/comments"
+    ]
+  }
+}

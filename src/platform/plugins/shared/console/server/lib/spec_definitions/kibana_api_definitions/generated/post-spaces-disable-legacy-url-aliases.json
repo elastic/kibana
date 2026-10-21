@@ -1,0 +1,10 @@
+{
+  "post-spaces-disable-legacy-url-aliases": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/spaces/_disable_legacy_url_aliases"
+    ]
+  }
+}

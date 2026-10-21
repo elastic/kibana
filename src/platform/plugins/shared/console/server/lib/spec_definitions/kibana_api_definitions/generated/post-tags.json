@@ -1,0 +1,10 @@
+{
+  "post-tags": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/tags"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "ReadExceptionListItem": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/exception_lists/items"
+    ]
+  }
+}

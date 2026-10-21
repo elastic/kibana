@@ -1,0 +1,10 @@
+{
+  "get-fleet-managed-integrations-policyid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/managed_integrations/{policyId}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "get-fleet-enrollment-api-keys-keyid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/enrollment_api_keys/{keyId}"
+    ]
+  }
+}

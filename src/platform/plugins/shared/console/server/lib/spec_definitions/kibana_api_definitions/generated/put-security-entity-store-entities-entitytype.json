@@ -1,0 +1,10 @@
+{
+  "put-security-entity-store-entities-entitytype": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security/entity_store/entities/{entityType}"
+    ]
+  }
+}

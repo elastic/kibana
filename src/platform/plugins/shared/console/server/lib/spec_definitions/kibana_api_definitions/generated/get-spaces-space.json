@@ -1,0 +1,10 @@
+{
+  "get-spaces-space": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/spaces/space"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "OsqueryFindSavedQueries": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/osquery/saved_queries"
+    ]
+  }
+}

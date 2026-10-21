@@ -1,0 +1,10 @@
+{
+  "get-fleet-agent-policies-agentpolicyid-outputs": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agent_policies/{agentPolicyId}/outputs"
+    ]
+  }
+}

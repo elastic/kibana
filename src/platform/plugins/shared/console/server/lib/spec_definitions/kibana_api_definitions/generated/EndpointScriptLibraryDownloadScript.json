@@ -1,0 +1,10 @@
+{
+  "EndpointScriptLibraryDownloadScript": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint/scripts_library/{script_id}/download"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "post-fleet-package-policies": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/package_policies"
+    ]
+  }
+}

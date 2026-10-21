@@ -1,0 +1,10 @@
+{
+  "delete-security-entity-store-entities": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/security/entity_store/entities/"
+    ]
+  }
+}

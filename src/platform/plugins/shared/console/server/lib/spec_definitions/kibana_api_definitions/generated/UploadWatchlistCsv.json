@@ -1,0 +1,10 @@
+{
+  "UploadWatchlistCsv": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/watchlists/{watchlist_id}/csv_upload"
+    ]
+  }
+}

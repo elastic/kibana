@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents-agentid-reassign": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}/reassign"
+    ]
+  }
+}

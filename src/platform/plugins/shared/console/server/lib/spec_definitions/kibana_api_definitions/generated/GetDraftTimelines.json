@@ -1,0 +1,10 @@
+{
+  "GetDraftTimelines": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/timeline/_draft"
+    ]
+  }
+}

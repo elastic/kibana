@@ -1,0 +1,10 @@
+{
+  "UpdateRule": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/detection_engine/rules"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "OsqueryGetScheduledQueryResults": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/osquery/scheduled_results/{scheduleId}/{executionCount}/results"
+    ]
+  }
+}

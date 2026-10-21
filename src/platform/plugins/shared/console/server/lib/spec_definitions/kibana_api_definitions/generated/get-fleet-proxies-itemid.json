@@ -1,0 +1,10 @@
+{
+  "get-fleet-proxies-itemid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/proxies/{itemId}"
+    ]
+  }
+}

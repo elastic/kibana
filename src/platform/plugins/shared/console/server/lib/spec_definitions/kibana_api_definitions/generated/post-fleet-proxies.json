@@ -1,0 +1,10 @@
+{
+  "post-fleet-proxies": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/proxies"
+    ]
+  }
+}

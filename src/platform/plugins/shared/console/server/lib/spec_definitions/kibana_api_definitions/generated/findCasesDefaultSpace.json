@@ -1,0 +1,10 @@
+{
+  "findCasesDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/_find"
+    ]
+  }
+}

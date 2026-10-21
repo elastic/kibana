@@ -1,0 +1,10 @@
+{
+  "EndpointGetProcessesAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/action/running_procs"
+    ]
+  }
+}

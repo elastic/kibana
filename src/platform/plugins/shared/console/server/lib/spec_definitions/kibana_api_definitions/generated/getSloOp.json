@@ -1,0 +1,10 @@
+{
+  "getSloOp": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "s/{spaceId}/api/observability/slos/{sloId}"
+    ]
+  }
+}

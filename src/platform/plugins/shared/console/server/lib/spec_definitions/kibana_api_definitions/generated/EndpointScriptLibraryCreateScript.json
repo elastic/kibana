@@ -1,0 +1,10 @@
+{
+  "EndpointScriptLibraryCreateScript": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/scripts_library"
+    ]
+  }
+}

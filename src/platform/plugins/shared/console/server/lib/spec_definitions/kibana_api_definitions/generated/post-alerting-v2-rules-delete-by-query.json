@@ -1,0 +1,10 @@
+{
+  "post-alerting-v2-rules-delete-by-query": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules/_delete_by_query"
+    ]
+  }
+}

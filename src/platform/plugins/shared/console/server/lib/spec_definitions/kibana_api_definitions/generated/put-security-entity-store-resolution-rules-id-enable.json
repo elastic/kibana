@@ -1,0 +1,10 @@
+{
+  "put-security-entity-store-resolution-rules-id-enable": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security/entity_store/resolution/rules/{id}/enable"
+    ]
+  }
+}

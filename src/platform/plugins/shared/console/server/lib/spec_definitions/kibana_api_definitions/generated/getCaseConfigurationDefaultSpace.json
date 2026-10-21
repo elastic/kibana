@@ -1,0 +1,10 @@
+{
+  "getCaseConfigurationDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/configure"
+    ]
+  }
+}

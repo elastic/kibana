@@ -1,0 +1,10 @@
+{
+  "post-fleet-agent-policies-bulk-get": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agent_policies/_bulk_get"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "post-alerting-rule-id": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/rule/{id}"
+    ]
+  }
+}

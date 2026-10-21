@@ -1,0 +1,10 @@
+{
+  "put-agent-builder-skills-skillid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/agent_builder/skills/{skillId}"
+    ]
+  }
+}

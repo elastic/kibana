@@ -1,0 +1,10 @@
+{
+  "put-agent-builder-tools-toolid": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/agent_builder/tools/{toolId}"
+    ]
+  }
+}

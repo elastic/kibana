@@ -1,0 +1,10 @@
+{
+  "delete-data-views-v2-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/data_views/v2/{id}"
+    ]
+  }
+}

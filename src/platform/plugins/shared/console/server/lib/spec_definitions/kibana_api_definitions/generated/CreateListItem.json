@@ -1,0 +1,10 @@
+{
+  "CreateListItem": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/lists/items"
+    ]
+  }
+}

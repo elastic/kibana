@@ -1,0 +1,10 @@
+{
+  "post-streams-streamname-attachments-bulk": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/streams/{streamName}/attachments/_bulk"
+    ]
+  }
+}

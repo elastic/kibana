@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents-bulk-rollback": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/bulk_rollback"
+    ]
+  }
+}

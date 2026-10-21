@@ -1,0 +1,10 @@
+{
+  "get-maintenance-window-find": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/maintenance_window/_find"
+    ]
+  }
+}

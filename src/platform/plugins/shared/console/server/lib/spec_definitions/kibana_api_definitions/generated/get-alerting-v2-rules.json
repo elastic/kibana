@@ -1,0 +1,10 @@
+{
+  "get-alerting-v2-rules": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/alerting/v2/rules"
+    ]
+  }
+}

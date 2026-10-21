@@ -1,0 +1,10 @@
+{
+  "post-fleet-agents-bulk-update-agent-tags": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/agents/bulk_update_agent_tags"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "delete-fleet-managed-integrations-policyid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/managed_integrations/{policyId}"
+    ]
+  }
+}

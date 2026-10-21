@@ -1,0 +1,10 @@
+{
+  "FindConversations": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/current_user/conversations/_find"
+    ]
+  }
+}

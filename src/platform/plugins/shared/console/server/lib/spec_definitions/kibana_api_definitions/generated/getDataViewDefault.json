@@ -1,0 +1,10 @@
+{
+  "getDataViewDefault": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/data_views/data_view/{viewId}"
+    ]
+  }
+}

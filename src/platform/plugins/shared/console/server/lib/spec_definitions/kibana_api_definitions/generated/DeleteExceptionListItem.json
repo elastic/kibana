@@ -1,0 +1,10 @@
+{
+  "DeleteExceptionListItem": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/exception_lists/items"
+    ]
+  }
+}

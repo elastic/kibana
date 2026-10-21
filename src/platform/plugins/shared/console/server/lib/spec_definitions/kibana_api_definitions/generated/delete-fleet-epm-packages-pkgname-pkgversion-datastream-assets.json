@@ -1,0 +1,10 @@
+{
+  "delete-fleet-epm-packages-pkgname-pkgversion-datastream-assets": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/{pkgVersion}/datastream_assets"
+    ]
+  }
+}

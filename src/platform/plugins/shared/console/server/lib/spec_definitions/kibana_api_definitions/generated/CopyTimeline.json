@@ -1,0 +1,10 @@
+{
+  "CopyTimeline": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/timeline/_copy"
+    ]
+  }
+}

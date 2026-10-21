@@ -1,0 +1,10 @@
+{
+  "post-fleet-setup": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/setup"
+    ]
+  }
+}

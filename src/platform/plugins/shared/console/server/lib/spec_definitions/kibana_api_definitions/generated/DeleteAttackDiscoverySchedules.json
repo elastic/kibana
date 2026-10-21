@@ -1,0 +1,10 @@
+{
+  "DeleteAttackDiscoverySchedules": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/attack_discovery/schedules/{id}"
+    ]
+  }
+}

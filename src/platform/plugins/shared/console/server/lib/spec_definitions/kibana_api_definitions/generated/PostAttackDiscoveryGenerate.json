@@ -1,0 +1,10 @@
+{
+  "PostAttackDiscoveryGenerate": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/attack_discovery/_generate"
+    ]
+  }
+}

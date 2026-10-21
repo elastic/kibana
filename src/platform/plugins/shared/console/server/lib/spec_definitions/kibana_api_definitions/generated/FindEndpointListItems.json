@@ -1,0 +1,10 @@
+{
+  "FindEndpointListItems": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/endpoint_list/items/_find"
+    ]
+  }
+}

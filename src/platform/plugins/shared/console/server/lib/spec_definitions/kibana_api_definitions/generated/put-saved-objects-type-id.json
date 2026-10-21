@@ -1,0 +1,10 @@
+{
+  "put-saved-objects-type-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/saved_objects/{type}/{id}"
+    ]
+  }
+}

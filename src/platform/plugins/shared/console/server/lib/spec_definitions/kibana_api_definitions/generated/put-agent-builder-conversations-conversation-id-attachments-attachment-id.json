@@ -1,0 +1,10 @@
+{
+  "put-agent-builder-conversations-conversation-id-attachments-attachment-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/agent_builder/conversations/{conversation_id}/attachments/{attachment_id}"
+    ]
+  }
+}

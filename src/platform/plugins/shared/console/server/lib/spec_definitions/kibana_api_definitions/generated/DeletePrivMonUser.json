@@ -1,0 +1,10 @@
+{
+  "DeletePrivMonUser": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/entity_analytics/monitoring/users/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "getDefinitionsOp": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "s/{spaceId}/internal/observability/slos/_definitions"
+    ]
+  }
+}

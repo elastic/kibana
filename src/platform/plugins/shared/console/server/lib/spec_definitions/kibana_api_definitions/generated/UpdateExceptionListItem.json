@@ -1,0 +1,10 @@
+{
+  "UpdateExceptionListItem": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/exception_lists/items"
+    ]
+  }
+}

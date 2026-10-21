@@ -1,0 +1,10 @@
+{
+  "get-streams": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/streams"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "post-fleet-epm-packages": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages"
+    ]
+  }
+}

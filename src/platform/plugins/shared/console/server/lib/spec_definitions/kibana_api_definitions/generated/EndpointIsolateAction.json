@@ -1,0 +1,10 @@
+{
+  "EndpointIsolateAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/action/isolate"
+    ]
+  }
+}

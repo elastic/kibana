@@ -1,0 +1,10 @@
+{
+  "CreateAttackDiscoverySchedules": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/attack_discovery/schedules"
+    ]
+  }
+}

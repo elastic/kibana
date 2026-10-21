@@ -1,0 +1,10 @@
+{
+  "post-fleet-cloud-connectors": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/cloud_connectors"
+    ]
+  }
+}

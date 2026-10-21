@@ -1,0 +1,10 @@
+{
+  "post-alerting-v2-alerts-id-unack": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/v2/alerts/{id}/_unack"
+    ]
+  }
+}

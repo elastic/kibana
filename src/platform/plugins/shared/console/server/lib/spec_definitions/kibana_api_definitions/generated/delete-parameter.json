@@ -1,0 +1,10 @@
+{
+  "delete-parameter": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/synthetics/params/{id}"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "get-fleet-agents-agentid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agents/{agentId}"
+    ]
+  }
+}

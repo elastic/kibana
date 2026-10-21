@@ -1,0 +1,10 @@
+{
+  "delete-saved-objects-type-id": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/saved_objects/{type}/{id}"
+    ]
+  }
+}

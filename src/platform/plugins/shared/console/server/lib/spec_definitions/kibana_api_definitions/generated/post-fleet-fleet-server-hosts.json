@@ -1,0 +1,10 @@
+{
+  "post-fleet-fleet-server-hosts": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/fleet_server_hosts"
+    ]
+  }
+}

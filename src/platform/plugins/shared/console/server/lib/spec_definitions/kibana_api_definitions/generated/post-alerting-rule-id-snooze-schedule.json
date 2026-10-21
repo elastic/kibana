@@ -1,0 +1,10 @@
+{
+  "post-alerting-rule-id-snooze-schedule": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/alerting/rule/{id}/snooze_schedule"
+    ]
+  }
+}

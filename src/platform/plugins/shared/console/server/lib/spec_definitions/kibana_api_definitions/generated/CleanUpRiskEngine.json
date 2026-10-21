@@ -1,0 +1,10 @@
+{
+  "CleanUpRiskEngine": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/risk_score/engine/dangerously_delete_data"
+    ]
+  }
+}

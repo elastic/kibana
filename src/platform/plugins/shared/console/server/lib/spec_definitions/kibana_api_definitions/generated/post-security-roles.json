@@ -1,0 +1,10 @@
+{
+  "post-security-roles": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security/roles"
+    ]
+  }
+}

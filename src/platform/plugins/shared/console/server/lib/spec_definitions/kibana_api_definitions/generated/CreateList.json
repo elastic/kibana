@@ -1,0 +1,10 @@
+{
+  "CreateList": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/lists"
+    ]
+  }
+}

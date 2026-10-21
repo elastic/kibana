@@ -1,0 +1,10 @@
+{
+  "PerformRulesBulkAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/detection_engine/rules/_bulk_action"
+    ]
+  }
+}

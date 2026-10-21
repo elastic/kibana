@@ -1,0 +1,10 @@
+{
+  "post-agent-builder-converse-async": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/agent_builder/converse/async"
+    ]
+  }
+}

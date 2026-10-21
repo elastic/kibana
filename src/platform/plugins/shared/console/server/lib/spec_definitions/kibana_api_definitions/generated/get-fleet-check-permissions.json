@@ -1,0 +1,10 @@
+{
+  "get-fleet-check-permissions": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/check-permissions"
+    ]
+  }
+}

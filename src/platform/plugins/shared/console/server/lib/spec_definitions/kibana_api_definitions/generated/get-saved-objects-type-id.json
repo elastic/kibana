@@ -1,0 +1,10 @@
+{
+  "get-saved-objects-type-id": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/saved_objects/{type}/{id}"
+    ]
+  }
+}

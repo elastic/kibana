@@ -1,0 +1,10 @@
+{
+  "OsqueryExportScheduledQueryResults": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export"
+    ]
+  }
+}

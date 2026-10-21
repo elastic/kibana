@@ -1,0 +1,10 @@
+{
+  "put-tags-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/tags/{id}"
+    ]
+  }
+}

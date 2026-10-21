@@ -1,0 +1,10 @@
+{
+  "CreateWatchlist": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/watchlists"
+    ]
+  }
+}

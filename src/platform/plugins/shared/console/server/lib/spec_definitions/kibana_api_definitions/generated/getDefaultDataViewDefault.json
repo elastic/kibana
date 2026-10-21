@@ -1,0 +1,10 @@
+{
+  "getDefaultDataViewDefault": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/data_views/default"
+    ]
+  }
+}

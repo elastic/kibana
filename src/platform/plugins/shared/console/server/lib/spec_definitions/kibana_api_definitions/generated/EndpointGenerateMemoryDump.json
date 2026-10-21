@@ -1,0 +1,10 @@
+{
+  "EndpointGenerateMemoryDump": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/action/memory_dump"
+    ]
+  }
+}

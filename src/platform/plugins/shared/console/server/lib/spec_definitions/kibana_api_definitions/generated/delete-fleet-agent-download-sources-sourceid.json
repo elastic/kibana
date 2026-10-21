@@ -1,0 +1,10 @@
+{
+  "delete-fleet-agent-download-sources-sourceid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/agent_download_sources/{sourceId}"
+    ]
+  }
+}

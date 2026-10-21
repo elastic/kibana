@@ -1,0 +1,10 @@
+{
+  "EndpointScanAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/endpoint/action/scan"
+    ]
+  }
+}

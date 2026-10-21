@@ -1,0 +1,10 @@
+{
+  "delete-synthetic-monitors": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/synthetics/monitors/_bulk_delete"
+    ]
+  }
+}

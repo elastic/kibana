@@ -1,0 +1,10 @@
+{
+  "delete-agent-builder-skills-skillid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/agent_builder/skills/{skillId}"
+    ]
+  }
+}

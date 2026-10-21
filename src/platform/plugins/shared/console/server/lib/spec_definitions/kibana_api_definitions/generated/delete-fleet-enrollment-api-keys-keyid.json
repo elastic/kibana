@@ -1,0 +1,10 @@
+{
+  "delete-fleet-enrollment-api-keys-keyid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/enrollment_api_keys/{keyId}"
+    ]
+  }
+}

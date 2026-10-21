@@ -1,0 +1,10 @@
+{
+  "getCaseAlertsDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/{caseId}/alerts"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "delete-fleet-package-policies-packagepolicyid": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/fleet/package_policies/{packagePolicyId}"
+    ]
+  }
+}

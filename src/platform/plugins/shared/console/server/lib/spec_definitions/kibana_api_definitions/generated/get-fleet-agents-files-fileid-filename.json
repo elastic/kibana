@@ -1,0 +1,10 @@
+{
+  "get-fleet-agents-files-fileid-filename": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agents/files/{fileId}/{fileName}"
+    ]
+  }
+}

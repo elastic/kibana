@@ -1,0 +1,10 @@
+{
+  "deleteCaseDefaultSpace": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/cases"
+    ]
+  }
+}

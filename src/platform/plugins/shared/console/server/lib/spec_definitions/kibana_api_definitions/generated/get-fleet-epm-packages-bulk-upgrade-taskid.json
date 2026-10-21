@@ -1,0 +1,10 @@
+{
+  "get-fleet-epm-packages-bulk-upgrade-taskid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/_bulk_upgrade/{taskId}"
+    ]
+  }
+}

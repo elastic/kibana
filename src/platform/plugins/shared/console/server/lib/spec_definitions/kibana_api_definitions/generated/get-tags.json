@@ -1,0 +1,10 @@
+{
+  "get-tags": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/tags"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "get-fleet-agents-tags": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/agents/tags"
+    ]
+  }
+}

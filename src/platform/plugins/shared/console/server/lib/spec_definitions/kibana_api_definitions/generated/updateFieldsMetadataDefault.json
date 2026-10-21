@@ -1,0 +1,10 @@
+{
+  "updateFieldsMetadataDefault": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/data_views/data_view/{viewId}/fields"
+    ]
+  }
+}

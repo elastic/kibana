@@ -1,0 +1,10 @@
+{
+  "get-workflows-aggs": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/aggs"
+    ]
+  }
+}

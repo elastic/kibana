@@ -1,0 +1,10 @@
+{
+  "findCaseConnectorsDefaultSpace": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/cases/configure/connectors/_find"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "get-links": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/links"
+    ]
+  }
+}

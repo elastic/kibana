@@ -1,0 +1,10 @@
+{
+  "deleteCaseFieldDefinitionDefaultSpace": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/cases/field_definitions/{field_definition_id}"
+    ]
+  }
+}

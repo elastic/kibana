@@ -1,0 +1,10 @@
+{
+  "deleteAgentConfiguration": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/apm/settings/agent-configuration"
+    ]
+  }
+}

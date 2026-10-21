@@ -1,0 +1,10 @@
+{
+  "post-chat-message": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/chat/message"
+    ]
+  }
+}

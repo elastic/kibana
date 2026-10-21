@@ -1,0 +1,10 @@
+{
+  "get-private-locations": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/synthetics/private_locations"
+    ]
+  }
+}

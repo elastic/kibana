@@ -1,0 +1,10 @@
+{
+  "searchSingleConfiguration": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/apm/settings/agent-configuration/search"
+    ]
+  }
+}

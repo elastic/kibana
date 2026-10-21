@@ -1,0 +1,10 @@
+{
+  "UnassignWatchlistEntities": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/entity_analytics/watchlists/{watchlist_id}/entities/unassign"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "get-fleet-epm-data-streams": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/data_streams"
+    ]
+  }
+}

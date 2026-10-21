@@ -1,0 +1,10 @@
+{
+  "get-actions-connector-connectorid-oauth-start": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/actions/connector/{connectorId}/oauth/start"
+    ]
+  }
+}

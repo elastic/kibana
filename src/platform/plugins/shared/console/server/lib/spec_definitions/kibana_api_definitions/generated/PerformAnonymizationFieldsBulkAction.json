@@ -1,0 +1,10 @@
+{
+  "PerformAnonymizationFieldsBulkAction": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/security_ai_assistant/anonymization_fields/_bulk_action"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "FindExceptionLists": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/exception_lists/_find"
+    ]
+  }
+}

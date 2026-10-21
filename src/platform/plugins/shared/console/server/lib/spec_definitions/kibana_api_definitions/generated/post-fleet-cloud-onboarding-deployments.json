@@ -1,0 +1,10 @@
+{
+  "post-fleet-cloud-onboarding-deployments": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/fleet/cloud_onboarding_deployments"
+    ]
+  }
+}

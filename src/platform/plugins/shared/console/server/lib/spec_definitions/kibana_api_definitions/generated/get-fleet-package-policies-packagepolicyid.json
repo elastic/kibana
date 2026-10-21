@@ -1,0 +1,10 @@
+{
+  "get-fleet-package-policies-packagepolicyid": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/package_policies/{packagePolicyId}"
+    ]
+  }
+}

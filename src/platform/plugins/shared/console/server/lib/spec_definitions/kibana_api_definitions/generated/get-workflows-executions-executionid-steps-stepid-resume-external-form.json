@@ -1,0 +1,10 @@
+{
+  "get-workflows-executions-executionid-steps-stepid-resume-external-form": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/workflows/executions/{executionId}/steps/{stepId}/resume/external/form"
+    ]
+  }
+}

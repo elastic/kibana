@@ -1,0 +1,10 @@
+{
+  "post-workflows-workflow": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/workflows/workflow"
+    ]
+  }
+}

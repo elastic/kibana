@@ -1,0 +1,10 @@
+{
+  "get-fleet-uninstall-tokens": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/uninstall_tokens"
+    ]
+  }
+}

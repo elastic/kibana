@@ -1,0 +1,10 @@
+{
+  "ImportTimelines": {
+    "methods": [
+      "POST"
+    ],
+    "patterns": [
+      "api/timeline/_import"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "put-security-role-name": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security/role/{name}"
+    ]
+  }
+}

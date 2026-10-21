@@ -1,0 +1,10 @@
+{
+  "delete-discover-session": {
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "api/discover_sessions/{id}"
+    ]
+  }
+}

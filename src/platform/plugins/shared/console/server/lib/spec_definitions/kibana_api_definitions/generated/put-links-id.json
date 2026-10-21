@@ -1,0 +1,10 @@
+{
+  "put-links-id": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/links/{id}"
+    ]
+  }
+}

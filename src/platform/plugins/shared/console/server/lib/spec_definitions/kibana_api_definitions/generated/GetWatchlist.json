@@ -1,0 +1,10 @@
+{
+  "GetWatchlist": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/entity_analytics/watchlists/{id}"
+    ]
+  }
+}

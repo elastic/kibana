@@ -1,0 +1,10 @@
+{
+  "put-security-entity-store-stop": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security/entity_store/stop"
+    ]
+  }
+}

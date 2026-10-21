@@ -1,0 +1,10 @@
+{
+  "get-streams-streamname-attachments": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/streams/{streamName}/attachments"
+    ]
+  }
+}

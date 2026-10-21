@@ -1,0 +1,10 @@
+{
+  "put-security-entity-store-entities-bulk": {
+    "methods": [
+      "PUT"
+    ],
+    "patterns": [
+      "api/security/entity_store/entities/bulk"
+    ]
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "FindLists": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/lists/_find"
+    ]
+  }
+}

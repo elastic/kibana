@@ -1,0 +1,10 @@
+{
+  "get-fleet-epm-packages-pkgname-stats": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/epm/packages/{pkgName}/stats"
+    ]
+  }
+}

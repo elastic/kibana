@@ -1,0 +1,10 @@
+{
+  "get-fleet-cloud-connectors-cloudconnectorid-usage": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/fleet/cloud_connectors/{cloudConnectorId}/usage"
+    ]
+  }
+}

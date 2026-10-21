@@ -1,0 +1,10 @@
+{
+  "GetAttackDiscoveryGenerations": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "api/attack_discovery/generations"
+    ]
+  }
+}
