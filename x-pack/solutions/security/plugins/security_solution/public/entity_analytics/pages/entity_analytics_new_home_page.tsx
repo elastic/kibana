@@ -352,13 +352,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     activeTile,
     setActiveTile,
   } = useEntityAnalyticsUrlState();
-<<<<<<< HEAD
+  const productTour = useProductTour();
   // The scope pins every time-bounded section of the flyouts opened from here (alerts, observed
   // data, anomalies, highlights, graph) to the selected range — see `SCOPE_FLYOUT_TIME_RANGES`.
-=======
-  const productTour = useProductTour();
-  // Flyouts opened from the table query alerts over the range it shows.
->>>>>>> c09f013c0fcb50f4454c81c9b771aea91fe8b21f
   const scopeId = getEntityAnalyticsNewHomeScopeId(timeRange);
 
   const [isGridFullScreen, setIsGridFullScreen] = useState(false);
