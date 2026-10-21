@@ -45,6 +45,7 @@ export const useSettleDeclinedProposals = (
       });
       const decided = new Set<string>();
       let refreshStarted = false;
+      let refreshError: unknown;
       // Counts each proposal once. The `finally` below covers a tracker that fails before its
       // decision, so one failure cannot hold the others open for ever.
       const markDecided = (id: string) => {
@@ -52,9 +53,16 @@ export const useSettleDeclinedProposals = (
         if (decided.size === proposalIds.length && !refreshStarted) {
           refreshStarted = true;
           void (async () => {
-            await Promise.all(proposalIds.map((proposalId) => dropDecidedProposal?.(proposalId)));
-            await queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
-            release();
+            try {
+              await Promise.all(proposalIds.map((proposalId) => dropDecidedProposal?.(proposalId)));
+              await queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
+            } catch (error) {
+              // Kept for the caller. The trackers must still be released, or the rows stay on
+              // "Declining" for ever.
+              refreshError = error;
+            } finally {
+              release();
+            }
           })();
         }
       };
@@ -68,6 +76,9 @@ export const useSettleDeclinedProposals = (
         )
       );
       statusSignal.bump();
+      if (refreshError !== undefined) {
+        throw refreshError;
+      }
     },
     [dropDecidedProposal, settleDeclined]
   );

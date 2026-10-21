@@ -156,6 +156,40 @@ describe('useSettleDeclinedProposals', () => {
     expect(invalidateQueries).toHaveBeenCalledTimes(1);
   });
 
+  it('releases every tracker, and reports the error, when the host drop callback rejects', async () => {
+    const ended: string[] = [];
+    mockSettle.mockImplementation(async (id, client, afterDecision) => {
+      await afterDecision?.();
+      ended.push(id);
+    });
+    invalidateQueries.mockResolvedValue(undefined);
+    const dropDecidedProposal = jest.fn().mockRejectedValue(new Error('drop failed'));
+    const { result } = renderHook(() => useSettleDeclinedProposals(dropDecidedProposal));
+
+    await act(async () => {
+      await expect(result.current(['p-1', 'p-2'])).rejects.toThrow('drop failed');
+    });
+
+    expect(ended.sort()).toEqual(['p-1', 'p-2']);
+    expect(bump).toHaveBeenCalledTimes(1);
+  });
+
+  it('releases every tracker, and reports the error, when the refresh rejects', async () => {
+    const ended: string[] = [];
+    mockSettle.mockImplementation(async (id, client, afterDecision) => {
+      await afterDecision?.();
+      ended.push(id);
+    });
+    invalidateQueries.mockRejectedValue(new Error('refresh failed'));
+    const { result } = renderHook(() => useSettleDeclinedProposals());
+
+    await act(async () => {
+      await expect(result.current(['p-1'])).rejects.toThrow('refresh failed');
+    });
+
+    expect(ended).toEqual(['p-1']);
+  });
+
   it('does not hold the other trackers open when one tracker fails', async () => {
     mockSettle.mockImplementation(async (id, client, afterDecision) => {
       if (id === 'p-1') {
