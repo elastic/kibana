@@ -303,6 +303,23 @@ describe('selectSkills', () => {
       expect(result).toEqual([]);
     });
 
+    it('grants ki-retrieval when AI Indices are enabled even if the agent has no AI Index', async () => {
+      const skills = createSkillsServiceMock();
+      skills.bulkGet.mockResolvedValue(new Map([[kiRetrievalSkillId, kiRetrievalSkill]]));
+      const skillsStore = createSkillsStoreMock();
+
+      const result = await selectSkills({
+        skills,
+        skillsStore,
+        agentConfiguration: createConfig({ ai_indices: [] }),
+        aiIndicesEnabled: true,
+      });
+
+      expect(skills.bulkGet).toHaveBeenCalledWith([kiRetrievalSkillId]);
+      expect(result).toEqual([kiRetrievalSkill]);
+      expect(skillsStore.add).toHaveBeenCalledWith(kiRetrievalSkill);
+    });
+
     it('appends capability skills after the agent and plugin skills, without duplicates', async () => {
       const customSkill = createSkill('custom-1');
       const pluginSkill = createSkill('plugin-1');

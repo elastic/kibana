@@ -7,11 +7,7 @@
 
 import type { BaseMessageLike } from '@langchain/core/messages';
 import { cleanPrompt } from '@kbn/agent-builder-genai-utils/prompts';
-import {
-  agentBuilderDefaultAiIndexId,
-  kiRetrievalSkillId,
-  type SerializedMetadataValue,
-} from '@kbn/agent-builder-common';
+import type { SerializedMetadataValue } from '@kbn/agent-builder-common';
 import type { ConversationTemplatesService } from '@kbn/agent-builder-server/runner/conversation_templates_service';
 import { getSkillsInstructions, getRelevantSkillsPointerInstructions } from './utils/skills';
 import { renderVisibleContext } from '../utils/visible_context';
@@ -124,7 +120,6 @@ const getAgentSystemMessage = async ({
     conversationMetadataWritable
   );
   const catalog = aiIndexCatalog ?? [];
-  const elasticAssigned = catalog.some(({ id }) => id === agentBuilderDefaultAiIndexId);
 
   return cleanPrompt(`You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
@@ -209,18 +204,14 @@ ${attachmentToolsInstructions()}
 
 ${
   experimentalFeatures.sml
-    ? `## SML @ REFERENCES
-When the user picks from the @ menu, the message includes markdown links: \`[@label](sml://ENTRY_ID)\`. The substring after \`sml://\` is the entry id (same as \`entry_id\` from \`sml_search\` and accepted by \`sml_attach\`).
+    ? `## SML '#' REFERENCES
+When the user picks from the # menu, the message includes markdown links: \`[#label](sml://ENTRY_ID)\`. The substring after \`sml://\` is the entry id (same as \`entry_id\` from \`sml_search\` and accepted by \`sml_attach\`).
 - For each distinct entry id in \`sml://\` links in the **current** user message, call \`sml_attach\` with those ids **before** other tools that need that asset's content. When this applies, it overrides generic tool-order rules for tools that depend on those assets.
 - Skip \`sml_attach\` for an entry id only if a **previous** turn already ran \`sml_attach\` successfully for that entry id (see prior tool output text such as \`created from SML item '...'\`). Do **not** infer skip from conversation attachment XML: attachment \`id\` attributes are conversation attachment ids, not SML entry ids.
 - You may pass multiple entry ids in one \`sml_attach\` call when the user referenced several assets.
 
 ## CONNECTOR DISCOVERY
-${
-  elasticAssigned
-    ? `This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, load the \`${kiRetrievalSkillId}\` skill and query the \`${agentBuilderDefaultAiIndexId}\` AI Index for connector records (\`type\` is \`connector\`) before concluding the task is out of scope. If a hit looks applicable, call \`sml_attach\` with its \`id\` to load its full spec — including available sub-actions and their parameters — before invoking it.`
-    : `This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, use \`sml_search\` with \`types: ["connector"]\` to find relevant connectors before concluding the task is out of scope. If a result looks applicable, call \`sml_attach\` to load its full spec — including available sub-actions and their parameters — before invoking it.`
-}`
+This agent may have connectors that reach external services (APIs, messaging systems, databases, etc.). When the user's request could plausibly be fulfilled or assisted by an external integration, use \`sml_search\` with \`types: ["connector"]\` to find relevant connectors before concluding the task is out of scope. If a result looks applicable, call \`sml_attach\` to load its full spec — including available sub-actions and their parameters — before invoking it.`
     : ''
 }
 

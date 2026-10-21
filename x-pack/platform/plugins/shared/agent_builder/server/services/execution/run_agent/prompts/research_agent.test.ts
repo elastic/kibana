@@ -275,11 +275,12 @@ describe('getResearchAgentPrompt', () => {
     );
     const system = asText(messages[0]);
 
-    expect(system).not.toContain('## SML @ REFERENCES');
+    expect(system).not.toContain("## SML '#' REFERENCES");
     expect(system).not.toContain('## CONNECTOR DISCOVERY');
+    expect(system).not.toMatch(/^(<<<<<<<|=======|>>>>>>>)/m);
   });
 
-  it('keeps connector discovery on sml_search when SML tools exist without the elastic index', async () => {
+  it('renders the SML sections with # references when SML is on', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
         experimentalFeatures: {
@@ -291,14 +292,13 @@ describe('getResearchAgentPrompt', () => {
       })
     );
     const system = asText(messages[0]);
-    const discovery = system.slice(system.indexOf('## CONNECTOR DISCOVERY'));
 
-    expect(system).toContain('## SML @ REFERENCES');
-    expect(discovery).toContain('use `sml_search` with `types: ["connector"]`');
-    expect(discovery).not.toContain('`elastic` AI Index');
+    expect(system).toContain("## SML '#' REFERENCES");
+    expect(system).toContain('`[#label](sml://ENTRY_ID)`');
+    expect(system).not.toMatch(/^(<<<<<<<|=======|>>>>>>>)/m);
   });
 
-  it('points connector discovery at the elastic index when it is in the catalog', async () => {
+  it('keeps connector discovery on the agent-scoped sml_search when the elastic index is in the catalog', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
         configuration: {
@@ -319,10 +319,8 @@ describe('getResearchAgentPrompt', () => {
     const system = asText(messages[0]);
     const discovery = system.slice(system.indexOf('## CONNECTOR DISCOVERY'));
 
-    expect(discovery).toContain('load the `ki-retrieval` skill');
-    expect(discovery).toContain('query the `elastic` AI Index for connector records');
-    expect(discovery).toContain('call `sml_attach` with its `id`');
-    expect(discovery).not.toContain('sml_search');
+    expect(discovery).toContain('use `sml_search` with `types: ["connector"]`');
+    expect(discovery).not.toContain('`elastic` AI Index');
   });
 
   it('renders every catalog entry, including custom AI Indices', async () => {
