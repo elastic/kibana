@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React, { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { Provider as ReduxProvider } from 'react-redux-v7';
@@ -22,6 +24,15 @@ import type { SyntheticsAppProps } from './synthetics_settings_context';
 import { storage, store } from '../state';
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
+// A theme change must not re-render SyntheticsSharedContext: that would replace its QueryClient.
+function StyledComponentsThemeProvider({
+  theme,
+  children,
+}: PropsWithChildren<{ theme: CoreStart['theme'] }>) {
+  const { darkMode } = useObservable(theme.theme$, theme.getTheme());
+  return <EuiThemeProvider darkMode={darkMode}>{children}</EuiThemeProvider>;
+}
+
 export const SyntheticsSharedContext: React.FC<
   React.PropsWithChildren<
     SyntheticsAppProps & {
@@ -32,7 +43,6 @@ export const SyntheticsSharedContext: React.FC<
   >
 > = ({ reduxStore, coreStart, setupPlugins, startPlugins, children, reload$, onAutoRefresh }) => {
   const queryClient = new QueryClient();
-  const { darkMode } = useObservable(coreStart.theme.theme$, coreStart.theme.getTheme());
 
   const spacesApi = startPlugins.spaces;
 
@@ -73,7 +83,7 @@ export const SyntheticsSharedContext: React.FC<
         licensing: startPlugins.licensing,
       }}
     >
-      <EuiThemeProvider darkMode={darkMode}>
+      <StyledComponentsThemeProvider theme={coreStart.theme}>
         <ReduxProvider store={reduxStore ?? store}>
           <QueryClientProvider client={queryClient}>
             <SyntheticsRefreshContextProvider reload$={reload$} onAutoRefresh={onAutoRefresh}>
@@ -93,7 +103,7 @@ export const SyntheticsSharedContext: React.FC<
             </SyntheticsRefreshContextProvider>
           </QueryClientProvider>
         </ReduxProvider>
-      </EuiThemeProvider>
+      </StyledComponentsThemeProvider>
     </KibanaContextProvider>
   );
 };
