@@ -51,6 +51,7 @@ describe('titles api', () => {
           "description": "less cool description",
           "hide_border": false,
           "hide_title": false,
+          "smart_title": undefined,
           "title": "UH OH, A TITLE",
         }
       `);
