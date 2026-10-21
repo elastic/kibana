@@ -19,14 +19,16 @@ api/
 ├── fixtures/
 │   ├── index.ts                 # Test fixtures extending apiTest
 │   └── constants.ts             # User roles and API headers
+├── lib/
+│   ├── doc_counts.ts            # Doc counts request helpers
+│   └── streams.ts               # Stream upsert bodies, admin context and failure store assertions
 ├── services/
 │   └── streams_api_service.ts   # Streams API helper service
 └── tests/
     ├── global.setup.ts          # Global setup (enables Streams)
-    ├── processing_simulate.spec.ts
-    ├── routing_fork_stream.spec.ts
-    ├── schema_field_mapping.spec.ts
-    └── lifecycle_retention.spec.ts
+    ├── streams/                 # Processing, routing, schema, lifecycle, query streams
+    ├── lifecycle/               # Failure store, ILM stats/policies, snapshot repositories
+    └── data_quality/            # Doc counts (total, ingestion, degraded, failed)
 ```
 
 ## Running Tests
