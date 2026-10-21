@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { clamp, sumBy } from 'lodash';
+import { clamp, escape, sumBy } from 'lodash';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { CUSTOM_CONTENT_MAX_HEIGHT, CUSTOM_CONTENT_MIN_HEIGHT } from '@kbn/custom-content-common';
+import { EntityRiskLevelsEnum } from '../../../../../common/api/entity_analytics/common';
+import { RISK_LEVEL_RANGES } from '../../../../../common/entity_analytics/risk_engine/risk_levels';
 import { formatCount, formatCountOf } from './describe_scope';
 import type { BriefRiskHistory, BriefViewModel } from './view_model';
 import { NO_PRIORITIES_LINE } from './view_model';
@@ -133,10 +135,16 @@ const renderRecommendation = ({ recommendation }: BriefViewModel): string =>
   </section>`
     : '';
 
-const renderPriorities = ({
-  priorities,
-  scope,
-}: BriefViewModel): string => `<section class="section">
+/** Without priorities a summary already says why, as in a brief with no model call, so only a brief without a summary needs the section. */
+const hasPrioritiesSection = ({ priorities, summary }: BriefViewModel): boolean =>
+  priorities.length > 0 || !summary;
+
+const renderPriorities = (viewModel: BriefViewModel): string => {
+  const { priorities, scope } = viewModel;
+  if (!hasPrioritiesSection(viewModel)) {
+    return '';
+  }
+  return `<section class="section">
     <h2>Priorities</h2>
     ${
       priorities.length === 0
@@ -146,6 +154,7 @@ const renderPriorities = ({
             .join('')}</ol>`
     }
   </section>`;
+};
 
 const renderPriority = (priority: Priority, periodLabel: string): string => {
   const { rank, name, type, risk, assetCriticality, privilegedUser, firstSeen } = priority;
@@ -213,11 +222,15 @@ const renderAlerts = (alerts: Alerts, periodLabel: string): string => {
       </div>`;
 };
 
+/** The risk levels the chart marks, highest first, at the score each starts. */
 const BANDS = [
-  { label: 'Critical 90', score: 90 },
-  { label: 'High 70', score: 70 },
-  { label: 'Moderate 40', score: 40 },
-];
+  EntityRiskLevelsEnum.Critical,
+  EntityRiskLevelsEnum.High,
+  EntityRiskLevelsEnum.Moderate,
+].map((level) => ({
+  label: `${level} ${RISK_LEVEL_RANGES[level].start}`,
+  score: RISK_LEVEL_RANGES[level].start,
+}));
 
 /** The fewest points that make a line worth drawing. */
 const MIN_CHART_POINTS = 3;
@@ -360,9 +373,11 @@ const estimateHeight = (viewModel: BriefViewModel): number => {
     prose(summary) +
     (getShownCounts(viewModel).length > 0 ? HEIGHTS.section + HEIGHTS.counts : 0) +
     prose(recommendation) +
-    HEIGHTS.section +
+    (hasPrioritiesSection(viewModel) ? HEIGHTS.section : 0) +
     (priorities.length === 0
-      ? HEIGHTS.line
+      ? hasPrioritiesSection(viewModel)
+        ? HEIGHTS.line
+        : 0
       : sumBy(priorities, ({ assessment, nextStep, alerts, riskHistory }) => {
           const lines =
             countLines(assessment, ASSESSMENT_CHARACTERS_PER_LINE) + countLines(nextStep);
@@ -387,15 +402,8 @@ const estimateRiskHistoryHeight = ({ points }: BriefRiskHistory): number => {
 
 // Text and dates
 
-/** Model text and names are data: escaped before they touch the HTML, `{` included. */
-const escapeHtml = (text: string): string =>
-  text
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;')
-    .replace(/\{/g, '&#123;');
+/** Model text and names are data: escaped before they touch the HTML. `{` too, so a template can't come back. */
+const escapeHtml = (text: string): string => escape(text).replace(/\{/g, '&#123;');
 
 const formatMonthDay = (iso: string): string => {
   const date = new Date(iso);
@@ -460,6 +468,7 @@ const CSS = `
 .brief .evidence{row-gap:2px;align-items:start;}
 .brief .rules{list-style:none;margin:0;padding:0;font-size:12.5px;max-width:560px;}
 .brief .rules li{display:flex;justify-content:space-between;gap:12px;padding:1px 0;border-bottom:1px dashed var(--cc-color-border);}
+.brief .rules li > span:first-child{min-width:0;overflow-wrap:anywhere;}
 .brief .rules li:last-child{border-bottom:0;}
 .brief .rule-count{font-variant-numeric:tabular-nums;font-weight:600;opacity:.85;flex:none;}
 .brief .rules-total{opacity:.72;}

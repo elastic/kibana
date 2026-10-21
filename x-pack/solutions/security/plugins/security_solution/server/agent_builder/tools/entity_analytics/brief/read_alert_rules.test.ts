@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BriefCandidate } from './types';
-import { buildAlertsFilter, toAlertsByCandidateId } from './read_alert_rules';
+import { buildAlertsFilter, readAlertRules, toAlertsByCandidateId } from './read_alert_rules';
 
 const bucket = (count: number, rules: Array<[string, number]>, ruleCount = rules.length) => ({
   doc_count: count,
@@ -79,5 +80,47 @@ describe('buildAlertsFilter', () => {
     expect(withIdentity).toContain('{"term":{"host.name":"web-01"}}');
     expect(withIdentity).toContain('"must_not":[{"exists":{"field":"kibana.alert.entity.id"}}]');
     expect(getBranches({})).toContain('"should":[]');
+  });
+});
+
+describe('buildAlertsFilter with a large group', () => {
+  it('matches the ids of every member of a stamped alert, and the records of the first 20 only', () => {
+    const members = Array.from({ length: 21 }, (_, index) => ({
+      id: `host:member-${index}`,
+      record: { host: { name: `member-${index}` } },
+    }));
+    const filter = JSON.stringify(
+      buildAlertsFilter({
+        id: 'host:web-01',
+        name: 'web-01',
+        type: 'host',
+        tileIds: [],
+        record: { host: { name: 'web-01' } },
+        members,
+      }).bool.should
+    );
+
+    expect(filter).toContain('"host:member-20"');
+    expect(filter).toContain('"host.name":"member-19"');
+    expect(filter).not.toContain('"host.name":"member-20"');
+  });
+});
+
+describe('readAlertRules', () => {
+  it('reports a failed read as no rules, never as an error', async () => {
+    const esClient = {
+      search: jest.fn().mockRejectedValue(new Error('no privileges')),
+    } as unknown as ElasticsearchClient;
+    const logger = { debug: jest.fn() } as unknown as Logger;
+
+    await expect(
+      readAlertRules({
+        candidates: [{ id: 'host:web-01', name: 'web-01', type: 'host', tileIds: [], record: {} }],
+        scope: { period: '7d', capturedAt: '2026-10-14T12:00:00.000Z', tiles: {} },
+        spaceId: 'default',
+        esClient,
+        logger,
+      })
+    ).resolves.toEqual({ alertsByEntityId: {}, isFailed: true });
   });
 });

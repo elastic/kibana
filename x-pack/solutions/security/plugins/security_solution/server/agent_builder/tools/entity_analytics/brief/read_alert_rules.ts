@@ -44,7 +44,7 @@ interface AlertsByCandidate {
  * entities grid and the tiles count them. A group's alerts are its members' alerts, counted once. An
  * alert is matched on the entity id it is stamped with, and an alert without one on the identity fields
  * of the candidate's and its members' records. A failure, such as a user who can't read alerts, means no
- * rules, never a failed brief.
+ * rules and `isFailed`, never a failed brief.
  */
 export const readAlertRules = async ({
   candidates,
@@ -58,9 +58,9 @@ export const readAlertRules = async ({
   spaceId: string;
   esClient: ElasticsearchClient;
   logger: Logger;
-}): Promise<Record<string, EntityAlerts>> => {
+}): Promise<{ alertsByEntityId: Record<string, EntityAlerts>; isFailed: boolean }> => {
   if (candidates.length === 0) {
-    return {};
+    return { alertsByEntityId: {}, isFailed: false };
   }
   try {
     const filtersByCandidateId = Object.fromEntries(
@@ -110,10 +110,10 @@ export const readAlertRules = async ({
         },
       },
     });
-    return toAlertsByCandidateId(response.aggregations);
+    return { alertsByEntityId: toAlertsByCandidateId(response.aggregations), isFailed: false };
   } catch (error) {
     logger.debug(`AI brief: no alert rules: ${error.message}`);
-    return {};
+    return { alertsByEntityId: {}, isFailed: true };
   }
 };
 

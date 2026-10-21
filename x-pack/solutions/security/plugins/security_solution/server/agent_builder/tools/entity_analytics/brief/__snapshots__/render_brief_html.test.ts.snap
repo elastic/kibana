@@ -48,6 +48,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
 .brief .evidence{row-gap:2px;align-items:start;}
 .brief .rules{list-style:none;margin:0;padding:0;font-size:12.5px;max-width:560px;}
 .brief .rules li{display:flex;justify-content:space-between;gap:12px;padding:1px 0;border-bottom:1px dashed var(--cc-color-border);}
+.brief .rules li > span:first-child{min-width:0;overflow-wrap:anywhere;}
 .brief .rules li:last-child{border-bottom:0;}
 .brief .rule-count{font-variant-numeric:tabular-nums;font-weight:600;opacity:.85;flex:none;}
 .brief .rules-total{opacity:.72;}

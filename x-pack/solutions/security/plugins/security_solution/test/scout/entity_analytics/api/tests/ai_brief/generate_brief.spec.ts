@@ -210,6 +210,9 @@ apiTest.describe(
         expect(getSubmitBriefRequests(llmProxy)).toHaveLength(0);
         expect(result.entity_table_tag).toBeUndefined();
         expect(template).toContain('Nothing in this view is flagged');
+        // The summary states it, so the brief has no Priorities section repeating it.
+        expect(template).not.toContain('No entity in this view has enough evidence to prioritize');
+        expect(template).not.toContain('<h2>Priorities</h2>');
       }
     );
 

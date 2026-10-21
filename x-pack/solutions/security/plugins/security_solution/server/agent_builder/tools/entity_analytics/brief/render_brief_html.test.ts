@@ -172,17 +172,32 @@ describe('renderBriefHtml', () => {
     expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
   });
 
-  it('says when nothing is flagged or worth prioritising', () => {
+  it('says when the model found nothing to prioritise', () => {
     const { html, height } = renderBriefHtml({
       ...fixtureViewModel,
+      summary: undefined,
       counts: [],
       priorities: [],
       recommendation: undefined,
     });
 
+    expect(html).toContain('<h2>Priorities</h2>');
     expect(html).toContain('No entity in this view has enough evidence to prioritize.');
     expect(html).not.toContain('This period at a glance');
     expect(height).toBeLessThan(500);
+  });
+
+  it('says it once, in the summary, when there was no model call to find priorities', () => {
+    const noPriorities = 'No entity in this view has enough evidence to prioritize.';
+    const { html } = renderBriefHtml({
+      ...fixtureViewModel,
+      summary: noPriorities,
+      priorities: [],
+      recommendation: undefined,
+    });
+
+    expect(html.split(noPriorities)).toHaveLength(2);
+    expect(html).not.toContain('<h2>Priorities</h2>');
   });
 
   it('keeps the chart however tall the brief is, and opens the card at its maximum', () => {

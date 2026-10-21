@@ -151,6 +151,10 @@ describe('buildViewModel', () => {
     );
   });
 
+  it('notes that the alerts could not be read', () => {
+    expect(build({ alertsFailed: true }).notes).toContain("Alert details couldn't be read.");
+  });
+
   it('notes the tiles whose data could not be read', () => {
     expect(build().notes).toEqual([
       "Not checked, because the data couldn't be read: Entities with anomalies.",

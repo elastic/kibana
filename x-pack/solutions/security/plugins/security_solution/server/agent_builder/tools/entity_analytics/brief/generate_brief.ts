@@ -54,7 +54,13 @@ export const generateBrief = async ({
     return { ...renderBriefHtml(viewModel), viewModel, priorityCount: 0 };
   }
 
-  const alertsByEntityId = await readAlertRules({ candidates, scope, spaceId, esClient, logger });
+  const { alertsByEntityId, isFailed: alertsFailed } = await readAlertRules({
+    candidates,
+    scope,
+    spaceId,
+    esClient,
+    logger,
+  });
   const facts = buildFacts(candidates, scope, alertsByEntityId);
   const draft = await draftBrief({
     inferenceClient,
@@ -78,7 +84,15 @@ export const generateBrief = async ({
     riskScoreDataClient,
     logger,
   });
-  const viewModel = buildViewModel({ scope, spaceId, entities, facts, verified, riskHistory });
+  const viewModel = buildViewModel({
+    scope,
+    spaceId,
+    entities,
+    facts,
+    verified,
+    riskHistory,
+    alertsFailed,
+  });
 
   logger.debug(
     `AI brief: ${candidates.length} candidates, ${verified.priorities.length} priorities, ` +

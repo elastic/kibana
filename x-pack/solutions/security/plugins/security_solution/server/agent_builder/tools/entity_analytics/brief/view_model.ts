@@ -106,6 +106,7 @@ export const buildViewModel = ({
   facts,
   verified,
   riskHistory,
+  alertsFailed = false,
 }: {
   scope: EntityAnalyticsScope;
   spaceId: string;
@@ -114,6 +115,8 @@ export const buildViewModel = ({
   verified?: VerifiedBrief;
   /** The history of the priority the chart goes under. */
   riskHistory?: { entityId: string; history: BriefRiskHistory };
+  /** The alerts couldn't be read, so no priority has rules. */
+  alertsFailed?: boolean;
 }): BriefViewModel => {
   const { tiles, period, focusTileId, entityFilters = {} } = scope;
   const namesById = new Map(entities.candidates.map(({ id, name }) => [id, name]));
@@ -141,7 +144,7 @@ export const buildViewModel = ({
       ),
       sample: describeSample(scope, entities),
     },
-    notes: buildNotes(scope, entities),
+    notes: buildNotes(scope, entities, alertsFailed),
     summary: verified ? verified.summary && withNames(verified.summary) : describeQuietView(scope),
     counts: SIGNAL_CARD_IDS.flatMap((tileId) => {
       const tile = tiles[tileId];
@@ -188,7 +191,11 @@ export const buildViewModel = ({
   };
 };
 
-const buildNotes = (scope: EntityAnalyticsScope, entities: CandidateEntities): string[] => {
+const buildNotes = (
+  scope: EntityAnalyticsScope,
+  entities: CandidateEntities,
+  alertsFailed: boolean
+): string[] => {
   const unavailableTitles = SIGNAL_CARD_IDS.flatMap((tileId) => {
     const tile = scope.tiles[tileId];
     return tile?.unavailable ? [tile.title] : [];
@@ -204,6 +211,7 @@ const buildNotes = (scope: EntityAnalyticsScope, entities: CandidateEntities): s
     unavailableTitles.length > 0
       ? `Not checked, because the data couldn't be read: ${unavailableTitles.join(', ')}.`
       : undefined,
+    alertsFailed ? "Alert details couldn't be read." : undefined,
   ]);
 };
 
