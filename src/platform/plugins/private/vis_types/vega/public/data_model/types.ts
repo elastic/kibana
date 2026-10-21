@@ -238,10 +238,7 @@ export interface VegaConfig extends DstObj {
   controlsDirection?: ControlsDirection;
 }
 
-/**
- * Everything a Vega view needs to render a parsed spec. Holds only structured-cloneable data, so it
- * can cross a frame boundary; spec parsing and data resolution have already happened.
- */
+/** The structured-cloneable state a Vega view needs to render an already parsed and resolved spec. */
 export interface VegaRenderDescriptor {
   readonly spec: VegaSpec;
   readonly vlspec?: VegaSpec;

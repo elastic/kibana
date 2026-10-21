@@ -31,10 +31,7 @@ export type VisParams = Required<Arguments>;
 
 export interface RenderValue {
   visData: VegaRenderDescriptor;
-  /**
-   * The expression's inspector adapters. They stay with the parent renderer, which uses them to
-   * surface the view's errors and data; they are never handed to the view itself.
-   */
+  /** Parent-side only and not cloneable, unlike `visData`; the view never receives these. */
   inspectorAdapters?: VegaInspectorAdapters;
   visType: 'vega';
   visConfig: VisParams;

@@ -17,7 +17,7 @@ import { getDataViews } from '../services';
 import { extractIndexPatternsFromSpec } from '../lib/extract_index_pattern';
 import { VEGA_EVENT_APPLY_FILTER } from '../constants';
 import type { VegaSpec } from '../data_model/types';
-import type { VegaEventHandler, VegaFilterAction } from '../types';
+import type { VegaEventHandler, VegaFilterActionHandler } from '../types';
 import { normalizeDate, normalizeObject, normalizeString } from './utils';
 
 type TimeValue = ReturnType<typeof normalizeDate>;
@@ -89,16 +89,12 @@ const parseTimeRange = (start: TimeValue, end: TimeValue) => {
   return { from, to, mode };
 };
 
-/**
- * Creates the parent-side handler for a Vega view's filter actions. Every argument comes from a
- * user-authored spec, so the handler normalizes it here rather than trusting the view to.
- */
+/** Creates the parent-side handler that validates and applies a Vega view's filter actions. */
 export const createVegaFilterActionHandler = ({
   spec,
   filterManager,
   fireEvent,
-}: VegaFilterActionHandlerDeps): ((action: VegaFilterAction) => Promise<void>) => {
-  /** Finds the data view id by title; without one, uses the spec's first index or the default. */
+}: VegaFilterActionHandlerDeps): VegaFilterActionHandler => {
   const findIndex = async (index?: string): Promise<string | undefined> => {
     const dataViews = getDataViews();
 

@@ -155,9 +155,9 @@ export class VegaBaseView {
     const vegaLoader = loader();
     const originalSanitize = vegaLoader.sanitize.bind(vegaLoader);
     vegaLoader.sanitize = async (uri, options) => {
-      if (this._trustedDataUrls.has(uri)) {
-        // Kibana resolved this URL on the spec's behalf (e.g. an EMS file), so it skips the check.
-      } else if (!this._externalUrl.isInternalUrl(uri)) {
+      // URLs Kibana resolved on the spec's behalf (e.g. EMS files) skip the check.
+      const isTrustedUrl = this._trustedDataUrls.has(uri);
+      if (!isTrustedUrl && !this._externalUrl.isInternalUrl(uri)) {
         if (!this._enableExternalUrls) {
           this.handleExternalUrlError(getExternalUrlsAreNotEnabledError());
         } else if (!this._externalUrl.validateUrl(uri)) {
