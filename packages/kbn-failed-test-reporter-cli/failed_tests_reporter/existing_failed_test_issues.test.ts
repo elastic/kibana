@@ -163,7 +163,7 @@ describe('Scout failures', () => {
     expect(existing.isScoutFailure(ftrFailure)).toBe(false);
   });
 
-  it('matches Scout failures by name only, ignoring target differences', async () => {
+  it('matches the same Scout test on another target, which keeps its test id', async () => {
     const existing = new ExistingFailedTestIssues(log);
 
     fetchMock.mockImplementation(async (_input, init) => {
@@ -188,7 +188,6 @@ describe('Scout failures', () => {
       });
     });
 
-    // First Scout failure with target chrome
     const scoutFailure1: TestFailure & { id: string; target: string; location: string } = {
       ...mockTestFailure,
       classname: 'scout suite',
@@ -198,20 +197,14 @@ describe('Scout failures', () => {
       location: '/path/to/test.ts',
     };
 
-    // Second Scout failure with same name but different target
+    // the same test on another target: the id hashes the file and the full title, not the target
     const scoutFailure2: TestFailure & { id: string; target: string; location: string } = {
-      ...mockTestFailure,
-      classname: 'scout suite',
-      name: 'scout test name',
-      id: 'test-id-2',
+      ...scoutFailure1,
       target: 'stateful',
-      location: '/path/to/test.ts',
     };
 
-    // Load the first failure
     await existing.loadForFailures([scoutFailure1]);
 
-    // Both failures should match the same issue (by name only)
     const issue1 = existing.getForFailure(scoutFailure1);
     const issue2 = existing.getForFailure(scoutFailure2);
 
@@ -222,12 +215,11 @@ describe('Scout failures', () => {
     expect(issue1).toEqual(issue2);
   });
 
-  it('correctly identifies seen Scout failures by name only', async () => {
+  it('does not ask ci-stats again about the same Scout test on another target', async () => {
     const existing = new ExistingFailedTestIssues(log);
 
     fetchMock.mockImplementation(async () => jsonResponse({ existingIssues: [] }));
 
-    // First Scout failure with target chrome
     const scoutFailure1: TestFailure & { id: string; target: string; location: string } = {
       ...mockTestFailure,
       classname: 'scout suite',
@@ -236,26 +228,64 @@ describe('Scout failures', () => {
       target: 'serverless=es',
       location: '/path/to/test.ts',
     };
-
-    // Second Scout failure with same name but different target
     const scoutFailure2: TestFailure & { id: string; target: string; location: string } = {
-      ...mockTestFailure,
-      classname: 'scout suite',
-      name: 'scout test name',
-      id: 'test-id-2',
+      ...scoutFailure1,
       target: 'stateful',
-      location: '/path/to/test.ts',
     };
 
-    // Load the first failure
     await existing.loadForFailures([scoutFailure1]);
-
-    // The second failure should be considered "seen" because it has the same name
-    // This tests the isFailureSeen logic
     await existing.loadForFailures([scoutFailure1, scoutFailure2]);
 
-    // Should only make one API call (for the first failure, second is already seen)
     expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps apart Scout tests that only share a title, in different suites', async () => {
+    const existing = new ExistingFailedTestIssues(log);
+
+    fetchMock.mockImplementation(async (_input, init) => {
+      const body = JSON.parse(init?.body as string) as {
+        failures: Array<{ classname: string; name: string }>;
+      };
+      return jsonResponse({
+        existingIssues: body.failures.map(
+          (t): FailedTestIssue => ({
+            classname: t.classname,
+            name: t.name,
+            github: {
+              htmlUrl: `htmlurl(${t.classname})`,
+              nodeId: `nodeid(${t.classname})`,
+              number: t.classname.length,
+              body: `FAILURE: ${t.classname}/${t.name}`,
+            },
+          })
+        ),
+      });
+    });
+
+    const dashboardFailure: TestFailure & { id: string; target: string; location: string } = {
+      ...mockTestFailure,
+      classname: 'Dashboard',
+      name: 'loads successfully',
+      id: 'dashboard-id',
+      target: 'stateful',
+      location: '/path/to/dashboard.spec.ts',
+    };
+    const discoverFailure: TestFailure & { id: string; target: string; location: string } = {
+      ...mockTestFailure,
+      classname: 'Discover',
+      name: 'loads successfully',
+      id: 'discover-id',
+      target: 'stateful',
+      location: '/path/to/discover.spec.ts',
+    };
+
+    // in two reports of the same job, as the second would otherwise count as seen
+    await existing.loadForFailures([dashboardFailure]);
+    await existing.loadForFailures([discoverFailure]);
+
+    expect(fetchMock).toHaveBeenCalledTimes(2);
+    expect(existing.getForFailure(dashboardFailure)?.classname).toBe('Dashboard');
+    expect(existing.getForFailure(discoverFailure)?.classname).toBe('Discover');
   });
 
   it('distinguishes between Scout and FTR failures correctly', async () => {

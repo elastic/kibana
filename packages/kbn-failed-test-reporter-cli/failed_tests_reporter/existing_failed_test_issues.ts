@@ -84,6 +84,21 @@ const getFramework = (failure: TestFailure): string | undefined =>
   isScoutFailure(failure) ? 'playwright' : failure.testType;
 
 /**
+ * Whether two failures are of the same test. Scout failures compare by test id, which a test keeps
+ * across targets while tests that share a title in other suites do not; the rest by classname and
+ * name.
+ */
+const isSameTest = (a: TestFailure, b: TestFailure): boolean => {
+  if (isScoutFailure(a) && isScoutFailure(b)) {
+    return a.id === b.id;
+  }
+  if (isScoutFailure(a) || isScoutFailure(b)) {
+    return false;
+  }
+  return a.classname === b.classname && a.name === b.name;
+};
+
+/**
  * Whether the failure is inside the `describe` block a suite issue is about. Suite titles join
  * every `describe` title; a JUnit name starts with them, a Scout failure only knows the innermost.
  */
@@ -193,29 +208,9 @@ export class ExistingFailedTestIssues {
   }
 
   getForFailure(failure: TestFailure) {
-    // Check if this is a Scout failure
-    const isScout = this.isScoutFailure(failure);
-
     for (const [f, issue] of this.results) {
-      if (!issue) {
-        continue;
-      }
-
-      // Verify both input and key are the same type (both Scout or both FTR)
-      const isKeyScoutFailure = this.isScoutFailure(f);
-
-      if (isScout) {
-        // For Scout failures, match by test name only (ignore target)
-        // Both must be Scout failures and names must match
-        if (isKeyScoutFailure && f.name === failure.name) {
-          return issue;
-        }
-      } else {
-        // For FTR failures, match by classname and name
-        // Both must be FTR failures (not Scout) and classname+name must match
-        if (!isKeyScoutFailure && f.classname === failure.classname && f.name === failure.name) {
-          return issue;
-        }
+      if (issue && isSameTest(f, failure)) {
+        return issue;
       }
     }
 
@@ -307,21 +302,9 @@ export class ExistingFailedTestIssues {
   }
 
   private isFailureSeen(failure: TestFailure) {
-    // Check if this is a Scout failure
-    const isScout = this.isScoutFailure(failure);
-
     for (const seen of this.results.keys()) {
-      if (isScout) {
-        // For Scout failures, match by test name only (ignore target)
-        const isExistingScoutFailure = this.isScoutFailure(seen);
-        if (isExistingScoutFailure && seen.name === failure.name) {
-          return true;
-        }
-      } else {
-        // For FTR failures, use original matching logic
-        if (seen.classname === failure.classname && seen.name === failure.name) {
-          return true;
-        }
+      if (isSameTest(seen, failure)) {
+        return true;
       }
     }
 
