@@ -61,8 +61,9 @@ steps:
   - name: install_rule
     type: kibana.request
     with:
-      # Call Kibana's own listener, not publicBaseUrl (an auth proxy answers with a sign-in page). See elastic/security-team#20135.
-      use_server_info: true
+      # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+      fetcher:
+        follow_redirects: false
       method: POST
       path: "/s/{{ workflow.spaceId }}/internal/detection_engine/prebuilt_rules/installation/_perform"
       headers:
@@ -92,8 +93,9 @@ steps:
     type: kibana.request
     if: "${{ steps.install_rule.output.summary.skipped > 0 }}"
     with:
-      # Call Kibana's own listener, not publicBaseUrl (an auth proxy answers with a sign-in page). See elastic/security-team#20135.
-      use_server_info: true
+      # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+      fetcher:
+        follow_redirects: false
       method: GET
       path: "/s/{{ workflow.spaceId }}/api/detection_engine/rules?rule_id={{ inputs.actionInput.rule_id | url_encode }}"
       headers:

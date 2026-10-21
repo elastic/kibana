@@ -105,8 +105,9 @@ steps:
     on-failure:
       continue: true
     with:
-      # Call Kibana's own listener, not publicBaseUrl (an auth proxy answers with a sign-in page). See elastic/security-team#20135.
-      use_server_info: true
+      # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+      fetcher:
+        follow_redirects: false
       method: GET
       path: "/s/{{ workflow.spaceId }}/api/endpoint/action/{{ consts.privilege_probe_action_id }}"
       headers:
@@ -138,8 +139,9 @@ steps:
   - name: dispatch
     type: kibana.request
     with:
-      # Call Kibana's own listener, not publicBaseUrl (an auth proxy answers with a sign-in page). See elastic/security-team#20135.
-      use_server_info: true
+      # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+      fetcher:
+        follow_redirects: false
       method: POST
       path: "/s/{{ workflow.spaceId }}/api/endpoint/action/memory_dump"
       headers:
@@ -171,8 +173,9 @@ steps:
             max-attempts: 3
             delay: 5s
         with:
-          # Call Kibana's own listener, not publicBaseUrl (an auth proxy answers with a sign-in page). See elastic/security-team#20135.
-          use_server_info: true
+          # Legacy path: fail on an auth proxy's sign-in redirect instead of passing with HTML (the self client already rejects redirects). See elastic/security-team#20135.
+          fetcher:
+            follow_redirects: false
           method: GET
           path: "/s/{{ workflow.spaceId }}/api/endpoint/action/{{ steps.dispatch.output.data.id }}"
           headers:
