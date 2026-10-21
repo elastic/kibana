@@ -186,7 +186,12 @@ describe('useProvisioningCallback', () => {
     await poll();
 
     expect(result.current.status).toBe('received');
-    expect(result.current.created).toEqual({ id: 'cc-1', name: 'my-identity' });
+    // The reported ARNs travel with the identity so the form can show them.
+    expect(result.current.created).toEqual({
+      id: 'cc-1',
+      name: 'my-identity',
+      ...RECEIVED_VALUES,
+    });
 
     // Polling stops once received.
     await poll();
@@ -261,7 +266,7 @@ describe('useProvisioningCallback', () => {
       const result = await startAndPassDeadline();
 
       expect(result.current.status).toBe('received');
-      expect(result.current.created).toEqual({ id: 'cc-1', name: 'cc-1' });
+      expect(result.current.created).toEqual({ id: 'cc-1', name: 'cc-1', ...RECEIVED_VALUES });
     });
 
     it('waits a little longer, once, when the report is still being applied', async () => {
@@ -336,7 +341,7 @@ describe('useProvisioningCallback', () => {
       } as any);
       await poll();
       expect(result.current.status).toBe('received');
-      expect(result.current.created).toEqual({ id: 'cc-1', name: 'cc-1' });
+      expect(result.current.created).toEqual({ id: 'cc-1', name: 'cc-1', ...RECEIVED_VALUES });
     });
 
     it('keeps the record for a manual Create to retire when the cancel failed', async () => {
@@ -507,7 +512,11 @@ describe('useProvisioningCallback', () => {
 
       expect(outcome).toBe('created');
       expect(result.current.status).toBe('received');
-      expect(result.current.created).toEqual({ id: 'cc-1', name: 'my-identity' });
+      expect(result.current.created).toEqual({
+        id: 'cc-1',
+        name: 'my-identity',
+        ...RECEIVED_VALUES,
+      });
       await poll();
       expect(mockedGet).not.toHaveBeenCalled();
     });
@@ -555,7 +564,7 @@ describe('useProvisioningCallback', () => {
       });
 
       expect(outcome).toBe('created');
-      expect(result.current.created).toEqual({ id: 'cc-1', name: 'cc-1' });
+      expect(result.current.created).toEqual({ id: 'cc-1', name: 'cc-1', ...RECEIVED_VALUES });
     });
 
     it('stops waiting when the record is already gone', async () => {

@@ -22,7 +22,7 @@ import { IAC_PROVISIONER_API_ROUTES } from '../../../../common/constants';
 
 export const PROVISIONING_CALLBACK_POLL_INTERVAL_MS = 3_000;
 /** Stop polling after this even if the record has not expired yet. */
-export const PROVISIONING_CALLBACK_POLL_TIMEOUT_MS = 15 * 60 * 1000;
+export const PROVISIONING_CALLBACK_POLL_TIMEOUT_MS = 10 * 60 * 1000;
 /** Extra time to wait when the deadline finds the stack's report still being applied. */
 export const PROVISIONING_CALLBACK_RECEIVING_GRACE_MS = 60 * 1000;
 
@@ -40,10 +40,12 @@ export type ProvisioningCallbackClientStatus =
  */
 export type ProvisioningCallbackCancelOutcome = 'cancelled' | 'created' | 'failed';
 
-/** The cloud connector created when the stack reported back. */
+/** The cloud connector created when the stack reported back, with the ARNs it reported. */
 export interface CloudConnectorCallbackCreated {
   id: string;
   name: string;
+  role_arn?: string;
+  stack_arn?: string;
 }
 
 /** Identity details stored on the record at launch and used to create the cloud connector. */
@@ -87,7 +89,12 @@ export interface UseProvisioningCallbackResult {
 
 const toCreated = (item: CloudConnectorCallback): CloudConnectorCallbackCreated | undefined =>
   item.cloud_connector_id
-    ? { id: item.cloud_connector_id, name: item.connector_name ?? item.cloud_connector_id }
+    ? {
+        id: item.cloud_connector_id,
+        name: item.connector_name ?? item.cloud_connector_id,
+        role_arn: item.role_arn,
+        stack_arn: item.stack_arn,
+      }
     : undefined;
 
 const toIdentityBody = (

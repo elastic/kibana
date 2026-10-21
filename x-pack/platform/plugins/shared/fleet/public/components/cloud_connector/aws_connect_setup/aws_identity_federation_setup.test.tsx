@@ -21,7 +21,9 @@ import { useGetCloudConnectors } from '../hooks/use_get_cloud_connectors';
 import { useCloudConnectorTemplate } from '../hooks/use_cloud_connector_template';
 import { useProvisioningCallback } from '../hooks/use_provisioning_callback';
 import type { ProvisioningCallbackCancelOutcome } from '../hooks/use_provisioning_callback';
+import { useCreateCloudConnector } from '../hooks/use_create_cloud_connector';
 import { IacKeyCheck } from '../components/iac_key_check';
+import { INVALID_STACK_ARN_MESSAGE } from '../utils';
 
 import { AwsIdentityFederationSetup } from './aws_identity_federation_setup';
 
@@ -29,6 +31,7 @@ jest.mock('@kbn/kibana-react-plugin/public');
 jest.mock('../hooks/use_get_cloud_connectors');
 jest.mock('../hooks/use_cloud_connector_template');
 jest.mock('../hooks/use_provisioning_callback');
+jest.mock('../hooks/use_create_cloud_connector');
 jest.mock('../../../hooks', () => ({
   useDisabledIdentityFederationProviders: jest.fn(),
   useIacProvisioner: jest.fn(),
@@ -46,6 +49,9 @@ const mockUseCloudConnectorTemplate = useCloudConnectorTemplate as jest.MockedFu
 const mockUseProvisioningCallback = useProvisioningCallback as jest.MockedFunction<
   typeof useProvisioningCallback
 >;
+const mockUseCreateCloudConnector = useCreateCloudConnector as jest.MockedFunction<
+  typeof useCreateCloudConnector
+>;
 const mockIacKeyCheck = IacKeyCheck as jest.MockedFunction<typeof IacKeyCheck>;
 const {
   useIacProvisioner: mockUseIacProvisioner,
@@ -56,6 +62,9 @@ const {
 };
 
 const STATIC_TEMPLATE_URL = 'https://console.aws.amazon.com/cloudformation/static';
+const VALID_STACK_ARN = 'arn:aws:cloudformation:us-east-1:123456789012:stack/my-stack/abc';
+const REPORTED_ROLE_ARN = 'arn:aws:iam::123456789012:role/ElasticWorkloadIdentity-abc';
+const NEW_ROLE_ARN = 'arn:aws:iam::123456789012:role/NewRole';
 // Template details the hook owns after a successful live render (key + blueprint), which Launch
 // puts on the callback record as iac_key / iac_blueprint_*.
 const RENDERED_IAC_CONFIRM: CloudConnectorIacState = {
@@ -143,10 +152,12 @@ describe('AwsIdentityFederationSetup', () => {
   let queryClient: QueryClient;
   const onConnectorIdChange = jest.fn();
   const onReadyChange = jest.fn();
+  const mockMutate = jest.fn();
   const mockLaunchOnClick = jest.fn();
   const mockCallbackStart = jest.fn();
   const mockCallbackCancel = jest.fn<Promise<ProvisioningCallbackCancelOutcome>, []>();
   const mockAddSuccess = jest.fn();
+  const mockAddDanger = jest.fn();
 
   const mockGetConnectors = (overrides: Partial<ReturnType<typeof useGetCloudConnectors>> = {}) => {
     mockUseGetCloudConnectors.mockReturnValue({
@@ -179,13 +190,28 @@ describe('AwsIdentityFederationSetup', () => {
     await user.type(screen.getByTestId('awsIdentityFederationSetup-connectorName'), 'my-identity');
   };
 
-  const expectNoManualEntry = () => {
-    for (const testSubj of [
-      'awsIdentityFederationSetup-stackArn',
-      'awsIdentityFederationSetup-roleArn',
-      'awsIdentityFederationSetup-createButton',
-    ]) {
-      expect(screen.queryByTestId(testSubj)).not.toBeInTheDocument();
+  /** Fills the fields a manual Create requires. */
+  const fillRequiredNewIdentityFields = async (user: ReturnType<typeof userEvent.setup>) => {
+    await typeIdentityName(user);
+    await user.type(screen.getByTestId('awsIdentityFederationSetup-roleArn'), NEW_ROLE_ARN);
+  };
+
+  const MANUAL_ENTRY_TEST_SUBJS = [
+    'awsIdentityFederationSetup-stackArn',
+    'awsIdentityFederationSetup-roleArn',
+    'awsIdentityFederationSetup-createButton',
+  ];
+
+  /** The ARN fields can be typed in; Create is only held back by its own validation. */
+  const expectManualEntryUnlocked = () => {
+    expect(screen.getByTestId('awsIdentityFederationSetup-stackArn')).toBeEnabled();
+    expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toBeEnabled();
+    expect(screen.getByTestId('awsIdentityFederationSetup-createButton')).toBeInTheDocument();
+  };
+
+  const expectManualEntryLocked = () => {
+    for (const testSubj of MANUAL_ENTRY_TEST_SUBJS) {
+      expect(screen.getByTestId(testSubj)).toBeDisabled();
     }
   };
 
@@ -196,9 +222,14 @@ describe('AwsIdentityFederationSetup', () => {
     mockUseKibana.mockReturnValue({
       services: {
         application: { navigateToApp: jest.fn() },
-        notifications: { toasts: { addSuccess: mockAddSuccess } },
+        notifications: { toasts: { addSuccess: mockAddSuccess, addDanger: mockAddDanger } },
       },
     } as unknown as ReturnType<typeof useKibana>);
+
+    mockUseCreateCloudConnector.mockReturnValue({
+      mutate: mockMutate,
+      isLoading: false,
+    } as unknown as ReturnType<typeof useCreateCloudConnector>);
 
     mockUseIacProvisioner.mockReturnValue({ isIacProvisionerEnabled: false });
     mockUseDisabledIdentityFederationProviders.mockReturnValue([]);
@@ -262,13 +293,39 @@ describe('AwsIdentityFederationSetup', () => {
     });
   });
 
+  describe('create flow', () => {
+    it('emits id and name together after a connector is created', async () => {
+      let onSuccess: ((connector: { id: string; name: string }) => void) | undefined;
+      mockUseCreateCloudConnector.mockImplementation((cb) => {
+        onSuccess = cb as typeof onSuccess;
+        return { mutate: jest.fn(), isLoading: false } as unknown as ReturnType<
+          typeof useCreateCloudConnector
+        >;
+      });
+
+      renderSetup();
+      onConnectorIdChange.mockClear();
+
+      // The created connector's name comes straight off the mutation response, so it is
+      // available before the invalidated connector-list query refetches.
+      act(() => {
+        onSuccess?.({ id: 'new-connector', name: 'Freshly Created' });
+      });
+
+      await waitFor(() => {
+        expect(onConnectorIdChange).toHaveBeenCalledWith('new-connector', 'Freshly Created');
+      });
+      expect(onConnectorIdChange).not.toHaveBeenCalledWith('new-connector', undefined);
+    });
+  });
+
   describe('without integrations (static template flow, as used by AwsConnectSetup)', () => {
     beforeEach(() => {
       // No connectors yet, so the New Identity tab is the initial tab.
       mockGetConnectors({ data: [] });
     });
 
-    it('offers no ARN fields or Create with the provisioner off: the static stack reports back too', () => {
+    it('renders the ARN fields and Create with the provisioner off, so the identity can be created by hand', () => {
       mockUseProvisioningCallback.mockReturnValue({
         available: true,
         isChecking: false,
@@ -279,10 +336,34 @@ describe('AwsIdentityFederationSetup', () => {
       });
       renderSetup({ cloud });
 
-      expectNoManualEntry();
+      expectManualEntryUnlocked();
       expect(
         screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')
       ).toBeInTheDocument();
+    });
+
+    it('posts the plain create body without IaC fields', async () => {
+      const user = userEvent.setup();
+      renderSetup({ cloud });
+
+      await fillRequiredNewIdentityFields(user);
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-createButton'));
+
+      expect(mockMutate).toHaveBeenCalledWith({
+        name: 'my-identity',
+        cloudProvider: 'aws',
+        accountType: 'single-account',
+        vars: {
+          role_arn: { value: NEW_ROLE_ARN, type: 'text' },
+        },
+      });
+    });
+
+    it('flags Role ARN as required when the host reports invalid required vars', () => {
+      renderSetup({ cloud, hasInvalidRequiredVars: true });
+
+      expect(screen.getByText('Role ARN is required')).toBeInTheDocument();
+      expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toBeInvalid();
     });
 
     it('does not render IacKeyCheck on the Existing Identity tab', () => {
@@ -324,10 +405,154 @@ describe('AwsIdentityFederationSetup', () => {
       expect(mockLaunchOnClick).toHaveBeenCalledTimes(1);
     });
 
-    it('offers no Role ARN, stack ARN or Create: the stack reports the ARNs back itself', () => {
+    it('passes the IaC confirm onto Create after a successful render', async () => {
+      // The hook owns the render outcome; Create forwards it as-is, and with no stack ARN typed
+      // no iac_deployment_id is posted alongside it.
+      mockUseCloudConnectorTemplate.mockReturnValue(
+        provisionerHookResult(mockLaunchOnClick, { iacConfirm: RENDERED_IAC_CONFIRM })
+      );
+      const user = userEvent.setup();
       renderSetup({ cloud, integrations });
 
-      expectNoManualEntry();
+      await fillRequiredNewIdentityFields(user);
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-createButton'));
+
+      expect(mockMutate).toHaveBeenCalledWith(
+        expect.objectContaining({ name: 'my-identity', ...RENDERED_IAC_CONFIRM })
+      );
+      expect(mockMutate.mock.calls[0][0]).not.toHaveProperty('iac_deployment_id');
+    });
+
+    it('posts the rendered key and the trimmed stack ARN on Create', async () => {
+      mockUseCloudConnectorTemplate.mockReturnValue(
+        provisionerHookResult(mockLaunchOnClick, { iacConfirm: RENDERED_IAC_CONFIRM })
+      );
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      await fillRequiredNewIdentityFields(user);
+      await user.type(
+        screen.getByTestId('awsIdentityFederationSetup-stackArn'),
+        ` ${VALID_STACK_ARN} `
+      );
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-createButton'));
+
+      expect(mockMutate).toHaveBeenCalledWith({
+        name: 'my-identity',
+        cloudProvider: 'aws',
+        accountType: 'single-account',
+        vars: {
+          role_arn: { value: NEW_ROLE_ARN, type: 'text' },
+        },
+        ...RENDERED_IAC_CONFIRM,
+        iac_deployment_id: VALID_STACK_ARN,
+      });
+    });
+
+    it('posts neither IaC field when nothing was rendered and no stack ARN was entered', async () => {
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      await fillRequiredNewIdentityFields(user);
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-createButton'));
+
+      expect(mockMutate).toHaveBeenCalledWith({
+        name: 'my-identity',
+        cloudProvider: 'aws',
+        accountType: 'single-account',
+        vars: {
+          role_arn: { value: NEW_ROLE_ARN, type: 'text' },
+        },
+      });
+    });
+
+    it('flags an invalid stack ARN and disables Create even with the other fields filled', async () => {
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      await fillRequiredNewIdentityFields(user);
+      expect(screen.getByTestId('awsIdentityFederationSetup-createButton')).toBeEnabled();
+
+      await user.type(screen.getByTestId('awsIdentityFederationSetup-stackArn'), 'not-an-arn');
+
+      expect(screen.getByText(INVALID_STACK_ARN_MESSAGE)).toBeInTheDocument();
+      expect(screen.getByTestId('awsIdentityFederationSetup-createButton')).toBeDisabled();
+    });
+
+    it('clears the form, the stack ARN and the rendered template details on create success and hands the new identity to IacKeyCheck', async () => {
+      let onSuccess: ((connector: { id: string; name: string }) => void) | undefined;
+      mockUseCreateCloudConnector.mockImplementation((cb) => {
+        onSuccess = cb as typeof onSuccess;
+        return { mutate: mockMutate, isLoading: false } as unknown as ReturnType<
+          typeof useCreateCloudConnector
+        >;
+      });
+      // Stateful stub of the hook's confirm-once contract: the template details stay until the
+      // component clears them, after which the hook reports nothing to post.
+      let iacConfirm: CloudConnectorIacState | undefined = RENDERED_IAC_CONFIRM;
+      const clearIacConfirm = jest.fn(() => {
+        iacConfirm = undefined;
+      });
+      mockUseCloudConnectorTemplate.mockImplementation(() =>
+        provisionerHookResult(mockLaunchOnClick, { iacConfirm, clearIacConfirm })
+      );
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      await fillRequiredNewIdentityFields(user);
+      await user.type(screen.getByTestId('awsIdentityFederationSetup-stackArn'), VALID_STACK_ARN);
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-createButton'));
+      expect(mockMutate).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          ...RENDERED_IAC_CONFIRM,
+          iac_deployment_id: VALID_STACK_ARN,
+        })
+      );
+
+      act(() => {
+        onSuccess?.({ id: 'new-connector', name: 'Freshly Created' });
+      });
+
+      // Lands on the Existing tab with the new identity selected and under check.
+      await waitFor(() => {
+        expect(lastIacKeyCheckProps()?.cloudConnectorId).toBe('new-connector');
+      });
+      expect(onConnectorIdChange).toHaveBeenLastCalledWith('new-connector', 'Freshly Created');
+      expect(clearIacConfirm).toHaveBeenCalledTimes(1);
+
+      // Back on the New tab the fields are blank and the template details were consumed by the
+      // first Create: a second Create without a new Launch posts neither the previous
+      // key/blueprint nor the cleared stack ARN.
+      await user.click(screen.getByRole('tab', { name: 'New Identity' }));
+      expect(screen.getByTestId('awsIdentityFederationSetup-connectorName')).toHaveValue('');
+      expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toHaveValue('');
+      expect(screen.getByTestId('awsIdentityFederationSetup-stackArn')).toHaveValue('');
+      await fillRequiredNewIdentityFields(user);
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-createButton'));
+
+      expect(mockMutate).toHaveBeenCalledTimes(2);
+      expect(mockMutate).toHaveBeenLastCalledWith({
+        name: 'my-identity',
+        cloudProvider: 'aws',
+        accountType: 'single-account',
+        vars: {
+          role_arn: { value: NEW_ROLE_ARN, type: 'text' },
+        },
+      });
+    });
+
+    it('keeps Create disabled while the live render is in flight', async () => {
+      // Before the render settles there are no template details to post; a Create pressed then
+      // would store a keyless identity that the late render could no longer attach to.
+      mockUseCloudConnectorTemplate.mockReturnValue(
+        provisionerHookResult(mockLaunchOnClick, { isGeneratingTemplate: true })
+      );
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      await fillRequiredNewIdentityFields(user);
+
+      expect(screen.getByTestId('awsIdentityFederationSetup-createButton')).toBeDisabled();
     });
 
     it('renders the template generation error from the hook as a danger callout', () => {
@@ -413,17 +638,18 @@ describe('AwsIdentityFederationSetup', () => {
       expect(mockUseCloudConnectorTemplate.mock.lastCall![0].getLaunchStackParams).toBeUndefined();
     });
 
-    it('explains and blocks Launch when the callback is not available: nothing else creates the identity', async () => {
+    it('explains the callback is not available and leaves Launch and manual entry usable', () => {
       mockUseProvisioningCallback.mockReturnValue(callbackState({ available: false }));
-      const user = userEvent.setup();
       renderSetup({ cloud, integrations });
 
       expect(
         screen.getByTestId('awsIdentityFederationSetup-callbackUnavailable')
       ).toBeInTheDocument();
-      await typeIdentityName(user);
-      expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeDisabled();
-      expectNoManualEntry();
+      // No name is needed before Launch: it is only needed at Create.
+      expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeEnabled();
+      expectManualEntryUnlocked();
+      // The guide tells the user to paste the outputs, since nothing reports back.
+      expect(screen.getByText(/then click the Outputs tab/)).toBeInTheDocument();
     });
 
     it('shows the server reason when the callback is not available because of the public URL', async () => {
@@ -439,7 +665,7 @@ describe('AwsIdentityFederationSetup', () => {
         screen.getByTestId('awsIdentityFederationSetup-callbackUnavailableReason')
       ).toHaveTextContent(reason);
       await typeIdentityName(user);
-      expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeDisabled();
+      expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeEnabled();
     });
 
     it('shows no callout and keeps Launch disabled while the server is still checking', async () => {
@@ -572,7 +798,130 @@ describe('AwsIdentityFederationSetup', () => {
       expect(screen.getByTestId('awsIdentityFederationSetup-connectorName')).toHaveValue('');
     });
 
-    it('keeps the name editable and Launch available while waiting, so the user can launch again', () => {
+    it('keeps the ARN fields and Create unlocked before Launch', () => {
+      renderSetup({ cloud, integrations });
+
+      expectManualEntryUnlocked();
+    });
+
+    it('locks the ARN fields and Create while waiting for the stack to report back', () => {
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      renderSetup({ cloud, integrations });
+
+      expectManualEntryLocked();
+      expect(screen.getByTestId('awsIdentityFederationSetup-callbackSpinner')).toBeInTheDocument();
+    });
+
+    it.each(['expired', 'error'] as const)(
+      'unlocks the ARN fields with a hint once the callback is %s',
+      (status) => {
+        mockUseProvisioningCallback.mockReturnValue(callbackState({ status }));
+        renderSetup({ cloud, integrations });
+
+        expectManualEntryUnlocked();
+        expect(
+          screen.getByTestId('awsIdentityFederationSetup-callbackGivenUp')
+        ).toBeInTheDocument();
+        expect(
+          screen.queryByTestId('awsIdentityFederationSetup-callbackPending')
+        ).not.toBeInTheDocument();
+      }
+    );
+
+    it('fills the ARN fields with what the stack reported', async () => {
+      const user = userEvent.setup();
+      mockUseProvisioningCallback.mockReturnValue(
+        callbackState({
+          status: 'received',
+          created: {
+            id: 'cc-1',
+            name: 'my-identity',
+            role_arn: REPORTED_ROLE_ARN,
+            stack_arn: VALID_STACK_ARN,
+          },
+        })
+      );
+      renderSetup({ cloud, integrations });
+
+      // The form moved to the Existing tab with the identity selected; the New tab shows what
+      // the stack reported.
+      await user.click(screen.getByRole('tab', { name: 'New Identity' }));
+      expect(screen.getByTestId('awsIdentityFederationSetup-roleArn')).toHaveValue(
+        REPORTED_ROLE_ARN
+      );
+      expect(screen.getByTestId('awsIdentityFederationSetup-stackArn')).toHaveValue(
+        VALID_STACK_ARN
+      );
+    });
+
+    it('offers to enter the ARNs by hand while waiting, which retires the record', async () => {
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-enterManually'));
+
+      expect(mockCallbackCancel).toHaveBeenCalledTimes(1);
+      expect(mockAddDanger).not.toHaveBeenCalled();
+    });
+
+    it('explains when the record could not be retired from the manual-entry link', async () => {
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
+      mockCallbackCancel.mockResolvedValue('failed');
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-enterManually'));
+
+      expect(mockAddDanger).toHaveBeenCalledWith({
+        title:
+          'Could not stop waiting for CloudFormation. Try again, or wait for the stack to report back.',
+      });
+    });
+
+    it('retires a record the deadline could not before creating the identity by hand', async () => {
+      // A failed cancel at the deadline keeps the id, so Create retries the cancel first.
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'expired' }));
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      await fillRequiredNewIdentityFields(user);
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-createButton'));
+
+      expect(mockCallbackCancel).toHaveBeenCalledTimes(1);
+      expect(mockMutate).toHaveBeenCalledWith(expect.objectContaining({ name: 'my-identity' }));
+    });
+
+    it('does not create by hand when the stack reported first', async () => {
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'expired' }));
+      mockCallbackCancel.mockResolvedValue('created');
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      await fillRequiredNewIdentityFields(user);
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-createButton'));
+
+      expect(mockCallbackCancel).toHaveBeenCalledTimes(1);
+      expect(mockMutate).not.toHaveBeenCalled();
+    });
+
+    it('does not create by hand when the record could not be retired', async () => {
+      mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'expired' }));
+      mockCallbackCancel.mockResolvedValue('failed');
+      const user = userEvent.setup();
+      renderSetup({ cloud, integrations });
+
+      await fillRequiredNewIdentityFields(user);
+      await user.click(screen.getByTestId('awsIdentityFederationSetup-createButton'));
+
+      expect(mockMutate).not.toHaveBeenCalled();
+      expect(mockAddDanger).toHaveBeenCalledWith({
+        title:
+          'Could not stop waiting for CloudFormation. Try again, or wait for the stack to report back.',
+      });
+    });
+
+    it('keeps the name editable but disables Launch while waiting: one launch at a time', () => {
       mockUseProvisioningCallback.mockReturnValue(callbackState({ status: 'pending' }));
       mockUseCloudConnectorTemplate.mockReturnValue(
         provisionerHookResult(mockLaunchOnClick, {
@@ -583,9 +932,7 @@ describe('AwsIdentityFederationSetup', () => {
       renderSetup({ cloud, integrations });
 
       expect(screen.getByTestId('awsIdentityFederationSetup-connectorName')).toBeEnabled();
-      expect(
-        screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeDisabled();
       expect(screen.getByTestId('awsIdentityFederationSetup-callbackSpinner')).toBeInTheDocument();
     });
 
@@ -602,19 +949,15 @@ describe('AwsIdentityFederationSetup', () => {
     });
 
     it.each(['expired', 'error'] as const)(
-      'asks for another launch, without a spinner, when the callback is %s',
+      'lets the user launch again, without a spinner, when the callback is %s',
       async (status) => {
         mockUseProvisioningCallback.mockReturnValue(callbackState({ status }));
         const user = userEvent.setup();
         renderSetup({ cloud, integrations });
 
         expect(
-          screen.getByTestId('awsIdentityFederationSetup-callbackGivenUp')
-        ).toBeInTheDocument();
-        expect(
-          screen.queryByTestId('awsIdentityFederationSetup-callbackPending')
+          screen.queryByTestId('awsIdentityFederationSetup-callbackSpinner')
         ).not.toBeInTheDocument();
-        expectNoManualEntry();
         await typeIdentityName(user);
         expect(screen.getByTestId('awsIdentityFederationSetup-launchCloudFormation')).toBeEnabled();
       }
