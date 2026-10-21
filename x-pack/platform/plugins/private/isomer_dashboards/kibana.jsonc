@@ -9,6 +9,6 @@
     "id": "isomerDashboards",
     "browser": true,
     "server": true,
-    "requiredPlugins": ["isomer", "share"]
+    "requiredPlugins": ["dataViews", "isomer", "share"]
   }
 }
