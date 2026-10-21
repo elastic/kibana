@@ -22,6 +22,8 @@ import { RuleFormProvider } from '@kbn/alerting-v2-rule-form';
 import type { RuleFormServices } from '@kbn/alerting-v2-rule-form';
 import { getMinimumScheduleInterval } from '../../kibana_services';
 import { useAlertingLocators } from '../../application/locator_context';
+import { CreateActionPolicyFormFlyout } from '../../components/action_policy/form_flyout/create_action_policy_form_flyout';
+import { useCreateActionPolicyDisabledReason } from '../../hooks/use_create_action_policy_disabled_reason';
 import { useSequenceBuilderForm, useSequenceBuilderState } from './use_sequence_builder_form';
 import { SequenceBuilderHeader } from './sequence_builder_header';
 import { AlertConditionCanvas } from './alert_condition_canvas';
@@ -47,6 +49,13 @@ const useRuleFormServicesBag = (): RuleFormServices => {
     | DashboardStart
     | undefined;
   const cps = useService(PluginStart('cps'), { optional: true }) as CPSPluginStart | undefined;
+  const createActionPolicyDisabledReason = useCreateActionPolicyDisabledReason();
+  const { actionPolicyLocators } = useAlertingLocators();
+  const getActionPolicyEditHref = useCallback(
+    (actionPolicyId: string) =>
+      actionPolicyLocators.getRedirectUrl({ page: 'edit', actionPolicyId }),
+    [actionPolicyLocators]
+  );
 
   return useMemo<RuleFormServices>(
     () => ({
@@ -62,6 +71,9 @@ const useRuleFormServicesBag = (): RuleFormServices => {
       dashboard,
       cps,
       minimumScheduleInterval: getMinimumScheduleInterval(),
+      createActionPolicyFormFlyout: CreateActionPolicyFormFlyout,
+      createActionPolicyDisabledReason,
+      getActionPolicyEditHref,
     }),
     [
       http,
@@ -75,6 +87,8 @@ const useRuleFormServicesBag = (): RuleFormServices => {
       uiActions,
       dashboard,
       cps,
+      createActionPolicyDisabledReason,
+      getActionPolicyEditHref,
     ]
   );
 };
