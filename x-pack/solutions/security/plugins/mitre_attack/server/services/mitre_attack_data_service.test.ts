@@ -366,6 +366,67 @@ describe('MitreAttackDataService', () => {
     expect(logger.warn).not.toHaveBeenCalled();
   });
 
+  describe('getStatus()', () => {
+    it('returns idle initially', () => {
+      expect(service.getStatus()).toEqual({ status: 'idle' });
+    });
+
+    it('returns ready with counts after successful population', async () => {
+      await service.populate();
+
+      const status = service.getStatus();
+      expect(status.status).toBe('ready');
+      expect(status.counts).toEqual({ enterprise: 1 });
+      expect(status.lastError).toBeUndefined();
+      expect(status.lastAttemptAt).toEqual(expect.any(Number));
+    });
+
+    it('returns failed with lastError after failed population', async () => {
+      savedObjectsRepository.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'enterprise:15.1:TA0001',
+            type: 'mitre-attack-entity',
+            error: { statusCode: 500, error: 'Internal Server Error', message: 'ES write error' },
+          },
+        ],
+      } as SavedObjectsBulkResponse<MitreEntity>);
+
+      await service.populate();
+
+      const status = service.getStatus();
+      expect(status.status).toBe('failed');
+      expect(status.lastError).toEqual(expect.any(String));
+      expect(status.lastAttemptAt).toEqual(expect.any(Number));
+    });
+  });
+
+  describe('reportEmptyWhileReady()', () => {
+    it('flips ready to degraded and triggers repopulation', async () => {
+      await service.populate();
+      expect(service.getStatus().status).toBe('ready');
+      expect(savedObjectsRepository.bulkCreate).toHaveBeenCalledTimes(1);
+
+      service.reportEmptyWhileReady();
+
+      expect(service.getStatus().status).toBe('initializing');
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('MITRE data reported empty while state is ready')
+      );
+      await service.populate(); // joins the repair run
+      expect(savedObjectsRepository.bulkCreate).toHaveBeenCalledTimes(2);
+      expect(service.getStatus().status).toBe('ready');
+    });
+
+    it('is a no-op when not in ready state', () => {
+      service.reportEmptyWhileReady();
+
+      expect(service.getStatus()).toEqual({ status: 'idle' });
+      expect(savedObjectsRepository.bulkCreate).not.toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+  });
+
   describe('retry cooldown', () => {
     const failedResponse = {
       saved_objects: [

@@ -27,7 +27,11 @@ const resolveScopedModelMock = resolveScopedModel as jest.MockedFunction<typeof 
 const huntBehaviorMock = huntBehavior as jest.MockedFunction<typeof huntBehavior>;
 
 const model = { connector: { id: 'gpt' } } as unknown as ScopedModel;
-const mitreDataClient = { list: jest.fn() } as unknown as MitreAttackDataClient;
+const mitreDataClient = {
+  list: jest.fn(),
+  getById: jest.fn(),
+  getStatus: jest.fn().mockReturnValue({ status: 'ready' }),
+} as unknown as MitreAttackDataClient;
 const tier2Result: HuntBehaviorResult = {
   status: 'no_behaviors_found',
   has_hit: false,

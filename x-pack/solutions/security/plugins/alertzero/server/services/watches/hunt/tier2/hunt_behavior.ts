@@ -693,17 +693,20 @@ export const huntBehavior = async (
 
   // Load the catalog first so a run without one pays for no model call. An empty catalog is a
   // deployment-side gap (population failed or data missing), not evidence the model invented ids.
-  const { techniqueById, subtechniqueById } = await getMitreCatalog({
+  const catalog = await getMitreCatalog({
     mitreDataClient,
     logger,
   });
+  const { techniqueById, subtechniqueById } = catalog;
   if (techniqueById.size === 0 && subtechniqueById.size === 0) {
+    const isDisabled =
+      catalog.unavailableReason === 'disabled' || catalog.unavailableReason === 'no_client';
+    const reason = isDisabled ? 'catalog_disabled' : 'catalog_unavailable';
     logger.warn(
-      '[hunt:extract] the managed MITRE ATT&CK data is unavailable; extraction was skipped and ' +
-        'no technique was verified or hunted.'
+      `[hunt:extract] the managed MITRE ATT&CK data is ${
+        isDisabled ? 'disabled' : 'temporarily unavailable'
+      }; extraction was skipped and ` + 'no technique was verified or hunted.'
     );
-    // Nothing was extracted, so there is no per-technique gap to name: one report-level
-    // entry (no technique_id), retryable by `completeness.ts`.
     return {
       status: 'no_behaviors_validated',
       report_id: reportId,
@@ -712,16 +715,19 @@ export const huntBehavior = async (
       has_hit: false,
       incomplete: [
         {
-          reason: 'catalog_unavailable',
-          detail:
-            'The managed MITRE ATT&CK data is unavailable (mitreAttack plugin disabled, ' +
-            'population failed, or data missing), so no technique could be extracted or ' +
-            'verified and the report was not hunted.',
+          reason,
+          detail: isDisabled
+            ? 'The mitreAttack plugin is disabled or its managed source is off. ' +
+              'This is a permanent configuration; retrying cannot resolve it.'
+            : 'The managed MITRE ATT&CK data is temporarily unavailable (population failed ' +
+              'or data missing), so no technique could be extracted or verified and the report ' +
+              'was not hunted.',
         },
       ],
-      next_step:
-        'Managed MITRE ATT&CK data is unavailable; retry the hunt once the mitreAttack plugin ' +
-        'has populated its data.',
+      next_step: isDisabled
+        ? 'The mitreAttack plugin is disabled; enable it to allow technique extraction and hunting.'
+        : 'Managed MITRE ATT&CK data is temporarily unavailable; retry the hunt once the mitreAttack plugin ' +
+          'has populated its data.',
     };
   }
 
@@ -833,9 +839,13 @@ export const huntBehavior = async (
   // optional field is one more a caller can miss and read silence as coverage.
   const incomplete: HuntIncompleteness[] = [
     ...droppedIds.map((technique_id) => ({
-      reason: 'unknown_technique_id' as const,
+      reason: catalog.degraded
+        ? ('catalog_unavailable' as const)
+        : ('unknown_technique_id' as const),
       technique_id,
-      detail: `${technique_id} is not in the ATT&CK catalog, so it was never searched for.`,
+      detail: catalog.degraded
+        ? `${technique_id} is absent from a degraded ATT&CK catalog; it may exist once population completes.`
+        : `${technique_id} is not in the ATT&CK catalog, so it was never searched for.`,
     })),
     ...ungroundedQuoteIds.map((technique_id) => ({
       reason: 'quote_ungrounded' as const,

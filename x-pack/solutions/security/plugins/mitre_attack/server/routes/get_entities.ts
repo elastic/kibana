@@ -11,6 +11,7 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import {
   GET_MITRE_ENTITIES_URL,
   GetMitreEntitiesRequestQuery,
+  MitreDataUnavailableError,
   type GetMitreEntitiesResponse,
 } from '@kbn/security-mitre-attack-common';
 import type { MitreAttackRequestHandlerContext } from '../types';
@@ -88,6 +89,12 @@ export const registerGetEntitiesRoute = (
             },
           });
         } catch (err) {
+          if (err instanceof MitreDataUnavailableError) {
+            return response.customError({
+              statusCode: 503,
+              body: { message: `MITRE data unavailable: ${err.reason}` },
+            });
+          }
           logger.error(
             `Error fetching MITRE entities: ${err instanceof Error ? err.message : String(err)}`
           );

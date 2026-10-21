@@ -171,6 +171,24 @@ describe('huntBehavior', () => {
     );
   });
 
+  it('marks absent technique IDs as catalog_unavailable when catalog is degraded', async () => {
+    const { getMitreCatalog } = jest.requireMock('./mitre_catalog');
+    getMitreCatalog.mockResolvedValueOnce({ ...enterpriseCatalog, degraded: true });
+    const model = buildMockModel([
+      { technique_id: 'T1566', evidence_quote: 'spear phishing used', llm_confidence: 0.9 },
+      { technique_id: 'T9999', evidence_quote: 'fictional', llm_confidence: 0.9 },
+    ]);
+    const result = await huntBehavior(model, logger, { text: REPORT_TEXT });
+    expect(result.incomplete).toContainEqual(
+      expect.objectContaining({
+        reason: 'catalog_unavailable',
+        technique_id: 'T9999',
+        detail: expect.stringContaining('degraded'),
+      })
+    );
+    expect(result.incomplete?.some((i) => i.reason === 'unknown_technique_id')).toBe(false);
+  });
+
   it('skips extraction and reports one report-level catalog_unavailable gap when the catalog is empty', async () => {
     const { getMitreCatalog } = jest.requireMock('./mitre_catalog');
     getMitreCatalog.mockResolvedValueOnce({
@@ -192,6 +210,26 @@ describe('huntBehavior', () => {
     ]);
     expect(result.incomplete?.[0].technique_id).toBeUndefined();
     expect(warnMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports catalog_disabled when the MITRE data client is not available', async () => {
+    const { getMitreCatalog } = jest.requireMock('./mitre_catalog');
+    getMitreCatalog.mockResolvedValueOnce({
+      techniqueById: new Map(),
+      subtechniqueById: new Map(),
+      unavailableReason: 'no_client',
+    });
+    const model = buildMockModel([
+      { technique_id: 'T1566', evidence_quote: 'spear phishing used', llm_confidence: 0.9 },
+    ]);
+    const result = await huntBehavior(model, logger, { text: REPORT_TEXT });
+    expect(model.extraction.chatModel.withStructuredOutput).not.toHaveBeenCalled();
+    expect(result.status).toBe('no_behaviors_validated');
+    expect(result.behaviors).toHaveLength(0);
+    expect(result.incomplete).toEqual([
+      expect.objectContaining({ reason: 'catalog_disabled', detail: expect.any(String) }),
+    ]);
+    expect(result.incomplete?.[0].technique_id).toBeUndefined();
   });
 
   it('loads the catalog before calling the extraction model', async () => {
