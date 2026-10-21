@@ -53,7 +53,7 @@ Vendor specs are sometimes wrong about authentication too. Trello's declares onl
 Responses come from, in order of preference:
 
 1. **Fixtures**: hand-written responses passed as `fixtures`, for operations where nothing else is good enough;
-2. **Recordings**: responses captured from the real vendor API, passed as `recordings`. A recording is served only while it conforms to the spec; one that doesn't, or that names an operation the spec lacks, is listed in `rejectedResponses`, which signals drift on the vendor's side. Recorded error responses are not served by default;
+2. **Recordings**: responses captured from the real vendor API, passed as `recordings`. A recording is served only while it conforms to the spec; one that doesn't, or that names an operation the spec lacks, is listed in `rejectedResponses` (with the `spec` it contradicts, for named specs), which signals drift on the vendor's side. Recorded error responses are not served by default;
 3. **Spec examples**: the response media type's `example` or `examples`, when they match the schema;
 4. **Samples** of the response schema.
 
