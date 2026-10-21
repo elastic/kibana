@@ -16,10 +16,13 @@ export const tokenCountToUsageMetadata = (tokens: ChatCompletionTokenCount): Usa
 });
 
 export const responseToLangchainMessage = (response: ChatCompleteResponse): AIMessage => {
-  const additionalKwargs = response.refusal ? { refusal: response.refusal } : undefined;
+  const additionalKwargs = {
+    ...(response.refusal ? { refusal: response.refusal } : {}),
+    ...(response.reasoning ? { reasoning: response.reasoning } : {}),
+  };
   return new AIMessage({
     content: response.content,
-    ...(additionalKwargs ? { additional_kwargs: additionalKwargs } : {}),
+    ...(Object.keys(additionalKwargs).length ? { additional_kwargs: additionalKwargs } : {}),
     ...(response.tokens ? { usage_metadata: tokenCountToUsageMetadata(response.tokens) } : {}),
     tool_calls: response.toolCalls.map((toolCall) => {
       return {

@@ -36,6 +36,10 @@ export type ChatCompletionMessageEvent<TToolOptions extends ToolOptions = ToolOp
        */
       refusal?: string;
       /**
+       * Reasoning (thinking) text returned by the model for this response, if any.
+       */
+      reasoning?: string;
+      /**
        * Optional deanonymized input messages metadata
        */
       deanonymized_input?: DeanonymizedMessageData[];
