@@ -69,6 +69,17 @@ it('keeps the automation when deleting its workflow bound to a service account f
   expect(soClient.delete).not.toHaveBeenCalled();
 });
 
+it.each([
+  ['the workflow lookup fails', () => getWorkflow.mockRejectedValue(new Error('unavailable'))],
+  ['the workflow cannot be read', () => getWorkflow.mockResolvedValue(null)],
+])('keeps the automation when deleting its workflow fails and %s', async (_, arrangeLookup) => {
+  arrangeLookup();
+  const error = new Error('Forbidden');
+  deleteWorkflows.mockRejectedValueOnce(error);
+  await expect(call()).rejects.toBe(error);
+  expect(soClient.delete).not.toHaveBeenCalled();
+});
+
 it('propagates budget cleanup failures', async () => {
   const error = new Error('Storage unavailable');
   soClient.delete.mockRejectedValueOnce(error);
