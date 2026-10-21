@@ -6,6 +6,7 @@ on:
       - main
       - '[0-9]+.[0-9]+'
     paths:
+      - 'oas_docs/output/kibana.yaml'
       - 'oas_docs/output/kibana-full.yaml'
 
 concurrency:
@@ -25,9 +26,20 @@ jobs:
 
       - uses: elastic/docs-actions/openapi/lint@v1
         with:
+          spec-path: oas_docs/output/kibana.yaml
+
+      - uses: elastic/docs-actions/openapi/upload@v1
+        with:
+          spec-path: oas_docs/output/kibana.yaml
+          spec-name: kibana
+
+      # Same bundle with the full Dashboards & Visualizations operations, consumed by docs-builder.
+      # Remove together with the bump-slim overlay when Bump.sh is decommissioned.
+      - uses: elastic/docs-actions/openapi/lint@v1
+        with:
           spec-path: oas_docs/output/kibana-full.yaml
 
       - uses: elastic/docs-actions/openapi/upload@v1
         with:
           spec-path: oas_docs/output/kibana-full.yaml
-          spec-name: kibana
+          spec-name: kibana-full

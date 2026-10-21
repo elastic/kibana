@@ -5,6 +5,7 @@ on:
     branches:
       - main
     paths:
+      - 'oas_docs/output/kibana.serverless.yaml'
       - 'oas_docs/output/kibana-full.serverless.yaml'
 
 concurrency:
@@ -24,9 +25,20 @@ jobs:
 
       - uses: elastic/docs-actions/openapi/lint@v1
         with:
+          spec-path: oas_docs/output/kibana.serverless.yaml
+
+      - uses: elastic/docs-actions/openapi/upload@v1
+        with:
+          spec-path: oas_docs/output/kibana.serverless.yaml
+          spec-name: kibana-serverless
+
+      # Same bundle with the full Dashboards & Visualizations operations, consumed by docs-builder.
+      # Remove together with the bump-slim overlay when Bump.sh is decommissioned.
+      - uses: elastic/docs-actions/openapi/lint@v1
+        with:
           spec-path: oas_docs/output/kibana-full.serverless.yaml
 
       - uses: elastic/docs-actions/openapi/upload@v1
         with:
           spec-path: oas_docs/output/kibana-full.serverless.yaml
-          spec-name: kibana-serverless
+          spec-name: kibana-serverless-full

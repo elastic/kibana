@@ -19,6 +19,8 @@ jobs:
       fail-fast: false
       matrix:
         spec:
+          - oas_docs/output/kibana.yaml
+          - oas_docs/output/kibana.serverless.yaml
           - oas_docs/output/kibana-full.yaml
           - oas_docs/output/kibana-full.serverless.yaml
     steps:
