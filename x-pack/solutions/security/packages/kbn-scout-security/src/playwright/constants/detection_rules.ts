@@ -5,6 +5,20 @@
  * 2.0.
  */
 
+export type RuleSeverity = 'low' | 'medium' | 'high' | 'critical';
+
+export interface CustomQueryRuleResponseAction {
+  action_type_id: '.endpoint';
+  params: {
+    command: 'isolate' | 'kill-process' | 'suspend-process' | 'runscript';
+    comment?: string;
+    config?: {
+      field: string;
+      overwrite: boolean;
+    };
+  };
+}
+
 export interface CustomQueryRule {
   index: string[];
   enabled: boolean;
@@ -12,11 +26,49 @@ export interface CustomQueryRule {
   description: string;
   risk_score: number;
   rule_id: string;
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  severity: RuleSeverity;
   type: 'query';
   query: string;
   from: string;
+  /** Rule run interval. Omitted values use the detection engine default. */
+  interval?: string;
   investigation_fields?: { field_names: string[] };
+  response_actions?: CustomQueryRuleResponseAction[];
+  threat?: Array<{
+    framework: string;
+    tactic: { id: string; name: string; reference: string };
+    technique?: Array<{
+      id: string;
+      name: string;
+      reference: string;
+      subtechnique?: Array<{ id: string; name: string; reference: string }>;
+    }>;
+  }>;
+}
+
+export interface ThreatMatchRule {
+  name: string;
+  description: string;
+  enabled: boolean;
+  risk_score: number;
+  rule_id: string;
+  severity: RuleSeverity;
+  type: 'threat_match';
+  query: string;
+  index: string[];
+  threat_index: string[];
+  threat_query: string;
+  threat_mapping: Array<{ entries: Array<{ field: string; value: string; type: 'mapping' }> }>;
+  threat_indicator_path?: string;
+  from: string;
+  interval?: string;
+  timeline_id?: string;
+  timeline_title?: string;
+}
+
+export interface EqlRule extends Omit<CustomQueryRule, 'type' | 'response_actions'> {
+  type: 'eql';
+  language: 'eql';
 }
 
 export const DEFAULT_SECURITY_SOLUTION_INDEXES = [
@@ -41,5 +93,19 @@ export const CUSTOM_QUERY_RULE: CustomQueryRule = {
   severity: 'high',
   type: 'query',
   query: '*:*',
+  from: '2019-01-01T00:00:00.000Z',
+};
+
+export const EQL_RULE: EqlRule = {
+  index: DEFAULT_SECURITY_SOLUTION_INDEXES,
+  enabled: true,
+  name: 'EQL Alert Testing Query',
+  description: 'Tests a simple EQL query',
+  risk_score: 1,
+  rule_id: 'eql-rule-1',
+  severity: 'high',
+  type: 'eql',
+  language: 'eql',
+  query: 'any where process.name == "zsh"',
   from: '2019-01-01T00:00:00.000Z',
 };

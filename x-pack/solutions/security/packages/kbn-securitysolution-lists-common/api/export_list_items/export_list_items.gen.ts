@@ -23,7 +23,7 @@ export const ExportListItemsRequestQuery = lazySchema(() =>
     /**
      * Value list's `id` to export.
      */
-    list_id: ListId,
+    list_id: ListId.describe("Value list's `id` to export."),
   })
 );
 export type ExportListItemsRequestQuery = z.infer<typeof ExportListItemsRequestQuery>;

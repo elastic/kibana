@@ -22,6 +22,7 @@ import {
 import { AppMenuPopover } from './app_menu_popover';
 import { SplitButtonWithNotification } from './split_button_with_notification';
 import type { AppMenuPrimaryActionItem, AppMenuSplitButtonProps } from '../types';
+import { asPlainText } from '../as_plain_text';
 import { getAppMenuActionButtonTestSubj } from '../test_subjects';
 
 type AppMenuActionButtonProps = AppMenuPrimaryActionItem & {
@@ -59,7 +60,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     fullWidth,
   } = props;
 
-  const itemText = upperFirst(label);
+  const itemText = upperFirst(asPlainText(label));
   const { title, content } = getTooltip({ tooltipContent, tooltipTitle });
   const showTooltip = Boolean(content || title);
 
@@ -78,7 +79,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
   const anchorDomElementRef = useRef<HTMLElement | null>(null);
 
   const handleClick = (event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
-    if (isDisabled(disableButton)) return;
+    if (isDisabled(disableButton) || splitButtonProps?.isMainButtonDisabled) return;
 
     if (hasItems) {
       onPopoverToggle();
@@ -140,6 +141,8 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
       <SplitButtonWithNotification
         {...otherSplitButtonProps}
         {...commonProps}
+        mainButtonTooltipContent={content}
+        mainButtonTooltipTitle={title}
         label={itemText}
         onSecondaryButtonClick={handleSecondaryButtonClick}
         isSelected={isPopoverOpen}
@@ -167,7 +170,7 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
    * So we only wrap in tooltip if there are no items (no popover).
    */
   const button =
-    showTooltip && !hasPopover ? (
+    showTooltip && !hasPopover && !splitButtonProps ? (
       <EuiToolTip content={content} title={title}>
         {buttonComponent}
       </EuiToolTip>
@@ -197,8 +200,6 @@ export const AppMenuActionButton = (props: AppMenuActionButtonProps) => {
     return (
       <AppMenuPopover
         items={splitButtonItems}
-        tooltipContent={content}
-        tooltipTitle={title}
         anchorElement={button}
         anchorDomElement={anchorDomElementRef.current ?? undefined}
         isOpen={isPopoverOpen}

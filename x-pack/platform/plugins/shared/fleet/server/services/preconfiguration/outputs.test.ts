@@ -12,12 +12,22 @@ import type { PreconfiguredOutput } from '../../../common/types';
 import type { Output } from '../../types';
 import * as agentPolicy from '../agent_policy';
 import { outputService } from '../output';
+import {
+  checkKafkaKerberosAllowed,
+  checkKafkaOAuth2Allowed,
+  checkOtlpOutputAllowed,
+} from '../outputs/helpers';
 
-import { SERVERLESS_DEFAULT_OUTPUT_ID, SERVERLESS_PRIVATE_OUTPUT_ID } from '../../constants';
+import {
+  SERVERLESS_DEFAULT_OUTPUT_ID,
+  SERVERLESS_PRIVATE_OUTPUT_ID,
+  SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+} from '../../constants';
 
 import {
   createOrUpdatePreconfiguredOutputs,
   cleanPreconfiguredOutputs,
+  createManagedBulkOutputMatcher,
   getPreconfiguredOutputFromConfig,
   hashSecret,
 } from './outputs';
@@ -27,8 +37,19 @@ jest.mock('../output');
 jest.mock('../epm/packages/bundled_packages');
 jest.mock('../epm/archive');
 jest.mock('../settings');
+jest.mock('../outputs/helpers');
 
 const mockedOutputService = outputService as jest.Mocked<typeof outputService>;
+const mockedCheckKafkaOAuth2Allowed = checkKafkaOAuth2Allowed as jest.MockedFunction<
+  typeof checkKafkaOAuth2Allowed
+>;
+const mockedCheckKafkaKerberosAllowed = checkKafkaKerberosAllowed as jest.MockedFunction<
+  typeof checkKafkaKerberosAllowed
+>;
+
+const mockedCheckOtlpOutputAllowed = checkOtlpOutputAllowed as jest.MockedFunction<
+  typeof checkOtlpOutputAllowed
+>;
 
 jest.mock('../app_context', () => ({
   appContextService: {
@@ -59,9 +80,11 @@ const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = jest.spyOn(
 
 describe('Outputs preconfiguration', () => {
   let logstashSecretHash: string;
+  let otlpKeyPemHash: string;
 
   beforeEach(async () => {
     logstashSecretHash = await hashSecret('secretKey');
+    otlpKeyPemHash = await hashSecret('secretKeyPem');
     const internalSoClientWithoutSpaceExtension = savedObjectsClientMock.create();
     jest
       .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension)
@@ -79,10 +102,15 @@ describe('Outputs preconfiguration', () => {
     mockedOutputService.update.mockReset();
     mockedOutputService.delete.mockReset();
     mockedOutputService.getDefaultDataOutputId.mockReset();
+    mockedCheckOtlpOutputAllowed.mockResolvedValue({ result: true });
+    mockedCheckKafkaOAuth2Allowed.mockResolvedValue({ result: true });
+    mockedCheckKafkaKerberosAllowed.mockResolvedValue({ result: true });
     mockedOutputService.getDefaultESHosts.mockReturnValue(['http://default-es:9200']);
     const keyHash = (await hashSecret('secretKey')) as string;
     const passwordHash = (await hashSecret('secretPassword')) as string;
     const serviceTokenHash = (await hashSecret('secretServiceToken')) as string;
+    const nestedTokenHash = (await hashSecret('secretNestedToken')) as string;
+    const clientSecretHash = (await hashSecret('secretClientSecret')) as string;
 
     mockedOutputService.bulkGet.mockImplementation(async (soClient, id): Promise<Output[]> => {
       return [
@@ -236,6 +264,56 @@ describe('Outputs preconfiguration', () => {
           },
         },
         {
+          id: 'existing-kafka-output-oauth2-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output OAuth2 1',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          is_preconfigured: true,
+          auth_type: 'oauth2',
+          oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
+          secrets: { oauth2: { client_secret: { id: '654', hash: clientSecretHash } } },
+        },
+        {
+          id: 'existing-kafka-output-kerberos-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output Kerberos 1',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          is_preconfigured: true,
+          auth_type: 'kerberos',
+          kerberos: {
+            auth_type: 'keytab',
+            config_path: '/etc/krb5.conf',
+            keytab: '/etc/kafka.keytab',
+            realm: 'EXAMPLE.COM',
+          },
+        },
+        {
+          id: 'existing-kafka-output-with-nested-secrets-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output With Nested Secrets 1',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          is_preconfigured: true,
+          secrets: {
+            password: {
+              id: '456',
+              hash: passwordHash,
+            },
+            // a secret nested deeper than the password
+            nested: {
+              token: {
+                id: '987',
+                hash: nestedTokenHash,
+              },
+            },
+          } as any,
+        },
+        {
           id: 'existing-remote-es-output-1',
           is_default: false,
           is_default_monitoring: false,
@@ -279,6 +357,25 @@ describe('Outputs preconfiguration', () => {
             service_token: 'secretServiceToken',
           },
         },
+        {
+          id: 'existing-otlp-output-with-secrets-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'OTLP Output With Secrets 1',
+          type: 'otlp',
+          otlp_exporter: {
+            endpoint: 'https://otlp.example.com:4317',
+            protocol: 'grpc',
+          },
+          is_preconfigured: true,
+          secrets: {
+            otlp_exporter: {
+              tls: {
+                key_pem: { id: 'otlp-key-pem-id', hash: otlpKeyPemHash },
+              },
+            },
+          },
+        },
       ];
     });
     spyAgentPolicyServicBumpAllAgentPoliciesForOutput.mockClear();
@@ -292,27 +389,27 @@ describe('Outputs preconfiguration', () => {
         },
       });
       expect(result).toMatchInlineSnapshot(`
-      Array [
-        Object {
-          "allow_edit": Array [
-            "hosts",
-            "ca_sha256",
-            "ca_trusted_fingerprint",
-          ],
-          "ca_sha256": undefined,
-          "ca_trusted_fingerprint": undefined,
-          "hosts": Array [
-            "http://elasticsearc:9201",
-          ],
-          "id": "fleet-default-output",
-          "is_default": true,
-          "is_default_monitoring": true,
-          "is_preconfigured": true,
-          "name": "default",
-          "type": "elasticsearch",
-        },
-      ]
-    `);
+        Array [
+          Object {
+            "allow_edit": Array [
+              "hosts",
+              "ca_sha256",
+              "ca_trusted_fingerprint",
+            ],
+            "ca_sha256": undefined,
+            "ca_trusted_fingerprint": undefined,
+            "hosts": Array [
+              "http://elasticsearc:9201",
+            ],
+            "id": "fleet-default-output",
+            "is_default": true,
+            "is_default_monitoring": true,
+            "is_preconfigured": true,
+            "name": "default",
+            "type": "elasticsearch",
+          },
+        ]
+      `);
       expect(result[0].allow_edit).toEqual(['hosts', 'ca_sha256', 'ca_trusted_fingerprint']);
     });
 
@@ -590,9 +687,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create a preconfigured ES output with secrets that does not exist', async () => {
@@ -614,9 +711,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create a preconfigured ES output with ca_trusted_fingerprint that does not exist', async () => {
@@ -634,8 +731,8 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.create).toBeCalledWith(
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.create).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -643,8 +740,8 @@ describe('Outputs preconfiguration', () => {
         }),
         expect.anything()
       );
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create a preconfigured ES output with default hosts if the output does not exist and hosts is not set', async () => {
@@ -661,7 +758,9 @@ describe('Outputs preconfiguration', () => {
       ]);
 
       expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.create.mock.calls[0][2].hosts).toEqual(['http://default-es:9200']);
+      expect(mockedOutputService.create.mock.calls[0][2]).toMatchObject({
+        hosts: ['http://default-es:9200'],
+      });
     });
 
     it('should create a preconfigured logstash output that does not exist', async () => {
@@ -679,9 +778,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create a preconfigured logstash output with secrets that does not exist', async () => {
@@ -702,8 +801,8 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.create).toBeCalledWith(
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.create).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         expect.objectContaining({
@@ -715,8 +814,8 @@ describe('Outputs preconfiguration', () => {
         }),
         expect.anything()
       );
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create preconfigured kafka output that does not exist', async () => {
@@ -733,9 +832,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create a preconfigured kafka output with secrets that does not exist', async () => {
@@ -757,9 +856,70 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+    });
+
+    it('should create a preconfigured OTLP output when the Fleet Server version requirement is met', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'non-existing-otlp-output-1',
+          name: 'OTLP Output 1',
+          type: 'otlp',
+          is_default: false,
+          is_default_monitoring: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+          },
+        },
+      ]);
+
       expect(mockedOutputService.create).toBeCalled();
       expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+    });
+
+    it('should skip the OTLP output but create the non-OTLP output when the version requirement is not met', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      mockedCheckOtlpOutputAllowed.mockResolvedValueOnce({
+        result: false,
+        error: 'OTLP output requires all Fleet Servers to be on version 9.6.0 or later.',
+      });
+
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'non-existing-otlp-output-1',
+          name: 'OTLP Output 1',
+          type: 'otlp',
+          is_default: false,
+          is_default_monitoring: false,
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+          },
+        },
+        {
+          id: 'non-existing-es-output-2',
+          name: 'ES Output 2',
+          type: 'elasticsearch',
+          is_default: false,
+          is_default_monitoring: false,
+          hosts: ['http://es.co:80'],
+        },
+      ]);
+
+      // ES output created; OTLP skipped — proves per-item skip, not batch abort
+      expect(mockedOutputService.create).toHaveBeenCalledTimes(1);
+      expect(mockedOutputService.create).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ name: 'ES Output 2' }),
+        expect.objectContaining({ id: 'non-existing-es-output-2' })
+      );
     });
 
     it('should create a preconfigured remote ES output that does not exist', async () => {
@@ -785,9 +945,9 @@ describe('Outputs preconfiguration', () => {
         } as PreconfiguredOutput,
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should create a preconfigured remote ES output with secrets that does not exist', async () => {
@@ -809,9 +969,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
   });
 
@@ -842,9 +1002,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(mockedOutputService.update).toBeCalledWith(
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'existing-es-output-1',
@@ -853,7 +1013,7 @@ describe('Outputs preconfiguration', () => {
         }),
         { fromPreconfiguration: true, secretHashes: expect.anything() }
       );
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if preconfigured ES output exists and changed', async () => {
@@ -870,9 +1030,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if preconfigured output exists and changed to is_internal: true', async () => {
@@ -890,9 +1050,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if preconfigured ES output with secrets exists and changed to is_internal: true', async () => {
@@ -911,9 +1071,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if a preconfigured logstash ouput exists and has changed', async () => {
@@ -934,9 +1094,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if a preconfigured logstash output with secrets exists and has changed', async () => {
@@ -957,9 +1117,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if preconfigured kafka output exists and changed', async () => {
@@ -976,9 +1136,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update ouput if a preconfigured kafka with secrets exists and has changed', async () => {
@@ -1000,9 +1160,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if preconfigured remote ES output exists and changed', async () => {
@@ -1020,9 +1180,9 @@ describe('Outputs preconfiguration', () => {
         } as PreconfiguredOutput,
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update ouput if a preconfigured remote ES with secrets exists and has changed', async () => {
@@ -1042,9 +1202,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if a preconfigured logstash output with plain value secrets exists and did not change', async () => {
@@ -1066,9 +1226,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if a preconfigured logstash output with secrets exists and hash algorithm changed', async () => {
@@ -1091,9 +1251,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should not update output if a preconfigured logstash output with secrets exists and hash algorithm did not changed', async () => {
@@ -1116,9 +1276,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should update output if a preconfigured kafka output with plain value secrets exists and did not change', async () => {
@@ -1141,9 +1301,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if a preconfigured remote ES output with plain value secrets exists and did not change', async () => {
@@ -1163,9 +1323,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     // Output should not update
@@ -1184,9 +1344,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should update output if preconfigured ES output exists and otel_exporter_config_yaml changed', async () => {
@@ -1204,9 +1364,9 @@ describe('Outputs preconfiguration', () => {
         } as any,
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if preconfigured ES output exists and otel_disable_beatsauth changed', async () => {
@@ -1224,9 +1384,9 @@ describe('Outputs preconfiguration', () => {
         } as any,
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should not update output if preconfigured ES output exists and otel fields did not change', async () => {
@@ -1244,9 +1404,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should update output if preconfigured remote ES output exists and otel_exporter_config_yaml changed', async () => {
@@ -1266,9 +1426,9 @@ describe('Outputs preconfiguration', () => {
         } as any,
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should update output if preconfigured remote ES output exists and otel_disable_beatsauth changed', async () => {
@@ -1288,9 +1448,9 @@ describe('Outputs preconfiguration', () => {
         } as any,
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
     });
 
     it('should not update output if preconfigured logstash output exists and did not change', async () => {
@@ -1311,9 +1471,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should not update output if preconfigured kafka output exists and did not change', async () => {
@@ -1334,9 +1494,9 @@ describe('Outputs preconfiguration', () => {
         } as PreconfiguredOutput,
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should not update output if preconfigured remote ES output exists and did not change', async () => {
@@ -1356,9 +1516,9 @@ describe('Outputs preconfiguration', () => {
         } as PreconfiguredOutput,
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should not update output if a preconfigured logstash output with secrets exists and did not change', async () => {
@@ -1380,9 +1540,9 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
     });
 
     it('should not update output if a preconfigured kafka output with secrets exists and did not change', async () => {
@@ -1403,9 +1563,305 @@ describe('Outputs preconfiguration', () => {
         },
       ]);
 
-      expect(mockedOutputService.create).not.toBeCalled();
-      expect(mockedOutputService.update).not.toBeCalled();
-      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+    });
+
+    describe('kafka output with Kerberos authentication', () => {
+      const kerberos = {
+        auth_type: 'keytab',
+        config_path: '/etc/krb5.conf',
+        keytab: '/etc/kafka.keytab',
+        realm: 'EXAMPLE.COM',
+      };
+      const kerberosOutput = (fields: Record<string, unknown> = {}) =>
+        ({
+          id: 'non-existing-kafka-output-kerberos-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output Kerberos 1',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          auth_type: 'kerberos',
+          kerberos,
+          ...fields,
+        } as any);
+
+      it('should create the output when Kerberos is allowed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [kerberosOutput()]);
+
+        expect(mockedCheckKafkaKerberosAllowed).toHaveBeenCalledWith(
+          esClient,
+          soClient,
+          expect.objectContaining({ kerberos: expect.any(Object) })
+        );
+        expect(mockedOutputService.create).toHaveBeenCalledWith(
+          soClient,
+          esClient,
+          expect.objectContaining({ auth_type: 'kerberos' }),
+          expect.objectContaining({ id: 'non-existing-kafka-output-kerberos-1' })
+        );
+      });
+
+      it('should not update an existing output when its Kerberos settings did not change', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          kerberosOutput({ id: 'existing-kafka-output-kerberos-1' }),
+        ]);
+
+        expect(mockedOutputService.update).not.toHaveBeenCalled();
+      });
+
+      it('should update an existing output when a Kerberos setting changed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          kerberosOutput({
+            id: 'existing-kafka-output-kerberos-1',
+            kerberos: { ...kerberos, realm: 'OTHER.COM' },
+          }),
+        ]);
+
+        expect(mockedOutputService.update).toHaveBeenCalled();
+      });
+
+      it('should skip the output, without failing, when Kerberos is not allowed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        mockedCheckKafkaKerberosAllowed.mockResolvedValue({
+          result: false,
+          error: 'Kerberos authentication of Kafka outputs is not enabled',
+        });
+
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [kerberosOutput()]);
+
+        expect(mockedOutputService.create).not.toHaveBeenCalled();
+        expect(mockedCheckKafkaOAuth2Allowed).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('kafka output with OAuth2 authentication', () => {
+      const oauth2Output = (fields: Record<string, unknown> = {}) =>
+        ({
+          id: 'non-existing-kafka-output-oauth2-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output OAuth2 1',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          auth_type: 'oauth2',
+          oauth2: { client_id: 'my-client', token_url: 'https://idp.example.com/oauth2/token' },
+          secrets: { oauth2: { client_secret: 'secretClientSecret' } },
+          ...fields,
+        } as any);
+
+      it('should create the output when OAuth2 is allowed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [oauth2Output()]);
+
+        expect(mockedCheckKafkaOAuth2Allowed).toHaveBeenCalledWith(esClient, soClient);
+        expect(mockedOutputService.create).toHaveBeenCalledWith(
+          soClient,
+          esClient,
+          expect.objectContaining({ auth_type: 'oauth2' }),
+          expect.objectContaining({
+            id: 'non-existing-kafka-output-oauth2-1',
+            fromPreconfiguration: true,
+            secretHashes: { oauth2: { client_secret: expect.stringContaining(':') } },
+          })
+        );
+      });
+
+      describe('existing output', () => {
+        const existingOauth2Output = (oauth2: Record<string, unknown>) =>
+          oauth2Output({
+            id: 'existing-kafka-output-oauth2-1',
+            name: 'Kafka Output OAuth2 1',
+            oauth2,
+          });
+
+        it('should not update the output when its OAuth2 settings did not change', async () => {
+          const soClient = savedObjectsClientMock.create();
+          const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+          await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+            existingOauth2Output({
+              client_id: 'my-client',
+              token_url: 'https://idp.example.com/oauth2/token',
+            }),
+          ]);
+
+          expect(mockedOutputService.update).not.toHaveBeenCalled();
+          expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+        });
+
+        it('should update the output when an OAuth2 setting changed', async () => {
+          const soClient = savedObjectsClientMock.create();
+          const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+          await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+            existingOauth2Output({
+              client_id: 'my-client',
+              token_url: 'https://idp.example.com/oauth2/token',
+              scopes: ['read'],
+            }),
+          ]);
+
+          expect(mockedOutputService.update).toHaveBeenCalled();
+          expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
+        });
+
+        it('should update the output when the client secret changed', async () => {
+          const soClient = savedObjectsClientMock.create();
+          const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+          await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+            {
+              ...existingOauth2Output({
+                client_id: 'my-client',
+                token_url: 'https://idp.example.com/oauth2/token',
+              }),
+              secrets: { oauth2: { client_secret: 'changedClientSecret' } },
+            },
+          ]);
+
+          expect(mockedOutputService.update).toHaveBeenCalled();
+        });
+      });
+
+      it('should skip the output, without failing, when OAuth2 is not allowed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        mockedCheckKafkaOAuth2Allowed.mockResolvedValue({
+          result: false,
+          error: 'OAuth2 authentication of Kafka outputs is not enabled',
+        });
+
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          oauth2Output(),
+          // the other outputs are not affected
+          {
+            id: 'non-existing-kafka-output-1',
+            name: 'Kafka Output 1',
+            type: 'kafka',
+            is_default: false,
+            is_default_monitoring: false,
+          } as any,
+        ]);
+
+        expect(mockedOutputService.create).toHaveBeenCalledTimes(1);
+        expect(mockedOutputService.create).toHaveBeenCalledWith(
+          soClient,
+          esClient,
+          expect.objectContaining({ name: 'Kafka Output 1' }),
+          expect.anything()
+        );
+      });
+
+      it('should not check OAuth2 when no output uses it', async () => {
+        mockedCheckKafkaOAuth2Allowed.mockClear();
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          {
+            id: 'non-existing-kafka-output-1',
+            name: 'Kafka Output 1',
+            type: 'kafka',
+            is_default: false,
+            is_default_monitoring: false,
+          } as any,
+        ]);
+
+        expect(mockedCheckKafkaOAuth2Allowed).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('kafka output with nested secrets', () => {
+      const preconfiguredNestedSecretsOutput = (secrets: Record<string, unknown>) =>
+        ({
+          id: 'existing-kafka-output-with-nested-secrets-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output With Nested Secrets 1',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          secrets,
+        } as any);
+
+      it('should not update the output if its nested secrets did not change', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          preconfiguredNestedSecretsOutput({
+            password: 'secretPassword',
+            nested: { token: 'secretNestedToken' },
+          }),
+        ]);
+
+        expect(mockedOutputService.update).not.toHaveBeenCalled();
+        expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+      });
+
+      it('should update the output if a nested secret changed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          preconfiguredNestedSecretsOutput({
+            password: 'secretPassword',
+            nested: { token: 'changedNestedToken' },
+          }),
+        ]);
+
+        expect(mockedOutputService.update).toHaveBeenCalled();
+        expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toHaveBeenCalled();
+      });
+
+      it('should update the output if a nested secret was removed', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          preconfiguredNestedSecretsOutput({ password: 'secretPassword' }),
+        ]);
+
+        expect(mockedOutputService.update).toHaveBeenCalled();
+      });
+
+      it('should update the output if a nested secret was added', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          preconfiguredNestedSecretsOutput({
+            password: 'secretPassword',
+            nested: { token: 'secretNestedToken', other: 'newSecret' },
+          }),
+        ]);
+
+        expect(mockedOutputService.update).toHaveBeenCalled();
+      });
+
+      it('should hash the nested secrets when creating the output', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          {
+            ...preconfiguredNestedSecretsOutput({
+              password: 'secretPassword',
+              nested: { token: 'secretNestedToken' },
+              ssl: { key: 'secretKey' },
+            }),
+            id: 'non-existing-kafka-output-with-nested-secrets-1',
+          },
+        ]);
+
+        const secretHashes = (mockedOutputService.create.mock.calls[0][3] as any).secretHashes;
+        expect(secretHashes).toEqual({
+          password: expect.stringContaining(':'),
+          nested: { token: expect.stringContaining(':') },
+          ssl: { key: expect.stringContaining(':') },
+        });
+      });
     });
 
     it('should not update output if a preconfigured remote ES output with secrets exists and did not change', async () => {
@@ -1423,6 +1879,36 @@ describe('Outputs preconfiguration', () => {
           secrets: {
             service_token: 'secretServiceToken',
             ssl: { key: 'secretKey' },
+          },
+        },
+      ]);
+
+      expect(mockedOutputService.create).not.toHaveBeenCalled();
+      expect(mockedOutputService.update).not.toHaveBeenCalled();
+      expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toHaveBeenCalled();
+    });
+
+    it('should not update output if a preconfigured OTLP output with secrets exists and did not change', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+        {
+          id: 'existing-otlp-output-with-secrets-1',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'OTLP Output With Secrets 1',
+          type: 'otlp',
+          otlp_exporter: {
+            endpoint: 'https://otlp.example.com:4317',
+            protocol: 'grpc',
+          },
+          is_preconfigured: true,
+          secrets: {
+            otlp_exporter: {
+              tls: {
+                key_pem: 'secretKeyPem',
+              },
+            },
           },
         },
       ]);
@@ -1463,8 +1949,122 @@ describe('Outputs preconfiguration', () => {
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
         await createOrUpdatePreconfiguredOutputs(soClient, esClient, [data]);
 
-        expect(mockedOutputService.create).not.toBeCalled();
-        expect(mockedOutputService.update).not.toBeCalled();
+        expect(mockedOutputService.create).not.toHaveBeenCalled();
+        expect(mockedOutputService.update).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('allow_edit migration on restart', () => {
+      it('should update es-private-output when its allow_edit is stale (missing new fields)', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        // Simulate an existing saved object that only has the original two fields
+        // (as shipped before this fix).
+        mockedOutputService.bulkGet.mockResolvedValue([
+          {
+            id: SERVERLESS_PRIVATE_OUTPUT_ID,
+            name: 'Private output',
+            type: 'elasticsearch',
+            hosts: ['https://private.es.example.com'],
+            is_default: false,
+            is_default_monitoring: false,
+            is_preconfigured: true,
+            allow_edit: ['is_default', 'is_default_monitoring'],
+          } as any,
+        ]);
+
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          {
+            id: SERVERLESS_PRIVATE_OUTPUT_ID,
+            name: 'Private output',
+            type: 'elasticsearch',
+            hosts: ['https://private.es.example.com'],
+            is_default: false,
+            is_default_monitoring: false,
+            is_preconfigured: true,
+            // project-controller currently ships allow_edit: [] — Kibana unions in the rest
+            allow_edit: [
+              'is_default',
+              'is_default_monitoring',
+              'shipper',
+              'config_yaml',
+              'preset',
+              'write_to_logs_streams',
+            ],
+          },
+        ]);
+
+        // The diff should detect the stale allow_edit and trigger an update
+        expect(mockedOutputService.update).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          SERVERLESS_PRIVATE_OUTPUT_ID,
+          expect.objectContaining({
+            allow_edit: expect.arrayContaining([
+              'is_default',
+              'is_default_monitoring',
+              'shipper',
+              'config_yaml',
+              'preset',
+              'write_to_logs_streams',
+            ]),
+          }),
+          expect.anything()
+        );
+      });
+
+      it('should preserve user-chosen preset across restart (applyAllowEditOverrides)', async () => {
+        const soClient = savedObjectsClientMock.create();
+        const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+        // Simulate: user already changed preset to 'throughput' at runtime
+        mockedOutputService.bulkGet.mockResolvedValue([
+          {
+            id: SERVERLESS_PRIVATE_OUTPUT_ID,
+            name: 'Private output',
+            type: 'elasticsearch',
+            hosts: ['https://private.es.example.com'],
+            is_default: false,
+            is_default_monitoring: false,
+            is_preconfigured: true,
+            preset: 'throughput', // user-set value in the SO
+            allow_edit: [
+              'is_default',
+              'is_default_monitoring',
+              'shipper',
+              'config_yaml',
+              'preset',
+              'write_to_logs_streams',
+            ],
+          } as any,
+        ]);
+
+        await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+          {
+            id: SERVERLESS_PRIVATE_OUTPUT_ID,
+            name: 'Private output',
+            type: 'elasticsearch',
+            hosts: ['https://private.es.example.com'],
+            is_default: false,
+            is_default_monitoring: false,
+            is_preconfigured: true,
+            // Config doesn't specify preset (project-controller never will)
+            allow_edit: [
+              'is_default',
+              'is_default_monitoring',
+              'shipper',
+              'config_yaml',
+              'preset',
+              'write_to_logs_streams',
+            ],
+          },
+        ]);
+
+        // No update should fire — the allow_edit list is unchanged, and the
+        // preset from the SO is copied back by applyAllowEditOverrides before
+        // the diff runs, so there is no difference to reconcile.
+        expect(mockedOutputService.update).not.toHaveBeenCalled();
       });
     });
 
@@ -1473,7 +2073,7 @@ describe('Outputs preconfiguration', () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true } as Output,
             { id: 'output2', is_preconfigured: true } as Output,
@@ -1501,13 +2101,13 @@ describe('Outputs preconfiguration', () => {
           },
         ]);
 
-        expect(mockedOutputService.delete).not.toBeCalled();
+        expect(mockedOutputService.delete).not.toHaveBeenCalled();
       });
 
       it('should delete deleted preconfigured output', async () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true } as Output,
             { id: 'output2', is_preconfigured: true } as Output,
@@ -1527,15 +2127,15 @@ describe('Outputs preconfiguration', () => {
           },
         ]);
 
-        expect(mockedOutputService.delete).toBeCalled();
-        expect(mockedOutputService.delete).toBeCalledTimes(1);
+        expect(mockedOutputService.delete).toHaveBeenCalled();
+        expect(mockedOutputService.delete).toHaveBeenCalledTimes(1);
         expect(mockedOutputService.delete.mock.calls[0][0]).toEqual('output2');
       });
 
       it('should update default deleted preconfigured output', async () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             { id: 'output1', is_preconfigured: true, is_default: true } as Output,
             { id: 'output2', is_preconfigured: true, is_default_monitoring: true } as Output,
@@ -1546,9 +2146,9 @@ describe('Outputs preconfiguration', () => {
         });
         await cleanPreconfiguredOutputs(soClient, esClient, []);
 
-        expect(mockedOutputService.delete).not.toBeCalled();
-        expect(mockedOutputService.update).toBeCalledTimes(2);
-        expect(mockedOutputService.update).toBeCalledWith(
+        expect(mockedOutputService.delete).not.toHaveBeenCalled();
+        expect(mockedOutputService.update).toHaveBeenCalledTimes(2);
+        expect(mockedOutputService.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           'output1',
@@ -1557,7 +2157,7 @@ describe('Outputs preconfiguration', () => {
           }),
           { fromPreconfiguration: true }
         );
-        expect(mockedOutputService.update).toBeCalledWith(
+        expect(mockedOutputService.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           'output2',
@@ -1572,7 +2172,7 @@ describe('Outputs preconfiguration', () => {
         const soClient = savedObjectsClientMock.create();
         const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-        mockedOutputService.list.mockResolvedValue({
+        mockedOutputService.listPreconfigured.mockResolvedValue({
           items: [
             {
               id: SERVERLESS_PRIVATE_OUTPUT_ID,
@@ -1589,7 +2189,7 @@ describe('Outputs preconfiguration', () => {
         await cleanPreconfiguredOutputs(soClient, esClient, []);
 
         // Should restore the public default
-        expect(mockedOutputService.update).toBeCalledWith(
+        expect(mockedOutputService.update).toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           SERVERLESS_DEFAULT_OUTPUT_ID,
@@ -1598,13 +2198,13 @@ describe('Outputs preconfiguration', () => {
         );
 
         // Should delete the PrivateLink output entirely so it cannot be re-enabled by mistake
-        expect(mockedOutputService.delete).toBeCalledWith(
+        expect(mockedOutputService.delete).toHaveBeenCalledWith(
           SERVERLESS_PRIVATE_OUTPUT_ID,
           expect.anything()
         );
 
         // Should NOT un-preconfigure (no ghost SO left behind)
-        expect(mockedOutputService.update).not.toBeCalledWith(
+        expect(mockedOutputService.update).not.toHaveBeenCalledWith(
           expect.anything(),
           expect.anything(),
           SERVERLESS_PRIVATE_OUTPUT_ID,
@@ -1613,5 +2213,155 @@ describe('Outputs preconfiguration', () => {
         );
       });
     });
+  });
+});
+
+describe('createManagedBulkOutputMatcher', () => {
+  beforeEach(() => {
+    (appContextService.getCloud as jest.Mock).mockReturnValue(null);
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+    });
+  });
+
+  it('matches the ECH bulk output on hostname, ignoring the port added by normalizeHostsForAgents', () => {
+    (appContextService.getCloud as jest.Mock).mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.invalid' },
+    });
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      agentless: { managedBulk: { enabled: true } },
+    });
+
+    const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
+
+    expect(
+      isManagedBulk({
+        type: 'elasticsearch',
+        hosts: ['https://managed-otlp.example.invalid:443/_es'],
+      } as unknown as Output)
+    ).toBe(true);
+  });
+
+  it('matches the serverless bulk output via the config-injected endpoint, with no cloud stub needed', () => {
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      outputs: [
+        {
+          id: SERVERLESS_AGENTLESS_MANAGED_BULK_OUTPUT_ID,
+          type: 'elasticsearch',
+          hosts: ['https://managed-otlp-internal.example.invalid:443/_es'],
+          is_default: false,
+          is_default_monitoring: false,
+          is_preconfigured: true,
+        },
+      ],
+    });
+
+    const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
+
+    expect(
+      isManagedBulk({
+        type: 'elasticsearch',
+        hosts: ['https://managed-otlp-internal.example.invalid:443/_es'],
+      } as unknown as Output)
+    ).toBe(true);
+  });
+
+  it('does not match a non-elasticsearch output type, even when the host matches', () => {
+    (appContextService.getCloud as jest.Mock).mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.invalid' },
+    });
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      agentless: { managedBulk: { enabled: true } },
+    });
+
+    const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
+
+    expect(
+      isManagedBulk({
+        type: 'remote_elasticsearch',
+        hosts: ['https://managed-otlp.example.invalid:443/_es'],
+      } as unknown as Output)
+    ).toBe(false);
+  });
+
+  it('does not match a direct-ES output on a different host', () => {
+    (appContextService.getCloud as jest.Mock).mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.invalid' },
+    });
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      agentless: { managedBulk: { enabled: true } },
+    });
+
+    const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
+
+    expect(
+      isManagedBulk({
+        type: 'elasticsearch',
+        hosts: ['https://es.example.invalid:9200'],
+      } as unknown as Output)
+    ).toBe(false);
+  });
+
+  it('does not match when the output has no hosts', () => {
+    (appContextService.getCloud as jest.Mock).mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.invalid' },
+    });
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      agentless: { managedBulk: { enabled: true } },
+    });
+
+    const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
+
+    expect(isManagedBulk({ type: 'elasticsearch', hosts: undefined } as unknown as Output)).toBe(
+      false
+    );
+  });
+
+  it('returns false for all outputs and does not throw when config is undefined', () => {
+    const isManagedBulk = createManagedBulkOutputMatcher(undefined);
+
+    expect(
+      isManagedBulk({
+        type: 'elasticsearch',
+        hosts: ['https://managed-otlp.example.invalid:443/_es'],
+      } as unknown as Output)
+    ).toBe(false);
+  });
+
+  it('returns false and does not throw when cloud.managed_otlp.url is a malformed non-URL string', () => {
+    (appContextService.getCloud as jest.Mock).mockReturnValue({
+      managedOtlp: { url: 'not-a-url' },
+    });
+    (appContextService.getConfig as jest.Mock).mockReturnValue({
+      agents: { enabled: true, elasticsearch: {} },
+      enabled: true,
+      agentless: { managedBulk: { enabled: true } },
+    });
+
+    const isManagedBulk = createManagedBulkOutputMatcher(appContextService.getConfig());
+
+    expect(() =>
+      isManagedBulk({
+        type: 'elasticsearch',
+        hosts: ['https://something.example.invalid'],
+      } as unknown as Output)
+    ).not.toThrow();
+    expect(
+      isManagedBulk({
+        type: 'elasticsearch',
+        hosts: ['https://something.example.invalid'],
+      } as unknown as Output)
+    ).toBe(false);
   });
 });

@@ -11,6 +11,7 @@ import {
   ALERT_RULE_UUID,
   ALERT_START,
   ALERT_UPDATED_AT,
+  ALERT_WORKFLOW_REASON,
   ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_STATUS_UPDATED_AT,
   ALERT_RULE_EXECUTION_UUID,
@@ -120,6 +121,7 @@ export const transformAttackDiscoveryAlertDocumentToApi = ({
       : undefined,
     alert_updated_by_user_id: doc[ALERT_UPDATED_BY_USER_ID] as string | undefined,
     alert_updated_by_user_name: doc[ALERT_UPDATED_BY_USER_NAME] as string | undefined,
+    alert_workflow_reason: doc[ALERT_WORKFLOW_REASON] as string | undefined,
     alert_workflow_status: doc[ALERT_WORKFLOW_STATUS] as string | undefined,
     alert_workflow_status_updated_at: moment(
       doc[ALERT_WORKFLOW_STATUS_UPDATED_AT] as string

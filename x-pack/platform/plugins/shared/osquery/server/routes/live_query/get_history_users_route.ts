@@ -63,6 +63,7 @@ export const getHistoryUsersRoute = (
       },
       async (context, request, response) => {
         try {
+          const cpsActive = await osqueryContext.isCpsActive(request);
           const [coreStartServices] = await osqueryContext.getStartServices();
           const clusterClient = coreStartServices.elasticsearch.client;
           const internalEsClient = clusterClient.asInternalUser;
@@ -79,7 +80,7 @@ export const getHistoryUsersRoute = (
           // The Fleet fallback index is never fanned out by CPS, so only the
           // osquery-owned actions index is read as the request user.
           const esClient = actionsIndexExists
-            ? getReadEsClient(clusterClient, request, osqueryContext.cpsEnabled)
+            ? getReadEsClient(clusterClient, request, cpsActive)
             : internalEsClient;
 
           const { searchTerm } = request.query;

@@ -12,10 +12,11 @@ import {
   compositeRuntimeFieldSchema,
   primitiveRuntimeFieldSchema,
 } from '../runtime_fields/schema_embedded_runtime_field';
-import { fieldSettingsBaseSchema } from '../schema_field_settings';
+import { fieldSettingsBaseSchema } from '../field_settings/schema_field_settings';
 import { AS_CODE_DATA_VIEW_REFERENCE_TYPE, AS_CODE_DATA_VIEW_SPEC_TYPE } from './constants';
 import {
   allowHiddenIndicesSchema,
+  fieldFiltersSchema,
   fieldSettingsFieldNameSchema,
   indexPatternSchema,
   timeFieldSchema,
@@ -49,7 +50,12 @@ export const dataViewSpecSchema = z
     index_pattern: indexPatternSchema,
     time_field: timeFieldSchema,
     allow_hidden_indices: allowHiddenIndicesSchema,
-    field_settings: z.record(fieldSettingsFieldNameSchema, fieldSettingsSchema).optional(),
+    field_filters: fieldFiltersSchema,
+    field_settings: z.record(fieldSettingsFieldNameSchema, fieldSettingsSchema).optional().meta({
+      title: 'Field settings',
+      description:
+        'Settings for individual fields, keyed by field name. To change how Kibana displays a field from the backing indices, set its label, description, or format. To define a runtime field, use the runtime field name and set `type`.',
+    }),
   })
   .strict()
   .meta({ id: 'kbn-data-view-spec-schema', title: 'Data view inline spec' });

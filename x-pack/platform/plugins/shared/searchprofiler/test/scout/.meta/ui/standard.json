@@ -1,5 +1,8 @@
 {
   "sha1": "13f74b388013a81d56f23316d8bbce50e8c5b254",
+  "testChannels": [
+    "ci-on-commit"
+  ],
   "tests": [
     {
       "id": "82a13b472e8925e-db356015770228d",
@@ -17,8 +20,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/ui/tests/json_parse.spec.ts",
-        "line": 35,
-        "column": 7
+        "line": 27,
+        "column": 23
       }
     },
     {
@@ -37,8 +40,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/ui/tests/json_parse.spec.ts",
-        "line": 48,
-        "column": 7
+        "line": 35,
+        "column": 72
       }
     },
     {
@@ -57,8 +60,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/ui/tests/json_parse.spec.ts",
-        "line": 61,
-        "column": 7
+        "line": 46,
+        "column": 5
       }
     },
     {
@@ -77,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/ui/tests/profile.spec.ts",
-        "line": 41,
-        "column": 7
+        "line": 33,
+        "column": 23
       }
     },
     {
@@ -97,8 +100,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/ui/tests/query_loading.spec.ts",
-        "line": 53,
-        "column": 7
+        "line": 49,
+        "column": 46
       }
     },
     {
@@ -117,8 +120,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/ui/tests/query_loading.spec.ts",
-        "line": 63,
-        "column": 7
+        "line": 56,
+        "column": 17
       }
     },
     {
@@ -137,8 +140,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/searchprofiler/test/scout/ui/tests/query_loading.spec.ts",
-        "line": 83,
-        "column": 7
+        "line": 74,
+        "column": 23
       }
     }
   ]

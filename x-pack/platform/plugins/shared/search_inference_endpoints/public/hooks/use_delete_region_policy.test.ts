@@ -11,7 +11,11 @@ import React from 'react';
 import { useDeleteRegionPolicy } from './use_delete_region_policy';
 import { useKibana } from './use_kibana';
 import { APIRoutes } from '../../common/types';
-import { REGION_POLICY_QUERY_KEY, ROUTE_VERSIONS } from '../../common/constants';
+import {
+  INFERENCE_ENDPOINTS_QUERY_KEY,
+  REGION_POLICY_QUERY_KEY,
+  ROUTE_VERSIONS,
+} from '../../common/constants';
 
 jest.mock('./use_kibana');
 
@@ -67,6 +71,7 @@ describe('useDeleteRegionPolicy', () => {
     mockDelete.mockResolvedValue({ acknowledged: true });
 
     const { queryClient } = createWrapper();
+    const invalidateSpy = jest.spyOn(queryClient, 'invalidateQueries');
     queryClient.setQueryData([REGION_POLICY_QUERY_KEY], {
       region_policy: { allowed_geos: ['eu'] },
     });
@@ -86,6 +91,7 @@ describe('useDeleteRegionPolicy', () => {
       expect.objectContaining({ title: 'Region preferences reset to default' })
     );
     expect(queryClient.getQueryData([REGION_POLICY_QUERY_KEY])).toBeNull();
+    expect(invalidateSpy).toHaveBeenCalledWith([INFERENCE_ENDPOINTS_QUERY_KEY]);
   });
 
   it('shows error toast on generic error and leaves the query cache untouched', async () => {

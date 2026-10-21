@@ -60,9 +60,15 @@ describe('Use get case configuration hook', () => {
     });
 
     /**
-     * The response after fetching
+     * No match → owner-specific fallback with Security autoExtractDefault.
      */
-    await waitFor(() => expect(result.current.data).toEqual(initialConfiguration));
+    await waitFor(() =>
+      expect(result.current.data).toEqual({
+        ...initialConfiguration,
+        owner: mockedTestProvidersOwner[0],
+        extractObservables: true,
+      })
+    );
   });
 
   it('returns the initial configuration if none exists', async () => {
@@ -75,9 +81,15 @@ describe('Use get case configuration hook', () => {
     });
 
     /**
-     * The response after fetching
+     * Empty list → owner-specific fallback with Security autoExtractDefault.
      */
-    await waitFor(() => expect(result.current.data).toEqual(initialConfiguration));
+    await waitFor(() =>
+      expect(result.current.data).toEqual({
+        ...initialConfiguration,
+        owner: mockedTestProvidersOwner[0],
+        extractObservables: true,
+      })
+    );
   });
 
   it('returns the initial configuration if the owner is undefined', async () => {

@@ -6,13 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import {
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiLoadingSpinner,
-  EuiPageTemplate,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiLoadingSpinner, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu } from '@kbn/app-header';
 import { i18n } from '@kbn/i18n';
@@ -251,58 +246,52 @@ export const ModelSettings: React.FC = () => {
       >
         {!hasAdvancedSettingsSavePermission && (
           <>
-            <EuiCallOut
+            <KbnWarningCallout
               title={i18n.translate(
                 'xpack.searchInferenceEndpoints.settings.noAdvancedSettingsPermission.title',
                 {
                   defaultMessage: 'Advanced Settings permission required',
                 }
               )}
-              color="warning"
-              iconType="lock"
               data-test-subj="noAdvancedSettingsPermissionCallout"
               announceOnMount={false}
-            >
-              <p data-test-subj="noAdvancedSettingsPermissionCalloutDescription">
-                {i18n.translate(
-                  'xpack.searchInferenceEndpoints.settings.noAdvancedSettingsPermission.description',
-                  {
-                    defaultMessage:
-                      'Saving the default AI model setting requires the Advanced Settings: All privilege. Contact your administrator if you need to make changes.',
-                  }
-                )}
-              </p>
-            </EuiCallOut>
+              text={
+                <p data-test-subj="noAdvancedSettingsPermissionCalloutDescription">
+                  {i18n.translate(
+                    'xpack.searchInferenceEndpoints.settings.noAdvancedSettingsPermission.description',
+                    {
+                      defaultMessage:
+                        'Saving the default AI model setting requires the Advanced Settings: All privilege. Contact your administrator if you need to make changes.',
+                    }
+                  )}
+                </p>
+              }
+            />
             <EuiSpacer size="l" />
           </>
         )}
         {showFeatureSections && invalidEndpointIds.size > 0 && (
           <>
-            <EuiCallOut
+            <KbnDangerCallout
               title={i18n.translate(
                 'xpack.searchInferenceEndpoints.settings.invalidEndpoints.title',
                 {
                   defaultMessage: 'Some assigned inference endpoints are no longer available',
                 }
               )}
-              color="danger"
-              iconType="warning"
               data-test-subj="invalidEndpointsCallout"
               announceOnMount
-            >
-              <p>
-                {i18n.translate(
-                  'xpack.searchInferenceEndpoints.settings.invalidEndpoints.description',
-                  {
-                    defaultMessage:
-                      'The following endpoints could not be found: {endpointList}. Features using these endpoints may not work as expected.',
-                    values: {
-                      endpointList: [...invalidEndpointIds].join(', '),
-                    },
-                  }
-                )}
-              </p>
-            </EuiCallOut>
+              text={i18n.translate(
+                'xpack.searchInferenceEndpoints.settings.invalidEndpoints.description',
+                {
+                  defaultMessage:
+                    'The following endpoints could not be found: {endpointList}. Features using these endpoints may not work as expected.',
+                  values: {
+                    endpointList: [...invalidEndpointIds].join(', '),
+                  },
+                }
+              )}
+            />
             <EuiSpacer size="l" />
           </>
         )}

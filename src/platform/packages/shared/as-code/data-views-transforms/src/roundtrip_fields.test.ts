@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { RUNTIME_FIELD_COMPOSITE_TYPE } from '@kbn/data-views-plugin/common';
+import { RUNTIME_FIELD_COMPOSITE_TYPE } from '@kbn/as-code-data-views-schema';
 import {
   AS_CODE_DATA_VIEW_SPEC_TYPE,
   type AsCodeDataViewSpec,
@@ -89,6 +89,24 @@ describe('roundtrip: AsCode → stored → AsCode', () => {
           type: 'keyword',
           custom_label: 'My Label',
           custom_description: 'A description',
+        },
+      };
+      const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields(fieldSettings);
+      expect(fromStoredFields(runtimeFieldMap, fieldFormats, fieldAttrs)).toEqual(fieldSettings);
+    });
+
+    it('preserves a color format with a numeral pattern', () => {
+      const fieldSettings: NonNullable<AsCodeDataViewSpec['field_settings']> = {
+        my_field: {
+          type: 'long',
+          format: {
+            type: 'color',
+            params: {
+              field_type: 'number',
+              pattern: '0,0.00',
+              colors: [{ range: '0:100', text: '#FFFFFF', background: '#000000' }],
+            },
+          },
         },
       };
       const { runtimeFieldMap, fieldFormats, fieldAttrs } = toStoredFromAsCodeFields(fieldSettings);
@@ -452,7 +470,7 @@ describe('roundtrip: stored → AsCode → stored', () => {
         },
       };
       const fieldFormats = {
-        prim: { id: 'number', params: { decimals: 2 } },
+        prim: { id: 'number', params: { pattern: '0,0.[000]b' } },
         'comp.sub_y': { id: 'date', params: { pattern: 'MM/DD/YYYY' } },
       };
       const fieldAttrs = {

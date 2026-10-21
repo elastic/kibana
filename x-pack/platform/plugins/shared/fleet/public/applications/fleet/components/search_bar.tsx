@@ -99,7 +99,7 @@ const concatKeys = (obj: any, parentKey = '') => {
   for (const key in obj) {
     if (typeof obj[key] === 'object') {
       result = result.concat(concatKeys(obj[key], `${parentKey}${key}.`));
-    } else {
+    } else if (typeof obj[key] !== 'number') {
       result.push(`${parentKey}${key}:${obj[key]}`);
     }
   }

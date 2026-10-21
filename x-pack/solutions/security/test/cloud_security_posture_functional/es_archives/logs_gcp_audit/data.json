@@ -131,6 +131,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -269,6 +272,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -407,6 +413,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -545,6 +554,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -692,6 +704,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -839,6 +854,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -958,6 +976,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/350.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1077,6 +1098,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/350.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1146,7 +1170,10 @@
       },
       "host": {
         "target": {
-          "id": ["host-instance-1", "host-instance-2"]
+          "id": [
+            "host-instance-1",
+            "host-instance-2"
+          ]
         }
       },
       "log": {
@@ -1177,6 +1204,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/350.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -1341,6 +1371,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1472,6 +1505,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/360.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1584,6 +1620,9 @@
         },
         "name": "Other",
         "original": "google-cloud-sdk/370.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1644,6 +1683,9 @@
         },
         "name": "AWS SDK",
         "original": "aws-sdk-go/1.44.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
       }
     }
   }
@@ -1709,6 +1751,9 @@
         },
         "name": "google-cloud-sdk",
         "original": "google-cloud-sdk gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }
@@ -1775,6 +1820,9 @@
         },
         "name": "google-cloud-sdk",
         "original": "google-cloud-sdk gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "low_impact"
       }
     }
   }
@@ -1841,6 +1889,9 @@
         },
         "name": "gcloud",
         "original": "gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "extreme_impact"
       }
     }
   }
@@ -1902,6 +1953,305 @@
         },
         "name": "gcloud",
         "original": "gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "euid-host-arm-1",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T16:50:00.000Z",
+      "service": {
+        "name": "deploy-pipeline"
+      },
+      "host": {
+        "target": {
+          "id": "web-1",
+          "name": "web-1"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.compute.v1.instances.setMetadata",
+        "agent_id_status": "missing",
+        "category": [
+          "configuration"
+        ],
+        "id": "euid-host-arm-event-1",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "change"
+        ]
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "deploy-pipeline",
+          "web-1"
+        ],
+        "hosts": [
+          "web-1"
+        ],
+        "ip": [
+          "10.0.1.10"
+        ]
+      },
+      "source": {
+        "ip": "10.0.1.10"
+      },
+      "tags": [],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "euid-host-arm-2",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T16:55:00.000Z",
+      "host": {
+        "id": "web-1",
+        "name": "web-1"
+      },
+      "service": {
+        "target": {
+          "name": "metrics-collector"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.monitoring.v3.MetricService.CreateTimeSeries",
+        "agent_id_status": "missing",
+        "category": [
+          "configuration"
+        ],
+        "id": "euid-host-arm-event-2",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "change"
+        ]
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "web-1",
+          "metrics-collector"
+        ],
+        "hosts": [
+          "web-1"
+        ],
+        "ip": [
+          "10.0.1.11"
+        ]
+      },
+      "source": {
+        "ip": "10.0.1.11"
+      },
+      "tags": [],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "high_impact"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "euid-host-arm-3",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T16:58:00.000Z",
+      "service": {
+        "name": "deploy-pipeline"
+      },
+      "host": {
+        "target": {
+          "name": "web-1"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.compute.v1.instances.setMetadata",
+        "agent_id_status": "missing",
+        "category": [
+          "configuration"
+        ],
+        "id": "euid-host-arm-event-3",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "change"
+        ]
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "deploy-pipeline",
+          "web-1"
+        ],
+        "hosts": [
+          "web-1"
+        ],
+        "ip": [
+          "10.0.1.12"
+        ]
+      },
+      "source": {
+        "ip": "10.0.1.12"
+      },
+      "tags": [],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/324.0.0"
+      },
+      "asset": {
+        "criticality": "low_impact"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "euid-host-arm-4",
+    "index": ".ds-logs-gcp.audit-default-2024.10.07-000001",
+    "source": {
+      "@timestamp": "2024-09-01T17:00:00.000Z",
+      "service": {
+        "name": "deploy-pipeline"
+      },
+      "host": {
+        "target": {
+          "id": "web-2",
+          "name": "web-1"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.compute.v1.instances.setMetadata",
+        "agent_id_status": "missing",
+        "category": [
+          "configuration"
+        ],
+        "id": "euid-host-arm-event-4",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "change"
+        ]
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "deploy-pipeline",
+          "web-2"
+        ],
+        "hosts": [
+          "web-1"
+        ],
+        "ip": [
+          "10.0.1.13"
+        ]
+      },
+      "source": {
+        "ip": "10.0.1.13"
+      },
+      "tags": [],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/324.0.0"
       }
     }
   }
@@ -1963,6 +2313,9 @@
         },
         "name": "gcloud",
         "original": "gcloud/450.0.0"
+      },
+      "asset": {
+        "criticality": "medium_impact"
       }
     }
   }

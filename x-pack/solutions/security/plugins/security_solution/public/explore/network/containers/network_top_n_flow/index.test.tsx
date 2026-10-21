@@ -10,7 +10,7 @@ import { TestProviders } from '../../../../common/mock';
 import { ID, useNetworkTopNFlow } from '.';
 import { useSearchStrategy } from '../../../../common/containers/use_search_strategy';
 import { networkModel } from '../../store';
-import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
+import { FlowTargetSourceDest, NetworkQueries } from '../../../../../common/search_strategy';
 
 jest.mock('../../../../common/containers/use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
@@ -49,6 +49,37 @@ describe('useNetworkTopNFlow', () => {
     });
 
     expect(mockSearch).toHaveBeenCalled();
+  });
+
+  it('labels the data and count searches with distinct network page execution contexts', () => {
+    renderHook(() => useNetworkTopNFlow(props), {
+      wrapper: TestProviders,
+    });
+
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        factoryQueryType: NetworkQueries.topNFlow,
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-network_page',
+            id: 'network_top_n_flow',
+          },
+        },
+      })
+    );
+    expect(mockUseSearchStrategy).toHaveBeenCalledWith(
+      expect.objectContaining({
+        factoryQueryType: NetworkQueries.topNFlowCount,
+        executionContext: {
+          child: {
+            type: 'security_solution',
+            name: 'entity_analytics:explore-network_page',
+            id: 'network_top_n_flow_count',
+          },
+        },
+      })
+    );
   });
 
   it('does not run search when skip = true', () => {

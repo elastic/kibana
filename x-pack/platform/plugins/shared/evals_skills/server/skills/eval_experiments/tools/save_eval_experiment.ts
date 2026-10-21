@@ -11,15 +11,16 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { MAX_ID_LENGTH, isEvalsOwnedWorkflow } from '@kbn/evals-plugin/common';
 import { generateSavedWorkflowYaml } from '@kbn/evals-plugin/server';
 import {
+  assertDatasetsVisible,
   buildWorkflowLink,
   errorResult,
   evalExperimentConfigSchema,
-  evalsTools,
+  evalsExperimentTools,
   otherResult,
   toErrorResult,
   toGenerateParams,
-} from './common';
-import { hasManageEvalsPrivilege } from './check_privileges';
+} from './tool_utils';
+import { hasManageEvalsPrivilege } from '../../common/check_privileges';
 import type { EvalExperimentsToolDeps } from './deps';
 
 const saveSchema = evalExperimentConfigSchema.extend({
@@ -39,25 +40,38 @@ const saveSchema = evalExperimentConfigSchema.extend({
 export const saveEvalExperimentTool = (
   deps: EvalExperimentsToolDeps
 ): BuiltinSkillBoundedTool<typeof saveSchema> => ({
-  id: evalsTools.saveExperiment,
+  id: evalsExperimentTools.saveExperiment,
   type: ToolType.builtin,
   description:
     'Save an evaluation experiment as a reusable workflow. Pass workflow_id to update an existing saved workflow in place (idempotent re-save); omit it to create a new one. Returns the workflow id and a link.',
   schema: saveSchema,
   handler: async ({ workflow_id: workflowId, ...config }, { request, spaceId }) => {
     try {
-      const { security } = await deps.getStartDependencies();
+      const { evals, security } = await deps.getStartDependencies();
       if (!(await hasManageEvalsPrivilege({ security, request, spaceId }))) {
         return errorResult(
           'You do not have the manage_evals privilege required to save evaluation experiment workflows in this space.'
         );
       }
 
+      if (!evals.datasetService) {
+        return toErrorResult(
+          new Error('the evals dataset service is unavailable'),
+          'Failed to save experiment workflow'
+        );
+      }
+
+      await assertDatasetsVisible({
+        datasetService: evals.datasetService,
+        spaceId,
+        datasetIds: config.dataset_ids,
+      });
+
       const params = toGenerateParams(config);
       const workflow = generateSavedWorkflowYaml(params);
 
       if (workflowId) {
-        const existing = await deps.workflowsApi.getWorkflow(workflowId, spaceId);
+        const existing = await deps.workflowsApi.getWorkflow(workflowId, spaceId, request);
         if (!isEvalsOwnedWorkflow(existing)) {
           return errorResult(`Workflow not found: ${workflowId}`);
         }

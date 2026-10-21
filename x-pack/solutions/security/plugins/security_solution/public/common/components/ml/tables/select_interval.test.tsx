@@ -24,6 +24,6 @@ describe('SelectInterval', () => {
     );
 
     await user.selectOptions(getByTestId('selectInterval'), getByText('1 hour'));
-    expect(onChangeCb).toBeCalledWith('hour');
+    expect(onChangeCb).toHaveBeenCalledWith('hour');
   });
 });
