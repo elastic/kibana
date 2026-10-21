@@ -2367,15 +2367,16 @@ describe('ConversationClient', () => {
       expect(mockEsClient.index).not.toHaveBeenCalled();
     });
 
-    it.each([{ telemetry_target: 'c0' }, {}, undefined])(
-      'rejects replacing or removing the target through update: %p',
-      async (metadata) => {
-        await expect(
-          client.update({ id: 'conversation-1', metadata }, { source: 'workflow' })
-        ).rejects.toThrow('Metadata field "telemetry_target" is immutable');
-        expect(mockEsClient.index).not.toHaveBeenCalled();
-      }
-    );
+    it.each<Record<string, SerializedMetadataValue> | undefined>([
+      { telemetry_target: 'c0' },
+      {},
+      undefined,
+    ])('rejects replacing or removing the target through update: %p', async (metadata) => {
+      await expect(
+        client.update({ id: 'conversation-1', metadata }, { source: 'workflow' })
+      ).rejects.toThrow('Metadata field "telemetry_target" is immutable');
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
 
     it.each(['other', undefined])(
       'rejects switching or removing the template through update: %p',
@@ -2400,7 +2401,7 @@ describe('ConversationClient', () => {
       });
     });
 
-    it.each([{ telemetry_target: 'orca' }, {}])(
+    it.each<Record<string, SerializedMetadataValue>>([{ telemetry_target: 'orca' }, {}])(
       'preserves the target binding when reapplying the template: %p',
       async (metadata) => {
         mockGetDocumentResponse(
