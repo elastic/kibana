@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { INDEX_TEMPLATE_PATTERN_PREFIX } from './constants';
+import type { EsClient } from '@kbn/scout';
 
-// ILM policy with minimal configuration
+// ILM policy with minimal configuration. Every `min_age` is at least a day, so no action runs
+// against an attached index during the suite.
 export const getPolicyPayload = (name: string) => ({
   name,
   phases: {
@@ -36,8 +37,12 @@ export const getPolicyPayload = (name: string) => ({
   },
 });
 
-// ILM policy with full configuration; includes searchable_snapshot configuration, which requires a valid repository and SLM policy
-export const getPolicyPayloadWithSearchableSnapshots = (name: string) => ({
+// ILM policy with full configuration. The searchable snapshot actions require an existing
+// repository, and `wait_for_snapshot` references an SLM policy.
+export const getPolicyPayloadWithSearchableSnapshots = (
+  name: string,
+  { repository, slmPolicy }: { repository: string; slmPolicy: string }
+) => ({
   name,
   phases: {
     hot: {
@@ -101,7 +106,7 @@ export const getPolicyPayloadWithSearchableSnapshots = (name: string) => ({
         },
         freeze: {},
         searchable_snapshot: {
-          snapshot_repository: 'backing_repo',
+          snapshot_repository: repository,
         },
       },
     },
@@ -109,7 +114,7 @@ export const getPolicyPayloadWithSearchableSnapshots = (name: string) => ({
       min_age: '20d',
       actions: {
         searchable_snapshot: {
-          snapshot_repository: 'backing_repo',
+          snapshot_repository: repository,
         },
       },
     },
@@ -117,7 +122,7 @@ export const getPolicyPayloadWithSearchableSnapshots = (name: string) => ({
       min_age: '30d',
       actions: {
         wait_for_snapshot: {
-          policy: 'policy',
+          policy: slmPolicy,
         },
         delete: {
           delete_searchable_snapshot: true,
@@ -127,9 +132,11 @@ export const getPolicyPayloadWithSearchableSnapshots = (name: string) => ({
   },
 });
 
-export const getTemplatePayload = () => ({
-  index_patterns: [`${INDEX_TEMPLATE_PATTERN_PREFIX}*`],
-  settings: {
-    number_of_shards: 1,
-  },
-});
+/** Seeds a policy directly in ES so the request under test has something to act on. */
+export const putPolicy = (
+  esClient: EsClient,
+  { name, ...policy }: ReturnType<typeof getPolicyPayload> & { _meta?: Record<string, unknown> }
+) => esClient.ilm.putLifecycle({ name, policy });
+
+export const deletePolicy = (esClient: EsClient, name: string) =>
+  esClient.ilm.deleteLifecycle({ name }, { ignore: [404] });

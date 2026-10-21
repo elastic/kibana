@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-export { getRandomString } from './random';
+import { createPlaywrightConfig } from '@kbn/scout';
 
-export { wait, getPolicyNames } from './utils';
-
-export { initElasticsearchHelpers } from './elasticsearch';
+export default createPlaywrightConfig({
+  testDir: './tests',
+});
