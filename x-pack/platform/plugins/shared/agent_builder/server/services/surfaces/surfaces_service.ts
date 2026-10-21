@@ -30,20 +30,25 @@ export class SurfacesServiceImpl implements SurfacesService {
   private readonly attachmentsService: AttachmentServiceStart;
   private readonly logger: Logger;
   private readonly isomer: IsomerPluginStart;
+  private readonly getBaseUrl: (spaceId: string) => string | undefined;
   private readonly surfaceRenderers: SurfaceRenderer[] = [slackSurface];
 
   constructor({
     attachmentsService,
     logger,
     isomer,
+    getBaseUrl,
   }: {
     attachmentsService: AttachmentServiceStart;
     logger: Logger;
     isomer: IsomerPluginStart;
+    /** The space's Kibana URL, which Kibana app links resolve against on the surface. */
+    getBaseUrl: (spaceId: string) => string | undefined;
   }) {
     this.attachmentsService = attachmentsService;
     this.logger = logger;
     this.isomer = isomer;
+    this.getBaseUrl = getBaseUrl;
   }
 
   async renderPayload(
@@ -72,7 +77,9 @@ export class SurfacesServiceImpl implements SurfacesService {
         runtime,
       });
 
-      return composition.body.length > 0 ? renderer.render(composition, runtime) : undefined;
+      return composition.body.length > 0
+        ? renderer.render(composition, runtime, { baseUrl: this.getBaseUrl(spaceId) })
+        : undefined;
     } catch (error) {
       this.logger.error(`Failed to render the ${renderer.id} surface payload: ${error.message}`);
 
