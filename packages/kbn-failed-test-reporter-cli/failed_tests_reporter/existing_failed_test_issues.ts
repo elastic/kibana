@@ -56,22 +56,26 @@ interface FindFailedTestIssuesResponse {
   suiteIssues?: FlakySuiteIssue[];
 }
 
-/** What ci-stats matches on: per-test issues by `classname` and `name`, suite issues by the rest */
-interface FailureSelector {
+/**
+ * How a failure identifies its test to ci-stats: per-test issues are matched on `classname` and
+ * `name`, suite issues on `filePath` and `testId`.
+ */
+interface FailureIdentity {
   classname: string;
   name: string;
   filePath?: string;
   testId?: string;
 }
 
-const getSelector = (failure: TestFailure): FailureSelector => ({
+const getFailureIdentity = (failure: TestFailure): FailureIdentity => ({
   classname: failure.classname,
   name: failure.name,
   filePath: getTestFilePath(failure),
   testId: getScoutTestId(failure),
 });
 
-const getLegacySelector = ({ classname, name }: TestFailure): FailureSelector => ({
+/** The two fields ci-stats versions that predate suite issues accept */
+const getLegacyFailureIdentity = ({ classname, name }: TestFailure): FailureIdentity => ({
   classname,
   name,
 });
@@ -253,13 +257,15 @@ export class ExistingFailedTestIssues {
     while (true) {
       attempt += 1;
 
-      const selectors = failures.map(this.askForSuiteIssues ? getSelector : getLegacySelector);
+      const identities = failures.map(
+        this.askForSuiteIssues ? getFailureIdentity : getLegacyFailureIdentity
+      );
       let response: Response;
       try {
         response = await fetch(`${BASE_URL}/v1/find_failed_test_issues`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ failures: selectors }),
+          body: JSON.stringify({ failures: identities }),
         });
       } catch (error: unknown) {
         // Network-level error (fetch throws TypeError for DNS/connection failures).
