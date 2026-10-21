@@ -81,7 +81,7 @@ export const listPolicyExecutionHistoryRequestSchema = lazySchema(() =>
       from: isoDateTime()
         .optional()
         .describe(
-          'Inclusive ISO datetime lower bound on the event timestamp; overrides the default 24-hour window. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.'
+          'Inclusive ISO datetime lower bound on the event timestamp. Defaults to 24 hours before `to`, or before the request when `to` is omitted. Independent of alert_ids — e.g. set it to an alert’s start time to scope results to that alert’s lifetime.'
         ),
       to: isoDateTime()
         .optional()

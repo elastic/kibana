@@ -112,8 +112,13 @@ export class ActionPolicyExecutionHistoryClient {
     to,
     sortOrder,
   }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
+    // Default lower bound: 24 hours before `to`, or before now when `to` is
+    // omitted, so a caller-supplied upper bound never yields an inverted window.
     const effectiveFrom =
-      from ?? new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+      from ??
+      new Date(
+        (to ? Date.parse(to) : Date.now()) - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000
+      ).toISOString();
     const spaceId = this.spaces.spacesService.getSpaceId(request);
     const searchIsActive = search !== undefined && search.trim() !== '';
 

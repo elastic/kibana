@@ -122,6 +122,17 @@ describe('ExecutionHistoryClient', () => {
       );
     });
 
+    it('defaults from to 24 hours before to when the caller passes to but omits from', async () => {
+      const { client, findRuleExecutions } = createMocks();
+      const to = '2026-06-02T12:00:00.000Z';
+
+      await client.listRuleExecutions({ ...baseArgs(), to });
+
+      expect(findRuleExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ from: '2026-06-01T12:00:00.000Z', to })
+      );
+    });
+
     it('keeps an explicit from instead of the default window', async () => {
       const { client, findRuleExecutions } = createMocks();
       await client.listRuleExecutions(baseArgs({ from: '2020-01-01T00:00:00.000Z' }));

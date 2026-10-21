@@ -26,12 +26,16 @@ import type {
 
 const SEARCH_ID_CAP = 500;
 
-// Default lower bound on `event.start` when the caller does not pass `from`;
-// the same rolling window the action-policy history applies.
+// Default lower bound on `event.start` when the caller does not pass `from`:
+// 24 hours before `to`, or before now when `to` is omitted — the same rolling
+// window the action-policy history applies. Anchoring on `to` keeps a
+// caller-supplied upper bound from producing an empty or inverted window.
 const DEFAULT_TIME_WINDOW_HOURS = 24;
 
-const defaultFrom = (): string =>
-  new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+const defaultFrom = (to?: string): string =>
+  new Date(
+    (to ? Date.parse(to) : Date.now()) - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000
+  ).toISOString();
 
 interface ResolvedSearch {
   ruleIds: string[];
@@ -53,10 +57,10 @@ export class ExecutionHistoryClient implements ExecutionHistoryClientContract {
 
   public async listRuleExecutions({
     search,
-    from = defaultFrom(),
+    from,
     ...rest
   }: ListRuleExecutionsArgs): Promise<ListRuleExecutionsResult> {
-    const args = { ...rest, from };
+    const args = { ...rest, from: from ?? defaultFrom(rest.to) };
     if (search === undefined) {
       const result = await this.eventLog.findRuleExecutions({ spaceId: this.spaceId, ...args });
       return { ...result, searchMatches: null };

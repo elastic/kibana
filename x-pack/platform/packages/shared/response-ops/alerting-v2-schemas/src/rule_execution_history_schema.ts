@@ -68,7 +68,7 @@ export const listRuleExecutionsRequestSchema = lazySchema(() =>
       from: isoDateTime()
         .optional()
         .describe(
-          'Inclusive ISO datetime lower bound on event.start. Defaults to 24 hours before the request. Set it to see older executions.'
+          'Inclusive ISO datetime lower bound on event.start. Defaults to 24 hours before `to`, or before the request when `to` is omitted. Set it to see older executions.'
         ),
       to: isoDateTime().optional().describe('Inclusive ISO datetime upper bound on event.start.'),
       sort_field: z

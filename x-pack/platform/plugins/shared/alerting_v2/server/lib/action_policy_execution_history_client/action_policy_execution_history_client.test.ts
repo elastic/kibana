@@ -130,6 +130,18 @@ describe('ActionPolicyExecutionHistoryClient', () => {
       jest.useRealTimers();
     });
 
+    it('defaults startDate to 24 hours before `to` when `from` is omitted', async () => {
+      const { client, eventLogService } = createMocks();
+      const request = httpServerMock.createKibanaRequest();
+      const to = '2026-05-06T10:00:00.000Z';
+
+      await client.listExecutionHistory({ request, to });
+
+      expect(eventLogService.findActionPolicyExecutionEvents).toHaveBeenCalledWith(
+        expect.objectContaining({ startDate: '2026-05-05T10:00:00.000Z', endDate: to })
+      );
+    });
+
     it('uses the provided `from` as the startDate lower bound', async () => {
       const { client, eventLogService } = createMocks();
       const request = httpServerMock.createKibanaRequest();

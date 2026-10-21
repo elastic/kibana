@@ -22,10 +22,6 @@ const buildLifecycle = (data: Partial<RuleAttachmentData>) =>
       }
     : {};
 
-const buildMetadata = (metadata: Partial<RuleAttachmentData>['metadata']) => ({
-  metadata: metadata!,
-});
-
 /**
  * Maps partial rule attachment data to the API request payload,
  * filling in required defaults for missing fields. Used by both the canvas
@@ -33,7 +29,7 @@ const buildMetadata = (metadata: Partial<RuleAttachmentData>['metadata']) => ({
  */
 export const buildRulePayload = (data: Partial<RuleAttachmentData>): CreateRuleData => ({
   kind: data.kind!,
-  ...buildMetadata(data.metadata),
+  metadata: data.metadata!,
   schedule: data.schedule!,
   query: data.query!,
   state_transition: data.state_transition,
