@@ -26,7 +26,7 @@ jobs:
             const whitelist = [
               // { user: 'kibanamachine', branchPrefix: 'api_docs', baseMatch: /^main$/ },
               // { user: 'kibanamachine', branchPrefix: 'backport', baseNotMatch: /^main$/ },
-              { user: 'kibanamachine', branchPrefix: 'scout_metadata_update' },
+              { user: 'elastic-vault-github-plugin-prod[bot]', branchPrefix: 'scout_metadata_update' },
               { user: 'kibanamachine', branchPrefix: 'update-pipeline-resource-defs', baseMatch: /^main$/ },
               { user: 'kibanamachine', branchPrefix: 'bump-versions' },
               { user: 'elastic-vault-github-plugin-prod[bot]', branchPrefix: 'update-bundled-packages', paths: ['fleet_packages.json'] },
