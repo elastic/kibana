@@ -10,6 +10,7 @@
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import { DEFAULT_MAX_STEP_SIZE } from './step/errors';
 
 const EventTriggersConfigSchema = schema.object({
@@ -51,14 +52,6 @@ const configSchema = schema.object({
   logging: schema.object({
     console: schema.boolean({ defaultValue: false }),
   }),
-  http: schema.object({
-    allowedHosts: schema.arrayOf(
-      schema.oneOf([schema.string({ hostname: true }), schema.literal('*')]),
-      {
-        defaultValue: ['*'],
-      }
-    ),
-  }),
   maxResponseSize: schema.byteSize({ defaultValue: DEFAULT_MAX_STEP_SIZE }),
   eviction: schema.object({
     /**
@@ -92,4 +85,21 @@ export type WorkflowsExecutionEngineConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<WorkflowsExecutionEngineConfig> = {
   schema: configSchema,
+  deprecations: ({ unused }) => [
+    unused('http', {
+      level: 'warning',
+      message: i18n.translate('workflowsExecutionEngine.deprecations.httpUnusedMessage', {
+        defaultMessage:
+          'workflowsExecutionEngine.http is not used. HTTP step hosts are checked against xpack.actions.allowedHosts.',
+      }),
+      correctiveActions: {
+        manualSteps: [
+          i18n.translate('workflowsExecutionEngine.deprecations.httpUnused.manualStepOneMessage', {
+            defaultMessage:
+              'Remove workflowsExecutionEngine.http from the Kibana config file, CLI flag, or environment variable. If allowedHosts listed specific hosts, set those hosts on xpack.actions.allowedHosts.',
+          }),
+        ],
+      },
+    }),
+  ],
 };
