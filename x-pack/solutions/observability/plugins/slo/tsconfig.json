@@ -137,6 +137,8 @@
     "@kbn/cps-utils",
     "@kbn/cps-server-utils",
     "@kbn/app-header",
-    "@kbn/ui-callout"
+    "@kbn/ui-callout",
+    "@kbn/sse-utils",
+    "@kbn/sse-utils-server"
   ]
 }
