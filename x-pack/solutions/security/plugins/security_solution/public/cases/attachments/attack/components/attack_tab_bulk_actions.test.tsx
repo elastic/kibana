@@ -571,7 +571,6 @@ describe('AttackTabBulkActions', () => {
       useAttackWorkflowStatusContextMenuItemsMock,
       useAttackTagsContextMenuItemsMock,
       useAttackAssigneesContextMenuItemsMock,
-      useAttackRunWorkflowContextMenuItemsMock,
       useAttackInvestigateInTimelineContextMenuItemsMock,
     ].forEach((hook) => {
       expect(hook).toHaveBeenCalledWith(

@@ -197,7 +197,6 @@ export const AttackTabBulkActions = ({
     useAttackRunWorkflowContextMenuItems({
       attacksForWorkflowRun: baseAttackProps,
       closePopover,
-      telemetrySource: TELEMETRY_SOURCE,
     });
 
   const attacksWithTimelineAlerts = useMemo(

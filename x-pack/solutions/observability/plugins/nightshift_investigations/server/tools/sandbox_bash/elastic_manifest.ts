@@ -9,22 +9,63 @@ import type { Logger } from '@kbn/core/server';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import { SANDBOX_BASH_TOOL_ID } from './tool';
 
+/** Where the sandbox gets Elasticsearch credentials: the telemetry connector or a secret pair. */
+export type ElasticCredentials =
+  | { kind: 'connector'; connectorId: string }
+  | { kind: 'secrets'; urlKey: string; apiKeyKey: string };
+
+const SECRET_API_KEY = 'ELASTICSEARCH_API_KEY';
+const SECRET_URL_KEYS = ['ELASTICSEARCH_URL', 'ELASTICSEARCH_ENDPOINT'] as const;
+
+/** The Elasticsearch URL and API key sandbox secrets, when both are configured. */
+export const findElasticSecretCredentials = (
+  secretKeys: readonly string[]
+): ElasticCredentials | undefined => {
+  const urlKey = SECRET_URL_KEYS.find((key) => secretKeys.includes(key));
+  if (!urlKey || !secretKeys.includes(SECRET_API_KEY)) return undefined;
+  return { kind: 'secrets', urlKey, apiKeyKey: SECRET_API_KEY };
+};
+
+const describeCredentials = (credentials: ElasticCredentials) => {
+  if (credentials.kind === 'connector') {
+    return {
+      urlVar: 'CONNECTOR_CONFIG_URL',
+      authVar: 'CONNECTOR_HEADER_AUTHORIZATION',
+      authDescription: 'full Authorization header value (`ApiKey <key>`)',
+      authHeader: '$CONNECTOR_HEADER_AUTHORIZATION',
+      parameterName: 'connector_id',
+      parameter: `connector_id: "${credentials.connectorId}"`,
+    };
+  }
+  return {
+    urlVar: credentials.urlKey,
+    authVar: credentials.apiKeyKey,
+    authDescription: 'Elasticsearch API key, used as `Authorization: ApiKey <key>`',
+    authHeader: `ApiKey $${credentials.apiKeyKey}`,
+    parameterName: 'secret_keys',
+    parameter: `secret_keys: ["${credentials.urlKey}", "${credentials.apiKeyKey}"]`,
+  };
+};
+
 /** How to query cluster telemetry from the sandbox. Names env vars; never embeds secrets. */
 export const renderElasticManifest = (
-  connectorId: string,
+  credentials: ElasticCredentials,
   { readableIndices }: { readableIndices?: string } = {}
-): string =>
-  [
+): string => {
+  const { urlVar, authVar, authDescription, authHeader, parameterName, parameter } =
+    describeCredentials(credentials);
+  const url = `$${urlVar}`;
+  return [
     '# Elasticsearch telemetry',
     '',
-    `Query this cluster by passing \`connector_id: "${connectorId}"\` to \`${SANDBOX_BASH_TOOL_ID}\`.`,
+    `Query this cluster by passing \`${parameter}\` to \`${SANDBOX_BASH_TOOL_ID}\`.`,
     'Credentials are not stored here: for that single command only, the environment contains',
     '',
-    '- `CONNECTOR_CONFIG_URL` — Elasticsearch URL',
-    '- `CONNECTOR_SECRET_PASSWORD` — Elasticsearch API key, used as `Authorization: ApiKey <key>`',
+    `- \`${urlVar}\` — Elasticsearch URL`,
+    `- \`${authVar}\` — ${authDescription}`,
     '',
     'Reference those variables directly and never hard-code their values. A command that omits',
-    '`connector_id` gets no credentials and cannot reach Elasticsearch.',
+    `\`${parameterName}\` gets no credentials and cannot reach Elasticsearch.`,
     '',
     readableIndices?.trim() || 'Readable indices: `logs-*`, `metrics-*`, `traces-*`.',
     '',
@@ -36,6 +77,9 @@ export const renderElasticManifest = (
     '  are not supplied above. To check many remotes, query them in parallel with a short',
     '  per-request timeout, as in the last example below: a sequential loop over dozens of remotes',
     '  exceeds the sandbox command timeout and returns nothing.',
+    '- Query a specific data stream, not a broad `logs-*`: on large clusters a broad pattern scans',
+    '  every data stream and times out. Find candidates with',
+    '  `GET /_resolve/index/<remote>:logs-*<keyword>*`, then query the one you need.',
     '- Add `?format=txt` to `_query` for a compact text table instead of JSON.',
     '- Bound every telemetry query with a `@timestamp` range and every curl with `--max-time 120`.',
     '  If a query times out, filter on a structured field (`data_stream.dataset`, `host.name`) before',
@@ -50,39 +94,44 @@ export const renderElasticManifest = (
     '  `STATS` for totals and a small `LIMIT` for raw documents.',
     '',
     '```bash',
-    '# connector_id must be set on every one of these commands',
-    'curl --fail-with-body -sS --max-time 120 -H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD" \\',
-    '  "$CONNECTOR_CONFIG_URL/_remote/info"',
+    `# ${parameterName} must be set on every one of these commands`,
+    `curl --fail-with-body -sS --max-time 120 -H "Authorization: ${authHeader}" \\`,
+    `  "${url}/_remote/info"`,
     '',
-    'curl --fail-with-body -sS --max-time 120 -H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD" \\',
+    `curl --fail-with-body -sS --max-time 120 -H "Authorization: ${authHeader}" \\`,
     '  -H "Content-Type: application/json" \\',
-    '  "$CONNECTOR_CONFIG_URL/_query?format=txt" \\',
+    `  "${url}/_query?format=txt" \\`,
     '  -d \'{"query":"FROM logs-* | WHERE @timestamp >= \\"2026-01-01T00:00:00Z\\" AND @timestamp < \\"2026-01-01T01:00:00Z\\" | STATS count = COUNT(*) BY service.name | SORT count DESC | LIMIT 20"}\'',
     '',
-    '# Same query on every remote whose name starts with logging-, 8 at a time, each line prefixed',
-    '# with its remote; failed requests print their error',
+    '# Find the data streams that match a keyword on one remote',
+    `curl --fail-with-body -sS --max-time 120 -H "Authorization: ${authHeader}" \\`,
+    `  "${url}/_resolve/index/<remote>:logs-*nginx*"`,
+    '',
+    '# Count one data stream on every remote whose name starts with logging-, 8 at a time, each line',
+    '# prefixed with its remote; failed requests print their error',
     'q() {',
-    '  curl --fail-with-body -sS --max-time 30 -H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD" \\',
-    '    -H "Content-Type: application/json" "$CONNECTOR_CONFIG_URL/_query?format=txt" \\',
-    '    -d "{\\"query\\":\\"FROM $1:logs-* | WHERE @timestamp >= \\\\\\"2026-01-01T00:00:00Z\\\\\\" AND @timestamp < \\\\\\"2026-01-01T06:00:00Z\\\\\\" | STATS count = COUNT(*)\\"}" \\',
+    `  curl --fail-with-body -sS --max-time 30 -H "Authorization: ${authHeader}" \\`,
+    `    -H "Content-Type: application/json" "${url}/_query?format=txt" \\`,
+    '    -d "{\\"query\\":\\"FROM $1:logs-nginx.error-* | WHERE @timestamp >= \\\\\\"2026-01-01T00:00:00Z\\\\\\" AND @timestamp < \\\\\\"2026-01-01T06:00:00Z\\\\\\" | STATS count = COUNT(*)\\"}" \\',
     '    2>&1 | sed "s/^/$1\\t/"',
     '}',
     'export -f q',
-    'curl --fail-with-body -sS --max-time 120 -H "Authorization: ApiKey $CONNECTOR_SECRET_PASSWORD" \\',
-    '  "$CONNECTOR_CONFIG_URL/_remote/info" | jq -r \'keys[] | select(startswith("logging-"))\' \\',
+    `curl --fail-with-body -sS --max-time 120 -H "Authorization: ${authHeader}" \\`,
+    `  "${url}/_remote/info" | jq -r 'keys[] | select(startswith("logging-"))' \\`,
     '  | xargs -P 8 -n 1 bash -c \'q "$0"\'',
     '```',
     '',
   ].join('\n');
+};
 
 export const writeElasticManifest = async ({
   session,
-  connectorId,
+  credentials,
   readableIndices,
   logger,
 }: {
   session: SandboxSession;
-  connectorId: string;
+  credentials: ElasticCredentials;
   readableIndices?: string;
   logger: Logger;
 }): Promise<void> => {
@@ -91,7 +140,7 @@ export const writeElasticManifest = async ({
   const [result] = await session.writeFiles([
     {
       path: '/workspace/elastic.md',
-      content: Buffer.from(renderElasticManifest(connectorId, { readableIndices }), 'utf8'),
+      content: Buffer.from(renderElasticManifest(credentials, { readableIndices }), 'utf8'),
     },
   ]);
   if (!result?.success) throw new Error('Failed to write sandbox telemetry guidance');
