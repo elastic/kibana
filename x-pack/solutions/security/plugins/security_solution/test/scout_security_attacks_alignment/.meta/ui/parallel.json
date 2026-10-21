@@ -1,5 +1,5 @@
 {
-  "sha1": "53de60be7708ac38cc25663953c63167df21e20a",
+  "sha1": "be88722876b4aa6ffd68790389af8ad171bf6a5e",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -13,6 +13,48 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "1f3b1f0fa751de1-7ce279b71bf6533",
+      "title": "Attack case attachments attaches an attack to a new case and renders the preview card and Attacks grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
+        "line": 188,
+        "column": 47
+      }
+    },
+    {
+      "id": "1f3b1f0fa751de1-dec293a9375b796",
+      "title": "Attack case attachments removes an attack from the Attacks grid, keeping the alerts another attack claims",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
+        "line": 306,
+        "column": 24
+      }
+    },
+    {
+      "id": "1f3b1f0fa751de1-4dc13498cd38f70",
+      "title": "Attack case attachments opens the attack flyout from the \"Show attack details\" action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout_security_attacks_alignment/ui/parallel_tests/detections/attacks/attack_cases.spec.ts",
+        "line": 473,
+        "column": 20
       }
     },
     {
