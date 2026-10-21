@@ -27,10 +27,14 @@ const isUnicodeRegExp = (pattern: string): boolean => {
 // Leading inline flags, as in Java's and Python's `(?i)^[a-f]+$`; JavaScript only scopes them.
 const LEADING_FLAGS = /^\(\?([ims]+)\)/;
 
+const CLASS_ESCAPE_LETTERS = new Set('dDwWsS');
+
 /**
  * Schema validators compile patterns with the `u` flag, which rejects identity escapes such as
- * `\_` that vendor specs commonly use. Drops the backslash from those escapes, and scopes leading
- * inline flags such as `(?i)` over the rest of the pattern.
+ * `\_` that vendor specs commonly use, and ranges from or to a class escape such as `[\w-_]`
+ * (AWS's CloudWatch Logs). Drops the backslash from those escapes, escapes a hyphen next to a
+ * class escape, which then means itself as without the flag, and scopes leading inline flags
+ * such as `(?i)` over the rest of the pattern.
  */
 export const toUnicodePattern = (source: string): string => {
   if (isUnicodeRegExp(source)) {
@@ -43,6 +47,7 @@ export const toUnicodePattern = (source: string): string => {
   }
   let result = '';
   let inClass = false;
+  let afterClassEscape = false;
   for (let index = 0; index < pattern.length; index++) {
     const char = pattern[index];
     if (char === '\\' && index + 1 < pattern.length) {
@@ -50,8 +55,17 @@ export const toUnicodePattern = (source: string): string => {
       const isValidEscape =
         SYNTAX_CHARACTERS.has(next) || ESCAPE_LETTERS.has(next) || (inClass && next === '-');
       result += isValidEscape ? `\\${next}` : next;
+      afterClassEscape = inClass && CLASS_ESCAPE_LETTERS.has(next);
       continue;
     }
+    const beforeClassEscape =
+      pattern[index + 1] === '\\' && CLASS_ESCAPE_LETTERS.has(pattern[index + 2]);
+    if (inClass && char === '-' && (afterClassEscape || beforeClassEscape)) {
+      result += '\\-';
+      afterClassEscape = false;
+      continue;
+    }
+    afterClassEscape = false;
     if (char === '[') {
       inClass = true;
     } else if (char === ']') {
