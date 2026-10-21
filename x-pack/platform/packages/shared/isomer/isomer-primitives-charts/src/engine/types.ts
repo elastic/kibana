@@ -31,6 +31,8 @@ export interface LiveChartProps<TNode extends ChartNode = ChartNode> {
   height?: number;
   /** Raised for a click, with engine-neutral targets; the pack turns it into an `ActionEventRef`. */
   onSelect?: (targets: readonly SelectionTarget[]) => void;
+  /** Engine-specific presentation for this drawing, overriding any the engine holds for the node's id. */
+  hint?: Readonly<Record<string, unknown>>;
 }
 
 export interface DrawRequest {
@@ -38,6 +40,8 @@ export interface DrawRequest {
   theme: ResolvedChartTheme;
   width: number;
   height: number;
+  /** Engine-specific presentation for this drawing, overriding any the engine holds for the node's id. */
+  hint?: Readonly<Record<string, unknown>>;
 }
 
 export interface LegendItem {

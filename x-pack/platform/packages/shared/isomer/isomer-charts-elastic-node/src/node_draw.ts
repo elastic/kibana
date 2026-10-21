@@ -292,7 +292,7 @@ export const createStaticDraw = async ({
     dark: sheet('@elastic/charts/dist/theme_dark.css'),
   };
   const { document } = environment.window;
-  const draw: StaticDraw = (node, { mode, theme, width, height }) => {
+  const draw: StaticDraw = (node, { mode, theme, width, height, hint }) => {
     const Live = engine.live?.[node.type] as ComponentType<LiveChartProps> | undefined;
     if (Live === undefined) {
       throw new Error(`no drawing for ${node.type}`);
@@ -301,7 +301,7 @@ export const createStaticDraw = async ({
     document.body.appendChild(container);
     const root = createRoot(container);
     try {
-      flushSync(() => root.render(createElement(Live, { node, theme, width, height })));
+      flushSync(() => root.render(createElement(Live, { node, theme, width, height, ...(hint ? { hint } : {}) })));
       environment.flushFrames();
       const chart = container.getElementsByClassName('echChart')[0] as HTMLElement | undefined;
       if (!chart) {

@@ -62,29 +62,29 @@ export const defineElasticChartsEngine = ({
     },
     live: {
       donut: (props: LiveChartProps<DonutNode>): ReactNode =>
-        h(DonutChart, { ...props, hint: hintFor(props.node) ?? {}, baseTheme }),
+        h(DonutChart, { ...props, hint: (props.hint as ChartHint | undefined) ?? hintFor(props.node) ?? {}, baseTheme }),
       gauge: (props: LiveChartProps<GaugeNode>): ReactNode =>
-        h(GaugeChart, { ...props, hint: hintFor(props.node) ?? {}, baseTheme }),
+        h(GaugeChart, { ...props, hint: (props.hint as ChartHint | undefined) ?? hintFor(props.node) ?? {}, baseTheme }),
       heatmap: (props: LiveChartProps<HeatmapNode>): ReactNode =>
         h(HeatmapChart, {
           ...props,
-          hint: hintFor(props.node) ?? {},
+          hint: (props.hint as ChartHint | undefined) ?? hintFor(props.node) ?? {},
           baseTheme,
         }),
       metricTrend: (props: LiveChartProps<MetricTrendNode>): ReactNode =>
         h(MetricTrendChart, {
           ...props,
-          hint: hintFor(props.node) ?? {},
+          hint: (props.hint as ChartHint | undefined) ?? hintFor(props.node) ?? {},
           baseTheme,
         }),
       treemap: (props: LiveChartProps<TreemapNode>): ReactNode =>
         h(TreemapChart, {
           ...props,
-          hint: hintFor(props.node) ?? {},
+          hint: (props.hint as ChartHint | undefined) ?? hintFor(props.node) ?? {},
           baseTheme,
         }),
       xyChart: (props: LiveChartProps<XyChartNode>): ReactNode =>
-        h(XyChart, { ...props, hint: hintFor(props.node) ?? {}, baseTheme }),
+        h(XyChart, { ...props, hint: (props.hint as ChartHint | undefined) ?? hintFor(props.node) ?? {}, baseTheme }),
     },
   };
 };

@@ -89,6 +89,22 @@ describe('prepareCharts', () => {
     expect(readArtifact(engine, chart, 'dark')).toEqual(artifact('nested'));
   });
 
+  it('sizes and hints each chart from its containers and content', async () => {
+    const engine = stubEngine(() => artifact('a'));
+    const panel = { type: 'group', size: { width: 300, height: 120 }, items: [chart] };
+    const { release } = await prepareCharts(engine, view(panel), {
+      walk,
+      mode: 'light',
+      width: 600,
+      sizeFor: (_node, ancestors) => (ancestors[0] as unknown as typeof panel | undefined)?.size,
+      hintFor: () => ({ legend: { show: false } }),
+    });
+    expect(engine.calls).toEqual([
+      expect.objectContaining({ width: 300, height: 120, hint: { legend: { show: false } } }),
+    ]);
+    release();
+  });
+
   it('keeps a drawing two overlapping calls share until both release', async () => {
     let finish: (value: ChartArtifact) => void = () => undefined;
     const engine = stubEngine(() => new Promise<ChartArtifact>((resolve) => (finish = resolve)));

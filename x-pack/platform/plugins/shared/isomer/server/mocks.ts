@@ -11,6 +11,7 @@ import type { IsomerPluginStart } from './plugin';
 /** A start contract whose `getRuntime` resolves a real runtime with the plugin's packs. */
 const createStartContract = (): jest.Mocked<IsomerPluginStart> => ({
   getRuntime: jest.fn(createRuntime),
+  getDrawing: jest.fn(() => Promise.reject(new Error('Server drawing is off'))),
 });
 
 export const isomerPluginMock = { createStartContract };
