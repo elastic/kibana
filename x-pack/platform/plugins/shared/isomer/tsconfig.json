@@ -9,6 +9,7 @@
     "@kbn/charts-plugin",
     "@kbn/config-schema",
     "@kbn/core",
+    "@kbn/core-plugins-server",
     "@kbn/isomer",
     "@kbn/isomer-charts-elastic",
     "@kbn/isomer-charts-elastic-node",
