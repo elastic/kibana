@@ -46,6 +46,7 @@ const scoutRestrictedFtrPatterns = {
 const SCOUT_TEST_FILE_GLOBS = [
   `${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**/*.ts`,
   'packages/**/test/scout{_*,}/**/*.ts',
+  'src/dev/build/test/scout{_*,}/**/*.ts',
 ];
 
 /** Packages which should not be included within production code. */
