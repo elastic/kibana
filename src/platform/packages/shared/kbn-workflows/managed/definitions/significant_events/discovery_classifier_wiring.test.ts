@@ -254,9 +254,9 @@ describe('discovery workflow detection classifier wiring', () => {
       const ids = (requireStep('write_skipped_marker').with?.body as Record<string, unknown>)
         .detection_ids;
 
-      expect(evaluate(prepare.detection_ids, { foreach: { item: ['detection-A', 'rule-A'] } })).toEqual(
-        ['detection-A']
-      );
+      expect(
+        evaluate(prepare.detection_ids, { foreach: { item: ['detection-A', 'rule-A'] } })
+      ).toEqual(['detection-A']);
       expect(
         evaluate(prepare.detection_ids, {
           foreach: { item: [['detection-A', 'detection-B'], 'rule-A'] },
