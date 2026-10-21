@@ -50,6 +50,11 @@ interface DeleteCaseAttachmentsArgs {
    * records the user actions and emits the event, so several steps count as 1 change.
    */
   onDeleted?: (deletedIds: ReadonlySet<string>) => void;
+  /**
+   * Runs once the attachments are authorized and known to be on the case, before any of them is
+   * deleted.
+   */
+  beforeDelete?: (attachments: DecodedAttachment[]) => Promise<void>;
 }
 
 /** Deletes attachments read for deletion and their files; shared by the comment delete routes. */
@@ -61,6 +66,7 @@ export const deleteCaseAttachments = async (
     notInCaseMessage = (ids) => doNotExistOnCaseMessage(ids, caseId),
     recordUserActions,
     onDeleted,
+    beforeDelete,
   }: DeleteCaseAttachmentsArgs,
   clientArgs: CasesClientArgs
 ): Promise<void> => {
@@ -126,6 +132,8 @@ export const deleteCaseAttachments = async (
 
   // Read before deleting, so a missing case fails the request with nothing deleted.
   await getCase();
+
+  await beforeDelete?.(decodedAttachments);
 
   const savedObjectIds = ownedAttachments.map(({ id }) => id);
   const deletedIds = new Set(await attachmentService.bulkDelete({ savedObjectIds, refresh: true }));
