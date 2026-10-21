@@ -97,7 +97,7 @@ const inputSchema = lazySchema(() =>
       .record(z.string(), z.unknown())
       .optional()
       .describe(
-        'Additional context to pass to the investigation workflow. When subject_type is "alert" this must carry an "alerts" array of alert snapshots, or the investigation is rejected.'
+        'Additional context to pass to the investigation workflow. When subject_type is "alert" and no "alerts" array is given, the alert is looked up by subject_id (classic or universal). Otherwise this must carry an "alerts" array of alert snapshots.'
       ),
     notificationDestinations: investigationNotificationDestinationsSchema
       .optional()
