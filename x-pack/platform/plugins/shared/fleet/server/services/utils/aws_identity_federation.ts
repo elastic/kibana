@@ -5,23 +5,16 @@
  * 2.0.
  */
 
-import { firstValueFrom } from 'rxjs';
-
 import { AWS_IDENTITY_FEDERATION_ENABLED_FLAG } from '../../../common/constants';
-
-import { appContextService } from '..';
+import type { FleetRequestHandlerContext } from '../../types';
 
 /**
- * The LaunchDarkly flag `fleet.awsIdentityFederationEnabled`. Falls back to enabled, as in the
- * browser.
+ * The LaunchDarkly flag `fleet.awsIdentityFederationEnabled`, read for the request so the
+ * decision follows the flag. Falls back to enabled, as in the browser.
  */
-export const isAwsIdentityFederationEnabled = async (): Promise<boolean> => {
-  const featureFlags = appContextService.getFeatureFlags();
-  if (!featureFlags) {
-    return true;
-  }
-
-  return await firstValueFrom(
-    featureFlags.getBooleanValue$(AWS_IDENTITY_FEDERATION_ENABLED_FLAG, true)
-  );
+export const isAwsIdentityFederationEnabled = async (
+  context: FleetRequestHandlerContext
+): Promise<boolean> => {
+  const { featureFlags } = await context.core;
+  return featureFlags.getBooleanValue(AWS_IDENTITY_FEDERATION_ENABLED_FLAG, true);
 };

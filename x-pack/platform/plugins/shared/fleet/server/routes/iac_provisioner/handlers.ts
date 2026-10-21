@@ -218,7 +218,7 @@ export const getProvisioningCallbackAvailabilityHandler: FleetRequestHandler = a
   request,
   response
 ) => {
-  if (!(await isAwsIdentityFederationEnabled())) {
+  if (!(await isAwsIdentityFederationEnabled(context))) {
     return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
   }
   const { available, kibanaUrl, reason } = getProvisioningCallbackAvailability();
@@ -236,7 +236,7 @@ export const createProvisioningCallbackHandler: FleetRequestHandler<
   undefined,
   TypeOf<typeof CreateProvisioningCallbackRequestSchema.body>
 > = async (context, request, response) => {
-  if (!(await isAwsIdentityFederationEnabled())) {
+  if (!(await isAwsIdentityFederationEnabled(context))) {
     return response.notFound(AWS_IDENTITY_FEDERATION_DISABLED);
   }
   // A public URL the stack cannot be given (not https) is refused, so no key is minted for a

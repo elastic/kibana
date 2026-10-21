@@ -5,31 +5,22 @@
  * 2.0.
  */
 
-import { of } from 'rxjs';
-
 import { AWS_IDENTITY_FEDERATION_ENABLED_FLAG } from '../../../common/constants';
-import { appContextService } from '../app_context';
+import type { FleetRequestHandlerContext } from '../../types';
 
 import { isAwsIdentityFederationEnabled } from './aws_identity_federation';
 
-jest.mock('../app_context');
-
 describe('isAwsIdentityFederationEnabled', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
+  const contextWith = (getBooleanValue: jest.Mock) =>
+    ({
+      core: Promise.resolve({ featureFlags: { getBooleanValue } }),
+    } as unknown as FleetRequestHandlerContext);
 
-  it.each([true, false])('follows the flag when it is %s', async (flag) => {
-    const getBooleanValue$ = jest.fn().mockReturnValue(of(flag));
-    jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue({ getBooleanValue$ } as any);
+  it.each([true, false])('reads the flag from the request context when it is %s', async (flag) => {
+    const getBooleanValue = jest.fn().mockResolvedValue(flag);
 
-    await expect(isAwsIdentityFederationEnabled()).resolves.toBe(flag);
-    expect(getBooleanValue$).toHaveBeenCalledWith(AWS_IDENTITY_FEDERATION_ENABLED_FLAG, true);
-  });
-
-  it('is enabled when feature flags are unavailable', async () => {
-    jest.spyOn(appContextService, 'getFeatureFlags').mockReturnValue(undefined);
-
-    await expect(isAwsIdentityFederationEnabled()).resolves.toBe(true);
+    await expect(isAwsIdentityFederationEnabled(contextWith(getBooleanValue))).resolves.toBe(flag);
+    // Enabled by default, as in the browser.
+    expect(getBooleanValue).toHaveBeenCalledWith(AWS_IDENTITY_FEDERATION_ENABLED_FLAG, true);
   });
 });
