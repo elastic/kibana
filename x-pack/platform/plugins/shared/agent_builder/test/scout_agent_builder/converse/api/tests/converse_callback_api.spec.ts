@@ -6,7 +6,7 @@
  */
 
 import { randomUUID } from 'crypto';
-import type { RoleApiCredentials } from '@kbn/scout';
+import type { ApiClientFixture, RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
@@ -287,6 +287,133 @@ apiTest.describe(
         expect(blocks).toContain(attachmentContent);
         expect(blocks).toContain('Anything else?');
         expect(blocks).not.toContain('render_attachment');
+      }
+    );
+
+    // A 1x1 transparent PNG.
+    const png = Buffer.from(
+      'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==',
+      'base64'
+    );
+    const chatImagesPath = '/api/files/files/chat-attachment-images';
+
+    /** Uploads `png` as a chat attachment image, as the admin user, and returns its file id. */
+    const uploadChatImage = async (apiClient: ApiClientFixture): Promise<string> => {
+      const created = await apiClient.post(chatImagesPath, {
+        headers: internalHeaders(),
+        body: { name: 'checkout-latency', mimeType: 'image/png' },
+        responseType: 'json',
+      });
+      expect(created).toHaveStatusCode(200);
+      const fileId = (created.body as { file: { id: string } }).file.id;
+
+      const uploaded = await apiClient.put(`${chatImagesPath}/${fileId}/blob`, {
+        headers: { ...internalHeaders(), 'content-type': 'image/png' },
+        body: png,
+        responseType: 'json',
+      });
+      expect(uploaded).toHaveStatusCode(200);
+
+      return fileId;
+    };
+
+    const converseWithImage = async (
+      apiClient: ApiClientFixture,
+      { key, surfaceAssets }: { key: string; surfaceAssets?: boolean }
+    ) => {
+      const fileId = await uploadChatImage(apiClient);
+
+      await setupAgentDirectAnswer({
+        proxy: llmProxy,
+        title: 'Callback Image Title',
+        response: 'Here is the chart:\n\n<render_attachment id="callback-image" />',
+      });
+
+      const response = await apiClient.post(`${INTERNAL_AGENT_BUILDER}/converse/callback`, {
+        headers: internalHeaders(),
+        body: {
+          input: 'Show me the chart',
+          connector_id: connectorId,
+          execution_idempotency_key: `Ev-callback-${key}-${testRunId}`,
+          attachments: [
+            {
+              id: 'callback-image',
+              type: 'image',
+              description: 'Checkout latency by region',
+              data: { file_id: fileId, name: 'checkout-latency.png', mime_type: 'image/png' },
+            },
+          ],
+          origin: {
+            type: ConversationOriginType.Slack,
+            external_conversation_id: `team:T123/channel:C123/thread:callback-${key}`,
+          },
+          callback: {
+            url: `${callbackServerUrl}/callback?token=${key}`,
+            ...(surfaceAssets === undefined ? {} : { surface_assets: surfaceAssets }),
+          },
+        },
+        responseType: 'json',
+      });
+
+      expect(response).toHaveStatusCode(202);
+      conversationIds.add((response.body as ChatCallbackAcceptedResponse).conversation_id);
+
+      const callbackRequests = await collectCompletedRoundRequests();
+      await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
+
+      await apiClient.delete(`${chatImagesPath}/${fileId}`, { headers: internalHeaders() });
+
+      const surfacePayload = getRoundCompleteEvent(callbackRequests).surface_payload;
+      if (!surfacePayload) {
+        throw new Error('round_complete carried no surface payload');
+      }
+      return surfacePayload;
+    };
+
+    apiTest(
+      'ships the image for upload in place of its tag when the callback uploads assets',
+      async ({ apiClient }) => {
+        const { blocks, assets } = await converseWithImage(apiClient, {
+          key: 'image-assets',
+          surfaceAssets: true,
+        });
+
+        expect(blocks.find(({ type }) => type === 'image')).toStrictEqual({
+          type: 'image',
+          alt_text: 'Checkout latency by region',
+          title: { type: 'plain_text', text: 'checkout-latency.png' },
+          slack_file: { ref: 'kibana-0' },
+        });
+        expect(assets).toStrictEqual([
+          {
+            ref: 'kibana-0',
+            data: png.toString('base64'),
+            mime_type: 'image/png',
+            filename: 'checkout-latency.png',
+            alt_text: 'Checkout latency by region',
+            fallback_blocks: [
+              {
+                type: 'context',
+                elements: [{ type: 'mrkdwn', text: 'Image: checkout-latency.png' }],
+              },
+            ],
+          },
+        ]);
+        expect(JSON.stringify(blocks)).not.toContain('render_attachment');
+      }
+    );
+
+    apiTest(
+      "shows the image's name when the callback doesn't upload assets",
+      async ({ apiClient }) => {
+        const payload = await converseWithImage(apiClient, { key: 'image-no-assets' });
+
+        expect(payload.blocks.find(({ type }) => type === 'context')).toStrictEqual({
+          type: 'context',
+          elements: [{ type: 'mrkdwn', text: 'Image: checkout-latency.png' }],
+        });
+        expect(JSON.stringify(payload.blocks)).not.toContain('slack_file');
+        expect(payload.assets).toBeUndefined();
       }
     );
 
