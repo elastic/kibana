@@ -12,6 +12,7 @@
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
+    "@kbn/data-source",
     "@kbn/core",
     "@kbn/human-readable-id",
     "@kbn/alerting-plugin",

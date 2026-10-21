@@ -10,6 +10,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import type { FilterableSource } from '@kbn/data-source';
 import { coreServices, dataViewsService } from '../../services/kibana_services';
 import { getDataViewIdFromESQLQuery } from './get_data_view_id_from_esql_query';
 
@@ -31,7 +32,7 @@ describe('getDataViewIdFromESQLQuery', () => {
     dataViewsService.find = jest.fn();
     const parentApi = {
       dataViews$: new BehaviorSubject<DataView[] | undefined>([
-        { id: 'published-data-view', getIndexPattern: () => 'logs-*' },
+        { id: 'published-data-view', title: 'logs-*', getIndexPattern: () => 'logs-*' },
       ] as DataView[]),
     };
 
@@ -40,6 +41,26 @@ describe('getDataViewIdFromESQLQuery', () => {
         parentApi,
       })
     ).resolves.toBe('published-data-view');
+
+    expect(dataViewsService.find).not.toHaveBeenCalled();
+    expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();
+  });
+
+  it('returns the id of a matching parent-published ES|QL source, which has no data view', async () => {
+    dataViewsService.find = jest.fn();
+    const esqlSource: FilterableSource = {
+      id: 'esql-dataset-id',
+      title: 'logs-*',
+      fields: [],
+      isTimeBased: () => false,
+    };
+    const parentApi = {
+      dataViews$: new BehaviorSubject<FilterableSource[] | undefined>([esqlSource]),
+    };
+
+    await expect(
+      getDataViewIdFromESQLQuery('FROM logs-* | STATS BY service.name', { parentApi })
+    ).resolves.toBe('esql-dataset-id');
 
     expect(dataViewsService.find).not.toHaveBeenCalled();
     expect(mockGetESQLAdHocDataview).not.toHaveBeenCalled();

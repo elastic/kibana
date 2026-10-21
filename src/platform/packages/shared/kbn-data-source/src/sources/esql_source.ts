@@ -387,6 +387,7 @@ export class EsqlSource implements DataSourceBase {
         buildFilterableFieldSpecs(dataset.getColumns(), dataset.timeFieldName)
       ).map((field) => ({ ...field, filterable: isFilterable(field) })),
       isTimeBased: () => dataset.isTimeBased(),
+      isPersisted: () => dataset.isPersisted(),
     };
     return dataset.filterableSource;
   }

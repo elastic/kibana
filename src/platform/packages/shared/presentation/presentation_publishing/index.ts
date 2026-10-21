@@ -139,6 +139,7 @@ export {
 export {
   apiPublishesDataViews,
   type PublishesDataViews,
+  type PublishesOnlyDataViews,
   type PublishesWritableDataViews,
 } from './interfaces/publishes_data_views';
 export {

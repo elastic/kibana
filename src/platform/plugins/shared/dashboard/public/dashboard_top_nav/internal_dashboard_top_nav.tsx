@@ -24,6 +24,7 @@ import {
 import { css } from '@emotion/react';
 import type { MountPoint } from '@kbn/core/public';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import type { FilterableSource } from '@kbn/data-source';
 import type { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -139,6 +140,10 @@ const DashboardAppHeader = ({
     />
   );
 };
+
+// An ES|QL data view, which never reports to be time based, even with a time field.
+const isEsqlDataView = (dataView: FilterableSource) =>
+  'type' in dataView && dataView.type === 'esql';
 
 export function InternalDashboardTopNav({
   customLeadingBreadCrumbs = [],
@@ -377,9 +382,7 @@ export function InternalDashboardTopNav({
     }
     const disabled =
       (allDataViews?.length ?? 0) > 0 &&
-      !allDataViews?.some(
-        (dv) => (dv.type !== 'esql' && dv.isTimeBased()) || (dv.type === 'esql' && dv.timeFieldName)
-      );
+      !allDataViews?.some((dv) => (isEsqlDataView(dv) ? dv.timeFieldName : dv.isTimeBased()));
     return { disabled };
   }, [visibilityProps.showDatePicker, allDataViews]);
 
