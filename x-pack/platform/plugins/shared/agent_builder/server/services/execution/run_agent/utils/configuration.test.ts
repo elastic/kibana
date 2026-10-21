@@ -16,10 +16,9 @@ describe('resolveConfiguration', () => {
     ai_indices: [agentBuilderDefaultAiIndexId, 'custom-index'],
   };
 
-  it('keeps the default AI index when it is enabled', async () => {
+  it('passes assigned AI indices through and resolves the catalog', async () => {
     const resolved = await resolveConfiguration(configuration, {
       aiIndicesEnabled: true,
-      smlEnabled: true,
       request,
     });
 
@@ -30,24 +29,13 @@ describe('resolveConfiguration', () => {
     ]);
   });
 
-  it('drops the default AI index when it is disabled, keeping custom ones', async () => {
-    const resolved = await resolveConfiguration(configuration, {
-      aiIndicesEnabled: true,
-      smlEnabled: false,
-      request,
-    });
-
-    expect(resolved.aiIndices).toEqual(['custom-index']);
-    expect(resolved.aiIndexCatalog?.map(({ id }) => id)).toEqual(['custom-index']);
-  });
-
   it('omits the catalog when AI indices are disabled', async () => {
     const resolved = await resolveConfiguration(configuration, {
       aiIndicesEnabled: false,
-      smlEnabled: true,
       request,
     });
 
+    expect(resolved.aiIndices).toEqual([agentBuilderDefaultAiIndexId, 'custom-index']);
     expect(resolved.aiIndexCatalog).toBeUndefined();
   });
 });
