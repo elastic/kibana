@@ -763,7 +763,7 @@ describe('executeDashboardUpsert', () => {
       expect(result.updated).toEqual(['section-a']);
     });
 
-    it('records a failure for each occurrence of a duplicated section id', async () => {
+    it('records one failure for a duplicated section id', async () => {
       const result = await executeDashboardUpsert({
         dashboardData: { title: 'Test', panels: [] },
         upsert: {
@@ -1740,7 +1740,7 @@ describe('executeDashboardUpsert', () => {
       expect(result.failures).toEqual([]);
     });
 
-    it('records a failure for each occurrence when a panel id is duplicated within one call', async () => {
+    it('records one failure when a panel id is duplicated within one call', async () => {
       const resolvePanelContent = createResolverMock(async (request) =>
         createResolvedPanelContent({
           type: LENS_EMBEDDABLE_TYPE,
