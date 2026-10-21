@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { Suspense } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPageSection, EuiSwitch, useEuiTheme } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
@@ -83,7 +83,7 @@ export const SnapshotPage = (): React.ReactElement => {
                       alignItems="center"
                       gutterSize="none"
                       css={css`
-                        padding: ${euiTheme.size.m};
+                        padding: ${euiTheme.size.m} ${euiTheme.size.m} 0 ${euiTheme.size.m};
                         flex: 0 0 auto;
                       `}
                     >
@@ -98,7 +98,9 @@ export const SnapshotPage = (): React.ReactElement => {
                     </EuiFlexGroup>
                   )}
                   {isNewExperienceActive ? (
-                    <div>Entity Inventory: new experience (placeholder)</div>
+                    <Suspense fallback={null}>
+                      {React.createElement(services.entityInventoryApp!.getAppComponent())}
+                    </Suspense>
                   ) : showOnboarding ? (
                     <InfraOnboardingPage />
                   ) : (
