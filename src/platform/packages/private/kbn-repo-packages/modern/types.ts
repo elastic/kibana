@@ -172,11 +172,17 @@ export interface PluginSelector {
    */
   testPlugins?: boolean;
   /**
-   * Absolute paths to specific plugin package which will always be included, regardless of the other settings
+   * Set to `true` to include `devOnly` plugins
+   */
+  devOnly?: boolean;
+  /**
+   * Absolute paths to specific plugin packages which will be included even when
+   * `examples` / `testPlugins` are off. `devOnly` plugins still require `devOnly: true`.
    */
   paths?: readonly string[];
   /**
-   * Absolute paths to parent directories of plugin packages which will always be included, regardless of the other settings
+   * Absolute paths to parent directories of plugin packages which will be included
+   * even when `examples` / `testPlugins` are off. `devOnly` plugins still require `devOnly: true`.
    */
   parentDirs?: readonly string[];
   /**

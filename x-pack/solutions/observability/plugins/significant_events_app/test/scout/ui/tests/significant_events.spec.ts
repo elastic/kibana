@@ -8,6 +8,7 @@
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE } from '@kbn/management-settings-ids';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { test } from '../fixtures';
 
@@ -36,14 +37,16 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth }) => {
+    test.beforeEach(async ({ browserAuth, kbnClient }) => {
+      await kbnClient.uiSettings.update({ [OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE]: false });
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ apiServices, config }) => {
+    test.afterAll(async ({ apiServices, config, kbnClient }) => {
       if (config.isCloud) {
         return;
       }
+      await kbnClient.uiSettings.unset(OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE);
       await apiServices.core.settings({
         'feature_flags.overrides': {
           [NIGHTSHIFT_ENABLED_FLAG]: null,
@@ -51,9 +54,9 @@ test.describe(
       });
     });
 
-    test('loads and redirects / to /streams tab by default', async ({ page }) => {
+    test('loads and redirects / to /queries tab by default', async ({ page }) => {
       await page.gotoApp('significant_events');
-      await expect(page).toHaveURL(/\/app\/significant_events\/streams/, { timeout: 60_000 });
+      await expect(page).toHaveURL(/\/app\/significant_events\/queries/, { timeout: 60_000 });
 
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.root)).toBeVisible({
         timeout: 60_000,
@@ -63,24 +66,22 @@ test.describe(
       );
     });
 
-    test('renders navigation tabs and links to Settings', async ({ page, pageObjects }) => {
-      await page.gotoApp('significant_events/streams');
+    test('renders navigation tabs without Detections and links to Settings', async ({
+      page,
+      pageObjects,
+    }) => {
+      await page.gotoApp('significant_events/queries');
       const tabBar = page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.tabs);
       await expect(tabBar).toBeVisible({ timeout: 60_000 });
 
-      for (const label of [
-        'Streams',
-        'Knowledge Indicators',
-        'Rules',
-        'Detections',
-        'Significant Events',
-      ]) {
+      for (const label of ['Rules', 'Significant events']) {
         await expect(tabBar.getByRole('tab', { name: label })).toBeVisible();
       }
+      await expect(tabBar.getByRole('tab', { name: 'Detections' })).toHaveCount(0);
 
-      await pageObjects.appMenu.clickItem('significantEventsSettingsLink');
+      await pageObjects.appMenu.clickItem('nightshiftSettingsLink');
 
-      await expect(page).toHaveURL(/\/app\/significant_events\/settings/);
+      await expect(page).toHaveURL(/\/app\/nightshift\/settings\/(general|detections)/);
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Settings');
     });
 
@@ -93,7 +94,7 @@ test.describe(
           [NIGHTSHIFT_ENABLED_FLAG]: false,
         },
       });
-      await page.gotoApp('significant_events/streams');
+      await page.gotoApp('significant_events/queries');
       await expect(page).toHaveURL(/\/app\/significant_events/, { timeout: 60_000 });
       await expect(page.testSubj.locator('significantEventsNotEnabledPrompt')).toBeVisible({
         timeout: 60_000,

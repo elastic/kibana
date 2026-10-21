@@ -8,6 +8,7 @@
  */
 
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { ESQL_TYPE } from '@kbn/data-view-utils';
 import type { DiscoverSessionTab } from '@kbn/saved-search-plugin/common';
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
 import { cloneDeep } from 'lodash';
@@ -70,6 +71,7 @@ describe('assignSessionDataViewIds', () => {
         createInlineTab('legacy', { ...inlineDataView, id: 'stored-inline-id' }),
         referencedTab,
         esqlTab,
+        createInlineTab('esql-view', { ...inlineDataView, type: ESQL_TYPE }),
       ],
     });
     const originalSession = cloneDeep(session);
@@ -148,6 +150,39 @@ describe('assignSessionDataViewIds', () => {
     });
     expect(restoredTab).toStrictEqual(originalTab);
     expect(mockedUuidv4).toHaveBeenCalledTimes(1);
+  });
+
+  it('reuses the local ID when only default names and empty field settings differ', () => {
+    const session = createDiscoverSessionMock({
+      id: 'session-id',
+      tabs: [createInlineTab('inline-a', { title: 'logs-*' })],
+    });
+    const localTab = getTabStateMock({
+      id: 'inline-a',
+      initialInternalState: {
+        serializedSearchSource: {
+          index: {
+            id: 'local-inline-id',
+            title: 'logs-*',
+            name: 'logs-*',
+            allowHidden: false,
+            fieldAttrs: { bytes: { count: 5 } },
+          },
+        },
+      },
+    });
+    const originalSession = cloneDeep(session);
+    const originalLocalTab = cloneDeep(localTab);
+
+    const result = assignSessionDataViewIds(session, [localTab]);
+
+    expect(result.tabs[0].serializedSearchSource.index).toStrictEqual({
+      title: 'logs-*',
+      id: 'local-inline-id',
+    });
+    expect(session).toStrictEqual(originalSession);
+    expect(localTab).toStrictEqual(originalLocalTab);
+    expect(mockedUuidv4).not.toHaveBeenCalled();
   });
 
   it('prefers the link ID for its tab without replacing another restored tab ID', () => {

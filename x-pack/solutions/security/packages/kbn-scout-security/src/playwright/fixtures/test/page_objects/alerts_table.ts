@@ -82,6 +82,21 @@ export class AlertsTablePage {
     await row.getByTestId('expand-event').click();
   }
 
+  /**
+   * Opens the document flyout for the first alert whose rule-name cell matches.
+   * Use when one rule can emit multiple alerts (`expandAlertDetailsFlyout` requires exactly one).
+   */
+  async expandFirstAlertDetailsFlyout(ruleName: string, timeout = 60_000) {
+    await this.alertsTable.waitFor({ state: 'visible', timeout });
+    const matchingCells = this.alertsTable.getByTestId('ruleName').filter({ hasText: ruleName });
+    // One rule can emit several alerts; open the first matching row.
+    // eslint-disable-next-line playwright/no-nth-methods
+    const firstCell = matchingCells.first();
+    await firstCell.waitFor({ state: 'visible', timeout });
+    const row = firstCell.locator('xpath=ancestor::div[contains(@class,"euiDataGridRow")]');
+    await row.getByTestId('expand-event').click();
+  }
+
   async clickRuleName(ruleName: string) {
     await this.alertsTable.waitFor({ state: 'visible' });
     // The rule column renders the rule name as a link (data-test-subj="ruleName"); filtered by the

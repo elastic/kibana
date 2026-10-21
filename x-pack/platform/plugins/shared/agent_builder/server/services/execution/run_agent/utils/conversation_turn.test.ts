@@ -20,10 +20,25 @@ import {
   TimelineTriggerType,
   type TimelineEvent,
 } from '@kbn/agent-builder-common/chat/timeline_events';
+import { pendingPromptRequest } from '@kbn/agent-builder-common';
 import { AgentPromptType, type PromptRequest } from '@kbn/agent-builder-common/agents/prompts';
 import { createEmptyConversation, createRound } from '../../../../test_utils/conversations';
+import {
+  BOOM,
+  abortedExec0Timeline,
+  completedRoundTimeline,
+  danglingResponseTimeline,
+  eventsNativeConversation,
+  failedExec0Timeline,
+  interruptedExecutionEvents,
+  pausedRoundTimeline,
+  pausedThenInterruptedResumeTimeline,
+  promptResponseEvent,
+} from '../../../../test_utils/timeline';
 import { roundsToEvents } from '../../../conversation/client/rounds_to_events';
 import * as eventsToRoundsModule from '../../../conversation/client/events_to_rounds';
+import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
+import { isPendingResumeConversation } from '../../utils/conversations';
 import { applyStepUpdates, stepUpdates } from '../step_state';
 import { foldConversationTurns, getPendingTurn } from './conversation_turn';
 
@@ -222,7 +237,7 @@ describe('foldConversationTurns', () => {
 
     expect(turns).toHaveLength(1);
     const [turn] = turns;
-    expect(turn.terminated.id).toBe('t2');
+    expect(turn.terminated?.id).toBe('t2');
     expect(turn.pendingPrompts).toEqual([]);
     expect(turn.state).toEqual({ pending: true });
     expect(turn.steps.map((s) => s.type)).toEqual([
@@ -251,7 +266,7 @@ describe('foldConversationTurns', () => {
     ]);
     expect(turns).toHaveLength(1);
     expect(turns[0].steps).toEqual([]);
-    expect(turns[0].terminated.id).toBe('t1');
+    expect(turns[0].terminated?.id).toBe('t1');
   });
 
   it('keeps only the latest todos step when a legacy merged round carried several', () => {
@@ -369,4 +384,80 @@ describe('getPendingTurn', () => {
 
     expect(() => getPendingTurn(conversation)).toThrow(/no legacy round found for pending turn/);
   });
+});
+
+const toolStep = (toolCallId: string, results: unknown[]): ConversationRoundStep =>
+  ({
+    type: ConversationRoundStepType.toolCall,
+    tool_call_id: toolCallId,
+    tool_id: 'my_tool',
+    params: {},
+    results,
+  } as ConversationRoundStep);
+
+describe('foldConversationTurns — interrupted executions', () => {
+  it('folds a failed exec_0 into a turn with steps, no pending prompts, an interruption', () => {
+    const [turn] = foldConversationTurns(failedExec0Timeline('r1', [reasoning('x')]));
+    expect(turn.steps).toHaveLength(1);
+    expect(turn.pendingPrompts).toEqual([]);
+    expect(turn.state).toBeUndefined();
+    expect(turn.terminated).toBeUndefined();
+    expect(turn.interruption).toEqual({ type: 'failed', error: BOOM });
+  });
+
+  it('an interrupted resume clears the paused turn: no pending prompts, no state, steps merged', () => {
+    const [turn] = foldConversationTurns([
+      ...pausedRoundTimeline('r1', ['tc1']),
+      promptResponseEvent('r1', 1, 'r1::execution_terminated'),
+      ...interruptedExecutionEvents({
+        roundId: 'r1',
+        index: 1,
+        steps: [toolStep('tc1', [{ type: 'other', data: 'a' }]), reasoning('y')],
+        interruption: { type: 'aborted' },
+      }),
+    ]);
+    expect(turn.pendingPrompts).toEqual([]);
+    expect(turn.state).toBeUndefined();
+    expect(turn.interruption).toEqual({ type: 'aborted' });
+    expect(turn.steps).toHaveLength(2);
+    expect((turn.steps[0] as ToolCallStep).results).toHaveLength(1);
+  });
+});
+
+describe('getPendingTurn — interrupted executions', () => {
+  it('is undefined after an interrupted resume and defined for an unanswered pause', () => {
+    expect(getPendingTurn(eventsNativeConversation(pausedRoundTimeline()))?.id).toBe('r1');
+    expect(
+      getPendingTurn(eventsNativeConversation(pausedThenInterruptedResumeTimeline()))
+    ).toBeUndefined();
+  });
+});
+
+describe('pending detection agreement', () => {
+  const fixtures: Array<[string, TimelineEvent[]]> = [
+    ['unanswered pause', pausedRoundTimeline()],
+    ['interrupted resume', pausedThenInterruptedResumeTimeline()],
+    ['failed exec_0', failedExec0Timeline()],
+    ['aborted exec_0', abortedExec0Timeline()],
+    ['completed round', completedRoundTimeline()],
+    ['dangling prompt_response', danglingResponseTimeline()],
+  ];
+
+  it.each(fixtures)(
+    '%s: getPendingTurn ⇔ isPendingResumeConversation ⇔ last round awaiting_prompt ⇔ pendingPromptRequest',
+    (_name, events) => {
+      // a stale stored `rounds` that says awaiting_prompt must not change any answer
+      const conversation = {
+        ...eventsNativeConversation(events),
+        rounds: [createRound({ id: 'r1', status: ConversationRoundStatus.awaitingPrompt })],
+      };
+      const expected = pendingPromptRequest(events) !== undefined;
+      expect(getPendingTurn(conversation) !== undefined).toBe(expected);
+      expect(isPendingResumeConversation(conversation)).toBe(expected);
+      const rounds = eventsToRounds(events);
+      expect(rounds[rounds.length - 1]?.status === ConversationRoundStatus.awaitingPrompt).toBe(
+        expected
+      );
+    }
+  );
 });

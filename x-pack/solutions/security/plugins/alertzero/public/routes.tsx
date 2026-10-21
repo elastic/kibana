@@ -6,17 +6,22 @@
  */
 
 import React from 'react';
+import { Redirect } from 'react-router-dom';
 import { Route, Routes } from '@kbn/shared-ux-router';
-import { PlaceholderPage } from './components/placeholder_page';
-import {
-  NAV_ALERTS,
-  NAV_ATTACKS,
-  NAV_STREAMS,
-  NAV_THREAT_HUNT,
-} from './components/app_chrome/translations';
-import { ConversationsPage } from './pages/conversations';
-import { SettingsPage } from './pages/settings';
+import { useAlertZeroInvestigationsCapabilities } from './hooks/use_alertzero_investigations_capabilities';
+import { EscalationsPage } from './pages/escalations';
 import { WatchesRoutes } from './pages/watches/routes';
+import { LandingPage } from './pages/landing_page';
+
+/**
+ * Renders the escalations page only when the current user has the `showEscalations`
+ * UI capability. Without it, the user is redirected to the root route to avoid landing
+ * on a page whose list requests would be rejected with 403.
+ */
+const EscalationsRoute: React.FC = () => {
+  const { showEscalations } = useAlertZeroInvestigationsCapabilities();
+  return showEscalations ? <EscalationsPage /> : <Redirect to="/" />;
+};
 
 /**
  * Top-level route table. A section with more than one page owns its own sub-routes — see
@@ -28,12 +33,9 @@ import { WatchesRoutes } from './pages/watches/routes';
  */
 export const AlertZeroRoutes: React.FC = () => (
   <Routes>
-    <Route path="/" exact component={ConversationsPage} />
-    <Route path="/alerts" render={() => <PlaceholderPage title={NAV_ALERTS} />} />
-    <Route path="/attacks" render={() => <PlaceholderPage title={NAV_ATTACKS} />} />
-    <Route path="/threat-hunt" render={() => <PlaceholderPage title={NAV_THREAT_HUNT} />} />
-    <Route path="/streams" render={() => <PlaceholderPage title={NAV_STREAMS} />} />
+    <Route path="/" exact component={LandingPage} />
+    <Route path="/escalations" exact component={EscalationsRoute} />
     <Route path="/watches" component={WatchesRoutes} />
-    <Route path="/settings" component={SettingsPage} />
+    <Redirect to="/" />
   </Routes>
 );

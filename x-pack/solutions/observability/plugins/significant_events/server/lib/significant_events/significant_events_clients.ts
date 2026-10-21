@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import {
@@ -14,24 +15,24 @@ import {
   type detectionsMappings,
 } from './detections';
 import type { DetectionClient } from './detections';
-import { EventService, eventsDataStream, type StoredEvent, type eventsMappings } from './events';
-import type { EventClient } from './events';
+import { RuleEventsClient } from './events/rule_events_client';
 import type { TriggerEmitter } from '../../workflows/triggers/emit';
 
 export interface SignificantEventsServices {
   detection: DetectionService;
-  event: EventService;
 }
 
 export interface SignificantEventsClients {
   getDetectionClient: () => Promise<DetectionClient>;
-  getEventClient: () => Promise<EventClient>;
+  /** Reads and writes Significant Events in `.rule-events`. */
+  getEventSearchClient: () => Promise<RuleEventsClient>;
+  /** Fire-and-forget workflow trigger emitter; undefined when workflows are unavailable. */
+  emitTrigger: TriggerEmitter | undefined;
 }
 
 export function createSignificantEventsServices(): SignificantEventsServices {
   return {
     detection: new DetectionService(),
-    event: new EventService(),
   };
 }
 
@@ -41,13 +42,22 @@ export function createSignificantEventsClients({
   esClient,
   space,
   triggerEmitter,
+  getAlertEventsClient,
 }: {
   services: SignificantEventsServices;
   dataStreams: DataStreamsStart;
   esClient: ElasticsearchClient;
   space: string;
   triggerEmitter?: TriggerEmitter;
+  getAlertEventsClient: () => Promise<AlertEventsClientApi>;
 }): SignificantEventsClients {
+  const eventSearchClient = new RuleEventsClient({
+    esClient,
+    space,
+    getAlertEventsClient,
+    emitTrigger: triggerEmitter,
+  });
+
   return {
     getDetectionClient: async () =>
       services.detection.getClient({
@@ -58,14 +68,7 @@ export function createSignificantEventsClients({
         esClient,
         space,
       }),
-    getEventClient: async () =>
-      services.event.getClient({
-        dataStreamClient: await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
-          eventsDataStream.name
-        ),
-        esClient,
-        space,
-        triggerEmitter,
-      }),
+    getEventSearchClient: async () => eventSearchClient,
+    emitTrigger: triggerEmitter,
   };
 }

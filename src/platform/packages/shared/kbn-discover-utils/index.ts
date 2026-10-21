@@ -15,6 +15,7 @@ export {
   DEFAULT_COLUMNS_SETTING,
   DEFAULT_ESQL_QUERY_SETTING,
   DOC_HIDE_TIME_COLUMN_SETTING,
+  ENABLE_SOLUTION_PROFILES_IN_CLASSIC_SETTING,
   FIELDS_LIMIT_SETTING,
   HIDE_ANNOUNCEMENTS,
   IS_ESQL_DEFAULT_FEATURE_FLAG_KEY,
@@ -33,6 +34,7 @@ export {
   buildDataTableRecord,
   buildDataTableRecordList,
   convertValueToString,
+  convertSourceToString,
   createLogsContextService,
   createApmContextService,
   createDegradedDocsControl,
@@ -48,6 +50,8 @@ export {
   getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
+  getFieldValueWithFallback,
+  getStacktraceFields,
   getChartHidden,
   getTableHidden,
   getSidebarHidden,
@@ -70,6 +74,7 @@ export {
   getFieldValue,
   getVisibleColumns,
   canPrependTimeFieldColumn,
+  getDataViewFieldFromDataSource,
   DiscoverFlyouts,
   AppMenuRegistry,
   dismissAllFlyoutsExceptFor,
@@ -116,6 +121,8 @@ export type {
   MetricsGridSortDirection,
   MetricsGridSortField,
   SimpleAggregation,
+  LogDocument,
+  ObservabilityIndexes,
 } from './src';
 
 export * from './src/types';

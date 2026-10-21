@@ -8,6 +8,13 @@
 import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
+const ALERTING_V2_FEATURE_IDS = [
+  'alerting_v2_rules',
+  'alerting_v2_alerts',
+  'alerting_v2_action_policies',
+  'alerting_v2_execution_history',
+];
+
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
 
@@ -62,6 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:apm",
                 "api:apm_write",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "api:apm_settings_write",
                 "app:apm",
                 "app:ux",
@@ -701,6 +709,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:apm",
                 "api:apm_write",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:apm",
                 "app:ux",
                 "app:kibana",
@@ -1337,6 +1346,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:apm",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:apm",
                 "app:ux",
                 "app:kibana",
@@ -1652,6 +1662,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:apm",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:apm",
                 "app:ux",
                 "app:kibana",
@@ -6102,6 +6113,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:infra",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:infra",
                 "app:metrics",
                 "app:kibana",
@@ -6900,6 +6912,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:infra",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:infra",
                 "app:metrics",
                 "app:kibana",
@@ -7698,6 +7711,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:infra",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:infra",
                 "app:metrics",
                 "app:kibana",
@@ -8083,6 +8097,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "login:",
                 "api:infra",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:infra",
                 "app:metrics",
                 "app:kibana",
@@ -8545,6 +8560,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:scheduled_report/share_to_space",
                 "ui:dashboard_v2/downloadCsv",
                 "api:generateReport",
+                "ui:dashboard_v2/generateScreenshot",
                 "ui:discover_v2/generateCsv",
               ],
               "minimal_all": Array [
@@ -8626,6 +8642,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:scheduled_report/share_to_space",
                 "ui:dashboard_v2/downloadCsv",
                 "api:generateReport",
+                "ui:dashboard_v2/generateScreenshot",
                 "ui:discover_v2/generateCsv",
               ],
               "minimal_read": Array [
@@ -9566,7 +9583,9 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:uptime-write",
                 "api:lists-all",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "api:private-location-write",
+                "api:secret-connection-write",
                 "app:uptime",
                 "app:kibana",
                 "app:synthetics",
@@ -9708,6 +9727,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:synthetics-privates-locations/delete",
                 "saved_object:synthetics-privates-locations/bulk_delete",
                 "saved_object:synthetics-privates-locations/share_to_space",
+                "saved_object:synthetics-secret-connection/bulk_get",
+                "saved_object:synthetics-secret-connection/get",
+                "saved_object:synthetics-secret-connection/find",
+                "saved_object:synthetics-secret-connection/open_point_in_time",
+                "saved_object:synthetics-secret-connection/close_point_in_time",
+                "saved_object:synthetics-secret-connection/create",
+                "saved_object:synthetics-secret-connection/bulk_create",
+                "saved_object:synthetics-secret-connection/update",
+                "saved_object:synthetics-secret-connection/bulk_update",
+                "saved_object:synthetics-secret-connection/delete",
+                "saved_object:synthetics-secret-connection/bulk_delete",
+                "saved_object:synthetics-secret-connection/share_to_space",
                 "saved_object:config/bulk_get",
                 "saved_object:config/get",
                 "saved_object:config/find",
@@ -9739,6 +9770,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "ui:uptime/alerting:save",
                 "ui:uptime/elasticManagedLocationsEnabled",
                 "ui:uptime/canManagePrivateLocations",
+                "ui:uptime/canManageSecretConnections",
                 "alerting:xpack.uptime.alerts.tls/uptime/rule/get",
                 "alerting:xpack.uptime.alerts.tls/uptime/rule/bulkGet",
                 "alerting:xpack.uptime.alerts.tls/uptime/rule/getRuleState",
@@ -11340,6 +11372,23 @@ export default function ({ getService }: FtrProviderContext) {
                 "alerting:xpack.synthetics.alerts.tls/observability/rule/updateGapAutoFillScheduler",
                 "alerting:xpack.synthetics.alerts.tls/observability/rule/deleteGapAutoFillScheduler",
               ],
+              "can_manage_secret_connections": Array [
+                "login:",
+                "api:secret-connection-write",
+                "saved_object:synthetics-secret-connection/bulk_get",
+                "saved_object:synthetics-secret-connection/get",
+                "saved_object:synthetics-secret-connection/find",
+                "saved_object:synthetics-secret-connection/open_point_in_time",
+                "saved_object:synthetics-secret-connection/close_point_in_time",
+                "saved_object:synthetics-secret-connection/create",
+                "saved_object:synthetics-secret-connection/bulk_create",
+                "saved_object:synthetics-secret-connection/update",
+                "saved_object:synthetics-secret-connection/bulk_update",
+                "saved_object:synthetics-secret-connection/delete",
+                "saved_object:synthetics-secret-connection/bulk_delete",
+                "saved_object:synthetics-secret-connection/share_to_space",
+                "ui:uptime/canManageSecretConnections",
+              ],
               "can_read_param_values": Array [
                 "login:",
                 "ui:uptime/canReadParamValues",
@@ -11359,6 +11408,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:uptime-write",
                 "api:lists-all",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:uptime",
                 "app:kibana",
                 "app:synthetics",
@@ -11486,6 +11536,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:synthetics-privates-locations/find",
                 "saved_object:synthetics-privates-locations/open_point_in_time",
                 "saved_object:synthetics-privates-locations/close_point_in_time",
+                "saved_object:synthetics-secret-connection/bulk_get",
+                "saved_object:synthetics-secret-connection/get",
+                "saved_object:synthetics-secret-connection/find",
+                "saved_object:synthetics-secret-connection/open_point_in_time",
+                "saved_object:synthetics-secret-connection/close_point_in_time",
                 "saved_object:config/bulk_get",
                 "saved_object:config/get",
                 "saved_object:config/find",
@@ -12349,6 +12404,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:uptime-read",
                 "api:lists-read",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:uptime",
                 "app:kibana",
                 "app:synthetics",
@@ -12387,6 +12443,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:synthetics-param/find",
                 "saved_object:synthetics-param/open_point_in_time",
                 "saved_object:synthetics-param/close_point_in_time",
+                "saved_object:synthetics-secret-connection/bulk_get",
+                "saved_object:synthetics-secret-connection/get",
+                "saved_object:synthetics-secret-connection/find",
+                "saved_object:synthetics-secret-connection/open_point_in_time",
+                "saved_object:synthetics-secret-connection/close_point_in_time",
                 "saved_object:synthetics-dynamic-settings/bulk_get",
                 "saved_object:synthetics-dynamic-settings/get",
                 "saved_object:synthetics-dynamic-settings/find",
@@ -12820,6 +12881,7 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:uptime-read",
                 "api:lists-read",
                 "api:rac",
+                "api:bulkGetUserProfiles",
                 "app:uptime",
                 "app:kibana",
                 "app:synthetics",
@@ -12858,6 +12920,11 @@ export default function ({ getService }: FtrProviderContext) {
                 "saved_object:synthetics-param/find",
                 "saved_object:synthetics-param/open_point_in_time",
                 "saved_object:synthetics-param/close_point_in_time",
+                "saved_object:synthetics-secret-connection/bulk_get",
+                "saved_object:synthetics-secret-connection/get",
+                "saved_object:synthetics-secret-connection/find",
+                "saved_object:synthetics-secret-connection/open_point_in_time",
+                "saved_object:synthetics-secret-connection/close_point_in_time",
                 "saved_object:synthetics-dynamic-settings/bulk_get",
                 "saved_object:synthetics-dynamic-settings/get",
                 "saved_object:synthetics-dynamic-settings/find",
@@ -13289,6 +13356,19 @@ export default function ({ getService }: FtrProviderContext) {
             },
           }
         `);
+      });
+
+      it('exposes alerting v2 feature privileges', async () => {
+        const { body } = await supertestWithoutAuth
+          .get('/api/security/privileges')
+          .set(svlCommonApi.getInternalRequestHeader())
+          .set(adminCredentials)
+          .expect(200);
+
+        const featureIds = Object.keys(body.features);
+        for (const featureId of ALERTING_V2_FEATURE_IDS) {
+          expect(featureIds).to.contain(featureId);
+        }
       });
     });
   });

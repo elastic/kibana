@@ -16,7 +16,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import type { WorkflowExecutionsTracking } from '@kbn/elastic-assistant-common';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
@@ -115,23 +115,11 @@ const LoadingCalloutComponent: React.FC<Props> = ({
   const isDarkMode = useKibanaIsDarkMode();
   const { featureFlags, http, telemetry, uiSettings } = useKibana().services;
 
-  const [isWorkflowsEnabled, setIsWorkflowsEnabled] = useState<boolean>(false);
+  const isWorkflowsEnabled =
+    featureFlags.useBooleanValue('securitySolution.attackDiscoveryWorkflowsEnabled', true) &&
+    uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false);
 
   const { hasWorkflowsRead } = useHasWorkflowsPrivileges();
-
-  // Load feature flag value and combine with per-space uiSetting opt-in
-  useEffect(() => {
-    const loadFeatureFlag = async () => {
-      const ffEnabled = await featureFlags.getBooleanValue(
-        'securitySolution.attackDiscoveryWorkflowsEnabled',
-        true
-      );
-      setIsWorkflowsEnabled(
-        ffEnabled && uiSettings.get(ENABLE_ATTACK_DISCOVERY_WORKFLOWS_SETTING, false)
-      );
-    };
-    loadFeatureFlag();
-  }, [featureFlags, uiSettings]);
 
   const isTerminalState = useMemo(() => getIsTerminalState(status), [status]);
 

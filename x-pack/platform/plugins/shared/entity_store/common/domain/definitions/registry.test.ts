@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { EntityDefinitionWithoutId } from './entity_schema';
+import type { EntityDefinitionWithoutId, EntityType } from './entity_schema';
 import { ALL_ENTITY_TYPES, entitySchema, EXTRACTION_MODE } from './entity_schema';
 import {
-  getEntityDefinitionWithoutId,
+  getBuiltInEntityDefinition,
   hasPriorityExtractionGate,
   resolveExtractionMode,
+  supportsNonPrioritySampling,
 } from './registry';
 
 /**
@@ -18,9 +19,24 @@ import {
  */
 describe('entitiesDefinitionRegistry', () => {
   it.each(ALL_ENTITY_TYPES)('%s definition parses against entitySchema', (entityType) => {
-    const definition = getEntityDefinitionWithoutId(entityType);
+    const definition = getBuiltInEntityDefinition(entityType);
 
     expect(() => entitySchema.parse({ ...definition, id: entityType })).not.toThrow();
+  });
+
+  const expectedDisplayNames: Record<EntityType, string> = {
+    host: 'Host',
+    user: 'User',
+    service: 'Service',
+    generic: 'Generic',
+  };
+
+  it.each(ALL_ENTITY_TYPES)('%s has a display name and a description', (entityType) => {
+    const { name, description } = getBuiltInEntityDefinition(entityType);
+
+    expect(name).toBe(expectedDisplayNames[entityType]);
+    expect(typeof description).toBe('string');
+    expect(description?.length).toBeGreaterThan(0);
   });
 });
 
@@ -34,6 +50,19 @@ describe('hasPriorityExtractionGate', () => {
   it.each(TYPES_WITHOUT_PRIORITY_GATE)('%s: returns false', (type) => {
     expect(hasPriorityExtractionGate(type)).toBe(false);
   });
+});
+
+describe('supportsNonPrioritySampling', () => {
+  it('user: returns true - declared alongside its priority gate', () => {
+    expect(supportsNonPrioritySampling('user')).toBe(true);
+  });
+
+  it.each(TYPES_WITHOUT_PRIORITY_GATE)(
+    '%s: returns false - future dual-process types must opt in explicitly',
+    (type) => {
+      expect(supportsNonPrioritySampling(type)).toBe(false);
+    }
+  );
 });
 
 describe('resolveExtractionMode', () => {
@@ -53,23 +82,23 @@ describe('resolveExtractionMode', () => {
   );
 });
 
-describe('getEntityDefinitionWithoutId', () => {
+describe('getBuiltInEntityDefinition', () => {
   it.each(ALL_ENTITY_TYPES)(
     '%s: defaults to single mode, returning the registered definition ungated',
     (type) => {
-      expect(getEntityDefinitionWithoutId(type)).toBe(getEntityDefinitionWithoutId(type, 'single'));
+      expect(getBuiltInEntityDefinition(type)).toBe(getBuiltInEntityDefinition(type, 'single'));
       // `extractionGate` is resolved on lookup; the type forbids a definition from authoring one.
-      expect(getEntityDefinitionWithoutId(type).extractionGate).toBeUndefined();
+      expect(getBuiltInEntityDefinition(type).extractionGate).toBeUndefined();
     }
   );
 
   it.each(TYPES_WITHOUT_PRIORITY_GATE)(
     '%s: throws for a process mode rather than silently scanning every document',
     (type) => {
-      expect(() => getEntityDefinitionWithoutId(type, 'priority')).toThrow(
+      expect(() => getBuiltInEntityDefinition(type, 'priority')).toThrow(
         /No priority extraction gate declared/
       );
-      expect(() => getEntityDefinitionWithoutId(type, 'nonPriority')).toThrow(
+      expect(() => getBuiltInEntityDefinition(type, 'nonPriority')).toThrow(
         /No priority extraction gate declared/
       );
     }
@@ -82,9 +111,9 @@ describe('getEntityDefinitionWithoutId', () => {
  * process, splitting one user into two entities.
  */
 describe('user extraction modes share identity logic', () => {
-  const single = getEntityDefinitionWithoutId('user');
-  const priority = getEntityDefinitionWithoutId('user', EXTRACTION_MODE.priority);
-  const nonPriority = getEntityDefinitionWithoutId('user', EXTRACTION_MODE.nonPriority);
+  const single = getBuiltInEntityDefinition('user');
+  const priority = getBuiltInEntityDefinition('user', EXTRACTION_MODE.priority);
+  const nonPriority = getBuiltInEntityDefinition('user', EXTRACTION_MODE.nonPriority);
 
   const asRecord = (definition: EntityDefinitionWithoutId) =>
     definition as unknown as Record<string, unknown>;
@@ -110,9 +139,12 @@ describe('user extraction modes share identity logic', () => {
   });
 
   it('gates priority on the declared gate and nonPriority on its complement', () => {
-    expect(priority.extractionGate).toBe(single.priorityExtractionGate);
+    expect(priority.extractionGate).toBe(single.extraction.priorityExtractionGate);
     expect(nonPriority.extractionGate).toEqual({
-      or: [{ field: 'event.kind', exists: false }, { not: single.priorityExtractionGate }],
+      or: [
+        { field: 'event.kind', exists: false },
+        { not: single.extraction.priorityExtractionGate },
+      ],
     });
   });
 });

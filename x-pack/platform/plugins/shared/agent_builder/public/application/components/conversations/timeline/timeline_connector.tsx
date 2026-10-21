@@ -17,12 +17,12 @@ import type { AgentTurnItem } from './types';
 /**
  * @todo: errors not handled yet. Probably should read the streaming context error state here
  */
-export const TimelineConnector: React.FC = () => {
+const TimelineConnectorComponent: React.FC = () => {
   const { conversation } = useConversation();
   const agentId = useAgentId();
   const { agent } = useAgentBuilderAgentById(agentId);
   const items = useTimelineItems();
-  const { isResuming } = useConversationStream();
+  const { isResuming, isStreaming } = useConversationStream();
   const lastTurn = items.filter((item): item is AgentTurnItem => item.kind === 'agentTurn').at(-1);
 
   return (
@@ -33,7 +33,11 @@ export const TimelineConnector: React.FC = () => {
         agent={agent}
         conversationAttachments={conversation?.attachments}
         isResuming={isResuming}
+        isStreaming={isStreaming}
       />
     </>
   );
 };
+
+export const TimelineConnector = React.memo(TimelineConnectorComponent);
+TimelineConnector.displayName = 'TimelineConnector';

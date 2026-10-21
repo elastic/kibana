@@ -1,0 +1,139 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { groupBy } from 'lodash';
+
+export const DEFAULT_ALERTS_INDEX = '.alerts-security.alerts' as const;
+export const THREAT_REPORTS_INDEX_PATTERN = '.kibana-threat-reports*' as const;
+/** Best-effort default for entity Discover lookups when no index pattern is provided. */
+export const DEFAULT_LOGS_INDEX_PATTERN = 'logs-*' as const;
+
+/** Escape a value for use inside a double-quoted ES|QL string literal. */
+const escapeEsqlString = (value: string): string =>
+  value.replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+
+/** The current space's alerts alias, which every alert exit ramp is pinned to. */
+export const getAlertsIndex = (spaceId: string): string => `${DEFAULT_ALERTS_INDEX}-${spaceId}`;
+
+const quoteEsqlIdentifier = (identifier: string): string => `"${escapeEsqlString(identifier)}"`;
+
+const quoteEsqlList = (values: string[]): string =>
+  values.map((value) => `"${escapeEsqlString(value)}"`).join(', ');
+
+const uniqueNonEmpty = (values: string[]): string[] => [
+  ...new Set(values.map((value) => value.trim()).filter(Boolean)),
+];
+
+/** Sentinel space id for global/shared threat-intel rows (mirrors GLOBAL_SPACE_ID in security_solution). */
+export const GLOBAL_THREAT_INTEL_SPACE_ID = '*' as const;
+
+/** Discover exit for one `events[]` ref, which carries its own source index. */
+export const buildEventLookupEsql = ({
+  index,
+  eventId,
+}: {
+  index: string;
+  eventId: string;
+}): string =>
+  // `_id` is only available after METADATA _id (otherwise Discover reports Unknown column [_id]).
+  // Match on `_id` only: `event.id` isn't populated by every integration (e.g. AWS CloudTrail),
+  // and querying it there fails with "Unknown column [event.id]" instead of just missing a hit.
+  `FROM ${quoteEsqlIdentifier(index)} METADATA _id | WHERE _id == "${escapeEsqlString(eventId)}"`;
+
+/**
+ * One Discover exit for a whole set of document refs, each carrying its own index.
+ * ES|QL `FROM` accepts a comma-separated source list, but a flat `_id IN (...)`
+ * filter across all sources loses the id-to-index pairing (a matching id can land
+ * in the wrong source index and surface an unrelated document). Group refs by
+ * index and OR each group's own `_id IN (...)` clause, scoped to its index via
+ * `_index ==`, so only the exact (index, id) pairs match.
+ */
+const buildDocRefsLookupEsql = ({
+  refs,
+  idField,
+}: {
+  refs: Array<{ id: string; index: string }>;
+  /**
+   * Optional ECS/field alias to OR against `_id`. Omit when the field isn't
+   * guaranteed present across every source index (e.g. `event.id` is absent
+   * from some integrations, such as AWS CloudTrail, and querying an absent
+   * field fails the whole ES|QL request instead of just missing a hit).
+   */
+  idField?: string;
+}): string | undefined => {
+  const validRefs = refs
+    .map((ref) => ({ id: ref.id.trim(), index: ref.index.trim() }))
+    .filter((ref) => ref.id && ref.index);
+
+  if (validRefs.length === 0) {
+    return undefined;
+  }
+
+  const byIndex = groupBy(validRefs, (ref) => ref.index);
+  const indices = Object.keys(byIndex);
+  const perIndexClauses = indices.map((index) => {
+    const quotedIds = quoteEsqlList(uniqueNonEmpty(byIndex[index].map((ref) => ref.id)));
+    const idFieldClause = idField ? `${idField} IN (${quotedIds}) OR ` : '';
+    return `(_index == ${quoteEsqlIdentifier(index)} AND (${idFieldClause}_id IN (${quotedIds})))`;
+  });
+
+  return `FROM ${indices
+    .map(quoteEsqlIdentifier)
+    .join(', ')} METADATA _id, _index | WHERE ${perIndexClauses.join(' OR ')}`;
+};
+
+/** Discover exit for all of an SSE's `events[]` refs at once. */
+export const buildEventsLookupEsql = ({
+  events,
+}: {
+  events: Array<{ event_id: string; source_index: string }>;
+}): string | undefined =>
+  buildDocRefsLookupEsql({
+    refs: events.map((event) => ({ id: event.event_id, index: event.source_index })),
+  });
+
+/**
+ * Discover exit for all of an SSE's `alerts[]` refs at once.
+ *
+ * Every ref is pinned to the current space's alerts alias rather than its persisted
+ * `index`, for the reason documented on `buildAlertDetailsUrl`: the schema accepts any
+ * non-empty index string and these payloads are workflow-authored, so a ref must not be
+ * able to point a conversation link at another space's alias or a wildcard.
+ */
+export const buildAlertsLookupEsql = ({
+  alerts,
+  spaceId,
+}: {
+  alerts: Array<{ alert_id: string; index: string }>;
+  spaceId: string;
+}): string | undefined =>
+  buildDocRefsLookupEsql({
+    refs: alerts.map((alert) => ({ id: alert.alert_id, index: getAlertsIndex(spaceId) })),
+    idField: 'kibana.alert.uuid',
+  });
+
+/**
+ * Build an ES|QL lookup for an exact ECS field + value from an SSE entity ref.
+ * `field` must already be allowlisted by the attachment entity schema.
+ */
+export const buildEntityLookupEsql = ({
+  field,
+  value,
+  indexPattern = DEFAULT_LOGS_INDEX_PATTERN,
+}: {
+  field: string;
+  value: string;
+  indexPattern?: string;
+}): string | undefined => {
+  if (!field.trim() || !value.trim()) {
+    return undefined;
+  }
+
+  return `FROM ${quoteEsqlIdentifier(indexPattern)} | WHERE ${field} == "${escapeEsqlString(
+    value
+  )}"`;
+};

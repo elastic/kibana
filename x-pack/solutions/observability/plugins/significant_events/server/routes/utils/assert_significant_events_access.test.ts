@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { of, throwError } from 'rxjs';
 import { FeatureNotEnabledError } from '../../lib/errors/feature_not_enabled_error';
 import { MissingDependencyError } from '../../lib/errors/missing_dependency_error';
 import {
@@ -21,7 +22,6 @@ interface ContextOverrides {
   hasEnterpriseLicense?: boolean;
   workflowsExtensionsPlugin?: boolean;
   workflowsManagementPlugin?: boolean;
-  inferencePlugin?: boolean;
   agentBuilderPlugin?: boolean;
 }
 
@@ -33,19 +33,17 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
     hasEnterpriseLicense = true,
     workflowsExtensionsPlugin = true,
     workflowsManagementPlugin = true,
-    inferencePlugin = true,
     agentBuilderPlugin = true,
   } = overrides;
 
   const server = {
     core: {
-      featureFlags: { getBooleanValue: jest.fn().mockResolvedValue(featureFlagAvailable) },
+      featureFlags: { getBooleanValue$: jest.fn().mockReturnValue(of(featureFlagAvailable)) },
       pricing: { isFeatureAvailable: jest.fn().mockReturnValue(tierAvailable) },
     },
     cloud: projectType && { isServerlessEnabled: true, serverless: { projectType } },
     workflowsExtensions: workflowsExtensionsPlugin ? {} : undefined,
     workflowsManagement: workflowsManagementPlugin ? {} : undefined,
-    searchInferenceEndpoints: inferencePlugin ? {} : undefined,
     agentBuilder: agentBuilderPlugin ? {} : undefined,
   };
 
@@ -62,7 +60,7 @@ const buildArgs = (overrides: ContextOverrides = {}) => {
 };
 
 describe('assertSignificantEventsAccess', () => {
-  it('resolves when all requirements are met', async () => {
+  it('resolves without the retired search inference endpoints dependency', async () => {
     await expect(assertSignificantEventsAccess(buildArgs())).resolves.toBeUndefined();
   });
 
@@ -72,14 +70,31 @@ describe('assertSignificantEventsAccess', () => {
     ).rejects.toBeInstanceOf(FeatureNotEnabledError);
   });
 
+  it('skips ignored requirements but still enforces the rest', async () => {
+    await expect(
+      assertSignificantEventsAccess({
+        ...buildArgs({ featureFlagAvailable: false }),
+        ignore: ['feature_flag'],
+      })
+    ).resolves.toBeUndefined();
+    await expect(
+      assertSignificantEventsAccess({
+        ...buildArgs({ featureFlagAvailable: false, hasEnterpriseLicense: false }),
+        ignore: ['feature_flag'],
+      })
+    ).rejects.toBeInstanceOf(FeatureNotEnabledError);
+  });
+
   it('fails closed (denies access) when the feature flag read rejects', async () => {
     const args = buildArgs();
-    const { getBooleanValue } = (
+    const { getBooleanValue$ } = (
       args as unknown as {
-        server: { core: { featureFlags: { getBooleanValue: jest.Mock } } };
+        server: { core: { featureFlags: { getBooleanValue$: jest.Mock } } };
       }
     ).server.core.featureFlags;
-    getBooleanValue.mockRejectedValue(new Error('feature flag provider unavailable'));
+    getBooleanValue$.mockReturnValue(
+      throwError(() => new Error('feature flag provider unavailable'))
+    );
 
     await expect(assertSignificantEventsAccess(args)).rejects.toThrow(
       'feature flag provider unavailable'
@@ -122,12 +137,6 @@ describe('assertSignificantEventsAccess', () => {
     ).rejects.toBeInstanceOf(MissingDependencyError);
   });
 
-  it('throws a MissingDependencyError (409) when inference endpoints are unavailable', async () => {
-    await expect(
-      assertSignificantEventsAccess(buildArgs({ inferencePlugin: false }))
-    ).rejects.toBeInstanceOf(MissingDependencyError);
-  });
-
   it('throws a MissingDependencyError (409) when agent builder is unavailable', async () => {
     await expect(
       assertSignificantEventsAccess(buildArgs({ agentBuilderPlugin: false }))
@@ -142,10 +151,10 @@ describe('getSignificantEventsAvailability', () => {
     });
   });
 
-  it('returns the unmet reason id', async () => {
+  it('returns the unmet plugin reason id', async () => {
     await expect(
-      getSignificantEventsAvailability(buildArgs({ inferencePlugin: false }))
-    ).resolves.toEqual({ available: false, reason: 'searchInferenceEndpoints' });
+      getSignificantEventsAvailability(buildArgs({ agentBuilderPlugin: false }))
+    ).resolves.toEqual({ available: false, reason: 'agentBuilder' });
   });
 
   it('returns the feature_flag reason when the flag is off', async () => {

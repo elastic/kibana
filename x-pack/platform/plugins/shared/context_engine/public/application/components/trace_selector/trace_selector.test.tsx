@@ -11,20 +11,30 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import { TraceSelector } from './trace_selector';
 
 const mockUseAgentBuilderAgents = jest.fn();
-const mockUseSearchDataStreams = jest.fn();
+const mockUseIndices = jest.fn();
 
 jest.mock('../../hooks/use_agent_builder_agents', () => ({
   useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
 }));
 
-jest.mock('../../hooks/use_search_data_streams', () => ({
-  useSearchDataStreams: () => mockUseSearchDataStreams(),
+jest.mock('../../hooks/use_indices', () => ({
+  useIndices: () => mockUseIndices(),
 }));
 
-const renderSelector = (props: React.ComponentProps<typeof TraceSelector>) => {
+const defaultEbtElement = CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePageTraceSelector;
+
+const withDefaultEbt = (
+  props: Omit<React.ComponentProps<typeof TraceSelector>, 'ebtElement'>
+): React.ComponentProps<typeof TraceSelector> => ({
+  ebtElement: defaultEbtElement,
+  ...props,
+});
+
+const renderWithProps = (props: React.ComponentProps<typeof TraceSelector>) => {
   const services = coreMock.createStart();
   return render(
     <I18nProvider>
@@ -37,6 +47,9 @@ const renderSelector = (props: React.ComponentProps<typeof TraceSelector>) => {
   );
 };
 
+const renderSelector = (props: Omit<React.ComponentProps<typeof TraceSelector>, 'ebtElement'>) =>
+  renderWithProps(withDefaultEbt(props));
+
 describe('TraceSelector', () => {
   beforeEach(() => {
     mockUseAgentBuilderAgents.mockReturnValue({
@@ -44,10 +57,9 @@ describe('TraceSelector', () => {
       isLoading: false,
       error: undefined,
     });
-    mockUseSearchDataStreams.mockReturnValue({
-      dataStreams: ['logs-genai-default'],
-      isLoading: false,
-      isError: false,
+    mockUseIndices.mockReturnValue({
+      indexNames: ['logs-genai-default'],
+      isFetching: false,
     });
   });
 
@@ -100,5 +112,28 @@ describe('TraceSelector', () => {
     fireEvent.click(screen.getByText('logs-genai-default'));
 
     expect(onChange).toHaveBeenCalledWith({ type: 'index', value: 'logs-genai-default' });
+  });
+
+  it('propagates the given ebtElement to the toggle buttons', () => {
+    const nonDefaultEbtElement = CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageTracesPanel;
+    renderWithProps({
+      value: undefined,
+      onChange: jest.fn(),
+      ebtElement: nonDefaultEbtElement,
+    });
+
+    const elasticAgentToggle = screen.getByTestId('contextTraceToggle-elastic_agent');
+    expect(elasticAgentToggle).toHaveAttribute('data-ebt-element', nonDefaultEbtElement);
+    expect(elasticAgentToggle).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.traces.TOGGLE_ELASTIC_AGENT
+    );
+
+    const indexToggle = screen.getByTestId('contextTraceToggle-index');
+    expect(indexToggle).toHaveAttribute('data-ebt-element', nonDefaultEbtElement);
+    expect(indexToggle).toHaveAttribute(
+      'data-ebt-action',
+      CONTEXT_ENGINE_UI_EBT.action.traces.TOGGLE_DATA_STREAM
+    );
   });
 });

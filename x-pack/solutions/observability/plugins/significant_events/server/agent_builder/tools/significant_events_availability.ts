@@ -7,14 +7,14 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ToolAvailabilityResult } from '@kbn/agent-builder-server';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../types';
 import { assertSignificantEventsAccess } from '../../routes/utils/assert_significant_events_access';
 
 export const createSignificantEventsAvailability = ({
   server,
   logger,
 }: {
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
 }) => ({
   cacheMode: 'space' as const,

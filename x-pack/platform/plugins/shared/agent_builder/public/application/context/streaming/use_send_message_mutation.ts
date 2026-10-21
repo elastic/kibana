@@ -11,6 +11,8 @@ import { toToolMetadata } from '@kbn/agent-builder-browser/tools/browser_api_too
 import type { BrowserApiToolDefinition } from '@kbn/agent-builder-browser/tools/browser_api_tool';
 import { firstValueFrom, tap } from 'rxjs';
 import { isEqual } from 'lodash';
+import { isHttpFetchError } from '@kbn/core-http-browser';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { v4 as uuidv4 } from 'uuid';
 import { isExecutionStartedEvent, isExecutionTerminalEvent } from '@kbn/agent-builder-common';
 import type {
@@ -28,6 +30,7 @@ import {
 import { useKibana } from '../../hooks/use_kibana';
 import type { StartServices } from '../../hooks/use_kibana';
 import { useAgentBuilderServices } from '../../hooks/use_agent_builder_service';
+import { useToasts } from '../../hooks/use_toasts';
 import { mutationKeys } from '../../mutation_keys';
 import { subscribeToChatEvents } from './use_subscribe_to_chat_events';
 import { BrowserToolExecutor } from '../../services/browser_tool_executor';
@@ -35,8 +38,12 @@ import { createConversationActions } from '../conversation/use_conversation_acti
 import type { ConversationStreamService } from '../../../services/events';
 import { releaseLocalContent } from './release_local_content';
 import { isStreamCancelled, requestAbort, type StreamHandle } from './stream_handle';
+import { isDisconnectError } from '../../../services/chat/reattach_on_disconnect';
 
 const SCREEN_CONTEXT_ATTACHMENT_ID = 'screen-context';
+
+const isRequestRejectedError = (error: unknown): boolean =>
+  isHttpFetchError(error) && !isDisconnectError(error);
 
 export interface SendMessageVars {
   message: string;
@@ -137,6 +144,7 @@ export const useSendMessageMutation = ({
 }: UseSendMessageMutationProps) => {
   const { chatService, conversationsService } = useAgentBuilderServices();
   const { services } = useKibana();
+  const { addErrorToast } = useToasts();
   const queryClient = useQueryClient();
   // One controller + executionId per in-flight conversation. Concurrent streams need
   // independent cancel; the executionId is what the abort endpoint uses to stop server-side.
@@ -178,13 +186,9 @@ export const useSendMessageMutation = ({
         })
       );
 
-      // The run owns its live events: hold the stream for its whole lifetime so it is not reclaimed
-      // while the user is looking at another conversation, before or after `execution_started`.
-      const retainedStream = conversationStreamService
-        .getActiveStream$(vars.conversationId)
-        .subscribe();
       let timelineExecutionId: string | undefined;
       let triggerEventId: string | undefined;
+      let streamEventArrived = false;
 
       try {
         const browserApiToolsMetadata = vars.browserApiTools?.map(toToolMetadata);
@@ -210,6 +214,7 @@ export const useSendMessageMutation = ({
 
         const events$ = rawEvents$.pipe(
           tap((event) => {
+            streamEventArrived = true;
             if (isExecutionStartedEvent(event)) {
               markStreamStarted(vars.conversationId);
             }
@@ -220,15 +225,21 @@ export const useSendMessageMutation = ({
           })
         );
 
-        // Failures are persisted by the server and arrive through the refetch below, so a stream
-        // that errors ends the same way as one that completed or was stopped.
+        // Failures of a run are persisted by the server and arrive through the refetch below, so a
+        // stream that errors ends the same way as one that completed or was stopped. Requests the
+        // server rejected before any event arrived have nothing persisted, so those are reported with
+        // a toast. An error after events arrived (e.g. a failed reattach) concerns a run that started.
         await subscribeToChatEvents({
           events$,
           conversationActions: streamActions,
           browserApiTools: vars.browserApiTools,
           browserToolExecutor,
           isAborted: () => isStreamCancelled(handle),
-        }).catch(() => {});
+        }).catch((error: unknown) => {
+          if (!streamEventArrived && isRequestRejectedError(error)) {
+            addErrorToast({ title: formatAgentBuilderErrorMessage(error) });
+          }
+        });
 
         // The message and its attachments are persisted whether the run completed or was stopped, so reset the composer.
         vars.resetAttachments?.();
@@ -245,7 +256,6 @@ export const useSendMessageMutation = ({
             ),
         });
       } finally {
-        retainedStream.unsubscribe();
         clearActiveStream(vars.conversationId);
         if (controllersRef.current.get(vars.conversationId)?.controller === controller) {
           controllersRef.current.delete(vars.conversationId);

@@ -12,7 +12,10 @@ import type { SuggestAutomationProvider } from '@kbn/context-engine-plugin/publi
 import { i18n } from '@kbn/i18n';
 import { EMPTY, switchMap } from 'rxjs';
 import { AI_INDEX_ATTACHMENT_TYPE } from '../common/agent_builder_attachments';
-import { CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID } from '../common/agent_builder_tools';
+import {
+  CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,
+  CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+} from '../common/agent_builder_tools';
 import type { AiIndexAttachmentData } from '../common/agent_builder_attachment_schemas';
 import { CONTEXT_ENGINE_SETUP_AGENT_ID } from '../common/agent_builder_agents';
 
@@ -22,11 +25,13 @@ const WORKFLOWS_MANAGEMENT_CAPABILITY = 'workflowsManagement';
 
 const AUTOMATION_REFRESH_TOOL_IDS: ReadonlySet<string> = new Set([
   CONTEXT_ENGINE_SAVE_AUTOMATION_TOOL_ID,
+  CONTEXT_ENGINE_INSTALL_AUTOMATION_TEMPLATE_TOOL_ID,
 ]);
 
 /**
  * The user reads this message in the conversation, so it says what they asked for and nothing more.
- * Which skills to load and how to work is carried by the `ai_index` attachment instead.
+ * Which skills to load and how to work are in the Context Engine agent's instructions; the
+ * `ai_index` attachment carries the index itself.
  */
 const SUGGEST_AUTOMATION_INITIAL_MESSAGE = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.automations.suggestAutomationInitialMessage',
@@ -45,6 +50,9 @@ const getAutomationToolAiIndexId = (result: ToolResult): string | undefined => {
   return result.data.aiIndexId;
 };
 
+export const buildSuggestAutomationSessionTag = (spaceId: string, aiIndexId: string): string =>
+  `context-engine-ai-index:${spaceId}:${aiIndexId}`;
+
 export const createSuggestAutomationProvider = ({
   agentBuilder,
   application,
@@ -62,7 +70,7 @@ export const createSuggestAutomationProvider = ({
     application.capabilities[WORKFLOWS_MANAGEMENT_CAPABILITY]?.executeWorkflow === true &&
     agentBuilder?.openChat !== undefined,
 
-  suggestAutomation: ({ aiIndex }) => {
+  suggestAutomation: ({ aiIndex, spaceId }) => {
     if (!agentBuilder?.openChat) {
       return;
     }
@@ -75,21 +83,21 @@ export const createSuggestAutomationProvider = ({
       traces: aiIndex.traces,
     };
     agentBuilder.openChat({
-      newConversation: true,
       autoSendInitialMessage: true,
       initialMessage: SUGGEST_AUTOMATION_INITIAL_MESSAGE,
-      sessionTag: `context-engine-ai-index-${aiIndex.id}`,
+      sessionTag: buildSuggestAutomationSessionTag(spaceId, aiIndex.id),
       agentId: CONTEXT_ENGINE_SETUP_AGENT_ID,
       attachments: [
         {
           id: aiIndex.id,
           type: AI_INDEX_ATTACHMENT_TYPE,
-          description:
-            aiIndex.description ??
-            i18n.translate('xpack.contextEngine.aiIndexDetail.automations.suggestAttachmentLabel', {
+          description: i18n.translate(
+            'xpack.contextEngine.aiIndexDetail.automations.suggestAttachmentLabel',
+            {
               defaultMessage: 'AI index {name}',
               values: { name: aiIndex.id },
-            }),
+            }
+          ),
           data: attachmentData,
         },
       ],

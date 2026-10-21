@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import semverCoerce from 'semver/functions/coerce';
+import semverLt from 'semver/functions/lt';
 import type { SyntheticsServerSetup } from '../../types';
 import { isEqlSafeLiteral } from './assign_by_condition';
 
@@ -20,11 +22,52 @@ export interface AgentInfo {
    * in the balancer (see `makeCapacityOf` in `assign_shards.ts`).
    */
   memoryMib: number | null;
+  /**
+   * Browser-capable image (see {@link isCompleteElasticAgent}). Browser
+   * monitors can run only on these agents.
+   */
+  complete: boolean;
 }
 
 interface AgentLocalMetadata {
   host?: { memory?: number };
+  os?: { platform?: string };
+  elastic?: { agent?: { complete?: boolean; version?: string } };
 }
+
+// elastic/elastic-agent#16841: `elastic-agent-complete-wolfi` reports `complete` from these
+// versions on. Older Wolfi agents can't be told apart from plain `elastic-agent-wolfi`.
+const WOLFI_COMPLETE_FLAG_SINCE: Readonly<Record<string, string>> = {
+  '8.19': '8.19.24',
+  '9.4': '9.4.9',
+  '9.5': '9.5.6',
+};
+const WOLFI_COMPLETE_FLAG_SINCE_DEFAULT = '9.6.0';
+
+const isWolfiWithoutCompleteFlag = ({ os, elastic }: AgentLocalMetadata): boolean => {
+  if (os?.platform !== 'wolfi') {
+    return false;
+  }
+  const version = semverCoerce(elastic?.agent?.version);
+  if (!version) {
+    return true;
+  }
+  const since =
+    WOLFI_COMPLETE_FLAG_SINCE[`${version.major}.${version.minor}`] ??
+    WOLFI_COMPLETE_FLAG_SINCE_DEFAULT;
+  return semverLt(version, since);
+};
+
+/**
+ * True when the agent can run browser monitors: it reports the
+ * `elastic-agent-complete` flag, or it is an older Wolfi agent that predates
+ * the flag on `elastic-agent-complete-wolfi`. Those keep the pre-flag behavior
+ * so upgrading Kibana doesn't stop browser monitors that already run there.
+ */
+export const isCompleteElasticAgent = (localMetadata: unknown): boolean => {
+  const metadata = (localMetadata ?? {}) as AgentLocalMetadata;
+  return metadata.elastic?.agent?.complete === true || isWolfiWithoutCompleteFlag(metadata);
+};
 
 /**
  * Per enrolled agent (for a single location's agent policy), keyed by Fleet
@@ -86,7 +129,11 @@ export const getAgentInfo = async (
           ? Math.round(host.memory / BYTES_PER_MIB)
           : null;
 
-      byAgentId.set(agent.id, { lastCheckin: last, memoryMib });
+      byAgentId.set(agent.id, {
+        lastCheckin: last,
+        memoryMib,
+        complete: isCompleteElasticAgent(agent.local_metadata),
+      });
     }
 
     fetched += agents.length;

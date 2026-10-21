@@ -27,7 +27,13 @@ export const createRootStateChunkEvent = (
     data: {
       chunk:
         typeof chunk === 'object' && chunk !== null
-          ? { currentCycle: 0, errorCount: 0, toolRenderState: {}, ...chunk }
+          ? {
+              currentCycle: 0,
+              errorCount: 0,
+              toolRenderState: {},
+              pendingToolCallIds: [],
+              ...chunk,
+            }
           : chunk,
     },
   } as LangchainStreamEvent);
