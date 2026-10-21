@@ -129,13 +129,13 @@ export const getOrCreateInvestigationConversation = async ({
         id,
         agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
         templateId: INVESTIGATION_TEMPLATE_ID,
-        // A starting rating, so the severity shows (and can be changed) from the beginning; the
-        // agent re-rates it from its findings when it concludes.
-        metadata: { severity: INITIAL_INVESTIGATION_SEVERITY },
+        metadata: {
+          // A starting rating, so the severity shows (and can be changed) from the beginning;
+          // the agent re-rates it from its findings when it concludes.
+          severity: INITIAL_INVESTIGATION_SEVERITY,
+          ...(workflowExecutionId ? { workflow_execution_ids: [workflowExecutionId] } : {}),
+        },
         accessControl: { access_mode: ConversationAccessControlMode.Public },
-        ...(workflowExecutionId
-          ? { metadata: { workflow_execution_ids: [workflowExecutionId] } }
-          : {}),
       });
     // Agent creation can precede its visibility to the conversation API's agent lookup.
     const created = beforeCreate
