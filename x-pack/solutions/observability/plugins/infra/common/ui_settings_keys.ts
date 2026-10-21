@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const NEW_INFRASTRUCTURE_EXPERIENCE_KEY = 'infra:newInfrastructureExperience';
+export const NEW_INFRASTRUCTURE_EXPERIENCE_KEY = 'observability:newInfrastructureExperience';

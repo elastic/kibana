@@ -152,7 +152,7 @@ export class InfraServerPlugin
           { defaultMessage: 'Enables the new entity-based infrastructure inventory experience.' }
         ),
         schema: schema.boolean(),
-        category: ['hiddenConfig'],
+        category: ['observability'],
       },
     });
 
