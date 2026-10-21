@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import { addSpaceIdToPath } from '@kbn/core-spaces-common';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
@@ -21,6 +22,7 @@ import { createAttachmentPublicClient } from './services/attachments';
 import type { AgentBuilderConfig } from './config';
 import { registerTracingExporter } from './tracing/register_tracing';
 import { ServiceManager } from './services';
+import { getKibanaUrl } from './utils/get_kibana_url';
 import type {
   AgentBuilderPluginSetup,
   AgentBuilderPluginStart,
@@ -71,6 +73,7 @@ export class AgentBuilderPlugin
   private readonly env: PluginInitializerContext['env'];
   private serviceManager: ServiceManager;
   private cloudSetup?: CloudSetup;
+  private getKibanaBaseUrl?: () => string;
   private usageCounter?: UsageCounter;
   private trackingService?: TrackingService;
   private analyticsService?: AnalyticsService;
@@ -93,6 +96,7 @@ export class AgentBuilderPlugin
   ): AgentBuilderPluginSetup {
     this.home = setupDeps.home;
     this.cloudSetup = setupDeps.cloud;
+    this.getKibanaBaseUrl = () => getKibanaUrl(coreSetup, setupDeps.cloud);
 
     setupDeps.files.registerFileKind({
       id: CHAT_ATTACHMENT_IMAGES_FILE_KIND,
@@ -386,6 +390,10 @@ export class AgentBuilderPlugin
       }),
       deductiveRegister: this.config.deductive?.register ?? false,
       isomer,
+      getSurfaceBaseUrl: (spaceId) => {
+        const kibanaUrl = this.getKibanaBaseUrl?.();
+        return kibanaUrl ? addSpaceIdToPath(kibanaUrl, spaceId) : undefined;
+      },
       conversationEventBus: this.conversationEventBus,
     });
 
