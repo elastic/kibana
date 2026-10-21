@@ -9,7 +9,7 @@ import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { accountFromFiles, parseKeyValue, podName, readBootId } from './cgroup_sample';
 
-test('a missing cgroup file stays null and a present zero stays zero', () => {
+void test('a missing cgroup file stays null and a present zero stays zero', () => {
   const account = accountFromFiles(() => null);
   assert.equal(account.current, null);
   assert.equal(account.anon, null);
@@ -32,7 +32,7 @@ test('a missing cgroup file stays null and a present zero stays zero', () => {
   assert.equal(zero.oomKill, 0);
 });
 
-test('working set subtracts inactive file and ignores a non-numeric peak', () => {
+void test('working set subtracts inactive file and ignores a non-numeric peak', () => {
   const account = accountFromFiles((file) => {
     if (file.endsWith('memory.current')) return '2147483648\n';
     if (file.endsWith('memory.stat')) {
@@ -52,7 +52,7 @@ test('working set subtracts inactive file and ignores a non-numeric peak', () =>
   assert.deepEqual(parseKeyValue('anon 5\nnot a line\n'), { anon: 5 });
 });
 
-test('boot id and pod name drop unexpected text', () => {
+void test('boot id and pod name drop unexpected text', () => {
   assert.equal(readBootId('abc-123\n'), 'abc-123');
   assert.equal(readBootId('boot id: secret'), null);
   assert.equal(readBootId(null), null);

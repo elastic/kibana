@@ -18,7 +18,7 @@ import {
   runsOnBackgroundTasks,
 } from './runtime';
 
-test('a runtime doc keeps the allowlist and rejects a bad cap', () => {
+void test('a runtime doc keeps the allowlist and rejects a bad cap', () => {
   assert.equal(parseRuntimeDoc(null), null);
   assert.equal(
     parseRuntimeDoc({ mode: 'thread', generation: 1, childCapMb: 384, sampleRequest: 0 }),
@@ -42,7 +42,7 @@ test('a runtime doc keeps the allowlist and rejects a bad cap', () => {
   assert.throws(() => buildRuntimeDoc(null, { mode: 'main', childCapMb: 32 }), /128 to 2048/);
 });
 
-test('generation changes the island and a sample request does not', () => {
+void test('generation changes the island and a sample request does not', () => {
   const first = buildRuntimeDoc(null, { mode: 'offmain-process', childCapMb: 384 });
   assert.equal(first.generation, 1);
   assert.equal(first.localSo, true);
@@ -55,7 +55,7 @@ test('generation changes the island and a sample request does not', () => {
   assert.equal(sample.childCapMb, 512);
 });
 
-test('applying the doc uses process transport and the doc cap, not the image default', async () => {
+void test('applying the doc uses process transport and the doc cap, not the image default', async () => {
   const seen: Array<Partial<T7aConfig>> = [];
   const controller = {
     configure: async (next: Partial<T7aConfig>) => {
@@ -85,7 +85,7 @@ test('applying the doc uses process transport and the doc cap, not the image def
   assert.equal(seen[1].processOldSpaceMb, undefined);
 });
 
-test('an explicit child cap beats the parent env and roles select the background process', () => {
+void test('an explicit child cap beats the parent env and roles select the background process', () => {
   assert.equal(resolveChildOldSpaceMb(512, '384'), '512');
   assert.equal(resolveChildOldSpaceMb(undefined, '384'), '384');
   assert.equal(resolveChildOldSpaceMb(32, '384'), '384');
