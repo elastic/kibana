@@ -134,11 +134,14 @@ const buildCheapPassAggs = (entityType: EntityType) => ({
       watchlistManaged: {
         filter: { prefix: { [WATCHLISTS_FIELD]: MANAGED_WATCHLIST_ID_PREFIX } },
       },
+      // An entity can be on managed and custom watchlists at once, so test each value.
       watchlistCustom: {
         filter: {
-          bool: {
-            filter: { exists: { field: WATCHLISTS_FIELD } },
-            must_not: { prefix: { [WATCHLISTS_FIELD]: MANAGED_WATCHLIST_ID_PREFIX } },
+          script: {
+            script: {
+              source: `for (def id : doc['${WATCHLISTS_FIELD}']) { if (!id.startsWith(params.prefix)) { return true; } } return false;`,
+              params: { prefix: MANAGED_WATCHLIST_ID_PREFIX },
+            },
           },
         },
       },
