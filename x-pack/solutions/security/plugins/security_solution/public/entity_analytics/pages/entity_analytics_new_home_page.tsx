@@ -108,7 +108,12 @@ import { RISK_MOVER_MIN_SCORE_CHANGE } from '../components/home/needs_attention_
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
 import { getEntityAnalyticsNewHomeScopeId } from '../common/scope_time_ranges';
 import { HuntWithAiButton } from '../components/home/hunt_with_ai_button';
-
+import {
+  ProductTour,
+  ProductTourBanner,
+  ROWS_MODE_SELECTOR_TEST_ID,
+  useProductTour,
+} from '../components/home/product_tour';
 import {
   MAX_TILE_FILTER_ENTITY_IDS,
   getCappedTileEntityIds,
@@ -347,8 +352,13 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     activeTile,
     setActiveTile,
   } = useEntityAnalyticsUrlState();
+<<<<<<< HEAD
   // The scope pins every time-bounded section of the flyouts opened from here (alerts, observed
   // data, anomalies, highlights, graph) to the selected range — see `SCOPE_FLYOUT_TIME_RANGES`.
+=======
+  const productTour = useProductTour();
+  // Flyouts opened from the table query alerts over the range it shows.
+>>>>>>> c09f013c0fcb50f4454c81c9b771aea91fe8b21f
   const scopeId = getEntityAnalyticsNewHomeScopeId(timeRange);
 
   const [isGridFullScreen, setIsGridFullScreen] = useState(false);
@@ -1198,7 +1208,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
             options={ROWS_OPTIONS}
             selectedKey={rowsMode}
             onChange={onRowsModeChange}
-            data-test-subj="eaRowsModeSelector"
+            data-test-subj={ROWS_MODE_SELECTOR_TEST_ID}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -1230,7 +1240,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   return (
     <>
       <div className="entityAnalyticsPageHeader" css={isGridFullScreen ? hiddenCss : undefined}>
-        <EntityAnalyticsHomeHeader />
+        <EntityAnalyticsHomeHeader onStartTour={productTour.startTour} />
       </div>
       <SecuritySolutionPageWrapper noPadding data-test-subj="entityAnalyticsNewHomePage">
         <div
@@ -1245,6 +1255,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
             isGridFullScreen && hiddenCss,
           ]}
         >
+          {productTour.isBannerVisible && (
+            <>
+              <ProductTourBanner
+                onStartTour={productTour.startTour}
+                onDismiss={productTour.dismissBanner}
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
           {/* SiemSearchBar has internal left padding; pull it left so its content aligns with the page edge */}
           <div
             css={css`
@@ -1335,6 +1354,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
           </DataViewContext.Provider>
         </div>
       </SecuritySolutionPageWrapper>
+      <ProductTour
+        steps={productTour.steps}
+        currentStep={productTour.currentStep}
+        onNext={productTour.nextStep}
+        onEnd={productTour.endTour}
+      />
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>
   );
