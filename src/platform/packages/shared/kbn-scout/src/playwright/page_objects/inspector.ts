@@ -80,10 +80,36 @@ export class InspectorPage {
 
   /**
    * Closes the inspector panel. No-ops if already closed.
+   *
+   * @param waitForFocusQuiet - When true, also waits for focus to settle after closing.
+   *   Closing the inspector restores focus to its trigger twice, the second time ~40ms later.
+   *   If that lands while a follow-up action is typing, the remaining keys go to the trigger
+   *   button and a space re-opens the inspector. Defaults to `false`.
    */
-  async close() {
+  async close(waitForFocusQuiet: boolean = false) {
     await this.closeButton.click();
     await this.panel.waitFor({ state: 'hidden' });
+    if (waitForFocusQuiet) {
+      await this.waitForFocusQuiet();
+    }
+  }
+
+  private async waitForFocusQuiet() {
+    await this.page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          const onFocus = () => {
+            clearTimeout(timer);
+            timer = setTimeout(done, 150);
+          };
+          const done = () => {
+            document.removeEventListener('focusin', onFocus, true);
+            resolve();
+          };
+          let timer = setTimeout(done, 150);
+          document.addEventListener('focusin', onFocus, true);
+        })
+    );
   }
 
   /** Reads the inner text of `statLocator` once the inspector panel is visible. */
