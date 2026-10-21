@@ -32,7 +32,6 @@ describe('LensVisService suggestions', () => {
       timeInterval: 'auto',
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: false,
       allSuggestions: [],
     });
 
@@ -58,7 +57,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: allSuggestionsMock,
     });
 
@@ -85,7 +83,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: true,
     });
@@ -114,7 +111,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
     });
@@ -126,7 +122,8 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 10 minute)
+| LIMIT 10000`,
     };
 
     expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
@@ -152,7 +149,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
     });
@@ -164,7 +160,8 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 10 minute)
+| LIMIT 10000`,
     };
 
     expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
@@ -190,7 +187,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
     });
@@ -202,7 +198,8 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `FROM metrics*
-| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 10 minute)
+| LIMIT 10000`,
     };
 
     expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
@@ -228,7 +225,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: true,
     });
@@ -257,7 +253,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
     });
@@ -286,7 +281,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
     });
@@ -320,7 +314,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
     });
@@ -345,7 +338,8 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| STATS results = COUNT(*) BY \`var0\`, timestamp = BUCKET(@timestamp, 30 minute) | sort \`var0\` asc`,
+| STATS results = COUNT(*) BY \`var0\`, timestamp = BUCKET(@timestamp, 10 minute) | sort \`var0\` asc
+| LIMIT 10000`,
     };
 
     expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
@@ -371,7 +365,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: allSuggestionsMock,
       isTransformationalESQL: false,
     });
@@ -402,7 +395,6 @@ describe('LensVisService suggestions', () => {
           },
         },
       ],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
     });
@@ -426,7 +418,8 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| STATS results = COUNT(*) BY \`coordinates\`, timestamp = BUCKET(@timestamp, 30 minute)`,
+| STATS results = COUNT(*) BY \`coordinates\`, timestamp = BUCKET(@timestamp, 10 minute)
+| LIMIT 10000`,
     };
 
     expect(getRepresentativeQuery(lensVis.visContext?.attributes)).toStrictEqual(histogramQuery);
@@ -475,7 +468,6 @@ describe('LensVisService suggestions', () => {
       },
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
       externalVisContext,
@@ -543,7 +535,6 @@ describe('LensVisService suggestions', () => {
       },
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
       externalVisContext,
@@ -596,7 +587,6 @@ describe('LensVisService suggestions', () => {
       },
       breakdownField: undefined,
       columns: [],
-      isPlainRecord: true,
       allSuggestions: [],
       isTransformationalESQL: false,
       externalVisContext,

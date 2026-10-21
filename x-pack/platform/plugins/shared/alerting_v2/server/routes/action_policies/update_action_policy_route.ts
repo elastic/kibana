@@ -26,7 +26,10 @@ import {
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
 } from './action_policy_route_descriptions';
-import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import {
+  ACTION_POLICY_PATCH_SEMANTICS_DESCRIPTION,
+  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+} from '../route_descriptions';
 import { actionPolicyIdParamsSchema } from './route_schemas';
 
 @injectable()
@@ -43,9 +46,9 @@ export class UpdateActionPolicyRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Partially update an action policy.',
-    description:
-      'Apply a partial update to an existing action policy. Fields not present in the body are left unchanged.',
+    description: ACTION_POLICY_PATCH_SEMANTICS_DESCRIPTION,
     oasOperationObject: updateActionPolicyOasExamples,
   } as const;
   static schemas = {

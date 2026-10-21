@@ -12,10 +12,14 @@ import {
   type AttachmentRenderProps,
   type CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
+import { PluginStart } from '@kbn/core-di';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
+import { bindLocatorsToHost, getAlertingV2Locators } from '../../application/bind_locators_to_host';
+import { LocatorProvider } from '../../application/locator_context';
 import {
   RuleSummaryAboutSection,
   RuleSummaryArtifactsSection,
@@ -23,7 +27,7 @@ import {
   RuleSummaryInvestigationSection,
 } from '../../components/rule/rule_summary';
 import { RuleSummaryQueryPreviewSection } from '../../components/rule/rule_summary/rule_summary_query_preview_section';
-import { paths } from '../../constants';
+import { OBSERVABILITY_ALERTING_HOST } from '../../observability_alerting_host';
 import { RulesApi } from '../../services/rules_api';
 import type { RuleAttachment } from './rule_attachment_definition';
 
@@ -37,10 +41,13 @@ export const RuleCanvasContent = ({
   updateOrigin,
 }: RuleCanvasContentProps) => {
   const rulesApi = useService(RulesApi);
-  const application = useService(CoreStart('application'));
-  const basePath = useService(CoreStart('http')).basePath;
+  const share = useService(PluginStart('share')) as SharePluginStart;
   const notifications = useService(CoreStart('notifications'));
   const [queryClient] = React.useState(() => new QueryClient());
+  const locators = useMemo(
+    () => bindLocatorsToHost(getAlertingV2Locators(share), OBSERVABILITY_ALERTING_HOST),
+    [share]
+  );
 
   const { data, origin: savedObjectId } = attachment;
   const isPersisted = isPersistedSavedObject(savedObjectId);
@@ -108,9 +115,11 @@ export const RuleCanvasContent = ({
         }),
         icon: 'external',
         type: ActionButtonType.OVERFLOW,
-        // TODO: Migrate to rules locator once agent builder attachments render inside the LocatorProvider tree
         handler: () => {
-          application.navigateToUrl(basePath.prepend(paths.ruleDetails(ruleId)));
+          getAlertingV2Locators(share).rulesLocators.navigateSync({
+            ruleId,
+            host: OBSERVABILITY_ALERTING_HOST.rules,
+          });
         },
       },
     ]);
@@ -121,22 +130,23 @@ export const RuleCanvasContent = ({
     registerActionButtons,
     updateOrigin,
     rulesApi,
-    application,
-    basePath,
+    share,
     notifications,
     data,
   ]);
 
   return (
     <QueryClientProvider client={queryClient}>
-      <EuiPanel paddingSize="l" hasShadow={false}>
-        <RuleSummaryBody rule={summaryRule}>
-          <RuleSummaryAboutSection />
-          <RuleSummaryQueryPreviewSection />
-          <RuleSummaryInvestigationSection />
-          <RuleSummaryArtifactsSection />
-        </RuleSummaryBody>
-      </EuiPanel>
+      <LocatorProvider locators={locators}>
+        <EuiPanel paddingSize="l" hasShadow={false}>
+          <RuleSummaryBody rule={summaryRule}>
+            <RuleSummaryAboutSection />
+            <RuleSummaryQueryPreviewSection />
+            <RuleSummaryInvestigationSection />
+            <RuleSummaryArtifactsSection />
+          </RuleSummaryBody>
+        </EuiPanel>
+      </LocatorProvider>
     </QueryClientProvider>
   );
 };

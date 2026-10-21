@@ -11,7 +11,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 
 const MAX_STRING_LENGTH = 2048;
 
-export const HttpMethodSchema = z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']);
+export const HttpMethodSchema = lazySchema(() => z.enum(['GET', 'POST', 'PUT', 'PATCH', 'DELETE']));
 export type HttpMethod = z.infer<typeof HttpMethodSchema>;
 
 export const RequestInputSchema = lazySchema(() =>

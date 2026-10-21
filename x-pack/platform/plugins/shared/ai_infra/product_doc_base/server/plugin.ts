@@ -191,6 +191,13 @@ export class ProductDocBasePlugin
       );
     }
 
+    if (!this.context.config.get().autoInstallEnabled) {
+      this.logger.info(
+        'Skipping product documentation auto-install: xpack.productDocBase.autoInstallEnabled is false'
+      );
+      return;
+    }
+
     const uiSettingsSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
     const uiSettingsClient = core.uiSettings.asScopedToClient(uiSettingsSoClient);
 

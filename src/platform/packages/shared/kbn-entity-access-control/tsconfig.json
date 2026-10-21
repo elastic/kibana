@@ -6,5 +6,12 @@
   },
   "include": ["**/*.ts"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/zod"]
+  "kbn_references": [
+    "@kbn/zod",
+    "@kbn/core-security-server",
+    "@kbn/core-http-server",
+    "@kbn/security-plugin-types-server",
+    "@kbn/core-security-server-mocks",
+    "@kbn/core-http-server-mocks"
+  ]
 }

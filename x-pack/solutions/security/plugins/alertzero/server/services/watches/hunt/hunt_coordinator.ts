@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { ScopedModel } from '@kbn/agent-builder-server';
+import type { MitreAttackDataClient } from '@kbn/mitre-attack-plugin/server';
 import type {
   HuntBehaviorArticleContext,
   HuntCompleteness,
@@ -22,7 +22,7 @@ import {
   huntCompletenessOf,
 } from './common/completeness';
 import { resolveHuntScope } from './common/resolve_index_scope';
-import { resolveTier2Targets } from './common/resolve_tier2_targets';
+import { needsModelDatasetMatch, resolveTier2Targets } from './common/resolve_tier2_targets';
 import type { Tier2TargetSource } from './common/resolve_tier2_targets';
 import { generateRecommendations } from './common/build_recommendations';
 import { buildHuntHeadline, buildHuntNarrative } from './common/build_hunt_narrative';
@@ -33,6 +33,12 @@ import type { ResolvedHuntScope } from './common/resolve_index_scope';
 import type { HuntScopeReportContext } from './common/match_hunt_datasets';
 import { SUMMARIZE_HIT_SOURCE_FIELDS, summarizeHit } from './common/summarize_hit';
 import { huntForThreat, emptyHuntForThreatResult } from './tier1/hunt_for_threat';
+import type { HuntBehaviorModels, HuntModels, HuntModelTier } from './types';
+import {
+  TIER2_MODEL_TIERS,
+  describeModelTiers,
+  unavailableModelTiers,
+} from './common/hunt_model_tiers';
 import type { HuntForThreatServiceResult } from './tier1/types';
 import { huntBehavior } from './tier2/hunt_behavior';
 import type { HuntBehaviorResult } from './tier2/types';
@@ -112,6 +118,13 @@ export interface HuntCoordinatorCoreResult {
   /** The signals that contributed to `tier2_targets`. Empty when `tier2_targets` is. */
   tier2_target_sources: Tier2TargetSource[];
   /**
+   * The datasets the report itself points at (its vendor or product match, or the model's
+   * match), without Tier 1 hit indices or the process-bearing streams in `tier2_targets`.
+   * Hunt packaging names these as the data a detection would query when a run has no hit
+   * events to name. Empty when neither signal matched.
+   */
+  report_intent_targets: string[];
+  /**
    * Streams and indices in the universe whose mapping carries `process.entity_id` or
    * `process.pid`: where a hit can become a Defend response action. A mapping says a host
    * can report process telemetry, not that it is enrolled; packaging decides that.
@@ -120,6 +133,13 @@ export interface HuntCoordinatorCoreResult {
   tier1: HuntCoordinatorTier1;
   tier2?: HuntCoordinatorTier2;
   tier2_skipped_reason?: HuntCoordinatorTier2SkipReason;
+  /**
+   * The model tiers that had no usable model on this run, in tier order; absent when every
+   * tier resolved. Reported whether or not the run needed them: a missing Efficient model
+   * quietly degrades dataset matching and recommendations without skipping anything, and a
+   * missing Frontier model is what makes Tier 2 report `no_inference`.
+   */
+  unavailable_model_tiers?: HuntModelTier[];
   message: string;
   next_step: string;
   /**
@@ -137,7 +157,8 @@ export interface HuntCoordinatorCoreResult {
    */
   completeness: HuntCompleteness;
   /**
-   * Whether the report stays eligible for a later run. Derived from `completeness`,
+   * Whether this run is done with the report and it can be retired: true when
+   * nothing a later sweep would cover is missing. Derived from `completeness`,
    * false only for `incomplete_retryable`. True for `incomplete_final` too, because
    * a deterministic gap recurs identically every run, so keeping the report eligible
    * re-spends the run forever without covering more. A caller that writes "clean"
@@ -145,6 +166,15 @@ export interface HuntCoordinatorCoreResult {
    * it; that is what `completeness` is for.
    */
   completed_successfully: boolean;
+  /**
+   * The coordinator's own coverage gaps — input this run had to truncate, and a Tier 2
+   * that was requested but could not run, or had nothing to run against. Not a copy of
+   * `tier1.incomplete` / `tier2.incomplete`, which the caller already has; this is the
+   * part of `completeness` that would otherwise reach the caller only as an enum (or,
+   * on the `tier1Only` paths, not even that). Absent or empty means the coordinator
+   * itself found nothing to report here.
+   */
+  incomplete?: HuntIncompleteness[];
   /**
    * Up to 8 analyst next-step lines for a confirmed hit, grounded to this run's own SSE-visible
    * entities. Absent when there is no confirmed hit or the run stopped before Tier 2.
@@ -176,6 +206,7 @@ const MAX_MATCHED_INDICES = 50;
 export interface HuntCoordinatorClients {
   esClient: ElasticsearchClient;
   reportsEsClient: ElasticsearchClient;
+  mitreDataClient?: MitreAttackDataClient;
 }
 
 const clampHuntReportText = (value: string | undefined): string | undefined => {
@@ -424,8 +455,8 @@ const coordinatorGaps = ({
 };
 
 const huntCoordinatorCore = async (
-  { esClient, reportsEsClient }: HuntCoordinatorClients,
-  model: ScopedModel | undefined,
+  { esClient, reportsEsClient, mitreDataClient }: HuntCoordinatorClients,
+  models: HuntModels,
   logger: Logger,
   params: HuntCoordinatorParams,
   narrativeContext: HuntNarrativeContext
@@ -465,6 +496,7 @@ const huntCoordinatorCore = async (
       index_patterns: [],
       tier2_targets: [],
       tier2_target_sources: [],
+      report_intent_targets: [],
       actionable_indices: [],
       tier1: {
         tier: 1,
@@ -598,6 +630,7 @@ const huntCoordinatorCore = async (
       index_patterns: [],
       tier2_targets: [],
       tier2_target_sources: [],
+      report_intent_targets: [],
       actionable_indices: [],
       tier1: emptyTier1,
       // Not the `on_hits` gate: with no scope there is no allowlist for Tier 2 to
@@ -634,6 +667,7 @@ const huntCoordinatorCore = async (
       index_patterns: [],
       tier2_targets: [],
       tier2_target_sources: [],
+      report_intent_targets: [],
       actionable_indices: [],
       tier1: {
         tier: 1,
@@ -690,12 +724,18 @@ const huntCoordinatorCore = async (
   // Stage 2: what Tier 2 may read, chosen now that the report was read and Tier 1 ran.
   // The model is a fallback inside it and spends tokens, so a run that Tier 2 will not
   // reach gets the deterministic targets only; they still describe the run.
-  const tier2Reachable = gatedSkipReason === null && model !== undefined && Boolean(text);
+  // The one place a hunt workload is mapped to a tier (see `HuntModels` for the reasoning).
+  // Both Tier 2 jobs run on Frontier, so Tier 2 is unreachable without it.
+  const tier2Models: HuntBehaviorModels | undefined = models.frontier
+    ? { extraction: models.frontier, esql: models.frontier }
+    : undefined;
+  const tier2Reachable = gatedSkipReason === null && tier2Models !== undefined && Boolean(text);
   const targets = await resolveTier2Targets({
     scope,
     tier1: tier1Raw,
     report: scopeReport,
-    model: tier2Reachable ? model : undefined,
+    // Dataset matching: a selection task from a list, so the efficient tier.
+    model: tier2Reachable ? models.efficient : undefined,
     logger,
   });
 
@@ -720,17 +760,20 @@ const huntCoordinatorCore = async (
     skipDetail?: string;
     readReportText?: boolean;
   }): HuntCoordinatorCoreResult => {
-    const completeness = huntCompletenessOf([
-      ...runGaps(readReportText),
-      // Tier 2 never ran on any of these paths, so nothing it could have executed
-      // counts towards coverage.
-      ...coordinatorGaps({
-        tier1Status: tier1Raw.status,
-        tier2Executed: false,
-        skipReason: reason,
-        skipDetail,
-      }),
-    ]);
+    // Tier 2 never ran on any of these paths, so nothing it could have executed
+    // counts towards coverage.
+    const skipGaps = coordinatorGaps({
+      tier1Status: tier1Raw.status,
+      tier2Executed: false,
+      skipReason: reason,
+      skipDetail,
+    });
+    const completeness = huntCompletenessOf([...runGaps(readReportText), ...skipGaps]);
+    // The coordinator's own gaps, not a copy of `tier1.incomplete` (which the caller
+    // already has): on this path it's the only place `nothing_searched` and a
+    // requested-but-unavailable Tier 2 reach the wire at all, since `next_step` here
+    // is a fixed string rather than one assembled from the gaps.
+    const coordinatorOwnGaps = [...inputGaps(readReportText), ...skipGaps];
     return {
       status: 'tier1_only',
       report_id: reportId,
@@ -738,6 +781,7 @@ const huntCoordinatorCore = async (
       index_patterns: scope.index_patterns,
       tier2_targets: targets.tier2_targets,
       tier2_target_sources: targets.tier2_target_sources,
+      report_intent_targets: targets.report_intent_targets,
       actionable_indices: scope.actionable_indices,
       tier1,
       tier2_skipped_reason: reason,
@@ -746,6 +790,7 @@ const huntCoordinatorCore = async (
       has_confirmed_hit: tier1Raw.has_confirmed_hit,
       completeness,
       completed_successfully: completedSuccessfully(completeness),
+      ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
     };
   };
 
@@ -760,25 +805,24 @@ const huntCoordinatorCore = async (
     });
   }
 
-  if (!model) {
+  if (!tier2Models) {
+    const missingTiers = describeModelTiers(unavailableModelTiers(models, TIER2_MODEL_TIERS));
     return tier1Only({
       reason: 'no_inference',
-      message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no GenAI connector).`,
-      nextStep:
-        'Tier 2 requires a GenAI connector. Configure one via Stack Management → Connectors.',
+      message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no model available for the ${missingTiers}).`,
+      nextStep: `Tier 2 needs a model for the ${missingTiers}. Create a GenAI connector if there is none, then pick it for the tier in Stack Management → Feature Settings.`,
     });
   }
 
   if (!text) {
-    const completeness = huntCompletenessOf([
-      // There is no text on this path, so there is no dropped text either.
-      ...runGaps(false),
-      ...coordinatorGaps({
-        tier1Status: tier1Raw.status,
-        tier2Executed: false,
-        skipReason: 'no_report_text',
-      }),
-    ]);
+    // There is no text on this path, so there is no dropped text either.
+    const skipGaps = coordinatorGaps({
+      tier1Status: tier1Raw.status,
+      tier2Executed: false,
+      skipReason: 'no_report_text',
+    });
+    const completeness = huntCompletenessOf([...runGaps(false), ...skipGaps]);
+    const coordinatorOwnGaps = [...inputGaps(false), ...skipGaps];
     return {
       status: 'tier2_only_skipped',
       report_id: reportId,
@@ -786,6 +830,7 @@ const huntCoordinatorCore = async (
       index_patterns: scope.index_patterns,
       tier2_targets: targets.tier2_targets,
       tier2_target_sources: targets.tier2_target_sources,
+      report_intent_targets: targets.report_intent_targets,
       actionable_indices: scope.actionable_indices,
       tier1,
       tier2_skipped_reason: 'no_report_text',
@@ -795,13 +840,30 @@ const huntCoordinatorCore = async (
       has_confirmed_hit: tier1Raw.has_confirmed_hit,
       completeness,
       completed_successfully: completedSuccessfully(completeness),
+      ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
     };
   }
 
   // Nothing to point Tier 2 at is not a failure to run it: every signal came up empty,
   // and a later run over the same data finds the same. `always` does not override it,
   // because a query with no allowed index could only be refused at the source gate.
+  //
+  // That only holds when every signal was consulted. Choosing a dataset by model is the last
+  // one, and without a model for the Efficient tier it never ran, so "no targets" says nothing
+  // about this report and a run with the model restored may find some. That is a Tier 2 that
+  // was requested but could not run, which stays retryable, and not a report to retire.
   if (targets.tier2_targets.length === 0) {
+    if (
+      !models.efficient &&
+      needsModelDatasetMatch({ scope, tier1: tier1Raw, report: scopeReport })
+    ) {
+      const missingTier = describeModelTiers(['efficient']);
+      return tier1Only({
+        reason: 'no_inference',
+        message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no model available for the ${missingTier} to choose where to hunt).`,
+        nextStep: `Tier 2 could not choose where to hunt because the ${missingTier} has no model. Create a GenAI connector if there is none, then pick it for the tier in Stack Management → Feature Settings.`,
+      });
+    }
     return tier1Only({
       reason: 'no_tier2_targets',
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (no_tier2_targets).`,
@@ -827,7 +889,7 @@ const huntCoordinatorCore = async (
   let tier2Raw: HuntBehaviorResult;
   try {
     tier2Raw = await huntBehavior(
-      model,
+      tier2Models,
       logger,
       {
         text,
@@ -842,7 +904,8 @@ const huntCoordinatorCore = async (
         // gates, the hit bar) treats this as the set Tier 2 may read.
         allowed_indices: targets.tier2_targets,
       },
-      esClient
+      esClient,
+      mitreDataClient
     );
   } catch (err) {
     logger.warn(`hunt_coordinator: tier2 huntBehavior failed — ${(err as Error).message}`);
@@ -866,11 +929,11 @@ const huntCoordinatorCore = async (
   // An absent `execution` is a behavior that never reached execute, which queried
   // exactly as much as one that executed and returned nothing: nothing.
   const tier2Executed = tier2Raw.behaviors.some(({ execution }) => execution?.executed === true);
-  const gaps = [
-    ...runGaps(true),
-    ...tier2Gaps,
-    ...coordinatorGaps({ tier1Status: tier1Raw.status, tier2Executed }),
-  ];
+  const ownGaps = coordinatorGaps({ tier1Status: tier1Raw.status, tier2Executed });
+  const gaps = [...runGaps(true), ...tier2Gaps, ...ownGaps];
+  // The coordinator's own gaps, not a copy of `tier1.incomplete` / `tier2.incomplete`
+  // (the caller already has both of those).
+  const coordinatorOwnGaps = [...inputGaps(true), ...ownGaps];
   // Both tiers ran, so `completed_successfully` is no longer a hardcoded `true`: it
   // follows the gaps each tier reported. A deterministic gap still retires the report,
   // because re-running reproduces it exactly and would re-spend the generation budget
@@ -898,6 +961,7 @@ const huntCoordinatorCore = async (
     index_patterns: scope.index_patterns,
     tier2_targets: targets.tier2_targets,
     tier2_target_sources: targets.tier2_target_sources,
+    report_intent_targets: targets.report_intent_targets,
     actionable_indices: scope.actionable_indices,
     tier1,
     tier2,
@@ -917,6 +981,7 @@ const huntCoordinatorCore = async (
     has_confirmed_hit: hasConfirmedHit,
     completeness,
     completed_successfully: completedSuccessfully(completeness),
+    ...(coordinatorOwnGaps.length > 0 ? { incomplete: coordinatorOwnGaps } : {}),
   };
 
   if (!hasConfirmedHit) {
@@ -940,7 +1005,8 @@ const huntCoordinatorCore = async (
     .join('\n');
 
   const recommendations = await generateRecommendations({
-    model,
+    // A few short grounded lines with a template floor, so the efficient tier.
+    model: models.efficient,
     logger,
     result: coreResult,
     context: recommendationContext,
@@ -956,12 +1022,15 @@ const huntCoordinatorCore = async (
  */
 export const huntCoordinator = async (
   clients: HuntCoordinatorClients,
-  model: ScopedModel | undefined,
+  models: HuntModels,
   logger: Logger,
   params: HuntCoordinatorParams
 ): Promise<HuntCoordinatorResult> => {
   const narrativeContext: HuntNarrativeContext = {};
-  const core = await huntCoordinatorCore(clients, model, logger, params, narrativeContext);
+  const coreResult = await huntCoordinatorCore(clients, models, logger, params, narrativeContext);
+  const unavailable = unavailableModelTiers(models);
+  const core: HuntCoordinatorCoreResult =
+    unavailable.length > 0 ? { ...coreResult, unavailable_model_tiers: unavailable } : coreResult;
   return {
     ...core,
     headline: buildHuntHeadline(core),

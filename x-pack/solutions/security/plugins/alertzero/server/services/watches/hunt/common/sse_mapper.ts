@@ -21,10 +21,8 @@
 
 import { createHash } from 'crypto';
 import dateMath from '@kbn/datemath';
-import {
-  huntIocSchema,
-  type SignificantSecurityEventAttachmentData,
-} from '../../../../../common/significant_security_event_schema';
+import { HuntIoc } from '@kbn/alertzero-common';
+import type { SignificantSecurityEventAttachmentData } from '../../../../../common/significant_security_event_schema';
 import type { SeverityLevel } from '../../../../../common/attachment_enums';
 import type { HuntCoordinatorCoreResult } from '../hunt_coordinator';
 
@@ -337,7 +335,7 @@ const toEventMatched = (
   if (!matched.field) return undefined;
   // The coordinator types `ioc.type` as a free string; the SSE schema only
   // accepts the IOC enum, so drop an ioc the schema would reject.
-  const ioc = matched.ioc ? huntIocSchema.safeParse(matched.ioc) : undefined;
+  const ioc = matched.ioc ? HuntIoc.safeParse(matched.ioc) : undefined;
   return {
     field: matched.field,
     ...(ioc?.success ? { ioc: ioc.data } : {}),
@@ -811,6 +809,7 @@ const buildEntry = ({
       capability: CAPABILITY_ID,
       run_id: result.run_id,
       report_id: reportId,
+      ...(techniqueId ? { corroborated_technique_id: techniqueId } : {}),
       security_knowledge_indicators: buildSecurityKnowledgeIndicators(result, techniqueId),
       entities,
       alerts,
@@ -843,6 +842,10 @@ const buildEntry = ({
  * `hunt_result.tier2.behaviors`, Tier 2 `hits`, and Tier 2 entities are
  * filtered to that technique. Tier 1 events attributed to another technique
  * are excluded; IOC-only / unscoped Tier 1 hits stay shared.
+ *
+ * A technique-scoped entry also carries `corroborated_technique_id`, so a reader can
+ * tell it apart from the report-scoped fallback entry even though the latter can list
+ * (uncorroborated) technique indicators of its own.
  */
 export const buildSseData = (
   result: HuntCoordinatorCoreResult,

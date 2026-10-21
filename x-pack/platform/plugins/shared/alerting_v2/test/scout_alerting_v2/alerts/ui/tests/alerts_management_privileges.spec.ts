@@ -39,7 +39,7 @@ const assertEpisodesManagementHappyPath = async ({
 
   await test.step('episodes table renders with item count', async () => {
     await expect(alertEpisodesList.tableToolbar).toBeVisible({ timeout: 60_000 });
-    await expect(alertEpisodesList.itemCount).toHaveText(/^Showing(?: first)? \d[\d,]* episodes?$/);
+    await expect(alertEpisodesList.itemCount).toHaveText(/^Showing(?: first)? \d[\d,]* alerts?$/);
   });
 
   await test.step('tags filter lists the seeded v2 tag', async () => {
@@ -61,7 +61,7 @@ const assertEpisodesManagementHappyPath = async ({
  */
 test.describe(
   'Alerts management page - privilege-based access',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
       test.setTimeout(180_000);

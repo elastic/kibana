@@ -13,6 +13,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type { ProfilingSchema } from '@kbn/profiling-utils';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import React from 'react';
 import { useAnyOfProfilingParams } from '../hooks/use_profiling_params';
@@ -23,7 +24,7 @@ import type { ProfilingRoutes } from '../routing';
 import { PrimaryProfilingSearchBar } from './profiling_app_page_template/primary_profiling_search_bar';
 import { ProfilingSearchBar } from './profiling_app_page_template/profiling_search_bar';
 
-export function PrimaryAndComparisonSearchBar() {
+export function PrimaryAndComparisonSearchBar({ schema }: { schema?: ProfilingSchema }) {
   const {
     path,
     query,
@@ -91,7 +92,7 @@ export function PrimaryAndComparisonSearchBar() {
           <h3>{baselineTitle}</h3>
         </EuiTitle>
         <EuiSpacer size="s" />
-        <PrimaryProfilingSearchBar showSubmitButton={false} />
+        <PrimaryProfilingSearchBar showSubmitButton={false} schema={schema} />
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ padding: '0 8px' }}>
         <EuiToolTip position="top" content={swapSides} disableScreenReaderOutput>
@@ -153,6 +154,7 @@ export function PrimaryAndComparisonSearchBar() {
             refresh();
           }}
           dataTestSubj="profilingComparisonUnifiedSearchBar"
+          schema={schema}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

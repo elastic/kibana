@@ -27,18 +27,19 @@ import { buildHeader } from './utils';
 
 /**
  * Renders the summary and output of an investigation (a root-cause-analysis run by an AI
- * agent), whether it is still running, has completed, or has failed. Meant to be embedded
- * anywhere an investigation's status needs to be shown — it takes no dependencies beyond
- * its props, so callers own how the underlying data (live or final `state`) is fetched. Pair
- * with {@link useInvestigationState} to source `state` correctly for both cases.
+ * agent), whether an agent is still working on it or not. Meant to be embedded anywhere an
+ * investigation's status needs to be shown — it takes no dependencies beyond its props, so
+ * callers own how the investigation is read. Pair with {@link useInvestigation}, which reads the
+ * shared investigations API and polls while the investigation runs.
  */
 export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
   status,
-  state,
+  investigation,
   error,
 }) => {
-  const hypotheses = state?.hypotheses ?? [];
-  const header = buildHeader(status, state);
+  const hypotheses = investigation?.hypotheses?.hypotheses ?? [];
+  const summary = investigation?.metadata.summary;
+  const header = buildHeader(status, investigation);
   const { euiTheme } = useEuiTheme();
 
   return (
@@ -68,7 +69,7 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
       {error && (
         <EuiText
           size="s"
-          color={status === 'unavailable' ? 'warning' : 'danger'}
+          color="warning"
           data-test-subj="investigationOutputError"
           css={css`
             padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
@@ -78,7 +79,7 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
         </EuiText>
       )}
 
-      {state?.summary && (
+      {summary && (
         <EuiMarkdownFormat
           textSize="s"
           color="subdued"
@@ -86,7 +87,7 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
             padding: 0 ${euiTheme.size.base} ${euiTheme.size.base};
           `}
         >
-          {state.summary}
+          {summary}
         </EuiMarkdownFormat>
       )}
 
@@ -135,12 +136,8 @@ export const InvestigationOutput: React.FC<InvestigationOutputProps> = ({
         </EuiPanel>
       )}
 
-      {/*
-       * Only shown once the investigation has actually finished — a mid-run `conclusion` is
-       * still a draft (and occasionally arrives with markdown mangled by the model over-escaping
-       * newlines in its tool-call JSON), so it's never rendered before `status` is `complete`.
-       */}
-      {status === 'complete' && state && <FinalResults state={state} />}
+      {/* Only shown once nothing works on it: a mid-run conclusion is still a draft. */}
+      {status === 'complete' && investigation && <FinalResults investigation={investigation} />}
     </EuiPanel>
   );
 };
