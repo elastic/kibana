@@ -39,7 +39,17 @@ export const ALERT_TRIAGE_WORKER_SETTINGS_DEFAULTS = {
   // `floor_alert_triage.yaml` decides `autoApprove` on `autonomy == 'supervised'` alone, which
   // leaves `assisted` meaning the same as `manual`.
   allowedAutonomyLevels: ['manual', 'supervised'],
-  extras: { defaultValue: { autoCloseConfidenceScoreMinThreshold: 0.85 } },
+  scheduleInterval: { defaultValue: '15m' },
+  extras: {
+    defaultValue: {
+      autoCloseConfidenceScoreMinThreshold: 0.85,
+      budgetPerHour: 1300,
+      lookbackHours: 24,
+      minSeverity: 'low',
+      excludeBuildingBlocks: false,
+      excludedRuleTags: [],
+    },
+  },
 } as const satisfies WorkerSettingsDefaults;
 
 export const ATTACK_DISCOVERY_WORKER_SETTINGS_DEFAULTS = {

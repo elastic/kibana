@@ -14,12 +14,13 @@ import type { OxlintOverride } from 'oxlint';
  * In oxlint, `**` inside `{}` alternatives matches a single path segment, so `x-pack/**` gets its
  * own glob to reach `x-pack/solutions/<solution>/...`.
  */
-const SCOUT_TEST_FILE_GLOBS = [
+export const SCOUT_TEST_FILE_GLOBS = [
   '{src/platform,src/core}/{plugins,packages}/**/test/scout{_*,}/**/*.ts',
   'x-pack/**/{plugins,packages}/**/test/scout{_*,}/**/*.ts',
   '{examples,x-pack/examples}/**/test/scout{_*,}/**/*.ts',
-  'src/core/test/scout{_*,}/**/*.ts',
+  'src/core/packages/core/test/scout{_*,}/**/*.ts',
   'packages/**/test/scout{_*,}/**/*.ts',
+  'src/dev/build/test/scout{_*,}/**/*.ts',
 ];
 
 /** Order matters: the API test overrides refine the generic one for their directories. */
@@ -110,6 +111,22 @@ export const scoutOverrides: OxlintOverride[] = [
     files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
     rules: {
       '@kbn/eslint/scout_no_raw_eui_selectors': 'error',
+    },
+  },
+  {
+    // Observability Scout tests (excludes plugins that are single-architecture by design:
+    // profiling/uptime are stateful-only, serverless_observability is serverless-only,
+    // ux/exploratory_view (RUM) ship stateful-only)
+    files: ['x-pack/solutions/observability/{packages,plugins}/*/test/{scout,scout_*}/**/*.ts'],
+    excludeFiles: [
+      'x-pack/solutions/observability/plugins/profiling/test/**',
+      'x-pack/solutions/observability/plugins/serverless_observability/test/**',
+      'x-pack/solutions/observability/plugins/uptime/test/**',
+      'x-pack/solutions/observability/plugins/ux/test/**',
+      'x-pack/solutions/observability/plugins/exploratory_view/test/**',
+    ],
+    rules: {
+      '@kbn/eslint/scout_prefer_both_arch_tags': 'warn',
     },
   },
 ];
