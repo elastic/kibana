@@ -9,7 +9,9 @@ import { inject, injectable } from 'inversify';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import {
   alertActionActorType,
+  alertActionSubtype,
   type AlertActionDocument,
+  type AlertActionSubtype,
 } from '../../../resources/datastreams/alert_actions';
 import type {
   Alert,
@@ -54,8 +56,10 @@ export class StoreActionsStep implements DispatcherStep {
         toAction({
           alert,
           actionType: 'suppress',
+          actionSubtype: alert.action_subtype,
           reason: alert.reason,
           spaceId: alert.space_id,
+          maintenanceWindowId: alert.maintenance_window_id,
         })
       ),
       ...throttled.flatMap((group) =>
@@ -63,6 +67,7 @@ export class StoreActionsStep implements DispatcherStep {
           toAction({
             alert,
             actionType: 'suppress',
+            actionSubtype: alertActionSubtype.throttled,
             reason: `suppressed by throttled policy ${group.policyId}`,
             spaceId: alert.space_id,
           })
@@ -123,13 +128,17 @@ export class StoreActionsStep implements DispatcherStep {
 export function toAction({
   alert,
   actionType,
+  actionSubtype,
   reason,
   spaceId,
+  maintenanceWindowId,
 }: {
   alert: Alert;
   actionType: 'suppress' | 'fire' | 'notified' | 'unmatched';
+  actionSubtype?: AlertActionSubtype;
   reason?: string;
   spaceId: string;
+  maintenanceWindowId?: string;
 }): AlertActionDocument {
   return {
     group_hash: alert.group_hash,
@@ -140,5 +149,7 @@ export function toAction({
     source: alert.source,
     reason,
     space_id: spaceId,
+    ...(actionSubtype !== undefined && { action_subtype: actionSubtype }),
+    ...(maintenanceWindowId !== undefined && { maintenance_window_id: maintenanceWindowId }),
   };
 }
