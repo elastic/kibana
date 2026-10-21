@@ -8,9 +8,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const QUEUE_PAGE_INFO = Object.freeze({
-  pageTitle: i18n.translate('xpack.alertzero.queue.pageTitle', {
-    defaultMessage: 'AlertZero - Proposals queue',
-  }),
   assignSuccess: i18n.translate('xpack.alertzero.queue.assignSuccess', {
     defaultMessage: 'Assignees updated',
   }),
