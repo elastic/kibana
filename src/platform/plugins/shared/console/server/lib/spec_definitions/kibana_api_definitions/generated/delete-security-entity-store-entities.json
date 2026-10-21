@@ -4,7 +4,7 @@
       "DELETE"
     ],
     "patterns": [
-      "api/security/entity_store/entities/"
+      "api/security/entity_store/entities"
     ],
     "documentation": "https://www.elastic.co/docs/api/doc/kibana/operation/operation-delete-security-entity-store-entities"
   }

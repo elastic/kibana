@@ -25,7 +25,7 @@ interface OasDocument {
 /**
  * Builds Console endpoint definitions (methods, URL patterns and documentation links)
  * from a parsed Kibana OpenAPI document, one definition per operation keyed by its
- * operationId. Patterns have no leading slash, matching the Elasticsearch ones.
+ * operationId. Patterns have no leading or trailing slash, matching the Elasticsearch ones.
  */
 export const extractKibanaApiPaths = (
   oasDocument: OasDocument
@@ -40,7 +40,7 @@ export const extractKibanaApiPaths = (
       }
       result[operationId] = {
         methods: [method.toUpperCase()],
-        patterns: [pathTemplate.replace(/^\//, '')],
+        patterns: [pathTemplate.replace(/^\/|\/$/g, '')],
         documentation: `${KIBANA_API_DOCS_URL}operation/operation-${operationId}`,
       };
     }

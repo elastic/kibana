@@ -36,6 +36,16 @@ describe('extractKibanaApiPaths', () => {
     });
   });
 
+  it('strips leading and trailing slashes from patterns', () => {
+    const oasDocument = {
+      paths: { '/api/entities/': { delete: { operationId: 'delete-entities' } } },
+    };
+
+    expect(extractKibanaApiPaths(oasDocument)['delete-entities'].patterns).toEqual([
+      'api/entities',
+    ]);
+  });
+
   it('skips operations without an operationId and unknown methods', () => {
     const oasDocument = {
       paths: {
