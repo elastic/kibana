@@ -7,6 +7,7 @@
 
 import { deleteSLOParamsSchema } from '@kbn/slo-schema';
 import { DeleteSLO } from '../services';
+import { REQUEST_RETRY_OPTIONS } from '../utils/retry';
 import { createSloServerRoute } from './utils/create_slo_server_route';
 import { assertPlatinumLicense } from './utils/assert_platinum_license';
 
@@ -36,7 +37,8 @@ export const deleteSLORoute = createSloServerRoute({
       summaryTransformManager,
       scopedClusterClient,
       rulesClient,
-      logger
+      logger,
+      { retryOptions: REQUEST_RETRY_OPTIONS }
     );
 
     await deleteSLO.execute(params.path.id);

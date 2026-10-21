@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { rulesClientMock } from '@kbn/alerting-plugin/server/rules_client.mock';
 import type { RulesClientApi } from '@kbn/alerting-plugin/server/types';
@@ -99,6 +100,62 @@ describe('DeleteSLO', () => {
         expect.objectContaining({
           labels: expect.objectContaining({ slo_id: slo.id, error_type: 'cleanup_failed' }),
         })
+      );
+    });
+  });
+
+  describe('options', () => {
+    it('stops retrying the pipeline deletion once the provided retry budget is exhausted', async () => {
+      const slo = createSLO({
+        id: 'irrelevant',
+        indicator: createAPMTransactionErrorRateIndicator(),
+      });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline.mockRejectedValue(
+        new EsErrors.ConnectionError('connection error')
+      );
+      const deleteSLOWithoutRetry = new DeleteSLO(
+        mockRepository,
+        mockTransformManager,
+        mockSummaryTransformManager,
+        mockScopedClusterClient,
+        mockRulesClient,
+        mockLogger,
+        { retryOptions: { maxRetries: 0, initialDelayMs: 0, maxDelayMs: 0 } }
+      );
+
+      await expect(deleteSLOWithoutRetry.execute(slo.id)).rejects.toThrow('connection error');
+
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalledTimes(2);
+    });
+
+    it('forwards the provided signal to the Elasticsearch calls', async () => {
+      const slo = createSLO({
+        id: 'irrelevant',
+        indicator: createAPMTransactionErrorRateIndicator(),
+      });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const { signal } = new AbortController();
+      const deleteSLOWithSignal = new DeleteSLO(
+        mockRepository,
+        mockTransformManager,
+        mockSummaryTransformManager,
+        mockScopedClusterClient,
+        mockRulesClient,
+        mockLogger,
+        { signal }
+      );
+
+      await deleteSLOWithSignal.execute(slo.id);
+
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).toHaveBeenCalledWith(expect.anything(), { ignore: [404], signal });
+      expect(mockScopedClusterClient.asCurrentUser.deleteByQuery).toHaveBeenCalledWith(
+        expect.anything(),
+        { signal }
       );
     });
   });

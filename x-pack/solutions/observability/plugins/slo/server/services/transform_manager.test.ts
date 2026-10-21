@@ -11,12 +11,14 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import type { MockedLogger } from '@kbn/logging-mocks';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { DefaultTransformManager } from './transform_manager';
 import {
   ApmTransactionErrorRateTransformGenerator,
   TransformGenerator,
 } from './transform_generators';
+import { createTransformGenerators } from './transform_generators/transform_generators_factory';
 import type { SLODefinition, IndicatorTypes } from '../domain/models';
 import {
   createAPMTransactionDurationIndicator,
@@ -216,6 +218,100 @@ describe('TransformManager', () => {
       expect(
         scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform
       ).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('Install idempotency', () => {
+    const alreadyExistsError = new EsErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        statusCode: 409,
+        body: { error: { type: 'resource_already_exists_exception' } },
+      })
+    );
+
+    const createManager = () =>
+      new DefaultTransformManager(
+        createTransformGenerators(spaceId, dataViewsService, false, false),
+        scopedClusterClientMock,
+        loggerMock,
+        { retryOptions: { maxRetries: 1, initialDelayMs: 0, maxDelayMs: 0 } }
+      );
+
+    it('resolves when a retried put returns already exists', async () => {
+      scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
+        .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))
+        .mockRejectedValueOnce(alreadyExistsError);
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      const transformId = await createManager().install(slo);
+
+      expect(transformId).toBe(`slo-${slo.id}-${slo.revision}`);
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
+      ).toHaveBeenCalledTimes(2);
+    });
+
+    it('rejects when the first put returns already exists', async () => {
+      scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform.mockRejectedValueOnce(
+        alreadyExistsError
+      );
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await expect(createManager().install(slo)).rejects.toThrow(alreadyExistsError);
+    });
+  });
+
+  describe('Signal', () => {
+    const createManager = (signal?: AbortSignal) =>
+      new DefaultTransformManager(
+        createTransformGenerators(spaceId, dataViewsService, false, false),
+        scopedClusterClientMock,
+        loggerMock,
+        { signal }
+      );
+
+    it('forwards the per-call signal to install, start and uninstall', async () => {
+      const { signal } = new AbortController();
+      const transformManager = createManager();
+      const slo = createSLO({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await transformManager.install(slo, { signal });
+      await transformManager.start('slo-transform-id', { signal });
+      await transformManager.uninstall('slo-transform-id', { signal });
+
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.putTransform
+      ).toHaveBeenCalledWith(expect.anything(), { signal });
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.startTransform
+      ).toHaveBeenCalledWith(expect.anything(), { ignore: [409], signal });
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform
+      ).toHaveBeenCalledWith(expect.anything(), { ignore: [404], signal });
+    });
+
+    it('falls back to the constructor signal when no per-call signal is given', async () => {
+      const { signal } = new AbortController();
+      const transformManager = createManager(signal);
+
+      await transformManager.uninstall('slo-transform-id');
+
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform
+      ).toHaveBeenCalledWith(expect.anything(), { ignore: [404], signal });
+    });
+
+    it('does not call Elasticsearch when the per-call signal is already aborted', async () => {
+      const controller = new AbortController();
+      controller.abort(new Error('deadline exceeded'));
+      const transformManager = createManager();
+
+      await expect(
+        transformManager.uninstall('slo-transform-id', { signal: controller.signal })
+      ).rejects.toThrow('deadline exceeded');
+      expect(
+        scopedClusterClientMock.asSecondaryAuthUser.transform.deleteTransform
+      ).not.toHaveBeenCalled();
     });
   });
 

@@ -83,6 +83,7 @@ export function transformSloResponseToFormState(
 
 export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): CreateSLOInput {
   return {
+    ...(values.id && { id: values.id }),
     name: values.name,
     description: values.description,
     indicator: values.indicator,
@@ -232,6 +233,9 @@ export function transformPartialSLODataToFormState(
     state.indicator = indicator;
   }
 
+  if ('id' in values && values.id) {
+    state.id = values.id;
+  }
   if (values.name) {
     state.name = values.name;
   }

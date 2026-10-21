@@ -11,12 +11,13 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { Paginated, Pagination } from '@kbn/slo-schema';
 import { ALL_VALUE, sloDefinitionSchemaZod, storedSloDefinitionSchemaZod } from '@kbn/slo-schema';
 import { merge } from 'lodash';
 import { SLO_MODEL_VERSION } from '../../common/constants';
 import type { SLODefinition, StoredSLODefinition } from '../domain/models';
-import { SLONotFound } from '../errors';
+import { SLOIdConflict, SLONotFound } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 
 interface SearchParams {
@@ -39,7 +40,17 @@ export class DefaultSLODefinitionRepository implements SLODefinitionRepository {
 
   async create(slo: SLODefinition): Promise<SLODefinition> {
     const { storedSLO, references } = this.toStoredSLO(slo);
-    await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, storedSLO, { references });
+    try {
+      await this.soClient.create<StoredSLODefinition>(SO_SLO_TYPE, storedSLO, {
+        id: slo.id,
+        references,
+      });
+    } catch (err) {
+      if (SavedObjectsErrorHelpers.isConflictError(err)) {
+        throw new SLOIdConflict(`SLO [${slo.id}] already exists`);
+      }
+      throw err;
+    }
     return slo;
   }
 

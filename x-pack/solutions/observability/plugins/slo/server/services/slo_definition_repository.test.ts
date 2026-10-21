@@ -10,7 +10,9 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import type { SavedObjectReference } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SLODefinition, StoredSLODefinition } from '../domain/models';
+import { SLOIdConflict } from '../errors';
 import { SO_SLO_TYPE } from '../saved_objects';
 import { createKQLCustomIndicator, createSLO } from './fixtures/slo';
 import { DefaultSLODefinitionRepository } from './slo_definition_repository';
@@ -78,6 +80,38 @@ describe('DefaultSLODefinitionRepository', () => {
       expect(slo.settings.preventCrossProjectSearch).toBeUndefined();
       expect(slo.settings.projectRoutings).toBeUndefined();
       expect(slo.settings.preventInitialBackfill).toBe(false);
+    });
+  });
+
+  describe('create', () => {
+    it('uses the SLO id as the saved object id', async () => {
+      const slo = createSLO({ id: 'my-slo-id-12345', indicator: createKQLCustomIndicator() });
+
+      await repository.create(slo);
+
+      expect(soClient.create).toHaveBeenCalledWith(
+        SO_SLO_TYPE,
+        expect.objectContaining({ id: 'my-slo-id-12345' }),
+        expect.objectContaining({ id: 'my-slo-id-12345' })
+      );
+    });
+
+    it('throws an SLOIdConflict when a saved object with the same id already exists', async () => {
+      const slo = createSLO({ id: 'my-slo-id-12345', indicator: createKQLCustomIndicator() });
+      soClient.create.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createConflictError(SO_SLO_TYPE, slo.id)
+      );
+
+      await expect(repository.create(slo)).rejects.toThrow(
+        new SLOIdConflict('SLO [my-slo-id-12345] already exists')
+      );
+    });
+
+    it('rethrows other errors', async () => {
+      const slo = createSLO({ indicator: createKQLCustomIndicator() });
+      soClient.create.mockRejectedValueOnce(new Error('boom'));
+
+      await expect(repository.create(slo)).rejects.toThrow('boom');
     });
   });
 

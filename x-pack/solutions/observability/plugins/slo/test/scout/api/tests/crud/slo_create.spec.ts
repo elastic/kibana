@@ -221,6 +221,31 @@ apiTest.describe(
       }
     );
 
+    apiTest(
+      'creates a single SLO when two requests with the same id are sent concurrently',
+      async ({ apiClient }) => {
+        const id = 'concurrent-create-slo-id';
+        const createSlo = () =>
+          apiClient.post('api/observability/slos', {
+            headers,
+            body: { ...DEFAULT_SLO, id },
+            responseType: 'json',
+          });
+
+        const responses = await Promise.all([createSlo(), createSlo()]);
+
+        expect(responses.map(({ statusCode }) => statusCode).sort()).toStrictEqual([200, 409]);
+
+        const retrieved = await apiClient.get(`api/observability/slos/${id}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(retrieved).toHaveStatusCode(200);
+        await transformHelper.assertExist(getSLOTransformId(id, 1));
+        await transformHelper.assertExist(getSLOSummaryTransformId(id, 1));
+      }
+    );
+
     apiTest('creates instanceId for SLOs with multi groupBy', async ({ apiClient, esClient }) => {
       apiTest.setTimeout(210_000);
       const apiResponse = await apiClient.post('api/observability/slos', {

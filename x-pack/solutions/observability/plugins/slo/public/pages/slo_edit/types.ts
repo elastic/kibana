@@ -13,6 +13,7 @@ import type {
 } from '@kbn/slo-schema';
 
 export interface CreateSLOForm<IndicatorType = Indicator> {
+  id?: string;
   name: string;
   description: string;
   indicator: IndicatorType;

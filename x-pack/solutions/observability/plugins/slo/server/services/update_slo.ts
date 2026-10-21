@@ -16,9 +16,7 @@ import {
   SLI_DESTINATION_INDEX_PATTERN,
   SLO_RESOURCES_VERSION,
   SUMMARY_DESTINATION_INDEX_PATTERN,
-  SUMMARY_TEMP_INDEX_NAME,
   getSLOPipelineId,
-  getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
   getWildcardPipelineId,
@@ -28,14 +26,17 @@ import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_p
 import type { SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SecurityException } from '../errors';
-import { retryTransientEsErrors } from '../utils/retry';
+import { createDeadline } from '../utils/deadline';
+import { REQUEST_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
 import type { SLODefinitionRepository } from './slo_definition_repository';
-import { createTempSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
+import { FORWARD_DEADLINE_MS, SLOResourcesInstaller } from './slo_resources_installer';
 import type { TransformManager } from './transform_manager';
 import { assertExpectedIndicatorSourceIndexPrivileges } from './utils/assert_expected_indicator_source_index_privileges';
 import { getSloApmLabels } from './utils';
 
 export class UpdateSLO {
+  private resourcesInstaller: SLOResourcesInstaller;
+
   constructor(
     private repository: SLODefinitionRepository,
     private transformManager: TransformManager,
@@ -45,7 +46,16 @@ export class UpdateSLO {
     private spaceId: string,
     private basePath: IBasePath,
     private userId: string
-  ) {}
+  ) {
+    this.resourcesInstaller = new SLOResourcesInstaller(
+      scopedClusterClient,
+      transformManager,
+      summaryTransformManager,
+      logger,
+      spaceId,
+      basePath
+    );
+  }
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
     const originalSlo = await this.repository.findById(sloId);
@@ -70,9 +80,30 @@ export class UpdateSLO {
 
     validateSLO(updatedSlo);
 
+    const { signal, clear } = createDeadline(FORWARD_DEADLINE_MS);
+    try {
+      await this.applyUpdate(originalSlo, updatedSlo, requireRevisionBump, signal);
+    } finally {
+      clear();
+    }
+
+    if (requireRevisionBump) {
+      await this.deleteOriginalSLO(originalSlo);
+    }
+
+    return this.toResponse(updatedSlo);
+  }
+
+  private async applyUpdate(
+    originalSlo: SLODefinition,
+    updatedSlo: SLODefinition,
+    requireRevisionBump: boolean,
+    signal: AbortSignal
+  ): Promise<void> {
     await assertExpectedIndicatorSourceIndexPrivileges(
       updatedSlo,
-      this.scopedClusterClient.asCurrentUser
+      this.scopedClusterClient.asCurrentUser,
+      { signal }
     );
 
     const rollbackOperations = [];
@@ -125,88 +156,14 @@ export class UpdateSLO {
         throw err;
       }
 
-      return this.toResponse(updatedSlo);
+      return;
     }
 
-    const updatedRollupTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);
-    const updatedSummaryTransformId = getSLOSummaryTransformId(updatedSlo.id, updatedSlo.revision);
-
-    try {
-      const sloPipelinePromise = this.createPipeline(
-        getSLIPipelineTemplate(updatedSlo, this.spaceId)
-      );
-      rollbackOperations.push(() =>
-        this.deletePipeline(getSLOPipelineId(updatedSlo.id, updatedSlo.revision))
-      );
-
-      const rollupTransformPromise = this.transformManager.install(updatedSlo);
-      rollbackOperations.push(() => this.transformManager.uninstall(updatedRollupTransformId));
-
-      const summaryPipelinePromise = this.createPipeline(
-        getSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
-      );
-      rollbackOperations.push(() =>
-        this.deletePipeline(getSLOSummaryPipelineId(updatedSlo.id, updatedSlo.revision))
-      );
-
-      const summaryTransformPromise = this.summaryTransformManager.install(updatedSlo);
-      rollbackOperations.push(() =>
-        this.summaryTransformManager.uninstall(updatedSummaryTransformId)
-      );
-
-      const tempDocPromise = this.createTempSummaryDocument(updatedSlo);
-      rollbackOperations.push(() => this.deleteTempSummaryDocument(updatedSlo));
-
-      await Promise.all([
-        sloPipelinePromise,
-        rollupTransformPromise,
-        summaryPipelinePromise,
-        summaryTransformPromise,
-        tempDocPromise,
-      ]);
-
-      // transforms can only be started after the pipelines are created
-      await Promise.all([
-        this.transformManager.start(updatedRollupTransformId),
-        this.summaryTransformManager.start(updatedSummaryTransformId),
-      ]);
-    } catch (err) {
-      this.logger.warn('Cannot update the SLO. Rolling back.', {
-        service: { name: 'update_slo' },
-        labels: {
-          slo_id: updatedSlo.id,
-          indicator_type: updatedSlo.indicator.type,
-          error_type: 'update_failed',
-        },
-        error: err,
-      });
-
-      await asyncForEach(rollbackOperations.reverse(), async (operation) => {
-        try {
-          await operation();
-        } catch (rollbackErr) {
-          this.logger.warn('Rollback operation failed.', {
-            service: { name: 'update_slo' },
-            labels: {
-              slo_id: updatedSlo.id,
-              indicator_type: updatedSlo.indicator.type,
-              error_type: 'rollback_failed',
-            },
-            error: rollbackErr,
-          });
-        }
-      });
-
-      if (err.meta?.body?.error?.type === 'security_exception') {
-        throw new SecurityException(err.meta.body.error.reason);
-      }
-
-      throw err;
-    }
-
-    await this.deleteOriginalSLO(originalSlo);
-
-    return this.toResponse(updatedSlo);
+    await this.resourcesInstaller.install(updatedSlo, {
+      signal,
+      operation: 'update',
+      finalRollback: () => this.repository.update(originalSlo),
+    });
   }
 
   private async isRevisionBumpRequired(originalSlo: SLODefinition, updatedSlo: SLODefinition) {
@@ -290,39 +247,14 @@ export class UpdateSLO {
           { id },
           { ignore: [404] }
         ),
-      { logger: this.logger }
+      { logger: this.logger, retryOptions: REQUEST_RETRY_OPTIONS }
     );
   }
 
   private async createPipeline(params: IngestPutPipelineRequest) {
     return retryTransientEsErrors(
       () => this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(params),
-      { logger: this.logger }
-    );
-  }
-
-  async createTempSummaryDocument(slo: SLODefinition) {
-    return retryTransientEsErrors(
-      () =>
-        this.scopedClusterClient.asCurrentUser.index({
-          index: SUMMARY_TEMP_INDEX_NAME,
-          id: `slo-${slo.id}`,
-          document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
-          refresh: true,
-        }),
-      { logger: this.logger }
-    );
-  }
-
-  private async deleteTempSummaryDocument(slo: SLODefinition) {
-    return retryTransientEsErrors(
-      () =>
-        this.scopedClusterClient.asCurrentUser.delete({
-          index: SUMMARY_TEMP_INDEX_NAME,
-          id: `slo-${slo.id}`,
-          refresh: true,
-        }),
-      { logger: this.logger }
+      { logger: this.logger, retryOptions: REQUEST_RETRY_OPTIONS }
     );
   }
 

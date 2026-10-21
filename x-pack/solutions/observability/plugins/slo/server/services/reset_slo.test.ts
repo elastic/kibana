@@ -29,8 +29,10 @@ import {
 } from './mocks';
 import { ResetSLO } from './reset_slo';
 import type { SLODefinitionRepository } from './slo_definition_repository';
+import { FORWARD_DEADLINE_MS } from './slo_resources_installer';
 import type { TransformManager } from './transform_manager';
 import type { SLODefinition } from '../domain/models';
+import { SLOOperationTimeout } from '../errors';
 
 const TEST_DATE = new Date('2023-01-01T00:00:00.000Z');
 
@@ -108,6 +110,62 @@ describe('ResetSLO', () => {
       await expect(resetSLO.execute(slo.id)).rejects.toThrow(
         "Missing ['read', 'view_index_metadata'] privileges on the source index [metrics-apm*]"
       );
+    });
+  });
+
+  describe('when installing the reset SLO resources fails', () => {
+    beforeEach(() => {
+      mockScopedClusterClient.asCurrentUser.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as SecurityHasPrivilegesResponse);
+    });
+
+    it('waits for in-flight installs before rolling back the new revision resources', async () => {
+      const slo = createSLO({ id: 'irrelevant', version: 1 });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      mockTransformManager.install.mockRejectedValueOnce(new Error('Transform install error'));
+      let resolveSummaryInstall: (transformId: string) => void = () => {};
+      mockSummaryTransformManager.install.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveSummaryInstall = resolve;
+          })
+      );
+
+      const executePromise = resetSLO.execute(slo.id);
+      const assertion = expect(executePromise).rejects.toThrow('Transform install error');
+      await jest.advanceTimersByTimeAsync(10);
+      const newRollupTransformId = getSLOTransformId(slo.id, slo.revision + 1);
+      const newSummaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision + 1);
+      expect(mockTransformManager.uninstall).not.toHaveBeenCalledWith(newRollupTransformId);
+
+      resolveSummaryInstall(newSummaryTransformId);
+      await assertion;
+
+      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(newRollupTransformId, {
+        signal: expect.any(AbortSignal),
+      });
+      expect(mockSummaryTransformManager.uninstall).toHaveBeenCalledWith(newSummaryTransformId, {
+        signal: expect.any(AbortSignal),
+      });
+      expect(mockRepository.update).not.toHaveBeenCalled();
+    });
+
+    it('throws an SLOOperationTimeout when the deadline is exceeded', async () => {
+      const slo = createSLO({ id: 'irrelevant', version: 1 });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      mockTransformManager.install.mockImplementationOnce(
+        (_slo, { signal } = {}) =>
+          new Promise((_resolve, reject) => {
+            signal?.addEventListener('abort', () => reject(signal.reason));
+          })
+      );
+
+      const assertion = expect(resetSLO.execute(slo.id)).rejects.toThrow(SLOOperationTimeout);
+      await jest.advanceTimersByTimeAsync(FORWARD_DEADLINE_MS);
+      await assertion;
+
+      expect(mockRepository.update).not.toHaveBeenCalled();
     });
   });
 

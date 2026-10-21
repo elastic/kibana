@@ -12,6 +12,7 @@ import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { InPortal } from 'react-reverse-portal';
+import { v4 as uuidv4 } from 'uuid';
 import { useCreateRule } from '../../../hooks/use_create_burn_rate_rule';
 import { useCreateSlo } from '../../../hooks/use_create_slo';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -40,7 +41,7 @@ export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
   } = useKibana().services;
 
   const isFlyout = Boolean(onFlyoutClose);
-  const { getValues, trigger } = useFormContext<CreateSLOForm>();
+  const { getValues, setValue, trigger } = useFormContext<CreateSLOForm>();
 
   const { mutateAsync: createSlo, isLoading: isCreateSloLoading } = useCreateSlo();
   const { mutateAsync: updateSlo, isLoading: isUpdateSloLoading } = useUpdateSlo();
@@ -60,7 +61,9 @@ export function SloEditFormFooter({ slo, onFlyoutClose, isEditMode }: Props) {
       await updateSlo({ sloId: slo.id, slo: processedValues });
       navigateToUrl(basePath.prepend(paths.slos));
     } else {
-      const processedValues = transformCreateSLOFormToCreateSLOInput(values);
+      const id = values.id ?? uuidv4();
+      setValue('id', id);
+      const processedValues = transformCreateSLOFormToCreateSLOInput({ ...values, id });
       const resp = await createSlo({ slo: processedValues });
       createBurnRateRule({
         rule: createBurnRateRuleRequestBody({ ...processedValues, id: resp.id }),

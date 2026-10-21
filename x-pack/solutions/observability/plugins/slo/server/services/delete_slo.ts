@@ -17,7 +17,8 @@ import {
   getCustomSLOWildcardPipelineId,
   getWildcardPipelineId,
 } from '../../common/constants';
-import { retryTransientEsErrors } from '../utils/retry';
+import type { RetryOptions } from '../utils/retry';
+import { DEFAULT_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
 import type { SLODefinitionRepository } from './slo_definition_repository';
 import type { TransformManager } from './transform_manager';
 import { getSloApmLabels } from './utils';
@@ -27,7 +28,15 @@ interface Options {
   skipRuleDeletion: boolean;
 }
 
+interface DeleteSLOOptions {
+  signal?: AbortSignal;
+  retryOptions?: RetryOptions;
+}
+
 export class DeleteSLO {
+  private signal: AbortSignal;
+  private retryOptions: RetryOptions;
+
   constructor(
     private repository: SLODefinitionRepository,
     private transformManager: TransformManager,
@@ -35,8 +44,14 @@ export class DeleteSLO {
     private scopedClusterClient: IScopedClusterClient,
     private rulesClient: RulesClientApi,
     private logger: Logger,
-    private signal: AbortSignal = new AbortController().signal
-  ) {}
+    {
+      signal = new AbortController().signal,
+      retryOptions = DEFAULT_RETRY_OPTIONS,
+    }: DeleteSLOOptions = {}
+  ) {
+    this.signal = signal;
+    this.retryOptions = retryOptions;
+  }
 
   public async execute(
     sloId: string,
@@ -57,17 +72,21 @@ export class DeleteSLO {
     await Promise.all([
       this.transformManager.uninstall(rollupTransformId),
       this.summaryTransformManager.uninstall(summaryTransformId),
-      retryTransientEsErrors(() =>
-        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-          { id: wildcardPipelineId },
-          { ignore: [404], signal: this.signal }
-        )
+      retryTransientEsErrors(
+        () =>
+          this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+            { id: wildcardPipelineId },
+            { ignore: [404], signal: this.signal }
+          ),
+        { logger: this.logger, retryOptions: this.retryOptions, signal: this.signal }
       ),
-      retryTransientEsErrors(() =>
-        this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
-          { id: customWildcardPipelineId },
-          { ignore: [404], signal: this.signal }
-        )
+      retryTransientEsErrors(
+        () =>
+          this.scopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline(
+            { id: customWildcardPipelineId },
+            { ignore: [404], signal: this.signal }
+          ),
+        { logger: this.logger, retryOptions: this.retryOptions, signal: this.signal }
       ),
       this.repository.deleteById(slo.id, { ignoreNotFound: true }),
     ]);

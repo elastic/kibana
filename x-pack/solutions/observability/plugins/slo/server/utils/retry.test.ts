@@ -10,7 +10,7 @@ import { setTimeout } from 'timers/promises';
 import { loggerMock } from '@kbn/logging-mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 
-import { retryTransientEsErrors } from './retry';
+import { REQUEST_RETRY_OPTIONS, retryTransientEsErrors } from './retry';
 
 const setTimeoutMock = setTimeout as jest.Mock<
   ReturnType<typeof setTimeout>,
@@ -54,7 +54,7 @@ describe('retryTransientErrors', () => {
     });
 
     expect(await retryTransientEsErrors(esCallMock)).toEqual('success');
-    expect(setTimeoutMock.mock.calls).toEqual([[2000], [4000], [8000], [16000]]);
+    expect(setTimeoutMock.mock.calls.map(([delay]) => delay)).toEqual([2000, 4000, 8000, 16000]);
     expect(esCallMock).toHaveBeenCalledTimes(5);
   });
 
@@ -82,6 +82,74 @@ describe('retryTransientErrors', () => {
     const error = new Error('foo!');
     const esCallMock = jest.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
     await expect(retryTransientEsErrors(esCallMock)).rejects.toThrow(error);
+    expect(esCallMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses the provided retry options', async () => {
+    const error = new EsErrors.ConnectionError('foo');
+    const esCallMock = jest.fn().mockRejectedValue(error);
+
+    await expect(
+      retryTransientEsErrors(esCallMock, { retryOptions: REQUEST_RETRY_OPTIONS })
+    ).rejects.toThrow(error);
+    expect(esCallMock).toHaveBeenCalledTimes(3);
+    expect(setTimeoutMock.mock.calls.map(([delay]) => delay)).toEqual([1000, 2000]);
+  });
+
+  it('caps the delay to the max delay', async () => {
+    const esCallMock = jest.fn().mockRejectedValue(new EsErrors.ConnectionError('foo'));
+
+    await expect(
+      retryTransientEsErrors(esCallMock, {
+        retryOptions: { maxRetries: 4, initialDelayMs: 1000, maxDelayMs: 3000 },
+      })
+    ).rejects.toThrow();
+    expect(setTimeoutMock.mock.calls.map(([delay]) => delay)).toEqual([1000, 2000, 3000, 3000]);
+  });
+
+  it('passes the attempt index to the operation', async () => {
+    const esCallMock = jest
+      .fn()
+      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+      .mockResolvedValue('success');
+
+    await retryTransientEsErrors(esCallMock);
+    expect(esCallMock.mock.calls).toEqual([[0], [1], [2]]);
+  });
+
+  it('does not call the operation when the signal is already aborted', async () => {
+    const controller = new AbortController();
+    controller.abort(new Error('aborted'));
+    const esCallMock = jest.fn().mockResolvedValue('success');
+
+    await expect(retryTransientEsErrors(esCallMock, { signal: controller.signal })).rejects.toThrow(
+      'aborted'
+    );
+    expect(esCallMock).not.toHaveBeenCalled();
+  });
+
+  it('passes the signal to the backoff timer', async () => {
+    const controller = new AbortController();
+    const esCallMock = jest
+      .fn()
+      .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
+      .mockResolvedValue('success');
+
+    await retryTransientEsErrors(esCallMock, { signal: controller.signal });
+    expect(setTimeoutMock).toHaveBeenCalledWith(2000, undefined, { signal: controller.signal });
+  });
+
+  it('stops retrying once the signal is aborted during backoff', async () => {
+    const controller = new AbortController();
+    setTimeoutMock.mockImplementationOnce(async () => {
+      controller.abort(new Error('aborted during backoff'));
+    });
+    const esCallMock = jest.fn().mockRejectedValue(new EsErrors.ConnectionError('foo'));
+
+    await expect(retryTransientEsErrors(esCallMock, { signal: controller.signal })).rejects.toThrow(
+      'aborted during backoff'
+    );
     expect(esCallMock).toHaveBeenCalledTimes(1);
   });
 });

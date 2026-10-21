@@ -9,30 +9,66 @@ import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/ap
 import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import type { IndicatorTypes, SLODefinition } from '../domain/models';
 import { SecurityException } from '../errors';
-import { retryTransientEsErrors } from '../utils/retry';
+import type { RetryOptions } from '../utils/retry';
+import { DEFAULT_RETRY_OPTIONS, retryTransientEsErrors } from '../utils/retry';
 import type { TransformGenerator } from './transform_generators';
 
 type TransformId = string;
 
+/**
+ * A retried PUT can conflict with the resource created by a previous attempt that timed out client-side.
+ */
+export const ignoreAlreadyExistsOnRetry = async <T>(
+  attempt: number,
+  esCall: () => Promise<T>
+): Promise<T | void> => {
+  try {
+    return await esCall();
+  } catch (err) {
+    if (attempt > 0 && err.meta?.body?.error?.type === 'resource_already_exists_exception') {
+      return;
+    }
+    throw err;
+  }
+};
+
+export interface TransformManagerOptions {
+  signal?: AbortSignal;
+  retryOptions?: RetryOptions;
+}
+
+export interface TransformCallOptions {
+  signal?: AbortSignal;
+}
+
 export interface TransformManager {
-  install(slo: SLODefinition): Promise<TransformId>;
+  install(slo: SLODefinition, options?: TransformCallOptions): Promise<TransformId>;
   inspect(slo: SLODefinition): Promise<TransformPutTransformRequest>;
   preview(transformId: TransformId): Promise<void>;
-  start(transformId: TransformId): Promise<void>;
+  start(transformId: TransformId, options?: TransformCallOptions): Promise<void>;
   stop(transformId: TransformId): Promise<void>;
-  uninstall(transformId: TransformId): Promise<void>;
+  uninstall(transformId: TransformId, options?: TransformCallOptions): Promise<void>;
   getVersion(transformId: TransformId): Promise<number | undefined>;
 }
 
 export class DefaultTransformManager implements TransformManager {
+  private signal: AbortSignal;
+  private retryOptions: RetryOptions;
+
   constructor(
     private generators: Record<IndicatorTypes, TransformGenerator>,
     private scopedClusterClient: IScopedClusterClient,
     private logger: Logger,
-    private signal: AbortSignal = new AbortController().signal
-  ) {}
+    {
+      signal = new AbortController().signal,
+      retryOptions = DEFAULT_RETRY_OPTIONS,
+    }: TransformManagerOptions = {}
+  ) {
+    this.signal = signal;
+    this.retryOptions = retryOptions;
+  }
 
-  async install(slo: SLODefinition): Promise<TransformId> {
+  async install(slo: SLODefinition, options: TransformCallOptions = {}): Promise<TransformId> {
     const generator = this.generators[slo.indicator.type];
     if (!generator) {
       this.logger.debug('No transform generator found for indicator type.', {
@@ -47,13 +83,16 @@ export class DefaultTransformManager implements TransformManager {
     }
 
     const transformParams = await generator.getTransformParams(slo);
+    const signal = this.getSignal(options);
     try {
       await retryTransientEsErrors(
-        () =>
-          this.scopedClusterClient.asSecondaryAuthUser.transform.putTransform(transformParams, {
-            signal: this.signal,
-          }),
-        { logger: this.logger }
+        (attempt) =>
+          ignoreAlreadyExistsOnRetry(attempt, () =>
+            this.scopedClusterClient.asSecondaryAuthUser.transform.putTransform(transformParams, {
+              signal,
+            })
+          ),
+        { logger: this.logger, retryOptions: this.retryOptions, signal }
       );
     } catch (err) {
       this.logger.warn('Cannot install SLO transform.', {
@@ -93,7 +132,7 @@ export class DefaultTransformManager implements TransformManager {
             { transform_id: transformId },
             { signal: this.signal }
           ),
-        { logger: this.logger }
+        { logger: this.logger, retryOptions: this.retryOptions, signal: this.signal }
       );
     } catch (err) {
       this.logger.warn('Cannot preview SLO transform.', {
@@ -105,15 +144,16 @@ export class DefaultTransformManager implements TransformManager {
     }
   }
 
-  async start(transformId: TransformId): Promise<void> {
+  async start(transformId: TransformId, options: TransformCallOptions = {}): Promise<void> {
+    const signal = this.getSignal(options);
     try {
       await retryTransientEsErrors(
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.startTransform(
             { transform_id: transformId },
-            { ignore: [409], signal: this.signal }
+            { ignore: [409], signal }
           ),
-        { logger: this.logger }
+        { logger: this.logger, retryOptions: this.retryOptions, signal }
       );
       await this.scheduleNowTransform(transformId);
     } catch (err) {
@@ -139,7 +179,7 @@ export class DefaultTransformManager implements TransformManager {
             },
             { ignore: [404], signal: this.signal }
           ),
-        { logger: this.logger }
+        { logger: this.logger, retryOptions: this.retryOptions, signal: this.signal }
       );
     } catch (err) {
       this.logger.warn('Cannot stop SLO transform.', {
@@ -151,15 +191,16 @@ export class DefaultTransformManager implements TransformManager {
     }
   }
 
-  async uninstall(transformId: TransformId): Promise<void> {
+  async uninstall(transformId: TransformId, options: TransformCallOptions = {}): Promise<void> {
+    const signal = this.getSignal(options);
     try {
       await retryTransientEsErrors(
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.transform.deleteTransform(
             { transform_id: transformId, force: true },
-            { ignore: [404], signal: this.signal }
+            { ignore: [404], signal }
           ),
-        { logger: this.logger }
+        { logger: this.logger, retryOptions: this.retryOptions, signal }
       );
     } catch (err) {
       this.logger.warn('Cannot uninstall SLO transform.', {
@@ -179,7 +220,7 @@ export class DefaultTransformManager implements TransformManager {
             { transform_id: transformId },
             { signal: this.signal }
           ),
-        { logger: this.logger }
+        { logger: this.logger, retryOptions: this.retryOptions, signal: this.signal }
       );
 
       if (response.count === 0) {
@@ -199,6 +240,10 @@ export class DefaultTransformManager implements TransformManager {
       });
       throw err;
     }
+  }
+
+  private getSignal({ signal }: TransformCallOptions): AbortSignal {
+    return signal ?? this.signal;
   }
 
   private async scheduleNowTransform(transformId: TransformId) {

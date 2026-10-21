@@ -324,3 +324,31 @@ describe('projectRoutings hydrate/submit matrix', () => {
     });
   });
 });
+
+describe('SLO id round-trip', () => {
+  it('copies the id from the URL state into the form state', () => {
+    expect(transform({ id: 'client-generated-id', name: 'my slo' })?.id).toBe(
+      'client-generated-id'
+    );
+  });
+
+  it('does not set an id when the URL state has none', () => {
+    expect(transform({ name: 'my slo' })?.id).toBeUndefined();
+  });
+
+  it('never yields an id from a template', () => {
+    expect(transform({ templateId: 'some-template', name: 'my slo' })?.id).toBeUndefined();
+  });
+
+  it('includes the form id in the create input', () => {
+    const form = { ...cloneDeep(SLO_EDIT_FORM_DEFAULT_VALUES), id: 'client-generated-id' };
+
+    expect(transformCreateSLOFormToCreateSLOInput(form).id).toBe('client-generated-id');
+  });
+
+  it('omits the id from the create input when the form has none', () => {
+    expect(
+      transformCreateSLOFormToCreateSLOInput(cloneDeep(SLO_EDIT_FORM_DEFAULT_VALUES))
+    ).not.toHaveProperty('id');
+  });
+});

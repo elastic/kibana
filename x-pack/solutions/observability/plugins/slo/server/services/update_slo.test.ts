@@ -24,6 +24,7 @@ import {
   SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
 import type { SLODefinition } from '../domain/models';
+import { SLOOperationTimeout } from '../errors';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import {
   createAPMTransactionErrorRateIndicator,
@@ -37,6 +38,7 @@ import {
   createTransformManagerMock,
 } from './mocks';
 import type { SLODefinitionRepository } from './slo_definition_repository';
+import { FORWARD_DEADLINE_MS } from './slo_resources_installer';
 import type { TransformManager } from './transform_manager';
 import { UpdateSLO } from './update_slo';
 
@@ -459,6 +461,67 @@ describe('UpdateSLO', () => {
       expect(mockRepository.update).toHaveBeenCalledWith(originalSlo);
       expect(mockSummaryTransformManager.uninstall).toHaveBeenCalled();
       expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline).toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).toHaveBeenCalled();
+    });
+
+    it('waits for in-flight installs and restores the original SLO definition after the resources are rolled back', async () => {
+      const originalSlo = createSLO({
+        id: 'original-id',
+        indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+      });
+      mockRepository.findById.mockResolvedValueOnce(originalSlo);
+      mockTransformManager.install.mockRejectedValueOnce(new Error('Transform install error'));
+      let resolveSummaryInstall: (transformId: string) => void = () => {};
+      mockSummaryTransformManager.install.mockImplementationOnce(
+        () =>
+          new Promise((resolve) => {
+            resolveSummaryInstall = resolve;
+          })
+      );
+
+      const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
+
+      const executePromise = updateSLO.execute(originalSlo.id, { indicator: newIndicator });
+      await new Promise((resolve) => setTimeout(resolve, 10));
+      expect(mockSummaryTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
+
+      resolveSummaryInstall('summary-transform-id');
+      await expect(executePromise).rejects.toThrow('Transform install error');
+
+      const restoreOrder = mockRepository.update.mock.invocationCallOrder[1];
+      const [uninstallOrder] = mockSummaryTransformManager.uninstall.mock.invocationCallOrder;
+      const [deletePipelineOrder] =
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline.mock.invocationCallOrder;
+      expect(mockRepository.update).toHaveBeenLastCalledWith(originalSlo);
+      expect(restoreOrder).toBeGreaterThan(uninstallOrder);
+      expect(restoreOrder).toBeGreaterThan(deletePipelineOrder);
+    });
+
+    it('restores the original SLO definition and throws an SLOOperationTimeout when the deadline is exceeded', async () => {
+      jest.useFakeTimers();
+      const originalSlo = createSLO({
+        id: 'original-id',
+        indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+      });
+      mockRepository.findById.mockResolvedValueOnce(originalSlo);
+      mockTransformManager.install.mockImplementationOnce(
+        (_slo, { signal } = {}) =>
+          new Promise((_resolve, reject) => {
+            signal?.addEventListener('abort', () => reject(signal.reason));
+          })
+      );
+
+      const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
+
+      const assertion = expect(
+        updateSLO.execute(originalSlo.id, { indicator: newIndicator })
+      ).rejects.toThrow(SLOOperationTimeout);
+      await jest.advanceTimersByTimeAsync(FORWARD_DEADLINE_MS);
+      await assertion;
+      jest.useRealTimers();
+
+      expect(mockRepository.update).toHaveBeenLastCalledWith(originalSlo);
       expect(mockTransformManager.uninstall).toHaveBeenCalled();
     });
   });

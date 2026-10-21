@@ -16,7 +16,9 @@ import {
 } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { ALL_PROJECT_ROUTING, LOCAL_PROJECT_ROUTING } from '../../common/project_routings';
+import { SLOIdConflict, SLOOperationTimeout } from '../errors';
 import { CreateSLO } from './create_slo';
+import { FORWARD_DEADLINE_MS } from './slo_resources_installer';
 import { fiveMinute, oneMinute } from './fixtures/duration';
 import { createAPMTransactionErrorRateIndicator, createSLOParams } from './fixtures/slo';
 import {
@@ -226,6 +228,58 @@ describe('CreateSLO', () => {
       await expect(createSLO.execute(sloParams)).rejects.toThrow(
         "Missing ['read', 'view_index_metadata'] privileges on the source index [metrics-apm*]"
       );
+    });
+
+    it('claims the SLO definition before installing any resource', async () => {
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      await createSLO.execute(sloParams);
+
+      const [claimOrder] = mockRepository.create.mock.invocationCallOrder;
+      const [pipelineOrder] =
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline.mock.invocationCallOrder;
+      const [transformOrder] = mockTransformManager.install.mock.invocationCallOrder;
+      expect(claimOrder).toBeLessThan(pipelineOrder);
+      expect(claimOrder).toBeLessThan(transformOrder);
+    });
+
+    it('does not install nor roll back any resource when the SLO id is already claimed', async () => {
+      mockRepository.create.mockRejectedValue(new SLOIdConflict('SLO [unique-id] already exists'));
+      const sloParams = createSLOParams({
+        id: 'unique-id',
+        indicator: createAPMTransactionErrorRateIndicator(),
+      });
+
+      await expect(createSLO.execute(sloParams)).rejects.toThrow(SLOIdConflict);
+
+      expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).not.toHaveBeenCalled();
+      expect(mockTransformManager.install).not.toHaveBeenCalled();
+      expect(mockSummaryTransformManager.install).not.toHaveBeenCalled();
+      expect(mockRepository.deleteById).not.toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(
+        mockScopedClusterClient.asSecondaryAuthUser.ingest.deletePipeline
+      ).not.toHaveBeenCalled();
+    });
+
+    it('rolls back and throws an SLOOperationTimeout when the deadline is exceeded', async () => {
+      mockTransformManager.install.mockImplementation(
+        (_slo, { signal } = {}) =>
+          new Promise((_resolve, reject) => {
+            signal?.addEventListener('abort', () => reject(signal.reason));
+          })
+      );
+      const sloParams = createSLOParams({ indicator: createAPMTransactionErrorRateIndicator() });
+
+      const executePromise = createSLO.execute(sloParams);
+      const assertion = expect(executePromise).rejects.toThrow(SLOOperationTimeout);
+      await jest.advanceTimersByTimeAsync(FORWARD_DEADLINE_MS);
+      await assertion;
+
+      expect(mockTransformManager.uninstall).toHaveBeenCalled();
+      expect(mockRepository.deleteById).toHaveBeenCalledWith(sloParams.id ?? expect.any(String), {
+        ignoreNotFound: true,
+      });
     });
 
     it('rollbacks completed operations when rollup transform install fails', async () => {

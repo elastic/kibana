@@ -11,7 +11,7 @@ import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assist
 import { useFetchDataViews } from '@kbn/observability-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { CreateSLOInput, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
@@ -148,7 +148,7 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
 const SLO_ID = 'slo-1234';
 
 describe('SLO Edit Page', () => {
-  const mockCreate = jest.fn(() => Promise.resolve({ id: SLO_ID }));
+  const mockCreate = jest.fn((_input: { slo: CreateSLOInput }) => Promise.resolve({ id: SLO_ID }));
   const mockUpdate = jest.fn();
   const mockCreateRule = jest.fn();
 
@@ -319,6 +319,50 @@ describe('SLO Edit Page', () => {
       });
 
       expect(mockCreate).toHaveBeenCalled();
+    });
+
+    it('sends the same generated SLO id when the form is submitted twice', async () => {
+      history.replace(
+        '/slos/create?_a=(name:CartServiceLatency,indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration))'
+      );
+      useFetchApmSuggestionsMock.mockReturnValue({
+        suggestions: ['cartService'],
+        isLoading: false,
+      });
+
+      const { getByTestId } = render(<SloEditPage />);
+
+      await waitFor(() => {
+        fireEvent.click(getByTestId('sloFormSubmitButton'));
+        expect(mockCreate).toHaveBeenCalledTimes(1);
+      });
+      await waitFor(() => {
+        fireEvent.click(getByTestId('sloFormSubmitButton'));
+        expect(mockCreate).toHaveBeenCalledTimes(2);
+      });
+
+      const [[firstCall], [secondCall]] = mockCreate.mock.calls;
+      expect(firstCall.slo.id).toEqual(expect.any(String));
+      expect(secondCall.slo.id).toBe(firstCall.slo.id);
+    });
+
+    it('reuses the SLO id from the URL when submitting the form', async () => {
+      history.replace(
+        '/slos/create?_a=(id:slo-id-from-url,name:CartServiceLatency,indicator:(params:(environment:prod,service:cartService),type:sli.apm.transactionDuration))'
+      );
+      useFetchApmSuggestionsMock.mockReturnValue({
+        suggestions: ['cartService'],
+        isLoading: false,
+      });
+
+      const { getByTestId } = render(<SloEditPage />);
+
+      await waitFor(() => {
+        fireEvent.click(getByTestId('sloFormSubmitButton'));
+        expect(mockCreate).toHaveBeenCalledWith({
+          slo: expect.objectContaining({ id: 'slo-id-from-url' }),
+        });
+      });
     });
 
     it('renders the SLO Edit Form with prefilled values from a template', async () => {
