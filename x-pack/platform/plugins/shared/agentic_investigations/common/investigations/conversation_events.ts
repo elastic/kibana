@@ -6,7 +6,6 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { eventViaSchema } from '../conversation_events/via';
 
 /** Written whenever the status of an investigation or escalation changes. */
 export const STATUS_CHANGED_EVENT_TYPE = 'status_changed' as const;
@@ -17,7 +16,6 @@ const statusSchema = z.enum(['open', 'closed']);
 export const statusChangedEventSchema = z.object({
   from: statusSchema.optional(),
   to: statusSchema,
-  via: eventViaSchema.optional(),
 });
 
 export type StatusChangedEventData = z.infer<typeof statusChangedEventSchema>;

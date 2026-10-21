@@ -10,13 +10,6 @@ import type { InvestigationStatusService } from '../services/investigation_statu
 import { WrongTemplateError } from '../../assignments/errors';
 import { getReopenInvestigationStepDefinition } from './reopen_investigation_step';
 
-const WORKFLOW_CONTEXT = {
-  type: 'workflow',
-  workflow_id: 'wf-1',
-  workflow_name: 'Triage',
-  execution_id: 'exec-1',
-};
-
 const FAKE_REQUEST = { fake: true } as never;
 
 const createContext = (input: Record<string, unknown>): StepHandlerContext<never, never> =>
@@ -27,7 +20,7 @@ const createContext = (input: Record<string, unknown>): StepHandlerContext<never
     contextManager: {
       getContext: jest.fn().mockReturnValue({
         execution: { id: 'exec-1', executedBy: 'worker-user' },
-        workflow: { id: 'wf-1', name: 'Triage', spaceId: 'default' },
+        workflow: { spaceId: 'default' },
       }),
       getScopedEsClient: jest.fn(),
       getFakeRequest: jest.fn().mockReturnValue(FAKE_REQUEST),
@@ -102,12 +95,7 @@ describe('investigations.reopen step', () => {
 
     const result = await definition.handler(createContext({ conversationId: 'conv-1' }));
 
-    expect(setStatusMock).toHaveBeenCalledWith(
-      FAKE_REQUEST,
-      'conv-1',
-      { status: 'open' },
-      WORKFLOW_CONTEXT
-    );
+    expect(setStatusMock).toHaveBeenCalledWith(FAKE_REQUEST, 'conv-1', { status: 'open' });
     expect(updateMock).toHaveBeenCalledWith({ id: 'conv-1', title: '[Reopen] My Investigation' });
     expect(result.output).toEqual({ reopened: true, title: '[Reopen] My Investigation' });
   });
@@ -134,12 +122,7 @@ describe('investigations.reopen step', () => {
     const result = await definition.handler(createContext({ conversationId: 'conv-1' }));
 
     expect(updateMock).not.toHaveBeenCalled();
-    expect(setStatusMock).toHaveBeenCalledWith(
-      FAKE_REQUEST,
-      'conv-1',
-      { status: 'open' },
-      WORKFLOW_CONTEXT
-    );
+    expect(setStatusMock).toHaveBeenCalledWith(FAKE_REQUEST, 'conv-1', { status: 'open' });
     expect(result.output).toEqual({ reopened: true, title: '[Reopen] My Investigation' });
   });
 
@@ -167,12 +150,7 @@ describe('investigations.reopen step', () => {
     const result = await definition.handler(createContext({ conversationId: 'conv-1' }));
 
     expect(updateMock).not.toHaveBeenCalled();
-    expect(setStatusMock).toHaveBeenCalledWith(
-      FAKE_REQUEST,
-      'conv-1',
-      { status: 'open' },
-      WORKFLOW_CONTEXT
-    );
+    expect(setStatusMock).toHaveBeenCalledWith(FAKE_REQUEST, 'conv-1', { status: 'open' });
     expect(result.output).toEqual({ reopened: true, title: '[Reopen] My Investigation' });
   });
 

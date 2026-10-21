@@ -58,18 +58,9 @@ export const getReopenInvestigationStepDefinition = ({
           await client.update({ id: input.conversationId, title: newTitle });
         }
 
-        const { workflow, execution } = context.contextManager.getContext();
-        await getInvestigationStatusService().setStatus(
-          request,
-          input.conversationId,
-          { status: 'open' },
-          {
-            type: 'workflow',
-            workflow_id: workflow.id,
-            workflow_name: workflow.name,
-            execution_id: execution.id,
-          }
-        );
+        await getInvestigationStatusService().setStatus(request, input.conversationId, {
+          status: 'open',
+        });
 
         return { output: { reopened: true, title: newTitle } };
       } catch (error) {

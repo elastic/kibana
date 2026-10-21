@@ -59,16 +59,7 @@ describe('updateConversationMetadataStepDefinition', () => {
     expect(patchMetadata).toHaveBeenCalledWith(
       'conv-1',
       { status: 'resolved', severity: 'low' },
-      {
-        access: 'converse',
-        source: 'workflow',
-        context: {
-          type: 'workflow',
-          workflow_id: 'workflow-1',
-          workflow_name: 'Test workflow',
-          execution_id: 'execution-1',
-        },
-      }
+      { access: 'converse', source: 'workflow' }
     );
     expect(result).toEqual({
       output: {

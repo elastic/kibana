@@ -24,7 +24,6 @@ describe('status changed event UI definition', () => {
     expect(screen.getByTestId('statusChangedEvent')).toHaveTextContent(
       'Status changed from Open to Closed'
     );
-    expect(screen.queryByTestId('conversationEventVia')).not.toBeInTheDocument();
   });
 
   it('renders a first status without a previous one', () => {
@@ -33,44 +32,11 @@ describe('status changed event UI definition', () => {
     expect(screen.getByTestId('statusChangedEvent')).toHaveTextContent('Status set to Open');
   });
 
-  it('names the workflow behind the change', () => {
-    renderEvent({
-      from: 'closed',
-      to: 'open',
-      via: { type: 'workflow', workflow_id: 'wf-1', workflow_name: 'Triage', execution_id: 'e1' },
-    });
-
-    expect(screen.getByTestId('conversationEventVia')).toHaveTextContent('via workflow Triage');
-  });
-
-  it('names the agent behind the change when its name is known', () => {
-    renderEvent({
-      from: 'open',
-      to: 'closed',
-      via: { type: 'agent', agent_id: 'a1', agent_name: 'Triage agent' },
-    });
-
-    expect(screen.getByTestId('conversationEventVia')).toHaveTextContent('via agent Triage agent');
-  });
-
-  it('falls back to a generic agent line without a name', () => {
-    renderEvent({ from: 'open', to: 'closed', via: { type: 'agent', agent_id: 'a1' } });
-
-    expect(screen.getByTestId('conversationEventVia')).toHaveTextContent('via the agent');
-  });
-
-  it('uses the user icon for people and the icon of the automation otherwise', () => {
+  it('uses the user icon', () => {
     const icon = (data: object) =>
       definition.getHeader?.({ data } as never, { conversationId: 'c1' })?.icon;
 
     expect(icon({ to: 'closed' })).toBe('user');
     expect(icon({ to: 'open' })).toBe('user');
-    expect(
-      icon({
-        to: 'open',
-        via: { type: 'workflow', workflow_id: 'wf-1', execution_id: 'e1' },
-      })
-    ).toBe('workflow');
-    expect(icon({ to: 'open', via: { type: 'agent', agent_id: 'a1' } })).toBe('productAgent');
   });
 });

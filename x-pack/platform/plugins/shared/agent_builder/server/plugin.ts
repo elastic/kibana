@@ -326,20 +326,6 @@ export class AgentBuilderPlugin
         enableUpdatedTrigger: (optIn) => {
           this.conversationUpdatedOptIns.push(optIn);
         },
-        onMetadataPatched: (listener) => {
-          this.conversationEventBus.onMetadataPatched((request, event) => {
-            // A third-party listener must never fail the metadata write that triggered it.
-            try {
-              listener(request, event);
-            } catch (error) {
-              this.logger.warn(
-                `A conversation metadata listener failed: ${
-                  error instanceof Error ? error.message : String(error)
-                }`
-              );
-            }
-          });
-        },
       },
       topSnippets: this.config.topSnippets,
     };

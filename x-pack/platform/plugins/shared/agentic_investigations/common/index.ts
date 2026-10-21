@@ -213,8 +213,6 @@ export {
   statusChangedEventSchema,
 } from './investigations/conversation_events';
 export type { StatusChangedEventData } from './investigations/conversation_events';
-export { eventViaSchema } from './conversation_events/via';
-export type { EventVia } from './conversation_events/via';
 
 export type {
   CreateEscalationRequest,

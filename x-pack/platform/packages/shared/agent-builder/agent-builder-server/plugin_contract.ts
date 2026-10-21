@@ -8,7 +8,7 @@
 import type { ZodObject } from '@kbn/zod/v4';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
-import type { ConversationMetadataPatchedEvent, ConversationPublicClient } from './conversations';
+import type { ConversationPublicClient } from './conversations';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
 import type { AttachmentTypeDefinition, AttachmentPublicClient } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
@@ -253,16 +253,6 @@ export interface ConversationsSetup {
    * performed it. Without a matching opt-in, the trigger is never emitted.
    */
   enableUpdatedTrigger(optIn: ConversationUpdatedOptIn): void;
-  /**
-   * Subscribes to metadata changes of any conversation, whoever made them: UI, API, workflow step
-   * or agent run. Called after the write succeeded and only when a field's value changed.
-   * `request` is the one the write was performed with. Listeners run synchronously on the write
-   * path: do not block (start async work without awaiting it). A listener that throws is logged
-   * and never fails the write.
-   */
-  onMetadataPatched(
-    listener: (request: KibanaRequest, event: ConversationMetadataPatchedEvent) => void
-  ): void;
 }
 
 /**

@@ -20,7 +20,6 @@ import {
   ASSIGNEES_CHANGED_EVENT_TYPE,
   type AssigneesChangedEventData,
 } from '../../../common/assignments/conversation_events';
-import { EventVia, getViaIcon } from '../../conversation_events/event_via';
 import { useUserProfiles } from '../../user_profiles';
 
 /** Renders the names of the given uids, falling back to the uid for a profile that can't be resolved. */
@@ -33,7 +32,7 @@ const renderUsers = (uids: string[], names: Map<string, string>) =>
   ));
 
 export const AssigneesChangedEvent = memo(
-  ({ data: { added, removed, via } }: { data: AssigneesChangedEventData }) => {
+  ({ data: { added, removed } }: { data: AssigneesChangedEventData }) => {
     const { data: profiles, isLoading } = useUserProfiles({ uids: added.concat(removed) });
 
     const names = new Map<string, string>();
@@ -73,7 +72,6 @@ export const AssigneesChangedEvent = memo(
             </EuiFlexGroup>
           )}
         </EuiText>
-        <EventVia via={via} />
       </>
     );
   }
@@ -96,7 +94,7 @@ export const createAssigneesChangedEventUiDefinition = ({
   return {
     type: ASSIGNEES_CHANGED_EVENT_TYPE,
     getHeader: ({ data }) => ({
-      icon: getViaIcon(data.via),
+      icon: 'user',
       label: i18n.translate('xpack.agenticInvestigations.assignments.events.headerLabel', {
         defaultMessage: 'Assignees',
       }),

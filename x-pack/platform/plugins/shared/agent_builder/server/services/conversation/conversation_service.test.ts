@@ -63,12 +63,7 @@ describe('ConversationServiceImpl', () => {
       await createService({ agents, eventBus }).getScopedClient({ request });
 
       const { eventEmitter } = createClientMock.mock.calls[0][0];
-      const metadataPayload = {
-        conversationId: 'conv-1',
-        changedFields: ['x'],
-        changes: { x: { to: 'y' } },
-        source: 'http_api' as const,
-      };
+      const metadataPayload = { conversationId: 'conv-1', changedFields: ['x'] };
       const attachmentPayload = { conversationId: 'conv-1', events: [] };
       eventEmitter!.emitMetadataPatched(metadataPayload);
       eventEmitter!.emitAttachmentEvents(attachmentPayload);

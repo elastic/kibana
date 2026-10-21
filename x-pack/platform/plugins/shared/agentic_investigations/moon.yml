@@ -56,7 +56,6 @@ dependsOn:
   - '@kbn/charts-theme'
   - '@kbn/core-ui-settings-browser'
   - '@kbn/visualization-utils'
-  - '@kbn/core-logging-server-mocks'
 tags:
   - plugin
   - prod

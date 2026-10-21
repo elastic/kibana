@@ -23,16 +23,6 @@ describe('assigneesChangedEventSchema', () => {
     );
   });
 
-  it('accepts the automation behind the change', () => {
-    expect(
-      assigneesChangedEventSchema.safeParse({
-        added: ['u1'],
-        removed: [],
-        via: { type: 'agent', agent_id: 'a1' },
-      }).success
-    ).toBe(true);
-  });
-
   it('rejects an event with no changes', () => {
     expect(assigneesChangedEventSchema.safeParse({ added: [], removed: [] }).success).toBe(false);
   });

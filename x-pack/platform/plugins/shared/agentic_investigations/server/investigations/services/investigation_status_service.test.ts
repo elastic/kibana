@@ -12,13 +12,8 @@ import {
   assertNoUnexpectedProposals,
   ProposalDismissFailedError,
 } from './investigation_status_service';
-import { waitForMetadataChangeEvents } from '../../conversation_events/metadata_change_events';
 import { CloseTargetsChangedError } from './close_targets_changed_error';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants';
-
-jest.mock('../../conversation_events/metadata_change_events', () => ({
-  waitForMetadataChangeEvents: jest.fn().mockResolvedValue(undefined),
-}));
 
 const logger = loggingSystemMock.createLogger();
 const request = httpServerMock.createKibanaRequest();
@@ -155,6 +150,7 @@ describe('InvestigationStatusService.setStatus — expected_proposal_ids', () =>
     const client = {
       get: jest.fn().mockResolvedValue(MOCK_CONVERSATION),
       patchMetadata: jest.fn().mockResolvedValue({ conversation: MOCK_CONVERSATION }),
+      addEvents: jest.fn().mockResolvedValue([]),
     };
     const service = new InvestigationStatusService({
       getConversationClient: jest.fn().mockResolvedValue(client),
@@ -245,6 +241,7 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     const client = {
       get: jest.fn().mockResolvedValue(MOCK_CONVERSATION),
       patchMetadata: jest.fn().mockResolvedValue({ conversation: MOCK_CONVERSATION }),
+      addEvents: jest.fn().mockResolvedValue([]),
     };
     const service = new InvestigationStatusService({
       getConversationClient: jest.fn().mockResolvedValue(client),
@@ -252,42 +249,58 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
       getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
       logger,
     });
-    return { service, releaseGate, get, patchMetadata: client.patchMetadata };
+    return {
+      service,
+      releaseGate,
+      get,
+      patchMetadata: client.patchMetadata,
+      client,
+    };
   };
 
-  it('waits for the request timeline writes after patching, before returning', async () => {
-    const { service, patchMetadata } = makeDismissService({ releaseGateSideEffect: 'success' });
-    const calls: string[] = [];
-    patchMetadata.mockImplementation(async () => {
-      calls.push('patch');
-      return { conversation: MOCK_CONVERSATION };
-    });
-    (waitForMetadataChangeEvents as jest.Mock).mockImplementationOnce(async () => {
-      calls.push('wait');
-    });
+  it('records the status change on the timeline after patching', async () => {
+    const { service, client } = makeDismissService({ releaseGateSideEffect: 'success' });
+    client.get.mockResolvedValue({ ...MOCK_CONVERSATION, metadata: { status: 'open' } });
 
     await service.setStatus(request, 'conv-1', { status: 'closed', dismiss_reason: 'no_reason' });
 
-    expect(waitForMetadataChangeEvents).toHaveBeenCalledWith(request);
-    expect(calls).toEqual(['patch', 'wait']);
+    expect(client.addEvents).toHaveBeenCalledWith({
+      conversationId: 'conv-1',
+      events: [{ type: 'status_changed', data: { from: 'open', to: 'closed' } }],
+    });
+    expect(client.patchMetadata.mock.invocationCallOrder[0]).toBeLessThan(
+      client.addEvents.mock.invocationCallOrder[0]
+    );
   });
 
-  it('passes the automation context to patchMetadata', async () => {
-    const { service, patchMetadata } = makeDismissService({ releaseGateSideEffect: 'success' });
-    const context = { type: 'agent' as const, agent_id: 'agent-1' };
+  it('omits the previous status when there was none', async () => {
+    const { service, client } = makeDismissService({ releaseGateSideEffect: 'success' });
 
-    await service.setStatus(
-      request,
-      'conv-1',
-      { status: 'closed', dismiss_reason: 'no_reason' },
-      context
-    );
+    await service.setStatus(request, 'conv-1', { status: 'closed', dismiss_reason: 'no_reason' });
 
-    expect(patchMetadata).toHaveBeenCalledWith(
-      'conv-1',
-      { status: 'closed' },
-      { access: 'converse', context }
-    );
+    expect(client.addEvents).toHaveBeenCalledWith({
+      conversationId: 'conv-1',
+      events: [{ type: 'status_changed', data: { to: 'closed' } }],
+    });
+  });
+
+  it('writes no event when the status did not change', async () => {
+    const { service, client } = makeDismissService({ releaseGateSideEffect: 'success' });
+    client.get.mockResolvedValue({ ...MOCK_CONVERSATION, metadata: { status: 'closed' } });
+
+    await service.setStatus(request, 'conv-1', { status: 'closed', dismiss_reason: 'no_reason' });
+
+    expect(client.addEvents).not.toHaveBeenCalled();
+  });
+
+  it('does not fail the status change when the event cannot be written', async () => {
+    const { service, client } = makeDismissService({ releaseGateSideEffect: 'success' });
+    client.addEvents.mockRejectedValue(new Error('boom'));
+
+    await expect(
+      service.setStatus(request, 'conv-1', { status: 'closed', dismiss_reason: 'no_reason' })
+    ).resolves.toMatchObject({ status: 'closed' });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('status_changed'));
   });
 
   it('skips a proposal that was already decided (conflict, re-read shows decided)', async () => {

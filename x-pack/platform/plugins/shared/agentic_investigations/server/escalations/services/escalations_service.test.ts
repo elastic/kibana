@@ -11,7 +11,6 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common';
-import { waitForMetadataChangeEvents } from '../../conversation_events/metadata_change_events';
 import { EscalationsService } from './escalations_service';
 import { InvalidLinkedInvestigationError, NotAnEscalationError } from './errors';
 import { CloseTargetsChangedError } from '../../investigations/services/close_targets_changed_error';
@@ -78,10 +77,6 @@ const ESCALATION_TEMPLATE = {
     linked_investigations: { input_type: 'TEXT_ARRAY' },
   },
 };
-
-jest.mock('../../conversation_events/metadata_change_events', () => ({
-  waitForMetadataChangeEvents: jest.fn().mockResolvedValue(undefined),
-}));
 
 const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
   get: jest.fn().mockResolvedValue(MOCK_INVESTIGATION),
@@ -1687,21 +1682,35 @@ describe('EscalationsService.sync', () => {
 });
 
 describe('EscalationsService.setStatus — timeline events', () => {
-  it('waits for the request timeline writes after patching, before returning', async () => {
+  it('records the status change on the timeline after patching', async () => {
     const { service, client } = makeService();
-    const calls: string[] = [];
-    client.get.mockResolvedValue({ ...MOCK_ESCALATION, template_id: ESCALATION_TEMPLATE_ID });
-    client.patchMetadata.mockImplementation(async () => {
-      calls.push('patch');
-      return { conversation: MOCK_ESCALATION, changedFields: ['status'] };
-    });
-    (waitForMetadataChangeEvents as jest.Mock).mockImplementationOnce(async () => {
-      calls.push('wait');
+    client.get.mockResolvedValue({
+      ...MOCK_ESCALATION,
+      template_id: ESCALATION_TEMPLATE_ID,
+      metadata: { status: 'closed' },
     });
 
     await service.setStatus(request, 'escalation-1', { status: 'open' } as never);
 
-    expect(waitForMetadataChangeEvents).toHaveBeenCalledWith(request);
-    expect(calls).toEqual(['patch', 'wait']);
+    expect(client.addEvents).toHaveBeenCalledWith({
+      conversationId: 'escalation-1',
+      events: [{ type: 'status_changed', data: { from: 'closed', to: 'open' } }],
+    });
+    expect(client.patchMetadata.mock.invocationCallOrder[0]).toBeLessThan(
+      client.addEvents.mock.invocationCallOrder[0]
+    );
+  });
+
+  it('writes no event when the status did not change', async () => {
+    const { service, client } = makeService();
+    client.get.mockResolvedValue({
+      ...MOCK_ESCALATION,
+      template_id: ESCALATION_TEMPLATE_ID,
+      metadata: { status: 'open' },
+    });
+
+    await service.setStatus(request, 'escalation-1', { status: 'open' } as never);
+
+    expect(client.addEvents).not.toHaveBeenCalled();
   });
 });

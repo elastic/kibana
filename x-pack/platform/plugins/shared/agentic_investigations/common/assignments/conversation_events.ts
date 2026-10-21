@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import { MAX_ESCALATION_ASSIGNEES } from '../escalations/constants';
-import { eventViaSchema } from '../conversation_events/via';
 import { assigneeIdSchema } from './assignment';
 
 /** Written whenever the assignee list of an investigation or escalation changes. */
@@ -21,7 +20,6 @@ export const assigneesChangedEventSchema = z
   .object({
     added: z.array(assigneeIdSchema).max(MAX_ESCALATION_ASSIGNEES),
     removed: z.array(assigneeIdSchema).max(MAX_ESCALATION_ASSIGNEES),
-    via: eventViaSchema.optional(),
   })
   .refine((data) => data.added.length + data.removed.length > 0, {
     message: 'At least one assignee must be added or removed',

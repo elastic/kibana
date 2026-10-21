@@ -18,7 +18,8 @@ import type {
   ConversationTemplatesStart,
 } from '@kbn/agent-builder-server';
 import type { ConversationSearchSort } from '@kbn/agent-builder-common';
-import { waitForMetadataChangeEvents } from '../../conversation_events/metadata_change_events';
+import { addTimelineEvent } from '../../conversation_events/add_timeline_event';
+import { STATUS_CHANGED_EVENT_TYPE } from '../../../common/investigations/conversation_events';
 import type {
   CreateEscalationRequest,
   EscalationConversation,
@@ -615,7 +616,21 @@ export class EscalationsService {
       { access: 'converse' }
     );
 
-    await waitForMetadataChangeEvents(request);
+    const previousStatus = current.metadata?.[ESCALATION_STATUS_FIELD];
+    if (previousStatus !== body.status) {
+      await addTimelineEvent({
+        client,
+        conversationId: escalationId,
+        type: STATUS_CHANGED_EVENT_TYPE,
+        data: {
+          ...(previousStatus === 'open' || previousStatus === 'closed'
+            ? { from: previousStatus }
+            : {}),
+          to: body.status,
+        },
+        logger: this.logger,
+      });
+    }
 
     return {
       escalation_id: updated.id,

@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { Conversation } from '@kbn/agent-builder-common';
 import { isPublicConversation, ConversationAccessControlRole } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
-import { waitForMetadataChangeEvents } from '../conversation_events/metadata_change_events';
+import { ASSIGNEES_CHANGED_EVENT_TYPE } from '../../common/assignments/conversation_events';
+import { addTimelineEvent } from '../conversation_events/add_timeline_event';
 import { WrongTemplateError } from './errors';
 
 export { WrongTemplateError };
 
 export interface AssignmentsServiceDeps {
   getConversationClient: (request: KibanaRequest) => Promise<ConversationPublicClient>;
+  logger: Logger;
 }
 
 /** Casts a raw metadata value to `string[]`, ignoring non-string elements. */
@@ -29,8 +31,11 @@ export class AssignmentsService {
     request: KibanaRequest
   ) => Promise<ConversationPublicClient>;
 
-  constructor({ getConversationClient }: AssignmentsServiceDeps) {
+  private readonly logger: Logger;
+
+  constructor({ getConversationClient, logger }: AssignmentsServiceDeps) {
     this.getConversationClient = getConversationClient;
+    this.logger = logger;
   }
 
   /**
@@ -57,9 +62,8 @@ export class AssignmentsService {
    * - A caller can remove themselves; the request succeeds but they lose access afterwards.
    * - The diff is computed from a read outside OCC, so concurrent reassigns can race (same
    *   as other multi-step writes in this plugin, e.g. linked_investigations).
-   * - The timeline event is not written here: the `metadata.assignees` write below emits Agent
-   *   Builder's metadata-changed event, which `registerMetadataChangeEvents` records, so changes
-   *   made by automation are covered too.
+   * - The `assignees_changed` timeline event is written after the patch and is best-effort: a
+   *   failed write is logged and never fails the assignment.
    * - An assignee who was never an ACL member (escalation created before add-sync) makes
    *   removeAccessControlEntries a no-op, which is safe.
    */
@@ -113,9 +117,17 @@ export class AssignmentsService {
       { access: 'converse' }
     );
 
-    // The timeline event is written by a listener that doesn't block the patch. Wait for it so the
-    // returned conversation, and the refetch that follows, include the event.
-    await waitForMetadataChangeEvents(request);
+    if (added.length > 0 || removed.length > 0) {
+      // Written before the refetch below so the returned conversation includes the event.
+      await addTimelineEvent({
+        client,
+        conversationId,
+        type: ASSIGNEES_CHANGED_EVENT_TYPE,
+        data: { added, removed },
+        logger: this.logger,
+      });
+    }
+
     try {
       return await client.get(conversationId);
     } catch (error) {

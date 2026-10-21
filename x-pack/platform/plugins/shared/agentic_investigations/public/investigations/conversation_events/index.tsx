@@ -17,7 +17,6 @@ import {
   STATUS_CHANGED_EVENT_TYPE,
   type StatusChangedEventData,
 } from '../../../common/investigations/conversation_events';
-import { EventVia, getViaIcon } from '../../conversation_events/event_via';
 
 const statusLabels = {
   open: i18n.translate('xpack.agenticInvestigations.statusEvents.open', {
@@ -34,7 +33,7 @@ export const createStatusChangedEventUiDefinition = (): ConversationEventUIDefin
 > => ({
   type: STATUS_CHANGED_EVENT_TYPE,
   getHeader: ({ data }) => ({
-    icon: getViaIcon(data.via),
+    icon: 'user',
     label: i18n.translate('xpack.agenticInvestigations.statusEvents.headerLabel', {
       defaultMessage: 'Status',
     }),
@@ -59,7 +58,6 @@ export const createStatusChangedEventUiDefinition = (): ConversationEventUIDefin
           />
         )}
       </EuiText>
-      <EventVia via={data.via} />
     </>
   ),
 });

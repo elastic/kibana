@@ -50,7 +50,6 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     },
     conversations: {
       enableUpdatedTrigger: jest.fn(),
-      onMetadataPatched: jest.fn(),
     },
     topSnippets: { numSnippets: 2, numWords: 750 },
   };

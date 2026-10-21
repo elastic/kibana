@@ -17,7 +17,6 @@ import type {
   ConversationListResult,
   MetadataFieldValue,
   ConversationAddEventInput,
-  ConversationWriteSource,
 } from '@kbn/agent-builder-common';
 
 /** Request for adding events to a conversation. */
@@ -46,42 +45,6 @@ export interface ConversationCreatePublicRequest {
    * Initial metadata values. Requires `templateId`.
    */
   metadata?: Record<string, MetadataFieldValue>;
-}
-
-/**
- * What automation performed a metadata write, for attribution on the timeline. Callers acting
- * directly for a user (HTTP routes, UI actions) omit it.
- */
-export type MetadataPatchContext =
-  | { type: 'workflow'; workflow_id: string; workflow_name?: string; execution_id: string }
-  | { type: 'agent'; agent_id: string; agent_name?: string; execution_id?: string };
-
-/** Options of `patchMetadata`. */
-export interface PatchMetadataOptions {
-  access?: 'owner' | 'converse';
-  /** Which workflow or agent made the write, when it was not a direct user action. */
-  context?: MetadataPatchContext;
-}
-
-/** A metadata field's serialized value before and after a write. */
-export interface MetadataFieldChange {
-  from?: string | string[];
-  to?: string | string[];
-}
-
-/** Emitted after a conversation's metadata changed. See `ConversationsSetup.onMetadataPatched`. */
-export interface ConversationMetadataPatchedEvent {
-  conversationId: string;
-  templateId?: string;
-  parentId?: string;
-  /** Names of the fields whose value changed. */
-  changedFields: string[];
-  /** Serialized before/after values of each changed field; `from` is absent for a first write. */
-  changes: Record<string, MetadataFieldChange>;
-  /** The code path that performed the write. */
-  source: ConversationWriteSource;
-  /** Set when the write came from a workflow or an agent run. */
-  context?: MetadataPatchContext;
 }
 
 /**
@@ -150,7 +113,7 @@ export interface ConversationPublicClient {
   patchMetadata(
     conversationId: string,
     updates: Record<string, MetadataFieldValue>,
-    options?: PatchMetadataOptions
+    options?: { access?: 'owner' | 'converse' }
   ): Promise<{ conversation: Conversation; changedFields: string[] }>;
   /**
    * Update the conversation's title. Requires the caller to be the conversation owner.

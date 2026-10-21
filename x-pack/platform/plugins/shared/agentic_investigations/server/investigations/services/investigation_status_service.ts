@@ -6,10 +6,11 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import type { ConversationPublicClient, MetadataPatchContext } from '@kbn/agent-builder-server';
+import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import type { ProposalsPluginStart } from '@kbn/proposals-plugin/server';
 import type { DismissReason } from '@kbn/proposals-common';
-import { waitForMetadataChangeEvents } from '../../conversation_events/metadata_change_events';
+import { addTimelineEvent } from '../../conversation_events/add_timeline_event';
+import { STATUS_CHANGED_EVENT_TYPE } from '../../../common/investigations/conversation_events';
 import { INVESTIGATION_TEMPLATE_ID } from '../../../common/escalations/constants';
 import { WrongTemplateError } from '../../assignments/assignments_service';
 import type {
@@ -212,9 +213,7 @@ export class InvestigationStatusService {
   async setStatus(
     request: KibanaRequest,
     conversationId: string,
-    body: SetInvestigationStatusRequest,
-    /** The workflow or agent run making the change, shown on the timeline event. */
-    context?: MetadataPatchContext
+    body: SetInvestigationStatusRequest
   ): Promise<SetInvestigationStatusResponse> {
     const client = await this.getConversationClient(request);
     const conversation = await client.get(conversationId);
@@ -307,10 +306,24 @@ export class InvestigationStatusService {
     const { conversation: updated } = await client.patchMetadata(
       conversationId,
       { status: body.status },
-      { access: 'converse', ...(context ? { context } : {}) }
+      { access: 'converse' }
     );
 
-    await waitForMetadataChangeEvents(request);
+    const previousStatus = conversation.metadata?.status;
+    if (previousStatus !== body.status) {
+      await addTimelineEvent({
+        client,
+        conversationId,
+        type: STATUS_CHANGED_EVENT_TYPE,
+        data: {
+          ...(previousStatus === 'open' || previousStatus === 'closed'
+            ? { from: previousStatus }
+            : {}),
+          to: body.status,
+        },
+        logger: this.logger,
+      });
+    }
 
     return {
       conversation_id: updated.id,

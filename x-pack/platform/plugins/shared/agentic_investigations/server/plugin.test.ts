@@ -62,7 +62,6 @@ const setupPlugin = ({ escalationsEnabled }: { escalationsEnabled?: boolean } = 
   const agentBuilder = {
     attachments: { registerType: jest.fn() },
     conversationEvents: { register: jest.fn() },
-    conversations: { onMetadataPatched: jest.fn() },
     tools: { register: jest.fn() },
   };
 

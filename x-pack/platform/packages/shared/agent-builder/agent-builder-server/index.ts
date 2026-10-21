@@ -220,10 +220,6 @@ export type {
   ConversationCreatePublicRequest,
   ConversationUpdatePublicRequest,
   ConversationAddEventsRequest,
-  MetadataPatchContext,
-  PatchMetadataOptions,
-  MetadataFieldChange,
-  ConversationMetadataPatchedEvent,
 } from './conversations';
 export { describeZodSchema, formatSchemaForLlm } from './tools';
 export type {

@@ -10,8 +10,4 @@ export type {
   ConversationPublicClient,
   ConversationUpdatePublicRequest,
   ConversationAddEventsRequest,
-  MetadataPatchContext,
-  PatchMetadataOptions,
-  MetadataFieldChange,
-  ConversationMetadataPatchedEvent,
 } from './types';

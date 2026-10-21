@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
   createConversationNotFoundError,
 } from '@kbn/agent-builder-common';
-import { waitForMetadataChangeEvents } from '../conversation_events/metadata_change_events';
 import { AssignmentsService, WrongTemplateError } from './assignments_service';
 
 const MOCK_CONVERSATION_PUBLIC = {
@@ -36,23 +36,21 @@ const withAssignees = (
   metadata: { ...base.metadata, assignees },
 });
 
-jest.mock('../conversation_events/metadata_change_events', () => ({
-  waitForMetadataChangeEvents: jest.fn().mockResolvedValue(undefined),
-}));
-
 const makeClient = (overrides: Record<string, jest.Mock> = {}) => ({
   get: jest.fn().mockResolvedValue(MOCK_CONVERSATION_PUBLIC),
   addAccessControlEntries: jest.fn().mockResolvedValue({}),
   removeAccessControlEntries: jest.fn().mockResolvedValue({}),
   patchMetadata: jest.fn().mockResolvedValue({ conversation: MOCK_CONVERSATION_PUBLIC }),
+  addEvents: jest.fn().mockResolvedValue([]),
   ...overrides,
 });
 
 const makeService = (clientMock: ReturnType<typeof makeClient>) => {
   const getConversationClient = jest.fn().mockResolvedValue(clientMock);
-  return new AssignmentsService({ getConversationClient });
+  return new AssignmentsService({ getConversationClient, logger });
 };
 
+const logger = loggingSystemMock.createLogger();
 const request = httpServerMock.createKibanaRequest();
 
 describe('AssignmentsService.assign', () => {
@@ -393,20 +391,21 @@ describe('AssignmentsService.assign', () => {
     expect(result).toBe(patchedConv);
   });
 
-  it('waits for the request timeline writes after patching and before re-reading', async () => {
+  it('records the assignee diff on the timeline after patching, before re-reading', async () => {
     const calls: string[] = [];
     const client = makeClient({
       get: jest.fn().mockImplementation(async () => {
         calls.push('get');
-        return MOCK_CONVERSATION_PUBLIC;
+        return { ...MOCK_CONVERSATION_PUBLIC, metadata: { assignees: ['user-2'] } };
       }),
       patchMetadata: jest.fn().mockImplementation(async () => {
         calls.push('patch');
         return { conversation: MOCK_CONVERSATION_PUBLIC };
       }),
-    });
-    (waitForMetadataChangeEvents as jest.Mock).mockImplementationOnce(async () => {
-      calls.push('wait');
+      addEvents: jest.fn().mockImplementation(async () => {
+        calls.push('event');
+        return [];
+      }),
     });
 
     await makeService(client).assign({
@@ -416,7 +415,42 @@ describe('AssignmentsService.assign', () => {
       expectedTemplate: 'escalation',
     });
 
-    expect(waitForMetadataChangeEvents).toHaveBeenCalledWith(request);
-    expect(calls).toEqual(['get', 'patch', 'wait', 'get']);
+    expect(client.addEvents).toHaveBeenCalledWith({
+      conversationId: 'conv-1',
+      events: [{ type: 'assignees_changed', data: { added: ['user-1'], removed: ['user-2'] } }],
+    });
+    expect(calls).toEqual(['get', 'patch', 'event', 'get']);
+  });
+
+  it('writes no event when the assignees did not change', async () => {
+    const client = makeClient({
+      get: jest.fn().mockResolvedValue({
+        ...MOCK_CONVERSATION_PUBLIC,
+        metadata: { assignees: ['user-1'] },
+      }),
+    });
+
+    await makeService(client).assign({
+      request,
+      conversationId: 'conv-1',
+      assignees: ['user-1'],
+      expectedTemplate: 'escalation',
+    });
+
+    expect(client.addEvents).not.toHaveBeenCalled();
+  });
+
+  it('does not fail the assignment when the event cannot be written', async () => {
+    const client = makeClient({ addEvents: jest.fn().mockRejectedValue(new Error('boom')) });
+
+    await expect(
+      makeService(client).assign({
+        request,
+        conversationId: 'conv-1',
+        assignees: ['user-1'],
+        expectedTemplate: 'escalation',
+      })
+    ).resolves.toBeDefined();
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('assignees_changed'));
   });
 });
