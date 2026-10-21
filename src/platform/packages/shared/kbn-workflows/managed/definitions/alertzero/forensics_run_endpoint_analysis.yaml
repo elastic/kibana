@@ -160,7 +160,7 @@ steps:
       # analysis but could not retire the indicator. Finding them lets this run
       # skip the agent and retry just the write. Fewer than both after an attempt
       # was already recorded skips the agent too: a later run does not start
-      # another 15m analysis. Another indicator's files do not count.
+      # another 30m analysis. Another indicator's files do not count.
       #
       # Listing rather than reading an attachment by id, because `ai.attachment.read`
       # reports "no such attachment" and "the attachment service is broken" the same
@@ -283,7 +283,7 @@ steps:
           # worker makes the same check (`check_index_scope`) before it selects a
           # report. The forensic skill resolves `logs-endpoint.events.*` only once
           # the agent is running, so without this a host with no Elastic Defend
-          # telemetry spends the indicator's single attempt on a 15m run that can
+          # telemetry spends the indicator's single attempt on a 30m run that can
           # only report nothing.
           #
           # Scoped to the padded incident window, not a lookback from now: telemetry
@@ -418,11 +418,11 @@ steps:
                 and steps.resolve_endpoint_telemetry.output.present == true }}
             # Continues on failure so the run still reaches its terminal write.
             # If this step failed the run instead, the indicator would stay
-            # `pending`, and the sweep would re-run this 15m agent every minute
+            # `pending`, and the sweep would re-run this 30m agent every minute
             # for the rest of the lookback window. Continuing instead lets
             # `journal_analysis_problem` log what happened and `mark_failed`
             # retire the indicator, at the cost of one handoff instead of a
-            # 15m run every minute for the sweep lookback.
+            # 30m run every minute for the sweep lookback.
             on-failure:
               continue: true
             agent-id: alertzero-thin-agent
@@ -434,7 +434,7 @@ steps:
             # plugin-id: per-Worker cost attribution; aggregate-by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID.
             plugin-id: alertzero_endpoint_analysis
             aggregate-by: alertzero_parent
-            timeout: "15m"
+            timeout: "30m"
             create-conversation: false
             with:
               configuration_overrides:
@@ -1335,7 +1335,7 @@ steps:
 
   # The investigation needs to hear how this analysis ended — every other
   # problem path already narrates itself, but this one didn't, even though
-  # it's the step that takes 15m and is most likely to fail. Without this,
+  # it's the step that takes 30m and is most likely to fail. Without this,
   # silence would read as "never analyzed" instead of "analyzed, found nothing."
   #
   # The note names which case it was and links the execution. It does not include
