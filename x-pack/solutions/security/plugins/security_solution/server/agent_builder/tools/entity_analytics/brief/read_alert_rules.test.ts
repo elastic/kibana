@@ -9,9 +9,8 @@ import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BriefCandidate } from './types';
 import { buildAlertsFilter, readAlertRules, toAlertsByCandidateId } from './read_alert_rules';
 
-const bucket = (count: number, rules: Array<[string, number]>, ruleCount = rules.length) => ({
+const bucket = (count: number, rules: Array<[string, number]>) => ({
   doc_count: count,
-  ruleCount: { value: ruleCount },
   rules: { buckets: rules.map(([key, docCount]) => ({ key, doc_count: docCount })) },
 });
 
@@ -23,14 +22,10 @@ describe('toAlertsByCandidateId', () => {
       {
         byCandidate: {
           buckets: {
-            'user:a': bucket(
-              9,
-              [
-                ['Credential Dump', 4],
-                ['Odd Logon', 3],
-              ],
-              5
-            ),
+            'user:a': bucket(9, [
+              ['Credential Dump', 4],
+              ['Odd Logon', 3],
+            ]),
             'host:b': bucket(0, []),
           },
         },
@@ -38,10 +33,9 @@ describe('toAlertsByCandidateId', () => {
       {
         'user:a': {
           count: 9,
-          ruleCount: 5,
           rules: [
-            { name: 'Credential Dump', count: 4 },
-            { name: 'Odd Logon', count: 3 },
+            { index: 1, name: 'Credential Dump', count: 4 },
+            { index: 2, name: 'Odd Logon', count: 3 },
           ],
         },
       },
@@ -49,7 +43,7 @@ describe('toAlertsByCandidateId', () => {
     [
       'a long rule name cut short',
       { byCandidate: { buckets: { 'user:a': bucket(1, [['x'.repeat(300), 1]]) } } },
-      { 'user:a': { count: 1, ruleCount: 1, rules: [{ name: `${'x'.repeat(97)}...`, count: 1 }] } },
+      { 'user:a': { count: 1, rules: [{ index: 1, name: `${'x'.repeat(97)}...`, count: 1 }] } },
     ],
   ])('returns %s', (_description, aggregations, expected) => {
     expect(toAlertsByCandidateId(aggregations)).toEqual(expected);

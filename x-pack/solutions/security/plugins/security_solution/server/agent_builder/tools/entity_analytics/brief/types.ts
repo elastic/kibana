@@ -35,10 +35,8 @@ export interface BriefCandidate {
 /** The open alerts of an entity, or of its resolution group, in the captured period. */
 export interface EntityAlerts {
   count: number;
-  /** How many distinct rules raised them. */
-  ruleCount: number;
-  /** The rules behind most of the alerts, most first. */
-  rules: Array<{ name: string; count: number }>;
+  /** The rules behind most of the alerts, most first. The model cites a rule by its index. */
+  rules: Array<{ index: number; name: string; count: number }>;
 }
 
 /** What the model knows about a candidate. */

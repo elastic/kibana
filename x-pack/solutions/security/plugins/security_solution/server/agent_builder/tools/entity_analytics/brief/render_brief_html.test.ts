@@ -44,14 +44,6 @@ const fixtureViewModel: BriefViewModel = {
       risk: { score: 76, level: 'High', of: 'resolution group' },
       assetCriticality: 'High impact',
       privilegedUser: true,
-      alerts: {
-        count: 12,
-        ruleCount: 7,
-        rules: [
-          { name: 'Potential SharpRDP Behavior', count: 3 },
-          { name: 'Privileged Container Creation with Host Directory Mount', count: 3 },
-        ],
-      },
       assessment:
         'Credential and remote access activity on a privileged identity newly at High risk is the shape of account misuse.',
       whyFirst:
@@ -127,25 +119,6 @@ describe('renderBriefHtml', () => {
     // The recommended step comes before the priorities, and there is no footer.
     expect(html.indexOf('Recommended next step')).toBeLessThan(html.indexOf('<h2>Priorities</h2>'));
     expect(html).not.toContain('<footer');
-  });
-
-  it('lists the alerts as one row per rule, with a total only when rules are left out', () => {
-    const { html } = renderBriefHtml(fixtureViewModel);
-    expect(html).toContain('12 open alerts this period, 5 more rules');
-
-    const { html: accountedFor } = renderBriefHtml({
-      ...fixtureViewModel,
-      priorities: [
-        {
-          ...fixtureViewModel.priorities[0],
-          alerts: { count: 1, ruleCount: 1, rules: [{ name: '<b>Rule</b>', count: 1 }] },
-        },
-      ],
-    });
-    expect(accountedFor).toContain(
-      '<li><span class="rule-count">1</span><span>&lt;b&gt;Rule&lt;/b&gt;</span></li>'
-    );
-    expect(accountedFor).not.toContain('<li class="rules-total">');
   });
 
   it('shows only the counts above zero or changed, and says when there is nothing to compare', () => {

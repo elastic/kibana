@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import type { EntityFacts } from './types';
 import type { CandidateEntities } from './read_entities';
@@ -53,7 +54,13 @@ const facts: EntityFacts[] = [
     flaggedFor: ['entitiesWithAlerts', 'riskMovers'],
     risk: { of: 'resolution group', level: 'High', score: 82 },
     assetCriticality: 'High impact',
-    alerts: { count: 3, ruleCount: 1, rules: [{ name: 'Credential Dump', count: 2 }] },
+    alerts: {
+      count: 3,
+      rules: [
+        { index: 1, name: 'Credential Dump', count: 2 },
+        { index: 2, name: 'Odd Logon', count: 1 },
+      ],
+    },
     firstSeen: '5 days ago',
   },
   {
@@ -139,7 +146,6 @@ describe('buildViewModel', () => {
         name: 'web_01',
         risk: { score: 82, level: 'High', of: 'resolution group' },
         assetCriticality: 'High impact',
-        alerts: { count: 3, ruleCount: 1, rules: [{ name: 'Credential Dump', count: 2 }] },
         // First seen only for an entity flagged as new.
         firstSeen: undefined,
         riskHistory: { points: [{ score: 40 }, { score: 82 }] },
@@ -152,6 +158,42 @@ describe('buildViewModel', () => {
     expect(build({ entities: { ...entities, notFoundCount: 2 } }).notes).toContain(
       '2 flagged entities were not found in the Entity Store.'
     );
+  });
+
+  it.each([
+    [
+      'a token for a rule of the entity becomes the rule',
+      'host:a',
+      'Seen in {{ rule 1 }}',
+      'Seen in Credential Dump.',
+      0,
+    ],
+    [
+      'a token with an index the entity has no rule at is removed',
+      'host:a',
+      'Seen in {{ rule 9 }}',
+      'Seen in .',
+      1,
+    ],
+    [
+      'a token for a rule of another entity is removed',
+      'user:b',
+      'Seen in {{ rule 1 }}',
+      'Seen in .',
+      1,
+    ],
+  ])('%s', (_description, entityId, assessment, expected, removed) => {
+    const logger = { debug: jest.fn() } as unknown as Logger;
+    const { priorities } = build({
+      logger,
+      verified: {
+        ...verified,
+        priorities: [{ entityId, assessment, whyFirst: 'Why.', nextStep: 'Next.' }],
+      },
+    });
+
+    expect(priorities[0].assessment).toBe(expected);
+    expect(logger.debug).toHaveBeenCalledTimes(removed);
   });
 
   it('notes that the alerts could not be read', () => {

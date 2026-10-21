@@ -92,6 +92,7 @@ export const generateBrief = async ({
     verified,
     riskHistory,
     alertsFailed,
+    logger,
   });
 
   logger.debug(

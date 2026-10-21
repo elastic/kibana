@@ -57,11 +57,6 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
 .brief .why-first{margin-top:4px;max-width:62ch;opacity:.7;}
 .brief .row{display:grid;grid-template-columns:56px 1fr;column-gap:12px;margin-top:8px;align-items:baseline;}
 .brief .row .label{padding-top:2px;}
-.brief .rules{list-style:none;padding:0;font-size:13px;max-width:560px;}
-.brief .rules li{display:grid;grid-template-columns:2.5ch 1fr;column-gap:10px;padding:2px 0;}
-.brief .rules li > span:last-child{min-width:0;overflow-wrap:anywhere;}
-.brief .rule-count{font-weight:600;opacity:.8;text-align:right;}
-.brief .rules-total{opacity:.6;font-size:12px;padding-top:4px;}
 .brief .next{max-width:62ch;}
 .brief .chart{margin:8px 0 0 36px;padding-top:8px;border-top:1px solid var(--cc-color-border);}
 .brief .chart figcaption{display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-bottom:4px;}
@@ -135,10 +130,6 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
       <div class=\\"body\\">
         <p class=\\"assessment\\">Credential and remote access activity on a privileged identity newly at High risk is the shape of account misuse.</p>
         <p class=\\"why-first\\">Privilege and a fresh threshold crossing make it the clearest place to confirm first.</p>
-        <div class=\\"row\\">
-          <span class=\\"label\\">Alerts</span>
-          <ul class=\\"rules\\"><li><span class=\\"rule-count\\">3</span><span>Potential SharpRDP Behavior</span></li><li><span class=\\"rule-count\\">3</span><span>Privileged Container Creation with Host Directory Mount</span></li><li class=\\"rules-total\\"><span></span><span>12 open alerts this period, 5 more rules</span></li></ul>
-        </div>
         <div class=\\"row\\"><span class=\\"label\\">Next</span><p class=\\"next\\">Review the alerts behind the new High risk score and confirm recent access activity.</p></div>
       </div>
       <figure class=\\"chart\\">
@@ -171,7 +162,6 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
       <div class=\\"body\\">
         <p class=\\"assessment\\">A host that appeared this week and is already alerting looks more like a provisioning problem.</p>
         <p class=\\"why-first\\">A new asset of this criticality is worth confirming on its own.</p>
-        
         <div class=\\"row\\"><span class=\\"label\\">Next</span><p class=\\"next\\">Check what triggered the alerts and verify the host&#39;s provisioning is expected.</p></div>
       </div>
       
@@ -187,7 +177,6 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
       <div class=\\"body\\">
         <p class=\\"assessment\\">A new host with alerts of the same kind as the first priority is worth a second look.</p>
         <p class=\\"why-first\\">Its recent appearance and the overlap in alert type put it ahead of the other hosts.</p>
-        
         <div class=\\"row\\"><span class=\\"label\\">Next</span><p class=\\"next\\">Review the alerts and confirm the host&#39;s role and ownership.</p></div>
       </div>
       

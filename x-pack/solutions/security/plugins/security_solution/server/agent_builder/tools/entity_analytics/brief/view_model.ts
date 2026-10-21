@@ -7,6 +7,7 @@
 
 import { compact } from 'lodash';
 import { z, lazySchema } from '@kbn/zod/v4';
+import type { Logger } from '@kbn/core/server';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import {
   SIGNAL_CARD_IDS,
@@ -21,7 +22,7 @@ import {
 } from './describe_scope';
 import type { CandidateEntities } from './read_entities';
 import type { VerifiedBrief } from './verify_draft';
-import { MENTION_PATTERN } from './verify_draft';
+import { MENTION_PATTERN, RULE_MENTION_PATTERN } from './verify_draft';
 
 export const QUIET_LINE = 'Nothing in this view is flagged as needing attention.';
 export const NO_PRIORITIES_LINE = 'No entity in this view has enough evidence to prioritize.';
@@ -80,13 +81,6 @@ export const BriefViewModel = lazySchema(() =>
           .optional(),
         assetCriticality: z.string().optional(),
         privilegedUser: z.literal(true).optional(),
-        alerts: z
-          .object({
-            count: z.number().int(),
-            ruleCount: z.number().int(),
-            rules: z.array(z.object({ name: z.string(), count: z.number().int() })),
-          })
-          .optional(),
         firstSeen: z.string().optional(),
         assessment: z.string(),
         whyFirst: z.string(),
@@ -99,6 +93,8 @@ export const BriefViewModel = lazySchema(() =>
 );
 export type BriefViewModel = z.infer<typeof BriefViewModel>;
 
+const TOKEN_PATTERN = new RegExp(`${MENTION_PATTERN.source}|${RULE_MENTION_PATTERN.source}`, 'g');
+
 /** Builds the view model from what the pipeline has. `verified` is absent when no model call was made. */
 export const buildViewModel = ({
   scope,
@@ -108,6 +104,7 @@ export const buildViewModel = ({
   verified,
   riskHistory,
   alertsFailed = false,
+  logger,
 }: {
   scope: EntityAnalyticsScope;
   spaceId: string;
@@ -118,17 +115,25 @@ export const buildViewModel = ({
   riskHistory?: { entityId: string; history: BriefRiskHistory };
   /** The alerts couldn't be read, so no priority has rules. */
   alertsFailed?: boolean;
+  logger?: Logger;
 }): BriefViewModel => {
   const { tiles, period, focusTileId, entityFilters = {} } = scope;
   const namesById = new Map(entities.candidates.map(({ id, name }) => [id, name]));
-  // Model text is prose: mentions become the Entity Store's names.
-  const withNames = (text: string) =>
-    text
-      .split(MENTION_PATTERN)
-      .map((part, index) => (index % 2 === 1 ? namesById.get(part) ?? part : part))
-      .join('');
-  const sentence = (text: string) => {
-    const named = withNames(text);
+  // Model text is prose: an entity mention becomes the Entity Store's name, and a rule mention the name
+  // of that rule of the entity the text is about. One that names no rule is removed.
+  const withNames = (text: string, entityFacts?: EntityFacts) =>
+    text.replace(TOKEN_PATTERN, (token, entityId?: string, ruleIndex?: string) => {
+      if (entityId !== undefined) {
+        return namesById.get(entityId) ?? entityId;
+      }
+      const rule = entityFacts?.alerts?.rules.find(({ index }) => index === Number(ruleIndex));
+      if (!rule) {
+        logger?.debug(`AI brief: removed ${token}, which names no alert rule of the entity`);
+      }
+      return rule?.name ?? '';
+    });
+  const sentence = (text: string, entityFacts: EntityFacts) => {
+    const named = withNames(text, entityFacts);
     return /[.!?…]$/.test(named) ? named : `${named}.`;
   };
 
@@ -159,16 +164,8 @@ export const buildViewModel = ({
         if (!entityFacts) {
           return [];
         }
-        const {
-          name,
-          type,
-          flaggedFor,
-          risk,
-          assetCriticality,
-          privilegedUser,
-          alerts,
-          firstSeen,
-        } = entityFacts;
+        const { name, type, flaggedFor, risk, assetCriticality, privilegedUser, firstSeen } =
+          entityFacts;
         return [
           {
             rank: index + 1,
@@ -178,12 +175,11 @@ export const buildViewModel = ({
             risk: risk && { score: risk.score, level: risk.level, of: risk.of },
             assetCriticality,
             privilegedUser,
-            alerts,
             // As the prompt does: first seen only for an entity flagged as new.
             firstSeen: flaggedFor.includes('newEntity') ? firstSeen : undefined,
-            assessment: sentence(assessment),
-            whyFirst: sentence(whyFirst),
-            nextStep: sentence(nextStep),
+            assessment: sentence(assessment, entityFacts),
+            whyFirst: sentence(whyFirst, entityFacts),
+            nextStep: sentence(nextStep, entityFacts),
             riskHistory: riskHistory?.entityId === entityId ? riskHistory.history : undefined,
           },
         ];

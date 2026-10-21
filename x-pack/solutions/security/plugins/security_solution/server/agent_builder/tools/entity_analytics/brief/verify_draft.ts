@@ -12,6 +12,9 @@ import type { EntityFacts } from './types';
 
 export const MENTION_PATTERN = /\{\{\s*entity\.id\s+([^}]+?)\s*\}\}/g;
 
+/** The model names an alert rule of the entity it writes about by its index in `alerts`. */
+export const RULE_MENTION_PATTERN = /\{\{\s*rule\s+(\d+)\s*\}\}/g;
+
 export interface VerifiedBrief {
   /** Absent without a priority: the brief then says there is nothing to prioritize. */
   summary?: string;

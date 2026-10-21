@@ -193,42 +193,12 @@ const renderPriority = (priority: Priority, periodLabel: string): string => {
       <div class="body">
         <p class="assessment">${escapeHtml(priority.assessment)}</p>
         <p class="why-first">${escapeHtml(priority.whyFirst)}</p>
-        ${priority.alerts ? renderAlerts(priority.alerts) : ''}
         <div class="row"><span class="label">Next</span><p class="next">${escapeHtml(
           priority.nextStep
         )}</p></div>
       </div>
       ${priority.riskHistory ? renderRiskHistory(priority.riskHistory, periodLabel) : ''}
     </li>`;
-};
-
-type Alerts = NonNullable<Priority['alerts']>;
-
-/** The rules shown account for every alert, so no total is needed. */
-const hasTotalRow = ({ count, rules }: Alerts): boolean => sumBy(rules, 'count') < count;
-
-/** One row per rule, then the total of the open alerts when the rules shown don't account for all of them. */
-const renderAlerts = (alerts: Alerts): string => {
-  const { count, ruleCount, rules } = alerts;
-  const moreRules = ruleCount - rules.length;
-  const total = `${formatCountOf(count, 'open alert', 'open alerts')} this period${
-    moreRules > 0 ? `, ${formatCountOf(moreRules, 'more rule', 'more rules')}` : ''
-  }`;
-  return `<div class="row">
-          <span class="label">Alerts</span>
-          <ul class="rules">${rules
-            .map(
-              (rule) =>
-                `<li><span class="rule-count">${formatCount(rule.count)}</span><span>${escapeHtml(
-                  rule.name
-                )}</span></li>`
-            )
-            .join('')}${
-    hasTotalRow(alerts)
-      ? `<li class="rules-total"><span></span><span>${escapeHtml(total)}</span></li>`
-      : ''
-  }</ul>
-        </div>`;
 };
 
 /** The risk levels the chart marks, highest first, at the score each starts. */
@@ -361,9 +331,6 @@ const HEIGHTS = {
   counts: 80,
   /** A priority's padding and title row, and the gaps between its blocks, on top of its lines. */
   priority: 90,
-  /** The gap above the alerts, and one row of them. */
-  alerts: 8,
-  rule: 23,
   /** The risk history with its chart, or with the caption alone. */
   chart: 140,
   caption: 40,
@@ -387,7 +354,7 @@ const estimateHeight = (viewModel: BriefViewModel): number => {
       ? hasPrioritiesSection(viewModel)
         ? HEIGHTS.line
         : 0
-      : sumBy(priorities, ({ assessment, whyFirst, nextStep, alerts, riskHistory }) => {
+      : sumBy(priorities, ({ assessment, whyFirst, nextStep, riskHistory }) => {
           const lines = [assessment, whyFirst, nextStep].reduce(
             (sum, text) => sum + countLines(text, TEXT_CHARACTERS_PER_LINE),
             0
@@ -395,9 +362,6 @@ const estimateHeight = (viewModel: BriefViewModel): number => {
           return (
             HEIGHTS.priority +
             lines * HEIGHTS.line +
-            (alerts
-              ? HEIGHTS.alerts + (alerts.rules.length + Number(hasTotalRow(alerts))) * HEIGHTS.rule
-              : 0) +
             (riskHistory ? estimateRiskHistoryHeight(riskHistory) : 0)
           );
         }))
@@ -490,11 +454,6 @@ const CSS = `
 .brief .why-first{margin-top:4px;max-width:62ch;opacity:.7;}
 .brief .row{display:grid;grid-template-columns:56px 1fr;column-gap:12px;margin-top:8px;align-items:baseline;}
 .brief .row .label{padding-top:2px;}
-.brief .rules{list-style:none;padding:0;font-size:13px;max-width:560px;}
-.brief .rules li{display:grid;grid-template-columns:2.5ch 1fr;column-gap:10px;padding:2px 0;}
-.brief .rules li > span:last-child{min-width:0;overflow-wrap:anywhere;}
-.brief .rule-count{font-weight:600;opacity:.8;text-align:right;}
-.brief .rules-total{opacity:.6;font-size:12px;padding-top:4px;}
 .brief .next{max-width:62ch;}
 .brief .chart{margin:8px 0 0 36px;padding-top:8px;border-top:1px solid var(--cc-color-border);}
 .brief .chart figcaption{display:flex;justify-content:space-between;gap:8px;font-size:12px;margin-bottom:4px;}

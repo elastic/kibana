@@ -20,7 +20,7 @@ import { getPeriodStart } from './describe_scope';
 import { getBriefEntityType } from './read_entities';
 import type { BriefCandidate, EntityAlerts } from './types';
 
-const MAX_RULES_PER_ENTITY = 2;
+const MAX_RULES_PER_ENTITY = 3;
 /** The members of a group whose records match its alerts without an entity id. Stamped alerts match every member. */
 const MAX_MEMBERS_MATCHED_BY_RECORD = 20;
 /** Rule names are written by users, so a long one is cut. */
@@ -32,7 +32,6 @@ interface AlertsByCandidate {
       string,
       {
         doc_count: number;
-        ruleCount: { value: number };
         rules: { buckets: Array<{ key: string; doc_count: number }> };
       }
     >;
@@ -105,7 +104,6 @@ export const readAlertRules = async ({
           },
           aggs: {
             rules: { terms: { field: ALERT_RULE_NAME, size: MAX_RULES_PER_ENTITY } },
-            ruleCount: { cardinality: { field: ALERT_RULE_NAME } },
           },
         },
       },
@@ -167,8 +165,8 @@ export const toAlertsByCandidateId = (
               id,
               {
                 count: bucket.doc_count,
-                ruleCount: bucket.ruleCount.value,
-                rules: bucket.rules.buckets.map(({ key, doc_count: count }) => ({
+                rules: bucket.rules.buckets.map(({ key, doc_count: count }, index) => ({
+                  index: index + 1,
                   name: truncate(key, { length: MAX_RULE_NAME_LENGTH }),
                   count,
                 })),
