@@ -97,7 +97,7 @@ export const SnapshotPage = (): React.ReactElement => {
                           compressed
                           data-test-subj="entityInventoryExperienceToggle"
                           label={entityInventoryToggleLabel}
-                          checked={isEntityInventoryEnabled ?? false}
+                          checked={isEntityInventoryEnabled}
                           onChange={(e) => setEntityInventoryEnabled(e.target.checked)}
                         />
                       </EuiFlexItem>
