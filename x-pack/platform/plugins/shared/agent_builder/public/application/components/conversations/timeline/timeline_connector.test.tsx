@@ -49,8 +49,12 @@ jest.mock('../../../context/streaming/streaming_context', () => ({
   useStreamRecord: () => mockStore.useMockState().record,
   useConversationStreamService: () => mockStreamService,
 }));
+const mockOnConnectorRender = jest.fn();
 jest.mock('./screen_reader_status', () => ({
-  TimelineScreenReaderStatus: () => null,
+  TimelineScreenReaderStatus: () => {
+    mockOnConnectorRender();
+    return null;
+  },
 }));
 jest.mock('../../../hooks/use_conversation_stream', () => ({
   useConversationStream: () => ({ isResuming: false }),
@@ -71,21 +75,37 @@ jest.mock('../../../hooks/use_agent_builder_service', () => ({
 const registeredAttachmentTypes = new Set<string>();
 /** Custom event types with a UI in this test's Kibana; empty unless a test registers one. */
 const registeredEventTypes = new Set<string>();
+const mockList = ({ items }: { items: TimelineItem[] }) => (
+  <ul>
+    {items.map((item) => (
+      <li key={item.key} data-test-subj="item">
+        {item.kind}:{item.key}:
+        {item.kind === 'agentTurn'
+          ? item.status
+          : item.kind === 'userMessage'
+          ? (item.event.data.attachment_refs ?? []).map((ref) => ref.attachment_id).join(',')
+          : ''}
+      </li>
+    ))}
+  </ul>
+);
+/** Swaps the list for the real `Timeline`, for tests that count how often a turn renders. */
+const mockUseRealTimeline = { current: false };
 jest.mock('./timeline', () => ({
-  Timeline: ({ items }: { items: TimelineItem[] }) => (
-    <ul>
-      {items.map((item) => (
-        <li key={item.key} data-test-subj="item">
-          {item.kind}:{item.key}:
-          {item.kind === 'agentTurn'
-            ? item.status
-            : item.kind === 'userMessage'
-            ? (item.event.data.attachment_refs ?? []).map((ref) => ref.attachment_id).join(',')
-            : ''}
-        </li>
-      ))}
-    </ul>
-  ),
+  Timeline: (props: { items: TimelineItem[] }) =>
+    mockUseRealTimeline.current
+      ? jest.requireActual('react').createElement(jest.requireActual('./timeline').Timeline, props)
+      : mockList(props),
+}));
+jest.mock('./items/user_message_event', () => ({ UserMessageEvent: () => null }));
+jest.mock('./items/attachment_event', () => ({ AttachmentEvent: () => null }));
+jest.mock('./items/custom_event', () => ({ CustomEvent: () => null }));
+const mockOnTurnRender = jest.fn();
+jest.mock('./agent_turn', () => ({
+  AgentTurn: jest.requireActual('react').memo(({ item }: { item: TimelineItem }) => {
+    mockOnTurnRender(item.key);
+    return null;
+  }),
 }));
 
 const conversationId = 'conv-1';
@@ -146,7 +166,9 @@ describe('TimelineConnector', () => {
     jest.clearAllMocks();
     registeredAttachmentTypes.clear();
     registeredEventTypes.clear();
+    mockUseRealTimeline.current = false;
     mockStreamService.clearPersistedExecution(conversationId, 'round-1::execution');
+    mockStreamService.clearPersistedExecution(conversationId, 'round-2::execution');
   });
 
   // `useLiveEvents` tells React about stream updates at most once per animation frame.
@@ -368,5 +390,56 @@ describe('TimelineConnector', () => {
       'userMessage:round-1::user_message:',
       'agentTurn:round-1::execution:running',
     ]);
+  });
+
+  describe('rendering cost', () => {
+    it('does not render again when its parent renders with the same props', async () => {
+      setState({ conversation: conversationWith([savedUserMessage, started, terminated]) });
+      const { rerender } = render(<TimelineConnector />);
+      await flushFrame();
+      const rendersBefore = mockOnConnectorRender.mock.calls.length;
+
+      rerender(<TimelineConnector />);
+
+      expect(mockOnConnectorRender).toHaveBeenCalledTimes(rendersBefore);
+    });
+  });
+
+  describe('rendering cost while a later turn streams', () => {
+    const turnRenderCount = (key: string) =>
+      mockOnTurnRender.mock.calls.filter(([renderedKey]) => renderedKey === key).length;
+
+    const chunk = (text_chunk: string) =>
+      ({ type: 'message_chunk', data: { message_id: 'm', text_chunk } } as unknown as ChatEvent);
+
+    it('does not render the saved turns again for every streamed event', async () => {
+      mockUseRealTimeline.current = true;
+      setState({
+        conversation: conversationWith([savedUserMessage, started, terminated]),
+        pendingMessage: 'second question',
+      });
+      render(<TimelineConnector />);
+      expect(turnRenderCount('round-1::execution')).toBe(1);
+
+      act(() => {
+        chatEvents$.next(
+          createExecutionStartedEvent({
+            id: 'round-2::execution_started',
+            execution_id: 'round-2::execution',
+            trigger_event_id: 'round-2::user_message',
+          }) as ChatEvent
+        );
+        chatEvents$.next(chunk('Hello'));
+      });
+      await flushFrame();
+      const streamingRendersBefore = turnRenderCount('round-2::execution');
+      act(() => {
+        chatEvents$.next(chunk(' there'));
+      });
+      await flushFrame();
+
+      expect(turnRenderCount('round-2::execution')).toBeGreaterThan(streamingRendersBefore);
+      expect(turnRenderCount('round-1::execution')).toBe(1);
+    });
   });
 });

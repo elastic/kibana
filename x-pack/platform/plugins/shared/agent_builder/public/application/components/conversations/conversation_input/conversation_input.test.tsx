@@ -73,13 +73,17 @@ jest.mock('../../../hooks/use_send_user_message', () => ({
 jest.mock('../../../hooks/use_toasts', () => ({
   useToasts: jest.fn(),
 }));
+const mockOnEditorRender = jest.fn();
 jest.mock('./message_editor', () => ({
   useMessageEditor: jest.fn(),
-  MessageEditor: ({ onSubmit }: { onSubmit: () => void }) => (
-    <button data-test-subj="mock-message-editor-submit" type="button" onClick={onSubmit}>
-      submit
-    </button>
-  ),
+  MessageEditor: ({ onSubmit }: { onSubmit: () => void }) => {
+    mockOnEditorRender();
+    return (
+      <button data-test-subj="mock-message-editor-submit" type="button" onClick={onSubmit}>
+        submit
+      </button>
+    );
+  },
   CommandBadgeSerializationError: class extends Error {},
 }));
 jest.mock('./input_actions/connector_selector', () => ({
@@ -290,6 +294,26 @@ describe('ConversationInput', () => {
 
     expect(mockedUseAgentModel).toHaveBeenCalledWith('elastic-ai-agent');
     expect(submitMessage).not.toHaveBeenCalled();
+  });
+
+  describe('rendering cost', () => {
+    it('does not render again when its parent renders with the same props', () => {
+      const onEditorFocus = jest.fn();
+      const { rerender } = renderInput(<ConversationInput onEditorFocus={onEditorFocus} />);
+      expect(mockOnEditorRender).toHaveBeenCalledTimes(1);
+
+      rerender(<ConversationInput onEditorFocus={onEditorFocus} />);
+
+      expect(mockOnEditorRender).toHaveBeenCalledTimes(1);
+    });
+
+    it('renders again when a prop changes', () => {
+      const { rerender } = renderInput(<ConversationInput onEditorFocus={jest.fn()} />);
+
+      rerender(<ConversationInput onEditorFocus={jest.fn()} />);
+
+      expect(mockOnEditorRender).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('message length limit', () => {
