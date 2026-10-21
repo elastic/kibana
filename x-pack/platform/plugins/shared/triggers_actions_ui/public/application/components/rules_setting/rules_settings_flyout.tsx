@@ -319,7 +319,7 @@ export const RulesSettingsFlyout = memo((props: RulesSettingsFlyoutProps) => {
       <EuiCallOut
         size="m"
         title={i18n.translate('xpack.triggersActionsUI.rulesSettings.flyout.calloutMessage', {
-          defaultMessage: 'Apply to all classic rules within the current space.',
+          defaultMessage: 'Applies to all Classic rules within the current space',
         })}
         css={css`
           position: sticky;
