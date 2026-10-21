@@ -27,11 +27,15 @@ jest.mock('@elastic/eui', () => ({
   useCurrentEuiBreakpoint: () => 'xl',
 }));
 jest.mock('./app/app', () => ({
-  NightshiftApp: ({ isStartInvestigationOpen }: { isStartInvestigationOpen?: boolean }) => (
-    <div
-      data-test-subj="nightshiftAppStub"
-      data-start-open={String(Boolean(isStartInvestigationOpen))}
-    />
+  NightshiftApp: () => <div data-test-subj="nightshiftAppStub" />,
+}));
+jest.mock('./investigation/start_investigation_panel', () => ({
+  StartInvestigationPanel: ({ onClose }: { onClose: () => void }) => (
+    <div data-test-subj="startInvestigationPanelStub">
+      <button onClick={onClose} type="button">
+        Close start investigation
+      </button>
+    </div>
   ),
 }));
 jest.mock('./sandbox_secrets/sandbox_secrets_flyout', () => ({
@@ -186,47 +190,61 @@ describe('NightshiftPage', () => {
     expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
   });
 
-  it('toggles the start investigation panel from the header primary action', async () => {
-    renderPage();
-
-    const investigateButton = await screen.findByTestId(
-      'o11yNightshiftAppStartInvestigationButton'
-    );
-    expect(investigateButton).toHaveTextContent('Investigate');
-    expect(screen.getByTestId('nightshiftAppStub')).toHaveAttribute('data-start-open', 'false');
-
-    await act(async () => fireEvent.click(investigateButton));
-    expect(screen.getByTestId('nightshiftAppStub')).toHaveAttribute('data-start-open', 'true');
-
-    await act(async () => fireEvent.click(investigateButton));
-    expect(screen.getByTestId('nightshiftAppStub')).toHaveAttribute('data-start-open', 'false');
-  });
-
-  it('hides the Investigate action without the Nightshift manage privilege', async () => {
-    mockUseKibana.mockReturnValue({
-      services: {
-        application: {
-          getUrlForApp,
-          navigateToUrl,
-          navigateToApp,
-          capabilities: { nightshift: { [NIGHTSHIFT_UI_PRIVILEGES.show]: true } },
-        },
-        featureFlags,
-        http: { basePath: { prepend: (path: string) => path } },
-        serverless: undefined,
-        observabilityShared: {
-          navigation: {
-            PageTemplate: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  describe('Investigate action', () => {
+    const withInvestigationsClient = (capabilities: Record<string, boolean>) => {
+      const { services } = mockUseKibana();
+      mockUseKibana.mockReturnValue({
+        services: {
+          ...services,
+          nightshiftInvestigations: { investigationsClient: {} },
+          application: {
+            ...services.application,
+            capabilities: { nightshift: capabilities },
           },
         },
-      },
-    });
-    renderPage();
+      });
+    };
 
-    await screen.findByTestId('nightshiftAppStub');
-    expect(
-      screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
-    ).not.toBeInTheDocument();
+    it('opens and closes the start investigation modal from the header primary action', async () => {
+      withInvestigationsClient({
+        [NIGHTSHIFT_UI_PRIVILEGES.show]: true,
+        [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
+      });
+      renderPage();
+
+      const investigateButton = await screen.findByTestId(
+        'o11yNightshiftAppStartInvestigationButton'
+      );
+      expect(investigateButton).toHaveTextContent('Investigate');
+      expect(screen.queryByTestId('startInvestigationPanelStub')).not.toBeInTheDocument();
+
+      await act(async () => fireEvent.click(investigateButton));
+      expect(screen.getByTestId('startInvestigationPanelStub')).toBeInTheDocument();
+
+      await act(async () =>
+        fireEvent.click(screen.getByRole('button', { name: 'Close start investigation' }))
+      );
+      expect(screen.queryByTestId('startInvestigationPanelStub')).not.toBeInTheDocument();
+    });
+
+    it('hides the action without the Nightshift manage privilege', async () => {
+      withInvestigationsClient({ [NIGHTSHIFT_UI_PRIVILEGES.show]: true });
+      renderPage();
+
+      await screen.findByTestId('nightshiftAppStub');
+      expect(
+        screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides the action when the investigations client is unavailable', async () => {
+      renderPage();
+
+      await screen.findByTestId('nightshiftAppStub');
+      expect(
+        screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
+      ).not.toBeInTheDocument();
+    });
   });
 
   it('links to Significant Events management', async () => {

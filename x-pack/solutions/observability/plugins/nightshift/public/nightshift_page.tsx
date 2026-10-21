@@ -30,6 +30,7 @@ import {
 import { AutomationsPage } from './automations/automations_page';
 import { useKibana } from './hooks/use_kibana';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
+import { StartInvestigationPanel } from './investigation/start_investigation_panel';
 import { SandboxSecretsFlyout } from './sandbox_secrets/sandbox_secrets_flyout';
 import { CustomContextFlyout } from './custom_context/custom_context_flyout';
 import { NightshiftOnboarding } from './onboarding/onboarding';
@@ -154,6 +155,10 @@ export function NightshiftPage(): React.ReactElement | null {
     setIsStartInvestigationOpen(false);
   }, [pathname]);
   const isLandingContent = !canUseAutomationsPage && !isOnboarding && !onboarding.isLoading;
+  // Starting an investigation only needs the investigations client, so the action and its modal
+  // don't depend on what the landing list renders.
+  const canStartInvestigation =
+    canManage && isLandingContent && nightshiftInvestigations?.investigationsClient != null;
 
   useBreadcrumbs(
     [
@@ -361,9 +366,7 @@ export function NightshiftPage(): React.ReactElement | null {
               canUseAutomations && !hidesHeaderActions ? navigateToAutomations : undefined
             }
             automationsHref={canUseAutomations && !hidesHeaderActions ? automationsHref : undefined}
-            onStartInvestigationClick={
-              canManage && isLandingContent ? toggleStartInvestigation : undefined
-            }
+            onStartInvestigationClick={canStartInvestigation ? toggleStartInvestigation : undefined}
             back={
               canUseAutomationsPage
                 ? {
@@ -401,13 +404,13 @@ export function NightshiftPage(): React.ReactElement | null {
                 <EuiLoadingSpinner size="xl" />
               </EuiFlexGroup>
             ) : (
-              <NightshiftApp
-                isStartInvestigationOpen={isStartInvestigationOpen}
-                onCloseStartInvestigation={closeStartInvestigation}
-              />
+              <NightshiftApp />
             )}
           </EuiPageTemplate.Section>
         </>
+      )}
+      {canStartInvestigation && isStartInvestigationOpen && (
+        <StartInvestigationPanel onClose={closeStartInvestigation} />
       )}
       {canManageSandboxSecrets && isSandboxSecretsFlyoutOpen && (
         <SandboxSecretsFlyout onClose={closeSandboxSecretsFlyout} />
