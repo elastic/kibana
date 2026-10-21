@@ -14,7 +14,7 @@ const applied: MetricsGridSettings = {
   counterAggregation: 'sum',
   gaugeAggregation: 'avg',
   histogramPercentile: 'p95',
-  histogramVisualization: 'percentile',
+  histogramVisualization: 'lnsXY',
   dimensions: ['host.name'],
   searchTerm: '',
 };
@@ -35,7 +35,7 @@ describe('getChangedSettings', () => {
       counterAggregation: 'sum',
       gaugeAggregation: 'min',
       histogramPercentile: 'p90',
-      histogramVisualization: 'percentile',
+      histogramVisualization: 'lnsXY',
       dimensions: ['host.name'],
       searchTerm: '',
     };

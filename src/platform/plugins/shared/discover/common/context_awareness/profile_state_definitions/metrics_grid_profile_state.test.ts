@@ -59,7 +59,7 @@ describe('METRICS_STATE_DEF', () => {
       counterAggregation: 'max',
       gaugeAggregation: 'avg',
       histogramPercentile: 'p95',
-      histogramVisualization: 'percentile',
+      histogramVisualization: 'lnsXY',
       sortField: 'alphabetically',
       sortDirection: 'asc',
       dimensions: [],

@@ -21,7 +21,6 @@ jest.mock('@kbn/discover-utils', () => {
   const metrics = jest.requireActual('@kbn/discover-utils/src/data_types/metrics');
 
   return {
-    HISTOGRAM_VISUALIZATION_CHART: metrics.HISTOGRAM_VISUALIZATION_CHART,
     METRICS_GRID_HISTOGRAM_PERCENTILES: metrics.METRICS_GRID_HISTOGRAM_PERCENTILES,
     METRICS_GRID_SIMPLE_AGGREGATIONS: metrics.METRICS_GRID_SIMPLE_AGGREGATIONS,
     isHistogramVisualization: metrics.isHistogramVisualization,
@@ -40,7 +39,7 @@ const defaultSettings: MetricsGridSettings = {
   counterAggregation: 'sum',
   gaugeAggregation: 'avg',
   histogramPercentile: 'p95',
-  histogramVisualization: 'distribution',
+  histogramVisualization: 'lnsHeatmap',
   dimensions: [],
   searchTerm: '',
 };
@@ -162,12 +161,12 @@ describe('GridSettingsFlyout', () => {
     });
     expect(mockTrackAggregationConfigChanged).toHaveBeenNthCalledWith(2, {
       metric_type: 'histogram',
-      previous_aggregation: 'distribution',
+      previous_aggregation: 'lnsHeatmap',
       new_aggregation: 'p95',
     });
     expect(onGridSettingsChange).toHaveBeenCalledWith({
       gaugeAggregation: 'min',
-      histogramVisualization: 'percentile',
+      histogramVisualization: 'lnsXY',
     });
   });
 
@@ -175,7 +174,7 @@ describe('GridSettingsFlyout', () => {
     const onGridSettingsChange = jest.fn();
     renderFlyout(
       <GridSettingsFlyout
-        gridSettings={{ ...defaultSettings, histogramVisualization: 'percentile' }}
+        gridSettings={{ ...defaultSettings, histogramVisualization: 'lnsXY' }}
         onGridSettingsChange={onGridSettingsChange}
         onClose={jest.fn()}
       />
@@ -185,11 +184,11 @@ describe('GridSettingsFlyout', () => {
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsDistributionChoice'));
     await userEvent.click(screen.getByTestId('metricsExperienceGridSettingsApplyButton'));
 
-    expect(onGridSettingsChange).toHaveBeenCalledWith({ histogramVisualization: 'distribution' });
+    expect(onGridSettingsChange).toHaveBeenCalledWith({ histogramVisualization: 'lnsHeatmap' });
     expect(mockTrackAggregationConfigChanged).toHaveBeenCalledWith({
       metric_type: 'histogram',
       previous_aggregation: 'p95',
-      new_aggregation: 'distribution',
+      new_aggregation: 'lnsHeatmap',
     });
   });
 
@@ -277,7 +276,7 @@ describe('GridSettingsFlyout', () => {
       <GridSettingsFlyout
         gridSettings={{
           ...defaultSettings,
-          histogramVisualization: 'percentile',
+          histogramVisualization: 'lnsXY',
           dimensions: ['host.name'],
         }}
         onGridSettingsChange={jest.fn()}

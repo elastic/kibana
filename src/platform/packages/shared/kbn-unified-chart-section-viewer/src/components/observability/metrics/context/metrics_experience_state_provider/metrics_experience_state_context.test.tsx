@@ -268,7 +268,7 @@ describe('MetricsExperienceStateProvider', () => {
         counterAggregation: 'sum',
         gaugeAggregation: 'avg',
         histogramPercentile: 'p95',
-        histogramVisualization: 'percentile',
+        histogramVisualization: 'lnsXY',
         dimensions: [],
         searchTerm: '',
       });
@@ -282,7 +282,7 @@ describe('MetricsExperienceStateProvider', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'min',
             histogramPercentile: 'p50',
-            histogramVisualization: 'percentile',
+            histogramVisualization: 'lnsXY',
             dimensions: ['host.name'],
             searchTerm: 'host',
           }}
@@ -296,7 +296,7 @@ describe('MetricsExperienceStateProvider', () => {
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p50',
-        histogramVisualization: 'percentile',
+        histogramVisualization: 'lnsXY',
         dimensions: ['host.name'],
         searchTerm: 'host',
       });

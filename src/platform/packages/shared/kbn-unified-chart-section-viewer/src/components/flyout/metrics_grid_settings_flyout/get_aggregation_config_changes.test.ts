@@ -47,13 +47,13 @@ describe('getAggregationConfigChanges', () => {
   it('reports distribution separately from the stored percentile', () => {
     expect(
       getAggregationConfigChanges(gridSettings, {
-        histogramVisualization: 'distribution',
+        histogramVisualization: 'lnsHeatmap',
       })
     ).toEqual([
       {
         metric_type: 'histogram',
         previous_aggregation: 'p95',
-        new_aggregation: 'distribution',
+        new_aggregation: 'lnsHeatmap',
       },
     ]);
   });
@@ -61,7 +61,7 @@ describe('getAggregationConfigChanges', () => {
   it('ignores a percentile change while distribution stays selected', () => {
     expect(
       getAggregationConfigChanges(
-        { ...gridSettings, histogramVisualization: 'distribution' },
+        { ...gridSettings, histogramVisualization: 'lnsHeatmap' },
         { histogramPercentile: 'p50' }
       )
     ).toEqual([]);

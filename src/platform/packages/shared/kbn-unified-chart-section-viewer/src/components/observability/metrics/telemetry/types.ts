@@ -32,9 +32,9 @@ export interface MetricAggregationConfigChangedEvent {
   previous_aggregation:
     | SimpleAggregation
     | HistogramPercentile
-    | Exclude<HistogramVisualization, 'percentile'>;
+    | Exclude<HistogramVisualization, 'lnsXY'>;
   new_aggregation:
     | SimpleAggregation
     | HistogramPercentile
-    | Exclude<HistogramVisualization, 'percentile'>;
+    | Exclude<HistogramVisualization, 'lnsXY'>;
 }

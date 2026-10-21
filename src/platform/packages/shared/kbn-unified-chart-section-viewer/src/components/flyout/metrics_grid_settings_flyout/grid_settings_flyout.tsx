@@ -28,7 +28,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
-  HISTOGRAM_VISUALIZATION_CHART,
   isHistogramVisualization,
   type HistogramVisualization,
   type MetricsGridSettings,
@@ -48,9 +47,9 @@ import { getChangedSettings } from './get_changed_settings';
 /** Explains the percentile series when the selected visualization cannot use it directly. */
 const getPercentileFallbackHint = (visualization: HistogramVisualization): string | undefined => {
   switch (visualization) {
-    case 'percentile':
+    case 'lnsXY':
       return undefined;
-    case 'distribution':
+    case 'lnsHeatmap':
       return i18n.translate('metricsExperience.gridSettingsFlyout.percentileFallbackHelpText', {
         defaultMessage:
           'Used when dimensions are selected. Distribution cannot be split by them, so histograms show the selected percentile instead.',
@@ -63,17 +62,17 @@ const getPercentileFallbackHint = (visualization: HistogramVisualization): strin
 };
 
 const getPercentileFieldLabel = (visualization: HistogramVisualization): string => {
-  switch (HISTOGRAM_VISUALIZATION_CHART[visualization]) {
-    case 'series':
+  switch (visualization) {
+    case 'lnsXY':
       return i18n.translate('metricsExperience.gridSettingsFlyout.percentileTypeLabel', {
         defaultMessage: 'Percentile type',
       });
-    case 'heatmap':
+    case 'lnsHeatmap':
       return i18n.translate('metricsExperience.gridSettingsFlyout.percentileFallbackLabel', {
         defaultMessage: 'Percentile fallback',
       });
     default: {
-      const unhandled: never = HISTOGRAM_VISUALIZATION_CHART[visualization];
+      const unhandled: never = visualization;
       return unhandled;
     }
   }
@@ -213,7 +212,7 @@ export const GridSettingsFlyout = ({
               legend={histogramDisplayLabel}
               data-test-subj="metricsExperienceGridSettingsHistogramDisplay"
               variant="selection"
-              display="highlighted"
+              display="regular"
               idSelected={draftSettings.histogramVisualization}
               onChange={onHistogramDisplayChange}
             >

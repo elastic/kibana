@@ -1159,7 +1159,7 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
-            histogramVisualization: 'percentile',
+            histogramVisualization: 'lnsXY',
             dimensions: [],
             searchTerm: '',
           }}
@@ -1178,7 +1178,7 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p95',
-            histogramVisualization: 'percentile',
+            histogramVisualization: 'lnsXY',
             dimensions: [],
             searchTerm: '',
           }}
@@ -1200,7 +1200,7 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
-            histogramVisualization: 'percentile',
+            histogramVisualization: 'lnsXY',
             dimensions: [],
             searchTerm: '',
           }}
@@ -1215,7 +1215,7 @@ describe('MetricsGrid', () => {
             counterAggregation: 'max',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p90',
-            histogramVisualization: 'percentile',
+            histogramVisualization: 'lnsXY',
             dimensions: [],
             searchTerm: '',
           },
@@ -1291,7 +1291,7 @@ describe('MetricsGrid', () => {
     const bounds = new Map([[getMetricUniqueKey(histogramItem), { bounds: { min: 1, max: 9 } }]]);
     const distributionGridSettings = {
       ...METRICS_GRID_SETTINGS_DEFAULTS,
-      histogramVisualization: 'distribution' as const,
+      histogramVisualization: 'lnsHeatmap' as const,
     };
 
     const renderMetricsGridWithHistDistributions = (props: Partial<MetricsGridProps> = {}) =>
@@ -1321,7 +1321,7 @@ describe('MetricsGrid', () => {
             counterAggregation: 'sum',
             gaugeAggregation: 'avg',
             histogramPercentile: 'p95',
-            histogramVisualization: 'percentile',
+            histogramVisualization: 'lnsXY',
             dimensions: [],
             searchTerm: '',
           }}

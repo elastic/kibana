@@ -26,8 +26,8 @@ const METRIC_TYPE_BY_SETTING: Record<AggregationSetting, MetricAggregationConfig
 
 const histogramAggregation = (
   settings: Pick<MetricsGridSettings, 'histogramPercentile' | 'histogramVisualization'>
-): HistogramPercentile | Exclude<HistogramVisualization, 'percentile'> =>
-  settings.histogramVisualization === 'percentile'
+): HistogramPercentile | Exclude<HistogramVisualization, 'lnsXY'> =>
+  settings.histogramVisualization === 'lnsXY'
     ? settings.histogramPercentile
     : settings.histogramVisualization;
 

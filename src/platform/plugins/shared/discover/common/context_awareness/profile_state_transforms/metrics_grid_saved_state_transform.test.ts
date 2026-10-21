@@ -39,7 +39,7 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
       counterAggregation: 'max',
       gaugeAggregation: 'min',
       histogramPercentile: 'p50',
-      histogramVisualization: 'percentile',
+      histogramVisualization: 'lnsXY',
       dimensions: ['host.name'],
       searchTerm: 'bytes',
       gridSortField: 'recency',
@@ -50,7 +50,7 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
         counterAggregation: 'max',
         gaugeAggregation: 'min',
         histogramPercentile: 'p50',
-        histogramVisualization: 'percentile',
+        histogramVisualization: 'lnsXY',
         dimensions: ['host.name'],
         searchTerm: 'bytes',
         sortField: 'recency',
@@ -106,13 +106,13 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
     const registry = createRegistry();
     const savedState = registry.toSavedState(DiscoverTabType.Metrics, {
       metricsState: {
-        histogramVisualization: 'distribution',
+        histogramVisualization: 'lnsHeatmap',
       },
     });
 
-    expect(savedState).toMatchObject({ histogramVisualization: 'distribution' });
+    expect(savedState).toMatchObject({ histogramVisualization: 'lnsHeatmap' });
     expect(registry.fromSavedState(savedState).metricsState).toMatchObject({
-      histogramVisualization: 'distribution',
+      histogramVisualization: 'lnsHeatmap',
     });
   });
 
@@ -135,7 +135,7 @@ describe('METRICS_GRID_SAVED_STATE_TRANSFORM', () => {
       counterAggregation: 'sum',
       gaugeAggregation: 'avg',
       histogramPercentile: 'p95',
-      histogramVisualization: 'percentile',
+      histogramVisualization: 'lnsXY',
       dimensions: [],
       searchTerm: '',
       gridSortField: 'alphabetically',

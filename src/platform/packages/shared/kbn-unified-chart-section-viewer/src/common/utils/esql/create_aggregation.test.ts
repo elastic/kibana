@@ -120,7 +120,7 @@ describe('createMetricAggregation with gridSettings override', () => {
     counterAggregation: 'max' as const,
     gaugeAggregation: 'min' as const,
     histogramPercentile: 'p90' as const,
-    histogramVisualization: 'percentile' as const,
+    histogramVisualization: 'lnsXY' as const,
     dimensions: [],
     searchTerm: '',
   };
@@ -161,7 +161,7 @@ describe('createMetricAggregation with gridSettings override', () => {
           counterAggregation: 'sum',
           gaugeAggregation,
           histogramPercentile: 'p95',
-          histogramVisualization: 'percentile' as const,
+          histogramVisualization: 'lnsXY' as const,
           dimensions: [],
           searchTerm: '',
         },

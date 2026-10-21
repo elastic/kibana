@@ -24,7 +24,7 @@ describe('grid_settings constants', () => {
       counterAggregation: 'sum',
       gaugeAggregation: 'avg',
       histogramPercentile: 'p95',
-      histogramVisualization: 'percentile',
+      histogramVisualization: 'lnsXY',
       dimensions: [],
       searchTerm: '',
     });

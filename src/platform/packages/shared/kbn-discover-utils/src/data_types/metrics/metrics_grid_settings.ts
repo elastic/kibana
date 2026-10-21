@@ -50,25 +50,20 @@ export const METRICS_GRID_HISTOGRAM_PERCENTILES = [
 export type HistogramPercentile = (typeof METRICS_GRID_HISTOGRAM_PERCENTILES)[number];
 
 /**
- * How a histogram metric is drawn. Add a value here to offer another choice.
- * Kept off the public session API until these visualizations are released.
+ * How a histogram metric is drawn. Values match the Lens saved-object
+ * `visualizationType` for the same graph. Add a value here to offer another
+ * choice. Kept off the public session API until these visualizations are released.
  */
-export const METRICS_GRID_HISTOGRAM_VISUALIZATIONS = ['percentile', 'distribution'] as const;
+export const METRICS_GRID_HISTOGRAM_VISUALIZATIONS = ['lnsXY', 'lnsHeatmap'] as const;
 
 export type HistogramVisualization = (typeof METRICS_GRID_HISTOGRAM_VISUALIZATIONS)[number];
-
-/** Chart each visualization draws. A new visualization has to name one. */
-export const HISTOGRAM_VISUALIZATION_CHART = {
-  percentile: 'series',
-  distribution: 'heatmap',
-} as const satisfies Record<HistogramVisualization, 'series' | 'heatmap'>;
 
 export const isHistogramVisualization = (value: string): value is HistogramVisualization =>
   (METRICS_GRID_HISTOGRAM_VISUALIZATIONS as readonly string[]).includes(value);
 
 /** True when this visualization draws a heatmap instead of the percentile series. */
 export const isHistogramHeatmapVisualization = (visualization: HistogramVisualization): boolean =>
-  HISTOGRAM_VISUALIZATION_CHART[visualization] === 'heatmap';
+  visualization === 'lnsHeatmap';
 
 export interface MetricsGridSettings extends SerializableRecord {
   counterAggregation: SimpleAggregation;
@@ -84,7 +79,7 @@ export const METRICS_GRID_SETTINGS_DEFAULTS: MetricsGridSettings = {
   gaugeAggregation: FunctionNames.AVG,
   histogramPercentile: 'p95',
   // Heatmaps stay opt-in until observability.metricsHeatmapsEnabled is on by default.
-  histogramVisualization: 'percentile',
+  histogramVisualization: 'lnsXY',
   dimensions: [],
   searchTerm: '',
 };

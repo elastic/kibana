@@ -1245,7 +1245,7 @@ describe('discover session API transforms', () => {
         histogramPercentile: 'p99',
         gridSortField: 'recency',
         gridSortDirection: 'desc',
-        histogramVisualization: 'distribution',
+        histogramVisualization: 'lnsHeatmap',
       };
       const savedMetricsSession = {
         ...discoverSessionAttributes,

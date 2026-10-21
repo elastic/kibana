@@ -133,7 +133,7 @@ describe('MetricsExperienceGridContent', () => {
       metricsSort: METRICS_GRID_SORT_DEFAULTS,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
-      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramVisualization: 'distribution' },
+      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramVisualization: 'lnsHeatmap' },
       recentlyExploredMetrics: [],
       onGridSettingsChange: jest.fn(),
     });
@@ -204,7 +204,7 @@ describe('MetricsExperienceGridContent', () => {
       metricsSort: METRICS_GRID_SORT_DEFAULTS,
       onMetricsSortChange: jest.fn(),
       profileId: 'test-profile-id',
-      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramVisualization: 'distribution' },
+      gridSettings: { ...METRICS_GRID_SETTINGS_DEFAULTS, histogramVisualization: 'lnsHeatmap' },
       recentlyExploredMetrics: [],
       onGridSettingsChange: jest.fn(),
     });

@@ -8,6 +8,7 @@
  */
 
 import type { EuiSuperSelectOption, IconType } from '@elastic/eui';
+import { IconChartHeatmap, IconChartLine } from '@kbn/chart-icons';
 import { i18n } from '@kbn/i18n';
 import type {
   HistogramPercentile,
@@ -96,19 +97,19 @@ export interface HistogramVisualizationChoice {
 /** Histogram choices shown in the flyout. */
 export const HISTOGRAM_VISUALIZATION_OPTIONS: HistogramVisualizationChoice[] = [
   {
-    id: 'distribution',
-    label: i18n.translate('metricsExperience.gridSettingsFlyout.distributionChoiceLabel', {
-      defaultMessage: 'Distribution',
+    id: 'lnsHeatmap',
+    label: i18n.translate('metricsExperience.gridSettingsFlyout.heatmapChoiceLabel', {
+      defaultMessage: 'Heat map',
     }),
-    iconType: 'chartHeatmap',
+    iconType: IconChartHeatmap as IconType,
     'data-test-subj': 'metricsExperienceGridSettingsDistributionChoice',
   },
   {
-    id: 'percentile',
-    label: i18n.translate('metricsExperience.gridSettingsFlyout.percentileChoiceLabel', {
-      defaultMessage: 'Percentile',
+    id: 'lnsXY',
+    label: i18n.translate('metricsExperience.gridSettingsFlyout.lineChoiceLabel', {
+      defaultMessage: 'Line',
     }),
-    iconType: 'chartLine',
+    iconType: IconChartLine as IconType,
     'data-test-subj': 'metricsExperienceGridSettingsPercentileChoice',
   },
 ];
