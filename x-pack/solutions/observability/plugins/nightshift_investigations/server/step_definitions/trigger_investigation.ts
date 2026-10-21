@@ -19,6 +19,8 @@ import {
   INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
   investigationNotificationDestinationsSchema,
+  MAX_KEYWORD_LENGTH,
+  toSlackThreadSubjectId,
 } from '../../common';
 import type { GetAutomationsSoClient, GetInvestigationsClient } from '../routes/types';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
@@ -38,14 +40,16 @@ const inputSchema = lazySchema(() =>
     subject_type: z
       .enum(INVESTIGATION_SUBJECT_TYPES)
       .describe(
-        'The type of entity being investigated. Use "manual" when the prompt is the whole subject, for example a Slack message.'
+        'The type of entity being investigated. Use "manual" when the prompt is the whole subject, and "slack_thread" when it is a Slack thread, which slack_thread then names.'
       ),
     subject_id: z
       .string()
       .min(1)
       .max(MAX_ID_LENGTH)
       .optional()
-      .describe('The subject ID; optional for a manual question'),
+      .describe(
+        'The subject ID; optional for a manual question, and not accepted for a Slack thread, whose ID comes from slack_thread'
+      ),
     title: z
       .string()
       .min(1)
@@ -102,6 +106,13 @@ const inputSchema = lazySchema(() =>
         workspace: z.string().min(1).max(128),
         channel: z.string().min(1).max(256),
         thread_ts: z.string().min(1).max(64),
+        external_conversation_id: z
+          .string()
+          .max(MAX_KEYWORD_LENGTH)
+          .optional()
+          .describe(
+            "The Relay's key for the thread. When empty, the same key is built from the thread's ids."
+          ),
       })
       .optional()
       .describe(
@@ -146,9 +157,21 @@ export const triggerInvestigationStepDefinition = (
       const input = inputSchema.parse(context.input);
       if (input.subject_type === 'manual') {
         if (!input.message?.trim()) throw new Error('Manual investigations require a message.');
+      } else if (input.subject_type === 'slack_thread') {
+        if (!input.slack_thread)
+          throw new Error('Slack thread investigations require slack_thread.');
+        if (input.subject_id) {
+          throw new Error('Slack thread investigations take their subject ID from slack_thread.');
+        }
+        if (!input.message?.trim())
+          throw new Error('Slack thread investigations require a message.');
       } else if (!input.subject_id) {
         throw new Error('Alert and significant event investigations require a subject ID.');
       }
+      const subjectId =
+        input.subject_type === 'slack_thread' && input.slack_thread
+          ? toSlackThreadSubjectId(input.slack_thread)
+          : input.subject_id ?? DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID;
       if (input.automation_id) {
         const soClient = getAutomationsSoClient(request, spaceId);
         const automation = await soClient.get<NightshiftAutomationAttributes>(
@@ -168,7 +191,7 @@ export const triggerInvestigationStepDefinition = (
       const result = await client.start({
         subject: {
           type: input.subject_type,
-          id: input.subject_id ?? DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
+          id: subjectId,
           summary: input.summary,
         },
         title: input.title,
