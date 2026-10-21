@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { css } from '@emotion/react';
 import {
+  EuiConfirmModal,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -18,14 +19,20 @@ import {
   EuiStepsHorizontal,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import type { CoreStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getOnboardingProvider } from './provider_registry';
 import { ONBOARDING_STEPS } from './steps';
 import { useStepState } from './use_step_state';
 import { useInvalidateDownstreamSteps } from './use_invalidate_downstream_steps';
+import { clearOnboardingSession } from './onboarding_session_storage';
+import { DEFAULT_RETURN_APP, getReturnUrl } from './return_url';
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import {
   AuthenticateAndDeployStep,
@@ -53,6 +60,9 @@ export function OnboardingShell() {
   const history = useHistory();
   const location = useLocation();
   const meta = getOnboardingProvider(integrationId)?.meta;
+  const { services } = useKibana<CoreStart>();
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+  const cancelModalTitleId = useGeneratedHtmlId();
 
   useEffect(() => {
     if (!meta) {
@@ -99,11 +109,25 @@ export function OnboardingShell() {
     };
   }, [currentStepId, currentStepIndex, markStepComplete, history]);
 
+  // The first step has no previous step: Back there cancels the flow, after a confirmation.
   const onBack = useMemo(() => {
-    if (currentStepIndex <= 0) return undefined;
+    if (currentStepIndex < 0) return undefined;
+    if (currentStepIndex === 0) return () => setIsCancelModalOpen(true);
     const prevStep = ONBOARDING_STEPS[currentStepIndex - 1];
     return () => history.push({ ...history.location, hash: `#${prevStep.id}` });
   }, [currentStepIndex, history]);
+
+  const handleCancelFlow = useCallback(() => {
+    // Read the return URL first, clearing the session removes it.
+    const returnUrl = getReturnUrl(integrationId);
+    clearOnboardingSession(integrationId);
+    setIsCancelModalOpen(false);
+    if (returnUrl) {
+      services.application?.navigateToUrl(returnUrl);
+    } else {
+      services.application?.navigateToApp(DEFAULT_RETURN_APP);
+    }
+  }, [integrationId, services.application]);
 
   const horizontalStepsConfig = useMemo(
     () =>
@@ -191,6 +215,34 @@ export function OnboardingShell() {
           CurrentStepComponent && <CurrentStepComponent onContinue={onContinue} onBack={onBack} />
         )}
       </EuiPageTemplate.Section>
+      {isCancelModalOpen && (
+        <EuiConfirmModal
+          aria-labelledby={cancelModalTitleId}
+          titleProps={{ id: cancelModalTitleId }}
+          title={i18n.translate('xpack.ingestHub.onboardingShell.cancelModal.title', {
+            defaultMessage: 'Cancel setup?',
+          })}
+          onCancel={() => setIsCancelModalOpen(false)}
+          onConfirm={handleCancelFlow}
+          cancelButtonText={i18n.translate(
+            'xpack.ingestHub.onboardingShell.cancelModal.keepEditingButton',
+            { defaultMessage: 'Keep editing' }
+          )}
+          confirmButtonText={i18n.translate(
+            'xpack.ingestHub.onboardingShell.cancelModal.cancelSetupButton',
+            { defaultMessage: 'Cancel setup' }
+          )}
+          buttonColor="danger"
+          data-test-subj="onboardingCancelModal"
+        >
+          <p>
+            <FormattedMessage
+              id="xpack.ingestHub.onboardingShell.cancelModal.body"
+              defaultMessage="Your changes will be lost if you cancel the flow."
+            />
+          </p>
+        </EuiConfirmModal>
+      )}
     </EuiPageTemplate>
   );
 }

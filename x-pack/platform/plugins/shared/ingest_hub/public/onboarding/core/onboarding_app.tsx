@@ -29,8 +29,7 @@ import { OnboardingFlowProvider } from '../onboarding_flow_context';
 import { clearOnboardingSession, getOnboardingSessionKey } from './onboarding_session_storage';
 import { ECF_LAUNCH_STEP_SESSION_KEY } from '../step_components/ecf_deployment_section';
 import { ONBOARDING_STEPS } from './steps';
-
-const DEFAULT_RETURN_APP = 'integrations';
+import { DEFAULT_RETURN_APP, saveReturnUrl } from './return_url';
 
 function RootRedirect() {
   const { services } = useKibana();
@@ -226,6 +225,13 @@ export async function renderOnboardingApp(
       // window.history.state survives a reload, so leaving it in place would re-clear every time.
       params.history.replace({ pathname, search, hash }, undefined);
     }
+  }
+
+  // Remember where the user came from, after the clear / hydrate above has wiped session storage.
+  const returnUrl = (state as { returnUrl?: string } | undefined)?.returnUrl;
+  const entryIntegrationId = pathname.split('/').filter(Boolean)[0];
+  if (entryIntegrationId && typeof returnUrl === 'string') {
+    saveReturnUrl(entryIntegrationId, returnUrl);
   }
 
   const queryClient = new QueryClient();

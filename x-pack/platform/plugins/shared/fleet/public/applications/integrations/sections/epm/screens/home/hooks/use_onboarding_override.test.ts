@@ -197,7 +197,7 @@ describe('useOnboardingOverride', () => {
       tile.onCardClick?.();
       expect(mockNavigateToApp).toHaveBeenCalledWith('onboarding', {
         path: '/aws',
-        state: { newSession: true },
+        state: { newSession: true, returnUrl: window.location.href },
       });
     });
 
@@ -212,7 +212,7 @@ describe('useOnboardingOverride', () => {
 
       expect(mockNavigateToApp).toHaveBeenCalledWith('onboarding', {
         path: '/aws',
-        state: { newSession: true },
+        state: { newSession: true, returnUrl: window.location.href },
       });
     });
 

@@ -14,6 +14,7 @@ export const SESSION_KEY_SUFFIXES = [
   'stepState',
   'ecfLaunchStep',
   'hydratedDeploymentId',
+  'returnUrl',
 ] as const;
 
 export type SessionKeySuffix = (typeof SESSION_KEY_SUFFIXES)[number];
