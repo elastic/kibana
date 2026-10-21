@@ -118,6 +118,18 @@ describe('streams unit schema', () => {
 describe('streams unit stats request schema', () => {
   const timeRange = { start: '2026-10-16T12:00:00.000Z', end: '2026-10-16T12:15:00.000Z' };
 
+  it('accepts up to 100 components and rejects more', () => {
+    const components = (count: number) =>
+      Array.from({ length: count }, (_, index) => ({ kind: 'destination', id: `d-${index}` }));
+
+    expect(streamsUnitStatsRequestSchema.safeParse({ components: components(100) }).success).toBe(
+      true
+    );
+    expect(streamsUnitStatsRequestSchema.safeParse({ components: components(101) }).success).toBe(
+      false
+    );
+  });
+
   it('treats an empty request and an empty components list as valid', () => {
     expect(streamsUnitStatsRequestSchema.safeParse({}).success).toBe(true);
     expect(streamsUnitStatsRequestSchema.safeParse({ components: [] }).success).toBe(true);
@@ -153,6 +165,21 @@ describe('streams unit stats request schema', () => {
     expect(
       streamsUnitStatsRequestSchema.safeParse({ filter: { time_range: timeRange } }).success
     ).toBe(true);
+  });
+
+  it('accepts a time range of 366 days and rejects a longer one', () => {
+    const parse = (days: number) =>
+      streamsUnitStatsRequestSchema.safeParse({
+        filter: {
+          time_range: {
+            start: '2026-01-01T00:00:00.000Z',
+            end: new Date(Date.parse('2026-01-01T00:00:00.000Z') + days * 86_400_000).toISOString(),
+          },
+        },
+      }).success;
+
+    expect(parse(366)).toBe(true);
+    expect(parse(367)).toBe(false);
   });
 
   it('rejects a time range that is partial, not ISO 8601, or not start before end', () => {

@@ -22,6 +22,7 @@ export {
   streamsUnitResponseSchema,
   streamsUnitSchema,
   streamsUnitSecretsSchema,
+  MAX_STREAMS_UNIT_STATS_COMPONENTS,
   streamsUnitStatsComponentRefSchema,
   streamsUnitStatsDestinationResultSchema,
   streamsUnitStatsErrorSchema,

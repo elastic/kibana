@@ -181,6 +181,15 @@ export const streamsUnitUpsertRequestSchema = z.object({
 });
 
 /**
+ * The most components one stats request can name. The UI shows at most 50 rows of a kind at
+ * a time, and a zoomed out map fits about 30, so 100 covers a table page twice over.
+ */
+export const MAX_STREAMS_UNIT_STATS_COMPONENTS = 100;
+
+/** The timepicker allows at most one year, so a leap year is the longest range. */
+const MAX_STATS_TIME_RANGE_MS = 366 * 24 * 60 * 60 * 1000;
+
+/**
  * Stats request. A component ref is a discriminated union on `kind`. Adding a kind is
  * adding a member.
  */
@@ -196,19 +205,29 @@ export const streamsUnitStatsFilterSchema = z.strictObject({
    * so the 128 cap is headroom, not a format check.
    */
   config_hash: z.string().min(1).max(128).optional(),
-  /** Absolute range, ISO 8601. Both fields are required when present. No maximum for now. */
+  /** Absolute range, ISO 8601. Both fields are required when present. At most 366 days. */
   time_range: z
     .strictObject({ start: z.iso.datetime(), end: z.iso.datetime() })
     .refine(({ start, end }) => Date.parse(start) < Date.parse(end), {
       message: 'time_range.start must be before time_range.end',
+    })
+    .refine(({ start, end }) => Date.parse(end) - Date.parse(start) <= MAX_STATS_TIME_RANGE_MS, {
+      message: 'time_range must not be longer than 366 days',
     })
     .optional(),
 });
 
 export const streamsUnitStatsRequestSchema = z.strictObject({
   filter: streamsUnitStatsFilterSchema.optional(),
-  /** Lists the unit components to receive stats on. Omit or leave empty to query every destination and processor in the unit. */
-  components: z.array(streamsUnitStatsComponentRefSchema).max(2000).optional(),
+  /**
+   * Lists the unit components to receive stats on. Omit or leave empty to query every
+   * destination and processor in the unit, which is only allowed when the unit has at most
+   * `MAX_STREAMS_UNIT_STATS_COMPONENTS` of them.
+   */
+  components: z
+    .array(streamsUnitStatsComponentRefSchema)
+    .max(MAX_STREAMS_UNIT_STATS_COMPONENTS)
+    .optional(),
 });
 
 export const streamsUnitStatsErrorSchema = z.object({
