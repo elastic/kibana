@@ -276,10 +276,8 @@ export const Expressions: React.FC<ExpressionsProps> = (props) => {
       }
     }
 
-    if (!ruleParams.schema) {
-      if (md && md.schema && canSelectSchema) {
-        setRuleParams('schema', md.schema);
-      }
+    if (!ruleParams.schema && canSelectSchema) {
+      setRuleParams('schema', md?.schema ?? DEFAULT_SCHEMA);
     }
 
     if (ruleParams.criteria && ruleParams.criteria.length) {
