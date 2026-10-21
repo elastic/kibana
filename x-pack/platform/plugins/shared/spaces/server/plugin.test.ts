@@ -95,6 +95,7 @@ describe('Spaces plugin', () => {
         ...cloudMock.createSetup(),
         apm: {},
         onboarding: { defaultSolution: 'security' },
+        registerBillingAccessChecker: jest.fn(),
       } as CloudSetup;
 
       const plugin = new SpacesPlugin(initializerContext);

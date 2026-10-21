@@ -19,6 +19,13 @@ export {
   resolveProtectedResource,
 } from './oauth_protected_resource';
 export type {
+  UiamAuthorizationCheck,
+  UiamAuthorizationCheckResult,
+  UiamAuthorizationResource,
+  UiamAuthorizationResult,
+} from './authorization_types';
+export { createBillingAccessChecker } from './billing_access';
+export type {
   ServiceAccountAssumableBy,
   UiamListServiceAccountsResponse,
   UiamOrganizationRoleAssignment,

@@ -53,6 +53,14 @@ describe('Cloud Plugin', () => {
         expect(setup.isCloudEnabled).toBe(true);
       });
 
+      it('accepts a single billing access checker', () => {
+        const { setup } = setupPlugin();
+        setup.registerBillingAccessChecker(jest.fn());
+        expect(() => setup.registerBillingAccessChecker(jest.fn())).toThrow(
+          'A billing access checker is already registered.'
+        );
+      });
+
       describe('isEce', () => {
         it('defaults to true for cloud-enabled non-serverless deployments when isSaasContainer is missing', () => {
           const { setup } = setupPlugin();

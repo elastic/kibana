@@ -37,3 +37,10 @@ export interface CloudSecurityAnswer {
     type?: 'splunk' | 'other';
   };
 }
+
+/**
+ * Whether the current user may see Cloud billing. `null` when Kibana has no way to check.
+ */
+export interface CloudBillingAccessResponse {
+  hasAccess: boolean | null;
+}
