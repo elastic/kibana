@@ -108,7 +108,7 @@ interface QueryPerformanceTrackerParams {
 
 interface QueryPerformanceReportEventParams {
   requestAdapter: RequestAdapter | undefined;
-  approximation?: boolean;
+  approximationApplied?: boolean;
 }
 
 export class ScopedDiscoverEBTManager {
@@ -435,7 +435,10 @@ export class ScopedDiscoverEBTManager {
     let reported = false;
 
     return {
-      reportEvent: ({ requestAdapter, approximation }: QueryPerformanceReportEventParams) => {
+      reportEvent: ({
+        requestAdapter,
+        approximationApplied,
+      }: QueryPerformanceReportEventParams) => {
         if (reported || !this.reportPerformanceEvent) {
           return;
         }
@@ -449,11 +452,12 @@ export class ScopedDiscoverEBTManager {
         );
         const mergedAnalysis = mergeMultiMatchAnalyses(queryAnalyses);
         const phraseQueryCount = mergedAnalysis.typeCounts.get('match_phrase') ?? 0;
-        const fetchType: QueryPerformanceFetchType = isOfAggregateQueryType(query)
+        const isEsqlQuery = isOfAggregateQueryType(query);
+        const fetchType: QueryPerformanceFetchType = isEsqlQuery
           ? 'fetchTextBased'
           : 'fetchDocuments';
         const queryRangeSeconds = timeRange ? getTimeDifferenceInSeconds(timeRange) : 0;
-        const querySourceCommand = isOfAggregateQueryType(query)
+        const querySourceCommand = isEsqlQuery
           ? getAnySourceCommandFromESQLQuery(query.esql) || undefined
           : undefined;
 
@@ -466,7 +470,7 @@ export class ScopedDiscoverEBTManager {
             fetchType,
             multi_match_types: mergedAnalysis.rawTypes,
             ...(querySourceCommand ? { query_source_command: querySourceCommand } : {}),
-            ...(approximation !== undefined ? { approximation } : {}),
+            ...(isEsqlQuery ? { approximationApplied: approximationApplied ?? false } : {}),
           },
           eventName,
           duration,

@@ -1104,6 +1104,7 @@ describe('DiscoverEBTManager', () => {
           fetchType: 'fetchTextBased',
           multi_match_types: ['match_phrase', 'phrase'],
           query_source_command: 'FROM',
+          approximationApplied: false,
         },
       });
 
@@ -1145,11 +1146,12 @@ describe('DiscoverEBTManager', () => {
           fetchType: 'fetchTextBased',
           multi_match_types: [],
           query_source_command: 'PROMQL',
+          approximationApplied: false,
         },
       });
     });
 
-    it('should omit query source command for classic queries', () => {
+    it('should omit query source command and approximationApplied for classic queries', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
@@ -1239,7 +1241,7 @@ describe('DiscoverEBTManager', () => {
       analyzeSpy.mockRestore();
     });
 
-    it('should track approximation as true when the response has approximate results', () => {
+    it('should track approximationApplied as true when the response has approximate results', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
@@ -1259,7 +1261,7 @@ describe('DiscoverEBTManager', () => {
         },
       });
 
-      tracker.reportEvent({ requestAdapter: undefined, approximation: true });
+      tracker.reportEvent({ requestAdapter: undefined, approximationApplied: true });
 
       expect(reportPerformanceMetricEvent).toHaveBeenCalledWith(coreSetupMock.analytics, {
         eventName: 'testQueryEvent',
@@ -1272,12 +1274,12 @@ describe('DiscoverEBTManager', () => {
           fetchType: 'fetchTextBased',
           multi_match_types: [],
           query_source_command: 'FROM',
-          approximation: true,
+          approximationApplied: true,
         },
       });
     });
 
-    it('should track approximation as false when the response does not have approximate results', () => {
+    it('should track approximationApplied as false when the response does not have approximate results', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
@@ -1297,7 +1299,7 @@ describe('DiscoverEBTManager', () => {
         },
       });
 
-      tracker.reportEvent({ requestAdapter: undefined, approximation: false });
+      tracker.reportEvent({ requestAdapter: undefined, approximationApplied: false });
 
       expect(reportPerformanceMetricEvent).toHaveBeenCalledWith(coreSetupMock.analytics, {
         eventName: 'testQueryEvent',
@@ -1310,12 +1312,12 @@ describe('DiscoverEBTManager', () => {
           fetchType: 'fetchTextBased',
           multi_match_types: [],
           query_source_command: 'FROM',
-          approximation: false,
+          approximationApplied: false,
         },
       });
     });
 
-    it('should omit approximation from the performance event when not provided', () => {
+    it('should default approximationApplied to false for ES|QL queries when not provided', () => {
       discoverEBTContextManager.initialize({
         core: coreSetupMock,
         discoverEbtContext$,
@@ -1348,6 +1350,7 @@ describe('DiscoverEBTManager', () => {
           fetchType: 'fetchTextBased',
           multi_match_types: [],
           query_source_command: 'FROM',
+          approximationApplied: false,
         },
       });
     });

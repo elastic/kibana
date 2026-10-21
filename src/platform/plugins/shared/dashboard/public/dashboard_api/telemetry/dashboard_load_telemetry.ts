@@ -178,7 +178,7 @@ function reportPerformanceMetrics({
     key9: 'mean_panel_rendering',
     value9: meanPanelRenderComplete,
     meta: {
-      approximation: getApproximationApplied(children),
+      approximationApplied: getApproximationApplied(children),
     },
   };
 
