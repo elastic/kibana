@@ -81,18 +81,19 @@ const IsomerExportFlyout = ({
   const timeRange = locatorParams?.params?.time_range;
   const controls = currentControls(locatorParams?.params?.pinned_panels);
   const [layout, setLayout] = useState<DashboardLayout>('grid');
-  const [busy, setBusy] = useState(false);
+  const [busy, setBusy] = useState<'pdf' | 'composition'>();
   const [error, setError] = useState<string>();
   const path = objectId ? `${API_BASE}/${encodeURIComponent(objectId)}` : undefined;
 
-  const download = async () => {
+  /** Downloads what `kind` exports: the PDF, or the composition it draws. */
+  const download = async (kind: 'pdf' | 'composition') => {
     if (!path) {
       return;
     }
-    setBusy(true);
+    setBusy(kind);
     setError(undefined);
     try {
-      const { response } = await core.http.post(`${path}/pdf`, {
+      const { response } = await core.http.post(`${path}/${kind}`, {
         body: JSON.stringify({
           layout,
           ...(timeRange ? { timeRange } : {}),
@@ -104,12 +105,15 @@ const IsomerExportFlyout = ({
       if (!response?.ok) {
         throw new Error((await response?.text()) ?? 'The export failed');
       }
-      downloadFileAs(`${title}.pdf`, await response.blob());
+      downloadFileAs(
+        kind === 'pdf' ? `${title}.pdf` : `${title}.isomer.json`,
+        await response.blob()
+      );
       closeFlyout();
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
     } finally {
-      setBusy(false);
+      setBusy(undefined);
     }
   };
 
@@ -208,12 +212,25 @@ const IsomerExportFlyout = ({
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              iconType="editorCodeBlock"
+              onClick={() => download('composition')}
+              isLoading={busy === 'composition'}
+              isDisabled={!path || busy !== undefined}
+              data-test-subj="isomerDashboardsDownloadComposition"
+            >
+              {i18n.translate('xpack.isomerDashboards.flyout.downloadComposition', {
+                defaultMessage: 'Download composition',
+              })}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiButton
               fill
               iconType="download"
-              onClick={download}
-              isLoading={busy}
-              isDisabled={!path}
+              onClick={() => download('pdf')}
+              isLoading={busy === 'pdf'}
+              isDisabled={!path || busy !== undefined}
               data-test-subj="isomerDashboardsDownloadPdf"
             >
               {i18n.translate('xpack.isomerDashboards.flyout.download', {
