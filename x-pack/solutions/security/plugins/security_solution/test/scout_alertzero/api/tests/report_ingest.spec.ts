@@ -11,7 +11,7 @@ import {
   CREATE_THREAT_REPORT_API_PATH,
   EXTRACT_IOCS_API_PATH,
 } from '../../../../common/threat_intel';
-import { apiTest, tags, testData, cleanupThreatReportsByIds } from '../fixtures';
+import { apiTest, tags, TI_HEADERS, cleanupThreatReportsByIds } from '../fixtures';
 
 interface CreateReportResponse {
   status: 'ingested' | 'duplicate';
@@ -22,12 +22,11 @@ interface CreateReportResponse {
 type ExtractIocsResponse = ExtractIocsResult;
 
 /**
- * `create_threat_report` writes to `.kibana-threat-reports`, which is created
- * lazily. Its dedup precheck therefore runs against an index that may not exist
- * yet on a fresh space or deployment, and a search without `ignore_unavailable`
- * throws `index_not_found_exception` before the route's own try block. Unit tests
- * mock the ES client and so never see a real missing index; only a run against a
- * live cluster covers the first-ingest path.
+ * Live ingest and dedup against `.kibana-threat-reports`. Bootstrap creates that
+ * companion index after the templates land, so a healthy Scout stack already has
+ * it. The create path still uses `ignore_unavailable` on the dedup precheck so a
+ * missing index (bootstrap incomplete, index deleted) does not 500 before the
+ * write; unit tests mock ES and never exercise that path on a real cluster.
  */
 apiTest.describe('Threat Intel - report ingest API', { tag: [...tags.stateful.classic] }, () => {
   let writeHeaders: Record<string, string>;
@@ -36,7 +35,7 @@ apiTest.describe('Threat Intel - report ingest API', { tag: [...tags.stateful.cl
   apiTest.beforeAll(async ({ samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     writeHeaders = {
-      ...testData.TI_HEADERS,
+      ...TI_HEADERS,
       ...cookieHeader,
     };
   });
@@ -61,8 +60,9 @@ apiTest.describe('Threat Intel - report ingest API', { tag: [...tags.stateful.cl
       body,
     });
 
-    // The first write lands even though the reports index did not exist before
-    // this request. A regression in the dedup precheck surfaces here as a 500.
+    // Ingest against the bootstrapped reports index. A regression in the dedup
+    // precheck (for example dropping `ignore_unavailable`) surfaces here as a 500
+    // only when the index is missing; on a healthy stack this is the happy path.
     expect(first).toHaveStatusCode(200);
     const firstBody = first.body as CreateReportResponse;
     expect(firstBody.status).toBe('ingested');

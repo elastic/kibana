@@ -19,7 +19,12 @@ import { RULE_WORKFLOW_TRIGGERS, RuleCreatedTriggerId } from './triggers';
 
 const ruleCreatedEvent: RuleCreatedEvent = {
   type: RULE_CREATED_EVENT_TYPE,
-  payload: { ruleId: 'rule-1', spaceId: 'my-space', correlationId: 'corr-1' },
+  payload: {
+    ruleId: 'rule-1',
+    spaceId: 'my-space',
+    correlationId: 'corr-1',
+    origin: { channel: 'api' },
+  },
 };
 
 // Workflows only ever see the projected rule reference, never the full payload.
