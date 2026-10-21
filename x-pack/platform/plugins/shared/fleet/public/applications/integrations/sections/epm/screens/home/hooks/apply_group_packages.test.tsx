@@ -13,6 +13,7 @@ import {
   getInstalledGroupSchemas,
   getGroupInstalledLabel,
 } from './apply_group_packages';
+import { applyGrouping } from './apply_grouping';
 
 jest.mock('../card_utils', () => ({
   mapToCard: ({ item }: { item: PackageListItem }) => ({
@@ -123,5 +124,46 @@ describe('applyGroupPackages', () => {
     expect(getGroupInstalledLabel(['ecs'])).toBe('Installed, ECS');
     expect(getGroupInstalledLabel(['otel'])).toBe('Installed, OTel');
     expect(getGroupInstalledLabel(['ecs', 'otel'])).toBe('Installed, ECS + OTel');
+  });
+
+  // PROTOTYPE: second group with no Kibana changes. Package list as served by the local registry
+  // on 2026-10-21 (apache_group + children built locally; Spark/Tomcat proxied from upstream EPR,
+  // which still tags them `group: apache`).
+  it('Apache: group tile, but the OTel content pack and the static Apache collection remain', () => {
+    const apacheGroup = pkg('apache_group', {
+      title: 'Apache HTTP Server',
+      requires: {
+        integration: [
+          { package: 'apache', version: '^3.0.0' },
+          { package: 'apache_input_otel', version: '^0.1.0' },
+        ],
+      },
+      schemas: {
+        otel: { integration: 'apache_input_otel', default: true },
+        ecs: { integration: 'apache' },
+      },
+    });
+    const items = [
+      apacheGroup,
+      pkg('apache', { title: 'Apache HTTP Server' }),
+      pkg('apache_input_otel', { type: 'input', title: 'Apache HTTP Server (OpenTelemetry)' }),
+      pkg('apache_otel', { type: 'content', title: 'Apache OpenTelemetry Assets' }),
+      pkg('apache_spark', { group: 'apache', title: 'Apache Spark' }),
+      pkg('apache_tomcat', { group: 'apache', title: 'Apache Tomcat' }),
+      pkg('apache_tomcat_otel', {
+        type: 'content',
+        group: 'apache',
+        title: 'Apache Tomcat OpenTelemetry Assets',
+      }),
+    ];
+    const { groupCards, remainingItems } = applyGroupPackages({ items, ...params });
+    const { collectionCards, ungroupedItems } = applyGrouping({ items: remainingItems, ...params });
+    expect(groupCards.map((c) => c.title)).toEqual(['Apache HTTP Server']);
+    // Input packages can't declare requires.content, so nothing links apache_otel to the group.
+    expect(ungroupedItems.map((i) => (i as PackageListItem).name)).toEqual(['apache_otel']);
+    // INTEGRATION_GROUPS.apache ("Apache technologies") still collects the upstream packages.
+    expect(collectionCards.map((c) => [c.title, c.groupMembers?.map((m) => m.name)])).toEqual([
+      ['Apache', ['apache_spark', 'apache_tomcat', 'apache_tomcat_otel']],
+    ]);
   });
 });

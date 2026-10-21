@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-// PROTOTYPE: layout primitives for the Nginx onboarding wizard, modeled on the design team's
+// PROTOTYPE: layout primitives for the integration group onboarding wizard, modeled on the design team's
 // Ingest Workbench prototype (elastic/ingest-workbench-preview). Not production components.
 //
 // Visual rules: white surfaces with hairline borders. Selection is a primary border plus a faint
 // wash. The only tinted surface is the shared "Global settings" block.
 
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
 import {
   EuiBadge,
@@ -30,8 +30,8 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import type { NginxStep } from './model';
-import { STEP_LABELS } from './model';
+import type { WizardStep } from './model';
+import { getStepLabel } from './model';
 
 export const SectionHeading: React.FC<{
   title: string;
@@ -140,11 +140,11 @@ export const ChoiceCard: React.FC<{
 
 /** Vertical step rail on the left of the wizard. */
 export const StepRail: React.FC<{
-  steps: NginxStep[];
-  current: NginxStep;
-  completed: (step: NginxStep) => boolean;
-  canSelect: (step: NginxStep) => boolean;
-  onSelect: (step: NginxStep) => void;
+  steps: WizardStep[];
+  current: WizardStep;
+  completed: (step: WizardStep) => boolean;
+  canSelect: (step: WizardStep) => boolean;
+  onSelect: (step: WizardStep) => void;
 }> = ({ steps, current, completed, canSelect, onSelect }) => {
   const { euiTheme } = useEuiTheme();
   return (
@@ -160,7 +160,7 @@ export const StepRail: React.FC<{
             disabled={!selectable}
             aria-current={isCurrent ? 'step' : undefined}
             onClick={() => onSelect(step)}
-            data-test-subj={`nginxWizardRail-${step}`}
+            data-test-subj={`groupWizardRail-${step}`}
             css={css({
               display: 'flex',
               alignItems: 'center',
@@ -185,7 +185,7 @@ export const StepRail: React.FC<{
               '&:hover': selectable ? { color: euiTheme.colors.textPrimary } : undefined,
             })}
           >
-            <span css={css({ flex: 1 })}>{STEP_LABELS[step]}</span>
+            <span css={css({ flex: 1 })}>{getStepLabel(step)}</span>
             {isDone && <EuiIcon type="check" color="success" size="s" aria-hidden={true} />}
           </button>
         );
@@ -249,10 +249,14 @@ export const SharedSettingsCard: React.FC<{
   title: string;
   description: string;
   advanced?: React.ReactNode;
+  forceOpenAdvanced?: boolean;
   children?: React.ReactNode;
-}> = ({ title, description, advanced, children }) => {
+}> = ({ title, description, advanced, forceOpenAdvanced, children }) => {
   const { euiTheme } = useEuiTheme();
   const [showAdvanced, setShowAdvanced] = useState(false);
+  useEffect(() => {
+    if (forceOpenAdvanced) setShowAdvanced(true);
+  }, [forceOpenAdvanced]);
   return (
     <div
       css={css({
@@ -316,14 +320,33 @@ export const AdvancedToggle: React.FC<{ isOpen: boolean; onToggle: () => void }>
 /** Collapsible row per data stream. Starts collapsed. Streams are picked on step 1. */
 export const StreamCard: React.FC<{
   title: string;
-  description: string;
+  description?: string;
+  icon?: React.ReactNode;
   advanced?: React.ReactNode;
+  /** Opens the card (and advanced options) e.g. to show validation errors. */
+  forceOpen?: boolean;
+  forceOpenAdvanced?: boolean;
+  footer?: React.ReactNode;
   children: React.ReactNode;
   'data-test-subj'?: string;
-}> = ({ title, description, advanced, children, ...rest }) => {
+}> = ({
+  title,
+  description,
+  icon,
+  advanced,
+  forceOpen,
+  forceOpenAdvanced,
+  footer,
+  children,
+  ...rest
+}) => {
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  useEffect(() => {
+    if (forceOpen) setIsOpen(true);
+    if (forceOpenAdvanced) setShowAdvanced(true);
+  }, [forceOpen, forceOpenAdvanced]);
   return (
     <div
       data-test-subj={rest['data-test-subj']}
@@ -355,14 +378,16 @@ export const StreamCard: React.FC<{
         })}
       >
         <Chevron isOpen={isOpen} size="m" />
-        <EuiIcon type="logoNginx" size="m" aria-hidden={true} />
+        {icon}
         <div css={css({ flex: 1 })}>
           <EuiText size="s">
             <strong>{title}</strong>
           </EuiText>
-          <EuiText size="xs" color="subdued">
-            {description}
-          </EuiText>
+          {description && (
+            <EuiText size="xs" color="subdued">
+              {description}
+            </EuiText>
+          )}
         </div>
         {advanced && (
           <div
@@ -389,6 +414,7 @@ export const StreamCard: React.FC<{
               <div css={css({ paddingTop: euiTheme.size.base })}>{advanced}</div>
             </Reveal>
           )}
+          {footer && <div css={css({ paddingTop: euiTheme.size.base })}>{footer}</div>}
         </div>
       </Reveal>
     </div>

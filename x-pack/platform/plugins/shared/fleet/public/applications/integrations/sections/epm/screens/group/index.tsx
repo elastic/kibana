@@ -5,47 +5,32 @@
  * 2.0.
  */
 
-// PROTOTYPE: integration group page. Nginx gets the hard-coded onboarding wizard. Other groups
-// redirect straight to the create-package-policy page for the default schema's child integration,
-// passing `?group=<name>`; the ECS / OTel toggle lives on that page.
+// PROTOTYPE: integration group page. Every group (package with `schemas`) gets the generic
+// onboarding wizard, driven by its child integrations' package metadata. No per-group code.
+// The create-package-policy page keeps its `?group=<name>` schema toggle for direct links.
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { useParams } from 'react-router-dom';
 import { EuiCallOut, EuiSkeletonText } from '@elastic/eui';
 
-import { INTEGRATIONS_PLUGIN_ID } from '../../../../constants';
-import { useStartServices } from '../../../../hooks';
 import { useGroupPackage } from '../../../../../../hooks/use_group_package';
 
-import { useGroupSchemaPath } from './schema_toggle';
-import { NginxOnboardingWizard } from './nginx_wizard';
-import type { NginxSchema } from './nginx_wizard/model';
-import { NGINX_GROUP_NAME } from './nginx_wizard/model';
+import { GroupOnboardingWizard } from './group_wizard';
 
 export { GroupSchemaToggle } from './schema_toggle';
 
 export const GroupPackagePage: React.FC = () => {
   const { groupName } = useParams<{ groupName: string }>();
-  const { application } = useStartServices();
   const { group, options, defaultSchema, isLoading } = useGroupPackage(groupName);
-  const getSchemaPath = useGroupSchemaPath();
 
-  const option =
-    options.find((o) => o.schema === defaultSchema && o.child) ?? options.find((o) => o.child);
-  const isNginx = groupName === NGINX_GROUP_NAME;
-  const path = group && option && !isNginx ? getSchemaPath(group.name, option) : undefined;
-
-  useEffect(() => {
-    if (path) application.navigateToApp(INTEGRATIONS_PLUGIN_ID, { path, replace: true });
-  }, [application, path]);
-
-  if (isLoading || path) return <EuiSkeletonText lines={6} />;
-  if (isNginx && group && options.some((o) => o.child)) {
+  if (isLoading) return <EuiSkeletonText lines={6} />;
+  if (group && options.some((o) => o.child)) {
     return (
-      <NginxOnboardingWizard
+      <GroupOnboardingWizard
         group={group}
-        options={options}
-        defaultSchema={(defaultSchema as NginxSchema) ?? 'otel'}
+        // Schemas whose child isn't in the registry can't be offered.
+        options={options.filter((o) => o.child)}
+        defaultSchema={defaultSchema}
       />
     );
   }
