@@ -6,9 +6,6 @@
   "include": ["common/**/*", "public/**/*", "server/**/*", "test/scout/**/*", "test/scout_digital_experience/**/*"],
   "kbn_references": [
     "@kbn/core",
-    "@kbn/core-http-router-server-mocks",
-    "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/logging-mocks",
     "@kbn/config-schema",
     "@kbn/data-plugin",
     "@kbn/deeplinks-observability",
