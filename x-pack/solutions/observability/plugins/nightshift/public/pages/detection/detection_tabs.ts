@@ -12,8 +12,8 @@ export const DETECTION_TAB_IDS = ['events'] as const;
 export type DetectionTabId = (typeof DETECTION_TAB_IDS)[number];
 
 export const DETECTION_TAB_LABELS: Record<DetectionTabId, string> = {
-  events: i18n.translate('xpack.nightshift.detectionPage.tabs.events', {
-    defaultMessage: 'Events',
+  events: i18n.translate('xpack.nightshift.detectionPage.tabs.discoveries', {
+    defaultMessage: 'Discoveries',
   }),
 };
 
