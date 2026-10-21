@@ -28,11 +28,7 @@ import { LoadingIndicator } from '../../components/loading_indicator/loading_ind
 import { ForecastingModal } from '../components/forecasting_modal/forecasting_modal';
 import { TimeseriesexplorerNoChartData } from '../components/timeseriesexplorer_no_chart_data';
 
-import {
-  APP_STATE_ACTION,
-  CHARTS_POINT_TARGET,
-  TIME_FIELD_NAME,
-} from '../timeseriesexplorer_constants';
+import { APP_STATE_ACTION, CHARTS_POINT_TARGET } from '../timeseriesexplorer_constants';
 import { getControlsForDetector } from '../get_controls_for_detector';
 import { TimeSeriesChartWithTooltips } from '../components/timeseries_chart/timeseries_chart_with_tooltip';
 import { isMetricDetector } from '../get_function_description';
@@ -260,7 +256,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       searchBounds,
       selectedJob,
       functionDescription,
-      TIME_FIELD_NAME
+      this.focusLoadSignal
     );
   }
 
@@ -921,6 +917,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                 tableData={tableData}
                 sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
                 telemetrySource={'embeddable_single_metric_viewer_chart'}
+                requestCancellationManager={this.props.requestCancellationManager}
               />
             </div>
           )}
