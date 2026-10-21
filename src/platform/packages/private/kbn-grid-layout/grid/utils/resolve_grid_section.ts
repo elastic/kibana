@@ -162,10 +162,9 @@ export const resolveGridSection = (
     for (const req of requests) {
       nextSectionData[req.id] = req;
     }
+    // a single dragged panel keeps the original behavior, where colliding panels are always pushed
     if (Array.isArray(dragRequest)) {
       fixedPanelIds = new Set(dragRequest.map((p) => p.id));
-    } else {
-      fixedPanelIds = fixedPanelIds ?? new Set([dragRequest.id]);
     }
   }
 
