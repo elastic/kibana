@@ -683,7 +683,10 @@ describe('buildCandidateQuery', () => {
         esClient,
         logger,
         { trigger: 'manual', report_ids: ['rpt-both'], spaceId: 'default' },
-        async () => new Set([buildHuntInvestigationConversationId('rpt-both')])
+        async () =>
+          new Set([
+            buildHuntInvestigationConversationId({ spaceId: 'default', reportId: 'rpt-both' }),
+          ])
       );
       expect(result.skipped).toEqual([{ id: 'rpt-both', reason: 'not_usable' }]);
     });
