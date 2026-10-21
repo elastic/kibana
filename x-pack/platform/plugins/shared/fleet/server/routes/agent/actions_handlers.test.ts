@@ -27,12 +27,12 @@ import type {
 } from '../../../common/types/rest_spec';
 
 import { AgentlessAgentRestrictionError } from '../../errors';
-import { throwIfAgentlessAgent } from '../../services/agents/hosted_agent';
+import { throwIfAgentInAgentlessPolicy } from '../../services/agents/hosted_agent';
 
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 
 jest.mock('../../services/agents/hosted_agent', () => ({
-  throwIfAgentlessAgent: jest.fn(),
+  throwIfAgentInAgentlessPolicy: jest.fn(),
 }));
 
 describe('test actions handlers schema', () => {
@@ -60,7 +60,7 @@ describe('test actions handlers', () => {
   let mockElasticsearchClient: jest.Mocked<ElasticsearchClient>;
 
   beforeEach(() => {
-    jest.mocked(throwIfAgentlessAgent).mockReset();
+    jest.mocked(throwIfAgentInAgentlessPolicy).mockReset();
     mockSavedObjectsClient = savedObjectsClientMock.create();
     mockElasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
     mockResponse = httpServerMock.createResponseFactory();
@@ -125,7 +125,7 @@ describe('test actions handlers', () => {
 
   it('should not create an action for an agentless agent', async () => {
     jest
-      .mocked(throwIfAgentlessAgent)
+      .mocked(throwIfAgentInAgentlessPolicy)
       .mockRejectedValueOnce(new AgentlessAgentRestrictionError('Cannot create an action'));
     const mockRequest = httpServerMock.createKibanaRequest({
       body: { action: { type: 'SETTINGS', data: { log_level: 'debug' } } },

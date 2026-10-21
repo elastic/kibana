@@ -17,7 +17,7 @@ import type {
 import type { ActionsService } from '../../services/agents';
 import type { PostNewAgentActionResponse } from '../../../common/types/rest_spec';
 import { getCurrentNamespace } from '../../services/spaces/get_current_namespace';
-import { throwIfAgentlessAgent } from '../../services/agents/hosted_agent';
+import { throwIfAgentInAgentlessPolicy } from '../../services/agents/hosted_agent';
 
 export const postNewAgentActionHandlerBuilder = function (
   actionsService: ActionsService
@@ -33,10 +33,9 @@ export const postNewAgentActionHandlerBuilder = function (
 
     const agent = await actionsService.getAgent(esClient, soClient, request.params.agentId);
     // agentless agents are managed by Elastic: no action can be created for them
-    await throwIfAgentlessAgent(
+    await throwIfAgentInAgentlessPolicy(
       soClient,
-      esClient,
-      agent.id,
+      agent,
       `Cannot create an action for managed integration agent ${agent.id}`
     );
 

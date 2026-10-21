@@ -77,7 +77,30 @@ export function throwIfAgentlessAgentPolicy(
 }
 
 /**
- * Single-agent actions that did not load the agent policy yet.
+ * Single-agent actions that already loaded the agent: only the agent policy is fetched, saving the
+ * extra agent lookup of `throwIfAgentlessAgent`.
+ */
+export async function throwIfAgentInAgentlessPolicy(
+  soClient: SavedObjectsClientContract,
+  agent: Pick<Agent, 'policy_id'>,
+  message: string
+) {
+  if (!agent.policy_id) {
+    return;
+  }
+  const agentPolicy = await agentPolicyService
+    .get(soClient, agent.policy_id, false)
+    .catch((err) => {
+      if (SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        return undefined;
+      }
+      throw err;
+    });
+  throwIfAgentlessAgentPolicy(agentPolicy, message);
+}
+
+/**
+ * Single-agent actions that did not load the agent yet.
  */
 export async function throwIfAgentlessAgent(
   soClient: SavedObjectsClientContract,

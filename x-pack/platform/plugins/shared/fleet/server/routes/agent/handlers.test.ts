@@ -19,7 +19,7 @@ import {
 } from '../../services/agents/status';
 import { agentPolicyService } from '../../services/agent_policy';
 import { fetchAndAssignAgentMetrics } from '../../services/agents/agent_metrics';
-import { throwIfAgentlessAgent } from '../../services/agents/hosted_agent';
+import { throwIfAgentInAgentlessPolicy } from '../../services/agents/hosted_agent';
 import { getPackageInfo } from '../../services/epm/packages';
 
 import {
@@ -68,7 +68,7 @@ jest.mock('../../services/agent_policy', () => ({
 }));
 
 jest.mock('../../services/agents/hosted_agent', () => ({
-  throwIfAgentlessAgent: jest.fn(),
+  throwIfAgentInAgentlessPolicy: jest.fn(),
 }));
 
 jest.mock('../../services/agents/agent_metrics', () => ({
@@ -354,11 +354,11 @@ describe('Handlers', () => {
           },
         }),
       };
-      (throwIfAgentlessAgent as jest.Mock).mockReset();
+      (throwIfAgentInAgentlessPolicy as jest.Mock).mockReset();
     });
 
     it('rejects the update of an agentless agent before writing anything', async () => {
-      (throwIfAgentlessAgent as jest.Mock).mockRejectedValue(
+      (throwIfAgentInAgentlessPolicy as jest.Mock).mockRejectedValue(
         new AgentlessAgentRestrictionError(`Cannot update agentless agent ${agentId}`)
       );
 

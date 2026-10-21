@@ -6,19 +6,23 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { Agent } from '../../types';
+import { agentPolicyService } from '../agent_policy';
 
 import {
   getAgentPolicyRestrictions,
   isAgentlessAgent,
   isHostedAgent,
+  throwIfAgentInAgentlessPolicy,
   throwIfAgentlessAgentPolicy,
 } from './hosted_agent';
 
 jest.mock('../agent_policy', () => {
   return {
     agentPolicyService: {
+      get: jest.fn(),
       getByIds: jest.fn().mockResolvedValue([
         { id: 'hosted-policy', is_managed: true },
         { id: 'regular-policy', is_managed: false },
@@ -157,6 +161,45 @@ describe('hosted agent helpers', () => {
       expect(() => throwIfAgentlessAgentPolicy({ supports_agentless: false }, 'msg')).not.toThrow();
       expect(() => throwIfAgentlessAgentPolicy(undefined, 'msg')).not.toThrow();
       expect(() => throwIfAgentlessAgentPolicy(null, 'msg')).not.toThrow();
+    });
+  });
+
+  describe('throwIfAgentInAgentlessPolicy', () => {
+    const agentPolicyServiceMock = agentPolicyService as jest.Mocked<typeof agentPolicyService>;
+
+    beforeEach(() => {
+      agentPolicyServiceMock.get.mockReset();
+    });
+
+    it('throws when the policy of the loaded agent is agentless', async () => {
+      agentPolicyServiceMock.get.mockResolvedValue({ supports_agentless: true } as any);
+
+      await expect(
+        throwIfAgentInAgentlessPolicy(soClientMock, { policy_id: 'agentless-policy' }, 'Cannot do')
+      ).rejects.toThrow(/Cannot do.*managed integration agents/);
+      expect(agentPolicyServiceMock.get).toHaveBeenCalledWith(
+        soClientMock,
+        'agentless-policy',
+        false
+      );
+    });
+
+    it('does not throw for a regular policy, a missing policy or an agent without policy', async () => {
+      agentPolicyServiceMock.get.mockResolvedValueOnce({ supports_agentless: false } as any);
+      await expect(
+        throwIfAgentInAgentlessPolicy(soClientMock, { policy_id: 'regular-policy' }, 'msg')
+      ).resolves.toBeUndefined();
+
+      agentPolicyServiceMock.get.mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('fleet-agent-policies', 'gone')
+      );
+      await expect(
+        throwIfAgentInAgentlessPolicy(soClientMock, { policy_id: 'deleted-policy' }, 'msg')
+      ).resolves.toBeUndefined();
+
+      agentPolicyServiceMock.get.mockClear();
+      await expect(throwIfAgentInAgentlessPolicy(soClientMock, {}, 'msg')).resolves.toBeUndefined();
+      expect(agentPolicyServiceMock.get).not.toHaveBeenCalled();
     });
   });
 });

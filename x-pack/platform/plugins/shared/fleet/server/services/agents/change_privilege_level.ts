@@ -20,7 +20,7 @@ import type { PackagePolicy } from '../../types';
 import type { AgentPrivilegeLevelChangeUserInfo } from '../../../common/types';
 
 import { createAgentAction } from './actions';
-import { throwIfAgentlessAgent } from './hosted_agent';
+import { throwIfAgentInAgentlessPolicy } from './hosted_agent';
 import type { GetAgentsOptions } from './crud';
 import { getAgentById, getAgents, getAgentsByKuery, openPointInTime } from './crud';
 import {
@@ -38,10 +38,9 @@ export async function changeAgentPrivilegeLevel(
 ) {
   const agent = await getAgentById(esClient, soClient, agentId);
 
-  await throwIfAgentlessAgent(
+  await throwIfAgentInAgentlessPolicy(
     soClient,
-    esClient,
-    agentId,
+    agent,
     `Cannot remove root privilege for managed integration agent ${agentId}`
   );
 

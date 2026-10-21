@@ -23,14 +23,14 @@ import {
 } from './change_privilege_level';
 import { getAgents } from './crud';
 import * as changePrivilegeRunner from './change_privilege_runner';
-import { isAgentlessAgent, throwIfAgentlessAgent } from './hosted_agent';
+import { isAgentlessAgent, throwIfAgentInAgentlessPolicy } from './hosted_agent';
 
 jest.mock('../package_policy');
 jest.mock('./crud');
 jest.mock('./actions');
 
 jest.mock('./hosted_agent', () => ({
-  throwIfAgentlessAgent: jest.fn(),
+  throwIfAgentInAgentlessPolicy: jest.fn(),
   getAgentPolicyRestrictions: jest.fn().mockResolvedValue({}),
   isAgentlessAgent: jest.fn().mockReturnValue(false),
 }));
@@ -71,7 +71,7 @@ describe('changeAgentPrivilegeLevel', () => {
       agent: { version: '9.3.0' },
       policy_id: policyId,
     } as any);
-    (throwIfAgentlessAgent as jest.Mock).mockRejectedValueOnce(
+    (throwIfAgentInAgentlessPolicy as jest.Mock).mockRejectedValueOnce(
       new AgentlessAgentRestrictionError(
         `Cannot remove root privilege for managed integration agent ${agentId}`
       )
