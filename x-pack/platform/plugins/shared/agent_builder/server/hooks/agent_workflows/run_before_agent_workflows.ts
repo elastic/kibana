@@ -22,7 +22,11 @@ import {
   type WorkflowContextEnvelope,
 } from '@kbn/agent-builder-common';
 import { AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
-import { ExecutionStatus, WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
+import {
+  AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
+  ExecutionStatus,
+  WORKFLOWS_UI_SETTING_ID,
+} from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { IUiSettingsClient } from '@kbn/core/server';
@@ -228,6 +232,7 @@ export async function runBeforeAgentWorkflows({
       spaceId,
       workflowApi,
       waitForCompletion: true,
+      triggeredBy: AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
     });
 
     if (!result.success) {
