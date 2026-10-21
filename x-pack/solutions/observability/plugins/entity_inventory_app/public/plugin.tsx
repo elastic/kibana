@@ -34,7 +34,7 @@ export class EntityInventoryAppPlugin
       }),
       visibleIn: [],
       mount: async ({ element }) => {
-        const { renderApp } = await import('./render_app');
+        const { renderApp } = await import('./application');
         return renderApp(element);
       },
     });
