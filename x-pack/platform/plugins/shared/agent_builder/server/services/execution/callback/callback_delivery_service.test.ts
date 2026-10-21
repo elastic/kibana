@@ -9,6 +9,10 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { AgentBuilderErrorCode, ConversationOriginType } from '@kbn/agent-builder-common';
 import { CallbackDeliveryError } from '@kbn/agent-builder-server';
 import type { ChatCallbackFailureResponse } from '../../../../common/http_api/chat_callback';
+import {
+  createConversationClientMock,
+  createEmptyConversation,
+} from '../../../test_utils/conversations';
 import { CallbackDeliveryService } from './callback_delivery_service';
 
 const callbackUrl = 'https://callback.example.com/v1/events?token=abc';
@@ -153,13 +157,17 @@ describe('resolveConversation', () => {
     request: {} as KibanaRequest,
   };
 
-  const setupService = () => {
+  const setupService = (byOrigin?: string) => {
+    const client = createConversationClientMock();
+    client.getByOrigin.mockResolvedValue(
+      byOrigin ? createEmptyConversation({ id: byOrigin }) : undefined
+    );
     const service = createCallbackDeliveryService();
-    return { service, callbacks: service.setup() };
+    return { service, callbacks: service.setup(), client };
   };
 
   it('returns the first answer among registered resolvers in registration order', async () => {
-    const { service, callbacks } = setupService();
+    const { service, callbacks, client } = setupService('conversation-1');
     const skipped = jest.fn().mockResolvedValue(undefined);
     const first = jest.fn().mockResolvedValue({ conversationId: 'investigation-1' });
     const second = jest.fn().mockResolvedValue({ conversationId: 'investigation-2' });
@@ -167,35 +175,37 @@ describe('resolveConversation', () => {
     callbacks.registerConversationResolver(first);
     callbacks.registerConversationResolver(second);
 
-    await expect(service.resolveConversation(context)).resolves.toEqual({
-      conversationId: 'investigation-1',
-    });
+    await expect(service.resolveConversation(context, client)).resolves.toBe('investigation-1');
     expect(skipped).toHaveBeenCalledWith(context);
     expect(first).toHaveBeenCalledWith(context);
     expect(second).not.toHaveBeenCalled();
+    expect(client.getByOrigin).not.toHaveBeenCalled();
   });
 
-  it('returns undefined when no registered resolver answers', async () => {
-    const { service, callbacks } = setupService();
+  it('returns the conversation that has the origin when no registered resolver answers', async () => {
+    const { service, callbacks, client } = setupService('conversation-1');
     callbacks.registerConversationResolver(jest.fn().mockResolvedValue(undefined));
 
-    await expect(service.resolveConversation(context)).resolves.toBeUndefined();
+    await expect(service.resolveConversation(context, client)).resolves.toBe('conversation-1');
+    expect(client.getByOrigin).toHaveBeenCalledWith({ external_conversation_id: 'thread-1' });
   });
 
-  it('returns undefined when no resolver is registered', async () => {
-    const { service } = setupService();
+  it('returns undefined when no resolver is registered and no conversation has the origin', async () => {
+    const { service, client } = setupService();
 
-    await expect(service.resolveConversation(context)).resolves.toBeUndefined();
+    await expect(service.resolveConversation(context, client)).resolves.toBeUndefined();
+    expect(client.getByOrigin).toHaveBeenCalledTimes(1);
   });
 
   it('propagates a registered resolver error without asking the next', async () => {
-    const { service, callbacks } = setupService();
+    const { service, callbacks, client } = setupService('conversation-1');
     const next = jest.fn();
     callbacks.registerConversationResolver(jest.fn().mockRejectedValue(new Error('lookup failed')));
     callbacks.registerConversationResolver(next);
 
-    await expect(service.resolveConversation(context)).rejects.toThrow('lookup failed');
+    await expect(service.resolveConversation(context, client)).rejects.toThrow('lookup failed');
     expect(next).not.toHaveBeenCalled();
+    expect(client.getByOrigin).not.toHaveBeenCalled();
   });
 });
 

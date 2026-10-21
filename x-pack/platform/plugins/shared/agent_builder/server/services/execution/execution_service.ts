@@ -842,8 +842,8 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
   }
 
   /**
-   * The conversation an execution continues: the one it names, else the one its origin continues,
-   * as a registered resolver answers or by origin lookup. `undefined` starts a new conversation.
+   * The conversation an execution continues: the one it names, else the one its origin continues.
+   * `undefined` starts a new conversation.
    */
   private async resolveConversationId({
     conversationId,
@@ -862,21 +862,10 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       return conversationId;
     }
 
-    const resolved = await this.deps.callbackDeliveryService.resolveConversation({
-      origin,
-      spaceId,
-      request,
-    });
-
-    if (resolved) {
-      return resolved.conversationId;
-    }
-
-    const conversation = await conversationClient.getByOrigin({
-      external_conversation_id: origin.external_conversation_id,
-    });
-
-    return conversation?.id;
+    return this.deps.callbackDeliveryService.resolveConversation(
+      { origin, spaceId, request },
+      conversationClient
+    );
   }
 
   private async writeUserMessage({

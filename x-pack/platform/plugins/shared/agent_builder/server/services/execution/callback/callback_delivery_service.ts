@@ -15,6 +15,7 @@ import type {
 } from '@kbn/agent-builder-server';
 import { isCallbackDeliveryError, throwIfNotDelivered } from '@kbn/agent-builder-server';
 import type { ChatCallbackResponse } from '../../../../common/http_api/chat_callback';
+import type { ConversationClient } from '../../conversation';
 
 const callbackRetryOptions = {
   retries: 2,
@@ -45,21 +46,26 @@ export class CallbackDeliveryService {
   }
 
   /**
-   * The conversation an external conversation continues, as the first registered resolver to
-   * answer says. An error from a registered resolver propagates.
+   * The conversation an external conversation continues: the first registered resolver's answer,
+   * else the conversation that has the origin. An error from a registered resolver propagates.
    */
   async resolveConversation(
-    context: CallbackConversationResolverContext
-  ): Promise<{ conversationId: string } | undefined> {
+    context: CallbackConversationResolverContext,
+    conversationClient: ConversationClient
+  ): Promise<string | undefined> {
     for (const resolver of this.conversationResolvers) {
       const resolved = await resolver(context);
 
       if (resolved) {
-        return resolved;
+        return resolved.conversationId;
       }
     }
 
-    return undefined;
+    const conversation = await conversationClient.getByOrigin({
+      external_conversation_id: context.origin.external_conversation_id,
+    });
+
+    return conversation?.id;
   }
 
   validateCallbackUrl(callbackUrl: string): void {
