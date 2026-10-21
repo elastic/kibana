@@ -8,6 +8,7 @@
 import { randomUUID } from 'crypto';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { expect } from '@kbn/scout/api';
+import { tags } from '@kbn/scout';
 import { EVENTS_SERIES_ID_EVAL } from '@kbn/alerting-v2-common-queries';
 import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { decodeSeriesId, encodeSeriesId } from '@kbn/alerting-v2-utils';
@@ -109,50 +110,46 @@ const readSeriesId = async (esClient: EsClient, groupHash: string): Promise<stri
   return (values[0][seriesIdIndex] as string | null) ?? null;
 };
 
-apiTest.describe(
-  'SERIES_ID_EVAL agrees with encodeSeriesId',
-  { tag: '@local-stateful-classic' },
-  () => {
-    const seededGroupHashes = cases.map(({ event }) => event.group_hash);
+apiTest.describe('SERIES_ID_EVAL agrees with encodeSeriesId', { tag: tags.stateful.all }, () => {
+  const seededGroupHashes = cases.map(({ event }) => event.group_hash);
 
-    const deleteSeededEvents = (esClient: EsClient) =>
-      esClient.deleteByQuery(
-        {
-          index: ALERT_EVENTS_DATA_STREAM,
-          query: { terms: { group_hash: seededGroupHashes } },
-          refresh: true,
-          conflicts: 'proceed',
-        },
-        { ignore: [404] }
+  const deleteSeededEvents = (esClient: EsClient) =>
+    esClient.deleteByQuery(
+      {
+        index: ALERT_EVENTS_DATA_STREAM,
+        query: { terms: { group_hash: seededGroupHashes } },
+        refresh: true,
+        conflicts: 'proceed',
+      },
+      { ignore: [404] }
+    );
+
+  apiTest.beforeAll(async ({ apiServices, esClient }) => {
+    await deleteSeededEvents(esClient);
+    await apiServices.alertingV2.ruleEvents.seed(cases.map(({ event }) => event));
+  });
+
+  apiTest.afterAll(async ({ esClient }) => {
+    await deleteSeededEvents(esClient);
+  });
+
+  for (const { name, event } of cases) {
+    apiTest(`produces the same series id as encodeSeriesId for ${name}`, async ({ esClient }) => {
+      // `encodeSeriesId` is the oracle for the id format; the ES|QL expression must reproduce
+      // it byte for byte, `null` included.
+      const expected = encodeSeriesId(toSeriesRef(event));
+
+      const seriesId = await readSeriesId(esClient, event.group_hash);
+
+      expect(seriesId).toBe(expected);
+
+      // And the id the query hands out decodes back to the series it came from.
+      const decoded = seriesId === null ? null : decodeSeriesId(seriesId);
+      expect(
+        decoded && { space_id: decoded.space_id, group_hash: decoded.group_hash }
+      ).toStrictEqual(
+        expected === null ? null : { space_id: SPACE_ID, group_hash: event.group_hash }
       );
-
-    apiTest.beforeAll(async ({ apiServices, esClient }) => {
-      await deleteSeededEvents(esClient);
-      await apiServices.alertingV2.ruleEvents.seed(cases.map(({ event }) => event));
     });
-
-    apiTest.afterAll(async ({ esClient }) => {
-      await deleteSeededEvents(esClient);
-    });
-
-    for (const { name, event } of cases) {
-      apiTest(`produces the same series id as encodeSeriesId for ${name}`, async ({ esClient }) => {
-        // `encodeSeriesId` is the oracle for the id format; the ES|QL expression must reproduce
-        // it byte for byte, `null` included.
-        const expected = encodeSeriesId(toSeriesRef(event));
-
-        const seriesId = await readSeriesId(esClient, event.group_hash);
-
-        expect(seriesId).toBe(expected);
-
-        // And the id the query hands out decodes back to the series it came from.
-        const decoded = seriesId === null ? null : decodeSeriesId(seriesId);
-        expect(
-          decoded && { space_id: decoded.space_id, group_hash: decoded.group_hash }
-        ).toStrictEqual(
-          expected === null ? null : { space_id: SPACE_ID, group_hash: event.group_hash }
-        );
-      });
-    }
   }
-);
+});

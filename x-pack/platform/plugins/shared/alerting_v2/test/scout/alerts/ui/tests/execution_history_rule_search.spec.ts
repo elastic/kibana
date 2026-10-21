@@ -13,7 +13,7 @@ const { POLL_TIMEOUT_MS } = testData;
 // A suite-owned space keeps the Rules tab's first page free of runs from other suites' rules.
 const SPACE_ID = 'eh-rule-search';
 
-test.describe('Execution history — rule search', { tag: ['@local-stateful-classic'] }, () => {
+test.describe('Execution history — rule search', { tag: testData.UI_TAG }, () => {
   let matchingRuleName: string;
   let otherRuleName: string;
 

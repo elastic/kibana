@@ -8,6 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import {
   ALERT_EVENTS_DATA_STREAM,
   ALERTING_V2_INTERNAL_SUGGESTIONS_RULE_EVENT_FIELDS_API_PATH,
@@ -60,7 +61,7 @@ const seedAlertEvents = async (esClient: EsClient): Promise<void> => {
   });
 };
 
-apiTest.describe('Rule event fields suggestions API', { tag: '@local-stateful-classic' }, () => {
+apiTest.describe('Rule event fields suggestions API', { tag: tags.stateful.all }, () => {
   let adminCredentials: RoleApiCredentials;
   let adminHeaders: Record<string, string>;
 

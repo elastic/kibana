@@ -1,5 +1,5 @@
 {
-  "sha1": "8070d60ea65dae646b845e227336ff136b013e46",
+  "sha1": "de2183c842c5ac5be419b3467951eb934da6fdf4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -3017,11 +3017,12 @@
       "title": "Rule event fields suggestions API returns the union of data.* field names across all matching alerts when no matcher is given",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 77,
+        "line": 78,
         "column": 47
       }
     },
@@ -3030,11 +3031,12 @@
       "title": "Rule event fields suggestions API falls back to the unfiltered result when matcher cannot be parsed",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 104,
+        "line": 105,
         "column": 14
       }
     },
@@ -3043,11 +3045,12 @@
       "title": "Rule event fields suggestions API validation: rejects empty matcher with a 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 116,
+        "line": 117,
         "column": 84
       }
     },
@@ -3056,11 +3059,12 @@
       "title": "Rule event fields suggestions API validation: rejects matcher longer than the schema limit with a 400",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 127,
+        "line": 128,
         "column": 5
       }
     },
@@ -3069,11 +3073,12 @@
       "title": "Rule event fields suggestions API authorization: returns 200 for a user with read-only privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 138,
+        "line": 139,
         "column": 14
       }
     },
@@ -3082,11 +3087,12 @@
       "title": "Rule event fields suggestions API authorization: returns 403 for a user without alerting_v2 privileges",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/rule_event_fields_suggestions.spec.ts",
-        "line": 150,
+        "line": 151,
         "column": 18
       }
     },
@@ -3095,12 +3101,13 @@
       "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for a rule-backed series (source \"internal\")",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_id_eval.spec.ts",
-        "line": 134,
-        "column": 22
+        "line": 132,
+        "column": 20
       }
     },
     {
@@ -3108,12 +3115,13 @@
       "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for an external source",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_id_eval.spec.ts",
-        "line": 134,
-        "column": 22
+        "line": 132,
+        "column": 20
       }
     },
     {
@@ -3121,12 +3129,13 @@
       "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for an external source containing the separator",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_id_eval.spec.ts",
-        "line": 134,
-        "column": 22
+        "line": 132,
+        "column": 20
       }
     },
     {
@@ -3134,12 +3143,13 @@
       "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for an external source ending in a colon",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_id_eval.spec.ts",
-        "line": 134,
-        "column": 22
+        "line": 132,
+        "column": 20
       }
     },
     {
@@ -3147,12 +3157,13 @@
       "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for an external source with non-ASCII characters",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_id_eval.spec.ts",
-        "line": 134,
-        "column": 22
+        "line": 132,
+        "column": 20
       }
     },
     {
@@ -3160,12 +3171,13 @@
       "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for an external source of the maximum length",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_id_eval.spec.ts",
-        "line": 134,
-        "column": 22
+        "line": 132,
+        "column": 20
       }
     },
     {
@@ -3173,12 +3185,13 @@
       "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for an empty source with a rule id",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_id_eval.spec.ts",
-        "line": 134,
-        "column": 22
+        "line": 132,
+        "column": 20
       }
     },
     {
@@ -3186,12 +3199,13 @@
       "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for an empty source without a rule id, which has no series id",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_id_eval.spec.ts",
-        "line": 134,
-        "column": 22
+        "line": 132,
+        "column": 20
       }
     },
     {
@@ -3199,12 +3213,13 @@
       "title": "SERIES_ID_EVAL agrees with encodeSeriesId produces the same series id as encodeSeriesId for the \"internal\" source without a rule id, which has no series id",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_id_eval.spec.ts",
-        "line": 134,
-        "column": 22
+        "line": 132,
+        "column": 20
       }
     },
     {
@@ -3212,11 +3227,12 @@
       "title": "Series identity when two rules share a group_hash snooze: stamps the action with the rule of the requested series, not the latest event of the shared group_hash",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_identity_collision.spec.ts",
-        "line": 99,
+        "line": 100,
         "column": 51
       }
     },
@@ -3225,11 +3241,12 @@
       "title": "Series identity when two rules share a group_hash snooze: a snooze on one rule does not make the identical snooze on the other rule a no-op",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_identity_collision.spec.ts",
-        "line": 144,
+        "line": 145,
         "column": 16
       }
     },
@@ -3238,11 +3255,12 @@
       "title": "Series identity when two rules share a group_hash bulk snooze: stamps each action with the rule of its own series",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_identity_collision.spec.ts",
-        "line": 168,
+        "line": 169,
         "column": 20
       }
     },
@@ -3251,11 +3269,12 @@
       "title": "Series identity when two rules share a group_hash deactivate: closes the latest episode of its own series even when another rule shares the group_hash",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_identity_collision.spec.ts",
-        "line": 194,
+        "line": 195,
         "column": 79
       }
     },
@@ -3264,11 +3283,12 @@
       "title": "Series identity when two rules share a group_hash read side: a snooze on one rule shows only on that rule in the episode and its action history",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/alerts/api/tests/series_identity_collision.spec.ts",
-        "line": 221,
+        "line": 222,
         "column": 25
       }
     },

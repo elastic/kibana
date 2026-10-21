@@ -9,6 +9,7 @@ import { randomUUID } from 'crypto';
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import { expect } from '@kbn/scout/api';
 import type { RoleApiCredentials } from '@kbn/scout';
+import { tags } from '@kbn/scout';
 import {
   buildEpisodeActionsHistoryQuery,
   buildEpisodeQuery,
@@ -49,7 +50,7 @@ const runEsql = async (esClient: EsClient, query: string) =>
 
 apiTest.describe(
   'Series identity when two rules share a group_hash',
-  { tag: '@local-stateful-classic' },
+  { tag: tags.stateful.all },
   () => {
     let writerCredentials: RoleApiCredentials;
     let writerHeaders: Record<string, string>;
