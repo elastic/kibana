@@ -79,7 +79,7 @@ export interface SeededFilterOptions {
   mode?: 'drop_step' | 'omit_result';
 }
 
-const matchesFilePathForKinds = (
+export const matchesFilePathForKinds = (
   rawPath: string,
   kinds: ReadonlySet<SeededWorkspaceKind>,
   baseDir = '/workspace'
@@ -103,16 +103,8 @@ const matchesFilePathForKinds = (
 const BASH_URL_RE = /\bhttps?:\/\/[^\s'")]+/gi;
 const BASH_CD_RE = /^\s*cd\s+(?:'([^']+)'|"([^"]+)"|([^\s'";|&()<>]+))/;
 const HEREDOC_OPEN_RE = /<<-?\s*['"]?([A-Za-z0-9_]+)['"]?/;
-const INTERPRETER_VERBS = new Set<string>([
-  'python',
-  'python3',
-  'node',
-  'sh',
-  'bash',
-  'zsh',
-  'perl',
-  'ruby',
-]);
+const SHELL_INTERPRETER_VERBS = new Set<string>(['sh', 'bash', 'zsh']);
+const SCRIPT_INTERPRETER_VERBS = new Set<string>(['python', 'python3', 'node', 'perl', 'ruby']);
 const DIR_OR_SEARCH_VERBS = new Set<string>([
   'ls',
   'find',
@@ -123,6 +115,7 @@ const DIR_OR_SEARCH_VERBS = new Set<string>([
   'egrep',
   'fgrep',
 ]);
+const QUERY_OR_NETWORK_VERBS = new Set<string>(['curl', 'wget', 'esql']);
 const SHELL_PREFIX_WORDS = new Set<string>([
   'do',
   'then',
@@ -158,42 +151,74 @@ export const extractSegmentVerb = (segment: string): string | undefined => {
 };
 
 /**
- * Strips non-executable heredoc bodies (such as `cat <<'EOF' > file.md`) while keeping heredoc
- * bodies fed into an interpreter (`python - <<'PY'`, `bash <<'SH'`, etc.) when stdout is not
- * redirected to a file.
+ * Extracts file paths read inside an inline or heredoc script (`python`, `node`, etc.),
+ * resolving simple `var = 'path'` bindings and ignoring write-mode `open(..., 'w' | 'a' | 'x' | '+')` calls.
  */
-const stripNonExecutableHeredocs = (command: string): string => {
-  const lines = command.split('\n');
-  const kept: string[] = [];
-  let activeDelimiter: string | undefined;
-  let keepBody = false;
+export const extractScriptReadPaths = (script: string): string[] => {
+  const normalized = script.replace(/\\(["'])/g, '$1');
+  const bindings = new Map<string, string>();
 
-  for (const line of lines) {
-    if (activeDelimiter !== undefined) {
-      if (line.trim() === activeDelimiter) {
-        activeDelimiter = undefined;
-      } else if (keepBody) {
-        kept.push(line);
-      }
-      continue;
-    }
-
-    const match = HEREDOC_OPEN_RE.exec(line);
-    if (match) {
-      activeDelimiter = match[1];
-      const headerBeforeHeredoc = line.slice(0, match.index);
-      const verb = extractSegmentVerb(headerBeforeHeredoc);
-      const unquotedLine = line.replace(BASH_QUOTED_STRING_RE, '');
-      const hasStdoutFileRedirect = BASH_UNQUOTED_STDOUT_REDIRECT_RE.test(unquotedLine);
-      keepBody = Boolean(verb && INTERPRETER_VERBS.has(verb) && !hasStdoutFileRedirect);
-      kept.push(headerBeforeHeredoc + line.slice(match.index + match[0].length));
-      continue;
-    }
-
-    kept.push(line);
+  const assignRe = /\b([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?:Path\s*\(\s*)?(['"])([^'"\n]+)\2/g;
+  let assignMatch = assignRe.exec(normalized);
+  while (assignMatch) {
+    bindings.set(assignMatch[1], assignMatch[3]);
+    assignMatch = assignRe.exec(normalized);
   }
 
-  return kept.join('\n');
+  const resolveArg = (rawArg: string): string | undefined => {
+    const trimmed = rawArg.trim();
+    const pathWrap = /^Path\s*\(([^()]+)\)$/.exec(trimmed);
+    const inner = pathWrap ? pathWrap[1].trim() : trimmed;
+    if (
+      (inner.startsWith("'") && inner.endsWith("'")) ||
+      (inner.startsWith('"') && inner.endsWith('"'))
+    ) {
+      return inner.slice(1, -1);
+    }
+    return bindings.get(inner);
+  };
+
+  const out: string[] = [];
+
+  // 1. open(target[, mode])
+  const openRe =
+    /\bopen\s*\(\s*(['"][^'"\n]+['"]|[A-Za-z_][A-Za-z0-9_]*)(?:\s*,\s*(?:mode\s*=\s*)?(['"])([^'"\n]*)\2)?/g;
+  let openMatch = openRe.exec(normalized);
+  while (openMatch) {
+    const mode = openMatch[3] ?? 'r';
+    if (!/[wax+]/.test(mode)) {
+      const resolved = resolveArg(openMatch[1]);
+      if (resolved) {
+        out.push(resolved);
+      }
+    }
+    openMatch = openRe.exec(normalized);
+  }
+
+  // 2. Path(target).read_text() / var.read_text()
+  const readTextRe =
+    /(?:Path\s*\(\s*(['"][^'"\n]+['"]|[A-Za-z_][A-Za-z0-9_]*)\s*\)|([A-Za-z_][A-Za-z0-9_]*))\s*\.\s*read_text\s*\(/g;
+  let rtMatch = readTextRe.exec(normalized);
+  while (rtMatch) {
+    const resolved = resolveArg(rtMatch[1] ?? rtMatch[2]);
+    if (resolved) {
+      out.push(resolved);
+    }
+    rtMatch = readTextRe.exec(normalized);
+  }
+
+  // 3. fs.readFileSync(target) / fs.readFile(target)
+  const readFileRe = /\breadFile(?:Sync)?\s*\(\s*(['"][^'"\n]+['"]|[A-Za-z_][A-Za-z0-9_]*)/g;
+  let rfMatch = readFileRe.exec(normalized);
+  while (rfMatch) {
+    const resolved = resolveArg(rfMatch[1]);
+    if (resolved) {
+      out.push(resolved);
+    }
+    rfMatch = readFileRe.exec(normalized);
+  }
+
+  return out;
 };
 
 export interface BashSegmentWithCwd {
@@ -201,11 +226,13 @@ export interface BashSegmentWithCwd {
   cwd: string;
   /** Index within a `|` pipeline (`0` for the first command, `> 0` when reading piped stdin). */
   pipelineIndex: number;
+  /** Optional non-shell interpreter script body attached via heredoc (`python - <<'PY'`). */
+  scriptBody?: string;
 }
 
 /**
- * Splits a bash command into segments while stripping non-executable heredoc bodies and URLs
- * and tracking `cd <dir>` updates against `workingDirectory` (default `/workspace`).
+ * Splits a bash command into segments while stripping write-only heredoc bodies, preserving
+ * shell/interpreter heredoc bodies, and tracking `cd <dir>` updates against `workingDirectory`.
  */
 export const splitBashSegmentsWithCwd = (
   command: string,
@@ -216,36 +243,230 @@ export const splitBashSegmentsWithCwd = (
       ? Path.posix.resolve('/workspace', workingDirectory.trim())
       : '/workspace';
 
-  const sanitized = stripNonExecutableHeredocs(command).replace(BASH_URL_RE, '');
-  const out: BashSegmentWithCwd[] = [];
+  const lines = command.split('\n');
+  const processedLines: Array<{ line: string; scriptBody?: string }> = [];
+  let activeDelimiter: string | undefined;
+  let activeMode: 'drop' | 'shell' | 'script' = 'drop';
+  let pendingHeaderLine = '';
+  let scriptBuffer: string[] = [];
 
-  for (const statement of sanitized.split(/\n|;|&&|\|\|/)) {
-    const stages = statement.split('|');
-    for (let pipelineIndex = 0; pipelineIndex < stages.length; pipelineIndex++) {
-      const segment = stages[pipelineIndex];
-      const cdMatch = BASH_CD_RE.exec(segment);
-      if (cdMatch) {
-        const target = cdMatch[1] ?? cdMatch[2] ?? cdMatch[3];
-        if (target && stages.length === 1) {
-          cwd = Path.posix.resolve(cwd, target);
+  for (const line of lines) {
+    if (activeDelimiter !== undefined) {
+      if (line.trim() === activeDelimiter) {
+        if (activeMode === 'script') {
+          processedLines.push({
+            line: pendingHeaderLine,
+            scriptBody: scriptBuffer.join('\n'),
+          });
         }
-        continue;
+        activeDelimiter = undefined;
+        scriptBuffer = [];
+      } else if (activeMode === 'shell') {
+        processedLines.push({ line });
+      } else if (activeMode === 'script') {
+        scriptBuffer.push(line);
       }
-      out.push({ segment, cwd, pipelineIndex });
+      continue;
+    }
+
+    const match = HEREDOC_OPEN_RE.exec(line);
+    if (match) {
+      activeDelimiter = match[1];
+      const headerBeforeHeredoc = line.slice(0, match.index);
+      const strippedLine = headerBeforeHeredoc + line.slice(match.index + match[0].length);
+      const verb = extractSegmentVerb(headerBeforeHeredoc);
+      const unquotedLine = line.replace(BASH_QUOTED_STRING_RE, '');
+      const hasStdoutFileRedirect = BASH_UNQUOTED_STDOUT_REDIRECT_RE.test(unquotedLine);
+
+      if (verb && !hasStdoutFileRedirect && SHELL_INTERPRETER_VERBS.has(verb)) {
+        activeMode = 'shell';
+        processedLines.push({ line: strippedLine });
+      } else if (verb && !hasStdoutFileRedirect && SCRIPT_INTERPRETER_VERBS.has(verb)) {
+        activeMode = 'script';
+        pendingHeaderLine = strippedLine;
+        scriptBuffer = [];
+      } else {
+        activeMode = 'drop';
+        processedLines.push({ line: strippedLine });
+      }
+      continue;
+    }
+
+    processedLines.push({ line });
+  }
+
+  if (activeDelimiter !== undefined && activeMode === 'script') {
+    processedLines.push({
+      line: pendingHeaderLine,
+      scriptBody: scriptBuffer.join('\n'),
+    });
+  }
+
+  const out: BashSegmentWithCwd[] = [];
+  for (const { line, scriptBody } of processedLines) {
+    const sanitizedLine = line.replace(BASH_URL_RE, '');
+    const statements = sanitizedLine.split(/;|&&|\|\|/);
+    for (const statement of statements) {
+      const stages = statement.split('|');
+      for (let pipelineIndex = 0; pipelineIndex < stages.length; pipelineIndex++) {
+        const segment = stages[pipelineIndex];
+        const cdMatch = BASH_CD_RE.exec(segment);
+        if (cdMatch) {
+          const target = cdMatch[1] ?? cdMatch[2] ?? cdMatch[3];
+          if (target && stages.length === 1) {
+            cwd = Path.posix.resolve(cwd, target);
+          }
+          continue;
+        }
+        out.push({
+          segment,
+          cwd,
+          pipelineIndex,
+          ...(scriptBody && pipelineIndex === stages.length - 1 ? { scriptBody } : {}),
+        });
+      }
     }
   }
 
   return out;
 };
 
-const isCandidateSeededToken = (rawToken: string, cwd: string): boolean => {
+const SEARCH_VALUE_FLAGS = new Set<string>([
+  '-e',
+  '--regexp',
+  '-f',
+  '--file',
+  '-m',
+  '--max-count',
+  '-A',
+  '--after-context',
+  '-B',
+  '--before-context',
+  '-C',
+  '--context',
+  '-g',
+  '--glob',
+  '-t',
+  '--type',
+  '--include',
+  '--exclude',
+  '--exclude-dir',
+  '--color',
+  '--colour',
+  '-d',
+  '--directories',
+]);
+
+const tokenizeShellWords = (segment: string): string[] => {
+  const words: string[] = [];
+  const wordRe = /'([^']*)'|"((?:[^"\\]|\\.)*)"|([^\s'";|&()<>]+)/g;
+  let match = wordRe.exec(segment);
+  while (match) {
+    const raw = match[1] ?? match[2]?.replace(/\\(["'\\])/g, '$1') ?? match[3] ?? '';
+    if (raw.length > 0) {
+      words.push(raw);
+    }
+    match = wordRe.exec(segment);
+  }
+  return words;
+};
+
+const checkDirOrSearchSegment = (
+  segment: string,
+  verb: string,
+  cwd: string,
+  pipelineIndex: number,
+  kindSet: ReadonlySet<SeededWorkspaceKind>
+): boolean => {
+  const words = tokenizeShellWords(segment);
+  let verbIdx = -1;
+  for (let i = 0; i < words.length; i++) {
+    const token = words[i].replace(/^\(+/, '');
+    if (!token || SHELL_PREFIX_WORDS.has(token) || /^[A-Za-z_][A-Za-z0-9_]*=/.test(token)) {
+      continue;
+    }
+    verbIdx = i;
+    break;
+  }
+  if (verbIdx === -1) {
+    return false;
+  }
+
+  const args = words.slice(verbIdx + 1);
+  if (verb === 'find') {
+    const findPaths: string[] = [];
+    for (const arg of args) {
+      if (arg === '-H' || arg === '-L' || arg === '-P') {
+        continue;
+      }
+      if (arg.startsWith('-') || arg === '!' || arg === '(') {
+        break;
+      }
+      findPaths.push(arg);
+    }
+    if (findPaths.length > 0) {
+      return findPaths.some((p) => matchesFilePathForKinds(p, kindSet, cwd));
+    }
+    return matchesFilePathForKinds(cwd, kindSet);
+  }
+
+  const isGrepOrRg = verb === 'grep' || verb === 'egrep' || verb === 'fgrep' || verb === 'rg';
+  let hasExplicitPatternFlag = false;
+  let isRecursive = verb === 'rg';
+  let optionsEnded = false;
+  const positional: string[] = [];
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (!optionsEnded && arg === '--') {
+      optionsEnded = true;
+      continue;
+    }
+    if (!optionsEnded && arg.startsWith('-') && arg !== '-') {
+      if (arg === '-e' || arg === '--regexp' || arg.startsWith('--regexp=')) {
+        hasExplicitPatternFlag = true;
+      }
+      if (arg === '-f' || arg === '--file' || arg.startsWith('--file=')) {
+        hasExplicitPatternFlag = true;
+        const fileArg = arg.includes('=') ? arg.slice(arg.indexOf('=') + 1) : args[i + 1];
+        if (fileArg && fileArg !== '-' && matchesFilePathForKinds(fileArg, kindSet, cwd)) {
+          return true;
+        }
+      }
+      if (
+        arg === '--recursive' ||
+        (/^-[a-zA-Z]+$/.test(arg) && (arg.includes('r') || arg.includes('R')))
+      ) {
+        isRecursive = true;
+      }
+      if (SEARCH_VALUE_FLAGS.has(arg)) {
+        i += 1;
+      }
+      continue;
+    }
+    positional.push(arg);
+  }
+
+  const pathOperands = isGrepOrRg && !hasExplicitPatternFlag ? positional.slice(1) : positional;
+  if (pathOperands.length > 0) {
+    return pathOperands.some((op) => op !== '-' && matchesFilePathForKinds(op, kindSet, cwd));
+  }
+
+  return (pipelineIndex === 0 || isRecursive) && matchesFilePathForKinds(cwd, kindSet);
+};
+
+const isCandidateSeededToken = (
+  rawToken: string,
+  cwd: string,
+  allowBareSeededDir: boolean
+): boolean => {
   const lower = rawToken.toLowerCase();
   if (lower.endsWith('.md') || lower.endsWith('.index.json')) {
     return true;
   }
   const parts = rawToken.split('/').filter((part) => part.length > 0 && part !== '.');
   if (parts.some((part) => SEEDED_DIR_NAMES.has(part))) {
-    return true;
+    return rawToken.includes('/') || allowBareSeededDir;
   }
   if (cwd === CORTEX_WORKSPACE_ROOT && parts.length > 0 && CORTEX_BUCKET_NAMES.has(parts[0])) {
     return true;
@@ -258,26 +479,48 @@ const bashAccessesSeededWorkspace = (
   workingDirectory: string | undefined,
   kindSet: ReadonlySet<SeededWorkspaceKind>
 ): boolean => {
-  // Remove backslash-escaped quotes (e.g. `WHERE service.name == \"cortex\"`) so query literals are not mistaken for paths
-  const cleanedCommand = command.replace(/\\["'][a-zA-Z0-9_.-]+\\["']/g, '');
-
-  for (const { segment, cwd, pipelineIndex } of splitBashSegmentsWithCwd(
-    cleanedCommand,
+  for (const { segment, cwd, pipelineIndex, scriptBody } of splitBashSegmentsWithCwd(
+    command,
     workingDirectory
   )) {
-    const tokens = segment.match(PATH_TOKEN_RE) ?? [];
-    for (const token of tokens) {
-      if (token.startsWith('-')) {
-        continue;
-      }
-      if (isCandidateSeededToken(token, cwd) && matchesFilePathForKinds(token, kindSet, cwd)) {
+    const verb = extractSegmentVerb(segment);
+
+    if (scriptBody) {
+      if (
+        extractScriptReadPaths(scriptBody).some((p) => matchesFilePathForKinds(p, kindSet, cwd))
+      ) {
         return true;
       }
     }
 
-    if (pipelineIndex === 0 && matchesFilePathForKinds(cwd, kindSet)) {
-      const verb = extractSegmentVerb(segment);
-      if (verb && DIR_OR_SEARCH_VERBS.has(verb)) {
+    if (verb && SCRIPT_INTERPRETER_VERBS.has(verb)) {
+      if (extractScriptReadPaths(segment).some((p) => matchesFilePathForKinds(p, kindSet, cwd))) {
+        return true;
+      }
+    }
+
+    if (verb && DIR_OR_SEARCH_VERBS.has(verb)) {
+      if (checkDirOrSearchSegment(segment, verb, cwd, pipelineIndex, kindSet)) {
+        return true;
+      }
+      continue;
+    }
+
+    const allowBareSeededDir = Boolean(verb && !QUERY_OR_NETWORK_VERBS.has(verb));
+    // Strip JSON `"key":"value"` pairs and `== "value"` query comparisons before scanning bare tokens
+    const strippedQueryLiterals = segment
+      .replace(/"[a-zA-Z0-9_.-]+"\s*:\s*"[a-zA-Z0-9_.-]+"/g, '')
+      .replace(/[=!]==?\s*\\?["'][a-zA-Z0-9_.-]+\\?["']/g, '');
+
+    const tokens = strippedQueryLiterals.match(PATH_TOKEN_RE) ?? [];
+    for (const token of tokens) {
+      if (token.startsWith('-')) {
+        continue;
+      }
+      if (
+        isCandidateSeededToken(token, cwd, allowBareSeededDir) &&
+        matchesFilePathForKinds(token, kindSet, cwd)
+      ) {
         return true;
       }
     }
