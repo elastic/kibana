@@ -2,7 +2,7 @@ pageLoadAssetSize:
   actions: 3928
   advancedSettings: 1981
   agentBuilder: 644
-  agentBuilderDashboards: 3743
+  agentBuilderDashboards: 4253
   agentBuilderPlatform: 23882
   agentBuilderSml: 597
   agentBuilderVisualizations: 1551
@@ -61,7 +61,7 @@ pageLoadAssetSize:
   elasticAssistant: 136070
   elasticAssistantSharedState: 3369
   elasticConsole: 1119
-  embeddable: 990
+  embeddable: 1163
   embeddableAlertsTable: 1536
   enterpriseSearch: 28188
   entityStore: 2252
