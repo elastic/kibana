@@ -11,13 +11,10 @@ import type {
   CallbackConversationResolver,
   CallbackConversationResolverContext,
   CallbacksSetup,
+  CallbackTransportDefinition,
 } from '@kbn/agent-builder-server';
-import { isCallbackDeliveryError } from '@kbn/agent-builder-server';
+import { isCallbackDeliveryError, throwIfNotDelivered } from '@kbn/agent-builder-server';
 import type { ChatCallbackResponse } from '../../../../common/http_api/chat_callback';
-import type { ConversationService } from '../../conversation';
-import { CallbackTransportRegistry } from './callback_transport_registry';
-import { createDefaultConversationResolver } from './default_conversation_resolver';
-import { createRelayTransport } from './relay_transport';
 
 const callbackRetryOptions = {
   retries: 2,
@@ -28,14 +25,12 @@ const callbackRetryOptions = {
 
 export class CallbackDeliveryService {
   private readonly actions: ActionsPluginSetup;
-  private readonly transports: CallbackTransportRegistry;
+  private readonly transports: CallbackTransportDefinition[];
   private readonly conversationResolvers: CallbackConversationResolver[] = [];
-  private defaultConversationResolver?: CallbackConversationResolver;
 
   constructor({ actions }: { actions: ActionsPluginSetup }) {
     this.actions = actions;
-    this.transports = new CallbackTransportRegistry();
-    this.transports.register(createRelayTransport({ actions }));
+    this.transports = [this.createRelayTransport()];
   }
 
   setup(): CallbacksSetup {
@@ -43,18 +38,15 @@ export class CallbackDeliveryService {
       registerConversationResolver: (resolver) => {
         this.conversationResolvers.push(resolver);
       },
-      registerTransport: (transport) => this.transports.register(transport),
+      registerTransport: (transport) => {
+        this.transports.push(transport);
+      },
     };
   }
 
-  /** Sets the default lookup by origin, which needs the conversation service from start. */
-  start({ conversations }: { conversations: ConversationService }): void {
-    this.defaultConversationResolver = createDefaultConversationResolver({ conversations });
-  }
-
   /**
-   * The conversation an external conversation continues: the first registered resolver's answer,
-   * else the default lookup's. An error from a registered resolver propagates.
+   * The conversation an external conversation continues, as the first registered resolver to
+   * answer says. An error from a registered resolver propagates.
    */
   async resolveConversation(
     context: CallbackConversationResolverContext
@@ -67,7 +59,7 @@ export class CallbackDeliveryService {
       }
     }
 
-    return this.defaultConversationResolver?.(context);
+    return undefined;
   }
 
   validateCallbackUrl(callbackUrl: string): void {
@@ -87,7 +79,7 @@ export class CallbackDeliveryService {
     payload: ChatCallbackResponse;
     retry: boolean;
   }): Promise<void> {
-    const transport = this.transports.get(callbackUrl);
+    const transport = this.getTransport(callbackUrl);
     const { timeout } = this.actions.getActionsConfigurationUtilities().getResponseSettings();
 
     await pRetry(
@@ -109,5 +101,47 @@ export class CallbackDeliveryService {
       },
       retry ? callbackRetryOptions : { retries: 0 }
     );
+  }
+
+  /** The first transport that handles the URL, else one that delivers with fetch. */
+  private getTransport(callbackUrl: string): CallbackTransportDefinition {
+    for (const transport of this.transports) {
+      if (transport.handles(callbackUrl)) {
+        return transport;
+      }
+    }
+
+    return {
+      handles: () => true,
+      send: async (url, payload, signal) => {
+        const response = await fetch(url, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+          redirect: 'error',
+          signal,
+        });
+
+        throwIfNotDelivered(response);
+      },
+    };
+  }
+
+  /** Delivers to Relay callback URLs through the Actions Relay client. */
+  private createRelayTransport(): CallbackTransportDefinition {
+    return {
+      handles: (callbackUrl) => this.actions.getRelayClient()?.isRelayOrigin(callbackUrl) ?? false,
+      send: async (callbackUrl, payload, signal) => {
+        const relayClient = this.actions.getRelayClient();
+
+        if (!relayClient) {
+          throw new Error('The Relay client is not available');
+        }
+
+        throwIfNotDelivered(await relayClient.postCallback(callbackUrl, payload, signal));
+      },
+    };
   }
 }

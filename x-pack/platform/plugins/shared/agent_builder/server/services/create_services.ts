@@ -227,8 +227,6 @@ export class ServiceManager {
       analyticsService,
     });
 
-    this.services.callbackDelivery.start({ conversations });
-
     const runnerFactory = new RunnerFactoryImpl({
       logger: logger.get('runnerFactory'),
       security,

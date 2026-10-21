@@ -9,10 +9,6 @@ import type { KibanaRequest } from '@kbn/core/server';
 import { AgentBuilderErrorCode, ConversationOriginType } from '@kbn/agent-builder-common';
 import { CallbackDeliveryError } from '@kbn/agent-builder-server';
 import type { ChatCallbackFailureResponse } from '../../../../common/http_api/chat_callback';
-import {
-  createConversationClientMock,
-  createEmptyConversation,
-} from '../../../test_utils/conversations';
 import { CallbackDeliveryService } from './callback_delivery_service';
 
 const callbackUrl = 'https://callback.example.com/v1/events?token=abc';
@@ -130,13 +126,12 @@ describe('transport selection', () => {
   it('posts through the first registered transport that handles the URL', async () => {
     const fetchMock = jest.spyOn(global, 'fetch');
     const service = createCallbackDeliveryService();
-    const skipped = { id: 'skipped', handles: jest.fn().mockReturnValue(false), send: jest.fn() };
+    const skipped = { handles: jest.fn().mockReturnValue(false), send: jest.fn() };
     const first = {
-      id: 'first',
       handles: jest.fn().mockReturnValue(true),
-      send: jest.fn().mockResolvedValue({ status: 202 }),
+      send: jest.fn().mockResolvedValue(undefined),
     };
-    const second = { id: 'second', handles: jest.fn().mockReturnValue(true), send: jest.fn() };
+    const second = { handles: jest.fn().mockReturnValue(true), send: jest.fn() };
     const { registerTransport } = service.setup();
     registerTransport(skipped);
     registerTransport(first);
@@ -149,24 +144,6 @@ describe('transport selection', () => {
     expect(second.send).not.toHaveBeenCalled();
     expect(fetchMock).not.toHaveBeenCalled();
   });
-
-  it('rejects a transport registered twice with the same id', () => {
-    const { registerTransport } = createCallbackDeliveryService().setup();
-    const transport = { id: 'transport-1', handles: () => true, send: jest.fn() };
-    registerTransport(transport);
-
-    expect(() => registerTransport(transport)).toThrow(
-      'Callback transport [transport-1] is already registered'
-    );
-  });
-
-  it.each(['default', 'relay'])('rejects a transport that takes the built-in id %p', (id) => {
-    const { registerTransport } = createCallbackDeliveryService().setup();
-
-    expect(() => registerTransport({ id, handles: () => true, send: jest.fn() })).toThrow(
-      `Callback transport [${id}] is already registered`
-    );
-  });
 });
 
 describe('resolveConversation', () => {
@@ -176,61 +153,13 @@ describe('resolveConversation', () => {
     request: {} as KibanaRequest,
   };
 
-  const startService = (byOrigin?: string) => {
-    const client = createConversationClientMock();
-    client.getByOrigin.mockResolvedValue(
-      byOrigin ? createEmptyConversation({ id: byOrigin }) : undefined
-    );
+  const setupService = () => {
     const service = createCallbackDeliveryService();
-    const callbacks = service.setup();
-    service.start({
-      conversations: {
-        getScopedClient: jest.fn().mockResolvedValue(client),
-        getScopedClientAsUser: jest.fn(),
-      },
-    });
-    return { service, callbacks, client };
+    return { service, callbacks: service.setup() };
   };
 
-  it('returns the registered resolver answer without asking the default', async () => {
-    const { service, callbacks, client } = startService('conversation-1');
-    const registered = jest.fn().mockResolvedValue({ conversationId: 'investigation-1' });
-    callbacks.registerConversationResolver(registered);
-
-    await expect(service.resolveConversation(context)).resolves.toEqual({
-      conversationId: 'investigation-1',
-    });
-    expect(registered).toHaveBeenCalledWith(context);
-    expect(client.getByOrigin).not.toHaveBeenCalled();
-  });
-
-  it('falls through to the default lookup when the registered resolver finds nothing', async () => {
-    const { service, callbacks, client } = startService('conversation-1');
-    callbacks.registerConversationResolver(jest.fn().mockResolvedValue(undefined));
-
-    await expect(service.resolveConversation(context)).resolves.toEqual({
-      conversationId: 'conversation-1',
-    });
-    expect(client.getByOrigin).toHaveBeenCalledWith({ external_conversation_id: 'thread-1' });
-  });
-
-  it('runs only the default lookup when no resolver is registered', async () => {
-    const { service, client } = startService();
-
-    await expect(service.resolveConversation(context)).resolves.toBeUndefined();
-    expect(client.getByOrigin).toHaveBeenCalledTimes(1);
-  });
-
-  it('propagates a registered resolver error without asking the default', async () => {
-    const { service, callbacks, client } = startService('conversation-1');
-    callbacks.registerConversationResolver(jest.fn().mockRejectedValue(new Error('lookup failed')));
-
-    await expect(service.resolveConversation(context)).rejects.toThrow('lookup failed');
-    expect(client.getByOrigin).not.toHaveBeenCalled();
-  });
-
   it('returns the first answer among registered resolvers in registration order', async () => {
-    const { service, callbacks, client } = startService('conversation-1');
+    const { service, callbacks } = setupService();
     const skipped = jest.fn().mockResolvedValue(undefined);
     const first = jest.fn().mockResolvedValue({ conversationId: 'investigation-1' });
     const second = jest.fn().mockResolvedValue({ conversationId: 'investigation-2' });
@@ -242,8 +171,31 @@ describe('resolveConversation', () => {
       conversationId: 'investigation-1',
     });
     expect(skipped).toHaveBeenCalledWith(context);
+    expect(first).toHaveBeenCalledWith(context);
     expect(second).not.toHaveBeenCalled();
-    expect(client.getByOrigin).not.toHaveBeenCalled();
+  });
+
+  it('returns undefined when no registered resolver answers', async () => {
+    const { service, callbacks } = setupService();
+    callbacks.registerConversationResolver(jest.fn().mockResolvedValue(undefined));
+
+    await expect(service.resolveConversation(context)).resolves.toBeUndefined();
+  });
+
+  it('returns undefined when no resolver is registered', async () => {
+    const { service } = setupService();
+
+    await expect(service.resolveConversation(context)).resolves.toBeUndefined();
+  });
+
+  it('propagates a registered resolver error without asking the next', async () => {
+    const { service, callbacks } = setupService();
+    const next = jest.fn();
+    callbacks.registerConversationResolver(jest.fn().mockRejectedValue(new Error('lookup failed')));
+    callbacks.registerConversationResolver(next);
+
+    await expect(service.resolveConversation(context)).rejects.toThrow('lookup failed');
+    expect(next).not.toHaveBeenCalled();
   });
 });
 
@@ -254,7 +206,7 @@ describe('makeCallbackRequest', () => {
 
   const deliverThrough = (transport: jest.Mock, retry: boolean) => {
     const service = createCallbackDeliveryService();
-    service.setup().registerTransport({ id: 'test', handles: () => true, send: transport });
+    service.setup().registerTransport({ handles: () => true, send: transport });
     return service.makeCallbackRequest({ callbackUrl, payload: failurePayload, retry });
   };
 

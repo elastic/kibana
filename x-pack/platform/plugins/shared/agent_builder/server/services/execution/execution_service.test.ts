@@ -1397,6 +1397,7 @@ describe('AgentExecutionService', () => {
           request: expect.anything(),
         });
         expect(conversationClient.get).toHaveBeenCalledWith('investigation-1');
+        expect(conversationClient.getByOrigin).not.toHaveBeenCalled();
         const [{ agentId, agentParams }] = mockExecutionClient.create.mock.calls[0];
         expect(agentId).toBe('agent-1');
         expect(agentParams).toMatchObject({
@@ -1406,19 +1407,39 @@ describe('AgentExecutionService', () => {
         });
       });
 
+      it('continues the conversation that has the origin when no resolver answers', async () => {
+        conversationClient.getByOrigin.mockResolvedValueOnce(boundConversation);
+        conversationClient.get.mockResolvedValueOnce(boundConversation);
+
+        await converse({ conversationId: undefined, origin });
+
+        expect(conversationClient.getByOrigin).toHaveBeenCalledWith({
+          external_conversation_id: 'thread-1',
+        });
+        expect(conversationClient.get).toHaveBeenCalledWith('investigation-1');
+        const [{ agentParams }] = mockExecutionClient.create.mock.calls[0];
+        expect(agentParams).toMatchObject({
+          conversationId: 'investigation-1',
+          conversationOperation: 'UPDATE',
+        });
+      });
+
       it('starts a conversation with the origin when nothing resolves it', async () => {
+        conversationClient.getByOrigin.mockResolvedValueOnce(undefined);
+
         await converse({ conversationId: undefined, origin });
 
         const [{ agentId, agentParams }] = mockExecutionClient.create.mock.calls[0];
         expect(agentId).toBe('agent-1');
         expect(agentParams).toMatchObject({ agentId: 'agent-1', conversationOperation: 'CREATE' });
-        expect(conversationClient.getByOrigin).not.toHaveBeenCalled();
+        expect(conversationClient.getByOrigin).toHaveBeenCalledTimes(1);
       });
 
       it('does not resolve the origin when the request names its conversation', async () => {
         await converse({ conversationId: 'conversation-1', origin });
 
         expect(resolveConversation).not.toHaveBeenCalled();
+        expect(conversationClient.getByOrigin).not.toHaveBeenCalled();
       });
 
       it('propagates a resolver error', async () => {
@@ -1427,6 +1448,7 @@ describe('AgentExecutionService', () => {
         await expect(converse({ conversationId: undefined, origin })).rejects.toThrow(
           'lookup failed'
         );
+        expect(conversationClient.getByOrigin).not.toHaveBeenCalled();
         expect(mockExecutionClient.create).not.toHaveBeenCalled();
       });
     });

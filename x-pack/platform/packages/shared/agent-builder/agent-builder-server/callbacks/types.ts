@@ -22,7 +22,6 @@ export type CallbackConversationResolver = (
 
 /** Delivers callback payloads to the callback URLs it handles. */
 export interface CallbackTransportDefinition {
-  id: string;
   /** Whether this transport delivers to the given callback URL. */
   handles(callbackUrl: string): boolean;
   /** Resolves once delivered; throws a `CallbackDeliveryError` to say whether to retry. */

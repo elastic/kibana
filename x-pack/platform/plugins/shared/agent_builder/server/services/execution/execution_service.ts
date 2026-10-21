@@ -41,6 +41,7 @@ import type {
   AgentExecutionService,
   AgentExecution,
   ConversationExecutionParams,
+  ExecutionConversationOrigin,
   ExecuteAgentParams,
   ExecuteAgentResult,
   MaybeExecuteAgentResult,
@@ -818,21 +819,14 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const receivedAt = new Date();
     const { origin, conversationId } = validatedParams;
 
-    const resolved =
+    const resolvedConversationId =
       origin && !conversationId
-        ? await this.deps.callbackDeliveryService.resolveConversation({
-            origin: {
-              type: origin.type,
-              external_conversation_id: origin.external_conversation_id,
-            },
-            spaceId,
-            request,
-          })
+        ? await this.resolveOriginConversationId({ origin, spaceId, request, conversationClient })
         : undefined;
 
     const conversation = await getConversation({
       agentId: validatedParams.agentId ?? agentBuilderDefaultAgentId,
-      conversationId: resolved?.conversationId ?? conversationId,
+      conversationId: resolvedConversationId ?? conversationId,
       autoCreateConversationWithId: validatedParams.autoCreateConversationWithId,
       conversationClient,
       accessControl: validatedParams.accessControl,
@@ -842,6 +836,36 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     });
 
     return { validatedParams, conversation, receivedAt };
+  }
+
+  /** The conversation an origin continues: a registered resolver's answer, else the conversation that has the origin. */
+  private async resolveOriginConversationId({
+    origin,
+    spaceId,
+    request,
+    conversationClient,
+  }: {
+    origin: ExecutionConversationOrigin;
+    spaceId: string;
+    request: KibanaRequest;
+    conversationClient: ConversationClient;
+  }): Promise<string | undefined> {
+    const { type, external_conversation_id: externalConversationId } = origin;
+    const resolved = await this.deps.callbackDeliveryService.resolveConversation({
+      origin: { type, external_conversation_id: externalConversationId },
+      spaceId,
+      request,
+    });
+
+    if (resolved) {
+      return resolved.conversationId;
+    }
+
+    const conversation = await conversationClient.getByOrigin({
+      external_conversation_id: externalConversationId,
+    });
+
+    return conversation?.id;
   }
 
   private async writeUserMessage({
