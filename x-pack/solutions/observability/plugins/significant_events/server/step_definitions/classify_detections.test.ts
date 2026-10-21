@@ -332,7 +332,7 @@ describe('classifyBatch', () => {
     });
   });
 
-  it('probes a rule once, with the first stored query, however many live series it is in', async () => {
+  it('fails open when live series use different stored queries', async () => {
     const probe = jest.fn(async () => probeResult('ok', true));
     const findLiveMembers = jest.fn(async () =>
       membersOf({
@@ -343,10 +343,15 @@ describe('classifyBatch', () => {
       })
     );
 
-    await classifyBatch(batchParams({ rows: [detectionRow('rule-A')], probe, findLiveMembers }));
+    const output = await classifyBatch(
+      batchParams({ rows: [detectionRow('rule-A')], probe, findLiveMembers })
+    );
 
-    expect(probe).toHaveBeenCalledTimes(1);
-    expect(probe).toHaveBeenCalledWith('FROM $.second');
+    expect(probe).not.toHaveBeenCalled();
+    expect(decided(output)['rule-A']).toMatchObject({
+      decision: 'needs_agent',
+      reason: 'probe_unavailable',
+    });
   });
 
   it('sends the detection to the agent when the probe fails, and reports the status', async () => {
@@ -414,9 +419,18 @@ describe('classifyBatch', () => {
 
   describe('the flaky_probe flag', () => {
     const flakyRow = [...detectionRow('rule-A').slice(0, 4), true];
-    it('keeps the flaky_probe flag, since the gate that sets it still runs', async () => {
-      const output = await classifyBatch(batchParams({ rows: [flakyRow] }));
-      expect(output.batch[0]).toMatchObject({ flaky_probe: true });
+    it('sends a flaky probe to the agent instead of skipping it', async () => {
+      const output = await classifyBatch(
+        batchParams({
+          rows: [flakyRow],
+          findLiveMembers: async () => membersOf({ 'rule-A': [membership('confirms')] }),
+        })
+      );
+      expect(output.batch[0]).toMatchObject({
+        flaky_probe: true,
+        classifier: { reason: 'flaky_probe' },
+      });
+      expect(output.skipped_count).toBe(0);
     });
   });
 

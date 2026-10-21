@@ -206,6 +206,13 @@ export const classifyBatch = async ({
       .filter(([, series]) => needsProbe(series))
       .map(([ruleUuid, series]) =>
         limiter(async () => {
+          const queryVariants = new Set(series.map(({ esqlQuery }) => esqlQuery ?? null));
+          if (queryVariants.size > 1) {
+            // A single probe cannot validate memberships backed by different stored queries.
+            // Fail open rather than applying one query's result to another membership.
+            probes.set(ruleUuid, { status: 'no_query', hasRows: false, durationMs: 0 });
+            return;
+          }
           const storedQuery = series.find(({ esqlQuery }) => esqlQuery !== undefined)?.esqlQuery;
           const [probed, observed] = await Promise.all([probe(storedQuery), observe(storedQuery)]);
           probes.set(ruleUuid, probed);
@@ -230,20 +237,24 @@ export const classifyBatch = async ({
     const probed = probes.get(ruleUuid);
     const baseline = baselines.get(ruleUuid);
     const series = memberships.get(ruleUuid) ?? [];
-    const classification: DetectionClassification =
-      index < MAX_CLASSIFIED_ROWS
-        ? withEscalation({
-            classification: classifyDetection({
-              memberships: series,
-              probe: probed ?? NOT_PROBED,
-            }),
-            memberships: series,
-            maxSkipAgeMs,
-            now,
-            joiningEventIds,
-            baseline,
-          })
-        : { decision: 'needs_agent', reason: 'over_cap' };
+    let classification: DetectionClassification;
+    if (entry.flaky_probe === true) {
+      classification = { decision: 'needs_agent', reason: 'flaky_probe' };
+    } else if (index >= MAX_CLASSIFIED_ROWS) {
+      classification = { decision: 'needs_agent', reason: 'over_cap' };
+    } else {
+      classification = withEscalation({
+        classification: classifyDetection({
+          memberships: series,
+          probe: probed ?? NOT_PROBED,
+        }),
+        memberships: series,
+        maxSkipAgeMs,
+        now,
+        joiningEventIds,
+        baseline,
+      });
+    }
     reasons.push(classification.reason);
     if (probed) probeStatuses.push(probed.status);
 

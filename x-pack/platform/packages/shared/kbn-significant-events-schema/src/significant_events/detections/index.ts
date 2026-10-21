@@ -52,6 +52,7 @@ export const NEEDS_AGENT_REASONS = [
   'member_joining',
   'series_too_old',
   'above_normal',
+  'flaky_probe',
   'over_cap',
 ] as const;
 

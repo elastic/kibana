@@ -61,15 +61,19 @@ describe('classifyDetection', () => {
   describe('a healthy verdict reached on found rows', () => {
     const healthyOnRows = { verdict: 'refutes' as const, evidenceFound: true };
 
-    it('expects rows: rows skip, no rows go to the agent', () => {
-      expect(classifyDetection({ memberships: [healthyOnRows], probe: withRows })).toEqual({
-        decision: 'skip',
-        reason: 'still_healthy',
-      });
-      expect(classifyDetection({ memberships: [healthyOnRows], probe: withoutRows })).toEqual({
-        decision: 'needs_agent',
-        reason: 'state_changed',
-      });
+    it('goes to the agent whatever the probe says, since row presence does not validate content', () => {
+      for (const probe of [withRows, withoutRows]) {
+        expect(classifyDetection({ memberships: [healthyOnRows], probe })).toEqual({
+          decision: 'needs_agent',
+          reason: 'state_changed',
+        });
+      }
+    });
+
+    it('takes the whole rule to the agent when another series would skip', () => {
+      expect(
+        classifyDetection({ memberships: [member('confirms'), healthyOnRows], probe: withRows })
+      ).toEqual({ decision: 'needs_agent', reason: 'state_changed' });
     });
   });
 

@@ -56,12 +56,14 @@ export const classifyDetection = ({
 
   if (probe.status !== 'ok') return needsAgent('probe_unavailable');
 
-  // What each member's stored verdict leads the probe to expect. A breach expects rows. A healthy
-  // verdict expects none, unless it was reached on found rows that were healthy: those expect rows.
-  const expectsRows = memberships.map(
-    ({ verdict, evidenceFound }, index) =>
-      states[index] === 'breaching' || (verdict === 'refutes' && evidenceFound === true)
-  );
+  // A healthy verdict reached on found rows cannot be revalidated by row presence alone, because the
+  // probe does not inspect row content.
+  if (memberships.some(({ verdict, evidenceFound }) => verdict === 'refutes' && evidenceFound)) {
+    return needsAgent('state_changed');
+  }
+
+  // A breach expects rows; a healthy verdict expects none.
+  const expectsRows = memberships.map((_, index) => states[index] === 'breaching');
 
   if (expectsRows.some((expected) => expected !== probe.hasRows)) {
     return needsAgent('state_changed');

@@ -255,21 +255,33 @@ steps:
         iteration-on-failure:
           continue: true
         steps:
-          - name: write_skipped_marker
-            type: kibana.request
+          - name: prepare_skipped_marker
+            type: data.set
             with:
-              method: POST
-              path: '/s/{{ variables.spaceId }}/internal/significant_events/detections/_mark_processed'
-              headers:
-                x-elastic-internal-origin: 'kibana'
-              body:
-                # A rule with one detection comes back as a string, with several as an array.
-                detection_ids: "${{ foreach.item[0] | join: ',' | split: ',' }}"
-                processed_by: '{{ execution.id }}'
-                # The classifier's decision for this rule, so the marker says why.
-                skip: "${{ steps.classify_detections.output.skips | where: 'rule_uuid', foreach.item[1] | map: 'skip' | first }}"
-            on-failure:
+              # A rule with one detection comes back as a string, with several as an array.
+              detection_ids: '${{ foreach.item[0] | join: "," | split: "," }}'
+              rule_uuid: '${{ foreach.item[1] }}'
+          - name: foreach_skipped_detection_chunk
+            type: foreach
+            # The mark-processed route accepts at most 1,000 IDs per request.
+            foreach: '${{ steps.prepare_skipped_marker.output.detection_ids | chunk: 1000 | json }}'
+            iteration-on-failure:
               continue: true
+            steps:
+              - name: write_skipped_marker
+                type: kibana.request
+                with:
+                  method: POST
+                  path: '/s/{{ variables.spaceId }}/internal/significant_events/detections/_mark_processed'
+                  headers:
+                    x-elastic-internal-origin: 'kibana'
+                  body:
+                    detection_ids: '${{ foreach.item }}'
+                    processed_by: '{{ execution.id }}'
+                    # The classifier's decision for this rule, so the marker says why.
+                    skip: "${{ steps.classify_detections.output.skips | where: 'rule_uuid', steps.prepare_skipped_marker.output.rule_uuid | map: 'skip' | first }}"
+                on-failure:
+                  continue: true
 
   # Rows for the agent. `default` would also replace a legitimately empty classified batch with the
   # raw rows, so only a missing output falls back to the raw count; a real 0 stays 0.
