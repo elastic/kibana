@@ -54,19 +54,6 @@ export const ATTACH_TO_CASE = i18n.translate(
   }
 );
 
-export const ATTACH_TO_NEW_CASE = i18n.translate(
-  'xpack.securitySolution.timeline.modal.attachToNewCaseButtonLabel',
-  {
-    defaultMessage: 'Attach to new case',
-  }
-);
-export const ATTACH_TO_EXISTING_CASE = i18n.translate(
-  'xpack.securitySolution.timeline.modal.attachToExistingCaseButtonLabel',
-  {
-    defaultMessage: 'Attach to existing case',
-  }
-);
-
 export const CALL_OUT_UNAUTHORIZED_MSG = i18n.translate(
   'xpack.securitySolution.timeline.callOut.unauthorized.message.description',
   {
