@@ -8,7 +8,7 @@ Scout tests for the alerting_v2 plugin, grouped into **namespaces** so CI can sc
 
 | Namespace | API | UI | Notes |
 |---|---|---|---|
-| `rules` | Rule HTTP CRUD, rule-template read APIs, error-envelope contract, matcher-value suggestions | Rules list, builder, Discover flyout | Mostly local-only (`@local-stateful-classic`); the rule-template specs are `tags.deploymentAgnostic` |
+| `rules` | Rule HTTP CRUD, rule-template read APIs, error-envelope contract, matcher-value suggestions | Rules list, builder, Discover flyout, Agent Builder rule attachment canvas | Mostly local-only (`@local-stateful-classic`); the rule-template specs are `tags.deploymentAgnostic`. Canvas specs use `agentChatTest`, which adds an LLM proxy (local-only) |
 | `action_policies` | Action-policy HTTP CRUD | Policy create/edit and privileges | Local-only |
 | `alerts` | Alert actions, execution history, rule-event field suggestions | Alert episodes, Discover compose, execution-history smoke | Local-only |
 | `engine` | End-to-end, telemetry, implicit index privileges, SML types access, **rule history** | — | `tags.stateful.classic` (local **and** cloud). API-only. |
@@ -53,7 +53,9 @@ test/scout_alerting_v2/
 └── management/ui/
 ```
 
-Each namespace category has `playwright.config.ts` (`testDir: './tests'`) and a one-line fixture re-export from `common/`. Specs import `../fixtures`.
+Each namespace category has `playwright.config.ts` (`testDir: './tests'`) and a fixture re-export from `common/`. Specs import `../fixtures`.
+
+`common/ui/fixtures/llm_mocks.ts` scripts the Agent Builder turns shared by the rule and action-policy canvases (title, `load_skill`, a tool-result call, and `<render_attachment>`). A namespace adds only its tool and attachment key, as `rules/ui/fixtures/llm_mocks.ts` does for `manage_rule` / `ruleAttachment`. An action-policy canvas spec should add `action_policies/ui/fixtures/llm_mocks.ts` for `manage_action_policy` / `actionPolicyAttachment` and re-export it from that namespace's fixtures.
 
 These suites are sequential (`workers: 1`). Do not add a parallel API lane until cleanup is isolated — almost every spec calls cluster-wide `*.cleanUp()`.
 

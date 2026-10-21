@@ -13,6 +13,7 @@ import {
   type AlertingApiServicesFixture,
 } from '../../alerting_api_services';
 import { ALL_ROLE, NO_ACCESS_ROLE, READ_ROLE } from '../../roles';
+import { provideLlmProxy, type LlmProxyWorkerFixtures } from './llm_proxy';
 
 export interface AlertingBrowserAuthFixture extends BrowserAuthFixture {
   loginAsAlertingV2Editor: () => Promise<void>;
@@ -65,6 +66,14 @@ export const test = baseTest.extend<
   ],
 });
 
+/**
+ * `test` plus a worker-scoped LLM proxy for specs that drive the Agent Builder chat. Kept separate
+ * so the other alerting specs never start a proxy or create a connector.
+ */
+export const agentChatTest = test.extend<{}, LlmProxyWorkerFixtures>({
+  llmProxy: [provideLlmProxy, { scope: 'worker', auto: true }],
+});
+
 export {
   ALL_ROLE,
   NO_ACCESS_ROLE,
@@ -88,3 +97,9 @@ export {
 export * as testData from '../../constants';
 export type { AlertingPageObjects } from './page_objects';
 export type { AlertingApp } from './page_objects/alerting_navigation';
+export {
+  mockFinalAnswerRenderingAttachment,
+  mockLoadSkill,
+  mockTitleGeneration,
+  mockToolResultCall,
+} from './llm_mocks';
