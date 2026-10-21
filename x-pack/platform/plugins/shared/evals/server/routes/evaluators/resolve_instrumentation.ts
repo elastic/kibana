@@ -13,6 +13,7 @@ import {
   ResolveInstrumentationRequestBody,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   getRecommendedInstrumentationProfile,
@@ -22,8 +23,13 @@ import {
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import { getNoTraceDocumentsMessage } from '../../evaluators/trace_readiness_errors';
 import type { RouteDependencies } from '../register_routes';
+import { resolveTraceReadSpaces } from '../traces/resolve_trace_read_spaces';
 
-export const registerResolveInstrumentationRoute = ({ router }: RouteDependencies) => {
+export const registerResolveInstrumentationRoute = ({
+  router,
+  getSpaceId,
+  getEvalsReadableSpaceIds,
+}: RouteDependencies) => {
   router.versioned
     .post({
       path: EVALS_RESOLVE_INSTRUMENTATION_URL,
@@ -52,12 +58,20 @@ export const registerResolveInstrumentationRoute = ({ router }: RouteDependencie
         }
 
         const coreContext = await context.core;
+        const readSpaceIds = await resolveTraceReadSpaces({
+          evalsContext: await context.evals,
+          spaceId: getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID,
+          traceId,
+          getEvalsReadableSpaceIds:
+            getEvalsReadableSpaceIds && (() => getEvalsReadableSpaceIds(request)),
+        });
         const traceAccessor = createTraceAccessor({
           traceId,
           // The probed evidence carries samples of the query, response and tool calls, so
           // reading as the internal user would hand trace content to a caller who holds
           // `manage_evals` but no Elasticsearch access to the trace.
           esClient: coreContext.elasticsearch.client.asCurrentUser,
+          spaceIds: readSpaceIds,
         });
 
         if (!(await hasTraceDocuments(traceAccessor))) {

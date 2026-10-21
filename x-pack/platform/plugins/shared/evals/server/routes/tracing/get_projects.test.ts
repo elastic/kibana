@@ -10,9 +10,9 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
-import { EVALS_TRACING_PROJECTS_URL, API_VERSIONS, TRACES_INDEX_PATTERN } from '@kbn/evals-common';
+import { EVALS_TRACING_PROJECTS_URL, API_VERSIONS } from '@kbn/evals-common';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import {
@@ -76,12 +76,13 @@ const buildTokenResponse = (
 });
 
 describe('GET /internal/evals/tracing/projects', () => {
-  const setup = () => {
+  const setup = ({ spaceId }: { spaceId?: string } = {}) => {
     const router = httpServiceMock.createRouter();
     const logger = loggingSystemMock.createLogger();
     registerGetTracingProjectsRoute({
       router,
       logger,
+      ...(spaceId ? { getSpaceId: async (_request: KibanaRequest) => spaceId } : {}),
       canEncrypt: false,
       evaluatorRegistry: createEvaluatorRegistryMock(),
       getInferenceStart: async () => ({ getClient: jest.fn() } as unknown as InferenceServerStart),
@@ -108,7 +109,7 @@ describe('GET /internal/evals/tracing/projects', () => {
       query: { page: 1, per_page: 25, ...query },
     });
 
-  it('queries traces-* index with size 0 and aggregations', async () => {
+  it('queries the space traces with size 0 and aggregations', async () => {
     const { handler, context, esClient } = setup();
     esClient.search.mockResolvedValueOnce({
       aggregations: {
@@ -121,10 +122,37 @@ describe('GET /internal/evals/tracing/projects', () => {
 
     expect(esClient.search).toHaveBeenCalledWith(
       expect.objectContaining({
-        index: TRACES_INDEX_PATTERN,
+        index: 'traces-*-default',
         size: 0,
       })
     );
+  });
+
+  it('keeps every search to the active space, so other spaces projects never show', async () => {
+    const { handler, context, esClient } = setup({ spaceId: 'marketing' });
+    esClient.search
+      .mockResolvedValueOnce({
+        aggregations: {
+          project_count: { value: 1 },
+          projects: { buckets: [buildProjectBucket({ name: 'my-project' })] },
+        },
+      } as any)
+      .mockResolvedValueOnce(
+        buildTraceIdsResponse([{ name: 'my-project', traceIds: ['trace-1'] }]) as any
+      )
+      .mockResolvedValueOnce(
+        buildTokenResponse([{ name: 'my-project', input: 1, output: 2 }]) as any
+      );
+
+    await handler(context, makeRequest(), kibanaResponseFactory);
+
+    expect(esClient.search).toHaveBeenCalledTimes(3);
+    const namespaceFilter = { term: { 'data_stream.namespace': 'marketing' } };
+    for (const [searchRequest] of esClient.search.mock.calls) {
+      const { index, query } = searchRequest as any;
+      expect(index).toBe('traces-*-marketing');
+      expect(query.bool.filter).toContainEqual(namespaceFilter);
+    }
   });
 
   it('excludes non-root spans and non-judge evaluator roots (keeps judge spans)', async () => {
@@ -302,7 +330,14 @@ describe('GET /internal/evals/tracing/projects', () => {
 
     expect(esClient.search).toHaveBeenCalledTimes(3);
     const tokenQuery = esClient.search.mock.calls[2][0] as any;
-    expect(tokenQuery.query).toEqual({ terms: { trace_id: ['trace-abc'] } });
+    expect(tokenQuery.query).toEqual({
+      bool: {
+        filter: [
+          { terms: { trace_id: ['trace-abc'] } },
+          { term: { 'data_stream.namespace': 'default' } },
+        ],
+      },
+    });
     expect(response.payload.projects[0].total_tokens).toBe(800);
   });
 

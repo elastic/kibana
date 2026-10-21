@@ -9,14 +9,14 @@ import {
   EVALS_TRACING_PROJECT_TRACES_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
-  TRACES_INDEX_PATTERN,
   GetProjectTracesRequestParams,
   GetProjectTracesRequestQuery,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
-import { escapeWildcard, EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS } from './utils';
+import { escapeWildcard, EXCLUDE_NON_JUDGE_EVALUATOR_ROOTS, getSpaceTracesScope } from './utils';
 
 interface RootSpanSource {
   trace_id?: string;
@@ -27,7 +27,11 @@ interface RootSpanSource {
   attributes?: Record<string, unknown>;
 }
 
-export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetProjectTracesRoute = ({
+  router,
+  logger,
+  getSpaceId,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_TRACING_PROJECT_TRACES_URL,
@@ -62,7 +66,13 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
-          const filters: Array<Record<string, unknown>> = [{ term: { name: projectName } }];
+          const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
+          const { index: tracesIndex, namespaceFilter } = getSpaceTracesScope(spaceId);
+
+          const filters: Array<Record<string, unknown>> = [
+            { term: { name: projectName } },
+            namespaceFilter,
+          ];
 
           if (from || to) {
             const range: Record<string, string> = {};
@@ -129,7 +139,7 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
           };
 
           const searchResponse = await esClient.search<RootSpanSource>({
-            index: TRACES_INDEX_PATTERN,
+            index: tracesIndex,
             size: perPage,
             from: (page - 1) * perPage,
             track_total_hits: true,
@@ -157,10 +167,12 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
 
           if (traceIds.length > 0) {
             const spanCountResponse = await esClient.search({
-              index: TRACES_INDEX_PATTERN,
+              index: tracesIndex,
               size: 0,
               query: {
-                terms: { trace_id: traceIds },
+                bool: {
+                  filter: [{ terms: { trace_id: traceIds } }, namespaceFilter],
+                },
               },
               aggs: {
                 per_trace: {
@@ -195,13 +207,14 @@ export const registerGetProjectTracesRoute = ({ router, logger }: RouteDependenc
             }
 
             const childEnrichResponse = await esClient.search({
-              index: TRACES_INDEX_PATTERN,
+              index: tracesIndex,
               size: 0,
               query: {
                 bool: {
                   filter: [
                     { terms: { trace_id: traceIds } },
                     { exists: { field: 'parent_span_id' } },
+                    namespaceFilter,
                   ],
                   should: [
                     { exists: { field: 'attributes.gen_ai.prompt.id' } },

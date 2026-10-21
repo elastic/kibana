@@ -16,6 +16,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { z } from '@kbn/zod/v4';
+import { withEvalSpace } from '@kbn/inference-tracing';
 import { withEvaluatorNameBaggage } from '../../../evaluators/evaluator_tracing_context';
 import { formatEvidenceSchemaIssues } from '../../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../../evaluators/trace_accessor';
@@ -48,6 +49,14 @@ interface ExecuteEvaluatorsOptions {
    * explanation can quote back whatever it was shown.
    */
   traceReader: ElasticsearchClient;
+  /** The space the evaluation runs in. Judge spans are written to its traces. */
+  spaceId?: string;
+  /**
+   * Limits where the trace is read from, by returning the spaces to read it in. Leave unset
+   * to find the trace by id wherever it was written: experiment runs and the CLI reach
+   * here with traces written in a space the request may not name.
+   */
+  resolveTraceReadSpaces?: (traceId: string) => Promise<string[]>;
 }
 
 export const executeEvaluators = async ({
@@ -58,6 +67,8 @@ export const executeEvaluators = async ({
   logger,
   getInferenceStart,
   traceReader,
+  spaceId,
+  resolveTraceReadSpaces,
 }: ExecuteEvaluatorsOptions): Promise<EvaluateResponse['results']> => {
   if (subject.mode === 'multi-turn') {
     throw new EvaluationExecutionError('multi-turn evaluation is not yet supported', 'badRequest');
@@ -99,7 +110,12 @@ export const executeEvaluators = async ({
     parsedReferenceData.set(definition, parsed.data as Record<string, unknown>);
   }
 
-  const traceAccessor = createTraceAccessor({ traceId, esClient: traceReader });
+  const traceReadSpaceIds = await resolveTraceReadSpaces?.(traceId);
+  const traceAccessor = createTraceAccessor({
+    traceId,
+    esClient: traceReader,
+    ...(traceReadSpaceIds !== undefined ? { spaceIds: traceReadSpaceIds } : {}),
+  });
   const activeProfile = subject.instrumentation?.profile ?? 'elastic-inference';
 
   let round: Awaited<ReturnType<typeof awaitTraceReady>>['round'];
@@ -206,14 +222,16 @@ export const executeEvaluators = async ({
         definition.kind === 'llm' && connectorId
           ? await getInferenceClient(connectorId)
           : undefined;
-      const result = await withEvaluatorNameBaggage(definition.name, () =>
-        definition.evaluate({
-          trace: traceAccessor,
-          round,
-          referenceData: parsedReferenceData.get(definition),
-          inferenceClient,
-          log: logger,
-        })
+      const result = await withEvalSpace(spaceId, () =>
+        withEvaluatorNameBaggage(definition.name, () =>
+          definition.evaluate({
+            trace: traceAccessor,
+            round,
+            referenceData: parsedReferenceData.get(definition),
+            inferenceClient,
+            log: logger,
+          })
+        )
       );
 
       results.push({

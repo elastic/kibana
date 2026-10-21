@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { context } from '@opentelemetry/api';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
+import { getEvalSpaceId } from '@kbn/inference-tracing';
 import { EVALS_EVALUATE_URL, EVALS_SCORES_URL } from '@kbn/evals-common';
 import type { EvalsTaskProvider, TaskProviderRegistry } from '../task_providers/types';
 import {
@@ -132,6 +135,35 @@ describe('runExampleEvaluation reference data', () => {
     const trace = evaluatedTrace(recorded);
     expect(trace.reference_data).toBeUndefined();
     expect('reference_data' in trace).toBe(false);
+  });
+});
+
+describe('runExampleEvaluation trace space', () => {
+  let contextManager: AsyncLocalStorageContextManager;
+
+  beforeEach(() => {
+    contextManager = new AsyncLocalStorageContextManager();
+    context.setGlobalContextManager(contextManager);
+    contextManager.enable();
+  });
+
+  afterEach(() => {
+    contextManager.disable();
+    context.disable();
+  });
+
+  it('runs the task so its spans are routed to the workflow space', async () => {
+    const recorded: RecordedCall[] = [];
+    let spaceDuringTask: string | undefined;
+    const registry = createRegistry(async () => {
+      spaceDuringTask = getEvalSpaceId(context.active());
+      return { output: { content: 'Paris' }, traceId: VALID_TRACE_ID };
+    });
+
+    await runExampleEvaluation(registry, createRuntime(recorded, 'marketing'), baseParams());
+
+    expect(spaceDuringTask).toBe('marketing');
+    expect(getEvalSpaceId(context.active())).toBeUndefined();
   });
 });
 

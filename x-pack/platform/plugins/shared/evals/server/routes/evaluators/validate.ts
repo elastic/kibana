@@ -23,6 +23,7 @@ import { getIssuePath } from '../../evaluators/evidence/schema_issues';
 import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import type { EvaluatorDefinition } from '../../evaluators/types';
 import type { RouteDependencies } from '../register_routes';
+import { resolveTraceReadSpaces } from '../traces/resolve_trace_read_spaces';
 
 const getUnmetPaths = (error: z.ZodError): string[] => [
   ...new Set(error.issues.map((issue) => getIssuePath(issue.path))),
@@ -56,6 +57,7 @@ export const registerValidateRoute = ({
   router,
   evaluatorRegistry,
   getSpaceId,
+  getEvalsReadableSpaceIds,
 }: RouteDependencies) => {
   router.versioned
     .post({
@@ -119,12 +121,20 @@ export const registerValidateRoute = ({
         const resolvedMapping = getInstrumentationProfile(activeProfile);
 
         const coreContext = await context.core;
+        const readSpaceIds = await resolveTraceReadSpaces({
+          evalsContext: await context.evals,
+          spaceId,
+          traceId,
+          getEvalsReadableSpaceIds:
+            getEvalsReadableSpaceIds && (() => getEvalsReadableSpaceIds(request)),
+        });
         const traceAccessor = createTraceAccessor({
           traceId,
           // Reports only whether evidence is present, but that is still the caller asking
           // about a trace, so it reads under their privileges like `_test` and
           // `_resolve_instrumentation`.
           esClient: coreContext.elasticsearch.client.asCurrentUser,
+          spaceIds: readSpaceIds,
         });
 
         // A dry run, so it neither waits for the trace nor requires one to exist: callers use

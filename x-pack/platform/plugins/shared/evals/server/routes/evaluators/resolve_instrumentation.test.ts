@@ -331,8 +331,14 @@ describe('POST /internal/evals/traces/_resolve_instrumentation', () => {
     return { handler, routeConfig };
   };
 
+  const noScoreHits = { hits: { total: { value: 0 }, hits: [] } };
+
   const buildContext = (searchMock = buildRouteSearchMock()) =>
     ({
+      evals: Promise.resolve({
+        evaluationScoreService: { search: jest.fn().mockResolvedValue(noScoreHits) },
+        onlineScoreService: { search: jest.fn().mockResolvedValue(noScoreHits) },
+      }),
       core: Promise.resolve({
         elasticsearch: {
           client: {

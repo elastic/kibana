@@ -30,6 +30,14 @@ export {
   EVALUATOR_NAME_BAGGAGE_KEY,
   CONVERSATION_ID_BAGGAGE_KEY,
 } from './src/baggage';
+export {
+  DATA_STREAM_NAMESPACE_ATTRIBUTE,
+  EvalSpaceSpanProcessor,
+  carryEvalSpaceId,
+  getEvalSpaceId,
+  setEvalSpaceId,
+  withEvalSpace,
+} from './src/eval_space';
 export { parseJsonAttr } from './src/util/parse_json_attr';
 
 export { isInferenceSpan } from './src/is_inference_span';

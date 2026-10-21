@@ -15,6 +15,7 @@ import { seedTrace, uniqueSuffix } from './helpers/fixtures';
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const es = getService('es');
+  const spaces = getService('spaces');
 
   let adminClient: SupertestWithRoleScopeType;
   let viewerClient: SupertestWithRoleScopeType;
@@ -24,7 +25,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   describe('Evals - Traces', function () {
     const suffix = uniqueSuffix();
-    const traceIndex = `traces-evals-ftr-${suffix}`;
+    const traceIndex = `traces-evals-ftr-${suffix}-default`;
     const traceId = `trace-${suffix}`;
     const startTime = '2024-01-01T00:00:00.000Z';
 
@@ -94,6 +95,45 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       const trace = body as GetTraceResponse;
       expect(trace.trace_id).to.eql(traceId);
       expect(trace.total_spans).to.eql(2);
+    });
+
+    describe('spaces', () => {
+      const spaceId = `evals-traces-${suffix}`;
+      const inSpace = (path: string) => `/s/${spaceId}${path}`;
+      const spaceTraceId = `space-trace-${suffix}`;
+      const spaceTraceIndex = `traces-evals-ftr-${suffix}-${spaceId}`;
+
+      before(async () => {
+        await spaces.create({ id: spaceId, name: 'Evals Traces Space', disabledFeatures: [] });
+        await seedTrace(
+          es,
+          spaceTraceIndex,
+          spaceTraceId,
+          [{ spanId: 'space-span-1', name: 'space root', timestamp: startTime, durationNanos: 1 }],
+          { namespace: spaceId }
+        );
+      });
+
+      after(async () => {
+        await es.indices.delete({ index: spaceTraceIndex }).catch(() => {
+          // best-effort cleanup
+        });
+        await spaces.delete(spaceId);
+      });
+
+      it('shows a trace in the space it was written in', async () => {
+        const { body } = await adminClient.get(inSpace(tracePath(spaceTraceId))).expect(200);
+
+        expect((body as GetTraceResponse).total_spans).to.eql(1);
+      });
+
+      it('keeps the traces of one space out of another', async () => {
+        const { body: fromDefault } = await adminClient.get(tracePath(spaceTraceId)).expect(200);
+        const { body: fromSpace } = await adminClient.get(inSpace(tracePath(traceId))).expect(200);
+
+        expect((fromDefault as GetTraceResponse).total_spans).to.eql(0);
+        expect((fromSpace as GetTraceResponse).total_spans).to.eql(0);
+      });
     });
   });
 }

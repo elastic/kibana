@@ -18,6 +18,7 @@ import {
   type GetTraceEvidenceResponse,
 } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import {
   extractProfilesEvidence,
@@ -36,6 +37,7 @@ import { createTraceAccessor } from '../../evaluators/trace_accessor';
 import { getNoTraceDocumentsMessage } from '../../evaluators/trace_readiness_errors';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
+import { resolveTraceReadSpaces } from './resolve_trace_read_spaces';
 
 const toResolvedResponse = ({
   traceId,
@@ -78,7 +80,12 @@ const toUnresolvedResponse = ({
   profile_diagnostics: toProfileDiagnostics(profiles),
 });
 
-export const registerGetTraceEvidenceRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetTraceEvidenceRoute = ({
+  router,
+  logger,
+  getSpaceId,
+  getEvalsReadableSpaceIds,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_TRACE_EVIDENCE_URL,
@@ -109,9 +116,17 @@ export const registerGetTraceEvidenceRoute = ({ router, logger }: RouteDependenc
 
         try {
           const coreContext = await context.core;
+          const readSpaceIds = await resolveTraceReadSpaces({
+            evalsContext: await context.evals,
+            spaceId: getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID,
+            traceId,
+            getEvalsReadableSpaceIds:
+              getEvalsReadableSpaceIds && (() => getEvalsReadableSpaceIds(request)),
+          });
           const traceAccessor = createTraceAccessor({
             traceId,
             esClient: coreContext.elasticsearch.client.asCurrentUser,
+            spaceIds: readSpaceIds,
           });
 
           if (wait !== 'none') {

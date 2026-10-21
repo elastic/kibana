@@ -7,6 +7,8 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { CreateOnlineEvalFlyout } from '.';
 import { useCreateOnlineEvalWorkflow } from '../../hooks/use_online_eval_workflows';
 import { useEvaluators } from '../../hooks/use_evaluators_api';
@@ -254,7 +256,7 @@ describe('CreateOnlineEvalFlyout', () => {
     expect(getByTestSubj('onlineEvalCreateSubmitButton')).toBeDisabled();
     expect(
       screen.getByText(
-        'Requires a name and at least one evaluator (with a connector for LLM evaluators).'
+        'Requires a name, an index pattern and at least one evaluator (with a connector for LLM evaluators).'
       )
     ).toBeInTheDocument();
     expect(mutateAsync).not.toHaveBeenCalled();
@@ -288,6 +290,57 @@ describe('CreateOnlineEvalFlyout', () => {
     expect(
       screen.getByText(/Evaluators that require reference data are unavailable here/)
     ).toBeInTheDocument();
+  });
+
+  describe('with spaces', () => {
+    const renderInSpace = (getActiveSpace: jest.Mock) => {
+      const spaces = { getActiveSpace } as unknown as SpacesPluginStart;
+      ({ container } = render(
+        <KibanaContextProvider services={{ spaces }}>
+          <CreateOnlineEvalFlyout onClose={onClose} />
+        </KibanaContextProvider>
+      ));
+    };
+
+    const fillRequiredFields = () => {
+      fireEvent.change(getByTestSubj('onlineEvalCreateNameInput'), {
+        target: { value: 'space monitor' },
+      });
+      fireEvent.change(getByTestSubj('onlineEvalCreateEvaluatorsCombo'), {
+        target: { value: 'cost' },
+      });
+      fireEvent.blur(getByTestSubj('onlineEvalCreateEvaluatorsCombo'), {
+        target: { value: 'cost' },
+      });
+    };
+
+    it('samples the Agent Builder traces of the active space', async () => {
+      renderInSpace(jest.fn().mockResolvedValue({ id: 'marketing' }));
+      fillRequiredFields();
+
+      await waitFor(() => expect(getByTestSubj('onlineEvalCreateSubmitButton')).toBeEnabled());
+      fireEvent.click(getByTestSubj('onlineEvalCreateSubmitButton'));
+
+      await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+      const { yaml } = mutateAsync.mock.calls[0][0] as { yaml: string };
+      expect(parseOnlineEvalWorkflowYaml(yaml)?.indexPattern).toBe(
+        'traces-agent_builder.otel-marketing'
+      );
+    });
+
+    it('does not save the default space traces while the active space is unknown', async () => {
+      renderInSpace(jest.fn().mockRejectedValue(new Error('lookup failed')));
+      fillRequiredFields();
+
+      await waitFor(() => expect(getByTestSubj('onlineEvalCreateSubmitButton')).toBeDisabled());
+      fireEvent.click(screen.getByRole('button', { name: 'Advanced' }));
+      expect(getByTestSubj('onlineEvalCreateIndexPatternInput')).toHaveValue('');
+
+      fireEvent.change(getByTestSubj('onlineEvalCreateIndexPatternInput'), {
+        target: { value: 'traces-custom-marketing' },
+      });
+      expect(getByTestSubj('onlineEvalCreateSubmitButton')).toBeEnabled();
+    });
   });
 
   it('adds no reference data note when every evaluator can run online', () => {

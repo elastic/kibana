@@ -9,18 +9,26 @@ import {
   EVALS_TRACE_URL,
   API_VERSIONS,
   INTERNAL_API_ACCESS,
-  TRACES_INDEX_PATTERN,
   GetTraceRequestParams,
+  buildSpaceTracesIndexPattern,
+  buildTracesNamespacesFilter,
 } from '@kbn/evals-common';
 import type { TraceSpan } from '@kbn/evals-common';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
+import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { EVALS_API_PRIVILEGES } from '../../../common';
 import type { RouteDependencies } from '../register_routes';
 import { handleMaximumResponseSizeExceededError } from '../utils/handle_response_size_error';
+import { resolveTraceReadSpaces } from './resolve_trace_read_spaces';
 import { MAX_SPANS_PER_TRACE_SEARCH, computeTraceDurationMs, shapeTraceSpan } from './trace_spans';
 import type { TraceSpanSource } from './trace_spans';
 
-export const registerGetTraceRoute = ({ router, logger }: RouteDependencies) => {
+export const registerGetTraceRoute = ({
+  router,
+  logger,
+  getSpaceId,
+  getEvalsReadableSpaceIds,
+}: RouteDependencies) => {
   router.versioned
     .get({
       path: EVALS_TRACE_URL,
@@ -45,10 +53,24 @@ export const registerGetTraceRoute = ({ router, logger }: RouteDependencies) => 
           const coreContext = await context.core;
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
+          const spaceId = getSpaceId ? await getSpaceId(request) : DEFAULT_SPACE_ID;
+          const readSpaceIds = await resolveTraceReadSpaces({
+            evalsContext: await context.evals,
+            spaceId,
+            traceId,
+            getEvalsReadableSpaceIds:
+              getEvalsReadableSpaceIds && (() => getEvalsReadableSpaceIds(request)),
+          });
+
           const searchResponse = await esClient.search<TraceSpanSource>({
-            index: TRACES_INDEX_PATTERN,
+            index: readSpaceIds.map(buildSpaceTracesIndexPattern),
             query: {
-              term: { trace_id: traceId },
+              bool: {
+                filter: [
+                  { term: { trace_id: traceId } },
+                  buildTracesNamespacesFilter(readSpaceIds),
+                ],
+              },
             },
             sort: [{ '@timestamp': { order: 'asc' } }],
             size: MAX_SPANS_PER_TRACE_SEARCH,
