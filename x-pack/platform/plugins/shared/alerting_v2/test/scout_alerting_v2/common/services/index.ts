@@ -54,6 +54,16 @@ export { getDispatcherApiService } from './dispatcher_api_service';
 export type { TaskManagerService } from './task_manager_service';
 export { getTaskManagerService } from './task_manager_service';
 
+export type { AlertActionsCleanupService } from './alert_actions_cleanup_service';
+export { getAlertActionsCleanupService } from './alert_actions_cleanup_service';
+
+export type {
+  EbtService,
+  RuleChangedEbtEvent,
+  WaitForRuleChangedEventsParams,
+} from './ebt_service';
+export { getEbtService } from './ebt_service';
+
 export type { TelemetryService } from './telemetry_service';
 export { getTelemetryService } from './telemetry_service';
 
