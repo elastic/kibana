@@ -1,0 +1,68 @@
+{
+  "sha1": "3a67637f71dc9ffe0978cf0d5a77f5766995fda2",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "585811e24aa494e-abc3c97abd88ccf",
+      "title": "Enable alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/rules/ui/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
+    {
+      "id": "b83b76554d1dd2b-596e67cf4a28a72",
+      "title": "Rule changed EBT telemetry reports a rule created from Discover with the discover app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/rules/ui/tests/ebt_telemetry.spec.ts",
+        "line": 71,
+        "column": 15
+      }
+    },
+    {
+      "id": "b83b76554d1dd2b-49e30c8475ba2b6",
+      "title": "Rule changed EBT telemetry reports a rule created from the rules list with the observabilityAlerting app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/rules/ui/tests/ebt_telemetry.spec.ts",
+        "line": 99,
+        "column": 23
+      }
+    },
+    {
+      "id": "a7140c67da7c4fe-ebf10327abcc16d",
+      "title": "Unset alerting:v2:enabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/rules/ui/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
+      }
+    }
+  ]
+}

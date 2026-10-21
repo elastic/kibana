@@ -5,7 +5,7 @@
   ],
   "tests": [
     {
-      "id": "7873ec14d2b0934-abc3c97abd88ccf",
+      "id": "6b2f3209971ee50-abc3c97abd88ccf",
       "title": "Enable alerting:v2:enabled",
       "expectedStatus": "passed",
       "tags": [
@@ -13,39 +13,39 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_cleanup/engine/api/tests/global.setup.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/engine/api/tests/global.setup.ts",
         "line": 5,
         "column": 1
       }
     },
     {
-      "id": "1d05ced4999f581-38a863d2228c7ae",
+      "id": "6990a4f8525f004-38a863d2228c7ae",
       "title": "Alert actions cleanup task is scheduled to run daily",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_cleanup/engine/api/tests/alert_actions_cleanup.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/engine/api/tests/alert_actions_cleanup.spec.ts",
         "line": 39,
         "column": 49
       }
     },
     {
-      "id": "1d05ced4999f581-e72c64b0c42bb49",
+      "id": "6990a4f8525f004-e72c64b0c42bb49",
       "title": "Alert actions cleanup task deletes expired dispatcher docs and keeps every other action",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_cleanup/engine/api/tests/alert_actions_cleanup.spec.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/engine/api/tests/alert_actions_cleanup.spec.ts",
         "line": 43,
         "column": 29
       }
     },
     {
-      "id": "3174294698f1970-ebf10327abcc16d",
+      "id": "60de58613aee394-ebf10327abcc16d",
       "title": "Unset alerting:v2:enabled",
       "expectedStatus": "passed",
       "tags": [
@@ -53,7 +53,7 @@
         "@cloud-stateful-classic"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_cleanup/engine/api/tests/global.teardown.ts",
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/engine/api/tests/global.teardown.ts",
         "line": 5,
         "column": 1
       }
