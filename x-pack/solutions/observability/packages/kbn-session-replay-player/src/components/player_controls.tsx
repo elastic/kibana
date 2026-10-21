@@ -95,7 +95,7 @@ export const PlayerControls = ({
         ) : (
           <EuiToolTip content={isEnded ? REPLAY_LABEL : PLAY_LABEL} disableScreenReaderOutput>
             <EuiButtonIcon
-              iconType={isEnded ? 'refresh' : 'playFilled'}
+              iconType={isEnded ? 'refresh' : 'play'}
               display="fill"
               size="s"
               aria-label={isEnded ? REPLAY_LABEL : PLAY_LABEL}
