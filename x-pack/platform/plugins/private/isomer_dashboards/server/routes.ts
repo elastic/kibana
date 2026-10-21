@@ -173,8 +173,53 @@ export const registerRoutes = (
           : undefined;
       },
     };
-    return { drawing, converted, composition, options };
+    return { drawing, converted, composition, hints, options };
   };
+
+  router.post(
+    {
+      path: `${API_BASE}/{id}/composition`,
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'Reads the dashboard and runs its queries only through the requesting user’s scoped clients.',
+        },
+      },
+      options: { access: 'internal' },
+      validate: { params, body: pdfBody },
+    },
+    async (context, request, response) => {
+      const { id } = request.params;
+      const { timeRange, layout, width, controls } = request.body as TypeOf<typeof pdfBody>;
+      try {
+        const { converted, composition, hints } = await prepare(context, request, {
+          id,
+          ...(timeRange ? { timeRange } : {}),
+          layout,
+          ...(width ? { width } : {}),
+          ...(controls ? { controls: controls as PinnedControl[] } : {}),
+        });
+        // What the PDF draws: the composition, as `render_composition` takes it, and the Lens hints by node id.
+        return response.ok({
+          body: { composition, hints },
+          headers: {
+            'content-disposition': `attachment; filename="${fileName(converted.title).replace(
+              /\.pdf$/,
+              ''
+            )}.isomer.json"`,
+          },
+        });
+      } catch (error) {
+        return notFound(error)
+          ? response.notFound({ body: { message: `Dashboard ${id} not found` } })
+          : response.customError({
+              statusCode: 500,
+              body: { message: String((error as Error)?.message ?? error) },
+            });
+      }
+    }
+  );
 
   router.post(
     {
