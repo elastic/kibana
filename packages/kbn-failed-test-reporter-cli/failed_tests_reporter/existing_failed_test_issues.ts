@@ -13,7 +13,6 @@ import type { ToolingLog } from '@kbn/tooling-log';
 
 import { getScoutTestId, getTestFilePath, isScoutFailure } from './failure_identity';
 import type { TestFailure } from './get_failures';
-import { getLocationFromClassname } from './get_failures';
 import type { GithubIssueMini } from './github_api';
 
 export interface FailedTestIssue {
@@ -35,7 +34,6 @@ export interface FlakySuiteIssue {
   kind: 'suite';
   suite: {
     filePath: string;
-    dirPath: string;
     /** the `describe` block, absent when the issue is about the whole file */
     title?: string;
     framework?: string;
@@ -61,24 +59,15 @@ interface FailureSelector {
   classname: string;
   name: string;
   filePath?: string;
-  dirPath?: string;
   testId?: string;
 }
 
-const getSelector = (failure: TestFailure): FailureSelector => {
-  const filePath = getTestFilePath(failure);
-  return {
-    classname: failure.classname,
-    name: failure.name,
-    filePath,
-    // a jest report without the file leaves the directory from the classname
-    dirPath:
-      !filePath && failure.testType === 'jest'
-        ? getLocationFromClassname(failure.classname) || undefined
-        : undefined,
-    testId: getScoutTestId(failure),
-  };
-};
+const getSelector = (failure: TestFailure): FailureSelector => ({
+  classname: failure.classname,
+  name: failure.name,
+  filePath: getTestFilePath(failure),
+  testId: getScoutTestId(failure),
+});
 
 const getFramework = (failure: TestFailure): string | undefined =>
   isScoutFailure(failure) ? 'playwright' : failure.testType;
@@ -105,19 +94,11 @@ const isAboutFailure = (issue: FlakySuiteIssue, failure: TestFailure): boolean =
   }
 
   // a test that became flaky after the issue was filed is only known by its file and describe block
-  const { filePath, dirPath } = getSelector(failure);
-  if (filePath) {
-    return (
-      suite.filePath === filePath &&
-      (suite.title === undefined || isInDescribe(failure, suite.title))
-    );
-  }
-  // with only a directory, the describe block has to tell the files of the directory apart
+  const filePath = getTestFilePath(failure);
   return (
-    dirPath !== undefined &&
-    suite.dirPath === dirPath &&
-    suite.title !== undefined &&
-    isInDescribe(failure, suite.title)
+    filePath !== undefined &&
+    suite.filePath === filePath &&
+    (suite.title === undefined || isInDescribe(failure, suite.title))
   );
 };
 

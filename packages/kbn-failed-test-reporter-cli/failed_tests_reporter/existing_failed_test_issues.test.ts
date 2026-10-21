@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import Path from 'path';
-
 import { createStripAnsiSerializer } from '@kbn/jest-serializers';
 import { computeTestID } from '@kbn/scout-reporting';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
@@ -351,12 +349,6 @@ describe('flaky suite issues', () => {
     testType: 'jest',
     location: JEST_FILE,
   };
-  // a jest report without the file in the suite name only leaves the directory
-  const jestFailureWithoutFile: TestFailure = {
-    ...jestFailure,
-    name: 'strategy search returns aggregations',
-    location: Path.dirname(JEST_FILE),
-  };
   const scoutFailure: TestFailure & { id: string; target: string; location: string } = {
     ...mockTestFailure,
     classname: 'Attachments',
@@ -372,7 +364,7 @@ describe('flaky suite issues', () => {
     state: FlakySuiteIssue['github']['state'] = 'open'
   ): FlakySuiteIssue => ({
     kind: 'suite',
-    suite: { dirPath: Path.dirname(suite.filePath), testIds: [], ...suite },
+    suite: { testIds: [], ...suite },
     github: {
       nodeId: `node-${number}`,
       number,
@@ -390,8 +382,8 @@ describe('flaky suite issues', () => {
 
   const numberOf = (issue: FlakySuiteIssue | undefined) => issue?.github.number;
 
-  it('sends ci-stats the file, directory and Scout test id each failure knows', async () => {
-    await loadWith([], [ftrFailure, jestFailure, jestFailureWithoutFile, scoutFailure]);
+  it('sends ci-stats the file and Scout test id each failure knows', async () => {
+    await loadWith([], [ftrFailure, jestFailure, scoutFailure]);
 
     expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toEqual({
       failures: [
@@ -406,11 +398,6 @@ describe('flaky suite issues', () => {
           name: jestFailure.name,
           filePath: JEST_FILE,
           testId: computeTestID(JEST_FILE, jestFailure.name),
-        },
-        {
-          classname: jestFailureWithoutFile.classname,
-          name: jestFailureWithoutFile.name,
-          dirPath: Path.dirname(JEST_FILE),
         },
         {
           classname: scoutFailure.classname,
@@ -451,19 +438,6 @@ describe('flaky suite issues', () => {
     expect(numberOf(existing.getSuiteIssueForFailure(scoutFailure))).toBe(3);
     // an issue without a title is about the whole file
     expect(numberOf(existing.getSuiteIssueForFailure(jestFailure))).toBe(4);
-  });
-
-  it('matches a jest failure that only knows its directory through the describe block', async () => {
-    const existing = await loadWith(
-      [
-        suiteIssue(1, { filePath: JEST_FILE }),
-        suiteIssue(2, { filePath: JEST_FILE, title: 'strategy search' }),
-      ],
-      [jestFailureWithoutFile]
-    );
-
-    // the whole-file issue could be about any file of the directory
-    expect(numberOf(existing.getSuiteIssueForFailure(jestFailureWithoutFile))).toBe(2);
   });
 
   it('prefers an open issue to a closed one, then the newest', async () => {

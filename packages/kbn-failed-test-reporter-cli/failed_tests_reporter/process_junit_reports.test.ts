@@ -53,7 +53,7 @@ const createExistingIssue = (failure: TestFailure): ExistingFailedTestIssue => (
 
 const createSuiteIssue = (failure: TestFailure): FlakySuiteIssue => ({
   kind: 'suite',
-  suite: { filePath: 'x-pack/test/a.ts', dirPath: 'x-pack/test', testIds: [failure.name] },
+  suite: { filePath: 'x-pack/test/a.ts', testIds: [failure.name] },
   github: {
     nodeId: 'suite-node',
     number: 7,
