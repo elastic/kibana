@@ -60,6 +60,14 @@ export interface DataGridControlColumn<TRow> {
   cellCss?: Interpolation<Theme>;
 }
 
+/** The one cell whose expansion popover is open, owned by the grid so opening another closes it. */
+export interface DataGridExpandedCell {
+  rowId: string;
+  columnId: string;
+  /** Viewport rect of what opened the popover, e.g. the expand icon. */
+  anchorRect: DOMRect;
+}
+
 /** The columns as the grid renders them, control columns included. */
 export interface DataGridInternalColumn<TRow> extends DataGridColumn<TRow> {
   isControl: boolean;

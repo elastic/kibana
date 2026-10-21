@@ -186,6 +186,25 @@ describe('DataGrid', () => {
       expect(screen.getByTestId('copyButton-1')).toBeInTheDocument();
     });
 
+    it('keeps the actions of a hovered cell mounted when it loses focus', async () => {
+      render(<DataGrid {...defaultProps} />);
+      const valueCell = getCell('valueA');
+      await userEvent.hover(valueCell);
+      valueCell.focus();
+      expect(
+        await within(valueCell).findByTestId(CELL_ACTIONS_TRIGGER_TEST_SUBJ)
+      ).toBeInTheDocument();
+
+      // E.g. the focus trap of another cell's popover takes the focus.
+      valueCell.blur();
+      expect(within(valueCell).getByTestId(CELL_ACTIONS_TRIGGER_TEST_SUBJ)).toBeInTheDocument();
+
+      await userEvent.unhover(valueCell);
+      expect(
+        within(valueCell).queryByTestId(CELL_ACTIONS_TRIGGER_TEST_SUBJ)
+      ).not.toBeInTheDocument();
+    });
+
     it('does not mount cell actions for control columns', async () => {
       render(<DataGrid {...defaultProps} />);
       const controlCell = screen
@@ -211,6 +230,26 @@ describe('DataGrid', () => {
 
       await userEvent.click(within(popover).getByTestId(CELL_EXPANSION_CLOSE_TEST_SUBJ));
       expect(screen.queryByTestId(CELL_EXPANSION_POPOVER_TEST_SUBJ)).not.toBeInTheDocument();
+    });
+
+    it('moves the popover to another cell when its expand button is clicked', async () => {
+      render(<DataGrid {...defaultProps} />);
+      const cellA = getCell('valueA');
+      await userEvent.hover(cellA);
+      await userEvent.click(await within(cellA).findByTestId(CELL_ACTIONS_TRIGGER_TEST_SUBJ));
+      expect(
+        within(await screen.findByTestId(CELL_EXPANSION_POPOVER_TEST_SUBJ)).getByText(
+          'details of valueA'
+        )
+      ).toBeInTheDocument();
+
+      const cellB = getCell('valueB');
+      await userEvent.hover(cellB);
+      await userEvent.click(await within(cellB).findByTestId(CELL_ACTIONS_TRIGGER_TEST_SUBJ));
+
+      const popovers = await screen.findAllByTestId(CELL_EXPANSION_POPOVER_TEST_SUBJ);
+      expect(popovers).toHaveLength(1);
+      expect(within(popovers[0]).getByText('details of valueB')).toBeInTheDocument();
     });
 
     it('expands the cell when the collapsed actions trigger is clicked', async () => {

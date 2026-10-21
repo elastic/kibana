@@ -13,7 +13,7 @@ import type { Virtualizer } from '@tanstack/react-virtual';
 import type { SerializedStyles } from '@emotion/react';
 import { DATA_GRID_ROW_CLASS } from '../constants';
 import type { DataGridStyles } from '../styles';
-import type { DataGridInternalColumn, DataGridProps } from '../types';
+import type { DataGridExpandedCell, DataGridInternalColumn, DataGridProps } from '../types';
 import { DataGridCell } from './data_grid_cell';
 
 interface DataGridRowProps<TRow> {
@@ -22,6 +22,10 @@ interface DataGridRowProps<TRow> {
   columnLayouts: SerializedStyles[];
   getCellProps?: DataGridProps<TRow>['getCellProps'];
   getRowProps?: DataGridProps<TRow>['getRowProps'];
+  /** Set only for the row that has the open expansion popover. */
+  expandedCell?: DataGridExpandedCell;
+  onOpenExpansion: (cell: DataGridExpandedCell) => void;
+  onCloseExpansion: () => void;
   ariaRowIndex: number;
   isStriped: boolean;
   styles: DataGridStyles;
@@ -38,6 +42,9 @@ const DataGridRowComponent = <TRow,>({
   columnLayouts,
   getCellProps,
   getRowProps,
+  expandedCell,
+  onOpenExpansion,
+  onCloseExpansion,
   ariaRowIndex,
   isStriped,
   styles,
@@ -66,7 +73,13 @@ const DataGridRowComponent = <TRow,>({
           key={column.id}
           column={column}
           row={row.original}
+          rowId={row.id}
           rowIndex={row.index}
+          expandedAnchorRect={
+            expandedCell?.columnId === column.id ? expandedCell.anchorRect : undefined
+          }
+          onOpenExpansion={onOpenExpansion}
+          onCloseExpansion={onCloseExpansion}
           colIndex={columnIndex + 1}
           styles={styles}
           layoutCss={columnLayouts[columnIndex]}

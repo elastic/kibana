@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useImperativeHandle, useMemo, useRef, useState } from 'react';
+import React, {
+  useCallback,
+  useEffect,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import {
   getCoreRowModel,
   useReactTable,
@@ -21,7 +28,12 @@ import { DEFAULT_ESTIMATED_ROW_HEIGHT, OVERSCAN } from '../constants';
 import { useColumnSizing } from '../hooks/use_column_sizing';
 import { useGridNavigation } from '../hooks/use_grid_navigation';
 import { componentStyles, getColumnLayoutStyles } from '../styles';
-import type { DataGridControlColumn, DataGridInternalColumn, DataGridProps } from '../types';
+import type {
+  DataGridControlColumn,
+  DataGridExpandedCell,
+  DataGridInternalColumn,
+  DataGridProps,
+} from '../types';
 import { DataGridHeaderRow } from './data_grid_header_row';
 import { DataGridRow } from './data_grid_row';
 
@@ -183,8 +195,25 @@ export const DataGrid = <TRow,>({
     [columns]
   );
 
+  // Only one cell can be expanded: opening another replaces it.
+  const [expandedCell, setExpandedCell] = useState<DataGridExpandedCell>();
+  const closeExpansion = useCallback(() => setExpandedCell(undefined), []);
+  useEffect(() => {
+    if (expandedCell && !rows.some((row) => getRowId(row) === expandedCell.rowId)) {
+      setExpandedCell(undefined);
+    }
+  }, [rows, getRowId, expandedCell]);
+
   // What pinned and virtualized rows have in common.
-  const sharedRowProps = { columns, columnLayouts, getCellProps, getRowProps, styles };
+  const sharedRowProps = {
+    columns,
+    columnLayouts,
+    getCellProps,
+    getRowProps,
+    styles,
+    onOpenExpansion: setExpandedCell,
+    onCloseExpansion: closeExpansion,
+  };
 
   return (
     <div
@@ -225,6 +254,7 @@ export const DataGrid = <TRow,>({
                   {...sharedRowProps}
                   key={tableRow.id}
                   row={tableRow}
+                  expandedCell={expandedCell?.rowId === tableRow.id ? expandedCell : undefined}
                   ariaRowIndex={ariaRowIndex}
                   isStriped={index % 2 === 1}
                   tabStopColIndex={getTabStopColIndex(ariaRowIndex)}
@@ -255,6 +285,7 @@ export const DataGrid = <TRow,>({
                 {...sharedRowProps}
                 key={key}
                 row={tableRow}
+                expandedCell={expandedCell?.rowId === tableRow.id ? expandedCell : undefined}
                 ariaRowIndex={ariaRowIndex}
                 isStriped={rowIndex % 2 === 1}
                 tabStopColIndex={getTabStopColIndex(ariaRowIndex)}

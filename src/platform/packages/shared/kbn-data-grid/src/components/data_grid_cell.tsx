@@ -31,7 +31,7 @@ import {
 } from '../constants';
 import type { DataGridStyles } from '../styles';
 import { getPopoverAnchorStyles, popoverContentStyles } from '../styles';
-import type { DataGridInternalColumn, DataGridProps } from '../types';
+import type { DataGridExpandedCell, DataGridInternalColumn, DataGridProps } from '../types';
 import type { CellActionsBubbleAction } from './cell_actions_bubble/cell_actions_bubble';
 import { CellActionsBubble } from './cell_actions_bubble/cell_actions_bubble';
 
@@ -42,8 +42,23 @@ interface CellExpansion {
   close: () => void;
 }
 
-const useCellExpansion = (cellRef: RefObject<HTMLDivElement | null>): CellExpansion => {
-  const [anchorRect, setAnchorRect] = useState<DOMRect>();
+interface UseCellExpansionParams {
+  cellRef: RefObject<HTMLDivElement | null>;
+  rowId: string;
+  columnId: string;
+  anchorRect?: DOMRect;
+  onOpenExpansion: (cell: DataGridExpandedCell) => void;
+  onCloseExpansion: () => void;
+}
+
+const useCellExpansion = ({
+  cellRef,
+  rowId,
+  columnId,
+  anchorRect,
+  onOpenExpansion,
+  onCloseExpansion,
+}: UseCellExpansionParams): CellExpansion => {
   const isOpen = anchorRect !== undefined;
 
   const open = useCallback(
@@ -53,12 +68,11 @@ const useCellExpansion = (cellRef: RefObject<HTMLDivElement | null>): CellExpans
       cell?.focus({ preventScroll: true });
       const rect = (anchor ?? cell)?.getBoundingClientRect();
       if (rect) {
-        setAnchorRect(rect);
+        onOpenExpansion({ rowId, columnId, anchorRect: rect });
       }
     },
-    [cellRef]
+    [cellRef, rowId, columnId, onOpenExpansion]
   );
-  const close = useCallback(() => setAnchorRect(undefined), []);
 
   // The popover is anchored to a fixed rect, so it would be left behind when the cell scrolls.
   useEffect(() => {
@@ -67,14 +81,17 @@ const useCellExpansion = (cellRef: RefObject<HTMLDivElement | null>): CellExpans
     }
     const onScroll = (event: Event) => {
       if (event.target instanceof Node && event.target.contains(cellRef.current)) {
-        close();
+        onCloseExpansion();
       }
     };
     window.addEventListener('scroll', onScroll, true);
     return () => window.removeEventListener('scroll', onScroll, true);
-  }, [isOpen, cellRef, close]);
+  }, [isOpen, cellRef, onCloseExpansion]);
 
-  return useMemo(() => ({ anchorRect, open, close }), [anchorRect, open, close]);
+  return useMemo(
+    () => ({ anchorRect, open, close: onCloseExpansion }),
+    [anchorRect, open, onCloseExpansion]
+  );
 };
 
 const CellActionIconButton: typeof EuiButtonIcon = ({
@@ -249,9 +266,14 @@ const CellContent = <TRow,>({
 interface DataGridCellProps<TRow> {
   column: DataGridInternalColumn<TRow>;
   row: TRow;
+  rowId: string;
   rowIndex: number;
   /** 1-based, matching `aria-colindex`. */
   colIndex: number;
+  /** Set when this cell's expansion popover is open. */
+  expandedAnchorRect?: DOMRect;
+  onOpenExpansion: (cell: DataGridExpandedCell) => void;
+  onCloseExpansion: () => void;
   styles: DataGridStyles;
   layoutCss: SerializedStyles;
   getCellProps?: DataGridProps<TRow>['getCellProps'];
@@ -262,30 +284,45 @@ interface DataGridCellProps<TRow> {
 const DataGridCellComponent = <TRow,>({
   column,
   row,
+  rowId,
   rowIndex,
   colIndex,
+  expandedAnchorRect,
+  onOpenExpansion,
+  onCloseExpansion,
   styles,
   layoutCss,
   getCellProps,
   isTabStop,
 }: DataGridCellProps<TRow>) => {
-  const [isActive, setIsActive] = useState(false);
+  // Hovered or focused. Tracked separately: a focus trap pulling focus away (e.g. another cell's open
+  // popover) must not unmount the actions under the pointer, or a click on them is lost.
+  const [isHovered, setIsHovered] = useState(false);
+  const [hasFocus, setHasFocus] = useState(false);
   const cellRef = useRef<HTMLDivElement>(null);
-  const expansion = useCellExpansion(cellRef);
-  const { open: openExpansion } = expansion;
   const { id: columnId, isControl, cellCss, renderCell } = column;
   const isInteractive = !isControl;
+  const expansion = useCellExpansion({
+    cellRef,
+    rowId,
+    columnId,
+    anchorRect: expandedAnchorRect,
+    onOpenExpansion,
+    onCloseExpansion,
+  });
+  const { open: openExpansion } = expansion;
   const {
     css: extraCss,
     className,
     'data-test-subj': dataTestSubj,
   } = getCellProps?.({ row, rowIndex, columnId }) ?? {};
 
-  const onActivate = useCallback(() => setIsActive(true), []);
-  const onDeactivate = useCallback(() => setIsActive(false), []);
+  const onMouseEnter = useCallback(() => setIsHovered(true), []);
+  const onMouseLeave = useCallback(() => setIsHovered(false), []);
+  const onFocus = useCallback(() => setHasFocus(true), []);
   const onBlur = useCallback((event: FocusEvent<HTMLDivElement>) => {
     if (!event.currentTarget.contains(event.relatedTarget)) {
-      setIsActive(false);
+      setHasFocus(false);
     }
   }, []);
   // Like EuiDataGrid, Enter or F2 on the focused cell opens its popover under the expand icon.
@@ -317,9 +354,9 @@ const DataGridCellComponent = <TRow,>({
       data-test-subj={dataTestSubj}
       className={className}
       tabIndex={isTabStop ? 0 : -1}
-      onMouseEnter={isInteractive ? onActivate : undefined}
-      onMouseLeave={isInteractive ? onDeactivate : undefined}
-      onFocus={isInteractive ? onActivate : undefined}
+      onMouseEnter={isInteractive ? onMouseEnter : undefined}
+      onMouseLeave={isInteractive ? onMouseLeave : undefined}
+      onFocus={isInteractive ? onFocus : undefined}
       onBlur={isInteractive ? onBlur : undefined}
       onKeyDown={isInteractive ? onKeyDown : undefined}
       css={[styles.cell, isInteractive && styles.cellWithActions, layoutCss, cellCss, extraCss]}
@@ -330,7 +367,7 @@ const DataGridCellComponent = <TRow,>({
           row={row}
           rowIndex={rowIndex}
           colIndex={colIndex}
-          isActive={isActive}
+          isActive={isHovered || hasFocus}
           anchorRef={cellRef}
           expansion={expansion}
         />
