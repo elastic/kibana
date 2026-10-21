@@ -101,9 +101,6 @@ export class AgentBuilderPlugin
       http: {
         create: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
         download: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-        getById: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-        list: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
-        delete: { requiredPrivileges: [apiPrivileges.readAgentBuilder] },
       },
     });
 

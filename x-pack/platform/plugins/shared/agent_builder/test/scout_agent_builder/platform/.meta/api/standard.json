@@ -1,5 +1,5 @@
 {
-  "sha1": "7d6545e32fb7af7590b583358aab9043264182bc",
+  "sha1": "6fee57a78945a15dba81c09ae9d6a753e4d01e65",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -61,8 +61,8 @@
       }
     },
     {
-      "id": "2d0f837112190fa-9a90b989161be2a",
-      "title": "Agent Builder — chat attachment images file kind a user with Agent Builder read access can create, upload, download and delete an image",
+      "id": "2d0f837112190fa-339fbf837f9fc75",
+      "title": "Agent Builder — chat attachment images file kind a user with Agent Builder read access can create, upload and download an image",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -70,8 +70,22 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/chat_attachment_images_api.spec.ts",
-        "line": 46,
-        "column": 17
+        "line": 58,
+        "column": 27
+      }
+    },
+    {
+      "id": "2d0f837112190fa-fc09381a3057793",
+      "title": "Agent Builder — chat attachment images file kind a user with Agent Builder read access cannot list, get or delete images",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/chat_attachment_images_api.spec.ts",
+        "line": 85,
+        "column": 16
       }
     },
     {
@@ -84,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/chat_attachment_images_api.spec.ts",
-        "line": 75,
-        "column": 25
+        "line": 121,
+        "column": 6
       }
     },
     {
