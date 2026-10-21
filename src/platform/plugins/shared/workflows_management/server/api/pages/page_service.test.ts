@@ -115,6 +115,44 @@ describe('parsePageSubmission', () => {
   it('rejects a submission missing a required field', () => {
     expect(() => parsePageSubmission({}, inputsSchema)).toThrow(ExternalResumeError);
   });
+
+  describe('with if/then rules', () => {
+    const conditionalSchema = {
+      type: 'object' as const,
+      properties: { notify: { type: 'boolean' as const } },
+      allOf: [
+        {
+          if: { properties: { notify: { const: true } }, required: ['notify'] },
+          then: {
+            properties: { email: { type: 'string' as const, format: 'email' as const } },
+            required: ['email'],
+          },
+        },
+      ],
+    };
+
+    it('requires a field once its rule applies', () => {
+      expect(() =>
+        parsePageSubmission({ notify: true }, conditionalSchema, { isJson: true })
+      ).toThrow('email: This field is required');
+    });
+
+    it('keeps a conditional field from a JSON submission', () => {
+      expect(
+        parsePageSubmission({ notify: true, email: 'a@example.com' }, conditionalSchema, {
+          isJson: true,
+        })
+      ).toEqual({ notify: true, email: 'a@example.com' });
+    });
+
+    it('drops a conditional field whose rule does not apply', () => {
+      expect(
+        parsePageSubmission({ notify: false, email: 'a@example.com' }, conditionalSchema, {
+          isJson: true,
+        })
+      ).toEqual({ notify: false });
+    });
+  });
 });
 
 describe('getPageSubmitter', () => {

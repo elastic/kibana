@@ -9,15 +9,13 @@
 
 import { isPageTrigger } from '@kbn/workflows';
 import type { PageTrigger, WorkflowDetailDto } from '@kbn/workflows';
+import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
+import { validatePageInputs } from '@kbn/workflows/spec/lib/page_inputs';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
+import type { PageInputs, PageUi } from '@kbn/workflows/spec/schema/triggers/page_trigger_schema';
 import { PAGE_FORM_PATH } from './constants';
 import { ExternalResumeError } from '../external_resume/external_resume_error';
-import {
-  buildExternalResumeFormFieldsHtml,
-  parseExternalResumeFormBody,
-  validateExternalResumeInput,
-} from '../external_resume/external_resume_form_fields';
-import { renderExternalResumeFormPage } from '../external_resume/render_external_resume_page';
+import { parseExternalResumeFormBody } from '../external_resume/external_resume_form_fields';
 
 /** Where the submitting client came from. Recorded on the execution for the POC. */
 export interface PageSubmitter {
@@ -30,7 +28,15 @@ export interface ResolvedPage {
   workflow: WorkflowDetailDto;
   secret: string;
   trigger: PageTrigger;
-  inputsSchema: JsonModelSchemaType | undefined;
+  inputsSchema: PageInputs | undefined;
+}
+
+/** What the page app needs to draw the form. Nothing about the workflow itself. */
+export interface PageDefinition {
+  title?: string;
+  description?: string;
+  schema: PageInputs | undefined;
+  ui: PageUi | undefined;
 }
 
 export interface PageRef {
@@ -77,7 +83,10 @@ export const resolvePage = async (lookup: PageLookup, ref: PageRef): Promise<Res
     workflow,
     secret: ref.secret,
     trigger,
-    inputsSchema: trigger.inputs as JsonModelSchemaType | undefined,
+    // Legacy array inputs become JSON Schema, so the page app has one shape to render.
+    inputsSchema: Array.isArray(trigger.inputs)
+      ? normalizeInputsToJsonSchema(trigger.inputs)
+      : trigger.inputs,
   };
 };
 
@@ -95,33 +104,40 @@ export const buildPageUrl = ({
     encodeURIComponent(secret)
   )}`;
 
-export const renderPageForm = ({
-  page,
-  basePath,
-}: {
-  page: ResolvedPage;
-  basePath: string;
-}): string =>
-  renderExternalResumeFormPage({
-    message: page.trigger.description ?? page.trigger.title,
-    formActionUrl: buildPageUrl({ basePath, workflowId: page.workflow.id, secret: page.secret }),
-    fieldsHtml: buildExternalResumeFormFieldsHtml(page.inputsSchema),
-  });
+export const toPageDefinition = ({ trigger, inputsSchema }: ResolvedPage): PageDefinition => ({
+  title: trigger.title,
+  description: trigger.description,
+  schema: inputsSchema,
+  ui: trigger.ui,
+});
 
-/** Validates a submission against the page's declared input schema. */
+/**
+ * Validates a submission against the page's input schema, with its `if`/`then` rules
+ * applied. The page app posts JSON. A plain HTML form posts strings, so those are coerced
+ * to the declared root types first.
+ */
 export const parsePageSubmission = (
   body: Record<string, unknown>,
-  inputsSchema: JsonModelSchemaType | undefined
+  inputsSchema: PageInputs | undefined,
+  { isJson = false }: { isJson?: boolean } = {}
 ): Record<string, unknown> => {
+  let values: Record<string, unknown>;
   try {
-    return validateExternalResumeInput(
-      parseExternalResumeFormBody(body, inputsSchema),
-      inputsSchema
-    );
+    values = isJson
+      ? body
+      : parseExternalResumeFormBody(body, inputsSchema as JsonModelSchemaType | undefined);
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Invalid form submission';
     throw new ExternalResumeError(message, 400, true);
   }
+  const result = validatePageInputs(inputsSchema, values);
+  if (!result.success) {
+    const [issue] = result.issues;
+    const field = issue?.path.join('.');
+    const message = issue ? `${field ? `${field}: ` : ''}${issue.message}` : 'Invalid input';
+    throw new ExternalResumeError(message, 400, true);
+  }
+  return result.data;
 };
 
 /**

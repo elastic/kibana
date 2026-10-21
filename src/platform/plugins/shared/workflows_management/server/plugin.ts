@@ -124,6 +124,7 @@ export class WorkflowsPlugin
 
     defineRoutes({
       router,
+      httpResources: core.http.resources,
       config: this.config,
       logger: this.logger,
       api,

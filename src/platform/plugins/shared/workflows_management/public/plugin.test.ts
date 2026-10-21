@@ -136,7 +136,8 @@ describe('WorkflowsPlugin', () => {
 
       const result = plugin.setup(coreSetup, setupDeps as any);
 
-      expect(coreSetup.application.register).toHaveBeenCalledTimes(1);
+      // The workflows app and the chromeless page app.
+      expect(coreSetup.application.register).toHaveBeenCalledTimes(2);
       expect(coreSetup.application.register).toHaveBeenCalledWith(
         expect.objectContaining({
           id: PLUGIN_ID,

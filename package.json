@@ -1466,7 +1466,6 @@
     "@reduxjs/toolkit": "2.12.0",
     "@rjsf/core": "5.24.13",
     "@rjsf/utils": "5.24.13",
-    "@rjsf/validator-ajv8": "5.24.13",
     "@slack/webhook": "7.0.6",
     "@smithy/eventstream-codec": "4.5.2",
     "@smithy/eventstream-serde-node": "4.5.2",

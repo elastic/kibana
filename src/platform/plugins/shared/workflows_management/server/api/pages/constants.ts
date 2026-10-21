@@ -8,7 +8,7 @@
  */
 
 /**
- * Public page URL. GET renders the form, POST submits it. Spaces strips the
+ * Public page URL. GET serves the page app, POST submits it. Spaces strips the
  * `/s/{spaceId}` prefix before routing, so one path serves every space.
  *
  * `{secret}` is the page's capability: anyone with the URL can submit the page.
@@ -17,7 +17,11 @@
  */
 export const PAGE_FORM_PATH = '/pages/{workflowId}/k/{secret}';
 
-export { PAGE_LINK_API_PATH, PAGE_ROTATE_API_PATH } from '../../../common/lib/api_constants';
+export {
+  PAGE_DEFINITION_API_PATH,
+  PAGE_LINK_API_PATH,
+  PAGE_ROTATE_API_PATH,
+} from '../../../common/lib/api_constants';
 
 export const PAGE_WORKFLOW_ID_MAX_LENGTH = 255;
 

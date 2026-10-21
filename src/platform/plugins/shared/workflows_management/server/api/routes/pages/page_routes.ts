@@ -8,13 +8,16 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { KibanaResponseFactory } from '@kbn/core/server';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import {
   isPageTrigger,
   toWorkflowExecutionEngineModel,
   UNTRUSTED_INPUTS_METADATA_KEY,
 } from '@kbn/workflows';
+import { ExternalResumeError } from '../../external_resume/external_resume_error';
 import {
+  PAGE_DEFINITION_API_PATH,
   PAGE_FORM_PATH,
   PAGE_LINK_API_PATH,
   PAGE_ROTATE_API_PATH,
@@ -25,13 +28,12 @@ import {
   buildPageUrl,
   getPageSubmitter,
   parsePageSubmission,
-  renderPageForm,
   resolvePage,
+  toPageDefinition,
 } from '../../pages/page_service';
 import {
   EXTERNAL_RESUME_SECURITY,
   handleExternalResumeError,
-  htmlOk,
   htmlSuccess,
 } from '../executions/external_resume_route_helpers';
 import type { RouteDependencies } from '../types';
@@ -45,8 +47,34 @@ const pageParamsSchema = schema.object({
   secret: schema.string({ maxLength: PAGE_SECRET_MAX_LENGTH }),
 });
 
-/** The page is a server-rendered HTML form, not an API, so it stays out of the OpenAPI spec. */
+/** The page is a hosted app, not an API, so it stays out of the OpenAPI spec. */
 const PAGE_ROUTE_OPTIONS = { access: 'public', excludeFromOAS: true } as const;
+
+const JSON_NO_STORE_HEADERS = { 'cache-control': 'no-store', 'referrer-policy': 'no-referrer' };
+
+const isJsonRequest = (headers: Record<string, unknown>): boolean => {
+  const contentType = headers['content-type'];
+  return typeof contentType === 'string' && contentType.includes('application/json');
+};
+
+/**
+ * JSON twin of `handleExternalResumeError` for the page app. A miss never says why, so
+ * a caller cannot tell a wrong secret from a disabled workflow.
+ */
+const pageJsonError = (
+  response: KibanaResponseFactory,
+  error: unknown,
+  logger: RouteDependencies['logger']
+) => {
+  logger.debug(() => `Page request failed: ${error instanceof Error ? error.message : error}`);
+  if (error instanceof ExternalResumeError && error.expose) {
+    return response.customError({ statusCode: error.statusCode, body: { message: error.message } });
+  }
+  if (error instanceof ExternalResumeError) {
+    return response.notFound({ body: { message: 'Page not found' } });
+  }
+  return response.badRequest({ body: { message: 'Unable to submit the page' } });
+};
 
 const workflowParamsSchema = schema.object({
   workflowId: schema.string({
@@ -73,15 +101,54 @@ const toPageLinkBody = ({
   serviceAccountId: string | undefined;
 }) => ({ enabled, serviceAccountId, path: buildPageUrl({ basePath, workflowId, secret }) });
 
-/** GET the hosted form for a workflow page. The secret in the URL is the credential. */
-export function registerPageFormRoute(deps: RouteDependencies) {
+/**
+ * GET the page app. The secret is checked before Kibana renders anything, so a wrong URL
+ * never loads the app. The app then fetches the form from the definition route.
+ */
+export function registerPageAppRoute(deps: RouteDependencies) {
+  const { httpResources, workflowsService, spaces, logger } = deps;
+
+  httpResources.register(
+    {
+      path: PAGE_FORM_PATH,
+      security: {
+        authc: {
+          enabled: 'optional',
+          reason: 'A page is public: the secret in the URL is the credential, not a session.',
+        },
+        authz: EXTERNAL_RESUME_SECURITY.authz,
+      },
+      options: { excludeFromOAS: true },
+      validate: { params: pageParamsSchema },
+    },
+    async (context, request, response) => {
+      try {
+        await resolvePage(workflowsService, {
+          ...request.params,
+          spaceId: spaces.getSpaceId(request),
+        });
+        // SPIKE: anonymous pages load only plugins with `enabledOnAnonymousPages`, and
+        // workflowsManagement cannot be one. Until the page app moves to a small anonymous
+        // plugin, only a logged-in visitor gets a working page.
+        return request.auth.isAuthenticated
+          ? response.renderCoreApp()
+          : response.renderAnonymousCoreApp();
+      } catch (error) {
+        return handleExternalResumeError(response, error, logger, 404);
+      }
+    }
+  );
+}
+
+/** GET the form definition of a page: only what the visitor needs to fill the form. */
+export function registerPageDefinitionRoute(deps: RouteDependencies) {
   const { router, workflowsService, spaces, logger } = deps;
 
   router.get(
     {
-      path: PAGE_FORM_PATH,
+      path: PAGE_DEFINITION_API_PATH,
       security: EXTERNAL_RESUME_SECURITY,
-      options: PAGE_ROUTE_OPTIONS,
+      options: { access: 'internal', excludeFromOAS: true },
       validate: { params: pageParamsSchema },
     },
     withAvailabilityCheck(async (context, request, response) => {
@@ -90,9 +157,9 @@ export function registerPageFormRoute(deps: RouteDependencies) {
           ...request.params,
           spaceId: spaces.getSpaceId(request),
         });
-        return htmlOk(response, renderPageForm({ page, basePath: request.basePath }));
+        return response.ok({ body: toPageDefinition(page), headers: JSON_NO_STORE_HEADERS });
       } catch (error) {
-        return handleExternalResumeError(response, error, logger, 404);
+        return pageJsonError(response, error, logger);
       }
     })
   );
@@ -119,7 +186,8 @@ export function registerPageSubmitRoute(deps: RouteDependencies) {
         const spaceId = spaces.getSpaceId(request);
         const page = await resolvePage(workflowsService, { ...request.params, spaceId });
         workflowId = page.workflow.id;
-        const inputs = parsePageSubmission(request.body, page.inputsSchema);
+        const isJson = isJsonRequest(request.headers);
+        const inputs = parsePageSubmission(request.body, page.inputsSchema, { isJson });
         const submitter = getPageSubmitter(request.headers, request.socket?.remoteAddress);
 
         // The visitor has no Kibana identity, so the run uses the workflow's `run_as`
@@ -133,12 +201,17 @@ export function registerPageSubmitRoute(deps: RouteDependencies) {
         );
 
         audit.logWorkflowRun(request, { workflowId, executionId: workflowExecutionId });
-        return htmlSuccess(response);
+        // The visitor gets no execution id: it would name a run they cannot see.
+        return isJson
+          ? response.ok({ body: { submitted: true }, headers: JSON_NO_STORE_HEADERS })
+          : htmlSuccess(response);
       } catch (error) {
         if (workflowId) {
           audit.logWorkflowRun(request, { workflowId, error });
         }
-        return handleExternalResumeError(response, error, logger, 404);
+        return isJsonRequest(request.headers)
+          ? pageJsonError(response, error, logger)
+          : handleExternalResumeError(response, error, logger, 404);
       }
     })
   );
