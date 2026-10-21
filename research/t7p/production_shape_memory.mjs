@@ -133,14 +133,42 @@ const main = async () => {
   await probe('gc');
   const oneGc = valueOf(await probe('stats'));
   const afterOne = await info();
+  const write = (payload) => {
+    mkdirSync(dirname(OUT), { recursive: true });
+    writeFileSync(OUT, JSON.stringify(payload));
+  };
   let load = null;
   if (RULE_ID) {
-    const t0 = performance.now();
-    const run = await call('POST', `/api/alerting/rule/${RULE_ID}/_run`, {});
-    load = { ruleId: RULE_ID, ms: performance.now() - t0, body: run };
-    await probe('gc');
+    try {
+      const t0 = performance.now();
+      const run = await call('POST', `/api/alerting/rule/${RULE_ID}/_run`, {});
+      load = { ruleId: RULE_ID, ms: performance.now() - t0, body: run };
+      await probe('gc');
+    } catch (error) {
+      load = { ruleId: RULE_ID, error: String(error).slice(0, 500) };
+    }
   }
-  const afterLoad = RULE_ID ? valueOf(await probe('stats')) : null;
+  const afterLoad = load && !load.error ? valueOf(await probe('stats')) : null;
+  const oneIsland = {
+    run_id: prereg.run_id,
+    partial: 'one-island',
+    at: new Date().toISOString(),
+    mainOnly,
+    cold,
+    warm,
+    oneGc,
+    afterOne,
+    load,
+    afterLoad,
+    summary: summarize({ mainOnly, cold, warm, oneGc, afterOne }),
+  };
+  write(oneIsland);
+  if (process.env.T7P_SKIP_SLOTS === '1') {
+    process.stdout.write(
+      `one-island cold p50=${oneIsland.summary.coldP50Ms} p95=${oneIsland.summary.coldP95Ms} rssDelta=${oneIsland.summary.rssDelta}\n`
+    );
+    return;
+  }
   await configure({ slots: 6, concurrency: 1 });
   const six = await Promise.all(Array.from({ length: 6 }, () => probe('boot')));
   await Promise.all(Array.from({ length: 6 }, () => probe('gc')));
