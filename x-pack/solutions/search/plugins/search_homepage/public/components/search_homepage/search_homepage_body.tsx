@@ -23,7 +23,7 @@ export const SearchHomepageBody = () => {
   const {
     services: { cloud },
   } = useKibana();
-  const { isAdmin, isBillingAdmin } = useAuthenticatedUser();
+  const { isAdmin } = useAuthenticatedUser();
   return (
     <KibanaPageTemplate.Section
       alignment="top"
@@ -34,7 +34,9 @@ export const SearchHomepageBody = () => {
     >
       <EuiFlexGroup gutterSize="l" direction="column">
         <MetricPanels />
-        {cloud?.isCloudEnabled && (!isAdmin || !isBillingAdmin) ? null : (
+        {/* TODO: also require billing access once Kibana can check it:
+            https://github.com/elastic/kibana-team/issues/4343 */}
+        {cloud?.isCloudEnabled && !isAdmin ? null : (
           <EuiFlexItem>
             <EuiSpacer size="l" />
             <CloudResources />

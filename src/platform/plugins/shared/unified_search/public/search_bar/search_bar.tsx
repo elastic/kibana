@@ -34,13 +34,13 @@ import type {
   SavedQueryTimeFilter,
 } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/public';
 
 import { BackgroundSearchRestoredCallout } from '@kbn/background-search';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { QuerySource, type ESQLQueryStats } from '@kbn/esql-types';
 import type { SuggestionsAbstraction, SuggestionsListSize } from '@kbn/kql/public';
+import type { FilterableSource } from '@kbn/data-source';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import type { SavedQueryMeta } from '../saved_query_form';
@@ -67,7 +67,10 @@ export interface SearchBarInjectedDeps {
 }
 
 export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
-  indexPatterns?: DataView[];
+  /**
+   * What to filter on: a `DataView`, or for an ES|QL source the value of `source.toFilterableSource()`.
+   */
+  indexPatterns?: FilterableSource[];
   isLoading?: boolean;
   customSubmitButton?: React.ReactNode;
   dataViewPickerOverride?: React.ReactNode;

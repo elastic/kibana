@@ -74,6 +74,8 @@ interface MoverSeed {
   criticality?: string;
   resolvedTo?: string;
   noEntityDoc?: boolean;
+  /** The group's own (resolution) score, on a main entity: its current value and its history. */
+  group?: { now: number; start?: ScoreDoc[]; end: ScoreDoc[] };
 }
 
 interface NewlySeed {
@@ -84,6 +86,7 @@ interface NewlySeed {
   criticality?: string;
   resolvedTo?: string;
   noEntityDoc?: boolean;
+  group?: { now: Level; start?: LevelDoc[]; end: LevelDoc[] };
 }
 
 const LAST = 0.5;
@@ -107,6 +110,34 @@ const MOVERS: readonly MoverSeed[] = [
     end: [[60, LAST]],
   },
   { id: 'host:m8', now: 61, start: [[10, TOO_OLD]], end: [[60, LAST]] },
+  // Groups are judged by their own score, not by the scores of their members.
+  // g1: its own score is flat, but the group's rose by 20 in the previous period.
+  {
+    id: 'host:g1',
+    now: 30,
+    start: [[30, LAST]],
+    end: [[30, LAST]],
+    group: { now: 65, start: [[40, LAST]], end: [[60, LAST]] },
+  },
+  { id: 'host:g1a', now: 60, start: [[10, LAST]], end: [[50, LAST]], resolvedTo: 'host:g1' },
+  // g2: the group is flat; only its alias rose, which must not count.
+  {
+    id: 'host:g2',
+    now: 30,
+    start: [[30, LAST]],
+    end: [[30, LAST]],
+    group: { now: 55, start: [[50, LAST]], end: [[52, LAST]] },
+  },
+  { id: 'host:g2a', now: 70, start: [[10, LAST]], end: [[50, LAST]], resolvedTo: 'host:g2' },
+  // g4: like g1, but its group docs are older than its own docs in each window. The group's value
+  // still counts: it rose by 20 in the previous period, and by 2 (not its own 32) in the current one.
+  {
+    id: 'host:g4',
+    now: 30,
+    start: [[30, LAST]],
+    end: [[30, LAST]],
+    group: { now: 62, start: [[40, OLD]], end: [[60, OLD]] },
+  },
 ];
 
 const NEWLY: readonly NewlySeed[] = [
@@ -133,6 +164,31 @@ const NEWLY: readonly NewlySeed[] = [
     end: [['High', LAST]],
   },
   { id: 'user:n9', now: 'Low', start: [['Low', LAST]], end: [['High', LAST]], noEntityDoc: true },
+  // g3: its own level stays Low, but the group went from Moderate to High in the previous period. Its
+  // alias is High now, which must not count the group as newly high in the current period.
+  {
+    id: 'user:g3',
+    now: 'Low',
+    start: [['Low', LAST]],
+    end: [['Low', LAST]],
+    group: { now: 'High', start: [['Moderate', LAST]], end: [['High', LAST]] },
+  },
+  {
+    id: 'user:g3a',
+    now: 'High',
+    start: [['Low', LAST]],
+    end: [['Low', LAST]],
+    resolvedTo: 'user:g3',
+  },
+  // g4: like g3, but its group docs are older than its own docs in each window. The group's level
+  // still counts: Moderate to High in the previous period, and High to High (not Low to High) now.
+  {
+    id: 'user:g4',
+    now: 'Low',
+    start: [['Low', LAST]],
+    end: [['Low', LAST]],
+    group: { now: 'High', start: [['Moderate', OLD]], end: [['High', OLD]] },
+  },
 ];
 
 const iso = (ms: number) => new Date(ms).toISOString();
@@ -142,7 +198,8 @@ const riskDoc = (
   id: string,
   at: number,
   hoursBefore: number,
-  value: { score?: number; level?: Level }
+  value: { score?: number; level?: Level },
+  scoreType?: 'base' | 'resolution'
 ) => ({
   '@timestamp': iso(at - hoursBefore * HOUR_MS),
   [`${typeOf(id)}.risk.id_field`]: 'entity.id',
@@ -151,6 +208,7 @@ const riskDoc = (
     ? {}
     : { [`${typeOf(id)}.risk.calculated_score_norm`]: value.score }),
   ...(value.level === undefined ? {} : { [`${typeOf(id)}.risk.calculated_level`]: value.level }),
+  ...(scoreType ? { [`${typeOf(id)}.risk.score_type`]: scoreType } : {}),
 });
 
 const loadFixture = async (client: Client, withStartHistory: boolean) => {
@@ -168,6 +226,8 @@ const loadFixture = async (client: Client, withStartHistory: boolean) => {
         'entity.risk.calculated_score_norm': FLOAT,
         'entity.risk.calculated_level': KEYWORD,
         'entity.relationships.resolution.resolved_to': KEYWORD,
+        'entity.relationships.resolution.risk.calculated_score_norm': FLOAT,
+        'entity.relationships.resolution.risk.calculated_level': KEYWORD,
         'asset.criticality': KEYWORD,
       },
     },
@@ -184,6 +244,7 @@ const loadFixture = async (client: Client, withStartHistory: boolean) => {
               [`${type}.risk.id_value`, KEYWORD],
               [`${type}.risk.calculated_score_norm`, FLOAT],
               [`${type}.risk.calculated_level`, KEYWORD],
+              [`${type}.risk.score_type`, KEYWORD],
             ]
           )
         ),
@@ -194,34 +255,56 @@ const loadFixture = async (client: Client, withStartHistory: boolean) => {
   const entity = (doc: object) => operations.push({ index: { _index: ENTITY_INDEX } }, doc);
   const risk = (doc: object) =>
     operations.push({ index: { _index: getRiskScoreIndex(NAMESPACE) } }, doc);
-  MOVERS.forEach(({ id, now: score, start = [], end, criticality, resolvedTo, noEntityDoc }) => {
-    if (!noEntityDoc) {
-      entity({
-        '@timestamp': iso(now),
-        'entity.id': id,
-        'entity.name': id.split(':')[1],
-        'entity.risk.calculated_score_norm': score,
-        ...(criticality ? { 'asset.criticality': criticality } : {}),
-        ...(resolvedTo ? { 'entity.relationships.resolution.resolved_to': resolvedTo } : {}),
-      });
+  MOVERS.forEach(
+    ({ id, now: score, start = [], end, criticality, resolvedTo, noEntityDoc, group }) => {
+      if (!noEntityDoc) {
+        entity({
+          '@timestamp': iso(now),
+          'entity.id': id,
+          'entity.name': id.split(':')[1],
+          'entity.risk.calculated_score_norm': score,
+          ...(group
+            ? { 'entity.relationships.resolution.risk.calculated_score_norm': group.now }
+            : {}),
+          ...(criticality ? { 'asset.criticality': criticality } : {}),
+          ...(resolvedTo ? { 'entity.relationships.resolution.resolved_to': resolvedTo } : {}),
+        });
+      }
+      const ownType = group ? 'base' : undefined;
+      if (withStartHistory) {
+        start.forEach(([s, h]) => risk(riskDoc(id, startAt, h, { score: s }, ownType)));
+        group?.start?.forEach(([s, h]) =>
+          risk(riskDoc(id, startAt, h, { score: s }, 'resolution'))
+        );
+      }
+      end.forEach(([s, h]) => risk(riskDoc(id, endAt, h, { score: s }, ownType)));
+      group?.end.forEach(([s, h]) => risk(riskDoc(id, endAt, h, { score: s }, 'resolution')));
     }
-    if (withStartHistory) start.forEach(([s, h]) => risk(riskDoc(id, startAt, h, { score: s })));
-    end.forEach(([s, h]) => risk(riskDoc(id, endAt, h, { score: s })));
-  });
-  NEWLY.forEach(({ id, now: level, start = [], end, criticality, resolvedTo, noEntityDoc }) => {
-    if (!noEntityDoc) {
-      entity({
-        '@timestamp': iso(now),
-        'entity.id': id,
-        'entity.name': id.split(':')[1],
-        'entity.risk.calculated_level': level,
-        ...(criticality ? { 'asset.criticality': criticality } : {}),
-        ...(resolvedTo ? { 'entity.relationships.resolution.resolved_to': resolvedTo } : {}),
-      });
+  );
+  NEWLY.forEach(
+    ({ id, now: level, start = [], end, criticality, resolvedTo, noEntityDoc, group }) => {
+      if (!noEntityDoc) {
+        entity({
+          '@timestamp': iso(now),
+          'entity.id': id,
+          'entity.name': id.split(':')[1],
+          'entity.risk.calculated_level': level,
+          ...(group ? { 'entity.relationships.resolution.risk.calculated_level': group.now } : {}),
+          ...(criticality ? { 'asset.criticality': criticality } : {}),
+          ...(resolvedTo ? { 'entity.relationships.resolution.resolved_to': resolvedTo } : {}),
+        });
+      }
+      const ownType = group ? 'base' : undefined;
+      if (withStartHistory) {
+        start.forEach(([l, h]) => risk(riskDoc(id, startAt, h, { level: l }, ownType)));
+        group?.start?.forEach(([l, h]) =>
+          risk(riskDoc(id, startAt, h, { level: l }, 'resolution'))
+        );
+      }
+      end.forEach(([l, h]) => risk(riskDoc(id, endAt, h, { level: l }, ownType)));
+      group?.end.forEach(([l, h]) => risk(riskDoc(id, endAt, h, { level: l }, 'resolution')));
     }
-    if (withStartHistory) start.forEach(([l, h]) => risk(riskDoc(id, startAt, h, { level: l })));
-    end.forEach(([l, h]) => risk(riskDoc(id, endAt, h, { level: l })));
-  });
+  );
   const response = await client.bulk({ operations, refresh: 'wait_for' });
   if (response.errors) throw new Error('Bulk indexing of the risk period fixture failed');
 };
@@ -286,9 +369,10 @@ describe('risk tiles for both periods on Elasticsearch', () => {
 
   describe('risk movers', () => {
     it('counts the previous period from the history at its start and its end', async () => {
+      // host:g1 and host:g4 count through their group's rise; host:g2 does not, only its alias rose.
       expect(await movers('previous')).toEqual({
-        count: 3,
-        ids: ['host:m1', 'host:m3', 'host:m7'],
+        count: 5,
+        ids: ['host:g1', 'host:g4', 'host:m1', 'host:m3', 'host:m7'],
       });
     });
 
@@ -297,7 +381,7 @@ describe('risk tiles for both periods on Elasticsearch', () => {
     });
 
     it('gives the delta as the current count minus the previous count', async () => {
-      expect((await movers('current')).count - (await movers('previous')).count).toBe(-1);
+      expect((await movers('current')).count - (await movers('previous')).count).toBe(-3);
     });
 
     it('keeps only the entities the filters keep in the previous period', async () => {
@@ -310,9 +394,10 @@ describe('risk tiles for both periods on Elasticsearch', () => {
 
   describe('newly high/critical', () => {
     it('counts the previous period from the history at its start and its end', async () => {
+      // user:g3 and user:g4 count through their group's level, which their own Low level hides.
       expect(await newly('previous')).toEqual({
-        count: 4,
-        ids: ['user:n1', 'user:n2', 'user:n4', 'user:n7'],
+        count: 6,
+        ids: ['user:g3', 'user:g4', 'user:n1', 'user:n2', 'user:n4', 'user:n7'],
       });
     });
 
@@ -321,7 +406,7 @@ describe('risk tiles for both periods on Elasticsearch', () => {
     });
 
     it('gives the delta as the current count minus the previous count', async () => {
-      expect((await newly('current')).count - (await newly('previous')).count).toBe(-2);
+      expect((await newly('current')).count - (await newly('previous')).count).toBe(-4);
     });
 
     it('keeps only the entities the filters keep in the previous period', async () => {

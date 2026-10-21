@@ -14,7 +14,7 @@ import type { KueryNode } from '@kbn/es-query';
 import { setupGetFieldSuggestions } from './field';
 import type { QuerySuggestionGetFnArgs } from '../query_suggestion_provider';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/public';
 
 const mockKueryNode = (kueryNode: Partial<KueryNode>) => kueryNode as unknown as KueryNode;
 
@@ -44,6 +44,25 @@ describe('Kuery field suggestions', () => {
     const filterableFields = (indexPatternResponse.fields as DataViewField[]).filter(isFilterable);
 
     expect(suggestions.length).toBe(filterableFields.length);
+  });
+
+  test('should keep the field of the data view in the suggestion, with its spec', async () => {
+    const field = new DataViewField({
+      name: 'bytes',
+      type: 'number',
+      searchable: true,
+      aggregatable: true,
+    });
+
+    const suggestions = await getSuggestions(
+      {
+        indexPatterns: [{ title: 'logs-*', fields: [field] }],
+      } as unknown as QuerySuggestionGetFnArgs,
+      mockKueryNode({ prefix: '', suffix: '' })
+    );
+
+    // consumers read the data view field from the suggestion, for example `field.spec.name`
+    expect(suggestions.map(({ field: suggested }) => suggested.spec.name)).toEqual(['bytes']);
   });
 
   test('should filter suggestions based on the query', async () => {
