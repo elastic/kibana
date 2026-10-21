@@ -148,6 +148,9 @@ export const testRunProperties: Record<PropertyName, MappingProperty> = {
       },
     },
   },
+  scope: {
+    type: 'keyword',
+  },
   fully_parallel: {
     type: 'boolean',
   },
