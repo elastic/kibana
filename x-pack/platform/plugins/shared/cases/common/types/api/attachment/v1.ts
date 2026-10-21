@@ -11,6 +11,7 @@ import {
   MAX_COMMENT_LENGTH,
   MAX_BULK_DELETE_ATTACHMENTS,
   MAX_ATTACHMENT_TYPE_LENGTH,
+  MAX_ATTACHMENT_JSON_LENGTH,
   MAX_DELETE_FILES,
   MAX_FILENAME_LENGTH,
   MAX_TITLE_LENGTH,
@@ -168,7 +169,7 @@ const BoundedPersistableStateRequestSchema = PersistableStateAttachmentPayloadSc
   persistableStateAttachmentTypeId: z.string().max(MAX_TITLE_LENGTH),
   persistableStateAttachmentState: limitedJsonObjectSchema({
     fieldName: 'persistableStateAttachmentState',
-    max: MAX_COMMENT_LENGTH,
+    max: MAX_ATTACHMENT_JSON_LENGTH,
   }),
 });
 
