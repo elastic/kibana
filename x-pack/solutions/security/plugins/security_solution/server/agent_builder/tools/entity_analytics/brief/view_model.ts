@@ -83,6 +83,7 @@ export const BriefViewModel = lazySchema(() =>
         alerts: z
           .object({
             count: z.number().int(),
+            ruleCount: z.number().int(),
             rules: z.array(z.object({ name: z.string(), count: z.number().int() })),
           })
           .optional(),

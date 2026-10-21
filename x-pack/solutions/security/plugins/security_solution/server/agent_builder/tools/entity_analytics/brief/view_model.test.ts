@@ -53,7 +53,7 @@ const facts: EntityFacts[] = [
     flaggedFor: ['entitiesWithAlerts', 'riskMovers'],
     risk: { of: 'resolution group', level: 'High', score: 82 },
     assetCriticality: 'High impact',
-    alerts: { count: 3, rules: [{ name: 'Credential Dump', count: 2 }] },
+    alerts: { count: 3, ruleCount: 1, rules: [{ name: 'Credential Dump', count: 2 }] },
     firstSeen: '5 days ago',
   },
   {
@@ -136,7 +136,7 @@ describe('buildViewModel', () => {
         name: 'web_01',
         risk: { score: 82, level: 'High', of: 'resolution group' },
         assetCriticality: 'High impact',
-        alerts: { count: 3, rules: [{ name: 'Credential Dump', count: 2 }] },
+        alerts: { count: 3, ruleCount: 1, rules: [{ name: 'Credential Dump', count: 2 }] },
         // First seen only for an entity flagged as new.
         firstSeen: undefined,
         riskHistory: { points: [{ score: 40 }, { score: 82 }] },

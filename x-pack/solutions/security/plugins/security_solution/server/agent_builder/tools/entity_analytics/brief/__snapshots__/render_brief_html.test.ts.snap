@@ -42,11 +42,16 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
 .brief .priority-title{display:flex;flex-direction:column;min-width:0;flex:1 1 160px;}
 .brief .name{font-weight:700;font-size:15px;overflow-wrap:anywhere;}
 .brief .pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}
-.brief .alerts{margin:6px 0 0 32px;}
-.brief .label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.72;margin-right:2px;}
-.brief .priority-text{margin-left:32px;}
-.brief .next{margin:6px 0 0 32px;}
-.brief .next .label{margin-right:6px;}
+.brief .label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.72;padding-top:3px;}
+.brief .assessment{margin:8px 0 0 32px;font-size:15px;line-height:1.45;max-width:62ch;}
+.brief .evidence,.brief .next{display:grid;grid-template-columns:auto 1fr;column-gap:14px;margin:10px 0 0 32px;}
+.brief .evidence{row-gap:2px;align-items:start;}
+.brief .rules{list-style:none;margin:0;padding:0;font-size:13px;max-width:560px;}
+.brief .rules li{display:flex;justify-content:space-between;gap:12px;padding:2px 0;border-bottom:1px dashed var(--cc-color-border);}
+.brief .rules li:last-child{border-bottom:0;}
+.brief .rule-count{font-variant-numeric:tabular-nums;font-weight:600;opacity:.85;flex:none;}
+.brief .rules-total{opacity:.72;}
+.brief .rules-total span{font-weight:400;}
 .brief .chart{margin:10px 0 0 32px;padding:8px 12px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);}
 .brief .chart figcaption{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;margin-bottom:4px;}
 .brief .chart-change{font-weight:600;}
@@ -58,7 +63,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
 .brief .chart .line{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;}
 .brief .chart .dot{fill:currentColor;}
 .brief .callout{border-left:3px solid var(--cc-color-primary);padding:10px 14px;background:var(--cc-color-surface);border-radius:var(--cc-radius);}
-@media (max-width:420px){.brief .header{flex-direction:column;} .brief .pills{justify-content:flex-start;} .brief .alerts,.brief .priority-text,.brief .next,.brief .chart{margin-left:0;}}
+@media (max-width:420px){.brief .header{flex-direction:column;} .brief .pills{justify-content:flex-start;} .brief .assessment,.brief .evidence,.brief .next,.brief .chart{margin-left:0;}}
 </style>
 <div class=\\"brief\\">
   <header class=\\"header\\">
@@ -117,9 +122,12 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         </div>
         <div class=\\"pills\\"><span class=\\"pill level-high\\">Risk 76 High <span class=\\"pill-detail\\">group</span></span><span class=\\"pill pill-outline\\">High impact</span><span class=\\"pill pill-outline\\">Privileged user</span></div>
       </div>
-      <p class=\\"alerts\\">3 alerts: Potential Credential Access via LSASS Memory Dump (2), Unusual Logon (1)</p>
-      <p class=\\"priority-text\\">A privileged, high-impact identity newly at High risk, with credential and remote access activity together, is the shape of account misuse and should be confirmed before anything else.</p>
-      <p class=\\"next\\"><span class=\\"label\\">Next</span>Review the alerts behind the new High risk score and confirm recent access activity.</p>
+      <p class=\\"assessment\\">A privileged, high-impact identity newly at High risk, with credential and remote access activity together, is the shape of account misuse and should be confirmed before anything else.</p>
+      <div class=\\"evidence\\">
+        <span class=\\"label\\">Alerts</span>
+        <ul class=\\"rules\\"><li><span>Potential SharpRDP Behavior</span><span class=\\"rule-count\\">3</span></li><li><span>Privileged Container Creation with Host Directory Mount</span><span class=\\"rule-count\\">3</span></li><li><span>Potential Credential Access via LSASS Memory Dump</span><span class=\\"rule-count\\">2</span></li><li class=\\"rules-total\\"><span>12 open alerts in the last 7 days, 4 more rules</span><span class=\\"rule-count\\">12</span></li></ul>
+      </div>
+      <div class=\\"next\\"><span class=\\"label\\">Next</span><span>Review the alerts behind the new High risk score and confirm recent access activity.</span></div>
       <figure class=\\"chart\\">
         <figcaption>
           <span>Risk score over the period for <strong>a.rodriguez</strong> (resolution group)</span>
@@ -147,9 +155,9 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         </div>
         <div class=\\"pills\\"><span class=\\"pill level-moderate\\">Risk 66 Moderate</span><span class=\\"pill pill-outline\\">Extreme impact</span></div>
       </div>
+      <p class=\\"assessment\\">A high-impact host that appeared this week and is already alerting points to a provisioning or tooling problem more than an intrusion, but confirm that first.</p>
       
-      <p class=\\"priority-text\\">A high-impact host that appeared this week and is already alerting points to a provisioning or tooling problem more than an intrusion, but confirm that first.</p>
-      <p class=\\"next\\"><span class=\\"label\\">Next</span>Check what triggered the alerts and verify the host&#39;s provisioning is expected.</p>
+      <div class=\\"next\\"><span class=\\"label\\">Next</span><span>Check what triggered the alerts and verify the host&#39;s provisioning is expected.</span></div>
       
     </li><li class=\\"priority\\">
       <div class=\\"priority-head\\">
@@ -160,9 +168,9 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         </div>
         <div class=\\"pills\\"><span class=\\"pill level-moderate\\">Risk 58 Moderate</span><span class=\\"pill pill-outline\\">High impact</span></div>
       </div>
+      <p class=\\"assessment\\">A newly appeared high-impact host with alerts of the same kind as the first priority could be the next step of the same activity.</p>
       
-      <p class=\\"priority-text\\">A newly appeared high-impact host with alerts of the same kind as the first priority could be the next step of the same activity.</p>
-      <p class=\\"next\\"><span class=\\"label\\">Next</span>Review the alerts and confirm the host&#39;s role and ownership.</p>
+      <div class=\\"next\\"><span class=\\"label\\">Next</span><span>Review the alerts and confirm the host&#39;s role and ownership.</span></div>
       
     </li></ol>
   </section>

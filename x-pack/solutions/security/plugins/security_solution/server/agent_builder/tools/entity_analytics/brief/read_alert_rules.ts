@@ -30,7 +30,11 @@ interface AlertsByCandidate {
   byCandidate?: {
     buckets: Record<
       string,
-      { doc_count: number; rules: { buckets: Array<{ key: string; doc_count: number }> } }
+      {
+        doc_count: number;
+        ruleCount: { value: number };
+        rules: { buckets: Array<{ key: string; doc_count: number }> };
+      }
     >;
   };
 }
@@ -99,7 +103,10 @@ export const readAlertRules = async ({
           filters: {
             filters: filtersByCandidateId,
           },
-          aggs: { rules: { terms: { field: ALERT_RULE_NAME, size: MAX_RULES_PER_ENTITY } } },
+          aggs: {
+            rules: { terms: { field: ALERT_RULE_NAME, size: MAX_RULES_PER_ENTITY } },
+            ruleCount: { cardinality: { field: ALERT_RULE_NAME } },
+          },
         },
       },
     });
@@ -160,6 +167,7 @@ export const toAlertsByCandidateId = (
               id,
               {
                 count: bucket.doc_count,
+                ruleCount: bucket.ruleCount.value,
                 rules: bucket.rules.buckets.map(({ key, doc_count: count }) => ({
                   name: truncate(key, { length: MAX_RULE_NAME_LENGTH }),
                   count,

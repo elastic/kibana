@@ -133,16 +133,21 @@ const renderRecommendation = ({ recommendation }: BriefViewModel): string =>
   </section>`
     : '';
 
-const renderPriorities = ({ priorities }: BriefViewModel): string => `<section class="section">
+const renderPriorities = ({
+  priorities,
+  scope,
+}: BriefViewModel): string => `<section class="section">
     <h2>Priorities</h2>
     ${
       priorities.length === 0
         ? `<p class="lead muted">${NO_PRIORITIES_LINE}</p>`
-        : `<ol class="priorities">${priorities.map(renderPriority).join('')}</ol>`
+        : `<ol class="priorities">${priorities
+            .map((priority) => renderPriority(priority, scope.periodLabel))
+            .join('')}</ol>`
     }
   </section>`;
 
-const renderPriority = (priority: Priority): string => {
+const renderPriority = (priority: Priority, periodLabel: string): string => {
   const { rank, name, type, risk, assetCriticality, privilegedUser, firstSeen } = priority;
   const riskPill = risk
     ? `<span class="pill level-${escapeHtml(risk.level.toLowerCase())}">Risk ${formatCount(
@@ -168,22 +173,44 @@ const renderPriority = (priority: Priority): string => {
         </div>
         <div class="pills">${riskPill}${criticalityPill}${privilegedPill}</div>
       </div>
-      ${
-        priority.alerts
-          ? `<p class="alerts">${escapeHtml(describeAlerts(priority.alerts))}</p>`
-          : ''
-      }
-      <p class="priority-text">${escapeHtml(priority.assessment)}</p>
-      <p class="next"><span class="label">Next</span>${escapeHtml(priority.nextStep)}</p>
+      <p class="assessment">${escapeHtml(priority.assessment)}</p>
+      ${priority.alerts ? renderAlerts(priority.alerts, periodLabel) : ''}
+      <div class="next"><span class="label">Next</span><span>${escapeHtml(
+        priority.nextStep
+      )}</span></div>
       ${priority.riskHistory ? renderRiskHistory(name, priority.riskHistory) : ''}
     </li>`;
 };
 
-/** The alerts and the rules behind most of them, as plain text. */
-const describeAlerts = ({ count, rules }: NonNullable<Priority['alerts']>): string => {
-  const alerts = formatCountOf(count, 'alert', 'alerts');
-  const names = rules.map((rule) => `${rule.name} (${rule.count})`).join(', ');
-  return names ? `${alerts}: ${names}` : alerts;
+type Alerts = NonNullable<Priority['alerts']>;
+
+/** The rules shown account for every alert, so no total is needed. */
+const hasTotalRow = ({ count, rules }: Alerts): boolean => sumBy(rules, 'count') < count;
+
+/** One row per rule, then the total of the open alerts when the rules shown don't account for all of them. */
+const renderAlerts = (alerts: Alerts, periodLabel: string): string => {
+  const { count, ruleCount, rules } = alerts;
+  const moreRules = ruleCount - rules.length;
+  const total = `${formatCountOf(count, 'open alert', 'open alerts')} in the last ${periodLabel}${
+    moreRules > 0 ? `, ${formatCountOf(moreRules, 'more rule', 'more rules')}` : ''
+  }`;
+  return `<div class="evidence">
+        <span class="label">Alerts</span>
+        <ul class="rules">${rules
+          .map(
+            (rule) =>
+              `<li><span>${escapeHtml(rule.name)}</span><span class="rule-count">${formatCount(
+                rule.count
+              )}</span></li>`
+          )
+          .join('')}${
+    hasTotalRow(alerts)
+      ? `<li class="rules-total"><span>${escapeHtml(
+          total
+        )}</span><span class="rule-count">${formatCount(count)}</span></li>`
+      : ''
+  }</ul>
+      </div>`;
 };
 
 const BANDS = [
@@ -295,8 +322,10 @@ const describeTrend = (first: number, last: number): string => {
 // Height. The card needs its height up front, so it is estimated from rounded sizes, measured in Chromium
 // at the card's 832 px width with the system font the sandbox falls back to. The margin covers a wider font.
 
-const HEIGHT_MARGIN = 60;
+const HEIGHT_MARGIN = 30;
 const CHARACTERS_PER_LINE = 100;
+/** The assessment is set in a narrower measure. */
+const ASSESSMENT_CHARACTERS_PER_LINE = 66;
 const HEIGHTS = {
   /** The padding around the brief, its header, and the gap below. */
   header: 120,
@@ -310,14 +339,16 @@ const HEIGHTS = {
   counts: 72,
   /** A priority's padding and title row, on top of its lines. */
   priority: 80,
-  /** The gap above the alerts line. */
-  alerts: 8,
+  /** The gap above the alerts, and one row of them. */
+  alerts: 10,
+  rule: 25,
   /** The risk history with its chart, or with the caption alone. */
   chart: 160,
   caption: 50,
 };
 
-const countLines = (text: string): number => Math.ceil(text.length / CHARACTERS_PER_LINE);
+const countLines = (text: string, charactersPerLine = CHARACTERS_PER_LINE): number =>
+  Math.ceil(text.length / charactersPerLine);
 
 const estimateHeight = (viewModel: BriefViewModel): number => {
   const { summary, recommendation, priorities } = viewModel;
@@ -333,11 +364,14 @@ const estimateHeight = (viewModel: BriefViewModel): number => {
     (priorities.length === 0
       ? HEIGHTS.line
       : sumBy(priorities, ({ assessment, nextStep, alerts, riskHistory }) => {
-          const lines = countLines(assessment) + countLines(nextStep);
+          const lines =
+            countLines(assessment, ASSESSMENT_CHARACTERS_PER_LINE) + countLines(nextStep);
           return (
             HEIGHTS.priority +
             lines * HEIGHTS.line +
-            (alerts ? HEIGHTS.alerts + countLines(describeAlerts(alerts)) * HEIGHTS.line : 0) +
+            (alerts
+              ? HEIGHTS.alerts + (alerts.rules.length + Number(hasTotalRow(alerts))) * HEIGHTS.rule
+              : 0) +
             (riskHistory ? estimateRiskHistoryHeight(riskHistory) : 0)
           );
         }))
@@ -420,11 +454,16 @@ const CSS = `
 .brief .priority-title{display:flex;flex-direction:column;min-width:0;flex:1 1 160px;}
 .brief .name{font-weight:700;font-size:15px;overflow-wrap:anywhere;}
 .brief .pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}
-.brief .alerts{margin:6px 0 0 32px;}
-.brief .label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.72;margin-right:2px;}
-.brief .priority-text{margin-left:32px;}
-.brief .next{margin:6px 0 0 32px;}
-.brief .next .label{margin-right:6px;}
+.brief .label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.72;padding-top:3px;}
+.brief .assessment{margin:8px 0 0 32px;font-size:15px;line-height:1.45;max-width:62ch;}
+.brief .evidence,.brief .next{display:grid;grid-template-columns:auto 1fr;column-gap:14px;margin:10px 0 0 32px;}
+.brief .evidence{row-gap:2px;align-items:start;}
+.brief .rules{list-style:none;margin:0;padding:0;font-size:13px;max-width:560px;}
+.brief .rules li{display:flex;justify-content:space-between;gap:12px;padding:2px 0;border-bottom:1px dashed var(--cc-color-border);}
+.brief .rules li:last-child{border-bottom:0;}
+.brief .rule-count{font-variant-numeric:tabular-nums;font-weight:600;opacity:.85;flex:none;}
+.brief .rules-total{opacity:.72;}
+.brief .rules-total span{font-weight:400;}
 .brief .chart{margin:10px 0 0 32px;padding:8px 12px;border:1px solid var(--cc-color-border);border-radius:var(--cc-radius);}
 .brief .chart figcaption{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font-size:12px;margin-bottom:4px;}
 .brief .chart-change{font-weight:600;}
@@ -436,5 +475,5 @@ const CSS = `
 .brief .chart .line{fill:none;stroke:currentColor;stroke-width:2;stroke-linejoin:round;}
 .brief .chart .dot{fill:currentColor;}
 .brief .callout{border-left:3px solid var(--cc-color-primary);padding:10px 14px;background:var(--cc-color-surface);border-radius:var(--cc-radius);}
-@media (max-width:420px){.brief .header{flex-direction:column;} .brief .pills{justify-content:flex-start;} .brief .alerts,.brief .priority-text,.brief .next,.brief .chart{margin-left:0;}}
+@media (max-width:420px){.brief .header{flex-direction:column;} .brief .pills{justify-content:flex-start;} .brief .assessment,.brief .evidence,.brief .next,.brief .chart{margin-left:0;}}
 `;
