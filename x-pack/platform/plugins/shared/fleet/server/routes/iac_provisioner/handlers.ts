@@ -253,11 +253,12 @@ export const createIacCallbackHandler: FleetRequestHandler<
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
   const { provider, ...identity } = request.body;
 
-  // Internal clients: creating the key must not need the user's `manage_api_key` privilege (it
-  // is unavailable on Serverless), and the type is space-agnostic.
+  // The key is granted for the caller through the security plugin, so they need no
+  // `manage_api_key` privilege (unavailable on Serverless). The type is space-agnostic, hence the
+  // internal saved objects client.
   const { item, apiKey } = await iacCallbackService.create(
     appContextService.getInternalUserSOClientWithoutSpaceExtension(),
-    appContextService.getInternalUserESClient(),
+    request,
     { provider, createdBy: user?.username, spaceId, identity }
   );
 

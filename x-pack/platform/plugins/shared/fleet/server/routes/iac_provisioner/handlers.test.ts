@@ -496,7 +496,6 @@ describe('IaC callback handlers', () => {
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let getCurrentUser: jest.Mock;
   const soClient = { tag: 'internal-so-client' };
-  const esClient = { tag: 'internal-es-client' };
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -505,7 +504,6 @@ describe('IaC callback handlers', () => {
     mockedAppContext.getLogger.mockReturnValue(loggingSystemMock.createLogger());
     mockedAppContext.getSecurityCore.mockReturnValue({ authc: { getCurrentUser } } as any);
     mockedAppContext.getInternalUserSOClientWithoutSpaceExtension.mockReturnValue(soClient as any);
-    mockedAppContext.getInternalUserESClient.mockReturnValue(esClient as any);
     mockedIsAwsIdentityFederationEnabled.mockResolvedValue(true);
     mockedGetAvailability.mockReturnValue({
       available: true,
@@ -627,14 +625,15 @@ describe('IaC callback handlers', () => {
       expect(response.ok).toHaveBeenCalledWith({ body: { item: ITEM, api_key: 'encoded-key' } });
     });
 
-    it('creates the record as the internal user, tagged with the caller and space', async () => {
+    it('creates the record for the request, tagged with the caller and space', async () => {
       getCurrentUser.mockReturnValue(realmUser());
       mockedService.create.mockResolvedValue({ item: ITEM, apiKey: 'encoded-key' });
       const request = httpServerMock.createKibanaRequest({ body: { provider: 'aws' } });
 
       await createIacCallbackHandler(buildCallbackContext('marketing'), request, response);
 
-      expect(mockedService.create).toHaveBeenCalledWith(soClient, esClient, {
+      // The request is handed down so the key can be granted on the caller's behalf.
+      expect(mockedService.create).toHaveBeenCalledWith(soClient, request, {
         provider: 'aws',
         createdBy: 'elastic',
         spaceId: 'marketing',
@@ -661,7 +660,7 @@ describe('IaC callback handlers', () => {
 
       expect(mockedService.create).toHaveBeenCalledWith(
         soClient,
-        esClient,
+        request,
         expect.objectContaining({
           provider: 'aws',
           identity: {

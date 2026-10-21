@@ -6,11 +6,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type {
-  ElasticsearchClient,
-  SavedObject,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import {
@@ -107,25 +103,31 @@ class IacCallbackService {
   }
 
   /**
-   * Creates a pending record and a zero-privilege key bound to it. The encoded key is returned
-   * exactly once and never stored; only its id is, so it can be matched and invalidated.
+   * Creates a pending record and a zero-privilege key bound to it. The key is granted on the
+   * caller's behalf through the security plugin, so the caller needs no `manage_api_key`
+   * privilege and the key stays attributed to them. The encoded key is returned exactly once and
+   * never stored; only its id is, so it can be matched and invalidated.
    */
   public async create(
     soClient: SavedObjectsClientContract,
-    esClient: ElasticsearchClient,
+    request: KibanaRequest,
     { provider, createdBy, spaceId, identity = {} }: CreateIacCallbackOptions
   ): Promise<{ item: IacCallback; apiKey: string }> {
     const id = uuidv4();
     const now = new Date();
 
-    const key = await esClient.security
-      .createApiKey({
+    const security = appContextService.getSecurity();
+    if (!security) {
+      throw new FleetError('Impossible to create an api key: security plugin is not available');
+    }
+    const key = await security.authc.apiKeys
+      .grantAsInternalUser(request, {
         name: `fleet-iac-callback-${id}`,
         expiration: IAC_CALLBACK_EXPIRATION,
         metadata: { managed_by: 'fleet', managed: true, type: 'iac_callback', callback_id: id },
         role_descriptors: {
           // Named descriptor with no privileges. An empty `role_descriptors: {}` would inherit
-          // the creating user's privileges instead.
+          // the caller's privileges instead.
           'fleet-apikey-iac-callback': {
             cluster: [],
             index: [],
@@ -138,6 +140,9 @@ class IacCallbackService {
       .catch((err) => {
         throw new FleetError(`Impossible to create an api key: ${err.message}`);
       });
+    if (!key) {
+      throw new FleetError('Impossible to create an api key: API keys are not available');
+    }
 
     const attributes: IacCallbackSOAttributes = {
       provider,
@@ -146,7 +151,8 @@ class IacCallbackService {
       created_at: now.toISOString(),
       ...(createdBy ? { created_by: createdBy } : {}),
       ...(spaceId ? { space_id: spaceId } : {}),
-      expires_at: new Date(key.expiration ?? now.getTime() + IAC_CALLBACK_TTL_MS).toISOString(),
+      // The grant answer carries no expiration; the key was asked for the same lifetime.
+      expires_at: new Date(now.getTime() + IAC_CALLBACK_TTL_MS).toISOString(),
     };
     for (const field of IDENTITY_FIELDS) {
       if (identity[field] !== undefined) {

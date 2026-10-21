@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { httpServerMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -15,13 +15,13 @@ import {
 } from '../../common/constants';
 import type { IacCallbackSOAttributes } from '../types/so_attributes';
 
-import { CloudConnectorCreateError } from '../errors';
+import { CloudConnectorCreateError, FleetError } from '../errors';
 
 import { appContextService } from './app_context';
 import { auditLoggingService } from './audit_logging';
 import { invalidateAPIKeys } from './api_keys/security';
 import { cloudConnectorService } from './cloud_connector';
-import { iacCallbackService, IAC_CALLBACK_EXPIRATION } from './iac_callback';
+import { iacCallbackService, IAC_CALLBACK_EXPIRATION, IAC_CALLBACK_TTL_MS } from './iac_callback';
 
 jest.mock('./app_context');
 jest.mock('./audit_logging');
@@ -74,13 +74,18 @@ const CLAIMED = pendingAttrs({ status: 'receiving', ...PAYLOAD });
 describe('iacCallbackService', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;
   let logger: ReturnType<typeof loggerMock.create>;
+  let grantAsInternalUser: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
     jest.useFakeTimers().setSystemTime(NOW);
     soClient = savedObjectsClientMock.create();
     logger = loggerMock.create();
+    grantAsInternalUser = jest.fn();
     jest.mocked(appContextService.getLogger).mockReturnValue(logger);
+    jest
+      .mocked(appContextService.getSecurity)
+      .mockReturnValue({ authc: { apiKeys: { grantAsInternalUser } } } as any);
     jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(soClient);
     jest.spyOn(cloudConnectorService, 'create').mockResolvedValue({
       id: 'cc-1',
@@ -104,14 +109,13 @@ describe('iacCallbackService', () => {
   });
 
   describe('create', () => {
-    it('mints a zero-privilege key bound to the record and returns the encoded key once', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.security.createApiKey.mockResolvedValue({
+    const request = httpServerMock.createKibanaRequest();
+
+    beforeEach(() => {
+      grantAsInternalUser.mockResolvedValue({
         id: 'key-1',
         name: 'fleet-iac-callback-cb-1',
         api_key: 'secret',
-        encoded: 'ignored',
-        expiration: new Date(FUTURE).getTime(),
       });
       soClient.create.mockImplementation(async (type, attributes, options) => ({
         id: options?.id ?? 'cb-1',
@@ -119,14 +123,18 @@ describe('iacCallbackService', () => {
         references: [],
         attributes: attributes as IacCallbackSOAttributes,
       }));
+    });
 
-      const { item, apiKey } = await iacCallbackService.create(soClient, esClient, {
+    it('grants a zero-privilege key for the caller through the security plugin and returns it encoded once', async () => {
+      const { item, apiKey } = await iacCallbackService.create(soClient, request, {
         provider: 'aws',
         createdBy: 'elastic',
         spaceId: 'default',
       });
 
-      expect(esClient.security.createApiKey).toHaveBeenCalledWith({
+      // The security plugin grants the key on the caller's behalf, so the caller needs no
+      // `manage_api_key` privilege and the key stays attributed to them.
+      expect(grantAsInternalUser).toHaveBeenCalledWith(request, {
         name: 'fleet-iac-callback-cb-1',
         expiration: IAC_CALLBACK_EXPIRATION,
         metadata: { managed_by: 'fleet', managed: true, type: 'iac_callback', callback_id: 'cb-1' },
@@ -141,6 +149,8 @@ describe('iacCallbackService', () => {
         },
       });
       expect(apiKey).toBe(Buffer.from('key-1:secret').toString('base64'));
+      // The grant answer carries no expiration, so the record's comes from the TTL.
+      const expiresAt = new Date(NOW.getTime() + IAC_CALLBACK_TTL_MS).toISOString();
       expect(soClient.create).toHaveBeenCalledWith(
         'fleet-iac-callback',
         {
@@ -150,7 +160,7 @@ describe('iacCallbackService', () => {
           created_at: NOW.toISOString(),
           created_by: 'elastic',
           space_id: 'default',
-          expires_at: FUTURE,
+          expires_at: expiresAt,
         },
         { id: 'cb-1' }
       );
@@ -161,35 +171,20 @@ describe('iacCallbackService', () => {
         created_at: NOW.toISOString(),
         created_by: 'elastic',
         space_id: 'default',
-        expires_at: FUTURE,
+        expires_at: expiresAt,
       });
       // The stored record and the returned item never carry the key or its id.
       expect(JSON.stringify(item)).not.toContain('secret');
       expect(item).not.toHaveProperty('api_key_id');
       // Operators can see the launch in the server log, without the key.
       expect(logger.info).toHaveBeenCalledWith(
-        `IaC callback created [id=cb-1] [space_id=default] [expires_at=${FUTURE}]`
+        `IaC callback created [id=cb-1] [space_id=default] [expires_at=${expiresAt}]`
       );
       expect(JSON.stringify(logger.info.mock.calls)).not.toContain('secret');
     });
 
     it('stores the name, account type and template details on the record', async () => {
-      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.security.createApiKey.mockResolvedValue({
-        id: 'key-1',
-        name: 'fleet-iac-callback-cb-1',
-        api_key: 'secret',
-        encoded: 'ignored',
-        expiration: new Date(FUTURE).getTime(),
-      });
-      soClient.create.mockImplementation(async (type, attributes, options) => ({
-        id: options?.id ?? 'cb-1',
-        type,
-        references: [],
-        attributes: attributes as IacCallbackSOAttributes,
-      }));
-
-      const { item } = await iacCallbackService.create(soClient, esClient, {
+      const { item } = await iacCallbackService.create(soClient, request, {
         provider: 'aws',
         identity: {
           connector_name: 'my-identity',
@@ -213,6 +208,34 @@ describe('iacCallbackService', () => {
         { id: 'cb-1' }
       );
       expect(item).toMatchObject({ connector_name: 'my-identity', iac_key: 'sha256:abc' });
+    });
+
+    it('fails without creating a record when the security plugin cannot grant a key', async () => {
+      // `null` is the contract's answer when API keys are unavailable (licence or security off).
+      grantAsInternalUser.mockResolvedValue(null);
+
+      await expect(
+        iacCallbackService.create(soClient, request, { provider: 'aws' })
+      ).rejects.toThrow(FleetError);
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('fails without creating a record when the security plugin is unavailable', async () => {
+      jest.mocked(appContextService.getSecurity).mockReturnValue(undefined as any);
+
+      await expect(
+        iacCallbackService.create(soClient, request, { provider: 'aws' })
+      ).rejects.toThrow(FleetError);
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('wraps a grant failure so the record is not created', async () => {
+      grantAsInternalUser.mockRejectedValue(new Error('boom'));
+
+      await expect(
+        iacCallbackService.create(soClient, request, { provider: 'aws' })
+      ).rejects.toThrow('Impossible to create an api key: boom');
+      expect(soClient.create).not.toHaveBeenCalled();
     });
   });
 
