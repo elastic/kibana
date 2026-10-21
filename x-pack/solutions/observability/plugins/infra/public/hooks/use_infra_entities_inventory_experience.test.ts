@@ -6,8 +6,8 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { NEW_INFRASTRUCTURE_EXPERIENCE_KEY } from '../../common/ui_settings_keys';
-import { useNewInfrastructureExperience } from './use_new_infrastructure_experience';
+import { INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY } from '../../common/ui_settings_keys';
+import { useInfraEntitiesInventoryExperience } from './use_infra_entities_inventory_experience';
 
 jest.mock('./use_kibana', () => ({
   useKibanaContextForPlugin: jest.fn(),
@@ -24,7 +24,7 @@ Object.defineProperty(window, 'location', {
   writable: true,
 });
 
-describe('useNewInfrastructureExperience', () => {
+describe('useInfraEntitiesInventoryExperience', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useKibanaContextForPlugin.mockReturnValue({
@@ -35,16 +35,16 @@ describe('useNewInfrastructureExperience', () => {
   it('returns false by default when the setting is not set', () => {
     mockGet.mockReturnValue(false);
 
-    const { result } = renderHook(() => useNewInfrastructureExperience());
+    const { result } = renderHook(() => useInfraEntitiesInventoryExperience());
 
     expect(result.current[0]).toBe(false);
-    expect(mockGet).toHaveBeenCalledWith(NEW_INFRASTRUCTURE_EXPERIENCE_KEY, false);
+    expect(mockGet).toHaveBeenCalledWith(INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY, false);
   });
 
   it('returns true when the setting is enabled', () => {
     mockGet.mockReturnValue(true);
 
-    const { result } = renderHook(() => useNewInfrastructureExperience());
+    const { result } = renderHook(() => useInfraEntitiesInventoryExperience());
 
     expect(result.current[0]).toBe(true);
   });
@@ -53,13 +53,13 @@ describe('useNewInfrastructureExperience', () => {
     mockGet.mockReturnValue(false);
     mockSet.mockResolvedValue(true);
 
-    const { result } = renderHook(() => useNewInfrastructureExperience());
+    const { result } = renderHook(() => useInfraEntitiesInventoryExperience());
 
     await act(async () => {
       await result.current[1](true);
     });
 
-    expect(mockSet).toHaveBeenCalledWith(NEW_INFRASTRUCTURE_EXPERIENCE_KEY, true);
+    expect(mockSet).toHaveBeenCalledWith(INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY, true);
     expect(mockReload).toHaveBeenCalled();
   });
 
@@ -67,13 +67,13 @@ describe('useNewInfrastructureExperience', () => {
     mockGet.mockReturnValue(false);
     mockSet.mockResolvedValue(false);
 
-    const { result } = renderHook(() => useNewInfrastructureExperience());
+    const { result } = renderHook(() => useInfraEntitiesInventoryExperience());
 
     await act(async () => {
       await result.current[1](true);
     });
 
-    expect(mockSet).toHaveBeenCalledWith(NEW_INFRASTRUCTURE_EXPERIENCE_KEY, true);
+    expect(mockSet).toHaveBeenCalledWith(INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY, true);
     expect(mockReload).not.toHaveBeenCalled();
   });
 });

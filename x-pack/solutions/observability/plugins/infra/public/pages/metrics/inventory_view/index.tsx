@@ -16,7 +16,7 @@ import { InfraOnboardingPage } from '../../../components/shared/templates/infra_
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useInfraHasData } from '../../../hooks/use_infra_has_data';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
-import { useNewInfrastructureExperience } from '../../../hooks/use_new_infrastructure_experience';
+import { useInfraEntitiesInventoryExperience } from '../../../hooks/use_infra_entities_inventory_experience';
 import {
   entityInventoryTitle,
   inventoryTitle,
@@ -33,13 +33,16 @@ import { useMetricsAppHeaderMenu } from '../header/use_metrics_app_header_menu';
 export const SnapshotPage = (): React.ReactElement => {
   const { euiTheme } = useEuiTheme();
   const { services } = useKibanaContextForPlugin();
-  const [isNewExperience, setIsNewExperience] = useNewInfrastructureExperience();
-  const isNewExperienceActive = isNewExperience && !!services.entityInventoryApp;
+  const [isEntityInventoryEnabled, setEntityInventoryEnabled] =
+    useInfraEntitiesInventoryExperience();
+  const isEntityInventoryActive = isEntityInventoryEnabled && !!services.entityInventoryApp;
 
   useTrackPageview({ app: 'infra_metrics', path: 'inventory' });
   useTrackPageview({ app: 'infra_metrics', path: 'inventory', delay: 15000 });
 
-  useMetricsBreadcrumbs(isNewExperienceActive ? [] : [{ text: inventoryTitle }], { parent: 'app' });
+  useMetricsBreadcrumbs(isEntityInventoryActive ? [] : [{ text: inventoryTitle }], {
+    parent: 'app',
+  });
 
   const { menu, flyouts } = useMetricsAppHeaderMenu();
   const { showOnboarding } = useInfraHasData();
@@ -57,8 +60,8 @@ export const SnapshotPage = (): React.ReactElement => {
                   header={
                     <>
                       <AppHeader
-                        title={isNewExperienceActive ? entityInventoryTitle : inventoryTitle}
-                        menu={isNewExperienceActive ? undefined : menu}
+                        title={isEntityInventoryActive ? entityInventoryTitle : inventoryTitle}
+                        menu={isEntityInventoryActive ? undefined : menu}
                         spacing="standard"
                       />
                       {flyouts}
@@ -92,15 +95,15 @@ export const SnapshotPage = (): React.ReactElement => {
                       <EuiFlexItem grow={false}>
                         <EuiSwitch
                           compressed
-                          data-test-subj="newInfrastructureExperienceToggle"
+                          data-test-subj="entityInventoryExperienceToggle"
                           label={newInfrastructureExperienceToggleLabel}
-                          checked={isNewExperience ?? false}
-                          onChange={(e) => setIsNewExperience(e.target.checked)}
+                          checked={isEntityInventoryEnabled ?? false}
+                          onChange={(e) => setEntityInventoryEnabled(e.target.checked)}
                         />
                       </EuiFlexItem>
                     </EuiFlexGroup>
                   )}
-                  {isNewExperienceActive ? (
+                  {isEntityInventoryActive ? (
                     <Suspense fallback={null}>
                       {React.createElement(services.entityInventoryApp!.getAppComponent())}
                     </Suspense>

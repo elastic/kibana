@@ -20,7 +20,7 @@ import { mapValues } from 'lodash';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
-import { NEW_INFRASTRUCTURE_EXPERIENCE_KEY } from '../common/ui_settings_keys';
+import { INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY } from '../common/ui_settings_keys';
 import { getMetricsFeature } from './features';
 import { registerRoutes } from './infra_server';
 import type {
@@ -143,14 +143,14 @@ export class InfraServerPlugin
 
     if (plugins.entityInventoryApp) {
       core.uiSettings.register({
-        [NEW_INFRASTRUCTURE_EXPERIENCE_KEY]: {
-          name: i18n.translate('xpack.infra.uiSettings.newInfrastructureExperienceName', {
-            defaultMessage: 'New infrastructure experience',
+        [INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY]: {
+          name: i18n.translate('xpack.infra.uiSettings.infraEntitiesInventoryExperienceName', {
+            defaultMessage: 'Infrastructure entities inventory experience',
           }),
           value: false,
           description: i18n.translate(
-            'xpack.infra.uiSettings.newInfrastructureExperienceDescription',
-            { defaultMessage: 'Enables the new entity-based infrastructure inventory experience.' }
+            'xpack.infra.uiSettings.infraEntitiesInventoryExperienceDescription',
+            { defaultMessage: 'Enables the entity-based infrastructure inventory experience.' }
           ),
           schema: schema.boolean(),
           category: ['observability'],

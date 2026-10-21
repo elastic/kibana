@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export const NEW_INFRASTRUCTURE_EXPERIENCE_KEY = 'observability:newInfrastructureExperience';
+export const INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY =
+  'observability:infraEntitiesInventoryExperience';

@@ -6,17 +6,17 @@
  */
 
 import { useCallback } from 'react';
-import { NEW_INFRASTRUCTURE_EXPERIENCE_KEY } from '../../common/ui_settings_keys';
+import { INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY } from '../../common/ui_settings_keys';
 import { useKibanaContextForPlugin } from './use_kibana';
 
-export function useNewInfrastructureExperience() {
+export function useInfraEntitiesInventoryExperience() {
   const { services } = useKibanaContextForPlugin();
 
-  const value = services.uiSettings.get<boolean>(NEW_INFRASTRUCTURE_EXPERIENCE_KEY, false);
+  const value = services.uiSettings.get<boolean>(INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY, false);
 
   const setValue = useCallback(
     async (enabled: boolean) => {
-      const saved = await services.uiSettings.set(NEW_INFRASTRUCTURE_EXPERIENCE_KEY, enabled);
+      const saved = await services.uiSettings.set(INFRA_ENTITIES_INVENTORY_EXPERIENCE_KEY, enabled);
       if (saved) window.location.reload();
     },
     [services]

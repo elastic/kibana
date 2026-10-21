@@ -23,8 +23,8 @@ const mockFetcherState: { hasData: boolean; status: MockFetchStatus } = {
 let mockIsNewExperience = false;
 let mockEntityInventoryApp: { getAppComponent: () => React.ComponentType } | undefined;
 
-jest.mock('../../../hooks/use_new_infrastructure_experience', () => ({
-  useNewInfrastructureExperience: () => [mockIsNewExperience, jest.fn()],
+jest.mock('../../../hooks/use_infra_entities_inventory_experience', () => ({
+  useInfraEntitiesInventoryExperience: () => [mockIsNewExperience, jest.fn()],
 }));
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({
@@ -205,7 +205,7 @@ describe('SnapshotPage', () => {
 
       renderSnapshotPage();
 
-      expect(screen.queryByTestId('newInfrastructureExperienceToggle')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('entityInventoryExperienceToggle')).not.toBeInTheDocument();
     });
 
     it('renders the toggle when entityInventoryApp is present', () => {
@@ -213,7 +213,7 @@ describe('SnapshotPage', () => {
 
       renderSnapshotPage();
 
-      expect(screen.getByTestId('newInfrastructureExperienceToggle')).toBeInTheDocument();
+      expect(screen.getByTestId('entityInventoryExperienceToggle')).toBeInTheDocument();
     });
 
     it('renders the entity inventory and hides the old inventory when the new experience is active', async () => {
