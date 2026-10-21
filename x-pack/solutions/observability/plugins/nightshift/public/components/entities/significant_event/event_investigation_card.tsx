@@ -40,9 +40,12 @@ export const EventInvestigationCard = ({
           defaultMessage: 'Investigation',
         });
   const canOpen = agentBuilder != null && conversationId != null;
-  const investigationState = getInvestigationState(event);
+  const latestInvestigation = getLatestInvestigation(event);
+  const investigationState = getInvestigationState({
+    investigations: latestInvestigation ? [latestInvestigation] : [],
+  });
   const statusLabel =
-    investigationState === 'completed' && getLatestInvestigation(event)?.outcome === 'failed'
+    investigationState === 'completed' && latestInvestigation?.outcome === 'failed'
       ? i18n.translate('xpack.nightshift.flyout.investigationCardFailedLabel', {
           defaultMessage: 'Failed',
         })

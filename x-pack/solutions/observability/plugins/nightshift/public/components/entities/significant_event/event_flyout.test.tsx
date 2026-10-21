@@ -477,6 +477,36 @@ describe('EventFlyout', () => {
     expect(queryClient.getQueryData(key)).toEqual({ hits: [followUp] });
   });
 
+  it.each([
+    { outcome: 'completed', label: 'Completed' },
+    { outcome: 'failed', label: 'Failed' },
+  ] as const)(
+    'shows the latest $outcome outcome despite an older unfinished investigation',
+    ({ outcome, label }) => {
+      renderFlyout({
+        event: {
+          ...mockEvent,
+          investigations: [
+            {
+              workflow_execution_id: 'older-investigation',
+              started_at: '2026-07-10T11:00:00Z',
+            },
+            {
+              workflow_execution_id: 'conv-1',
+              started_at: '2026-07-10T12:00:00Z',
+              completed_at: '2026-07-10T12:05:00Z',
+              outcome,
+            },
+          ],
+        },
+      });
+
+      expect(screen.getByTestId('nightshiftEventInvestigationCard')).toHaveTextContent(
+        `Investigation · ${label}`
+      );
+    }
+  );
+
   it('renders the summary section with the summary text', () => {
     renderFlyout();
 
