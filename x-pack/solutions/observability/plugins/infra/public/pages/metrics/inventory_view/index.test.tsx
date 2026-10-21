@@ -11,7 +11,7 @@ import { EuiProvider } from '@elastic/eui';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { SnapshotPage } from '.';
-import { inventoryTitle } from '../../../translations';
+import { entityInventoryTitle, inventoryTitle } from '../../../translations';
 
 type MockFetchStatus = 'loading' | 'success' | 'failure' | 'not_initiated' | 'pending';
 
@@ -216,12 +216,15 @@ describe('SnapshotPage', () => {
       expect(screen.getByTestId('newInfrastructureExperienceToggle')).toBeInTheDocument();
     });
 
-    it('renders the entity inventory and hides the old inventory when the new experience is active', () => {
+    it('renders the entity inventory and hides the old inventory when the new experience is active', async () => {
       mockIsNewExperience = true;
       mockEntityInventoryApp = { getAppComponent: () => MockEntityInventory };
 
       renderSnapshotPage();
 
+      expect(await screen.findByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent(
+        entityInventoryTitle
+      );
       expect(screen.getByTestId('entityInventoryApp')).toBeInTheDocument();
       expect(screen.queryByTestId('inventorySnapshotContainer')).not.toBeInTheDocument();
     });

@@ -17,7 +17,11 @@ import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useInfraHasData } from '../../../hooks/use_infra_has_data';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useNewInfrastructureExperience } from '../../../hooks/use_new_infrastructure_experience';
-import { inventoryTitle } from '../../../translations';
+import {
+  entityInventoryTitle,
+  inventoryTitle,
+  newInfrastructureExperienceToggleLabel,
+} from '../../../translations';
 import { SnapshotContainer } from './components/snapshot_container';
 import { WaffleTimeProvider } from './hooks/use_waffle_time';
 import { WaffleFiltersProvider } from './hooks/use_waffle_filters';
@@ -53,9 +57,7 @@ export const SnapshotPage = (): React.ReactElement => {
                   header={
                     <>
                       <AppHeader
-                        title={
-                          isNewExperienceActive ? 'Entity Inventory (placeholder)' : inventoryTitle
-                        }
+                        title={isNewExperienceActive ? entityInventoryTitle : inventoryTitle}
                         menu={isNewExperienceActive ? undefined : menu}
                         spacing="standard"
                       />
@@ -91,7 +93,7 @@ export const SnapshotPage = (): React.ReactElement => {
                         <EuiSwitch
                           compressed
                           data-test-subj="newInfrastructureExperienceToggle"
-                          label="New infrastructure experience"
+                          label={newInfrastructureExperienceToggleLabel}
                           checked={isNewExperience ?? false}
                           onChange={(e) => setIsNewExperience(e.target.checked)}
                         />
