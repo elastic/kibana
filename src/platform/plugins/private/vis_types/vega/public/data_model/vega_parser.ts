@@ -708,10 +708,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       }
     } else if (_.isPlainObject(obj)) {
       if (key === 'data' && _.isPlainObject(obj.url)) {
-        // Assume that any  "data": {"url": {...}}  is a request for data.
-        // Intercepting every object-valued url here, including Vega's {"signal": ...} form, resolves
-        // all data before the view exists, so the view never loads data from a URL computed at
-        // runtime. The Vega sandbox relies on this: do not let object-valued urls through to the view.
+        // Assume that any  "data": {"url": {...}}  is a request for data
         if (obj.values !== undefined || obj.source !== undefined) {
           throw new Error(
             i18n.translate(
