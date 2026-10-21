@@ -151878,6 +151878,8 @@ components:
             type: string
           maxItems: 10000
           type: array
+        smart_title:
+          type: boolean
         split_field:
           description: The optional field used to split change point results.
           maxLength: 10000
@@ -151919,6 +151921,8 @@ components:
           type: boolean
         hide_title:
           description: When true, the panel title is hidden. Defaults to false.
+          type: boolean
+        smart_title:
           type: boolean
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
@@ -151990,6 +151994,8 @@ components:
           minimum: 0.00001
           nullable: true
           type: number
+        smart_title:
+          type: boolean
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
@@ -154316,6 +154322,8 @@ components:
             type: string
           maxItems: 4
           type: array
+        smart_title:
+          type: boolean
         sync_with_dashboard_filters:
           type: boolean
         time_range:
@@ -156572,6 +156580,8 @@ components:
               default: false
               description: Whether to show the distribution mini-charts in the table.
               type: boolean
+            smart_title:
+              type: boolean
             time_range:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
             title:
@@ -156610,6 +156620,8 @@ components:
             show_distributions:
               default: false
               description: Whether to show the distribution mini-charts in the table.
+              type: boolean
+            smart_title:
               type: boolean
             time_range:
               $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
@@ -161841,6 +161853,7 @@ components:
         auto_apply_filters: true
         hide_panel_borders: false
         hide_panel_titles: false
+        show_hint_bar: false
         sync_colors: false
         sync_cursor: true
         sync_tooltips: false
@@ -161858,6 +161871,10 @@ components:
         hide_panel_titles:
           default: false
           description: When `true`, panel titles are hidden. Defaults to `false`.
+          type: boolean
+        show_hint_bar:
+          default: false
+          description: When `true`, a bar with keyboard and mouse shortcuts is shown while editing the dashboard. Defaults to `false`.
           type: boolean
         sync_colors:
           default: false
@@ -162005,6 +162022,8 @@ components:
             hide_title:
               description: When true, the panel title is hidden. Defaults to false.
               type: boolean
+            smart_title:
+              type: boolean
             template:
               maxLength: 510000
               type: string
@@ -162083,6 +162102,8 @@ components:
                   type: boolean
                 hide_title:
                   description: When true, the panel title is hidden. Defaults to false.
+                  type: boolean
+                smart_title:
                   type: boolean
                 tabs:
                   description: Inline tab configuration. Used when no `ref_id` is set. Currently supports one tab.
@@ -162668,6 +162689,8 @@ components:
                 selected_tab_id:
                   description: Tab to select from the referenced saved object. If omitted, defaults to the first tab.
                   type: string
+                smart_title:
+                  type: boolean
                 time_range:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
                 title:
@@ -162898,6 +162921,8 @@ components:
                   description: Image source
               required:
                 - src
+            smart_title:
+              type: boolean
             title:
               description: The panel title.
               type: string
@@ -162954,6 +162979,8 @@ components:
                       - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-link-type-externalLink'
                   maxItems: 100
                   type: array
+                smart_title:
+                  type: boolean
                 title:
                   description: The panel title.
                   type: string
@@ -162977,6 +163004,8 @@ components:
                   description: The unique identifier of the links library item.
                   title: Reference ID
                   type: string
+                smart_title:
+                  type: boolean
                 title:
                   description: The panel title.
                   type: string
@@ -163031,6 +163060,8 @@ components:
                       default: true
                       description: Open links in a new browser tab.
                       type: boolean
+                smart_title:
+                  type: boolean
                 title:
                   description: The panel title.
                   type: string
@@ -163053,6 +163084,8 @@ components:
                 ref_id:
                   description: The unique identifier of the markdown library item.
                   type: string
+                smart_title:
+                  type: boolean
                 title:
                   description: The panel title.
                   type: string
@@ -163380,6 +163413,8 @@ components:
             hide_title:
               description: When true, the panel title is hidden. Defaults to false.
               type: boolean
+            smart_title:
+              type: boolean
             title:
               description: The panel title.
               type: string
@@ -163551,6 +163586,8 @@ components:
               type: boolean
             hide_title:
               description: When true, the panel title is hidden. Defaults to false.
+              type: boolean
+            smart_title:
               type: boolean
             title:
               description: The panel title.
@@ -163748,6 +163785,8 @@ components:
                       items:
                         $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
                       type: array
+                    smart_title:
+                      type: boolean
                     time_range:
                       $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
                     title:
@@ -163890,6 +163929,8 @@ components:
                   items:
                     $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-content-management-utils-referenceSchema'
                   type: array
+                smart_title:
+                  type: boolean
                 time_range:
                   $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
                 title:
@@ -166785,6 +166826,8 @@ components:
                   - min
           maxItems: 5
           type: array
+        smart_title:
+          type: boolean
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
@@ -166824,6 +166867,8 @@ components:
               maximum: 100
               minimum: 0
               type: number
+            smart_title:
+              type: boolean
             swimlane_type:
               enum:
                 - overall
@@ -166866,6 +166911,8 @@ components:
               maximum: 100
               minimum: 0
               type: number
+            smart_title:
+              type: boolean
             swimlane_type:
               enum:
                 - viewBy
@@ -166929,6 +166976,8 @@ components:
               - type: number
           description: Values of the partition, by, or over fields that identify the single time series to display.
           type: object
+        smart_title:
+          type: boolean
         time_range:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-es-query-server-timeRangeSchema'
         title:
@@ -174878,6 +174927,8 @@ components:
               - slo_id
           maxItems: 100
           type: array
+        smart_title:
+          type: boolean
         title:
           description: The panel title.
           type: string
@@ -174947,6 +174998,8 @@ components:
           description: ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).
           maxLength: 512
           type: string
+        smart_title:
+          type: boolean
         title:
           description: The panel title.
           type: string
@@ -175015,6 +175068,8 @@ components:
           description: ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).
           maxLength: 512
           type: string
+        smart_title:
+          type: boolean
         title:
           description: The panel title.
           type: string
@@ -175112,6 +175167,8 @@ components:
           enum:
             - groups
           type: string
+        smart_title:
+          type: boolean
         title:
           description: The panel title.
           type: string
@@ -175358,6 +175415,8 @@ components:
           description: ID of the SLO instance. Set when the SLO uses group_by; identifies which instance to show. Defaults to * (all instances).
           maxLength: 512
           type: string
+        smart_title:
+          type: boolean
         title:
           description: The panel title.
           type: string
