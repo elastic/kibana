@@ -50,7 +50,11 @@ describe('reconcileTransforms', () => {
 
     // 0.15.0 is orphaned — must be stopped and deleted without touching destination index
     expect(esClient.transform.stopTransform).toHaveBeenCalledWith(
-      { transform_id: 'endpoint.metadata_current-default-0.15.0', force: true },
+      {
+        transform_id: 'endpoint.metadata_current-default-0.15.0',
+        force: true,
+        wait_for_completion: true,
+      },
       { ignore: [404] }
     );
     expect(esClient.transform.deleteTransform).toHaveBeenCalledWith(

@@ -19,8 +19,9 @@ import { MAX_CONCURRENT_TRANSFORMS_OPERATIONS } from '../../../../constants';
 
 export const stopTransforms = async (transformIds: string[], esClient: ElasticsearchClient) => {
   for (const transformId of transformIds) {
+    // Without wait_for_completion the indexer keeps draining and can re-create the transform's state doc after deleteTransform removed it.
     await esClient.transform.stopTransform(
-      { transform_id: transformId, force: true },
+      { transform_id: transformId, force: true, wait_for_completion: true },
       { ignore: [404] }
     );
   }

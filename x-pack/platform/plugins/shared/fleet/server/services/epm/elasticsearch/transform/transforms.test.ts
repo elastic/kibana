@@ -311,6 +311,7 @@ _meta:
         {
           transform_id: 'logs-endpoint.metadata_current-default-0.1.0',
           force: true,
+          wait_for_completion: true,
         },
         { ignore: [404] },
       ],
@@ -765,6 +766,7 @@ _meta:
         {
           transform_id: 'endpoint.metadata_current-default-0.1.0',
           force: true,
+          wait_for_completion: true,
         },
         { ignore: [404] },
       ],
@@ -1048,6 +1050,7 @@ _meta:
         {
           transform_id: 'logs-endpoint.metadata_current-default-0.1.0',
           force: true,
+          wait_for_completion: true,
         },
         { ignore: [404] },
       ],
