@@ -26,6 +26,9 @@ const AGENTIC_INVESTIGATIONS_API_PRIVILEGE_MANAGE = 'manage_investigations';
 const PROPOSALS_API_PRIVILEGE_READ = 'read_proposals';
 const PROPOSALS_API_PRIVILEGE_MANAGE = 'manage_proposals';
 
+// Nightshift's user-scoped rules client needs access to Alerting v2's hidden rule records.
+const ALERTING_V2_RULE_SO_TYPE = 'alerting_rule';
+
 export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
   features.registerKibanaFeature({
     id: NIGHTSHIFT_FEATURE_ID,
@@ -52,7 +55,7 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         // Significant Events reads as the current user.
         alerts: { read: true },
         aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
-        savedObject: { all: [NIGHTSHIFT_SOURCE_SO_TYPE], read: [] },
+        savedObject: { all: [NIGHTSHIFT_SOURCE_SO_TYPE, ALERTING_V2_RULE_SO_TYPE], read: [] },
       },
       read: {
         app: [NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID],
@@ -65,7 +68,7 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         ui: [NIGHTSHIFT_UI_PRIVILEGES.show],
         alerts: { read: true },
         aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
-        savedObject: { all: [], read: [NIGHTSHIFT_SOURCE_SO_TYPE] },
+        savedObject: { all: [], read: [NIGHTSHIFT_SOURCE_SO_TYPE, ALERTING_V2_RULE_SO_TYPE] },
       },
     },
     subFeatures: [

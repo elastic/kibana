@@ -7,7 +7,11 @@
 
 import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
-import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
+import {
+  NIGHTSHIFT_API_PRIVILEGES,
+  NIGHTSHIFT_SOURCE_SO_TYPE,
+  NIGHTSHIFT_UI_PRIVILEGES,
+} from '@kbn/nightshift-shared';
 import { registerNightshiftFeature } from './register_feature';
 
 const getRegisteredFeature = (): KibanaFeatureConfig => {
@@ -17,6 +21,34 @@ const getRegisteredFeature = (): KibanaFeatureConfig => {
 };
 
 describe('registerNightshiftFeature', () => {
+  it('grants source and rule saved-object writes with `all`', () => {
+    const { privileges } = getRegisteredFeature();
+
+    expect(privileges?.all.savedObject).toEqual({
+      all: [NIGHTSHIFT_SOURCE_SO_TYPE, 'alerting_rule'],
+      read: [],
+    });
+  });
+
+  it('grants only source and rule saved-object reads with `read`', () => {
+    const { privileges } = getRegisteredFeature();
+
+    expect(privileges?.read.savedObject).toEqual({
+      all: [],
+      read: [NIGHTSHIFT_SOURCE_SO_TYPE, 'alerting_rule'],
+    });
+  });
+
+  it('keeps UI capabilities limited to Nightshift', () => {
+    const { privileges } = getRegisteredFeature();
+
+    expect(privileges?.all.ui).toEqual([
+      NIGHTSHIFT_UI_PRIVILEGES.show,
+      NIGHTSHIFT_UI_PRIVILEGES.manage,
+    ]);
+    expect(privileges?.read.ui).toEqual([NIGHTSHIFT_UI_PRIVILEGES.show]);
+  });
+
   it('grants the agentic investigations and proposals API privileges with `all`', () => {
     const { privileges } = getRegisteredFeature();
 
