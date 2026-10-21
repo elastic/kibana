@@ -41,13 +41,20 @@ jobs:
             });
 
             const changedFiles = files.map(file => file.filename);
+            core.info(`PR #${context.payload.pull_request.number} by ${user}: ${headRef} -> ${baseRef}`);
             core.info(`Changed files: ${changedFiles.join(', ')}`);
 
-            const matches = whitelist.some((rule) => {
-              if (rule.user !== user) return false;
-              if (!headRef.startsWith(rule.branchPrefix)) return false;
-              if (rule.baseMatch && !rule.baseMatch.test(baseRef)) return false;
-              if (rule.baseNotMatch && rule.baseNotMatch.test(baseRef)) return false;
+            const matchedRule = whitelist.find((rule) => {
+              const ruleName = `${rule.user}/${rule.branchPrefix}`;
+              const reject = (reason) => {
+                core.info(`Rule ${ruleName} skipped: ${reason}`);
+                return false;
+              };
+
+              if (rule.user !== user) return reject(`user is not ${rule.user}`);
+              if (!headRef.startsWith(rule.branchPrefix)) return reject(`branch does not start with ${rule.branchPrefix}`);
+              if (rule.baseMatch && !rule.baseMatch.test(baseRef)) return reject(`base does not match ${rule.baseMatch}`);
+              if (rule.baseNotMatch && rule.baseNotMatch.test(baseRef)) return reject(`base matches ${rule.baseNotMatch}`);
 
               // If paths is specified, every changed file must match one of them
               if (rule.paths) {
@@ -61,16 +68,18 @@ jobs:
                     return file === path;
                   })
                 );
-                if (!allFilesMatch) {
-                  core.info(`File check failed for rule ${rule.user}/${rule.branchPrefix}: not all changed files match paths`);
-                  return false;
-                }
+                if (!allFilesMatch) return reject(`not all changed files match ${rule.paths.join(', ')}`);
               }
 
               return true;
             });
 
-            core.setOutput('should_approve', matches ? 'true' : 'false');
+            if (matchedRule) {
+              core.notice(`Approving: matched rule ${matchedRule.user}/${matchedRule.branchPrefix}`);
+            } else {
+              core.notice('Not approving: no rule matched');
+            }
+            core.setOutput('should_approve', matchedRule ? 'true' : 'false');
 
       - uses: hmarr/auto-approve-action@f0939ea97e9205ef24d872e76833fa908a770363 # v4.0.0
         name: Approve as github-actions[bot]
