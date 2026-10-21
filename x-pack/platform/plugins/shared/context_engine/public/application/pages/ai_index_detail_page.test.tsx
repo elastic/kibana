@@ -15,6 +15,7 @@ import { INDEX_MANAGEMENT_LOCATOR_ID } from '@kbn/index-management-shared-types'
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -912,6 +913,10 @@ describe('AiIndexDetailPage', () => {
     services.application.capabilities = {
       ...services.application.capabilities,
       discover_v2: { show: true },
+      index_management: {
+        ...services.application.capabilities.index_management,
+        monitor: true,
+      },
     };
     const history = createMemoryHistory({
       initialEntries: [{ pathname: getAiIndexDetailPath(aiIndex.id) }],
@@ -954,6 +959,17 @@ describe('AiIndexDetailPage', () => {
     );
     expect(screen.getByTestId('contextListKiPanel')).toBeInTheDocument();
     expect(history.location.pathname).toBe(getAiIndexKnowledgeIndicatorsPath(aiIndex.id));
+    await openAppMenuOverflow();
+    await waitFor(() => {
+      expect(screen.getByTestId('contextListKiPanelDestLink')).toBeInTheDocument();
+    });
+    expect(screen.getByTestId('contextListKiDiscoverLink')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextListKiPanelSummary')).not.toBeInTheDocument();
+
+    expect(screen.getByTestId('contextListKiDiscoverLink')).toHaveAttribute(
+      'href',
+      '/app/discover'
+    );
   });
 
   it('hides the Knowledge Indicators tab when there are no KIs', async () => {
