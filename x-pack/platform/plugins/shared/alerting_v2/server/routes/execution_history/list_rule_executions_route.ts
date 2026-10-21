@@ -59,6 +59,8 @@ export const toListRuleExecutionsArgs = ({
 const toRuleExecutionView = ({
   id,
   rule,
+  // `spaceId` is destructured only to keep it out of `rest`; the space is
+  // implied by the request and is not exposed on the public item.
   spaceId,
   startedAt,
   endedAt,
@@ -73,7 +75,6 @@ const toRuleExecutionView = ({
   return {
     id,
     rule: { id: rule.id, version: rule.version ?? undefined },
-    space_id: spaceId,
     started_at: startedAt,
     ended_at: endedAt,
     timings: { duration_ms: duration, scheduled_delay_ms: scheduledDelay },

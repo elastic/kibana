@@ -108,7 +108,6 @@ export const ruleExecutionViewSchema = lazySchema(() =>
             'The rule version this run executed. Omitted until the rule executor emits its own event; the `task-run` event does not carry one.'
           ),
       }),
-      space_id: z.string(),
       started_at: isoDateTime(),
       ended_at: isoDateTime(),
       timings: z.object({

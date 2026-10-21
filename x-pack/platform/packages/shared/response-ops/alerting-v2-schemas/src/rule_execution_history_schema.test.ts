@@ -24,7 +24,6 @@ import {
 const validView = {
   id: 'doc-1',
   rule: { id: 'rule-1' },
-  space_id: 'default',
   started_at: '2026-06-01T00:00:00.000Z',
   ended_at: '2026-06-01T00:00:01.500Z',
   timings: { duration_ms: 1500, scheduled_delay_ms: 250 },
