@@ -89,4 +89,18 @@ describe('dashboard', () => {
     expect(html).toContain('Traffic');
     expect(height).toBeGreaterThan(16 * 28);
   });
+
+  it('lets a frameless body fill its panel', () => {
+    const frameless: DashboardNode = {
+      ...node,
+      panels: [{ ...node.panels[1], title: undefined, frame: 'none' }],
+    };
+    expect(runtime.validate(view(frameless)).errors).toEqual([]);
+    expect(dashboardChartSize(1200)({ id: 'chart-1' }, [frameless])).toEqual({
+      width: 596,
+      height: 272,
+    });
+    const { html } = runtime.surfaces.html.render(view(frameless));
+    expect(html).not.toContain('isomerDashboard-panel ');
+  });
 });
