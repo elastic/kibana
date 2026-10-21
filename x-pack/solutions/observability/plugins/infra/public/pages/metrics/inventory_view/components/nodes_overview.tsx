@@ -113,7 +113,6 @@ export const NodesOverview = ({
   const hasDataOnAnotherSchema =
     schemas.length === 1 && preferredSchema !== schemas[0] && isSchemaAwareNodeType(nodeType);
 
-  console.log('####', hasDataOnAnotherSchema);
   const refetchProps = hasDataOnAnotherSchema
     ? {}
     : {
