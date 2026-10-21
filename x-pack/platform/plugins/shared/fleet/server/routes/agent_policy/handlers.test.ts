@@ -17,6 +17,7 @@ import type { AgentClient } from '../../services/agents';
 import type { AgentPolicy } from '../../types';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
+import { FLEET_API_PRIVILEGES } from '../../constants/api_privileges';
 
 import {
   bulkGetAgentPoliciesHandler,
@@ -306,6 +307,34 @@ describe('Agent policy API handlers', () => {
         expect.anything(),
         expect.objectContaining({ showAgentless })
       );
+    });
+  });
+
+  describe('getAgentPoliciesHandler for users without agent policies read privilege', () => {
+    it('keeps supports_agentless in the sanitized policies', async () => {
+      agentPolicyServiceMock.list.mockResolvedValue({
+        items: [
+          { id: 'agentless-policy', name: 'Agentless', supports_agentless: true },
+          { id: 'regular-policy', name: 'Regular', supports_agentless: false },
+        ] as AgentPolicy[],
+        total: 2,
+        page: 1,
+        perPage: 20,
+      });
+      const request = httpServerMock.createKibanaRequest({ query: {} });
+      // Agents read only: no agent policies read
+      (request as any).authzResult = {
+        [FLEET_API_PRIVILEGES.AGENTS.READ]: true,
+        [FLEET_API_PRIVILEGES.AGENT_POLICIES.READ]: false,
+      };
+
+      await getAgentPoliciesHandler(context, request, response);
+
+      const { items } = (response.ok as jest.Mock).mock.calls[0][0].body;
+      expect(items).toEqual([
+        expect.objectContaining({ id: 'agentless-policy', supports_agentless: true }),
+        expect.objectContaining({ id: 'regular-policy', supports_agentless: false }),
+      ]);
     });
   });
 

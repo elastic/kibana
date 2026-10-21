@@ -177,6 +177,7 @@ function sanitizeItemForReadAgentOnly(item: AgentPolicy): AgentPolicy {
     namespace: item.namespace,
     is_managed: item.is_managed,
     is_protected: item.is_protected,
+    supports_agentless: item.supports_agentless,
     status: item.status,
     updated_at: item.updated_at,
     updated_by: item.updated_by,
