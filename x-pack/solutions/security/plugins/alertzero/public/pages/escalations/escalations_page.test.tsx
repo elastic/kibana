@@ -125,6 +125,7 @@ const renderPage = (
   mockUseCapabilities.mockReturnValue({
     showEscalations: true,
     manageEscalations: true,
+    readInvestigations: true,
     manageInvestigations: true,
     ...overrides.capabilities,
   });
@@ -166,6 +167,7 @@ beforeEach(() => {
   mockUseCapabilities.mockReturnValue({
     showEscalations: true,
     manageEscalations: true,
+    readInvestigations: true,
     manageInvestigations: true,
   });
   mockUseConversationsUrlParams.mockReturnValue({

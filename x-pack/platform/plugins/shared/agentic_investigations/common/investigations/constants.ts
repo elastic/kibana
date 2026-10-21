@@ -13,6 +13,7 @@ export const INVESTIGATIONS_INTERNAL_URL =
 /** URL for the per-investigation assignment route. */
 export const INVESTIGATION_ASSIGN_URL = `${INVESTIGATIONS_INTERNAL_URL}/{id}/assignees` as const;
 
+export const INVESTIGATIONS_UI_CAPABILITY_READ = 'readInvestigations' as const;
 export const INVESTIGATIONS_UI_CAPABILITY_SHOW = 'showInvestigations' as const;
 export const INVESTIGATIONS_UI_CAPABILITY_MANAGE = 'manageInvestigations' as const;
 

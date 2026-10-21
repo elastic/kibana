@@ -24,10 +24,13 @@ export const useProposalImpactPills = ({
   origin,
   categories,
   decidedWithinHours,
+  enabled = true,
 }: {
   origin: ProposalOrigin;
   categories: readonly string[];
   decidedWithinHours?: number;
+  /** Turn off when the user cannot read investigations; the request would only fail. */
+  enabled?: boolean;
 }) => {
   const { services } = useKibana<CoreStart>();
 
@@ -44,6 +47,7 @@ export const useProposalImpactPills = ({
       });
       return pills;
     },
+    enabled,
     keepPreviousData: true,
     retry: retryOnTransientError,
   });

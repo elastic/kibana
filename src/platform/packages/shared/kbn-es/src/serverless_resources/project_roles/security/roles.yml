@@ -1517,6 +1517,8 @@ _alertzero_alert_triage:
     - application: 'kibana-.kibana'
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all
@@ -1604,6 +1606,8 @@ _alertzero_attack_discovery:
     - application: 'kibana-.kibana'
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all
@@ -1664,6 +1668,8 @@ _alertzero_endpoint_analysis:
     - application: 'kibana-.kibana'
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all
@@ -1712,6 +1718,8 @@ _alertzero_threat_hunt:
     - application: 'kibana-.kibana'
       privileges:
         - feature_alertzero.all
+        - feature_agenticInvestigations.minimal_all
+        - feature_agenticInvestigations.investigations_all
         - feature_agentBuilder.read
         - feature_contextEngine.all
         - feature_proposals.all
