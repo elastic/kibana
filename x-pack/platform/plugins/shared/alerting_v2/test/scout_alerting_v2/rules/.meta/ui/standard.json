@@ -1,5 +1,5 @@
 {
-  "sha1": "96ad7b7f126179ca83bc1e3ee44823ed85df74df",
+  "sha1": "53949c244dcea82b39ce453b41ff73006cd6d2b8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -89,6 +89,34 @@
       }
     },
     {
+      "id": "e3c907aa2ae798f-596e67cf4a28a72",
+      "title": "Rule changed EBT telemetry reports a rule created from Discover with the discover app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/ebt_telemetry.spec.ts",
+        "line": 71,
+        "column": 15
+      }
+    },
+    {
+      "id": "e3c907aa2ae798f-49e30c8475ba2b6",
+      "title": "Rule changed EBT telemetry reports a rule created from the rules list with the observabilityAlerting app",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/ebt_telemetry.spec.ts",
+        "line": 99,
+        "column": 23
+      }
+    },
+    {
       "id": "c81eb23bac82e1c-365fefaed06dbcf",
       "title": "ES|QL rule flyout — ?param validation save button is enabled and no callout shown when query has no ?params",
       "expectedStatus": "passed",
@@ -142,6 +170,20 @@
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/install_rule_template.spec.ts",
         "line": 70,
         "column": 56
+      }
+    },
+    {
+      "id": "b470088e3702fe3-1d2597bde6b013c",
+      "title": "Rule library - install a rule template the rule count links to the rules created from the template",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2/rules/ui/tests/install_rule_template.spec.ts",
+        "line": 135,
+        "column": 13
       }
     },
     {

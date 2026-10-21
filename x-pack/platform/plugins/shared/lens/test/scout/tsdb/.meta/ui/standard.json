@@ -1,5 +1,5 @@
 {
-  "sha1": "c0b08d9c8d26f85edccca499a85c5cd0721d68d9",
+  "sha1": "d3cde778c841d5527fee20ce7da6179bf33b20ec",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -595,8 +595,8 @@
       }
     },
     {
-      "id": "0e686497cfdccd7-95e73ce22655808",
-      "title": "Lens TSDB stream downgrade scenarios supports a downgraded TSDB data stream without additional indices",
+      "id": "5151b3f1086ab41-e217ced82e64167",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream with another TSDB stream keeps the counter field compatible with Average",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -609,14 +609,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 146,
-        "column": 8
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/additional_tsdb_stream.spec.ts",
+        "line": 22,
+        "column": 68
       }
     },
     {
-      "id": "0e686497cfdccd7-e9d2ccb4dd6cfe9",
-      "title": "Lens TSDB stream downgrade scenarios supports a downgraded TSDB data stream with a regular index",
+      "id": "5151b3f1086ab41-16d1e5258d29fa3",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream with another TSDB stream counts documents before and after the downgrade",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -629,14 +629,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 154,
-        "column": 5
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/additional_tsdb_stream.spec.ts",
+        "line": 26,
+        "column": 13
       }
     },
     {
-      "id": "0e686497cfdccd7-bf75fc7d80eccc9",
-      "title": "Lens TSDB stream downgrade scenarios supports a downgraded TSDB data stream with a downsampled TSDB stream",
+      "id": "5151b3f1086ab41-8702c27150204cc",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream with another TSDB stream visualizes data on both sides of the downgrade boundary",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -649,14 +649,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 166,
-        "column": 5
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/additional_tsdb_stream.spec.ts",
+        "line": 32,
+        "column": 74
       }
     },
     {
-      "id": "0e686497cfdccd7-806afd6883b3ea7",
-      "title": "Lens TSDB stream downgrade scenarios supports a downgraded TSDB data stream with regular and downsampled resources",
+      "id": "ca27df1e55037f7-7fde7270227f499",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream without additional indices keeps the counter field compatible with Average",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -669,14 +669,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 178,
-        "column": 5
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/base_stream.spec.ts",
+        "line": 22,
+        "column": 68
       }
     },
     {
-      "id": "0e686497cfdccd7-b733b138d262f4f",
-      "title": "Lens TSDB stream downgrade scenarios supports a downgraded TSDB data stream with another TSDB stream",
+      "id": "ca27df1e55037f7-edd807275452160",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream without additional indices counts documents before and after the downgrade",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -689,14 +689,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade.spec.ts",
-        "line": 195,
-        "column": 16
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/base_stream.spec.ts",
+        "line": 26,
+        "column": 13
       }
     },
     {
-      "id": "a55716045b821ff-cfc5662eb8bc50d",
-      "title": "Lens TSDB stream upgrade scenarios supports an upgraded TSDB data stream without additional indices",
+      "id": "ca27df1e55037f7-c4f6f7f9f2274b4",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream without additional indices visualizes data on both sides of the downgrade boundary",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -709,14 +709,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade.spec.ts",
-        "line": 131,
-        "column": 8
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/base_stream.spec.ts",
+        "line": 32,
+        "column": 74
       }
     },
     {
-      "id": "a55716045b821ff-262e2389c524312",
-      "title": "Lens TSDB stream upgrade scenarios supports an upgraded TSDB data stream with a regular index",
+      "id": "ec998f546826e6e-751f44327bdb1f2",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream with a downsampled TSDB stream keeps the counter field compatible with Average",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -729,14 +729,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade.spec.ts",
-        "line": 139,
-        "column": 5
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/downsampled_tsdb_stream.spec.ts",
+        "line": 22,
+        "column": 68
       }
     },
     {
-      "id": "a55716045b821ff-d8765ed48ef14b3",
-      "title": "Lens TSDB stream upgrade scenarios supports an upgraded TSDB data stream with a downsampled TSDB stream",
+      "id": "ec998f546826e6e-92776633d622b67",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream with a downsampled TSDB stream counts documents before and after the downgrade",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -749,14 +749,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade.spec.ts",
-        "line": 151,
-        "column": 24
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/downsampled_tsdb_stream.spec.ts",
+        "line": 26,
+        "column": 13
       }
     },
     {
-      "id": "a55716045b821ff-ccf60734e02ab62",
-      "title": "Lens TSDB stream upgrade scenarios supports an upgraded TSDB data stream with regular and downsampled resources",
+      "id": "ec998f546826e6e-fe1f74478ed6b7e",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream with a downsampled TSDB stream visualizes data on both sides of the downgrade boundary",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -769,14 +769,14 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade.spec.ts",
-        "line": 163,
-        "column": 24
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/downsampled_tsdb_stream.spec.ts",
+        "line": 32,
+        "column": 74
       }
     },
     {
-      "id": "a55716045b821ff-14a59aebc57d8ac",
-      "title": "Lens TSDB stream upgrade scenarios supports an upgraded TSDB data stream with another TSDB stream",
+      "id": "07206d070cc22a8-b4d4951a355dde8",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream with regular and downsampled resources keeps the counter field compatible with Average",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -789,9 +789,309 @@
         "@cloud-serverless-security_complete"
       ],
       "location": {
-        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade.spec.ts",
-        "line": 180,
-        "column": 16
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/regular_and_downsampled.spec.ts",
+        "line": 22,
+        "column": 68
+      }
+    },
+    {
+      "id": "07206d070cc22a8-55f521087e7df5d",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream with regular and downsampled resources counts documents before and after the downgrade",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/regular_and_downsampled.spec.ts",
+        "line": 26,
+        "column": 13
+      }
+    },
+    {
+      "id": "07206d070cc22a8-5c4c3e4a3ae8316",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream with regular and downsampled resources visualizes data on both sides of the downgrade boundary",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/regular_and_downsampled.spec.ts",
+        "line": 32,
+        "column": 74
+      }
+    },
+    {
+      "id": "077938e4c9f5348-a79c1cf0a75b939",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream with a regular index keeps the counter field compatible with Average",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/regular_index.spec.ts",
+        "line": 22,
+        "column": 68
+      }
+    },
+    {
+      "id": "077938e4c9f5348-8648ad75717974d",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream with a regular index counts documents before and after the downgrade",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/regular_index.spec.ts",
+        "line": 26,
+        "column": 13
+      }
+    },
+    {
+      "id": "077938e4c9f5348-3f8c31c7063db48",
+      "title": "Lens TSDB stream downgrade: supports a downgraded TSDB data stream with a regular index visualizes data on both sides of the downgrade boundary",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_downgrade/regular_index.spec.ts",
+        "line": 32,
+        "column": 74
+      }
+    },
+    {
+      "id": "cee498231962539-d57d1eda7440ede",
+      "title": "Lens TSDB stream upgrade: supports an upgraded TSDB data stream with another TSDB stream keeps the counter field compatible with Average",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade/additional_tsdb_stream.spec.ts",
+        "line": 22,
+        "column": 68
+      }
+    },
+    {
+      "id": "cee498231962539-76bb4f2cf2ed24e",
+      "title": "Lens TSDB stream upgrade: supports an upgraded TSDB data stream with another TSDB stream visualizes counter data before and after the upgrade",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade/additional_tsdb_stream.spec.ts",
+        "line": 26,
+        "column": 13
+      }
+    },
+    {
+      "id": "d08fd688591a01c-08dc1aaf699df06",
+      "title": "Lens TSDB stream upgrade: supports an upgraded TSDB data stream without additional indices keeps the counter field compatible with Average",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade/base_stream.spec.ts",
+        "line": 22,
+        "column": 68
+      }
+    },
+    {
+      "id": "d08fd688591a01c-8b16d01fa26589f",
+      "title": "Lens TSDB stream upgrade: supports an upgraded TSDB data stream without additional indices visualizes counter data before and after the upgrade",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade/base_stream.spec.ts",
+        "line": 26,
+        "column": 13
+      }
+    },
+    {
+      "id": "81211aa09e1d5a3-e032e08c96a2814",
+      "title": "Lens TSDB stream upgrade: supports an upgraded TSDB data stream with a downsampled TSDB stream keeps the counter field compatible with Average",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade/downsampled_tsdb_stream.spec.ts",
+        "line": 22,
+        "column": 68
+      }
+    },
+    {
+      "id": "81211aa09e1d5a3-e9fea5915bf6934",
+      "title": "Lens TSDB stream upgrade: supports an upgraded TSDB data stream with a downsampled TSDB stream visualizes counter data before and after the upgrade",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade/downsampled_tsdb_stream.spec.ts",
+        "line": 26,
+        "column": 13
+      }
+    },
+    {
+      "id": "2763185da3a835c-3d6916b91799d1e",
+      "title": "Lens TSDB stream upgrade: supports an upgraded TSDB data stream with regular and downsampled resources keeps the counter field compatible with Average",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade/regular_and_downsampled.spec.ts",
+        "line": 22,
+        "column": 68
+      }
+    },
+    {
+      "id": "2763185da3a835c-01b3ae3a8a7cc1e",
+      "title": "Lens TSDB stream upgrade: supports an upgraded TSDB data stream with regular and downsampled resources visualizes counter data before and after the upgrade",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade/regular_and_downsampled.spec.ts",
+        "line": 26,
+        "column": 13
+      }
+    },
+    {
+      "id": "f9a2137dd626054-df3839c7d7ea0a9",
+      "title": "Lens TSDB stream upgrade: supports an upgraded TSDB data stream with a regular index keeps the counter field compatible with Average",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade/regular_index.spec.ts",
+        "line": 22,
+        "column": 68
+      }
+    },
+    {
+      "id": "f9a2137dd626054-26f654a1f0f88ad",
+      "title": "Lens TSDB stream upgrade: supports an upgraded TSDB data stream with a regular index visualizes counter data before and after the upgrade",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/lens/test/scout/tsdb/ui/tests/stream_upgrade/regular_index.spec.ts",
+        "line": 26,
+        "column": 13
       }
     }
   ]
