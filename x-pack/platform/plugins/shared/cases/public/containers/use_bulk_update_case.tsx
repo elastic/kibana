@@ -6,11 +6,12 @@
  */
 
 import { useQueryClient, useMutation } from '@kbn/react-query';
+import type { UseMutationResult } from '@kbn/react-query';
 import type { ToastInputFields } from '@kbn/core/public';
 import * as i18n from './translations';
 import { getCase, updateCases } from './api';
 import type { UpdateSummary } from '../../common/types/api';
-import type { CaseUpdateRequest, CasesUI } from './types';
+import type { CaseUI, CaseUpdateRequest, CasesUI } from './types';
 import { useCasesToast } from '../common/use_cases_toast';
 import type { ServerError } from '../types';
 import { casesQueriesKeys, casesMutationsKeys } from './constants';
@@ -37,7 +38,11 @@ interface MutationArgs {
  * selected cases are filtered out before the request; only matching ids are used
  * for the rebase check.
  */
-export const useUpdateCases = () => {
+export const useUpdateCases = (): UseMutationResult<
+  Array<CaseUI & { updateSummary?: UpdateSummary }>,
+  ServerError,
+  MutationArgs
+> => {
   const queryClient = useQueryClient();
   const { showErrorToast, showSuccessToast } = useCasesToast();
 

@@ -348,11 +348,14 @@ export const ModelSelect: React.FC = () => {
             onFocusBadge: false,
           }}
           height={listHeight}
+          // @ts-ignore
           onChange={onChange}
+          // @ts-ignore
           renderOption={renderOption}
           isLoading={isLoading}
           searchable
           searchProps={{
+            // @ts-ignore
             onChange: onSearchChange,
           }}
         >

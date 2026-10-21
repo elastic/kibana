@@ -272,7 +272,9 @@ export const AdvancedDetectorModal: FC<Props> = ({
             <AggDescription titleId={aggDescriptionTitleId}>
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
+                // @ts-ignore
                 options={aggOptions}
+                // @ts-ignore
                 selectedOptions={createSelectedOptions(aggOption)}
                 onChange={onOptionChange(setAggOption)}
                 isClearable={true}

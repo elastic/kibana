@@ -7,6 +7,7 @@
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import React, { memo, useCallback, useContext, useMemo } from 'react';
+import type { MemoExoticComponent } from 'react';
 import { useSelector } from 'react-redux-v7';
 import { getTableByIdSelector, TableId } from '@kbn/securitysolution-data-table';
 import { noop } from 'lodash';
@@ -142,4 +143,5 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
   );
 };
 
-export const ActionsCell = memo(ActionsCellComponent);
+export const ActionsCell: MemoExoticComponent<typeof ActionsCellComponent> =
+  memo(ActionsCellComponent);

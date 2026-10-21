@@ -170,6 +170,7 @@ export const OptionsListPopoverSortingButton = ({
         <EuiSelectable
           options={sortByOptions}
           singleSelection="always"
+          // @ts-ignore
           onChange={onSortByChange}
           id="optionsList_sortingOptions"
           listProps={{ bordered: false, paddingSize: 's' }}

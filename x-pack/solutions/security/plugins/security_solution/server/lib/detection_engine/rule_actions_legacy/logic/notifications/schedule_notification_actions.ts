@@ -31,7 +31,7 @@ const convertToLegacyAlert = (alert: DetectionAlert) =>
     return acc;
   }, {} as Record<string, unknown>);
 
-export const normalizeAlertForNotificationActions = (alert: DetectionAlert) => {
+export const normalizeAlertForNotificationActions = (alert: DetectionAlert): DetectionAlert => {
   if (isThresholdRule(alert[ALERT_RULE_TYPE])) {
     const { [ALERT_THRESHOLD_RESULT]: thresholdResult, ...alertWithoutThresholdResult } = alert;
     return {

@@ -17,6 +17,8 @@ export const HOST_METRICS_INDEX = 'metrics-system.load-default';
 export const HOST_LOAD_DOC_COUNT = 75;
 export const HOST_NAME = 'viz-eval-host';
 
+type HostLoadEvent = ReturnType<ReturnType<typeof infra.host>['load']>;
+
 export function buildHostLoadEvents({
   now = Date.now(),
   count = HOST_LOAD_DOC_COUNT,
@@ -26,7 +28,7 @@ export function buildHostLoadEvents({
   count?: number;
   /** Written to `agent.id` so cleanup can target exactly this run's documents. */
   runId?: string;
-} = {}) {
+} = {}): HostLoadEvent[] {
   if (count < 1) {
     return [];
   }

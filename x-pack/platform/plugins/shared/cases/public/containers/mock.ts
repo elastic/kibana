@@ -278,7 +278,7 @@ export const caseWithAlertsSyncOff = {
   id: caseWithAlertsSyncOffId,
 };
 
-export const caseWithRegisteredAttachments = {
+export const caseWithRegisteredAttachments: CaseUI = {
   ...basicCase,
   id: 'case-with-registered-attachment',
   comments: [externalReferenceAttachment, persistableStateAttachment],

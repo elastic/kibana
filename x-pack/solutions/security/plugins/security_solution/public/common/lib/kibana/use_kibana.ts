@@ -6,6 +6,8 @@
  */
 
 import { useKibana as useKibanaGeneric } from '@kbn/kibana-react-plugin/public';
+import type { KibanaReactContextValue, KibanaServices } from '@kbn/kibana-react-plugin/public';
 import type { StartServices } from '../../../types';
 
-export const useKibana = useKibanaGeneric<StartServices>;
+export const useKibana: () => KibanaReactContextValue<KibanaServices & StartServices> =
+  useKibanaGeneric<StartServices>;

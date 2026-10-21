@@ -90,7 +90,24 @@ const generateLatestAttachments = ({
     });
 };
 
-export const defaultUseFindCaseUserActions = {
+interface MockFindCaseUserActionsPage {
+  total: number;
+  perPage: number;
+  page: number;
+  userActions: UserActionUI[];
+  latestAttachments: ReturnType<typeof generateLatestAttachments>;
+}
+
+interface MockQueryState {
+  isLoading: boolean;
+  isFetching: boolean;
+  isError: boolean;
+}
+
+export const defaultUseFindCaseUserActions: MockQueryState & {
+  data: MockFindCaseUserActionsPage;
+  refetch: jest.Mock;
+} = {
   data: {
     total: 4,
     perPage: 10,
@@ -107,7 +124,11 @@ export const defaultUseFindCaseUserActions = {
   isError: false,
 };
 
-export const defaultInfiniteUseFindCaseUserActions = {
+export const defaultInfiniteUseFindCaseUserActions: MockQueryState & {
+  data: { pages: MockFindCaseUserActionsPage[] };
+  hasNextPage: boolean;
+  fetchNextPage: jest.Mock;
+} = {
   data: {
     pages: [
       {

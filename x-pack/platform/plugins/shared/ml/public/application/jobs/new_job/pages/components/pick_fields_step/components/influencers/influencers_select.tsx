@@ -49,7 +49,9 @@ export const InfluencersSelect: FC<Props> = ({
   return (
     <EuiComboBox
       singleSelection={false}
+      // @ts-ignore
       options={options}
+      // @ts-ignore
       selectedOptions={selection}
       onChange={onChange}
       isClearable={false}

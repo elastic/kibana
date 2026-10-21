@@ -260,7 +260,7 @@ export class EmsVectorTileLayer extends AbstractLayer {
     return new Promise((resolve, reject) => {
       const image = new Image();
       if (this._isCrossOriginUrl(imgUrl)) {
-        image.crossOrigin = 'Anonymous';
+        image.crossOrigin = 'anonymous';
       }
       image.onload = (event) => {
         resolve(this._getImageData(image));
