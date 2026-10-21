@@ -20,7 +20,7 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: main 9.5 9.4 8.19
       default_branch: main
@@ -41,9 +41,13 @@ spec:
         skip_pull_request_builds_for_existing_commits: false
       teams:
         everyone:
-          access_level: BUILD_AND_READ
+          access_level: READ_ONLY
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
+        kibana-release-operators:
+          access_level: BUILD_AND_READ
+        artifact-management:
+          access_level: BUILD_AND_READ
         appex-qa:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
@@ -90,7 +94,7 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: true
       branch_configuration: main 9.5 9.4 8.19
       default_branch: main
@@ -111,9 +115,13 @@ spec:
         skip_pull_request_builds_for_existing_commits: false
       teams:
         everyone:
-          access_level: BUILD_AND_READ
+          access_level: READ_ONLY
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
+        kibana-release-operators:
+          access_level: BUILD_AND_READ
+        artifact-management:
+          access_level: BUILD_AND_READ
         appex-qa:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:
@@ -143,10 +151,11 @@ spec:
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-operations-alerts'
-        KIBANA_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
         SLACK_NOTIFICATIONS_SKIP_FOR_RETRIES: 'true'
         REPORT_FAILED_TESTS_TO_GITHUB: 'false'
         SCOUT_REPORTER_ENABLED: 'true'
+        SCOUT_TEST_RUN_SCOPE: 'es-snapshot-verify'
       allow_rebuilds: true
       branch_configuration: main 9.5 9.4 8.19
       default_branch: main
@@ -167,9 +176,13 @@ spec:
         skip_pull_request_builds_for_existing_commits: false
       teams:
         everyone:
-          access_level: BUILD_AND_READ
+          access_level: READ_ONLY
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
+        kibana-release-operators:
+          access_level: BUILD_AND_READ
+        artifact-management:
+          access_level: BUILD_AND_READ
         appex-qa:
           access_level: MANAGE_BUILD_AND_READ
         kibana-tech-leads:

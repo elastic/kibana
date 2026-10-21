@@ -158,7 +158,40 @@ describe('RelayClient', () => {
     });
   });
 
-  it('posts installs through the Actions HTTP plane with Relay SSL overrides', async () => {
+  it('posts an API-key install unchanged when Relay UIAM is off', async () => {
+    requestMock.mockResolvedValue({
+      status: 200,
+      data: { authorize_url: 'https://slack/oauth', claim_id: 'claim-1' },
+    } as never);
+
+    const body = {
+      kibana_api_key: 'api-key',
+      kibana_url: 'https://kibana.test',
+      kibana_version: '9.2.0',
+      license_info: 'platinum',
+      created_by_user_key: 'admin',
+    };
+    await expect(createClient({ useSystemIdentity: false }).startInstall(body)).resolves.toEqual({
+      authorize_url: 'https://slack/oauth',
+      claim_id: 'claim-1',
+    });
+
+    expect(requestMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        url: 'https://relay.test/v1/slack/install',
+        method: 'post',
+        data: body,
+        configurationUtilities,
+        sslOverrides: relaySSLSettings,
+        maxRedirects: 0,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    );
+    expect(requestMock.mock.calls[0][0].data).not.toHaveProperty('uiam_service_account_id');
+    expect(systemIdentity.createEphemeralToken).not.toHaveBeenCalled();
+  });
+
+  it('posts a service-account install with only the id when Relay UIAM is on', async () => {
     requestMock.mockResolvedValue({
       status: 200,
       data: { authorize_url: 'https://slack/oauth', claim_id: 'claim-1' },
@@ -166,7 +199,7 @@ describe('RelayClient', () => {
 
     await expect(
       createClient().startInstall({
-        kibana_api_key: 'api-key',
+        uiam_service_account_id: 'sa-1',
         kibana_url: 'https://kibana.test',
         kibana_version: '9.2.0',
         license_info: 'platinum',
@@ -179,12 +212,113 @@ describe('RelayClient', () => {
     expect(requestMock).toHaveBeenCalledWith(
       expect.objectContaining({
         url: 'https://relay.test/v1/slack/install',
-        method: 'post',
-        configurationUtilities,
-        sslOverrides: relaySSLSettings,
-        maxRedirects: 0,
+        data: {
+          uiam_service_account_id: 'sa-1',
+          kibana_url: 'https://kibana.test',
+          kibana_version: '9.2.0',
+          license_info: 'platinum',
+        },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: 'Bearer essu_kibana-token',
+        },
       })
     );
+    expect(requestMock.mock.calls[0][0].data).not.toHaveProperty('kibana_api_key');
+    expect(JSON.stringify(requestMock.mock.calls[0][0].data)).not.toContain('essu_');
+  });
+
+  it.each([
+    {
+      label: 'both credentials',
+      useSystemIdentity: true,
+      body: {
+        kibana_api_key: 'api-key-secret',
+        uiam_service_account_id: 'sa-1',
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+      },
+    },
+    {
+      label: 'an API key while UIAM is on',
+      useSystemIdentity: true,
+      body: {
+        kibana_api_key: 'api-key-secret',
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+      },
+    },
+    {
+      label: 'a service-account id while UIAM is off',
+      useSystemIdentity: false,
+      body: {
+        uiam_service_account_id: 'sa-1',
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+      },
+    },
+  ])('refuses $label before sending', async ({ useSystemIdentity, body }) => {
+    await expect(createClient({ useSystemIdentity }).startInstall(body as never)).rejects.toThrow(
+      /exactly one|must send/
+    );
+    expect(requestMock).not.toHaveBeenCalled();
+    expect(systemIdentity.createEphemeralToken).not.toHaveBeenCalled();
+  });
+
+  it('strips the install credential from a Relay failure', async () => {
+    const apiKey = 'api-key-secret-value';
+    requestMock.mockResolvedValue({
+      status: 502,
+      data: { message: `upstream rejected ${apiKey}` },
+    } as never);
+
+    await expect(
+      createClient({ useSystemIdentity: false }).startInstall({
+        kibana_api_key: apiKey,
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+      })
+    ).rejects.toThrow(/\[redacted\]/);
+
+    try {
+      await createClient({ useSystemIdentity: false }).startInstall({
+        kibana_api_key: apiKey,
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+      });
+    } catch (error) {
+      expect(String(error)).not.toContain(apiKey);
+      expect(error).not.toHaveProperty('config');
+    }
+  });
+
+  it('strips the service-account id from a transport failure', async () => {
+    const serviceAccountId = 'sa-secret-id';
+    const transportError = new Error(`connect ECONNREFUSED while sending ${serviceAccountId}`);
+    (transportError as Error & { config?: unknown }).config = {
+      data: { uiam_service_account_id: serviceAccountId },
+    };
+    requestMock.mockRejectedValue(transportError);
+
+    try {
+      await createClient().startInstall({
+        uiam_service_account_id: serviceAccountId,
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+      });
+      throw new Error('startInstall should have failed');
+    } catch (error) {
+      expect(error).not.toBe(transportError);
+      expect(String(error)).not.toContain(serviceAccountId);
+      expect(error).not.toHaveProperty('config');
+      expect((error as Error).cause).toBeUndefined();
+    }
   });
 
   it('maps claim responses', async () => {
@@ -203,6 +337,30 @@ describe('RelayClient', () => {
     await expect(createClient().fetchClaim('claim-1')).resolves.toEqual({
       status: 'complete',
       tenant_key: undefined,
+    });
+  });
+
+  it('returns the workspace name and URL from a complete claim', async () => {
+    requestMock.mockResolvedValueOnce({
+      status: 200,
+      data: { tenant_key: 'T0123ABC', tenant_name: 'Acme', tenant_url: 'https://acme.slack.com/' },
+    } as never);
+    await expect(createClient().fetchClaim('claim-1')).resolves.toEqual({
+      status: 'complete',
+      tenant_key: 'T0123ABC',
+      tenant_name: 'Acme',
+      tenant_url: 'https://acme.slack.com/',
+    });
+  });
+
+  it('drops non-string workspace name and URL from a complete claim', async () => {
+    requestMock.mockResolvedValueOnce({
+      status: 200,
+      data: { tenant_key: 'T0123ABC', tenant_name: 42, tenant_url: null },
+    } as never);
+    await expect(createClient().fetchClaim('claim-1')).resolves.toEqual({
+      status: 'complete',
+      tenant_key: 'T0123ABC',
     });
   });
 
@@ -344,7 +502,7 @@ describe('RelayClient', () => {
     it('posts the snake_case outbound body with the Relay SSL overrides', async () => {
       requestMock.mockResolvedValue({
         status: 202,
-        data: { ok: true, surface: 'slack', tenant_key: 'team-A', ref: '1700000000.000100' },
+        data: { ok: true, ref: '1700000000.000100', channel: 'C123' },
       } as never);
 
       await expect(
@@ -353,7 +511,7 @@ describe('RelayClient', () => {
           channel: 'C123',
           message: 'hello',
         })
-      ).resolves.toEqual({ ref: '1700000000.000100', tenantKey: 'team-A', channel: 'C123' });
+      ).resolves.toEqual({ ref: '1700000000.000100', channel: 'C123' });
 
       expect(requestMock).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -363,6 +521,29 @@ describe('RelayClient', () => {
           sslOverrides: relaySSLSettings,
         })
       );
+    });
+
+    it.each([
+      {
+        label: 'returns the',
+        origin: { type: 'slack', external_conversation_id: 'slack:team-A:C123:1700000000.000100' },
+        expected: 'slack:team-A:C123:1700000000.000100',
+      },
+      { label: 'omits a missing', origin: undefined, expected: undefined },
+      { label: 'omits an empty', origin: { external_conversation_id: '' }, expected: undefined },
+    ])('$label conversation key from the Relay origin', async ({ origin, expected }) => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000100', origin },
+      } as never);
+
+      const response = await createClient().trigger({
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'hello',
+      });
+
+      expect(response.externalConversationId).toBe(expected);
     });
 
     it('includes thread_ts only when replying in a thread', async () => {
@@ -385,6 +566,51 @@ describe('RelayClient', () => {
       );
     });
 
+    it('sends blocks only when there are some', async () => {
+      requestMock.mockResolvedValue({
+        status: 202,
+        data: { ref: '1700000000.000200', tenant_key: 'team-A' },
+      } as never);
+      const blocks = [{ type: 'section', text: { type: 'mrkdwn', text: 'hi' } }];
+
+      await createClient().trigger({ tenantKey: 'team-A', channel: 'C123', message: 'hi', blocks });
+      await createClient().trigger({
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'hi',
+        blocks: [],
+      });
+
+      expect(requestMock.mock.calls[0][0]).toMatchObject({ data: { blocks } });
+      expect((requestMock.mock.calls[1][0] as { data: object }).data).not.toHaveProperty('blocks');
+    });
+
+    it('sends message_ts and drops thread_ts when editing a posted message', async () => {
+      requestMock.mockResolvedValue({
+        status: 200,
+        data: { ref: '1700000000.000200', tenant_key: 'team-A' },
+      } as never);
+
+      await createClient().trigger({
+        tenantKey: 'team-A',
+        channel: 'C123',
+        message: 'edited',
+        threadTs: '1700000000.000100',
+        messageTs: '1700000000.000200',
+      });
+
+      expect(requestMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: {
+            tenant_key: 'team-A',
+            channel: 'C123',
+            message: 'edited',
+            message_ts: '1700000000.000200',
+          },
+        })
+      );
+    });
+
     it.each([403, 409, 429, 502])(
       'turns a %s into a RelayRequestError carrying the status',
       async (status) => {
@@ -403,8 +629,8 @@ describe('RelayClient', () => {
     it.each([
       { label: 'empty body', data: undefined },
       { label: 'empty object', data: {} },
-      { label: 'empty ref', data: { ref: '', tenant_key: 'team-A' } },
-      { label: 'missing ref', data: { tenant_key: 'team-A' } },
+      { label: 'empty ref', data: { ref: '' } },
+      { label: 'missing ref', data: { channel: 'C123' } },
     ])('throws RelayRequestError when response body has $label', async ({ data }) => {
       requestMock.mockResolvedValue({ status: 202, data } as never);
 
@@ -419,25 +645,10 @@ describe('RelayClient', () => {
       });
     });
 
-    it('falls back to the caller tenantKey when tenant_key is absent from the response', async () => {
-      requestMock.mockResolvedValue({
-        status: 202,
-        data: { ref: '1700000000.000400' },
-      } as never);
-
-      await expect(
-        createClient().trigger({
-          tenantKey: 'team-A',
-          channel: 'C123',
-          message: 'hello',
-        })
-      ).resolves.toEqual({ ref: '1700000000.000400', tenantKey: 'team-A', channel: 'C123' });
-    });
-
     it("forwards a channel name and returns Relay's resolved channel id", async () => {
       requestMock.mockResolvedValue({
         status: 202,
-        data: { ref: '1700000000.000500', tenant_key: 'team-A', channel: 'C0123456789' },
+        data: { ref: '1700000000.000500', channel: 'C0123456789' },
       } as never);
 
       await expect(
@@ -448,7 +659,6 @@ describe('RelayClient', () => {
         })
       ).resolves.toEqual({
         ref: '1700000000.000500',
-        tenantKey: 'team-A',
         channel: 'C0123456789',
       });
 

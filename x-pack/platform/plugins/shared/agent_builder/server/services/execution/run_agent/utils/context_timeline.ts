@@ -15,12 +15,12 @@ import type {
   ExecutionStepEvent,
   ExecutionTerminalEvent,
   TimelineEvent,
-  UserMessageEvent,
   ConversationEvent,
 } from '@kbn/agent-builder-common';
 import {
   TimelineEventType,
   interruptionOfTerminal,
+  isCustomConversationEvent,
   isEventsNativeVersion,
   isExecutionTerminalEvent,
   isTimelineEvent,
@@ -28,25 +28,42 @@ import {
   parseExecutionId,
   pendingPromptRequest,
 } from '@kbn/agent-builder-common';
-import type { ProcessedRoundInput } from '@kbn/agent-builder-server';
+import type { ProcessedTimelineEvent, ProcessedUserMessageEvent } from '@kbn/agent-builder-server';
 import { eventsToRounds } from '../../../conversation/client/events_to_rounds';
 import {
   isRoundDerivedEventId,
   roundsToEvents,
 } from '../../../conversation/client/rounds_to_events';
 
-/** A `user_message` whose payload has been processed for the agent (attachments migrated to refs, context rendered). */
-export type ProcessedUserMessageEvent = Omit<UserMessageEvent, 'data'> & {
-  data: ProcessedRoundInput;
-};
+export type {
+  ProcessedCustomEvent,
+  ProcessedTimelineEvent,
+  ProcessedUserMessageEvent,
+} from '@kbn/agent-builder-server';
 
-/** The agent-context timeline: normalized events, with `user_message` payloads processed. */
-export type ProcessedTimelineEvent =
-  | Exclude<TimelineEvent, UserMessageEvent>
-  | ProcessedUserMessageEvent;
+/**
+ * The context timeline as `eventsForContext` returns it: the built-in timeline events plus the
+ * custom (registered) events stored on the conversation.
+ */
+export type ContextTimelineEvent = TimelineEvent | ConversationEvent;
 
 type AnyTimelineEvent = TimelineEvent | ProcessedTimelineEvent | ConversationEvent;
-type UserMessageOf<E extends AnyTimelineEvent> = E & UserMessageEvent;
+/**
+ * The `user_message` member of a timeline element type. Selected by discriminant rather than
+ * intersected, so a custom event (whose `type` is any string) never masquerades as one.
+ */
+type UserMessageOf<E extends AnyTimelineEvent> = Extract<
+  E,
+  { type: TimelineEventType.userMessage }
+>;
+/**
+ * The custom events of a timeline element type: `never` for a pure `TimelineEvent[]`,
+ * `ConversationEvent` for the context timeline, `ProcessedCustomEvent` for the processed one.
+ */
+export type CustomEventOf<E extends AnyTimelineEvent> = Exclude<
+  E,
+  TimelineEvent | ProcessedUserMessageEvent
+>;
 
 /** A round as it appears on the normalized context timeline: one execution triggered by a user message. */
 export interface TimelineRound<E extends AnyTimelineEvent = TimelineEvent> {
@@ -65,21 +82,35 @@ export interface TimelineStandaloneUserMessage<E extends AnyTimelineEvent = Time
   userMessage: UserMessageOf<E>;
 }
 
+/** A custom (registered) event, as it appears on the context timeline: owned by no execution. */
+export interface TimelineCustomEvent<E extends AnyTimelineEvent = TimelineEvent> {
+  event: CustomEventOf<E>;
+}
+
 export type TimelineEntry<E extends AnyTimelineEvent = TimelineEvent> =
   | TimelineRound<E>
-  | TimelineStandaloneUserMessage<E>;
+  | TimelineStandaloneUserMessage<E>
+  | TimelineCustomEvent<E>;
 
 /**
  * The normalized timeline the agent context is built from: one execution per round, with HITL
  * resume executions folded into their round. Legacy (rounds-only) conversations serialize their
  * stored rounds; events-native conversations are folded and re-serialized. Context only, never
  * persisted, so downstream consumers can read events without reconstructing rounds.
+ *
+ * Custom (registered) events are carried through untouched: they belong to no execution, so
+ * they are ordered by timestamp and stored position like the other non-round events.
+ *
+ * Activity-only events (the `ConversationActivityEventType` lifecycle types) are dropped: they
+ * have no agent representation yet. One would be a third partition here, next to the custom
+ * events, rendered where `prepareConversation` resolves them.
  */
-export const eventsForContext = (conversation: Conversation): TimelineEvent[] => {
+export const eventsForContext = (conversation: Conversation): ContextTimelineEvent[] => {
   if (!isEventsNativeVersion(conversation.schema_version) || !conversation.events?.length) {
     return roundsToEvents(conversation);
   }
   const timelineEvents = conversation.events.filter(isTimelineEvent);
+  const custom = customEvents(conversation.events);
   const folded = roundsToEvents({ ...conversation, rounds: eventsToRounds(timelineEvents) });
   const positions = new Map(conversation.events.map((event, index) => [event.id, index]));
   const position = (id: string) => positions.get(id) ?? Number.MAX_SAFE_INTEGER;
@@ -88,7 +119,7 @@ export const eventsForContext = (conversation: Conversation): TimelineEvent[] =>
   // synthesizes events that were never stored; stored position then breaks ties, keeping a message
   // and a round sent in the same second apart. Interrupted executions fold into rounds like any
   // other, so nothing else is re-added.
-  return [...folded, ...standaloneUserMessages(timelineEvents)].sort(
+  return [...folded, ...standaloneUserMessages(timelineEvents), ...custom].sort(
     (left, right) =>
       left.created_at.localeCompare(right.created_at) || position(left.id) - position(right.id)
   );
@@ -128,6 +159,48 @@ const sortedSteps = <E extends AnyTimelineEvent>(events: E[]): ConversationRound
     .sort((a, b) => a.data.sequence - b.data.sequence)
     .map((event) => event.data.step);
 
+/** One execution on a normalized timeline: its own events, and the content events that triggered it. */
+export interface TimelineExecution<E extends AnyTimelineEvent = TimelineEvent> {
+  id: string;
+  /** The content events its events point to through `trigger_event_id`, in timeline order. */
+  triggers: E[];
+  /** Its lifecycle events, in timeline order. */
+  events: E[];
+}
+
+/**
+ * Groups a normalized timeline by execution, in first-seen order. Ownership is resolved through
+ * `execution_id` and `trigger_event_id`, never by parsing ids. Every execution is returned, with
+ * or without a trigger or a terminal; `groupTimelineRounds` is the stricter view.
+ */
+export const groupTimelineExecutions = <E extends AnyTimelineEvent>(
+  timeline: E[]
+): Array<TimelineExecution<E>> => {
+  const { executions, triggersOf } = bucketExecutions(timeline);
+  return Array.from(executions, ([id, execution]) => ({
+    id,
+    triggers: triggersOf(execution),
+    events: execution.events,
+  }));
+};
+
+/**
+ * An execution's steps: its `execution_step` events in sequence order, else the snapshot its
+ * `execution_terminated` carries. Interrupted terminals never carry one.
+ */
+export const executionSteps = <E extends AnyTimelineEvent>(
+  events: E[]
+): ConversationRoundStep[] => {
+  const stepEvents = sortedSteps(events);
+  if (stepEvents.length > 0) {
+    return stepEvents;
+  }
+  const terminal = events.find((event): event is E & ExecutionTerminalEvent =>
+    isExecutionTerminalEvent(event)
+  );
+  return terminal?.type === TimelineEventType.executionTerminated ? terminal.data.steps ?? [] : [];
+};
+
 /**
  * Groups a normalized timeline (see `eventsForContext`) into rounds. Ownership is resolved through
  * `execution_id` and `trigger_event_id`, never by parsing ids. An execution without a triggering
@@ -136,53 +209,27 @@ const sortedSteps = <E extends AnyTimelineEvent>(events: E[]): ConversationRound
 export const groupTimelineRounds = <E extends AnyTimelineEvent>(
   timeline: E[]
 ): Array<TimelineRound<E>> => {
-  const { executions, triggersOf } = bucketExecutions(timeline);
-
   const rounds: Array<TimelineRound<E>> = [];
-  for (const [executionId, execution] of executions) {
-    const triggers = triggersOf(execution);
-    const userMessage = triggers.find((event) => event.type === TimelineEventType.userMessage) as
-      | UserMessageOf<E>
-      | undefined;
+  for (const execution of groupTimelineExecutions(timeline)) {
+    const userMessage = execution.triggers.find(
+      (event) => event.type === TimelineEventType.userMessage
+    ) as UserMessageOf<E> | undefined;
     const terminal = execution.events.find((event): event is E & ExecutionTerminalEvent =>
       isExecutionTerminalEvent(event)
     );
     if (!userMessage || !terminal) {
       continue;
     }
-    const stepEvents = sortedSteps(execution.events);
-    // Only an `execution_terminated` may carry a steps snapshot; interrupted terminals never do.
-    const snapshotSteps =
-      terminal.type === TimelineEventType.executionTerminated ? terminal.data.steps ?? [] : [];
     rounds.push({
-      id: parseExecutionId(executionId)?.roundId ?? executionId,
+      id: parseExecutionId(execution.id)?.roundId ?? execution.id,
       userMessage,
-      steps: stepEvents.length > 0 ? stepEvents : snapshotSteps,
+      steps: executionSteps(execution.events),
       terminal,
       // A trigger precedes its execution on a normalized timeline, so this keeps timeline order.
-      events: [...triggers, ...execution.events],
+      events: [...execution.triggers, ...execution.events],
     });
   }
   return rounds;
-};
-
-/**
- * The timeline minus the events of the given rounds, as a filter over the timeline so stored
- * order — which grouping and compaction rely on — is preserved.
- */
-export const dropTimelineRounds = <E extends AnyTimelineEvent>(
-  timeline: E[],
-  roundIds: ReadonlySet<string>
-): E[] => {
-  if (roundIds.size === 0) {
-    return timeline;
-  }
-  const dropped = new Set<string>(
-    groupTimelineRounds(timeline)
-      .filter((round) => roundIds.has(round.id))
-      .flatMap((round) => round.events.map((event) => event.id))
-  );
-  return timeline.filter((event) => !dropped.has(event.id));
 };
 
 /** True when the round is paused on a prompt (on the folded timeline: its terminal is a pause). */
@@ -217,9 +264,15 @@ export const isTimelineRound = <E extends AnyTimelineEvent>(
   entry: TimelineEntry<E>
 ): entry is TimelineRound<E> => 'terminal' in entry;
 
+/** Narrows an entry to a custom event. */
+export const isTimelineCustomEvent = <E extends AnyTimelineEvent>(
+  entry: TimelineEntry<E>
+): entry is TimelineCustomEvent<E> => 'event' in entry;
+
 export const isTimelineStandaloneUserMessage = <E extends AnyTimelineEvent>(
   entry: TimelineEntry<E>
-): entry is TimelineStandaloneUserMessage<E> => !isTimelineRound(entry);
+): entry is TimelineStandaloneUserMessage<E> =>
+  !isTimelineRound(entry) && !isTimelineCustomEvent(entry);
 
 /** Selects user messages, excluding execution triggers and receipt-time round inputs. */
 export const standaloneUserMessages = <E extends AnyTimelineEvent>(
@@ -235,21 +288,35 @@ export const standaloneUserMessages = <E extends AnyTimelineEvent>(
   );
 };
 
-/** Groups execution history and user messages without fabricating rounds. */
+/** Selects the custom (registered) events of a timeline: everything that is not a built-in event. */
+export const customEvents = <E extends AnyTimelineEvent>(timeline: E[]): Array<CustomEventOf<E>> =>
+  timeline.filter((event): event is CustomEventOf<E> => isCustomConversationEvent(event));
+
+/** The event an entry is ordered by: its triggering message, or the custom event itself. */
+const entryAnchor = <E extends AnyTimelineEvent>(
+  entry: TimelineEntry<E>
+): { id: string; created_at: string } =>
+  isTimelineCustomEvent(entry) ? entry.event : entry.userMessage;
+
+/** Groups execution history, user messages and custom events without fabricating rounds. */
 export const groupTimelineEntries = <E extends AnyTimelineEvent>(
   timeline: E[]
 ): Array<TimelineEntry<E>> => {
   const entries: Array<TimelineEntry<E>> = [
     ...groupTimelineRounds(timeline),
     ...standaloneUserMessages(timeline).map((userMessage) => ({ userMessage })),
+    ...customEvents(timeline).map((event) => ({ event })),
   ];
   const positions = new Map(timeline.map((event, index) => [event.id, index]));
-  // Entries are concatenated by kind, so restore timeline order: by the entry's triggering
-  // message, falling back to its position in `timeline` when two share a timestamp.
-  return entries.sort(
-    (left, right) =>
-      left.userMessage.created_at.localeCompare(right.userMessage.created_at) ||
-      (positions.get(left.userMessage.id) ?? Number.MAX_SAFE_INTEGER) -
-        (positions.get(right.userMessage.id) ?? Number.MAX_SAFE_INTEGER)
-  );
+  // Entries are concatenated by kind, so restore timeline order: by the entry's anchor event,
+  // falling back to its position in `timeline` when two share a timestamp.
+  return entries.sort((left, right) => {
+    const leftAnchor = entryAnchor(left);
+    const rightAnchor = entryAnchor(right);
+    return (
+      leftAnchor.created_at.localeCompare(rightAnchor.created_at) ||
+      (positions.get(leftAnchor.id) ?? Number.MAX_SAFE_INTEGER) -
+        (positions.get(rightAnchor.id) ?? Number.MAX_SAFE_INTEGER)
+    );
+  });
 };

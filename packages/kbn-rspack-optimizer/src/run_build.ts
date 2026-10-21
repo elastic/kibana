@@ -31,6 +31,8 @@ export const IGNORED_WATCH_PATTERNS: RegExp[] = [
   /\.mock\.[jt]sx?$/,
   /[\\/]__(?:mocks|snapshots|fixtures|jest)__[\\/]/,
   /[\\/]jest(?:\.integration)?\.config\.[jt]s$/,
+  // Scout specs, fixtures, page objects, and configs are outside the browser bundle.
+  /[\\/]test[\\/]scout(?:_[^\\/]+)?(?:[\\/]|$)/,
   // Scout/Playwright output (test artifacts, reports, server configs) written
   // into plugin dirs during test runs; must not trigger watch rebuilds.
   /[\\/]\.scout[\\/]/,
@@ -44,6 +46,8 @@ export interface BuildOptions {
   cache?: boolean;
   examples?: boolean;
   testPlugins?: boolean;
+  /** Include `devOnly` plugins */
+  devOnly?: boolean;
   /** Explicit plugin paths passed via --plugin-path */
   pluginPaths?: string[];
   /** Directories scanned for plugins */
@@ -99,6 +103,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
     cache = true,
     examples = false,
     testPlugins = false,
+    devOnly = false,
     pluginPaths,
     pluginScanDirs,
     allowlistPluginGroups,
@@ -139,6 +144,7 @@ export async function runBuild(options: BuildOptions): Promise<BuildResult> {
       cache,
       examples,
       testPlugins,
+      devOnly,
       pluginPaths,
       pluginScanDirs,
       allowlistPluginGroups,

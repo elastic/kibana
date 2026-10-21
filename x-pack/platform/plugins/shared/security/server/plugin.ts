@@ -19,6 +19,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { CoreSecurityDelegateServiceAccounts } from '@kbn/core-security-server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type {
   EncryptedSavedObjectsPluginSetup,
@@ -168,6 +169,14 @@ export class SecurityPlugin
 
   private readonly serviceAccountsService: ServiceAccountsService;
   private serviceAccountsStart?: ServiceAccountsServiceStart | null;
+  /** What Core knows about workload types, handed back when the security delegate registers. */
+  private workloadTypes?: CoreSecurityDelegateServiceAccounts;
+  private readonly getWorkloadTypes = () => {
+    if (!this.workloadTypes) {
+      throw new Error(`workloadTypes is not registered!`);
+    }
+    return this.workloadTypes;
+  };
   private canEncryptSavedObjects = false;
   /**
    * Returns the service account management API, or `null` when service accounts are
@@ -347,6 +356,8 @@ export class SecurityPlugin
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request),
       getSID: (request) => this.getSession().getSID(request),
       getCurrentUser,
+      getFakeRequestPrincipal: (request) =>
+        this.serviceAccountsStart?.backend.getFakeRequestPrincipal(request) ?? null,
       recordAuditLoggingUsage: () => this.getFeatureUsageService().recordAuditLoggingUsage(),
     });
 
@@ -404,7 +415,7 @@ export class SecurityPlugin
 
     this.registerDeprecations(core, license);
 
-    core.security.registerSecurityDelegate(
+    ({ serviceAccounts: this.workloadTypes } = core.security.registerSecurityDelegate(
       buildSecurityApi({
         getAuthc: this.getAuthentication.bind(this),
         getSession: this.getSession,
@@ -413,7 +424,7 @@ export class SecurityPlugin
         config,
         logger: this.logger,
       })
-    );
+    ));
     core.userProfile.registerUserProfileDelegate(
       buildUserProfileApi({
         getUserProfile: this.getUserProfileService.bind(this),
@@ -454,6 +465,7 @@ export class SecurityPlugin
       authz: {
         actions: this.authorizationSetup.actions,
         checkPrivilegesWithRequest: this.authorizationSetup.checkPrivilegesWithRequest,
+        checkUserProfilesPrivileges: this.authorizationSetup.checkUserProfilesPrivileges,
         checkPrivilegesDynamicallyWithRequest:
           this.authorizationSetup.checkPrivilegesDynamicallyWithRequest,
         checkSavedObjectsPrivilegesWithRequest:
@@ -553,6 +565,7 @@ export class SecurityPlugin
       license: this.securityLicense!,
       uiam,
       checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
+      audit: this.auditSetup!,
       cloudProjectContext: this.cloudProjectContext,
       clusterClient,
       savedObjects: core.savedObjects,
@@ -562,6 +575,7 @@ export class SecurityPlugin
       getCurrentUserProfileId: (request) =>
         this.getUserProfileService().getCurrentProfileId({ request }),
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
+      workloadTypes: this.getWorkloadTypes(),
     });
 
     this.authorizationService.start({
@@ -588,6 +602,7 @@ export class SecurityPlugin
       authz: {
         actions: this.authorizationSetup!.actions,
         checkPrivilegesWithRequest: this.authorizationSetup!.checkPrivilegesWithRequest,
+        checkUserProfilesPrivileges: this.authorizationSetup!.checkUserProfilesPrivileges,
         checkPrivilegesDynamicallyWithRequest:
           this.authorizationSetup!.checkPrivilegesDynamicallyWithRequest,
         checkSavedObjectsPrivilegesWithRequest:

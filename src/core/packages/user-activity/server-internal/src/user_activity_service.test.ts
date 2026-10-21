@@ -8,12 +8,21 @@
  */
 
 import { setTimeout as timer } from 'timers/promises';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { ObjectToConfigAdapter } from '@kbn/config';
+import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { loggingSystemMock, loggingServiceMock } from '@kbn/core-logging-server-mocks';
+import type { OtelAppenderPluginConfig, PluginAppenderConfigType } from '@kbn/core-logging-server';
 import type { InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
+import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
 import type { TrackUserActionParams, UserActivityActionId } from '@kbn/core-user-activity-server';
 import { UserActivityService } from './user_activity_service';
+import {
+  applyUserActivityOtelFieldMap,
+  USER_ACTIVITY_OTEL_PROMOTE_RESOURCE_ATTRIBUTES,
+} from './user_activity_otel_transform';
 import type { InternalUserActivityServiceSetup } from './types';
 
 const TEST_ACTION = 'create_alerting_rule' as UserActivityActionId;
@@ -57,6 +66,93 @@ describe('UserActivityService', () => {
     });
   });
 
+  describe('OTel appender shaping', () => {
+    const otelAppender: PluginAppenderConfigType = {
+      type: 'otel',
+      protocol: 'http',
+      url: 'http://collector:4318/v1/logs',
+    };
+    const configWithOtel = {
+      ...defaultConfig,
+      appenders: new Map<string, PluginAppenderConfigType>([
+        ['console_appender', { type: 'console', layout: { type: 'json' } }],
+        [
+          'file_appender',
+          { type: 'file', fileName: 'easy_to_find.jsonl', layout: { type: 'json' } },
+        ],
+        ['otel_appender', otelAppender],
+      ]),
+    };
+
+    const setupWithFlavor = (serverless: boolean, cloudId?: string) => {
+      const coreContext = mockCoreContext.create({
+        env: createTestEnv({ envOptions: getEnvOptions({ cliArgs: { serverless } }) }),
+      });
+      coreContext.configService.atPath.mockReturnValue(new BehaviorSubject(configWithOtel));
+      coreContext.configService.getConfig$.mockReturnValue(
+        new BehaviorSubject(
+          new ObjectToConfigAdapter(cloudId ? { xpack: { cloud: { id: cloudId } } } : {})
+        )
+      );
+      new UserActivityService(coreContext).setup({ logging: loggingService });
+      const [, config$] = loggingService.configure.mock.calls[0];
+      return firstValueFrom(config$);
+    };
+
+    it('extends the otel appender with the user activity transforms when serverless', async () => {
+      const { appenders } = await setupWithFlavor(true);
+      const appendersMap = appenders as Map<string, PluginAppenderConfigType>;
+      const shaped = appendersMap.get('otel_appender') as OtelAppenderPluginConfig;
+
+      expect(shaped.transformAttributes).toBe(applyUserActivityOtelFieldMap);
+      expect(shaped.includeResources).toEqual(['service.name', 'service.type']);
+      expect(shaped.promoteResourceAttributes).toEqual(
+        USER_ACTIVITY_OTEL_PROMOTE_RESOURCE_ATTRIBUTES
+      );
+      expect(shaped.attributes).toEqual({
+        'service.name': 'serverless-kibana',
+        'service.type': 'kibana',
+      });
+    });
+
+    it('extends the otel appender with the user activity transforms when not serverless', async () => {
+      const { appenders } = await setupWithFlavor(false);
+      const appendersMap = appenders as Map<string, PluginAppenderConfigType>;
+      const shaped = appendersMap.get('otel_appender') as OtelAppenderPluginConfig;
+
+      expect(shaped.transformAttributes).toBe(applyUserActivityOtelFieldMap);
+      expect(shaped.includeResources).toEqual(['service.name', 'service.type']);
+      expect(shaped.promoteResourceAttributes).toEqual(
+        USER_ACTIVITY_OTEL_PROMOTE_RESOURCE_ATTRIBUTES
+      );
+      expect(shaped.attributes).toEqual({
+        'service.name': 'self-managed-kibana',
+        'service.type': 'kibana',
+      });
+    });
+
+    it('sets service.name to hosted-kibana when xpack.cloud.id is configured', async () => {
+      const { appenders } = await setupWithFlavor(false, 'my-cloud-id');
+      const appendersMap = appenders as Map<string, PluginAppenderConfigType>;
+      const shaped = appendersMap.get('otel_appender') as OtelAppenderPluginConfig;
+
+      expect(shaped.attributes).toEqual({
+        'service.name': 'hosted-kibana',
+        'service.type': 'kibana',
+      });
+    });
+
+    it('leaves non-otel appenders untouched', async () => {
+      const { appenders } = await setupWithFlavor(true);
+      const appendersMap = appenders as Map<string, PluginAppenderConfigType>;
+
+      expect(appendersMap.get('console_appender')).toBe(
+        configWithOtel.appenders.get('console_appender')
+      );
+      expect(appendersMap.get('file_appender')).toBe(configWithOtel.appenders.get('file_appender'));
+    });
+  });
+
   describe('trackUserAction', () => {
     beforeEach(() => {
       service = new UserActivityService(core).setup({ logging: loggingService });
@@ -75,10 +171,24 @@ describe('UserActivityService', () => {
           {
             message: 'Custom message for action',
             event: { action: TEST_ACTION, type: ['change'], outcome: 'unknown' },
-            object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] },
+            kibana: { object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] } },
           },
         ],
       ]);
+    });
+
+    it('does not log the object at the top level', () => {
+      service.trackUserAction({
+        message: 'Custom message for action',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] },
+      });
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls[0][1]).not.toHaveProperty('object');
+      expect(logCalls[0][1]).toMatchObject({
+        kibana: { object: { id: 'obj-1', name: 'Test Object', type: 'rule', tags: ['tag1'] } },
+      });
     });
 
     it('defaults event.outcome to unknown when not provided', () => {
@@ -93,7 +203,7 @@ describe('UserActivityService', () => {
       });
     });
 
-    it('logs optional event timing fields and metadata', () => {
+    it('logs optional event timing fields and caller-provided kibana metadata buckets', () => {
       const params: TrackUserActionParams = {
         message: 'Action with metadata',
         event: {
@@ -103,22 +213,27 @@ describe('UserActivityService', () => {
           end: '2026-01-01T00:00:00.250Z',
           duration: 250000000,
         },
-        object: { id: 'obj-meta', name: 'Object', type: 'rule', tags: [] },
-        metadata: {
-          field1: 'val1',
-          field2: 'val2',
-          num1: 1,
+        object: { id: 'obj-meta', name: 'Object', type: 'dashboard', tags: [] },
+        kibana: {
+          dashboard: {
+            field1: 'val1',
+            field2: 'val2',
+            num1: 1,
+          },
         },
       };
 
       service.trackUserAction(params);
 
+      const { object, kibana, ...paramsWithoutObjectAndKibana } = params;
       const logCalls = loggingSystemMock.collect(core.logger).info;
       expect(logCalls).toHaveLength(1);
       expect(logCalls[0][0]).toBe('Action with metadata');
       expect(logCalls[0][1]).toMatchObject({
-        ...params,
+        ...paramsWithoutObjectAndKibana,
+        kibana: { object, ...kibana },
       });
+      expect(logCalls[0][1]).not.toHaveProperty('metadata');
     });
 
     it('logs optional event.outcome on the event object', () => {
@@ -162,7 +277,7 @@ describe('UserActivityService', () => {
         message: 'Merged payload',
         event: { action: TEST_ACTION, type: ['change'], outcome: 'success' },
         object: { id: 'obj-m', name: 'Obj', type: 'dashboard', tags: ['t1'] },
-        metadata: { attempt: 1 },
+        kibana: { dashboard: { attempt: 1 } },
         error: { message: 'ignored downstream' },
       };
 
@@ -171,10 +286,13 @@ describe('UserActivityService', () => {
       expect(loggingSystemMock.collect(core.logger).info[0][1]).toMatchObject({
         message: 'Merged payload',
         event: { action: TEST_ACTION, type: ['change'], outcome: 'success' },
-        object: { id: 'obj-m', name: 'Obj', type: 'dashboard', tags: ['t1'] },
-        metadata: { attempt: 1 },
+        kibana: {
+          object: { id: 'obj-m', name: 'Obj', type: 'dashboard', tags: ['t1'] },
+          dashboard: { attempt: 1 },
+        },
         error: { message: 'ignored downstream' },
       });
+      expect(loggingSystemMock.collect(core.logger).info[0][1]).not.toHaveProperty('metadata');
     });
 
     it('generates default message when not provided', () => {
@@ -219,7 +337,11 @@ describe('UserActivityService', () => {
           email: 'jesuswr@test.com',
           roles: ['superuser', 'normaluser', 'magicknight'],
         },
-        kibana: { space: { id: 'default' }, session: { id: 'session-456' } },
+        kibana: {
+          space: { id: 'default' },
+          session: { id: 'session-456' },
+          object: { id: 'obj-3', name: 'Object', type: 'visualization', tags: [] },
+        },
       });
     });
 
@@ -380,6 +502,93 @@ describe('UserActivityService', () => {
       });
 
       expect(loggingSystemMock.collect(coreWithFilters.logger).info).toHaveLength(0);
+    });
+  });
+
+  describe('kibana.saved_object', () => {
+    beforeEach(() => {
+      service = new UserActivityService(core).setup({ logging: loggingService });
+    });
+
+    const createStartedService = (registeredTypeNames: string[]) => {
+      const userActivityService = new UserActivityService(core);
+      userActivityService.setup({ logging: loggingService });
+      const typeRegistry = typeRegistryMock.create();
+      typeRegistry.getAllTypes.mockReturnValue(
+        registeredTypeNames.map((name) => ({ name } as SavedObjectsType))
+      );
+      return userActivityService.start({ typeRegistry });
+    };
+
+    it('emits kibana.saved_object when object.type is a registered saved object type', () => {
+      const startedService = createStartedService(['dashboard', 'index-pattern']);
+
+      startedService.trackUserAction({
+        message: 'Test',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'dash-1', name: 'My Dashboard', type: 'dashboard', tags: [] },
+      });
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls[0][1]).toMatchObject({
+        kibana: {
+          object: { id: 'dash-1', name: 'My Dashboard', type: 'dashboard', tags: [] },
+          saved_object: { type: 'dashboard', id: 'dash-1' },
+        },
+      });
+    });
+
+    it('omits kibana.saved_object when object.type is not a registered saved object type', () => {
+      const startedService = createStartedService(['dashboard']);
+
+      startedService.trackUserAction({
+        message: 'Test',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'rule-1', name: 'My Rule', type: 'rule', tags: [] },
+      });
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls[0][1]).toMatchObject({
+        kibana: { object: { id: 'rule-1', name: 'My Rule', type: 'rule', tags: [] } },
+      });
+      expect(logCalls[0][1]).not.toHaveProperty('kibana.saved_object');
+    });
+
+    it('omits kibana.saved_object when the type registry is not available yet', () => {
+      // `service` only went through setup, so the registry has not been read.
+      service.trackUserAction({
+        message: 'Test',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'dash-1', name: 'My Dashboard', type: 'dashboard', tags: [] },
+      });
+
+      const logCalls = loggingSystemMock.collect(core.logger).info;
+      expect(logCalls[0][1]).toMatchObject({
+        kibana: { object: { id: 'dash-1', name: 'My Dashboard', type: 'dashboard', tags: [] } },
+      });
+      expect(logCalls[0][1]).not.toHaveProperty('kibana.saved_object');
+    });
+
+    it('reads the type registry only once at start', () => {
+      const userActivityService = new UserActivityService(core);
+      const setupContract = userActivityService.setup({ logging: loggingService });
+      const typeRegistry = typeRegistryMock.create();
+      typeRegistry.getAllTypes.mockReturnValue([{ name: 'dashboard' } as SavedObjectsType]);
+      userActivityService.start({ typeRegistry });
+
+      setupContract.trackUserAction({
+        message: 'First',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'dash-1', name: 'Dash', type: 'dashboard', tags: [] },
+      });
+      setupContract.trackUserAction({
+        message: 'Second',
+        event: { action: TEST_ACTION, type: ['change'] },
+        object: { id: 'dash-2', name: 'Dash', type: 'dashboard', tags: [] },
+      });
+
+      expect(typeRegistry.getAllTypes).toHaveBeenCalledTimes(1);
+      expect(loggingSystemMock.collect(core.logger).info).toHaveLength(2);
     });
   });
 

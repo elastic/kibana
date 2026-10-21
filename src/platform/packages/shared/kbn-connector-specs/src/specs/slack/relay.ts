@@ -13,6 +13,7 @@ import type {
   SlackListChannelsInput,
   SlackResolveChannelIdInput,
   SlackSendMessageInput,
+  SlackUpdateMessageInput,
 } from './types';
 
 const getRelaySupportedActions = () => Object.keys(slackRelay.actions);
@@ -26,8 +27,16 @@ const RELAY_CHANNEL_SOURCE = 'relay-bindings' as const;
 const createChannelNotConnectedError = (channel: string): Error =>
   new Error(`Channel ${channel} is not connected. Connect it in the Elastic Slack app settings.`);
 
+export type SlackRelayClient = Omit<RelayActionClient, 'trigger'> & {
+  trigger(
+    input: Parameters<RelayActionClient['trigger']>[0] & {
+      blocks?: Array<Record<string, unknown>>;
+    }
+  ): ReturnType<RelayActionClient['trigger']>;
+};
+
 export interface SlackRelayConnection {
-  client: RelayActionClient;
+  client: SlackRelayClient;
   tenantKey: string;
 }
 
@@ -90,7 +99,7 @@ export async function relaySendMessage(
   connection: SlackRelayConnection,
   ctx: ActionContext,
   input: SlackSendMessageInput
-): Promise<{ ok: true; channel: string; ts: string }> {
+): Promise<{ ok: true; channel: string; ts: string; externalConversationId?: string }> {
   if (input.unfurlLinks !== undefined || input.unfurlMedia !== undefined) {
     ctx.log.debug(
       'Slack sendMessage: unfurl options are not supported through the Elastic Slack app and were ignored'
@@ -105,16 +114,55 @@ export async function relaySendMessage(
   ctx.log.debug(`Slack sendMessage request through relay: channel=${channel}`);
 
   try {
+    const {
+      ref,
+      channel: resolvedChannel,
+      externalConversationId,
+    } = await connection.client.trigger({
+      tenantKey: connection.tenantKey,
+      channel,
+      message: input.text,
+      ...(input.blocks?.length ? { blocks: input.blocks } : {}),
+      ...(input.threadTs ? { threadTs: input.threadTs } : {}),
+    });
+
+    return {
+      ok: true,
+      channel: resolvedChannel,
+      ts: ref,
+      ...(externalConversationId ? { externalConversationId } : {}),
+    };
+  } catch (error) {
+    ctx.log.error(`Slack sendMessage through relay failed: ${(error as Error).message}`);
+    throw toUserFacingError(error, channel);
+  }
+}
+
+/** Edits a message this app posted through the Relay, returning its timestamp as `ts`. */
+export async function relayUpdateMessage(
+  connection: SlackRelayConnection,
+  ctx: ActionContext,
+  input: SlackUpdateMessageInput
+): Promise<{ ok: true; channel: string; ts: string }> {
+  const channel = input.channel.trim();
+  if (channel.length === 0 || channel === '#') {
+    throw new Error('Channel is required.');
+  }
+
+  ctx.log.debug(`Slack updateMessage request through relay: channel=${channel}`);
+
+  try {
     const { ref, channel: resolvedChannel } = await connection.client.trigger({
       tenantKey: connection.tenantKey,
       channel,
       message: input.text,
-      ...(input.threadTs ? { threadTs: input.threadTs } : {}),
+      ...(input.blocks?.length ? { blocks: input.blocks } : {}),
+      messageTs: input.messageTs,
     });
 
     return { ok: true, channel: resolvedChannel, ts: ref };
   } catch (error) {
-    ctx.log.error(`Slack sendMessage through relay failed: ${(error as Error).message}`);
+    ctx.log.error(`Slack updateMessage through relay failed: ${(error as Error).message}`);
     throw toUserFacingError(error, channel);
   }
 }
@@ -273,6 +321,7 @@ export const slackRelay = {
   test: relayTest,
   actions: {
     sendMessage: relaySendMessage,
+    updateMessage: relayUpdateMessage,
     listChannels: relayListChannels,
     resolveChannelId: relayResolveChannelId,
   },
