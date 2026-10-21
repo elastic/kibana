@@ -164,11 +164,14 @@ export { LookbackWindow } from './form/fields/lookback_window';
 export {
   QueryPipelineExplainer,
   AssembledQueriesControl,
+  HighlightedEsqlBlock,
   buildPipelineSteps,
   isComplexEsql,
   DEMO_QUERY,
   DEMO_RECOVERY,
   DEMO_NO_DATA,
+  DEMO_BASE_QUERY,
+  DEMO_SHAPE_HIGHLIGHT_SEGMENT,
 } from './query_pipeline_explainer';
 export type {
   QueryPipelineExplainerProps,

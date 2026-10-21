@@ -8,6 +8,7 @@
 export { QueryPipelineExplainer } from './query_pipeline_explainer';
 export type { QueryPipelineExplainerProps } from './query_pipeline_explainer';
 export { AssembledQueriesControl } from './assembled_queries_control';
+export { HighlightedEsqlBlock } from './highlighted_esql_block';
 export {
   buildPipelineSteps,
   isComplexEsql,
@@ -24,4 +25,5 @@ export {
   DEMO_BASE_QUERY,
   DEMO_BREACH_SEGMENT,
   DEMO_RECOVERY_SEGMENT,
+  DEMO_SHAPE_HIGHLIGHT_SEGMENT,
 } from './demo_queries';

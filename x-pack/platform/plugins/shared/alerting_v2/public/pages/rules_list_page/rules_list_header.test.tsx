@@ -6,13 +6,21 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
+import { APP_MENU_TEST_SUBJECTS } from '@kbn/ui-app-menu';
 import { triggersActionsRoute } from '@kbn/rule-data-utils';
 import { ALERTING_V2_RULES_BASE_PATH } from '@kbn/alerting-v2-constants';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { TabsProvider } from '../../application/tabs_context';
 import { RulesListHeader } from './rules_list_header';
+
+/** Get started is forced into the More (overflow) menu. */
+const openGetStartedFromHeaderMenu = async () => {
+  await screen.findByTestId('createRuleButton');
+  fireEvent.click(await screen.findByTestId(APP_MENU_TEST_SUBJECTS.overflowButton));
+  return screen.findByTestId('rulesListHeaderGetStartedButton');
+};
 
 let mockPhase: 'initialLoad' | 'empty' | 'populated' | 'filtering' | 'filtered' = 'populated';
 let mockCanReadV1Rules = true;
@@ -53,11 +61,17 @@ jest.mock('@kbn/core-di-browser', () => {
 });
 
 const onCreateRule = jest.fn();
+const onHelpMeOnboard = jest.fn();
 
 const renderHeader = (props?: Partial<React.ComponentProps<typeof RulesListHeader>>) =>
   render(
     <ListPageTestProviders>
-      <RulesListHeader canWrite={true} onCreateRule={onCreateRule} {...props} />
+      <RulesListHeader
+        canWrite={true}
+        onCreateRule={onCreateRule}
+        onHelpMeOnboard={onHelpMeOnboard}
+        {...props}
+      />
     </ListPageTestProviders>
   );
 
@@ -121,6 +135,22 @@ describe('RulesListHeader', () => {
     expect(screen.queryByRole('tab')).not.toBeInTheDocument();
   });
 
+  it('renders Get started under the More menu next to Create rule', async () => {
+    renderHeader();
+
+    expect(screen.queryByTestId('rulesListHeaderGetStartedButton')).not.toBeInTheDocument();
+    expect(await openGetStartedFromHeaderMenu()).toHaveTextContent('Get started');
+    expect(screen.getByTestId('createRuleButton')).toBeInTheDocument();
+  });
+
+  it('calls onHelpMeOnboard when Get started is clicked', async () => {
+    renderHeader();
+
+    fireEvent.click(await openGetStartedFromHeaderMenu());
+
+    expect(onHelpMeOnboard).toHaveBeenCalledTimes(1);
+  });
+
   it('renders the tabs even in the true empty state, unlike the create menu', () => {
     mockPhase = 'empty';
     renderHeader();
@@ -128,6 +158,7 @@ describe('RulesListHeader', () => {
     expect(screen.getByTestId('v1RulesTab')).toBeInTheDocument();
     expect(screen.getByTestId('v2RulesTab')).toBeInTheDocument();
     expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('rulesListHeaderGetStartedButton')).not.toBeInTheDocument();
   });
 
   it('renders host-provided tabs instead of management hrefs', async () => {
@@ -151,7 +182,11 @@ describe('RulesListHeader', () => {
     render(
       <ListPageTestProviders>
         <TabsProvider tabs={hostTabs}>
-          <RulesListHeader canWrite={true} onCreateRule={onCreateRule} />
+          <RulesListHeader
+            canWrite={true}
+            onCreateRule={onCreateRule}
+            onHelpMeOnboard={onHelpMeOnboard}
+          />
         </TabsProvider>
       </ListPageTestProviders>
     );

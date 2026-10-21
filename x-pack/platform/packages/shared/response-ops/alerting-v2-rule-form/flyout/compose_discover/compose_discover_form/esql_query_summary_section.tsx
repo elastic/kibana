@@ -6,12 +6,11 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { RuleKind, RuleQuery } from '../../../form/types';
 import { getBreachQuery } from '../../../form/utils/query_helpers';
-import { AssembledQueriesControl } from '../../../query_pipeline_explainer';
 import { QueryBlock, QuerySummary } from '../query_summary';
 
 export type EsqlSummaryState =
@@ -216,23 +215,16 @@ export const EsqlQuerySummarySection: React.FC<EsqlQuerySummarySectionProps> = (
       )}
 
       <EuiSpacer size="s" />
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            color="text"
-            iconType={isEditCta ? 'pencil' : 'plusCircle'}
-            isDisabled={isEditorOpen}
-            onClick={onOpenEditor}
-            data-test-subj="esqlSummaryOpenEditor"
-          >
-            {ctaLabel}
-          </EuiButton>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <AssembledQueriesControl />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      <EuiButton
+        size="s"
+        color="text"
+        iconType={isEditCta ? 'pencil' : 'plusCircle'}
+        isDisabled={isEditorOpen}
+        onClick={onOpenEditor}
+        data-test-subj="esqlSummaryOpenEditor"
+      >
+        {ctaLabel}
+      </EuiButton>
     </div>
   );
 };

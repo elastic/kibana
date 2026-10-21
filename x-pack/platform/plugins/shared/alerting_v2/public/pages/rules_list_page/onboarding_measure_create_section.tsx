@@ -28,71 +28,183 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { AiButton } from '@kbn/ui-ai-components';
+import { SvgAiGradientDefs, useSvgAiGradient } from '@kbn/ui-ai-components';
 import { experimentalBadgeLabel } from '../../components/experimental_badge';
 import { SparklesIcon } from './sparkles_icon';
 
-const measureSearchStyles = {
-  /** Matches Discover "Query with AI" sparkle twinkle on hover/focus. */
-  aiButtonSparkleHover: ({ euiTheme }: UseEuiTheme) =>
-    euiTheme
-      ? css`
-          overflow: visible;
+/** Matches Discover QuickSearchVisor mode toggle (magnify + sparkles). */
+const measureModeToggleStyles = ({ euiTheme }: UseEuiTheme) => ({
+  modeToggle: css`
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    flex-shrink: 0;
+    box-sizing: border-box;
+    gap: ${euiTheme.size.xs};
+    block-size: ${euiTheme.size.xl};
+    max-block-size: ${euiTheme.size.xl};
+    padding: ${euiTheme.size.xs};
+    border-radius: ${euiTheme.border.radius.control};
 
-          &::after {
-            content: none;
-          }
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: ${euiTheme.border.width.thin} solid ${euiTheme.components.forms.border};
+      border-radius: inherit;
+      pointer-events: none;
+    }
 
-          @keyframes onboardingMeasureSparkleTwinkle {
-            0%,
-            100% {
-              opacity: 1;
-              transform: scale(1);
-            }
-            50% {
-              opacity: 0.45;
-              transform: scale(0.85);
-            }
-          }
+    .euiButtonIcon {
+      border-radius: calc(${euiTheme.border.radius.control} - ${euiTheme.size.xxs});
+    }
+  `,
+  modeIconButton: css`
+    &.euiButtonIcon {
+      inline-size: ${euiTheme.size.l};
+      block-size: ${euiTheme.size.l};
+      border-radius: calc(${euiTheme.border.radius.control} - ${euiTheme.size.xxs});
+      background-color: transparent;
 
-          ${euiCanAnimate} {
-            &:hover svg path,
-            &:focus-visible svg path {
-              transform-box: fill-box;
-              transform-origin: center;
-              animation-name: onboardingMeasureSparkleTwinkle;
-              animation-duration: calc(${euiTheme.animation.extraSlow} * 2);
-              animation-timing-function: ease-in-out;
-              animation-iteration-count: infinite;
-            }
+      &:hover,
+      &:focus,
+      &:focus-visible {
+        background-color: ${euiTheme.components.buttons.backgroundEmptyTextHover};
+      }
+    }
+  `,
+  modeIconButtonActive: css`
+    &.euiButtonIcon,
+    &.euiButtonIcon:hover,
+    &.euiButtonIcon:focus,
+    &.euiButtonIcon:focus-visible {
+      background-color: ${euiTheme.colors.backgroundLightText};
+    }
+  `,
+  aiButtonSparkleHover: css`
+    overflow: visible;
+    box-sizing: border-box;
+    block-size: ${euiTheme.size.l};
+    max-block-size: ${euiTheme.size.l};
 
-            &:hover svg path:nth-of-type(2),
-            &:focus-visible svg path:nth-of-type(2) {
-              animation-delay: ${euiTheme.animation.slow};
-            }
+    &::after {
+      content: none;
+    }
 
-            &:hover svg path:nth-of-type(3),
-            &:focus-visible svg path:nth-of-type(3) {
-              animation-delay: ${euiTheme.animation.extraSlow};
-            }
-          }
-        `
-      : // required for unit tests to pass
-        undefined,
-  aiButtonSelected: ({ euiTheme }: UseEuiTheme) =>
-    euiTheme
-      ? css`
-          background: linear-gradient(
-            180deg,
-            ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
-            ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
-          ) !important;
-        `
-      : // required for unit tests to pass
-        undefined,
+    @keyframes onboardingMeasureSparkleTwinkle {
+      0%,
+      100% {
+        opacity: 1;
+        transform: scale(1);
+      }
+      50% {
+        opacity: 0.45;
+        transform: scale(0.85);
+      }
+    }
+
+    ${euiCanAnimate} {
+      &:hover svg path,
+      &:focus-visible svg path {
+        transform-box: fill-box;
+        transform-origin: center;
+        animation-name: onboardingMeasureSparkleTwinkle;
+        animation-duration: calc(${euiTheme.animation.extraSlow} * 2);
+        animation-timing-function: ease-in-out;
+        animation-iteration-count: infinite;
+      }
+
+      &:hover svg path:nth-of-type(2),
+      &:focus-visible svg path:nth-of-type(2) {
+        animation-delay: ${euiTheme.animation.slow};
+      }
+
+      &:hover svg path:nth-of-type(3),
+      &:focus-visible svg path:nth-of-type(3) {
+        animation-delay: ${euiTheme.animation.extraSlow};
+      }
+    }
+  `,
+  aiButtonSelected: css`
+    background: linear-gradient(
+      180deg,
+      ${euiTheme.components.buttons.backgroundPrimaryHover} 18%,
+      ${euiTheme.components.buttons.backgroundAssistanceHover} 83%
+    ) !important;
+  `,
+});
+
+const SEARCH_MODE_LABEL = i18n.translate('xpack.alertingV2.onboardingMeasure.searchModeLabel', {
+  defaultMessage: 'Search suggestions',
+});
+
+const AI_MODE_LABEL = i18n.translate('xpack.alertingV2.onboardingMeasure.aiModeTooltip', {
+  defaultMessage: 'Describe a rule in natural language with the AI agent',
+});
+
+const MODE_TOGGLE_LEGEND = i18n.translate('xpack.alertingV2.onboardingMeasure.modeToggleLegend', {
+  defaultMessage: 'Switch between search and AI',
+});
+
+const MeasureModeToggle = ({
+  isAiMode,
+  onModeChange,
+}: {
+  isAiMode: boolean;
+  onModeChange: (nextIsAiMode: boolean) => void;
+}): JSX.Element => {
+  const euiThemeContext = useEuiTheme();
+  const styles = useMemo(() => measureModeToggleStyles(euiThemeContext), [euiThemeContext]);
+  const { gradientId, iconGradientCss, colors } = useSvgAiGradient({ variant: 'outlined' });
+
+  return (
+    <div
+      role="group"
+      aria-label={MODE_TOGGLE_LEGEND}
+      css={styles.modeToggle}
+      data-test-subj="onboardingMeasureModeToggle"
+    >
+      <EuiToolTip content={SEARCH_MODE_LABEL} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType="magnify"
+          size="xs"
+          iconSize="m"
+          color="text"
+          display="empty"
+          aria-label={SEARCH_MODE_LABEL}
+          aria-pressed={!isAiMode}
+          isSelected={!isAiMode}
+          onClick={() => onModeChange(false)}
+          data-test-subj="onboardingMeasureSearchMode"
+          css={[styles.modeIconButton, !isAiMode && styles.modeIconButtonActive]}
+        />
+      </EuiToolTip>
+      {isAiMode ? <SvgAiGradientDefs gradientId={gradientId} colors={colors} /> : null}
+      <EuiToolTip content={AI_MODE_LABEL} disableScreenReaderOutput>
+        <EuiButtonIcon
+          iconType={SparklesIcon}
+          size="xs"
+          iconSize="m"
+          color="text"
+          display="empty"
+          aria-label={AI_MODE_LABEL}
+          aria-pressed={isAiMode}
+          isSelected={isAiMode}
+          onClick={() => onModeChange(true)}
+          data-test-subj="onboardingMeasureAiMode"
+          css={[
+            styles.modeIconButton,
+            isAiMode && styles.aiButtonSparkleHover,
+            isAiMode && styles.aiButtonSelected,
+            isAiMode && iconGradientCss,
+          ]}
+        />
+      </EuiToolTip>
+    </div>
+  );
 };
 
-type DataDomain = 'infra' | 'apm' | 'logs' | 'synthetics' | 'slo' | 'custom' | 'specific';
+type DataDomain = 'infra' | 'apm' | 'ml' | 'logs' | 'synthetics' | 'slo' | 'custom' | 'specific';
 type CreatePath = 'threshold' | 'esql';
 
 const DEFAULT_CREATE_PATHS: CreatePath[] = ['threshold', 'esql'];
@@ -141,10 +253,28 @@ const DATA_DOMAIN_OPTIONS: DataDomainOption[] = [
     classicSearch: 'APM',
     createPaths: [],
     hint: i18n.translate('xpack.alertingV2.onboardingMeasure.domainApmHint', {
-      defaultMessage: 'APM and ML rules are only supported in Classic alerting.',
+      defaultMessage: 'APM rules are only supported in Classic alerting.',
     }),
     examplePrompt: i18n.translate('xpack.alertingV2.onboardingMeasure.domainApmExample', {
       defaultMessage: 'APM',
+    }),
+  },
+  {
+    id: 'ml',
+    label: i18n.translate('xpack.alertingV2.onboardingMeasure.domainMl', {
+      defaultMessage: 'Machine Learning',
+    }),
+    description: i18n.translate('xpack.alertingV2.onboardingMeasure.domainMlDescription', {
+      defaultMessage: 'Anomaly detection jobs and ML-based alerts',
+    }),
+    prefersClassic: true,
+    classicSearch: 'Anomaly',
+    createPaths: [],
+    hint: i18n.translate('xpack.alertingV2.onboardingMeasure.domainMlHint', {
+      defaultMessage: 'Anomaly detection and ML rules are only supported in Classic alerting.',
+    }),
+    examplePrompt: i18n.translate('xpack.alertingV2.onboardingMeasure.domainMlExample', {
+      defaultMessage: 'Anomaly',
     }),
   },
   {
@@ -153,7 +283,7 @@ const DATA_DOMAIN_OPTIONS: DataDomainOption[] = [
       defaultMessage: 'Logs',
     }),
     description: i18n.translate('xpack.alertingV2.onboardingMeasure.domainLogsDescription', {
-      defaultMessage: 'Error counts, patterns, or anomalies in log data',
+      defaultMessage: 'Error counts, patterns, or spikes in log data',
     }),
     createPaths: ['threshold', 'esql'],
     hint: i18n.translate('xpack.alertingV2.onboardingMeasure.domainLogsHint', {
@@ -161,7 +291,7 @@ const DATA_DOMAIN_OPTIONS: DataDomainOption[] = [
         'Use Threshold for counts, ES|QL for custom queries, or AI mode to describe what you want.',
     }),
     examplePrompt: i18n.translate('xpack.alertingV2.onboardingMeasure.domainLogsExample', {
-      defaultMessage: 'Error counts, patterns, or anomalies in log data',
+      defaultMessage: 'Error counts, patterns, or spikes in log data',
     }),
   },
   {
@@ -237,8 +367,8 @@ const inferDataDomain = (text: string): DataDomain | null => {
   if (/\b(apm|transaction|span|trace|latency|throughput)\b/.test(value)) {
     return 'apm';
   }
-  if (/\b(ml|anomaly|machine learning)\b/.test(value)) {
-    return 'apm';
+  if (/\b(ml|anomaly|anomalies|machine learning)\b/.test(value)) {
+    return 'ml';
   }
   if (/\b(synthetics?|uptime|heartbeat|monitor journey|ping check)\b/.test(value)) {
     return 'synthetics';
@@ -453,10 +583,10 @@ export const OnboardingMeasureCreateSection = ({
         key="esql"
         iconType="code"
         title={i18n.translate('xpack.alertingV2.onboardingMeasure.esqlTitle', {
-          defaultMessage: 'ES|QL',
+          defaultMessage: 'ES|QL rule',
         })}
         description={i18n.translate('xpack.alertingV2.onboardingMeasure.esqlDescription', {
-          defaultMessage: 'Create a rule from an ES|QL query with live preview.',
+          defaultMessage: 'Write your own ES|QL query and preview the results live.',
         })}
         onClick={onChooseEsql}
         data-test-subj="onboardingMeasureChooseEsql"
@@ -490,6 +620,19 @@ export const OnboardingMeasureCreateSection = ({
       </EuiText>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <MeasureModeToggle
+            isAiMode={isAiMode}
+            onModeChange={(nextIsAiMode) => {
+              setIsAiMode(nextIsAiMode);
+              if (!nextIsAiMode) {
+                setSelectedDomain(null);
+                setMeasureText('');
+                setIsSuggestionsOpen(false);
+              }
+            }}
+          />
+        </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem>
@@ -503,7 +646,7 @@ export const OnboardingMeasureCreateSection = ({
                   placeholder={i18n.translate(
                     'xpack.alertingV2.onboardingMeasure.aiModePlaceholder',
                     {
-                      defaultMessage: 'Describe the query you want in natural language',
+                      defaultMessage: 'Describe the rule you want in natural language',
                     }
                   )}
                   data-test-subj="onboardingMeasureSearch"
@@ -593,41 +736,6 @@ export const OnboardingMeasureCreateSection = ({
               </EuiFlexItem>
             ) : null}
           </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip
-            content={i18n.translate('xpack.alertingV2.onboardingMeasure.aiModeTooltip', {
-              defaultMessage: 'Describe a rule in natural language with the AI agent',
-            })}
-          >
-            <AiButton
-              size="s"
-              variant="outlined"
-              iconType={SparklesIcon as unknown as 'sparkles'}
-              aria-pressed={isAiMode}
-              isSelected={isAiMode}
-              onClick={() => {
-                setIsAiMode((current) => {
-                  const next = !current;
-                  if (!next) {
-                    setSelectedDomain(null);
-                    setMeasureText('');
-                    setIsSuggestionsOpen(false);
-                  }
-                  return next;
-                });
-              }}
-              data-test-subj="onboardingMeasureAiMode"
-              css={[
-                measureSearchStyles.aiButtonSparkleHover,
-                isAiMode ? measureSearchStyles.aiButtonSelected : undefined,
-              ]}
-            >
-              {i18n.translate('xpack.alertingV2.onboardingMeasure.aiModeLabel', {
-                defaultMessage: 'Ask Agent',
-              })}
-            </AiButton>
-          </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

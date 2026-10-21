@@ -8,21 +8,25 @@
 import type { NoData, Query, Recovery } from '@kbn/alerting-v2-schemas';
 import { noDataStrategy, recoveryStrategy } from '@kbn/alerting-v2-schemas';
 
-/** Generic CPU demo used on Get started (not domain-mirrored). */
+/**
+ * Generic CPU demo for Get started.
+ * Kept intentionally short while still showing what Universal adds over a single
+ * Classic ES|QL rule query: schedule window params, grouping, severity on the
+ * row, explicit returned fields, plus separate alert/recovery condition segments.
+ */
 export const DEMO_BASE_QUERY = `FROM metrics-*
 | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-| WHERE system.cpu.total.norm.pct IS NOT NULL
-| STATS
-    avg_cpu_pct = ROUND(AVG(system.cpu.total.norm.pct) * 100, 0),
-    samples = COUNT(*)
-  BY host.name, cloud.availability_zone
-| EVAL severity = CASE(avg_cpu_pct > 95, "critical", avg_cpu_pct > 90, "high", avg_cpu_pct > 85, "medium")
-| WHERE samples >= 10 AND severity IS NOT NULL
-| KEEP host.name, cloud.availability_zone, avg_cpu_pct, severity, samples`;
+| STATS avg_cpu_pct = AVG(system.cpu.total.norm.pct) * 100 BY host.name
+| EVAL severity = CASE(avg_cpu_pct > 95, "critical", avg_cpu_pct > 85, "high")
+| KEEP host.name, avg_cpu_pct, severity`;
 
 export const DEMO_BREACH_SEGMENT = 'WHERE avg_cpu_pct > 85';
 
 export const DEMO_RECOVERY_SEGMENT = 'WHERE avg_cpu_pct <= 85';
+
+/** Severity + KEEP — the part of the base query that shapes the alert document. */
+export const DEMO_SHAPE_HIGHLIGHT_SEGMENT = `EVAL severity = CASE(avg_cpu_pct > 95, "critical", avg_cpu_pct > 85, "high")
+| KEEP host.name, avg_cpu_pct, severity`;
 
 export const DEMO_QUERY: Query = {
   base: DEMO_BASE_QUERY,

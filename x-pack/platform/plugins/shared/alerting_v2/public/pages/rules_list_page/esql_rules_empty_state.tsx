@@ -81,7 +81,7 @@ export const EsqlRulesEmptyState = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
-                  iconType="play"
+                  iconType="rocket"
                   onClick={onHelpMeOnboard}
                   data-test-subj="esqlRulesEmptyStateHelpMeOnboardButton"
                 >

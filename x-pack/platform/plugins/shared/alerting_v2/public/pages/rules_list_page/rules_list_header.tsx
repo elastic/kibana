@@ -20,8 +20,27 @@ const RULES_LIST_PAGE_TITLE = i18n.translate('xpack.alertingV2.rulesList.pageTit
   defaultMessage: 'Rules',
 });
 
-const getRulesListMenu = ({ onCreateRule }: { onCreateRule: () => void }): AppHeaderMenu => ({
-  items: [],
+const getRulesListMenu = ({
+  onCreateRule,
+  onHelpMeOnboard,
+}: {
+  onCreateRule: () => void;
+  onHelpMeOnboard: () => void;
+}): AppHeaderMenu => ({
+  items: [
+    {
+      id: 'getStarted',
+      order: 0,
+      label: i18n.translate('xpack.alertingV2.rulesList.getStartedButton', {
+        defaultMessage: 'Get started',
+      }),
+      iconType: 'rocket',
+      run: onHelpMeOnboard,
+      testId: 'rulesListHeaderGetStartedButton',
+      // Keep Create rule primary in the header; tuck onboarding under More.
+      overflow: true,
+    },
+  ],
   primaryActionItem: {
     id: 'createRule',
     label: i18n.translate('xpack.alertingV2.rulesList.createRuleButton', {
@@ -36,15 +55,21 @@ const getRulesListMenu = ({ onCreateRule }: { onCreateRule: () => void }): AppHe
 export interface RulesListHeaderProps {
   canWrite: boolean;
   onCreateRule: () => void;
+  onHelpMeOnboard: () => void;
 }
 
 /**
  * App header for the Universal rules list. Create opens the host create flow
  * (mixed chooser in Observability Alerting, or create-options flyout elsewhere).
+ * Get started opens the same onboarding modal as the empty-state CTA.
  * Hidden during the empty state so create options live only in that prompt.
  * Must render under {@link ContentListProvider}.
  */
-export const RulesListHeader = ({ canWrite, onCreateRule }: RulesListHeaderProps) => {
+export const RulesListHeader = ({
+  canWrite,
+  onCreateRule,
+  onHelpMeOnboard,
+}: RulesListHeaderProps) => {
   const phase = useContentListPhase();
   const showHeaderMenu = canWrite && phase !== 'empty' && phase !== 'initialLoad';
   const application = useService(CoreStart('application'));
@@ -89,8 +114,8 @@ export const RulesListHeader = ({ canWrite, onCreateRule }: RulesListHeaderProps
   const tabs = hostTabs ?? defaultTabs;
 
   const headerMenu = useMemo(
-    () => (showHeaderMenu ? getRulesListMenu({ onCreateRule }) : undefined),
-    [showHeaderMenu, onCreateRule]
+    () => (showHeaderMenu ? getRulesListMenu({ onCreateRule, onHelpMeOnboard }) : undefined),
+    [showHeaderMenu, onCreateRule, onHelpMeOnboard]
   );
 
   return (

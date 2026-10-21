@@ -10,7 +10,7 @@
     "browser": true,
     "server": false,
     "requiredPlugins": ["alertingVTwo", "triggersActionsUi", "observabilityShared"],
-    "optionalPlugins": ["cases", "nightshiftInvestigations", "security"],
+    "optionalPlugins": ["cases", "nightshiftInvestigations", "security", "agentBuilder"],
     "requiredBundles": ["alertingVTwo", "cases", "observability"],
   },
 }

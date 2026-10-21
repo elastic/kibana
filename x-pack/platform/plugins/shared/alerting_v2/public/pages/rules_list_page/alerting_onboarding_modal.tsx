@@ -10,8 +10,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
-  EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -25,14 +23,15 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiStepStatus } from '@elastic/eui';
-import {
-  caseManagement,
-  communication,
-  discovery,
-  fieldExtraction,
-} from '@elastic/eui-illustrations';
+import { communication } from '@elastic/eui-illustrations';
 import type { EuiIllustrationSource } from '@elastic/eui-illustrations';
 import { css } from '@emotion/react';
+import {
+  DEMO_BASE_QUERY,
+  DEMO_SHAPE_HIGHLIGHT_SEGMENT,
+  HighlightedEsqlBlock,
+  QueryPipelineExplainer,
+} from '@kbn/alerting-v2-rule-form';
 import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import {
@@ -42,26 +41,15 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { esqlRulesIllustration } from '../../assets/esql_rules_illustration';
+import onboardingAlertsDiscoverImg from '../../assets/onboarding_alerts_discover.jpg';
+import onboardingAlertsTriageImg from '../../assets/onboarding_alerts_triage.jpg';
 import { FullscreenPageModal } from '../../components/fullscreen_page_modal/fullscreen_page_modal';
-import { QueryPipelineExplainer } from '@kbn/alerting-v2-rule-form';
 import { OnboardingLifecycleTimelineDemo } from './onboarding_lifecycle_timeline_demo';
 import { OnboardingMeasureCreateSection } from './onboarding_measure_create_section';
 import {
   type OnboardingSignals,
   useOnboardingSignals,
 } from './use_onboarding_signals';
-
-const SAMPLE_ESQL_QUERY = `FROM metrics-*
-| WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend
-| WHERE system.cpu.total.norm.pct IS NOT NULL
-| STATS
-    avg_cpu_pct = ROUND(AVG(system.cpu.total.norm.pct) * 100, 0),
-    samples = COUNT(*)
-  BY host.name, cloud.availability_zone
-| EVAL severity = CASE(avg_cpu_pct > 95, "critical", avg_cpu_pct > 90, "high", avg_cpu_pct > 85, "medium")
-| WHERE samples >= 10 AND severity IS NOT NULL
-| KEEP host.name, cloud.availability_zone, avg_cpu_pct, severity, samples`;
 
 export interface AlertingOnboardingModalProps {
   onClose: () => void;
@@ -70,6 +58,7 @@ export interface AlertingOnboardingModalProps {
   onCreateWithAgent: (userInput?: string) => void;
   onBuildSequence: () => void;
   onBrowseClassic: (search?: string) => void;
+  onCreateActionPolicy: () => void;
   documentationHref: string;
   /** When false, Classic-only domains still show Universal create paths. */
   showClassic?: boolean;
@@ -77,22 +66,132 @@ export interface AlertingOnboardingModalProps {
   signalsOverride?: OnboardingSignals;
 }
 
+type AdvantageSelectorCardAsset =
+  | {
+      type: 'illustration';
+      illustration: EuiIllustrationSource;
+      illustrationAlt: string;
+    }
+  | {
+      type: 'screenshot';
+      src: string;
+      alt: string;
+    }
+  | {
+      type: 'highlightedQuery';
+      query: string;
+      highlightSegment: string;
+    }
+  | { type: 'lifecycleTimeline' };
+
+interface AdvantageSelectorCard {
+  id: string;
+  title: string;
+  description: string;
+  asset: AdvantageSelectorCardAsset;
+}
+
+/** Shape + lifecycle + Discover + triage — formerly two accordions. */
+const ALERT_AS_DATA_YOU_CONTROL_CARDS: AdvantageSelectorCard[] = [
+  {
+    id: 'shape',
+    title: i18n.translate(
+      'xpack.alertingV2.rulesList.onboardingModal.advantages.alertAsData.card.shape.title',
+      { defaultMessage: 'You shape the alert' }
+    ),
+    description: i18n.translate(
+      'xpack.alertingV2.rulesList.onboardingModal.advantages.alertAsData.card.shape.description',
+      {
+        defaultMessage: 'Returned fields, severity, and grouping are yours to define.',
+      }
+    ),
+    asset: {
+      type: 'highlightedQuery',
+      query: DEMO_BASE_QUERY,
+      highlightSegment: DEMO_SHAPE_HIGHLIGHT_SEGMENT,
+    },
+  },
+  {
+    id: 'lifecycle',
+    title: i18n.translate(
+      'xpack.alertingV2.rulesList.onboardingModal.advantages.alertAsData.card.lifecycle.title',
+      { defaultMessage: 'Lifecycle you control' }
+    ),
+    description: i18n.translate(
+      'xpack.alertingV2.rulesList.onboardingModal.advantages.alertAsData.card.lifecycle.description',
+      {
+        defaultMessage:
+          'Tune alert delay, recovery, and no-data behavior so brief spikes do not flap.',
+      }
+    ),
+    asset: { type: 'lifecycleTimeline' },
+  },
+  {
+    id: 'discover',
+    title: i18n.translate(
+      'xpack.alertingV2.rulesList.onboardingModal.advantages.alertAsData.card.discover.title',
+      { defaultMessage: 'Discover' }
+    ),
+    description: i18n.translate(
+      'xpack.alertingV2.rulesList.onboardingModal.advantages.alertAsData.card.discover.description',
+      {
+        defaultMessage: 'Search alerts in Discover, build dashboards, or write rules on top of them.',
+      }
+    ),
+    asset: {
+      type: 'screenshot',
+      src: onboardingAlertsDiscoverImg,
+      alt: i18n.translate(
+        'xpack.alertingV2.rulesList.onboardingModal.advantages.alertAsData.card.discover.screenshotAlt',
+        {
+          defaultMessage:
+            'Discover showing an ES|QL query over alert episodes alongside logs',
+        }
+      ),
+    },
+  },
+  {
+    id: 'triage',
+    title: i18n.translate(
+      'xpack.alertingV2.rulesList.onboardingModal.advantages.alertAsData.card.triage.title',
+      { defaultMessage: 'One place to triage' }
+    ),
+    description: i18n.translate(
+      'xpack.alertingV2.rulesList.onboardingModal.advantages.alertAsData.card.triage.description',
+      {
+        defaultMessage:
+          'Universal and Classic alerts share an inbox. Nothing has to migrate to get started.',
+      }
+    ),
+    asset: {
+      type: 'screenshot',
+      src: onboardingAlertsTriageImg,
+      alt: i18n.translate(
+        'xpack.alertingV2.rulesList.onboardingModal.advantages.alertAsData.card.triage.screenshotAlt',
+        {
+          defaultMessage:
+            'Alerts page showing Universal and Classic alerts in one triage inbox',
+        }
+      ),
+    },
+  },
+];
+
 const ADVANTAGES: Array<{
   id: string;
-  icon: 'search' | 'controls' | 'clock' | 'bell' | 'database' | 'list';
+  icon: 'search' | 'controls' | 'bell' | 'database';
   title: string;
   description: string;
   illustration?: EuiIllustrationSource;
   illustrationAlt?: string;
-  sampleQuery?: string;
   /** Interactive demo instead of a static illustration. */
-  expandedDemo?: 'lifecycleTimeline';
+  expandedDemo?: 'queryPipeline' | 'alertAsDataYouControl';
 }> = [
   {
     id: 'query',
     icon: 'search',
     title: i18n.translate('xpack.alertingV2.rulesList.onboardingModal.advantages.query.title', {
-      defaultMessage: 'Any condition you can query',
+      defaultMessage: 'Rules: Any condition you can query',
     }),
     description: i18n.translate(
       'xpack.alertingV2.rulesList.onboardingModal.advantages.query.description',
@@ -101,45 +200,25 @@ const ADVANTAGES: Array<{
           'Write an ES|QL rule or use the threshold builder — you are not limited to a fixed rule-type form.',
       }
     ),
-    illustration: esqlRulesIllustration,
-    illustrationAlt: i18n.translate(
-      'xpack.alertingV2.rulesList.onboardingModal.advantages.query.illustrationAlt',
-      { defaultMessage: 'Illustration of writing a query-based alert rule' }
-    ),
-    sampleQuery: SAMPLE_ESQL_QUERY,
+    expandedDemo: 'queryPipeline',
   },
   {
-    id: 'shape',
-    icon: 'controls',
-    title: i18n.translate('xpack.alertingV2.rulesList.onboardingModal.advantages.shape.title', {
-      defaultMessage: 'You shape the alert',
-    }),
-    description: i18n.translate(
-      'xpack.alertingV2.rulesList.onboardingModal.advantages.shape.description',
+    id: 'alertAsData',
+    icon: 'database',
+    title: i18n.translate(
+      'xpack.alertingV2.rulesList.onboardingModal.advantages.alertAsData.title',
       {
-        defaultMessage: 'Returned fields, severity, and grouping are yours to define.',
+        defaultMessage: 'Alerts you shape and use as data',
       }
     ),
-    illustration: fieldExtraction,
-    illustrationAlt: i18n.translate(
-      'xpack.alertingV2.rulesList.onboardingModal.advantages.shape.illustrationAlt',
-      { defaultMessage: 'Illustration of shaping alert fields' }
-    ),
-  },
-  {
-    id: 'lifecycle',
-    icon: 'clock',
-    title: i18n.translate('xpack.alertingV2.rulesList.onboardingModal.advantages.lifecycle.title', {
-      defaultMessage: 'Lifecycle you control',
-    }),
     description: i18n.translate(
-      'xpack.alertingV2.rulesList.onboardingModal.advantages.lifecycle.description',
+      'xpack.alertingV2.rulesList.onboardingModal.advantages.alertAsData.description',
       {
         defaultMessage:
-          'Tune alert delay, recovery, and no-data behavior so brief spikes do not flap.',
+          'Define fields, severity, and lifecycle — then search, visualize, and triage alerts like any other Elasticsearch data.',
       }
     ),
-    expandedDemo: 'lifecycleTimeline',
+    expandedDemo: 'alertAsDataYouControl',
   },
   {
     id: 'policies',
@@ -160,43 +239,6 @@ const ADVANTAGES: Array<{
       { defaultMessage: 'Illustration of shared notification policies' }
     ),
   },
-  {
-    id: 'data',
-    icon: 'database',
-    title: i18n.translate('xpack.alertingV2.rulesList.onboardingModal.advantages.data.title', {
-      defaultMessage: 'Alerts are data',
-    }),
-    description: i18n.translate(
-      'xpack.alertingV2.rulesList.onboardingModal.advantages.data.description',
-      {
-        defaultMessage: 'Search them in Discover, build dashboards, or write rules on top of them.',
-      }
-    ),
-    illustration: discovery,
-    illustrationAlt: i18n.translate(
-      'xpack.alertingV2.rulesList.onboardingModal.advantages.data.illustrationAlt',
-      { defaultMessage: 'Illustration of exploring alerts as data' }
-    ),
-  },
-  {
-    id: 'inbox',
-    icon: 'list',
-    title: i18n.translate('xpack.alertingV2.rulesList.onboardingModal.advantages.inbox.title', {
-      defaultMessage: 'One place to triage',
-    }),
-    description: i18n.translate(
-      'xpack.alertingV2.rulesList.onboardingModal.advantages.inbox.description',
-      {
-        defaultMessage:
-          'Universal and Classic alerts share an inbox. Nothing has to migrate to get started.',
-      }
-    ),
-    illustration: caseManagement,
-    illustrationAlt: i18n.translate(
-      'xpack.alertingV2.rulesList.onboardingModal.advantages.inbox.illustrationAlt',
-      { defaultMessage: 'Illustration of a shared alerts inbox' }
-    ),
-  },
 ];
 
 type ChecklistStepId = 'data' | 'classic' | 'create';
@@ -204,23 +246,179 @@ type ChecklistStepId = 'data' | 'classic' | 'create';
 interface ChecklistItem {
   id: ChecklistStepId;
   title: string;
-  description: string;
+  description?: string;
   complete: boolean;
-  actionLabel: string;
+  actionLabel?: string;
+  /** Status-only steps (data / Classic) — title only when complete. */
+  compact?: boolean;
 }
 
-type OnboardingSection = 'setup' | 'why' | 'query';
+type OnboardingSection = 'setup' | 'why';
 
 const SECTION_TITLES: Record<OnboardingSection, string> = {
   setup: i18n.translate('xpack.alertingV2.rulesList.onboardingModal.section.setup.title', {
     defaultMessage: 'Get started — your setup',
   }),
   why: i18n.translate('xpack.alertingV2.rulesList.onboardingModal.section.why.title', {
-    defaultMessage: 'Why Universal Alerting',
+    defaultMessage: "What's new on Kibana Universal Alerting",
   }),
-  query: i18n.translate('xpack.alertingV2.rulesList.onboardingModal.section.query.title', {
-    defaultMessage: 'Query power',
-  }),
+};
+
+interface OnboardingAdvantageSelectorPanelProps {
+  cards: AdvantageSelectorCard[];
+  intro: React.ReactNode;
+  testSubj: string;
+  cardTestSubjPrefix: string;
+}
+
+/**
+ * Security Get started–style selector: cards on the left, asset/demo on the right.
+ */
+const OnboardingAdvantageSelectorPanel = ({
+  cards,
+  intro,
+  testSubj,
+  cardTestSubjPrefix,
+}: OnboardingAdvantageSelectorPanelProps): JSX.Element => {
+  const { euiTheme } = useEuiTheme();
+  const [selectedCardId, setSelectedCardId] = useState(cards[0].id);
+  const selectedCard = cards.find((card) => card.id === selectedCardId) ?? cards[0];
+
+  const styles = useMemo(
+    () => ({
+      panel: css`
+        display: flex;
+        flex-direction: column;
+        text-align: start;
+      `,
+      columns: css`
+        display: flex;
+        flex-direction: row;
+        gap: ${euiTheme.size.xl};
+        align-items: center;
+      `,
+      content: css`
+        flex: 1 1 50%;
+        min-inline-size: 0;
+      `,
+      intro: css`
+        p {
+          margin-block: 0;
+        }
+      `,
+      selectedCard: css`
+        border: 1px solid ${euiTheme.colors.primary};
+        background-color: ${euiTheme.colors.backgroundBasePrimary};
+      `,
+      assetColumn: css`
+        flex: 1 1 50%;
+        min-inline-size: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      `,
+      asset: css`
+        inline-size: 100%;
+        max-inline-size: 100%;
+        display: block;
+        line-height: 0;
+      `,
+      screenshot: css`
+        inline-size: 100%;
+        max-inline-size: 100%;
+        display: block;
+        border-radius: ${euiTheme.border.radius.medium};
+        border: ${euiTheme.border.thin};
+        box-shadow: 0 ${euiTheme.size.xs} ${euiTheme.size.m} rgba(0, 0, 0, 0.08);
+      `,
+    }),
+    [euiTheme]
+  );
+
+  const renderAsset = () => {
+    if (selectedCard.asset.type === 'lifecycleTimeline') {
+      return (
+        <div css={styles.assetColumn}>
+          <div css={styles.asset}>
+            <OnboardingLifecycleTimelineDemo />
+          </div>
+        </div>
+      );
+    }
+    if (selectedCard.asset.type === 'screenshot') {
+      return (
+        <div css={styles.assetColumn}>
+          <img
+            src={selectedCard.asset.src}
+            alt={selectedCard.asset.alt}
+            css={styles.screenshot}
+          />
+        </div>
+      );
+    }
+    if (selectedCard.asset.type === 'highlightedQuery') {
+      return (
+        <div css={styles.assetColumn}>
+          <div css={styles.asset} data-test-subj="alertingOnboardingAlertAsDataShapeQuery">
+            <HighlightedEsqlBlock
+              query={selectedCard.asset.query}
+              highlightSegment={selectedCard.asset.highlightSegment}
+              maxHeight={360}
+            />
+          </div>
+        </div>
+      );
+    }
+    return (
+      <div css={styles.assetColumn}>
+        <EuiIllustration
+          type={selectedCard.asset.illustration}
+          alt={selectedCard.asset.illustrationAlt}
+          css={styles.asset}
+        />
+      </div>
+    );
+  };
+
+  return (
+    <div css={styles.panel} data-test-subj={testSubj}>
+      <EuiText size="s" color="subdued" css={styles.intro}>
+        <p>{intro}</p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <div css={styles.columns}>
+        <div css={styles.content}>
+          <EuiFlexGroup direction="column" gutterSize="s">
+            {cards.map((card) => {
+              const isSelected = card.id === selectedCard.id;
+              return (
+                <EuiFlexItem key={card.id} grow={false}>
+                  <EuiPanel
+                    hasBorder
+                    paddingSize="m"
+                    element="button"
+                    color={isSelected ? 'subdued' : 'plain'}
+                    css={isSelected ? styles.selectedCard : undefined}
+                    onClick={() => setSelectedCardId(card.id)}
+                    aria-pressed={isSelected}
+                    data-test-subj={`${cardTestSubjPrefix}-${card.id}`}
+                    data-selected={isSelected ? true : undefined}
+                  >
+                    <EuiTitle size="xxs">
+                      <h4>{card.title}</h4>
+                    </EuiTitle>
+                    <EuiSpacer size="xs" />
+                    <EuiText size="xs">{card.description}</EuiText>
+                  </EuiPanel>
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGroup>
+        </div>
+        {renderAsset()}
+      </div>
+    </div>
+  );
 };
 
 /**
@@ -233,6 +431,7 @@ export const AlertingOnboardingModal = ({
   onCreateWithAgent,
   onBuildSequence,
   onBrowseClassic,
+  onCreateActionPolicy,
   documentationHref,
   showClassic = true,
   signalsOverride,
@@ -242,7 +441,7 @@ export const AlertingOnboardingModal = ({
   const share = useService(PluginStart('share')) as SharePluginStart;
   const liveSignals = useOnboardingSignals();
   const signals = signalsOverride ?? liveSignals;
-  const [activeSection, setActiveSection] = useState<OnboardingSection>('setup');
+  const [activeSection, setActiveSection] = useState<OnboardingSection>('why');
   const [activeAdvantageId, setActiveAdvantageId] = useState<string>(ADVANTAGES[0].id);
   const [focusedStepId, setFocusedStepId] = useState<ChecklistStepId | null>(null);
   const createSectionRef = useRef<HTMLDivElement>(null);
@@ -260,7 +459,7 @@ export const AlertingOnboardingModal = ({
 
   const handleDataStep = useCallback(() => {
     if (signals.hasData) {
-      setFocusedStepId('classic');
+      setFocusedStepId('create');
       return;
     }
     const locator = share.url.locators.get<ObservabilityOnboardingLocatorParams>(
@@ -274,16 +473,6 @@ export const AlertingOnboardingModal = ({
     void application.navigateToApp('observabilityOnboarding');
   }, [application, onClose, share.url.locators, signals.hasData]);
 
-  const handleRulesStep = useCallback(() => {
-    if (signals.hasClassicRules) {
-      // Migration guidance lives on Why Universal until a dedicated entry point ships.
-      setActiveSection('why');
-      setFocusedStepId('classic');
-      return;
-    }
-    scrollToCreate();
-  }, [scrollToCreate, signals.hasClassicRules]);
-
   const handleCreateStep = useCallback(() => {
     scrollToCreate();
   }, [scrollToCreate]);
@@ -292,10 +481,9 @@ export const AlertingOnboardingModal = ({
     () =>
       ({
         data: handleDataStep,
-        classic: handleRulesStep,
         create: handleCreateStep,
-      }) satisfies Record<ChecklistStepId, () => void>,
-    [handleCreateStep, handleDataStep, handleRulesStep]
+      }) satisfies Partial<Record<ChecklistStepId, () => void>>,
+    [handleCreateStep, handleDataStep]
   );
 
   const checklist = useMemo<ChecklistItem[]>(() => {
@@ -310,13 +498,7 @@ export const AlertingOnboardingModal = ({
               defaultMessage: 'Add data',
             }),
         description: signals.hasData
-          ? i18n.translate(
-              'xpack.alertingV2.rulesList.onboardingModal.checklist.data.readyDescription',
-              {
-                defaultMessage:
-                  'We found data views in this space — continue to review rules, then create your first Universal rule.',
-              }
-            )
+          ? undefined
           : i18n.translate(
               'xpack.alertingV2.rulesList.onboardingModal.checklist.data.missingDescription',
               {
@@ -325,77 +507,48 @@ export const AlertingOnboardingModal = ({
               }
             ),
         complete: signals.hasData,
+        compact: signals.hasData,
         actionLabel: signals.hasData
-          ? i18n.translate('xpack.alertingV2.rulesList.onboardingModal.checklist.data.continue', {
-              defaultMessage: 'Continue',
-            })
+          ? undefined
           : i18n.translate('xpack.alertingV2.rulesList.onboardingModal.checklist.data.addData', {
               defaultMessage: 'Add data',
             }),
       },
       {
         id: 'classic',
+        // Status check only — used later to gate a migration path.
         title: signals.hasClassicRules
           ? i18n.translate(
               'xpack.alertingV2.rulesList.onboardingModal.checklist.classic.hasRules',
               {
-                defaultMessage: '{count, plural, one {# Classic rule} other {# Classic rules}}',
-                values: { count: signals.classicRulesCount },
+                defaultMessage: 'Classic rules',
               }
             )
           : i18n.translate(
               'xpack.alertingV2.rulesList.onboardingModal.checklist.classic.noRules',
               {
-                defaultMessage: 'No Classic rules yet',
-              }
-            ),
-        description: signals.hasClassicRules
-          ? i18n.translate(
-              'xpack.alertingV2.rulesList.onboardingModal.checklist.classic.hasRulesDescription',
-              {
-                defaultMessage:
-                  'Classic keeps running. Review when to prefer Universal, and watch for guided migration (coming soon).',
-              }
-            )
-          : i18n.translate(
-              'xpack.alertingV2.rulesList.onboardingModal.checklist.classic.noRulesDescription',
-              {
-                defaultMessage:
-                  'A clean start — go to Universal Alerting to create your first rule.',
+                defaultMessage: 'No Classic rules',
               }
             ),
         complete: true,
-        actionLabel: signals.hasClassicRules
-          ? i18n.translate(
-              'xpack.alertingV2.rulesList.onboardingModal.checklist.classic.seeMigration',
-              {
-                defaultMessage: 'See Universal vs Classic',
-              }
-            )
-          : i18n.translate(
-              'xpack.alertingV2.rulesList.onboardingModal.checklist.classic.startUniversal',
-              {
-                defaultMessage: 'Start with Universal',
-              }
-            ),
+        compact: true,
       },
       {
         id: 'create',
         title: i18n.translate('xpack.alertingV2.rulesList.onboardingModal.checklist.create.title', {
-          defaultMessage: 'Create your first Universal rule',
+          defaultMessage: 'Start with Kibana Universal Alerting',
         }),
         description: i18n.translate(
           'xpack.alertingV2.rulesList.onboardingModal.checklist.create.description',
           {
-            defaultMessage:
-              'Use an ES|QL rule for full control, or the threshold builder for a guided start.',
+            defaultMessage: 'Create a Universal rule and set up notifications.',
           }
         ),
         complete: false,
         actionLabel: i18n.translate(
           'xpack.alertingV2.rulesList.onboardingModal.checklist.create.action',
           {
-            defaultMessage: 'Create a rule',
+            defaultMessage: 'Get started',
           }
         ),
       },
@@ -431,6 +584,11 @@ export const AlertingOnboardingModal = ({
     onBrowseClassic(search);
   };
 
+  const handleCreateActionPolicy = () => {
+    onClose();
+    onCreateActionPolicy();
+  };
+
   const setupSteps = useMemo(() => {
     let foundCurrent = false;
     return checklist.map((item) => {
@@ -446,24 +604,36 @@ export const AlertingOnboardingModal = ({
       if (focusedStepId === item.id && !item.complete) {
         status = 'current';
       }
+
+      const action = checklistActions[item.id];
+      const showBody = !item.compact && (item.description || (item.actionLabel && action));
+
       return {
         title: item.title,
         status,
-        children: (
+        children: showBody ? (
           <div data-test-subj={`alertingOnboardingChecklistStep-${item.id}`}>
-            <EuiText size="s" color="subdued">
-              <p>{item.description}</p>
-            </EuiText>
-            <EuiSpacer size="s" />
-            <EuiButtonEmpty
-              size="xs"
-              flush="left"
-              onClick={checklistActions[item.id]}
-              data-test-subj={`alertingOnboardingChecklistAction-${item.id}`}
-            >
-              {item.actionLabel}
-            </EuiButtonEmpty>
+            {item.description ? (
+              <EuiText size="s" color="subdued">
+                <p>{item.description}</p>
+              </EuiText>
+            ) : null}
+            {item.actionLabel && action ? (
+              <>
+                {item.description ? <EuiSpacer size="s" /> : null}
+                <EuiButtonEmpty
+                  size="xs"
+                  flush="left"
+                  onClick={action}
+                  data-test-subj={`alertingOnboardingChecklistAction-${item.id}`}
+                >
+                  {item.actionLabel}
+                </EuiButtonEmpty>
+              </>
+            ) : null}
           </div>
+        ) : (
+          <span data-test-subj={`alertingOnboardingChecklistStep-${item.id}`} />
         ),
       };
     });
@@ -485,13 +655,15 @@ export const AlertingOnboardingModal = ({
         cursor: pointer;
         text-align: start;
         width: 100%;
-        background-color: ${isActive
-          ? euiTheme.colors.backgroundBasePlain
+        background-color: ${isExpanded
+          ? euiTheme.colors.backgroundBaseSubdued
           : euiTheme.colors.backgroundBasePlain};
         border-color: ${isActive ? euiTheme.colors.borderBasePlain : undefined};
 
         &:hover {
-          background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
+          background-color: ${isExpanded
+            ? euiTheme.colors.backgroundBaseSubdued
+            : euiTheme.colors.backgroundBaseInteractiveHover};
         }
 
         &:focus {
@@ -506,9 +678,6 @@ export const AlertingOnboardingModal = ({
         ${isExpanded
           ? `
           cursor: default;
-          &:hover {
-            background-color: ${euiTheme.colors.backgroundBasePlain};
-          }
         `
           : ''}
       `,
@@ -516,13 +685,6 @@ export const AlertingOnboardingModal = ({
         flex-shrink: 0;
         margin-block-start: auto;
         padding-block-start: ${euiTheme.size.m};
-      `,
-      queryCanvasShell: css`
-        display: flex;
-        flex-direction: column;
-        flex: 1 1 auto;
-        min-block-size: 0;
-        block-size: 100%;
       `,
       advantageIcon: css`
         display: flex;
@@ -554,8 +716,7 @@ export const AlertingOnboardingModal = ({
         margin-inline: auto;
         display: block;
       `,
-      sampleQuery: css`
-        inline-size: 100%;
+      queryPipelineCompact: css`
         text-align: start;
       `,
     }),
@@ -577,19 +738,14 @@ export const AlertingOnboardingModal = ({
 
   const navItems: Array<{ id: OnboardingSection; label: string; testSubj: string }> = [
     {
-      id: 'setup',
-      label: SECTION_TITLES.setup,
-      testSubj: 'alertingOnboardingNav-setup',
-    },
-    {
       id: 'why',
       label: SECTION_TITLES.why,
       testSubj: 'alertingOnboardingNav-why',
     },
     {
-      id: 'query',
-      label: SECTION_TITLES.query,
-      testSubj: 'alertingOnboardingNav-query',
+      id: 'setup',
+      label: SECTION_TITLES.setup,
+      testSubj: 'alertingOnboardingNav-setup',
     },
   ];
 
@@ -702,7 +858,7 @@ export const AlertingOnboardingModal = ({
         <h2>
           <FormattedMessage
             id="xpack.alertingV2.rulesList.onboardingModal.create.title"
-            defaultMessage="Create a Universal rule"
+            defaultMessage="Start with Kibana Universal Alerting"
           />
         </h2>
       </EuiTitle>
@@ -711,6 +867,25 @@ export const AlertingOnboardingModal = ({
         <p>
           <FormattedMessage
             id="xpack.alertingV2.rulesList.onboardingModal.create.intro"
+            defaultMessage="Create a Universal rule, then set up notifications with an action policy."
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="l" />
+
+      <EuiTitle size="xxs">
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.onboardingModal.create.ruleSectionTitle"
+            defaultMessage="Create a rule"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued">
+        <p>
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.onboardingModal.create.ruleSectionIntro"
             defaultMessage="Search what you want to measure — we’ll suggest Threshold or ES|QL, or send you to Classic when that domain fits better."
           />
         </p>
@@ -726,6 +901,64 @@ export const AlertingOnboardingModal = ({
           showClassic={showClassic}
         />
       </EuiPanel>
+
+      <EuiSpacer size="xl" />
+
+      <EuiTitle size="xxs">
+        <h3>
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.onboardingModal.create.notificationSectionTitle"
+            defaultMessage="Create notifications"
+          />
+        </h3>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiText size="s" color="subdued">
+        <p>
+          <FormattedMessage
+            id="xpack.alertingV2.rulesList.onboardingModal.create.notificationSectionIntro"
+            defaultMessage="Action policies route alerts to Slack, email, and other connectors — shared across many rules."
+          />
+        </p>
+      </EuiText>
+      <EuiSpacer size="m" />
+      <EuiPanel
+        element="button"
+        hasBorder
+        paddingSize="m"
+        onClick={handleCreateActionPolicy}
+        data-test-subj="alertingOnboardingCreateActionPolicy"
+        css={css`
+          text-align: start;
+          cursor: pointer;
+          width: 100%;
+        `}
+      >
+        <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="bell" size="l" color="text" aria-hidden />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiText size="s">
+              <strong>
+                <FormattedMessage
+                  id="xpack.alertingV2.rulesList.onboardingModal.create.actionPolicyTitle"
+                  defaultMessage="Create action policy"
+                />
+              </strong>
+            </EuiText>
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.alertingV2.rulesList.onboardingModal.create.actionPolicyDescription"
+                defaultMessage="Define matchers, destinations, and throttling in one place."
+              />
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="arrowRight" color="subdued" aria-hidden />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
     </div>
   );
 
@@ -740,6 +973,7 @@ export const AlertingOnboardingModal = ({
         </p>
       </EuiText>
       <EuiSpacer size="m" />
+
       <EuiFlexGroup direction="column" gutterSize="s">
         {ADVANTAGES.map((item) => {
           const isExpanded = item.id === activeAdvantageId;
@@ -798,20 +1032,25 @@ export const AlertingOnboardingModal = ({
                     onKeyDown={(event) => event.stopPropagation()}
                     role="presentation"
                   >
-                    {item.sampleQuery ? (
-                      <EuiCodeBlock
-                        language="esql"
-                        fontSize="s"
-                        paddingSize="m"
-                        overflowHeight={320}
-                        isCopyable
-                        css={styles.sampleQuery}
-                        data-test-subj="alertingOnboardingSampleQuery"
+                    {item.expandedDemo === 'queryPipeline' ? (
+                      <div
+                        css={styles.queryPipelineCompact}
+                        data-test-subj="alertingOnboardingQueryPipeline"
                       >
-                        {item.sampleQuery}
-                      </EuiCodeBlock>
-                    ) : item.expandedDemo === 'lifecycleTimeline' ? (
-                      <OnboardingLifecycleTimelineDemo />
+                        <QueryPipelineExplainer demo forceExpanded layout="split" />
+                      </div>
+                    ) : item.expandedDemo === 'alertAsDataYouControl' ? (
+                      <OnboardingAdvantageSelectorPanel
+                        cards={ALERT_AS_DATA_YOU_CONTROL_CARDS}
+                        testSubj="alertingOnboardingAlertAsData"
+                        cardTestSubjPrefix="alertingOnboardingAlertAsDataCard"
+                        intro={
+                          <FormattedMessage
+                            id="xpack.alertingV2.rulesList.onboardingModal.advantages.alertAsData.panelIntro"
+                            defaultMessage="You define how each alert looks and behaves — then treat those alerts as first-class data you can search, visualize, and triage."
+                          />
+                        }
+                      />
                     ) : item.illustration && item.illustrationAlt ? (
                       <EuiIllustration
                         type={item.illustration}
@@ -921,60 +1160,11 @@ export const AlertingOnboardingModal = ({
             </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
-
-        <EuiSpacer size="l" />
-
-        <EuiCallOut
-          title={
-            <>
-              {i18n.translate('xpack.alertingV2.rulesList.onboardingModal.migration.title', {
-                defaultMessage: 'Guided migration from Classic',
-              })}{' '}
-              <EuiBadge color="accent" data-test-subj="alertingOnboardingMigrationSoonBadge">
-                <FormattedMessage
-                  id="xpack.alertingV2.rulesList.onboardingModal.migration.comingSoonBadge"
-                  defaultMessage="Coming soon"
-                />
-              </EuiBadge>
-            </>
-          }
-          color="plain"
-          iconType="clock"
-          size="s"
-          data-test-subj="alertingOnboardingMigrationSoon"
-        >
-          <p>
-            <FormattedMessage
-              id="xpack.alertingV2.rulesList.onboardingModal.migration.body"
-              defaultMessage="Until then, recreate the rules you want more control over with ES|QL or the threshold builder. Classic rules keep running unchanged."
-            />
-          </p>
-        </EuiCallOut>
       </div>
     </div>
   );
 
-  const queryContent = (
-    <div data-test-subj="alertingOnboardingQueryPipeline" css={styles.queryCanvasShell}>
-      <EuiText size="s" color="subdued">
-        <p>
-          <FormattedMessage
-            id="xpack.alertingV2.rulesList.onboardingModal.query.intro"
-            defaultMessage="Universal runs a small query pipeline — base, alert, recovery, and an optional no-data check — from the intent you write once."
-          />
-        </p>
-      </EuiText>
-      <EuiSpacer size="m" />
-      <QueryPipelineExplainer demo forceExpanded layout="canvas" />
-    </div>
-  );
-
-  const mainContent =
-    activeSection === 'setup'
-      ? setupContent
-      : activeSection === 'why'
-      ? whyContent
-      : queryContent;
+  const mainContent = activeSection === 'setup' ? setupContent : whyContent;
 
   return (
     <FullscreenPageModal

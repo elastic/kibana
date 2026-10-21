@@ -45,9 +45,10 @@ export interface QueryPipelineExplainerProps {
   forceExpanded?: boolean;
   /**
    * `stack` — map above detail (create-form accordion).
-   * `canvas` — full-height map with detail panel docked inside (Get started).
+   * `canvas` — full-height map with detail panel docked inside.
+   * `split` — 50/50 map | detail (Get started onboarding).
    */
-  layout?: 'stack' | 'canvas';
+  layout?: 'stack' | 'canvas' | 'split';
   'data-test-subj'?: string;
 }
 
@@ -93,11 +94,14 @@ const StepDetail = ({
   showFullNoDataQuery,
   onToggleFullNoData,
   compact,
+  hideVisual,
 }: {
   active: PipelineStep;
   showFullNoDataQuery: boolean;
   onToggleFullNoData: () => void;
   compact?: boolean;
+  /** When true, omit StepVisual (e.g. rendered under the map in split layout). */
+  hideVisual?: boolean;
 }) => {
   const showDiagram = active.id === 'noData' && active.preferDiagram && !showFullNoDataQuery;
 
@@ -127,8 +131,12 @@ const StepDetail = ({
           </EuiText>
         </>
       ) : null}
-      <EuiSpacer size={compact ? 's' : 'm'} />
-      <StepVisual stepId={active.id} label={active.visualLabel} />
+      {!hideVisual ? (
+        <>
+          <EuiSpacer size={compact ? 's' : 'm'} />
+          <StepVisual stepId={active.id} label={active.visualLabel} />
+        </>
+      ) : null}
       <EuiSpacer size={compact ? 's' : 'm'} />
       {showDiagram ? (
         <>
@@ -199,7 +207,7 @@ const ExpandedBody = ({
   onSelect: (id: PipelineStepId) => void;
   showFullNoDataQuery: boolean;
   onToggleFullNoData: () => void;
-  layout: 'stack' | 'canvas';
+  layout: 'stack' | 'canvas' | 'split';
 }) => {
   const active = steps.find((s) => s.id === activeId) ?? steps[0];
   const detail = (
@@ -207,8 +215,19 @@ const ExpandedBody = ({
       active={active}
       showFullNoDataQuery={showFullNoDataQuery}
       onToggleFullNoData={onToggleFullNoData}
-      compact={layout === 'canvas'}
+      compact={layout === 'canvas' || layout === 'split'}
     />
+  );
+
+  const footer = (
+    <EuiText size="xs" color="subdued">
+      <p data-test-subj="queryPipelineClassicFooter">
+        <FormattedMessage
+          id="xpack.alertingV2.queryPipelineExplainer.classicFooter"
+          defaultMessage="Universal exposes this query pipeline. Classic rule types keep detection logic inside the rule type."
+        />
+      </p>
+    </EuiText>
   );
 
   if (layout === 'canvas') {
@@ -230,14 +249,38 @@ const ExpandedBody = ({
           fullHeight
         />
         <EuiSpacer size="m" />
-        <EuiText size="xs" color="subdued">
-          <p data-test-subj="queryPipelineClassicFooter">
-            <FormattedMessage
-              id="xpack.alertingV2.queryPipelineExplainer.classicFooter"
-              defaultMessage="Universal exposes this query pipeline. Classic rule types keep detection logic inside the rule type."
-            />
-          </p>
-        </EuiText>
+        {footer}
+      </div>
+    );
+  }
+
+  if (layout === 'split') {
+    return (
+      <div
+        css={css`
+          display: flex;
+          flex-direction: row;
+          gap: 24px;
+          align-items: flex-start;
+        `}
+        data-test-subj="queryPipelineSplitLayout"
+      >
+        <div
+          css={css`
+            flex: 1 1 50%;
+            min-inline-size: 0;
+          `}
+        >
+          <PipelineMap steps={steps} activeId={activeId} onSelect={onSelect} />
+        </div>
+        <div
+          css={css`
+            flex: 1 1 50%;
+            min-inline-size: 0;
+          `}
+        >
+          {detail}
+        </div>
       </div>
     );
   }
@@ -253,14 +296,7 @@ const ExpandedBody = ({
       </EuiFlexGroup>
 
       <EuiSpacer size="m" />
-      <EuiText size="xs" color="subdued">
-        <p data-test-subj="queryPipelineClassicFooter">
-          <FormattedMessage
-            id="xpack.alertingV2.queryPipelineExplainer.classicFooter"
-            defaultMessage="Universal exposes this query pipeline. Classic rule types keep detection logic inside the rule type."
-          />
-        </p>
-      </EuiText>
+      {footer}
     </>
   );
 };
@@ -350,7 +386,7 @@ export const QueryPipelineExplainer = ({
       <div
         data-test-subj={dataTestSubj}
         css={
-          layout === 'canvas'
+          layout === 'canvas' || layout === 'split'
             ? css`
                 display: flex;
                 flex-direction: column;

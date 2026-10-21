@@ -21,8 +21,12 @@ const SAVE_SUCCESS_MESSAGE = 'Rules settings updated successfully.';
 const DEFAULT_LOOK_BACK = 10;
 const DEFAULT_STATUS_CHANGE_THRESHOLD = 10;
 
-const openRulesSettingsPage = async (page: ScoutPage) => {
-  await page.testSubj.click(SETTINGS_LINK_SUBJ);
+const openRulesSettingsPage = async (
+  page: ScoutPage,
+  appMenu: { clickItem: (item: string) => Promise<void> }
+) => {
+  // Settings is forced into the More overflow menu.
+  await appMenu.clickItem(SETTINGS_LINK_SUBJ);
 
   const settingsPage = page.testSubj.locator(PAGE_SUBJ);
   await expect(settingsPage).toBeVisible();
@@ -44,15 +48,16 @@ test.describe('Rules settings page', { tag: tags.stateful.classic }, () => {
     await apiServices.alerting.settings.reset();
   });
 
-  test('opens, shows configured values, and persists changes', async ({ page }) => {
-    await test.step('the rules settings link is enabled', async () => {
+  test('opens, shows configured values, and persists changes', async ({ page, pageObjects }) => {
+    await test.step('the rules settings link is enabled under More', async () => {
+      await pageObjects.appMenu.revealItem(SETTINGS_LINK_SUBJ);
       const link = page.testSubj.locator(SETTINGS_LINK_SUBJ);
       await expect(link).toBeVisible();
       await expect(link).toBeEnabled();
     });
 
     await test.step('opens the settings page with the configured values', async () => {
-      const settingsPage = await openRulesSettingsPage(page);
+      const settingsPage = await openRulesSettingsPage(page, pageObjects.appMenu);
 
       await expect(settingsPage.getByTestId(FLAPPING_OFF_PROMPT_SUBJ)).toBeHidden();
       await expect(settingsPage.getByTestId(FLAPPING_TOGGLE_SUBJ)).toBeVisible();
@@ -96,7 +101,7 @@ test.describe('Rules settings page', { tag: tags.stateful.classic }, () => {
       );
       await expect(settingsPage).toBeHidden();
 
-      const reopenedPage = await openRulesSettingsPage(page);
+      const reopenedPage = await openRulesSettingsPage(page, pageObjects.appMenu);
 
       await expect(reopenedPage.getByTestId(FLAPPING_OFF_PROMPT_SUBJ)).toBeVisible();
       await reopenedPage.getByTestId(FLAPPING_TOGGLE_SUBJ).click();

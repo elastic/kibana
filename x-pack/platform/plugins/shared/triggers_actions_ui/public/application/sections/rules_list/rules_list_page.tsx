@@ -89,6 +89,8 @@ export const RulesListContainer = () => {
               iconType: 'table' as const,
               run: () => history.push('/logs'),
               testId: 'rulesLogsLink',
+              // Keep Create rule primary; tuck Logs under More with Settings.
+              overflow: true,
             },
           ]
         : [];

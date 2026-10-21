@@ -11,6 +11,17 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { noDataStrategy } from '@kbn/alerting-v2-schemas';
 import { QueryPipelineExplainer } from './query_pipeline_explainer';
 
+jest.mock('@kbn/code-editor', () => ({
+  CodeEditor: ({ value, dataTestSubj }: { value: string; dataTestSubj?: string }) => (
+    <pre data-test-subj={dataTestSubj ?? 'mockCodeEditor'}>{value}</pre>
+  ),
+  ESQL_LANG_ID: 'esql',
+}));
+
+jest.mock('@kbn/esql-utils', () => ({
+  prettifyQuery: (query: string) => query,
+}));
+
 const renderExplainer = (props: React.ComponentProps<typeof QueryPipelineExplainer> = {}) =>
   render(
     <IntlProvider locale="en">
@@ -58,6 +69,17 @@ describe('QueryPipelineExplainer', () => {
     renderExplainer({ forceExpanded: true, layout: 'canvas' });
 
     expect(screen.getByTestId('queryPipelineDetailPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('queryPipelineActiveTitle')).toHaveTextContent('Alert query');
+    expect(screen.getByTestId('queryPipelineActiveQuery')).toBeInTheDocument();
+    expect(screen.getByTestId('queryPipelineVisual-alert')).toBeInTheDocument();
+  });
+
+  it('places map and detail side by side when layout is split', () => {
+    renderExplainer({ forceExpanded: true, layout: 'split' });
+
+    expect(screen.getByTestId('queryPipelineSplitLayout')).toBeInTheDocument();
+    expect(screen.getByTestId('queryPipelineMap')).toBeInTheDocument();
+    expect(screen.queryByTestId('queryPipelineDetailPanel')).not.toBeInTheDocument();
     expect(screen.getByTestId('queryPipelineActiveTitle')).toHaveTextContent('Alert query');
     expect(screen.getByTestId('queryPipelineActiveQuery')).toBeInTheDocument();
     expect(screen.getByTestId('queryPipelineVisual-alert')).toBeInTheDocument();

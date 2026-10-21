@@ -67,6 +67,19 @@ jest.mock('@kbn/alerting-v2-rule-form', () => ({
       How a rule runs queries
     </div>
   ),
+  HighlightedEsqlBlock: ({
+    query,
+    highlightSegment,
+  }: {
+    query: string;
+    highlightSegment?: string;
+  }) => (
+    <pre data-test-subj="queryPipelineActiveQuery">
+      <span data-test-subj="queryPipelineQueryHighlight">{highlightSegment ?? query}</span>
+    </pre>
+  ),
+  DEMO_BASE_QUERY: 'FROM metrics-* | EVAL severity = "high" | KEEP host.name, severity',
+  DEMO_SHAPE_HIGHLIGHT_SEGMENT: 'EVAL severity = "high"\n| KEEP host.name, severity',
 }));
 
 jest.mock('./onboarding_lifecycle_timeline_demo', () => ({
@@ -91,6 +104,7 @@ const renderModal = (
   const onCreateWithAgent = props.onCreateWithAgent ?? jest.fn();
   const onBuildSequence = props.onBuildSequence ?? jest.fn();
   const onBrowseClassic = props.onBrowseClassic ?? jest.fn();
+  const onCreateActionPolicy = props.onCreateActionPolicy ?? jest.fn();
   return {
     onClose,
     onCreateEsqlRule,
@@ -98,6 +112,7 @@ const renderModal = (
     onCreateWithAgent,
     onBuildSequence,
     onBrowseClassic,
+    onCreateActionPolicy,
     ...render(
       <IntlProvider locale="en">
         <AlertingOnboardingModal
@@ -107,6 +122,7 @@ const renderModal = (
           onCreateWithAgent={onCreateWithAgent}
           onBuildSequence={onBuildSequence}
           onBrowseClassic={onBrowseClassic}
+          onCreateActionPolicy={onCreateActionPolicy}
           documentationHref="https://docs.test/alerting"
           signalsOverride={props.signalsOverride ?? readySignals}
         />
@@ -121,24 +137,32 @@ describe('AlertingOnboardingModal', () => {
     mockOnboardingNavigate.mockReset();
   });
 
-  it('defaults to setup create pane with Your setup expanded in the right sidebar', () => {
+  it('defaults to What\'s new with advantages in the main pane', () => {
     renderModal();
 
     expect(screen.getByTestId('alertingOnboardingModal')).toBeInTheDocument();
     expect(screen.getByTestId('alertingOnboardingModalSidebar')).toBeInTheDocument();
     expect(screen.getByTestId('alertingOnboardingModalMain')).toBeInTheDocument();
     expect(screen.getByTestId('alertingOnboardingNav')).toBeInTheDocument();
-    expect(screen.getByTestId('alertingOnboardingNav-setup')).toHaveAttribute('data-selected');
-    expect(screen.getByTestId('alertingOnboardingCreateSection')).toBeInTheDocument();
-    expect(screen.getByTestId('alertingOnboardingChecklist')).toBeInTheDocument();
-    expect(screen.getByTestId('onboardingMeasureCreateSection')).toBeInTheDocument();
-    expect(screen.queryByTestId('alertingOnboardingAdvantages')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('alertingOnboardingQueryPipeline')).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertingOnboardingNav-why')).toHaveAttribute('data-selected');
+    expect(screen.getByTestId('alertingOnboardingNav-why')).toHaveTextContent(
+      "What's new on Kibana Universal Alerting"
+    );
+    expect(screen.getByTestId('alertingOnboardingAdvantages')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingOnboardingQueryPipeline')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertingOnboardingCreateSection')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertingOnboardingChecklist')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertingOnboardingNav-compare')).not.toBeInTheDocument();
   });
 
   it('switches the main pane when a sidebar nav item is selected', () => {
     renderModal();
+
+    fireEvent.click(screen.getByTestId('alertingOnboardingNav-setup'));
+    expect(screen.getByTestId('alertingOnboardingCreateSection')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingOnboardingChecklist')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingOnboardingNav-setup')).toHaveAttribute('data-selected');
+    expect(screen.queryByTestId('alertingOnboardingAdvantages')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('alertingOnboardingNav-why'));
     expect(screen.getByTestId('alertingOnboardingAdvantages')).toBeInTheDocument();
@@ -146,47 +170,64 @@ describe('AlertingOnboardingModal', () => {
     expect(screen.getByTestId('alertingOnboardingNav-why')).toHaveAttribute('data-selected');
     expect(screen.queryByTestId('alertingOnboardingCreateSection')).not.toBeInTheDocument();
     expect(screen.queryByTestId('alertingOnboardingChecklist')).not.toBeInTheDocument();
+  });
 
-    fireEvent.click(screen.getByTestId('alertingOnboardingNav-query'));
+  it('shows expandable advantage cards and embeds query power in Any condition', () => {
+    renderModal();
+
+    expect(screen.getByTestId('alertingOnboardingAdvantage-query')).toHaveAttribute(
+      'data-expanded'
+    );
+    expect(screen.getByTestId('alertingOnboardingAdvantageExpanded')).toBeInTheDocument();
     expect(screen.getByTestId('alertingOnboardingQueryPipeline')).toBeInTheDocument();
     expect(screen.getByTestId('queryPipelineExplainer')).toHaveAttribute(
       'data-force-expanded',
       'true'
     );
-    expect(screen.getByTestId('queryPipelineExplainer')).toHaveAttribute('data-layout', 'canvas');
-
-    fireEvent.click(screen.getByTestId('alertingOnboardingNav-setup'));
-    expect(screen.getByTestId('alertingOnboardingCreateSection')).toBeInTheDocument();
-    expect(screen.getByTestId('alertingOnboardingChecklist')).toBeInTheDocument();
-  });
-
-  it('shows expandable advantage cards and Universal vs Classic on the Why Universal section', () => {
-    renderModal();
-
-    fireEvent.click(screen.getByTestId('alertingOnboardingNav-why'));
-    expect(screen.getByTestId('alertingOnboardingAdvantage-query')).toHaveAttribute(
-      'data-expanded'
-    );
-    expect(screen.getByTestId('alertingOnboardingAdvantageExpanded')).toBeInTheDocument();
-    expect(screen.getByTestId('alertingOnboardingSampleQuery')).toBeInTheDocument();
+    expect(screen.getByTestId('queryPipelineExplainer')).toHaveAttribute('data-layout', 'split');
     expect(screen.getByTestId('alertingOnboardingWhenUniversal')).toBeInTheDocument();
     expect(screen.getByTestId('alertingOnboardingWhenClassic')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('alertingOnboardingAdvantage-shape'));
-    expect(screen.getByTestId('alertingOnboardingAdvantage-shape')).toHaveAttribute(
+    fireEvent.click(screen.getByTestId('alertingOnboardingAdvantage-alertAsData'));
+    expect(screen.getByTestId('alertingOnboardingAdvantage-alertAsData')).toHaveAttribute(
       'data-expanded'
     );
-    expect(screen.queryByTestId('alertingOnboardingSampleQuery')).not.toBeInTheDocument();
-    expect(screen.getByTestId('alertingOnboardingAdvantageExpanded')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertingOnboardingQueryPipeline')).not.toBeInTheDocument();
+    expect(screen.getByTestId('alertingOnboardingAlertAsData')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingOnboardingAlertAsDataCard-shape')).toHaveAttribute(
+      'data-selected'
+    );
 
-    fireEvent.click(screen.getByTestId('alertingOnboardingAdvantage-lifecycle'));
-    expect(screen.getByTestId('alertingOnboardingAdvantage-lifecycle')).toHaveAttribute(
-      'data-expanded'
-    );
+    fireEvent.click(screen.getByTestId('alertingOnboardingAlertAsDataCard-lifecycle'));
     expect(screen.getByTestId('alertingOnboardingLifecycleTimelineDemo')).toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('alertingOnboardingAdvantage-lifecycle'));
+    fireEvent.click(screen.getByTestId('alertingOnboardingAdvantage-alertAsData'));
     expect(screen.queryByTestId('alertingOnboardingAdvantageExpanded')).not.toBeInTheDocument();
+  });
+
+  it('merges shape, lifecycle, Discover, and triage into one accordion', () => {
+    renderModal();
+
+    expect(screen.queryByTestId('alertingOnboardingAdvantage-shapeLifecycle')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertingOnboardingAdvantage-data')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertingOnboardingAdvantage-inbox')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('alertingOnboardingAdvantage-alertAsData'));
+    expect(screen.getByTestId('alertingOnboardingAlertAsData')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingOnboardingAlertAsDataCard-shape')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingOnboardingAlertAsDataShapeQuery')).toBeInTheDocument();
+    expect(screen.getByTestId('queryPipelineQueryHighlight')).toHaveTextContent('EVAL severity');
+    expect(screen.getByTestId('alertingOnboardingAlertAsDataCard-lifecycle')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingOnboardingAlertAsDataCard-discover')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingOnboardingAlertAsDataCard-triage')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('alertingOnboardingAlertAsDataCard-triage'));
+    expect(screen.getByTestId('alertingOnboardingAlertAsDataCard-triage')).toHaveAttribute(
+      'data-selected'
+    );
+    expect(screen.getByTestId('alertingOnboardingAlertAsDataCard-shape')).not.toHaveAttribute(
+      'data-selected'
+    );
   });
 
   it('shows Add data in the header when no data views', () => {
@@ -202,7 +243,7 @@ describe('AlertingOnboardingModal', () => {
     expect(screen.getByTestId('alertingOnboardingModalAddData')).toBeInTheDocument();
   });
 
-  it('shows Classic rule count in the checklist when Classic rules exist', () => {
+  it('shows a compact Classic rules status check when Classic rules exist', () => {
     renderModal({
       signalsOverride: {
         hasData: true,
@@ -212,12 +253,23 @@ describe('AlertingOnboardingModal', () => {
       },
     });
 
-    expect(screen.getByText(/12 Classic rules/i)).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('alertingOnboardingNav-setup'));
+    expect(screen.getByText('Classic rules')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertingOnboardingChecklistAction-classic')).not.toBeInTheDocument();
+  });
+
+  it('keeps Data is available compact when data is ready', () => {
+    renderModal();
+
+    fireEvent.click(screen.getByTestId('alertingOnboardingNav-setup'));
+    expect(screen.getByText('Data is available')).toBeInTheDocument();
+    expect(screen.queryByTestId('alertingOnboardingChecklistAction-data')).not.toBeInTheDocument();
   });
 
   it('closes and opens ES|QL create when the measure ES|QL card is clicked', () => {
     const { onClose, onCreateEsqlRule } = renderModal();
 
+    fireEvent.click(screen.getByTestId('alertingOnboardingNav-setup'));
     fireEvent.click(screen.getByTestId('onboardingMeasureChooseEsql'));
 
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -227,6 +279,7 @@ describe('AlertingOnboardingModal', () => {
   it('closes and opens threshold create when the measure Threshold card is clicked', () => {
     const { onClose, onCreateThresholdRule } = renderModal();
 
+    fireEvent.click(screen.getByTestId('alertingOnboardingNav-setup'));
     fireEvent.click(screen.getByTestId('onboardingMeasureChooseThreshold'));
 
     expect(onClose).toHaveBeenCalledTimes(1);
@@ -236,6 +289,7 @@ describe('AlertingOnboardingModal', () => {
   it('suggests Classic when an APM domain is selected', () => {
     const { onBrowseClassic, onClose } = renderModal();
 
+    fireEvent.click(screen.getByTestId('alertingOnboardingNav-setup'));
     fireEvent.focus(screen.getByTestId('onboardingMeasureSearch'));
     fireEvent.click(screen.getByTestId('onboardingMeasureDomain-apm'));
 
@@ -244,19 +298,6 @@ describe('AlertingOnboardingModal', () => {
 
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(onBrowseClassic).toHaveBeenCalledWith('APM');
-  });
-
-  it('shows Coming soon as a badge on the migration callout', () => {
-    renderModal();
-
-    fireEvent.click(screen.getByTestId('alertingOnboardingNav-why'));
-
-    expect(screen.getByTestId('alertingOnboardingMigrationSoon')).toHaveTextContent(
-      /Guided migration from Classic/
-    );
-    expect(screen.getByTestId('alertingOnboardingMigrationSoonBadge')).toHaveTextContent(
-      'Coming soon'
-    );
   });
 
   it('closes from the back control', () => {
@@ -277,34 +318,31 @@ describe('AlertingOnboardingModal', () => {
       },
     });
 
+    fireEvent.click(screen.getByTestId('alertingOnboardingNav-setup'));
     fireEvent.click(screen.getByTestId('alertingOnboardingChecklistAction-data'));
 
     expect(onClose).toHaveBeenCalledTimes(1);
     expect(mockOnboardingNavigate).toHaveBeenCalledWith({});
   });
 
-  it('starts Universal create when Rules step is clicked with no Classic rules', () => {
+  it('shows Start with Kibana Universal Alerting and both create paths', () => {
     renderModal();
 
-    fireEvent.click(screen.getByTestId('alertingOnboardingChecklistAction-classic'));
-
-    expect(screen.getByTestId('alertingOnboardingCreateSection')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('alertingOnboardingNav-setup'));
+    expect(screen.getAllByText('Start with Kibana Universal Alerting').length).toBeGreaterThan(0);
     expect(screen.getByTestId('alertingOnboardingChecklistAction-create')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingOnboardingCreateSection')).toBeInTheDocument();
+    expect(screen.getByTestId('onboardingMeasureCreateSection')).toBeInTheDocument();
+    expect(screen.getByTestId('alertingOnboardingCreateActionPolicy')).toBeInTheDocument();
   });
 
-  it('opens Why Universal for migration guidance when Classic rules exist', () => {
-    renderModal({
-      signalsOverride: {
-        hasData: true,
-        hasClassicRules: true,
-        classicRulesCount: 3,
-        isLoading: false,
-      },
-    });
+  it('closes and opens action policy create from the notification path', () => {
+    const { onClose, onCreateActionPolicy } = renderModal();
 
-    fireEvent.click(screen.getByTestId('alertingOnboardingChecklistAction-classic'));
+    fireEvent.click(screen.getByTestId('alertingOnboardingNav-setup'));
+    fireEvent.click(screen.getByTestId('alertingOnboardingCreateActionPolicy'));
 
-    expect(screen.getByTestId('alertingOnboardingAdvantages')).toBeInTheDocument();
-    expect(screen.getByTestId('alertingOnboardingMigrationSoon')).toBeInTheDocument();
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onCreateActionPolicy).toHaveBeenCalledTimes(1);
   });
 });

@@ -30,7 +30,8 @@
     "@kbn/cases-plugin",
     "@kbn/security-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/ui-ai-components"
+    "@kbn/ui-ai-components",
+    "@kbn/agent-builder-browser"
   ],
   "exclude": ["target/**/*"]
 }
