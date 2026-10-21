@@ -30,7 +30,7 @@ import {
   type GridBox,
   gridHeight,
   PANEL_CHROME,
-  panelBox,
+  panelBodySize,
   readingOrder,
   stackedHeight,
 } from './geometry';
@@ -410,18 +410,10 @@ export const dashboardChartSize =
     if (!owner || !panel) {
       return undefined;
     }
-    const box =
-      owner.layout === 'stack'
-        ? { width, height: stackedHeight(panel.grid) }
-        : panelBox(panel.grid, width);
-    if (panel.frame === 'none') {
-      return { width: Math.max(80, box.width), height: Math.max(60, box.height) };
-    }
-    const chrome = 2 * PANEL_CHROME.padding + (panel.title ? PANEL_CHROME.header : 0) + 2;
-    return {
-      width: Math.max(80, box.width - 2 * PANEL_CHROME.padding - 2),
-      height: Math.max(60, box.height - chrome),
-    };
+    return panelBodySize(
+      { grid: panel.grid, titled: Boolean(panel.title), frameless: panel.frame === 'none' },
+      { width, ...(owner.layout ? { layout: owner.layout } : {}) }
+    );
   };
 
 /** The dashboard pack: Kibana's dashboard grid as one node. */

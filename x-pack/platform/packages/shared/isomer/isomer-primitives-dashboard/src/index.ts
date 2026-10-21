@@ -13,4 +13,4 @@ export {
   dashboardChartSize,
   dashboardPack,
 } from './dashboard';
-export { type GridBox, DASHBOARD_GRID, panelBox, readingOrder } from './geometry';
+export { type GridBox, DASHBOARD_GRID, panelBodySize, panelBox, readingOrder } from './geometry';
