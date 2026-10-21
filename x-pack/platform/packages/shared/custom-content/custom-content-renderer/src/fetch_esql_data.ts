@@ -53,18 +53,10 @@ const INSPECTOR_REQUEST_DESCRIPTION = i18n.translate(
   }
 );
 
-const getInspectorErrorJson = (error: unknown): object => {
-  if (
-    typeof error === 'object' &&
-    error !== null &&
-    'attributes' in error &&
-    typeof error.attributes === 'object' &&
-    error.attributes !== null
-  ) {
-    return error.attributes;
-  }
-  return { message: error instanceof Error ? error.message : String(error) };
-};
+const getInspectorErrorJson = (error: unknown): object =>
+  (error as { attributes?: object } | null)?.attributes ?? {
+    message: error instanceof Error ? error.message : String(error),
+  };
 
 export async function fetchEsqlData(
   search: ISearchGeneric,
@@ -145,8 +137,6 @@ export async function fetchEsqlData(
       ...(esqlVariables?.length ? { variables: esqlVariables } : {}),
     });
 
-    // getESQLResults types this as the search params, but it is the connection request that was sent.
-    // The server strips its body, so the request shown in Inspector is rebuilt from what was sent.
     const requestParams = params as unknown as ConnectionRequestParams;
 
     // A newer fetch has already reset the adapter, so this response must not leave a stale entry.
