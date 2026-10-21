@@ -8,11 +8,13 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
+import { CHAT_MESSAGE_MAX_LENGTH } from '@kbn/agent-builder-common';
 import { ConversationInput } from './conversation_input';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { useAgentModel } from '../../../hooks/agents/use_agent_model';
+import { useAgentBuilderAgentById } from '../../../hooks/agents/use_agent_by_id';
 import {
   useAgentId,
   useConversationReadOnly,
@@ -42,6 +44,9 @@ jest.mock('../../../hooks/agents/use_validate_agent_id', () => ({
 }));
 jest.mock('../../../hooks/agents/use_agent_model', () => ({
   useAgentModel: jest.fn(),
+}));
+jest.mock('../../../hooks/agents/use_agent_by_id', () => ({
+  useAgentBuilderAgentById: jest.fn(),
 }));
 jest.mock('../../../hooks/use_conversation', () => ({
   useAgentId: jest.fn(),
@@ -158,6 +163,7 @@ const mockedUseConversationStream = jest.mocked(useConversationStream);
 const mockedUseAgentBuilderAgents = jest.mocked(useAgentBuilderAgents);
 const mockedUseValidateAgentId = jest.mocked(useValidateAgentId);
 const mockedUseAgentModel = jest.mocked(useAgentModel);
+const mockedUseAgentBuilderAgentById = jest.mocked(useAgentBuilderAgentById);
 const mockedUseAgentId = jest.mocked(useAgentId);
 const mockedUseConversationReadOnly = jest.mocked(useConversationReadOnly);
 const mockedUseConversationTitle = jest.mocked(useConversationTitle);
@@ -206,6 +212,7 @@ describe('ConversationInput', () => {
     mockedUseValidateAgentId.mockReturnValue(((agentId?: string): agentId is string =>
       Boolean(agentId)) as never);
     mockedUseAgentModel.mockReturnValue({ isLoading: false, isLocked: false });
+    mockedUseAgentBuilderAgentById.mockReturnValue({ agent: undefined, isLoading: false } as never);
     mockedUseAgentId.mockReturnValue('elastic-ai-agent');
     mockedUseConversationReadOnly.mockReturnValue({ isReadOnly: false, isLoading: false });
     mockedUseConversationTitle.mockReturnValue({ title: '', isLoading: false } as never);
@@ -240,6 +247,7 @@ describe('ConversationInput', () => {
     mockedUseMessageEditor.mockReturnValue({
       messageEditor: {} as never,
       controller: editorController,
+      overLimitCharacterCount: 0,
     } as never);
   });
 
@@ -275,6 +283,31 @@ describe('ConversationInput', () => {
 
     expect(mockedUseAgentModel).toHaveBeenCalledWith('elastic-ai-agent');
     expect(submitMessage).not.toHaveBeenCalled();
+  });
+
+  describe('message length limit', () => {
+    it('does not show a warning for a message within the limit', () => {
+      renderInput(<ConversationInput />);
+
+      expect(screen.queryByTestId('agentBuilderConversationInputTooLong')).not.toBeInTheDocument();
+    });
+
+    it('shows a warning and blocks submit when the message exceeds the limit', () => {
+      mockedUseMessageEditor.mockReturnValue({
+        messageEditor: {} as never,
+        controller: editorController,
+        overLimitCharacterCount: CHAT_MESSAGE_MAX_LENGTH + 1,
+      } as never);
+
+      renderInput(<ConversationInput />);
+      fireEvent.click(screen.getByTestId('mock-message-editor-submit'));
+
+      expect(screen.getByTestId('agentBuilderConversationInputTooLong')).toHaveTextContent(
+        'Message is too long'
+      );
+      expect(submitMessage).not.toHaveBeenCalled();
+      expect(editorController.clear).not.toHaveBeenCalled();
+    });
   });
 
   describe('trigger mode selector', () => {

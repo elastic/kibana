@@ -18,47 +18,19 @@ describe('HydrateAlertDataStep', () => {
     expect(new HydrateAlertDataStep(queryService).name).toBe('hydrate_alert_data');
   });
 
-  it('returns continue without querying when dispatchable is empty', async () => {
+  it.each([
+    ['empty', { dispatchable: [] }],
+    ['absent', {}],
+  ])('returns continue without querying when dispatchable is %s', async (_, overrides) => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
     const step = new HydrateAlertDataStep(queryService);
 
-    const state = createDispatcherPipelineState({ dispatchable: [] });
+    const state = createDispatcherPipelineState(overrides);
     const result = await step.execute(state, loggerService);
 
-    expect(result.type).toBe('continue');
+    expect(result).toEqual({ type: 'continue' });
     expect(mockEsClient.esql.query).not.toHaveBeenCalled();
-  });
-
-  it('returns continue without querying when dispatchable is absent', async () => {
-    const { queryService, mockEsClient } = createQueryService();
-    const { loggerService } = createLoggerService();
-    const step = new HydrateAlertDataStep(queryService);
-
-    const state = createDispatcherPipelineState();
-    const result = await step.execute(state, loggerService);
-
-    expect(result.type).toBe('continue');
-    expect(mockEsClient.esql.query).not.toHaveBeenCalled();
-  });
-
-  it('attaches data to the matching alert', async () => {
-    const { queryService, mockEsClient } = createQueryService();
-    const { loggerService } = createLoggerService();
-    const step = new HydrateAlertDataStep(queryService);
-
-    const alerts = [createAlert({ alert_id: 'ep-1', rule_id: 'r1' })];
-
-    mockEsClient.esql.query.mockResolvedValueOnce(
-      createAlertDataResponse([{ alert_id: 'ep-1', data_json: '{"host":"server-01","count":3}' }])
-    );
-
-    const state = createDispatcherPipelineState({ dispatchable: alerts });
-    const result = await step.execute(state, loggerService);
-
-    expect(result.type).toBe('continue');
-    if (result.type !== 'continue') return;
-    expect(result.data?.triage?.dispatchable[0].data).toEqual({ host: 'server-01', count: 3 });
   });
 
   it('un-flattens dot-separated keys in data_json', async () => {
@@ -182,7 +154,7 @@ describe('HydrateAlertDataStep', () => {
     expect(calledQuery).toContain('"2026-01-22T07:10:00.000Z"');
   });
 
-  it('attaches data to each alert independently', async () => {
+  it('attaches data to each alert by alert_id regardless of row order', async () => {
     const { queryService, mockEsClient } = createQueryService();
     const { loggerService } = createLoggerService();
     const step = new HydrateAlertDataStep(queryService);
@@ -194,8 +166,8 @@ describe('HydrateAlertDataStep', () => {
 
     mockEsClient.esql.query.mockResolvedValueOnce(
       createAlertDataResponse([
-        { alert_id: 'ep-1', data_json: '{"x":1}' },
         { alert_id: 'ep-2', data_json: '{"y":2}' },
+        { alert_id: 'ep-1', data_json: '{"x":1}' },
       ])
     );
 

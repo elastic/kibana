@@ -12,6 +12,7 @@ import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { AGENT_BUILDER_PRE_PROMPT_WORKFLOW_IDS } from '@kbn/management-settings-ids';
 import { ExecutionStatus } from '@kbn/workflows';
+import type { ExecutionConversationAccess } from '@kbn/agent-builder-server';
 import { runBeforeAgentWorkflows } from './run_before_agent_workflows';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import { getCurrentSpaceId } from '../../utils/spaces';
@@ -35,11 +36,17 @@ describe('runBeforeAgentWorkflows', () => {
   const logger = loggingSystemMock.createLogger();
 
   const createContext = (
-    overrides: { conversationId?: string; agentId?: string; roundExecutionIndex?: number } = {}
+    overrides: {
+      conversationId?: string;
+      agentId?: string;
+      roundExecutionIndex?: number;
+      conversationAccess?: ExecutionConversationAccess;
+    } = {}
   ) => ({
     request,
     nextInput: { message: 'hello', attachments: [] },
     agentId: 'agent-1',
+    conversationAccess: 'readWrite' as const,
     ...overrides,
   });
 
@@ -257,6 +264,29 @@ describe('runBeforeAgentWorkflows', () => {
         workflowParams: expect.objectContaining({ round_execution_index: 1 }),
       })
     );
+  });
+
+  it('still runs pre-execution workflows for an ephemeral run', async () => {
+    const context = createContext({
+      conversationId: 'conv-1',
+      conversationAccess: 'readOnly',
+    });
+    const { workflowApi, getInternalServices } = createDeps();
+    executeWorkflowMock.mockResolvedValue({
+      success: true,
+      execution: {
+        execution_id: 'exec-ephemeral',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: { model_context: 'ephemeral context' },
+      },
+    });
+
+    await expect(
+      runBeforeAgentWorkflows({ context, workflowApi, getInternalServices, logger })
+    ).resolves.toEqual({ preExecutionWorkflow: { model_context: 'ephemeral context' } });
+    expect(executeWorkflowMock).toHaveBeenCalledTimes(1);
   });
 
   it('accumulates model_context without replacing the user message', async () => {

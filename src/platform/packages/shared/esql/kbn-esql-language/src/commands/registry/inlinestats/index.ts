@@ -25,6 +25,7 @@ export const inlineStatsCommand = {
   name: 'inline stats',
   methods: inlineStatsCommandMethods,
   metadata: {
+    docPreserving: true,
     hidden: false,
     preview: false,
     description: i18n.translate('kbn-esql-language.esql.definitions.inlineStatsDoc', {

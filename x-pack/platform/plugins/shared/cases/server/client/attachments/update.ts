@@ -73,13 +73,13 @@ export async function update(
     const caseRef = myComment.references.find((c) => c.type === CASE_SAVED_OBJECT);
     if (caseRef == null || (caseRef != null && caseRef.id !== model.savedObject.id)) {
       throw Boom.notFound(
-        `This comment ${queryCommentId} does not exist in ${model.savedObject.id}).`
+        `This comment ${queryCommentId} does not exist in case ${model.savedObject.id}.`
       );
     }
 
     if (queryCommentVersion !== myComment.version) {
       throw Boom.conflict(
-        'This case has been updated. Please refresh before saving additional updates.'
+        'This attachment has been updated. Please refresh before saving additional updates.'
       );
     }
 

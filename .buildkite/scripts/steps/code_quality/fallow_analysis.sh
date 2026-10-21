@@ -79,7 +79,7 @@ else
   echo "--- Skip saving snapshot (FALLOW_SAVE_SNAPSHOT not set to 'true')"
 fi
 
-if [ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ]; then
+if [ "${ELASTIC_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ] || [ "${KIBANA_SLACK_NOTIFICATIONS_ENABLED:-}" = "true" ]; then
   echo "--- Send Slack notification"
   CHANNEL="${SLACK_NOTIFICATIONS_CHANNEL:-}"
   if [ -z "$CHANNEL" ]; then
@@ -102,7 +102,7 @@ Build: ${BUILD_URL}"
       echo "  - label: \":slack: Code Quality Notify\""
       echo "    command: \"echo 'Code Quality report sent to Slack'\""
       echo "    agents:"
-      echo "      image: family/kibana-ubuntu-2404"
+      echo "      image: family/kibana-minimal-ubuntu-2604"
       echo "      imageProject: elastic-images-prod"
       echo "      provider: gcp"
       echo "      machineType: n2-standard-2"
