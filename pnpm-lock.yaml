@@ -2534,6 +2534,9 @@ importers:
       '@kbn/isomer-components':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer-components
+      '@kbn/isomer-dashboards-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/private/isomer_dashboards
       '@kbn/isomer-lowering':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/isomer/isomer-lowering
@@ -9353,6 +9356,8 @@ importers:
   x-pack/platform/plugins/private/indices_metadata: {}
 
   x-pack/platform/plugins/private/intercepts: {}
+
+  x-pack/platform/plugins/private/isomer_dashboards: {}
 
   x-pack/platform/plugins/private/license_api_guard: {}
 

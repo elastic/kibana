@@ -1,0 +1,14 @@
+{
+  "type": "plugin",
+  "id": "@kbn/isomer-dashboards-plugin",
+  "owner": ["@elastic/appex-sharedux"],
+  "group": "platform",
+  "visibility": "private",
+  "description": "Demo only: exports a dashboard as a PDF drawn by Isomer, and as a mobile view.",
+  "plugin": {
+    "id": "isomerDashboards",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": ["isomer", "share"]
+  }
+}
