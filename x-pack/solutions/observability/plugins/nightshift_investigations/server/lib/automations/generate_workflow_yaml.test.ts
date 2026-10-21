@@ -481,7 +481,8 @@ describe('generateWorkflowYaml', () => {
 
       it('rejects Slack filters longer than a trigger condition allows', () => {
         const bots = Array.from({ length: 30 }, (_, i) => `A${String(i).padStart(10, '0')}`);
-        expect(() => generateWorkflowYaml('auto-123', slackAutomation(slackRow({ bots })))).toThrow(
+        const automation = slackAutomation(slackRow({ bots }));
+        expect(() => generateWorkflowYaml({ automationId: 'auto-123', automation })).toThrow(
           'too long'
         );
       });
