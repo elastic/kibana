@@ -60,8 +60,7 @@ import type { RuleUnbackedFilter } from './types';
 
 const SEARCH_SIZE_LIMIT = 10_000;
 const QUERY_FEATURE_ID = 'query.features.id';
-// `FUSE` passes `label` through as `FIRST(label, NULL)`, so a fused row carries it iff the semantic
-// branch contributed that row; the tie fallback gates on it.
+// `FUSE` preserves this label only when the semantic branch contributes the row.
 const RANK_LABEL_COLUMN = 'label';
 const SEMANTIC_LABEL = 'semantic';
 
@@ -255,29 +254,27 @@ export class IndicatorSearcher {
       ruleBackedFilter
     );
 
-    const docs = await this.revisionReader.fetchLatestRevisions(where, postGroupingWhere);
+    const latestRevisions = await this.revisionReader.fetchLatestRevisionEntries(
+      where,
+      postGroupingWhere
+    );
+    const docs = latestRevisions.map(({ doc }) => doc);
     const docById = new Map(docs.map((d) => [`${d['source.id']}:${d.type}:${d.id}`, d]));
 
-    // Phase 2: rank via ES|QL on the latest doc subset. We re-issue a query
-    // constrained by the (source.id, type, id) tuples from phase 1.
     if (docById.size === 0) {
       return { hits: [] };
     }
 
-    const ids = Array.from(new Set(docs.map((d) => d.id)));
+    const latestRevisionIds = latestRevisions.map(({ esId }) => esId);
     const limit = options.limit ?? SEARCH_SIZE_LIMIT;
     // `buildRankQuery` issues its own FROM and bypasses `RevisionReader`, so the space
     // filter has to be re-applied here.
     const phase2Where = andWhere(
-      combineWhere(
-        inPredicate(ID, ids),
-        inPredicate(SOURCE_ID, sourceIds),
-        inPredicate(TYPE, options.types ?? [])
-      ),
+      combineWhere(inPredicate(SOURCE_ID, sourceIds), inPredicate(TYPE, options.types ?? [])),
       inSpace(this.space)
     );
 
-    const rankedRows = await this.rankWithTieFallback(mode, (semanticMinScore) =>
+    const rankedRows = await this.rankWithTieFallback(mode, latestRevisionIds, (semanticMinScore) =>
       this.buildRankQuery(
         mode,
         phase2Where,
@@ -327,32 +324,22 @@ export class IndicatorSearcher {
   }
 
   /**
-   * Minmax normalizes an all-tied semantic branch to 0.0 (Elasticsearch `MinMaxNormalizer` returns
-   * 0.0 when `min == max`), so a positive threshold drops every row. The branch ties when it holds
-   * one row (`min(semanticMatches, limit) == 1`) or identical copies of one indicator. A
-   * non-degenerate branch always keeps its 1.0 row, so no semantic row after thresholding means
-   * "no match" or that tie, and retrying without the threshold returns exactly the tied rows. The
-   * gate is a semantic-labeled row rather than an empty page because in hybrid mode a keyword hit
-   * would mask the tied branch.
-   *
-   * The gate reads the fused page after the final `LIMIT`, so it assumes a non-degenerate branch's
-   * rank-1 row survives the cut. That holds because both branches are sorted before `FUSE RRF`
-   * (rank is arrival order) and carry equal weight: the semantic rank-1 row scores
-   * `1 / (rank_constant + 1)`, ties keyword rank-1 and beats every other row, so `LIMIT >= 2` keeps
-   * it and `LIMIT 1` is the degenerate case. Weights, a third branch, or an unsorted branch break
-   * this, and a false retry drops the threshold on a legitimately non-degenerate branch.
-   *
-   * Only the all-tied case is recovered; with two distinct scores the lower still normalizes to
-   * 0.0. Once `INLINE STATS` is allowed after `LIMIT`
-   * (https://github.com/elastic/elasticsearch/issues/135543) the branch can normalize itself with
-   * `CASE(max == min, 1.0, ...)` and this retry goes away.
+   * Retries when minmax collapses an all-tied semantic branch to zero.
+   * The gate assumes equal-weight, two-branch RRF keeps semantic rank one on the final page.
+   * Replace the retry once https://github.com/elastic/elasticsearch/issues/135543 is resolved.
    */
   private async rankWithTieFallback(
     mode: SearchMode,
+    latestRevisionIds: string[],
     build: (semanticMinScore: number) => ComposerQuery
   ): Promise<RankedIndicatorRow[]> {
+    const filter = { ids: { values: latestRevisionIds } };
     const rankedRows = esqlToObjects<RankedIndicatorRow>(
-      await queryEsql({ esClient: this.esClient, query: build(this.config.semantic_min_score) })
+      await queryEsql({
+        esClient: this.esClient,
+        query: build(this.config.semantic_min_score),
+        filter,
+      })
     );
     if (mode === 'keyword' || rankedRows.some((row) => row[RANK_LABEL_COLUMN] === SEMANTIC_LABEL)) {
       return rankedRows;
@@ -361,7 +348,7 @@ export class IndicatorSearcher {
       `KnowledgeIndicator ${mode} search: semantic branch contributed no rows above ${this.config.semantic_min_score}; retrying without the threshold`
     );
     return esqlToObjects<RankedIndicatorRow>(
-      await queryEsql({ esClient: this.esClient, query: build(0) })
+      await queryEsql({ esClient: this.esClient, query: build(0), filter })
     );
   }
 
