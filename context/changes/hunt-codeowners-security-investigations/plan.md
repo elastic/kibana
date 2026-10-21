@@ -387,5 +387,5 @@ These files touch all AlertZero Workers (Triage, Attack Discovery, Forensics, De
 
 #### Automated
 
-- [x] 3.1 Expand `# AlertZero Hunt Watch services` CODEOWNERS block
-- [x] 3.2 Ownership resolution + CODEOWNERS generator + team validation + eslint pass
+- [x] 3.1 Expand `# AlertZero Hunt Watch services` CODEOWNERS block — d4f48b85f8c0
+- [x] 3.2 Ownership resolution + CODEOWNERS generator + team validation + eslint pass — d4f48b85f8c0

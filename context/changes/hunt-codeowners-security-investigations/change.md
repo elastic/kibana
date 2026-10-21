@@ -1,6 +1,6 @@
 # hunt-codeowners-security-investigations
 
-status: implementing
+status: implemented
 updated: 2026-10-21
 
 ## Summary
@@ -18,3 +18,4 @@ by PR 297827, which pinged only security-solution and workflows-eng.
 - Branch / worktree: `hunt-codeowners-security-investigations` at `~/dev/kibana.worktrees/hunt-codeowners-security-investigations`
 - Phase 1 commit: f242bb12d30f
 - Phase 2 commit: 28aa3bab5d6d
+- Phase 3 commit: d4f48b85f8c0
