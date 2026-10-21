@@ -77,7 +77,9 @@ triggers:
             Document ids of the DETECTION alerts the Attack Discovery correlated.
             Not the Attack Discovery's own id — that is `attack_discovery_id`.
             Nothing below ever closes these: an attack being closed says nothing
-            about the alerts underneath it.
+            about the alerts underneath it. A true-positive or inconclusive verdict
+            acknowledges them and tags them `az:ad_correlated`, which keeps them out
+            of the Worker's next runs.
         summary_markdown:
           type: string
           maxLength: 8000
@@ -157,6 +159,10 @@ consts:
   # hold, so another writer can still add to it, and few enough pills for the
   # landing page to stay readable.
   impact_entity_cap: 50
+  # Marks the detection alerts behind an escalated attack as correlated by this
+  # Worker, following the `az:` convention of the Alert Triage Worker. The batched
+  # generation query excludes alerts carrying it; keep the literal there in sync.
+  ad_correlated_tag: az:ad_correlated
 steps:
   # kibana-q0t5: the Investigation id is a pure function of the attack, so every
   # execution that reviews this attack addresses the SAME Investigation — a hand
@@ -274,6 +280,16 @@ steps:
     type: ai.conversation.metadata.read
     with:
       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+
+  # Telemetry: once the Investigation exists. A create error here means a re-review.
+  - name: report_review_started
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: ad_worker_review_started
+      investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      is_rereview: "${{ steps.open_investigation.error != blank }}"
 
   - name: append_workflow_execution
     type: investigations.appendWorkflowExecutionId
@@ -610,6 +626,16 @@ steps:
     on-failure:
       continue: true
 
+  # Reported for every verdict, including `failed`.
+  - name: report_analysis_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: ad_worker_analysis_completed
+      verdict: "{{ steps.resolve_analysis.output.verdict }}"
+      analysis_error: "${{ steps.run_fp_tp_analysis.error != blank }}"
+
   - name: journal_analysis_finished
     type: workflow.execute
     with:
@@ -664,6 +690,16 @@ steps:
                   without escalation.
             on-failure:
               continue: true
+
+          - name: report_investigation_closed_false_positive
+            type: alertzero.reportWorkerOutcome
+            if: "${{ steps.close_investigation_false_positive.error == blank and steps.close_investigation_false_positive.output.changed_fields contains 'status' }}"
+            on-failure:
+              continue: true
+            with:
+              event: worker_investigation_closed
+              investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+              close_reason: false_positive
 
           # `reason: false_positive` is the verdict, recorded on the attack itself.
           # The claim is about the ATTACK — this narrative is not supported by its
@@ -859,6 +895,160 @@ steps:
         classification: "{{ steps.resolve_analysis.output.verdict }}"
         workflow_execution_id: "{{ execution.id }}"
 
+  # The correlated detection alerts, retired from the Worker's queue. Written BEFORE
+  # the gate, not after the decision: the gate can park this run for up to 168h, and
+  # every Worker run in that window would otherwise correlate the same alerts again
+  # and persist a near-duplicate attack with an Investigation of its own.
+  #
+  # Tagged first, because the tag is what the generation query excludes on, so a
+  # failed status write after it still keeps the alerts out of the next run.
+  #
+  # Bookkeeping, not the lifecycle: no step here is a reason to cancel the escalation
+  # the verdict calls for, so each retries and then continues. A write can return 200
+  # and change nothing, so `verify_alerts_retired` reads the alerts back and the
+  # journal note says what actually landed. One call each, because `alert_ids` holds
+  # at most 1000 ids. The `alert_ids` guard is required: the tag write rejects an
+  # empty id list.
+  #
+  # Every alert is tagged, closed ones included: a tag changes no status, and it is
+  # what traces an alert to this Worker.
+  - name: tag_correlated_alerts
+    type: security.setAlertTags
+    if: >-
+      ${{ steps.resolve_escalation.output.escalate == true
+        and inputs.alert_ids != blank }}
+    with:
+      alert_ids: "${{ inputs.alert_ids }}"
+      # Listed item by item because security.setAlertTags takes an array here and its
+      # input schema is a union, so a whole-array template fails workflow validation.
+      tags_to_add:
+        - "{{ consts.ad_correlated_tag }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
+  # Only the alerts that are still `open` are acknowledged. The ids were chosen at
+  # generation, minutes before the verdict, and in that window an analyst or the
+  # Alert Triage Worker can close one, typically as a false positive. The status
+  # script drops `workflow_reason`, so acknowledging a closed alert would reopen it
+  # and erase a reason the Rule Tuning Worker harvests on.
+  #
+  # By query, so the status check and the write are one update-by-query: an alert
+  # closed before it starts does not match, and one closed while it runs is skipped
+  # as a version conflict. `conflicts: proceed` skips rather than failing, so the
+  # retry fires only on a real error and re-checks the status when it does. A by-id
+  # write (`security.setAlertStatus`) has no status condition, and its retry after a
+  # conflict would acknowledge exactly the alert that was just closed.
+  #
+  # `kibana.SetAlertsStatus` calls the same route as `security.setAlertStatus`, with
+  # the same privilege check, audit logging and status-changed event; only it can send
+  # the route's by-query body. An alert another writer updates mid-flight stays
+  # `open`, which the read-back reports.
+  - name: acknowledge_correlated_alerts
+    type: kibana.SetAlertsStatus
+    if: >-
+      ${{ steps.resolve_escalation.output.escalate == true
+        and inputs.alert_ids != blank }}
+    timeout: "60s"
+    with:
+      status: acknowledged
+      conflicts: proceed
+      query:
+        bool:
+          filter:
+            - ids:
+                values: "${{ inputs.alert_ids }}"
+            - term:
+                kibana.alert.workflow_status: open
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
+  # Both writes refresh the index, so this read sees them.
+  - name: verify_alerts_retired
+    type: elasticsearch.search
+    if: >-
+      ${{ steps.resolve_escalation.output.escalate == true
+        and inputs.alert_ids != blank }}
+    with:
+      index: .alerts-security.alerts-{{ workflow.spaceId }}
+      size: 0
+      track_total_hits: true
+      query:
+        ids:
+          values: "${{ inputs.alert_ids }}"
+      aggregations:
+        tagged:
+          filter:
+            term:
+              kibana.alert.workflow_tags: "{{ consts.ad_correlated_tag }}"
+        open:
+          filter:
+            term:
+              kibana.alert.workflow_status: open
+        acknowledged:
+          filter:
+            term:
+              kibana.alert.workflow_status: acknowledged
+        closed:
+          filter:
+            term:
+              kibana.alert.workflow_status: closed
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
+  # Counts resolved once, because Liquid cannot compare the result of a filter chain.
+  - name: resolve_alerts_retired
+    type: data.set
+    if: >-
+      ${{ steps.resolve_escalation.output.escalate == true
+        and inputs.alert_ids != blank }}
+    with:
+      read: "${{ steps.verify_alerts_retired.output.hits != null }}"
+      requested: "${{ inputs.alert_ids | size }}"
+      tagged: "${{ steps.verify_alerts_retired.output.aggregations.tagged.doc_count | default: 0 }}"
+      open: "${{ steps.verify_alerts_retired.output.aggregations.open.doc_count | default: 0 }}"
+      acknowledged: "${{ steps.verify_alerts_retired.output.aggregations.acknowledged.doc_count | default: 0 }}"
+      closed: "${{ steps.verify_alerts_retired.output.aggregations.closed.doc_count | default: 0 }}"
+
+  # Reports the alerts' state as read back, never a write's error message: an internal
+  # failure's message would land in the Investigation, where every later agent round
+  # reads it as user input. The execution history keeps the message.
+  - name: journal_alerts_retired
+    type: workflow.execute
+    if: >-
+      ${{ steps.resolve_escalation.output.escalate == true
+        and inputs.alert_ids != blank }}
+    with:
+      workflow-id: system-alertzero-journal-note
+      run-as-mode: inherit
+      inputs:
+        conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+        message: >-
+          {%- assign retired = steps.resolve_alerts_retired.output -%}
+          {% if retired.read != true %}Could not read the
+          {{ retired.requested }} correlated detection alert(s) back, so whether they
+          were tagged {{ consts.ad_correlated_tag }} and acknowledged is unknown. See
+          review execution {{ execution.id }}.{% else %}Tagged {{ retired.tagged }} of
+          {{ retired.requested }} correlated detection alert(s)
+          {{ consts.ad_correlated_tag }}{% if retired.tagged < retired.requested %}; later
+          Worker runs may correlate the other {{ retired.requested | minus: retired.tagged }}
+          again{% else %}, so later Worker runs skip them{% endif %}. Acknowledged:
+          {{ retired.acknowledged }}{% if retired.closed > 0 %}; already closed and left as
+          they were: {{ retired.closed }}{% endif %}{% if retired.open > 0 %}; still open,
+          because acknowledging them did not land: {{ retired.open }}{% endif %}.{% if
+          retired.tagged < retired.requested or retired.open > 0 %} See review execution
+          {{ execution.id }}.{% endif %}{% endif %}
+    on-failure:
+      continue: true
+
   # One gate for both escalating verdicts. The shared workflow creates the proposal,
   # parks on the analyst decision unless `autoApprove` lets it through, and runs the
   # handoff action on approval.
@@ -920,6 +1110,27 @@ steps:
       declined: "${{ steps.escalation_gate.output.decision == 'dismissed' }}"
       expired: "${{ steps.escalation_gate.output.status == 'expired' }}"
 
+  # Only for an escalated review; the outcome follows the journal note's order.
+  - name: report_handoff_resolved
+    type: alertzero.reportWorkerOutcome
+    if: "${{ steps.resolve_escalation.output.escalate == true }}"
+    on-failure:
+      continue: true
+    with:
+      event: ad_worker_handoff_resolved
+      outcome: |-
+        {%- if steps.record_decision.output.approved == true -%}
+        approved
+        {%- elsif steps.record_decision.output.declined == true -%}
+        dismissed
+        {%- elsif steps.record_decision.output.expired == true -%}
+        expired
+        {%- elsif steps.escalation_gate.output.decision == 'approved' -%}
+        approved_action_failed
+        {%- endif -%}
+      verdict: "{{ steps.resolve_analysis.output.verdict }}"
+      auto_approve_requested: "${{ steps.resolve_escalation.output.auto_approve }}"
+
   - name: journal_decision_recorded
     type: workflow.execute
     if: "${{ steps.resolve_escalation.output.escalate == true }}"
@@ -977,6 +1188,16 @@ steps:
           {{ steps.read_proposal_decision.output.rationale }}
     on-failure:
       continue: true
+
+  - name: report_investigation_closed_declined
+    type: alertzero.reportWorkerOutcome
+    if: "${{ steps.record_decision.output.declined == true and steps.close_investigation_declined.error == blank and steps.close_investigation_declined.output.changed_fields contains 'status' }}"
+    on-failure:
+      continue: true
+    with:
+      event: worker_investigation_closed
+      investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      close_reason: other
 
   # Closed with NO `reason`, unlike the false-positive branch. There the analysis
   # produced a verdict about the attack, so `false_positive` records it. Here the

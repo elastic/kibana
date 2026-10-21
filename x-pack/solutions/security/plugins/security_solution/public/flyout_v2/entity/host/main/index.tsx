@@ -158,7 +158,7 @@ export const Host: FC<HostProps> = memo(function Host({
     entityType: 'host',
     skip: !entityStoreV2Enabled || isInitializing,
   });
-  const { aliasRecords } = entityFromStoreResult;
+  const { aliasRecords, aliasCount } = entityFromStoreResult;
   const isGroupView = isEntityGroupView(aliasRecords);
 
   const documentEntityIdentifiers = useMemo<IdentityFields>(() => {
@@ -406,6 +406,7 @@ export const Host: FC<HostProps> = memo(function Host({
             entityType: 'host',
             entityName: hostName,
             scopeId,
+            mode,
             onShowEntity: onShowHost,
             onShowRelatedEntity: onShowRelatedEntityFromResolution,
             title: hostName,
@@ -443,6 +444,7 @@ export const Host: FC<HostProps> = memo(function Host({
           lastSeen={observedHost.lastSeen}
           entityId={panelDisplayEntityId}
           aliasRecords={aliasRecords}
+          aliasCount={aliasCount}
           mode={mode}
           identityFields={documentEntityIdentifiers}
           isEntityInStore={!!observedHost.entityRecord}

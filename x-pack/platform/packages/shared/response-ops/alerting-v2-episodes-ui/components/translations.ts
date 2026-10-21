@@ -83,3 +83,10 @@ export const RULE_CELL_RULE_ID_COPIED = i18n.translate(
     defaultMessage: 'Rule ID copied',
   }
 );
+
+export const SUPPRESSED_BY_MAINTENANCE_WINDOW = i18n.translate(
+  'xpack.alertingV2EpisodesUi.suppressedCell.suppressedByMWBadge',
+  {
+    defaultMessage: 'Suppressed by maintenance window',
+  }
+);
