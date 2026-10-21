@@ -30,7 +30,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const find = getService('find');
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
-  const toasts = getService('toasts');
 
   async function createConnectorManualCleanup(overwrites: Record<string, any> = {}) {
     const { body: createdConnector } = await supertest
@@ -305,11 +304,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Edit rule button', function () {
-      const ruleName = uuidv4();
-      const updatedRuleName = `Changed Rule Name ${ruleName}`;
+      let ruleName: string;
+      let updatedRuleName: string;
       let rule: { id: string; name: string };
 
-      before(async () => {
+      beforeEach(async () => {
+        ruleName = uuidv4();
+        updatedRuleName = `Changed Rule Name ${ruleName}`;
+
         rule = await createAlwaysFiringRule({
           name: ruleName,
           rule_type_id: '.index-threshold',
@@ -359,10 +361,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         // click on first rule
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(ruleName);
 
-        const actionsButton = await testSubjects.find('app-menu-overflow-button');
-        await actionsButton.click();
-        const editButton = await testSubjects.find('openEditRuleFlyoutButton');
-        await editButton.click();
+        await testSubjects.clickWhenNotDisabled('app-menu-overflow-button');
+        await testSubjects.clickWhenNotDisabled('openEditRuleFlyoutButton');
         expect(await testSubjects.exists('hasActionsDisabled')).to.eql(false);
 
         await testSubjects.setValue('ruleDetailsNameInput', updatedRuleName, {
@@ -370,10 +370,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         await find.clickByCssSelector('[data-test-subj="rulePageFooterSaveButton"]:not(disabled)');
-
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql(`Updated "${updatedRuleName}"`);
-        expect((await getRule(rule.id)).name).to.eql(updatedRuleName);
+        await retry.try(async () => {
+          const { name } = await getRule(rule.id);
+          expect(name).to.eql(updatedRuleName);
+        });
       });
 
       it('should reset rule when canceling an edit', async () => {
@@ -390,14 +390,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
 
         // click on first rule
-        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(updatedRuleName);
+        await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(ruleName);
 
-        const actionsButton = await testSubjects.find('app-menu-overflow-button');
-        await actionsButton.click();
-        const editButton = await testSubjects.find('openEditRuleFlyoutButton');
-        await editButton.click();
+        await testSubjects.clickWhenNotDisabled('app-menu-overflow-button');
+        await testSubjects.clickWhenNotDisabled('openEditRuleFlyoutButton');
 
-        await testSubjects.setValue('ruleDetailsNameInput', uuidv4(), {
+        await testSubjects.setValue('ruleDetailsNameInput', updatedRuleName, {
           clearWithKeyboard: true,
         });
 
@@ -406,12 +404,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('confirmRuleCloseModal > confirmModalConfirmButton');
         await find.waitForDeletedByCssSelector('[data-test-subj="rulePageFooterCancelButton"]');
 
-        await actionsButton.click();
-        await testSubjects.click('openEditRuleFlyoutButton');
-
-        const nameInputAfterCancel = await testSubjects.find('ruleDetailsNameInput');
-        const textAfterCancel = await nameInputAfterCancel.getAttribute('value');
-        expect(textAfterCancel).to.eql(updatedRuleName);
+        await retry.try(async () => {
+          const { name } = await getRule(rule.id);
+          expect(name).to.eql(ruleName);
+        });
       });
     });
 
@@ -461,8 +457,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
         await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-        const toastTitle = await toasts.getTitleAndDismiss();
-        expect(toastTitle).to.eql('Deleted 1 connector');
+        await supertest.get(`/api/actions/connector/${connector.id}`).expect(404);
 
         // Wait to ensure the table is finished loading
         await pageObjects.triggersActionsUI.tableFinishedLoading();
