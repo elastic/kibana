@@ -1534,6 +1534,7 @@
     "@kbn/import-locator": "workspace:*",
     "@kbn/import-resolver": "workspace:*",
     "@kbn/inference-cli": "workspace:*",
+    "@kbn/jest": "workspace:*",
     "@kbn/jest-serializers": "workspace:*",
     "@kbn/journeys": "workspace:*",
     "@kbn/json-ast": "workspace:*",

@@ -37,7 +37,7 @@ module.exports = {
   reporters: [
     'default',
     [
-      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/junit_reporter',
+      '<rootDir>/src/platform/packages/shared/kbn-jest/src/junit_reporter',
       {
         rootDirectory: '.',
       },
@@ -45,7 +45,7 @@ module.exports = {
     ...(process.env.TEST_GROUP_TYPE_UNIT
       ? [
           [
-            '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/ci_stats_jest_reporter.ts',
+            '<rootDir>/src/platform/packages/shared/kbn-jest/src/ci_stats_jest_reporter.ts',
             {
               testGroupType: process.env.TEST_GROUP_TYPE_UNIT,
             },
@@ -65,20 +65,20 @@ module.exports = {
   // The paths to modules that run some code to configure or set up the testing environment before each test
   setupFiles: [
     '<rootDir>/src/setup_node_env/polyfill.ts',
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/polyfills.jsdom.js',
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/enzyme.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/polyfills.jsdom.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/enzyme.js',
   ],
 
   // A list of paths to modules that run some code to configure or set up the testing framework before each test
   setupFilesAfterEnv: [
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/setup_test.js',
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.moment_timezone.js',
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.eui.js',
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/react_testing_library.js',
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js',
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.vega.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/setup_test.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/mocks.moment_timezone.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/mocks.eui.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/react_testing_library.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/mocks.kbn_i18n_react.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/mocks.vega.js',
     process.env.CI
-      ? '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/disable_console_logs.js'
+      ? '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/disable_console_logs.js'
       : [],
   ].flat(),
 
@@ -91,8 +91,8 @@ module.exports = {
   snapshotSerializers: [
     '<rootDir>/src/platform/packages/shared/react/kibana_mount/test_helpers/react_mount_serializer.ts',
     'enzyme-to-json/serializer',
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/enzyme_emotion_serializer.js',
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/setup/emotion.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/enzyme_emotion_serializer.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/setup/emotion.js',
   ],
 
   // The test environment that will be used for testing
@@ -111,10 +111,10 @@ module.exports = {
   // A map from regular expressions to paths to transformers
   transform: {
     '^.+\\.(js|mjs|tsx?)$':
-      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/swc/index.js',
+      '<rootDir>/src/platform/packages/shared/kbn-jest/src/transforms/swc/index.js',
     '^.+\\.(txt|html)?$':
-      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/raw.js',
-    '^.+\\.peggy?$': '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/transforms/peggy.js',
+      '<rootDir>/src/platform/packages/shared/kbn-jest/src/transforms/raw.js',
+    '^.+\\.peggy?$': '<rootDir>/src/platform/packages/shared/kbn-jest/src/transforms/peggy.js',
   },
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files will skip transformation
@@ -139,7 +139,7 @@ module.exports = {
 
   watchPathIgnorePatterns: ['.*/__tmp__/.*'],
 
-  resolver: '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/resolver.js',
+  resolver: '<rootDir>/src/platform/packages/shared/kbn-jest/src/resolver.js',
 
   // Workaround to "TypeError: Cannot assign to read only property 'structuredClone' of object '[object global]'"
   // This happens when we run jest tests with --watch after node20+
@@ -148,5 +148,5 @@ module.exports = {
   },
 
   testResultsProcessor:
-    '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/result_processors/logging_result_processor.js',
+    '<rootDir>/src/platform/packages/shared/kbn-jest/src/result_processors/logging_result_processor.js',
 };

@@ -585,6 +585,7 @@ x-pack/platform/plugins/private/intercepts @elastic/appex-sharedux
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-io-ts-utils @elastic/obs-knowledge-team
 x-pack/solutions/search/packages/kbn-ipynb @elastic/search-kibana
+src/platform/packages/shared/kbn-jest @elastic/kibana-operations
 src/platform/packages/private/kbn-jest-serializers @elastic/kibana-operations
 src/platform/packages/private/kbn-journeys @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-json-ast @elastic/kibana-operations
@@ -1917,8 +1918,8 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /config/serverless.security.complete.yml @elastic/security-solution @elastic/kibana-security
 /typings/ @elastic/kibana-core
 /typings/vega/ @elastic/kibana-visualizations
-/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
-/src/platform/packages/shared/kbn-test/src/jest/setup/mocks.vega.js @elastic/kibana-visualizations
+/src/platform/packages/shared/kbn-jest/src/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
+/src/platform/packages/shared/kbn-jest/src/setup/mocks.vega.js @elastic/kibana-visualizations
 /x-pack/platform/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/test_serverless/**/test_suites/common/saved_objects_management/ @elastic/kibana-core
 /x-pack/platform/test/serverless/**/test_suites/saved_objects_management/ @elastic/kibana-core

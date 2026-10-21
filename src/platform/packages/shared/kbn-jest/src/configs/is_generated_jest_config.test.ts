@@ -36,49 +36,49 @@ const writeConfig = (source: string): string => {
 describe('isGeneratedJestConfig', () => {
   it('recognizes the unmodified web-package template', () => {
     const abs = writeConfig(
-      `module.exports = { preset: '@kbn/test', rootDir: '../..', roots: ['<rootDir>/pkg-0/nested'] };`
+      `module.exports = { preset: '@kbn/jest', rootDir: '../..', roots: ['<rootDir>/pkg-0/nested'] };`
     );
     expect(isGeneratedJestConfig(abs)).toBe(true);
   });
 
   it('recognizes the unmodified node-package template', () => {
     const abs = writeConfig(
-      `module.exports = { preset: '@kbn/test/jest_node', rootDir: '../..', roots: ['<rootDir>/pkg-1/nested'] };`
+      `module.exports = { preset: '@kbn/jest/jest_node', rootDir: '../..', roots: ['<rootDir>/pkg-1/nested'] };`
     );
     expect(isGeneratedJestConfig(abs)).toBe(true);
   });
 
   it('rejects a config with an extra key (e.g. testMatch)', () => {
     const abs = writeConfig(
-      `module.exports = { preset: '@kbn/test', rootDir: '../..', roots: ['<rootDir>/pkg-2/nested'], testMatch: ['**/*.test.ts'] };`
+      `module.exports = { preset: '@kbn/jest', rootDir: '../..', roots: ['<rootDir>/pkg-2/nested'], testMatch: ['**/*.test.ts'] };`
     );
     expect(isGeneratedJestConfig(abs)).toBe(false);
   });
 
   it('rejects a config with coverage customization', () => {
     const abs = writeConfig(
-      `module.exports = { preset: '@kbn/test', rootDir: '../..', roots: ['<rootDir>/pkg-3/nested'], collectCoverageFrom: ['**/*.ts'] };`
+      `module.exports = { preset: '@kbn/jest', rootDir: '../..', roots: ['<rootDir>/pkg-3/nested'], collectCoverageFrom: ['**/*.ts'] };`
     );
     expect(isGeneratedJestConfig(abs)).toBe(false);
   });
 
   it('rejects a config with more than one root', () => {
     const abs = writeConfig(
-      `module.exports = { preset: '@kbn/test', rootDir: '../..', roots: ['<rootDir>/pkg-4/nested', '<rootDir>/pkg-4/other'] };`
+      `module.exports = { preset: '@kbn/jest', rootDir: '../..', roots: ['<rootDir>/pkg-4/nested', '<rootDir>/pkg-4/other'] };`
     );
     expect(isGeneratedJestConfig(abs)).toBe(false);
   });
 
   it('rejects a config whose single root does not point at its own directory', () => {
     const abs = writeConfig(
-      `module.exports = { preset: '@kbn/test', rootDir: '../..', roots: ['<rootDir>/somewhere/else'] };`
+      `module.exports = { preset: '@kbn/jest', rootDir: '../..', roots: ['<rootDir>/somewhere/else'] };`
     );
     expect(isGeneratedJestConfig(abs)).toBe(false);
   });
 
   it('rejects an integration preset (the generator never emits integration configs)', () => {
     const abs = writeConfig(
-      `module.exports = { preset: '@kbn/test/jest_integration', rootDir: '../..', roots: ['<rootDir>/pkg-6/nested'] };`
+      `module.exports = { preset: '@kbn/jest/jest_integration', rootDir: '../..', roots: ['<rootDir>/pkg-6/nested'] };`
     );
     expect(isGeneratedJestConfig(abs)).toBe(false);
   });

@@ -16,9 +16,9 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import type { Config } from '@jest/types';
 import { AggregatedResult, Test, BaseReporter } from '@jest/reporters';
 
-import { escapeCdata } from '../../mocha/xml';
-import { getUniqueJunitReportPath } from '../../report_path';
-import { prettifyCommandLine } from '../../prettify_command_line';
+import { escapeCdata } from '../xml';
+import { getUniqueJunitReportPath } from '../report_path';
+import { prettifyCommandLine } from '../prettify_command_line';
 
 interface ReporterOptions {
   reportName?: string;

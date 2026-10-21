@@ -16,7 +16,7 @@ const { createFailError } = require('@kbn/dev-cli-errors');
 const { run } = require('@kbn/dev-cli-runner');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
-const FLAGS_FILE = 'src/platform/packages/shared/kbn-test/src/jest/jest_flags.json';
+const FLAGS_FILE = 'src/platform/packages/shared/kbn-jest/src/jest_flags.json';
 
 function readStdin() {
   return new Promise((resolve, reject) => {

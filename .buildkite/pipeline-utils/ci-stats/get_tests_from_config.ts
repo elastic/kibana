@@ -15,7 +15,7 @@ import { getKibanaDir } from '#pipeline-utils';
 /**
  * IMPORTANT: this is a lightweight re-implementation of the empty-config
  * detection in
- * `src/platform/packages/shared/kbn-test/src/jest/configs/get_jest_configs.ts`
+ * `src/platform/packages/shared/kbn-jest/src/configs/get_jest_configs.ts`
  * (`parseJestConfig` / `matchesJestRules`). It lives here because the Buildkite
  * pipeline-utils workspace does not import from `@kbn/test` at runtime, and this
  * step runs before the whole repo is built. If you change how "a jest config has
@@ -32,12 +32,12 @@ import { getKibanaDir } from '#pipeline-utils';
 /** Test-file extensions Kibana's presets match. Kibana never matches `.spec`. */
 const TEST_EXTENSIONS = '{js,mjs,ts,tsx}';
 
-/** `testMatch` used by the base (unit) preset — see kbn-test/jest-preset.js */
+/** `testMatch` used by the base (unit) preset — see kbn-jest/jest-preset.js */
 const UNIT_TEST_MATCH = [`**/*.test.${TEST_EXTENSIONS}`];
 
 /**
  * `testMatch` used by the integration presets — see
- * kbn-test/jest_integration{,_node}/jest-preset.js. Both scope matching to an
+ * kbn-jest/jest_integration{,_node}/jest-preset.js. Both scope matching to an
  * `integration_tests` directory.
  */
 const INTEGRATION_TEST_MATCH = [`**/integration_tests/**/*.test.${TEST_EXTENSIONS}`];

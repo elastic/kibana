@@ -12,7 +12,7 @@ import Path from 'path';
 import { minimatch } from 'minimatch';
 import { getRepoFiles } from '@kbn/get-repo-files';
 
-import { testMatch } from '../../../jest-preset';
+import { testMatch } from '../../jest-preset';
 
 const UNIT_CONFIG_NAME = 'jest.config.js';
 const INTEGRATION_CONFIG_NAME = 'jest.integration.config.js';

@@ -14,7 +14,7 @@ import { dirname, resolve } from 'path';
  * package template (`packages/kbn-generate/templates/package/jest.config.js.ejs`):
  *
  *   module.exports = {
- *     preset: '@kbn/test' | '@kbn/test/jest_node',
+ *     preset: '@kbn/jest' | '@kbn/jest/jest_node',
  *     rootDir: <relative path to repo root>,
  *     roots: ['<rootDir>/<package dir>'],
  *   };
@@ -31,7 +31,7 @@ import { dirname, resolve } from 'path';
  *
  * If the generator template changes, update the shape recognized here.
  */
-const GENERATED_PRESETS = new Set(['@kbn/test', '@kbn/test/jest_node']);
+const GENERATED_PRESETS = new Set(['@kbn/jest', '@kbn/jest/jest_node']);
 const GENERATED_KEYS = new Set(['preset', 'rootDir', 'roots']);
 
 export function isGeneratedJestConfig(configAbsPath: string): boolean {
