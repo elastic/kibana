@@ -101,10 +101,16 @@ export const findInvestigationConversation = async (
 export const getOrCreateInvestigationConversation = async ({
   conversations,
   id,
+  workflowExecutionId,
   beforeCreate,
 }: {
   conversations: ConversationPublicClient;
   id: string;
+  /**
+   * The run creating it. Recorded in the creating write, so the investigation never reads as not
+   * in progress between its creation and the run being recorded on it.
+   */
+  workflowExecutionId?: string;
   beforeCreate?: () => Promise<void>;
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
@@ -120,6 +126,9 @@ export const getOrCreateInvestigationConversation = async ({
         agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
         templateId: INVESTIGATION_TEMPLATE_ID,
         accessControl: { access_mode: ConversationAccessControlMode.Public },
+        ...(workflowExecutionId
+          ? { metadata: { workflow_execution_ids: [workflowExecutionId] } }
+          : {}),
       });
     // Agent creation can precede its visibility to the conversation API's agent lookup.
     const created = beforeCreate
