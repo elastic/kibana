@@ -54,6 +54,13 @@ const parentOldSpaceFlag = (): number | null => {
   return Number.isInteger(value) ? value : null;
 };
 
+/** Keeps the parent up. The message is the crash evidence; stacks stay in the worker. */
+const noteWorkerError = (error: unknown): void => {
+  const name = error instanceof Error ? error.name : 'Error';
+  const message = error instanceof Error ? error.message.slice(0, 300) : '';
+  process.stderr.write(`t7p worker error ${name} ${message}\n`);
+};
+
 const isThreadCap = (value: number | undefined): value is number =>
   value != null && Number.isInteger(value) && value >= 128 && value <= 2048;
 
@@ -108,7 +115,7 @@ const startCappedThreadEndpoint = (filename: string, capMb: number): Endpoint =>
   const queuedPackets: Packet[] = [];
   const bind = (created: Worker) => {
     worker = created;
-    created.on('error', () => undefined);
+    created.on('error', noteWorkerError);
     for (const handler of messageHandlers) created.on('message', handler);
     for (const handler of exitHandlers) created.once('exit', handler);
     for (const packet of queuedPackets.splice(0)) created.postMessage(packet);
@@ -148,7 +155,7 @@ export const startEndpoint = (
   if (transport === 'thread') {
     if (isThreadCap(threadOldSpaceMb)) return startCappedThreadEndpoint(entry, threadOldSpaceMb);
     const worker = new Worker(entry);
-    worker.on('error', () => undefined);
+    worker.on('error', noteWorkerError);
     return {
       send: (packet) => worker.postMessage(packet),
       onMessage: (handler) => {
@@ -167,7 +174,7 @@ export const startEndpoint = (
     stdio: ['ignore', 'ignore', 'ignore', 'ipc'],
     ...processForkOptions(processOldSpaceMb),
   });
-  child.on('error', () => undefined);
+  child.on('error', noteWorkerError);
   return {
     send: (packet) => {
       if (!child.connected) throw new Error('Capability child disconnected');
