@@ -24,7 +24,7 @@ import {
   getDetectionsLabel,
   getKnowledgeIndicatorsLabel,
   getRulesLabel,
-  getDiscoveriesLabel,
+  getSignificantEventsLabel,
   getSourcesLabel,
   OVERVIEW_ERROR_MESSAGE,
   OVERVIEW_ERROR_TITLE,
@@ -92,7 +92,7 @@ export const DetectionOverview = ({
       icon: 'warning',
       tone: 'danger',
       value: counts?.significant_events,
-      getLabel: getDiscoveriesLabel,
+      getLabel: getSignificantEventsLabel,
       testSubject: 'nightshiftDetectionOverviewSignificantEvents',
     },
   ];
