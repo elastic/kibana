@@ -7,10 +7,16 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BriefCandidate } from './types';
-import { buildAlertsFilter, readAlertRules, toAlertsByCandidateId } from './read_alert_rules';
+import {
+  buildAlertsFilter,
+  buildRulesAggregation,
+  readAlertRules,
+  toAlertsByCandidateId,
+} from './read_alert_rules';
 
-const bucket = (count: number, rules: Array<[string, number]>) => ({
+const bucket = (count: number, rules: Array<[string, number]>, ruleCount = rules.length) => ({
   doc_count: count,
+  ruleCount: { value: ruleCount },
   rules: { buckets: rules.map(([key, docCount]) => ({ key, doc_count: docCount })) },
 });
 
@@ -22,10 +28,14 @@ describe('toAlertsByCandidateId', () => {
       {
         byCandidate: {
           buckets: {
-            'user:a': bucket(9, [
-              ['Credential Dump', 4],
-              ['Odd Logon', 3],
-            ]),
+            'user:a': bucket(
+              9,
+              [
+                ['Credential Dump', 4],
+                ['Odd Logon', 3],
+              ],
+              5
+            ),
             'host:b': bucket(0, []),
           },
         },
@@ -33,6 +43,8 @@ describe('toAlertsByCandidateId', () => {
       {
         'user:a': {
           count: 9,
+          ruleCount: 5,
+          otherRuleCount: 3,
           rules: [
             { index: 1, name: 'Credential Dump', count: 4 },
             { index: 2, name: 'Odd Logon', count: 3 },
@@ -43,7 +55,14 @@ describe('toAlertsByCandidateId', () => {
     [
       'a long rule name cut short',
       { byCandidate: { buckets: { 'user:a': bucket(1, [['x'.repeat(300), 1]]) } } },
-      { 'user:a': { count: 1, rules: [{ index: 1, name: `${'x'.repeat(97)}...`, count: 1 }] } },
+      {
+        'user:a': {
+          count: 1,
+          ruleCount: 1,
+          otherRuleCount: 0,
+          rules: [{ index: 1, name: `${'x'.repeat(97)}...`, count: 1 }],
+        },
+      },
     ],
   ])('returns %s', (_description, aggregations, expected) => {
     expect(toAlertsByCandidateId(aggregations)).toEqual(expected);
@@ -116,5 +135,18 @@ describe('readAlertRules', () => {
         logger,
       })
     ).resolves.toEqual({ alertsByEntityId: {}, isFailed: true });
+  });
+});
+
+describe('buildRulesAggregation', () => {
+  it('takes the two rules with the most severe alerts, then the most alerts', () => {
+    const { terms, aggs } = buildRulesAggregation();
+
+    expect(terms.size).toBe(2);
+    expect(terms.order).toEqual([{ highestSeverity: 'desc' }, { _count: 'desc' }]);
+    const { ranks } = aggs.highestSeverity.max.script.params;
+    expect(ranks.critical).toBeGreaterThan(ranks.high);
+    expect(ranks.high).toBeGreaterThan(ranks.medium);
+    expect(ranks.medium).toBeGreaterThan(ranks.low);
   });
 });

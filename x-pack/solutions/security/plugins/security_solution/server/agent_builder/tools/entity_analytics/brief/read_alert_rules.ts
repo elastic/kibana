@@ -12,7 +12,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
-import { ALERT_RULE_NAME, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_RULE_NAME, ALERT_SEVERITY, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
 import { DEFAULT_ALERTS_INDEX } from '../../../../../common/constants';
 import { ALERT_ENTITY_ID } from '../../../../../common/field_maps/field_names';
@@ -20,7 +20,10 @@ import { getPeriodStart } from './describe_scope';
 import { getBriefEntityType } from './read_entities';
 import type { BriefCandidate, EntityAlerts } from './types';
 
-const MAX_RULES_PER_ENTITY = 3;
+/** The two most important rules are given to the model, and the rest are counted. */
+const MAX_RULES_PER_ENTITY = 2;
+/** How the severity of an alert ranks its rule: the highest severity of a rule's alerts comes first. */
+const SEVERITY_RANKS = { low: 1, medium: 2, high: 3, critical: 4 };
 /** The members of a group whose records match its alerts without an entity id. Stamped alerts match every member. */
 const MAX_MEMBERS_MATCHED_BY_RECORD = 20;
 /** Rule names are written by users, so a long one is cut. */
@@ -32,6 +35,7 @@ interface AlertsByCandidate {
       string,
       {
         doc_count: number;
+        ruleCount: { value: number };
         rules: { buckets: Array<{ key: string; doc_count: number }> };
       }
     >;
@@ -103,7 +107,8 @@ export const readAlertRules = async ({
             filters: filtersByCandidateId,
           },
           aggs: {
-            rules: { terms: { field: ALERT_RULE_NAME, size: MAX_RULES_PER_ENTITY } },
+            rules: buildRulesAggregation(),
+            ruleCount: { cardinality: { field: ALERT_RULE_NAME } },
           },
         },
       },
@@ -114,6 +119,25 @@ export const readAlertRules = async ({
     return { alertsByEntityId: {}, isFailed: true };
   }
 };
+
+/** The rules with the most severe alerts first, then the most alerts. */
+export const buildRulesAggregation = () => ({
+  terms: {
+    field: ALERT_RULE_NAME,
+    size: MAX_RULES_PER_ENTITY,
+    order: [{ highestSeverity: 'desc' as const }, { _count: 'desc' as const }],
+  },
+  aggs: {
+    highestSeverity: {
+      max: {
+        script: {
+          source: `params.ranks.getOrDefault(doc['${ALERT_SEVERITY}'].size() == 0 ? '' : doc['${ALERT_SEVERITY}'].value, 0)`,
+          params: { ranks: SEVERITY_RANKS },
+        },
+      },
+    },
+  },
+});
 
 /** The ids of a candidate and its members. */
 const getEntityIds = ({ id, members = [] }: Pick<BriefCandidate, 'id' | 'members'>): string[] => [
@@ -165,6 +189,8 @@ export const toAlertsByCandidateId = (
               id,
               {
                 count: bucket.doc_count,
+                ruleCount: bucket.ruleCount.value,
+                otherRuleCount: Math.max(0, bucket.ruleCount.value - bucket.rules.buckets.length),
                 rules: bucket.rules.buckets.map(({ key, doc_count: count }, index) => ({
                   index: index + 1,
                   name: truncate(key, { length: MAX_RULE_NAME_LENGTH }),

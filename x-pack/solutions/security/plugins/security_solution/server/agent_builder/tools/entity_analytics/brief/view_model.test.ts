@@ -56,6 +56,8 @@ const facts: EntityFacts[] = [
     assetCriticality: 'High impact',
     alerts: {
       count: 3,
+      ruleCount: 2,
+      otherRuleCount: 0,
       rules: [
         { index: 1, name: 'Credential Dump', count: 2 },
         { index: 2, name: 'Odd Logon', count: 1 },
