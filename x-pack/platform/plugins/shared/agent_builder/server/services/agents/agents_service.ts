@@ -79,7 +79,6 @@ export class AgentsService {
 
     this.typeRegistry.register({
       id: chatAgentTypeId,
-      // The default `elastic` AI index is the SML index, so it follows the experimental flag.
       baseConfiguration: async ({ request }) => ({
         ai_indices: (await this.isExperimentalEnabled(request))
           ? Object.keys(defaultAiIndices)
