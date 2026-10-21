@@ -98,7 +98,10 @@ const plotOf = (
       return h(
         'div',
         { className, style: { width, height } },
-        h('style', null, plot.stylesheet),
+        // Raw, as a stylesheet is read: React would escape its quotes as text. `</style` can't close it early.
+        h('style', {
+          dangerouslySetInnerHTML: { __html: plot.stylesheet.replace(/<\/style/gi, '<\\/style') },
+        }),
         h('div', { dangerouslySetInnerHTML: { __html: plot.html } })
       );
   }

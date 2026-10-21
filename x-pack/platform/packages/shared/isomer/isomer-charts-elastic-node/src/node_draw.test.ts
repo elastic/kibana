@@ -7,7 +7,7 @@
 
 import type { Canvas } from '@napi-rs/canvas';
 
-import { createStaticDraw } from './node_draw';
+import { createStaticDraw, fixedTracks } from './node_draw';
 
 // `mock`-prefixed, so Jest's hoisting lets the factory reach it.
 const mockCreated: Canvas[] = [];
@@ -86,5 +86,17 @@ describe('createStaticDraw', () => {
     expect(mockCreated.map(({ width, height }) => [width, height])).toEqual(
       mockCreated.map(() => [1, 1])
     );
+  });
+});
+
+describe('fixedTracks', () => {
+  it('resolves auto-fill and auto-fit tracks to the count a browser fits in the width', () => {
+    expect(fixedTracks('grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));', 640)).toBe(
+      'grid-template-columns: repeat(3, minmax(200px, 1fr));'
+    );
+    expect(fixedTracks('repeat(auto-fit, minmax(300px, 1fr))', 120)).toBe(
+      'repeat(1, minmax(300px, 1fr))'
+    );
+    expect(fixedTracks('repeat(2, minmax(10px, 1fr))', 640)).toBe('repeat(2, minmax(10px, 1fr))');
   });
 });

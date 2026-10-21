@@ -28,6 +28,8 @@ import { JSDOM } from 'jsdom';
 
 import type { ElasticChartsEngineOptions } from '@kbn/isomer-charts-elastic';
 
+import { euiHostStyles } from './host_styles';
+
 export interface FontFile {
   family: string;
   /** A TTF, OTF, WOFF, or WOFF2 file, e.g. Kibana's own `assets/fonts`. */
@@ -225,8 +227,23 @@ const contentRows = (css: string): string =>
       : `grid-template-rows:${rows}`
   );
 
+/**
+ * Grid tracks without `auto-fill` or `auto-fit`, which takumi cannot lay out: as many `minmax(<size>px, …)` tracks as
+ * fit in `width`, the count a browser computes for the chart's width. Elastic Charts' bottom legend uses them.
+ */
+export const fixedTracks = (css: string, width: number): string =>
+  css.replace(
+    /repeat\(\s*auto-(?:fill|fit)\s*,\s*minmax\(\s*([\d.]+)px\s*,([^()]*)\)\s*\)/g,
+    (_, min: string, max: string) =>
+      `repeat(${Math.max(1, Math.floor(width / parseFloat(min)))}, minmax(${min}px,${max}))`
+  );
+
 /** The chart as markup: each canvas becomes an image of its Skia drawing, sized as the canvas was. */
-const serialize = (chart: HTMLElement, canvases: Map<HTMLCanvasElement, Canvas>): string => {
+const serialize = (
+  chart: HTMLElement,
+  canvases: Map<HTMLCanvasElement, Canvas>,
+  width: number
+): string => {
   for (const element of [...chart.getElementsByTagName('canvas')]) {
     const canvas = canvases.get(element);
     const image = chart.ownerDocument.createElement('img');
@@ -241,7 +258,7 @@ const serialize = (chart: HTMLElement, canvases: Map<HTMLCanvasElement, Canvas>)
     }
     element.replaceWith(image);
   }
-  return contentRows(closeMetricGrid(chart.outerHTML));
+  return fixedTracks(contentRows(closeMetricGrid(chart.outerHTML)), width);
 };
 
 export type StaticDraw = (node: ChartNode, request: DrawRequest) => ChartArtifact;
@@ -266,8 +283,8 @@ export const createStaticDraw = async ({
     import('@kbn/isomer-charts-elastic'),
   ]);
   const engine = engineModule.defineElasticChartsEngine(options);
-  // EUI's reset normally sits under Elastic Charts' stylesheet; without it Metric's list draws bullets.
-  const reset = '.echChart ul,.echChart li{list-style:none;margin:0;padding:0}';
+  // Elastic Charts' stylesheet over the page it expects: EUI's global reset and body font, as in Kibana.
+  const reset = euiHostStyles();
   const sheet = (path: string) =>
     `${reset}${contentRows(readFileSync(require.resolve(path), 'utf8'))}`;
   const stylesheets = {
@@ -293,7 +310,7 @@ export const createStaticDraw = async ({
       return {
         plot: {
           kind: 'markup',
-          html: serialize(chart, environment.canvases),
+          html: serialize(chart, environment.canvases, width),
           stylesheet: stylesheets[mode],
         },
         width,
