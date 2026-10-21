@@ -11,8 +11,6 @@
  * This is a big file used for documenting/introspecting APIs. Always load it lazily!
  */
 
-import type { DeepPartial } from '@kbn/utility-types';
-
 import { ControlValuesSource } from '@kbn/controls-constants';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import type { DashboardCreateResponseBody } from './create';
@@ -22,484 +20,6 @@ import type { DashboardUpdateResponseBody } from './update';
 
 const dashboardCreateDescription =
   'Creates a new dashboard and returns its ID, full state, and metadata.';
-
-const createCurlCodeSample = ({
-  lang = 'cURL',
-  label,
-  method,
-  path,
-  body,
-}: {
-  lang?: string;
-  label: string;
-  method: 'POST' | 'PUT';
-  path: string;
-  body: object;
-}) => ({
-  lang,
-  label,
-  source:
-    [
-      `curl -X ${method} "\${KIBANA_URL}${path}" \\`,
-      `  -H "Authorization: ApiKey \${API_KEY}" \\`,
-      `  -H "kbn-xsrf: true" \\`,
-      `  -H "Content-Type: application/json" \\`,
-      `  -d '${JSON.stringify(body, null, 2)}'`,
-    ].join('\n') + '\n',
-});
-
-const createConsoleCodeSample = ({
-  lang = 'Console',
-  label,
-  method,
-  path,
-  body,
-}: {
-  lang?: string;
-  label: string;
-  method: 'POST' | 'PUT';
-  path: string;
-  body: object;
-}) => ({
-  lang,
-  label,
-  source: [`${method} kbn:${path}`, JSON.stringify(body, null, 2)].join('\n') + '\n',
-});
-
-const dashboardCreateSimpleBody = {
-  title: 'Web logs overview',
-  access_control: {
-    access_mode: 'write_restricted',
-  },
-  panels: [
-    {
-      grid: {
-        x: 0,
-        y: 0,
-        w: 24,
-        h: 15,
-      },
-      type: 'markdown',
-      config: {
-        content:
-          '## Web logs overview\n' +
-          '\n' +
-          '&nbsp;\n' +
-          '\n' +
-          'Created with the [Dashboards API](https://www.elastic.co/docs/api/doc/kibana) using the Kibana sample web logs dataset (`kibana_sample_data_logs`). Contains:\n' +
-          '- This markdown panel\n' +
-          '- 2 metrics, showing request count and average response size\n' +
-          '- A line chart based on an ES|QL query\n' +
-          '\n' +
-          '&nbsp;\n' +
-          '\n' +
-          '&nbsp;\n' +
-          '\n' +
-          '[Learn more about dashboards](https://www.elastic.co/docs/explore-analyze/dashboards)',
-      },
-    },
-    {
-      grid: {
-        x: 24,
-        y: 0,
-        w: 12,
-        h: 5,
-      },
-      type: 'vis',
-      config: {
-        type: 'metric',
-        data_source: {
-          type: 'data_view_spec',
-          index_pattern: 'kibana_sample_data_logs',
-          time_field: 'timestamp',
-        },
-        metrics: [
-          {
-            type: 'primary',
-            operation: 'count',
-          },
-        ],
-      },
-    },
-    {
-      grid: {
-        x: 36,
-        y: 0,
-        w: 12,
-        h: 5,
-      },
-      type: 'vis',
-      config: {
-        type: 'metric',
-        data_source: {
-          type: 'data_view_spec',
-          index_pattern: 'kibana_sample_data_logs',
-          time_field: 'timestamp',
-        },
-        metrics: [
-          {
-            type: 'primary',
-            operation: 'average',
-            field: 'bytes',
-          },
-        ],
-      },
-    },
-    {
-      grid: {
-        x: 24,
-        y: 5,
-        w: 24,
-        h: 10,
-      },
-      type: 'vis',
-      config: {
-        type: 'xy',
-        title: 'Requests over time',
-        layers: [
-          {
-            type: 'line',
-            data_source: {
-              type: 'esql',
-              query:
-                'FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
-            },
-            x: {
-              column: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
-            },
-            y: [
-              {
-                column: 'count',
-              },
-            ],
-          },
-        ],
-        axis: {
-          x: {
-            title: {
-              visible: false,
-            },
-          },
-        },
-      },
-    },
-  ],
-} satisfies DeepPartial<DashboardState>;
-
-const dashboardCreateSimpleConsoleBody = {
-  title: dashboardCreateSimpleBody.title,
-  panels: dashboardCreateSimpleBody.panels,
-} satisfies DeepPartial<DashboardState>;
-
-const dashboardCreateWithSectionsAndControlsBody = {
-  title: 'Operations overview',
-  time_range: {
-    from: 'now-7d',
-    to: 'now',
-  },
-  pinned_panels: [
-    {
-      type: 'options_list_control',
-      width: 'medium',
-      grow: true,
-      config: {
-        title: 'Response code',
-        data_view_id: '90943e30-9a47-11e8-b64d-95841ca0b247',
-        field_name: 'response.keyword',
-      },
-    },
-  ],
-  panels: [
-    {
-      title: 'Key metrics',
-      collapsed: false,
-      grid: {
-        y: 0,
-      },
-      panels: [
-        {
-          grid: {
-            x: 0,
-            y: 0,
-            w: 12,
-            h: 5,
-          },
-          type: 'vis',
-          config: {
-            type: 'metric',
-            data_source: {
-              type: 'data_view_spec',
-              index_pattern: 'kibana_sample_data_logs',
-              time_field: 'timestamp',
-            },
-            metrics: [
-              {
-                type: 'primary',
-                operation: 'count',
-              },
-            ],
-          },
-        },
-        {
-          grid: {
-            x: 12,
-            y: 0,
-            w: 12,
-            h: 5,
-          },
-          type: 'vis',
-          config: {
-            type: 'metric',
-            data_source: {
-              type: 'data_view_spec',
-              index_pattern: 'kibana_sample_data_logs',
-              time_field: 'timestamp',
-            },
-            metrics: [
-              {
-                type: 'primary',
-                operation: 'average',
-                field: 'bytes',
-              },
-            ],
-          },
-        },
-      ],
-    },
-    {
-      title: 'Traffic trends',
-      collapsed: false,
-      grid: {
-        y: 8,
-      },
-      panels: [
-        {
-          grid: {
-            x: 0,
-            y: 0,
-            w: 24,
-            h: 10,
-          },
-          type: 'vis',
-          config: {
-            type: 'xy',
-            title: 'Requests over time',
-            layers: [
-              {
-                type: 'line',
-                data_source: {
-                  type: 'data_view_spec',
-                  index_pattern: 'kibana_sample_data_logs',
-                  time_field: 'timestamp',
-                },
-                x: {
-                  operation: 'date_histogram',
-                  field: 'timestamp',
-                },
-                y: [
-                  {
-                    operation: 'count',
-                  },
-                ],
-              },
-            ],
-            axis: {
-              x: {
-                title: {
-                  visible: false,
-                },
-              },
-            },
-          },
-        },
-        {
-          grid: {
-            x: 24,
-            y: 0,
-            w: 24,
-            h: 10,
-          },
-          type: 'vis',
-          config: {
-            type: 'xy',
-            title: 'Requests over time (ES|QL)',
-            layers: [
-              {
-                type: 'line',
-                data_source: {
-                  type: 'esql',
-                  query:
-                    'FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
-                },
-                x: {
-                  column: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
-                },
-                y: [
-                  {
-                    column: 'count',
-                  },
-                ],
-              },
-            ],
-            axis: {
-              x: {
-                title: {
-                  visible: false,
-                },
-              },
-            },
-          },
-        },
-      ],
-    },
-  ],
-} satisfies DeepPartial<DashboardState>;
-
-const dashboardUpdateBody = {
-  title: 'Web logs overview',
-  panels: [
-    {
-      grid: {
-        x: 0,
-        y: 0,
-        w: 12,
-        h: 5,
-      },
-      type: 'vis',
-      config: {
-        type: 'metric',
-        data_source: {
-          type: 'data_view_spec',
-          index_pattern: 'kibana_sample_data_logs',
-          time_field: 'timestamp',
-        },
-        metrics: [
-          {
-            type: 'primary',
-            operation: 'count',
-          },
-        ],
-      },
-    },
-    {
-      grid: {
-        x: 12,
-        y: 0,
-        w: 12,
-        h: 5,
-      },
-      type: 'vis',
-      config: {
-        type: 'metric',
-        data_source: {
-          type: 'data_view_spec',
-          index_pattern: 'kibana_sample_data_logs',
-          time_field: 'timestamp',
-        },
-        metrics: [
-          {
-            type: 'primary',
-            operation: 'average',
-            field: 'bytes',
-          },
-        ],
-      },
-    },
-    {
-      grid: {
-        x: 0,
-        y: 8,
-        w: 24,
-        h: 10,
-      },
-      type: 'vis',
-      config: {
-        type: 'xy',
-        title: 'Requests over time',
-        layers: [
-          {
-            type: 'line',
-            data_source: {
-              type: 'esql',
-              query:
-                'FROM kibana_sample_data_logs | STATS count = COUNT() BY BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
-            },
-            x: {
-              column: 'BUCKET(@timestamp, 75, ?_tstart, ?_tend)',
-            },
-            y: [
-              {
-                column: 'count',
-              },
-            ],
-          },
-        ],
-        axis: {
-          x: {
-            title: {
-              visible: false,
-            },
-          },
-        },
-      },
-    },
-    {
-      grid: {
-        x: 24,
-        y: 8,
-        w: 12,
-        h: 5,
-      },
-      type: 'vis',
-      config: {
-        type: 'metric',
-        data_source: {
-          type: 'data_view_spec',
-          index_pattern: 'kibana_sample_data_logs',
-          time_field: 'timestamp',
-        },
-        metrics: [
-          {
-            type: 'primary',
-            operation: 'unique_count',
-            field: 'clientip',
-          },
-        ],
-      },
-    },
-  ],
-} satisfies DeepPartial<DashboardState>;
-
-const dashboardCreateCodeSamples = [
-  createCurlCodeSample({
-    lang: 'cURL_simple',
-    label: 'Create a dashboard (simple) - cURL',
-    method: 'POST',
-    path: '/api/dashboards',
-    body: dashboardCreateSimpleBody,
-  }),
-  createConsoleCodeSample({
-    lang: 'Console_simple',
-    label: 'Create a dashboard (simple) - Console',
-    method: 'POST',
-    path: '/api/dashboards',
-    body: dashboardCreateSimpleConsoleBody,
-  }),
-  createCurlCodeSample({
-    lang: 'cURL_Sections',
-    label: 'Create a dashboard (with sections and controls) - cURL',
-    method: 'POST',
-    path: '/api/dashboards',
-    body: dashboardCreateWithSectionsAndControlsBody,
-  }),
-  createConsoleCodeSample({
-    lang: 'Console_sections',
-    label: 'Create a dashboard (with sections and controls) - Console',
-    method: 'POST',
-    path: '/api/dashboards',
-    body: dashboardCreateWithSectionsAndControlsBody,
-  }),
-];
 
 const dashboardSearchCodeSamples = [
   {
@@ -515,26 +35,26 @@ const dashboardSearchCodeSamples = [
     source: 'GET kbn:/api/dashboards?query=web+logs&per_page=10\n',
   },
   {
-    lang: 'cURL_tag_names',
+    lang: 'cURL',
     label: 'Filter by tag name - cURL',
     source:
       'curl -X GET "${KIBANA_URL}/api/dashboards?tag_names=Security&tag_names=Observability" \\\n' +
       '  -H "Authorization: ApiKey ${API_KEY}"\n',
   },
   {
-    lang: 'Console_tag_names',
+    lang: 'Console',
     label: 'Filter by tag name - Console',
     source: 'GET kbn:/api/dashboards?tag_names=Security&tag_names=Observability\n',
   },
   {
-    lang: 'cURL_excluded_tag_names',
+    lang: 'cURL',
     label: 'Exclude by tag name - cURL',
     source:
       'curl -X GET "${KIBANA_URL}/api/dashboards?excluded_tag_names=Deprecated" \\\n' +
       '  -H "Authorization: ApiKey ${API_KEY}"\n',
   },
   {
-    lang: 'Console_excluded_tag_names',
+    lang: 'Console',
     label: 'Exclude by tag name - Console',
     source: 'GET kbn:/api/dashboards?excluded_tag_names=Deprecated\n',
   },
@@ -567,21 +87,6 @@ const dashboardUpdateDescription =
   'You can optionally include `access_control.access_mode` to change the dashboard access mode.\n' +
   'If the authenticated user is not authorized to change access mode for the target dashboard,\n' +
   'the request returns a `403` response with a descriptive `message`.\n';
-
-const dashboardUpdateCodeSamples = [
-  createCurlCodeSample({
-    label: 'Update a dashboard - cURL',
-    method: 'PUT',
-    path: '/api/dashboards/3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b',
-    body: dashboardUpdateBody,
-  }),
-  createConsoleCodeSample({
-    label: 'Update a dashboard - Console',
-    method: 'PUT',
-    path: '/api/dashboards/3c4b8e10-d57a-11ef-9a52-4f3c2a8d0e1b',
-    body: dashboardUpdateBody,
-  }),
-];
 
 const dashboardDeleteCodeSamples = [
   {
@@ -1860,7 +1365,6 @@ const dashboardUpdateCreatedResponseExamples = {
 
 export const createDashboardOASOperationObject = {
   description: dashboardCreateDescription,
-  'x-codeSamples': dashboardCreateCodeSamples,
   requestBody: {
     content: {
       'application/json': {
@@ -1907,7 +1411,6 @@ export const readDashboardOASOperationObject = {
 
 export const updateDashboardOASOperationObject = {
   description: dashboardUpdateDescription,
-  'x-codeSamples': dashboardUpdateCodeSamples,
   requestBody: {
     content: {
       'application/json': {

@@ -73,6 +73,8 @@ api-docs-overlay: ## Apply all overlays; kibana-full*.yaml skips bump-slim (full
 	@bump overlay "output/kibana.tmp6.yaml" "overlays/visualizations.overlays.yaml" > "output/kibana.tmp7.yaml"
 	@bump overlay "output/kibana.tmp7.yaml" "overlays/discover_sessions.overlays.yaml" > "output/kibana.tmp8.yaml"
 	@bump overlay "output/kibana.tmp8.yaml" "overlays/kibana.overlays.bump_slim.yaml" > "output/kibana.tmp9.yaml"
+	@# Bump.sh needs the external link in the Discover sessions overlay. docs-builder needs a relative operation link.
+	@perl -pi -e 's|https://elastic\.github\.io/dashboards-api-spec/dashboards#tag/Dashboards/operation/create-dashboard|../operation/operation-create-dashboard|g' output/kibana.tmp8.yaml output/kibana.serverless.tmp8.yaml
 	@redocly bundle output/kibana.serverless.tmp8.yaml --ext yaml -o output/kibana-full.serverless.yaml
 	@redocly bundle output/kibana.tmp8.yaml --ext yaml -o output/kibana-full.yaml
 	@redocly bundle output/kibana.serverless.tmp9.yaml --ext yaml -o output/kibana.serverless.yaml
