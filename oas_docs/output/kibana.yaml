@@ -184186,8 +184186,11 @@ components:
                   anyOf:
                     - type: string
                     - type: number
+                    - type: boolean
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiValueCell'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangeKey'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiFieldKey'
+                  nullable: true
                 maxItems: 1000
                 type: array
             required:
@@ -185671,8 +185674,11 @@ components:
                   anyOf:
                     - type: string
                     - type: number
+                    - type: boolean
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiValueCell'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangeKey'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiFieldKey'
+                  nullable: true
                 maxItems: 100
                 type: array
             required:
@@ -187401,6 +187407,7 @@ components:
       type: object
     Kibana_HTTP_APIs_visMultiFieldKey:
       additionalProperties: false
+      description: Composite key from a multi-terms bucket.
       properties:
         keys:
           items:
@@ -187416,6 +187423,22 @@ components:
         - keys
       title: Multi Field Key
       type: object
+    Kibana_HTTP_APIs_visMultiValueCell:
+      anyOf:
+        - items:
+            type: string
+          maxItems: 100
+          type: array
+        - items:
+            type: number
+          maxItems: 100
+          type: array
+        - items:
+            type: boolean
+          maxItems: 100
+          type: array
+      description: Values of a multi-value cell.
+      title: Multi Value Cell
     Kibana_HTTP_APIs_visNoColor:
       additionalProperties: false
       description: Explicitly disables coloring
@@ -187838,6 +187861,7 @@ components:
       type: object
     Kibana_HTTP_APIs_visRangeKey:
       additionalProperties: false
+      description: Identifies a range bucket. Omit either bound for an open end.
       properties:
         from:
           anyOf:
@@ -187859,8 +187883,6 @@ components:
                   - type: string
                   - type: number
             required:
-              - from
-              - to
               - label
           maxItems: 100
           type: array
@@ -187874,8 +187896,6 @@ components:
           type: string
       required:
         - type
-        - from
-        - to
         - ranges
       title: Range Key
       type: object
