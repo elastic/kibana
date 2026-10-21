@@ -745,6 +745,21 @@ describe('validateExtendedFields', () => {
       const errors = validateExtendedFields({ systems_as_keyword: '[]' }, fields);
       expect(errors).toEqual([]);
     });
+
+    it.each([
+      ['a comma-separated string', 'api,database'],
+      ['a plain string', 'api'],
+      ['a JSON string literal', '"api"'],
+      ['a JSON object', '{"api":true}'],
+      ['a JSON number', '1'],
+      ['an array with non-string items', '["api",1]'],
+    ])('reports error when the value is %s instead of an array of strings', (_name, value) => {
+      const fields: FieldSchemaType[] = [makeCheckboxGroupField()];
+      const errors = validateExtendedFields({ systems_as_keyword: value }, fields);
+      expect(errors).toEqual([
+        'Field "Systems" must be a JSON array of strings, e.g. ["option1","option2"]',
+      ]);
+    });
   });
 
   describe('USER_PICKER empty-array check', () => {
