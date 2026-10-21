@@ -51,8 +51,13 @@ export interface MapServices {
   darkMode?: boolean;
 }
 
+/** The box a panel's content draws in, by panel id; the host's grid decides it. */
+export type PanelSize = (panelId: string) => { width: number; height: number } | undefined;
+
 export interface MapLoweringOptions {
   search: ExecuteSearch;
+  /** Each panel's body box; without it, Kibana's grid at a 1600-pixel viewport. */
+  panelSize?: PanelSize;
   /** Runs an ES|QL layer's statement; without it, ES|QL layers refuse. */
   executeEsql?: ExecuteEsql;
   services?: MapServices;
@@ -965,7 +970,7 @@ export const bindMapPanels = async (
         ...options,
         map,
         view,
-        size: mapChartArea(panel.gridData),
+        size: options.panelSize?.(panelId) ?? mapChartArea(panel.gridData),
         hiddenLayers: panel.embeddableConfig?.hiddenLayers ?? [],
         ...(timeRange ? { timeRange } : {}),
         context,
