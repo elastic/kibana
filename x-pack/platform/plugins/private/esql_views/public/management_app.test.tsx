@@ -615,7 +615,7 @@ describe('ManagementApp', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'ES|QL query' })).toBeInTheDocument();
     expect(
-      screen.getByText('Write a new query, or select a recently or starred query.')
+      screen.getByText('Write a new query, or select a recent or starred query.')
     ).toBeInTheDocument();
     expect(screen.getByTestId('esqlViewQueryEditor')).toHaveValue(
       'FROM kibana_sample_data_ecommerce | WHERE KQL("term")'

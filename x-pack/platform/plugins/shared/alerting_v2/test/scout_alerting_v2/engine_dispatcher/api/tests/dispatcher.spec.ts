@@ -1569,6 +1569,8 @@ apiTest.describe('Dispatcher', { tag: tags.stateful.classic }, () => {
           actor: { type: 'internal' },
           source: 'internal',
           reason: `maintenance_window:${mw.id}`,
+          action_subtype: 'maintenance_window',
+          maintenance_window_id: mw.id,
         });
       }
 
