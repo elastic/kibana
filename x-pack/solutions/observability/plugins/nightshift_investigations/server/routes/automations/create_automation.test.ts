@@ -131,17 +131,18 @@ describe('request validation', () => {
 
   it.each([
     ['no filters', {}],
-    ['empty filter lists', { channels: [], users: [] }],
+    ['empty filter lists', { channels: [], users: [], bots: [] }],
     ['blank filter values', { channels: [' '], users: [''], messageFilter: '  ' }],
   ])('rejects a Slack trigger row with %s', (_name, filters) => {
     expect(() => parseRows([{ kind: 'slack', event: 'message', ...filters }])).toThrow(
-      'at least one of channels, users or messageFilter'
+      'at least one of channels, users, bots or messageFilter'
     );
   });
 
   it.each([
     ['channels', { channels: ['C123'] }],
     ['users', { users: ['U123'] }],
+    ['bots', { bots: ['PagerDuty'] }],
     ['messageFilter', { messageFilter: 'outage' }],
   ])('accepts a Slack trigger row with only %s', (_name, filters) => {
     const row = { kind: 'slack', event: 'message', ...filters };

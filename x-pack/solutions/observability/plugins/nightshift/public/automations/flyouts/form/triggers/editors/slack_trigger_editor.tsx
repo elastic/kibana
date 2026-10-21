@@ -121,5 +121,15 @@ export const SlackTriggerEditor = ({
       testSubject="automationSlackTriggerUsers"
       readOnly={readOnly}
     />
+    <EuiText size="s">{triggerLabels.via}</EuiText>
+    <ListPill
+      ariaLabel={triggerLabels.anyApp}
+      emptyLabel={triggerLabels.anyApp}
+      placeholder={triggerLabels.searchApps}
+      values={trigger.bots}
+      onChange={(bots) => onChange({ ...trigger, bots })}
+      testSubject="automationSlackTriggerBots"
+      readOnly={readOnly}
+    />
   </Sentence>
 );
