@@ -59,6 +59,7 @@ export const NIGHTSHIFT_EBT_ACTIONS = {
 export const NIGHTSHIFT_EBT_ELEMENTS = {
   AUTOMATIONS_CREATE_FLYOUT: 'automationsCreateFlyout',
   AUTOMATIONS_DETAIL_FLYOUT: 'automationsDetailFlyout',
+  AUTOMATIONS_FORM: 'automationsForm',
   AUTOMATIONS_LIST: 'automationsList',
   IMPACTED_SERVICES: 'nightshiftImpactedServices',
   INVESTIGATIONS_LIST: 'nightshiftInvestigationsList',

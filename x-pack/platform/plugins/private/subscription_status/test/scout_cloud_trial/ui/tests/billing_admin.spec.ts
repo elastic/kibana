@@ -8,29 +8,14 @@
 import { test } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 
+// Admins are treated as billing admins until Kibana can check billing access:
+// https://github.com/elastic/kibana-team/issues/4343
 test.describe(
   'Subscription status badge for billing admins',
   { tag: ['@local-serverless-search'] },
   () => {
     test.beforeEach(async ({ browserAuth, page }) => {
-      /**
-       * HACK: fakes the Cloud billing admin role by rewriting the current user response in the browser.
-       *
-       * There is no supported way to grant this role in a Scout test. Cloud assigns it at the
-       * organization level, and with UIAM a Scout user only carries the single project role it
-       * logged in with, so role mappings (used by the stateful cloud_links tests) don't apply.
-       * Replace this with a real role once Scout can log in with extra Cloud roles:
-       * https://github.com/elastic/kibana/issues/297366
-       */
-      await page.route('**/internal/security/me', async (route) => {
-        const response = await route.fetch();
-        const user: { roles: string[] } = await response.json();
-        await route.fulfill({
-          response,
-          json: { ...user, roles: [...user.roles, '_ec_billing_admin'] },
-        });
-      });
-      await browserAuth.loginAsViewer();
+      await browserAuth.loginAsAdmin();
       await page.gotoApp('management');
     });
 

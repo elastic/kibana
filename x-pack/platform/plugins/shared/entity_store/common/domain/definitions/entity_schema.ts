@@ -8,6 +8,10 @@
 import type { Condition } from '@kbn/streamlang';
 import { conditionSchema as streamlangConditionSchema } from '@kbn/streamlang';
 import { z, lazySchema } from '@kbn/zod/v4';
+import { assertDynamicDefinitionRules, dynamicBlockSchema } from './dynamic';
+
+export { dynamicBlockSchema };
+export type { DynamicBlock } from './dynamic';
 
 export type EntityType = z.infer<typeof EntityType>;
 export const EntityType = lazySchema(() => z.enum(['user', 'host', 'service', 'generic']));
@@ -170,9 +174,15 @@ export const euidRankingSchema = lazySchema(() =>
 );
 
 // Any field used in the euid calculation must be mapped in the fields array,
-// otherwise we won't have guarantees of field being available
+// otherwise we won't have guarantees of field being available.
+//
+// Both identity variants are strict. Consumers hold the definition object as registered, not the
+// parsed copy, and tell the variants apart by key presence (`isSingleFieldIdentity`). A plain
+// object would let a calculated identity absorb a stray `singleField` by stripping it, so the
+// ranking is what gets validated while the stored object still carries the unvalidated single
+// field. Strictness makes an identity with keys of both variants fail every variant.
 const calculatedIdentityFieldLogicSchema = lazySchema(() =>
-  z.object({
+  z.strictObject({
     // Ranking mechanism for EUID: branches evaluated in order; first matching branch wins.
     // Branch with no `when` always matches (fallback). Used by ESQL, Painless, Memory, DSL.
     euidRanking: euidRankingSchema,
@@ -195,9 +205,10 @@ const calculatedIdentityFieldLogicSchema = lazySchema(() =>
 /**
  * Single-field identity: entity is identified by one field only (e.g. service.name, entity.id).
  * No composition, no field evaluations. ESQL/DSL use a simplified path for this shape.
+ * Strict for the same reason as the calculated variant above.
  */
 export const singleFieldIdentitySchema = lazySchema(() =>
-  z.object({
+  z.strictObject({
     singleField: z.string(),
     // When true, the entity id is not prefixed with the entity type (e.g. output "a" instead of "generic:a").
     skipTypePrepend: z.optional(z.boolean()),
@@ -316,8 +327,11 @@ export const extractionBlockSchema = lazySchema(() =>
   })
 );
 
-/** Identity core (`type`, `name`, `description`, `managedBy`, `identityField`) plus the optional `extraction` block. */
-export const entitySchema = lazySchema(() =>
+/**
+ * The definition's object shape without its whole-definition rules. Derive other schemas from this
+ * one (zod cannot `omit` a refined object) and re-apply `assertDynamicDefinitionRules`.
+ */
+export const entityDefinitionObjectSchema = lazySchema(() =>
   z.object({
     id: z.string().max(MAX_DEFINITION_ID_LENGTH),
     type: entityDefinitionTypeSchema,
@@ -329,14 +343,23 @@ export const entitySchema = lazySchema(() =>
     managedBy: z.optional(EntityDefinitionManagedBy),
     identityField: identityFieldSchema,
     extraction: z.optional(extractionBlockSchema),
+    dynamic: z.optional(dynamicBlockSchema),
   })
+);
+
+/**
+ * Identity core (`type`, `name`, `description`, `managedBy`, `identityField`) plus the optional
+ * `extraction` and `dynamic` blocks, with the whole-definition rules for `dynamic`.
+ */
+export const entitySchema = lazySchema(() =>
+  entityDefinitionObjectSchema.superRefine(assertDynamicDefinitionRules)
 );
 
 export type EntityField = z.infer<typeof fieldSchema>; // entities fields
 export type CalculatedEntityIdentity = z.infer<typeof calculatedIdentityFieldLogicSchema>; // full identity (euidRanking + documentsFilter + optional fieldEvaluations)
 export type SingleFieldIdentity = z.infer<typeof singleFieldIdentitySchema>;
 export type EntityIdentity = z.infer<typeof identityFieldSchema>; // definition-time identity (full or singleField)
-export type EntityDefinition = z.infer<typeof entitySchema>; // entity with id generated in runtime
+export type EntityDefinition = z.infer<typeof entityDefinitionObjectSchema>; // entity with id generated in runtime
 export type EntityDefinitionWithoutId = Omit<EntityDefinition, 'id'>;
 /** @deprecated `EntityDefinitionWithoutId` now accepts any valid type name; use it instead. */
 export type EntityDefinitionOfAnyType = EntityDefinitionWithoutId;
