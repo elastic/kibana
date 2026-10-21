@@ -1568,6 +1568,8 @@ apiTest.describe('Dispatcher', { tag: testData.API_ENGINE_TAG }, () => {
           actor: { type: 'internal' },
           source: 'internal',
           reason: `maintenance_window:${mw.id}`,
+          action_subtype: 'maintenance_window',
+          maintenance_window_id: mw.id,
         });
       }
 

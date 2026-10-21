@@ -12,6 +12,7 @@ import type {
   RuleTemplateData,
 } from '@kbn/alerting-v2-schemas';
 import { noDataStrategy, recoveryStrategy } from '@kbn/alerting-v2-schemas';
+import { encodeSeriesId } from '@kbn/alerting-v2-utils';
 import type { AlertEvent } from '../../../server/resources/datastreams/alert_events';
 import { LOOKBACK_WINDOW, SCHEDULE_INTERVAL } from './constants';
 
@@ -182,4 +183,24 @@ export const buildExternalAlertEvent = (input: BuildExternalAlertEventInput = {}
     space_id: 'default',
     ...input,
   } as AlertEvent;
+};
+
+/**
+ * Derives the series id the series routes expect from a seeded event, using the
+ * same owner rules as the server: rule-backed series are keyed by `rule.id`,
+ * external ones by `source`.
+ */
+export const buildSeriesId = (event: AlertEvent): string => {
+  const seriesId = encodeSeriesId({
+    space_id: event.space_id,
+    group_hash: event.group_hash,
+    rule_id: event.rule?.id,
+    source: event.source,
+  });
+
+  if (seriesId === null) {
+    throw new Error('Cannot build a series id for an event without a rule or a source');
+  }
+
+  return seriesId;
 };

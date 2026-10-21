@@ -55,6 +55,7 @@ export {
   buildAlertEvent,
   buildExternalAlertEvent,
   buildGroupHash,
+  buildSeriesId,
   buildCreateRuleData,
   buildCreateActionPolicyData,
   buildRuleTemplateData,
