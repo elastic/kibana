@@ -1428,6 +1428,7 @@ packages:
   - 'x-pack/platform/plugins/private/index_lifecycle_management'
   - 'x-pack/platform/plugins/private/indices_metadata'
   - 'x-pack/platform/plugins/private/intercepts'
+  - 'x-pack/platform/plugins/private/isomer_dashboards'
   - 'x-pack/platform/plugins/private/license_api_guard'
   - 'x-pack/platform/plugins/private/logstash'
   - 'x-pack/platform/plugins/private/monitoring'
