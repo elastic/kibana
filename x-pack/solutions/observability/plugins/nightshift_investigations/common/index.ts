@@ -247,3 +247,7 @@ export type {
   NightshiftBoundWorkflowStatus,
   NightshiftServiceAccountInfo,
 } from './service_account';
+export {
+  ensureNightshiftServiceAccountRoles,
+  NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES,
+} from './service_account_roles';

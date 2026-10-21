@@ -71,7 +71,7 @@ Nightshift is moving to running investigations and automations as service accoun
 
 ### Accounts and roles
 
-There is one account of each kind per deployment, shared by every space. Each holds a role that Nightshift never creates or changes. On Serverless, where Nightshift ships, the roles are elasticsearch-controller predefined roles, whose names start with `_`. Stateful Elasticsearch has no such roles, so on stateful they are created by whoever sets up the deployment, named like the account. Their definitions are in `scripts/service_account_roles/`. Scout tests create them with `ensureNightshiftServiceAccountRoles`, so the tests also run against Elastic Cloud Hosted.
+There is one account of each kind per deployment, shared by every space. Each holds a role that Nightshift never creates or changes. On Serverless, where Nightshift ships, the roles are elasticsearch-controller predefined roles, whose names start with `_`. Stateful Elasticsearch has no such roles, so on stateful they are created by whoever sets up the deployment, named like the account. Their definitions are in `common/service_account_roles.ts`. Scout tests and evals create them with `ensureNightshiftServiceAccountRoles`, so they also run against Elastic Cloud Hosted.
 
 | Account | Role (stateful / Serverless) | Used by |
 |---|---|---|

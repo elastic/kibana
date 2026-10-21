@@ -9,7 +9,6 @@
     "public/**/*",
     "integration_tests/**/*",
     "scripts/**/*",
-    "scripts/**/*.json",
     "test/scout*/**/*"
   ],
   "exclude": ["target/**/*"],
