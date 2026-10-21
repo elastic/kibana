@@ -9,7 +9,7 @@ import type { ConversationTemplate } from '@kbn/agent-builder-common';
 
 export const investigationTemplate: ConversationTemplate = {
   id: 'investigation',
-  version: 3,
+  version: 4,
   name: 'Investigation',
   description: 'Use for investigations',
   fields: {
@@ -64,6 +64,7 @@ export const investigationTemplate: ConversationTemplate = {
     telemetry_target: {
       input_type: 'TEXT',
       required: false,
+      immutable: true,
       description: 'Telemetry target retained by this investigation.',
       max_length: 64,
       regex: {

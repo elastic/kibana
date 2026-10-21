@@ -2328,6 +2328,105 @@ describe('ConversationClient', () => {
     });
   });
 
+  describe('immutable metadata', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      mockEsClient.index.mockResolvedValue({ _seq_no: 2, _primary_term: 1 });
+      getTemplateMock.mockReturnValue(
+        makeTemplate('investigation', {
+          telemetry_target: { input_type: 'TEXT', immutable: true },
+          summary: { input_type: 'TEXT' },
+        })
+      );
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({
+          templateId: 'investigation',
+          metadata: { telemetry_target: 'orca' },
+        })
+      );
+    });
+
+    it.each(['c0', 'none', ''])('rejects changing the target to %p', async (target) => {
+      await expect(
+        client.patchMetadata(
+          'conversation-1',
+          { telemetry_target: target, summary: 'must not be written' },
+          { source: 'http_api' }
+        )
+      ).rejects.toThrow('Metadata field "telemetry_target" is immutable');
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it('rejects assigning a target to a legacy investigation', async () => {
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({ templateId: 'investigation' })
+      );
+      await expect(
+        client.patchMetadata('conversation-1', { telemetry_target: 'orca' }, { source: 'workflow' })
+      ).rejects.toThrow('Metadata field "telemetry_target" is immutable');
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+
+    it.each([{ telemetry_target: 'c0' }, {}, undefined])(
+      'rejects replacing or removing the target through update: %p',
+      async (metadata) => {
+        await expect(
+          client.update({ id: 'conversation-1', metadata }, { source: 'workflow' })
+        ).rejects.toThrow('Metadata field "telemetry_target" is immutable');
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each(['other', undefined])(
+      'rejects switching or removing the template through update: %p',
+      async (templateId) => {
+        await expect(
+          client.update({ id: 'conversation-1', template_id: templateId }, { source: 'workflow' })
+        ).rejects.toThrow('Cannot change a template with immutable metadata fields');
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      }
+    );
+
+    it('allows the same target alongside unrelated metadata updates', async () => {
+      const { changedFields } = await client.patchMetadata(
+        'conversation-1',
+        { telemetry_target: 'orca', summary: 'Updated summary' },
+        { source: 'http_api' }
+      );
+      expect(changedFields).toEqual(['summary']);
+      expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual({
+        telemetry_target: 'orca',
+        summary: 'Updated summary',
+      });
+    });
+
+    it.each([{ telemetry_target: 'orca' }, {}])(
+      'preserves the target binding when reapplying the template: %p',
+      async (metadata) => {
+        mockGetDocumentResponse(
+          createConversationDocumentWithTemplate({ templateId: 'investigation', metadata })
+        );
+        await client.applyTemplate('conversation-1', 'investigation', { source: 'http_api' });
+        expect(mockEsClient.index.mock.calls[0][0].document.metadata).toEqual(metadata);
+      }
+    );
+
+    it('rejects adding an immutable default to a legacy investigation during migration', async () => {
+      mockGetDocumentResponse(
+        createConversationDocumentWithTemplate({ templateId: 'investigation' })
+      );
+      getTemplateMock.mockReturnValue(
+        makeTemplate('investigation', {
+          telemetry_target: { input_type: 'TEXT', immutable: true, default_value: 'orca' },
+        })
+      );
+      await expect(
+        client.applyTemplate('conversation-1', 'investigation', { source: 'http_api' })
+      ).rejects.toThrow('Metadata field "telemetry_target" is immutable');
+      expect(mockEsClient.index).not.toHaveBeenCalled();
+    });
+  });
+
   describe('patchMetadata', () => {
     beforeEach(() => {
       jest.clearAllMocks();
