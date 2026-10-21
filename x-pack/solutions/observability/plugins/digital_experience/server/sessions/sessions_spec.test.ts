@@ -105,7 +105,7 @@ describe('sessions transform spec', () => {
   });
 
   it('passes candidate fields to the dest pipeline script as params', () => {
-    const script = sessionsDestPipeline.processors?.[0].script;
+    const script = sessionsDestPipeline.processors?.[0]?.script;
     expect(script?.params).toEqual({
       fields: SESSION_ATTRIBUTE_FIELDS,
       vitals: [...WEB_VITAL_NAMES],
