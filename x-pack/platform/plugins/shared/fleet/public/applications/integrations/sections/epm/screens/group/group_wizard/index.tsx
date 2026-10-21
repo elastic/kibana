@@ -119,7 +119,7 @@ export interface GroupWizardExitResult {
 
 /**
  * PROTOTYPE: host contract. The route renders it as a full page with URL step state; an embedding
- * host (browse flyout today, Streams "+ Source" or observability onboarding later) renders it
+ * host (browse modal today, Streams "+ Source" or observability onboarding later) renders it
  * `embedded` with local step state and owns the exit.
  */
 export interface GroupWizardHostProps {

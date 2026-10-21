@@ -8,7 +8,7 @@
 // PROTOTYPE: integration group page. Every group (package with `schemas`) gets the generic
 // onboarding wizard, driven by its child integrations' package metadata. No per-group code.
 // The route is a thin host: full page, step in the URL, exits to the integration (done) or to
-// browse (cancel). The browse tile opens the same wizard in a flyout (group_wizard_flyout.tsx).
+// browse (cancel). The browse tile opens the same wizard in a modal (group_wizard_modal.tsx).
 // The create-package-policy page keeps its `?group=<name>` schema toggle for direct links.
 // User-facing copy says "integration", never "group".
 
@@ -26,7 +26,7 @@ import type { GroupWizardExitResult } from './group_wizard';
 import { GroupOnboardingWizard } from './group_wizard';
 
 export { GroupSchemaToggle } from './schema_toggle';
-export { GroupWizardFlyout, useGroupWizardFlyout } from './group_wizard_flyout';
+export { GroupWizardModal, useGroupWizardModal } from './group_wizard_modal';
 
 const GroupWizardRoute: React.FC<{ group: PackageListItem; options: GroupSchemaOption[] }> = ({
   group,

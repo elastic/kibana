@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-// PROTOTYPE: the integration onboarding wizard embedded in a large flyout, opened from the
+// PROTOTYPE: the integration onboarding wizard embedded in a large modal, opened from the
 // browse tile. Reference host for the embeddable contract (GroupWizardHostProps): local step
 // state, no URL changes, the host owns the header, close and exit.
 
 import React, { useCallback, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
+  EuiModal,
+  EuiModalBody,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiSkeletonText,
   EuiText,
-  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -31,12 +32,12 @@ import type { IntegrationCardItem } from '../home/card_utils';
 import { GroupOnboardingWizard } from './group_wizard';
 
 /**
- * PROTOTYPE: group tiles open the wizard in a flyout instead of navigating, regardless of
+ * PROTOTYPE: group tiles open the wizard in a modal instead of navigating, regardless of
  * `enableIntegrationTileClickToAdd`. Flip to false to go back to the full-page route.
  */
-export const GROUP_TILE_OPENS_FLYOUT = true;
+export const GROUP_TILE_OPENS_MODAL = true;
 
-export const GroupWizardFlyout: React.FC<{ groupName: string; onClose: () => void }> = ({
+export const GroupWizardModal: React.FC<{ groupName: string; onClose: () => void }> = ({
   groupName,
   onClose,
 }) => {
@@ -45,41 +46,44 @@ export const GroupWizardFlyout: React.FC<{ groupName: string; onClose: () => voi
   const available = options.filter((o) => o.child);
 
   return (
-    <EuiFlyout
-      size="l"
-      ownFocus
+    <EuiModal
       onClose={onClose}
       aria-labelledby={titleId}
-      data-test-subj="groupWizardFlyout"
+      maxWidth={false}
+      // PROTOTYPE: fixed size so the modal doesn't resize between steps
+      css={css({ width: 'min(1280px, 92vw)', height: 'min(900px, 90vh)' })}
+      data-test-subj="groupWizardModal"
     >
-      <EuiFlyoutHeader hasBorder>
-        <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-          {group && (
+      <EuiModalHeader>
+        <div>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            {group && (
+              <EuiFlexItem grow={false}>
+                <PackageIcon
+                  packageName={group.name}
+                  version={group.version}
+                  icons={group.icons}
+                  size="l"
+                />
+              </EuiFlexItem>
+            )}
             <EuiFlexItem grow={false}>
-              <PackageIcon
-                packageName={group.name}
-                version={group.version}
-                icons={group.icons}
-                size="l"
-              />
+              <EuiModalHeaderTitle id={titleId}>
+                {group?.title ?? 'Add integration'}
+              </EuiModalHeaderTitle>
             </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">Integration</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+          {group?.description && (
+            <EuiText size="s" color="subdued">
+              {group.description}
+            </EuiText>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="m">
-              <h2 id={titleId}>{group?.title ?? 'Add integration'}</h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">Integration</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        {group?.description && (
-          <EuiText size="s" color="subdued">
-            {group.description}
-          </EuiText>
-        )}
-      </EuiFlyoutHeader>
-      <EuiFlyoutBody>
+        </div>
+      </EuiModalHeader>
+      <EuiModalBody>
         {isLoading ? (
           <EuiSkeletonText lines={6} />
         ) : group && available.length ? (
@@ -89,7 +93,7 @@ export const GroupWizardFlyout: React.FC<{ groupName: string; onClose: () => voi
             stepState="local"
             layout="embedded"
             exitLabel="Done"
-            // PROTOTYPE: the flyout host just closes; a real host decides where to go next
+            // PROTOTYPE: the modal host just closes; a real host decides where to go next
             onExit={onClose}
           />
         ) : (
@@ -100,17 +104,17 @@ export const GroupWizardFlyout: React.FC<{ groupName: string; onClose: () => voi
             title={`"${group?.title ?? groupName}" can't be added right now`}
           />
         )}
-      </EuiFlyoutBody>
-    </EuiFlyout>
+      </EuiModalBody>
+    </EuiModal>
   );
 };
 
-/** Browse pages: make group tiles open the wizard flyout, and render the flyout when open. */
-export const useGroupWizardFlyout = () => {
+/** Browse pages: make group tiles open the wizard modal, and render the modal when open. */
+export const useGroupWizardModal = () => {
   const [groupName, setGroupName] = useState<string>();
-  const withGroupFlyout = useCallback(
+  const withGroupWizard = useCallback(
     <T extends IntegrationCardItem>(cards: T[]): T[] =>
-      GROUP_TILE_OPENS_FLYOUT
+      GROUP_TILE_OPENS_MODAL
         ? cards.map((card) =>
             card.isIntegrationGroupCard
               ? { ...card, onCardClick: () => setGroupName(card.name) }
@@ -119,8 +123,8 @@ export const useGroupWizardFlyout = () => {
         : cards,
     []
   );
-  const flyout = groupName ? (
-    <GroupWizardFlyout groupName={groupName} onClose={() => setGroupName(undefined)} />
+  const groupWizardModal = groupName ? (
+    <GroupWizardModal groupName={groupName} onClose={() => setGroupName(undefined)} />
   ) : null;
-  return { withGroupFlyout, flyout, openGroupWizard: setGroupName };
+  return { withGroupWizard, groupWizardModal, openGroupWizard: setGroupName };
 };

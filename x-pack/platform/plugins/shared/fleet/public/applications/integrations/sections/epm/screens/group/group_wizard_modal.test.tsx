@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-// PROTOTYPE: browse tile -> onboarding wizard flyout (embedded host).
+// PROTOTYPE: browse tile -> onboarding wizard modal (embedded host).
 
 import React from 'react';
 import { act, fireEvent, waitFor } from '@testing-library/react';
@@ -17,7 +17,7 @@ import type { IntegrationCardItem } from '../home/card_utils';
 
 import { nginxOtelPackageInfo, nginxPackageInfo } from './group_wizard/__fixtures__/nginx';
 import { nginxGroupItem } from './group_wizard/__fixtures__/groups';
-import { GROUP_TILE_OPENS_FLYOUT, useGroupWizardFlyout } from './group_wizard_flyout';
+import { GROUP_TILE_OPENS_MODAL, useGroupWizardModal } from './group_wizard_modal';
 
 jest.mock('../../../../../../services/use_yaml', () => ({ useYaml: () => require('yaml') }));
 jest.mock(
@@ -68,41 +68,41 @@ const PACKAGES: Record<string, PackageInfo> = {
 };
 
 const Browse: React.FC<{ cards: IntegrationCardItem[] }> = ({ cards }) => {
-  const { withGroupFlyout, flyout } = useGroupWizardFlyout();
+  const { withGroupWizard, groupWizardModal } = useGroupWizardModal();
   return (
     <>
-      {withGroupFlyout(cards).map((card) => (
+      {withGroupWizard(cards).map((card) => (
         <button key={card.id} data-test-subj={`card-${card.name}`} onClick={card.onCardClick}>
           {card.title}
         </button>
       ))}
-      {flyout}
+      {groupWizardModal}
     </>
   );
 };
 
-describe('group tile -> wizard flyout', () => {
+describe('group tile -> wizard modal', () => {
   beforeEach(() => {
     (sendGetPackageInfoByKeyForRq as jest.Mock).mockImplementation((name: string) =>
       Promise.resolve({ item: PACKAGES[name] })
     );
   });
 
-  it('opens the wizard embedded in a flyout, other tiles untouched', async () => {
-    expect(GROUP_TILE_OPENS_FLYOUT).toBe(true);
+  it('opens the wizard embedded in a modal, other tiles untouched', async () => {
+    expect(GROUP_TILE_OPENS_MODAL).toBe(true);
     const cards = [
       { id: 'epr:nginx_group', name: 'nginx_group', title: 'Nginx', isIntegrationGroupCard: true },
       { id: 'epr:redis', name: 'redis', title: 'Redis' },
     ] as IntegrationCardItem[];
     const renderer = createIntegrationsTestRendererMock();
     const result = renderer.render(<Browse cards={cards} />);
-    expect(result.queryByTestId('groupWizardFlyout')).not.toBeInTheDocument();
+    expect(result.queryByTestId('groupWizardModal')).not.toBeInTheDocument();
 
     act(() => {
       fireEvent.click(result.getByTestId('card-nginx_group'));
     });
-    await waitFor(() => expect(result.getByTestId('groupWizardFlyout')).toBeInTheDocument());
-    expect(result.getByTestId('groupWizardFlyout')).toHaveTextContent(nginxGroupItem.title);
+    await waitFor(() => expect(result.getByTestId('groupWizardModal')).toBeInTheDocument());
+    expect(result.getByTestId('groupWizardModal')).toHaveTextContent(nginxGroupItem.title);
     await waitFor(() => expect(result.getByTestId('groupWizardSignal-logs')).toBeInTheDocument());
     // Embedded: the host owns the header, the wizard doesn't render its page header
     expect(result.queryByTestId('groupWizardBack')).not.toBeInTheDocument();
