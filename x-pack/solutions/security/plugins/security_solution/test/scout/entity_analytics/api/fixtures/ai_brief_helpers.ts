@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import type { ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { Conversation, ConversationRoundStep } from '@kbn/agent-builder-common';
 import { isToolCallStep } from '@kbn/agent-builder-common';
+import { uniq } from 'lodash';
 import { createToolCallMessage, type LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { EsClient } from '@kbn/scout-security';
 import {
@@ -32,7 +33,19 @@ const TITLE_SYSTEM_PROMPT = 'You are a title-generation utility';
 export interface ConverseResponseBody {
   conversation_id: string;
   steps: ConversationRoundStep[];
+  response: { message: string };
 }
+
+/** What the brief tool returns: the render tags the agent pastes, and what it needs to answer follow-ups. */
+export interface BriefToolResult {
+  attachment_id: string;
+  version: number;
+  brief_tag: string;
+  entity_table_tag?: string;
+}
+
+const isBriefToolResult = (data: unknown): data is BriefToolResult =>
+  typeof data === 'object' && data !== null && 'attachment_id' in data && 'brief_tag' in data;
 
 const getToolChoiceName = (toolChoice: unknown): string | undefined => {
   if (typeof toolChoice !== 'object' || toolChoice === null || !('function' in toolChoice)) {
@@ -90,9 +103,21 @@ export const buildDraft = (entityId: string): BriefDraft => ({
   recommendation: `Start with {{ entity.id ${entityId} }}.`,
 });
 
+/** The render tags in the brief tool's result, as the agent receives them in its messages. */
+const getRenderTags = (messages: unknown[]): string[] => {
+  // The tags sit inside JSON strings, so their quotes arrive escaped one or more times.
+  const matches = JSON.stringify(messages).matchAll(
+    /<render_attachment id=\\*"([^"\\]+)\\*" version=\\*"(\d+)\\*" \/>/g
+  );
+  return uniq(
+    [...matches].map(([, id, version]) => `<render_attachment id="${id}" version="${version}" />`)
+  );
+};
+
 /**
  * Mocks one brief round: title, the agent calling the brief tool, the forced composition call
- * when `draft` is given, and the final answer. The proxy answers with the first match.
+ * when `draft` is given, and the final answer, which pastes the render tags as it is told to.
+ * The proxy answers with the first match.
  */
 export const mockBriefRound = (llmProxy: LlmProxy, draft?: BriefDraft): void => {
   void llmProxy
@@ -123,7 +148,12 @@ export const mockBriefRound = (llmProxy: LlmProxy, draft?: BriefDraft): void => 
     .intercept({
       name: 'agent: final answer',
       when: () => true,
-      responseMock: 'Here is the brief.',
+      responseMock: ({ messages }) =>
+        [
+          'Here is the brief.',
+          ...getRenderTags(messages),
+          'Ask me about any of these entities.',
+        ].join('\n\n'),
     })
     .completeAfterIntercept();
 };
@@ -150,13 +180,26 @@ export const buildBriefConverseBody = (connectorId: string, scope: EntityAnalyti
   ],
 });
 
-export const getBriefFromSteps = ({ steps }: ConverseResponseBody): string => {
+export const getBriefResult = ({ steps }: ConverseResponseBody): BriefToolResult => {
   const result = steps
     .filter(isToolCallStep)
     .find(({ tool_id: toolId }) => toolId === BRIEF_TOOL_ID)?.results[0];
-  const brief = result?.data && 'brief' in result.data ? result.data.brief : undefined;
-  if (typeof brief !== 'string') {
+  if (!isBriefToolResult(result?.data)) {
     throw new Error(`No brief in the tool call steps: ${JSON.stringify(steps)}`);
   }
-  return brief;
+  return result.data;
+};
+
+/** The HTML of the conversation's `visualization` attachment, which is where the brief is posted. */
+export const getBriefTemplate = ({ attachments = [] }: Conversation): string => {
+  const attachment = attachments.find(({ type }) => type === 'visualization');
+  const version = attachment?.versions.find(
+    ({ version: number }) => number === attachment.current_version
+  );
+  const template = (version?.data as { visualization?: { template?: unknown } } | undefined)
+    ?.visualization?.template;
+  if (typeof template !== 'string') {
+    throw new Error(`No brief visualization in the conversation: ${JSON.stringify(attachments)}`);
+  }
+  return template;
 };

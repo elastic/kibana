@@ -12,6 +12,7 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import type { RiskScoreDataClient } from '../../../../lib/entity_analytics/risk_score/risk_score_data_client';
 import type { SignalCardId } from '../../../../../common/entity_analytics/home/constants';
 import type { EntityAnalyticsScope } from '../../../../../common/entity_analytics/ai_brief/scope';
+import type { BriefViewModel } from './view_model';
 
 export const MAX_BRIEF_CANDIDATES = 25;
 
@@ -63,7 +64,12 @@ export interface GenerateBriefParams {
 }
 
 export interface GenerateBriefResult {
-  /** Markdown, presented verbatim by the agent. */
-  brief: string;
+  /** The brief as the HTML of an inline visualization. */
+  html: string;
+  /** The card's height in pixels. */
+  height: number;
+  viewModel: BriefViewModel;
+  /** The `security.entity` table of the priorities, as its render tag. */
+  entityTableTag?: string;
   priorityCount: number;
 }

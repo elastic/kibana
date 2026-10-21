@@ -24,10 +24,12 @@ import {
   getBriefToolId,
 } from './brief';
 import { checkResolutionAccess } from './resolution/check_resolution_access';
+import { buildRenderAttachmentTag } from './attachment_utils';
 import { createToolTelemetryTracker } from './tool_telemetry_tracker';
 
 /** The tool's name in logs and telemetry; each captured view gets its own tool id. */
 const BRIEF_TOOL_NAME = 'security.generate_entity_analytics_brief';
+const BRIEF_TITLE = 'Entity Analytics AI brief';
 
 const ENTITY_READ_FAILED_MESSAGE = "Entity details couldn't be read, so no brief was generated.";
 const MODEL_FAILED_MESSAGE = 'The AI model call failed, so no brief was generated.';
@@ -82,7 +84,7 @@ export const createGenerateBriefTool = ({
         return { results: [access.result] };
       }
       const { inferenceClient } = await modelProvider.getDefaultModel();
-      const { brief, priorityCount } = await generateBrief({
+      const { html, height, viewModel, entityTableTag, priorityCount } = await generateBrief({
         scope,
         spaceId,
         esClient: esClient.asCurrentUser,
@@ -100,12 +102,34 @@ export const createGenerateBriefTool = ({
         logger,
       });
       telemetryTracker.recordResultCount(priorityCount);
+      const attachment = await attachments.add({
+        type: 'visualization',
+        data: {
+          renderer: 'custom_content',
+          query: BRIEF_TITLE,
+          visualization: { template: html, height, title: BRIEF_TITLE },
+        },
+        description: BRIEF_TITLE,
+      });
+      const { summary, priorities, recommendation } = viewModel;
       return {
         results: [
           {
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
-            data: { brief, instructions: BRIEF_RESULT_INSTRUCTIONS },
+            data: {
+              attachment_id: attachment.id,
+              version: attachment.current_version,
+              brief_tag: buildRenderAttachmentTag({
+                attachmentId: attachment.id,
+                version: attachment.current_version,
+              }),
+              entity_table_tag: entityTableTag,
+              summary,
+              priorities: priorities.map(({ name, nextStep }) => ({ name, nextStep })),
+              recommendation,
+              instructions: BRIEF_RESULT_INSTRUCTIONS,
+            },
           },
         ],
       };

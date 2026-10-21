@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Conversation } from '@kbn/agent-builder-common';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ApiClientFixture } from '@kbn/scout-security';
 import { apiTest, tags } from '@kbn/scout-security';
@@ -27,13 +28,14 @@ import {
   buildDraft,
   buildScope,
   ensureLatestEntitiesIndex,
-  getBriefFromSteps,
+  getBriefResult,
+  getBriefTemplate,
   getSubmitBriefRequests,
   mockBriefRound,
+  type BriefToolResult,
   type ConverseResponseBody,
 } from '../../fixtures/ai_brief_helpers';
 
-const PRIORITY_LINE = `1. **${SEEDED_USER_ID}**`;
 const SPACE_ID = 'brief-scout-space';
 const SPACE_USER_ID = 'user:brief-scout-space-user';
 
@@ -51,19 +53,29 @@ apiTest.describe(
     let spaceConnectorId: string;
     let spaceLlmProxy: LlmProxy;
 
+    /** The brief tool's result, the HTML it posted to the conversation, and the agent's reply. */
     const askForBrief = async (
       apiClient: ApiClientFixture,
       scope: EntityAnalyticsScope
-    ): Promise<string> => {
+    ): Promise<{ result: BriefToolResult; template: string; reply: string }> => {
       const response = await apiClient.post<ConverseResponseBody>('api/agent_builder/converse', {
         headers,
         responseType: 'json',
         body: buildBriefConverseBody(connectorId, scope),
       });
       expect(response).toHaveStatusCode(200);
-      conversationIds.push(response.body.conversation_id);
+      const { conversation_id: conversationId } = response.body;
+      conversationIds.push(conversationId);
       await llmProxy.waitForAllInterceptorsToHaveBeenCalled();
-      return getBriefFromSteps(response.body);
+      const conversation = await apiClient.get<Conversation>(
+        `api/agent_builder/conversations/${conversationId}`,
+        { headers, responseType: 'json' }
+      );
+      return {
+        result: getBriefResult(response.body),
+        template: getBriefTemplate(conversation.body),
+        reply: response.body.response.message,
+      };
     };
 
     apiTest.beforeAll(async ({ apiServices, esClient, requestAuth, log }) => {
@@ -122,10 +134,10 @@ apiTest.describe(
       await apiServices.spaces.delete(SPACE_ID);
     });
 
-    apiTest('writes a brief with one priority from the tile entities', async ({ apiClient }) => {
+    apiTest('posts a brief with one priority from the tile entities', async ({ apiClient }) => {
       mockBriefRound(llmProxy, buildDraft(SEEDED_USER_ID));
 
-      const brief = await askForBrief(
+      const { result, template, reply } = await askForBrief(
         apiClient,
         buildScope(
           {
@@ -152,16 +164,21 @@ apiTest.describe(
         )
       );
 
-      expect(brief).toContain(PRIORITY_LINE);
-      expect(brief).toContain('| Entities with alerts | 14 | +3 |');
-      expect(brief).toContain('| Newly high/critical | 1 | not enough history |');
-      // An unavailable count has nothing to say, so it gets no row.
-      expect(brief).not.toContain('| Entities with anomalies |');
-      expect(brief).toContain(
-        "Not checked, because the data couldn't be read: Entities with anomalies"
-      );
-      expect(brief).toContain(`**Recommended next step**\nStart with **${SEEDED_USER_ID}**.`);
-      expect(brief).toContain('<render_attachment');
+      // The tool returns the render tags, and the agent pastes them unchanged.
+      expect(typeof result.attachment_id).toBe('string');
+      expect(result.brief_tag).toContain(`id="${result.attachment_id}"`);
+      expect(result.entity_table_tag).toContain('<render_attachment');
+      expect(reply).toContain(result.brief_tag);
+      expect(reply).toContain(result.entity_table_tag);
+
+      // The conversation holds the brief as an inline visualization.
+      expect(template).toContain(SEEDED_USER_ID);
+      expect(template).toContain('+3');
+      expect(template).toContain('No comparison');
+      // An unavailable count has nothing to say, so it gets no tile.
+      expect(template).not.toContain('<div class="count-label">Entities with anomalies');
+      expect(template).toContain('Not checked, because the data couldn&#39;t be read');
+      expect(template).toContain(`Start with ${SEEDED_USER_ID}.`);
 
       const submitRequests = getSubmitBriefRequests(llmProxy);
       expect(submitRequests).toHaveLength(1);
@@ -172,11 +189,11 @@ apiTest.describe(
     });
 
     apiTest(
-      'writes the quiet brief without a model call when no tile is flagged',
+      'posts the quiet brief without a model call when no tile is flagged',
       async ({ apiClient }) => {
         mockBriefRound(llmProxy);
 
-        const brief = await askForBrief(
+        const { result, template } = await askForBrief(
           apiClient,
           buildScope({
             entitiesWithAlerts: {
@@ -191,7 +208,8 @@ apiTest.describe(
         );
 
         expect(getSubmitBriefRequests(llmProxy)).toHaveLength(0);
-        expect(brief).toContain('Nothing in this view is flagged');
+        expect(result.entity_table_tag).toBeUndefined();
+        expect(template).toContain('Nothing in this view is flagged');
       }
     );
 
@@ -221,7 +239,16 @@ apiTest.describe(
       const [submitRequest] = getSubmitBriefRequests(spaceLlmProxy);
       expect(submitRequest).toContain(SPACE_USER_ID);
       expect(submitRequest).not.toContain(SEEDED_USER_ID);
-      expect(getBriefFromSteps(response.body)).toContain(`1. **${SPACE_USER_ID}**`);
+      const template = getBriefTemplate(
+        (
+          await apiClient.get<Conversation>(
+            `s/${SPACE_ID}/api/agent_builder/conversations/${response.body.conversation_id}`,
+            { headers: spaceUserHeaders, responseType: 'json' }
+          )
+        ).body
+      );
+      expect(template).toContain(SPACE_USER_ID);
+      expect(template).not.toContain(SEEDED_USER_ID);
     });
   }
 );
