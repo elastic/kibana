@@ -22,7 +22,7 @@ import { fromRoot } from '@kbn/repo-info';
 import type { MapGeometry } from '@kbn/isomer-primitives-maps';
 import { createChartsDrawing } from '../../server/charts_drawing';
 import { type ComparedPanel, comparePanels } from './compare';
-import { engineHint } from './lens_hints';
+import { engineHintFromLens } from '@kbn/isomer-lowering';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 type Json = Record<string, any>;
@@ -83,7 +83,7 @@ export const run = async () => {
     const hints = Object.fromEntries(
       Object.entries(exported.hints ?? {}).map(([id, hint]) => [
         id,
-        engineHint(hint as Json, nodeOf(id)),
+        engineHintFromLens(hint as Json, nodeOf(id)),
       ])
     );
     const startedAt = performance.now();

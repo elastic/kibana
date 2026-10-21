@@ -1,0 +1,67 @@
+{
+  "id": "lens-heatmap-traffic-by-region-hour",
+  "type": "lens",
+  "attributes": {
+    "title": "Traffic by region and hour",
+    "visualizationType": "lnsHeatmap",
+    "state": {
+      "datasourceStates": {
+        "formBased": {
+          "layers": {
+            "layer-1": {
+              "indexPatternId": "web-*",
+              "columns": {
+                "col-hour": {
+                  "operationType": "date_histogram",
+                  "sourceField": "@timestamp",
+                  "isBucketed": true,
+                  "dataType": "date",
+                  "params": {
+                    "interval": "1h"
+                  },
+                  "label": "@timestamp per hour"
+                },
+                "col-region": {
+                  "operationType": "terms",
+                  "sourceField": "region",
+                  "isBucketed": true,
+                  "dataType": "string",
+                  "params": {
+                    "size": 5
+                  },
+                  "label": "Top region"
+                },
+                "col-count": {
+                  "operationType": "count",
+                  "isBucketed": false,
+                  "dataType": "number",
+                  "label": "Requests"
+                }
+              },
+              "columnOrder": ["col-hour", "col-region", "col-count"]
+            }
+          }
+        }
+      },
+      "visualization": {
+        "layerId": "layer-1",
+        "xAccessor": "col-hour",
+        "yAccessor": "col-region",
+        "valueAccessor": "col-count",
+        "shape": "heatmap"
+      },
+      "filters": [],
+      "query": {
+        "query": "",
+        "language": "kuery"
+      }
+    }
+  },
+  "references": [
+    {
+      "id": "web-data-view",
+      "name": "indexpattern-datasource-layer-layer-1",
+      "type": "index-pattern"
+    }
+  ]
+}

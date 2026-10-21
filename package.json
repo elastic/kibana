@@ -868,6 +868,7 @@
     "@kbn/isomer-charts-elastic": "workspace:*",
     "@kbn/isomer-charts-elastic-node": "workspace:*",
     "@kbn/isomer-components": "workspace:*",
+    "@kbn/isomer-lowering": "workspace:*",
     "@kbn/isomer-plugin": "workspace:*",
     "@kbn/isomer-primitives-charts": "workspace:*",
     "@kbn/isomer-primitives-maps": "workspace:*",

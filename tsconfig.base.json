@@ -1701,6 +1701,8 @@
       "@kbn/isomer-charts-elastic-node/*": ["./x-pack/platform/packages/shared/isomer/isomer-charts-elastic-node/*"],
       "@kbn/isomer-components": ["./x-pack/platform/packages/shared/isomer/isomer-components"],
       "@kbn/isomer-components/*": ["./x-pack/platform/packages/shared/isomer/isomer-components/*"],
+      "@kbn/isomer-lowering": ["./x-pack/platform/packages/shared/isomer/isomer-lowering"],
+      "@kbn/isomer-lowering/*": ["./x-pack/platform/packages/shared/isomer/isomer-lowering/*"],
       "@kbn/isomer-plugin": ["./x-pack/platform/plugins/shared/isomer"],
       "@kbn/isomer-plugin/*": ["./x-pack/platform/plugins/shared/isomer/*"],
       "@kbn/isomer-primitives-charts": ["./x-pack/platform/packages/shared/isomer/isomer-primitives-charts"],
