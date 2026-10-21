@@ -2909,8 +2909,6 @@
     "discover.context.olderDocumentsWarningZero": "Nenhum documento mais antigo do que a âncora foi encontrado.",
     "discover.context.pageTitle": "Documentos ao redor de #{anchorId}",
     "discover.context.reloadPageDescription.reloadOrVisitTextMessage": "Recarregue ou volte à lista de documentos para selecionar um documento âncora válido.",
-    "discover.context.unableToLoadAnchorDocumentDescription": "Não é possível carregar o documento âncora",
-    "discover.context.unableToLoadDocumentDescription": "Não foi possível carregar os documentos",
     "discover.contextAwareness.changePointDocViewer.noChartBody": "O gráfico de pontos de mudança só estará disponível após uma consulta ser executada.",
     "discover.contextAwareness.changePointDocViewer.noChartTitle": "Gráfico não disponível",
     "discover.contextAwareness.changePointPvalueCell.impactHigh": "alta",

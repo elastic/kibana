@@ -61,6 +61,90 @@
       }
     },
     {
+      "id": "aa4700cb29dad06-69a000e76d74772",
+      "title": "Agent Builder — chat attachment binaries file kind a user with Agent Builder read access can create, upload and download a PDF",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/chat_attachment_binaries_api.spec.ts",
+        "line": 58,
+        "column": 27
+      }
+    },
+    {
+      "id": "aa4700cb29dad06-2aa810bd6a2bd58",
+      "title": "Agent Builder — chat attachment binaries file kind a user with Agent Builder read access cannot list, get or delete PDFs",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/chat_attachment_binaries_api.spec.ts",
+        "line": 85,
+        "column": 16
+      }
+    },
+    {
+      "id": "aa4700cb29dad06-98d7e7e90a572a2",
+      "title": "Agent Builder — chat attachment binaries file kind a user without Agent Builder access cannot create a PDF",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/chat_attachment_binaries_api.spec.ts",
+        "line": 121,
+        "column": 6
+      }
+    },
+    {
+      "id": "2d0f837112190fa-339fbf837f9fc75",
+      "title": "Agent Builder — chat attachment images file kind a user with Agent Builder read access can create, upload and download an image",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/chat_attachment_images_api.spec.ts",
+        "line": 58,
+        "column": 27
+      }
+    },
+    {
+      "id": "2d0f837112190fa-fc09381a3057793",
+      "title": "Agent Builder — chat attachment images file kind a user with Agent Builder read access cannot list, get or delete images",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/chat_attachment_images_api.spec.ts",
+        "line": 85,
+        "column": 16
+      }
+    },
+    {
+      "id": "2d0f837112190fa-47fded1d4747f34",
+      "title": "Agent Builder — chat attachment images file kind a user without Agent Builder access cannot create an image",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agent_builder/test/scout_agent_builder/platform/api/tests/chat_attachment_images_api.spec.ts",
+        "line": 121,
+        "column": 6
+      }
+    },
+    {
       "id": "1a4b2c6fe9b0c8c-72848fc3099b974",
       "title": "Agent Builder — plugin installation API install from remote zip URL lifecycle",
       "expectedStatus": "passed",
