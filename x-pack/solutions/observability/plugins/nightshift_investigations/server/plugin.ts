@@ -25,6 +25,7 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
+import { ALERTING_V2_RULE_SO_TYPE } from './lib/alert_snapshot';
 import type { NightshiftInvestigationsConfig } from './config';
 import { InvestigationLocatorDefinition } from '../common/locators';
 import { NightshiftInvestigationsClient } from './client/investigations_client';
@@ -123,6 +124,7 @@ export class NightshiftInvestigationsPlugin
   private ruleRegistry?: NightshiftInvestigationsStartDeps['ruleRegistry'];
   private elasticsearch?: ElasticsearchServiceStart;
   private savedObjects?: CoreStart['savedObjects'];
+  private http?: CoreStart['http'];
   private uiSettings?: CoreStart['uiSettings'];
   private featureFlags?: CoreStart['featureFlags'];
   private actionsStart?: ActionsPluginStart;
@@ -465,6 +467,25 @@ export class NightshiftInvestigationsPlugin
           getTriggerEmitter,
           getAlertsClient: (request: KibanaRequest) =>
             this.ruleRegistry?.getRacClientWithRequest(request),
+          getEpisodeLookup: (request: KibanaRequest) => {
+            if (!this.elasticsearch || !this.savedObjects || !this.http) {
+              throw new Error(
+                'core services are not available — plugin start() has not been called'
+              );
+            }
+            const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+            return {
+              esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
+              soClient: this.savedObjects
+                .getScopedClient(request, {
+                  excludedExtensions: [SECURITY_EXTENSION_ID],
+                  includedHiddenTypes: [ALERTING_V2_RULE_SO_TYPE],
+                })
+                .asScopedToNamespace(spaceId),
+              spaceId,
+              basePath: this.http.basePath.get(request),
+            };
+          },
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
@@ -544,6 +565,7 @@ export class NightshiftInvestigationsPlugin
     this.ruleRegistry = plugins.ruleRegistry;
     this.elasticsearch = coreStart.elasticsearch;
     this.savedObjects = coreStart.savedObjects;
+    this.http = coreStart.http;
     this.uiSettings = coreStart.uiSettings;
     this.featureFlags = coreStart.featureFlags;
     this.actionsStart = plugins.actions;

@@ -71,8 +71,12 @@ describe('fetchAlertSnapshot', () => {
     } as unknown as AlertsClient);
 
   it('loads the alert and returns its snapshot', async () => {
-    await expect(fetchAlertSnapshot(makeAlertsClient(), 'alert-1')).resolves.toEqual(
-      expect.objectContaining({ id: 'alert-1', rule_id: 'rule-1' })
+    await expect(fetchAlertSnapshot(makeAlertsClient(), 'alert-1', '/base')).resolves.toEqual(
+      expect.objectContaining({
+        id: 'alert-1',
+        rule_id: 'rule-1',
+        url: '/base/app/observability/alerts/alert-1',
+      })
     );
   });
 
@@ -80,7 +84,7 @@ describe('fetchAlertSnapshot', () => {
     const alertsClient = makeAlertsClient({
       getAuthorizedAlertsIndices: jest.fn().mockResolvedValue([]),
     });
-    await expect(fetchAlertSnapshot(alertsClient, 'alert-1')).rejects.toMatchObject({
+    await expect(fetchAlertSnapshot(alertsClient, 'alert-1', '/base')).rejects.toMatchObject({
       output: { statusCode: 404 },
     });
   });
@@ -89,7 +93,7 @@ describe('fetchAlertSnapshot', () => {
     const alertsClient = makeAlertsClient({
       get: jest.fn().mockResolvedValue({ ...alert, 'kibana.alert.uuid': undefined }),
     });
-    await expect(fetchAlertSnapshot(alertsClient, 'alert-1')).rejects.toMatchObject({
+    await expect(fetchAlertSnapshot(alertsClient, 'alert-1', '/base')).rejects.toMatchObject({
       output: { statusCode: 400 },
     });
   });
@@ -97,6 +101,6 @@ describe('fetchAlertSnapshot', () => {
   it('preserves alert lookup failures', async () => {
     const lookupError = new Error('Elasticsearch unavailable');
     const alertsClient = makeAlertsClient({ get: jest.fn().mockRejectedValue(lookupError) });
-    await expect(fetchAlertSnapshot(alertsClient, 'alert-1')).rejects.toBe(lookupError);
+    await expect(fetchAlertSnapshot(alertsClient, 'alert-1', '/base')).rejects.toBe(lookupError);
   });
 });

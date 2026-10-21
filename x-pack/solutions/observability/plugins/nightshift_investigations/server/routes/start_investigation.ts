@@ -8,9 +8,13 @@
 import { serverUnavailable } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
-import { freeFormContextSchema, investigationNotificationDestinationsSchema } from '../../common';
+import {
+  freeFormContextSchema,
+  investigationNotificationDestinationsSchema,
+  MAX_ALERTS_PER_INVESTIGATION,
+} from '../../common';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID, MAX_KEYWORD_LENGTH } from '../../common';
-import { fetchAlertSnapshot } from '../lib/alert_snapshot';
+import { fetchInvestigationAlertSnapshot } from '../lib/alert_snapshot';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
 import { rethrowInvestigationClientError } from './rethrow_investigation_client_error';
 
@@ -44,6 +48,10 @@ const startInvestigationBodySchema = z.union([
       type: z.literal('alert'),
       ...subjectIdAndSummary,
     }),
+    alert_ids: z
+      .array(z.string().min(1).max(MAX_KEYWORD_LENGTH))
+      .max(MAX_ALERTS_PER_INVESTIGATION)
+      .optional(),
     title: titleSchema.optional(),
     ...startInvestigationMessage,
     ...startInvestigationModel,
@@ -96,7 +104,13 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
   params: z.object({
     body: startInvestigationBodySchema,
   }),
-  handler: async ({ request, params, getInvestigationsClient, getAlertsClient }) => {
+  handler: async ({
+    request,
+    params,
+    getInvestigationsClient,
+    getAlertsClient,
+    getEpisodeLookup,
+  }) => {
     const client = getInvestigationsClient(request);
     const { body } = params;
 
@@ -107,11 +121,17 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
         if (!alertsClient) {
           throw serverUnavailable('Alert lookup is unavailable');
         }
-        const snapshot = await fetchAlertSnapshot(alertsClient, body.subject.id);
+        const lookup = getEpisodeLookup(request);
+        const alertIds = [...new Set([body.subject.id, ...(body.alert_ids ?? [])])];
+        const alerts = await Promise.all(
+          alertIds.map((alertId) =>
+            fetchInvestigationAlertSnapshot({ alertsClient, alertId, ...lookup })
+          )
+        );
         return await client.start({
           subject: body.subject,
           title: body.title,
-          context: { alerts: [snapshot] },
+          context: { alerts },
           trigger_type: 'manual',
           message: body.message,
           ...(body.connector_id ? { connector_id: body.connector_id } : {}),

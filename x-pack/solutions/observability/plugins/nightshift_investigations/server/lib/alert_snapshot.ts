@@ -6,6 +6,13 @@
  */
 
 import Boom from '@hapi/boom';
+import { esql } from '@elastic/esql';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { ALERT_EVENTS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import {
+  OBSERVABILITY_ALERTING_ALERTS_PATH,
+  OBSERVABILITY_ALERTING_BASE_PATH,
+} from '@kbn/deeplinks-observability';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
@@ -30,7 +37,17 @@ import {
   STACK_RULE_TYPE_IDS_SUPPORTED_BY_OBSERVABILITY,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { alertSnapshotSchema, type AlertSnapshot } from '../../common';
+import {
+  alertSnapshotSchema,
+  v2AlertSnapshotSchema,
+  type InvestigationAlertSnapshot,
+  type AlertSnapshot,
+  type V2AlertSnapshot,
+} from '../../common';
+
+export const ALERTING_V2_RULE_SO_TYPE = 'alerting_rule';
+
+const OBSERVABILITY_ALERT_DETAILS_PATH = '/app/observability/alerts';
 
 const INVESTIGABLE_RULE_TYPE_IDS = [
   ...OBSERVABILITY_RULE_TYPE_IDS,
@@ -71,7 +88,8 @@ export const parseAlertSnapshot = (alert: Record<string, unknown>): AlertSnapsho
 
 export const fetchAlertSnapshot = async (
   alertsClient: AlertsClient,
-  alertId: string
+  alertId: string,
+  basePath: string
 ): Promise<AlertSnapshot> => {
   const indices = (await alertsClient.getAuthorizedAlertsIndices(INVESTIGABLE_RULE_TYPE_IDS)) ?? [];
   if (!indices.length) {
@@ -89,5 +107,87 @@ export const fetchAlertSnapshot = async (
   if (!snapshot) {
     throw Boom.badRequest('Alert does not contain the fields required for an investigation');
   }
-  return snapshot;
+  return {
+    ...snapshot,
+    url: `${basePath}${OBSERVABILITY_ALERT_DETAILS_PATH}/${encodeURIComponent(alertId)}`,
+  };
 };
+
+export interface EpisodeLookup {
+  esClient: ElasticsearchClient;
+  soClient: SavedObjectsClientContract;
+  spaceId: string;
+  basePath: string;
+}
+
+export const fetchV2AlertSnapshot = async ({
+  esClient,
+  soClient,
+  spaceId,
+  basePath,
+  episodeId,
+}: EpisodeLookup & { episodeId: string }): Promise<V2AlertSnapshot> => {
+  const { query } = esql`
+    FROM ${ALERT_EVENTS_DATA_STREAM} METADATA _source
+    | WHERE type == "alert" AND space_id == ${spaceId} AND episode.id == ${episodeId}
+    | EVAL data_json = JSON_EXTRACT(_source, "$.data"), episode_id = episode.id
+    | DROP _source
+    | STATS
+        start = MIN(@timestamp),
+        last_event_timestamp = MAX(@timestamp),
+        data_json = LAST(data_json, @timestamp) WHERE data_json != "{}",
+        status = LAST(episode.status, @timestamp),
+        severity = LAST(severity, @timestamp),
+        source = LAST(source, @timestamp),
+        rule_id = LAST(rule.id, @timestamp),
+        group_hash = LAST(group_hash, @timestamp)
+      BY episode_id`.toRequest();
+
+  const { columns, values } = await esClient.esql.query({ query, drop_null_columns: true });
+  const [row] = values;
+  if (!row) {
+    throw Boom.notFound(`Alert with id ${episodeId} not found`);
+  }
+
+  const {
+    data_json: dataJson,
+    episode_id: id,
+    ...fields
+  } = Object.fromEntries(columns.map(({ name }, index) => [name, row[index]]));
+  const result = v2AlertSnapshotSchema.safeParse({
+    alert_version: 'v2',
+    id,
+    ...fields,
+    data: typeof dataJson === 'string' ? JSON.parse(dataJson) : undefined,
+    url: `${basePath}${OBSERVABILITY_ALERTING_BASE_PATH}${OBSERVABILITY_ALERTING_ALERTS_PATH}/${encodeURIComponent(
+      episodeId
+    )}`,
+  });
+  if (!result.success) {
+    throw Boom.badRequest('Alert does not contain the fields required for an investigation');
+  }
+  const {
+    saved_objects: [rule],
+  } = await soClient.bulkGet<{ metadata?: { name?: string } }>([
+    { type: ALERTING_V2_RULE_SO_TYPE, id: result.data.rule_id },
+  ]);
+  return {
+    ...result.data,
+    rule_name: 'attributes' in rule ? rule.attributes.metadata?.name : undefined,
+  };
+};
+
+export const fetchInvestigationAlertSnapshot = ({
+  alertsClient,
+  alertId,
+  ...lookup
+}: EpisodeLookup & {
+  alertsClient: AlertsClient;
+  alertId: string;
+}): Promise<InvestigationAlertSnapshot> =>
+  fetchAlertSnapshot(alertsClient, alertId, lookup.basePath).catch((error) => {
+    if (Boom.isBoom(error) && error.output.statusCode === 404) {
+      return fetchV2AlertSnapshot({ ...lookup, episodeId: alertId });
+    }
+    throw error;
+  });

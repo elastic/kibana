@@ -30,6 +30,8 @@ const getAlertsClient = jest.fn().mockResolvedValue({
   get: jest.fn().mockResolvedValue(alert),
 });
 
+const getEpisodeLookup = jest.fn().mockReturnValue({ basePath: '' });
+
 beforeEach(() => jest.clearAllMocks());
 
 it('loads the alert and builds the investigation context server-side', async () => {
@@ -38,6 +40,7 @@ it('loads the alert and builds the investigation context server-side', async () 
       request: {},
       getInvestigationsClient,
       getAlertsClient,
+      getEpisodeLookup,
       params: { body: { subject: { type: 'alert', id: 'alert-1' } } },
     } as never)
   ).resolves.toEqual({ investigation_id: 'investigation-1' });
@@ -55,6 +58,7 @@ it('passes a caller-provided title on', async () => {
     request: {},
     getInvestigationsClient,
     getAlertsClient,
+    getEpisodeLookup,
     params: { body: { subject: { type: 'alert', id: 'alert-1' }, title: 'Custom title' } },
   } as never);
   expect(start).toHaveBeenCalledWith(expect.objectContaining({ title: 'Custom title' }));
@@ -75,6 +79,7 @@ it('forwards connector_id for an alert investigation', async () => {
     request: {},
     getInvestigationsClient,
     getAlertsClient,
+    getEpisodeLookup,
     params: {
       body: {
         subject: { type: 'alert', id: 'alert-1' },
@@ -95,6 +100,7 @@ it('starts a manual investigation from the question alone', async () => {
     request: {},
     getInvestigationsClient,
     getAlertsClient,
+    getEpisodeLookup,
     params: { body },
   } as never);
 
@@ -117,6 +123,7 @@ it('forwards connector_id for a manual investigation', async () => {
     request: {},
     getInvestigationsClient,
     getAlertsClient,
+    getEpisodeLookup,
     params: { body },
   } as never);
 
@@ -133,6 +140,7 @@ it('passes a manual investigation title on only when the caller gives one', asyn
     request: {},
     getInvestigationsClient,
     getAlertsClient,
+    getEpisodeLookup,
     params: { body: explicit },
   } as never);
   expect(start).toHaveBeenLastCalledWith(expect.objectContaining({ title: 'Checkout p99 spike' }));
@@ -167,6 +175,7 @@ it.each(['alert', 'manual'])(
       request: {},
       getInvestigationsClient,
       getAlertsClient,
+      getEpisodeLookup,
       params: { body },
     } as never);
     expect(start).toHaveBeenCalledWith(
@@ -194,6 +203,7 @@ it('returns bad request for runtime notification validation failures', async () 
       request: {},
       getInvestigationsClient,
       getAlertsClient,
+      getEpisodeLookup,
       params: {
         body: schema.parse({
           subject: { type: 'manual' },
