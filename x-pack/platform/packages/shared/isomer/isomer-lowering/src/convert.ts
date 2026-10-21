@@ -24,7 +24,7 @@ import {
 import { type GridData, planDashboard, type TimeRange } from './dashboard';
 import type { ExecuteEsql, ExecuteSearch } from './esql_response';
 import { parseSavedObjectNdjson } from './kibana/from-saved-object/ndjson';
-import { bindMapPanels, type MapServices } from './map_panels';
+import { bindMapPanels, type MapServices, type PanelSize } from './map_panels';
 import { bindVegaPanels } from './vega_panels';
 
 export interface ConvertedPanel {
@@ -73,6 +73,11 @@ export interface ConvertDashboardOptions {
   esQueryConfig?: Partial<EsQueryConfig>;
   /** EMS boundaries and basemaps for Maps panels; without them, choropleths refuse and basemaps fall back. */
   mapServices?: MapServices;
+  /**
+   * The box a panel's content draws in, from its grid box and whether it shows a title; the host's grid decides it.
+   * Content whose data depends on its size, such as a map's extent, is lowered at that size.
+   */
+  panelSize?: (grid: GridData, layout: { titled: boolean }) => { width: number; height: number };
 }
 
 interface PanelJson {
@@ -99,6 +104,7 @@ export const convertDashboard = async ({
   resolveField,
   esQueryConfig,
   mapServices,
+  panelSize,
 }: ConvertDashboardOptions): Promise<ConvertedDashboard> => {
   const objects = parseSavedObjectNdjson(ndjson) as unknown as Array<Record<string, any>>; // eslint-disable-line @typescript-eslint/no-explicit-any
   const saved = objects.find(({ type, id }) => type === 'dashboard' && id === dashboardId);
@@ -125,6 +131,14 @@ export const convertDashboard = async ({
   if (context.timeslice) {
     planned = plan(context.timeslice);
   }
+  const sizeOf: PanelSize | undefined = panelSize
+    ? (panelId) => {
+        const panel = panelJson.find(({ panelIndex }) => panelIndex === panelId);
+        return panel
+          ? panelSize(panel.gridData, { titled: !panel.embeddableConfig?.hidePanelTitles })
+          : undefined;
+      }
+    : undefined;
   const dashboardFilter = { bool: context.bool } as unknown as Record<string, unknown>;
   const executeFor = (panel: (typeof planned.panels)[number]): ExecuteEsql => {
     const window = panel.timeRange ?? planned.timeRange;
@@ -162,12 +176,13 @@ export const convertDashboard = async ({
   };
   const [charts, vega, maps] = await Promise.all([
     bindChartsDashboard(planned, executeEsql, executeFor),
-    bindVegaPanels(planned, search, context.bool, mapServices),
+    bindVegaPanels(planned, search, context.bool, mapServices, sizeOf),
     bindMapPanels(objects, dashboardId, planned.timeRange, context.bool, {
       search,
       executeEsql,
       ...(mapServices ? { services: mapServices } : {}),
       ...(esQueryConfig ? { esQueryConfig } : {}),
+      ...(sizeOf ? { panelSize: sizeOf } : {}),
     }),
   ]);
 

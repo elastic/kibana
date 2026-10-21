@@ -66,6 +66,7 @@ export {
   type MapDataView,
   type MapPanelState,
   type MapServices,
+  type PanelSize,
 } from './map_panels';
 export { engineHintFromLens } from './engine_hints';
 export {

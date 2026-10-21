@@ -18,7 +18,7 @@ import {
 } from '@kbn/isomer-primitives-vega';
 
 import type { PanelOutcome } from './bind_charts';
-import type { MapServices } from './map_panels';
+import type { MapServices, PanelSize } from './map_panels';
 import type { PlannedDashboard } from './dashboard';
 import type { ExecuteSearch } from './esql_response';
 import {
@@ -147,7 +147,9 @@ export const bindVegaPanels = (
   /** The dashboard's query, filters and controls, for `%context%` and `%dashboard_context-*%`. */
   context: DashboardBool = {},
   /** EMS basemaps for map-mode specs; without them a map draws without its basemap. */
-  services: MapServices = {}
+  services: MapServices = {},
+  /** Each panel's body box, which the chart fills; without it, the planned size. */
+  panelSize?: PanelSize
 ): Promise<BoundPanel[]> =>
   Promise.all(
     planned.vegaPanels.map(async ({ panelId, specPath, sources }): Promise<BoundPanel> => {
@@ -179,7 +181,7 @@ export const bindVegaPanels = (
         const kibana = kibanaConfigOf(planNode.spec);
         // The spec as authored, its queries in place; each query's result goes beside it, by the data entry's path.
         const authored = withoutPanelTitle(withoutKibanaConfig(planNode.spec), title);
-        const size = { width: planNode.width, height: planNode.height };
+        const size = panelSize?.(panelId) ?? { width: planNode.width, height: planNode.height };
         let mode = planNode.mode;
         let spec = authored;
         let results: VegaResult[] = resolved.map(({ path, values }) => ({

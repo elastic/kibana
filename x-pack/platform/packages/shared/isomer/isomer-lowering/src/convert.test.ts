@@ -275,3 +275,28 @@ describe('convertDashboard with a Vega-Lite map', () => {
     expect(vegaSchema.safeParse({ ...node, caption: 'Points.' }).success).toBe(true);
   });
 });
+
+describe('convertDashboard with panel sizes', () => {
+  it('lowers every sized node at its panel’s box, as the host’s grid draws it', async () => {
+    const flights = readFileSync(join(__dirname, '../fixtures/flights_sample.ndjson'), 'utf8');
+    const box = (grid: { w: number; h: number }, { titled }: { titled: boolean }) => ({
+      width: grid.w * 20,
+      height: grid.h * 25 - (titled ? 30 : 0),
+    });
+    const converted = await convertDashboard({
+      ndjson: flights,
+      dashboardId: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+      now: Date.parse('2026-10-20T00:00:00Z'),
+      executeEsql,
+      search: async () => ({ hits: { hits: [] }, aggregations: {} }),
+      panelSize: box,
+    });
+    const sized = converted.panels.filter(
+      ({ kind, node }) => node && (kind === 'map' || kind === 'vega')
+    );
+    expect(sized.map(({ kind }) => kind).sort()).toEqual(['map', 'vega']);
+    for (const { grid, node } of sized) {
+      expect({ width: node!.width, height: node!.height }).toEqual(box(grid, { titled: true }));
+    }
+  });
+});
