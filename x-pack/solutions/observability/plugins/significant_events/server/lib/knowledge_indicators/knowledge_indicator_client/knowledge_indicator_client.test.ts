@@ -1073,6 +1073,28 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       expect(rankEsql).toHaveBeenCalledTimes(1);
     });
 
+    it('widens only the fused hybrid page to two rows for limit 1 and trims the result', async () => {
+      const { client, runEsql, rankEsql } = makeClientWithRanker();
+      const semantic = createFeatureDoc({ id: 'feat-semantic' });
+      const keywordOnly = createFeatureDoc({ id: 'feat-keyword' });
+      runEsql.mockResolvedValue(latestRevisionResponse([semantic, keywordOnly]));
+      rankEsql.mockResolvedValueOnce(rankedResponse([{ ...keywordOnly, label: null }, semantic]));
+
+      const { hits } = await client.findIndicators(SOURCE, 'checkout', {
+        types: [KI_TYPE_FEATURE],
+        searchMode: 'hybrid',
+        limit: 1,
+      });
+
+      expect(rankEsql).toHaveBeenCalledTimes(1);
+      const { query } = rankRequest(rankEsql);
+      expect(query.match(/\| LIMIT 1\b/g)).toHaveLength(3);
+      expect(query).toMatch(/FUSE RRF.*\| LIMIT 2$/);
+      expect(hits.map((hit) => hit.type === 'feature' && hit.feature.uuid)).toEqual([
+        'feat-keyword',
+      ]);
+    });
+
     it('never retries in keyword mode', async () => {
       const { client, runEsql, rankEsql } = makeClientWithRanker();
       runEsql.mockResolvedValue(latestRevisionResponse([createFeatureDoc()]));

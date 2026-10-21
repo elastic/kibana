@@ -63,6 +63,9 @@ const QUERY_FEATURE_ID = 'query.features.id';
 // `FUSE` preserves this label only when the semantic branch contributes the row.
 const RANK_LABEL_COLUMN = 'label';
 const SEMANTIC_LABEL = 'semantic';
+// Semantic rank one ties keyword rank one and beats every other keyword-only row, so it is always
+// within the top two of an equal-weight RRF page; a page of one can cut it and fool the tie gate.
+const MIN_TIE_GATE_PAGE = 2;
 
 type RankedIndicatorRow = Record<string, unknown> & {
   id?: string;
@@ -274,15 +277,19 @@ export class IndicatorSearcher {
       inSpace(this.space)
     );
 
-    const rankedRows = await this.rankWithTieFallback(mode, latestRevisionIds, (semanticMinScore) =>
-      this.buildRankQuery(
-        mode,
-        phase2Where,
-        queryText,
-        options.types ?? [],
-        limit,
-        semanticMinScore
-      )
+    const rankedRows = await this.rankWithTieFallback(
+      mode,
+      limit,
+      latestRevisionIds,
+      (semanticMinScore) =>
+        this.buildRankQuery(
+          mode,
+          phase2Where,
+          queryText,
+          options.types ?? [],
+          limit,
+          semanticMinScore
+        )
     );
 
     // Walk the ranked rows and surface each group once, in rank order. A row
@@ -324,12 +331,13 @@ export class IndicatorSearcher {
   }
 
   /**
-   * Retries when minmax collapses an all-tied semantic branch to zero.
-   * The gate assumes equal-weight, two-branch RRF keeps semantic rank one on the final page.
+   * Retries when minmax collapses an all-tied semantic branch to zero. The hybrid query over-fetches
+   * to `MIN_TIE_GATE_PAGE` rows for the gate; the page is trimmed to `limit` here.
    * Replace the retry once https://github.com/elastic/elasticsearch/issues/135543 is resolved.
    */
   private async rankWithTieFallback(
     mode: SearchMode,
+    limit: number,
     latestRevisionIds: string[],
     build: (semanticMinScore: number) => ComposerQuery
   ): Promise<RankedIndicatorRow[]> {
@@ -342,14 +350,15 @@ export class IndicatorSearcher {
       })
     );
     if (mode === 'keyword' || rankedRows.some((row) => row[RANK_LABEL_COLUMN] === SEMANTIC_LABEL)) {
-      return rankedRows;
+      return rankedRows.slice(0, limit);
     }
     this.logger.debug(
       `KnowledgeIndicator ${mode} search: semantic branch contributed no rows above ${this.config.semantic_min_score}; retrying without the threshold`
     );
-    return esqlToObjects<RankedIndicatorRow>(
+    const retriedRows = esqlToObjects<RankedIndicatorRow>(
       await queryEsql({ esClient: this.esClient, query: build(0), filter })
     );
+    return retriedRows.slice(0, limit);
   }
 
   private buildRankQuery(
@@ -417,7 +426,7 @@ export class IndicatorSearcher {
       | FUSE RRF WITH {"rank_constant":${this.config.rrf_rank_constant}}
       | SORT _score DESC
       | KEEP ${rankGroupKeyColumns()}, _score, ${label}
-      | LIMIT ${limit}`;
+      | LIMIT ${Math.max(limit, MIN_TIE_GATE_PAGE)}`;
   }
 
   private buildKeywordExpressions(
