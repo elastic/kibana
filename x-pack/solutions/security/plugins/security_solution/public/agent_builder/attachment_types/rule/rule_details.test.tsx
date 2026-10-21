@@ -744,6 +744,29 @@ describe('RuleInlineContent integration', () => {
     (window as { location: unknown }).location = originalLocation;
   });
 
+  it('groups threat entries by framework in a single display', () => {
+    const entry = (framework: string, id: string) => ({
+      framework,
+      tactic: { id, name: `Tactic ${id}`, reference: `https://example.com/${id}` },
+      technique: [],
+    });
+    renderInlineContent({
+      ...baseRule,
+      type: 'query',
+      query: 'host.name: *',
+      threat: [
+        entry('MITRE ATLAS', 'AML.TA0000'),
+        entry('MITRE ATT&CK', 'TA0001'),
+        entry('MITRE ATLAS', 'AML.TA0001'),
+      ],
+    });
+
+    expect(screen.getAllByTestId('mitreFrameworkGroupTitle').map((el) => el.textContent)).toEqual([
+      'MITRE ATT&CK',
+      'MITRE ATLAS',
+    ]);
+  });
+
   it('shows "Rule type: Indicator Match" for threat_match rule', () => {
     const { container } = renderInlineContent({
       ...baseRule,

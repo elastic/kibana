@@ -78,10 +78,11 @@ describe('formatNumber()', () => {
     ).toMatchInlineSnapshot(`"(€1.00)"`);
   });
 
-  // not sure how to test this, and probably doesn't matter
-  // because we default to en-US, and generally don't have
-  // control over the server's locale
-  it.skip('option localeMatcher is successful', () => {});
+  it('option localeMatcher is successful', () => {
+    expect(formatNumber(logger, '1000; de-DE; localeMatcher: lookup')).toMatchInlineSnapshot(
+      `"1.000"`
+    );
+  });
 
   it('option notation is successful', () => {
     expect(formatNumber(logger, '1000;; notation: engineering')).toMatchInlineSnapshot(`"1E3"`);
@@ -116,17 +117,35 @@ describe('formatNumber()', () => {
     expect(formatNumber(logger, '1000;; useGrouping: false')).toMatchInlineSnapshot(`"1000"`);
   });
 
-  // not yet supported in node.js
-  it.skip('option roundingMode is successful', () => {});
+  it('option roundingMode is successful', () => {
+    expect(
+      formatNumber(logger, '1.9;; roundingMode: floor, maximumFractionDigits: 0')
+    ).toMatchInlineSnapshot(`"1"`);
+  });
 
-  // not yet supported in node.js
-  it.skip('option roundingPriority is successful', () => {});
+  it('option roundingPriority is successful', () => {
+    expect(
+      formatNumber(
+        logger,
+        '1.234;; roundingPriority: lessPrecision, maximumFractionDigits: 2, maximumSignificantDigits: 2'
+      )
+    ).toMatchInlineSnapshot(`"1.2"`);
+  });
 
-  // not yet supported in node.js
-  it.skip('option roundingIncrement is successful', () => {});
+  it('option roundingIncrement is successful', () => {
+    expect(
+      formatNumber(
+        logger,
+        '1.23;; roundingIncrement: 5, minimumFractionDigits: 2, maximumFractionDigits: 2'
+      )
+    ).toMatchInlineSnapshot(`"1.25"`);
+  });
 
-  // not yet supported in node.js
-  it.skip('option trailingZeroDisplay is successful', () => {});
+  it('option trailingZeroDisplay is successful', () => {
+    expect(
+      formatNumber(logger, '1;; trailingZeroDisplay: stripIfInteger, minimumFractionDigits: 2')
+    ).toMatchInlineSnapshot(`"1"`);
+  });
 
   it('option minimumIntegerDigits is successful', () => {
     expect(formatNumber(logger, '1;; minimumIntegerDigits: 7')).toMatchInlineSnapshot(

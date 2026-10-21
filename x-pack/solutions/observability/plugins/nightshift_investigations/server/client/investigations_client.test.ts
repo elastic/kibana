@@ -40,7 +40,8 @@ jest.mock('../lib/install_investigation_agent', () => ({
   installInvestigationAgent: jest.fn().mockResolvedValue(undefined),
 }));
 
-jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: () => 'inv-new' }));
+const mockNewInvestigationId = jest.fn(() => 'inv-new');
+jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: () => mockNewInvestigationId() }));
 
 const installInvestigationAgentMock = installInvestigationAgent as jest.MockedFunction<
   typeof installInvestigationAgent
@@ -183,8 +184,21 @@ beforeEach(() => {
   getConnectorById.mockImplementation(async (connectorId: string) => ({ connectorId }));
   withConversations();
   // Like Agent Builder, a conversation created without a title carries the placeholder.
-  conversations.create.mockImplementation(async ({ id, title }: { id: string; title?: string }) =>
-    makeConversation({ id, title: title ?? DEFAULT_CONVERSATION_TITLE })
+  conversations.create.mockImplementation(
+    async ({
+      id,
+      title,
+      metadata,
+    }: {
+      id: string;
+      title?: string;
+      metadata?: { workflow_execution_ids?: string[] };
+    }) =>
+      makeConversation({
+        id,
+        title: title ?? DEFAULT_CONVERSATION_TITLE,
+        workflowExecutionIds: metadata?.workflow_execution_ids,
+      })
   );
   conversations.patchMetadata.mockResolvedValue({ conversation: {}, changedFields: ['status'] });
   subjectsClient.upsertSubjects.mockResolvedValue([]);
@@ -335,6 +349,47 @@ describe('NightshiftInvestigationsClient.start()', () => {
       'nightshift-investigations'
     );
     expect(result).toEqual({ investigation_id: 'inv-new' });
+  });
+
+  it('applies a per-run timeout without mutating the installed investigation workflow', async () => {
+    const workflow = {
+      id: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+      enabled: true,
+      valid: true,
+      definition: { steps: [], settings: { timeout: '60m', concurrency: { max: 1 } } },
+    };
+    mockManagement.getWorkflow.mockResolvedValue(workflow);
+    await makeClient().start({
+      subject: { type: 'manual', id: 'manual' },
+      trigger_type: 'automatic',
+      message: 'Review errors.',
+      timeout_seconds: 20,
+    });
+    expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
+      expect.objectContaining({
+        definition: { steps: [], settings: { timeout: '20s', concurrency: { max: 1 } } },
+      }),
+      SPACE_ID,
+      expect.anything(),
+      mockRequest,
+      'nightshift-investigations'
+    );
+    expect(workflow.definition.settings.timeout).toBe('60m');
+  });
+
+  it('starts fresh investigations for repeated automatic questions without matching an open conversation', async () => {
+    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
+    mockNewInvestigationId.mockReturnValueOnce('inv-one').mockReturnValueOnce('inv-two');
+    const client = makeClient();
+    const request = {
+      subject: { type: 'manual' as const, id: 'manual' },
+      trigger_type: 'automatic' as const,
+      message: 'Review checkout health.',
+    };
+    expect(await client.start(request)).toEqual({ investigation_id: 'inv-one' });
+    expect(await client.start(request)).toEqual({ investigation_id: 'inv-two' });
+    expect(agenticInvestigationsClient.findOpenBySubjects).not.toHaveBeenCalled();
+    expect(investigationQuotaCallback).toHaveBeenCalledTimes(2);
   });
 
   it('labels a manual run with its prompt so it does not read as "manual" while running', async () => {
@@ -970,12 +1025,16 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
   it('creates the conversation of a new investigation once the start is accepted, with the run recorded', async () => {
     await expect(startAlerts('alert-1')).resolves.toEqual({ investigation_id: 'inv-new' });
 
+    // The run is recorded in the creating write, so the investigation never reads as not in
+    // progress between its creation and a separate metadata patch.
     expect(conversations.create).toHaveBeenCalledWith(
-      expect.objectContaining({ id: 'inv-new', templateId: 'investigation' })
+      expect.objectContaining({
+        id: 'inv-new',
+        templateId: 'investigation',
+        metadata: { workflow_execution_ids: ['exec-1'] },
+      })
     );
-    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-new', {
-      workflow_execution_ids: ['exec-1'],
-    });
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
     // After the claim and the run, so a denied or failed start creates nothing.
     expect(subjectsClient.claimSubjects.mock.invocationCallOrder[0]).toBeLessThan(
       conversations.create.mock.invocationCallOrder[0]
@@ -1271,14 +1330,14 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       agentId: 'nightshift.investigation',
       templateId: 'investigation',
       accessControl: { access_mode: 'public' },
+      // The run is recorded in the creating write, so the investigation reads as in progress
+      // from the moment it exists.
+      metadata: { workflow_execution_ids: ['exec-1'] },
     });
     // A conversation this call created holds no subjects yet.
     expect(subjectsClient.listByConversationIds).not.toHaveBeenCalled();
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
-    // The run is recorded, so the investigation reads as in progress while it runs.
-    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
-      workflow_execution_ids: ['exec-1'],
-    });
+    expect(conversations.patchMetadata).not.toHaveBeenCalled();
   });
 
   it('appends the run to the runs an investigation already records, once', async () => {
