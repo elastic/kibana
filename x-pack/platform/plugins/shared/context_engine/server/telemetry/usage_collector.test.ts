@@ -155,7 +155,7 @@ describe('context_engine usage collector', () => {
     expect(esClient.esql.query).not.toHaveBeenCalled();
   });
 
-  it('counts unreadable dests as zero', async () => {
+  it('skips dests that fail to count', async () => {
     setHits([
       { id: 'broken', dest: { type: 'index', value: 'ai-index-idx-broken' } },
       { id: 'ok', dest: { type: 'index', value: 'ai-index-idx-ok' } },
@@ -178,7 +178,18 @@ describe('context_engine usage collector', () => {
     });
   });
 
-  it('guards unmapped lifecycle fields', async () => {
+  it('sets a request timeout on every query', async () => {
+    setHits([{ id: 'a', dest: { type: 'index', value: 'ai-index-idx-a' } }]);
+
+    await fetch();
+
+    expect(esClient.esql.query).toHaveBeenCalledTimes(2);
+    for (const call of esClient.esql.query.mock.calls) {
+      expect(call[1]).toEqual({ requestTimeout: 30_000 });
+    }
+  });
+
+  it('leaves unmapped fields out of the query', async () => {
     setHits([{ id: 'bare', dest: { type: 'data_stream', value: 'ai-index-ds-bare' } }]);
     esqlResponses.set('ai-index-ds-bare', { columns: ['_id', '_index'], counts: { active: 2 } });
 
