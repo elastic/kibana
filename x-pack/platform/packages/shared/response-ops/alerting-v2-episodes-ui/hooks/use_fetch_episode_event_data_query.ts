@@ -8,8 +8,11 @@
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { useQuery } from '@kbn/react-query';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { rowsFromEsql } from '@kbn/alerting-v2-common-queries';
-import { buildEpisodeEventDataQuery } from '../queries/episode_event_data_query';
+import {
+  buildEpisodeDataRequest,
+  buildEpisodeQuery,
+  rowsFromEsql,
+} from '@kbn/alerting-v2-common-queries';
 import { QUERY_STALE_TIME } from '../constants';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { queryKeys } from '../query_keys';
@@ -37,7 +40,9 @@ export interface EpisodeEventData {
  * Fetches the alert `data` object from the latest non-empty event for an episode,
  * along with the timestamp of that event and a flag indicating whether a more
  * recent event without data exists. Returns `null` when no event with non-empty
- * data is available yet.
+ * data is available yet. Only the event with the data has its `_source` parsed:
+ * the latest event timestamp comes from the episode row, which reads indexed
+ * fields only.
  */
 export const useFetchEpisodeEventDataQuery = ({
   episodeId,
@@ -49,31 +54,40 @@ export const useFetchEpisodeEventDataQuery = ({
   return useQuery({
     queryKey: queryKeys.episodeEventData(spaceId, episodeId ?? ''),
     queryFn: async ({ signal }): Promise<EpisodeEventData | null> => {
-      const query = buildEpisodeEventDataQuery(spaceId, episodeId!);
-      const raw = await runEsqlAsyncSearch({
-        data,
-        params: {
-          query: query.print('basic'),
-          time_zone: 'UTC',
-        },
-        abortSignal: signal,
-      });
-      const row = rowsFromEsql(query, raw)[0];
-      if (!row || !row.last_data || !row.last_data_timestamp) return null;
+      const dataRequest = buildEpisodeDataRequest(spaceId, episodeId!);
+      const episodeQuery = buildEpisodeQuery(spaceId, episodeId!);
+      const [rawData, rawEpisode] = await Promise.all([
+        runEsqlAsyncSearch({
+          data,
+          params: {
+            query: dataRequest.query.print('basic'),
+            filter: dataRequest.filter,
+            time_zone: 'UTC',
+          },
+          abortSignal: signal,
+        }),
+        runEsqlAsyncSearch({
+          data,
+          params: { query: episodeQuery.print('basic'), time_zone: 'UTC' },
+          abortSignal: signal,
+        }),
+      ]);
+      const [dataRow] = rowsFromEsql(dataRequest.query, rawData);
+      if (!dataRow?.episode_data) return null;
 
       let parsed: Record<string, unknown>;
       try {
-        parsed = JSON.parse(row.last_data) as Record<string, unknown>;
+        parsed = JSON.parse(dataRow.episode_data) as Record<string, unknown>;
       } catch {
         return null;
       }
 
+      const [episodeRow] = rowsFromEsql(episodeQuery, rawEpisode);
+      const lastEventTimestamp = episodeRow?.last_timestamp;
       return {
         data: parsed,
-        dataTimestamp: row.last_data_timestamp,
-        isStale: Boolean(
-          row.last_event_timestamp && row.last_event_timestamp !== row.last_data_timestamp
-        ),
+        dataTimestamp: dataRow['@timestamp'],
+        isStale: Boolean(lastEventTimestamp && lastEventTimestamp !== dataRow['@timestamp']),
       };
     },
     enabled: Boolean(episodeId),

@@ -14,6 +14,7 @@ export interface EpisodeActionState {
   lastAckActor: string | null;
   lastDeactivateAction: string | null;
   lastDeactivateActor: string | null;
+  tags?: string[];
 }
 
 export interface AlertEpisodeGroupAction {

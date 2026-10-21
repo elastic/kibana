@@ -37,6 +37,7 @@ import {
 } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions';
 import { useFetchRule } from '@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule';
 import { useEpisodeFlapping } from '@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping';
+import { withEpisodeActionState } from '@kbn/alerting-v2-episodes-ui/utils/with_episode_action_state';
 import { isRuleLoaded } from '@kbn/alerting-v2-episodes-ui/types/rule_state';
 import { useInvalidateEpisodeQueries } from '@kbn/alerting-v2-episodes-ui/hooks/use_invalidate_episode_queries';
 import { createEpisodeActions, type EpisodeAction } from '@kbn/alerting-v2-episodes-ui/actions';
@@ -103,7 +104,7 @@ export function EpisodeDetailsPage() {
   const canReadExecutionHistory = useService(UserCapabilities).canRead('executionHistory');
 
   const {
-    data: episode,
+    data: episodeEvents,
     isLoading: isLoadingEpisode,
     isError: isEpisodeError,
   } = useFetchEpisodeQuery({
@@ -111,8 +112,8 @@ export function EpisodeDetailsPage() {
     services: { data, spaces },
   });
 
-  const ruleId = episode?.['rule.id'];
-  const groupHash = episode?.group_hash;
+  const ruleId = episodeEvents?.['rule.id'];
+  const groupHash = episodeEvents?.group_hash;
 
   const { ruleState } = useFetchRule({ id: ruleId, http });
 
@@ -133,6 +134,10 @@ export function EpisodeDetailsPage() {
 
   const episodeAction = episodeId ? episodeActionsMap?.get(episodeId) : undefined;
   const groupAction = groupHash ? getGroupAction(groupActionsMap, ruleId, groupHash) : undefined;
+  const episode = useMemo(
+    () => withEpisodeActionState(episodeEvents, episodeAction, groupAction),
+    [episodeEvents, episodeAction, groupAction]
+  );
 
   const showRuleDependentUi = isRuleLoaded(ruleState);
 

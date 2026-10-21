@@ -9,7 +9,7 @@ import { renderHook, waitFor } from '@testing-library/react';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { buildEpisodeQuery, buildEpisodeGroupHashQuery } from '../queries/episode_query';
+import { buildEpisodeDataRequest, buildEpisodeQuery } from '@kbn/alerting-v2-common-queries';
 import { runEsqlAsyncSearch } from '../utils/run_esql_async_search';
 import { createMockSpaces, createQueryClientWrapper, createTestQueryClient } from './test_utils';
 import { useFetchEpisodeQuery } from './use_fetch_episode_query';
@@ -23,21 +23,37 @@ const wrapper = createQueryClientWrapper(queryClient);
 
 const GROUP_HASH = 'gh-1';
 
-const mockGroupHashResponse = {
-  columns: [{ name: 'group_hash', type: 'keyword' }],
-  values: [[GROUP_HASH]],
-};
-
 const mockEpisodeResponse = (episodeId: string) => ({
   columns: [
     { name: 'episode.id', type: 'keyword' },
     { name: 'episode.status', type: 'keyword' },
     { name: 'rule.id', type: 'keyword' },
     { name: 'group_hash', type: 'keyword' },
-    { name: 'last_tags', type: 'keyword' },
   ],
-  values: [[episodeId, ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', GROUP_HASH, 'tag-a']],
+  values: [[episodeId, ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', GROUP_HASH]],
 });
+
+const mockDataResponse = (episodeData: string) => ({
+  columns: [
+    { name: '@timestamp', type: 'date' },
+    { name: 'episode_data', type: 'keyword' },
+  ],
+  values: [['2024-03-01T10:00:00Z', episodeData]],
+});
+
+const EMPTY_RESPONSE = { columns: [], values: [] };
+
+// Answers each of the two parallel requests by its query.
+const mockResponses = ({
+  episode,
+  episodeData,
+}: {
+  episode: ReturnType<typeof mockEpisodeResponse> | typeof EMPTY_RESPONSE;
+  episodeData: ReturnType<typeof mockDataResponse> | typeof EMPTY_RESPONSE;
+}) =>
+  runEsqlAsyncSearchMock.mockImplementation(async ({ params }) =>
+    String(params.query).includes('JSON_EXTRACT') ? episodeData : episode
+  );
 
 describe('useFetchEpisodeQuery', () => {
   const data = dataPluginMock.createStartContract();
@@ -65,15 +81,17 @@ describe('useFetchEpisodeQuery', () => {
     expect(runEsqlAsyncSearchMock).not.toHaveBeenCalled();
   });
 
-  it('loads the episode row with a single query when groupHash is provided', async () => {
+  it('loads the episode row and its latest data in parallel', async () => {
     const episodeId = 'ep-1';
-    runEsqlAsyncSearchMock.mockResolvedValue(mockEpisodeResponse(episodeId));
+    mockResponses({
+      episode: mockEpisodeResponse(episodeId),
+      episodeData: mockDataResponse('{"host":"web-01"}'),
+    });
 
     const { result } = renderHook(
       () =>
         useFetchEpisodeQuery({
           episodeId,
-          groupHash: GROUP_HASH,
           services: { data, spaces: mockSpaces },
         }),
       { wrapper }
@@ -81,13 +99,22 @@ describe('useFetchEpisodeQuery', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
 
-    expect(runEsqlAsyncSearchMock).toHaveBeenCalledTimes(1);
+    const dataRequest = buildEpisodeDataRequest(DEFAULT_SPACE_ID, episodeId);
+    expect(runEsqlAsyncSearchMock).toHaveBeenCalledTimes(2);
     expect(runEsqlAsyncSearchMock).toHaveBeenCalledWith(
       expect.objectContaining({
         data,
         params: expect.objectContaining({
-          query: buildEpisodeQuery(DEFAULT_SPACE_ID, episodeId, GROUP_HASH).print('basic'),
+          query: buildEpisodeQuery(DEFAULT_SPACE_ID, episodeId).print('basic'),
           time_zone: 'UTC',
+        }),
+      })
+    );
+    expect(runEsqlAsyncSearchMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({
+          query: dataRequest.query.print('basic'),
+          filter: dataRequest.filter,
         }),
       })
     );
@@ -97,96 +124,33 @@ describe('useFetchEpisodeQuery', () => {
       'episode.status': ALERT_EPISODE_STATUS.ACTIVE,
       'rule.id': 'rule-1',
       group_hash: GROUP_HASH,
-      last_tags: ['tag-a'],
+      episode_data: '{"host":"web-01"}',
     });
   });
 
-  it('resolves the group hash first when not provided', async () => {
-    const episodeId = 'ep-1';
-    runEsqlAsyncSearchMock
-      .mockResolvedValueOnce(mockGroupHashResponse)
-      .mockResolvedValueOnce(mockEpisodeResponse(episodeId));
-
-    const { result } = renderHook(
-      () =>
-        useFetchEpisodeQuery({
-          episodeId,
-          services: { data, spaces: mockSpaces },
-        }),
-      { wrapper }
-    );
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-
-    expect(runEsqlAsyncSearchMock).toHaveBeenCalledTimes(2);
-    expect(runEsqlAsyncSearchMock).toHaveBeenNthCalledWith(
-      1,
-      expect.objectContaining({
-        params: expect.objectContaining({
-          query: buildEpisodeGroupHashQuery(DEFAULT_SPACE_ID, episodeId).print('basic'),
-        }),
-      })
-    );
-    expect(runEsqlAsyncSearchMock).toHaveBeenNthCalledWith(
-      2,
-      expect.objectContaining({
-        params: expect.objectContaining({
-          query: buildEpisodeQuery(DEFAULT_SPACE_ID, episodeId, GROUP_HASH).print('basic'),
-        }),
-      })
-    );
-
-    expect(result.current.data).toMatchObject({ 'episode.id': episodeId });
-  });
-
-  it('returns undefined data without running the episode query when the group hash lookup finds nothing', async () => {
-    runEsqlAsyncSearchMock.mockResolvedValue({ columns: [], values: [] });
-
-    const { result } = renderHook(
-      () =>
-        useFetchEpisodeQuery({
-          episodeId: 'ep-missing',
-          services: { data, spaces: mockSpaces },
-        }),
-      { wrapper }
-    );
-
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(runEsqlAsyncSearchMock).toHaveBeenCalledTimes(1);
-    expect(result.current.data).toBeUndefined();
-  });
-
-  it('normalizes last_tags from string to array', async () => {
-    runEsqlAsyncSearchMock.mockResolvedValue({
-      columns: [
-        { name: 'episode.id', type: 'keyword' },
-        { name: 'last_tags', type: 'keyword' },
-      ],
-      values: [['ep-1', 'single-tag']],
-    });
+  it('sets episode_data to null when no event has data', async () => {
+    mockResponses({ episode: mockEpisodeResponse('ep-1'), episodeData: EMPTY_RESPONSE });
 
     const { result } = renderHook(
       () =>
         useFetchEpisodeQuery({
           episodeId: 'ep-1',
-          groupHash: GROUP_HASH,
           services: { data, spaces: mockSpaces },
         }),
       { wrapper }
     );
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    expect(result.current.data?.last_tags).toEqual(['single-tag']);
+    expect(result.current.data?.episode_data).toBeNull();
   });
 
   it('returns undefined data when no rows come back', async () => {
-    runEsqlAsyncSearchMock.mockResolvedValue({ columns: [], values: [] });
+    mockResponses({ episode: EMPTY_RESPONSE, episodeData: EMPTY_RESPONSE });
 
     const { result } = renderHook(
       () =>
         useFetchEpisodeQuery({
           episodeId: 'ep-missing',
-          groupHash: GROUP_HASH,
           services: { data, spaces: mockSpaces },
         }),
       { wrapper }

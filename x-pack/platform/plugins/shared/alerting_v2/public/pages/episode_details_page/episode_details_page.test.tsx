@@ -160,8 +160,16 @@ const mockEpisode = {
   last_timestamp: '2026-05-08T08:05:00.000Z',
   triggered_at: '2026-05-08T08:00:00.000Z',
   duration: 300000,
-  last_tags: ['tag-a'],
+};
+
+// The page adds the episode and series action state to the rule events row.
+const mockEpisodeWithActions = {
+  ...mockEpisode,
+  last_ack_action: 'ack',
   last_assignee_uid: 'u-1',
+  last_tags: ['tag-a'],
+  last_snooze_action: null,
+  snoozed_until: null,
 };
 
 const episodeQuery = {
@@ -228,6 +236,7 @@ beforeEach(() => {
           lastAckAction: ALERT_EPISODE_ACTION_TYPE.ACK,
           lastAssigneeUid: 'u-1',
           lastAckActor: null,
+          tags: ['tag-a'],
         },
       ],
     ]),
@@ -497,7 +506,7 @@ describe('EpisodeDetailsPage', () => {
 
     expect(execute).toHaveBeenCalledWith(
       expect.objectContaining({
-        episodes: [mockEpisode],
+        episodes: [mockEpisodeWithActions],
       })
     );
   });
@@ -617,7 +626,7 @@ describe('EpisodeDetailsPage', () => {
       renderPage();
 
       expect(mockUseAlertAutoAttach).toHaveBeenCalledWith(
-        mockEpisode,
+        mockEpisodeWithActions,
         {
           ruleName: 'Rule A',
           groupingFields: ['host.name'],
@@ -639,7 +648,7 @@ describe('EpisodeDetailsPage', () => {
       renderPage();
 
       expect(mockUseAlertAutoAttach).toHaveBeenCalledWith(
-        mockEpisode,
+        mockEpisodeWithActions,
         {
           ruleName: undefined,
           groupingFields: undefined,
@@ -677,7 +686,7 @@ describe('EpisodeDetailsPage', () => {
       );
 
       expect(mockUseAlertAutoAttach).toHaveBeenLastCalledWith(
-        nextEpisode,
+        expect.objectContaining(nextEpisode),
         {
           ruleName: 'Rule A',
           groupingFields: ['host.name'],

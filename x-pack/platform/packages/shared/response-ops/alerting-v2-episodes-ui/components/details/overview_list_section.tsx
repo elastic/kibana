@@ -92,8 +92,8 @@ export const AlertEpisodeOverviewListSection = ({
       ? 'error'
       : 'visible';
   const groupingData = parseEpisodeDataJson(episode?.episode_data);
-  const assigneeUid = episode?.last_assignee_uid ?? undefined;
   const episodeAction = episodeActionsMap?.get(episodeId);
+  const assigneeUid = episodeAction?.lastAssigneeUid ?? undefined;
   const groupAction = groupHash ? getGroupAction(groupActionsMap, ruleId, groupHash) : undefined;
 
   return (

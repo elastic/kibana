@@ -269,7 +269,7 @@ export const AlertEpisodeDetailsFlyout = ({
 
   // Info block values
   const durationMs = episode?.duration;
-  const assigneeUid = episode?.last_assignee_uid ?? undefined;
+  const assigneeUid = episodeAction?.lastAssigneeUid ?? undefined;
   const episodeData = parseEpisodeDataJson(episode?.episode_data);
   const rawAlertUrl =
     typeof episodeData.alert_url === 'string' && episodeData.alert_url.length > 0
