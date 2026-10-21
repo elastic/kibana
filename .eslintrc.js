@@ -46,6 +46,7 @@ const scoutRestrictedFtrPatterns = {
 const SCOUT_TEST_FILE_GLOBS = [
   `${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**/*.ts`,
   'packages/**/test/scout{_*,}/**/*.ts',
+  'src/dev/build/test/scout{_*,}/**/*.ts',
 ];
 
 /** Packages which should not be included within production code. */
@@ -627,9 +628,9 @@ module.exports = {
      */
     {
       files: ['x-pack/platform/plugins/shared/fleet/**/*.{js,mjs,ts,tsx}'],
+      // `testing-library/*` rules run in oxlint (.oxlint/testing_library.mts); registered for `eslint-disable` directives.
       plugins: ['testing-library'],
       rules: {
-        'testing-library/await-async-utils': 'error',
         'import/order': [
           'warn',
           {
@@ -821,7 +822,6 @@ module.exports = {
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
         complexity: 'warn',
-        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
@@ -903,7 +903,8 @@ module.exports = {
     },
     {
       files: ['x-pack/platform/plugins/shared/cases/**/*.{test,mock,test_helper}.tsx'],
-      extends: ['plugin:testing-library/react'],
+      // `testing-library/*` rules run in oxlint (.oxlint/testing_library.mts); registered for `eslint-disable` directives.
+      plugins: ['testing-library'],
     },
 
     /**
@@ -988,73 +989,12 @@ module.exports = {
     {
       files: ['**/kbn-scout*/src/playwright/**/*.ts', ...SCOUT_TEST_FILE_GLOBS],
       excludedFiles: ['src/platform/packages/shared/kbn-scout/src/playwright/**/*.test.ts'],
-      extends: ['plugin:playwright/recommended'],
+      // `eslint-plugin-playwright` rules run in oxlint (.oxlint/playwright.mts). The plugin stays
+      // registered so `eslint-disable` directives naming its rules resolve.
       plugins: ['playwright'],
-      settings: {
-        playwright: {
-          globalAliases: {
-            test: ['test', 'spaceTest', 'apiTest'],
-          },
-        },
-      },
       rules: {
-        // Allow assert* helpers (e.g. assertDowngradeResult) that wrap expect()
-        // calls. The linter can't trace expects into called functions, so without
-        // this config tests using assertion helpers trigger a false-positive
-        // "Test has no assertions" warning. Registering the assert* pattern as
-        // known assertion functions avoids that.
-        'playwright/expect-expect': [
-          'warn',
-          {
-            assertFunctionNames: ['expect', 'expect.soft'],
-            assertFunctionPatterns: ['^assert[A-Z]'],
-          },
-        ],
-        'playwright/consistent-spacing-between-blocks': 'error',
-        'playwright/no-commented-out-tests': 'error',
-        'playwright/no-conditional-expect': 'error',
-        'playwright/no-duplicate-hooks': 'error',
-        'playwright/no-element-handle': 'error',
-        'playwright/no-eval': 'error',
-        'playwright/no-get-by-title': 'error',
-        'playwright/no-identical-title': 'error',
-        'playwright/no-magic-timeouts': 'warn',
-        'playwright/no-nested-step': 'error',
-        'playwright/no-nth-methods': 'error',
-        'playwright/no-page-pause': 'error',
-        'playwright/no-raw-locators': ['warn', { allowed: ['[data-test-subj'] }],
-        'playwright/no-restricted-matchers': 'error',
-        'playwright/no-slowed-test': 'error',
-        'playwright/no-test-return-statement': 'error',
-        'playwright/no-unnecessary-assertions': 'error',
-        'playwright/no-useless-await': 'error',
-        'playwright/no-wait-for-selector': 'error',
-        'playwright/max-nested-describe': ['error', { max: 1 }],
-        'playwright/prefer-comparison-matcher': 'error',
-        'playwright/prefer-equality-matcher': 'error',
-        'playwright/prefer-hooks-in-order': 'error',
-        'playwright/prefer-hooks-on-top': 'error',
-        'playwright/prefer-native-locators': 'warn',
-        'playwright/prefer-strict-equal': 'error',
-        'playwright/prefer-to-be': 'error',
-        'playwright/prefer-to-contain': 'error',
-        'playwright/prefer-to-have-count': 'error',
-        'playwright/prefer-to-have-length': 'error',
-        'playwright/require-to-throw-message': 'error',
-        'playwright/require-top-level-describe': 'error',
-        // Scout has a its own runtime validator for test tags
-        'playwright/valid-test-tags': 'off',
-      },
-    },
-    {
-      // no-export only applies to spec files — fixture/helper modules legitimately export
-      files: [
-        '**/kbn-scout*/src/playwright/**/*.spec.ts',
-        `${TESTABLE_COMPONENT_SCOUT_ROOT_PATH_GLOB}/**/*.spec.ts`,
-        'packages/**/test/scout{_*,}/**/*.spec.ts',
-      ],
-      rules: {
-        'playwright/no-export': 'error',
+        // Turned off by `plugin:playwright/recommended`: fixtures are often destructured as `({}, testInfo)`.
+        'no-empty-pattern': 'off',
       },
     },
     {
@@ -1094,7 +1034,6 @@ module.exports = {
             ignoreDeclarationSort: true,
           },
         ],
-        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
@@ -1732,7 +1671,6 @@ module.exports = {
         'array-callback-return': 'error',
         'no-array-constructor': 'error',
         complexity: 'warn',
-        'n/no-deprecated-api': 'error',
         'no-bitwise': 'error',
         'no-continue': 'error',
         'no-dupe-keys': 'error',
@@ -1892,10 +1830,8 @@ module.exports = {
      */
     {
       files: ['x-pack/solutions/security/plugins/cloud_security_posture/**/*.{js,mjs,ts,tsx}'],
+      // `testing-library/*` rules run in oxlint (.oxlint/testing_library.mts); registered for `eslint-disable` directives.
       plugins: ['testing-library'],
-      rules: {
-        'testing-library/await-async-utils': 'error',
-      },
     },
     /**
      * Code inside .buildkite runs separately from everything else in CI, before bootstrap, with Node. It needs a few tweaks because of this.
