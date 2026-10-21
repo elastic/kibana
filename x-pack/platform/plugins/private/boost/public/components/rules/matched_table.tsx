@@ -16,6 +16,7 @@ import {
   EuiInMemoryTable,
   EuiSpacer,
   EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoostDataSource, BoostProfileType } from '../../../common/types';
@@ -45,12 +46,13 @@ interface MatchedTableProps {
 }
 
 /**
- * The indices or data streams a rule matches, each linking to its details in Index Management, with
- * the rule that applies to it. Those a higher-ranked rule applies to instead are struck through. A
+ * The indices or data streams a rule matches, each linking to its details in Index Management. Those
+ * a higher-ranked rule applies to instead are struck through, followed by that rule. A
  * search box filters them by name, and a filter group by whether the rule applies to them, with how
  * many of the search results each would show.
  */
 export const MatchedTable = ({ type, matched, supersededBy }: MatchedTableProps) => {
+  const { euiTheme } = useEuiTheme();
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<MatchStatus>();
   const isDataStreams = type === 'data_streams';
@@ -84,22 +86,26 @@ export const MatchedTable = ({ type, matched, supersededBy }: MatchedTableProps)
           })
         : i18n.translate('xpack.boost.matchedTable.indexColumn', { defaultMessage: 'Index' }),
       sortable: true,
-      render: (name: string, dataSource: BoostDataSource) => (
-        <TargetName name={name} supersededBy={supersededBy.get(name)} linkedAs={dataSource.type} />
-      ),
-    },
-    {
-      name: i18n.translate('xpack.boost.matchedTable.appliedByColumn', {
-        defaultMessage: 'Applied by',
-      }),
-      render: ({ name }: BoostDataSource) => {
+      render: (name: string, dataSource: BoostDataSource) => {
         const supersedingRule = supersededBy.get(name);
-        return supersedingRule ? (
-          <EuiText size="s">
-            <SupersedingRule rule={supersedingRule} isLinked />
-          </EuiText>
-        ) : (
-          i18n.translate('xpack.boost.matchedTable.thisRule', { defaultMessage: 'This rule' })
+        return (
+          // A higher-ranked rule that applies instead follows the name, as in the rule flyout's
+          // lists, and wraps below it when there's no room.
+          <span
+            css={{
+              display: 'inline-flex',
+              flexWrap: 'wrap',
+              alignItems: 'center',
+              columnGap: euiTheme.size.s,
+            }}
+          >
+            <TargetName name={name} supersededBy={supersedingRule} linkedAs={dataSource.type} />
+            {supersedingRule && (
+              <EuiText size="xs" color="subdued" component="span">
+                <SupersedingRule rule={supersedingRule} isLinked />
+              </EuiText>
+            )}
+          </span>
         );
       },
     },

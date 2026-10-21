@@ -261,11 +261,12 @@ describe('RuleDetailsPage', () => {
     expect(usage).toHaveTextContent('Applies to1 index');
 
     const matched = screen.getByTestId('boostRuleMatched');
-    const springRow = within(matched).getByText('catalog-spring').closest('tr');
-    expect(springRow).toHaveTextContent('This rule');
+    // Only a match that a higher-ranked rule applies to instead names a rule, after its name.
+    const springRow = within(matched).getByText('catalog-spring').closest('tr') as HTMLElement;
+    expect(within(springRow).queryByTestId('boostSupersedingRule')).not.toBeInTheDocument();
     expect(springRow).toHaveTextContent('2,000');
-    const fallRow = within(matched).getByText('catalog-fall').closest('tr');
-    expect(fallRow).toHaveTextContent('catalog-first');
+    const fallRow = within(matched).getByText('catalog-fall').closest('tr') as HTMLElement;
+    expect(within(fallRow).getByTestId('boostSupersedingRule')).toHaveTextContent('catalog-first');
     expect(fallRow).toHaveTextContent('4,000');
     // The table always pages, however few it matches.
     expect(matched).toHaveTextContent('Rows per page: 10');
