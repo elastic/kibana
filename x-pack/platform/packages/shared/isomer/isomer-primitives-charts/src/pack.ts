@@ -14,11 +14,12 @@ import {
   type PrimitivePack,
   type ThemePair,
 } from '@elastic/isomer-sdk';
+import { borealisDark, borealisLight } from '@kbn/isomer-theme';
 
 import type { ChartDefinition } from './charts/define';
 import type { ChartEngine, ChartNode } from './engine/types';
 import { chartDefinitions } from './registry';
-import type { ChartPackTypes, ChartsFrameTheme } from './render/context';
+import { type ChartPackTypes, type ChartsFrameTheme, colorModeOf } from './render/context';
 import { chartReact, type ChartSeam } from './render/figure';
 import { type ChartHeading, chartMarkdown, chartSlack, chartText } from './render/surfaces';
 import { chartDistillery, chartRoot } from './theme/distillery';
@@ -36,7 +37,24 @@ export interface ChartsPackOptions {
   render?: 'live' | 'static';
   /** The mode on surfaces that name none (`react`, `html`); `snapshot` takes its frame's. Defaults to `light`. */
   colorMode?: ColorMode;
+  /** The height an engine draws each chart at on `snapshot`, which the card frame sizes for. Defaults to the figure height. */
+  drawHeight?: number;
 }
+
+// Estimated card heights, at the figure's 14px body and 12px caption: a line of text, and a table row.
+const LINE = 22;
+const ROW = 27;
+
+const snapshotHeight =
+  <TNode extends ChartNode & ChartHeading>(read: ChartDefinition<TNode>['read'], seam: ChartSeam) =>
+  (node: TNode): number => {
+    const headings = (node.title === undefined ? 0 : LINE) + (node.description === undefined ? 0 : LINE);
+    if (seam.engine) {
+      return headings + seam.drawHeight + LINE;
+    }
+    const { rows } = read(node).table;
+    return headings + LINE + (rows.length + 1) * ROW + LINE;
+  };
 
 const bind = <TNode extends ChartNode & ChartHeading>(
   { type, catalog, examples, schema, read }: ChartDefinition<TNode>,
@@ -53,6 +71,7 @@ const bind = <TNode extends ChartNode & ChartHeading>(
       markdown: (node) => chartMarkdown(node, read(node)),
       slack: (node) => chartSlack(node, read(node)),
     },
+    metrics: { snapshotHeight: snapshotHeight(read, seam) },
   });
 
 /**
@@ -61,9 +80,13 @@ const bind = <TNode extends ChartNode & ChartHeading>(
  */
 export const defineChartsPack = (
   engine?: ChartEngine,
-  { render = 'static', colorMode = 'light' }: ChartsPackOptions = {}
+  {
+    render = 'static',
+    colorMode = 'light',
+    drawHeight = parseFloat(chartDistillery.resolveValues('light').figure.height),
+  }: ChartsPackOptions = {}
 ): PrimitivePack<ChartsFrameTheme> => {
-  const seam: ChartSeam = { ...(engine ? { engine } : {}), render, colorMode };
+  const seam: ChartSeam = { ...(engine ? { engine } : {}), render, colorMode, drawHeight };
   return definePrimitivePack<ChartsFrameTheme>({
     id: 'charts',
     primitives: chartDefinitions.map((definition) =>
@@ -75,8 +98,8 @@ export const defineChartsPack = (
 };
 
 export const chartThemes: ThemePair<ChartsFrameTheme> = {
-  light: { colorMode: 'light' },
-  dark: { colorMode: 'dark' },
+  light: borealisLight,
+  dark: borealisDark,
 };
 
 const { frame } = chartDistillery.resolveValues('light');
@@ -94,7 +117,7 @@ export const chartCardFrame: Frame<ChartsFrameTheme> = {
       {
         className: chartRoot,
         style: {
-          background: resolveChartTheme(theme.colorMode).surface,
+          background: resolveChartTheme(colorModeOf(theme)).surface,
           boxSizing: 'border-box',
           display: 'flex',
           flexDirection: 'column',

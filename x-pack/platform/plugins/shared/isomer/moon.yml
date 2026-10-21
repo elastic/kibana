@@ -26,6 +26,7 @@ dependsOn:
   - '@kbn/isomer-components'
   - '@kbn/isomer-primitives-charts'
   - '@kbn/isomer-primitives-vega'
+  - '@kbn/isomer-theme'
   - '@kbn/react-kibana-context-render'
   - '@kbn/repo-info'
 tags:

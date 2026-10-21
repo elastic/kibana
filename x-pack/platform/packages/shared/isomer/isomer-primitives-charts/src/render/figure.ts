@@ -14,7 +14,7 @@ import { type ChartSelection, selectionEvent, type SelectionTarget } from '../mo
 import { chartRoot } from '../theme/distillery';
 import { type ColorMode, resolveChartTheme } from '../theme/resolve';
 
-import { type ChartReactEnv, cls } from './context';
+import { type ChartReactEnv, cls, colorModeOf } from './context';
 import { figureModule, legendModule, tableModule } from './styles';
 import type { ChartHeading, ChartReading } from './surfaces';
 import type { ChartTable } from './table';
@@ -28,6 +28,8 @@ export interface ChartSeam {
   engine?: ChartEngine;
   render: 'live' | 'static';
   colorMode: ColorMode;
+  /** The height an engine draws each chart at on `snapshot`. */
+  drawHeight: number;
 }
 
 const DataTable = ({
@@ -137,7 +139,7 @@ export const chartReact =
   (node: TNode, { context, theme }: ChartReactEnv): ReactNode => {
     const { title, description } = node;
     const { summary, table: data } = read(node);
-    const colorMode = theme?.colorMode ?? seam.colorMode;
+    const colorMode = theme ? colorModeOf(theme) : seam.colorMode;
     const Live =
       seam.render === 'live'
         ? (seam.engine?.live?.[node.type] as ComponentType<LiveChartProps> | undefined)
