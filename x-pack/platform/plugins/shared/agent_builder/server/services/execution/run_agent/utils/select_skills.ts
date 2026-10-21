@@ -26,8 +26,9 @@ interface BuiltInCapabilitySkillRule {
  */
 const builtInCapabilitySkillRules: BuiltInCapabilitySkillRule[] = [
   {
-    // Context Engine retrieval: the agent can reach at least one AI Index. The skill itself is
-    // unavailable in spaces where `contextEngine:enabled` is off.
+    // Context Engine retrieval: the agent can reach at least one AI Index, or AI Indices are
+    // enabled and the prompt points an agent with none assigned at this skill to find them. The
+    // skill itself is unavailable in spaces where `contextEngine:enabled` is off.
     skillId: kiRetrievalSkillId,
     applies: ({ agentConfiguration: { ai_indices: aiIndices }, aiIndicesEnabled }) =>
       aiIndicesEnabled || (aiIndices?.length ?? 0) > 0,
