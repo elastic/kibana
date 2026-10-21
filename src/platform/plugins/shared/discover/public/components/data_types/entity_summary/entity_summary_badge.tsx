@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, type ReactNode } from 'react';
+import React, { useEffect, useMemo, type ReactNode } from 'react';
 import { EuiBadge, EuiPopover, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -18,6 +18,8 @@ import type { ContextAwarenessToolkit } from '../../../context_awareness';
 import { useDiscoverServices } from '../../../hooks/use_discover_services';
 import { useFetchEntitySummary } from './use_fetch_entity_summary';
 import type { EntitySummaryDefinition } from './types';
+// TEMPORARY DEMO ONLY — remove with `entity_summary_layout_demo.tsx` before shipping.
+import { ensureLayoutDemoMounted, useLayoutDemoDirection } from './entity_summary_layout_demo';
 
 const badgeStyle = css`
   max-width: 100%;
@@ -51,6 +53,12 @@ export const EntitySummaryBadge = <RawData,>({
 }: EntitySummaryBadgeProps<RawData>) => {
   const services = useDiscoverServices();
   const [isPopoverOpen, { toggle: togglePopover, off: closePopover }] = useBoolean(false);
+
+  // TEMPORARY DEMO ONLY — mounts the floating layout toggle and reads its current selection.
+  useEffect(() => {
+    ensureLayoutDemoMounted();
+  }, []);
+  const metricsDirection = useLayoutDemoDirection();
 
   const entity = useMemo(
     () => definition.getEntity({ row, fieldName }),
@@ -148,6 +156,7 @@ export const EntitySummaryBadge = <RawData,>({
         titleHref={content?.titleHref}
         icon={headerIcon}
         metrics={content?.metrics ?? []}
+        metricsDirection={metricsDirection}
         links={links}
         isLoading={loading}
         onClose={closePopover}

@@ -83,7 +83,12 @@ const baseProps: EntitySummaryProps = {
   onCopyValue: () => {},
 };
 
+// Horizontal layout (`metricsDirection="row"`, the default): metrics sit side by side.
 export const Default: StoryFn = () => <EntitySummary {...baseProps} />;
+
+// Stacked layout (`metricsDirection="column"`): charts line up vertically. This is what the
+// Discover summary popover uses.
+export const Stacked: StoryFn = () => <EntitySummary {...baseProps} metricsDirection="column" />;
 
 export const Loading: StoryFn = () => (
   <EntitySummary

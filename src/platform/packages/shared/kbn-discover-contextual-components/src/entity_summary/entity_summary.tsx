@@ -67,6 +67,8 @@ export interface EntitySummaryProps {
   icon?: ReactNode;
   /** Ordered metrics (e.g. latency, throughput, failed transaction rate). */
   metrics: EntitySummaryMetric[];
+  /** Lay the metrics out side by side (`row`, default) or stacked (`column`). */
+  metricsDirection?: 'row' | 'column';
   isLoading?: boolean;
   /** Secondary links ("Open overview", "Active alerts", …). */
   links?: EntitySummaryLink[];
@@ -87,6 +89,7 @@ export function EntitySummary({
   titleHref,
   icon,
   metrics,
+  metricsDirection = 'row',
   isLoading = false,
   links = [],
   onClose,
@@ -113,6 +116,11 @@ export function EntitySummary({
         />
       </Section>
 
+      <EuiHorizontalRule margin="none" />
+      <Section>
+        <MetricsSection metrics={metrics} direction={metricsDirection} isLoading={isLoading} />
+      </Section>
+
       {onFilterFor || onFilterOut || onCopyValue ? (
         <>
           <EuiHorizontalRule margin="none" />
@@ -123,11 +131,6 @@ export function EntitySummary({
           />
         </>
       ) : null}
-
-      <EuiHorizontalRule margin="none" />
-      <Section>
-        <MetricsSection metrics={metrics} isLoading={isLoading} />
-      </Section>
 
       {links.length > 0 ? (
         <>
@@ -202,25 +205,39 @@ function Header({
   );
 }
 
-// Stacked layout: label + value on the left, chart on the right, so the charts line up vertically.
 function MetricsSection({
   metrics,
+  direction,
   isLoading,
 }: {
   metrics: EntitySummaryMetric[];
+  direction: 'row' | 'column';
   isLoading: boolean;
 }) {
+  if (direction === 'column') {
+    return (
+      <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+        {metrics.map((metric) => (
+          <EuiFlexItem key={metric.label} grow={false}>
+            <MetricRow metric={metric} isLoading={isLoading} />
+          </EuiFlexItem>
+        ))}
+      </EuiFlexGroup>
+    );
+  }
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+    <EuiFlexGroup gutterSize="m" responsive={false}>
       {metrics.map((metric) => (
-        <EuiFlexItem key={metric.label} grow={false}>
-          <MetricRow metric={metric} isLoading={isLoading} />
+        <EuiFlexItem key={metric.label}>
+          <MetricColumn metric={metric} isLoading={isLoading} />
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
   );
 }
 
+// Stacked layout: label + value on the left, chart on the right, so the charts line up vertically.
 function MetricRow({ metric, isLoading }: { metric: EntitySummaryMetric; isLoading: boolean }) {
   const { label, valueLabel } = metric;
 
@@ -246,7 +263,31 @@ function MetricRow({ metric, isLoading }: { metric: EntitySummaryMetric; isLoadi
   );
 }
 
-// The sparkline, or a dashed placeholder for no data.
+// Horizontal layout: metrics sit side by side, each stacking label, value, and chart vertically.
+function MetricColumn({ metric, isLoading }: { metric: EntitySummaryMetric; isLoading: boolean }) {
+  const { label, valueLabel } = metric;
+
+  return (
+    <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" color="subdued">
+          {label}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiText size="s">
+          <strong>{valueLabel}</strong>
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <MetricSparkline metric={metric} isLoading={isLoading} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+// Shared chart renderer for both metric layouts: a full-width sparkline (so it fills its column and
+// no horizontal space is wasted), or a dashed placeholder for no data.
 function MetricSparkline({
   metric,
   isLoading,
