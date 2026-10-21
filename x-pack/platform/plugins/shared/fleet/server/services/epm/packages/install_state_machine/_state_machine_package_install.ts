@@ -212,6 +212,11 @@ export const streamingStatesDefinition: StateMachineStates<string> = {
   },
   install_kibana_assets: {
     onTransition: stepInstallKibanaAssetsWithStreaming,
+    nextState: INSTALL_STATES.INSTALL_WORKFLOWS,
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_workflows: {
+    onTransition: stepInstallWorkflows,
     nextState: INSTALL_STATES.SAVE_ARCHIVE_ENTRIES,
     onPostTransition: updateLatestExecutedState,
   },
