@@ -5,11 +5,17 @@
  * 2.0.
  */
 
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 import type { Agent } from '../../types';
 
-import { partitionAgentsForMigration } from './migrate_action_runner';
+import { createAgentAction, createErrorActionResults } from './actions';
+import { bulkMigrateAgentsBatch, partitionAgentsForMigration } from './migrate_action_runner';
+
+jest.mock('./actions', () => ({
+  createAgentAction: jest.fn(),
+  createErrorActionResults: jest.fn(),
+}));
 
 jest.mock('./crud', () => ({
   getAgentPolicyForAgents: jest.fn().mockResolvedValue([
@@ -110,5 +116,82 @@ describe('partitionAgentsForMigration', () => {
       expect(agentsToAction).toHaveLength(0);
       expect(errors['agent-variant-910'].message).toContain('protected');
     });
+  });
+});
+
+describe('bulkMigrateAgentsBatch', () => {
+  const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+  const soClient = savedObjectsClientMock.create();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('counts the agents that fail validation in the action total', async () => {
+    const agentlessAgent = makeAgent({
+      id: 'agent-agentless',
+      policy_id: 'agentless-policy',
+      policy_base_id: 'agentless-policy',
+    });
+    const openAgent = makeAgent({
+      id: 'agent-open',
+      policy_id: 'open-policy',
+      policy_base_id: 'open-policy',
+    });
+
+    await bulkMigrateAgentsBatch(esClient, soClient, [agentlessAgent, openAgent], {
+      uri: 'https://example.com:8220',
+      enrollment_token: 'token',
+    });
+
+    expect(createAgentAction).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({ agents: ['agent-open'], total: 2, type: 'MIGRATE' })
+    );
+    expect(createErrorActionResults).toHaveBeenCalledWith(
+      esClient,
+      expect.any(String),
+      { 'agent-agentless': expect.any(Error) },
+      expect.any(String)
+    );
+  });
+
+  it('keeps total 1 and no error results when the only agent is eligible', async () => {
+    const openAgent = makeAgent({
+      id: 'agent-open',
+      policy_id: 'open-policy',
+      policy_base_id: 'open-policy',
+    });
+
+    await bulkMigrateAgentsBatch(esClient, soClient, [openAgent], {});
+
+    expect(createAgentAction).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({ agents: ['agent-open'], total: 1 })
+    );
+    expect(createErrorActionResults).toHaveBeenCalledWith(
+      esClient,
+      expect.any(String),
+      {},
+      expect.any(String)
+    );
+  });
+
+  it('uses the given total when it is passed', async () => {
+    const openAgent = makeAgent({
+      id: 'agent-open',
+      policy_id: 'open-policy',
+      policy_base_id: 'open-policy',
+    });
+
+    await bulkMigrateAgentsBatch(esClient, soClient, [openAgent], { total: 500 });
+
+    expect(createAgentAction).toHaveBeenCalledWith(
+      esClient,
+      soClient,
+      expect.objectContaining({ total: 500 })
+    );
   });
 });

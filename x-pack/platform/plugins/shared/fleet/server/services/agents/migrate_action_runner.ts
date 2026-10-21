@@ -109,7 +109,9 @@ export async function bulkMigrateAgentsBatch(
   const { agentsToAction, errors } = await partitionAgentsForMigration(soClient, agents);
   const actionId = options.actionId ?? uuidv4();
   const agentIds = agentsToAction.map((agent) => agent.id);
-  const total = options.total ?? agentIds.length;
+  // all given agents, also the ones that failed validation: they get an error result, which counts
+  // against the total in the action status
+  const total = options.total ?? agents.length;
   const spaceId = options.spaceId;
   const namespaces = spaceId ? [spaceId] : [];
 
