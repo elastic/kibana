@@ -6,6 +6,7 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-v2-schemas';
+import type { RuleEventOrigin } from '../../event_origin/origin_schemas';
 
 /**
  * Data carried by every rule-lifecycle domain event.
@@ -33,6 +34,8 @@ export interface RuleEventPayload {
    * for bulk emits.
    */
   readonly correlationId?: string;
+  /** Channel and app derived from the rules client's request. */
+  readonly origin: RuleEventOrigin;
 }
 
 /**

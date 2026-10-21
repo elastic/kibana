@@ -281,6 +281,16 @@ steps:
     with:
       conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
 
+  # Telemetry: once the Investigation exists. A create error here means a re-review.
+  - name: report_review_started
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: ad_worker_review_started
+      investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      is_rereview: "${{ steps.open_investigation.error != blank }}"
+
   - name: append_workflow_execution
     type: investigations.appendWorkflowExecutionId
     if: "${{ inputs.parent_run_id != blank }}"
@@ -616,6 +626,16 @@ steps:
     on-failure:
       continue: true
 
+  # Reported for every verdict, including `failed`.
+  - name: report_analysis_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: ad_worker_analysis_completed
+      verdict: "{{ steps.resolve_analysis.output.verdict }}"
+      analysis_error: "${{ steps.run_fp_tp_analysis.error != blank }}"
+
   - name: journal_analysis_finished
     type: workflow.execute
     with:
@@ -670,6 +690,16 @@ steps:
                   without escalation.
             on-failure:
               continue: true
+
+          - name: report_investigation_closed_false_positive
+            type: alertzero.reportWorkerOutcome
+            if: "${{ steps.close_investigation_false_positive.error == blank and steps.close_investigation_false_positive.output.changed_fields contains 'status' }}"
+            on-failure:
+              continue: true
+            with:
+              event: worker_investigation_closed
+              investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+              close_reason: false_positive
 
           # `reason: false_positive` is the verdict, recorded on the attack itself.
           # The claim is about the ATTACK — this narrative is not supported by its
@@ -1080,6 +1110,27 @@ steps:
       declined: "${{ steps.escalation_gate.output.decision == 'dismissed' }}"
       expired: "${{ steps.escalation_gate.output.status == 'expired' }}"
 
+  # Only for an escalated review; the outcome follows the journal note's order.
+  - name: report_handoff_resolved
+    type: alertzero.reportWorkerOutcome
+    if: "${{ steps.resolve_escalation.output.escalate == true }}"
+    on-failure:
+      continue: true
+    with:
+      event: ad_worker_handoff_resolved
+      outcome: |-
+        {%- if steps.record_decision.output.approved == true -%}
+        approved
+        {%- elsif steps.record_decision.output.declined == true -%}
+        dismissed
+        {%- elsif steps.record_decision.output.expired == true -%}
+        expired
+        {%- elsif steps.escalation_gate.output.decision == 'approved' -%}
+        approved_action_failed
+        {%- endif -%}
+      verdict: "{{ steps.resolve_analysis.output.verdict }}"
+      auto_approve_requested: "${{ steps.resolve_escalation.output.auto_approve }}"
+
   - name: journal_decision_recorded
     type: workflow.execute
     if: "${{ steps.resolve_escalation.output.escalate == true }}"
@@ -1137,6 +1188,16 @@ steps:
           {{ steps.read_proposal_decision.output.rationale }}
     on-failure:
       continue: true
+
+  - name: report_investigation_closed_declined
+    type: alertzero.reportWorkerOutcome
+    if: "${{ steps.record_decision.output.declined == true and steps.close_investigation_declined.error == blank and steps.close_investigation_declined.output.changed_fields contains 'status' }}"
+    on-failure:
+      continue: true
+    with:
+      event: worker_investigation_closed
+      investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      close_reason: other
 
   # Closed with NO `reason`, unlike the false-positive branch. There the analysis
   # produced a verdict about the attack, so `false_positive` records it. Here the
