@@ -151,6 +151,17 @@ export const Timeline = ({
     &:focus-visible {
       outline: ${euiTheme.focus.width} solid ${euiTheme.focus.color};
     }
+    /* The kind shows in the shape as well as the colour. */
+    &[data-marker-kind='error'] {
+      width: ${euiTheme.size.m};
+      border-radius: 0;
+      clip-path: polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+    }
+    &[data-marker-kind='click'] {
+      height: ${euiTheme.size.s};
+      top: ${euiTheme.size.xs};
+      border-radius: 50%;
+    }
   `;
 
   return (
