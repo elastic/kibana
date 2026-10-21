@@ -487,8 +487,7 @@ describe('vegaEmbeddableFactory', () => {
     render(<PanelComponent />);
 
     await waitFor(() => expect(mockVegaVisComponentProps).toBeDefined());
-    // Cast because the emitter is untyped JavaScript: the guard exists for exactly this case, which
-    // the types alone cannot rule out.
+    // Cast to bypass `VegaEvent`, simulating a caller outside the typed emitters.
     mockVegaVisComponentProps?.fireEvent({
       name: 'someOtherEvent',
       data: { filters: [] },

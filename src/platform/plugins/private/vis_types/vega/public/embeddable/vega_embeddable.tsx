@@ -334,8 +334,7 @@ export const vegaEmbeddableFactory = (
     // Identities must be stable: `VegaVisComponent` rebuilds its Vega view whenever `fireEvent`
     // changes and re-renders whenever `renderComplete` changes.
     const fireEvent = (event: VegaEvent) => {
-      // `VegaEvent` narrows `name` to the filter event, but the emitter (`vega_base_view.js`) is
-      // untyped JavaScript, so the compiler cannot enforce that on the calling side.
+      // `VegaEvent` already narrows `name`; the guard stays because `fireEvent` is a public prop.
       if (event.name !== VEGA_EVENT_APPLY_FILTER || areTriggersDisabled(api)) {
         return;
       }

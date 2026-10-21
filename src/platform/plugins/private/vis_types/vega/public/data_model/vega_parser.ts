@@ -35,6 +35,7 @@ import type {
   VegaSpec,
   VegaConfig,
   TooltipConfig,
+  ResolvedTooltipConfig,
   DstObj,
   UrlParserConfig,
   PendingType,
@@ -67,7 +68,7 @@ export class VegaParser {
   _config?: VegaConfig;
   useMap?: boolean;
   renderer?: string;
-  tooltips?: boolean | TooltipConfig;
+  tooltips?: false | ResolvedTooltipConfig;
   mapConfig?: VegaConfig;
   vlspec?: VegaSpec;
   useResize?: boolean;
@@ -435,7 +436,7 @@ The URL is an identifier only. Kibana and your browser will never access this UR
     return result || {};
   }
 
-  _parseTooltips() {
+  _parseTooltips(): false | ResolvedTooltipConfig {
     if (this._config && this._config.tooltips === false) {
       return false;
     }
@@ -496,7 +497,8 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       );
     }
 
-    return result;
+    const { position, padding, textTruncate, centerOnMark } = result;
+    return { position, padding, textTruncate, centerOnMark };
   }
 
   /**

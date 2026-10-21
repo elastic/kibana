@@ -10,8 +10,9 @@
 import { View, parse } from 'vega';
 import { VegaBaseView } from './vega_base_view';
 
+/** Renders a non-map Vega spec. */
 export class VegaView extends VegaBaseView {
-  async _initViewCustomizations() {
+  protected async _initViewCustomizations(): Promise<void> {
     // In some cases, Vega may be initialized twice... TBD
     if (!this._container) return;
 
