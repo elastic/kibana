@@ -9,6 +9,19 @@ import { i18n } from '@kbn/i18n';
 import type { SlackTriggerKind } from '../automation_form_values';
 
 export const triggerLabels = {
+  customCron: i18n.translate('xpack.nightshift.automations.flyout.customCronDropDownOptionLabel', {
+    defaultMessage: 'Custom Cron',
+  }),
+  cronHelp: i18n.translate('xpack.nightshift.automations.flyout.cronHelpDescription', {
+    defaultMessage:
+      'Five numeric fields: minute, hour, day-of-month, month, day-of-week. Use *, lists, ranges, or steps. Month and at least one day field must be *. Sunday is 0 or 7. Times follow the selected timezone.',
+  }),
+  invalidTimezone: i18n.translate(
+    'xpack.nightshift.automations.flyout.invalidTimezoneErrorMessage',
+    {
+      defaultMessage: 'Select a valid IANA timezone.',
+    }
+  ),
   triggers: i18n.translate('xpack.nightshift.automations.flyout.triggers', {
     defaultMessage: 'Trigger',
   }),

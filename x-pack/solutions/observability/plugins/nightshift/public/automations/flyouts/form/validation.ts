@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   MAX_AUTOMATION_INSTRUCTIONS_LENGTH,
   parsePresetSchedule,
+  parseAutomationSchedule,
 } from '@kbn/nightshift-investigations-plugin/common';
 import { MAX_DAILY_LIMIT } from '../../utils/daily_usage';
 import {
@@ -55,6 +56,9 @@ export const isValidDailyLimit = (value: string): boolean => {
 
 export const isTriggerValid = (trigger?: TriggerFormValues): trigger is TriggerFormValues => {
   if (!trigger) return false;
+  if (trigger.kind === 'cron') {
+    return parseAutomationSchedule({ schedulePreset: 'custom', ...trigger }).success;
+  }
   if (trigger.kind === 'every') {
     return parsePresetSchedule(toPresetSchedule(trigger)).success;
   }
@@ -63,7 +67,7 @@ export const isTriggerValid = (trigger?: TriggerFormValues): trigger is TriggerF
 
 export const getSaveBlocker = (values: AutomationFormValues): string | undefined => {
   if (!values.trigger) return validationLabels.triggerRequired;
-  if (values.trigger.kind === 'every') {
+  if (values.trigger.kind === 'every' || values.trigger.kind === 'cron') {
     if (!values.instructions.trim()) return validationLabels.instructionsRequired;
     if (values.instructions.trim().length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
       return validationLabels.instructionsTooLong;

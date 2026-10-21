@@ -835,3 +835,43 @@ describe('generateWorkflowYaml', () => {
     });
   });
 });
+
+it('routes mixed Cron, alert and Slack triggers through their existing investigation branches', () => {
+  const automation = baseAutomation();
+  automation.trigger.rows = [
+    {
+      kind: 'schedule',
+      schedulePreset: 'custom',
+      cronExpression: '0 9 * * *',
+      timezone: 'UTC',
+      scopeQuery: 'service.name:checkout',
+    },
+    { kind: 'alert', ruleNames: ['CPU'] },
+    { kind: 'slack', event: 'message', channels: ['C1'] },
+  ];
+  automation.execution.promptTemplate = 'Review health.';
+  automation.runtime.timeoutSeconds = 90;
+  const workflow = parse(generateWorkflowYaml('auto-123', automation));
+  expect(workflow.triggers.map(({ type }: { type: string }) => type)).toEqual([
+    'alerting.v1.alertStatusChanged',
+    'slack2.message',
+    'scheduled',
+  ]);
+  expect(workflow.steps[0]).toMatchObject({
+    name: 'on_schedule_trigger',
+    condition: "${{ execution.triggeredBy == 'scheduled' }}",
+    steps: [
+      {
+        with: {
+          subject_type: 'manual',
+          message: 'Review health.',
+          scope_query: 'service.name:checkout',
+          timeout_seconds: 90,
+          automation_id: 'auto-123',
+        },
+      },
+    ],
+  });
+  expect(workflow.steps[1].steps[0].with.subject_type).toBe('alert');
+  expect(workflow.steps[2].steps[0].with.message).toContain('{{ event.text');
+});

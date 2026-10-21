@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PresetSchedule } from '../../../common/automation_schedule';
+import type { AutomationSchedule } from '../../../common/automation_schedule';
 
 export type AutomationType = 'custom' | 'managed';
 
@@ -24,7 +24,7 @@ export type NightshiftTriggerRow =
       ruleNameMatchMode?: RuleNameMatchMode;
       tags?: string[];
     }
-  | (PresetSchedule & { kind: 'schedule'; scopeQuery?: string })
+  | (AutomationSchedule & { kind: 'schedule'; scopeQuery?: string })
   | {
       kind: 'slack';
       event: SlackTriggerEvent;

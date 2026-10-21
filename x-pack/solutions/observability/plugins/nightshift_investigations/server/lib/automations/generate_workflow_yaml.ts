@@ -7,7 +7,7 @@
 
 import { stringify } from 'yaml';
 import { DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID } from '../../../common';
-import { parsePresetSchedule } from '../../../common/automation_schedule';
+import { parseAutomationSchedule } from '../../../common/automation_schedule';
 import type { InvestigationNotificationDestination } from '../../../common';
 import type { NightshiftAutomationAttributes, NightshiftTriggerRow, OverlapPolicy } from './types';
 
@@ -181,7 +181,7 @@ function generateScheduledWorkflow(
   automation: NightshiftAutomationAttributes,
   schedule: Extract<NightshiftTriggerRow, { kind: 'schedule' }>
 ) {
-  const parsed = parsePresetSchedule(schedule);
+  const parsed = parseAutomationSchedule(schedule);
   if (!parsed.success) throw new Error(parsed.error);
   const notificationDestinations = buildNotificationDestinations(
     automationId,

@@ -32,6 +32,14 @@ const toTriggerRow = (
       ...(trigger.ruleTags.length ? { tags: trigger.ruleTags } : {}),
     };
   }
+  if (trigger.kind === 'cron') {
+    return {
+      kind: 'schedule',
+      schedulePreset: 'custom',
+      cronExpression: trigger.cronExpression,
+      timezone: trigger.timezone,
+    };
+  }
   if (isSlackTrigger(trigger)) {
     const messageFilter = trigger.messageFilter.trim();
     return {

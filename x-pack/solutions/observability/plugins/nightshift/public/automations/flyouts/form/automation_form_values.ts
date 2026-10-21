@@ -6,7 +6,7 @@
  */
 
 import {
-  parsePresetSchedule,
+  parseAutomationSchedule,
   type PresetSchedule,
 } from '@kbn/nightshift-investigations-plugin/common';
 import type { Automation } from '../../hooks/use_automations';
@@ -45,6 +45,7 @@ export type TriggerFormValues =
       endTime: string;
       timezone: string;
     }
+  | { kind: 'cron'; cronExpression: string; timezone: string }
   | { kind: SlackTriggerKind; channels: string[]; users: string[]; messageFilter: string };
 
 export type SlackTriggerFormValues = Extract<TriggerFormValues, { kind: SlackTriggerKind }>;
@@ -77,6 +78,9 @@ const WEEKDAYS = [1, 2, 3, 4, 5];
 export const createTriggerFormValues = (kind: TriggerFormValues['kind']): TriggerFormValues => {
   if (isSlackTriggerKind(kind)) {
     return { kind, channels: [], users: [], messageFilter: '' };
+  }
+  if (kind === 'cron') {
+    return { kind, cronExpression: '0 9 * * *', timezone: DEFAULT_TIMEZONE };
   }
   if (kind === 'alert') {
     return { kind, ruleNamePattern: '', ruleNames: [], ruleTags: [] };
@@ -132,8 +136,11 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
   const row = automation.trigger.rows[0];
   const [completion] = automation.completions;
   const schedule = row?.kind === 'schedule' ? row : undefined;
-  const parsed = schedule ? parsePresetSchedule(schedule) : undefined;
-  const preset = parsed?.success ? parsed.schedule : undefined;
+  const parsed = schedule ? parseAutomationSchedule(schedule) : undefined;
+  const preset =
+    parsed?.success && parsed.schedule.schedulePreset !== 'custom' ? parsed.schedule : undefined;
+  const custom =
+    parsed?.success && parsed.schedule.schedulePreset === 'custom' ? parsed.schedule : undefined;
   const trigger: TriggerFormValues | undefined =
     row?.kind === 'alert'
       ? {
@@ -148,6 +155,12 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
           channels: row.channels ?? [],
           users: row.users ?? [],
           messageFilter: row.messageFilter ?? '',
+        }
+      : custom
+      ? {
+          kind: 'cron',
+          cronExpression: custom.cronExpression,
+          timezone: custom.timezone ?? DEFAULT_TIMEZONE,
         }
       : preset
       ? {

@@ -6,13 +6,43 @@ This plugin provides the domain API for starting and reading investigations, ind
 
 Hourly, daily and weekly automation presets generate calendar-based workflow triggers. Daily and
 weekly times, and inclusive hourly windows, use the saved IANA timezone and follow daylight saving
-time. Custom cron execution is deferred. Unsupported schedules are ignored when loading the form
-and rejected by the API.
+time. Custom Cron schedules support the subset below. Unsupported schedules are ignored when loading
+the form and rejected by the API.
 
 Schedule rows store structured presets and generate RRULE directly. Daily and weekly presets use
 `time` in `HH:mm` format; weekly presets also require `daysOfWeek` (0 for Sunday through 6 for
 Saturday). Hourly presets optionally use `hourWindow: { start, end }` with inclusive whole hours.
 All presets accept an IANA `timezone`, defaulting to UTC.
+
+Custom schedules use `schedulePreset: "custom"`, `cronExpression`, and an optional IANA `timezone`
+(default UTC). The expression is preserved when saved and reopened. The supported dialect has five
+numeric fields: minute (0–59), hour (0–23), day-of-month (1–31), month, and day-of-week (0–7, with both
+0 and 7 meaning Sunday). Fields support `*`, comma-separated lists, ascending inclusive ranges, and
+positive `/` steps. Steps apply within each field, not as elapsed durations: `*/45` in the minute
+field means minutes 0 and 45 of each hour; `5/20` means minutes 5, 25, and 45.
+
+The month field must be literally `*`, and at least one of day-of-month and day-of-week must be
+literally `*`. Names, macros, seconds/year fields, wrapping ranges, and Quartz extensions such as
+`?`, `L`, `W`, or `#` are unsupported. Invalid values and unsupported syntax are rejected with HTTP
+400 before writes. These restrictions allow faithful conversion to one RRULE without changing Unix
+Cron's OR semantics for restricted day fields. For example:
+
+- `*/15 9-17 * * 1-5`: every quarter hour during hours 9 through 17, Monday through Friday.
+- `0 9 1,15 * *`: 09:00 on the first and fifteenth of every month.
+- `0 9 31 * *`: 09:00 on the thirty-first, skipping months that have no thirty-first.
+
+Cron schedules inherit the workflow RRULE scheduler's timezone behavior. Ordinary local times remain
+fixed across DST offset changes. Missing and repeated hours follow RRULE/Moment normalization,
+not Unix cron's skip-gap/run-both policy: in Europe/Berlin, `30 2 * * *` calculated before the spring
+transition selects 01:30 local time on the transition day, and calculated after the transition selects
+03:30. During the autumn overlap it selects the 02:30 occurrence matching the calculation's offset
+(the earlier occurrence when calculated before the transition). A continuously running schedule does
+not deliberately dispatch both overlapping occurrences. UTC avoids these local-clock ambiguities.
+Task Manager dispatch remains subject to normal polling delay; schedules are not real-time deadlines.
+
+Editing a schedule updates the same backing workflow and scheduled task. Disabling removes its
+scheduled task; enabling activates the saved schedule. Presets and Cron share the existing scheduled
+investigation path, including mixed alert/Slack triggers and Nightshift feature availability checks.
 
 Scheduled automations require nonempty instructions (at most 5,000 characters). Each tick starts a
 fresh investigation using a `manual` question subject with an `automatic` trigger type, so normal

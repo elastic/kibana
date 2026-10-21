@@ -103,3 +103,19 @@ describe('automation validation', () => {
     });
   });
 });
+
+it('validates Cron expressions, timezone, instructions and daily limits together', () => {
+  const values = { ...createAutomationFormValues(), trigger: createTriggerFormValues('cron') };
+  expect(canSaveAutomation(values)).toBe(false);
+  expect(canSaveAutomation({ ...values, instructions: 'Review health.' })).toBe(true);
+  expect(canSaveAutomation({ ...values, instructions: 'x'.repeat(5001) })).toBe(false);
+  expect(
+    canSaveAutomation({ ...values, instructions: 'Review health.', dailyDispatchLimit: '0' })
+  ).toBe(false);
+  expect(isTriggerValid({ kind: 'cron', cronExpression: '0 9 * 1 *', timezone: 'UTC' })).toBe(
+    false
+  );
+  expect(isTriggerValid({ kind: 'cron', cronExpression: '0 9 * * *', timezone: 'Not/AZone' })).toBe(
+    false
+  );
+});
