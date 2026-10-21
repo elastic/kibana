@@ -32,10 +32,11 @@ export const bulkDeleteAttachmentsRoute = createCasesRoute({
       case_id: schema.string({ maxLength: MAX_CASE_ID_LENGTH }),
     }),
     body: schema.oneOf([
-      schema.object({ ids: idsSchema }),
+      schema.object({ ids: idsSchema, include_related: schema.maybe(schema.boolean()) }),
       schema.object({
         type: schema.string({ minLength: 1, maxLength: MAX_ATTACHMENT_TYPE_LENGTH }),
         attachmentIds: idsSchema,
+        include_related: schema.maybe(schema.boolean()),
       }),
     ]),
   },
@@ -49,11 +50,12 @@ export const bulkDeleteAttachmentsRoute = createCasesRoute({
 
       const caseId = request.params.case_id;
       const { body } = request;
+      const { include_related: includeRelated } = body;
 
       await client.attachments.bulkDelete(
         'ids' in body
-          ? { caseId, savedObjectIds: body.ids }
-          : { caseId, type: body.type, attachmentIds: body.attachmentIds }
+          ? { caseId, savedObjectIds: body.ids, includeRelated }
+          : { caseId, type: body.type, attachmentIds: body.attachmentIds, includeRelated }
       );
 
       return response.noContent();

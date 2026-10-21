@@ -506,7 +506,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.events.populate_file_data',
       {
         defaultMessage:
-          'Enable collection of entropy and header bytes on file events. Default: false.',
+          'Enable collection of entropy and header bytes on file events. For Defend 9.6 and later, default: true.',
       }
     ),
   },

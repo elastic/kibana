@@ -33,6 +33,9 @@ jest.mock('../components/home/needs_attention_tiles/hooks', () => ({
   useRiskMoversCount: jest.fn(),
   useRiskMoversDelta: jest.fn(),
   useRiskTilesSeries: jest.fn(),
+  useTilesLoadTelemetry: jest.fn(),
+  useTilesTimeoutNotice: jest.fn(),
+  TILE_TIMEOUT_MESSAGE: 'Timed out',
 }));
 jest.mock('../components/entity_store/hooks/use_entity_store', () => ({
   useEntityStoreStatus: jest.fn(),
@@ -430,6 +433,35 @@ describe('EntityAnalyticsNewHomePage: each tile waits for its own count', () => 
       mockTiles({ [tile]: { reachesBack: undefined } });
       render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
       expect(seriesReachesBack(tile)).toBeUndefined();
+    });
+  });
+
+  describe('when a count times out', () => {
+    it('says so on its tiles, warns once for the page, and reports the timeout', () => {
+      mockTiles();
+      hooks.useAlertBasedTiles.mockReturnValue({
+        severeAlertsCount: 0,
+        severeAlertsEntityIds: [],
+        watchlistedCount: 0,
+        watchlistedEntityIds: [],
+        isLoading: false,
+        isCountPending: false,
+        isTimedOut: true,
+      });
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      const messageOf = (id: SignalCardData['id']) => getCard(id)?.noDataMessage;
+      expect(messageOf('entitiesWithAlerts')).toBe('Timed out');
+      expect(messageOf('watchlisted')).toBe('Timed out');
+      expect(messageOf('newEntity')).toBeUndefined();
+      expect(lastOptions('useTilesTimeoutNotice')).toBe(true);
+      expect(lastOptions('useTilesLoadTelemetry').tiles.alerts.isTimedOut).toBe(true);
+    });
+
+    it('warns for nothing when no count timed out', () => {
+      mockTiles();
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      expect(lastOptions('useTilesTimeoutNotice')).toBeFalsy();
     });
   });
 

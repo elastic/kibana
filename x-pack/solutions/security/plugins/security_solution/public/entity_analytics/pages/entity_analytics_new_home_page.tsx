@@ -100,10 +100,20 @@ import {
   useRiskMoversCount,
   useRiskMoversDelta,
   useRiskTilesSeries,
+  useTilesLoadTelemetry,
+  useTilesTimeoutNotice,
+  TILE_TIMEOUT_MESSAGE,
 } from '../components/home/needs_attention_tiles/hooks';
 import { RISK_MOVER_MIN_SCORE_CHANGE } from '../components/home/needs_attention_tiles/queries/risk_history';
 import { SignalCards } from '../components/home/needs_attention_tiles/signal_cards';
-import { getEntityAnalyticsNewHomeScopeId } from '../common/alert_time_range_overrides';
+import { getEntityAnalyticsNewHomeScopeId } from '../common/scope_time_ranges';
+import { HuntWithAiButton } from '../components/home/hunt_with_ai_button';
+import {
+  ProductTour,
+  ProductTourBanner,
+  ROWS_MODE_SELECTOR_TEST_ID,
+  useProductTour,
+} from '../components/home/product_tour';
 import {
   MAX_TILE_FILTER_ENTITY_IDS,
   getCappedTileEntityIds,
@@ -342,7 +352,9 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     activeTile,
     setActiveTile,
   } = useEntityAnalyticsUrlState();
-  // Flyouts opened from the table query alerts over the range it shows.
+  const productTour = useProductTour();
+  // The scope pins every time-bounded section of the flyouts opened from here (alerts, observed
+  // data, anomalies, highlights, graph) to the selected range — see `SCOPE_FLYOUT_TIME_RANGES`.
   const scopeId = getEntityAnalyticsNewHomeScopeId(timeRange);
 
   const [isGridFullScreen, setIsGridFullScreen] = useState(false);
@@ -395,6 +407,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
           entityType,
           value: entity.entityName ?? '',
           entityId: entity.entityId,
+          scopeId,
           mode: getEntityViewMode(rowMode),
         });
       },
@@ -534,6 +547,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     watchlistedEntityIds,
     isLoading: alertBasedLoading,
     isCountPending: alertBasedPending,
+    isTimedOut: alertBasedTimedOut,
+    error: alertBasedError,
   } = useAlertBasedTiles({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -546,6 +561,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     isLoading: anomaliesLoading,
     isMissingJobs: anomaliesMissingJobs,
     isCountPending: anomaliesPending,
+    isTimedOut: anomaliesTimedOut,
+    error: anomaliesError,
   } = useEntitiesWithAnomaliesCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -557,6 +574,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     entityIds: newEntityEntityIds,
     isLoading: newEntityLoading,
     isCountPending: newEntityPending,
+    isTimedOut: newEntityTimedOut,
+    error: newEntityError,
   } = useNewEntityCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -569,6 +588,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     isLoading: riskMoversLoading,
     isMissingIndex: riskMoversMissingIndex,
     isCountPending: riskMoversPending,
+    isTimedOut: riskMoversTimedOut,
+    error: riskMoversError,
   } = useRiskMoversCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -581,6 +602,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     isLoading: newlyHCLoading,
     isMissingIndex: newlyHCMissingIndex,
     isCountPending: newlyHCPending,
+    isTimedOut: newlyHCTimedOut,
+    error: newlyHCError,
   } = useNewlyHighCriticalCount({
     spaceId: resolvedSpaceId,
     timeRange,
@@ -651,7 +674,11 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
 
   // The sparklines follow the deltas: each starts once its own counts and deltas have settled, and
   // only for a tile whose history reaches back twice the range, so they never delay them.
-  const { alertsTrend, watchlistedTrend } = useAlertBasedTilesSeries({
+  const {
+    alertsTrend,
+    watchlistedTrend,
+    isTrendLoading: alertBasedTrendLoading,
+  } = useAlertBasedTilesSeries({
     ...deltaOptions,
     skip: skipAlertTiles,
     isReady: !alertBasedPending && !isDeltaLoading,
@@ -659,14 +686,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     severeAlertsCount,
     watchlistedCount,
   });
-  const { trend: anomaliesTrend } = useEntitiesWithAnomaliesSeries({
-    ...deltaOptions,
-    skip: skipAnomaliesTile,
-    isReady: !anomaliesPending && !anomaliesDeltaLoading,
-    reachesBack: anomaliesReachesBack,
-    count: anomaliesCount,
-  });
-  const { trend: newEntityTrend } = useNewEntitySeries({
+  const { trend: anomaliesTrend, isTrendLoading: anomaliesTrendLoading } =
+    useEntitiesWithAnomaliesSeries({
+      ...deltaOptions,
+      skip: skipAnomaliesTile,
+      isReady: !anomaliesPending && !anomaliesDeltaLoading,
+      reachesBack: anomaliesReachesBack,
+      count: anomaliesCount,
+    });
+  const { trend: newEntityTrend, isTrendLoading: newEntityTrendLoading } = useNewEntitySeries({
     ...deltaOptions,
     isReady: !newEntityPending && !newEntityDeltaLoading,
     reachesBack: newEntityReachesBack,
@@ -674,7 +702,11 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   });
   // The two risk tiles read the same risk score history, so one query serves both sparklines: it
   // waits for both risk tiles.
-  const { riskMoversTrend, newlyHighCriticalTrend: newlyHCTrend } = useRiskTilesSeries({
+  const {
+    riskMoversTrend,
+    newlyHighCriticalTrend: newlyHCTrend,
+    isTrendLoading: riskTrendLoading,
+  } = useRiskTilesSeries({
     ...deltaOptions,
     skip: skipRiskTiles,
     isReady:
@@ -683,6 +715,73 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
     newlyHighCriticalReachesBack: newlyHCReachesBack,
     riskMoversCount,
     newlyHighCriticalCount: newlyHCCount,
+  });
+
+  // A new range or filter is a new page load for the timeout notice and the load telemetry.
+  const tilesRunKey = `${timeRange}:${JSON.stringify(entityFilters)}`;
+  useTilesTimeoutNotice(
+    alertBasedTimedOut ||
+      anomaliesTimedOut ||
+      newEntityTimedOut ||
+      riskMoversTimedOut ||
+      newlyHCTimedOut,
+    tilesRunKey
+  );
+  const tileLoadState = (
+    countPending: boolean,
+    deltaLoading: boolean,
+    trendLoading: boolean,
+    timedOut: boolean,
+    error: unknown
+  ) => ({
+    isCountPending: countPending,
+    isDeltaLoading: deltaLoading,
+    isTrendLoading: trendLoading,
+    isTimedOut: timedOut,
+    hasError: Boolean(error),
+  });
+  useTilesLoadTelemetry({
+    skip: skipTileQueries,
+    runKey: tilesRunKey,
+    timeRange,
+    hasEntityFilters: Object.values(entityFilters).some((values) => values.length > 0),
+    tiles: {
+      alerts: tileLoadState(
+        alertBasedPending,
+        isDeltaLoading,
+        alertBasedTrendLoading,
+        alertBasedTimedOut,
+        alertBasedError
+      ),
+      anomalies: tileLoadState(
+        anomaliesPending,
+        anomaliesDeltaLoading,
+        anomaliesTrendLoading,
+        anomaliesTimedOut,
+        anomaliesError
+      ),
+      newEntity: tileLoadState(
+        newEntityPending,
+        newEntityDeltaLoading,
+        newEntityTrendLoading,
+        newEntityTimedOut,
+        newEntityError
+      ),
+      riskMovers: tileLoadState(
+        riskMoversPending,
+        riskMoversDeltaLoading,
+        riskTrendLoading,
+        riskMoversTimedOut,
+        riskMoversError
+      ),
+      newlyHighCritical: tileLoadState(
+        newlyHCPending,
+        newlyHCDeltaLoading,
+        riskTrendLoading,
+        newlyHCTimedOut,
+        newlyHCError
+      ),
+    },
   });
 
   const handleFilterForCard = useCallback(
@@ -805,7 +904,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         title: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.title',
           {
-            defaultMessage: 'Entities with alerts',
+            defaultMessage: 'Severely alerting',
           }
         ),
         value: severeAlertsCount,
@@ -814,13 +913,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: alertsTrend,
         isLoading: alertBasedLoading,
-        noDataMessage: canReadAlerts ? undefined : NO_ALERTS_ACCESS_MESSAGE,
+        noDataMessage: !canReadAlerts
+          ? NO_ALERTS_ACCESS_MESSAGE
+          : alertBasedTimedOut
+          ? TILE_TIMEOUT_MESSAGE
+          : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAlerts.description',
           {
-            defaultMessage:
-              'Entities with at least one high or critical alert in the last {timeRange}',
-            values: { timeRange },
+            defaultMessage: 'Have at least one high- or critical-severity alert',
           }
         ),
         filterLabel: i18n.translate(
@@ -836,7 +937,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         title: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.title',
           {
-            defaultMessage: 'Entities with anomalies',
+            defaultMessage: 'Anomalous',
           }
         ),
         value: anomaliesCount,
@@ -847,6 +948,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isLoading: anomaliesLoading,
         noDataMessage: !canReadAnomalies
           ? NO_ANOMALIES_ACCESS_MESSAGE
+          : anomaliesTimedOut
+          ? TILE_TIMEOUT_MESSAGE
           : anomaliesMissingJobs
           ? i18n.translate(
               'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.noJobs',
@@ -856,8 +959,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.entitiesWithAnomalies.description',
           {
-            defaultMessage: 'Entities with at least one ML anomaly in the last {timeRange}',
-            values: { timeRange },
+            defaultMessage: 'Flagged by at least one ML anomaly',
           }
         ),
         filterLabel: i18n.translate(
@@ -884,28 +986,20 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isLoading: riskMoversLoading,
         noDataMessage: !canReadRisk
           ? NO_RISK_ACCESS_MESSAGE
+          : riskMoversTimedOut
+          ? TILE_TIMEOUT_MESSAGE
           : riskMoversMissingIndex
           ? i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.noData', {
               defaultMessage: 'Requires risk score history data',
             })
           : undefined,
-        description:
-          timeRange === '24h'
-            ? i18n.translate(
-                'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description24h',
-                {
-                  defaultMessage: 'Entities whose risk score rose ≥{points} points vs yesterday',
-                  values: { points: RISK_MOVER_MIN_SCORE_CHANGE },
-                }
-              )
-            : i18n.translate(
-                'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description',
-                {
-                  defaultMessage:
-                    'Entities whose risk score rose ≥{points} points vs the previous {timeRange}',
-                  values: { timeRange, points: RISK_MOVER_MIN_SCORE_CHANGE },
-                }
-              ),
+        description: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.description',
+          {
+            defaultMessage: 'Risk score up by {points} or more',
+            values: { points: RISK_MOVER_MIN_SCORE_CHANGE },
+          }
+        ),
         filterLabel: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.riskMovers.filterLabel',
           {
@@ -918,7 +1012,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         title: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.title',
           {
-            defaultMessage: 'Newly high/critical',
+            defaultMessage: 'Newly high-risk',
           }
         ),
         value: newlyHCCount,
@@ -929,6 +1023,8 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isLoading: newlyHCLoading,
         noDataMessage: !canReadRisk
           ? NO_RISK_ACCESS_MESSAGE
+          : newlyHCTimedOut
+          ? TILE_TIMEOUT_MESSAGE
           : newlyHCMissingIndex
           ? i18n.translate(
               'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.noData',
@@ -937,23 +1033,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
               }
             )
           : undefined,
-        description:
-          timeRange === '24h'
-            ? i18n.translate(
-                'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description24h',
-                {
-                  defaultMessage:
-                    'Entities that crossed into High or Critical risk since yesterday',
-                }
-              )
-            : i18n.translate(
-                'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description',
-                {
-                  defaultMessage:
-                    'Entities that crossed into High or Critical risk in the last {timeRange}',
-                  values: { timeRange },
-                }
-              ),
+        description: i18n.translate(
+          'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.description',
+          {
+            defaultMessage: 'Risk level climbed to high or critical',
+          }
+        ),
         filterLabel: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newlyHighCritical.filterLabel',
           {
@@ -966,7 +1051,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         title: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.title',
           {
-            defaultMessage: 'Watchlisted',
+            defaultMessage: 'Watchlisted & alerting',
           }
         ),
         value: watchlistedCount,
@@ -975,13 +1060,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: alertBasedHistoryMissing,
         trend: watchlistedTrend,
         isLoading: alertBasedLoading,
-        noDataMessage: canReadAlerts ? undefined : NO_ALERTS_ACCESS_MESSAGE,
+        noDataMessage: !canReadAlerts
+          ? NO_ALERTS_ACCESS_MESSAGE
+          : alertBasedTimedOut
+          ? TILE_TIMEOUT_MESSAGE
+          : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.watchlisted.description',
           {
-            defaultMessage:
-              'Entities on a watchlist with at least one alert in the last {timeRange}',
-            values: { timeRange },
+            defaultMessage: 'On a watchlist with at least one alert in this period',
           }
         ),
         filterLabel: i18n.translate(
@@ -994,7 +1081,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       {
         id: 'newEntity',
         title: i18n.translate('xpack.securitySolution.entityAnalytics.home.tiles.newEntity.title', {
-          defaultMessage: 'New entity',
+          defaultMessage: 'New & alerting',
         }),
         value: newEntityCount,
         delta: newEntityDelta,
@@ -1002,12 +1089,11 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
         isDeltaUnavailable: newEntityHistoryMissing,
         trend: newEntityTrend,
         isLoading: newEntityLoading,
+        noDataMessage: newEntityTimedOut ? TILE_TIMEOUT_MESSAGE : undefined,
         description: i18n.translate(
           'xpack.securitySolution.entityAnalytics.home.tiles.newEntity.description',
           {
-            defaultMessage:
-              'Entities first seen in the last {timeRange} with a risk score above zero',
-            values: { timeRange },
+            defaultMessage: 'First seen in this period with at least one alert',
           }
         ),
         filterLabel: i18n.translate(
@@ -1027,6 +1113,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       alertsDelta,
       alertsTrend,
       alertBasedLoading,
+      alertBasedTimedOut,
       isDeltaLoading,
       alertBasedHistoryMissing,
       anomaliesCount,
@@ -1035,6 +1122,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       anomaliesDeltaLoading,
       anomaliesHistoryMissing,
       anomaliesLoading,
+      anomaliesTimedOut,
       anomaliesMissingJobs,
       riskMoversCount,
       riskMoversDelta,
@@ -1042,12 +1130,14 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       riskMoversDeltaLoading,
       riskMoversHistoryMissing,
       riskMoversLoading,
+      riskMoversTimedOut,
       newlyHCCount,
       newlyHCDelta,
       newlyHCTrend,
       newlyHCDeltaLoading,
       newlyHCHistoryMissing,
       newlyHCLoading,
+      newlyHCTimedOut,
       newlyHCMissingIndex,
       watchlistedCount,
       watchlistedDelta,
@@ -1058,6 +1148,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
       newEntityDeltaLoading,
       newEntityHistoryMissing,
       newEntityLoading,
+      newEntityTimedOut,
       riskMoversMissingIndex,
       timeRange,
     ]
@@ -1113,7 +1204,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
             options={ROWS_OPTIONS}
             selectedKey={rowsMode}
             onChange={onRowsModeChange}
-            data-test-subj="eaRowsModeSelector"
+            data-test-subj={ROWS_MODE_SELECTOR_TEST_ID}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -1145,7 +1236,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
   return (
     <>
       <div className="entityAnalyticsPageHeader" css={isGridFullScreen ? hiddenCss : undefined}>
-        <EntityAnalyticsHomeHeader />
+        <EntityAnalyticsHomeHeader onStartTour={productTour.startTour} />
       </div>
       <SecuritySolutionPageWrapper noPadding data-test-subj="entityAnalyticsNewHomePage">
         <div
@@ -1160,6 +1251,15 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
             isGridFullScreen && hiddenCss,
           ]}
         >
+          {productTour.isBannerVisible && (
+            <>
+              <ProductTourBanner
+                onStartTour={productTour.startTour}
+                onDismiss={productTour.dismissBanner}
+              />
+              <EuiSpacer size="m" />
+            </>
+          )}
           {/* SiemSearchBar has internal left padding; pull it left so its content aligns with the page edge */}
           <div
             css={css`
@@ -1191,6 +1291,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
               padding-inline: ${euiTheme.size.base};
             `}
           >
+            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+              <EuiFlexItem grow={false}>
+                <HuntWithAiButton />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+            <EuiSpacer size="s" />
             <SignalCards
               activeTile={activeTile}
               cards={signalCards}
@@ -1244,6 +1350,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{ readAccess: ReadAccess }> = 
           </DataViewContext.Provider>
         </div>
       </SecuritySolutionPageWrapper>
+      <ProductTour
+        steps={productTour.steps}
+        currentStep={productTour.currentStep}
+        onNext={productTour.nextStep}
+        onEnd={productTour.endTour}
+      />
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>
   );
