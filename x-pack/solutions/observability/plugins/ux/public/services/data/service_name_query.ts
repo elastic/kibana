@@ -117,3 +117,11 @@ export function serviceNameQuery(
     },
   };
 }
+
+interface ServicesAggregation {
+  services?: { buckets?: Array<{ key: string }> };
+}
+
+/** The service names in a `serviceNameQuery` response's aggregations. */
+export const getServiceNames = (aggregations?: ServicesAggregation): string[] =>
+  aggregations?.services?.buckets?.map(({ key }) => key) ?? [];

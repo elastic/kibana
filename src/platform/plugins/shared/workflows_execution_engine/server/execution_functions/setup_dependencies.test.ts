@@ -52,6 +52,7 @@ describe('setupDependencies', () => {
 
   const mockConfig: WorkflowsExecutionEngineConfig = {
     enabled: true,
+    storage: { source: 'plain_index', dataRetention: '90d' },
     eventDriven: { enabled: true, logEvents: true, maxChainDepth: 10 },
     maxWorkflowDepth: 10,
     logging: {
@@ -96,7 +97,11 @@ describe('setupDependencies', () => {
       getStepGraph: jest.fn().mockReturnThis(),
       topologicalOrder: ['entry-node'],
       getNode: jest.fn().mockReturnValue({ id: 'entry-node' }),
-      getNodeStack: jest.fn().mockReturnValue(['entry-node']),
+      getNodeStack: jest.fn().mockReturnValue([]),
+      getAllNodes: jest.fn().mockReturnValue([]),
+      getEdges: jest.fn().mockReturnValue([]),
+      getInnerStepIds: jest.fn().mockReturnValue(new Set()),
+      getWorkflowLevelTimeout: jest.fn(),
     };
     (WorkflowGraph.fromWorkflowDefinition as jest.Mock) = jest
       .fn()

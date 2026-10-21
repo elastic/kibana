@@ -9,6 +9,7 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { NOTIFICATIONS_REQUESTER_ID } from '@kbn/actions-plugin/server';
 import type { PluginStartContract as ActionsStart } from '@kbn/actions-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
+import { brandSpaceId } from '@kbn/core-spaces-common';
 import {
   csvFilename,
   reportEmailHtml,
@@ -155,7 +156,7 @@ export const sendRumReportEmail = async ({
   const result = await unsecured.execute({
     requesterId: NOTIFICATIONS_REQUESTER_ID,
     id: schedule.connectorId,
-    spaceId,
+    spaceId: brandSpaceId(spaceId),
     params: {
       to: schedule.to,
       subject: `${report.title} (${rangeFrom.slice(0, 10)} - ${rangeTo.slice(0, 10)})`,
@@ -204,7 +205,7 @@ export const sendRumReportEmailTest = async ({
   const result = await unsecured.execute({
     requesterId: NOTIFICATIONS_REQUESTER_ID,
     id: connectorId,
-    spaceId,
+    spaceId: brandSpaceId(spaceId),
     params: {
       to,
       subject: 'UX report email test',

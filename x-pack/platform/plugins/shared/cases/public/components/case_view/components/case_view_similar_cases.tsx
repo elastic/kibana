@@ -6,15 +6,27 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 
-import { EuiFlexItem, EuiFlexGroup, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import { useGetSimilarCases, initialData } from '../../../containers/use_get_similar_cases';
-import type { CaseUI } from '../../../../common/ui/types';
+import type { CaseUI, SortOrder } from '../../../../common/ui/types';
+import { SortFieldCase } from '../../../../common/ui/types';
 
-import { CASES_TABLE_PER_PAGE_VALUES, type EuiBasicTableOnChange } from '../../all_cases/types';
+import {
+  CASES_TABLE_PER_PAGE_VALUES,
+  type CasesColumnSelection,
+  type EuiBasicTableOnChange,
+} from '../../all_cases/types';
+import { ColumnsPopover } from '../../all_cases/components/columns_popover';
 import { SimilarCasesTable } from '../../similar_cases/table';
-import { useCasesConfig } from '../../../common/lib/kibana';
-import { SidebarToggleButton } from '../../cases_redesign/case_view/components/sidebar/sidebar_toggle_button';
+import { useSimilarCasesColumnsSelection } from '../../similar_cases/use_similar_cases_columns_selection';
+import { SidebarToggleButton } from './sidebar/sidebar_toggle_button';
+
+const DEFAULT_SORT_FIELD = SortFieldCase.createdAt;
+const DEFAULT_SORT_ORDER: SortOrder = 'desc';
+
+const isSortFieldCase = (field: unknown): field is SortFieldCase =>
+  Object.values<unknown>(SortFieldCase).includes(field);
 
 interface CaseViewSimilarCasesProps {
   caseData: CaseUI;
@@ -22,21 +34,57 @@ interface CaseViewSimilarCasesProps {
 
 export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) => {
   const { euiTheme } = useEuiTheme();
-  const { detailsRedesignEnabled } = useCasesConfig();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(CASES_TABLE_PER_PAGE_VALUES[0]);
+  const [sortField, setSortField] = useState<SortFieldCase>(DEFAULT_SORT_FIELD);
+  const [sortOrder, setSortOrder] = useState<SortOrder>(DEFAULT_SORT_ORDER);
+
+  const { pickerColumns, tableColumns, setPickerColumns } = useSimilarCasesColumnsSelection();
 
   const { data = initialData, isLoading: isLoadingCases } = useGetSimilarCases({
     caseId: caseData.id,
     page: pageIndex + 1,
     perPage: pageSize,
     enabled: true,
+    sortField,
+    sortOrder,
   });
 
   const tableOnChangeCallback = useCallback(({ page, sort }: EuiBasicTableOnChange) => {
-    setPageIndex(page.index);
-    setPageSize(page.size);
+    if (sort && isSortFieldCase(sort.field)) {
+      setSortField(sort.field);
+      setSortOrder(sort.direction);
+    }
+    if (page) {
+      setPageIndex(page.index);
+      setPageSize(page.size);
+    }
   }, []);
+
+  const onPickerColumnsChange = useCallback(
+    (columns: CasesColumnSelection[]) => {
+      setPickerColumns(columns);
+
+      const isSortedColumnHidden = columns.some(
+        ({ field, isChecked }) => field === sortField && !isChecked
+      );
+
+      if (!isSortedColumnHidden) {
+        return;
+      }
+
+      const isDefaultSort = sortField === DEFAULT_SORT_FIELD && sortOrder === DEFAULT_SORT_ORDER;
+
+      if (isDefaultSort) {
+        return;
+      }
+
+      setSortField(DEFAULT_SORT_FIELD);
+      setSortOrder(DEFAULT_SORT_ORDER);
+      setPageIndex(0);
+    },
+    [setPickerColumns, sortField, sortOrder]
+  );
 
   const pagination = useMemo(
     () => ({
@@ -48,26 +96,41 @@ export const CaseViewSimilarCases = ({ caseData }: CaseViewSimilarCasesProps) =>
     [data.total, pageIndex, pageSize]
   );
 
+  const sorting = useMemo(
+    () => ({ sort: { field: sortField, direction: sortOrder } }),
+    [sortField, sortOrder]
+  );
+
   return (
-    <EuiFlexGroup direction="column" gutterSize="none">
-      {detailsRedesignEnabled && (
-        <EuiFlexItem grow={false} css={{ paddingTop: euiTheme.size.s }}>
-          <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-            <EuiFlexItem grow={false}>
-              <SidebarToggleButton />
-            </EuiFlexItem>
-          </EuiFlexGroup>
+    // A plain block wrapper stops the parent column flex item from stretching the toolbar
+    // and the table vertically when the sidebar is taller than the table content.
+    <div>
+      <EuiFlexGroup
+        justifyContent="spaceBetween"
+        gutterSize="s"
+        alignItems="center"
+        css={{ paddingTop: euiTheme.size.s }}
+        data-test-subj="similar-cases-table-toolbar"
+      >
+        <EuiFlexItem grow={false}>
+          <ColumnsPopover
+            selectedColumns={pickerColumns}
+            onSelectedColumnsChange={onPickerColumnsChange}
+          />
         </EuiFlexItem>
-      )}
-      <EuiFlexItem>
-        <SimilarCasesTable
-          isLoading={isLoadingCases}
-          cases={data.cases}
-          pagination={pagination}
-          onChange={tableOnChangeCallback}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        <EuiFlexItem grow={false}>
+          <SidebarToggleButton />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+      <SimilarCasesTable
+        isLoading={isLoadingCases}
+        cases={data.cases}
+        pagination={pagination}
+        onChange={tableOnChangeCallback}
+        selectedColumns={tableColumns}
+        sorting={sorting}
+      />
+    </div>
   );
 };
 

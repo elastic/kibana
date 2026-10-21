@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { useAppDependencies } from '../../../app_dependencies';
+import { useGetTransformCpsEnabled } from '../../../hooks/use_get_transform_cps_enabled';
 
 import { useFormField } from '../state_management/selectors/form_field';
 
@@ -168,8 +169,12 @@ export const EditTransformProjectScope: FC<EditTransformProjectScopeProps> = ({
 }) => {
   const { cps } = useAppDependencies();
   const cpsManager = cps?.cpsManager;
+  const canCheckProjectScope = Boolean(cps?.isTierEligible && cpsManager);
+  const { data: isTransformCpsEnabled } = useGetTransformCpsEnabled({
+    enabled: canCheckProjectScope,
+  });
 
-  if (!cps?.isTierEligible || !cpsManager) {
+  if (!canCheckProjectScope || isTransformCpsEnabled !== true || !cpsManager) {
     return null;
   }
 

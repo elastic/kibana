@@ -10,8 +10,9 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { AgentCreateRequest, ConversationTemplate } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from './conversations';
 import type { StaticToolRegistration, ToolRegistry } from './tools';
-import type { AttachmentTypeDefinition } from './attachments';
+import type { AttachmentTypeDefinition, AttachmentPublicClient } from './attachments';
 import type { RendererTypeDefinition } from './renderers';
+import type { ConversationEventTypeDefinition } from './conversation_events';
 import type { SkillDefinition } from './skills';
 import type { SkillRegistry } from './skills/registry';
 import type {
@@ -61,6 +62,16 @@ export interface AttachmentsSetup {
    * Register an attachment type to be available in agentBuilder.
    */
   registerType(attachmentType: AttachmentTypeDefinition): void;
+}
+
+/**
+ * AgentBuilder attachments service's start contract.
+ */
+export interface AttachmentsStart {
+  /**
+   * Returns an attachment client scoped to the given request's user and space.
+   */
+  getScopedClient(opts: { request: KibanaRequest }): Promise<AttachmentPublicClient>;
 }
 
 /**
@@ -154,11 +165,15 @@ export interface AgentsStart {
    * Optional `availability` is kept in memory and keyed by `agent.id` (never persisted). Use the
    * same {@link AgentAvailabilityConfig} shape as built-in agents. Prefer passing it on every
    * `ensure` call for that id.
+   *
+   * Optional `hidden` is kept in memory the same way and overrides the default UI visibility
+   * (system-created non-chat agents are hidden from the agent picker and management list).
    */
   ensure: (opts: {
     spaceId: string;
     agent: AgentCreateRequest;
     availability?: AgentAvailabilityConfig;
+    hidden?: boolean;
   }) => Promise<void>;
 }
 
@@ -218,6 +233,33 @@ export interface RuntimeStart {
 }
 
 /**
+ * Opt-in to the `ai.conversation.updated` workflow trigger for conversations of given templates.
+ */
+export interface ConversationUpdatedOptIn {
+  /**
+   * Templates whose conversations emit the trigger. Writes to conversations of other templates,
+   * or without a template, never run `isEnabled`.
+   */
+  templateIds: readonly string[];
+  /**
+   * Resolves whether the trigger is emitted for the request that performed the write.
+   */
+  isEnabled: (request: KibanaRequest) => Promise<boolean>;
+}
+
+/**
+ * AgentBuilder conversations service's setup contract.
+ */
+export interface ConversationsSetup {
+  /**
+   * Opts in to the `ai.conversation.updated` workflow trigger. A conversation write emits it when
+   * an opt-in registered for the conversation's template resolves `true` for the request that
+   * performed it. Without a matching opt-in, the trigger is never emitted.
+   */
+  enableUpdatedTrigger(optIn: ConversationUpdatedOptIn): void;
+}
+
+/**
  * AgentBuilder conversations service's start contract.
  */
 export interface ConversationsStart {
@@ -238,6 +280,12 @@ export interface TopSnippetsConfig {
 /**
  * Setup contract of the agentBuilder plugin.
  */
+/** AgentBuilder conversation events setup contract. */
+export interface ConversationEventsSetup {
+  /** Register a custom conversation event type. */
+  register(definition: ConversationEventTypeDefinition): void;
+}
+
 export interface AgentBuilderPluginSetup {
   /**
    * Agents setup contract, which can be used to register built-in agents.
@@ -256,9 +304,17 @@ export interface AgentBuilderPluginSetup {
    */
   conversationTemplates: ConversationTemplatesSetup;
   /**
+   * Conversations setup contract, which can be used to opt in to conversation workflow triggers.
+   */
+  conversations: ConversationsSetup;
+  /**
    * Renderers setup contract, which can be used to register renderer types.
    */
   renderers: RenderersSetup;
+  /**
+   * Conversation events setup contract, which can be used to register custom event types.
+   */
+  conversationEvents: ConversationEventsSetup;
   /**
    * Hooks setup contract, which can be used to register lifecycle event hooks.
    */
@@ -308,9 +364,13 @@ export interface AgentBuilderPluginStart {
    */
   runtime: RuntimeStart;
   /**
-   * Conversations service (read-only), to list and retrieve conversations.
+   * Conversations service, to list, retrieve, and append events to conversations.
    */
   conversations: ConversationsStart;
+  /**
+   * Attachments service, to manage conversation attachments.
+   */
+  attachments: AttachmentsStart;
   /**
    * Conversation templates service, to look up registered templates.
    */

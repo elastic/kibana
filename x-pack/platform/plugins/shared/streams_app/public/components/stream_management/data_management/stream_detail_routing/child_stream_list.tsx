@@ -20,6 +20,7 @@ import {
   EuiText,
   useEuiTheme,
   EuiButtonGroup,
+  EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
@@ -191,7 +192,6 @@ export function ChildStreamList({ availableStreams = [] }: { availableStreams?: 
             idSelected={selectedChildStreamMode}
             onChange={handleModeChange}
             buttonSize="compressed"
-            color="primary"
             data-test-subj="streamsAppChildStreamTypeSelector"
           />
         </div>
@@ -340,21 +340,28 @@ function IngestModeChildrenList({ availableStreams }: { availableStreams: string
               </EuiFlexItem>
             </>
           )}
-          <EuiFlexItem grow={false}>
-            <EuiToolTip
-              position="bottom"
-              content={getReasonDisabledCreateButton(canManageRoutingRules, isAtMaxNestingLevel)}
-            >
-              <CreateButtonComponent
-                size="s"
-                data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
-                onClick={createNewRule}
-                disabled={!canCreateRoutingRules || isAtMaxNestingLevel}
+          {/* Wait for AI features to resolve so the button type doesn't swap and remount under a click. */}
+          {aiFeatures?.loading ? (
+            <EuiFlexItem grow={false}>
+              <EuiLoadingSpinner size="m" />
+            </EuiFlexItem>
+          ) : (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                position="bottom"
+                content={getReasonDisabledCreateButton(canManageRoutingRules, isAtMaxNestingLevel)}
               >
-                {createPartitionText}
-              </CreateButtonComponent>
-            </EuiToolTip>
-          </EuiFlexItem>
+                <CreateButtonComponent
+                  size="s"
+                  data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
+                  onClick={createNewRule}
+                  disabled={!canCreateRoutingRules || isAtMaxNestingLevel}
+                >
+                  {createPartitionText}
+                </CreateButtonComponent>
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
         {showAdditionalChargesCallout && (
           <EuiFlexItem grow={false}>

@@ -12,11 +12,11 @@
  */
 
 /**
- * Managed workflow id, installed globally by the pnd plugin at start via installStatic /
- * PND_WATCH_WORKFLOW_IDS. The eval asserts this exact document is present — it does not create or
+ * Managed workflow id, installed globally by the alertzero plugin at start via installStatic /
+ * ALERTZERO_WATCH_WORKFLOW_IDS. The eval asserts this exact document is present — it does not create or
  * carry its own copy, so eval and production cannot drift.
  */
-export { PND_RULE_CREATION_WORKFLOW_ID as RULE_CREATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+export { ALERTZERO_RULE_CREATION_WORKFLOW_ID as RULE_CREATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 
 /**
  * Public workflows_management API version (`Elastic-Api-Version` header). Inlined: the source of
@@ -24,7 +24,7 @@ export { PND_RULE_CREATION_WORKFLOW_ID as RULE_CREATION_WORKFLOW_ID } from '@kbn
  */
 export const WORKFLOWS_API_VERSION = '2023-10-31';
 
-/** Step ids from the managed workflow yaml (@kbn/workflows managed/definitions/pnd/rule_creation.yaml). */
+/** Step ids from the managed workflow yaml (@kbn/workflows managed/definitions/alertzero/rule_creation.yaml). */
 export const DRAFT_STEP_ID = 'draft_creation';
 export const REVIEW_STEP_ID = 'review_creation';
 
@@ -35,8 +35,8 @@ export const REVIEW_STEP_ID = 'review_creation';
  */
 export const RULE_CREATION_TOOL_ID = 'security.create_detection_rule';
 
-/**
- * Skill the workflow's `ai.agent` step is instructed to route through. Consumed by the
- * Tool Routing evaluator (src/evaluators/tool_routing.ts).
- */
+/** Agent Builder tool the detection-rule-edit skill directs the agent to call after drafting. */
+export const RULE_PREVIEW_TOOL_ID = 'security.run_rule_preview';
+
+/** Skill the workflow's `ai.agent` step is instructed to route through. */
 export const RULE_CREATION_SKILL_ID = 'detection-rule-edit';

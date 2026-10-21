@@ -101,15 +101,6 @@ export const toNavigationItems = (
     );
   };
 
-  // Title/icon for `renderAs: 'home'` are normalized upstream in `applyCustomization`.
-  // TODO: remove the `renderAs: 'home'` special-casing entirely in favor of
-  // solution-owned nav tree config: https://github.com/elastic/kibana/issues/272291
-  if (!primaryNodes.some((node) => node.renderAs === 'home')) {
-    warnOnce(
-      `No "home" node found in primary nodes. There should be a node with renderAs: "home".`
-    );
-  }
-
   // TODO: The visibility checks below (sideNavStatus === 'hidden', empty panel-opener pruning,
   // section-header flattening) duplicate logic already handled by `getRenderableNodes` in
   // `@kbn/core-chrome-browser-internal`. Once `getNavigation$()` passes a pre-pruned tree, this

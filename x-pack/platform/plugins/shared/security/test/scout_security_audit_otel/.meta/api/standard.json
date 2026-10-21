@@ -1,5 +1,5 @@
 {
-  "sha1": "3d12d1c19ccfbc61072ccdb9c91ae0efde7fb920",
+  "sha1": "962cb19337074362182b623e6c9ea38eab2022b9",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -42,8 +42,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 79,
-        "column": 23
+        "line": 72,
+        "column": 47
       }
     },
     {
@@ -56,7 +56,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 144,
+        "line": 137,
         "column": 18
       }
     },
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 188,
-        "column": 18
+        "line": 181,
+        "column": 9
       }
     },
     {
@@ -84,8 +84,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 236,
-        "column": 24
+        "line": 234,
+        "column": 18
       }
     },
     {
@@ -98,8 +98,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/security/test/scout_security_audit_otel/api/tests/audit_log.spec.ts",
-        "line": 285,
-        "column": 20
+        "line": 278,
+        "column": 28
       }
     }
   ]

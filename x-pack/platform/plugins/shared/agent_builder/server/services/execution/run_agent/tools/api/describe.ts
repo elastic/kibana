@@ -8,17 +8,12 @@
 import { z } from '@kbn/zod/v4';
 import { stringify as stringifyYaml } from 'yaml';
 import { ToolType } from '@kbn/agent-builder-common';
+import type { ApiTarget } from '@kbn/agent-builder-common';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { InternalBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import {
-  EXPANDABLE_KEY,
-  getUnsupportedReason,
-  loadApi,
-  targetSchema,
-  toDescribedSchema,
-} from '../../api';
-import type { ApiRegistryDefinition, ApiTarget } from '../../api';
+import { EXPANDABLE_KEY, loadApi, targetSchema, toDescribedSchema } from '../../api';
+import type { ApiRegistryDefinition } from '../../api';
 import { apiFailureToErrorResult } from './errors';
 
 export interface ApiDescribeResultData {
@@ -30,7 +25,6 @@ export interface ApiDescribeResultData {
   destructive: boolean;
   params_schema_yaml: string;
   expandable_types: string[];
-  unsupported_reason?: string;
 }
 
 const describeSchema = z.object({
@@ -38,12 +32,21 @@ const describeSchema = z.object({
   api: z
     .string()
     .describe(
-      `The API identifier returned by the ${internalTools.discoverApis} tool, formed from the namespace ` +
-        'and name (e.g. "indices.create", "bulk", "cluster.health").'
+      'The API identifier, formed from the namespace and name (e.g. "indices.create", "bulk", ' +
+        '"cluster.health").'
     ),
 });
 
-export const createDescribeApiTool = (): InternalBuiltinToolDefinition<typeof describeSchema> => {
+export const createDescribeApiTool = ({
+  discoveryEnabled,
+}: {
+  discoveryEnabled: boolean;
+}): InternalBuiltinToolDefinition<typeof describeSchema> => {
+  const identifierGuidance = discoveryEnabled
+    ? `Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identifier, then call`
+    : `The \`api\` identifier comes from the instruction you are following, or from what you already
+know the target exposes. Describe it here to confirm it exists and to see its params, then call`;
+
   return {
     id: internalTools.describeApi,
     type: ToolType.builtin,
@@ -54,8 +57,6 @@ Returns:
   interpolates is one of the parameters below, and must be supplied for the call to run.
 - \`destructive\`: whether the operation modifies or deletes existing data. Prefer a non-destructive
   alternative when one exists.
-- \`unsupported_reason\`: present only when the operation cannot be executed at all — look for
-  another operation that does the same job.
 - A YAML document describing every accepted parameter with its type and description. It is one flat
   set: pass them all in a single \`params\` map and the routing into the URL path, query string, and
   request body is handled for you.
@@ -69,7 +70,7 @@ Returns:
 - \`expandable_types\`: the name of every type the schema stubbed, so you can see up front what
   still has to be expanded before you can fill it in.
 
-Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identifier, then call
+${identifierGuidance}
 \`${internalTools.executeApi}\` with the same \`target\` and \`api\` plus the \`params\` from this schema.`,
     schema: describeSchema,
     handler: async ({ target, api }, { logger }) => {
@@ -82,6 +83,7 @@ Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identif
               target,
               api,
               logger,
+              discoveryEnabled,
             }),
           ],
         };
@@ -113,8 +115,6 @@ Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identif
         }
       }
 
-      const unsupportedReason = getUnsupportedReason(definition);
-
       const data: ApiDescribeResultData = {
         target,
         api,
@@ -124,7 +124,6 @@ Use the \`${internalTools.discoverApis}\` tool first to find the \`api\` identif
         destructive: definition.destructive,
         params_schema_yaml: paramsYaml,
         expandable_types: expandableTypes,
-        ...(unsupportedReason === undefined ? {} : { unsupported_reason: unsupportedReason }),
       };
 
       return {

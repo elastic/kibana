@@ -22,7 +22,9 @@ export const DeleteMonitoringEngineRequestQuery = lazySchema(() =>
     /**
      * Whether to delete all the privileged user data
      */
-    data: BooleanFromString.optional().default(false),
+    data: BooleanFromString.optional()
+      .default(false)
+      .describe('Whether to delete all the privileged user data'),
   })
 );
 export type DeleteMonitoringEngineRequestQuery = z.infer<typeof DeleteMonitoringEngineRequestQuery>;

@@ -1,5 +1,5 @@
 {
-  "sha1": "1891485aadfd9c545d4d4e44c29074155bcf0a48",
+  "sha1": "715ca746a5fddc8a73c9b5e9d44b99d14e53b212",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -15,6 +15,97 @@
         "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/global.setup.ts",
         "line": 5,
         "column": 1
+      }
+    },
+    {
+      "id": "c8a4f8dffc24ad5-153376e0d1f07f1",
+      "title": "Uptime accessibility overview page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/accessibility.spec.ts",
+        "line": 55,
+        "column": 61
+      }
+    },
+    {
+      "id": "c8a4f8dffc24ad5-c08a80b3e8c3187",
+      "title": "Uptime accessibility overview page with expanded monitor detail",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/accessibility.spec.ts",
+        "line": 58,
+        "column": 8
+      }
+    },
+    {
+      "id": "c8a4f8dffc24ad5-ff5c3c716331ca2",
+      "title": "Uptime accessibility overview alert popover controls",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/accessibility.spec.ts",
+        "line": 62,
+        "column": 8
+      }
+    },
+    {
+      "id": "c8a4f8dffc24ad5-4767caa2aba6bc5",
+      "title": "Uptime accessibility overview alert popover controls nested content",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/accessibility.spec.ts",
+        "line": 64,
+        "column": 23
+      }
+    },
+    {
+      "id": "c8a4f8dffc24ad5-25df96a816936e0",
+      "title": "Uptime accessibility detail page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/accessibility.spec.ts",
+        "line": 68,
+        "column": 56
+      }
+    },
+    {
+      "id": "c8a4f8dffc24ad5-edfe9577f8a72ff",
+      "title": "Uptime accessibility settings page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/accessibility.spec.ts",
+        "line": 71,
+        "column": 13
+      }
+    },
+    {
+      "id": "c8a4f8dffc24ad5-9ade239a9ed5c80",
+      "title": "Uptime accessibility certificates page",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/uptime/test/scout/ui/tests/accessibility.spec.ts",
+        "line": 74,
+        "column": 73
       }
     },
     {

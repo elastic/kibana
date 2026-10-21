@@ -16,9 +16,21 @@ import { expect } from '@kbn/scout/ui';
  */
 export class BackgroundSearchManagementPage {
   private readonly table: Locator;
+  private readonly actionsMenuButton: Locator;
+  private readonly actionsMenu: Locator;
+  private readonly inspectCloseButton: Locator;
+  private readonly renameInput: Locator;
+  private readonly renameCancelButton: Locator;
+  private readonly deleteCancelButton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.table = this.page.testSubj.locator('searchSessionsMgmtUiTable');
+    this.actionsMenuButton = this.table.getByTestId('sessionManagementActionsCol');
+    this.actionsMenu = this.page.getByRole('dialog', { name: 'Background Search actions' });
+    this.inspectCloseButton = this.page.testSubj.locator('euiFlyoutCloseButton');
+    this.renameInput = this.page.testSubj.locator('editNameInput');
+    this.renameCancelButton = this.page.testSubj.locator('cancelEditName');
+    this.deleteCancelButton = this.page.testSubj.locator('confirmModalCancelButton');
   }
 
   async goTo() {
@@ -69,7 +81,7 @@ export class BackgroundSearchManagementPage {
   }
 
   async renameRow(newName: string) {
-    await this.table.getByTestId('sessionManagementActionsCol').click();
+    await this.actionsMenuButton.click();
     await this.page.testSubj.click('sessionManagementPopoverAction-rename');
     const input = this.page.testSubj.locator('editNameInput');
     await input.fill(newName);
@@ -81,5 +93,40 @@ export class BackgroundSearchManagementPage {
 
   async viewRow() {
     await this.table.getByTestId('sessionManagementNameLink').click();
+  }
+
+  async openActionsMenu() {
+    await this.actionsMenuButton.click();
+    await this.actionsMenu.waitFor({ state: 'visible' });
+  }
+
+  async openInspect() {
+    await this.page.testSubj.click('sessionManagementPopoverAction-inspect');
+    await this.inspectCloseButton.waitFor({ state: 'visible' });
+  }
+
+  async closeInspect() {
+    await this.inspectCloseButton.click();
+    await this.inspectCloseButton.waitFor({ state: 'hidden' });
+  }
+
+  async openRename() {
+    await this.page.testSubj.click('sessionManagementPopoverAction-rename');
+    await this.renameInput.waitFor({ state: 'visible' });
+  }
+
+  async cancelRename() {
+    await this.renameCancelButton.click();
+    await this.renameInput.waitFor({ state: 'hidden' });
+  }
+
+  async openDelete() {
+    await this.page.testSubj.click('sessionManagementPopoverAction-delete');
+    await this.deleteCancelButton.waitFor({ state: 'visible' });
+  }
+
+  async cancelDelete() {
+    await this.deleteCancelButton.click();
+    await this.deleteCancelButton.waitFor({ state: 'hidden' });
   }
 }

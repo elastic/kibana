@@ -42,7 +42,7 @@ import type {
   CloseReasonValidator,
 } from './types';
 import { CasesClientFactory } from './client/factory';
-import type { CasesClientSource } from './client/types';
+import type { CasesClientSource, GetCasesClientOptions } from './client/types';
 import { getCasesKibanaFeatures } from './features';
 import { registerRoutes } from './routes/api/register_routes';
 import { getExternalRoutes } from './routes/api/get_external_routes';
@@ -60,6 +60,7 @@ import type { ConfigType } from './config';
 import { registerConnectorTypes } from './connectors';
 import { registerSavedObjects } from './saved_object_types';
 import type { ServerlessProjectType } from '../common/constants/types';
+import { SERVERLESS_PROJECT_TYPES } from '../common/constants/owners';
 
 import { IncrementalIdTaskManager } from './tasks/incremental_id/incremental_id_task_manager';
 import { TemplatesMigrationTaskManager } from './tasks/templates_migration/templates_migration_task_manager';
@@ -77,6 +78,7 @@ import { registerCaseWorkflowSteps } from './workflows';
 import { registerCasesAgentBuilderTools } from './agent_builder';
 import { registerCaseWorkflowTriggers } from './workflows/triggers';
 import { registerCasesWorkflowEventBridge } from './workflows/triggers/event_bridge';
+import { CasesWorkflowRunService } from './workflows/execution/service';
 import { initUiSettings } from './ui_settings';
 
 export class CasePlugin
@@ -168,7 +170,7 @@ export class CasePlugin
       plugins.features.registerKibanaFeature(casesFeatures.v3);
     }
 
-    this.casesEventBus = new CasesEventBus();
+    this.casesEventBus = new CasesEventBus(this.logger);
 
     registerSavedObjects({
       core,
@@ -223,6 +225,37 @@ export class CasePlugin
 
     const router = core.http.createRouter<CasesRequestHandlerContext>();
     this.usageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+    const getSpaceId = (request?: KibanaRequest) => {
+      if (!request) {
+        return DEFAULT_SPACE_ID;
+      }
+
+      return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    };
+    const workflowRunService =
+      this.caseConfig.runWorkflows.enabled && plugins.workflowsManagement
+        ? new CasesWorkflowRunService({
+            management: plugins.workflowsManagement.management,
+            logger: this.logger,
+            audit: plugins.security.audit,
+            attachmentTypeRegistry: this.unifiedAttachmentTypeRegistry,
+          })
+        : undefined;
+
+    // Resolves a request-scoped workflow run context. Defined here and threaded directly into
+    // the route so that `getCasesWorkflowRunContext` does not need to live on `CaseRequestContext`
+    // (which would expose it to all ~20 plugins that depend on the `cases` context).
+    const getWorkflowRunContext = workflowRunService
+      ? async (request: KibanaRequest) => {
+          const [coreStart] = await core.getStartServices();
+          return this.clientFactory.createWorkflowRunContext({
+            request,
+            scopedClusterClient: coreStart.elasticsearch.client.asScoped(request).asCurrentUser,
+            savedObjectsService: coreStart.savedObjects,
+            clientSource: 'rest_api',
+          });
+        }
+      : undefined;
 
     registerRoutes({
       router,
@@ -232,7 +265,13 @@ export class CasePlugin
           docLinks: core.docLinks,
           config: this.caseConfig,
         }),
-        ...getInternalRoutes(this.userProfileService, this.caseConfig),
+        ...getInternalRoutes(
+          this.userProfileService,
+          this.caseConfig,
+          workflowRunService && getWorkflowRunContext
+            ? { service: workflowRunService, getSpaceId, getWorkflowRunContext }
+            : undefined
+        ),
       ],
       logger: this.logger,
       kibanaVersion: this.kibanaVersion,
@@ -244,24 +283,16 @@ export class CasePlugin
 
     const getCasesClient = (
       clientSource: CasesClientSource
-    ): ((request: KibanaRequest) => Promise<CasesClient>) => {
-      return async (request: KibanaRequest) => {
+    ): ((request: KibanaRequest, options?: GetCasesClientOptions) => Promise<CasesClient>) => {
+      return async (request: KibanaRequest, options?: GetCasesClientOptions) => {
         const [coreStart] = await core.getStartServices();
-        return this.getCasesClientWithRequest(coreStart, clientSource)(request);
+        return this.getCasesClientWithRequest(coreStart, clientSource)(request, options);
       };
     };
 
     const getActionsClient = async (request: KibanaRequest) => {
       const [, pluginsStart] = await core.getStartServices();
       return pluginsStart.actions.getActionsClientWithRequest(request);
-    };
-
-    const getSpaceId = (request?: KibanaRequest) => {
-      if (!request) {
-        return DEFAULT_SPACE_ID;
-      }
-
-      return plugins.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
     };
 
     const serverlessProjectType = this.isServerless
@@ -291,7 +322,11 @@ export class CasePlugin
     );
     registerCaseWorkflowTriggers(plugins.workflowsExtensions);
 
-    if (plugins.agentBuilder) {
+    const isCasesAgentBuilderAllowed =
+      !this.isServerless ||
+      (!!serverlessProjectType && SERVERLESS_PROJECT_TYPES.includes(serverlessProjectType));
+
+    if (plugins.agentBuilder && isCasesAgentBuilderAllowed) {
       registerCasesAgentBuilderTools(
         plugins.agentBuilder,
         getCasesClient('agent_builder'),
@@ -402,6 +437,10 @@ export class CasePlugin
         //    so deleting a data view in space `analytics-1` from a `/reset`
         //    request that arrived in `default` 404s on the existence check
         //    (even with `force: true`).
+        //  - The reconciliation task lists the hidden `space` SOs to delete
+        //    analytics documents of deleted spaces. Only opted in when Spaces
+        //    is enabled: it registers the type, and opting in an unregistered
+        //    type throws.
         // The cases SO types are hidden, so they must be opted in
         // explicitly. `index-pattern` is a globally-registered SO type
         // (data-views plugin); opting it in here grants the internal client
@@ -411,6 +450,7 @@ export class CasePlugin
         // unified `cases-attachments` type is registered unconditionally
         // since #275225), so both are opted in here and the attachments
         // reconciliation runner always walks both source types.
+        const spacesEnabled = plugins.spaces != null;
         const v2InternalRepository = core.savedObjects.createInternalRepository([
           CASE_SAVED_OBJECT,
           CASE_USER_ACTION_SAVED_OBJECT,
@@ -419,6 +459,7 @@ export class CasePlugin
           CASE_TEMPLATE_SAVED_OBJECT,
           CASE_FIELD_DEFINITION_SAVED_OBJECT,
           'index-pattern',
+          ...(spacesEnabled ? ['space'] : []),
         ]);
         const v2InternalSavedObjectsClient = new SavedObjectsClient(v2InternalRepository);
         void this.casesAnalyticsV2Service.start({
@@ -426,6 +467,7 @@ export class CasePlugin
           taskManager: plugins.taskManager,
           internalSavedObjectsClient: v2InternalSavedObjectsClient,
           dataViewsService: plugins.dataViews,
+          spacesEnabled,
         });
       }
     }
@@ -559,7 +601,7 @@ export class CasePlugin
 
   private getCasesClientWithRequest =
     (core: CoreStart, clientSource: CasesClientSource) =>
-    async (request: KibanaRequest): Promise<CasesClient> => {
+    async (request: KibanaRequest, options?: GetCasesClientOptions): Promise<CasesClient> => {
       const client = core.elasticsearch.client;
 
       return this.clientFactory.create({
@@ -567,6 +609,7 @@ export class CasePlugin
         scopedClusterClient: client.asScoped(request).asCurrentUser,
         savedObjectsService: core.savedObjects,
         clientSource,
+        actionSource: options?.actionSource,
       });
     };
 }

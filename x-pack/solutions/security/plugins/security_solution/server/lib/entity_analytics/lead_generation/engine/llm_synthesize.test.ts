@@ -33,7 +33,8 @@ const { llmSynthesizeBatch, __testables } = jest.requireActual('./llm_synthesize
   llmSynthesizeBatch: typeof import('./llm_synthesize').llmSynthesizeBatch;
   __testables: typeof import('./llm_synthesize').__testables;
 };
-const { formatLeadsPayload, formatRiskEscalation, formatRelatedEntities } = __testables;
+const { formatLeadsPayload, formatRiskEscalation, formatRelatedEntities, formatPromotionReason } =
+  __testables;
 
 const createMockEntity = (name: string, type = 'user'): LeadEntity => {
   const id = `${type}:${name}`;
@@ -276,7 +277,7 @@ describe('llmSynthesizeBatch', () => {
         title: 'Threat',
         byline: 'Byline',
         description: 'Description',
-        tags: ['Credential Access', 'T1078', 'Brute Force', 'T1110.003'],
+        tags: ['Credential Access', 'T1078', 'Brute Force', 'T1110.003', 'AML.T0044'],
         recommendations: ['rec'],
       },
     ];
@@ -286,6 +287,7 @@ describe('llmSynthesizeBatch', () => {
     expect(results[0].tags).toEqual(['Credential Access', 'Brute Force']);
     expect(results[0].tags).not.toContain('T1078');
     expect(results[0].tags).not.toContain('T1110.003');
+    expect(results[0].tags).not.toContain('AML.T0044');
   });
 
   it('caps tags at 6 and recommendations at 5', async () => {
@@ -394,6 +396,46 @@ describe('formatLeadsPayload', () => {
 
     expect(payload).toContain('Related entities:');
     expect(payload).toContain('administers host "web-01"');
+  });
+
+  it('includes the Promotion reason line when the candidate was promoted', () => {
+    const entity: ScoredEntity = {
+      ...createScoredEntity('alice', 2),
+      promotionReason: 'administers a Critical-risk host',
+      promotionConfidence: 'high',
+    };
+
+    const payload = formatLeadsPayload([entity]);
+
+    expect(payload).toContain(
+      'Promotion reason (confidence: high): administers a Critical-risk host'
+    );
+  });
+
+  it('omits the Promotion reason line for a normally-scored candidate', () => {
+    const entities = [createScoredEntity('alice', 8)];
+
+    const payload = formatLeadsPayload(entities);
+
+    expect(payload).not.toContain('Promotion reason');
+  });
+});
+
+describe('formatPromotionReason', () => {
+  it('returns an empty string when the candidate has no promotion reason', () => {
+    expect(formatPromotionReason(createScoredEntity('alice', 8))).toBe('');
+  });
+
+  it('renders the reason with confidence when present', () => {
+    const entity: ScoredEntity = {
+      ...createScoredEntity('alice', 2),
+      promotionReason: 'owns a high-criticality database',
+      promotionConfidence: 'medium',
+    };
+
+    expect(formatPromotionReason(entity)).toBe(
+      '  Promotion reason (confidence: medium): owns a high-criticality database'
+    );
   });
 });
 

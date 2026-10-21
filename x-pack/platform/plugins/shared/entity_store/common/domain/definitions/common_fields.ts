@@ -100,12 +100,6 @@ export const getEntityFieldsDescriptions = (rootField?: EntityType) => {
     newestValue({ source: `${prefix}.sub_type`, destination: 'entity.sub_type' }),
     newestValue({ source: `${prefix}.url`, destination: 'entity.url' }),
 
-    // PROVENANCE ------------------------------------------------------------
-    managedValue({
-      destination: ENTITY_CREATED_BY_FIELD,
-      mapping: { type: 'keyword' },
-    }),
-
     // ATTRIBUTES ------------------------------------------------------------
     managedValue({
       destination: 'entity.attributes.watchlists',

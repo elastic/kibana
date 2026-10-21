@@ -19,6 +19,8 @@ import type { AlertRuleFromVisUIActionData } from '@kbn/alerts-ui-shared';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { isTimeChart } from '../../../common/helpers';
 import type { CommonXYDataLayerConfig } from '../../../common';
+import type { AxisFormatPolicy } from '../../../common/axis_format_policy_types';
+import { getDataMemberFactor, toSourceUnitValue } from '../../../common/axis_unit_conversion';
 import type { DatatablesWithFormatInfo, LayersFieldFormats } from '../../helpers';
 import type { MultiFilterEvent } from '../../types';
 
@@ -118,7 +120,8 @@ export const getTooltipActions = (
   formatFactory: FormatFactory,
   isEsqlMode?: boolean,
   canCreateAlerts?: boolean,
-  isEnabled?: boolean
+  isEnabled?: boolean,
+  axisFormatPolicies?: AxisFormatPolicy[]
 ) => {
   if (!isEnabled) return;
   const hasSplitAccessors = dataLayers.some((l) => l.splitAccessors?.length);
@@ -234,7 +237,17 @@ export const getTooltipActions = (
                   const yColumn = getColumnByAccessor(yAccessor.toString(), table.columns);
                   if (!yColumn || !yColumn.meta.sourceParams) return null;
                   const { sourceField } = yColumn.meta.sourceParams;
-                  const yValue = value.value as number;
+                  const yValue =
+                    typeof value.value === 'number'
+                      ? toSourceUnitValue(
+                          value.value,
+                          getDataMemberFactor(
+                            axisFormatPolicies,
+                            layer.layerId,
+                            yAccessor.toString()
+                          )
+                        )
+                      : (value.value as number);
                   // If there is no sourceField, wrap the Y axis label in {curly braces} to let the user set the field name manually
                   const esqlFieldName = String(sourceField ?? `{${yColumn?.name ?? 'Y'}}`);
                   const values: Record<string, string | number> = {

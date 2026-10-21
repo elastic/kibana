@@ -8,8 +8,8 @@
 import { schema } from '@kbn/config-schema';
 import type { CreateRuleParams } from './create_rule';
 import { RulesClient } from '../../../../rules_client';
+import { ApiKeyType } from '../../../../task_runner/types';
 import { getRulesClientMockParams } from '../../../../test_utils';
-import { coreFeatureFlagsMock } from '@kbn/core/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleNotifyWhen } from '../../constants';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -447,6 +447,7 @@ describe('create()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -456,6 +457,7 @@ describe('create()', () => {
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
+        "createdByProfileUid": null,
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
@@ -506,6 +508,7 @@ describe('create()', () => {
         "throttle": null,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "updatedByProfileUid": null,
       }
     `);
     expect(unsecuredSavedObjectsClient.create.mock.calls[0][2]).toMatchInlineSnapshot(`
@@ -713,6 +716,7 @@ describe('create()', () => {
         "apiKey": null,
         "apiKeyCreatedByUser": null,
         "apiKeyOwner": null,
+        "apiKeyOwnerProfileUid": null,
         "artifacts": Object {
           "dashboards": Array [],
           "investigation_guide": Object {
@@ -722,6 +726,7 @@ describe('create()', () => {
         "consumer": "bar",
         "createdAt": "2019-02-12T21:01:22.479Z",
         "createdBy": "elastic",
+        "createdByProfileUid": null,
         "enabled": true,
         "executionStatus": Object {
           "lastExecutionDate": "2019-02-12T21:01:22.479Z",
@@ -772,6 +777,7 @@ describe('create()', () => {
         "throttle": null,
         "updatedAt": "2019-02-12T21:01:22.479Z",
         "updatedBy": "elastic",
+        "updatedByProfileUid": null,
       }
     `);
   });
@@ -1198,6 +1204,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -1206,6 +1213,7 @@ describe('create()', () => {
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
+        createdByProfileUid: null,
         enabled: true,
         legacyId: null,
         executionStatus: {
@@ -1228,6 +1236,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: 'mock-saved-object-id',
@@ -1458,6 +1467,7 @@ describe('create()', () => {
         apiKey: null,
         apiKeyCreatedByUser: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
@@ -1465,6 +1475,7 @@ describe('create()', () => {
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
+        createdByProfileUid: null,
         enabled: true,
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -1513,6 +1524,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: 'mock-saved-object-id',
@@ -1722,6 +1734,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
@@ -1730,6 +1743,7 @@ describe('create()', () => {
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
+        createdByProfileUid: null,
         enabled: true,
         legacyId: null,
         executionStatus: {
@@ -1752,6 +1766,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: 'mock-saved-object-id',
@@ -1928,6 +1943,7 @@ describe('create()', () => {
         alertTypeId: '123',
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
@@ -1937,6 +1953,7 @@ describe('create()', () => {
         consumer: 'bar',
         createdAt: '2019-02-12T21:01:22.479Z',
         createdBy: 'elastic',
+        createdByProfileUid: null,
         enabled: true,
         executionStatus: {
           lastExecutionDate: '2019-02-12T21:01:22.479Z',
@@ -1958,6 +1975,7 @@ describe('create()', () => {
         throttle: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
       },
       {
         id: 'mock-saved-object-id',
@@ -2058,7 +2076,10 @@ describe('create()', () => {
     });
 
     await rulesClient.create({ data });
-    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/my rule name');
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith(
+      'Alerting: 123/my rule name',
+      undefined
+    );
   });
 
   test('should create rule with given notifyWhen value if notifyWhen is not null', async () => {
@@ -2124,14 +2145,17 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -2281,14 +2305,17 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
           investigation_guide: { blob: '' },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -2438,6 +2465,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         artifacts: {
           dashboards: [],
@@ -2446,8 +2474,10 @@ describe('create()', () => {
           },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -2618,6 +2648,7 @@ describe('create()', () => {
           },
         ],
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKey: null,
         apiKeyCreatedByUser: null,
         artifacts: {
@@ -2628,7 +2659,9 @@ describe('create()', () => {
         },
         legacyId: null,
         createdBy: 'elastic',
+        createdByProfileUid: null,
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedAt: '2019-02-12T21:01:22.479Z',
         muteAll: false,
@@ -3098,6 +3131,7 @@ describe('create()', () => {
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyCreatedByUser: false,
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         artifacts: {
           dashboards: [],
           investigation_guide: {
@@ -3105,8 +3139,10 @@ describe('create()', () => {
           },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -3217,10 +3253,13 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: null,
         apiKeyOwner: null,
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: null,
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: false,
         meta: {
@@ -4173,6 +4212,7 @@ describe('create()', () => {
         params: { bar: true },
         apiKey: Buffer.from('123:abc').toString('base64'),
         apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
         apiKeyCreatedByUser: true,
         artifacts: {
           dashboards: [],
@@ -4181,8 +4221,10 @@ describe('create()', () => {
           },
         },
         createdBy: 'elastic',
+        createdByProfileUid: null,
         createdAt: '2019-02-12T21:01:22.479Z',
         updatedBy: 'elastic',
+        updatedByProfileUid: null,
         updatedAt: '2019-02-12T21:01:22.479Z',
         enabled: true,
         meta: {
@@ -4215,6 +4257,81 @@ describe('create()', () => {
         ],
       }
     );
+  });
+
+  test('mints a framework-owned key instead of persisting the caller credential when the cloneApiKey option is set', async () => {
+    // No actions: the file-level uuid mock is a counter, and consuming uuids here would shift
+    // the hardcoded uuid expectations of later tests.
+    const data = getMockData({ actions: [] });
+    rulesClientParams.isAuthenticationTypeAPIKey.mockReturnValueOnce(true);
+    rulesClientParams.cloneAPIKey.mockResolvedValueOnce({
+      apiKeysEnabled: true,
+      result: { id: 'cloned-id', name: 'cloned', api_key: 'cloned-secret' },
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        running: false,
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+        params: { bar: true },
+        actions: [],
+      },
+      references: [],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: { actions: [], scheduledTaskId: 'task-123' },
+      references: [],
+    });
+
+    await rulesClient.create({ data, options: { cloneApiKey: true } });
+
+    expect(rulesClientParams.cloneAPIKey).toHaveBeenCalledWith('Alerting: 123/abc');
+    expect(rulesClientParams.getAuthenticationAPIKey).not.toHaveBeenCalled();
+    expect(rulesClientParams.createAPIKey).not.toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      expect.objectContaining({
+        apiKey: Buffer.from('cloned-id:cloned-secret').toString('base64'),
+        apiKeyOwner: 'elastic',
+        apiKeyOwnerProfileUid: null,
+        apiKeyCreatedByUser: false,
+      }),
+      expect.any(Object)
+    );
+  });
+
+  test('ignores the cloneApiKey option when the request is not authenticated with an API key', async () => {
+    // No actions: see the uuid-counter note in the previous test.
+    const data = getMockData({ actions: [] });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        running: false,
+        executionStatus: getRuleExecutionStatusPending('2019-02-12T21:01:22.479Z'),
+        params: { bar: true },
+        actions: [],
+      },
+      references: [],
+    });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: { actions: [], scheduledTaskId: 'task-123' },
+      references: [],
+    });
+
+    await rulesClient.create({ data, options: { cloneApiKey: true } });
+
+    expect(rulesClientParams.cloneAPIKey).not.toHaveBeenCalled();
+    expect(rulesClientParams.createAPIKey).toHaveBeenCalledWith('Alerting: 123/abc', undefined);
   });
 
   test('throws error and does not add API key to invalidatePendingApiKey SO when create saved object fails if the user is authenticated using an api key', async () => {
@@ -4412,6 +4529,7 @@ describe('create()', () => {
           alertTypeId: '123',
           apiKey: null,
           apiKeyOwner: null,
+          apiKeyOwnerProfileUid: null,
           apiKeyCreatedByUser: null,
           artifacts: {
             dashboards: [],
@@ -4422,6 +4540,7 @@ describe('create()', () => {
           consumer: 'bar',
           createdAt: '2019-02-12T21:01:22.479Z',
           createdBy: 'elastic',
+          createdByProfileUid: null,
           enabled: true,
           legacyId: null,
           executionStatus: {
@@ -4444,6 +4563,7 @@ describe('create()', () => {
           throttle: null,
           updatedAt: '2019-02-12T21:01:22.479Z',
           updatedBy: 'elastic',
+          updatedByProfileUid: null,
         },
         {
           id: 'mock-saved-object-id',
@@ -4832,17 +4952,15 @@ This is the type of text _investigation guides_ will contain.`;
   });
 
   describe('missing UIAM API key tagging', () => {
-    test('should add missing UIAM API key tag when UIAM key creation fails in serverless with feature flag enabled', async () => {
-      // Set up serverless environment with feature flag enabled
-      const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
-
+    test('should defer missing UIAM API key tagging until rule execution', async () => {
+      // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
         isServerless: true,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
         // To signal that user does not create the API key
         isAuthenticationTypeAPIKey: () => false,
-        featureFlags,
       });
 
       const data = getMockData();
@@ -4882,25 +5000,23 @@ This is the type of text _investigation guides_ will contain.`;
 
       await serverlessRulesClient.create({ data });
 
-      // Verify the missing UIAM key tag was added
+      // Rule execution owns the missing UIAM key tag.
       expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
         RULE_SAVED_OBJECT_TYPE,
         expect.objectContaining({
-          tags: expect.arrayContaining(['foo', 'Missing Elastic Cloud API Key']),
+          tags: ['foo'],
         }),
         expect.anything()
       );
     });
 
     test('should not add missing UIAM API key tag when UIAM key is present', async () => {
-      // Set up serverless environment with feature flag enabled
-      const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
-
+      // Set up serverless environment
       const serverlessRulesClient = new RulesClient({
         ...rulesClientParams,
         isServerless: true,
-        featureFlags,
+        shouldGrantUiam: true,
+        apiKeyType: ApiKeyType.UIAM,
       });
 
       const data = getMockData();
@@ -4952,12 +5068,8 @@ This is the type of text _investigation guides_ will contain.`;
 
     test('should not add missing UIAM API key tag in non-serverless environment', async () => {
       // Non-serverless environment (default rulesClientParams.isServerless = false)
-      const featureFlags = coreFeatureFlagsMock.createStart();
-      featureFlags.getBooleanValue = jest.fn().mockResolvedValue(true);
-
       const nonServerlessRulesClient = new RulesClient({
         ...rulesClientParams,
-        featureFlags,
       });
 
       const data = getMockData();
@@ -5265,5 +5377,53 @@ This is the type of text _investigation guides_ will contain.`;
 
       await expect(rulesClient.create({ data: getMockData() })).resolves.toBeDefined();
     });
+  });
+
+  test('persists createdByProfileUid and updatedByProfileUid when the actor has a profile uid', async () => {
+    rulesClientParams.getProfileUid.mockResolvedValueOnce('u_profile_1');
+    const data = getMockData({ enabled: false });
+    unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
+      id: '1',
+      type: RULE_SAVED_OBJECT_TYPE,
+      attributes: {
+        enabled: false,
+        alertTypeId: '123',
+        schedule: { interval: '1m' },
+        params: { bar: true },
+        running: false,
+        executionStatus: getRuleExecutionStatusPending(now),
+        createdAt: now,
+        updatedAt: now,
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        createdByProfileUid: 'u_profile_1',
+        updatedByProfileUid: 'u_profile_1',
+        notifyWhen: null,
+        actions: [
+          {
+            group: 'default',
+            actionRef: 'action_0',
+            actionTypeId: 'test',
+            uuid: 'test-uuid',
+            params: { foo: true },
+          },
+        ],
+      },
+      references: [{ name: 'action_0', type: 'action', id: '1' }],
+    });
+
+    await rulesClient.create({ data });
+
+    expect(rulesClientParams.getProfileUid).toHaveBeenCalled();
+    expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      expect.objectContaining({
+        createdBy: 'elastic',
+        updatedBy: 'elastic',
+        createdByProfileUid: 'u_profile_1',
+        updatedByProfileUid: 'u_profile_1',
+      }),
+      expect.any(Object)
+    );
   });
 });

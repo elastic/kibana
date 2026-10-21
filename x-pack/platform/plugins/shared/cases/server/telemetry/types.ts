@@ -231,6 +231,73 @@ export interface CustomFieldsSolutionTelemetry {
   customFields: CustomFieldsTelemetry;
 }
 
+export interface TemplatesVersionPercentiles {
+  p50: number;
+  p90: number;
+  p99: number;
+}
+
+/**
+ * Sourced from `fieldCount`, counted before `$ref` resolution. Not comparable with the
+ * `fieldDefinitions` totals, which drop unresolvable refs.
+ */
+export interface TemplatesFieldCountTelemetry {
+  total: number;
+  max: number;
+  average: number;
+}
+
+/** Read from the indexed `fieldDefinitions` nested field, never from the YAML definition. */
+export interface TemplatesFieldTypesTelemetry {
+  totalsByControl: Record<string, number>;
+  totalsByType: Record<string, number>;
+}
+
+/**
+ * A case's template reference is mutable after creation, so these are current-state
+ * counts rather than created-from-a-template counts.
+ */
+export interface TemplatesCasesTelemetry {
+  withTemplate: Count;
+  withoutTemplate: Count;
+}
+
+/**
+ * Scoped to the latest version of each template, so version history cannot inflate it.
+ * `totalSoftDeleted` inverts the `deletedAt` condition; every other count excludes deleted.
+ */
+export interface TemplatesSolutionTelemetry {
+  total: number;
+  totalEnabled: number;
+  totalDisabled: number;
+  totalSoftDeleted: number;
+  totalMigratedFromV1: number;
+  versionPercentiles: TemplatesVersionPercentiles;
+  fieldCount: TemplatesFieldCountTelemetry;
+  fieldDefinitions: TemplatesFieldTypesTelemetry;
+  cases: TemplatesCasesTelemetry;
+}
+
+export interface TemplatesTelemetry {
+  all: TemplatesSolutionTelemetry;
+  sec: TemplatesSolutionTelemetry;
+  obs: TemplatesSolutionTelemetry;
+  main: TemplatesSolutionTelemetry;
+}
+
+export interface FieldLibrarySolutionTelemetry {
+  total: number;
+  totalGlobal: number;
+  totalReusable: number;
+}
+
+export interface FieldLibraryTelemetry {
+  all: FieldLibrarySolutionTelemetry;
+  sec: FieldLibrarySolutionTelemetry;
+  obs: FieldLibrarySolutionTelemetry;
+  main: FieldLibrarySolutionTelemetry;
+}
+
 export type CasesTelemetryConnectorKeys =
   | 'itsm'
   | 'sir'
@@ -239,6 +306,35 @@ export type CasesTelemetryConnectorKeys =
   | 'swimlane'
   | 'thehive'
   | 'caseswebhook';
+
+/** Workflow runs per origin type, keyed without the `cases.` prefix. */
+export interface WorkflowOriginTypeCounts {
+  case: number;
+  observable: number;
+  observables: number;
+  attachment: number;
+  attachments: number;
+  /** Runs with no origin (cases-list bulk runs). */
+  unattributed: number;
+}
+
+export interface WorkflowsSolutionTelemetry {
+  /** Total and time-bucketed workflow run counts (one per case per execution). */
+  runs: Count;
+  /** Number of distinct cases that have had at least one workflow run. */
+  totalCasesWithRuns: number;
+  /** Cardinality of distinct usernames that have triggered a workflow from a case. */
+  totalUniqueUsers: number;
+  /** Runs by origin type (e.g. `cases.observable` is reported as `observable`). */
+  byOriginType: WorkflowOriginTypeCounts;
+  /**
+   * Attachment-origin runs keyed by sanitized attachment type (e.g. `security.alert` becomes
+   * `security_alert`). Only types that have been run against appear.
+   */
+  byAttachmentType: Record<string, number>;
+  /** Number of case configurations that have at least one workflow tag set. */
+  configurationsWithWorkflowTags: number;
+}
 
 export interface CasesTelemetry {
   cases: {
@@ -296,6 +392,14 @@ export interface CasesTelemetry {
     totalCasesCreated: number;
     totalRules: number;
   };
+  templates: TemplatesTelemetry;
+  fieldLibrary: FieldLibraryTelemetry;
+  workflows: {
+    all: WorkflowsSolutionTelemetry;
+    sec: WorkflowsSolutionTelemetry;
+    obs: WorkflowsSolutionTelemetry;
+    main: WorkflowsSolutionTelemetry;
+  };
 }
 
 export type CountSchema = MakeSchemaFrom<Count>;
@@ -308,3 +412,6 @@ export type AttachmentFrameworkSchema = MakeSchemaFrom<AttachmentFramework['atta
 export type AttachmentTypeStatsSchema = MakeSchemaFrom<AttachmentTypeStats>;
 export type SolutionTelemetrySchema = MakeSchemaFrom<SolutionTelemetry>;
 export type CustomFieldsSolutionTelemetrySchema = MakeSchemaFrom<CustomFieldsSolutionTelemetry>;
+export type TemplatesSolutionTelemetrySchema = MakeSchemaFrom<TemplatesSolutionTelemetry>;
+export type FieldLibrarySolutionTelemetrySchema = MakeSchemaFrom<FieldLibrarySolutionTelemetry>;
+export type WorkflowsSolutionTelemetrySchema = MakeSchemaFrom<WorkflowsSolutionTelemetry>;

@@ -144,6 +144,7 @@ export const manageCasesTool = (
     },
     schema: manageCasesSchema,
     tags: ['cases'],
+    excludeFromMcp: true,
     handler: async (args, toolContext) => {
       const { mode, connector_id, tags_to_add, case_id, assignees, ...rest } = args;
 
@@ -191,7 +192,7 @@ export const manageCasesTool = (
 
       const result = await runStep();
       if (mode !== 'delete') {
-        const attachmentIds = await emitFromStepResult(toolContext.attachments, result);
+        const attachmentIds = await emitFromStepResult(toolContext, result);
         return injectAttachmentIds(result, attachmentIds);
       }
       return result;

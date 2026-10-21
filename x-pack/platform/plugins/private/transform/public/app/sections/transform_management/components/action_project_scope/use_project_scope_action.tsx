@@ -14,6 +14,7 @@ import { TRANSFORM_PROJECT_ROUTING_MAX_LENGTH } from '../../../../../../common/c
 import { useAppDependencies, useToastNotifications } from '../../../../app_dependencies';
 import type { TransformListRow } from '../../../../common';
 import { useTransformCapabilities, useUpdateTransformsProjectScope } from '../../../../hooks';
+import { useGetTransformCpsEnabled } from '../../../../hooks/use_get_transform_cps_enabled';
 
 import { isProjectScopeActionDisabled } from './project_scope_action_name';
 
@@ -62,6 +63,10 @@ export const useProjectScopeAction = ({ onUpdateSuccess }: UseProjectScopeAction
   const cpsManager = cps?.cpsManager;
   const { canCreateTransform } = useTransformCapabilities();
   const updateTransformsProjectScope = useUpdateTransformsProjectScope();
+  const canCheckProjectScope = Boolean(cps?.isTierEligible && cpsManager);
+  const { data: isTransformCpsEnabled } = useGetTransformCpsEnabled({
+    enabled: canCheckProjectScope,
+  });
   const defaultProjectRoutingGetter = useCallback(
     () => cpsManager?.getDefaultProjectRouting() ?? PROJECT_ROUTING.ALL,
     [cpsManager]
@@ -91,7 +96,7 @@ export const useProjectScopeAction = ({ onUpdateSuccess }: UseProjectScopeAction
     () => (originProject ? [originProject, ...linkedProjects] : linkedProjects),
     [linkedProjects, originProject]
   );
-  const isCpsEnabled = Boolean(cps?.isTierEligible && cpsManager && !error);
+  const isCpsEnabled = Boolean(canCheckProjectScope && isTransformCpsEnabled === true && !error);
   const hasLinkedProjects = linkedProjects.length > 0;
   const isLoadingProjectScope = isLoading;
   const hasChanges = items.some(

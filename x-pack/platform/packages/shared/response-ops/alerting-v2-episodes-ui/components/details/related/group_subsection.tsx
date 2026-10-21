@@ -11,11 +11,11 @@ import type { CoreStart } from '@kbn/core/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { css } from '@emotion/react';
 import { getRuleIdFromRuleState, type RuleState } from '../../../types/rule_state';
+import type { RelatedEpisodesScope } from '../../../queries/related_episodes_query';
 import { RELATED_ALERT_EPISODES_PAGE_SIZE } from '../../../constants';
 import { useFetchEpisodeActions } from '../../../hooks/use_fetch_episode_actions';
-import { useFetchGroupActions } from '../../../hooks/use_fetch_group_actions';
+import { getGroupAction, useFetchGroupActions } from '../../../hooks/use_fetch_group_actions';
 import { useFetchSameGroupEpisodesQuery } from '../../../hooks/use_fetch_same_group_episodes_query';
 import { AlertEpisodeCardListSkeleton } from '../section_skeletons';
 import { RelatedAlertEpisodesList } from './related_list';
@@ -31,6 +31,7 @@ export interface RelatedEpisodesGroupSubsectionProps {
   currentEpisodeId: string | undefined;
   groupHash: string | undefined;
   ruleState: RuleState;
+  scope: RelatedEpisodesScope;
   getEpisodeDetailsHref: (episodeId: string) => string;
   /**
    * When `true`, drop the inner horizontal padding so the subsection sits
@@ -47,6 +48,7 @@ export function RelatedEpisodesGroupSubsection({
   currentEpisodeId,
   groupHash,
   ruleState,
+  scope,
   getEpisodeDetailsHref,
   compressed = false,
 }: RelatedEpisodesGroupSubsectionProps) {
@@ -65,7 +67,7 @@ export function RelatedEpisodesGroupSubsection({
 
   const { data: sameGroupRows = [], isLoading: isLoadingSameGroupRows } =
     useFetchSameGroupEpisodesQuery({
-      ruleId,
+      scope,
       excludeEpisodeId: currentEpisodeId,
       pageSize: RELATED_ALERT_EPISODES_PAGE_SIZE,
       groupHash,
@@ -98,21 +100,12 @@ export function RelatedEpisodesGroupSubsection({
     services: { expressions, spaces },
   });
 
-  if (!ruleId || !groupHash) {
+  if (!groupHash) {
     return null;
   }
 
   return (
-    <div
-      data-test-subj="alertingV2RelatedEpisodesGroupSubsection"
-      css={
-        compressed
-          ? undefined
-          : css`
-              padding-inline: ${euiTheme.size.m};
-            `
-      }
-    >
+    <div data-test-subj="alertingV2RelatedEpisodesGroupSubsection">
       <EuiTitle size={compressed ? 'xxs' : 'xs'}>
         <h4>{i18n.RELATED_SAME_GROUP_TITLE}</h4>
       </EuiTitle>
@@ -121,7 +114,9 @@ export function RelatedEpisodesGroupSubsection({
         color="subdued"
         css={{ marginBlockStart: euiTheme.size.xs }}
       >
-        {i18n.RELATED_SAME_GROUP_DESCRIPTION}
+        {scope.type === 'rule'
+          ? i18n.RELATED_SAME_GROUP_DESCRIPTION
+          : i18n.RELATED_SAME_GROUP_SOURCE_DESCRIPTION}
       </EuiText>
       <EuiSpacer size="s" />
       {isLoadingSameGroupRows ? (
@@ -142,7 +137,7 @@ export function RelatedEpisodesGroupSubsection({
           rows={sameGroupRows}
           ruleState={ruleState}
           getEpisodeAction={(id) => sameGroupEpisodeActionsMap?.get(id)}
-          getGroupAction={(gh) => sameGroupGroupActionsMap?.get(gh)}
+          getGroupAction={(gh) => getGroupAction(sameGroupGroupActionsMap, ruleId, gh)}
           getEpisodeDetailsHref={getEpisodeDetailsHref}
           compressed={compressed}
         />

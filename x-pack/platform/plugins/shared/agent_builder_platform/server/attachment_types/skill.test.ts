@@ -46,7 +46,7 @@ describe('skill attachment type', () => {
 
   describe('validate', () => {
     it('accepts a fully populated payload', async () => {
-      const result = await definition.validate(validSkill);
+      const result = await definition.validate(validSkill, formatContext);
       expect(result.valid).toBe(true);
       if (result.valid) {
         expect(result.data.skill.id).toBe('incident-triage');
@@ -54,40 +54,52 @@ describe('skill attachment type', () => {
     });
 
     it('rejects an empty content body', async () => {
-      const result = await definition.validate({
-        ...validSkill,
-        skill: { ...validSkill.skill, content: '' },
-      });
+      const result = await definition.validate(
+        {
+          ...validSkill,
+          skill: { ...validSkill.skill, content: '' },
+        },
+        formatContext
+      );
       expect(result.valid).toBe(false);
     });
 
     it('rejects an id with uppercase letters', async () => {
-      const result = await definition.validate({
-        ...validSkill,
-        skill: { ...validSkill.skill, id: 'Incident-Triage' },
-      });
+      const result = await definition.validate(
+        {
+          ...validSkill,
+          skill: { ...validSkill.skill, id: 'Incident-Triage' },
+        },
+        formatContext
+      );
       expect(result.valid).toBe(false);
     });
 
     it('rejects a referenced file with a path outside ./', async () => {
-      const result = await definition.validate({
-        ...validSkill,
-        skill: {
-          ...validSkill.skill,
-          referenced_content: [{ name: 'examples', relativePath: '/examples', content: 'x' }],
+      const result = await definition.validate(
+        {
+          ...validSkill,
+          skill: {
+            ...validSkill.skill,
+            referenced_content: [{ name: 'examples', relativePath: '/examples', content: 'x' }],
+          },
         },
-      });
+        formatContext
+      );
       expect(result.valid).toBe(false);
     });
 
     it('rejects more than 5 tool_ids', async () => {
-      const result = await definition.validate({
-        ...validSkill,
-        skill: {
-          ...validSkill.skill,
-          tool_ids: Array.from({ length: 6 }, (_, i) => `tool_${i}`),
+      const result = await definition.validate(
+        {
+          ...validSkill,
+          skill: {
+            ...validSkill.skill,
+            tool_ids: Array.from({ length: 6 }, (_, i) => `tool_${i}`),
+          },
         },
-      });
+        formatContext
+      );
       expect(result.valid).toBe(false);
     });
   });

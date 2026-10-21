@@ -115,10 +115,7 @@ const templateFromTags = (tags: string[] | undefined): RumAlertTemplateId | null
   return isRumAlertTemplateId(id) ? id : null;
 };
 
-const breachQueryOf = (rule: RuleResponse): string => {
-  const query = rule.query as { breach?: { query?: string } } | undefined;
-  return typeof query?.breach?.query === 'string' ? query.breach.query : '';
-};
+const breachQueryOf = (rule: RuleResponse): string => rule.query.base ?? '';
 
 const toSummary = (rule: RuleResponse): RumAlertRuleSummary => ({
   id: rule.id,
@@ -292,16 +289,16 @@ export const createRumAlertRoute = createUxServerRoute({
         ).slice(0, 200),
         description: built.description,
         tags: built.tags,
-        builder_type: 'ux_rum',
+        routing_tags: [RUM_ALERT_TAG],
+        builder: { type: 'ux_rum' },
       },
       time_field: usesSessionIndex ? 'start_time' : '@timestamp',
       schedule: { every: built.every, lookback: built.lookback },
       query: {
-        format: 'standalone',
-        breach: { query: built.query },
+        base: built.query,
       },
-      recovery_strategy: built.recoveryStrategy,
-      no_data_strategy: built.noDataStrategy,
+      recovery: { strategy: built.recoveryStrategy },
+      no_data: { strategy: 'ignore' },
       ...(built.groupingFields.length > 0 ? { grouping: { fields: built.groupingFields } } : {}),
     };
     const created = await rulesClient.createRule({ data });
@@ -382,7 +379,7 @@ export const upsertRumAlertNotificationsRoute = createUxServerRoute({
     let workflowId = existing?.workflowId;
     const workflows = resources.workflowsManagement.management;
     if (workflowId) {
-      const current = await workflows.getWorkflow(workflowId, spaceId);
+      const current = await workflows.getWorkflow(workflowId, spaceId, resources.request);
       if (current) {
         await workflows.updateWorkflow(workflowId, { yaml }, spaceId, resources.request);
       } else {
@@ -400,17 +397,16 @@ export const upsertRumAlertNotificationsRoute = createUxServerRoute({
       name: 'UX RUM email',
       description: 'Emails when a User Experience RUM alert fires',
       destinations: [{ type: 'workflow' as const, id: workflowId }],
-      matcher: `rule.tags: "${RUM_ALERT_TAG}"`,
-      groupingMode: 'per_episode' as const,
-      throttle: { strategy: 'on_status_change' as const, interval: null },
-      tags: [RUM_ALERT_TAG],
+      matcher: { tags: [RUM_ALERT_TAG] },
+      grouping: { mode: 'per_alert' as const },
+      throttle: { strategy: 'on_status_change' as const },
     };
     if (policyId) {
       try {
-        const current = await policyClient.getActionPolicy({ id: policyId });
+        await policyClient.getActionPolicy({ id: policyId });
         await policyClient.updateActionPolicy({
           data: policyData,
-          options: { id: policyId, version: current.version ?? '1' },
+          options: { id: policyId },
         });
       } catch {
         policyId = undefined;

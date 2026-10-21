@@ -15,6 +15,11 @@ import type { Connector } from '../../../types';
 
 export interface GetAllParams {
   includeSystemActions?: boolean;
+  /**
+   * When true, only connectors whose config.authType is in the action type's
+   * sandboxSupportedAuthTypes are returned. Client-only; not exposed on HTTP routes.
+   */
+  sandboxCapableOnly?: boolean;
   context: ActionsClientContext;
 }
 

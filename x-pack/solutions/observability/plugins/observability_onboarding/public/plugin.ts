@@ -35,7 +35,10 @@ import type {
 import type { IngestHubStart } from '@kbn/ingest-hub-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
-import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../common/feature_flags';
+import {
+  ADD_DATA_PAGE_V2_ENABLED_DEFAULT,
+  IS_ADD_DATA_PAGE_V2_ENABLED,
+} from '../common/feature_flags';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
 import type { ObservabilityOnboardingPluginLocators } from './locators';
 import type { ConfigSchema } from '.';
@@ -45,6 +48,7 @@ import {
   OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
+  OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT,
 } from '../common/telemetry_events';
 import {
   registerAddDataExperienceContext,
@@ -143,6 +147,7 @@ export class ObservabilityOnboardingPlugin
     core.analytics.registerEventType(
       OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT
     );
+    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_ADD_DATA_TILE_CLICK_TELEMETRY_EVENT);
     registerAddDataExperienceContext(core.analytics, this.addDataExperience$);
 
     return {
@@ -152,7 +157,7 @@ export class ObservabilityOnboardingPlugin
   }
   public async start(core: CoreStart, plugins: ObservabilityOnboardingPluginStartDeps) {
     this.addDataExperienceSubscription = core.featureFlags
-      .getBooleanValue$(IS_ADD_DATA_PAGE_V2_ENABLED, false)
+      .getBooleanValue$(IS_ADD_DATA_PAGE_V2_ENABLED, ADD_DATA_PAGE_V2_ENABLED_DEFAULT)
       .pipe(map((enabled): AddDataExperience => (enabled ? 'v2' : 'v1')))
       .subscribe(this.addDataExperience$);
 

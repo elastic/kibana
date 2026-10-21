@@ -278,7 +278,13 @@ function AppSettingsButton() {
   );
 }
 
-function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
+export function DashboardToolbar({
+  tab = 'overview',
+  showWebApplicationSelect = true,
+}: {
+  tab?: UxHomeTab;
+  showWebApplicationSelect?: boolean;
+}) {
   const {
     urlParams: { serviceName },
   } = useLegacyUrlParams();
@@ -321,9 +327,11 @@ function DashboardToolbar({ tab }: { tab: UxHomeTab }) {
       </EuiFlexGroup>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" alignItems="center" wrap>
-        <EuiFlexItem grow={false} style={{ minWidth: 200, maxWidth: 260 }}>
-          <WebApplicationSelect />
-        </EuiFlexItem>
+        {showWebApplicationSelect ? (
+          <EuiFlexItem grow={false} style={{ minWidth: 200, maxWidth: 260 }}>
+            <WebApplicationSelect />
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={true} style={{ minWidth: 280 }}>
           <RumKueryBar />
         </EuiFlexItem>

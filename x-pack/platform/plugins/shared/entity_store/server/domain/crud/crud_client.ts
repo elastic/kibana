@@ -13,12 +13,14 @@ import type {
   QueryDslQueryContainer,
   Result,
   SearchHit,
+  SortCombinations,
   SortOrder,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Entity } from '../../../common/domain/definitions/entity.gen';
 import type { EntityType } from '../../../common';
 import { hashEuid, getEuidFromObject } from '../../../common/domain/euid';
+import { getBuiltInEntityDefinition } from '../../../common/domain/definitions/registry';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
 import {
   BadCRUDRequestError,
@@ -35,6 +37,8 @@ import { buildEntityFromSource } from './entity_from_source';
 import { runWithSpan } from '../../telemetry/traces';
 import {
   searchEntitiesV2,
+  searchEntitiesV2Batch,
+  type SearchEntitiesV2BatchItemResult,
   type SearchEntitiesV2Inspect,
   type SearchEntitiesV2Params,
   type SearchEntitiesV2Result,
@@ -66,6 +70,8 @@ export interface ListEntitiesParams {
   size?: number;
   source?: string[] | undefined;
   searchAfter?: Array<string | number>;
+  /** Cursor-mode sort; defaults to `@timestamp` desc. A `_shard_doc` tiebreaker is always appended. */
+  sort?: SortCombinations[];
   fields?: (QueryDslFieldAndFormat | string)[];
   /** Page/search mode (unified latest index); mutually exclusive with KQL `filter` / cursor params on the route. */
   entityTypes?: EntityType[];
@@ -85,6 +91,9 @@ export interface ListEntitiesResult {
   per_page?: number;
   inspect?: SearchEntitiesV2Inspect;
 }
+
+export type ListEntitiesBatchParams = SearchEntitiesV2Params;
+export type ListEntitiesBatchItemResult = SearchEntitiesV2BatchItemResult;
 
 export interface BulkObject {
   type: EntityType;
@@ -282,6 +291,26 @@ export class CRUDClient {
       writable: true,
     });
 
+    const baseListEntitiesBatch = this.listEntitiesBatch.bind(this);
+    const tracedListEntitiesBatch = (
+      paramsList: ListEntitiesBatchParams[]
+    ): Promise<ListEntitiesBatchItemResult[]> =>
+      runWithSpan({
+        name: 'entityStore.crud.list_entities_batch',
+        namespace,
+        attributes: {
+          'entity_store.crud.operation': 'list_entities_batch',
+          'entity_store.crud.batch_size': paramsList.length,
+        },
+        cb: () => baseListEntitiesBatch(paramsList),
+      });
+
+    Object.defineProperty(this, 'listEntitiesBatch', {
+      value: tracedListEntitiesBatch,
+      configurable: true,
+      writable: true,
+    });
+
     const baseSearchLatestEntities = this.searchLatestEntities.bind(this);
     const tracedSearchLatestEntities = (
       params: SearchEntitiesV2Params
@@ -359,7 +388,7 @@ export class CRUDClient {
   // 3. Identity only - no ID and identifying data - ID will be generated
   public async updateEntity(entityType: EntityType, doc: Entity, force: boolean): Promise<void> {
     await this.assertInstalled();
-    const generatedId = getEuidFromObject(entityType, doc);
+    const generatedId = getEuidFromObject(getBuiltInEntityDefinition(entityType), doc);
     const valid = validateAndTransformDoc(
       'update',
       entityType,
@@ -411,7 +440,7 @@ export class CRUDClient {
 
     this.logger.debug(`Preparing ${objects.length} entities for bulk update`);
     for (const { type: entityType, doc } of objects) {
-      const generatedId = getEuidFromObject(entityType, doc);
+      const generatedId = getEuidFromObject(getBuiltInEntityDefinition(entityType), doc);
       const valid = validateAndTransformDoc(
         'update',
         entityType,
@@ -474,7 +503,7 @@ export class CRUDClient {
   // createEntity generates EUID and creates the entity in the LATEST index
   public async createEntity(entityType: EntityType, doc: Entity): Promise<void> {
     await this.assertInstalled();
-    const id = getEuidFromObject(entityType, doc);
+    const id = getEuidFromObject(getBuiltInEntityDefinition(entityType), doc);
     if (!id) {
       throw new BadCRUDRequestError(`Could not derive EUID from document`);
     }
@@ -647,7 +676,7 @@ export class CRUDClient {
 
     this.logger.debug('Listing entities (cursor mode)');
 
-    const { filter, size, searchAfter, source, fields } = p;
+    const { filter, size, searchAfter, source, fields, sort } = p;
 
     let query: QueryDslQueryContainer = { match_all: {} };
     if (filter) {
@@ -664,7 +693,7 @@ export class CRUDClient {
       index: await this.latestIndexName(),
       query,
       size,
-      sort: [{ '@timestamp': 'desc' }, { _shard_doc: 'desc' }],
+      sort: [...(sort ?? [{ '@timestamp': 'desc' }]), { _shard_doc: 'desc' }],
       search_after: searchAfter,
       ...(fields && fields.length > 0 ? { fields } : {}),
       ...buildEntityListSourceFilter({
@@ -682,5 +711,20 @@ export class CRUDClient {
       nextSearchAfter: lastHit?.sort as Array<string | number> | undefined,
       ...(entityFields ? { fields: entityFields } : {}),
     };
+  }
+
+  // Runs several page-mode queries as one ES `_msearch` request instead of N
+  // separate listEntities calls, resolving the index name once for all of them.
+  // One query's failure surfaces as `{ error }` at its position instead of
+  // rejecting the others.
+  public async listEntitiesBatch(
+    paramsList: ListEntitiesBatchParams[]
+  ): Promise<ListEntitiesBatchItemResult[]> {
+    this.logger.debug(`Listing entities (batch mode, ${paramsList.length} queries)`);
+    return searchEntitiesV2Batch({
+      esClient: this.esClient,
+      namespace: this.namespace,
+      queries: paramsList,
+    });
   }
 }
