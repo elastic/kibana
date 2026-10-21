@@ -96,8 +96,10 @@ export const AgentDashboardLink: React.FunctionComponent<{
   const { isInstalled, link, isLoading } = useAgentDashboardLink(agent, packageName);
   const { getHref } = useLink();
 
+  // agent metrics are not supported for agentless agents, even if the policy has metrics monitoring on
   const isMetricsEnabled =
-    agentPolicy?.monitoring_enabled?.includes('metrics') || agent.type === 'OPAMP';
+    !agentPolicy?.supports_agentless &&
+    (agentPolicy?.monitoring_enabled?.includes('metrics') || agent.type === 'OPAMP');
 
   const buttonArgs =
     !isInstalled || isLoading || !isMetricsEnabled ? { disabled: true } : { href: link };

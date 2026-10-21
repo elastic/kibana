@@ -23,6 +23,7 @@ import {
   bulkGetAgentPoliciesHandler,
   copyAgentPolicyHandler,
   createAgentPolicyHandler,
+  deleteAgentPoliciesHandler,
   downloadFullAgentPolicy,
   getFullAgentPolicy,
   GetListAgentPolicyOutputsHandler,
@@ -40,6 +41,7 @@ jest.mock('../../services/agent_policy', () => {
       getByIds: jest.fn(),
       copy: jest.fn(),
       update: jest.fn(),
+      delete: jest.fn(),
       listAllOutputsForPolicies: jest.fn(),
       getFullAgentPolicy: jest.fn(),
       getFleetServerPolicy: jest.fn(),
@@ -130,6 +132,51 @@ describe('Agent policy API handlers', () => {
       expect(appContextService.getLogger().warn).not.toHaveBeenCalledWith(
         expect.stringContaining('legacy_agentless_write_deprecation')
       );
+    });
+  });
+
+  describe('deleteAgentPoliciesHandler', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+      appContextService.start(createAppContextStartContractMock());
+      agentPolicyServiceMock.delete.mockResolvedValue({ id: 'policy-1', name: 'Policy' } as any);
+    });
+
+    const deleteRequest = (force?: boolean) =>
+      httpServerMock.createKibanaRequest({ body: { agentPolicyId: 'policy-1', force } });
+
+    it('rejects deleting an agentless policy without force', async () => {
+      agentPolicyServiceMock.get.mockResolvedValue({
+        id: 'policy-1',
+        supports_agentless: true,
+      } as any);
+
+      await expect(deleteAgentPoliciesHandler(context, deleteRequest(), response)).rejects.toThrow(
+        'To delete managed integrations, use the managed integrations API.'
+      );
+      expect(agentPolicyServiceMock.delete).not.toHaveBeenCalled();
+    });
+
+    it('allows deleting an agentless policy with force', async () => {
+      await deleteAgentPoliciesHandler(context, deleteRequest(true), response);
+
+      expect(agentPolicyServiceMock.delete).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'policy-1',
+        expect.objectContaining({ force: true })
+      );
+    });
+
+    it('allows deleting a regular policy without force', async () => {
+      agentPolicyServiceMock.get.mockResolvedValue({
+        id: 'policy-1',
+        supports_agentless: false,
+      } as any);
+
+      await deleteAgentPoliciesHandler(context, deleteRequest(), response);
+
+      expect(agentPolicyServiceMock.delete).toHaveBeenCalledTimes(1);
     });
   });
 

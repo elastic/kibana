@@ -760,6 +760,14 @@ export const deleteAgentPoliciesHandler: RequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const user = appContextService.getSecurityCore().authc.getCurrentUser(request) || undefined;
 
+  // agentless policies are managed by Elastic; `force` is the escape hatch
+  if (!request.body.force) {
+    const agentPolicy = await agentPolicyService.get(soClient, request.body.agentPolicyId, false);
+    if (agentPolicy?.supports_agentless) {
+      throw new FleetError('To delete managed integrations, use the managed integrations API.');
+    }
+  }
+
   const body: DeleteAgentPolicyResponse = await agentPolicyService.delete(
     soClient,
     esClient,
