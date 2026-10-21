@@ -46,9 +46,7 @@ describe('InFlightProposalBadge', () => {
   });
 
   it('keeps the Applying badge while the approved action runs', () => {
-    renderWithKibanaRenderContext(
-      <InFlightProposalBadge proposalId="p1" proposalStatus="executing" />
-    );
+    renderWithKibanaRenderContext(<InFlightProposalBadge proposalId="p1" isProposalSettling />);
 
     expect(screen.getByText('Applying')).toBeInTheDocument();
   });

@@ -269,8 +269,8 @@ const ConversationsPageContent: React.FC = () => {
   const assignInvestigation = useAssignInvestigation();
 
   const renderInFlightStatus = useCallback(
-    ({ id, proposalStatus }: Investigation) => (
-      <InFlightProposalBadge proposalId={id} proposalStatus={proposalStatus} />
+    ({ id, isProposalSettling }: Investigation) => (
+      <InFlightProposalBadge proposalId={id} isProposalSettling={isProposalSettling} />
     ),
     []
   );

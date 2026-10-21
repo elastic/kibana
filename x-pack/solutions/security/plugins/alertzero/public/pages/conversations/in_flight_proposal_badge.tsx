@@ -15,20 +15,16 @@ import { getApprovalOutcomeBadge, ProposedActionStatusBadge } from '@kbn/proposa
  */
 export const InFlightProposalBadge = ({
   proposalId,
-  proposalStatus,
+  isProposalSettling,
 }: {
   proposalId: string;
-  proposalStatus?: string;
+  isProposalSettling?: boolean;
 }) => {
   const isApproving = useIsApprovingProposal(proposalId);
   const isDeclining = useIsDecliningProposal(proposalId);
 
   const badge = getApprovalOutcomeBadge(
-    isApproving || proposalStatus === 'executing'
-      ? 'applying'
-      : isDeclining
-      ? 'declining'
-      : 'pending'
+    isApproving || isProposalSettling ? 'applying' : isDeclining ? 'declining' : 'pending'
   );
   if (!badge) return null;
 

@@ -138,8 +138,33 @@ describe('proposalToInvestigation', () => {
         decidedAt: '2026-09-10T11:00:00.000Z',
       });
       expect(result.recommendedAction).toBe('respond');
-      expect(result.proposalStatus).toBe('executing');
+      expect(result.isProposalSettling).toBe(true);
       expect(result.pendingProposalCount).toBe(0);
+    });
+
+    it('marks an approved proposal that still reads pending as settling and keeps its category', () => {
+      // The gate writes the decision before the status, so a read can see both for a moment.
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        category: 'respond',
+        decision: 'approved',
+        status: 'pending',
+        decidedAt: '2026-09-10T11:00:00.000Z',
+      });
+      expect(result.recommendedAction).toBe('respond');
+      expect(result.isProposalSettling).toBe(true);
+    });
+
+    it('does not mark an undecided or a settled proposal as settling', () => {
+      expect(proposalToInvestigation({ ...baseProposal }).isProposalSettling).toBe(false);
+      expect(
+        proposalToInvestigation({
+          ...baseProposal,
+          decision: 'approved',
+          status: 'succeeded',
+          decidedAt: '2026-09-10T11:00:00.000Z',
+        }).isProposalSettling
+      ).toBe(false);
     });
 
     it.each(['succeeded', 'failed', 'expired', 'no_action'] as const)(
