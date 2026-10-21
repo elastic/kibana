@@ -178,6 +178,39 @@ describe('rssAdapter', () => {
 
   // The fingerprint used to be feed URL + guid + title only, so an advisory
   // that kept its guid and title while revising the text deduped away forever.
+  describe('Atom fingerprint', () => {
+    const atomWith = (published: string) => `<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom"><title>Acme</title>
+  <entry><id>acme:1</id><title>Item one</title><link href="https://acme.example/1"/>
+    <published>${published}</published><updated>2026-05-14T08:00:00Z</updated>
+    <summary>Body one</summary></entry>
+</feed>`;
+
+    const fingerprintFor = async (feed: string) => {
+      const [report] = await rssAdapter.run(
+        buildSource(),
+        buildContext(jest.fn().mockResolvedValue(okResponse(feed)))
+      );
+      return report.content_fingerprint;
+    };
+
+    // Entries ingested before <published> became the preferred date were fingerprinted on
+    // <updated>; changing that would re-ingest and re-enrich every Atom entry once.
+    it('keeps folding <updated> into the fingerprint, whatever <published> says', async () => {
+      expect(await fingerprintFor(atomWith('2026-05-10T08:00:00Z'))).toBe(
+        await fingerprintFor(atomWith('2026-05-11T08:00:00Z'))
+      );
+    });
+
+    it('still stamps <published> as content.published_at', async () => {
+      const [report] = await rssAdapter.run(
+        buildSource(),
+        buildContext(jest.fn().mockResolvedValue(okResponse(atomWith('2026-05-10T08:00:00Z'))))
+      );
+      expect(report.content.published_at).toBe('2026-05-10T08:00:00.000Z');
+    });
+  });
+
   describe('revision detection', () => {
     const feedWith = ({ body = 'Body one', pubDate = 'Tue, 12 May 2026 09:30:00 GMT' } = {}) =>
       `<?xml version="1.0" encoding="UTF-8"?>

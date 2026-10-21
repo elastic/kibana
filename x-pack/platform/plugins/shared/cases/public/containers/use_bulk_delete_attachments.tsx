@@ -18,6 +18,7 @@ export interface BulkDeleteAttachmentsVariables {
   request: BulkDeleteAttachmentsRequest;
   /** Counted noun shown in the success toast, e.g. "2 files". */
   countLabel: string;
+  includeRelated?: boolean;
 }
 
 export const useBulkDeleteAttachments = (caseId: string) => {
@@ -25,7 +26,8 @@ export const useBulkDeleteAttachments = (caseId: string) => {
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   return useMutation(
-    ({ request }: BulkDeleteAttachmentsVariables) => bulkDeleteAttachments({ caseId, request }),
+    ({ request, includeRelated }: BulkDeleteAttachmentsVariables) =>
+      bulkDeleteAttachments({ caseId, request, includeRelated }),
     {
       mutationKey: casesMutationsKeys.bulkDeleteAttachments,
       onError: (error: ServerError) => {

@@ -955,7 +955,7 @@ const migrateExistingPublishedAtMapping = async (
       log.error(
         `Failed to migrate content.published_at on ${indexName}: ${
           (err as Error).message
-        }. The candidate lookback cannot see publish dates on this index until the mapping is updated.`
+        }. The mapping is dynamic: strict, so writes of reports carrying published_at will be rejected and ingest will fail until the mapping is updated.`
       );
     }
   }

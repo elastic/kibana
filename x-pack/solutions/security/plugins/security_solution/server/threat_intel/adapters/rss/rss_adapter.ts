@@ -101,7 +101,7 @@ export const rssAdapter: FetchAdapter = {
         feedUrl,
         entry.id,
         title,
-        entry.publishedAt,
+        entry.fingerprintDate ?? entry.publishedAt,
         fullBodyText,
       ]);
       const articleUrl = normalizeProvenanceUrl(entry.link);

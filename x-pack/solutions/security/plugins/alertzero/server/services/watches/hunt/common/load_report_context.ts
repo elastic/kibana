@@ -16,6 +16,14 @@ export interface ReportHuntContext {
   iocs: HuntIoc[];
   techniques: string[];
   text?: string;
+  /**
+   * True when the enrich workflow has not finished with the report: its
+   * `lineage.extraction_method` is absent, blank or `pending`, so `extracted.*` is not
+   * written yet and a hunt would have nothing to search. `workflow_v4_rejected` is
+   * deliberately not pending: a rejected report has been through extraction and must
+   * retire.
+   */
+  extraction_pending: boolean;
   /** Descriptive fields the Investigation narratives cite; absent when the report does not carry them. */
   title?: string;
   source_name?: string;
@@ -50,6 +58,7 @@ export interface ReportHuntContext {
 interface StoredReportSource {
   content?: { title?: string; body_text?: string; published_at?: string };
   source?: { name?: string };
+  lineage?: { extraction_method?: string };
   severity?: { level?: string };
   extracted?: {
     iocs?: Array<{ type?: string; value?: string }>;
@@ -138,6 +147,7 @@ export const loadReportHuntContext = async ({
       'content.body_text',
       'source.name',
       'severity.level',
+      'lineage.extraction_method',
       'extracted.iocs',
       'extracted.ttps.techniques',
       'extracted.vulnerability.vendor',
@@ -193,7 +203,13 @@ export const loadReportHuntContext = async ({
   // defect, and candidate selection keeps its own fallback for reports without a date.
   const publishedAt = asLabel(source.content?.published_at);
   const severity = asLabel(source.severity?.level);
+  const method =
+    typeof source.lineage?.extraction_method === 'string'
+      ? source.lineage.extraction_method.trim()
+      : '';
+  const extractionPending = method.length === 0 || method === 'pending';
   return {
+    extraction_pending: extractionPending,
     ...(title !== undefined ? { title } : {}),
     ...(sourceName !== undefined ? { source_name: sourceName } : {}),
     ...(publishedAt !== undefined ? { published_at: publishedAt } : {}),
