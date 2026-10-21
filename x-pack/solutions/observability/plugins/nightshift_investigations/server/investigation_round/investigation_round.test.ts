@@ -459,6 +459,41 @@ describe('server/investigation_round', () => {
         )
       ).toBe(false);
 
+      // Content searches relative to a seeded working_directory (e.g. grep -R services/ or rg redis)
+      expect(
+        isSeededWorkspaceAccess(
+          SANDBOX_BASH_TOOL_ID,
+          {
+            working_directory: '/workspace/cortex',
+            command: 'grep -R redis services/',
+          },
+          { skipRoots: ['cortex'] }
+        )
+      ).toBe(true);
+      expect(
+        isSeededWorkspaceAccess(
+          SANDBOX_BASH_TOOL_ID,
+          {
+            working_directory: '/workspace/memories',
+            command: 'rg redis',
+          },
+          { skipRoots: ['memories'] }
+        )
+      ).toBe(true);
+
+      // Executable Python heredoc reading a seeded file vs write-only heredoc
+      expect(
+        isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
+          command:
+            "python - <<'PY'\nprint(open('/workspace/memories/redis-pool-exhaustion.md').read())\nPY",
+        })
+      ).toBe(true);
+      expect(
+        isSeededWorkspaceAccess(SANDBOX_BASH_TOOL_ID, {
+          command: "cat <<'EOF' > /tmp/note.txt\n/workspace/memories/redis-pool-exhaustion.md\nEOF",
+        })
+      ).toBe(false);
+
       const steps = stepsFromRound([
         {
           type: 'tool_call',
@@ -466,6 +501,15 @@ describe('server/investigation_round', () => {
           params: {
             working_directory: '/workspace/memories',
             command: 'cat redis-pool-exhaustion.md 2>/dev/null && jq ".count > 0" .index.json',
+          },
+          results: [{ type: 'other', data: { stdout: '...', exit_code: 0 } }],
+        },
+        {
+          type: 'tool_call',
+          tool_id: SANDBOX_BASH_TOOL_ID,
+          params: {
+            command:
+              "python3 - <<'PY'\nprint(open('/workspace/memories/heredoc-read.md').read())\nopen('/workspace/memories/heredoc-written.md', 'w').write('x')\nPY",
           },
           results: [{ type: 'other', data: { stdout: '...', exit_code: 0 } }],
         },
@@ -527,7 +571,7 @@ describe('server/investigation_round', () => {
       ]);
 
       const reads = extractWorkspaceReads(steps);
-      expect(reads.memoryIds).toEqual(['memory_redis-pool-exhaustion']);
+      expect(reads.memoryIds).toEqual(['memory_redis-pool-exhaustion', 'memory_heredoc-read']);
       expect(reads.cortexIds).toEqual(['cortex_service_checkout-service']);
       expect(reads.decisionTreeIds).toEqual(['symptom:edited-tree']);
       expect(reads.indexReads.memoryIndex).toBe(true);

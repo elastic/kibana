@@ -8,6 +8,7 @@
 import Path from 'path';
 import { internalTools, ToolResultType, type ToolResult } from '@kbn/agent-builder-common';
 import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
+import { CORTEX_ENTITY_TYPE_BUCKETS, CORTEX_ENTITY_TYPES } from '../../common/cortex';
 import { INVESTIGATION_TOOL_IDS } from '../agents/investigation';
 import { CORTEX_WORKSPACE_ROOT } from '../cortex/materialize';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
@@ -30,6 +31,11 @@ const SEEDED_ROOT_BY_KIND: Record<Exclude<SeededWorkspaceKind, 'env_docs'>, stri
   memories: MEMORY_WORKSPACE_ROOT,
   decision_trees: DECISION_TREE_WORKSPACE_ROOT,
 };
+
+const SEEDED_DIR_NAMES = new Set<string>(['cortex', 'memories', 'decision-trees']);
+const CORTEX_BUCKET_NAMES = new Set<string>(
+  CORTEX_ENTITY_TYPES.map((entityType) => CORTEX_ENTITY_TYPE_BUCKETS[entityType])
+);
 
 export const FILE_TOOL_IDS = new Set<string>([
   SANDBOX_VIEW_FILE_TOOL_ID,
@@ -94,48 +100,157 @@ const matchesFilePathForKinds = (
   return false;
 };
 
-const BASH_HEREDOC_BODY_RE = /<<-?\s*['"]?([A-Za-z0-9_]+)['"]?[^\n]*\n[\s\S]*?(?:\n\1(?=\n|$)|$)/g;
 const BASH_URL_RE = /\bhttps?:\/\/[^\s'")]+/gi;
 const BASH_CD_RE = /^\s*cd\s+(?:'([^']+)'|"([^"]+)"|([^\s'";|&()<>]+))/;
-const BASH_BARE_DIR_LIST_RE = /^\s*(?:ls|find|tree|du)(?:\s+-[a-zA-Z0-9-]+)*\s*$/;
-const BASH_DOT_PATH_RE =
-  /^\s*(?:ls|find|tree|du|grep|rg)\b[^;|&\n]*(?:^|[\s'"=(])\.\.?(?:\/)?(?=[\s'";|)&>]|$)/;
+const HEREDOC_OPEN_RE = /<<-?\s*['"]?([A-Za-z0-9_]+)['"]?/;
+const INTERPRETER_VERBS = new Set<string>([
+  'python',
+  'python3',
+  'node',
+  'sh',
+  'bash',
+  'zsh',
+  'perl',
+  'ruby',
+]);
+const DIR_OR_SEARCH_VERBS = new Set<string>([
+  'ls',
+  'find',
+  'tree',
+  'du',
+  'rg',
+  'grep',
+  'egrep',
+  'fgrep',
+]);
+const SHELL_PREFIX_WORDS = new Set<string>([
+  'do',
+  'then',
+  'else',
+  'elif',
+  'while',
+  'until',
+  'if',
+  'time',
+  '!',
+  'env',
+  'command',
+  'sudo',
+]);
 
-// Matches explicit seeded directory paths or relative/absolute `.md` / `.index.json` file tokens in bash.
-const BASH_CANDIDATE_PATH_RE =
-  /(?:^|[\s'"=(:<])((?:\/workspace\/|\.\.?\/)(?:cortex|memories|decision-trees)(?:\/[a-z0-9_.-]*)*|(?:cortex|memories|decision-trees)\/[a-z0-9_./-]*|(?:\/workspace\/|\.\.?\/|[a-z0-9_.-]+\/)*(?:[a-z0-9][a-z0-9_-]*\.md|\.index\.json))(?=[^a-z0-9._/-]|$)/gi;
+export const PATH_TOKEN_RE = /[a-zA-Z0-9_./-]+/g;
+const BASH_QUOTED_STRING_RE = /'[^']*'|"(?:[^"\\]|\\.)*"/g;
+const BASH_UNQUOTED_STDOUT_REDIRECT_RE = /(?:^|[^\d&>])(?:1|&)?>>?\|?\s*(?!&)(?!\/dev\/stdout\b)/;
 
-const BASH_BARE_SEEDED_DIR_RE = /(?:^|\s)(cortex|memories|decision-trees)(?=[\s;|)&>]|$)/g;
+export const extractSegmentVerb = (segment: string): string | undefined => {
+  for (const raw of segment.trim().split(/\s+/)) {
+    const token = raw.replace(/^\(+/, '');
+    if (!token || SHELL_PREFIX_WORDS.has(token)) {
+      continue;
+    }
+    if (/^[A-Za-z_][A-Za-z0-9_]*=/.test(token)) {
+      continue;
+    }
+    const match = /^[A-Za-z0-9_./-]+/.exec(token);
+    return match ? Path.posix.basename(match[0]).toLowerCase() : undefined;
+  }
+  return undefined;
+};
 
 /**
- * Splits a bash command into pipeline/list segments while stripping heredoc bodies and URLs
+ * Strips non-executable heredoc bodies (such as `cat <<'EOF' > file.md`) while keeping heredoc
+ * bodies fed into an interpreter (`python - <<'PY'`, `bash <<'SH'`, etc.) when stdout is not
+ * redirected to a file.
+ */
+const stripNonExecutableHeredocs = (command: string): string => {
+  const lines = command.split('\n');
+  const kept: string[] = [];
+  let activeDelimiter: string | undefined;
+  let keepBody = false;
+
+  for (const line of lines) {
+    if (activeDelimiter !== undefined) {
+      if (line.trim() === activeDelimiter) {
+        activeDelimiter = undefined;
+      } else if (keepBody) {
+        kept.push(line);
+      }
+      continue;
+    }
+
+    const match = HEREDOC_OPEN_RE.exec(line);
+    if (match) {
+      activeDelimiter = match[1];
+      const headerBeforeHeredoc = line.slice(0, match.index);
+      const verb = extractSegmentVerb(headerBeforeHeredoc);
+      const unquotedLine = line.replace(BASH_QUOTED_STRING_RE, '');
+      const hasStdoutFileRedirect = BASH_UNQUOTED_STDOUT_REDIRECT_RE.test(unquotedLine);
+      keepBody = Boolean(verb && INTERPRETER_VERBS.has(verb) && !hasStdoutFileRedirect);
+      kept.push(headerBeforeHeredoc + line.slice(match.index + match[0].length));
+      continue;
+    }
+
+    kept.push(line);
+  }
+
+  return kept.join('\n');
+};
+
+export interface BashSegmentWithCwd {
+  segment: string;
+  cwd: string;
+  /** Index within a `|` pipeline (`0` for the first command, `> 0` when reading piped stdin). */
+  pipelineIndex: number;
+}
+
+/**
+ * Splits a bash command into segments while stripping non-executable heredoc bodies and URLs
  * and tracking `cd <dir>` updates against `workingDirectory` (default `/workspace`).
  */
 export const splitBashSegmentsWithCwd = (
   command: string,
   workingDirectory?: string
-): Array<{ segment: string; cwd: string }> => {
+): BashSegmentWithCwd[] => {
   let cwd =
     typeof workingDirectory === 'string' && workingDirectory.trim().length > 0
       ? Path.posix.resolve('/workspace', workingDirectory.trim())
       : '/workspace';
 
-  const sanitized = command.replace(BASH_HEREDOC_BODY_RE, '<<$1').replace(BASH_URL_RE, '');
-  const out: Array<{ segment: string; cwd: string }> = [];
+  const sanitized = stripNonExecutableHeredocs(command).replace(BASH_URL_RE, '');
+  const out: BashSegmentWithCwd[] = [];
 
-  for (const segment of sanitized.split(/\n|;|&&|\|\||\|/)) {
-    const cdMatch = BASH_CD_RE.exec(segment);
-    if (cdMatch) {
-      const target = cdMatch[1] ?? cdMatch[2] ?? cdMatch[3];
-      if (target) {
-        cwd = Path.posix.resolve(cwd, target);
+  for (const statement of sanitized.split(/\n|;|&&|\|\|/)) {
+    const stages = statement.split('|');
+    for (let pipelineIndex = 0; pipelineIndex < stages.length; pipelineIndex++) {
+      const segment = stages[pipelineIndex];
+      const cdMatch = BASH_CD_RE.exec(segment);
+      if (cdMatch) {
+        const target = cdMatch[1] ?? cdMatch[2] ?? cdMatch[3];
+        if (target && stages.length === 1) {
+          cwd = Path.posix.resolve(cwd, target);
+        }
+        continue;
       }
-      continue;
+      out.push({ segment, cwd, pipelineIndex });
     }
-    out.push({ segment, cwd });
   }
 
   return out;
+};
+
+const isCandidateSeededToken = (rawToken: string, cwd: string): boolean => {
+  const lower = rawToken.toLowerCase();
+  if (lower.endsWith('.md') || lower.endsWith('.index.json')) {
+    return true;
+  }
+  const parts = rawToken.split('/').filter((part) => part.length > 0 && part !== '.');
+  if (parts.some((part) => SEEDED_DIR_NAMES.has(part))) {
+    return true;
+  }
+  if (cwd === CORTEX_WORKSPACE_ROOT && parts.length > 0 && CORTEX_BUCKET_NAMES.has(parts[0])) {
+    return true;
+  }
+  return false;
 };
 
 const bashAccessesSeededWorkspace = (
@@ -143,30 +258,28 @@ const bashAccessesSeededWorkspace = (
   workingDirectory: string | undefined,
   kindSet: ReadonlySet<SeededWorkspaceKind>
 ): boolean => {
-  for (const { segment, cwd } of splitBashSegmentsWithCwd(command, workingDirectory)) {
-    BASH_CANDIDATE_PATH_RE.lastIndex = 0;
-    let match = BASH_CANDIDATE_PATH_RE.exec(segment);
-    while (match) {
-      if (matchesFilePathForKinds(match[1], kindSet, cwd)) {
+  // Remove backslash-escaped quotes (e.g. `WHERE service.name == \"cortex\"`) so query literals are not mistaken for paths
+  const cleanedCommand = command.replace(/\\["'][a-zA-Z0-9_.-]+\\["']/g, '');
+
+  for (const { segment, cwd, pipelineIndex } of splitBashSegmentsWithCwd(
+    cleanedCommand,
+    workingDirectory
+  )) {
+    const tokens = segment.match(PATH_TOKEN_RE) ?? [];
+    for (const token of tokens) {
+      if (token.startsWith('-')) {
+        continue;
+      }
+      if (isCandidateSeededToken(token, cwd) && matchesFilePathForKinds(token, kindSet, cwd)) {
         return true;
       }
-      match = BASH_CANDIDATE_PATH_RE.exec(segment);
     }
 
-    BASH_BARE_SEEDED_DIR_RE.lastIndex = 0;
-    let dirMatch = BASH_BARE_SEEDED_DIR_RE.exec(segment);
-    while (dirMatch) {
-      if (matchesFilePathForKinds(dirMatch[1], kindSet, cwd)) {
+    if (pipelineIndex === 0 && matchesFilePathForKinds(cwd, kindSet)) {
+      const verb = extractSegmentVerb(segment);
+      if (verb && DIR_OR_SEARCH_VERBS.has(verb)) {
         return true;
       }
-      dirMatch = BASH_BARE_SEEDED_DIR_RE.exec(segment);
-    }
-
-    if (
-      matchesFilePathForKinds(cwd, kindSet) &&
-      (BASH_BARE_DIR_LIST_RE.test(segment) || BASH_DOT_PATH_RE.test(segment))
-    ) {
-      return true;
     }
   }
 
