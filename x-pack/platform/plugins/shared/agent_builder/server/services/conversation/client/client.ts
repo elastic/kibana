@@ -1760,9 +1760,36 @@ class ConversationClientImpl implements ConversationClient {
         id: conversationId,
         mutate: (current) => {
           before = current;
+          const update = fields(current);
+          // Enforce inside the OCC mutation for every metadata writer, including template migrations.
+          if (current.template_id && ('metadata' in update || 'template_id' in update)) {
+            const template = getTemplate(current.template_id);
+            const immutableFields = Object.entries(template?.fields ?? {})
+              .filter(([, definition]) => definition.immutable)
+              .map(([key]) => key);
+            if (
+              immutableFields.length > 0 &&
+              'template_id' in update &&
+              update.template_id !== current.template_id
+            ) {
+              throw createBadRequestError(
+                'Cannot change a template with immutable metadata fields'
+              );
+            }
+            const changedFields =
+              'metadata' in update
+                ? diffMetadata(current.metadata ?? {}, update.metadata ?? {})
+                : [];
+            const changedImmutableField = changedFields.find((key) =>
+              immutableFields.includes(key)
+            );
+            if (changedImmutableField) {
+              throw createBadRequestError(`Metadata field "${changedImmutableField}" is immutable`);
+            }
+          }
           return updateConversation({
             conversation: current,
-            update: { id: conversationId, ...fields(current) },
+            update: { id: conversationId, ...update },
             updateDate: new Date(),
             space: this.space,
           });
