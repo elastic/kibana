@@ -196,7 +196,50 @@ describe('generateDashboardTool handler', () => {
       expect(results).toEqual([
         {
           type: ToolResultType.error,
-          data: { message: expect.any(String), metadata: { failures } },
+          data: {
+            message: expect.stringContaining('see metadata.failures'),
+            metadata: { failures },
+          },
+        },
+      ]);
+      expect(attachments.add).not.toHaveBeenCalled();
+      expect(sendUiEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not create a new dashboard whose requested panels left only empty sections', async () => {
+      mockRetrieveLatestVersion.mockReturnValue(undefined);
+      mockGeneratedDashboard({
+        ...generatedDashboard,
+        panels: [{ id: 'section', title: 'Section', collapsed: false, grid: { y: 0 }, panels: [] }],
+      });
+
+      const { results, sendUiEvent, attachments } = await callHandler(undefined, undefined, {
+        sections: [{ id: 'section', title: 'Section' }],
+        panels: [{ id: 'panel', section: 'section' }],
+      });
+
+      expect(results[0]).toEqual({
+        type: ToolResultType.error,
+        data: { message: expect.any(String), metadata: { failures } },
+      });
+      expect(attachments.add).not.toHaveBeenCalled();
+      expect(sendUiEvent).not.toHaveBeenCalled();
+    });
+
+    it('does not create a new dashboard when every requested control was left out without a failure', async () => {
+      mockRetrieveLatestVersion.mockReturnValue(undefined);
+
+      const { results, sendUiEvent, attachments } = await callHandler(undefined, undefined, {
+        controls: [{ id: 'control' }],
+      });
+
+      expect(results).toEqual([
+        {
+          type: ToolResultType.error,
+          data: {
+            message: expect.stringContaining('controls you add on your own are left out'),
+            metadata: { failures: [] },
+          },
         },
       ]);
       expect(attachments.add).not.toHaveBeenCalled();

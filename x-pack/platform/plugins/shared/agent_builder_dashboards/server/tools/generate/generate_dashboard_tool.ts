@@ -43,6 +43,9 @@ const newDashboardMetadataErrorMessage = 'New dashboards require a non-empty `ti
 const noDashboardCreatedErrorMessage =
   'No dashboard was created because none of the requested panels or controls could be added (see metadata.failures). Fix the failures and call again without dashboardAttachmentId.';
 
+const noControlsAddedErrorMessage =
+  'No dashboard was created because none of the requested controls could be added: controls you add on your own are left out when their field is missing or does not suit the control. Add panels, or controls on suitable fields, and call again without dashboardAttachmentId.';
+
 /** Whether the dashboard has no panels and no controls. Empty sections do not count. */
 const isEmptyDashboard = ({ panels, pinned_panels: pinnedPanels }: DashboardAttachmentData) =>
   panels.every((widget) => isSection(widget) && widget.panels.length === 0) &&
@@ -246,7 +249,10 @@ Panel positions and sizes are set automatically after the changes are applied, a
               {
                 type: ToolResultType.error,
                 data: {
-                  message: noDashboardCreatedErrorMessage,
+                  message:
+                    failures.length > 0
+                      ? noDashboardCreatedErrorMessage
+                      : noControlsAddedErrorMessage,
                   metadata: { failures },
                 },
               },
