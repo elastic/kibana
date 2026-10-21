@@ -730,6 +730,46 @@ describe('useSettleDeclinedProposal', () => {
     expect(http.get).toHaveBeenCalledTimes(2);
   });
 
+  it('keeps reading as declining until `afterDecision` ends, even after the decision lands', async () => {
+    const http = makeHttp();
+    http.get.mockResolvedValue({ decision: 'dismissed' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+    let finishRefresh!: () => void;
+    const afterDecision = jest.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          finishRefresh = resolve;
+        })
+    );
+
+    const { Wrapper, queryClient } = createWrapper();
+    const { result } = renderHook(
+      () => ({
+        settle: useSettleDeclinedProposal(),
+        isDeclining: useIsDecliningProposal('p-1'),
+      }),
+      { wrapper: Wrapper }
+    );
+
+    let settled: Promise<void> | undefined;
+    act(() => {
+      settled = result.current.settle('p-1', queryClient, afterDecision);
+    });
+
+    await waitFor(() => expect(afterDecision).toHaveBeenCalledTimes(1));
+    // The decision is recorded, but the refresh has not ended: the row must still read declining.
+    expect(result.current.isDeclining).toBe(true);
+
+    await act(async () => {
+      finishRefresh();
+      await settled;
+    });
+
+    await waitFor(() => expect(result.current.isDeclining).toBe(false));
+  });
+
   it('shows the decline only on the client it was given, until the decision lands', async () => {
     let resolveDecision!: (value: { decision: string }) => void;
     const http = makeHttp();
