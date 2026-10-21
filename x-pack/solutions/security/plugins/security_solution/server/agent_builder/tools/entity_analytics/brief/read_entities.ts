@@ -80,12 +80,16 @@ export const readEntities = async ({
     GROUP_VALUE_FIELDS
   );
   return {
-    candidates: ranked.map((candidate) =>
-      withGroupValues(
-        candidate,
-        (membersById[candidate.id] ?? []).map(({ record }) => record)
-      )
-    ),
+    candidates: ranked.map((candidate) => {
+      const members = membersById[candidate.id] ?? [];
+      return {
+        ...withGroupValues(
+          candidate,
+          members.map(({ record }) => record)
+        ),
+        memberIds: members.map(({ id }) => id),
+      };
+    }),
     capturedCount: entityIds.length,
     readCount: response.hits.hits.length,
     isTruncated: candidates.length > MAX_BRIEF_CANDIDATES,

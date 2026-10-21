@@ -14,14 +14,15 @@ import {
   getEntityLifecycle,
   matchesPrivilegedWatchlist,
 } from '../../../../lib/entity_analytics/lead_generation/observation_modules/utils';
-import type { BriefCandidate, EntityFacts } from './types';
+import type { BriefCandidate, EntityAlerts, EntityFacts } from './types';
 import { formatStoredValue } from './describe_scope';
 import { getCandidateRisk } from './read_entities';
 
 /** What the model knows about each candidate, as data. */
 export const buildFacts = (
   candidates: BriefCandidate[],
-  scope: EntityAnalyticsScope
+  scope: EntityAnalyticsScope,
+  alertsByEntityId: Record<string, EntityAlerts> = {}
 ): EntityFacts[] =>
   candidates.map((candidate) => {
     const criticality = getAssetCriticality(candidate);
@@ -38,6 +39,7 @@ export const buildFacts = (
       risk: risk && { of: risk.of, level: risk.level, score: Math.round(risk.score) },
       assetCriticality: criticality ? formatStoredValue(criticality) : undefined,
       privilegedUser: extractIsPrivileged(candidate) || undefined,
+      alerts: alertsByEntityId[candidate.id],
       otherWatchlists: otherWatchlists || undefined,
       // Relative to the capture, so no date or time zone is stated.
       firstSeen: firstSeen ? moment(firstSeen).from(scope.capturedAt) : undefined,

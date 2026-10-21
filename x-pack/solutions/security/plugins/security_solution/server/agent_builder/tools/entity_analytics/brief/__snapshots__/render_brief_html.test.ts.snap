@@ -42,6 +42,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
 .brief .priority-title{display:flex;flex-direction:column;min-width:0;flex:1 1 160px;}
 .brief .name{font-weight:700;font-size:15px;overflow-wrap:anywhere;}
 .brief .pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}
+.brief .alerts{margin:6px 0 0 32px;}
 .brief .evidence{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 6px 32px;}
 .brief .label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.72;margin-right:2px;}
 .brief .chip{display:inline-block;padding:0 8px;line-height:20px;border-radius:var(--cc-radius-s);border:1px solid var(--cc-color-border);font-size:12px;}
@@ -118,6 +119,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         </div>
         <div class=\\"pills\\"><span class=\\"pill level-high\\">Risk 76 High <span class=\\"pill-detail\\">group</span></span><span class=\\"pill pill-outline\\">High impact</span><span class=\\"pill pill-outline\\">Privileged user</span></div>
       </div>
+      <p class=\\"alerts\\">3 alerts: Potential Credential Access via LSASS Memory Dump (2), Unusual Logon (1)</p>
       <div class=\\"evidence\\"><span class=\\"label\\">Flagged by</span><span class=\\"chip\\">Entities with alerts</span><span class=\\"chip\\">Newly high/critical</span><span class=\\"chip\\">Watchlisted</span></div>
       <p class=\\"priority-text\\">Has alerts, is newly high/critical, and sits on the watchlist, with risk score 76 (High). Combines a privileged, high-impact identity with three separate flags, unlike any other entity here.</p>
       <p class=\\"next\\"><span class=\\"label\\">Next</span>Review the alerts behind the new High risk score and confirm recent access activity.</p>
@@ -148,6 +150,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         </div>
         <div class=\\"pills\\"><span class=\\"pill level-moderate\\">Risk 66 Moderate</span><span class=\\"pill pill-outline\\">Extreme impact</span></div>
       </div>
+      
       <div class=\\"evidence\\"><span class=\\"label\\">Flagged by</span><span class=\\"chip\\">Entities with alerts</span><span class=\\"chip\\">New entity</span></div>
       <p class=\\"priority-text\\">Flagged for alerts and as a new entity, first seen 2 days ago, asset criticality is Extreme impact, risk score 66 (Moderate). Extreme impact criticality on a host seen for the first time this week raises the stakes of its alerts.</p>
       <p class=\\"next\\"><span class=\\"label\\">Next</span>Check what triggered the alerts and verify the host&#39;s provisioning is expected.</p>
@@ -161,6 +164,7 @@ exports[`renderBriefHtml renders the fixture brief 1`] = `
         </div>
         <div class=\\"pills\\"><span class=\\"pill level-moderate\\">Risk 58 Moderate</span><span class=\\"pill pill-outline\\">High impact</span></div>
       </div>
+      
       <div class=\\"evidence\\"><span class=\\"label\\">Flagged by</span><span class=\\"chip\\">Entities with alerts</span><span class=\\"chip\\">New entity</span></div>
       <p class=\\"priority-text\\">Flagged for alerts and as a new entity, first seen 3 days ago, asset criticality is High impact, risk score 58 (Moderate). A newly appeared high-impact host with alerts warrants a look even without other flags.</p>
       <p class=\\"next\\"><span class=\\"label\\">Next</span>Review the alerts and confirm the host&#39;s role and ownership.</p>

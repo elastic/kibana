@@ -82,6 +82,12 @@ export const BriefViewModel = lazySchema(() =>
           .optional(),
         assetCriticality: z.string().optional(),
         privilegedUser: z.literal(true).optional(),
+        alerts: z
+          .object({
+            count: z.number().int(),
+            rules: z.array(z.object({ name: z.string(), count: z.number().int() })),
+          })
+          .optional(),
         firstSeen: z.string().optional(),
         observed: z.string(),
         whyItMatters: z.string(),
@@ -151,8 +157,16 @@ export const buildViewModel = ({
         if (!entityFacts) {
           return [];
         }
-        const { name, type, flaggedFor, risk, assetCriticality, privilegedUser, firstSeen } =
-          entityFacts;
+        const {
+          name,
+          type,
+          flaggedFor,
+          risk,
+          assetCriticality,
+          privilegedUser,
+          alerts,
+          firstSeen,
+        } = entityFacts;
         return [
           {
             rank: index + 1,
@@ -163,6 +177,7 @@ export const buildViewModel = ({
             risk: risk && { score: risk.score, level: risk.level, of: risk.of },
             assetCriticality,
             privilegedUser,
+            alerts,
             // As the prompt does: first seen only for an entity flagged as new.
             firstSeen: flaggedFor.includes('newEntity') ? firstSeen : undefined,
             observed: sentence(observed),

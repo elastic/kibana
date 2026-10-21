@@ -21,6 +21,7 @@ import type {
 import { buildFacts } from './build_facts';
 import { describeSample, getPeriodStart } from './describe_scope';
 import { draftBrief } from './draft_brief';
+import { readAlertRules } from './read_alert_rules';
 import { getCandidateRisk, readEntities } from './read_entities';
 import type { BriefPriority } from './prompts';
 import { renderBriefHtml } from './render_brief_html';
@@ -53,7 +54,8 @@ export const generateBrief = async ({
     return { ...renderBriefHtml(viewModel), viewModel, priorityCount: 0 };
   }
 
-  const facts = buildFacts(candidates, scope);
+  const alertsByEntityId = await readAlertRules({ candidates, scope, spaceId, esClient, logger });
+  const facts = buildFacts(candidates, scope, alertsByEntityId);
   const draft = await draftBrief({
     inferenceClient,
     scope,

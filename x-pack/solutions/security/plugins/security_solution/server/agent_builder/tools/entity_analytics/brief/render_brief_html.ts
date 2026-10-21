@@ -171,6 +171,7 @@ const renderPriority = (priority: Priority): string => {
         </div>
         <div class="pills">${riskPill}${criticalityPill}${privilegedPill}</div>
       </div>
+      ${priority.alerts ? renderAlerts(priority.alerts) : ''}
       <div class="evidence"><span class="label">Flagged by</span>${chips}</div>
       <p class="priority-text">${escapeHtml(priority.observed)} ${escapeHtml(
     priority.whyItMatters
@@ -178,6 +179,13 @@ const renderPriority = (priority: Priority): string => {
       <p class="next"><span class="label">Next</span>${escapeHtml(priority.nextStep)}</p>
       ${priority.riskHistory ? renderRiskHistory(name, priority.riskHistory) : ''}
     </li>`;
+};
+
+/** The alerts and the rules behind most of them, as one line of plain text. */
+const renderAlerts = ({ count, rules }: NonNullable<Priority['alerts']>): string => {
+  const alerts = formatCountOf(count, 'alert', 'alerts');
+  const names = rules.map((rule) => `${rule.name} (${rule.count})`).join(', ');
+  return `<p class="alerts">${escapeHtml(names ? `${alerts}: ${names}` : alerts)}</p>`;
 };
 
 /** Bands are labelled only when the labels don't overlap in the chart. */
@@ -305,6 +313,8 @@ const HEIGHTS = {
   priority: 154.5,
   /** The row the evidence chips need when they don't fit one line, with its gap. */
   chipRow: 28,
+  /** The line that names the alerts and their rules, with its gap. */
+  alerts: 27,
   chart: 131,
 };
 /** The counts' height by how many there are, as labels and changes wrap in narrower counts. */
@@ -350,6 +360,7 @@ const estimatePriorityHeight = ({
   whyItMatters,
   nextStep,
   riskHistory,
+  alerts,
 }: Priority): number => {
   const chipsWidth = sumBy(
     flaggedFor,
@@ -363,6 +374,7 @@ const estimatePriorityHeight = ({
     HEIGHTS.priority +
     (chipRows - 1) * HEIGHTS.chipRow +
     (textLines - 2) * LINE_HEIGHTS.text +
+    (alerts ? HEIGHTS.alerts : 0) +
     (riskHistory ? HEIGHTS.chart : 0)
   );
 };
@@ -436,6 +448,7 @@ const CSS = `
 .brief .priority-title{display:flex;flex-direction:column;min-width:0;flex:1 1 160px;}
 .brief .name{font-weight:700;font-size:15px;overflow-wrap:anywhere;}
 .brief .pills{display:flex;flex-wrap:wrap;gap:6px;justify-content:flex-end;}
+.brief .alerts{margin:6px 0 0 32px;}
 .brief .evidence{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:8px 0 6px 32px;}
 .brief .label{font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.72;margin-right:2px;}
 .brief .chip{display:inline-block;padding:0 8px;line-height:20px;border-radius:var(--cc-radius-s);border:1px solid var(--cc-color-border);font-size:12px;}

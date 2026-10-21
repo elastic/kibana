@@ -27,6 +27,15 @@ export interface BriefCandidate {
   /** The tiles that flag the entity, in the page's order. */
   tileIds: SignalCardId[];
   record: Entity;
+  /** The ids of the members resolved to a golden entity. Absent for an entity without members. */
+  memberIds?: string[];
+}
+
+/** The open alerts of an entity, or of its resolution group, in the captured period. */
+export interface EntityAlerts {
+  count: number;
+  /** The rules behind most of the alerts, most first. */
+  rules: Array<{ name: string; count: number }>;
 }
 
 /** What the model knows about a candidate. */
@@ -43,6 +52,7 @@ export interface EntityFacts {
   };
   assetCriticality?: string;
   privilegedUser?: true;
+  alerts?: EntityAlerts;
   otherWatchlists?: number;
   /** Relative to the capture, such as "5 days ago". */
   firstSeen?: string;

@@ -45,6 +45,13 @@ const fixtureViewModel: BriefViewModel = {
       risk: { score: 76, level: 'High', of: 'resolution group' },
       assetCriticality: 'High impact',
       privilegedUser: true,
+      alerts: {
+        count: 3,
+        rules: [
+          { name: 'Potential Credential Access via LSASS Memory Dump', count: 2 },
+          { name: 'Unusual Logon', count: 1 },
+        ],
+      },
       observed:
         'Has alerts, is newly high/critical, and sits on the watchlist, with risk score 76 (High).',
       whyItMatters:
@@ -123,6 +130,20 @@ describe('renderBriefHtml', () => {
     // The recommended step comes before the priorities, and there is no footer.
     expect(html.indexOf('Recommended next step')).toBeLessThan(html.indexOf('<h2>Priorities</h2>'));
     expect(html).not.toContain('<footer');
+  });
+
+  it('names the alerts and their rules in plain text', () => {
+    const { html } = renderBriefHtml({
+      ...fixtureViewModel,
+      priorities: [
+        {
+          ...fixtureViewModel.priorities[0],
+          alerts: { count: 1, rules: [{ name: '<b>Rule</b>', count: 1 }] },
+        },
+      ],
+    });
+
+    expect(html).toContain('<p class="alerts">1 alert: &lt;b&gt;Rule&lt;/b&gt; (1)</p>');
   });
 
   it('shows only the counts above zero or changed, and says when there is nothing to compare', () => {
