@@ -212,7 +212,10 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
         // add bottom border for current dashboard
         boxShadow: `${euiTheme.colors.textPrimary} 0 calc(-.5 * ${euiTheme.size.xs}) inset`,
         paddingInline: 0,
-        // trade 2px of EUI's 6px bottom padding for margin to raise the border without moving the text
+        // EuiListGroupItem gives its label span 6px of block padding, and the inset box-shadow above
+        // is drawn at the bottom of that padding. Moving 2px of the bottom padding into margin raises
+        // the underline by 2px while keeping the item's outer height, so the label stays aligned with
+        // the other links.
         paddingBlockEnd: euiTheme.size.xs,
         marginBlockEnd: euiTheme.size.xxs,
       },
