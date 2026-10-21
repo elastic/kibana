@@ -81,7 +81,7 @@ Call \`${SECURITY_GENERATE_LEADS_TOOL_ID}\` when the user wants to kick off a ne
 - The tool will prompt the user for confirmation before starting.
 - The tool returns immediately with \`{ status: 'running', executionUuid }\` — generation continues in the background.
 - After the run completes, new leads appear in \`list_leads\`. Tell the user to re-list leads to see the new results.
-- \`connectorName\` is optional — provide a name or partial name (e.g. "OpenAI") and the tool resolves it to the correct connector. If omitted, the previously configured connector is used. If no connector has been configured, the tool will ask for one.
+- \`connectorName\` is optional — provide a name or partial name (e.g. "OpenAI") and the tool resolves it to the correct connector. If omitted, the previously configured connector is used. If no connector has been configured, the tool uses the chat connector.
 
 ## Using dismiss_lead
 
@@ -100,7 +100,7 @@ Call \`${SECURITY_DISMISS_LEAD_TOOL_ID}\` when the user decides a lead is not wo
 3. Note any stale leads and the last generation run time
 
 ### "Generate new investigation leads"
-1. Call \`${SECURITY_GENERATE_LEADS_TOOL_ID}\` (with \`connectorName\` if not previously configured, e.g. \`connectorName: "OpenAI"\`)
+1. Call \`${SECURITY_GENERATE_LEADS_TOOL_ID}\` (with \`connectorName\` only if the user asks for a specific connector, e.g. \`connectorName: "OpenAI"\`)
 2. The tool will ask the user to confirm before starting
 3. On confirmation, report that generation has started and suggest calling \`list_leads\` once it completes
 

@@ -155,7 +155,12 @@ const renderPage = ({
     fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
   }
 
-  return { history, application: core.application, toasts: core.notifications.toasts };
+  return {
+    history,
+    application: core.application,
+    reportEvent: core.analytics.reportEvent as jest.Mock,
+    toasts: core.notifications.toasts,
+  };
 };
 
 describe('OnboardingPage', () => {
@@ -554,6 +559,27 @@ describe('OnboardingPage', () => {
         )
       );
       expect(history.location.pathname).toBe('/onboarding');
+    });
+
+    it('reports each failed enable and the partial save as onboarding errors', async () => {
+      const triageId = SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
+      const httpPatch = jest.fn(async (url: string) => {
+        if (url.includes(triageId)) {
+          throw new Error('blocked by index [secret]');
+        }
+        return { worker: { id: 'mock', enabled: true } };
+      });
+      const { reportEvent } = renderPage({ canWrite: true, httpPatch });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
+      await waitFor(() =>
+        expect(screen.getByRole('button', { name: 'Enable and run' })).not.toBeDisabled()
+      );
+
+      expect(reportEvent.mock.calls).toEqual([
+        ['alertzero_ui_error_shown', { error_class: 'unknown', surface: 'onboarding' }],
+        ['alertzero_ui_error_shown', { error_class: 'partial_failure', surface: 'onboarding' }],
+      ]);
     });
 
     it('sends the saved revision when Enable and run is retried after a partial save', async () => {
