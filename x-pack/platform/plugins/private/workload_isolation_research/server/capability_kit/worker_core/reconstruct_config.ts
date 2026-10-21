@@ -8,8 +8,9 @@
 /* RESEARCH ONLY. Shared by workflow and agent islands.
  * Captured effective config is plain JSON from toPlainConfig. Validating {}
  * applies schema defaults. Copying only string leaves drops numbers, booleans,
- * arrays, and optional objects. This helper restores ByteSizeValue and Duration
- * inputs, then validates the whole capture. */
+ * arrays, and optional objects. Duration and ByteSizeValue are restored only
+ * where the owner schema says so. A string that merely looks like PT30S stays
+ * a string in headers and allowedHosts. */
 
 import { duration as momentDuration } from 'moment';
 
@@ -35,22 +36,88 @@ const isoDurationMs = (value: string): number | null => {
   return ms;
 };
 
-/** Turns captured ByteSizeValue and ISO durations back into schema inputs. */
-export const restoreSchemaInput = (value: unknown, depth = 0): unknown => {
+/** Config-schema node. Inner fields are the class members used to walk types. */
+interface SchemaNode {
+  readonly constructor: { name: string };
+  getPropSchemas?: () => Record<string, SchemaNode>;
+  readonly arrayType?: SchemaNode;
+  readonly maybeType?: SchemaNode;
+  readonly unionTypes?: readonly SchemaNode[];
+  readonly equalType?: SchemaNode;
+  readonly notEqualType?: SchemaNode;
+  readonly valueType?: SchemaNode;
+}
+
+const schemaKind = (schema: SchemaNode | undefined): string => schema?.constructor?.name ?? '';
+
+/**
+ * Restores ByteSizeValue and moment Duration JSON only on schema nodes of those
+ * types. Strings on every other node, including headers and host lists, stay
+ * strings. Without a schema, nothing is converted.
+ */
+export const restoreSchemaInput = (value: unknown, schema?: SchemaNode, depth = 0): unknown => {
   if (depth > MAX_DEPTH) throw new Error('worker-core config reconstruction exceeded depth');
-  if (typeof value === 'string') {
+  if (!schema) return value;
+  const kind = schemaKind(schema);
+  if (kind === 'DurationType') {
+    if (typeof value !== 'string') return value;
     const ms = isoDurationMs(value);
     return ms === null ? value : ms;
   }
-  if (Array.isArray(value)) return value.map((item) => restoreSchemaInput(item, depth + 1));
-  if (!value || typeof value !== 'object') return value;
-  if (isByteSizePlain(value)) return value.valueInBytes;
-  const out: Record<string, unknown> = {};
-  for (const [key, child] of Object.entries(value)) {
-    if (child === undefined) continue;
-    out[key] = restoreSchemaInput(child, depth + 1);
+  if (kind === 'ByteSizeType') {
+    if (value && typeof value === 'object' && isByteSizePlain(value)) return value.valueInBytes;
+    return value;
   }
-  return out;
+  if (kind === 'MaybeType' && schema.maybeType) {
+    if (value === undefined || value === null) return value;
+    return restoreSchemaInput(value, schema.maybeType, depth + 1);
+  }
+  if (kind === 'ArrayType' && schema.arrayType && Array.isArray(value)) {
+    return value.map((item) => restoreSchemaInput(item, schema.arrayType, depth + 1));
+  }
+  if (
+    kind === 'RecordOfType' &&
+    schema.valueType &&
+    value &&
+    typeof value === 'object' &&
+    !Array.isArray(value)
+  ) {
+    const out: Record<string, unknown> = {};
+    for (const [key, child] of Object.entries(value)) {
+      out[key] = restoreSchemaInput(child, schema.valueType, depth + 1);
+    }
+    return out;
+  }
+  if (kind === 'UnionType' && schema.unionTypes) {
+    const durationOnly = schema.unionTypes.every((alternative) => schemaKind(alternative) === 'DurationType');
+    if (durationOnly && schema.unionTypes[0]) {
+      return restoreSchemaInput(value, schema.unionTypes[0], depth + 1);
+    }
+    return value;
+  }
+  if (kind === 'ConditionalType' && schema.equalType && schema.notEqualType) {
+    if (schemaKind(schema.equalType) === schemaKind(schema.notEqualType)) {
+      return restoreSchemaInput(value, schema.equalType, depth + 1);
+    }
+    return value;
+  }
+  if (
+    kind === 'ObjectType' &&
+    schema.getPropSchemas &&
+    value &&
+    typeof value === 'object' &&
+    !Array.isArray(value)
+  ) {
+    const props = schema.getPropSchemas();
+    const out: Record<string, unknown> = {};
+    for (const [key, child] of Object.entries(value)) {
+      if (child === undefined) continue;
+      const childSchema = props[key];
+      out[key] = childSchema ? restoreSchemaInput(child, childSchema, depth + 1) : child;
+    }
+    return out;
+  }
+  return value;
 };
 
 const missing = (pluginId: string): boolean =>
@@ -88,5 +155,8 @@ export const reconstructPluginConfig = (
     }
     return validated;
   }
-  return configSchema.validate(restoreSchemaInput(capturedEffectiveConfig), context);
+  return configSchema.validate(
+    restoreSchemaInput(capturedEffectiveConfig, configSchema as SchemaNode),
+    context
+  );
 };

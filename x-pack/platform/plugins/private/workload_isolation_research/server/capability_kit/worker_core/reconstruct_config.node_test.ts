@@ -187,38 +187,77 @@ test('agent builder capture keeps numbers, booleans, arrays, and optional object
   assert.equal(omitted.deductive, undefined);
 });
 
-test('ISO durations become moment Durations and Kibana duration strings stay', () => {
+test('ISO durations become moment Durations only on duration schema nodes', () => {
   const durationSchema = schema.object({
     responseTimeout: schema.duration({ defaultValue: '60s' }),
     dataRetention: schema.string({ defaultValue: '90d' }),
+    nested: schema.object({ idle: schema.duration({ defaultValue: '1s' }) }),
   });
-  const typed = durationSchema.validate({ responseTimeout: '30s', dataRetention: '90d' }, context);
-  const captured = toPlainConfig(typed) as { responseTimeout: string; dataRetention: string };
+  const typed = durationSchema.validate(
+    { responseTimeout: '30s', dataRetention: '90d', nested: { idle: '90s' } },
+    context
+  );
+  const captured = toPlainConfig(typed) as {
+    responseTimeout: string;
+    dataRetention: string;
+    nested: { idle: string };
+  };
   assert.equal(captured.responseTimeout, 'PT30S');
   assert.equal(captured.dataRetention, '90d');
+  assert.equal(captured.nested.idle, 'PT1M30S');
   assert.throws(() => durationSchema.validate(captured, context));
   const rebuilt = reconstructPluginConfig('actions', durationSchema, captured, context) as {
     responseTimeout: { asMilliseconds: () => number };
     dataRetention: string;
+    nested: { idle: { asMilliseconds: () => number } };
   };
   assert.equal(rebuilt.responseTimeout.asMilliseconds(), 30000);
   assert.equal(rebuilt.dataRetention, '90d');
-  const restored = restoreSchemaInput({
+  assert.equal(rebuilt.nested.idle.asMilliseconds(), 90000);
+  const unguided = restoreSchemaInput({
     requestTimeout: 'PT30S',
-    dataRetention: '90d',
-    nested: { idle: 'PT1M30S' },
-    valueInBytes: 5,
-    extra: true,
-  }) as {
-    requestTimeout: number;
-    dataRetention: string;
-    nested: { idle: number };
-    valueInBytes: number;
-    extra: boolean;
+    header: 'PT30S',
+  }) as { requestTimeout: string; header: string };
+  assert.equal(unguided.requestTimeout, 'PT30S');
+  assert.equal(unguided.header, 'PT30S');
+});
+
+test('ISO-looking strings in headers and allowedHosts stay strings', () => {
+  const agentCaptured = {
+    enabled: false,
+    topSnippets: { numSnippets: 7, numWords: 100 },
+    tracing: {
+      exporters: [{ url: 'https://example.com/v1/traces', headers: { 'x-test': 'PT30S' } }],
+      opik_distributed_tracing: true,
+    },
   };
-  assert.equal(restored.requestTimeout, 30000);
-  assert.equal(restored.dataRetention, '90d');
-  assert.equal(restored.nested.idle, 90000);
-  assert.equal(restored.valueInBytes, 5);
-  assert.equal(restored.extra, true);
+  const everyIso = (value: unknown): unknown => {
+    if (typeof value === 'string' && value.startsWith('P')) return 30000;
+    if (Array.isArray(value)) return value.map(everyIso);
+    if (value && typeof value === 'object') {
+      return Object.fromEntries(
+        Object.entries(value).map(([key, child]) => [key, everyIso(child)])
+      );
+    }
+    return value;
+  };
+  assert.throws(() => agentConfigSchema.validate(everyIso(agentCaptured), context));
+  const agent = reconstructPluginConfig('agentBuilder', agentConfigSchema, agentCaptured, context) as {
+    tracing: { exporters: Array<{ headers?: Record<string, string> }> };
+  };
+  assert.equal(agent.tracing.exporters[0].headers?.['x-test'], 'PT30S');
+
+  const hostsCaptured = {
+    enabled: true,
+    maxWorkflowDepth: 3,
+    http: { allowedHosts: ['PT30S'] },
+  };
+  assert.throws(() => executionConfig.schema.validate(everyIso(hostsCaptured), context));
+  const hosts = reconstructPluginConfig(
+    'workflowsExecutionEngine',
+    executionConfig.schema,
+    hostsCaptured,
+    context
+  ) as { http: { allowedHosts: string[] } };
+  assert.deepEqual(hosts.http.allowedHosts, ['PT30S']);
 });
