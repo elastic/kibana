@@ -108,7 +108,9 @@ use `off_topic` only when it matches neither.
 - entity: `{ type: "entity", subtype, feature_id, name, source_id? }`
 - infrastructure: `{ type: "infrastructure", subtype, feature_id, title?, workloads, source_id? }`
 
-`feature_id` is the fetched KI's `feature.id` (or a matched query's `features[].id`, or  `properties.name`), copied exactly. Copy classification verbatim from each fetched KI:
+`feature_id` is the fetched KI's `feature.id` (or a matched query's `features[].id`), copied exactly. If a
+feature name is provided, use it only to locate the fetched feature, then copy that feature's `id`.
+Copy classification verbatim from each fetched KI:
 `subtype` on every entry and `type` on cause entries. Blast-radius `type` remains the row-shape label listed above.
 
 </topology_entry_shapes>

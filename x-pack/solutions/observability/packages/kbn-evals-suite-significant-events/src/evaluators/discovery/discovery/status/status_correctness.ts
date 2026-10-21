@@ -75,6 +75,13 @@ export const statusCorrectnessEvaluator: DiscoveryEvaluator = {
 
     const checks = expectedRuleSets.length + forbiddenRules.size;
     const failures = missingEvents.length + wronglyWritten.length;
+    if (checks === 0) {
+      return Promise.resolve({
+        score: null,
+        label: 'unavailable',
+        explanation: 'No active expected or forbidden rules declared for this scenario',
+      });
+    }
     const issues = [
       ...missingEvents.map(
         (rules) => `no event written for expected rules [${[...rules].sort().join(', ')}]`

@@ -118,6 +118,17 @@ describe('statusCorrectnessEvaluator', () => {
     expect(result.score).toBe(1);
   });
 
+  it('is unavailable when all expected events are inactive and no forbidden rules exist', async () => {
+    const result = await evaluate({
+      inputRules: ['benign'],
+      expectedEvents: [{ rules: ['benign'], status: 'inactive' }],
+      writtenEvents: [{ rules: ['benign'] }],
+    });
+
+    expect(result.score).toBeNull();
+    expect(result.label).toBe('unavailable');
+  });
+
   it('still fails a confirmed event for a detection no expected event covers, inactive or not', async () => {
     const result = await evaluate({
       inputRules: ['r1', 'benign', 'stray'],
