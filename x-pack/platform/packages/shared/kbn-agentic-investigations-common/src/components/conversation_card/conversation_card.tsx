@@ -127,7 +127,7 @@ export const ConversationCard = memo<ConversationCardProps>(
             >
               <EuiFlexItem grow={false}>
                 <ConversationMetaInfo
-                  createdAt={investigation.createdAt}
+                  timestamp={investigation.createdAt}
                   inFlightStatus={renderInFlightStatus?.(investigation)}
                 />
               </EuiFlexItem>
@@ -169,12 +169,17 @@ export const ConversationCard = memo<ConversationCardProps>(
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiTitle size="xxs">
-              <EuiTextTruncate text={investigation.title} />
+              {/* EuiTitle appends its own styles after the child's, so the weight needs the
+                  doubled selector to take precedence over the title's bold default. */}
+              <EuiTextTruncate
+                text={investigation.title}
+                css={{ '&&': { fontWeight: euiTheme.font.weight.semiBold } }}
+              />
             </EuiTitle>
           </EuiFlexItem>
           {investigation.summary ? (
             <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
+              <EuiText size="xs" color="subdued">
                 <EuiTextTruncate text={investigation.summary} />
               </EuiText>
             </EuiFlexItem>

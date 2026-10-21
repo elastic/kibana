@@ -10,7 +10,7 @@ import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/const
 import type { CaseCustomField, User } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
-  BulkCreateAttachmentsRequestV2,
+  BulkCreateUnifiedAttachmentsRequest,
   CasePatchRequest,
   CasePostRequest,
   CaseResolveResponse,
@@ -28,6 +28,7 @@ import type {
   FindCasesContainingAllDocumentsRequest,
   UpdateSummary,
   CasesPatchResponse,
+  BulkDeleteAttachmentsRequest,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -60,7 +61,9 @@ import {
   getCaseCreateObservableUrl,
   getCaseUpdateObservableUrl,
   getCaseDeleteObservableUrl,
+  getCaseBulkDeleteObservablesUrl,
   getCaseSimilarCasesUrl,
+  getCaseBulkDeleteAttachmentsUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -546,7 +549,7 @@ export const createAttachments = async ({
   caseId,
   signal,
 }: {
-  attachments: BulkCreateAttachmentsRequestV2;
+  attachments: BulkCreateUnifiedAttachmentsRequest;
   caseId: string;
   signal?: AbortSignal;
 }): Promise<CaseUI> => {
@@ -573,6 +576,22 @@ export const deleteFileAttachments = async ({
   await KibanaServices.get().http.fetch(getCasesDeleteFileAttachmentsUrl(caseId), {
     method: 'POST',
     body: JSON.stringify({ ids: fileIds }),
+    signal,
+  });
+};
+
+export const bulkDeleteAttachments = async ({
+  caseId,
+  request,
+  signal,
+}: {
+  caseId: string;
+  request: BulkDeleteAttachmentsRequest;
+  signal?: AbortSignal;
+}): Promise<void> => {
+  await KibanaServices.get().http.fetch(getCaseBulkDeleteAttachmentsUrl(caseId), {
+    method: 'POST',
+    body: JSON.stringify(request),
     signal,
   });
 };
@@ -693,17 +712,35 @@ export const deleteObservable = async (
   });
 };
 
+export const bulkDeleteObservables = async (
+  caseId: string,
+  observableIds: string[],
+  signal?: AbortSignal
+): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(
+    getCaseBulkDeleteObservablesUrl(caseId),
+    {
+      method: 'POST',
+      body: JSON.stringify({ observableIds }),
+      signal,
+    }
+  );
+  return convertCaseToCamelCase(decodeCaseResponse(response));
+};
+
 export const getSimilarCases = async ({
   caseId,
   signal,
   perPage,
   page,
+  sortField,
+  sortOrder,
 }: SimilarCasesProps): Promise<CasesSimilarResponseUI> => {
   const response = await KibanaServices.get().http.fetch<CasesSimilarResponse>(
     getCaseSimilarCasesUrl(caseId),
     {
       method: 'POST',
-      body: JSON.stringify({ page, perPage }),
+      body: JSON.stringify({ page, perPage, sortField, sortOrder }),
       signal,
     }
   );

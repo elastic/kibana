@@ -23,6 +23,7 @@ import {
   PerOsAttackSurfaceReductionCard,
   SWITCH_LABEL,
 } from './per_os_attack_surface_reduction_card';
+import { REGISTRY_CREDENTIAL_HARDENING_LICENSE_UPSELL } from '../components/shared_translations';
 
 jest.mock('../../../../../../common/hooks/use_license');
 
@@ -165,6 +166,143 @@ describe('PerOsAttackSurfaceReductionCard', () => {
       expect(
         renderResult.getByTestId(testSubj.windows.enableDisableSwitch).getAttribute('aria-checked')
       ).toBe('false');
+    });
+  });
+
+  it('should not render the registry credential hardening switch when the experimental flag is off', () => {
+    render();
+
+    expect(
+      renderResult.queryByTestId(testSubj.windows.registryCredentialHardeningSwitch)
+    ).toBeNull();
+    expect(
+      renderResult.queryByTestId(testSubj.windows.registryCredentialHardeningSwitchLabel)
+    ).toBeNull();
+  });
+
+  describe('and the registry credential hardening experimental flag is on', () => {
+    beforeEach(() => {
+      mockedContext.setExperimentalFlag({ registryCredentialHardening: true });
+    });
+
+    it('should render the switch checked when the policy field is enabled', () => {
+      set(policy, 'windows.attack_surface_reduction.registry_credential_hardening.enabled', true);
+      render();
+
+      expect(
+        renderResult.getByTestId(testSubj.windows.registryCredentialHardeningSwitch)
+      ).toHaveAttribute('aria-checked', 'true');
+    });
+
+    it('should render the switch unchecked when the policy field is disabled', () => {
+      set(policy, 'windows.attack_surface_reduction.registry_credential_hardening.enabled', false);
+      render();
+
+      expect(
+        renderResult.getByTestId(testSubj.windows.registryCredentialHardeningSwitch)
+      ).toHaveAttribute('aria-checked', 'false');
+    });
+
+    it('should render the switch unchecked when the policy field is absent', () => {
+      delete policy.windows.attack_surface_reduction.registry_credential_hardening;
+      render();
+
+      expect(
+        renderResult.getByTestId(testSubj.windows.registryCredentialHardeningSwitch)
+      ).toHaveAttribute('aria-checked', 'false');
+    });
+
+    it('toggling the switch only changes registry credential hardening, leaving credential hardening and other OSes untouched', async () => {
+      set(policy, 'windows.attack_surface_reduction.registry_credential_hardening.enabled', false);
+      const macBefore = cloneDeep(policy.mac);
+      const linuxBefore = cloneDeep(policy.linux);
+      const windowsBefore = cloneDeep(policy.windows);
+      render();
+
+      await userEvent.click(
+        renderResult.getByTestId(testSubj.windows.registryCredentialHardeningSwitch)
+      );
+
+      const updatedPolicy = getUpdatedPolicy();
+      expect(
+        updatedPolicy.windows.attack_surface_reduction.registry_credential_hardening?.enabled
+      ).toBe(true);
+      expect(updatedPolicy.mac).toEqual(macBefore);
+      expect(updatedPolicy.linux).toEqual(linuxBefore);
+
+      const windowsRemainder = cloneDeep(updatedPolicy.windows);
+      windowsRemainder.attack_surface_reduction.registry_credential_hardening =
+        windowsBefore.attack_surface_reduction.registry_credential_hardening;
+      expect(windowsRemainder).toEqual(windowsBefore);
+    });
+
+    describe('and license is lower than Enterprise', () => {
+      beforeEach(() => {
+        const licenseServiceMock = createLicenseServiceMock();
+        licenseServiceMock.isPlatinumPlus.mockReturnValue(true);
+        licenseServiceMock.isEnterprise.mockReturnValue(false);
+
+        useLicenseMock.mockReturnValue(licenseServiceMock);
+      });
+
+      afterEach(() => {
+        useLicenseMock.mockReturnValue(licenseServiceMocked);
+      });
+
+      it('should render the switch disabled and show an Enterprise license hint', async () => {
+        render();
+
+        expect(
+          renderResult.getByTestId(testSubj.windows.registryCredentialHardeningSwitch)
+        ).toBeDisabled();
+
+        await userEvent.hover(
+          renderResult.getByTestId(testSubj.windows.registryCredentialHardeningTooltipIcon)
+        );
+
+        expect(
+          await renderResult.findByText(REGISTRY_CREDENTIAL_HARDENING_LICENSE_UPSELL)
+        ).toBeInTheDocument();
+      });
+    });
+
+    describe('and a serverless PLI upsell message is present', () => {
+      const pliUpsellMessage =
+        'To enable registry credential hardening, you must add Endpoint Complete to your project.';
+
+      beforeEach(() => {
+        mockedContext.startServices.upselling.setMessages({
+          endpoint_registry_credential_hardening: pliUpsellMessage,
+        });
+      });
+
+      it('should render the switch disabled and show the PLI upsell message', async () => {
+        render();
+
+        expect(
+          renderResult.getByTestId(testSubj.windows.registryCredentialHardeningSwitch)
+        ).toBeDisabled();
+
+        await userEvent.hover(
+          renderResult.getByTestId(testSubj.windows.registryCredentialHardeningTooltipIcon)
+        );
+
+        expect(await renderResult.findByText(pliUpsellMessage)).toBeInTheDocument();
+      });
+    });
+
+    describe('and displayed in View Mode', () => {
+      beforeEach(() => {
+        props.mode = 'view';
+      });
+
+      it('should render the switch disabled', () => {
+        render();
+
+        expect(
+          renderResult.getByTestId(testSubj.windows.registryCredentialHardeningSwitch)
+        ).toBeDisabled();
+      });
     });
   });
 });

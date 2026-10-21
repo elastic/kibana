@@ -15,6 +15,7 @@ import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-hel
 import { ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 import { ToolingLog } from '@kbn/tooling-log';
 import { setTimeout as timer } from 'timers/promises';
+import { withTimeout } from '@kbn/std';
 import type { Root } from '@kbn/core-root-server-internal';
 
 export async function startElasticsearch(): Promise<TestElasticsearchUtils> {
@@ -75,9 +76,8 @@ async function runWithTimeout(
   message: string,
   millis: number = 5_000
 ): Promise<void> {
-  const timeout = async () => {
-    await timer(millis);
+  const outcome = await withTimeout({ promise: task(), timeoutMs: millis });
+  if (outcome.timedout) {
     throw new Error(message);
-  };
-  await Promise.race([task(), timeout()]);
+  }
 }

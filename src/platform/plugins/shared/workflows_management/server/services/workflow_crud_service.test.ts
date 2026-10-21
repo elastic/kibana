@@ -118,9 +118,11 @@ const makeDeps = (
     }),
   } as unknown as WorkflowValidationService;
   const workflowExecutionsDataClient = {
+    refresh: jest.fn().mockResolvedValue(undefined),
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as WorkflowExecutionsDataClient;
   const stepExecutionsDataClient = {
+    refresh: jest.fn().mockResolvedValue(undefined),
     deleteByQuery: jest.fn().mockResolvedValue({ deleted: 0 }),
   } as unknown as StepExecutionsDataClient;
   const deps: WorkflowCrudDeps = {
@@ -2392,7 +2394,7 @@ describe('WorkflowCrudService', () => {
         steps: [],
       };
 
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: parsedDefinition,
           name: 'Parsed Workflow',
@@ -2464,7 +2466,7 @@ describe('WorkflowCrudService', () => {
         steps: [],
       };
 
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: parsedDefinition,
           name: 'Parsed Workflow',
@@ -2647,7 +2649,7 @@ describe('WorkflowCrudService', () => {
     });
 
     it('returns hoisted YAML validation errors without changing stored definition', async () => {
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: null,
           enabled: false,
@@ -2708,7 +2710,7 @@ describe('WorkflowCrudService', () => {
       // `applyYamlUpdate` is mocked, so this asserts that `updateWorkflow` spreads the
       // returned patch (including `name`) into the indexed document — not that the name
       // is recovered from the raw YAML (that parsing is covered in workflow_prepare.test.ts).
-      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockReturnValue({
+      jest.spyOn(workflowPrepare, 'applyYamlUpdate').mockResolvedValue({
         updatedDataPatch: {
           definition: null,
           enabled: false,

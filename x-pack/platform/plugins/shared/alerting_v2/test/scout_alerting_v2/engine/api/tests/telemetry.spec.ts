@@ -19,7 +19,6 @@
 import { expect } from '@kbn/scout/api';
 import { tags } from '@kbn/scout';
 import type { NameValuePair } from '../../../../../server/lib/usage/types';
-import { AGENT_BUILDER_TAG } from '../../../../../server/agent_builder/common/constants';
 import { apiTest, buildCreateActionPolicyData, buildCreateRuleData } from '../fixtures';
 
 const sortByName = (buckets: NameValuePair[] | undefined): NameValuePair[] =>
@@ -36,7 +35,7 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
       apiServices.alertingV2.rules.create(
         buildCreateRuleData({
           kind: 'alert',
-          metadata: { name: 'alert-rule-1', tags: [AGENT_BUILDER_TAG] },
+          metadata: { name: 'alert-rule-1' },
           time_field: '@timestamp',
           schedule: { every: '1m', lookback: '5m' },
           query: { base: 'FROM metrics-* | LIMIT 10' },
@@ -127,8 +126,8 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           description: 'policy-1 description',
           destinations: [{ type: 'workflow', id: 'workflow-1' }],
           matcher: { expression: "env == 'production'" },
-          group_by: ['service.name', 'environment'],
-          throttle: { interval: '5m' },
+          grouping: { mode: 'per_field', fields: ['service.name', 'environment'] },
+          throttle: { strategy: 'time_interval', interval: '5m' },
         })
       ),
       apiServices.alertingV2.actionPolicies.create(
@@ -136,7 +135,7 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
           name: 'policy-2',
           description: 'policy-2 description',
           destinations: [{ type: 'workflow', id: 'workflow-2' }],
-          throttle: { interval: '1h' },
+          throttle: { strategy: 'per_status_interval', interval: '1h' },
         })
       ),
     ]);
@@ -159,7 +158,6 @@ apiTest.describe('Alerting V2 Telemetry', { tag: tags.stateful.classic }, () => 
     // Rule stats
     expect(state.count_total).toBe(7);
     expect(state.count_enabled).toBe(6);
-    expect(state.count_agent_builder_assisted).toBe(1);
     expect(state.count_by_kind).toStrictEqual({ alert: 6, signal: 1 });
     expect(sortByName(state.count_by_schedule)).toStrictEqual([
       { name: '1m', value: 1 },

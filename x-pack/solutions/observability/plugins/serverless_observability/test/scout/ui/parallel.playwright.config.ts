@@ -10,4 +10,5 @@ import { createPlaywrightConfig } from '@kbn/scout-oblt';
 export default createPlaywrightConfig({
   testDir: './parallel_tests',
   workers: 2,
+  runGlobalSetup: true,
 });

@@ -37,6 +37,16 @@ jest.mock('./hooks/use_automations', () => ({
   useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../hooks/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
+jest.mock('../settings/components/apps_section/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../settings/components/apps_section/use_relay_app_bindings'),
+  useAllRelayAppBindings: () => ({
+    bindings: [],
+    isLoading: false,
+    isError: false,
+    isComplete: true,
+  }),
+}));
 jest.mock('./flyouts/create_flyout/create_automation_flyout', () => ({
   CreateAutomationFlyout: () => <div data-test-subj="createAutomationFlyoutStub">new</div>,
 }));
@@ -66,7 +76,7 @@ describe('AutomationsPage', () => {
     mockUseFetchAutomations.mockReturnValue({ data: { automations: [] }, isInitialLoading: false });
     mockUseAutomationsRunsInRange.mockReturnValue([]);
     mockUseAutomationRunsInRange.mockReturnValue({
-      data: { runs: [], total: 0 },
+      data: { runs: [], total: 0, usedToday: 0 },
       isInitialLoading: false,
     });
     mockUseCreateAutomation.mockReturnValue({ mutate: jest.fn(), isLoading: false });
@@ -168,7 +178,7 @@ describe('AutomationsPage', () => {
       isEnabled: true,
       trigger: { rows: [{ kind: 'alert' }] },
       execution: {},
-      completion: {},
+      completions: [],
       runtime: { dailyDispatchLimit: 20 },
       createdAt: '2026-10-01T00:00:00.000Z',
       updatedAt: '2026-10-01T00:00:00.000Z',
@@ -187,7 +197,7 @@ describe('AutomationsPage', () => {
         id: 'report',
         name: 'Daily report',
         isEnabled: false,
-        trigger: { rows: [{ kind: 'schedule' }] },
+        trigger: { rows: [{ kind: 'schedule', schedulePreset: 'daily', time: '09:00' }] },
         runtime: { dailyDispatchLimit: 5 },
         author: 'Daniel Hughes',
       }),
@@ -211,6 +221,7 @@ describe('AutomationsPage', () => {
         ids.map((id) => ({
           data: {
             total: startedAfter === todayStart.toISOString() ? totals[id].today : totals[id].range,
+            usedToday: totals[id].today,
             runs:
               id === 'triage'
                 ? [
@@ -224,6 +235,7 @@ describe('AutomationsPage', () => {
       mockUseAutomationRunsInRange.mockImplementation((id: string) => ({
         data: {
           total: totals[id].range,
+          usedToday: totals[id].today,
           runs: [{ status: 'completed', startedAt: new Date().toISOString() }],
         },
         isInitialLoading: false,
@@ -293,7 +305,10 @@ describe('AutomationsPage', () => {
       fireEvent.click(await screen.findByTestId('deleteAutomation'));
       fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
-      expect(deleteMutate).toHaveBeenCalledWith('report', expect.anything());
+      expect(deleteMutate).toHaveBeenCalledWith(
+        { id: 'report', name: 'Daily report' },
+        expect.anything()
+      );
     });
 
     it('returns to the list when the automation id in the URL does not exist', () => {
