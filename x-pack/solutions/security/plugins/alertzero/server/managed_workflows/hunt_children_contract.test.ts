@@ -234,6 +234,16 @@ describe('system-security-hunt-execute', () => {
     expect(update.with?.conversation_id).toBe(add.with?.conversation_id);
   });
 
+  // `fallback` alone does not rescue the step: the engine's `ExitTryBlockNodeImpl` re-throws
+  // the stored add error after the fallback path completes, so without `continue` the rerun
+  // still fails at `attach_sse` even though the update landed (fallback_step/README.md,
+  // "With Continue"). The add stays `failed` in the execution detail; the run completes.
+  it('lets a successful update fallback finish the add step instead of re-throwing the conflict', () => {
+    const add = stepNamed(workflow, 'add_sse_attachment');
+
+    expect(add['on-failure']?.continue).toBe(true);
+  });
+
   // The hunt-once evidence write (last_hunted_at, last_hunt_status and siblings) is a dedicated
   // step calling its own route -- see write_hunt_evidence.test.ts for the `deriveLastHuntStatus` /
   // script-shape coverage this test used to provide at the YAML level when it was still an
