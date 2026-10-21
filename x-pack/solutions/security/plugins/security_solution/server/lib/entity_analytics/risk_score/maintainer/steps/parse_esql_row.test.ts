@@ -5,7 +5,42 @@
  * 2.0.
  */
 
-import { parseEsqlResolutionScoreRow } from './parse_esql_row';
+import { parseEsqlBaseScoreRow, parseEsqlResolutionScoreRow } from './parse_esql_row';
+
+describe('parseEsqlBaseScoreRow', () => {
+  const parseRow = parseEsqlBaseScoreRow('.alerts-security.alerts-default');
+  const input = '{ "risk_score": "60", "time": "2026-01-01T00:00:00.000Z", "id": "alert-1" }';
+
+  it('reads the entity id after the alert sources column', () => {
+    const parsed = parseRow([10, 100, input, ['9:okta', '1:azure'], 'user:a@okta']);
+
+    expect(parsed.entity_id).toBe('user:a@okta');
+    expect(parsed.alert_count).toBe(10);
+    expect(parsed.alert_sources).toEqual([
+      { source: 'okta', alerts: 9 },
+      { source: 'azure', alerts: 1 },
+    ]);
+  });
+
+  it('wraps a single source and drops null sources', () => {
+    expect(parseRow([1, 10, input, '1:okta', 'user:a@okta']).alert_sources).toEqual([
+      { source: 'okta', alerts: 1 },
+    ]);
+    expect(parseRow([1, 10, input, null, 'user:a@okta']).alert_sources).toEqual([]);
+  });
+
+  it('splits on the first colon, so sources can contain colons', () => {
+    expect(parseRow([3, 10, input, '3:custom:source', 'user:a@okta']).alert_sources).toEqual([
+      { source: 'custom:source', alerts: 3 },
+    ]);
+  });
+
+  it('drops values without a count', () => {
+    expect(parseRow([1, 10, input, ['okta', ':okta', 'x:okta'], 'user:a']).alert_sources).toEqual(
+      []
+    );
+  });
+});
 
 describe('parseEsqlResolutionScoreRow', () => {
   it('parses resolution row and filters self related entities', () => {

@@ -282,6 +282,30 @@ describe('Calculate risk scores with ESQL', () => {
         expect(query).toContain('MV_SLICE(kibana.alert.entity.id, 2, 2)');
       });
 
+      it.each([EntityType.host, EntityType.user])(
+        'counts the alerts of each %s entity per source, before the entity id column',
+        (entityType) => {
+          const query = getBaseScoreESQL(
+            entityType,
+            { lower: `${entityType}:a`, upper: `${entityType}:z` },
+            10000,
+            3500,
+            '.alerts-security.alerts-default'
+          );
+
+          expect(query).toContain('EVAL alert_source = COALESCE(entity.source, "unknown")');
+          expect(query).toContain(
+            'INLINE STATS source_alert_count = COUNT(*) BY entity_id, alert_source'
+          );
+          expect(query).toContain(
+            'EVAL alert_source_count = CONCAT(TO_STRING(source_alert_count), ":", alert_source)'
+          );
+          expect(query).toMatch(/alert_sources = VALUES\(alert_source_count\)\s+BY entity_id/);
+          expect(query.indexOf('WHERE entity_id >')).toBeLessThan(query.indexOf('INLINE STATS'));
+          expect(query.indexOf('entity.source =')).toBeLessThan(query.indexOf('alert_source ='));
+        }
+      );
+
       it('emits the coalesce clause in getBaseScoreESQL for user', () => {
         const query = getBaseScoreESQL(
           EntityType.user,

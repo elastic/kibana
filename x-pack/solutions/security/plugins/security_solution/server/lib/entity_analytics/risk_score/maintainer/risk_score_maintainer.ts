@@ -38,6 +38,7 @@ import { getIndexPatternDataStream } from '../configurations';
 import { resetToZero } from './steps/reset_to_zero';
 import { buildAlertFilters } from './steps/build_alert_filters';
 import { scoreBaseEntities } from './steps/score_base_entities';
+import type { AlertSourceCounts } from './steps/tally_alert_sources';
 import type { MaintainerErrorKind } from './telemetry_reporter';
 import { createRiskScoreMaintainerTelemetryReporter } from './telemetry_reporter';
 import {
@@ -540,6 +541,7 @@ const executeEntityTypeRun = async ({
   const baseStage = runTelemetry.startBaseStage();
   const baseStartedAtMs = Date.now();
 
+  let alertSources: AlertSourceCounts = {};
   try {
     const baseSummary = await runWithSpan({
       name: ENTITY_ANALYTICS_SPAN_NAMES.stageBase,
@@ -566,6 +568,7 @@ const executeEntityTypeRun = async ({
     });
     runLogger.debug('completed base scoring pass');
     metricsTracker.recordBase(runMetrics, baseSummary);
+    alertSources = baseSummary.alertSources;
     baseStage.success({
       pagesProcessed: baseSummary.pagesProcessed,
       scoresWritten: baseSummary.scoresWrittenRiskIndex,
@@ -826,6 +829,7 @@ const executeEntityTypeRun = async ({
       entityType,
       metrics: runMetrics,
       stages: frameworkTelemetryStages,
+      alertSources,
     })
   );
 
