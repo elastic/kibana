@@ -1,9 +1,26 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { accountCgroup, deltaAccount, kernelBytes, parseMemoryStat, winningCap } from './sweep_summary.mjs';
+import {
+  accountCgroup,
+  deltaAccount,
+  kernelBytes,
+  parseMemoryStat,
+  winningCap,
+} from './sweep_summary.mjs';
 
 test('working set subtracts reclaimable inactive file cache', () => {
-  const stat = parseMemoryStat('anon 400\nfile 1000\ninactive_file 700\nshmem 20\nkernel 50\nslab 40\n');
+  const stat = parseMemoryStat(
+    'anon 400\nfile 1000\ninactive_file 700\nshmem 20\nkernel 50\nslab 40\n'
+  );
   assert.equal(kernelBytes(stat), 50);
   const account = accountCgroup(1500, stat);
   assert.equal(account.workingSet, 800);

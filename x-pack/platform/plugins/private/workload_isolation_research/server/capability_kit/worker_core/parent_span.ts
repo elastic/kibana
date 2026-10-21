@@ -25,7 +25,8 @@ const SPAN_ID = /^(?!0{16}$)[0-9a-f]{16}$/;
  */
 const fromOtel = (): ParentSpanContext | undefined => {
   const current = trace.getActiveSpan()?.spanContext();
-  if (!current || !TRACE_ID.test(current.traceId) || !SPAN_ID.test(current.spanId)) return undefined;
+  if (!current || !TRACE_ID.test(current.traceId) || !SPAN_ID.test(current.spanId))
+    return undefined;
   return { traceId: current.traceId, spanId: current.spanId, traceFlags: current.traceFlags };
 };
 

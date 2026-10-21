@@ -224,9 +224,7 @@ export const fireAndForget = async (
   _input: CodecInput,
   context: WorkerContext
 ): Promise<CodecInput> => {
-  void context
-    .call('fixture', 'slow', {}, undefined, { detached: true })
-    .catch(() => undefined);
+  void context.call('fixture', 'slow', {}, undefined, { detached: true }).catch(() => undefined);
   return { ok: true };
 };
 

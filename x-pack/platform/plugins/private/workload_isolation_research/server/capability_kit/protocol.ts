@@ -127,7 +127,11 @@ export type Packet =
       /** 0.1.9: requested worker event-loop heartbeat interval (stall watchdog). */
       readonly heartbeatMs?: number;
       /** Non-recording parent captured on main inside the task-manager span. */
-      readonly parentSpan?: { readonly traceId: string; readonly spanId: string; readonly traceFlags: number };
+      readonly parentSpan?: {
+        readonly traceId: string;
+        readonly spanId: string;
+        readonly traceFlags: number;
+      };
     }
   | {
       readonly version: 1;
@@ -198,7 +202,12 @@ export type Packet =
       readonly buffer: SharedArrayBuffer;
     }
   | { readonly version: 1; readonly kind: 'ready' }
-  | { readonly version: 1; readonly kind: 'drop_call'; readonly runId: string; readonly id: number };
+  | {
+      readonly version: 1;
+      readonly kind: 'drop_call';
+      readonly runId: string;
+      readonly id: number;
+    };
 
 export type Outcome =
   | {

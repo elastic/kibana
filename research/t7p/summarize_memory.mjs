@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /** Pure summaries for the production-shape memory run. No I/O. */
 
 export const MIB = 1024 * 1024;
@@ -29,7 +38,10 @@ export const slotsThatFit = (mainRss, marginalRss, limitBytes) => {
  * `2/2/1` is Track 4 shape A. Missing class bytes stay null; the sum is null.
  */
 export const mixBytes = (shape, perClass) => {
-  const counts = shape === '6/3/1' ? { alerting: 6, workflow: 3, agent: 1 } : { alerting: 2, workflow: 2, agent: 1 };
+  const counts =
+    shape === '6/3/1'
+      ? { alerting: 6, workflow: 3, agent: 1 }
+      : { alerting: 2, workflow: 2, agent: 1 };
   if (shape !== '6/3/1' && shape !== '2/2/1') throw new Error(`unknown shape ${shape}`);
   const parts = ['alerting', 'workflow', 'agent'].map((name) => {
     const bytes = perClass[name];
@@ -45,6 +57,7 @@ export const mixBytes = (shape, perClass) => {
  * initialised/uninitialised ratio. Returns null when the ratio cannot be formed.
  */
 export const scaleFamily = (track4FamilyBytes, track4AlertingBytes, measuredAlertingBytes) => {
-  if (track4AlertingBytes <= 0 || measuredAlertingBytes == null || track4FamilyBytes == null) return null;
+  if (track4AlertingBytes <= 0 || measuredAlertingBytes == null || track4FamilyBytes == null)
+    return null;
   return (track4FamilyBytes * measuredAlertingBytes) / track4AlertingBytes;
 };

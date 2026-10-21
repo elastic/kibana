@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Overlay the distribution's compiled probe with the phases kind.
  * The image was built before this measurement. Boot and run text stay in place.
@@ -119,12 +128,15 @@ export const patchMainHost = (source) => {
 };
 
 export const patchRoutes = (source) => {
-  if (source.includes("schema.literal('phases')") || source.includes('literal(\'phases\')')) {
+  if (source.includes("schema.literal('phases')") || source.includes("literal('phases')")) {
     return source;
   }
   const anchor = "_configschema.schema.literal('platform-watch')";
   if (!source.includes(anchor)) throw new Error('routes anchor missing');
-  return source.replace(anchor, `${anchor},\n                    _configschema.schema.literal('phases')`);
+  return source.replace(
+    anchor,
+    `${anchor},\n                    _configschema.schema.literal('phases')`
+  );
 };
 
 /** Same cache as policies.ts: hash once per generation, expected fingerprint, and type object. */
@@ -207,7 +219,10 @@ export const patchMemory = (source) => {
 
 const isMain = process.argv[1] && process.argv[1].endsWith('patch_phase_probe.mjs');
 if (isMain) {
-  const root = new URL('../../build/kibana/node_modules/@kbn/workload-isolation-research-plugin/server/t7a/', import.meta.url);
+  const root = new URL(
+    '../../build/kibana/node_modules/@kbn/workload-isolation-research-plugin/server/t7a/',
+    import.meta.url
+  );
   const outDir = process.argv[2];
   if (!outDir) throw new Error('output directory required');
   mkdirSync(outDir, { recursive: true });

@@ -477,8 +477,7 @@ export class ExecutionHost {
       }
       execution.executionStarted = true;
       if (execution.timer) clearTimeout(execution.timer);
-      if (execution.options.taskId)
-        this.options.onExecutionStart?.(execution.options.taskId, now);
+      if (execution.options.taskId) this.options.onExecutionStart?.(execution.options.taskId, now);
       const grace = execution.options.abortGraceMs ?? this.options.abortGraceMs ?? 250;
       const cap = bootstrapEnds + execution.options.deadlineMs + grace;
       execution.absoluteCapAt = cap;

@@ -38,7 +38,10 @@ interface RunState {
     }
   >;
   /** Fire-and-forget calls. They still complete on main, but they do not fail the task. */
-  readonly detached: Map<number, { resolve: (value: CodecInput) => void; reject: (error: Error) => void }>;
+  readonly detached: Map<
+    number,
+    { resolve: (value: CodecInput) => void; reject: (error: Error) => void }
+  >;
 }
 
 /** Keeps signals, pending RPC and registry snapshots local to each co-resident async run. */
@@ -242,12 +245,22 @@ const startRuntime = (): void => {
           run.executionNotified = true;
           send({ version: 1, kind: 'execution_start', runId: bundle.runId });
         },
-        call: (capability, operation, args, signal?: AbortSignal, options?: { detached?: boolean }) =>
+        call: (
+          capability,
+          operation,
+          args,
+          signal?: AbortSignal,
+          options?: { detached?: boolean }
+        ) =>
           new Promise((resolve, reject) => {
             const grant = bundle.grants[capability];
             if (!grant) return reject(new Error('Capability not granted'));
             if (signal?.aborted) {
-              reject(signal.reason instanceof Error ? signal.reason : new Error('Capability call aborted'));
+              reject(
+                signal.reason instanceof Error
+                  ? signal.reason
+                  : new Error('Capability call aborted')
+              );
               return;
             }
             const id = ++sequence;
@@ -279,7 +292,11 @@ const startRuntime = (): void => {
               } catch {
                 /* The host may already be gone. */
               }
-              reject(signal?.reason instanceof Error ? signal.reason : new Error('Capability call aborted'));
+              reject(
+                signal?.reason instanceof Error
+                  ? signal.reason
+                  : new Error('Capability call aborted')
+              );
             };
             run.pending.set(id, { resolve, reject, capability, operation, signal, onAbort });
             signal?.addEventListener('abort', onAbort, { once: true });

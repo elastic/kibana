@@ -1,5 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
@@ -49,12 +58,7 @@ const call = async (
       'x-elastic-internal-origin': 'Kibana',
       'content-type': ndjson ? 'application/x-ndjson' : 'application/json',
     },
-    body:
-      body === undefined
-        ? undefined
-        : ndjson
-        ? (body as string)
-        : JSON.stringify(body),
+    body: body === undefined ? undefined : ndjson ? (body as string) : JSON.stringify(body),
   });
   const text = await res.text();
   let parsed: unknown = text;
@@ -66,7 +70,8 @@ const call = async (
   return { status: res.status, body: parsed };
 };
 const must = <T>(r: { status: number; body: T }, what: string): T => {
-  if (r.status >= 300) throw new Error(`${what}: ${r.status} ${JSON.stringify(r.body).slice(0, 500)}`);
+  if (r.status >= 300)
+    throw new Error(`${what}: ${r.status} ${JSON.stringify(r.body).slice(0, 500)}`);
   return r.body;
 };
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
@@ -91,7 +96,8 @@ const seed = async () => {
   const lines: string[] = [];
   for (let r = 0; r < ROWS; r++) {
     const doc: Record<string, unknown> = { '@timestamp': SEED_TS, 'host.name': `host-${r}` };
-    for (let f = 0; f < FIELDS; f++) doc[`attr_${f}`] = `value-${r}-${f}-lorem-ipsum-dolor-sit-amet`;
+    for (let f = 0; f < FIELDS; f++)
+      doc[`attr_${f}`] = `value-${r}-${f}-lorem-ipsum-dolor-sit-amet`;
     lines.push(JSON.stringify({ index: { _index: WIDE, _id: `row-${r}` } }), JSON.stringify(doc));
   }
   must(await call(ES, 'POST', '/_bulk?refresh=true', lines.join('\n') + '\n', true), 'bulk');
@@ -145,7 +151,8 @@ const normaliser = (ids: Record<string, string>) => {
       const decoded = lz.decompressFromBase64(decodeURIComponent(enc));
       return `lz=<${decoded ?? 'UNDECODABLE'}>`;
     });
-    for (const [name, value] of Object.entries(ids)) if (value) out = out.split(value).join(`<${name}>`);
+    for (const [name, value] of Object.entries(ids))
+      if (value) out = out.split(value).join(`<${name}>`);
     out = out.replace(isoRe, (m) => (m === SEED_TS ? '<SEED_TS>' : '<TS>'));
     out = out.replace(uuidRe, (m) => {
       if (!uuidMap.has(m)) uuidMap.set(m, `<uuid>`);
@@ -241,10 +248,19 @@ const run = async (label: string, outDir: string) => {
   let last = '';
   for (let i = 0; i < 60; i++) {
     await call(ES, 'POST', `/${OUT_INDEX},.alerts-*,.kibana-event-log-*/_refresh`);
-    const ev = (await call(ES, 'POST', '/.kibana-event-log-*/_count', {
-      query: { nested: { path: 'kibana.saved_objects', query: { terms: { 'kibana.saved_objects.id': [rule.id, connector.id] } } } },
-    })).body.count;
-    const docs = (await call(ES, 'POST', `/${OUT_INDEX}/_count`, { query: { term: { 'run_id.keyword': tag } } })).body.count;
+    const ev = (
+      await call(ES, 'POST', '/.kibana-event-log-*/_count', {
+        query: {
+          nested: {
+            path: 'kibana.saved_objects',
+            query: { terms: { 'kibana.saved_objects.id': [rule.id, connector.id] } },
+          },
+        },
+      })
+    ).body.count;
+    const docs = (
+      await call(ES, 'POST', `/${OUT_INDEX}/_count`, { query: { term: { 'run_id.keyword': tag } } })
+    ).body.count;
     const now = `${ev}/${docs}`;
     if (now === last) break;
     last = now;
@@ -368,7 +384,9 @@ const run = async (label: string, outDir: string) => {
   ).count;
 
   const sortCanon = (arr: Json[]) =>
-    arr.map((x) => norm(x as Json)).sort((a, b) => (JSON.stringify(a) < JSON.stringify(b) ? -1 : 1));
+    arr
+      .map((x) => norm(x as Json))
+      .sort((a, b) => (JSON.stringify(a) < JSON.stringify(b) ? -1 : 1));
 
   const eventSummary = (() => {
     const counts: Record<string, number> = {};
@@ -400,9 +418,19 @@ const run = async (label: string, outDir: string) => {
   const digests = Object.fromEntries(
     ['rule', 'task', 'aad', 'action_docs', 'events'].map((k) => [k, digest((result as any)[k])])
   );
-  writeFileSync(join(outDir, `parity-${label}.json`), JSON.stringify({ ...result, digests }, null, 1));
+  writeFileSync(
+    join(outDir, `parity-${label}.json`),
+    JSON.stringify({ ...result, digests }, null, 1)
+  );
   console.log(
-    JSON.stringify({ label, timings_ms: result.timings_ms, counts: result.counts, event_summary: eventSummary, digests, eventMessagesSample: eventMessages.slice(0, 0) })
+    JSON.stringify({
+      label,
+      timings_ms: result.timings_ms,
+      counts: result.counts,
+      event_summary: eventSummary,
+      digests,
+      eventMessagesSample: eventMessages.slice(0, 0),
+    })
   );
   await call(KBN, 'POST', `/api/alerting/rule/${rule.id}/_disable`);
 };
@@ -411,7 +439,12 @@ const diff = (a: string, b: string) => {
   const A = JSON.parse(readFileSync(a, 'utf8'));
   const B = JSON.parse(readFileSync(b, 'utf8'));
   const report: Record<string, unknown> = {};
-  const canon = (v: unknown) => JSON.stringify(v, (_k, x) => (x && typeof x === 'object' && !Array.isArray(x) ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => (a < b ? -1 : 1))) : x));
+  const canon = (v: unknown) =>
+    JSON.stringify(v, (_k, x) =>
+      x && typeof x === 'object' && !Array.isArray(x)
+        ? Object.fromEntries(Object.entries(x).sort(([a], [b]) => (a < b ? -1 : 1)))
+        : x
+    );
   for (const k of ['counts', 'event_summary'])
     report[k] = canon(A[k]) === canon(B[k]) ? 'equal' : { a: A[k], b: B[k] };
   const short = (v: unknown) => JSON.stringify(v).slice(0, 400);
@@ -419,14 +452,26 @@ const diff = (a: string, b: string) => {
   const leafDiffs = (x: any, y: any, path = '', out: string[] = []): string[] => {
     if (out.length > 8) return out;
     if (JSON.stringify(x) === JSON.stringify(y)) return out;
-    if (x && y && typeof x === 'object' && typeof y === 'object' && !Array.isArray(x) && !Array.isArray(y)) {
-      for (const key of new Set([...Object.keys(x), ...Object.keys(y)])) leafDiffs(x[key], y[key], `${path}.${key}`, out);
+    if (
+      x &&
+      y &&
+      typeof x === 'object' &&
+      typeof y === 'object' &&
+      !Array.isArray(x) &&
+      !Array.isArray(y)
+    ) {
+      for (const key of new Set([...Object.keys(x), ...Object.keys(y)]))
+        leafDiffs(x[key], y[key], `${path}.${key}`, out);
       return out;
     }
     if (typeof x === 'string' && typeof y === 'string') {
       let i = 0;
       while (i < x.length && x[i] === y[i]) i++;
-      out.push(`${path}: @${i} a=${JSON.stringify(x.slice(Math.max(0, i - 60), i + 80))} b=${JSON.stringify(y.slice(Math.max(0, i - 60), i + 80))}`);
+      out.push(
+        `${path}: @${i} a=${JSON.stringify(
+          x.slice(Math.max(0, i - 60), i + 80)
+        )} b=${JSON.stringify(y.slice(Math.max(0, i - 60), i + 80))}`
+      );
       return out;
     }
     out.push(`${path}: a=${short(x)} b=${short(y)}`);

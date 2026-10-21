@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * Production-shape memory driver. Talks to a Kibana that is already up.
  * Correctness/memory only: does not take bench.lock.
@@ -22,7 +31,11 @@ const PODS = [
   { id: 'security-background-tasks', limitBytes: 4 * GIB, heapCapMiB: 3277 },
 ];
 
-const TRACK4_PC_HEAP = { alerting: 142 * 1024 * 1024, workflow: 92 * 1024 * 1024, agent: 74 * 1024 * 1024 };
+const TRACK4_PC_HEAP = {
+  alerting: 142 * 1024 * 1024,
+  workflow: 92 * 1024 * 1024,
+  agent: 74 * 1024 * 1024,
+};
 
 const call = async (method, path, body) => {
   const res = await fetch(KBN + path, {
@@ -100,7 +113,8 @@ const summarize = (samples) => {
     perClassHeap,
     perClassRss,
     pods,
-    model: 'workflow and agent heap/RSS are Track 4 PC uninitialised family bytes scaled by measured alerting / 142 MiB. Not a direct measurement of those islands.',
+    model:
+      'workflow and agent heap/RSS are Track 4 PC uninitialised family bytes scaled by measured alerting / 142 MiB. Not a direct measurement of those islands.',
   };
 };
 
@@ -109,7 +123,13 @@ const main = async () => {
   const prereg = JSON.parse(readFileSync(PREREG, 'utf8'));
   if (prereg.run_id !== 't7p-prod-shape-mem-001') throw new Error('unexpected prereg run_id');
   const mainOnly = await info();
-  await configure({ mode: 'offmain', transport: 'thread', slots: 1, concurrency: 1, localSo: true });
+  await configure({
+    mode: 'offmain',
+    transport: 'thread',
+    slots: 1,
+    concurrency: 1,
+    localSo: true,
+  });
   const cold = [];
   for (let i = 0; i < COLD_N; i++) {
     const row = await probe('coldstart');
@@ -128,7 +148,12 @@ const main = async () => {
     const t0 = performance.now();
     const row = await probe('boot');
     const value = valueOf(row);
-    warm.push({ i, clientMs: performance.now() - t0, waitedMs: value.waitedMs, bootMs: value.bootMs });
+    warm.push({
+      i,
+      clientMs: performance.now() - t0,
+      waitedMs: value.waitedMs,
+      bootMs: value.bootMs,
+    });
   }
   await probe('gc');
   const oneGc = valueOf(await probe('stats'));
@@ -191,9 +216,7 @@ const main = async () => {
   };
   mkdirSync(dirname(OUT), { recursive: true });
   writeFileSync(OUT, JSON.stringify(result));
-  const podLine = result.summary.pods
-    .map((pod) => `${pod.pod}=${pod.verdict}`)
-    .join(' ');
+  const podLine = result.summary.pods.map((pod) => `${pod.pod}=${pod.verdict}`).join(' ');
   process.stdout.write(
     `${podLine} cold p50=${result.summary.coldP50Ms} p95=${result.summary.coldP95Ms} rssDelta=${result.summary.rssDelta}\n`
   );

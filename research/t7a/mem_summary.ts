@@ -1,5 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
@@ -11,7 +20,8 @@ import { join } from 'path';
 
 const dir = process.argv[2];
 const mib = (b?: number) => (typeof b === 'number' ? Math.round((b / 2 ** 20) * 10) / 10 : null);
-const read = (f: string) => (existsSync(join(dir, f)) ? JSON.parse(readFileSync(join(dir, f), 'utf8')) : undefined);
+const read = (f: string) =>
+  existsSync(join(dir, f)) ? JSON.parse(readFileSync(join(dir, f), 'utf8')) : undefined;
 const mem = (f: string) => read(f)?.value?.memory;
 const rssKb = (f: string) => read(f)?.rss_kb ?? read(f)?.rss_kb_no_host;
 const kids = (f: string) =>
@@ -20,14 +30,28 @@ const kids = (f: string) =>
         .split('\n')
         .filter(Boolean)
         .map((l) => l.split(' '))
-        .map(([pid, rss, ...cmd]) => ({ pid, rssMiB: Math.round(Number(rss) / 1024), cmd: cmd.join(' ') }))
+        .map(([pid, rss, ...cmd]) => ({
+          pid,
+          rssMiB: Math.round(Number(rss) / 1024),
+          cmd: cmd.join(' '),
+        }))
     : [];
 const samples = existsSync(join(dir, '05_samples.ndjson'))
-  ? readFileSync(join(dir, '05_samples.ndjson'), 'utf8').split('\n').filter(Boolean).map((l) => JSON.parse(l))
+  ? readFileSync(join(dir, '05_samples.ndjson'), 'utf8')
+      .split('\n')
+      .filter(Boolean)
+      .map((l) => JSON.parse(l))
   : [];
-const heaps = samples.map((s) => s.probe?.heapUsed).filter((x): x is number => typeof x === 'number');
+const heaps = samples
+  .map((s) => s.probe?.heapUsed)
+  .filter((x): x is number => typeof x === 'number');
 const kidPeak = samples
-  .flatMap((s) => String(s.kids ?? '').split(' ').filter(Boolean).map((x: string) => Number(x.split(':')[1])))
+  .flatMap((s) =>
+    String(s.kids ?? '')
+      .split(' ')
+      .filter(Boolean)
+      .map((x: string) => Number(x.split(':')[1]))
+  )
   .reduce((a, b) => Math.max(a, b), 0);
 const summary = {
   dir,

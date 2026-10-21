@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, copyFileSync, writeFileSync, rmSync } from 'node:fs';
@@ -8,7 +17,13 @@ import { fileURLToPath } from 'node:url';
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
-const { readLimits, appliesTo, workerThreadIds, withoutOldSpaceFlag, withoutOldSpaceEnv } = require('./worker_limits.cjs');
+const {
+  readLimits,
+  appliesTo,
+  workerThreadIds,
+  withoutOldSpaceFlag,
+  withoutOldSpaceEnv,
+} = require('./worker_limits.cjs');
 const here = path.dirname(fileURLToPath(import.meta.url));
 const probe = path.join(here, 'worker_bootstrap_probe.js');
 const preload = path.join(here, 'worker_limits.cjs');
@@ -16,7 +31,10 @@ const preload = path.join(here, 'worker_limits.cjs');
 test('readLimits keeps only positive integer caps', () => {
   const dir = mkdtempSync(path.join(tmpdir(), 't7p-limits-'));
   const file = path.join(dir, 'limits.json');
-  writeFileSync(file, JSON.stringify({ maxOldGenerationSizeMb: 256, maxYoungGenerationSizeMb: 'nope' }));
+  writeFileSync(
+    file,
+    JSON.stringify({ maxOldGenerationSizeMb: 256, maxYoungGenerationSizeMb: 'nope' })
+  );
   assert.deepEqual(readLimits({ T7P_WORKER_LIMITS_FILE: file }), { maxOldGenerationSizeMb: 256 });
   writeFileSync(file, '{}');
   assert.deepEqual(readLimits({ T7P_WORKER_LIMITS_FILE: file }), {});
@@ -60,9 +78,12 @@ const heapLimit = (filename, limitsFile, parentFlag) => {
 };
 
 test('strips the parent old-space flag that would override resourceLimits', () => {
-  assert.deepEqual(withoutOldSpaceFlag(['--max-old-space-size=1638', '--no-warnings']), ['--no-warnings']);
+  assert.deepEqual(withoutOldSpaceFlag(['--max-old-space-size=1638', '--no-warnings']), [
+    '--no-warnings',
+  ]);
   assert.equal(
-    withoutOldSpaceEnv({ NODE_OPTIONS: '--no-warnings --max-old-space-size=1638', PATH: 'x' }).NODE_OPTIONS,
+    withoutOldSpaceEnv({ NODE_OPTIONS: '--no-warnings --max-old-space-size=1638', PATH: 'x' })
+      .NODE_OPTIONS,
     '--no-warnings'
   );
 });
@@ -172,7 +193,11 @@ test('setFlagsFromString changes the next isolate and leaves the parent heap con
 test('a child process argv cap wins over a larger NODE_OPTIONS', () => {
   const result = spawnSync(
     process.execPath,
-    ['--max-old-space-size=256', '-e', 'process.stdout.write(String(require("v8").getHeapStatistics().heap_size_limit))'],
+    [
+      '--max-old-space-size=256',
+      '-e',
+      'process.stdout.write(String(require("v8").getHeapStatistics().heap_size_limit))',
+    ],
     {
       env: { ...process.env, NODE_OPTIONS: '--max-old-space-size=2048' },
       encoding: 'utf8',

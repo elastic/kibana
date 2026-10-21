@@ -1,3 +1,12 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /**
  * One-process cap sweep against a Kibana that is already up.
  * Correctness of the cap is the point. Scored n≥20 is a separate mode and
@@ -71,7 +80,9 @@ const call = async (method, path, body, timeoutMs = 180000) => {
       last = error;
       const code = error.cause?.code ?? '';
       if (code === 'ECONNREFUSED' || attempt === 3) throw error;
-      process.stderr.write(`t7p fetch ${method} ${path} attempt ${attempt} ${code || error.name}\n`);
+      process.stderr.write(
+        `t7p fetch ${method} ${path} attempt ${attempt} ${code || error.name}\n`
+      );
       const alive = await inspectContainer().catch(() => 'inspect-failed');
       if (alive.includes('oom=true') || alive.startsWith('exited') || alive.startsWith('dead')) {
         process.stderr.write(`t7p container stopped ${alive}\n`);
@@ -96,7 +107,13 @@ const writeLimits = (cell) => {
 const readCgroup = async () => {
   const { stdout } = await exec(
     'docker',
-    ['exec', CONTAINER, 'sh', '-c', 'printf "CURRENT "; cat /sys/fs/cgroup/memory.current; printf "\\nMAX "; cat /sys/fs/cgroup/memory.max; printf "\\nSTAT\\n"; cat /sys/fs/cgroup/memory.stat'],
+    [
+      'exec',
+      CONTAINER,
+      'sh',
+      '-c',
+      'printf "CURRENT "; cat /sys/fs/cgroup/memory.current; printf "\\nMAX "; cat /sys/fs/cgroup/memory.max; printf "\\nSTAT\\n"; cat /sys/fs/cgroup/memory.stat',
+    ],
     { timeout: 5000 }
   );
   const currentLine = stdout.match(/^CURRENT\s+(\d+)/m);
@@ -147,7 +164,12 @@ const hostPressure = async () => {
     .map((line) => {
       const match = line.match(/^(\d+)\s+([0-9.]+)\s+(\d+)\s+(.*)$/);
       if (!match) return null;
-      return { pid: Number(match[1]), pcpu: Number(match[2]), rss: Number(match[3]), command: match[4] };
+      return {
+        pid: Number(match[1]),
+        pcpu: Number(match[2]),
+        rss: Number(match[3]),
+        command: match[4],
+      };
     })
     .filter(Boolean);
   const top = [...parsed].sort((left, right) => right.pcpu - left.pcpu).slice(0, 12);
@@ -183,7 +205,10 @@ const survivedOutcome = (body) => {
   const value = valueOf(body);
   if (!value || typeof value !== 'object') return { survived: false, reason: 'empty' };
   if (value.status === 'failure' || value.status === 'terminated') {
-    return { survived: false, reason: `${value.status}:${value.reason ?? value.error ?? ''}`.slice(0, 400) };
+    return {
+      survived: false,
+      reason: `${value.status}:${value.reason ?? value.error ?? ''}`.slice(0, 400),
+    };
   }
   if (value.memory?.heapUsed == null || value.bootMs == null) {
     return { survived: false, reason: 'missing-boot-memory' };
@@ -253,14 +278,15 @@ const assertPrereg = () => {
     MODE === 'rootcause'
       ? ['t7p-prod-shape-mem-003']
       : MODE === 'effective'
-        ? ['t7p-prod-shape-mem-004', 't7p-prod-shape-mem-007']
-        : MODE === 'phases'
-          ? ['t7p-prod-shape-mem-005', 't7p-prod-shape-mem-006', 't7p-prod-shape-mem-009']
-          : MODE === 'process'
-            ? ['t7p-prod-shape-mem-008']
-            : ['t7p-prod-shape-mem-002'];
+      ? ['t7p-prod-shape-mem-004', 't7p-prod-shape-mem-007']
+      : MODE === 'phases'
+      ? ['t7p-prod-shape-mem-005', 't7p-prod-shape-mem-006', 't7p-prod-shape-mem-009']
+      : MODE === 'process'
+      ? ['t7p-prod-shape-mem-008']
+      : ['t7p-prod-shape-mem-002'];
   if (!expected.includes(prereg.run_id)) throw new Error(`unexpected prereg ${prereg.run_id}`);
-  if (Date.parse(prereg.written_at) > Date.now()) throw new Error('prereg written_at is in the future');
+  if (Date.parse(prereg.written_at) > Date.now())
+    throw new Error('prereg written_at is in the future');
   return prereg;
 };
 
@@ -274,7 +300,11 @@ const waitReady = async () => {
     try {
       const info = await call('GET', '/internal/workload_isolation_research/info', undefined, 5000);
       last = `http-${info.status}`;
-      if (info.status === 200 && info.body?.build_sha && info.body?.main_memory?.pointerCompression === true) {
+      if (
+        info.status === 200 &&
+        info.body?.build_sha &&
+        info.body?.main_memory?.pointerCompression === true
+      ) {
         return info.body;
       }
       if (info.status === 200 && info.body?.build_sha) {
@@ -348,12 +378,17 @@ const oneCell = async (cell, mainOnlyAccount) => {
   const inspect = await inspectContainer();
   const killed = inspect.includes('oom=true') ? inspect : polled.error ? await oomKilled() : null;
   const http = polled.result;
-  const outcome = http && http.status < 300 ? survivedOutcome(http.body) : { survived: false, reason: `http-${http?.status ?? 'throw'}` };
+  const outcome =
+    http && http.status < 300
+      ? survivedOutcome(http.body)
+      : { survived: false, reason: `http-${http?.status ?? 'throw'}` };
   let retained = null;
   let after = null;
   if (outcome.survived && !killed) {
     await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'gc' });
-    const stats = await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'stats' });
+    const stats = await call('POST', '/internal/workload_isolation_research/t7a/probe', {
+      kind: 'stats',
+    });
     retained = valueOf(stats.body)?.memory ?? null;
     await sleep(1000);
     after = await readCgroup();
@@ -364,11 +399,7 @@ const oneCell = async (cell, mainOnlyAccount) => {
   const limitLog = await recentLimitLog();
   const applied = cell.old === 'inherit' || limitLogMatches(cell, limitLog);
   const survived = Boolean(outcome.survived) && !killed && applied;
-  const reason = !applied
-    ? 'cap-not-applied'
-    : killed
-      ? `oom ${killed}`
-      : outcome.reason ?? null;
+  const reason = !applied ? 'cap-not-applied' : killed ? `oom ${killed}` : outcome.reason ?? null;
   return {
     id: cell.id,
     old: cell.old,
@@ -407,7 +438,8 @@ const sweep = async (prereg) => {
   if (!String(ready.node_options).includes('--max-old-space-size=1638')) {
     throw new Error(`main heap flag is not 1638: ${ready.node_options}`);
   }
-  if (!ready.build_sha.startsWith('63f36682c19c')) throw new Error(`unexpected build ${ready.build_sha}`);
+  if (!ready.build_sha.startsWith('63f36682c19c'))
+    throw new Error(`unexpected build ${ready.build_sha}`);
   await configureHost();
   const mainOnlyInfo = await sampleMain();
   const mainOnlyCgroup = await readCgroup();
@@ -495,7 +527,9 @@ const scored = async (prereg) => {
   const pressureStart = await hostPressure();
   const cold = [];
   for (let i = 0; i < 20; i++) {
-    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'coldstart' });
+    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', {
+      kind: 'coldstart',
+    });
     const value = valueOf(row.body);
     cold.push({
       i,
@@ -510,7 +544,9 @@ const scored = async (prereg) => {
   const warmBoot = [];
   for (let i = 0; i < 20; i++) {
     const t0 = performance.now();
-    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'boot' });
+    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', {
+      kind: 'boot',
+    });
     const value = valueOf(row.body);
     warmBoot.push({
       i,
@@ -522,7 +558,9 @@ const scored = async (prereg) => {
   const warmStats = [];
   for (let i = 0; i < 20; i++) {
     const t0 = performance.now();
-    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'stats' });
+    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', {
+      kind: 'stats',
+    });
     warmStats.push({ i, clientMs: performance.now() - t0, status: row.status });
   }
   const coldOk = cold.filter((row) => row.bootMs != null);
@@ -546,7 +584,10 @@ const scored = async (prereg) => {
         cold: coldOk.length ? percentileOf(coldOk, 'coldStartMs') : null,
         coldBoot: coldOk.length ? percentileOf(coldOk, 'bootMs') : null,
         coldWaited: coldOk.length ? percentileOf(coldOk, 'waitedMs') : null,
-        warmBootWaited: percentileOf(warmBoot.filter((row) => row.waitedMs != null), 'waitedMs'),
+        warmBootWaited: percentileOf(
+          warmBoot.filter((row) => row.waitedMs != null),
+          'waitedMs'
+        ),
         warmBootClient: percentileOf(warmBoot, 'clientMs'),
         warmStatsClient: percentileOf(warmStats, 'clientMs'),
         bootMsUnchanged: new Set(warmBoot.map((row) => row.bootMs)).size === 1,
@@ -568,7 +609,9 @@ const rootcause = async (prereg) => {
   const pressureStart = await hostPressure();
   const cold = [];
   for (let i = 0; i < 20; i++) {
-    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'coldstart' });
+    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', {
+      kind: 'coldstart',
+    });
     const value = valueOf(row.body);
     cold.push({
       i,
@@ -583,7 +626,9 @@ const rootcause = async (prereg) => {
   const warmBoot = [];
   for (let i = 0; i < 20; i++) {
     const t0 = performance.now();
-    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'boot' });
+    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', {
+      kind: 'boot',
+    });
     const value = valueOf(row.body);
     warmBoot.push({
       i,
@@ -596,11 +641,15 @@ const rootcause = async (prereg) => {
   const warmStats = [];
   for (let i = 0; i < 20; i++) {
     const t0 = performance.now();
-    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'stats' });
+    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', {
+      kind: 'stats',
+    });
     warmStats.push({ i, clientMs: performance.now() - t0, status: row.status });
   }
   await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'gc' });
-  const retained = await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'stats' });
+  const retained = await call('POST', '/internal/workload_isolation_research/t7a/probe', {
+    kind: 'stats',
+  });
   const cgroup = await readCgroup();
   const main = await sampleMain();
   const coldOk = cold.filter((row) => row.bootMs != null);
@@ -609,9 +658,11 @@ const rootcause = async (prereg) => {
   const result = {
     run_id: prereg.run_id,
     prereg_written_at: prereg.written_at,
-    label: 'LOCAL CGROUP EMULATION (colima VM, 2 CPU), not serverless evidence. Not a pod-fit verdict.',
+    label:
+      'LOCAL CGROUP EMULATION (colima VM, 2 CPU), not serverless evidence. Not a pod-fit verdict.',
     at: new Date().toISOString(),
-    purpose: 'locked cold/warm/stats on a 4 GiB cgroup because every 2 GiB cap OOM-killed the process',
+    purpose:
+      'locked cold/warm/stats on a 4 GiB cgroup because every 2 GiB cap OOM-killed the process',
     ready: {
       build_sha: ready.build_sha,
       node_options: ready.node_options,
@@ -636,7 +687,10 @@ const rootcause = async (prereg) => {
       cold: coldOk.length ? percentileOf(coldOk, 'coldStartMs') : null,
       coldBoot: coldOk.length ? percentileOf(coldOk, 'bootMs') : null,
       coldWaited: coldOk.length ? percentileOf(coldOk, 'waitedMs') : null,
-      warmBootWaited: percentileOf(warmBoot.filter((row) => row.waitedMs != null), 'waitedMs'),
+      warmBootWaited: percentileOf(
+        warmBoot.filter((row) => row.waitedMs != null),
+        'waitedMs'
+      ),
       warmBootClient: percentileOf(warmBoot, 'clientMs'),
       warmStatsClient: percentileOf(warmStats, 'clientMs'),
       bootMsUnchanged: new Set(warmBoot.map((row) => row.bootMs)).size === 1,
@@ -688,7 +742,9 @@ const effective = async (prereg) => {
     const row = await oneCell(cell, baseline);
     state.cells.push(row);
     persist(state);
-    process.stdout.write(`${cell.id} survived=${row.survived} heap=${row.endOfBootHeap?.heapUsed ?? 'na'}\n`);
+    process.stdout.write(
+      `${cell.id} survived=${row.survived} heap=${row.endOfBootHeap?.heapUsed ?? 'na'}\n`
+    );
     if (row.endOfBootHeap?.heapUsed > 900 * 1024 * 1024) {
       state.capStillIneffective = cell.id;
       break;
@@ -723,7 +779,9 @@ const phases = async (prereg) => {
   const warm = [];
   for (let i = 0; i < 20; i++) {
     const t0 = performance.now();
-    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'phases' });
+    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', {
+      kind: 'phases',
+    });
     const value = valueOf(row.body);
     const marks = value?.phases;
     const clientMs = performance.now() - t0;
@@ -743,7 +801,9 @@ const phases = async (prereg) => {
   const warmStats = [];
   for (let i = 0; i < 20; i++) {
     const t0 = performance.now();
-    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'stats' });
+    const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', {
+      kind: 'stats',
+    });
     warmStats.push({ i, clientMs: performance.now() - t0, status: row.status });
   }
   const pressureEnd = await hostPressure();
@@ -790,7 +850,10 @@ const phases = async (prereg) => {
       replicaRefresh: percentileOf(component('replicaRefreshMs'), 'value'),
       readiness: percentileOf(component('readinessMs'), 'value'),
       definitionParity: percentileOf(component('definitionParityMs'), 'value'),
-      client: percentileOf(ok.map((row) => ({ value: row.clientMs })), 'value'),
+      client: percentileOf(
+        ok.map((row) => ({ value: row.clientMs })),
+        'value'
+      ),
       statsClient: percentileOf(
         warmStats.filter((row) => row.status === 200).map((row) => ({ value: row.clientMs })),
         'value'
@@ -829,7 +892,8 @@ const processArm = async (prereg) => {
     const inspect = await inspectContainer().catch((error) => `inspect-failed ${error}`);
     const http = polled.result;
     const value = valueOf(http?.body);
-    const killed = inspect.includes('oom=true') || inspect.includes('exited') || inspect.includes('dead');
+    const killed =
+      inspect.includes('oom=true') || inspect.includes('exited') || inspect.includes('dead');
     const ok = Boolean(http && http.status < 300 && value && !killed);
     cold.push({
       i,
@@ -852,7 +916,9 @@ const processArm = async (prereg) => {
     await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'gc' });
     for (let i = 0; i < 20; i++) {
       const t0 = performance.now();
-      const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'phases' });
+      const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', {
+        kind: 'phases',
+      });
       const value = valueOf(row.body);
       const marks = value?.phases;
       const clientMs = performance.now() - t0;
@@ -870,7 +936,9 @@ const processArm = async (prereg) => {
     }
     for (let i = 0; i < 20; i++) {
       const t0 = performance.now();
-      const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', { kind: 'stats' });
+      const row = await call('POST', '/internal/workload_isolation_research/t7a/probe', {
+        kind: 'stats',
+      });
       warmStats.push({ i, clientMs: performance.now() - t0, status: row.status });
     }
     after = await readCgroup();
@@ -910,9 +978,16 @@ const processArm = async (prereg) => {
       endOfBootHeap: coldOk.at(-1)?.heap ?? null,
       warmN: ok.length,
       readiness: ok.length ? percentileOf(component('readinessMs'), 'value') : null,
-      client: ok.length ? percentileOf(ok.map((row) => ({ value: row.clientMs })), 'value') : null,
+      client: ok.length
+        ? percentileOf(
+            ok.map((row) => ({ value: row.clientMs })),
+            'value'
+          )
+        : null,
       transport: ok.length ? percentileOf(field('transportMs'), 'value') : null,
-      parityDefinitionChecks: ok.length ? percentileOf(field('parityDefinitionChecksMs'), 'value') : null,
+      parityDefinitionChecks: ok.length
+        ? percentileOf(field('parityDefinitionChecksMs'), 'value')
+        : null,
       islandReentry: ok.length ? percentileOf(field('islandReentryMs'), 'value') : null,
       statsClient: percentileOf(
         warmStats.filter((row) => row.status === 200).map((row) => ({ value: row.clientMs })),
@@ -921,7 +996,9 @@ const processArm = async (prereg) => {
     },
   };
   persist(result);
-  process.stdout.write(`${JSON.stringify({ cap, survived, invalid: result.invalid, summary: result.summary })}\n`);
+  process.stdout.write(
+    `${JSON.stringify({ cap, survived, invalid: result.invalid, summary: result.summary })}\n`
+  );
 };
 
 const main = async () => {
