@@ -5,8 +5,15 @@
  * 2.0.
  */
 
-import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type {
+  ImpactEntityTarget,
+  RegisterFlyoutGroupedAttachment,
+} from '@kbn/agentic-investigations-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
+import type { ComponentType } from 'react';
+import type { ProposalsPublicPluginStart } from '@kbn/proposals-plugin/public';
+import type { InvestigationCardProps } from './conversation_templates/templates/investigation/card';
 
 export interface AgenticInvestigationsPublicSetupDependencies {
   workflowsExtensions: WorkflowsExtensionsPublicPluginSetup;
@@ -14,7 +21,31 @@ export interface AgenticInvestigationsPublicSetupDependencies {
 
 export interface AgenticInvestigationsPublicStartDependencies {
   agentBuilder?: AgentBuilderPluginStart;
+  proposals?: ProposalsPublicPluginStart;
 }
 
-export type AgenticInvestigationsPublicPluginSetup = Record<string, never>;
-export type AgenticInvestigationsPublicPluginStart = Record<string, never>;
+/** The part of `xpack.agenticInvestigations` exposed to the browser. */
+export interface AgenticInvestigationsPublicConfig {
+  /** Escalations are AlertZero-only for now; off on Observability serverless. */
+  escalations: { enabled: boolean };
+}
+
+export interface AgenticInvestigationsPublicPluginSetup {
+  registerFlyoutGroupedAttachment: RegisterFlyoutGroupedAttachment;
+}
+
+/** Opens the entity flyout for one impacted entity. Supplied by the solution that owns the flyout. */
+export type ImpactEntityOpener = (entity: ImpactEntityTarget) => void;
+
+export interface AgenticInvestigationsPublicPluginStart {
+  /**
+   * Registers the entity-flyout opener. Called from the solution's start, which runs after this
+   * plugin's start, so the overview reads it when a row is clicked rather than at registration.
+   */
+  registerImpactEntityOpener: (opener: ImpactEntityOpener) => void;
+  /**
+   * The investigation card the `investigation` template's brief card renders, for a solution
+   * that lists investigations from the query API itself. Loaded on first render.
+   */
+  InvestigationCard: ComponentType<InvestigationCardProps>;
+}

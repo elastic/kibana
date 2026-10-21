@@ -56,7 +56,9 @@ describe('CreateUserPage', () => {
     );
 
     fireEvent.change(await findByLabelText('Username'), { target: { value: 'jdoe' } });
-    fireEvent.change(await findByLabelText('Password'), { target: { value: 'changeme' } });
+    fireEvent.change(await findByLabelText('Password', { selector: 'input' }), {
+      target: { value: 'changeme' },
+    });
     fireEvent.change(await findByLabelText('Confirm password'), {
       target: { value: 'changeme' },
     });
@@ -159,11 +161,15 @@ describe('CreateUserPage', () => {
       /Username must contain only letters, numbers, spaces, punctuation, and symbols/i
     );
 
-    fireEvent.change(await findByLabelText('Password'), { target: { value: '111' } });
+    fireEvent.change(await findByLabelText('Password', { selector: 'input' }), {
+      target: { value: '111' },
+    });
 
     await findAllByText(/Password must be at least 6 characters/i);
 
-    fireEvent.change(await findByLabelText('Password'), { target: { value: '123456' } });
+    fireEvent.change(await findByLabelText('Password', { selector: 'input' }), {
+      target: { value: '123456' },
+    });
     fireEvent.change(await findByLabelText('Confirm password'), { target: { value: '111' } });
 
     await findAllByText(/Passwords do not match/i);

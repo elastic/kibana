@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
 import type { ConversationEventTypeDefinition } from '@kbn/agent-builder-server';
 
 import { TEXT_NOTE_EVENT_TYPE } from '../../common/conversation_events/constants';
+import { textNoteEventSchema } from '../../common/conversation_events/text_note';
 
-export const textNoteEventType: ConversationEventTypeDefinition = {
+export const textNoteEventType: ConversationEventTypeDefinition<
+  typeof TEXT_NOTE_EVENT_TYPE,
+  typeof textNoteEventSchema
+> = {
   type: TEXT_NOTE_EVENT_TYPE,
-  payloadSchema: z.object({
-    title: z.string().min(1).max(256).optional(),
-    text: z.string().min(1).max(1000),
+  payloadSchema: textNoteEventSchema,
+  format: ({ data }) => ({
+    type: 'text',
+    value: data.title ? `${data.title}\n${data.text}` : data.text,
   }),
 };

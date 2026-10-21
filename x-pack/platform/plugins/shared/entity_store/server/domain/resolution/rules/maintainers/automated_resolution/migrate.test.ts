@@ -11,6 +11,8 @@ import { migrate } from './migrate';
 import { AUTOMATED_RESOLUTION_STATE_VERSION, type AutomatedResolutionState } from './types';
 
 const EMAIL_RULE = RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH;
+const SID_RULE = RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE;
+const CROWDSTRIKE_RULE = RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE;
 
 const ZEROED_STATS = {
   skippedOversizedBuckets: 0,
@@ -24,16 +26,37 @@ const FIXTURES: Record<string, unknown> = {
     lastProcessedTimestamp: '2026-05-30T10:00:00Z',
     lastRun: { resolutionsCreated: 42, skippedAmbiguousBuckets: 3 },
   },
-  'already-migrated-v2': {
+  'already-migrated-v3': {
     version: AUTOMATED_RESOLUTION_STATE_VERSION,
     rules: {
       [EMAIL_RULE]: {
         lastProcessedTimestamp: '2026-05-31T08:30:00Z',
         lastRun: { resolutionsCreated: 7, skippedAmbiguousBuckets: 1 },
       },
+      [SID_RULE]: {
+        lastProcessedTimestamp: '2026-09-10T12:00:00Z',
+        lastRun: { resolutionsCreated: 0, skippedAmbiguousBuckets: 0 },
+      },
       some_future_rule: {
         lastProcessedTimestamp: '2026-06-01T09:00:00Z',
         lastRun: { resolutionsCreated: 2, skippedAmbiguousBuckets: 0 },
+      },
+    },
+  },
+  'v2-sid-backfill': {
+    version: 2,
+    rules: {
+      [EMAIL_RULE]: {
+        lastProcessedTimestamp: '2026-05-31T08:30:00Z',
+        lastRun: { resolutionsCreated: 7, skippedAmbiguousBuckets: 1 },
+      },
+      [SID_RULE]: {
+        lastProcessedTimestamp: '2026-09-10T00:00:00Z',
+        lastRun: { resolutionsCreated: 0, skippedAmbiguousBuckets: 0 },
+      },
+      [CROWDSTRIKE_RULE]: {
+        lastProcessedTimestamp: '2026-09-10T00:00:00Z',
+        lastRun: { resolutionsCreated: 0, skippedAmbiguousBuckets: 0 },
       },
     },
   },
@@ -42,6 +65,10 @@ const FIXTURES: Record<string, unknown> = {
       [EMAIL_RULE]: {
         lastProcessedTimestamp: '2026-05-31T08:30:00Z',
         lastRun: { resolutionsCreated: 7, skippedAmbiguousBuckets: 1 },
+      },
+      [SID_RULE]: {
+        lastProcessedTimestamp: '2026-09-10T00:00:00Z',
+        lastRun: { resolutionsCreated: 0, skippedAmbiguousBuckets: 0 },
       },
     },
   },
@@ -104,14 +131,29 @@ describe('automated-resolution state migration', () => {
   });
 
   it('preserves unknown rule ids on versioned state and sanitizes watermarks', () => {
-    const output = migrate(FIXTURES['already-migrated-v2'], logger);
+    const output = migrate(FIXTURES['already-migrated-v3'], logger);
 
     expect(output.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
     expect(output.rules[EMAIL_RULE].lastProcessedTimestamp).toBe('2026-05-31T08:30:00Z');
+    expect(output.rules[SID_RULE].lastProcessedTimestamp).toBe('2026-09-10T12:00:00Z');
     expect(output.rules.some_future_rule).toEqual({
       lastProcessedTimestamp: '2026-06-01T09:00:00Z',
       lastRun: { resolutionsCreated: 2, skippedAmbiguousBuckets: 0, ...ZEROED_STATS },
     });
+  });
+
+  it('resets the SID and CrowdStrike watermarks on a v2 upgrade', () => {
+    const output = migrate(FIXTURES['v2-sid-backfill'], logger);
+
+    expect(output.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
+    expect(output.rules[EMAIL_RULE].lastProcessedTimestamp).toBe('2026-05-31T08:30:00Z');
+    expect(output.rules[SID_RULE].lastProcessedTimestamp).toBeNull();
+    expect(output.rules[SID_RULE].lastRun).toEqual({
+      resolutionsCreated: 0,
+      skippedAmbiguousBuckets: 0,
+      ...ZEROED_STATS,
+    });
+    expect(output.rules[CROWDSTRIKE_RULE].lastProcessedTimestamp).toBeNull();
   });
 
   it('resets the email watermark once when version is missing from per-rule state', () => {
@@ -119,6 +161,7 @@ describe('automated-resolution state migration', () => {
 
     expect(output.version).toBe(AUTOMATED_RESOLUTION_STATE_VERSION);
     expect(output.rules[EMAIL_RULE].lastProcessedTimestamp).toBeNull();
+    expect(output.rules[SID_RULE].lastProcessedTimestamp).toBeNull();
     expect(output.rules[EMAIL_RULE].lastRun).toEqual({
       resolutionsCreated: 7,
       skippedAmbiguousBuckets: 1,
@@ -263,5 +306,46 @@ describe('automated-resolution state migration', () => {
     );
 
     expect(output.rules[relatedUserId].lastRun).toEqual(relatedLastRun);
+  });
+
+  it('keeps custom rule fingerprints and attempt times, and drops malformed ones', () => {
+    const watermark = '2026-10-01T00:00:00Z';
+    const output = migrate(
+      {
+        version: AUTOMATED_RESOLUTION_STATE_VERSION,
+        rules: {
+          'custom:a': {
+            lastProcessedTimestamp: watermark,
+            lastRun: null,
+            definitionFingerprint: 'abc',
+            lastAttemptAt: '2026-10-13T10:00:00.000Z',
+            lastStartedFirstAt: '2026-10-13T09:55:00.000Z',
+            deferredByDeadline: true,
+            lastError: 'boom',
+          },
+          'custom:b': {
+            lastProcessedTimestamp: watermark,
+            lastRun: null,
+            definitionFingerprint: 42,
+            lastAttemptAt: 1760349600000,
+            lastStartedFirstAt: 1760349300000,
+            deferredByDeadline: 'yes',
+            lastError: { message: 'boom' },
+          },
+        },
+      },
+      loggerMock.create()
+    );
+
+    expect(output.rules['custom:a']).toEqual({
+      lastProcessedTimestamp: watermark,
+      lastRun: null,
+      definitionFingerprint: 'abc',
+      lastAttemptAt: '2026-10-13T10:00:00.000Z',
+      lastStartedFirstAt: '2026-10-13T09:55:00.000Z',
+      deferredByDeadline: true,
+      lastError: 'boom',
+    });
+    expect(output.rules['custom:b']).toEqual({ lastProcessedTimestamp: watermark, lastRun: null });
   });
 });

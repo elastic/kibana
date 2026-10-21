@@ -14,6 +14,7 @@ import type {
 
 import type { AttacksActionTelemetrySource } from '../../../../../common/lib/telemetry';
 import { BulkAlertTagsPanel } from '../../../../../common/components/toolbar/bulk_actions/alert_bulk_tags';
+import { ATTACK_TAG_ACTION_ID } from '../../../../../common/constants/action_ids';
 import { useAttacksPrivileges } from '../use_attacks_privileges';
 import { extractRelatedDetectionAlertIds } from '../utils/extract_related_detection_alert_ids';
 import { useApplyAttackTags } from '../apply_actions/use_apply_attack_tags';
@@ -47,7 +48,7 @@ export const useBulkAttackTagsItems = ({
 
     return [
       {
-        key: 'manage-attack-tags',
+        key: ATTACK_TAG_ACTION_ID,
         'data-test-subj': 'attack-tags-context-menu-item',
         name: i18n.ATTACK_TAGS_CONTEXT_MENU_ITEM_TITLE,
         panel: 1,

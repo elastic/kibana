@@ -30,6 +30,8 @@ import { TagsUserActionSchema } from './tags/v1';
 import { TitleUserActionSchema } from './title/v1';
 import { CustomFieldsUserActionSchema } from './custom_fields/v1';
 import { ObservablesUserActionSchema } from './observables/v1';
+import { WorkflowUserActionSchema } from './workflow/v1';
+import { BulkAttachmentsUserActionSchema } from './bulk_attachments/v1';
 
 export { UserActionTypes, UserActionActions } from './action/v1';
 export { StatusUserActionSchema } from './status/v1';
@@ -79,6 +81,8 @@ const BasicUserActionsSchema = z.union([
   CategoryUserActionSchema,
   CustomFieldsUserActionSchema,
   ObservablesUserActionSchema,
+  WorkflowUserActionSchema,
+  BulkAttachmentsUserActionSchema,
 ]);
 
 const CommonUserActionsWithIdsSchema = z.union([BasicUserActionsSchema, CommentUserActionSchema]);

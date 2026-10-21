@@ -14,7 +14,7 @@ export const ATTACHMENT_TYPE_CONFIG: Record<AttachmentType, { label: string; ico
       label: i18n.translate('xpack.streams.attachmentTypeConfig.typeDashboard', {
         defaultMessage: 'Dashboard',
       }),
-      icon: 'dashboardApp',
+      icon: 'productDashboard',
     },
     rule: {
       label: i18n.translate('xpack.streams.attachmentTypeConfig.typeRule', {
@@ -26,6 +26,6 @@ export const ATTACHMENT_TYPE_CONFIG: Record<AttachmentType, { label: string; ico
       label: i18n.translate('xpack.streams.attachmentTypeConfig.typeSlo', {
         defaultMessage: 'SLO',
       }),
-      icon: 'watchesApp',
+      icon: 'chartGauge',
     },
   };

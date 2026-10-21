@@ -2865,4 +2865,63 @@ describe('CloudConnectorService', () => {
       });
     });
   });
+
+  describe('iac fields', () => {
+    const baseCreate: CreateCloudConnectorRequest = {
+      name: 'iac-connector',
+      cloudProvider: 'aws',
+      vars: { role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' } },
+    };
+
+    it('create leaves iac fields unset when not provided (static template)', async () => {
+      mockSoClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 1 });
+      mockSoClient.create.mockImplementation(async (_type, attributes) => ({
+        id: 'cc-1',
+        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes,
+      }));
+
+      await service.create(mockSoClient, baseCreate);
+
+      const [, attributes] = mockSoClient.create.mock.calls[0];
+      expect(attributes).not.toHaveProperty('iac_key');
+      expect(attributes).not.toHaveProperty('iac_deployment_id');
+    });
+
+    it('update writes iac_key and iac_deployment_id only when present in the request', async () => {
+      const existing = {
+        id: 'cc-1',
+        type: CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        references: [],
+        attributes: {
+          name: 'iac-connector',
+          namespace: '*',
+          cloudProvider: 'aws',
+          vars: { role_arn: { value: 'arn:aws:iam::123456789012:role/TestRole', type: 'text' } },
+          created_at: '2026-01-01T00:00:00.000Z',
+          updated_at: '2026-01-01T00:00:00.000Z',
+        },
+      };
+      mockSoClient.get.mockResolvedValue(existing);
+      mockSoClient.update.mockImplementation(async (_type, _id, attributes) => ({
+        ...existing,
+        attributes: { ...existing.attributes, ...attributes },
+      }));
+      mockSoClient.find.mockResolvedValue({ saved_objects: [], total: 0, page: 1, per_page: 0 });
+
+      await service.update(mockSoClient, 'cc-1', { iac_key: 'sha256:new' });
+      expect(mockSoClient.update).toHaveBeenCalledWith(
+        CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
+        'cc-1',
+        expect.objectContaining({ iac_key: 'sha256:new' })
+      );
+      const [, , firstUpdate] = mockSoClient.update.mock.calls[0];
+      expect(firstUpdate).not.toHaveProperty('iac_deployment_id');
+
+      await service.update(mockSoClient, 'cc-1', { name: 'renamed' });
+      const [, , secondUpdate] = mockSoClient.update.mock.calls[1];
+      expect(secondUpdate).not.toHaveProperty('iac_key');
+    });
+  });
 });

@@ -18,5 +18,5 @@ export const BulkSnoozeSeriesActionRoute = createBulkSeriesActionRouteForType({
   summary: 'Bulk snooze alert episode series',
   bodySchema: bulkSnoozeSeriesActionBodySchema,
   oasOperationObject: bulkSnoozeSeriesActionOasExamples,
-  access: 'public' as const,
+  access: 'internal' as const,
 });

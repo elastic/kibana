@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parseDocument } from 'yaml';
+import { LineCounter, parseDocument } from 'yaml';
 import type { WorkflowValidationRuleId, WorkflowYaml } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
+import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { getYamlMarkerRuleId } from './get_yaml_marker_rule_id';
 import { validateGraphBuild } from './validate_graph_build';
+import { validateIgnoredFetcherSetting } from './validate_ignored_fetcher_setting';
 import { validateLiquidTemplate } from './validate_liquid_template';
 import { validateStepNameUniqueness } from './validate_step_name_uniqueness';
 import { validateTriggerConditions } from './validate_trigger_conditions';
@@ -20,7 +22,6 @@ import { validateWorkflowYaml } from '../../../../common/lib/validate_workflow_y
 import { getWorkflowZodSchema } from '../../../../common/schema';
 import { performComputation } from '../../../entities/workflows/store/workflow_detail/utils/computation';
 import { triggerSchemas } from '../../../trigger_schemas';
-import type { YamlValidationResult } from '../model/types';
 
 const INVALID_YAML = 'name: [unclosed';
 const SCHEMA_VIOLATION_YAML = ['enabled: true', 'steps: []'].join('\n');
@@ -85,6 +86,21 @@ const INVALID_TRIGGER_YAML = [
   '    with:',
   '      message: test',
 ].join('\n');
+const KIBANA_FETCHER_YAML = [
+  "version: '1'",
+  'name: kibana-fetcher',
+  'enabled: true',
+  'triggers:',
+  '  - type: manual',
+  'steps:',
+  '  - name: status',
+  '    type: kibana.request',
+  '    with:',
+  '      method: GET',
+  '      path: /api/status',
+  '      fetcher:',
+  '        skip_ssl_verification: true',
+].join('\n');
 
 const workflowSchema = getWorkflowZodSchema({}, []);
 const workflowSchemaWithCustomTrigger = getWorkflowZodSchema({}, [CUSTOM_TRIGGER_ID]);
@@ -99,21 +115,23 @@ const customTriggerDefinition: PublicTriggerDefinition = {
 const getClientRuleIds = (results: YamlValidationResult[]): WorkflowValidationRuleId[] =>
   results.flatMap(({ ruleId }) => (ruleId ? [ruleId] : []));
 
-const getServerRuleIds = (
+const getServerRuleIds = async (
   yaml: string,
   options?: Parameters<typeof validateWorkflowYaml>[2]
-): WorkflowValidationRuleId[] =>
-  validateWorkflowYaml(
+): Promise<WorkflowValidationRuleId[]> => {
+  const { diagnostics } = await validateWorkflowYaml(
     yaml,
     options?.triggerDefinitions ? workflowSchemaWithCustomTrigger : workflowSchema,
     options
-  ).diagnostics.map(({ ruleId }) => ruleId);
+  );
+  return diagnostics.map(({ ruleId }) => ruleId);
+};
 
 interface RuleParityCase {
   name: string;
   expectedRuleId: WorkflowValidationRuleId;
   getClientRuleIds: () => WorkflowValidationRuleId[];
-  getServerRuleIds: () => WorkflowValidationRuleId[];
+  getServerRuleIds: () => Promise<WorkflowValidationRuleId[]>;
 }
 
 const ruleParityCases: RuleParityCase[] = [
@@ -132,10 +150,13 @@ const ruleParityCases: RuleParityCase[] = [
   {
     name: 'Liquid syntax errors',
     expectedRuleId: 'liquidSyntaxError',
-    getClientRuleIds: () =>
-      getClientRuleIds(
-        validateLiquidTemplate(INVALID_LIQUID_YAML, parseDocument(INVALID_LIQUID_YAML))
-      ),
+    getClientRuleIds: () => {
+      const lineCounter = new LineCounter();
+      const yamlDocument = parseDocument(INVALID_LIQUID_YAML, { lineCounter });
+      return getClientRuleIds(
+        validateLiquidTemplate(INVALID_LIQUID_YAML, yamlDocument, lineCounter)
+      );
+    },
     getServerRuleIds: () => getServerRuleIds(INVALID_LIQUID_YAML),
   },
   {
@@ -181,14 +202,27 @@ const ruleParityCases: RuleParityCase[] = [
     getServerRuleIds: () =>
       getServerRuleIds(INVALID_TRIGGER_YAML, { triggerDefinitions: [customTriggerDefinition] }),
   },
+  {
+    name: 'ignored kibana fetcher setting',
+    expectedRuleId: 'ignoredFetcherSetting',
+    getClientRuleIds: () => {
+      const { workflowLookup, yamlLineCounter } = performComputation(KIBANA_FETCHER_YAML);
+      if (!workflowLookup || !yamlLineCounter) {
+        throw new Error('Expected kibana fetcher fixture to parse');
+      }
+      return getClientRuleIds(validateIgnoredFetcherSetting(workflowLookup, yamlLineCounter, true));
+    },
+    getServerRuleIds: () =>
+      getServerRuleIds(KIBANA_FETCHER_YAML, { warnIgnoredKibanaFetcher: true }),
+  },
 ];
 
 describe('workflow validation rule parity', () => {
   it.each(ruleParityCases)(
     'uses $expectedRuleId for $name in both client and server validation',
-    ({ expectedRuleId, getClientRuleIds: getClientIds, getServerRuleIds: getServerIds }) => {
+    async ({ expectedRuleId, getClientRuleIds: getClientIds, getServerRuleIds: getServerIds }) => {
       const clientRuleId = getClientIds().find((ruleId) => ruleId === expectedRuleId);
-      const serverRuleId = getServerIds().find((ruleId) => ruleId === expectedRuleId);
+      const serverRuleId = (await getServerIds()).find((ruleId) => ruleId === expectedRuleId);
 
       expect(clientRuleId).toBe(expectedRuleId);
       expect(serverRuleId).toBe(clientRuleId);

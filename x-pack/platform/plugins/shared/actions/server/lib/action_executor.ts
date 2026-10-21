@@ -17,15 +17,21 @@ import { set } from '@kbn/safer-lodash-set';
 import { addSpanLabels, withSpan } from '@kbn/apm-utils';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
+import type { SpaceId } from '@kbn/core-spaces-common';
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource as getTaskManagerErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { isConnectorAuthorizationError } from '@kbn/connector-specs';
-import { ACTION_TYPE_SOURCES } from '@kbn/actions-types';
 import { IN_MEMORY_CONNECTOR_REVISION } from './single_file_connectors/build_client_lease_key';
 import { GEN_AI_TOKEN_COUNT_EVENT } from './event_based_telemetry';
 import { ConnectorUsageCollector } from '../usage/connector_usage_collector';
+import type { ConnectorExecuteErrorType } from './connector_metrics';
+import {
+  getConnectorAuthType,
+  recordConnectorAuth,
+  recordConnectorExecute,
+} from './connector_metrics';
 import {
   getGenAiTokenTracking,
   shouldTrackGenAiToken,
@@ -95,7 +101,7 @@ export interface ExecuteOptions<Source = unknown> {
   /**
    * Optional space override. When provided, Action execution will be scoped to this spaceId.
    */
-  spaceId?: string;
+  spaceId?: SpaceId;
   source?: ActionExecutionSource<Source>;
   taskInfo?: TaskInfo;
   connectorTokenClient?: ConnectorTokenClientContract;
@@ -110,14 +116,14 @@ type ExecuteHelperOptions<Source = unknown> = Omit<ExecuteOptions<Source>, 'requ
   namespace: { namespace?: string };
   request?: KibanaRequest;
   services: Services | UnsecuredServices;
-  spaceId?: string;
+  spaceId?: SpaceId;
 };
 
 type UnsecuredExecuteOptions<Source = unknown> = Pick<
   ExecuteOptions<Source>,
   'actionExecutionId' | 'actionId' | 'params' | 'relatedSavedObjects' | 'source'
 > & {
-  spaceId: string;
+  spaceId: SpaceId;
 };
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -277,7 +283,7 @@ export class ActionExecutor {
     relatedSavedObjects: RelatedSavedObjects;
     source?: ActionExecutionSource<Source>;
     consumer?: string;
-    spaceId?: string;
+    spaceId?: SpaceId;
   }) {
     const { spaces, eventLogger } = this.actionExecutorContext!;
 
@@ -444,6 +450,11 @@ export class ActionExecutor {
         }
 
         if (this.connectorRateLimiter.isRateLimited(actionTypeId)) {
+          recordConnectorExecute({
+            connectorType: actionTypeId,
+            errorType: 'rate_limited',
+            errorSource: 'user',
+          });
           return {
             actionId,
             status: 'error',
@@ -461,6 +472,11 @@ export class ActionExecutor {
           try {
             actionTypeRegistry.ensureActionTypeEnabled(actionTypeId);
           } catch (e) {
+            recordConnectorExecute({
+              connectorType: actionTypeId,
+              errorType: 'disabled',
+              errorSource: 'framework',
+            });
             throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
           }
         }
@@ -576,10 +592,17 @@ export class ActionExecutor {
             },
           });
           eventLogger.logEvent(event);
+          recordConnectorExecute({
+            connectorType: actionTypeId,
+            errorType: 'invalid',
+            errorSource: err.result?.errorSource === TaskErrorSource.USER ? 'user' : 'framework',
+          });
           return err.result;
         }
 
         let rawResult: ActionTypeExecutorRawResult<unknown>;
+        let errorType: ConnectorExecuteErrorType = 'other';
+        const executionStartedAt = Date.now();
         try {
           if (checkCanExecuteFn) {
             await checkCanExecuteFn(actionTypeId);
@@ -602,11 +625,7 @@ export class ActionExecutor {
             signal,
             authMode,
             profileUid,
-            ...(actionType.source === ACTION_TYPE_SOURCES.spec
-              ? {
-                  connectorVersion: isInMemory ? IN_MEMORY_CONNECTOR_REVISION : connectorVersion,
-                }
-              : {}),
+            connectorVersion: isInMemory ? IN_MEMORY_CONNECTOR_REVISION : connectorVersion,
           });
 
           if (rawResult && rawResult.status === 'error') {
@@ -615,8 +634,16 @@ export class ActionExecutor {
         } catch (err) {
           const errorSource = getErrorSource(err) || TaskErrorSource.FRAMEWORK;
           if (err.reason === ActionExecutionErrorReason.Authorization) {
+            errorType = 'unauthorized';
             rawResult = err.result;
           } else if (isConnectorAuthorizationError(err)) {
+            errorType = 'auth_failed';
+            recordConnectorAuth({
+              phase: 'execute',
+              authType: getConnectorAuthType({ config, secrets }),
+              connectorType: actionTypeId,
+              errorType: 'authorization_failed',
+            });
             rawResult = {
               actionId,
               status: 'error',
@@ -652,6 +679,20 @@ export class ActionExecutor {
           actionId,
           status: 'ok',
         };
+
+        const { subAction } = validatedParams;
+        recordConnectorExecute({
+          connectorType: actionTypeId,
+          // Validated against the connector's params schema, so the value is bounded.
+          ...(typeof subAction === 'string' ? { subAction } : {}),
+          ...(result.status === 'ok'
+            ? {}
+            : {
+                errorType,
+                errorSource: result.errorSource === TaskErrorSource.USER ? 'user' : 'framework',
+              }),
+          durationMs: Date.now() - executionStartedAt,
+        });
 
         event.event = event.event || {};
 
