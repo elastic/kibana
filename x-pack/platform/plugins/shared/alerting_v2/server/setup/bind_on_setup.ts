@@ -59,6 +59,7 @@ export function bindOnSetup({ bind }: ContainerModuleLoadOptions) {
 
     registerAlertingAdvancedSettings(uiSettingsSetup);
 
+    // Event types must be registered during setup, before the first `reportEvent`.
     registerTelemetryEvents(container.get(CoreSetup('analytics')));
 
     const eventLogService = container.get(

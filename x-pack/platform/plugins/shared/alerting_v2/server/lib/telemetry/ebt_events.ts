@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleChangedEbtData, RuleEbtEventType } from './rule_ebt_schema';
 import type {
   WorkflowDispatchedEbtData,
   WorkflowDispatchedEbtEventType,
@@ -12,8 +13,12 @@ import type {
 
 /**
  * Maps every EBT event type the plugin registers to the data it is reported with.
+ * Rule-lifecycle events share {@link RuleChangedEbtData}.
+ * Workflow-dispatched events share {@link WorkflowDispatchedEbtData}.
  */
 export type AlertingEbtEventMap = {
+  [TEventType in RuleEbtEventType]: RuleChangedEbtData;
+} & {
   [TEventType in WorkflowDispatchedEbtEventType]: WorkflowDispatchedEbtData;
 };
 

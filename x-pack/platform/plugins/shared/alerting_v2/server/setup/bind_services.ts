@@ -34,6 +34,7 @@ import {
   ExecutionHistoryClientToken,
 } from '../lib/execution_history_client';
 import { EventOriginToken } from '../lib/event_origin/token';
+import { RulesClientOptionsToken } from '../lib/rules_client/tokens';
 import { InternalRulesClient, InternalRulesClientProvider } from '../lib/internal_rules_client';
 import { RulesClient } from '../lib/rules_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
@@ -132,6 +133,7 @@ export function bindServices({ bind }: ContainerModuleLoadOptions) {
   bind(InternalRulesClientProvider).toSelf().inSingletonScope();
   bind(InternalRulesClient).toSelf().inSingletonScope();
   bind(EventOriginToken).toConstantValue('user');
+  bind(RulesClientOptionsToken).toConstantValue({});
   bind(ArtifactTypeRegistry).toSelf().inSingletonScope();
   bind(RequestSpaceIdToken)
     .toDynamicValue(({ get }) => {
