@@ -6,6 +6,7 @@
  */
 
 import { type DiagnosticResult, errors } from '@elastic/elasticsearch';
+import Boom from '@hapi/boom';
 
 import { schema } from '@kbn/config-schema';
 import type {
@@ -17,6 +18,7 @@ import type {
 } from '@kbn/core/server';
 import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { UiamAuthorizationCheck, UiamAuthorizationResource } from '@kbn/core-security-server';
 import { ROUTE_TAG_AUTH_FLOW } from '@kbn/security-plugin/server';
 import { restApiKeySchema } from '@kbn/security-plugin-types-server';
 import {
@@ -1039,6 +1041,57 @@ export function initRoutes(
         logger.error(`Failed to create a system identity token: ${err}`, err);
         return response.customError({
           statusCode: 500,
+          body: { message: err.message },
+        });
+      }
+    }
+  );
+
+  // Relays authorization checks to UIAM through Core's security contract, so tests can observe
+  // UIAM's decisions for the request's own credentials.
+  router.post(
+    {
+      path: '/test_endpoints/uiam/authorization/_check',
+      validate: {
+        body: schema.object({
+          checks: schema.arrayOf(
+            schema.object({
+              action: schema.string({ maxLength: 256 }),
+              resource: schema.recordOf(
+                schema.string({ maxLength: 256 }),
+                schema.string({ maxLength: 256 })
+              ),
+            }),
+            { minSize: 1, maxSize: 16 }
+          ),
+        }),
+      },
+      security: {
+        authz: { enabled: false, reason: 'Test endpoint relaying authorization checks to UIAM' },
+      },
+    },
+    async (context, request, response) => {
+      const [{ security: coreSecurity }] = await core.getStartServices();
+      if (!coreSecurity.authz.uiam) {
+        return response.badRequest({ body: { message: 'UIAM authorization is not available' } });
+      }
+
+      const checks: UiamAuthorizationCheck[] = [];
+      for (const { action, resource } of request.body.checks) {
+        if (typeof resource.type !== 'string') {
+          return response.badRequest({ body: { message: 'Every resource needs a `type`' } });
+        }
+        checks.push({ action, resource: resource as UiamAuthorizationResource });
+      }
+
+      try {
+        return response.ok({
+          body: await coreSecurity.authz.uiam.checkAuthorization(request, checks),
+        });
+      } catch (err) {
+        logger.error(`Failed to check authorization with UIAM: ${err}`, err);
+        return response.customError({
+          statusCode: Boom.isBoom(err) ? err.output.statusCode : 500,
           body: { message: err.message },
         });
       }

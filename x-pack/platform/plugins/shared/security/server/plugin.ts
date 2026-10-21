@@ -136,6 +136,14 @@ export class SecurityPlugin
     return this.config;
   };
 
+  private uiam?: UiamService;
+  private readonly getUiam = () => {
+    if (!this.uiam) {
+      throw new Error('UIAM service is not available.');
+    }
+    return this.uiam;
+  };
+
   private session?: Session;
   private readonly getSession = () => {
     if (!this.session) {
@@ -420,6 +428,7 @@ export class SecurityPlugin
         getAuthc: this.getAuthentication.bind(this),
         getSession: this.getSession,
         getServiceAccounts: this.getServiceAccountsService,
+        getUiam: this.getUiam,
         audit: this.auditSetup,
         config,
         logger: this.logger,
@@ -540,6 +549,7 @@ export class SecurityPlugin
           kibanaVersion: this.initializerContext.env.packageInfo.version,
         })
       : undefined;
+    this.uiam = uiam;
 
     this.authenticationStart = this.authenticationService.start({
       audit: this.auditSetup!,

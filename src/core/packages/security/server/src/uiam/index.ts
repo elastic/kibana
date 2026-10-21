@@ -15,6 +15,13 @@ export {
   deriveInternalCallerAttestation,
 } from './attestation';
 export type { UiamProjectType } from './project_type';
+export type {
+  UiamAuthorizationCheck,
+  UiamAuthorizationCheckResult,
+  UiamAuthorizationResource,
+  UiamAuthorizationResult,
+  UiamAuthorizationType,
+} from './authorization';
 export { markExternalUiamCredential, isExternalUiamCredential } from './external_credential';
 export { resolveUiamClientAuthentication } from './client_authentication';
 export type { UiamClientAuthenticationParams } from './client_authentication';
