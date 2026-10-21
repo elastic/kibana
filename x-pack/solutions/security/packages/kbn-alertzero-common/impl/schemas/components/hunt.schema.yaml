@@ -35,14 +35,16 @@ components:
         - refs_unavailable
         - nothing_searched
         - input_truncated
+        - extraction_pending
       description: >-
         Why a hunt could not corroborate part of what it was asked to look at, or
-        could not show what it found. Eight are transient, named rather than
+        could not show what it found. Nine are transient, named rather than
         counted so this list stays honest as reasons are added:
         `search_partial`, `index_unavailable`, `generation_failed`,
-        `execute_failed`, `catalog_unavailable` (the managed ATT&CK data was
-        temporarily unavailable due to population failure, so a later run can
-        extract and verify the report's techniques), and the three that mean a model's output was refused —
+        `execute_failed`, `extraction_pending` (the report's enrichment has not
+        finished, so a later sweep will have terms this one did not),
+        `catalog_unavailable` (the managed ATT&CK data was
+        unavailable, so a later run can extract and verify the report's techniques), and the three that mean a model's output was refused —
         `query_out_of_scope`, `query_ungrounded`, `quote_ungrounded`. Those three
         are transient because generation and extraction vary between runs, so a
         technique refused once is still unsearched and a later run may produce a
@@ -55,9 +57,6 @@ components:
         technique's own behavior was not. The same report and quotes reproduce it.
         `input_truncated` means the report carried more IOCs, techniques or text
         than a hunt accepts, so only a prefix of it was hunted.
-        `catalog_disabled` means the mitreAttack plugin is disabled or its
-        managed source is off; this is permanent for the deployment and retrying
-        cannot resolve it.
 
     HuntIncompleteness:
       type: object
