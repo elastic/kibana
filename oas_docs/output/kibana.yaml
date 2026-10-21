@@ -13319,6 +13319,7 @@ paths:
           required: false
           schema:
             format: date-time
+            maxLength: 64
             type: string
         - description: Inclusive ISO datetime upper bound on the event timestamp.
           in: query
@@ -13326,6 +13327,7 @@ paths:
           required: false
           schema:
             format: date-time
+            maxLength: 64
             type: string
         - description: Alert filter. Narrows events to those referencing at least one of the provided alert IDs.
           in: query
@@ -13523,6 +13525,14 @@ paths:
             maxItems: 50
             minItems: 1
             type: array
+        - description: Free-text search. Matches rule name, description or rule ID (case-insensitive). Combined with rule_ids using AND.
+          in: query
+          name: search
+          required: false
+          schema:
+            maxLength: 256
+            minLength: 1
+            type: string
         - description: 'Outcome filter. '
           in: query
           name: outcomes
@@ -13542,6 +13552,7 @@ paths:
           required: false
           schema:
             format: date-time
+            maxLength: 64
             type: string
         - description: Inclusive ISO datetime upper bound on event.start.
           in: query
@@ -13549,6 +13560,7 @@ paths:
           required: false
           schema:
             format: date-time
+            maxLength: 64
             type: string
         - description: Sort field. Defaults to started_at.
           in: query
@@ -74134,6 +74146,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -74247,14 +74260,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -74676,6 +74692,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -74752,6 +74769,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -74865,14 +74883,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -75294,6 +75315,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     host:
                       additionalProperties: false
@@ -75402,6 +75424,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -75515,14 +75538,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -75944,6 +75970,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -76027,6 +76054,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -76187,14 +76215,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -76615,6 +76646,7 @@ paths:
                       properties:
                         ingested:
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -76808,6 +76840,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -76921,14 +76954,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -77350,6 +77386,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -77426,6 +77463,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -77539,14 +77577,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -77968,6 +78009,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     host:
                       additionalProperties: false
@@ -78076,6 +78118,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -78189,14 +78232,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -78618,6 +78664,7 @@ paths:
                         ingested:
                           description: When the event was ingested into Elasticsearch.
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -78701,6 +78748,7 @@ paths:
                     '@timestamp':
                       description: The time the entity record was last updated.
                       format: date-time
+                      maxLength: 64
                       type: string
                     asset:
                       additionalProperties: false
@@ -78861,14 +78909,17 @@ paths:
                             first_seen:
                               description: When the entity was first observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_activity:
                               description: When the entity last generated activity.
                               format: date-time
+                              maxLength: 64
                               type: string
                             last_seen:
                               description: When the entity was last observed.
                               format: date-time
+                              maxLength: 64
                               type: string
                         name:
                           description: Human-readable name of the entity.
@@ -79289,6 +79340,7 @@ paths:
                       properties:
                         ingested:
                           format: date-time
+                          maxLength: 64
                           type: string
                     labels:
                       additionalProperties: {}
@@ -79482,6 +79534,7 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
+                                maxLength: 64
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -79595,14 +79648,17 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -80024,6 +80080,7 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
+                                    maxLength: 64
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -80100,6 +80157,7 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
+                                maxLength: 64
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -80213,14 +80271,17 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -80642,6 +80703,7 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
+                                    maxLength: 64
                                     type: string
                               host:
                                 additionalProperties: false
@@ -80750,6 +80812,7 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
+                                maxLength: 64
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -80863,14 +80926,17 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -81292,6 +81358,7 @@ paths:
                                   ingested:
                                     description: When the event was ingested into Elasticsearch.
                                     format: date-time
+                                    maxLength: 64
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -81375,6 +81442,7 @@ paths:
                               '@timestamp':
                                 description: The time the entity record was last updated.
                                 format: date-time
+                                maxLength: 64
                                 type: string
                               asset:
                                 additionalProperties: false
@@ -81535,14 +81603,17 @@ paths:
                                       first_seen:
                                         description: When the entity was first observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_activity:
                                         description: When the entity last generated activity.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                       last_seen:
                                         description: When the entity was last observed.
                                         format: date-time
+                                        maxLength: 64
                                         type: string
                                   name:
                                     description: Human-readable name of the entity.
@@ -81963,6 +82034,7 @@ paths:
                                 properties:
                                   ingested:
                                     format: date-time
+                                    maxLength: 64
                                     type: string
                               labels:
                                 additionalProperties: {}
@@ -154694,6 +154766,7 @@ components:
         created_at:
           description: The ISO datetime when the action policy was created.
           format: date-time
+          maxLength: 64
           type: string
         created_by:
           allOf:
@@ -154748,6 +154821,7 @@ components:
         updated_at:
           description: The ISO datetime when the action policy was last updated.
           format: date-time
+          maxLength: 64
           type: string
         updated_by:
           allOf:
@@ -155193,6 +155267,7 @@ components:
         snoozed_until:
           description: The ISO datetime until which the targeted action policies should be snoozed.
           format: date-time
+          maxLength: 64
           type: string
       required:
         - ids
@@ -155448,6 +155523,7 @@ components:
           type: array
         dispatched_at:
           format: date-time
+          maxLength: 64
           type: string
         error:
           additionalProperties: false
@@ -155719,6 +155795,7 @@ components:
       properties:
         ended_at:
           format: date-time
+          maxLength: 64
           type: string
         error:
           additionalProperties: false
@@ -155759,6 +155836,7 @@ components:
           type: string
         started_at:
           format: date-time
+          maxLength: 64
           type: string
         timings:
           additionalProperties: false
@@ -155801,6 +155879,20 @@ components:
           maximum: 9007199254740991
           minimum: 1
           type: integer
+        search_matches:
+          additionalProperties: false
+          description: Match counts for the active search. Omitted when no search was provided.
+          type: object
+          properties:
+            is_truncated:
+              description: True when more than 500 rules matched the search. Only the executions of the first 500 matching rules are returned, so the results are incomplete. Narrow the search to see the rest.
+              type: boolean
+            rules:
+              description: 'Rules matching the search. This count is an estimate: results above 10,000 may be reported as 10,000.'
+              type: number
+          required:
+            - rules
+            - is_truncated
         total:
           description: 'The number of rule executions matching the query. This count is an estimate: results above 10,000 may be reported as 10,000.'
           maximum: 9007199254740991
@@ -156147,6 +156239,7 @@ components:
         created_at:
           description: ISO timestamp when the rule was created.
           format: date-time
+          maxLength: 64
           type: string
         created_by:
           allOf:
@@ -156248,6 +156341,7 @@ components:
         updated_at:
           description: ISO timestamp when the rule was last updated.
           format: date-time
+          maxLength: 64
           type: string
         updated_by:
           allOf:
@@ -156415,6 +156509,7 @@ components:
         snoozed_until:
           description: The ISO datetime until which the action policy should be snoozed.
           format: date-time
+          maxLength: 64
           type: string
       required:
         - snoozed_until
@@ -184091,8 +184186,11 @@ components:
                   anyOf:
                     - type: string
                     - type: number
+                    - type: boolean
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiValueCell'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangeKey'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiFieldKey'
+                  nullable: true
                 maxItems: 1000
                 type: array
             required:
@@ -185576,8 +185674,11 @@ components:
                   anyOf:
                     - type: string
                     - type: number
+                    - type: boolean
+                    - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiValueCell'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visRangeKey'
                     - $ref: '#/components/schemas/Kibana_HTTP_APIs_visMultiFieldKey'
+                  nullable: true
                 maxItems: 100
                 type: array
             required:
@@ -187306,6 +187407,7 @@ components:
       type: object
     Kibana_HTTP_APIs_visMultiFieldKey:
       additionalProperties: false
+      description: Composite key from a multi-terms bucket.
       properties:
         keys:
           items:
@@ -187321,6 +187423,22 @@ components:
         - keys
       title: Multi Field Key
       type: object
+    Kibana_HTTP_APIs_visMultiValueCell:
+      anyOf:
+        - items:
+            type: string
+          maxItems: 100
+          type: array
+        - items:
+            type: number
+          maxItems: 100
+          type: array
+        - items:
+            type: boolean
+          maxItems: 100
+          type: array
+      description: Values of a multi-value cell.
+      title: Multi Value Cell
     Kibana_HTTP_APIs_visNoColor:
       additionalProperties: false
       description: Explicitly disables coloring
@@ -187743,6 +187861,7 @@ components:
       type: object
     Kibana_HTTP_APIs_visRangeKey:
       additionalProperties: false
+      description: Identifies a range bucket. Omit either bound for an open end.
       properties:
         from:
           anyOf:
@@ -187764,8 +187883,6 @@ components:
                   - type: string
                   - type: number
             required:
-              - from
-              - to
               - label
           maxItems: 100
           type: array
@@ -187779,8 +187896,6 @@ components:
           type: string
       required:
         - type
-        - from
-        - to
         - ranges
       title: Range Key
       type: object

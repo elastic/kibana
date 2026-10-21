@@ -77,27 +77,31 @@ enabled:
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/visualize/group1/config.ts
-  - src/platform/test/functional/apps/visualize/group2/config.ts
   - src/platform/test/functional/apps/visualize/group3/config.ts
-  - src/platform/test/functional/apps/visualize/group6/config.ts
   - src/platform/test/functional/apps/visualize/group7/config.ts
   - src/platform/test/functional/apps/visualize/group8/config.ts
-  # Legacy TSVB editor (metric / gauge / top N / misc). Low churn vs Lens; run daily.
+  - src/platform/test/functional/apps/visualize/misc/config.ts
+  # Legacy TSVB editor (metric / gauge / top N / misc / markdown / table / TSDB). Low churn vs Lens; run every 3h.
   - src/platform/test/functional/apps/visualize/group4/config.ts:
-      testChannels: ['ci-batch-daily']
+      testChannels: ['ci-batch-3h']
   - src/platform/test/functional/apps/visualize/group9/config.ts:
-      testChannels: ['ci-batch-daily']
+      testChannels: ['ci-batch-3h']
   - src/platform/test/functional/apps/visualize/group10/config.ts:
-      testChannels: ['ci-batch-daily']
+      testChannels: ['ci-batch-3h']
   - src/platform/test/functional/apps/visualize/group11/config.ts:
-      testChannels: ['ci-batch-daily']
-  # Legacy agg-based Visualize XY / Timelion (post-vislib). Low churn vs Lens; run daily.
+      testChannels: ['ci-batch-3h']
+  - src/platform/test/functional/apps/visualize/group6/config.ts:
+      testChannels: ['ci-batch-3h']
+  # Legacy agg-based Visualize XY / Timelion (post-vislib), vislib heatmap, gauge, metric and
+  # experimental vis notification. Low churn vs Lens; run every 3h.
+  - src/platform/test/functional/apps/visualize/group2/config.ts:
+      testChannels: ['ci-batch-3h']
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_1/config.ts:
-      testChannels: ['ci-batch-daily']
+      testChannels: ['ci-batch-3h']
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_2/config.ts:
-      testChannels: ['ci-batch-daily']
+      testChannels: ['ci-batch-3h']
   - src/platform/test/functional/apps/visualize/replaced_vislib_chart_types_3/config.ts:
-      testChannels: ['ci-batch-daily']
+      testChannels: ['ci-batch-3h']
   - src/platform/test/functional/config.ccs.ts
   - src/platform/test/health_gateway/config.ts
   - src/platform/test/interpreter_functional/config.ts
@@ -207,14 +211,17 @@ enabled:
   - x-pack/platform/test/functional/apps/dashboard/group3/config.ts
   - x-pack/platform/test/functional/apps/lens/group2/config.ts
   # LogsDB index mode migration scenarios (upgrade in group8, downgrade was already migrated to Scout). Long-running
-  # and covering low-churn code paths, so they run daily instead of on every commit.
+  # and covering low-churn code paths, so they run every 3h instead of on every commit.
   # See https://github.com/elastic/kibana/issues/282230
   - x-pack/platform/test/functional/apps/lens/group8/config.ts:
-      testChannels: ['ci-batch-daily']
+      testChannels: ['ci-batch-3h']
   - x-pack/platform/test/functional/apps/lens/group12/config.ts
   - x-pack/platform/test/functional/apps/lens/group14/config.ts
   - x-pack/platform/test/functional/apps/lens/group15/config.ts
-  - x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts
+  # Converts Legacy Visualize panels to Lens from a dashboard; stays FTR-only until Legacy Visualize is removed.
+  # See https://github.com/elastic/kibana/issues/266317
+  - x-pack/platform/test/functional/apps/lens/open_in_lens/dashboard/config.ts:
+      testChannels: ['ci-batch-3h']
   - x-pack/platform/test/functional/apps/logstash/config.ts
   - x-pack/platform/test/functional/apps/managed_content/config.ts
   - x-pack/platform/test/functional/apps/maps/group1/config.ts
@@ -336,7 +343,6 @@ enabled:
   - x-pack/platform/test/api_integration/apis/es/config.ts
   - x-pack/platform/test/api_integration/apis/file_upload/config.ts
   - x-pack/platform/test/api_integration/apis/kibana/config.ts
-  - x-pack/platform/test/api_integration/apis/management/config.ts
   - x-pack/platform/test/api_integration/apis/ml/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring/config.ts
   - x-pack/platform/test/api_integration/apis/monitoring_collection/config.ts
