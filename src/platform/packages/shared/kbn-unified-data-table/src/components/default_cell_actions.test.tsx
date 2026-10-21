@@ -58,18 +58,10 @@ describe('Default cell actions ', () => {
     jest.clearAllMocks();
   });
 
-  const CopyBtn = buildCopyValueButton(
-    createCellActionProps({
-      colIndex: 0,
-      columnId: 'extension',
-    }),
-    servicesMock.toastNotifications,
-    dataTableContextMock.valueToStringConverter,
-    'table'
-  );
   const extensionField = getField('extension');
   const messageField = getField('message');
   const sourceField = getField('_source');
+  const bytesField = getField('bytes');
 
   it('should not show cell actions for unfilterable fields', () => {
     const cellActions = buildCellActions(
@@ -84,10 +76,10 @@ describe('Default cell actions ', () => {
       cellActions[0](
         createCellActionProps({
           colIndex: 1,
-          columnId: 'extension',
+          columnId: 'message',
         })
       )!.props['aria-label']
-    ).toEqual(CopyBtn.props['aria-label']);
+    ).toEqual('Copy value of message');
   });
 
   it('should show filter actions for filterable fields', () => {
@@ -114,10 +106,41 @@ describe('Default cell actions ', () => {
       cellActions[0](
         createCellActionProps({
           colIndex: 1,
-          columnId: 'extension',
+          columnId: '_source',
         })
       )!.props['aria-label']
-    ).toEqual(CopyBtn.props['aria-label']);
+    ).toEqual('Copy value of _source');
+  });
+
+  it('should use the field display name in the action labels', () => {
+    const cellActions = buildCellActions(
+      bytesField,
+      servicesMock.toastNotifications,
+      dataTableContextMock.valueToStringConverter,
+      'table',
+      jest.fn()
+    );
+
+    renderWithI18n(
+      <UnifiedDataTableContext.Provider value={dataTableContextMock}>
+        {cellActions.map((CellAction, index) => (
+          <CellAction
+            key={index}
+            {...createCellActionProps({ colIndex: 1, columnId: 'bytes', rowIndex: 1 })}
+          />
+        ))}
+      </UnifiedDataTableContext.Provider>
+    );
+
+    expect(
+      screen.getByRole('button', { name: 'Filter for this bytesDisplayName' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Filter out this bytesDisplayName' })
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: 'Copy value of bytesDisplayName' })
+    ).toBeInTheDocument();
   });
 
   it('triggers filter function when FilterInBtn is clicked', async () => {
