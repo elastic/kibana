@@ -109,8 +109,6 @@ export const toDashboardComposition = (
       ...(title ? { title } : {}),
       grid: panel.grid,
       body: body as DashboardPanel['body'],
-      // A metric or gauge draws its own title and frame, so it fills the panel, as Lens's do.
-      ...(!title && DRAWS_OWN_TITLE.has(body.type) ? { frame: 'none' as const } : {}),
     };
   });
   const period = periodOf(converted);
