@@ -25,6 +25,9 @@ export const MARK_SCANNED_ENDPOINT = 'internal/significant_events/detections/_ma
 export const SOURCES_ENDPOINT = 'internal/nightshift/sources';
 export const getFeaturesEndpoint = (sourceId: string): string =>
   `internal/streams/${sourceId}/features`;
+export const QUERIES_ENDPOINT = 'internal/significant_events/queries';
+export const DISCOVERY_QUERIES_ENDPOINT = 'internal/streams/_queries';
+export const BULK_DELETE_QUERIES_ENDPOINT = 'internal/streams/queries/_bulk_delete';
 export const RUN_QUOTAS_ENDPOINT = 'internal/significant_events/run_quotas';
 export const TOOL_EXECUTE_ENDPOINT = 'api/agent_builder/tools/_execute';
 
@@ -46,7 +49,9 @@ export const CONFIGURE_ONLY_REQUESTS = [
 ] as const;
 
 const FENCE_TIMEOUT_MS = 120_000;
-const FENCE_POLL_INTERVAL_MS = 1_000;
+const POLL_INTERVAL_MS = 1_000;
+const WRITE_LEASE_TIMEOUT_MS = 30_000;
+const WRITE_LEASE_CONFLICT_MESSAGE = 'Source knowledge is being updated';
 
 export const POLL_OPTIONS = { timeout: 30_000, intervals: [1_000] };
 
@@ -80,6 +85,19 @@ export const buildFeature = (id: string) => ({
   confidence: 90,
   evidence: [`service.name=${id}`],
   tags: ['entity', 'service'],
+});
+
+/** A filter-only MATCH query, so storing it also installs its backing Alerting v2 rule. */
+export const buildRuleBackedQuery = ({
+  sourceId,
+  viewName,
+}: {
+  sourceId: string;
+  viewName: string;
+}) => ({
+  title: 'Built-in role access check',
+  esql: { query: `FROM ${viewName} | WHERE severity_text == "ERROR"` },
+  source_id: sourceId,
 });
 
 /** Indexes a significant event straight into `.rule-events`, the way the alerting v2 executor stores it. */
@@ -144,6 +162,63 @@ export const deleteDetections = async (esClient: EsClient, ruleUuid: string): Pr
   });
 };
 
+const isConflictResponse = ({ statusCode }: { statusCode: number }): boolean => statusCode === 409;
+
+/**
+ * Resends a source knowledge write while another writer (reconcile, onboarding, a sweep) holds the
+ * source's write lease, which the write answers with a 409 instead of waiting.
+ *
+ * Temporary: remove once https://github.com/elastic/kibana/pull/298878 is merged, which makes the
+ * server wait for the lease itself.
+ */
+export const retryOnWriteLease = async <TResponse extends { statusCode: number }>({
+  send,
+  isLeaseConflict = isConflictResponse,
+}: {
+  send: () => Promise<TResponse>;
+  isLeaseConflict?: (response: TResponse) => boolean;
+}): Promise<TResponse> => {
+  const deadline = Date.now() + WRITE_LEASE_TIMEOUT_MS;
+  let response = await send();
+  while (isLeaseConflict(response) && Date.now() < deadline) {
+    await delay(POLL_INTERVAL_MS);
+    response = await send();
+  }
+  return response;
+};
+
+/** Agent Builder tools answer 200 and report the lease conflict as an error result. */
+export const isToolWriteLeaseConflict = ({
+  body,
+}: {
+  body: { results?: Array<{ type: string; data?: { message?: string } }> };
+}): boolean =>
+  (body.results ?? []).some(
+    ({ type, data }) =>
+      type === 'error' && Boolean(data?.message?.includes(WRITE_LEASE_CONFLICT_MESSAGE))
+  );
+
+const requestRetryingWriteLease = async ({
+  kbnClient,
+  request,
+}: {
+  kbnClient: KbnClient;
+  request: Parameters<KbnClient['request']>[0];
+}): Promise<void> => {
+  const { statusCode } = await retryOnWriteLease({
+    send: async () => {
+      const { status } = await kbnClient.request({
+        ...request,
+        ignoreErrors: [...(request.ignoreErrors ?? []), 409],
+      });
+      return { statusCode: status };
+    },
+  });
+  if (statusCode === 409) {
+    throw new Error(`${request.method} ${request.path} still hit the source write lease`);
+  }
+};
+
 export const seedFeature = async ({
   kbnClient,
   sourceId,
@@ -153,11 +228,14 @@ export const seedFeature = async ({
   sourceId: string;
   featureId: string;
 }): Promise<void> => {
-  await kbnClient.request({
-    method: 'POST',
-    path: `/${getFeaturesEndpoint(sourceId)}`,
-    headers: COMMON_API_HEADERS,
-    body: buildFeature(featureId),
+  await requestRetryingWriteLease({
+    kbnClient,
+    request: {
+      method: 'POST',
+      path: `/${getFeaturesEndpoint(sourceId)}`,
+      headers: COMMON_API_HEADERS,
+      body: buildFeature(featureId),
+    },
   });
 };
 
@@ -170,11 +248,52 @@ export const deleteFeature = async ({
   sourceId: string;
   featureId: string;
 }): Promise<void> => {
+  await requestRetryingWriteLease({
+    kbnClient,
+    request: {
+      method: 'DELETE',
+      path: `/${getFeaturesEndpoint(sourceId)}/${featureId}`,
+      headers: COMMON_API_HEADERS,
+      ignoreErrors: [404],
+    },
+  });
+};
+
+export const seedRuleBackedQuery = async ({
+  kbnClient,
+  queryId,
+  sourceId,
+  viewName,
+}: {
+  kbnClient: KbnClient;
+  queryId: string;
+  sourceId: string;
+  viewName: string;
+}): Promise<void> => {
+  await requestRetryingWriteLease({
+    kbnClient,
+    request: {
+      method: 'PUT',
+      path: `/${QUERIES_ENDPOINT}/${queryId}`,
+      headers: COMMON_API_HEADERS,
+      body: buildRuleBackedQuery({ sourceId, viewName }),
+    },
+  });
+};
+
+/** Deletes the query and its backing rule. A query that is already gone is skipped. */
+export const deleteQuery = async ({
+  kbnClient,
+  queryId,
+}: {
+  kbnClient: KbnClient;
+  queryId: string;
+}): Promise<void> => {
   await kbnClient.request({
-    method: 'DELETE',
-    path: `/${getFeaturesEndpoint(sourceId)}/${featureId}`,
+    method: 'POST',
+    path: `/${BULK_DELETE_QUERIES_ENDPOINT}`,
     headers: COMMON_API_HEADERS,
-    ignoreErrors: [404],
+    body: { queryIds: [queryId] },
   });
 };
 
@@ -185,16 +304,18 @@ export const createAccessSource = async ({
 }: {
   kbnClient: KbnClient;
   title: string;
-}): Promise<{ id: string; slug: string }> => {
-  const { data } = await kbnClient.request<{ source: { id: string; slug: string } }>({
+}): Promise<{ id: string; slug: string; viewName: string }> => {
+  const { data } = await kbnClient.request<{
+    source: { id: string; slug: string; view_name: string };
+  }>({
     method: 'POST',
     path: `/${SOURCES_ENDPOINT}`,
     headers: COMMON_API_HEADERS,
     body: { title, esql: ACCESS_SOURCE_ESQL },
   });
-  const source = { id: data.source.id, slug: data.source.slug };
-  await fenceAutomaticOnboarding({ kbnClient, source });
-  return source;
+  const { id, slug, view_name: viewName } = data.source;
+  await fenceAutomaticOnboarding({ kbnClient, source: { id, slug } });
+  return { id, slug, viewName };
 };
 
 /**
@@ -202,7 +323,7 @@ export const createAccessSource = async ({
  * one-time onboarding run. Writes to the source answer 409 until both are out of the way, so the
  * reconcile is applied here first, and the run it started is cancelled and waited out.
  */
-const fenceAutomaticOnboarding = async ({
+export const fenceAutomaticOnboarding = async ({
   kbnClient,
   source,
 }: {
@@ -221,7 +342,7 @@ const fenceAutomaticOnboarding = async ({
 
   let reconcile = await request('POST', '_reconcile_source', { sourceSlug: source.slug });
   while (reconcile.status === 409 && Date.now() < deadline) {
-    await delay(FENCE_POLL_INTERVAL_MS);
+    await delay(POLL_INTERVAL_MS);
     reconcile = await request('POST', '_reconcile_source', { sourceSlug: source.slug });
   }
   if (reconcile.status === 409) {
@@ -238,7 +359,7 @@ const fenceAutomaticOnboarding = async ({
     if (!KIS_ONBOARDING_IN_PROGRESS_STATUSES.has(data.status)) {
       return;
     }
-    await delay(FENCE_POLL_INTERVAL_MS);
+    await delay(POLL_INTERVAL_MS);
   }
   throw new Error(`Onboarding of source ${source.id} is still running after being cancelled`);
 };
