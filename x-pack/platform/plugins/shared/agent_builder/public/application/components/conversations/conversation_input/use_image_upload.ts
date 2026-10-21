@@ -23,7 +23,7 @@ export interface UseImageUploadParams {
 export interface UseImageUploadResult {
   uploadingNames: Set<string>;
   handlePasteFile?: (file: File) => string | undefined;
-  handleAfterInput: (inputType?: string) => void;
+  handleAfterInput: () => void;
   handleRemoveAttachment?: (attachment: ConversationAttachment) => void;
 }
 
@@ -37,6 +37,8 @@ export const useImageUpload = ({
     useConversationContext();
   const [uploadingNames, setUploadingNames] = useState<Set<string>>(new Set());
   const uploadControllers = useRef<Map<string, AbortController>>(new Map());
+  // Image attachments whose chip left the editor, kept so undo/redo can bring them back
+  const detachedAttachments = useRef<Map<string, ConversationAttachment>>(new Map());
 
   const attachmentsRef = useRef(attachments);
   attachmentsRef.current = attachments;
@@ -44,11 +46,13 @@ export const useImageUpload = ({
   // Abort every in-flight upload when navigating away from this conversation
   useEffect(() => {
     const controllers = uploadControllers.current;
+    const detached = detachedAttachments.current;
     return () => {
       for (const controller of controllers.values()) {
         controller.abort();
       }
       controllers.clear();
+      detached.clear();
       setUploadingNames(new Set());
     };
   }, [conversationId]);
@@ -66,6 +70,12 @@ export const useImageUpload = ({
       );
       // Also include in-flight names so two simultaneous pastes don't collide
       for (const n of uploadingNames) existingImageNames.add(n);
+      // Names of detached images and hidden uploads stay taken, so their chip can come back
+      const takenNames = new Set([
+        ...existingImageNames,
+        ...detachedAttachments.current.keys(),
+        ...uploadControllers.current.keys(),
+      ]);
 
       if (
         rejectIfTooManyImages({
@@ -77,7 +87,7 @@ export const useImageUpload = ({
         return undefined;
       }
 
-      const name = getUniqueName(file.name || 'image.png', existingImageNames);
+      const name = getUniqueName(file.name || 'image.png', takenNames);
       const controller = new AbortController();
       uploadControllers.current.set(name, controller);
 
@@ -86,7 +96,16 @@ export const useImageUpload = ({
         file,
         name,
         filesClient,
-        upsertAttachments,
+        upsertAttachments: (uploaded) => {
+          // The chip can be removed while uploading; keep the result until it comes back
+          if (messageEditorController.getPlaceholderNames().includes(name)) {
+            upsertAttachments(uploaded);
+            return;
+          }
+          for (const attachment of uploaded) {
+            detachedAttachments.current.set(name, attachment);
+          }
+        },
         addErrorToast,
         reportEvent: services.analytics.reportEvent,
         abortSignal: controller.signal,
@@ -118,61 +137,45 @@ export const useImageUpload = ({
     ]
   );
 
-  const handleAfterInput = useCallback(
-    (inputType?: string) => {
-      const placeholderNames = new Set(messageEditorController.getPlaceholderNames());
+  const handleAfterInput = useCallback(() => {
+    const placeholderNames = new Set(messageEditorController.getPlaceholderNames());
 
-      // Redo cannot bring back the attachment, so a chip without one is not restored
-      if (inputType === 'historyRedo') {
-        const attachedNames = new Set(
-          (attachmentsRef.current ?? []).flatMap((a) =>
-            !('items' in a) && a.type === AttachmentType.image
-              ? [(a.data as { name?: string }).name ?? '']
-              : []
-          )
-        );
-        const hasOrphanChip = [...placeholderNames].some(
-          (name) => !attachedNames.has(name) && !uploadControllers.current.has(name)
-        );
-        if (hasOrphanChip) {
-          // The browser rejects a nested undo, so it must wait until the redo has finished
-          setTimeout(() => document.execCommand('undo'), 0);
-          return;
+    // Keep the attachment of a removed chip aside, so undo can bring it back
+    const current = attachmentsRef.current;
+    if (current && removeAttachment) {
+      for (let i = current.length - 1; i >= 0; i--) {
+        const a = current[i];
+        if ('items' in a || a.type !== AttachmentType.image) continue;
+        const name = (a.data as { name?: string }).name;
+        if (name && !placeholderNames.has(name) && !detachedAttachments.current.has(name)) {
+          detachedAttachments.current.set(name, a);
+          removeAttachment(i);
         }
       }
+    }
 
-      const abortUpload = (name: string) => {
-        uploadControllers.current.get(name)?.abort();
-        uploadControllers.current.delete(name);
-        setUploadingNames((prev) => {
-          const next = new Set(prev);
-          next.delete(name);
-          return next;
-        });
-      };
+    // Undo or redo brought a chip back, so its attachment comes back too
+    const restored = [...placeholderNames].flatMap((name) => {
+      const attachment = detachedAttachments.current.get(name);
+      if (!attachment) return [];
+      detachedAttachments.current.delete(name);
+      return [attachment];
+    });
+    if (restored.length > 0) {
+      upsertAttachments?.(restored);
+    }
 
-      const current = attachmentsRef.current;
-      if (current && removeAttachment) {
-        for (let i = current.length - 1; i >= 0; i--) {
-          const a = current[i];
-          if ('items' in a || a.type !== AttachmentType.image) continue;
-          const name = (a.data as { name?: string }).name;
-          if (name && !placeholderNames.has(name)) {
-            abortUpload(name);
-            removeAttachment(i);
-          }
-        }
-      }
-
-      // To remove a pill if a placeholder was removed before upload completes.
-      for (const name of uploadingNames) {
-        if (!placeholderNames.has(name)) {
-          abortUpload(name);
-        }
-      }
-    },
-    [removeAttachment, messageEditorController, uploadingNames]
-  );
+    // Uploads keep running while their chip is removed, but only chips in the editor show progress
+    const visibleUploadingNames = [...uploadControllers.current.keys()].filter((name) =>
+      placeholderNames.has(name)
+    );
+    setUploadingNames((prev) =>
+      prev.size === visibleUploadingNames.length &&
+      visibleUploadingNames.every((name) => prev.has(name))
+        ? prev
+        : new Set(visibleUploadingNames)
+    );
+  }, [removeAttachment, upsertAttachments, messageEditorController]);
 
   const handleRemoveAttachment = useCallback(
     (attachment: ConversationAttachment) => {

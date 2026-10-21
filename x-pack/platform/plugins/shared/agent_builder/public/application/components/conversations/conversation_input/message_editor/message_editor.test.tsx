@@ -582,6 +582,29 @@ describe('MessageEditor', () => {
     expect(chip.getAttribute('data-uploading')).toBeNull();
   });
 
+  it('re-syncs the uploading state of chips from uploadingNames on input', () => {
+    const { messageEditor } = createMockMessageEditor();
+    render(
+      <MessageEditor
+        messageEditor={messageEditor}
+        onSubmit={mockOnSubmit}
+        uploadingNames={new Set(['uploading.png'])}
+        data-test-subj="messageEditor"
+      />
+    );
+
+    const editor = screen.getByTestId('messageEditor');
+    const uploadingChip = createImagePlaceholderElement('uploading.png');
+    const doneChip = createImagePlaceholderElement('done.png');
+    doneChip.setAttribute('data-uploading', 'true');
+    editor.append(uploadingChip, doneChip);
+
+    fireEvent.input(editor);
+
+    expect(uploadingChip.getAttribute('data-uploading')).toBe('true');
+    expect(doneChip.getAttribute('data-uploading')).toBeNull();
+  });
+
   it('pasting an image inserts a trailing non-breaking space and places the caret after it', () => {
     const onPasteFile = jest.fn().mockReturnValue('screenshot.png');
     const { messageEditor } = createMockMessageEditor();

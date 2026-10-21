@@ -84,7 +84,7 @@ interface MessageEditorProps {
   ariaLabel?: string;
   'data-test-subj'?: string;
   onPasteFile?: (file: File) => string | undefined;
-  onAfterInput?: (inputType?: string) => void;
+  onAfterInput?: () => void;
   onHoveredPlaceholderChange?: (name: string | null) => void;
   uploadingNames?: ReadonlySet<string>;
 }
@@ -179,9 +179,13 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
         data-placeholder={placeholder}
         data-test-subj={dataTestSubj}
         css={editorStyles}
-        onInput={(event) => {
+        onInput={() => {
           onChange();
-          onAfterInput?.((event.nativeEvent as InputEvent).inputType);
+          onAfterInput?.();
+          // Undo/redo can bring back a chip with an outdated uploading state
+          if (ref.current) {
+            syncChipsUploadingState(ref.current, uploadingNames);
+          }
         }}
         onMouseDown={(event) =>
           handleImagePlaceholderRemoveClick(event.nativeEvent, { onChange, onAfterInput })
