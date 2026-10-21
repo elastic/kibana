@@ -16,6 +16,7 @@ import { createPath, PageLoader } from '../../router';
 import { useRouteResolver } from '../../use_resolver';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { DataSourceContextProvider } from '../../../contexts/ml';
+import { getMlNodeCount } from '../../../ml_nodes_check/check_ml_nodes';
 
 const Page = dynamic(async () => ({
   default: (await import('../../../datavisualizer/index_based/index_data_visualizer'))
@@ -65,7 +66,7 @@ export const indexESQLBasedRouteFactory = (
 });
 
 const PageWrapper: FC<{ esql: boolean }> = ({ esql }) => {
-  const { context } = useRouteResolver('basic', []);
+  const { context } = useRouteResolver('basic', [], { getMlNodeCount });
 
   return (
     <PageLoader context={context}>
