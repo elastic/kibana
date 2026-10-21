@@ -65,6 +65,18 @@ steps:
     type: elasticsearch.esql.query
     timeout: "5m"
     with:
+      # Alerts the review already retired: a true-positive or inconclusive attack
+      # tags its alerts `az:ad_correlated` (`consts.ad_correlated_tag` in
+      # attack_discovery_review.yaml; keep the two in sync), so correlating them again
+      # would only persist a near-duplicate attack. A DSL `must_not` rather than a
+      # `| WHERE`: it is pushed down to Lucene, and it handles an untagged alert and a
+      # multi-valued tag field without the null arm an ES|QL comparison would need.
+      filter:
+        bool:
+          must_not:
+            - terms:
+                kibana.alert.workflow_tags:
+                  - az:ad_correlated
       # The `IS NULL` arm is load-bearing: `!=` alone is null-valued, and so
       # false, for an alert with no closing reason. Kept as its own `| WHERE`
       # pipe (pipes are ANDed) so the `OR` cannot widen the clauses above it.

@@ -45,9 +45,10 @@ import {
 } from '../../../../services';
 
 import type { PackageListItem } from '../../../../types';
+import { COLLECTION_QUERYPARAM } from '../../../../../../services/collections';
 
 /** URL query-param key that holds the currently-open collection group id. */
-export const COLLECTION_QUERYPARAM = 'collection';
+export { COLLECTION_QUERYPARAM };
 
 export interface CollectionStateRef {
   groupId: string;
@@ -121,6 +122,7 @@ export const mapToCard = ({
   addBasePath,
   packageVerificationKeyId,
   selectedCategory,
+  canAddIntegration = true,
 }: {
   getAbsolutePath: (p: string) => string;
   getHref: (page: StaticPage | DynamicPage, values?: DynamicPagePathValues) => string;
@@ -128,6 +130,8 @@ export const mapToCard = ({
   item: CustomIntegration | PackageListItem;
   packageVerificationKeyId?: string;
   selectedCategory?: string;
+  // The add-integration page requires write privileges; users without them keep the overview page.
+  canAddIntegration?: boolean;
 }): IntegrationCardItem => {
   let uiInternalPathUrl: string;
 
@@ -175,7 +179,7 @@ export const mapToCard = ({
       ('addIntegrationFromCatalog' in item ? item.addIntegrationFromCatalog : undefined) ??
       shouldAddIntegrationFromCatalog(item);
     const url =
-      !enableIntegrationTileClickToAdd || !addIntegrationFromCatalog
+      !enableIntegrationTileClickToAdd || !canAddIntegration || !addIntegrationFromCatalog
         ? getHref('integration_details_overview', {
             pkgkey: `${item.name}-${version}`,
             ...(item.integration ? { integration: item.integration } : {}),

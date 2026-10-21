@@ -60,10 +60,10 @@ export const EPISODES_LIST_COLUMN_SOURCE = i18n.translate(
   }
 );
 
-export const EPISODES_LIST_COLUMN_MAINTENANCE_WINDOWS = i18n.translate(
-  'xpack.alertingV2.episodes.columns.maintenanceWindows',
+export const EPISODES_LIST_COLUMN_SUPPRESSED = i18n.translate(
+  'xpack.alertingV2.episodes.columns.suppressed',
   {
-    defaultMessage: 'Maintenance windows',
+    defaultMessage: 'Suppressed',
   }
 );
 
