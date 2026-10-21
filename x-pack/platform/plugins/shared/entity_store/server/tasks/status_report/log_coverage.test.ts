@@ -193,6 +193,30 @@ describe('collectLogCoverage', () => {
     expect(next).toBe(20_000);
   });
 
+  it('stops waiting for the index patterns after 10s', async () => {
+    jest.useFakeTimers();
+    const esClient = clientWith(() => ({}));
+
+    const pending = collect(esClient, { getIndexPatterns: () => new Promise(() => {}) });
+    await jest.advanceTimersByTimeAsync(10_001);
+    const { event } = await pending;
+
+    expect(event.outcome).toBe('timed_out');
+    expect(esClient.esql.query).not.toHaveBeenCalled();
+  });
+
+  it('skips without resolving the index patterns when the task is aborted', async () => {
+    const esClient = clientWith(() => ({}));
+    const controller = new AbortController();
+    controller.abort();
+    const getIndexPatterns = jest.fn(async () => ['logs-*']);
+
+    const { event } = await collect(esClient, { getIndexPatterns, signal: controller.signal });
+
+    expect(event.outcome).toBe('skipped');
+    expect(getIndexPatterns).not.toHaveBeenCalled();
+  });
+
   it('reports partial when Elasticsearch returns partial results', async () => {
     const esClient = clientWith((query) =>
       query.includes('totalDocs')
