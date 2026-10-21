@@ -823,9 +823,11 @@ export interface DocLinks {
   };
   readonly subscriptions: string;
   readonly cases: {
+    readonly overview: string;
     readonly casesPermissions: string;
     readonly configureCaseSettings: string;
     readonly manageCaseTemplates: string;
+    readonly createCases: string;
   };
 }
 
