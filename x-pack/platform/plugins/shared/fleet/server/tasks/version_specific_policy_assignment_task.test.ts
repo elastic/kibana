@@ -13,6 +13,7 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
 
 import { createAppContextStartContractMock } from '../mocks';
+import { AgentAlreadyAssignedError, AgentReassignmentError } from '../errors';
 import { agentPolicyService, appContextService, packagePolicyService } from '../services';
 import { fetchAllAgentsByKuery, getAgentsByKuery } from '../services/agents';
 import { reassignAgents } from '../services/agents/reassign';
@@ -453,6 +454,53 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
       for (const [, , , targetPolicyId] of mockedReassignAgents.mock.calls) {
         expect(targetPolicyId).toBe('policy-1#8.18');
       }
+    });
+
+    describe.each([
+      [
+        'logs at debug level when the agents are already assigned',
+        new AgentAlreadyAssignedError('x'),
+        false,
+      ],
+      [
+        'logs an error when the agents are hosted',
+        new AgentReassignmentError('No agents to reassign, already assigned or hosted agents'),
+        true,
+      ],
+      ['logs an error when the reassignment fails', new Error('boom'), true],
+    ])('Reassignment failure: %s', (_name, reassignError, expectError) => {
+      it('logs with the expected level', async () => {
+        const logFactory = loggingSystemMock.create();
+        const logger = loggingSystemMock.createLogger();
+        logFactory.get.mockReturnValue(logger);
+        const task = new VersionSpecificPolicyAssignmentTask({
+          core: mockCore,
+          taskManager: mockTaskManagerSetup,
+          logFactory,
+          config: { taskInterval: '1m' },
+        });
+        const agents = generateAgents(1, 'policy-1');
+        mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
+          { id: 'policy-1', revision: 5, has_agent_version_conditions: true },
+        ] as AgentPolicy[]);
+        mockAgentPolicyService.deployPolicies = jest.fn().mockResolvedValue(undefined);
+        mockedGetAgentsByKuery.mockResolvedValue({
+          total: agents.length,
+          agents,
+          page: 1,
+          perPage: agents.length,
+        });
+        mockedFetchAllAgentsByKuery.mockResolvedValue(getMockFetchAllAgentsByKuery(agents));
+        mockedReassignAgents.mockRejectedValueOnce(reassignError);
+
+        await task.start({ taskManager: tmStartMock() });
+        await task.runTask(MOCK_TASK_INSTANCE, mockCore, new AbortController().signal);
+
+        const isReassignLog = ([message]: unknown[]) =>
+          String(message).includes('Error reassigning agents to policy-1#8.18');
+        expect(logger.error.mock.calls.some(isReassignLog)).toBe(expectError);
+        expect(logger.debug.mock.calls.some(isReassignLog)).toBe(!expectError);
+      });
     });
 
     it('Should not reassign more batches once the task is aborted', async () => {

@@ -135,6 +135,7 @@ import { isSignificantEventsSemanticCodeSearchGroundingEnabled } from './lib/sem
 
 const SIGNIFICANT_EVENTS_MANAGED_WORKFLOW_OWNER = 'significantEvents';
 const SLACK_CONNECTOR_RECONCILE_INTERVAL_MS = 60_000;
+const RULE_CREATION_APP = 'nightshift';
 
 export class SignificantEventsPlugin
   implements
@@ -258,7 +259,9 @@ export class SignificantEventsPlugin
       });
 
       const getAlertingV2RulesClient = async () =>
-        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, space);
+        pluginsStart.alertingVTwo.getRulesClientWithRequestInSpace(request, space, {
+          app: RULE_CREATION_APP,
+        });
 
       const resolveSignificantEventsAlertingContext =
         createSignificantEventsAlertingContextResolver({

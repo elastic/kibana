@@ -7,6 +7,8 @@
 import type { estypes } from '@elastic/elasticsearch';
 
 import {
+  AgentAlreadyAssignedError,
+  AgentReassignmentError,
   AgentlessAgentRestrictionError,
   HostedAgentPolicyRestrictionRelatedError,
 } from '../../errors';
@@ -230,6 +232,36 @@ describe('reassignAgent', () => {
       expect(updated.operations?.length).toBe(2);
       // @ts-expect-error
       expect(updated.operations[0].update._id).toEqual(agentInAgentlessDoc._id);
+    });
+
+    it('throws AgentAlreadyAssignedError when all agents are already assigned to the policy', async () => {
+      const { soClient, esClient, agentInRegularDoc, regularAgentPolicySO } = mocks;
+
+      esClient.search.mockResponse({ hits: { hits: [agentInRegularDoc] } } as any);
+
+      await expect(
+        reassignAgents(
+          soClient,
+          esClient,
+          { agentIds: [agentInRegularDoc._id] },
+          regularAgentPolicySO.id
+        )
+      ).rejects.toThrow(AgentAlreadyAssignedError);
+    });
+
+    it('throws AgentReassignmentError, not AgentAlreadyAssignedError, when the agents are hosted', async () => {
+      const { soClient, esClient, agentInHostedDoc, regularAgentPolicySO2 } = mocks;
+
+      esClient.search.mockResponse({ hits: { hits: [agentInHostedDoc] } } as any);
+
+      const error = await reassignAgents(
+        soClient,
+        esClient,
+        { agentIds: [agentInHostedDoc._id] },
+        regularAgentPolicySO2.id
+      ).catch((e) => e);
+      expect(error).toBeInstanceOf(AgentReassignmentError);
+      expect(error).not.toBeInstanceOf(AgentAlreadyAssignedError);
     });
 
     it('should report errors from ES agent update call', async () => {
