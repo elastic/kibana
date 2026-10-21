@@ -55,9 +55,9 @@ export const getRulesLabel = (count: number): string =>
     values: { count },
   });
 
-export const getDiscoveriesLabel = (count: number): string =>
-  i18n.translate('xpack.nightshift.detectionPage.discoveriesCountLabel', {
-    defaultMessage: '{count, plural, one {discovery} other {discoveries}}',
+export const getDetectionsLabel = (count: number): string =>
+  i18n.translate('xpack.nightshift.detectionPage.detectionsCountLabel', {
+    defaultMessage: '{count, plural, one {detection} other {detections}}',
     values: { count },
   });
 

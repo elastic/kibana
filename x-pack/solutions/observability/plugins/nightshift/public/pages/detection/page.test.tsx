@@ -76,7 +76,7 @@ describe('DetectionPage', () => {
     expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
     expect(screen.getByTestId('nightshiftDetectionStatus')).toHaveTextContent('Paused');
     expect(screen.getByText('knowledge indicators')).toBeInTheDocument();
-    expect(screen.getByText('discoveries')).toBeInTheDocument();
+    expect(screen.getByText('detections')).toBeInTheDocument();
   });
 
   it('shows the overview error instead of zero counts', async () => {
