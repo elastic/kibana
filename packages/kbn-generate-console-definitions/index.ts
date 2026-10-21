@@ -10,3 +10,4 @@
 export * from './src/cli';
 export * from './src/audit_overrides_cli';
 export * from './src/generate_kibana_api_doc_links_cli';
+export * from './src/generate_kibana_api_paths_cli';

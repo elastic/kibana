@@ -16,3 +16,9 @@ export const CONSOLE_DEFINITIONS_FOLDER = Path.resolve(
 );
 export const GENERATED_SUBFOLDER = 'generated';
 export const OVERRIDES_SUBFOLDER = 'overrides';
+
+export const KIBANA_API_DEFINITIONS_GENERATED_FOLDER = Path.resolve(
+  REPO_ROOT,
+  'src/platform/plugins/shared/console/server/lib/spec_definitions/kibana_api_definitions',
+  GENERATED_SUBFOLDER
+);
