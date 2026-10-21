@@ -79,6 +79,20 @@ it('shows Decision Trees when developer mode is on and the feature is available'
   );
 });
 
+it('hides Decision Trees when developer mode is turned off after availability was cached', async () => {
+  httpGetMock.mockResolvedValue({ enabled: true });
+  fetchMock.mockResolvedValue({ enabled: false });
+  const { result, rerender } = renderHook(() => useKnowledgeTabsAvailability(), {
+    wrapper: createWrapper(),
+  });
+  await waitFor(() => expect(result.current.decision_trees.isEnabled).toBe(true));
+
+  givenDeveloperMode(false);
+  rerender();
+
+  expect(result.current.decision_trees).toEqual({ isEnabled: false, isLoading: false });
+});
+
 it('reports a disabled Memory feature after the availability request settles', async () => {
   fetchMock.mockResolvedValue({ enabled: false });
   const { result } = renderHook(() => useMemoryEnabled(), { wrapper: createWrapper() });
