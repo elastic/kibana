@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { i18n } from '@kbn/i18n';
+import { Builder, LeafPrinter } from '@elastic/esql';
 import { ControlTriggerSource, ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import type {
   ICommandCallbacks,
@@ -34,6 +36,7 @@ import {
   findConstantPlaceholderType,
 } from '../../../../registry/complete_items';
 import { shouldSuggestComma, type CommaContext } from './comma_decision_engine';
+import { SuggestionCategory } from '../../../../../language/autocomplete/utils/sorting/types';
 
 interface FunctionSuggestionOptions {
   ignored?: string[];
@@ -99,6 +102,36 @@ export class SuggestionBuilder {
     });
 
     this.suggestions.push(...fieldSuggestions);
+    return this;
+  }
+
+  /** Adds the distinct values of a column, fetched by running a query. */
+  async addColumnValues(columnName: string): Promise<this> {
+    const getColumnValues = this.context.callbacks?.getColumnValues;
+    if (!getColumnValues) {
+      return this;
+    }
+
+    const values = await getColumnValues(columnName);
+
+    this.suggestions.push(
+      ...values.map((value) => {
+        const text =
+          typeof value === 'string'
+            ? LeafPrinter.string(Builder.expression.literal.string(value))
+            : String(value);
+        return {
+          label: text,
+          text,
+          kind: 'Value' as const,
+          detail: i18n.translate('kbn-esql-language.esql.autocomplete.columnValueDetail', {
+            defaultMessage: 'Value of {columnName}',
+            values: { columnName },
+          }),
+          category: SuggestionCategory.CONSTANT_VALUE,
+        };
+      })
+    );
     return this;
   }
 

@@ -81,6 +81,7 @@ export {
 export { type ESQLQueryStats, type ESQLControlsContext } from './src/editor_types';
 export {
   type ESQLCallbacks,
+  type ESQLColumnValue,
   type PartialFieldsMetadataClient,
   type ESQLFieldWithMetadata,
   type ESQLFullTextMatch,

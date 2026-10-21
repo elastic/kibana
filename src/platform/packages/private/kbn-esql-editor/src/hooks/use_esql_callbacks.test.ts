@@ -8,6 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+import { of, throwError } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { MapCache } from 'lodash';
 import type { FavoritesClient } from '@kbn/content-management-favorites-public';
@@ -299,6 +300,53 @@ describe('useEsqlCallbacks', () => {
 
       expect(params.esqlFieldsCache.has('Q1')).toBe(true);
       expect(params.esqlFieldsCache.get('Q1')).toBe(freshEntry);
+    });
+  });
+
+  describe('getValuesForQuery', () => {
+    const query = 'FROM logs | STATS BY host | SORT host | LIMIT 20';
+
+    it('returns the scalar values of the first column', async () => {
+      const params = createDefaultParams();
+      (params.data.search.search as jest.Mock).mockReturnValue(
+        of({ rawResponse: { columns: [], values: [['a'], [1], [true], [null], [['x', 'y']]] } })
+      );
+
+      const { result } = renderHook(() => useEsqlCallbacks(params));
+
+      expect(await result.current.getValuesForQuery!(query)).toEqual(['a', 1, true]);
+      expect(params.data.search.search).toHaveBeenCalledWith(
+        { params: expect.objectContaining({ query }) },
+        expect.objectContaining({ strategy: 'esql_async' })
+      );
+    });
+
+    it('returns no values when the query fails', async () => {
+      const params = createDefaultParams();
+      (params.data.search.search as jest.Mock).mockReturnValue(
+        throwError(() => new Error('Unknown column'))
+      );
+
+      const { result } = renderHook(() => useEsqlCallbacks(params));
+
+      expect(await result.current.getValuesForQuery!(query)).toEqual([]);
+    });
+
+    it('aborts the previous request when values are requested again', async () => {
+      const params = createDefaultParams();
+      (params.data.search.search as jest.Mock).mockReturnValue(
+        of({ rawResponse: { columns: [], values: [] } })
+      );
+
+      const { result } = renderHook(() => useEsqlCallbacks(params));
+
+      await result.current.getValuesForQuery!(query);
+      await result.current.getValuesForQuery!(query);
+
+      const [[, firstOptions], [, secondOptions]] = (params.data.search.search as jest.Mock).mock
+        .calls;
+      expect(firstOptions.abortSignal.aborted).toBe(true);
+      expect(secondOptions.abortSignal.aborted).toBe(false);
     });
   });
 });

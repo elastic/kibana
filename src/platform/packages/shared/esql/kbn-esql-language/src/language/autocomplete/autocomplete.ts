@@ -8,7 +8,7 @@
  */
 import { ControlTriggerSource, ESQLVariableType, type ESQLCallbacks } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
-import { EsqlQuery, isHeaderCommand, Walker } from '@elastic/esql';
+import { BasicPrettyPrinter, EsqlQuery, isHeaderCommand, Walker } from '@elastic/esql';
 import type { ESQLColumn, ESQLCommandOption, ESQLAstAllCommands } from '@elastic/esql/types';
 import { esqlCommandRegistry } from '../../commands';
 import { getCommandAutocompleteDefinitions } from '../../commands/registry/complete_items';
@@ -18,6 +18,7 @@ import { getRecommendedQueriesSuggestionsFromStaticTemplates } from '../../comma
 import type {
   ESQLColumnData,
   GetColumnsByTypeFn,
+  ICommandCallbacks,
   ISuggestionItem,
 } from '../../commands/registry/types';
 import { getControlSuggestionIfSupported } from '../../commands/definitions/utils';
@@ -26,6 +27,7 @@ import { getFromCommandHelper } from '../shared/resources_helpers';
 import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './recommended_queries_helpers';
 import { getQueryForFields } from '../shared/get_query_for_fields';
+import { buildColumnValuesQuery } from '../shared/build_column_values_query';
 import type { ColumnsMap, GetColumnMapFn } from '../shared/columns_retrieval_helpers';
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 import { getUnmappedFieldsStrategy } from '../../commands/definitions/utils/settings';
@@ -60,11 +62,20 @@ export async function suggest(
   // When in a subquery, use the subquery's AST to get only its fields
   const astForFields = astContext.astForContext;
 
+  const queryForFields = getQueryForFields(innerText, astForFields);
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(innerText, astForFields),
+    queryForFields,
     innerText,
     resourceRetriever
   );
+
+  const getValuesForQuery = resourceRetriever?.getValuesForQuery;
+  const getColumnValues = getValuesForQuery
+    ? (columnName: string) =>
+        getValuesForQuery(
+          BasicPrettyPrinter.print(buildColumnValuesQuery(queryForFields, columnName))
+        )
+    : undefined;
 
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   const getVariables = resourceRetriever?.getVariables;
@@ -232,7 +243,8 @@ export async function suggest(
       getColumnMapOnce,
       resourceRetriever,
       offset,
-      hasMinimumLicenseRequired
+      hasMinimumLicenseRequired,
+      getColumnValues
     );
 
     const lineStart = fullText.lastIndexOf('\n', offset - 1) + 1;
@@ -270,7 +282,8 @@ async function getSuggestionsWithinCommandExpression(
   getColumnMap: GetColumnMapFn,
   callbacks?: ESQLCallbacks,
   offset?: number,
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean,
+  getColumnValues?: ICommandCallbacks['getColumnValues']
 ) {
   const innerText = fullText.substring(0, offset);
   const commandDefinition = esqlCommandRegistry.getCommandByName(astContext.command.name);
@@ -340,6 +353,7 @@ async function getSuggestionsWithinCommandExpression(
       canCreateLookupIndex: callbacks?.canCreateLookupIndex,
       canSuggestResourceBrowser: callbacks?.canSuggestResourceBrowser,
       isServerless: callbacks?.isServerless,
+      getColumnValues,
     },
     context,
     offset

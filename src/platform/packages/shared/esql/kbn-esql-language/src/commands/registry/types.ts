@@ -15,6 +15,7 @@ import type {
   ESQLFieldWithMetadata,
   ESQLFullTextMatch,
   ESQLCallbacks,
+  ESQLColumnValue,
   EsqlView,
   EsqlDataset,
 } from '@kbn/esql-types';
@@ -208,6 +209,8 @@ export interface ICommandCallbacks {
   isServerless?: boolean;
   getKqlSuggestions?: ESQLCallbacks['getKqlSuggestions'];
   canSuggestResourceBrowser?: () => Promise<boolean>;
+  /** Returns a sample of the distinct values of a column at the cursor position. */
+  getColumnValues?: (columnName: string) => Promise<ESQLColumnValue[]>;
 }
 
 export interface ICommandContext {

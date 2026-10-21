@@ -10,7 +10,12 @@
 import { useCallback, useEffect, useMemo, useRef, type MutableRefObject } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
-import type { ESQLCallbacks, ESQLControlVariable, ESQLRegistrySolutionId } from '@kbn/esql-types';
+import type {
+  ESQLCallbacks,
+  ESQLColumnValue,
+  ESQLControlVariable,
+  ESQLRegistrySolutionId,
+} from '@kbn/esql-types';
 import { KQL_TYPE_TO_KIND_MAP } from '@kbn/esql-types';
 import type { ILicense } from '@kbn/licensing-types';
 import type { MapCache } from 'lodash';
@@ -21,6 +26,7 @@ import {
   getInferenceEndpoints,
   getViews,
   getDatasets,
+  getESQLResults,
   getSourceCommandQueryFromESQLQuery,
 } from '@kbn/esql-utils';
 import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
@@ -37,6 +43,9 @@ import {
   HISTORY_STARRED_ITEMS_CACHE_KEY,
   TIMESERIES_INDICES_CACHE_KEY,
 } from '../helpers';
+
+const isColumnValue = (value: unknown): value is ESQLColumnValue =>
+  typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean';
 
 type MemoizedFn<TArgs extends unknown[], TResult> = (...args: TArgs) => {
   timestamp: number;
@@ -124,6 +133,7 @@ export const useEsqlCallbacks = ({
   const previousColumnsQueryRef = useRef<string | undefined>(undefined);
   const lifecycleAbortControllerRef = useRef(new AbortController());
   const sourcesAbortControllerRef = useRef(new AbortController());
+  const valuesAbortControllerRef = useRef<AbortController | undefined>(undefined);
 
   const getSources = useCallback(async () => {
     clearCacheWhenOld(dataSourcesCache, DATA_SOURCES_CACHE_KEY);
@@ -193,6 +203,30 @@ export const useEsqlCallbacks = ({
     [data.query.timefilter.timefilter, esqlFieldsCache, memoizedFieldsFromESQL, esqlService]
   );
 
+  const getValuesForQuery = useCallback(
+    async (queryToExecute: string): Promise<ESQLColumnValue[]> => {
+      // Only the latest values request matters, the user has moved on from the previous one.
+      valuesAbortControllerRef.current?.abort();
+      const controller = new AbortController();
+      valuesAbortControllerRef.current = controller;
+
+      try {
+        const { response } = await getESQLResults({
+          esqlQuery: queryToExecute,
+          search: data.search.search,
+          signal: controller.signal,
+          timeRange: data.query.timefilter.timefilter.getTime(),
+          variables: esqlService?.variablesService?.esqlVariables,
+          projectRouting,
+        });
+        return response.values.map(([value]) => value).filter(isColumnValue);
+      } catch {
+        return [];
+      }
+    },
+    [data.search.search, data.query.timefilter.timefilter, esqlService, projectRouting]
+  );
+
   // Abort any in-flight requests when the editor unmounts.
   useEffect(() => {
     const lifecycleController = lifecycleAbortControllerRef.current;
@@ -200,6 +234,7 @@ export const useEsqlCallbacks = ({
     return () => {
       lifecycleController.abort();
       sourcesController.abort();
+      valuesAbortControllerRef.current?.abort();
     };
   }, []);
 
@@ -382,6 +417,7 @@ export const useEsqlCallbacks = ({
       isServerless,
       getKqlSuggestions,
       canSuggestResourceBrowser,
+      getValuesForQuery,
     }),
     [
       getSources,
@@ -404,6 +440,7 @@ export const useEsqlCallbacks = ({
       isServerless,
       getKqlSuggestions,
       canSuggestResourceBrowser,
+      getValuesForQuery,
     ]
   );
 };

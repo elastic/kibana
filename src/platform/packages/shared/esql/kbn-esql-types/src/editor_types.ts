@@ -147,6 +147,9 @@ interface KQLInESQLSuggestion {
   range: { start: number; end: number };
 }
 
+/** A scalar value of an ES|QL column, as returned in a query response. */
+export type ESQLColumnValue = string | number | boolean;
+
 export interface ESQLCallbacks {
   getSources?: CallbackFn<{}, ESQLSourceResult>;
   getColumnsFor?: CallbackFn<{ query: string }, ESQLFieldWithMetadata>;
@@ -182,4 +185,6 @@ export interface ESQLCallbacks {
     // it shoud be ISuggestionItem[] but we need to carry this first from the kbn-esql-language package
     // to avoid circular dependency
   ) => Promise<KQLInESQLSuggestion[] | undefined>;
+  /** Executes a query and returns the non-null scalar values of its first column. */
+  getValuesForQuery?: (query: string) => Promise<ESQLColumnValue[]>;
 }

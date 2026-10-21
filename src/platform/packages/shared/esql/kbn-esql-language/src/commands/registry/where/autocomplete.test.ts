@@ -554,4 +554,41 @@ describe('WHERE Autocomplete', () => {
       });
     });
   });
+
+  describe('column values', () => {
+    const getColumnValues = jest.fn(async (_columnName: string) => ['a"b', 'c', 3, true]);
+
+    const getValueTexts = async (query: string) => {
+      const results = await suggest(
+        query,
+        mockContext,
+        'where',
+        { ...mockCallbacks, getColumnValues },
+        autocomplete
+      );
+      return results.filter(({ kind }) => kind === 'Value').map(({ text }) => text);
+    };
+
+    beforeEach(() => getColumnValues.mockClear());
+
+    it.each(['==', '!='])('suggests the values of the column after %s', async (operator) => {
+      expect(await getValueTexts(`from a | where keywordField ${operator} `)).toEqual([
+        '"a\\"b"',
+        '"c"',
+        '3',
+        'true',
+      ]);
+      expect(getColumnValues).toHaveBeenCalledWith('keywordField');
+    });
+
+    it('does not fetch values for other operators', async () => {
+      await getValueTexts('from a | where doubleField > ');
+      expect(getColumnValues).not.toHaveBeenCalled();
+    });
+
+    it('does not fetch values when the left side is not a column', async () => {
+      await getValueTexts('from a | where to_lower(keywordField) == ');
+      expect(getColumnValues).not.toHaveBeenCalled();
+    });
+  });
 });

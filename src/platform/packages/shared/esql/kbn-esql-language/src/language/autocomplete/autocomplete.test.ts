@@ -364,6 +364,21 @@ describe('autocomplete', () => {
         expect(params.query).not.toContain(EDITOR_MARKER);
       }
     });
+    it('should send the column values query for WHERE equality', async () => {
+      const callbackMocks = {
+        ...createCustomCallbackMocks(undefined, undefined, undefined),
+        getValuesForQuery: jest.fn(async () => ['foo']),
+      };
+      const statement =
+        'from index_b | sort dateField desc | rename keywordField as ds | where ds == ';
+
+      const suggestions = await suggest(statement, statement.length, callbackMocks);
+
+      expect(callbackMocks.getValuesForQuery).toHaveBeenCalledWith(
+        'FROM index_b | LIMIT 10000 | SORT dateField DESC | RENAME keywordField AS ds | STATS BY ds | SORT ds | LIMIT 20'
+      );
+      expect(suggestions).toContainEqual(expect.objectContaining({ text: '"foo"', kind: 'Value' }));
+    });
   });
 
   /**

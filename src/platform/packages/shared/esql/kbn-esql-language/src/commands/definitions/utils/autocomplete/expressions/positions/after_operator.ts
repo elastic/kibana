@@ -7,8 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isColumn } from '@elastic/esql';
 import type { ESQLAstItem, ESQLFunction } from '@elastic/esql/types';
 import type { ISuggestionItem } from '../../../../../registry/types';
+import { Location } from '../../../../../registry/types';
 import { listCompleteItem } from '../../../../../registry/complete_items';
 import type { FunctionDefinition, SupportedDataType } from '../../../../types';
 import { FunctionDefinitionTypes, isArrayType } from '../../../../types';
@@ -32,6 +34,8 @@ import {
   removeFinalUnknownIdentiferArg,
   type IncompleteOperatorReason,
 } from '../utils';
+
+const EQUALITY_OPERATORS = ['==', '!='];
 
 /**
  * Suggests completions after an operator (e.g., field = |, field IN |)
@@ -206,6 +210,16 @@ async function handleIncompleteOperator(
             addSpaceAfterFunction: options.addSpaceAfterOperator ?? false,
           })
       );
+
+    // WHERE field == | suggests actual values of the field
+    const [leftArg] = operator.args;
+    if (
+      ctx.location === Location.WHERE &&
+      EQUALITY_OPERATORS.includes(operator.name) &&
+      isColumn(leftArg)
+    ) {
+      await builder.addColumnValues(leftArg.parts.join('.'));
+    }
   }
 
   if (reason === 'wrongTypes') {
