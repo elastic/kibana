@@ -16,6 +16,7 @@ import type { DocLinks } from '@kbn/doc-links';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { isObject } from 'lodash';
+import { CLOUD_SECURITY_POSTURE_BASE_PATH } from '@kbn/cloud-security-posture-common';
 import { PageScope } from './data_view_manager/constants';
 import {
   ALERTS_PATH,
@@ -216,6 +217,12 @@ export const isRulesManagementPath = (pathname: string): boolean =>
   !!matchPath(pathname, {
     path: `${RULES_PATH}/:tabName(${Object.values(AllRulesTabs).join('|')})`,
     exact: true,
+    strict: false,
+  });
+
+export const isCloudSecurityPosturePath = (pathname: string): boolean =>
+  !!matchPath(pathname, {
+    path: CLOUD_SECURITY_POSTURE_BASE_PATH,
     strict: false,
   });
 
