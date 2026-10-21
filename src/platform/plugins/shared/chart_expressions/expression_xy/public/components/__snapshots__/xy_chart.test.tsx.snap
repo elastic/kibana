@@ -1239,6 +1239,7 @@ exports[`XYChart component it renders area 1`] = `
           style={
             Object {
               "axisTitle": Object {
+                "fill": undefined,
                 "padding": undefined,
                 "visible": true,
               },
@@ -1276,6 +1277,8 @@ exports[`XYChart component it renders area 1`] = `
           style={
             Object {
               "axisTitle": Object {
+                "fill": "#516381",
+                "fontWeight": 450,
                 "padding": undefined,
                 "visible": true,
               },
@@ -2716,6 +2719,7 @@ exports[`XYChart component it renders bar 1`] = `
           style={
             Object {
               "axisTitle": Object {
+                "fill": undefined,
                 "padding": undefined,
                 "visible": true,
               },
@@ -2753,6 +2757,8 @@ exports[`XYChart component it renders bar 1`] = `
           style={
             Object {
               "axisTitle": Object {
+                "fill": "#516381",
+                "fontWeight": 450,
                 "padding": undefined,
                 "visible": true,
               },
@@ -4193,6 +4199,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           style={
             Object {
               "axisTitle": Object {
+                "fill": undefined,
                 "padding": undefined,
                 "visible": true,
               },
@@ -4230,6 +4237,8 @@ exports[`XYChart component it renders horizontal bar 1`] = `
           style={
             Object {
               "axisTitle": Object {
+                "fill": "#516381",
+                "fontWeight": 450,
                 "padding": undefined,
                 "visible": true,
               },
@@ -5670,6 +5679,7 @@ exports[`XYChart component it renders line 1`] = `
           style={
             Object {
               "axisTitle": Object {
+                "fill": undefined,
                 "padding": undefined,
                 "visible": true,
               },
@@ -5707,6 +5717,8 @@ exports[`XYChart component it renders line 1`] = `
           style={
             Object {
               "axisTitle": Object {
+                "fill": "#516381",
+                "fontWeight": 450,
                 "padding": undefined,
                 "visible": true,
               },
@@ -7147,6 +7159,7 @@ exports[`XYChart component it renders stacked area 1`] = `
           style={
             Object {
               "axisTitle": Object {
+                "fill": undefined,
                 "padding": undefined,
                 "visible": true,
               },
@@ -7184,6 +7197,8 @@ exports[`XYChart component it renders stacked area 1`] = `
           style={
             Object {
               "axisTitle": Object {
+                "fill": "#516381",
+                "fontWeight": 450,
                 "padding": undefined,
                 "visible": true,
               },
@@ -8624,6 +8639,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
           style={
             Object {
               "axisTitle": Object {
+                "fill": undefined,
                 "padding": undefined,
                 "visible": true,
               },
@@ -8661,6 +8677,8 @@ exports[`XYChart component it renders stacked bar 1`] = `
           style={
             Object {
               "axisTitle": Object {
+                "fill": "#516381",
+                "fontWeight": 450,
                 "padding": undefined,
                 "visible": true,
               },
@@ -10101,6 +10119,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           style={
             Object {
               "axisTitle": Object {
+                "fill": undefined,
                 "padding": undefined,
                 "visible": true,
               },
@@ -10138,6 +10157,8 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
           style={
             Object {
               "axisTitle": Object {
+                "fill": "#516381",
+                "fontWeight": 450,
                 "padding": undefined,
                 "visible": true,
               },
@@ -11597,6 +11618,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
           style={
             Object {
               "axisTitle": Object {
+                "fill": undefined,
                 "padding": undefined,
                 "visible": true,
               },
@@ -11692,6 +11714,8 @@ exports[`XYChart component split chart should render split chart if both, splitR
           style={
             Object {
               "axisTitle": Object {
+                "fill": "#516381",
+                "fontWeight": 450,
                 "padding": undefined,
                 "visible": true,
               },
@@ -13164,6 +13188,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           style={
             Object {
               "axisTitle": Object {
+                "fill": undefined,
                 "padding": undefined,
                 "visible": true,
               },
@@ -13258,6 +13283,8 @@ exports[`XYChart component split chart should render split chart if splitColumnA
           style={
             Object {
               "axisTitle": Object {
+                "fill": "#516381",
+                "fontWeight": 450,
                 "padding": undefined,
                 "visible": true,
               },
@@ -14724,6 +14751,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           style={
             Object {
               "axisTitle": Object {
+                "fill": undefined,
                 "padding": undefined,
                 "visible": true,
               },
@@ -14818,6 +14846,8 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
           style={
             Object {
               "axisTitle": Object {
+                "fill": "#516381",
+                "fontWeight": 450,
                 "padding": undefined,
                 "visible": true,
               },
