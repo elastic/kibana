@@ -105,7 +105,7 @@ interface TableProps {
 const Table = ({
   node,
   context,
-  view: { columns, rows, cells, sourceIndexes, note },
+  view: { columns, rows, cells, sourceIndexes, note, styles },
   sortable,
 }: TableProps) => {
   const sorted = nodeSort(node);
@@ -113,17 +113,22 @@ const Table = ({
     <div {...nodeAnchor(context, node)} className={classNames(context, handles.root)}>
       <table
         className={classNames(context, handles.table)}
+        // Sized columns keep their widths; the table may then be wider than its box, which cuts it off.
+        {...(columns.some(({ width }) => width)
+          ? { style: { width: 'max-content', minWidth: '100%' } }
+          : {})}
         {...(sortable ? data(TABLE_SORT_ATTRIBUTES.table) : {})}
       >
         <thead>
           <tr>
-            {columns.map(({ label, align }, index) => {
+            {columns.map(({ label, align, width }, index) => {
               const direction = sorted?.column === index ? sorted.direction : undefined;
               return (
                 <th
                   key={index}
                   scope="col"
                   className={classNames(context, handles.head, handles[align])}
+                  {...(width ? { style: { width, minWidth: width, maxWidth: width } } : {})}
                   {...(direction ? { 'aria-sort': ARIA_SORT[direction] } : {})}
                   {...(sortable ? data(TABLE_SORT_ATTRIBUTES.column, index) : {})}
                 >
@@ -150,10 +155,14 @@ const Table = ({
             >
               {row.map((text, index) => {
                 const cell = cells[rowIndex][index];
+                const style = styles?.[rowIndex]?.[index];
                 return (
                   <td
                     key={index}
                     className={classNames(context, handles.cell, handles[columns[index].align])}
+                    {...(style
+                      ? { style: { backgroundColor: style.background, color: style.color } }
+                      : {})}
                     {...(sortable && cell !== null
                       ? data(TABLE_SORT_ATTRIBUTES.value, JSON.stringify(cell))
                       : {})}

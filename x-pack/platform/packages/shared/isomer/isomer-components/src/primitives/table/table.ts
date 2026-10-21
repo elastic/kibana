@@ -45,6 +45,26 @@ const columnSchema = z
       .enum(['left', 'center', 'right'])
       .optional()
       .describe('Defaults to right for numbers, left otherwise.'),
+    width: z
+      .number()
+      .int()
+      .min(16)
+      .max(4096)
+      .optional()
+      .describe('The column’s width in pixels. Columns past the table’s width are cut off.'),
+    color: z
+      .object({
+        mode: z
+          .enum(['cell', 'text'])
+          .describe('`cell` fills the cell, with text that contrasts; `text` colors the text.'),
+        values: z
+          .array(z.union([z.string().regex(/^#[0-9a-fA-F]{6}$/), z.null()]))
+          .max(MAX_ROWS)
+          .describe('One `#rrggbb` color or null per row, in `rows` order.'),
+      })
+      .strict()
+      .optional()
+      .describe('Each cell’s color, as a dashboard table colors a column by value.'),
   })
   .strict();
 
@@ -125,6 +145,15 @@ const tableSchema = z
       });
       return;
     }
+    columns.forEach(({ color }, index) => {
+      if (color && color.values.length !== rows.length) {
+        context.addIssue({
+          code: 'custom',
+          message: `needs one color per row (${rows.length})`,
+          path: ['columns', index, 'color', 'values'],
+        });
+      }
+    });
     rows.forEach((row, index) => {
       if (row.length !== columns.length) {
         context.addIssue({
