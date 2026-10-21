@@ -33,12 +33,8 @@ import {
 import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
-import {
-  getInvestigationAgentId,
-  getInvestigationTelemetryTarget,
-  telemetryTargetNameSchema,
-} from '../../common/telemetry_targets';
-import { resolveTelemetryTarget } from '../telemetry_targets';
+import { telemetryTargetNameSchema } from '../../common/telemetry_targets';
+import { resolveTelemetryTarget, type TelemetryTarget } from '../telemetry_targets';
 import type { NightshiftInvestigationsConfig } from '../config';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import {
@@ -444,7 +440,10 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
 
-    resolveTelemetryTarget(this.telemetryConfig, telemetry_target);
+    resolveTelemetryTarget(
+      this.telemetryConfig,
+      telemetry_target ?? this.telemetryConfig?.default_telemetry_target
+    );
 
     const parsedNotificationDestinations = investigationNotificationDestinationsSchema
       .optional()
@@ -506,9 +505,9 @@ export class NightshiftInvestigationsClient {
     const existing = isFollowUp
       ? await findInvestigationConversation(conversations, investigationId)
       : undefined;
-    if (existing) this.assertConversationTarget(existing.agentId, telemetry_target);
+    if (existing) this.assertConversationTarget(existing.telemetryTarget, telemetry_target);
     const telemetryTarget = existing
-      ? getInvestigationTelemetryTarget(existing.agentId)
+      ? existing.telemetryTarget
       : telemetry_target ?? this.telemetryConfig?.default_telemetry_target;
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
@@ -572,7 +571,7 @@ export class NightshiftInvestigationsClient {
         conversations,
         investigationId,
         executionId,
-        agentId: getInvestigationAgentId(telemetryTarget),
+        telemetryTarget,
       });
     }
 
@@ -598,12 +597,12 @@ export class NightshiftInvestigationsClient {
     conversations,
     investigationId,
     executionId,
-    agentId,
+    telemetryTarget,
   }: {
     conversations: ConversationPublicClient;
     investigationId: string;
     executionId: string;
-    agentId: string;
+    telemetryTarget?: string;
   }): Promise<void> {
     try {
       // Records the run in the creating write. If the run's `_ensure` step created the
@@ -612,7 +611,7 @@ export class NightshiftInvestigationsClient {
         conversations,
         id: investigationId,
         workflowExecutionId: executionId,
-        agentId,
+        telemetryTarget,
       });
     } catch (error) {
       this.logger.warn(
@@ -788,13 +787,13 @@ export class NightshiftInvestigationsClient {
       request: this.request,
     });
     const requestedTarget = telemetryTargetNameSchema.optional().parse(inputs?.telemetry_target);
-    resolveTelemetryTarget(this.telemetryConfig, requestedTarget);
     const telemetryTarget = requestedTarget ?? this.telemetryConfig?.default_telemetry_target;
+    resolveTelemetryTarget(this.telemetryConfig, telemetryTarget);
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
       workflowExecutionId: executionId,
-      agentId: getInvestigationAgentId(telemetryTarget),
+      telemetryTarget,
       // A raw workflow can fail before ensuring its agent, which conversation creation requires.
       ...(!reopen
         ? {
@@ -803,7 +802,7 @@ export class NightshiftInvestigationsClient {
         : {}),
     });
 
-    this.assertConversationTarget(conversation.agentId, requestedTarget);
+    this.assertConversationTarget(conversation.telemetryTarget, requestedTarget);
 
     const subjects = recoverSubjectsFromInputs(inputs, investigationId);
     if (subjects.length > 0) {
@@ -905,19 +904,28 @@ export class NightshiftInvestigationsClient {
     };
   }
 
-  /** Returns the agent identity retained by an investigation's conversation. */
-  async getConversationAgentId(conversationId: string): Promise<string> {
+  /** Resolves the telemetry retained by an investigation's conversation, without applying defaults. */
+  async getTelemetryTarget(conversationId: string): Promise<TelemetryTarget> {
     const { agentBuilder } = this.requireWriteDeps();
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
-    const conversation = await findInvestigationConversation(conversations, conversationId);
+    const conversation = (await conversations.bulkGet([conversationId])).get(conversationId);
     if (!conversation) throw new InvestigationNotFoundError(conversationId);
-    return conversation.agentId;
+    const telemetryTarget = telemetryTargetNameSchema
+      .optional()
+      .parse(conversation.metadata?.telemetry_target);
+    return {
+      ...resolveTelemetryTarget(this.telemetryConfig, telemetryTarget),
+      ...(telemetryTarget ? { allowSecretFallback: false } : {}),
+    };
   }
 
-  private assertConversationTarget(agentId: string, requestedTarget?: string): void {
-    if (requestedTarget && getInvestigationTelemetryTarget(agentId) !== requestedTarget) {
+  private assertConversationTarget(
+    storedTarget: string | undefined,
+    requestedTarget?: string
+  ): void {
+    if (requestedTarget && storedTarget !== requestedTarget) {
       throw badRequest('An investigation cannot change its telemetry target');
     }
   }
@@ -1023,6 +1031,8 @@ export class NightshiftInvestigationsClient {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
 
+    const telemetryTarget = this.telemetryConfig?.default_telemetry_target;
+    resolveTelemetryTarget(this.telemetryConfig, telemetryTarget);
     const spaceId = this.getSpaceId();
     await this.installAgents(agentBuilder, spaceId);
 
@@ -1041,6 +1051,7 @@ export class NightshiftInvestigationsClient {
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
+      telemetryTarget,
     });
     // The first create of the thread records it; a create that continues another reads it back.
     const threadSubject = conversation.created

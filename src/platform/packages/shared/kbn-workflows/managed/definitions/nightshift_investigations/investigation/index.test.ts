@@ -310,16 +310,13 @@ describe('Nightshift investigation workflow', () => {
   });
 });
 
-it('passes a telemetry target independently of the model and uses the conversation-bound agent', () => {
+it('accepts a telemetry target independently of the model and keeps the single investigator', () => {
   expect(investigation.triggers[0].inputs.properties.telemetry_target).toMatchObject({
     type: 'string',
     maxLength: 64,
   });
-  expect(requireStep('ensure_investigation_agent').with).toMatchObject({
-    telemetry_target: '{{ inputs.telemetry_target }}',
-  });
   expect(requireStep('investigate')).toMatchObject({
-    'agent-id': '${{ steps.persist_investigation_started.output.agent_id }}',
+    'agent-id': 'nightshift.investigation',
     'connector-id': '{{ steps.resolve_model.output.connector_id }}',
   });
 });

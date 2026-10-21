@@ -14,6 +14,7 @@ import {
 import type { Conversation, ConversationPermissions } from '@kbn/agent-builder-common';
 import type { ConversationPublicClient } from '@kbn/agent-builder-server';
 import { INVESTIGATION_TEMPLATE_ID } from '@kbn/agentic-investigations-plugin/common';
+import { telemetryTargetNameSchema } from '../../common/telemetry_targets';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 import { InvestigationNotFoundError } from './errors';
 
@@ -21,7 +22,7 @@ import { InvestigationNotFoundError } from './errors';
 export interface InvestigationConversation {
   /** The investigation id, which is the conversation id. */
   id: string;
-  agentId: string;
+  telemetryTarget?: string;
   /** Agent Builder's placeholder until Agent Builder titles it on the first round. */
   title: string;
   /** `metadata.status`; a missing status reads as open. */
@@ -32,10 +33,7 @@ export interface InvestigationConversation {
   created: boolean;
 }
 
-type ConversationWithAccess = Pick<
-  Conversation,
-  'id' | 'agent_id' | 'title' | 'metadata' | 'template_id'
-> & {
+type ConversationWithAccess = Pick<Conversation, 'id' | 'title' | 'metadata' | 'template_id'> & {
   permissions: ConversationPermissions;
 };
 
@@ -54,7 +52,9 @@ const toInvestigationConversation = (
   }
   return {
     id: conversation.id,
-    agentId: conversation.agent_id,
+    telemetryTarget: telemetryTargetNameSchema
+      .optional()
+      .parse(conversation.metadata?.telemetry_target),
     title: conversation.title,
     status: conversation.metadata?.status === 'closed' ? 'closed' : 'open',
     workflowExecutionIds: toWorkflowExecutionIds(conversation.metadata),
@@ -112,7 +112,7 @@ export const getOrCreateInvestigationConversation = async ({
   id,
   workflowExecutionId,
   beforeCreate,
-  agentId = NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+  telemetryTarget,
 }: {
   conversations: ConversationPublicClient;
   id: string;
@@ -122,7 +122,7 @@ export const getOrCreateInvestigationConversation = async ({
    */
   workflowExecutionId?: string;
   beforeCreate?: () => Promise<void>;
-  agentId?: string;
+  telemetryTarget?: string;
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
   if (existing) {
@@ -134,13 +134,14 @@ export const getOrCreateInvestigationConversation = async ({
     const create = () =>
       conversations.create({
         id,
-        agentId,
+        agentId: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
         templateId: INVESTIGATION_TEMPLATE_ID,
         metadata: {
           // A starting rating, so the severity shows (and can be changed) from the beginning;
           // the agent re-rates it from its findings when it concludes.
           severity: INITIAL_INVESTIGATION_SEVERITY,
           ...(workflowExecutionId ? { workflow_execution_ids: [workflowExecutionId] } : {}),
+          ...(telemetryTarget ? { telemetry_target: telemetryTarget } : {}),
         },
         accessControl: { access_mode: ConversationAccessControlMode.Public },
       });

@@ -45,10 +45,44 @@ export const createSandboxWorkspaceManager = ({
   telemetryConnectorId?: string;
   telemetryReadableIndices?: string;
   telemetryTargets?: TelemetryTarget[];
-  getTelemetryTarget?: (agentId?: string) => TelemetryTarget;
+  getTelemetryTarget?: (callContext: SandboxCallContext) => Promise<TelemetryTarget | undefined>;
   logger: Logger;
 }) => {
   const lastWorkspaceKeys = new Map<SandboxSession, string>();
+
+  const configuredTargets = telemetryTargets ?? [
+    { connectorId: telemetryConnectorId, readableIndices: telemetryReadableIndices },
+  ];
+  const telemetryConnectorIds = new Set(configuredTargets.map(({ connectorId }) => connectorId));
+  const callTargets = new WeakMap<SandboxCallContext, Promise<TelemetryTarget | undefined>>();
+
+  const prepareCallContext = (
+    callContext: SandboxCallContext
+  ): Promise<TelemetryTarget | undefined> => {
+    const cached = callTargets.get(callContext);
+    if (cached) return cached;
+    const pending = (async () => {
+      const boundTarget = await getTelemetryTarget?.(callContext);
+      if (boundTarget !== undefined) {
+        // Restrict both manifests and credential resolution to this conversation's telemetry.
+        callContext.allowedConnectorIds = callContext.allowedConnectorIds.filter(
+          (id) => !telemetryConnectorIds.has(id) || id === boundTarget.connectorId
+        );
+      }
+      const allowedTargets = configuredTargets.filter(
+        ({ connectorId }) => connectorId && callContext.allowedConnectorIds.includes(connectorId)
+      );
+      if (
+        boundTarget === undefined &&
+        new Set(allowedTargets.map(({ connectorId }) => connectorId)).size > 1
+      ) {
+        throw new Error('An investigation must select only one telemetry connector');
+      }
+      return boundTarget ?? allowedTargets[0];
+    })();
+    callTargets.set(callContext, pending);
+    return pending;
+  };
 
   const listSecretKeys = async (
     sandboxSecretsClient: Pick<SandboxSecretsClient, 'listKeysForSandbox'> | undefined,
@@ -64,6 +98,9 @@ export const createSandboxWorkspaceManager = ({
   };
 
   return {
+    async prepareCallContext(callContext: SandboxCallContext): Promise<void> {
+      await prepareCallContext(callContext);
+    },
     async ensureWorkspaceReady({
       session,
       callContext,
@@ -72,19 +109,7 @@ export const createSandboxWorkspaceManager = ({
       callContext: SandboxCallContext;
     }): Promise<void> {
       const { actions, sandboxSecretsClient } = getDeps();
-      const selectedTargets = (
-        telemetryTargets ?? [
-          { connectorId: telemetryConnectorId, readableIndices: telemetryReadableIndices },
-        ]
-      ).filter(
-        ({ connectorId }) => connectorId && callContext.allowedConnectorIds.includes(connectorId)
-      );
-      const selected = getTelemetryTarget
-        ? getTelemetryTarget(callContext.agentId)
-        : selectedTargets[0];
-      if (selectedTargets.some(({ connectorId }) => connectorId !== selected?.connectorId)) {
-        throw new Error('An investigation must select only one telemetry connector');
-      }
+      const selected = await prepareCallContext(callContext);
       const selectedConnectorId = selected?.connectorId;
       const selectedReadableIndices = selected?.readableIndices;
       const secretKeys = await listSecretKeys(sandboxSecretsClient, callContext);
@@ -144,14 +169,15 @@ export const createSandboxWorkspaceManager = ({
         const credentials: ElasticCredentials | undefined =
           selectedConnectorId && canUseTelemetry
             ? { kind: 'connector', connectorId: selectedConnectorId }
+            : selected?.allowSecretFallback === false
+            ? undefined
             : findElasticSecretCredentials(secretKeys);
         if (credentials) {
           await writeElasticManifest({
             session,
             credentials,
             // Connector-specific guidance must stay gated on connector authorization.
-            readableIndices:
-              credentials.kind === 'connector' ? selectedReadableIndices : undefined,
+            readableIndices: credentials.kind === 'connector' ? selectedReadableIndices : undefined,
             logger,
           });
         }

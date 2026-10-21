@@ -12,13 +12,14 @@ import { telemetryTargetNameSchema } from '../common/telemetry_targets';
 export interface TelemetryTarget {
   connectorId?: string;
   readableIndices?: string;
+  allowSecretFallback?: boolean;
 }
 
 export const resolveTelemetryTarget = (
   sandbox: NightshiftInvestigationsConfig['sandbox'],
   requestedTarget?: string
 ): TelemetryTarget => {
-  const target = requestedTarget || sandbox?.default_telemetry_target;
+  const target = requestedTarget;
   if (!target) {
     return {
       connectorId: sandbox?.telemetry_connector_id,

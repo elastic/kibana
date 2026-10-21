@@ -137,15 +137,33 @@ export const withSandboxOutputRedaction = <TSchema extends ZodObject>(
   tool: BuiltinToolDefinition<TSchema>,
   {
     getOutputRedactor,
+    prepareCallContext,
     logger,
   }: {
     getOutputRedactor: GetSandboxOutputRedactor;
+    prepareCallContext?: (callContext: SandboxCallContext) => Promise<void>;
     logger: Logger;
   }
 ): BuiltinToolDefinition<TSchema> => ({
   ...tool,
   handler: async (params, context) => {
     const callContext = getSandboxCallContext(context);
+    try {
+      await prepareCallContext?.(callContext);
+    } catch (err) {
+      logger.error(`Resolving sandbox telemetry failed: ${(err as Error).message}`);
+      return {
+        results: [
+          {
+            type: ToolResultType.error,
+            data: {
+              message:
+                'Sandbox tools are unavailable: the conversation telemetry could not be resolved. Check the investigation and its configured target.',
+            },
+          },
+        ],
+      };
+    }
     let redactor: OutputRedactor;
     try {
       redactor = await getOutputRedactor(callContext);

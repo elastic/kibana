@@ -324,15 +324,20 @@ Examples from both sources can share one examples file or stored dataset:
 The plugin reads `sandbox.telemetry_targets.<name>.connector_id` and optional `readable_indices`
 from Kibana config. `sandbox.default_telemetry_target` supplies an optional default. The hook fills
 these settings from the profile blocks above. An omitted target preserves the existing
-`nightshift.telemetry` connector unless a default is configured. Without either, no telemetry is
-available. Explicit `none` always selects no telemetry; bundled synthetic examples use it.
+`nightshift.telemetry` connector unless a default is configured. Defaults are applied only when
+creating a conversation; older conversations without target metadata keep the legacy connector.
+Explicit `none` selects no configured telemetry connector; bundled synthetic examples use it.
 
-Each target uses a separate persisted investigator identity with the same investigator type.
-The conversation retains that identity, so subsequent turns keep their source without mutating
-another investigation's agent. An existing investigation cannot switch to a different target.
-Only its selected connector's authorized index hint is written to `/workspace/elastic.md`.
-Unknown targets fail before investigation execution, and the sandbox rejects an allow-list that
-mixes telemetry sources.
+All investigations use the single `nightshift.investigation` agent. The conversation stores
+`telemetry_target` in its initial metadata alongside the creating workflow run. Later turns retain
+that target, and an existing investigation cannot switch to a different one. The agent type allows
+all configured telemetry connectors; the sandbox workspace manager reads the conversation metadata
+and narrows the per-call connector list before writing manifests, resolving credentials, or loading
+the output redactor. Only the selected connector's authorized hint reaches `/workspace/elastic.md`.
+Decision-tree reinforcement uses the same conversation target. Unknown targets fail before execution.
+Custom sandbox agents keep selection through their own connector allow-list. Legacy investigations
+retain the sandbox-secret fallback when no telemetry connector is usable; named targets and `none`
+do not fall back to a different Elasticsearch source.
 
 ### Legacy remote telemetry configuration
 

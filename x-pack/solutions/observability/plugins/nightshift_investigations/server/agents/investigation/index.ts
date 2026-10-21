@@ -22,8 +22,7 @@ import {
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../../common';
-import { getInvestigationTelemetryTarget } from '../../../common/telemetry_targets';
-import { resolveTelemetryTarget } from '../../telemetry_targets';
+import { getTelemetryTargets } from '../../telemetry_targets';
 import type { NightshiftInvestigationsConfig } from '../../config';
 import instructions from './instructions/investigator.md.text';
 import decisionTreesSection from './instructions/decision_trees.text';
@@ -151,7 +150,17 @@ export const buildNightshiftAgentConfiguration = ({
       },
     ],
     enable_elastic_capabilities: false,
-    connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
+    connector_ids: telemetryConfig
+      ? [
+          ...new Set(
+            getTelemetryTargets(telemetryConfig).flatMap(({ connectorId }) =>
+              connectorId ? [connectorId] : []
+            )
+          ),
+        ]
+      : telemetryConnectorId
+      ? [telemetryConnectorId]
+      : [],
     ...(() => {
       // Decision trees are no longer a separate before-agent hook: they hydrate as a third
       // parallel branch of the combined materialize workflow, which already carries the

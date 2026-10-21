@@ -18,6 +18,8 @@ import {
   withSandboxOutputRedaction,
 } from './sandbox_output_redaction';
 
+import type { SandboxCallContext } from './tool_utils';
+
 const STORED_SECRET = 'stored-sandbox-secret';
 const CONNECTOR_SECRET = 'connector-api-key-123';
 const SAVED_CONNECTOR_ID = 'saved-1';
@@ -37,10 +39,12 @@ const setup = ({
     ],
   },
   allowedConnectorIds = [],
+  prepareCallContext,
 }: {
   getRedactionValues?: jest.Mock;
   handlerReturn?: unknown;
   allowedConnectorIds?: string[];
+  prepareCallContext?: (callContext: SandboxCallContext) => Promise<void>;
 } = {}) => {
   const handler = jest.fn().mockResolvedValue(handlerReturn);
   const tool = { id: 'sandbox_tool', schema, handler } as unknown as BuiltinToolDefinition<
@@ -70,6 +74,7 @@ const setup = ({
   } as unknown as ActionsPluginStart;
   const logger = loggingSystemMock.createLogger();
   const wrapped = withSandboxOutputRedaction(tool, {
+    prepareCallContext,
     getOutputRedactor: createSandboxOutputRedactorProvider({
       getDeps: () => ({ actions, sandboxSecretsClient: { getRedactionValues } }),
     }),
@@ -80,7 +85,13 @@ const setup = ({
   const run = () =>
     (wrapped.handler as unknown as (p: unknown, c: unknown) => Promise<unknown>)(
       {},
-      { request, agentConfiguration: { connector_ids: allowedConnectorIds } }
+      {
+        request,
+        agentConfiguration: { connector_ids: allowedConnectorIds },
+        runContext: {
+          stack: [{ type: 'agent', agentId: 'nightshift.investigation', conversationId: 'inv-c0' }],
+        },
+      }
     );
 
   return { run, handler, getRedactionValues, logger, request, actionsClient, actions };
@@ -91,6 +102,44 @@ const resultWithStdout = (stdout: string) => ({
 });
 
 describe('withSandboxOutputRedaction', () => {
+  it('applies conversation scoping before reading credentials and passes that scope to the tool', async () => {
+    const prepareCallContext = jest.fn(async (callContext: SandboxCallContext) => {
+      expect(callContext.conversationId).toBe('inv-c0');
+      expect(callContext.agentId).toBe('nightshift.investigation');
+      callContext.allowedConnectorIds = [SAVED_CONNECTOR_ID];
+    });
+    const { run, handler, actionsClient } = setup({
+      allowedConnectorIds: [SAVED_CONNECTOR_ID, 'unselected-telemetry'],
+      prepareCallContext,
+    });
+    await run();
+    expect(actionsClient.getSandboxCredentials).toHaveBeenCalledTimes(1);
+    expect(actionsClient.getSandboxCredentials).toHaveBeenCalledWith({ id: SAVED_CONNECTOR_ID });
+    expect(handler).toHaveBeenCalledWith(
+      {},
+      expect.objectContaining({
+        sandboxCallContext: expect.objectContaining({ allowedConnectorIds: [SAVED_CONNECTOR_ID] }),
+      })
+    );
+  });
+
+  it('blocks the tool before credentials are read when conversation telemetry cannot be resolved', async () => {
+    const { run, handler, actionsClient } = setup({
+      allowedConnectorIds: [SAVED_CONNECTOR_ID],
+      prepareCallContext: jest.fn().mockRejectedValue(new Error('Conversation unavailable')),
+    });
+    await expect(run()).resolves.toMatchObject({
+      results: [
+        {
+          type: ToolResultType.error,
+          data: { message: expect.stringContaining('conversation telemetry') },
+        },
+      ],
+    });
+    expect(handler).not.toHaveBeenCalled();
+    expect(actionsClient.getSandboxCredentials).not.toHaveBeenCalled();
+  });
+
   it('redacts stored sandbox secrets and connector secrets anywhere in the results', async () => {
     const { run, getRedactionValues, request } = setup();
 
