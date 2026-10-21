@@ -166,6 +166,7 @@ dependsOn:
   - '@kbn/core-overlays-browser-mocks'
   - '@kbn/core-rendering-browser-mocks'
   - '@kbn/announcement-banner'
+  - '@kbn/ftr-llm-proxy'
 tags:
   - plugin
   - prod
