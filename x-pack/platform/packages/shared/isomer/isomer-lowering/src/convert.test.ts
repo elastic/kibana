@@ -300,3 +300,22 @@ describe('convertDashboard with panel sizes', () => {
     }
   });
 });
+
+describe('convertDashboard markdown', () => {
+  it('draws a legacy Markdown visualization as Kibana does, at its font size', async () => {
+    const flights = readFileSync(join(__dirname, '../fixtures/flights_sample.ndjson'), 'utf8');
+    const converted = await convertDashboard({
+      ndjson: flights,
+      dashboardId: '7adfa750-4c81-11e8-b3d7-01146121b73d',
+      now: Date.parse('2026-10-20T00:00:00Z'),
+      executeEsql,
+      search: async () => ({ hits: { hits: [] }, aggregations: {} }),
+    });
+    // `fontSize: 10` points.
+    expect(converted.panels.find(({ kind }) => kind === 'markdown')?.node).toMatchObject({
+      type: 'markdown',
+      appearance: 'kibanaLegacy',
+      fontSize: 13.33,
+    });
+  });
+});

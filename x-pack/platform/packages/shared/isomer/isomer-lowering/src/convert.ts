@@ -84,9 +84,40 @@ interface PanelJson {
   panelIndex: string;
   type?: string;
   title?: string;
+  panelRefName?: string;
   gridData: GridData;
-  embeddableConfig?: { title?: string; hidePanelTitles?: boolean };
+  embeddableConfig?: {
+    title?: string;
+    hidePanelTitles?: boolean;
+    savedVis?: { type?: string; params?: { fontSize?: number | string } };
+  };
 }
+
+/**
+ * How Kibana renders a Markdown panel: a legacy Markdown visualization through `kibana_react`'s `Markdown` at its
+ * `fontSize` in points (`markdown_fn` parses it as an integer, 12 by default), or the Markdown panel through
+ * `EuiMarkdownFormat`.
+ */
+const markdownAppearance = (
+  panel: PanelJson,
+  references: ReadonlyArray<{ name: string; id: string }>,
+  objects: ReadonlyArray<{ type?: unknown; id?: unknown; attributes?: { visState?: string } }>
+): { appearance: 'kibanaLegacy'; fontSize: number } | Record<string, never> => {
+  if (panel.type !== 'visualization') {
+    return {};
+  }
+  const byValue = panel.embeddableConfig?.savedVis;
+  const reference = references.find(({ name }) =>
+    panel.panelRefName ? name === panel.panelRefName : name.startsWith(`${panel.panelIndex}:`)
+  );
+  const saved = objects.find(({ type, id }) => type === 'visualization' && id === reference?.id);
+  const visState = byValue ?? (saved ? JSON.parse(saved.attributes?.visState ?? '{}') : undefined);
+  if (visState?.type !== 'markdown') {
+    return {};
+  }
+  const points = parseInt(String(visState.params?.fontSize ?? '12'), 10) || 12;
+  return { appearance: 'kibanaLegacy', fontSize: Math.round(((points * 4) / 3) * 100) / 100 };
+};
 
 interface GridItem {
   node: { type: string; format?: string; body?: string; title?: string };
@@ -240,7 +271,12 @@ export const convertDashboard = async ({
           grid,
           kind: 'markdown',
           outcome: { status: 'converted', nodeType: 'markdown' },
-          node: { id: panelId, type: 'markdown', text: item.body ?? '' },
+          node: {
+            id: panelId,
+            type: 'markdown',
+            text: item.body ?? '',
+            ...markdownAppearance(panel, saved.references ?? [], objects),
+          },
         };
       }
       return {
