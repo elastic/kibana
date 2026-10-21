@@ -38,6 +38,7 @@ import { installAgentOptimizationsWorkflow } from './lib/managed_workflows/insta
 import { installInvestigationAgent } from './lib/install_investigation_agent';
 import { createInvestigationAvailability } from './create_investigation_availability';
 import { nightshiftInvestigationsRouteRepository } from './routes';
+import type { GetEpisodeLookup } from './routes/types';
 import {
   isInvestigationInfrastructureAvailable,
   isInvestigationRunAvailable,
@@ -342,7 +343,9 @@ export class NightshiftInvestigationsPlugin
         plugins.workflowsExtensions.registerStepDefinition(
           triggerInvestigationStepDefinition(
             this.getInvestigationsClient,
-            this.getAutomationsSoClient
+            this.getAutomationsSoClient,
+            this.getAlertsClient,
+            this.getEpisodeLookup
           )
         );
         // `agentBuilder` is only available from `start()`, so the step resolves it lazily.
@@ -465,27 +468,8 @@ export class NightshiftInvestigationsPlugin
         dependencies: {
           getInvestigationsClient: this.getInvestigationsClient,
           getTriggerEmitter,
-          getAlertsClient: (request: KibanaRequest) =>
-            this.ruleRegistry?.getRacClientWithRequest(request),
-          getEpisodeLookup: (request: KibanaRequest) => {
-            if (!this.elasticsearch || !this.savedObjects || !this.http) {
-              throw new Error(
-                'core services are not available — plugin start() has not been called'
-              );
-            }
-            const spaceId = this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-            return {
-              esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
-              soClient: this.savedObjects
-                .getScopedClient(request, {
-                  excludedExtensions: [SECURITY_EXTENSION_ID],
-                  includedHiddenTypes: [ALERTING_V2_RULE_SO_TYPE],
-                })
-                .asScopedToNamespace(spaceId),
-              spaceId,
-              basePath: this.http.basePath.get(request),
-            };
-          },
+          getAlertsClient: this.getAlertsClient,
+          getEpisodeLookup: this.getEpisodeLookup,
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
@@ -722,6 +706,32 @@ export class NightshiftInvestigationsPlugin
       conversationId,
       investigationId,
     });
+  };
+
+  private getAlertsClient = (request: KibanaRequest) =>
+    this.ruleRegistry?.getRacClientWithRequest(request);
+
+  private getEpisodeLookup: GetEpisodeLookup = (request, spaceId) => {
+    if (!this.elasticsearch || !this.savedObjects || !this.http) {
+      throw new Error('core services are not available — plugin start() has not been called');
+    }
+    const resolvedSpaceId =
+      spaceId ?? this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
+    return {
+      esClient: this.elasticsearch.client.asScoped(request).asCurrentUser,
+      soClient: this.savedObjects
+        .getScopedClient(request, {
+          excludedExtensions: [SECURITY_EXTENSION_ID],
+          includedHiddenTypes: [ALERTING_V2_RULE_SO_TYPE],
+        })
+        .asScopedToNamespace(resolvedSpaceId),
+      spaceId: resolvedSpaceId,
+      basePath: spaceId
+        ? `${this.http.basePath.serverBasePath}${
+            spaceId === DEFAULT_SPACE_ID ? '' : `/s/${spaceId}`
+          }`
+        : this.http.basePath.get(request),
+    };
   };
 
   private getAutomationsSoClient = (request: KibanaRequest, spaceId: string) => {

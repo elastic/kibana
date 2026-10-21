@@ -14,13 +14,21 @@ import {
 } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { serverUnavailable } from '@hapi/boom';
+import type { KibanaRequest } from '@kbn/core/server';
 import {
   DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
   INVESTIGATION_SUBJECT_TYPES,
   INVESTIGATION_TRIGGER_TYPES,
   investigationNotificationDestinationsSchema,
 } from '../../common';
-import type { GetAutomationsSoClient, GetInvestigationsClient } from '../routes/types';
+import type {
+  GetAlertsClient,
+  GetAutomationsSoClient,
+  GetEpisodeLookup,
+  GetInvestigationsClient,
+} from '../routes/types';
+import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../lib/automations/types';
 import { consumeAutomationBudget } from '../lib/automations/automation_budget';
@@ -110,9 +118,35 @@ const inputSchema = lazySchema(() =>
   })
 );
 
+const resolveAlerts = async ({
+  subjectId,
+  request,
+  spaceId,
+  getAlertsClient,
+  getEpisodeLookup,
+}: {
+  subjectId: string;
+  request: KibanaRequest;
+  spaceId: string;
+  getAlertsClient: GetAlertsClient;
+  getEpisodeLookup: GetEpisodeLookup;
+}) => {
+  const alertsClient = await getAlertsClient(request);
+  if (!alertsClient) {
+    throw serverUnavailable('Alert lookup is unavailable');
+  }
+  return fetchInvestigationAlertSnapshots({
+    alertsClient,
+    alertIds: [subjectId],
+    ...getEpisodeLookup(request, spaceId),
+  });
+};
+
 export const triggerInvestigationStepDefinition = (
   getInvestigationsClient: GetInvestigationsClient,
-  getAutomationsSoClient: GetAutomationsSoClient
+  getAutomationsSoClient: GetAutomationsSoClient,
+  getAlertsClient: GetAlertsClient,
+  getEpisodeLookup: GetEpisodeLookup
 ) =>
   createServerStepDefinition({
     id: 'nightshift.triggerInvestigation',
@@ -165,6 +199,16 @@ export const triggerInvestigationStepDefinition = (
         }
       }
       const client = getInvestigationsClient(request, spaceId);
+      const alerts =
+        input.subject_type === 'alert' && input.subject_id && !input.context?.alerts
+          ? await resolveAlerts({
+              subjectId: input.subject_id,
+              request,
+              spaceId,
+              getAlertsClient,
+              getEpisodeLookup,
+            })
+          : undefined;
       const result = await client.start({
         subject: {
           type: input.subject_type,
@@ -175,10 +219,11 @@ export const triggerInvestigationStepDefinition = (
         trigger_type: input.trigger_type ?? 'automatic',
         message: input.message,
         source_ids: input.source_ids,
-        context:
-          input.scope_query && input.subject_type === 'manual'
-            ? { ...input.context, scope_query: input.scope_query }
-            : input.context,
+        context: alerts
+          ? { alerts }
+          : input.scope_query && input.subject_type === 'manual'
+          ? { ...input.context, scope_query: input.scope_query }
+          : input.context,
         timeout_seconds: input.timeout_seconds,
         notificationDestinations: input.notificationDestinations,
         slack_thread: input.slack_thread,

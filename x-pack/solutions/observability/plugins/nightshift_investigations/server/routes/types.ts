@@ -26,7 +26,10 @@ export type GetInvestigationsClient = (
 
 export type GetAlertsClient = (request: KibanaRequest) => Promise<AlertsClient> | undefined;
 
-export type GetEpisodeLookup = (request: KibanaRequest) => {
+export type GetEpisodeLookup = (
+  request: KibanaRequest,
+  spaceId?: string
+) => {
   esClient: ElasticsearchClient;
   soClient: SavedObjectsClientContract;
   spaceId: string;
