@@ -1,5 +1,5 @@
 {
-  "sha1": "b3ef08fd4bae4e83327a21d9401318132a508c80",
+  "sha1": "ab92b8fe6e62ee8634f1510aca8b8bd34330187d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -10,12 +10,13 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
-        "@cloud-stateful-classic"
+        "@cloud-stateful-classic",
+        "@cloud-serverless-observability_complete"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/engine_dispatcher/api/tests/dispatch_workflow_execution.spec.ts",
-        "line": 76,
-        "column": 13
+        "line": 75,
+        "column": 25
       }
     },
     {
