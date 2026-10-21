@@ -126,6 +126,11 @@ export interface ServicesStartDeps {
   deploymentInfo: DeploymentInfo;
   /** Renders round responses for their surfaces, such as Slack. */
   isomer: IsomerPluginStart;
+  /**
+   * The space's Kibana URL, from `getKibanaUrl`, that surfaces such as Slack resolve Kibana app
+   * links against. Undefined when no Kibana URL can be resolved.
+   */
+  getSurfaceBaseUrl: (spaceId: string) => string | undefined;
   /** `xpack.agentBuilder.deductive.register` for this deployment. */
   deductiveRegister: boolean;
 }

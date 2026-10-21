@@ -11,8 +11,12 @@ import type { SurfaceRenderer } from './types';
 /** Renders the response message as Block Kit, for Slack. */
 export const slackSurface: SurfaceRenderer = {
   id: ConversationOriginType.Slack,
-  render: (composition, runtime) => {
-    const { text, blocks } = runtime.surfaces.slack.render(composition, { heading: false });
+  render: (composition, runtime, { baseUrl }) => {
+    const { text, blocks } = runtime.surfaces.slack.render(composition, {
+      heading: false,
+      // Kibana app links resolve against it; `actions` take absolute URLs only.
+      ...(baseUrl ? { baseUrl } : {}),
+    });
 
     return { text, blocks };
   },
