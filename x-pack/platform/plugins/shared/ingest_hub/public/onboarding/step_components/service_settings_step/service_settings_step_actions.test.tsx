@@ -52,7 +52,11 @@ function makeVarDef(name: string): RegistryVarsEntry {
   return { name, type: 'text', title: name, required: true, show_user: true } as RegistryVarsEntry;
 }
 
-const ECF_SVC = makeService('ecf_svc', [{ method: 'ecf' }]);
+// The flow context stamps `settingsScope: 'ecf'` on entries showing the ECF-minimal view.
+const ECF_SVC: AwsServiceMatrixEntry = {
+  ...makeService('ecf_svc', [{ method: 'ecf' }]),
+  settingsScope: 'ecf',
+};
 const AGENTLESS_SVC = makeService('agentless_svc', [
   { method: 'managed_integration', preferred: true },
 ]);
@@ -62,6 +66,7 @@ const BOTH_SVC = makeService('both_svc', [
 ]);
 const ECF_CONFIGURABLE_SVC: AwsServiceMatrixEntry = {
   ...makeService('ecf_configurable_svc', [{ method: 'ecf' }]),
+  settingsScope: 'ecf',
   dataStreams: ['cloudtrail'],
   inputs: ['aws-s3', 'aws-cloudwatch'],
   requiredConfig: ['bucket_arn', 'log_group_arn'],

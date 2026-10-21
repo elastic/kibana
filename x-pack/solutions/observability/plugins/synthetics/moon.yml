@@ -60,7 +60,6 @@ dependsOn:
   - '@kbn/es-types'
   - '@kbn/core-http-server-mocks'
   - '@kbn/utility-types'
-  - '@kbn/telemetry-plugin'
   - '@kbn/core-elasticsearch-client-server-mocks'
   - '@kbn/core-saved-objects-api-server'
   - '@kbn/core-saved-objects-common'
@@ -144,6 +143,7 @@ dependsOn:
   - '@kbn/ui-callout'
   - '@kbn/app-header'
   - '@kbn/app-menu'
+  - '@kbn/config'
 tags:
   - plugin
   - prod
@@ -161,6 +161,4 @@ fileGroups:
     - test/scout_synthetics_agent_e2e/**/*
     - test/scenarios/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

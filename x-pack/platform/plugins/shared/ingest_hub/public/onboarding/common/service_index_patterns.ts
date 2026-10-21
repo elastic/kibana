@@ -8,6 +8,8 @@
 import { isValidDataStreamIndexPattern } from '@kbn/fleet-plugin/common';
 import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
 
+const OTELCOL_INPUT = 'otelcol';
+
 /**
  * Returns the index patterns for a service entry.
  * Each data stream with a known dataset produces a pattern of the form
@@ -37,10 +39,15 @@ export function getServiceIndexPatterns(
     for (const [, dsInfo] of Object.entries(entry.varDefsByDataStream)) {
       // OTel input packages (e.g. aws_cloudwatch_input_otel) store the actual data stream
       // coordinates as variable defaults under varDefsByInput rather than at the top level.
-      const dataset =
+      const baseDataset =
         entry.dataFormat === 'otel'
           ? getInputVarDefault(dsInfo.varDefsByInput, 'data_stream.dataset')
           : dsInfo.dataset;
+      // Data ingested through the `otelcol` input lands in `<dataset>.otel`, not in the manifest default.
+      const dataset =
+        baseDataset && dsInfo.inputs.includes(OTELCOL_INPUT) && !baseDataset.endsWith('.otel')
+          ? `${baseDataset}.otel`
+          : baseDataset;
       const type = dsInfo.type;
       if (dataset && type) {
         const concrete = `${type}-${dataset}-${namespace}`;

@@ -23,38 +23,39 @@ jest.mock('../../hooks/use_workflows_monaco_theme', () => ({
   WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
 }));
 
-jest.mock('@kbn/code-editor', () => ({
-  CodeEditor: ({ value, onChange, dataTestSubj }: any) => (
-    <div data-test-subj={dataTestSubj}>
-      <span data-test-subj="editorValue">{value}</span>
-      <button
-        data-test-subj="editorChangeValid"
-        onClick={() => onChange('{"approved":true}')}
-        type="button"
-      >
-        {'valid change'}
-      </button>
-      <button
-        data-test-subj="editorChangeInvalid"
-        onClick={() => onChange('{bad json')}
-        type="button"
-      >
-        {'invalid change'}
-      </button>
-      <button
-        data-test-subj="editorChangeSyntaxOkSchemaFail"
-        onClick={() => onChange('{"wrongKey": true}')}
-        type="button"
-      >
-        {'valid json invalid schema'}
-      </button>
-    </div>
-  ),
-  monaco: {
-    languages: { json: { jsonDefaults: { setDiagnosticsOptions: jest.fn() } } },
-    editor: {},
-  },
-}));
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
+  return {
+    ...actual,
+    CodeEditor: ({ value, onChange, dataTestSubj }: any) => (
+      <div data-test-subj={dataTestSubj}>
+        <span data-test-subj="editorValue">{value}</span>
+        <button
+          data-test-subj="editorChangeValid"
+          onClick={() => onChange('{"approved":true}')}
+          type="button"
+        >
+          {'valid change'}
+        </button>
+        <button
+          data-test-subj="editorChangeInvalid"
+          onClick={() => onChange('{bad json')}
+          type="button"
+        >
+          {'invalid change'}
+        </button>
+        <button
+          data-test-subj="editorChangeSyntaxOkSchemaFail"
+          onClick={() => onChange('{"wrongKey": true}')}
+          type="button"
+        >
+          {'valid json invalid schema'}
+        </button>
+      </div>
+    ),
+  };
+});
 
 const renderWithProviders = (props: ResumeExecutionModalProps) => {
   return render(<ResumeExecutionModal {...props} />, { wrapper: I18nProvider });

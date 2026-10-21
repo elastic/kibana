@@ -16,7 +16,7 @@ import {
   type ConversationRound,
   type ToolCallStep,
 } from '@kbn/agent-builder-common';
-import { ExecutionStatus } from '@kbn/workflows';
+import { AGENT_BUILDER_HOOK_TRIGGER_SOURCE, ExecutionStatus } from '@kbn/workflows';
 import {
   MAX_TOOL_RESULT_ARRAY_ITEMS,
   MAX_TOOL_RESULT_DATA_CHARS,
@@ -135,6 +135,7 @@ describe('runAfterExecutionWorkflows', () => {
     agentConfiguration: { tools: [], post_execution_workflow_ids: ['wf-1'] },
     agentId: 'agent-1',
     conversationId: 'conv-1',
+    conversationAccess: 'readWrite',
     ...overrides,
   });
 
@@ -153,6 +154,24 @@ describe('runAfterExecutionWorkflows', () => {
   });
 
   describe('early-exit guards', () => {
+    it('does nothing for an ephemeral run on an existing conversation', async () => {
+      const { workflowApi, getInternalServices } = createDeps();
+      const context = createContext({ conversationAccess: 'readOnly' });
+
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+
+      expect(executeWorkflowMock).not.toHaveBeenCalled();
+    });
+
+    it('still runs for a one-shot run that stores nothing', async () => {
+      const { workflowApi, getInternalServices } = createDeps();
+      const context = createContext({ conversationAccess: 'none' });
+
+      await runAfterExecutionWorkflows({ context, workflowApi, getInternalServices, logger });
+
+      expect(executeWorkflowMock).toHaveBeenCalledTimes(1);
+    });
+
     it('does nothing when post_execution_workflow_ids is empty', async () => {
       const { workflowApi, getInternalServices } = createDeps();
       const context = createContext({
@@ -248,6 +267,8 @@ describe('runAfterExecutionWorkflows', () => {
       expect(executeWorkflowMock).toHaveBeenCalledWith(
         expect.objectContaining({
           workflowId: 'wf-1',
+          // Lets a workflow refuse runs that a user started directly.
+          triggeredBy: AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
           workflowParams: {
             prompt: 'my question',
             response: 'my answer',

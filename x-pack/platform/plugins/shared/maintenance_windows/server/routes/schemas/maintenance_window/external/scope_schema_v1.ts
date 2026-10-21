@@ -58,7 +58,7 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
             schema.boolean({
               meta: {
                 description:
-                  'Whether this maintenance window affects Alerting V2 alert episodes. Defaults to `true`.',
+                  'Whether this maintenance window affects Alerting V2 alerts. Defaults to `true`.',
               },
             })
           ),
@@ -68,7 +68,7 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
                 maxLength: MAX_KQL_LENGTH,
                 meta: {
                   description:
-                    "A KQL filter that limits which Alerting V2 alert episodes this maintenance window affects. You can filter on `episode_id`, `episode_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching episodes don't send notifications while the window is active. If you omit query, the window affects all Alerting V2 alert episodes.",
+                    "A KQL filter that limits which Alerting V2 alerts this maintenance window affects. You can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If you omit query, the window affects all Alerting V2 alerts.",
                 },
               }),
             })
@@ -77,7 +77,7 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
         {
           meta: {
             description:
-              "Settings that control how this maintenance window affects Alerting V2 alerting episodes, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alert episodes.",
+              "Settings that control how this maintenance window affects Alerting V2 alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alerts.",
           },
         }
       )

@@ -59,6 +59,7 @@ dependsOn:
   - '@kbn/core-chrome-layout-constants'
   - '@kbn/zod'
   - '@kbn/test-jest-helpers'
+  - '@kbn/es-errors'
 tags:
   - plugin
   - prod
@@ -74,6 +75,4 @@ fileGroups:
     - e2e/**/*
     - test/scout/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

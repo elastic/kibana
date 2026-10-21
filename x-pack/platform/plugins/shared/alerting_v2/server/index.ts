@@ -49,11 +49,12 @@ export type {
   AlertingServerSetup,
   AlertingServerStart,
   RulesClientApi,
+  InternalRulesClientApi,
   ActionPolicyClientApi,
   AlertEventsClientApi,
 } from './types';
 export type { ArtifactTypeDefinition, ArtifactReferenceDescriptor } from './lib/artifact_types';
-export type { FindRulesArgs } from './lib/rules_client';
+export type { FindRulesArgs, CreateRulesClientOptions } from './lib/rules_client';
 export type { FindActionPoliciesArgs } from './lib/action_policy_client';
 
 /**

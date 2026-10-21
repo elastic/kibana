@@ -25,30 +25,32 @@ const MAX_DOCUMENTS_LIMIT = 10_000;
 const MAX_BODY_CHARS_LIMIT = 50_000;
 const MAX_UNITS_LIMIT = 10_000;
 const MAX_KIS_LENGTH = 50_000;
+/** One KI per source, so the list is capped at the 100-KI onboarding budget (`strategy_catalog`, "The KI budget"). */
+const MAX_INDEX_METADATA_SOURCES = 100;
 
 /**
  * Which arguments belong to which template. Anything listed against another template is rejected
  * rather than ignored, so a wrong argument surfaces instead of silently taking a default.
  */
 const TEMPLATE_FIELDS = {
-  document_orchestration: [
-    'titleField',
-    'bodyField',
-    'corpusFilter',
-    'maxDocuments',
-    'bodyMaxChars',
-  ],
-  index_metadata: ['categoryField'],
-  unit_profile: ['unitKey', 'activityField', 'breakdownField', 'maxUnits'],
+  document_orchestration: ['titleField', 'bodyField', 'maxDocuments', 'bodyMaxChars'],
+  index_metadata: ['categoryField', 'sources'],
+  unit_profile: ['unitKey', 'activityField', 'breakdownField', 'metricFields', 'maxUnits'],
   targeted_ki_writer: ['kis'],
 } as const;
 
+const MAX_METRIC_FIELDS = 10;
+
+/** index_metadata takes either `sources` or `sourceIndex` + `categoryField`; checked separately. */
 const REQUIRED_TEMPLATE_FIELDS = {
   document_orchestration: ['titleField', 'bodyField', 'sourceIndex'],
-  index_metadata: ['categoryField', 'sourceIndex'],
+  index_metadata: [],
   unit_profile: ['unitKey', 'activityField', 'breakdownField', 'sourceIndex'],
   targeted_ki_writer: ['kis'],
 } as const;
+
+const findDuplicate = (values: readonly string[]): string | undefined =>
+  values.find((item, position) => values.indexOf(item) !== position);
 
 const installAutomationTemplateSchema = z
   .object({
@@ -58,7 +60,7 @@ const installAutomationTemplateSchema = z
         dedent`
           Which automation to install. Required fields per template:
           document_orchestration → name, sourceIndex, titleField, bodyField
-          index_metadata         → name, sourceIndex, categoryField
+          index_metadata         → name, sources  (or sourceIndex + categoryField for one index)
           unit_profile           → name, sourceIndex, unitKey, activityField, breakdownField
           targeted_ki_writer     → name, kis  (no sourceIndex)
         `
@@ -70,7 +72,7 @@ const installAutomationTemplateSchema = z
       .refine((v) => v.trim().length > 0, { message: 'name must not be blank or whitespace-only' })
       .refine((v) => !v.includes('/'), { message: 'name must not contain a forward slash' })
       .describe(
-        'REQUIRED. Human-readable name for this automation within the AI index (e.g. "flight-activity-docs", "loyalty-tier-profile"). No forward slashes. If an automation with this name already exists on the AI index it is replaced in-place; a different name installs an additional copy. Must be provided on every call.'
+        'REQUIRED. Human-readable name for this automation within the AI index (e.g. "kb-articles-docs", "product-profile"). No forward slashes. Installing the same template with the same name replaces that automation in place; a different name installs an additional copy. Must be provided on every call.'
       ),
     sourceIndex: z
       .string()
@@ -78,7 +80,20 @@ const installAutomationTemplateSchema = z
       .max(MAX_SOURCE_INDEX_LENGTH)
       .optional()
       .describe(
-        'REQUIRED for document_orchestration, index_metadata, unit_profile. Not used by targeted_ki_writer. Index or data stream the automation reads.'
+        'REQUIRED for document_orchestration and unit_profile. For index_metadata, use sources instead, or sourceIndex + categoryField for a single index. Not used by targeted_ki_writer. Index or data stream the automation reads.'
+      ),
+    sources: z
+      .array(
+        z.object({
+          index: z.string().min(1).max(MAX_SOURCE_INDEX_LENGTH),
+          categoryField: z.string().min(1).max(MAX_FIELD_NAME_LENGTH),
+        })
+      )
+      .min(1)
+      .max(MAX_INDEX_METADATA_SOURCES)
+      .optional()
+      .describe(
+        'index_metadata only. Every index to profile, one KI each: list every source of the AI index here so one install covers them all. categoryField is the keyword field that index groups by first.'
       ),
     titleField: z
       .string()
@@ -97,7 +112,9 @@ const installAutomationTemplateSchema = z
       .min(1)
       .max(MAX_FIELD_NAME_LENGTH)
       .optional()
-      .describe('REQUIRED for index_metadata. Keyword field the index profile groups by.'),
+      .describe(
+        'index_metadata with a single sourceIndex only. Keyword field the index profile groups by.'
+      ),
     unitKey: z
       .string()
       .min(1)
@@ -122,6 +139,13 @@ const installAutomationTemplateSchema = z
       .describe(
         'REQUIRED for unit_profile. Second field whose per-unit distribution characterises the unit.'
       ),
+    metricFields: z
+      .array(z.string().min(1).max(MAX_FIELD_NAME_LENGTH))
+      .max(MAX_METRIC_FIELDS)
+      .optional()
+      .describe(
+        'Optional. unit_profile only. Numeric fields in sourceIndex averaged per unit and written into each profile, so sibling profiles carry the numbers that tell them apart. Defaults to none.'
+      ),
     kis: z
       .string()
       .min(1)
@@ -142,7 +166,7 @@ const installAutomationTemplateSchema = z
       .max(MAX_CORPUS_FILTER_LENGTH)
       .optional()
       .describe(
-        'Optional. ES|QL clause inserted after FROM, such as "| WHERE published_at >= NOW() - 365 days". A WHERE line may omit the leading pipe. Empty reads the whole index. document_orchestration only. Defaults to empty.'
+        'Optional. ES|QL clause inserted after FROM, such as "| WHERE published_at >= NOW() - 365 days". A WHERE line may omit the leading pipe. Empty reads the whole index. document_orchestration and unit_profile; for unit_profile it bounds both which units are found and which rows each profile counts. Defaults to empty.'
       ),
     maxDocuments: z
       .number()
@@ -169,7 +193,7 @@ const installAutomationTemplateSchema = z
       .max(MAX_UNITS_LIMIT)
       .optional()
       .describe(
-        'Optional. Upper bound on units profiled in one run. Each costs a model call. unit_profile only. Defaults to 25.'
+        'Optional. Upper bound on units profiled in one run. Each costs a model call. unit_profile only. Defaults to 100.'
       ),
   })
   .superRefine((value, ctx) => {
@@ -196,6 +220,57 @@ const installAutomationTemplateSchema = z
           });
         }
       }
+    }
+
+    if (
+      value.corpusFilter !== undefined &&
+      value.template !== 'document_orchestration' &&
+      value.template !== 'unit_profile'
+    ) {
+      ctx.addIssue({
+        code: 'custom',
+        message: 'corpusFilter is only valid for document_orchestration and unit_profile.',
+        path: ['corpusFilter'],
+      });
+    }
+
+    if (value.template === 'index_metadata') {
+      const hasSingle = value.sourceIndex !== undefined || value.categoryField !== undefined;
+      if (value.sources !== undefined && hasSingle) {
+        ctx.addIssue({
+          code: 'custom',
+          message:
+            'Pass either sources or sourceIndex + categoryField for index_metadata, not both.',
+          path: ['sources'],
+        });
+      } else if (
+        value.sources === undefined &&
+        (value.sourceIndex === undefined || value.categoryField === undefined)
+      ) {
+        ctx.addIssue({
+          code: 'custom',
+          message: 'index_metadata needs sources, or both sourceIndex and categoryField.',
+          path: ['sources'],
+        });
+      }
+
+      const duplicateIndex = findDuplicate((value.sources ?? []).map(({ index }) => index));
+      if (duplicateIndex !== undefined) {
+        ctx.addIssue({
+          code: 'custom',
+          message: `sources lists '${duplicateIndex}' twice; its two KIs would overwrite each other.`,
+          path: ['sources'],
+        });
+      }
+    }
+
+    const duplicateMetric = findDuplicate(value.metricFields ?? []);
+    if (duplicateMetric !== undefined) {
+      ctx.addIssue({
+        code: 'custom',
+        message: `metricFields lists '${duplicateMetric}' twice.`,
+        path: ['metricFields'],
+      });
     }
 
     if (value.template === 'targeted_ki_writer' && value.sourceIndex !== undefined) {
@@ -251,20 +326,24 @@ const toInstallParams = (
       unitKey: input.unitKey,
       activityField: input.activityField,
       breakdownField: input.breakdownField,
-      corpusFilter: '',
+      corpusFilter: input.corpusFilter ?? '',
+      metricFields: input.metricFields ?? [],
       maxUnits: input.maxUnits ?? 100,
       name,
     };
   }
 
+  if (input.sources) {
+    return { template: 'index_metadata', sources: input.sources, name };
+  }
+
   if (!input.categoryField || !input.sourceIndex) {
-    throw new Error('categoryField and sourceIndex are required for index_metadata.');
+    throw new Error('index_metadata needs sources, or sourceIndex and categoryField.');
   }
 
   return {
     template: 'index_metadata',
-    sourceIndex: input.sourceIndex,
-    categoryField: input.categoryField,
+    sources: [{ index: input.sourceIndex, categoryField: input.categoryField }],
     name,
   };
 };
@@ -302,20 +381,19 @@ export const createInstallAutomationTemplateTool = ({
 
     Required fields per template (you MUST include all of them or the call will fail):
       document_orchestration → name, sourceIndex, titleField, bodyField
-      index_metadata         → name, sourceIndex, categoryField
+      index_metadata         → name, sources  (or sourceIndex + categoryField for one index)
       unit_profile           → name, sourceIndex, unitKey, activityField, breakdownField
       targeted_ki_writer     → name, kis  (no sourceIndex)
 
-    name is always required. It identifies this automation within the AI index. Same name → replaces
-    the existing automation in-place. Different name → installs an additional copy.
-    If the AI index has a pre-name automation (installed before this tool required a name, e.g.
-    named "Document KI automation"), it will NOT be replaced automatically. Delete it manually
-    first, then reinstall with a descriptive name.
+    name is always required. It identifies this automation within the AI index. Same template and
+    name → replaces the existing automation in-place. Different name → installs an additional copy.
 
     document_orchestration summarises each document into its own KI with verified ES|QL access
     patterns.
-    index_metadata writes one KI profiling the whole index, grouped by categoryField.
-    unit_profile writes one KI per distinct unitKey value, grounded in per-unit aggregations.
+    index_metadata writes one KI per source index, each profiling that whole index grouped by its
+    categoryField. Pass every source of the AI index in sources so one install covers them all.
+    unit_profile writes one KI per distinct unitKey value in one index, grounded in per-unit
+    aggregations plus the averages of any metricFields.
     targeted_ki_writer takes no dynamic parameters beyond name and kis. It writes KIs verbatim from
     the kis YAML you supply, then the workflow can be run with platform.core.execute_workflow.
   `,

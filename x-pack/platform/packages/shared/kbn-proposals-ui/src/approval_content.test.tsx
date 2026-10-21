@@ -56,12 +56,151 @@ describe('ApprovalContent', () => {
     expect(screen.getByText('Needs review')).toBeInTheDocument();
   });
 
+  it.each<Partial<ApprovalProposal>>([
+    { status: 'superseded' },
+    { status: 'failed', decision: 'approved', supersededBy: 'successor' },
+    { status: 'expired', supersededBy: 'successor' },
+  ])(
+    'keeps a replaced proposal visible without pending or outcome instructions: %j',
+    (overrides) => {
+      renderContent({
+        proposal: {
+          ...baseProposal,
+          category: 'configure',
+          previousExecutionError: 'Prior failure',
+          ...overrides,
+        },
+        onDismiss: jest.fn(),
+      });
+      expect(screen.getByText('Block IP 10.0.0.4')).toBeInTheDocument();
+      expect(screen.getByText(/Configure/)).toBeInTheDocument();
+      expect(screen.getByText('Isolate the compromised host.')).toBeInTheDocument();
+      expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('approvalContent-outcome')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('approvalContent-previous-failure')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('approvalContent-expired')).not.toBeInTheDocument();
+      expect(screen.getByTestId('approvalContent-confirm')).toBeDisabled();
+      expect(screen.getByTestId('approvalContent-dismiss')).toBeDisabled();
+    }
+  );
+
+  it('shows who acted and when on a replaced proposal that had been decided', () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        status: 'failed',
+        decision: 'approved',
+        decidedBy: { username: 'elastic', fullName: null, email: null },
+        decidedAt: '2026-10-09T14:05:00.000Z',
+        supersededBy: 'successor',
+      },
+    });
+    expect(screen.getByText('elastic')).toBeInTheDocument();
+    expect(screen.queryByTestId('approvalContent-outcome')).not.toBeInTheDocument();
+  });
+
+  it('shows a Failed badge on a replaced proposal whose action failed', () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        status: 'failed',
+        decision: 'approved',
+        decidedBy: { username: 'elastic', fullName: null, email: null },
+        decidedAt: '2026-10-09T14:05:00.000Z',
+        supersededBy: 'successor',
+      },
+    });
+    expect(screen.getByText('Failed')).toBeInTheDocument();
+    expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-confirm')).toBeDisabled();
+  });
+
+  it("shows a replaced attempt's own error in a danger callout when its action failed", () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        status: 'failed',
+        decision: 'approved',
+        decidedBy: { username: 'elastic', fullName: null, email: null },
+        decidedAt: '2026-10-09T14:05:00.000Z',
+        supersededBy: 'successor',
+        executionError: 'HTTP 500: host unreachable',
+      },
+    });
+    expect(screen.getByText('This attempt failed to execute the action')).toBeInTheDocument();
+    expect(screen.getByText('HTTP 500: host unreachable')).toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-failed-attempt')).toHaveClass('euiCallOut--danger');
+    expect(
+      isBefore(
+        screen.getByTestId('approvalContent-failed-attempt'),
+        screen.getByTestId('approvalContent-confirm')
+      )
+    ).toBe(true);
+  });
+
+  it('leaves the error to the outcome banner when a failed proposal was not replaced', () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        status: 'failed',
+        decision: 'approved',
+        decidedBy: { username: 'elastic', fullName: null, email: null },
+        decidedAt: '2026-10-09T14:05:00.000Z',
+        executionError: 'HTTP 500: host unreachable',
+      },
+    });
+    expect(screen.queryByTestId('approvalContent-failed-attempt')).not.toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(
+      'HTTP 500: host unreachable'
+    );
+  });
+
+  it('shows no status badge on a replaced revision that was never decided', () => {
+    renderContent({ proposal: { ...baseProposal, status: 'superseded', supersededBy: 'next' } });
+    expect(screen.queryByText('Needs review')).not.toBeInTheDocument();
+    expect(screen.queryByText('Failed')).not.toBeInTheDocument();
+  });
+
+  it('prefixes the actor with "executed" when the approved action failed', () => {
+    renderContent({
+      proposal: {
+        ...baseProposal,
+        status: 'failed',
+        decision: 'approved',
+        decidedBy: { username: 'elastic', fullName: null, email: null },
+        decidedAt: '2026-10-09T14:05:00.000Z',
+      },
+    });
+    expect(screen.getByText(/executed by/)).toBeInTheDocument();
+  });
+
+  it('restores the comment and disables decisions when replaced during dismissal', () => {
+    const onDismiss = jest.fn();
+    const { rerender } = renderContent({ onDismiss });
+    fireEvent.click(screen.getByTestId('approvalContent-dismiss'));
+    expect(screen.getByTestId('approvalContent-decline-form')).toBeInTheDocument();
+
+    rerender(
+      <ApprovalContent
+        {...baseProps}
+        proposal={{ ...baseProposal, status: 'superseded', supersededBy: 'successor' }}
+        onDismiss={onDismiss}
+      />
+    );
+
+    expect(screen.queryByTestId('approvalContent-decline-form')).not.toBeInTheDocument();
+    expect(screen.getByText('Isolate the compromised host.')).toBeInTheDocument();
+    expect(screen.getByTestId('approvalContent-confirm')).toBeDisabled();
+    expect(screen.getByTestId('approvalContent-dismiss')).toBeDisabled();
+    expect(onDismiss).not.toHaveBeenCalled();
+  });
+
   it('renders a caption derived from the proposal, e.g. category, reversibility and impact', () => {
     renderContent({
       proposal: {
         ...baseProposal,
         category: 'configure',
-        action: { name: 'Block IP', reversible: true },
+        action: { name: 'Block IP', reversible: true, approvalPolicy: 'always-gate' },
       },
     });
     expect(screen.getByText('Configure • Reversible • Critical impact')).toBeInTheDocument();
@@ -81,7 +220,7 @@ describe('ApprovalContent', () => {
       proposal: {
         ...baseProposal,
         category: 'configure',
-        action: { name: 'Block IP', reversible: true },
+        action: { name: 'Block IP', reversible: true, approvalPolicy: 'always-gate' },
         expiresAt,
       },
     });
@@ -111,6 +250,15 @@ describe('ApprovalContent', () => {
   it('renders emphasis in the comment as markdown rather than literal asterisks', () => {
     renderContent({ proposal: { ...baseProposal, comment: 'Revoking **all** sessions.' } });
     expect(screen.getByText('all').tagName).toBe('STRONG');
+  });
+
+  it('opens links in the comment in a new tab', () => {
+    renderContent({
+      proposal: { ...baseProposal, comment: 'See [the runbook](https://example.com/runbook).' },
+    });
+    const link = screen.getByRole('link', { name: /the runbook/ });
+    expect(link).toHaveAttribute('target', '_blank');
+    expect(link).toHaveAttribute('rel', expect.stringContaining('noopener'));
   });
 
   it('renders a GFM table in the comment, which is how a proposal lists what it touches', () => {
@@ -146,16 +294,18 @@ describe('ApprovalContent', () => {
     expect(screen.getByTestId('approvalContent-confirm')).toHaveTextContent('Approve');
   });
 
-  it('colors the Approve button by the proposal tone: danger for high/critical impact', () => {
-    // `baseProposal` is `critical` impact, so the default render already covers this.
+  it('keeps the Approve button primary even for high/critical impact', () => {
+    // `baseProposal` is `critical` impact. The risk is conveyed by the caption and the Decline
+    // action; Approve itself stays the primary call to action rather than turning `danger`.
     renderContent();
-    expect(screen.getByTestId('approvalContent-confirm').className).toContain('danger');
+    const className = screen.getByTestId('approvalContent-confirm').className;
+    expect(className).toContain('primary');
+    expect(className).not.toContain('danger');
   });
 
   it('colors the Approve button primary for low/medium impact, not success', () => {
     // Regression check: the chat card's Approve button was once styled `success` here,
-    // independent of — and inconsistent with — the flyout modal's tone-derived `primary`. Both
-    // hosts now share this one derivation, so this covers both.
+    // independent of the flyout modal's `primary`. Both hosts share this one component.
     renderContent({ proposal: { ...baseProposal, impact: 'low' } });
     const className = screen.getByTestId('approvalContent-confirm').className;
     expect(className).toContain('primary');
@@ -204,6 +354,15 @@ describe('ApprovalContent', () => {
     ).toBe(true);
   });
 
+  it('renders the previous-execution-error callout as a danger callout', () => {
+    renderContent({
+      proposal: { ...baseProposal, previousExecutionError: 'HTTP 400: something went wrong' },
+    });
+    expect(screen.getByTestId('approvalContent-previous-failure')).toHaveClass(
+      'euiCallOut--danger'
+    );
+  });
+
   it('hides the previous-execution-error callout once the proposal is decided', () => {
     renderContent({
       proposal: {
@@ -224,6 +383,14 @@ describe('ApprovalContent', () => {
         'This proposal expired before a decision was made and can no longer be actioned.'
       )
     ).toBeInTheDocument();
+  });
+
+  it('shows why the proposal expired', () => {
+    const reason =
+      "The rule was deleted after this proposal was created, so this tuning can't be applied.";
+    renderContent({ proposal: { ...baseProposal, status: 'expired', rationale: reason } });
+
+    expect(screen.getByTestId('approvalContent-expired')).toHaveTextContent(reason);
   });
 
   it('renders always-allow checkbox when alwaysAllow is supplied', () => {
@@ -263,6 +430,7 @@ describe('ApprovalContent', () => {
 
       // The badge and the outcome banner's own title both say it.
       expect(screen.getAllByText('Applying').length).toBeGreaterThanOrEqual(2);
+      expect(screen.getByTestId('approvalContent-outcome')).toHaveTextContent(/^Applying$/);
       expect(screen.queryByTestId('approvalContent-confirm')).not.toBeInTheDocument();
       expect(screen.getAllByText(/Ava/).length).toBeGreaterThan(0);
     });
@@ -356,8 +524,8 @@ describe('ApprovalContent', () => {
         },
       });
 
-      expect(screen.getByText('Approved')).toBeInTheDocument();
-      expect(screen.getByText('Approved — no action to run')).toBeInTheDocument();
+      // The badge's short label and the banner's title read the same.
+      expect(screen.getAllByText('Approved')).toHaveLength(2);
       expect(screen.queryByText('Applied')).not.toBeInTheDocument();
     });
 
@@ -538,6 +706,7 @@ describe('ApprovalContent', () => {
         />
       );
       expect(screen.queryByTestId('card-decline-form')).not.toBeInTheDocument();
+      expect(screen.getByTestId('card-outcome')).toHaveTextContent(/^Declining$/);
     });
   });
 });

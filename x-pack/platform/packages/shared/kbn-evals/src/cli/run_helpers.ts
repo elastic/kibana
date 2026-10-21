@@ -26,11 +26,13 @@ import {
   envFromDatasetsProfile,
   envFromExportProfile,
   loadVaultConfig,
+  readSuiteSecretFromDevVault,
   stripTrailingSlash,
   probeHttp,
   isExportProfileImplicitLocal,
 } from './profiles';
 import { runScoutHook } from './scout_hook';
+import { resolveScoutTarget, type ScoutTarget } from './scout_target';
 import { readCachedEisConnectors } from './eis_connectors_cache';
 import { parseSpaceIds } from '../utils/space_ids';
 import { getConcurrencyFromEnv, parseConcurrency } from '../utils/concurrency';
@@ -52,7 +54,8 @@ const shellQuote = (value: string): string => {
 export const formatEvalCliCommand = (args: string[]): string =>
   ['node', 'scripts/evals', ...args.map((a) => (a.includes(' ') ? shellQuote(a) : a))].join(' ');
 
-const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {
+/** Finds a suite by id, refreshing discovery once before failing with the available ids. */
+export const ensureSuite = (suiteId: string, repoRoot: string, log: ToolingLog) => {
   const suites = resolveEvalSuites(repoRoot, log);
   const match = suites.find((suite) => suite.id === suiteId);
   if (match) return match;
@@ -236,9 +239,19 @@ export interface ResolveProfileEnvOverridesOptions {
 /**
  * The config a `scoutHook` reads: the datasets profile only. Suite secrets are credentials, like
  * `evaluationsKbn`, so an auto-selected export profile (e.g. `config.local.json`) must not replace them.
+ * With `dev-vault`, a suite that declares a `vaultSecret` reads that secret instead of the general
+ * config; file profiles keep passing the profile JSON, which holds any suite blocks itself.
  */
-const loadScoutHookConfig = (repoRoot: string, datasetsProfile: string | undefined): object =>
-  loadVaultConfig(repoRoot, datasetsProfile) ?? {};
+export const loadScoutHookConfig = (
+  repoRoot: string,
+  datasetsProfile: string | undefined,
+  suite: Pick<EvalSuiteDefinition, 'vaultSecret'> | undefined
+): object => {
+  if (suite?.vaultSecret && isDevVaultProfile(datasetsProfile)) {
+    return readSuiteSecretFromDevVault(suite.vaultSecret) ?? {};
+  }
+  return loadVaultConfig(repoRoot, datasetsProfile) ?? {};
+};
 
 export const resolveProfileEnvOverrides = async ({
   repoRoot,
@@ -276,7 +289,7 @@ export const resolveProfileEnvOverrides = async ({
   }
 
   const suiteScoutEnv = suite?.scoutHook
-    ? runScoutHook(repoRoot, suite.scoutHook, loadScoutHookConfig(repoRoot, datasetsProfile))
+    ? runScoutHook(repoRoot, suite.scoutHook, loadScoutHookConfig(repoRoot, datasetsProfile, suite))
     : {};
 
   return { datasetsProfile, exportProfile, profileEnvOverrides, suiteScoutEnv };
@@ -507,12 +520,29 @@ export const buildEvalRunArgs = ({
     runArgs.push('--space-ids', spaceIds.join(','));
   }
 
+  for (const flag of ['scout-arch', 'scout-domain']) {
+    const value = flagsReader.string(flag);
+    if (value) {
+      runArgs.push(`--${flag}`, value);
+    }
+  }
+
   if (skipServer) {
     runArgs.push('--skip-server');
   }
 
   return runArgs;
 };
+
+/** The Scout arch/domain for a run: `--scout-arch` / `--scout-domain`, else the suite's. */
+export const resolveEvalScoutTarget = (
+  flagsReader: FlagsReader,
+  suite?: EvalSuiteDefinition
+): ScoutTarget =>
+  resolveScoutTarget(suite, {
+    arch: flagsReader.string('scout-arch'),
+    domain: flagsReader.string('scout-domain'),
+  });
 
 export const evalRunFlags: FlagOptions = {
   string: [
@@ -529,6 +559,8 @@ export const evalRunFlags: FlagOptions = {
     'export-profile',
     'evaluations-kbn-url',
     'evaluations-kbn-api-key',
+    'scout-arch',
+    'scout-domain',
   ],
   boolean: ['skip-server', 'dry-run', 'skip-init'],
   alias: { model: 'project', judge: 'evaluation-connector-id' },

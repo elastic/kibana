@@ -24,6 +24,7 @@ export const registeredDomainCommand = {
   name: Commands.REGISTERED_DOMAIN,
   methods: registeredDomainCommandMethods,
   metadata: {
+    docPreserving: true,
     preview: true,
     description: i18n.translate('kbn-esql-language.esql.definitions.registeredDomainDoc', {
       defaultMessage:

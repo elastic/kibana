@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AnalyticsServiceSetup, CoreStart, Logger } from '@kbn/core/server';
+import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
@@ -42,17 +43,21 @@ export const withToolResults = (
 };
 
 export const cortexOptimizeStepDefinition = ({
+  getAgentBuilder,
   getInference,
   getSavedObjects,
   getUiSettings,
   analytics,
   logger,
+  isEnabled,
 }: {
+  getAgentBuilder: () => AgentBuilderPluginStart | undefined;
   getInference: () => InferenceServerStart | undefined;
   getSavedObjects: () => CoreStart['savedObjects'] | undefined;
   getUiSettings: () => CoreStart['uiSettings'] | undefined;
   analytics: AnalyticsServiceSetup;
   logger: Logger;
+  isEnabled?: () => boolean;
 }) =>
   createServerStepDefinition({
     id: 'nightshift.cortexOptimize',
@@ -60,7 +65,8 @@ export const cortexOptimizeStepDefinition = ({
     category: StepCategory.Ai,
     description:
       'Proposes Cortex wiki edits from a completed investigation round and writes them ' +
-      'to the Context Engine AI index.',
+      'to the Context Engine AI index. sandbox_id identifies the workspace this round used; ' +
+      'the optimizer currently reads the transcript, not the sandbox files.',
     inputSchema: z.object({
       prompt: z
         .string()
@@ -71,6 +77,11 @@ export const cortexOptimizeStepDefinition = ({
         .max(MAX_ROUND_TEXT_LENGTH)
         .describe("The assistant's final response for the round."),
       agent_id: z.string().max(1024).optional().describe('Agent id that produced the round.'),
+      sandbox_id: z
+        .string()
+        .max(1024)
+        .optional()
+        .describe('Workspace key from nightshift.obtainSandbox. Already space-scoped.'),
       conversation_id: z
         .string()
         .max(1024)
@@ -81,8 +92,16 @@ export const cortexOptimizeStepDefinition = ({
         .max(1024)
         .optional()
         .describe('Id of the completed round. Recorded on the edit telemetry events.'),
-      connector_id: z.string().max(MAX_KEYWORD_LENGTH).optional(),
-      round_connector_id: z.string().max(MAX_KEYWORD_LENGTH).optional(),
+      connector_id: z
+        .string()
+        .max(MAX_KEYWORD_LENGTH)
+        .optional()
+        .describe('Strict model override for a direct run. Fails when the id does not resolve.'),
+      round_connector_id: z
+        .string()
+        .max(MAX_KEYWORD_LENGTH)
+        .optional()
+        .describe('Inference connector the triggering agent used for this round.'),
       tool_calls: toolCallsSchema.describe(
         'Investigator tool calls from this round. Shows the optimizer what the investigator queried.'
       ),
@@ -92,8 +111,17 @@ export const cortexOptimizeStepDefinition = ({
     }),
     outputSchema: z.object({
       status: z.literal('ok').describe('The optimizer finished without throwing.'),
+      skipped: z.boolean().optional(),
     }),
     handler: async (context) => {
+      if (isEnabled && !isEnabled()) {
+        context.logger.info('Skipped Cortex optimize (flag off)');
+        return { output: { status: 'ok' as const, skipped: true } };
+      }
+
+      context.logger.info(
+        `Running Cortex optimize for agent ${context.input.agent_id ?? 'unknown'}`
+      );
       const { workflow, execution } = context.contextManager.getContext();
       await withTimeout(
         (signal) =>
@@ -116,6 +144,7 @@ export const cortexOptimizeStepDefinition = ({
             requestedConnectorId: context.input.connector_id,
             roundConnectorId: context.input.round_connector_id,
             logger,
+            getAgentBuilder,
             getInference,
             getSavedObjects,
             getUiSettings,

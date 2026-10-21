@@ -53,6 +53,4 @@ fileGroups:
     - package.json
     - storybook/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

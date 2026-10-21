@@ -9,9 +9,10 @@ export { InvestigationOutput } from './src/investigation_output';
 export { HypothesisRow } from './src/hypothesis_row';
 export { FinalResults } from './src/final_results';
 export {
-  useInvestigationState,
-  type UseInvestigationStateResult,
-} from './src/use_investigation_state';
+  useInvestigation,
+  INVESTIGATION_POLL_INTERVAL_MS,
+  type UseInvestigationResult,
+} from './src/use_investigation';
 export type { InvestigationOutputProps, InvestigationStatus } from './src/types';
 export {
   EvidenceList,
