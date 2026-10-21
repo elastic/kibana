@@ -15,14 +15,14 @@ const rangeKeySchema = lazySchema(() =>
   z
     .object({
       type: z.literal('range_key'),
-      from: rangeValueSchema,
-      to: rangeValueSchema,
+      from: rangeValueSchema.optional(),
+      to: rangeValueSchema.optional(),
       ranges: z
         .array(
           z
             .object({
-              from: rangeValueSchema,
-              to: rangeValueSchema,
+              from: rangeValueSchema.optional(),
+              to: rangeValueSchema.optional(),
               label: z.string(),
             })
             .strict()
@@ -30,7 +30,11 @@ const rangeKeySchema = lazySchema(() =>
         .max(100),
     })
     .strict()
-    .meta({ id: 'visRangeKey', title: 'Range Key' })
+    .meta({
+      id: 'visRangeKey',
+      title: 'Range Key',
+      description: 'Identifies a range bucket. Omit either bound for an open end.',
+    })
 );
 
 const multiFieldKeySchema = lazySchema(() =>
@@ -40,11 +44,38 @@ const multiFieldKeySchema = lazySchema(() =>
       keys: z.array(z.string()).max(100),
     })
     .strict()
-    .meta({ id: 'visMultiFieldKey', title: 'Multi Field Key' })
+    .meta({
+      id: 'visMultiFieldKey',
+      title: 'Multi Field Key',
+      description: 'Composite key from a multi-terms bucket.',
+    })
+);
+
+const multiValueCellSchema = lazySchema(() =>
+  z
+    .union([
+      z.array(z.string()).max(100),
+      z.array(z.number()).max(100),
+      z.array(z.boolean()).max(100),
+    ])
+    .meta({
+      id: 'visMultiValueCell',
+      title: 'Multi Value Cell',
+      description: 'Values of a multi-value cell.',
+    })
 );
 
 export const serializedValueSchema = lazySchema(() =>
-  z.union([z.string(), z.number(), rangeKeySchema, multiFieldKeySchema])
+  z.union([
+    z.string(),
+    z.number(),
+    z.boolean(),
+    z.null(),
+    multiValueCellSchema,
+    rangeKeySchema,
+    multiFieldKeySchema,
+  ])
 );
 
 export type SerializableValueType = z.output<typeof serializedValueSchema>;
+export type RangeKeyType = z.output<typeof rangeKeySchema>;
