@@ -9,8 +9,20 @@ import type { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { AgentClient, AgentService } from '@kbn/fleet-plugin/server';
 
+/**
+ * `'reported'`: the endpoint's metadata was read, so `capabilities` is what it reports (possibly
+ * none). `'unavailable'`: it could not be read, so `capabilities` is empty because nothing is
+ * known, not because the endpoint reports none.
+ */
+export type CapabilitiesSource = 'reported' | 'unavailable';
+
 export type HostEnrollment =
-  | { enrolled: true; agentId: string; capabilities: string[] }
+  | {
+      enrolled: true;
+      agentId: string;
+      capabilities: string[];
+      capabilitiesSource: CapabilitiesSource;
+    }
   | { enrolled: false };
 
 /**
@@ -32,9 +44,17 @@ interface EndpointMetadataSource {
   Endpoint?: { capabilities?: unknown };
 }
 
+interface EndpointCapabilities {
+  capabilities: string[];
+  capabilitiesSource: CapabilitiesSource;
+}
+
+const UNAVAILABLE: EndpointCapabilities = { capabilities: [], capabilitiesSource: 'unavailable' };
+
 /**
  * Reads the endpoint's capability list from its metadata document. Conservative: a missing
- * index, document, or field, or any error, yields `[]` ("suspend only"), never a skipped host.
+ * index, document, or field yields `[]` marked `'reported'`, and a failed search yields `[]`
+ * marked `'unavailable'`. Neither skips the host; both mean "suspend only".
  */
 const readEndpointCapabilities = async ({
   esClient,
@@ -44,7 +64,7 @@ const readEndpointCapabilities = async ({
   esClient: ElasticsearchClient;
   agentId: string;
   logger?: Logger;
-}): Promise<string[]> => {
+}): Promise<EndpointCapabilities> => {
   try {
     const response = await esClient.search<EndpointMetadataSource>({
       index: ENDPOINT_METADATA_CURRENT_PATTERN,
@@ -75,10 +95,14 @@ const readEndpointCapabilities = async ({
       allow_no_indices: true,
     });
     const capabilities = response.hits.hits[0]?._source?.Endpoint?.capabilities;
-    return Array.isArray(capabilities) &&
-      capabilities.every((value): value is string => typeof value === 'string')
-      ? capabilities
-      : [];
+    return {
+      capabilities:
+        Array.isArray(capabilities) &&
+        capabilities.every((value): value is string => typeof value === 'string')
+          ? capabilities
+          : [],
+      capabilitiesSource: 'reported',
+    };
   } catch (error) {
     // Warn, not debug: a privilege failure here silently downgrades every response to
     // "suspend only", and nothing else would surface it.
@@ -87,13 +111,48 @@ const readEndpointCapabilities = async ({
         error instanceof Error ? error.message : String(error)
       }`
     );
-    return [];
+    return UNAVAILABLE;
+  }
+};
+
+/**
+ * Whether the calling identity can read the endpoint metadata. A search by an identity with no
+ * privilege on the pattern resolves to zero authorized indices and returns an empty, error-free
+ * result rather than a 403, so the search cannot tell "unreadable" from "no document". This probe
+ * can. A probe that cannot run is treated as readable, so it never makes the outcome worse than
+ * searching without it.
+ */
+const canReadEndpointMetadata = async (
+  esClient: ElasticsearchClient,
+  logger?: Logger
+): Promise<boolean> => {
+  if (!esClient.security?.hasPrivileges) {
+    return true;
+  }
+  try {
+    const { has_all_requested: hasAllRequested } = await esClient.security.hasPrivileges({
+      index: [{ names: [ENDPOINT_METADATA_CURRENT_PATTERN], privileges: ['read'] }],
+    });
+    if (!hasAllRequested) {
+      logger?.warn(
+        `resolveHostEnrollment: caller lacks read privilege on ${ENDPOINT_METADATA_CURRENT_PATTERN}; treating every host in this run as capabilities unknown`
+      );
+    }
+    return hasAllRequested;
+  } catch (error) {
+    logger?.debug(
+      `resolveHostEnrollment: privilege check for ${ENDPOINT_METADATA_CURRENT_PATTERN} failed; falling through to search — ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return true;
   }
 };
 
 /**
  * Resolves a host name to its enrolled Elastic Defend agent id via a space-scoped Fleet client,
- * plus the endpoint's reported capabilities when an ES client is available.
+ * plus the endpoint's reported capabilities when an ES client is available. Capabilities that
+ * cannot be read come back empty with `capabilitiesSource: 'unavailable'`.
  *
  * Both Fleet name fields are matched: the caller collects entities from either `host.name` or
  * `host.hostname`, and the two routinely differ on one machine. `showInactive: false` matches
@@ -113,6 +172,16 @@ export const makeResolveHostEnrollment = (
   if (!agentClient) {
     return async () => ({ enrolled: false });
   }
+  // Probed on the first enrolled host and shared by every lookup this resolver makes, so one
+  // packaging run costs one privilege check.
+  let canRead: Promise<boolean> | undefined;
+  const readCapabilities = async (agentId: string): Promise<EndpointCapabilities> => {
+    if (!esClient) {
+      return UNAVAILABLE;
+    }
+    canRead ??= canReadEndpointMetadata(esClient, logger);
+    return (await canRead) ? readEndpointCapabilities({ esClient, agentId, logger }) : UNAVAILABLE;
+  };
   return async (hostName) => {
     const escaped = escapeKuery(hostName);
     let agent: { id: string } | undefined;
@@ -147,10 +216,8 @@ export const makeResolveHostEnrollment = (
     if (!agent) {
       return { enrolled: false };
     }
-    const capabilities = esClient
-      ? await readEndpointCapabilities({ esClient, agentId: agent.id, logger })
-      : [];
-    return { enrolled: true, agentId: agent.id, capabilities };
+    const { capabilities, capabilitiesSource } = await readCapabilities(agent.id);
+    return { enrolled: true, agentId: agent.id, capabilities, capabilitiesSource };
   };
 };
 
@@ -160,7 +227,9 @@ export const makeResolveHostEnrollment = (
  *
  * The service is read through a getter because step definitions register during `setup` but
  * run after `start`. The ES client is passed per call: it must be the step's own scoped client so
- * the calling user's privileges apply to the endpoint metadata read, not the internal user's. Without a space there is no correct lookup to make, so every
+ * the calling user's privileges apply to the endpoint metadata read, not the internal user's. A
+ * privilege self-check on that read is what makes a gap visible, because the search itself comes
+ * back empty rather than denied. Without a space there is no correct lookup to make, so every
  * host reports unenrolled -- a recommendation instead of an action, rather than acting on
  * whichever space's host matched first.
  */

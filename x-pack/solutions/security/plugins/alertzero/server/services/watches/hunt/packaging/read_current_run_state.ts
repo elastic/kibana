@@ -259,9 +259,10 @@ export const readCurrentRunState = async ({
         enrolled: true,
         agentId: enrollment.agentId,
         capabilities: enrollment.capabilities,
+        capabilitiesSource: enrollment.capabilitiesSource,
       });
     } else {
-      hosts.push({ name, enrolled: false, capabilities: [] });
+      hosts.push({ name, enrolled: false, capabilities: [], capabilitiesSource: 'reported' });
     }
   }
 
