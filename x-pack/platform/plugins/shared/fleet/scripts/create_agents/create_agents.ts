@@ -98,7 +98,7 @@ function setAgentStatus(agent: any, status: AgentStatus) {
       agent.last_checkin = null;
       break;
     case 'offline':
-      agent.last_checkin = new Date(new Date().getTime() - 1000 * 60 * 5).toISOString();
+      agent.last_checkin = new Date(new Date().getTime() - 1000 * 60 * 6).toISOString();
       // half the time make the previous status error
       if (Math.random() > 0.5) {
         agent.last_checkin_status = 'ERROR';
