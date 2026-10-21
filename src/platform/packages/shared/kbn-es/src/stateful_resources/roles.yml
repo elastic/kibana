@@ -119,46 +119,6 @@ admin:
       resources: ['*']
   run_as: ['*']
 
-# Roles of the Nightshift service accounts (kibana/nightshift_agent, kibana/nightshift_automations).
-# Nightshift ships on Serverless, where elasticsearch-controller defines them as _nightshift_agent and
-# _nightshift_automations (mirrored in serverless_resources/project_roles/oblt/roles.yml). Stateful
-# Elasticsearch has no such roles, so they are defined here for local development and stateful CI.
-# Keep the grants in sync with the Serverless roles.
-nightshift_agent:
-  cluster: ['monitor_inference']
-  indices:
-    - names: ['logs-*', 'metrics-*', 'traces-*', 'apm-*']
-      privileges: ['read', 'view_index_metadata']
-      allow_restricted_indices: false
-    - names:
-        - 'ai-index-idx-nightshift-cortex'
-        - 'ai-index-idx-nightshift-semantic-memory'
-        - 'ai-index-idx-nightshift-decision-trees'
-      privileges: ['read', 'view_index_metadata', 'write', 'auto_configure']
-      allow_restricted_indices: false
-  applications:
-    - application: 'kibana-.kibana'
-      privileges:
-        - 'feature_nightshift.minimal_all'
-        - 'feature_agentBuilder.minimal_all'
-        - 'feature_actions.read'
-        - 'feature_workflowsManagement.read'
-      resources: ['*']
-  run_as: []
-
-nightshift_automations:
-  cluster: ['monitor_inference']
-  applications:
-    - application: 'kibana-.kibana'
-      privileges:
-        - 'feature_nightshift.read'
-        - 'feature_agenticInvestigations.minimal_read'
-        - 'feature_agenticInvestigations.investigations_all'
-        - 'feature_agentBuilder.minimal_all'
-        - 'feature_actions.read'
-      resources: ['*']
-  run_as: []
-
 # temporarily added for testing purpose
 system_indices_superuser:
   cluster: ['all']

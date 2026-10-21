@@ -28,10 +28,9 @@ export const getNightshiftServiceAccountId = (kind: NightshiftServiceAccountKind
 
 /**
  * The role an account holds. Nightshift never creates or changes these roles. On Serverless they
- * are elasticsearch-controller predefined roles, whose names must start with `_`. Stateful
- * Elasticsearch has no such roles; for local development and stateful CI, `@kbn/es` defines them,
- * named like the account, in its stateful `roles.yml`. The roles cover every space; the per-space
- * bound workflows decide where an account acts.
+ * are elasticsearch-controller predefined roles, whose names must start with `_`. On stateful they
+ * are named like the account and created by whoever sets up the deployment (see the README). The
+ * roles cover every space; the per-space bound workflows decide where an account acts.
  */
 export const getNightshiftRoleName = (
   kind: NightshiftServiceAccountKind,
