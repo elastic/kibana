@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
-
-export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Management', () => {});
-}
+export { ProductTour } from './product_tour';
+export { ProductTourBanner } from './product_tour_banner';
+export { useProductTour } from './use_product_tour';
+export { SIGNAL_CARDS_TOUR_ANCHOR_TEST_ID, ROWS_MODE_SELECTOR_TEST_ID } from './constants';
