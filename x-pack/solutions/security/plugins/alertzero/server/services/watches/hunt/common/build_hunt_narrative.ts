@@ -98,6 +98,8 @@ const describeTier2Skip = (
       return 'Tier 2 behavior hunting was skipped because the report exposed nothing to search for.';
     case 'tier2_failed':
       return 'Tier 2 behavior hunting failed before it could finish.';
+    case 'extraction_pending':
+      return 'Tier 2 behavior hunting was skipped because the report has not been enriched yet.';
     case 'report_not_found':
     case 'scope_blocked':
       return '';
@@ -275,7 +277,11 @@ const describeSearch = (result: HuntCoordinatorCoreResult): string[] => {
  */
 const describeCoverage = (result: HuntCoordinatorCoreResult): string[] => {
   if (result.completeness === 'complete') return [];
-  const gaps = [...(result.tier1.incomplete ?? []), ...(result.tier2?.incomplete ?? [])];
+  const gaps = [
+    ...(result.incomplete ?? []),
+    ...(result.tier1.incomplete ?? []),
+    ...(result.tier2?.incomplete ?? []),
+  ];
   const seen = new Set<string>();
   const lines: string[] = [
     result.completeness === 'incomplete_retryable'
@@ -313,6 +319,12 @@ const describeOutcome = (
     return {
       heading: 'Hunt Watch could not hunt this report',
       summary: `Hunt Watch could not hunt ${report}: the report is not visible in this space, so nothing was searched.`,
+    };
+  }
+  if (result.tier2_skipped_reason === 'extraction_pending') {
+    return {
+      heading: 'Hunt Watch did not hunt this report yet',
+      summary: `Hunt Watch did not hunt ${report}: the report has not been enriched yet, so nothing was searched. It is not marked as hunted, so a later sweep can pick it up once enrichment finishes.`,
     };
   }
   if (!result.completed_successfully && !result.has_confirmed_hit) {
@@ -367,6 +379,9 @@ export const buildHuntHeadline = (result: HuntCoordinatorCoreResult): string => 
   if (result.tier2_skipped_reason === 'report_not_found') {
     return 'hunt failed, the report is not visible in this space';
   }
+  if (result.tier2_skipped_reason === 'extraction_pending') {
+    return 'hunt skipped, the report has not been enriched yet';
+  }
   const { tier1, tier2 } = result;
   const tier1Part =
     tier1.status === 'no_searchable_terms'
@@ -406,7 +421,9 @@ export const buildHuntNarrative = (
   const { heading, summary } = describeOutcome(result, ctx);
   const blocks: string[] = [`### ${heading}`, summary];
   const terminal =
-    result.status === 'blocked' || result.tier2_skipped_reason === 'report_not_found';
+    result.status === 'blocked' ||
+    result.tier2_skipped_reason === 'report_not_found' ||
+    result.tier2_skipped_reason === 'extraction_pending';
   if (!terminal) {
     blocks.push(describeCoverage(result).join('\n'));
     blocks.push(describeSearch(result).join('\n'));

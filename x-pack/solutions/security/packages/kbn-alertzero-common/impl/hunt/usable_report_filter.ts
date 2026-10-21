@@ -17,6 +17,9 @@ import type { estypes } from '@elastic/elasticsearch';
  * `workflow_v4`, `kev`, `text_indicator_list`, `seeded` and any future adapter
  * value count; a missing `extraction_method` does not.
  *
+ * Consumers: the threat intel find route, the readiness route, and the AlertZero
+ * hunt candidate selector.
+ *
  * Indicator-eligible: at least one nested IOC. Find and readiness AND it with
  * hunt-usable; promote keeps its own IOC-only filter. KEV reports are hunt-usable
  * but not indicator-eligible.

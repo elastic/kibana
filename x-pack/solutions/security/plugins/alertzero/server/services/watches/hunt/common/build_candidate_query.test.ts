@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import { HUNT_USABLE_FILTER } from '@kbn/alertzero-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { SearchResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { buildCandidateQuery } from './build_candidate_query';
 import { buildHuntInvestigationConversationId } from './hunt_investigation_id';
+import { buildHuntSpaceFilterTerms } from './space_filter';
+import { HUNT_REPORTS_INDEX } from '../../../../../common/constants';
 
 const logger = loggingSystemMock.createLogger();
 
@@ -553,6 +556,139 @@ describe('buildCandidateQuery', () => {
       expect(result.ids).toEqual(['rpt-free']);
       expect(result.skipped).toEqual([{ id: 'rpt-open', reason: 'open_proposal' }]);
       expect(result.truncated).toBe(false);
+    });
+  });
+
+  describe('the hunt-usable bar', () => {
+    /** First search answers with `usable`, the ids-only lookup with `existing`. */
+    const serveNamed = (usable: string[], existing: string[]) => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search
+        .mockResolvedValueOnce(searchResponseOf(usable))
+        .mockResolvedValueOnce(searchResponseOf(existing));
+      return esClient;
+    };
+
+    it('applies to the scheduled request', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf([]));
+      await buildCandidateQuery(esClient, logger, { trigger: 'scheduled', spaceId: 'default' });
+      expect(searchBodyOf(esClient).query.bool.filter).toContain(HUNT_USABLE_FILTER);
+    });
+
+    it('applies to the manual request alongside the ids clause', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf(['rpt-1']));
+      await buildCandidateQuery(esClient, logger, {
+        trigger: 'manual',
+        report_ids: ['rpt-1'],
+        spaceId: 'default',
+      });
+      const { filter } = searchBodyOf(esClient).query.bool;
+      expect(filter).toContain(HUNT_USABLE_FILTER);
+      expect(filter).toContainEqual({ ids: { values: ['rpt-1'] } });
+    });
+
+    it('skips a named report that exists but is filtered out as not_usable', async () => {
+      const esClient = serveNamed(['rpt-ok'], ['rpt-pending']);
+      const result = await buildCandidateQuery(esClient, logger, {
+        trigger: 'manual',
+        report_ids: ['rpt-ok', 'rpt-pending'],
+        spaceId: 'default',
+      });
+      expect(result.ids).toEqual(['rpt-ok']);
+      expect(result.skipped).toEqual([{ id: 'rpt-pending', reason: 'not_usable' }]);
+    });
+
+    it('looks up only the missing ids, in the same space, without source or totals', async () => {
+      const esClient = serveNamed(['rpt-ok'], ['rpt-pending']);
+      await buildCandidateQuery(esClient, logger, {
+        trigger: 'manual',
+        report_ids: ['rpt-ok', 'rpt-pending'],
+        spaceId: 'default',
+      });
+      expect(searchBodyOf(esClient, 1)).toEqual({
+        index: HUNT_REPORTS_INDEX,
+        size: 1,
+        ignore_unavailable: false,
+        track_total_hits: false,
+        _source: false,
+        query: {
+          bool: {
+            filter: [buildHuntSpaceFilterTerms('default'), { ids: { values: ['rpt-pending'] } }],
+          },
+        },
+      });
+    });
+
+    it('keeps a named id that neither search returns as not_found', async () => {
+      const esClient = serveNamed([], []);
+      const result = await buildCandidateQuery(esClient, logger, {
+        trigger: 'manual',
+        report_ids: ['rpt-ghost'],
+        spaceId: 'default',
+      });
+      expect(result.skipped).toEqual([{ id: 'rpt-ghost', reason: 'not_found' }]);
+    });
+
+    it('issues no second search when every named id came back', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search.mockResolvedValue(searchResponseOf(['rpt-1', 'rpt-2']));
+      await buildCandidateQuery(esClient, logger, {
+        trigger: 'manual',
+        report_ids: ['rpt-1', 'rpt-2'],
+        spaceId: 'default',
+      });
+      expect(esClient.search).toHaveBeenCalledTimes(1);
+    });
+
+    it('fails closed when the lookup throws', async () => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search
+        .mockResolvedValueOnce(searchResponseOf([]))
+        .mockRejectedValueOnce(new Error('lookup boom'));
+      await expect(
+        buildCandidateQuery(esClient, logger, {
+          trigger: 'manual',
+          report_ids: ['rpt-1'],
+          spaceId: 'default',
+        })
+      ).rejects.toThrow('lookup boom');
+    });
+
+    it.each([
+      ['timed out', { timed_out: true }, 'named report lookup timed out'],
+      [
+        'lost a shard',
+        { _shards: { total: 3, successful: 2, skipped: 0, failed: 1 } },
+        'shards failed on the named report lookup',
+      ],
+    ])('fails closed when the lookup %s', async (_label, partial, message) => {
+      const esClient = elasticsearchServiceMock.createElasticsearchClient();
+      esClient.search
+        .mockResolvedValueOnce(searchResponseOf([]))
+        .mockResolvedValueOnce({ ...searchResponseOf(['rpt-1']), ...partial });
+      await expect(
+        buildCandidateQuery(esClient, logger, {
+          trigger: 'manual',
+          report_ids: ['rpt-1'],
+          spaceId: 'default',
+        })
+      ).rejects.toThrow(message);
+    });
+
+    it('reports a named report that is unusable and has an open proposal as not_usable only', async () => {
+      const esClient = serveNamed([], ['rpt-both']);
+      const result = await buildCandidateQuery(
+        esClient,
+        logger,
+        { trigger: 'manual', report_ids: ['rpt-both'], spaceId: 'default' },
+        async () =>
+          new Set([
+            buildHuntInvestigationConversationId({ spaceId: 'default', reportId: 'rpt-both' }),
+          ])
+      );
+      expect(result.skipped).toEqual([{ id: 'rpt-both', reason: 'not_usable' }]);
     });
   });
 });
