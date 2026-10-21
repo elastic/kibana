@@ -131,9 +131,9 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
       );
     });
 
-    it('should be able to adjust snooze settings', () => {
+    it('should be able to set and remove snooze from the "More" menu', () => {
       snoozeRuleOnDetailsPage('3 days');
-      expectRuleSnoozedOnDetailsPage();
+      expectRuleSnoozedOnDetailsPage('3 days');
       unsnoozeRuleOnDetailsPage();
       expectUnsnoozeSuccessToast();
     });
@@ -175,7 +175,7 @@ describe('Rules table - privileges', { tags: ['@ess'] }, () => {
       cy.get(ADD_EXCEPTIONS_BTN_FROM_EMPTY_PROMPT_BTN).should('not.exist');
     });
 
-    it('should not be able to adjust snooze settings', () => {
+    it('should not be able to set snooze from the "More" menu', () => {
       expectSnoozeDisabledOnDetailsPage();
     });
   });

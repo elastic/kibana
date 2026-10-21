@@ -69,7 +69,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
     // Open rule detail page
     cy.get(RULE_NAME).contains('Test on all pages').click();
 
-    expectRuleSnoozedOnDetailsPage();
+    expectRuleSnoozedOnDetailsPage('1 hours');
 
     // Open rule editing page actions tab
     goToRuleEditSettings();
@@ -229,7 +229,7 @@ describe('rule snoozing', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'
         visitRuleDetailsPage(rule.id);
       });
 
-      expectSnoozeDisabledOnDetailsPage();
+      expectSnoozeDisabledOnDetailsPage('Unable to fetch snooze settings');
     });
 
     it('shows an error if unable to save snooze settings', () => {

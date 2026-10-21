@@ -7,6 +7,7 @@
 
 import moment from 'moment';
 import { RULE_NAME, TOASTER } from '../screens/alerts_detection_rules';
+import { TOOLTIP } from '../screens/common';
 import {
   RULE_DETAILS_SET_SNOOZE_BUTTON,
   RULE_DETAILS_SNOOZED_BADGE,
@@ -106,17 +107,21 @@ export function unsnoozeRuleOnDetailsPage(): void {
   expectRuleUnsnoozedOnDetailsPage();
 }
 
-export function expectRuleSnoozedOnDetailsPage(): void {
-  cy.get(RULE_DETAILS_SNOOZED_BADGE).should('exist');
+export function expectRuleSnoozedOnDetailsPage(duration: SnoozeDuration): void {
+  cy.get(RULE_DETAILS_SNOOZED_BADGE).contains(expectedSnoozeBadgeText(duration));
 }
 
 export function expectRuleUnsnoozedOnDetailsPage(): void {
   cy.get(RULE_DETAILS_SNOOZED_BADGE).should('not.exist');
 }
 
-export function expectSnoozeDisabledOnDetailsPage(): void {
+export function expectSnoozeDisabledOnDetailsPage(tooltip?: string): void {
   openAppMenuOverflow();
   cy.get(RULE_DETAILS_SET_SNOOZE_BUTTON).should('be.disabled');
+  if (tooltip) {
+    cy.get(RULE_DETAILS_SET_SNOOZE_BUTTON).trigger('mouseover', { force: true }); // Have to force because button element is disabled
+    cy.get(TOOLTIP).contains(tooltip);
+  }
 }
 
 export function findRuleRowInTable(
