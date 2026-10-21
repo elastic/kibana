@@ -42,6 +42,27 @@ const LEGACY_MARKDOWN = {
   notApplied: { openLinksInNewTab: 'a printed link opens nowhere' } as Record<string, string>,
 };
 
+const MAP_STYLE = {
+  applied: [
+    'fillColor',
+    'lineColor',
+    'lineWidth',
+    'iconSize',
+    'labelText',
+    'labelColor',
+    'labelSize',
+    'labelPosition',
+    'labelZoomRange',
+    'symbolizeAs',
+  ],
+  notApplied: {
+    icon: 'markers draw as circles; an icon is named in the outcome’s notes',
+    iconOrientation: 'circles have no orientation',
+    labelBorderColor: 'label halos are not drawn, and the outcome says so',
+    labelBorderSize: 'label halos are not drawn, and the outcome says so',
+  } as Record<string, string>,
+};
+
 /** Every Lens state in the corpus: saved Lens objects, and Lens panels held by value on dashboards. */
 const lensStates = (): Array<{ visualizationType?: string; state?: Record<string, unknown> }> => [
   ...corpusObjects(['lens'], 'visualizationType').map(({ attributes }) => attributes),
@@ -99,5 +120,23 @@ describe('saved settings the lowering meets', () => {
     }
     expect(params.length).toBeGreaterThan(0);
     expect(unknownKeys(params, LEGACY_MARKDOWN)).toEqual([]);
+  });
+
+  it('applies or names every Maps vector style property', () => {
+    const properties: string[] = [];
+    for (const { attributes } of corpusObjects(['map'], 'layerListJSON')) {
+      try {
+        for (const layer of JSON.parse(String(attributes.layerListJSON)) as Array<{
+          style?: { type?: string; properties?: Record<string, unknown> };
+        }>) {
+          if (layer.style?.type === 'VECTOR')
+            properties.push(...Object.keys(layer.style.properties ?? {}));
+        }
+      } catch {
+        // A corpus map whose layer list doesn't parse has no styles to check.
+      }
+    }
+    expect(properties.length).toBeGreaterThan(0);
+    expect(unknownKeys(properties, MAP_STYLE)).toEqual([]);
   });
 });

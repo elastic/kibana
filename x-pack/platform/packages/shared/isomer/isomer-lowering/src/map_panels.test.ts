@@ -257,6 +257,44 @@ describe('lowerMap', () => {
     expect(await labelOf('doc_count')).toBe('3');
   });
 
+  it('paints a layer’s outline, icon size and labels as its vector style sets them', async () => {
+    const { node, notes } = await lowerMap(
+      options(
+        mapOf([
+          {
+            id: 'd',
+            label: 'Docs',
+            type: 'GEOJSON_VECTOR',
+            sourceDescriptor: { type: 'ES_SEARCH', geoField: 'loc', indexPatternRefName: 'dv' },
+            style: {
+              properties: {
+                lineColor: { type: 'STATIC', options: { color: '#3d3d3d' } },
+                lineWidth: { type: 'STATIC', options: { size: 2 } },
+                iconSize: { type: 'STATIC', options: { size: 9 } },
+                labelText: { type: 'STATIC', options: { value: 'Origin' } },
+                labelColor: { type: 'STATIC', options: { color: '#000000' } },
+                labelSize: { type: 'STATIC', options: { size: 14 } },
+                symbolizeAs: { options: { value: 'icon' } },
+                icon: { type: 'STATIC', options: { value: 'airport' } },
+              },
+            },
+          },
+        ])
+      )
+    );
+    expect(node?.layers?.[0]).toMatchObject({
+      kind: 'markers',
+      lineColor: '#3d3d3d',
+      lineWidth: 2,
+      markerSize: { min: 9, max: 9 },
+      labelColor: '#000000',
+      labelSize: 14,
+      markerLabels: 'inside',
+      markers: [{ label: 'Origin' }],
+    });
+    expect(notes).toEqual(['Docs (GEOJSON_VECTOR/ES_SEARCH): the airport icon draws as a circle']);
+  });
+
   it('refuses a layer it can’t draw by name, and the whole map with it', async () => {
     const lowered = await lowerMap(
       options(

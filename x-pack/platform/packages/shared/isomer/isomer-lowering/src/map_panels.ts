@@ -396,9 +396,12 @@ export const lowerMap = async ({
         default:
           throw new Refusal(`${label}: no lowering for a ${source.type ?? 'missing'} source`);
       }
-      // Kibana paints a vector layer at its `alpha` (`Layer.getAlpha`, default 1).
+      // Kibana paints a vector layer at its `alpha` (`Layer.getAlpha`, default 1), with its style's line and labels.
       const opacity = typeof layer.alpha === 'number' ? layer.alpha : 1;
-      for (const added of out.layers.slice(before)) added.opacity = opacity;
+      for (const added of out.layers.slice(before)) {
+        added.opacity = opacity;
+        applyStyle(added, props, label);
+      }
     } catch (error) {
       if (error instanceof Refusal) {
         out.refused.push(error.message);
@@ -873,6 +876,68 @@ export const lowerMap = async ({
       ...(color ? { color } : {}),
     });
     out.drawn.push(`${label}: ${markers.length} ${what}`);
+  }
+
+  // A vector style's line, icon and label properties (`VectorStyle`), as far as a static map draws them.
+  function applyStyle(added: MapLayer, style: Json, label: string) {
+    const note = (text: string) => out.notes.push(`${label}: ${text}`);
+    const lineColor = staticColor(style.lineColor);
+    if (lineColor) added.lineColor = lineColor;
+    else if (style.lineColor?.type === 'DYNAMIC')
+      note('a line colored by value draws in the default outline');
+    if (style.lineWidth?.type === 'STATIC' && typeof style.lineWidth.options?.size === 'number') {
+      added.lineWidth = style.lineWidth.options.size;
+    } else if (style.lineWidth?.type === 'DYNAMIC' && added.kind !== 'arcs') {
+      note('a line width by value draws at the default width');
+    }
+    if (added.kind !== 'markers') return;
+    if (style.symbolizeAs?.options?.value === 'icon') {
+      note(`the ${style.icon?.options?.value ?? 'marker'} icon draws as a circle`);
+    }
+    if (
+      style.iconSize?.type === 'STATIC' &&
+      typeof style.iconSize.options?.size === 'number' &&
+      !added.markerSize
+    ) {
+      const radius = style.iconSize.options.size as number;
+      added.markerSize = { min: radius, max: radius };
+    }
+    const labelColor = staticColor(style.labelColor);
+    if (labelColor) added.labelColor = labelColor;
+    if (style.labelSize?.type === 'STATIC' && typeof style.labelSize.options?.size === 'number') {
+      added.labelSize = style.labelSize.options.size;
+    } else if (style.labelSize?.type === 'DYNAMIC') {
+      note('a label size by value draws at the default size');
+    }
+    const staticText =
+      style.labelText?.type === 'STATIC' ? String(style.labelText.options?.value ?? '') : '';
+    if (staticText) {
+      added.markers = added.markers.map((marker) => ({
+        ...marker,
+        label: staticText.slice(0, 80),
+      }));
+    }
+    const position = style.labelPosition?.options?.position;
+    if (position === 'TOP' || position === 'BOTTOM') {
+      note(`labels ${position.toLowerCase()} of markers draw beside them`);
+      delete added.markerLabels;
+    } else if (staticText || style.labelText?.type === 'DYNAMIC') {
+      added.markerLabels = 'inside';
+    }
+    if (style.labelBorderSize?.options?.size && style.labelBorderSize.options.size !== 'NONE') {
+      const hasLabels = added.markers.some((marker) => marker.label);
+      if (hasLabels) note('label halos are not drawn');
+    }
+    // `labelZoomRange`: labels show between its zooms, or the layer's.
+    const range = style.labelZoomRange?.options;
+    if (
+      range &&
+      range.useLayerZoomRange === false &&
+      (view.zoom < range.minZoom || view.zoom > range.maxZoom)
+    ) {
+      added.markers = added.markers.map(({ label: _label, ...marker }) => marker);
+      delete added.markerLabels;
+    }
   }
 
   function heatmapRamp(label: string, name: string | undefined): MapRamp {
