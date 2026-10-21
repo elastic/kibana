@@ -25,8 +25,8 @@ api-docs: ## Generate Serverless and ESS Kibana OpenAPI bundles (slim for Bump.s
 space-aware-api-docs: ## Add special space aware description entries
 	@node scripts/promote_space_awareness.js oas_docs/output/kibana.yaml
 	@node scripts/promote_space_awareness.js oas_docs/output/kibana.serverless.yaml
-	@node scripts/promote_space_awareness.js oas_docs/output/kibana-full.yaml --full
-	@node scripts/promote_space_awareness.js oas_docs/output/kibana-full.serverless.yaml --full
+	@node scripts/promote_space_awareness.js oas_docs/output/kibana_full.yaml --full
+	@node scripts/promote_space_awareness.js oas_docs/output/kibana_full.serverless.yaml --full
 
 .PHONY: merge-api-docs
 merge-api-docs: ## Merge Serverless and ESS Kibana OpenAPI bundles with kbn-openapi-bundler
@@ -54,7 +54,7 @@ api-docs-lint-serverless: ## Run redocly API docs linter on kibana.serverless.ya
 	@redocly lint "output/kibana.serverless.yaml" --config "linters/redocly.yaml" --format stylish --max-problems 500
 
 .PHONY: api-docs-overlay
-api-docs-overlay: ## Apply all overlays; kibana-full*.yaml skips bump-slim (full Dashboards & Visualizations), kibana*.yaml includes it
+api-docs-overlay: ## Apply all overlays; kibana_full*.yaml skips bump-slim (full Dashboards & Visualizations), kibana*.yaml includes it
 	@bump overlay "output/kibana.serverless.yaml" "overlays/kibana.overlays.serverless.yaml" > "output/kibana.serverless.tmp1.yaml"
 	@bump overlay "output/kibana.serverless.tmp1.yaml" "overlays/alerting.overlays.yaml" > "output/kibana.serverless.tmp2.yaml"
 	@bump overlay "output/kibana.serverless.tmp2.yaml" "overlays/connectors.overlays.yaml" > "output/kibana.serverless.tmp3.yaml"
@@ -75,8 +75,8 @@ api-docs-overlay: ## Apply all overlays; kibana-full*.yaml skips bump-slim (full
 	@bump overlay "output/kibana.tmp8.yaml" "overlays/kibana.overlays.bump_slim.yaml" > "output/kibana.tmp9.yaml"
 	@# Bump.sh needs the external link in the Discover sessions overlay. docs-builder needs a relative operation link.
 	@perl -pi -e 's|https://elastic\.github\.io/dashboards-api-spec/dashboards#tag/Dashboards/operation/create-dashboard|../operation/operation-create-dashboard|g' output/kibana.tmp8.yaml output/kibana.serverless.tmp8.yaml
-	@redocly bundle output/kibana.serverless.tmp8.yaml --ext yaml -o output/kibana-full.serverless.yaml
-	@redocly bundle output/kibana.tmp8.yaml --ext yaml -o output/kibana-full.yaml
+	@redocly bundle output/kibana.serverless.tmp8.yaml --ext yaml -o output/kibana_full.serverless.yaml
+	@redocly bundle output/kibana.tmp8.yaml --ext yaml -o output/kibana_full.yaml
 	@redocly bundle output/kibana.serverless.tmp9.yaml --ext yaml -o output/kibana.serverless.yaml
 	@redocly bundle output/kibana.tmp9.yaml --ext yaml -o output/kibana.yaml
 	rm -f output/kibana.tmp*.yaml
