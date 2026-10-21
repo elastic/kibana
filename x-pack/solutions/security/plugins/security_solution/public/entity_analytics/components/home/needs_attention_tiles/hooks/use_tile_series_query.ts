@@ -11,6 +11,7 @@ import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
+import { retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
 
 interface TileSeriesQueryOptions<T> {
   /** Identifies the tile in the query cache. */
@@ -43,14 +44,16 @@ export const useTileSeriesQuery = <T>({
     [tileKey, query],
     async ({ signal }) => {
       if (!query) return undefined;
-      const result = await lastValueFrom(
-        data.search.search(
-          { params: { query } },
-          {
-            abortSignal: signal,
-            strategy: 'esql_async',
-            ...(localOnly ? { projectRouting: '_alias:_origin' } : {}),
-          }
+      const result = await runWithTileTimeout(signal, (tileSignal) =>
+        lastValueFrom(
+          data.search.search(
+            { params: { query } },
+            {
+              abortSignal: tileSignal,
+              strategy: 'esql_async',
+              ...(localOnly ? { projectRouting: '_alias:_origin' } : {}),
+            }
+          )
         )
       );
       return parse(result.rawResponse as unknown as ESQLSearchResponse);
@@ -60,7 +63,7 @@ export const useTileSeriesQuery = <T>({
       keepPreviousData: true,
       ...TILE_QUERY_CACHE_OPTIONS,
       refetchOnWindowFocus: false,
-      retry: 1,
+      retry: retryUnlessTimedOut,
     }
   );
 

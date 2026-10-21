@@ -69,6 +69,7 @@ export class AgentBuilderPlatformPlugin
       coreSetup,
       setupDeps,
       binaryConverters,
+      logger: this.logger,
     });
     registerBinarySupportedTypesRoute({
       router: coreSetup.http.createRouter(),

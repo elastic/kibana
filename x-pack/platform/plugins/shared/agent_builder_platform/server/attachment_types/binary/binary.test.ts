@@ -287,7 +287,7 @@ describe('binary attachment type', () => {
               signal.addEventListener('abort', () => reject(new Error('aborted')), {
                 once: true,
               });
-              aborted$.complete();
+              aborted$.next();
             })
         );
         return { abortedRequest };
@@ -301,6 +301,24 @@ describe('binary attachment type', () => {
           createDefinition(plugin).resolve!('file-abc', createResolveContext(abortedRequest))
         ).rejects.toThrow('aborted');
         expect(deleteFile).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when the request ends normally', () => {
+      it('does not abort the conversion', async () => {
+        const completed$ = new Subject<void>();
+        const completedRequest = { events: { aborted$: completed$ } } as unknown as KibanaRequest;
+        let conversionSignal: AbortSignal | undefined;
+        pdfConverter.toText.mockImplementation(async ({ signal }) => {
+          conversionSignal = signal;
+          completed$.complete();
+          return '# Invoice';
+        });
+        const { plugin } = createFilesPluginStub();
+
+        await createDefinition(plugin).resolve!('file-abc', createResolveContext(completedRequest));
+
+        expect(conversionSignal?.aborted).toBe(false);
       });
     });
   });

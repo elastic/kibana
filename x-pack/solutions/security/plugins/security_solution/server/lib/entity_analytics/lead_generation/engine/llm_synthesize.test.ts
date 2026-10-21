@@ -277,7 +277,7 @@ describe('llmSynthesizeBatch', () => {
         title: 'Threat',
         byline: 'Byline',
         description: 'Description',
-        tags: ['Credential Access', 'T1078', 'Brute Force', 'T1110.003'],
+        tags: ['Credential Access', 'T1078', 'Brute Force', 'T1110.003', 'AML.T0044'],
         recommendations: ['rec'],
       },
     ];
@@ -287,6 +287,7 @@ describe('llmSynthesizeBatch', () => {
     expect(results[0].tags).toEqual(['Credential Access', 'Brute Force']);
     expect(results[0].tags).not.toContain('T1078');
     expect(results[0].tags).not.toContain('T1110.003');
+    expect(results[0].tags).not.toContain('AML.T0044');
   });
 
   it('caps tags at 6 and recommendations at 5', async () => {
