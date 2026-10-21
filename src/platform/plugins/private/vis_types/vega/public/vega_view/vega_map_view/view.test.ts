@@ -129,7 +129,9 @@ describe('vega_map_view/view', () => {
       await vegaParser.parseAsync();
       return new VegaMapView({
         serviceSettings: await mockGetServiceSettings(),
-        vegaParser,
+        descriptor: vegaParser.toRenderDescriptor(),
+        onError: jest.fn(),
+        onViewCreated: jest.fn(),
         filterManager: dataPluginStart.query.filterManager,
         timefilter: dataPluginStart.query.timefilter.timefilter,
         fireEvent: (event: any) => {},
@@ -171,7 +173,7 @@ describe('vega_map_view/view', () => {
       const vegaMapView = await createVegaMapView();
       await vegaMapView.init();
 
-      const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
+      const { longitude, latitude, scrollWheelZoom } = vegaMapView._descriptor.mapConfig ?? {};
       expect(maplibregl.Map).toHaveBeenCalledWith({
         attributionControl: {
           customAttribution: 'tilemap-attribution',
@@ -197,7 +199,7 @@ describe('vega_map_view/view', () => {
       const vegaMapView = await createVegaMapView();
       await vegaMapView.init();
 
-      const { longitude, latitude, scrollWheelZoom } = vegaMapView._parser.mapConfig;
+      const { longitude, latitude, scrollWheelZoom } = vegaMapView._descriptor.mapConfig ?? {};
       expect(maplibregl.Map).toHaveBeenCalledWith({
         attributionControl: {
           customAttribution: ['<a rel="noreferrer noopener" href="tms_attributions"></a>'],

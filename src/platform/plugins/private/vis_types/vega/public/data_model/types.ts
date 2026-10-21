@@ -238,6 +238,31 @@ export interface VegaConfig extends DstObj {
   controlsDirection?: ControlsDirection;
 }
 
+/**
+ * Everything a Vega view needs to render a parsed spec. Holds only structured-cloneable data, so it
+ * can cross a frame boundary; spec parsing and data resolution have already happened.
+ */
+export interface VegaRenderDescriptor {
+  readonly spec: VegaSpec;
+  readonly vlspec?: VegaSpec;
+  readonly isVegaLite?: boolean;
+  readonly useMap?: boolean;
+  readonly useResize?: boolean;
+  readonly useHover?: boolean;
+  readonly renderer?: string;
+  readonly tooltips?: boolean | TooltipConfig;
+  readonly mapConfig?: VegaConfig;
+  readonly containerDir?: ControlsLocation | ControlsDirection;
+  readonly controlsDir?: ControlsLocation;
+  readonly hideWarnings: boolean;
+  readonly restoreSignalValuesOnRefresh: boolean;
+  readonly warnings: readonly string[];
+  readonly error?: string;
+  readonly approximationApplied?: boolean;
+  /** Data URLs Kibana resolved on the spec's behalf (EMS files) that skip the external URL check. */
+  readonly trustedDataUrls: readonly string[];
+}
+
 export interface UrlParserConfig {
   [index: string]: any;
   elasticsearch: EsQueryParser;

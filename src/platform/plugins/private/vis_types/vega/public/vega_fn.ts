@@ -18,7 +18,7 @@ import type { TimeRange, Query } from '@kbn/es-query';
 import type { KibanaContext } from '@kbn/data-plugin/public';
 import type { VegaVisualizationDependencies } from './plugin';
 import type { VegaInspectorAdapters } from './vega_inspector';
-import type { VegaParser } from './data_model/vega_parser';
+import type { VegaRenderDescriptor } from './data_model/types';
 
 type Input = KibanaContext | { type: 'null' };
 type Output = Promise<Render<RenderValue>>;
@@ -30,7 +30,12 @@ interface Arguments {
 export type VisParams = Required<Arguments>;
 
 export interface RenderValue {
-  visData: VegaParser;
+  visData: VegaRenderDescriptor;
+  /**
+   * The expression's inspector adapters. They stay with the parent renderer, which uses them to
+   * surface the view's errors and data; they are never handed to the view itself.
+   */
+  inspectorAdapters?: VegaInspectorAdapters;
   visType: 'vega';
   visConfig: VisParams;
 }
@@ -80,6 +85,7 @@ export const createVegaFn = (
       as: 'vega_vis',
       value: {
         visData: response,
+        inspectorAdapters: context.inspectorAdapters,
         visType: 'vega',
         visConfig: {
           spec: args.spec,

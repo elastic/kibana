@@ -15,14 +15,16 @@ function createMockView(spec) {
 
   return new VegaBaseView({
     parentEl: document.createElement('div'),
-    vegaParser: {
+    descriptor: {
       spec,
       vlspec: null,
       isVegaLite: false,
       renderer: 'canvas',
       tooltips: false,
-      searchAPI: { inspectorAdapters: {} },
+      trustedDataUrls: [],
     },
+    onError: jest.fn(),
+    onViewCreated: jest.fn(),
     fireEvent: jest.fn(),
     filterManager: { getFilters: jest.fn(() => []) },
     externalUrl: {

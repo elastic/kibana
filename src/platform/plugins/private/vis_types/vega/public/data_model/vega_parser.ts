@@ -41,6 +41,7 @@ import type {
   ControlsLocation,
   ControlsDirection,
   KibanaConfig,
+  VegaRenderDescriptor,
 } from './types';
 
 const locToDirMap: Record<string, ControlsLocation> = {
@@ -67,7 +68,7 @@ export class VegaParser {
   useMap?: boolean;
   renderer?: string;
   tooltips?: boolean | TooltipConfig;
-  mapConfig?: object;
+  mapConfig?: VegaConfig;
   vlspec?: VegaSpec;
   useResize?: boolean;
   containerDir?: ControlsLocation | ControlsDirection;
@@ -109,6 +110,29 @@ export class VegaParser {
       this.error = Utils.formatErrorToStr(err);
     }
     return this;
+  }
+
+  /** Returns the structured-cloneable render state of a parsed spec, without parser internals. */
+  toRenderDescriptor(): VegaRenderDescriptor {
+    return {
+      spec: this.spec,
+      vlspec: this.vlspec,
+      isVegaLite: this.isVegaLite,
+      useMap: this.useMap,
+      useResize: this.useResize,
+      useHover: this.useHover,
+      renderer: this.renderer,
+      tooltips: this.tooltips,
+      mapConfig: this.mapConfig,
+      containerDir: this.containerDir,
+      controlsDir: this.controlsDir,
+      hideWarnings: this.hideWarnings,
+      restoreSignalValuesOnRefresh: this.restoreSignalValuesOnRefresh,
+      warnings: this.warnings,
+      error: this.error,
+      approximationApplied: this.approximationApplied,
+      trustedDataUrls: this._urlParsers?.emsfile.trustedUrls ?? [],
+    };
   }
 
   async _parseAsync() {
