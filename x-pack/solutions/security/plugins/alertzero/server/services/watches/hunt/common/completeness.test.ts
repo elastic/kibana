@@ -6,7 +6,11 @@
  */
 
 import type { HuntIncompleteness, HuntIncompleteReason } from '@kbn/alertzero-common';
-import { completedSuccessfully, huntCompletenessOf } from './completeness';
+import {
+  completedSuccessfully,
+  FINAL_WHEN_NOTHING_SEARCHABLE,
+  huntCompletenessOf,
+} from './completeness';
 
 const gap = (reason: HuntIncompleteReason): HuntIncompleteness => ({ reason, detail: 'because' });
 
@@ -20,6 +24,7 @@ describe('huntCompletenessOf', () => {
     'index_unavailable',
     'generation_failed',
     'execute_failed',
+    'catalog_unavailable',
   ])('treats %s as retryable, so the report stays eligible', (reason) => {
     expect(huntCompletenessOf([gap(reason)])).toBe('incomplete_retryable');
     expect(completedSuccessfully(huntCompletenessOf([gap(reason)]))).toBe(false);
@@ -37,6 +42,7 @@ describe('huntCompletenessOf', () => {
 
   it.each<HuntIncompleteReason>([
     'generation_budget',
+    'collapsed',
     'unknown_technique_id',
     'rows_unclassifiable',
     'refs_unavailable',
@@ -46,6 +52,31 @@ describe('huntCompletenessOf', () => {
     expect(huntCompletenessOf([gap(reason)])).toBe('incomplete_final');
     // Retired, because re-running reproduces the same gap and re-spends the run.
     expect(completedSuccessfully(huntCompletenessOf([gap(reason)]))).toBe(true);
+  });
+
+  it('lets a retryable gap win over a collapsed one', () => {
+    // The sibling that generation never ran for stays final on its own, but a report
+    // that also hit a retryable gap elsewhere still gains from a later run.
+    expect(huntCompletenessOf([gap('collapsed'), gap('execute_failed')])).toBe(
+      'incomplete_retryable'
+    );
+  });
+
+  it('treats an ungrounded query as final when the run had nothing searchable, so the report retires', () => {
+    // Same text, same generation, same grounding failure: retrying only re-spends Tier 2.
+    const completeness = huntCompletenessOf([gap('query_ungrounded')], {
+      treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE,
+    });
+    expect(completeness).toBe('incomplete_final');
+    expect(completedSuccessfully(completeness)).toBe(true);
+  });
+
+  it('keeps other retryable gaps retryable under the nothing-searchable override', () => {
+    expect(
+      huntCompletenessOf([gap('query_ungrounded'), gap('execute_failed')], {
+        treatAsFinal: FINAL_WHEN_NOTHING_SEARCHABLE,
+      })
+    ).toBe('incomplete_retryable');
   });
 
   it('lets a retryable gap win over a deterministic one', () => {

@@ -35,6 +35,7 @@ interface SourcesToolbarProps {
   onSelectedStatusesChange: (statuses: SourceStatus[]) => void;
   onRefresh: () => void;
   onAddSource: () => void;
+  isAddDisabled?: boolean;
 }
 
 export const SourcesToolbar = ({
@@ -49,6 +50,7 @@ export const SourcesToolbar = ({
   onSelectedStatusesChange,
   onRefresh,
   onAddSource,
+  isAddDisabled = false,
 }: SourcesToolbarProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -119,7 +121,12 @@ export const SourcesToolbar = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton fill onClick={onAddSource} data-test-subj="streamsAddSourceButton">
+        <EuiButton
+          fill
+          onClick={onAddSource}
+          isDisabled={isAddDisabled}
+          data-test-subj="streamsAddSourceButton"
+        >
           {i18n.translate('xpack.streams.sources.addSourceButtonLabel', {
             defaultMessage: 'Add source',
           })}

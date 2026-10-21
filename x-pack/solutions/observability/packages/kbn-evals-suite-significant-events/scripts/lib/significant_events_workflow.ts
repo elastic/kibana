@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import type { Client } from '@elastic/elasticsearch';
 import type {
   MappingTypeMapping,
@@ -13,11 +14,9 @@ import type {
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Feature, SignificantEvent } from '@kbn/significant-events-schema';
-import { KIsOnboardingStep } from '@kbn/significant-events-schema';
 import {
-  SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
+  KIS_ONBOARDING_IN_PROGRESS_STATUSES,
+  KIsOnboardingStep,
 } from '@kbn/significant-events-schema';
 import type { ConnectionConfig } from './get_connection_config';
 import { kibanaRequest } from './kibana';
@@ -39,7 +38,6 @@ import {
   DISCOVERIES_TEMP_INDEX_PATTERN,
   DETECTIONS_TEMP_INDEX_PATTERN,
   DETECTIONS_DATA_STREAM,
-  EVENTS_DATA_STREAM,
   KNOWLEDGE_INDICATORS_TEMP_INDEX_PATTERN,
 } from '../../src/data_generators/snapshot_indices';
 
@@ -47,15 +45,15 @@ const RAW_DATA_STREAM_SEARCH_LIMIT = 1000;
 
 /**
  * Features snapshot mapping. `dynamic: false` with `properties`/`meta` as `enabled: false` keeps
- * the index lean and prevents mapping explosions from those free-form objects; `stream_name` is a
- * keyword for per-stream filtering. Not reused from `knowledgeIndicatorsMappings` because features
+ * the index lean and prevents mapping explosions from those free-form objects; `source_id` is a
+ * keyword for per-source filtering. Not reused from `knowledgeIndicatorsMappings` because features
  * arrive flattened from the features API, not in the raw KI shape that mapping describes.
  */
 const FEATURES_SNAPSHOT_MAPPING: MappingTypeMapping = {
   dynamic: false,
   properties: {
     id: { type: 'keyword' },
-    stream_name: { type: 'keyword' },
+    source_id: { type: 'keyword' },
     type: { type: 'keyword' },
     subtype: { type: 'keyword' },
     title: { type: 'keyword' },
@@ -98,59 +96,142 @@ export async function enableSignificantEvents(
   throw new Error(`Failed to enable significant events: ${status} ${JSON.stringify(data)}`);
 }
 
-export async function configureModelSelectionSettings(
-  config: ConnectionConfig,
-  log: ToolingLog,
-  connectorId: string
-): Promise<void> {
-  log.info(`Configuring model override via inference settings (connector: ${connectorId})...`);
-  const { status, data } = await kibanaRequest(
-    config,
-    'PUT',
-    '/internal/search_inference_endpoints/settings',
-    {
-      features: [
-        {
-          feature_id: SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
-          endpoints: [{ id: connectorId }],
-        },
-        {
-          feature_id: SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
-          endpoints: [{ id: connectorId }],
-        },
-        {
-          feature_id: SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-          endpoints: [{ id: connectorId }],
-        },
-      ],
-    }
-  );
+const CAPTURE_FENCE_TIMEOUT_MS = 120_000;
+const CAPTURE_FENCE_POLL_INTERVAL_MS = 1_000;
 
-  if (status >= 200 && status < 300) {
-    log.info('Model selection settings configured via inference settings');
-    return;
+/**
+ * Creating a source queues a reconcile that holds the source's write lease and then starts a
+ * one-time onboarding run. The capture runs its own extraction right after, and a run left going
+ * would drop it (the onboarding concurrency key drops a second run) or mix its output into the
+ * snapshot. So the reconcile is applied here first, then the run it started is cancelled and
+ * waited out.
+ */
+async function fenceAutomaticOnboarding(
+  config: ConnectionConfig,
+  source: { id: string; slug: string }
+): Promise<void> {
+  const deadline = Date.now() + CAPTURE_FENCE_TIMEOUT_MS;
+  const wait = () => new Promise((resolve) => setTimeout(resolve, CAPTURE_FENCE_POLL_INTERVAL_MS));
+
+  for (;;) {
+    const { status, data } = await kibanaRequest(
+      config,
+      'POST',
+      `/internal/streams/${source.id}/_reconcile_source`,
+      { sourceSlug: source.slug }
+    );
+    if (status >= 200 && status < 300) {
+      break;
+    }
+    // A 409 means the queued reconcile holds the source's write lease. Retry until it lets go.
+    if (status !== 409 || Date.now() >= deadline) {
+      throw new Error(`Failed to reconcile capture source: ${status} ${JSON.stringify(data)}`);
+    }
+    await wait();
   }
 
-  throw new Error(`Failed to configure inference settings: ${status} ${JSON.stringify(data)}`);
+  const cancel = await kibanaRequest(
+    config,
+    'POST',
+    `/internal/streams/${source.id}/onboarding/_execute`,
+    { action: 'cancel' }
+  );
+  if (cancel.status < 200 || cancel.status >= 300) {
+    throw new Error(
+      `Failed to cancel the automatic onboarding: ${cancel.status} ${JSON.stringify(cancel.data)}`
+    );
+  }
+
+  while (Date.now() < deadline) {
+    const { data } = await kibanaRequest(
+      config,
+      'GET',
+      `/internal/streams/${source.id}/onboarding/_status`
+    );
+    const taskStatus = (data as Record<string, unknown>)?.status;
+    if (
+      typeof taskStatus !== 'string' ||
+      !(KIS_ONBOARDING_IN_PROGRESS_STATUSES as ReadonlySet<string>).has(taskStatus)
+    ) {
+      return;
+    }
+    await wait();
+  }
+  throw new Error(`Onboarding of source ${source.id} is still running after being cancelled`);
 }
+
+/**
+ * Creates the source used by the capture's onboarding and discovery runs. Create it right before
+ * the extraction: the source is returned once its automatic onboarding is out of the way.
+ */
+export async function createCaptureSource(
+  config: ConnectionConfig,
+  logsIndex: string
+): Promise<{ id: string; view_name: string }> {
+  const { status, data } = await kibanaRequest(config, 'POST', '/internal/nightshift/sources', {
+    title: `Snapshot capture ${logsIndex}`,
+    esql: `FROM ${logsIndex},${logsIndex}.*`,
+  });
+  if (status < 200 || status >= 300) {
+    throw new Error(`Failed to create capture source: ${status} ${JSON.stringify(data)}`);
+  }
+  const { source } = z
+    .object({
+      source: z.object({
+        id: z.string().min(1).max(255),
+        slug: z.string().min(1).max(255),
+        view_name: z.string().min(1).max(1024),
+      }),
+    })
+    .parse(data);
+  try {
+    await fenceAutomaticOnboarding(config, source);
+  } catch (error) {
+    // The caller only receives the source on success, so nothing else can delete it.
+    await deleteCaptureSource(config, source.id).catch(() => undefined);
+    throw error;
+  }
+  return { id: source.id, view_name: source.view_name };
+}
+
+/** Removes the capture source and its ES|QL view. */
+export async function deleteCaptureSource(
+  config: ConnectionConfig,
+  sourceId: string
+): Promise<void> {
+  const { status, data } = await kibanaRequest(
+    config,
+    'DELETE',
+    `/internal/nightshift/sources/${sourceId}`
+  );
+  if (status < 200 || status >= 300) {
+    throw new Error(`Failed to delete capture source: ${status} ${JSON.stringify(data)}`);
+  }
+}
+
 export async function triggerKIExtraction(
   config: ConnectionConfig,
   log: ToolingLog,
-  streamName: string = DEFAULT_LOGS_INDEX,
+  connectorId: string,
+  sourceId: string,
   steps: KIsOnboardingStep[] = [KIsOnboardingStep.FeaturesIdentification]
 ): Promise<void> {
-  log.info(`Triggering KI onboarding (${steps.join(', ')}) on stream ${streamName}...`);
+  log.info(`Triggering KI onboarding (${steps.join(', ')}) on source ${sourceId}...`);
 
   const now = Date.now();
   const { status, data } = await kibanaRequest(
     config,
     'POST',
-    `/internal/streams/${streamName}/onboarding/_execute`,
+    `/internal/streams/${sourceId}/onboarding/_execute`,
     {
       action: 'schedule',
       from: new Date(now - 24 * 60 * 60 * 1000).toISOString(),
       to: new Date(now).toISOString(),
       steps,
+      connectors: {
+        features: connectorId,
+        queries: connectorId,
+      },
     }
   );
 
@@ -165,7 +246,7 @@ export async function triggerKIExtraction(
 export async function waitForKIExtraction(
   config: ConnectionConfig,
   log: ToolingLog,
-  streamName: string = DEFAULT_LOGS_INDEX,
+  sourceId: string,
   timeoutMs: number = KI_FEATURE_EXTRACTION_TIMEOUT_MS
 ): Promise<void> {
   log.info(`Polling onboarding status for KI extraction (timeout ${timeoutMs / 1000}s)...`);
@@ -176,7 +257,7 @@ export async function waitForKIExtraction(
     const { data } = await kibanaRequest(
       config,
       'GET',
-      `/internal/streams/${streamName}/onboarding/_status`
+      `/internal/streams/${sourceId}/onboarding/_status`
     );
 
     const taskStatus = (data as Record<string, unknown>)?.status;
@@ -206,9 +287,9 @@ export async function waitForKIExtraction(
 export async function logExtractedKIFeatures(
   config: ConnectionConfig,
   log: ToolingLog,
-  streamName: string = DEFAULT_LOGS_INDEX
+  sourceId: string
 ): Promise<void> {
-  const kis = await fetchKIFeatures(config, log, streamName);
+  const kis = await fetchKIFeatures(config, log, sourceId);
   log.info(`Extracted ${kis.length} KIs:`);
   for (const f of kis) {
     log.info(`  - ${f.title || f.description} (${f.type})`);
@@ -218,9 +299,9 @@ export async function logExtractedKIFeatures(
 async function fetchKIFeatures(
   config: ConnectionConfig,
   log: ToolingLog,
-  streamName: string
+  sourceId: string
 ): Promise<Feature[]> {
-  const { data } = await kibanaRequest(config, 'GET', `/internal/streams/${streamName}/features`);
+  const { data } = await kibanaRequest(config, 'GET', `/internal/streams/${sourceId}/features`);
   const features = (data as Record<string, unknown>)?.features;
   if (!Array.isArray(features)) {
     throw new Error(`Expected "features" array from Kibana, got: ${JSON.stringify(data)}`);
@@ -233,14 +314,15 @@ export async function persistKIFeaturesForSnapshot(
   esClient: Client,
   log: ToolingLog,
   snapshotName: string,
-  streamName: string = DEFAULT_LOGS_INDEX
+  sourceId: string,
+  snapshotSourceId: string
 ): Promise<{ index: string; count: number }> {
-  const features = await fetchKIFeatures(config, log, streamName);
+  const features = await fetchKIFeatures(config, log, sourceId);
   return persistDocsForSnapshot(
     esClient,
     log,
     getSnapshotKIFeaturesIndex(snapshotName),
-    features as unknown as Array<Record<string, unknown>>,
+    features.map((feature) => ({ ...feature, source_id: snapshotSourceId })),
     'id',
     'feature KI(s)',
     FEATURES_SNAPSHOT_MAPPING
@@ -272,13 +354,15 @@ export async function persistKnowledgeIndicatorsForSnapshot(
   esClient: Client,
   log: ToolingLog,
   snapshotName: string,
-  streamName: string = DEFAULT_LOGS_INDEX
+  sourceId: string,
+  snapshotSourceId: string,
+  sourceView: string
 ): Promise<{ index: string; count: number }> {
   const kiDocs = await withTempSuperuser(esClient, log, config, (sysClient) =>
     readRawDataStreamDocs(
       sysClient,
       KNOWLEDGE_INDICATORS_DATA_STREAM,
-      { term: { 'stream.name': streamName } },
+      { term: { 'source.id': sourceId } },
       'knowledge indicator(s)'
     )
   );
@@ -287,7 +371,12 @@ export async function persistKnowledgeIndicatorsForSnapshot(
     esClient,
     log,
     getSnapshotKnowledgeIndicatorsIndex(snapshotName),
-    kiDocs,
+    kiDocs.map((doc) => ({
+      ...doc,
+      snapshot_source_view: sourceView,
+      source: { id: snapshotSourceId },
+      'source.id': snapshotSourceId,
+    })),
     'id',
     'knowledge indicator(s)'
   );
@@ -301,7 +390,7 @@ export async function persistDiscoveriesForSnapshot(
 ): Promise<{ index: string; count: number }> {
   const discoveries = await fetchAllPaginated<SignificantEvent>(
     config,
-    '/internal/significant_events/events?status=pending',
+    '/internal/significant_events/events?status=active',
     'events'
   );
   return persistDocsForSnapshot(
@@ -309,7 +398,7 @@ export async function persistDiscoveriesForSnapshot(
     log,
     getSnapshotDiscoveriesIndex(snapshotName),
     discoveries as unknown as Array<Record<string, unknown>>,
-    'event_uuid',
+    'event_id',
     'discovery(s)'
   );
 }
@@ -317,12 +406,7 @@ export async function persistDiscoveriesForSnapshot(
 export async function cleanupExtractedData(esClient: Client, log: ToolingLog): Promise<void> {
   log.info('Cleaning up ES data...');
 
-  const dataStreamTargets = [
-    'logs*',
-    KNOWLEDGE_INDICATORS_DATA_STREAM,
-    DETECTIONS_DATA_STREAM,
-    EVENTS_DATA_STREAM,
-  ];
+  const dataStreamTargets = ['logs*', KNOWLEDGE_INDICATORS_DATA_STREAM, DETECTIONS_DATA_STREAM];
   const indexTargets = [
     FEATURES_TEMP_INDEX_PATTERN,
     DISCOVERIES_TEMP_INDEX_PATTERN,
@@ -389,13 +473,17 @@ export async function resetQueriesPromotion({ esClient }: { esClient: Client }):
   });
 }
 
-export async function triggerDiscovery(config: ConnectionConfig, log: ToolingLog): Promise<void> {
+export async function triggerDiscovery(
+  config: ConnectionConfig,
+  log: ToolingLog,
+  connectorId: string
+): Promise<void> {
   log.info('Triggering significant events discovery...');
   const { status, data } = await kibanaRequest(
     config,
     'POST',
     '/internal/streams/significant_events/discovery/_execute',
-    { action: 'trigger' }
+    { action: 'trigger', connector_id: connectorId }
   );
 
   if (status >= 200 && status < 300) {

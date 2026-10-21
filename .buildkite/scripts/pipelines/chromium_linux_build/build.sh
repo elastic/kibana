@@ -20,8 +20,8 @@ ARTIFACT_PROD_STORAGE_BUCKET="gs://headless_shell"
 
 ARTIFACT_QUERY="chromium-${CHROMIUM_COMMIT_HASH:0:7}-.*_$PLATFORM_VARIANT"
 
-## impersonate service account that has access to our storage bucket 
-"$KIBANA_CHECKOUT_DIR/.buildkite/scripts/common/activate_service_account.sh" "kibana-ci-access-chromium-blds"
+## impersonate service account that has access to our storage bucket, refreshing credentials during the hours-long build
+"$KIBANA_CHECKOUT_DIR/.buildkite/scripts/common/activate_service_account.sh" --auto-refresh "kibana-ci-access-chromium-blds"
 
 # Query to determine if expected build artifact from a prior build exists, 
 # the build.py script uploads the build artifact to the staging bucket

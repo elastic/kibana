@@ -46,7 +46,6 @@ const externals = {
   // JSX runtime exports for SWC's importSource: '@emotion/react'
   '@emotion/react/jsx-runtime': '__kbnSharedDeps__.EmotionReactJsxRuntime',
   '@emotion/react/jsx-dev-runtime': '__kbnSharedDeps__.EmotionReactJsxDevRuntime',
-  jquery: '__kbnSharedDeps__.Jquery',
   moment: '__kbnSharedDeps__.Moment',
   'moment-timezone': '__kbnSharedDeps__.MomentTimezone',
   react: '__kbnSharedDeps__.React',
@@ -58,7 +57,12 @@ const externals = {
   'styled-components': '__kbnSharedDeps__.StyledComponents',
   '@kbn/monaco': '__kbnSharedDeps__.KbnMonaco',
   // this is how plugins/consumers from npm load monaco
+  // (monaco-editor 0.56 remapped its subpaths via an "exports" map: the old
+  // esm/vs/... specifier is kept for npm packages that still request it, since
+  // externals match on the raw request string before resolution)
   'monaco-editor/esm/vs/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
+  'monaco-editor/editor/editor.api': '__kbnSharedDeps__.MonacoBarePluginApi',
+  'monaco-editor/editor/editor.api.js': '__kbnSharedDeps__.MonacoBarePluginApi',
   'fp-ts/Option': '__kbnSharedDeps__.FpTs.option',
   'fp-ts/pipeable': '__kbnSharedDeps__.FpTs.pipeable',
   'fp-ts/TaskEither': '__kbnSharedDeps__.FpTs.taskEither',

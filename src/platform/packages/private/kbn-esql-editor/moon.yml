@@ -24,9 +24,11 @@ dependsOn:
   - '@kbn/language-documentation'
   - '@kbn/test-jest-helpers'
   - '@kbn/data-plugin'
+  - '@kbn/data-service'
   - '@kbn/code-editor'
   - '@kbn/fields-metadata-plugin'
   - '@kbn/esql-utils'
+  - '@kbn/data-source'
   - '@kbn/content-management-favorites-public'
   - '@kbn/usage-collection-plugin'
   - '@kbn/content-management-favorites-common'
@@ -39,7 +41,6 @@ dependsOn:
   - '@kbn/licensing-types'
   - '@kbn/index-editor'
   - '@kbn/react-hooks'
-  - '@kbn/calculate-width-from-char-count'
   - '@kbn/kql'
   - '@kbn/ebt-tools'
   - '@kbn/shared-ux-utility'
@@ -49,6 +50,8 @@ dependsOn:
   - '@kbn/data-views-plugin'
   - '@kbn/cps'
   - '@kbn/es-types'
+  - '@kbn/ui-ai-components'
+  - '@kbn/ui-callout'
 tags:
   - shared-browser
   - package

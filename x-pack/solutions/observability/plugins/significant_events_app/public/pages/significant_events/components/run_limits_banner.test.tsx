@@ -9,14 +9,14 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RunQuotasResponse } from '@kbn/significant-events-plugin/common';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useRunQuotas } from '../../../hooks/use_significant_events_run_quotas';
-import { RunLimitsBanner } from './run_limits_banner';
+import { getRunQuotaSettingsTab, RunLimitsBanner } from './run_limits_banner';
 
+jest.mock('../../../hooks/use_kibana');
 jest.mock('../../../hooks/use_significant_events_run_quotas');
-jest.mock('../../../hooks/use_significant_events_app_router', () => ({
-  useSignificantEventsAppRouter: () => ({ link: jest.fn().mockReturnValue('#settings') }),
-}));
 
+const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseRunQuotas = useRunQuotas as jest.MockedFunction<typeof useRunQuotas>;
 
 const response = (overrides: Partial<RunQuotasResponse> = {}): RunQuotasResponse => ({
@@ -47,6 +47,31 @@ const setResponse = (data: RunQuotasResponse) => {
 };
 
 describe('RunLimitsBanner', () => {
+  beforeEach(() => {
+    mockUseKibana.mockReturnValue({
+      dependencies: {
+        start: {
+          share: {
+            url: {
+              locators: {
+                get: jest.fn(() => ({
+                  getRedirectUrl: ({ tab }: { tab?: string }) =>
+                    `/app/nightshift/settings${tab ? `/${tab}` : ''}`,
+                })),
+              },
+            },
+          },
+        },
+      },
+    } as never);
+  });
+
+  it('maps exhausted groups to the tab that owns their settings', () => {
+    expect(getRunQuotaSettingsTab(['investigation'])).toBe('investigations');
+    expect(getRunQuotaSettingsTab(['detection'])).toBe('detections');
+    expect(getRunQuotaSettingsTab(['investigation', 'ki_extraction'])).toBe('detections');
+  });
+
   it('shows only finite reached limits while enforcement is enabled', () => {
     setResponse(response());
 
@@ -68,6 +93,9 @@ describe('RunLimitsBanner', () => {
     expect(screen.getByTestId('significantEventsRunLimitsBanner')).not.toHaveTextContent(
       /critical/i
     );
+    expect(
+      screen.getByTestId('significantEventsAppRunQuotaExhaustionCalloutReviewRunLimitsButton')
+    ).toHaveAttribute('href', '/app/nightshift/settings/detections');
   });
 
   it('clears when the limit is raised or enforcement is disabled', () => {

@@ -12,8 +12,9 @@ import { renderHook } from '@testing-library/react';
 import type { monaco } from '@kbn/code-editor';
 import { ReviewActionsWidget } from './review_actions_widget';
 
-const buildEditor = () =>
+const buildEditor = (editorFocus: jest.Mock = jest.fn()) =>
   ({
+    focus: editorFocus,
     changeViewZones: jest.fn((cb: (accessor: monaco.editor.IViewZoneChangeAccessor) => void) => {
       cb({
         addZone: jest.fn(() => 'zone-id'),
@@ -46,6 +47,150 @@ describe('ReviewActionsWidget', () => {
     acceptBtn.click();
     expect(onAccept).toHaveBeenCalledTimes(1);
     expect(onReject).toHaveBeenCalledTimes(1);
+  });
+
+  describe('keyboard focus', () => {
+    const tab = (target: HTMLElement, shiftKey = false) =>
+      target.dispatchEvent(
+        new KeyboardEvent('keydown', { key: 'Tab', shiftKey, bubbles: true, cancelable: true })
+      );
+
+    const setup = (editorFocus: jest.Mock = jest.fn()) => {
+      const widget = new ReviewActionsWidget(euiTheme, buildEditor(editorFocus), 1, {
+        onAccept: jest.fn(),
+        onReject: jest.fn(),
+      });
+      const dom = widget.getDomNode();
+      document.body.appendChild(dom);
+      const [undoButton, replaceButton] = Array.from(dom.querySelectorAll('button'));
+      return { widget, dom, undoButton, replaceButton };
+    };
+
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('moves focus from Undo to Replace on Tab and back on Shift+Tab', () => {
+      const { widget, dom, undoButton, replaceButton } = setup();
+
+      undoButton.focus();
+      tab(undoButton);
+      expect(document.activeElement).toBe(replaceButton);
+
+      tab(replaceButton, true);
+      expect(document.activeElement).toBe(undoButton);
+
+      dom.remove();
+      widget.dispose();
+    });
+
+    it('lets the browser move focus out of the toolbar when tabbing past either end', () => {
+      const editorFocus = jest.fn();
+      const { widget, dom, undoButton, replaceButton } = setup(editorFocus);
+
+      const forward = new KeyboardEvent('keydown', { key: 'Tab', bubbles: true, cancelable: true });
+      const backward = new KeyboardEvent('keydown', {
+        key: 'Tab',
+        shiftKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+      const stopForward = jest.spyOn(forward, 'stopPropagation');
+      const stopBackward = jest.spyOn(backward, 'stopPropagation');
+
+      replaceButton.dispatchEvent(forward);
+      undoButton.dispatchEvent(backward);
+
+      expect(forward.defaultPrevented).toBe(false);
+      expect(backward.defaultPrevented).toBe(false);
+      expect(stopForward).toHaveBeenCalled();
+      expect(stopBackward).toHaveBeenCalled();
+      expect(editorFocus).not.toHaveBeenCalled();
+
+      dom.remove();
+      widget.dispose();
+    });
+
+    it('focuses Undo only once Monaco has rendered the widget', () => {
+      const { widget, dom, undoButton } = setup();
+
+      widget.focus();
+      expect(document.activeElement).not.toBe(undoButton);
+
+      widget.afterRender(null);
+      expect(document.activeElement).not.toBe(undoButton);
+
+      widget.afterRender(0);
+      expect(document.activeElement).toBe(undoButton);
+
+      dom.remove();
+      widget.dispose();
+    });
+
+    it('does not steal focus on later renders', () => {
+      const { widget, dom, undoButton, replaceButton } = setup();
+
+      widget.focus();
+      widget.afterRender(0);
+      replaceButton.focus();
+      widget.afterRender(0);
+
+      expect(document.activeElement).toBe(replaceButton);
+      expect(document.activeElement).not.toBe(undoButton);
+
+      dom.remove();
+      widget.dispose();
+    });
+
+    it.each([
+      ['Undo', 0],
+      ['Replace', 1],
+    ])('returns focus to the editor when disposed while %s has focus', (_, buttonIndex) => {
+      const editorFocus = jest.fn();
+      const { widget, dom, undoButton, replaceButton } = setup(editorFocus);
+
+      [undoButton, replaceButton][buttonIndex].focus();
+      widget.dispose();
+
+      expect(editorFocus).toHaveBeenCalledTimes(1);
+      dom.remove();
+    });
+
+    it('does not move focus to the editor when disposed while focus is elsewhere', () => {
+      const editorFocus = jest.fn();
+      const { widget, dom } = setup(editorFocus);
+      const outside = document.createElement('input');
+      document.body.appendChild(outside);
+      outside.focus();
+
+      widget.dispose();
+
+      expect(editorFocus).not.toHaveBeenCalled();
+      expect(document.activeElement).toBe(outside);
+      outside.remove();
+      dom.remove();
+    });
+
+    it('does not move focus to the editor when disposed before ever being focused', () => {
+      const editorFocus = jest.fn();
+      const { widget, dom } = setup(editorFocus);
+
+      widget.dispose();
+
+      expect(editorFocus).not.toHaveBeenCalled();
+      dom.remove();
+    });
+
+    it('does not focus after being disposed', () => {
+      const { widget, dom, undoButton } = setup();
+
+      widget.focus();
+      widget.dispose();
+      widget.afterRender(0);
+
+      expect(document.activeElement).not.toBe(undoButton);
+      dom.remove();
+    });
   });
 
   it('labels the accept button "Replace" when isReplaceMode is true and "Keep" otherwise', () => {

@@ -88,6 +88,8 @@ export const getListActionPoliciesUrl = (
 export const getRuleTemplateUrl = (id: string) =>
   `${RULE_TEMPLATE_API_PATH}/${encodeURIComponent(id)}`;
 
+export const getInstallRuleTemplateUrl = (id: string) => `${getRuleTemplateUrl(id)}/_install`;
+
 export const getFindRuleTemplatesUrl = (
   query?: Record<string, string | number | string[] | undefined>
 ): string => {
@@ -95,13 +97,18 @@ export const getFindRuleTemplatesUrl = (
   return qs ? `${RULE_TEMPLATE_API_PATH}?${qs}` : RULE_TEMPLATE_API_PATH;
 };
 
-const getSeriesActionUrl = (groupHash: string, suffix: string) =>
-  `${SERIES_API_PATH}/${encodeURIComponent(groupHash)}/${suffix}`;
+export const getRuleTemplateTagsUrl = (search?: string): string => {
+  const path = `${RULE_TEMPLATE_API_PATH}/tags`;
+  return search === undefined ? path : `${path}?${toQueryString({ search })}`;
+};
 
-export const getSnoozeSeriesActionUrl = (groupHash: string) =>
-  getSeriesActionUrl(groupHash, '_snooze');
-export const getUnsnoozeSeriesActionUrl = (groupHash: string) =>
-  getSeriesActionUrl(groupHash, '_unsnooze');
+const getSeriesActionUrl = (seriesId: string, suffix: string) =>
+  `${SERIES_API_PATH}/${encodeURIComponent(seriesId)}/${suffix}`;
+
+export const getSnoozeSeriesActionUrl = (seriesId: string) =>
+  getSeriesActionUrl(seriesId, '_snooze');
+export const getUnsnoozeSeriesActionUrl = (seriesId: string) =>
+  getSeriesActionUrl(seriesId, '_unsnooze');
 
 export const BULK_SNOOZE_SERIES_ACTION_URL = `${SERIES_API_PATH}/_bulk_snooze`;
 export const BULK_UNSNOOZE_SERIES_ACTION_URL = `${SERIES_API_PATH}/_bulk_unsnooze`;

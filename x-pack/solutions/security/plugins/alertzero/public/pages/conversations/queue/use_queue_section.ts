@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { UseInfiniteQueryResult, UseQueryResult } from '@kbn/react-query';
 import { useQueryClient } from '@kbn/react-query';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
@@ -44,8 +44,14 @@ export interface QueueSection {
    * not blank rows still worth reading.
    */
   hasLoadError: boolean;
+  /** The rows' fetch error behind `hasLoadError`, for its telemetry class; never shown. */
+  loadError: unknown;
+  /** The rows are being fetched again, which hides a load error until the retry settles. */
+  isRefetchingRows: boolean;
   /** The analyst's own Show more failed, as opposed to a poll they never asked for. */
   hasLoadMoreError: boolean;
+  /** The Show more fetch error behind `hasLoadMoreError`, for its telemetry class; never shown. */
+  loadMoreError: unknown;
   hasCountError: boolean;
   /** Refetches both of this section's queries, behind the failure's retry. */
   retry: () => void;
@@ -104,11 +110,20 @@ const needsCountRequest = (
 const useSection = (
   id: RecommendedAction,
   firstPageSize: number,
-  { isOpen, onToggle, retry }: ReturnType<typeof useSectionState>,
+  { isOpen, onToggle: setIsOpen, retry }: ReturnType<typeof useSectionState>,
   countQuery: UseQueryResult<ProposalsPageResponse>,
   pagesQuery: UseInfiniteQueryResult<ProposalsPageResponse>
 ): QueueSection => {
   const pages = pagesQuery.data?.pages;
+  const hasSettledDefault = useRef(false);
+
+  const onToggle = useCallback(
+    (nextIsOpen: boolean) => {
+      hasSettledDefault.current = true;
+      setIsOpen(nextIsOpen);
+    },
+    [setIsOpen]
+  );
 
   // Deduplicated because the pages are offset windows over a list that moves: a row
   // decided between two fetches shifts everything after it up, and an optimistic drop
@@ -124,10 +139,19 @@ const useSection = (
   const total = totalFromPages(pagesQuery) ?? countQuery.data?.total;
   const { fetchNextPage, hasNextPage, isFetchingNextPage } = pagesQuery;
 
+  useEffect(() => {
+    if (hasSettledDefault.current || total === undefined) return;
+    hasSettledDefault.current = true;
+    if (total === 0) {
+      setIsOpen(false);
+    }
+  }, [total, setIsOpen]);
+
   // Tracked from the click rather than read off `pagesQuery.error`, which a failed
   // poll sets just the same — and a poll the analyst did not ask for must not
   // report that their Show more failed.
   const [hasLoadMoreError, setHasLoadMoreError] = useState(false);
+  const [loadMoreError, setLoadMoreError] = useState<unknown>(undefined);
 
   useEffect(() => {
     if (!isOpen) {
@@ -140,7 +164,10 @@ const useSection = (
       setHasLoadMoreError(false);
       // `throwOnError` is the only way to hear about this fetch alone: v4 has no
       // `isFetchNextPageError`, and the query's own error outlives it.
-      fetchNextPage({ throwOnError: true }).catch(() => setHasLoadMoreError(true));
+      fetchNextPage({ throwOnError: true }).catch((error: unknown) => {
+        setLoadMoreError(error);
+        setHasLoadMoreError(true);
+      });
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage]);
 
@@ -154,7 +181,10 @@ const useSection = (
     retry,
     loadingRows: pagesQuery.isInitialLoading ? Math.min(total ?? firstPageSize, firstPageSize) : 0,
     hasLoadError: Boolean(pagesQuery.error) && proposals.length === 0,
+    loadError: proposals.length === 0 ? pagesQuery.error : undefined,
+    isRefetchingRows: Boolean(pagesQuery.isFetching),
     hasLoadMoreError,
+    loadMoreError: hasLoadMoreError ? loadMoreError : undefined,
     hasCountError: Boolean(countQuery.error) && total === undefined,
     remaining: Math.max(Math.min(total ?? 0, MAX_QUEUE_REACH) - proposals.length, 0),
     // The authority, so the control is never offered when a click fetches nothing.
@@ -164,29 +194,35 @@ const useSection = (
   };
 };
 
-export const useCategoryQueueSection = (category: RecommendedAction): QueueSection => {
+export const useCategoryQueueSection = (
+  category: RecommendedAction,
+  entity?: string | null
+): QueueSection => {
   const state = useSectionState(category);
   const pagesQuery = useProposalsByCategory(category, {
     firstPageSize: CATEGORY_PAGE_SIZE,
     step: SHOW_MORE_STEP,
     enabled: state.isOpen,
+    entity,
   });
   const countQuery = useProposalsByCategoryCount(
     category,
-    needsCountRequest(state.isOpen, pagesQuery)
+    needsCountRequest(state.isOpen, pagesQuery),
+    entity
   );
 
   return useSection(category, CATEGORY_PAGE_SIZE, state, countQuery, pagesQuery);
 };
 
-export const useClosedQueueSection = (): QueueSection => {
+export const useClosedQueueSection = (entity?: string | null): QueueSection => {
   const state = useSectionState(CLOSED_GROUP_KEY);
   const pagesQuery = useClosedProposals({
     firstPageSize: CLOSED_PAGE_SIZE,
     step: SHOW_MORE_STEP,
     enabled: state.isOpen,
+    entity,
   });
-  const countQuery = useClosedProposalsCount(needsCountRequest(state.isOpen, pagesQuery));
+  const countQuery = useClosedProposalsCount(needsCountRequest(state.isOpen, pagesQuery), entity);
 
   return useSection(CLOSED_GROUP_KEY, CLOSED_PAGE_SIZE, state, countQuery, pagesQuery);
 };
