@@ -33,11 +33,15 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { buildClassicStreamsGraph } from './build_graph';
 import {
+  buildRoutingEdges,
   buildUnitConnectionEdges,
   configuredDestinationNodeId,
+  configuredRoutingNodeId,
   configuredSourceNodeId,
   readConfiguredDestinationId,
+  readConfiguredRoutingId,
   readConfiguredSourceId,
+  routingRuleHandleId,
 } from './build_unit_connection_edges';
 import {
   CanvasContextMenu,
@@ -58,10 +62,12 @@ import { useCanvasHistory } from './use_canvas_history';
 import { StreamFlyout, type StreamFlyoutTabId } from '../../../stream_flyout';
 import {
   DESTINATION_NODE_TYPE,
+  ROUTING_NODE_TYPE,
   SOURCE_NODE_TYPE,
   type ClassicCanvasGraph,
   type ClassicCanvasNode,
   type DestinationNode,
+  type RoutingNode,
   type SourceNode,
 } from './types';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../../util/kbn_url_state_context';
@@ -106,6 +112,8 @@ import {
   moveUnitConnection,
   removeComponentFromPipelines,
 } from '../../../../services/unit_connections';
+import { getUnitRoutings } from '../../../streams_layout/routing/routing_models';
+import type { RoutingViewModel } from '../../../streams_layout/routing/types';
 import { RoutingFlyout } from '../../../stream_routing_flyout';
 import { ProcessingFlyout } from '../../../stream_processing_flyout';
 
@@ -240,13 +248,13 @@ function StreamsCanvasInner() {
 
   const graph = useMemo<ClassicCanvasGraph>(() => {
     const nextGraph = buildClassicStreamsGraph(value?.streams ?? []);
-    const unitConnectionEdges = buildUnitConnectionEdges(
-      unitDefinition,
-      sources.map((source) => source.id),
-      destinations.map((destination) => destination.id)
-    );
+    const sourceIds = sources.map((source) => source.id);
+    const destinationIds = destinations.map((destination) => destination.id);
+    const unitConnectionEdges = buildUnitConnectionEdges(unitDefinition, sourceIds, destinationIds);
+    const routings = getUnitRoutings(unitDefinition);
+    const routingEdges = buildRoutingEdges(routings, sourceIds, destinationIds);
     const connectedDestinationIds = new Set(
-      unitConnectionEdges.flatMap((edge) => {
+      [...unitConnectionEdges, ...routingEdges].flatMap((edge) => {
         const destinationId = readConfiguredDestinationId(edge.target);
         return destinationId ? [destinationId] : [];
       })
@@ -259,10 +267,12 @@ function StreamsCanvasInner() {
     const unconfiguredDestinationNodes = unconfiguredDestinationNodeIds.map(
       buildUnconfiguredDestinationNode
     );
-    const edges = [...nextGraph.edges, ...unitConnectionEdges];
+    const routingNodes = routings.map(buildRoutingNode);
+    const edges = [...nextGraph.edges, ...unitConnectionEdges, ...routingEdges];
     const graphNodes = [
       ...configuredSourceNodes,
       ...unconfiguredSourceNodes,
+      ...routingNodes,
       ...configuredDestinationNodes,
       ...unconfiguredDestinationNodes,
       ...nextGraph.nodes.map(
@@ -468,13 +478,16 @@ function StreamsCanvasInner() {
 
   const onConnect = useCallback<OnConnect>(
     (connection) => {
+      console.log('CONN', connection);
       const sourceId = readConfiguredSourceId(connection.source);
       const destinationId = readConfiguredDestinationId(connection.target);
-      if (!sourceId || !destinationId) {
+      const routingId = readConfiguredRoutingId(connection.source);
+      const fromId = sourceId || routingId;
+      if (!fromId || !destinationId) {
         return;
       }
       record();
-      changeUnitConnection(connectSourceToDestination(unitDefinition, sourceId, destinationId));
+      changeUnitConnection(connectSourceToDestination(unitDefinition, fromId, destinationId));
     },
     [changeUnitConnection, record, unitDefinition]
   );
@@ -486,16 +499,19 @@ function StreamsCanvasInner() {
         return;
       }
       const sourceId = readConfiguredSourceId(params.nodeId);
-      if (!sourceId) {
+      const routingId = readConfiguredRoutingId(params.nodeId);
+      const fromId = sourceId || routingId;
+      if (!fromId) {
         setConnectionTargetIds(null);
         return;
       }
+      console.log('nyah');
       setConnectionTargetIds(
         new Set(
           destinations
             .map((destination) => destination.id)
             .filter((destinationId) =>
-              canConnectSourceToDestination(unitDefinition, sourceId, destinationId)
+              canConnectSourceToDestination(unitDefinition, fromId, destinationId)
             )
         )
       );
@@ -511,16 +527,21 @@ function StreamsCanvasInner() {
     (connection) => {
       const sourceId = readConfiguredSourceId(connection.source);
       const destinationId = readConfiguredDestinationId(connection.target);
-      if (!sourceId || !destinationId) {
+      const routingId = readConfiguredRoutingId(connection.source);
+      const fromId = sourceId || routingId;
+      if (!fromId || !destinationId) {
         return false;
       }
-      return canConnectSourceToDestination(unitDefinition, sourceId, destinationId);
+      const valid = canConnectSourceToDestination(unitDefinition, fromId, destinationId);
+      console.log('VALID?', connection, valid);
+      return valid;
     },
     [unitDefinition]
   );
 
   const onReconnect = useCallback<OnReconnect>(
     (oldEdge, connection) => {
+      console.log(oldEdge, connection);
       const previousSourceId = readConfiguredSourceId(oldEdge.source);
       const previousDestinationId = readConfiguredDestinationId(oldEdge.target);
       const sourceId = readConfiguredSourceId(connection.source);
@@ -545,6 +566,7 @@ function StreamsCanvasInner() {
     NonNullable<React.ComponentProps<typeof CanvasShell>['onReconnectEnd']>
   >(
     (_event, edge, _handleType, connectionState) => {
+      console.log(edge, connectionState);
       // Dropping on a handle keeps or moves the line. Releasing on the canvas unhooks it.
       if (connectionState.toHandle) {
         return;
@@ -572,7 +594,7 @@ function StreamsCanvasInner() {
         if (node.data.unconfiguredNodeId) {
           if (node.type === SOURCE_NODE_TYPE) {
             removedSourcePlaceholders.push(node.data.unconfiguredNodeId);
-          } else {
+          } else if (node.type === DESTINATION_NODE_TYPE) {
             removedDestinationPlaceholders.push(node.data.unconfiguredNodeId);
           }
           continue;
@@ -966,6 +988,50 @@ const buildConfiguredDestinationNode = (
         }),
   },
 });
+
+const buildRoutingNode = (routing: RoutingViewModel): RoutingNode => {
+  const name = routing.name || routing.id;
+  return {
+    id: configuredRoutingNodeId(routing.id),
+    type: ROUTING_NODE_TYPE,
+    position: { x: 0, y: 0 },
+    deletable: false,
+    ariaLabel: i18n.translate('xpack.streams.canvas.routingNode.ariaLabel', {
+      defaultMessage: 'Routing: {name}, {count, plural, one {# rule} other {# rules}}',
+      values: { name, count: routing.rules.length },
+    }),
+    data: {
+      pipelineId: routing.id,
+      rules: routing.rules.map((rule) => {
+        let label: string;
+
+        if (rule.when) {
+          label = i18n.translate('xpack.streams.canvas.routingNode.allDataRuleLabel', {
+            defaultMessage: 'Route when: {condition}',
+            values: {
+              condition: rule.when,
+            },
+          });
+        } else if (routing.rules.length === 1) {
+          label = i18n.translate('xpack.streams.canvas.routingNode.allDataRuleLabel', {
+            defaultMessage: 'All data',
+          });
+        } else {
+          label = i18n.translate('xpack.streams.canvas.routingNode.otherwiseRuleLabel', {
+            defaultMessage: 'Otherwise',
+          });
+        }
+
+        return {
+          handleId: routingRuleHandleId(rule.targets),
+          isCatchAll: rule.when === undefined,
+          action: rule.action,
+          label,
+        };
+      }),
+    },
+  };
+};
 
 const buildUnconfiguredDestinationNode = (nodeId: string): DestinationNode => ({
   id: nodeId,

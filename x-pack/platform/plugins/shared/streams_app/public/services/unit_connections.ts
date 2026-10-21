@@ -34,13 +34,27 @@ export interface UnitConnection {
 
 type RouteRule = Extract<PipelineConfig[number], { name: 'routes' }>['value'][number];
 
-const readIdentifiers = (config: PipelineConfig, name: 'sources' | 'destinations'): string[] => {
+const readIdentifiers = (
+  config: PipelineConfig,
+  name: 'sources' | 'destinations' | 'routes'
+): string[] => {
   for (const entry of config) {
     if (entry.name === 'sources' && name === 'sources') {
       return [...entry.value];
     }
     if (entry.name === 'destinations' && name === 'destinations') {
       return [...entry.value];
+    }
+    if (entry.name === 'routes' && name === 'routes') {
+      return entry.value.flatMap((item) => {
+        if ('destinations' in item) {
+          return item.destinations;
+        } else if ('pipelines' in item) {
+          return item.pipelines;
+        } else {
+          return [];
+        }
+      });
     }
   }
   return [];
@@ -146,6 +160,9 @@ const replacePipelines = (unit: Unit, pipelines: Unit['unit']['pipelines']): Uni
 
 const findSourcePipelineIndex = (pipelines: Unit['unit']['pipelines'], sourceId: string): number =>
   pipelines.findIndex((pipeline) => readIdentifiers(pipeline.config, 'sources').includes(sourceId));
+
+const findRoutePipelineIndex = (pipelines: Unit['unit']['pipelines'], sourceId: string): number =>
+  pipelines.findIndex((pipeline) => readIdentifiers(pipeline.config, 'routes').includes(sourceId));
 
 const writePipeline = (unit: Unit, pipelineIndex: number, config: PipelineConfig): Unit => {
   const pipelines = unit.unit.pipelines.flatMap((pipeline, index) => {
@@ -277,6 +294,7 @@ export const getUnitConnections = (
       }
     }
   }
+  console.log('nuh', connections);
   return connections;
 };
 
@@ -290,7 +308,9 @@ const telemetryFit = (
   sourceId: string,
   destinationId: string
 ): 'unknown' | 'incompatible' | UnitPipeline['supported_telemetry'] => {
-  const source = unit.unit.sources?.find((item) => item.id === sourceId);
+  const source =
+    unit.unit.sources?.find((item) => item.id === sourceId) ||
+    unit.unit.pipelines?.find((item) => item.id === sourceId);
   const destination = unit.unit.destinations?.find((item) => item.id === destinationId);
   if (!source || !destination) {
     return 'unknown';
@@ -322,7 +342,8 @@ export const canConnectSourceToDestination = (
     return false;
   }
   const pipelineIndex = findSourcePipelineIndex(unit.unit.pipelines, sourceId);
-  if (pipelineIndex === -1) {
+  const routePipelineIndex = findRoutePipelineIndex(unit.unit.pipelines, sourceId);
+  if (pipelineIndex === -1 || routePipelineIndex === -1) {
     return true;
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
@@ -349,13 +370,16 @@ export const connectSourceToDestination = (
     return unit;
   }
   const pipelineIndex = findSourcePipelineIndex(unit.unit.pipelines, sourceId);
-  if (pipelineIndex === -1) {
+  const routePipelineIndex = findRoutePipelineIndex(unit.unit.pipelines, sourceId);
+  if (pipelineIndex === -1 || routePipelineIndex === -1) {
+    console.log('guhhhh');
     return appendSourcePipeline(unit, sourceId, pipelineTelemetry(unit, sourceId, destinationId), [
       { name: 'destinations', value: [destinationId] },
     ]);
   }
-  const pipeline = unit.unit.pipelines[pipelineIndex];
+  const pipeline = unit.unit.pipelines[pipelineIndex] ?? unit.unit.pipelines[routePipelineIndex];
   const sources = readIdentifiers(pipeline.config, 'sources');
+  const sourceRoutes = readIdentifiers(pipeline.config, 'routes');
   if (pipelineUsesRoutes(pipeline)) {
     const routes = addDestinationToRoutes(readRoutes(pipeline.config), destinationId);
     if (sources.length === 1) {

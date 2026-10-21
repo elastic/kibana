@@ -18,6 +18,8 @@ const ConnectionTargetsContext = createContext<ReadonlySet<string> | null>(null)
 export const ConnectionTargetsProvider = ConnectionTargetsContext.Provider;
 
 interface ConnectionHandleProps {
+  /** Distinguishes several handles of the same type on one node. */
+  id?: string;
   type: 'source' | 'target';
   position: Position;
   /** Configured unit nodes can start or receive a pipeline connection. */
@@ -27,6 +29,7 @@ interface ConnectionHandleProps {
 }
 
 export function ConnectionHandle({
+  id,
   type,
   position,
   isConnectable,
@@ -47,6 +50,7 @@ export function ConnectionHandle({
 
   return (
     <Handle
+      id={id}
       type={type}
       position={position}
       isConnectable={isConnectable}
