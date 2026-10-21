@@ -178,7 +178,8 @@ export class ActionPolicyClient {
 
   /**
    * Reports one telemetry event per policy. The origin is resolved here so reads never pay for it.
-   * Call only after the write succeeded.
+   * Call only after the write succeeded. A failure is logged rather than thrown because the write
+   * has already happened.
    */
   private reportActionPolicyChanged(
     operation: ActionPolicyOperation,
@@ -188,15 +189,23 @@ export class ActionPolicyClient {
       return;
     }
 
-    const origin = { actor: this.actor, ...resolveRuleEventOrigin(this.request) };
-    const eventType = ACTION_POLICY_EBT_EVENT_TYPE_BY_OPERATION[operation];
-    const spaceId = savedObjectNamespacesToSpaceId(this.namespace ? [this.namespace] : undefined);
+    try {
+      const origin = { actor: this.actor, ...resolveRuleEventOrigin(this.request) };
+      const eventType = ACTION_POLICY_EBT_EVENT_TYPE_BY_OPERATION[operation];
+      const spaceId = savedObjectNamespacesToSpaceId(this.namespace ? [this.namespace] : undefined);
 
-    for (const policy of policies) {
-      this.ebtService.reportEvent(
-        eventType,
-        buildActionPolicyChangedEventData(policy, origin, spaceId)
-      );
+      for (const policy of policies) {
+        this.ebtService.reportEvent(
+          eventType,
+          buildActionPolicyChangedEventData(policy, origin, spaceId)
+        );
+      }
+    } catch (error) {
+      this.logger.warn({
+        message: `Failed to build the ${operation} telemetry event`,
+        code: ALERTING_LOG_CODES.TELEMETRY_EBT_REPORT_FAILED,
+        error,
+      });
     }
   }
 
@@ -205,7 +214,7 @@ export class ActionPolicyClient {
    * their stored state, and a failed read is logged rather than thrown because the write has
    * already happened.
    */
-  private async reportBulkActionPolicyChanged(
+  private async reportBulkActionPolicyChange(
     operation: ActionPolicyOperation,
     ids: string[]
   ): Promise<void> {
@@ -608,7 +617,7 @@ export class ActionPolicyClient {
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
     await this.licenseService.assertActionPoliciesLicense();
     const { response, succeededIds } = await this.executeBulkUpdate(ids, { enabled: true });
-    await this.reportBulkActionPolicyChanged('enabled', succeededIds);
+    await this.reportBulkActionPolicyChange('enabled', succeededIds);
     return response;
   }
 
@@ -616,7 +625,7 @@ export class ActionPolicyClient {
     ids,
   }: BulkActionPoliciesByIdsParams): Promise<BulkResponse> {
     const { response, succeededIds } = await this.executeBulkUpdate(ids, { enabled: false });
-    await this.reportBulkActionPolicyChanged('disabled', succeededIds);
+    await this.reportBulkActionPolicyChange('disabled', succeededIds);
     return response;
   }
 

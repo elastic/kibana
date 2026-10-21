@@ -85,11 +85,13 @@ export const actionPolicyChangedTelemetryDataSchema = lazySchema(() =>
     grouping_mode: groupingModeSchema
       .optional()
       .describe(
-        'How matched alerts are batched into notifications, when the policy sets grouping.'
+        'The grouping mode the policy sets: `per_alert`, `all` or `per_field`. Absent when the policy sets no grouping, in which case notifications are sent `per_alert`.'
       ),
     throttle_strategy: throttleStrategySchema
       .optional()
-      .describe('The throttle strategy, when the action policy has a throttle.'),
+      .describe(
+        'The throttle strategy the policy sets. Absent when the policy sets no throttle, in which case the strategy defaults to `on_status_change` for `per_alert` grouping and `time_interval` otherwise.'
+      ),
     snoozed: z.boolean().describe('Whether the action policy has a snooze set.'),
     origin: ruleChangedEventOriginSchema.describe('Where the change came from.'),
   })

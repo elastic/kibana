@@ -90,14 +90,15 @@ const actionPolicyChangedEventSchema: EventTypeOpts<ActionPolicyChangedEbtData>[
     type: 'keyword',
     _meta: {
       description:
-        'How matched alerts are batched into notifications: `per_alert`, `all` or `per_field`, when the policy sets grouping.',
+        'The grouping mode the policy sets: `per_alert`, `all` or `per_field`. Absent when the policy sets no grouping, in which case notifications are sent `per_alert`.',
       optional: true,
     },
   },
   throttle_strategy: {
     type: 'keyword',
     _meta: {
-      description: 'The throttle strategy, when the action policy has a throttle.',
+      description:
+        'The throttle strategy the policy sets. Absent when the policy sets no throttle, in which case the strategy defaults to `on_status_change` for `per_alert` grouping and `time_interval` otherwise.',
       optional: true,
     },
   },

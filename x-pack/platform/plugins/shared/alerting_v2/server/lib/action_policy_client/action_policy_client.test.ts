@@ -3610,6 +3610,30 @@ describe('ActionPolicyClient', () => {
       });
     });
 
+    it('returns the created policy and logs when reporting the event throws', async () => {
+      mockStoredCreate('policy-created');
+      ebtService.reportEvent.mockImplementationOnce(() => {
+        throw new Error('report failed');
+      });
+
+      await expect(
+        client.createActionPolicy({
+          data: {
+            name: 'my-policy',
+            destinations: [{ type: 'workflow', id: 'my-workflow' }],
+          },
+          options: { id: 'policy-created' },
+        })
+      ).resolves.toMatchObject({ id: 'policy-created' });
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'Failed to build the created telemetry event',
+        expect.objectContaining({
+          labels: { code: ALERTING_LOG_CODES.TELEMETRY_EBT_REPORT_FAILED },
+        })
+      );
+    });
+
     it('does not report when the create conflicts', async () => {
       mockSavedObjectsClient.create.mockRejectedValueOnce(
         SavedObjectsErrorHelpers.createConflictError(ACTION_POLICY_SAVED_OBJECT_TYPE, 'dup')
