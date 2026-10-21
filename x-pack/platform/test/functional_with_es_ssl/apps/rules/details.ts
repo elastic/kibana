@@ -12,6 +12,7 @@ import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
+import { snoozeAlert } from '../../lib/alert_api_actions';
 import { ObjectRemover } from '../../lib/object_remover';
 import { getTestAlertData, getTestConnectorData } from '../../lib/get_test_data';
 
@@ -141,6 +142,24 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return body;
   }
 
+  async function snoozeRule(ruleId: string) {
+    await supertest
+      .post(`/internal/alerting/rule/${encodeURIComponent(ruleId)}/_snooze`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        snooze_schedule: {
+          id: uuidv4(),
+          duration: 60 * 60 * 1000,
+          rRule: {
+            count: 1,
+            dtstart: moment().add(3, 'hours').toISOString(),
+            tzid: 'UTC',
+          },
+        },
+      })
+      .expect(204);
+  }
+
   async function getRuleSnoozeState(ruleId: string) {
     const {
       mute_all: muteAll,
@@ -254,7 +273,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      it('should reenable a disabled the rule', async () => {
+      it('should reenable a disabled rule', async () => {
         expect((await getRule(rule.id)).enabled).to.equal(false);
 
         await testSubjects.click('ruleEnabledSwitch');
@@ -299,6 +318,39 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const { muteAll, scheduleCount } = await getRuleSnoozeState(rule.id);
           expect(muteAll).to.equal(false);
           expect(scheduleCount).to.equal(1);
+        });
+      });
+
+      it('should unsnooze an actively snoozed rule from the snooze badge', async () => {
+        await snoozeAlert({ supertest, alertId: rule.id });
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await testSubjects.clickWhenNotDisabled('rulesListNotifyBadge-snoozed');
+        await testSubjects.clickWhenNotDisabled('ruleSnoozeCancel');
+        await testSubjects.waitForDeleted('ruleSnoozeCancel');
+
+        await retry.try(async () => {
+          expect(await getRuleSnoozeState(rule.id)).to.eql({
+            muteAll: false,
+            scheduleCount: 0,
+            isSnoozedUntil: null,
+          });
+        });
+      });
+
+      it('should remove all snooze schedules from the snooze badge', async () => {
+        await snoozeRule(rule.id);
+        await browser.refresh();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await testSubjects.clickWhenNotDisabled('rulesListNotifyBadge-scheduled');
+        await testSubjects.clickWhenNotDisabled('ruleRemoveAllSchedules');
+        await testSubjects.click('confirmModalConfirmButton');
+        await testSubjects.waitForDeleted('ruleRemoveAllSchedules');
+
+        await retry.try(async () => {
+          expect((await getRuleSnoozeState(rule.id)).scheduleCount).to.equal(0);
         });
       });
     });
