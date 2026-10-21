@@ -107,7 +107,9 @@ describe('digital experience apps', () => {
             'event_name' in doc && doc.event_name === 'browser.web_vital'
         );
 
-      webVitals(collect(false)).forEach((doc) => {
+      const withoutAttribution = webVitals(collect(false));
+      expect(withoutAttribution.length).toBeGreaterThan(0);
+      withoutAttribution.forEach((doc) => {
         expect(doc).not.toHaveProperty('body');
       });
       const withAttribution = webVitals(collect(false, true));
