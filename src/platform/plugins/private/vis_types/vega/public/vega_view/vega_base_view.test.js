@@ -151,6 +151,18 @@ describe('VegaBaseView errors', () => {
   });
 });
 
+describe('VegaBaseView messages', () => {
+  test('shows a repeated error once', () => {
+    const parentEl = document.createElement('div');
+    const view = createMockView({}, { parentEl });
+
+    view.onError(new Error('Index "missing" not found'));
+    view.onError(new Error('Index "missing" not found'));
+
+    expect(parentEl.querySelectorAll('.vgaVis__message--err')).toHaveLength(1);
+  });
+});
+
 describe('VegaBaseView filter actions', () => {
   test('forwards the function name and arguments to the parent', async () => {
     const onFilterAction = jest.fn().mockResolvedValue(undefined);

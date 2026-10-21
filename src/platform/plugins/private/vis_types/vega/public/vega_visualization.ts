@@ -15,7 +15,7 @@ import type { VegaEventHandler } from './types';
 import type { VegaInspectorAdapters } from './vega_inspector';
 import type { DebugValues } from './vega_inspector/vega_adapter';
 import { getNotifications, getData } from './services';
-import type { VegaBaseView } from './vega_view/vega_base_view';
+import type { VegaView } from './vega_view/vega_view';
 import { createVegaStateRestorer } from './lib/vega_state_restorer';
 import { createVegaFilterActionHandler } from './vega_view/vega_filter_action_handler';
 
@@ -31,7 +31,7 @@ export const createVegaVisualization = (
 ): VegaVisType =>
   class VegaVisualization {
     private readonly dataPlugin = getData();
-    private vegaView: VegaBaseView | null = null;
+    private vegaView: InstanceType<typeof VegaView> | null = null;
     private vegaStateRestorer = createVegaStateRestorer({
       isActive: () => Boolean(this.vegaView?._descriptor?.restoreSignalValuesOnRefresh),
     });

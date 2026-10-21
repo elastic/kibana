@@ -8,53 +8,34 @@
  */
 
 import { calculatePopoverPosition } from '@elastic/eui';
-import type { Item, View } from 'vega';
 import { formatValue as createTooltipContent } from 'vega-tooltip';
 import _ from 'lodash';
-import type { ResolvedTooltipConfig } from '../data_model/types';
 
 // Some of this code was adapted from https://github.com/vega/vega-tooltip
 
 const tooltipId = 'vega-kibana-tooltip';
 
-/** The scenegraph fields of a hovered Vega item, which the public `Item` typings omit. */
-interface SceneItem {
-  x: number;
-  y: number;
-  bounds: { x1: number; y1: number; width: () => number; height: () => number };
-  mark: { group?: SceneItem };
-}
-
-/** The scenegraph handler Vega passes to tooltip handlers; `_origin` is the view's offset. */
-interface SceneHandler {
-  _origin: [number, number];
-}
-
 /**
  * Simulate the result of the DOM's getBoundingClientRect()
  */
-const createRect = (left: number, top: number, width: number, height: number) => ({
-  left,
-  top,
-  width,
-  height,
-  x: left,
-  y: top,
-  right: left + width,
-  bottom: top + height,
-});
+function createRect(left, top, width, height) {
+  return {
+    left,
+    top,
+    width,
+    height,
+    x: left,
+    y: top,
+    right: left + width,
+    bottom: top + height,
+  };
+}
 
 /**
  * The tooltip handler class.
  */
 export class TooltipHandler {
-  private readonly container: HTMLElement;
-  private readonly position: ResolvedTooltipConfig['position'];
-  private readonly padding: number;
-  private readonly centerOnMark: number;
-  private readonly textTruncate: boolean;
-
-  constructor(container: HTMLElement, view: View, opts: ResolvedTooltipConfig) {
+  constructor(container, view, opts) {
     this.container = container;
     this.position = opts.position;
     this.padding = opts.padding;
@@ -67,10 +48,8 @@ export class TooltipHandler {
   /**
    * The handler function.
    */
-  handler(view: SceneHandler, event: MouseEvent, hoveredItem: Item, value: unknown): void {
+  handler(view, event, item, value) {
     this.hideTooltip();
-    // Vega passes its scenegraph item, which carries the bounds and offsets the public type omits.
-    const item = hoveredItem as Item & SceneItem;
 
     // hide tooltip for null, undefined, or empty string values
     if (value == null || value === '') {
@@ -104,7 +83,7 @@ export class TooltipHandler {
       let top = containerBox.top + view._origin[1] + item.bounds.y1;
 
       // loop item mark group
-      let ancestorItem: SceneItem = item;
+      let ancestorItem = item;
 
       while (ancestorItem.mark.group) {
         ancestorItem = ancestorItem.mark.group;
@@ -125,7 +104,7 @@ export class TooltipHandler {
     el.setAttribute('style', `top: ${pos.top}px; left: ${pos.left}px`);
   }
 
-  hideTooltip(): void {
+  hideTooltip() {
     const el = document.getElementById(tooltipId);
     if (el) el.remove();
   }

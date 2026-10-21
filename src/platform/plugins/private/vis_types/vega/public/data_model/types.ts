@@ -212,14 +212,6 @@ export interface TooltipConfig {
   textTruncate?: boolean;
 }
 
-/** Tooltip settings after the parser has applied defaults and validated every value. */
-export interface ResolvedTooltipConfig {
-  position: ToolTipPositions;
-  padding: number;
-  centerOnMark: number;
-  textTruncate: boolean;
-}
-
 export interface DstObj {
   [index: string]: any;
   type?: string;
@@ -255,7 +247,7 @@ export interface VegaRenderDescriptor {
   readonly useResize?: boolean;
   readonly useHover?: boolean;
   readonly renderer?: Renderer;
-  readonly tooltips?: false | ResolvedTooltipConfig;
+  readonly tooltips?: boolean | TooltipConfig;
   readonly mapConfig?: VegaConfig;
   /** Named Vega color schemes the spec relies on, such as Kibana's `elastic` palette. */
   readonly colorSchemes?: Readonly<Record<string, string[]>>;
