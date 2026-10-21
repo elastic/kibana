@@ -15,7 +15,8 @@ The static `react` renderer draws one inline SVG, which `html` and `snapshot` us
 - countries from `geometry.world_countries` form an outline basemap under everything;
 - regions fill the boundary file named by `regionSet`, joined on the property Kibana Maps uses (`iso2` for countries, the English name otherwise), colored by `regionRamp`;
 - `markerRamp` colors and sizes markers by `value`, as Kibana draws coarse geo-grid clusters;
-- `cellRamp` colors geotile cells.
+- `cellRamp` colors geotile cells;
+- `layers` stacks any number of region, marker, cell and arc layers bottom to top, as a Kibana map stacks its layers, each with its own ramp or static `color` and its `opacity` (a Maps layer's `alpha`). The single-layer fields draw under them.
 
 Ramps are Kibana Maps' (`euiPaletteCool(8)` and its siblings under Borealis).
 

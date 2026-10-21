@@ -10,6 +10,7 @@ import {
   MAP_MAX_ARCS,
   MAP_MAX_BASEMAP_TILES,
   MAP_MAX_CELLS,
+  MAP_MAX_LAYERS,
   MAP_MAX_MARKERS,
   MAP_MAX_REGIONS,
   MAP_RAMPS,
@@ -59,6 +60,62 @@ const basemapTileSchema = z.object({
   src: z.string().min(1).max(120000),
 });
 
+const regionSetSchema = z
+  .string()
+  .regex(/^[a-z0-9_]+$/)
+  .max(100)
+  .describe(`An EMS boundary file id, such as ${MAP_REGION_SETS.join(', ')}.`);
+const regionKeySchema = z
+  .string()
+  .min(1)
+  .max(100)
+  .describe(
+    'The boundary property each region’s code matches; defaults by region set, else `name`.'
+  );
+const markerSizeSchema = z.object({
+  min: z.number().min(0).max(200),
+  max: z.number().min(0).max(200),
+});
+const markerLabelsSchema = z.enum(['beside', 'inside']);
+const cellShapeSchema = z.enum(['grid', 'hex', 'heatmap']);
+const color = z.string().regex(/^#[0-9a-fA-F]{6}$/);
+const opacity = z.number().min(0).max(1);
+
+const layerSchema = z.discriminatedUnion('kind', [
+  z.object({
+    kind: z.literal('regions'),
+    color: color.optional(),
+    opacity: opacity.optional(),
+    regions: z.array(regionSchema).max(MAP_MAX_REGIONS),
+    regionSet: regionSetSchema,
+    regionKey: regionKeySchema.optional(),
+    regionRamp: ramp.optional(),
+  }),
+  z.object({
+    kind: z.literal('markers'),
+    color: color.optional(),
+    opacity: opacity.optional(),
+    markers: z.array(markerSchema).max(MAP_MAX_MARKERS),
+    markerRamp: ramp.optional(),
+    markerSize: markerSizeSchema.optional(),
+    markerLabels: markerLabelsSchema.optional(),
+  }),
+  z.object({
+    kind: z.literal('cells'),
+    color: color.optional(),
+    opacity: opacity.optional(),
+    cells: z.array(cellSchema).max(MAP_MAX_CELLS),
+    cellShape: cellShapeSchema.optional(),
+    cellRamp: ramp.optional(),
+  }),
+  z.object({
+    kind: z.literal('arcs'),
+    color: color.optional(),
+    opacity: opacity.optional(),
+    arcs: z.array(arcSchema).max(MAP_MAX_ARCS),
+  }),
+]);
+
 const tmsCoord = z.number().int().min(0).max(1023);
 
 export const mapSchema = z.object({
@@ -78,17 +135,17 @@ export const mapSchema = z.object({
     .optional(),
   markers: z.array(markerSchema).max(MAP_MAX_MARKERS).optional(),
   markerRamp: ramp.optional(),
-  markerSize: z
-    .object({ min: z.number().min(0).max(200), max: z.number().min(0).max(200) })
-    .optional(),
-  markerLabels: z.enum(['beside', 'inside']).optional(),
+  markerSize: markerSizeSchema.optional(),
+  markerLabels: markerLabelsSchema.optional(),
   cells: z.array(cellSchema).max(MAP_MAX_CELLS).optional(),
-  cellShape: z.enum(['grid', 'hex', 'heatmap']).optional(),
+  cellShape: cellShapeSchema.optional(),
   cellRamp: ramp.optional(),
   regions: z.array(regionSchema).max(MAP_MAX_REGIONS).optional(),
-  regionSet: z.enum(MAP_REGION_SETS).optional(),
+  regionSet: regionSetSchema.optional(),
+  regionKey: regionKeySchema.optional(),
   regionRamp: ramp.optional(),
   arcs: z.array(arcSchema).max(MAP_MAX_ARCS).optional(),
+  layers: z.array(layerSchema).max(MAP_MAX_LAYERS).optional(),
   legend: z.object({ unit: z.string().max(32).optional() }).optional(),
   basemap: z
     .object({

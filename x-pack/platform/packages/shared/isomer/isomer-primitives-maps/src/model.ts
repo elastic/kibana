@@ -16,7 +16,7 @@ import {
   type GeoBounds,
 } from './projection';
 import { rampColor } from './ramps';
-import type { MapArc, MapMarker, MapNode, MapRegion } from './types';
+import type { MapArc, MapLayer, MapMarker, MapNode, MapRegion } from './types';
 
 export const MAP_PLOT_WIDTH = 700;
 export const MAP_PLOT_HEIGHT = 360;
@@ -56,6 +56,8 @@ export interface MapCellModel {
 
 export interface MapArcModel {
   path: string;
+  /** The layer's static color, when the arc has no tone. */
+  color?: string;
   tone: NamedColor;
   weight: number;
   label: string | undefined;
@@ -75,6 +77,57 @@ export interface MapRegionModel extends MapRegion {
   fill: string | undefined;
 }
 
+/** A data layer as drawn, bottom to top. */
+export type MapLayerModel = { opacity: number | undefined } & (
+  | { kind: 'regions'; regionSet?: string; regionKey?: string; regions: MapRegionModel[] }
+  | { kind: 'markers'; labels: 'beside' | 'inside'; markers: MapMarkerModel[] }
+  | { kind: 'cells'; shape: MapNode['cellShape']; cells: MapCellModel[] }
+  | { kind: 'arcs'; arcs: MapArcModel[] }
+);
+
+/** A data layer before projection: a `layers` entry, or the node's single-layer fields. */
+type NodeLayer =
+  | (Omit<Extract<MapLayer, { kind: 'regions' }>, 'regionSet'> & { regionSet?: string })
+  | Exclude<MapLayer, { kind: 'regions' }>;
+
+/** The node's single-layer fields as layers, in the order they have always drawn, then its `layers`. */
+export const layersOf = (node: MapNode): NodeLayer[] => [
+  ...(node.regions?.length
+    ? [
+        {
+          kind: 'regions' as const,
+          regions: node.regions,
+          regionSet: node.regionSet,
+          regionKey: node.regionKey,
+          regionRamp: node.regionRamp,
+        },
+      ]
+    : []),
+  ...(node.cells?.length
+    ? [
+        {
+          kind: 'cells' as const,
+          cells: node.cells,
+          cellShape: node.cellShape,
+          cellRamp: node.cellRamp,
+        },
+      ]
+    : []),
+  ...(node.arcs?.length ? [{ kind: 'arcs' as const, arcs: node.arcs }] : []),
+  ...(node.markers?.length
+    ? [
+        {
+          kind: 'markers' as const,
+          markers: node.markers,
+          markerRamp: node.markerRamp,
+          markerSize: node.markerSize,
+          markerLabels: node.markerLabels,
+        },
+      ]
+    : []),
+  ...(node.layers ?? []),
+];
+
 export interface MapModel {
   label: string | undefined;
   ariaLabel: string;
@@ -86,6 +139,8 @@ export interface MapModel {
   arcs: MapArcModel[];
   tiles: MapTileModel[];
   regions: MapRegionModel[];
+  /** Every data layer, bottom to top; `markers`, `cells`, `arcs` and `regions` flatten them. */
+  layers: MapLayerModel[];
   cellShape: MapNode['cellShape'];
   legendUnit: string | undefined;
   basemap: MapNode['basemap'];
@@ -124,9 +179,12 @@ const viewProjector = (
   });
 };
 
-const boundsFromFeatures = (node: MapNode): GeoBounds => {
+const boundsFromFeatures = (layers: readonly NodeLayer[]): GeoBounds => {
   let bounds: GeoBounds | undefined;
-  for (const marker of node.markers ?? []) {
+  const markers = layers.flatMap((layer) => (layer.kind === 'markers' ? layer.markers : []));
+  const arcs = layers.flatMap((layer) => (layer.kind === 'arcs' ? layer.arcs : []));
+  const cells = layers.flatMap((layer) => (layer.kind === 'cells' ? layer.cells : []));
+  for (const marker of markers) {
     bounds = extendBounds(bounds, {
       west: marker.lon,
       east: marker.lon,
@@ -134,7 +192,7 @@ const boundsFromFeatures = (node: MapNode): GeoBounds => {
       north: marker.lat,
     });
   }
-  for (const arc of node.arcs ?? []) {
+  for (const arc of arcs) {
     const [fromLat, fromLon] = arc.from;
     const [toLat, toLon] = arc.to;
     bounds = extendBounds(bounds, {
@@ -144,7 +202,7 @@ const boundsFromFeatures = (node: MapNode): GeoBounds => {
       north: Math.max(fromLat, toLat),
     });
   }
-  for (const cell of node.cells ?? []) {
+  for (const cell of cells) {
     const tile = parseGeotileKey(cell.key);
     if (tile) {
       bounds = extendBounds(bounds, geotileBounds(tile));
@@ -164,25 +222,22 @@ const arcPath = (from: ProjectedPoint, to: ProjectedPoint): string => {
 const extent = (values: readonly number[]) =>
   values.length === 0 ? { min: 0, max: 0 } : { min: Math.min(...values), max: Math.max(...values) };
 
-export const createMapModel = (node: MapNode): MapModel => {
-  const width = node.width ?? MAP_PLOT_WIDTH;
-  const height = node.height ?? MAP_PLOT_HEIGHT;
-  const fixed = node.view && node.view !== 'fit' ? node.view : undefined;
-  const bounds = fixed ? WORLD : boundsFromFeatures(node);
-  const project = fixed ? viewProjector(fixed, width, height) : fitProjector(bounds, width, height);
-
+const markerModels = (
+  layer: Extract<NodeLayer, { kind: 'markers' }>,
+  project: Projector
+): MapMarkerModel[] => {
   const markerValues = extent(
-    (node.markers ?? []).flatMap(({ value }) => (value === undefined ? [] : [value]))
+    layer.markers.flatMap(({ value }) => (value === undefined ? [] : [value]))
   );
   const sizeOf = (marker: MapMarker) => marker.size ?? marker.value;
   const markerSizes = extent(
-    (node.markers ?? []).flatMap((marker) => {
+    layer.markers.flatMap((marker) => {
       const size = sizeOf(marker);
       return size === undefined ? [] : [size];
     })
   );
-  const radius = node.markerSize ?? (node.markerRamp ? MARKER_RADIUS : undefined);
-  const markers: MapMarkerModel[] = (node.markers ?? []).map((marker: MapMarker) => {
+  const radius = layer.markerSize ?? (layer.markerRamp ? MARKER_RADIUS : undefined);
+  return layer.markers.map((marker: MapMarker) => {
     const point = project(marker.lon, marker.lat);
     const size = sizeOf(marker);
     const scaled =
@@ -196,52 +251,104 @@ export const createMapModel = (node: MapNode): MapModel => {
       value: marker.value,
       radius: radius ? radius.min + (scaled ?? 0) * (radius.max - radius.min) : MARKER_RADIUS.fixed,
       fill:
-        node.markerRamp && marker.value !== undefined
-          ? rampColor(node.markerRamp, marker.value, markerValues.min, markerValues.max)
-          : undefined,
+        layer.markerRamp && marker.value !== undefined
+          ? rampColor(layer.markerRamp, marker.value, markerValues.min, markerValues.max)
+          : marker.tone
+          ? undefined
+          : layer.color,
       ...point,
     };
   });
+};
 
-  const cellValues = extent((node.cells ?? []).map(({ value }) => value));
+export const createMapModel = (node: MapNode): MapModel => {
+  const width = node.width ?? MAP_PLOT_WIDTH;
+  const height = node.height ?? MAP_PLOT_HEIGHT;
+  const fixed = node.view && node.view !== 'fit' ? node.view : undefined;
+  const layers = layersOf(node);
+  const bounds = fixed ? WORLD : boundsFromFeatures(layers);
+  const project = fixed ? viewProjector(fixed, width, height) : fitProjector(bounds, width, height);
+
+  const layerModels: MapLayerModel[] = [];
   let droppedCellCount = 0;
-  const cells: MapCellModel[] = [];
-  for (const cell of node.cells ?? []) {
-    const tile = parseGeotileKey(cell.key);
-    if (!tile) {
-      droppedCellCount += 1;
-      continue;
+  for (const layer of layers) {
+    switch (layer.kind) {
+      case 'markers':
+        layerModels.push({
+          kind: 'markers',
+          opacity: layer.opacity,
+          labels: layer.markerLabels ?? 'beside',
+          markers: markerModels(layer, project),
+        });
+        break;
+      case 'cells': {
+        const cellValues = extent(layer.cells.map(({ value }) => value));
+        const cells: MapCellModel[] = [];
+        for (const cell of layer.cells) {
+          const tile = parseGeotileKey(cell.key);
+          if (!tile) {
+            droppedCellCount += 1;
+            continue;
+          }
+          const tileBounds = geotileBounds(tile);
+          const topLeft = project(tileBounds.west, tileBounds.north);
+          const bottomRight = project(tileBounds.east, tileBounds.south);
+          cells.push({
+            key: cell.key,
+            value: cell.value,
+            left: topLeft.x,
+            top: topLeft.y,
+            width: Math.max(bottomRight.x - topLeft.x, 1),
+            height: Math.max(bottomRight.y - topLeft.y, 1),
+            fill: layer.cellRamp
+              ? rampColor(layer.cellRamp, cell.value, cellValues.min, cellValues.max)
+              : layer.color,
+          });
+        }
+        layerModels.push({ kind: 'cells', opacity: layer.opacity, shape: layer.cellShape, cells });
+        break;
+      }
+      case 'arcs':
+        layerModels.push({
+          kind: 'arcs',
+          opacity: layer.opacity,
+          arcs: layer.arcs.map((arc: MapArc) => ({
+            path: arcPath(project(arc.from[1], arc.from[0]), project(arc.to[1], arc.to[0])),
+            tone: arc.tone ?? 'neutral',
+            weight: arc.weight ?? 1,
+            label: arc.label,
+            ...(layer.color && !arc.tone ? { color: layer.color } : {}),
+          })),
+        });
+        break;
+      case 'regions': {
+        const regionValues = extent(layer.regions.map(({ value }) => value));
+        layerModels.push({
+          kind: 'regions',
+          opacity: layer.opacity,
+          regionSet: layer.regionSet,
+          regionKey: layer.regionKey,
+          regions: layer.regions.map((region) => ({
+            ...region,
+            fill: layer.regionRamp
+              ? rampColor(layer.regionRamp, region.value, regionValues.min, regionValues.max)
+              : region.tone
+              ? undefined
+              : layer.color,
+          })),
+        });
+        break;
+      }
     }
-    const tileBounds = geotileBounds(tile);
-    const topLeft = project(tileBounds.west, tileBounds.north);
-    const bottomRight = project(tileBounds.east, tileBounds.south);
-    cells.push({
-      key: cell.key,
-      value: cell.value,
-      left: topLeft.x,
-      top: topLeft.y,
-      width: Math.max(bottomRight.x - topLeft.x, 1),
-      height: Math.max(bottomRight.y - topLeft.y, 1),
-      fill: node.cellRamp
-        ? rampColor(node.cellRamp, cell.value, cellValues.min, cellValues.max)
-        : undefined,
-    });
   }
-
-  const arcs: MapArcModel[] = (node.arcs ?? []).map((arc: MapArc) => ({
-    path: arcPath(project(arc.from[1], arc.from[0]), project(arc.to[1], arc.to[0])),
-    tone: arc.tone ?? 'neutral',
-    weight: arc.weight ?? 1,
-    label: arc.label,
-  }));
-
-  const regionValues = extent((node.regions ?? []).map(({ value }) => value));
-  const regions: MapRegionModel[] = (node.regions ?? []).map((region) => ({
-    ...region,
-    fill: node.regionRamp
-      ? rampColor(node.regionRamp, region.value, regionValues.min, regionValues.max)
-      : undefined,
-  }));
+  const flat = <K extends MapLayerModel['kind']>(kind: K) =>
+    layerModels.flatMap((layer) => (layer.kind === kind ? [layer] : [])) as Array<
+      Extract<MapLayerModel, { kind: K }>
+    >;
+  const markers = flat('markers').flatMap((layer) => layer.markers);
+  const cells = flat('cells').flatMap((layer) => layer.cells);
+  const arcs = flat('arcs').flatMap((layer) => layer.arcs);
+  const regions = flat('regions').flatMap((layer) => layer.regions);
 
   const tiles: MapTileModel[] = [];
   const { basemap } = node;
@@ -282,7 +389,8 @@ export const createMapModel = (node: MapNode): MapModel => {
     arcs,
     tiles,
     regions,
-    cellShape: node.cellShape,
+    layers: layerModels,
+    cellShape: node.cellShape ?? flat('cells')[0]?.shape,
     legendUnit: node.legend?.unit,
     basemap: node.basemap,
     bounds,
