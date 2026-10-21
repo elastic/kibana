@@ -16,7 +16,8 @@ import { AttachmentType, ExternalReferenceStorageType } from '../../domain/attac
 import {
   AttachmentPatchRequestSchema,
   AttachmentRequestSchema,
-  BulkDeleteAttachmentsRequestSchema,
+  BulkDeleteAttachmentsByAttachmentIdRequestSchema,
+  BulkDeleteAttachmentsBySavedObjectIdRequestSchema,
   BulkDeleteFileAttachmentsRequestSchema,
 } from './v1';
 
@@ -300,15 +301,40 @@ describe('BulkDeleteFileAttachmentsRequestSchema', () => {
   });
 });
 
-describe('BulkDeleteAttachmentsRequestSchema', () => {
+describe('BulkDeleteAttachmentsByAttachmentIdRequestSchema', () => {
+  const request = { type: 'security.alert', attachmentIds: ['alert-1', 'alert-2'] };
+
   it('has expected attributes in request', () => {
-    const result = BulkDeleteAttachmentsRequestSchema.safeParse({ ids: ['abc', 'xyz'] });
+    const result = BulkDeleteAttachmentsByAttachmentIdRequestSchema.safeParse(request);
+    expect(result.success).toBe(true);
+    expect(result.data).toStrictEqual(request);
+  });
+
+  it('fails with an empty array of attachment ids', () => {
+    expect(
+      BulkDeleteAttachmentsByAttachmentIdRequestSchema.safeParse({ ...request, attachmentIds: [] })
+        .success
+    ).toBe(false);
+  });
+
+  it('fails with an empty type', () => {
+    expect(
+      BulkDeleteAttachmentsByAttachmentIdRequestSchema.safeParse({ ...request, type: '' }).success
+    ).toBe(false);
+  });
+});
+
+describe('BulkDeleteAttachmentsBySavedObjectIdRequestSchema', () => {
+  it('has expected attributes in request', () => {
+    const result = BulkDeleteAttachmentsBySavedObjectIdRequestSchema.safeParse({
+      ids: ['abc', 'xyz'],
+    });
     expect(result.success).toBe(true);
     expect(result.data).toStrictEqual({ ids: ['abc', 'xyz'] });
   });
 
   it('removes foo:bar attributes from request', () => {
-    const result = BulkDeleteAttachmentsRequestSchema.safeParse({
+    const result = BulkDeleteAttachmentsBySavedObjectIdRequestSchema.safeParse({
       ids: ['abc', 'xyz'],
       foo: 'bar',
     });
@@ -318,14 +344,20 @@ describe('BulkDeleteAttachmentsRequestSchema', () => {
 
   it(`fails with more than ${MAX_BULK_DELETE_ATTACHMENTS} ids`, () => {
     const ids = new Array(MAX_BULK_DELETE_ATTACHMENTS + 1).fill('id');
-    expect(BulkDeleteAttachmentsRequestSchema.safeParse({ ids }).success).toBe(false);
+    expect(BulkDeleteAttachmentsBySavedObjectIdRequestSchema.safeParse({ ids }).success).toBe(
+      false
+    );
   });
 
   it('fails with an empty array of ids', () => {
-    expect(BulkDeleteAttachmentsRequestSchema.safeParse({ ids: [] }).success).toBe(false);
+    expect(BulkDeleteAttachmentsBySavedObjectIdRequestSchema.safeParse({ ids: [] }).success).toBe(
+      false
+    );
   });
 
   it('fails with an empty string id', () => {
-    expect(BulkDeleteAttachmentsRequestSchema.safeParse({ ids: [''] }).success).toBe(false);
+    expect(BulkDeleteAttachmentsBySavedObjectIdRequestSchema.safeParse({ ids: [''] }).success).toBe(
+      false
+    );
   });
 });

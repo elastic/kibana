@@ -1812,6 +1812,21 @@ describe('huntCoordinator', () => {
       expect(result.completed_successfully).toBe(false);
     });
 
+    it('carries a collapsed Tier 2 gap through as incomplete_final, so the report is not re-swept forever', async () => {
+      mockT1.mockResolvedValueOnce(tier1Result());
+      mockT2.mockResolvedValueOnce(
+        tier2Result({
+          incomplete: [{ reason: 'collapsed', technique_id: 'T1566', detail: 'cut' }],
+        })
+      );
+
+      const result = await run('run-t2-collapsed');
+
+      expect(result.completeness).toBe('incomplete_final');
+      // Retrying reproduces the same gap, so the run counts as done — but not as clean.
+      expect(result.completed_successfully).toBe(true);
+    });
+
     it('reports nothing_searched when Tier 1 mapped no term and Tier 2 was configured off', async () => {
       mockT1.mockResolvedValueOnce(tier1Result({ status: 'no_searchable_terms' }));
 

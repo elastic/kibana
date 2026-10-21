@@ -11,6 +11,10 @@ import { UserActionTypes } from '../action/v1';
 export const BulkAttachmentsPayloadSchema = z.object({
   /** The unified attachment type, e.g. `security.alert` or `file`. */
   attachmentType: z.string(),
+  /**
+   * The removed items, e.g. alerts or files, counted once each. An attachment that references
+   * nothing counts as 1 item.
+   */
   count: z.number(),
 });
 

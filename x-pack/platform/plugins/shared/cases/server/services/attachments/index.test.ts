@@ -2213,6 +2213,18 @@ describe('AttachmentService', () => {
     });
   });
 
+  describe('countAlertsWithinCase', () => {
+    it('logs and rethrows when the aggregation fails', async () => {
+      unsecuredSavedObjectsClient.find.mockRejectedValue(new Error('aggregation failed'));
+
+      await expect(service.countAlertsWithinCase('test-id')).rejects.toThrow('aggregation failed');
+
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        'Error while counting alerts for case test-id: Error: aggregation failed'
+      );
+    });
+  });
+
   describe('countAlertsAttachedToCase', () => {
     const mockFinder = mockPointInTimeFinder(unsecuredSavedObjectsClient);
 
