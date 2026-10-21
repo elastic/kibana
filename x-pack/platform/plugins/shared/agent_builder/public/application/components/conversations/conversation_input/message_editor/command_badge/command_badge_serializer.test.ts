@@ -267,6 +267,22 @@ describe('deserializeInputSegments', () => {
     ]);
   });
 
+  it('drops the previous trigger from the label of a badge serialized with it', () => {
+    const segments = deserializeInputSegments('[@visualization/Pacific Sales](sml://entry-1)');
+
+    expect(segments).toEqual([
+      {
+        type: 'badge',
+        data: {
+          commandId: CommandId.Sml,
+          label: 'visualization/Pacific Sales',
+          id: 'entry-1',
+          metadata: {},
+        },
+      },
+    ]);
+  });
+
   it('parses an image segment', () => {
     const segments = deserializeInputSegments('[photo.png](image://photo.png)');
 

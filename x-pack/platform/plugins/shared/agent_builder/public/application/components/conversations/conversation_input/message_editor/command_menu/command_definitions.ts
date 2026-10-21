@@ -25,6 +25,7 @@ const COMMAND_DEFINITIONS: readonly CommandDefinition[] = [
     id: CommandId.Sml,
     scheme: 'sml',
     sequence: '#',
+    legacySequences: ['@'],
     name: semanticKnowledgeCommandName,
     menuComponent: Sml,
     experimental: true,
