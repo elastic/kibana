@@ -15,6 +15,21 @@ import { useCancellableSearch } from './use_cancellable_search';
 
 jest.mock('./use_aiops_app_context');
 
+// jsdom 20's AbortSignal does not implement AbortSignal.any, which current browsers do.
+if (typeof AbortSignal.any !== 'function') {
+  AbortSignal.any = (signals: AbortSignal[]): AbortSignal => {
+    const controller = new AbortController();
+    for (const signal of signals) {
+      if (signal.aborted) {
+        controller.abort(signal.reason);
+        return controller.signal;
+      }
+      signal.addEventListener('abort', () => controller.abort(signal.reason), { once: true });
+    }
+    return controller.signal;
+  };
+}
+
 describe('useCancellableSearch', () => {
   const search = jest.fn();
 
