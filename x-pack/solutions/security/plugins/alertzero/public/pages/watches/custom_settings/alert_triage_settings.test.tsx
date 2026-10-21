@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import {
   SYSTEM_SECURITY_WATCH_FLOOR_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
@@ -18,6 +19,9 @@ const SAVED_EXTRAS = {
   autoCloseConfidenceScoreMinThreshold: 0.9,
   budgetPerHour: 600,
   lookbackHours: 48,
+  minSeverity: 'medium' as const,
+  excludeBuildingBlocks: true,
+  excludedRuleTags: ['SEND_TO_DEV'],
 };
 
 const alertTriage: Worker = {
@@ -54,6 +58,40 @@ describe('AlertTriageSettings', () => {
     renderSettings();
 
     expect(screen.getByTestId('alertZeroMinimumConfidenceScoreRow')).toBeInTheDocument();
+  });
+
+  it('shows the saved minimum severity and emits the whole extras object when it changes', async () => {
+    const { onExtrasChange } = renderSettings();
+
+    const select = screen.getByTestId('alertZeroMinimumSeveritySelect');
+    expect(select).toHaveValue('medium');
+    await userEvent.selectOptions(select, 'critical');
+
+    expect(onExtrasChange).toHaveBeenCalledWith({ ...SAVED_EXTRAS, minSeverity: 'critical' });
+  });
+
+  it('turns building-block exclusion off while keeping the other extras', async () => {
+    const { onExtrasChange } = renderSettings();
+
+    await userEvent.click(screen.getByTestId('alertZeroExcludeBuildingBlocksSwitch'));
+
+    expect(onExtrasChange).toHaveBeenCalledWith({ ...SAVED_EXTRAS, excludeBuildingBlocks: false });
+  });
+
+  it('adds a trimmed rule tag once and ignores a duplicate', async () => {
+    const { onExtrasChange } = renderSettings();
+    const input = within(screen.getByTestId('alertZeroExcludedRuleTagsInput')).getByRole(
+      'combobox'
+    );
+
+    await userEvent.type(input, ' noisy {enter}');
+    await userEvent.type(input, 'SEND_TO_DEV{enter}');
+
+    expect(onExtrasChange).toHaveBeenCalledTimes(1);
+    expect(onExtrasChange).toHaveBeenCalledWith({
+      ...SAVED_EXTRAS,
+      excludedRuleTags: ['SEND_TO_DEV', 'noisy'],
+    });
   });
 
   // Budget and lookback are internal levers: a user cranking them can push the worker into a bad

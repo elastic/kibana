@@ -10,12 +10,14 @@ import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   ALERT_FETCH_LIMIT,
+  ALERT_SEVERITIES,
   BATCH_ALERT_CAP,
   OPEN_ALERT_STATUSES,
   RULE_FETCH_LIMIT,
   TRIAGE_FAILED_TAG,
   TRIAGE_PENDING_TAG,
   VERDICT_TAGS,
+  type AlertSeverity,
 } from '../../alert_triage/constants';
 import type { SweepPorts } from '../../alert_triage/plan_sweep';
 import type { TriageAlert } from '../../alert_triage/types';
@@ -43,6 +45,7 @@ const ALERT_FIELDS = {
   ruleId: 'kibana.alert.rule.uuid',
   ruleName: 'kibana.alert.rule.name',
   riskScore: 'kibana.alert.risk_score',
+  severity: 'kibana.alert.severity',
   status: 'kibana.alert.workflow_status',
   tags: 'kibana.alert.workflow_tags',
   timestamp: '@timestamp',
@@ -197,6 +200,34 @@ const UNTRIAGED_MUST_NOT = (analysisTagPrefix: string) => [
   { prefix: { [ALERT_FIELDS.tags]: analysisTagPrefix } },
 ];
 
+export interface TriageFilters {
+  minSeverity: AlertSeverity;
+  excludeBuildingBlocks: boolean;
+  excludedRuleTags: readonly string[];
+}
+
+// Filter-only fields: kept out of `ALERT_FIELDS`, which also decides which fields are fetched.
+const BUILDING_BLOCK_TYPE_FIELD = 'kibana.alert.building_block_type';
+const RULE_TAGS_FIELD = 'kibana.alert.rule.tags';
+
+/** Alerts the settings keep from ever reaching a Worker, beyond the untriaged check. */
+const excludedByFilters = ({ excludeBuildingBlocks, excludedRuleTags }: TriageFilters) => [
+  ...(excludeBuildingBlocks ? [{ exists: { field: BUILDING_BLOCK_TYPE_FIELD } }] : []),
+  ...(excludedRuleTags.length > 0 ? [{ terms: { [RULE_TAGS_FIELD]: [...excludedRuleTags] } }] : []),
+];
+
+/** No clause for `low`: the lowest severity admits every alert, including ones with no severity. */
+const severityFilter = (minSeverity: AlertSeverity) =>
+  minSeverity === ALERT_SEVERITIES[0]
+    ? []
+    : [
+        {
+          terms: {
+            [ALERT_FIELDS.severity]: ALERT_SEVERITIES.slice(ALERT_SEVERITIES.indexOf(minSeverity)),
+          },
+        },
+      ];
+
 /**
  * Open alerts created since `windowStart` that still need triage, so the look-back is the search
  * window and older alerts are never read or tagged. They are read per rule, the most urgent
@@ -207,7 +238,8 @@ const UNTRIAGED_MUST_NOT = (analysisTagPrefix: string) => [
 export const fetchTriageAlerts = async (
   api: KibanaApi,
   analysisTagPrefix: string,
-  windowStart: number
+  windowStart: number,
+  filters: TriageFilters
 ): Promise<TriageAlert[]> => {
   const openStatus = { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } };
   const [unclaimed, claimed] = await Promise.all([
@@ -216,8 +248,9 @@ export const fetchTriageAlerts = async (
         filter: [
           openStatus,
           { range: { [ALERT_FIELDS.timestamp]: { gte: new Date(windowStart).toISOString() } } },
+          ...severityFilter(filters.minSeverity),
         ],
-        must_not: UNTRIAGED_MUST_NOT(analysisTagPrefix),
+        must_not: [...UNTRIAGED_MUST_NOT(analysisTagPrefix), ...excludedByFilters(filters)],
       },
     }),
     searchAlerts(api, {
@@ -259,7 +292,8 @@ export const tagAlerts =
 export const countAgedOutAlerts = async (
   { callKibanaApi }: KibanaApi,
   analysisTagPrefix: string,
-  windowStart: number
+  windowStart: number,
+  filters: TriageFilters
 ): Promise<number> => {
   const { body } = await callKibanaApi<{ hits?: { total?: { value?: number } | number } }>({
     method: 'POST',
@@ -272,8 +306,9 @@ export const countAgedOutAlerts = async (
           filter: [
             { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
             { range: { [ALERT_FIELDS.timestamp]: { lt: new Date(windowStart).toISOString() } } },
+            ...severityFilter(filters.minSeverity),
           ],
-          must_not: UNTRIAGED_MUST_NOT(analysisTagPrefix),
+          must_not: [...UNTRIAGED_MUST_NOT(analysisTagPrefix), ...excludedByFilters(filters)],
         },
       },
     },

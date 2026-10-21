@@ -139,6 +139,9 @@ export interface AlertTriageWorkerTemplateValues extends ScheduledWorkerTemplate
     autoCloseConfidenceScoreMinThreshold: number;
     budgetPerHour: number;
     lookbackHours: number;
+    minSeverity: 'low' | 'medium' | 'high' | 'critical';
+    excludeBuildingBlocks: boolean;
+    excludedRuleTags: readonly string[];
   };
 }
 

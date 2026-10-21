@@ -49,6 +49,7 @@ export const LOOKBACK_HOURS_MAX = 168;
 
 export const ALERT_TRIAGE_DEFAULT_EXTRAS: AlertTriageWorkerExtras = {
   ...ALERT_TRIAGE_EXTRAS_DEFAULTS,
+  excludedRuleTags: [...ALERT_TRIAGE_EXTRAS_DEFAULTS.excludedRuleTags],
 };
 
 export const ALERT_TRIAGE_SETTINGS: WorkerSettingsDeclaration<AlertTriageWorkerExtras> = {

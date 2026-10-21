@@ -38,6 +38,9 @@ const workers: Array<[string, (serviceAccountId?: string) => string]> = [
           autoCloseConfidenceScoreMinThreshold: 0.85,
           budgetPerHour: 1300,
           lookbackHours: 24,
+          minSeverity: 'low',
+          excludeBuildingBlocks: false,
+          excludedRuleTags: [],
         },
         serviceAccountId,
       }),
@@ -122,6 +125,9 @@ describe('Alert Triage sweep rendering', () => {
         autoCloseConfidenceScoreMinThreshold: 0.85,
         budgetPerHour: 1300,
         lookbackHours: 24,
+        minSeverity: 'low',
+        excludeBuildingBlocks: false,
+        excludedRuleTags: [],
       },
     });
 
@@ -150,6 +156,9 @@ describe('Alert Triage sweep rendering', () => {
       autoCloseConfidenceScoreMinThreshold: 0.85,
       budgetPerHour: 1300,
       lookbackHours: 24,
+      minSeverity: 'low',
+      excludeBuildingBlocks: false,
+      excludedRuleTags: [],
     });
   });
 

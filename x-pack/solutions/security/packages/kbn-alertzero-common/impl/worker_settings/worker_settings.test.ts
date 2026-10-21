@@ -81,6 +81,9 @@ describe('Worker settings declarations', () => {
         autoCloseConfidenceScoreMinThreshold: 0.85,
         budgetPerHour: 1300,
         lookbackHours: 24,
+        minSeverity: 'low',
+        excludeBuildingBlocks: false,
+        excludedRuleTags: [],
       },
     });
     expect(createDefaultWorkerSettings(ATTACK_DISCOVERY)).not.toHaveProperty('extras');
