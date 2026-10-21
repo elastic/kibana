@@ -110,6 +110,7 @@ import type { SecurityCanvasEmbeddedBundle } from './agent_builder/components/se
 import { registerWorkflowSteps } from './workflows/step_types';
 import { registerSecurityWorkflowTriggers } from './workflows/triggers';
 import { registerThreatIntelWorkflowSteps } from './threat_intel/workflows/step_types';
+import { flyoutV2DocViewerStateSchema } from './flyout_v2/shared/url_state/flyout_v2_doc_viewer_state_schema';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -629,7 +630,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const alertFlyoutOverviewTabFeature: SecuritySolutionAlertFlyoutOverviewTabFeature = {
       id: 'security-solution-alert-flyout-overview-tab',
-      render: ({ hit, onAlertUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
+      shareableStateSchema: flyoutV2DocViewerStateSchema,
+      render: ({
+        hit,
+        onAlertUpdated,
+        columns,
+        filter,
+        onAddColumn,
+        onRemoveColumn,
+        initialState,
+        onInitialStateChange,
+      }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -644,6 +655,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               filter={filter}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
+              initialState={initialState}
+              onInitialStateChange={onInitialStateChange}
             />
           </React.Suspense>
         );
@@ -710,7 +723,16 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const iocFlyoutOverviewTabFeature: SecuritySolutionIOCFlyoutOverviewTabFeature = {
       id: 'security-solution-ioc-flyout-overview-tab',
-      render: ({ hit, columns, filter, onAddColumn, onRemoveColumn }) => {
+      shareableStateSchema: flyoutV2DocViewerStateSchema,
+      render: ({
+        hit,
+        columns,
+        filter,
+        onAddColumn,
+        onRemoveColumn,
+        initialState,
+        onInitialStateChange,
+      }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -724,6 +746,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               filter={filter}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
+              initialState={initialState}
+              onInitialStateChange={onInitialStateChange}
             />
           </React.Suspense>
         );
@@ -790,7 +814,17 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
 
     const attackFlyoutOverviewTabFeature: SecuritySolutionAttackFlyoutOverviewTabFeature = {
       id: 'security-solution-attack-flyout-overview-tab',
-      render: ({ hit, onAttackUpdated, columns, filter, onAddColumn, onRemoveColumn }) => {
+      shareableStateSchema: flyoutV2DocViewerStateSchema,
+      render: ({
+        hit,
+        onAttackUpdated,
+        columns,
+        filter,
+        onAddColumn,
+        onRemoveColumn,
+        initialState,
+        onInitialStateChange,
+      }) => {
         const servicesPromise = this.getDiscoverFlyoutServices(core);
         const storePromise = this.getDiscoverFlyoutStore(core);
 
@@ -805,6 +839,8 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
               filter={filter}
               onAddColumn={onAddColumn}
               onRemoveColumn={onRemoveColumn}
+              initialState={initialState}
+              onInitialStateChange={onInitialStateChange}
             />
           </React.Suspense>
         );
