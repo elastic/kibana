@@ -73,6 +73,10 @@ export enum ProductFeatureSecurityKey {
    */
   endpointCustomYaraSignatures = 'endpoint_custom_yara_signatures',
   /**
+   * Enables Registry credential hardening in the Elastic Defend policy (Endpoint Complete tier).
+   */
+  endpointRegistryCredentialHardening = 'endpoint_registry_credential_hardening',
+  /**
    * Enables all of endpoint's supported response actions - like host isolation, file operations,
    * process operations, command execution, etc.
    */
@@ -116,6 +120,9 @@ export enum ProductFeatureSecurityKey {
    * enables Cloud Security Posture - CSPM, KSPM, CNVM
    */
   cloudSecurityPosture = 'cloud_security_posture',
+
+  /** Enables Cloud Defend integration installation. */
+  cloudDefend = 'cloud_defend',
 
   /**
    * enables the automatic import

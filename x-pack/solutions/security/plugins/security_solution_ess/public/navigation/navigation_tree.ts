@@ -43,7 +43,10 @@ export const createNavigationTree = (
   return {
     body: [
       ...(showAgentBuilder && agentBuilderNavAtTop ? [agentBuilderLink] : []),
-      contextEngineLink,
+      // Context Engine follows Agent Builder wherever it renders; it no longer has a
+      // fixed top position.
+      ...(showAgentBuilder && agentBuilderNavAtTop ? [contextEngineLink] : []),
+      ...(!showAgentBuilder ? [contextEngineLink] : []),
       {
         link: 'inbox' as AppDeepLinkId,
         icon: 'mail',
@@ -70,6 +73,7 @@ export const createNavigationTree = (
       ...getWorkflowsNavPanel(services),
       // TODO: remove this item when agentBuilderNavAtTop is enabled by default and the Agent Builder link is always at the top of the nav
       ...(showAgentBuilder && !agentBuilderNavAtTop ? [agentBuilderLink] : []),
+      ...(showAgentBuilder && !agentBuilderNavAtTop ? [contextEngineLink] : []),
       {
         id: SecurityPageName.attackDiscovery,
         icon: 'bolt',
@@ -261,6 +265,7 @@ export const createNavigationTree = (
             title: i18nStrings.stackManagement.ai.title,
             children: [
               { link: 'management:genAiSettings' },
+              { link: 'management:aiAnonymizationSettings' },
               { link: 'management:evals' },
               { link: 'management:aiAssistantManagementSelection' },
             ],

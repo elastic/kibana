@@ -9,5 +9,5 @@ import { ApiPrivileges } from '@kbn/core-security-server';
 
 export const INVESTIGATIONS_API_PRIVILEGE_MANAGE = ApiPrivileges.manage('investigations');
 
-/** Reading investigations. Manage implies it. */
+/** Reads through the investigations query API. Manage implies it on every read route. */
 export const INVESTIGATIONS_API_PRIVILEGE_READ = ApiPrivileges.read('investigations');

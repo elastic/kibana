@@ -539,6 +539,54 @@ describe('AssetManagerClient', () => {
       expect(scheduledModes()).toEqual([EXTRACTION_MODE.single]);
     });
 
+    describe('getStatus config', () => {
+      beforeEach(() => {
+        mockEngineDescriptorClient.getAll.mockResolvedValue([
+          { type: 'host', status: 'started' },
+          {
+            type: 'user',
+            status: 'started',
+            nonPriorityLogExtractionConfig: { frequency: '5m' },
+          },
+        ]);
+        mockGlobalStateClient.findLogExtractionOverrides.mockResolvedValue({
+          maxLogsPerWindow: 500000,
+        });
+      });
+
+      it('resolves priority and non-priority config for dual-process types', async () => {
+        const result = await createDualProcessClient().getStatus();
+        if (!('logsExtractionConfigByType' in result)) throw new Error('expected installed');
+        const { logsExtractionConfigByType, nonPriorityLogsExtractionConfigByType } = result;
+
+        expect(logsExtractionConfigByType.user).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'defer',
+          maxLogsPerWindow: 500000,
+          frequency: '1m',
+        });
+        expect(nonPriorityLogsExtractionConfigByType.user).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'drop',
+          maxLogsPerWindow: 500000,
+          frequency: '5m',
+        });
+        expect(logsExtractionConfigByType.host).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'drop',
+          maxLogsPerWindow: 500000,
+        });
+        expect(nonPriorityLogsExtractionConfigByType.host).toBeUndefined();
+      });
+
+      it('resolves single config only with the flag off', async () => {
+        const result = await client.getStatus();
+        if (!('logsExtractionConfigByType' in result)) throw new Error('expected installed');
+
+        expect(result.logsExtractionConfigByType.user).toMatchObject({
+          maxLogsPerWindowCapBehavior: 'drop',
+        });
+        expect(result.nonPriorityLogsExtractionConfigByType).toEqual({});
+      });
+    });
+
     it('start rolls the shared task back when the non-priority schedule fails', async () => {
       mockScheduleExtractEntityTask
         .mockResolvedValueOnce(undefined)
@@ -641,6 +689,79 @@ describe('AssetManagerClient', () => {
       );
       expect(errorUpdate).toBeDefined();
       expect(errorUpdate![1]).not.toHaveProperty('nonPriorityStatus');
+    });
+
+    describe('per-process start/stop', () => {
+      it('startProcess schedules only the non-priority task and writes only its status', async () => {
+        await createDualProcessClient().startProcess(
+          {} as KibanaRequest,
+          'user',
+          EXTRACTION_MODE.nonPriority
+        );
+
+        expect(scheduledModes()).toEqual([EXTRACTION_MODE.nonPriority]);
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledTimes(1);
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+          nonPriorityStatus: ENGINE_STATUS.STARTED,
+          nonPriorityError: null,
+        });
+      });
+
+      it('startProcess schedules only the priority task and writes only the shared status', async () => {
+        await createDualProcessClient().startProcess(
+          {} as KibanaRequest,
+          'user',
+          EXTRACTION_MODE.priority
+        );
+
+        expect(scheduledModes()).toEqual([EXTRACTION_MODE.single]);
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+          status: ENGINE_STATUS.STARTED,
+          error: null,
+        });
+      });
+
+      // `priority` and `single` resolve to the same task id, so a `priority` request on a type
+      // with no priority variant acts on its only task — and must schedule it at the same
+      // frequency. This fails loudly if a mode-level frequency is ever introduced and starts
+      // silently rescheduling ungated types at a different cadence.
+      it('startProcess priority keeps an ungated type on its single-process frequency', async () => {
+        const dualProcessClient = createDualProcessClient();
+
+        await dualProcessClient.start({} as KibanaRequest, 'host');
+        const [singleArgs] = mockScheduleExtractEntityTask.mock.calls.at(-1)!;
+
+        mockScheduleExtractEntityTask.mockClear();
+        await dualProcessClient.startProcess({} as KibanaRequest, 'host', EXTRACTION_MODE.priority);
+        const [priorityArgs] = mockScheduleExtractEntityTask.mock.calls.at(-1)!;
+
+        expect(priorityArgs.extractionMode ?? EXTRACTION_MODE.single).toBe(EXTRACTION_MODE.single);
+        expect(priorityArgs.frequency).toBe(singleArgs.frequency);
+      });
+
+      it('stopProcess removes only the non-priority task', async () => {
+        await createDualProcessClient().stopProcess('user', EXTRACTION_MODE.nonPriority);
+
+        expect(mockStopExtractEntityTask).toHaveBeenCalledTimes(1);
+        expect(mockStopExtractEntityTask).toHaveBeenCalledWith(
+          expect.objectContaining({ type: 'user', extractionMode: EXTRACTION_MODE.nonPriority })
+        );
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+          nonPriorityStatus: ENGINE_STATUS.STOPPED,
+        });
+      });
+
+      it('stopProcess marks only its own process errored on failure', async () => {
+        mockStopExtractEntityTask.mockRejectedValueOnce(new Error('remove failed'));
+
+        await expect(
+          createDualProcessClient().stopProcess('user', EXTRACTION_MODE.nonPriority)
+        ).rejects.toThrow('remove failed');
+
+        expect(mockEngineDescriptorClient.update).toHaveBeenCalledWith('user', {
+          nonPriorityStatus: ENGINE_STATUS.ERROR,
+        });
+      });
     });
   });
 });

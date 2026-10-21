@@ -12,6 +12,7 @@ import type {
   LensInternalApi,
   LensPublicCallbacks,
   SharingSavedObjectProps,
+  TextBasedPersistedState,
   UserMessagesDisplayLocationId,
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
@@ -304,7 +305,16 @@ export function loadEmbeddableData(
       getUsedDataViews(
         currentState.attributes.references,
         currentState.attributes.state?.adHocDataViews,
-        services.dataViews
+        services.dataViews,
+        {
+          layers: (
+            currentState.attributes.state?.datasourceStates?.textBased as
+              | TextBasedPersistedState
+              | undefined
+          )?.layers,
+          http: services.coreStart.http,
+          projectRouting: searchContext.projectRouting,
+        }
       ),
     ]);
 

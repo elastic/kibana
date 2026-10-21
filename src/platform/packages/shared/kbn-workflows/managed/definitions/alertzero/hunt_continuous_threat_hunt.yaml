@@ -20,8 +20,7 @@ settings:
     key: hunt-continuous-threat-hunt
     strategy: drop
     max: 1
-# Triggers are rendered from autonomy: manual = manual only; assisted/supervised
-# add the schedule.
+# Always scheduled (locked 4h) plus manual with optional reportIds.
 triggers:
 __WORKER_TRIGGERS__
 consts:
@@ -128,6 +127,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-security-hunt-find-or-create-investigation
+          run-as-mode: inherit
           inputs:
             reportId: "{{ foreach.item }}"
             runId: "{{ execution.id }}"
@@ -136,6 +136,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-security-hunt-execute
+          run-as-mode: inherit
           inputs:
             reportId: "{{ foreach.item }}"
             investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
@@ -149,6 +150,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-security-hunt-package-report
+          run-as-mode: inherit
           inputs:
             reportId: "{{ foreach.item }}"
             investigationConversationId: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
@@ -160,6 +162,17 @@ steps:
             # having no output at all.
             huntStatus: "{{ steps.hunt.output.status | default: 'failed' }}"
             hasConfirmedHit: "${{ steps.hunt.output.hit == true }}"
+            # What the hunt prepared, for packaging to compare against what it actually finds
+            # attached (`attach_sse`'s foreach can silently drop an item via `continue`). A
+            # missing hunt output (the step errored outright) has nothing to compare, so this
+            # defaults to 0 -- same as a hunt that genuinely confirmed nothing.
+            expectedSseCount: "${{ steps.hunt.output.sse_count | default: 0 }}"
+            # What a clean run cannot leave on an attachment: the datasets the report points
+            # at and the executed behaviors. Packaging derives the coverage KI's `data_sources`
+            # and `validated_esql` from them.
+            reportIntentTargets: "${{ steps.hunt.output.report_intent_targets | compact }}"
+            behaviors: "${{ steps.hunt.output.behaviors | compact }}"
+            tier2_invoked: "${{ steps.hunt.output.tier2_invoked == true }}"
 
       # Outcome derivation: find_or_create failing means no Investigation ever
       # existed, so no conclusion is possible (handled by
@@ -184,8 +197,9 @@ steps:
             packaging
             {%- endif -%}
 
-      # Always-runs terminal step, unconditional: an `if` is impossible here
-      # because the engine rejects a flow-control key on a branch-body step.
+      # Always-runs step, unconditional (only the outcome record follows it):
+      # an `if` is impossible here because the engine rejects a flow-control
+      # key on a branch-body step.
       # journal_note.yaml's own `on-failure: continue: true` makes an empty
       # conversation_id (find_or_create never minted one) a silent no-op, which
       # gives "a run that never obtained an Investigation writes no conclusion"
@@ -203,6 +217,7 @@ steps:
         type: workflow.execute
         with:
           workflow-id: system-alertzero-journal-note
+          run-as-mode: inherit
           inputs:
             conversation_id: "{{ steps.find_or_create_investigation.output.investigationConversationId }}"
             message: |-
@@ -230,3 +245,58 @@ steps:
               - **What this means:** no findings or hunt evidence were recorded, so the report stays eligible for the next scheduled sweep or a manual rerun.
               {% endif -%}
               - **Run:** `{{ execution.id }}` ([full per-stage detail]({{ execution.url }}))
+
+      # Telemetry: the branch's last step, so the run report can count its outcome.
+      - name: record_report_outcome
+        type: data.set
+        with:
+          outcome: "{{ steps.resolve_run_outcome.output.outcome }}"
+
+  # Telemetry: the sweep's outcome.
+  - name: report_worker_run_completed
+    type: alertzero.reportWorkerOutcome
+    on-failure:
+      continue: true
+    with:
+      event: worker_run_completed
+      candidates_found: "${{ steps.select_candidate_reports.output.ids | size }}"
+      items_dispatched: "${{ steps.report_fan_out.output.results | size }}"
+      items_failed: |-
+        {%- assign failed_hunts = steps.report_fan_out.output.results | map: 'output' | where: 'outcome', 'failed' | size -%}
+        {{ steps.report_fan_out.output.failed | default: 0 | plus: failed_hunts }}
+      source_read_failed: "${{ steps.select_candidate_reports.error != null }}"
+      lookup_failed: "${{ steps.check_index_scope.error != null }}"
+      degraded_reason: |-
+        {%- assign reports = steps.report_fan_out.output.results | size -%}
+        {%- assign completed = steps.report_fan_out.output.results | map: 'output' | where: 'outcome', 'completed' | size -%}
+        {%- assign finished = steps.report_fan_out.output.results | map: 'output' | where: 'outcome', 'partial' | size | plus: completed -%}
+        {%- if steps.check_index_scope.output.status == 'blocked' -%}
+        missing_data
+        {%- elsif steps.resolve_index_scope_gate.output.index_scope_blocked == true -%}
+        dependency_unavailable
+        {%- elsif steps.select_candidate_reports.output.ids == nil -%}
+        dependency_unavailable
+        {%- elsif finished < reports -%}
+        dependency_unavailable
+        {%- elsif completed < reports -%}
+        other
+        {%- else -%}
+        none
+        {%- endif -%}
+      run_outcome: |-
+        {%- assign reports = steps.report_fan_out.output.results | size -%}
+        {%- assign completed = steps.report_fan_out.output.results | map: 'output' | where: 'outcome', 'completed' | size -%}
+        {%- assign partial = steps.report_fan_out.output.results | map: 'output' | where: 'outcome', 'partial' | size -%}
+        {%- if steps.resolve_index_scope_gate.output.index_scope_blocked == true -%}
+        blocked_precondition
+        {%- elsif steps.select_candidate_reports.output.ids == nil -%}
+        failed_source_unavailable
+        {%- elsif reports == 0 -%}
+        empty_nothing_pending
+        {%- elsif completed == reports -%}
+        produced
+        {%- elsif completed == 0 and partial == 0 -%}
+        failed_all_items
+        {%- else -%}
+        degraded_partial
+        {%- endif -%}
