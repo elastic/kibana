@@ -20,7 +20,12 @@ import type {
 import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { getESQLResults, getESQLTimeField } from '@kbn/esql-utils';
+import {
+  getESQLResults,
+  getESQLTimeField,
+  getEsqlInspectorStats,
+  getNamedParams,
+} from '@kbn/esql-utils';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 
@@ -109,6 +114,15 @@ export async function fetchEsqlData(
 
   const filter = hasConstraints ? { bool: { ...esBoolQuery.bool, filter: allFilters } } : undefined;
 
+  const namedParams = getNamedParams(esqlQuery, timeRange, esqlVariables);
+  const requestBody = {
+    query: esqlQuery,
+    ...(filter ? { filter } : {}),
+    ...(namedParams.length ? { params: namedParams } : {}),
+    ...(isApproximate !== undefined ? { approximation: isApproximate } : {}),
+    ...(projectRouting !== undefined ? { project_routing: projectRouting } : {}),
+  };
+
   try {
     const { response, params } = await getESQLResults({
       esqlQuery,
@@ -122,36 +136,12 @@ export async function fetchEsqlData(
     });
 
     // getESQLResults types this as the search params, but it is the connection request that was sent.
+    // The server strips its body, so the request shown in Inspector is rebuilt from what was sent.
     const requestParams = params as unknown as ConnectionRequestParams;
 
     logRequest()
-      ?.stats({
-        hits: {
-          label: i18n.translate('xpack.customContent.inspector.hitsLabel', {
-            defaultMessage: 'Hits',
-          }),
-          value: `${response.values.length}`,
-          description: i18n.translate('xpack.customContent.inspector.hitsDescription', {
-            defaultMessage: 'The number of rows returned by the query.',
-          }),
-        },
-        ...(response.took !== undefined && {
-          queryTime: {
-            label: i18n.translate('xpack.customContent.inspector.queryTimeLabel', {
-              defaultMessage: 'Query time',
-            }),
-            value: i18n.translate('xpack.customContent.inspector.queryTimeValue', {
-              defaultMessage: '{queryTime}ms',
-              values: { queryTime: response.took },
-            }),
-            description: i18n.translate('xpack.customContent.inspector.queryTimeDescription', {
-              defaultMessage:
-                'The time it took to process the query. Does not include the time to send the request or parse it in the browser.',
-            }),
-          },
-        }),
-      })
-      .json(requestParams)
+      ?.stats(getEsqlInspectorStats(response))
+      .json(requestBody)
       .ok({ json: { rawResponse: response }, requestParams });
 
     return response;
@@ -159,7 +149,7 @@ export async function fetchEsqlData(
     // A superseded fetch is aborted on purpose; it is not a failed request worth showing.
     if (!signal.aborted) {
       logRequest()
-        ?.json({ query: esqlQuery, ...(filter ? { filter } : {}) })
+        ?.json(requestBody)
         .error({ json: error?.attributes ?? { message: error?.message ?? String(error) } });
     }
     throw error;

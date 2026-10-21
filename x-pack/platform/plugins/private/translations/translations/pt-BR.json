@@ -2660,8 +2660,6 @@
     "data.search.eql.size.help": "Parâmetro de tamanho searchAPI do Elasticsearch",
     "data.search.es_search.dataRequest.description": "Essa solicitação consulta o Elasticsearch para buscar os dados da visualização.",
     "data.search.es_search.dataViewLabel": "Visualização de dados",
-    "data.search.es_search.documentsProcessedDescription": "O número de documentos processados pela consulta.",
-    "data.search.es_search.documentsProcessedLabel": "Documentos processados",
     "data.search.es_search.hitsDescription": "O número de documentos retornados pela consulta.",
     "data.search.es_search.hitsLabel": "Acertos",
     "data.search.es_search.hitsTotalDescription": "O número de documentos que correspondem à consulta.",

@@ -44,6 +44,7 @@ export {
   isESQLColumnSortable,
   isESQLColumnGroupable,
   isESQLFieldGroupable,
+  getEsqlInspectorStats,
   sanitazeESQLInput,
   escapeEsqlColumnName,
   queryCannotBeSampled,

@@ -19,6 +19,7 @@ jest.mock('@kbn/es-query', () => ({
 }));
 
 jest.mock('@kbn/esql-utils', () => ({
+  ...jest.requireActual('@kbn/esql-utils'),
   getESQLResults: jest.fn(),
   getESQLTimeField: jest.fn(),
 }));
@@ -280,11 +281,12 @@ describe('fetchEsqlData', () => {
   });
 
   describe('inspector request adapter', () => {
-    it('records a successful request with its hits, params and response', async () => {
+    it('records a successful request with its hits, body and response', async () => {
       const requestAdapter = new RequestAdapter();
+      const connectionParams = { method: 'POST', path: '/_query/async' };
       mockGetESQLResults.mockResolvedValue({
         response: { columns: [], values: [[1], [2]], all_columns: [], took: 12 },
-        params: { query: esqlQuery, params: [{ _tstart: 'a' }] },
+        params: connectionParams,
       } as unknown as Awaited<ReturnType<typeof getESQLResults>>);
 
       await fetchEsqlData(mockSearch, mockHttp, esqlQuery, undefined, mockSignal, {
@@ -294,11 +296,50 @@ describe('fetchEsqlData', () => {
       const [request] = requestAdapter.getRequests();
       expect(requestAdapter.getRequests()).toHaveLength(1);
       expect(request.status).toBe(RequestStatus.OK);
-      expect(request.json).toEqual({ query: esqlQuery, params: [{ _tstart: 'a' }] });
+      expect(request.json).toEqual({ query: esqlQuery });
       expect(request.stats?.hits.value).toBe('2');
       expect(request.stats?.queryTime.value).toBe('12ms');
       expect(request.response?.json).toEqual({
         rawResponse: expect.objectContaining({ took: 12 }),
+      });
+      expect(request.response?.requestParams).toEqual(connectionParams);
+    });
+
+    it('shows the filters and the time range filter that were sent in the request body', async () => {
+      const requestAdapter = new RequestAdapter();
+      const matchPhrase = { match_phrase: { 'host.name': 'web-01' } };
+      mockBuildEsQuery.mockReturnValue({
+        bool: { filter: [matchPhrase], must: [], must_not: [], should: [] },
+      } as ReturnType<typeof buildEsQuery>);
+      mockGetESQLTimeField.mockResolvedValue('@timestamp');
+
+      await fetchEsqlData(
+        mockSearch,
+        mockHttp,
+        esqlQuery,
+        { from: 'now-7d', to: 'now' },
+        mockSignal,
+        { requestAdapter }
+      );
+
+      expect(requestAdapter.getRequests()[0].json).toEqual({
+        query: esqlQuery,
+        filter: {
+          bool: expect.objectContaining({
+            filter: [
+              matchPhrase,
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2024-01-01T00:00:00.000Z',
+                    lt: '2024-01-08T00:00:00.000Z',
+                    format: 'strict_date_optional_time',
+                  },
+                },
+              },
+            ],
+          }),
+        },
       });
     });
 

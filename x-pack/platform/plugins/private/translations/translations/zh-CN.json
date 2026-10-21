@@ -2658,8 +2658,6 @@
     "data.search.eql.size.help": "ElasticSearch searchAPI 大小参数",
     "data.search.es_search.dataRequest.description": "此请求查询 Elasticsearch，以获取可视化的数据。",
     "data.search.es_search.dataViewLabel": "数据视图",
-    "data.search.es_search.documentsProcessedDescription": "查询处理的文档数目。",
-    "data.search.es_search.documentsProcessedLabel": "已处理的文档",
     "data.search.es_search.hitsDescription": "查询返回的文档数目。",
     "data.search.es_search.hitsLabel": "命中数",
     "data.search.es_search.hitsTotalDescription": "与查询匹配的文档数目。",
