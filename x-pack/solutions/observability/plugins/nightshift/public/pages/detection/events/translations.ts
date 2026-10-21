@@ -53,6 +53,10 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
   'xpack.nightshift.detectionPage.events.searchPlaceholder',
   { defaultMessage: 'Search events' }
 );
+export const LOADING_EVENTS_MESSAGE = i18n.translate(
+  'xpack.nightshift.detectionPage.events.loadingMessage',
+  { defaultMessage: 'Loading events…' }
+);
 export const EMPTY_TITLE = i18n.translate('xpack.nightshift.detectionPage.events.emptyTitle', {
   defaultMessage: 'No significant events found',
 });

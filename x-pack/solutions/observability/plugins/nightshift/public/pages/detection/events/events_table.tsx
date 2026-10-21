@@ -46,6 +46,7 @@ import {
   EVENTS_TABLE_CAPTION,
   INVESTIGATE_LABEL,
   INVESTIGATION_LABEL,
+  LOADING_EVENTS_MESSAGE,
   SEVERITY_LABEL,
   STATUS_LABEL,
   TIME_COLUMN_LABEL,
@@ -264,7 +265,7 @@ export const EventsTable = ({
         'data-test-subj': `nightshiftDetectionEventRow-${event.event_id}`,
         onClick: () => onEventClick(event),
       })}
-      noItemsMessage=""
+      noItemsMessage={isLoading ? LOADING_EVENTS_MESSAGE : ''}
     />
   );
 };

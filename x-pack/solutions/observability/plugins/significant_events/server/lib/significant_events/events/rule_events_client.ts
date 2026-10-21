@@ -267,9 +267,13 @@ const applySort = (
       // A missing alert.status decodes as active (see decodeSignificantEvent).
       return query.pipe`EVAL ${esql.col(SORT_RANK_COLUMN)} = CASE(${esql.col(
         'alert.status'
-      )} == ${esql.str('inactive')}, 1, ${esql.col('alert.status')} == ${esql.str(
-        'recovering'
-      )}, 2, 3)`.sort([SORT_RANK_COLUMN, direction], ['created_at', 'DESC'], ['_id', 'ASC']);
+      )} == ${esql.str(ALERT_EPISODE_STATUS.INACTIVE)}, 1, ${esql.col(
+        'alert.status'
+      )} == ${esql.str(ALERT_EPISODE_STATUS.RECOVERING)}, 2, 3)`.sort(
+        [SORT_RANK_COLUMN, direction],
+        ['created_at', 'DESC'],
+        ['_id', 'ASC']
+      );
     default:
       return query.sort(['@timestamp', 'DESC'], ['_id', 'ASC']);
   }
@@ -475,7 +479,9 @@ export class RuleEventsClient {
         esClient,
         // A missing alert.status decodes as active (see decodeSignificantEvent).
         query: this.buildLatestByCurrentStateQuery({ ...options, status: undefined })
-          .pipe`EVAL event_status = COALESCE(${esql.col('alert.status')}, ${esql.str('active')})`,
+          .pipe`EVAL event_status = COALESCE(${esql.col('alert.status')}, ${esql.str(
+          ALERT_EPISODE_STATUS.ACTIVE
+        )})`,
         column: 'event_status',
         keys: SIGNIFICANT_EVENT_STATUS_OPTIONS,
       }),

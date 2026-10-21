@@ -31,6 +31,7 @@ import {
 } from '../../../common/url_params';
 import { PAGE_QUERY_PARAM } from '../constants';
 
+// PAGE_QUERY_PARAM lives in ../constants because the time range hook also resets it.
 const SEARCH_QUERY_PARAM = 'search';
 const STATUS_QUERY_PARAM = 'status';
 const SEVERITY_QUERY_PARAM = 'severity';
