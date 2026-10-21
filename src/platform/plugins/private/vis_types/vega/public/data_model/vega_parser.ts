@@ -705,7 +705,22 @@ The URL is an identifier only. Kibana and your browser will never access this UR
       }
     } else if (_.isPlainObject(obj)) {
       if (key === 'data' && _.isPlainObject(obj.url)) {
-        // Assume that any  "data": {"url": {...}}  is a request for data
+        // Assume that any  "data": {"url": {...}}  is a request for data.
+        // Intercepting every object-valued url here resolves all data before the view exists, so
+        // the view never fetches from a URL computed by a runtime signal. The Vega sandbox boundary
+        // relies on this: do not let object-valued urls through to the view.
+        if ('signal' in obj.url) {
+          throw new Error(
+            i18n.translate('visTypeVega.vegaParser.signalDataUrlNotSupportedErrorMessage', {
+              defaultMessage:
+                'Signal-driven data URLs are not supported. Set {urlParam} to a URL string or a Kibana data source such as {typeParam}.',
+              values: {
+                urlParam: '"data.url"',
+                typeParam: '{"%type%": "esql"}',
+              },
+            })
+          );
+        }
         if (obj.values !== undefined || obj.source !== undefined) {
           throw new Error(
             i18n.translate(
