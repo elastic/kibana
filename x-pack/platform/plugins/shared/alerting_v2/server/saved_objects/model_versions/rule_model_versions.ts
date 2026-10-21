@@ -230,4 +230,31 @@ export const ruleModelVersions: SavedObjectsModelVersionMap = {
       create: ruleSavedObjectAttributesSchemaV8,
     },
   },
+  '11': {
+    /*
+     * Indexes the existing `metadata.template.id`. The attribute shape is
+     * unchanged, so existing rules need no backfill. A rollback to model
+     * version 10 drops the mapping; counts read zero until it returns.
+     */
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          metadata: {
+            properties: {
+              template: {
+                properties: {
+                  id: { type: 'keyword', ignore_above: 256 },
+                },
+              },
+            },
+          },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: ruleSavedObjectAttributesSchemaV8.extends({}, { unknowns: 'ignore' }),
+      create: ruleSavedObjectAttributesSchemaV8,
+    },
+  },
 };

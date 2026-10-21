@@ -640,7 +640,7 @@ export class WorkflowsManagementApi {
     // Rewrite only the `name` field directly in the YAML text so that cloning
     // works even when the source workflow's YAML is schema-invalid. Strictly
     // parsing/validating here would reject invalid-but-editable workflows.
-    const cloneName = `${workflow.name} ${i18n.translate('workflowsManagement.cloneSuffix', {
+    const cloneName = `${workflow.name} ${i18n.translate('workflows.cloneSuffix', {
       defaultMessage: 'Copy',
     })}`;
     const clonedYaml = updateWorkflowYamlFields(workflow.yaml, { name: cloneName });
@@ -891,7 +891,7 @@ export class WorkflowsManagementApi {
       params.spaceId,
       params.request,
       // This throws on an invalid result, so it must not apply the variable rules.
-      { includeVariableRules: false }
+      { includeVariableRules: false, includeEsqlRules: false }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
       throw buildWorkflowValidationError(validation, params.yaml);
@@ -1068,6 +1068,7 @@ export class WorkflowsManagementApi {
       request,
       {
         includeVariableRules: false,
+        includeEsqlRules: false,
       }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
@@ -1125,6 +1126,7 @@ export class WorkflowsManagementApi {
       request,
       {
         includeVariableRules: false,
+        includeEsqlRules: false,
       }
     );
     if (!validation.valid || !validation.parsedWorkflow) {
@@ -1645,6 +1647,7 @@ export class WorkflowsManagementApi {
   ): Promise<ValidateWorkflowResponseDto> {
     return this.workflowsService.validateWorkflow(yaml, spaceId, request, {
       includeVariableRules: true,
+      includeEsqlRules: true,
     });
   }
 

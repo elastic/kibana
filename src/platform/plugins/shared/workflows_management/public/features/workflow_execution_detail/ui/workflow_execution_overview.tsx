@@ -217,7 +217,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                   <EuiFlexGroup direction="column" gutterSize="xs">
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
-                        {i18n.translate('workflowsManagement.executionOverview.executionStarted', {
+                        {i18n.translate('workflows.executionOverview.executionStarted', {
                           defaultMessage: 'Execution started',
                         })}
                       </EuiText>
@@ -246,7 +246,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                   <EuiFlexGroup direction="column" gutterSize="xs">
                     <EuiFlexItem grow={false}>
                       <EuiText size="xs" color="subdued">
-                        {i18n.translate('workflowsManagement.executionOverview.executionEnded', {
+                        {i18n.translate('workflows.executionOverview.executionEnded', {
                           defaultMessage: 'Execution ended',
                         })}
                       </EuiText>

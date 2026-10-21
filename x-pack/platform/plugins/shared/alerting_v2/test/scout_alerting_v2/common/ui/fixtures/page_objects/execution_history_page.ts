@@ -14,6 +14,9 @@ export class ExecutionHistoryPage {
   public readonly rulesTab: Locator;
   public readonly actionPoliciesTab: Locator;
   public readonly searchBar: Locator;
+  public readonly ruleSearchBar: Locator;
+  public readonly ruleExecutionsTable: Locator;
+  public readonly filteredEmptyPrompt: Locator;
   public readonly policiesTable: Locator;
   public readonly policyDetailsFlyout: Locator;
 
@@ -27,6 +30,9 @@ export class ExecutionHistoryPage {
     this.rulesTab = this.page.testSubj.locator('executionHistoryRulesTab');
     this.actionPoliciesTab = this.page.testSubj.locator('executionHistoryPoliciesTab');
     this.searchBar = this.page.testSubj.locator('executionHistorySearchBar');
+    this.ruleSearchBar = this.page.testSubj.locator('ruleExecutionHistorySearch');
+    this.ruleExecutionsTable = this.page.testSubj.locator('ruleExecutionHistoryTable');
+    this.filteredEmptyPrompt = this.page.testSubj.locator('executionHistoryFilteredEmptyPrompt');
     this.policiesTable = this.page.testSubj.locator('policyExecutionHistoryTable');
     this.policyDetailsFlyout = this.page.testSubj.locator('actionPolicyDetailsFlyout');
   }
@@ -50,6 +56,10 @@ export class ExecutionHistoryPage {
 
   async search(value: string) {
     await this.searchBar.fill(value);
+  }
+
+  async searchRules(value: string) {
+    await this.ruleSearchBar.fill(value);
   }
 
   policyRow(policyName: string): Locator {
