@@ -6,11 +6,24 @@
  */
 
 import type { ConversationOriginType, SurfacePayload } from '@kbn/agent-builder-common';
-import type { SurfaceComposition } from '@kbn/agent-builder-server/attachments';
+import type {
+  AttachmentSurfaceCompositionContext,
+  SurfaceComposition,
+} from '@kbn/agent-builder-server/attachments';
 import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
+import type { Logger } from '@kbn/logging';
+import type { SlackAssetSource } from './slack_assets';
 
-/** What a surface renderer gets from the round, beyond the composition. */
+/** What a {@link SurfaceRenderer} renders with. */
 export interface SurfaceRenderOptions {
+  runtime: KibanaIsomerRuntime;
+  /** The request and space the payload renders for, which asset sources load files as. */
+  context: AttachmentSurfaceCompositionContext;
+  /** Whether the poster uploads the payload's assets. Without it, images render as text. */
+  assets: boolean;
+  /** Load the files of the nodes the surface turns into images. */
+  assetSources: readonly SlackAssetSource[];
+  logger: Logger;
   /**
    * The Kibana URL of the round's space, which Kibana app links resolve against. Undefined when
    * none can be resolved, and those links are left out.
@@ -25,7 +38,6 @@ export interface SurfaceRenderer {
   /** Renders the message's composition, with its attachments resolved, for the surface. */
   render: (
     composition: SurfaceComposition,
-    runtime: KibanaIsomerRuntime,
     options: SurfaceRenderOptions
-  ) => SurfacePayload;
+  ) => Promise<SurfacePayload>;
 }
