@@ -60,6 +60,7 @@ import {
 } from '../../../common/proposals/list';
 import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summary';
 import { useQueuePolling } from '../../hooks/use_queue_polling';
+import { useSettlingProposalsPolling } from '../../hooks/use_settling_proposals_polling';
 import { queryKeys } from '../../query_keys';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
 import { AlertZeroPageHeader } from '../../components/alertzero_page_header';
@@ -143,6 +144,7 @@ const ConversationsPageContent: React.FC = () => {
     proposalsById,
     investigations: conversations,
   } = useQueueSections(effectiveEntityFilter);
+  useSettlingProposalsPolling(proposalsById.values());
 
   // When the flyout's status toggle changes status (isolated QueryClient), bump the signal
   // so this page's QueryClient invalidates its proposal queries and the queue refreshes.
@@ -303,7 +305,7 @@ const ConversationsPageContent: React.FC = () => {
     async (proposal: ProposalItem) => {
       try {
         await approveDecision({ id: proposal.id, body: { actionInput: proposal.actionInput } });
-        void dropDecided(proposal.id);
+        dropDecided(proposal.id);
       } catch (err) {
         onDecisionError(err);
         throw err;
@@ -319,7 +321,7 @@ const ConversationsPageContent: React.FC = () => {
     async (proposal: ProposalItem, { dismissReason, rationale }: DeclineParams) => {
       try {
         await dismissDecision({ id: proposal.id, body: { dismissReason, rationale } });
-        void dropDecided(proposal.id);
+        dropDecided(proposal.id);
       } catch (err) {
         onDecisionError(err);
         throw err;
@@ -351,7 +353,7 @@ const ConversationsPageContent: React.FC = () => {
           onConfirm={async ({ dismissReason, rationale }) => {
             try {
               await dismissDecision({ id: recordId, body: { dismissReason, rationale } });
-              void dropDecided(recordId);
+              dropDecided(recordId);
               onClose();
             } catch (err) {
               onDecisionError(err);
