@@ -87,3 +87,34 @@ describe('createMapModel cells', () => {
     expect(model.droppedCellCount).toBe(1);
   });
 });
+
+describe('createMapModel layers', () => {
+  it('stacks the single-layer fields under `layers`, in order, each with its own ramp and color', () => {
+    const model = createMapModel({
+      type: 'map',
+      regions: [{ code: 'US', value: 1 }],
+      regionSet: 'world_countries',
+      layers: [
+        {
+          kind: 'regions',
+          regionSet: 'usa_states',
+          regionKey: 'name',
+          regionRamp: 'blues',
+          regions: [
+            { code: 'Ohio', value: 1 },
+            { code: 'Utah', value: 3 },
+          ],
+        },
+        { kind: 'markers', color: '#2200ff', markers: [{ id: 'a', lat: 40, lon: -100 }] },
+      ],
+    });
+    expect(model.layers.map((layer) => layer.kind)).toEqual(['regions', 'regions', 'markers']);
+    const [world, states, markers] = model.layers;
+    expect(world.kind === 'regions' && world.regionSet).toBe('world_countries');
+    expect(states.kind === 'regions' && states.regions[0].fill).not.toBe(
+      states.kind === 'regions' && states.regions[1].fill
+    );
+    expect(markers.kind === 'markers' && markers.markers[0].fill).toBe('#2200ff');
+    expect(model.regions).toHaveLength(3);
+  });
+});

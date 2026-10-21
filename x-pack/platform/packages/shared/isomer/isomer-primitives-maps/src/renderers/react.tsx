@@ -7,7 +7,7 @@
 
 import React, { type ReactNode } from 'react';
 import type { NamedColor } from '@elastic/isomer-sdk';
-import { type MapGeometry, projectRegions, REGION_KEY } from '../geometry';
+import { type MapGeometry, projectRegions, REGION_KEY, regionKeyOf } from '../geometry';
 import { createMapModel } from '../model';
 import { MAP_SLOT_ATTR } from '../slot';
 import type { MapNode } from '../types';
@@ -42,19 +42,31 @@ export const createMapReactRenderer =
     const model = createMapModel(node);
     const { width, height, project } = model;
     const world = geometry.world_countries;
-    const land = world
-      ? projectRegions(world, REGION_KEY.world_countries, project, width, height)
-      : [];
-    const regionGeometry = node.regionSet ? geometry[node.regionSet] : undefined;
-    const regionShapes =
-      regionGeometry && node.regionSet
+    // A raster basemap draws land itself; the outlines stand in only without one.
+    const land =
+      world && model.tiles.length === 0
+        ? projectRegions(world, REGION_KEY.world_countries, project, width, height)
+        : [];
+    // Each region layer's shapes by code, or none when its boundary file isn't loaded.
+    const shapesOf = (regionSet: string | undefined, regionKey: string | undefined) => {
+      const regionGeometry = regionSet ? geometry[regionSet] : undefined;
+      return regionGeometry && regionSet
         ? new Map(
-            projectRegions(regionGeometry, REGION_KEY[node.regionSet], project, width, height).map(
-              ({ code, path }) => [code, path]
-            )
+            projectRegions(
+              regionGeometry,
+              regionKeyOf({ regionSet, regionKey }),
+              project,
+              width,
+              height
+            ).map(({ code, path }) => [code, path])
           )
         : undefined;
-    const maxCell = model.cells.reduce((max, cell) => Math.max(max, cell.value), 0) || 1;
+    };
+    const regionLayers = model.layers.flatMap((layer) =>
+      layer.kind === 'regions'
+        ? [{ layer, shapes: shapesOf(layer.regionSet, layer.regionKey) }]
+        : []
+    );
     return (
       <div aria-label={model.ariaLabel} {...{ [MAP_SLOT_ATTR]: '' }}>
         {model.label ? <div style={{ fontWeight: 600, marginBottom: 8 }}>{model.label}</div> : null}
@@ -88,74 +100,96 @@ export const createMapReactRenderer =
               strokeWidth={0.6}
             />
           ))}
-          {regionShapes
-            ? model.regions.map((region) => {
-                const path = regionShapes.get(region.code);
-                return path ? (
-                  <path
-                    key={`region-${region.code}`}
-                    d={path}
-                    fill={region.fill ?? toneFill(region.tone ?? 'primary')}
-                    fillOpacity={0.75}
-                    stroke={PAINT.regionLine}
-                    strokeWidth={0.6}
+          {model.layers.map((layer, layerIndex) => {
+            switch (layer.kind) {
+              case 'regions': {
+                const shapes = regionLayers.find((entry) => entry.layer === layer)?.shapes;
+                return shapes
+                  ? layer.regions.map((region) => {
+                      const path = shapes.get(region.code);
+                      return path ? (
+                        <path
+                          key={`region-${layerIndex}-${region.code}`}
+                          d={path}
+                          fill={region.fill ?? toneFill(region.tone ?? 'primary')}
+                          fillOpacity={layer.opacity ?? 0.75}
+                          stroke={PAINT.regionLine}
+                          strokeWidth={0.6}
+                        />
+                      ) : null;
+                    })
+                  : null;
+              }
+              case 'cells': {
+                const maxCell =
+                  layer.cells.reduce((max, cell) => Math.max(max, cell.value), 0) || 1;
+                return layer.cells.map((cell) => (
+                  <rect
+                    key={`cell-${layerIndex}-${cell.key}`}
+                    x={cell.left}
+                    y={cell.top}
+                    width={cell.width}
+                    height={cell.height}
+                    fill={cell.fill ?? toneFill('primary')}
+                    fillOpacity={
+                      layer.opacity ?? (cell.fill ? 0.75 : 0.15 + (cell.value / maxCell) * 0.55)
+                    }
                   />
-                ) : null;
-              })
-            : null}
-          {model.cells.map((cell) => (
-            <rect
-              key={cell.key}
-              x={cell.left}
-              y={cell.top}
-              width={cell.width}
-              height={cell.height}
-              fill={cell.fill ?? toneFill('primary')}
-              fillOpacity={cell.fill ? 0.75 : 0.15 + (cell.value / maxCell) * 0.55}
-            />
-          ))}
-          {model.arcs.map((arc, index) => (
-            <path
-              key={`arc-${index}`}
-              d={arc.path}
-              fill="none"
-              stroke={toneFill(arc.tone)}
-              strokeWidth={Math.max(1.5, Math.min(arc.weight, 4))}
-            />
-          ))}
-          {model.markers.map((marker) => (
-            <circle
-              key={marker.id}
-              cx={marker.x}
-              cy={marker.y}
-              r={marker.radius}
-              fill={marker.fill ?? toneFill(marker.tone)}
-              stroke={PAINT.markerLine}
-              strokeWidth={1}
-            />
-          ))}
-          {model.markers.map((marker) =>
-            marker.label ? (
-              <text
-                key={`${marker.id}-label`}
-                x={node.markerLabels === 'inside' ? marker.x : marker.x + marker.radius + 3}
-                y={marker.y + 4}
-                fontSize={11}
-                textAnchor={node.markerLabels === 'inside' ? 'middle' : 'start'}
-                fill={PAINT.text}
-              >
-                {marker.label}
-              </text>
-            ) : null
-          )}
+                ));
+              }
+              case 'arcs':
+                return layer.arcs.map((arc, index) => (
+                  <path
+                    key={`arc-${layerIndex}-${index}`}
+                    d={arc.path}
+                    fill="none"
+                    stroke={arc.color ?? toneFill(arc.tone)}
+                    strokeWidth={Math.max(1.5, Math.min(arc.weight, 4))}
+                    strokeOpacity={layer.opacity ?? 1}
+                  />
+                ));
+              case 'markers':
+                return [
+                  ...layer.markers.map((marker) => (
+                    <circle
+                      key={`marker-${layerIndex}-${marker.id}`}
+                      cx={marker.x}
+                      cy={marker.y}
+                      r={marker.radius}
+                      fill={marker.fill ?? toneFill(marker.tone)}
+                      fillOpacity={layer.opacity ?? 1}
+                      stroke={PAINT.markerLine}
+                      strokeWidth={1}
+                    />
+                  )),
+                  ...layer.markers.map((marker) =>
+                    marker.label ? (
+                      <text
+                        key={`marker-${layerIndex}-${marker.id}-label`}
+                        x={layer.labels === 'inside' ? marker.x : marker.x + marker.radius + 3}
+                        y={marker.y + 4}
+                        fontSize={11}
+                        textAnchor={layer.labels === 'inside' ? 'middle' : 'start'}
+                        fill={PAINT.text}
+                      >
+                        {marker.label}
+                      </text>
+                    ) : null
+                  ),
+                ];
+            }
+          })}
         </svg>
-        {model.regions.length > 0 && !regionShapes ? (
+        {regionLayers.some(({ shapes }) => !shapes) ? (
           <div>
-            {model.regions.slice(0, 8).map((region) => (
-              <div key={region.code}>
-                {region.label ?? region.code} {region.value}
-              </div>
-            ))}
+            {regionLayers
+              .flatMap(({ layer, shapes }) => (shapes ? [] : layer.regions))
+              .slice(0, 8)
+              .map((region) => (
+                <div key={region.code}>
+                  {region.label ?? region.code} {region.value}
+                </div>
+              ))}
           </div>
         ) : null}
       </div>

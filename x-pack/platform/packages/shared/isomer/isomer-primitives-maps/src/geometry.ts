@@ -17,16 +17,23 @@ export interface RegionFeatureCollection {
   }>;
 }
 
-/** Boundary files by region set, supplied by the host; the pack ships none. */
+/**
+ * Boundary files by EMS id, supplied by the host; the pack ships none. A host may fill it in before a render, so
+ * a map can name any file.
+ */
 export type MapGeometry = Partial<Record<MapRegionSet, RegionFeatureCollection>>;
 
-/** The property a region's `code` matches in each EMS file, as Kibana Maps' joins use it. */
-export const REGION_KEY: Record<MapRegionSet, string> = {
+/** The property a region's `code` matches in the EMS files the pack knows, as Kibana Maps' joins use it. */
+export const REGION_KEY: Record<string, string> = {
   world_countries: 'iso2',
   usa_states: 'name',
   france_departments: 'label_en',
   uk_subdivisions: 'label_en',
 };
+
+/** The property a region's code matches: the node's `regionKey`, else the file's known key, else `name`. */
+export const regionKeyOf = ({ regionSet, regionKey }: { regionSet?: string; regionKey?: string }) =>
+  regionKey ?? (regionSet ? REGION_KEY[regionSet] : undefined) ?? 'name';
 
 type Ring = ReadonlyArray<readonly [number, number]>;
 

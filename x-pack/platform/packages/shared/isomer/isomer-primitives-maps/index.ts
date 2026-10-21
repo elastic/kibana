@@ -6,7 +6,7 @@
  */
 
 export { defineMapsPack, mapsPack, type MapsPackOptions } from './src/pack';
-export { createMapModel, MAP_PLOT_HEIGHT, MAP_PLOT_WIDTH } from './src/model';
+export { createMapModel, layersOf, MAP_PLOT_HEIGHT, MAP_PLOT_WIDTH } from './src/model';
 export {
   type MapGeometry,
   type RegionFeatureCollection,
@@ -19,17 +19,23 @@ export { mapCanonicalExample, mapExamples } from './src/examples';
 export { MAP_SLOT_ATTR } from './src/slot';
 export type {
   MapArc,
+  MapArcsLayer,
   MapBasemap,
   MapCell,
+  MapCellsLayer,
+  MapLayer,
   MapMarker,
+  MapMarkersLayer,
   MapNode,
   MapRamp,
   MapRegion,
   MapRegionSet,
+  MapRegionsLayer,
 } from './src/types';
 export {
   MAP_MAX_ARCS,
   MAP_MAX_CELLS,
+  MAP_MAX_LAYERS,
   MAP_MAX_MARKERS,
   MAP_MAX_REGIONS,
   MAP_RAMPS,

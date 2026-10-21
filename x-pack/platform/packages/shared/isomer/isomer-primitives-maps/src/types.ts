@@ -12,6 +12,7 @@ export const MAP_MAX_CELLS = 2000;
 export const MAP_MAX_REGIONS = 250;
 export const MAP_MAX_ARCS = 100;
 export const MAP_MAX_BASEMAP_TILES = 16;
+export const MAP_MAX_LAYERS = 16;
 
 export const MAP_RAMPS = [
   'blues',
@@ -28,6 +29,7 @@ export type MapRamp = (typeof MAP_RAMPS)[number];
 
 export type MapCellShape = 'grid' | 'hex' | 'heatmap';
 
+/** The EMS boundary files whose match field the pack knows without a `regionKey`. */
 export const MAP_REGION_SETS = [
   'world_countries',
   'usa_states',
@@ -35,8 +37,11 @@ export const MAP_REGION_SETS = [
   'uk_subdivisions',
 ] as const;
 
-/** An EMS boundary file; a region's `code` is its ISO 3166-1 alpha-2 code for countries, else its English name. */
-export type MapRegionSet = (typeof MAP_REGION_SETS)[number];
+/**
+ * An EMS boundary file by its id, such as `world_countries` or `usa_states`: any file in the EMS catalog, as a
+ * Kibana Maps layer can name. Its geometry comes from the host.
+ */
+export type MapRegionSet = string;
 
 export interface MapMarker {
   id: string;
@@ -108,9 +113,50 @@ export interface MapNode extends PrimitiveNode {
   cellRamp?: MapRamp;
   regions?: MapRegion[];
   regionSet?: MapRegionSet;
+  /** The boundary property a region's `code` matches, as a Maps join's left field; defaults by `regionSet`. */
+  regionKey?: string;
   /** Colors regions by `value`. Without it a region takes its `tone`. */
   regionRamp?: MapRamp;
   arcs?: MapArc[];
+  /** Data layers bottom to top, as Kibana stacks a map's layers; drawn above the single-layer fields. */
+  layers?: MapLayer[];
   legend?: { unit?: string };
   basemap?: MapBasemap;
 }
+
+interface MapLayerBase {
+  /** A static `#rrggbb` fill, as a Maps layer's static color; a ramp's colors win where the layer has one. */
+  color?: string;
+  /** The layer's opacity, 0 to 1, as a Maps layer's `alpha`; defaults to each kind's own. */
+  opacity?: number;
+}
+
+export interface MapRegionsLayer extends MapLayerBase {
+  kind: 'regions';
+  regions: MapRegion[];
+  regionSet: MapRegionSet;
+  regionKey?: string;
+  regionRamp?: MapRamp;
+}
+
+export interface MapMarkersLayer extends MapLayerBase {
+  kind: 'markers';
+  markers: MapMarker[];
+  markerRamp?: MapRamp;
+  markerSize?: { min: number; max: number };
+  markerLabels?: 'beside' | 'inside';
+}
+
+export interface MapCellsLayer extends MapLayerBase {
+  kind: 'cells';
+  cells: MapCell[];
+  cellShape?: MapCellShape;
+  cellRamp?: MapRamp;
+}
+
+export interface MapArcsLayer extends MapLayerBase {
+  kind: 'arcs';
+  arcs: MapArc[];
+}
+
+export type MapLayer = MapRegionsLayer | MapMarkersLayer | MapCellsLayer | MapArcsLayer;
