@@ -257,7 +257,52 @@ describe('useWorkflowExecutionPolling', () => {
     await advance();
     expect(result.current.error?.message).toBe('Request failed');
     expect(result.current.isLoading).toBe(false);
-    await advance(WORKFLOW_EXECUTION_POLL_INTERVAL_MS);
+    // The first failure doubles the polling interval.
+    await advance(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 2);
+    expect(result.current.error).toBeNull();
+    expect(result.current.workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
+  });
+
+  it('stops polling and toasts once when the execution does not exist', async () => {
+    mockGetExecution.mockRejectedValue(
+      Object.assign(new Error('Not Found'), {
+        name: 'HttpFetchError',
+        request: {},
+        response: { status: 404 },
+      })
+    );
+    const { result } = renderPolling();
+    await advance(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 10);
+
+    expect(mockGetExecution).toHaveBeenCalledTimes(1);
+    expect(getMockServices(store).notifications.toasts.addError).toHaveBeenCalledTimes(1);
+    expect(result.current.error?.message).toBe("This execution doesn't exist or has been deleted.");
+    expect(result.current.isLoading).toBe(false);
+  });
+
+  it('backs off on repeated failures, toasts once, and recovers', async () => {
+    mockGetExecution
+      .mockRejectedValueOnce(new Error('Server error'))
+      .mockRejectedValueOnce(new Error('Server error'))
+      .mockRejectedValueOnce(new Error('Server error'))
+      .mockResolvedValue(createMockWorkflowExecution(ExecutionStatus.COMPLETED));
+    const { result } = renderPolling();
+    await advance();
+    expect(mockGetExecution).toHaveBeenCalledTimes(1);
+
+    await advance(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 2 - 1);
+    expect(mockGetExecution).toHaveBeenCalledTimes(1);
+    await advance(1);
+    expect(mockGetExecution).toHaveBeenCalledTimes(2);
+
+    await advance(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 4 - 1);
+    expect(mockGetExecution).toHaveBeenCalledTimes(2);
+    await advance(1);
+    expect(mockGetExecution).toHaveBeenCalledTimes(3);
+
+    await advance(WORKFLOW_EXECUTION_POLL_INTERVAL_MS * 8);
+    expect(mockGetExecution).toHaveBeenCalledTimes(4);
+    expect(getMockServices(store).notifications.toasts.addError).toHaveBeenCalledTimes(1);
     expect(result.current.error).toBeNull();
     expect(result.current.workflowExecution?.status).toBe(ExecutionStatus.COMPLETED);
   });
