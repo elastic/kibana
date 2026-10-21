@@ -10,6 +10,7 @@ import type { CreateRuleParams } from './create_rule';
 import { RulesClient } from '../../../../rules_client';
 import { ApiKeyType } from '../../../../task_runner/types';
 import { getRulesClientMockParams } from '../../../../test_utils';
+import { changeTrackingServiceMock } from '../../../../rules_client/lib/change_tracking/service.mock';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ruleNotifyWhen } from '../../constants';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
@@ -5143,11 +5144,7 @@ This is the type of text _investigation guides_ will contain.`;
       ],
     };
 
-    const createChangeTrackingService = () => ({
-      log: jest.fn().mockResolvedValue(undefined),
-      logBulk: jest.fn().mockResolvedValue(undefined),
-      getHistory: jest.fn().mockResolvedValue({ items: [], total: 0 }),
-    });
+    const createChangeTrackingService = () => changeTrackingServiceMock.createScoped();
 
     const setRuleType = (overrides: { trackChanges?: boolean } = {}) => {
       ruleTypeRegistry.get.mockReturnValue({

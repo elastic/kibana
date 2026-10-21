@@ -9,6 +9,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { RULES_API_ALL } from '@kbn/security-solution-features/constants';
+import { RuleChangeTrackingDisabledError } from '@kbn/alerting-plugin/server';
 import {
   RULE_RESTORE_FROM_HISTORY_URL,
   RestoreRuleFromHistoryRequestBody,
@@ -84,6 +85,13 @@ export const restoreRuleFromHistoryRoute = (router: SecuritySolutionPluginRouter
               if (err instanceof RuleConcurrencyError) {
                 return response.conflict({
                   body: { message: err.message, attributes: { revision: err.currentRevision } },
+                });
+              }
+
+              if (err instanceof RuleChangeTrackingDisabledError) {
+                return siemResponse.error({
+                  statusCode: 403,
+                  body: 'Rule changes history is disabled. You may enable it in Advanced Settings.',
                 });
               }
 
