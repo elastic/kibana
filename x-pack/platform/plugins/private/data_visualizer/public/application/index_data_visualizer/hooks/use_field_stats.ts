@@ -83,10 +83,7 @@ export function useFieldStatsSearchStrategy(
     getInitialProgress()
   );
 
-  const [initialAbortCtrl] = useState(
-    () => requestCancellationManager?.createChildController() ?? new AbortController()
-  );
-  const abortCtrl = useRef(initialAbortCtrl);
+  const abortCtrl = useRef(new AbortController());
   const searchSubscription$ = useRef<Subscription>();
   const retries$ = useRef<Subscription>();
 
@@ -94,8 +91,7 @@ export function useFieldStatsSearchStrategy(
     searchSubscription$.current?.unsubscribe();
     retries$.current?.unsubscribe();
     abortCtrl.current.abort();
-    abortCtrl.current =
-      requestCancellationManager?.createChildController() ?? new AbortController();
+    abortCtrl.current = new AbortController();
 
     // The panel was cancelled and no new load has started yet, don't start requests.
     if (requestCancellationManager?.signal.aborted) {
@@ -190,7 +186,9 @@ export function useFieldStatsSearchStrategy(
 
     const { sessionId, embeddableExecutionContext } = searchStrategyParams;
     const searchOptions: ISearchOptions = {
-      abortSignal: abortCtrl.current.signal,
+      abortSignal: requestCancellationManager
+        ? AbortSignal.any([abortCtrl.current.signal, requestCancellationManager.signal])
+        : abortCtrl.current.signal,
       sessionId,
       ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
     };

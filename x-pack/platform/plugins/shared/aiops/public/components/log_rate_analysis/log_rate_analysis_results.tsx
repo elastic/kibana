@@ -129,10 +129,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
   // Store the performance metric's start time using a ref
   // to be able to track it across rerenders.
   const analysisStartTime = useRef<number | undefined>(window.performance.now());
-  const [initialAbortCtrl] = useState(
-    () => requestCancellationManager?.createChildController() ?? new AbortController()
-  );
-  const abortCtrl = useRef(initialAbortCtrl);
+  const abortCtrl = useRef(new AbortController());
   const previousSearchQuery = useRef(searchQuery);
   const [overrides, setOverrides] = useState<AiopsLogRateAnalysisSchema['overrides'] | undefined>(
     undefined
@@ -249,8 +246,7 @@ export const LogRateAnalysisResults: FC<LogRateAnalysisResultsProps> = ({
     }
 
     if (abortCtrl.current.signal.aborted) {
-      abortCtrl.current =
-        requestCancellationManager?.createChildController() ?? new AbortController();
+      abortCtrl.current = new AbortController();
     }
 
     if (!continueAnalysis) {

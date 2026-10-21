@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useCallback } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { HttpFetchOptions } from '@kbn/core/public';
@@ -22,11 +22,7 @@ import type { MinimumTimeRangeOption } from '../../../../common/embeddables/patt
 
 export function useMinimumTimeRange(requestCancellationManager?: RequestCancellationManager) {
   const { http } = useAiopsAppContext();
-  // Lazily created so rendering doesn't attach a new listener to the manager each time
-  const [initialController] = useState(
-    () => requestCancellationManager?.createChildController() ?? new AbortController()
-  );
-  const abortController = useRef<AbortController>(initialController);
+  const abortController = useRef(new AbortController());
 
   const getMinimumTimeRange = useCallback(
     async (
@@ -56,7 +52,9 @@ export function useMinimumTimeRange(requestCancellationManager?: RequestCancella
         query: queryIn,
         runtimeMappings,
         path: '/internal/file_upload/time_field_range',
-        signal: abortController.current.signal,
+        signal: requestCancellationManager
+          ? AbortSignal.any([abortController.current.signal, requestCancellationManager.signal])
+          : abortController.current.signal,
       });
 
       if (resp.end.epoch === null || resp.start.epoch === null) {
@@ -84,7 +82,7 @@ export function useMinimumTimeRange(requestCancellationManager?: RequestCancella
         useSubAgg: true,
       };
     },
-    [http]
+    [http, requestCancellationManager]
   );
 
   const [minimumTimeRangeOption, setMinimumTimeRangeOption] = useStorage<
@@ -94,9 +92,8 @@ export function useMinimumTimeRange(requestCancellationManager?: RequestCancella
 
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
-    abortController.current =
-      requestCancellationManager?.createChildController() ?? new AbortController();
-  }, [requestCancellationManager]);
+    abortController.current = new AbortController();
+  }, []);
 
   return {
     getMinimumTimeRange,

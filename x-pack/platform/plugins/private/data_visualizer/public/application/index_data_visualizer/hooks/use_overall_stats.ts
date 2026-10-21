@@ -6,7 +6,7 @@
  */
 
 import type { RequestCancellationManager } from '@kbn/presentation-publishing';
-import { useCallback, useEffect, useState, useRef, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useRef, useMemo, useReducer, useState } from 'react';
 import type { Subscription } from 'rxjs';
 import { map } from 'rxjs';
 import { chunk } from 'lodash';
@@ -97,14 +97,8 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     getInitialProgress()
   );
 
-  const [initialAbortCtrl] = useState(
-    () => requestCancellationManager?.createChildController() ?? new AbortController()
-  );
-  const [initialPopulatedFieldsAbortCtrl] = useState(
-    () => requestCancellationManager?.createChildController() ?? new AbortController()
-  );
-  const abortCtrl = useRef(initialAbortCtrl);
-  const populatedFieldsAbortCtrl = useRef(initialPopulatedFieldsAbortCtrl);
+  const abortCtrl = useRef(new AbortController());
+  const populatedFieldsAbortCtrl = useRef(new AbortController());
 
   const searchSubscription$ = useRef<Subscription>();
 
@@ -121,9 +115,13 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
 
       const fetchPopulatedFields = async () => {
         populatedFieldsAbortCtrl.current.abort();
-        populatedFieldsAbortCtrl.current =
-          requestCancellationManager?.createChildController() ?? new AbortController();
-        const { signal } = populatedFieldsAbortCtrl.current;
+        populatedFieldsAbortCtrl.current = new AbortController();
+        const signal = requestCancellationManager
+          ? AbortSignal.any([
+              populatedFieldsAbortCtrl.current.signal,
+              requestCancellationManager.signal,
+            ])
+          : populatedFieldsAbortCtrl.current.signal;
 
         // Trick to avoid duplicate getFieldsForWildcard requests
         // wouldn't make sense to make time-based query if either earliest & latest timestamps is undefined
@@ -182,8 +180,7 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
     try {
       searchSubscription$.current?.unsubscribe();
       abortCtrl.current.abort();
-      abortCtrl.current =
-        requestCancellationManager?.createChildController() ?? new AbortController();
+      abortCtrl.current = new AbortController();
 
       // The panel was cancelled and no new load has started yet, don't start requests.
       // Note this must not mark the fetch as loaded, that would report the panel as rendered.
@@ -227,7 +224,9 @@ export function useOverallStats<TParams extends OverallStatsSearchStrategyParams
       } = searchStrategyParams;
 
       const searchOptions: ISearchOptions = {
-        abortSignal: abortCtrl.current.signal,
+        abortSignal: requestCancellationManager
+          ? AbortSignal.any([abortCtrl.current.signal, requestCancellationManager.signal])
+          : abortCtrl.current.signal,
         sessionId,
         ...(embeddableExecutionContext ? { executionContext: embeddableExecutionContext } : {}),
       };

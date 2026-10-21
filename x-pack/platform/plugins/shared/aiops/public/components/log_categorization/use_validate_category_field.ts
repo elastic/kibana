@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useState, useCallback } from 'react';
+import { useRef, useCallback } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
@@ -21,11 +21,7 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 export function useValidateFieldRequest(requestCancellationManager?: RequestCancellationManager) {
   const { http } = useAiopsAppContext();
-  // Lazily created so rendering doesn't attach a new listener to the manager each time
-  const [initialController] = useState(
-    () => requestCancellationManager?.createChildController() ?? new AbortController()
-  );
-  const abortController = useRef<AbortController>(initialController);
+  const abortController = useRef(new AbortController());
 
   const runValidateFieldRequest = useCallback(
     async (
@@ -57,20 +53,21 @@ export function useValidateFieldRequest(requestCancellationManager?: RequestCanc
           }),
           headers,
           version: '1',
-          signal: abortController.current.signal,
+          signal: requestCancellationManager
+            ? AbortSignal.any([abortController.current.signal, requestCancellationManager.signal])
+            : abortController.current.signal,
         }
       );
 
       return resp;
     },
-    [http]
+    [http, requestCancellationManager]
   );
 
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
-    abortController.current =
-      requestCancellationManager?.createChildController() ?? new AbortController();
-  }, [requestCancellationManager]);
+    abortController.current = new AbortController();
+  }, []);
 
   return { runValidateFieldRequest, cancelRequest };
 }

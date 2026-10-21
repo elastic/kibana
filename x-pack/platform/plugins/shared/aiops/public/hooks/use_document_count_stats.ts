@@ -110,8 +110,10 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
     onLoadingChange?.(true);
 
     try {
-      abortCtrl.current =
-        requestCancellationManager?.createChildController() ?? new AbortController();
+      abortCtrl.current = new AbortController();
+      const signal = requestCancellationManager
+        ? AbortSignal.any([abortCtrl.current.signal, requestCancellationManager.signal])
+        : abortCtrl.current.signal;
 
       if (
         esqlQuery !== undefined &&
@@ -129,7 +131,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
           latest: searchParams.latest,
           intervalMs: searchParams.intervalMs,
           searchQuery: searchParams.searchQuery,
-          signal: abortCtrl.current.signal,
+          signal,
         });
         const esqlStats: DocumentStats = { sampleProbability: 1, documentCountStats, totalCount };
         setDocumentStats(esqlStats);
@@ -158,7 +160,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
           {
             params: getDocumentCountStatsRequest(totalHitsParams, undefined, changePointsByDefault),
           },
-          { abortSignal: abortCtrl.current.signal }
+          { abortSignal: signal }
         )
       );
       const totalHitsStats = processDocumentCountStats(totalHitsResp?.rawResponse, searchParams);
@@ -179,7 +181,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
               searchParamsCompare === undefined && changePointsByDefault
             ),
           },
-          { abortSignal: abortCtrl.current.signal }
+          { abortSignal: signal }
         )
       );
 
@@ -204,7 +206,7 @@ export function useDocumentCountStats<TParams extends DocumentStatsSearchStrateg
                 randomSamplerWrapper
               ),
             },
-            { abortSignal: abortCtrl.current.signal }
+            { abortSignal: signal }
           )
         );
 

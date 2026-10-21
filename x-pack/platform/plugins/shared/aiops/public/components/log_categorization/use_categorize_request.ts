@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useRef, useState, useCallback, useMemo } from 'react';
+import { useRef, useCallback, useMemo } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
@@ -36,11 +36,7 @@ export function useCategorizeRequest(
 ) {
   const { data } = useAiopsAppContext();
 
-  // Lazily created so rendering doesn't attach a new listener to the manager each time
-  const [initialController] = useState(
-    () => requestCancellationManager?.createChildController() ?? new AbortController()
-  );
-  const abortController = useRef<AbortController>(initialController);
+  const abortController = useRef(new AbortController());
 
   const randomSampler = useMemo(
     () => new RandomSampler(randomSamplerStorage),
@@ -79,7 +75,14 @@ export function useCategorizeRequest(
               true,
               additionalFilter === undefined // don't include the outer sparkline if there is an additional filter
             ),
-            { abortSignal: abortController.current.signal }
+            {
+              abortSignal: requestCancellationManager
+                ? AbortSignal.any([
+                    abortController.current.signal,
+                    requestCancellationManager.signal,
+                  ])
+                : abortController.current.signal,
+            }
           )
           .subscribe({
             next: (result) => {
@@ -100,14 +103,13 @@ export function useCategorizeRequest(
           });
       });
     },
-    [data.search, randomSampler]
+    [data.search, randomSampler, requestCancellationManager]
   );
 
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
-    abortController.current =
-      requestCancellationManager?.createChildController() ?? new AbortController();
-  }, [requestCancellationManager]);
+    abortController.current = new AbortController();
+  }, []);
 
   return { runCategorizeRequest, cancelRequest, randomSampler };
 }

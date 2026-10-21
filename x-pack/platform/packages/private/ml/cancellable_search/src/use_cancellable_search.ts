@@ -33,7 +33,6 @@ export interface UseCancellableSearch {
  */
 export interface RequestCancellationLike {
   readonly signal: AbortSignal;
-  createChildController(): AbortController;
 }
 
 // Similar to aiops/hooks/use_cancellable_search.ts
@@ -41,11 +40,7 @@ export function useCancellableSearch(
   data: DataPublicPluginStart,
   requestCancellationManager?: RequestCancellationLike
 ) {
-  // Lazily created so rendering doesn't attach a new listener to the manager each time
-  const [initialController] = useState(
-    () => requestCancellationManager?.createChildController() ?? new AbortController()
-  );
-  const abortController = useRef<AbortController>(initialController);
+  const abortController = useRef(new AbortController());
   const [isLoading, setIsFetching] = useState<boolean>(false);
 
   const runRequest = useCallback(
@@ -53,21 +48,13 @@ export function useCancellableSearch(
       requestBody: RequestBody,
       options = {}
     ): Promise<ResponseType | null> => {
-      // A controller aborted by the manager stays aborted until the next load starts,
-      // at which point the manager's signal is replaced and we need a fresh child.
-      if (
-        requestCancellationManager &&
-        abortController.current.signal.aborted &&
-        !requestCancellationManager.signal.aborted
-      ) {
-        abortController.current = requestCancellationManager.createChildController();
-      }
-
       return new Promise((resolve, reject) => {
-        const { signal } = abortController.current;
+        const signal = requestCancellationManager
+          ? AbortSignal.any([abortController.current.signal, requestCancellationManager.signal])
+          : abortController.current.signal;
         data.search
           .search<RequestBody, ResponseType>(requestBody, {
-            abortSignal: abortController.current.signal,
+            abortSignal: signal,
             ...options,
           })
           .pipe(
@@ -106,9 +93,8 @@ export function useCancellableSearch(
 
   const cancelRequest = useCallback(() => {
     abortController.current.abort();
-    abortController.current =
-      requestCancellationManager?.createChildController() ?? new AbortController();
-  }, [requestCancellationManager]);
+    abortController.current = new AbortController();
+  }, []);
 
   return { runRequest, cancelRequest, isLoading };
 }

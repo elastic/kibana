@@ -57,29 +57,4 @@ export class RequestCancellationManager {
   public cancel(reason: AbortReason = AbortReason.CANCELED): void {
     this.abortController.abort(reason);
   }
-
-  /**
-   * Creates a child `AbortController` that is aborted whenever the manager's current
-   * signal is aborted, inheriting its abort reason. If the manager's signal is already
-   * aborted, the child is born aborted.
-   *
-   * Intended for request-fetching code that already owns its own `AbortController` (e.g.
-   * to support an in-panel cancel button or stale-result guarding) and just needs that
-   * controller to also be cancelled when the embeddable-level manager is cancelled.
-   */
-  public createChildController(): AbortController {
-    const child = new AbortController();
-    const parent = this.abortController.signal;
-    if (parent.aborted) {
-      child.abort(parent.reason);
-    } else {
-      // Tying the listener to the child's own signal removes it from the parent once the
-      // child is aborted (e.g. by an in-panel cancel), so long-lived managers don't accumulate them.
-      parent.addEventListener('abort', () => child.abort(parent.reason), {
-        once: true,
-        signal: child.signal,
-      });
-    }
-    return child;
-  }
 }
