@@ -381,7 +381,7 @@ export const allowedExperimentalValues = Object.freeze({
    * feature is treated as disabled unless both flags are on (`isLinuxRansomwareProtectionEnabled`).
    * Release: 9.6
    */
-  linuxRansomwareProtection: false,
+  linuxRansomwareProtection: true,
 
   /**
    * Enables the AI Data Collection card in the per-OS Elastic Defend policy settings form and
