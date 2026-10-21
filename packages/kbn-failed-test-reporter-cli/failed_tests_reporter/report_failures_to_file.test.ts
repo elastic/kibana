@@ -160,15 +160,6 @@ describe('reportFailuresToFile', () => {
     expect(html).toContain('>#42</a>');
   });
 
-  it('links a flaky suite issue without a failure count', async () => {
-    await report([makeFailure('a', { githubIssue: 'https://gh/issues/42', trackedBySuite: true })]);
-
-    const html = readHtml();
-    expect(html).toContain('Flaky suite issue');
-    expect(html).toContain('>#42</a>');
-    expect(html).not.toContain('Failures in tracked branches');
-  });
-
   it('collapses standard output when there is any', async () => {
     await report([makeFailure('a', { 'system-out': 'the ftr log' })]);
 

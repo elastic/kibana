@@ -16,10 +16,12 @@ Tests without an exact file path get no link.
 
 For every failure the reporter asks ci-stats which `failed-test` issue tracks the test, and links
 that issue from the failure's HTML report, the Buildkite annotation and the Slack message. A test
-covered by a flaky suite issue (see below) is only linked: the daily report keeps that issue up to
-date, so the job neither comments on it nor opens a per-test issue next to it. ci-stats finds suite
-issues by the test's file or its Scout test id (recomputed for FTR and Jest failures from the file
-and the test name).
+covered by a flaky suite issue (see below) has its failure recorded on that issue instead of on an
+issue of its own: the fail count goes up, the issue is reopened if needed and a comment names the
+test and the build. The body text and the `flaky-test-suite` metadata stay with the daily report,
+the count lives in the `failed-test` metadata next to them. ci-stats finds suite issues by the
+test's file or its Scout test id (recomputed for FTR and Jest failures from the file and the test
+name).
 
 ## `node scripts/report_flaky_test_issues`
 

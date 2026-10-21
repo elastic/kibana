@@ -20,6 +20,7 @@ jest.mock('./report_metadata', () => ({ getReportMessageIter: jest.fn() }));
 jest.mock('./report_failure', () => ({
   createFailureIssue: jest.fn(),
   updateFailureIssue: jest.fn(),
+  updateSuiteIssue: jest.fn(),
 }));
 jest.mock('./report_failures_to_es', () => ({ reportFailuresToEs: jest.fn() }));
 jest.mock('./report_failures_to_file', () => ({ reportFailuresToFile: jest.fn() }));
@@ -28,7 +29,8 @@ jest.mock('./add_messages_to_report', () => ({ addMessagesToReport: jest.fn() })
 const { readTestReport, getRootMetadata } = jest.requireMock('./test_report');
 const { getFailures } = jest.requireMock('./get_failures');
 const { getReportMessageIter } = jest.requireMock('./report_metadata');
-const { createFailureIssue, updateFailureIssue } = jest.requireMock('./report_failure');
+const { createFailureIssue, updateFailureIssue, updateSuiteIssue } =
+  jest.requireMock('./report_failure');
 const { reportFailuresToEs } = jest.requireMock('./report_failures_to_es');
 const { reportFailuresToFile } = jest.requireMock('./report_failures_to_file');
 
@@ -59,6 +61,7 @@ const createSuiteIssue = (failure: TestFailure): FlakySuiteIssue => ({
     number: 7,
     htmlUrl: 'https://github.com/issues/7',
     state: 'open',
+    body: 'suite body',
   },
 });
 
@@ -106,6 +109,7 @@ beforeEach(() => {
   getReportMessageIter.mockReturnValue([]);
   createFailureIssue.mockResolvedValue({ html_url: 'https://github.com/issues/1' });
   updateFailureIssue.mockResolvedValue({ newBody: 'body', newCount: 2 });
+  updateSuiteIssue.mockResolvedValue({ newBody: 'suite body, counted', newCount: 5 });
 });
 
 describe('processJUnitReports one-failure-per-report (bail behavior)', () => {
@@ -199,7 +203,7 @@ describe('processJUnitReports one-failure-per-report (bail behavior)', () => {
 });
 
 describe('processJUnitReports flaky suite issues', () => {
-  it('links a failure tracked by a suite issue without creating or updating anything', async () => {
+  it('records a failure on its suite issue instead of on a per-test issue', async () => {
     const failures = [makeFailure(0), makeFailure(1)];
     getFailures.mockReturnValue(failures);
     const suiteIssue = createSuiteIssue(failures[0]);
@@ -211,13 +215,27 @@ describe('processJUnitReports flaky suite issues', () => {
 
     await processJUnitReports(['report.xml'], params);
 
+    expect(updateSuiteIssue).toHaveBeenCalledTimes(1);
+    expect(updateSuiteIssue.mock.calls[0][1]).toBe(suiteIssue);
+    expect(updateSuiteIssue.mock.calls[0][5]).toBe(failures[0]);
     expect(updateFailureIssue).not.toHaveBeenCalled();
     expect(failures[0].githubIssue).toBe('https://github.com/issues/7');
-    expect(failures[0].trackedBySuite).toBe(true);
-    expect(failures[0].failureCount).toBeUndefined();
+    expect(failures[0].failureCount).toBe(5);
+    // the next failure of the suite in this run counts from the updated body
+    expect(suiteIssue.github.body).toBe('suite body, counted');
     // the suite-tracked failure does not use up the one new issue per report
     expect(createFailureIssue).toHaveBeenCalledTimes(1);
     expect(createFailureIssue.mock.calls[0][1]).toBe(failures[1]);
+  });
+
+  it('shows the count the suite issue had without bumping it when GitHub updates are off', async () => {
+    const failures = [makeFailure(0)];
+    getFailures.mockReturnValue(failures);
+    const { params } = createParams([], [[failures[0], createSuiteIssue(failures[0])]]);
+
+    await processJUnitReports(['report.xml'], { ...params, updateGithub: false });
+
+    expect(failures[0].failureCount).toBe(4);
   });
 });
 

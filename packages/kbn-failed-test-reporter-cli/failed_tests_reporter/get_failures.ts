@@ -23,11 +23,6 @@ export type TestFailure = FailedTestCase['$'] & {
   'system-out'?: string;
   githubIssue?: string;
   failureCount?: number;
-  /**
-   * Set when `githubIssue` is a flaky suite issue filed by `report_flaky_test_issues`: it tracks
-   * the whole suite, is kept up to date by the daily report and has no per-test failure count.
-   */
-  trackedBySuite?: boolean;
   commandLine?: string;
   owners?: string;
   testType?: JUnitTestType;

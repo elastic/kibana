@@ -45,6 +45,8 @@ export interface FlakySuiteIssue {
     number: number;
     htmlUrl: string;
     state: 'open' | 'closed';
+    /** as of the last issue event ci-stats saw; the fail count the job keeps is read from it */
+    body: string;
   };
 }
 
@@ -179,8 +181,7 @@ export class ExistingFailedTestIssues {
 
   /**
    * The flaky suite issue tracking the failure's test, if any: an open one before a closed one,
-   * then the newest. Suite issues are kept up to date by `report_flaky_test_issues`, so callers
-   * link to them without updating them.
+   * then the newest.
    */
   getSuiteIssueForFailure(failure: TestFailure): FlakySuiteIssue | undefined {
     const about = this.suiteIssues.filter((issue) => isAboutFailure(issue, failure));

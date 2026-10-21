@@ -370,6 +370,7 @@ describe('flaky suite issues', () => {
       number,
       htmlUrl: `https://github.com/elastic/kibana/issues/${number}`,
       state,
+      body: '',
     },
   });
 

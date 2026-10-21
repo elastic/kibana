@@ -10,7 +10,7 @@
 import { addMessagesToReport } from './add_messages_to_report';
 import { getFailures } from './get_failures';
 import type { ProcessReportsParams } from './process_reports_types';
-import { createFailureIssue, updateFailureIssue } from './report_failure';
+import { createFailureIssue, updateFailureIssue, updateSuiteIssue } from './report_failure';
 import { reportFailuresToEs } from './report_failures_to_es';
 import { reportFailuresToFile } from './report_failures_to_file';
 import { getReportMessageIter } from './report_metadata';
@@ -98,13 +98,29 @@ export async function processJUnitReports(
       }
       seenNewIssueKeys.add(key);
 
-      // the daily flaky test report keeps suite issues up to date, the job only links to them
+      // a test tracked by a flaky suite issue gets its failures recorded there, not on an issue of its own
       const suiteIssue = existingIssues.getSuiteIssueForFailure(failure);
       if (suiteIssue) {
+        const { newBody, newCount } = await updateSuiteIssue(
+          buildUrl,
+          suiteIssue,
+          githubApi,
+          branch,
+          pipeline,
+          failure
+        );
         const url = suiteIssue.github.htmlUrl;
+        suiteIssue.github.body = newBody;
         failure.githubIssue = url;
-        failure.trackedBySuite = true;
-        pushMessage(`Test is tracked by a flaky suite issue: ${url}`);
+        failure.failureCount = updateGithub ? newCount : newCount - 1;
+        pushMessage(
+          `Test is tracked by a flaky suite issue with ${
+            newCount - 1
+          } failures on tracked branches: ${url}`
+        );
+        if (updateGithub) {
+          pushMessage(`Updated flaky suite issue: ${url} (fail count: ${newCount})`);
+        }
         continue;
       }
 
