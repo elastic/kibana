@@ -8,10 +8,11 @@
  */
 
 import { getRepresentativeQuery } from '@kbn/lens-common';
+import type { XYVisualizationState } from '@kbn/lens-common';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { deepMockedFields, buildDataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { allSuggestionsMock } from '../__mocks__/suggestions';
+import { allSuggestionsMock, histogramESQLSuggestionMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 import { convertDatatableColumnToDataViewFieldSpec } from '@kbn/data-view-utils';
 import { UnifiedHistogramSuggestionType, type UnifiedHistogramVisContext } from '../types';
@@ -64,6 +65,92 @@ describe('LensVisService suggestions', () => {
       UnifiedHistogramSuggestionType.lensSuggestion
     );
     expect(lensVis.currentSuggestionContext?.suggestion).toBe(allSuggestionsMock[0]);
+  });
+
+  test('applies the Discover default legend to new ES|QL XY charts', async () => {
+    const xySuggestion = {
+      ...histogramESQLSuggestionMock,
+      visualizationState: {
+        ...(histogramESQLSuggestionMock.visualizationState as XYVisualizationState),
+        legend: { isVisible: true, position: 'bottom', layout: 'list' },
+      },
+    };
+    const lensVis = await getLensVisMock({
+      filters: [],
+      query: { esql: 'from the-data-view | stats maxB = max(bytes)' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      breakdownField: undefined,
+      columns: [
+        {
+          id: 'var0',
+          name: 'var0',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      allSuggestions: [xySuggestion],
+    });
+
+    expect(lensVis.currentSuggestionContext?.suggestion?.visualizationState).toEqual(
+      expect.objectContaining({
+        legend: { isVisible: true, position: 'right' },
+      })
+    );
+  });
+
+  test.each([
+    { isVisible: true, position: 'bottom', layout: 'list' },
+    { isVisible: false, position: 'left' },
+  ])('keeps the saved Discover legend %o when suggesting an ES|QL chart', async (legend) => {
+    const xySuggestion = {
+      ...histogramESQLSuggestionMock,
+      visualizationState: {
+        ...(histogramESQLSuggestionMock.visualizationState as XYVisualizationState),
+        legend,
+      },
+    };
+    const lensVis = await getLensVisMock({
+      filters: [],
+      query: { esql: 'from the-data-view | stats maxB = max(bytes)' },
+      dataView: dataViewMock,
+      timeInterval: 'auto',
+      breakdownField: undefined,
+      columns: [
+        {
+          id: 'var0',
+          name: 'var0',
+          meta: {
+            type: 'number',
+          },
+        },
+      ],
+      allSuggestions: [xySuggestion],
+      externalVisContext: {
+        attributes: {
+          title: 'saved',
+          visualizationType: 'lnsXY',
+          references: [],
+          state: {
+            datasourceStates: { formBased: { layers: {} } },
+            visualization: xySuggestion.visualizationState,
+            filters: [],
+          },
+        },
+        requestData: {
+          dataViewId: dataViewMock.id,
+          timeField: '@timestamp',
+          timeInterval: undefined,
+          breakdownField: undefined,
+        },
+        suggestionType: UnifiedHistogramSuggestionType.lensSuggestion,
+      },
+    });
+
+    expect(lensVis.currentSuggestionContext?.suggestion?.visualizationState).toEqual(
+      expect.objectContaining({ legend })
+    );
   });
 
   test('should return suggestionUnsupported if no timerange is provided and no suggestions returned by the api', async () => {

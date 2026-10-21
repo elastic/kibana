@@ -67,6 +67,11 @@ import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 const ESQL_HISTOGRAM_RESULT_LIMIT = 10000;
+// Discover has little vertical space, so its charts keep the legend on the right.
+const DISCOVER_DEFAULT_LEGEND = {
+  isVisible: true,
+  position: 'right',
+} as XYConfiguration['legend'];
 
 /** Lens suggestions still take a DataView. Classic unwraps it; ES|QL uses the registered shim. */
 function resolveLensDataView(dataSource: DataSource): DataView | undefined {
@@ -464,8 +469,7 @@ export class LensVisService {
         },
       ],
       legend: {
-        isVisible: true,
-        position: 'right',
+        ...DISCOVER_DEFAULT_LEGEND,
         legendSize,
         shouldTruncate: false,
       },
@@ -598,14 +602,17 @@ export class LensVisService {
           )
         : undefined;
 
-      const suggestions =
+      const suggestions = (
         this.lensSuggestionsApi(
           context,
           dataView,
           ['lnsDatatable'],
           ChartType.XY,
           updatedAttributesWithQuery
-        ) ?? [];
+        ) ?? []
+      ).map((suggestion) =>
+        applyDiscoverLegend(suggestion, preferredVisAttributes?.visualizationType)
+      );
       if (suggestions.length) {
         const suggestion = suggestions[0];
         const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
@@ -715,7 +722,7 @@ export class LensVisService {
         preferredChartType,
         visAttributes
       ) ?? []
-    );
+    ).map((suggestion) => applyDiscoverLegend(suggestion, visAttributes?.visualizationType));
   };
 
   private getLensAttributesState = ({
@@ -870,6 +877,23 @@ export class LensVisService {
     };
   };
 }
+
+const applyDiscoverLegend = (
+  suggestion: Suggestion,
+  preferredVisualizationType: string | undefined
+): Suggestion => {
+  if (suggestion.visualizationId !== 'lnsXY' || preferredVisualizationType === 'lnsXY') {
+    return suggestion;
+  }
+
+  return {
+    ...suggestion,
+    visualizationState: {
+      ...(suggestion.visualizationState as XYConfiguration),
+      legend: DISCOVER_DEFAULT_LEGEND,
+    },
+  };
+};
 
 function areSuggestionAndVisContextAndQueryParamsStillCompatible({
   suggestionType,

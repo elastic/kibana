@@ -637,6 +637,28 @@ describe('xy_suggestions', () => {
     `);
   });
 
+  test.each(['textBased', 'formBased'])(
+    'defaults a new %s XY chart legend to bottom list',
+    (datasourceId) => {
+      const [suggestion] = getSuggestions({
+        table: {
+          isMultiRow: true,
+          columns: [numCol('price'), dateCol('date')],
+          layerId: 'first',
+          changeType: 'unchanged',
+        },
+        keptLayerIds: [],
+        datasourceId,
+      });
+
+      expect(suggestion.state.legend).toEqual({
+        isVisible: true,
+        position: 'bottom',
+        layout: 'list',
+      });
+    }
+  );
+
   test('suggests a split x y chart with date on x', () => {
     const [suggestion, ...rest] = getSuggestions({
       table: {
