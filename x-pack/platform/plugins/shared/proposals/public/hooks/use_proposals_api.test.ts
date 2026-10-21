@@ -474,6 +474,63 @@ describe('useApproveProposal', () => {
   });
 });
 
+describe('after an approval ends, before the new data arrives', () => {
+  it('never shows "not approving" with the old data while many observers share the list', async () => {
+    let decided = false;
+    const http = makeHttp();
+    http.get.mockImplementation(async (url: string) => {
+      const proposal = decided
+        ? { id: 'p-1', decision: 'approved', status: 'executing' }
+        : { id: 'p-1', status: 'pending' };
+      // The list read is slower than the detail read, as with a real index.
+      if (url.endsWith('/p-1')) {
+        return proposal;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 100));
+      return { proposals: [proposal], total: 1 };
+    });
+    http.post.mockImplementation(async () => {
+      setTimeout(() => {
+        decided = true;
+      }, 300);
+      return { id: 'p-1', status: 'pending' };
+    });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+    const { Wrapper } = createWrapper();
+    const seen: string[] = [];
+
+    const { result } = renderHook(
+      () => {
+        // The flyout reads this list in many components: the rows, the count and the badge.
+        const list = useConversationProposals('conv-42');
+        useConversationProposals('conv-42');
+        useConversationProposals('conv-42');
+        const approve = useApproveProposal();
+        const isApproving = useIsApprovingProposal('p-1');
+        const proposal = list.data?.pages[0]?.proposals[0];
+        const state = `approving=${isApproving} status=${proposal?.status}`;
+        if (seen[seen.length - 1] !== state) {
+          seen.push(state);
+        }
+        return approve;
+      },
+      { wrapper: Wrapper }
+    );
+    await waitFor(() => expect(seen).toContain('approving=false status=pending'));
+
+    await result.current.mutateAsync({ id: 'p-1', body: { actionInput: {} } as never });
+    await waitFor(() => expect(seen[seen.length - 1]).toBe('approving=false status=executing'));
+
+    expect(seen).not.toContain('approving=false status=pending approved');
+    expect(seen.slice(seen.indexOf('approving=true status=pending'))).toEqual([
+      'approving=true status=pending',
+      'approving=false status=executing',
+    ]);
+  });
+});
+
 describe('useDismissProposal', () => {
   it('posts to the dismiss endpoint with the given body', async () => {
     const http = makeHttp();
