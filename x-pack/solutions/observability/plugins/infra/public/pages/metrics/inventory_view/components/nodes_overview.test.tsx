@@ -119,7 +119,7 @@ const mockSchemas = (schemas: DataSchemaFormat[]) => {
   });
 };
 
-const renderOverview = (overrides: Partial<typeof baseProps> = {}) =>
+const renderOverview = (overrides: Partial<React.ComponentProps<typeof NodesOverview>> = {}) =>
   render(
     <EuiProvider>
       <I18nProvider>
