@@ -134,7 +134,6 @@ export function AttacksGroupTakeActionItems({
     useAttackRunWorkflowContextMenuItems({
       attacksForWorkflowRun: attacksWithTimelineAlerts,
       closePopover,
-      telemetrySource,
     });
 
   const { items: investigateInTimelineItems } = useAttackInvestigateInTimelineContextMenuItems({
