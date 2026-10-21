@@ -9,18 +9,10 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { tags } from '@kbn/scout-oblt';
 import { test } from '../fixtures';
 
-const V2_FF_ID = 'observability.addDataPageV2Enabled';
-
 test.describe.serial(
   'Host Onboarding',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ apiServices }) => {
-      await apiServices.core.settings({
-        'feature_flags.overrides': { [V2_FF_ID]: true },
-      });
-    });
-
     test.beforeEach(async ({ browserAuth }) => {
       await browserAuth.loginAsAdmin();
     });
