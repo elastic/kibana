@@ -48,7 +48,6 @@ dependsOn:
   - '@kbn/agent-builder-sml-plugin'
   - '@kbn/as-code-filters-transforms'
   - '@kbn/as-code-shared-transforms'
-  - '@kbn/data-views-plugin'
   - '@kbn/test-jest-helpers'
   - '@kbn/presentation-publishing'
   - '@kbn/scout'
