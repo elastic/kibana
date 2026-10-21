@@ -1,5 +1,5 @@
 {
-  "sha1": "f3865dfe82fa9e265ce218205afc332be60a229c",
+  "sha1": "9b930804e319982baf41a2ac8e2c2461ca22d74d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -25,8 +25,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/create_query_stream.spec.ts",
-        "line": 33,
-        "column": 70
+        "line": 31,
+        "column": 11
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/create_query_stream.spec.ts",
-        "line": 42,
-        "column": 8
+        "line": 38,
+        "column": 94
       }
     },
     {
@@ -53,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/create_query_stream.spec.ts",
-        "line": 56,
-        "column": 23
+        "line": 64,
+        "column": 24
       }
     },
     {
@@ -67,8 +67,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/create_query_stream.spec.ts",
-        "line": 82,
-        "column": 23
+        "line": 80,
+        "column": 5
       }
     },
     {
@@ -81,7 +81,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/delete_query_stream.spec.ts",
-        "line": 29,
+        "line": 25,
         "column": 11
       }
     },
@@ -95,8 +95,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/edit_query_stream_classic_partitioning.spec.ts",
-        "line": 52,
-        "column": 39
+        "line": 46,
+        "column": 10
       }
     },
     {
@@ -109,7 +109,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/edit_query_stream_classic_partitioning.spec.ts",
-        "line": 76,
+        "line": 70,
         "column": 26
       }
     },
@@ -123,7 +123,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/edit_query_stream_partitioning.spec.ts",
-        "line": 35,
+        "line": 30,
         "column": 13
       }
     },
@@ -137,8 +137,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/edit_query_stream_partitioning.spec.ts",
-        "line": 69,
-        "column": 9
+        "line": 67,
+        "column": 13
       }
     },
     {
@@ -151,7 +151,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/edit_query_stream.spec.ts",
-        "line": 30,
+        "line": 25,
         "column": 11
       }
     },
@@ -165,8 +165,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/query_stream_nesting_delete.spec.ts",
-        "line": 43,
-        "column": 72
+        "line": 41,
+        "column": 18
       }
     },
     {
@@ -179,8 +179,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/query_stream_nesting_error.spec.ts",
-        "line": 41,
-        "column": 62
+        "line": 38,
+        "column": 61
       }
     },
     {
@@ -193,8 +193,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/query_stream_nesting_ingest_parent.spec.ts",
-        "line": 43,
-        "column": 62
+        "line": 40,
+        "column": 61
       }
     },
     {
@@ -207,8 +207,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/query_stream_nesting_query_parent.spec.ts",
-        "line": 43,
-        "column": 72
+        "line": 41,
+        "column": 18
       }
     },
     {
@@ -221,7 +221,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/query_streams_feature_flag.spec.ts",
-        "line": 15,
+        "line": 16,
         "column": 23
       }
     },
@@ -235,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/query_streams_feature_flag.spec.ts",
-        "line": 21,
+        "line": 22,
         "column": 5
       }
     },
@@ -249,7 +249,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/query_streams/ui/tests/view_query_stream.spec.ts",
-        "line": 29,
+        "line": 25,
         "column": 11
       }
     },
