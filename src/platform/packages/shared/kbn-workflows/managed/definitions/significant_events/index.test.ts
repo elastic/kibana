@@ -242,10 +242,14 @@ describe('significant events persistence workflow contracts', () => {
     expect(engine.parseAndRenderSync(template, makeContext([{ id: 'inv-1' }]))).toBe('false');
   });
 
-  it('attaches completed investigations only to Significant Events', () => {
+  it('attaches completed or failed investigations only to Significant Events', () => {
     expect(investigationCompleted.triggers).toEqual([
       {
         type: 'nightshift-investigations.completed',
+        on: { condition: 'event.subject.type: "significant_event"' },
+      },
+      {
+        type: 'nightshift-investigations.failed',
         on: { condition: 'event.subject.type: "significant_event"' },
       },
     ]);
