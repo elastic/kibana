@@ -29,7 +29,12 @@ export const useSettlingProposalsPolling = (proposals: Iterable<Proposal>): void
       if (!focusManager.isFocused()) {
         return;
       }
-      void queryClient.invalidateQueries({ queryKey: platformQueryKeys.proposals.all });
+      // Join a refetch that is still running. Do not cancel it. The queue sections refetch all
+      // loaded pages one after another, and that can take longer than one interval.
+      void queryClient.invalidateQueries(
+        { queryKey: platformQueryKeys.proposals.all },
+        { cancelRefetch: false }
+      );
     }, PROPOSAL_SETTLING_POLL_INTERVAL_MS);
     return () => clearInterval(poll);
   }, [hasSettling, queryClient]);

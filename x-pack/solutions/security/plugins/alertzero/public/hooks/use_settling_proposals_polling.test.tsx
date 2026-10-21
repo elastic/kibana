@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { act, renderHook } from '@testing-library/react';
-import { focusManager, QueryClient, QueryClientProvider } from '@kbn/react-query';
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { focusManager, QueryClient, QueryClientProvider, useQuery } from '@kbn/react-query';
 import { PROPOSAL_SETTLING_POLL_INTERVAL_MS } from '@kbn/proposals-common';
 import type { Proposal } from '@kbn/proposals-common';
 import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
@@ -51,7 +51,10 @@ describe('useSettlingProposalsPolling', () => {
     await tick();
 
     expect(invalidate).toHaveBeenCalledTimes(2);
-    expect(invalidate).toHaveBeenCalledWith({ queryKey: platformQueryKeys.proposals.all });
+    expect(invalidate).toHaveBeenCalledWith(
+      { queryKey: platformQueryKeys.proposals.all },
+      { cancelRefetch: false }
+    );
   });
 
   it('does not poll when every proposal is pending or settled', async () => {
@@ -76,6 +79,34 @@ describe('useSettlingProposalsPolling', () => {
     await tick();
 
     expect(invalidate).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not restart a refetch that is still running', async () => {
+    const queryClient = new QueryClient({
+      logger: { log: () => null, warn: () => null, error: () => null },
+    });
+    const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+      <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+    );
+    // The first fetch ends at once. Every later fetch stays open, like a slow refetch of many pages.
+    const queryFn = jest
+      .fn()
+      .mockResolvedValueOnce('ok')
+      .mockImplementation(() => new Promise(() => {}));
+    const { result } = renderHook(
+      () => {
+        useSettlingProposalsPolling([executing]);
+        return useQuery({ queryKey: [...platformQueryKeys.proposals.all, 'slow'], queryFn });
+      },
+      { wrapper: Wrapper }
+    );
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+    await tick();
+    await tick();
+    await tick();
+
+    expect(queryFn).toHaveBeenCalledTimes(2);
   });
 
   it('skips a refresh while the window has no focus', async () => {
