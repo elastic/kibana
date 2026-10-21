@@ -9,7 +9,7 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { useActiveKibanaSpace } from './use_kibana_space';
 
-export const NEW_INFRASTRUCTURE_EXPERIENCE_STORAGE_KEY = 'newInfrastructureExperience';
+const NEW_INFRASTRUCTURE_EXPERIENCE_STORAGE_KEY = 'newInfrastructureExperience';
 
 export function useNewInfrastructureExperience() {
   const { space } = useActiveKibanaSpace();
