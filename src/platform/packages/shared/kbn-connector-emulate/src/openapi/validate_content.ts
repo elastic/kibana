@@ -26,9 +26,13 @@ const findContent = (contents: readonly MediaTypeContent[], mediaType: string) =
     .find(Boolean);
 };
 
-// Multipart, binary and XML bodies arrive as text that their schemas don't describe.
+// Multipart, binary and XML bodies arrive as text that their schemas don't describe. AWS's JSON
+// RPC protocols send JSON as `application/x-amz-json-1.0` and `-1.1`.
 const canValidate = (mediaType: string): boolean =>
-  /[/+]json$/.test(mediaType) || mediaType === FORM_MEDIA_TYPE || mediaType.startsWith('text/');
+  /[/+]json$/.test(mediaType) ||
+  /^application\/x-amz-json-1\.[01]$/.test(mediaType) ||
+  mediaType === FORM_MEDIA_TYPE ||
+  mediaType.startsWith('text/');
 
 const toFormFields = (body: string): Record<string, string | string[]> => {
   const fields: Record<string, string | string[]> = {};

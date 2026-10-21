@@ -13,21 +13,25 @@ import { createShapeConverter, isRequired } from './shape_schema';
 import type { MemberShape, Shape, SmithyModel } from './smithy_model';
 import {
   collectOperations,
-  findServices,
+  documentationOf,
+  endpointPrefixOf,
+  errorStatus,
   getShape,
   hasTrait,
+  membersOf,
+  pickService,
+  protocolsOf,
+  regionalServers,
   shapeName,
+  sigv4Security,
+  sigv4SecuritySchemes,
   traitRecord,
-  UNIT,
 } from './smithy_model';
 
 const REST_JSON = 'aws.protocols#restJson1';
-const SIGV4 = 'aws.auth#sigv4';
 type ResponseHeaders = Record<string, Node & { readonly required: boolean }>;
 // `application/json` and structured suffixes such as `application/vnd.api+json`.
 const JSON_MEDIA_TYPE = /^application\/(?:[\w.-]+\+)?json$/i;
-// The scheme name and shape smithy-openapi uses for SigV4.
-const SIGV4_SCHEME = 'aws.auth.sigv4';
 
 type Node = Record<string, unknown>;
 
@@ -35,10 +39,6 @@ export interface ConvertSmithyOptions {
   /** The service shape ID, for models that define more than one service. */
   readonly service?: string;
 }
-
-/** The members of a structure, by name. */
-const membersOf = (model: SmithyModel, target: string | undefined): Array<[string, MemberShape]> =>
-  target && target !== UNIT ? Object.entries(getShape(model, target)?.members ?? {}) : [];
 
 const bindingOf = (member: MemberShape): string | undefined =>
   [
@@ -50,35 +50,6 @@ const bindingOf = (member: MemberShape): string | undefined =>
     'smithy.api#httpPayload',
     'smithy.api#httpResponseCode',
   ].find((trait) => hasTrait(member.traits, trait));
-
-const documentationOf = (shape: { readonly traits?: Readonly<Record<string, unknown>> }) => {
-  const documentation = shape.traits?.['smithy.api#documentation'];
-  return typeof documentation === 'string' ? { description: documentation } : {};
-};
-
-/** The status of an error shape: its `@httpError`, or 400 for client and 500 for server errors. */
-const errorStatus = (shape: Shape | undefined): string => {
-  const code = shape?.traits?.['smithy.api#httpError'];
-  if (typeof code === 'number') {
-    return String(code);
-  }
-  return shape?.traits?.['smithy.api#error'] === 'server' ? '500' : '400';
-};
-
-const pickService = (model: SmithyModel, id?: string): [string, Shape] => {
-  const services = findServices(model);
-  const service = id ? services.find(([serviceId]) => serviceId === id) : services[0];
-  if (!service || (!id && services.length > 1)) {
-    throw new Error(
-      id
-        ? `The model has no service ${id}`
-        : `Expected one service in the model, found ${
-            services.map(([serviceId]) => serviceId).join(', ') || 'none'
-          }; pass the service to convert`
-    );
-  }
-  return service;
-};
 
 /**
  * Converts a Smithy model of an AWS `restJson1` service to OpenAPI 3.0, as `convertDiscovery`
@@ -95,9 +66,7 @@ export const convertSmithy = (
   options: ConvertSmithyOptions = {}
 ): OpenApiDocument => {
   const [serviceId, service] = pickService(model, options.service);
-  const protocols = Object.keys(service.traits ?? {}).filter((trait) =>
-    trait.startsWith('aws.protocols#')
-  );
+  const protocols = protocolsOf(service);
   if (!protocols.includes(REST_JSON)) {
     throw new Error(
       `${serviceId} uses ${
@@ -107,11 +76,7 @@ export const convertSmithy = (
   }
   const converter = createShapeConverter(model);
   const { components } = converter;
-  const awsService = traitRecord(service.traits, 'aws.api#service');
-  const sigv4 = traitRecord(service.traits, SIGV4);
-  const endpointPrefix = String(
-    awsService?.endpointPrefix ?? sigv4?.name ?? shapeName(serviceId).toLowerCase()
-  );
+  const endpointPrefix = endpointPrefixOf(serviceId, service);
   const serviceErrors = service.errors ?? [];
 
   const toParameter = (
@@ -360,30 +325,13 @@ export const convertSmithy = (
       version: service.version ?? '1',
       ...documentationOf(service),
     },
-    servers: [
-      {
-        url: `https://${endpointPrefix}.{region}.amazonaws.com`,
-        variables: { region: { default: 'us-east-1' } },
-      },
-    ],
+    servers: regionalServers(endpointPrefix),
     paths,
     ...(Object.keys(msPaths).length > 0 ? { 'x-ms-paths': msPaths } : {}),
     components: {
       schemas: components,
-      ...(sigv4
-        ? {
-            securitySchemes: {
-              [SIGV4_SCHEME]: {
-                type: 'apiKey',
-                description: 'AWS Signature Version 4 authentication',
-                name: 'Authorization',
-                in: 'header',
-                'x-amazon-apigateway-authtype': 'awsSigv4',
-              },
-            },
-          }
-        : {}),
+      ...sigv4SecuritySchemes(service),
     },
-    ...(sigv4 ? { security: [{ [SIGV4_SCHEME]: [] }] } : {}),
+    ...sigv4Security(service),
   };
 };
