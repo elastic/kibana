@@ -353,8 +353,10 @@ export class T7aController {
   }
 
   private refreshFlags(): void {
-    const flags = classifyFlagOverrides(readResearchConfig('feature_flags'));
-    if (this.probeFlag !== undefined) flags.booleans['workerCore.liveProbe'] = this.probeFlag;
+    const classified = classifyFlagOverrides(readResearchConfig('feature_flags'));
+    const booleans = { ...classified.booleans };
+    if (this.probeFlag !== undefined) booleans['workerCore.liveProbe'] = this.probeFlag;
+    const flags = { ...classified, booleans };
     const next = advanceGeneration(this.flagsState.hash, this.flagsState.generation, {
       flags,
       invalidation: this.flagInvalidation,
@@ -629,7 +631,11 @@ export class T7aController {
             );
           }
           if (operation !== 'featureFlag') throw new Error('t7a replica: op not allowlisted');
-          const flags = core.featureFlags;
+          const flags = core.featureFlags as typeof core.featureFlags & {
+            getStringValue(key: string, fallback: string): unknown;
+            getNumberValue(key: string, fallback: number): unknown;
+            getBooleanValue(key: string, fallback: boolean): unknown;
+          };
           if (record.kind === 'string') {
             return toData(flags.getStringValue(String(record.key), String(record.fallback ?? '')));
           }
@@ -735,21 +741,19 @@ export class T7aController {
 
   private createStub(taskType: string, context: RunContext) {
     const { taskInstance } = context;
+    const task = taskInstance as unknown as Obj;
     const space = String((taskInstance.params as Obj | undefined)?.spaceId ?? 'default');
     const baseInput = {
       taskType,
-      taskInstance: taskInstance as unknown as Obj,
+      taskInstance: task,
       executionUuid: context.executionUuid,
-      executionContext: taskManagerExecutionContext(
-        taskType,
-        String((taskInstance as Obj).id ?? '')
-      ),
+      executionContext: taskManagerExecutionContext(taskType, String(task.id ?? '')),
       ...(context.fakeRequest ? { fakeRequest: encodeFakeRequest(context.fakeRequest) } : {}),
     };
-    const taskId = String((taskInstance as Obj).id ?? '');
+    const taskId = String(task.id ?? '');
     const override =
-      !(taskInstance as Obj).schedule && typeof (taskInstance as Obj).timeoutOverride === 'string'
-        ? String((taskInstance as Obj).timeoutOverride)
+      !task.schedule && typeof task.timeoutOverride === 'string'
+        ? String(task.timeoutOverride)
         : undefined;
     const executionMs = researchExecutionBudgetMs(taskType, this.config.deadlineMs, override);
     const dispatch = async (phase: 'run' | 'cleanup') => {

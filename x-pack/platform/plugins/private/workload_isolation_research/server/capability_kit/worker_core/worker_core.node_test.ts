@@ -387,7 +387,7 @@ test('analytics reportEvent forwards a registered string event type and its data
   const counters: Array<{ event_type: unknown; code: string }> = [];
   const client = createAnalytics({
     isDev: false,
-    logger: new Proxy({}, { get: () => () => undefined }),
+    logger: new Proxy({}, { get: () => () => undefined }) as never,
   });
   client.telemetryCounter$.subscribe((counter: { event_type: unknown; code: string }) => {
     counters.push(counter);
@@ -408,11 +408,11 @@ test('analytics reportEvent forwards a registered string event type and its data
       ),
     /eventType must be a string/
   );
-  registerForwardedEventType((definition) => client.registerEventType(definition), {
+  registerForwardedEventType((definition) => client.registerEventType(definition as never), {
     eventType: 'gen_ai_token_count',
     schema: {},
   });
-  registerForwardedEventType((definition) => client.registerEventType(definition), {
+  registerForwardedEventType((definition) => client.registerEventType(definition as never), {
     eventType: 'gen_ai_token_count',
     schema: {},
   });
@@ -744,11 +744,12 @@ test('execution class parity fails closed and collateral losses refund at most t
   const runner = createTaskRunnerWithResearchOverride(
     'alerting:.es-query',
     () => ({ run: async () => ({ state: { from: 'main' } }) }),
-    { taskInstance: {} }
+    { taskInstance: {} } as never
   );
-  return runner.run().then((result: { state: { from?: string } }) => {
+  return runner.run().then((result) => {
+    const state = (result as { state?: { from?: string } } | undefined)?.state;
     assert.equal(ran, 1);
-    assert.equal(result.state.from, undefined);
+    assert.equal(state?.from, undefined);
     resetResearchExecutionClasses();
   });
 });

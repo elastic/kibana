@@ -383,7 +383,7 @@ export const createTaskRunnerWithResearchOverride = (
       const dispatch = runner.run.bind(runner);
       return {
         ...runner,
-        run: () => match.aroundDispatch!(context, dispatch),
+        run: () => match.aroundDispatch!(context, dispatch) as ReturnType<typeof dispatch>,
       };
     }
   }

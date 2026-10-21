@@ -6,7 +6,6 @@
  */
 
 import os from 'os';
-import { sampleProcessMemory } from './capability_kit/worker_core/memory_sample';
 import type {
   CoreSetup,
   CoreStart,
@@ -18,6 +17,7 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { sampleProcessMemory } from './capability_kit/worker_core/memory_sample';
 import type { WorkloadIsolationResearchConfig } from './config';
 import { Recorder } from './lib/recorder';
 import { registerRoutes } from './routes';
@@ -103,7 +103,11 @@ export class WorkloadIsolationResearchPlugin implements Plugin<void, void, Setup
       core.status.overall$.subscribe((value) => {
         publishStatus({ overall: String(value.level) });
       });
-      this.analyticsSetup = core.analytics;
+      this.analyticsSetup = {
+        registerEventType: (definition: unknown) => {
+          core.analytics.registerEventType(definition as never);
+        },
+      };
     }
     const router = core.http.createRouter();
     registerTierBRoutes(router, API_BASE, getRecorder, getStart);

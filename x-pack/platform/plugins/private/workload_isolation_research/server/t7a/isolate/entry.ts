@@ -208,7 +208,7 @@ export const runTask: TaskEntry = async (rawInput: CodecInput, context: WorkerCo
       const seen: boolean[] = [];
       const subscription = current.platform
         .booleanFlag$('workerCore.liveProbe', false)
-        .subscribe((value) => seen.push(value));
+        .subscribe((value) => seen.push(value ?? false));
       const licenseSeen: string[] = [];
       const statusSeen: string[] = [];
       const licenseSub = current.platform.license$.subscribe((value) => {
