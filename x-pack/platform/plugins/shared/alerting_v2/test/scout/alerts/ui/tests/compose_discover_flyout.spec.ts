@@ -26,8 +26,13 @@ const RULE_NAME = 'scout-compose-discover-create';
 const EDIT_RULE_NAME = 'scout-compose-discover-edit';
 const EDITED_RULE_NAME = 'scout-compose-discover-edited';
 const NO_TIME_FIELD_RULE_NAME = 'scout-compose-discover-no-time-field';
-// `logs-*` is never ingested, so no date field resolves — the sad path.
-const NO_TIME_FIELD_QUERY = 'FROM logs-* | LIMIT 10';
+/**
+ * Test-owned index with no date field, so no time field resolves — the sad path.
+ * A shared glob like `logs-*` would match date-bearing indices on cloud/obs
+ * deployments and defeat the assertion.
+ */
+const NO_DATE_FIELD_INDEX = 'test-compose-discover-no-date-field';
+const NO_TIME_FIELD_QUERY = `FROM ${NO_DATE_FIELD_INDEX} | LIMIT 10`;
 /**
  * Index whose only date field is `timestamp` (no `@timestamp`) — mirrors
  * kibana_sample_data_flights for standalone time-field resolution.
@@ -114,6 +119,22 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
       },
       refresh: 'wait_for',
     });
+    await esClient.indices.create(
+      {
+        index: NO_DATE_FIELD_INDEX,
+        mappings: {
+          properties: {
+            message: { type: 'keyword' },
+          },
+        },
+      },
+      { ignore: [400] }
+    );
+    await esClient.index({
+      index: NO_DATE_FIELD_INDEX,
+      document: { message: 'no date field here' },
+      refresh: 'wait_for',
+    });
   });
 
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
@@ -128,6 +149,7 @@ test.describe('ComposeDiscoverFlyout — create and edit flows', { tag: testData
     await esClient.indices.delete({ index: TEST_INDEX }, { ignore: [404] });
     await esClient.indices.delete({ index: TIMESTAMP_ONLY_INDEX }, { ignore: [404] });
     await esClient.indices.delete({ index: TWO_DATE_FIELDS_INDEX }, { ignore: [404] });
+    await esClient.indices.delete({ index: NO_DATE_FIELD_INDEX }, { ignore: [404] });
   });
 
   test('create flow: open flyout, define query, step through, and submit', async ({
