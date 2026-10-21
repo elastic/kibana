@@ -66,6 +66,7 @@ const emptyRegistry = createMockWorkflowContextRegistry();
 const mockKibanaValue = createUseKibanaMockValue();
 const readyValidationContext: WorkflowYamlValidationContext = {
   registry: emptyRegistry,
+  isManaged: false,
   connectorTypes: { status: 'ready', value: {} },
   connectorsManagementUrl: 'http://test/connectors',
   workflows: { workflows: {}, totalWorkflows: 0 },

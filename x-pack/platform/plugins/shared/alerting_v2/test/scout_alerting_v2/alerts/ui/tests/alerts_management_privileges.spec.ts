@@ -39,7 +39,7 @@ const assertEpisodesManagementHappyPath = async ({
 
   await test.step('episodes table renders with item count', async () => {
     await expect(alertEpisodesList.tableToolbar).toBeVisible({ timeout: 60_000 });
-    await expect(alertEpisodesList.itemCount).toHaveText(/^Showing(?: first)? \d[\d,]* episodes?$/);
+    await expect(alertEpisodesList.itemCount).toHaveText(/^Showing(?: first)? \d[\d,]* alerts?$/);
   });
 
   await test.step('tags filter lists the seeded v2 tag', async () => {
@@ -61,7 +61,7 @@ const assertEpisodesManagementHappyPath = async ({
  */
 test.describe(
   'Alerts management page - privilege-based access',
-  { tag: '@local-stateful-classic' },
+  { tag: ['@local-stateful-classic', '@local-serverless-observability_complete'] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
       test.setTimeout(180_000);
@@ -73,14 +73,14 @@ test.describe(
           '@timestamp': now,
           rule: { id: SEEDED_RULE_ID, version: 1 },
           group_hash: SEEDED_GROUP_HASH,
-          episode: { id: 'scout-alerts-mgmt-priv-episode', status: 'active' },
+          alert: { id: 'scout-alerts-mgmt-priv-episode', status: 'active' },
         }),
       ]);
       await apiServices.alertingV2.alertActionsEvents.seed([
         {
           '@timestamp': now,
           last_series_event_timestamp: now,
-          actor: null,
+          actor: { type: 'user' },
           action_type: 'tag',
           group_hash: SEEDED_GROUP_HASH,
           rule_id: SEEDED_RULE_ID,

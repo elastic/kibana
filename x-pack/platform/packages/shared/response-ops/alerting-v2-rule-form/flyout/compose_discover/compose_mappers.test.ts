@@ -9,6 +9,8 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { noDataStrategy, recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import { DASHBOARD_ARTIFACT_TYPE, RUNBOOK_ARTIFACT_TYPE } from '@kbn/alerting-v2-constants';
 import type { FormValues } from '../../form/types';
+import { DELAY_MODE } from '../../form/types';
+import { parseYamlToFormValues } from '../../form/utils/yaml_form_utils';
 import {
   composeFormToCreateRequest,
   composeFormToUpdateRequest,
@@ -56,6 +58,16 @@ const baseFormValues: FormValues = {
 // ── composeFormToCreateRequest ───────────────────────────────────────────────
 
 describe('composeFormToCreateRequest', () => {
+  it('maps builder type to builder metadata', () => {
+    const result = composeFormToCreateRequest(baseFormValues, 'threshold');
+
+    expect(result.metadata).toEqual({
+      name: 'Test Rule',
+      tags: ['tag1'],
+      builder: { type: 'threshold' },
+    });
+  });
+
   it('maps basic form values to create request', () => {
     const result = composeFormToCreateRequest(baseFormValues);
     expect(result.kind).toBe('alert');
@@ -106,6 +118,29 @@ describe('composeFormToCreateRequest', () => {
     };
     const result = composeFormToCreateRequest(values);
     expect(result.metadata.tags).toBeUndefined();
+  });
+
+  it('omits the description the user never typed rather than sending an empty string', () => {
+    const values: FormValues = {
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, description: '' },
+    };
+    const result = composeFormToCreateRequest(values);
+    expect(result.metadata).not.toHaveProperty('description');
+  });
+
+  it('maps routing tags when present and omits them when empty', () => {
+    const withRoutingTags = composeFormToCreateRequest({
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, routingTags: ['sre'] },
+    });
+    expect(withRoutingTags.metadata.routing_tags).toEqual(['sre']);
+
+    const withoutRoutingTags = composeFormToCreateRequest({
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, routingTags: [] },
+    });
+    expect(withoutRoutingTags.metadata).not.toHaveProperty('routing_tags');
   });
 
   it('maps grouping when present', () => {
@@ -291,6 +326,18 @@ describe('composeFormToCreateRequest', () => {
 // ── composeFormToUpdateRequest ───────────────────────────────────────────────
 
 describe('composeFormToUpdateRequest', () => {
+  it('maps builder type to builder metadata', () => {
+    const result = composeFormToUpdateRequest(baseFormValues, 'threshold');
+
+    expect(result.metadata?.builder).toEqual({ type: 'threshold' });
+  });
+
+  it('clears builder metadata outside builder mode', () => {
+    const result = composeFormToUpdateRequest(baseFormValues);
+
+    expect(result.metadata?.builder).toBeNull();
+  });
+
   it('excludes kind from update request', () => {
     const result = composeFormToUpdateRequest(baseFormValues);
     expect(result).not.toHaveProperty('kind');
@@ -324,6 +371,19 @@ describe('composeFormToUpdateRequest', () => {
     };
     const result = composeFormToUpdateRequest(values);
     expect(result.metadata?.tags).toEqual(['prod', 'infra']);
+  });
+
+  it('sends routing tags when present', () => {
+    const result = composeFormToUpdateRequest({
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, routingTags: ['sre'] },
+    });
+    expect(result.metadata?.routing_tags).toEqual(['sre']);
+  });
+
+  it('nullifies routing tags when empty (clear all routing tags on a partial update)', () => {
+    const result = composeFormToUpdateRequest(baseFormValues);
+    expect(result.metadata?.routing_tags).toBeNull();
   });
 
   it('preserves grouping when present', () => {
@@ -363,6 +423,41 @@ describe('composeFormToUpdateRequest', () => {
     const result = composeFormToUpdateRequest(values);
     expect(result.recovery).toEqual({ strategy: 'condition', segment: RECOVERY_SEGMENT });
   });
+
+  it('nullifies the breach the user removed rather than omitting it', () => {
+    const result = composeFormToUpdateRequest({
+      ...baseFormValues,
+      query: { base: 'FROM logs-*', breach: { segment: '' } },
+    });
+
+    expect(result.query).toEqual({ base: 'FROM logs-*', breach: null });
+  });
+
+  it.each([
+    ['never set', undefined],
+    ['emptied in the field', ''],
+  ])('nullifies a description %s rather than omitting it', (_label, description) => {
+    const result = composeFormToUpdateRequest({
+      ...baseFormValues,
+      metadata: { ...baseFormValues.metadata, description },
+    });
+
+    expect(result.metadata?.description).toBeNull();
+  });
+
+  it('spells out the phase leaves dropped by a switch from a duration to a breach count', () => {
+    const result = composeFormToUpdateRequest({
+      ...baseFormValues,
+      stateTransition: { pendingCount: 3 },
+      stateTransitionAlertDelayMode: DELAY_MODE.breaches,
+    });
+
+    expect(result.state_transition?.pending).toEqual({
+      count: 3,
+      timeframe: null,
+      operator: null,
+    });
+  });
 });
 
 // ── mapRuleToComposeFormValues ───────────────────────────────────────────────
@@ -379,6 +474,14 @@ describe('mapRuleToComposeFormValues', () => {
     });
     expect(result.stateTransitionAlertDelayMode).toBe('immediate');
     expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
+  });
+
+  it('loads routing tags from the rule', () => {
+    const rule = {
+      ...baseRuleResponse,
+      metadata: { ...baseRuleResponse.metadata, routing_tags: ['sre'] },
+    } as RuleResponse;
+    expect(mapRuleToComposeFormValues(rule).metadata.routingTags).toEqual(['sre']);
   });
 
   it('maps schedule with lookback', () => {
@@ -470,8 +573,10 @@ describe('mapRuleToComposeFormValues', () => {
     expect(result.stateTransition).toEqual({
       pendingCount: 3,
       pendingTimeframe: '10m',
+      pendingOperator: null,
       recoveringCount: null,
       recoveringTimeframe: null,
+      recoveringOperator: null,
     });
     expect(result.stateTransitionAlertDelayMode).toBe('duration');
     expect(result.stateTransitionRecoveryDelayMode).toBe('immediate');
@@ -645,5 +750,59 @@ describe('mapYamlFormValuesToComposeFormValues', () => {
     });
 
     expect(result.query).toEqual(signalQuery);
+  });
+});
+
+/**
+ * Deleting a key from the YAML is how the editor says "unset", but PATCH merges leaf by leaf, so a
+ * request that simply omits it would keep what the user just deleted. These walk the save path the
+ * editor takes — parse, map to compose values, build the request — on a rule that has the leaf.
+ */
+describe('saving edited YAML clears the leaves the user deleted', () => {
+  const editedYaml = (body: string) => {
+    const { values, error } = parseYamlToFormValues(body);
+    if (!values) throw new Error(`Fixture YAML did not parse: ${error}`);
+    return composeFormToUpdateRequest(mapYamlFormValuesToComposeFormValues(values));
+  };
+
+  it('nulls the pending leaves left out of the state transition', () => {
+    const request = editedYaml(`
+kind: alert
+metadata:
+  name: Test Rule
+time_field: '@timestamp'
+schedule:
+  every: 5m
+  lookback: 2m
+query:
+  base: ${BASE.split('\n')[0]}
+  breach:
+    segment: ${ALERT_SEGMENT}
+state_transition:
+  pending:
+    count: 2
+`);
+
+    expect(request.state_transition?.pending).toEqual({
+      count: 2,
+      timeframe: null,
+      operator: null,
+    });
+  });
+
+  it('nulls the breach when its segment is deleted', () => {
+    const request = editedYaml(`
+kind: alert
+metadata:
+  name: Test Rule
+time_field: '@timestamp'
+schedule:
+  every: 5m
+  lookback: 2m
+query:
+  base: ${BASE.split('\n')[0]}
+`);
+
+    expect(request.query?.breach).toBeNull();
   });
 });

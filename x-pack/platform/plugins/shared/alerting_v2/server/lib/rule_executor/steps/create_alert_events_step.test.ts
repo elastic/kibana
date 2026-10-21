@@ -30,6 +30,10 @@ describe('CreateAlertEventsStep', () => {
     const config: PluginConfig = {
       enabled: true,
       invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
+      retention: {
+        ruleEvents: { enabled: false, dataRetention: '90d' },
+        alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
+      },
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
@@ -330,7 +334,6 @@ describe('CreateAlertEventsStep', () => {
       buildGroupHash({
         rowDoc: { 'host.name': host },
         groupKeyFields: ['host.name'],
-        fallbackSeed: 'unused',
       });
 
     it('never drops an active group and preserves the active set on state for reuse', async () => {

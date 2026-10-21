@@ -14,7 +14,7 @@ import {
   ftrTestChannels,
 } from '#pipeline-utils/ci-stats/pick_test_group_run_order/test_channels';
 
-const VALID_SOLUTIONS = ['observability', 'search', 'security', 'workplaceai', 'vectordb'];
+const VALID_SOLUTIONS = ['observability', 'search', 'security', 'vectordb'];
 const VALID_LIMIT_CONFIG_TYPES = ['unit', 'integration', 'functional'];
 
 // Defaults mirror `.buildkite/scripts/common/env.sh` so this script can also run

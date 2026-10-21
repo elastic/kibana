@@ -37,7 +37,6 @@ describe('SubmitErrorCallout', () => {
       <div
         class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
         data-size="m"
-        style="--euiCallOutTypeColor: #C61E25;"
       >
         <div
           class="css-1slkmya-wrapper"
@@ -91,7 +90,6 @@ describe('SubmitErrorCallout', () => {
       <div
         class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
         data-size="m"
-        style="--euiCallOutTypeColor: #C61E25;"
       >
         <div
           class="css-1slkmya-wrapper"
@@ -145,7 +143,6 @@ describe('SubmitErrorCallout', () => {
       <div
         class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
         data-size="m"
-        style="--euiCallOutTypeColor: #0B64DD;"
       >
         <div
           class="css-1slkmya-wrapper"
@@ -216,7 +213,6 @@ describe('SubmitErrorCallout', () => {
       <div
         class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
         data-size="m"
-        style="--euiCallOutTypeColor: #C61E25;"
       >
         <div
           class="css-1slkmya-wrapper"
@@ -275,7 +271,6 @@ describe('SubmitErrorCallout', () => {
       <div
         class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
         data-size="m"
-        style="--euiCallOutTypeColor: #0B64DD;"
       >
         <div
           class="css-1slkmya-wrapper"
@@ -347,7 +342,6 @@ describe('SubmitErrorCallout', () => {
       <div
         class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
         data-size="m"
-        style="--euiCallOutTypeColor: #C61E25;"
       >
         <div
           class="css-1slkmya-wrapper"
@@ -402,7 +396,6 @@ describe('SubmitErrorCallout', () => {
       <div
         class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
         data-size="m"
-        style="--euiCallOutTypeColor: #C61E25;"
       >
         <div
           class="css-1slkmya-wrapper"
@@ -461,7 +454,6 @@ describe('SubmitErrorCallout', () => {
       <div
         class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
         data-size="m"
-        style="--euiCallOutTypeColor: #C61E25;"
       >
         <div
           class="css-1slkmya-wrapper"
@@ -520,7 +512,6 @@ describe('SubmitErrorCallout', () => {
       <div
         class="euiPanel euiPanel--primary euiCallOut euiCallOut--primary emotion-euiPanel-none-primary-euiCallOut-primary"
         data-size="m"
-        style="--euiCallOutTypeColor: #0B64DD;"
       >
         <div
           class="css-1slkmya-wrapper"
@@ -590,7 +581,6 @@ describe('SubmitErrorCallout', () => {
       <div
         class="euiPanel euiPanel--danger euiCallOut euiCallOut--danger emotion-euiPanel-none-danger-euiCallOut-danger"
         data-size="m"
-        style="--euiCallOutTypeColor: #C61E25;"
       >
         <div
           class="css-1slkmya-wrapper"

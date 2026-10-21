@@ -73,6 +73,15 @@ export const translations = {
   queryColumn: i18n.translate('xpack.esqlViews.managementPage.queryColumn', {
     defaultMessage: 'Query',
   }),
+  reservedBadgeLabel: i18n.translate('xpack.esqlViews.managementPage.reservedBadgeLabel', {
+    defaultMessage: 'Reserved',
+  }),
+  reservedViewsFilterLabel: i18n.translate(
+    'xpack.esqlViews.managementPage.reservedViewsFilterLabel',
+    {
+      defaultMessage: 'Reserved views',
+    }
+  ),
   showFullQueryForView: (viewName: string) =>
     i18n.translate('xpack.esqlViews.managementPage.showFullQueryForView', {
       defaultMessage: 'Show full query for {viewName}',
@@ -99,12 +108,6 @@ export const translations = {
   flyoutSubtitle: i18n.translate('xpack.esqlViews.managementPage.flyoutSubtitle', {
     defaultMessage:
       'Changes affect every dashboard, alert, and other saved object that uses this view.',
-  }),
-  viewDetailsTitle: i18n.translate('xpack.esqlViews.managementPage.viewDetailsTitle', {
-    defaultMessage: 'ES|QL view details',
-  }),
-  viewDetailsDescription: i18n.translate('xpack.esqlViews.managementPage.viewDetailsDescription', {
-    defaultMessage: 'Name and describe the view.',
   }),
   viewNameLabel: i18n.translate('xpack.esqlViews.managementPage.viewNameLabel', {
     defaultMessage: 'Name',
@@ -135,8 +138,38 @@ export const translations = {
     defaultMessage: 'ES|QL query',
   }),
   viewQueryDescription: i18n.translate('xpack.esqlViews.managementPage.viewQueryDescription', {
-    defaultMessage: 'Write a new query, or select a recently or starred query.',
+    defaultMessage: 'Write a new query, or select a recent or starred query.',
   }),
+  previewResultsTitle: i18n.translate('xpack.esqlViews.managementPage.previewResultsTitle', {
+    defaultMessage: 'ES|QL query results',
+  }),
+  previewEmptyTitle: i18n.translate('xpack.esqlViews.managementPage.previewEmptyTitle', {
+    defaultMessage: 'No results yet',
+  }),
+  previewEmptyDescription: i18n.translate(
+    'xpack.esqlViews.managementPage.previewEmptyDescription',
+    {
+      defaultMessage: 'Run the query above to preview its results here.',
+    }
+  ),
+  previewLoadingTitle: i18n.translate('xpack.esqlViews.managementPage.previewLoadingTitle', {
+    defaultMessage: 'Running ES|QL query',
+  }),
+  previewGridLoadingTitle: i18n.translate(
+    'xpack.esqlViews.managementPage.previewGridLoadingTitle',
+    {
+      defaultMessage: 'Loading preview results',
+    }
+  ),
+  previewNoResultsTitle: i18n.translate('xpack.esqlViews.managementPage.previewNoResultsTitle', {
+    defaultMessage: 'No results found',
+  }),
+  previewNoResultsDescription: i18n.translate(
+    'xpack.esqlViews.managementPage.previewNoResultsDescription',
+    {
+      defaultMessage: 'The query ran successfully but returned no results.',
+    }
+  ),
   nameRequiredErrorMessage: i18n.translate(
     'xpack.esqlViews.managementPage.nameRequiredErrorMessage',
     {
@@ -209,6 +242,18 @@ export const translations = {
   selectRowAriaLabel: i18n.translate('xpack.esqlViews.managementPage.selectRowAriaLabel', {
     defaultMessage: 'Select this row',
   }),
+  reservedViewNotSelectable: i18n.translate(
+    'xpack.esqlViews.managementPage.reservedViewNotSelectable',
+    {
+      defaultMessage: 'Reserved views cannot be deleted.',
+    }
+  ),
+  reservedViewActionsDisabled: i18n.translate(
+    'xpack.esqlViews.managementPage.reservedViewActionsDisabled',
+    {
+      defaultMessage: 'Reserved views cannot be edited or deleted.',
+    }
+  ),
   openInDiscoverButtonLabel: i18n.translate(
     'xpack.esqlViews.managementPage.openInDiscoverButtonLabel',
     {

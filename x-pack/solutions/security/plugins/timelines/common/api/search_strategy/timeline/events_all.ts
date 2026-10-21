@@ -5,39 +5,43 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { language } from '../model/language';
 import { runtimeMappings } from '../model/runtime_mappings';
 import { sortItem } from '../model/sort';
 import { TimelineEventsQueries } from '../model/timeline_events_queries';
 import { requestPaginated } from './request_paginated';
 
-const extendedSortItem = sortItem.extend({
-  esTypes: z.array(z.string()),
-});
+const extendedSortItem = lazySchema(() =>
+  sortItem.extend({
+    esTypes: z.array(z.string()),
+  })
+);
 
-const sort = z.array(extendedSortItem);
+const sort = lazySchema(() => z.array(extendedSortItem));
 
-export const timelineEventsAllSchema = requestPaginated.extend({
-  authFilter: z.object({}).optional(),
-  dateRangeField: z.string().optional(),
-  excludeEcsData: z.boolean().optional(),
-  fieldRequested: z.array(z.string()),
-  sort,
-  filterQuery: z.any(),
-  fields: z.array(
-    z.union([
-      z.string(),
-      z.object({
-        field: z.string(),
-        include_unmapped: z.boolean(),
-      }),
-    ])
-  ),
-  runtimeMappings,
-  language,
-  factoryQueryType: z.literal(TimelineEventsQueries.all),
-});
+export const timelineEventsAllSchema = lazySchema(() =>
+  requestPaginated.extend({
+    authFilter: z.object({}).optional(),
+    dateRangeField: z.string().optional(),
+    excludeEcsData: z.boolean().optional(),
+    fieldRequested: z.array(z.string()),
+    sort,
+    filterQuery: z.any(),
+    fields: z.array(
+      z.union([
+        z.string(),
+        z.object({
+          field: z.string(),
+          include_unmapped: z.boolean(),
+        }),
+      ])
+    ),
+    runtimeMappings,
+    language,
+    factoryQueryType: z.literal(TimelineEventsQueries.all),
+  })
+);
 
 export type TimelineEventsAllOptionsInput = z.input<typeof timelineEventsAllSchema>;
 

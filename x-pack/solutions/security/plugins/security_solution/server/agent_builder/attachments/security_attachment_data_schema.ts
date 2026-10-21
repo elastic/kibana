@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 
 /**
  * Base schema for all Security Solution agent-builder attachments.
@@ -13,6 +13,8 @@ import { z } from '@kbn/zod/v4';
  * Each attachment can override its UI label by providing an `attachmentLabel`,
  * which must be included in the schema in order for the attachment validate method to persist the label
  */
-export const securityAttachmentDataSchema = z.object({
-  attachmentLabel: z.string().optional(),
-});
+export const securityAttachmentDataSchema = lazySchema(() =>
+  z.object({
+    attachmentLabel: z.string().optional(),
+  })
+);

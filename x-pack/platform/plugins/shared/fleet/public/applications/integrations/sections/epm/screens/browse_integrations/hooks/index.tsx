@@ -11,6 +11,7 @@ import { searchIdField, useLocalSearch } from '../../../../../hooks';
 
 import { useAvailablePackages } from '../../home/hooks/use_available_packages';
 import type { IntegrationCardItem } from '../../home';
+import { withSearchMemberMatch } from '../../home/search_member_match';
 
 import { STATUS_DEPRECATED } from '../types';
 
@@ -337,6 +338,15 @@ export function useBrowseIntegrationHook({
     );
   }, [filteredAllCategories, effectiveCategories]);
 
+  // Tell the user which bundled service their search matched (e.g. AWS tile for "guardduty").
+  const filteredCardsWithMemberMatch = useMemo(
+    () =>
+      searchTerm
+        ? filteredCards.map((card) => withSearchMemberMatch(card, searchTerm))
+        : filteredCards,
+    [filteredCards, searchTerm]
+  );
+
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {
       setUrlCategory({ category: id });
@@ -358,7 +368,7 @@ export function useBrowseIntegrationHook({
     isLoadingAppendCustomIntegrations,
     eprPackageLoadingError,
     eprCategoryLoadingError,
-    filteredCards,
+    filteredCards: filteredCardsWithMemberMatch,
     allCards,
     availableSubCategories,
     onCategoryChange,

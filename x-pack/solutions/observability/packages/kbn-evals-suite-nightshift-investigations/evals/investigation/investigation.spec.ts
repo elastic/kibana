@@ -12,6 +12,7 @@ import type { ConversationRound } from '@kbn/agent-builder-common';
 import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
+import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
 import {
   ANTI_LEAKAGE_EVALUATOR,
   CAUSE_COMPLETENESS_EVALUATOR,
@@ -24,7 +25,9 @@ import { INVESTIGATION_TIMEOUT_MS, runInvestigation } from './task';
 import { assertSuccessfulSandboxCommand } from './trace_evidence';
 import type { InvestigationTaskOutput } from './types';
 
-evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.classic }, () => {
+const suiteTags = [...tags.stateful.classic, ...tags.serverless.observability.complete];
+
+evaluate.describe('Nightshift investigations: trace-only', { tag: suiteTags }, () => {
   evaluate(
     'grades investigations with the RCA judges and persists complete agent traces',
     async ({
@@ -34,6 +37,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
       evalsClient,
       traceEsClient,
       repetitions,
+      concurrency: requestedConcurrency,
       log,
       inferenceClient,
       evaluationConnector,
@@ -45,7 +49,8 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
         evaluationConnector,
         log,
       });
-      const concurrency = 16;
+      // The evals_nightshift_investigations config set sizes Task Manager for 16 investigations.
+      const concurrency = Math.min(16, requestedConcurrency);
       evaluate.setTimeout(
         Math.ceil((dataset.examples.length * repetitions) / concurrency) *
           (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +
@@ -78,6 +83,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           { timeout: 60_000 }
         )
         .toBe(true);
+      await replaceCustomContext(fetch, getDatasetCustomContext(dataset.name));
       const [experiment] = await executorClient.runExperiment(
         {
           name: 'Nightshift graded investigation traces',
@@ -115,7 +121,7 @@ evaluate.describe('Nightshift investigations: trace-only', { tag: tags.stateful.
           // These execution-acceptance checks alone establish that the run itself succeeded,
           // independently of the quality scores the judges assign.
           expect(output.execution_error).toBeUndefined();
-          expect(output.workflow_status).toBe('completed');
+          expect(output.workflow_status).toBe('complete');
           expect(output.investigation_id).toEqual(expect.any(String));
           expect(output.conversation_id).toEqual(expect.any(String));
           expect(

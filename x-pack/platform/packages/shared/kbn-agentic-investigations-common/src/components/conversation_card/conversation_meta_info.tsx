@@ -24,18 +24,20 @@ const INCREMENTABLE_UNITS: ReadonlyArray<ReturnType<typeof selectUnit>['unit']> 
  * label freezes at whatever it read when the card mounted.
  */
 export const ConversationMetaInfo = memo<{
-  createdAt: Investigation['createdAt'];
-}>(({ createdAt }) => {
-  const { unit } = selectUnit(new Date(createdAt));
+  timestamp: Investigation['createdAt'];
+  /** Rendered beside the age; the host supplies it only while a decision is in flight. */
+  inFlightStatus?: React.ReactNode;
+}>(({ timestamp, inFlightStatus }) => {
+  const { unit } = selectUnit(new Date(timestamp));
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive direction="row">
+    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} direction="row">
       <EuiFlexItem grow={false}>
-        <EuiToolTip content={<FormattedDate value={createdAt} dateStyle="full" timeStyle="long" />}>
+        <EuiToolTip content={<FormattedDate value={timestamp} dateStyle="full" timeStyle="long" />}>
           {/* Focusable so the exact time is reachable without a pointer. */}
           <EuiText size="xs" color="subdued" component="span" tabIndex={0}>
             <FormattedRelative
-              value={createdAt}
+              value={timestamp}
               updateIntervalInSeconds={
                 INCREMENTABLE_UNITS.includes(unit) ? UPDATE_INTERVAL_SECONDS : undefined
               }
@@ -43,6 +45,7 @@ export const ConversationMetaInfo = memo<{
           </EuiText>
         </EuiToolTip>
       </EuiFlexItem>
+      {inFlightStatus ? <EuiFlexItem grow={false}>{inFlightStatus}</EuiFlexItem> : null}
     </EuiFlexGroup>
   );
 });

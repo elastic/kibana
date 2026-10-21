@@ -42,7 +42,6 @@ export const CommentsLayer = () => {
   const controller = useComments();
   const active = useCommentsState((state) => state.active);
   const pending = useCommentsState((state) => state.pending);
-  const overlayOpen = useCommentsState((state) => state.overlayOpen);
   const notice = useCommentsState((state) => state.notice);
   const guided = useCommentsState(({ guide, comments }) =>
     guide ? comments.find(({ id }) => id === guide.id) ?? null : null
@@ -109,7 +108,7 @@ export const CommentsLayer = () => {
   return (
     <ResolvedAnchorsProvider>
       <SelectionStyles />
-      {!guided && !overlayOpen && <CommentModeOverlay />}
+      {!guided && <CommentModeOverlay />}
       <PinsLayer />
       {pending && <ComposerPopover pending={pending} />}
       {!guided && <CommentsPanel />}

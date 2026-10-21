@@ -198,6 +198,21 @@ describe('saveDiscoverSession', () => {
     expect(toolkit.getCurrentTab().appState.hideSidebar).toBe(true);
   });
 
+  it('should persist the title when a new session is saved', async () => {
+    const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
+    await toolkit.initializeTabs();
+
+    await toolkit.internalState
+      .dispatch(
+        internalStateActions.saveDiscoverSession(
+          getSaveDiscoverSessionParams({ newTitle: 'New title' })
+        )
+      )
+      .unwrap();
+
+    expect(toolkit.internalState.getState().persistedDiscoverSession?.title).toBe('New title');
+  });
+
   it('should not update local state if saveDiscoverSession returns undefined', async () => {
     const resetOnSavedSearchChangeSpy = jest.spyOn(
       internalStateSlice.actions,
