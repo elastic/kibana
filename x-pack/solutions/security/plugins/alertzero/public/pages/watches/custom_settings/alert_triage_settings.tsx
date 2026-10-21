@@ -116,24 +116,29 @@ export const AlertTriageSettings: WorkerCustomSettingsComponent = ({
         labelHelp={i18n.MINIMUM_SEVERITY_HELP_TEXT}
         data-test-subj="alertZeroMinimumSeverityRow"
       >
-        <EuiSelect
-          compressed
-          options={SEVERITY_OPTIONS}
-          value={extras.minSeverity}
-          disabled={isDisabled}
-          onChange={({ target }) =>
-            onExtrasChange({
-              ...extras,
-              minSeverity: target.value as AlertTriageWorkerExtras['minSeverity'],
-            })
-          }
-          aria-label={i18n.MINIMUM_SEVERITY_LABEL}
-          aria-describedby={severityDetailId}
+        {/* The width sits on a wrapper: EUI places the chevron against the wrapper, not the <select>. */}
+        <div
           css={css`
             width: ${SEVERITY_SELECT_WIDTH_PX}px;
           `}
-          data-test-subj="alertZeroMinimumSeveritySelect"
-        />
+        >
+          <EuiSelect
+            compressed
+            fullWidth
+            options={SEVERITY_OPTIONS}
+            value={extras.minSeverity}
+            disabled={isDisabled}
+            onChange={({ target }) =>
+              onExtrasChange({
+                ...extras,
+                minSeverity: target.value as AlertTriageWorkerExtras['minSeverity'],
+              })
+            }
+            aria-label={i18n.MINIMUM_SEVERITY_LABEL}
+            aria-describedby={severityDetailId}
+            data-test-subj="alertZeroMinimumSeveritySelect"
+          />
+        </div>
         <SettingDetail id={severityDetailId}>{i18n.MINIMUM_SEVERITY_DETAIL_TEXT}</SettingDetail>
       </SettingRow>
       <SettingRow
