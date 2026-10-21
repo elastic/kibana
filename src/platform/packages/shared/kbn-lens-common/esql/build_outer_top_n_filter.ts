@@ -27,7 +27,9 @@ export interface OuterTopNFilterInput {
 
 /**
  * Top-N subquery shared by the outer `WHERE … IN` filter and the Other-bucket `EVAL` remap.
- * Returns exactly one column (`KEEP`) so it can be compared against `groupExpr`.
+ * Returns exactly one column (`KEEP`) so it can be compared against `groupExpr`. Documents
+ * without the field are excluded so a `null` group cannot take a top-N slot, which DSL terms
+ * never ranks.
  */
 export const buildOuterTopNSubquery = ({
   source,
@@ -44,6 +46,7 @@ export const buildOuterTopNSubquery = ({
   }
 
   subqueryParts.push(
+    `WHERE ${groupExpr} IS NOT NULL`,
     `STATS ${scoreFragment} BY ${groupExpr}`,
     `SORT ${sortClause}`,
     `LIMIT ${size}`,

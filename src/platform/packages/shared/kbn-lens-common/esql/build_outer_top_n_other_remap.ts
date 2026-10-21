@@ -15,15 +15,27 @@ import { buildOuterTopNSubquery, type OuterTopNFilterInput } from './build_outer
  */
 export const OTHER_BUCKET_ESQL_LITERAL = '"Other"::KEYWORD';
 
+export interface OuterTopNOtherRemapInput extends OuterTopNFilterInput {
+  /**
+   * Casts kept values to keyword for non-string fields (number, ip, …), since a `CASE`
+   * cannot mix the field type with the `"Other"` keyword.
+   */
+  castToString?: boolean;
+}
+
 /**
  * Remaps values outside the top-N set to `"Other"` before aggregation, so Convert to ES|QL can
  * keep the remaining-values bucket that classic esaggs builds with a post-flight filters agg.
  */
-export const buildOuterTopNOtherRemap = (input: OuterTopNFilterInput): string => {
+export const buildOuterTopNOtherRemap = ({
+  castToString = false,
+  ...input
+}: OuterTopNOtherRemapInput): string => {
   const { groupExpr } = input;
+  const keptValue = castToString ? `TO_STRING(${groupExpr})` : groupExpr;
   return `EVAL ${groupExpr} = CASE(${groupExpr} IN (${buildOuterTopNSubquery(
     input
-  )}), ${groupExpr}, ${OTHER_BUCKET_ESQL_LITERAL})`;
+  )}), ${keptValue}, ${OTHER_BUCKET_ESQL_LITERAL})`;
 };
 
 /**
@@ -37,5 +49,4 @@ export const buildOtherBucketNamedFlagFragment = ({
 }: {
   flagAlias: string;
   groupExpr: string;
-}): string =>
-  `${flagAlias} = CASE(${groupExpr} == ${OTHER_BUCKET_ESQL_LITERAL}, 0::LONG, 1::LONG)`;
+}): string => `${flagAlias} = CASE(${groupExpr} == ${OTHER_BUCKET_ESQL_LITERAL}, 0::LONG, 1::LONG)`;

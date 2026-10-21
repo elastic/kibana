@@ -84,6 +84,15 @@ describe('getTermsConversionFailure', () => {
     ).toBeUndefined();
   });
 
+  it('returns terms_other_bucket_not_supported when Other also includes missing values', () => {
+    expect(
+      getTermsConversionFailure(
+        createTermsColumn({ otherBucket: true, missingBucket: true }),
+        context({ supportsOtherBucket: true })
+      )
+    ).toBe('terms_other_bucket_not_supported');
+  });
+
   it('prefers unsupported nesting over other bucket when both apply', () => {
     expect(
       getTermsConversionFailure(

@@ -38,9 +38,9 @@ export interface TermsConversionContext {
  * or `undefined` when the column is eligible. Check order:
  * 1. Unsupported nesting of Top values and a date histogram — shown before Other
  *    so charts that cannot convert even with Other off get the structural reason
- * 2. Other bucket when this column is not outer-eligible for Other (also covers
- *    missing values — the UI only enables "Include documents without the selected
- *    field" when Other is on, and toEsAggsFn forces missingBucket = otherBucket &&
+ * 2. Other bucket when this column is not eligible for Other, or when it also
+ *    includes documents without the field (missingBucket; the UI only enables it
+ *    when Other is on, and toEsAggsFn forces missingBucket = otherBucket &&
  *    missingBucket)
  * 3. More than two Top values dimensions
  * 4. Multiple fields on one Top values dimension
@@ -68,8 +68,9 @@ export const getTermsConversionFailure = (
     reasons.push('terms_date_histogram_not_supported');
   }
 
-  // unset/false = Other off (UI / toEsAggsFn Boolean).
-  if (params.otherBucket === true && !supportsOtherBucket) {
+  // unset/false = Other off (UI / toEsAggsFn Boolean). With missingBucket, DSL shows missing
+  // documents as their own bucket, while the ES|QL remap would count them in Other.
+  if (params.otherBucket === true && (!supportsOtherBucket || params.missingBucket === true)) {
     reasons.push('terms_other_bucket_not_supported');
   }
 

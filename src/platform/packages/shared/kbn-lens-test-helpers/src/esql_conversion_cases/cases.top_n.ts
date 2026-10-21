@@ -44,6 +44,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     return [
       from,
       ...(where ? [where] : []),
+      `WHERE ${field} IS NOT NULL`,
       `STATS ${score} BY ${field}`,
       `SORT ${sort}`,
       `LIMIT ${size}`,
@@ -56,10 +57,20 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
 
   // Remaps non-top-N keys to "Other" (single Top values + Other; nested outer Other is a follow-up).
   // Type casts use uppercase to match `esql(...).print('basic')`.
-  const outerTopNOtherRemap = (args: Parameters<typeof outerTopNSubquery>[0]) =>
+  const outerTopNOtherRemap = ({
+    castToString = false,
+    ...args
+  }: Parameters<typeof outerTopNSubquery>[0] & { castToString?: boolean }) =>
     `EVAL ${args.field} = CASE(${args.field} IN (${outerTopNSubquery(args)}), ${
-      args.field
+      castToString ? `TO_STRING(${args.field})` : args.field
     }, "Other"::KEYWORD)`;
+
+  // Sorts "Other" last, after the chart's own sort keys are applied.
+  const otherNamedFlag = (field: string) =>
+    `EVAL named_${field.replace(
+      /[^A-Za-z0-9_]/g,
+      '_'
+    )} = CASE(${field} == "Other"::KEYWORD, 0::LONG, 1::LONG)`;
 
   return [
     {
@@ -191,7 +202,9 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
           score: 'COUNT(*)',
           sort: 'host.keyword ASC',
           size: 5,
-        })} | INLINE STATS named_host_keyword = CASE(host.keyword == "Other"::KEYWORD, 0::LONG, 1::LONG) BY host.keyword | STATS AVG(bytes) BY named_host_keyword, host.keyword | SORT named_host_keyword DESC, host.keyword ASC | LIMIT 6 | DROP named_host_keyword`,
+        })} | STATS AVG(bytes) BY host.keyword | ${otherNamedFlag(
+          'host.keyword'
+        )} | SORT named_host_keyword DESC, host.keyword ASC | LIMIT 6 | DROP named_host_keyword`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
       },
@@ -212,7 +225,9 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
           score: 'COUNT(*)',
           sort: 'host.keyword DESC',
           size: 5,
-        })} | INLINE STATS named_host_keyword = CASE(host.keyword == "Other"::KEYWORD, 0::LONG, 1::LONG) BY host.keyword | STATS AVG(bytes) BY named_host_keyword, host.keyword | SORT named_host_keyword DESC, host.keyword DESC | LIMIT 6 | DROP named_host_keyword`,
+        })} | STATS AVG(bytes) BY host.keyword | ${otherNamedFlag(
+          'host.keyword'
+        )} | SORT named_host_keyword DESC, host.keyword DESC | LIMIT 6 | DROP named_host_keyword`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
       },
@@ -238,7 +253,9 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
           score: 'rank_host_keyword = AVG(bytes)',
           sort: 'rank_host_keyword DESC, host.keyword ASC',
           size: 3,
-        })} | INLINE STATS named_host_keyword = CASE(host.keyword == "Other"::KEYWORD, 0::LONG, 1::LONG) BY host.keyword | STATS AVG(bytes) BY named_host_keyword, host.keyword | SORT named_host_keyword DESC, \`AVG(bytes)\` DESC, host.keyword ASC | LIMIT 4 | DROP named_host_keyword`,
+        })} | STATS AVG(bytes) BY host.keyword | ${otherNamedFlag(
+          'host.keyword'
+        )} | SORT named_host_keyword DESC, \`AVG(bytes)\` DESC, host.keyword ASC | LIMIT 4 | DROP named_host_keyword`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
       },
@@ -264,9 +281,58 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
           score: 'rank_host_keyword = AVG(bytes)',
           sort: 'rank_host_keyword ASC, host.keyword ASC',
           size: 3,
-        })} | INLINE STATS named_host_keyword = CASE(host.keyword == "Other"::KEYWORD, 0::LONG, 1::LONG) BY host.keyword | STATS AVG(bytes) BY named_host_keyword, host.keyword | SORT named_host_keyword DESC, \`AVG(bytes)\` ASC, host.keyword ASC | LIMIT 4 | DROP named_host_keyword`,
+        })} | STATS AVG(bytes) BY host.keyword | ${otherNamedFlag(
+          'host.keyword'
+        )} | SORT named_host_keyword DESC, \`AVG(bytes)\` ASC, host.keyword ASC | LIMIT 4 | DROP named_host_keyword`,
         columnNames: ['AVG(bytes)', 'host.keyword'],
         expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'single terms on an ip field with other bucket casts kept values to keyword',
+      columns: {
+        col1: terms(
+          'clientip',
+          {
+            size: 9,
+            orderBy: { type: 'column', columnId: 'col2' },
+            orderDirection: 'desc',
+            otherBucket: true,
+          },
+          { dataType: 'ip' }
+        ),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNOtherRemap({
+          field: 'clientip',
+          score: 'rank_clientip = AVG(bytes)',
+          sort: 'rank_clientip DESC, clientip ASC',
+          size: 9,
+          castToString: true,
+        })} | STATS AVG(bytes) BY clientip | ${otherNamedFlag(
+          'clientip'
+        )} | SORT named_clientip DESC, \`AVG(bytes)\` DESC, clientip ASC | LIMIT 10 | DROP named_clientip`,
+        columnNames: ['AVG(bytes)', 'clientip'],
+        expectedSourceIds: { 'AVG(bytes)': ['col2'], clientip: ['col1'] },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'single terms with other bucket and missing values is not convertible',
+      columns: {
+        col1: terms('host.keyword', { otherBucket: true, missingBucket: true }),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: false,
+        reason: 'terms_other_bucket_not_supported',
       },
     },
     {

@@ -25,7 +25,7 @@ describe('buildOuterTopNOtherRemap', () => {
         size: 3,
       })
     ).toBe(
-      'EVAL host.keyword = CASE(host.keyword IN (FROM kibana_sample_data_logs | WHERE timestamp >= ?_tstart AND timestamp <= ?_tend | STATS AVG(bytes) BY host.keyword | SORT `AVG(bytes)` DESC | LIMIT 3 | KEEP host.keyword), host.keyword, "Other"::KEYWORD)'
+      'EVAL host.keyword = CASE(host.keyword IN (FROM kibana_sample_data_logs | WHERE timestamp >= ?_tstart AND timestamp <= ?_tend | WHERE host.keyword IS NOT NULL | STATS AVG(bytes) BY host.keyword | SORT `AVG(bytes)` DESC | LIMIT 3 | KEEP host.keyword), host.keyword, "Other"::KEYWORD)'
     );
   });
 
@@ -39,7 +39,22 @@ describe('buildOuterTopNOtherRemap', () => {
         size: 5,
       })
     ).toBe(
-      'EVAL category.keyword = CASE(category.keyword IN (FROM ft_ecommerce | STATS COUNT(*) BY category.keyword | SORT category.keyword ASC | LIMIT 5 | KEEP category.keyword), category.keyword, "Other"::KEYWORD)'
+      'EVAL category.keyword = CASE(category.keyword IN (FROM ft_ecommerce | WHERE category.keyword IS NOT NULL | STATS COUNT(*) BY category.keyword | SORT category.keyword ASC | LIMIT 5 | KEEP category.keyword), category.keyword, "Other"::KEYWORD)'
+    );
+  });
+
+  it('casts kept values to keyword for non-string fields so CASE branches share a type', () => {
+    expect(
+      buildOuterTopNOtherRemap({
+        source: 'kibana_sample_data_logs',
+        groupExpr: 'clientip',
+        scoreFragment: 'COUNT(*)',
+        sortClause: 'clientip ASC',
+        size: 3,
+        castToString: true,
+      })
+    ).toBe(
+      'EVAL clientip = CASE(clientip IN (FROM kibana_sample_data_logs | WHERE clientip IS NOT NULL | STATS COUNT(*) BY clientip | SORT clientip ASC | LIMIT 3 | KEEP clientip), TO_STRING(clientip), "Other"::KEYWORD)'
     );
   });
 });

@@ -798,23 +798,25 @@ export function generateEsqlQuery(
                   : [{ expr: quoteEsqlColumnRef(fieldExpr), direction: orderDirectionUpper }]
               ),
               size,
+              castToString: innerTermsBucket.col.dataType !== 'string',
             })
           );
+
+          const statsClause = buildStatsClause();
+          if (statsClause) {
+            queryParts.push(statsClause);
+          }
 
           // named=1 / Other=0 so SORT named DESC keeps Other last like DSL, for both metric and
           // alphabetical ranking. Metric ranking also breaks ties by the field (DSL key order).
           // A single CASE(metric) cannot mix 0::LONG with AVG (double) or similar.
           const namedFlagAlias = getOtherBucketNamedFlagAlias(innerTermsBucket.col.sourceField);
           queryParts.push(
-            `INLINE STATS ${buildOtherBucketNamedFlagFragment({
+            `EVAL ${buildOtherBucketNamedFlagFragment({
               flagAlias: namedFlagAlias,
               groupExpr: fieldExpr,
-            })} BY ${fieldExpr}`
+            })}`
           );
-          const statsClause = buildStatsClause([namedFlagAlias]);
-          if (statsClause) {
-            queryParts.push(statsClause);
-          }
           queryParts.push(
             `SORT ${formatSortKeys([
               { expr: namedFlagAlias, direction: 'DESC' },
