@@ -244,6 +244,20 @@ export const isSharedExceptionListsPath = (pathname: string): boolean =>
     strict: false,
   });
 
+/**
+ * Matches the pages migrated to the page app header, which render their own actions
+ * and therefore must not mount the legacy global header action menu.
+ */
+export const isPageWithAppHeaderPath = (pathname: string): boolean =>
+  [
+    isRuleChangesHistoryPath,
+    isRulesManagementPath,
+    isRulesAddPath,
+    isRuleDetailsPath,
+    isSharedExceptionListsPath,
+    isCloudSecurityPosturePath,
+  ].some((matchesPath) => matchesPath(pathname));
+
 const isAlertsPath = (pathname: string): boolean => {
   return !!matchPath(pathname, {
     path: `${ALERTS_PATH}`,
