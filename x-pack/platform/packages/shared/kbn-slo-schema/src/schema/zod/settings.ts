@@ -5,32 +5,38 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 
-const sloSettingsSchema = z.object({
-  useAllRemoteClusters: z
-    .boolean()
-    .describe('Indicates if the remote clusters are all used for the summary'),
-  selectedRemoteClusters: z
-    .array(z.string())
-    .describe('The list of remote clusters used for the summary'),
-  staleThresholdInHours: z
-    .number()
-    .describe('The duration in hours after which an SLO instance is considered stale'),
-  staleInstancesCleanupEnabled: z
-    .boolean()
-    .describe('Indicates if the cleanup of stale SLO instances is enabled'),
-});
+const sloSettingsSchema = lazySchema(() =>
+  z.object({
+    useAllRemoteClusters: z
+      .boolean()
+      .describe('Indicates if the remote clusters are all used for the summary'),
+    selectedRemoteClusters: z
+      .array(z.string())
+      .describe('The list of remote clusters used for the summary'),
+    staleThresholdInHours: z
+      .number()
+      .describe('The duration in hours after which an SLO instance is considered stale'),
+    staleInstancesCleanupEnabled: z
+      .boolean()
+      .describe('Indicates if the cleanup of stale SLO instances is enabled'),
+  })
+);
 
 // The stale-instance fields were added later, so they can be missing in some stored settings.
-const storedSloSettingsSchema = sloSettingsSchema.partial({
-  staleThresholdInHours: true,
-  staleInstancesCleanupEnabled: true,
-});
+const storedSloSettingsSchema = lazySchema(() =>
+  sloSettingsSchema.partial({
+    staleThresholdInHours: true,
+    staleInstancesCleanupEnabled: true,
+  })
+);
 
-const serverlessSloSettingsSchema = sloSettingsSchema.pick({
-  staleThresholdInHours: true,
-  staleInstancesCleanupEnabled: true,
-});
+const serverlessSloSettingsSchema = lazySchema(() =>
+  sloSettingsSchema.pick({
+    staleThresholdInHours: true,
+    staleInstancesCleanupEnabled: true,
+  })
+);
 
 export { serverlessSloSettingsSchema, sloSettingsSchema, storedSloSettingsSchema };
