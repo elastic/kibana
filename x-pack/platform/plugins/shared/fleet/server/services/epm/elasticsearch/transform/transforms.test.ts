@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
@@ -1646,5 +1647,24 @@ describe('installTransforms - cross-cluster source indices', () => {
       }),
       expect.anything()
     );
+  });
+
+  it('swallows a top-level version_conflict_engine_exception from putTransform', async () => {
+    appContextService.start(createAppContextStartContractMock());
+    esClient.transform.putTransform.mockImplementationOnce(() => {
+      // Shape ES returns when the transform's internal state/stats doc already exists: the
+      // wrapping TransformStatePersistenceException is unwrapped away at the REST layer.
+      throw new errors.ResponseError({
+        statusCode: 500,
+        body: {
+          error: {
+            type: 'version_conflict_engine_exception',
+            root_cause: [{ type: 'version_conflict_engine_exception' }],
+          },
+        },
+      } as any);
+    });
+
+    await expect(installLegacyEndpointTransform()).resolves.not.toThrow();
   });
 });

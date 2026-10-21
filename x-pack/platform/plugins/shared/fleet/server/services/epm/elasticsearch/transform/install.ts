@@ -830,9 +830,12 @@ async function handleTransformInstall({
       err?.body?.error?.type === 'security_exception' &&
       err?.body?.error?.reason?.includes('unauthorized for API key');
 
+    // ES unwraps the transform's internal-state write failure, so the version conflict arrives as
+    // the top-level error type rather than nested under `caused_by`.
     const isAlreadyExistError =
       isResponseError &&
       (err?.body?.error?.type === 'resource_already_exists_exception' ||
+        err?.body?.error?.type === 'version_conflict_engine_exception' ||
         err?.body?.error?.caused_by?.type?.includes('version_conflict_engine_exception'));
 
     // swallow the error if the transform already exists or if API key has insufficient permissions
