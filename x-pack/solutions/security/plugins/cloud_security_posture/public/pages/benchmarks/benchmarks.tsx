@@ -8,11 +8,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import type { EuiFieldSearchProps } from '@elastic/eui';
 import {
-  EuiButton,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiPageHeader,
   EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
@@ -21,12 +19,10 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
-import { pagePathGetters } from '@kbn/fleet-plugin/public';
 import { extractErrorMessage } from '@kbn/cloud-security-posture-common';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
-import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../common/constants';
-import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
+import { CspAppHeader } from '../../components/csp_app_header';
 import { BenchmarksTable } from './benchmarks_table';
 import type { UseCspBenchmarkIntegrationsProps } from './use_csp_benchmark_integrations';
 import { useCspBenchmarkIntegrationsV2 } from './use_csp_benchmark_integrations';
@@ -37,35 +33,9 @@ import {
   NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS,
 } from '../../common/constants';
 import { usePageSize } from '../../common/hooks/use_page_size';
-import { useKibana } from '../../common/hooks/use_kibana';
 import { NoFindingsStates } from '../../components/no_findings_states';
 
 const SEARCH_DEBOUNCE_MS = 300;
-
-const AddCisIntegrationButton = () => {
-  const { http, fleet } = useKibana().services;
-  const canInstallPackages = fleet?.authz?.integrations.installPackages;
-
-  const integrationsPath = pagePathGetters
-    .integrations_all({
-      searchTerm: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-    })
-    .join('');
-
-  return canInstallPackages ? (
-    <EuiButton
-      data-test-subj={TEST_SUBJ.ADD_INTEGRATION_TEST_SUBJ}
-      fill
-      iconType="plusCircle"
-      href={http.basePath.prepend(integrationsPath)}
-    >
-      <FormattedMessage
-        id="xpack.csp.benchmarks.benchmarksPageHeader.addIntegrationButtonLabel"
-        defaultMessage="Add Integration"
-      />
-    </EuiButton>
-  ) : null;
-};
 
 const BenchmarkEmptyState = ({ name }: { name: string }) => (
   <div>
@@ -203,17 +173,10 @@ export const Benchmarks = () => {
 
   return (
     <CloudPosturePage>
-      <EuiPageHeader
-        data-test-subj={TEST_SUBJ.BENCHMARKS_PAGE_HEADER}
-        pageTitle={
-          <CloudPosturePageTitle
-            title={i18n.translate('xpack.csp.benchmarks.benchmarksPageHeader.benchmarksTitle', {
-              defaultMessage: 'Benchmarks',
-            })}
-          />
-        }
-        rightSideItems={[<AddCisIntegrationButton />]}
-        bottomBorder
+      <CspAppHeader
+        title={i18n.translate('xpack.csp.benchmarks.benchmarksPageHeader.benchmarksTitle', {
+          defaultMessage: 'Benchmarks',
+        })}
       />
       <EuiSpacer />
       {showNoFindingsStates ? (
