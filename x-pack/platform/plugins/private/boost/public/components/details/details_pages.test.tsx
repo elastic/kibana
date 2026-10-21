@@ -200,6 +200,8 @@ describe('ProfileDetailsPage', () => {
     const usedBy = screen.getByTestId('boostProfileUsedBy');
     expect(usedBy).toHaveTextContent('catalog-spring');
     expect(usedBy).not.toHaveTextContent('catalog-fall');
+    // The table always pages, however few use the profile.
+    expect(usedBy).toHaveTextContent('Rows per page: 10');
     expect(screen.getByTestId('boostProfileUsage')).toHaveTextContent('Applies to1 index');
   });
 

@@ -487,7 +487,7 @@ export const ProfileDetailsPage = () => {
           items={usedBy}
           columns={usedByColumns}
           sorting={{ sort: { field: 'name', direction: 'asc' } }}
-          pagination={usedBy.length > 10 ? { pageSizeOptions: [10, 25, 50] } : undefined}
+          pagination={{ initialPageSize: 10, pageSizeOptions: [10, 25, 50] }}
           noItemsMessage={
             profile.type === 'indices'
               ? i18n.translate('xpack.boost.profileDetails.noIndices', {
