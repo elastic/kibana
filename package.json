@@ -714,6 +714,7 @@
     "@kbn/enterprise-search-plugin": "workspace:*",
     "@kbn/entity-access-control": "workspace:*",
     "@kbn/entity-access-control-ui": "workspace:*",
+    "@kbn/entity-inventory-app-plugin": "workspace:*",
     "@kbn/entity-inventory-plugin": "workspace:*",
     "@kbn/entity-store": "workspace:*",
     "@kbn/error-boundary-example-plugin": "workspace:*",
