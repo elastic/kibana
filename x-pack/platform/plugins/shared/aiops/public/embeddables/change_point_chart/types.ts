@@ -16,7 +16,7 @@ import type { ChangePointChartEmbeddableState } from '@kbn/aiops-server-schemas/
 
 export type ChangePointEmbeddableCustomState = Omit<
   ChangePointChartEmbeddableState,
-  'time_range' | 'title' | 'description' | 'hide_title' | 'hide_border'
+  'time_range' | 'title' | 'description' | 'hide_title' | 'hide_border' | 'smart_title'
 >;
 
 export interface ChangePointComponentApi {

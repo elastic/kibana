@@ -156,7 +156,7 @@ export const CustomizePanelEditor = ({
             helpText={
               <FormattedMessage
                 defaultMessage="When on, the panel title is replaced by the breakdown dimension field name for charts that use a breakdown."
-                id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.smartTitleHelp"
+                id="embeddableApi.action.customizePanel.flyout.optionsMenuForm.smartTitleHelp"
               />
             }
           >
@@ -167,7 +167,7 @@ export const CustomizePanelEditor = ({
               label={
                 <FormattedMessage
                   defaultMessage="Smart title"
-                  id="presentationPanel.action.customizePanel.flyout.optionsMenuForm.smartTitle"
+                  id="embeddableApi.action.customizePanel.flyout.optionsMenuForm.smartTitle"
                 />
               }
               onChange={(e) => setSmartTitle(e.target.checked)}

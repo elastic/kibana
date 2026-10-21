@@ -20,7 +20,7 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
   return new (class DashboardCustomizePanel {
     public readonly FLYOUT_TEST_SUBJ = 'customizePanel';
     /** Flyouts that include the panel settings: customize panel, Lens and other edit flyouts */
-    private readonly SETTINGS_FLYOUT_TEST_SUBJS = [
+    public readonly SETTINGS_FLYOUT_TEST_SUBJS = [
       this.FLYOUT_TEST_SUBJ,
       'customizeLens',
       'panelEditFlyout',
@@ -28,9 +28,9 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
       'createImageEmbeddableFlyout',
     ];
 
-    private async findExistingTestSubject(testSubjs: string[]) {
+    public async findExistingTestSubject(testSubjs: string[]) {
       for (const testSubj of testSubjs) {
-        if (await testSubjects.exists(testSubj, { timeout: 500 })) return testSubj;
+        if (await testSubjects.waitForExists(testSubj, { timeout: 500 })) return testSubj;
       }
     }
     public readonly TOGGLE_TIME_RANGE_TEST_SUBJ = 'customizePanelShowCustomTimeRange';

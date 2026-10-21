@@ -241,7 +241,7 @@ export const PresentationPanelTitle = ({
           color="primary"
           onClick={hasBreakdownFieldApi(api) ? openBreakdownPopover : () => onClickCustomize()}
           data-test-subj="embeddablePanelTitle-SmartTitleFieldLink"
-          aria-label={i18n.translate('presentationPanel.header.smartTitleFieldLinkAriaLabel', {
+          aria-label={i18n.translate('embeddableApi.header.smartTitleFieldLinkAriaLabel', {
             defaultMessage: 'Data field: {field}. Click to change.',
             values: { field: breakdownFieldName },
           })}
@@ -257,6 +257,9 @@ export const PresentationPanelTitle = ({
           closePopover={closeBreakdownPopover}
           anchorPosition="upCenter"
           panelPaddingSize="s"
+          aria-label={i18n.translate('embeddableApi.header.smartTitleFieldPopoverAriaLabel', {
+            defaultMessage: 'Breakdown fields',
+          })}
           data-test-subj="embeddablePanelTitle-SmartTitleFieldPopover"
         >
           <div
@@ -269,13 +272,13 @@ export const PresentationPanelTitle = ({
           >
             {breakdownOptionsLoading ? (
               <div css={css({ padding: 12 })}>
-                {i18n.translate('presentationPanel.header.smartTitleLoadingFields', {
+                {i18n.translate('embeddableApi.header.smartTitleLoadingFields', {
                   defaultMessage: 'Loading fields…',
                 })}
               </div>
             ) : breakdownOptions.length === 0 ? (
               <div css={css({ padding: 12 })}>
-                {i18n.translate('presentationPanel.header.smartTitleNoFields', {
+                {i18n.translate('embeddableApi.header.smartTitleNoFields', {
                   defaultMessage: 'No breakdown fields available',
                 })}
               </div>
@@ -285,6 +288,7 @@ export const PresentationPanelTitle = ({
                   key={opt.value}
                   type="button"
                   role="option"
+                  aria-selected={opt.value === breakdownFieldName}
                   css={css`
                     display: block;
                     width: 100%;
@@ -361,7 +365,6 @@ export const PresentationPanelTitle = ({
     hideTitle,
     panelTitle,
     isEditableTitle,
-    viewMode,
     api,
     euiTheme,
     titleHighlight,

@@ -181,7 +181,9 @@ export class DashboardPanelActionsService extends FtrService {
       await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
       // some panels (e.g. maps, Vega) open an edit flyout that links to their editor. The flyout
       // opens right away (before its content loads), so a short timeout is enough to tell the cases apart
-      if (await this.testSubjects.exists(PANEL_EDIT_FLYOUT_DATA_TEST_SUBJ, { timeout: 500 })) {
+      if (
+        await this.testSubjects.waitForExists(PANEL_EDIT_FLYOUT_DATA_TEST_SUBJ, { timeout: 500 })
+      ) {
         await this.testSubjects.click(PANEL_EDIT_FLYOUT_EDITOR_LINK_DATA_TEST_SUBJ);
       }
     } else {
@@ -241,7 +243,9 @@ export class DashboardPanelActionsService extends FtrService {
     await this.clickPanelAction(EDIT_PANEL_DATA_TEST_SUBJ, wrapper);
     // markdown is edited in place, its settings flyout opens from the editor toolbar
     if (
-      await this.testSubjects.exists(MARKDOWN_SETTINGS_BUTTON_DATA_TEST_SUBJ, { timeout: 1000 })
+      await this.testSubjects.waitForExists(MARKDOWN_SETTINGS_BUTTON_DATA_TEST_SUBJ, {
+        timeout: 1000,
+      })
     ) {
       await this.testSubjects.click(MARKDOWN_SETTINGS_BUTTON_DATA_TEST_SUBJ);
     }

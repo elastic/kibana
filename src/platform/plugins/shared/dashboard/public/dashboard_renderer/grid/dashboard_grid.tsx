@@ -452,6 +452,8 @@ export const DashboardGrid = () => {
       <SelectionPreviewContext.Provider value={previewSelectedPanelIds}>
         <div
           ref={layoutRef}
+          // pointer-only selection gestures; keyboard users select through the panel context menu
+          role="presentation"
           className={classNames({
             'dshLayout--editing': viewMode === 'edit',
             'dshLayout--selectMode': viewMode === 'edit' && isSelectMode,
