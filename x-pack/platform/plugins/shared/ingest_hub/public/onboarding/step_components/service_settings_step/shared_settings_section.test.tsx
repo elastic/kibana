@@ -21,7 +21,6 @@ const renderSection = (props: Partial<React.ComponentProps<typeof SharedSettings
         onIntegrationNameChange={onIntegrationNameChange}
         description=""
         onDescriptionChange={onDescriptionChange}
-        isLocked={false}
         {...props}
       />
     </I18nProvider>
@@ -71,12 +70,5 @@ describe('SharedSettingsSection', () => {
     });
 
     expect(screen.getByText('An integration name is required.')).toBeInTheDocument();
-  });
-
-  it('disables both fields once the services are deployed', () => {
-    renderSection({ isLocked: true });
-
-    expect(screen.getByTestId('sharedSettingsIntegrationName')).toBeDisabled();
-    expect(screen.getByTestId('sharedSettingsDescription')).toBeDisabled();
   });
 });

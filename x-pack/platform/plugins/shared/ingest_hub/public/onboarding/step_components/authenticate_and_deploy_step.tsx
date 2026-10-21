@@ -30,6 +30,7 @@ import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/manag
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
 import { getIncompleteInstances } from './service_settings_step/use_service_settings';
 import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_deploy';
+import { toSOSettings } from './authenticate_and_deploy_step/so_settings';
 import { useOnboardingDriftDetection } from './authenticate_and_deploy_step/use_onboarding_drift_detection';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
@@ -454,6 +455,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           Record<string, unknown>
         >,
         globalRegion,
+        ...toSOSettings(serviceSettings),
         dataFormat,
       }));
     if (deploymentId) {
@@ -465,6 +467,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       // This write is load-bearing — failure leaves the SO advertising the wrong mechanism
       // and an orphaned connector reference, so we must confirm it before navigating.
       const writeSucceeded = await updateDeployment(deploymentId, {
+        ...toSOSettings(serviceSettings),
         mechanisms: ['ecf'],
         connectorId: null,
         authMethod: null,
@@ -503,6 +506,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     detectAndReviewStep.onboardingDeploymentId,
     selectedServiceIds,
     serviceVars,
+    serviceSettings,
     awsServicesMap,
     globalRegion,
     dataFormat,

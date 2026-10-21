@@ -67,7 +67,6 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     description,
     setDescription,
     descriptionError,
-    hasPolicyServices,
     bareNamePackage,
     instances,
     filteredInstances,
@@ -525,20 +524,15 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
 
       <EuiSpacer size="m" />
 
-      {hasPolicyServices && (
-        <>
-          <SharedSettingsSection
-            integrationName={integrationName}
-            onIntegrationNameChange={setIntegrationName}
-            integrationNameError={integrationNameError}
-            description={description}
-            onDescriptionChange={setDescription}
-            descriptionError={descriptionError}
-            isLocked={isRegionDisabled}
-          />
-          <EuiSpacer size="m" />
-        </>
-      )}
+      <SharedSettingsSection
+        integrationName={integrationName}
+        onIntegrationNameChange={setIntegrationName}
+        integrationNameError={integrationNameError}
+        description={description}
+        onDescriptionChange={setDescription}
+        descriptionError={descriptionError}
+      />
+      <EuiSpacer size="m" />
 
       {hasErroredSelectedManifests && (
         <>

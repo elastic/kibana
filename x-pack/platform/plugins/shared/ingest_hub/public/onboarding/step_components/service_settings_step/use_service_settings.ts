@@ -19,6 +19,8 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { makeDsView } from '../../aws_service_matrix';
 import { getOnboardingSessionKey } from '../../core/onboarding_session_storage';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
+import { toSOSettings } from '../authenticate_and_deploy_step/so_settings';
 import {
   getMissingSourceGroup,
   getRequiredTextFields,
@@ -233,7 +235,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     awsServicesMap,
     deploymentMethod,
     setServiceSettingsMethod,
+    detectAndReviewStep,
   } = useOnboardingFlow();
+  const { updateDeployment } = useOnboardingSO();
   const { selectedServiceIds } = servicesStep;
 
   const [persisted, setPersisted] = useSessionStorage<ServiceSettingsPersistedState>(
@@ -283,7 +287,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   );
 
   // Packages of the services that deploy as a package policy. ECF-only services create none under
-  // managed integration, so name and description only matter for the others.
+  // managed integration; the name and description still apply to them (they describe the
+  // onboarding instance) but they do not take part in naming policies.
   const policyPackages = useMemo(
     () =>
       instances.flatMap((inst) => {
@@ -294,7 +299,6 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       }),
     [instances, awsServicesMap, deploymentMethod]
   );
-  const hasPolicyServices = policyPackages.length > 0;
 
   // The package whose policy keeps the integration name as entered (the only package selected, or
   // the main one), so the default name already carries the package when that is not `aws`.
@@ -321,7 +325,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
   toAutoNameRef.current = toAutoName;
   const isPrefilling = useRef(false);
   useEffect(() => {
-    if (!hasPolicyServices || persisted?.integrationName !== undefined || isPrefilling.current) {
+    if (persisted?.integrationName !== undefined || isPrefilling.current) {
       return;
     }
     isPrefilling.current = true;
@@ -358,7 +362,7 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       cancelled = true;
       isPrefilling.current = false;
     };
-  }, [hasPolicyServices, persisted?.integrationName, setPersisted]);
+  }, [persisted?.integrationName, setPersisted]);
 
   // A name nobody edited follows the selection: Bedrock alone gives `aws-1-aws_bedrock`, adding an
   // `aws` service back gives `aws-1`.
@@ -522,10 +526,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [incompleteInstances]
   );
 
-  const integrationNameError = hasPolicyServices
-    ? getIntegrationNameError(integrationName)
-    : undefined;
-  const descriptionError = hasPolicyServices ? getDescriptionError(description) : undefined;
+  const integrationNameError = getIntegrationNameError(integrationName);
+  const descriptionError = getDescriptionError(description);
 
   const isReady = useMemo(
     () =>
@@ -545,8 +547,24 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       instances,
     });
     setServiceSettingsMethod(deploymentMethod);
+    // The name and description stay editable after a deploy, and a later deploy may find nothing
+    // to do, so save them to the onboarding record here. Best-effort: the next deploy writes them
+    // again.
+    const deploymentId = detectAndReviewStep?.onboardingDeploymentId;
+    if (deploymentId) {
+      updateDeployment(deploymentId, toSOSettings(persisted));
+    }
     onContinue();
-  }, [onContinue, persisted, setPersisted, instances, deploymentMethod, setServiceSettingsMethod]);
+  }, [
+    onContinue,
+    persisted,
+    setPersisted,
+    instances,
+    deploymentMethod,
+    setServiceSettingsMethod,
+    detectAndReviewStep?.onboardingDeploymentId,
+    updateDeployment,
+  ]);
 
   // All instance display names — used by the duplicate modal for collision detection.
   const allInstanceNames = useMemo(() => instances.map((i) => i.name), [instances]);
@@ -560,7 +578,6 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     description,
     setDescription,
     descriptionError,
-    hasPolicyServices,
     bareNamePackage,
     instances,
     filteredInstances,

@@ -10,6 +10,9 @@ import { useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 
 jest.mock('react-use/lib/useSessionStorage');
+jest.mock('../authenticate_and_deploy_step/use_onboarding_so', () => ({
+  useOnboardingSO: jest.fn(),
+}));
 jest.mock('@kbn/fleet-plugin/public', () => ({
   ...jest.requireActual('@kbn/fleet-plugin/public'),
   sendGetPackagePolicies: jest.fn(),
@@ -20,6 +23,7 @@ jest.mock('../../onboarding_flow_context', () => ({
 
 import { sendGetPackagePolicies } from '@kbn/fleet-plugin/public';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { useOnboardingSO } from '../authenticate_and_deploy_step/use_onboarding_so';
 import { getIncompleteInstances, useServiceSettings } from './use_service_settings';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 import { AWS_SERVICES_MAP } from '../../aws_service_matrix';
@@ -28,8 +32,12 @@ import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 const mockUseOnboardingFlow = useOnboardingFlow as jest.MockedFunction<typeof useOnboardingFlow>;
 const mockUseSessionStorage = useSessionStorage as jest.MockedFunction<typeof useSessionStorage>;
 const mockSendGetPackagePolicies = sendGetPackagePolicies as jest.Mock;
+const mockUpdateDeployment = jest.fn();
 
 beforeEach(() => {
+  mockUpdateDeployment.mockReset();
+  mockUpdateDeployment.mockResolvedValue(true);
+  (useOnboardingSO as jest.Mock).mockReturnValue({ updateDeployment: mockUpdateDeployment });
   mockSendGetPackagePolicies.mockReset();
   mockSendGetPackagePolicies.mockResolvedValue({ data: { items: [] } });
   mockUseSessionStorage.mockImplementation((_key, initial) => useState(initial));
@@ -108,6 +116,7 @@ describe('useServiceSettings — incompleteInstances', () => {
   it('instance leaves incompleteInstances after required var is filled', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
     act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName('my-aws'));
     act(() =>
       result.current.setServiceFieldsAndInputs(
         'svc_a',
@@ -198,6 +207,7 @@ describe('useServiceSettings — namespace', () => {
   it('keeps an instance complete when its namespace is empty', () => {
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
     act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName('my-aws'));
     act(() => result.current.setServiceFieldsAndInputs('svc_a', filledVars, ['svc_a'], ''));
     expect(result.current.incompleteInstances).toHaveLength(0);
     expect(result.current.isReady).toBe(true);
@@ -688,23 +698,38 @@ describe('useServiceSettings — integration name and description', () => {
     expect(kuery).toContain('package.name:aws');
   });
 
-  it('treats ECF-only services as policy services in agent-based mode', async () => {
-    mockServices([ecfOnlyService], 'agent_based');
+  it('names the policies of ECF-only services after their package in agent-based mode', async () => {
+    const ecfLogs = makeEntry('svc_l', {
+      packageName: 'aws_logs',
+      deploymentMethods: ecfOnlyService.deploymentMethods,
+    });
+    mockServices([ecfLogs], 'agent_based');
 
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
 
-    expect(result.current.hasPolicyServices).toBe(true);
-    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1-aws_logs'));
+    expect(result.current.bareNamePackage).toBe('aws_logs');
   });
 
-  it('does not prefill ECF-only selections, which create no package policy', async () => {
+  it('leaves ECF-only services out of policy naming under managed integration', async () => {
+    const ecfLogs = makeEntry('svc_l', {
+      packageName: 'aws_logs',
+      deploymentMethods: ecfOnlyService.deploymentMethods,
+    });
+    mockServices([ecfLogs], 'managed_integration');
+
+    const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+    expect(result.current.bareNamePackage).toBe('aws');
+  });
+
+  it('prefills ECF-only selections too, since the name describes the onboarding', async () => {
     mockServices([ecfOnlyService]);
 
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
 
-    expect(result.current.hasPolicyServices).toBe(false);
-    expect(mockSendGetPackagePolicies).not.toHaveBeenCalled();
-    expect(result.current.integrationName).toBe('');
+    await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
   });
 
   it('keeps a name the user typed instead of prefilling over it', async () => {
@@ -747,12 +772,52 @@ describe('useServiceSettings — integration name and description', () => {
     expect(result.current.isReady).toBe(false);
   });
 
-  it('does not require a name for ECF-only selections', () => {
+  it('requires a name for ECF-only selections too', () => {
     mockServices([ecfOnlyService]);
     const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
     act(() => result.current.setGlobalRegion('us-east-1'));
+    act(() => result.current.setIntegrationName(' '));
 
-    expect(result.current.integrationNameError).toBeUndefined();
-    expect(result.current.isReady).toBe(true);
+    expect(result.current.integrationNameError).toBeDefined();
+    expect(result.current.isReady).toBe(false);
+  });
+
+  describe('saving to the onboarding record on Next', () => {
+    const withDeployment = (onboardingDeploymentId?: string) => {
+      mockUseOnboardingFlow.mockReturnValue({
+        servicesStep: { selectedServiceIds: [policyService.id] },
+        removeDeployInstance: jest.fn(),
+        awsServicesMap: new Map([[policyService.id, policyService]]),
+        setServiceSettingsMethod: jest.fn(),
+        detectAndReviewStep: { onboardingDeploymentId },
+      } as unknown as ReturnType<typeof useOnboardingFlow>);
+    };
+
+    it('saves the name and description when a deployment exists', async () => {
+      withDeployment('dep-1');
+      const onContinue = jest.fn();
+      const { result } = renderHook(() => useServiceSettings({ onContinue }));
+      await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+      act(() => result.current.setIntegrationName(' my-aws '));
+      act(() => result.current.setDescription('Production'));
+
+      act(() => result.current.handleNext());
+
+      expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
+        integrationName: 'my-aws',
+        description: 'Production',
+      });
+      expect(onContinue).toHaveBeenCalled();
+    });
+
+    it('writes nothing before the first deploy has created the record', async () => {
+      withDeployment(undefined);
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+
+      act(() => result.current.handleNext());
+
+      expect(mockUpdateDeployment).not.toHaveBeenCalled();
+    });
   });
 });
