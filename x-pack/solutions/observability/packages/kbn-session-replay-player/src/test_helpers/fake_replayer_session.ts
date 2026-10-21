@@ -53,6 +53,7 @@ export const createFakeSessionFactory = (): {
     const appended: ReplayEvent[] = [];
     const wrapper = root.ownerDocument.createElement('div');
     wrapper.className = 'replayer-wrapper';
+    wrapper.appendChild(root.ownerDocument.createElement('iframe'));
     root.appendChild(wrapper);
 
     const meta = initialEvents.find((event) => event.type === 4);

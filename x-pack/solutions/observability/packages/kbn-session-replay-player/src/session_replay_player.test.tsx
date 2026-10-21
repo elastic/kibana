@@ -173,6 +173,15 @@ describe('SessionReplayPlayer', () => {
       expect(screen.getByTestId('sessionReplayClock')).toHaveTextContent('0:00 / 0:09');
     });
 
+    it('names the frame the recorded page is shown in', async () => {
+      const { container } = setup();
+      await untilReady();
+
+      await waitFor(() =>
+        expect(container.querySelector('iframe')).toHaveAttribute('title', 'Recorded page')
+      );
+    });
+
     it('creates a single session with the playable events', async () => {
       const { sessions } = setup();
       await untilReady();

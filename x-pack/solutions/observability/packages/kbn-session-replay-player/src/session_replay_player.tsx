@@ -29,7 +29,7 @@ import type { Size } from './model/stage_fit';
 import { useReplayerSession } from './rrweb/use_replayer_session';
 import type { LoadSessionFactory } from './rrweb/use_replayer_session';
 import type { ReplayerSession, ReplayerSessionCallbacks } from './rrweb/types';
-import { PLAYER_ARIA_LABEL } from './translations';
+import { PLAYER_ARIA_LABEL, STAGE_ARIA_LABEL } from './translations';
 import type { ReplayEvent, SessionReplayPlayerHandle, SessionReplayPlayerProps } from './types';
 
 /** Seams the tests use to run the player without rrweb or with small thresholds. */
@@ -259,6 +259,11 @@ const SessionReplayPlayerView = forwardRef<SessionReplayPlayerHandle, SessionRep
     useEffect(() => {
       session?.setSpeed(speed);
     }, [session, speed]);
+
+    // The frame rrweb creates has no accessible name of its own.
+    useEffect(() => {
+      session?.getWrapper()?.querySelector('iframe')?.setAttribute('title', STAGE_ARIA_LABEL);
+    }, [session]);
 
     const jumpOverIdle = useCallback((offset: number): number => {
       const timeline = latest.current.getTimelineIndex();
