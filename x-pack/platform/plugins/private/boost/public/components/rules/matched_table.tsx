@@ -15,13 +15,12 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiSpacer,
-  EuiText,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { BoostDataSource, BoostProfileType } from '../../../common/types';
 import { formatSize } from '../cost_format';
 import { DetailsSection } from '../details/details_page';
+import { EmptyCell } from '../empty_cell';
 import { formatCount } from '../format';
 import { SupersedingRule, TargetName } from './target_name';
 
@@ -47,16 +46,17 @@ interface MatchedTableProps {
 
 /**
  * The indices or data streams a rule matches, each linking to its details in Index Management. Those
- * a higher-ranked rule applies to instead are struck through, followed by that rule. A
- * search box filters them by name, and a filter group by whether the rule applies to them, with how
- * many of the search results each would show.
+ * a higher-ranked rule applies to instead are struck through, with that rule in a column that only
+ * shows when there are any. A search box filters them by name, and a filter group by whether the
+ * rule applies to them, with how many of the search results each would show.
  */
 export const MatchedTable = ({ type, matched, supersededBy }: MatchedTableProps) => {
-  const { euiTheme } = useEuiTheme();
   const [query, setQuery] = useState('');
   const [status, setStatus] = useState<MatchStatus>();
   const isDataStreams = type === 'data_streams';
 
+  // Whether to show the column of rules that outrank matches, which the search doesn't change.
+  const hasOutranked = matched.some(({ name }) => supersededBy.has(name));
   const getStatus = ({ name }: BoostDataSource): MatchStatus =>
     supersededBy.has(name) ? 'outranked' : 'applied';
   const normalizedQuery = query.trim().toLowerCase();
@@ -86,29 +86,29 @@ export const MatchedTable = ({ type, matched, supersededBy }: MatchedTableProps)
           })
         : i18n.translate('xpack.boost.matchedTable.indexColumn', { defaultMessage: 'Index' }),
       sortable: true,
-      render: (name: string, dataSource: BoostDataSource) => {
-        const supersedingRule = supersededBy.get(name);
-        return (
-          // A higher-ranked rule that applies instead follows the name, as in the rule flyout's
-          // lists, and wraps below it when there's no room.
-          <span
-            css={{
-              display: 'inline-flex',
-              flexWrap: 'wrap',
-              alignItems: 'center',
-              columnGap: euiTheme.size.s,
-            }}
-          >
-            <TargetName name={name} supersededBy={supersedingRule} linkedAs={dataSource.type} />
-            {supersedingRule && (
-              <EuiText size="xs" color="subdued" component="span">
-                <SupersedingRule rule={supersedingRule} isLinked />
-              </EuiText>
-            )}
-          </span>
-        );
-      },
+      render: (name: string, dataSource: BoostDataSource) => (
+        <TargetName name={name} supersededBy={supersededBy.get(name)} linkedAs={dataSource.type} />
+      ),
     },
+    // Only when a higher-ranked rule applies to any of the matches instead, which it names.
+    ...(hasOutranked
+      ? [
+          {
+            name: i18n.translate('xpack.boost.matchedTable.outrankedByColumn', {
+              defaultMessage: 'Outranked by rule',
+            }),
+            render: ({ name }: BoostDataSource) => {
+              const supersedingRule = supersededBy.get(name);
+              // The header says what the rule did, so it needs no icon for ranking higher.
+              return supersedingRule ? (
+                <SupersedingRule rule={supersedingRule} isLinked hasIcon={false} />
+              ) : (
+                <EmptyCell />
+              );
+            },
+          },
+        ]
+      : []),
     {
       field: 'docs_count',
       name: i18n.translate('xpack.boost.matchedTable.docsCountColumn', {
@@ -117,7 +117,7 @@ export const MatchedTable = ({ type, matched, supersededBy }: MatchedTableProps)
       width: '13em',
       sortable: true,
       dataType: 'number',
-      render: formatCount,
+      render: (count?: number) => (count === undefined ? <EmptyCell /> : formatCount(count)),
     },
     {
       field: 'size_in_bytes',

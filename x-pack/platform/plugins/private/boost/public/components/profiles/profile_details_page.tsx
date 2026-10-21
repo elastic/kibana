@@ -43,6 +43,7 @@ import { COST_DISCLAIMER, formatSize, getCostText } from '../cost_format';
 import { DetailsPage, DetailsPanel, SimpleModeNotice } from '../details/details_page';
 import { DetailsList } from '../details/details_list';
 import { DetailsLink } from '../details_link';
+import { EmptyCell } from '../empty_cell';
 import { PROFILE_TYPE_LABELS, formatBoost, formatDataSourceCount, formatMaxAge } from '../format';
 import { LoadError } from '../load_error';
 import { RuleFlyout } from '../rules/rule_flyout';
@@ -126,7 +127,7 @@ const DataStreamsSettings = ({ profile }: { profile: DataStreamsBoostProfile }) 
         defaultMessage: 'Max age',
       }),
       // Background has no max age; it holds everything older.
-      render: ({ period }: PeriodRow) => formatMaxAge(period.max_age) ?? '—',
+      render: ({ period }: PeriodRow) => formatMaxAge(period.max_age) ?? <EmptyCell />,
     },
   ];
   return (

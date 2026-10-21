@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { FocusEventHandler } from 'react';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { EuiLink } from '@elastic/eui';
@@ -20,14 +21,18 @@ interface DetailsLinkProps {
   kind: 'rule' | 'profile';
   name: string;
   'data-test-subj'?: string;
+  // A tooltip around the link opens when it's focused, and describes it.
+  onFocus?: FocusEventHandler<HTMLAnchorElement>;
+  onBlur?: FocusEventHandler<HTMLAnchorElement>;
+  'aria-describedby'?: string;
 }
 
 /** A rule's or profile's name, linking to its details page. */
-export const DetailsLink = ({ kind, name, 'data-test-subj': dataTestSubj }: DetailsLinkProps) => {
+export const DetailsLink = ({ kind, name, ...rest }: DetailsLinkProps) => {
   const history = useHistory();
   const path = kind === 'rule' ? getRuleDetailsPath(name) : getProfileDetailsPath(name);
   return (
-    <EuiLink {...reactRouterNavigate(history, path)} data-test-subj={dataTestSubj}>
+    <EuiLink {...reactRouterNavigate(history, path)} {...rest}>
       {name}
     </EuiLink>
   );

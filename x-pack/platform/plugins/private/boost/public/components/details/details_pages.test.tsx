@@ -261,9 +261,10 @@ describe('RuleDetailsPage', () => {
     expect(usage).toHaveTextContent('Applies to1 index');
 
     const matched = screen.getByTestId('boostRuleMatched');
-    // Only a match that a higher-ranked rule applies to instead names a rule, after its name.
+    // Only a match that a higher-ranked rule applies to instead names a rule; the others have a dash.
     const springRow = within(matched).getByText('catalog-spring').closest('tr') as HTMLElement;
     expect(within(springRow).queryByTestId('boostSupersedingRule')).not.toBeInTheDocument();
+    expect(within(springRow).getByTestId('boostEmptyCell')).toHaveTextContent('—');
     expect(springRow).toHaveTextContent('2,000');
     const fallRow = within(matched).getByText('catalog-fall').closest('tr') as HTMLElement;
     expect(within(fallRow).getByTestId('boostSupersedingRule')).toHaveTextContent('catalog-first');
@@ -283,6 +284,11 @@ describe('RuleDetailsPage', () => {
     // A higher-ranked rule applies to catalog-fall instead, so its name is struck through.
     expect(within(matched).getByTestId('boostSupersededTarget')).toHaveTextContent('catalog-fall');
     expect(within(matched).getByRole('link', { name: 'catalog-fall' })).toBeInTheDocument();
+    // The rule that applies instead explains itself.
+    await userEvent.hover(within(matched).getByRole('link', { name: 'catalog-first' }));
+    expect(await screen.findByRole('tooltip')).toHaveTextContent(
+      '"catalog-first" ranks higher, so it applies instead.'
+    );
 
     await userEvent.click(within(matched).getByRole('link', { name: 'catalog-spring' }));
     expect(mockIndexManagementLocator.navigate).toHaveBeenCalledWith({
@@ -353,6 +359,24 @@ describe('RuleDetailsPage', () => {
     expect(screen.getByTestId('boostAgeTimeline')).toHaveTextContent(
       'Data in each period across the 1 data stream this rule applies to, 3 GB in total.'
     );
+  });
+
+  it('only has a column of outranking rules when a higher-ranked rule outranks a match', () => {
+    const { unmount } = renderAt('/rules/catalogs');
+    expect(
+      within(screen.getByTestId('boostRuleMatched')).getByRole('columnheader', {
+        name: 'Outranked by rule',
+      })
+    ).toBeInTheDocument();
+    unmount();
+
+    // catalog-first matches only catalog-fall, which nothing outranks.
+    renderAt('/rules/catalog-first');
+    expect(
+      within(screen.getByTestId('boostRuleMatched')).queryByRole('columnheader', {
+        name: 'Outranked by rule',
+      })
+    ).not.toBeInTheDocument();
   });
 
   it('has no age timeline for an indices rule', () => {
