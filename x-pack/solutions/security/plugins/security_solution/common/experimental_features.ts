@@ -395,7 +395,7 @@ export const allowedExperimentalValues = Object.freeze({
    * Attack Surface Reduction section (`windows.attack_surface_reduction.registry_credential_hardening`).
    * Release: 9.6
    */
-  registryCredentialHardening: false,
+  registryCredentialHardening: true,
 
   /**
    * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
