@@ -204,10 +204,10 @@ test.describe('Rules list bulk actions', { tag: tags.stateful.classic }, () => {
 
     await expect
       .poll(async () => (await apiServices.alerting.rules.get(r1.data.id)).data.updated_at)
-      .not.toEqual(r1UpdatedAt);
+      .not.toStrictEqual(r1UpdatedAt);
     await expect
       .poll(async () => (await apiServices.alerting.rules.get(r2.data.id)).data.updated_at)
-      .toEqual(r2UpdatedAt);
+      .toStrictEqual(r2UpdatedAt);
   });
 
   test('should apply filters to bulk actions when using the select all button', async ({
