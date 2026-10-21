@@ -110,9 +110,24 @@ export interface ShapeConverter {
   readonly components: Record<string, JsonSchema>;
 }
 
+export interface ShapeConverterOptions {
+  /** Whether documents use `@jsonName`, as restJson1 does and awsJson doesn't. Defaults to true. */
+  readonly jsonNames?: boolean;
+  /**
+   * Whether float and double members in documents also take `"NaN"`, `"Infinity"` and
+   * `"-Infinity"`, as AWS's JSON protocols send them.
+   */
+  readonly nonNumericFloats?: boolean;
+}
+
 /** Converts Smithy shapes to OpenAPI 3.0 schemas, collecting named shapes as components. */
-export const createShapeConverter = (model: SmithyModel): ShapeConverter => {
+export const createShapeConverter = (
+  model: SmithyModel,
+  { jsonNames = true, nonNumericFloats = false }: ShapeConverterOptions = {}
+): ShapeConverter => {
   const components: Record<string, JsonSchema> = {};
+  const nameOf = (name: string, member: MemberShape): string =>
+    jsonNames ? jsonName(name, member) : name;
 
   const toObjectSchema = (members: ReadonlyArray<[string, MemberShape]>): JsonSchema => {
     const required = members.filter(([, member]) => isRequired(member));
@@ -120,12 +135,12 @@ export const createShapeConverter = (model: SmithyModel): ShapeConverter => {
       type: 'object',
       properties: Object.fromEntries(
         members.map(([name, member]) => [
-          jsonName(name, member),
+          nameOf(name, member),
           toSchema(member.target, 'body', member.traits),
         ])
       ),
       ...(required.length > 0
-        ? { required: required.map(([name, member]) => jsonName(name, member)) }
+        ? { required: required.map(([name, member]) => nameOf(name, member)) }
         : {}),
     };
   };
@@ -145,9 +160,9 @@ export const createShapeConverter = (model: SmithyModel): ShapeConverter => {
           oneOf: members.map(([name, member]) => ({
             type: 'object',
             properties: {
-              [jsonName(name, member)]: toSchema(member.target, 'body', member.traits),
+              [nameOf(name, member)]: toSchema(member.target, 'body', member.traits),
             },
-            required: [jsonName(name, member)],
+            required: [nameOf(name, member)],
           })),
         };
       default:
@@ -201,8 +216,12 @@ export const createShapeConverter = (model: SmithyModel): ShapeConverter => {
         case 'bigInteger':
           return { type: 'integer' };
         case 'float':
-        case 'double':
-          return { type: 'number', format: NUMBER_FORMATS[shape.type] };
+        case 'double': {
+          const number = { type: 'number', format: NUMBER_FORMATS[shape.type] };
+          return nonNumericFloats && (location === 'body' || location === 'payload')
+            ? { anyOf: [number, { type: 'string', enum: ['NaN', 'Infinity', '-Infinity'] }] }
+            : number;
+        }
         case 'bigDecimal':
           return { type: 'number' };
         case 'timestamp':

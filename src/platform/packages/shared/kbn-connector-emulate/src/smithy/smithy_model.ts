@@ -142,3 +142,82 @@ export const traitRecord = (
 
 export const hasTrait = (traits: Traits | undefined, id: string): boolean =>
   traits !== undefined && id in traits;
+
+/** The members of a structure, by name; none for `smithy.api#Unit`. */
+export const membersOf = (
+  model: SmithyModel,
+  target: string | undefined
+): Array<[string, MemberShape]> =>
+  target && target !== UNIT ? Object.entries(getShape(model, target)?.members ?? {}) : [];
+
+export const documentationOf = (shape: { readonly traits?: Traits }) => {
+  const documentation = shape.traits?.['smithy.api#documentation'];
+  return typeof documentation === 'string' ? { description: documentation } : {};
+};
+
+/** The status of an error shape: its `@httpError`, or 400 for client and 500 for server errors. */
+export const errorStatus = (shape: Shape | undefined): string => {
+  const code = shape?.traits?.['smithy.api#httpError'];
+  if (typeof code === 'number') {
+    return String(code);
+  }
+  return shape?.traits?.['smithy.api#error'] === 'server' ? '500' : '400';
+};
+
+/** The service to convert: the one with this ID, or the model's only service. */
+export const pickService = (model: SmithyModel, id?: string): [string, Shape] => {
+  const services = findServices(model);
+  const service = id ? services.find(([serviceId]) => serviceId === id) : services[0];
+  if (!service || (!id && services.length > 1)) {
+    throw new Error(
+      id
+        ? `The model has no service ${id}`
+        : `Expected one service in the model, found ${
+            services.map(([serviceId]) => serviceId).join(', ') || 'none'
+          }; pass the service to convert`
+    );
+  }
+  return service;
+};
+
+/** The AWS protocol traits of a service, such as `aws.protocols#restJson1`. */
+export const protocolsOf = (service: Shape): string[] =>
+  Object.keys(service.traits ?? {}).filter((trait) => trait.startsWith('aws.protocols#'));
+
+const SIGV4 = 'aws.auth#sigv4';
+// The scheme name and shape smithy-openapi uses for SigV4.
+const SIGV4_SCHEME = 'aws.auth.sigv4';
+
+/** The prefix of the service's regional hosts, such as `monitoring`. */
+export const endpointPrefixOf = (serviceId: string, service: Shape): string => {
+  const awsService = traitRecord(service.traits, 'aws.api#service');
+  const sigv4 = traitRecord(service.traits, SIGV4);
+  return String(awsService?.endpointPrefix ?? sigv4?.name ?? shapeName(serviceId).toLowerCase());
+};
+
+/** The service's regional endpoint, with the region as a server variable. */
+export const regionalServers = (endpointPrefix: string) => [
+  {
+    url: `https://${endpointPrefix}.{region}.amazonaws.com`,
+    variables: { region: { default: 'us-east-1' } },
+  },
+];
+
+/** SigV4 as an `Authorization` header requirement, for services that use it. */
+export const sigv4SecuritySchemes = (service: Shape) =>
+  hasTrait(service.traits, SIGV4)
+    ? {
+        securitySchemes: {
+          [SIGV4_SCHEME]: {
+            type: 'apiKey',
+            description: 'AWS Signature Version 4 authentication',
+            name: 'Authorization',
+            in: 'header',
+            'x-amazon-apigateway-authtype': 'awsSigv4',
+          },
+        },
+      }
+    : {};
+
+export const sigv4Security = (service: Shape) =>
+  hasTrait(service.traits, SIGV4) ? { security: [{ [SIGV4_SCHEME]: [] }] } : {};
