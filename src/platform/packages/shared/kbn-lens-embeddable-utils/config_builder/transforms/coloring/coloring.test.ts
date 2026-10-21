@@ -1351,22 +1351,14 @@ describe('Color util transforms', () => {
         });
 
         describe('range keys', () => {
-          const ranges = [
-            { from: 0, to: 1000, label: 'Small' },
-            { from: 1000, to: null, label: 'Large' },
-            { from: null, to: 0, label: 'Negative' },
-            { from: null, to: null, label: 'Full open' },
-          ];
-          const apiRanges = [
-            { from: 0, to: 1000, label: 'Small' },
-            { from: 1000, label: 'Large' },
-            { to: 0, label: 'Negative' },
-            { label: 'Full open' },
-          ];
-          const openEndedRangeKey = { type: 'rangeKey', from: 1000, to: null, ranges };
-          const openStartRangeKey = { type: 'rangeKey', from: null, to: 0, ranges };
-
           it('should round-trip an open-ended range key value', () => {
+            const openEndedRangeKey = {
+              type: 'rangeKey',
+              from: 1000,
+              to: null,
+              ranges: [{ from: 1000, to: null, label: 'Large' }],
+            };
+
             const lensState: ColorMapping.Config = {
               paletteId: SEMANTIC_PALETTE,
               specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
@@ -1387,7 +1379,9 @@ describe('Color util transforms', () => {
               mapping: [
                 {
                   color: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 0 },
-                  values: [{ type: 'range_key', from: 1000, ranges: apiRanges }],
+                  values: [
+                    { type: 'range_key', from: 1000, ranges: [{ from: 1000, label: 'Large' }] },
+                  ],
                 },
               ],
             });
@@ -1398,6 +1392,13 @@ describe('Color util transforms', () => {
           });
 
           it('should round-trip an open-start range key value', () => {
+            const openStartRangeKey = {
+              type: 'rangeKey',
+              from: null,
+              to: 0,
+              ranges: [{ from: null, to: 0, label: 'Negative' }],
+            };
+
             const lensState: ColorMapping.Config = {
               paletteId: SEMANTIC_PALETTE,
               specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
@@ -1418,7 +1419,45 @@ describe('Color util transforms', () => {
               mapping: [
                 {
                   color: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 0 },
-                  values: [{ type: 'range_key', to: 0, ranges: apiRanges }],
+                  values: [{ type: 'range_key', to: 0, ranges: [{ to: 0, label: 'Negative' }] }],
+                },
+              ],
+            });
+
+            expect(fromColorMappingAPIToLensState(apiFormat)).toStrictEqual({
+              colorMapping: lensState,
+            });
+          });
+
+          it('should round-trip a fully open range key value', () => {
+            const fullyOpenRangeKey = {
+              type: 'rangeKey',
+              from: null,
+              to: null,
+              ranges: [{ from: null, to: null, label: 'Full open' }],
+            };
+
+            const lensState: ColorMapping.Config = {
+              paletteId: SEMANTIC_PALETTE,
+              specialAssignments: [{ rules: [{ type: 'other' }], color: { type: 'loop' } }],
+              assignments: [
+                {
+                  rules: [{ type: 'raw', value: fullyOpenRangeKey }],
+                  color: { type: 'categorical', paletteId: SEMANTIC_PALETTE, colorIndex: 0 },
+                },
+              ],
+              colorMode: { type: 'categorical' },
+            };
+
+            const apiFormat = fromColorMappingLensStateToAPI(lensState);
+
+            expect(apiFormat).toStrictEqual({
+              palette: SEMANTIC_PALETTE,
+              mode: 'categorical',
+              mapping: [
+                {
+                  color: { type: 'from_palette', palette: SEMANTIC_PALETTE, index: 0 },
+                  values: [{ type: 'range_key', ranges: [{ label: 'Full open' }] }],
                 },
               ],
             });

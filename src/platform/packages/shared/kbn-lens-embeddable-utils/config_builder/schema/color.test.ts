@@ -434,13 +434,6 @@ describe('Color Schema', () => {
     });
 
     describe('assignment value types', () => {
-      const ranges = [
-        { from: 0, to: 1000, label: 'Small' },
-        { from: 1000, label: 'Large' },
-        { to: 0, label: 'Negative' },
-        { label: 'Full open' },
-      ];
-
       const cases: Array<[string, SerializableValueType]> = [
         ['a boolean `true` value', true],
         ['a boolean `false` value', false],
@@ -448,8 +441,15 @@ describe('Color Schema', () => {
         ['a multi-value array of strings', ['a', 'b']],
         ['a multi-value array of numbers', [1, 2]],
         ['a multi-value array of booleans', [true, false]],
-        ['an open-ended range key', { type: 'range_key', from: 1000, ranges }],
-        ['an open-start range key', { type: 'range_key', to: 0, ranges }],
+        [
+          'an open-ended range key',
+          { type: 'range_key', from: 1000, ranges: [{ from: 1000, label: 'Large' }] },
+        ],
+        [
+          'an open-start range key',
+          { type: 'range_key', to: 0, ranges: [{ to: 0, label: 'Negative' }] },
+        ],
+        ['a fully open range key', { type: 'range_key', ranges: [{ label: 'Full open' }] }],
       ];
 
       describe('categorical', () => {
