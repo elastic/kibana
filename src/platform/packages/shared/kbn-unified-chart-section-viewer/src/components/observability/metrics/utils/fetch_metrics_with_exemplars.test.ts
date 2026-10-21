@@ -11,7 +11,6 @@ jest.mock('./execute_esql_query', () => ({
   executeEsqlQuery: jest.fn(),
 }));
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { executeEsqlQuery } from './execute_esql_query';
@@ -22,7 +21,7 @@ const mockExecuteEsqlQuery = executeEsqlQuery as jest.MockedFunction<typeof exec
 
 const params = {
   search: jest.fn() as unknown as ISearchGeneric,
-  dataView: { getIndexPattern: () => 'metrics-generic.otel-default' } as unknown as DataView,
+  timeFieldName: '@timestamp',
   timeRange: { from: 'now-15m', to: 'now' },
   uiSettings: {} as IUiSettingsClient,
   profileId: 'metrics-data-source-profile',

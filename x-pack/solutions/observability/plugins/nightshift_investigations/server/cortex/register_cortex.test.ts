@@ -8,11 +8,11 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import {
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
-  SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
-  SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-} from '@kbn/significant-events-schema';
+  NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+  NIGHTSHIFT_USAGE_PARENT_ID,
+  NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
+  NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
+} from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { NIGHTSHIFT_CORTEX_EDIT_APPLIED_EVENT_TYPE } from '../telemetry';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
@@ -130,9 +130,9 @@ describe('runCortexOptimize', () => {
     { tool_id: 'nightshift_sandbox_bash', params: { command: 'esql "FROM logs-* | LIMIT 5"' } },
     { tool_id: 'nightshift_sandbox_view_file', params: { file_path: '/workspace/elastic.md' } },
   ];
-  const progressReport: InvestigationToolCall = {
-    tool_id: 'platform.streams.investigation_progress_report',
-    params: { step: 'triage' },
+  const recordHypotheses: InvestigationToolCall = {
+    tool_id: 'agentic_investigations.set_hypotheses',
+    params: { hypotheses: [] },
   };
 
   const run = (
@@ -197,10 +197,10 @@ describe('runCortexOptimize', () => {
       request,
       defaultConnectorId: 'anthropic-sonnet',
       telemetryMetadata: {
-        pluginId: SIGNIFICANT_EVENTS_INVESTIGATION_INFERENCE_FEATURE_ID,
-        aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-        productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
-        productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
+        pluginId: NIGHTSHIFT_INVESTIGATION_MEMORY_USAGE_ID,
+        aggregateBy: NIGHTSHIFT_USAGE_PARENT_ID,
+        productSolution: NIGHTSHIFT_USAGE_PRODUCT_SOLUTION,
+        productFeature: NIGHTSHIFT_USAGE_PRODUCT_FEATURE,
         interactionId: 'execution-1',
       },
     });
@@ -231,14 +231,14 @@ describe('runCortexOptimize', () => {
 
   it('passes only sandbox tool calls to the optimizer', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
-      calls: [progressReport, ...toolCalls, progressReport],
+      calls: [recordHypotheses, ...toolCalls, recordHypotheses],
     });
     expect(optimizeCortex).toHaveBeenCalledWith(expect.objectContaining({ toolCalls }));
   });
 
   it('does not count non-sandbox tool calls towards the minimum', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
-      calls: [...toolCalls.slice(0, 2), progressReport, progressReport],
+      calls: [...toolCalls.slice(0, 2), recordHypotheses, recordHypotheses],
     });
     expect(optimizeCortex).not.toHaveBeenCalled();
   });

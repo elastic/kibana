@@ -53,7 +53,7 @@ export const ReferenceLine: FC<ReferenceLineProps> = ({
   const axisGroup = getAxisGroupForReferenceLine(axesConfiguration, decorationConfig, isHorizontal);
 
   const formatter =
-    formatters[decorationConfig.forAccessor] || axisGroup?.formatter || xAxisFormatter;
+    axisGroup?.formatter ?? formatters[decorationConfig.forAccessor] ?? xAxisFormatter;
   const id = `${layer.layerId}-${value}`;
   const name = decorationConfig.textVisibility
     ? columnToLabelMap[decorationConfig.forAccessor]

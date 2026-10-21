@@ -50,23 +50,21 @@ export class ProfilingHomePage {
     await this.page.getByText('Top 1').waitFor({ state: 'visible' });
   }
 
+  async getStackTracesCharts() {
+    return this.page.getByTestId('profilingSubChartLink');
+  }
+
+  async getStackTracesChart(label: string) {
+    return (await this.getStackTracesCharts()).filter({ hasText: label });
+  }
+
   // URL verification methods
   async expectUrlToInclude(path: string) {
     await this.page.waitForURL(`**${path}**`);
   }
 
-  // Setup status methods
-  async getSetupStatus() {
-    return this.page.testSubj.locator('profilingSetupStatus');
-  }
-
-  async isSetupComplete() {
-    const status = await this.getSetupStatus();
-    return (await status.getAttribute('data-status')) === 'complete';
-  }
-
   // Error state methods
   async getErrorState() {
-    return this.page.testSubj.locator('profilingErrorState');
+    return this.page.getByTestId('profilingErrorState');
   }
 }

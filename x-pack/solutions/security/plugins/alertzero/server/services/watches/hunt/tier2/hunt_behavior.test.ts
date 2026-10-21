@@ -5,18 +5,55 @@
  * 2.0.
  */
 
+import type { MitreEntity } from '@kbn/security-mitre-attack-common';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { ScopedModel } from '@kbn/agent-builder-server';
 import { executeEsql, generateEsql } from '@kbn/agent-builder-genai-utils';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import type { HuntBehaviorModels } from '../types';
 import { huntBehavior } from './hunt_behavior';
 import { ESQL_GENERATION_INSTRUCTIONS } from './extraction_contract';
-import { getMitreCatalog } from './mitre_catalog';
+import { buildMitreCatalog } from './mitre_catalog';
+import { UNGROUNDED_QUERY_FIXTURES } from './ungrounded_query_fixtures';
+
+/**
+ * A small ATT&CK Enterprise entity set for tests that need real-looking technique ids, plus 30
+ * filler techniques: enough to exceed Tier 2's per-report generation budget.
+ */
+// A hoisted function declaration (mock-prefixed) so the jest.mock factory below can call it.
+function mockBuildEnterpriseFixture(): MitreEntity[] {
+  const { buildMockMitreTechnique, buildMockMitreSubtechnique, buildMockMitreEntities } =
+    jest.requireActual<typeof import('@kbn/security-mitre-attack-mocks')>(
+      '@kbn/security-mitre-attack-mocks'
+    );
+  return [
+    buildMockMitreTechnique({ id: 'T1566', name: 'Phishing', tactic_ids: ['TA0001'] }),
+    buildMockMitreTechnique({ id: 'T1078', name: 'Valid Accounts', tactic_ids: ['TA0001'] }),
+    buildMockMitreSubtechnique({
+      id: 'T1078.004',
+      name: 'Cloud Accounts',
+      technique_id: 'T1078',
+      tactic_ids: ['TA0001'],
+    }),
+    ...buildMockMitreEntities(30),
+  ];
+}
+
+// The catalog now comes from the managed MITRE data client; serve a fixed ATT&CK Enterprise
+// catalog instead so these tests do not need a data client.
+jest.mock('./mitre_catalog', () => {
+  const actual = jest.requireActual('./mitre_catalog');
+  const { buildMitreCatalog: build } = actual;
+  const catalog = build(mockBuildEnterpriseFixture());
+  return { ...actual, getMitreCatalog: jest.fn(async () => catalog) };
+});
 
 jest.mock('@kbn/agent-builder-genai-utils', () => ({
   generateEsql: jest.fn(),
   executeEsql: jest.fn(),
 }));
+
+const enterpriseCatalog = buildMitreCatalog(mockBuildEnterpriseFixture());
 
 const generateEsqlMock = generateEsql as jest.MockedFunction<typeof generateEsql>;
 const executeEsqlMock = executeEsql as jest.MockedFunction<typeof executeEsql>;
@@ -43,15 +80,16 @@ const generateByTechnique = (queries: Record<string, string>) =>
 
 const buildMockModel = (
   candidates: Array<{ technique_id: string; evidence_quote: string; llm_confidence: number }> = []
-): ScopedModel => {
+): HuntBehaviorModels => {
   const withStructuredOutput = jest.fn().mockReturnValue({
     invoke: jest.fn().mockResolvedValue({ candidates }),
   });
-  return {
+  const model: ScopedModel = {
     chatModel: { withStructuredOutput } as unknown as ScopedModel['chatModel'],
     inferenceClient: {} as ScopedModel['inferenceClient'],
     connector: {} as ScopedModel['connector'],
   };
+  return { extraction: model, esql: model };
 };
 
 // Carries a stub `esql.query` because the probe-scoping wrapper reads `esClient.esql` when the
@@ -72,7 +110,7 @@ const t1566Candidate = { technique_id: 'T1566', evidence_quote: 'phishing', llm_
 const executeParams = {
   text: REPORT_TEXT,
   window: { from: 'now-30d', to: 'now' },
-  required_indices: ['logs-aws.*'],
+  allowed_indices: ['logs-aws.*'],
   row_limit: 25,
 };
 
@@ -133,6 +171,46 @@ describe('huntBehavior', () => {
     );
   });
 
+  it('skips extraction and reports one report-level catalog_unavailable gap when the catalog is empty', async () => {
+    const { getMitreCatalog } = jest.requireMock('./mitre_catalog');
+    getMitreCatalog.mockResolvedValueOnce({
+      techniqueById: new Map(),
+      subtechniqueById: new Map(),
+    });
+    const warnMock = logger.warn as jest.Mock;
+    warnMock.mockClear();
+    const model = buildMockModel([
+      { technique_id: 'T1566', evidence_quote: 'spear phishing used', llm_confidence: 0.9 },
+      { technique_id: 'T1566', evidence_quote: 'phishing', llm_confidence: 0.9 },
+    ]);
+    const result = await huntBehavior(model, logger, { text: REPORT_TEXT });
+    expect(model.extraction.chatModel.withStructuredOutput).not.toHaveBeenCalled();
+    expect(result.status).toBe('no_behaviors_validated');
+    expect(result.behaviors).toHaveLength(0);
+    expect(result.incomplete).toEqual([
+      expect.objectContaining({ reason: 'catalog_unavailable', detail: expect.any(String) }),
+    ]);
+    expect(result.incomplete?.[0].technique_id).toBeUndefined();
+    expect(warnMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('loads the catalog before calling the extraction model', async () => {
+    const { getMitreCatalog } = jest.requireMock('./mitre_catalog');
+    getMitreCatalog.mockClear();
+    const model = buildMockModel([]);
+    const order: string[] = [];
+    getMitreCatalog.mockImplementationOnce(async () => {
+      order.push('catalog');
+      return enterpriseCatalog;
+    });
+    (model.extraction.chatModel.withStructuredOutput as jest.Mock).mockImplementationOnce(() => {
+      order.push('extraction');
+      return { invoke: jest.fn().mockResolvedValue({ candidates: [] }) };
+    });
+    await huntBehavior(model, logger, { text: REPORT_TEXT });
+    expect(order).toEqual(['catalog', 'extraction']);
+  });
+
   it('returns indexed_behaviors id as reportId:techniqueId', async () => {
     const model = buildMockModel([
       { technique_id: 'T1566', evidence_quote: 'spear phishing', llm_confidence: 0.8 },
@@ -154,10 +232,8 @@ describe('huntBehavior', () => {
       text: REPORT_TEXT,
     });
     expect(generateEsqlMock).not.toHaveBeenCalled();
-    expect(result.behaviors[0].proposed_esql_rule).toContain(
-      'Grounded ES|QL generation unavailable'
-    );
-    expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
+    expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+    expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
   });
 
   it('keeps a line break in an evidence quote from ending the comment that makes the placeholder safe', async () => {
@@ -173,11 +249,30 @@ describe('huntBehavior', () => {
       { text: `Incident report: ${injected} was observed.` }
     );
 
-    const rule = result.behaviors[0].proposed_esql_rule;
+    const rule = result.behaviors[0].validated_esql;
     expect(rule).toContain('Grounded ES|QL generation unavailable');
     // The whole placeholder stays commented out, which is the property that makes it
     // non-executable — a single uncommented line would be ES|QL.
     expect(rule.split('\n').every((line) => line.startsWith('//'))).toBe(true);
+  });
+
+  it('reads the report on the extraction model and generates ES|QL on the esql model', async () => {
+    // Distinct models, so a job wired to the wrong one fails here. Every other test hands both
+    // jobs the same object and could not tell.
+    const { extraction: extractionModel } = buildMockModel([t1078Candidate]);
+    const esqlModel = { connector: { id: 'esql' } } as unknown as ScopedModel;
+
+    await huntBehavior(
+      { extraction: extractionModel, esql: esqlModel },
+      logger,
+      { text: REPORT_TEXT },
+      esClient
+    );
+
+    expect(extractionModel.chatModel.withStructuredOutput).toHaveBeenCalledTimes(1);
+    expect(generateEsqlMock).toHaveBeenCalledTimes(1);
+    expect(generateEsqlMock.mock.calls[0][0].model).toBe(esqlModel);
+    expect(generateEsqlMock.mock.calls[0][0].model).not.toBe(extractionModel);
   });
 
   it('returns one generateEsql call per validated behavior', async () => {
@@ -213,95 +308,66 @@ describe('huntBehavior', () => {
     ]);
   });
 
-  it('returns generateEsql targeting only allowlisted matched indices', async () => {
+  it('ignores matched_indices and targets the full allowed_indices union, even when a matched index sits inside it', async () => {
+    // Decided (Q2): one query over the union for the demo. Narrowing to whichever
+    // concrete index Tier 1's per-index buckets happened to hit is exactly what this
+    // must not do — a coincidental IOC match landing in an unrelated dataset that
+    // shares a baseline wildcard must not misdirect the FROM to that dataset alone.
     await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
       {
         text: REPORT_TEXT,
-        required_indices: ['logs-aws.*'],
+        allowed_indices: ['logs-aws.*', 'logs-endpoint.events.*'],
+        article_context: {
+          matched_indices: ['.ds-logs-aws.cloudtrail-default-2026.09.01-000001', '.kibana'],
+        },
+      },
+      esClient
+    );
+    expect(generateEsqlMock).toHaveBeenCalledWith(
+      expect.objectContaining({ index: 'logs-aws.*,logs-endpoint.events.*' })
+    );
+  });
+
+  it('ignores matched_indices entirely under a broad scope too, targeting the broad pattern', async () => {
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      {
+        text: REPORT_TEXT,
+        allowed_indices: ['logs-*'],
         article_context: {
           matched_indices: [
             '.ds-logs-aws.cloudtrail-default-2026.09.01-000001',
-            '.kibana',
             'logs-okta.system-default',
           ],
         },
       },
       esClient
     );
-    expect(generateEsqlMock).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-aws.cloudtrail-default*' })
-    );
+    expect(generateEsqlMock).toHaveBeenCalledWith(expect.objectContaining({ index: 'logs-*' }));
   });
 
-  it('returns generateEsql targeting the integrations that produced Tier 1 hits', async () => {
+  it('strips exclusion entries from allowed_indices before building the FROM target', async () => {
+    // Exclusion entries (`-logs-elastic_agent*`) belong to the search, not to a FROM.
     await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
       {
         text: REPORT_TEXT,
-        required_indices: ['logs-*'],
-        article_context: {
-          matched_indices: [
-            '.ds-logs-aws.cloudtrail-default-2026.09.01-000001',
-            '.ds-logs-aws.cloudtrail-default-2026.09.02-000002',
-            'logs-okta.system-default',
-          ],
-        },
+        allowed_indices: ['logs-*', '-logs-elastic_agent*', '-logs-fleet_server*'],
       },
       esClient
     );
-    expect(generateEsqlMock).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-aws.cloudtrail-default*,logs-okta.system-default*' })
-    );
-  });
-
-  it('does not double the wildcard on matched indices that already carry one', async () => {
-    await huntBehavior(
-      buildMockModel([t1078Candidate]),
-      logger,
-      {
-        text: REPORT_TEXT,
-        required_indices: ['logs-*'],
-        article_context: {
-          // A discovered scope hands over wildcard patterns, not concrete backing indices.
-          matched_indices: ['logs-cisco_asa.log-*', 'logs-aws.*'],
-        },
-      },
-      esClient
-    );
-    expect(generateEsqlMock).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-cisco_asa.log-*,logs-aws.*' })
-    );
-  });
-
-  it('keeps an exact matched index when wildcarding it would cross a broad-scope exclusion', async () => {
-    // `logs-elastic` is searchable under `logs-*` with `-logs-elastic_agent*`, but
-    // `logs-elastic*` would expand into the excluded agent streams and the gate
-    // would refuse both that wildcard and the `logs-*` fallback.
-    await huntBehavior(
-      buildMockModel([t1078Candidate]),
-      logger,
-      {
-        text: REPORT_TEXT,
-        required_indices: ['logs-*', '-logs-elastic_agent*', '-logs-fleet_server*'],
-        article_context: {
-          matched_indices: ['logs-elastic'],
-        },
-      },
-      esClient
-    );
-    expect(generateEsqlMock).toHaveBeenCalledWith(
-      expect.objectContaining({ index: 'logs-elastic' })
-    );
+    expect(generateEsqlMock).toHaveBeenCalledWith(expect.objectContaining({ index: 'logs-*' }));
   });
 
   it('returns generateEsql targeting the required indices when Tier 1 had no hits', async () => {
     await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: REPORT_TEXT, required_indices: ['logs-aws.*', 'logs-okta.*'] },
+      { text: REPORT_TEXT, allowed_indices: ['logs-aws.*', 'logs-okta.*'] },
       esClient
     );
     expect(generateEsqlMock).toHaveBeenCalledWith(
@@ -345,16 +411,51 @@ describe('huntBehavior', () => {
     expect(additionalContext).toContain('the report body');
   });
 
+  it('bounds the sample-events section in aggregate at the schema max of 50 events', async () => {
+    // Each event is independently capped at 2048 chars by the schema (`max_tier2_sample_events`'s
+    // own ceiling); unbounded in aggregate, 50 of them is ~100 KB repeated into every one of up
+    // to 20 behaviors' `generateEsql` calls.
+    const sampleEvents = Array.from({ length: 50 }, (_, i) => `event-${i}-`.padEnd(2048, 'x'));
+    await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      { text: REPORT_TEXT, article_context: { sample_events: sampleEvents } },
+      esClient
+    );
+    const { additionalContext } = generateEsqlMock.mock.calls[0][0];
+    expect(additionalContext).toBeDefined();
+    // Generous ceiling covering every section (sample events + IOCs + report text + headers),
+    // but an order of magnitude below the ~100 KB the unbounded array would have produced.
+    expect(additionalContext?.length).toBeLessThan(20000);
+    // The cap keeps whole events rather than truncating mid-event: the first event, which
+    // always fits, must still be intact.
+    expect(additionalContext).toContain(sampleEvents[0]);
+  });
+
   it('returns the generated query under the grounded header as the proposed rule', async () => {
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: REPORT_TEXT },
+      executeParams,
       esClient
     );
-    const rule = result.behaviors[0].proposed_esql_rule;
+    const rule = result.behaviors[0].validated_esql;
     expect(rule.startsWith('// Generated from hunt.hunt_behavior')).toBe(true);
     expect(rule.endsWith(`\n${GROUNDED_ESQL}`)).toBe(true);
+  });
+
+  it('refuses every generated query when allowed_indices is empty', async () => {
+    const result = await huntBehavior(
+      buildMockModel([t1078Candidate]),
+      logger,
+      { text: REPORT_TEXT, allowed_indices: [] },
+      esClient
+    );
+
+    expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+    expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
+    expect(result.behaviors[0].execution?.executed).toBe(false);
+    expect(executeEsqlMock).not.toHaveBeenCalled();
   });
 
   it('returns a non-executable placeholder when generateEsql reports an error', async () => {
@@ -365,10 +466,8 @@ describe('huntBehavior', () => {
       executeParams,
       esClient
     );
-    expect(result.behaviors[0].proposed_esql_rule).toContain(
-      'Grounded ES|QL generation unavailable'
-    );
-    expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
+    expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+    expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
     expect(executeEsqlMock).not.toHaveBeenCalled();
   });
 
@@ -391,10 +490,8 @@ describe('huntBehavior', () => {
       executeParams,
       esClient
     );
-    expect(result.behaviors[0].proposed_esql_rule).toContain(
-      'Grounded ES|QL generation unavailable'
-    );
-    expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
+    expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+    expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
     expect(result.status).toBe('behaviors_proposed');
   });
 
@@ -402,7 +499,7 @@ describe('huntBehavior', () => {
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: REPORT_TEXT, required_indices: ['logs-aws.*'], row_limit: 25 },
+      { text: REPORT_TEXT, allowed_indices: ['logs-aws.*'], row_limit: 25 },
       esClient
     );
     expect(result.has_hit).toBe(false);
@@ -412,7 +509,7 @@ describe('huntBehavior', () => {
     const result = await huntBehavior(
       buildMockModel([t1078Candidate]),
       logger,
-      { text: REPORT_TEXT, required_indices: ['logs-aws.*'], row_limit: 25 },
+      { text: REPORT_TEXT, allowed_indices: ['logs-aws.*'], row_limit: 25 },
       esClient
     );
     expect(executeEsqlMock).not.toHaveBeenCalled();
@@ -686,7 +783,7 @@ describe('huntBehavior', () => {
         esClient
       );
 
-      expect(result.behaviors[0].proposed_esql_rule).not.toContain('.kibana-secrets');
+      expect(result.behaviors[0].validated_esql).not.toContain('.kibana-secrets');
       expect(result.behaviors[0].execution?.executed).toBe(false);
       expect(executeEsqlMock).not.toHaveBeenCalled();
     });
@@ -701,7 +798,7 @@ describe('huntBehavior', () => {
         esClient
       );
 
-      expect(result.behaviors[0].proposed_esql_rule).toContain(GROUNDED_ESQL);
+      expect(result.behaviors[0].validated_esql).toContain(GROUNDED_ESQL);
     });
 
     it('gives generateEsql a probe client that refuses an out-of-scope schema probe', async () => {
@@ -751,10 +848,8 @@ describe('huntBehavior', () => {
         esClient
       );
       expect(executeEsqlMock).not.toHaveBeenCalled();
-      expect(result.behaviors[0].proposed_esql_rule).toContain(
-        'Grounded ES|QL generation unavailable'
-      );
-      expect(result.behaviors[0].proposed_esql_rule).not.toContain('FROM ');
+      expect(result.behaviors[0].validated_esql).toContain('Grounded ES|QL generation unavailable');
+      expect(result.behaviors[0].validated_esql).not.toContain('FROM ');
       expect(result.behaviors[0].execution).toEqual({
         executed: false,
         row_count: 0,
@@ -789,6 +884,384 @@ describe('huntBehavior', () => {
     });
   });
 
+  describe('the grounding retry', () => {
+    const UNGROUNDED_ESQL = 'FROM logs-aws.*\n| LIMIT 1';
+
+    // `generateByTechnique` keys on `nlQuery`, which is identical across the first call and
+    // the retry, so these use `mockResolvedValueOnce`/`mockRejectedValueOnce` chains instead.
+
+    it('rescues a behavior whose first query is ungrounded but whose retry grounds', async () => {
+      generateEsqlMock
+        .mockResolvedValueOnce({ query: UNGROUNDED_ESQL })
+        .mockResolvedValueOnce({ query: GROUNDED_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(result.behaviors[0].validated_esql).toContain(GROUNDED_ESQL);
+      expect(executeEsqlMock).toHaveBeenCalledTimes(1);
+    });
+
+    it('keeps the placeholder as query_ungrounded when the retry is also ungrounded', async () => {
+      generateEsqlMock
+        .mockResolvedValueOnce({ query: UNGROUNDED_ESQL })
+        .mockResolvedValueOnce({ query: 'FROM logs-aws.*\n| LIMIT 2' });
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(result.behaviors[0].execution).toEqual({
+        executed: false,
+        row_count: 0,
+        hit: false,
+        inconclusive_reason: 'query_ungrounded',
+      });
+      expect(result.incomplete).toContainEqual(
+        expect.objectContaining({
+          reason: 'query_ungrounded',
+          technique_id: 'T1078.004',
+          detail: expect.stringContaining('no filtering predicate'),
+        })
+      );
+      expect(executeEsqlMock).not.toHaveBeenCalled();
+    });
+
+    it('keeps the placeholder as query_ungrounded, not generation_failed, when the retry call errors', async () => {
+      generateEsqlMock
+        .mockResolvedValueOnce({ query: UNGROUNDED_ESQL })
+        .mockResolvedValueOnce({ error: 'Unknown column [nope]' });
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(result.behaviors[0].execution?.inconclusive_reason).toBe('query_ungrounded');
+    });
+
+    it('keeps the placeholder as query_ungrounded, not generation_failed, when the retry call throws', async () => {
+      generateEsqlMock
+        .mockResolvedValueOnce({ query: UNGROUNDED_ESQL })
+        .mockRejectedValueOnce(new Error('Could not discover a suitable index'));
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(result.behaviors[0].execution?.inconclusive_reason).toBe('query_ungrounded');
+    });
+
+    it('retries with the rejected query and gate reason, every other argument unchanged', async () => {
+      generateEsqlMock
+        .mockResolvedValueOnce({ query: UNGROUNDED_ESQL })
+        .mockResolvedValueOnce({ query: GROUNDED_ESQL });
+
+      await huntBehavior(buildMockModel([t1078Candidate]), logger, executeParams, esClient);
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      const [firstCall, secondCall] = generateEsqlMock.mock.calls.map(([args]) => args);
+      expect(secondCall.additionalInstructions?.startsWith(ESQL_GENERATION_INSTRUCTIONS)).toBe(
+        true
+      );
+      expect(secondCall.additionalInstructions).toContain(UNGROUNDED_ESQL);
+      expect(secondCall.additionalInstructions).toContain('no filtering predicate');
+      expect(secondCall.nlQuery).toBe(firstCall.nlQuery);
+      expect(secondCall.index).toBe(firstCall.index);
+      expect(secondCall.additionalContext).toBe(firstCall.additionalContext);
+      expect(secondCall.execute).toBe(firstCall.execute);
+      expect(secondCall.rowLimit).toBe(firstCall.rowLimit);
+      expect(secondCall.disableNamedParams).toBe(firstCall.disableNamedParams);
+    });
+
+    it('does not retry a first-call generation error', async () => {
+      generateEsqlMock.mockResolvedValueOnce({ error: 'Unknown column [nope]' });
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(1);
+      expect(result.behaviors[0].execution?.inconclusive_reason).toBe('generation_failed');
+    });
+
+    it('does not retry an out-of-scope first query, and logs no ungrounded-query debug line', async () => {
+      generateByTechnique({ 'T1078.004': 'FROM .kibana-*\n| WHERE true\n| LIMIT 10' });
+      const debugSpy = jest.spyOn(logger, 'debug');
+
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(1);
+      expect(result.behaviors[0].execution?.inconclusive_reason).toBe('query_out_of_scope');
+      expect(debugSpy).not.toHaveBeenCalledWith(expect.stringContaining('ungrounded query'));
+    });
+
+    it.each(UNGROUNDED_QUERY_FIXTURES)(
+      '$name: rescues through the real wrapper on the retry',
+      async ({ reportText, evidenceQuote, iocValues, query, rewrittenQuery }) => {
+        generateEsqlMock
+          .mockResolvedValueOnce({ query })
+          .mockResolvedValueOnce({ query: rewrittenQuery });
+
+        const result = await huntBehavior(
+          buildMockModel([{ ...t1078Candidate, evidence_quote: evidenceQuote }]),
+          logger,
+          {
+            ...executeParams,
+            text: reportText,
+            iocs: iocValues.map((value) => ({ type: 'domain', value })),
+          },
+          esClient
+        );
+
+        expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+        expect(result.behaviors[0].validated_esql).toContain(rewrittenQuery);
+        expect(result.incomplete?.some((i) => i.reason === 'query_ungrounded')).not.toBe(true);
+      }
+    );
+  });
+
+  describe('collapsing same-artifact behaviors', () => {
+    const sharedIoc = { type: 'domain', value: 'evil.example.com' };
+    const COLLAPSE_TEXT = `${REPORT_TEXT} Attackers used evil.example.com for both lateral movement and persistence.`;
+    // A survivor query that filters on the shared artifact, so its siblings really are covered.
+    // GROUNDED_ESQL grounds on `AssumeRole` instead, which clears the gate without hunting the
+    // domain at all — the case a sibling must not be collapsed against.
+    const COVERING_ESQL =
+      'FROM logs-aws.cloudtrail-*\n| WHERE destination.domain == "evil.example.com"\n| LIMIT 10';
+    const sharedCandidates = [
+      {
+        technique_id: 'T1078.004',
+        evidence_quote: 'evil.example.com for both lateral movement',
+        llm_confidence: 0.9,
+      },
+      {
+        technique_id: 'T1566',
+        evidence_quote: 'evil.example.com for both lateral movement and persistence',
+        llm_confidence: 0.5,
+      },
+    ];
+
+    it('generates the survivor first and the sibling in a second wave when budget remains', async () => {
+      generateByTechnique({ 'T1078.004': COVERING_ESQL, T1566: COVERING_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel(sharedCandidates),
+        logger,
+        { ...executeParams, text: COLLAPSE_TEXT, iocs: [sharedIoc] },
+        esClient
+      );
+
+      // Sharing an artifact set orders generation; it does not drop the second technique.
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(generateEsqlMock.mock.calls[0][0].nlQuery).toContain('T1078.004');
+      expect(generateEsqlMock.mock.calls[1][0].nlQuery).toContain('T1566');
+
+      const winner = result.behaviors.find((b) => b.technique_id === 'T1078.004');
+      const sibling = result.behaviors.find((b) => b.technique_id === 'T1566');
+      expect(winner?.validated_esql).toContain(COVERING_ESQL);
+      expect(sibling?.validated_esql).toContain(COVERING_ESQL);
+      expect(sibling?.execution?.inconclusive_reason).toBeUndefined();
+      expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+    });
+
+    it('generates the sibling in a second wave even when the survivor grounds on a different report literal', async () => {
+      // The survivor's query clears the grounding gate on `AssumeRole`, never mentioning the
+      // domain its sibling was deferred for. Budget remains, so the sibling generates either
+      // way; this locks that nothing about the survivor's query can retire it while it does.
+      generateByTechnique({ 'T1078.004': GROUNDED_ESQL, T1566: COVERING_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel(sharedCandidates),
+        logger,
+        { ...executeParams, text: COLLAPSE_TEXT, iocs: [sharedIoc] },
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      const sibling = result.behaviors.find((b) => b.technique_id === 'T1566');
+      expect(sibling?.validated_esql).toContain(COVERING_ESQL);
+      expect(sibling?.execution?.inconclusive_reason).toBeUndefined();
+      expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+    });
+
+    it('generates the sibling in a second wave when the survivor produced no usable query', async () => {
+      // Only the sibling has a fixture; the survivor's generation errors out. The sibling's
+      // generation does not depend on the survivor's outcome while budget remains.
+      generateByTechnique({ T1566: COVERING_ESQL });
+
+      const result = await huntBehavior(
+        buildMockModel(sharedCandidates),
+        logger,
+        { ...executeParams, text: COLLAPSE_TEXT, iocs: [sharedIoc] },
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      const survivor = result.behaviors.find((b) => b.technique_id === 'T1078.004');
+      const sibling = result.behaviors.find((b) => b.technique_id === 'T1566');
+      expect(survivor?.execution?.inconclusive_reason).toBe('generation_failed');
+      expect(sibling?.validated_esql).toContain(COVERING_ESQL);
+      expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+    });
+
+    it('charges uncovered siblings to the generation budget when the first wave used it all', async () => {
+      // 20 survivors fill the budget. Their queries ground on `AssumeRole`, so nothing searched
+      // the two deferred siblings' artifacts, and no budget remains to generate them: they
+      // report `generation_budget`, never `collapsed`, and no 21st generation call is made.
+      const ids = [...enterpriseCatalog.techniqueById.keys()].slice(0, 22);
+      const sharedQuote = 'evidence mentioning evil.example.com directly';
+      generateEsqlMock.mockResolvedValue({ query: GROUNDED_ESQL });
+
+      const candidates = ids.map((technique_id, index) => ({
+        technique_id,
+        evidence_quote: index < 3 ? sharedQuote : 'evidence',
+        llm_confidence: 0.5 + index * 0.01,
+      }));
+
+      const result = await huntBehavior(
+        buildMockModel(candidates),
+        logger,
+        { ...executeParams, text: `${REPORT_TEXT} ${sharedQuote}`, iocs: [sharedIoc] },
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(20);
+      expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+      expect(result.incomplete?.filter((i) => i.reason === 'generation_budget')).toHaveLength(2);
+    });
+
+    it('does not collapse behaviors whose quotes name no shared artifact', async () => {
+      const result = await huntBehavior(
+        buildMockModel([t1078Candidate, t1566Candidate]),
+        logger,
+        executeParams,
+        esClient
+      );
+
+      expect(generateEsqlMock).toHaveBeenCalledTimes(2);
+      expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+    });
+
+    it('does not collapse anything when no esClient is given', async () => {
+      const result = await huntBehavior(
+        buildMockModel([
+          {
+            technique_id: 'T1078.004',
+            evidence_quote: 'evil.example.com for both lateral movement',
+            llm_confidence: 0.9,
+          },
+          {
+            technique_id: 'T1566',
+            evidence_quote: 'evil.example.com for both lateral movement and persistence',
+            llm_confidence: 0.5,
+          },
+        ]),
+        logger,
+        { text: COLLAPSE_TEXT, iocs: [sharedIoc] }
+      );
+
+      expect(generateEsqlMock).not.toHaveBeenCalled();
+      expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+    });
+
+    it('records collapsed only for a sibling that lost to the budget after its survivor searched its artifacts', async () => {
+      const ids = [...enterpriseCatalog.techniqueById.keys()].slice(0, 22);
+      const sharedQuote = 'evidence mentioning evil.example.com directly';
+      generateEsqlMock.mockResolvedValue({ query: COVERING_ESQL });
+
+      const candidates = ids.map((technique_id, index) => ({
+        technique_id,
+        // The first 3 ids share the artifact set and collapse to one survivor; the rest
+        // are distinct behaviors with no shared artifact, so none of them merge.
+        evidence_quote: index < 3 ? sharedQuote : 'evidence',
+        llm_confidence: 0.5 + index * 0.01,
+      }));
+
+      const result = await huntBehavior(
+        buildMockModel(candidates),
+        logger,
+        { ...executeParams, text: `${REPORT_TEXT} ${sharedQuote}`, iocs: [sharedIoc] },
+        esClient
+      );
+
+      expect(result.behaviors).toHaveLength(22);
+      // 20 survivors fill the budget first, so distinct artifact sets never lose a slot to a
+      // duplicate. The 2 siblings then have no budget left; their survivor's query filters on
+      // the shared domain, so they are `collapsed` rather than `generation_budget`.
+      expect(generateEsqlMock).toHaveBeenCalledTimes(20);
+      expect(result.incomplete?.some((i) => i.reason === 'generation_budget')).not.toBe(true);
+      const collapsed = result.incomplete?.filter((i) => i.reason === 'collapsed') ?? [];
+      expect(collapsed).toHaveLength(2);
+      expect(collapsed[0].detail).toContain('evil.example.com');
+      expect(collapsed[0].detail).toContain('reached its budget');
+      const sibling = result.behaviors.find((b) => b.technique_id === collapsed[0].technique_id);
+      expect(sibling?.execution).toEqual({
+        executed: false,
+        row_count: 0,
+        hit: false,
+        inconclusive_reason: 'collapsed',
+      });
+      // The sibling stays in both output arrays, exactly as a generation_budget behavior does.
+      expect(result.indexed_behaviors.some((b) => b.technique_id === sibling?.technique_id)).toBe(
+        true
+      );
+    });
+
+    it('does not mark siblings collapsed when their survivor is cut by the generation budget', async () => {
+      // 20 high-confidence unique behaviors fill the budget. Three lower-confidence behaviors
+      // (still above the 0.5 extraction floor) share one artifact; collapse keeps one survivor,
+      // then that survivor misses the cut. The two siblings must not claim `collapsed` (nothing
+      // hunted those artifacts).
+      const ids = [...enterpriseCatalog.techniqueById.keys()].slice(0, 23);
+      const sharedQuote = 'evidence mentioning evil.example.com directly';
+      generateEsqlMock.mockResolvedValue({ query: GROUNDED_ESQL });
+
+      const candidates = ids.map((technique_id, index) => ({
+        technique_id,
+        evidence_quote: index < 3 ? sharedQuote : 'evidence',
+        // Shared group clears the extraction threshold but stays below every unique behavior.
+        llm_confidence: index < 3 ? 0.5 + index * 0.01 : 0.7 + index * 0.01,
+      }));
+
+      const result = await huntBehavior(
+        buildMockModel(candidates),
+        logger,
+        { ...executeParams, text: `${REPORT_TEXT} ${sharedQuote}`, iocs: [sharedIoc] },
+        esClient
+      );
+
+      expect(result.behaviors).toHaveLength(23);
+      expect(result.incomplete?.some((i) => i.reason === 'collapsed')).not.toBe(true);
+      expect(result.incomplete?.filter((i) => i.reason === 'generation_budget')).toHaveLength(3);
+      expect(generateEsqlMock).toHaveBeenCalledTimes(20);
+    });
+  });
+
   describe('the generation budget', () => {
     const GENERATION_BUDGET = 20;
     const OVER_BUDGET = GENERATION_BUDGET + 5;
@@ -800,7 +1273,7 @@ describe('huntBehavior', () => {
     });
 
     /** Real catalog ids, so none are dropped as unknown before generation. */
-    const catalogIds = () => [...getMitreCatalog().techniqueById.keys()].slice(0, OVER_BUDGET);
+    const catalogIds = () => [...enterpriseCatalog.techniqueById.keys()].slice(0, OVER_BUDGET);
 
     /** Ascending confidence, so the lowest-confidence ids are the ones over budget. */
     const ascendingCandidates = () =>

@@ -18,6 +18,7 @@ export interface ApprovalAction {
   onClick: () => void | Promise<void>;
   iconType?: IconType;
   color?: EuiButtonColor;
+  fill?: boolean;
   isDisabled?: boolean;
   isLoading?: boolean;
   'data-test-subj'?: string;
@@ -66,6 +67,7 @@ export type ApprovalProposal = Pick<
   | 'comment'
   | 'impact'
   | 'status'
+  | 'supersededBy'
   | 'category'
   | 'expiresAt'
   | 'actionWorkflowId'
@@ -75,5 +77,6 @@ export type ApprovalProposal = Pick<
   | 'decidedAt'
   | 'dismissReason'
   | 'rationale'
+  | 'executionError'
   | 'previousExecutionError'
 >;

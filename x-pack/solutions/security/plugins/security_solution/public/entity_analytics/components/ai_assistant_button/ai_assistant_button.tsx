@@ -91,6 +91,7 @@ export const AiAssistantButton = <T extends EntityType>({
     return (
       <NewAgentBuilderAttachment
         onClick={openAgentBuilderFlyout}
+        iconType="addToChat"
         telemetry={{ pathway: telemetryPathway, attachments: ['entity'] }}
       />
     );

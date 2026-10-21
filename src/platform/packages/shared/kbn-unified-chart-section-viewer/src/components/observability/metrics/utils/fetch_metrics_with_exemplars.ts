@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { IUiSettingsClient } from '@kbn/core/public';
@@ -41,7 +40,7 @@ export type MetricsWithExemplars = ReadonlyMap<string, ReadonlySet<string>>;
 
 export interface FetchMetricsWithExemplarsParams {
   search: ISearchGeneric;
-  dataView: DataView;
+  timeFieldName?: string;
   timeRange: TimeRange;
   uiSettings: IUiSettingsClient;
   profileId: string;
@@ -51,7 +50,7 @@ export interface FetchMetricsWithExemplarsParams {
 
 export const fetchMetricsWithExemplars = async ({
   search,
-  dataView,
+  timeFieldName,
   timeRange,
   uiSettings,
   profileId,
@@ -64,7 +63,7 @@ export const fetchMetricsWithExemplars = async ({
     esqlQuery: EXEMPLARS_PROBE_QUERY,
     search,
     signal,
-    dataView,
+    timeFieldName,
     timeRange,
     uiSettings,
     profileId,

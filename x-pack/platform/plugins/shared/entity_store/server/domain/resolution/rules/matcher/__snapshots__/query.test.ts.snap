@@ -14,60 +14,12 @@ FROM \\".entities.v2.latest.default\\"
 | EVAL is_new = CASE(1 == 1, 1, 0)
 | EVAL unresolved_id = CASE(is_unresolved == 1, entity.id, null)
 | EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
+| EVAL is_unresolved_local = CASE(is_unresolved == 1 AND entity.namespace == \\"local\\", 1, 0)
 | STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
         unresolved_ns = VALUES(unresolved_namespace),
         existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
         unresolved_n = SUM(is_unresolved),
-        total_n = COUNT(*),
-        new_n = SUM(is_new)
-    BY match_value
-| WHERE total_n >= 2 AND new_n >= 1
-| SORT match_value ASC
-| LIMIT 5000"
-`;
-
-exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for email 1`] = `
-"SET unmapped_fields=\\"nullify\\";
-FROM \\".entities.v2.latest.default\\"
-| WHERE entity.EngineMetadata.Type == \\"user\\"
-    AND MV_COUNT(user.email) == 1
-| EVAL match_value = TO_LOWER(user.email)
-| WHERE match_value IS NOT NULL
-    AND match_value != \\"\\"
-| EVAL is_unresolved = CASE(entity.relationships.resolution.resolved_to IS NULL, 1, 0)
-| EVAL is_new = CASE(1 == 1, 1, 0)
-| EVAL unresolved_id = CASE(is_unresolved == 1, entity.id, null)
-| EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
-| STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
-        unresolved_ns = VALUES(unresolved_namespace),
-        existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
-        unresolved_n = SUM(is_unresolved),
-        total_n = COUNT(*),
-        new_n = SUM(is_new)
-    BY match_value
-| WHERE total_n >= 2 AND new_n >= 1
-| SORT match_value ASC
-| LIMIT 5000"
-`;
-
-exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for entra GUID 1`] = `
-"SET unmapped_fields=\\"nullify\\";
-FROM \\".entities.v2.latest.default\\"
-| WHERE entity.EngineMetadata.Type == \\"user\\"
-    AND MV_COUNT(user.id) == 1
-    AND entity.namespace IN (\\"m365_defender\\", \\"entra_id\\")
-| EVAL match_value = user.id
-| WHERE match_value IS NOT NULL
-    AND match_value != \\"\\"
-    AND match_value RLIKE \\"[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\\"
-| EVAL is_unresolved = CASE(entity.relationships.resolution.resolved_to IS NULL, 1, 0)
-| EVAL is_new = CASE(1 == 1, 1, 0)
-| EVAL unresolved_id = CASE(is_unresolved == 1, entity.id, null)
-| EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
-| STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
-        unresolved_ns = VALUES(unresolved_namespace),
-        existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
-        unresolved_n = SUM(is_unresolved),
+        unresolved_local_n = SUM(is_unresolved_local),
         total_n = COUNT(*),
         new_n = SUM(is_new)
     BY match_value
@@ -91,10 +43,66 @@ FROM \\".entities.v2.latest.default\\"
 | EVAL is_new = CASE(1 == 1, 1, 0)
 | EVAL unresolved_id = CASE(is_unresolved == 1, entity.id, null)
 | EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
+| EVAL is_unresolved_local = CASE(is_unresolved == 1 AND entity.namespace == \\"local\\", 1, 0)
 | STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
         unresolved_ns = VALUES(unresolved_namespace),
         existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
         unresolved_n = SUM(is_unresolved),
+        unresolved_local_n = SUM(is_unresolved_local),
+        total_n = COUNT(*),
+        new_n = SUM(is_new)
+    BY match_value
+| WHERE total_n >= 2 AND new_n >= 1
+| SORT match_value ASC
+| LIMIT 5000"
+`;
+
+exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for email 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM \\".entities.v2.latest.default\\"
+| WHERE entity.EngineMetadata.Type == \\"user\\"
+    AND MV_COUNT(user.email) == 1
+| EVAL match_value = TO_LOWER(user.email)
+| WHERE match_value IS NOT NULL
+    AND match_value != \\"\\"
+| EVAL is_unresolved = CASE(entity.relationships.resolution.resolved_to IS NULL, 1, 0)
+| EVAL is_new = CASE(1 == 1, 1, 0)
+| EVAL unresolved_id = CASE(is_unresolved == 1, entity.id, null)
+| EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
+| EVAL is_unresolved_local = CASE(is_unresolved == 1 AND entity.namespace == \\"local\\", 1, 0)
+| STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
+        unresolved_ns = VALUES(unresolved_namespace),
+        existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
+        unresolved_n = SUM(is_unresolved),
+        unresolved_local_n = SUM(is_unresolved_local),
+        total_n = COUNT(*),
+        new_n = SUM(is_new)
+    BY match_value
+| WHERE total_n >= 2 AND new_n >= 1
+| SORT match_value ASC
+| LIMIT 5000"
+`;
+
+exports[`ES|QL matcher query builder buildMatchGroupsQuery emits a valid query for entra GUID 1`] = `
+"SET unmapped_fields=\\"nullify\\";
+FROM \\".entities.v2.latest.default\\"
+| WHERE entity.EngineMetadata.Type == \\"user\\"
+    AND MV_COUNT(user.id) == 1
+    AND entity.namespace IN (\\"m365_defender\\", \\"entra_id\\")
+| EVAL match_value = user.id
+| WHERE match_value IS NOT NULL
+    AND match_value != \\"\\"
+    AND match_value RLIKE \\"[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\\"
+| EVAL is_unresolved = CASE(entity.relationships.resolution.resolved_to IS NULL, 1, 0)
+| EVAL is_new = CASE(1 == 1, 1, 0)
+| EVAL unresolved_id = CASE(is_unresolved == 1, entity.id, null)
+| EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
+| EVAL is_unresolved_local = CASE(is_unresolved == 1 AND entity.namespace == \\"local\\", 1, 0)
+| STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
+        unresolved_ns = VALUES(unresolved_namespace),
+        existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
+        unresolved_n = SUM(is_unresolved),
+        unresolved_local_n = SUM(is_unresolved_local),
         total_n = COUNT(*),
         new_n = SUM(is_new)
     BY match_value
@@ -118,10 +126,12 @@ FROM \\".entities.v2.latest.default\\"
 | EVAL is_new = CASE(1 == 1, 1, 0)
 | EVAL unresolved_id = CASE(is_unresolved == 1, entity.id, null)
 | EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
+| EVAL is_unresolved_local = CASE(is_unresolved == 1 AND entity.namespace == \\"local\\", 1, 0)
 | STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
         unresolved_ns = VALUES(unresolved_namespace),
         existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
         unresolved_n = SUM(is_unresolved),
+        unresolved_local_n = SUM(is_unresolved_local),
         total_n = COUNT(*),
         new_n = SUM(is_new)
     BY match_value
@@ -143,10 +153,12 @@ FROM \\".entities.v2.latest.default\\"
 | EVAL is_new = CASE(1 == 1, 1, 0)
 | EVAL unresolved_id = CASE(is_unresolved == 1, entity.id, null)
 | EVAL unresolved_namespace = CASE(is_unresolved == 1, entity.namespace, null)
+| EVAL is_unresolved_local = CASE(is_unresolved == 1 AND entity.namespace == \\"local\\", 1, 0)
 | STATS ids = TOP(unresolved_id, 100, \\"asc\\"),
         unresolved_ns = VALUES(unresolved_namespace),
         existing_targets = TOP(entity.relationships.resolution.resolved_to, 100, \\"asc\\"),
         unresolved_n = SUM(is_unresolved),
+        unresolved_local_n = SUM(is_unresolved_local),
         total_n = COUNT(*),
         new_n = SUM(is_new)
     BY match_value

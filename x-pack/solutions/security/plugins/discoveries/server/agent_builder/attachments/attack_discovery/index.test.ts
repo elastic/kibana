@@ -23,6 +23,7 @@ import { ATTACK_DISCOVERY_ATTACHMENT_TOOL_IDS, createAttackDiscoveryAttachmentTy
 const logger = loggingSystemMock.createLogger();
 
 const HOST_UUID = '3d241119-f77a-454e-8ee3-d36e05a8714f';
+const UNUSED_UUID = 'a0b1c2d3-e4f5-4a6b-8c7d-9e0f1a2b3c4d';
 
 const validData = {
   alert_ids: ['alert-1', 'alert-2'],
@@ -45,6 +46,9 @@ const discoveryHit = {
     '@timestamp': '2026-09-15T00:00:00.000Z',
   },
 };
+
+// What `resolve` returns for `discoveryHit`: the projection plus its `@timestamp`.
+const resolvedData = { ...validData, timestamp: '2026-09-15T00:00:00.000Z' };
 
 const adhocAttackDiscoveryDataClient = {
   indexNameWithNamespace: jest.fn(
@@ -224,6 +228,22 @@ describe('createAttackDiscoveryAttachmentType', () => {
         ...validData,
         entity_summary_markdown: 'a'.repeat(8001),
       });
+
+      expect(result).toMatchObject({ valid: false });
+    });
+
+    it('accepts an ISO timestamp', () => {
+      const data = { ...validData, timestamp: '2026-09-15T00:00:00.000Z' };
+
+      const result = createAttackDiscoveryAttachmentType(defaultDeps()).validate(data);
+
+      expect(result).toEqual({ data, valid: true });
+    });
+
+    it('returns invalid when the timestamp is not an ISO date-time', () => {
+      const data = { ...validData, timestamp: 'yesterday' };
+
+      const result = createAttackDiscoveryAttachmentType(defaultDeps()).validate(data);
 
       expect(result).toMatchObject({ valid: false });
     });
@@ -453,7 +473,30 @@ describe('createAttackDiscoveryAttachmentType', () => {
         resolveContext
       );
 
-      expect(resolved).toEqual(validData);
+      expect(resolved).toEqual(resolvedData);
+    });
+
+    // The Attacks page filters on `@timestamp`, so "Open in Attacks" links to that time.
+    it("returns the discovery's persisted @timestamp", async () => {
+      const resolved = await createAttackDiscoveryAttachmentType(defaultDeps()).resolve?.(
+        'discovery-1',
+        resolveContext
+      );
+
+      expect(resolved).toEqual(expect.objectContaining({ timestamp: '2026-09-15T00:00:00.000Z' }));
+    });
+
+    it('omits the timestamp when the discovery has no @timestamp', async () => {
+      const sourceWithoutTimestamp = Object.fromEntries(
+        Object.entries(discoveryHit._source).filter(([field]) => field !== '@timestamp')
+      );
+      const resolved = await createAttackDiscoveryAttachmentType({
+        adhocAttackDiscoveryDataClient,
+        esClient: createEsClient([{ ...discoveryHit, _source: sourceWithoutTimestamp }]).esClient,
+        logger,
+      }).resolve?.('discovery-1', resolveContext);
+
+      expect(resolved).not.toHaveProperty('timestamp');
     });
 
     it('projects the entity summary and MITRE tactics when the discovery has them', async () => {
@@ -473,9 +516,40 @@ describe('createAttackDiscoveryAttachmentType', () => {
       }).resolve?.('discovery-1', resolveContext);
 
       expect(resolved).toEqual({
-        ...validData,
+        ...resolvedData,
         entity_summary_markdown: 'Host host-1 was targeted.',
         mitre_attack_tactics: ['Initial Access', 'Execution'],
+      });
+    });
+
+    // So an Investigation's analysts and agent read the original values, as "Add to chat" does.
+    // The generation's replacements also cover its other discoveries, so only the ones this
+    // discovery's text uses are kept.
+    it('returns only the replacements the discovery uses and the schema accepts', async () => {
+      const title = `Suspicious activity on ${HOST_UUID}`;
+      const resolved = await createAttackDiscoveryAttachmentType({
+        adhocAttackDiscoveryDataClient,
+        esClient: createEsClient([
+          {
+            ...discoveryHit,
+            _source: {
+              ...discoveryHit._source,
+              'kibana.alert.attack_discovery.title': title,
+              'kibana.alert.attack_discovery.replacements': [
+                { uuid: HOST_UUID, value: 'SRVWIN04' },
+                { uuid: UNUSED_UUID, value: 'unrelated-host' },
+                { uuid: 'not-a-uuid', value: 'dropped' },
+              ],
+            },
+          },
+        ]).esClient,
+        logger,
+      }).resolve?.('discovery-1', resolveContext);
+
+      expect(resolved).toEqual({
+        ...resolvedData,
+        replacements: { [HOST_UUID]: 'SRVWIN04' },
+        title,
       });
     });
 
@@ -581,6 +655,20 @@ describe('createAttackDiscoveryAttachmentType', () => {
       expect(createAttackDiscoveryAttachmentType(defaultDeps()).getAgentDescription?.()).toContain(
         'Rendering this attachment inline displays'
       );
+    });
+
+    // Field pills in the conversation UI do not open flyouts, so the agent must not tell
+    // the user to click them.
+    it('describes the field pills as non-interactive', () => {
+      expect(createAttackDiscoveryAttachmentType(defaultDeps()).getAgentDescription?.()).toContain(
+        'non-interactive field pills'
+      );
+    });
+
+    it('does not describe the field pills as interactive', () => {
+      expect(
+        createAttackDiscoveryAttachmentType(defaultDeps()).getAgentDescription?.()
+      ).not.toMatch(/(?<!non-)interactive|can open|click/i);
     });
 
     it.each(['Use it as', 'Treat it as', 'You have been provided'])(

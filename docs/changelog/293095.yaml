@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/293095
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: Fix chat errors when the connection drops mid-response
-description: Fixes an issue where Agent Builder chat responses failed with an error when the connection was interrupted while the agent was still running, for example by a proxy timeout. The chat now reconnects and continues streaming the response.

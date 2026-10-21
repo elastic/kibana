@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -240,7 +239,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
-  const leadingControlColumns = useTimelineControlColumn({
+  const rowAdditionalLeadingControls = useTimelineControlColumn({
     timelineId,
     refetch,
     events,
@@ -315,7 +314,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           activeTab={activeTab}
           updatedAt={refreshedAt}
           isTextBasedQuery={false}
-          leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+          rowAdditionalLeadingControls={rowAdditionalLeadingControls}
           onUpdatePageIndex={onUpdatePageIndex}
         />
       </FullWidthFlexGroup>

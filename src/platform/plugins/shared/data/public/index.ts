@@ -136,6 +136,11 @@ export {
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
+  ACTION as SEARCH_SESSION_ACTION,
+  getInProgressSessionIds,
+  setInProgressSessionIds,
+  SearchSessionEBTManager,
+  SessionsClient,
   SearchSource,
   SearchSessionState,
   SortDirection,
@@ -147,7 +152,13 @@ export type {
   SearchSessionInfoProvider,
   ISessionsClient,
   SearchUsageCollector,
+  ISearchSessionEBTManager,
+  PersistedSearchSessionSavedObjectAttributes,
+  UISearchSessionState,
+  UISession,
 } from './search';
+
+export type { SearchSessionsConfigSchema } from '../server/config';
 
 export { isRunningResponse } from '../common';
 
