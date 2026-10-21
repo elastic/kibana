@@ -15,14 +15,12 @@
  * Add --help to list the connection flags.
  */
 
+import type { estypes } from '@elastic/elasticsearch';
 import { run } from '@kbn/dev-cli-runner';
-import NIGHTSHIFT_AGENT_ROLE from './service_account_roles/nightshift_agent.json';
-import NIGHTSHIFT_AUTOMATIONS_ROLE from './service_account_roles/nightshift_automations.json';
-
-const ROLES = {
-  nightshift_agent: NIGHTSHIFT_AGENT_ROLE,
-  nightshift_automations: NIGHTSHIFT_AUTOMATIONS_ROLE,
-} as const;
+import {
+  ensureNightshiftServiceAccountRoles,
+  NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES,
+} from '../common/service_account_roles';
 
 const basicAuth = (credentials: string): string =>
   `Basic ${Buffer.from(credentials).toString('base64')}`;
@@ -32,22 +30,22 @@ run(
     const esUrl = String(flags['es-url']).replace(/\/$/, '');
     const auth = String(flags.auth);
 
-    for (const [name, role] of Object.entries(ROLES)) {
+    const putRole = async ({ name, ...role }: estypes.SecurityPutRoleRequest): Promise<void> => {
       const response = await fetch(`${esUrl}/_security/role/${name}`, {
         method: 'PUT',
         headers: { Authorization: basicAuth(auth), 'Content-Type': 'application/json' },
         body: JSON.stringify(role),
       });
       if (!response.ok) {
-        throw new Error(
-          `PUT /_security/role/${name} -> ${response.status}: ${(await response.text()).slice(
-            0,
-            500
-          )}`
-        );
+        const text = await response.text();
+        throw new Error(`PUT /_security/role/${name} -> ${response.status}: ${text.slice(0, 500)}`);
       }
-      log.success(`Role ${name} is up to date`);
-    }
+    };
+
+    await ensureNightshiftServiceAccountRoles({ security: { putRole } }, { isServerless: false });
+    log.success(
+      `Roles up to date: ${Object.keys(NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES).join(', ')}`
+    );
   },
   {
     description: 'Create the roles of the Nightshift service accounts on a local stateful cluster',
