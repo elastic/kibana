@@ -277,11 +277,17 @@ export const planDashboard = (
     timeRange,
     now,
     panelTimeRanges = true,
+    dashboardContext = 'esql',
   }: {
     timeRange?: TimeRange;
     /** Pins every relative range, the dashboard's and each panel's, to absolute times at this instant. */
     now?: number;
     panelTimeRanges?: boolean;
+    /**
+     * `esql` (default) writes the dashboard's query and filters into each panel's ES|QL, where the translator can.
+     * `dsl` leaves them out, for a host that sends them as the request's DSL `filter`, as Kibana does.
+     */
+    dashboardContext?: 'esql' | 'dsl';
   } = {}
 ): PlannedDashboard => {
   const envelopes = parseSavedObjectNdjson(ndjson);
@@ -332,7 +338,10 @@ export const planDashboard = (
   if (!lowered) {
     throw new Error(`dashboard ${dashboardId} did not lower: ${JSON.stringify(diagnostics)}`);
   }
-  const plan = planAdaptiveDashboard(lowered, { layout: 'grid' });
+  const plan = planAdaptiveDashboard(
+    dashboardContext === 'dsl' ? { ...lowered, filters: [] } : lowered,
+    { layout: 'grid' }
+  );
 
   const attributes = dashboard.attributes as { title?: string; panelsJSON?: string };
   const panelJson = JSON.parse(attributes.panelsJSON ?? '[]') as DashboardPanelJson[];
@@ -407,6 +416,7 @@ export const planDashboard = (
       const replanned = planDashboard(ndjson, dashboardId, {
         timeRange: own,
         panelTimeRanges: false,
+        dashboardContext,
       });
       const resolved = !replanned.diagnostics.some(
         (diagnostic) =>

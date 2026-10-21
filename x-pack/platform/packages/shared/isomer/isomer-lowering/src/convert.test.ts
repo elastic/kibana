@@ -9,6 +9,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { convertDashboard } from './convert';
+import { readPinnedControls } from './dashboard_context';
+import { parseSavedObjectNdjson } from './kibana/from-saved-object/ndjson';
 import type { EsqlResponse } from './esql_response';
 
 const ndjson = readFileSync(join(__dirname, '../fixtures/web_logs_sample.ndjson'), 'utf8');
@@ -63,5 +65,47 @@ describe('convertDashboard', () => {
       type: 'markdown',
       text: expect.stringContaining(''),
     });
+  });
+});
+
+describe('convertDashboard with controls', () => {
+  it('sends the on-screen control selection with every query, and Vega searches, as Kibana does', async () => {
+    const dashboard = parseSavedObjectNdjson(ndjson).find(
+      ({ type, id }) => type === 'dashboard' && id === LOGS
+    )!;
+    const [optionsList] = readPinnedControls(
+      dashboard.attributes as Record<string, unknown>,
+      (dashboard as { references?: never[] }).references ?? []
+    ).filter(({ type }) => type === 'options_list_control');
+    expect(optionsList).toBeDefined();
+    const filters: unknown[] = [];
+    const searches: unknown[] = [];
+    const converted = await convertDashboard({
+      ndjson,
+      dashboardId: LOGS,
+      now: Date.parse('2026-10-20T00:00:00Z'),
+      executeEsql: async (esql, options) => {
+        filters.push(options?.filter);
+        return executeEsql(esql);
+      },
+      search: async (_index, body) => {
+        searches.push(body);
+        return { hits: { hits: [] }, aggregations: {} };
+      },
+      controls: [{ ...optionsList, config: { ...optionsList.config, selected_options: ['IN'] } }],
+      resolveField: async (dataViewId, name) => ({
+        dataView: { id: dataViewId, title: 'kibana_sample_data_logs', fields: [] },
+        field: { name, type: 'string' },
+      }),
+    });
+    const phrase = { match_phrase: { [String(optionsList.config.field_name)]: 'IN' } };
+    expect(converted.diagnostics).toEqual([]);
+    expect(filters.length).toBeGreaterThan(0);
+    for (const filter of filters.filter(Boolean)) {
+      expect(JSON.stringify(filter)).toContain(JSON.stringify(phrase));
+    }
+    expect(searches.some((body) => JSON.stringify(body).includes(JSON.stringify(phrase)))).toBe(
+      true
+    );
   });
 });

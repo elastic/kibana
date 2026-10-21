@@ -12,6 +12,7 @@
 import type { PanelOutcome } from './bind_charts';
 import type { TimeRange } from './dashboard';
 import type { ExecuteSearch } from './esql_response';
+import type { DashboardBool } from './vega';
 import type { BoundPanel } from './vega_panels';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
@@ -73,7 +74,9 @@ export const bindMapPanels = async (
   objects: readonly Json[],
   dashboardId: string,
   timeRange: TimeRange | undefined,
-  search: ExecuteSearch
+  search: ExecuteSearch,
+  /** The dashboard's query, filters and controls, for each source that applies the global query. */
+  context: DashboardBool = {}
 ): Promise<BoundPanel[]> => {
   const dashboard = objects.find(({ type, id }) => type === 'dashboard' && id === dashboardId);
   if (!dashboard) {
@@ -115,8 +118,24 @@ export const bindMapPanels = async (
           timeField: dataView?.attributes.timeFieldName as string | undefined,
         };
       };
-      const timeFilter = (timeField: string | undefined) =>
-        timeField && timeRange
+      // A Maps source applies the global time and query unless its descriptor opts out, as Kibana's ES sources do.
+      const scoped = (descriptor: Json, clauses: Json[]) => ({
+        bool: {
+          filter: [
+            ...clauses,
+            ...(descriptor.applyGlobalQuery === false ? [] : context.filter ?? []),
+          ],
+          ...(descriptor.applyGlobalQuery === false
+            ? {}
+            : {
+                must: context.must ?? [],
+                should: context.should ?? [],
+                must_not: context.must_not ?? [],
+              }),
+        },
+      });
+      const timeFilter = (timeField: string | undefined, descriptor: Json = {}) =>
+        timeField && timeRange && descriptor.applyGlobalTime !== false
           ? [
               {
                 range: {
@@ -184,7 +203,7 @@ export const bindMapPanels = async (
           const { index, timeField } = indexOf(join.indexPatternRefName);
           const body = {
             size: 0,
-            query: { bool: { filter: timeFilter(timeField) } },
+            query: scoped(join, timeFilter(timeField, join)),
             aggs: { terms: { terms: { field: join.term, size: join.size ?? 65535 } } },
           };
           const buckets = ((await search(index, body)) as Json).aggregations.terms
@@ -216,14 +235,10 @@ export const bindMapPanels = async (
           const sums = (source.metrics ?? []).filter(({ type }: Json) => type === 'sum');
           const body = {
             size: 0,
-            query: {
-              bool: {
-                filter: [
-                  ...timeFilter(timeField),
-                  { geo_bounding_box: { [source.geoField]: bounds } },
-                ],
-              },
-            },
+            query: scoped(source, [
+              ...timeFilter(timeField, source),
+              { geo_bounding_box: { [source.geoField]: bounds } },
+            ]),
             aggs: {
               grid: {
                 geotile_grid: { field: source.geoField, precision, size: 65535 },

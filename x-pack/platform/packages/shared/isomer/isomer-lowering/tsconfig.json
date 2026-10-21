@@ -6,5 +6,10 @@
   },
   "include": ["**/*.ts", "src/**/*.json"],
   "exclude": ["target/**/*"],
-  "kbn_references": ["@kbn/isomer-charts-elastic", "@kbn/isomer-primitives-charts"]
+  "kbn_references": [
+    "@kbn/es-query",
+    "@kbn/esql-utils",
+    "@kbn/isomer-charts-elastic",
+    "@kbn/isomer-primitives-charts"
+  ]
 }

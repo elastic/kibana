@@ -12,7 +12,13 @@ export interface EsqlResponse {
   values: unknown[][];
 }
 
-export type ExecuteEsql = (esql: string) => Promise<EsqlResponse>;
+/** What Kibana sends beside an ES|QL query: the dashboard's DSL `filter`, and named `params` for `?variables`. */
+export interface EsqlRequestOptions {
+  filter?: Record<string, unknown>;
+  params?: Array<Record<string, unknown>>;
+}
+
+export type ExecuteEsql = (esql: string, options?: EsqlRequestOptions) => Promise<EsqlResponse>;
 
 /** `POST /<index>/_search`, resolving to the raw response. */
 export type ExecuteSearch = (index: string, body: Record<string, unknown>) => Promise<unknown>;

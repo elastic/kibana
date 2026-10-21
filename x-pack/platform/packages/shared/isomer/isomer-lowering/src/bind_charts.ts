@@ -573,7 +573,9 @@ const bindDatatable = (chart: AdaptiveDatatableChart, response: EsqlResponse): C
 /** Executes each panel's query and binds it to one of the six chart types, reporting every panel. */
 export const bindChartsDashboard = async (
   planned: PlannedDashboard,
-  executeEsql: ExecuteEsql
+  executeEsql: ExecuteEsql,
+  /** Each panel's own executor, for a host that sends per-panel context such as the dashboard's DSL filter. */
+  executeFor?: (panel: PlannedPanel) => ExecuteEsql
 ): Promise<ChartsDashboard> => {
   const trendQueries = new Map<string, string>();
   for (const panel of planned.panels) {
@@ -591,6 +593,7 @@ export const bindChartsDashboard = async (
         node?: ChartNode;
         hints?: Record<string, unknown>;
       }> => {
+        const run = executeFor ? executeFor(panel) : executeEsql;
         const chart = panel.query.chart as AdaptiveChart;
         const title = panel.query.label ?? '';
         const { esql } = panel.query.query;
@@ -618,7 +621,7 @@ export const bindChartsDashboard = async (
           return { report: report({ status: 'outside', reason: 'waffle layout' }) };
         }
         try {
-          const response = await executeEsql(esql);
+          const response = await run(esql);
           if (response.values.length === 0 && chart.kind !== 'datatable') {
             return { report: report({ status: 'empty' }) };
           }
@@ -647,13 +650,13 @@ export const bindChartsDashboard = async (
                 response,
                 title,
                 binding,
-                trendQuery ? await executeEsql(trendQuery) : undefined
+                trendQuery ? await run(trendQuery) : undefined
               );
               break;
             }
             case 'partition': {
               if (isNestedTreemap(panel.lens)) {
-                const nested = await bindNestedTreemap(panel, title, executeEsql);
+                const nested = await bindNestedTreemap(panel, title, run);
                 binding.refuse.push(...nested.refusals);
                 colorRank = nested.colorRank;
                 node = nested.node ?? { type: 'treemap' };
@@ -699,7 +702,7 @@ export const bindChartsDashboard = async (
             annotations,
             hints: annotationHints,
             refusals,
-          } = await bindAnnotations(panel.lens, node, { window, esql, executeEsql });
+          } = await bindAnnotations(panel.lens, node, { window, esql, executeEsql: run });
           reasons.push(...refusals);
           if (annotations.length > 0) {
             node.annotations = annotations;
