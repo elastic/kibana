@@ -179,6 +179,17 @@ describe('callbackConversePayloadSchema', () => {
     expect(() => callbackConversePayloadSchema.validate(basePayload)).not.toThrow();
   });
 
+  it('accepts surface_assets on the callback, and only as a boolean', () => {
+    const withAssets = (surfaceAssets: unknown) =>
+      callbackConversePayloadSchema.validate({
+        ...basePayload,
+        callback: { ...basePayload.callback, surface_assets: surfaceAssets },
+      });
+
+    expect(withAssets(true).callback.surface_assets).toBe(true);
+    expect(() => withAssets('yes')).toThrow(/surface_assets/);
+  });
+
   it('rejects trigger_mode', () => {
     expect(() =>
       callbackConversePayloadSchema.validate({

@@ -138,6 +138,7 @@ export const deliverCallbackEvents = ({
             const surfacePayload = surfacesService.renderPayload(completedEvent, {
               originType: execution.agentParams.origin?.type,
               agentId: execution.agentId,
+              assets: execution.agentParams.callback?.surface_assets === true,
               request,
               spaceId: execution.spaceId,
             });
