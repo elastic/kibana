@@ -24,8 +24,9 @@ import { getShardPaths } from './get_shard_paths';
 const LINTABLE_EXTENSIONS = new Set(['.ts', '.tsx', '.js', '.jsx', '.cjs', '.mjs', '.cts', '.mts']);
 
 // `oxlint.config.mjs` with `warn` rules off. Oxlint's `--fix` also fixes warnings and `--quiet`
-// only hides them, so `--fix` runs against this config to fix errors only, as ESLint did.
-const FIX_CONFIG = 'oxlint.fix.config.mjs';
+// only hides them, so `--fix` runs against this config to fix errors only, as ESLint did, and
+// `--quiet` runs use it to skip warn rules whose results would be hidden anyway.
+const ERRORS_ONLY_CONFIG = 'oxlint.fix.config.mjs';
 
 // JS plugin rules run on a single JS thread per oxlint process, so a full-repo run splits the
 // repo across processes. Each process also pays a fixed config/plugin startup cost, so a few
@@ -86,13 +87,17 @@ async function lintFiles({
   if (fix) {
     // The errors-only config reports exactly what `--quiet` shows, so with `--quiet` one run is
     // enough. Errors left after fixing fail this run before warnings are reported.
-    await runOxlint(['--fix', '--quiet', '--config', FIX_CONFIG, ...paths]);
+    await runOxlint(['--fix', '--quiet', '--config', ERRORS_ONLY_CONFIG, ...paths]);
     if (quiet) {
       return;
     }
   }
 
-  await runOxlint([...(quiet ? ['--quiet'] : []), '--config', 'oxlint.config.mjs', ...paths]);
+  await runOxlint(
+    quiet
+      ? ['--quiet', '--config', ERRORS_ONLY_CONFIG, ...paths]
+      : ['--config', 'oxlint.config.mjs', ...paths]
+  );
 }
 
 /** Lints the whole repo with one oxlint process per shard, printing each shard's output whole. */
