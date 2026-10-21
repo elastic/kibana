@@ -12,6 +12,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import { ENABLE_WORKFLOW_ASSETS_FLAG } from '../../../../../../common/constants';
 
 import { KibanaSavedObjectType } from '../../../../../../common/types';
+import { FleetError } from '../../../../../errors';
 import { appContextService } from '../../../../app_context';
 import { withPackageSpan } from '../../utils';
 import type { InstallContext } from '../_state_machine_package_install';
@@ -32,7 +33,7 @@ export const stepInstallWorkflows = async (
   context: Pick<
     InstallContext,
     'logger' | 'savedObjectsClient' | 'packageInstallContext' | 'spaceId' | 'installedPkg'
-  > & { installAsAdditionalSpace?: boolean }
+  > & { installAsAdditionalSpace?: boolean; throwIfUnavailable?: boolean }
 ) => {
   const {
     logger,
@@ -41,6 +42,7 @@ export const stepInstallWorkflows = async (
     spaceId,
     installAsAdditionalSpace: explicitInstallAsAdditionalSpace,
     installedPkg,
+    throwIfUnavailable = false,
   } = context;
 
   // The state machine does not set the flag; derive it from the package's primary space so
@@ -78,6 +80,9 @@ export const stepInstallWorkflows = async (
     ? await appContextService.getManagedWorkflowsClient()
     : undefined;
   if (!client) {
+    if (throwIfUnavailable) {
+      throw new FleetError('Workflows are not available, cannot install workflow assets');
+    }
     // Intentional: when the workflows plugin is unavailable or fleet.enableWorkflowAssets is
     // off, skip install entirely — no deferred refs and nothing shown in the Assets tab.
     logger.warn('Workflows are not available, skipping workflow assets installation');

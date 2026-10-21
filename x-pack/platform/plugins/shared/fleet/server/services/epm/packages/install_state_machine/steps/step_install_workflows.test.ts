@@ -160,6 +160,25 @@ describe('stepInstallWorkflows', () => {
     expect(saveKibanaAssetsRefs).not.toHaveBeenCalled();
   });
 
+  it('throws when the client is not available and throwIfUnavailable is set', async () => {
+    mockedAppContext.getManagedWorkflowsClient.mockResolvedValue(undefined);
+    const context = createContext({ paths: [WORKFLOW_PATH] });
+
+    await expect(stepInstallWorkflows({ ...context, throwIfUnavailable: true })).rejects.toThrow(
+      'Workflows are not available'
+    );
+    expect(saveKibanaAssetsRefs).not.toHaveBeenCalled();
+  });
+
+  it('throws when the feature flag is off and throwIfUnavailable is set', async () => {
+    mockFeatureFlag(false);
+    const context = createContext({ paths: [WORKFLOW_PATH] });
+
+    await expect(stepInstallWorkflows({ ...context, throwIfUnavailable: true })).rejects.toThrow(
+      'Workflows are not available'
+    );
+  });
+
   it('leaves the saved workflow refs untouched when the feature flag is off', async () => {
     mockFeatureFlag(false);
     const context = createContext({ paths: [WORKFLOW_PATH], installedKibana: [WORKFLOW_REF] });

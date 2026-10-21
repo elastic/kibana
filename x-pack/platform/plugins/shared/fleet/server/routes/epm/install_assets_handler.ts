@@ -286,6 +286,7 @@ export const installWorkflowAssetsHandler: FleetRequestHandler<
     spaceId,
     installedPkg: installation,
     installAsAdditionalSpace,
+    throwIfUnavailable: true,
   });
 
   return response.ok({ body: { success: true } });
